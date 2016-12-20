@@ -1,0 +1,761 @@
+.box h3 {
+	font-size: 140%;
+}
+.box h4 {
+	font-size: 130%;
+}
+.box h5 {
+	font-size: 120%;
+}
+.box h6 {
+	font-size: 110%;
+}
+
+pre br {
+	line-height: 0px;
+	display: none;
+}
+
+.center {
+	text-align: center;
+}
+
+ul.rules {
+	list-style-type: none;
+}
+
+div.rule_short {
+	font-weight: bold;
+	font-size: 10pt;
+}
+
+div.rule_wrap {
+	display: inline-table;
+	width: 96%;
+}
+
+a.rule_link {
+	display: inline-table;
+	font-weight: bold;
+	font-size: 10pt;
+	width: 4%;
+}
+
+.golden_rules {
+	list-style-type: none !important;
+}
+
+ul.collage_images {
+	padding: 0px;
+	width: 590px;
+	border-collapse: collapse;
+}
+
+.collage_images {
+	display: table;
+}
+
+ul.collage_images li {
+	border: none;
+	float: left;
+	margin: 0;
+	width: 118px;
+	height: 118px;
+	list-style: none;
+	list-style-type: none;
+}
+
+ul.collage_images li a {
+	display: block;
+	height: 118px;
+	overflow: hidden;
+}
+
+ul.collage_images img {
+	height: 118px;
+	width: 118px;
+}
+
+.selected a {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.invisible {
+	visibility: hidden;
+}
+
+.collage td {
+	padding: 0px;
+	border: none;
+}
+
+.line_new {
+	color: green;
+}
+
+.line_deleted {
+	color: red;
+}
+
+.line_moved {
+	color: blue;
+}
+
+.line_unchanged {
+
+}
+
+.log1 {
+
+}
+
+.log2 {
+	color: yellow;
+}
+
+.log3 {
+	color: #0E88C6;
+}
+
+.log4 {
+ 	font-weight: bold;
+}
+
+.log5 {
+ 	text-decoration: underline;
+}
+
+.good {
+	font-weight: bold;
+	color: green;
+}
+
+.bad {
+	font-weight: bold;
+	color: red;
+}
+
+.goodish {
+	font-weight: bold;
+	color: #35BF00;
+}
+
+.badish {
+	font-weight: bold;
+	color: #E5B244;
+}
+
+pre {
+	overflow: auto;
+}
+
+.hidden {
+	display: none;
+}
+
+.disable_grouping {
+	display: none;
+}
+
+form textarea, form input {
+	max-width: 100%;
+}
+
+a.beta {
+	font-weight: bold;
+	color: #ff0000;
+}
+
+strong.important_text {
+	color: red;
+	font-weight: bold;
+}
+
+strong.important_text_alt {
+	color: green;
+	font-weight: bold;
+}
+
+.invalid, .warning, .error, .new {
+	color: #ff0000;
+}
+
+/* Make [+] on add multiple artists stay at the bottom (on torrent details page) */
+div#AddArtists {
+	position: relative;
+}
+
+div#AddArtists a {
+	position: absolute;
+	right: 0pt;
+	bottom: 0pt;
+}
+
+.clear:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.new-subscriptions {
+	font-weight: bold;
+}
+
+#forums #quickpost {
+	width: 95%
+}
+
+.rippywrap {
+	z-index: 25;
+	display: block;
+	position: fixed;
+	color: black;
+	text-align: center;
+	width: 190px;
+	height: 180px;
+	bottom: 0px;
+	right: 0px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.rippywrap div.rippy {
+	z-index: 25;
+	height: 111px;
+	width: 190px;
+	position: fixed;
+	bottom: 0px;
+	right: 0px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+
+td.label {
+	vertical-align: top;
+}
+
+span.rbt {
+	display: block;
+	padding: 8px 0 0;
+	background: url('../rippy/rippy_top.gif') no-repeat top;
+}
+
+span.rbm {
+	display: block;
+	background: url('../rippy/rippy_middle.gif') repeat bottom;
+	padding: 0 5px;
+}
+
+span.rbb {
+	display: block;
+	padding: 4px 0px 18px;
+	margin-bottom: 5px;
+	background: url('../rippy/rippy_bottom.gif') no-repeat bottom;
+}
+
+span.secondary_class {
+	font-size: 85%;
+	font-weight: bold;
+}
+
+.breadcrumbs {
+	font-weight: bold;
+	text-align: right;
+}
+
+.paranoia_override {
+	font-style: italic;
+}
+
+#manage_collage_table.ui-sortable .drag {
+	cursor: n-resize;
+}
+
+#manage_collage_table.ui-sortable .ui-sortable-helper.drag {
+	cursor: grabbing;
+	cursor: -moz-grabbing;
+	cursor: -webkit-grabbing;
+}
+
+#manage_collage_table .ui-sortable-helper td, #manage_collage_table .ui-sortable-placeholder {
+	border: 0;
+}
+
+.drag_drop_save {
+	padding: 6px 0;
+	overflow: hidden;
+}
+
+.headerSort {
+	cursor: pointer;
+}
+
+.headerSort span {
+	background: url("../common/table-order.png") no-repeat scroll right -38px transparent;
+	padding: 0px 20px 0 0;
+}
+
+.headerSortDown span {
+	background: url("../common/table-order.png") no-repeat scroll right 4px transparent;
+}
+
+.headerSortUp span {
+	background: url("../common/table-order.png") no-repeat scroll right -79px transparent;
+}
+
+.headerSort.sorter-false,
+.headerSort.sorter-false span {
+    background-image: none;
+    cursor: default;
+}
+
+.album_votes {
+	text-align: center;
+}
+
+.favoritecount {
+	font-size: 150%;
+	font-weight: bold;
+}
+
+.favoritecount_small {
+	font-size: 110%;
+	font-weight: bold;
+}
+
+ul.votedalbums li {
+	list-style: none;
+	list-style-type: none;
+	margin: 0;
+}
+
+tr.torrent .bookmark>a:before {
+	text-decoration: none;
+	font-weight: normal;
+}
+
+tr.torrent .bookmark>a:after {
+	text-decoration: none;
+	font-weight: normal;
+}
+
+#sortable {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	width: 50%;
+}
+
+#sortable li {
+	padding: 0px;
+	font-size: 1.2em;
+	height: 1.5em;
+}
+
+
+.ui-state-highlight {
+	background: #007DC6 /*{bgColorHighlight}*/;
+	opacity: 0.15;
+	width: 50%;
+
+}
+
+.navigation_list, .navigation_list ol {
+	list-style-position: inside;
+	margin-top: 10px;
+	margin-bottom: 20px;
+}
+
+.navigation_list > li {
+	list-style-type: upper-roman !important;
+}
+
+.navigation_list li li {
+	list-style-type: upper-alpha;
+}
+
+.navigation_list li li li {
+	list-style-type: decimal;
+}
+
+.navigation_list li li li li {
+	list-style-type: lower-alpha;
+}
+
+.voted_type {
+	font-weight: bold;
+}
+
+.torrent_table .group .votes_info_td strong {
+	font-size: inherit;
+}
+
+.preview_wrap {
+	text-align: left;
+}
+
+.text_preview {
+	min-height: 100px
+}
+
+#lastfm_compatibilitybar_container {
+	width: 100%;
+	height: 5px;
+	background: #969696;
+}
+
+#lastfm_compatibilitybar {
+	height: 100%;
+}
+
+.brackets {
+	text-indent: 0px;
+	white-space: nowrap;
+}
+
+.votespan.brackets:before {
+	content: "( ";
+}
+
+.votespan.brackets:after {
+	content: " )";
+}
+
+.brackets:before {
+	content: "[";
+}
+
+.brackets:after {
+	content: "]";
+}
+
+#userinfo .brackets:before, #userinfo .brackets:after {
+	content: "";
+}
+.group_image {
+	overflow: hidden;
+}
+.float_left {
+	float: left;
+}
+.float_right {
+	float: right;
+}
+.float_clear {
+	clear: both;
+}
+.group_image + .group_info {
+	margin-left: 100px;
+}
+
+.group_image img {
+	cursor: pointer;
+}
+
+.user_title {
+	font-weight: normal;
+}
+
+/*
+ * Fix long filename tables overflowing (Chrome only).
+ * Stop various release page containers from overflowing with long input.
+ * !! Be sure to test all major browsers before changing this section. !!
+ * Fix report information tables overflowing long reports (all browsers).
+ * Fix long release descriptions overflowing containers (all browsers).
+ * Fix flowing issues in the report resolving pages.
+ */
+.wrap_overflow, .filelist_table td, .reportinfo_table, .torrentdetails blockquote {
+	word-break: normal;
+	-ms-word-wrap: break-word;
+	word-wrap: break-word;
+	-webkit-hyphens: auto;
+	-moz-hyphens: auto;
+	-ms-hyphens: auto;
+	hyphens: auto;
+	/* Note that IE will have different behavior on word-break,
+	 * but this is required to keep the layout from breaking. */
+	-ms-word-break: break-all;
+}
+/* Non-web-standard for webkit */
+.torrentdetails blockquote {
+	word-break: break-word;
+}
+/* Fix long filename tables overflowing (Chrome only). */
+.filelist_table td:first-child {
+	word-break: break-all;
+}
+/* Fix long overflow for Opera (doesn't support word-break). */
+.reportinfo_table {
+	table-layout: fixed;
+}
+/* Wrap release info for consistent DOM and to limit table expansion. */
+.no_overflow {
+	width: 100%;
+	overflow: hidden;
+}
+/* Stylesheet gallery in user profile editing */
+#css_gallery {
+	display: none;
+	overflow: hidden;
+	margin-top: 10px;
+}
+.preview_wrapper {
+	position: relative;
+	display: inline-block;
+	width: 29%;
+	height: 120px;
+	margin: 0 10px;
+}
+.preview_image {
+	display: block;
+	height: 80px;
+	cursor: pointer;
+	overflow: hidden;
+}
+.preview_image img {
+	width: 100%;
+}
+.preview_name {
+	text-align: center;
+	margin-top: 5px;
+}
+
+.option_group {
+	margin-bottom: 10px;
+}
+.option_group:last-child {
+	margin-bottom: 0px;
+}
+
+.autocomplete-suggestions {
+	margin-top: 5px;
+	border: 1px solid #999;
+	background: #FFF;
+	overflow: auto;
+}
+.autocomplete-suggestion {
+	padding: 2px 5px;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+}
+.autocomplete-selected {
+	background: #F0F0F0;
+}
+.autocomplete-suggestions strong {
+	font-weight: normal;
+	color: #3399FF;
+}
+
+.process_info {
+	table-layout: fixed;
+	width: 100%;
+}
+.process_info_pid {
+	width: 70px;
+}
+.process_info_data {
+	overflow: auto;
+}
+
+.setting_description > * {
+	margin: 1em 0 0 0;
+}
+
+.settings_sidebar {
+	min-height: 385px;
+}
+
+#settings_sections {
+	position: absolute;
+}
+
+#settings_sections.fixed {
+	position: fixed;
+	top: 0px;
+}
+
+#settings_sections #submit, #settings_sections #settings_search {
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	width: 100%;
+}
+
+#settings_sections h2 {
+	text-align: left;
+}
+
+.donor_icon {
+	margin-left: 2px;
+	width: 15px;
+	height: 13px;
+}
+
+.donation_info {
+	padding: 10px 10px 10px 20px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 20px;
+}
+
+.donation_info_title {
+	display: block;
+	font-size: 1.75em;
+	-webkit-margin-before: 1em;
+	-webkit-margin-after: 1em;
+	-webkit-margin-start: 0px;
+	-webkit-margin-end: 0px;
+	font-weight: bold;
+	margin: 10px 0;
+}
+
+.number_column {
+	text-align: right;
+}
+
+.wide_input_text {
+	width: 95%;
+}
+
+.top_artist_list li {
+	margin-left: 25px;
+	margin-bottom: 5px;
+	list-style-type: decimal;
+	font-size: 150%;
+}
+
+.permission_subcontainer {
+	margin-bottom: 10px;
+}
+
+.vote_tag_up, .vote_artist_up, .vote_album_up {
+	font-weight: bolder;
+}
+
+.vote_tag_down, .vote_artist_down, .vote_album_down {
+	font-weight: bolder;
+}
+
+.noborder {
+	border: none;
+}
+
+.two_columns {
+	float: left;
+	width: 50%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+
+.field_div {
+	margin-bottom: 10px;
+}
+
+.field_div:last-of-type {
+	margin-bottom: 0;
+}
+
+.field_div .label,
+.submit_div .label {
+	float: left;
+	padding: 0 5px;
+	text-align: right;
+	width: 150px;
+}
+.field_div .input,
+.submit_div .input {
+	padding: 0 5px;
+}
+
+.small_label {
+	text-align: right;
+	width: auto;
+}
+
+.scale_image {
+	max-width: 500px;
+}
+
+.sidebar img {
+	max-width: 220px;
+}
+
+.forum_post td img {
+	max-width: 675px;
+}
+
+#collage #reply_box img,
+#forums #reply_box img {
+	max-width: 650px;
+}
+
+#artistcomments #reply_box img,
+#request_comments #reply_box img,
+#torrent_comments #reply_box img {
+	max-width: 400px;
+}
+
+#artistcomments img,
+#request_comments img,
+#torrent_comments img {
+	max-width: 417px;
+}
+
+.blog_post img {
+	max-width: 825px;
+}
+
+#artist_information img,
+.box_request_desc img,
+.news_post img,
+.torrent_description img,
+.wiki_article img {
+	max-width: 570px;
+}
+
+.torrentdetails img {
+	max-width: 540px;
+}
+
+#inbox #preview img,
+#staffpm #reply_box img,
+#wiki .create_form img,
+#wiki .edit_form img {
+	max-width: 805px;
+}
+
+#inbox .body img {
+	max-width: 830px;
+}
+
+#userform img {
+	max-width: 490px;
+}
+
+.profileinfo img {
+	max-width: 565px;
+}
+
+#reportsv2 .manage_form img {
+	max-width: 616px;
+}
+
+/* make Safari treat <input type="search" /> as a regular text box */
+input[type="search"] {
+	-webkit-appearance: textfield;
+	/*font-size: medium;
+	background: #fff;*/
+}

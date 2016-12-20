@@ -1,0 +1,571 @@
+CHANGE LOG
+
+2016-11-01 by Bourbon
+Remove username substring search functionality. Username searches must now be exact to return a result.
+
+2016-02-18 by newman
+Fix staff seeing FLS-assigned staff PMs. Add checkbox to allow adding a linked account or editing a linked account without updating staff notes
+
+2016-02-13 by lawnmower
+minor usability improvement to artist alias editing
+
+2016-02-11 by newman
+Fix punctuation typo in uploading rules
+
+2016-02-10 by newman
+Make advanced searching by invitees not timeout. Set snatched to off by default to drastically improve page load time
+
+2016-02-06 by newman
+Fix some Staff PM bugs
+
+2016-02-05 by newman
+Add tool to mark multiple torrent groups/collages as FL/NL/Regular, optionally NLing torrents above a certain size. Add level cap to Staff PMs
+
+2016-02-04 by newman
+Fix regex in reports.js to not remove the last character of each line except the last. Redirect to log.php when attempting to report a deleted torrent
+
+2016-01-31 by newman
+Allow locked accounts to send staff PMs to staff only
+
+2016-01-27 by newman
+Fix downloading torrents via wget or other utilities when account is locked. This should prevent plugins like autodl-irssi from downloading torrents after an account becomes locked
+
+2016-01-23 by newman
+Add confirmation for deleting poll options. Don't load all news and blogs when editing one. Don't load all news when writing a new post, instead load 5 and add the "click to view more" link, similar to the homepage. Add "Replies" column to staffpm.php and Staff PMs on user profiles. Add better.php header link
+
+2016-01-19 by newman
+Fix PRs 93 and 91
+
+2016-01-10 by newman
+Fix typo in ajax_report.php
+
+2016-01-08 by newman
+Add lossy master approval request report type. Remove unapproved cassette report type
+
+2016-01-07 by lawnmower
+Remove usage of top_snatchers. Send reseed requests to the last 100 snatchers
+
+2016-01-07 by newman
+Add JS confirmation to request re-seed button
+
+2016-01-05 by newman
+Left align staff PM common answer preview. Sort staff PM common responses alphabetically instead of by ID
+
+2016-01-03 by newman
+Fix several permissions bugs
+
+2015-12-24 by newman
+Fix several XSS, SQLi, and misc vulnerabilities
+
+2015-12-20 by newman
+Add password age to user profiles
+
+2015-12-18 by newman
+Add override option in check_perms() for overriding $MinClass
+
+2015-12-16 by lawnmower
+Fix adding donor points with decimals
+
+2015-12-01 by newman
+Fix typo in locked accounts index.php
+
+2015-11-20 by lawnmower
+Add extension blacklist for uploaded torrents
+
+2015-11-19 by lawnmower
+Fix several XSS and SQLi vulerabilities
+
+2015-11-14 by techietrash
+Fix ctrl+click group collapsing/expanding on OSX
+
+2015-11-13 by newman
+Fix SQLi vulnerability (thanks v1nc3re)
+
+2015-11-06 by newman
+Add proper title to torrent stats page. Update token history to display deleted torrents.
+
+2015-10-31 by newman
+Add read-only version of site options for mods
+
+2015-10-30 by newman
+Update staff.php layout
+
+2015-10-27 by newman
+Paginate ask the staff
+
+2015-10-24 by newman
+Implement locked accounts and site options. Locked accounts is an intermediary between enabled and disabled, and is presented on a user's staff tools. It limits the user to navigating to only the locked page and staffpm. Site options eliminates the need to hardcode values that may change in the future.
+
+Users can now also reset their password without logging out.
+
+2015-10-21 by newman
+Update the IRC message sent when creating a new staff blog to be more useful
+
+2015-10-19 by newman
+Fix capitalization on the torrent group edit page
+
+2014-11-06 by porkpie
+    Create a TorrentSearch class that does most of the torrent search job.
+    Add PHP post-processing of matches if a search query doesn't need
+    any torrent-specific fulltext conditions.
+    Comments
+
+2014-11-03 by downinthings
+Fix comments on User API
+
+2014-10-30 by tobbez
+Add stats API method
+
+2014-10-27 by porkpie
+Clear news cache immediately after updating the database
+
+2014-10-20 by Narcolepsy
+Consolidated commit list since 2014-04-20:
+
+Fix some LTR issues (bug thread 189685)
+Move loading comments before View::show_header. This should fix subscriptions and quote notifications appearing when a user is already on the page of that last subscription
+Replace some hardcoded IRC channels with configuration parameters
+Fix HTML in <title> for non-{Music, Audiobooks, Comedy} requests (bug thread 189855)
+Fix: link directly to the torrent on bad files/folders better.php pages (thread 190009)
+Update internal cache when a cache key is changed
+This should make quote notifications disappear when viewing threads (#183300)
+Cast user id to int on user profile pages to get rid of trailing period
+Remove WhatMan's spellcheck tool (seriously it was crap)
+Fix a few cache key typos:
+    Blog => blog
+    requests_$RequestID => request_$RequestID
+    users_stats_$UserID => user_stats_$UserID
+Fix some sorting issues related to Torrents::get_groups not returning the groups in the same order they were passed in; DO NOT iterate over Torrents::get_groups results...
+Fix image in bookmarks JSON API
+Fix comments appearing on the wrong page (bug thread 190203)
+Passwords aren't limited to 40 characters
+Fix better.php/single and rename some variables so they make some sense
+    Bug thread #190289
+Don't continue to process forum post deletes if the post or thread doesn't exist
+Trusting rdns is bad
+Fix two cache issues in the schedule
+    - Permissions of users that are demoted to User/Member for low ratio or upload were not updated/cleared, which meant that e.g. demoted PU users could still see the PU forum
+    - The cache was cleared before the promotion/demotion queries. This could cause a race condition if the cache key were filled again (through a Users::user_info call)
+Fix some cache issues (bug thread 190802)
+Speed up BBCode
+BBCode profiling
+Fix a bunch of bookmarks stuff. HTML/CSS consistency, jQuerified functions
+Bye sizzle
+show rank 4 instead of 5 when 5 points in pms
+More accurate donor rank expiration times
+Apparently users_donor_ranks can contain NULL values.
+    Change these to 0 after fetching to fix cache
+Fix a grammar error and use SITE_NAME constant in the post-invite confirmation PM that gets sent to the inviter
+Remove trailing whitespace in public Gazelle, improve grammar, add some missing spaces in 80char's CSS file
+Remove extraneous whitespace from various files
+Coding standards cleanup in script_start.php
+    Remove some WCD-specific smileys from public Gazelle
+
+    Remove these:
+    * ackbar-what.png
+    * jesusfish-what.png
+    * louisdefunes-what.png
+Add Tools::check_cidr_range to check if an IP is inside a given range in CIDR format
+Torrent size is a 64-bit Sphinx attribute, so let's make use of it
+    Should partially fix bug #185554
+Fix SQLI in PushServer::push_pushbullet
+Minor coding standards fixes in classes/pushserver.class.php
+Fix User Upload Count API
+fix lack of artist name in concert titles
+add mailgun as alternative to self-hosting email, config changes in template to match
+user api additional stats, patch from user downinthings
+
+2014-04-20 by SevenNationArmy
+Replace old IRC applet with Mibbit
+
+2014-04-09 by alderaan
+Rename and reword the labels and tooltips for some profile settings for torrent grouping and release types. These should no longer be misleading or wholly incorrect.
+
+2014-04-09 by alderaan
+Wrap various PM reasons in [quote] tags where appropriate
+
+2014-04-06 by hateradio
+Add wildcard support to taglist in request search
+
+2014-04-05 by DutchDude
+Make blog post author name link to author profile
+
+2014-03-31 by Ajax
+Pushbullet support for push notifications
+
+2014-03-25 by alderaan
+Remove class="wide_input_text" from the "extra log message" and "extra staff notes" text boxes on the Reports v2 and torrent deletion forms
+
+2014-03-24 by alderaan
+Fix various CSS issues with input text boxes of type "search"
+
+2014-03-22 by alderaan
+Forum search: Rename "Username" to "Posted by" and add an HTML5 placeholder for the "posted by" text box
+
+2014-03-22 by alderaan
+"ask the staff" tool: improve display of page header
+
+2014-03-22 by alderaan
+Use HTML5 input type "search" for text boxes in search forms
+
+2014-03-22 by alderaan
+Use HTML5's placeholder attribute for the "search inbox" text box
+
+2014-03-22 by alderaan
+Add class="label" to the form labels on the "create a user" page
+
+2014-03-22 by alderaan
+Add missing header for the "invite pool" staff tool page
+
+2014-03-22 by alderaan
+Remove duplicated "economic stats" link on /tools.php
+
+2014-03-22 by alderaan
+Use HTML5 input type "email" for forms that require email address input
+
+2014-03-22 by alderaan
+Move the text box for entering the target torrent group ID into the same row as its label
+
+2014-03-22 by alderaan
+Add a "release type" label for the drop-down menu when editing torrent groups
+
+2014-03-20 by alderaan
+Use class="wide_input_text" for the "extra log message" and "extra staff notes" text boxes on the Reports v2 and torrent deletion forms
+
+2014-03-20 by alderaan
+Rename "Upload" to "Remove upload privileges" on the torrent deletion form
+
+2014-03-20 by alderaan
+Add <label> tags for the "Delete", "Warning", and "Upload" fields on the torrent deletion form
+
+2014-03-18 by alderaan
+Add a "[Jump to staff tools]" button on user profiles that links to a page anchor after the "Recent Snatches", "Recent Uploads", collage sections, etc.
+
+2014-03-18 by alderaan
+Remove page anchor buttons on user profiles
+
+2014-03-18 by alderaan
+README: State that Sphinx 2.0.6 or newer is required
+
+2014-03-17 by alderaan
+Uncomment some of the Ratio Watch code in public Gazelle. This was accidentally commented out in the public code.
+
+2014-03-16 by hateradio
+Update TableSorter JS; remove minified version; improve table sorting by adding attributes to table headings instead of relying on JS to disable columns.
+
+2014-03-16 by alderaan
+Remove permission "site_see_old_requests"
+
+2014-03-16 by alderaan
+Remove sections/requests/requests.php.presphinx
+
+2014-03-16 by alderaan
+requests.php: Add <label> elements for the "include filled" and "include old" check boxes
+
+2014-03-12 by Ajax
+Open donor icon links in a new tab
+
+2014-02-27 by alderaan
+Increase the size of the Reports v2 "report comment" text box from 45 to 70
+
+2014-02-27 by alderaan
+Replace nearly every instance of {,NON}SSL_SITE_URL with the site_url() function
+
+2014-02-19 by alderaan
+Reduce width of the main table in the Tag Aliases manager
+
+2014-02-11 by alderaan
+Re-enable torrent inactivity deletion for public Gazelle. This was accidentally put in a public release.
+
+2014-02-11 by alderaan
+Enable usage of the OpenDyslexic fonts on the mobile version of the site
+
+2014-01-28 by alderaan
+Adv. User Search: Replace date format tooltips with "placeholder" HTML attributes
+
+2014-01-28 by alderaan
+Clear cache key "num_staff_pms_$LoggedUser[ID]" when reassigning Staff PMs
+
+2014-01-27 by alderaan
+UI improvements to the Client Whitelist Manager
+
+2014-01-27 by alderaan
+.gitattributes: set diff=html and diff=php, and clean up the file a bit
+
+This should give us better diff output for HTML and PHP files by choosing more sane hunk headers.
+
+2014-01-23 by Ajax
+Introduced classes to test models. Classes with a @TestClass comment which include public static functions with a @Test comment will be made available to test via testing.php
+
+2014-01-18 by alderaan
+Fix grammar in pop-up notifications about new Staff PMs.
+
+2014-01-18 by flaming
+Rename "Unrelated Ebooks" torrent report type to "Ebook Collection".
+
+2014-01-18 by alderaan
+Rename the "Dismiss" button to "Hide" for pop-up notifications.
+
+2014-01-05 by Ajax
+Wildcard searches in IP history
+
+2014-01-04 by Ajax
+Added hidden user class span in privateheader for css devs, .userclass and #nav_userclass
+
+2013-12-28 by alderaan
+Require the Text class in sections/feeds/index.php to fix broken RSS feeds.
+
+2013-12-28 by alderaan
+Append "(this session)" to the "Up" column on torrent group peer lists
+
+2013-12-28 by alderaan
+Fix display of bidirectional text (mixed LTR/RTL) for torrent group/artist names in the heading on torrent group pages.
+
+2013-12-25 by Ajax
+Custom date input for manual additions to the changelog
+
+2013-12-24 by Y
+Split the "Wiki" class (which has nothing to do with the wiki but deals with revisions on artist and torrent pages) into RevisionHistory + RevisionHistoryView
+
+2013-12-24 by Y
+New Wiki class that handles the stuff ALIAS did before; various changes to the horrible wiki system, including the deletion of some obsolete files
+
+2013-12-23 by alderaan
+Clear "user_info_$UserID" for each user that gets disabled for having never logged in
+
+2013-12-23 by alderaan
+Clear "num_staff_pms_$UserID" cache key when reassigning a Staff PM
+
+2013-12-22 by Ajax
+Donor rank expiration
+
+2013-12-16 by alderaan
+Remove code to check for public torrents
+
+2013-12-16 by Ajax
+Un-strip the torrent group log from the torrents index file
+
+2013-12-15 by Ajax
+Introduced datetime picker JS, changed date picker in forum search, added date and time validation functions. Also proving a point.
+
+2013-12-12 by Y
+Transform Text into a static class
+
+2013-12-10 by alderaan
+Fix bug that would assign the "Log" flag to torrents that shouldn't have it
+
+2013-12-10 by alderaan
+Clear cache key "request_artists_$RequestID" in two missed places
+
+2013-12-10 by alderaan
+Refactor ignored log file name code (e.g. for "audiochecker.log" and friends)
+
+2013-12-01 by alderaan
+Fix some CSS issues in the forum search category list for Anorex, Layer Cake, Kuro, and Whatnificent
+
+2013-11-30 by alderaan
+For staff notes, wrap custom titles in [code] BBcode tags
+
+2013-11-25 by alderaan
+Add a [Check private flag] button for torrents. Uncomment its HTML to use it. Note: Torrent files must be encoded in a certain way in the DB for this to work.
+
+2013-11-23 by alderaan
+Add a warning message when attempting to delete a personal collage
+
+2013-11-23 by alderaan
+Add collage recovery link to the Staff Toolbox
+
+2013-11-09 by mcnellis
+Set image max-width explicitly for each stylesheet.
+Also added new classes for news_post, blog_post, wiki_article, torrent_comments, request_comments, artist information, and more
+
+2013-11-08 by alderaan
+Revised some of the Golden Rules for clarity
+
+2013-11-06 by Y
+Add multi-key functionality to the cache clearing/viewing tool
+
+2013-11-02 by alderaan
+Significantly improve the usability and appearance of the debug class' list of cache keys
+
+2013-11-02 by alderaan
+Highlight "Urgent" reports in the Reports v2 system
+
+2013-10-31 by porkpie
+Albums with the same vote score are tied on toplists
+
+2013-10-31 by alderaan
+Remove redundant sentences from and fix other issues with automatic PMs sent via Reports v2.
+
+2013-10-31 by alderaan
+Fix cache bug when making an artist into a non-redirecting alias of another artist (typo'd name of cache key)
+
+2013-10-31 by alderaan
+Renamed take*.php files in sections/requests/ (added underscores)
+
+2013-10-28 by alderaan
+Collage API now returns subscriberCount and torrentGroupIDList
+
+2013-10-28 by alderaan
+Reports v1 stats page revamped. Now, looks very similar to the Reports v2 "Views" page.
+
+2013-10-26 by alderaan
+Added tooltip class to many HTML elements that were missing it
+
+2013-10-25 by alderaan
+Fix many display bugs in the unsupported/unofficial Eye Candy CSS.
+
+2013-10-24 by alderaan
+Layer Cake CSS now has a wider table of torrents on torrents.php
+
+2013-10-23 by alderaan
+Use less granular times and prevent word wrapping of datetimes in requests list
+
+2013-10-23 by alderaan
+When viewing the bookmarked requests page, don't show the requests search box if you have 0 bookmarked requests.
+
+2013-10-23 by alderaan
+On the bookmarked torrents page, if you have no bookmarked torrents with artists, display a message in "Top Artists" and always show "Artists: 0"
+
+2013-10-23 by alderaan
+Fix several bugs with unstyled tooltips (mostly caused by missing data-title-plain attributes)
+
+2013-10-22 by alderaan
+Second avatars and donor icons will now be automatically reset by the image proxy if they are too large
+
+2013-10-17 by porkpie
+Load notifications without an Ajax request
+
+2013-10-16 by alderaan
+Update OpenDyslexic font files and add OpenDyslexic Mono font
+
+2013-10-13 by Y
+Added thread notes in forums
+
+2013-10-13 by Ajax
+Added "Ask the Staff" tool for users to ask staff random questions. 
+
+2013-10-10 by alderaan
+Users will receive a PM when they get promoted or demoted
+
+2013-10-05 by alderaan
+Similar Artists and torrent tag boxes, plus the mini up/downvote buttons on torrents when viewing an artist page, now use the same colored glyphs as the Album Votes box
+
+2013-10-05 by alderaan
+Enhanced Album Votes box to show downvotes, the binomial confidence interval score, and the percentage of positive votes. Vote counts now use a colored arrow glyph.
+
+2013-10-01 by alderaan
+In the staff toolbox, reorganized tools into more useful categories
+
+2013-09-30 by alderaan
+Refactored backend code for staff toolbox
+
+2013-09-30 by alderaan
+Add function site_url() for printing the site's URL
+
+2013-09-28 by Ajax
+Added top artists data to top10 page using last.fm chart data
+
+2013-09-22 by Ajax
+Show tags on collage and bookmark tooltips
+
+2013-09-14 by Ajax
+Added date constrains to forum search
+
+2013-09-12 by porkpie
+Switch to SphinxQL for request searches
+
+2013-09-05 by porkpie
+Fix multi-format uploader when switching from "Music" to something else, then back to "Music"
+
+2013-09-05 by alderaan
+Fix missing category change JavaScript code on torrent edit page in public Gazelle
+
+2013-09-01 by Ajax
+Tool for staff to send mass PMs to primary and secondary classes
+
+2013-08-28 by porkpie
+Add an option for the styled tooltips
+
+2013-08-25 by Y
+Comment subscriptions, quote notifications and quote linking
+
+2013-08-24 by Ajax
+Notifications Manager class and noty.js library to provide popup notifications 
+
+2013-08-24 by Ajax
+Redesigned user settings page
+
+2013-08-24 by Ajax
+Tooltipster library added for tooltips
+
+2013-08-24 by Ajax
+Calendar in Staff Toolbox
+
+2013-08-24 by Ajax
+Donor Rank system and rewrite of all donation code
+
+2013-08-08 by Squiffy
+Drag and Drop ordering on the Do Not Upload page in toolbox
+
+2013-08-05 by Ajax
+Search email blacklist
+
+2013-07-30 by Y
+Collage API additions. 
+
+2013-07-23 by draculesti
+New mod button to generate random user passwords
+
+2013-07-13 by draculesti
+Ability to quote locked and trashed threads
+
+2013-07-08 by alderaan
+Add "has_results()" function for MySQL class to replace "record_count() === 0" conditional checks
+
+2013-07-06 by draculesti
+Bounty amount after tax shown on request pages
+
+2013-07-04 by Ajax
+added collages to api
+
+2013-07-03 by Ajax
+Option to enable/disable autocomplete in user profile settings.
+
+2013-07-01 by alderaan
+Serve Google Charts API images over HTTPS
+
+2013-07-01 by Ajax
+Moved autocomplete logic to jquery plugin, introduced artist autocompletes on rest of site
+
+2013-06-30 by Ajax
+Give custom ordering to stickied threads
+
+2013-06-24 by Ajax
+Added user recents to API. ajax.php?action=user_recents&userid=<ID>&limit=<LIMIT> the limit defaults to 15 if empty and maxes out at 50
+
+2013-06-23 by alderaan
+The "Torrent options" section when editing user profiles now follows Microsoft's UI design guidelines, which has been adopted as something we will try to follow in the future. For an overview of what this generally entails, refer to this example document:
+http://msdn.microsoft.com/en-us/library/windows/desktop/aa511452.aspx
+
+2013-06-19 by alderaan
+UI revisions on the artist and torrent group edit pages, with the most significant changes occurring in the artist aliases section%
+
+2013-06-16 by porkpie
+Require a click and an ajax call to view some of the stats on profile pages
+
+2013-06-15 by Ajax
+Adding &artistreleases=1 to artist api url will display only releases by the current artist
+
+2013-06-15 by Ajax
+Added artist and extended artist information to torrent groups in artist json output
+
+2013-06-14 by eth
+Adds option to load news posts using ajax
+
+2013-06-14 by Ajax
+Show number of subscribers and last updated in collage stats
+
+2013-06-14 by Ajax
+Hello Change Log
+

@@ -1,0 +1,28 @@
+body {
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+#extra3 {
+    position:relative;
+    z-index:-2;
+}
+
+#extra3:after {
+    content:'';
+    position: fixed;
+    background-attachment: fixed;
+    background-size: cover;
+    display:block;
+    height:100%;
+    width:984px;
+    top:0; bottom:0; left:0; right:0;
+    margin:0px auto;
+    z-index:-2;
+    -webkit-filter: blur(12px);
+    -moz-filter: blur(12px);
+    -o-filter: blur(12px);
+    -ms-filter: blur(12px);
+    filter: blur(12px);
+    clip: rect(0%, 100%, 100%, 100%);
+}
