@@ -15,7 +15,9 @@ if(count($Logs) > 0) {
 	foreach($Logs as $Log) {
 		list($LogID, $LogTxt, $LogDetails, $LogRevision, $LogAdjusted, $LogAdjustedBy, $LogSScore, $LogNotEnglish, $LogAdjustmentReason) = $Log;
 		echo '<tr class=\'log_section\'><td>';
-		if ($LogAdjusted) { //todo: move query out of loop, i.e. check only once
+        echo "<div style='text-align:right;'><a href='torrents.php?action=removelogs&amp;torrentid=".$TorrentID."'>Remove log</a></div>";
+
+        if ($LogAdjusted) { //todo: move query out of loop, i.e. check only once
 			$DB->query("SELECT Username FROM users_main WHERE ID = $LogAdjustedBy");
 			list($LogAdjustedByUser) = $DB->next_record();
 			$LogAdjustmentReason = ($LogAdjustmentReason) ? ': '.$LogAdjustmentReason : '';
@@ -30,7 +32,9 @@ if(count($Logs) > 0) {
 			foreach($LogDetails as $LogDetailsEntry) { echo '<li>'.$LogDetailsEntry.'</li>'; }
 			echo '</ul></blockquote>';
 		}
-		echo '<blockquote><pre style="white-space:pre-wrap;">'.html_entity_decode($LogTxt).'</pre></blockquote></td></tr>'; // MUCH faster than htmlspecialchars_decode
+
+		echo "<blockquote><pre style='white-space:pre-wrap;'>".html_entity_decode($LogTxt)."</pre></blockquote>";
+        echo '</td></tr>';
 	}
 	echo '</table>';
 	echo ob_get_clean();

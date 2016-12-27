@@ -24,6 +24,11 @@ if (!empty($_REQUEST['action'])) {
 			include(SERVER_ROOT.'/sections/torrents/log_ajax.php');
 			break;
 
+		case 'removelogs':
+			enforce_login();
+			include(SERVER_ROOT.'/sections/torrents/remove_logs.php');
+			break;
+
 		case 'edit':
 			enforce_login();
 			include(SERVER_ROOT.'/sections/torrents/edit.php');
