@@ -43,7 +43,7 @@ class View {
 	 */
 	public static function show_footer($Options = array()) {
 		global $ScriptStartTime, $SessionID, $UserSessions, $Debug, $Time, $Mobile;
-		if (!is_array(G::$LoggedUser) || $Options['recover'] === true) {
+		if (!is_array(G::$LoggedUser) || (isset($Options['recover']) && $Options['recover'] === true)) {
 			require(SERVER_ROOT.'/design/publicfooter.php');
 		} else {
 			require(SERVER_ROOT.'/design/privatefooter.php');

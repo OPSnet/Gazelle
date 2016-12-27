@@ -408,7 +408,7 @@ class NotificationsManager {
 	}
 
 	public function load_quote_notifications() {
-		if (G::$LoggedUser['NotifyOnQuote']) {
+		if (isset(G::$LoggedUser['NotifyOnQuote']) && G::$LoggedUser['NotifyOnQuote']) {
 			$QuoteNotificationsCount = Subscriptions::has_new_quote_notifications();
 			if ($QuoteNotificationsCount > 0) {
 				$Title = 'New quote' . ($QuoteNotificationsCount > 1 ? 's' : '');
