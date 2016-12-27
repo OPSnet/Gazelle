@@ -91,6 +91,13 @@ class LOG_CHECKER
 				unset($this->Logs[$key]);
 			}
 		}
+
+        foreach ($this->Logs as $key => $value) {
+            if (preg_match("/---- CUETools DB Plugin V.+/i", $value)) {
+                unset($this->Logs[$key]);
+            } //strip empty
+        }
+
 		$this->Logs = array_values($this->Logs); //rebuild index
 		if (count($this->Logs) > 1) {
 			$this->Combined = count($this->Logs);
