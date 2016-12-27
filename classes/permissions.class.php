@@ -7,9 +7,9 @@ class Permissions {
 	 * @param string $MinClass Return false if the user's class level is below this.
 	 */
 	public static function check_perms($PermissionName, $MinClass = 0) {
-		
+
 		$OverrideClass = 1000;
-		
+
 		$Override = G::$LoggedUser['EffectiveClass'] >= $OverrideClass;
 		return (
 			($PermissionName == null ||
@@ -92,7 +92,10 @@ class Permissions {
 		} else {
 			$DonorPerms = array('Permissions' => array());
 		}
-		$MaxCollages = $Permissions['Permissions']['MaxCollages'] + $BonusCollages;
+		$MaxCollages = $BonusCollages;
+		if (isset($Permissions['Permissions']['MaxCollages'])) {
+			$MaxCollages += $Permissions['Permissions']['MaxCollages'];
+		}
 		if (isset($CustomPermissions['MaxCollages'])) {
 			$MaxCollages += $CustomPermissions['MaxCollages'];
 			unset($CustomPermissions['MaxCollages']);
