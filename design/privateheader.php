@@ -225,7 +225,7 @@ if (check_perms('site_send_unlimited_invites')) {
 					<li id="nav_donate" class="brackets<?=Format::add_class($PageID, array('donate'), 'active', false)?>">
 						<a href="donate.php">Donate</a>
 					</li>
-					
+
 				</ul>
 				<ul id="userinfo_stats">
 					<li id="stats_seeding">
@@ -247,7 +247,7 @@ if (check_perms('site_send_unlimited_invites')) {
 <?	}
 	if (G::$LoggedUser['FLTokens'] > 0) { ?>
 					<li id="fl_tokens">
-						<a href="wiki.php?action=article&amp;id=754">Tokens</a>:
+						<a href="wiki.php?action=article&amp;id=57">Tokens</a>:
 						<span class="stat">
 							<a href="userhistory.php?action=token_history&amp;userid=<?=G::$LoggedUser['ID']?>"><?=G::$LoggedUser['FLTokens']?></a>
 						</span>
@@ -408,9 +408,9 @@ if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] == FORUM_MOD) {
 	$NumStaffPMs = G::$Cache->get_value('num_staff_pms_'.G::$LoggedUser['ID']);
 	if ($NumStaffPMs === false) {
 		if (check_perms('users_mod')) {
-			
+
 			$LevelCap = 1000;
-			
+
 			G::$DB->query("
 				SELECT COUNT(ID)
 				FROM staff_pm_conversations
