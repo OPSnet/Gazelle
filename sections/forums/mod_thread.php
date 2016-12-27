@@ -10,7 +10,7 @@ threads will linger with the 'Moved' flag until they're knocked off
 the front page.
 
 \*********************************************************************/
-define('TRASH_FORUM_ID', 12);
+define('TRASH_FORUM_ID', 4);
 
 // Quick SQL injection check
 if (!is_number($_POST['threadid'])) {
