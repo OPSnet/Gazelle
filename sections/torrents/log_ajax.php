@@ -15,7 +15,9 @@ if(count($Logs) > 0) {
 	foreach($Logs as $Log) {
 		list($LogID, $LogTxt, $LogDetails, $LogRevision, $LogAdjusted, $LogAdjustedBy, $LogSScore, $LogNotEnglish, $LogAdjustmentReason) = $Log;
 		echo '<tr class=\'log_section\'><td>';
-        echo "<div style='text-align:right;'><a href='torrents.php?action=removelogs&amp;torrentid=".$TorrentID."'>Remove log</a></div>";
+        if (check_perms('torrents_delete')) {
+            echo "<div style='text-align:right;'><a href='torrents.php?action=removelogs&amp;torrentid=".$TorrentID."'>Remove log</a></div>";
+        }
 
         if ($LogAdjusted) { //todo: move query out of loop, i.e. check only once
 			$DB->query("SELECT Username FROM users_main WHERE ID = $LogAdjustedBy");

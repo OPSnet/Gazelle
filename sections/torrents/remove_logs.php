@@ -5,7 +5,7 @@ if (!$TorrentID || !is_number($TorrentID)) {
     error(404);
 }
 
-if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_delete')) {
+if (!check_perms('torrents_delete')) {
     error(403);
 }
 
