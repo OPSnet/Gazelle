@@ -74,7 +74,13 @@ class LOG_CHECKER
 			$this->Logs = preg_split("/(\n[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
 		} else { //no checksum
 			$this->Logs = preg_split("/(\nEnd of status report)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
+            foreach ($this->Logs as $key => $value) {
+                if (preg_match("/---- CUETools DB Plugin V.+/i", $value)) {
+                    unset($this->Logs[$key]);
+                } //strip empty
+            }
 		}
+
 		foreach ($this->Logs as $key => $value) {
 			if (trim($value) == "") {
 				unset($this->Logs[$key]);
@@ -91,12 +97,6 @@ class LOG_CHECKER
 				unset($this->Logs[$key]);
 			}
 		}
-
-        foreach ($this->Logs as $key => $value) {
-            if (preg_match("/---- CUETools DB Plugin V.+/i", $value)) {
-                unset($this->Logs[$key]);
-            } //strip empty
-        }
 
 		$this->Logs = array_values($this->Logs); //rebuild index
 		if (count($this->Logs) > 1) {

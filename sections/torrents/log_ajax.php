@@ -12,12 +12,16 @@ if(count($Logs) > 0) {
 	if ($LogScore < 100) {
 		//echo '<td><strong>Please note: Score below 100 doesn\'t necessarily mean inferior (sound) quality!</strong></td>';
 	}
+
+    if (check_perms('torrents_delete')) {
+        echo "<tr class=\'colhead_dark\' style=\'font-weight: bold;\'><td style='text-align:right;'>
+			<a onclick=\"return confirm('This is permanent and irreversible. Missing logs can still be uploaded.');\" href='torrents.php?action=removelogs&amp;torrentid=".$TorrentID."'>Remove all logs</a>
+	    </td></tr>";
+    }
+
 	foreach($Logs as $Log) {
 		list($LogID, $LogTxt, $LogDetails, $LogRevision, $LogAdjusted, $LogAdjustedBy, $LogSScore, $LogNotEnglish, $LogAdjustmentReason) = $Log;
 		echo '<tr class=\'log_section\'><td>';
-        if (check_perms('torrents_delete')) {
-            echo "<div style='text-align:right;'><a href='torrents.php?action=removelogs&amp;torrentid=".$TorrentID."'>Remove log</a></div>";
-        }
 
         if ($LogAdjusted) { //todo: move query out of loop, i.e. check only once
 			$DB->query("SELECT Username FROM users_main WHERE ID = $LogAdjustedBy");
