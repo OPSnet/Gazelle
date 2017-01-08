@@ -22,6 +22,9 @@ if (strtotime($BannedUntil) < time()) {
 	You have <span class="info"><?=(6 - $Attempts)?></span> attempts remaining.<br /><br />
 	<strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br /><br />
 <?	} ?>
+<?	if (isset($_GET['invalid2fa'])) { ?>
+	<span class="warning">You have entered an invalid two-factor authentication key. Please login again.</span>
+<?	} ?>
 	<table class="layout">
 		<tr>
 			<td>Username&nbsp;</td>
