@@ -19,8 +19,8 @@ class Referral {
             'base_url' => 'https://apollo.rip/',
             'api_path' => 'ajax.php?action=',
             'login_path' => 'login.php',
-            'username' => 'foo',
-            'password' => 'bar',
+            'username' => 'prnd',
+            'password' => 'foo',
             'cookie' => '',
             'cookie_expiry' => 0,
             'status' => TRUE
@@ -37,7 +37,7 @@ class Referral {
             'status' => TRUE
         ],
     ];
-
+    private $CookieExpiry = 604800; // 1 week
 
     /**
      * Constructor
@@ -48,6 +48,7 @@ class Referral {
      */
     function __construct() {
         // populate services array from cache if it exists, if not then grab from template
+$this->ExternalServices = $this->ExternalServicesTemplate;
         if (empty($this->ExternalServices)) {
             $this->ExternalServices = G::$Cache->get_value('referral_services');
             // grab from template if not in cache
@@ -57,6 +58,8 @@ class Referral {
             }
         }
 
+        // use php session for lack of better solution
+        session_start();
 
         // init curl object
         if (!function_exists('curl_version')) {
@@ -64,6 +67,10 @@ class Referral {
         }
         $this->curl = curl_init();
         curl_setopt($this->curl, CURLOPT_TIMEOUT, 30);
+        curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($this->curl, CURLOPT_AUTOREFERER, 1);
+        curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($this->curl, CURLOPT_MAXREDIRS, 10);
 
 
     }
@@ -79,10 +86,35 @@ class Referral {
      */
     public function services_list() {
         foreach ($this->ExternalServices as $key => $val) {
-            $response[] = $key;
+            // check if service is up and enabled
+            if ($val['status'] === TRUE && $this->service_is_up($key)) {
+                $response[] = $key;
+            }
         }
         return $response;
     }
+
+    /**
+     * Generates a unique token for referral verification
+     *
+     * @return generated token
+     */
+    public function generate_token() {
+
+        $_SESSION['referral_token'] = 'APL:' . Users::make_secret(1024) . ':APL';
+        return $_SESSION['referral_token'];
+    }
+
+    public function verify_token($service, $username) {
+
+        if (!$this->login($service)) {
+            die("This referral service is unavailable.");
+        }
+
+
+
+    }
+
 
     /**
      * Checks if a service called by name returns 200
@@ -99,11 +131,28 @@ class Referral {
         $curl = curl_init($this->ExternalServices[$service]['base_url']);
         //set to HEAD request only
         curl_setopt($curl, CURLOPT_NOBODY, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         // do the request
         curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
         return $code == 200;
+    }
+
+    /**
+     * Login Method, points to relevant login method based on service type
+     *
+     * @param $service
+     */
+    private function login($service) {
+        switch ($this->ExternalServices[$service]['type']) {
+
+            case 'gazelle':
+                 return $this->gazelle_login($service);
+                break;
+            default:
+                die("Invalid External Service");
+        }
     }
 
     /**
@@ -128,17 +177,21 @@ class Referral {
             'password' => $this->ExternalServices[$service]['password'],
             'keeplogged' => 1
         ];
-
         curl_setopt($this->curl, CURLOPT_URL, $this->ExternalServices[$service]['base_url'] . $this->ExternalServices[$service]['login_path']);
-        curl_setopt($this->curl, CURLOPT_HEADER, 1);
         curl_setopt($this->curl, CURLOPT_POST, TRUE);
         curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($login_fields));
         // do el requesto
         $result = curl_exec($this->curl);
+        $header_size = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
         //check for session cookie, as it is the indicator of success
-        $cookies = $this->parse_cookies($result);
+        $cookies = $this->parse_cookies($result, $header_size);
         if (array_key_exists('session', $cookies)) {
             $this->ExternalServices[$service]['cookie'] = $cookies['session'];
+            $this->ExternalServices[$service]['cookie_expiry'] = time() + $this->CookieExpiry;
+            $this->cache_services();
+            return TRUE;
+        } else {
+            return FALSE;
         }
 
     }
@@ -150,7 +203,6 @@ class Referral {
      * @return array - an array of cookies set by the request
      */
     private function parse_cookies($result) {
-
         preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $result, $matches);
         $cookies = array();
         foreach ($matches[1] as $item) {
