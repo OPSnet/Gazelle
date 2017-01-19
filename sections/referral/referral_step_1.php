@@ -1,89 +1,79 @@
-<?
-View::show_header('Register');
-echo $Val->GenerateJS('registerform');
+<?php
+
+// redirect if referrals are currently closed
+if (!OPEN_EXTERNAL_REFERRALS) {
+
+    include('closed.php');
+    die();
+}
+
+// get service from post value
+$Service = $_POST['service'];
+// save service to session
+
+
+// generate token
+$Token = $Referral->generate_token();
+
+
+
+View::show_header('External Tracker Referrals');
 ?>
-    <script src="<?=STATIC_SERVER?>functions/validate.js" type="text/javascript"></script>
-    <script src="<?=STATIC_SERVER?>functions/password_validate.js" type="text/javascript"></script>
-    <form class="create_form" name="user" id="registerform" method="post" action="" onsubmit="return formVal();">
-        <div style="width: 500px;">
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-            <?
+    <style>
+        * {
+            margin: initial;
+            padding: initial;
+        }
+        ol {
+            -webkit-margin-before: 1em;
+            -webkit-margin-after: 1em;
+            -webkit-padding-start: 40px;
+        }
+        label {
+            margin-left: 15px;
+        }
+        #referral-code {
+            color: #f5f5f5;
+            padding: 10px;
+            background-color: #151515;
+            text-align: center;
+        }
+    </style>
+    <div style="width: 500px; text-align: left">
+        <h1>External Tracker Referrals</h1>
+        <br/>
+        <p>Here you are able to gain access to <?php echo SITE_NAME; ?> by verifying that you are a member of another private tracker that we trust.</p>
+        <br/>
+        <h4>The process is as follows:</h4>
+        <br/>
+        <ol>
+            <li>Choose a tracker from the list that you're a member of.</li>
+            <li><?php echo SITE_NAME; ?> will generate a string of characters that you will place in the body of your profile at the tracker of your choice.</li>
+            <li>Paste the character string anywhere in the body of your profile.</li>
+            <li>Enter your username and <?php echo SITE_NAME; ?> will verify your membership and issue an invite code to you.</li>
+            <li>Join <?php echo SITE_NAME; ?>.</li>
+            <li><strong>???</strong></li>
+            <li>Profit.</li>
+        </ol>
+        <br/>
+        <h2>Step 1: Paste Your Code</h2>
+        <br/>
+        <p>Copy and paste the code below into the profile of your <?php echo $Service; ?> account. It can go anywhere in your profile as long as it is in one piece.</p>
+        <br/>
+        <br/>
+        <p id="referral-code"><?php echo $Token; ?></p>
+        <br/>
+        <br/>
+        <p>Now, enter the username you use at <?php echo $Service; ?> exactly. This is critical in verifying your account.</p>
+        <br/>
+        <form name="referral_service" method="post" action="">
+            <input type="text" name="username" /><label for="username">Username</label>
+            <input type="hidden" name="token" value="<?php echo $Token; ?>" />
+            <input type="hidden" name="service" value="<?php echo $Service; ?>" />
+            <br/>
+            <br/>
+            <input type="submit" name="submit" value="Verify" class="submit" />
+        </form>
 
-            if (empty($Sent)) {
-                if (!empty($_REQUEST['invite'])) {
-                    echo '<input type="hidden" name="invite" value="'.display_str($_REQUEST['invite']).'" />'."\n";
-                }
-                if (!empty($Err)) {
-                    ?>
-                    <strong class="important_text"><?=$Err?></strong><br /><br />
-                <?	} ?>
-                <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center">
-                    <tr valign="top">
-                        <td align="right" style="width: 100px;">Username&nbsp;</td>
-                        <td align="left">
-                            <input type="text" name="username" id="username" class="inputtext" placeholder="Username" value="<?=(!empty($_REQUEST['username']) ? display_str($_REQUEST['username']) : '')?>" />
-                            <p>Use common sense when choosing your username. Offensive usernames will not be tolerated. <strong>Do not choose a username that can be associated with your real name.</strong> If you do so, we will not be changing it for you.</p>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td align="right">Email address&nbsp;</td>
-                        <td align="left">
-                            <input type="email" name="email" id="email" class="inputtext" placeholder="Email" value="<?=(!empty($_REQUEST['email']) ? display_str($_REQUEST['email']) : (!empty($InviteEmail) ? display_str($InviteEmail) : ''))?>" />
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td align="right">Password&nbsp;</td>
-                        <td align="left">
-                            <input type="password" name="password" id="new_pass_1" class="inputtext" placeholder="Password" /> <strong id="pass_strength"></strong>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td align="right">Verify password&nbsp;</td>
-                        <td align="left">
-                            <input type="password" name="confirm_password" id="new_pass_2" class="inputtext" placeholder="Verify password" /> <strong id="pass_match"></strong>
-                            <p>A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or a symbol, or is 20 characters or longer.</p>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td></td>
-                        <td align="left">
-                            <input type="checkbox" name="readrules" id="readrules" value="1"<? if (!empty($_REQUEST['readrules'])) { ?> checked="checked"<? } ?> />
-                            <label for="readrules">I will read the rules.</label>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td></td>
-                        <td align="left">
-                            <input type="checkbox" name="readwiki" id="readwiki" value="1"<? if (!empty($_REQUEST['readwiki'])) { ?> checked="checked"<? } ?> />
-                            <label for="readwiki">I will read the wiki.</label>
-                        </td>
-                    </tr>
-                    <tr valign="top">
-                        <td></td>
-                        <td align="left">
-                            <input type="checkbox" name="agereq" id="agereq" value="1"<? if (!empty($_REQUEST['agereq'])) { ?> checked="checked"<? } ?> />
-                            <label for="agereq">I am 13 years of age or older.</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" height="10"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" align="right"><input type="submit" name="submit" value="Submit" class="submit" /></td>
-                    </tr>
-                </table>
-            <? } else { ?>
-                An email has been sent to the address that you provided. After you confirm your email address, you will be able to log into your account.
-                <?
-                // <strong>Congratulations! Your account has been created.</strong><br />
-                //You can now log into your account using the <a href="login.php">login</a> page.
-                ?>
-
-                <? 		if ($NewInstall) {
-                    echo "Since this is a new installation, you can log in directly without having to confirm your account.";
-                }
-            } ?>
-        </div>
-    </form>
-<?
-View::show_footer();
+    </div>
+<?php View::show_footer(); ?>
