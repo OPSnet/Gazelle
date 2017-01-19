@@ -8,8 +8,7 @@
  */
 class Referral {
 
-    // curl object
-    private $curl;
+
     // array to store external site credentials and API URIs, stored in cache to keep user sessions alive
     private $ExternalServices;
     // template for external services array
@@ -20,7 +19,18 @@ class Referral {
             'api_path' => 'ajax.php?action=',
             'login_path' => 'login.php',
             'username' => 'prnd',
-            'password' => 'foo',
+            'password' => 'zxJe*65*E^X^3w6MP5ed',
+            'cookie' => '',
+            'cookie_expiry' => 0,
+            'status' => TRUE
+        ],
+        "VagrantGazelle" => [
+            'type' => 'gazelle',
+            'base_url' => 'http://localhost:80/',
+            'api_path' => 'ajax.php?action=',
+            'login_path' => 'login.php',
+            'username' => 'prnd',
+            'password' => 'bang2Electro',
             'cookie' => '',
             'cookie_expiry' => 0,
             'status' => TRUE
@@ -65,13 +75,7 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         if (!function_exists('curl_version')) {
             die('cURL is unavailable on this server.');
         }
-        $this->curl = curl_init();
-        curl_setopt($this->curl, CURLOPT_TIMEOUT, 30);
-        curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($this->curl, CURLOPT_AUTOREFERER, 1);
-        curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($this->curl, CURLOPT_MAXREDIRS, 10);
-
+        $this->set_curl();
 
     }
 
@@ -101,18 +105,26 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
      */
     public function generate_token() {
 
-        $_SESSION['referral_token'] = 'APL:' . Users::make_secret(1024) . ':APL';
+        $_SESSION['referral_token'] = 'APL:' . Users::make_secret(64) . ':APL';
         return $_SESSION['referral_token'];
     }
 
-    public function verify_token($service, $username) {
+    /**
+     * Verify Method, verifies via API calls that a user has an account at the external service based on the service type.
+     *
+     * @param $service
+     * @param $username
+     */
+    public function verify($service, $username) {
 
-        if (!$this->login($service)) {
-            die("This referral service is unavailable.");
+        switch ($this->ExternalServices[$service]['type']) {
+
+            case 'gazelle':
+                return $this->gazelle_verify($service, $username);
+                break;
+            default:
+                die("Invalid External Service");
         }
-
-
-
     }
 
 
@@ -132,6 +144,7 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         //set to HEAD request only
         curl_setopt($curl, CURLOPT_NOBODY, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 5);
         // do the request
         curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -177,12 +190,16 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
             'password' => $this->ExternalServices[$service]['password'],
             'keeplogged' => 1
         ];
-        curl_setopt($this->curl, CURLOPT_URL, $this->ExternalServices[$service]['base_url'] . $this->ExternalServices[$service]['login_path']);
-        curl_setopt($this->curl, CURLOPT_POST, TRUE);
-        curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($login_fields));
+        $ch = curl_init();
+        $this->set_curl($ch);
+        curl_setopt($ch, CURLOPT_URL, $this->ExternalServices[$service]['base_url'] . $this->ExternalServices[$service]['login_path']);
+        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($login_fields));
         // do el requesto
-        $result = curl_exec($this->curl);
-        $header_size = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
+        $result = curl_exec($ch);
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        curl_close($ch);
         //check for session cookie, as it is the indicator of success
         $cookies = $this->parse_cookies($result, $header_size);
         if (array_key_exists('session', $cookies)) {
@@ -194,6 +211,87 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
             return FALSE;
         }
 
+    }
+
+    /**
+     * Method to verify that a username exists at a given external gazelle service
+     * Calls gazelle_verify_token to verify token is in place.
+     *
+     * @param $service
+     * @param $username
+     * @return bool
+     */
+    private function gazelle_verify($service, $username) {
+        if (!array_key_exists($service, $this->ExternalServices)) {
+            die("Invalid referral service");
+        }
+        // login to ensure that we haven't expired out session with the external service
+        $this->login($service);
+        // build usersearch url
+        $url = $this->ExternalServices[$service]['base_url'];
+        $url .= $this->ExternalServices[$service]['api_path'];
+        $url .= 'usersearch';
+        $url .= '&search=' . $username;
+        // do la requesta
+        $ch = curl_init($url);
+        $this->set_curl($ch);
+        curl_setopt($ch, CURLOPT_COOKIE, 'session=' . urlencode($this->ExternalServices[$service]['cookie']));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        // toss json results into array
+        $result = json_decode($result, TRUE);
+        // fail with error if we get an error message
+        if ($result['status'] === 'failure') {
+            die('Error: Try again - ' . $result['error']);
+        } elseif ($result['status'] !== 'success') {
+            die('Error: Try again later');
+        }
+        $user_results = $result['results'];
+        if (count($user_results) == 0) {
+            $_SESSION['verify_error'] = "User Not Found, Please Try Again";
+            return FALSE;
+        }
+        foreach ($user_results as $user_result) {
+            if ($user_result['username'] === $username) {
+                $match = TRUE;
+                $user_id = $user_result['userId'];
+                break;
+            }
+        }
+        // we match it, then verify token
+        if ($match) {
+            return $this->gazelle_verify_token($service, $user_id);
+        } else {
+            $_SESSION['verify_error'] = "User Not Found, Please Try Again";
+            return FALSE;
+        }
+    }
+
+    private function gazelle_verify_token($service, $user_id) {
+        if (!array_key_exists($service, $this->ExternalServices)) {
+            die("Invalid referral service");
+        }
+        // login to ensure that we haven't expired out session with the external service
+        $this->login($service);
+        // build usersearch url
+        $url = $this->ExternalServices[$service]['base_url'];
+        $url .= $this->ExternalServices[$service]['api_path'];
+        $url .= 'user';
+        $url .= '&id=' . $user_id;
+        // do la requesta
+        $ch = curl_init($url);
+        $this->set_curl($ch);
+        curl_setopt($ch, CURLOPT_COOKIE, 'session=' . urlencode($this->ExternalServices[$service]['cookie']));
+        $result = curl_exec($ch);
+        curl_close($ch);
+        // toss json results into array
+        $result = json_decode($result, TRUE);
+        // fail with error if we get an error message
+        if ($result['status'] === 'failure') {
+            die('Error: Try again - ' . $result['error']);
+        } elseif ($result['status'] !== 'success') {
+            die('Error: Try again later');
+        }
     }
 
     /**
@@ -217,5 +315,17 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
      */
     private function cache_services() {
         G::$Cache->cache_value('referral_services', $this->ExternalServices);
+    }
+
+    /**
+     * Inits and sets defaults for curl object
+     */
+    private function set_curl($ch) {
+
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
     }
 }
