@@ -34,7 +34,7 @@ View::show_header('Two-factor Authentication');
 			<? endif; ?>
 		</div>
 
-		<a href="<?= site_url() ?>user.php?action=2fa&do=enable2&userid=<?= G::$LoggedUser['ID'] ?>" id="pad_next">Next &raquo;</a>
+		<a href="user.php?action=2fa&do=enable2&userid=<?= G::$LoggedUser['ID'] ?>" id="pad_next">Next &raquo;</a>
 	</div>
 </div>
 

@@ -90,7 +90,7 @@ switch ($_REQUEST['action']) {
 				}
 				
 				if (empty($_SESSION['private_key'])) {
-					header('Location: ' . site_url() . 'user.php?action=2fa&do=enable&userid=' . G::$LoggedUser['ID']);
+					header('Location: user.php?action=2fa&do=enable&userid=' . G::$LoggedUser['ID']);
 					exit;
 				}
 				
@@ -101,7 +101,7 @@ switch ($_REQUEST['action']) {
 					
 					if (!$works) {
 						// user got their token wrong...
-						header('Location: ' . site_url() . 'user.php?action=2fa&do=enable&invalid&userid=' . $LoggedUser['ID']);
+						header('Location: user.php?action=2fa&do=enable&invalid&userid=' . $LoggedUser['ID']);
 					} else {
 						// user got their token right!
 						$key = $DB->escape_str($_SESSION['private_key']);
@@ -109,13 +109,13 @@ switch ($_REQUEST['action']) {
 						$recovery = [];
 						
 						for ($i = 0; $i < 6; $i++) {
-							$recovery[] = strtoupper(bin2hex(random_bytes(12)));
+							$recovery[] = strtoupper(bin2hex(openssl_random_pseudo_bytes(16)));
 						}
 						
 						$recovery = serialize($recovery);
 						
 						$DB->query("UPDATE users_main SET 2FA_Key = '{$key}', Recovery = '{$recovery}' WHERE ID = '{$UserID}'");
-						header('Location: ' . site_url() . 'user.php?action=2fa&do=complete&userid=' . $LoggedUser['ID']);
+						header('Location: user.php?action=2fa&do=complete&userid=' . $LoggedUser['ID']);
 					}
 				}
 				break;
@@ -140,11 +140,11 @@ switch ($_REQUEST['action']) {
 					include('2fa/password_confirm.php');
 				} else {
 					if (!check_perms('users_mod') && !Users::check_password($_POST['password'], $PassHash, $Secret)) {
-						header('Location: ' . site_url() . 'user.php?action=2fa&do=disable&invalid&userid=' . $LoggedUser['ID']);
+						header('Location: user.php?action=2fa&do=disable&invalid&userid=' . $LoggedUser['ID']);
 						exit;
 					}
 					$DB->query("UPDATE users_main SET 2FA_Key = '', Recovery = '' WHERE ID = '{$UserID}'");
-					header('Location: ' . site_url() . 'user.php?action=edit&userid=' . $LoggedUser['ID']);
+					header('Location: user.php?action=edit&userid=' . $LoggedUser['ID']);
 				}
 				break;
 		}
