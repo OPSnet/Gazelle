@@ -207,7 +207,7 @@ class TORRENT_FORM {
 			<tr id="artist_tr">
 			<td class="label">Artist(s):</td>
 			<td id="artistfields">
-				<p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=369" target="_blank">this</a> for more information.</p>
+				<p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</p>
 <?
 			if (!empty($Torrent['Artists'])) {
 				$FirstArtist = true;
