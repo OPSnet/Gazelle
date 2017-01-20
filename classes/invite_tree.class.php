@@ -13,7 +13,7 @@ class INVITE_TREE {
 	// Set things up
 	function INVITE_TREE($UserID, $Options = array()) {
 		$this->UserID = $UserID;
-		if ($Options['visible'] === false) {
+		if (isset($Options['visible']) && $Options['visible'] === false) {
 			$this->Visible = false;
 		}
 	}
@@ -29,11 +29,11 @@ class INVITE_TREE {
 			SELECT TreePosition, TreeID, TreeLevel
 			FROM invite_tree
 			WHERE UserID = $UserID");
-		list($TreePosition, $TreeID, $TreeLevel) = G::$DB->next_record(MYSQLI_NUM, false);
-
-		if (!$TreeID) {
+		if (!G::$DB->has_results()) {
 			return;
 		}
+		list($TreePosition, $TreeID, $TreeLevel) = G::$DB->next_record(MYSQLI_NUM, false);
+
 		G::$DB->query("
 			SELECT TreePosition
 			FROM invite_tree
