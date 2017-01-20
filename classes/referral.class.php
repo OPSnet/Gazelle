@@ -15,6 +15,7 @@ class Referral {
     private $ExternalServicesTemplate = [
         "APOLLO" => [
             'type' => 'gazelle',
+            'inviter_id' => 1,
             'base_url' => 'https://apollo.rip/',
             'api_path' => 'ajax.php?action=',
             'login_path' => 'login.php',
@@ -26,6 +27,7 @@ class Referral {
         ],
         "VagrantGazelle" => [
             'type' => 'gazelle',
+            'inviter_id' => 1,
             'base_url' => 'http://localhost:80/',
             'api_path' => 'ajax.php?action=',
             'login_path' => 'login.php',
@@ -37,6 +39,7 @@ class Referral {
         ],
         "PassThePopcorn" => [
             'type' => 'gazelle',
+            'inviter_id' => 1,
             'base_url' => 'https://passthepopcorn.me/',
             'api_path' => 'ajax.php?action=',
             'login_path' => 'login.php',
@@ -71,12 +74,10 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         // use php session for lack of better solution
         session_start();
 
-        // init curl object
+        // check for curl
         if (!function_exists('curl_version')) {
             die('cURL is unavailable on this server.');
         }
-        $this->set_curl();
-
     }
 
     /**
@@ -110,10 +111,28 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
     }
 
     /**
+     * Login Method, points to relevant login method based on service type
+     *
+     * @param $service
+     * @return bool
+     */
+    private function login($service) {
+        switch ($this->ExternalServices[$service]['type']) {
+
+            case 'gazelle':
+                return $this->gazelle_login($service);
+                break;
+            default:
+                die("Invalid External Service");
+        }
+    }
+
+    /**
      * Verify Method, verifies via API calls that a user has an account at the external service based on the service type.
      *
      * @param $service
      * @param $username
+     * @return bool
      */
     public function verify($service, $username) {
 
@@ -153,22 +172,8 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
     }
 
     /**
-     * Login Method, points to relevant login method based on service type
+     * Method to gain access to the external gazelle API, or affirm that we still have a session active.
      *
-     * @param $service
-     */
-    private function login($service) {
-        switch ($this->ExternalServices[$service]['type']) {
-
-            case 'gazelle':
-                 return $this->gazelle_login($service);
-                break;
-            default:
-                die("Invalid External Service");
-        }
-    }
-
-    /**
      * @param $service
      * @return bool
      */
@@ -203,7 +208,7 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         //check for session cookie, as it is the indicator of success
         $cookies = $this->parse_cookies($result, $header_size);
         if (array_key_exists('session', $cookies)) {
-            $this->ExternalServices[$service]['cookie'] = $cookies['session'];
+            $this->ExternalServices[$service]['cookie'] = urlencode($cookies['session']);
             $this->ExternalServices[$service]['cookie_expiry'] = time() + $this->CookieExpiry;
             $this->cache_services();
             return TRUE;
@@ -222,6 +227,7 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
      * @return bool
      */
     private function gazelle_verify($service, $username) {
+        $match = FALSE;
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
@@ -235,7 +241,7 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         // do la requesta
         $ch = curl_init($url);
         $this->set_curl($ch);
-        curl_setopt($ch, CURLOPT_COOKIE, 'session=' . urlencode($this->ExternalServices[$service]['cookie']));
+        curl_setopt($ch, CURLOPT_COOKIE, 'session=' . $this->ExternalServices[$service]['cookie']);
         $result = curl_exec($ch);
         curl_close($ch);
         // toss json results into array
@@ -246,7 +252,7 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         } elseif ($result['status'] !== 'success') {
             die('Error: Try again later');
         }
-        $user_results = $result['results'];
+        $user_results = $result['response']['results'];
         if (count($user_results) == 0) {
             $_SESSION['verify_error'] = "User Not Found, Please Try Again";
             return FALSE;
@@ -267,13 +273,20 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         }
     }
 
+    /**
+     * Method to verify that the generated token has been added to the body of the external tracker users profile.
+     *
+     * @param $service
+     * @param $user_id
+     * @return bool
+     */
     private function gazelle_verify_token($service, $user_id) {
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
         // login to ensure that we haven't expired out session with the external service
         $this->login($service);
-        // build usersearch url
+        // build user profile url
         $url = $this->ExternalServices[$service]['base_url'];
         $url .= $this->ExternalServices[$service]['api_path'];
         $url .= 'user';
@@ -281,7 +294,7 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
         // do la requesta
         $ch = curl_init($url);
         $this->set_curl($ch);
-        curl_setopt($ch, CURLOPT_COOKIE, 'session=' . urlencode($this->ExternalServices[$service]['cookie']));
+        curl_setopt($ch, CURLOPT_COOKIE, 'session=' . $this->ExternalServices[$service]['cookie']);
         $result = curl_exec($ch);
         curl_close($ch);
         // toss json results into array
@@ -291,6 +304,16 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
             die('Error: Try again - ' . $result['error']);
         } elseif ($result['status'] !== 'success') {
             die('Error: Try again later');
+        }
+        // grab profile text from response
+        $user_profile_text = $result['response']['profileText'];
+        // let's get a match
+        $match = strpos($user_profile_text, $_SESSION['referral_token']);
+        if ($match !== FALSE) {
+            return TRUE;
+        } else {
+            $_SESSION['verify_error'] = "Token Not Found, Please Try Again";
+            return FALSE;
         }
     }
 
@@ -308,6 +331,55 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
             $cookies = array_merge($cookies, $cookie);
         }
         return $cookies;
+    }
+
+    /**
+     * This method creates an invite and sends it to the specified email address.
+     * This borrows heavily from the /sections/user/take_invite.php file
+     * I am so sorry if you are the one refactoring the invite functionality.
+     *
+     * @author prnd
+     * @param $service
+     * @param $email
+     * @param $username
+     * @return bool
+     */
+    public function create_invite($service, $email, $username) {
+        if (!array_key_exists($service, $this->ExternalServices)) {
+            die("Invalid referral service");
+        }
+
+        $SiteName = SITE_NAME;
+        $SiteURL = site_url();
+        $InviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
+        $InviteReason = '';
+        $InviteKey = db_string(Users::make_secret());
+        $DisabledChan = BOT_DISABLED_CHAN;
+        $IRCServer = BOT_SERVER;
+
+        $Message = "You have been invited you to join $SiteName and has specified this address ($email) as your email address. If you do not know this person, please ignore this email, and do not reply.
+
+        Please note that selling invites, trading invites, and giving invites away publicly (e.g. on a forum) is strictly forbidden.
+
+        If you have previously had an account at $SiteName, do not use this invite. Instead, please join $DisabledChan on $IRCServer and ask for your account to be reactivated.
+
+        To confirm your invite, click on the following link:
+
+        {$SiteURL}register.php?invite=$InviteKey
+
+        After you register, you will be able to use your account. Please take note that if you do not use this invite in the next 3 days, it will expire. We urge you to read the RULES and the wiki immediately after you join.
+
+        Thank you,
+        $SiteName Staff";
+
+        // save invite to DB
+        $DB->query("
+        INSERT INTO invites
+			(InviterID, InviteKey, Email, Expires, Reason)
+		VALUES
+			(' . $this->ExternalServices[$service]['inviter_id'] . ', '$InviteKey', '".db_string($email)."', '$InviteExpires', '$InviteReason')");
+
+
     }
 
     /**

@@ -58,7 +58,7 @@ View::show_header('External Tracker Referrals');
         <br/>
         <h2>Step 1: Paste Your Code</h2>
         <br/>
-        <p>Copy and paste the code below into the profile of your <?php echo $Service; ?> account. It can go anywhere in your profile as long as it is in one piece.</p>
+        <p>Copy and paste the code below into the profile of your <?php echo $Service; ?> account. It can go anywhere in your profile body (commonly known as "Profile info 1") as long as it is in one piece.</p>
         <br/>
         <br/>
         <p id="referral-code"><?php echo $Token; ?></p>
@@ -68,6 +68,7 @@ View::show_header('External Tracker Referrals');
         <br/>
         <form name="referral_service" method="post" action="">
             <input type="text" name="username" /><label for="username">Username</label>
+            <input type="text" name="email" /><label for="Email">Email Address</label>
             <input type="hidden" name="token" value="<?php echo $Token; ?>" />
             <input type="hidden" name="service" value="<?php echo $Service; ?>" />
             <br/>

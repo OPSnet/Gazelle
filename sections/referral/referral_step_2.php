@@ -7,16 +7,29 @@ if (!OPEN_EXTERNAL_REFERRALS) {
     die();
 }
 
-// get service from post value
+// get needed information from post values
 $Service = $_POST['service'];
+$Email = $_POST['email'];
+
+// let's sanitize the email before we continue
+$SanitizedEmail = filter_var($Email, FILTER_SANITIZE_EMAIL);
+if (!filter_var($SanitizedEmail, FILTER_VALIDATE_EMAIL)) {
+    $_SESSION['verify_error'] = "Invalid Email Address, Please Try Again";
+}
 
 // check post token vs session
 if ($_POST['token'] !== $_SESSION['referral_token']) {
     die('Invalid Token, please try again.');
 }
 
-
+// verify external user with token match
 $Verify = $Referral->verify($Service, $_POST['username']);
+if ($Verify === TRUE) {
+    // success
+    $Invited = $Referral->create_invite($Service, $SanitizedEmail, $_POST['username']);
+} else {
+    $error = $_SESSION['verify_error'];
+}
 
 
 
@@ -62,7 +75,12 @@ View::show_header('External Tracker Referrals');
         <br/>
         <h2>Step 2: Join <?php echo SITE_NAME; ?></h2>
         <br/>
-        <p>Copy and paste the code below into the profile of your <?php echo $Service; ?> account. It can go anywhere in your profile as long as it is in one piece.</p>
+        <?php if (!$Verify || $error): ?>
+            <h3>There was an error verifying your account at <?php echo $Service; ?>. Please refresh the page and try again.</h3>
+            <p><?php echo $error; ?></p>
+        <?php else: ?>
+            <h3>Congratulations, you have verified your account at <?php echo $Service; ?>. You have been issued an email that has been sent to the email address you provided. Be sure to check your spam folder, and welcome to <?php echo SITE_NAME; ?>!</h3
+        <?php endif; ?>
         <br/>
         <br/>
 

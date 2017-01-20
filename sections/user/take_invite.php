@@ -1,5 +1,10 @@
 <?
 
+/**
+ * Hello there. If you are refactoring this code, please note that this functionality also sort of exists in /classes/referral.class.php
+ * Super sorry for doing that, but this is totally not reusable.
+ */
+
 if (!$UserCount = $Cache->get_value('stats_user_count')) {
 	$DB->query("
 		SELECT COUNT(ID)
