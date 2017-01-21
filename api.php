@@ -1,4 +1,4 @@
-<?
+<?php
 /*-- API Start Class -------------------------------*/
 /*--------------------------------------------------*/
 /* Simplified version of script_start, used for the	*/
@@ -13,14 +13,22 @@ if (isset($_GET['clearcache'])) {
 	unset($_GET['clearcache']);
 }
 
-require 'classes/config.php'; //The config contains all site wide configuration information as well as memcached rules
+require_once('classes/config.php'); //The config contains all site wide configuration information as well as memcached rules
 
-require(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
-require(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
+
+require_once(SERVER_ROOT.'/classes/mysql.class.php');
+require_once(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
+require_once(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
+require_once(SERVER_ROOT.'/classes/time.class.php');
+require_once(SERVER_ROOT.'/classes/misc.class.php');
+require(SERVER_ROOT.'/classes/classloader.php');
+
 $Cache = NEW CACHE($MemcachedServers); //Load the caching class
-
+$DB = new DB_MYSQL;
 $Debug = new DEBUG;
 $Debug->handle_errors();
+
+G::initialize();
 
 // Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
 function send_irc($Raw) {
@@ -34,7 +42,7 @@ function check_perms() {
 }
 
 function error($Code) {
-	echo '<error>', $Code, '</error></payload>';
+	echo json_encode(array('status' => 'failure', 'error' => $Code, 'response' => array()));
 	die();
 }
 
@@ -123,7 +131,5 @@ function display_array($Array, $Escape = array()) {
 
 header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
 header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');
-header('Content-type: text/xml');
-echo '<?xml version="1.0"?><payload>';
-require(SERVER_ROOT.'/sections/api/index.php');
-?>
+header('Content-type: application/json');
+require_once(SERVER_ROOT.'/sections/api/index.php');
