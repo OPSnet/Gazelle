@@ -15,7 +15,6 @@ if (isset($_GET['clearcache'])) {
 
 require_once('classes/config.php'); //The config contains all site wide configuration information as well as memcached rules
 
-
 require_once(SERVER_ROOT.'/classes/mysql.class.php');
 require_once(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
 require_once(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
@@ -42,7 +41,7 @@ function check_perms() {
 }
 
 function error($Code) {
-	echo json_encode(array('status' => 'failure', 'error' => $Code, 'response' => array()));
+	echo json_encode(array('status' => 400, 'error' => $Code, 'response' => array()));
 	die();
 }
 

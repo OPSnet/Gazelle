@@ -46,5 +46,5 @@ if ($app['Token'] !== $token) {
 }
 
 $response = $class->run();
-print(json_encode(array('status' => 'success', 'response' => $response), JSON_UNESCAPED_SLASHES));
+print(json_encode(array('status' => 200, 'response' => $response), JSON_UNESCAPED_SLASHES));
 //$Debug->profile();
