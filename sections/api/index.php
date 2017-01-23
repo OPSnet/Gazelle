@@ -1,5 +1,7 @@
 <?php
 
+require_once(SERVER_ROOT.'/sections/api/AbstractAPI.php');
+
 function getClassObject($name, $db) {
     $name = str_replace("_", "", ucwords($name, "_"));
     require_once(SERVER_ROOT."/sections/api/{$name}.php");
@@ -7,19 +9,23 @@ function getClassObject($name, $db) {
 }
 
 $available = array(
-    'generate_invite'
+    'generate_invite',
+    'user'
 );
 
 switch($_GET['action']) {
     case 'generate_invite':
         $class = getClassObject('generate_invite', $DB);
         break;
+    case 'user':
+        $class = getClassObject('user', $DB);
+        break;
     default:
-        error('invalid action');
+        json_error('invalid action');
 }
 
 if (empty($_GET['aid']) || empty($_GET['token'])) {
-    error('invalid parameters');
+    json_error('invalid parameters');
 }
 
 $app_id = intval($_GET['aid']);
@@ -42,7 +48,7 @@ if (!is_array($app)) {
 $app = $app[0];
 
 if ($app['Token'] !== $token) {
-    error('invalid token');
+    json_error('invalid token');
 }
 
 $response = $class->run();

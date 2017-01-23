@@ -1,11 +1,9 @@
 <?php
 
-require_once(SERVER_ROOT.'/sections/api/AbstractAPI.php');
-
 class GenerateInvite extends AbstractAPI {
     public function run() {
         if (!isset($_GET['interviewer_id']) && !isset($_GET['interviewer_name'])) {
-            error('Missing interviewer_id or interviewer_name');
+            json_error('Missing interviewer_id or interviewer_name');
         }
     
         if (isset($_GET['interviewer_id'])) {
@@ -16,7 +14,7 @@ class GenerateInvite extends AbstractAPI {
         }
         $this->db->query("SELECT ID, Username FROM users_main WHERE {$where}");
         if ($this->db->record_count() === 0) {
-            error("Could not find interviewer");
+            json_error("Could not find interviewer");
         }
         $user = $this->db->next_record();
         $interviewer_id = $user['ID'];
@@ -30,13 +28,13 @@ class GenerateInvite extends AbstractAPI {
         if (!empty($_GET['email'])) {
             $this->db->query("SELECT ID, Username FROM users_main WHERE Email='{$email}'");
             if ($this->db->record_count() > 0) {
-                error("Email address already in use");
+                json_error("Email address already in use");
             }
     
             $this->db->query("SELECT * FROM invites WHERE Email='{$email}'");
             if ($this->db->record_count() > 0) {
                 $key = $this->db->next_record();
-                error("Invite code already generated for this email address");
+                json_error("Invite code already generated for this email address");
             }
         }
         
