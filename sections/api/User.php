@@ -17,10 +17,10 @@ class User extends AbstractAPI {
         $this->db->query("
 SELECT
     um.ID, um.Username, um.Email, um.IRCKey, um.Uploaded, um.Downloaded, um.Paranoia, um.Enabled,
-    um.Invites, um.PermissionID, p.Level as PermissionLevel, p.Name as PermissionName, ui.*
+    um.Invites, um.PermissionID, um.LastAccess, p.Level as PermissionLevel, p.Name as PermissionName, ui.*
 FROM users_main as um
 LEFT JOIN (
-    SELECT UserID, AdminComment, Donor, JoinDate, Inviter, DisableIRC, BanDate, BanReason
+    SELECT UserID, AdminComment, Donor, JoinDate, Inviter, DisableIRC, BanDate, BanReason, JoinDate
     FROM users_info
 ) AS ui ON ui.UserID = um.ID
 LEFT JOIN (SELECT ID, Level, Name FROM permissions) AS p ON p.ID = um.PermissionID
