@@ -11,7 +11,7 @@ class User extends AbstractAPI {
             $where = "um.Username='".db_string($_GET['username'])."'";
         }
         else {
-            json_error("Need to supply either user_id or user_name");
+            json_error("Need to supply either user_id or username");
         }
         
         $this->db->query("
@@ -20,7 +20,7 @@ SELECT
     um.Invites, um.PermissionID, um.LastAccess, p.Level as PermissionLevel, p.Name as PermissionName, ui.*
 FROM users_main as um
 LEFT JOIN (
-    SELECT UserID, AdminComment, Donor, JoinDate, Inviter, DisableIRC, BanDate, BanReason, JoinDate
+    SELECT UserID, AdminComment, Donor, JoinDate, Inviter, DisableIRC, BanDate, BanReason
     FROM users_info
 ) AS ui ON ui.UserID = um.ID
 LEFT JOIN (SELECT ID, Level, Name FROM permissions) AS p ON p.ID = um.PermissionID
