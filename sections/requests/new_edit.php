@@ -170,10 +170,11 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 <?
 		if (!empty($ArtistForm)) {
 			$First = true;
+			$cnt = 0;
 			foreach ($ArtistForm as $Importance => $ArtistNames) {
 				foreach ($ArtistNames as $Artist) {
 ?>
-						<input type="text" id="artist" name="artists[]"<? Users::has_autocomplete_enabled('other'); ?> size="45" value="<?=display_str($Artist['name']) ?>" />
+						<input type="text" id="artist_<?=$cnt ?>" name="artists[]"<? Users::has_autocomplete_enabled('other'); ?> size="45" value="<?=display_str($Artist['name']) ?>" />
 						<select id="importance" name="importance[]">
 							<option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
 							<option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
@@ -186,10 +187,11 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 						<? if ($First) { ?><a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a><? } $First = false; ?>
 						<br />
 <?
+				    $cnt++;
 				}
 			}
 		} else {
-?>						<input type="text" id="artist" name="artists[]"<? Users::has_autocomplete_enabled('other'); ?> size="45" onblur="CheckVA();" />
+?>						<input type="text" id="artist_0" name="artists[]"<? Users::has_autocomplete_enabled('other'); ?> size="45" onblur="CheckVA();" />
 						<select id="importance" name="importance[]">
 							<option value="1">Main</option>
 							<option value="2">Guest</option>

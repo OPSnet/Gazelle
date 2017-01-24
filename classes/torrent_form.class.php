@@ -88,7 +88,7 @@ class TORRENT_FORM {
 		<table cellpadding="3" cellspacing="1" border="0" class="layout border" width="100%">
 			<tr>
 				<td class="label">Torrent file:</td>
-				<td><input id="file" type="file" name="file_input" size="50" /></td>
+				<td><input id="file" type="file" name="file_input" size="50" required /></td>
 			</tr>
 			<tr>
 				<td class="label">Type:</td>
@@ -211,10 +211,11 @@ class TORRENT_FORM {
 <?
 			if (!empty($Torrent['Artists'])) {
 				$FirstArtist = true;
+				$cnt = 0;
 				foreach ($Torrent['Artists'] as $Importance => $Artists) {
 					foreach ($Artists as $Artist) {
 ?>
-					<input type="text" id="artist" name="artists[]" size="45" value="<?=display_str($Artist['name']) ?>" onblur="CheckVA();"<? Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+					<input type="text" id="artist_<?=$cnt ?>" name="artists[]" size="45" value="<?=display_str($Artist['name']) ?>" onblur="CheckVA();"<? Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> required />
 					<select id="importance" name="importance[]"<?=$this->Disabled?>>
 						<option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
 						<option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
@@ -236,11 +237,12 @@ class TORRENT_FORM {
 ?>
 					<br />
 <?
+					    $cnt++;
 					}
 				}
 			} else {
 ?>
-					<input type="text" id="artist" name="artists[]" size="45" onblur="CheckVA();"<? Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+					<input type="text" id="artist_0" name="artists[]" size="45" onblur="CheckVA();"<? Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> required />
 					<select id="importance" name="importance[]"<?=$this->Disabled?>>
 						<option value="1">Main</option>
 						<option value="2">Guest</option>
@@ -257,7 +259,7 @@ class TORRENT_FORM {
 			<tr id="title_tr">
 				<td class="label">Album title:</td>
 				<td>
-					<input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title'])?>"<?=$this->Disabled?> />
+					<input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title'])?>"<?=$this->Disabled?> required />
 					<p class="min_padding">Do not include the words remaster, re-issue, MFSL Gold, limited edition, bonus tracks, bonus disc or country-specific information in this field. That belongs in the edition information fields below; see <a href="wiki.php?action=article&amp;id=18" target="_blank">this</a> for further information. Also remember to use the correct capitalization for your upload. See the <a href="wiki.php?action=article&id=42" target="_blank">Capitalization Guidelines</a> for more information.</p>
 				</td>
 			</tr>
@@ -311,7 +313,7 @@ function show() {
 				</td>
 				<td>
 					<p id="yearwarning" class="hidden">You have entered a year for a release which predates the medium's availability. You will need to change the year and enter additional edition information. If this information cannot be provided, check the &quot;Unknown Release&quot; check box below.</p>
-					<input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>"<?=$this->Disabled?> onblur="CheckYear();" /> This is the year of the original release.
+					<input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>"<?=$this->Disabled?> onblur="CheckYear();" required /> This is the year of the original release.
 				</td>
 			</tr>
 			<tr id="label_tr">
@@ -331,8 +333,8 @@ function show() {
 					<span id="releasetype_label">Release type:</span>
 				</td>
 				<td>
-					<select id="releasetype" name="releasetype"<?=$this->Disabled?>>
-						<option>---</option>
+					<select id="releasetype" name="releasetype"<?=$this->Disabled?> required >
+						<option value="">---</option>
 <?
 			foreach ($ReleaseTypes as $Key => $Val) {
 				echo "\t\t\t\t\t\t<option value=\"$Key\"";
@@ -420,8 +422,8 @@ function show() {
 			<tr>
 				<td class="label">Format:</td>
 				<td>
-					<select id="format" name="format" onchange="Format()">
-						<option>---</option>
+					<select id="format" name="format" onchange="Format()" required>
+						<option value="">---</option>
 <?
 		foreach (Misc::display_array($this->Formats) as $Format) {
 			echo "\t\t\t\t\t\t<option value=\"$Format\"";
@@ -439,7 +441,7 @@ function show() {
 			<tr id="bitrate_row">
 				<td class="label">Bitrate:</td>
 				<td>
-					<select id="bitrate" name="bitrate" onchange="Bitrate()">
+					<select id="bitrate" name="bitrate" onchange="Bitrate()" required>
 						<option value="">---</option>
 <?
 		if ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], $this->Bitrates)) {
@@ -508,8 +510,8 @@ function show() {
 			<tr>
 				<td class="label">Media:</td>
 				<td>
-					<select name="media" onchange="CheckYear();" id="media">
-						<option>---</option>
+					<select name="media" onchange="CheckYear();" id="media" required>
+						<option value="">---</option>
 <?
 		foreach ($this->Media as $Media) {
 			echo "\t\t\t\t\t\t<option value=\"$Media\"";
@@ -610,7 +612,7 @@ function show() {
 <?				} ?>
 					</select>
 <?			} ?>
-					<input type="text" id="tags" name="tags" size="40" value="<?=display_str($Torrent['TagList']) ?>"<? Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+					<input type="text" id="tags" name="tags" size="40" value="<?=display_str($Torrent['TagList']) ?>"<? Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> required />
 					<br />
 <? Rules::display_site_tag_rules(true); ?>
 				</td>
@@ -654,14 +656,14 @@ function show() {
 			<tr id="title_tr">
 				<td class="label">Author - Title:</td>
 				<td>
-					<input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title']) ?>" />
+					<input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title']) ?>" required />
 					<p class="min_padding">Should only include the author if applicable.</p>
 				</td>
 			</tr>
 <?		} ?>
 			<tr id="year_tr">
 				<td class="label">Year:</td>
-				<td><input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>" /></td>
+				<td><input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>" required /></td>
 			</tr>
 			<tr>
 				<td class="label">Format:</td>
@@ -756,7 +758,7 @@ function show() {
 <?			} else { ?>
 				<td class="label">Title:</td>
 <?			} ?>
-				<td><input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title']) ?>" /></td>
+				<td><input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title']) ?>" required /></td>
 			</tr>
 			<tr>
 				<td class="label">Tags:</td>

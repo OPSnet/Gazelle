@@ -66,6 +66,9 @@ if (!empty($_POST['action'])) {
 			// Get posts
 			require(SERVER_ROOT.'/sections/forums/get_post.php');
 			break;
+        case 'get_post2':
+            require(SERVER_ROOT.'/sections/forums/get_post2.php');
+            break;
 		case 'delete':
 			// Delete posts
 			require(SERVER_ROOT.'/sections/forums/delete.php');
