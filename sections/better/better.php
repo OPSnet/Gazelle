@@ -86,6 +86,30 @@ View::show_header('Better');
 					Torrents that have been marked as having "Bad File Names".
 				</td>
 			</tr>
+            <tr class="rowb">
+                <td class="nobr">
+                    <a href="better.php?method=artwork">Missing Torrent Artwork</a>
+                </td>
+                <td class="nobr">
+                    Torrent groups that are missing artwork.
+                </td>
+            </tr>
+            <tr class="rowb">
+                <td class="nobr">
+                    <a href="better.php?method=artistimage">Missing Artist Image</a>
+                </td>
+                <td class="nobr">
+                    Artist groups that have no images.
+                </td>
+            </tr>
+            <tr class="rowb">
+                <td class="nobr">
+                    <a href="better.php?method=description">Missing Artist Description</a>
+                </td>
+                <td class="nobr">
+                    Artist groups that have no descriptions.
+                </td>
+            </tr>
 			<tr class="rowb">
 				<td class="nobr">
 					<a href="better.php?method=single">Single-seeded FLAC torrents</a>
