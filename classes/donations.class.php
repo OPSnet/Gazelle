@@ -857,7 +857,7 @@ Sincerely,
 
 [b]Genre:[/b] Post-Punk, Rock, Experimental
 
-[b]Torrents:[/b] https://what.cd/torrents.php?id=649629
+[b]Torrents:[/b] https://apollo.rip/torrents.php?id=214188
 
 [b]Review:[/b] [quote=Mutant Sounds]Stumblebum idiot savant songform fragmentation that vacillates between moments of delirious jerry-rigged inspiration and passages that border on the insufferably sophomoric, brought to you by this batch of DIY rabble rousers whose stance and attitude (complete with DIY manifestos on the back cover) aligned them strongly at the time with the likes of The Desperate Bicycles. Loosely yoked to a whole network of willfully rinky dink art damage, Nag and Bendle (2/3 of The Door And The Window) also participated in The 49 Americans, a group with a similar propensity for inspired faux naif art brut whimsy and Mark Perry (the other 1/3) was of course the leader of Alternative TV, whose NWW list included group The Good Missionaries also traffic in much the same sort of abstruse fuckery.[/quote]
 
@@ -876,7 +876,7 @@ Sincerely,
 
 [b]Genre:[/b] Post-Punk, Rock, Experimental
 
-[b]Torrents:[/b] https://what.cd/torrents.php?id=649629
+[b]Torrents:[/b] https://apollo.rip/torrents.php?id=214188
 
 [b]Release Info:[/b]
 [*][u]Release Date[/u]: 1980 (Reissue: 2003)

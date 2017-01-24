@@ -1,6 +1,4 @@
-#ignore IDE project files
-.idea
-
-#ignore local configs
-sphinx.conf
-classes/config.php
+.idea/
+html/
+/classes/config.php
+/sphinx.conf
