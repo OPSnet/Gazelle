@@ -777,7 +777,7 @@ list($ArtistsAdded) = $DB->next_record();
 					<div class="field_div">
 						<input type="text" size="50" name="irckey" id="irckey" value="<?=display_str($IRCKey)?>" />
 					</div>
-					<p class="min_padding">If set, this key will be used instead of your site password when authenticating with <?=BOT_NICK?> on the <a href="wiki.php?action=article&amp;id=30">site's IRC network</a>. <span style="white-space: nowrap;">Please note:</span></p>
+					<p class="min_padding">If set, this key will be used instead of your site password when authenticating with <?=BOT_NICK?> on the <a href="wiki.php?action=article&amp;id=5">site's IRC network</a>. <span style="white-space: nowrap;">Please note:</span></p>
 					<ul>
 						<li>This value is stored in plaintext and should not be your password.</li>
 						<li>IRC keys must be between 6 and 32 characters.</li>
