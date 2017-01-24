@@ -31,9 +31,6 @@ if ($Verify === TRUE) {
     $error = $_SESSION['verify_error'];
 }
 
-
-
-
 View::show_header('External Tracker Referrals');
 ?>
     <style>
@@ -68,15 +65,14 @@ View::show_header('External Tracker Referrals');
             <li><?php echo SITE_NAME; ?> will generate a string of characters that you will place in the body of your profile at the tracker of your choice.</li>
             <li>Paste the character string anywhere in the body of your profile.</li>
             <li>Enter your username and <?php echo SITE_NAME; ?> will verify your membership and issue an invite code to you.</li>
-            <li>Join <?php echo SITE_NAME; ?>.</li>
-            <li><strong>???</strong></li>
-            <li>Profit.</li>
+            <li>Join <?php echo SITE_NAME; ?>!</li>
         </ol>
         <br/>
         <h2>Step 2: Join <?php echo SITE_NAME; ?></h2>
         <br/>
         <?php if (!$Verify || $error): ?>
             <h3>There was an error verifying your account at <?php echo $Service; ?>. Please refresh the page and try again.</h3>
+            <br/>
             <p><?php echo $error; ?></p>
         <?php else: ?>
             <h3>Congratulations, you have verified your account at <?php echo $Service; ?>. You have been issued an email that has been sent to the email address you provided. Be sure to check your spam folder, and welcome to <?php echo SITE_NAME; ?>!</h3

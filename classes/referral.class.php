@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Referral
  * @author prnd
@@ -8,48 +7,9 @@
  */
 class Referral {
 
-
     // array to store external site credentials and API URIs, stored in cache to keep user sessions alive
     private $ExternalServices;
-    // template for external services array
-    private $ExternalServicesTemplate = [
-        "APOLLO" => [
-            'type' => 'gazelle',
-            'inviter_id' => 1,
-            'base_url' => 'https://apollo.rip/',
-            'api_path' => 'ajax.php?action=',
-            'login_path' => 'login.php',
-            'username' => 'prnd',
-            'password' => 'zxJe*65*E^X^3w6MP5ed',
-            'cookie' => '',
-            'cookie_expiry' => 0,
-            'status' => TRUE
-        ],
-        "VagrantGazelle" => [
-            'type' => 'gazelle',
-            'inviter_id' => 1,
-            'base_url' => 'http://localhost:80/',
-            'api_path' => 'ajax.php?action=',
-            'login_path' => 'login.php',
-            'username' => 'prnd',
-            'password' => 'bang2Electro',
-            'cookie' => '',
-            'cookie_expiry' => 0,
-            'status' => TRUE
-        ],
-        "PassThePopcorn" => [
-            'type' => 'gazelle',
-            'inviter_id' => 1,
-            'base_url' => 'https://passthepopcorn.me/',
-            'api_path' => 'ajax.php?action=',
-            'login_path' => 'login.php',
-            'username' => 'foo',
-            'password' => 'bar',
-            'cookie' => '',
-            'cookie_expiry' => 0,
-            'status' => TRUE
-        ],
-    ];
+    // set session length
     private $CookieExpiry = 604800; // 1 week
 
     /**
@@ -61,19 +21,27 @@ class Referral {
      */
     function __construct() {
         // populate services array from cache if it exists, if not then grab from template
-$this->ExternalServices = $this->ExternalServicesTemplate;
+        $services_config = $GLOBALS['ExternalServicesConfig'];
+        $this->ExternalServices = G::$Cache->get_value('referral_services');
+        // grab from template if not in cache
         if (empty($this->ExternalServices)) {
-            $this->ExternalServices = G::$Cache->get_value('referral_services');
-            // grab from template if not in cache
-            if (empty($this->ExternalServices)) {
-                $this->ExternalServices = $this->ExternalServicesTemplate;
-                $this->cache_services();
+            $this->ExternalServices = $GLOBALS['ExternalServicesConfig'];
+            $this->cache_services();
+        } else {
+            // make sure we get fresh credentials from config
+            foreach ($services_config as $service => $config) {
+                // copy entire thing if it's new to the cache
+                if (!in_array($service, $this->ExternalServices)) {
+                    $this->ExternalServices[$service] = $config;
+                } else {
+                    // else just grab new creds
+                    $this->ExternalServices[$service]['username'] = $config['username'];
+                    $this->ExternalServices[$service]['password'] = $config['password'];
+                }
             }
         }
-
         // use php session for lack of better solution
         session_start();
-
         // check for curl
         if (!function_exists('curl_version')) {
             die('cURL is unavailable on this server.');
@@ -349,37 +317,30 @@ $this->ExternalServices = $this->ExternalServicesTemplate;
             die("Invalid referral service");
         }
 
-        $SiteName = SITE_NAME;
-        $SiteURL = site_url();
+        // form invite data and populate template
         $InviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
-        $InviteReason = '';
+        $InviteReason = 'This user was referred to membership by their account at ' . $service . '. They verified their account on ' . date('Y-m-d H:i:s');
         $InviteKey = db_string(Users::make_secret());
-        $DisabledChan = BOT_DISABLED_CHAN;
-        $IRCServer = BOT_SERVER;
-
-        $Message = "You have been invited you to join $SiteName and has specified this address ($email) as your email address. If you do not know this person, please ignore this email, and do not reply.
-
-        Please note that selling invites, trading invites, and giving invites away publicly (e.g. on a forum) is strictly forbidden.
-
-        If you have previously had an account at $SiteName, do not use this invite. Instead, please join $DisabledChan on $IRCServer and ask for your account to be reactivated.
-
-        To confirm your invite, click on the following link:
-
-        {$SiteURL}register.php?invite=$InviteKey
-
-        After you register, you will be able to use your account. Please take note that if you do not use this invite in the next 3 days, it will expire. We urge you to read the RULES and the wiki immediately after you join.
-
-        Thank you,
-        $SiteName Staff";
+        $InviterId = $this->ExternalServices[$service]['inviter_id'];
+        require(SERVER_ROOT . '/classes/templates.class.php');
+        $Tpl = NEW TEMPLATE;
+        $Tpl->open(SERVER_ROOT . '/templates/referral.tpl'); // Password reset template
+        $Tpl->set('Email', $email);
+        $Tpl->set('InviteKey', $InviteKey);
+        $Tpl->set('DISABLED_CHAN', BOT_DISABLED_CHAN);
+        $Tpl->set('IRC_SERVER', BOT_SERVER);
+        $Tpl->set('SITE_NAME', SITE_NAME);
+        $Tpl->set('SITE_URL', SITE_URL);
 
         // save invite to DB
-        $DB->query("
-        INSERT INTO invites
+        G::$DB->query("
+		INSERT INTO invites
 			(InviterID, InviteKey, Email, Expires, Reason)
 		VALUES
-			(' . $this->ExternalServices[$service]['inviter_id'] . ', '$InviteKey', '".db_string($email)."', '$InviteExpires', '$InviteReason')");
+			('$InviterId', '$InviteKey', '".db_string($email)."', '$InviteExpires', '$InviteReason')");
 
-
+        // send email
+        Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $Tpl->get(), 'noreply', 'text/plain');
     }
 
     /**

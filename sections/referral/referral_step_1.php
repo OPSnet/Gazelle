@@ -51,9 +51,7 @@ View::show_header('External Tracker Referrals');
             <li><?php echo SITE_NAME; ?> will generate a string of characters that you will place in the body of your profile at the tracker of your choice.</li>
             <li>Paste the character string anywhere in the body of your profile.</li>
             <li>Enter your username and <?php echo SITE_NAME; ?> will verify your membership and issue an invite code to you.</li>
-            <li>Join <?php echo SITE_NAME; ?>.</li>
-            <li><strong>???</strong></li>
-            <li>Profit.</li>
+            <li>Join <?php echo SITE_NAME; ?>!</li>
         </ol>
         <br/>
         <h2>Step 1: Paste Your Code</h2>
@@ -68,6 +66,8 @@ View::show_header('External Tracker Referrals');
         <br/>
         <form name="referral_service" method="post" action="">
             <input type="text" name="username" /><label for="username">Username</label>
+            <br/>
+            <br/>
             <input type="text" name="email" /><label for="Email">Email Address</label>
             <input type="hidden" name="token" value="<?php echo $Token; ?>" />
             <input type="hidden" name="service" value="<?php echo $Service; ?>" />

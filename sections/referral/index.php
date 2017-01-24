@@ -50,8 +50,6 @@
             <li>Paste the character string anywhere in the body of your profile and save it.</li>
             <li>Enter your username and <?php echo SITE_NAME; ?> will verify your membership and issue an invite code to you.</li>
             <li>Join <?php echo SITE_NAME; ?>!</li>
-            <li><strong>???</strong></li>
-            <li>Profit.</li>
         </ol>
 
     <?php if (!empty($AvailableServices)): ?>
