@@ -276,7 +276,7 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 		$HasLog, $HasCue, $LogScore, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
-		$CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
+		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
 		$LogInDB, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
@@ -418,6 +418,10 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 	}
 	if (!empty($BadFolders)) {
 		$ExtraInfo .= $AddExtra . Format::torrent_label('Bad Folders');
+		$AddExtra = ' / ';
+	}
+	if (!empty($MissingLineage)) {
+		$ExtraInfo .= $AddExtra . Format::torrent_label('Missing Lineage');
 		$AddExtra = ' / ';
 	}
 	if (!empty($CassetteApproved)) {
