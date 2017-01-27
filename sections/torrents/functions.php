@@ -84,6 +84,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				tbt.TorrentID AS BadTags,
 				tbf.TorrentID AS BadFolders,
 				tfi.TorrentID AS BadFiles,
+				ml.TorrentID AS MissingLineage,
 				ca.TorrentID AS CassetteApproved,
 				lma.TorrentID AS LossymasterApproved,
 				lwa.TorrentID AS LossywebApproved,
@@ -94,6 +95,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				LEFT JOIN torrents_bad_tags AS tbt ON tbt.TorrentID = t.ID
 				LEFT JOIN torrents_bad_folders AS tbf ON tbf.TorrentID = t.ID
 				LEFT JOIN torrents_bad_files AS tfi ON tfi.TorrentID = t.ID
+				LEFT JOIN torrents_missing_lineage AS ml ON ml.TorrentID = t.ID
 				LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
 				LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
 				LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.ID
