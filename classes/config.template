@@ -279,5 +279,5 @@ $ExternalServicesConfig = [
         'cookie' => '',
         'cookie_expiry' => 0,
         'status' => TRUE
-    ],
+    ]];
 ?>

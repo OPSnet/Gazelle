@@ -150,7 +150,7 @@ class Referral {
             die("Invalid referral service");
         }
         //check if cookie is still valid
-        if (time() < $this->ExternalServices[$service]['cookie_expiry']) {
+        if ($this->gazelle_valid_session($service)) {
             //cookie is valid, so we can continue making requests to the API
             return TRUE;
         } else {
@@ -184,6 +184,33 @@ class Referral {
             return FALSE;
         }
 
+    }
+
+    /**
+     * Method to verify active user session at external gazelle service
+     * @param $service
+     * @return bool
+     */
+    private function gazelle_valid_session($service) {
+        if (!array_key_exists($service, $this->ExternalServices)) {
+            die("Invalid referral service");
+        }
+        $url = $this->ExternalServices[$service]['base_url'];
+        $url .= $this->ExternalServices[$service]['api_path'];
+        $url .= 'index';
+        // do la requesta
+        $ch = curl_init($url);
+        $this->set_curl($ch);
+        curl_setopt($ch, CURLOPT_COOKIE, 'session=' . $this->ExternalServices[$service]['cookie']);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        // toss json results into array
+        $result = json_decode($result, TRUE);
+        if ($result['status'] === 'success') {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
     }
 
     /**
