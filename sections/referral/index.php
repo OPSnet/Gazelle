@@ -7,8 +7,6 @@
         exit;
     }
 
-    include(SERVER_ROOT."/classes/referral.class.php");
-
     $Referral = new Referral();
     $AvailableServices = $Referral->services_list();
 
