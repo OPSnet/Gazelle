@@ -482,7 +482,7 @@ function show() {
 				</td>
 				<td id="logfields">
 					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-					<input id="file" type="file" multiple="multiple" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+					<input id="file" type="file" accept=".log,.txt" multiple="multiple" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 				</td>
 			</tr>
 <?
