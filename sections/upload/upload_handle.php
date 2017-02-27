@@ -822,7 +822,7 @@ if ($Type == 'Music') {
 	if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
 		$Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
 	}
-	$Announce .= "\003 - \00310";
+	$Announce .= "\003 - \003";
 	$Announce .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
 	if ($HasLog == 1) {
 		$Announce .= ' / Log';
