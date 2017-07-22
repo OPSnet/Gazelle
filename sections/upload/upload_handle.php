@@ -817,39 +817,43 @@ if ($Type == 'Music') {
 	$Announce .= Artists::display_artists($ArtistForm, false);
 }
 $Announce .= trim($Properties['Title']).' ';
+$Details = "";
 if ($Type == 'Music') {
 	$Announce .= '['.trim($Properties['Year']).']';
 	if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
 		$Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
 	}
-	$Announce .= "\003 - \00310";
-	$Announce .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
+	$Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
 	if ($HasLog == 1) {
-		$Announce .= ' / Log';
+        $Details .= ' / Log';
 	}
 	if ($LogInDB) {
-		$Announce .= ' / '.$LogScoreAverage.'%';
+        $Details .= ' / '.$LogScoreAverage.'%';
 	}
 	if ($HasCue == 1) {
-		$Announce .= ' / Cue';
+        $Details .= ' / Cue';
 	}
-	$Announce .= ' / '.trim($Properties['Media']);
+	$Details .= ' / '.trim($Properties['Media']);
 	if ($Properties['Scene'] == '1') {
-		$Announce .= ' / Scene';
+        $Details .= ' / Scene';
 	}
 	if ($T['FreeLeech'] == '1') {
-		$Announce .= ' / Freeleech!';
+        $Details .= ' / Freeleech!';
 	}
-        $Announce .= "\003";
 }
-$Title = $Announce;
 
-$AnnounceSSL = "\002TORRENT:\002 \00303$Announce\003";
-$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
+$Title = $Announce;
+if ($Details !== "") {
+    $Title .= " - ".$Details;
+    $Announce .= "\003 - \00310".$Details."\003";
+}
+
+$AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003";
+//$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
 
 $AnnounceSSL .= " - \00312".trim($Properties['TagList'])."\003";
 $AnnounceSSL .= " - \00304".site_url()."torrents.php?id=$GroupID\003 / \00304".site_url()."torrents.php?action=download&id=$TorrentID\003";
-$Announce .= ' - '.trim($Properties['TagList']);
+//$Announce .= ' - '.trim($Properties['TagList']);
 
 // ENT_QUOTES is needed to decode single quotes/apostrophes
 //send_irc('PRIVMSG #'.NONSSL_SITE_URL.' :'.html_entity_decode($Announce, ENT_QUOTES));
