@@ -26,7 +26,7 @@ list($FrontLineSupport, $ForumStaff, $Staff) = $SupportStaff;
 		<br />
 		<h2 style="text-align: left;">Community Help</h2>
 		<h3 style="font-size: 17px;" id="fls"><i>First-Line Support</i></h3>
-		<p><strong>These users are not official staff members.</strong> They are users who have volunteered their time to help people in need. Please treat them with respect, and read <a href="wiki.php?action=article&amp;id=260">this</a> before contacting them.</p><br />
+		<p><strong>These users are not official staff members.</strong> They are users who have volunteered their time to help people in need. Please treat them with respect, and read <a href="wiki.php?action=article&amp;id=52">this</a> before contacting them.</p><br />
 		<table class="staff" width="100%">
 			<tr class="colhead">
 				<td style="width: 130px;">Username</td>
