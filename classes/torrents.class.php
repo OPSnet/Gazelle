@@ -316,6 +316,9 @@ class Torrents {
 			DELETE FROM torrents_bad_files
 			WHERE TorrentID = $ID");
 		G::$DB->query("
+			DELETE FROM torrents_missing_lineage
+			WHERE TorrentID = $ID");
+		G::$DB->query("
 			DELETE FROM torrents_cassette_approved
 			WHERE TorrentID = $ID");
 		G::$DB->query("

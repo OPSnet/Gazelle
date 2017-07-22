@@ -44,6 +44,7 @@ $DB->query("
 		bt.TorrentID AS BadTags,
 		bf.TorrentID AS BadFolders,
 		bfi.TorrentID AS BadFiles,
+		ml.TorrentID AS MissingLineage,
 		ca.TorrentID AS CassetteApproved,
 		lma.TorrentID AS LossymasterApproved,
 		lwa.TorrentID AS LossywebApproved
@@ -53,6 +54,7 @@ $DB->query("
 		LEFT JOIN torrents_bad_tags AS bt ON bt.TorrentID = t.ID
 		LEFT JOIN torrents_bad_folders AS bf ON bf.TorrentID = t.ID
 		LEFT JOIN torrents_bad_files AS bfi ON bfi.TorrentID = t.ID
+		LEFT JOIN torrents_missing_lineage AS ml ON ml.TorrentID = t.ID
 		LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
 		LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
 		LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.id

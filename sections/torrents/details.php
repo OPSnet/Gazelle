@@ -537,15 +537,15 @@ foreach ($TorrentList as $Torrent) {
 		//t.HasLog, t.HasCue, t.LogScore, t.FileCount, t.Size, t.Seeders, t.Leechers,
 		//t.Snatched, t.FreeTorrent, t.Time, t.Description, t.FileList,
 		//t.FilePath, t.UserID, t.last_action, HEX(t.info_hash), (bad tags), (bad folders), (bad filenames),
-		//(cassette approved), (lossy master approved), (lossy web approved), t.LastReseedRequest,
-		//LogInDB, (has file), Torrents::torrent_properties()
+		//(missing lineage) (cassette approved), (lossy master approved), (lossy web approved),
+	  //t.LastReseedRequest, LogInDB, (has file), Torrents::torrent_properties()
 	list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
 		$RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
 		$HasLog, $HasCue, $LogScore, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
-		$CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
-		$LogInDB, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
+		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, 
+		$LastReseedRequest, $LogInDB, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
 		$FirstUnknown = !isset($FirstUnknown);
@@ -648,6 +648,7 @@ foreach ($TorrentList as $Torrent) {
 	if ($Reported) { $ExtraInfo.=$AddExtra. Format::torrent_label('Reported'); $AddExtra=' / '; }
 	if (!empty($BadTags)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Bad Tags'); $AddExtra=' / '; }
 	if (!empty($BadFolders)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Bad Folders'); $AddExtra=' / '; }
+	if (!empty($MissingLineage)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Missing Lineage'); $AddExtra = ' / '; }
 	if (!empty($CassetteApproved)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Cassette Approved'); $AddExtra=' / '; }
 	if (!empty($LossymasterApproved)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Lossy Master Approved'); $AddExtra=' / '; }
 	if (!empty($LossywebApproved)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Lossy WEB Approved'); $AddExtra = ' / '; }
