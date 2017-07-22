@@ -197,6 +197,7 @@ class TORRENT_FORM {
 		$BadTags = $Torrent['BadTags'];
 		$BadFolders = $Torrent['BadFolders'];
 		$BadFiles = $Torrent['BadFiles'];
+		$MissingLineage = $Torrent['MissingLineage'];
 		$CassetteApproved = $Torrent['CassetteApproved'];
 		$LossymasterApproved = $Torrent['LossymasterApproved'];
 		$LossywebApproved = $Torrent['LossywebApproved'];
@@ -207,7 +208,7 @@ class TORRENT_FORM {
 			<tr id="artist_tr">
 			<td class="label">Artist(s):</td>
 			<td id="artistfields">
-				<p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=369" target="_blank">this</a> for more information.</p>
+				<p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</p>
 <?
 			if (!empty($Torrent['Artists'])) {
 				$FirstArtist = true;
@@ -480,7 +481,7 @@ function show() {
 				</td>
 				<td id="logfields">
 					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-					<input id="file" type="file" multiple="multiple" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+					<input id="file" type="file" accept=".log,.txt" multiple="multiple" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 				</td>
 			</tr>
 <?
@@ -582,6 +583,10 @@ function show() {
 			<tr>
 				<td class="label">Bad file names:</td>
 				<td><input type="checkbox" id="bad_files" name="bad_files"<? if ($BadFiles) {echo ' checked="checked"';} ?> /> <label for="bad_files">Check this box if the torrent has bad file names.</label></td>
+			</tr>
+			<tr>
+				<td class="label">Missing lineage:</td>
+				<td><input type="checkbox" id="missing_lineage" name="missing_lineage"<? if ($MissingLineage) {echo ' checked="checked"';} ?> /> <label for="missing_lineage">Check this box if the torrent is missing lineage information.</label></td>
 			</tr>
 			<tr>
 				<td class="label">Cassette approved:</td>

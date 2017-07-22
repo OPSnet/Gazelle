@@ -199,6 +199,19 @@ if ($DB->affected_rows() > 0 || !$Report) {
 		$Cache->delete_value("torrents_details_$GroupID");
 		$SendPM = true;
 	}
+	elseif ($_POST['resolve_type'] === 'lineage') {
+		$DB->query("
+			INSERT IGNORE INTO torrents_missing_lineage
+				(TorrentID, UserID, TimeAdded)
+			VALUES
+				($TorrentID, ".$LoggedUser['ID'].", '".sqltime()."')");
+		$DB->query("
+			SELECT GroupID
+			FROM torrents
+			WHERE ID = $TorrentID");
+		list($GroupID) = $DB->next_record();
+		$Cache->delete_value("torrents_details_$GroupID");
+	}
 	elseif ($_POST['resolve_type'] === 'lossyapproval') {
 		$DB->query("
 			INSERT INTO torrents_lossymaster_approved

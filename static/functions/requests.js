@@ -80,52 +80,67 @@ function Calculate() {
 }
 
 function AddArtistField() {
-		var ArtistCount = document.getElementsByName("artists[]").length;
-		if (ArtistCount >= 200) {
-			return;
-		}
-		var ArtistField = document.createElement("input");
-		ArtistField.type = "text";
-		ArtistField.id = "artist";
-		ArtistField.name = "artists[]";
-		ArtistField.size = 45;
+	var ArtistCount = document.getElementsByName("artists[]").length;
+	if (ArtistCount >= 200) {
+		return;
+	}
+	var ArtistField = document.createElement("input");
+	ArtistField.type = "text";
+	ArtistField.id = "artist_" + ArtistCount;
+	ArtistField.name = "artists[]";
+	ArtistField.size = 45;
+	ArtistField.onblur = CheckVA;
 
-		var ImportanceField = document.createElement("select");
-		ImportanceField.id = "importance";
-		ImportanceField.name = "importance[]";
-		ImportanceField.options[0] = new Option("Main", "1");
-		ImportanceField.options[1] = new Option("Guest", "2");
-		ImportanceField.options[2] = new Option("Composer", "4");
-		ImportanceField.options[3] = new Option("Conductor", "5");
-		ImportanceField.options[4] = new Option("DJ / Compiler", "6");
-		ImportanceField.options[5] = new Option("Remixer", "3");
-		ImportanceField.options[6] = new Option("Producer", "7");
+	var ImportanceField = document.createElement("select");
+	ImportanceField.id = "importance";
+	ImportanceField.name = "importance[]";
+	ImportanceField.options[0] = new Option("Main", "1");
+	ImportanceField.options[1] = new Option("Guest", "2");
+	ImportanceField.options[2] = new Option("Composer", "4");
+	ImportanceField.options[3] = new Option("Conductor", "5");
+	ImportanceField.options[4] = new Option("DJ / Compiler", "6");
+	ImportanceField.options[5] = new Option("Remixer", "3");
+	ImportanceField.options[6] = new Option("Producer", "7");
 
-		var x = $('#artistfields').raw();
-		x.appendChild(document.createElement("br"));
-		x.appendChild(ArtistField);
-		x.appendChild(document.createTextNode('\n'));
-		x.appendChild(ImportanceField);
+	var x = $('#artistfields').raw();
+	x.appendChild(document.createElement("br"));
+	x.appendChild(ArtistField);
+	x.appendChild(document.createTextNode('\n'));
+	x.appendChild(ImportanceField);
 
-		if ($("#artist").data("gazelle-autocomplete")) {
-			$(ArtistField).live('focus', function() {
-				$(ArtistField).autocomplete({
-					serviceUrl : 'artist.php?action=autocomplete'
-				});
+	if ($("#artist_0").data("gazelle-autocomplete")) {
+		$(ArtistField).live('focus', function() {
+			$(ArtistField).autocomplete({
+				serviceUrl : 'artist.php?action=autocomplete'
 			});
-		}
+		});
+	}
+}
 
-		ArtistCount++;
+function CheckVA () {
+    var ArtistCount = document.getElementsByName("artists[]").length;
+    var shown = false;
+    for (var i = 0; i < ArtistCount; i++) {
+        var artistId = "#artist_" + i;
+        if ($(artistId).raw().value.toLowerCase().trim().match(/^(va|various(\sa|a)rtis(t|ts)|various)$/)) {
+            $('#vawarning').gshow();
+            shown = true;
+            break;
+        }
+    }
+    if (!shown) {
+        $('#vawarning').ghide();
+    }
 }
 
 function RemoveArtistField() {
 		var ArtistCount = document.getElementsByName("artists[]").length;
-		if (ArtistCount == 1) {
+		if (ArtistCount === 1) {
 			return;
 		}
 		var x = $('#artistfields').raw();
 
-		while (x.lastChild.tagName != "INPUT") {
+		while (x.lastChild.tagName !== "INPUT") {
 			x.removeChild(x.lastChild);
 		}
 		x.removeChild(x.lastChild);

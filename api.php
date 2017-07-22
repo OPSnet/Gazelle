@@ -1,4 +1,4 @@
-<?
+<?php
 /*-- API Start Class -------------------------------*/
 /*--------------------------------------------------*/
 /* Simplified version of script_start, used for the	*/
@@ -13,28 +13,28 @@ if (isset($_GET['clearcache'])) {
 	unset($_GET['clearcache']);
 }
 
-require 'classes/config.php'; //The config contains all site wide configuration information as well as memcached rules
+require_once('classes/config.php'); //The config contains all site wide configuration information as well as memcached rules
 
-require(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
-require(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
+require_once(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
+require_once(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
+require_once(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
+require_once(SERVER_ROOT.'/classes/encrypt.class.php'); //Require the encryption class
+require_once(SERVER_ROOT.'/classes/time.class.php'); //Require the time class
+require_once(SERVER_ROOT.'/classes/paranoia.class.php'); //Require the paranoia check_paranoia function
+require_once(SERVER_ROOT.'/classes/regex.php');
+require_once(SERVER_ROOT.'/classes/util.php');
+
 $Cache = NEW CACHE($MemcachedServers); //Load the caching class
-
+$DB = new DB_MYSQL;
 $Debug = new DEBUG;
 $Debug->handle_errors();
 
-// Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
-function send_irc($Raw) {
-	$IRCSocket = fsockopen(SOCKET_LISTEN_ADDRESS, SOCKET_LISTEN_PORT);
-	fwrite($IRCSocket, $Raw);
-	fclose($IRCSocket);
-}
+require(SERVER_ROOT.'/classes/classloader.php');
 
-function check_perms() {
-	return false;
-}
+G::initialize();
 
-function error($Code) {
-	echo '<error>', $Code, '</error></payload>';
+function json_error($Code) {
+	echo json_encode(array('status' => 400, 'error' => $Code, 'response' => array()));
 	die();
 }
 
@@ -42,41 +42,6 @@ function make_secret($Length = 32) {
 	$NumBytes = (int) round($Length / 2);
 	$Secret = bin2hex(openssl_random_pseudo_bytes($NumBytes));
 	return substr($Secret, 0, $Length);
-}
-
-function is_number($Str) {
-	if ($Str < 0) {
-		return false;
-	}
-	// We're converting input to a int, then string and comparing to original
-	return ($Str == strval(intval($Str)) ? true : false);
-}
-
-function display_str($Str) {
-	if ($Str != '') {
-		$Str = make_utf8($Str);
-		$Str = mb_convert_encoding($Str, 'HTML-ENTITIES', 'UTF-8');
-		$Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,5};)/m", '&amp;', $Str);
-
-		$Replace = array(
-			"'",'"',"<",">",
-			'&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
-			'&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
-			'&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
-			'&#156;','&#158;','&#159;'
-		);
-
-		$With = array(
-			'&#39;','&quot;','&lt;','&gt;',
-			'&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
-			'&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
-			'&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
-			'&#339;','&#382;','&#376;'
-		);
-
-		$Str = str_replace($Replace, $With, $Str);
-	}
-	return $Str;
 }
 
 function make_utf8($Str) {
@@ -123,7 +88,5 @@ function display_array($Array, $Escape = array()) {
 
 header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
 header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');
-header('Content-type: text/xml');
-echo '<?xml version="1.0"?><payload>';
-require(SERVER_ROOT.'/sections/api/index.php');
-?>
+header('Content-type: application/json');
+require_once(SERVER_ROOT.'/sections/api/index.php');

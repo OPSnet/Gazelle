@@ -1,72 +1,56 @@
-<?
-$Available = array(
-	'access_request',
-	'access_state',
-	'user_stats_ratio',
-	'user_stats_torrent',
-	'user_stats_comumnity',
-);
+<?php
 
-if (
-	empty($_GET['req'])
-	|| empty($_GET['uid'])
-	|| empty($_GET['aid'])
-	|| empty($_GET['key'])
-	|| !is_number($_GET['uid'])
-	|| !is_number($_GET['aid'])
-	|| !in_array($_GET['req'], $Available, true)
-) {
-	error('invalid');
+require_once(SERVER_ROOT.'/sections/api/AbstractAPI.php');
+
+function getClassObject($name, $db) {
+    $name = str_replace("_", "", ucwords($name, "_"));
+    require_once(SERVER_ROOT."/sections/api/{$name}.php");
+    return new $name($db);
 }
 
+$available = array(
+    'generate_invite',
+    'user'
+);
 
-$AppID = $_GET['aid'];
-$UserID = $_GET['uid'];
+switch($_GET['action']) {
+    case 'generate_invite':
+        $class = getClassObject('generate_invite', $DB);
+        break;
+    case 'user':
+        $class = getClassObject('user', $DB);
+        break;
+    default:
+        json_error('invalid action');
+}
 
-$App = $Cache->get_value("api_apps_$AppID");
-if (!is_array($App)) {
-	if (!isset($DB)) {
-		require(SERVER_ROOT.'/classes/mysql.class.php');
-		$DB = new DB_MYSQL;
-	}
+if (empty($_GET['aid']) || empty($_GET['token'])) {
+    json_error('invalid parameters');
+}
+
+$app_id = intval($_GET['aid']);
+$user_id = intval($_GET['uid']);
+$token = $_GET['token'];
+
+$app = $Cache->get_value("api_apps_{$app_id}");
+if (!is_array($app)) {
 	$DB->query("
 		SELECT Token, Name
 		FROM api_applications
-		WHERE ID = '$AppID'
+		WHERE ID = '{$app_id}'
 		LIMIT 1");
-	$App = $DB->to_array(false, MYSQLI_ASSOC);
-	$Cache->cache_value("api_apps_$AppID", $App, 0);
+	if ($DB->record_count() === 0) {
+	    error('invalid app');
+    }
+    $app = $DB->to_array(false, MYSQLI_ASSOC);
+	$Cache->cache_value("api_apps_{$app_id}", $app, 0);
 }
-$App = $App[0];
+$app = $app[0];
 
-//Handle our request auths
-if ($_GET['req'] === 'access_request') {
-	if (md5($App['Token']) !== $_GET['key']) {
-		error('invalid');
-	}
-} else {
-	$User = $Cache->get_value("api_users_$UserID");
-	if (!is_array($User)) {
-		if (!isset($DB)) {
-			require(SERVER_ROOT.'/classes/mysql.class.php');
-			$DB = new DB_MYSQL;
-		}
-		$DB->query("
-			SELECT AppID, Token, State, Time, Access
-			FROM api_users
-			WHERE UserID = '$UserID'
-			LIMIT 1"); //int, no db_string
-		$User = $DB->to_array('AppID', MYSQLI_ASSOC);
-		$Cache->cache_value("api_users_$UserID", $User, 0);
-	}
-	$User = $User[$AppID];
-
-	if (md5($User['Token'] . $App['Token']) !== $_GET['key']) {
-		error('invalid');
-	}
+if ($app['Token'] !== $token) {
+    json_error('invalid token');
 }
 
-die('API put on hold');
-require(SERVER_ROOT.'/sections/api/'.$_GET['req'].'.php');
-echo '</payload>';
-$Debug->profile();
+$response = $class->run();
+print(json_encode(array('status' => 200, 'response' => $response), JSON_UNESCAPED_SLASHES));
+//$Debug->profile();

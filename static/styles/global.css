@@ -759,3 +759,8 @@ input[type="search"] {
 	/*font-size: medium;
 	background: #fff;*/
 }
+
+#pad_next {
+	display: block;
+	margin-top: 10px;
+}

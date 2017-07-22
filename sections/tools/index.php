@@ -207,7 +207,9 @@ switch ($_REQUEST['action']) {
 	case 'official_tags':
 		include(SERVER_ROOT.'/sections/tools/managers/official_tags.php');
 		break;
-
+	case 'edit_tags':
+		include(SERVER_ROOT.'/sections/tools/misc/tags.php');
+		break;
 	case 'tag_aliases':
 		include(SERVER_ROOT.'/sections/tools/managers/tag_aliases.php');
 		break;
