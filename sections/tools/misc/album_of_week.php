@@ -72,7 +72,7 @@ if (isset($_POST['GroupID'])) {
 	//Show our beautiful header
 	View::show_header('Album of the Week');
 
-	?>
+?>
 	<div class="header">
 		<h2>Album of the Week</h2>
 	</div>
@@ -95,5 +95,7 @@ if (isset($_POST['GroupID'])) {
 	</div>
 <?
 	
-	View::show_footer(); ?>
+ 	View::show_footer();
 }
+
+?>
