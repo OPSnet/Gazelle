@@ -18,7 +18,7 @@ if (is_number($FeaturedAlbum['GroupID'])) {
 	$Artists = Artists::get_artist($FeaturedAlbum['GroupID']);
 ?>
 		<div class="box">
-			<div class="head colhead_dark"><strong>Featured Album</strong></div>
+			<div class="head colhead_dark"><strong>Album of the Week</strong></div>
 			<div class="center pad">
 				<?=Artists::display_artists($Artists, true, true)?><a href="torrents.php?id=<?=$FeaturedAlbum['GroupID']?>"><?=$FeaturedAlbum['Name']?></a>
 			</div>
@@ -28,7 +28,7 @@ if (is_number($FeaturedAlbum['GroupID'])) {
 				</a>
 			</div>
 			<div class="center pad">
-			<!--	<a href="forums.php?action=viewthread&amp;threadid=<?=$FeaturedAlbum['ThreadID']?>"><em>Read the interview with the artist, discuss here</em></a> -->
+				<a href="forums.php?action=viewthread&amp;threadid=<?=$FeaturedAlbum['ThreadID']?>"><em>Discuss here</em></a>
 			</div>
 		</div>
 <?
