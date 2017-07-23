@@ -28,7 +28,7 @@ if (is_number($FeaturedAlbum['GroupID'])) {
 				</a>
 			</div>
 			<div class="center pad">
-				<a href="forums.php?action=viewthread&amp;threadid=<?=$FeaturedAlbum['ThreadID']?>"><em>Read the interview with the artist, discuss here</em></a>
+			<!--	<a href="forums.php?action=viewthread&amp;threadid=<?=$FeaturedAlbum['ThreadID']?>"><em>Read the interview with the artist, discuss here</em></a> -->
 			</div>
 		</div>
 <?
