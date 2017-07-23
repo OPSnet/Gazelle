@@ -64,7 +64,7 @@ View::show_header('External Tracker Referrals');
             <li>Choose a tracker from the list that you're a member of.</li>
             <li><?php echo SITE_NAME; ?> will generate a string of characters that you will place in the body of your profile at the tracker of your choice.</li>
             <li>Paste the character string anywhere in the body of your profile.</li>
-            <li>Enter your username and <?php echo SITE_NAME; ?> will verify your membership and issue an invite code to you.</li>
+            <li>Enter your username and <?php echo SITE_NAME; ?> will verify your membership and issue an invite to you.</li>
             <li>Join <?php echo SITE_NAME; ?>!</li>
         </ol>
         <br/>
@@ -75,7 +75,7 @@ View::show_header('External Tracker Referrals');
             <br/>
             <p><?php echo $error; ?></p>
         <?php else: ?>
-            <h3>Congratulations, you have verified your account at <?php echo $Service; ?>. You have been issued an email that has been sent to the email address you provided. Be sure to check your spam folder, and welcome to <?php echo SITE_NAME; ?>!</h3
+            <h3>Congratulations, you have verified your account at <?php echo $Service; ?>. We have sent you an email that has been sent to the address you specified. Make sure to check your spam folder! Welcome to <?php echo SITE_NAME; ?>!</h3
         <?php endif; ?>
         <br/>
         <br/>
