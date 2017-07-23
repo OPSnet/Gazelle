@@ -18,6 +18,7 @@ if (isset($_POST['GroupID'])) {
 
 	$DB->query('
 		SELECT
+			tg.ID,
 			tg.ArtistID,
 			tg.Name,
 			tg.WikiImage,
