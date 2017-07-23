@@ -62,7 +62,7 @@ View::show_header('External Tracker Referrals');
         <p id="referral-code"><?php echo $Token; ?></p>
         <br/>
         <br/>
-        <p>Now, enter the username you use at <?php echo $Service; ?> exactly. This is critical in verifying your account.</p>
+        <p>Enter the username you use at <?php echo $Service; ?> exactly as it appears on the site. This is critical in verifying your account.</p>
         <br/>
         <form name="referral_service" method="post" action="">
             <input type="text" name="username" /><label for="username">Username</label>
