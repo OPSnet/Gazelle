@@ -7,7 +7,8 @@ SELECT COUNT(*) as count FROM artists_group AS a
 LEFT JOIN wiki_artists AS wiki ON wiki.RevisionID = a.RevisionID
 WHERE wiki.Body is NULL OR wiki.Body = ''");
 $row = $DB->next_record();
-$total = number_format($row['count']);
+$total = $row['count'];
+$total_str = number_format($total);
 $page = max(0, isset($_GET['page']) ? (intval($_GET['page'])-1) : 0);
 $limit = TORRENTS_PER_PAGE;
 $offset = TORRENTS_PER_PAGE * $page;
@@ -33,7 +34,7 @@ print <<<HTML
 </div>
 
 <div class="thin box pad">
-    <h3>There are {$total} artists remaining</h3>
+    <h3>There are {$total_str} artists remaining</h3>
     <table class="torrent_table">
 HTML;
 
