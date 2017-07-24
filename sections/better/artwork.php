@@ -4,7 +4,8 @@ View::show_header('Torrents with no artwork');
 
 $DB->query("SELECT COUNT(*) as count FROM torrents_group WHERE CategoryID = 1 AND WikiImage = ''");
 $row = $DB->next_record();
-$total = number_format($row['count']);
+$total = $row['count'];
+$total_str = number_format($total);
 $page = max(0, isset($_GET['page']) ? (intval($_GET['page'])-1) : 0);
 $limit = TORRENTS_PER_PAGE;
 $offset = TORRENTS_PER_PAGE * $page;
@@ -36,7 +37,7 @@ print <<<HTML
 </div>
 
 <div class="thin box pad">
-    <h3>There are {$total} torrent groups remaining</h3>
+    <h3>There are {$total_str} torrent groups remaining</h3>
     <table class="torrent_table">
 HTML;
 
