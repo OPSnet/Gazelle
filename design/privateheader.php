@@ -292,6 +292,9 @@ if (check_perms('site_send_unlimited_invites')) {
 					<li id="nav_better"<?=
 						Format::add_class($PageID, array('better'), 'active', true)?>>
 						<a href="better.php">Better</a></li>
+					<li id="nav_random"<?=
+						Format::add_class($PageID, array('random'), 'active', true)?>>
+						<a href="random.php">Random Album</a></li>
 				</ul>
 			</div>
 			<div id="menu">
