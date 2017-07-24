@@ -9,9 +9,10 @@ WHERE wiki.Image is NULL OR wiki.Image = ''");
 $row = $DB->next_record();
 $total = $row['count'];
 $total_str = number_format($total);
-$page = max(0, isset($_GET['page']) ? (intval($_GET['page'])-1) : 0);
+$page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
+$page = max(1, $page);
 $limit = TORRENTS_PER_PAGE;
-$offset = TORRENTS_PER_PAGE * $page;
+$offset = TORRENTS_PER_PAGE * ($page-1);
 $DB->query("
 SELECT
     a.ArtistID,
@@ -22,7 +23,7 @@ WHERE wiki.Image is NULL OR wiki.Image = ''
 ORDER BY a.Name
 LIMIT {$limit} OFFSET {$offset}");
 $artists = $DB->to_array('ArtistID', MYSQLI_ASSOC);
-$pages = Format::get_pages($offset+1, $total, TORRENTS_PER_PAGE);
+$pages = Format::get_pages($page, $total, TORRENTS_PER_PAGE);
 print <<<HTML
 <div class="header">
     <h2>Artists that are missing images</h2>

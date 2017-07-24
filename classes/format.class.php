@@ -213,6 +213,7 @@ class Format {
 	 * @param int $StartPage: The current record the page you're on starts with.
 	 *		e.g. if you're on page 2 of a forum thread with 25 posts per page, $StartPage is 25.
 	 *		If you're on page 1, $StartPage is 0.
+	 *      FIXME: I don't think this is right and you want to pass in a number 1 - max page
 	 * @param int $TotalRecords: The total number of records in the result set.
 	 *		e.g. if you're on a forum thread with 152 posts, $TotalRecords is 152.
 	 * @param int $ItemsPerPage: Self-explanatory. The number of records shown on each page
