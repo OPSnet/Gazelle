@@ -13,6 +13,7 @@ function show_peers (TorrentID, Page) {
 			$('#peers_' + TorrentID).gtoggle();
 		}
 	}
+    $('#viewlog_' + TorrentID).ghide();
 	$('#snatches_' + TorrentID).ghide();
 	$('#downloads_' + TorrentID).ghide();
 	$('#files_' + TorrentID).ghide();
@@ -34,6 +35,7 @@ function show_snatches (TorrentID, Page) {
 			$('#snatches_' + TorrentID).gtoggle();
 		}
 	}
+    $('#viewlog_' + TorrentID).ghide();
 	$('#peers_' + TorrentID).ghide();
 	$('#downloads_' + TorrentID).ghide();
 	$('#files_' + TorrentID).ghide();
@@ -55,6 +57,7 @@ function show_downloads (TorrentID, Page) {
 			$('#downloads_' + TorrentID).gtoggle();
 		}
 	}
+    $('#viewlog_' + TorrentID).ghide();
 	$('#peers_' + TorrentID).ghide();
 	$('#snatches_' + TorrentID).ghide();
 	$('#files_' + TorrentID).ghide();
@@ -62,25 +65,26 @@ function show_downloads (TorrentID, Page) {
 }
 
 function show_logs (TorrentID, LogScore) {
-        if (LogScore > 0) {
-                if ($('#viewlog_' + TorrentID).raw().innerHTML === '') {
-                        $('#viewlog_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
-                        ajax.get('torrents.php?action=viewlog&logscore=' + LogScore + '&torrentid=' + TorrentID, function(response) {
-                                $('#viewlog_' + TorrentID).gshow().raw().innerHTML = response;
-                        });
-                } else {
-                        $('#viewlog_' + TorrentID).gtoggle();
-                }
-        }
-        $('#peers_' + TorrentID).ghide();
-        $('#snatches_' + TorrentID).ghide();
-        $('#downloads_' + TorrentID).ghide();
-        $('#files_' + TorrentID).ghide();
-        $('#reported_' + TorrentID).ghide();
+    if (LogScore > 0) {
+        if ($('#viewlog_' + TorrentID).raw().innerHTML === '') {
+			$('#viewlog_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
+			ajax.get('torrents.php?action=viewlog&logscore=' + LogScore + '&torrentid=' + TorrentID, function(response) {
+				$('#viewlog_' + TorrentID).gshow().raw().innerHTML = response;
+			});
+		} else {
+			$('#viewlog_' + TorrentID).gtoggle();
+		}
+	}
+    $('#peers_' + TorrentID).ghide();
+    $('#snatches_' + TorrentID).ghide();
+    $('#downloads_' + TorrentID).ghide();
+    $('#files_' + TorrentID).ghide();
+    $('#reported_' + TorrentID).ghide();
 }
 
 function show_files(TorrentID) {
 	$('#files_' + TorrentID).gtoggle();
+    $('#viewlog_' + TorrentID).ghide();
 	$('#peers_' + TorrentID).ghide();
 	$('#snatches_' + TorrentID).ghide();
 	$('#downloads_' + TorrentID).ghide();
@@ -89,6 +93,7 @@ function show_files(TorrentID) {
 
 function show_reported(TorrentID) {
 	$('#files_' + TorrentID).ghide();
+    $('#viewlog_' + TorrentID).ghide();
 	$('#peers_' + TorrentID).ghide();
 	$('#snatches_' + TorrentID).ghide();
 	$('#downloads_' + TorrentID).ghide();
@@ -192,7 +197,7 @@ function toggle_edition(groupid, editionid, lnk, event) {
 				|| event.keyCode == 224 // Firefox
 				|| event.keyCode == 17 // Opera
 				) ? true : null;
-	
+
 	var group_rows = $('tr.groupid_' + groupid);
 	for (var i = 0; i < group_rows.results(); i++) {
 		var row = $(group_rows.raw(i));

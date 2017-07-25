@@ -544,7 +544,7 @@ foreach ($TorrentList as $Torrent) {
 		$HasLog, $HasCue, $LogScore, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
-		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, 
+		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved,
 		$LastReseedRequest, $LogInDB, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
@@ -726,7 +726,9 @@ foreach ($TorrentList as $Torrent) {
 <?	} ?>
 					<div class="linkbox">
 						<a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
+<?  if ($HasLog && $LogInDB) { ?>
 						<a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', '<?=$LogScore?>'); return false;">View log</a>
+<?  } ?>
 <?	if (check_perms('site_view_torrent_snatchlist')) { ?>
 						<a href="#" class="brackets tooltip" onclick="show_downloads('<?=$TorrentID?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View download list</a>
 						<a href="#" class="brackets tooltip" onclick="show_snatches('<?=$TorrentID?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatch list</a>
