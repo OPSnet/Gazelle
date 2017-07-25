@@ -44,6 +44,10 @@ if (isset($_GET['username'])) {
 		if ($NumResults > 300) {
 			$NumResults = 300;
 		}
+		elseif (intval($NumResults) === 1) {
+			list($UserID, $Username, $Enabled, $PermissionID, $Donor, $Warned) = $Results[0];
+			header("Location: user.php?id={$UserID}");
+        }
 	}
 }
 

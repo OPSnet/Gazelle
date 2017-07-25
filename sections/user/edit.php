@@ -24,7 +24,7 @@ $DB->query("
 		JOIN users_info AS i ON i.UserID = m.ID
 		LEFT JOIN permissions AS p ON p.ID = m.PermissionID
 	WHERE m.ID = '".db_string($UserID)."'");
-list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle) = $DB->next_record(MYSQLI_NUM, array(3, 8));
+list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle) = $DB->next_record(MYSQLI_NUM, array(3, 9));
 
 if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Class)) {
 	error(403);
@@ -822,9 +822,9 @@ list($ArtistsAdded) = $DB->next_record();
 				<td class="label"><strong>Two-factor Authentication</strong></td>
 				<td>
 					Two-factor autentication is currently <strong class="<?= $TwoFAKey ? 'r99' : 'warning'; ?>"><?= $TwoFAKey ? 'enabled' : 'disabled'; ?></strong> for your account.
-					
+
 					<br><br>
-					
+
 					<a href="user.php?action=2fa&do=<?= $TwoFAKey ? 'disable' : 'enable'; ?>&userid=<?= G::$LoggedUser['ID'] ?>">Click here to <?= $TwoFAKey ? 'disable' : 'enable'; ?></a>
 				</td>
 			</tr>

@@ -97,8 +97,8 @@ class ARTISTS_SIMILAR extends ARTIST{
 
 		// Calculate decimal point scores between artists
 		foreach ($this->Similar as $SimilarArtist) {
-			list($ArtistID, $Similar) = array_values($SimilarArtist);
-			$this->Similar[$ArtistID]['Decimal'] =  $this->similarity($Similar['Score'], $this->TotalScore);
+			list($ArtistID, $Score) = array_values($SimilarArtist);
+			$this->Similar[$ArtistID]['Decimal'] =  $this->similarity($Score, $this->TotalScore);
 
 			if ($this->Similar[$ArtistID]['Decimal'] < $this->LowestDecimal) {
 				$this->LowestDecimal = $this->Similar[$ArtistID]['Decimal'];

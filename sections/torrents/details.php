@@ -544,7 +544,7 @@ foreach ($TorrentList as $Torrent) {
 		$HasLog, $HasCue, $LogScore, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
-		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, 
+		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved,
 		$LastReseedRequest, $LogInDB, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
@@ -705,18 +705,25 @@ foreach ($TorrentList as $Torrent) {
 						<blockquote>
 							Uploaded by <?=Users::format_username($UserID, false, false, false)?> <?=time_diff($TorrentTime);?>
 <?	if ($Seeders == 0) {
-		if ($LastActive != '0000-00-00 00:00:00' && time() - strtotime($LastActive) >= 1209600) { ?>
-						<br /><strong>Last active: <?=time_diff($LastActive); ?></strong>
+		// If the last time this was seeded was 50 years ago, most likely it has never been seeded, so don't bother
+		// displaying "Last active: 2000+ years" as that's dumb
+		if (time() - strtotime($LastActive) > 1576800000) { ?>
+							<br />Last active: Never
+<?
+		} elseif ($LastActive != '0000-00-00 00:00:00' && time() - strtotime($LastActive) >= 1209600) { ?>
+							<br /><strong>Last active: <?=time_diff($LastActive); ?></strong>
 <?		} else { ?>
-						<br />Last active: <?=time_diff($LastActive); ?>
+							<br />Last active: <?=time_diff($LastActive); ?>
 <?		}
 	}
 
 	if (($Seeders == 0 && $LastActive != '0000-00-00 00:00:00' && time() - strtotime($LastActive) >= 345678 && time() - strtotime($LastReseedRequest) >= 864000) || check_perms('users_mod')) { ?>
-						<br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=$GroupID?>" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
+							<br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=$GroupID?>" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
 <?	}
 
-	?>
+	$NewRatio = Format::get_ratio_html(G::$LoggedUser['BytesUploaded'], G::$LoggedUser['BytesDownloaded'] + $Size);
+?>
+							<br /><br />If you download this, your ratio will become <?=$NewRatio?>.
 						</blockquote>
 					</div>
 <?	if (check_perms('site_moderate_requests')) { ?>
@@ -726,7 +733,9 @@ foreach ($TorrentList as $Torrent) {
 <?	} ?>
 					<div class="linkbox">
 						<a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
+<?  if ($HasLog && $LogInDB) { ?>
 						<a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', '<?=$LogScore?>'); return false;">View log</a>
+<?  } ?>
 <?	if (check_perms('site_view_torrent_snatchlist')) { ?>
 						<a href="#" class="brackets tooltip" onclick="show_downloads('<?=$TorrentID?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View download list</a>
 						<a href="#" class="brackets tooltip" onclick="show_snatches('<?=$TorrentID?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatch list</a>
