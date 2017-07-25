@@ -296,7 +296,7 @@ if (count($_GET)) {
 
 		if ($_GET['lockedaccount'] != '' && $_GET['lockedaccount'] != 'any') {
 			$Join['la'] = '';
-			
+
 			if ($_GET['lockedaccount'] == 'unlocked') {
 				$Join['la'] .= ' LEFT';
 				$Where[] = ' la.UserID IS NULL';
@@ -305,7 +305,7 @@ if (count($_GET)) {
 			$Join['la'] .= ' JOIN locked_accounts AS la ON la.UserID = um1.ID ';
 		}
 
-		
+
 
 		if (!empty($_GET['cc'])) {
 			if ($_GET['cc_op'] == 'equal') {
@@ -349,7 +349,7 @@ if (count($_GET)) {
 			$Invitees2 = round($_GET['invitees2']);
 			$Having[] = implode(' AND ', num_compare('Invitees', $_GET['invitees'], $Invitees1, $Invitees2));
 		}
-		
+
 		if ($_GET['disabled_invites'] == 'yes') {
 			$Where[] = 'ui1.DisableInvites = \'1\'';
 		} elseif ($_GET['disabled_invites'] == 'no') {
@@ -749,11 +749,11 @@ View::show_header('User search');
 			</tr>
 
 			<tr>
-				
-				
+
+
 				<td></td>
 				<td></td>
-				
+
 				<td width="30%" class="label nobr"># of invitees:</td>
 				<td>
 					<select name="invitees">
