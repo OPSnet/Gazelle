@@ -724,18 +724,26 @@ if ($HasLog) {
 	ini_set('upload_max_filesize',1000000);
 	$LogMinScore = null;
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-		if (!$_FILES['logfiles']['size'][$Pos]) { break; }
+		if (!$_FILES['logfiles']['size'][$Pos]) {
+		    break;
+		}
 		//todo: more validation
 		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
-		if (!$File) { die('LogFile doesn\'t exist, or couldn\'t open'); } // File doesn't exist, or couldn't open
+		if (!$File) {
+		    die('LogFile doesn\'t exist, or couldn\'t open');
+		} // File doesn't exist, or couldn't open
 		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
 		fclose($File);
 		//detect & transcode unicode
-		if (detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) { $LogFile = iconv("unicode","UTF-8",$LogFile); }
+		if (detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
+		    $LogFile = iconv("unicode","UTF-8",$LogFile);
+		}
 		$Log = new LOG_CHECKER;
 		$Log->new_file($LogFile);
 		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
-		if (!$LogMinScore || $Score < $LogMinScore) { $LogMinScore = $Score; }
+		if ($LogMinScore === null || $Score < $LogMinScore) {
+		    $LogMinScore = $Score;
+		}
 		//$LogGood = implode("\r\n",$LogGood);
 		$LogBad = implode("\r\n",$LogBad);
 		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;
