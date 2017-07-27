@@ -115,12 +115,15 @@ class Tracker {
 	/**
 	 * Send a request to the tracker
 	 *
-	 * @param string $Path GET string to send to the tracker
+	 * @param string $Get GET string to send to the tracker
 	 * @param int $MaxAttempts Maximum number of failed attempts before giving up
-	 * @param $Err Variable to use as storage for the error string if the request fails
+	 * @param bool $Err Variable to use as storage for the error string if the request fails
 	 * @return tracker response message or false if the request failed
 	 */
 	private static function send_request($Get, $MaxAttempts = 1, &$Err = false) {
+		if (defined('DISABLE_TRACKER') && DISABLE_TRACKER === true) {
+			return false;
+		}
 		$Header = "GET /$Get HTTP/1.1\r\nConnection: Close\r\n\r\n";
 		$Attempts = 0;
 		$Sleep = 0;
