@@ -46,7 +46,7 @@ define('SPHINX_MAX_MATCHES', 1000); // Must be <= the server's max_matches varia
 define('SPHINX_INDEX', 'torrents');
 
 // Ocelot details
-define('DISABLE_TRACKER', false);
+// define('DISABLE_TRACKER', false);
 define('TRACKER_HOST', 'localhost');
 define('TRACKER_PORT', 2710);
 define('TRACKER_SECRET', ''); // Must be 32 characters and match site_password in Ocelot's config.cpp
@@ -115,7 +115,7 @@ define('MAILGUN_API_KEY', '');
 define('MAILGUN_API_URL', '');
 
 // IRC settings
-define('DISABLE_IRC', false);
+// define('DISABLE_IRC', false);
 define('BOT_NICK', '');
 define('BOT_SERVER', ''); // IRC server address. Used for onsite chat tool.
 define('BOT_PORT', 6667);
