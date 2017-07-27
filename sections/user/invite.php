@@ -165,12 +165,12 @@ list($CanLeech) = $DB->next_record();
 <?
 } elseif (!empty($LoggedUser['DisableInvites'])) { ?>
 	<div class="box pad" style="text-align: center;">
-		<strong class="important_text">Your invites have been disabled. Please read <a href="wiki.php?action=article&amp;id=310">this article</a> for more information.</strong>
+		<strong class="important_text">Your invites have been disabled. Please read <a href="wiki.php?action=article&amp;id=116">this article</a> for more information.</strong>
 	</div>
 <?
 } elseif ($LoggedUser['RatioWatch'] || !$CanLeech) { ?>
 	<div class="box pad" style="text-align: center;">
-		<strong class="important_text">You may not send invites while on Ratio Watch or while your leeching privileges are disabled. Please read <a href="wiki.php?action=article&amp;id=310">this article</a> for more information.</strong>
+		<strong class="important_text">You may not send invites while on Ratio Watch or while your leeching privileges are disabled. Please read <a href="wiki.php?action=article&amp;id=116">this article</a> for more information.</strong>
 	</div>
 <?
 }
