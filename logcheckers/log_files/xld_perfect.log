@@ -1,0 +1,353 @@
+X Lossless Decoder version 20161007 (149.3)
+
+XLD extraction logfile from 2017-02-27 21:18:18 -0500
+
+Roy Orbison / A Black and White Night Live
+
+Used drive : SONY DVD RW DRU-710A (revision BYZ1)
+Media type : Pressed CD
+
+Ripper mode             : XLD Secure Ripper
+Disable audio cache     : OK for the drive with a cache less than 1375KiB
+Make use of C2 pointers : NO
+Read offset correction  : 12
+Max retry count         : 20
+Gap status              : Analyzed, Appended (except HTOA)
+
+TOC of the extracted CD
+     Track |   Start  |  Length  | Start sector | End sector 
+    ---------------------------------------------------------
+        1  | 00:00:35 | 02:43:22 |        35    |    12281   
+        2  | 02:43:57 | 03:09:40 |     12282    |    26496   
+        3  | 05:53:22 | 03:50:08 |     26497    |    43754   
+        4  | 09:43:30 | 02:59:25 |     43755    |    57204   
+        5  | 12:42:55 | 05:12:45 |     57205    |    80649   
+        6  | 17:55:25 | 03:10:35 |     80650    |    94934   
+        7  | 21:05:60 | 03:04:40 |     94935    |   108774   
+        8  | 24:10:25 | 02:29:20 |    108775    |   119969   
+        9  | 26:39:45 | 03:11:20 |    119970    |   134314   
+       10  | 29:50:65 | 03:33:50 |    134315    |   150339   
+       11  | 33:24:40 | 03:21:22 |    150340    |   165436   
+       12  | 36:45:62 | 04:10:65 |    165437    |   184251   
+       13  | 40:56:52 | 03:36:40 |    184252    |   200491   
+       14  | 44:33:17 | 03:24:38 |    200492    |   215829   
+       15  | 47:57:55 | 03:12:52 |    215830    |   230281   
+       16  | 51:10:32 | 06:19:43 |    230282    |   258749   
+
+List of alternate offset correction values
+        #  | Absolute | Relative | Confidence 
+    ------------------------------------------
+        1  |    306   |    294   |      8     
+        2  |    320   |    308   |      7     
+        3  |    385   |    373   |      3     
+        4  |    163   |    151   |      3     
+        5  |    359   |    347   |      3     
+
+AccurateRip Summary (DiscID: 001fcbda-01800a88-e40d7a10)
+    Track 01 : OK (v1+v2, confidence 29/50)
+    Track 02 : OK (v1+v2, confidence 29/51)
+    Track 03 : OK (v1+v2, confidence 30/51)
+    Track 04 : OK (v1+v2, confidence 30/51)
+    Track 05 : OK (v1+v2, confidence 30/52)
+    Track 06 : OK (v1+v2, confidence 30/52)
+    Track 07 : OK (v1+v2, confidence 30/51)
+    Track 08 : OK (v1+v2, confidence 30/53)
+    Track 09 : OK (v1+v2, confidence 30/53)
+    Track 10 : OK (v1+v2, confidence 30/53)
+    Track 11 : OK (v1+v2, confidence 30/54)
+    Track 12 : OK (v1+v2, confidence 28/50)
+    Track 13 : OK (v1+v2, confidence 29/52)
+    Track 14 : OK (v1+v2, confidence 30/50)
+    Track 15 : OK (v1+v2, confidence 30/51)
+    Track 16 : OK (v1+v2, confidence 30/51)
+        ->All tracks accurately ripped.
+
+All Tracks
+    Album gain               : 1.78 dB
+    Peak                     : 0.901276
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 01
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/01 Only the Lonely.flac
+    Pre-gap length : 00:02:35
+
+    Track gain               : 3.06 dB
+    Peak                     : 0.802948
+    CRC32 hash (test run)    : 65241DDF
+    CRC32 hash               : 65241DDF
+    CRC32 hash (skip zero)   : DE0F5A6D
+    AccurateRip v1 signature : 478D9A3C
+    AccurateRip v2 signature : 7EDFBC1F
+        ->Accurately ripped (v1+v2, confidence 12+17/50)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 02
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/02 In Dreams.flac
+
+    Track gain               : 1.51 dB
+    Peak                     : 0.701141
+    CRC32 hash (test run)    : 10AB3600
+    CRC32 hash               : 10AB3600
+    CRC32 hash (skip zero)   : 03223DB2
+    AccurateRip v1 signature : DE354BCD
+    AccurateRip v2 signature : B06EE225
+        ->Accurately ripped (v1+v2, confidence 11+18/51)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 03
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/03 Dream Baby.flac
+
+    Track gain               : 0.88 dB
+    Peak                     : 0.760468
+    CRC32 hash (test run)    : 33126A5B
+    CRC32 hash               : 33126A5B
+    CRC32 hash (skip zero)   : 64B94317
+    AccurateRip v1 signature : 916897C2
+    AccurateRip v2 signature : 9DDAA974
+        ->Accurately ripped (v1+v2, confidence 12+18/51)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 04
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/04 Leah.flac
+
+    Track gain               : 1.76 dB
+    Peak                     : 0.789825
+    CRC32 hash (test run)    : 283B50C9
+    CRC32 hash               : 283B50C9
+    CRC32 hash (skip zero)   : 46819A01
+    AccurateRip v1 signature : B07F8797
+    AccurateRip v2 signature : B5D3B997
+        ->Accurately ripped (v1+v2, confidence 12+18/51)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 05
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/05 Move on Down the Line.flac
+
+    Track gain               : 1.44 dB
+    Peak                     : 0.716431
+    CRC32 hash (test run)    : 414E9D86
+    CRC32 hash               : 414E9D86
+    CRC32 hash (skip zero)   : F0B141A7
+    AccurateRip v1 signature : 2358F24C
+    AccurateRip v2 signature : E0B2B89B
+        ->Accurately ripped (v1+v2, confidence 12+18/52)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 06
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/06 Crying.flac
+
+    Track gain               : 0.82 dB
+    Peak                     : 0.901276
+    CRC32 hash (test run)    : 4B2FE3F6
+    CRC32 hash               : 4B2FE3F6
+    CRC32 hash (skip zero)   : 28A4F446
+    AccurateRip v1 signature : 6D61CDF9
+    AccurateRip v2 signature : 23B389D2
+        ->Accurately ripped (v1+v2, confidence 12+18/52)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 07
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/07 Mean Woman Blues.flac
+
+    Track gain               : 0.92 dB
+    Peak                     : 0.660187
+    CRC32 hash (test run)    : 0CB4F7F1
+    CRC32 hash               : 0CB4F7F1
+    CRC32 hash (skip zero)   : 9981EABA
+    AccurateRip v1 signature : 7E5F26E5
+    AccurateRip v2 signature : 1C8EAE46
+        ->Accurately ripped (v1+v2, confidence 12+18/51)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 08
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/08 Running Scared.flac
+
+    Track gain               : 2.52 dB
+    Peak                     : 0.717560
+    CRC32 hash (test run)    : 7BE0F61F
+    CRC32 hash               : 7BE0F61F
+    CRC32 hash (skip zero)   : 63191CE8
+    AccurateRip v1 signature : 24A6A8B3
+    AccurateRip v2 signature : B8DB48C8
+        ->Accurately ripped (v1+v2, confidence 12+18/53)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 09
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/09 Blue Bayou.flac
+
+    Track gain               : 4.72 dB
+    Peak                     : 0.549103
+    CRC32 hash (test run)    : 8E910014
+    CRC32 hash               : 8E910014
+    CRC32 hash (skip zero)   : 9F2567FF
+    AccurateRip v1 signature : 3D3BBB13
+    AccurateRip v2 signature : 8B319B5E
+        ->Accurately ripped (v1+v2, confidence 12+18/53)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 10
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/10 Candy Man.flac
+
+    Track gain               : 2.06 dB
+    Peak                     : 0.566040
+    CRC32 hash (test run)    : 163EC2F7
+    CRC32 hash               : 163EC2F7
+    CRC32 hash (skip zero)   : FFBE9B52
+    AccurateRip v1 signature : 26CB6026
+    AccurateRip v2 signature : CA9A5978
+        ->Accurately ripped (v1+v2, confidence 12+18/53)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 11
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/11 Uptown.flac
+
+    Track gain               : 1.44 dB
+    Peak                     : 0.582428
+    CRC32 hash (test run)    : FBBBA44A
+    CRC32 hash               : FBBBA44A
+    CRC32 hash (skip zero)   : C5503AB2
+    AccurateRip v1 signature : D962CA39
+    AccurateRip v2 signature : D070B01E
+        ->Accurately ripped (v1+v2, confidence 12+18/54)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 12
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/12 Ooby Dooby.flac
+
+    Track gain               : 1.47 dB
+    Peak                     : 0.823425
+    CRC32 hash (test run)    : FFF65E47
+    CRC32 hash               : FFF65E47
+    CRC32 hash (skip zero)   : B6461827
+    AccurateRip v1 signature : 8DBD03E2
+    AccurateRip v2 signature : 78B92A19
+        ->Accurately ripped (v1+v2, confidence 10+18/50)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 13
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/13 The Comedians.flac
+
+    Track gain               : 3.09 dB
+    Peak                     : 0.535889
+    CRC32 hash (test run)    : BB14DF3B
+    CRC32 hash               : BB14DF3B
+    CRC32 hash (skip zero)   : C5212874
+    AccurateRip v1 signature : DE096C6E
+    AccurateRip v2 signature : E785F38F
+        ->Accurately ripped (v1+v2, confidence 11+18/52)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 14
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/14 (All I Can Do Is) Dream You.flac
+
+    Track gain               : 1.13 dB
+    Peak                     : 0.775482
+    CRC32 hash (test run)    : 376949FD
+    CRC32 hash               : 376949FD
+    CRC32 hash (skip zero)   : CC213527
+    AccurateRip v1 signature : FB5F5E73
+    AccurateRip v2 signature : F1F13071
+        ->Accurately ripped (v1+v2, confidence 12+18/50)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 15
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/15 It's Over.flac
+
+    Track gain               : 3.85 dB
+    Peak                     : 0.630005
+    CRC32 hash (test run)    : 4D7FB554
+    CRC32 hash               : 4D7FB554
+    CRC32 hash (skip zero)   : D75952B6
+    AccurateRip v1 signature : BEE44E57
+    AccurateRip v2 signature : B6CE9E65
+        ->Accurately ripped (v1+v2, confidence 12+18/51)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 16
+    Filename : /Users/timdonnelly/Music/New Rips - Need to Export/Roy Orbison - A Black and White Night Live (1989) [FLAC]/16 Oh Pretty Woman.flac
+
+    Track gain               : 2.48 dB
+    Peak                     : 0.690735
+    CRC32 hash (test run)    : 92399E94
+    CRC32 hash               : 92399E94
+    CRC32 hash (skip zero)   : 52058270
+    AccurateRip v1 signature : E5F01BBF
+    AccurateRip v2 signature : A37B22E5
+        ->Accurately ripped (v1+v2, confidence 13+17/51)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+No errors occurred
+
+End of status report
+
+-----BEGIN XLD SIGNATURE-----
+jU0O8FeyT1QTjX3mXrcnCQuXsPJXJcahcu6H8FrfULi7.DtG9_DhVbHcJucgOOcOK9dWFUZC1Ck4SXRm2fVNAGs7gdB0dmRnkDffzFC
+-----END XLD SIGNATURE-----

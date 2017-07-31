@@ -1,74 +1,96 @@
 <?
-View::show_header('Logchecker'); 
-$DB->query("
-SELECT t.ID, g.Name as AlbumName, a.Name as ArtistName, g.Year, t.Format, t.Encoding 
-FROM torrents t 
-JOIN torrents_group g ON t.GroupID = g.ID 
-JOIN torrents_artists ta ON g.ID = ta.GroupID 
-JOIN artists_group a ON a.ArtistID = ta.ArtistID 
-WHERE t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
-        
-if ($DB->has_results()) {
-	$output = '';
-	while (list($ID, $AlbumName, $ArtistName, $Year, $Format, $Encoding) = $DB->next_record()) {
-		$output .= "<tr><td><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td><a href=\"/torrents.php?torrentid=$ID\">$ArtistName - $AlbumName [$Year] [$Format/$Encoding]</a></td></tr>";	
-	}
-}
-?>
-<!--<div class="thin">
-	<h2 class="center">Apollo Logchecker: dBpoweramp, EAC and xld.</h2>
-	<table class="forum_post vertical_margin">
-		<tr class="colhead">
-			<td colspan="2">Upload file</td>
-		</tr>
-		<tr>
-			<td>
-				<form action="" method="post" enctype="multipart/form-data">
-					<input type="hidden" name="action" value="takeupload" />
-					<input type="file" name="log" size="40" />
-					<input type="submit" value="Upload log" name="submit" />
-				</form>
-			</td>
-		</tr>
-		<tr class="colhead">
-			<td colspan="2">Paste log</td>
-		</tr>
-		<tr>
-			<td>
-				<form action="" method="post">
-					<input type="hidden" name="action" value="takeupload" />
-					<textarea rows="5" cols="60" name="pastelog" wrap="soft"></textarea>
-					<input type="submit" value="Upload log" name="submit" />
-				</form>
-			</td>
-		</tr>
-	</table>
-	<br />
-	<br />
-</div>-->
+View::show_header('Logchecker');
+
+print <<<HTML
+<div class="linkbox">
+	<a href="logchecker.php" class="brackets">Test Logchecker</a>
+	<a href="logchecker.php?action=upload" class="brackets">Upload Missing Logs</a>
+	<a href="logchecker.php?action=update" class="brackets">Update Uploaded Logs</a>
+</div>
 <div class="thin">
 	<h2 class="center">Update Log</h2>
-	<p>Uploads with logs and score. Fix this by selecting an unscored torrent and upload the log files in the form <u>below</u> (Please select all logs at once).</p><br>
-    <form action="" method="post" enctype="multipart/form-data">
-      <input type="hidden" name="action" value="missinglogupload" />
-      <table class="form_post vertical_margin">
-        <tr class="colhead">
-          <td colspan="2">Select a Torrent</td>
-        </tr>
-        	<?= $output ?>        
-        <tr class="colhead">
-          <td colspan="2">Upload Logs for This Torrent</td>
-        </tr>
-        <tr>
-          <td>
-            <input type="file" accept=".log,.txt" name="logfiles[]" size="40" multiple required/>
-            <input type="submit" value="Upload Logs!" name="logsubmit" />
-          </td>
-        </tr>
-      </table>
-	<br />
-	<br />
+	<div class="box pad">
+		<p>
+		This form allows you to update the logs for any torrent that you've uploaded.
+		Select a torrent and upload the log files in the form <u>below</u>, making sure to add
+		all logs that you wish to upload. This will overwrite any previously uploaded logs for
+		this torrent. If you wish to just have a torrent manually rescored, please report it
+		to staff.
+		</p>
+		<br />
+		<form action="" method="post" enctype="multipart/form-data">
+		  <input type="hidden" name="action" value="missinglogupload" />
+		  <table class="form_post vertical_margin">
+			<tr class="colhead">
+			  <td colspan="2">Select a Torrent</td>
+			</tr>
+HTML;
+
+$DB->query("
+	SELECT t.ID, t.GroupID, t.Format, t.Encoding 
+	FROM torrents t
+	WHERE t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
+
+if ($DB->has_results()) {
+	$GroupIDs = $DB->collect('GroupID');
+	$TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
+	$Groups = Torrents::get_groups($torrent_ids);
+
+	foreach ($TorrentsInfo as $TorrentID => $Torrent) {
+		list($ID, $GroupID, $Format, $Encoding) = $Torrent;
+		$Group = $Groups[$GroupID];
+		$GroupName = $Group['Name'];
+		$GroupYear = $Group['Year'];
+		$ExtendedArtists = $Group['ExtendedArtists'];
+		$Artists = $Group['Artists'];
+		if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
+			unset($ExtendedArtists[2]);
+			unset($ExtendedArtists[3]);
+			$DisplayName = Artists::display_artists($ExtendedArtists);
+		} elseif (!empty($Artists)) {
+			$DisplayName = Artists::display_artists(array(1 => $Artists));
+		} else {
+			$DisplayName = '';
+		}
+		$DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$ID.'" class="tooltip" title="View torrent" dir="ltr">'.$GroupName.'</a>';
+		if ($GroupYear > 0) {
+			$DisplayName .= " [{$GroupYear}]";
+		}
+		$Info = array();
+		if (!empty($Data['Format'])) {
+			$Info[] = $Data['Format'];
+		}
+		if (!empty($Data['Encoding'])) {
+			$Info[] = $Data['Encoding'];
+		}
+		if (!empty($Info)) {
+			$DisplayName .= ' [' . implode('/', $Info) . ']';
+		}
+		$Output .= "<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
+	}
+	$AcceptValues = LOG_CHECKER::get_accept_values();
+	echo <<<HTML
+			{$Output}
+			<tr class="colhead">
+			  <td colspan="2">Upload Logs for This Torrent</td>
+			</tr>
+			<tr>
+			  <td>
+				<input type="file" accept="{$AcceptValues}" name="logfiles[]" size="40" multiple required/>
+				<input type="submit" value="Upload Logs!" name="logsubmit" />
+			  </td>
+			</tr>
+HTML;
+
+}
+else {
+	echo "\t\t\t<tr><td colspan='2'>No uploads found.</td></tr>";
+}
+print <<<HTML
+		  </table>
+	</div>
     </form>
 </div>
-<? View::show_footer(); ?>
+HTML;
 
+View::show_footer();

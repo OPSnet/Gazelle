@@ -1,19 +1,13 @@
 <?
 /*******************************************************************
- * Automated EAC/XLD/dBpoweramp log checker (V4) *
- * OCT 2013 ~ robotnik *
- *-----------------------------------------------------------------*
- * MAJOR CHANGES V4:
- * - dBpoweramp parsing included (optional)
- * - Removed unimportant, redundant entries for validation report
- * - Scoring for combined logs balanced to resemble multiple single log submissions
- * - Addition of id3 tags will trigger notice instead of deduction
+ * Automated EAC/XLD log checker *
  ********************************************************************/
-class LOG_CHECKER
-{
+
+class LOG_CHECKER {
 	var $Log = '';
 	var $Logs = array();
 	var $Tracks = array();
+	var $Checksum = false;
 	var $Score = 100;
 	var $Good = array();
 	var $Bad = array();
@@ -36,48 +30,37 @@ class LOG_CHECKER
 	var $ARSummary = null;
 	var $XLDSecureRipper = false;
 	var $Limit = 15; //display low prior msg up to this count
-	var $ProcessDBpoweramp = true;
-	//http://www.dbpoweramp.com/Version-Changes-DMC.htm
-	//don't set safe to anything below 12! latest major revision is assumed best
-	var $DBAVersionCheck = array('safe' => 12, 'best' => 14);
 	var $LBA = array();
 	var $FrameReRipConf = array();
 	var $IARTracks = array();
 	var $InvalidateCache = true;
 	var $DubiousTracks = 0;
-	function new_file($Log)
-	{
+	function new_file($Log) {
 		$this->Log = $Log;
 	}
+
 	function parse()
 	{
 		$Log	   = display_str($this->Log);
 		$Log	   = str_replace("\r\n", "\n", $Log);
 		$Log	   = str_replace("\r", '', $Log);
 		$this->Log = $Log;
-		if (preg_match("/^dBpoweramp /i", $Log) && $this->ProcessDBpoweramp) {
-			$this->RIPPER = "DBPA";
-			$this->parse_dBpoweramp();
-			return array(
-				$this->Score,
-				$this->Good,
-				$this->Bad,
-				$this->Log
-			);
-		}
-		$Checksum = false;
 		if (preg_match("/[\=]+\s+Log checksum/i", $Log)) { // eac checksum
-			$Checksum   = true;
+			exec('wine ' . __DIR__ . '/../logcheckers/eac_log_checker.exe > /dev/null', $return);
+			$this->Checksum = true;
 			$this->Logs = preg_split("/(\n\=+\s+Log checksum.*)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
+
 		} elseif (preg_match("/[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+/i", $Log)) { // xld checksum (plugin)
-			$Checksum   = true;
+			exec('wine ' . __DIR__ . '/../logcheckers/xld_log_checker.exe logcheckers/log_files/xld_perfect.log 2>&1', $return);
+			// XLD only outputs an "OK" or "Malformed" for the file
+			$this->Checksum = strpos($return[count($return)-1], ': OK') !== false;
 			$this->Logs = preg_split("/(\n[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
 		} else { //no checksum
 			$this->Logs = preg_split("/(\nEnd of status report)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
             foreach ($this->Logs as $key => $value) {
                 if (preg_match("/---- CUETools DB Plugin V.+/i", $value)) {
                     unset($this->Logs[$key]);
-                } //strip empty
+                }
             }
 		}
 
@@ -86,13 +69,13 @@ class LOG_CHECKER
 				unset($this->Logs[$key]);
 			} //strip empty
 			//append stat msgs
-			elseif (!$Checksum && preg_match("/\nEnd of status report/i", $value)) {
+			elseif (!$this->Checksum && preg_match("/\nEnd of status report/i", $value)) {
 				$this->Logs[$key - 1] .= $value;
 				unset($this->Logs[$key]);
-			} elseif ($Checksum && preg_match("/[\=]+\s+Log checksum/i", $value)) {
+			} elseif ($this->Checksum && preg_match("/[\=]+\s+Log checksum/i", $value)) {
 				$this->Logs[$key - 1] .= $value;
 				unset($this->Logs[$key]);
-			} elseif ($Checksum && preg_match("/[\-]+BEGIN XLD SIGNATURE/i", $value)) {
+			} elseif ($this->Checksum && preg_match("/[\-]+BEGIN XLD SIGNATURE/i", $value)) {
 				$this->Logs[$key - 1] .= $value;
 				unset($this->Logs[$key]);
 			}
@@ -135,7 +118,8 @@ class LOG_CHECKER
 					$this->Score,
 					$this->Good,
 					$this->Bad,
-					$this->Log
+					$this->Log,
+					$this->Checksum
 				);
 			} else {
 				$this->RIPPER = ($EAC) ? "EAC" : "XLD";
@@ -674,7 +658,8 @@ class LOG_CHECKER
 			$this->Score,
 			$this->Good,
 			$this->Bad,
-			$this->Log
+			$this->Log,
+			$this->Checksum
 		);
 	}
 	// Callback functions
@@ -978,7 +963,7 @@ class LOG_CHECKER
 			}
 			return "<span class=\"log4\">Test CRC <span class=\"$Class\">$Matches[1]</span></span>\n$Matches[2]<span class=\"log4\">Copy CRC <span class=\"$Class\">$Matches[3]</span></span>";
 		}
-		if ($this->RIPPER == "XLD") {
+		elseif ($this->RIPPER == "XLD") {
 			if ($Matches[2] == $Matches[5]) {
 				$Class = 'good';
 			} else {
@@ -1012,6 +997,7 @@ class LOG_CHECKER
 			return '<span class="log4">' . $Matches[1] . $Matches[2] . '</span> <span class="' . $Class . '">' . $Matches[3] . '</span>';
 		}
 	}
+
 	function xld_stat($Matches)
 	{
 		if (strtolower($Matches[1]) == 'read error') {
@@ -1063,543 +1049,12 @@ class LOG_CHECKER
 			return '<span class="log4">' . $Matches[1] . $Matches[2] . '</span> <span class="' . $Class . '">' . $Matches[3] . '</span>';
 		}
 	}
+
 	function toc($Matches)
 	{
 		return "$Matches[1]<span class=\"log4\">$Matches[2]</span>$Matches[3]<strong>|</strong>$Matches[4]<span class=\"log1\">$Matches[5]</span>$Matches[7]<strong>|</strong>$Matches[8]<span class=\"log1\">$Matches[9]</span>$Matches[11]<strong>|</strong>$Matches[12]<span class=\"log1\">$Matches[13]</span>$Matches[14]<strong>|</strong>$Matches[15]<span class=\"log1\">$Matches[16]</span>$Matches[17]" . "\n";
 	}
-	function parse_dBpoweramp()
-	{
-		$Log		= display_str($this->Log);
-		$this->Logs = preg_split("/(dBpoweramp Release.*?\n)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
-		foreach ($this->Logs as $key => $value) {
-			if (trim($value) == "") {
-				unset($this->Logs[$key]);
-				continue;
-			} //strip empty
-			//prepend capture
-			if (!preg_match("/dBpoweramp Release.*?\n/i", $value)) {
-				$this->Logs[$key - 1] .= $value;
-				unset($this->Logs[$key]);
-			}
-		}
-		$this->Logs = array_values($this->Logs); //rebuild index
-		if (count($this->Logs) > 1) {
-			$this->Combined = count($this->Logs);
-		} //is_combined
-		foreach ($this->Logs as $LogArrayKey => $Log) {
-			// log loop
-			$this->CurrLog = $LogArrayKey + 1;
-			$CurrScore	 = $this->Score;
-			//release / date
-			if (preg_match('/^dBpoweramp Release +(\d+)/i', $Log, $Matches)) {
-				if ($Matches[1] < $this->DBAVersionCheck['safe']) {
-					$this->account('Unsafe version detected, please update to ' . $this->DBAVersionCheck['safe'] . ' | ' . $this->DBAVersionCheck['best'] . ' for best results', false, 0);
-					return;
-				} else if ($Matches[1] < $this->DBAVersionCheck['best']) {
-					$this->account('Please update to version ' . $this->DBAVersionCheck['best'] . ' for best results', false, false, false, true);
-				}
-			} else {
-				$this->account('Error verifying dBpoweramp version', false, 0);
-				return;
-			}
-			$Log = preg_replace("/dBpoweramp Release ([\.\d]+)(.*?)(\d+.*)/i", "dBpoweramp Release <span class=\"log1\">$1</span>$2<span class=\"log1\">$3</span>", $Log, 1, $Count);
-			//drive
-			$Log = preg_replace_callback("/Ripping with drive(.*?):( +\[.+\])/i", array(
-				$this,
-				'drive'
-			), $Log, 1, $Count);
-			if (!$Count) {
-				$this->account('Could not verify used drive', 1);
-			}
-			//offset
-			$Log = preg_replace_callback('/(Drive offset\s*): ([+-]?[0-9]+)/i', array(
-				$this,
-				'read_offset'
-			), $Log, 1, $Count);
-			if (!$Count) {
-				$this->account('Could not verify read offset', 1);
-			}
-			//overread
-			$Log = preg_replace('/Overread Lead-in\/out( *): (Yes|No)/i', '<span class="log5">Overread Lead-in/out$1</span>: <span class="log4">$2</span>', $Log, 1, $Count);
-			//accurateRip active
-			$Log = preg_replace_callback('/AccurateRip:( +)([\w\s]+)/i', array(
-				$this,
-				'dbpa_accuraterip_active'
-			), $Log, 1, $Count);
-			if (!$Count) {
-				$this->account('Could not verify accurate rip active', 1);
-			}
-			//c2 pointers
-			$Log = preg_replace_callback('/Using C2:( +)(Yes|No)/i', array(
-				$this,
-				'dbpa_c2_pointers'
-			), $Log, 1, $C2);
-			if (!$C2) {
-				$this->account('Could not verify c2 pointers', 1);
-			}
-			//cache (potentially bad)
-			$Log = preg_replace_callback('/Cache:( +)(None|\w+)/i', array(
-				$this,
-				'dbpa_audio_cache'
-			), $Log, 1, $Cache);
-			if (!$Cache) {
-				$this->account('Could not verify cache setting', 1);
-				$this->InvalidateCache = false;
-			}
-			//fua invalidate (bad for non-plextor)
-			$Log = preg_replace_callback('/FUA Cache Invalidate:( +)(Yes|No)/i', array(
-				$this,
-				'dbpa_fua'
-			), $Log, 1, $Fua);
-			if (!$Fua) {
-				$this->account('Could not verify fua setting');
-			}
-			//passes drive speed
-			$Log = preg_replace("/(Pass \d+ Drive Speed)(: +)([^,]+)/i", "<span class=\"log5\">$1</span>$2<span class=\"log4\">$3</span>", $Log, -1, $Count);
-			//ultra
-			$Log = preg_replace_callback('/Ultra:+( +Vary Drive Speed: +)(Yes|No)(.*?Min Passes: +)(\d+)(.*?Max Passes: +)(\d+)(.*?Finish After Clean Passes: +)(\d+)/i', array(
-				$this,
-				'dbpa_ultra'
-			), $Log, 1, $Ultra);
-			if (!$Ultra) {
-				$this->SecureMode = false;
-				$this->account('Ultra secure mode was not used', 10);
-			}
-			//bad sector re-rip
-			$Log = preg_replace_callback('/Bad Sector Re-rip:+( +Drive Speed: +)(\w+)(.*?Maximum Re-reads: +)(\d+)/i', array(
-				$this,
-				'dbpa_rerip'
-			), $Log, 1, $ReRip);
-			if (!$ReRip) {
-				$this->account('Could not verify bad sector re-rip setting', 1);
-			}
-			//encoder
-			$Log = preg_replace("/(\nEncoder)(: +)(.*?\n)/i", "<span class=\"log5\">$1</span>$2<span class=\"log4\">$3</span>", $Log, 1, $Count);
-			//compression level
-			if (preg_match('/FLAC[ =]+\-?compression( |-)+level( |-)+(\d)/i', $Log, $Matches)) {
-				if ($Matches[3] < 8) {
-					$this->account('Flac compression level should be 8', false, false, false, true);
-				}
-			}
-			//dsp / action
-			if ($Log = preg_replace("/(DSP Effects.*?)(:.*?)\n/i", "<span class=\"log5\">$1</span>$2\n", $Log, 1, $Matches)) {
-				$badDSP	 = array( //add destructive effect names here, ci, partial
-					'Normalize',
-					'Fade',
-					'Silence Track Deletion',
-					'Silence Removal',
-					'Grabber',
-					'Equalizer',
-					'Insert Audio',
-					'Karaoke',
-					'Loop',
-					'Maximum Length',
-					'Minimum Length',
-					'Reverse',
-					'Trim',
-					'Write Silence'
-				);
-				$dubiousDSP = array( //add potentially bad effect names here, ci, partial
-					'Bit Depth',
-					'Channel Count',
-					'Channel Mapper',
-					'DirectX',
-					'Resample',
-					'VST'
-				);
-				foreach ($badDSP as $dsp) {
-					if (preg_match("/dspeffect\d+.*?([^=]+" . $dsp . ".*?)=/i", $Log, $M)) {
-						$effect = preg_replace("/&quot;|\"/i", '', $M[1]);
-						unset($this->Bad);
-						$this->account('Destructive dsp effect used: ' . $effect, false, 0);
-						return;
-					}
-				}
-				foreach ($dubiousDSP as $dsp) {
-					if (preg_match("/dspeffect\d+.*?([^=]+" . $dsp . ".*?)=/i", $Log, $M)) {
-						$effect = preg_replace("/&quot;|\"/i", '', $M[1]);
-						$this->account('Dubious dsp effect used: ' . $effect, 10, false, false, false, 10);
-					}
-				}
-			}
-			//drive & settings (label)
-			$Log = preg_replace("/(\nDrive +(&amp;|and|&) +Settings *\n)/i", "<span class=\"log1\">$1</span>", $Log, 1, $Count);
-			//extraction log (label)
-			$Log = preg_replace("/(\nExtraction Log *\n)/i", "<span class=\"log1\">$1</span>", $Log, 1, $Count);
-			if (!$Count) {
-				$this->account('No extraction log', false, 0, true);
-			}
-			//overread disclaimer
-			$Log = preg_replace("/(\n.*? Drive is unable to read .*?\n)/i", "<span class=\"badish\">$1</span>", $Log, 1, $Count);
-			if ($Count) {
-				$this->account('Uncheck over-read option for this drive', false, false, false, true);
-			}
-			//------ Handle individual tracks ------//
-			$FormattedTrackListing = '';
-			preg_match('/\nTrack( +)([0-9]{1,3})([^<]+)/i', $Log, $Matches);
-			$TrackListing = $Matches[0];
-			$FullTracks   = preg_split('/\nTrack( +)([0-9]{1,3})/i', $TrackListing, -1, PREG_SPLIT_DELIM_CAPTURE);
-			array_shift($FullTracks);
-			$TrackBodies = preg_split('/\nTrack( +)([0-9]{1,3})/i', $TrackListing, -1);
-			array_shift($TrackBodies);
-			$Tracks = array();
-			while (list($Key, $TrackBody) = each($TrackBodies)) {
-				// The number of spaces between 'Track' and the number, to keep formatting intact
-				$Spaces				   = $FullTracks[($Key * 3)];
-				// Track number
-				$TrackNumber			  = $FullTracks[($Key * 3) + 1];
-				$this->TrackNumber		= $TrackNumber;
-				// How much to decrease the overall score by, if this track fails and no attempt at recovery is made later on
-				$this->DecreaseScoreTrack = 0;
-				// List of things that went wrong to add to $this->Bad if this track fails and no attempt at recovery is made later on
-				$this->BadTrack		   = array();
-				// The track number is stripped in the preg_split, let's bring it back, eh?
-				$TrackBody				= '<span class="log5">Track</span>' . $Spaces . '<span class="log4 log1">' . $TrackNumber . '</span>' . $TrackBody;
-				//lba
-				$TrackBody				= preg_replace_callback('/( +Ripped LBA +)(\d+)( +to +)(\d+)(.*?\.)/i', array(
-					$this,
-					'dbpa_lba'
-				), $TrackBody, 1, $LBAGood);
-				$TrackBody				= preg_replace_callback('/( +ERROR Ripping LBA +)(\d+)( +to +)(\d+)(.*?\.)/i', array(
-					$this,
-					'dbpa_lba'
-				), $TrackBody, 1, $LBABad);
-				if (!$LBAGood && !$LBABad) {
-					$this->account_track('Could not verify rip status', 30);
-				}
-				//filename
-				$TrackBody = preg_replace('/Filename: ((.+)?\.(wav|flac|ape|ignore))\n/i', "<span class=\"log4\">Filename: <span class=\"log3\">$1</span></span>\n", $TrackBody, 1, $Count);
-				if (!$Count) {
-					$this->account_track('Could not verify filename', 1);
-				}
-				//ar track + conf (not in use atm for dbpa)
-				preg_match('/AccurateRip: +Accurate +\(confidence ([0-9]+)\)/i', $TrackBody, $matches);
-				if ($matches) {
-					$this->ARTracks[$TrackNumber] = $matches[1];
-				} else {
-					$this->ARTracks[$TrackNumber] = 0;
-				}
-				//we need this one instead
-				preg_match('/AccurateRip: +Inaccurate +\(confidence ([0-9]+)\)/i', $TrackBody, $matches);
-				if ($matches) {
-					$this->IARTracks[$TrackNumber] = $matches[1];
-				} //match - no boost
-				else {
-					$this->IARTracks[$TrackNumber] = 0;
-				}
-				//accurate rip
-				$TrackBody	= preg_replace_callback('/AccurateRip:(.*?)\(confidence ([0-9]+)\)/i', array(
-					$this,
-					'dbpa_accurip'
-				), $TrackBody, 1, $Count);
-				//accurip crc
-				$TrackBody	= preg_replace('/AccurateRip CRC: +([a-fA-F0-9]{8})/i', "<span class=\"log4\">AccurateRip CRC: <span class=\"log3\">$1</span></span>", $TrackBody, 1, $Count);
-				//accurip verified
-				$TrackBody	= preg_replace_callback('/AccurateRip(.+)(\[CRCv\d +)([a-fA-F0-9]+)\]/i', array(
-					$this,
-					'dbpa_accurip_verified'
-				), $TrackBody, -1, $Count);
-				//copy crc
-				$TrackBody	= preg_replace('/CRC32: +([a-fA-F0-9]{8})/i', "<span class=\"log4\">CRC32: <span class=\"log3\">$1</span></span>", $TrackBody, 1, $Count);
-				//disc id
-				$TrackBody	= preg_replace('/\[DiscID: +(.*?)\]/i', "[DiscID: <span class=\"log1\">$1</span>]", $TrackBody, 1, $Count);
-				//in/secure
-				$TrackBody	= preg_replace_callback('/(I?n?Secure)(.*?)(\[.*?\])/i', array(
-					$this,
-					'dbpa_secure'
-				), $TrackBody, 1, $Count);
-				//re-rip frame
-				$TrackBody	= preg_replace_callback('/Re-rip Frame: +(.*?\n)/i', array(
-					$this,
-					'dbpa_rerip_frame'
-				), $TrackBody, -1, $Count);
-				$DubiousTrack = false;
-				if ($Count && !$this->InvalidateCache && $this->ARTracks[$TrackNumber] < 2) {
-					$DubiousTrack = true;
-				}
-				$Tracks[$TrackNumber] = array(
-					'number' => $TrackNumber,
-					'spaces' => $Spaces,
-					'text' => $TrackBody,
-					'decreasescore' => $this->DecreaseScoreTrack,
-					'bad' => $this->BadTrack,
-					'lba_start' => $this->LBA[$TrackNumber]['start'],
-					'lba_end' => $this->LBA[$TrackNumber]['stop'],
-					'rerip_conf' => $this->FrameReRipConf[$TrackNumber],
-					'inaccurate' => $this->IARTracks[$TrackNumber],
-					'dubious' => $DubiousTrack
-				);
-				$FormattedTrackListing .= "\n" . $TrackBody;
-				$this->Tracks[$TrackNumber] = $Tracks[$TrackNumber];
-			}
-			unset($Tracks);
-			$Log = str_replace($TrackListing, $FormattedTrackListing, $Log);
-			$Log = str_replace('<br>', "\n", $Log);
-			//status report
-			$Log = preg_replace_callback('/([\-\n]+)(\d+ Tracks.*\n?)/is', array(
-				$this,
-				'dbpa_status_report'
-			), $Log, 1, $Status1);
-			$Log = preg_replace_callback('/([\-\n]+)(User Stopped Ripping.*\n?)/is', array(
-				$this,
-				'dbpa_status_report'
-			), $Log, 1, $Status2);
-			if (!$Status1 && !$Status2) {
-				$this->account('No or invalid status report', false, 0, false, false, 100);
-			}
-			// end parsing
-			$this->Logs[$LogArrayKey] = $Log;
-			$this->check_tracks();
-			$minLBA = $minLBATrack = $prevLBA = null;
-			foreach ($this->Tracks as $Num => $Track) { //send score/bad
-				if ($Track['decreasescore']) {
-					$this->Score -= $Track['decreasescore'];
-				}
-				if (count($Track['bad']) > 0) {
-					$this->Bad = array_merge($this->Bad, $Track['bad']);
-				}
-				if ($Track['dubious']) {
-					$this->DubiousTracks++;
-				}
-				//boost track
-				else if (!$Track['inaccurate'] && $Track['rerip_conf'] && $Track['decreasescore'] > 0) {
-					$toScore = ($this->Score + $Track['decreasescore'] <= 0) ? '' : 'to ' . ($this->Score + $Track['decreasescore']) . ' points!';
-					$this->account('Track ' . $Num . (($this->Combined) ? " (" . $this->CurrLog . ")" : '') . ': All frames re-ripped matching with good confidence, score boosted ' . $toScore, false, ($this->Score + $Track['decreasescore']));
-				}
-				$minLBA	  = ($minLBA === null || $Track['lba_start'] < $minLBA) ? $Track['lba_start'] : $minLBA;
-				$minLBATrack = ($Track['lba_start'] == $minLBA) ? $Num : $minLBATrack;
-				if ($prevLBA && $prevLBA != $Track['lba_start']) {
-					$this->account('LBA inconsistency detected at track ' . $Num, 1, false, true, false, 1);
-				}
-				$prevLBA = $Track['lba_end'];
-			}
-			if ($minLBATrack != 1) {
-				$this->account('Partial rip detected, starting with track ' . $minLBATrack . ' at block ' . $minLBA, false, false, true, true);
-			} else if ($minLBA > 75) {
-				$this->account('Unusual pre-gap of ' . number_format(($minLBA / 75), 4, '.', ',') . ' sec. detected, first track starting with block ' . $minLBA, false, false, true, true);
-			} else if ($minLBA > 0) {
-				$this->account('Pre-gap of ' . $minLBA . ' blocks detected', false, false, true, true);
-			}
-			unset($this->Tracks);
-			unset($this->LBA);
-			unset($this->FrameReRipConf);
-			//boost ar
-			$ar_with_conf = false;
-			$minConf	  = null;
-			foreach ($this->ARTracks as $Track => $Conf) {
-				if (!is_numeric($Conf) || $Conf < 2) {
-					$ar_with_conf = false;
-					break;
-				} //non-ar track found
-				else {
-					$ar_with_conf = true;
-					$minConf	  = (!$minConf || $Conf < $minConf) ? $Conf : $minConf;
-				}
-			}
-			if ($this->Score != 100 && $ar_with_conf) {
-				$tmp_score   = $this->Score;
-				$this->Score = (($CurrScore) ? $CurrScore : 100) - $this->DecreaseBoost;
-				if (((($CurrScore) ? $CurrScore : 100) - $tmp_score) != $this->DecreaseBoost) {
-					$Msg		 = 'All tracks accurately ripped with at least confidence ' . $minConf . '. Score ' . (($this->Combined) ? "for log " . $this->CurrLog . " " : '') . 'boosted to ' . $this->Score . ' points!';
-					$this->Bad[] = $Msg;
-				}
-			}
-			$this->ARTracks		= array();
-			$this->IARTracks	   = array();
-			$this->DecreaseBoost   = 0;
-			$this->SecureMode	  = true;
-			$this->NonSecureMode   = null;
-			$this->InvalidateCache = true;
-		} //end log loop
-		$this->Log = implode($this->Logs);
-		if ($this->DubiousTracks) {
-			$Decrease = ($this->DubiousTracks > 5) ? 5 : $this->DubiousTracks;
-			$this->account($this->DubiousTracks . ' track' . ($this->DubiousTracks > 1 ? 's' : '') . ' re-ripped with no cache invalidate', $Decrease);
-		}
-		$this->Score = ($this->Score < 0) ? 0 : $this->Score; //min. score
-		natcasesort($this->Bad); //sort ci
-		$this->format_report();
-		if ($this->Combined) {
-			array_unshift($this->Bad, "Combined Log (" . $this->Combined . ")");
-		} //combined log msg
-		// end dBpoweramp
-	}
-	function dbpa_rerip_frame($Matches)
-	{
-		$Status = strtolower(trim($Matches[1]));
-		$Runs   = null;
-		if (preg_match('/\d+ +\/ +(\d+)/i', $Matches[1], $M)) {
-			$Runs = $M[1];
-		}
-		if (strpos($Status, "matched")) {
-			$Class = ($Runs && $Runs < 20) ? 'goodish' : 'badish';
-		} else {
-			$Class = 'bad';
-		}
-		if ($Class == 'goodish' && $this->FrameReRipConf[$this->TrackNumber] !== false) {
-			$this->FrameReRipConf[$this->TrackNumber] = true;
-		} else if ($Class != 'goodish') {
-			$this->FrameReRipConf[$this->TrackNumber] = false;
-		}
-		return 'Re-rip Frame:' . '<span class="' . $Class . '"> ' . $Matches[1] . '</span>';
-	}
-	function dbpa_status_report($Matches)
-	{
-		$Stopped = $Error = $Inaccurate = $Insecure = $Warning = $Secure = $Accurate = false;
-		if (preg_match('/Stopped/i', $Matches[2], $Void)) {
-			$Stopped = true;
-			$this->account('User stopped ripping', false, 0, false, false, 100);
-		}
-		if (preg_match('/Could not/i', $Matches[2], $Void)) {
-			$Error = true;
-		}
-		if (preg_match('/Inaccurate/i', $Matches[2], $Void)) {
-			$Inaccurate = true;
-		}
-		if (preg_match('/\Insecure/i', $Matches[2], $Void)) {
-			$Insecure = true;
-		}
-		if (preg_match('/\(Warning/i', $Matches[2], $Void)) {
-			$Warning = true;
-		}
-		if (preg_match('/\d+ Secure|Securely/i', $Matches[2], $Void)) {
-			$Secure = true;
-		}
-		if (preg_match('/\d+ Accurate|Accurately/i', $Matches[2], $Void)) {
-			$Accurate = true;
-		}
-		if ($Stopped || $Error || $Inaccurate || $Insecure) {
-			$Class = "bad";
-		} else if ($Warning) {
-			$Class = "badish";
-		} else if (($Secure && !$this->SecureMode) || ($Accurate && $Secure)) {
-			$Class = "goodish";
-		} else if ($Accurate || ($Secure && $this->SecureMode)) {
-			$Class = "good";
-		}
-		return $Matches[1] . '<span class="' . $Class . '">' . $Matches[2] . '</span>';
-	}
-	function dbpa_secure($Matches)
-	{
-		$status  = strtolower(trim($Matches[1]));
-		$warning = strtolower(trim($Matches[2]));
-		$passes  = $Matches[3];
-		if ($status == "secure" && $warning == "(warning)") {
-			$Class = 'badish';
-			if (!$this->ARTracks[$this->TrackNumber] && !$this->IARTracks[$this->TrackNumber]) {
-				if ($this->SecureMode) {
-					$this->account_track('Secure with warning', false, false, false, true);
-				} else {
-					$Class = 'bad';
-					$this->account_track('Secure with warning (no ultra, not in database)', 1);
-				}
-			}
-		} else if ($status == "secure") {
-			if ($this->SecureMode) {
-				$Class = 'good';
-			} else {
-				$Class = 'goodish';
-			}
-		} else if ($status == "insecure") {
-			$Class = 'bad';
-			if (!$this->ARTracks[$TrackNumber] && !strpos(implode(",", $this->BadTrack), "Inaccurate")) {
-				$this->account_track('Insecure', 30);
-			}
-		}
-		return '<span class="' . $Class . '">' . $Matches[1] . $Matches[2] . '</span><span class="log3">' . $Matches[3] . '</span>';
-	}
-	function dbpa_accurip($Matches)
-	{
-		$status = strtolower(trim($Matches[1]));
-		$conf   = $Matches[2];
-		if ($status == "inaccurate") {
-			if ($conf >= 2) {
-				$this->account_track('Inaccurate with confidence ' . $conf, 30);
-				$Class = 'bad';
-			} else {
-				$this->account_track('Inaccurate with confidence ' . $conf, 10);
-				$Class = 'badish';
-			}
-		} else if ($status == "accurate") {
-			if ($conf >= 2) {
-				$Class = 'good';
-			} else {
-				$Class = 'goodish';
-			}
-		} else {
-			$Class = 'badish';
-		}
-		return '<span class="log4">AccurateRip</span>:<span class="' . $Class . '">' . $Matches[1] . '(confidence ' . $Matches[2] . ')</span>';
-	}
-	function dbpa_accurip_verified($Matches)
-	{
-		$status = strtolower(trim($Matches[1]));
-		if (preg_match('/^verified +confidence +(\d+)/', $status, $M)) {
-			if ($M[1] >= 2) {
-				$Class = 'good';
-			} else {
-				$Class = 'goodish';
-			}
-		} else if (preg_match('/not|can\'t|can\s?not|inaccurate/', $status, $Void)) { //needs verification
-			$Class = 'bad';
-		} else {
-			$Class = 'badish';
-		}
-		return '<span class="log4">AccurateRip</span><span class="' . $Class . '">' . $Matches[1] . '</span>' . $Matches[2] . '<span class="log3">' . $Matches[3] . '</span>]';
-	}
-	function dbpa_lba($Matches)
-	{
-		$Class = 'good';
-		if (strpos(strtolower($Matches[1]), "error")) {
-			$this->account('Error ripping track ' . $this->TrackNumber, false, 0, true);
-			$Class = 'bad';
-		}
-		$this->LBA[$this->TrackNumber] = array(
-			'start' => $Matches[2],
-			'stop' => $Matches[4]
-		);
-		return '<span class="' . $Class . '">' . $Matches[1] . '</span><span class="log3">' . $Matches[2] . '</span>' . $Matches[3] . '<span class="log3">' . $Matches[4] . '</span>' . $Matches[5];
-	}
-	function dbpa_rerip($Matches)
-	{
-		if ($Matches[4] > 34) {
-			$Class = 'bad';
-			$this->account('Bad sector: Too many re-reads, should be 34 or less', 1);
-		} else if ($Matches[4] > 19) {
-			$Class = 'goodish';
-		} else {
-			$Class = 'good';
-		}
-		return '<span class="log5">Bad Sector Re-rip</span>:' . $Matches[1] . $Matches[2] . $Matches[3] . '<span class="' . $Class . '">' . $Matches[4] . '</span>';
-	}
-	function dbpa_ultra($Matches)
-	{
-		if ($Matches[2] == 'Yes') {
-			$Class_1 = 'good';
-		} else {
-			$Class_1 = 'badish';
-			$this->account('Ultra: Vary Drive Speed should be yes', false, false, false, true);
-		}
-		if ($Matches[4] >= 3) {
-			$Class_2 = 'good';
-		} else {
-			$Class_2 = 'bad';
-			$this->account('Ultra: Min passes should be 3 or more', 1);
-		}
-		if ($Matches[6] >= 6) {
-			$Class_3 = 'good';
-		} else {
-			$Class_3 = 'badish';
-			$this->account('Ultra: Max passes should be 6 or more', false, false, false, true);
-		}
-		if ($Matches[8] >= 2) {
-			$Class_4 = 'good';
-		} else {
-			$Class_4 = 'bad';
-			$this->account('Ultra: Finish After Clean Passes should be 2 or more', 1);
-		}
-		return '<span class="log5">Ultra</span>:' . $Matches[1] . '<span class="' . $Class_1 . '">' . $Matches[2] . '</span>' . $Matches[3] . '<span class="' . $Class_2 . '">' . $Matches[4] . '</span>' . $Matches[5] . '<span class="' . $Class_3 . '">' . $Matches[6] . '</span>' . $Matches[7] . '<span class="' . $Class_4 . '">' . $Matches[8] . '</span>';
-	}
+
 	function check_tracks()
 	{
 		if (!count($this->Tracks)) { //no tracks
@@ -1647,6 +1102,7 @@ class LOG_CHECKER
 			array_push($this->Bad, "(..)");
 		}
 	}
+
 	function account($Msg, $Decrease = false, $Score = false, $InclCombined = false, $Notice = false, $DecreaseBoost = false)
 	{
 		$DecreaseScore = $SetScore = false;
@@ -1685,55 +1141,37 @@ class LOG_CHECKER
 		$Prepend		  = 'Track ' . $tn . (($this->Combined) ? " (" . $this->CurrLog . ")" : '') . ': ';
 		$this->BadTrack[] = $Prepend . $Msg . $Append;
 	}
-	function dbpa_fua($Matches)
-	{
-		$isPlextor = ($this->Drive && preg_match('/Plextor/i', $this->Drive)) ? true : false;
-		if ((trim($Matches[2]) == 'Yes' && $isPlextor) || trim($Matches[2]) == 'No') {
-			$Class = 'good';
-		} else if (trim($Matches[2]) == 'Yes') {
-			$Class = 'bad';
-			$this->account('FUA Cache Invalidate should only be set for compatible Plextor drives', 5);
+
+	public static function detect_utf_bom_encoding($filename) {
+		// Unicode BOM is U+FEFF, but after encoded, it will look like this.
+		define ('UTF32_BIG_ENDIAN_BOM' , chr(0x00) . chr(0x00) . chr(0xFE) . chr(0xFF));
+		define ('UTF32_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00));
+		define ('UTF16_BIG_ENDIAN_BOM' , chr(0xFE) . chr(0xFF));
+		define ('UTF16_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE));
+		define ('UTF8_BOM' , chr(0xEF) . chr(0xBB) . chr(0xBF));
+		$text = file_get_contents($filename);
+		$first2 = substr($text, 0, 2);
+		$first3 = substr($text, 0, 3);
+		$first4 = substr($text, 0, 3);
+		if ($first3 == UTF8_BOM) {
+			return 'UTF-8';
 		}
-		return '<span class="log5">FUA Cache Invalidate</span>:' . $Matches[1] . '<span class="' . $Class . '">' . $Matches[2] . '</span>';
+		elseif ($first4 == UTF32_BIG_ENDIAN_BOM) {
+			return 'UTF-32BE';
+		}
+		elseif ($first4 == UTF32_LITTLE_ENDIAN_BOM) {
+			return 'UTF-32LE';
+		}
+		elseif ($first2 == UTF16_BIG_ENDIAN_BOM) {
+			return 'UTF-16BE';
+		}
+		elseif ($first2 == UTF16_LITTLE_ENDIAN_BOM) {
+			return 'UTF-16LE';
+		}
+		return null;
 	}
-	function dbpa_audio_cache($Matches)
-	{
-		if (trim($Matches[2]) == 'None') {
-			$Class = 'badish';
-			$this->account('No cache is a potentially bad setting and should only be used if the drive doesn\'t cache audio', false, false, false, true);
-			$this->InvalidateCache = false;
-		} else {
-			preg_match('/(\d+)/i', $Matches[2], $CacheSize);
-			if ($CacheSize[1] && $CacheSize[1] >= 1024) {
-				$Class = 'good';
-			} else if ($CacheSize[1] && $CacheSize[1] > 0) {
-				$Class = 'goodish';
-			} else {
-				$Class = 'bad';
-				$this->account('Invalid cache setting', 5);
-			}
-		}
-		return '<span class="log5">Cache</span>:' . $Matches[1] . '<span class="' . $Class . '">' . $Matches[2] . '</span>';
-	}
-	function dbpa_c2_pointers($Matches)
-	{
-		if (trim($Matches[2]) == 'Yes') {
-			$Class = 'good';
-		} else {
-			$Class = 'badish';
-			$this->account('C2 pointers should be used if supported', false, false, false, true);
-		}
-		return '<span class="log5">Using C2</span>:' . $Matches[1] . '<span class="' . $Class . '">' . $Matches[2] . '</span>';
-	}
-	function dbpa_accuraterip_active($Matches)
-	{
-		if (trim($Matches[2]) == 'Active') {
-			$Class = 'good';
-		} else {
-			$Class = 'bad';
-			$this->account('AccurateRip not active', 5);
-		}
-		return '<span class="log5">AccurateRip</span>:' . $Matches[1] . '<span class="' . $Class . '">' . $Matches[2] . '</span>';
+
+	public static function get_accept_values() {
+		return ".txt,.TXT,.log,.LOG";
 	}
 }
-?>

@@ -474,25 +474,24 @@ function show() {
 					</span>
 				</td>
 			</tr>
-<?		if ($this->NewTorrent) { ?>
+<?		if ($this->NewTorrent) {
+			$AcceptTypes = LOG_CHECKER::get_accept_values();
+?>
 			<tr id="upload_logs" class="hidden">
 				<td class="label">
 					Log files:
 				</td>
 				<td id="logfields">
 					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-					<input id="file" type="file" accept=".log,.txt" multiple="multiple" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+					<input id="file" type="file" accept="<?=$AcceptTypes?>" multiple="multiple" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 				</td>
 			</tr>
-<?
-		}
-		if ($this->NewTorrent) { ?>
-		<tr>
-			<td class="label">Multi-format uploader:</td>
-			<td><input type="button" value="+" id="add_format" /><input type="button" style="display: none;" value="-" id="remove_format" /></td>
-		</tr>
-		<tr id="placeholder_row_top"></tr>
-		<tr id="placeholder_row_bottom"></tr>
+			<tr>
+				<td class="label">Multi-format uploader:</td>
+				<td><input type="button" value="+" id="add_format" /><input type="button" style="display: none;" value="-" id="remove_format" /></td>
+			</tr>
+			<tr id="placeholder_row_top"></tr>
+			<tr id="placeholder_row_bottom"></tr>
 <?
 		}
 		if (check_perms('torrents_edit_vanityhouse') && $this->NewTorrent) {

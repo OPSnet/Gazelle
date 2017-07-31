@@ -26,24 +26,6 @@ $Feed = new FEED;
 
 define('QUERY_EXCEPTION', true); // Shut up debugging
 
-function detect_utf_bom_encoding($filename) {
-	// Unicode BOM is U+FEFF, but after encoded, it will look like this.
-	define ('UTF32_BIG_ENDIAN_BOM' , chr(0x00) . chr(0x00) . chr(0xFE) . chr(0xFF));
-	define ('UTF32_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00));
-	define ('UTF16_BIG_ENDIAN_BOM' , chr(0xFE) . chr(0xFF));
-	define ('UTF16_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE));
-	define ('UTF8_BOM' , chr(0xEF) . chr(0xBB) . chr(0xBF));
-	$text = file_get_contents($filename);
-	$first2 = substr($text, 0, 2);
-	$first3 = substr($text, 0, 3);
-	$first4 = substr($text, 0, 3);
-	if ($first3 == UTF8_BOM) return 'UTF-8';
-	elseif ($first4 == UTF32_BIG_ENDIAN_BOM) return 'UTF-32BE';
-	elseif ($first4 == UTF32_LITTLE_ENDIAN_BOM) return 'UTF-32LE';
-	elseif ($first2 == UTF16_BIG_ENDIAN_BOM) return 'UTF-16BE';
-	elseif ($first2 == UTF16_LITTLE_ENDIAN_BOM) return 'UTF-16LE';
-}
-
 //******************************************************************************//
 //--------------- Set $Properties array ----------------------------------------//
 // This is used if the form doesn't validate, and when the time comes to enter	//
@@ -277,8 +259,6 @@ if ($Type == 'Music') {
 
 $LogScoreAverage = 0;
 $LogScoreCount = 0;
-require_once(SERVER_ROOT.'/classes/logchecker.class.php');
-$Log = new LOG_CHECKER;
 $logs = array();
 $LogScores = array();
 
@@ -727,11 +707,15 @@ if ($HasLog) {
 		if (!$_FILES['logfiles']['size'][$Pos]) { break; }
 		//todo: more validation
 		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
-		if (!$File) { die('LogFile doesn\'t exist, or couldn\'t open'); } // File doesn't exist, or couldn't open
+		if (!$File) {
+			die('LogFile doesn\'t exist, or couldn\'t open');
+		} // File doesn't exist, or couldn't open
 		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
 		fclose($File);
 		//detect & transcode unicode
-		if (detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) { $LogFile = iconv("unicode","UTF-8",$LogFile); }
+		if (LOG_CHECKER::detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
+			$LogFile = iconv("unicode", "UTF-8", $LogFile);
+		}
 		$Log = new LOG_CHECKER;
 		$Log->new_file($LogFile);
 		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
