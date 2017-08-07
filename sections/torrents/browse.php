@@ -442,15 +442,21 @@ if ($NumResults == 0) {
 		GROUP BY tt.TagID
 		ORDER BY Score DESC
 		LIMIT 8");
-?>
+	$TagText = array();
+	while (list($Tag) = $DB->next_record()) {
+		$TagText[] = "<a href='torrents.php?taglist={$Tag}'>{$Tag}</a>";
+	}
+	$TagText = implode(", ", $TagText);
+	print <<<HTML
 <div class="box pad" align="center">
 	<h2>Your search did not match anything.</h2>
 	<p>Make sure all names are spelled correctly, or try making your search less specific.</p>
-	<p>You might like (beta): <? while (list($Tag) = $DB->next_record()) { ?><a href="torrents.php?taglist=<?=$Tag?>"><?=$Tag?></a><? } ?></p>
+	<p>You might like (beta): {$TagText}</p>
 </div>
 </div>
-<? 
-View::show_footer();die();
+HTML;
+	View::show_footer();
+	die();
 }
 
 if ($NumResults < ($Page - 1) * TORRENTS_PER_PAGE + 1) {
