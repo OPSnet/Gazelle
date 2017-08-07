@@ -42,7 +42,6 @@ $Properties['Scene'] = (isset($_POST['scene']))? 1 : 0;
 $Properties['HasLog'] = (isset($_POST['flac_log']))? 1 : 0;
 $Properties['HasCue'] = (isset($_POST['flac_cue']))? 1 : 0;
 $Properties['LogScore'] = (isset($_POST['log_score'])) ? intval($_POST['log_score']) : 0;
-$Properties['AdjustmentReason'] = (isset($_POST['adjustment_reason'])) ? $_POST['adjustment_reason'] : "";
 $Properties['BadTags'] = (isset($_POST['bad_tags']))? 1 : 0;
 $Properties['BadFolders'] = (isset($_POST['bad_folders']))? 1 : 0;
 $Properties['BadFiles'] = (isset($_POST['bad_files'])) ? 1 : 0;
@@ -61,9 +60,6 @@ $Properties['TorrentDescription'] = $_POST['release_desc'];
 $Properties['Name'] = $_POST['title'];
 if ($_POST['album_desc']) {
 	$Properties['GroupDescription'] = $_POST['album_desc'];
-}
-if (check_perms('users_mod')) {
-
 }
 if (check_perms('torrents_freeleech')) {
 	$Free = (int)$_POST['freeleech'];

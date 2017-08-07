@@ -41,7 +41,6 @@ $DB->query("
 		t.HasLog,
 		t.HasCue,
 		t.LogScore,
-		t.AdjustmentReason,
 		bt.TorrentID AS BadTags,
 		bf.TorrentID AS BadFolders,
 		bfi.TorrentID AS BadFiles,
