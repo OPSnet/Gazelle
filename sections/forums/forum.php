@@ -247,7 +247,7 @@ if (count($Forum) === 0) {
 
 ?>
 				<strong>
-					<a href="forums.php?action=viewthread&amp;threadid=<?=$TopicID?>" class="tooltip" data-title-plain="<?=$Title?>"><?=Format::cut_string($DisplayTitle, $TopicLength) ?></a>
+					<a href="forums.php?action=viewthread&amp;threadid=<?=$TopicID?>" class="tooltip" data-title-plain="<?=$Title?>" <?=(strlen($DisplayTitle) > $TopicLength ? "title='".$Title."'" : "")?>><?=Format::cut_string($DisplayTitle, $TopicLength)?></a>
 				</strong>
 				<?=$PagesText?>
 			</span>
