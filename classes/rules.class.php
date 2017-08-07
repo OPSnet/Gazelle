@@ -11,10 +11,10 @@ class Rules {
 		$staffpm = '<a href="staffpm.php">Staff PM</a>';
 		$irc = '<a href="chat.php">IRC</a>';
 		$vpns_article = '<a href="wiki.php?action=article&name=vpns">Proxy/VPN Tips</a>';
-		$ips_article = '<a href="wiki.php?action=article&name=ips">Multiple IPs</a>';
-		$autofl_article = '<a href="wiki.php?action=article&name=autofl">Freeleech Autosnatching Policy</a>';
-		$bugs_article = '<a href="wiki.php?action=article&name=bugs">Responsible Disclosure Policy</a>';
-		$exploit_article = '<a href="wiki.php?action=article&name=exploit">Exploit Policy</a>';
+		$ips_article = '<a href="wiki.php?action=article&id=95">Multiple IPs</a>';
+		$autofl_article = '<a href="wiki.php?action=article&id=66">Freeleech Autosnatching Policy</a>';
+		$bugs_article = '<a href="wiki.php?action=article&id=67">Responsible Disclosure Policy</a>';
+		$exploit_article = '<a href="wiki.php?action=article&id=68">Exploit Policy</a>';
 		$golden_rules = array(
 			[ 'n' => "1.1",
 			  'short' => "Do not create more than one account.",
@@ -24,7 +24,7 @@ class Rules {
 			  'long' => "If you no longer wish to use your account, send a ${staffpm} and request that your account be disabled." ],
 			[ 'n' => "1.3",
 			  'short' => "Do not share accounts.",
-			  'long' => "Accounts are for personal use only. Granting access to your account in any way (e.g., shared login details, external programs) is prohibited. <a href=\"wiki.php?action=article&name=invite\">Invite</a> friends or direct them to the <a href=\"http://www.whatinterviewprep.com/\">IRC Interview</a>." ],
+			  'long' => "Accounts are for personal use only. Granting access to your account in any way (e.g., shared login details, external programs) is prohibited. <a href=\"wiki.php?action=article&name=invite\">Invite</a> friends or direct them to the interview channel (#recruitment)." ],
 			[ 'n' => "2.1",
 			  'short' => "Do not invite bad users.",
 			  'long' => "You are responsible for your invitees. You will not be punished if your invitees fail to maintain required share ratios, but invitees who break golden rules will place your invite privileges and account at risk." ],
@@ -200,7 +200,7 @@ class Rules {
 				No language other than English is permitted in the forums. If we can't understand it, we can't moderate it.
 			</li>
 			<li>
-				Be cautious when posting mature content on the forums. All mature imagery must abide by <a href="wiki.php?action=article&amp;id=1063">the rules found here</a>. Gratuitously sexual or violent content which falls outside of the allowable categories will result in a warning or worse.
+				Be cautious when posting mature content on the forums. All mature imagery must abide by <a href="wiki.php?action=article&amp;id=96">the rules found here</a>. Gratuitously sexual or violent content which falls outside of the allowable categories will result in a warning or worse.
 			</li>
 			<li>
 				Mature content in posts must be properly tagged. The correct format is as follows: <strong>[mature=description] ...content... [/mature]</strong>, where "description" is a mandatory description of the post contents. Misleading or inadequate descriptions will be penalized.

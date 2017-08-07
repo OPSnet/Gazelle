@@ -29,6 +29,15 @@ if (isset($_GET['method'])) {
 		case 'upload':
 			include(SERVER_ROOT.'/sections/better/upload.php');
 			break;
+		case 'artwork':
+			include(SERVER_ROOT.'/sections/better/artwork.php');
+			break;
+		case 'artistimage':
+			include(SERVER_ROOT.'/sections/better/artistimage.php');
+			break;
+		case 'description':
+			include(SERVER_ROOT.'/sections/better/description.php');
+			break;
 		default:
 			error(404);
 			break;

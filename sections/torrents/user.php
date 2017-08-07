@@ -21,6 +21,10 @@ function header_link($SortKey, $DefaultWay = 'DESC') {
 	return "torrents.php?way=$NewWay&amp;order=$SortKey&amp;" . Format::get_url(array('way','order'));
 }
 
+if (!isset($_GET['userid'])) {
+    header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
+}
+
 $UserID = $_GET['userid'];
 if (!is_number($UserID)) {
 	error(0);

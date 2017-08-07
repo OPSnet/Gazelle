@@ -35,12 +35,125 @@ switch ($_REQUEST['action']) {
 	case 'search':// User search
 		if (check_perms('admin_advanced_user_search') && check_perms('users_view_ips') && check_perms('users_view_email')) {
 			include('advancedsearch.php');
-		} else {
+		}
+		else {
 			include('search.php');
 		}
 		break;
 	case 'edit':
-		include('edit.php');
+		if (isset($_REQUEST['userid'])) {
+			include('edit.php');
+		}
+		else {
+			header("Location: user.php?action=edit&userid={$LoggedUser['ID']}");
+		}
+		break;
+	case '2fa':
+		include(SERVER_ROOT . '/classes/google_authenticator.class.php');
+		include(SERVER_ROOT . '/classes/qr.class.php');
+
+		if (session_status() === PHP_SESSION_NONE) {
+			session_start();
+		}
+
+		if (empty($_GET['do'])) {
+			// we didn't get a required "do", we'll just let the 404 handler deal with the request.
+			error(404);
+		}
+
+		$UserID = $_REQUEST['userid'];
+
+		if (!is_number($UserID)) {
+			error(404);
+		}
+
+		$DB->query("SELECT m.PassHash, m.Secret, m.2FA_Key, p.Level FROM users_main AS m LEFT JOIN permissions AS p ON p.ID = PermissionID WHERE m.ID = '" . db_string($UserID) . "'");
+
+		list($PassHash, $Secret, $TFAKey, $Level) = $DB->next_record(MYSQLI_NUM);
+
+		if ($UserID != $LoggedUser['ID'] && !check_perms('users_mod')) {
+			error(403);
+		}
+
+		switch($_GET['do']) {
+			case 'enable':
+				if ($TFAKey) {
+					// 2fa is already enabled...
+					error(404);
+				}
+
+				if (empty($_SESSION['private_key'])) {
+					$_SESSION['private_key'] = (new PHPGangsta_GoogleAuthenticator())->createSecret();
+				}
+
+				include('2fa/step1.php');
+				break;
+
+			case 'enable2':
+				if ($TFAKey) {
+					// 2fa is already enabled...
+					error(404);
+				}
+
+				if (empty($_SESSION['private_key'])) {
+					header('Location: user.php?action=2fa&do=enable&userid=' . G::$LoggedUser['ID']);
+					exit;
+				}
+
+				if (empty($_POST['2fa'])) {
+					include('2fa/step2.php');
+				} else {
+					$works = (new PHPGangsta_GoogleAuthenticator())->verifyCode($_SESSION['private_key'], $_POST['2fa'], 2);
+
+					if (!$works) {
+						// user got their token wrong...
+						header('Location: user.php?action=2fa&do=enable&invalid&userid=' . $LoggedUser['ID']);
+					} else {
+						// user got their token right!
+						$key = $DB->escape_str($_SESSION['private_key']);
+
+						$recovery = [];
+
+						for ($i = 0; $i < 6; $i++) {
+							$recovery[] = strtoupper(bin2hex(openssl_random_pseudo_bytes(16)));
+						}
+
+						$recovery = serialize($recovery);
+
+						$DB->query("UPDATE users_main SET 2FA_Key = '{$key}', Recovery = '{$recovery}' WHERE ID = '{$UserID}'");
+						header('Location: user.php?action=2fa&do=complete&userid=' . $LoggedUser['ID']);
+					}
+				}
+				break;
+
+			case 'complete':
+				// user should only ever see this page once.
+				if (empty($_SESSION['private_key'])) {
+					error(404);
+				}
+
+				include('2fa/complete.php');
+				unset($_SESSION['private_key']);
+				break;
+
+			case 'disable':
+				if (!$TFAKey) {
+					// 2fa isn't enabled...
+					error(404);
+				}
+
+				if (empty($_POST['password']) && !check_perms('users_mod')) {
+					include('2fa/password_confirm.php');
+				} else {
+					if (!check_perms('users_mod') && !Users::check_password($_POST['password'], $PassHash, $Secret)) {
+						header('Location: user.php?action=2fa&do=disable&invalid&userid=' . $LoggedUser['ID']);
+						exit;
+					}
+					$DB->query("UPDATE users_main SET 2FA_Key = '', Recovery = '' WHERE ID = '{$UserID}'");
+					header('Location: user.php?action=edit&userid=' . $LoggedUser['ID']);
+				}
+				break;
+		}
 		break;
 	case 'take_edit':
 		include('take_edit.php');
@@ -127,7 +240,7 @@ switch ($_REQUEST['action']) {
 		if (isset($_REQUEST['id'])) {
 			include(SERVER_ROOT.'/sections/user/user.php');
 		} else {
-			header('Location: index.php');
+			header("Location: user.php?id={$LoggedUser['ID']}");
 		}
 }
 ?>
