@@ -559,7 +559,7 @@ if ($Override = check_perms('users_mod') || $OwnProfile || !empty($SupportFor)) 
 <?
 }
 
-if ($OwnProfile || check_perms('users_mod')) { 
+if ($OwnProfile || check_perms('users_mod')) {
 	$DB->query("SELECT MAX(uhp.ChangeTime), ui.JoinDate
 				FROM users_info ui
 				LEFT JOIN users_history_passwords uhp ON uhp.UserID = $UserID
@@ -1021,14 +1021,14 @@ if (check_perms('users_mod', $Class)) { ?>
 					<select name="Class">
 <?
 		foreach ($ClassLevels as $CurClass) {
-			if (check_perms('users_promote_below', $Class) && $CurClass['ID'] >= $LoggedUser['EffectiveClass']) {
-				break;
-			}
-			if ($CurClass['ID'] > $LoggedUser['EffectiveClass']) {
-				break;
-			}
 			if ($CurClass['Secondary']) {
 				continue;
+			}
+			elseif ($LoggedUser['ID'] != $UserID && !check_perms('users_promote_to', $Class-1) && $CurClass['Level'] == $LoggedUser['EffectiveClass']) {
+				break;
+			}
+			elseif ($CurClass['Level'] > $LoggedUser['EffectiveClass']) {
+				break;
 			}
 			if ($Class === $CurClass['Level']) {
 				$Selected = ' selected="selected"';
