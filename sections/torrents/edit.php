@@ -74,9 +74,6 @@ if (($LoggedUser['ID'] != $Properties['UserID'] && !check_perms('torrents_edit')
 View::show_header('Edit torrent', 'upload,torrent');
 
 if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || check_perms('edit_unknowns')) {
-	if (!isset($Err)) {
-		$Err = false;
-	}
 	$TorrentForm = new TORRENT_FORM($Properties, $Err, false);
 
 	$TorrentForm->head();

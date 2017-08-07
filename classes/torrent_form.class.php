@@ -559,14 +559,11 @@ function show() {
 ?>
 				</td>
 			</tr>
-<?			if ($HasLog) { ?>
-			<!-- TODO: We should revamp this so that adjusting log score is done on a per log basis -->
-			and we can then set the reason per log so that
+<?/*			if ($HasLog) { ?>
 			<tr>
 				<td class="label">Log score</td>
 				<td><input type="text" name="log_score" size="5" id="log_score" value="<?=display_str($Torrent['LogScore']) ?>" /></td>
 			</tr>
-			<!--
 			<tr>
 				<td class="label">Log adjustment reason</td>
 				<td>
@@ -574,8 +571,7 @@ function show() {
 					<p class="min_padding">Contains reason for adjusting a score. <strong>This field is displayed on the torrent page.</strong></p>
 				</td>
 			</tr>
-			-->
-<?			} ?>
+<?			}*/?>
 			<tr>
 				<td class="label">Bad tags:</td>
 				<td><input type="checkbox" id="bad_tags" name="bad_tags"<? if ($BadTags) { echo ' checked="checked"';} ?> /> <label for="bad_tags">Check this box if the torrent has bad tags.</label></td>
