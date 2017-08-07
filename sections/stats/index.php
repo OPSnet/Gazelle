@@ -10,6 +10,9 @@ if (!isset($_REQUEST['action'])) {
 		case 'torrents':
 			include(SERVER_ROOT.'/sections/stats/torrents.php');
 			break;
+		default:
+			error(404);
+			break;
 	}
 }
 ?>

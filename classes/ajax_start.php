@@ -117,6 +117,9 @@ function make_secret($Length = 32) {
 
 // Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
 function send_irc($Raw) {
+	if (defined('DISABLE_IRC') && DISABLE_IRC === true) {
+		return;
+	}
 	$IRCSocket = fsockopen(SOCKET_LISTEN_ADDRESS, SOCKET_LISTEN_PORT);
 	$Raw = str_replace(array("\n", "\r"), '', $Raw);
 	fwrite($IRCSocket, $Raw);

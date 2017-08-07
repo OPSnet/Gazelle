@@ -11,13 +11,11 @@ class Permissions {
 		$OverrideClass = 1000;
 
 		$Override = G::$LoggedUser['EffectiveClass'] >= $OverrideClass;
-		return (
-			($PermissionName == null ||
+		return ($PermissionName === null ||
 			(isset(G::$LoggedUser['Permissions'][$PermissionName]) && G::$LoggedUser['Permissions'][$PermissionName]))
 			&& (G::$LoggedUser['Class'] >= $MinClass
 				|| G::$LoggedUser['EffectiveClass'] >= $MinClass
-				|| $Override)
-			) ? true : false;
+				|| $Override);
 	}
 
 	/**
