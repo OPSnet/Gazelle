@@ -598,7 +598,7 @@ Your torrent was reported because one or more tracks contain encoding errors.'
 					'upload' => '0',
 					'warn' => '0',
 					'delete' => '0',
-					'pm' => '[rule]2.2.10.3[/rule]. A FLAC upload with an EAC or XLD rip log that scores 100% on the log checker replaces one with a lower score... . Note: A FLAC upload with a log that scores 95% for not defeating the audio cache may be rescored to 100% following the procedure outlined in [url='.site_url().'wiki.php?action=article&amp;id=219]this wiki[/url].
+					'pm' => '[rule]2.2.10.3[/rule]. A FLAC upload with an EAC or XLD rip log that scores 100% on the log checker replaces one with a lower score... . Note: A FLAC upload with a log that scores 95% for not defeating the audio cache may be rescored to 100% following the procedure outlined in [url='.site_url().'wiki.php?action=article&amp;id=79]this wiki[/url].
 [rule]2.2.10.5[/rule]. XLD and EAC logs in languages other than English require a manual log checker score adjustment by staff.
 [rule]2.2.10.6.2[/rule]. If you created a CD range rip that has matching CRCs for test and copy, and where every track has an AccurateRip score of 2 or more, then you may submit your torrent for manual score adjustment.
 [rule]2.2.10.9.2[/rule]. If you find that an appended log has not been scored properly, please report the torrent and use the log rescore option.
