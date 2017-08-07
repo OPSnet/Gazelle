@@ -305,7 +305,7 @@ if (check_perms('users_mod')) {
 		$SQL .= "
 			HasLog = $T[HasLog],
 			HasCue = $T[HasCue],
-			LogScore = {$T['LogScore']}";
+			LogScore = {$T['LogScore']},";
 	}
 
 	$DB->query("
