@@ -57,7 +57,7 @@ $Properties['Title'] = $_POST['title'];
 $Properties['Remastered'] = isset($_POST['remaster']) ? 1 : 0;
 if ($Properties['Remastered'] || isset($_POST['unknown'])) {
 	$Properties['UnknownRelease'] = isset($_POST['unknown']) ? 1 : 0;
-	$Properties['RemasterYear'] = $_POST['remaster_year'];
+	$Properties['RemasterYear'] = trim($_POST['remaster_year']);
 	$Properties['RemasterTitle'] = $_POST['remaster_title'];
 	$Properties['RemasterRecordLabel'] = $_POST['remaster_record_label'];
 	$Properties['RemasterCatalogueNumber'] = $_POST['remaster_catalogue_number'];
@@ -69,7 +69,7 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
 	$Properties['RemasterRecordLabel'] = '';
 	$Properties['RemasterCatalogueNumber'] = '';
 }
-$Properties['Year'] = $_POST['year'];
+$Properties['Year'] = trim($_POST['year']);
 $Properties['RecordLabel'] = $_POST['record_label'];
 $Properties['CatalogueNumber'] = $_POST['catalogue_number'];
 $Properties['ReleaseType'] = $_POST['releasetype'];

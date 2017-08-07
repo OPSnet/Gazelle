@@ -26,7 +26,7 @@ $TorrentID = (int)$_POST['torrentid'];
 $Properties['Remastered'] = (isset($_POST['remaster']))? 1 : 0;
 if ($Properties['Remastered']) {
 	$Properties['UnknownRelease'] = (isset($_POST['unknown'])) ? 1 : 0;
-	$Properties['RemasterYear'] = $_POST['remaster_year'];
+	$Properties['RemasterYear'] = trim($_POST['remaster_year']);
 	$Properties['RemasterTitle'] = $_POST['remaster_title'];
 	$Properties['RemasterRecordLabel'] = $_POST['remaster_record_label'];
 	$Properties['RemasterCatalogueNumber'] = $_POST['remaster_catalogue_number'];
