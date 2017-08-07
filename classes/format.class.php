@@ -36,10 +36,10 @@ class Format {
 	/**
 	 * Shorten a string
 	 *
-	 * @param $Str string to cut
-	 * @param $Length cut at length
-	 * @param $Hard force cut at length instead of at closest word
-	 * @param $ShowDots Show dots at the end
+	 * @param string $Str string to cut
+	 * @param int    $Length cut at length
+	 * @param bool   $Hard force cut at length instead of at closest word
+	 * @param bool   $ShowDots Show dots at the end
 	 * @return string formatted string
 	 */
 	public static function cut_string($Str, $Length, $Hard = false, $ShowDots = true) {

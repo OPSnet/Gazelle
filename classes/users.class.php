@@ -464,7 +464,16 @@ class Users {
 		// This array is a hack that should be made less retarded, but whatevs
 		// 						  PermID => ShortForm
 		$SecondaryClasses = array(
-								 );
+			'23' => 'FLS', // First Line Support
+			'30' => 'IN', // Interviewer
+			'31' => 'TC', // Torrent Celebrity
+			'32' => 'D', // Designer
+			'33' => 'ST', // Security Team
+			'36' => 'AT', // Alpha Team
+			'37' => 'BT', // Bravo Team
+			'38' => 'CT', // Charlie Team
+			'39' => 'DT', // Delta Team
+		 );
 
 		if ($UserID == 0) {
 			return 'System';
@@ -542,8 +551,7 @@ class Users {
 					. (G::$LoggedUser['ID'] === $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
 					. '" class="tooltip" /></a>' : '';
 		$Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
-
-
+		
 		if ($Badges) {
 			$ClassesDisplay = array();
 			foreach (array_intersect_key($SecondaryClasses, $UserInfo['ExtraClasses']) as $PermID => $PermShort) {
