@@ -86,6 +86,14 @@ View::show_header('Better');
 					Torrents that have been marked as having "Bad File Names".
 				</td>
 			</tr>
+			<tr class="rowb">
+				<td class="nobr">
+					<a href="better.php?method=lineage">Missing Lineage</a>
+				</td>
+				<td class="nobr">
+					Torrents that have been marked as "Missing Lineage"
+				</td>
+			</tr>
             <tr class="rowb">
                 <td class="nobr">
                     <a href="better.php?method=artwork">Missing Torrent Artwork</a>
