@@ -46,7 +46,7 @@ class LOG_CHECKER {
 		$Log	   = str_replace("\r", '', $Log);
 		$this->Log = $Log;
 		if (preg_match("/[\=]+\s+Log checksum/i", $Log)) { // eac checksum
-			exec('wine ' . __DIR__ . '/../logcheckers/eac_log_checker.exe > /dev/null', $return);
+			exec('wine ' . __DIR__ . '/../logcheckers/eac_log_checker.exe 2>/dev/null', $return);
 			$this->Checksum = true;
 			$this->Logs = preg_split("/(\n\=+\s+Log checksum.*)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
 
