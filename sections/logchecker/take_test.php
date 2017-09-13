@@ -39,7 +39,6 @@ if (LOG_CHECKER::detect_utf_bom_encoding($FileName)) {
 $Log = new LOG_CHECKER;
 $Log->new_file($LogFile);
 list($Score, $Good, $Bad, $Text, $Checksum) = $Log->parse();
-$Bad = implode("\r\n",$Bad);
 
 if($Score == 100) {
 	$Color = '#418B00';

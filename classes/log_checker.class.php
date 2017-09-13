@@ -20,7 +20,7 @@ class LOG_CHECKER {
 	var $BadTrack = array();
 	var $DecreaseScoreTrack = 0;
 	var $RIPPER = null;
-	var $VERSION = null;
+	var $Version = null;
 	var $TrackNumber = null;
 	var $ARTracks = array();
 	var $Combined = null;
@@ -41,18 +41,19 @@ class LOG_CHECKER {
 
 	function parse()
 	{
+		$tmp_file = sys_get_temp_dir()."/".uniqid('log_');
+		file_put_contents($tmp_file, $this->Log);
 		$Log	   = display_str($this->Log);
 		$Log	   = str_replace("\r\n", "\n", $Log);
 		$Log	   = str_replace("\r", '', $Log);
 		$this->Log = $Log;
 		if (preg_match("/[\=]+\s+Log checksum/i", $Log)) { // eac checksum
-			exec('wine ' . __DIR__ . '/../logcheckers/eac_log_checker.exe 2>/dev/null', $return);
+			#exec('wine ' . __DIR__ . '/../logcheckers/eac_log_checker.exe 2>/dev/null', $return);
 			$this->Checksum = true;
 			$this->Logs = preg_split("/(\n\=+\s+Log checksum.*)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
-
 		} elseif (preg_match("/[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+/i", $Log)) { // xld checksum (plugin)
-			exec('wine ' . __DIR__ . '/../logcheckers/xld_log_checker.exe logcheckers/log_files/xld_perfect.log 2>&1', $return);
 			// XLD only outputs an "OK" or "Malformed" for the file
+			exec('wine ' . __DIR__ . '/../logcheckers/xld_log_checker.exe ' . $tmp_file . ' 2>&1', $return);
 			$this->Checksum = strpos($return[count($return)-1], ': OK') !== false;
 			$this->Logs = preg_split("/(\n[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
 		} else { //no checksum
@@ -90,14 +91,23 @@ class LOG_CHECKER {
 			$CurrScore	 = $this->Score;
 			$Log		   = preg_replace('/(\=+\s+Log checksum.*)/i', '<span class="good">$1</span>', $Log, 1, $Count);
 			if (preg_match('/Exact Audio Copy (.+) from/i', $Log, $Matches)) { //eac v1 & checksum
+				if ($Matches[1]) {
+					$this->Version = floatval(explode(" ", substr($Matches[1], 1))[0]);
+					if ($this->Version <= 0.95) {
+						$this->account("EAC version older than 0.99", 30);
+					}
+				}
+				else {
+					$this->account("Unknown EAC version", 30);
+				}
 				if ($Matches[1] && is_numeric(substr($Matches[1], 1, 1)) && substr($Matches[1], 1, 1) > 0 && !$Count) {
 					$this->account('No checksum appended', false, false, true, true);
 				}
 			}
 			$Log = preg_replace('/([\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+)/i', '<span class="good">$1</span>', $Log, 1, $Count);
 			if (preg_match('/X Lossless Decoder version (\d+) \((.+)\)/i', $Log, $Matches)) { //xld version & checksum
-				$this->VERSION = $Matches[1];
-				if ($this->VERSION > 20130000 && !$Count) { // 2013++
+				$this->Version = $Matches[1];
+				if ($this->Version > 20130000 && !$Count) { // 2013++
 					$this->account('No checksum appended', false, false, true, true);
 				}
 			}
@@ -135,7 +145,7 @@ class LOG_CHECKER {
 				$this,
 				'media_type_xld'
 			), $Log, 1, $Count);
-			if ($XLD && $this->VERSION && $this->VERSION >= 20130127 && !$Count) {
+			if ($XLD && $this->Version && $this->Version >= 20130127 && !$Count) {
 				$this->account('Could not verify media type', 1);
 			}
 			$Log = preg_replace_callback('/Read mode( +): ([a-z]+)(.*)?/i', array(
@@ -604,7 +614,7 @@ class LOG_CHECKER {
 			if ($this->NonSecureMode) { #non-secure mode
 				$this->account($this->NonSecureMode . ' mode was used', 2);
 			}
-			if ($this->Score != 100) { //boost?
+			if (false && $this->Score != 100) { //boost?
 				$boost   = null;
 				$minConf = null;
 				if (!$this->ARSummary) {
@@ -1130,6 +1140,7 @@ class LOG_CHECKER {
 			}
 		}
 	}
+
 	function account_track($Msg, $Decrease = false)
 	{
 		$tn	 = (intval($this->TrackNumber) < 10) ? '0' . intval($this->TrackNumber) : $this->TrackNumber;
