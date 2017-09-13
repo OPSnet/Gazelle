@@ -7,7 +7,7 @@ class LOG_CHECKER {
 	var $Log = '';
 	var $Logs = array();
 	var $Tracks = array();
-	var $Checksum = false;
+	var $Checksum = true;
 	var $Score = 100;
 	var $Good = array();
 	var $Bad = array();
@@ -41,22 +41,16 @@ class LOG_CHECKER {
 
 	function parse()
 	{
-		$tmp_file = sys_get_temp_dir()."/".uniqid('log_');
-		file_put_contents($tmp_file, $this->Log);
 		$Log	   = display_str($this->Log);
 		$Log	   = str_replace("\r\n", "\n", $Log);
 		$Log	   = str_replace("\r", '', $Log);
 		$this->Log = $Log;
 		if (preg_match("/[\=]+\s+Log checksum/i", $Log)) { // eac checksum
-			#exec('wine ' . __DIR__ . '/../logcheckers/eac_log_checker.exe 2>/dev/null', $return);
-			$this->Checksum = true;
 			$this->Logs = preg_split("/(\n\=+\s+Log checksum.*)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
 		} elseif (preg_match("/[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+/i", $Log)) { // xld checksum (plugin)
-			// XLD only outputs an "OK" or "Malformed" for the file
-			exec('wine ' . __DIR__ . '/../logcheckers/xld_log_checker.exe ' . $tmp_file . ' 2>&1', $return);
-			$this->Checksum = strpos($return[count($return)-1], ': OK') !== false;
 			$this->Logs = preg_split("/(\n[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
 		} else { //no checksum
+			$this->Checksum = false;
 			$this->Logs = preg_split("/(\nEnd of status report)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
             foreach ($this->Logs as $key => $value) {
                 if (preg_match("/---- CUETools DB Plugin V.+/i", $value)) {
@@ -91,24 +85,45 @@ class LOG_CHECKER {
 			$CurrScore	 = $this->Score;
 			$Log		   = preg_replace('/(\=+\s+Log checksum.*)/i', '<span class="good">$1</span>', $Log, 1, $Count);
 			if (preg_match('/Exact Audio Copy (.+) from/i', $Log, $Matches)) { //eac v1 & checksum
+				// we set $this->Checksum to true here as these torrents are already trumpable by virtue of a bad score
 				if ($Matches[1]) {
 					$this->Version = floatval(explode(" ", substr($Matches[1], 1))[0]);
 					if ($this->Version <= 0.95) {
+						$this->Checksum = false;
 						$this->account("EAC version older than 0.99", 30);
+					}
+
+					if ($this->Version < 1) {
+						$this->Checksum = false;
+					}
+					elseif ($this->Version >= 1 && $Count) {
+						$this->Checksum = $this->Checksum && true;
+					}
+					else {
+						$this->Checksum = false;
+						//$this->account('No checksum appended', false, false, true, true);
 					}
 				}
 				else {
-					$this->account("Unknown EAC version", 30);
-				}
-				if ($Matches[1] && is_numeric(substr($Matches[1], 1, 1)) && substr($Matches[1], 1, 1) > 0 && !$Count) {
-					$this->account('No checksum appended', false, false, true, true);
+					$this->Checksum = false;
+					$this->account("EAC version older than 0.99", 30);
 				}
 			}
+
+			if (preg_match('/EAC extraction logfile from/i', $Log)) {
+				$this->Checksum = false;
+				$this->account("EAC version older than 0.99", 30);
+			}
+
 			$Log = preg_replace('/([\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+)/i', '<span class="good">$1</span>', $Log, 1, $Count);
 			if (preg_match('/X Lossless Decoder version (\d+) \((.+)\)/i', $Log, $Matches)) { //xld version & checksum
 				$this->Version = $Matches[1];
 				if ($this->Version > 20130000 && !$Count) { // 2013++
-					$this->account('No checksum appended', false, false, true, true);
+					$this->Checksum = false;
+					//$this->account('No checksum appended', false, false, true, true);
+				}
+				else {
+					$this->Checksum = $this->Checksum && true;
 				}
 			}
 			$Log = preg_replace('/Exact Audio Copy (.+) from (.+)/i', 'Exact Audio Copy <span class="log1">$1</span> from <span class="log1">$2</span>', $Log, 1, $Count);
