@@ -1,11 +1,12 @@
 <?
 View::show_header('Logchecker');
+/*
 $DB->query("
-SELECT t.ID, g.Name as AlbumName, a.Name as ArtistName, g.Year, t.Format, t.Encoding 
-FROM torrents t 
-JOIN torrents_group g ON t.GroupID = g.ID 
-JOIN torrents_artists ta ON g.ID = ta.GroupID 
-JOIN artists_group a ON a.ArtistID = ta.ArtistID 
+SELECT t.ID, g.Name as AlbumName, a.Name as ArtistName, g.Year, t.Format, t.Encoding
+FROM torrents t
+JOIN torrents_group g ON t.GroupID = g.ID
+JOIN torrents_artists ta ON g.ID = ta.GroupID
+JOIN artists_group a ON a.ArtistID = ta.ArtistID
 WHERE t.HasLog='1' AND t.LogScore=0 AND t.UserID = " . $LoggedUser['ID']);
 
 if ($DB->has_results()) {
@@ -14,6 +15,7 @@ if ($DB->has_results()) {
 		$output .= "<tr><td style=\"width: 5%\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td><a href=\"/torrents.php?torrentid=$ID\">$ArtistName - $AlbumName [$Year] [$Format/$Encoding]</a></td></tr>";
 	}
 }
+*/
 
 $AcceptValues = LOG_CHECKER::get_accept_values();
 

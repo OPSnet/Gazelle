@@ -3,6 +3,12 @@
  * Automated EAC/XLD log checker *
  ********************************************************************/
 
+$EAC_LANG = array();
+require_once __DIR__ . '/logchecker_languages/eac.php';
+
+$XLD_LANG = array();
+require_once __DIR__ . '/logchecker_languages/xld.php';
+
 class LOG_CHECKER {
 	var $Log = '';
 	var $Logs = array();
@@ -20,6 +26,7 @@ class LOG_CHECKER {
 	var $BadTrack = array();
 	var $DecreaseScoreTrack = 0;
 	var $RIPPER = null;
+	var $Language = null;
 	var $Version = null;
 	var $TrackNumber = null;
 	var $ARTracks = array();
@@ -35,6 +42,7 @@ class LOG_CHECKER {
 	var $IARTracks = array();
 	var $InvalidateCache = true;
 	var $DubiousTracks = 0;
+
 	function new_file($Log) {
 		$this->Log = $Log;
 	}
@@ -45,6 +53,19 @@ class LOG_CHECKER {
 		$Log	   = str_replace("\r\n", "\n", $Log);
 		$Log	   = str_replace("\r", '', $Log);
 		$this->Log = $Log;
+
+		foreach ($EAC_LANG as $lang => $dict) {
+			if ($lang === 'en') {
+				continue;
+			}
+			if (preg_match("/{$dict[1274]}/i", $this->Log) === 1) {
+				$this->account("Translated log from {$dict[1]} ({$dict[2]} to {$EAC_LANG['en'][1]}.", false, false, false, true);
+				foreach ($dict as $key => $value) {
+					$this->Log = preg_replace("/{$value}/i", $EAC_LANG[$lang][$key], $this->Log);
+				}
+			}
+		}
+		// Split the log apart based on what would be the
 		if (preg_match("/[\=]+\s+Log checksum/i", $Log)) { // eac checksum
 			$this->Logs = preg_split("/(\n\=+\s+Log checksum.*)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
 		} elseif (preg_match("/[\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+/i", $Log)) { // xld checksum (plugin)
@@ -100,8 +121,9 @@ class LOG_CHECKER {
 						$this->Checksum = $this->Checksum && true;
 					}
 					else {
+						// Above version 1 and no checksum
 						$this->Checksum = false;
-						//$this->account('No checksum appended', false, false, true, true);
+						$this->account('No log checksum with EAC 1.0 or newer', 15);
 					}
 				}
 				else {
@@ -109,8 +131,7 @@ class LOG_CHECKER {
 					$this->account("EAC version older than 0.99", 30);
 				}
 			}
-
-			if (preg_match('/EAC extraction logfile from/i', $Log)) {
+			elseif (preg_match('/EAC extraction logfile from/i', $Log)) {
 				$this->Checksum = false;
 				$this->account("EAC version older than 0.99", 30);
 			}
@@ -118,9 +139,9 @@ class LOG_CHECKER {
 			$Log = preg_replace('/([\-]+BEGIN XLD SIGNATURE[\S\n\-]+END XLD SIGNATURE[\-]+)/i', '<span class="good">$1</span>', $Log, 1, $Count);
 			if (preg_match('/X Lossless Decoder version (\d+) \((.+)\)/i', $Log, $Matches)) { //xld version & checksum
 				$this->Version = $Matches[1];
-				if ($this->Version > 20130000 && !$Count) { // 2013++
+				if ($this->Version >= 20121222 && !$Count) {
 					$this->Checksum = false;
-					//$this->account('No checksum appended', false, false, true, true);
+					$this->account('No checksum with XLD 20121222 or newer', 15);
 				}
 				else {
 					$this->Checksum = $this->Checksum && true;
@@ -138,7 +159,7 @@ class LOG_CHECKER {
 				} else {
 					$this->Bad[] = "Unrecognized log file! Feel free to report for manual review.";
 				}
-				$this->Score = 1;
+				$this->Score = 0;
 				return array(
 					$this->Score,
 					$this->Good,
@@ -250,7 +271,7 @@ class LOG_CHECKER {
 			if (!$Count && $EAC) {
 				$this->account('Could not verify missing offset samples', 1);
 			}
-			$Log = preg_replace_callback('/Delete leading and trailing silent blocks[ \w]*( +): (Yes|No)/i', array(
+			$Log = preg_replace_callback('/Delete leading and trailing silent blocks([ \w]*)( +): (Yes|No)/i', array(
 				$this,
 				'delete_silent_blocks'
 			), $Log, 1, $Count);
@@ -270,14 +291,14 @@ class LOG_CHECKER {
 				'gap_handling'
 			), $Log, 1, $Count);
 			if (!$Count && $EAC) {
-				$this->account('Could not verify gap handling');
+				$this->account('Could not verify gap handling', 10);
 			}
 			$Log = preg_replace_callback('/Gap status( +): (.*)/i', array(
 				$this,
 				'gap_handling_xld'
 			), $Log, 1, $Count);
 			if (!$Count && $XLD) {
-				$this->account('Could not verify gap status');
+				$this->account('Could not verify gap status', 10);
 			}
 			$Log = preg_replace('/Used output format( +): ([^\n]+)/i', '<span class="log5">Used output format$1</span>: <span class="log4">$2</span>', $Log, 1, $Count);
 			$Log = preg_replace('/Sample format( +): ([^\n]+)/i', '<span class="log5">Sample format$1</span>: <span class="log4">$2</span>', $Log, 1, $Count);
@@ -289,7 +310,7 @@ class LOG_CHECKER {
 				'add_id3_tag'
 			), $Log, 1, $Count);
 			if (!$Count && $EAC) {
-				$this->account('Could not verify id3 tag setting');
+				$this->account('Could not verify id3 tag setting', 1);
 			}
 			$Log = preg_replace("/(Use compression offset\s+:\s+\d+)/i", "<span class=\"bad\">$1</span>", $Log, 1, $Count);
 			if ($Count) {
@@ -627,7 +648,7 @@ class LOG_CHECKER {
 			}
 			unset($this->Tracks); //fixes weird bug
 			if ($this->NonSecureMode) { #non-secure mode
-				$this->account($this->NonSecureMode . ' mode was used', 2);
+				$this->account($this->NonSecureMode . ' mode was used', 20);
 			}
 			if (false && $this->Score != 100) { //boost?
 				$boost   = null;
@@ -674,7 +695,7 @@ class LOG_CHECKER {
 		} //end log loop
 		$this->Log   = implode($this->Logs);
 		$this->Score = ($this->Score < 0) ? 0 : $this->Score; //min. score
-		natcasesort($this->Bad); //sort ci
+		//natcasesort($this->Bad); //sort ci
 		$this->format_report();
 		if ($this->Combined) {
 			array_unshift($this->Bad, "Combined Log (" . $this->Combined . ")");
@@ -844,7 +865,7 @@ class LOG_CHECKER {
 			$Class = 'good';
 		} else {
 			$Class = 'bad';
-			$this->account('"Defeat audio cache" should be yes', 5);
+			$this->account('"Defeat audio cache" should be yes', 10);
 		}
 		return '<span class="log5">Defeat audio cache' . $Matches[1] . '</span>: <span class="' . $Class . '">' . $Matches[2] . '</span>';
 	}
@@ -854,7 +875,7 @@ class LOG_CHECKER {
 			$Class = 'good';
 		} else {
 			$Class = 'bad';
-			$this->account('Audio cache not disabled', 5);
+			$this->account('Audio cache not disabled', 10);
 		}
 		return '<span> </span><span class="' . $Class . '">' . $Matches[1] . 'disable cache</span>';
 	}
@@ -864,7 +885,7 @@ class LOG_CHECKER {
 			$Class = 'good';
 		} else {
 			$Class = 'bad';
-			$this->account('"Disable audio cache" should be yes/ok', 5);
+			$this->account('"Disable audio cache" should be yes/ok', 10);
 		}
 		return '<span class="log5">Disable audio cache' . $Matches[1] . '</span>: <span class="' . $Class . '">' . $Matches[2] . '</span>';
 	}
@@ -925,7 +946,7 @@ class LOG_CHECKER {
 		} else {
 			$Class = 'good';
 		}
-		return '<span class="log5">Delete leading and trailing silent blocks' . $Matches[1] . '</span>: <span class="' . $Class . '">' . $Matches[2] . '</span>';
+		return '<span class="log5">Delete leading and trailing silent blocks' . $Matches[1] . $Matches[2] .'</span>: <span class="' . $Class . '">' . $Matches[3] . '</span>';
 	}
 	function null_samples($Matches)
 	{
@@ -941,7 +962,7 @@ class LOG_CHECKER {
 	{
 		if (strpos($Matches[2], 'Not detected') !== false) {
 			$Class = 'bad';
-			$this->account('Gap handling was not detected', 5, false, false, false, 5);
+			$this->account('Gap handling was not detected', 10, false, false, false, 5);
 		} elseif (strpos($Matches[2], 'Appended to previous track') !== false) {
 			$Class = 'good';
 		} else {
@@ -953,12 +974,12 @@ class LOG_CHECKER {
 	{
 		if (strpos(strtolower($Matches[2]), 'not') !== false) { //?
 			$Class = 'bad';
-			$this->account('Incorrect gap handling', 5, false, false, false, 5);
+			$this->account('Incorrect gap handling', 10, false, false, false, 5);
 		} elseif (strpos(strtolower($Matches[2]), 'analyzed') !== false && strpos(strtolower($Matches[2]), 'appended') !== false) {
 			$Class = 'good';
 		} else {
 			$Class = 'badish';
-			$this->account('Incomplete gap handling', 3, false, false, false, 3);
+			$this->account('Incomplete gap handling', 10, false, false, false, 3);
 		}
 		return '<span class="log5">Gap status' . $Matches[1] . '</span>: <span class="' . $Class . '">' . $Matches[2] . '</span>';
 	}
@@ -966,7 +987,7 @@ class LOG_CHECKER {
 	{
 		if ($Matches[2] == 'Yes') {
 			$Class = 'badish';
-			$this->account('ID3 tags should not be added to FLAC files - they are mainly for MP3 files. FLACs should have vorbis comments for tags instead.', false, false, false, true);
+			$this->account('ID3 tags should not be added to FLAC files - they are mainly for MP3 files. FLACs should have vorbis comments for tags instead.', 1);
 		} else {
 			$Class = 'good';
 		}
