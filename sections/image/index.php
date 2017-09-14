@@ -1,4 +1,5 @@
 <?
+
 if (!check_perms('site_proxy_images')) {
 	img_error('forbidden');
 }
@@ -19,7 +20,17 @@ if (isset($_GET['c'])) {
 }
 if (!isset($Data) || !$Data) {
 	$Cached = false;
-	$Data = @file_get_contents($URL, 0, stream_context_create(array('http' => array('timeout' => 15))));
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $URL);
+	curl_setopt($ch, CURLOPT_HEADER, false);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11');
+	$Data = curl_exec($ch);
+	$rescode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	curl_close($ch);
+
 	if (!$Data || empty($Data)) {
 		img_error('timeout');
 	}
@@ -38,6 +49,7 @@ if (!isset($Data) || !$Data) {
 		$Cache->cache_value('image_cache_'.md5($URL), array($Data, $FileType), 3600 * 24 * 7);
 	}
 }
+
 // Reset avatar, add mod note
 function reset_image($UserID, $Type, $AdminComment, $PrivMessage) {
 	if ($Type === 'avatar') {
