@@ -28,7 +28,7 @@ echo <<<HTML
 	<h2 class="center">Logchecker Test Results</h2>
 HTML;
 //detect & transcode unicode
-if (LOG_CHECKER::detect_utf_bom_encoding($FileName)) {
+if (LOG_CHECKER::detect_utf_bom_encoding($LogFile)) {
 	$LogFile = iconv("unicode", "UTF-8", $LogFile);
 }
 $Log = new LOG_CHECKER;

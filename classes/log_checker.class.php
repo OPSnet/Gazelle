@@ -1,4 +1,4 @@
-<?
+<?php
 /*******************************************************************
  * Automated EAC/XLD log checker *
  ********************************************************************/
@@ -1208,14 +1208,16 @@ class LOG_CHECKER {
 		$this->BadTrack[] = $Prepend . $Msg . $Append;
 	}
 
-	public static function detect_utf_bom_encoding($filename) {
+	public static function detect_utf_bom_encoding_file($filename) {
+		return self::detect_utf_bom_encoding(file_get_contents($filename));
+	}
+	public static function detect_utf_bom_encoding($text) {
 		// Unicode BOM is U+FEFF, but after encoded, it will look like this.
 		define ('UTF32_BIG_ENDIAN_BOM' , chr(0x00) . chr(0x00) . chr(0xFE) . chr(0xFF));
 		define ('UTF32_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00));
 		define ('UTF16_BIG_ENDIAN_BOM' , chr(0xFE) . chr(0xFF));
 		define ('UTF16_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE));
 		define ('UTF8_BOM' , chr(0xEF) . chr(0xBB) . chr(0xBF));
-		$text = file_get_contents($filename);
 		$first2 = substr($text, 0, 2);
 		$first3 = substr($text, 0, 3);
 		$first4 = substr($text, 0, 3);
