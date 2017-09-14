@@ -981,7 +981,10 @@ class LOG_CHECKER {
 	{
 		if (strpos($Matches[2], 'Not detected') !== false) {
 			$Class = 'bad';
-			$this->account('Gap handling was not detected', 10, false, false, false, 5);
+			$this->account('Gap handling was not detected', 10);
+		} elseif (strpos($Matches[2], 'Appended to next track') !== false) {
+			$Class = 'bad';
+			$this->account('Gap handling should be appended to previous track', 5);
 		} elseif (strpos($Matches[2], 'Appended to previous track') !== false) {
 			$Class = 'good';
 		} else {
