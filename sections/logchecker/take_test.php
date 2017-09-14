@@ -10,12 +10,7 @@ enforce_login();
 $File = (isset($_FILES['log'])) ? $_FILES['log'] : null; // Our log file
 $FileName = $File['tmp_name'];
 if (is_uploaded_file($FileName) && filesize($FileName)) {
-	$File = fopen($FileName, 'rb'); // open file for reading
-	if (!$File) {
-		die('File doesn\'t exist, or couldn\'t open');
-	} // File doesn't exist, or couldn't open
-	$LogFile = fread($File, 1000000);
-	fclose($File);
+	$LogFile = file_get_contents($FileName);
 	// Contents of the log are now stored in $LogFile
 } elseif (!empty($_POST["pastelog"])) {
 	$LogFile = $_POST["pastelog"];
@@ -34,7 +29,7 @@ echo <<<HTML
 HTML;
 //detect & transcode unicode
 if (LOG_CHECKER::detect_utf_bom_encoding($FileName)) {
-	$LogFile = iconv("unicode","UTF-8",$LogFile);
+	$LogFile = iconv("unicode", "UTF-8", $LogFile);
 }
 $Log = new LOG_CHECKER;
 $Log->new_file($LogFile);

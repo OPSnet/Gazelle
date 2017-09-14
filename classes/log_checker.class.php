@@ -3,12 +3,6 @@
  * Automated EAC/XLD log checker *
  ********************************************************************/
 
-$EAC_LANG = array();
-require_once __DIR__ . '/logchecker_languages/eac.php';
-
-$XLD_LANG = array();
-require_once __DIR__ . '/logchecker_languages/xld.php';
-
 class LOG_CHECKER {
 	var $Log = '';
 	var $Logs = array();
@@ -42,6 +36,22 @@ class LOG_CHECKER {
 	var $IARTracks = array();
 	var $InvalidateCache = true;
 	var $DubiousTracks = 0;
+	var $EAC_LANG = array();
+	var $XLD_LANG = array();
+
+	function __construct()
+	{
+		$EAC_LANG = array();
+		require_once __DIR__ . '/logchecker_languages/eac.php';
+		$this->EAC_LANG = $EAC_LANG;
+
+		$XLD_LANG = array();
+		require_once __DIR__ . '/logchecker_languages/xld.php';
+		$this->XLD_LANG = $XLD_LANG;
+
+		ini_set('pcre.backtrack_limit', '10000000');
+		ini_set('pcre.recursion_limit', '10000000');
+	}
 
 	function new_file($Log) {
 		$this->Log = $Log;
@@ -49,22 +59,28 @@ class LOG_CHECKER {
 
 	function parse()
 	{
+		// We have to translate the log before we go any further as display_str munges the whole thing
+		// to hell otherwise
+		foreach ($this->EAC_LANG as $lang => $dict) {
+			if ($lang === 'en') {
+				continue;
+			}
+			if (preg_match("/{$dict[1274]}/ui", $this->Log) === 1) {
+				$this->account("Translated log from {$dict[1]} ({$dict[2]}) to {$this->EAC_LANG['en'][1]}.", false, false, false, true);
+				foreach ($dict as $key => $value) {
+					$Log = preg_replace("/{$value}/ui", $this->EAC_LANG['en'][$key], $this->Log);
+					if ($Log !== null) {
+						$this->Log = $Log;
+					}
+				}
+			}
+		}
+
 		$Log	   = display_str($this->Log);
 		$Log	   = str_replace("\r\n", "\n", $Log);
 		$Log	   = str_replace("\r", '', $Log);
 		$this->Log = $Log;
 
-		foreach ($EAC_LANG as $lang => $dict) {
-			if ($lang === 'en') {
-				continue;
-			}
-			if (preg_match("/{$dict[1274]}/i", $this->Log) === 1) {
-				$this->account("Translated log from {$dict[1]} ({$dict[2]} to {$EAC_LANG['en'][1]}.", false, false, false, true);
-				foreach ($dict as $key => $value) {
-					$this->Log = preg_replace("/{$value}/i", $EAC_LANG[$lang][$key], $this->Log);
-				}
-			}
-		}
 		// Split the log apart based on what would be the
 		if (preg_match("/[\=]+\s+Log checksum/i", $Log)) { // eac checksum
 			$this->Logs = preg_split("/(\n\=+\s+Log checksum.*)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -726,11 +742,14 @@ class LOG_CHECKER {
 		$this->Drive = $DriveName;
 		$Search	  = preg_split('/[^0-9a-z]/i', trim($DriveName));
 		$SearchText  = implode("%' AND Name LIKE '%", $Search);
-		$DB->query("SELECT Offset,Name FROM drives WHERE Name LIKE '%" . $SearchText . "%'");
-		$this->Drives  = $DB->collect('Name');
-		$Offsets	   = array_unique($DB->collect('Offset'));
+		// TODO: put this back in
+		//$DB->query("SELECT Offset,Name FROM drives WHERE Name LIKE '%" . $SearchText . "%'");
+		//$this->Drives  = $DB->collect('Name');
+		$this->Drives = array();
+		//$Offsets	   = array_unique($DB->collect('Offset'));
+		$Offsets = array();
 		$this->Offsets = $Offsets;
-		while (list($Key, $Offset) = each($Offsets)) {
+		foreach ($Offsets as $Key => $Offset) {
 			$StrippedOffset  = preg_replace('/[^0-9]/s', '', $Offset);
 			$this->Offsets[] = $StrippedOffset;
 		}
