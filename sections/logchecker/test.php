@@ -17,7 +17,7 @@ if ($DB->has_results()) {
 }
 */
 
-$AcceptValues = LOG_CHECKER::get_accept_values();
+$AcceptValues = Logchecker::get_accept_values();
 
 echo <<<HTML
 <div class="linkbox">

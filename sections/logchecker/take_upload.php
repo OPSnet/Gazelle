@@ -21,11 +21,11 @@ if ($TorrentID != 0 && $FileCount > 0) {
 		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
 		fclose($File);
 		//detect & transcode unicode
-		if (LOG_CHECKER::detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
+		if (Logchecker::detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
 			$LogFile = iconv("unicode","UTF-8",$LogFile);
 		}
-		$Log = new LOG_CHECKER;
-		$Log->new_file($LogFile);
+		$Log = new Logchecker();
+		$Log->new_file($LogFile, $FileName);
 		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
 		if (!$LogMinScore || $Score < $LogMinScore) {
 			$LogMinScore = $Score;
@@ -33,7 +33,7 @@ if ($TorrentID != 0 && $FileCount > 0) {
 		//$LogGood = implode("\r\n",$LogGood);
 		$LogBad = implode("\r\n",$LogBad);
 		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;
-		$DB->query("INSERT INTO torrents_logs_new VALUES (null, $TorrentID, '".db_string($LogText)."', '".db_string($LogBad)."', $Score, 1, 0, 0, $LogNotEnglish, '')"); //set log scores
+		$DB->query("INSERT INTO torrents_logs VALUES (null, $TorrentID, '".db_string($LogText)."', '".db_string($LogBad)."', $Score, 1, 0, 0, $LogNotEnglish, '')"); //set log scores
 	}
 	if ($LogMinScore) {
 		$DB->query("UPDATE torrents SET LogScore='$LogMinScore' WHERE ID=$TorrentID");

@@ -68,7 +68,7 @@ if ($DB->has_results()) {
 		}
 		$Output .= "<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
 	}
-	$AcceptValues = LOG_CHECKER::get_accept_values();
+	$AcceptValues = Logchecker::get_accept_values();
 	echo <<<HTML
 			{$Output}
 			<tr class="colhead">

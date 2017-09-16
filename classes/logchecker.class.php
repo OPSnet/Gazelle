@@ -3,8 +3,9 @@
  * Automated EAC/XLD log checker *
  ********************************************************************/
 
-class LOG_CHECKER {
+class Logchecker {
 	var $Log = '';
+	var $FileName = null;
 	var $Logs = array();
 	var $Tracks = array();
 	var $Checksum = true;
@@ -37,24 +38,18 @@ class LOG_CHECKER {
 	var $InvalidateCache = true;
 	var $DubiousTracks = 0;
 	var $EAC_LANG = array();
-	var $XLD_LANG = array();
 
 	function __construct()
 	{
 		$EAC_LANG = array();
-		require_once __DIR__ . '/logchecker_languages/eac.php';
+		require_once __DIR__ . '/logchecker/eac_languages.php';
 		$this->EAC_LANG = $EAC_LANG;
-
-		$XLD_LANG = array();
-		require_once __DIR__ . '/logchecker_languages/xld.php';
-		$this->XLD_LANG = $XLD_LANG;
-
-		ini_set('pcre.backtrack_limit', '10000000');
-		ini_set('pcre.recursion_limit', '10000000');
 	}
 
-	function new_file($Log) {
+	function new_file($Log, $FileName = null)
+	{
 		$this->Log = $Log;
+		$this->FileName = $FileName;
 	}
 
 	function parse()
@@ -186,6 +181,26 @@ class LOG_CHECKER {
 			} else {
 				$this->RIPPER = ($EAC) ? "EAC" : "XLD";
 			}
+
+			if ($this->Checksum && !empty($this->FileName)) {
+				if ($EAC) {
+					$Exe = __DIR__ . "/logchecker/eac_logchecker.exe";
+					$Out = shell_exec("script -q -c 'wine ${Exe} {$this->FileName}' /dev/null");
+					if (strpos($Out, "Log entry is fine!") === false) {
+						$this->account("Checksum invalid. Log modified.", 15);
+						$this->Checksum = false;
+					}
+				}
+				else {
+					$Exe = __DIR__ . '/logchecker/xldlogchecker';
+					$Out = shell_exec("{$Exe} {$this->FileName}");
+					if (strpos($Out, "OK") === false) {
+						$this->account("Checksum invalid. Log modified.", 15);
+						$this->Checksum = false;
+					}
+				}
+			}
+
 			$Log = preg_replace_callback("/Used drive( +): (.+)/i", array(
 				$this,
 				'drive'
@@ -1147,7 +1162,7 @@ class LOG_CHECKER {
 		if (!count($this->Bad)) {
 			return;
 		}
-		$myBad = array();
+		$myBad = array('high' => array(), 'low' => array());
 		foreach ($this->Bad as $Key => $Val) {
 			if (preg_match("/(points?\W)|(boosted)\)/i", $Val)) {
 				$myBad['high'][] = $Val;
