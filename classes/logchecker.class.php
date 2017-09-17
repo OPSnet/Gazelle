@@ -134,7 +134,6 @@ class Logchecker {
 					else {
 						// Above version 1 and no checksum
 						$this->Checksum = false;
-						$this->account('No log checksum with EAC 1.0 or newer', 15);
 					}
 				}
 				else {
@@ -186,16 +185,16 @@ class Logchecker {
 				if ($EAC) {
 					$Exe = __DIR__ . "/logchecker/eac_logchecker.exe";
 					$Out = shell_exec("script -q -c 'wine ${Exe} {$this->FileName}' /dev/null");
-					if (strpos($Out, "Log entry is fine!") === false) {
-						$this->account("Checksum invalid. Log modified.", 15);
+					if (strpos($Out, "Log entry has no checksum!") !== false ||
+						strpos($Out, "Log entry was modified, checksum incorrect!") !== false ||
+						strpos($Out, "Log entry is fine!") === false) {
 						$this->Checksum = false;
 					}
 				}
 				else {
 					$Exe = __DIR__ . '/logchecker/xldlogchecker';
 					$Out = shell_exec("{$Exe} {$this->FileName}");
-					if (strpos($Out, "OK") === false) {
-						$this->account("Checksum invalid. Log modified.", 15);
+					if (strpos($Out, "Malformed") !== false || strpos($Out, "OK") === false) {
 						$this->Checksum = false;
 					}
 				}
@@ -769,7 +768,7 @@ class Logchecker {
 			$this->Offsets[] = $StrippedOffset;
 		}
 		reset($this->Offsets);
-		if ($DB->record_count() > 0) {
+		if (false && $DB->record_count() > 0) {
 			$Class			= 'good';
 			$this->DriveFound = true;
 		} else {

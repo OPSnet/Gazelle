@@ -14,13 +14,13 @@ if (is_uploaded_file($FileName) && filesize($FileName)) {
 	// Contents of the log are now stored in $LogFile
 } elseif (!empty($_POST["pastelog"])) {
 	$LogFile = $_POST["pastelog"];
-	$FileName = sys_get_temp_dir(). '/' . uniqid('log_') . '.log';
-	file_put_contents($FileName, $LogFile);
 } else {
 	error('No log file uploaded or file is empty.');
 }
 
+
 View::show_header('Logchecker');
+
 echo <<<HTML
 <div class="linkbox">
 	<a href="javascript:history.go(-1)" class="brackets">Test Another Log File</a>
@@ -29,12 +29,15 @@ echo <<<HTML
 <div class="thin">
 	<h2 class="center">Logchecker Test Results</h2>
 HTML;
+
 //detect & transcode unicode
 if (Logchecker::detect_utf_bom_encoding($LogFile)) {
 	$LogFile = iconv("unicode", "UTF-8", $LogFile);
 }
+
 $Log = new Logchecker();
 $Log->new_file($LogFile, $FileName);
+
 list($Score, $Good, $Bad, $Text, $Checksum) = $Log->parse();
 
 if($Score == 100) {

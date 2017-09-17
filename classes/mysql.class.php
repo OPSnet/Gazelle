@@ -146,7 +146,9 @@ function db_array($Array, $DontEscape = array(), $Quote = false) {
 
 //TODO: revisit access levels once Drone is replaced by ZeRobot
 class DB_MYSQL {
+	/** @var mysqli|bool */
 	public $LinkID = false;
+	/** @var mysqli_result|bool */
 	protected $QueryID = false;
 	protected $Record = array();
 	protected $Row;
