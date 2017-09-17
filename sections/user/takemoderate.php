@@ -324,7 +324,7 @@ if ($Logs095 !== 0) {
 	$TargetScore = $Logs095 === 100 ? 99 : 100;
 	$Logs = $DB->query("
 		SELECT DISTINCT TorrentID
-		FROM torrents_logs_new
+		FROM torrents_logs
 			JOIN torrents ON ID = TorrentID
 		WHERE Log LIKE 'EAC extraction logfile%'
 			AND UserID = $UserID
@@ -344,7 +344,7 @@ if ($Logs095 !== 0) {
 			SET LogScore = $Logs095
 			WHERE ID = $TorrentID");
 		$DB->query("
-			UPDATE torrents_logs_new
+			UPDATE torrents_logs
 			SET Score = $Logs095, Details = '$Details'
 			WHERE TorrentID = $TorrentID");
 		$DB->set_query_id($Logs);

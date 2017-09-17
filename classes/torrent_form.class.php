@@ -530,30 +530,7 @@ function show() {
 					<input type="checkbox" id="flac_cue" name="flac_cue"<? if ($HasCue) { echo ' checked="checked"';} ?> /> <label for="flac_cue">Check this box if the torrent has, or should have, a cue file.</label><br />
 <?
 		}
-		if ((check_perms('users_mod') || G::$LoggedUser['ID'] == $Torrent['UserID']) && ($Torrent['LogScore'] == 100 || $Torrent['LogScore'] == 99)) {
 
-			G::$DB->query('
-				SELECT LogID
-				FROM torrents_logs_new
-				WHERE TorrentID = '.$this->TorrentID."
-					AND Log LIKE 'EAC extraction logfile%'
-					AND (Adjusted = '0' OR Adjusted = '')");
-			list($LogID) = G::$DB->next_record();
-			if ($LogID) {
-				if (!check_perms('users_mod')) {
-?>
-			<tr>
-				<td class="label">Trumpable:</td>
-				<td>
-<?				} ?>
-					<input type="checkbox" id="make_trumpable" name="make_trumpable"<? if ($Torrent['LogScore'] == 99) { echo ' checked="checked"';} ?> /> <label for="make_trumpable">Check this box if you want this torrent to be trumpable (subtracts 1 point).</label>
-<?				if (!check_perms('users_mod')) { ?>
-				</td>
-			</tr>
-<?
-				}
-			}
-		}
 		if (!$this->NewTorrent && check_perms('users_mod')) {
 ?>
 				</td>

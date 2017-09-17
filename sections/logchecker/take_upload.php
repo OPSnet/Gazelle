@@ -7,37 +7,22 @@ $FileCount = count($_FILES['logfiles']['name']);
 
 if ($TorrentID != 0 && $FileCount > 0) {
 	ini_set('upload_max_filesize',1000000);
-	$LogMinScore = null;
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			break;
 		}
 		//todo: more validation
-		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
-		// File doesn't exist, or couldn't open
-		if (!$File) {
-			die('LogFile doesn\'t exist, or couldn\'t open');
-		}
-		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
-		fclose($File);
+		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
 		//detect & transcode unicode
-		if (Logchecker::detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
-			$LogFile = iconv("unicode","UTF-8",$LogFile);
+		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
+			$LogFile = iconv("unicode", "UTF-8", $LogFile);
 		}
 		$Log = new Logchecker();
 		$Log->new_file($LogFile, $FileName);
-		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
-		if (!$LogMinScore || $Score < $LogMinScore) {
-			$LogMinScore = $Score;
-		}
-		//$LogGood = implode("\r\n",$LogGood);
-		$LogBad = implode("\r\n",$LogBad);
-		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;
-		$DB->query("INSERT INTO torrents_logs VALUES (null, $TorrentID, '".db_string($LogText)."', '".db_string($LogBad)."', $Score, 1, 0, 0, $LogNotEnglish, '')"); //set log scores
+		list($Score, $Details, $Checksum, $LogText) = $Log->parse();
+		$Details = implode("\r\n", $Details);
+		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."')");
 	}
-	if ($LogMinScore) {
-		$DB->query("UPDATE torrents SET LogScore='$LogMinScore' WHERE ID=$TorrentID");
-	} //set main score
 } else {
 	error('No log file uploaded or no torrent is selected.');
 }
@@ -68,23 +53,34 @@ else {
 
 echo "<blockquote><strong>Score:</strong> <span style=\"color:$Color\">$Score</span> (out of 100)</blockquote>";
 
-if($Bad){
-print <<<HTML
+if (!$Checksum) {
+	echo <<<HTML
+	<blockquote>
+		<strong>Trumpable For:</strong>
+		<br /><br />
+		Bad/No Checksum(s)
+	</blockquote>
+HTML;
+}
+
+$Details = explode("\r\n", $Details);
+if(!empty($Details)){
+	print <<<HTML
 	<blockquote>
 	<h3>Log validation report:</h3>
 	<ul>
 HTML;
-	foreach($Bad as $Property){
+	foreach($Details as $Property){
 		print "\t\t<li>{$Property}</li>";
 	}
-print <<<HTML
+	print <<<HTML
 	</ul>
 	</blockquote>
 HTML;
 }
 echo <<<HTML
 	<blockquote>
-		<pre>{$Text}</pre>
+		<pre>{$LogText}</pre>
 	</blockquote>
 </div>
 HTML;

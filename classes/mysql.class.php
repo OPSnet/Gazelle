@@ -119,6 +119,10 @@ if (!extension_loaded('mysqli')) {
 	die('Mysqli Extension not loaded.');
 }
 
+function enum_boolean($bool) {
+	return $bool === true ? '1' : '0';
+}
+
 //Handles escaping
 function db_string($String, $DisableWildcards = false) {
 	global $DB;

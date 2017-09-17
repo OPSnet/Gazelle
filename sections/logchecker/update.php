@@ -19,7 +19,7 @@ print <<<HTML
 		</p>
 		<br />
 		<form action="" method="post" enctype="multipart/form-data">
-		  <input type="hidden" name="action" value="missinglogupload" />
+		  <input type="hidden" name="action" value="take_upload" />
 		  <table class="form_post vertical_margin">
 			<tr class="colhead">
 			  <td colspan="2">Select a Torrent</td>

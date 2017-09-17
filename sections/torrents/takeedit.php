@@ -483,7 +483,7 @@ if ($Properties['Trumpable'] == 1 && $LogScore == 100) {
 	$Results[] = 'The original uploader has chosen to allow this log to be deducted one point for using EAC v0.95., -1 point [1]';
 	$Details = db_string(serialize($Results));
 	$DB->query("
-		UPDATE torrents_logs_new
+		UPDATE torrents_logs
 		SET Score = 99, Details = '$Details'
 		WHERE TorrentID = $TorrentID");
 }
@@ -496,7 +496,7 @@ list($Enabled) = $DB->next_record();
 if ($Properties['Trumpable'] == 0 && $LogScore == 99 && $Enabled == 1 && strtotime($Time) < 1284422400) {
 	$DB->query("
 		SELECT Log
-		FROM torrents_logs_new
+		FROM torrents_logs
 		WHERE TorrentID = $TorrentID");
 	list($Log) = $DB->next_record();
 	if (strpos($Log, 'EAC extraction') === 0) {
@@ -505,7 +505,7 @@ if ($Properties['Trumpable'] == 0 && $LogScore == 99 && $Enabled == 1 && strtoti
 			SET LogScore = 100
 			WHERE ID = $TorrentID");
 		$DB->query("
-			UPDATE torrents_logs_new
+			UPDATE torrents_logs
 			SET Score = 100, Details = ''
 			WHERE TorrentID = $TorrentID");
 	}

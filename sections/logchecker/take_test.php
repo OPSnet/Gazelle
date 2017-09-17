@@ -94,4 +94,7 @@ echo <<<HTML
 </div>
 HTML;
 View::show_footer();
-unlink($FileName);
+
+if (!empty($FileName) && is_file($FileName)) {
+	unlink($FileName);
+}

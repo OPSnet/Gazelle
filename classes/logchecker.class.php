@@ -10,8 +10,7 @@ class Logchecker {
 	var $Tracks = array();
 	var $Checksum = true;
 	var $Score = 100;
-	var $Good = array();
-	var $Bad = array();
+	var $Details = array();
 	var $Offsets = array();
 	var $DriveFound = false;
 	var $Drives = array();
@@ -52,6 +51,9 @@ class Logchecker {
 		$this->FileName = $FileName;
 	}
 
+	/**
+	 * @return array Returns an array that contains [Score, Details, Checksum, Log]
+	 */
 	function parse()
 	{
 		// We have to translate the log before we go any further as display_str munges the whole thing
@@ -163,20 +165,14 @@ class Logchecker {
 			$Log = preg_replace("/XLD extraction logfile from (.+)\n+(.+)/i", "<span class=\"good\">XLD extraction logfile from <span class=\"log5\">$1</span></span>\n\n<span class=\"log4\">$2</span>", $Log, 1, $XLD);
 			if (!$EAC && !$XLD) {
 				if ($this->Combined) {
-					unset($this->Bad);
-					$this->Bad[] = "Combined Log (" . $this->Combined . ")";
-					$this->Bad[] = "Unrecognized log file (" . $this->CurrLog . ")! Feel free to report for manual review.";
+					unset($this->Details);
+					$this->Details[] = "Combined Log (" . $this->Combined . ")";
+					$this->Details[] = "Unrecognized log file (" . $this->CurrLog . ")! Feel free to report for manual review.";
 				} else {
-					$this->Bad[] = "Unrecognized log file! Feel free to report for manual review.";
+					$this->Details[] = "Unrecognized log file! Feel free to report for manual review.";
 				}
 				$this->Score = 0;
-				return array(
-					$this->Score,
-					$this->Good,
-					$this->Bad,
-					$this->Log,
-					$this->Checksum
-				);
+				return $this->return();
 			} else {
 				$this->RIPPER = ($EAC) ? "EAC" : "XLD";
 			}
@@ -580,9 +576,9 @@ class Logchecker {
 						} else if ($XLD) {
 							$Msg = 'Rip was not done with Secure Ripper / in CDParanoia mode, and T+C was not used - as a result, we cannot verify the authenticity of the rip (-40 points)';
 						}
-						if (!in_array($Msg, $this->Bad)) {
+						if (!in_array($Msg, $this->Details)) {
 							$this->Score -= 40;
-							$this->Bad[] = $Msg;
+							$this->Details[] = $Msg;
 						}
 					}
 				}
@@ -673,7 +669,7 @@ class Logchecker {
 					$this->Score -= $Track['decreasescore'];
 				}
 				if (count($Track['bad']) > 0) {
-					$this->Bad = array_merge($this->Bad, $Track['bad']);
+					$this->Details = array_merge($this->Details, $Track['bad']);
 				}
 			}
 			unset($this->Tracks); //fixes weird bug
@@ -713,7 +709,7 @@ class Logchecker {
 					$this->Score = (($CurrScore) ? $CurrScore : 100) - $this->DecreaseBoost;
 					if (((($CurrScore) ? $CurrScore : 100) - $tmp_score) != $this->DecreaseBoost) {
 						$Msg		 = 'All tracks accurately ripped with at least confidence ' . $minConf . '. Score ' . (($this->Combined) ? "for log " . $this->CurrLog . " " : '') . 'boosted to ' . $this->Score . ' points!';
-						$this->Bad[] = $Msg;
+						$this->Details[] = $Msg;
 					}
 				}
 			}
@@ -728,15 +724,9 @@ class Logchecker {
 		//natcasesort($this->Bad); //sort ci
 		$this->format_report();
 		if ($this->Combined) {
-			array_unshift($this->Bad, "Combined Log (" . $this->Combined . ")");
+			array_unshift($this->Details, "Combined Log (" . $this->Combined . ")");
 		} //combined log msg
-		return array(
-			$this->Score,
-			$this->Good,
-			$this->Bad,
-			$this->Log,
-			$this->Checksum
-		);
+		return $this->return();
 	}
 	// Callback functions
 	function drive($Matches)
@@ -1140,48 +1130,43 @@ class Logchecker {
 	function check_tracks()
 	{
 		if (!count($this->Tracks)) { //no tracks
-			unset($this->Bad);
+			unset($this->Details);
 			if ($this->Combined) {
-				$this->Bad[] = "Combined Log (" . $this->Combined . ")";
-				$this->Bad[] = "Invalid log (" . $this->CurrLog . "), no tracks!";
+				$this->Details[] = "Combined Log (" . $this->Combined . ")";
+				$this->Details[] = "Invalid log (" . $this->CurrLog . "), no tracks!";
 			} else {
-				$this->Bad[] = "Invalid log, no tracks!";
+				$this->Details[] = "Invalid log, no tracks!";
 			}
 			$this->Score = 0;
-			return array(
-				$this->Score,
-				$this->Good,
-				$this->Bad,
-				$this->Log
-			);
+			return $this->return();
 		}
 	}
 	function format_report() //sort by importance & reasonable log length
 	{
-		if (!count($this->Bad)) {
+		if (!count($this->Details)) {
 			return;
 		}
 		$myBad = array('high' => array(), 'low' => array());
-		foreach ($this->Bad as $Key => $Val) {
+		foreach ($this->Details as $Key => $Val) {
 			if (preg_match("/(points?\W)|(boosted)\)/i", $Val)) {
 				$myBad['high'][] = $Val;
 			} else {
 				$myBad['low'][] = $Val;
 			}
 		}
-		$this->Bad = array();
-		$this->Bad = $myBad['high'];
-		if (count($this->Bad) < $this->Limit) {
+		$this->Details = array();
+		$this->Details = $myBad['high'];
+		if (count($this->Details) < $this->Limit) {
 			foreach ($myBad['low'] as $Key => $Val) {
-				if (count($this->Bad) > $this->Limit) {
+				if (count($this->Details) > $this->Limit) {
 					break;
 				} else {
-					$this->Bad[] = $Val;
+					$this->Details[] = $Val;
 				}
 			}
 		}
-		if (count($this->Bad) > $this->Limit) {
-			array_push($this->Bad, "(..)");
+		if (count($this->Details) > $this->Limit) {
+			array_push($this->Details, "(..)");
 		}
 	}
 
@@ -1199,8 +1184,8 @@ class Logchecker {
 			$Decrease = 100 - $Score;
 			$Append2  = ($Decrease > 0) ? ' (-' . $Decrease . ' point' . ($Decrease == 1 ? '' : 's') . ')' : '';
 		}
-		if (!in_array($Prepend . $Msg . $Append1 . $Append2, $this->Bad)) {
-			$this->Bad[] = $Prepend . $Msg . $Append1 . $Append2;
+		if (!in_array($Prepend . $Msg . $Append1 . $Append2, $this->Details)) {
+			$this->Details[] = $Prepend . $Msg . $Append1 . $Append2;
 			if ($DecreaseScore) {
 				$this->Score -= $Decrease;
 			}
@@ -1223,6 +1208,15 @@ class Logchecker {
 		}
 		$Prepend		  = 'Track ' . $tn . (($this->Combined) ? " (" . $this->CurrLog . ")" : '') . ': ';
 		$this->BadTrack[] = $Prepend . $Msg . $Append;
+	}
+
+	function return() {
+		return array(
+			$this->Score,
+			$this->Details,
+			$this->Checksum,
+			$this->Log
+		);
 	}
 
 	public static function detect_utf_bom_encoding_file($filename) {

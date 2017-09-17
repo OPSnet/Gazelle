@@ -257,13 +257,8 @@ if ($Type == 'Music') {
 	include(SERVER_ROOT.'/sections/upload/get_extra_torrents.php');
 }
 
-$LogScoreAverage = 0;
-$LogScoreCount = 0;
-$logs = array();
-$LogScores = array();
 
 //Multiple artists!
-
 $LogName = '';
 if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 	$MainArtistCount = 0;
@@ -637,22 +632,57 @@ if (!$Properties['GroupID']) {
 	}
 }
 
+//******************************************************************************//
+//--------------- Add the log scores to the DB ---------------------------------//
+$LogScore = 100;
+$LogChecksum = 1;
+$LogInDB = 0;
+if ($HasLog) {
+	ini_set('upload_max_filesize', 1000000);
+	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
+		if (!$_FILES['logfiles']['size'][$Pos]) {
+			continue;
+		}
+
+		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
+		if ($LogFile === false) {
+			die("Logfile doesn't exist or couldn't be opened");
+		}
+
+		//detect & transcode unicode
+		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
+			$LogFile = iconv("unicode", "UTF-8", $LogFile);
+		}
+		$Log = new Logchecker;
+		$Log->new_file($LogFile);
+		list($Score, $Details, $LogText, $Checksum) = $Log->parse();
+		$LogScore = min($Score, $LogScore);
+		$LogChecksum = min($Checksum, $LogChecksum);
+		$Details = implode("\r\n", $Details);
+		$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."')"); //set log scores
+		$LogID = $DB->inserted_id();
+		if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+			die("Could not copy logfile to the server.");
+		}
+		$LogInDB = 1;
+	}
+}
+
 // Use this section to control freeleeches
 $T['FreeLeech'] = 0;
 $T['FreeLeechType'] = 0;
-$LogScore = ($HasLog == 1 ? $LogScoreAverage : 0);
 // Torrent
 $DB->query("
 	INSERT INTO torrents
 		(GroupID, UserID, Media, Format, Encoding,
 		Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-		Scene, HasLog, HasCue, info_hash, FileCount, FileList, FilePath,
-		Size, Time, Description, LogScore, FreeTorrent, FreeLeechType)
+		Scene, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, info_hash, FileCount, FileList, 
+		FilePath, Size, Time, Description, FreeTorrent, FreeLeechType)
 	VALUES
 		($GroupID, $LoggedUser[ID], $T[Media], $T[Format], $T[Encoding],
 		$T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
-		$T[Scene], '$HasLog', '$HasCue', '".db_string($InfoHash)."', $NumFiles, '$FileString', '$FilePath',
-		$TotalSize, '".sqltime()."', $T[TorrentDescription], $LogScore, '$T[FreeLeech]', '$T[FreeLeechType]')");
+		$T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum',''".db_string($InfoHash)."', $NumFiles, '$FileString', '$FilePath',
+		$TotalSize, '".sqltime()."', $T[TorrentDescription], '$T[FreeLeech]', '$T[FreeLeechType]')");
 
 $Cache->increment('stats_torrent_count');
 $TorrentID = $DB->inserted_id();
@@ -678,58 +708,6 @@ $Debug->set_flag('upload: sphinx updated');
 
 if ($Type == 'Music') {
 	include(SERVER_ROOT.'/sections/upload/insert_extra_torrents.php');
-}
-
-
-
-//******************************************************************************//
-//--------------- Add the log scores to the DB ---------------------------------//
-
-if (!empty($LogScores) && $HasLog) {
-	$LogQuery = '
-		INSERT INTO torrents_logs_new
-			(TorrentID, Log, Details, NotEnglish, Score, Revision, Adjusted, AdjustedBy, AdjustmentReason)
-		VALUES (';
-	foreach ($LogScores as $LogKey => $LogScore) {
-		$LogScores[$LogKey] = "$TorrentID, $LogScore, 1, 0, 0, NULL";
-	}
-	$LogQuery .= implode('),(', $LogScores).')';
-	$DB->query($LogQuery);
-	$LogInDB = true;
-}
-
-//******************************************************************************//
-//--------------- Add the log scores to the DB ---------------------------------//
-if ($HasLog) {
-	ini_set('upload_max_filesize',1000000);
-	$LogMinScore = null;
-	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-		if (!$_FILES['logfiles']['size'][$Pos]) {
-		    break;
-		}
-		//todo: more validation
-		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
-		if (!$File) {
-		    die('LogFile doesn\'t exist, or couldn\'t open');
-		} // File doesn't exist, or couldn't open
-		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
-		fclose($File);
-		//detect & transcode unicode
-		if (LOG_CHECKER::detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
-			$LogFile = iconv("unicode", "UTF-8", $LogFile);
-		}
-		$Log = new LOG_CHECKER;
-		$Log->new_file($LogFile);
-		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
-		if ($LogMinScore === null || $Score < $LogMinScore) {
-		    $LogMinScore = $Score;
-		}
-		//$LogGood = implode("\r\n",$LogGood);
-		$LogBad = implode("\r\n",$LogBad);
-		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;
-		$DB->query("INSERT INTO torrents_logs_new VALUES (null, $TorrentID, '".db_string($LogText)."', '".db_string($LogBad)."', $Score, 1, 0, 0, $LogNotEnglish, '')"); //set log scores
-	}
-	if ($LogMinScore) { $DB->query("UPDATE torrents SET LogScore='$LogMinScore' WHERE ID=$TorrentID"); } //set main score
 }
 
 //******************************************************************************//
@@ -816,7 +794,7 @@ if ($Type == 'Music') {
         $Details .= ' / Log';
 	}
 	if ($LogInDB) {
-        $Details .= ' / '.$LogScoreAverage.'%';
+        $Details .= ' / '.$LogScore.'%';
 	}
 	if ($HasCue == 1) {
         $Details .= ' / Cue';

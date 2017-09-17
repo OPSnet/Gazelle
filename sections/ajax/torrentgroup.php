@@ -102,6 +102,7 @@ foreach ($TorrentList as $Torrent) {
 		'hasLog'      => $Torrent['HasLog'] == 1,
 		'hasCue'      => $Torrent['HasCue'] == 1,
 		'logScore'    => (int)$Torrent['LogScore'],
+		'logChecksum' => (int)$Torrent['LogChecksum'],
 		'fileCount'   => (int)$Torrent['FileCount'],
 		'size'        => (int)$Torrent['Size'],
 		'seeders'     => (int)$Torrent['Seeders'],

@@ -67,7 +67,8 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				t.Scene,
 				t.HasLog,
 				t.HasCue,
-				t.LogScore,
+				min(CASE WHEN tln.Adjusted = '1' THEN tln.AdjustedScore ELSE tln.Score END) as LogScore,
+				min(tln.Checksum) as LogChecksum,
 				t.FileCount,
 				t.Size,
 				t.Seeders,
@@ -99,7 +100,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
 				LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
 				LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.ID
-				LEFT JOIN torrents_logs_new AS tln ON tln.TorrentID = t.ID
+				LEFT JOIN torrents_logs AS tln ON tln.TorrentID = t.ID
 			WHERE t.GroupID = '".db_string($GroupID)."'
 			GROUP BY t.ID
 			ORDER BY t.Remastered ASC,
@@ -148,7 +149,6 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 }
 
 function get_torrent_info($TorrentID, $Return = true, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
-	global $Cache, $DB;
 	$GroupID = (int)torrentid_to_groupid($TorrentID);
 	$GroupInfo = get_group_info($GroupID, $Return, $RevisionID, $PersonalProperties, $ApiCall);
 	if ($GroupInfo) {
@@ -225,7 +225,7 @@ function set_torrent_logscore($TorrentID) {
 		UPDATE torrents
 		SET LogScore = (
 				SELECT FLOOR(AVG(Score))
-				FROM torrents_logs_new
+				FROM torrents_logs
 				WHERE TorrentID = $TorrentID
 				)
 		WHERE ID = $TorrentID");
@@ -273,7 +273,7 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 	//LogInDB, (has file), Torrents::torrent_properties()
 	list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
 		$RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
-		$HasLog, $HasCue, $LogScore, $FileCount, $Size, $Seeders, $Leechers,
+		$HasLog, $HasCue, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
 		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
@@ -412,6 +412,12 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 		$ExtraInfo .= $AddExtra . Format::torrent_label('Reported');
 		$AddExtra = ' / ';
 	}
+
+	if ($HasLog && $LogInDB && $LogChecksum !== '1') {
+		$ExtraInfo .= $AddExtra . Format::torrent_label('Bad/Missing Checksum');
+		$AddExtra = ' / ';
+	}
+
 	if (!empty($BadTags)) {
 		$ExtraInfo .= $AddExtra . Format::torrent_label('Bad Tags');
 		$AddExtra = ' / ';

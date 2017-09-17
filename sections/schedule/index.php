@@ -746,7 +746,7 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 			SELECT DISTINCT t.ID
 			FROM torrents AS t
 				JOIN users_main AS um ON t.UserID = um.ID
-				JOIN torrents_logs_new AS tl ON tl.TorrentID = t.ID
+				JOIN torrents_logs AS tl ON tl.TorrentID = t.ID
 			WHERE um.Enabled = '2'
 				AND t.HasLog = '1'
 				AND LogScore = 100
@@ -760,7 +760,7 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 			SET LogScore = 99
 			WHERE ID = $TorrentID");
 		$DB->query("
-			UPDATE torrents_logs_new
+			UPDATE torrents_logs
 			SET Score = 99, Details = '$Details'
 			WHERE TorrentID = $TorrentID");
 	}

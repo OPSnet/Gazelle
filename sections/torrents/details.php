@@ -532,16 +532,9 @@ $LastRemasterCatalogueNumber = '';
 $EditionID = 0;
 
 foreach ($TorrentList as $Torrent) {
-		//t.ID,	t.Media, t.Format, t.Encoding, t.Remastered, t.RemasterYear,
-		//t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Scene,
-		//t.HasLog, t.HasCue, t.LogScore, t.FileCount, t.Size, t.Seeders, t.Leechers,
-		//t.Snatched, t.FreeTorrent, t.Time, t.Description, t.FileList,
-		//t.FilePath, t.UserID, t.last_action, HEX(t.info_hash), (bad tags), (bad folders), (bad filenames),
-		//(missing lineage) (cassette approved), (lossy master approved), (lossy web approved),
-	  //t.LastReseedRequest, LogInDB, (has file), Torrents::torrent_properties()
 	list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
 		$RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
-		$HasLog, $HasCue, $LogScore, $FileCount, $Size, $Seeders, $Leechers,
+		$HasLog, $HasCue, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
 		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved,
@@ -646,6 +639,8 @@ foreach ($TorrentList as $Torrent) {
 	if ($FreeTorrent == '2') { $ExtraInfo.=$AddExtra. Format::torrent_label('Neutral Leech!'); $AddExtra=' / '; }
 	if ($PersonalFL) { $ExtraInfo.=$AddExtra. Format::torrent_label('Personal Freeleech!'); $AddExtra=' / '; }
 	if ($Reported) { $ExtraInfo.=$AddExtra. Format::torrent_label('Reported'); $AddExtra=' / '; }
+
+	if ($HasLog && $LogInDB && $LogChecksum !== '1') { $ExtraInfo .= $AddExtra . Format::torrent_label('Bad/Missing Checksum'); $AddExtra = ' / '; }
 	if (!empty($BadTags)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Bad Tags'); $AddExtra=' / '; }
 	if (!empty($BadFolders)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Bad Folders'); $AddExtra=' / '; }
 	if (!empty($MissingLineage)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Missing Lineage'); $AddExtra = ' / '; }
