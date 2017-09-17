@@ -2,11 +2,20 @@
 
 enforce_login();
 
-$TorrentID = 0 + $_POST['torrentid'];
+$TorrentID = intval($_POST['torrentid']);
 $FileCount = count($_FILES['logfiles']['name']);
 
-if ($TorrentID != 0 && $FileCount > 0) {
-	ini_set('upload_max_filesize',1000000);
+$LogScore = 100;
+$LogChecksum = true;
+
+$DB->query("
+	SELECT t.ID, t.GroupID, t.Format, t.Encoding 
+	FROM torrents t
+	WHERE t.ID = {$TorrentID} AND t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
+
+if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
+	$DB->query("DELETE FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
+	ini_set('upload_max_filesize', 1000000);
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			break;
@@ -20,8 +29,12 @@ if ($TorrentID != 0 && $FileCount > 0) {
 		$Log->new_file($LogFile, $FileName);
 		list($Score, $Details, $Checksum, $LogText) = $Log->parse();
 		$Details = implode("\r\n", $Details);
+		$LogScore = min($LogScore, $Score);
+		$LogChecksum = $LogChecksum && $Checksum;
 		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."')");
 	}
+
+	$DB->query("UPDATE torrents SET HasLogDB='1', LogScore={$LogScore}, LogChecksum='".enum_boolean($LogChecksum)."' WHERE ID='{$TorrentID}'");
 } else {
 	error('No log file uploaded or no torrent is selected.');
 }
