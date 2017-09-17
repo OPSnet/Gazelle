@@ -67,6 +67,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				t.Scene,
 				t.HasLog,
 				t.HasCue,
+				t.HasLogDB,
 				t.LogScore,
 				t.LogChecksum,
 				t.FileCount,
@@ -90,7 +91,6 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				lma.TorrentID AS LossymasterApproved,
 				lwa.TorrentID AS LossywebApproved,
 				t.LastReseedRequest,
-				t.HasLogDB AS LogInDB,
 				t.ID AS HasFile
 			FROM torrents AS t
 				LEFT JOIN torrents_bad_tags AS tbt ON tbt.TorrentID = t.ID
@@ -272,11 +272,11 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 	//LogInDB, (has file), Torrents::torrent_properties()
 	list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
 		$RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
-		$HasLog, $HasCue, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
+		$HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
 		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
-		$LogInDB, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
+		$HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
 		$FirstUnknown = !isset($FirstUnknown);
@@ -376,7 +376,7 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 		$ExtraInfo .= "{$AddExtra}Log";
 		$AddExtra = ' / ';
 	}
-	if ($HasLog && $LogInDB) {
+	if ($HasLog && $HasLogDB) {
 		$ExtraInfo .= ' (' . (int)$LogScore . '%)';
 	}
 	if ($HasCue) {
@@ -412,7 +412,7 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 		$AddExtra = ' / ';
 	}
 
-	if ($HasLog && $LogInDB && $LogChecksum !== '1') {
+	if ($HasLog && $HasLogDB && $LogChecksum !== '1') {
 		$ExtraInfo .= $AddExtra . Format::torrent_label('Bad/Missing Checksum');
 		$AddExtra = ' / ';
 	}

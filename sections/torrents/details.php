@@ -534,11 +534,11 @@ $EditionID = 0;
 foreach ($TorrentList as $Torrent) {
 	list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
 		$RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
-		$HasLog, $HasCue, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
+		$HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
 		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved,
-		$LastReseedRequest, $LogInDB, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
+		$LastReseedRequest, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
 		$FirstUnknown = !isset($FirstUnknown);
@@ -628,7 +628,7 @@ foreach ($TorrentList as $Torrent) {
 	if ($Format) { $ExtraInfo.=display_str($Format); $AddExtra=' / '; }
 	if ($Encoding) { $ExtraInfo.=$AddExtra.display_str($Encoding); $AddExtra=' / '; }
 	if ($HasLog) { $ExtraInfo.=$AddExtra.'Log'; $AddExtra=' / '; }
-	if ($HasLog && $LogInDB) { $ExtraInfo.=' ('.(int)$LogScore.'%)'; }
+	if ($HasLog && $HasLogDB) { $ExtraInfo.=' ('.(int)$LogScore.'%)'; }
 	if ($HasCue) { $ExtraInfo.=$AddExtra.'Cue'; $AddExtra=' / '; }
 	if ($Scene) { $ExtraInfo.=$AddExtra.'Scene'; $AddExtra=' / '; }
 	if (!$ExtraInfo) {
@@ -640,7 +640,7 @@ foreach ($TorrentList as $Torrent) {
 	if ($PersonalFL) { $ExtraInfo.=$AddExtra. Format::torrent_label('Personal Freeleech!'); $AddExtra=' / '; }
 	if ($Reported) { $ExtraInfo.=$AddExtra. Format::torrent_label('Reported'); $AddExtra=' / '; }
 
-	if ($HasLog && $LogInDB && $LogChecksum !== '1') { $ExtraInfo .= $AddExtra . Format::torrent_label('Bad/Missing Checksum'); $AddExtra = ' / '; }
+	if ($HasLog && $HasLogDB && $LogChecksum !== '1') { $ExtraInfo .= $AddExtra . Format::torrent_label('Bad/Missing Checksum'); $AddExtra = ' / '; }
 	if (!empty($BadTags)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Bad Tags'); $AddExtra=' / '; }
 	if (!empty($BadFolders)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Bad Folders'); $AddExtra=' / '; }
 	if (!empty($MissingLineage)) { $ExtraInfo.=$AddExtra. Format::torrent_label('Missing Lineage'); $AddExtra = ' / '; }
@@ -728,7 +728,7 @@ foreach ($TorrentList as $Torrent) {
 <?	} ?>
 					<div class="linkbox">
 						<a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
-<?  if ($HasLog && $LogInDB) { ?>
+<?  if ($HasLog && $HasLogDB) { ?>
 						<a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', '<?=$LogScore?>'); return false;">View log</a>
 <?  } ?>
 <?	if (check_perms('site_view_torrent_snatchlist')) { ?>
