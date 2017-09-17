@@ -637,6 +637,7 @@ if (!$Properties['GroupID']) {
 $LogScore = 100;
 $LogChecksum = 1;
 $LogInDB = 0;
+$LogScores = array();
 if ($HasLog) {
 	ini_set('upload_max_filesize', 1000000);
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
@@ -659,11 +660,7 @@ if ($HasLog) {
 		$LogScore = min($Score, $LogScore);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Details = implode("\r\n", $Details);
-		$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."')"); //set log scores
-		$LogID = $DB->inserted_id();
-		if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
-			die("Could not copy logfile to the server.");
-		}
+		$LogScores[$Pos] = array($Score, $Details, $LogText, $Checksum);
 		$LogInDB = 1;
 	}
 }
@@ -681,8 +678,8 @@ $DB->query("
 	VALUES
 		($GroupID, $LoggedUser[ID], $T[Media], $T[Format], $T[Encoding],
 		$T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
-		$T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum',''".db_string($InfoHash)."', $NumFiles, '$FileString', '$FilePath',
-		$TotalSize, '".sqltime()."', $T[TorrentDescription], '$T[FreeLeech]', '$T[FreeLeechType]')");
+		$T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum','".db_string($InfoHash)."', $NumFiles, '$FileString', 
+		'$FilePath', $TotalSize, '".sqltime()."', $T[TorrentDescription], '$T[FreeLeech]', '$T[FreeLeechType]')");
 
 $Cache->increment('stats_torrent_count');
 $TorrentID = $DB->inserted_id();
@@ -693,6 +690,18 @@ $Debug->set_flag('upload: ocelot updated');
 // Prevent deletion of this torrent until the rest of the upload process is done
 // (expire the key after 10 minutes to prevent locking it for too long in case there's a fatal error below)
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
+
+//******************************************************************************//
+//--------------- Write Log DB       -------------------------------------------//
+
+foreach ($LogScores as $Pos => $Log) {
+	list($Score, $Details, $LogText, $Checksum) = $Log;
+	$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."')"); //set log scores
+	$LogID = $DB->inserted_id();
+	if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+		die("Could not copy logfile to the server.");
+	}
+}
 
 //******************************************************************************//
 //--------------- Write torrent file -------------------------------------------//

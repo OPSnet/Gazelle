@@ -172,7 +172,7 @@ class Logchecker {
 					$this->Details[] = "Unrecognized log file! Feel free to report for manual review.";
 				}
 				$this->Score = 0;
-				return $this->return();
+				return $this->returnParse();
 			} else {
 				$this->RIPPER = ($EAC) ? "EAC" : "XLD";
 			}
@@ -726,7 +726,7 @@ class Logchecker {
 		if ($this->Combined) {
 			array_unshift($this->Details, "Combined Log (" . $this->Combined . ")");
 		} //combined log msg
-		return $this->return();
+		return $this->returnParse();
 	}
 	// Callback functions
 	function drive($Matches)
@@ -1138,7 +1138,7 @@ class Logchecker {
 				$this->Details[] = "Invalid log, no tracks!";
 			}
 			$this->Score = 0;
-			return $this->return();
+			return $this->returnParse();
 		}
 	}
 	function format_report() //sort by importance & reasonable log length
@@ -1210,7 +1210,7 @@ class Logchecker {
 		$this->BadTrack[] = $Prepend . $Msg . $Append;
 	}
 
-	function return() {
+	function returnParse() {
 		return array(
 			$this->Score,
 			$this->Details,

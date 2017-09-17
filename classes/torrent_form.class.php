@@ -475,7 +475,7 @@ function show() {
 				</td>
 			</tr>
 <?		if ($this->NewTorrent) {
-			$AcceptTypes = LOG_CHECKER::get_accept_values();
+			$AcceptTypes = LogChecker::get_accept_values();
 ?>
 			<tr id="upload_logs" class="hidden">
 				<td class="label">
