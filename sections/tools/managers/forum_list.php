@@ -127,7 +127,7 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
 			</td>
 			<td>
 				<input type="submit" name="submit" value="Edit" />
-				<input type="submit" name="submit" value="Delete" />
+				<input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this forum? This is an irreversible action!')"/>
 			</td>
 
 		</form>

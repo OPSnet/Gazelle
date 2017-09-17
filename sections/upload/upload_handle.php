@@ -39,7 +39,7 @@ $Properties['Title'] = $_POST['title'];
 $Properties['Remastered'] = isset($_POST['remaster']) ? 1 : 0;
 if ($Properties['Remastered'] || isset($_POST['unknown'])) {
 	$Properties['UnknownRelease'] = isset($_POST['unknown']) ? 1 : 0;
-	$Properties['RemasterYear'] = $_POST['remaster_year'];
+	$Properties['RemasterYear'] = trim($_POST['remaster_year']);
 	$Properties['RemasterTitle'] = $_POST['remaster_title'];
 	$Properties['RemasterRecordLabel'] = $_POST['remaster_record_label'];
 	$Properties['RemasterCatalogueNumber'] = $_POST['remaster_catalogue_number'];
@@ -51,7 +51,7 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
 	$Properties['RemasterRecordLabel'] = '';
 	$Properties['RemasterCatalogueNumber'] = '';
 }
-$Properties['Year'] = $_POST['year'];
+$Properties['Year'] = trim($_POST['year']);
 $Properties['RecordLabel'] = $_POST['record_label'];
 $Properties['CatalogueNumber'] = $_POST['catalogue_number'];
 $Properties['ReleaseType'] = $_POST['releasetype'];
@@ -704,11 +704,13 @@ if ($HasLog) {
 	ini_set('upload_max_filesize',1000000);
 	$LogMinScore = null;
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-		if (!$_FILES['logfiles']['size'][$Pos]) { break; }
+		if (!$_FILES['logfiles']['size'][$Pos]) {
+		    break;
+		}
 		//todo: more validation
 		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
 		if (!$File) {
-			die('LogFile doesn\'t exist, or couldn\'t open');
+		    die('LogFile doesn\'t exist, or couldn\'t open');
 		} // File doesn't exist, or couldn't open
 		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
 		fclose($File);
@@ -719,7 +721,9 @@ if ($HasLog) {
 		$Log = new LOG_CHECKER;
 		$Log->new_file($LogFile);
 		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
-		if (!$LogMinScore || $Score < $LogMinScore) { $LogMinScore = $Score; }
+		if ($LogMinScore === null || $Score < $LogMinScore) {
+		    $LogMinScore = $Score;
+		}
 		//$LogGood = implode("\r\n",$LogGood);
 		$LogBad = implode("\r\n",$LogBad);
 		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;

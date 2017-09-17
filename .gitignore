@@ -2,4 +2,4 @@
 html/
 /classes/config.php
 /sphinx.conf
-.Ds_Store
+.DS_Store

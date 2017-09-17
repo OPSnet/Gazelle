@@ -199,13 +199,13 @@ if ($LockType == '---' || $LockedAccount == 0) {
 				VALUES ('" . $UserID . "', '" . $LockType . "')
 				ON DUPLICATE KEY UPDATE Type = '" . $LockType . "'");
 	$Cache->delete_value('user_' . $Cur['torrent_pass']);
-		
+
 	if ($Cur['Type'] != $LockType) {
 		$EditSummary[] = 'Account lock reason changed to ' . $LockType;
 	} else {
 		$EditSummary[] = 'Account locked (' . $LockType . ')';
 	}
-	
+
 }
 $Cache->delete_value("user_info_" . $UserID);
 $DB->set_query_id($QueryID);
@@ -492,7 +492,7 @@ if ($Invites != $Cur['Invites'] && check_perms('users_edit_invites')) {
 
 if ($Warned == 1 && $Cur['Warned'] == '0000-00-00 00:00:00' && check_perms('users_warn')) {
 	$Weeks = 'week' . ($WarnLength === 1 ? '' : 's');
-	Misc::send_pm($UserID, 0, 'You have received a warning', "You have been [url=".site_url()."wiki.php?action=article&amp;id=218]warned for $WarnLength {$Weeks}[/url] by [user]".$LoggedUser['Username']."[/user]. The reason given was:
+	Misc::send_pm($UserID, 0, 'You have received a warning', "You have been [url=".site_url()."wiki.php?action=article&amp;id=114]warned for $WarnLength {$Weeks}[/url] by [user]".$LoggedUser['Username']."[/user]. The reason given was:
 [quote]{$WarnReason}[/quote]");
 	$UpdateSet[] = "Warned = '".sqltime()."' + INTERVAL $WarnLength WEEK";
 	$Msg = "warned for $WarnLength $Weeks";

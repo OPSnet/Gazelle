@@ -136,7 +136,7 @@ list($CanLeech) = $DB->next_record();
 	) { ?>
 	<div class="box pad">
 		<p>Please note that selling, trading, or publicly giving away our invitations&#8202;&mdash;&#8202;or responding to public invite requests&#8202;&mdash;&#8202;is strictly forbidden, and may result in you and your entire invite tree being banned.</p>
-		<p>Do not send an invite to anyone who has previously had a <?=SITE_NAME?> account. Please direct them to <?=BOT_DISABLED_CHAN?> on <?=BOT_SERVER?> if they wish to reactivate their account.</p>
+		<p>Do not send an invite to anyone who has previously had an <?=SITE_NAME?> account. Please direct them to <?=BOT_DISABLED_CHAN?> on <?=BOT_SERVER?> if they wish to reactivate their account.</p>
 		<p>Remember that you are responsible for ALL invitees, and your account and/or privileges may be disabled due to your invitees' actions. You should know and trust the person you're inviting. If you aren't familiar enough with the user to trust them, do not invite them.</p>
 		<p><em>Do not send an invite if you have not read or do not understand the information above.</em></p>
 	</div>
@@ -165,12 +165,12 @@ list($CanLeech) = $DB->next_record();
 <?
 } elseif (!empty($LoggedUser['DisableInvites'])) { ?>
 	<div class="box pad" style="text-align: center;">
-		<strong class="important_text">Your invites have been disabled. Please read <a href="wiki.php?action=article&amp;id=310">this article</a> for more information.</strong>
+		<strong class="important_text">Your invites have been disabled. Please read <a href="wiki.php?action=article&amp;id=116">this article</a> for more information.</strong>
 	</div>
 <?
 } elseif ($LoggedUser['RatioWatch'] || !$CanLeech) { ?>
 	<div class="box pad" style="text-align: center;">
-		<strong class="important_text">You may not send invites while on Ratio Watch or while your leeching privileges are disabled. Please read <a href="wiki.php?action=article&amp;id=310">this article</a> for more information.</strong>
+		<strong class="important_text">You may not send invites while on Ratio Watch or while your leeching privileges are disabled. Please read <a href="wiki.php?action=article&amp;id=116">this article</a> for more information.</strong>
 	</div>
 <?
 }
