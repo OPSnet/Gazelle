@@ -74,7 +74,9 @@ if (!empty($_GET['date'])) {
 				t.Scene,
 				t.HasLog,
 				t.HasCue,
+				t.HasLogDB,
 				t.LogScore,
+				t.LogChecksum,
 				t.RemasterYear,
 				g.Year,
 				t.RemasterTitle
@@ -103,7 +105,7 @@ if (!empty($_GET['date'])) {
 <?
 	foreach ($Details as $Detail) {
 		list($Rank, $TitleString, $TagString, $TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags,
-			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $LogScore, $Year, $GroupYear,
+			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear,
 			$RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Detail;
 
 		// highlight every other row
@@ -138,7 +140,7 @@ if (!empty($_GET['date'])) {
 			}
 			//"FLAC / Lossless / Log (100%) / Cue / CD";
 			if ($HasLog) {
-				$ExtraInfo .= "$AddExtra Log ($LogScore%)";
+				$ExtraInfo .= "$AddExtra Log".($HasLogDB ? " ($LogScore%)" : '');
 				$AddExtra = ' / ';
 			}
 			if ($HasCue) {

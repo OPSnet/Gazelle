@@ -5,7 +5,7 @@ if (!isset($TorrentID) || empty($TorrentID)) {
 	error(403);
 }
 $LogScore = isset($_GET['logscore']) ? intval($_GET['logscore']) : 0;
-$DB->query("SELECT LogId, Log, Details, Score, Checksum, Adjusted, AdjustedBy, AdjustedScore, AdjustmentReason, AdjustmentDetails FROM torrents_logs WHERE TorrentID = '$TorrentID'");
+$DB->query("SELECT LogId, Log, Details, Score, `Checksum`, Adjusted, AdjustedBy, AdjustedScore, AdjustmentReason, AdjustmentDetails FROM torrents_logs WHERE TorrentID = '$TorrentID'");
 $Logs = $DB->to_array();
 if(count($Logs) > 0) {
 	ob_start();
@@ -20,6 +20,16 @@ if(count($Logs) > 0) {
 	foreach($Logs as $Log) {
 		list($LogID, $Log, $Details, $Score, $Checksum, $Adjusted, $AdjustedBy, $AdjustedScore, $LogAdjustmentReason, $AdjustmentDetails) = $Log;
 		echo '<tr class=\'log_section\'><td>';
+
+		if ($Checksum === '0') {
+			echo <<<HTML
+	<blockquote>
+		<strong>Trumpable For:</strong>
+		<br /><br />
+		Bad/No Checksum(s)
+	</blockquote>
+HTML;
+		}
 
         if ($Adjusted === '1') {
 			$LogAdjustmentReason = ($LogAdjustmentReason) ? ': '.$LogAdjustmentReason : '';

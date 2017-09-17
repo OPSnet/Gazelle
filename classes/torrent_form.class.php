@@ -535,14 +535,14 @@ function show() {
 ?>
 				</td>
 			</tr>
+
 <?			if ($HasLog) { ?>
-			<!-- TODO: We should revamp this so that adjusting log score is done on a per log basis -->
+			<!-- TODO: This should be done on a per log basis
 			and we can then set the reason per log so that
 			<tr>
 				<td class="label">Log score</td>
 				<td><input type="text" name="log_score" size="5" id="log_score" value="<?=display_str($Torrent['LogScore']) ?>" /></td>
 			</tr>
-			<!--
 			<tr>
 				<td class="label">Log adjustment reason</td>
 				<td>

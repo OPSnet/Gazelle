@@ -657,7 +657,7 @@ if ($HasLog) {
 		$Log->new_file($LogFile);
 		list($Score, $Details, $LogText, $Checksum) = $Log->parse();
 		$LogScore = min($Score, $LogScore);
-		$LogChecksum = min($Checksum, $LogChecksum);
+		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Details = implode("\r\n", $Details);
 		$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."')"); //set log scores
 		$LogID = $DB->inserted_id();
@@ -705,10 +705,6 @@ Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.
 
 Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
-
-if ($Type == 'Music') {
-	include(SERVER_ROOT.'/sections/upload/insert_extra_torrents.php');
-}
 
 //******************************************************************************//
 //--------------- Stupid Recent Uploads ----------------------------------------//
@@ -791,10 +787,7 @@ if ($Type == 'Music') {
 	}
 	$Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
 	if ($HasLog == 1) {
-        $Details .= ' / Log';
-	}
-	if ($LogInDB) {
-        $Details .= ' / '.$LogScore.'%';
+        $Details .= ' / Log'.($LogInDB ? " ({$LogScore}%)" : "");
 	}
 	if ($HasCue == 1) {
         $Details .= ' / Cue';

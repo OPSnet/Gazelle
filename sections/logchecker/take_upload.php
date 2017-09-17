@@ -11,7 +11,6 @@ if ($TorrentID != 0 && $FileCount > 0) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			break;
 		}
-		//todo: more validation
 		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
 		//detect & transcode unicode
 		if (Logchecker::detect_utf_bom_encoding($LogFile)) {

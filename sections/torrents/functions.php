@@ -67,8 +67,8 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				t.Scene,
 				t.HasLog,
 				t.HasCue,
-				min(CASE WHEN tln.Adjusted = '1' THEN tln.AdjustedScore ELSE tln.Score END) as LogScore,
-				min(tln.Checksum) as LogChecksum,
+				t.LogScore,
+				t.LogChecksum,
 				t.FileCount,
 				t.Size,
 				t.Seeders,
@@ -90,7 +90,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				lma.TorrentID AS LossymasterApproved,
 				lwa.TorrentID AS LossywebApproved,
 				t.LastReseedRequest,
-				tln.TorrentID AS LogInDB,
+				t.HasLogDB AS LogInDB,
 				t.ID AS HasFile
 			FROM torrents AS t
 				LEFT JOIN torrents_bad_tags AS tbt ON tbt.TorrentID = t.ID
@@ -100,7 +100,6 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
 				LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
 				LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.ID
-				LEFT JOIN torrents_logs AS tln ON tln.TorrentID = t.ID
 			WHERE t.GroupID = '".db_string($GroupID)."'
 			GROUP BY t.ID
 			ORDER BY t.Remastered ASC,

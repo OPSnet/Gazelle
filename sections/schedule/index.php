@@ -740,33 +740,6 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 
 	sleep(5);
 
-	//------------- Rescore 0.95 logs of disabled users
-
-	$LogQuery = $DB->query("
-			SELECT DISTINCT t.ID
-			FROM torrents AS t
-				JOIN users_main AS um ON t.UserID = um.ID
-				JOIN torrents_logs AS tl ON tl.TorrentID = t.ID
-			WHERE um.Enabled = '2'
-				AND t.HasLog = '1'
-				AND LogScore = 100
-				AND Log LIKE 'EAC extraction logfile from%'");
-	$Details = array();
-	$Details[] = "Ripped with EAC v0.95, -1 point [1]";
-	$Details = serialize($Details);
-	while (list($TorrentID) = $DB->next_record()) {
-		$DB->query("
-			UPDATE torrents
-			SET LogScore = 99
-			WHERE ID = $TorrentID");
-		$DB->query("
-			UPDATE torrents_logs
-			SET Score = 99, Details = '$Details'
-			WHERE TorrentID = $TorrentID");
-	}
-
-	sleep(5);
-
 	//------------- Disable downloading ability of users on ratio watch
 	$UserQuery = $DB->query("
 			SELECT ID, torrent_pass
@@ -1092,7 +1065,9 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 				t.Scene,
 				t.HasLog,
 				t.HasCue,
+				t.HasLogDB,
 				t.LogScore,
+				t.LogChecksum,
 				t.RemasterYear,
 				g.Year,
 				t.RemasterTitle,
@@ -1113,8 +1088,8 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 	$i = 1;
 	foreach ($Top10 as $Torrent) {
 		list($TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags,
-			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $LogScore, $Year, $GroupYear,
-			$RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Torrent;
+			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year,
+			$GroupYear, $RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Torrent;
 
 		$DisplayName = '';
 
@@ -1143,7 +1118,7 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 		}
 		// "FLAC / Lossless / Log (100%) / Cue / CD";
 		if ($HasLog) {
-			$ExtraInfo .= "{$AddExtra}Log ($LogScore%)";
+			$ExtraInfo .= "{$AddExtra}Log".($HasLogDB ? " ($LogScore%)" : "");
 			$AddExtra = ' / ';
 		}
 		if ($HasCue) {
@@ -1204,7 +1179,9 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 					t.Scene,
 					t.HasLog,
 					t.HasCue,
+					t.HasLogDB,
 					t.LogScore,
+					t.LogChecksum,
 					t.RemasterYear,
 					g.Year,
 					t.RemasterTitle,
@@ -1225,8 +1202,8 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 		$i = 1;
 		foreach ($Top10 as $Torrent) {
 			list($TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags,
-				$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $LogScore, $Year, $GroupYear,
-				$RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Torrent;
+				$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year,
+				$GroupYear, $RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Torrent;
 
 			$DisplayName = '';
 
@@ -1255,7 +1232,7 @@ if (!$NoDaily && $Day != $NextDay || $_GET['runday']) {
 			}
 			// "FLAC / Lossless / Log (100%) / Cue / CD";
 			if ($HasLog) {
-				$ExtraInfo .= "{$AddExtra}Log ($LogScore%)";
+				$ExtraInfo .= "{$AddExtra}Log".($HasLogDB ? " ($LogScore%)" : '');
 				$AddExtra = ' / ';
 			}
 			if ($HasCue) {
