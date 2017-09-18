@@ -1,5 +1,5 @@
 <?
-View::show_header('Logchecker');
+View::show_header('Logchecker', 'upload');
 
 print <<<HTML
 <div class="linkbox">
@@ -27,18 +27,19 @@ print <<<HTML
 HTML;
 
 $DB->query("
-	SELECT t.ID, t.GroupID, t.Format, t.Encoding 
+	SELECT 
+		t.ID, t.GroupID, t.Format, t.Encoding, t.HasCue, t.HasLog, t.HasLogDB, t.LogScore, 
+		t.LogChecksum
 	FROM torrents t
-	WHERE t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
+	WHERE t.HasLog='1' AND t.hasLogDB='1' AND t.UserID = " . $LoggedUser['ID']);
 
 if ($DB->has_results()) {
 	$GroupIDs = $DB->collect('GroupID');
-	$TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
-	$Groups = Torrents::get_groups($torrent_ids);
-
+	$TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_NUM);
+	$Groups = Torrents::get_groups($GroupIDs);
 	foreach ($TorrentsInfo as $TorrentID => $Torrent) {
-		list($ID, $GroupID, $Format, $Encoding) = $Torrent;
-		$Group = $Groups[$GroupID];
+		list($ID, $GroupID, $Format, $Encoding, $HasCue, $HasLog, $HasLogDB, $LogScore, $LogChecksum) = $Torrent;
+		$Group = $Groups[(int) $GroupID];
 		$GroupName = $Group['Name'];
 		$GroupYear = $Group['Year'];
 		$ExtendedArtists = $Group['ExtendedArtists'];
@@ -66,19 +67,33 @@ if ($DB->has_results()) {
 		if (!empty($Info)) {
 			$DisplayName .= ' [' . implode('/', $Info) . ']';
 		}
+		if ($HasLog == '1') {
+			$DisplayName .= ' / Log'.($HasLogDB == '1' ? " ({$LogScore}%)" : "");
+		}
+		if ($HasCue == '1') {
+			$DisplayName .= ' / Cue';
+		}
+		if ($LogChecksum == '0') {
+			$DisplayName .= ' / ' . Format::torrent_label('Bad/Missing Checksum');
+		}
 		$Output .= "<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
 	}
 	$AcceptValues = Logchecker::get_accept_values();
 	echo <<<HTML
 			{$Output}
 			<tr class="colhead">
-			  <td colspan="2">Upload Logs for This Torrent</td>
+				<td colspan="2">Upload Logs for This Torrent</td>
 			</tr>
 			<tr>
-			  <td>
-				<input type="file" accept="{$AcceptValues}" name="logfiles[]" size="40" multiple required/>
-				<input type="submit" value="Upload Logs!" name="logsubmit" />
-			  </td>
+				<td colspan="2" id="logfields">
+					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
+					<input id="file" type="file" accept="<?=$AcceptTypes?>" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+				</td>
+			<tr />
+			<tr>
+				<td colspan="2">
+					<input type="submit" value="Upload Logs!" name="logsubmit" />
+				</td>
 			</tr>
 HTML;
 

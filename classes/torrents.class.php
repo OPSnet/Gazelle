@@ -119,7 +119,7 @@ class Torrents {
 						Time, 
 						ID AS HasFile,
 						HasLogDB,
-						LogChecksum,
+						LogChecksum
 					FROM torrents
 					WHERE GroupID IN ($IDs)
 					ORDER BY GroupID, Remastered, (RemasterYear != 0) DESC, RemasterYear, RemasterTitle,
