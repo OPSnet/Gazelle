@@ -153,7 +153,7 @@ class Logchecker {
 				$this->Version = $Matches[1];
 				if ($this->Version >= 20121222 && !$Count) {
 					$this->Checksum = false;
-					$this->account('No checksum with XLD 20121222 or newer', 15);
+					//$this->account('No checksum with XLD 20121222 or newer', 15);
 				}
 				else {
 					$this->Checksum = $this->Checksum && true;
