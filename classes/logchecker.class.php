@@ -86,11 +86,11 @@ class Logchecker {
 		} else { //no checksum
 			$this->Checksum = false;
 			$this->Logs = preg_split("/(\nEnd of status report)/i", $Log, -1, PREG_SPLIT_DELIM_CAPTURE);
-            foreach ($this->Logs as $key => $value) {
-                if (preg_match("/---- CUETools DB Plugin V.+/i", $value)) {
-                    unset($this->Logs[$key]);
-                }
-            }
+			foreach ($this->Logs as $key => $value) {
+				if (preg_match("/---- CUETools DB Plugin V.+/i", $value)) {
+					unset($this->Logs[$key]);
+				}
+			}
 		}
 
 		foreach ($this->Logs as $key => $value) {
