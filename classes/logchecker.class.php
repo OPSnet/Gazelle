@@ -188,7 +188,7 @@ class Logchecker {
 					}
 				}
 				else {
-					$Exe = __DIR__ . '/logchecker/xldlogchecker';
+					$Exe = __DIR__ . '/logchecker/xld_logchecker';
 					$Out = shell_exec("{$Exe} {$this->FileName}");
 					if (strpos($Out, "Malformed") !== false || strpos($Out, "OK") === false) {
 						$this->Checksum = false;
@@ -746,19 +746,16 @@ class Logchecker {
 		$this->Drive = $DriveName;
 		$Search	  = preg_split('/[^0-9a-z]/i', trim($DriveName));
 		$SearchText  = implode("%' AND Name LIKE '%", $Search);
-		// TODO: put this back in
-		//$DB->query("SELECT Offset,Name FROM drives WHERE Name LIKE '%" . $SearchText . "%'");
-		//$this->Drives  = $DB->collect('Name');
-		$this->Drives = array();
-		//$Offsets	   = array_unique($DB->collect('Offset'));
-		$Offsets = array();
+		$DB->query("SELECT Offset,Name FROM drives WHERE Name LIKE '%" . $SearchText . "%'");
+		$this->Drives  = $DB->collect('Name');
+		$Offsets	   = array_unique($DB->collect('Offset'));
 		$this->Offsets = $Offsets;
 		foreach ($Offsets as $Key => $Offset) {
 			$StrippedOffset  = preg_replace('/[^0-9]/s', '', $Offset);
 			$this->Offsets[] = $StrippedOffset;
 		}
 		reset($this->Offsets);
-		if (false && $DB->record_count() > 0) {
+		if ($DB->record_count() > 0) {
 			$Class			= 'good';
 			$this->DriveFound = true;
 		} else {
