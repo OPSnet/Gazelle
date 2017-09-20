@@ -120,7 +120,7 @@ if (!extension_loaded('mysqli')) {
 }
 
 function enum_boolean($bool) {
-	return $bool === true ? '1' : '0';
+	return $bool == true ? '1' : '0';
 }
 
 //Handles escaping

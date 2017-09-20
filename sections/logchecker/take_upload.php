@@ -13,6 +13,7 @@ $DB->query("
 	FROM torrents t
 	WHERE t.ID = {$TorrentID} AND t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
 
+$DetailsArray = array();
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 	list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);
 	$DB->query("DELETE FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
@@ -30,9 +31,11 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		$Log = new Logchecker();
 		$Log->new_file($LogFile, $FileName);
 		list($Score, $Details, $Checksum, $LogText) = $Log->parse();
-		$Details = implode("\r\n", $Details);
+		$Details = trim(implode("\r\n", $Details));
+		$DetailsArray[] = $Details;
 		$LogScore = min($LogScore, $Score);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
+		$Logs[] = array($Details, $LogText);
 		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')");
 	}
 
@@ -51,25 +54,25 @@ echo <<<HTML
 <div class="thin">
 HTML;
 
-if($Score == 100) {
+if($LogScore == 100) {
 	$Color = '#418B00';
 }
-elseif($Score > 90) {
+elseif($LogScore > 90) {
 	$Color = '#74C42E';
 }
-elseif($Score > 75) {
+elseif($LogScore > 75) {
 	$Color = '#FFAA00';
 }
-elseif($Score > 50) {
+elseif($LogScore > 50) {
 	$Color = '#FF5E00';
 }
 else {
 	$Color = '#FF0000';
 }
 
-echo "<blockquote><strong>Score:</strong> <span style=\"color:$Color\">$Score</span> (out of 100)</blockquote>";
+echo "<blockquote><strong>Score:</strong> <span style=\"color:$Color\">$LogScore</span> (out of 100)</blockquote>";
 
-if (!$Checksum) {
+if ($LogChecksum === 0) {
 	echo <<<HTML
 	<blockquote>
 		<strong>Trumpable For:</strong>
@@ -79,27 +82,32 @@ if (!$Checksum) {
 HTML;
 }
 
-$Details = explode("\r\n", $Details);
-if(!empty($Details)){
-	print <<<HTML
+foreach ($Logs as $Log) {
+	list($Details, $Text) = $Log;
+	if (!empty($Details)) {
+		$Details = explode("\r\n", $Details);
+		print <<<HTML
 	<blockquote>
 	<h3>Log validation report:</h3>
 	<ul>
 HTML;
-	foreach($Details as $Property){
-		print "\t\t<li>{$Property}</li>";
-	}
-	print <<<HTML
+		foreach ($Details as $Property) {
+			print "\t\t<li>{$Property}</li>";
+		}
+		print <<<HTML
 	</ul>
 	</blockquote>
 HTML;
-}
-echo <<<HTML
+	}
+
+	echo <<<HTML
 	<blockquote>
-		<pre>{$LogText}</pre>
+		<pre>{$Text}</pre>
 	</blockquote>
 </div>
 HTML;
+
+}
 
 View::show_footer();
 
