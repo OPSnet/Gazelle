@@ -31,7 +31,7 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		$Details = implode("\r\n", $Details);
 		$LogScore = min($LogScore, $Score);
 		$LogChecksum = $LogChecksum && $Checksum;
-		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."')");
+		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')");
 	}
 
 	$DB->query("UPDATE torrents SET HasLogDB='1', LogScore={$LogScore}, LogChecksum='".enum_boolean($LogChecksum)."' WHERE ID='{$TorrentID}'");
