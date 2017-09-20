@@ -74,7 +74,7 @@ if ($DB->has_results()) {
 		if ($LogChecksum == '0') {
 			$DisplayName .= ' / ' . Format::torrent_label('Bad/Missing Checksum');
 		}
-		$Output .= "<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
+		echo "\t\t\t\t<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
 	}
 	$AcceptValues = Logchecker::get_accept_values();
 	echo <<<HTML
