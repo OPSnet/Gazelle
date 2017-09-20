@@ -18,7 +18,7 @@ echo <<<HTML
 		</p>
 		<br />
 		<form action="" method="post" enctype="multipart/form-data">
-			<input type="hidden" name="action" value="missinglogupload" />
+			<input type="hidden" name="action" value="take_upload" />
 			<table class="form_post vertical_margin">
 				<tr class="colhead">
 					<td colspan="2">Select a Torrent</td>
@@ -74,7 +74,7 @@ if ($DB->has_results()) {
 		if ($LogChecksum == '0') {
 			$DisplayName .= ' / ' . Format::torrent_label('Bad/Missing Checksum');
 		}
-		echo "\t\t\t\t<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
+		echo "\t\t\t\t<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"{$ID}\"></td><td>{$DisplayName}</td></tr>";
 	}
 	$AcceptValues = Logchecker::get_accept_values();
 	echo <<<HTML
