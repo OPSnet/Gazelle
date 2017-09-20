@@ -31,7 +31,7 @@ $DB->query("
 		t.ID, t.GroupID, t.Format, t.Encoding, t.HasCue, t.HasLog, t.HasLogDB, t.LogScore, 
 		t.LogChecksum
 	FROM torrents t
-	WHERE t.HasLog='1' AND t.hasLogDB='1' AND t.UserID = " . $LoggedUser['ID']);
+	WHERE t.HasLog='1' AND t.HasLogDB='1' AND t.UserID = " . $LoggedUser['ID']);
 
 if ($DB->has_results()) {
 	$GroupIDs = $DB->collect('GroupID');

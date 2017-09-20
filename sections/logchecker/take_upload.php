@@ -9,11 +9,12 @@ $LogScore = 100;
 $LogChecksum = 1;
 
 $DB->query("
-	SELECT t.ID, t.GroupID, t.Format, t.Encoding 
+	SELECT t.ID, t.GroupID
 	FROM torrents t
 	WHERE t.ID = {$TorrentID} AND t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
 
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
+	list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);
 	$DB->query("DELETE FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
 	ini_set('upload_max_filesize', 1000000);
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
@@ -36,6 +37,8 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 	}
 
 	$DB->query("UPDATE torrents SET HasLogDB='1', LogScore={$LogScore}, LogChecksum='".enum_boolean($LogChecksum)."' WHERE ID='{$TorrentID}'");
+	$Cache->delete_value("torrent_group_{$GroupID}");
+	$Cache->delete_value("torrents_details_{$GroupID}");
 } else {
 	error('No log file uploaded or no torrent is selected.');
 }
