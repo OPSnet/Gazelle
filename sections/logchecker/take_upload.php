@@ -6,7 +6,7 @@ $TorrentID = intval($_POST['torrentid']);
 $FileCount = count($_FILES['logfiles']['name']);
 
 $LogScore = 100;
-$LogChecksum = true;
+$LogChecksum = 1;
 
 $DB->query("
 	SELECT t.ID, t.GroupID, t.Format, t.Encoding 
@@ -31,7 +31,7 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		list($Score, $Details, $Checksum, $LogText) = $Log->parse();
 		$Details = implode("\r\n", $Details);
 		$LogScore = min($LogScore, $Score);
-		$LogChecksum = $LogChecksum && $Checksum;
+		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')");
 	}
 
