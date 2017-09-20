@@ -20,6 +20,7 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			break;
 		}
+		$FileName = $_FILES['logfiles']['tmp_name'][$Pos];
 		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
 		//detect & transcode unicode
 		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
