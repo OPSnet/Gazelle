@@ -26,14 +26,13 @@ echo <<<HTML
 HTML;
 $DB->query("
 	SELECT 
-		t.ID, t.GroupID, t.Format, t.Encoding, t.HasCue, t.HasLog, t.HasLogDB, t.LogScore, 
-		t.LogChecksum
-	FROM torrents t
-	WHERE t.HasLog='1' AND t.HasLogDB='0' AND t.UserID = ".$LoggedUser['ID']." GROUP BY t.ID");
+		ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore, LogChecksum
+	FROM torrents
+	WHERE HasLog='1' AND HasLogDB='0' AND UserID = ".$LoggedUser['ID']);
 
 if ($DB->has_results()) {
 	$GroupIDs = $DB->collect('GroupID');
-	$TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_NUM);
+	$TorrentsInfo = $DB->to_array('ID');
 	$Groups = Torrents::get_groups($GroupIDs);
 
 	foreach ($TorrentsInfo as $TorrentID => $Torrent) {
@@ -77,16 +76,15 @@ if ($DB->has_results()) {
 		}
 		$Output .= "<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
 	}
-	$AcceptTypes = Logchecker::get_accept_values();
+	$AcceptValues = Logchecker::get_accept_values();
 	echo <<<HTML
-				{$Output}
 				<tr class="colhead">
 					<td colspan="2">Upload Logs for This Torrent</td>
 				</tr>
 				<tr>
 					<td colspan="2" id="logfields">
 						Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-						<input id="file" type="file" accept="<?=$AcceptTypes?>" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+						<input id="file" type="file" accept="<?=$AcceptValues?>" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 					</td>
 				<tr />
 				<tr>
