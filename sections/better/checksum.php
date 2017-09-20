@@ -5,13 +5,23 @@ $Join = '';
 $Where = '';
 $Filter = 0;
 if($_GET['filter'] === 'snatched') {
-	$Join = 'JOIN xbt_snatched AS x ON x.fid = tfi.TorrentID AND x.uid = '.$LoggedUser['ID'];
+	$Join = 'JOIN xbt_snatched AS x ON x.fid = t.ID AND x.uid = '.$LoggedUser['ID'];
 	$Filter = 1;
 }
 elseif ($_GET['filter'] === 'uploaded') {
 	$Where = "AND t.UserID = {$LoggedUser['ID']}";
 	$Filter = 2;
 }
+
+$DB->query("SELECT count(t.ID) as count FROM torrents AS t {$Join} WHERE t.HasLogDB='1' AND t.LogChecksum='0' {$Where}");
+$row = $DB->next_record();
+$total = $row['count'];
+$total_str = number_format($total);
+$page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
+$page = max(1, $page);
+$limit = TORRENTS_PER_PAGE;
+$offset = TORRENTS_PER_PAGE * ($page-1);
+$pages = Format::get_pages($page, $total, TORRENTS_PER_PAGE);
 
 View::show_header('Torrents with bad/missing checksum');
 $DB->query("
@@ -23,10 +33,11 @@ $DB->query("
 	WHERE t.HasLogDB = '1' AND t.LogChecksum = '0' {$Where}
 	ORDER BY t.ID ASC");
 $TorrentsInfo = $DB->to_array('ID', MYSQLI_ASSOC);
+$GroupIDs = array();
 foreach ($TorrentsInfo as $Torrent) {
 	$GroupIDs[] = $Torrent['GroupID'];
 }
-$Results = Torrents::get_groups($GroupIDs);
+$Results = (count($GroupIDs) > 0) ? Torrents::get_groups($GroupIDs) : array();
 ?>
 	<div class="header">
 		<? if ($Filter === 0) { ?>
@@ -49,9 +60,12 @@ $Results = Torrents::get_groups($GroupIDs);
 				<a href="better.php?method=checksum&amp;filter=uploaded" class="brackets">Show only those you have uploaded</a>
 			<? } ?>
 		</div>
+		<div class="linkbox">
+			<?=$pages?>
+		</div>
 	</div>
 	<div class="thin box pad">
-		<h3>There are <?=number_format(count($TorrentsInfo))?> torrents remaining</h3>
+		<h3>There are <?=$total_str?> torrents remaining</h3>
 		<table class="torrent_table">
 			<?
 			foreach ($TorrentsInfo as $TorrentID => $Info) {
