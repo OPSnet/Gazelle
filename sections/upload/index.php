@@ -6,13 +6,19 @@ if (!check_perms('site_upload')) {
 if ($LoggedUser['DisableUpload']) {
 	error('Your upload privileges have been revoked.');
 }
-// build the page
-if($_REQUEST['action'] == 'take_log') {
-	include(SERVER_ROOT.'/sections/upload/take_log.php');
+
+if (!empty($_GET['action'])) {
+	switch($_GET['action']) {
+		case 'parse_html':
+			include SERVER_ROOT.'/sections/upload/parse_html.php';
+			break;
+		default:
+			error(404);
+	}
 }
-if (!empty($_POST['submit'])) {
-	include('upload_handle.php');
-} else {
+elseif (!empty($_POST['submit'])) {
+	include(SERVER_ROOT . '/sections/upload/upload_handle.php');
+}
+else {
 	include(SERVER_ROOT.'/sections/upload/upload.php');
 }
-?>

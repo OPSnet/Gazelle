@@ -91,6 +91,10 @@ class TORRENT_FORM {
 				<td><input id="file" type="file" name="file_input" size="50" /></td>
 			</tr>
 			<tr>
+				<td class="label">JSON file:</td>
+				<td><input type="file" onchange="ParseUploadJson()" id="torrent-json-file" /></td>
+			</tr>
+			<tr>
 				<td class="label">Type:</td>
 				<td>
 					<select id="categories" name="type" onchange="Categories()"<?=$this->Disabled?>>

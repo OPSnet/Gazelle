@@ -932,6 +932,49 @@ class Text {
 		$Str = strtr($Str, self::$ProcessedSmileys);
 		return $Str;
 	}
+
+	/**
+	 * Given a String that is composed of HTML, attempt to convert it back
+	 * into BBCode. Useful when we're trying to deal with the output from
+	 * some other site's metadata
+	 *
+	 * @param String $Html
+	 * @return String
+	 */
+	public static function parse_html($Html) {
+		$Document = new DOMDocument();
+		$Document->loadHtml($Html);
+		$Elements = $Document->getElementsByTagName('span');
+		for ($i = $Elements->length - 1; $i >= 0; $i--) {
+			$Element = $Elements->item($i);
+			if (strpos($Element->getAttribute('class'), 'size') !== false) {
+				$NewElement = $Document->createElement('size', $Element->nodeValue);
+				$NewElement->setAttribute('size', str_replace('size', '', $Element->getAttribute('class')));
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+			elseif (strpos($Element->getAttribute('style'), 'font-style: italic') !== false) {
+				$NewElement = $Document->createElement('italic', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+			elseif (strpos($Element->getAttribute('style'), 'text-decoration: underline') !== false) {
+				$NewElement = $Document->createElement('underline', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Str = str_replace(array("<body>\n", "\n</body>"), "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
+		$Str = preg_replace("/\<(\/*)strong\>/", "[\\1b]", $Str);
+		$Str = preg_replace("/\<(\/*)italic\>/", "[\\1i]", $Str);
+		$Str = preg_replace("/\<(/\*)underline\>/", "[\\1u]", $Str);
+		$Str = preg_replace("/\<size size=\"([0-9]+)\"\>/", "[size=\\1]", $Str);
+		$Str = preg_replace("/\<\/size\>/", "[/size]", $Str);
+		$Str = preg_replace("/\<a href=\"rules.php?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
+		$Str = preg_replace("/\<a href=\"wiki.php?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
+		$Str = preg_replace("/\<a href=\"artist.php?artistname=(.*)\"\>(.*)\<\/a\>/", "[artist]\\1[/artist]", $Str);
+		$Str = preg_replace("/\<a href=\"user.php?action=search&search=(.*)\"\>(.*)\<\/a\>/", "[user]\\1[/user]", $Str);
+		$Str = preg_replace("/\<a(.*)href=\"(.*)\">(.*)\<\/a\>/", "[url=\\2]\\3[/url]", $Str);
+		return str_replace(array("<br />", "<br>"), "\n", $Str);
+	}
 }
 /*
 

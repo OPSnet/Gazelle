@@ -691,6 +691,7 @@ foreach ($TorrentList as $Torrent) {
 						| <a href="torrents.php?action=delete&amp;torrentid=<?=$TorrentID ?>" class="tooltip" title="Remove">RM</a>
 <?	}?>
 						| <a href="torrents.php?torrentid=<?=$TorrentID ?>" class="tooltip" title="Permalink">PL</a>
+						| <a href="ajax.php?action=torrent&id=<?=($TorrentID)?>" download="<?=$Title?> [apollo.rip].json" class="tooltip" title="JSON">JS</a>
 					]</span>
 					&raquo; <a href="#" onclick="$('#torrent_<?=$TorrentID?>').gtoggle(); return false;"><?=$ExtraInfo; ?></a>
 				</td>

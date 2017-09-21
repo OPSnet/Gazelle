@@ -220,7 +220,7 @@ function AddArtistField() {
     ArtistField.onblur = CheckVA;
 
     var ImportanceField = document.createElement("select");
-    ImportanceField.id = "importance";
+    ImportanceField.id = "importance_" + ArtistCount;
     ImportanceField.name = "importance[]";
     ImportanceField.options[0] = new Option("Main", "1");
     ImportanceField.options[1] = new Option("Guest", "2");
@@ -330,5 +330,163 @@ function GroupRemaster() {
         $('#remaster_title').raw().value = remasters[index][2];
         $('#remaster_record_label').raw().value = remasters[index][3];
         $('#remaster_catalogue_number').raw().value = remasters[index][4];
+    }
+}
+
+
+/**
+ * Accepts a mapping which is an object where each prop is the id of
+ * an html element and the value corresponds to a key in the data object
+ * which we want to put as the value of the html element.
+ *
+ * @param mapping
+ * @param data
+ */
+function FillInFields(mapping, data) {
+    for (var prop in mapping) {
+        if (!mapping.hasOwnProperty(prop)) {
+            continue;
+        }
+        if (data[mapping[prop]] && data[mapping[prop]] !== '') {
+            $('#' + prop).val(data[mapping[prop]]);
+        }
+    }
+}
+
+function AddArtist(array, importance, cnt) {
+    for (var i = 0; i < array.length; i++) {
+        var artist_id = (cnt > 0) ? 'artist_' + cnt : 'artist';
+        var importance_id = (cnt > 0) ? 'importance_' + cnt : 'importance';
+        if (array[i]['name']) {
+			$('#' + artist_id).val(array[i]['name']);
+			$('#' + importance_id).val(importance);
+			AddArtistField();
+			cnt++;
+        }
+    }
+    return cnt;
+}
+
+function ParseMusicJson(group, torrent) {
+    console.log(group);
+    console.log(torrent);
+
+    var cnt = 0;
+
+	// JSON property to HTML value for importance
+	var mapping = {
+		artists: 1,
+		with: 2,
+		composers: 4,
+		conductor: 5,
+		dj: 6,
+		remixedBy: 3,
+		producer: 7
+	};
+
+    if (group['musicInfo']) {
+		for (var prop in group['musicInfo']) {
+		    if (!group['musicInfo'].hasOwnProperty(prop)) {
+		        continue;
+            }
+            cnt = AddArtist(group['musicInfo'][prop], mapping[prop], cnt);
+		}
+    }
+
+    // HTML ID to JSON key for group data
+    mapping = {
+		record_label: 'recordLabel',
+		releasetype: 'releaseType',
+		catalogue_number: 'catalogueNumber'
+	};
+
+	FillInFields(mapping, group);
+
+	// HTML ID to JSON key for torrent data
+	mapping = {
+		format: 'format',
+		bitrate: 'encoding',
+		media: 'media'
+    };
+	FillInFields(mapping, torrent);
+
+	// special columns
+    if (group['tags']) {
+        $('#tags').val(group['tags'].join(','));
+    }
+
+    if (torrent['scene']) {
+        $('#scene').prop('checked', torrent['scene']);
+    }
+
+    if (torrent['remastered'] === true) {
+        $('remaster').prop('checked', torrent['remastered']);
+        mapping = {
+            remaster_year: 'remasterYear',
+			remaster_title: 'remasterTitle',
+			remaster_record_label: 'remasterRecordLabel',
+			remaster_catalogue_number: 'remasterCatalogueNumber'
+        };
+        FillInFields(mapping, torrent);
+    }
+
+    if (torrent['description']) {
+		$.post('upload.php?action=parse_html',
+			{'html': torrent['description']},
+			function(response) {
+				$('#release_desc').val(response);
+			}
+		);
+    }
+}
+
+function ParseUploadJson() {
+    var reader = new FileReader();
+
+    reader.addEventListener('load', function() {
+        try {
+			var data = JSON.parse(reader.result.toString());
+			var group = data['response']['group'];
+			var torrent = data['response']['torrent'];
+			var mapping = {
+			    title: 'name',
+                year: 'year',
+                image: 'wikiImage',
+                //album_desc: 'wikiBody',
+                //desc: 'wikiBody'
+            };
+			FillInFields(mapping, group);
+			if (group['categoryName'] === 'Music') {
+                $('#categories').val(0);
+                ParseMusicJson(group, torrent);
+            }
+
+			if (group['wikiBody']) {
+				$.post('upload.php?action=parse_html',
+					{
+						'html': group['wikiBody']
+					},
+					function(response) {
+						$('#album_desc').val(response);
+						$('#desc').val(response);
+					}
+				);
+            }
+
+            // reset the file input
+            var el = $('#torrent-json-file');
+			el.wrap('<form>').closest('form').get(0).reset();
+			el.unwrap();
+        }
+        catch (e) {
+            alert("Could not read file. Please try again.");
+            console.log(e);
+        }
+    }, false);
+
+
+    var file = $('#torrent-json-file')[0].files[0];
+    if (file) {
+        reader.readAsText(file);
     }
 }
