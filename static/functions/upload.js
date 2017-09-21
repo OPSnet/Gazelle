@@ -456,7 +456,7 @@ function ParseUploadJson() {
                 //desc: 'wikiBody'
             };
 			FillInFields(mapping, group);
-			if (group['categoryName'] === 'Music') {
+			if (!group['cateogryName'] || group['categoryName'] === 'Music') {
                 $('#categories').val(0);
                 ParseMusicJson(group, torrent);
             }
