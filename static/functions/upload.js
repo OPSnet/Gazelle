@@ -414,6 +414,7 @@ function ParseMusicJson(group, torrent) {
             }
             cnt = AddArtist(group['musicInfo'][prop], mapping[prop], cnt);
 		}
+		RemoveArtistField();
     }
 
     // HTML ID to JSON key for group data
@@ -522,9 +523,6 @@ function ParseUploadJson() {
 			var data = JSON.parse(reader.result.toString());
 			var group = data['response']['group'];
 			var torrent = data['response']['torrent'];
-
-			console.log(group);
-			console.log(torrent);
 
 			var categories_mapping = {
 			    'Music': 0,
