@@ -435,7 +435,7 @@ function ParseMusicJson(group, torrent) {
     }
 
     if (torrent['remastered'] === true) {
-        $('remaster').prop('checked', torrent['remastered']);
+        $('#remaster').prop('checked', true);
         mapping = {
             remaster_year: 'remasterYear',
 			remaster_title: 'remasterTitle',
