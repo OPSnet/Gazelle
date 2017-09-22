@@ -16,10 +16,12 @@ function Remaster() {
 }
 
 function Format() {
-    if ($('#format').raw().options[$('#format').raw().selectedIndex].value == 'FLAC') {
-        for (var i = 0; i < $('#bitrate').raw().options.length; i++) {
-            if ($('#bitrate').raw().options[i].value == 'Lossless') {
-                $('#bitrate').raw()[i].selected = true;
+    var format = $('#format');
+    var bitrate = $('#bitrate');
+    if (format.raw().options[format.raw().selectedIndex].value === 'FLAC') {
+        for (var i = 0; i < bitrate.raw().options.length; i++) {
+            if (bitrate.raw().options[i].value === 'Lossless') {
+                bitrate.raw()[i].selected = true;
             }
         }
         $('#upload_logs').gshow();
@@ -29,16 +31,20 @@ function Format() {
         $('#upload_logs').ghide();
     }
 
-    if ($('#format').raw().options[$('#format').raw().selectedIndex].value == 'AAC') {
-        $('#format_warning').raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on APOLLO in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
-    } else {
-        $('#format_warning').raw().innerHTML = '';
+    var format_warning = $('#format_warning');
+    if (format_warning.raw()) {
+		if (format.raw().options[format.raw().selectedIndex].value === 'AAC') {
+			format_warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on APOLLO in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
+		} else {
+			format_warning.raw().innerHTML = '';
+		}
     }
 }
 
 function Bitrate() {
+    var bitrate = $('#bitrate');
     $('#other_bitrate').raw().value = '';
-    if ($('#bitrate').raw().options[$('#bitrate').raw().selectedIndex].value == 'Other') {
+    if (bitrate.raw().options[bitrate.raw().selectedIndex].value === 'Other') {
         $('#other_bitrate_span').gshow();
     } else {
         $('#other_bitrate_span').ghide();
@@ -57,7 +63,7 @@ function AltBitrate() {
 function add_tag() {
     if ($('#tags').raw().value == "") {
         $('#tags').raw().value = $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
-    } else if ($('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value == '---') {
+    } else if ($('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value === '---') {
     } else {
         $('#tags').raw().value = $('#tags').raw().value + ', ' + $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
     }
@@ -348,7 +354,7 @@ function FillInFields(mapping, data) {
             continue;
         }
         if (data[mapping[prop]] && data[mapping[prop]] !== '') {
-            $('#' + prop).val(data[mapping[prop]]);
+            $('#' + prop).val(data[mapping[prop]]).trigger('change');
         }
     }
 }
@@ -367,10 +373,23 @@ function AddArtist(array, importance, cnt) {
     return cnt;
 }
 
-function ParseMusicJson(group, torrent) {
-    console.log(group);
-    console.log(torrent);
+function ParseEncoding(encoding) {
+    if ($("#bitrate option[value='" + encoding + "']").length > 0) {
+        $('#bitrate').val(encoding);
+    }
+    else {
+        $('#bitrate').val('Other').trigger('change');
+        setTimeout(function() {
+            if (encoding.length > 5 && encoding.substr(-5) === '(VBR)') {
+                encoding = encoding.substr(0, encoding.length - 6);
+				$('#vbr').prop('checked', true);
+            }
+            $('#other_bitrate').val(encoding);
+        }, 50);
+    }
+}
 
+function ParseMusicJson(group, torrent) {
     var cnt = 0;
 
 	// JSON property to HTML value for importance
@@ -405,15 +424,11 @@ function ParseMusicJson(group, torrent) {
 	// HTML ID to JSON key for torrent data
 	mapping = {
 		format: 'format',
-		bitrate: 'encoding',
 		media: 'media'
     };
 	FillInFields(mapping, torrent);
 
-	// special columns
-    if (group['tags']) {
-        $('#tags').val(group['tags'].join(','));
-    }
+	ParseEncoding(torrent['encoding']);
 
     if (torrent['scene']) {
         $('#scene').prop('checked', torrent['scene']);
@@ -429,15 +444,57 @@ function ParseMusicJson(group, torrent) {
         };
         FillInFields(mapping, torrent);
     }
+}
 
-    if (torrent['description']) {
+function ParseForm(group, torrent) {
+	var mapping = {
+		title: 'name',
+		year: 'year',
+		image: 'wikiImage'
+	};
+	FillInFields(mapping, group);
+
+	if (!group['categoryName'] || group['categoryName'] === 'Music') {
+		ParseMusicJson(group, torrent);
+	}
+	else if (group['categoryName'] === 'Comedy') {
+        mapping = {
+            format: 'format'
+        };
+	    FillInFields(mapping, torrent);
+        ParseEncoding(torrent['encoding']);
+	}
+
+	// special columns
+	if (group['tags']) {
+		$('#tags').val(group['tags'].join(','));
+	}
+
+	if (group['wikiBody']) {
+		$.post('upload.php?action=parse_html',
+			{
+				'html': group['wikiBody']
+			},
+			function(response) {
+				$('#album_desc').val(response);
+				$('#desc').val(response);
+			}
+		);
+	}
+
+	if (torrent['description']) {
 		$.post('upload.php?action=parse_html',
 			{'html': torrent['description']},
 			function(response) {
 				$('#release_desc').val(response);
 			}
 		);
-    }
+	}
+
+	// reset the file input
+	var el = $('#torrent-json-file');
+	el.wrap('<form>').closest('form').get(0).reset();
+	el.unwrap();
 }
 
 function ParseUploadJson() {
@@ -448,35 +505,24 @@ function ParseUploadJson() {
 			var data = JSON.parse(reader.result.toString());
 			var group = data['response']['group'];
 			var torrent = data['response']['torrent'];
-			var mapping = {
-			    title: 'name',
-                year: 'year',
-                image: 'wikiImage',
-                //album_desc: 'wikiBody',
-                //desc: 'wikiBody'
+
+			var categories = {
+			    'Music': 0,
+                'Applications': 1,
+			    'E-Books': 2,
+                'Audiobooks': 3,
+                'E-Learning Videos': 4,
+                'Comedy': 5,
+                'Comics': 6
             };
-			FillInFields(mapping, group);
-			if (!group['cateogryName'] || group['categoryName'] === 'Music') {
-                $('#categories').val(0);
-                ParseMusicJson(group, torrent);
+			if (group['categoryName']) {
+			    $('#categories').val(categories[group['categoryName']]).trigger('change');
+			    // delay for the form to change before filling it
+			    setTimeout(function() { ParseForm(group, torrent); }, 100);
             }
-
-			if (group['wikiBody']) {
-				$.post('upload.php?action=parse_html',
-					{
-						'html': group['wikiBody']
-					},
-					function(response) {
-						$('#album_desc').val(response);
-						$('#desc').val(response);
-					}
-				);
+            else {
+			    ParseForm(group, torrent);
             }
-
-            // reset the file input
-            var el = $('#torrent-json-file');
-			el.wrap('<form>').closest('form').get(0).reset();
-			el.unwrap();
         }
         catch (e) {
             alert("Could not read file. Please try again.");

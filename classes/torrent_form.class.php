@@ -679,7 +679,7 @@ function show() {
 			<tr>
 				<td class="label">Format:</td>
 				<td>
-					<select name="format" onchange="Format()">
+					<select id="format" name="format" onchange="Format()">
 						<option value="">---</option>
 <?
 		foreach (Misc::display_array($this->Formats) as $Format) {

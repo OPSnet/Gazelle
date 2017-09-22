@@ -945,6 +945,7 @@ class Text {
 		$Document = new DOMDocument();
 		$Document->loadHtml($Html);
 		$Elements = $Document->getElementsByTagName('span');
+		// When removing elements, you have to iterate over the list backwards
 		for ($i = $Elements->length - 1; $i >= 0; $i--) {
 			$Element = $Elements->item($i);
 			if (strpos($Element->getAttribute('class'), 'size') !== false) {
@@ -960,19 +961,65 @@ class Text {
 				$NewElement = $Document->createElement('underline', $Element->nodeValue);
 				$Element->parentNode->replaceChild($NewElement, $Element);
 			}
+			elseif (strpos($Element->getAttribute('style'), 'color: ') !== false) {
+				$NewElement = $Document->createElement('color', $Element->nodeValue);
+				$NewElement->setAttribute('color', str_replace(array('color: ', ';'), '', $Element->getAttribute('style')));
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
 		}
 
-		$Str = str_replace(array("<body>\n", "\n</body>"), "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
+		$Elements = $Document->getElementsByTagName('ul');
+		for ($i = 0; $i < $Elements->length; $i++) {
+			$InnerElements = $Elements->item($i)->getElementsByTagName('li');
+			for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
+				$Element = $InnerElements->item($j);
+				$NewElement = $Document->createElement('bullet', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Elements = $Document->getElementsByTagName('ol');
+		for ($i = 0; $i < $Elements->length; $i++) {
+			$InnerElements = $Elements->item($i)->getElementsByTagName('li');
+			for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
+				$Element = $InnerElements->item($j);
+				$NewElement = $Document->createElement('number', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Elements = $Document->getElementsByTagName('strong');
+		for ($i = $Elements->length - 1; $i >= 0; $i++) {
+			$Element = $Elements->item($i);
+			if ($Element->hasAttribute('class') === 'important_text') {
+				$NewElement = $Document->createElement('important', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Str = str_replace(array("<body>\n", "\n</body>", "<body>", "</body>"), "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
+		$Str = str_replace(array("\r\n", "\n"), "", $Str);
+		$Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*)\<blockquote\>/","[quote=\\1]", $Str);
+		$Str = preg_replace("/\<(\/*)blockquote\>/", "[\\1quote]", $Str);
 		$Str = preg_replace("/\<(\/*)strong\>/", "[\\1b]", $Str);
 		$Str = preg_replace("/\<(\/*)italic\>/", "[\\1i]", $Str);
-		$Str = preg_replace("/\<(/\*)underline\>/", "[\\1u]", $Str);
+		$Str = preg_replace("/\<(\/*)underline\>/", "[\\1u]", $Str);
+		$Str = preg_replace("/\<(\/*)important\>/", "[\\1important]", $Str);
+		$Str = preg_replace("/\<color color=\"(.*)\"\>/", "[color=\\1]", $Str);
+		$Str = str_replace("</color>", "[/color]", $Str);
+		$Str = str_replace(array('<number>', '<bullet>'), array('[#]', '[*]'), $Str);
+		$Str = str_replace(array('</number>', '</bullet>'), '<br />', $Str);
+		$Str = str_replace(array('<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'), '', $Str);
 		$Str = preg_replace("/\<size size=\"([0-9]+)\"\>/", "[size=\\1]", $Str);
-		$Str = preg_replace("/\<\/size\>/", "[/size]", $Str);
+		$Str = str_replace("</size>", "[/size]", $Str);
 		$Str = preg_replace("/\<a href=\"rules.php?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
 		$Str = preg_replace("/\<a href=\"wiki.php?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
 		$Str = preg_replace("/\<a href=\"artist.php?artistname=(.*)\"\>(.*)\<\/a\>/", "[artist]\\1[/artist]", $Str);
 		$Str = preg_replace("/\<a href=\"user.php?action=search&search=(.*)\"\>(.*)\<\/a\>/", "[user]\\1[/user]", $Str);
 		$Str = preg_replace("/\<a(.*)href=\"(.*)\">(.*)\<\/a\>/", "[url=\\2]\\3[/url]", $Str);
+		$Str = preg_replace("/\<img(.*)src=\"(.*)\"(.*)\>/", '[img]\\2[/img]', $Str);
+		$Str = str_replace('<p>', '', $Str);
+		$Str = str_replace('</p>', '<br />', $Str);
 		return str_replace(array("<br />", "<br>"), "\n", $Str);
 	}
 }
