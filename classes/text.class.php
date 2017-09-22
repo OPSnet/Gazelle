@@ -1001,10 +1001,10 @@ class Text {
 		for ($i = $Elements->length - 1; $i >= 0; $i--) {
 			$Element = $Elements->item($i);
 			if ($Element->hasAttribute('href')) {
+				$Element->removeAttribute('rel');
+				$Element->removeAttribute('target');
 				if ($Element->getAttribute('href') === $Element->nodeValue) {
 					$Element->removeAttribute('href');
-					$Element->removeAttribute('rel');
-					$Element->removeAttribute('target');
 				}
 				elseif ($Element->getAttribute('href') === 'javascript:void(0);'
 					&& $Element->getAttribute('onclick') === 'BBCode.spoiler(this);') {
@@ -1018,7 +1018,14 @@ class Text {
 							break;
 						}
 					}
-
+				}
+				elseif (substr($Element->getAttribute('href'), 0, 22) === 'artist.php?artistname=') {
+					$NewElement = $Document->createElement('artist', $Element->nodeValue);
+					$Element->parentNode->replaceChild($NewElement, $Element);
+				}
+				elseif (substr($Element->getAttribute('href'), 0, 30) === 'user.php?action=search&search=') {
+					$NewElement = $Document->createElement('user', $Element->nodeValue);
+					$Element->parentNode->replaceChild($NewElement, $Element);
 				}
 			}
 		}
@@ -1040,11 +1047,11 @@ class Text {
 		$Str = str_replace(array('<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'), '', $Str);
 		$Str = preg_replace("/\<size size=\"([0-9]+)\"\>/", "[size=\\1]", $Str);
 		$Str = str_replace("</size>", "[/size]", $Str);
-		$Str = preg_replace("/\<a href=\"rules.php?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
-		$Str = preg_replace("/\<a href=\"wiki.php?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
-		$Str = preg_replace("/\<a href=\"artist.php?artistname=(.*)\"\>(.*)\<\/a\>/", "[artist]\\1[/artist]", $Str);
-		$Str = preg_replace("/\<a href=\"user.php?action=search&search=(.*)\"\>(.*)\<\/a\>/", "[user]\\1[/user]", $Str);
-		$Str = preg_replace("/\<a(.*)href=\"(.*)\">(.*)\<\/a\>/", "[url=\\2]\\3[/url]", $Str);
+		//$Str = preg_replace("/\<a href=\"rules.php\?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
+		//$Str = preg_replace("/\<a href=\"wiki.php\?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
+		$Str = preg_replace("/\<(\/*)artist\>/", "[\\1artist]", $Str);
+		$Str = preg_replace("/\((\/*)user\>/", "[\\1user]", $Str);
+		$Str = preg_replace("/\<a href=\"(.*)\">/", "[url=\\2]", $Str);
 		$Str = preg_replace("/\<(\/*)a\>/", "[\\1url]", $Str);
 		$Str = preg_replace("/\<img(.*)src=\"(.*)\"(.*)\>/", '[img]\\2[/img]', $Str);
 		$Str = str_replace('<p>', '', $Str);

@@ -1,3 +1,5 @@
+var ArtistCount = 1;
+
 function Categories() {
 	var dynamic_form = $('#dynamic_form');
     ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
@@ -8,6 +10,8 @@ function Categories() {
         setTimeout(function() {
 			dynamic_form.data('loaded', true);
 		}, 500);
+
+		ArtistCount = 1;
     });
 }
 
@@ -214,9 +218,6 @@ function RemoveFormat() {
 
     FormatCount--;
 }
-
-
-var ArtistCount = 1;
 
 function AddArtistField() {
     if (ArtistCount >= 200) {
