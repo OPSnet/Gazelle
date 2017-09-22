@@ -1179,7 +1179,11 @@ if (check_perms('users_mod', $Class)) { ?>
 			<tr>
 				<td class="label">Two-factor Authentication:</td>
 				<td>
-					<a href="user.php?action=2fa&page=user&do=<?= $FA_Key ? 'disable' : 'enable'; ?>&userid=<?= $UserID ?>">Click here to <?= $FA_Key ? 'disable' : 'enable'; ?></a>
+<?      if ($FA_Key) { ?>
+					<a href="user.php?action=2fa&page=user&do=disable&userid=<?= $UserID ?>">Click here to disable</a>
+<?      } else { ?>
+					Currently Disabled
+<?      } ?>
 				</td>
 			</tr>
 
