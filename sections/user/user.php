@@ -18,8 +18,7 @@ if ($UserID == $LoggedUser['ID']) {
 }
 $EnabledRewards = Donations::get_enabled_rewards($UserID);
 $ProfileRewards = Donations::get_profile_rewards($UserID);
-
-
+$FA_Key = null;
 
 if (check_perms('users_mod')) { // Person viewing is a staff member
 	$DB->query("
@@ -65,6 +64,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 			i.DisableIRC,
 			i.DisableRequests," . "
 			m.FLTokens,
+			m.2FA_Key,
 			SHA1(i.AdminComment),
 			i.InfoTitle,
 			la.Type AS LockedAccount
@@ -81,7 +81,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 		header("Location: log.php?search=User+$UserID");
 	}
 
-	list($Username,	$Email,	$LastAccess, $IP, $Class, $Uploaded, $Downloaded, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, array(8, 11));
+	list($Username,	$Email,	$LastAccess, $IP, $Class, $Uploaded, $Downloaded, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, array(8, 11));
 } else { // Person viewing is a normal user
 	$DB->query("
 		SELECT
@@ -1175,6 +1175,14 @@ if (check_perms('users_mod', $Class)) { ?>
 					<button type="button" id="random_password">Generate</button>
 				</td>
 			</tr>
+
+			<tr>
+				<td class="label">Two-factor Authentication:</td>
+				<td>
+					<a href="user.php?action=2fa&page=user&do=<?= $FA_Key ? 'disable' : 'enable'; ?>&userid=<?= $UserID ?>">Click here to <?= $FA_Key ? 'disable' : 'enable'; ?></a>
+				</td>
+			</tr>
+
 <?	} ?>
 		</table>
 

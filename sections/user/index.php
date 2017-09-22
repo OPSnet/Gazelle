@@ -150,7 +150,8 @@ switch ($_REQUEST['action']) {
 						exit;
 					}
 					$DB->query("UPDATE users_main SET 2FA_Key = '', Recovery = '' WHERE ID = '{$UserID}'");
-					header('Location: user.php?action=edit&userid=' . $LoggedUser['ID']);
+					$action = (!isset($_GET['page']) || $_GET['page'] !== 'user') ? 'action=edit&' : '';
+					header('Location: user.php?' . $action . 'userid=' . $LoggedUser['ID']);
 				}
 				break;
 		}
