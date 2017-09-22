@@ -1,12 +1,13 @@
 function Categories() {
 	var dynamic_form = $('#dynamic_form');
-	dynamic_form.data('loaded', false);
     ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
 		dynamic_form.raw().innerHTML = response;
-		dynamic_form.data('loaded', true);
         initMultiButtons();
         // Evaluate the code that generates previews.
         eval($('#dynamic_form script.preview_code').html());
+        setTimeout(function() {
+			dynamic_form.data('loaded', true);
+		}, 500);
     });
 }
 
@@ -508,7 +509,7 @@ function WaitForCategory(callback) {
 			callback();
 		}
 		else {
-			setTimeout(WaitForCategory, 100);
+			setTimeout(WaitForCategory(callback), 400);
 		}
 	}, 100);
 }
@@ -536,16 +537,13 @@ function ParseUploadJson() {
             };
 
 			var categories = $('#categories');
-			categories.val((categories.val() + 1) % 7).trigger('change');
+			if (!group['categoryName']) {
+				group['categoryName'] = 'Music';
+			}
+			categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
+			// delay for the form to change before filling it
 			WaitForCategory(function() {
-				if (!group['categoryName']) {
-					group['categoryName'] = 'Music';
-				}
-				categories.val(categories_mapping[group['categoryName']]).trigger('change');
-				// delay for the form to change before filling it
-				WaitForCategory(function() {
-					ParseForm(group, torrent);
-				});
+				ParseForm(group, torrent);
 			});
         }
         catch (e) {
