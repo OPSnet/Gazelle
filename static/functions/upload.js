@@ -506,7 +506,7 @@ function ParseUploadJson() {
 			var group = data['response']['group'];
 			var torrent = data['response']['torrent'];
 
-			var categories = {
+			var categories_mapping = {
 			    'Music': 0,
                 'Applications': 1,
 			    'E-Books': 2,
@@ -515,21 +515,23 @@ function ParseUploadJson() {
                 'Comedy': 5,
                 'Comics': 6
             };
-			if (group['categoryName']) {
-			    $('#categories').val(categories[group['categoryName']]).trigger('change');
-			    // delay for the form to change before filling it
-			    setTimeout(function() { ParseForm(group, torrent); }, 100);
-            }
-            else {
-			    ParseForm(group, torrent);
-            }
+
+			var categories = $('#categories');
+			categories.val((categories.val() + 1) % 7).trigger('change');
+			setTimeout(function() {
+				if (!group['categoryName']) {
+					group['categoryName'] = 'Music';
+				}
+				categories.val(categories_mapping[group['categoryName']]).trigger('change');
+				// delay for the form to change before filling it
+				setTimeout(function() { ParseForm(group, torrent); }, 100);
+			});
         }
         catch (e) {
             alert("Could not read file. Please try again.");
             console.log(e);
         }
     }, false);
-
 
     var file = $('#torrent-json-file')[0].files[0];
     if (file) {
