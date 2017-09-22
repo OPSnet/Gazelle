@@ -1,6 +1,9 @@
 function Categories() {
+	var dynamic_form = $('#dynamic_form');
+	dynamic_form.data('loaded', false);
     ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
-        $('#dynamic_form').raw().innerHTML = response;
+		dynamic_form.raw().innerHTML = response;
+		dynamic_form.data('loaded', true);
         initMultiButtons();
         // Evaluate the code that generates previews.
         eval($('#dynamic_form script.preview_code').html());
@@ -435,7 +438,7 @@ function ParseMusicJson(group, torrent) {
     }
 
     if (torrent['remastered'] === true) {
-        $('#remaster').prop('checked', true);
+        $('#remaster').prop('checked', true).triggerHandler('click');
         mapping = {
             remaster_year: 'remasterYear',
 			remaster_title: 'remasterTitle',
@@ -497,6 +500,17 @@ function ParseForm(group, torrent) {
 	el.unwrap();
 }
 
+function WaitForCategory(callback) {
+	setTimeout(function() {
+		if ($('#dynamic_form').data('loaded') === true) {
+			callback();
+		}
+		else {
+			setTimeout(WaitForCategory, 100);
+		}
+	}, 100);
+}
+
 function ParseUploadJson() {
     var reader = new FileReader();
 
@@ -505,6 +519,9 @@ function ParseUploadJson() {
 			var data = JSON.parse(reader.result.toString());
 			var group = data['response']['group'];
 			var torrent = data['response']['torrent'];
+
+			console.log(group);
+			console.log(torrent);
 
 			var categories_mapping = {
 			    'Music': 0,
@@ -518,13 +535,15 @@ function ParseUploadJson() {
 
 			var categories = $('#categories');
 			categories.val((categories.val() + 1) % 7).trigger('change');
-			setTimeout(function() {
+			WaitForCategory(function() {
 				if (!group['categoryName']) {
 					group['categoryName'] = 'Music';
 				}
 				categories.val(categories_mapping[group['categoryName']]).trigger('change');
 				// delay for the form to change before filling it
-				setTimeout(function() { ParseForm(group, torrent); }, 100);
+				WaitForCategory(function() {
+					ParseForm(group, torrent);
+				});
 			});
         }
         catch (e) {

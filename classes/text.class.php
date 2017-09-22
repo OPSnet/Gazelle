@@ -1000,15 +1000,33 @@ class Text {
 		$Elements = $Document->getElementsByTagName('a');
 		for ($i = $Elements->length - 1; $i >= 0; $i--) {
 			$Element = $Elements->item($i);
-			if ($Element->hasAttribute('href') && $Element->getAttribute('href') === $Element->nodeValue) {
-				$Element->removeAttribute('href');
-				$Element->removeAttribute('rel');
-				$Element->removeAttribute('target');
+			if ($Element->hasAttribute('href')) {
+				if ($Element->getAttribute('href') === $Element->nodeValue) {
+					$Element->removeAttribute('href');
+					$Element->removeAttribute('rel');
+					$Element->removeAttribute('target');
+				}
+				elseif ($Element->getAttribute('href') === 'javascript:void(0);'
+					&& $Element->getAttribute('onclick') === 'BBCode.spoiler(this);') {
+					$Spoilers = $Document->getElementsByTagName('blockquote');
+					for ($j = $Spoilers->length - 1; $j >= 0; $j--) {
+						$Spoiler = $Spoilers->item($j);
+						if ($Spoiler->hasAttribute('class') && $Spoiler->getAttribute('class') === 'hidden spoiler') {
+							$NewElement = $Document->createElement('spoiler', $Spoiler->nodeValue);
+							$Element->parentNode->replaceChild($NewElement, $Element);
+							$Spoiler->parentNode->removeChild($Spoiler);
+							break;
+						}
+					}
+
+				}
 			}
 		}
 
 		$Str = str_replace(array("<body>\n", "\n</body>", "<body>", "</body>"), "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
 		$Str = str_replace(array("\r\n", "\n"), "", $Str);
+		$Str = preg_replace("/\<strong\>([a-zA-Z0-9 ]+)\<\/strong\>\: \<spoiler\>/", "[spoiler=\\1]", $Str);
+		$Str = str_replace("</spoiler>", "[/spoiler]", $Str);
 		$Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*)\<blockquote\>/","[quote=\\1]", $Str);
 		$Str = preg_replace("/\<(\/*)blockquote\>/", "[\\1quote]", $Str);
 		$Str = preg_replace("/\<(\/*)strong\>/", "[\\1b]", $Str);
@@ -1031,6 +1049,7 @@ class Text {
 		$Str = preg_replace("/\<img(.*)src=\"(.*)\"(.*)\>/", '[img]\\2[/img]', $Str);
 		$Str = str_replace('<p>', '', $Str);
 		$Str = str_replace('</p>', '<br />', $Str);
+		//return $Str;
 		return str_replace(array("<br />", "<br>"), "\n", $Str);
 	}
 }
