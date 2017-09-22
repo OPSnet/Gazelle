@@ -989,11 +989,21 @@ class Text {
 		}
 
 		$Elements = $Document->getElementsByTagName('strong');
-		for ($i = $Elements->length - 1; $i >= 0; $i++) {
+		for ($i = $Elements->length - 1; $i >= 0; $i--) {
 			$Element = $Elements->item($i);
 			if ($Element->hasAttribute('class') === 'important_text') {
 				$NewElement = $Document->createElement('important', $Element->nodeValue);
 				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Elements = $Document->getElementsByTagName('a');
+		for ($i = $Elements->length - 1; $i >= 0; $i--) {
+			$Element = $Elements->item($i);
+			if ($Element->hasAttribute('href') && $Element->getAttribute('href') === $Element->nodeValue) {
+				$Element->removeAttribute('href');
+				$Element->removeAttribute('rel');
+				$Element->removeAttribute('target');
 			}
 		}
 
@@ -1017,6 +1027,7 @@ class Text {
 		$Str = preg_replace("/\<a href=\"artist.php?artistname=(.*)\"\>(.*)\<\/a\>/", "[artist]\\1[/artist]", $Str);
 		$Str = preg_replace("/\<a href=\"user.php?action=search&search=(.*)\"\>(.*)\<\/a\>/", "[user]\\1[/user]", $Str);
 		$Str = preg_replace("/\<a(.*)href=\"(.*)\">(.*)\<\/a\>/", "[url=\\2]\\3[/url]", $Str);
+		$Str = preg_replace("/\<(\/*)a\>/", "[\\1url]", $Str);
 		$Str = preg_replace("/\<img(.*)src=\"(.*)\"(.*)\>/", '[img]\\2[/img]', $Str);
 		$Str = str_replace('<p>', '', $Str);
 		$Str = str_replace('</p>', '<br />', $Str);
