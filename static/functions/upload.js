@@ -502,7 +502,9 @@ function ParseForm(group, torrent) {
 
 function WaitForCategory(callback) {
 	setTimeout(function() {
-		if ($('#dynamic_form').data('loaded') === true) {
+		var dynamic_form = $('#dynamic_form');
+		if (dynamic_form.data('loaded') === true) {
+			dynamic_form.data('loaded', false);
 			callback();
 		}
 		else {
