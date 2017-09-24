@@ -77,10 +77,8 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
 							('$UserID', '$_SERVER[REMOTE_ADDR]', '".sqltime()."')");
 					$Reset = true; // Past tense form of "to reset", meaning that password has now been reset
 					$LoggedUser['ID'] = $UserID; // Set $LoggedUser['ID'] for logout_all_sessions() to work
-					
+
 					logout_all_sessions();
-
-
 				}
 			}
 
@@ -168,27 +166,20 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
 	} // End if (step 1)
 
 } // End password recovery
-elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
+elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
 	if (!isset($_SESSION['temp_user_data'])) {
 		header('Location: login.php');
 		exit;
 	}
-	
-	if (empty($_POST['2fa'])) {
-		require('2fa.php');
-	} else {
-		include(SERVER_ROOT . '/classes/google_authenticator.class.php');
-		
-		list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $_SESSION['temp_user_data'];
-		
-		if (!(new PHPGangsta_GoogleAuthenticator())->verifyCode($TFAKey, $_POST['2fa'], 2)) {
-			// invalid 2fa key, log the user completely out
-			unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
-			header('Location: login.php?invalid2fa');
-		} else {
+	elseif (empty($_POST['2fa_recovery_key'])) {
+		require('2fa_recovery.php');
+	}
+	else {
+		list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+		$Recovery = (!empty($Recovery)) ? unserialize($Recovery) : array();
+		if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) !== false) {
 			$SessionID = Users::make_secret();
 			$Cookie = $Enc->encrypt($Enc->encrypt($SessionID . '|~|' . $UserID));
-			
 			if ($_SESSION['temp_stay_logged']) {
 				$KeepLogged = 1;
 				setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
@@ -196,9 +187,9 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
 				$KeepLogged = 0;
 				setcookie('session', $Cookie, 0, '/', '', $SSL, true);
 			}
-			
+
 			unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
-			
+
 			//TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
 			// Because we <3 our staff
 			$Permissions = Permissions::get_permissions($PermissionID);
@@ -208,13 +199,13 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
 			) {
 				$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 			}
-			
+
 			$DB->query("
-							INSERT INTO users_sessions
-								(UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, LastUpdate, FullUA)
-							VALUES
-								('$UserID', '" . db_string($SessionID) . "', '$KeepLogged', '$Browser', '$OperatingSystem', '" . db_string($_SERVER['REMOTE_ADDR']) . "', '" . sqltime() . "', '" . db_string($_SERVER['HTTP_USER_AGENT']) . "')");
-			
+				INSERT INTO users_sessions
+					(UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, LastUpdate, FullUA)
+				VALUES
+					('$UserID', '" . db_string($SessionID) . "', '$KeepLogged', '$Browser', '$OperatingSystem', '" . db_string($_SERVER['REMOTE_ADDR']) . "', '" . sqltime() . "', '" . db_string($_SERVER['HTTP_USER_AGENT']) . "')");
+
 			$Cache->begin_transaction("users_sessions_$UserID");
 			$Cache->insert_front($SessionID, array(
 				'SessionID' => $SessionID,
@@ -224,16 +215,171 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
 				'LastUpdate' => sqltime()
 			));
 			$Cache->commit_transaction(0);
-			
+
+			unset($Recovery[$Key]);
+			$Recovery = serialize($Recovery);
+			$Sql = "
+				UPDATE users_main
+				SET
+					LastLogin = '" . sqltime() . "',
+					LastAccess = '" . sqltime() . "',
+					Recovery = '" . db_string($Recovery) . "'
+				WHERE ID = '" . db_string($UserID) . "'";
+
+			$DB->query($Sql);
+
+			if (!empty($_COOKIE['redirect'])) {
+				$URL = $_COOKIE['redirect'];
+				setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
+				header("Location: $URL");
+				die();
+			} else {
+				header('Location: index.php');
+				die();
+			}
+		}
+		else {
+			$DB->query("
+				SELECT ID, Attempts, Bans, BannedUntil
+				FROM login_attempts
+				WHERE IP = '".db_string($_SERVER['REMOTE_ADDR'])."'");
+			list($AttemptID, $Attempts, $Bans, $BannedUntil) = $DB->next_record();
+
+			// Function to log a user's login attempt
+			function log_attempt($UserID) {
+				global $DB, $Cache, $AttemptID, $Attempts, $Bans, $BannedUntil;
+				$IPStr = $_SERVER['REMOTE_ADDR'];
+				$IPA = substr($IPStr, 0, strcspn($IPStr, '.'));
+				$IP = Tools::ip_to_unsigned($IPStr);
+				if ($AttemptID) { // User has attempted to log in recently
+					$Attempts++;
+					if ($Attempts > 5) { // Only 6 allowed login attempts, ban user's IP
+						$BannedUntil = time_plus(60 * 60 * 6);
+						$DB->query("
+					UPDATE login_attempts
+					SET
+						LastAttempt = '".sqltime()."',
+						Attempts = '".db_string($Attempts)."',
+						BannedUntil = '".db_string($BannedUntil)."',
+						Bans = Bans + 1
+					WHERE ID = '".db_string($AttemptID)."'");
+
+						if ($Bans > 9) { // Automated bruteforce prevention
+							$DB->query("
+						SELECT Reason
+						FROM ip_bans
+						WHERE $IP BETWEEN FromIP AND ToIP");
+							if ($DB->has_results()) {
+								//Ban exists already, only add new entry if not for same reason
+								list($Reason) = $DB->next_record(MYSQLI_BOTH, false);
+								if ($Reason != 'Automated ban per >60 failed login attempts') {
+									$DB->query("
+								UPDATE ip_bans
+								SET Reason = CONCAT('Automated ban per >60 failed login attempts AND ', Reason)
+								WHERE FromIP = $IP
+									AND ToIP = $IP");
+								}
+							} else {
+								//No ban
+								$DB->query("
+							INSERT IGNORE INTO ip_bans
+								(FromIP, ToIP, Reason)
+							VALUES
+								('$IP','$IP', 'Automated ban per >60 failed login attempts')");
+								$Cache->delete_value("ip_bans_$IPA");
+							}
+						}
+					} else {
+						// User has attempted fewer than 6 logins
+						$DB->query("
+					UPDATE login_attempts
+					SET
+						LastAttempt = '".sqltime()."',
+						Attempts = '".db_string($Attempts)."',
+						BannedUntil = '0000-00-00 00:00:00'
+					WHERE ID = '".db_string($AttemptID)."'");
+					}
+				} else { // User has not attempted to log in recently
+					$Attempts = 1;
+					$DB->query("
+				INSERT INTO login_attempts
+					(UserID, IP, LastAttempt, Attempts)
+				VALUES
+					('".db_string($UserID)."', '".db_string($IPStr)."', '".sqltime()."', 1)");
+				}
+			} // end log_attempt function
+			log_attempt($UserID);
+			unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+			header('Location: login.php');
+		}
+	}
+}
+elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
+	if (!isset($_SESSION['temp_user_data'])) {
+		header('Location: login.php');
+		exit;
+	}
+
+	if (empty($_POST['2fa'])) {
+		require('2fa.php');
+	} else {
+		include(SERVER_ROOT . '/classes/google_authenticator.class.php');
+
+		list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+
+		if (!(new PHPGangsta_GoogleAuthenticator())->verifyCode($TFAKey, $_POST['2fa'], 2)) {
+			// invalid 2fa key, log the user completely out
+			unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+			header('Location: login.php?invalid2fa');
+		} else {
+			$SessionID = Users::make_secret();
+			$Cookie = $Enc->encrypt($Enc->encrypt($SessionID . '|~|' . $UserID));
+
+			if ($_SESSION['temp_stay_logged']) {
+				$KeepLogged = 1;
+				setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
+			} else {
+				$KeepLogged = 0;
+				setcookie('session', $Cookie, 0, '/', '', $SSL, true);
+			}
+
+			unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+
+			//TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
+			// Because we <3 our staff
+			$Permissions = Permissions::get_permissions($PermissionID);
+			$CustomPermissions = unserialize($CustomPermissions);
+			if (isset($Permissions['Permissions']['site_disable_ip_history'])
+				|| isset($CustomPermissions['site_disable_ip_history'])
+			) {
+				$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+			}
+
+			$DB->query("
+							INSERT INTO users_sessions
+								(UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, LastUpdate, FullUA)
+							VALUES
+								('$UserID', '" . db_string($SessionID) . "', '$KeepLogged', '$Browser', '$OperatingSystem', '" . db_string($_SERVER['REMOTE_ADDR']) . "', '" . sqltime() . "', '" . db_string($_SERVER['HTTP_USER_AGENT']) . "')");
+
+			$Cache->begin_transaction("users_sessions_$UserID");
+			$Cache->insert_front($SessionID, array(
+				'SessionID' => $SessionID,
+				'Browser' => $Browser,
+				'OperatingSystem' => $OperatingSystem,
+				'IP' => $_SERVER['REMOTE_ADDR'],
+				'LastUpdate' => sqltime()
+			));
+			$Cache->commit_transaction(0);
+
 			$Sql = "
 							UPDATE users_main
 							SET
 								LastLogin = '" . sqltime() . "',
 								LastAccess = '" . sqltime() . "'
 							WHERE ID = '" . db_string($UserID) . "'";
-			
+
 			$DB->query($Sql);
-			
+
 			if (!empty($_COOKIE['redirect'])) {
 				$URL = $_COOKIE['redirect'];
 				setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
@@ -252,7 +398,7 @@ else {
 		header('Location: login.php?act=2fa');
 		exit;
 	}
-	
+
 	$Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', array('regex' => USERNAME_REGEX));
 	$Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', array('minlength' => '6', 'maxlength' => '150'));
 
@@ -344,11 +490,12 @@ else {
 					PassHash,
 					Secret,
 					Enabled,
-					2FA_Key
+					2FA_Key,
+					Recovery
 				FROM users_main
 				WHERE Username = '".db_string($_POST['username'])."'
 					AND Username != ''");
-			$UserData = $DB->next_record(MYSQLI_NUM, array(2));
+			$UserData = $DB->next_record(MYSQLI_NUM, array(2, 7));
 			list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
 			if (strtotime($BannedUntil) < time()) {
 				if ($UserID && Users::check_password($_POST['password'], $PassHash, $Secret)) {
@@ -362,7 +509,7 @@ else {
 					if ($Enabled == 1) {
 						$SessionID = Users::make_secret();
 						$Cookie = $Enc->encrypt($Enc->encrypt($SessionID . '|~|' . $UserID));
-						
+
 						if ($TFAKey) {
 							// user has TFA enabled! :)
 							$_SESSION['temp_stay_logged'] = (isset($_POST['keeplogged']) && $_POST['keeplogged']);
@@ -370,7 +517,7 @@ else {
 							header('Location: login.php?act=2fa');
 							exit;
 						}
-						
+
 						if (isset($_POST['keeplogged']) && $_POST['keeplogged']) {
 							$KeepLogged = 1;
 							setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
