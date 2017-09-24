@@ -31,10 +31,11 @@ if (isset($_POST['GroupID'])) {
 
 	//Make sure album exists
 	if (is_number($Album['ID'])) {
-	    
+
 	    //Remove old albums
         $DB->query('TRUNCATE TABLE `featured_albums`');
-	    	
+        $Cache->delete_value('featured_album');
+
 		//Get post title (album title)
 		if ($Album['ArtistID'] != '0') {
 			$Title = $Album['Artist'] . ' - ' . $Album['Name'];
@@ -97,7 +98,7 @@ if (isset($_POST['GroupID'])) {
 	</form>
 	</div>
 <?
-	
+
  	View::show_footer();
 }
 
