@@ -196,7 +196,7 @@ switch ($Action) {
 	case 'collages':
 		$BaseLink = 'comments.php?action=collages' . $LinkID;
 		if ($Type != 'default') {
-			$TypeLinks[] = '<a href="' . $BaseLink . '" class="brackets">Display collage comments ' . ($Self ? 'you\'ve' : $Username . ' has') . ' made</a>';
+			$TypeLinks[] = '<a href="' . $BaseLink . '" class="brackets">Display comments left on collages ' . ($Self ? 'you\'ve' : $Username . ' has') . ' made</a>';
 		}
 		if ($Type != 'created') {
 			$TypeLinks[] = '<a href="' . $BaseLink . '&amp;type=created" class="brackets">Display comments left on ' . ($Self ? 'your collages' : 'collages created by ' .$Username) . '</a>';
@@ -208,21 +208,23 @@ switch ($Action) {
 	case 'requests':
 		$BaseLink = 'comments.php?action=requests' . $LinkID;
 		if ($Type != 'default') {
-			$TypeLinks[] = '<a href="' . $BaseLink . '" class="brackets">Display request comments you\'ve made</a>';
+			$TypeLinks[] = '<a href="' . $BaseLink . '" class="brackets">Display comments left on requests ' . ($Self ? 'you\'ve' : $Username . 'has') . ' made</a>';
 		}
 		if ($Type != 'created') {
-			$TypeLinks[] = '<a href="' . $BaseLink . '&amp;type=created" class="brackets">Display comments left on your requests</a>';
+			//
+			//your requests
+			$TypeLinks[] = '<a href="' . $BaseLink . '&amp;type=created" class="brackets">Display comments left on requests ' . ($Self ? 'you' :  $Username) . ' created</a>';
 		}
 		if ($Type != 'voted') {
-			$TypeLinks[] = '<a href="' . $BaseLink . '&amp;type=voted" class="brackets">Display comments left on requests you\'ve voted on</a>';
+			$TypeLinks[] = '<a href="' . $BaseLink . '&amp;type=voted" class="brackets">Display comments left on requests ' . ($Self ? 'you\'ve' : $Username . ' has') . ' voted on</a>';
 		}
 		break;
 	case 'torrents':
 		if ($Type != 'default') {
-			$TypeLinks[] = '<a href="comments.php?action=torrents' . $LinkID . '" class="brackets">Display comments you have made</a>';
+			$TypeLinks[] = '<a href="comments.php?action=torrents' . $LinkID . '" class="brackets">Display comments left on torrents ' . ($Self ? 'you\'ve' : $Username . ' has' ) . ' made</a>';
 		}
 		if ($Type != 'uploaded') {
-			$TypeLinks[] = '<a href="comments.php?action=torrents' . $LinkID . '&amp;type=uploaded" class="brackets">Display comments left on your uploads</a>';
+			$TypeLinks[] = '<a href="comments.php?action=torrents' . $LinkID . '&amp;type=uploaded" class="brackets">Display comments left on torrents ' . ($Self ? 'you\'ve' : $Username . ' has') . ' uploaded</a>';
 		}
 		break;
 }
