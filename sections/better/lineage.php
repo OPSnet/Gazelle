@@ -17,9 +17,9 @@ $DB->query("
 	SELECT tfi.TorrentID, t.GroupID
 	FROM torrents_missing_lineage AS tfi
 		JOIN torrents AS t ON t.ID = tfi.TorrentID
-		$Join
 	ORDER BY tfi.TimeAdded ASC");
 $TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
+$GroupIDs = array();
 foreach ($TorrentsInfo as $Torrent) {
 	$GroupIDs[] = $Torrent['GroupID'];
 }
