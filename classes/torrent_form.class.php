@@ -91,6 +91,10 @@ class TORRENT_FORM {
 				<td><input id="file" type="file" name="file_input" size="50" /></td>
 			</tr>
 			<tr>
+				<td class="label">JSON file:</td>
+				<td><input type="file" onchange="ParseUploadJson()" id="torrent-json-file" /></td>
+			</tr>
+			<tr>
 				<td class="label">Type:</td>
 				<td>
 					<select id="categories" name="type" onchange="Categories()"<?=$this->Disabled?>>
@@ -675,7 +679,7 @@ function show() {
 			<tr>
 				<td class="label">Format:</td>
 				<td>
-					<select name="format" onchange="Format()">
+					<select id="format" name="format" onchange="Format()">
 						<option value="">---</option>
 <?
 		foreach (Misc::display_array($this->Formats) as $Format) {
