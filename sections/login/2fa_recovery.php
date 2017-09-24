@@ -5,7 +5,7 @@
 <?
 if (strtotime($BannedUntil) < time()) {
 	?>
-	<form class="auth_form" name="login" id="loginform" method="post" action="login.php?act=2fa">
+	<form class="auth_form" name="login" id="loginform" method="post" action="login.php?act=2fa_recovery">
 		<?
 
 		if (!empty($BannedUntil) && $BannedUntil != '0000-00-00 00:00:00') {
@@ -23,12 +23,13 @@ if (strtotime($BannedUntil) < time()) {
 			You have <span class="info"><?= (6 - $Attempts) ?></span> attempts remaining.<br/><br/>
 			<strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br/><br/>
 		<? } ?>
+		Note: You will only be able to use a recovery key once!
 		<table class="layout">
 			<tr>
-				<td>2FA Key&nbsp;</td>
+				<td>2FA Recovery Key&nbsp;</td>
 				<td colspan="2">
-					<input type="text" name="2fa" id="2fa" class="inputtext" required="required"
-						   maxlength="6" pattern="[0-9]{6}" autofocus="autofocus" placeholder="Two-factor Auth Key"/>
+					<input type="text" name="2fa_recovery_key" id="2fa_recovery_key" class="inputtext" required="required"
+						   autofocus="autofocus" placeholder="2FA Recovery Key"/>
 				</td>
 			</tr>
 
@@ -39,7 +40,6 @@ if (strtotime($BannedUntil) < time()) {
 		</table>
 	</form>
 	<br /><br />
-	<a href="login.php?act=2fa_recovery" class="tooltip" title="Use 2FA Recovery Code">Use a recovery key?</a>
 	<?
 } else {
 	?>
@@ -50,11 +50,11 @@ if (strtotime($BannedUntil) < time()) {
 ?>
 <script type="text/javascript" src="static/functions/detect_mobile.js"></script>
 <script type="text/javascript">
-    cookie.set('cookie_test', 1, 1);
-    if (cookie.get('cookie_test') != null) {
-        cookie.del('cookie_test');
-    } else {
-        $('#no-cookies').gshow();
-    }
+	cookie.set('cookie_test', 1, 1);
+	if (cookie.get('cookie_test') != null) {
+		cookie.del('cookie_test');
+	} else {
+		$('#no-cookies').gshow();
+	}
 </script>
 <? View::show_footer(); ?>
