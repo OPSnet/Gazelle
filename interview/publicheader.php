@@ -14,13 +14,13 @@ include('config.php');
 	<link rel="stylesheet" href="https://apollo.rip/static/styles/apollostage/style.css" />
 
 	<style type="text/css" media="screen">
-#suggestions a,p{color:#fff;font-weight:200}
 body{background-color:#212328;margin:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
-.container{margin:150px auto 140px;width:900px;}
+.container{margin:30px auto 140px;width:900px;}
 a{color:#fff;text-decoration:none}
 a:hover{text-decoration:underline}
 p{margin:10px 0;font-size:18px;line-height:1.6em}
 #suggestions{margin-top:35px;color:#fff}
+#suggestions a,p{color:#fff;font-weight:200}
 #suggestions a{font-size:14px;margin:0 10px}
 	</style>
 </head>

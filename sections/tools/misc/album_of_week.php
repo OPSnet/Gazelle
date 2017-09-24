@@ -31,7 +31,10 @@ if (isset($_POST['GroupID'])) {
 
 	//Make sure album exists
 	if (is_number($Album['ID'])) {
-
+	    
+	    //Remove old albums
+        $DB->query('TRUNCATE TABLE `featured_albums`');
+	    	
 		//Get post title (album title)
 		if ($Album['ArtistID'] != '0') {
 			$Title = $Album['Artist'] . ' - ' . $Album['Name'];
