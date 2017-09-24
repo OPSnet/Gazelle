@@ -458,7 +458,7 @@ foreach ($Importances as $Group) {
 <?		if (Torrents::can_use_token($Torrent)) { ?>
 						| <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('Are you sure you want to use a freeleech token here?');">FL</a>
 <?		} ?>
-						| <a href="ajax.php?action=torrent&id=<?=($TorrentID)?>" download="<?=$Name . " - " . $GroupName . ' ['. $GroupYear .']'?> [apollo.rip].json" class="tooltip" title="JSON">JS</a>
+						| <a href="ajax.php?action=torrent&id=<?=($TorrentID)?>" download="<?=$Name . " - " . $GroupName . ' ['. $GroupYear .']'?> [apollo.rip].json" class="tooltip" title="Download JSON">JS</a>
 				]
 			</span>
 			&nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?></a>
