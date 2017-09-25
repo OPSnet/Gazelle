@@ -18,9 +18,9 @@ list($Recovery) = $DB->next_record(MYSQLI_NUM, false);
 		retrieve your account. Ensure you keep your backup keys in a safe place.</p>
 </div>
 
-<div class="box box2">
+<div class="box pad">
 	<p>Two-factor authentication has now been enabled on your account. Please note down the following recovery keys, they are the only way you will be able to recover your account if you lose your hardware device.</p>
-	
+
 	<ul class="pad">
 		<? foreach(unserialize($Recovery) as $r): ?>
 			<li><?= $r ?></li>

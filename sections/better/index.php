@@ -41,6 +41,9 @@ if (isset($_GET['method'])) {
 		case 'description':
 			include(SERVER_ROOT.'/sections/better/description.php');
 			break;
+		case 'lineage':
+			include(SERVER_ROOT.'/sections/better/lineage.php');
+			break;
 		default:
 			error(404);
 			break;
