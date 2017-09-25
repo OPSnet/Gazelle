@@ -375,7 +375,7 @@ check_name($DirName); // check the folder name against the blacklist
 foreach ($FileList as $File) {
 	list($Size, $Name) = $File;
 	// add +log to encoding
-	if ($T['Encoding'] == "'Lossless'" && !in_array($Name, $IgnoredLogFileNames) && substr($Name, -4, 4) === '.log') {
+	if ($T['Encoding'] == "'Lossless'" && !in_array(strtolower($Name), $IgnoredLogFileNames) && preg_match('/\.log$/i', $Name)) {
 		$HasLog = 1;
 	}
 	// add +cue to encoding
