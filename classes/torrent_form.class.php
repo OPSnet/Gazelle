@@ -47,13 +47,14 @@ class TORRENT_FORM {
 	}
 
 	function head() {
+		$AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 ?>
 
 <div class="thin">
 <?		if ($this->NewTorrent) { ?>
 	<p style="text-align: center;">
 		Your personal announce URL is:<br />
-		<input type="text" value="<?= ANNOUNCE_URL . '/' . G::$LoggedUser['torrent_pass'] . '/announce'?>" size="71" onclick="this.select();" readonly="readonly" />
+		<input type="text" value="<?= $AnnounceURL . '/' . G::$LoggedUser['torrent_pass'] . '/announce'?>" size="71" onclick="this.select();" readonly="readonly" />
 	</p>
 <?		}
 		if ($this->Error) {
