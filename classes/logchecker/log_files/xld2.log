@@ -1,0 +1,326 @@
+X Lossless Decoder version 20161007 (149.3)
+
+XLD extraction logfile from 2017-04-06 13:22:38 -0400
+
+Icona Pop / This Is… Icona Pop
+
+Used drive : HL-DT-ST DVDRAM GE24NU30 (revision NT00)
+Media type : Pressed CD
+
+Ripper mode             : XLD Secure Ripper
+Disable audio cache     : OK for the drive with a cache less than 1375KiB
+Make use of C2 pointers : NO
+Read offset correction  : 667
+Max retry count         : 100
+Gap status              : Analyzed, Appended
+
+TOC of the extracted CD
+     Track |   Start  |  Length  | Start sector | End sector 
+    ---------------------------------------------------------
+        1  | 00:00:00 | 02:35:55 |         0    |    11679   
+        2  | 02:35:55 | 03:07:02 |     11680    |    25706   
+        3  | 05:42:57 | 03:07:01 |     25707    |    39732   
+        4  | 08:49:58 | 02:40:25 |     39733    |    51757   
+        5  | 11:30:08 | 02:51:24 |     51758    |    64606   
+        6  | 14:21:32 | 03:17:28 |     64607    |    79409   
+        7  | 17:38:60 | 03:12:53 |     79410    |    93862   
+        8  | 20:51:38 | 03:09:43 |     93863    |   108080   
+        9  | 24:01:06 | 03:18:32 |    108081    |   122962   
+       10  | 27:19:38 | 03:20:37 |    122963    |   137999   
+       11  | 30:40:00 | 02:22:04 |    138000    |   148653   
+       12  | 33:02:04 | 03:25:24 |    148654    |   164052   
+       13  | 36:27:28 | 02:59:00 |    164053    |   177477   
+       14  | 39:26:28 | 02:58:02 |    177478    |   190829   
+       15  | 42:24:30 | 05:04:72 |    190830    |   213701   
+
+AccurateRip Summary (DiscID: 0018e137-011c0e52-cc0b210f)
+    Track 01 : OK (v2, confidence 8/8)
+    Track 02 : OK (v2, confidence 8/8)
+    Track 03 : OK (v2, confidence 8/8)
+    Track 04 : OK (v2, confidence 8/8)
+    Track 05 : OK (v2, confidence 8/8)
+    Track 06 : OK (v2, confidence 8/8)
+    Track 07 : OK (v2, confidence 8/8)
+    Track 08 : OK (v2, confidence 8/8)
+    Track 09 : OK (v2, confidence 8/8)
+    Track 10 : OK (v2, confidence 8/8)
+    Track 11 : OK (v2, confidence 8/8)
+    Track 12 : OK (v2, confidence 8/8)
+    Track 13 : OK (v2, confidence 8/8)
+    Track 14 : OK (v2, confidence 8/8)
+    Track 15 : OK (v2, confidence 8/8)
+        ->All tracks accurately ripped.
+
+All Tracks
+    Album gain               : -9.96 dB
+    Peak                     : 0.999237
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 01
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/01 I Love It (feat. Charli XCX).flac
+    Pre-gap length : 00:02:00
+
+    Track gain               : -10.92 dB
+    Peak                     : 0.998962
+    CRC32 hash (test run)    : F7630EF2
+    CRC32 hash               : F7630EF2
+    CRC32 hash (skip zero)   : 38999DC5
+    AccurateRip v1 signature : 27414024
+    AccurateRip v2 signature : 1522A844
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 02
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/02 All Night.flac
+
+    Track gain               : -10.09 dB
+    Peak                     : 0.998993
+    CRC32 hash (test run)    : CCFA1E09
+    CRC32 hash               : CCFA1E09
+    CRC32 hash (skip zero)   : 1E17FEFA
+    AccurateRip v1 signature : 63EE53B4
+    AccurateRip v2 signature : 4D40588A
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 03
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/03 We Got the World.flac
+
+    Track gain               : -9.21 dB
+    Peak                     : 0.998444
+    CRC32 hash (test run)    : CAAEEA61
+    CRC32 hash               : CAAEEA61
+    CRC32 hash (skip zero)   : 43004A40
+    AccurateRip v1 signature : B4FEB208
+    AccurateRip v2 signature : 22AECA12
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 04
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/04 Ready for the Weekend.flac
+
+    Track gain               : -10.19 dB
+    Peak                     : 0.998840
+    CRC32 hash (test run)    : DFE98134
+    CRC32 hash               : DFE98134
+    CRC32 hash (skip zero)   : 5DD58668
+    AccurateRip v1 signature : F6AEA345
+    AccurateRip v2 signature : 2F44A469
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 05
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/05 Girlfriend.flac
+
+    Track gain               : -9.83 dB
+    Peak                     : 0.860992
+    CRC32 hash (test run)    : 052055BF
+    CRC32 hash               : 052055BF
+    CRC32 hash (skip zero)   : EA9D1FFD
+    AccurateRip v1 signature : 96E641B5
+    AccurateRip v2 signature : 45A07144
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 06
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/06 In the Stars.flac
+
+    Track gain               : -10.66 dB
+    Peak                     : 0.999023
+    CRC32 hash (test run)    : 32B8A283
+    CRC32 hash               : 32B8A283
+    CRC32 hash (skip zero)   : 8A56E079
+    AccurateRip v1 signature : D5C44D61
+    AccurateRip v2 signature : 23EFF2A6
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 07
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/07 On a Roll.flac
+
+    Track gain               : -9.64 dB
+    Peak                     : 0.999237
+    CRC32 hash (test run)    : 2CDB16AE
+    CRC32 hash               : 2CDB16AE
+    CRC32 hash (skip zero)   : 6B90C65D
+    AccurateRip v1 signature : E9231469
+    AccurateRip v2 signature : C4562DD1
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 08
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/08 Just Another Night.flac
+
+    Track gain               : -8.55 dB
+    Peak                     : 0.998993
+    CRC32 hash (test run)    : 81E24788
+    CRC32 hash               : 81E24788
+    CRC32 hash (skip zero)   : F91ED688
+    AccurateRip v1 signature : D74E6B05
+    AccurateRip v2 signature : E706A955
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 09
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/09 Hold On.flac
+
+    Track gain               : -9.09 dB
+    Peak                     : 0.998840
+    CRC32 hash (test run)    : 8E969BE5
+    CRC32 hash               : 8E969BE5
+    CRC32 hash (skip zero)   : 9C3B9623
+    AccurateRip v1 signature : 958D594F
+    AccurateRip v2 signature : 6D167637
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 10
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/10 Light Me Up.flac
+
+    Track gain               : -10.35 dB
+    Peak                     : 0.998444
+    CRC32 hash (test run)    : 4359B648
+    CRC32 hash               : 4359B648
+    CRC32 hash (skip zero)   : 336D5F00
+    AccurateRip v1 signature : D45D529D
+    AccurateRip v2 signature : D458E4D2
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 11
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/11 Then We Kiss.flac
+
+    Track gain               : -9.87 dB
+    Peak                     : 0.999237
+    CRC32 hash (test run)    : 5060A88F
+    CRC32 hash               : 5060A88F
+    CRC32 hash (skip zero)   : D981094B
+    AccurateRip v1 signature : 68BB4C53
+    AccurateRip v2 signature : C0F652CE
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 12
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/12 Nights Like This.flac
+    Pre-gap length : 00:01:55
+
+    Track gain               : -9.27 dB
+    Peak                     : 0.998840
+    CRC32 hash (test run)    : 5396450A
+    CRC32 hash               : 5396450A
+    CRC32 hash (skip zero)   : F9389BCD
+    AccurateRip v1 signature : 6B4B2C8A
+    AccurateRip v2 signature : FBE88263
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 13
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/13 Heads Up.flac
+
+    Track gain               : -9.05 dB
+    Peak                     : 0.998840
+    CRC32 hash (test run)    : 0DA96A19
+    CRC32 hash               : 0DA96A19
+    CRC32 hash (skip zero)   : 538DBCD3
+    AccurateRip v1 signature : 6FDFB4BF
+    AccurateRip v2 signature : B5DB9566
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 14
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/14 Lovers to Friends.flac
+
+    Track gain               : -9.85 dB
+    Peak                     : 0.998840
+    CRC32 hash (test run)    : 6F166B3D
+    CRC32 hash               : 6F166B3D
+    CRC32 hash (skip zero)   : B6BC46CA
+    AccurateRip v1 signature : B7D82502
+    AccurateRip v2 signature : 8F984826
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 15
+    Filename : /Volumes/BUZZ-IN/BitTorrent/Uploads/FLAC/Icona Pop - This Is… Icona Pop [CD] [FLAC]/15 I Love It (feat. Charli XCX) (Fix8 remix).flac
+
+    Track gain               : -10.21 dB
+    Peak                     : 0.998840
+    CRC32 hash (test run)    : 835484BE
+    CRC32 hash               : 835484BE
+    CRC32 hash (skip zero)   : 59510904
+    AccurateRip v1 signature : 898D1B8C
+    AccurateRip v2 signature : 41EB99AF
+        ->Accurately ripped (v2, confidence 8/8)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+No errors occurred
+
+End of status report
+
+-----BEGIN XLD SIGNATURE-----
+wfrQ4xHULiUcJuSub5zY5myxJzZMICVkRDVNHfXS1DMur9SGYK2bKdOByGgqAymsaZjqTPZw8hFBBkfQI92PnhePHJs5OUnhOqP2o6q
+-----END XLD SIGNATURE-----
