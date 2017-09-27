@@ -1,17 +1,18 @@
 <?
 View::show_header('Logchecker'); 
 $DB->query("
-SELECT t.ID, g.Name as AlbumName, a.Name as ArtistName, g.Year, t.Format, t.Encoding 
-FROM torrents t 
-JOIN torrents_group g ON t.GroupID = g.ID 
-JOIN torrents_artists ta ON g.ID = ta.GroupID 
-JOIN artists_group a ON a.ArtistID = ta.ArtistID 
-WHERE t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
-        
+	SELECT t.ID, g.Name as AlbumName, a.Name as ArtistName, g.Year, t.Format, t.Encoding 
+	FROM torrents t
+	JOIN torrents_group g ON t.GroupID = g.ID 
+	JOIN torrents_artists ta ON g.ID = ta.GroupID 
+	JOIN artists_group a ON a.ArtistID = ta.ArtistID 
+	JOIN xbt_snatched s ON s.fid = t.ID
+	WHERE t.HasLog='1' AND t.LogScore=0 AND s.uid = ".$LoggedUser['ID']." GROUP BY t.ID");
+
 if ($DB->has_results()) {
 	$output = '';
 	while (list($ID, $AlbumName, $ArtistName, $Year, $Format, $Encoding) = $DB->next_record()) {
-		$output .= "<tr><td><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td><a href=\"/torrents.php?torrentid=$ID\">$ArtistName - $AlbumName [$Year] [$Format/$Encoding]</a></td></tr>";	
+		$output .= "<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td><a href=\"/torrents.php?torrentid=$ID\">$ArtistName - $AlbumName [$Year] [$Format/$Encoding]</a></td></tr>";	
 	}
 }
 ?>
@@ -47,8 +48,8 @@ if ($DB->has_results()) {
 	<br />
 </div>-->
 <div class="thin">
-	<h2 class="center">Update Log</h2>
-	<p>Uploads with logs and score. Fix this by selecting an unscored torrent and upload the log files in the form <u>below</u> (Please select all logs at once).</p><br>
+	<h2 class="center">Missing Log (Snatched torrents)</h2>
+	<p>Uploads with logs, but no score/info. Fix this by selecting an unscored torrent and upload the log files in the form <u>below</u> (Please select all logs at once).</p><br>
     <form action="" method="post" enctype="multipart/form-data">
       <input type="hidden" name="action" value="missinglogupload" />
       <table class="form_post vertical_margin">
@@ -60,7 +61,7 @@ if ($DB->has_results()) {
           <td colspan="2">Upload Logs for This Torrent</td>
         </tr>
         <tr>
-          <td>
+          <td colspan="2">
             <input type="file" accept=".log,.txt" name="logfiles[]" size="40" multiple required/>
             <input type="submit" value="Upload Logs!" name="logsubmit" />
           </td>

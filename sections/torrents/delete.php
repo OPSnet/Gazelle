@@ -109,9 +109,7 @@ if (check_perms('admin_reports')) {
 				t.Encoding,
 				t.Size,
 				t.HasLog,
-				t.HasLogDB,
 				t.LogScore,
-				t.LogChecksum,
 				t.UserID AS UploaderID,
 				uploader.Username
 			FROM torrents AS t
@@ -125,7 +123,7 @@ if (check_perms('admin_reports')) {
 		die();
 	}
 	list($GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID, $Time, $Remastered, $RemasterTitle,
-		$RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $HasLogDB, $LogScore, $LogChecksum, $UploaderID, $UploaderName) = $DB->next_record();
+		$RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $LogScore, $UploaderID, $UploaderName) = $DB->next_record();
 
 	$Type = 'dupe'; //hardcoded default
 
@@ -141,17 +139,17 @@ if (check_perms('admin_reports')) {
 	$RemasterDisplayString = Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear);
 
 	if ($ArtistID == 0 && empty($ArtistName)) {
-		$RawName = $GroupName.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasLog ? " (Log".($HasLogDB ? ": {$LogScore}%" : '').')' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
-		$LinkName = "<a href=\"torrents.php?id=$GroupID\">$GroupName".($Year ? " ($Year)" : '')."</a> <a href=\"torrents.php?torrentid=$TorrentID\">".($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . "$RemasterDisplayString</a>" . ($HasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID\">(Log".($HasLogDB ? ": {$LogScore}%" : '').')</a>' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
-		$BBName = "[url=torrents.php?id=$GroupID]$GroupName".($Year ? " ($Year)" : '')."[/url] [url=torrents.php?torrentid=$TorrentID][$Format/$Encoding/$Media]{$RemasterDisplayString}[/url] " . ($HasLog ? " [url=torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID](Log".($HasLogDB ? ": {$LogScore}%" : '').')[/url]' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$RawName = $GroupName.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasLog ? " ({$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$LinkName = "<a href=\"torrents.php?id=$GroupID\">$GroupName".($Year ? " ($Year)" : '')."</a> <a href=\"torrents.php?torrentid=$TorrentID\">".($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . "$RemasterDisplayString</a>" . ($HasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID\">(Log: {$LogScore}%)</a>" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$BBName = "[url=torrents.php?id=$GroupID]$GroupName".($Year ? " ($Year)" : '')."[/url] [url=torrents.php?torrentid=$TorrentID][$Format/$Encoding/$Media]{$RemasterDisplayString}[/url] " . ($HasLog ? " [url=torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID](Log: {$LogScore}%)[/url]" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
 	} elseif ($ArtistID == 0 && $ArtistName == 'Various Artists') {
 		$RawName = "Various Artists - $GroupName".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]$RemasterDisplayString" . ($HasLog ? " ({$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
-		$LinkName = "Various Artists - <a href=\"torrents.php?id=$GroupID\">$GroupName".($Year ? " ($Year)" : '')."</a> <a href=\"torrents.php?torrentid=$TorrentID\"> [$Format/$Encoding/$Media]$RemasterDisplayString</a> ".($HasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID\">(Log".($HasLogDB ? ": {$LogScore}%" : '').')</a>' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
-		$BBName = "Various Artists - [url=torrents.php?id=$GroupID]$GroupName".($Year ? " ($Year)" : '')."[/url] [url=torrents.php?torrentid=$TorrentID][$Format/$Encoding/$Media]{$RemasterDisplayString}[/url] ".($HasLog ? " [url=torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID](Log".($HasLogDB ? ": {$LogScore}%" : '').')[/url]' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$LinkName = "Various Artists - <a href=\"torrents.php?id=$GroupID\">$GroupName".($Year ? " ($Year)" : '')."</a> <a href=\"torrents.php?torrentid=$TorrentID\"> [$Format/$Encoding/$Media]$RemasterDisplayString</a> ".($HasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID\">(Log: {$LogScore}%)</a>" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$BBName = "Various Artists - [url=torrents.php?id=$GroupID]$GroupName".($Year ? " ($Year)" : '')."[/url] [url=torrents.php?torrentid=$TorrentID][$Format/$Encoding/$Media]{$RemasterDisplayString}[/url] ".($HasLog ? " [url=torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID](Log: {$LogScore}%)[/url]" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
 	} else {
-		$RawName = "$ArtistName - $GroupName".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]$RemasterDisplayString" . ($HasLog ? " (Log".($HasLogDB ? ": {$LogScore}%" : '').')' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
-		$LinkName = "<a href=\"artist.php?id=$ArtistID\">$ArtistName</a> - <a href=\"torrents.php?id=$GroupID\">$GroupName".($Year ? " ($Year)" : '')."</a> <a href=\"torrents.php?torrentid=$TorrentID\"> [$Format/$Encoding/$Media]$RemasterDisplayString</a> ".($HasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID\">(Log".($HasLogDB ? ": {$LogScore}%" : '').')</a>' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
-		$BBName = "[url=artist.php?id=$ArtistID]".$ArtistName."[/url] - [url=torrents.php?id=$GroupID]$GroupName".($Year ? " ($Year)" : '')."[/url] [url=torrents.php?torrentid=$TorrentID][$Format/$Encoding/$Media]{$RemasterDisplayString}[/url] " . ($HasLog ? " [url=torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID](Log".($HasLogDB ? ": {$LogScore}%" : '').')[/url]' : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$RawName = "$ArtistName - $GroupName".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]$RemasterDisplayString" . ($HasLog ? " ({$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$LinkName = "<a href=\"artist.php?id=$ArtistID\">$ArtistName</a> - <a href=\"torrents.php?id=$GroupID\">$GroupName".($Year ? " ($Year)" : '')."</a> <a href=\"torrents.php?torrentid=$TorrentID\"> [$Format/$Encoding/$Media]$RemasterDisplayString</a> ".($HasLog ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID\">(Log: {$LogScore}%)</a>" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+		$BBName = "[url=artist.php?id=$ArtistID]".$ArtistName."[/url] - [url=torrents.php?id=$GroupID]$GroupName".($Year ? " ($Year)" : '')."[/url] [url=torrents.php?torrentid=$TorrentID][$Format/$Encoding/$Media]{$RemasterDisplayString}[/url] " . ($HasLog ? " [url=torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID](Log: {$LogScore}%)[/url]" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
 	}
 ?>
 	<div id="report<?=$ReportID?>" class="report">
