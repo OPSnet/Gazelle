@@ -41,7 +41,6 @@ if (!$Properties['Remastered']) {
 $Properties['Scene'] = (isset($_POST['scene']))? 1 : 0;
 $Properties['HasLog'] = (isset($_POST['flac_log']))? 1 : 0;
 $Properties['HasCue'] = (isset($_POST['flac_cue']))? 1 : 0;
-$Properties['LogScore'] = (isset($_POST['log_score'])) ? intval($_POST['log_score']) : 0;
 $Properties['BadTags'] = (isset($_POST['bad_tags']))? 1 : 0;
 $Properties['BadFolders'] = (isset($_POST['bad_folders']))? 1 : 0;
 $Properties['BadFiles'] = (isset($_POST['bad_files'])) ? 1 : 0;
@@ -55,7 +54,6 @@ $Properties['Format'] = $_POST['format'];
 $Properties['Media'] = $_POST['media'];
 $Properties['Bitrate'] = $_POST['bitrate'];
 $Properties['Encoding'] = $_POST['bitrate'];
-$Properties['Trumpable'] = (isset($_POST['make_trumpable'])) ? 1 : 0;
 $Properties['TorrentDescription'] = $_POST['release_desc'];
 $Properties['Name'] = $_POST['title'];
 if ($_POST['album_desc']) {
@@ -83,20 +81,13 @@ if (check_perms('torrents_freeleech')) {
 //--------------- Validate data in edit form -----------------------------------//
 
 $DB->query("
-	SELECT UserID, Remastered, RemasterYear, FreeTorrent, LogScore
+	SELECT UserID, Remastered, RemasterYear, FreeTorrent
 	FROM torrents
 	WHERE ID = $TorrentID");
 if (!$DB->has_results()) {
 	error(404);
 }
-list($UserID, $Remastered, $RemasterYear, $CurFreeLeech, $LogScore) = $DB->next_record(MYSQLI_BOTH, false);
-
-if($LogScoreAverage > 0) {
-	$DB->query("
-	UPDATE torrents
-	SET LogScore = $LogScoreAverage
-	WHERE ID = $TorrentID");
-}
+list($UserID, $Remastered, $RemasterYear, $CurFreeLeech) = $DB->next_record(MYSQLI_BOTH, false);
 
 if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_edit')) {
 	error(403);
@@ -300,8 +291,7 @@ if (check_perms('users_mod')) {
 	} else {
 		$SQL .= "
 			HasLog = $T[HasLog],
-			HasCue = $T[HasCue],
-			LogScore = {$T['LogScore']},";
+			HasCue = $T[HasCue],";
 	}
 
 	$DB->query("
@@ -467,49 +457,6 @@ if (strtotime($Time) > 1241352173) {
 			VALUES ('$GroupID', '$UserID', '1')");
 	}
 }
-// End competiton
-
-$DB->query("
-	SELECT LogScore
-	FROM torrents
-	WHERE ID = $TorrentID");
-list($LogScore) = $DB->next_record();
-if ($Properties['Trumpable'] == 1 && $LogScore == 100) {
-	$DB->query("
-		UPDATE torrents
-		SET LogScore = 99
-		WHERE ID = $TorrentID");
-	$Results = array();
-	$Results[] = 'The original uploader has chosen to allow this log to be deducted one point for using EAC v0.95., -1 point [1]';
-	$Details = db_string(serialize($Results));
-	$DB->query("
-		UPDATE torrents_logs_new
-		SET Score = 99, Details = '$Details'
-		WHERE TorrentID = $TorrentID");
-}
-
-$DB->query("
-	SELECT Enabled
-	FROM users_main
-	WHERE ID = $UserID");
-list($Enabled) = $DB->next_record();
-if ($Properties['Trumpable'] == 0 && $LogScore == 99 && $Enabled == 1 && strtotime($Time) < 1284422400) {
-	$DB->query("
-		SELECT Log
-		FROM torrents_logs_new
-		WHERE TorrentID = $TorrentID");
-	list($Log) = $DB->next_record();
-	if (strpos($Log, 'EAC extraction') === 0) {
-		$DB->query("
-			UPDATE torrents
-			SET LogScore = 100
-			WHERE ID = $TorrentID");
-		$DB->query("
-			UPDATE torrents_logs_new
-			SET Score = 100, Details = ''
-			WHERE TorrentID = $TorrentID");
-	}
-}
 
 $DB->query("
 	SELECT Name
@@ -526,4 +473,3 @@ Torrents::update_hash($GroupID);
 // All done!
 
 header("Location: torrents.php?id=$GroupID");
-?>

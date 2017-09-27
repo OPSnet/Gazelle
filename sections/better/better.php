@@ -64,6 +64,14 @@ View::show_header('Better');
 			</tr>
 			<tr class="rowb">
 				<td class="nobr">
+					<a href="better.php?method=checksum">Checksum</a>
+				</td>
+				<td class="nobr">
+					Torrents that have been marked as having a "Bad/Missing Checksum".
+				</td>
+			</tr>
+			<tr class="rowb">
+				<td class="nobr">
 					<a href="better.php?method=tags&amp;filter=all">Tags</a>
 				</td>
 				<td class="nobr">

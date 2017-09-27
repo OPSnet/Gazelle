@@ -96,9 +96,30 @@ class Torrents {
 				$QueryID = G::$DB->get_query_id();
 				G::$DB->query("
 					SELECT
-						ID, GroupID, Media, Format, Encoding, RemasterYear, Remastered, RemasterTitle,
-						RemasterRecordLabel, RemasterCatalogueNumber, Scene, HasLog, HasCue, LogScore,
-						FileCount, FreeTorrent, Size, Leechers, Seeders, Snatched, Time, ID AS HasFile
+						ID, 
+						GroupID, 
+						Media, 
+						Format, 
+						Encoding, 
+						RemasterYear, 
+						Remastered, 
+						RemasterTitle,
+						RemasterRecordLabel, 
+						RemasterCatalogueNumber, 
+						Scene, 
+						HasLog, 
+						HasCue, 
+						LogScore,
+						FileCount, 
+						FreeTorrent, 
+						Size, 
+						Leechers, 
+						Seeders, 
+						Snatched, 
+						Time, 
+						ID AS HasFile,
+						HasLogDB,
+						LogChecksum
 					FROM torrents
 					WHERE GroupID IN ($IDs)
 					ORDER BY GroupID, Remastered, (RemasterYear != 0) DESC, RemasterYear, RemasterTitle,
@@ -654,7 +675,7 @@ class Torrents {
 		}
 		if (!empty($Data['HasLog'])) {
 			$Str = 'Log';
-			if (!empty($Data['LogScore'])) {
+			if (!empty($Data['HasLogDB'])) {
 				$Str .= ' ('.$Data['LogScore'].'%)';
 			}
 			$Info[] = $Str;

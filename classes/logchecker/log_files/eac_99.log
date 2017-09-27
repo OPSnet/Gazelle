@@ -1,0 +1,243 @@
+Exact Audio Copy V0.99 prebeta 4 from 23. January 2008
+
+EAC extraction logfile from 9. September 2008, 16:18
+
+Schiller / Leben
+
+Used drive  : MAD DOG MD-16X2DVD9-8X   Adapter: 1  ID: 0
+
+Read mode               : Secure
+Utilize accurate stream : Yes
+Defeat audio cache      : Yes
+Make use of C2 pointers : No
+
+Read offset correction                      : 48
+Overread into Lead-In and Lead-Out          : No
+Fill up missing offset samples with silence : Yes
+Delete leading and trailing silent blocks   : No
+Null samples used in CRC calculations       : Yes
+Used interface                              : Installed external ASPI interface
+Gap handling                                : Appended to previous track
+
+Used output format : Internal WAV Routines
+Sample format      : 44.100 Hz; 16 Bit; Stereo
+
+
+TOC of the extracted CD
+
+     Track |   Start  |  Length  | Start sector | End sector 
+    ---------------------------------------------------------
+        1  |  0:00.00 |  1:10.66 |         0    |     5315   
+        2  |  1:10.66 |  3:53.74 |      5316    |    22864   
+        3  |  5:04.65 |  4:50.41 |     22865    |    44655   
+        4  |  9:55.31 |  4:33.66 |     44656    |    65196   
+        5  | 14:29.22 |  4:05.18 |     65197    |    83589   
+        6  | 18:34.40 |  4:41.60 |     83590    |   104724   
+        7  | 23:16.25 |  6:02.18 |    104725    |   131892   
+        8  | 29:18.43 |  5:34.15 |    131893    |   156957   
+        9  | 34:52.58 |  4:53.05 |    156958    |   178937   
+       10  | 39:45.63 |  5:33.04 |    178938    |   203916   
+       11  | 45:18.67 |  4:29.60 |    203917    |   224151   
+       12  | 49:48.52 |  4:21.07 |    224152    |   243733   
+       13  | 54:09.59 |  4:01.43 |    243734    |   261851   
+       14  | 58:11.27 |  4:14.55 |    261852    |   280956   
+       15  | 62:26.07 |  4:28.61 |    280957    |   301117   
+       16  | 66:54.68 |  4:57.20 |    301118    |   323412   
+       17  | 71:52.13 |  3:44.28 |    323413    |   340240   
+
+
+Track  1
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\01 Schiller - Willkommen.wav
+
+     Pre-gap length  0:00:02.00
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC A6751941
+     Copy CRC A6751941
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  2
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\02 Schiller - Sommerregen.wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC D6EE6535
+     Copy CRC D6EE6535
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  3
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\03 Schiller - I've Seen It All (Mit Maya Saban).wav
+
+     Peak level 99.8 %
+     Track quality 99.9 %
+     Test CRC 228D28BF
+     Copy CRC 228D28BF
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  4
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\04 Schiller - Zukunft (Aus dem Film 'Gate To Heaven').wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC 5E58F913
+     Copy CRC 5E58F913
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  5
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\05 Schiller - Liebe (Mit Mila Mar).wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC 0645EA6E
+     Copy CRC 0645EA6E
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  6
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\06 Schiller - Einklang.wav
+
+     Peak level 98.1 %
+     Track quality 100.0 %
+     Test CRC CE1C3863
+     Copy CRC CE1C3863
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  7
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\07 Schiller - I Miss You (Mit Maya Saban).wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC D234B96A
+     Copy CRC D234B96A
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  8
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\08 Schiller - Leben ... I Feel You (Mit Heppner).wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC 1D3CFF97
+     Copy CRC 1D3CFF97
+     Track not present in AccurateRip database
+     Copy OK
+
+Track  9
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\09 Schiller - Mittelerde.wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC 20A0DE76
+     Copy CRC 20A0DE76
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 10
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\10 Schiller - The Smile (Mit Sarah Brightman).wav
+
+     Peak level 99.8 %
+     Track quality 99.9 %
+     Test CRC 5A8BCFA8
+     Copy CRC 5A8BCFA8
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 11
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\11 Schiller - Dreiklang.wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC F1B359E8
+     Copy CRC F1B359E8
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 12
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\12 Schiller - Babel (Mit Mila Mar).wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC 9EE8BE73
+     Copy CRC 9EE8BE73
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 13
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\13 Schiller - Desire (Mit Veljanov).wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC 5A05EA28
+     Copy CRC 5A05EA28
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 14
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\14 Schiller - Stille.wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC C113541F
+     Copy CRC C113541F
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 15
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\15 Schiller - Vergangenheit.wav
+
+     Peak level 100.0 %
+     Track quality 100.0 %
+     Test CRC FDA8D59E
+     Copy CRC FDA8D59E
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 16
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\16 Schiller - Delicately Yours (Mit Kim Sanders).wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC C8DE46CC
+     Copy CRC C8DE46CC
+     Track not present in AccurateRip database
+     Copy OK
+
+Track 17
+
+     Filename K:\Kirill\Music\Schiller - Leben (2003)\17 Schiller - Ausklang.wav
+
+     Peak level 99.8 %
+     Track quality 100.0 %
+     Test CRC 6F28ACA4
+     Copy CRC 6F28ACA4
+     Track not present in AccurateRip database
+     Copy OK
+
+
+None of the tracks are present in the AccurateRip database
+
+No errors occurred
+
+End of status report

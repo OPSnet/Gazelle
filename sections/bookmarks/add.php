@@ -53,19 +53,19 @@ if (!$DB->has_results()) {
 		$TagList = str_replace('_', '.', $TagList);
 
 		$DB->query("
-			SELECT ID, Format, Encoding, HasLog, HasCue, LogScore, Media, Scene, FreeTorrent, UserID
+			SELECT ID, Format, Encoding, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, Media, Scene, FreeTorrent, UserID
 			FROM torrents
 			WHERE GroupID = $PageID");
 		// RSS feed stuff
 		while ($Torrent = $DB->next_record()) {
 			$Title = $GroupTitle;
-			list($TorrentID, $Format, $Bitrate, $HasLog, $HasCue, $LogScore, $Media, $Scene, $Freeleech, $UploaderID) = $Torrent;
+			list($TorrentID, $Format, $Bitrate, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Media, $Scene, $Freeleech, $UploaderID) = $Torrent;
 			$Title .= " [$Year] - ";
 			$Title .= "$Format / $Bitrate";
 			if ($HasLog == "'1'") {
 				$Title .= ' / Log';
 			}
-			if ($HasLog) {
+			if ($HasLogDB) {
 				$Title .= " / $LogScore%";
 			}
 			if ($HasCue == "'1'") {
