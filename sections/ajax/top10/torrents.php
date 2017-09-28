@@ -30,7 +30,9 @@ $BaseQuery = "SELECT
 	t.Scene,
 	t.HasLog,
 	t.HasCue,
+	t.HasLogDB,
 	t.LogScore,
+	t.LogChecksum,
 	t.RemasterYear,
 	g.Year,
 	t.RemasterTitle,
@@ -151,7 +153,7 @@ function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
 	$results = array();
 	foreach ($Details as $Detail) {
 		list($TorrentID, $GroupID, $GroupName, $GroupCategoryID, $WikiImage, $TorrentTags,
-			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $LogScore, $Year, $GroupYear,
+			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear,
 			$RemasterTitle, $Snatched, $Seeders, $Leechers, $Data, $ReleaseType, $Size) = $Detail;
 
 		$Artist = Artists::display_artists(Artists::get_artist($GroupID), false, true);
@@ -180,6 +182,9 @@ function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
 			'encoding' => $Encoding,
 			'hasLog' => $HasLog == 1,
 			'hasCue' => $HasCue == 1,
+			'hasLogDB' => $HasLogDB == 1,
+			'logScore' => $LogScore,
+			'logChecksum' => $LogChecksum,
 			'media' => $Media,
 			'scene' => $Scene == 1,
 			'year' => (int)$Year,

@@ -17,6 +17,9 @@ if (isset($_GET['method'])) {
 		case 'artistless':
 			include(SERVER_ROOT.'/sections/better/artistless.php');
 			break;
+		case 'checksum':
+			include(SERVER_ROOT.'/sections/better/checksum.php');
+			break;
 		case 'tags':
 			include(SERVER_ROOT.'/sections/better/tags.php');
 			break;

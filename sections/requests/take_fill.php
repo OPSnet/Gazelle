@@ -39,7 +39,9 @@ $DB->query("
 		t.Media,
 		t.HasLog,
 		t.HasCue,
+		t.HasLogDB,
 		t.LogScore,
+		t.LogChecksum,
 		tg.CategoryID,
 		IF(t.Remastered = '1', t.RemasterCatalogueNumber, tg.CatalogueNumber)
 	FROM torrents AS t
@@ -50,7 +52,7 @@ $DB->query("
 if (!$DB->has_results()) {
 	error(404);
 }
-list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $LogScore, $TorrentCategoryID, $TorrentCatalogueNumber) = $DB->next_record();
+list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber) = $DB->next_record();
 
 $FillerID = $LoggedUser['ID'];
 $FillerUsername = $LoggedUser['Username'];
@@ -112,7 +114,7 @@ if ($CategoryName === 'Music') {
 	//$VinylOverride = (strpos($MediaList, 'Vinyl') !== false && $Media === 'Vinyl');
 	//if ($Format === 'FLAC' && $LogCue && !$WEBOverride && !$VinylOverride) {
 	if ($Format === 'FLAC' && $LogCue && $Media === 'CD') {
-		if (strpos($LogCue, 'Log') !== false && !$HasLog) {
+		if (strpos($LogCue, 'Log') !== false && !$HasLogDB) {
 			$Err = 'This request requires a log.';
 		}
 
