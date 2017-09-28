@@ -478,25 +478,24 @@ function show() {
 					</span>
 				</td>
 			</tr>
-<?		if ($this->NewTorrent) { ?>
+<?		if ($this->NewTorrent) {
+			$AcceptTypes = LogChecker::get_accept_values();
+?>
 			<tr id="upload_logs" class="hidden">
 				<td class="label">
 					Log files:
 				</td>
 				<td id="logfields">
 					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-					<input id="file" type="file" accept=".log,.txt" multiple="multiple" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+					<input id="file" type="file" accept="<?=$AcceptTypes?>" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 				</td>
 			</tr>
-<?
-		}
-		if ($this->NewTorrent) { ?>
-		<tr>
-			<td class="label">Multi-format uploader:</td>
-			<td><input type="button" value="+" id="add_format" /><input type="button" style="display: none;" value="-" id="remove_format" /></td>
-		</tr>
-		<tr id="placeholder_row_top"></tr>
-		<tr id="placeholder_row_bottom"></tr>
+			<tr>
+				<td class="label">Multi-format uploader:</td>
+				<td><input type="button" value="+" id="add_format" /><input type="button" style="display: none;" value="-" id="remove_format" /></td>
+			</tr>
+			<tr id="placeholder_row_top"></tr>
+			<tr id="placeholder_row_bottom"></tr>
 <?
 		}
 		if (check_perms('torrents_edit_vanityhouse') && $this->NewTorrent) {
@@ -535,42 +534,19 @@ function show() {
 					<input type="checkbox" id="flac_cue" name="flac_cue"<? if ($HasCue) { echo ' checked="checked"';} ?> /> <label for="flac_cue">Check this box if the torrent has, or should have, a cue file.</label><br />
 <?
 		}
-		if ((check_perms('users_mod') || G::$LoggedUser['ID'] == $Torrent['UserID']) && ($Torrent['LogScore'] == 100 || $Torrent['LogScore'] == 99)) {
 
-			G::$DB->query('
-				SELECT LogID
-				FROM torrents_logs_new
-				WHERE TorrentID = '.$this->TorrentID."
-					AND Log LIKE 'EAC extraction logfile%'
-					AND (Adjusted = '0' OR Adjusted = '')");
-			list($LogID) = G::$DB->next_record();
-			if ($LogID) {
-				if (!check_perms('users_mod')) {
-?>
-			<tr>
-				<td class="label">Trumpable:</td>
-				<td>
-<?				} ?>
-					<input type="checkbox" id="make_trumpable" name="make_trumpable"<? if ($Torrent['LogScore'] == 99) { echo ' checked="checked"';} ?> /> <label for="make_trumpable">Check this box if you want this torrent to be trumpable (subtracts 1 point).</label>
-<?				if (!check_perms('users_mod')) { ?>
-				</td>
-			</tr>
-<?
-				}
-			}
-		}
 		if (!$this->NewTorrent && check_perms('users_mod')) {
 ?>
 				</td>
 			</tr>
+
 <?			if ($HasLog) { ?>
-			<!-- TODO: We should revamp this so that adjusting log score is done on a per log basis -->
+			<!-- TODO: This should be done on a per log basis
 			and we can then set the reason per log so that
 			<tr>
 				<td class="label">Log score</td>
 				<td><input type="text" name="log_score" size="5" id="log_score" value="<?=display_str($Torrent['LogScore']) ?>" /></td>
 			</tr>
-			<!--
 			<tr>
 				<td class="label">Log adjustment reason</td>
 				<td>

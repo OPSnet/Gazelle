@@ -1,0 +1,245 @@
+X Lossless Decoder version 20161007 (149.3)
+
+XLD extraction logfile from 2017-01-04 18:59:53 -0500
+
+Pink Floyd / A Momentary Lapse Of Reason
+
+Used Drive : MATSHITA DVD-R   UJ-875 (revision DB09) (not found in database)
+Media type : Pressed CD
+
+Ripper mode             : XLD Secure Ripper
+Disable audio cache     : OK for the drive with a cache less than 1375KiB
+Make use of C2 pointers : NO
+Read offset correction  : 102
+Max retry count         : 100
+Gap status              : Analyzed, Appended
+
+TOC of the extracted CD
+     Track |   Start  |  Length  | Start sector | End sector 
+    ---------------------------------------------------------
+        1  | 00:00:32 | 04:24:30 |        32    |    19861   
+        2  | 04:24:62 | 04:53:20 |     19862    |    41856   
+        3  | 09:18:07 | 06:05:40 |     41857    |    69271   
+        4  | 15:23:47 | 05:10:35 |     69272    |    92556   
+        5  | 20:34:07 | 05:42:28 |     92557    |   118234   
+        6  | 26:16:35 | 07:28:00 |    118235    |   151834   
+        7  | 33:44:35 | 01:46:45 |    151835    |   159829   
+        8  | 35:31:05 | 06:17:07 |    159830    |   188111   
+        9  | 41:48:12 | 00:38:53 |    188112    |   191014   
+       10  | 42:26:65 | 08:46:65 |    191015    |   230529   
+
+List of alternate offset correction values
+        #  | Absolute | Relative | Confidence
+    ------------------------------------------
+        1  |    281   |    179   |     20     
+
+
+AccurateRip Summary (DiscID: 00134621-009a09eb-7a0c010a)
+    Track 01 : OK (v1+v2, confidence 382/1213)
+    Track 02 : OK (v1+v2, confidence 390/1223)
+    Track 03 : OK (v1+v2, confidence 388/1218)
+    Track 04 : OK (v1+v2, confidence 387/1222)
+    Track 05 : OK (v1+v2, confidence 392/1225)
+    Track 06 : OK (v1+v2, confidence 394/1223)
+    Track 07 : OK (v1+v2, confidence 394/1223)
+    Track 08 : OK (v1+v2, confidence 385/1210)
+    Track 09 : OK (v1+v2, confidence 394/1227)
+    Track 10 : OK (v1+v2, confidence 371/1191)
+        ->All tracks accurately ripped.
+
+All Tracks
+    Album gain               : -3.17 dB
+    Peak                     : 0.999969
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 01
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/01 Pink Floyd - Signs Of Life.flac
+    Pre-gap length : 00:02:32
+
+    Track gain               : 2.11 dB
+    Peak                     : 0.641541
+    CRC32 hash (test run)    : 1C49F741
+    CRC32 hash               : 1C49F741
+    CRC32 hash (skip zero)   : 995CAEB6
+    AccurateRip v1 signature : DCC74450
+    AccurateRip v2 signature : 19F25E1B
+        ->Accurately ripped (v1+v2, confidence 191+191/1213)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 02
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/02 Pink Floyd - Learning To Fly.flac
+    Pre-gap length : 00:00:02
+
+    Track gain               : -2.95 dB
+    Peak                     : 0.999969
+    CRC32 hash (test run)    : 5C4FD939
+    CRC32 hash               : 5C4FD939
+    CRC32 hash (skip zero)   : DF51CE90
+    AccurateRip v1 signature : 945655FB
+    AccurateRip v2 signature : 6DE762F3
+        ->Accurately ripped (v1+v2, confidence 197+193/1223)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 03
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/03 Pink Floyd - The Dogs Of War.flac
+    Pre-gap length : 00:01:05
+
+    Track gain               : -4.38 dB
+    Peak                     : 0.888794
+    CRC32 hash (test run)    : 9C53CB50
+    CRC32 hash               : 9C53CB50
+    CRC32 hash (skip zero)   : E1041992
+    AccurateRip v1 signature : 75E4DC2F
+    AccurateRip v2 signature : 35A86EA7
+        ->Accurately ripped (v1+v2, confidence 195+193/1218)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 04
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/04 Pink Floyd - One Slip.flac
+    Pre-gap length : 00:00:02
+
+    Track gain               : -3.04 dB
+    Peak                     : 0.852234
+    CRC32 hash (test run)    : 7BBEB0AF
+    CRC32 hash               : 7BBEB0AF
+    CRC32 hash (skip zero)   : 5B81E3EC
+    AccurateRip v1 signature : CC2614C8
+    AccurateRip v2 signature : 6E055683
+        ->Accurately ripped (v1+v2, confidence 192+195/1222)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 05
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/05 Pink Floyd - On The Turning Away.flac
+    Pre-gap length : 00:02:55
+
+    Track gain               : -3.51 dB
+    Peak                     : 0.831940
+    CRC32 hash (test run)    : 926C36C6
+    CRC32 hash               : 926C36C6
+    CRC32 hash (skip zero)   : 0FBAC486
+    AccurateRip v1 signature : 6C1C2934
+    AccurateRip v2 signature : C0E5C087
+        ->Accurately ripped (v1+v2, confidence 197+195/1225)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 06
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/06 Pink Floyd - Yet Another Movie／Round And Around.flac
+    Pre-gap length : 00:02:48
+
+    Track gain               : -2.97 dB
+    Peak                     : 0.976959
+    CRC32 hash (test run)    : 1F6F0261
+    CRC32 hash               : 1F6F0261
+    CRC32 hash (skip zero)   : E374DCB3
+    AccurateRip v1 signature : 07A5A584
+    AccurateRip v2 signature : 92255C38
+        ->Accurately ripped (v1+v2, confidence 198+196/1223)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 07
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/07 Pink Floyd - A New Machine (Part 1).flac
+    Pre-gap length : 00:02:00
+
+    Track gain               : 3.98 dB
+    Peak                     : 0.399567
+    CRC32 hash (test run)    : 4AB9BA13
+    CRC32 hash               : 4AB9BA13
+    CRC32 hash (skip zero)   : 40569784
+    AccurateRip v1 signature : 570D464D
+    AccurateRip v2 signature : E07CADCB
+        ->Accurately ripped (v1+v2, confidence 198+196/1223)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 08
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/08 Pink Floyd - Terminal Frost.flac
+    Pre-gap length : 00:00:03
+
+    Track gain               : -3.34 dB
+    Peak                     : 0.975830
+    CRC32 hash (test run)    : 856FCE86
+    CRC32 hash               : 856FCE86
+    CRC32 hash (skip zero)   : 473AE61B
+    AccurateRip v1 signature : E56CC52F
+    AccurateRip v2 signature : 9810D625
+        ->Accurately ripped (v1+v2, confidence 193+192/1210)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 09
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/09 Pink Floyd - A New Machine (Part 2).flac
+    Pre-gap length : 00:00:02
+
+    Track gain               : 3.62 dB
+    Peak                     : 0.388275
+    CRC32 hash (test run)    : 74F2A443
+    CRC32 hash               : 74F2A443
+    CRC32 hash (skip zero)   : 12F52FFD
+    AccurateRip v1 signature : FE15F935
+    AccurateRip v2 signature : 7B4CCB5C
+        ->Accurately ripped (v1+v2, confidence 197+197/1227)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+Track 10
+    Filename : /Volumes/Tunes/Music/iTunes/iTunes Music/Pink Floyd/[Lossless]/Pink Floyd - A Momentary Lapse Of Reason (1987) [EMI CDP 7 48068 2] [flac]/10 Pink Floyd - Sorrow.flac
+    Pre-gap length : 00:00:03
+
+    Track gain               : -2.15 dB
+    Peak                     : 0.909851
+    CRC32 hash (test run)    : 969633EC
+    CRC32 hash               : 969633EC
+    CRC32 hash (skip zero)   : 19A5D24F
+    AccurateRip v1 signature : 9D3FDF59
+    AccurateRip v2 signature : CD8BFBD1
+        ->Accurately ripped (v1+v2, confidence 187+184/1191)
+    Statistics
+        Read error                           : 0
+        Jitter error (maybe fixed)           : 0
+        Retry sector count                   : 0
+        Damaged sector count                 : 0
+
+No errors occurred
+
+End of status report
+
+-----BEGIN XLD SIGNATURE-----
+elwupjZbC9r2cbzOI1uzGxZrY_LTw3zMTe__TTCLA6ZQk5nV80.BKvawc09fw2vriSllH1edoaIVYvBWnBuz3eHa_IpmNkBo.YRAj.i
+-----END XLD SIGNATURE-----

@@ -3,3 +3,5 @@ html/
 /classes/config.php
 /sphinx.conf
 .DS_Store
+logs/
+!logs/README.txt
