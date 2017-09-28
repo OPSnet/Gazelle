@@ -23,13 +23,13 @@ View::show_header('Bonus Points Shop');
 		<tbody>
 <?php
 
+$Cnt = 1;
 foreach ($Options as $Key => $Option) {
-	$Key += 1;
-	$RowClass = ($Key % 2 === 0) ? 'rowb' : 'rowa';
+	$RowClass = ($Cnt % 2 === 0) ? 'rowb' : 'rowa';
 	$Price = number_format($Option['Price']);
 	print <<<HTML
 			<tr class="$RowClass">
-				<td>{$Key}</td>
+				<td>{$Cnt}</td>
 				<td>{$Option['Title']}</td>
 				<td>{$Price}</td>
 				<td>
@@ -55,10 +55,14 @@ HTML;
 HTML;
 
 	}
+	print <<<HTML
+				</td>
+	</tr>
+HTML;
+
+	$Cnt++;
 }
 ?>
-				</td>
-			</tr>
 		</tbody>
 	</table>
 </div>
