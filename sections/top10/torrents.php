@@ -160,9 +160,7 @@ $BaseQuery = '
 		t.Scene,
 		t.HasLog,
 		t.HasCue,
-		t.HasLogDB,
 		t.LogScore,
-		t.LogChecksum,
 		t.RemasterYear,
 		g.Year,
 		t.RemasterTitle,
@@ -457,7 +455,7 @@ function generate_torrent_table($Caption, $Tag, $Details, $Limit) {
 
 	foreach ($Details as $Detail) {
 		list($TorrentID, $GroupID, $GroupName, $GroupCategoryID, $WikiImage, $TagsList,
-			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear,
+			$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $LogScore, $Year, $GroupYear,
 			$RemasterTitle, $Snatched, $Seeders, $Leechers, $Data, $ReleaseType, $Size) = $Detail;
 
 		$IsBookmarked = Bookmarks::has_bookmarked('torrent', $GroupID);
@@ -498,7 +496,7 @@ function generate_torrent_table($Caption, $Tag, $Details, $Limit) {
 			}
 			// "FLAC / Lossless / Log (100%) / Cue / CD";
 			if ($HasLog) {
-				$ExtraInfo .= $AddExtra.'Log'.($HasLogDB ? " ({$LogScore}%)" : "");
+				$ExtraInfo .= $AddExtra.'Log ('.$LogScore.'%)';
 				$AddExtra = ' / ';
 			}
 			if ($HasCue) {

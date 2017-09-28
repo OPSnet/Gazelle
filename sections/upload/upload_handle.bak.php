@@ -8,10 +8,10 @@
 
 // Maximum allowed size for uploaded files.
 // http://php.net/upload-max-filesize
-//ini_set('upload_max_filesize', 2097152); // 2 Mibibytes
+ini_set('upload_max_filesize', 2097152); // 2 Mibibytes
 
 ini_set('max_file_uploads', 100);
-define(MAX_FILENAME_LENGTH, 300);
+define(MAX_FILENAME_LENGTH, 180);
 include(SERVER_ROOT.'/classes/validate.class.php');
 include(SERVER_ROOT.'/classes/feed.class.php');
 include(SERVER_ROOT.'/sections/torrents/functions.php');
@@ -26,24 +26,6 @@ $Feed = new FEED;
 
 define('QUERY_EXCEPTION', true); // Shut up debugging
 
-function detect_utf_bom_encoding($filename) {
-	// Unicode BOM is U+FEFF, but after encoded, it will look like this.
-	define ('UTF32_BIG_ENDIAN_BOM' , chr(0x00) . chr(0x00) . chr(0xFE) . chr(0xFF));
-	define ('UTF32_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00));
-	define ('UTF16_BIG_ENDIAN_BOM' , chr(0xFE) . chr(0xFF));
-	define ('UTF16_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE));
-	define ('UTF8_BOM' , chr(0xEF) . chr(0xBB) . chr(0xBF));
-	$text = file_get_contents($filename);
-	$first2 = substr($text, 0, 2);
-	$first3 = substr($text, 0, 3);
-	$first4 = substr($text, 0, 3);
-	if ($first3 == UTF8_BOM) return 'UTF-8';
-	elseif ($first4 == UTF32_BIG_ENDIAN_BOM) return 'UTF-32BE';
-	elseif ($first4 == UTF32_LITTLE_ENDIAN_BOM) return 'UTF-32LE';
-	elseif ($first2 == UTF16_BIG_ENDIAN_BOM) return 'UTF-16BE';
-	elseif ($first2 == UTF16_LITTLE_ENDIAN_BOM) return 'UTF-16LE';
-}
-
 //******************************************************************************//
 //--------------- Set $Properties array ----------------------------------------//
 // This is used if the form doesn't validate, and when the time comes to enter	//
@@ -57,7 +39,7 @@ $Properties['Title'] = $_POST['title'];
 $Properties['Remastered'] = isset($_POST['remaster']) ? 1 : 0;
 if ($Properties['Remastered'] || isset($_POST['unknown'])) {
 	$Properties['UnknownRelease'] = isset($_POST['unknown']) ? 1 : 0;
-	$Properties['RemasterYear'] = trim($_POST['remaster_year']);
+	$Properties['RemasterYear'] = $_POST['remaster_year'];
 	$Properties['RemasterTitle'] = $_POST['remaster_title'];
 	$Properties['RemasterRecordLabel'] = $_POST['remaster_record_label'];
 	$Properties['RemasterCatalogueNumber'] = $_POST['remaster_catalogue_number'];
@@ -69,7 +51,7 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
 	$Properties['RemasterRecordLabel'] = '';
 	$Properties['RemasterCatalogueNumber'] = '';
 }
-$Properties['Year'] = trim($_POST['year']);
+$Properties['Year'] = $_POST['year'];
 $Properties['RecordLabel'] = $_POST['record_label'];
 $Properties['CatalogueNumber'] = $_POST['catalogue_number'];
 $Properties['ReleaseType'] = $_POST['releasetype'];
@@ -276,11 +258,25 @@ if ($Type == 'Music') {
 }
 
 $LogScoreAverage = 0;
-$LogScoreCount = 0;
-require_once(SERVER_ROOT.'/classes/logchecker.class.php');
-$Log = new LOG_CHECKER;
-$logs = array();
-$LogScores = array();
+
+if (!$Err && $Properties['Format'] == 'FLAC') {
+	foreach ($_FILES['logfiles']['name'] as $FileName) {
+		if (!empty($FileName) && substr(strtolower($FileName), strlen($FileName) - strlen('.log')) !== '.log') {
+			$Err = 'You seem to have put something other than an EAC or XLD log file into an upload field. ('.$FileName.').';
+			break;
+		}
+	}
+	//There is absolutely no point in checking the type of the file upload as its interpretation of the type is decided by the client.
+	/*	foreach ($_FILES['logfiles']['type'] as $FileType) {
+			if (!empty($FileType) && $FileType != "text/plain" && $FileType != "text/x-log" && $FileType != "application/octet-stream" && $FileType != "text/richtext") {
+				$Err = "You seem to have put something other than an EAC or XLD log file into an upload field. (".$FileType.")";
+				break;
+			}
+		}
+	*/
+}
+
+
 
 //Multiple artists!
 
@@ -719,40 +715,6 @@ if (!empty($LogScores) && $HasLog) {
 }
 
 //******************************************************************************//
-//--------------- Add the log scores to the DB ---------------------------------//
-if ($HasLog) {
-	ini_set('upload_max_filesize',1000000);
-	$LogMinScore = null;
-	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-		if (!$_FILES['logfiles']['size'][$Pos]) {
-		    break;
-		}
-		//todo: more validation
-		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
-		if (!$File) {
-		    die('LogFile doesn\'t exist, or couldn\'t open');
-		} // File doesn't exist, or couldn't open
-		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
-		fclose($File);
-		//detect & transcode unicode
-		if (detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
-		    $LogFile = iconv("unicode","UTF-8",$LogFile);
-		}
-		$Log = new LOG_CHECKER;
-		$Log->new_file($LogFile);
-		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
-		if ($LogMinScore === null || $Score < $LogMinScore) {
-		    $LogMinScore = $Score;
-		}
-		//$LogGood = implode("\r\n",$LogGood);
-		$LogBad = implode("\r\n",$LogBad);
-		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;
-		$DB->query("INSERT INTO torrents_logs_new VALUES (null, $TorrentID, '".db_string($LogText)."', '".db_string($LogBad)."', $Score, 1, 0, 0, $LogNotEnglish, '')"); //set log scores
-	}
-	if ($LogMinScore) { $DB->query("UPDATE torrents SET LogScore='$LogMinScore' WHERE ID=$TorrentID"); } //set main score
-}
-
-//******************************************************************************//
 //--------------- Stupid Recent Uploads ----------------------------------------//
 
 if (trim($Properties['Image']) != '') {
@@ -818,54 +780,48 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 //******************************************************************************//
-//---------------IRC announce and feeds ---------------------------------------//
+//--------------- IRC announce and feeds ---------------------------------------//
 $Announce = '';
 
 if ($Type == 'Music') {
 	$Announce .= Artists::display_artists($ArtistForm, false);
 }
 $Announce .= trim($Properties['Title']).' ';
-$Details = "";
 if ($Type == 'Music') {
 	$Announce .= '['.trim($Properties['Year']).']';
 	if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
 		$Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
 	}
-	$Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
+	$Announce .= ' - ';
+	$Announce .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
 	if ($HasLog == 1) {
-        $Details .= ' / Log';
+		$Announce .= ' / Log';
 	}
 	if ($LogInDB) {
-        $Details .= ' / '.$LogScoreAverage.'%';
+		$Announce .= ' / '.$LogScoreAverage.'%';
 	}
 	if ($HasCue == 1) {
-        $Details .= ' / Cue';
+		$Announce .= ' / Cue';
 	}
-	$Details .= ' / '.trim($Properties['Media']);
+	$Announce .= ' / '.trim($Properties['Media']);
 	if ($Properties['Scene'] == '1') {
-        $Details .= ' / Scene';
+		$Announce .= ' / Scene';
 	}
 	if ($T['FreeLeech'] == '1') {
-        $Details .= ' / Freeleech!';
+		$Announce .= ' / Freeleech!';
 	}
 }
-
 $Title = $Announce;
-if ($Details !== "") {
-    $Title .= " - ".$Details;
-    $Announce .= "\003 - \00310".$Details."\003";
-}
 
-$AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003";
-//$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
+$AnnounceSSL = "$Announce - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
+$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
 
-$AnnounceSSL .= " - \00312".trim($Properties['TagList'])."\003";
-$AnnounceSSL .= " - \00304".site_url()."torrents.php?id=$GroupID\003 / \00304".site_url()."torrents.php?action=download&id=$TorrentID\003";
-//$Announce .= ' - '.trim($Properties['TagList']);
+$AnnounceSSL .= ' - '.trim($Properties['TagList']);
+$Announce .= ' - '.trim($Properties['TagList']);
 
 // ENT_QUOTES is needed to decode single quotes/apostrophes
-//send_irc('PRIVMSG #'.NONSSL_SITE_URL.' :'.html_entity_decode($Announce, ENT_QUOTES));
-send_irc('PRIVMSG #ANNOUNCE :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));
+send_irc('PRIVMSG #'.NONSSL_SITE_URL.'-announce :'.html_entity_decode($Announce, ENT_QUOTES));
+send_irc('PRIVMSG #'.NONSSL_SITE_URL.'-announce-ssl :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));
 $Debug->set_flag('upload: announced on irc');
 
 // Manage notifications
@@ -1105,4 +1061,3 @@ $Cache->delete_value("torrents_details_$GroupID");
 
 // Allow deletion of this torrent now
 $Cache->delete_value("torrent_{$TorrentID}_lock");
-
