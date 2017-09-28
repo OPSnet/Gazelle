@@ -8,10 +8,10 @@
 
 // Maximum allowed size for uploaded files.
 // http://php.net/upload-max-filesize
-//ini_set('upload_max_filesize', 2097152); // 2 Mibibytes
+ini_set('upload_max_filesize', 2097152); // 2 Mibibytes
 
 ini_set('max_file_uploads', 100);
-define(MAX_FILENAME_LENGTH, 300);
+define(MAX_FILENAME_LENGTH, 180);
 include(SERVER_ROOT.'/classes/validate.class.php');
 include(SERVER_ROOT.'/classes/feed.class.php');
 include(SERVER_ROOT.'/sections/torrents/functions.php');
@@ -57,7 +57,7 @@ $Properties['Title'] = $_POST['title'];
 $Properties['Remastered'] = isset($_POST['remaster']) ? 1 : 0;
 if ($Properties['Remastered'] || isset($_POST['unknown'])) {
 	$Properties['UnknownRelease'] = isset($_POST['unknown']) ? 1 : 0;
-	$Properties['RemasterYear'] = trim($_POST['remaster_year']);
+	$Properties['RemasterYear'] = $_POST['remaster_year'];
 	$Properties['RemasterTitle'] = $_POST['remaster_title'];
 	$Properties['RemasterRecordLabel'] = $_POST['remaster_record_label'];
 	$Properties['RemasterCatalogueNumber'] = $_POST['remaster_catalogue_number'];
@@ -69,7 +69,7 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
 	$Properties['RemasterRecordLabel'] = '';
 	$Properties['RemasterCatalogueNumber'] = '';
 }
-$Properties['Year'] = trim($_POST['year']);
+$Properties['Year'] = $_POST['year'];
 $Properties['RecordLabel'] = $_POST['record_label'];
 $Properties['CatalogueNumber'] = $_POST['catalogue_number'];
 $Properties['ReleaseType'] = $_POST['releasetype'];
@@ -724,26 +724,18 @@ if ($HasLog) {
 	ini_set('upload_max_filesize',1000000);
 	$LogMinScore = null;
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-		if (!$_FILES['logfiles']['size'][$Pos]) {
-		    break;
-		}
+		if (!$_FILES['logfiles']['size'][$Pos]) { break; }
 		//todo: more validation
 		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
-		if (!$File) {
-		    die('LogFile doesn\'t exist, or couldn\'t open');
-		} // File doesn't exist, or couldn't open
+		if (!$File) { die('LogFile doesn\'t exist, or couldn\'t open'); } // File doesn't exist, or couldn't open
 		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
 		fclose($File);
 		//detect & transcode unicode
-		if (detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
-		    $LogFile = iconv("unicode","UTF-8",$LogFile);
-		}
+		if (detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) { $LogFile = iconv("unicode","UTF-8",$LogFile); }
 		$Log = new LOG_CHECKER;
 		$Log->new_file($LogFile);
 		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
-		if ($LogMinScore === null || $Score < $LogMinScore) {
-		    $LogMinScore = $Score;
-		}
+		if (!$LogMinScore || $Score < $LogMinScore) { $LogMinScore = $Score; }
 		//$LogGood = implode("\r\n",$LogGood);
 		$LogBad = implode("\r\n",$LogBad);
 		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;
@@ -825,43 +817,39 @@ if ($Type == 'Music') {
 	$Announce .= Artists::display_artists($ArtistForm, false);
 }
 $Announce .= trim($Properties['Title']).' ';
-$Details = "";
 if ($Type == 'Music') {
 	$Announce .= '['.trim($Properties['Year']).']';
 	if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
 		$Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
 	}
-	$Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
+	$Announce .= "\003 - \00310";
+	$Announce .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
 	if ($HasLog == 1) {
-        $Details .= ' / Log';
+		$Announce .= ' / Log';
 	}
 	if ($LogInDB) {
-        $Details .= ' / '.$LogScoreAverage.'%';
+		$Announce .= ' / '.$LogScoreAverage.'%';
 	}
 	if ($HasCue == 1) {
-        $Details .= ' / Cue';
+		$Announce .= ' / Cue';
 	}
-	$Details .= ' / '.trim($Properties['Media']);
+	$Announce .= ' / '.trim($Properties['Media']);
 	if ($Properties['Scene'] == '1') {
-        $Details .= ' / Scene';
+		$Announce .= ' / Scene';
 	}
 	if ($T['FreeLeech'] == '1') {
-        $Details .= ' / Freeleech!';
+		$Announce .= ' / Freeleech!';
 	}
+        $Announce .= "\003";
 }
-
 $Title = $Announce;
-if ($Details !== "") {
-    $Title .= " - ".$Details;
-    $Announce .= "\003 - \00310".$Details."\003";
-}
 
-$AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003";
-//$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
+$AnnounceSSL = "\002TORRENT:\002 \00303$Announce\003";
+$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
 
 $AnnounceSSL .= " - \00312".trim($Properties['TagList'])."\003";
 $AnnounceSSL .= " - \00304".site_url()."torrents.php?id=$GroupID\003 / \00304".site_url()."torrents.php?action=download&id=$TorrentID\003";
-//$Announce .= ' - '.trim($Properties['TagList']);
+$Announce .= ' - '.trim($Properties['TagList']);
 
 // ENT_QUOTES is needed to decode single quotes/apostrophes
 //send_irc('PRIVMSG #'.NONSSL_SITE_URL.' :'.html_entity_decode($Announce, ENT_QUOTES));
