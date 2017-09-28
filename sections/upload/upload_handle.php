@@ -26,24 +26,6 @@ $Feed = new FEED;
 
 define('QUERY_EXCEPTION', true); // Shut up debugging
 
-function detect_utf_bom_encoding($filename) {
-	// Unicode BOM is U+FEFF, but after encoded, it will look like this.
-	define ('UTF32_BIG_ENDIAN_BOM' , chr(0x00) . chr(0x00) . chr(0xFE) . chr(0xFF));
-	define ('UTF32_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00));
-	define ('UTF16_BIG_ENDIAN_BOM' , chr(0xFE) . chr(0xFF));
-	define ('UTF16_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE));
-	define ('UTF8_BOM' , chr(0xEF) . chr(0xBB) . chr(0xBF));
-	$text = file_get_contents($filename);
-	$first2 = substr($text, 0, 2);
-	$first3 = substr($text, 0, 3);
-	$first4 = substr($text, 0, 3);
-	if ($first3 == UTF8_BOM) return 'UTF-8';
-	elseif ($first4 == UTF32_BIG_ENDIAN_BOM) return 'UTF-32BE';
-	elseif ($first4 == UTF32_LITTLE_ENDIAN_BOM) return 'UTF-32LE';
-	elseif ($first2 == UTF16_BIG_ENDIAN_BOM) return 'UTF-16BE';
-	elseif ($first2 == UTF16_LITTLE_ENDIAN_BOM) return 'UTF-16LE';
-}
-
 //******************************************************************************//
 //--------------- Set $Properties array ----------------------------------------//
 // This is used if the form doesn't validate, and when the time comes to enter	//
@@ -275,15 +257,8 @@ if ($Type == 'Music') {
 	include(SERVER_ROOT.'/sections/upload/get_extra_torrents.php');
 }
 
-$LogScoreAverage = 0;
-$LogScoreCount = 0;
-require_once(SERVER_ROOT.'/classes/logchecker.class.php');
-$Log = new LOG_CHECKER;
-$logs = array();
-$LogScores = array();
 
 //Multiple artists!
-
 $LogName = '';
 if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 	$MainArtistCount = 0;
@@ -400,7 +375,7 @@ check_name($DirName); // check the folder name against the blacklist
 foreach ($FileList as $File) {
 	list($Size, $Name) = $File;
 	// add +log to encoding
-	if ($T['Encoding'] == "'Lossless'" && !in_array($Name, $IgnoredLogFileNames) && substr($Name, -4, 4) === '.log') {
+	if ($T['Encoding'] == "'Lossless'" && !in_array(strtolower($Name), $IgnoredLogFileNames) && preg_match('/\.log$/i', $Name)) {
 		$HasLog = 1;
 	}
 	// add +cue to encoding
@@ -657,22 +632,54 @@ if (!$Properties['GroupID']) {
 	}
 }
 
+//******************************************************************************//
+//--------------- Add the log scores to the DB ---------------------------------//
+$LogScore = 100;
+$LogChecksum = 1;
+$LogInDB = 0;
+$LogScores = array();
+if ($HasLog) {
+	ini_set('upload_max_filesize', 1000000);
+	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
+		if (!$_FILES['logfiles']['size'][$Pos]) {
+			continue;
+		}
+
+		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
+		if ($LogFile === false) {
+			die("Logfile doesn't exist or couldn't be opened");
+		}
+
+		//detect & transcode unicode
+		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
+			$LogFile = iconv("unicode", "UTF-8", $LogFile);
+		}
+		$Log = new Logchecker;
+		$Log->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
+		list($Score, $Details, $Checksum, $Text) = $Log->parse();
+		$LogScore = min($Score, $LogScore);
+		$LogChecksum = min(intval($Checksum), $LogChecksum);
+		$Details = implode("\r\n", $Details);
+		$LogScores[$Pos] = array($Score, $Details, $Checksum, $Text, $File);
+		$LogInDB = 1;
+	}
+}
+
 // Use this section to control freeleeches
 $T['FreeLeech'] = 0;
 $T['FreeLeechType'] = 0;
-$LogScore = ($HasLog == 1 ? $LogScoreAverage : 0);
 // Torrent
 $DB->query("
 	INSERT INTO torrents
 		(GroupID, UserID, Media, Format, Encoding,
 		Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-		Scene, HasLog, HasCue, info_hash, FileCount, FileList, FilePath,
-		Size, Time, Description, LogScore, FreeTorrent, FreeLeechType)
+		Scene, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, info_hash, FileCount, FileList, 
+		FilePath, Size, Time, Description, FreeTorrent, FreeLeechType)
 	VALUES
 		($GroupID, $LoggedUser[ID], $T[Media], $T[Format], $T[Encoding],
 		$T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
-		$T[Scene], '$HasLog', '$HasCue', '".db_string($InfoHash)."', $NumFiles, '$FileString', '$FilePath',
-		$TotalSize, '".sqltime()."', $T[TorrentDescription], $LogScore, '$T[FreeLeech]', '$T[FreeLeechType]')");
+		$T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum','".db_string($InfoHash)."', $NumFiles, '$FileString', 
+		'$FilePath', $TotalSize, '".sqltime()."', $T[TorrentDescription], '$T[FreeLeech]', '$T[FreeLeechType]')");
 
 $Cache->increment('stats_torrent_count');
 $TorrentID = $DB->inserted_id();
@@ -685,6 +692,18 @@ $Debug->set_flag('upload: ocelot updated');
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 
 //******************************************************************************//
+//--------------- Write Log DB       -------------------------------------------//
+
+foreach ($LogScores as $Pos => $Log) {
+	list($Score, $Details, $Checksum, $Text, $FileName) = $Log;
+	$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($Text)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')"); //set log scores
+	$LogID = $DB->inserted_id();
+	if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+		die("Could not copy logfile to the server.");
+	}
+}
+
+//******************************************************************************//
 //--------------- Write torrent file -------------------------------------------//
 
 $DB->query("
@@ -695,62 +714,6 @@ Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.
 
 Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
-
-if ($Type == 'Music') {
-	include(SERVER_ROOT.'/sections/upload/insert_extra_torrents.php');
-}
-
-
-
-//******************************************************************************//
-//--------------- Add the log scores to the DB ---------------------------------//
-
-if (!empty($LogScores) && $HasLog) {
-	$LogQuery = '
-		INSERT INTO torrents_logs_new
-			(TorrentID, Log, Details, NotEnglish, Score, Revision, Adjusted, AdjustedBy, AdjustmentReason)
-		VALUES (';
-	foreach ($LogScores as $LogKey => $LogScore) {
-		$LogScores[$LogKey] = "$TorrentID, $LogScore, 1, 0, 0, NULL";
-	}
-	$LogQuery .= implode('),(', $LogScores).')';
-	$DB->query($LogQuery);
-	$LogInDB = true;
-}
-
-//******************************************************************************//
-//--------------- Add the log scores to the DB ---------------------------------//
-if ($HasLog) {
-	ini_set('upload_max_filesize',1000000);
-	$LogMinScore = null;
-	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-		if (!$_FILES['logfiles']['size'][$Pos]) {
-		    break;
-		}
-		//todo: more validation
-		$File = fopen($_FILES['logfiles']['tmp_name'][$Pos], 'rb'); // open file for reading
-		if (!$File) {
-		    die('LogFile doesn\'t exist, or couldn\'t open');
-		} // File doesn't exist, or couldn't open
-		$LogFile = fread($File, 1000000); // Contents of the log are now stored in $LogFile
-		fclose($File);
-		//detect & transcode unicode
-		if (detect_utf_bom_encoding($_FILES['logfiles']['tmp_name'][$Pos])) {
-		    $LogFile = iconv("unicode","UTF-8",$LogFile);
-		}
-		$Log = new LOG_CHECKER;
-		$Log->new_file($LogFile);
-		list($Score, $LogGood, $LogBad, $LogText) = $Log->parse();
-		if ($LogMinScore === null || $Score < $LogMinScore) {
-		    $LogMinScore = $Score;
-		}
-		//$LogGood = implode("\r\n",$LogGood);
-		$LogBad = implode("\r\n",$LogBad);
-		$LogNotEnglish = (strpos($LogBad, 'Unrecognized log file')) ? 1 : 0;
-		$DB->query("INSERT INTO torrents_logs_new VALUES (null, $TorrentID, '".db_string($LogText)."', '".db_string($LogBad)."', $Score, 1, 0, 0, $LogNotEnglish, '')"); //set log scores
-	}
-	if ($LogMinScore) { $DB->query("UPDATE torrents SET LogScore='$LogMinScore' WHERE ID=$TorrentID"); } //set main score
-}
 
 //******************************************************************************//
 //--------------- Stupid Recent Uploads ----------------------------------------//
@@ -833,10 +796,7 @@ if ($Type == 'Music') {
 	}
 	$Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
 	if ($HasLog == 1) {
-        $Details .= ' / Log';
-	}
-	if ($LogInDB) {
-        $Details .= ' / '.$LogScoreAverage.'%';
+        $Details .= ' / Log'.($LogInDB ? " ({$LogScore}%)" : "");
 	}
 	if ($HasCue == 1) {
         $Details .= ' / Cue';

@@ -30,9 +30,10 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
 	$TorrentList = $TorrentCache[1];
 	// Resolve the torrentlist to the one specific torrent being reported
 	foreach ($TorrentList as &$Torrent) {
-	// Remove unneeded entries
-	if ($Torrent['ID'] != $TorrentID)
-		unset($TorrentList[$Torrent['ID']]);
+		// Remove unneeded entries
+		if ($Torrent['ID'] != $TorrentID) {
+			unset($TorrentList[$Torrent['ID']]);
+		}
 	}
 	// Group details
 	list($WikiBody, $WikiImage, $GroupID, $GroupName, $GroupYear,
