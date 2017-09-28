@@ -21,7 +21,9 @@ if ($Top10 === false) {
 				t.Scene,
 				t.HasLog,
 				t.HasCue,
+				t.HasLogDB,
 				t.LogScore,
+				t.LogChecksum,
 				t.RemasterYear,
 				g.Year,
 				t.RemasterTitle,
@@ -42,8 +44,8 @@ if ($Top10 === false) {
 $i = 1;
 foreach ($Top10 as $Torrent) {
 	list($TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags,
-		$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $LogScore, $Year, $GroupYear,
-		$RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Torrent;
+		$Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum,
+		$Year, $GroupYear, $RemasterTitle, $Snatched, $Seeders, $Leechers, $Data) = $Torrent;
 
 	$DisplayName = '';
 
@@ -72,7 +74,7 @@ foreach ($Top10 as $Torrent) {
 	}
 	// "FLAC / Lossless / Log (100%) / Cue / CD";
 	if ($HasLog) {
-		$ExtraInfo .= "{$AddExtra}Log ($LogScore%)";
+		$ExtraInfo .= "{$AddExtra}Log".($HasLogDB ? " ($LogScore%)" : "");
 		$AddExtra = ' / ';
 	}
 	if ($HasCue) {
