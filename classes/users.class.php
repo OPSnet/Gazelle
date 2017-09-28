@@ -158,6 +158,7 @@ class Users {
 					i.DisableInvites,
 					i.DisablePosting,
 					i.DisableUpload,
+					i.DisablePoints,
 					i.DisableWiki,
 					i.DisableAvatar,
 					i.DisablePM,
@@ -551,7 +552,7 @@ class Users {
 					. (G::$LoggedUser['ID'] === $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
 					. '" class="tooltip" /></a>' : '';
 		$Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
-		
+
 		if ($Badges) {
 			$ClassesDisplay = array();
 			foreach (array_intersect_key($SecondaryClasses, $UserInfo['ExtraClasses']) as $PermID => $PermShort) {
