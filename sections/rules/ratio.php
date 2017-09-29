@@ -3,6 +3,7 @@
 View::show_header('Ratio Requirements');
 ?>
 <div class="thin">
+<? include('jump.php'); ?>
 	<div class="header">
 		<h2 class="center">Ratio Rules</h2>
 	</div>
@@ -197,7 +198,6 @@ View::show_header('Ratio Requirements');
 		<br />
 		<br />
 	</div>
-<? include('jump.php'); ?>
 </div>
 <?
 	View::show_footer();

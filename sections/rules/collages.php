@@ -3,6 +3,7 @@
 View::show_header('Collages Rules');
 ?>
 <div class="thin">
+<? include('jump.php'); ?>
 	<div class="header">
 		<h2 class="center">Collages</h2>
 	</div>
@@ -52,7 +53,6 @@ View::show_header('Collages Rules');
 
 		</ul>
 	</div>
-<? include('jump.php'); ?>
 </div>
 <?
 View::show_footer();

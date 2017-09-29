@@ -11,7 +11,8 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
 	$Cache->cache_value('whitelisted_clients', $WhitelistedClients, 604800);
 }
 ?>
-	<div class="thin">
+<div class="thin">
+<? include('jump.php'); ?>
 	<div class="header">
 		<h2 class="center">Client Whitelist</h2>
 	</div>
@@ -35,6 +36,5 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
 <?	} ?>
 		</table>
 	</div>
-<? include('jump.php'); ?>
 </div>
 <? View::show_footer(); ?>
