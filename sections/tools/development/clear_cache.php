@@ -6,6 +6,19 @@ if (!check_perms('users_mod') || !check_perms('admin_clear_cache')) {
 View::show_header('Clear a cache key');
 
 //Make sure the form was sent
+if (isset($_GET['cache'])) {
+	if ($_GET['cache'] === 'users') {
+		$DB->query("SELECT count(*) as count FROM users_main");
+		list($Count) = $DB->next_record();
+
+		for ($i = 1; $i <= $Count; $i++) {
+			$Cache->delete_value('users_stats_' . $i);
+			$Cache->delete_value('users_info_' . $i);
+			$Cache->delete_value('users_info_heavy_' . $i);
+		}
+		echo "<div class='save_message'>{$Count} users' caches cleared!</div>";
+	}
+}
 if (!empty($_GET['key'])) {
 	if ($_GET['submit'] == 'Multi') {
 		$Keys = array_map('trim', preg_split('/\s+/', $_GET['key']));
@@ -58,6 +71,10 @@ $MultiKeyTooltip = 'Enter cache keys delimited by any amount of whitespace.';
 					<input type="submit" name="submit" value="Multi" class="submit" />
 				</form>
 			</td>
+		</tr>
+		<tr>
+			<td>Clear Common Caches:</td>
+			<td><a href="tools.php?action=clear_cache&cache=users">Users</a></td>
 		</tr>
 	</table>
 <?
