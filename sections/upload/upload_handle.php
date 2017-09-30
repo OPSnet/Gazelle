@@ -11,7 +11,7 @@
 //ini_set('upload_max_filesize', 2097152); // 2 Mibibytes
 
 ini_set('max_file_uploads', 100);
-define(MAX_FILENAME_LENGTH, 300);
+define(MAX_FILENAME_LENGTH, 255);
 include(SERVER_ROOT.'/classes/validate.class.php');
 include(SERVER_ROOT.'/classes/feed.class.php');
 include(SERVER_ROOT.'/sections/torrents/functions.php');
