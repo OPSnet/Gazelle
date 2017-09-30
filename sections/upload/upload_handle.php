@@ -11,7 +11,7 @@
 //ini_set('upload_max_filesize', 2097152); // 2 Mibibytes
 
 ini_set('max_file_uploads', 100);
-define(MAX_FILENAME_LENGTH, 300);
+define(MAX_FILENAME_LENGTH, 255);
 include(SERVER_ROOT.'/classes/validate.class.php');
 include(SERVER_ROOT.'/classes/feed.class.php');
 include(SERVER_ROOT.'/sections/torrents/functions.php');
@@ -375,7 +375,7 @@ check_name($DirName); // check the folder name against the blacklist
 foreach ($FileList as $File) {
 	list($Size, $Name) = $File;
 	// add +log to encoding
-	if ($T['Encoding'] == "'Lossless'" && !in_array($Name, $IgnoredLogFileNames) && substr($Name, -4, 4) === '.log') {
+	if ($T['Encoding'] == "'Lossless'" && !in_array(strtolower($Name), $IgnoredLogFileNames) && preg_match('/\.log$/i', $Name)) {
 		$HasLog = 1;
 	}
 	// add +cue to encoding

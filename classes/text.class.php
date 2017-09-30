@@ -932,6 +932,133 @@ class Text {
 		$Str = strtr($Str, self::$ProcessedSmileys);
 		return $Str;
 	}
+
+	/**
+	 * Given a String that is composed of HTML, attempt to convert it back
+	 * into BBCode. Useful when we're trying to deal with the output from
+	 * some other site's metadata
+	 *
+	 * @param String $Html
+	 * @return String
+	 */
+	public static function parse_html($Html) {
+		$Document = new DOMDocument();
+		$Document->loadHtml($Html);
+		$Elements = $Document->getElementsByTagName('span');
+		// When removing elements, you have to iterate over the list backwards
+		for ($i = $Elements->length - 1; $i >= 0; $i--) {
+			$Element = $Elements->item($i);
+			if (strpos($Element->getAttribute('class'), 'size') !== false) {
+				$NewElement = $Document->createElement('size', $Element->nodeValue);
+				$NewElement->setAttribute('size', str_replace('size', '', $Element->getAttribute('class')));
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+			elseif (strpos($Element->getAttribute('style'), 'font-style: italic') !== false) {
+				$NewElement = $Document->createElement('italic', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+			elseif (strpos($Element->getAttribute('style'), 'text-decoration: underline') !== false) {
+				$NewElement = $Document->createElement('underline', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+			elseif (strpos($Element->getAttribute('style'), 'color: ') !== false) {
+				$NewElement = $Document->createElement('color', $Element->nodeValue);
+				$NewElement->setAttribute('color', str_replace(array('color: ', ';'), '', $Element->getAttribute('style')));
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Elements = $Document->getElementsByTagName('ul');
+		for ($i = 0; $i < $Elements->length; $i++) {
+			$InnerElements = $Elements->item($i)->getElementsByTagName('li');
+			for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
+				$Element = $InnerElements->item($j);
+				$NewElement = $Document->createElement('bullet', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Elements = $Document->getElementsByTagName('ol');
+		for ($i = 0; $i < $Elements->length; $i++) {
+			$InnerElements = $Elements->item($i)->getElementsByTagName('li');
+			for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
+				$Element = $InnerElements->item($j);
+				$NewElement = $Document->createElement('number', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Elements = $Document->getElementsByTagName('strong');
+		for ($i = $Elements->length - 1; $i >= 0; $i--) {
+			$Element = $Elements->item($i);
+			if ($Element->hasAttribute('class') === 'important_text') {
+				$NewElement = $Document->createElement('important', $Element->nodeValue);
+				$Element->parentNode->replaceChild($NewElement, $Element);
+			}
+		}
+
+		$Elements = $Document->getElementsByTagName('a');
+		for ($i = $Elements->length - 1; $i >= 0; $i--) {
+			$Element = $Elements->item($i);
+			if ($Element->hasAttribute('href')) {
+				$Element->removeAttribute('rel');
+				$Element->removeAttribute('target');
+				if ($Element->getAttribute('href') === $Element->nodeValue) {
+					$Element->removeAttribute('href');
+				}
+				elseif ($Element->getAttribute('href') === 'javascript:void(0);'
+					&& $Element->getAttribute('onclick') === 'BBCode.spoiler(this);') {
+					$Spoilers = $Document->getElementsByTagName('blockquote');
+					for ($j = $Spoilers->length - 1; $j >= 0; $j--) {
+						$Spoiler = $Spoilers->item($j);
+						if ($Spoiler->hasAttribute('class') && $Spoiler->getAttribute('class') === 'hidden spoiler') {
+							$NewElement = $Document->createElement('spoiler', $Spoiler->nodeValue);
+							$Element->parentNode->replaceChild($NewElement, $Element);
+							$Spoiler->parentNode->removeChild($Spoiler);
+							break;
+						}
+					}
+				}
+				elseif (substr($Element->getAttribute('href'), 0, 22) === 'artist.php?artistname=') {
+					$NewElement = $Document->createElement('artist', $Element->nodeValue);
+					$Element->parentNode->replaceChild($NewElement, $Element);
+				}
+				elseif (substr($Element->getAttribute('href'), 0, 30) === 'user.php?action=search&search=') {
+					$NewElement = $Document->createElement('user', $Element->nodeValue);
+					$Element->parentNode->replaceChild($NewElement, $Element);
+				}
+			}
+		}
+
+		$Str = str_replace(array("<body>\n", "\n</body>", "<body>", "</body>"), "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
+		$Str = str_replace(array("\r\n", "\n"), "", $Str);
+		$Str = preg_replace("/\<strong\>([a-zA-Z0-9 ]+)\<\/strong\>\: \<spoiler\>/", "[spoiler=\\1]", $Str);
+		$Str = str_replace("</spoiler>", "[/spoiler]", $Str);
+		$Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*)\<blockquote\>/","[quote=\\1]", $Str);
+		$Str = preg_replace("/\<(\/*)blockquote\>/", "[\\1quote]", $Str);
+		$Str = preg_replace("/\<(\/*)strong\>/", "[\\1b]", $Str);
+		$Str = preg_replace("/\<(\/*)italic\>/", "[\\1i]", $Str);
+		$Str = preg_replace("/\<(\/*)underline\>/", "[\\1u]", $Str);
+		$Str = preg_replace("/\<(\/*)important\>/", "[\\1important]", $Str);
+		$Str = preg_replace("/\<color color=\"(.*)\"\>/", "[color=\\1]", $Str);
+		$Str = str_replace("</color>", "[/color]", $Str);
+		$Str = str_replace(array('<number>', '<bullet>'), array('[#]', '[*]'), $Str);
+		$Str = str_replace(array('</number>', '</bullet>'), '<br />', $Str);
+		$Str = str_replace(array('<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'), '', $Str);
+		$Str = preg_replace("/\<size size=\"([0-9]+)\"\>/", "[size=\\1]", $Str);
+		$Str = str_replace("</size>", "[/size]", $Str);
+		//$Str = preg_replace("/\<a href=\"rules.php\?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
+		//$Str = preg_replace("/\<a href=\"wiki.php\?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
+		$Str = preg_replace("/\<(\/*)artist\>/", "[\\1artist]", $Str);
+		$Str = preg_replace("/\((\/*)user\>/", "[\\1user]", $Str);
+		$Str = preg_replace("/\<a href=\"(.*)\">/", "[url=\\2]", $Str);
+		$Str = preg_replace("/\<(\/*)a\>/", "[\\1url]", $Str);
+		$Str = preg_replace("/\<img(.*)src=\"(.*)\"(.*)\>/", '[img]\\2[/img]', $Str);
+		$Str = str_replace('<p>', '', $Str);
+		$Str = str_replace('</p>', '<br />', $Str);
+		//return $Str;
+		return str_replace(array("<br />", "<br>"), "\n", $Str);
+	}
 }
 /*
 

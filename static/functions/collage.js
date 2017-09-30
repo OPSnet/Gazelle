@@ -67,7 +67,10 @@ var collageShow = {
 		return ul;
 	},
 	page:function(num, el) {
-		var ul = $('#collage_page' + num).raw(), s = this.selected(), covers, lists, i;
+		var ul = $('#collage_page' + num).raw();
+		var s = this.selected();
+		var covers, lists, i;
+
 		this.pg = num;
 
 		if (!ul) {
@@ -83,10 +86,13 @@ var collageShow = {
 		if (s) {
 			$(s).remove_class('selected');
 		}
+
 		if (el) {
 			$(el.parentNode).add_class('selected');
 		}
-
+		else {
+			$('#pagelink' + this.pg).add_class('selected');
+		}
 
 		// Toggle the page number links
 		first = Math.max(0, this.pg - 2);
