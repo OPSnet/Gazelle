@@ -337,11 +337,11 @@ function logout() {
  */
 function logout_all_sessions() {
 	$UserID = G::$LoggedUser['ID'];
-	
+
 	G::$DB->query("
 		DELETE FROM users_sessions
 		WHERE UserID = '$UserID'");
-	
+
 	G::$Cache->delete_value('users_sessions_' . $UserID);
 	logout();
 }
@@ -358,8 +358,8 @@ function enforce_login() {
  * Make sure $_GET['auth'] is the same as the user's authorization key
  * Should be used for any user action that relies solely on GET.
  *
- * @param Are we using ajax?
- * @return authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
+ * @param bool Are we using ajax?
+ * @return bool Authorisation status. Prints an error message to LAB_CHAN on IRC on failure.
  */
 function authorize($Ajax = false) {
 	if (empty($_REQUEST['auth']) || $_REQUEST['auth'] != G::$LoggedUser['AuthKey']) {
