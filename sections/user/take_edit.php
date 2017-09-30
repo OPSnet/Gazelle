@@ -232,6 +232,7 @@ $Options['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
 $Options['CoverArt']            = (int)!empty($_POST['coverart']);
 $Options['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
 $Options['AutoComplete']        = (int)$_POST['autocomplete'];
+$Options['HttpsTracker']        = (!empty($_POST['httpstracker']) ? 1 : 0);
 
 if (isset($LoggedUser['DisableFreeTorrentTop10'])) {
 	$Options['DisableFreeTorrentTop10'] = $LoggedUser['DisableFreeTorrentTop10'];
@@ -367,7 +368,7 @@ $SQL .= "WHERE m.ID = '".db_string($UserID)."'";
 $DB->query($SQL);
 
 if ($ResetPassword) {
-	
+
 	logout_all_sessions();
 }
 
