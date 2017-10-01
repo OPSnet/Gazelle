@@ -66,7 +66,7 @@ View::show_header('Staff Tools');
 	create_row("News post", "tools.php?action=news", check_perms("admin_manage_news"));
 	create_row("Vanity House additions", "tools.php?action=recommend", check_perms("site_recommend_own") || check_perms("site_manage_recommendations"));
 	create_row("Album of the Week", "tools.php?action=weekalbum", check_perms("users_mod"));
-
+	
 	if ($ToolsHTML) {
 ?>
 		<div class="permission_subcontainer">
@@ -150,7 +150,17 @@ View::show_header('Staff Tools');
 
 	// begin Developer Sandboxes category
 	$ToolsHTML = "";
+	create_row("Sandbox (1)", "tools.php?action=sandbox1", check_perms("site_debug"));
+	create_row("Sandbox (2)", "tools.php?action=sandbox2", check_perms("site_debug"));
+	create_row("Sandbox (3)", "tools.php?action=sandbox3", check_perms("site_debug"));
+	create_row("Sandbox (4)", "tools.php?action=sandbox4", check_perms("site_debug"));
+	create_row("Sandbox (5)", "tools.php?action=sandbox5", check_perms("site_debug"));
+	create_row("Sandbox (6)", "tools.php?action=sandbox6", check_perms("site_debug"));
+	create_row("Sandbox (7)", "tools.php?action=sandbox7", check_perms("site_debug"));
+	create_row("Sandbox (8)", "tools.php?action=sandbox8", check_perms("site_debug"));
 	create_row("BBCode sandbox", "tools.php?action=bbcode_sandbox", check_perms("users_mod"));
+	create_row("Public sandbox", "tools.php?action=public_sandbox", check_perms("users_mod"), "Do not click this!");
+	create_row("Mod-level sandbox", "tools.php?action=mod_sandbox", check_perms("users_mod"), "Do not click this!");
 	create_row("Testing", "testing.php", check_perms("users_mod"));
 
 	if ($ToolsHTML) {

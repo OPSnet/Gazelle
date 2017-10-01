@@ -51,8 +51,11 @@ function checked($Checked) {
 	return ($Checked ? ' checked="checked"' : '');
 }
 
-$SiteOptions = ($SiteOptions) ? unserialize($SiteOptions) : array();
-$SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
+if ($SiteOptions) {
+	$SiteOptions = unserialize($SiteOptions);
+} else {
+	$SiteOptions = array();
+}
 
 View::show_header("$Username &gt; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
 
