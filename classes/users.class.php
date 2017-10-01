@@ -227,7 +227,8 @@ class Users {
 				unset($HeavyInfo['CustomForums']['']);
 			}
 
-			$HeavyInfo['SiteOptions'] = array_merge(static::default_site_options(), unserialize($HeavyInfo['SiteOptions']));
+			$HeavyInfo['SiteOptions'] = !empty($HeavyInfo['SiteOptions']) ? unserialize($HeavyInfo['SiteOptions']) : array();
+			$HeavyInfo['SiteOptions'] = array_merge(static::default_site_options(), $HeavyInfo['SiteOptions']);
 			$HeavyInfo = array_merge($HeavyInfo, $HeavyInfo['SiteOptions']);
 			unset($HeavyInfo['SiteOptions']);
 
