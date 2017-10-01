@@ -268,7 +268,8 @@ class Users {
 			FROM users_info
 			WHERE UserID = $UserID");
 		list($SiteOptions) = G::$DB->next_record(MYSQLI_NUM, false);
-		$SiteOptions = array_merge(static::default_site_options(), unserialize($SiteOptions));
+		$SiteOptions = !empty($SiteOptions) ? unserialize($SiteOptions) : array();
+		$SiteOptions = array_merge(static::default_site_options(), $SiteOptions);
 
 		// Get HeavyInfo
 		$HeavyInfo = Users::user_heavy_info($UserID);
