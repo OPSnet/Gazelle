@@ -49,8 +49,11 @@ if (!empty($_GET['setdefault'])) {
 		FROM users_info
 		WHERE UserID = '".db_string($LoggedUser['ID'])."'");
 	list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
-	$SiteOptions = (!empty($SiteOptions)) ? unserialize($SiteOptions) : array();
-
+	if (!empty($SiteOptions)) {
+		$SiteOptions = unserialize($SiteOptions);
+	} else {
+		$SiteOptions = array();
+	}
 	$SiteOptions['DefaultSearch'] = preg_replace($UnsetRegexp, '', $_SERVER['QUERY_STRING']);
 	$DB->query("
 		UPDATE users_info
@@ -67,7 +70,7 @@ if (!empty($_GET['setdefault'])) {
 		FROM users_info
 		WHERE UserID = '".db_string($LoggedUser['ID'])."'");
 	list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
-	$SiteOptions = (!empty($SiteOptions)) ? unserialize($SiteOptions) : array();
+	$SiteOptions = unserialize($SiteOptions);
 	$SiteOptions['DefaultSearch'] = '';
 	$DB->query("
 		UPDATE users_info
