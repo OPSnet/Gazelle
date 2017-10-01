@@ -133,7 +133,7 @@ class Users {
 	 * Gets the heavy user info
 	 * Only used for current user
 	 *
-	 * @param int $UserID The userid to get the information for
+	 * @param $UserID The userid to get the information for
 	 * @return fetched heavy info.
 	 *		Just read the goddamn code, I don't have time to comment this shit.
 	 */
@@ -141,6 +141,7 @@ class Users {
 
 		$HeavyInfo = G::$Cache->get_value("user_info_heavy_$UserID");
 		if (empty($HeavyInfo)) {
+
 			$QueryID = G::$DB->get_query_id();
 			G::$DB->query("
 				SELECT
@@ -227,8 +228,10 @@ class Users {
 				unset($HeavyInfo['CustomForums']['']);
 			}
 
-			$HeavyInfo['SiteOptions'] = array_merge(static::default_site_options(), unserialize($HeavyInfo['SiteOptions']));
-			$HeavyInfo = array_merge($HeavyInfo, $HeavyInfo['SiteOptions']);
+			$HeavyInfo['SiteOptions'] = unserialize($HeavyInfo['SiteOptions']);
+			if (!empty($HeavyInfo['SiteOptions'])) {
+				$HeavyInfo = array_merge($HeavyInfo, $HeavyInfo['SiteOptions']);
+			}
 			unset($HeavyInfo['SiteOptions']);
 
 			G::$DB->set_query_id($QueryID);
@@ -236,12 +239,6 @@ class Users {
 			G::$Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
 		}
 		return $HeavyInfo;
-	}
-
-	public static function default_site_options() {
-		return array(
-			'HttpsTracker' => true
-		);
 	}
 
 	/**
@@ -267,7 +264,7 @@ class Users {
 			FROM users_info
 			WHERE UserID = $UserID");
 		list($SiteOptions) = G::$DB->next_record(MYSQLI_NUM, false);
-		$SiteOptions = array_merge(static::default_site_options(), unserialize($SiteOptions));
+		$SiteOptions = unserialize($SiteOptions);
 
 		// Get HeavyInfo
 		$HeavyInfo = Users::user_heavy_info($UserID);
@@ -554,7 +551,7 @@ class Users {
 					. (G::$LoggedUser['ID'] === $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
 					. '" class="tooltip" /></a>' : '';
 		$Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
-
+		
 		if ($Badges) {
 			$ClassesDisplay = array();
 			foreach (array_intersect_key($SecondaryClasses, $UserInfo['ExtraClasses']) as $PermID => $PermShort) {
