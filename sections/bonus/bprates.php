@@ -24,8 +24,8 @@ WHERE
 
 list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $DB->next_record();
 $TotalTorrents = intval($TotalTorrents);
-$TotalSize = intval($TotalSize);
-$TotalHourlyPoints = intval($TotalHourlyPoints);
+$TotalSize = floatval($TotalSize);
+$TotalHourlyPoints = floatval($TotalHourlyPoints);
 $TotalDailyPoints = $TotalHourlyPoints * 24;
 $TotalWeeklyPoints = $TotalDailyPoints * 7;
 // The mean number of days in a month in the Gregorian calendar,
@@ -57,11 +57,11 @@ $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 		<tr>
 			<td><?=$TotalTorrents?></td>
 			<td><?=$TotalSize?></td>
-			<td><?=number_format($TotalHourlyPoints)?></td>
-			<td><?=number_format($TotalDailyPoints)?></td>
-			<td><?=number_format($TotalWeeklyPoints)?></td>
-			<td><?=number_format($TotalMonthlyPoints)?></td>
-			<td><?=number_format($TotalYearlyPoints)?></td>
+			<td><?=number_format($TotalHourlyPoints, 2)?></td>
+			<td><?=number_format($TotalDailyPoints, 2)?></td>
+			<td><?=number_format($TotalWeeklyPoints, 2)?></td>
+			<td><?=number_format($TotalMonthlyPoints, 2)?></td>
+			<td><?=number_format($TotalYearlyPoints, 2)?></td>
 		</tr>
 	</tbody>
 </table>
@@ -112,7 +112,8 @@ $GroupIDs = $DB->collect('GroupID');
 $Groups = Torrents::get_groups($GroupIDs, true, true);
 while(list($TorrentID, $GroupID, $Size, $Seeders, $Seedtime, $HourlyPoints) = $DB->next_record()) {
 	$Size = intval($Size);
-	$HourlyPoints = intval($HourlyPoints);
+	$Seeders = max(0, intval($Seeders));
+	$HourlyPoints = floatval($HourlyPoints);
 	$DailyPoints = $HourlyPoints * 24;
 	$WeeklyPoints = $DailyPoints * 7;
 	$MonthlyPoints = $DailyPoints * 30.436875;
@@ -150,11 +151,11 @@ while(list($TorrentID, $GroupID, $Size, $Seeders, $Seedtime, $HourlyPoints) = $D
 			<td><?=Format::get_size($Size)?></td>
 			<td><?=number_format($Seeders)?></td>
 			<td><?=convert_hours($Seedtime, 2)?></td>
-			<td><?=number_format($HourlyPoints)?></td>
-			<td><?=number_format($DailyPoints)?></td>
-			<td><?=number_format($WeeklyPoints)?></td>
-			<td><?=number_format($MonthlyPoints)?></td>
-			<td><?=number_format($YearlyPoints)?></td>
+			<td><?=number_format($HourlyPoints, 2)?></td>
+			<td><?=number_format($DailyPoints, 2)?></td>
+			<td><?=number_format($WeeklyPoints, 2)?></td>
+			<td><?=number_format($MonthlyPoints, 2)?></td>
+			<td><?=number_format($YearlyPoints, 2)?></td>
 		</tr>
 <?php
 }

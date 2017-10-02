@@ -30,7 +30,7 @@ UPDATE users_main AS um
       GROUP BY
         xfu.uid
     ) AS p ON um.ID = p.ID
-SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE ROUND(p.NewPoints, 0) END");
+SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE ROUND(p.NewPoints, 5) END");
 
 $DB->query("SELECT UserID FROM users_info WHERE DisablePoints = '0'");
 if ($DB->has_results()) {
