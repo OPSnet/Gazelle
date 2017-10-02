@@ -38,4 +38,3 @@ if (count($IDs) > 0) {
 		$Cache->delete_value("forums_$ForumID");
 	}
 }
-echo "Old threads locked\n";

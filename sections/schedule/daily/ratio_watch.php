@@ -12,7 +12,8 @@ $UserQuery = $DB->query("
 				torrent_pass
 			FROM users_info AS i
 				JOIN users_main AS m ON m.ID = i.UserID
-			WHERE m.Uploaded/m.Downloaded >= m.RequiredRatio
+			WHERE m.Downloaded > 0
+				AND m.Uploaded / m.Downloaded >= m.RequiredRatio
 				AND i.RatioWatchEnds != '0000-00-00 00:00:00'
 				AND m.can_leech = '0'
 				AND m.Enabled = '1'");
@@ -46,7 +47,8 @@ $UserQuery = $DB->query("
 				SELECT m.ID, torrent_pass
 				FROM users_info AS i
 					JOIN users_main AS m ON m.ID = i.UserID
-				WHERE m.Uploaded / m.Downloaded >= m.RequiredRatio
+				WHERE m.Downloaded > 0
+					AND m.Uploaded / m.Downloaded >= m.RequiredRatio
 					AND i.RatioWatchEnds != '0000-00-00 00:00:00'
 					AND m.Enabled = '1'");
 $OffRatioWatch = $DB->collect('ID');
@@ -79,7 +81,8 @@ $DB->query("
 		SELECT m.ID, m.Downloaded
 		FROM users_info AS i
 			JOIN users_main AS m ON m.ID = i.UserID
-		WHERE m.Uploaded / m.Downloaded < m.RequiredRatio
+		WHERE m.Downloaded > 0
+			AND m.Uploaded / m.Downloaded < m.RequiredRatio
 			AND i.RatioWatchEnds = '0000-00-00 00:00:00'
 			AND m.Enabled = '1'
 			AND m.can_leech = '1'");
