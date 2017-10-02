@@ -200,16 +200,10 @@ function convert_hours($Hours,$Levels=2,$Span=true) {
 
 	if ($Hours > 0 && $Levels > 0) {
 		$Return .= $Hours.'h';
-		$Levels--;
-	}
-
-	if ($Minutes > 0 && $Levels > 0) {
-		$Return .= $Minutes.'m';
-		$Levels--;
 	}
 
 	if ($Span) {
-		return '<span title="'.date('M d Y, H:i', $TimeStamp).'">'.$Return.'</span>';
+		return '<span>'.$Return.'</span>';
 	} else {
 		return $Return;
 	}
