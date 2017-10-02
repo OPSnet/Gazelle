@@ -1,6 +1,10 @@
 <?php
 enforce_login();
 
+if (G::$LoggedUser['DisablePoints']) {
+	error('Your points have been disabled.');
+}
+
 $Items = array(
 	'1_token' => array(
 		'Title' => '1 Freeleech Token',

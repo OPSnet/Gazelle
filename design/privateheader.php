@@ -211,7 +211,7 @@ if ($NotificationsManager->is_skipped(NotificationsManager::SUBSCRIPTIONS)) {
 						<a href="upload.php">Upload</a>
 					</li>
 					<li id="nav_bonus" class="brackets<?=Format::add_class($PageID, array('user', 'bonus'), 'active', false)?>">
-						<a href="bonus.php">Bonus (<?=G::$LoggedUser['BonusPoints']?>)</a>
+						<a href="bonus.php">Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)</a>
 					</li>
 <?
 if (check_perms('site_send_unlimited_invites')) {
