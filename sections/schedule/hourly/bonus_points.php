@@ -6,14 +6,6 @@
 // Size (convert from bytes to GB) is in torrents
 // Seedtime (convert to hours to days) is in xbt_snatched
 // Seeders is in torrents
-$DB->query("
-SELECT *
-FROM users_main as um
-JOIN users_info as i on um.ID = i.UserID
-WHERE 
-	um.Enabled = '1'
-	AND i.DisablePoints = '0'
-");
 
 $DB->query("
 UPDATE users_main AS um
