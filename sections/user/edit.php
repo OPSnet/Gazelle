@@ -364,6 +364,13 @@ echo $Val->GenerateJS('userform');
 					<label for="downloadalt">Enable downloading torrent files as text files</label>
 				</td>
 			</tr>
+			<tr id="tor_https_tr">
+				<td class="label tooltip" title="Use HTTPs tracker. Some clients do not work well with https announcements"><strong>Use HTTPs Tracker</strong></td>
+				<td>
+					<input type="checkbox" name="httpstracker" id="httpstracker"<?=$SiteOptions['HttpsTracker'] ? ' checked="checked"' : ''?> />
+					<label for="httpstracker">Enable HTTPs tracker for announce URL</label>
+				</td>
+			</tr>
 		</table>
 		<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="community_settings">
 			<tr class="colhead_dark">

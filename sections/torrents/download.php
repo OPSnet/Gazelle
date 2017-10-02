@@ -9,7 +9,7 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
 	if (strpos($_REQUEST['torrent_pass'], '_') !== false) {
 		error(404);
 	}
-	
+
 	$UserInfo = $Cache->get_value('user_'.$_REQUEST['torrent_pass']);
 	if (!is_array($UserInfo)) {
 		$DB->query("
@@ -193,6 +193,8 @@ if ($DownloadAlt) {
 }
 header('Content-disposition: attachment; filename="'.$FileName.'"');
 
-echo TorrentsDL::get_file($Contents, ANNOUNCE_URL."/$TorrentPass/announce");
+$AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
+
+echo TorrentsDL::get_file($Contents, $AnnounceURL."/$TorrentPass/announce");
 
 define('SKIP_NO_CACHE_HEADERS', 1);
