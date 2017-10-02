@@ -21,7 +21,7 @@ UPDATE users_main AS um
       FROM
         xbt_files_users AS xfu
         JOIN users_info AS ui ON ui.UserID = xfu.uid
-        JOIN xbt_snatched AS xs ON xs.fid = xfu.fid
+        JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid AND xfu.uid
         JOIN torrents AS t ON t.ID = xfu.fid
       WHERE
         xfu.active = '1'

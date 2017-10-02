@@ -1,4 +1,10 @@
 <?php
+
+$Page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
+$Page = max(1, $Page);
+$Limit = TORRENTS_PER_PAGE;
+$Offset = TORRENTS_PER_PAGE * ($Page-1);
+
 View::show_header('Bonus Points Rate');
 
 $DB->query("
@@ -14,7 +20,7 @@ SELECT
 FROM
 	xbt_files_users AS xfu
 	JOIN users_info AS ui ON ui.UserID = xfu.uid
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid
+	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
 	xfu.uid = {$LoggedUser['ID']}
@@ -86,10 +92,23 @@ $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 
 $DB->query("
 SELECT
+	COUNT(*) as count
+FROM
+	xbt_files_users AS xfu
+	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
+WHERE
+	xfu.uid = {$LoggedUser['ID']}
+	AND xfu.active = '1'
+	AND xfu.remaining = 0");
+
+list($NumResults) = $DB->next_record();
+
+$DB->query("
+SELECT
 	t.ID,
 	t.GroupID,
 	t.Size,
-	t.Seeders,
+	GREATEST(t.Seeders, 1),
 	xs.seedtime,
 	((t.Size / (1024 * 1024 * 1024)) * (
 			0.0754 + (
@@ -99,20 +118,20 @@ SELECT
 	) AS HourlyPoints
 FROM
 	xbt_files_users AS xfu
-	JOIN users_info AS ui ON ui.UserID = xfu.uid
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid
+	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
 	xfu.uid = {$LoggedUser['ID']}
 	AND xfu.active = '1'
 	AND xfu.remaining = 0
-	AND ui.DisablePoints = '0'");
+LIMIT {$Limit}
+OFFSET {$Offset}");
 
 $GroupIDs = $DB->collect('GroupID');
 $Groups = Torrents::get_groups($GroupIDs, true, true);
 while(list($TorrentID, $GroupID, $Size, $Seeders, $Seedtime, $HourlyPoints) = $DB->next_record()) {
 	$Size = intval($Size);
-	$Seeders = max(0, intval($Seeders));
+	$Seeders = intval($Seeders);
 	$HourlyPoints = floatval($HourlyPoints);
 	$DailyPoints = $HourlyPoints * 24;
 	$WeeklyPoints = $DailyPoints * 7;
