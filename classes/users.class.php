@@ -25,6 +25,20 @@ class Users {
 		return array($Classes, $ClassLevels);
 	}
 
+	public static function user_stats($UserID) {
+		global $Cache, $DB;
+		$UserStats = $Cache->get_value('user_stats_'.$UserID);
+		if (!is_array($UserStats)) {
+			$DB->query("
+			SELECT Uploaded AS BytesUploaded, Downloaded AS BytesDownloaded, BonusPoints, RequiredRatio
+			FROM users_main
+			WHERE ID = '$UserID'");
+			$UserStats = $DB->next_record(MYSQLI_ASSOC);
+			$Cache->cache_value('user_stats_'.$UserID, $UserStats, 3600);
+		}
+		return $UserStats;
+	}
+
 
 	/**
 	 * Get user info, is used for the current user and usernames all over the site.

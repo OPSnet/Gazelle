@@ -7,6 +7,15 @@ $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
 View::show_header('Bonus Points Rate');
 
+if (empty($_GET['id']) || !check_perms('users_mod')) {
+	$UserID = $LoggedUser['ID'];
+	$User = $LoggedUser;
+}
+else {
+	$UserID = intval($_GET['id']);
+	$User = array_merge(Users::user_stats($_GET['id']), Users::user_heavy_info($_GET['id']));
+}
+
 $DB->query("
 SELECT
 	COUNT(xfu.uid) as TotalTorrents,
@@ -23,7 +32,7 @@ FROM
 	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
-	xfu.uid = {$LoggedUser['ID']}
+	xfu.uid = {$UserID}
 	AND xfu.active = '1'
 	AND xfu.remaining = 0
 	AND ui.DisablePoints = '0'");
@@ -41,7 +50,8 @@ $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 
 ?>
 <div class="header">
-	<h2>Bonus Points Shop</h2>
+	<h2>Bonus Points Rates</h2>
+	<h3>Points: <?=number_format($User['BonusPoints'])?></h3>
 </div>
 <div class="linkbox">
 	<a href="wiki.php?action=article&id=130" class="brackets">About Bonus Points</a>
@@ -97,7 +107,7 @@ FROM
 	xbt_files_users AS xfu
 	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
 WHERE
-	xfu.uid = {$LoggedUser['ID']}
+	xfu.uid = {$UserID}
 	AND xfu.active = '1'
 	AND xfu.remaining = 0");
 
@@ -121,7 +131,7 @@ FROM
 	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
-	xfu.uid = {$LoggedUser['ID']}
+	xfu.uid = {$UserID}
 	AND xfu.active = '1'
 	AND xfu.remaining = 0
 LIMIT {$Limit}

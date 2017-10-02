@@ -283,11 +283,11 @@ if ($Avatar && Users::has_avatars_enabled()) {
 				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Required Ratio: <span class="tooltip" title="<?=number_format((double)$RequiredRatio, 5)?>"><?=number_format((double)$RequiredRatio, 2)?></span></li>
 <?
 	}
-	if (($Override = check_paranoia_here('bonuspoints')) && isset($BonusPoints)) {
+	/*if (($Override = check_paranoia_here('bonuspoints')) && isset($BonusPoints)) {
 ?>
 				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Bonus Points: <?=number_format($BonusPoints)?></li>
 <?php
-	}
+	}*/
 	if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {
 ?>
 				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>">Tokens</a>: <?=number_format($FLTokens)?></li>
