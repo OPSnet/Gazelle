@@ -30,6 +30,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 			p.Level AS Class,
 			m.Uploaded,
 			m.Downloaded,
+			m.BonusPoints,
 			m.RequiredRatio,
 			m.Title,
 			m.torrent_pass,
@@ -81,7 +82,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 		header("Location: log.php?search=User+$UserID");
 	}
 
-	list($Username,	$Email,	$LastAccess, $IP, $Class, $Uploaded, $Downloaded, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, array(8, 11));
+	list($Username,	$Email,	$LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, array(8, 11));
 } else { // Person viewing is a normal user
 	$DB->query("
 		SELECT
@@ -92,6 +93,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 			p.Level AS Class,
 			m.Uploaded,
 			m.Downloaded,
+			m.BonusPoints,
 			m.RequiredRatio,
 			m.Enabled,
 			m.Paranoia,
@@ -122,7 +124,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 		header("Location: log.php?search=User+$UserID");
 	}
 
-    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
+    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints,
 $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass,
 $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
 $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle) = $DB->next_record(MYSQLI_NUM, array(9, 11));
@@ -1098,6 +1100,13 @@ if (check_perms('users_mod', $Class)) { ?>
 				<td>
 					<input type="hidden" name="OldDownloaded" value="<?=$Downloaded?>" />
 					<input type="text" size="20" name="Downloaded" value="<?=$Downloaded?>" />
+				</td>
+			</tr>
+			<tr>
+				<td class="label tooltip" title="Bonus Points.">Bonus Points:</td>
+				<td>
+					<input type="hidden" name="OldBonusPoints" value="<?=$BonusPoints?>" />
+					<input type="text" size="20" name="BonusPoints" value="<?=$BonusPoints?>" />
 				</td>
 			</tr>
 			<tr>

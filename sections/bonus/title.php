@@ -1,26 +1,66 @@
 <?php
 
-if (isset($_GET['Remove']) && $_GET['Remove'] === 'true') {
+$BBCode = (isset($_REQUEST['BBCode']) && $_REQUEST['BBCode'] === 'true') ? 'true' : 'false';
+$Option = (isset($_REQUEST['BBCode']) && $_REQUEST['BBCode'] === 'true') ? 'title_bbcode' : 'title_nobbcode';
+$Item = $Items[$Option];
+$Price = $Item['Price'];
+$ID = G::$LoggedUser['ID'];
+
+if (isset($_REQUEST['preview'])) {
+	$Title = ($BBCode === 'true') ? Text::full_format($_POST['title']) : Text::strip_bbcode($_POST['title']);
+	print($Title);
+	die();
+}
+if (isset($_REQUEST['Remove']) && $_REQUEST['Remove'] === 'true') {
 	G::$DB->query("UPDATE users_main SET Title='' WHERE ID={$ID}");
 	G::$Cache->delete_value("user_info_{$ID}");
 	G::$Cache->delete_value("user_stats_{$ID}");
+	header('Location: bonus.php?complete');
 }
-elseif (isset($_GET['confirm'])) {
-	if (!isset($_GET['Title'])) {
+elseif (isset($_POST['confirm'])) {
+	if (!isset($_POST['title'])) {
 		error(403);
 	}
-	$Option = (isset($_GET['BBCode']) && $_GET['BBCode'] === 'true') ? 'title_bbcode' : 'title_nobbcode';
-	$Price = $Options[$Option]['Price'];
+
 	if ($Price > G::$LoggedUser['BonusPoints']) {
-		error('You cannot afford this item');
+		error('You cannot afford this item.');
 	}
-	if (!isset($_GET['BBCode']) || $_GET['BBCode'] !== 'true') {
-		$_GET['Title'] = Text::strip_bbcode($_GET['Title']);
-	}
-	$ID = G::$LoggedUser['ID'];
-	G::$DB->query("UPDATE users_main SET Title='".db_string($_GET['Title'])."', BonusPoints=BonusPoints - {$Price} WHERE ID={$ID}");
+	$Title = ($BBCode === 'true') ? Text::full_format($_POST['title']) : Text::strip_bbcode($_POST['title']);
+	G::$DB->query("UPDATE users_main SET Title='".db_string($Title)."', BonusPoints=BonusPoints - {$Price} WHERE ID={$ID}");
 	G::$Cache->delete_value("user_info_{$ID}");
 	G::$Cache->delete_value("user_stats_{$ID}");
+	header('Location: bonus.php?complete');
+}
+else {
+
+	$Title = ($BBCode !== 'true') ? 'no BBCode allowed' : 'BBCode allowed';
+
+	View::show_header('Bonus Points - Title', 'bonus');
+	?>
+	<div class="thin">
+		<table>
+			<thead>
+			<tr>
+				<td>Custom Title, <?=$Title?> - <?=number_format($Price)?> Points</td>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>
+					<form action="bonus.php?action=title&BBCode=<?=$BBCode?>" method="post">
+						<input type="hidden" name="confirm" value="true" />
+						<input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
+						<input type="submit" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
+						<div id="preview"></div>
+					</form>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	<?php
+
+	View::show_footer();
 }
 
-// Show the confirmation page with a preview of the page
+?>

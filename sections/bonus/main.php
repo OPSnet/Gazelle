@@ -1,6 +1,14 @@
 <?php
 
-View::show_header('Bonus Points Shop');
+View::show_header('Bonus Points Shop', 'bonus');
+
+if (isset($_GET['complete'])) {
+	print <<<HTML
+<div class="alertbar blend">
+	Item Purchased!
+</div>
+HTML;
+}
 
 ?>
 <div class="header">
@@ -10,6 +18,7 @@ View::show_header('Bonus Points Shop');
 	<a href="wiki.php?action=article&id=130" class="brackets">About Bonus Points</a>
 	<a href="bonus.php?action=bprates" class="brackets">Bonus Point Rates</a>
 </div>
+
 <div class="thin">
 	<table>
 		<thead>
@@ -24,34 +33,31 @@ View::show_header('Bonus Points Shop');
 <?php
 
 $Cnt = 1;
-foreach ($Options as $Key => $Option) {
+foreach ($Items as $Key => $Item) {
 	$RowClass = ($Cnt % 2 === 0) ? 'rowb' : 'rowa';
-	$Price = number_format($Option['Price']);
+	$Price = number_format($Item['Price']);
 	print <<<HTML
 			<tr class="$RowClass">
 				<td>{$Cnt}</td>
-				<td>{$Option['Title']}</td>
+				<td>{$Item['Title']}</td>
 				<td>{$Price}</td>
 				<td>
 HTML;
 
-	if (G::$LoggedUser['BonusPoints'] >= $Option['Price']) {
-		print <<<HTML
-					<form action="bonus.php?action={$Option['Action']}">
-HTML;
-
-		foreach ($Option['Hidden'] as $Name => $Value) {
-			print "\t\t\t\t\t\t<input type='hidden' name='{$Name}' value='{$Value}' />";
+	if (G::$LoggedUser['BonusPoints'] >= $Item['Price']) {
+		$Url = array();
+		foreach ($Item['Options'] as $Key => $Value) {
+			$Url[] = "{$Key}={$Value}";
 		}
-
+		$Url = implode("&", $Url);
+		$Onclick = (isset($Item['Onclick'])) ? "onclick='{$Item['Onclick']}(this)'" : '';
 		print <<<HTML
-						<input type="submit" value="Exchange" />
-					</form>
+					<a href="bonus.php?action={$Item['Action']}&{$Url}" {$Onclick}>Purchase</a>
 HTML;
 	}
 	else {
 		print <<<HTML
-					<input type="submit" disabled="disabled" value="Exchange" />
+					<span style="font-style: italic">Too Expensive</span>
 HTML;
 
 	}

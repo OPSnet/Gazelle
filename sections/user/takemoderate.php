@@ -36,6 +36,7 @@ $Invites = (int)$_POST['Invites'];
 $SupportFor = db_string($_POST['SupportFor']);
 $Pass = $_POST['ChangePassword'];
 $Warned = isset($_POST['Warned']) ? 1 : 0;
+$Uploaded = $Downloaded = $BonusPoints = null;
 if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
 	$Uploaded = ($_POST['Uploaded'] === '' ? 0 : $_POST['Uploaded']);
 	if ($Arithmetic = strpbrk($Uploaded, '+-')) {
@@ -47,6 +48,17 @@ if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
 	}
 	if (!is_number($Uploaded) || !is_number($Downloaded)) {
 		error(0);
+	}
+}
+if (isset($_POST['BonusPoints'])) {
+	if (empty($_POST['BonusPoints'])) {
+		$BonusPoints = 0;
+	}
+	elseif (!is_number($_POST['BonusPoints'])) {
+		error(0);
+	}
+	else {
+		$BonusPoints = intval($_POST['BonusPoints']);
 	}
 }
 $FLTokens = isset($_POST['FLTokens']) ? $_POST['FLTokens'] : 0;
@@ -103,6 +115,7 @@ $DB->query("
 		m.Enabled,
 		m.Uploaded,
 		m.Downloaded,
+		m.BonusPoints,
 		m.Invites,
 		m.can_leech,
 		m.Visible,
@@ -443,6 +456,13 @@ if ($Downloaded != $Cur['Downloaded'] && $Downloaded != $_POST['OldDownloaded'] 
 		$UpdateSet[] = "Downloaded = '$Downloaded'";
 		$EditSummary[] = "downloaded changed from ".Format::get_size($Cur['Downloaded']).' to '.Format::get_size($Downloaded);
 		$Cache->delete_value("user_stats_$UserID");
+}
+
+if ($BonusPoints != intval($Cur['BonusPoints']) && $BonusPoints != intval($_POST['OldBonusPoints'])
+	&& (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {
+	$UpdateSet[] = "BonusPoints = '{$BonusPoints}'";
+	$EditSummary[] = "bonus points changed from {$Cur['BonusPoints']} to {$BonusPoints}";
+	$Cache->delete_value("user_stats_{$UserID}");
 }
 
 if ($FLTokens != $Cur['FLTokens'] && (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {

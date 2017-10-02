@@ -692,6 +692,20 @@ $Debug->set_flag('upload: ocelot updated');
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 
 //******************************************************************************//
+//--------------- Give Bonus Points  -------------------------------------------//
+
+$Amount = 10;
+if ($T['Format'] === 'FLAC' && $LogScore === 100 && $LogChecksum === 1) {
+	$Amount = 100;
+}
+elseif ($T['Format'] === 'FLAC' || ($T['Format'] === 'MP3' && in_array($T['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
+	$Amount = 30;
+}
+
+$DB->query("UPDATE users_main SET BonusPoints = BonusPoints + {$Amount} WHERE ID=".$LoggedUser['ID']);
+$Cache->delete_value('user_stats_'.$LoggedUser['ID']);
+
+//******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//
 
 foreach ($LogScores as $Pos => $Log) {
