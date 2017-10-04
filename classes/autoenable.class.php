@@ -262,7 +262,10 @@ class AutoEnable {
 				// Good request, decrement cache value and enable account
 				G::$Cache->decrement_value(AutoEnable::CACHE_KEY_NAME);
 				G::$DB->query("UPDATE users_main SET Enabled = '1', can_leech = '1' WHERE ID = '$UserID'");
-		G::$DB->query("UPDATE users_info SET BanReason = '0' WHERE UserID = '$UserID'");
+				G::$DB->query("UPDATE users_info SET BanReason = '0' WHERE UserID = '$UserID'");
+				G::$DB->query("SELECT torrent_pass FROM users_main WHERE ID='{$UserID}'");
+				list($TorrentPass) = G::$DB->next_record();
+				Tracker::update_tracker('add_user', array('id' => $UserID, 'passkey' => $TorrentPass));
 				$Err = "Your account has been enabled. You may now log in.";
 			}
 		} else {
