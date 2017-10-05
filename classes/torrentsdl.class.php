@@ -30,6 +30,7 @@ class TorrentsDL {
 		$this->QueryResult = $QueryResult;
 		$this->Title = $Title;
 		$this->User = G::$LoggedUser;
+		$AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 		$this->AnnounceURL = ANNOUNCE_URL . '/' . G::$LoggedUser['torrent_pass'] . '/announce';
 		$this->Zip = new Zip(Misc::file_string($Title));
 	}
