@@ -242,6 +242,16 @@ class Users {
 	}
 
 	/**
+	 * Default settings to use for SiteOptions
+	 * @return array
+	 */
+	public static function default_site_options() {
+		return array(
+			'HttpsTracker' => true
+		);
+	}
+
+	/**
 	 * Updates the site options in the database
 	 *
 	 * @param int $UserID the UserID to set the options for

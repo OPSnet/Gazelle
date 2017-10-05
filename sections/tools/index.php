@@ -461,38 +461,6 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/development/rerender_gallery.php');
 		break;
 
-	case 'sandbox1':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox1.php');
-		break;
-
-	case 'sandbox2':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox2.php');
-		break;
-
-	case 'sandbox3':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox3.php');
-		break;
-
-	case 'sandbox4':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox4.php');
-		break;
-
-	case 'sandbox5':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox5.php');
-		break;
-
-	case 'sandbox6':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox6.php');
-		break;
-
-	case 'sandbox7':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox7.php');
-		break;
-
-	case 'sandbox8':
-		include(SERVER_ROOT.'/sections/tools/sandboxes/sandbox8.php');
-		break;
-
 	case 'public_sandbox':
 		include(SERVER_ROOT.'/sections/tools/sandboxes/public_sandbox.php');
 		break;
