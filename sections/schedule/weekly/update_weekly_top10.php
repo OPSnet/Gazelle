@@ -20,9 +20,9 @@ if ($Top10 === false) {
 					t.Scene,
 					t.HasLog,
 					t.HasCue,
-          			t.HasLogDB,
+		  			t.HasLogDB,
 					t.LogScore,
-					t.LogChecksum
+					t.LogChecksum,
 					t.RemasterYear,
 					g.Year,
 					t.RemasterTitle,

@@ -104,6 +104,8 @@ $CurrentHour = date('H');
 $CurrentDay = date('d');
 $CurrentBiWeek = ($CurrentDay < 22 && $CurrentDay >= 8) ? 22 : 8;
 
+$ChooseRun = false;
+
 if (empty($RunTasks) && !$RunManual && !$RunEvery && !$RunHourly && !$RunDaily && !$RunWeekly && !$RunBiweekly) {
 	// We set this true here just so we run the tasks as we're (trying) to run all sections and
 	// not just an individual one (or some collection of tasks)
@@ -114,6 +116,9 @@ if (empty($RunTasks) && !$RunManual && !$RunEvery && !$RunHourly && !$RunDaily &
 		NextHour = $CurrentHour,
 		NextDay = $CurrentDay,
 		NextBiWeekly = $CurrentBiWeek");
+}
+else {
+	$ChooseRun = true;
 }
 
 $sqltime = sqltime();
@@ -141,7 +146,7 @@ These functions are run every hour.
 
 \*************************************************************************/
 
-if ($Hour != $CurrentHour || $RunHourly) {
+if ((!$ChooseRun && $Hour != $CurrentHour) || $RunHourly) {
 	echo "Running hourly tasks...\n";
 	run_tasks('hourly');
 	echo "\n";
@@ -154,7 +159,7 @@ These functions are run in the first 15 minutes of every day.
 
 \*************************************************************************/
 
-if ($Day != $CurrentDay || $RunDaily) {
+if ((!$ChooseRun && $Day != $CurrentDay) || $RunDaily) {
 	echo "Running daily tasks...\n";
 	run_tasks('daily');
 	echo "\n";
@@ -167,7 +172,7 @@ These functions are run in the first 15 minutes of the week (Sunday).
 
 \*************************************************************************/
 
-if (($Day != $CurrentDay || $RunDaily) && date('w') == 0) {
+if ((!$ChooseRun && $Day != $CurrentDay && date('w') == 0) || $RunWeekly) {
 	echo "Running weekly tasks...\n";
 	run_tasks('weekly');
 	echo "\n";
@@ -180,7 +185,7 @@ These functions are twice per month, on the 8th and the 22nd.
 
 \*************************************************************************/
 
-if ($BiWeek != $CurrentBiWeek || $RunBiweekly) {
+if ((!$ChooseRun && $BiWeek != $CurrentBiWeek) || $RunBiweekly) {
 	echo "Running bi-weekly tasks...\n";
 	run_tasks('biweekly');
 	echo "\n";
