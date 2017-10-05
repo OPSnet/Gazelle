@@ -11,7 +11,7 @@ $UseTooltipster = !isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Toolt
 	<meta http-equiv="X-UA-Compatible" content="chrome=1;IE=edge" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="msapplication-config" content="none" />
-	<meta name="referrer" content="origin-when-cross-origin" />
+	<meta name="referrer" content="none, no-referrer, same-origin" />
 	<link rel="shortcut icon" href="favicon.ico" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Torrents" href="opensearch.php?type=torrents" />
