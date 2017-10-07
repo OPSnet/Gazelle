@@ -31,6 +31,7 @@ class User extends AbstractAPI {
 
 	private function getUser() {
 		$where = ($this->id !== null) ? "um.ID = '{$this->id}'" : "um.Username = '".db_string($this->username)."'";
+		// TODO: add um.BonusPoints,
 		$this->db->query("
 			SELECT
 				um.ID,
@@ -38,7 +39,6 @@ class User extends AbstractAPI {
 				um.IRCKey,
 				um.Uploaded,
 				um.Downloaded,
-				um.BonusPoints,
 				um.PermissionID AS Class,
 				um.Paranoia,
 				ui.DisableIRC,
@@ -56,7 +56,7 @@ class User extends AbstractAPI {
 		$user = $this->db->next_record(MYSQLI_ASSOC, array('Paranoia'));
 		if (!empty($user['Username'])) {
 			$user['SecondaryClasses'] = array_map("intval", explode(",", $user['SecondaryClasses']));
-			foreach (array('ID', 'Uploaded', 'Downloaded', 'BonusPoints', 'Class', 'Level') as $key) {
+			foreach (array('ID', 'Uploaded', 'Downloaded', 'Class', 'Level') as $key) {
 				$user[$key] = intval($user[$key]);
 			}
 			$user['Paranoia'] = !empty($user['Paranoia']) ? unserialize($user['Paranoia']) : array();
