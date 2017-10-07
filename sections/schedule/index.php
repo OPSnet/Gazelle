@@ -10,6 +10,8 @@ set_time_limit(50000);
 ob_end_flush();
 gc_enable();
 
+$LineEnd = check_perms('admin_schedule') ? "<br />" : "\n";
+
 /*
  * Use this if your version of pgrep does not support the '-c' option.
  * The '-c' option requires procps-ng.
@@ -19,10 +21,9 @@ gc_enable();
 $PCount = chop(shell_exec("/usr/bin/pgrep -cf schedule.php"));
 if ($PCount > 3) {
 	// 3 because the cron job starts two processes and pgrep finds itself
-	die("schedule.php is already running. Exiting ($PCount)\n");
+	die("schedule.php is already running. Exiting ($PCount){$LineEnd}");
 }
 
-$LineEnd = check_perms('admin_schedule') ? "<br />" : "\n";
 $RunEvery = false;
 $RunHourly = false;
 $RunDaily = false;
@@ -123,7 +124,7 @@ else {
 
 $sqltime = sqltime();
 
-echo "Current Time: $sqltime\n\n";
+echo "Current Time: $sqltime{$LineEnd}{$LineEnd}";
 
 /*************************************************************************\
 //--------------Run every time ------------------------------------------//
@@ -134,9 +135,9 @@ minutes).
 \*************************************************************************/
 
 if ($RunEvery) {
-	echo "Running every run tasks...\n";
+	echo "Running every run tasks...{$LineEnd}";
 	run_tasks('every');
-	echo "\n";
+	echo "{$LineEnd}";
 }
 
 /*************************************************************************\
@@ -147,9 +148,9 @@ These functions are run every hour.
 \*************************************************************************/
 
 if ((!$ChooseRun && $Hour != $CurrentHour) || $RunHourly) {
-	echo "Running hourly tasks...\n";
+	echo "Running hourly tasks...{$LineEnd}";
 	run_tasks('hourly');
-	echo "\n";
+	echo "{$LineEnd}";
 }
 
 /*************************************************************************\
@@ -160,9 +161,9 @@ These functions are run in the first 15 minutes of every day.
 \*************************************************************************/
 
 if ((!$ChooseRun && $Day != $CurrentDay) || $RunDaily) {
-	echo "Running daily tasks...\n";
+	echo "Running daily tasks...{$LineEnd}";
 	run_tasks('daily');
-	echo "\n";
+	echo "{$LineEnd}";
 }
 
 /*************************************************************************\
@@ -173,9 +174,9 @@ These functions are run in the first 15 minutes of the week (Sunday).
 \*************************************************************************/
 
 if ((!$ChooseRun && $Day != $CurrentDay && date('w') == 0) || $RunWeekly) {
-	echo "Running weekly tasks...\n";
+	echo "Running weekly tasks...{$LineEnd}";
 	run_tasks('weekly');
-	echo "\n";
+	echo "{$LineEnd}";
 }
 
 /*************************************************************************\
@@ -186,9 +187,9 @@ These functions are twice per month, on the 8th and the 22nd.
 \*************************************************************************/
 
 if ((!$ChooseRun && $BiWeek != $CurrentBiWeek) || $RunBiweekly) {
-	echo "Running bi-weekly tasks...\n";
+	echo "Running bi-weekly tasks...{$LineEnd}";
 	run_tasks('biweekly');
-	echo "\n";
+	echo "{$LineEnd}";
 }
 
 /*************************************************************************\
@@ -198,13 +199,13 @@ These functions are only run when manual is specified via GET 'runmanual'
 
 \*************************************************************************/
 if ($RunManual) {
-	echo "Running manual tasks...\n";
+	echo "Running manual tasks...{$LineEnd}";
 	run_tasks('manually');
 }
 
 // Done
 
-echo "-------------------------\n\n";
+echo "-------------------------{$LineEnd}{$LineEnd}";
 if (check_perms('admin_schedule')) {
 	echo '<pre>';
 	View::show_footer();
