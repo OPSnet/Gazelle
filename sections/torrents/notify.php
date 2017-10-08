@@ -301,7 +301,7 @@ if (empty($Results)) {
 				<span>
 					[ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
 <?			if (Torrents::can_use_token($TorrentInfo)) { ?>
-					| <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('Are you sure you want to use a freeleech token here?');">FL</a>
+					| <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'])?>');">FL</a>
 <?
 			}
 			if (!$Sneaky) { ?>
@@ -347,4 +347,5 @@ if (empty($Results)) {
 	<div class="linkbox"><?=$Pages?></div>
 <?	} ?>
 </div>
-<? View::show_footer(); ?>
+<?
+View::show_footer();
