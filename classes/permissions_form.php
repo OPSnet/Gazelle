@@ -248,7 +248,7 @@ function permissions_form() {
 					display_perm('admin_manage_blog', 'Can manage the site blog');
 					display_perm('admin_manage_polls', 'Can manage polls');
 					display_perm('admin_manage_forums', 'Can manage forums (add/edit/delete)');
-					display_perm('admin_manage_fls', 'Can manage global FL tokens');
+					display_perm('admin_manage_fls', 'Can manage First Line Support (FLS) crew.');
 					display_perm('admin_manage_user_fls', 'Can manage user FL tokens');
 					display_perm('admin_reports', 'Can access reports system');
 					display_perm('admin_advanced_user_search', 'Can access advanced user search');
