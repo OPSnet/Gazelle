@@ -230,10 +230,10 @@ class Users {
 				unset($HeavyInfo['CustomForums']['']);
 			}
 
-			$HeavyInfo['SiteOptions'] = unserialize($HeavyInfo['SiteOptions']);
-			if (!empty($HeavyInfo['SiteOptions'])) {
-				$HeavyInfo = array_merge($HeavyInfo, $HeavyInfo['SiteOptions']);
-			}
+			$HeavyInfo['SiteOptions'] = !empty($HeavyInfo['SiteOptions']) ? unserialize($HeavyInfo['SiteOptions']) : array();
+			$HeavyInfo['SiteOptions'] = array_merge(static::default_site_options(), $HeavyInfo['SiteOptions']);
+			$HeavyInfo = array_merge($HeavyInfo, $HeavyInfo['SiteOptions']);
+
 			unset($HeavyInfo['SiteOptions']);
 
 			G::$DB->set_query_id($QueryID);
@@ -241,6 +241,16 @@ class Users {
 			G::$Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
 		}
 		return $HeavyInfo;
+	}
+
+	/**
+	 * Default settings to use for SiteOptions
+	 * @return array
+	 */
+	public static function default_site_options() {
+		return array(
+			'HttpsTracker' => true
+		);
 	}
 
 	/**
@@ -266,7 +276,8 @@ class Users {
 			FROM users_info
 			WHERE UserID = $UserID");
 		list($SiteOptions) = G::$DB->next_record(MYSQLI_NUM, false);
-		$SiteOptions = unserialize($SiteOptions);
+		$SiteOptions = !empty($SiteOptions) ? unserialize($SiteOptions) : array();
+		$SiteOptions = array_merge(static::default_site_options(), $SiteOptions);
 
 		// Get HeavyInfo
 		$HeavyInfo = Users::user_heavy_info($UserID);
