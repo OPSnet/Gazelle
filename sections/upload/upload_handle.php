@@ -254,7 +254,46 @@ if (!is_uploaded_file($TorrentName) || !filesize($TorrentName)) {
 }
 
 if ($Type == 'Music') {
-	include(SERVER_ROOT.'/sections/upload/get_extra_torrents.php');
+    //extra torrent files
+    $ExtraTorrents = array();
+    $DupeNames = array();
+    $DupeNames[] = $_FILES['file_input']['name'];
+
+    if (isset($_POST['extra_format']) && isset($_POST['extra_bitrate'])) {
+        for ($i = 1; $i <= 5; $i++) {
+            if (isset($_FILES["extra_file_$i"])) {
+                $ExtraFile = $_FILES["extra_file_$i"];
+                $ExtraTorrentName = $ExtraFile['tmp_name'];
+                if (!is_uploaded_file($ExtraTorrentName) || !filesize($ExtraTorrentName)) {
+                    $Err = 'No extra torrent file uploaded, or file is empty.';
+                } elseif (substr(strtolower($ExtraFile['name']), strlen($ExtraFile['name']) - strlen('.torrent')) !== '.torrent') {
+                    $Err = 'You seem to have put something other than an extra torrent file into the upload field. (' . $ExtraFile['name'] . ').';
+                } elseif (in_array($ExtraFile['name'], $DupeNames)) {
+                    $Err = 'One or more torrents has been entered into the form twice.';
+                } else {
+                    $j = $i - 1;
+                    $ExtraTorrents[$ExtraTorrentName]['Name'] = $ExtraTorrentName;
+                    $ExtraFormat = $_POST['extra_format'][$j];
+                    if (empty($ExtraFormat)) {
+                        $Err = 'Missing format for extra torrent.';
+                        break;
+                    } else {
+                        $ExtraTorrents[$ExtraTorrentName]['Format'] = db_string(trim($ExtraFormat));
+                    }
+                    $ExtraBitrate = $_POST['extra_bitrate'][$j];
+                    if (empty($ExtraBitrate)) {
+                        $Err = 'Missing bitrate for extra torrent.';
+                        break;
+                    } else {
+                        $ExtraTorrents[$ExtraTorrentName]['Encoding'] = db_string(trim($ExtraBitrate));
+                    }
+                    $ExtraReleaseDescription = $_POST['extra_release_desc'][$j];
+                    $ExtraTorrents[$ExtraTorrentName]['TorrentDescription'] = db_string(trim($ExtraReleaseDescription));
+                    $DupeNames[] = $ExtraFile['name'];
+                }
+            }
+        }
+    }
 }
 
 
@@ -400,7 +439,71 @@ $FileString = db_string(implode("\n", $TmpFileList));
 $Debug->set_flag('upload: torrent decoded');
 
 if ($Type == 'Music') {
-	include(SERVER_ROOT.'/sections/upload/generate_extra_torrents.php');
+    $ExtraTorrentsInsert = array();
+    foreach ($ExtraTorrents as $ExtraTorrent) {
+        $Name = $ExtraTorrent['Name'];
+        $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
+        $ThisInsert =& $ExtraTorrentsInsert[$Name];
+        $ExtraTor = new BencodeTorrent($Name, true);
+        if (isset($ExtraTor->Dec['encrypted_files'])) {
+            $Err = 'At least one of the torrents contain an encrypted file list which is not supported here';
+            break;
+        }
+        if (!$ExtraTor->is_private()) {
+            $ExtraTor->make_private(); // The torrent is now private.
+            $PublicTorrent = true;
+        }
+
+        // File list and size
+        list($ExtraTotalSize, $ExtraFileList) = $ExtraTor->file_list();
+        $ExtraDirName = isset($ExtraTor->Dec['info']['files']) ? Format::make_utf8($ExtraTor->get_name()) : '';
+
+        $ExtraTmpFileList = array();
+        foreach ($ExtraFileList as $ExtraFile) {
+            list($ExtraSize, $ExtraName) = $ExtraFile;
+
+            check_file($Type, $ExtraName);
+
+            // Make sure the file name is not too long
+            if (mb_strlen($ExtraName, 'UTF-8') + mb_strlen($ExtraDirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
+                $Err = "The torrent contained one or more files with too long of a name: <br />$ExtraDirName/$ExtraName";
+                break;
+            }
+            // Add file and size to array
+            $ExtraTmpFileList[] = Torrents::filelist_format_file($ExtraFile);
+        }
+
+        // To be stored in the database
+        $ThisInsert['FilePath'] = db_string($ExtraDirName);
+        $ThisInsert['FileString'] = db_string(implode("\n", $ExtraTmpFileList));
+        $ThisInsert['InfoHash'] = pack('H*', $ExtraTor->info_hash());
+        $ThisInsert['NumFiles'] = count($ExtraFileList);
+        $ThisInsert['TorEnc'] = db_string($ExtraTor->encode());
+        $ThisInsert['TotalSize'] = $ExtraTotalSize;
+
+        $Debug->set_flag('upload: torrent decoded');
+        $DB->query("
+            SELECT ID
+            FROM torrents
+            WHERE info_hash = '" . db_string($ThisInsert['InfoHash']) . "'");
+        if ($DB->has_results()) {
+            list($ExtraID) = $DB->next_record();
+            $DB->query("
+                SELECT TorrentID
+                FROM torrents_files
+                WHERE TorrentID = $ExtraID");
+            if ($DB->has_results()) {
+                $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">The exact same torrent file already exists on the site!</a>";
+            } else {
+                //One of the lost torrents.
+                $DB->query("
+                    INSERT INTO torrents_files (TorrentID, File)
+                    VALUES ($ExtraID, '$ThisInsert[TorEnc]')");
+                $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">Thank you for fixing this torrent.</a>";
+            }
+        }
+    }
+    unset($ThisInsert);
 }
 
 if (!empty($Err)) { // Show the upload form, with the data the user entered
@@ -714,6 +817,69 @@ Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.
 
 Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
+
+foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
+	$ExtraHasLog = 0;
+	$ExtraHasCue = 0;
+	$LogScore = 0;
+	// Torrent
+	$DB->query("
+	INSERT INTO torrents
+		(GroupID, UserID, Media, Format, Encoding,
+		Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
+		HasLog, HasCue, info_hash, FileCount, FileList, FilePath, Size, Time,
+		Description, LogScore, FreeTorrent, FreeLeechType)
+	VALUES
+		($GroupID, $LoggedUser[ID], $T[Media], '$ExtraTorrent[Format]', '$ExtraTorrent[Encoding]',
+		$T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
+		$ExtraHasLog, $ExtraHasCue, '".db_string($ExtraTorrent['InfoHash'])."', $ExtraTorrent[NumFiles],
+		'$ExtraTorrent[FileString]', '$ExtraTorrent[FilePath]', $ExtraTorrent[TotalSize], '".sqltime()."',
+		'$ExtraTorrent[TorrentDescription]', $LogScore, '$T[FreeLeech]', '$T[FreeLeechType]')");
+
+	$Cache->increment('stats_torrent_count');
+	$ExtraTorrentID = $DB->inserted_id();
+
+	Tracker::update_tracker('add_torrent', array('id' => $ExtraTorrentID, 'info_hash' => rawurlencode($ExtraTorrent['InfoHash']), 'freetorrent' => $T['FreeLeech']));
+
+	//******************************************************************************//
+	//--------------- Write torrent file -------------------------------------------//
+
+	$DB->query("
+		INSERT INTO torrents_files
+			(TorrentID, File)
+		VALUES
+			($ExtraTorrentID, '$ExtraTorrent[TorEnc]')");
+
+	Misc::write_log("Torrent $ExtraTorrentID ($LogName) (" . number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2) . ' MB) was uploaded by ' . $LoggedUser['Username']);
+	Torrents::write_group_log($GroupID, $ExtraTorrentID, $LoggedUser['ID'], 'uploaded (' . number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2) . ' MB)', 0);
+
+	Torrents::update_hash($GroupID);
+
+	// IRC
+	$Announce = '';
+	$Announce .= Artists::display_artists($ArtistForm, false);
+	$Announce .= trim($Properties['Title']) . ' ';
+	$Announce .= '[' . trim($Properties['Year']) . ']';
+	if (($Properties['ReleaseType'] > 0)) {
+		$Announce .= ' [' . $ReleaseTypes[$Properties['ReleaseType']] . ']';
+	}
+	$Announce .= ' - ';
+	$Announce .= trim(str_replace("'", '', $ExtraTorrent['Format'])) . ' / ' . trim(str_replace("'", '', $ExtraTorrent['Encoding']));
+	$Announce .= ' / ' . trim($Properties['Media']);
+	if ($T['FreeLeech'] == '1') {
+		$Announce .= ' / Freeleech!';
+	}
+
+	$AnnounceSSL = $Announce . ' - ' . site_url() . "torrents.php?id=$GroupID / " . site_url() . "torrents.php?action=download&id=$ExtraTorrentID";
+	$Announce .= ' - ' . site_url() . "torrents.php?id=$GroupID / " . site_url() . "torrents.php?action=download&id=$ExtraTorrentID";
+
+	$AnnounceSSL .= ' - ' . trim($Properties['TagList']);
+	$Announce .= ' - ' . trim($Properties['TagList']);
+
+	// ENT_QUOTES is needed to decode single quotes/apostrophes
+	//send_irc('PRIVMSG #' . NONSSL_SITE_URL . '-announce :' . html_entity_decode($Announce, ENT_QUOTES));
+	//send_irc('PRIVMSG #' . SSL_SITE_URL . '-announce-ssl :' . html_entity_decode($AnnounceSSL, ENT_QUOTES));
+}
 
 //******************************************************************************//
 //--------------- Stupid Recent Uploads ----------------------------------------//
@@ -1065,4 +1231,3 @@ $Cache->delete_value("torrents_details_$GroupID");
 
 // Allow deletion of this torrent now
 $Cache->delete_value("torrent_{$TorrentID}_lock");
-
