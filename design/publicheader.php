@@ -8,6 +8,7 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 	<title><?=display_str($PageTitle)?></title>
 	<meta http-equiv="X-UA-Compatible" content="chrome=1; IE=edge" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="referrer" content="none, no-referrer, same-origin" />
 	<link rel="shortcut icon" href="favicon.ico" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <? if ($Mobile) { ?>

@@ -49,11 +49,9 @@ if (!empty($_GET['setdefault'])) {
 		FROM users_info
 		WHERE UserID = '".db_string($LoggedUser['ID'])."'");
 	list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
-	if (!empty($SiteOptions)) {
-		$SiteOptions = unserialize($SiteOptions);
-	} else {
-		$SiteOptions = array();
-	}
+	$SiteOptions = (!empty($SiteOptions)) ? unserialize($SiteOptions) : array();
+	$SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
+
 	$SiteOptions['DefaultSearch'] = preg_replace($UnsetRegexp, '', $_SERVER['QUERY_STRING']);
 	$DB->query("
 		UPDATE users_info
