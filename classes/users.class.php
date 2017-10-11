@@ -150,6 +150,7 @@ class Users {
 					m.IP,
 					m.CustomPermissions,
 					m.can_leech AS CanLeech,
+					m.IRCKey,
 					i.AuthKey,
 					i.RatioWatchEnds,
 					i.RatioWatchDownload,
@@ -163,6 +164,7 @@ class Users {
 					i.DisablePM,
 					i.DisableRequests,
 					i.DisableForums,
+					i.DisableIRC,
 					i.DisableTagging," . "
 					i.SiteOptions,
 					i.DownloadAlt,
@@ -551,7 +553,7 @@ class Users {
 					. (G::$LoggedUser['ID'] === $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
 					. '" class="tooltip" /></a>' : '';
 		$Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
-		
+
 		if ($Badges) {
 			$ClassesDisplay = array();
 			foreach (array_intersect_key($SecondaryClasses, $UserInfo['ExtraClasses']) as $PermID => $PermShort) {
