@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 if (!check_perms('site_edit_wiki')) {
 	error(403);
@@ -29,5 +29,5 @@ $DB->query("
 		('$GroupID', ".$LoggedUser['ID'].", '".sqltime()."', '".db_string("Additional cover \"$Summary - $Image\" removed from group")."')");
 
 $Cache->delete_value("torrents_cover_art_$GroupID");
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

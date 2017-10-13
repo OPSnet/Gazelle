@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $UserID = $LoggedUser['ID'];
@@ -81,5 +81,5 @@ if ($Changed) {
 	Torrents::update_hash($GroupID);
 }
 
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

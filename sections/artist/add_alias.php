@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 if (!check_perms('torrents_edit')) {
@@ -86,5 +86,6 @@ if (!$CloneAliasID) {
 
 	Misc::write_log("The alias $AliasID ($DBAliasName) was added to the artist $ArtistID (".db_string($ArtistName).') by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].')');
 }
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?action=edit&artistid={$ArtistID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

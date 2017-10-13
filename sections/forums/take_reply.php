@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 //TODO: Remove all the stupid queries that could get their information just as easily from the cache
@@ -36,7 +36,8 @@ if (isset($_POST['forum']) && !is_number($_POST['forum'])) {
 
 // If you're not sending anything, go back
 if ($_POST['body'] === '' || !isset($_POST['body'])) {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
+	$Location = empty($_SERVER['HTTP_REFERER']) ? "forums.php?action=viewthread&threadid={$_POST['thread']}" : $_SERVER['HTTP_REFERER'];
+	header("Location: {$Location}");
 	die();
 }
 
