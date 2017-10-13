@@ -7,9 +7,9 @@ if ($ConvID = (int)$_GET['id']) {
 		FROM staff_pm_conversations
 		WHERE ID = $ConvID");
 	list($Subject, $UserID, $Level, $AssignedToUser, $Unread, $Status) = $DB->next_record();
-	
+
 	$LevelCap = 1000;
-	
+
 
 	$PMLevel = $Level;
 	$Level = min($Level, $LevelCap);
@@ -44,28 +44,29 @@ if ($ConvID = (int)$_GET['id']) {
 	<div class="header">
 		<h2>Staff PM - <?=display_str($Subject)?></h2>
 		<div class="linkbox">
-<?
-	// Staff only
-	if ($IsStaff) {
-?>
-		<a href="staffpm.php" class="brackets">My unanswered</a>
-<?
-	}
 
-	// FLS/Staff
-	if ($IsFLS) {
-?>
-			<a href="staffpm.php?view=unanswered" class="brackets">All unanswered</a>
-			<a href="staffpm.php?view=open" class="brackets">Open</a>
-			<a href="staffpm.php?view=resolved" class="brackets">Resolved</a>
 <?
-		// User
-	} else {
+if ($IsStaff) {
 ?>
-			<a href="staffpm.php" class="brackets">Back to inbox</a>
+	<a href="staffpm.php" class="brackets">View your unanswered</a>
 <?
-	}
-
+}
+if ($IsFLS) {
+?>
+<a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
+<a href="staffpm.php?view=open" class="brackets">View unresolved</a>
+<a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
+<?
+}
+if ($IsStaff) { ?>
+	<a href="staffpm.php?action=scoreboard" class="brackets">View scoreboard</a>
+<?
+}
+if (!$IsStaff && !$IsFLS) {
+?>
+	<a href="staffpm.php" class="brackets">Back to inbox</a>
+<?
+}
 ?>		</div>
 	</div>
 	<br />
