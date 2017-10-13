@@ -426,10 +426,10 @@ if ($Hour != $NextHour || $_GET['runhour'] || isset($argv[2])) {
 			AND TimeFilled != '0000-00-00 00:00:00'");
 
 	//------------- Remove dead peers ---------------------------------------//
-	/* sleep(3);
+	 sleep(3);
 	 $DB->query("
 		DELETE FROM xbt_files_users
-		WHERE mtime < unix_timestamp(NOW() - INTERVAL 6 HOUR)"); */
+		WHERE mtime < unix_timestamp(NOW() - INTERVAL 6 HOUR)");
 
 	//------------- Remove dead sessions ---------------------------------------//
 	sleep(3);
