@@ -1,5 +1,5 @@
 <!-- Other Sections -->
-<h3 id="jump">Other Sections</h3>
+<h3 id="jump">Rule Sections</h3>
 <div class="box pad rule_table" style="padding: 10px 10px 10px 20px;">
 	<table width="100%">
 		<tr class="colhead">
