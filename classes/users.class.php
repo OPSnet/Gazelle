@@ -95,7 +95,7 @@ class Users {
 			} else {
 				$UserInfo = G::$DB->next_record(MYSQLI_ASSOC, array('Paranoia', 'Title'));
 				$UserInfo['CatchupTime'] = strtotime($UserInfo['CatchupTime']);
-				$UserInfo['Paranoia'] = unserialize($UserInfo['Paranoia']);
+				$UserInfo['Paranoia'] = unserialize_array($UserInfo['Paranoia']);
 				if ($UserInfo['Paranoia'] === false) {
 					$UserInfo['Paranoia'] = array();
 				}
@@ -179,11 +179,7 @@ class Users {
 				WHERE m.ID = '$UserID'");
 			$HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, array('CustomPermissions', 'SiteOptions'));
 
-			if (!empty($HeavyInfo['CustomPermissions'])) {
-				$HeavyInfo['CustomPermissions'] = unserialize($HeavyInfo['CustomPermissions']);
-			} else {
-				$HeavyInfo['CustomPermissions'] = array();
-			}
+			$HeavyInfo['CustomPermissions'] = unserialize_array($HeavyInfo['CustomPermissions']);
 
 			if (!empty($HeavyInfo['RestrictedForums'])) {
 				$RestrictedForums = array_map('trim', explode(',', $HeavyInfo['RestrictedForums']));
@@ -230,7 +226,7 @@ class Users {
 				unset($HeavyInfo['CustomForums']['']);
 			}
 
-			$HeavyInfo['SiteOptions'] = !empty($HeavyInfo['SiteOptions']) ? unserialize($HeavyInfo['SiteOptions']) : array();
+			$HeavyInfo['SiteOptions'] = unserialize_array($HeavyInfo['SiteOptions']);
 			$HeavyInfo['SiteOptions'] = array_merge(static::default_site_options(), $HeavyInfo['SiteOptions']);
 			$HeavyInfo = array_merge($HeavyInfo, $HeavyInfo['SiteOptions']);
 
@@ -276,7 +272,7 @@ class Users {
 			FROM users_info
 			WHERE UserID = $UserID");
 		list($SiteOptions) = G::$DB->next_record(MYSQLI_NUM, false);
-		$SiteOptions = !empty($SiteOptions) ? unserialize($SiteOptions) : array();
+		$SiteOptions = unserialize_array($SiteOptions);
 		$SiteOptions = array_merge(static::default_site_options(), $SiteOptions);
 
 		// Get HeavyInfo

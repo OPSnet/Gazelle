@@ -51,12 +51,10 @@ function checked($Checked) {
 	return ($Checked ? ' checked="checked"' : '');
 }
 
-$SiteOptions = (!empty($SiteOptions)) ? unserialize($SiteOptions) : array();
+$SiteOptions = unserialize_array($SiteOptions);
 $SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
 
 View::show_header("$Username &gt; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
-
-
 
 $DonorRank = Donations::get_rank($UserID);
 $DonorIsVisible = Donations::is_visible($UserID);

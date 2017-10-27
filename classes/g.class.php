@@ -1,6 +1,8 @@
 <?
 class G {
+	/** @var DB_MYSQL */
 	public static $DB;
+	/** @var CACHE */
 	public static $Cache;
 	public static $LoggedUser;
 
