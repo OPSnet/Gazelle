@@ -53,13 +53,13 @@ class User extends AbstractAPI {
 			WHERE
 				{$where}");
 
-		$user = $this->db->next_record(MYSQLI_ASSOC, array('Paranoia'));
+		$user = $this->db->next_record(MYSQLI_ASSOC, array('IRCKey', 'Paranoia'));
 		if (!empty($user['Username'])) {
 			$user['SecondaryClasses'] = array_map("intval", explode(",", $user['SecondaryClasses']));
 			foreach (array('ID', 'Uploaded', 'Downloaded', 'Class', 'Level') as $key) {
 				$user[$key] = intval($user[$key]);
 			}
-			$user['Paranoia'] = !empty($user['Paranoia']) ? unserialize($user['Paranoia']) : array();
+			$user['Paranoia'] = unserialize_array($user['Paranoia']);
 
 			$user['Ratio'] = Format::get_ratio($user['Uploaded'], $user['Downloaded']);
 			$user['DisplayStats'] = array(
