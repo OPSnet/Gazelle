@@ -1106,12 +1106,6 @@ if (check_perms('users_mod', $Class)) { ?>
 					<input type="text" size="40" name="MergeStatsFrom" />
 				</td>
 			</tr>
-			<tr>
-				<td class="label">Freeleech tokens:</td>
-				<td>
-					<input type="text" size="5" name="FLTokens" value="<?=$FLTokens?>" />
-				</td>
-			</tr>
 <?
 	}
 
@@ -1120,6 +1114,15 @@ if (check_perms('users_mod', $Class)) { ?>
 			<tr>
 				<td class="label tooltip" title="Number of invites">Invites:</td>
 				<td><input type="text" size="5" name="Invites" value="<?=$Invites?>" /></td>
+			</tr>
+<?
+	}
+
+	if (check_perms('admin_manage_user_fls')) {
+?>
+			<tr>
+				<td class="label tooltip" title="Number of FL tokens">FL Tokens:</td>
+				<td><input type="text" size="5" name="FLTokens" value="<?=$FLTokens?>" /></td>
 			</tr>
 <?
 	}
