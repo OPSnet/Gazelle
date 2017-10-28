@@ -466,15 +466,20 @@ if ($BonusPoints != intval($Cur['BonusPoints']) && $BonusPoints != intval($_POST
 	$Cache->delete_value("user_stats_{$UserID}");
 }
 
-if ($FLTokens != $Cur['FLTokens'] && (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {
-	$UpdateSet[] = "FLTokens = $FLTokens";
-	$EditSummary[] = "Freeleech Tokens changed from ".$Cur['FLTokens']." to $FLTokens";
-	$HeavyUpdates['FLTokens'] = $FLTokens;
+if ($FLTokens != $Cur['FLTokens']
+    && (
+        check_perms('users_edit_ratio')
+        || (check_perms('admin_manage_user_fls'))
+        || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])
+    )) {
+        $UpdateSet[] = "FLTokens = $FLTokens";
+        $EditSummary[] = "Freeleech Tokens changed from $Cur[FLTokens] to $FLTokens";
+        $HeavyUpdates['FLTokens'] = $FLTokens;
 }
 
 if ($Invites != $Cur['Invites'] && check_perms('users_edit_invites')) {
 	$UpdateSet[] = "invites = '$Invites'";
-	$EditSummary[] = "number of invites changed to $Invites";
+	$EditSummary[] = "number of invites changed from $Cur[Invites] to $Invites";
 	$HeavyUpdates['Invites'] = $Invites;
 }
 
@@ -888,4 +893,3 @@ function translateLeechStatus($Status) {
 			return $Status;
 	}
 }
-?>
