@@ -329,7 +329,7 @@ $DB->query("
 						<td class="label">User comment:</td>
 						<td colspan="3"><?=Text::full_format($UserComment)?></td>
 					</tr>
-<?					// END REPORTED STUFF :|: BEGIN MOD STUFF ?>
+<?					/* END REPORTED STUFF :|: BEGIN MOD STUFF */ ?>
 					<tr>
 						<td class="label">Report comment:</td>
 						<td colspan="3">

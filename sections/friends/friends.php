@@ -128,7 +128,7 @@ foreach ($Friends as $Friend) {
 	<div class="linkbox">
 		<?=$Pages?>
 	</div>
-<? // close <div class="thin"> ?>
+<? /* close <div class="thin"> */ ?>
 </div>
 <?
 View::show_footer();

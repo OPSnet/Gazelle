@@ -1191,7 +1191,7 @@ if (check_perms('users_mod', $Class)) { ?>
 					<input type="checkbox" name="Warned"<? if ($Warned != '0000-00-00 00:00:00') { ?> checked="checked"<? } ?> />
 				</td>
 			</tr>
-<?		if ($Warned == '0000-00-00 00:00:00') { // user is not warned ?>
+<?		if ($Warned == '0000-00-00 00:00:00') { /* user is not warned */ ?>
 			<tr>
 				<td class="label">Expiration:</td>
 				<td>
@@ -1204,7 +1204,7 @@ if (check_perms('users_mod', $Class)) { ?>
 					</select>
 				</td>
 			</tr>
-<?		} else { // user is warned ?>
+<?		} else { /* user is warned */ ?>
 			<tr>
 				<td class="label">Extension:</td>
 				<td>

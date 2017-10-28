@@ -228,7 +228,7 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
 			</table>
 		</form>
 	</div>
-<?	} // if (!$BookmarkView) ?>
+<?	} /* if (!$BookmarkView) */ ?>
 	<div class="linkbox">
 <?
 	if (!$BookmarkView) {

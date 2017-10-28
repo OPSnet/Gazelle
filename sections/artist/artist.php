@@ -627,8 +627,7 @@ foreach ($ZIPOptions as $Option) {
 				</form>
 			</div>
 		</div>
-<?
-} //if (check_perms('zip_downloader')) ?>
+<?  } /* if (check_perms('zip_downloader')) */ ?>
 		<div class="box box_tags">
 			<div class="head"><strong>Tags</strong></div>
 			<ul class="stats nobullet">
@@ -941,7 +940,7 @@ function require(file, callback) {
 //]]>
 </script>
 
-<? } // if $NumSimilar > 0 ?>
+<? } /* if $NumSimilar > 0 */ ?>
 		<div id="artist_information" class="box">
 			<div id="info" class="head">
 				<a href="#">&uarr;</a>&nbsp;
