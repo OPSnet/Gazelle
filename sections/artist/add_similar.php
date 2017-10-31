@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $UserID = $LoggedUser['ID'];
@@ -66,5 +66,5 @@ if (!empty($Artist2ID)) { // artist was found in the database
 	$Cache->delete_value("similar_positions_$Artist2ID"); // Delete artist's similar map cache
 }
 
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$Artist1ID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

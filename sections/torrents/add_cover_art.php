@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 if (!check_perms('site_edit_wiki')) {
@@ -46,5 +46,5 @@ if ($Changed) {
 	$Cache->delete_value("torrents_cover_art_$GroupID");
 }
 
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

@@ -45,5 +45,6 @@ if ($Artists == '|') {
 }
 $Cache->delete_value('notify_filters_'.$LoggedUser['ID']);
 $Cache->delete_value('notify_artists_'.$LoggedUser['ID']);
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$ArtistID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

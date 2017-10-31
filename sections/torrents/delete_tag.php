@@ -51,5 +51,5 @@ if ($Count < 1) {
 }
 // Cache the deleted tag for 5 minutes
 $Cache->cache_value('deleted_tags_'.$GroupID.'_'.$LoggedUser['ID'], $TagName, 300);
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

@@ -1,6 +1,7 @@
 <?php
 authorize();
 $SimilarID = db_string($_GET['similarid']);
+$PrimaryArtistID = intval($_GET['artistid']);
 
 if (!is_number($SimilarID) || !$SimilarID) {
 	error(404);
@@ -28,5 +29,6 @@ foreach ($ArtistIDs as $ArtistID) {
 	$Cache->delete_value("artist_$ArtistID"); // Delete artist cache
 	$Cache->delete_value("similar_positions_$ArtistID");
 }
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$PrimaryArtistID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 if (!check_perms('site_torrents_notify')) {
 	error(403);
@@ -52,5 +52,6 @@ if (empty($Notify) && !$DB->has_results()) {
 		$Cache->delete_value('notify_artists_'.$LoggedUser['ID']);
 	}
 }
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$ArtistID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

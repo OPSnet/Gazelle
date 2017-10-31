@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 /*
@@ -31,7 +31,8 @@ if (isset($_POST['forum']) && !is_number($_POST['forum'])) {
 
 // If you're not sending anything, go back
 if (empty($_POST['body']) || empty($_POST['title'])) {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
+	$Location = (empty($_SERVER['HTTP_REFERER'])) ? "forums.php?action=viewforum&forumid={$_POST['forum']}": $_SERVER['HTTP_REFERER'];
+	header("Location: {$Location}");
 	die();
 }
 
