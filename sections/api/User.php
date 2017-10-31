@@ -36,6 +36,7 @@ class User extends AbstractAPI {
 			SELECT
 				um.ID,
 				um.Username,
+				um.Enabled,
 				um.IRCKey,
 				um.Uploaded,
 				um.Downloaded,
@@ -72,11 +73,7 @@ class User extends AbstractAPI {
 					$user['DisplayStats'][$key] = "Hidden";
 				}
 			}
-			$user['UserPage'] = "http";
-			if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "") {
-				$user['UserPage'] .= "s";
-			}
-			$user['UserPage'] .= "://" . SITE_URL . "/user.php?id={$user['ID']}";
+			$user['UserPage'] = site_url() . "user.php?id={$user['ID']}";
 		}
 		return $user;
 	}
