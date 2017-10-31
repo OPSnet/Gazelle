@@ -1,4 +1,4 @@
-<?
+<?php
 //******************************************************************************//
 //--------------- Delete a recommendation --------------------------------------//
 
@@ -27,5 +27,5 @@ $DB->query("
 	WHERE GroupID = '$GroupID'");
 
 $Cache->delete_value('recommend');
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "tools.php?action=recommend" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

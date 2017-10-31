@@ -8,10 +8,11 @@ $FileCount = count($_FILES['logfiles']['name']);
 $LogScore = 100;
 $LogChecksum = 1;
 
+$Extra = check_perms('users_mod') ? '' : " AND t.UserID = '{$LoggedUser['ID']}'";
 $DB->query("
 	SELECT t.ID, t.GroupID
 	FROM torrents t
-	WHERE t.ID = {$TorrentID} AND t.HasLog='1' AND t.UserID = " . $LoggedUser['ID']);
+	WHERE t.ID = {$TorrentID} AND t.HasLog='1'" . $Extra);
 
 $DetailsArray = array();
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {

@@ -71,7 +71,6 @@ amazing prizes to our top ten uploaders!</p>
 <ul>
 <li>Our top five uploaders will all get <b>a freeleech pick</b> while sixth to tenth will get a neutral leech pick!</li>
 <li>Instead of keeping the FL tokens or custom title from the prize yourself, you can also choose to give them away to a user (or users) of your choice!</li>
-<li>The top three finishers from each of the User, Member and Elite classes will earn themselves a custom title!</li>
 </ul>
 
 <h3>Have questions?</h3>

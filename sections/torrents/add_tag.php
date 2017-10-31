@@ -6,6 +6,7 @@ if (!empty($LoggedUser['DisableTagging'])) {
 
 $UserID = $LoggedUser['ID'];
 $GroupID = $_POST['groupid'];
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
 
 if (!is_number($GroupID) || !$GroupID) {
 	error(0);
@@ -42,7 +43,7 @@ foreach ($Tags as $TagName) {
 					AND TagID = '$TagID'
 					AND UserID = '$UserID'");
 			if ($DB->has_results()) { // User has already voted on this tag, and is trying hax to make the rating go up
-				header('Location: '.$_SERVER['HTTP_REFERER']);
+				header("Location: {$Location}");
 				die();
 			}
 		}
@@ -70,5 +71,4 @@ foreach ($Tags as $TagName) {
 }
 
 Torrents::update_hash($GroupID); // Delete torrent group cache
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+header("Location: {$Location}");

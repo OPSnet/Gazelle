@@ -84,7 +84,7 @@ class Rules {
 			  'long' => "The automatic snatching of freeleech torrents using any method involving little or no user-input (e.g., API-based scripts, log or site scraping, etc.) is prohibited. See ${site_name}'s ${autofl_article} article for more information." ],
 			[ 'n' => "6.1",
 			  'short' => "Do not seek or exploit live bugs for any reason.",
-			  'long' => "Seeking or exploiting bugs in the live site (as opposed to a local development environment) is prohibited. If you discover a critical bug or security vulnerability, immediately report it in accordance with ${site_name}'s ${bugs_article}. Non-critical bugs can be reported in the <a href=\"forums.php?action=viewforum&forumid=27\">Bugs Forum</a>." ],
+			  'long' => "Seeking or exploiting bugs in the live site (as opposed to a local development environment) is prohibited. If you discover a critical bug or security vulnerability, immediately report it in accordance with ${site_name}'s ${bugs_article}. Non-critical bugs can be reported in the <a href=\"forums.php?action=viewforum&forumid=6\">Bugs Forum</a>." ],
 			[ 'n' => "6.2",
 			  'short' => "Do not publish exploits.",
 			  'long' => "The publication, organization, dissemination, sharing, technical discussion, or technical facilitation of exploits is prohibited at staff discretion. Exploits are defined as unanticipated or unaccepted uses of internal, external, non-profit, or for-profit services. See ${site_name}'s ${exploit_article} article for more information. Exploits are subject to reclassification at any time." ]

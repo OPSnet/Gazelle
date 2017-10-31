@@ -74,7 +74,7 @@ View::show_header('contest admin');
 				<td>
                     <p>Even if a person is not on the displayed ladderboard, we can still tell them
                     where they are (this corresponds to an SQL LIMIT value).</p>
-					<input type="text" size="20" name="maxtrack" value="<?=$CONTEST[MaxTracked]?>" />
+					<input type="text" size="20" name="maxtrack" value="<?=$CONTEST[CONTEST_MAXTRACKED]?>" />
                 </td>
             </tr>
         </table>
