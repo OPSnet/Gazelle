@@ -30,31 +30,3 @@ Gazelle's code adheres to a set of coding standards that can be found [here](htt
 Vagrant uses virtual machines to allow for easy development in consistent environments. The setup linked above allows for development on your local machine and the Gazelle setup to run without altering your system.
 
 Once set up, the Gazelle source files will be present in `src/`, which is shared to `/var/www/` on the machine. A port forward from port 80 on the guest to 8080 on the host will also be established.
-
-SQL to run for contests:
-
-CREATE TABLE contest (
-    ID integer not null auto_increment,
-    Name varchar(80) not null,
-    DTBegin datetime not null,
-    DTEnd datetime not null,
-    Primary key (ID),
-    Unique (Name)
-);
-
-CREATE TABLE contest_leaderboard (
-    ContestID integer not null,
-    UserID integer not null,
-    FlacCount integer not null,
-    LastTorrentID integer not null,
-    LastTorrentName varchar(80) not null,
-    ArtistList varchar(80) not null,
-    ArtistNames varchar(200) not null,
-    LastUpload datetime not null,
-    CONSTRAINT `contest_fk` FOREIGN KEY (`ContestID`) REFERENCES `contest` (`ID`) ON DELETE CASCADE
-);
-
-CREATE INDEX flac_upload_idx ON contest_leaderboard (FlacCount DESC, LastUpload, UserID);
-
-INSERT INTO contest (Name, DTBEgin, DTEnd) values ('Euterpe FLAC Challenge', '2017-10-01 00:00:00', '2017-10-31 00:00:00');
-

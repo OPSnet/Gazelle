@@ -2,11 +2,11 @@
 
 include(SERVER_ROOT.'/sections/contest/config.php');
 
-if ($CONTEST !== false) {
+if (($CONTEST = contest_config()) !== false) {
     $begin = time();
-    $contest_id = $CONTEST[CONTEST_ID];
-    $dt_begin = $CONTEST[CONTEST_DATE_BEGIN];
-    $dt_end = $CONTEST[CONTEST_DATE_BEGIN];
+    $contest_id = $CONTEST['ID'];
+    $dt_begin = $CONTEST['Date_Begin'];
+    $dt_end = $CONTEST['Date_End'];
 
     $DB->query("DELETE FROM contest_leaderboard where ContestID = $contest_id");
     $DB->query("

@@ -1,14 +1,14 @@
 <?php
 enforce_login();
 $CONTEST = contest_config();
-$Leaderboard = contest_leaderboard($CONTEST[CONTEST_ID]);
-View::show_header($CONTEST[CONTEST_NAME]);
+$Leaderboard = contest_leaderboard($CONTEST['ID']);
+View::show_header($CONTEST['Name']);
 ?>
 
 <div class="thin">
 
 <div class="box pad">
-<img border="0" src="/static/common/contest-euterpe.png" alt="<?=$CONTEST[CONTEST_NAME]?>" title="<?=$CONTEST[CONTEST_NAME]?>" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
+<img border="0" src="/static/common/contest-euterpe.png" alt="<?=$CONTEST['Name']?>" title="<?=$CONTEST['Name']?>" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
 </div>
 
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
@@ -59,7 +59,7 @@ if (!count($Leaderboard)) {
         $score = $row[1];
         if ($score != $prev_score) {
             ++$rank;
-            if ($rank > $CONTEST[CONTEST_DISPLAYED] || $nr_rows > $CONTEST[CONTEST_DISPLAYED]) {
+            if ($rank > $CONTEST['Displayed'] || $nr_rows > $CONTEST['Displayed']) {
                 // cut off at limit, even if we haven't reached last winning place because of too many ties
                 break;
             }
@@ -118,7 +118,7 @@ END_STR
             }
             if (!$user_seen) {
 ?>
-            <p>It doesn't look like you're on the leaderboard at all... upload some FLACs for fame and glory!/p>
+            <p>It doesn't look like you're on the leaderboard at all... upload some FLACs for fame and glory!</p>
 <?php
             }
         }

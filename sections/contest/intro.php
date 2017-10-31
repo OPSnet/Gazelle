@@ -30,7 +30,7 @@ if (($CONTEST = contest_config()) === false) {
 <h2>What's the challenge?</h2>
 
 <p>Inspired by Euterpe, the Greek Muse of Music, perfect FLAC is the name of the game! Starting now
-and ending on <?=$CONTEST[CONTEST_DATE_END]?> UTC, your goal is to upload as many perfect FLACs as possible with
+and ending on <?=$CONTEST[Date_End]?> UTC, your goal is to upload as many perfect FLACs as possible with
 amazing prizes to our top ten uploaders!</p>
 
 <h2>What counts as a perfect FLAC?</h2>
@@ -45,29 +45,32 @@ amazing prizes to our top ten uploaders!</p>
 <h2>What are the prizes?</h2>
 
 <div style="padding: 10px 50px;">
-<h3>First Place</h3>
-<p>VIP status and XX Bonus Points (BP)</p>
 
-<h3>Second Place</h3>
-<p>XX Bonus Points (BP)</p>
+<h3><strong class="important_text">First Place</strong></h3>
+<p><b><i>VIP status</i></b> and 30 Freeleech Tokens</p>
 
-<h3>Third Place</h3>
-<p>XX Bonus Points (BP)</p>
+<h3><strong class="important_text">Second Place</strong></h3>
+<p>20 Freeleech Tokens and a custom title</p>
 
-<h3>Fourth Place</h3>
-<p>XX Bonus Points (BP)</p>
+<h3><strong class="important_text">Third Place</strong></h3>
+<p>15 Freeleech Tokens and a custom title</p>
 
-<h3>Fifth Place</h3>
-<p>XX Bonus Points (BP)</p>
+<h3><strong class="important_text">Fourth Place</strong></h3>
+<p>10 Freeleech Tokens and a custom title</p>
 
-<h3>Sixth to Tenth Place</h3>
-<p>XX Bonus Points (BP)</p>
+<h3><strong class="important_text">Fifth Place</strong></h3>
+<p>5 Freeleech Tokens</p>
+
+<h3><strong class="important_text">Sixth to Tenth Place</strong></h3>
+<p>3 Freeleech Tokens</p>
+
 </div>
 
 <h3>In addition</h3>
 
 <ul>
-<li>Our top five uploaders will all get a freeleech pick while sixth to tenth will get a neutral leech pick!</li>
+<li>Our top five uploaders will all get <b>a freeleech pick</b> while sixth to tenth will get a neutral leech pick!</li>
+<li>Instead of keeping the FL tokens or custom title from the prize yourself, you can also choose to give them away to a user (or users) of your choice!</li>
 <li>The top three finishers from each of the User, Member and Elite classes will earn themselves a custom title!</li>
 </ul>
 

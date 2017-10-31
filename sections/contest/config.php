@@ -1,22 +1,15 @@
 <?php
 
-define("CONTEST_ID", 0);
-define("CONTEST_NAME", 1);
-define("CONTEST_DISPLAYED", 2);
-define("CONTEST_MAXTRACKED", 3);
-define("CONTEST_DATE_BEGIN", 4);
-define("CONTEST_DATE_END", 5);
-
 function contest_config() {
     $contest = G::$Cache->get_value('contest_current');
     if ($contest === false) {
         G::$DB->query("
-            SELECT ID, Name, Display, MaxTracked, DTBegin, DTEnd
+            SELECT ID, Name, Display, MaxTracked, DateBegin, DateEnd
             FROM contest
-            WHERE now() BETWEEN DTBegin AND DTEnd
+            WHERE now() BETWEEN DateBegin AND DateEnd
         ");
         if (G::$DB->has_results()) {
-            $contest = G::$DB->next_record(MYSQLI_NUM);
+            $contest = G::$DB->next_record(MYSQLI_ASSOC);
             G::$Cache->cache_value('contest_current', $contest, 86400 * 3);
         }
     }
@@ -30,8 +23,8 @@ function contest_leaderboard($id) {
     $key = "contest_leaderboard_$id";
     $Leaderboard = G::$Cache->get_value($key);
     if ($Leaderboard === false) {
-        $id = $CONTEST[CONTEST_ID];
-        $limit = $CONTEST[CONTEST_MAXTRACKED];
+        $id = $CONTEST['ID'];
+        $limit = $CONTEST['MaxTracked'];
         G::$DB->query("
             SELECT l.UserID,
                 l.FlacCount,
