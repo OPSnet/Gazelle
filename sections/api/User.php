@@ -36,6 +36,7 @@ class User extends AbstractAPI {
 			SELECT
 				um.ID,
 				um.Username,
+				um.Enabled,
 				um.IRCKey,
 				um.Uploaded,
 				um.Downloaded,
@@ -53,13 +54,13 @@ class User extends AbstractAPI {
 			WHERE
 				{$where}");
 
-		$user = $this->db->next_record(MYSQLI_ASSOC, array('Paranoia'));
+		$user = $this->db->next_record(MYSQLI_ASSOC, array('IRCKey', 'Paranoia'));
 		if (!empty($user['Username'])) {
 			$user['SecondaryClasses'] = array_map("intval", explode(",", $user['SecondaryClasses']));
 			foreach (array('ID', 'Uploaded', 'Downloaded', 'Class', 'Level') as $key) {
 				$user[$key] = intval($user[$key]);
 			}
-			$user['Paranoia'] = !empty($user['Paranoia']) ? unserialize($user['Paranoia']) : array();
+			$user['Paranoia'] = unserialize_array($user['Paranoia']);
 
 			$user['Ratio'] = Format::get_ratio($user['Uploaded'], $user['Downloaded']);
 			$user['DisplayStats'] = array(
@@ -72,11 +73,7 @@ class User extends AbstractAPI {
 					$user['DisplayStats'][$key] = "Hidden";
 				}
 			}
-			$user['UserPage'] = "http";
-			if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "") {
-				$user['UserPage'] .= "s";
-			}
-			$user['UserPage'] .= "://" . SITE_URL . "/user.php?id={$user['ID']}";
+			$user['UserPage'] = site_url() . "user.php?id={$user['ID']}";
 		}
 		return $user;
 	}

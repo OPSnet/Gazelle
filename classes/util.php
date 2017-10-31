@@ -193,6 +193,7 @@ function json_print($Status, $Message) {
  * Print the site's URL including the appropriate URI scheme, including the trailing slash
  *
  * @param bool $SSL - whether the URL should be crafted for HTTPS or regular HTTP
+ * @return url for site
  */
 function site_url($SSL = true) {
 	return $SSL ? 'https://' . SSL_SITE_URL . '/' : 'http://' . NONSSL_SITE_URL . '/';
@@ -211,4 +212,17 @@ function FL_confirmation_msg($seeders) {
     return ($seeders == 0)
         ? 'Warning! This torrent is not seeded at the moment, are you sure you want to use a Freeleech token here?'
         : 'Are you sure you want to use a Freeleech token here?';
+}
+
+/**
+ * Utility function that unserializes an array, and then if the unserialization fails,
+ * it'll then return an empty array instead of a null or false which will break downstream
+ * things that require an incoming array
+ *
+ * @param string $array
+ * @return array
+ */
+function unserialize_array($array) {
+	$array = empty($array) ? array() : unserialize($array);
+	return (empty($array)) ? array() : $array;
 }

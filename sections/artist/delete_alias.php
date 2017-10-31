@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 if (!check_perms('torrents_edit')) {
 	error(403);
@@ -49,4 +49,5 @@ $DB->query("
 
 Misc::write_log("The alias $AliasID ($AliasName) was removed from the artist $ArtistID ($ArtistName) by user $LoggedUser[ID] ($LoggedUser[Username])");
 
-header("Location: $_SERVER[HTTP_REFERER]");
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?action=edit&artistid={$ArtistID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

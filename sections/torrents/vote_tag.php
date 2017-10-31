@@ -36,5 +36,6 @@ if (!$DB->has_results()) {
 			('$GroupID', '$TagID', '$UserID', '$Way')");
 	$Cache->delete_value("torrents_details_$GroupID"); // Delete torrent group cache
 }
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");
