@@ -34,7 +34,8 @@ $Err = $Validate->ValidateForm($_POST); // Validate the form
 
 if ($Err) {
 	error($Err);
-	header('Location: '.$_SERVER['HTTP_REFERER']);
+	$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=masspm&id={$GroupID}&torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER'];
+	header("Location: {$Location}");
 	die();
 }
 

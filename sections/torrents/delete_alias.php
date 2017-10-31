@@ -58,5 +58,5 @@ Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "removed artist $Artis
 Torrents::update_hash($GroupID);
 $Cache->delete_value("artist_groups_$ArtistID");
 
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

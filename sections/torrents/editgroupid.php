@@ -1,4 +1,4 @@
-<?
+<?php
 /***************************************************************
 * This page handles the backend of the "edit group ID" function
 * (found on edit.php). It simply changes the group ID of a
@@ -13,11 +13,14 @@ $OldGroupID = $_POST['oldgroupid'];
 $GroupID = $_POST['groupid'];
 $TorrentID = $_POST['torrentid'];
 
+
 if (!is_number($OldGroupID) || !is_number($GroupID) || !is_number($TorrentID) || !$OldGroupID || !$GroupID || !$TorrentID) {
 	error(0);
 }
+
 if ($OldGroupID == $GroupID) {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
+	$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=edit&id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+	header("Location: {$Location}");
 	die();
 }
 
@@ -30,7 +33,8 @@ if (empty($_POST['confirm'])) {
 	if (!$DB->has_results()) {
 		//Trying to move to an empty group? I think not!
 		set_message('The destination torrent group does not exist!');
-		header('Location: '.$_SERVER['HTTP_REFERER']);
+		$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=edit&id={$OldGroupID}" : $_SERVER['HTTP_REFERER'];
+		header("Location: {$Location}");
 		die();
 	}
 	list($Name) = $DB->next_record();
@@ -113,5 +117,4 @@ if (empty($_POST['confirm'])) {
 	$Cache->delete_value("torrent_download_$TorrentID");
 
 	header("Location: torrents.php?id=$GroupID");
-	}
-?>
+}

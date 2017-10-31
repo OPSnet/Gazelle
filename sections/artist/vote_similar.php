@@ -1,4 +1,4 @@
-<?
+<?php
 $UserID = $LoggedUser['ID'];
 $SimilarID = db_string($_GET['similarid']);
 $ArtistID = db_string($_GET['artistid']);
@@ -34,5 +34,6 @@ if (!$DB->has_results()) {
 		VALUES ('$SimilarID', '$UserID', '$Way')");
 	$Cache->delete_value('artist_'.$ArtistID); // Delete artist cache
 }
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$ArtistID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

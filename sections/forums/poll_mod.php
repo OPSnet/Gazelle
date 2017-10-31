@@ -59,5 +59,6 @@ if (isset($_POST['close'])) {
 
 $Cache->cache_value('polls_'.$TopicID, array($Question,$Answers,$Votes,$Featured,$Closed), 0);
 
-header('Location: '.$_SERVER['HTTP_REFERER']);
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "forums.php?action=viewthread&threadid={$TopicID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");
 die();
