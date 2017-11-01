@@ -1,8 +1,8 @@
 <?php
 enforce_login();
-$CONTEST = contest_config();
-$Leaderboard = contest_leaderboard($CONTEST['ID']);
-View::show_header($CONTEST['Name']);
+$Contest = Contest::get_current_contest();
+$Leaderboard = Contest::get_leaderboard($Contest['ID']);
+View::show_header($Contest['Name']);
 ?>
 
 
@@ -18,25 +18,25 @@ View::show_header($CONTEST['Name']);
 <div class="thin">
 
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
-<h2>Leaderboard</h2>
+	<h2>Leaderboard</h2>
 
 <?php
 
 if (!count($Leaderboard)) {
 ?>
-<p>That's not supposed to happen. Looks like the contest hasn't begun yet!<p>
+	<p>That's not supposed to happen. Looks like the contest hasn't begun yet!<p>
 <?php
 } else {
 ?>
-<table class="layout">
+	<table class="layout">
 
-<tr>
-<td class="label">Rank</td>
-<td class="label">Who</td>
-<td class="label">Most recent upload</td>
-<td class="label">Most recent time</td>
-<td class="label">Perfect FLACs</td>
-</tr>
+	<tr>
+	<td class="label">Rank</td>
+	<td class="label">Who</td>
+	<td class="label">Most recent upload</td>
+	<td class="label">Most recent time</td>
+	<td class="label">Perfect FLACs</td>
+	</tr>
 <?php
     $rank = 0;
     $prev_score = 0;
@@ -65,7 +65,7 @@ if (!count($Leaderboard)) {
         $score = $row[1];
         if ($score != $prev_score) {
             ++$rank;
-            if ($rank > $CONTEST['Display'] || $nr_rows > $CONTEST['Display']) {
+            if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
                 // cut off at limit, even if we haven't reached last winning place because of too many ties
                 break;
             }

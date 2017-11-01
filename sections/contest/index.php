@@ -1,8 +1,6 @@
 <?
 enforce_login();
 
-include(SERVER_ROOT.'/sections/contest/config.php');
-
 if (isset($_GET['action'])) {
 	switch ($_GET['action']) {
 		case 'leaderboard':
