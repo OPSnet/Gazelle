@@ -83,7 +83,7 @@ if (($Contest = Contest::get_current_contest()) === false) {
 
 		<h1>Leaderboard</h1>
 
-		<p>Keep an eye on <a href="/contest.php?leaderboard=1">the contest Leaderboard</a> to see where you stand!</p>
+		<p>Keep an eye on <a href="/contest.php?action=leaderboard">the contest Leaderboard</a> to see where you stand!</p>
 
 	</div>
 <?php
