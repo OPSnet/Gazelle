@@ -65,7 +65,7 @@ if (!count($Leaderboard)) {
         $score = $row[1];
         if ($score != $prev_score) {
             ++$rank;
-            if ($rank > $CONTEST['Displayed'] || $nr_rows > $CONTEST['Displayed']) {
+            if ($rank > $CONTEST['Display'] || $nr_rows > $CONTEST['Display']) {
                 // cut off at limit, even if we haven't reached last winning place because of too many ties
                 break;
             }
@@ -131,9 +131,9 @@ END_STR
     }
 }
 ?>
-
+<!--
 <p>←  <a href="/contest.php">Announcement and rules.</a></p>
-
+-->
 </div>
 
 <?php View::show_footer(); ?>

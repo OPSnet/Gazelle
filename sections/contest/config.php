@@ -26,7 +26,8 @@ function contest_leaderboard($id) {
         $id = $CONTEST['ID'];
         $limit = $CONTEST['MaxTracked'];
         G::$DB->query("
-            SELECT l.UserID,
+            SELECT 
+            	l.UserID,
                 l.FlacCount,
                 l.LastTorrentID,
                 l.LastTorrentNAme,

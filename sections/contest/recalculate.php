@@ -5,8 +5,8 @@ include(SERVER_ROOT.'/sections/contest/config.php');
 if (($CONTEST = contest_config()) !== false) {
     $begin = time();
     $contest_id = $CONTEST['ID'];
-    $dt_begin = $CONTEST['Date_Begin'];
-    $dt_end = $CONTEST['Date_End'];
+    $dt_begin = $CONTEST['DateBegin'];
+    $dt_end = $CONTEST['DateEnd'];
 
     $DB->query("DELETE FROM contest_leaderboard where ContestID = $contest_id");
     $DB->query("
@@ -45,8 +45,8 @@ GROUP BY
     LADDER.nr,
     T.ID,
     TG.Name,
-    T.Time
-    ");
+    T.Time");
+	G::$Cache->delete_value('contest_leaderboard_' . $contest_id);
     contest_leaderboard($contest_id);
     printf("Contest $contest_id recalculated in %d seconds\n", time() - $begin);
 }
