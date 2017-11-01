@@ -1,7 +1,5 @@
 <?php
 
-include(SERVER_ROOT.'/sections/contest/config.php');
-
 if (($Contest = Contest::get_current_contest()) !== false) {
 	$begin = time();
 	$Contest_id = $Contest['ID'];
