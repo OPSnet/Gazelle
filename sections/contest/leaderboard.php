@@ -5,7 +5,6 @@ $Leaderboard = Contest::get_leaderboard($Contest['ID']);
 View::show_header($Contest['Name']);
 ?>
 
-
 <div class="pad">
 	<img border="0" src="/static/common/contest-euterpe.png" alt="Apollo Euterpe FLAC Challenge" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
 </div>
@@ -43,6 +42,25 @@ if (!count($Leaderboard)) {
     $nr_rows = 0;
     $user_seen = 0;
     foreach ($Leaderboard as $row) {
+        $score = $row[1];
+        if ($score != $prev_score) {
+            ++$rank;
+            if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
+                // cut off at limit, even if we haven't reached last winning place because of too many ties
+                break;
+            }
+        }
+        $prev_score = $score;
+        ++$nr_rows;
+
+        if ($row[0] == $LoggedUser['ID']) {
+            $user_extra = " (that's you!)";
+            $user_seen = 1;
+        }
+        else {
+            $user_extra = '';
+        }
+
         $artist_markup = '';
         $artist_id = explode(',', $row[4]);
         $artist_name = explode(chr(1), $row[5]);
@@ -62,24 +80,8 @@ if (!count($Leaderboard)) {
                 $artist_id[0], $artist_name[0]
             );
         }
-        $score = $row[1];
-        if ($score != $prev_score) {
-            ++$rank;
-            if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
-                // cut off at limit, even if we haven't reached last winning place because of too many ties
-                break;
-            }
-        }
-        $userinfo = Users::user_info($row[0]);
-        if ($row[0] == $LoggedUser['ID']) {
-            $user_extra = " (that's you!)";
-            $user_seen = 1;
-        }
-        else {
-            $user_extra = '';
-        }
 
-        $prev_score = $score;
+        $userinfo = Users::user_info($row[0]);
         printf(<<<END_STR
     <tr>
         <td>%d</td>
@@ -101,33 +103,24 @@ END_STR
 </table>
 <?php
     if (!$user_seen) {
-        // the user isn't on the ladderboard, let's see if we can find them
-        // 1. Is it the current row?
-        if ($row[1] == $LoggedUser['ID']) {
-?>
-            <p>You're almost there, you are currently number <?=$rank?> on the leaderboard! One last push and you'll have your name in lights!</p>
-<?php
-        }
-        else {
-            while ($row = $DB->next_record(MYSQLI_NUM)) {
-                $score = $row[2];
-                if ($score != $prev_score) {
-                    ++$rank;
-                }
-                if ($row[1] == $LoggedUser['ID']) {
-                    $user_seen = 1;
-?>
-            <p>You are currently number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
-<?php
-                }
-                $prev_score = $score;
+        // the user isn't on the ladderboard, let's go through the list again and see if we can find them
+        $rank = 0;
+        $prev_score = 0;
+        foreach ($Leaderboard as $row) {
+            $score = $row[1];
+            if ($score != $prev_score) {
+                ++$rank;
             }
-            if (!$user_seen) {
+            if ($row[0] == $LoggedUser['ID']) {
+?>
+            <p>You are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
+<?php
+                break;
+            }
+        }
 ?>
             <p>It doesn't look like you're on the leaderboard at all... upload some FLACs for fame and glory!</p>
 <?php
-            }
-        }
     }
 }
 ?>
