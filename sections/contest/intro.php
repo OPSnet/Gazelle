@@ -73,6 +73,7 @@ if (($Contest = Contest::get_current_contest()) === false) {
 		<ul>
 			<li>Our top five uploaders will all get <b>a freeleech pick</b> while sixth to tenth will get a neutral leech pick!</li>
 			<li>Instead of keeping the FL tokens or custom title from the prize yourself, you can also choose to give them away to a user (or users) of your choice!</li>
+            <li>If there are people tied at given place at the end of the contest, they all win the prize!</li>
 		</ul>
 
 		<h3>Have questions?</h3>
