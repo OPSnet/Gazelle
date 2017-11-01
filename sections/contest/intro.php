@@ -3,10 +3,13 @@ enforce_login();
 View::show_header('Apollo Euterpe FLAC Challenge');
 ?>
 
-<div class="box pad">
-<div style="margin: 0 auto 0 auto;">
-<img border="0" src="/static/common/contest-euterpe.png" alt="Apollo Euterpe FLAC Challenge" width="640" height="125"/>
+<div class="pad">
+	<img border="0" src="/static/common/contest-euterpe.png" alt="Apollo Euterpe FLAC Challenge" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
 </div>
+
+<div class="linkbox">
+	<a href="contest.php?action=leaderboard" class="brackets">Leaderboard</a>
+	<?=(check_perms('users_mod')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
 </div>
 
 <div class="thin">

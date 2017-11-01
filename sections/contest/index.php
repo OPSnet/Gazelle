@@ -3,11 +3,15 @@ enforce_login();
 
 include(SERVER_ROOT.'/sections/contest/config.php');
 
-if (isset($_GET['leaderboard']) && $_GET['leaderboard'] == 1) {
-    include(SERVER_ROOT.'/sections/contest/leaderboard.php');
-}
-elseif (isset($_GET['theunitadmin']) && $_GET['theunitadmin'] == 1) {
-    include(SERVER_ROOT.'/sections/contest/admin.php');
+if (isset($_GET['action'])) {
+	switch ($_GET['action']) {
+		case 'leaderboard':
+			include(SERVER_ROOT . '/sections/contest/leaderboard.php');
+			break;
+		case 'admin':
+			include(SERVER_ROOT . '/sections/contest/admin.php');
+			break;
+	}
 }
 else {
     include(SERVER_ROOT.'/sections/contest/intro.php');

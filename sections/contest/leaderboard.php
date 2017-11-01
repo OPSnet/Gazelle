@@ -5,11 +5,17 @@ $Leaderboard = contest_leaderboard($CONTEST['ID']);
 View::show_header($CONTEST['Name']);
 ?>
 
-<div class="thin">
 
-<div class="box pad">
-<img border="0" src="/static/common/contest-euterpe.png" alt="<?=$CONTEST['Name']?>" title="<?=$CONTEST['Name']?>" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
+<div class="pad">
+	<img border="0" src="/static/common/contest-euterpe.png" alt="Apollo Euterpe FLAC Challenge" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
 </div>
+
+<div class="linkbox">
+	<a href="contest.php" class="brackets">Intro</a>
+	<?=(check_perms('users_mod')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
+</div>
+
+<div class="thin">
 
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
 <h2>Leaderboard</h2>
