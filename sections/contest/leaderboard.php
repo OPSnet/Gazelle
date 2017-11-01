@@ -1,8 +1,14 @@
 <?php
 enforce_login();
 $Contest = Contest::get_current_contest();
-$Leaderboard = Contest::get_leaderboard($Contest['ID']);
-View::show_header($Contest['Name']);
+
+if (!empty($Contest)) {
+	$Leaderboard = Contest::get_leaderboard($Contest['ID']);
+	View::show_header($Contest['Name'].' Leaderboard');
+}
+else {
+	View::show_header('Leaderboard');
+}
 ?>
 
 
@@ -16,9 +22,9 @@ View::show_header($Contest['Name']);
 </div>
 
 <div class="thin">
-
+<h1>Leaderboard</h1>
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
-	<h2>Leaderboard</h2>
+
 
 <?php
 
