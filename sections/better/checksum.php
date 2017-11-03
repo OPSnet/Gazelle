@@ -14,14 +14,14 @@ elseif ($_GET['filter'] === 'uploaded') {
 }
 
 $DB->query("SELECT count(t.ID) as count FROM torrents AS t {$Join} WHERE t.HasLogDB='1' AND t.LogChecksum='0' {$Where}");
-$row = $DB->next_record();
-$total = $row['count'];
-$total_str = number_format($total);
-$page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
-$page = max(1, $page);
-$limit = TORRENTS_PER_PAGE;
-$offset = TORRENTS_PER_PAGE * ($page-1);
-$pages = Format::get_pages($page, $total, TORRENTS_PER_PAGE);
+$Row = $DB->next_record();
+$Total = $Row['count'];
+$TotalStr = number_format($Total);
+$Page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
+$Page = max(1, $Page);
+$Limit = TORRENTS_PER_PAGE;
+$Offset = TORRENTS_PER_PAGE * ($Page-1);
+$Pages = Format::get_pages($Page, $Total, TORRENTS_PER_PAGE);
 
 View::show_header('Torrents with bad/missing checksum');
 $DB->query("
@@ -31,7 +31,9 @@ $DB->query("
 	FROM torrents AS t
 		{$Join}
 	WHERE t.HasLogDB = '1' AND t.LogChecksum = '0' {$Where}
-	ORDER BY t.ID ASC");
+	ORDER BY t.ID ASC
+	LIMIT {$Limit} OFFSET {$Offset}");
+
 $TorrentsInfo = $DB->to_array('ID', MYSQLI_ASSOC);
 $GroupIDs = array();
 foreach ($TorrentsInfo as $Torrent) {
@@ -61,11 +63,11 @@ $Results = (count($GroupIDs) > 0) ? Torrents::get_groups($GroupIDs) : array();
 			<? } ?>
 		</div>
 		<div class="linkbox">
-			<?=$pages?>
+			<?=$Pages?>
 		</div>
 	</div>
 	<div class="thin box pad">
-		<h3>There are <?=$total_str?> torrents remaining</h3>
+		<h3>There are <?=$TotalStr?> torrents remaining</h3>
 		<table class="torrent_table">
 			<?
 			foreach ($TorrentsInfo as $TorrentID => $Info) {

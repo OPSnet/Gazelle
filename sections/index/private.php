@@ -128,7 +128,10 @@ for ($i = 0; $i < $Limit; $i++) {
 ?>
 			</ul>
 		</div>
-<?		//SiteHistoryView::render_recent_sidebar(SiteHistory::get_events(null, null, null, null, null, null, 5));
+
+<?
+include('contest_leaderboard.php');
+//SiteHistoryView::render_recent_sidebar(SiteHistory::get_events(null, null, null, null, null, null, 5));
 ?>
 		<div class="box">
 			<div class="head colhead_dark"><strong>Stats</strong></div>

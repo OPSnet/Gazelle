@@ -23,4 +23,5 @@ $DB->query("UPDATE torrents SET HasLog='1', HasLogDB=0, LogScore=0, LogChecksum=
 $DB->query(sprintf("INSERT INTO group_log (GroupID, TorrentID, UserID, Time, Info) VALUES(%d, %d, %d, '%s', 'Logs removed from torrent')",
     $GroupID, $TorrentID, $LoggedUser['ID'], sqltime()));
 
-header('Location: '.$_SERVER['HTTP_REFERER']);
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER'];
+header("Location: {$Location}");

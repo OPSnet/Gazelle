@@ -1,4 +1,4 @@
-<?
+<?php
 //******************************************************************************//
 //--------------- Add a recommendation -----------------------------------------//
 authorize();
@@ -15,9 +15,10 @@ $Val->SetFields('url',
 			'1','regex','The URL must be a link to a torrent on the site.',array('regex' => '/^'.TORRENT_GROUP_REGEX.'/i'));
 $Err = $Val->ValidateForm($_POST); // Validate the form
 
+$Location = (empty($_SERVER['HTTP_REFERER'])) ? "tools.php?action=recommend" : $_SERVER['HTTP_REFERER'];
 if ($Err) { // if something didn't validate
 	error($Err);
-	header('Location: '.$_SERVER['HTTP_REFERER']);
+	header("Location: {$Location}");
 	exit;
 }
 
@@ -33,5 +34,4 @@ $DB->query("INSERT INTO torrents_recommended (GroupID, UserID, Time) VALUES ('".
 Torrents::freeleech_groups($GroupID, 2, 3);
 
 $Cache->delete_value('recommend');
-header('Location: '.$_SERVER['HTTP_REFERER']);
-?>
+header("Location: {$Location}");
