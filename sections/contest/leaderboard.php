@@ -92,7 +92,7 @@ if (!count($Leaderboard)) {
     <tr>
         <td>%d</td>
         <td><a href="/user.php?id=%d">%s</a>$user_extra</td>
-        <td>%s - <a href="/torrents.php?id=%d">%s</a></td>
+        <td>%s - <a href="/torrents.php?torrentid=%d">%s</a></td>
         <td>%s</td>
         <td>%d</td>
     </tr>
