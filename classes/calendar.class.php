@@ -11,13 +11,11 @@ class Calendar {
 	public static $Teams = array(
 									0 => "Everyone",
 									1 => "Staff"
-									
+
 									);
 
 	public static function can_view() {
-		return check_perms('users_mod')
-			
-			;
+		return check_perms('users_mod');
 	}
 
 	private static function get_teams_query() {
@@ -26,7 +24,7 @@ class Calendar {
 		if ($IsMod) {
 			$Teams[] = 1;
 		}
-		
+
 		return "Team IN (" . implode(",", $Teams) . ") ";
 	}
 
