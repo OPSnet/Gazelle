@@ -92,6 +92,9 @@ minutes).
 
 \*************************************************************************/
 
+// Contest leaderboard
+
+include(SERVER_ROOT.'/sections/contest/recalculate.php');
 
 echo "Ran every-time functions\n";
 
