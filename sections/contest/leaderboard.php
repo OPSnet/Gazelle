@@ -121,12 +121,15 @@ END_STR
 ?>
             <p>You are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
 <?php
+                $user_seen = 1;
                 break;
             }
         }
+        if (!$user_seen) {
 ?>
             <p>It doesn't look like you're on the leaderboard at all... upload some FLACs for fame and glory!</p>
 <?php
+        }
     }
 }
 ?>
