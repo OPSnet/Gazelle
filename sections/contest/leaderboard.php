@@ -92,7 +92,7 @@ if (!count($Leaderboard)) {
     <tr>
         <td>%d</td>
         <td><a href="/user.php?id=%d">%s</a>$user_extra</td>
-        <td>%s - <a href="/torrents.php?id=%d">%s</a></td>
+        <td>%s - <a href="/torrents.php?torrentid=%d">%s</a></td>
         <td>%s</td>
         <td>%d</td>
     </tr>
@@ -121,12 +121,15 @@ END_STR
 ?>
             <p>You are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
 <?php
+                $user_seen = 1;
                 break;
             }
         }
+        if (!$user_seen) {
 ?>
             <p>It doesn't look like you're on the leaderboard at all... upload some FLACs for fame and glory!</p>
 <?php
+        }
     }
 }
 ?>
