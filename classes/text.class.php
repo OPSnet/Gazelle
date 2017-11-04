@@ -188,6 +188,7 @@ class Text {
 		$Regex .= '(\w+(:\w+)?@)?'; // user:pass@
 		$Regex .= '(';
 		$Regex .= '(([0-9]{1,3}\.){3}[0-9]{1,3})|'; // IP or...
+		$Regex .= '(localhost(\:[0-9]{1,5})?)|'; // locahost or...
 		$Regex .= '(([a-z0-9\-\_]+\.)+\w{2,6})'; // sub.sub.sub.host.com
 		$Regex .= ')';
 		$Regex .= '(:[0-9]{1,5})?'; // port

@@ -226,7 +226,7 @@ if (!$NumResults) {
 				</span>
 			</td>
 		</tr>
-<?		if (!empty($Result['LastReadBody'])) { // if a user is subscribed to a topic/comments but hasn't accessed the site ever, LastReadBody will be null - in this case we don't display a post. ?>
+<?		if (!empty($Result['LastReadBody'])) { /* if a user is subscribed to a topic/comments but hasn't accessed the site ever, LastReadBody will be null - in this case we don't display a post. */ ?>
 		<tr class="row<?=$ShowCollapsed ? ' hidden' : '' ?>">
 <?			if (Users::has_avatars_enabled()) { ?>
 			<td class="avatar" valign="top">

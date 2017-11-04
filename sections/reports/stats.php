@@ -148,7 +148,7 @@ $Results = $DB->to_array();
 <?	} ?>
 		</table>
 <?
-} //if (check_perms('admin_reports')) ?>
+} /* if (check_perms('admin_reports')) */ ?>
 	</div>
 	<div class="two_columns pad">
 <?

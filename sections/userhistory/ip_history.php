@@ -279,7 +279,7 @@ foreach ($Results as $Index => $Result) {
 				<span class="reltime"><?=time_diff($EndTime)?></span>
 				<span class="abstime hidden"><?=$EndTime?></span>
 			</td>
-			<td><?//time_diff(strtotime($StartTime), strtotime($EndTime)); ?></td>
+			<td><?/*time_diff(strtotime($StartTime), strtotime($EndTime));*/ ?></td>
 		</tr>
 <?
 	if (!empty($OtherUsers) && ($FirstOccurrence || count($OtherUsers) < 100)) {
@@ -299,7 +299,7 @@ foreach ($Results as $Index => $Result) {
 				<span class="reltime"><?=time_diff($OtherUser['EndTime'])?></span>
 				<span class="hidden abstime"><?=$OtherUser['EndTime']?></span>
 			</td>
-			<td><?//time_diff(strtotime($OtherUser['StartTime']), strtotime($OtherUser['EndTime'])); ?></td>
+			<td><?/*time_diff(strtotime($OtherUser['StartTime']), strtotime($OtherUser['EndTime'])); */ ?></td>
 		</tr>
 <?
 		}

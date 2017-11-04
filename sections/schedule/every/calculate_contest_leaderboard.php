@@ -46,5 +46,5 @@ GROUP BY
 	T.Time");
 	G::$Cache->delete_value('contest_leaderboard_' . $Contest_id);
 	Contest::get_leaderboard($Contest_id, false);
-	printf("Contest $Contest_id recalculated in %d seconds\n", time() - $begin);
+	//printf("Contest $Contest_id recalculated in %d seconds\n", time() - $begin);
 }

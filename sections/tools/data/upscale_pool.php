@@ -80,7 +80,7 @@ if ($DB->has_results()) {
 			<td class="number_column"><?=Format::get_size($Downloaded - $RatioWatchDownload)?></td>
 			<td><?=time_diff($Joined, 2)?></td>
 			<td><?=time_diff($RatioWatchEnds)?></td>
-			<td><?//time_diff(strtotime($Joined), strtotime($RatioWatchEnds))?></td>
+			<td><?/*time_diff(strtotime($Joined), strtotime($RatioWatchEnds))*/?></td>
 		</tr>
 <?	} ?>
 	</table>

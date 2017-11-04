@@ -112,7 +112,7 @@ class TORRENT_FORM {
 				</td>
 			</tr>
 		</table>
-<?		}//if ?>
+<?		}/*if*/ ?>
 		<div id="dynamic_form">
 <?
 	} // function head
@@ -616,7 +616,7 @@ function show() {
 					<p class="min_padding">Contains background information such as album history and maybe a review.</p>
 				</td>
 			</tr>
-<?		} // if new torrent ?>
+<?		} /* if new torrent */ ?>
 			<tr>
 				<td class="label">Release description (optional):</td>
 				<td>
