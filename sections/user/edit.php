@@ -609,7 +609,7 @@ echo $Val->GenerateJS('userform');
 				<td>
 					<input type="button" onclick="ParanoiaResetOff();" value="Show everything" />
 					<input type="button" onclick="ParanoiaResetStats();" value="Show stats only" />
-					<!--<input type="button" onclick="ParanoiaResetOn();" value="Show nothing" />-->
+					<input type="button" onclick="ParanoiaResetOn();" value="Show nothing" />
 				</td>
 			</tr>
 			<tr id="para_donations_tr">
@@ -628,10 +628,12 @@ echo $Val->GenerateJS('userform');
 $UploadChecked = checked(!in_array('uploaded', $Paranoia));
 $DownloadChecked = checked(!in_array('downloaded', $Paranoia));
 $RatioChecked = checked(!in_array('ratio', $Paranoia));
+$BonusCheched = checked(!in_array('bonuspoints', $Paranoia));
 ?>
 					<label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"<?=$UploadChecked?> /> Uploaded</label>&nbsp;&nbsp;
 					<label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"<?=$DownloadChecked?> /> Downloaded</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"<?=$RatioChecked?> /> Ratio</label>
+					<label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"<?=$RatioChecked?> /> Ratio</label>&nbsp;&nbsp;
+					<label><input type="checkbox" name="p_bonuspoints" <?=$BonusCheched?> /> Bonus Points</label>
 				</td>
 			</tr>
 			<tr id="para_reqratio_tr">

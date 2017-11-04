@@ -11,7 +11,8 @@
 //ini_set('upload_max_filesize', 2097152); // 2 Mibibytes
 
 ini_set('max_file_uploads', 100);
-define(MAX_FILENAME_LENGTH, 255);
+define('MAX_FILENAME_LENGTH', 255);
+
 include(SERVER_ROOT.'/classes/validate.class.php');
 include(SERVER_ROOT.'/classes/feed.class.php');
 include(SERVER_ROOT.'/sections/torrents/functions.php');
@@ -793,6 +794,26 @@ $Debug->set_flag('upload: ocelot updated');
 // Prevent deletion of this torrent until the rest of the upload process is done
 // (expire the key after 10 minutes to prevent locking it for too long in case there's a fatal error below)
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
+
+//******************************************************************************//
+//--------------- Give Bonus Points  -------------------------------------------//
+
+if (G::$LoggedUser['DisablePoints'] == 0) {
+	$Amount = 10;
+
+	$Formats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
+		'Blu-ray', 'DAT');
+	if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
+		in_array($Properties['Media'], $Formats))) {
+		$Amount = 100;
+	}
+	elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
+		$Amount = 30;
+	}
+
+	$DB->query("UPDATE users_main SET BonusPoints = BonusPoints + {$Amount} WHERE ID=".$LoggedUser['ID']);
+	$Cache->delete_value('user_stats_'.$LoggedUser['ID']);
+}
 
 //******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//

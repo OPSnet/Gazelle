@@ -148,6 +148,67 @@ function time_diff($TimeStamp, $Levels = 2, $Span = true, $Lowercase = false, $S
 	}
 }
 
+/**
+ * Given a number of horus, convert it to a human readable time of
+ * years, months, days, etc.
+ *
+ * @param $TimeStamp
+ * @param int $Levels
+ * @param bool $Span
+ * @return string
+ */
+function convert_hours($Hours,$Levels=2,$Span=true) {
+	if ($Hours === 0) {
+		return 'Never';
+	}
+
+	$Years= floor($Hours/8760); // hours in a year
+	$Remain = $Hours - $Years*8760;
+
+	$Months = floor($Remain/730); // hours in a month
+	$Remain = $Remain - $Months*730;
+
+	$Weeks = floor($Remain/168); // hours in a week
+	$Remain = $Remain - $Weeks*168;
+
+	$Days = floor($Remain/24); // hours in a day
+	$Remain = $Remain - $Days*24;
+
+	$Hours = floor($Remain);
+
+	$Return = '';
+
+	if ($Years > 0 && $Levels > 0) {
+		$Return .= $Years.'y';
+		$Levels--;
+	}
+
+	if ($Months > 0 && $Levels > 0) {
+		$Return .= $Months.'mo';
+		$Levels--;
+	}
+
+	if ($Weeks > 0 && $Levels > 0) {
+		$Return .= $Weeks.'w';
+		$Levels--;
+	}
+
+	if ($Days > 0 && $Levels > 0) {
+		$Return .= $Days.'d';
+		$Levels--;
+	}
+
+	if ($Hours > 0 && $Levels > 0) {
+		$Return .= $Hours.'h';
+	}
+
+	if ($Span) {
+		return '<span>'.$Return.'</span>';
+	} else {
+		return $Return;
+	}
+}
+
 /* SQL utility functions */
 
 function time_plus($Offset) {
