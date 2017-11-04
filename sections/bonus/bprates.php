@@ -75,7 +75,7 @@ $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 	<tbody>
 		<tr>
 			<td><?=$TotalTorrents?></td>
-			<td><?=$TotalSize?></td>
+			<td><?=Format::get_size($TotalSize)?></td>
 			<td><?=number_format($TotalHourlyPoints, 2)?></td>
 			<td><?=number_format($TotalDailyPoints, 2)?></td>
 			<td><?=number_format($TotalWeeklyPoints, 2)?></td>
