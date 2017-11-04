@@ -297,8 +297,7 @@ if (empty($NoReason)) {
 		</form>
 	</div>
 <?
-}
-// close <div class="thin"> ?>
+} /* close <div class="thin"> */ ?>
 </div>
 <?
 View::show_footer();

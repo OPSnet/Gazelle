@@ -84,7 +84,7 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
 <?	if ($CanEdit) { ?>
 			<a href="requests.php?action=edit&amp;id=<?=$RequestID?>" class="brackets">Edit</a>
 <?	}
-	if ($UserCanEdit || check_perms('users_mod')) { //check_perms('site_moderate_requests')) { ?>
+	if ($UserCanEdit || check_perms('users_mod')) { ?>
 			<a href="requests.php?action=delete&amp;id=<?=$RequestID?>" class="brackets">Delete</a>
 <?	}
 	if (Bookmarks::has_bookmarked('request', $RequestID)) { ?>

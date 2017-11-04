@@ -370,7 +370,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
 					<input type="hidden" name="large" value="1" />
 					<input type="hidden" name="topicid" value="<?=$ThreadID?>" />
 					<ul style="list-style: none;" id="poll_options">
-<?		foreach ($Answers as $i => $Answer) { //for ($i = 1, $il = count($Answers); $i <= $il; $i++) { ?>
+<?		foreach ($Answers as $i => $Answer) { ?>
 						<li>
 							<input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
 							<label for="answer_<?=$i?>"><?=display_str($Answer)?></label>

@@ -94,7 +94,7 @@ if (!$IsStaff && !$IsFLS) {
 ?>
 		<div class="box vertical_space" id="post<?=$MessageID?>">
 			<div class="head">
-<?				// TODO: the inline style in the <a> tag is an ugly hack. get rid of it. ?>
+<?				/* TODO: the inline style in the <a> tag is an ugly hack. get rid of it. */ ?>
 				<a class="postid" href="staffpm.php?action=viewconv&amp;id=<?=$ConvID?>#post<?=$MessageID?>" style="font-weight: normal;">#<?=$MessageID?></a>
 				<strong>
 					<?=$UserString?>
@@ -228,7 +228,7 @@ if (!$IsStaff && !$IsFLS) {
 						</optgroup>
 					</select>
 					<input type="button" onclick="Assign();" value="Assign" />
-<?	} elseif ($IsFLS) {	// FLS assign button ?>
+<?	} elseif ($IsFLS) {	/* FLS assign button */ ?>
 					<input type="button" value="Assign to staff" onclick="location.href='staffpm.php?action=assign&amp;to=staff&amp;convid=<?=$ConvID?>';" />
 					<input type="button" value="Assign to forum staff" onclick="location.href='staffpm.php?action=assign&amp;to=forum&amp;convid=<?=$ConvID?>';" />
 <?
@@ -236,7 +236,7 @@ if (!$IsStaff && !$IsFLS) {
 
 	if ($Status != 'Resolved') { ?>
 					<input type="button" value="Resolve" onclick="location.href='staffpm.php?action=resolve&amp;id=<?=$ConvID?>';" />
-<?		if ($IsFLS) { //Moved by request ?>
+<?		if ($IsFLS) { /* Moved by request */ ?>
 					<input type="button" value="Common answers" onclick="$('#common_answers').gtoggle();" />
 <?		} ?>
 					<input type="button" id="previewbtn" value="Preview" class="hidden button_preview_<?=$TextPrev->getID()?>" />

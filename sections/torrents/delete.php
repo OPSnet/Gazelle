@@ -234,7 +234,7 @@ if (check_perms('admin_reports')) {
 		?>
 					</td>
 				</tr>
-<?				// END REPORTED STUFF :|: BEGIN MOD STUFF ?>
+<?				/* END REPORTED STUFF :|: BEGIN MOD STUFF */ ?>
 				<tr>
 					<td class="label">
 						<a href="javascript:Load('<?=$ReportID?>')" class="tooltip" title="Click here to reset the resolution options to their default values.">Resolve:</a>
