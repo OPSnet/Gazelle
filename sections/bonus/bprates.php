@@ -48,6 +48,20 @@ $TotalWeeklyPoints = $TotalDailyPoints * 7;
 $TotalMonthlyPoints = $TotalDailyPoints * 30.436875;
 $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 
+$DB->query("
+SELECT
+	COUNT(*) as count
+FROM
+	xbt_files_users AS xfu
+	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
+WHERE
+	xfu.uid = {$UserID}
+	AND xfu.active = '1'
+	AND xfu.remaining = 0");
+
+list($NumResults) = $DB->next_record();
+$Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
+
 ?>
 <div class="header">
 	<h2>Bonus Points Rates</h2>
@@ -102,20 +116,6 @@ $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 	</thead>
 	<tbody>
 <?php
-
-$DB->query("
-SELECT
-	COUNT(*) as count
-FROM
-	xbt_files_users AS xfu
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
-WHERE
-	xfu.uid = {$UserID}
-	AND xfu.active = '1'
-	AND xfu.remaining = 0");
-
-list($NumResults) = $DB->next_record();
-$Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 
 $DB->query("
 SELECT
