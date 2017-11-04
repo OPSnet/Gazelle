@@ -57,6 +57,9 @@ $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 	<a href="wiki.php?action=article&id=130" class="brackets">About Bonus Points</a>
 	<a href="bonus.php" class="brackets">Bonus Point Shop</a>
 </div>
+<div class="linkbox">
+	<?=$Pages?>
+</div>
 <table>
 	<thead>
 		<tr class="colhead">
@@ -112,6 +115,7 @@ WHERE
 	AND xfu.remaining = 0");
 
 list($NumResults) = $DB->next_record();
+$Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 
 $DB->query("
 SELECT
@@ -193,6 +197,6 @@ while(list($TorrentID, $GroupID, $Size, $Seeders, $Seedtime, $HourlyPoints) = $D
 	</tbody>
 </table>
 <?php
-$Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
+
 View::show_footer();
 ?>
