@@ -54,11 +54,11 @@ if (isset($_POST['BonusPoints'])) {
 	if (empty($_POST['BonusPoints'])) {
 		$BonusPoints = 0;
 	}
-	elseif (!is_number($_POST['BonusPoints'])) {
+	elseif ($_POST['BonusPoints'] != strval(floatval($_POST['BonusPoints']))) {
 		error(0);
 	}
 	else {
-		$BonusPoints = intval($_POST['BonusPoints']);
+		$BonusPoints = round(floatval($_POST['BonusPoints']), 5);
 	}
 }
 $FLTokens = isset($_POST['FLTokens']) ? $_POST['FLTokens'] : 0;
@@ -459,7 +459,7 @@ if ($Downloaded != $Cur['Downloaded'] && $Downloaded != $_POST['OldDownloaded'] 
 		$Cache->delete_value("user_stats_$UserID");
 }
 
-if ($BonusPoints != intval($Cur['BonusPoints']) && $BonusPoints != intval($_POST['OldBonusPoints'])
+if ($BonusPoints != floatval($Cur['BonusPoints']) && $BonusPoints != floatval($_POST['OldBonusPoints'])
 	&& (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {
 	$UpdateSet[] = "BonusPoints = '{$BonusPoints}'";
 	$EditSummary[] = "bonus points changed from {$Cur['BonusPoints']} to {$BonusPoints}";
