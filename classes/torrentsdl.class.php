@@ -31,7 +31,7 @@ class TorrentsDL {
 		$this->Title = $Title;
 		$this->User = G::$LoggedUser;
 		$AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
-		$this->AnnounceURL = ANNOUNCE_URL . '/' . G::$LoggedUser['torrent_pass'] . '/announce';
+		$this->AnnounceURL = $AnnounceURL . '/' . G::$LoggedUser['torrent_pass'] . '/announce';
 		$this->Zip = new Zip(Misc::file_string($Title));
 	}
 
@@ -85,7 +85,7 @@ class TorrentsDL {
 		$FileName = self::construct_file_name($Info['Artist'], $Info['Name'], $Info['Year'], $Info['Media'], $Info['Format'], $Info['Encoding'], $Info['TorrentID'], false, $MaxPathLength);
 		$this->Size += $Info['Size'];
 		$this->NumAdded++;
-		$this->Zip->add_file(self::get_file($TorrentData, $this->AnnounceURL), ($FolderName ? "$FolderName/" : "") . $FileName);
+		$this->Zip->add_file(self::get_file($TorrentData, $this->AnnounceURL, $Info['TorrentID']), ($FolderName ? "$FolderName/" : "") . $FileName);
 		usleep(25000); // We don't want to send much faster than the client can receive
 	}
 
@@ -222,17 +222,21 @@ class TorrentsDL {
 	 * Convert a stored torrent into a binary file that can be loaded in a torrent client
 	 *
 	 * @param mixed $TorrentData bencoded torrent without announce URL (new format) or TORRENT object (old format)
-	 * @return bencoded string
+	 * @param string $AnnounceURL
+	 * @param int $TorrentID
+	 * @return string bencoded string
 	 */
-	public static function get_file(&$TorrentData, $AnnounceURL) {
-		if (Misc::is_new_torrent($TorrentData)) {
-			return BencodeTorrent::add_announce_url($TorrentData, $AnnounceURL);
-		}
-		$Tor = new TORRENT(unserialize(base64_decode($TorrentData)), true);
+	public static function get_file($TorrentData, $AnnounceURL, $TorrentID) {
+		$Tor = new TORRENT($TorrentData);
 		$Tor->set_announce_url($AnnounceURL);
+		// We have to sort the dictionary because of the added comment field.
+		// "Keys must be strings and appear in sorted order"
+		// https://wiki.theory.org/BitTorrentSpecification
+		$Tor->Val['comment'] = site_url()."/torrents.php?torrentid={$TorrentID}";
 		unset($Tor->Val['announce-list']);
 		unset($Tor->Val['url-list']);
 		unset($Tor->Val['libtorrent_resume']);
+		ksort($Tor->Val);
 		return $Tor->enc();
 	}
 }
