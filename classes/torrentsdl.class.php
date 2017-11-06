@@ -232,7 +232,7 @@ class TorrentsDL {
 		// We have to sort the dictionary because of the added comment field.
 		// "Keys must be strings and appear in sorted order"
 		// https://wiki.theory.org/BitTorrentSpecification
-		$Tor->Val['comment'] = site_url()."/torrents.php?torrentid={$TorrentID}";
+		$Tor->Val['comment'] = site_url()."torrents.php?torrentid={$TorrentID}";
 		unset($Tor->Val['announce-list']);
 		unset($Tor->Val['url-list']);
 		unset($Tor->Val['libtorrent_resume']);
