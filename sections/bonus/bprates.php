@@ -21,21 +21,16 @@ SELECT
 	COUNT(xfu.uid) as TotalTorrents,
 	SUM(t.Size) as TotalSize,
 	SUM((t.Size / (1024 * 1024 * 1024)) * (
-			0.0754 + (
-				LN(1 + (xs.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
-			)
+		0.0754 + (
+			LN(1 + (xfh.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
 		)
-	) AS TotalHourlyPoints
+	)) AS TotalHourlyPoints
 FROM
-	xbt_files_users AS xfu
-	JOIN users_info AS ui ON ui.UserID = xfu.uid
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
+	(SELECT * FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) GROUP BY uid,fid) AS xfu
+	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.uid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
-	xfu.uid = {$UserID}
-	AND xfu.active = '1'
-	AND xfu.remaining = 0
-	AND ui.DisablePoints = '0'");
+	xfu.uid = {$UserID}");
 
 list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $DB->next_record();
 $TotalTorrents = intval($TotalTorrents);
@@ -52,12 +47,10 @@ $DB->query("
 SELECT
 	COUNT(*) as count
 FROM
-	xbt_files_users AS xfu
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
+	(SELECT * FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) GROUP BY uid,fid) AS xfu
+	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.uid
 WHERE
-	xfu.uid = {$UserID}
-	AND xfu.active = '1'
-	AND xfu.remaining = 0");
+	xfu.uid = {$UserID}");
 
 list($NumResults) = $DB->next_record();
 $Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
@@ -123,21 +116,19 @@ SELECT
 	t.GroupID,
 	t.Size,
 	GREATEST(t.Seeders, 1),
-	xs.seedtime,
+	xfh.seedtime,
 	((t.Size / (1024 * 1024 * 1024)) * (
 			0.0754 + (
-				LN(1 + (xs.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
+				LN(1 + (xfh.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
 			)
 		)
 	) AS HourlyPoints
 FROM
-	xbt_files_users AS xfu
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
+	(SELECT * FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) GROUP BY uid,fid) AS xfu
+	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.uid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
 	xfu.uid = {$UserID}
-	AND xfu.active = '1'
-	AND xfu.remaining = 0
 LIMIT {$Limit}
 OFFSET {$Offset}");
 
