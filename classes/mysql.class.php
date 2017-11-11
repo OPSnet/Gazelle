@@ -159,6 +159,9 @@ class DB_MYSQL {
 	protected $Errno = 0;
 	protected $Error = '';
 
+	protected $PreparedQuery = null;
+	protected $Statement = null;
+
 	public $Queries = array();
 	public $Time = 0.0;
 
@@ -210,8 +213,7 @@ class DB_MYSQL {
 		}
 	}
 
-	function query($Query, $AutoHandle = 1) {
-		global $Debug;
+	private function setup_query() {
 		/*
 		 * If there was a previous query, we store the warnings. We cannot do
 		 * this immediately after mysqli_query because mysqli_insert_id will
@@ -225,11 +227,95 @@ class DB_MYSQL {
 		if ($this->QueryID) {
 			$this->warnings();
 		}
-		$QueryStartTime = microtime(true);
+
 		$this->connect();
+	}
+
+	/**
+	 * Runs a raw query assuming pre-sanitized input. However, attempting to self sanitize (such
+	 * as via db_string) is still not as safe for using prepared statements so for queries
+	 * involving user input, you really should not use this function (instead opting for
+	 * prepare_query) {@See DB_MYSQL::prepare_query}
+	 *
+	 * When running a batch of queries using the same statement
+	 * with a variety of inputs, it's more performant to reuse the statement
+	 * with {@see DB_MYSQL::prepare} and {@see DB_MYSQL::execute}
+	 *
+	 * @return mysqli_result|bool Returns a mysqli_result object
+	 *                            for successful SELECT queries,
+	 *                            or TRUE for other successful DML queries
+	 *                            or FALSE on failure.
+	 *
+	 * @param $Query
+	 * @param int $AutoHandle
+	 * @return bool|int|mysqli_result
+	 */
+	function query($Query, $AutoHandle=1) {
+		$this->setup_query();
+		$LinkID = &$this->LinkID;
+
+		$Closure = function() use ($LinkID, $Query) {
+			return mysqli_query($this->LinkID, $Query);
+		};
+
+		return $this->attempt_query($Query, $Closure, $AutoHandle);
+	}
+
+	function prepare($Query) {
+		$this->setup_query();
+		$this->PreparedQuery = $Query;
+		$this->Statement = mysqli_prepare($this->LinkID, $Query);
+		return $this->Statement;
+	}
+
+	function execute(...$Parameters) {
+		$Statement = &$this->Statement;
+		if (count($Parameters) > 0) {
+			$Binders = "";
+			foreach ($Parameters as $Parameter) {
+				// Note: A PHP integer can be potentially bigger than the specified type in MySQL which we're not
+				// going to worry about actually happening so make sure to specify the right sized columns in the DB
+				if (is_int($Parameter)) {
+					$Binder .= "i";
+				}
+				elseif (is_double($Parameter)) {
+					$Binder .= "d";
+				}
+				else {
+					$Binder .= "s";
+				}
+			}
+
+			$Statement->bind_param($Binders, ...$Parameters);
+		}
+
+		$Closure = function() use ($Statement) {
+			$Statement->execute();
+			return $Statement->get_result();
+		};
+
+		$Query = "Prepared Statement: {$this->PreparedQuery}\n";
+		foreach ( $Parameters as $key => $value ) {
+			$Query .= "$key => $value\n";
+		}
+
+		$Return = $this->attempt_query($Query, $Closure);
+
+		return $Return;
+	}
+
+	function prepared_query($Query, ...$Parameters) {
+		$this->prepare($Query);
+		return $this->execute(...$Parameters);
+
+	}
+
+	private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
+		global $Debug;
+		$QueryStartTime=microtime(true);
 		// In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
 		for ($i = 1; $i < 6; $i++) {
-			$this->QueryID = mysqli_query($this->LinkID, $Query);
+			$this->QueryID = $Closure();
 			if (!in_array(mysqli_errno($this->LinkID), array(1213, 1205))) {
 				break;
 			}
@@ -239,6 +325,10 @@ class DB_MYSQL {
 			sleep($i * rand(2, 5)); // Wait longer as attempts increase
 		}
 		$QueryEndTime = microtime(true);
+		// Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB
+		if (($Len = strlen($Query))>16384) {
+			$Query = substr($Query, 0, 16384).'... '.($Len-16384).' bytes trimmed';
+		}
 		$this->Queries[] = array($Query, ($QueryEndTime - $QueryStartTime) * 1000, null);
 		$this->Time += ($QueryEndTime - $QueryStartTime) * 1000;
 
@@ -252,6 +342,7 @@ class DB_MYSQL {
 				return $this->Errno;
 			}
 		}
+
 
 		/*
 		$QueryType = substr($Query, 0, 6);
@@ -289,6 +380,18 @@ class DB_MYSQL {
 			}
 			return $this->Record;
 		}
+		return null;
+	}
+
+	/**
+	 * TODO: move all calls of next_record to fetch_record and then move the
+	 * non-escape stuff from next_record here except for the escape nonsense.
+	 *
+	 * @param int $Type
+	 * @return mixed
+	 */
+	function fetch_record($Type = MYSQLI_BOTH) {
+		return $this->next_record($Type, false);
 	}
 
 	function close() {
