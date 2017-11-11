@@ -248,7 +248,7 @@ class DB_MYSQL {
 	 *
 	 * @param $Query
 	 * @param int $AutoHandle
-	 * @return bool|int|mysqli_result
+	 * @return mysqli_result|bool
 	 */
 	function query($Query, $AutoHandle=1) {
 		$this->setup_query();
@@ -261,6 +261,19 @@ class DB_MYSQL {
 		return $this->attempt_query($Query, $Closure, $AutoHandle);
 	}
 
+	/**
+	 * Prepares an SQL statement for execution with data.
+	 *
+	 * Normally, you'll most likely just want to be using
+	 * DB_MYSQL::prepared_query to call both DB_MYSQL::prepare
+	 * and DB_MYSQL::execute for one-off queries, you can use
+	 * this separately in the case where you plan to be running
+	 * this query repeatedly while just changing the bound
+	 * parameters (such as if doing a bulk update or the like).
+	 *
+	 * @return mysqli_stmt|bool Returns a statement object
+	 *                          or FALSE if an error occurred.
+	 */
 	function prepare($Query) {
 		$this->setup_query();
 		$this->PreparedQuery = $Query;
@@ -268,21 +281,32 @@ class DB_MYSQL {
 		return $this->Statement;
 	}
 
+	/**
+	 * Bind variables to our last prepared query and execute it.
+	 *
+	 * Variables that are passed into the function will have their
+	 * type automatically set for how to bind it to the query (either
+	 * integer (i), double (d), or string (s)).
+	 *
+	 * @param  array $Parameters,... variables for the query
+	 * @return mysqli_result|bool Returns a mysqli_result object
+	 *                            for successful SELECT queries,
+	 *                            or TRUE for other successful DML queries
+	 *                            or FALSE on failure.
+	 */
 	function execute(...$Parameters) {
 		$Statement = &$this->Statement;
 		if (count($Parameters) > 0) {
 			$Binders = "";
 			foreach ($Parameters as $Parameter) {
-				// Note: A PHP integer can be potentially bigger than the specified type in MySQL which we're not
-				// going to worry about actually happening so make sure to specify the right sized columns in the DB
-				if (is_int($Parameter)) {
-					$Binder .= "i";
+				if (is_integer($Parameter)) {
+					$Binders .= "i";
 				}
 				elseif (is_double($Parameter)) {
-					$Binder .= "d";
+					$Binders .= "d";
 				}
 				else {
-					$Binder .= "s";
+					$Binders .= "s";
 				}
 			}
 
@@ -304,6 +328,19 @@ class DB_MYSQL {
 		return $Return;
 	}
 
+	/**
+	 * Prepare and execute a prepared query returning the result set.
+	 *
+	 * Utility function that wraps DB_MYSQL::prepare and DB_MYSQL::execute
+	 * as most times, the query is going to be one-off and this will save
+	 * on keystrokes. If you do plan to be executing a prepared query
+	 * multiple times with different bound parameters, you'll want to call
+	 * the two functions separately instead of this function.
+	 *
+	 * @param $Query
+	 * @param array ...$Parameters
+	 * @return bool|mysqli_result
+	 */
 	function prepared_query($Query, ...$Parameters) {
 		$this->prepare($Query);
 		return $this->execute(...$Parameters);
@@ -384,14 +421,18 @@ class DB_MYSQL {
 	}
 
 	/**
-	 * TODO: move all calls of next_record to fetch_record and then move the
-	 * non-escape stuff from next_record here except for the escape nonsense.
+	 * Fetches next record from the result set of the previously executed query.
 	 *
-	 * @param int $Type
-	 * @return mixed
+	 * Utility around next_record, with making escape being something the programmer
+	 * must explicitly declare for a given column, defaulting to escaping nothing.
+	 *
+	 * @param int    $Type
+	 * @param mixed  $Escape Boolean true/false for escaping entire/none of query
+	 * 				         or can be an array of array keys for what columns to escape
+	 * @return array next result set if exists
 	 */
-	function fetch_record($Type = MYSQLI_BOTH) {
-		return $this->next_record($Type, false);
+	function fetch_record($Type = MYSQLI_BOTH, $Escape = false) {
+		return $this->next_record($Type, $Escape);
 	}
 
 	function close() {
