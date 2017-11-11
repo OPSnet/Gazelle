@@ -43,6 +43,7 @@ $RunTasks = null;
 function run_tasks($Dir) {
 	global $RunTasks, $LineEnd;
 	$Tasks = array_diff(scandir(SERVER_ROOT.'/sections/schedule/'.$Dir, 1), array('.', '..'));
+	sort($Tasks);
 	extract($GLOBALS);
 	foreach ($Tasks as $Task) {
 		$TimeStart = microtime(true);
