@@ -5,37 +5,35 @@ $Page = max(1, $Page);
 $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
-View::show_header('Bonus Points Rate');
-
-if (empty($_GET['id']) || !check_perms('users_mod')) {
+if (!empty($_GET['id']) && check_perms('users_mod')) {
+	$UserID = intval($_GET['id']);
+	$User = array_merge(Users::user_stats($_GET['id']), Users::user_info($_GET['id']), Users::user_heavy_info($_GET['id']));
+	if (empty($User)) {
+		error(404);
+	}
+}
+else {
 	$UserID = $LoggedUser['ID'];
 	$User = $LoggedUser;
 }
-else {
-	$UserID = intval($_GET['id']);
-	$User = array_merge(Users::user_stats($_GET['id']), Users::user_heavy_info($_GET['id']));
-}
+$Title = ($UserID === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
+View::show_header($Title);
 
 $DB->query("
 SELECT
 	COUNT(xfu.uid) as TotalTorrents,
 	SUM(t.Size) as TotalSize,
 	SUM((t.Size / (1024 * 1024 * 1024)) * (
-			0.0754 + (
-				LN(1 + (xs.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
-			)
+		0.0754 + (
+			LN(1 + (xfh.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
 		)
-	) AS TotalHourlyPoints
+	)) AS TotalHourlyPoints
 FROM
-	xbt_files_users AS xfu
-	JOIN users_info AS ui ON ui.UserID = xfu.uid
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
+	(SELECT * FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) GROUP BY uid,fid) AS xfu
+	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.uid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
-	xfu.uid = {$UserID}
-	AND xfu.active = '1'
-	AND xfu.remaining = 0
-	AND ui.DisablePoints = '0'");
+	xfu.uid = {$UserID}");
 
 list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $DB->next_record();
 $TotalTorrents = intval($TotalTorrents);
@@ -52,19 +50,17 @@ $DB->query("
 SELECT
 	COUNT(*) as count
 FROM
-	xbt_files_users AS xfu
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
+	(SELECT * FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) GROUP BY uid,fid) AS xfu
+	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.uid
 WHERE
-	xfu.uid = {$UserID}
-	AND xfu.active = '1'
-	AND xfu.remaining = 0");
+	xfu.uid = {$UserID}");
 
 list($NumResults) = $DB->next_record();
 $Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 
 ?>
 <div class="header">
-	<h2>Bonus Points Rates</h2>
+	<h2><?=$Title?></h2>
 	<h3>Points: <?=number_format($User['BonusPoints'])?></h3>
 </div>
 <div class="linkbox">
@@ -117,79 +113,86 @@ $Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 	<tbody>
 <?php
 
-$DB->query("
-SELECT
-	t.ID,
-	t.GroupID,
-	t.Size,
-	GREATEST(t.Seeders, 1),
-	xs.seedtime,
-	((t.Size / (1024 * 1024 * 1024)) * (
-			0.0754 + (
-				LN(1 + (xs.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
+if ($NumResults > 0) {
+	$DB->query("
+	SELECT
+		t.ID,
+		t.GroupID,
+		t.Size,
+		GREATEST(t.Seeders, 1),
+		xfh.seedtime,
+		((t.Size / (1024 * 1024 * 1024)) * (
+				0.0754 + (
+					LN(1 + (xfh.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
+				)
 			)
-		)
-	) AS HourlyPoints
-FROM
-	xbt_files_users AS xfu
-	JOIN xbt_snatched AS xs ON xs.fid = xfu.fid AND xs.uid = xfu.uid
-	JOIN torrents AS t ON t.ID = xfu.fid
-WHERE
-	xfu.uid = {$UserID}
-	AND xfu.active = '1'
-	AND xfu.remaining = 0
-LIMIT {$Limit}
-OFFSET {$Offset}");
+		) AS HourlyPoints
+	FROM
+		(SELECT * FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) GROUP BY uid,fid) AS xfu
+		JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.uid
+		JOIN torrents AS t ON t.ID = xfu.fid
+	WHERE
+		xfu.uid = {$UserID}
+	LIMIT {$Limit}
+	OFFSET {$Offset}");
 
-$GroupIDs = $DB->collect('GroupID');
-$Groups = Torrents::get_groups($GroupIDs, true, true);
-while(list($TorrentID, $GroupID, $Size, $Seeders, $Seedtime, $HourlyPoints) = $DB->next_record()) {
-	$Size = intval($Size);
-	$Seeders = intval($Seeders);
-	$HourlyPoints = floatval($HourlyPoints);
-	$DailyPoints = $HourlyPoints * 24;
-	$WeeklyPoints = $DailyPoints * 7;
-	$MonthlyPoints = $DailyPoints * 30.436875;
-	$YearlyPoints = $DailyPoints * 365.2425;
+	$GroupIDs = $DB->collect('GroupID');
+	$Groups = Torrents::get_groups($GroupIDs, true, true);
+	while (list($TorrentID, $GroupID, $Size, $Seeders, $Seedtime, $HourlyPoints) = $DB->next_record()) {
+		$Size = intval($Size);
+		$Seeders = intval($Seeders);
+		$HourlyPoints = floatval($HourlyPoints);
+		$DailyPoints = $HourlyPoints * 24;
+		$WeeklyPoints = $DailyPoints * 7;
+		$MonthlyPoints = $DailyPoints * 30.436875;
+		$YearlyPoints = $DailyPoints * 365.2425;
 
-	extract(Torrents::array_group($Groups[$GroupID]));
-	$Torrent = $Torrents[$TorrentID];
+		extract(Torrents::array_group($Groups[$GroupID]));
+		$Torrent = $Torrents[$TorrentID];
 
-	$TorrentTags = new Tags($TagList);
+		$TorrentTags = new Tags($TagList);
 
-	if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
-		unset($ExtendedArtists[2]);
-		unset($ExtendedArtists[3]);
-		$DisplayName = Artists::display_artists($ExtendedArtists);
-	} elseif (!empty($Artists)) {
-		$DisplayName = Artists::display_artists(array(1 => $Artists));
-	} else {
-		$DisplayName = '';
-	}
-	$DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$TorrentID.'" class="tooltip" title="View torrent" dir="ltr">'.$GroupName.'</a>';
-	if ($GroupYear > 0) {
-		$DisplayName .= " [$GroupYear]";
-	}
-	if ($GroupVanityHouse) {
-		$DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
-	}
+		if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
+			unset($ExtendedArtists[2]);
+			unset($ExtendedArtists[3]);
+			$DisplayName = Artists::display_artists($ExtendedArtists);
+		} elseif (!empty($Artists)) {
+			$DisplayName = Artists::display_artists(array(1 => $Artists));
+		} else {
+			$DisplayName = '';
+		}
+		$DisplayName .= '<a href="torrents.php?id=' . $GroupID . '&amp;torrentid=' . $TorrentID . '" class="tooltip" title="View torrent" dir="ltr">' . $GroupName . '</a>';
+		if ($GroupYear > 0) {
+			$DisplayName .= " [$GroupYear]";
+		}
+		if ($GroupVanityHouse) {
+			$DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
+		}
 
-	$ExtraInfo = Torrents::torrent_info($Torrent);
-	if ($ExtraInfo) {
-		$DisplayName .= " - $ExtraInfo";
-	}
+		$ExtraInfo = Torrents::torrent_info($Torrent);
+		if ($ExtraInfo) {
+			$DisplayName .= " - $ExtraInfo";
+		}
 ?>
-		<tr>
-			<td><?=$DisplayName?></td>
-			<td><?=Format::get_size($Size)?></td>
-			<td><?=number_format($Seeders)?></td>
-			<td><?=convert_hours($Seedtime, 2)?></td>
-			<td><?=number_format($HourlyPoints, 2)?></td>
-			<td><?=number_format($DailyPoints, 2)?></td>
-			<td><?=number_format($WeeklyPoints, 2)?></td>
-			<td><?=number_format($MonthlyPoints, 2)?></td>
-			<td><?=number_format($YearlyPoints, 2)?></td>
-		</tr>
+	<tr>
+		<td><?= $DisplayName ?></td>
+		<td><?= Format::get_size($Size) ?></td>
+		<td><?= number_format($Seeders) ?></td>
+		<td><?= convert_hours($Seedtime, 2) ?></td>
+		<td><?= number_format($HourlyPoints, 2) ?></td>
+		<td><?= number_format($DailyPoints, 2) ?></td>
+		<td><?= number_format($WeeklyPoints, 2) ?></td>
+		<td><?= number_format($MonthlyPoints, 2) ?></td>
+		<td><?= number_format($YearlyPoints, 2) ?></td>
+	</tr>
+<?php
+	}
+}
+else {
+?>
+	<tr>
+		<td colspan="9" style="text-align:center;">No torrents being seeded currently</td>
+	</tr>
 <?php
 }
 ?>
