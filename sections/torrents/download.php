@@ -184,17 +184,20 @@ $DB->query("
 
 Torrents::set_snatch_update_time($UserID, Torrents::SNATCHED_UPDATE_AFTERDL);
 list($Contents) = $DB->next_record(MYSQLI_NUM, false);
+
+$AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 $FileName = TorrentsDL::construct_file_name($Info['PlainArtists'], $Name, $Year, $Media, $Format, $Encoding, $TorrentID, $DownloadAlt);
 
 if ($DownloadAlt) {
 	header('Content-Type: text/plain; charset=utf-8');
-} elseif (!$DownloadAlt || $Failed) {
+}
+elseif (!$DownloadAlt || $Failed) {
 	header('Content-Type: application/x-bittorrent; charset=utf-8');
 }
 header('Content-disposition: attachment; filename="'.$FileName.'"');
 
 $AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 
-echo TorrentsDL::get_file($Contents, $AnnounceURL."/$TorrentPass/announce");
+echo TorrentsDL::get_file($Contents, $AnnounceURL."/$TorrentPass/announce", $TorrentID);
 
 define('SKIP_NO_CACHE_HEADERS', 1);
