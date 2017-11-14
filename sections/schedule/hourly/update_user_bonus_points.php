@@ -26,6 +26,8 @@ LEFT JOIN (
 	WHERE
 		um.Enabled = '1' 
 		AND ui.DisablePoints = '0'
+	GROUP BY
+		xfu.uid
 ) AS p ON um.ID = p.ID
 SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE ROUND(p.NewPoints, 5) END");
 
