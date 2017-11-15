@@ -480,7 +480,7 @@ class Users {
 	 * @param boolean $Class whether or not to show the class
 	 * @param boolean $Title whether or not to show the title
 	 * @param boolean $IsDonorForum for displaying donor forum honorific prefixes and suffixes
-	 * @return HTML formatted username
+	 * @return string HTML formatted username
 	 */
 	public static function format_username($UserID, $Badges = false, $IsWarned = true, $IsEnabled = true, $Class = false, $Title = false, $IsDonorForum = false) {
 		global $Classes;

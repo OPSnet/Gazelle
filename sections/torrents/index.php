@@ -19,6 +19,16 @@ $ArtistTypes = array(1 => 'Main', 2 => 'Guest', 3 => 'Remixer', 4 => 'Composer',
 
 if (!empty($_REQUEST['action'])) {
 	switch ($_REQUEST['action']) {
+		case 'editlog':
+			enforce_login();
+			include(SERVER_ROOT.'/sections/torrents/edit_log.php');
+			break;
+
+		case 'take_editlog':
+			enforce_login();
+			include(SERVER_ROOT.'/sections/torrents/take_edit_log.php');
+			break;
+
 		case 'viewlog':
 			enforce_login();
 			include(SERVER_ROOT.'/sections/torrents/log_ajax.php');
