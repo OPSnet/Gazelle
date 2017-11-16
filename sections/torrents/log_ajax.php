@@ -36,12 +36,12 @@ HTML;
         if ($Log['Adjusted'] === '1') {
 			echo '<blockquote>Log adjusted by '.Users::format_username($Log['AdjustedBy'])." from score {$Log['Score']} to {$Log['AdjustedScore']}";
 			if (!empty($Log['AdjustmentReason'])) {
-				echo "<br />Reason: {$Log['AdjustmentReason']}<br />";
+				echo "<br />Reason: {$Log['AdjustmentReason']}";
 			}
 			$AdjustmentDetails = unserialize($Log['AdjustmentDetails']);
 			unset($AdjustmentDetails['tracks']);
 			if (!empty($AdjustmentDetails)) {
-				echo '<strong>Adjustment Details:</strong><ul>';
+				echo '<br /><strong>Adjustment Details:</strong><ul>';
 				foreach ($AdjustmentDetails as $Entry) {
 					echo '<li>'.$Entry.'</li>';
 				}
