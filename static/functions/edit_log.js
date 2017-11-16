@@ -12,6 +12,7 @@ $(document).ready(function() {
 					field.val(score + change);
 				}
 			}
+			field.val(Math.max(0, field.val()));
 		});
 	});
 
@@ -24,10 +25,16 @@ $(document).ready(function() {
 		$('input[name="' + value + '"]').on('focus', function() {
 			previous = this.value;
 		}).change(function() {
-			var change = (parseInt(this.value) - previous) * $(this).data('score');
+			var value = parseInt(this.value);
+			if (value < 0) {
+				value = 0;
+				this.value = value;
+			}
+			var change = (value - previous) * $(this).data('score');
 			var field = $('input[name="adjusted_score"]');
 			var score = parseInt(field.val());
 			field.val(score - change);
+			field.val(Math.max(0, field.val()));
 		});
 	});
 });
