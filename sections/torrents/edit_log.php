@@ -62,12 +62,12 @@ $AdjustmentDetails = array('tracks' => array('crc_mismatches' => 0, 'suspicious_
 if (!empty($Log['AdjustmentDetails'])) {
 	$AdjustmentDetails = unserialize($Log['AdjustmentDetails']);
 }
-View::show_header("Edit Log");
+View::show_header("Edit Log", 'edit_log');
 
 ?>
 <div class="thin">
 	<h2 class="center">Edit Log</h2>
-	<form action="torrents.php?action=take_editlog" method="post">
+	<form action="torrents.php?action=take_editlog" method="post" name="edit_log">
 		<input type="hidden" name="logid" value="<?=$LogID?>" />
 		<input type="hidden" name="torrentid" value="<?=$TorrentID?>" />
 		<table class="layout border">
@@ -115,53 +115,53 @@ View::show_header("Edit Log");
 			</tr>
 			<tr>
 				<td rowspan="4">Audio Deductions</td>
-				<td><label><input type="checkbox" name="read_mode_secure" <?=isset_checked($AdjustmentDetails['read_mode_secure'])?> /> Non-Secure Mode used (-20 points)</label></td>
-				<td><label><input type="checkbox" name="audio_cache" <?=isset_checked($AdjustmentDetails['audio_cache'])?> /> Defeat/disable audio cache should be yes (-10 points)</label></td>
+				<td><label><input type="checkbox" name="read_mode_secure" <?=isset_array_checked($AdjustmentDetails, 'read_mode_secure')?> data-score="20"/> Non-Secure Mode used (-20 points)</label></td>
+				<td><label><input type="checkbox" name="audio_cache" <?=isset_array_checked($AdjustmentDetails, 'audio_cache')?> data-score="10" /> Defeat/disable audio cache should be yes (-10 points)</label></td>
 			</tr>
 			<tr>
 				<td style="display: none"></td>
-				<td><label><input type="checkbox" name="c2_points" <?=isset_checked($AdjustmentDetails['c2_points'])?> /> C2 Pointers enabled (-10 points)</td>
-				<td><label><input type="checkbox" name="drive_offset" <?=isset_checked($AdjustmentDetails['drive_offset'])?> /> Incorred drive offset (-5 points)</td>
+				<td><label><input type="checkbox" name="c2_points" <?=isset_array_checked($AdjustmentDetails, 'c2_points')?> data-score="10" /> C2 Pointers enabled (-10 points)</td>
+				<td><label><input type="checkbox" name="drive_offset" <?=isset_array_checked($AdjustmentDetails, 'drive_offset')?> data-score="5" /> Incorred drive offset (-5 points)</td>
 			</tr>
 			<tr>
 				<td style="display: none"></td>
-				<td><label><input type="checkbox" name="fill_offsets" <?=isset_checked($AdjustmentDetails['fill_offsets'])?> /> Does not fill up missing offset samples with silence (-5 points)</td>
-				<td><label><input type="checkbox" name="deletes_ofsets" <?=isset_checked($AdjustmentDetails['deletes_ofsets'])?> /> Deletes leading and trailing silent blocks (-5 points)</td>
+				<td><label><input type="checkbox" name="fill_offsets" <?=isset_array_checked($AdjustmentDetails, 'fill_offsets')?> data-score="5" /> Does not fill up missing offset samples with silence (-5 points)</td>
+				<td><label><input type="checkbox" name="deletes_ofsets" <?=isset_array_checked($AdjustmentDetails, 'deletes_ofsets')?> data-score="5" /> Deletes leading and trailing silent blocks (-5 points)</td>
 			</tr>
 			<tr>
 				<td style="display: none"></td>
-				<td><label><input type="checkbox" name="gap_handling" <?=isset_checked($AdjustmentDetails['gap_handling'])?> /> Gap handling should be appended to previous track (-10 points)</td>
-				<td><label><input type="checkbox" name="test_and_copy" <?=isset_checked($AdjustmentDetails['test_and_copy'])?> /> Test & Copy not used (-10 points)</td>
+				<td><label><input type="checkbox" name="gap_handling" <?=isset_array_checked($AdjustmentDetails, 'gap_handling')?> data-score="10" /> Gap handling should be appended to previous track (-10 points)</td>
+				<td><label><input type="checkbox" name="test_and_copy" <?=isset_array_checked($AdjustmentDetails, 'test_and_copy')?> data-score="10" /> Test & Copy not used (-10 points)</td>
 			</tr>
 			<tr>
 				<td rowspan="3">Track Deductions</td>
 				<td>CRC Mismatches (-30 each)</td>
-				<td><input type="text" name="crc_mismatches" value="<?=$AdjustmentDetails['tracks']['crc_mismatches']?>" /></td>
+				<td><input type="text" name="crc_mismatches" value="<?=$AdjustmentDetails['tracks']['crc_mismatches']?>" data-score="30"/></td>
 			</tr>
 			<tr>
 				<td style="display:none"></td>
 				<td>Suspicious Positions (-20 each)></td>
-				<td><input type="text" name="suspicious_positions" value="<?=$AdjustmentDetails['tracks']['suspicious_positions']?>" /></td>
+				<td><input type="text" name="suspicious_positions" value="<?=$AdjustmentDetails['tracks']['suspicious_positions']?>" data-score="20"/></td>
 			</tr>
 			<tr>
 				<td style="display:none"></td>
 				<td>Timing Problems (-20 each)</td>
-				<td><input type="text" name="timing_problems" value="<?=$AdjustmentDetails['tracks']['timing_problems']?>" /></td>
+				<td><input type="text" name="timing_problems" value="<?=$AdjustmentDetails['tracks']['timing_problems']?>" data-score="20"/></td>
 			</tr>
 			<tr>
 				<td rowspan="2">Non-Audio Deductions</td>
-				<td><label><input type="checkbox" name="range_rip" <?=isset_checked($AdjustmentDetails['range_rip'])?> /> Range Rip (-30 points)</td>
-				<td><label><input type="checkbox" name="null_samples" <?=isset_checked($AdjustmentDetails['null_samples'])?> /> Null samples should be used in CRC calculations (-5 points)</td>
+				<td><label><input type="checkbox" name="range_rip" <?=isset_array_checked($AdjustmentDetails, 'range_rip')?> data-score="30" /> Range Rip (-30 points)</td>
+				<td><label><input type="checkbox" name="null_samples" <?=isset_array_checked($AdjustmentDetails, 'null_samples')?> data-score="5" /> Null samples should be used in CRC calculations (-5 points)</td>
 			</tr>
 			<tr>
 				<td style="display:none"></td>
-				<td><label><input type="checkbox" name="eac_old" <?=isset_checked($AdjustmentDetails['eac_old'])?> /> EAC older than 0.99 (-30 points)</td>
-				<td><label><input type="checkbox" name="id3_tags" <?=isset_checked($AdjustmentDetails['id3_tags'])?> /> ID3 tags found (-1 points)</td>
+				<td><label><input type="checkbox" name="eac_old" <?=isset_array_checked($AdjustmentDetails, 'eac_old')?> data-score="30" /> EAC older than 0.99 (-30 points)</td>
+				<td><label><input type="checkbox" name="id3_tags" <?=isset_array_checked($AdjustmentDetails, 'id3_tags')?> data-score="1" /> ID3 tags found (-1 points)</td>
 			</tr>
 			<tr>
 				<td rowspan="1">Other Reaons</td>
-				<td><label><input type="checkbox" name="foreign_log" <?=isset_checked($AdjustmentDetails['foreign_log'])?> /> Foreign Log</label></td>
-				<td><label><input type="checkbox" name="combined_log" <?=isset_checked($AdjustmentDetails['combined_log'])?> /> Combined Log</label></td>
+				<td><label><input type="checkbox" name="foreign_log" <?=isset_array_checked($AdjustmentDetails, 'foreign_log')?> /> Foreign Log</label></td>
+				<td><label><input type="checkbox" name="combined_log" <?=isset_array_checked($AdjustmentDetails, 'combined_log')?> /> Combined Log</label></td>
 			</tr>
 			<tr style="text-align: center">
 				<td colspan="3"><input type="submit" value="Rescore Log" /></td>

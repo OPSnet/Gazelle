@@ -232,6 +232,6 @@ function unserialize_array($array) {
  * @param $value
  * @return string
  */
-function isset_checked($value) {
-	return (isset($value)) ? "checked" : "";
+function isset_array_checked($array, $value) {
+	return (isset($array[$value])) ? "checked" : "";
 }
