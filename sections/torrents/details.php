@@ -730,7 +730,7 @@ foreach ($TorrentList as $Torrent) {
 					<div class="linkbox">
 						<a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
 <?  if ($HasLog && $HasLogDB) { ?>
-						<a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', '<?=$LogScore?>'); return false;">View log</a>
+						<a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log</a>
 <?  } ?>
 <?	if (check_perms('site_view_torrent_snatchlist')) { ?>
 						<a href="#" class="brackets tooltip" onclick="show_downloads('<?=$TorrentID?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View download list</a>
