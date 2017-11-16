@@ -47,12 +47,12 @@ $Log = $DB->next_record(MYSQLI_ASSOC, array('AdjustmentDetails'));
 $Checksum = ($Log['Checksum'] == '1') ? 'Good' : 'Missing/Invalid Checksum';
 $Details = "";
 if (!empty($Log['Details'])) {
-	$Details = explode("\r\n", $Log['Details']);
-	echo '<ul>';
+	$Log['Details'] = explode("\r\n", $Log['Details']);
+	$Details .= '<ul>';
 	foreach($Log['Details'] as $Entry) {
-		echo '<li>'.$Entry.'</li>';
+		$Details .='<li>'.$Entry.'</li>';
 	}
-	echo '</ul>';
+	$Details .= '</ul>';
 }
 
 $AdjustedScore = (!isset($Log['AdjustedScore']) || $Log['Adjusted'] == '0') ? $Log['Score'] : $Log['AdjustedScore'];

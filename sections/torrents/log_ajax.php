@@ -34,8 +34,10 @@ HTML;
 		}
 
         if ($Log['Adjusted'] === '1') {
-			$Log['AdjustmentReason'] = ($Log['AdjustmentReason']) ? ': '.$Log['AdjustmentReason'] : '';
-			echo '<blockquote>Log adjusted by '.Users::format_username($Log['AdjustedBy']).$Log['AdjustmentReason'].'<br />';
+			echo '<blockquote>Log adjusted by '.Users::format_username($Log['AdjustedBy'])." from score {$Log['Score']} to {$Log['AdjustedScore']}";
+			if (!empty($Log['AdjustmentReason'])) {
+				echo "<br />Reason: {$Log['AdjustmentReason']}<br />";
+			}
 			$AdjustmentDetails = unserialize($Log['AdjustmentDetails']);
 			unset($AdjustmentDetails['tracks']);
 			if (!empty($AdjustmentDetails)) {
