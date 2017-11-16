@@ -1,18 +1,22 @@
 $(document).ready(function() {
+	var field = $('input[name="adjusted_score"]');
 	$('form[name="edit_log"] input:checkbox').each(function() {
+		if ($(this).data('score')) {
+			if ($(this).is(':checked')) {
+				field.data('actual', field.data('actual') - $(this).data('score'));
+			}
+		}
 		$(this).click(function() {
 			if ($(this).data('score')) {
 				var change = $(this).data('score');
-				var field = $('input[name="adjusted_score"]');
-				var score = parseInt(field.val());
 				if ($(this).is(':checked')) {
-					field.val(score - change);
+					field.data('actual', field.data('actual') - change);
 				}
 				else {
-					field.val(score + change);
+					field.data('actual', field.data('actual') + change);
 				}
 			}
-			field.val(Math.max(0, field.val()));
+			field.val(Math.max(0, field.data('actual')));
 		});
 	});
 
@@ -22,7 +26,10 @@ $(document).ready(function() {
 		'suspicious_positions',
 		'timing_problems'
 	].forEach(function(value) {
-		$('input[name="' + value + '"]').on('focus', function() {
+		var input = $('input[name="' + value + '"]');
+		field.data('actual', field.data('actual') - (parseInt(input.val()) * input.data('score')));
+		field.val(Math.max(0, field.data('actual')));
+		input.on('focus', function() {
 			previous = this.value;
 		}).change(function() {
 			var value = parseInt(this.value);
@@ -31,10 +38,9 @@ $(document).ready(function() {
 				this.value = value;
 			}
 			var change = (value - previous) * $(this).data('score');
-			var field = $('input[name="adjusted_score"]');
-			var score = parseInt(field.val());
-			field.val(score - change);
-			field.val(Math.max(0, field.val()));
+			field.data('actual', field.data('actual') - change);
+			field.val(Math.max(0, field.data('actual')));
 		});
 	});
+	console.log(field.data('actual'));
 });
