@@ -106,7 +106,7 @@ View::show_header("Edit Log", 'edit_log');
 				<td colspan="2"><input type="text" name="adjusted_score" value="<?=$AdjustedScore?>" disabled="disabled" data-actual="100"/></td>
 			</tr>
 			<tr>
-				<td>Adjusted Checksum</td>
+				<td>Checksum Valid</td>
 				<td colspan="2"><input type="checkbox" name="adjusted_checksum" <?=($AdjustedChecksum == '1' ? 'checked' : '')?>/></td>
 			</tr>
 			<tr>
