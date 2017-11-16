@@ -33,7 +33,7 @@ $(document).ready(function() {
 			previous = this.value;
 		}).change(function() {
 			var value = parseInt(this.value);
-			if (value < 0) {
+			if (isNaN(value) || value < 0) {
 				value = 0;
 				this.value = value;
 			}
