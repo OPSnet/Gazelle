@@ -107,6 +107,25 @@ class BencodeTorrent extends BencodeDecode {
 	}
 
 	/**
+	 * Adds thet "source" flag to the torrent to allow for easier cross-seeding
+	 *
+	 * @return bool false if the source flag was already set to APL, else true
+	 */
+	function set_source() {
+		if (empty($this->Dec)) {
+			return false;
+		}
+
+		if (isset($this->Dec['info']['source']) && $this->Dec['info']['source'] === 'APL') {
+			return false;
+		}
+
+		$this->Dec['info']['source'] = 'APL';
+		ksort($this->Dec['info']);
+		return true;
+	}
+
+	/**
 	 * Calculate the torrent's info hash
 	 *
 	 * @return info hash in hexadecimal form
