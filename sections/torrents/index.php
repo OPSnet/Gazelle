@@ -29,6 +29,11 @@ if (!empty($_REQUEST['action'])) {
 			include(SERVER_ROOT.'/sections/torrents/take_edit_log.php');
 			break;
 
+		case 'rescore_log':
+			enforce_login();
+			include(SERVER_ROOT.'/sections/torrents/rescore_log.php');
+			break;
+
 		case 'viewlog':
 			enforce_login();
 			include(SERVER_ROOT.'/sections/torrents/log_ajax.php');

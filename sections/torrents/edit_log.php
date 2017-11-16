@@ -80,11 +80,11 @@ View::show_header("Edit Log", 'edit_log');
 			</tr>
 			<tr>
 				<td>Log File</td>
-				<td colspan="2"><?=$Log['FileName']?> (<a hre="logs/<?=$TorrentID?>_<?=$LogID?>.log" target="_blank">View Raw</a>)</td>
+				<td colspan="2"><?=$Log['FileName']?> (<a href="logs/<?=$TorrentID?>_<?=$LogID?>.log" target="_blank">View Raw</a>)</td>
 			</tr>
 			<tr>
 				<td>Score</td>
-				<td colspan="2"><?=$Log['Score']?></td>
+				<td colspan="2"><?=$Log['Score']?> (<a href="torrents.php?action=rescore_log&logid=<?=$LogID?>&torrentid=<?=$TorrentID?>">Rescore Log</a>)</td>
 			</tr>
 			<tr>
 				<td>Checksum</td>
