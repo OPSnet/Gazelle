@@ -30,7 +30,7 @@ SELECT
 		)
 	)) AS TotalHourlyPoints
 FROM
-	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)) AS xfu
+	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}) AS xfu
 	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
@@ -130,7 +130,7 @@ if ($TotalTorrents > 0) {
 			)
 		) AS HourlyPoints
 	FROM
-		(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)) AS xfu
+		(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}) AS xfu
 		JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
 		JOIN torrents AS t ON t.ID = xfu.fid
 	WHERE
