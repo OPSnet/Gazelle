@@ -659,11 +659,12 @@ class Torrents {
 
 	/**
 	 * Format the information about a torrent.
-	 * @param $Data an array a subset of the following keys:
+	 * @param array $Data an array a subset of the following keys:
 	 *	Format, Encoding, HasLog, LogScore HasCue, Media, Scene, RemasterYear
 	 *	RemasterTitle, FreeTorrent, PersonalFL
 	 * @param boolean $ShowMedia if false, Media key will be omitted
 	 * @param boolean $ShowEdition if false, RemasterYear/RemasterTitle will be omitted
+	 * @return string
 	 */
 	public static function torrent_info($Data, $ShowMedia = false, $ShowEdition = false) {
 		$Info = array();
@@ -839,7 +840,7 @@ class Torrents {
 	 * @return bool
 	 */
 	public static function has_snatched($TorrentID) {
-		if (empty(G::$LoggedUser) || !G::$LoggedUser['ShowSnatched']) {
+		if (empty(G::$LoggedUser) || empty(G::$LoggedUser['ShowSnatched'])) {
 			return false;
 		}
 

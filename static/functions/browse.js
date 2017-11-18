@@ -64,8 +64,8 @@ function show_downloads (TorrentID, Page) {
 	$('#reported_' + TorrentID).ghide();
 }
 
-function show_logs (TorrentID, LogScore) {
-    if (LogScore > 0) {
+function show_logs (TorrentID, HasLogDB, LogScore) {
+    if (HasLogDB === 1) {
         if ($('#viewlog_' + TorrentID).raw().innerHTML === '') {
 			$('#viewlog_' + TorrentID).gshow().raw().innerHTML = '<h4>Loading...</h4>';
 			ajax.get('torrents.php?action=viewlog&logscore=' + LogScore + '&torrentid=' + TorrentID, function(response) {

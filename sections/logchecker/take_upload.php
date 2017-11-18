@@ -17,6 +17,10 @@ $DB->query("
 $DetailsArray = array();
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 	list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);
+	$DB->query("SELECT LogID FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
+	while(list($LogID) = $DB->next_record(MYSQLI_NUM)) {
+		@unlink(SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log");
+	}
 	$DB->query("DELETE FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
 	ini_set('upload_max_filesize', 1000000);
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
@@ -38,6 +42,10 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Logs[] = array($Details, $LogText);
 		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')");
+		$LogID = $DB->inserted_id();
+		if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+			die("Could not copy logfile to the server.");
+		}
 	}
 
 	$DB->query("UPDATE torrents SET HasLogDB='1', LogScore={$LogScore}, LogChecksum='".enum_boolean($LogChecksum)."' WHERE ID='{$TorrentID}'");
