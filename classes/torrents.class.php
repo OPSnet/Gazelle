@@ -196,11 +196,11 @@ class Torrents {
 			'GroupRecordLabel' => $Group['RecordLabel'],
 			'GroupCatalogueNumber' => $Group['CatalogueNumber'],
 			'GroupVanityHouse' => $Group['VanityHouse'],
-			'GroupFlags' => $Group['Flags'],
+			'GroupFlags' => isset($Group['Flags']) ? $Group['Flags'] : array('IsSnatched' => false),
 			'TagList' => $Group['TagList'],
 			'ReleaseType' => $Group['ReleaseType'],
 			'WikiImage' => $Group['WikiImage'],
-			'Torrents' => $Group['Torrents'],
+			'Torrents' => isset($Group['Torrents']) ? $Group['Torrents'] : array(),
 			'Artists' => $Group['Artists'],
 			'ExtendedArtists' => $Group['ExtendedArtists']
 		);

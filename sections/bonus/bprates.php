@@ -16,6 +16,7 @@ else {
 	$UserID = $LoggedUser['ID'];
 	$User = $LoggedUser;
 }
+
 $Title = ($UserID === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
 View::show_header($Title);
 
@@ -46,17 +47,7 @@ $TotalWeeklyPoints = $TotalDailyPoints * 7;
 $TotalMonthlyPoints = $TotalDailyPoints * 30.436875;
 $TotalYearlyPoints = $TotalDailyPoints * 365.2425;
 
-$DB->query("
-SELECT
-	COUNT(*) as count
-FROM
-	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)) AS xfu
-	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-WHERE
-	xfu.uid = {$UserID}");
-
-list($NumResults) = $DB->next_record();
-$Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
+$Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 
 ?>
 <div class="header">
@@ -113,14 +104,25 @@ $Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 	<tbody>
 <?php
 
-if ($NumResults > 0) {
+if ($TotalTorrents > 0) {
 	$DB->query("
 	SELECT
 		t.ID,
 		t.GroupID,
 		t.Size,
-		GREATEST(t.Seeders, 1),
-		xfh.seedtime,
+		t.Format,
+		t.Encoding,
+		t.HasLog,
+		t.HasLogDB,
+		t.HasCue,
+		t.LogScore,
+		t.LogChecksum,
+		t.Media,
+		t.Scene,
+		t.RemasterYear,
+		t.RemasterTitle,
+		GREATEST(t.Seeders, 1) AS Seeders,
+		xfh.seedtime AS Seedtime,
 		((t.Size / (1024 * 1024 * 1024)) * (
 				0.0754 + (
 					LN(1 + (xfh.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
@@ -137,18 +139,18 @@ if ($NumResults > 0) {
 	OFFSET {$Offset}");
 
 	$GroupIDs = $DB->collect('GroupID');
-	$Groups = Torrents::get_groups($GroupIDs, true, true);
-	while (list($TorrentID, $GroupID, $Size, $Seeders, $Seedtime, $HourlyPoints) = $DB->next_record()) {
-		$Size = intval($Size);
-		$Seeders = intval($Seeders);
-		$HourlyPoints = floatval($HourlyPoints);
+	$Groups = Torrents::get_groups($GroupIDs, true, true, false);
+	while ($Torrent = $DB->next_record(MYSQLI_ASSOC)) {
+		// list($TorrentID, $GroupID, $Size, $Format, $Encoding, $HasLog, $HasLogDB, $HasCue, $LogScore, $LogChecksum, $Media, $Scene, $Seeders, $Seedtime, $HourlyPoints)
+		$Size = intval($Torrent['Size']);
+		$Seeders = intval($Torrent['Seeders']);
+		$HourlyPoints = floatval($Torrent['HourlyPoints']);
 		$DailyPoints = $HourlyPoints * 24;
 		$WeeklyPoints = $DailyPoints * 7;
 		$MonthlyPoints = $DailyPoints * 30.436875;
 		$YearlyPoints = $DailyPoints * 365.2425;
 
-		extract(Torrents::array_group($Groups[$GroupID]));
-		$Torrent = $Torrents[$TorrentID];
+		extract(Torrents::array_group($Groups[$Torrent['GroupID']]));
 
 		$TorrentTags = new Tags($TagList);
 
@@ -176,9 +178,9 @@ if ($NumResults > 0) {
 ?>
 	<tr>
 		<td><?= $DisplayName ?></td>
-		<td><?= Format::get_size($Size) ?></td>
+		<td><?= Format::get_size($Torrent['Size']) ?></td>
 		<td><?= number_format($Seeders) ?></td>
-		<td><?= convert_hours($Seedtime, 2) ?></td>
+		<td><?= convert_hours($Torrent['Seedtime'], 2) ?></td>
 		<td><?= number_format($HourlyPoints, 2) ?></td>
 		<td><?= number_format($DailyPoints, 2) ?></td>
 		<td><?= number_format($WeeklyPoints, 2) ?></td>
