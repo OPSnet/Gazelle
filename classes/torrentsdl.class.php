@@ -174,7 +174,7 @@ class TorrentsDL {
 	 * @param int $TorrentID if given, append "-TorrentID" to torrent name
 	 * @param bool $Txt whether to use .txt or .torrent as file extension
 	 * @param int $MaxLength maximum file name length
-	 * @return file name with at most $MaxLength characters
+	 * @return string file name with at most $MaxLength characters
 	 */
 	public static function construct_file_name($Artist, $Album, $Year, $Media, $Format, $Encoding, $TorrentID = false, $Txt = false, $MaxLength = self::MaxPathLength) {
 		$MaxLength -= ($Txt ? 4 : 8);

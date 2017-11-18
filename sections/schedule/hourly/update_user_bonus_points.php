@@ -24,7 +24,10 @@ LEFT JOIN (
 		JOIN users_info AS ui ON ui.UserID = xfu.uid
 		JOIN torrents AS t ON t.ID = xfu.fid
 	WHERE
-		ui.DisablePoints = '0'
+		um.Enabled = '1' 
+		AND ui.DisablePoints = '0'
+	GROUP BY
+		xfu.uid
 ) AS p ON um.ID = p.ID
 SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE ROUND(p.NewPoints, 5) END");
 

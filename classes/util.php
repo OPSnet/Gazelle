@@ -226,3 +226,12 @@ function unserialize_array($array) {
 	$array = empty($array) ? array() : unserialize($array);
 	return (empty($array)) ? array() : $array;
 }
+
+/**
+ * Utility function for determining if checkbox should be checked if some $value is set or not
+ * @param $value
+ * @return string
+ */
+function isset_array_checked($array, $value) {
+	return (isset($array[$value])) ? "checked" : "";
+}
