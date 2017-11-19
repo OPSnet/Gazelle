@@ -6,7 +6,14 @@ authorize();
 replace */
 
 if (!isset($_POST['messages']) || !is_array($_POST['messages'])) {
-	error('You forgot to select messages to delete.');
+	$Message = 'to delete';
+	if (isset($_POST['unread'])) {
+		$Message = 'to mark as unread';
+	}
+	elseif (isset($_POST['read'])) {
+		$Message = 'to mark as read';
+	}
+	error("You forgot to select messages {$Message}.");
 	header('Location: ' . Inbox::get_inbox_link());
 	die();
 }
