@@ -159,6 +159,9 @@ class DB_MYSQL {
 	protected $Errno = 0;
 	protected $Error = '';
 
+	protected $PreparedQuery = null;
+	protected $Statement = null;
+
 	public $Queries = array();
 	public $Time = 0.0;
 
@@ -210,8 +213,7 @@ class DB_MYSQL {
 		}
 	}
 
-	function query($Query, $AutoHandle = 1) {
-		global $Debug;
+	private function setup_query() {
 		/*
 		 * If there was a previous query, we store the warnings. We cannot do
 		 * this immediately after mysqli_query because mysqli_insert_id will
@@ -225,11 +227,132 @@ class DB_MYSQL {
 		if ($this->QueryID) {
 			$this->warnings();
 		}
-		$QueryStartTime = microtime(true);
+
 		$this->connect();
+	}
+
+	/**
+	 * Runs a raw query assuming pre-sanitized input. However, attempting to self sanitize (such
+	 * as via db_string) is still not as safe for using prepared statements so for queries
+	 * involving user input, you really should not use this function (instead opting for
+	 * prepare_query) {@See DB_MYSQL::prepare_query}
+	 *
+	 * When running a batch of queries using the same statement
+	 * with a variety of inputs, it's more performant to reuse the statement
+	 * with {@see DB_MYSQL::prepare} and {@see DB_MYSQL::execute}
+	 *
+	 * @return mysqli_result|bool Returns a mysqli_result object
+	 *                            for successful SELECT queries,
+	 *                            or TRUE for other successful DML queries
+	 *                            or FALSE on failure.
+	 *
+	 * @param $Query
+	 * @param int $AutoHandle
+	 * @return mysqli_result|bool
+	 */
+	function query($Query, $AutoHandle=1) {
+		$this->setup_query();
+		$LinkID = &$this->LinkID;
+
+		$Closure = function() use ($LinkID, $Query) {
+			return mysqli_query($this->LinkID, $Query);
+		};
+
+		return $this->attempt_query($Query, $Closure, $AutoHandle);
+	}
+
+	/**
+	 * Prepares an SQL statement for execution with data.
+	 *
+	 * Normally, you'll most likely just want to be using
+	 * DB_MYSQL::prepared_query to call both DB_MYSQL::prepare
+	 * and DB_MYSQL::execute for one-off queries, you can use
+	 * this separately in the case where you plan to be running
+	 * this query repeatedly while just changing the bound
+	 * parameters (such as if doing a bulk update or the like).
+	 *
+	 * @return mysqli_stmt|bool Returns a statement object
+	 *                          or FALSE if an error occurred.
+	 */
+	function prepare($Query) {
+		$this->setup_query();
+		$this->PreparedQuery = $Query;
+		$this->Statement = mysqli_prepare($this->LinkID, $Query);
+		return $this->Statement;
+	}
+
+	/**
+	 * Bind variables to our last prepared query and execute it.
+	 *
+	 * Variables that are passed into the function will have their
+	 * type automatically set for how to bind it to the query (either
+	 * integer (i), double (d), or string (s)).
+	 *
+	 * @param  array $Parameters,... variables for the query
+	 * @return mysqli_result|bool Returns a mysqli_result object
+	 *                            for successful SELECT queries,
+	 *                            or TRUE for other successful DML queries
+	 *                            or FALSE on failure.
+	 */
+	function execute(...$Parameters) {
+		$Statement = &$this->Statement;
+		if (count($Parameters) > 0) {
+			$Binders = "";
+			foreach ($Parameters as $Parameter) {
+				if (is_integer($Parameter)) {
+					$Binders .= "i";
+				}
+				elseif (is_double($Parameter)) {
+					$Binders .= "d";
+				}
+				else {
+					$Binders .= "s";
+				}
+			}
+
+			$Statement->bind_param($Binders, ...$Parameters);
+		}
+
+		$Closure = function() use ($Statement) {
+			$Statement->execute();
+			return $Statement->get_result();
+		};
+
+		$Query = "Prepared Statement: {$this->PreparedQuery}\n";
+		foreach ( $Parameters as $key => $value ) {
+			$Query .= "$key => $value\n";
+		}
+
+		$Return = $this->attempt_query($Query, $Closure);
+
+		return $Return;
+	}
+
+	/**
+	 * Prepare and execute a prepared query returning the result set.
+	 *
+	 * Utility function that wraps DB_MYSQL::prepare and DB_MYSQL::execute
+	 * as most times, the query is going to be one-off and this will save
+	 * on keystrokes. If you do plan to be executing a prepared query
+	 * multiple times with different bound parameters, you'll want to call
+	 * the two functions separately instead of this function.
+	 *
+	 * @param $Query
+	 * @param array ...$Parameters
+	 * @return bool|mysqli_result
+	 */
+	function prepared_query($Query, ...$Parameters) {
+		$this->prepare($Query);
+		return $this->execute(...$Parameters);
+
+	}
+
+	private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
+		global $Debug;
+		$QueryStartTime=microtime(true);
 		// In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
 		for ($i = 1; $i < 6; $i++) {
-			$this->QueryID = mysqli_query($this->LinkID, $Query);
+			$this->QueryID = $Closure();
 			if (!in_array(mysqli_errno($this->LinkID), array(1213, 1205))) {
 				break;
 			}
@@ -239,6 +362,10 @@ class DB_MYSQL {
 			sleep($i * rand(2, 5)); // Wait longer as attempts increase
 		}
 		$QueryEndTime = microtime(true);
+		// Kills admin pages, and prevents Debug->analysis when the whole set exceeds 1 MB
+		if (($Len = strlen($Query))>16384) {
+			$Query = substr($Query, 0, 16384).'... '.($Len-16384).' bytes trimmed';
+		}
 		$this->Queries[] = array($Query, ($QueryEndTime - $QueryStartTime) * 1000, null);
 		$this->Time += ($QueryEndTime - $QueryStartTime) * 1000;
 
@@ -252,6 +379,7 @@ class DB_MYSQL {
 				return $this->Errno;
 			}
 		}
+
 
 		/*
 		$QueryType = substr($Query, 0, 6);
@@ -289,6 +417,22 @@ class DB_MYSQL {
 			}
 			return $this->Record;
 		}
+		return null;
+	}
+
+	/**
+	 * Fetches next record from the result set of the previously executed query.
+	 *
+	 * Utility around next_record, with making escape being something the programmer
+	 * must explicitly declare for a given column, defaulting to escaping nothing.
+	 *
+	 * @param int    $Type
+	 * @param mixed  $Escape Boolean true/false for escaping entire/none of query
+	 * 				         or can be an array of array keys for what columns to escape
+	 * @return array next result set if exists
+	 */
+	function fetch_record($Type = MYSQLI_BOTH, $Escape = false) {
+		return $this->next_record($Type, $Escape);
 	}
 
 	function close() {

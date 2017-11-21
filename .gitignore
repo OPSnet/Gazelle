@@ -5,3 +5,8 @@ html/
 .DS_Store
 logs/
 !logs/README.txt
+
+static/stylespreview/
+!static/stylespreview/.gitkeep
+
+sections/tools/development/node_modules/
