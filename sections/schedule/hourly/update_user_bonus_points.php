@@ -13,8 +13,8 @@ LEFT JOIN (
 	SELECT
 		xfu.uid AS ID,
 		SUM((t.Size / (1024 * 1024 * 1024)) * (
-			0.0754 + (
-				LN(1 + (xfh.seedtime / (24))) / (POW(GREATEST(t.Seeders, 1), 0.55))
+			0.0433 + (
+				(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.55))
 			)
 		)) AS NewPoints
 	FROM
