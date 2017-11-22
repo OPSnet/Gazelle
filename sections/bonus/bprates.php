@@ -26,7 +26,7 @@ SELECT
 	SUM(t.Size) as TotalSize,
 	SUM((t.Size / (1024 * 1024 * 1024)) * (
 		0.0433 + (
-			(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.55))
+			(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
 		)
 	)) AS TotalHourlyPoints
 FROM
@@ -125,7 +125,7 @@ if ($TotalTorrents > 0) {
 		xfh.seedtime AS Seedtime,
 		((t.Size / (1024 * 1024 * 1024)) * (
 			0.0433 + (
-				(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.55))
+				(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
 			)
 		)) AS HourlyPoints
 	FROM
