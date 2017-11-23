@@ -38,9 +38,9 @@ if (!count($Leaderboard)) {
 	<tr>
 	<td class="label">Rank</td>
 	<td class="label">Who</td>
-	<td class="label">Most recent upload</td>
+	<td class="label">Most recent <?= $Contest['ContestType'] == 'request_fill' ? 'fill' : 'upload'; ?></td>
 	<td class="label">Most recent time</td>
-	<td class="label">Perfect FLACs</td>
+	<td class="label"><?= $Contest['ContestType'] == 'request_fill' ? 'Requests Filled' : 'Perfect FLACs'; ?></td>
 	</tr>
 <?php
     $rank = 0;
@@ -49,14 +49,19 @@ if (!count($Leaderboard)) {
     $user_seen = 0;
     foreach ($Leaderboard as $row) {
         $score = $row[1];
-        if ($score != $prev_score) {
-            ++$rank;
-            if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
-                // cut off at limit, even if we haven't reached last winning place because of too many ties
-                break;
-            }
+        if ($Contest['ContestType'] == 'request_fill') {
+                ++$rank;
         }
-        $prev_score = $score;
+        else {
+            if ($score != $prev_score) {
+                ++$rank;
+                if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
+                    // cut off at limit, even if we haven't reached last winning place because of too many ties
+                    break;
+                }
+            }
+            $prev_score = $score;
+        }
         ++$nr_rows;
 
         if ($row[0] == $LoggedUser['ID']) {
@@ -114,8 +119,13 @@ END_STR
         $prev_score = 0;
         foreach ($Leaderboard as $row) {
             $score = $row[1];
-            if ($score != $prev_score) {
+            if ($Contest['ContestType'] == 'request_fill') {
                 ++$rank;
+            }
+            else {
+                if ($score != $prev_score) {
+                    ++$rank;
+                }
             }
             if ($row[0] == $LoggedUser['ID']) {
 ?>
