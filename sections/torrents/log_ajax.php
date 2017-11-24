@@ -20,8 +20,11 @@ if($DB->record_count() > 0) {
 		echo "<tr class='log_section'><td>";
 		if (check_perms('users_mod')) {
 			echo "<a class='brackets' href='torrents.php?action=editlog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Edit Log</a>&nbsp;";
+			//echo "<a class='brackets' href='torrents.php?action=deletelog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Delete Log</a>&nbsp;";
 		}
-		echo "<a class='brackets' href='logs/{$TorrentID}_{$Log['LogID']}.log' target='_blank'>View Raw Log</a>";
+		if (file_exists(SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log")) {
+			echo "<a class='brackets' href='logs/{$TorrentID}_{$Log['LogID']}.log' target='_blank'>View Raw Log</a>";
+		}
 
 		if (($Log['Adjusted'] === '0' && $Log['Checksum'] === '0') || ($Log['Adjusted'] === '1' && $Log['AdjustedChecksum'] === '0')) {
 			echo <<<HTML
