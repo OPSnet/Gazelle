@@ -810,7 +810,7 @@ if (G::$LoggedUser['DisablePoints'] == 0) {
 		'Blu-ray', 'DAT');
 	if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
 		in_array($Properties['Media'], $Formats))) {
-		$Amount = 100;
+		$Amount = 200;
 	}
 	elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
 		$Amount = 30;
