@@ -434,7 +434,7 @@ class Format {
 	 * @param bool $AddAttribute Whether to include the "class" attribute in the output
 	 * @param string $UserIDKey Key in _REQUEST for a user ID parameter, which if given will be compared to G::$LoggedUser[ID]
 	 *
-	 * @return class name on match, otherwise an empty string
+	 * @return string class name on match, otherwise an empty string
 	 */
 	public static function add_class($Target, $Tests, $ClassName, $AddAttribute, $UserIDKey = false) {
 		if ($UserIDKey && isset($_REQUEST[$UserIDKey]) && G::$LoggedUser['ID'] != $_REQUEST[$UserIDKey]) {
