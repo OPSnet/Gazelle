@@ -186,7 +186,7 @@ if (!$Err && !empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empt
 	if (Users::check_password($_POST['cur_pass'], $PassHash)) {
 		if ($_POST['cur_pass'] == $_POST['new_pass_1']) {
 			$Err = 'Your new password cannot be the same as your old password.';
-		} else if ($_POST['new_pass_1'] != $_POST['new_pass_2']) {
+		} else if ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
 			$Err = 'You did not enter the same password twice.';
 		}
 		else {
