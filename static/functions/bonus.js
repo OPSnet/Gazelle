@@ -7,9 +7,12 @@ function PreviewTitle(BBCode) {
 	});
 }
 
+/**
+ * @return {boolean}
+ */
 function ConfirmOther(Element) {
 	var name = prompt('Enter username to give tokens to:');
-	if (name === null || name === '') {
+	if (!name || name === '') {
 		event.preventDefault();
 		return false;
 	}
