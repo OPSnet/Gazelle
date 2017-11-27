@@ -50,9 +50,9 @@ HTML;
 			$Url[] = "{$Key}={$Value}";
 		}
 		$Url = implode("&", $Url);
-		$Onclick = (isset($Item['Onclick'])) ? "onclick='{$Item['Onclick']}(this)'" : '';
+		$NextFunction = (isset($Item['Onclick'])) ? "{$Item['Onclick']}" : 'null';
 		print <<<HTML
-					<a href="bonus.php?action={$Item['Action']}&{$Url}" {$Onclick}>Purchase</a>
+					<a href="bonus.php?action={$Item['Action']}&{$Url}" onclick="ConfirmPurchase('{$Item['Title']}', $NextFunction, this);;">Purchase</a>
 HTML;
 	}
 	else {
