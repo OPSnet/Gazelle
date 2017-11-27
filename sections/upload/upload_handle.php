@@ -837,7 +837,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 	if ($ExtraTorrent['Format'] === 'FLAC' && in_array($Properties['Media'], $PerfectFormats)) {
 		$BonusPoints += 200;
 	}
-	if ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Encoding'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
+	elseif ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Encoding'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
 		$BonusPoints += 30;
 	}
 	else {
