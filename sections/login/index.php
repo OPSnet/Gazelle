@@ -499,11 +499,11 @@ else {
 			list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
 			if (strtotime($BannedUntil) < time()) {
 				if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
-					if (!password_needs_rehash($PassHash, PASSWORD_DEFAULT)) {
-						$CryptHash = Users::make_password_hash($_POST['password']);
+					var_dump("redoing this");
+					if (password_needs_rehash($PassHash, PASSWORD_DEFAULT)) {
 						$DB->query("
 							UPDATE users_main
-							SET passhash = '".db_string($CryptHash)."'
+							SET passhash = '".db_string(Users::make_password_hash($_POST['password']))."'
 							WHERE ID = $UserID");
 					}
 					if ($Enabled == 1) {
