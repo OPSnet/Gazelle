@@ -21,8 +21,9 @@ if ($Other === 'true') {
 	$Option .= '_other';
 }
 
-$Item = $Items[$Option];
-if ($Item['Price'] > G::$LoggedUser['BonusPoints']) {
+$Item = Bonus::$Items[$Option];
+$Price = Bonus::get_price($Item);
+if ($Price > G::$LoggedUser['BonusPoints']) {
 	error('You cannot afford this item.');
 }
 
@@ -58,7 +59,7 @@ else {
 	$ID = G::$LoggedUser['ID'];
 }
 
-G::$DB->query("UPDATE users_main SET BonusPoints = BonusPoints - {$Item['Price']} WHERE ID='".G::$LoggedUser['ID']."'");
+G::$DB->query("UPDATE users_main SET BonusPoints = BonusPoints - {$Price} WHERE ID='".G::$LoggedUser['ID']."'");
 G::$Cache->delete_value('user_stats_'.G::$LoggedUser['ID']);
 
 G::$DB->query("UPDATE users_main SET FLTokens = FLTokens + {$Amount} WHERE ID='{$ID}'");

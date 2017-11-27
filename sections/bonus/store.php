@@ -33,9 +33,9 @@ HTML;
 <?php
 
 $Cnt = 1;
-foreach ($Items as $Key => $Item) {
+foreach (Bonus::$Items as $Key => $Item) {
 	$RowClass = ($Cnt % 2 === 0) ? 'rowb' : 'rowa';
-	$Price = number_format($Item['Price']);
+	$Price = number_format(Bonus::get_price($Item));
 	print <<<HTML
 			<tr class="$RowClass">
 				<td>{$Cnt}</td>
@@ -46,8 +46,8 @@ HTML;
 
 	if (G::$LoggedUser['BonusPoints'] >= $Item['Price']) {
 		$Url = array();
-		foreach ($Item['Options'] as $Key => $Value) {
-			$Url[] = "{$Key}={$Value}";
+		foreach ($Item['Options'] as $KKey => $Value) {
+			$Url[] = "{$KKey}={$Value}";
 		}
 		$Url = implode("&", $Url);
 		$NextFunction = (isset($Item['Onclick'])) ? "{$Item['Onclick']}" : 'null';
