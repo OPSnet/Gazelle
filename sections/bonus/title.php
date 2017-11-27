@@ -50,7 +50,7 @@ else {
 					<form action="bonus.php?action=title&BBCode=<?=$BBCode?>" method="post">
 						<input type="hidden" name="confirm" value="true" />
 						<input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
-						<input type="submit" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
+						<input type="submit" onclick="ConfirmPurchase('<?=$Item['Title']?>')" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
 						<div id="preview"></div>
 					</form>
 				</td>

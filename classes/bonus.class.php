@@ -65,7 +65,8 @@ class Bonus {
 			),
 			'Free' => array(
 				'Level' => 400
-			)
+			),
+			'Confirm' => false,
 		),
 		'title_bbcode' => array(
 			'Title' => 'Custom Title (BBCode Allowed)',
@@ -76,7 +77,8 @@ class Bonus {
 			),
 			'Free' => array(
 				'Level' => 400
-			)
+			),
+			'Confirm' => false,
 		),
 		'title_remove' => array(
 			'Title' => 'Remove Custom Title',

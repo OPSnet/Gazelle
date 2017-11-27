@@ -51,8 +51,9 @@ HTML;
 		}
 		$Url = implode("&", $Url);
 		$NextFunction = (isset($Item['Onclick'])) ? "{$Item['Onclick']}" : 'null';
+		$Onclick = (isset($Item['Confirm']) && $Item['Confirm'] === false) ? "NoOp" : "ConfirmPurchase";
 		print <<<HTML
-					<a href="bonus.php?action={$Item['Action']}&{$Url}" onclick="ConfirmPurchase('{$Item['Title']}', $NextFunction, this);;">Purchase</a>
+					<a href="bonus.php?action={$Item['Action']}&{$Url}" onclick="{$Onclick}('{$Item['Title']}', $NextFunction, this);;">Purchase</a>
 HTML;
 	}
 	else {

@@ -7,7 +7,14 @@ function PreviewTitle(BBCode) {
 	});
 }
 
+function NoOp(item, next, element) {
+	return next && next(element);
+}
+
 /**
+ * @param {String} item
+ * @param {Function} next
+ * @param {Object} element
  * @return {boolean}
  */
 function ConfirmPurchase(item, next, element) {
@@ -16,7 +23,7 @@ function ConfirmPurchase(item, next, element) {
 		event.preventDefault();
 		return false;
 	}
-	var check = confirm('Are you sure you want to purchase ' + item + '?');
+	check = confirm('Are you sure you want to purchase ' + item + '?');
 	if (!check) {
 		event.preventDefault();
 		return false;
