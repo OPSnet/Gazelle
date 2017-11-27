@@ -65,7 +65,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
 							users_main AS m,
 							users_info AS i
 						SET
-							m.PassHash = '".db_string(Users::make_crypt_hash($_REQUEST['password']))."',
+							m.PassHash = '".db_string(Users::make_password_hash($_REQUEST['password']))."',
 							i.ResetKey = '',
 							i.ResetExpires = '0000-00-00 00:00:00'
 						WHERE m.ID = '$UserID'
@@ -498,9 +498,9 @@ else {
 			$UserData = $DB->next_record(MYSQLI_NUM, array(2, 7));
 			list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
 			if (strtotime($BannedUntil) < time()) {
-				if ($UserID && Users::check_password($_POST['password'], $PassHash, $Secret)) {
-					if (!Users::is_crypt_hash($PassHash)) {
-						$CryptHash = Users::make_crypt_hash($_POST['password']);
+				if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
+					if (!password_needs_rehash($PassHash, PASSWORD_DEFAULT)) {
+						$CryptHash = Users::make_password_hash($_POST['password']);
 						$DB->query("
 							UPDATE users_main
 							SET passhash = '".db_string($CryptHash)."'
