@@ -832,7 +832,7 @@ $BonusPoints = 0;
 //--------------- Upload Extra torrents ----------------------------------------//
 
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
-	if ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
+	if ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Encoding'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
 		$BonusPoints += 30;
 	}
 	else {
