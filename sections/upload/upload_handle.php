@@ -831,7 +831,12 @@ $BonusPoints = 0;
 //******************************************************************************//
 //--------------- Upload Extra torrents ----------------------------------------//
 
+$PerfectFormats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
+	'Blu-ray', 'DAT');
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
+	if ($ExtraTorrent['Format'] === 'FLAC' && in_array($Properties['Media'], $PerfectFormats)) {
+		$BonusPoints += 200;
+	}
 	if ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Encoding'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
 		$BonusPoints += 30;
 	}
@@ -905,10 +910,9 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 //--------------- Give Bonus Points  -------------------------------------------//
 
 if (G::$LoggedUser['DisablePoints'] == 0) {
-	$Formats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
-		'Blu-ray', 'DAT');
+
 	if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
-			in_array($Properties['Media'], $Formats))) {
+			in_array($Properties['Media'], $PerfectFormats))) {
 		$BonusPoints += 200;
 	}
 	elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
