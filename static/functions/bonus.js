@@ -7,23 +7,25 @@ function PreviewTitle(BBCode) {
 	});
 }
 
-function NoOp(item, next, element) {
-	return next && next(element);
+function NoOp(event, item, next, element) {
+	return next && next(event, element);
 }
 
 /**
+ * @param {Object} event
  * @param {String} item
  * @param {Function} next
  * @param {Object} element
  * @return {boolean}
  */
-function ConfirmPurchase(item, next, element) {
+function ConfirmPurchase(event, item, next, element) {
 	var check = (next) ? next(element) : true;
 	if (!check) {
 		event.preventDefault();
 		return false;
 	}
 	check = confirm('Are you sure you want to purchase ' + item + '?');
+	console.log(check);
 	if (!check) {
 		event.preventDefault();
 		return false;
@@ -34,11 +36,11 @@ function ConfirmPurchase(item, next, element) {
 /**
  * @return {boolean}
  */
-function ConfirmOther(Element) {
+function ConfirmOther(event, element) {
 	var name = prompt('Enter username to give tokens to:');
 	if (!name || name === '') {
 		return false;
 	}
-	$(Element).attr('href', $(Element).attr('href') + '&user=' + encodeURIComponent(name));
+	$(element).attr('href', $(element).attr('href') + '&user=' + encodeURIComponent(name));
 	return true;
 }
