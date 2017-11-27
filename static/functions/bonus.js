@@ -19,7 +19,7 @@ function NoOp(event, item, next, element) {
  * @return {boolean}
  */
 function ConfirmPurchase(event, item, next, element) {
-	var check = (next) ? next(element) : true;
+	var check = (next) ? next(event, element) : true;
 	if (!check) {
 		event.preventDefault();
 		return false;
