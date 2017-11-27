@@ -5,7 +5,7 @@ $Page = max(1, $Page);
 $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
-if (!empty($_GET['id']) && check_perms('users_mod')) {
+if (!empty($_GET['userid']) && check_perms('users_mod')) {
 	$UserID = intval($_GET['id']);
 	$User = array_merge(Users::user_stats($_GET['id']), Users::user_info($_GET['id']), Users::user_heavy_info($_GET['id']));
 	if (empty($User)) {
