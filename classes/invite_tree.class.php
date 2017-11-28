@@ -11,7 +11,7 @@ class INVITE_TREE {
 	var $Visible = true;
 
 	// Set things up
-	function INVITE_TREE($UserID, $Options = array()) {
+	function __construct($UserID, $Options = array()) {
 		$this->UserID = $UserID;
 		if (isset($Options['visible']) && $Options['visible'] === false) {
 			$this->Visible = false;
