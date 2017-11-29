@@ -12,11 +12,11 @@ UPDATE users_main AS um
 LEFT JOIN (
 	SELECT
 		xfu.uid AS ID,
-		SUM((t.Size / (1024 * 1024 * 1024)) * (
+		SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
 			0.0433 + (
 				(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
 			)
-		)) AS NewPoints
+		), 0)) AS NewPoints
 	FROM
 		(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)) AS xfu
 		JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid

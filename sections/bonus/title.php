@@ -1,10 +1,10 @@
 <?php
 
+$ID = G::$LoggedUser['ID'];
 $BBCode = (isset($_REQUEST['BBCode']) && $_REQUEST['BBCode'] === 'true') ? 'true' : 'false';
 $Option = (isset($_REQUEST['BBCode']) && $_REQUEST['BBCode'] === 'true') ? 'title_bbcode' : 'title_nobbcode';
-$Item = $Items[$Option];
-$Price = $Item['Price'];
-$ID = G::$LoggedUser['ID'];
+$Item = Bonus::$Items[$Option];
+$Price = Bonus::get_price($Item);
 
 if (isset($_REQUEST['preview'])) {
 	$Title = ($BBCode === 'true') ? Text::full_format($_POST['title']) : Text::strip_bbcode($_POST['title']);
@@ -50,7 +50,7 @@ else {
 					<form action="bonus.php?action=title&BBCode=<?=$BBCode?>" method="post">
 						<input type="hidden" name="confirm" value="true" />
 						<input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
-						<input type="submit" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
+						<input type="submit" onclick="ConfirmPurchase(event, '<?=$Item['Title']?>')" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
 						<div id="preview"></div>
 					</form>
 				</td>

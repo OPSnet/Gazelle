@@ -131,6 +131,21 @@ $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
 $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle) = $DB->next_record(MYSQLI_NUM, array(10, 12));
 }
 
+$DB->query("
+SELECT
+	IFNULL(SUM((t.Size / (1024 * 1024 * 1024)) * (
+		0.0433 + (
+			(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
+		)
+	)),0)
+FROM
+	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}) AS xfu
+	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
+	JOIN torrents AS t ON t.ID = xfu.fid
+WHERE
+	xfu.uid = {$UserID}");
+list($BonusPointsPerHour) = $DB->next_record(MYSQLI_NUM);
+
 // Image proxy CTs
 $DisplayCustomTitle = $CustomTitle;
 if (check_perms('site_proxy_images') && !empty($CustomTitle)) {
@@ -286,6 +301,7 @@ if ($Avatar && Users::has_avatars_enabled()) {
 	if (($Override = check_paranoia_here('bonuspoints')) && isset($BonusPoints)) {
 ?>
 				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Bonus Points: <?=number_format($BonusPoints)?></li>
+				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><a href="bonus.php?action=bprates&userid=<?=$UserID?>">Points Per Hour</a>: <?=number_format($BonusPointsPerHour)?></li>
 <?php
 	}
 	if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {

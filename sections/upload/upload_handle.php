@@ -801,26 +801,6 @@ $Debug->set_flag('upload: ocelot updated');
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 
 //******************************************************************************//
-//--------------- Give Bonus Points  -------------------------------------------//
-
-if (G::$LoggedUser['DisablePoints'] == 0) {
-	$Amount = 10;
-
-	$Formats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
-		'Blu-ray', 'DAT');
-	if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
-		in_array($Properties['Media'], $Formats))) {
-		$Amount = 200;
-	}
-	elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
-		$Amount = 30;
-	}
-
-	$DB->query("UPDATE users_main SET BonusPoints = BonusPoints + {$Amount} WHERE ID=".$LoggedUser['ID']);
-	$Cache->delete_value('user_stats_'.$LoggedUser['ID']);
-}
-
-//******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//
 
 foreach ($LogScores as $Pos => $Log) {
@@ -844,7 +824,26 @@ Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.
 Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
 
+
+// Running total for amount of BP to give
+$BonusPoints = 0;
+
+//******************************************************************************//
+//--------------- Upload Extra torrents ----------------------------------------//
+
+$PerfectFormats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
+	'Blu-ray', 'DAT');
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
+	if ($ExtraTorrent['Format'] === 'FLAC' && in_array($Properties['Media'], $PerfectFormats)) {
+		$BonusPoints += 200;
+	}
+	elseif ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Encoding'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
+		$BonusPoints += 30;
+	}
+	else {
+		$BonusPoints += 10;
+	}
+
 	$ExtraHasLog = 0;
 	$ExtraHasCue = 0;
 	$LogScore = 0;
@@ -905,6 +904,26 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 	// ENT_QUOTES is needed to decode single quotes/apostrophes
 	//send_irc('PRIVMSG #' . NONSSL_SITE_URL . '-announce :' . html_entity_decode($Announce, ENT_QUOTES));
 	//send_irc('PRIVMSG #' . SSL_SITE_URL . '-announce-ssl :' . html_entity_decode($AnnounceSSL, ENT_QUOTES));
+}
+
+//******************************************************************************//
+//--------------- Give Bonus Points  -------------------------------------------//
+
+if (G::$LoggedUser['DisablePoints'] == 0) {
+
+	if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
+			in_array($Properties['Media'], $PerfectFormats))) {
+		$BonusPoints += 200;
+	}
+	elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
+		$BonusPoints += 30;
+	}
+	else {
+		$BonusPoints += 10;
+	}
+
+	$DB->query("UPDATE users_main SET BonusPoints = BonusPoints + {$BonusPoints} WHERE ID=".$LoggedUser['ID']);
+	$Cache->delete_value('user_stats_'.$LoggedUser['ID']);
 }
 
 //******************************************************************************//

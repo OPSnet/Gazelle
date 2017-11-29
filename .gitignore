@@ -6,6 +6,9 @@ html/
 logs/
 !logs/README.txt
 
+static/similar/
+!static/similar/.gitkeep
+
 static/stylespreview/
 !static/stylespreview/.gitkeep
 
