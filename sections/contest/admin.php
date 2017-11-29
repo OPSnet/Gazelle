@@ -14,19 +14,8 @@ if (!check_perms('users_mod')) {
 
 if (!empty($_POST['name'])) {
 	authorize();
-	$Id = $Contest['ID'];
-	G::$DB->query("
-		UPDATE contest SET
-			Name		  = '".db_string($_POST['name'])."',
-			Display	   = {$_POST['display']},
-			MaxTracked	= {$_POST['maxtrack']},
-			DateBegin	 = '".db_string($_POST['date_begin'])."',
-			DateEnd	   = '".db_string($_POST['date_end'])."',
-			ContestTypeID = {$_POST['type']}
-		WHERE ID = {$Id}");
-	G::$Cache->delete_value('contest_current');
-	G::$Cache->delete_value("contest_{$Id}");
-	$Contest = Contest::get_contest($Id);
+    Contest::save($_POST);
+	$Contest = Contest::get_contest($_POST['cid']);
 	$Saved = 1;
 }
 
@@ -121,7 +110,7 @@ if (!empty($Contest)) {
 ?>
 	</div>
 <?
-	}
+	} /* request_fill */
 ?>
 	<form class="edit_form" name="contest" id="contestform" action="contest.php?action=admin&id=<?= $Contest['ID'] ?>" method="post">
 		<table>
@@ -142,7 +131,7 @@ if (!empty($Contest)) {
 						foreach (Contest::contest_type() as $id => $name) {
 							printf('					<option value="%d"%s>%s</option>',
 								$id,
-								($id == $Contest['ContestType']) ? ' selected' : '',
+								($name == $Contest['ContestType']) ? ' selected' : '',
 								$name
 							);
 						}
@@ -183,13 +172,35 @@ if (!empty($Contest)) {
 					<input type="text" size="20" name="maxtrack" value="<?= $Contest['MaxTracked'] ?>"/>
 				</td>
 			</tr>
+
+			<tr>
+				<td class="label">Banner:</td>
+				<td>
+					<p>This is the image displayed at the top of the page (optional).
+                       May be a local asset, or a URL.</p>
+					<input type="text" size="60" name="banner" value="<?= $Contest['Banner'] ?>"/>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="label">Introduction:</td>
+				<td>
+					<p>This is the introduction / guide of the contest.</p>
+                    <?php $IntroText = new TEXTAREA_PREVIEW('intro', 'intro', display_str($Contest['WikiText']), 60, 8, true, false); ?>
+                    <div style="text-align: center;">
+                        <input type="button" value="Preview" class="hidden button_preview_<?=$IntroText->getID()?>" tabindex="1" />
+                    </div>
+				</td>
+			</tr>
+
 		</table>
 		<input type="hidden" name="userid" value="<?= $UserID ?>"/>
+		<input type="hidden" name="cid" value="<?= $Contest['ID'] ?>"/>
 		<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>"/>
 		<input type="submit" id="submit" value="Save contest"/>
 	</form>
 </div>
 
 <?php
-}
+} /* !empty($Contest) */
 View::show_footer();

@@ -7,7 +7,7 @@ class Contest {
 		$Contest = G::$Cache->get_value("contest_{$Id}");
 		if ($Contest === false) {
 			G::$DB->query("
-				SELECT c.ID, t.Name as ContestType, c.Name, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd
+				SELECT c.ID, t.Name as ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd
 				FROM contest c
 				INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
 				WHERE c.ID={$Id}
@@ -24,7 +24,7 @@ class Contest {
 		$Contest = G::$Cache->get_value('contest_current');
 		if ($Contest === false) {
 			G::$DB->query("
-				SELECT c.ID, t.Name as ContestType, c.Name, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd
+				SELECT c.ID, t.Name as ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd
 				FROM contest c
 				INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
 				WHERE c.DateEnd = (select max(DateEnd) from contest)
@@ -205,5 +205,22 @@ class Contest {
 
 	public static function contest_type() {
 		return self::$contest_type;
+	}
+
+	public static function save($params) {
+		G::$DB->query("
+			UPDATE contest SET
+				Name		= '".db_string($params['name'])."',
+				Display		= {$params['display']},
+				MaxTracked	= {$params['maxtrack']},
+				DateBegin	= '".db_string($params['date_begin'])."',
+				DateEnd		= '".db_string($params['date_end'])."',
+				ContestTypeID	= {$params['type']},
+				Banner		= '".db_string($params['banner'])."',
+				WikiText	= '".db_string($params['intro'])."'
+			WHERE ID = {$params['cid']}
+		");
+		G::$Cache->delete_value('contest_current');
+		G::$Cache->delete_value("contest_{$params['cid']}");
 	}
 }
