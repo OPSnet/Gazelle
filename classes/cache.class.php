@@ -174,9 +174,7 @@ class CACHE extends Memcached {
 		if (empty($Key)) {
 			trigger_error('Cache deletion failed for empty key');
 		}
-		/*if (!$this->delete($Key)) {
-			trigger_error("Cache delete failed for key $Key");
-		}*/
+		$this->delete($Key);
 		unset($this->CacheHits[$Key]);
 		$this->Time += (microtime(true) - $StartTime) * 1000;
 	}

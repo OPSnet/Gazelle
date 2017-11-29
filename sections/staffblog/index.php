@@ -84,11 +84,11 @@ if (check_perms('admin_manage_blog')) {
 			<div class="head">
 				<?=((empty($_GET['action'])) ? 'Create a staff blog post' : 'Edit staff blog post')?>
 				<span style="float: right;">
-					<a href="#" onclick="$('#postform').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=(($_REQUEST['action'] != 'editblog') ? 'Show' : 'Hide')?></a>
+					<a href="#" onclick="$('#postform').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=((!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editblog') ? 'Show' : 'Hide')?></a>
 				</span>
 			</div>
 			<form class="<?=((empty($_GET['action'])) ? 'create_form' : 'edit_form')?>" name="blog_post" action="staffblog.php" method="post">
-				<div id="postform" class="pad<?=($_REQUEST['action'] != 'editblog') ? ' hidden' : '' ?>">
+				<div id="postform" class="pad<?=(!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editblog') ? ' hidden' : '' ?>">
 					<input type="hidden" name="action" value="<?=((empty($_GET['action'])) ? 'takenewblog' : 'takeeditblog')?>" />
 					<input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
 <?		if (!empty($_GET['action']) && $_GET['action'] == 'editblog') { ?>
