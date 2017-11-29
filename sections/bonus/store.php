@@ -33,26 +33,28 @@ HTML;
 <?php
 
 $Cnt = 1;
-foreach ($Items as $Key => $Item) {
+foreach (Bonus::$Items as $Key => $Item) {
 	$RowClass = ($Cnt % 2 === 0) ? 'rowb' : 'rowa';
-	$Price = number_format($Item['Price']);
+	$Price = Bonus::get_price($Item);
+	$FormattedPrice = number_format($Price);
 	print <<<HTML
 			<tr class="$RowClass">
 				<td>{$Cnt}</td>
 				<td>{$Item['Title']}</td>
-				<td>{$Price}</td>
+				<td>{$FormattedPrice}</td>
 				<td>
 HTML;
 
-	if (G::$LoggedUser['BonusPoints'] >= $Item['Price']) {
+	if (G::$LoggedUser['BonusPoints'] >= $Price) {
 		$Url = array();
-		foreach ($Item['Options'] as $Key => $Value) {
-			$Url[] = "{$Key}={$Value}";
+		foreach ($Item['Options'] as $KKey => $Value) {
+			$Url[] = "{$KKey}={$Value}";
 		}
 		$Url = implode("&", $Url);
-		$Onclick = (isset($Item['Onclick'])) ? "onclick='{$Item['Onclick']}(this)'" : '';
+		$NextFunction = (isset($Item['Onclick'])) ? "{$Item['Onclick']}" : 'null';
+		$Onclick = (isset($Item['Confirm']) && $Item['Confirm'] === false) ? "NoOp" : "ConfirmPurchase";
 		print <<<HTML
-					<a href="bonus.php?action={$Item['Action']}&{$Url}" {$Onclick}>Purchase</a>
+					<a href="bonus.php?action={$Item['Action']}&{$Url}" onclick="{$Onclick}(event, '{$Item['Title']}', $NextFunction, this);;">Purchase</a>
 HTML;
 	}
 	else {

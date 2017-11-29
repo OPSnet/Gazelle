@@ -145,7 +145,7 @@ switch ($_REQUEST['action']) {
 				if (empty($_POST['password']) && !check_perms('users_mod')) {
 					include('2fa/password_confirm.php');
 				} else {
-					if (check_perms('users_edit_password') || Users::check_password($_POST['password'], $PassHash, $Secret)) {
+					if (check_perms('users_edit_password') || Users::check_password($_POST['password'], $PassHash)) {
 						$DB->query("UPDATE users_main SET 2FA_Key = '', Recovery = '' WHERE ID = '{$UserID}'");
 						if (isset($_GET['page']) && $_GET['page'] === 'user') {
 							$action = '';

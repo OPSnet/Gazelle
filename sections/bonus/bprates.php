@@ -5,9 +5,9 @@ $Page = max(1, $Page);
 $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
-if (!empty($_GET['id']) && check_perms('users_mod')) {
-	$UserID = intval($_GET['id']);
-	$User = array_merge(Users::user_stats($_GET['id']), Users::user_info($_GET['id']), Users::user_heavy_info($_GET['id']));
+if (!empty($_GET['userid']) && check_perms('users_mod')) {
+	$UserID = intval($_GET['userid']);
+	$User = array_merge(Users::user_stats($_GET['userid']), Users::user_info($_GET['userid']), Users::user_heavy_info($_GET['userid']));
 	if (empty($User)) {
 		error(404);
 	}
@@ -24,11 +24,11 @@ $DB->query("
 SELECT
 	COUNT(xfu.uid) as TotalTorrents,
 	SUM(t.Size) as TotalSize,
-	SUM((t.Size / (1024 * 1024 * 1024)) * (
+	SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
 		0.0433 + (
 			(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
 		)
-	)) AS TotalHourlyPoints
+	), 0)) AS TotalHourlyPoints
 FROM
 	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}) AS xfu
 	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
