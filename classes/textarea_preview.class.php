@@ -20,7 +20,7 @@ class TEXTAREA_PREVIEW_SUPER {
 	 * @static
 	 * @var bool For use in JavaScript method
 	 */
-	private static $Exectuted = false;
+	private static $Executed = false;
 
 	/**
 	 * This method should only run once with $all as true and should be placed
@@ -39,11 +39,11 @@ class TEXTAREA_PREVIEW_SUPER {
 		if (self::$Textareas === 0) {
 			return;
 		}
-		if (self::$Exectuted === false && $all) {
+		if (self::$Executed === false && $all) {
 			View::parse('generic/textarea/script.phtml');
 		}
 
-		self::$Exectuted = true;
+		self::$Executed = true;
 		self::iterator();
 	}
 
