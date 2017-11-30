@@ -80,6 +80,7 @@ View::show_header('Staff Tools');
 
 	// begin Community category
 	$ToolsHTML = "";
+	create_row("Category manager", "tools.php?action=categories", check_perms("admin_manage_forums"));
 	create_row("Forum manager", "tools.php?action=forum", check_perms("admin_manage_forums"));
 
 	if ($ToolsHTML) {

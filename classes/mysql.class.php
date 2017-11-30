@@ -309,7 +309,6 @@ class DB_MYSQL {
 					$Binders .= "s";
 				}
 			}
-
 			$Statement->bind_param($Binders, ...$Parameters);
 		}
 
@@ -369,8 +368,10 @@ class DB_MYSQL {
 		$this->Queries[] = array($Query, ($QueryEndTime - $QueryStartTime) * 1000, null);
 		$this->Time += ($QueryEndTime - $QueryStartTime) * 1000;
 
-		if (!$this->QueryID) {
-			$this->Errno = mysqli_errno($this->LinkID);
+		// Update/Insert/etc statements for prepared queries don't return a QueryID,
+		// but mysqli_errno is also going to be 0 for no error
+		$this->Errno = mysqli_errno($this->LinkID);
+		if (!$this->QueryID && $this->Errno !== 0) {
 			$this->Error = mysqli_error($this->LinkID);
 
 			if ($AutoHandle) {
@@ -379,7 +380,6 @@ class DB_MYSQL {
 				return $this->Errno;
 			}
 		}
-
 
 		/*
 		$QueryType = substr($Query, 0, 6);
@@ -423,16 +423,24 @@ class DB_MYSQL {
 	/**
 	 * Fetches next record from the result set of the previously executed query.
 	 *
-	 * Utility around next_record, with making escape being something the programmer
-	 * must explicitly declare for a given column, defaulting to escaping nothing.
+	 * Utility around next_record where we just return the array as MYSQLI_BOTH
+	 * and require the user to explicitly define which columns to define (as opposed
+	 * to all columns always being escaped, which is a bad sort of lazy). Things that
+	 * need to be escaped are strings that users input (with any characters) and
+	 * are not displayed inside a textarea or input field.
 	 *
-	 * @param int    $Type
 	 * @param mixed  $Escape Boolean true/false for escaping entire/none of query
 	 * 				         or can be an array of array keys for what columns to escape
 	 * @return array next result set if exists
 	 */
-	function fetch_record($Type = MYSQLI_BOTH, $Escape = false) {
-		return $this->next_record($Type, $Escape);
+	function fetch_record(...$Escape) {
+		if (count($Escape) === 1 && $Escape[0] === true) {
+			$Escape = true;
+		}
+		elseif (count($Escape) === 0) {
+			$Escape = false;
+		}
+		return $this->next_record(MYSQLI_BOTH, $Escape);
 	}
 
 	function close() {
@@ -474,7 +482,7 @@ class DB_MYSQL {
 
 	// You should use db_string() instead.
 	function escape_str($Str) {
-		$this->connect(0);
+		$this->connect();
 		if (is_array($Str)) {
 			trigger_error('Attempted to escape array.');
 			return '';
