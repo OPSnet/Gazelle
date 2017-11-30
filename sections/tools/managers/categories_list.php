@@ -45,7 +45,7 @@ $DB->prepared_query('
 				<td>
 					<input type="submit" name="submit" value="Edit" />
 					<?php if ($Count === 0) { ?>
-					<input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this forum? This is an irreversible action!')"/>
+					<input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this category? This is an irreversible action!')"/>
 					<?php } ?>
 				</td>
 
