@@ -134,7 +134,7 @@ class Forums {
 			G::$DB->query("
 				SELECT ID, Name
 				FROM forums_categories
-				ORDER BY Sort");
+				ORDER BY Sort, Name");
 			$ForumCats = array();
 			while (list ($ID, $Name) = G::$DB->next_record()) {
 				$ForumCats[$ID] = $Name;
