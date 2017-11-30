@@ -59,7 +59,7 @@ $DB->query('
 		AutoLockWeeks
 	FROM forums AS f
 	LEFT JOIN forums_categories AS fc ON fc.ID = f.CategoryID
-	ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort');
+	ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort, f.Name');
 ?>
 <div class="header">
 	<script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>
