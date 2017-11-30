@@ -747,6 +747,7 @@ $LogScore = 100;
 $LogChecksum = 1;
 $LogInDB = 0;
 $LogScores = array();
+$Logchecker = new Logchecker();
 if ($HasLog) {
 	ini_set('upload_max_filesize', 1000000);
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
@@ -763,9 +764,8 @@ if ($HasLog) {
 		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
 			$LogFile = iconv("unicode", "UTF-8", $LogFile);
 		}
-		$Log = new Logchecker;
-		$Log->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
-		list($Score, $Details, $Checksum, $Text) = $Log->parse();
+		$Logchecker->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
+		list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
 		$LogScore = min($Score, $LogScore);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Details = implode("\r\n", $Details);

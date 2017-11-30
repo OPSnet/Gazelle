@@ -15,6 +15,7 @@ $DB->query("
 	WHERE t.ID = {$TorrentID} AND t.HasLog='1'" . $Extra);
 
 $DetailsArray = array();
+$Logchecker = new Logchecker();
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 	list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);
 	$DB->query("SELECT LogID FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
@@ -33,9 +34,8 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
 			$LogFile = iconv("unicode", "UTF-8", $LogFile);
 		}
-		$Log = new Logchecker();
-		$Log->new_file($LogFile, $FileName);
-		list($Score, $Details, $Checksum, $LogText) = $Log->parse();
+		$Logchecker->new_file($LogFile, $FileName);
+		list($Score, $Details, $Checksum, $LogText) = $Logchecker->parse();
 		$Details = trim(implode("\r\n", $Details));
 		$DetailsArray[] = $Details;
 		$LogScore = min($LogScore, $Score);

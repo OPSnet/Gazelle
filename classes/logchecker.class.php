@@ -49,6 +49,36 @@ class Logchecker {
 	{
 		$this->Log = $Log;
 		$this->FileName = $FileName;
+		$this->Logs = array();
+		$this->Tracks = array();
+		$this->Checksum = true;
+		$this->Score = 100;
+		$this->Details = array();
+		$this->Offsets = array();
+		$this->DriveFound = false;
+		$this->Drives = array();
+		$this->Drive = null;
+		$this->SecureMode = true;
+		$this->NonSecureMode = null;
+		$this->BadTrack = array();
+		$this->DecreaseScoreTrack = 0;
+		$this->RIPPER = null;
+		$this->Language = null;
+		$this->Version = null;
+		$this->TrackNumber = null;
+		$this->ARTracks = array();
+		$this->Combined = null;
+		$this->CurrLog = null;
+		$this->DecreaseBoost = 0;
+		$this->Range = null;
+		$this->ARSummary = null;
+		$this->XLDSecureRipper = false;
+		$this->Limit = 15;
+		$this->LBA = array();
+		$this->FrameReRipConf = array();
+		$this->IARTracks = array();
+		$this->InvalidateCache = true;
+		$this->DubiousTracks = 0;
 	}
 
 	/**
@@ -62,10 +92,10 @@ class Logchecker {
 			if ($lang === 'en') {
 				continue;
 			}
-			if (preg_match("/{$dict[1274]}/ui", $this->Log) === 1) {
+			if (preg_match('/'.preg_quote($dict[1274], "/").'/ui', $this->Log) === 1) {
 				$this->account("Translated log from {$dict[1]} ({$dict[2]}) to {$this->EAC_LANG['en'][1]}.", false, false, false, true);
 				foreach ($dict as $key => $value) {
-					$Log = preg_replace("/{$value}/ui", $this->EAC_LANG['en'][$key], $this->Log);
+					$Log = preg_replace("/".preg_quote($value, '/')."/ui", $this->EAC_LANG['en'][$key], $this->Log);
 					if ($Log !== null) {
 						$this->Log = $Log;
 					}
@@ -1221,11 +1251,13 @@ class Logchecker {
 	}
 	public static function detect_utf_bom_encoding($text) {
 		// Unicode BOM is U+FEFF, but after encoded, it will look like this.
-		define ('UTF32_BIG_ENDIAN_BOM' , chr(0x00) . chr(0x00) . chr(0xFE) . chr(0xFF));
-		define ('UTF32_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00));
-		define ('UTF16_BIG_ENDIAN_BOM' , chr(0xFE) . chr(0xFF));
-		define ('UTF16_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE));
-		define ('UTF8_BOM' , chr(0xEF) . chr(0xBB) . chr(0xBF));
+		if (!defined('UTF32_BIG_ENDIAN_BOM')) {
+			define ('UTF32_BIG_ENDIAN_BOM' , chr(0x00) . chr(0x00) . chr(0xFE) . chr(0xFF));
+			define ('UTF32_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE) . chr(0x00) . chr(0x00));
+			define ('UTF16_BIG_ENDIAN_BOM' , chr(0xFE) . chr(0xFF));
+			define ('UTF16_LITTLE_ENDIAN_BOM', chr(0xFF) . chr(0xFE));
+			define ('UTF8_BOM' , chr(0xEF) . chr(0xBB) . chr(0xBF));
+		}
 		$first2 = substr($text, 0, 2);
 		$first3 = substr($text, 0, 3);
 		$first4 = substr($text, 0, 3);
