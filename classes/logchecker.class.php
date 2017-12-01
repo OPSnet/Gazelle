@@ -92,13 +92,17 @@ class Logchecker {
 	function parse()
 	{
 		$Encoded = false;
-		foreach ($this->Encodings as $Encoding) {
-			if (mb_check_encoding($this->Log, $Encoding)) {
-				$this->Log = mb_convert_encoding($this->Log, 'UTF-8', $Encoding);
-				$Encoded = true;
-				break;
+		/*$Check = substr($this->Log, 0, 100);
+		//if (!mb_check_encoding($Check, 'UTF-8')) {
+			var_dump(mb_ereg_match('/'))
+			foreach ($this->Encodings as $Encoding) {
+				if (mb_check_encoding($Check, $Encoding)) {
+					$this->Log = mb_convert_encoding($this->Log, 'UTF-8', $Encoding);
+					$Encoded = true;
+					break;
+				}
 			}
-		}
+		//}*/
 
 		if (!$Encoded) {
 			if (ord($this->Log[0]) . ord($this->Log[1]) == 0xFF . 0xFE) {
