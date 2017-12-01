@@ -28,20 +28,16 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			break;
 		}
-		$FileName = $_FILES['logfiles']['tmp_name'][$Pos];
+		$FileName = $_FILES['logfiles']['name'][$Pos];
 		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
-		//detect & transcode unicode
-		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
-			$LogFile = iconv("unicode", "UTF-8", $LogFile);
-		}
-		$Logchecker->new_file($LogFile, $FileName);
+		$Logchecker->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
 		list($Score, $Details, $Checksum, $LogText) = $Logchecker->parse();
 		$Details = trim(implode("\r\n", $Details));
 		$DetailsArray[] = $Details;
 		$LogScore = min($LogScore, $Score);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Logs[] = array($Details, $LogText);
-		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')");
+		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')");
 		$LogID = $DB->inserted_id();
 		if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
 			die("Could not copy logfile to the server.");

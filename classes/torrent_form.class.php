@@ -540,23 +540,13 @@ function show() {
 ?>
 				</td>
 			</tr>
-
-<?			if ($HasLog) { ?>
-			<!-- TODO: This should be done on a per log basis
-			and we can then set the reason per log so that
 			<tr>
-				<td class="label">Log score</td>
-				<td><input type="text" name="log_score" size="5" id="log_score" value="<?=display_str($Torrent['LogScore']) ?>" /></td>
-			</tr>
-			<tr>
-				<td class="label">Log adjustment reason</td>
-				<td>
-					<textarea name="adjustment_reason" id="adjustment_reason" cols="60" rows="8"><?=display_str($Torrent['AdjustmentReason']); ?></textarea>
-					<p class="min_padding">Contains reason for adjusting a score. <strong>This field is displayed on the torrent page.</strong></p>
+				<td class="label">Upload Log:</td>
+				<td id="logfields">
+					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
+					<input id="file" type="file" accept="<?=$AcceptTypes?>" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 				</td>
 			</tr>
-			-->
-<?			} ?>
 			<tr>
 				<td class="label">Bad tags:</td>
 				<td><input type="checkbox" id="bad_tags" name="bad_tags"<? if ($BadTags) { echo ' checked="checked"';} ?> /> <label for="bad_tags">Check this box if the torrent has bad tags.</label></td>

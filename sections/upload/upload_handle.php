@@ -760,16 +760,12 @@ if ($HasLog) {
 			die("Logfile doesn't exist or couldn't be opened");
 		}
 
-		//detect & transcode unicode
-		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
-			$LogFile = iconv("unicode", "UTF-8", $LogFile);
-		}
 		$Logchecker->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
 		list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
 		$LogScore = min($Score, $LogScore);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Details = implode("\r\n", $Details);
-		$LogScores[$Pos] = array($Score, $Details, $Checksum, $Text, $File);
+		$LogScores[$Pos] = array($Score, $Details, $Checksum, $Text, $_FILES['logfiles']['name'][$Pos]);
 		$LogInDB = 1;
 	}
 }
@@ -805,7 +801,7 @@ $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 
 foreach ($LogScores as $Pos => $Log) {
 	list($Score, $Details, $Checksum, $Text, $FileName) = $Log;
-	$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($Text)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')"); //set log scores
+	$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($Text)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')"); //set log scores
 	$LogID = $DB->inserted_id();
 	if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
 		die("Could not copy logfile to the server.");

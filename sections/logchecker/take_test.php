@@ -30,11 +30,6 @@ echo <<<HTML
 	<h2 class="center">Logchecker Test Results</h2>
 HTML;
 
-//detect & transcode unicode
-if (Logchecker::detect_utf_bom_encoding($LogFile)) {
-	$LogFile = iconv("unicode", "UTF-8", $LogFile);
-}
-
 $Log = new Logchecker();
 $Log->new_file($LogFile, $FileName);
 
