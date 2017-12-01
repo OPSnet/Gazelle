@@ -8,6 +8,9 @@ if ($TorrentID === 0 || $LogID === 0) {
 }
 
 G::$DB->prepared_query("SELECT GroupID FROM torrents WHERE ID=?", $TorrentID);
+if (!G::$DB->has_results()) {
+	error(404);
+}
 list($GroupID) = G::$DB->fetch_record();
 
 @unlink(SERVER_ROOT."logs/{$TorrentID}_{$LogID}.log");

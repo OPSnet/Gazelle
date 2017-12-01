@@ -38,6 +38,11 @@ class Logchecker {
 	var $DubiousTracks = 0;
 	var $EAC_LANG = array();
 
+	// Sometimes things get put into weird encodings
+	var $Encodings = array(
+		'Windows-1251'
+	);
+
 	function __construct()
 	{
 		$EAC_LANG = array();
@@ -86,14 +91,25 @@ class Logchecker {
 	 */
 	function parse()
 	{
-		if (ord($this->Log[0]) . ord($this->Log[1]) == 0xFF . 0xFE) {
-			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16LE');
+		$Encoded = false;
+		foreach ($this->Encodings as $Encoding) {
+			if (mb_check_encoding($this->Log, $Encoding)) {
+				$this->Log = mb_convert_encoding($this->Log, 'UTF-8', $Encoding);
+				$Encoded = true;
+				break;
+			}
 		}
-		elseif (ord($this->Log[0]) . ord($LogData[1]) == 0xFE . 0xFF) {
-			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16BE');
-		}
-		elseif (ord($this->Log[0]) == 0xEF && ord($this->Log[1]) == 0xBB && ord($this->Log[2]) == 0xBF) {
-			$this->Log = substr($this->Log, 3);
+
+		if (!$Encoded) {
+			if (ord($this->Log[0]) . ord($this->Log[1]) == 0xFF . 0xFE) {
+				$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16LE');
+			}
+			elseif (ord($this->Log[0]) . ord($LogData[1]) == 0xFE . 0xFF) {
+				$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16BE');
+			}
+			elseif (ord($this->Log[0]) == 0xEF && ord($this->Log[1]) == 0xBB && ord($this->Log[2]) == 0xBF) {
+				$this->Log = substr($this->Log, 3);
+			}
 		}
 
 		foreach ($this->EAC_LANG as $lang => $dict) {
@@ -134,7 +150,7 @@ class Logchecker {
 				unset($this->Logs[$Key]);
 			} //strip empty
 			//append stat msgs
-			elseif (!$this->Checksum && preg_match("/\nEnd of status report/i", $Log)) {
+			elseif (!$this->Checksum && preg_match("/End of status report/i", $Log)) {
 				$this->Logs[$Key - 1] .= $Log;
 				unset($this->Logs[$Key]);
 			} elseif ($this->Checksum && preg_match("/[\=]+\s+Log checksum/i", $Log)) {

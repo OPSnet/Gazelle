@@ -11,7 +11,6 @@ $File = (isset($_FILES['log'])) ? $_FILES['log'] : null; // Our log file
 $FileName = $File['tmp_name'];
 if (is_uploaded_file($FileName) && filesize($FileName)) {
 	$LogFile = file_get_contents($FileName);
-	// Contents of the log are now stored in $LogFile
 } elseif (!empty($_POST["pastelog"])) {
 	$LogFile = $_POST["pastelog"];
 } else {
