@@ -36,7 +36,8 @@ $ForumCats = $Cache->get_value('forums_categories');
 if ($ForumCats === false) {
 	$DB->query('
 		SELECT ID, Name
-		FROM forums_categories');
+		FROM forums_categories
+		ORDER BY Sort, Name');
 	$ForumCats = array();
 	while (list($ID, $Name) = $DB->next_record()) {
 		$ForumCats[$ID] = $Name;
@@ -46,18 +47,19 @@ if ($ForumCats === false) {
 
 $DB->query('
 	SELECT
-		ID,
+		f.ID,
 		CategoryID,
-		Sort,
-		Name,
+		f.Sort,
+		f.Name,
 		Description,
 		MinClassRead,
 		MinClassWrite,
 		MinClassCreate,
 		AutoLock,
 		AutoLockWeeks
-	FROM forums
-	ORDER BY CategoryID, Sort ASC');
+	FROM forums AS f
+	LEFT JOIN forums_categories AS fc ON fc.ID = f.CategoryID
+	ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort, f.Name');
 ?>
 <div class="header">
 	<script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>

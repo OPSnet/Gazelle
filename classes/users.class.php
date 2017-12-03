@@ -380,8 +380,8 @@ class Users {
 	/**
 	 * Generate a random string
 	 *
-	 * @param Length
-	 * @return random alphanumeric string
+	 * @param  int    $Length
+	 * @return string random alphanumeric string
 	 */
 	public static function make_secret($Length = 32) {
 		$NumBytes = (int) round($Length / 2);
@@ -390,84 +390,29 @@ class Users {
 	}
 
 	/**
-	 * Create a password hash. This method is deprecated and
-	 * should not be used to create new passwords
-	 *
-	 * @param $Str password
-	 * @param $Secret salt
-	 * @return password hash
-	 */
-	public static function make_hash($Str, $Secret) {
-		return sha1(md5($Secret).$Str.sha1($Secret).SITE_SALT);
-	}
-
-	/**
 	 * Verify a password against a password hash
 	 *
-	 * @param $Password password
-	 * @param $Hash password hash
-	 * @param $Secret salt - Only used if the hash was created
-	 *			   with the deprecated Users::make_hash() method
-	 * @return true on correct password
+	 * @param string $Password password
+	 * @param string $Hash password hash
+	 * @return bool  true on correct password
 	 */
-	public static function check_password($Password, $Hash, $Secret = '') {
-		if (!$Password || !$Hash) {
+	public static function check_password($Password, $Hash) {
+		if (empty($Password) || empty($Hash)) {
 			return false;
 		}
-		if (Users::is_crypt_hash($Hash)) {
-			return crypt($Password, $Hash) == $Hash;
-		} elseif ($Secret) {
-			return Users::make_hash($Password, $Secret) == $Hash;
-		}
-		return false;
-	}
 
-	/**
-	 * Test if a given hash is a crypt hash
-	 *
-	 * @param $Hash password hash
-	 * @return true if hash is a crypt hash
-	 */
-	public static function is_crypt_hash($Hash) {
-		return preg_match('/\$\d[axy]?\$/', substr($Hash, 0, 4));
+		return password_verify($Password, $Hash);
 	}
 
 	/**
 	 * Create salted crypt hash for a given string with
 	 * settings specified in CRYPT_HASH_PREFIX
 	 *
-	 * @param $Str string to hash
-	 * @return salted crypt hash
+	 * @param string  $Str string to hash
+	 * @return string hashed password
 	 */
-	public static function make_crypt_hash($Str) {
-		$Salt = CRYPT_HASH_PREFIX.Users::gen_crypt_salt().'$';
-		return crypt($Str, $Salt);
-	}
-
-	/**
-	 * Create salt string for eksblowfish hashing. If /dev/urandom cannot be read,
-	 * fall back to an unsecure method based on mt_rand(). The last character needs
-	 * a special case as it must be either '.', 'O', 'e', or 'u'.
-	 *
-	 * @return salt suitable for eksblowfish hashing
-	 */
-	public static function gen_crypt_salt() {
-		$Salt = '';
-		$Chars = "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		$Numchars = strlen($Chars) - 1;
-		if ($Handle = @fopen('/dev/urandom', 'r')) {
-			$Bytes = fread($Handle, 22);
-			for ($i = 0; $i < 21; $i++) {
-				$Salt .= $Chars[ord($Bytes[$i]) & $Numchars];
-			}
-			$Salt[$i] = $Chars[(ord($Bytes[$i]) & 3) << 4];
-		} else {
-			for ($i = 0; $i < 21; $i++) {
-				$Salt .= $Chars[mt_rand(0, $Numchars)];
-			}
-			$Salt[$i] = $Chars[mt_rand(0, 3) << 4];
-		}
-		return $Salt;
+	public static function make_password_hash($Str) {
+		return password_hash($Str, PASSWORD_DEFAULT);
 	}
 
 	/**

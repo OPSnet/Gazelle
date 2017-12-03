@@ -98,10 +98,10 @@ if (isset($_GET['action'])) {
 			require_once(SERVER_ROOT . '/sections/bonus/tokens.php');
 			break;
 		default:
-			error(404);
+			require_once(SERVER_ROOT . '/sections/bonus/store.php');
 			break;
 	}
 }
 else {
-	require_once(SERVER_ROOT . '/sections/bonus/main.php');
+	require_once(SERVER_ROOT . '/sections/bonus/store.php');
 }

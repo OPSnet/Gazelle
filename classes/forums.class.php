@@ -133,7 +133,8 @@ class Forums {
 			$QueryID = G::$DB->get_query_id();
 			G::$DB->query("
 				SELECT ID, Name
-				FROM forums_categories");
+				FROM forums_categories
+				ORDER BY Sort, Name");
 			$ForumCats = array();
 			while (list ($ID, $Name) = G::$DB->next_record()) {
 				$ForumCats[$ID] = $Name;
@@ -174,7 +175,7 @@ class Forums {
 					JOIN forums_categories AS fc ON fc.ID = f.CategoryID
 					LEFT JOIN forums_topics AS t ON t.ID = f.LastPostTopicID
 				GROUP BY f.ID
-				ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort");
+				ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort, f.Name");
 			$Forums = G::$DB->to_array('ID', MYSQLI_ASSOC, false);
 
 			G::$DB->query("

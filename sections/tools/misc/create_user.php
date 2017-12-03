@@ -29,7 +29,7 @@ if (isset($_POST['Username'])) {
 			INSERT INTO users_main
 				(Username, Email, PassHash, torrent_pass, Enabled, PermissionID)
 			VALUES
-				('".db_string($Username)."', '".db_string($Email)."', '".db_string(Users::make_crypt_hash($Password))."', '".db_string($torrent_pass)."', '1', '".USER."')");
+				('".db_string($Username)."', '".db_string($Email)."', '".db_string(Users::make_password_hash($Password))."', '".db_string($torrent_pass)."', '1', '".USER."')");
 
 		//Increment site user count
 		$Cache->increment('stats_user_count');

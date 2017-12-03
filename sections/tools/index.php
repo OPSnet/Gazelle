@@ -61,6 +61,14 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/services/get_cc.php');
 		break;
 	//Managers
+	case 'categories':
+		include(SERVER_ROOT . '/sections/tools/managers/categories_list.php');
+		break;
+
+	case 'categories_alter':
+		include(SERVER_ROOT . '/sections/tools/managers/categories_alter.php');
+		break;
+
 	case 'forum':
 		include(SERVER_ROOT.'/sections/tools/managers/forum_list.php');
 		break;
