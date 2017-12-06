@@ -54,7 +54,7 @@ HTML;
 		$NextFunction = (isset($Item['Onclick'])) ? "{$Item['Onclick']}" : 'null';
 		$Onclick = (isset($Item['Confirm']) && $Item['Confirm'] === false) ? "NoOp" : "ConfirmPurchase";
 		print <<<HTML
-					<a href="bonus.php?action={$Item['Action']}&auth={$LoggedUser['AuthKey']}&{$Url}" onclick="{$Onclick}(event, '{$Item['Title']}', $NextFunction, this);;">Purchase</a>
+					<a href="bonus.php?action={$Item['Action']}&auth={$LoggedUser['AuthKey']}&{$Url}" onclick="{$Onclick}(event, '{$Item['Title']}', $NextFunction, this);">Purchase</a>
 HTML;
 	}
 	else {
