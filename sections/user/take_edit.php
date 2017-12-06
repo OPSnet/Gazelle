@@ -1,13 +1,20 @@
-<?
+<?php
 authorize();
 
-$UserID = $_REQUEST['userid'];
+if (!empty($_REQUEST['userid'])) {
+	$UserID = $_REQUEST['userid'];
+}
+else {
+	$UserID = $LoggedUser['ID'];
+}
+
 if (!is_number($UserID)) {
 	error(404);
 }
 
 //For this entire page, we should generally be using $UserID not $LoggedUser['ID'] and $U[] not $LoggedUser[]
 $U = Users::user_info($UserID);
+$UH = Users::user_heavy_info($UserID);
 
 if (!$U) {
 	error(404);
@@ -297,8 +304,8 @@ Donations::update_rewards($UserID);
 NotificationsManager::save_settings($UserID);
 
 // Information on how the user likes to download torrents is stored in cache
-if ($DownloadAlt != $LoggedUser['DownloadAlt']) {
-	$Cache->delete_value('user_'.$LoggedUser['torrent_pass']);
+if ($DownloadAlt != $UH['DownloadAlt'] || $Options['HttpsTracker'] != $UH['HttpsTracker']) {
+	$Cache->delete_value('user_'.$UH['torrent_pass']);
 }
 
 $Cache->begin_transaction("user_info_$UserID");
@@ -376,5 +383,3 @@ if ($ResetPassword) {
 }
 
 header("Location: user.php?action=edit&userid=$UserID");
-
-?>

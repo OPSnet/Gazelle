@@ -3,8 +3,9 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
 	enforce_login();
 	$TorrentPass = $LoggedUser['torrent_pass'];
 	$DownloadAlt = $LoggedUser['DownloadAlt'];
-	$UserID		 = $LoggedUser['ID'];
-	$AuthKey	 = $LoggedUser['AuthKey'];
+	$UserID	= $LoggedUser['ID'];
+	$AuthKey = $LoggedUser['AuthKey'];
+	$HttpsTracker = $LoggedUser['HttpsTracker'];
 } else {
 	if (strpos($_REQUEST['torrent_pass'], '_') !== false) {
 		error(404);
@@ -13,17 +14,19 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
 	$UserInfo = $Cache->get_value('user_'.$_REQUEST['torrent_pass']);
 	if (!is_array($UserInfo)) {
 		$DB->query("
-			SELECT ID, DownloadAlt, la.UserID
+			SELECT ID, DownloadAlt, SiteOptions, la.UserID
 			FROM users_main AS m
 				INNER JOIN users_info AS i ON i.UserID = m.ID
 				LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
 			WHERE m.torrent_pass = '".db_string($_REQUEST['torrent_pass'])."'
 				AND m.Enabled = '1'");
-		$UserInfo = $DB->next_record();
+		$UserInfo = $DB->next_record(MYSQLI_NUM, array(2));
+		$SiteOptions = array_merge(Users::default_site_options(), unserialize_array($UserInfo[2]));
+		$UserInfo[2] = $SiteOptions['HttpsTracker'];
 		$Cache->cache_value('user_'.$_REQUEST['torrent_pass'], $UserInfo, 3600);
 	}
 	$UserInfo = array($UserInfo);
-	list($UserID, $DownloadAlt, $Locked) = array_shift($UserInfo);
+	list($UserID, $DownloadAlt, $HttpsTracker, $Locked) = array_shift($UserInfo);
 	if (!$UserID) {
 		error(0);
 	}
@@ -37,8 +40,6 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
 }
 
 $TorrentID = $_REQUEST['id'];
-
-
 
 if (!is_number($TorrentID)) {
 	error(0);
@@ -185,9 +186,8 @@ $DB->query("
 Torrents::set_snatch_update_time($UserID, Torrents::SNATCHED_UPDATE_AFTERDL);
 list($Contents) = $DB->next_record(MYSQLI_NUM, false);
 
-$AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 $FileName = TorrentsDL::construct_file_name($Info['PlainArtists'], $Name, $Year, $Media, $Format, $Encoding, $TorrentID, $DownloadAlt);
-
+$AnnounceURL = ($HttpsTracker) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 if ($DownloadAlt) {
 	header('Content-Type: text/plain; charset=utf-8');
 }
@@ -195,8 +195,6 @@ elseif (!$DownloadAlt || $Failed) {
 	header('Content-Type: application/x-bittorrent; charset=utf-8');
 }
 header('Content-disposition: attachment; filename="'.$FileName.'"');
-
-$AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 
 echo TorrentsDL::get_file($Contents, $AnnounceURL."/$TorrentPass/announce", $TorrentID);
 
