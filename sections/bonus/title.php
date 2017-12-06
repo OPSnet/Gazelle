@@ -12,12 +12,14 @@ if (isset($_REQUEST['preview'])) {
 	die();
 }
 if (isset($_REQUEST['Remove']) && $_REQUEST['Remove'] === 'true') {
+	authorize();
 	G::$DB->query("UPDATE users_main SET Title='' WHERE ID={$ID}");
 	G::$Cache->delete_value("user_info_{$ID}");
 	G::$Cache->delete_value("user_stats_{$ID}");
 	header('Location: bonus.php?complete');
 }
 elseif (isset($_POST['confirm'])) {
+	authorize();
 	if (!isset($_POST['title'])) {
 		error(403);
 	}
@@ -48,6 +50,7 @@ else {
 			<tr>
 				<td>
 					<form action="bonus.php?action=title&BBCode=<?=$BBCode?>" method="post">
+						<input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
 						<input type="hidden" name="confirm" value="true" />
 						<input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
 						<input type="submit" onclick="ConfirmPurchase(event, '<?=$Item['Title']?>')" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
