@@ -14,7 +14,7 @@ if (!check_perms('users_mod')) {
 
 if (!empty($_POST['name'])) {
 	authorize();
-    Contest::save($_POST);
+	Contest::save($_POST);
 	$Contest = Contest::get_contest($_POST['cid']);
 	$Saved = 1;
 }
@@ -177,7 +177,7 @@ if (!empty($Contest)) {
 				<td class="label">Banner:</td>
 				<td>
 					<p>This is the image displayed at the top of the page (optional).
-                       May be a local asset, or a URL.</p>
+					   May be a local asset, or a URL.</p>
 					<input type="text" size="60" name="banner" value="<?= $Contest['Banner'] ?>"/>
 				</td>
 			</tr>
@@ -186,10 +186,10 @@ if (!empty($Contest)) {
 				<td class="label">Introduction:</td>
 				<td>
 					<p>This is the introduction / guide of the contest.</p>
-                    <?php $IntroText = new TEXTAREA_PREVIEW('intro', 'intro', display_str($Contest['WikiText']), 60, 8, true, false); ?>
-                    <div style="text-align: center;">
-                        <input type="button" value="Preview" class="hidden button_preview_<?=$IntroText->getID()?>" tabindex="1" />
-                    </div>
+					<?php $IntroText = new TEXTAREA_PREVIEW('intro', 'intro', display_str($Contest['WikiText']), 60, 8, true, false); ?>
+					<div style="text-align: center;">
+						<input type="button" value="Preview" class="hidden button_preview_<?=$IntroText->getID()?>" tabindex="1" />
+					</div>
 				</td>
 			</tr>
 

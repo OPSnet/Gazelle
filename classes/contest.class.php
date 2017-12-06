@@ -7,7 +7,8 @@ class Contest {
 		$Contest = G::$Cache->get_value("contest_{$Id}");
 		if ($Contest === false) {
 			G::$DB->query("
-				SELECT c.ID, t.Name as ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd
+				SELECT c.ID, t.Name as ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd,
+					CASE WHEN now() BETWEEN c.DateBegin AND c.DateEnd THEN 1 ELSE 0 END as is_open
 				FROM contest c
 				INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
 				WHERE c.ID={$Id}
@@ -24,7 +25,8 @@ class Contest {
 		$Contest = G::$Cache->get_value('contest_current');
 		if ($Contest === false) {
 			G::$DB->query("
-				SELECT c.ID, t.Name as ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd
+				SELECT c.ID, t.Name as ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd,
+					CASE WHEN now() BETWEEN c.DateBegin AND c.DateEnd THEN 1 ELSE 0 END as is_open
 				FROM contest c
 				INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
 				WHERE c.DateEnd = (select max(DateEnd) from contest)
@@ -39,18 +41,27 @@ class Contest {
 		return $Contest;
 	}
 
-	private static function leaderboard_query() {
-		/* return the query that counts whatever it is that the ladder is measuring */
-		G::$DB->query("
-			SELECT c.ID, t.Name, c.DateBegin, c.DateEnd
-			FROM contest c
-			INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
-			ORDER BY c.DateEnd DESC
-			LIMIT 1
-		");
-		/* called from schedule, don't need to worry about caching this */
-		list($contest_id, $contest_type, $dt_begin, $dt_end) = G::$DB->next_record();
-		switch ($contest_type) {
+	public static function get_prior_contests() {
+		$Prior = G::$Cache->get_value('contest_prior');
+		if ($Prior === false) {
+			G::$DB->query("
+				SELECT c.ID
+				FROM contest c
+				WHERE c.DateBegin < NOW()
+				/* AND ... we may want to think about excluding certain past contests */
+				ORDER BY c.DateBegin ASC
+			");
+			if (G::$DB->has_results()) {
+				$Prior = G::$DB->to_array(false, MYSQLI_BOTH);
+				G::$Cache->cache_value('contest_prior', $Prior, 86400 * 3);
+			}
+		}
+		return $Prior;
+	}
+
+	private static function leaderboard_query($Contest) {
+		/* only called from schedule, don't need to worry about caching this */
+		switch ($Contest['ContestType']) {
 			case 'upload_flac':
 				/* how many 100% flacs uploaded? */
 				$sql = "
@@ -60,7 +71,7 @@ class Contest {
 					FROM users_main u
 					INNER JOIN torrents t ON (t.Userid = u.ID)
 					WHERE t.Format = 'FLAC'
-						AND t.Time BETWEEN '$dt_begin' AND '$dt_end'
+						AND t.Time BETWEEN '{$Contest['DateBegin']}' AND '{$Contest['DateEnd']}'
 						AND (
 							t.Media IN ('Vinyl', 'WEB')
 							OR (t.Media = 'CD'
@@ -85,9 +96,9 @@ class Contest {
 							MAX(r.TimeFilled) as TimeFilled
 						FROM requests r
 						INNER JOIN users_main u ON (r.FillerID = u.ID)
-						WHERE r.TimeFilled BETWEEN '$dt_begin' AND '$dt_end'
+						WHERE r.TimeFilled BETWEEN '{$Contest['DateBegin']}' AND '{$Contest['DateEnd']}'
 							AND r.FIllerId != r.UserID
-							AND r.TimeAdded < '$dt_begin'
+							AND r.TimeAdded < '{$Contest['DateBegin']}'
 						GROUP BY r.FillerID
 					) LAST USING (FillerID)
 					GROUP BY r.FillerID
@@ -97,40 +108,57 @@ class Contest {
 				$sql = null;
 				break;
 		}
-		return [$contest_id, $sql];
+		return $sql;
 	}
 
 	public static function calculate_leaderboard() {
-		list($Contest_id, $subquery) = self::leaderboard_query();
-		if ($subquery) {
-			$begin = time();
-			G::$DB->query("BEGIN");
-			G::$DB->query("DELETE FROM contest_leaderboard where ContestID = $Contest_id");
-			G::$DB->query("
-				INSERT INTO contest_leaderboard
-				SELECT $Contest_id, LADDER.userid,
-					LADDER.nr,
-					T.ID,
-					TG.Name,
-					group_concat(TA.ArtistID),
-					group_concat(AG.Name order by AG.Name separator 0x1),
-					T.Time
-				FROM torrents_artists TA
-				INNER JOIN torrents_group TG ON (TG.ID = TA.GroupID)
-				INNER JOIN artists_group AG ON (AG.ArtistID = TA.ArtistID)
-				INNER JOIN torrents T ON (T.GroupID = TG.ID)
-				INNER JOIN (
-					$subquery
-				) LADDER on (LADDER.last_torrent = T.ID)
-				GROUP BY
-					LADDER.nr,
-					T.ID,
-					TG.Name,
-					T.Time
-			");
-			G::$DB->query("COMMIT");
-			G::$Cache->delete_value('contest_leaderboard_' . $Contest_id);
-			self::get_leaderboard($Contest_id, false);
+		G::$DB->query("
+			SELECT c.ID
+			FROM contest c
+			INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
+			WHERE c.DateEnd > now() - INTERVAL 1 MONTH
+			ORDER BY c.DateEnd DESC
+		");
+		$contest_id = [];
+		while (G::$DB->has_results()) {
+			$c = G::$DB->next_record();
+			if (isset($c['ID'])) {
+				$contest_id[] = $c['ID'];
+			}
+		}
+		foreach ($contest_id as $id) {
+			$Contest = Contest::get_contest($id);
+			$subquery = self::leaderboard_query($Contest);
+			if ($subquery) {
+				$begin = time();
+				G::$DB->query("BEGIN");
+				G::$DB->query("DELETE FROM contest_leaderboard where ContestID = $id");
+				G::$DB->query("
+					INSERT INTO contest_leaderboard
+					SELECT $id, LADDER.userid,
+						LADDER.nr,
+						T.ID,
+						TG.Name,
+						group_concat(TA.ArtistID),
+						group_concat(AG.Name order by AG.Name separator 0x1),
+						T.Time
+					FROM torrents_artists TA
+					INNER JOIN torrents_group TG ON (TG.ID = TA.GroupID)
+					INNER JOIN artists_group AG ON (AG.ArtistID = TA.ArtistID)
+					INNER JOIN torrents T ON (T.GroupID = TG.ID)
+					INNER JOIN (
+						$subquery
+					) LADDER on (LADDER.last_torrent = T.ID)
+					GROUP BY
+						LADDER.nr,
+						T.ID,
+						TG.Name,
+						T.Time
+				");
+				G::$DB->query("COMMIT");
+				G::$Cache->delete_value('contest_leaderboard_' . $id);
+				self::get_leaderboard($id, false);
+			}
 		}
 	}
 
