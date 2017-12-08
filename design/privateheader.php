@@ -326,7 +326,7 @@ if (check_perms('site_send_unlimited_invites')) {
 					</li>
 					<li id="nav_irc"<?=
 						Format::add_class($PageID, array('chat'), 'active', true)?>>
-						<a href="chat.php">IRC</a>
+						<a href="wiki.php?action=article&name=irc">IRC</a>
 					</li>
 					<li id="nav_top10"<?=
 						Format::add_class($PageID, array('top10'), 'active', true)?>>
@@ -568,6 +568,7 @@ if (isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType']) { // Ad
 						<span class="hidden">Requests: </span>
 						<form class="search_form" name="requests" action="requests.php" method="get">
 							<input id="requestssearch" spellcheck="false"
+								    accesskey="r"
 									onfocus="if (this.value == 'Requests') { this.value = ''; }"
 									onblur="if (this.value == '') { this.value = 'Requests'; }"
 									value="Requests" placeholder="Requests" type="text" name="search" size="17" />
@@ -578,6 +579,7 @@ if (isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType']) { // Ad
 						<form class="search_form" name="forums" action="forums.php" method="get">
 							<input value="search" type="hidden" name="action" />
 							<input id="forumssearch"
+								    accesskey="f"
 									onfocus="if (this.value == 'Forums') { this.value = ''; }"
 									onblur="if (this.value == '') { this.value = 'Forums'; }"
 									value="Forums" placeholder="Forums" type="text" name="search" size="17" />
@@ -599,6 +601,7 @@ if (isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType']) { // Ad
 						<span class="hidden">Log: </span>
 						<form class="search_form" name="log" action="log.php" method="get">
 							<input id="logsearch"
+								    accesskey="l"
 									onfocus="if (this.value == 'Log') { this.value = ''; }"
 									onblur="if (this.value == '') { this.value = 'Log'; }"
 									value="Log" placeholder="Log" type="text" name="search" size="17" />
@@ -609,7 +612,7 @@ if (isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType']) { // Ad
 						<form class="search_form" name="users" action="user.php" method="get">
 							<input type="hidden" name="action" value="search" />
 							<input
-									id="userssearch"
+									id="userssearch" accesskey="u"
 									onfocus="if (this.value == 'Users') { this.value = ''; }"
 									onblur="if (this.value == '') { this.value = 'Users'; }"
 									value="Users" placeholder="Users" type="text" name="search" size="20" />
