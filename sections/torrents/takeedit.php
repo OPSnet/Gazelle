@@ -296,19 +296,16 @@ if (count($_FILES['logfiles']['name']) > 0) {
 			continue;
 		}
 
-		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
-		if ($LogFile === false) {
-			die("Logfile doesn't exist or couldn't be opened");
-		}
+		$LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
+		$FileName = $_FILES['logfiles']['name'][$Pos];
 
-		$Logchecker->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
+		$Logchecker->new_file($LogPath);
 		list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
 		$Details = implode("\r\n", $Details);
-		$FileName = $_FILES['logfiles']['name'][$Pos];
 
 		$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($Text)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')"); //set log scores
 		$LogID = $DB->inserted_id();
-		if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+		if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
 			die("Could not copy logfile to the server.");
 		}
 	}

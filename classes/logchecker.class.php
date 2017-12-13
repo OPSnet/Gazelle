@@ -5,7 +5,7 @@
 
 class Logchecker {
 	var $Log = '';
-	var $FileName = null;
+	var $LogPath = null;
 	var $Logs = array();
 	var $Tracks = array();
 	var $Checksum = true;
@@ -37,23 +37,43 @@ class Logchecker {
 	var $InvalidateCache = true;
 	var $DubiousTracks = 0;
 	var $EAC_LANG = array();
+	var $Encodings = array('Windows-1251');
+	var $Chardet;
 
-	// Sometimes things get put into weird encodings
-	var $Encodings = array(
-		'Windows-1251'
-	);
+	var $ValidateChecksum = true;
 
-	function __construct()
-	{
-		$EAC_LANG = array();
-		require_once __DIR__ . '/logchecker/eac_languages.php';
-		$this->EAC_LANG = $EAC_LANG;
+	function __construct() {
+		$this->EAC_LANG = require_once(__DIR__ . '/logchecker/eac_languages.php');
+		$this->Chardet = new Yupmin\PHPChardet\Chardet();
 	}
 
-	function new_file($Log, $FileName = null)
-	{
-		$this->Log = $Log;
-		$this->FileName = $FileName;
+	/**
+	 * @param string $LogPath path to log file on local filesystem
+	 */
+	function new_file($LogPath) {
+		$this->reset();
+		$this->LogPath = $LogPath;
+		$this->Log = file_get_contents($this->LogPath);
+
+		if (ord($this->Log[0]) . ord($this->Log[1]) == 0xFF . 0xFE) {
+			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16LE');
+		}
+		elseif (ord($this->Log[0]) . ord($LogData[1]) == 0xFE . 0xFF) {
+			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16BE');
+		}
+		elseif (ord($this->Log[0]) == 0xEF && ord($this->Log[1]) == 0xBB && ord($this->Log[2]) == 0xBF) {
+			$this->Log = substr($this->Log, 3);
+		}
+		else {
+			$ChardetContainer = $this->Chardet->analyze($this->LogPath);
+			if ($ChardetContainer->getCharset() !== 'utf-8' && $ChardetContainer->getConfidence() > 0.7) {
+				$this->Log = mb_convert_encoding($this->Log, 'UTF-8', $ChardetContainer->getCharset());
+			}
+		}
+	}
+
+	function reset() {
+		$this->LogPath = null;
 		$this->Logs = array();
 		$this->Tracks = array();
 		$this->Checksum = true;
@@ -86,41 +106,27 @@ class Logchecker {
 		$this->DubiousTracks = 0;
 	}
 
+	function validateChecksum($Bool) {
+		$this->ValidateChecksum = $Bool;
+	}
+
 	/**
 	 * @return array Returns an array that contains [Score, Details, Checksum, Log]
 	 */
-	function parse()
-	{
-		if (ord($this->Log[0]) . ord($this->Log[1]) == 0xFF . 0xFE) {
-			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16LE');
-		}
-		elseif (ord($this->Log[0]) . ord($LogData[1]) == 0xFE . 0xFF) {
-			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16BE');
-		}
-		elseif (ord($this->Log[0]) == 0xEF && ord($this->Log[1]) == 0xBB && ord($this->Log[2]) == 0xBF) {
-			$this->Log = substr($this->Log, 3);
-		}
-		else {
-			foreach ($this->Encodings as $Encoding) {
-				if (mb_check_encoding($this->Log, $Encoding)) {
-					$this->Log = mb_convert_encoding($this->Log, 'UTF-8', $Encoding);
-					break;
-				}
-			}
-		}
-
-		foreach ($this->EAC_LANG as $lang => $dict) {
-			if ($lang === 'en') {
+	function parse() {
+		foreach ($this->EAC_LANG as $Lang => $Dict) {
+			if ($Lang === 'en') {
 				continue;
 			}
-			if (preg_match('/'.preg_quote($dict[1274], "/").'/ui', $this->Log) === 1) {
-				$this->account("Translated log from {$dict[1]} ({$dict[2]}) to {$this->EAC_LANG['en'][1]}.", false, false, false, true);
-				foreach ($dict as $key => $value) {
-					$Log = preg_replace("/".preg_quote($value, '/')."/ui", $this->EAC_LANG['en'][$key], $this->Log);
+			if (preg_match('/'.preg_quote($Dict[1274], "/").'/ui', $this->Log) === 1) {
+				$this->account("Translated log from {$Dict[1]} ({$Dict[2]}) to {$this->EAC_LANG['en'][1]}.", false, false, false, true);
+				foreach ($Dict as $Key => $Value) {
+					$Log = preg_replace('/'.preg_quote($Value, '/').'/ui', $this->EAC_LANG['en'][$Key], $this->Log);
 					if ($Log !== null) {
 						$this->Log = $Log;
 					}
 				}
+				break;
 			}
 		}
 
@@ -226,21 +232,24 @@ class Logchecker {
 				$this->RIPPER = ($EAC) ? "EAC" : "XLD";
 			}
 
-			if ($this->Checksum && !empty($this->FileName)) {
-				if ($EAC) {
-					$Exe = __DIR__ . "/logchecker/eac_logchecker.exe";
-					$Out = shell_exec("script -q -c 'wine ${Exe} {$this->FileName}' /dev/null");
-					if (strpos($Out, "Log entry has no checksum!") !== false ||
-						strpos($Out, "Log entry was modified, checksum incorrect!") !== false ||
-						strpos($Out, "Log entry is fine!") === false) {
-						$this->Checksum = false;
+			if ($this->ValidateChecksum && $this->Checksum && !empty($this->LogPath)) {
+				$Exe = ($EAC) ? __DIR__ . "/logchecker/eac_logchecker.exe" : __DIR__ . "/logchecker/eac_logchecker.exe";
+				if (file_exists($Exe)) {
+					if ($EAC) {
+						$Script = "script -q -c 'wine {$Exe} {$this->LogPath}' /dev/null";
+						$Out = shell_exec($Script);
+						if (strpos($Out, "Log entry has no checksum!") !== false ||
+							strpos($Out, "Log entry was modified, checksum incorrect!") !== false ||
+							strpos($Out, "Log entry is fine!") === false) {
+							$this->Checksum = false;
+						}
 					}
-				}
-				else {
-					$Exe = __DIR__ . '/logchecker/xld_logchecker';
-					$Out = shell_exec("{$Exe} {$this->FileName}");
-					if (strpos($Out, "Malformed") !== false || strpos($Out, "OK") === false) {
-						$this->Checksum = false;
+					else {
+						$Exe = __DIR__ . '/logchecker/xld_logchecker';
+						$Out = shell_exec("{$Exe} {$this->LogPath}");
+						if (strpos($Out, "Malformed") !== false || strpos($Out, "OK") === false) {
+							$this->Checksum = false;
+						}
 					}
 				}
 			}

@@ -755,17 +755,16 @@ if ($HasLog) {
 			continue;
 		}
 
-		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
-		if ($LogFile === false) {
-			die("Logfile doesn't exist or couldn't be opened");
-		}
+		$LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
+		$FileName = $_FILES['logfiles']['name'][$Pos];
 
-		$Logchecker->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
+		$Logchecker->new_file($LogPath);
 		list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
+
 		$LogScore = min($Score, $LogScore);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Details = implode("\r\n", $Details);
-		$LogScores[$Pos] = array($Score, $Details, $Checksum, $Text, $_FILES['logfiles']['name'][$Pos]);
+		$LogScores[$Pos] = array($Score, $Details, $Checksum, $Text, $FileName);
 		$LogInDB = 1;
 	}
 }
