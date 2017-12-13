@@ -254,6 +254,7 @@ function permissions_form() {
 					display_perm('admin_advanced_user_search', 'Can access advanced user search');
 					display_perm('admin_create_users', 'Can create users through an administrative form');
 					display_perm('admin_donor_log', 'Can view the donor log');
+					display_perm('admin_manage_stylesheets', 'Can manage stylesheets');
 					display_perm('admin_manage_ipbans', 'Can manage IP bans');
 					display_perm('admin_dnu', 'Can manage do not upload list');
 					display_perm('admin_clear_cache', 'Can clear cached pages');
