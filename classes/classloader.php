@@ -35,7 +35,4 @@ spl_autoload_register(function ($ClassName) {
 	require_once($FilePath);
 });
 
-$Loader = require(__DIR__.'/../vendor/autoload.php');
-// TODO: Move this over to compoer to autodump once we're more set on
-// structure and usage
-$Loader->addPsr4('ApolloRIP\\Gazelle\\', _DIR__.'../app');
+require(__DIR__.'/../vendor/autoload.php');
