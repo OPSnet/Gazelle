@@ -83,7 +83,7 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
 		error(404);
 	}
 	$Info = array($DB->next_record(MYSQLI_NUM, array(4, 5, 6, 10)));
-	$Artists = Artists::get_artist($Info[0][4], false);
+	$Artists = Artists::get_artist($Info[0][4]);
 	$Info['Artists'] = Artists::display_artists($Artists, false, true);
 	$Info['PlainArtists'] = Artists::display_artists($Artists, false, true, false);
 	$Cache->cache_value("torrent_download_$TorrentID", $Info, 0);

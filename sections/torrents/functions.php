@@ -250,7 +250,7 @@ function get_group_requests($GroupID) {
 }
 
 //Used by both sections/torrents/details.php and sections/reportsv2/report.php
-function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $GroupCategoryID, $ReleaseType, $TorrentList, $Types, $Username, $ReportedTimes) {
+function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $GroupCategoryID, $ReleaseType, $TorrentList, $Types) {
 
 	function filelist($Str) {
 		return "</td>\n<td>" . Format::get_size($Str[1]) . "</td>\n</tr>";
@@ -283,7 +283,6 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 	}
 
 	$Reported = false;
-	unset($ReportedTimes);
 	$Reports = Torrents::get_reports($TorrentID);
 	$NumReports = count($Reports);
 
@@ -362,7 +361,6 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 	$ExtraInfo = ''; // String that contains information on the torrent (e.g. format and encoding)
 	$AddExtra = ''; // Separator between torrent properties
 
-	$TorrentUploader = $Username; // Save this for "Uploaded by:" below
 	// similar to Torrents::torrent_info()
 	if ($Format) {
 		$ExtraInfo .= display_str($Format);
@@ -457,15 +455,17 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 		$EditionID++;
 ?>
 				<tr class="releases_<?=($ReleaseType)?> groupid_<?=($GroupID)?> edition group_torrent">
-					<td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=($GroupID)?>, <?=($EditionID)?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= Torrents::edition_string($Torrent, $TorrentDetails) ?></strong></td>
+					<td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=($GroupID)?>, <?=($EditionID)?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, array())?></strong></td>
 				</tr>
 <?
 	}
+
 	$LastRemasterTitle = $RemasterTitle;
 	$LastRemasterYear = $RemasterYear;
 	$LastRemasterRecordLabel = $RemasterRecordLabel;
 	$LastRemasterCatalogueNumber = $RemasterCatalogueNumber;
 	$LastMedia = $Media;
+
 		?>
 				<tr class="torrent_row releases_<?=($ReleaseType)?> groupid_<?=($GroupID)?> edition_<?=($EditionID)?> group_torrent<?=($IsSnatched ? ' snatched_torrent' : '')?>" style="font-weight: normal;" id="torrent<?=($TorrentID)?>">
 					<td>
