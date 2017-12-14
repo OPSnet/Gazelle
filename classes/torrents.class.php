@@ -1001,7 +1001,7 @@ class Torrents {
 		return $DisplayName;
 	}
 
-	public static function edition_string(array $Torrent, array $Group) {
+	public static function edition_string(array $Torrent, array $Group = array()) {
 		if ($Torrent['Remastered'] && $Torrent['RemasterYear'] != 0) {
 			$EditionName = $Torrent['RemasterYear'];
 			$AddExtra = ' - ';
