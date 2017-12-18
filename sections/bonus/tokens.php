@@ -1,4 +1,5 @@
 <?php
+authorize();
 
 $Other = (isset($_GET['Other']) && $_GET['Other'] === 'true') ? 'true' : 'false';
 $Amount = (isset($_GET['Amount'])) ? intval($_GET['Amount']) : 0;

@@ -162,7 +162,7 @@ if ($TotalTorrents > 0) {
 		} else {
 			$DisplayName = '';
 		}
-		$DisplayName .= '<a href="torrents.php?id=' . $GroupID . '&amp;torrentid=' . $TorrentID . '" class="tooltip" title="View torrent" dir="ltr">' . $GroupName . '</a>';
+		$DisplayName .= '<a href="torrents.php?id=' . $GroupID . '&amp;torrentid=' . $Torrent['ID'] . '" class="tooltip" title="View torrent" dir="ltr">' . $GroupName . '</a>';
 		if ($GroupYear > 0) {
 			$DisplayName .= " [$GroupYear]";
 		}
