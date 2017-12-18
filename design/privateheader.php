@@ -209,10 +209,10 @@ if ($NotificationsManager->is_skipped(NotificationsManager::SUBSCRIPTIONS)) {
 				</ul>
 				<ul id="userinfo_major">
 					<li id="nav_upload" class="brackets<?=Format::add_class($PageID, array('upload'), 'active', false)?>">
-						<a href="upload.php">Upload</a>
+						<a href="upload.php" title="Upload">Upload</a>
 					</li>
 					<li id="nav_bonus" class="brackets<?=Format::add_class($PageID, array('user', 'bonus'), 'active', false)?>">
-						<a href="bonus.php">Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)</a>
+						<a href="bonus.php" title="Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)">Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)</a>
 					</li>
 <?
 if (check_perms('site_send_unlimited_invites')) {
@@ -224,10 +224,10 @@ if (check_perms('site_send_unlimited_invites')) {
 }
 ?>
 					<li id="nav_invite" class="brackets<?=Format::add_class($PageID, array('user','invite'), 'active', false)?>">
-						<a href="user.php?action=invite">Invite<?=$Invites?></a>
+						<a href="user.php?action=invite" title="Invite<?=$Invites?>">Invite<?=$Invites?></a>
 					</li>
 					<li id="nav_donate" class="brackets<?=Format::add_class($PageID, array('donate'), 'active', false)?>">
-						<a href="donate.php">Donate</a>
+						<a href="donate.php" title="Donate">Donate</a>
 					</li>
 
 				</ul>
@@ -342,7 +342,7 @@ if (check_perms('site_send_unlimited_invites')) {
 					</li>
 					<li id="nav_staff"<?=
 						Format::add_class($PageID, array('staff'), 'active', true)?>>
-						<a href="staff.php">Staff</a>
+						<a href="staff.php" title="Staff">Staff</a>
 					</li>
 				</ul>
 			</div>

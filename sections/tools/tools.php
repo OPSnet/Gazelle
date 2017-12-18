@@ -133,6 +133,7 @@ View::show_header('Staff Tools');
 
 	// begin Managers category
 	$ToolsHTML = "";
+	create_row("Stylesheets", "tools.php?action=stylesheets", check_perms("admin_manage_stylesheets"));
 	create_row("Email blacklist", "tools.php?action=email_blacklist", check_perms("users_view_email"));
 	create_row("IP address bans", "tools.php?action=ip_ban", check_perms("admin_manage_ipbans"));
 	create_row("Duplicate IP addresses", "tools.php?action=dupe_ips", check_perms("users_view_ips"));
