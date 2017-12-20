@@ -8,7 +8,7 @@ html, body {
 }
 
 body {
-	background-color: #d23c3e;
+	background-color: #261c2d;
 	font-family: Bitstream Vera Sans, Tahoma, sans-serif;
 	font-size: 11px;
 	color: #FFFFFF;
@@ -20,7 +20,7 @@ table {
 }
 
 a {
-	color: #FFFFFF;
+	color: #757575;
 	text-decoration: none;
 }
 
@@ -66,7 +66,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 }
 
 #foot > span {
-	color: #FFFFFF;
+	color: #393939;
 }
 
 #maincontent {
@@ -77,7 +77,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 #logo {
 	height: 139px;
 	width: 150px;
-	background-image: url('images/loginlogo.png');
+	background-image: url('images/loginlogored.png');
 	background-repeat: no-repeat;
 	background-position: top left;
 	padding: 50px 0px 0px 0px;
