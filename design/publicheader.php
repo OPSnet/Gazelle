@@ -36,6 +36,7 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 		<td align="center" valign="middle">
 			<div id="logo"></div>
 				<ul class="links">
+				    <li><a href="login.php">Log in</a></li>
 <? if (OPEN_REGISTRATION) { ?>
 					<li><a href="index.php">Home</a></li>
 					<li><a href="login.php">Log in</a></li>
