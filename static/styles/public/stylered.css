@@ -41,7 +41,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 	height: 6%;
 	min-height: 25px;
 	width: 100%;
-	background-color: #261c2d;
+	background-color: #f4f4f4;
 	overflow: hidden;
 }
 #foot {
