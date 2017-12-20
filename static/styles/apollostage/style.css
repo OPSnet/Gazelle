@@ -517,7 +517,7 @@ table.box2 {
 	margin-left: 8px
 }
 
-.last_read:before {
+.last_read :before {
 	content: '➜';
 	display: inline-block
 }
