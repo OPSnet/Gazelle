@@ -8,7 +8,7 @@ html, body {
 }
 
 body {
-	background-color: #261c2d;
+	background-color: #d23c3e;
 	font-family: Bitstream Vera Sans, Tahoma, sans-serif;
 	font-size: 11px;
 	color: #FFFFFF;
@@ -20,7 +20,7 @@ table {
 }
 
 a {
-	color: #757575;
+	color: #FFFFFF;
 	text-decoration: none;
 }
 
@@ -66,7 +66,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 }
 
 #foot > span {
-	color: #393939;
+	color: #FFFFFF;
 }
 
 #maincontent {
