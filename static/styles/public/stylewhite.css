@@ -6,20 +6,20 @@ html, body {
 	height: 100%;
 }
 body {
-	background-color: #d33d3e;
+	background-color: #f4f4f4;
 	font-family: Bitstream Vera Sans, Tahoma, sans-serif;
 	font-size: 11px;
-	color: #FFFFFF;
+	color: #d13c3d;
 }
 table {
 	font-size: inherit;
 }
 a {
-	color: #FFFFFF;
+	color: #d13c3d;
 	text-decoration: none;
 }
 a:hover {
-	color: #FFFFFF;
+	color: #008151;
 }
 input[type="text"], input[type="password"] {
 	padding: 1px 3px 0px 3px;
@@ -41,7 +41,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 	height: 6%;
 	min-height: 25px;
 	width: 100%;
-	background-color: #d33d3e;
+	background-color: #f4f4f4;
 	overflow: hidden;
 }
 #foot {
@@ -53,7 +53,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 	padding: 20px;
 }
 #foot > span {
-	color: #FFFFFF;
+	color: #008151;
 }
 #maincontent {
 	width: 100%;
@@ -62,7 +62,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 #logo {
 	height: 139px;
 	width: 150px;
-	background-image: url('images/loginlogowhite.png');
+	background-image: url('images/loginlogogreenred.png');
 	background-repeat: no-repeat;
 	background-position: top left;
 	padding: 50px 0px 0px 0px;
