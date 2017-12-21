@@ -9,7 +9,7 @@ class ARTIST {
 	var $y = 0;
 	var $Similar = array();
 
-	function ARTIST($ID = '', $Name = '') {
+	function __construct($ID = '', $Name = '') {
 		$this->ID = $ID;
 		$this->NameLength = mb_strlen($Name, 'utf8');
 		$this->Name = display_str($Name);

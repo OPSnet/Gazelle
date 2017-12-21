@@ -41,7 +41,7 @@ class Votes {
 				SELECT GroupID, Type
 				FROM users_votes
 				WHERE UserID = $UserID");
-			$UserVotes = G::$DB->to_array('GroupID', MYSQL_ASSOC, false);
+			$UserVotes = G::$DB->to_array('GroupID', MYSQLI_ASSOC, false);
 			G::$DB->set_query_id($QueryID);
 			G::$Cache->cache_value("voted_albums_$UserID", $UserVotes);
 		}
