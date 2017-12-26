@@ -200,6 +200,9 @@ switch ($_REQUEST['action']) {
 		header('Location: index.php');
 		break;
 
+	case 'bonus_points':
+		include(SERVER_ROOT.'/sections/tools/managers/bonus_points.php');
+		break;
 	case 'tokens':
 		include(SERVER_ROOT.'/sections/tools/managers/tokens.php');
 		break;
