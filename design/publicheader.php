@@ -14,8 +14,11 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 <? if ($Mobile) { ?>
 	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0, user-scalable=no;" />
 	<link href="<?=STATIC_SERVER ?>styles/mobile/style.css?v=<?=filemtime(SERVER_ROOT.'/static/mobile/style.css')?>" rel="stylesheet" type="text/css" />
-<? } else { ?>
-	<link href="<?=STATIC_SERVER ?>styles/public/stylered.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/public/stylered.css')?>" rel="stylesheet" type="text/css" />
+<? } else {
+	$styles = array('', 'red', 'green', 'white');
+	$style = $styles[array_rand($styles)];
+?>
+	<link href="<?=STATIC_SERVER ?>styles/public/style<?=$style?>.css?v=<?=filemtime(SERVER_ROOT."/static/styles/public/style{$style}.css")?>" rel="stylesheet" type="text/css" />
 <? } ?>
 	<script src="<?=STATIC_SERVER?>functions/jquery.js" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/script_start.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/script_start.js')?>" type="text/javascript"></script>
