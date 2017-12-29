@@ -25,7 +25,7 @@ memcached -d -m 8192 -l 10.10.0.1 -t8 -C
 |*************************************************************************/
 
 if (!extension_loaded('memcached')) {
-	die('Memcache Extension not loaded.');
+	die('memcached Extension not loaded.');
 }
 
 class CACHE extends Memcached {
@@ -57,6 +57,20 @@ class CACHE extends Memcached {
 	public $CanClear = false;
 	public $InternalCache = true;
 
+	/**
+	 * CACHE constructor. Takes a array of $Servers with a host, port, and optionally a weight.
+	 * We then add each of the servers in the array to our memcached pool assuming we haven't
+	 * already connected to it before (cross-checking against the pool's server list). If you want
+	 * to connect to a socket, you need to use port 0, though internally in the pool it'll have
+	 * port 11211, so if using a server with port 0, we also need to check for port 11211 in
+	 * the $ServerList as Memcached really doesn't like the same server being added hundreds of time
+	 * with the same weight.
+	 *
+	 * @see Memcached::getServerList()
+	 *
+	 * @param $Servers
+	 * @param string $PersistantID
+	 */
 	function __construct($Servers, $PersistantID = 'apl') {
 		parent::__construct($PersistantID);
 		$this->Servers = $Servers;
@@ -65,7 +79,11 @@ class CACHE extends Memcached {
 			$ServerList["{$Server['host']}:{$Server['port']}"] = true;
 		}
 		foreach ($this->Servers as $Server) {
-			if (!isset($ServerList["{$Server['host']}:{$Server['port']}"])) {
+			$ServerCheck = isset($ServerList["{$Server['host']}:{$Server['port']}"]);
+			if ($Server['port'] == 0) {
+				$ServerCheck = $ServerCheck || isset($ServerList["{$Server['host']}:11211"]);
+			}
+			if (!$ServerCheck) {
 				$Weight = (isset($Server['weight'])) ? $Server['weight'] : 0;
 				$this->addServer($Server['host'], $Server['port'], $Weight);
 			}
