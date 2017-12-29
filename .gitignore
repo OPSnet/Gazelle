@@ -13,3 +13,4 @@ static/stylespreview/
 !static/stylespreview/.gitkeep
 
 sections/tools/development/node_modules/
+/vendor/

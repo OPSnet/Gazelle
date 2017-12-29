@@ -1,4 +1,5 @@
-<?
+<?php
+
 /**
  * Load classes automatically when they're needed
  *
@@ -33,3 +34,5 @@ spl_autoload_register(function ($ClassName) {
 	}
 	require_once($FilePath);
 });
+
+require(__DIR__.'/../vendor/autoload.php');
