@@ -747,6 +747,7 @@ $LogScore = 100;
 $LogChecksum = 1;
 $LogInDB = 0;
 $LogScores = array();
+$Logchecker = new Logchecker();
 if ($HasLog) {
 	ini_set('upload_max_filesize', 1000000);
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
@@ -754,22 +755,16 @@ if ($HasLog) {
 			continue;
 		}
 
-		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
-		if ($LogFile === false) {
-			die("Logfile doesn't exist or couldn't be opened");
-		}
+		$LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
+		$FileName = $_FILES['logfiles']['name'][$Pos];
 
-		//detect & transcode unicode
-		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
-			$LogFile = iconv("unicode", "UTF-8", $LogFile);
-		}
-		$Log = new Logchecker;
-		$Log->new_file($LogFile, $_FILES['logfiles']['tmp_name'][$Pos]);
-		list($Score, $Details, $Checksum, $Text) = $Log->parse();
+		$Logchecker->new_file($LogPath);
+		list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
+
 		$LogScore = min($Score, $LogScore);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Details = implode("\r\n", $Details);
-		$LogScores[$Pos] = array($Score, $Details, $Checksum, $Text, $File);
+		$LogScores[$Pos] = array($Score, $Details, $Checksum, $Text, $FileName);
 		$LogInDB = 1;
 	}
 }
@@ -805,7 +800,7 @@ $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 
 foreach ($LogScores as $Pos => $Log) {
 	list($Score, $Details, $Checksum, $Text, $FileName) = $Log;
-	$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($Text)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')"); //set log scores
+	$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($Text)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')"); //set log scores
 	$LogID = $DB->inserted_id();
 	if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
 		die("Could not copy logfile to the server.");

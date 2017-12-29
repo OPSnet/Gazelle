@@ -147,8 +147,8 @@ class Users {
 	 * Gets the heavy user info
 	 * Only used for current user
 	 *
-	 * @param $UserID The userid to get the information for
-	 * @return fetched heavy info.
+	 * @param string $UserID The userid to get the information for
+	 * @return array fetched heavy info.
 	 *		Just read the goddamn code, I don't have time to comment this shit.
 	 */
 	public static function user_heavy_info($UserID) {

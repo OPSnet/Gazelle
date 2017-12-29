@@ -1,19 +1,15 @@
 <?
-//******************************************************************************//
-//--------------- Take upload --------------------------------------------------//
-// This pages handles the backend of the torrent upload function. It checks //
-// the data, and if it all validates, it builds the torrent file, then writes //
-// the data to the database and the torrent to the disk. //
-//******************************************************************************//
 //ini_set('upload_max_filesize',1000000);
 enforce_login();
-$File = (isset($_FILES['log'])) ? $_FILES['log'] : null; // Our log file
-$FileName = $File['tmp_name'];
-if (is_uploaded_file($FileName) && filesize($FileName)) {
-	$LogFile = file_get_contents($FileName);
-	// Contents of the log are now stored in $LogFile
+
+$ValidateChecksum = true;
+if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
+	$File = $_FILES['log'];
 } elseif (!empty($_POST["pastelog"])) {
-	$LogFile = $_POST["pastelog"];
+	$ValidateChecksum = false;
+	$TmpFile = tempnam('/tmp', 'log_');
+	file_put_contents($TmpFile, $_POST["pastelog"]);
+	$File = array('tmp_name' => $TmpFile, 'name' => $TmpFile);
 } else {
 	error('No log file uploaded or file is empty.');
 }
@@ -30,13 +26,9 @@ echo <<<HTML
 	<h2 class="center">Logchecker Test Results</h2>
 HTML;
 
-//detect & transcode unicode
-if (Logchecker::detect_utf_bom_encoding($LogFile)) {
-	$LogFile = iconv("unicode", "UTF-8", $LogFile);
-}
-
 $Log = new Logchecker();
-$Log->new_file($LogFile, $FileName);
+$Log->validateChecksum($ValidateChecksum);
+$Log->new_file($File['tmp_name']);
 
 list($Score, $Bad, $Checksum, $Text) = $Log->parse();
 
@@ -95,6 +87,6 @@ echo <<<HTML
 HTML;
 View::show_footer();
 
-if (!empty($FileName) && is_file($FileName)) {
-	unlink($FileName);
+if (!empty($TmpFile) && is_file($TmpFile)) {
+	unlink($TmpFile);
 }

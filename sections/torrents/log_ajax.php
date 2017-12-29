@@ -20,9 +20,9 @@ if($DB->record_count() > 0) {
 		echo "<tr class='log_section'><td>";
 		if (check_perms('users_mod')) {
 			echo "<a class='brackets' href='torrents.php?action=editlog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Edit Log</a>&nbsp;";
-			//echo "<a class='brackets' href='torrents.php?action=deletelog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Delete Log</a>&nbsp;";
+			echo "<a class='brackets' onclick=\"return confirm('Are you sure you want to deleted this log? There is NO undo!');\" href='torrents.php?action=deletelog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Delete Log</a>&nbsp;";
 		}
-		if (file_exists(SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log")) {
+		if (file_exists(SERVER_ROOT . "/logs/{$TorrentID}_{$Log['LogID']}.log")) {
 			echo "<a class='brackets' href='logs/{$TorrentID}_{$Log['LogID']}.log' target='_blank'>View Raw Log</a>";
 		}
 

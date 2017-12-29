@@ -161,15 +161,7 @@ if (isset($LoginCookie)) {
 	}
 
 	// Up/Down stats
-	$UserStats = $Cache->get_value('user_stats_'.$LoggedUser['ID']);
-	if (!is_array($UserStats)) {
-		$DB->query("
-			SELECT Uploaded AS BytesUploaded, Downloaded AS BytesDownloaded, BonusPoints, RequiredRatio
-			FROM users_main
-			WHERE ID = '$LoggedUser[ID]'");
-		$UserStats = $DB->next_record(MYSQLI_ASSOC);
-		$Cache->cache_value('user_stats_'.$LoggedUser['ID'], $UserStats, 3600);
-	}
+	$UserStats = Users::user_stats($LoggedUser['ID']);
 
 	// Get info such as username
 	$LightInfo = Users::user_info($LoggedUser['ID']);

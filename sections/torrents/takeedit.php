@@ -266,7 +266,15 @@ foreach ($DBTorVals as $Key => $Value) {
 
 // Update info for the torrent
 $SQL = "
-	UPDATE torrents
+	UPDATE torrents AS t
+	JOIN (
+		SELECT
+			TorrentID,
+			MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+			MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+		FROM torrents_logs
+		GROUP BY TorrentID
+ 	) AS tl ON t.ID = tl.TorrentID
 	SET
 		Media = $T[Media],
 		Format = $T[Format],
@@ -276,7 +284,33 @@ $SQL = "
 		RemasterTitle = $T[RemasterTitle],
 		RemasterRecordLabel = $T[RemasterRecordLabel],
 		RemasterCatalogueNumber = $T[RemasterCatalogueNumber],
-		Scene = $T[Scene],";
+		Scene = $T[Scene],
+		LogScore = tl.Score,
+		LogChecksum=tl.Checksum,";
+
+$Logchecker = new Logchecker();
+if (count($_FILES['logfiles']['name']) > 0) {
+	ini_set('upload_max_filesize', 1000000);
+	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
+		if (!$_FILES['logfiles']['size'][$Pos]) {
+			continue;
+		}
+
+		$LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
+		$FileName = $_FILES['logfiles']['name'][$Pos];
+
+		$Logchecker->new_file($LogPath);
+		list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
+		$Details = implode("\r\n", $Details);
+
+		$DB->query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($Text)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')"); //set log scores
+		$LogID = $DB->inserted_id();
+		if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+			die("Could not copy logfile to the server.");
+		}
+	}
+	$SQL .= "HasLogDB = '1',";
+}
 
 if (check_perms('torrents_freeleech')) {
 	$SQL .= "FreeTorrent = $T[FreeLeech],";

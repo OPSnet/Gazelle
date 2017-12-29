@@ -15,6 +15,7 @@ $DB->query("
 	WHERE t.ID = {$TorrentID} AND t.HasLog='1'" . $Extra);
 
 $DetailsArray = array();
+$Logchecker = new Logchecker();
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 	list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);
 	$DB->query("SELECT LogID FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
@@ -27,23 +28,18 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			break;
 		}
-		$FileName = $_FILES['logfiles']['tmp_name'][$Pos];
-		$LogFile = file_get_contents($_FILES['logfiles']['tmp_name'][$Pos]);
-		//detect & transcode unicode
-		if (Logchecker::detect_utf_bom_encoding($LogFile)) {
-			$LogFile = iconv("unicode", "UTF-8", $LogFile);
-		}
-		$Log = new Logchecker();
-		$Log->new_file($LogFile, $FileName);
-		list($Score, $Details, $Checksum, $LogText) = $Log->parse();
+		$FileName = $_FILES['logfiles']['name'][$Pos];
+		$LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
+		$Logchecker->new_file($LogPath);
+		list($Score, $Details, $Checksum, $LogText) = $Logchecker->parse();
 		$Details = trim(implode("\r\n", $Details));
 		$DetailsArray[] = $Details;
 		$LogScore = min($LogScore, $Score);
 		$LogChecksum = min(intval($Checksum), $LogChecksum);
 		$Logs[] = array($Details, $LogText);
-		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($File)."')");
+		$DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')");
 		$LogID = $DB->inserted_id();
-		if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+		if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
 			die("Could not copy logfile to the server.");
 		}
 	}

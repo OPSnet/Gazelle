@@ -16,14 +16,9 @@ if (!$DB->has_results()) {
 }
 $Log = $DB->next_record(MYSQLI_ASSOC);
 
-$File = SERVER_ROOT."/logs/{$TorrentID}_{$LogID}.log";
-$LogFile = file_get_contents($File);
-//detect & transcode unicode
-if (Logchecker::detect_utf_bom_encoding($LogFile)) {
-	$LogFile = iconv("unicode", "UTF-8", $LogFile);
-}
+$LogPath = SERVER_ROOT."/logs/{$TorrentID}_{$LogID}.log";
 $Log = new Logchecker();
-$Log->new_file($LogFile, $File);
+$Log->new_file($LogPath);
 list($Score, $Details, $Checksum, $LogText) = $Log->parse();
 $Details = trim(implode("\r\n", $Details));
 $DetailsArray[] = $Details;

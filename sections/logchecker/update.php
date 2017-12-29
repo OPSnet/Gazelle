@@ -79,7 +79,6 @@ if ($DB->has_results()) {
 	}
 	$AcceptValues = Logchecker::get_accept_values();
 	echo <<<HTML
-			{$Output}
 			<tr class="colhead">
 				<td colspan="2">Upload Logs for This Torrent</td>
 			</tr>
