@@ -25,7 +25,7 @@ class TORRENT_FORM {
 	var $Disabled = '';
 	var $DisabledFlag = false;
 
-	function TORRENT_FORM($Torrent = false, $Error = false, $NewTorrent = true) {
+	function __construct($Torrent = false, $Error = false, $NewTorrent = true) {
 
 		$this->NewTorrent = $NewTorrent;
 		$this->Torrent = $Torrent;

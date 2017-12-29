@@ -291,6 +291,7 @@ ul.thin li {
 	top: 10px;
 	left: 5%;
 	z-index: 11;
+	width:140px;
 }
 
 #userinfo_stats {

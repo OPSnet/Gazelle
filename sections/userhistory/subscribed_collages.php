@@ -187,7 +187,11 @@ if (!$NumResults) {
 	<tr class="group_torrent groupid_<?=$CollageID . $GroupID?> edition_<?=$EditionID?> hidden<?=$SnatchedTorrentClass . $SnatchedGroupClass?>">
 		<td colspan="2">
 			<span>
-				<a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+				[ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+				<? if (Torrents::can_use_token($Torrent)) { ?>
+					| <a href="torrents.php?action=download&id=<?=$TorrentID?>&authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" title="Use a FL Token" class="tooltip" onclick="return confirm(<?=FL_confirmation_msg($Torrent['Seeders'])?>);">FL</a>
+				<? } ?>
+				]
 			</span>
 			&nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?></a>
 		</td>
@@ -228,6 +232,9 @@ if (!$NumResults) {
 			<div class="group_info clear">
 				<span>
 					[ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
+				<? if (Torrents::can_use_token($Torrent)) { ?>
+					| <a href="torrents.php?action=download&id=<?=$TorrentID?>&authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" title="Use a FL Token" class="tooltip" onclick="return confirm(<?=FL_confirmation_msg($Torrent['Seeders'])?>);">FL</a>
+				<? } ?>
 					| <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a> ]
 				</span>
 				<strong><?=$DisplayName?></strong>

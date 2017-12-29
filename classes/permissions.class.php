@@ -1,10 +1,13 @@
 <?
 class Permissions {
-	/* Check to see if a user has the permission to perform an action
+	/**
+	 * Check to see if a user has the permission to perform an action
 	 * This is called by check_perms in util.php, for convenience.
 	 *
 	 * @param string PermissionName
-	 * @param string $MinClass Return false if the user's class level is below this.
+	 * @param int $MinClass Return false if the user's class level is below this.
+	 *
+	 * @return bool
 	 */
 	public static function check_perms($PermissionName, $MinClass = 0) {
 

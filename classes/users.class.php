@@ -418,7 +418,7 @@ class Users {
 	/**
 	 * Returns a username string for display
 	 *
-	 * @param int $UserID
+	 * @param int|string $UserID
 	 * @param boolean $Badges whether or not badges (donor, warned, enabled) should be shown
 	 * @param boolean $IsWarned -- TODO: Why the fuck do we need this?
 	 * @param boolean $IsEnabled -- TODO: Why the fuck do we need this?
