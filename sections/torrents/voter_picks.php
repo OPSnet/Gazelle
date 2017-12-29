@@ -18,7 +18,7 @@ if ($Top10 === false || isset($Top10[$GroupID])) {
 			WHERE v.GroupID != '$GroupID'
 			GROUP BY v.GroupID
 			HAVING Ups > 0");
-		$VotePairs = $DB->to_array('GroupID', MYSQL_ASSOC, false);
+		$VotePairs = $DB->to_array('GroupID', MYSQLI_ASSOC, false);
 		$Cache->cache_value('vote_pairs_'.$GroupID, $VotePairs, 21600);
 	}
 
