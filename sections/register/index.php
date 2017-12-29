@@ -109,7 +109,7 @@ if (!empty($_REQUEST['confirm'])) {
 				INSERT INTO users_main
 					(Username, Email, PassHash, torrent_pass, IP, PermissionID, Enabled, Invites, Uploaded, ipcc)
 				VALUES
-					('".db_string(trim($_POST['username']))."', '".db_string($_POST['email'])."', '".db_string(Users::make_password_hash($_POST['password']))."', '".db_string($torrent_pass)."', '".db_string($_SERVER['REMOTE_ADDR'])."', '$Class', '$Enabled', '".STARTING_INVITES."', '524288000', '$IPcc')");
+					('".db_string(trim($_POST['username']))."', '".db_string($_POST['email'])."', '".db_string(Users::make_password_hash($_POST['password']))."', '".db_string($torrent_pass)."', '".db_string($_SERVER['REMOTE_ADDR'])."', '$Class', '$Enabled', '".STARTING_INVITES."', '3145728000', '$IPcc')");
 
 			$UserID = $DB->inserted_id();
 

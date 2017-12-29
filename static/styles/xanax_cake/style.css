@@ -11,8 +11,8 @@
 .cats_music { width: 28px; height: 28px; background: url('images/music.png') no-repeat center center; }
 /* Global */
 * {
-	padding: 0em;
-	margin: 0em;
+	padding: 0;
+	margin: 0;
 }
 
 html {
@@ -33,7 +33,7 @@ body {
 a {
 	text-decoration: none;
 	border: none;
-	color: #222;
+	color: #444;
 }
 
 a:hover {

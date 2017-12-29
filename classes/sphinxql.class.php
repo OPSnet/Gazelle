@@ -35,7 +35,7 @@ class Sphinxql extends mysqli {
 	 * @param string $Server server address or hostname
 	 * @param int $Port listening port
 	 * @param string $Socket Unix socket address, overrides $Server:$Port
-	 * @return identification string
+	 * @return string identification string
 	 */
 	private static function get_ident($Server, $Port, $Socket) {
 		if ($Socket) {
@@ -113,7 +113,7 @@ class Sphinxql extends mysqli {
 	 * Lowercase ASCII characters because some Sphinx operators are all caps words.
 	 *
 	 * @param string $String string to escape
-	 * @return escaped string
+	 * @return string escaped string
 	 */
 	public static function sph_escape_string($String) {
 		return strtr(strtolower($String), array(

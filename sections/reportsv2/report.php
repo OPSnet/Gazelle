@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * This is the frontend of reporting a torrent, it's what users see when
  * they visit reportsv2.php?id=xxx
@@ -25,7 +25,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
 		die();
 	}
 	$Artists = Artists::get_artist($GroupID);
-	$TorrentCache = get_group_info($GroupID, true, $RevisionID);
+	$TorrentCache = get_group_info($GroupID, true);
 	$GroupDetails = $TorrentCache[0];
 	$TorrentList = $TorrentCache[1];
 	// Resolve the torrentlist to the one specific torrent being reported
@@ -87,8 +87,8 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode,recommend');
 				<td class="sign seeders"><img src="static/styles/<?=($LoggedUser['StyleName'])?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
 				<td class="sign leechers"><img src="static/styles/<?=($LoggedUser['StyleName'])?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
 			</tr>
-			<?
-			build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $GroupCategoryID, $ReleaseType, $TorrentList, $Types, $Username, $ReportedTimes);
+			<?php
+			build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $GroupCategoryID, $ReleaseType, $TorrentList, $Types);
 			?>
 		</table>
 	</div>
@@ -151,6 +151,6 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode,recommend');
 	<input type="submit" value="Submit report" />
 	</form>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

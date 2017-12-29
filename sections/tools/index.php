@@ -200,6 +200,9 @@ switch ($_REQUEST['action']) {
 		header('Location: index.php');
 		break;
 
+	case 'bonus_points':
+		include(SERVER_ROOT.'/sections/tools/managers/bonus_points.php');
+		break;
 	case 'tokens':
 		include(SERVER_ROOT.'/sections/tools/managers/tokens.php');
 		break;
@@ -241,8 +244,8 @@ switch ($_REQUEST['action']) {
 		if (!empty($_REQUEST['id'])) {
 			$Val->SetFields('name', true, 'string', 'You did not enter a valid name for this permission set.');
 			$Val->SetFields('level', true, 'number', 'You did not enter a valid level for this permission set.');
+			$_POST['maxcollages'] = (empty($_POST['maxcollages'])) ? 0 : $_POST['maxcollages'];
 			$Val->SetFields('maxcollages', true, 'number', 'You did not enter a valid number of personal collages.');
-			//$Val->SetFields('test', true, 'number', 'You did not enter a valid level for this permission set.');
 
 			if (is_numeric($_REQUEST['id'])) {
 				$DB->query("
@@ -491,6 +494,9 @@ switch ($_REQUEST['action']) {
 		break;
 	case 'take_calendar_event':
 		include(SERVER_ROOT.'/sections/tools/managers/ajax_take_calendar_event.php');
+		break;
+	case 'stylesheets':
+		include(SERVER_ROOT.'/sections/tools/managers/stylesheets_list.php');
 		break;
 	case 'mass_pm':
 		include(SERVER_ROOT.'/sections/tools/managers/mass_pm.php');

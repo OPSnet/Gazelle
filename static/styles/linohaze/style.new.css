@@ -1,12 +1,4 @@
-/*********************************************************
--------------------------- LinoHaze --------------------------
-Haze Design: apopagasm
-Haze CSS: Exanurous
-LinoHaze: linotype
-Style derived from Gazelle Postmod
-*********************************************************/
-
-@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,bold";
+@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,bold";
 * {
 	padding: 0;
 	margin: 0
@@ -17,10 +9,13 @@ html {
 }
 
 body {
+	background-attachment: fixed;
+	background-position: center center;
+	background-repeat: no-repeat;
 	background-size: cover;
-	background: #424242 no-repeat fixed center center;
-	/*background-image: url(images/bg.jpg);*/
-	font-family: 'Source Sans Pro', Source Sans Pro, Source Sans Pro, sans-serif;
+	background-color: #424242;
+	background-image: url(images/bg.jpg);
+	font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
 	font-size: 12px;
 	font-weight: 300;
 	color: #fff
@@ -51,7 +46,7 @@ h4 {
 }
 
 h2 {
-	font-size: 20px!important;
+	font-size: 24px!important;
 	text-shadow: 0 0 15px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.8)
 }
 
@@ -78,7 +73,6 @@ table tbody a,
 .main_column a,
 .sidebar a,
 .box a {
-	font-weight: 400;
 	color: rgba(255, 255, 255, 0.6)
 }
 
@@ -153,7 +147,7 @@ img {
 
 strong,
 b {
-	font-weight: 700!important
+	font-weight: 400!important
 }
 
 .head .time {
@@ -317,8 +311,7 @@ ul.thin li {
 	border: none;
 	width: 235px;
 	height: 58px;
-	background:url(images/logo.png) no-repeat top left;
-	background-size:250px 58px;
+	background: url() no-repeat top left;
 	display: block;
 	margin-left: -14px
 }
@@ -333,7 +326,6 @@ logo a:focus {
 }
 
 #menu {
-	font-size: 13px;
 	margin-bottom: 2px;
 	height: 50px
 }
@@ -438,42 +430,33 @@ logo a:focus {
 
 #nav_staff {
 	position: absolute;
-	margin: -91px 0 0 620px !important
+	margin: -76px 0 0 713px !important
 }
 
 #nav_staff a {
-	font-weight: 400;
-	font-size: 12px;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 	height: 38px!important;
-	margin-top: 11px;
 	width: 50px!important;
-	color: #fff!important;
-	/*background:url(https://i.imgur.com/ua8et5N.png) no-repeat top left;
-	background-size:38px;*/
+	color: transparent!important;
+	background: url(https://i.imgur.com/ua8et5N.png)no-repeat top left;
+	background-size: 38px
 }
 
-#nav_staff a:hover{
-	/*background:url(https://i.imgur.com/ViQAU6I.png) no-repeat top left !important;
-	background-size:38px !important;
-	background-color: transparent !important;
-	margin-top:-1px!important;*/
-	font-weight: 400!important;
-	color: rgba(255, 255, 255, 0.8)!important;
+#nav_staff a:hover {
+	background: url(https://i.imgur.com/ViQAU6I.png)no-repeat top left!important;
+	background-size: 38px!important;
 	background-color: transparent!important;
-	margin-top: 10px!important;
+	margin-top: -1px!important
 }
 
-#nav_staff a:active{
-	/*background:url(https://i.imgur.com/ua8et5N.png)no-repeat top left;
-	background-size:42px*/
-	color: #fff;
+#nav_staff a:active {
+	background: url(https://i.imgur.com/ua8et5N.png)no-repeat top left;
+	background-size: 42px
 }
 
 #userinfo {
-	font-size: 12px;
 	position: relative;
 	color: #fff;
 	width: 100%;
@@ -482,14 +465,14 @@ logo a:focus {
 }
 
 #userinfo_major {
-	font-weight: 400;
-	font-size: 12px;
 	position: absolute;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
-	margin: -65px 0 0 663px;
+	margin: -76px 0 0 765px;
 	float: right;
+	height: 42px;
+	line-height: 42px;
 	white-space: nowrap
 }
 
@@ -498,95 +481,76 @@ logo a:focus {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
-	/*width: 50px;*/
+	width: 50px;
+	height: 42px;
 	color: transparent
 }
 
 #userinfo_major li {
-	margin: 0 0 0 4px !important;
+	margin: 0 0 0 -2px !important
 }
 
-
 #userinfo_major #nav_upload a {
-	/*background: url(https://i.imgur.com/FgNnS5C.png)no-repeat top left;
-	background-size: 38px;*/
-	color: #fff;
+	background: url(https://i.imgur.com/FgNnS5C.png)no-repeat top left;
+	background-size: 38px
 }
 
 #userinfo_major #nav_upload a:hover {
-	/*background: url(https://i.imgur.com/BfwevuK.png)no-repeat top left;
-	background-size: 38px;*/
-	color: rgba(255, 255, 255, 0.8);
+	background: url(https://i.imgur.com/BfwevuK.png)no-repeat top left;
+	background-size: 38px
 }
 
 #userinfo_major #nav_upload a:active {
-	/*background: url(https://i.imgur.com/FgNnS5C.png) no-repeat top left;
-	background-size: 38px*/
-	color: #fff;
+	background: url(https://i.imgur.com/FgNnS5C.png)no-repeat top left;
+	background-size: 38px
 }
 
 #userinfo_major #nav_invite a {
-	/*background-size: 38px;
-	background: url(https://i.imgur.com/johRGly.png) no-repeat 0 0; */
-	color: #fff;
+	background: url(https://i.imgur.com/johRGly.png)no-repeat top left;
+	background-size: 38px;
+	background-position: 0 0
 }
 
 #userinfo_major #nav_invite a:hover {
-	/*background: url(https://i.imgur.com/bmZo2bq.png) no-repeat top left;
-	background-size: 38px;*/
-	color: rgba(255, 255, 255, 0.8);
+	background: url(https://i.imgur.com/bmZo2bq.png)no-repeat top left;
+	background-size: 38px
 }
 
 #userinfo_major #nav_invite a:active {
-	/*background: url(https://i.imgur.com/johRGly.png) no-repeat top left;
-	background-size: 38px;*/
-	color: #fff;
+	background: url(https://i.imgur.com/johRGly.png)no-repeat top left;
+	background-size: 38px
 }
 
 #userinfo_major #nav_store a {
 	margin-left: -100px;
-	/*background: url(https://i.imgur.com/IRVh2R9.png) 0 0;*/
-	color: #fff;
+	background: url(https://i.imgur.com/IRVh2R9.png);
+	background-position: 0 0
 }
 
 #userinfo_major #nav_store a:hover {
-	/*background: url(https://i.imgur.com/IRVh2R9.png) 0 84px;*/
-	color: rgba(255, 255, 255, 0.8);
+	background: url(https://i.imgur.com/IRVh2R9.png);
+	background-position: 0 84px
 }
 
 #userinfo_major #nav_store a:active {
-	/*background: url(https://i.imgur.com/IRVh2R9.png) 0 38px;*/
-	color: #fff;
-}
-
-#userinfo_major #nav_bonus a {
-	color: #fff;
-}
-
-#userinfo_major #nav_bonus a:hover {
-	color: rgba(255, 255, 255, 0.8);
-}
-
-#userinfo_major #nav_bonus a:active {
-	color: #fff;
+	background: url(https://i.imgur.com/IRVh2R9.png);
+	background-position: 0 38px
 }
 
 #userinfo_major #nav_donate a {
-	/*background-size: 38px;
-	background: url(https://i.imgur.com/r2SiLH1.png) no-repeat 0 0;*/
-	color: #fff;
+	background: url(https://i.imgur.com/r2SiLH1.png)no-repeat top left;
+	background-size: 38px;
+	background-position: 0 0
 }
 
 #userinfo_major #nav_donate a:hover {
-	/*background: url(https://i.imgur.com/p22iYRQ.png)no-repeat top left;
-	background-size: 38px*/
-	color: rgba(255, 255, 255, 0.8);
+	background: url(https://i.imgur.com/p22iYRQ.png)no-repeat top left;
+	background-size: 38px
 }
 
 #userinfo_major #nav_donate a:active {
-	/*background: url(https://i.imgur.com/r2SiLH1.png)no-repeat top left;
-	background-size: 38px;*/
-	color: #fff;
+	background: url(https://i.imgur.com/r2SiLH1.png)no-repeat top left;
+	background-size: 38px
 }
 
 #userinfo_stats {
@@ -619,8 +583,6 @@ logo a:focus {
 }
 
 #userinfo_username li:first-child a {
-	font-weight: 400;
-	font-size: 13px;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
@@ -823,8 +785,7 @@ logo a:focus {
 	padding: 8px 0;
 	border: 1px solid rgba(0, 0, 0, 0.07);
 	background: rgba(33, 33, 33, 0.1);
-	background-image: url(https://i.imgur.com/LB1bfuW.png);
-	background-size: 20px;
+	background-image: url(https://i.imgur.com/4zIhAoG.png);
 	background-repeat: no-repeat;
 	background-position: 13px 14px;
 	margin-bottom: 10px
@@ -1101,7 +1062,7 @@ p.min_padding {
 .sidebar {
 	float: right;
 	width: 240px;
-	font-weight: 400
+	font-weight: 300
 }
 
 .sidebar .stats {
@@ -1500,7 +1461,6 @@ tr.torrent td {
 #artist .thin>table,
 #forums .forum_list,
 #forums .thin>.box,
-#inbox .thin > .box,
 #wiki .thin>table,
 #wiki .thin>form,
 #collage .thin .search_form,
@@ -1589,7 +1549,7 @@ table.forum_post .colhead_dark {
 }
 
 table.forum_post .colhead_dark strong a {
-	color: #fff!important
+	color: #fff
 }
 
 td.avatar {
@@ -2009,7 +1969,7 @@ select {
 	color: #fff;
 	-webkit-appearance: none;
 	appearance: none;
-	font-family: 'Source Sans Pro', Source Sans Pro, Source Sans Pro, sans-serif;
+	font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
@@ -2025,7 +1985,7 @@ option {
 	border-radius: 1px;
 	color: #fff;
 	text-decoration: none;
-	font-family: 'Source Sans Pro', Source Sans Pro, Source Sans Pro, sans-serif
+	font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif
 }
 
 select:hover {
@@ -2052,7 +2012,7 @@ select:focus {
 	background-position: right 2px top 2px, 0 0;
 	outline: none;
 	color: #fff;
-	font-family: 'Source Sans Pro', Source Sans Pro, Source Sans Pro, sans-serif
+	font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif
 }
 
 #logchecker .thin,
@@ -2325,7 +2285,7 @@ div.sidebar #event_div {
 }
 
 .box_image_avatar img {
-	width: 120px;
+	width: 240px;
 	max-height: 1000px!important
 }
 
@@ -2430,15 +2390,12 @@ span.rbb {
 img[alt="Snatches"] {
 	background: url(https://i.imgur.com/qNWsRe8.png) no-repeat scroll 0 0 transparent;
 	height: 15px;
-	color: transparent;
 	padding-right: 15px;
-	width: 0;
-	color: transparent;
+	width: 0
 }
 
 img[alt="Seeders"] {
 	background: url(https://i.imgur.com/Y1JRS7X.png) no-repeat scroll 0 0 transparent;
-	color: transparent;
 	height: 15px;
 	padding-right: 11px;
 	width: 0
@@ -2448,7 +2405,6 @@ img[alt="Leechers"] {
 	background: url(https://i.imgur.com/Jbhygxk.png) no-repeat scroll 0 0 transparent;
 	height: 15px;
 	padding-right: 11px;
-	color: transparent;
 	width: 0
 }
 
@@ -2552,6 +2508,11 @@ body {
 	background-color: #353434
 }
 
+#logo a {
+	background: url(https://i.imgur.com/WWmq67j.png) no-repeat top left;
+	background-size: 250px 58px
+}
+
 .read {
 	background: url(https://i.imgur.com/2iuJIm7.png) no-repeat center center
 }
@@ -2565,42 +2526,5 @@ select {
 	text-indent: .01px
 }
 
-.group_torrent span {
-	text-indent: 40px;
-}
 
-body {
-	background-image: none;
-}
-
-input {
-	padding-top: 0 !important;
-	padding-bottom: 0 !important;
-}
-
-.box,
-.main_column table {
-	margin-bottom: 8px;
-}
-
-h1,
-h2,
-h3,
-h4 {
-	font-weight: 400!important;
-}
-
-#menu {
-	font-weight: 400;
-}
-
-.news_post {
-	font-weight: 400;
-	line-height: 1.45;
-	font-size: 12px;
-}
-
-.box {
-	font-size: 12px;
-	font-weight: 400;
-}
+/*3:45PM*/

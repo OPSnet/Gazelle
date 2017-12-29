@@ -17,9 +17,12 @@ html {
 }
 
 body {
+	background-attachment: fixed;
+	background-position: center center;
+	background-repeat: no-repeat;
 	background-size: cover;
-	background: #424242 no-repeat fixed center center;
-	/*background-image: url(images/bg.jpg);*/
+	background-color: #424242;
+	background-image: url(images/bg.jpg);
 	font-family: 'Source Sans Pro', Source Sans Pro, Source Sans Pro, sans-serif;
 	font-size: 12px;
 	font-weight: 300;
@@ -317,8 +320,7 @@ ul.thin li {
 	border: none;
 	width: 235px;
 	height: 58px;
-	background:url(images/logo.png) no-repeat top left;
-	background-size:250px 58px;
+	background: url() no-repeat top left;
 	display: block;
 	margin-left: -14px
 }
@@ -438,7 +440,7 @@ logo a:focus {
 
 #nav_staff {
 	position: absolute;
-	margin: -91px 0 0 620px !important
+	margin: -91px 0 0 708px !important
 }
 
 #nav_staff a {
@@ -451,25 +453,20 @@ logo a:focus {
 	margin-top: 11px;
 	width: 50px!important;
 	color: #fff!important;
-	/*background:url(https://i.imgur.com/ua8et5N.png) no-repeat top left;
-	background-size:38px;*/
+	background: url()no-repeat top left;
+	background-size: 38px
 }
 
-#nav_staff a:hover{
-	/*background:url(https://i.imgur.com/ViQAU6I.png) no-repeat top left !important;
-	background-size:38px !important;
-	background-color: transparent !important;
-	margin-top:-1px!important;*/
+#nav_staff a:hover {
 	font-weight: 400!important;
 	color: rgba(255, 255, 255, 0.8)!important;
 	background-color: transparent!important;
-	margin-top: 10px!important;
+	margin-top: 10px!important
 }
 
-#nav_staff a:active{
-	/*background:url(https://i.imgur.com/ua8et5N.png)no-repeat top left;
-	background-size:42px*/
-	color: #fff;
+#nav_staff a:active {
+	background: url()no-repeat top left;
+	background-size: 42px
 }
 
 #userinfo {
@@ -488,7 +485,7 @@ logo a:focus {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
-	margin: -65px 0 0 663px;
+	margin: -65px 0 0 761px;
 	float: right;
 	white-space: nowrap
 }
@@ -498,95 +495,78 @@ logo a:focus {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
-	/*width: 50px;*/
+	width: 50px;
 	color: transparent
 }
 
 #userinfo_major li {
-	margin: 0 0 0 4px !important;
+	margin: 0 0 0 -2px !important
 }
 
-
 #userinfo_major #nav_upload a {
-	/*background: url(https://i.imgur.com/FgNnS5C.png)no-repeat top left;
-	background-size: 38px;*/
+	background: url()no-repeat top left;
+	background-size: 38px;
 	color: #fff;
 }
 
 #userinfo_major #nav_upload a:hover {
-	/*background: url(https://i.imgur.com/BfwevuK.png)no-repeat top left;
-	background-size: 38px;*/
 	color: rgba(255, 255, 255, 0.8);
+	background-size: 38px
 }
 
 #userinfo_major #nav_upload a:active {
-	/*background: url(https://i.imgur.com/FgNnS5C.png) no-repeat top left;
-	background-size: 38px*/
 	color: #fff;
+	background-size: 38px
 }
 
 #userinfo_major #nav_invite a {
-	/*background-size: 38px;
-	background: url(https://i.imgur.com/johRGly.png) no-repeat 0 0; */
+	background: url()no-repeat top left;
+	background-size: 38px;
+	background-position: 0 0;
 	color: #fff;
 }
 
 #userinfo_major #nav_invite a:hover {
-	/*background: url(https://i.imgur.com/bmZo2bq.png) no-repeat top left;
-	background-size: 38px;*/
 	color: rgba(255, 255, 255, 0.8);
+	background-size: 38px
 }
 
 #userinfo_major #nav_invite a:active {
-	/*background: url(https://i.imgur.com/johRGly.png) no-repeat top left;
-	background-size: 38px;*/
 	color: #fff;
+	background-size: 38px
 }
 
 #userinfo_major #nav_store a {
 	margin-left: -100px;
-	/*background: url(https://i.imgur.com/IRVh2R9.png) 0 0;*/
-	color: #fff;
+	background: url(https://i.imgur.com/IRVh2R9.png);
+	background-position: 0 0
 }
 
 #userinfo_major #nav_store a:hover {
-	/*background: url(https://i.imgur.com/IRVh2R9.png) 0 84px;*/
-	color: rgba(255, 255, 255, 0.8);
+	background: url(https://i.imgur.com/IRVh2R9.png);
+	background-position: 0 84px
 }
 
 #userinfo_major #nav_store a:active {
-	/*background: url(https://i.imgur.com/IRVh2R9.png) 0 38px;*/
-	color: #fff;
-}
-
-#userinfo_major #nav_bonus a {
-	color: #fff;
-}
-
-#userinfo_major #nav_bonus a:hover {
-	color: rgba(255, 255, 255, 0.8);
-}
-
-#userinfo_major #nav_bonus a:active {
-	color: #fff;
+	background: url(https://i.imgur.com/IRVh2R9.png);
+	background-position: 0 38px
 }
 
 #userinfo_major #nav_donate a {
-	/*background-size: 38px;
-	background: url(https://i.imgur.com/r2SiLH1.png) no-repeat 0 0;*/
+	background: url()no-repeat top left;
+	background-size: 38px;
+	background-position: 0 0;
 	color: #fff;
 }
 
 #userinfo_major #nav_donate a:hover {
-	/*background: url(https://i.imgur.com/p22iYRQ.png)no-repeat top left;
-	background-size: 38px*/
 	color: rgba(255, 255, 255, 0.8);
+	background-size: 38px
 }
 
 #userinfo_major #nav_donate a:active {
-	/*background: url(https://i.imgur.com/r2SiLH1.png)no-repeat top left;
-	background-size: 38px;*/
 	color: #fff;
+	background-size: 38px
 }
 
 #userinfo_stats {
@@ -2550,6 +2530,11 @@ body {
 
 body {
 	background-color: #353434
+}
+
+#logo a {
+	background: url(https://i.imgur.com/m87cby9.png) no-repeat top left;
+	background-size: 250px 58px
 }
 
 .read {

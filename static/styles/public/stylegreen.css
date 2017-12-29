@@ -1,0 +1,98 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+html, body {
+	height: 100%;
+}
+body {
+	background-color: #008151;
+	font-family: Bitstream Vera Sans, Tahoma, sans-serif;
+	font-size: 11px;
+	color: #FFFFFF;
+}
+table {
+	font-size: inherit;
+}
+a {
+	color: #FFFFFF;
+	text-decoration: none;
+}
+a:hover {
+	color: #FFFFFF;
+}
+input[type="text"], input[type="password"] {
+	padding: 1px 3px 0px 3px;
+	font-family: "tahoma", "arial", "helvetica", "sans-serif";
+	font-size: 8pt;
+	width: 200px;
+}
+input[type="text"]:valid, input[type="password"]:valid {
+	border-style: none;
+}
+input[type="text"]:invalid, input[type="password"]:invalid {
+	border-top-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+	border-right-style: solid 2px;
+	border-color: red;
+}
+#head, #foot {
+	height: 6%;
+	min-height: 25px;
+	width: 100%;
+	background-color: #008151;
+	overflow: hidden;
+}
+#foot {
+	text-align: center;
+}
+#foot > span,#head > span {
+	top: 35%;
+	position: relative;
+	padding: 20px;
+}
+#foot > span {
+	color: #FFFFFF;
+}
+#maincontent {
+	width: 100%;
+	height: 88%;
+}
+#logo {
+	height: 139px;
+	width: 150px;
+	background-image: url('images/loginlogowhite.png');
+	background-repeat: no-repeat;
+	background-position: top left;
+	padding: 50px 0px 0px 0px;
+	text-align: center;
+}
+#logo ul {
+	float: left;
+	left: 50%;
+	margin: 0 auto;
+	position: relative;
+}
+#logo ul li {
+	float: left;
+	position: relative;
+	right: 50%;
+	margin: 0 1em 0 0;
+	list-style: none;
+}
+.poetry {
+	width: 320px;
+	text-align: justify;
+}
+.hidden {
+	display: none;
+}
+.info {
+	color: green;
+	font-weight: bold;
+}
+.warning {
+	color: red;
+	font-weight: bold;
+}

@@ -6,7 +6,7 @@ include(SERVER_ROOT.'/sections/staff/functions.php');
 
 $SupportStaff = get_support();
 
-list($FrontLineSupport, $ForumStaff, $Staff) = $SupportStaff;
+list($FrontLineSupport, $Staff) = $SupportStaff;
 
 ?>
 <div class="thin">
@@ -42,29 +42,10 @@ list($FrontLineSupport, $ForumStaff, $Staff) = $SupportStaff;
 
 	} ?>
 		</table>
-	<br />
-		<br />
-		<h3 style="font-size: 17px;" id="forum_mods"><i>Forum Moderators</i></h3>
-		<p>Forum Moderators are users who have been promoted to help moderate the forums. They can only help with forum-oriented questions.</p><br />
-		<table class="staff" width="100%">
-			<tr class="colhead">
-				<td style="width: 130px;">Username</td>
-				<td style="width: 130px;">Last seen</td>
-				<td><strong>Remark</strong></td>
-			</tr>
-<?
-	$Row = 'a';
-	foreach ($ForumStaff as $Support) {
-		list($ID, $Class, $Username, $Paranoia, $LastAccess, $SupportFor) = $Support;
-
-		$Row = make_staff_row($Row, $ID, $Paranoia, $Class, $LastAccess, $SupportFor);
-
-	} ?>
-		</table>
 	</div>
 	<br />
 	<div class="box pad" style="padding: 0px 10px 10px 10px;">
-		<br />
+		<h2 style='text-align: left;'>Moderators</h2>
 <?
 	$CurClass = 0;
 	$CloseTable = false;
@@ -84,7 +65,10 @@ list($FrontLineSupport, $ForumStaff, $Staff) = $SupportStaff;
 
 			$HTMLID = '';
 			switch ($ClassName) {
+				case 'Forum Moderator':
+				case 'Torrent Moderator':
 				case 'Moderator':
+				case 'Senior Moderator':
 					$HTMLID = 'mods';
 					break;
 				case 'Developer':
@@ -121,11 +105,7 @@ list($FrontLineSupport, $ForumStaff, $Staff) = $SupportStaff;
 						$AdminDiv = true;
 					}
 			}
-			if ($HTMLID != 'mods') {
-				echo "\t\t<h3 style=\"font-size: 17px;\" id=\"$HTMLID\"><i>".$ClassName."s</i></h3>\n";
-			} else {
-				echo "\t\t<h2 style='text-align: left'>" . $ClassName . "s</h2>\n";
-			}
+			echo "\t\t<h3 style=\"font-size: 17px;\" id=\"$HTMLID\"><i>".$ClassName."s</i></h3>\n";
 ?>
 		<table class="staff" width="100%">
 			<tr class="colhead">

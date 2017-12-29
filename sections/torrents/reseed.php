@@ -75,7 +75,7 @@ View::show_header();
 		<h2>Successfully sent re-seed request</h2>
 	</div>
 	<div class="box pad thin">
-		<p style="color: black;">Successfully sent re-seed request for torrent <a href="torrents.php?id=<?=$GroupID?>&torrentid=<?=$TorrentID?>"><?=display_str($Name)?></a> to <?=$NumUsers?> user<?=$NumUsers === 1 ? '' : 's';?>.</p>
+		<p>Successfully sent re-seed request for torrent <a href="torrents.php?id=<?=$GroupID?>&torrentid=<?=$TorrentID?>"><?=display_str($Name)?></a> to <?=$NumUsers?> user<?=$NumUsers === 1 ? '' : 's';?>.</p>
 	</div>
 </div>
 <?
