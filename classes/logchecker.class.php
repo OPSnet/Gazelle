@@ -37,7 +37,6 @@ class Logchecker {
 	var $InvalidateCache = true;
 	var $DubiousTracks = 0;
 	var $EAC_LANG = array();
-	var $Encodings = array('Windows-1251');
 	var $Chardet;
 
 	var $ValidateChecksum = true;
@@ -130,7 +129,7 @@ class Logchecker {
 			}
 		}
 
-		$this->Log = str_replace(array("\r\n", "\r"), "\n", $this->Log);
+		$this->Log = str_replace(array("\r\n", "\r"), array("\n", ""), $this->Log);
 
 		// Split the log apart
 		if (preg_match("/[\=]+\s+Log checksum/i", $this->Log)) { // eac checksum

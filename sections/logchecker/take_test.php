@@ -2,9 +2,11 @@
 //ini_set('upload_max_filesize',1000000);
 enforce_login();
 
+$ValidateChecksum = true;
 if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
 	$File = $_FILES['log'];
 } elseif (!empty($_POST["pastelog"])) {
+	$ValidateChecksum = false;
 	$TmpFile = tempnam('/tmp', 'log_');
 	file_put_contents($TmpFile, $_POST["pastelog"]);
 	$File = array('tmp_name' => $TmpFile, 'name' => $TmpFile);
@@ -25,6 +27,7 @@ echo <<<HTML
 HTML;
 
 $Log = new Logchecker();
+$Log->validateChecksum($ValidateChecksum);
 $Log->new_file($File['tmp_name']);
 
 list($Score, $Bad, $Checksum, $Text) = $Log->parse();
