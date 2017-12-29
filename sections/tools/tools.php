@@ -45,6 +45,7 @@ View::show_header('Staff Tools');
 	create_row("Create user", "tools.php?action=create_user", check_perms("admin_create_users"));
 	create_row("Permissions manager", "tools.php?action=permissions", check_perms("admin_manage_permissions"));
 	create_row("Special users", "tools.php?action=special_users", check_perms("admin_manage_permissions"));
+	create_row("Manage Bonus Points", "tools.php?action=bonus_points", check_perms("users_mod"));
 
 	if ($ToolsHTML) {
 ?>
