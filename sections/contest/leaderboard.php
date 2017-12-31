@@ -77,7 +77,7 @@ if (!count($Leaderboard)) {
 	$user_seen = 0;
 	foreach ($Leaderboard as $row) {
 		$score = $row[1];
-		if ($Contest['ContestType'] == 'request_fill') {
+		if ($Contest['ContestType'] == 'request_fill' || $Contest['ContestType'] == 'upload_flac_strict_rank') {
 				++$rank;
 		}
 		else {
@@ -149,7 +149,7 @@ END_STR
 			$prev_score = 0;
 			foreach ($Leaderboard as $row) {
 				$score = $row[1];
-				if ($Contest['ContestType'] == 'request_fill') {
+				if ($Contest['ContestType'] == 'request_fill' || $Contest['ContestType'] == 'upload_flac_strict_rank') {
 					++$rank;
 				}
 				else {

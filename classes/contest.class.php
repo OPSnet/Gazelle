@@ -63,6 +63,7 @@ class Contest {
 		/* only called from schedule, don't need to worry about caching this */
 		switch ($Contest['ContestType']) {
 			case 'upload_flac':
+			case 'upload_flac_strict_rank':
 				/* how many 100% flacs uploaded? */
 				$sql = "
 					SELECT u.ID AS userid,
