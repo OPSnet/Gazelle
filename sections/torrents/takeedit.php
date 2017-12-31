@@ -268,13 +268,13 @@ foreach ($DBTorVals as $Key => $Value) {
 $SQL = "
 	UPDATE torrents AS t
 	LEFT JOIN (
-		SELECT
-			TorrentID,
-			MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-			MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+	  SELECT
+		  TorrentID,
+		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
 		FROM torrents_logs
 		GROUP BY TorrentID
- 	) AS tl ON t.ID = tl.TorrentID
+ 	  ) AS tl ON t.ID = tl.TorrentID
 	SET
 		Media = $T[Media],
 		Format = $T[Format],
@@ -285,12 +285,13 @@ $SQL = "
 		RemasterRecordLabel = $T[RemasterRecordLabel],
 		RemasterCatalogueNumber = $T[RemasterCatalogueNumber],
 		Scene = $T[Scene],
-		LogScore = tl.Score,
-		LogChecksum=tl.Checksum,";
+		LogScore = CASE WHEN tl.Score IS NULL THEN 100 ELSE tl.Score END,
+		LogChecksum = CASE WHEN tl.Checksum IS NULL THEN '1' ELSE tl.Checksum END,";
 
-$Logchecker = new Logchecker();
 if (count($_FILES['logfiles']['name']) > 0) {
 	ini_set('upload_max_filesize', 1000000);
+	$Logchecker = new Logchecker();
+	$Added = false;
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			continue;
@@ -308,8 +309,11 @@ if (count($_FILES['logfiles']['name']) > 0) {
 		if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
 			die("Could not copy logfile to the server.");
 		}
+		$Added = true;
 	}
-	$SQL .= "HasLogDB = '1',";
+	if ($Added) {
+		$SQL .= "HasLogDB = '1',";
+	}
 }
 
 if (check_perms('torrents_freeleech')) {
@@ -496,7 +500,5 @@ $Cache->delete_value("torrent_download_$TorrentID");
 
 Torrents::update_hash($GroupID);
 // All done!
-View::show_header('test');
-var_dump("ugh?");
-View::show_footer();
-//header("Location: torrents.php?id=$GroupID");
+
+header("Location: torrents.php?id=$GroupID");
