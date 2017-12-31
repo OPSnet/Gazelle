@@ -22,7 +22,7 @@ list($Count) = G::$DB->fetch_record();
 if ($Count > 0) {
 	G::$DB->prepared_query("
 UPDATE torrents AS t
-JOIN (
+LEFT JOIN (
 	SELECT
 		TorrentID,
 		MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,

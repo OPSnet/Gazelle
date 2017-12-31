@@ -210,7 +210,7 @@ if ($Properties['Remastered'] && !$Properties['RemasterYear']) {
 // Strip out Amazon's padding
 $AmazonReg = '/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i';
 $Matches = array();
-if (preg_match($RegX, $Properties['Image'], $Matches)) {
+if (preg_match($AmazonReg, $Properties['Image'], $Matches)) {
 	$Properties['Image'] = $Matches[1].'.jpg';
 }
 ImageTools::blacklisted($Properties['Image']);
@@ -267,7 +267,7 @@ foreach ($DBTorVals as $Key => $Value) {
 // Update info for the torrent
 $SQL = "
 	UPDATE torrents AS t
-	JOIN (
+	LEFT JOIN (
 		SELECT
 			TorrentID,
 			MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
@@ -318,7 +318,7 @@ if (check_perms('torrents_freeleech')) {
 }
 
 if (check_perms('users_mod')) {
-	if ($T[Format] != "'FLAC'") {
+	if ($T['Format'] != "'FLAC'") {
 		$SQL .= "
 			HasLog = '0',
 			HasCue = '0',";
@@ -483,15 +483,6 @@ $DB->query("
 	WHERE ID = '$TorrentID'");
 list($GroupID, $Time) = $DB->next_record();
 
-// Competition
-if (strtotime($Time) > 1241352173) {
-	if ($_POST['log_score'] == '100') {
-		$DB->query("
-			INSERT IGNORE into users_points (GroupID, UserID, Points)
-			VALUES ('$GroupID', '$UserID', '1')");
-	}
-}
-
 $DB->query("
 	SELECT Name
 	FROM torrents_group
@@ -505,5 +496,7 @@ $Cache->delete_value("torrent_download_$TorrentID");
 
 Torrents::update_hash($GroupID);
 // All done!
-
-header("Location: torrents.php?id=$GroupID");
+View::show_header('test');
+var_dump("ugh?");
+View::show_footer();
+//header("Location: torrents.php?id=$GroupID");
