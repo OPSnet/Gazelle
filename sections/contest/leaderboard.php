@@ -37,6 +37,7 @@ if ($Contest['Banner']) {
 
 <?
 $Prior = Contest::get_prior_contests();
+$Prior = []; // FIXME: no dropdown to see older contests (Blame Athena <3 )
 if (count($Prior)) {
 ?>
 	<form class="edit_form" style="float: right;" action="contest.php?action=leaderboard" method="post">
