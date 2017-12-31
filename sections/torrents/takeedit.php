@@ -264,34 +264,10 @@ foreach ($DBTorVals as $Key => $Value) {
 	}
 }
 
-// Update info for the torrent
-$SQL = "
-	UPDATE torrents AS t
-	LEFT JOIN (
-	  SELECT
-		  TorrentID,
-		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
-		FROM torrents_logs
-		GROUP BY TorrentID
- 	  ) AS tl ON t.ID = tl.TorrentID
-	SET
-		Media = $T[Media],
-		Format = $T[Format],
-		Encoding = $T[Encoding],
-		RemasterYear = $T[RemasterYear],
-		Remastered = $T[Remastered],
-		RemasterTitle = $T[RemasterTitle],
-		RemasterRecordLabel = $T[RemasterRecordLabel],
-		RemasterCatalogueNumber = $T[RemasterCatalogueNumber],
-		Scene = $T[Scene],
-		LogScore = CASE WHEN tl.Score IS NULL THEN 100 ELSE tl.Score END,
-		LogChecksum = CASE WHEN tl.Checksum IS NULL THEN '1' ELSE tl.Checksum END,";
-
+$AddedLogs = false;
 if (count($_FILES['logfiles']['name']) > 0) {
 	ini_set('upload_max_filesize', 1000000);
 	$Logchecker = new Logchecker();
-	$Added = false;
 	foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
 		if (!$_FILES['logfiles']['size'][$Pos]) {
 			continue;
@@ -309,11 +285,42 @@ if (count($_FILES['logfiles']['name']) > 0) {
 		if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
 			die("Could not copy logfile to the server.");
 		}
-		$Added = true;
+		$AddedLogs = true;
 	}
-	if ($Added) {
-		$SQL .= "HasLogDB = '1',";
-	}
+}
+
+// Update info for the torrent
+$SQL = "
+	UPDATE torrents AS t";
+
+if ($AddedLogs) {
+	$SQL .= "
+	LEFT JOIN (
+	  SELECT
+		  TorrentID,
+		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+		FROM torrents_logs
+		GROUP BY TorrentID
+ 	  ) AS tl ON t.ID = tl.TorrentID
+";
+}
+$SQL .= "
+	SET
+		Media = $T[Media],
+		Format = $T[Format],
+		Encoding = $T[Encoding],
+		RemasterYear = $T[RemasterYear],
+		Remastered = $T[Remastered],
+		RemasterTitle = $T[RemasterTitle],
+		RemasterRecordLabel = $T[RemasterRecordLabel],
+		RemasterCatalogueNumber = $T[RemasterCatalogueNumber],
+		Scene = $T[Scene],";
+if ($AddedLogs) {
+	$SQL .= "
+		LogScore = CASE WHEN tl.Score IS NULL THEN 100 ELSE tl.Score END,
+		LogChecksum = CASE WHEN tl.Checksum IS NULL THEN '1' ELSE tl.Checksum END,
+		HasLogDB = '1',";
 }
 
 if (check_perms('torrents_freeleech')) {
