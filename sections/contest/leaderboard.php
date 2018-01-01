@@ -84,13 +84,13 @@ if (!count($Leaderboard)) {
 		else {
 			if ($score != $prev_score) {
 				++$rank;
-				if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
-					// cut off at limit, even if we haven't reached last winning place because of too many ties
-					break;
-				}
 			}
 			$prev_score = $score;
 		}
+        if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
+            // cut off at limit, even if we haven't reached last winning place because of too many ties
+            break;
+        }
 		++$nr_rows;
 
 		if ($row[0] == $LoggedUser['ID']) {
