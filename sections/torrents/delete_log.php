@@ -22,19 +22,19 @@ list($Count) = G::$DB->fetch_record();
 if ($Count > 0) {
 	G::$DB->prepared_query("
 UPDATE torrents AS t
-JOIN (
-	SELECT
-		TorrentID,
-		MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-		MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+LEFT JOIN (
+  SELECT
+	  TorrentID,
+	  MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+	  MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
 	FROM torrents_logs
 	GROUP BY TorrentID
- ) AS tl ON t.ID = tl.TorrentID
+  ) AS tl ON t.ID = tl.TorrentID
 SET t.LogScore = tl.Score, t.LogChecksum=tl.Checksum
 WHERE t.ID = ?", $TorrentID);
 }
 else {
-	G::$DB->prepared_query("UPDATE torrents SET HasLogDB = 0, LogScore = 0, LogChecksum = 0 WHERE ID=?", $TorrentID);
+	G::$DB->prepared_query("UPDATE torrents SET HasLogDB = 0, LogScore = 100, LogChecksum = 1 WHERE ID=?", $TorrentID);
 }
 
 $Cache->delete_value("torrent_group_{$GroupID}");
