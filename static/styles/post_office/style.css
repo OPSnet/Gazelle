@@ -262,7 +262,7 @@ div#wrapper div#content td.label {
 #logo {
   width: 259px;
   height: 62px;
-  background: url(https://i.imgur.com/W1b6om4.png) no-repeat top left;
+  background: url('images/logo.png') no-repeat top left;
   margin-left: -129.5px;
   position: absolute;
   z-index: 2;
