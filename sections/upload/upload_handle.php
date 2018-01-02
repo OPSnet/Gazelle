@@ -908,7 +908,7 @@ if (G::$LoggedUser['DisablePoints'] == 0) {
 
 	if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
 			in_array($Properties['Media'], $PerfectFormats))) {
-		$BonusPoints += 200;
+		$BonusPoints += 400;
 	}
 	elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
 		$BonusPoints += 30;
