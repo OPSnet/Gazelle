@@ -158,6 +158,12 @@ class Contest {
 				");
 				G::$DB->query("COMMIT");
 				G::$Cache->delete_value('contest_leaderboard_' . $id);
+				G::$DB->prepared_query('SELECT sum(FlacCount) FROM contest_leaderboard WHERE ContestID = ?', $id);
+				G::$Cache->cache_value(
+					"contest_leaderboard_total_{$Contest['ID']}",
+					G::$DB->has_results() ? G::$DB->next_record()[0] : 0,
+					3600 * 6
+				);
 				self::get_leaderboard($id, false);
 			}
 		}
