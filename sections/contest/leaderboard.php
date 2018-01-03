@@ -62,8 +62,12 @@ if (!count($Leaderboard)) {
 <?
 } else {
 ?>
-	<h3>Grand total: <?= G::$Cache->get_value("contest_leaderboard_total_{$Contest['ID']}") ?? "many, many, many" ?> uploads!</h3>
-
+	<div class="head">
+        <h3>A grand total of <?=
+            G::$Cache->get_value("contest_leaderboard_total_{$Contest['ID']}")
+            ?: "<span title=\"We will recalculate the numbers soon\">many, many, many</span>"
+        ?> torrents have been uploaded.</h3>
+    </div>
 	<table class="layout">
 
 	<tr>

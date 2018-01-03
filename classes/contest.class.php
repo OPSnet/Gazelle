@@ -158,7 +158,22 @@ class Contest {
 				");
 				G::$DB->query("COMMIT");
 				G::$Cache->delete_value('contest_leaderboard_' . $id);
-				G::$DB->prepared_query('SELECT sum(FlacCount) FROM contest_leaderboard WHERE ContestID = ?', $id);
+				G::$DB->prepared_query("
+					SELECT count(*) AS nr
+					FROM torrents t
+					WHERE t.Format = 'FLAC'
+						AND t.Time BETWEEN ? AND ?
+						AND (
+							t.Media IN ('Vinyl', 'WEB')
+							OR (t.Media = 'CD'
+								AND t.HasLog = '1'
+								AND t.HasCue = '1'
+								AND t.LogScore = 100
+								AND t.LogChecksum = '1'
+							)
+						)
+					", $Contest['DateBegin'], $Contest['DateEnd']
+                );
 				G::$Cache->cache_value(
 					"contest_leaderboard_total_{$Contest['ID']}",
 					G::$DB->has_results() ? G::$DB->next_record()[0] : 0,
