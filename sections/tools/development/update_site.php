@@ -84,7 +84,7 @@ $PhinxMigrations = array_filter(json_decode(shell_exec('vendor/bin/phinx status 
 		<span style="width: 150px; display: inline-block;">Remote Hash:</span> <?=$RemoteHash?><br />
 		<?php
 		if ($GitOutput !== '') {
-			print "Pull Results:<br />{$GitOutput}<br />";
+			print "Git Command Results:<br />{$GitOutput}<br />";
 		}
 		?>
 		<input type="button" onclick="window.location.href='tools.php?action=update_site&method=git_pull&auth=<?=G::$LoggedUser['AuthKey']?>';" value="git pull" />
