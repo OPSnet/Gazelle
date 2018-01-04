@@ -19,9 +19,13 @@ View::show_header('Update Site');
 
 // Note: The shell execs are operating from the root of the gazelle repo
 $GitOutput = '';
-if ($Method == 'git_pull') {
-	$GitOutput = shell_exec('git pull 2>&1');
+if ($Method === 'git_pull') {
+	$GitOutput = nl2br(shell_exec('git pull 2>&1'));
 }
+elseif ($Method === 'git_reset') {
+	$GitOutput = nl2br(shell_exec('git reset --hard HEAD^'));
+}
+
 $GitBranch = shell_exec('git rev-parse --abbrev-ref HEAD');
 $GitHash = shell_exec('git rev-parse HEAD');
 $RemoteHash = shell_exec("git rev-parse origin/{$GitBranch}");
@@ -31,10 +35,10 @@ $ComposerVersion = substr(shell_exec('COMPOSER_ALLOW_XDEBUG=1 composer --version
 
 $Packages = [];
 $ComposerOutput = '';
-if ($Method == 'composer_install') {
+if ($Method === 'composer_install') {
 	$ComposerOutput = nl2br(shell_exec('COMPOSER_ALLOW_XDEBUG=1 composer install 2>&1'));
 }
-elseif ($Method == 'composer_dump_autoload') {
+elseif ($Method === 'composer_dump_autoload') {
 	$ComposerOutput = nl2br(shell_exec('COMPOSER_ALLOW_XDEBUG=1 composer dump-autoload 2>&1'));
 }
 
@@ -57,10 +61,10 @@ foreach ($ComposerPackages['installed'] as $Package) {
 
 $PhinxVersion = shell_exec('vendor/bin/phinx --version');
 $PhinxOutput = '';
-if ($Method == 'phinx_migrate') {
+if ($Method === 'phinx_migrate') {
 	$PhinxOutput = nl2br(shell_exec('vendor/bin/phinx migrate -e apollo'));
 }
-elseif ($Method == 'phinx_rollback') {
+elseif ($Method === 'phinx_rollback') {
 	$PhinxOutput = nl2br(shell_exec('vendor/bin/phinx rollback -e apollo'));
 }
 $PhinxMigrations = array_filter(json_decode(shell_exec('vendor/bin/phinx status -e apollo --format=json | tail -n 1'), true)['migrations'], function($value) { return count($value) > 0; });
@@ -84,7 +88,7 @@ $PhinxMigrations = array_filter(json_decode(shell_exec('vendor/bin/phinx status 
 		}
 		?>
 		<input type="button" onclick="window.location.href='tools.php?action=update_site&method=git_pull&auth=<?=G::$LoggedUser['AuthKey']?>';" value="git pull" />
-		<input type="button" onclick="window.location.href='tools.php?action=update_site&method=git_reset&auth=<?=G::$LoggedUser['AuthKey']?>';" value="git reset --hard HEAD~1" />
+		<input type="button" onclick="window.location.href='tools.php?action=update_site&method=git_reset&auth=<?=G::$LoggedUser['AuthKey']?>';" value="git reset --hard HEAD^" />
 	</div>
 	<h3>Composer</h3>
 	<div class="box pad">
