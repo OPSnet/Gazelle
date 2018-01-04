@@ -24,7 +24,7 @@ if ($Method == 'git_pull') {
 }
 $GitBranch = shell_exec('git rev-parse --abbrev-ref HEAD');
 $GitHash = shell_exec('git rev-parse HEAD');
-$RemoteHash = shell_exec('git rev-parse origin/master');
+$RemoteHash = shell_exec("git rev-parse origin/{$GitBranch}");
 
 // If composer detects xdebug is running, it'll disable it and then restart PHP which shell_exec really doesn't like
 $ComposerVersion = substr(shell_exec('COMPOSER_ALLOW_XDEBUG=1 composer --version'), 16);
@@ -84,7 +84,7 @@ $PhinxMigrations = array_filter(json_decode(shell_exec('vendor/bin/phinx status 
 		}
 		?>
 		<input type="button" onclick="window.location.href='tools.php?action=update_site&method=git_pull&auth=<?=G::$LoggedUser['AuthKey']?>';" value="git pull" />
-		<input type="button" onclick="window.location.href='tools.php?action=update_site&method=git_reset&auth=<?=G::$LoggedUser['AuthKey]'?>';" value="git reset --hard HEAD~1"
+		<input type="button" onclick="window.location.href='tools.php?action=update_site&method=git_reset&auth=<?=G::$LoggedUser['AuthKey']?>';" value="git reset --hard HEAD~1" />
 	</div>
 	<h3>Composer</h3>
 	<div class="box pad">
