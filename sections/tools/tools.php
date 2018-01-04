@@ -223,6 +223,11 @@ View::show_header('Staff Tools');
 	create_row("Site options", "tools.php?action=site_options", check_perms('users_mod'));
 	create_row("Tracker info", "tools.php?action=ocelot_info", check_perms("users_mod"));
 	create_row("Update GeoIP", "tools.php?action=update_geoip", check_perms("admin_update_geoip"));
+	$Classes = array(SYSOP);
+	if (defined('LEAD_DEV')) {
+		$Classes[] = LEAD_DEV;
+	}
+	create_row("Update Site", "tools.php?action=update_site", check_perms("site_debug") && in_array(G::$LoggedUser['PermissionID'], $Classes));
 
 	if ($ToolsHTML) {
 ?>

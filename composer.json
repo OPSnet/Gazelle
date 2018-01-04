@@ -10,6 +10,7 @@
     }
   ],
   "require": {
+    "robmorgan/phinx": "^0.9.2",
     "yupmin/php-chardet": "^1.0"
   },
   "require-dev": {
