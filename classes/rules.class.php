@@ -50,7 +50,7 @@ class Rules {
 			  'short' => "Do not share .torrent files or your passkey.",
 			  'long' => "Embedded in each ${site_name} .torrent file is an announce URL containing your personal passkey. Passkeys enable users to report stats to the tracker." ],
 			[ 'n' => "4.1",
-			  'short' => "Do not blackmail, threaten, or expose fellow users or Staff.",
+			  'short' => "Do not blackmail, threaten, or expose fellow users or staff.",
 			  'long' => "Exposing or threatening to expose private information about users for any reason is prohibited. Private information includes but is not limited to personally identifying information (e.g., names, records, biographical details, photos). Information that hasn't been openly volunteered by a user should not be discussed or shared without permission. This includes private information collected via investigations into openly volunteered information (e.g., Google search results)." ],
 			[ 'n' => "4.2",
 			  'short' => "Do not scam or defraud.",
