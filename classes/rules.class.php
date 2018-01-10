@@ -17,8 +17,8 @@ class Rules {
 		$exploit_article = '<a href="wiki.php?action=article&id=68">Exploit Policy</a>';
 		$golden_rules = array(
 			[ 'n' => "1.1",
-			  'short' => "Do not create more than one account.",
-			  'long' => "Users are allowed one account per lifetime. If your account is disabled, contact staff in ${disabled_channel} on ${irc}." ],
+			  'short' => "One account per person, per lifetime.",
+			  'long' => "Users are allowed one account per lifetime. If your account is disabled, contact staff in ${disabled_channel} on ${irc}. Never make another account, you will be disabled without questioning." ],
 			[ 'n' => "1.2",
 			  'short' => "Do not trade, sell, give away, or offer accounts.",
 			  'long' => "If you no longer wish to use your account, send a ${staffpm} and request that your account be disabled." ],
@@ -50,17 +50,17 @@ class Rules {
 			  'short' => "Do not share .torrent files or your passkey.",
 			  'long' => "Embedded in each ${site_name} .torrent file is an announce URL containing your personal passkey. Passkeys enable users to report stats to the tracker." ],
 			[ 'n' => "4.1",
-			  'short' => "Do not blackmail, threaten, or expose fellow users.",
+			  'short' => "Do not blackmail, threaten, or expose fellow users or Staff.",
 			  'long' => "Exposing or threatening to expose private information about users for any reason is prohibited. Private information includes but is not limited to personally identifying information (e.g., names, records, biographical details, photos). Information that hasn't been openly volunteered by a user should not be discussed or shared without permission. This includes private information collected via investigations into openly volunteered information (e.g., Google search results)." ],
 			[ 'n' => "4.2",
 			  'short' => "Do not scam or defraud.",
 			  'long' => "Scams (e.g., phishing) of any kind are prohibited." ],
 			[ 'n' => "4.3",
 			  'short' => "Do not disrespect staff decisions.",
-			  'long' => "Disagreements must be discussed privately with the deciding moderator. If the moderator has retired or is unavailable, you may send a ${staffpm}. Do not contact multiple moderators hoping to find one amenable to your cause; however, you may contact a site administrator if you require a second opinion. Options for contacting staff include private message, Staff PM, and ${disabled_channel} on ${irc}." ],
+			  'long' => "Disagreements must be discussed privately with the deciding moderator. If the moderator has retired or is unavailable, you may send a ${staffpm}. Do not contact multiple moderators hoping to find one amenable to your cause; however, you may contact a site administrator if you require a second opinion. Options for contacting staff include private message, Staff PM, and #help on ${irc}." ],
 			[ 'n' => "4.4",
 			  'short' => "Do not impersonate staff.",
-			  'long' => "Impersonating staff or official service accounts (e.g., Drone) on-site, off-site, or on IRC is prohibited. Deceptively misrepresenting staff decisions is also prohibited." ],
+			  'long' => "Impersonating staff or official service accounts (e.g., Hermes) on-site, off-site, or on IRC is prohibited. Deceptively misrepresenting staff decisions is also prohibited." ],
 			[ 'n' => "4.5",
 			  'short' => "Do not backseat moderate.",
 			  'long' => "\"Backseat moderation\" occurs when users police other users. Confronting, provoking, or chastising users suspected of violating rules&mdash;or users suspected of submitting reports&mdash;is prohibited. Submit a report if you see a rule violation." ],
@@ -87,7 +87,13 @@ class Rules {
 			  'long' => "Seeking or exploiting bugs in the live site (as opposed to a local development environment) is prohibited. If you discover a critical bug or security vulnerability, immediately report it in accordance with ${site_name}'s ${bugs_article}. Non-critical bugs can be reported in the <a href=\"forums.php?action=viewforum&forumid=6\">Bugs Forum</a>." ],
 			[ 'n' => "6.2",
 			  'short' => "Do not publish exploits.",
-			  'long' => "The publication, organization, dissemination, sharing, technical discussion, or technical facilitation of exploits is prohibited at staff discretion. Exploits are defined as unanticipated or unaccepted uses of internal, external, non-profit, or for-profit services. See ${site_name}'s ${exploit_article} article for more information. Exploits are subject to reclassification at any time." ]
+			  'long' => "The publication, organization, dissemination, sharing, technical discussion, or technical facilitation of exploits is prohibited at staff discretion. Exploits are defined as unanticipated or unaccepted uses of internal, external, non-profit, or for-profit services. See ${site_name}'s ${exploit_article} article for more information. Exploits are subject to reclassification at any time." ],
+            [ 'n' => "7.0",
+			  'short' => "Be respectful to all staff members.",
+			  'long' => "Staff on ${site_name} are volunteers that dedicate their time in order to keep the site running, without reveicing any compensation. Being disrespectful to them is prohibited, and might result in a warning or worse." ],
+            [ 'n' => "7.1",
+			  'short' => "Staff have the final word on rule interpretations.",
+			  'long' => "All rules on ${site_name} might be subject to different interpretations. Since the staff wrote these rules, their interpretation should be followed. If you need clarification on a rule, or if you think a rule should be restated, please send a ${staffpm}." ]
 		);
 		echo "<ul class=\"rules golden_rules\">\n";
 		foreach($golden_rules as $gr) {
@@ -125,7 +131,7 @@ class Rules {
 
 			<li>Do not add "useless" tags, such as "<strong class="important_text">seen.live</strong>", "<strong class="important_text">awesome</strong>", "<strong class="important_text">rap</strong>" (is encompassed by "<strong class="important_text_alt">hip.hop</strong>"), etc. If an album is live, you can tag it as "<strong class="important_text_alt">live</strong>".</li>
 
-			<li>Only tag information on the album itself&#8202;&mdash;&#8202;<strong>not the individual release</strong>. Tags such as "<strong class="important_text">v0</strong>", "<strong class="important_text">eac</strong>", "<strong class="important_text">vinyl</strong>", "<strong class="important_text">from.oink</strong>", etc. are strictly forbidden. Remember that these tags will be used for other versions of the same album.</li>
+			<li>Only tag information on the album itself&#8202;&mdash;&#8202;<strong>not the individual release</strong>. Tags such as "<strong class="important_text">v0</strong>", "<strong class="important_text">eac</strong>", "<strong class="important_text">vinyl</strong>", "<strong class="important_text">from.what</strong>", etc. are strictly forbidden. Remember that these tags will be used for other versions of the same album.</li>
 
 			<li><strong>You should be able to build up a list of tags using only the official tags <?=($OnUpload ? 'to the left of the text box' : 'on <a href="upload.php">the torrent upload page</a>')?>. If you are in any doubt about whether or not a tag is acceptable, do not add it.</strong></li>
 		</ul>
@@ -140,7 +146,7 @@ class Rules {
 		?>
 		<ol>
 			<li>
-				Many forums (Tutorials, The Library, etc.) have their own set of rules. Make sure you read and take note of these rules before you attempt to post in one of these forums.
+				Many forums (Serious Discussions, Chat, etc.) have their own set of rules. Make sure you read and take note of these rules before you attempt to post in one of these forums.
 			</li>
 			<li>
 				Don't use all capital letters, excessive !!! (exclamation marks) or ??? (question marks). It seems like you're shouting!
@@ -149,7 +155,7 @@ class Rules {
 				No lame referral schemes. This includes freeipods.com, freepsps.com, or any other similar scheme in which the poster gets personal gain from users clicking a link.
 			</li>
 			<li>
-				No asking for money for any reason whatsoever. We don't know or care about your friend who lost everything, or dying relative who wants to enjoy their last few moments alive by being given lots of money.
+				No asking for money for any reason whatsoever. Although we care about your friend who lost everything, or dying relative who wants to enjoy their last few moments alive by being given lots of money, Apollo is not the kind of place for it.
 			</li>
 			<li>
 				Do not inappropriately advertise your uploads. In special cases, it is acceptable to mention new uploads in an approved thread (e.g. <a href="forums.php?action=viewthread&amp;threadid=841">Post your first upload here so people snatch it</a>), but be sure to carefully read the thread's rules before posting. It is also acceptable to discuss releases you have uploaded when conversing about the music itself. Blatant attempts to advertise your uploads outside of the appropriate forums or threads may result in a warning or the loss of forum privileges.
@@ -185,16 +191,16 @@ class Rules {
 				No posting of requests for serials or cracks. No links to warez or crack sites in the forums.
 			</li>
 			<li>
-				No political or religious discussions. These types of discussions lead to arguments and flaming users, something that will not be tolerated. The only exception to this rule is The Library forum, which exists solely for the purpose of intellectual discussion and civilized debate.
+				No political or religious discussions. These types of discussions lead to arguments and flaming users, something that will not be tolerated. The only exception to this rule is the Serious Discussions forum, which exists solely for the purpose of intellectual discussion and civilized debate.
 			</li>
 			<li>
 				Don't waste other people's bandwidth by posting images of a large file size.
 			</li>
 			<li>
-				Be patient with newcomers. Once you have become an expert, it is easy to forget that you started out as a newbie too.
+				Be patient with newcomers. Once you have become an expert, it is easy to forget that you started out as a newbie too. Try to help them out if you can.
 			</li>
 			<li>
-				No requesting invites to any sites anywhere on the site or IRC. Invites may be <strong>offered</strong> in the invite forum, and nowhere else.
+				No requesting invites to any sites anywhere on the site or IRC. Invites may be <strong>offered</strong> in the Invitations forum (which is restricted to Elite and above), and nowhere else.
 			</li>
 			<li>
 				No language other than English is permitted in the forums. If we can't understand it, we can't moderate it.
@@ -206,7 +212,7 @@ class Rules {
 				Mature content in posts must be properly tagged. The correct format is as follows: <strong>[mature=description] ...content... [/mature]</strong>, where "description" is a mandatory description of the post contents. Misleading or inadequate descriptions will be penalized.
 			</li>
 			<li>
-				Threads created for the exclusive purpose of posting mature imagery will be trashed. Mature content (including graphic album art) should be contextually relevant to the thread and/or forum you're posting in. Mature content is only allowed in: The Lounge, The Lounge +1, The Library, Music, Power Users, Elite, Torrent Masters, VIPs, Comics, Contests &amp; Designs, The Laboratory. If you are in doubt about a post's appropriateness, send a <a href="staffpm.php">Staff PM to the Forum Moderators</a> and wait for a reply before proceeding.
+				Threads created for the exclusive purpose of posting mature imagery will be trashed. Mature content (including graphic album art) should be contextually relevant to the thread and/or forum you're posting in. If you are in doubt about a post's appropriateness, send a <a href="staffpm.php">Staff PM to the Forum Moderators</a> and wait for a reply before proceeding.
 			</li>
 		</ol>
 <?
@@ -225,14 +231,15 @@ class Rules {
 			<li>Excessive swearing will get you kicked; keep swearing to a minimum.</li>
 			<li>Do not leave Caps Lock enabled all the time. It gets annoying, and you will likely get yourself kicked.</li>
 			<li>No arguing. You can't win an argument over the Internet, so you are just wasting your time trying.</li>
-			<li>No prejudice, especially related to race, religion, politics, ethnic background, etc. It is highly suggested to avoid this entirely.</li>
+			<li>No prejudice, especially related to race, religion, politics, sexual preference, ethnic background, etc. It is highly suggested to avoid these subjects entirely.</li>
 			<li>Flooding is irritating and will warrant you a kick. This includes, but is not limited to, automatic "now playing" scripts, pasting large amounts of text, and multiple consecutive lines with no relevance to the conversation at hand.</li>
 			<li>Impersonation of other members&#8202;&mdash;&#8202;particularly staff members&#8202;&mdash;&#8202;will not go unpunished. If you are uncertain of a user's identity, check their vhost.</li>
 			<li>Spamming is strictly forbidden. This includes, but is not limited to, personal sites, online auctions, and torrent uploads.</li>
 			<li>Obsessive annoyance&#8202;&mdash;&#8202;both to other users and staff&#8202;&mdash;&#8202;will not be tolerated.</li>
 			<li>Do not PM, DCC, or Query anyone you don't know or have never talked to without asking first; this applies specifically to staff.</li>
-			<li>No language other than English is permitted in the official IRC channels. If we cannot understand it, we cannot moderate it.</li>
+			<li>No language other than English is permitted in the IRC channels. If we cannot understand it, we cannot moderate it.</li>
 			<li>The offering, selling, trading, and giving away of invites to this or any other site on our IRC network is <strong>strictly forbidden</strong>.</li>
+            <li>The creation of non-official channels on the IRC network is prohibited. Please send a <a href="staffpm.php">Staff PM</a> if you want to add a channel to our network.
 			<li><strong>Read the channel topic before asking questions.</strong></li>
 		</ol>
 <?
