@@ -155,7 +155,7 @@ class Rules {
 				No lame referral schemes. This includes any website or any other similar scheme in which the poster gets personal gain from users clicking a link.
 			</li>
 			<li>
-				No asking for money for any reason whatsoever. Although we care about your friend who lost everything, or a dying relative who wants to enjoy their last few moments alive by being given lots of money, ${sitename} is not the place for it.
+				No asking for money for any reason whatsoever. Although we care about your friend who lost everything, or a dying relative who wants to enjoy their last few moments alive by being given lots of money, <?=(SITE_NAME)?> is not the place for it.
 			</li>
 			<li>
 				Do not inappropriately advertise your uploads. In special cases, it is acceptable to mention new uploads in an approved thread (e.g. <a href="forums.php?action=viewthread&amp;threadid=841">Post your first upload here so people snatch it</a>), but be sure to carefully read the thread's rules before posting. It is also acceptable to discuss releases you have uploaded when conversing about the music itself. Blatant attempts to advertise your uploads outside of the appropriate forums or threads may result in a warning or the loss of forum privileges.
