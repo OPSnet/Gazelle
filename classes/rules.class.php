@@ -90,7 +90,7 @@ class Rules {
 			  'long' => "The publication, organization, dissemination, sharing, technical discussion, or technical facilitation of exploits is prohibited at staff discretion. Exploits are defined as unanticipated or unaccepted uses of internal, external, non-profit, or for-profit services. See ${site_name}'s ${exploit_article} article for more information. Exploits are subject to reclassification at any time." ],
 			[ 'n' => "7.0",
 			  'short' => "Be respectful to all staff members.",
-			  'long' => "Staff on ${site_name} are volunteers that dedicate their time in order to keep the site running, without reveiving any compensation. Being disrespectful to them is prohibited, and might result in a warning or worse." ],
+			  'long' => "Staff on ${site_name} are volunteers that dedicate their time in order to keep the site running, without receiving any compensation. Being disrespectful to them is prohibited, and might result in a warning or worse." ],
 			[ 'n' => "7.1",
 			  'short' => "Staff have the final word on rule interpretations.",
 			  'long' => "All rules on ${site_name} might be subject to different interpretations. Since the staff wrote these rules, their interpretation should be followed. If you need clarification on a rule, or if you think a rule should be restated, please send a ${staffpm}." ]
