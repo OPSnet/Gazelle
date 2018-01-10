@@ -33,7 +33,7 @@ class Rules {
 			  'long' => "Only invite people you know and trust. Do not offer invites via other trackers, forums, social media, or other public locations. Responding to public invite requests is prohibited. Exception: Staff-designated recruiters may offer invites in approved locations." ],
 			[ 'n' => "2.3",
 			  'short' => "Do not request invites or accounts.",
-			  'long' => "Requesting invites to&mdash;or accounts on&mdash;${site_name} or other trackers is prohibited. Invites may be <i>offered</i>, but not requested, in the site's Invites forum (restricted to the <a href=\"wiki.php?action=article&name=classes\">Power User class</a> and above). You may request invites by messaging users only when they have offered them in the Invites Forum. Unsolicited invite requests, even by private message, are prohibited." ],
+			  'long' => "Requesting invites to&mdash;or accounts on&mdash;${site_name} or other trackers is prohibited. Invites may be <i>offered</i>, but not requested, in the Invites forum (restricted to the <a href=\"wiki.php?action=article&name=classes\">Power User class</a> and above). You may request invites by messaging users only when they have offered them in the Invites Forum. Unsolicited invite requests, even by private message, are prohibited." ],
 			[ 'n' => "3.1",
 			  'short' => "Do not engage in ratio manipulation.",
 			  'long' => "Transferring buffer&mdash;or increasing your buffer&mdash;through unintended uses of the BitTorrent protocol or site features (e.g., <a href=\"rules.php?p=requests\">request abuse</a>) constitutes ratio manipulation. When in doubt, send a ${staffpm} asking for more information." ],
@@ -42,7 +42,7 @@ class Rules {
 			  'long' => "Reporting incorrect data to the tracker constitutes cheating, whether it is accomplished through the use of a modified \"cheat client\" or through manipulation of an approved client." ],
 			[ 'n' => "3.3",
 			  'short' => "Do not use unapproved clients.",
-			  'long' => "Your client must be found on the <a href=\"rules.php?p=clients\">Client Whitelist</a>. You must not use clients that have been modified in any way. Developers interested in testing unstable clients must first receive staff approval." ],
+			  'long' => "Your client must be listed on the <a href=\"rules.php?p=clients\">Client Whitelist</a>. You must not use clients that have been modified in any way. Developers interested in testing unstable clients must receive staff approval prior to testing." ],
 			[ 'n' => "3.4",
 			  'short' => "Do not modify ${site_name} .torrent files.",
 			  'long' => "Embedding non-${site_name} announce URLs in ${site_name} .torrents is prohibited. Doing so causes false data to be reported and will be interpreted as cheating. This applies to standalone .torrent files and .torrent files that have been loaded into a client." ],
@@ -51,7 +51,7 @@ class Rules {
 			  'long' => "Embedded in each ${site_name} .torrent file is an announce URL containing your personal passkey. Passkeys enable users to report stats to the tracker." ],
 			[ 'n' => "4.1",
 			  'short' => "Do not blackmail, threaten, or expose fellow users or staff.",
-			  'long' => "Exposing or threatening to expose private information about users for any reason is prohibited. Private information includes but is not limited to personally identifying information (e.g., names, records, biographical details, photos). Information that hasn't been openly volunteered by a user should not be discussed or shared without permission. This includes private information collected via investigations into openly volunteered information (e.g., Google search results)." ],
+			  'long' => "Exposing or threatening to expose private information about users for any reason is prohibited. Private information includes, but is not limited to, personally identifying information (e.g., names, records, biographical details, photos). Information that has not been openly volunteered by a user should not be discussed or shared without permission. This includes private information collected via investigations into openly volunteered information (e.g., Google search results)." ],
 			[ 'n' => "4.2",
 			  'short' => "Do not scam or defraud.",
 			  'long' => "Scams (e.g., phishing) of any kind are prohibited." ],
@@ -69,7 +69,7 @@ class Rules {
 			  'long' => "Special events (e.g., freeleech, neutral leech, picks) are launched at the discretion of the staff. They do not adhere to a fixed schedule, and may not be requested by users." ],
 			[ 'n' => "4.7",
 			  'short' => "Do not harvest user-identifying information.",
-			  'long' => "Using ${site_name}'s services to harvest user-identifying information of any kind (e.g., IP addresses, personal links) through the use of scripts, exploits, or other techniques is prohibited." ],
+			  'long' => "It is prohibited to use ${site_name}'s services to harvest user-identifying information of any kind (e.g., IP addresses, personal links) through the use of scripts, exploits, or other techniques." ],
 			[ 'n' => "4.8",
 			  'short' => "Do not use ${site_name}'s services (including the tracker, website, and IRC network) for commercial gain.",
 			  'long' => "Commercializing services provided by or code maintained by ${site_name} (e.g., Gazelle, Ocelot) is prohibited. Commercializing content provided by ${site_name} users via the aforementioned services (e.g., user torrent data) is prohibited. Referral schemes, financial solicitations, and money offers are also prohibited." ],
@@ -78,7 +78,7 @@ class Rules {
 			  'long' => "You may browse the site through a private server/proxy only if it has a static IP address unique to you, or through your private or shared seedbox. Note that this applies to every kind of proxy, including VPN services, Tor, and public proxies. When in doubt, send a ${staffpm} seeking approval of your proxy or VPN. See our ${vpns_article} and ${ips_article} articles for more information." ],
 			[ 'n' => "5.2",
 			  'short' => "Do not abuse automated site access.",
-			  'long' => "All automated site access must be done through the <a href=\"https://github.com/WhatCD/Gazelle/wiki/JSON-API-Documentation\">API</a>. API use is limited to 5 requests within any 10-second window. Scripts and other automated processes must not scrape the site's HTML pages." ],
+			  'long' => "All automated site access must be done through the <a href=\"https://github.com/WhatCD/Gazelle/wiki/JSON-API-Documentation\">API</a>. API use is limited to 5 requests within any 10-second window. Scripts and other automated processes must not scrape the site's HTML pages. When in doubt, seek advice from staff." ],
 			[ 'n' => "5.3",
 			  'short' => "Do not autosnatch freeleech torrents.",
 			  'long' => "The automatic snatching of freeleech torrents using any method involving little or no user-input (e.g., API-based scripts, log or site scraping, etc.) is prohibited. See ${site_name}'s ${autofl_article} article for more information." ],
@@ -90,10 +90,10 @@ class Rules {
 			  'long' => "The publication, organization, dissemination, sharing, technical discussion, or technical facilitation of exploits is prohibited at staff discretion. Exploits are defined as unanticipated or unaccepted uses of internal, external, non-profit, or for-profit services. See ${site_name}'s ${exploit_article} article for more information. Exploits are subject to reclassification at any time." ],
 			[ 'n' => "7.0",
 			  'short' => "Be respectful to all staff members.",
-			  'long' => "Staff on ${site_name} are volunteers that dedicate their time in order to keep the site running, without receiving any compensation. Being disrespectful to them is prohibited, and might result in a warning or worse." ],
+			  'long' => "Staff on ${site_name} are volunteers who dedicate their time in order to keep the site running, without receiving any compensation. Being disrespectful to them is prohibited, and might result in a warning or worse." ],
 			[ 'n' => "7.1",
 			  'short' => "Staff have the final word on rule interpretations.",
-			  'long' => "All rules on ${site_name} might be subject to different interpretations. Since the staff wrote these rules, their interpretation should be followed. If you need clarification on a rule, or if you think a rule should be restated, please send a ${staffpm}." ]
+			  'long' => "All rules on ${site_name} may be subject to different interpretations. Since the staff wrote these rules, their interpretation is final. If you need clarification on a rule, or if you think a rule should be restated, please send a ${staffpm}." ]
 		);
 		echo "<ul class=\"rules golden_rules\">\n";
 		foreach($golden_rules as $gr) {
@@ -152,10 +152,10 @@ class Rules {
 				Don't use all capital letters, excessive !!! (exclamation marks) or ??? (question marks). It seems like you're shouting!
 			</li>
 			<li>
-				No lame referral schemes. This includes freeipods.com, freepsps.com, or any other similar scheme in which the poster gets personal gain from users clicking a link.
+				No lame referral schemes. This includes any website or any other similar scheme in which the poster gets personal gain from users clicking a link.
 			</li>
 			<li>
-				No asking for money for any reason whatsoever. Although we care about your friend who lost everything, or dying relative who wants to enjoy their last few moments alive by being given lots of money, Apollo is not the kind of place for it.
+				No asking for money for any reason whatsoever. Although we care about your friend who lost everything, or a dying relative who wants to enjoy their last few moments alive by being given lots of money, ${sitename} is not the place for it.
 			</li>
 			<li>
 				Do not inappropriately advertise your uploads. In special cases, it is acceptable to mention new uploads in an approved thread (e.g. <a href="forums.php?action=viewthread&amp;threadid=841">Post your first upload here so people snatch it</a>), but be sure to carefully read the thread's rules before posting. It is also acceptable to discuss releases you have uploaded when conversing about the music itself. Blatant attempts to advertise your uploads outside of the appropriate forums or threads may result in a warning or the loss of forum privileges.
@@ -203,7 +203,7 @@ class Rules {
 				No requesting invites to any sites anywhere on the site or IRC. Invites may be <strong>offered</strong> in the Invitations forum (which is restricted to Elite and above), and nowhere else.
 			</li>
 			<li>
-				No language other than English is permitted in the forums. If we can't understand it, we can't moderate it.
+				There are some language threads (e.g. French, Greek) in the Chat forum. Apart from these, no language other than English is permitted in the forums. If we can't understand it, we can't moderate it. Some FLS members speak other languages. You may send them a PM if you have a specific question and you do not feel comfortable in expressing yourself in English.
 			</li>
 			<li>
 				Be cautious when posting mature content on the forums. All mature imagery must abide by <a href="wiki.php?action=article&amp;id=96">the rules found here</a>. Gratuitously sexual or violent content which falls outside of the allowable categories will result in a warning or worse.
@@ -212,7 +212,7 @@ class Rules {
 				Mature content in posts must be properly tagged. The correct format is as follows: <strong>[mature=description] ...content... [/mature]</strong>, where "description" is a mandatory description of the post contents. Misleading or inadequate descriptions will be penalized.
 			</li>
 			<li>
-				Threads created for the exclusive purpose of posting mature imagery will be trashed. Mature content (including graphic album art) should be contextually relevant to the thread and/or forum you're posting in. If you are in doubt about a post's appropriateness, send a <a href="staffpm.php">Staff PM to the Forum Moderators</a> and wait for a reply before proceeding.
+				Threads created for the exclusive purpose of posting mature imagery will be trashed. Mature content (including graphic album art) should be contextually relevant to the thread and/or forum you're posting in. If you are in doubt as to whether a post is appropriate, send a <a href="staffpm.php">Staff PM to the Forum Moderators</a> and wait for a reply before proceeding.
 			</li>
 		</ol>
 <?
