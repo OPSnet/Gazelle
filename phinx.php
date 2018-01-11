@@ -14,7 +14,7 @@ return
 		'apollo' => [
 			'adapter' => 'mysql',
 			'host' => SQLHOST,
-			'name' => 'gazelle',
+			'name' => SQLDB,
 			'user' => SQLLOGIN,
 			'pass' => SQLPASS,
 			'port' => SQLPORT,
