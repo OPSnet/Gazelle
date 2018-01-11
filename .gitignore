@@ -15,5 +15,22 @@ static/stylespreview/
 sections/tools/development/node_modules/
 /vendor/
 
-donate/
+static/userscripts/gazelle-json-export.js.txt
+
+.bash_history
+.cache/
+.config/
+.local/
+.npm-global/
+.npm/
+.npmrc
+.pki/
+.profile
+.wine/
+
 donate.php
+sections/donate/
+btcipn.php
+sections/btcipn/
+btcm.php
+sections/btcm/

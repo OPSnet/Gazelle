@@ -62,6 +62,12 @@ if (!count($Leaderboard)) {
 <?
 } else {
 ?>
+	<div class="head">
+        <h3>A grand total of <?=
+            G::$Cache->get_value("contest_leaderboard_total_{$Contest['ID']}")
+            ?: "<span title=\"We will recalculate the numbers soon\">many, many, many</span>"
+        ?> torrents have been uploaded.</h3>
+    </div>
 	<table class="layout">
 
 	<tr>
@@ -160,7 +166,7 @@ END_STR
 				}
 				if ($row[0] == $LoggedUser['ID']) {
 ?>
-				<p>You are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
+				<p>With your <?=$score?> upload<?= $score == 1 ? '' : 's' ?>, you are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
 <?
 					$user_seen = 1;
 					break;
