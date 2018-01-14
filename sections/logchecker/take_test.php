@@ -19,7 +19,7 @@ View::show_header('Logchecker');
 
 echo <<<HTML
 <div class="linkbox">
-	<a href="javascript:history.go(-1)" class="brackets">Test Another Log File</a>
+	<a href="logchecker.php" class="brackets">Test Another Log File</a>
 	<a href="logchecker.php?action=upload" class="brackets">Upload Missing Logs</a>
 </div>
 <div class="thin">

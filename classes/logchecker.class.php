@@ -57,7 +57,7 @@ class Logchecker {
 		if (ord($this->Log[0]) . ord($this->Log[1]) == 0xFF . 0xFE) {
 			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16LE');
 		}
-		elseif (ord($this->Log[0]) . ord($LogData[1]) == 0xFE . 0xFF) {
+		elseif (ord($this->Log[0]) . ord($this->Log[1]) == 0xFE . 0xFF) {
 			$this->Log = mb_convert_encoding(substr($this->Log, 2), 'UTF-8', 'UTF-16BE');
 		}
 		elseif (ord($this->Log[0]) == 0xEF && ord($this->Log[1]) == 0xBB && ord($this->Log[2]) == 0xBF) {

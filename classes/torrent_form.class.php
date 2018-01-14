@@ -479,16 +479,14 @@ function show() {
 					</span>
 				</td>
 			</tr>
-<?		if ($this->NewTorrent) {
-			$AcceptTypes = LogChecker::get_accept_values();
-?>
+<?		if ($this->NewTorrent) { ?>
 			<tr id="upload_logs" class="hidden">
 				<td class="label">
 					Log files:
 				</td>
 				<td id="logfields">
 					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-					<input id="file" type="file" accept="<?=$AcceptTypes?>" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+					<input id="file" type="file" accept="<?=LogChecker::get_accept_values()?>" multiple name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField('<?=Logchecker::get_accept_values()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 				</td>
 			</tr>
 			<tr>
@@ -544,7 +542,7 @@ function show() {
 				<td class="label">Upload Log:</td>
 				<td id="logfields">
 					Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-					<input id="file" type="file" accept="<?=$AcceptTypes?>" name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+					<input id="file" type="file" accept="<?=LogChecker::get_accept_values()?>" multiple name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField('<?=Logchecker::get_accept_values()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
 				</td>
 			</tr>
 			<tr>

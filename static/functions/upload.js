@@ -79,7 +79,7 @@ function add_tag() {
 
 var LogCount = 1;
 
-function AddLogField() {
+function AddLogField(acceptTypes) {
     if (LogCount >= 200) {
         return;
     }
@@ -87,6 +87,8 @@ function AddLogField() {
     LogField.type = "file";
     LogField.id = "file";
     LogField.name = "logfiles[]";
+    LogField.accept = acceptTypes;
+    LogField.multiple = true;
     LogField.size = 50;
     var x = $('#logfields').raw();
     x.appendChild(document.createElement("br"));
