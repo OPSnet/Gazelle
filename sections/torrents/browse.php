@@ -395,6 +395,10 @@ if ($x % 7 != 0) { // Padding
 		</table>
 		<table class="layout cat_list" width="100%">
 			<tr>
+				<td>
+					<a class="brackets" href="random.php?action=torrent">Random Torrent</a>
+					<a class="brackets" href="random.php?action=artist">Random Artist</a>
+				</td>
 				<td class="label">
 					<a class="brackets" href="#" onclick="$('#taglist').gtoggle(); if (this.innerHTML == 'View tags') { this.innerHTML = 'Hide tags'; } else { this.innerHTML = 'View tags'; }; return false;"><?=(empty($LoggedUser['ShowTags']) ? 'View tags' : 'Hide tags')?></a>
 				</td>

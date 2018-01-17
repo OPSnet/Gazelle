@@ -1,2 +1,2 @@
 <?php
-require('classes/script_start.php');
+header('Location: random.php?action=collage');

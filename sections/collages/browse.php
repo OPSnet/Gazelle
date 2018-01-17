@@ -271,6 +271,7 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
 <?		} ?>
 		<a href="collages.php?userid=<?=$LoggedUser['ID']?>" class="brackets">Collages you started</a>
 		<a href="collages.php?userid=<?=$LoggedUser['ID']?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
+		<a href="random.php?action=collage" class="brackets">Random collage</a>
 		<br /><br />
 <?	} else { ?>
 		<a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
