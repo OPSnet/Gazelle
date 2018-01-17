@@ -32,7 +32,7 @@ if (!empty($Groups[$GroupID])) {
 			FROM group_log
 			WHERE GroupID = $GroupID
 			ORDER BY Time DESC");
-	$LogEntries = $DB->to_array(false, MYSQL_NUM);
+	$LogEntries = $DB->to_array(false, MYSQLI_NUM);
 	foreach ($LogEntries AS $LogEntry) {
 		list($TorrentID, $UserID, $Info, $Time) = $LogEntry;
 ?>
