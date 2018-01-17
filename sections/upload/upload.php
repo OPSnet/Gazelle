@@ -75,6 +75,12 @@ if (!empty($ArtistForm)) {
 }
 
 require(SERVER_ROOT.'/classes/torrent_form.class.php');
+if (empty($Properties)) {
+	$Properties = null;
+}
+if (empty($Err)) {
+	$Err = null;
+}
 $TorrentForm = new TORRENT_FORM($Properties, $Err);
 
 $GenreTags = $Cache->get_value('genre_tags');
@@ -158,9 +164,8 @@ switch ($UploadForm) {
 $TorrentForm->foot();
 ?>
 <script type="text/javascript">
-	Format();
+	Format(<?=(!empty($Err)) ? 'true' : 'false'?>);
 	Bitrate();
 </script>
-<?
+<?php
 View::show_footer();
-?>

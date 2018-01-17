@@ -313,7 +313,7 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 	);
 	for ($i = 0, $il = count($Artists); $i < $il; $i++) {
 		if (trim($Artists[$i]) != '') {
-			if (!in_array($Artists[$i], trim($ArtistNames))) {
+			if (!in_array($Artists[$i], $ArtistNames)) {
 				$ArtistForm[$Importance[$i]][] = array('name' => Artists::normalise_artist_name($Artists[$i]));
 				if ($Importance[$i] == 1) {
 					$MainArtistCount++;

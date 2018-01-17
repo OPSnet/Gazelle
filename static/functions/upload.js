@@ -23,19 +23,23 @@ function Remaster() {
     }
 }
 
-function Format() {
+function Format(skip_bitrate) {
     var format = $('#format');
     var bitrate = $('#bitrate');
     if (format.raw().options[format.raw().selectedIndex].value === 'FLAC') {
-        for (var i = 0; i < bitrate.raw().options.length; i++) {
-            if (bitrate.raw().options[i].value === 'Lossless') {
-                bitrate.raw()[i].selected = true;
+        if (!skip_bitrate) {
+            for (var i = 0; i < bitrate.raw().options.length; i++) {
+                if (bitrate.raw().options[i].value === 'Lossless') {
+                    bitrate.raw()[i].selected = true;
+                }
             }
         }
         $('#upload_logs').gshow();
         $('#other_bitrate_span').ghide();
     } else {
-        $('#bitrate').raw()[0].selected = true;
+        if (!skip_bitrate) {
+            $('#bitrate').raw()[0].selected = true;
+        }
         $('#upload_logs').ghide();
     }
 

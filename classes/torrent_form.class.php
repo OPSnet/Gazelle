@@ -650,7 +650,7 @@ function show() {
 		foreach (Misc::display_array($this->Formats) as $Format) {
 			echo "\t\t\t\t\t\t<option value=\"$Format\"";
 			if ($Format == $Torrent['Format']) {
-				echo ' selected="selected"';
+				echo ' selected';
 			}
 			echo '>';
 			echo $Format;
@@ -678,7 +678,7 @@ function show() {
 		foreach (Misc::display_array($this->Bitrates) as $Bitrate) {
 			echo "\t\t\t\t\t\t<option value=\"$Bitrate\"";
 			if ($Bitrate == $Torrent['Bitrate'] || ($OtherBitrate && $Bitrate == 'Other')) {
-				echo ' selected="selected"';
+				echo ' selected';
 			}
 			echo '>';
 			echo $Bitrate;
