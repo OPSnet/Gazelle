@@ -86,7 +86,10 @@ while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) { ?>
 	<div class="box vertical_space">
 		<div class="head" style="overflow: hidden;">
 			<div style="float: left;">
-				<strong><?=$Users[(int)$SenderID]['UserStr']?></strong> <?=time_diff($SentDate)?> - <a href="#quickpost" onclick="Quote('<?=$MessageID?>','<?=$Users[(int)$SenderID]['Username']?>');" class="brackets">Quote</a>
+				<strong><?=$Users[(int)$SenderID]['UserStr']?></strong> <?=time_diff($SentDate)?>
+<?	if ($SenderID > 0) { ?>
+					- <a href="#quickpost" onclick="Quote('<?=$MessageID?>','<?=$Users[(int)$SenderID]['Username']?>');" class="brackets">Quote</a>
+<?	} ?>
 			</div>
 			<div style="float: right;"><a href="#">&uarr;</a> <a href="#messageform">&darr;</a></div>
 		</div>
