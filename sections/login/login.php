@@ -62,7 +62,6 @@ if ($Attempts > 0) {
 <?
 }
 ?>
-<script type="text/javascript" src="static/functions/detect_mobile.js"></script>
 <script type="text/javascript">
 cookie.set('cookie_test', 1, 1);
 if (cookie.get('cookie_test') != null) {
@@ -70,5 +69,6 @@ if (cookie.get('cookie_test') != null) {
 } else {
 	$('#no-cookies').gshow();
 }
+window.onload = function() {document.getElementById("username").focus();
 </script>
-<? View::show_footer(); ?>
+<? View::show_footer();

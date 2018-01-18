@@ -92,9 +92,6 @@ G::initialize();
 
 $Browser = UserAgent::browser($_SERVER['HTTP_USER_AGENT']);
 $OperatingSystem = UserAgent::operating_system($_SERVER['HTTP_USER_AGENT']);
-//$Mobile = UserAgent::mobile($_SERVER['HTTP_USER_AGENT']);
-$Mobile = in_array($_SERVER['HTTP_HOST'], array('m.'.NONSSL_SITE_URL, 'm.'.NONSSL_SITE_URL));
-
 
 $Debug->set_flag('start user handling');
 
