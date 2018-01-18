@@ -183,6 +183,7 @@ if (!empty($Pending)) {
 			<tr class="colhead">
 				<td>Email address</td>
 				<td>Expires in</td>
+				<td>Invite link</td>
 				<td>Delete invite</td>
 			</tr>
 <?
@@ -194,6 +195,7 @@ if (!empty($Pending)) {
 			<tr class="row<?=$Row?>">
 				<td><?=display_str($Email)?></td>
 				<td><?=time_diff($Expires)?></td>
+				<td><a href="register.php?invite=<?=$InviteKey?>">Invite link</a></td>
 				<td><a href="user.php?action=delete_invite&amp;invite=<?=$InviteKey?>&amp;auth=<?=$LoggedUser['AuthKey']?>" onclick="return confirm('Are you sure you want to delete this invite?');">Delete invite</a></td>
 			</tr>
 <?	} ?>
