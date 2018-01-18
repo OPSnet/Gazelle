@@ -223,6 +223,7 @@ View::show_header('Staff Tools');
 	create_row("Site options", "tools.php?action=site_options", check_perms('users_mod'));
 	create_row("Tracker info", "tools.php?action=ocelot_info", check_perms("users_mod"));
 	create_row("Update GeoIP", "tools.php?action=update_geoip", check_perms("admin_update_geoip"));
+	create_row("Update Drive Offsets", "tools.php?action=update_offsets", check_perms("users_mod"));
 
 	if ($ToolsHTML) {
 ?>
