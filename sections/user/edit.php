@@ -408,7 +408,7 @@ echo $Val->GenerateJS('userform');
 			<tr id="comm_avatars_tr">
 				<td class="label tooltip" title="This option allows you to disable all avatars, show all avatars (with a placeholder for users without avatars), show all avatars &lt;em&gt;or&lt;/em&gt; an identicon set (for users without avatars), or replace all avatars with an identicon set of your choosing." data-title-plain="This option allows you to disable all avatars, show all avatars (with a placeholder for users without avatars), show all avatars or an identicon set (for users without avatars), or replace all avatars with an identicon set of your choosing."><strong>Avatar display (posts)</strong></td>
 				<td>
-					<select name="disableavatars" id="disableavatars" onclick="ToggleIdenticons();">
+					<select name="disableavatars" id="disableavatars" onchange="ToggleIdenticons();">
 						<option value="1"<?=$SiteOptions['DisableAvatars'] == 1 ? ' selected="selected"' : ''?>>Disable avatars</option>
 						<option value="0"<?=$SiteOptions['DisableAvatars'] == 0 ? ' selected="selected"' : ''?>>Show avatars</option>
 						<option value="2"<?=$SiteOptions['DisableAvatars'] == 2 ? ' selected="selected"' : ''?>>Show avatars or:</option>
