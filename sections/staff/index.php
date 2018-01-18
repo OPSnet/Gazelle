@@ -7,8 +7,14 @@ include(SERVER_ROOT.'/sections/staff/functions.php');
 $SupportStaff = get_support();
 
 list($FrontLineSupport, $Staff) = $SupportStaff;
-
 ?>
+
+<? if (check_perms('admin_manage_applicants')) { ?>
+<div class="linkbox">
+	<a href="apply.php">Role applications</a>
+</div>
+<?  } ?>
+
 <div class="thin">
 	<div class="header">
 		<h2><?=SITE_NAME?> Staff</h2>
@@ -19,6 +25,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 		<div id="below_box">
 			<p>If you are looking for help with a general question, we appreciate it if you would only message through the staff inbox, where we can all help you.</p>
 			<p>You can do that by <strong><a href="#" onclick="$('#compose').gtoggle(); return false;">sending a message to the Staff Inbox</a></strong>.</p>
+			<p>If you'd like to join our staff, please feel free to <strong><a href="apply.php">apply</a></strong>!</p>
 			<p>If you are looking to ask staff a question which isn't fit for a Staff PM or support area, <a href='questions.php'>you can use our questions feature</a>.</p>
 		</div>
 	</div>

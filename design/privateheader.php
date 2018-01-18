@@ -502,6 +502,25 @@ if (check_perms('admin_reports')) {
 	}
 }
 
+if (check_perms('admin_manage_applicants')) {
+	$NumNewApplicants = Applicant::new_applicant_count();
+	if ($NumNewApplicants > 0) {
+		$ModBar[] = sprintf(
+			'<a href="apply.php?action=view">%d new Applicant%s</a>',
+				$NumNewApplicants,
+				($NumNewApplicants == 1 ? '' : 's')
+		);
+	}
+
+	$NumNewReplies = Applicant::new_reply_count();
+	if ($NumNewReplies > 0) {
+		$ModBar[] = sprintf(
+			'<a href="apply.php?action=view">%d new Applicant %s</a>',
+				$NumNewReplies,
+				($NumNewReplies == 1 ? 'Reply' : 'Replies')
+		);
+	}
+}
 
 if (check_perms('users_mod') && FEATURE_EMAIL_REENABLE) {
 	$NumEnableRequests = G::$Cache->get_value(AutoEnable::CACHE_KEY_NAME);

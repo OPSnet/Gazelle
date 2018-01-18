@@ -92,7 +92,7 @@ class CACHE extends Memcached {
 
 	//---------- Caching functions ----------//
 
-	// Allows us to set an expiration on otherwise perminantly cache'd values
+	// Allows us to set an expiration on otherwise permanently cached values
 	// Useful for disabled users, locked threads, basically reducing ram usage
 	public function expire_value($Key, $Duration = 2592000) {
 		$StartTime = microtime(true);

@@ -6,7 +6,8 @@
  * @param string $ClassName class name
  */
 spl_autoload_register(function ($ClassName) {
-	$FilePath = SERVER_ROOT . '/classes/' . strtolower($ClassName) . '.class.php';
+	$ROOT = (PHP_SAPI === 'cli') ? '.' : SERVER_ROOT;
+	$FilePath = $ROOT . '/classes/' . strtolower($ClassName) . '.class.php';
 	if (!file_exists($FilePath)) {
 		// TODO: Rename the following classes to conform with the code guidelines
 		switch ($ClassName) {
@@ -30,7 +31,7 @@ spl_autoload_register(function ($ClassName) {
 			default:
 				die("Couldn't import class $ClassName");
 		}
-		$FilePath = SERVER_ROOT . "/classes/$FileName.php";
+		$FilePath = $ROOT . "/classes/$FileName.php";
 	}
 	require_once($FilePath);
 });

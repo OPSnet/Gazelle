@@ -5,8 +5,8 @@
 /* classes and functions used all over the site to the  */
 /* page currently being displayed.                      */
 /*------------------------------------------------------*/
-/* The code that includes the main php files and		*/
-/* generates the page are at the bottom.				*/
+/* The code that includes the main php files and        */
+/* generates the page are at the bottom.                */
 /*------------------------------------------------------*/
 /********************************************************/
 require 'config.php'; //The config contains all site wide configuration information
@@ -15,7 +15,9 @@ if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
 	die('d14:failure reason40:Invalid .torrent, try downloading again.e');
 }
 
-require(SERVER_ROOT.'/classes/proxies.class.php');
+$ROOT = (PHP_SAPI === 'cli') ? '.' : SERVER_ROOT;
+
+require($ROOT.'/classes/proxies.class.php');
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
@@ -26,9 +28,9 @@ if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
 	$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
 }
 else if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])
-            && filter_var($_SERVER['HTTP_CF_CONNECTING_IP'], FILTER_VALIDATE_IP,
-                          FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+		&& filter_var($_SERVER['HTTP_CF_CONNECTING_IP'], FILTER_VALIDATE_IP,
+			FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+	$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
 }
 
 $SSL = (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
@@ -53,24 +55,26 @@ if (!isset($argv) && !empty($_SERVER['HTTP_HOST'])) {
 	}
 }
 
-
-
 $ScriptStartTime = microtime(true); //To track how long a page takes to create
 if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
 	$RUsage = getrusage();
 	$CPUTimeStart = $RUsage['ru_utime.tv_sec'] * 1000000 + $RUsage['ru_utime.tv_usec'];
 }
-ob_start(); //Start a buffer, mainly in case there is a mysql error
 
+if (PHP_SAPI !== 'cli') {
+	ob_start(); //Start a buffer, mainly in case there is a mysql error
+}
 
-require(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
-require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-require(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
-require(SERVER_ROOT.'/classes/encrypt.class.php'); //Require the encryption class
-require(SERVER_ROOT.'/classes/time.class.php'); //Require the time class
-require(SERVER_ROOT.'/classes/paranoia.class.php'); //Require the paranoia check_paranoia function
-require(SERVER_ROOT.'/classes/regex.php');
-require(SERVER_ROOT.'/classes/util.php');
+set_include_path($ROOT);
+
+require($ROOT.'/classes/debug.class.php'); //Require the debug class
+require($ROOT.'/classes/mysql.class.php'); //Require the database wrapper
+require($ROOT.'/classes/cache.class.php'); //Require the caching class
+require($ROOT.'/classes/encrypt.class.php'); //Require the encryption class
+require($ROOT.'/classes/time.class.php'); //Require the time class
+require($ROOT.'/classes/paranoia.class.php'); //Require the paranoia check_paranoia function
+require($ROOT.'/classes/regex.php');
+require($ROOT.'/classes/util.php');
 
 $Debug = new DEBUG;
 $Debug->handle_errors();
@@ -81,7 +85,7 @@ $Cache = new CACHE($MemcachedServers);
 $Enc = new CRYPT;
 
 // Autoload classes.
-require(SERVER_ROOT.'/classes/classloader.php');
+require($ROOT.'/classes/classloader.php');
 
 // Note: G::initialize is called twice.
 // This is necessary as the code inbetween (initialization of $LoggedUser) makes use of G::$DB and G::$Cache.
@@ -263,8 +267,6 @@ if (isset($LoginCookie)) {
 		$Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
 		$Cache->update_row(false, array('IP' => $_SERVER['REMOTE_ADDR']));
 		$Cache->commit_transaction(0);
-
-
 	}
 
 
@@ -288,6 +290,7 @@ if (isset($LoginCookie)) {
 		logout(); // Ghost
 	}
 }
+
 G::initialize();
 $Debug->set_flag('end user handling');
 
@@ -360,47 +363,53 @@ function authorize($Ajax = false) {
 }
 
 $Debug->set_flag('ending function definitions');
-//Include /sections/*/index.php
-$Document = basename(parse_url($_SERVER['SCRIPT_FILENAME'], PHP_URL_PATH), '.php');
-if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
-	error(404);
+
+if (PHP_SAPI !== 'cli') {
+	//Include /sections/*/index.php
+	$Document = basename(parse_url($_SERVER['SCRIPT_FILENAME'], PHP_URL_PATH), '.php');
+	if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
+		error(404);
+	}
+
+	$StripPostKeys = array_fill_keys(array('password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'), true);
+	$Cache->cache_value('php_' . getmypid(),
+		[
+			'start' => sqltime(),
+			'document' => $Document,
+			'query' => $_SERVER['QUERY_STRING'],
+			'get' => $_GET,
+			'post' => array_diff_key($_POST, $StripPostKeys)
+		], 600
+	);
+
+	// Locked account constant
+	define('STAFF_LOCKED', 1);
+
+	$AllowedPages = ['staffpm', 'ajax', 'locked', 'logout', 'login'];
+
+	if (isset(G::$LoggedUser['LockedAccount']) && !in_array($Document, $AllowedPages)) {
+		require($ROOT . '/sections/locked/index.php');
+	} else {
+		require($ROOT . '/sections/' . $Document . '/index.php');
+	}
+
+	$Debug->set_flag('completed module execution');
+
+	/* Required in the absence of session_start() for providing that pages will change
+	 * upon hit rather than being browser cached for changing content.
+	 * ld versions of Internet Explorer choke when downloading binary files over HTTPS with disabled cache.
+	 * Define the following constant in files that handle file downloads.
+	 */
+	if (!defined('SKIP_NO_CACHE_HEADERS')) {
+		header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: no-cache');
+	}
+
+	//Flush to user
+	ob_end_flush();
+
+	$Debug->set_flag('set headers and send to user');
+
+	//Attribute profiling
+	$Debug->profile();
 }
-
-$StripPostKeys = array_fill_keys(array('password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'), true);
-$Cache->cache_value('php_' . getmypid(), array(
-	'start' => sqltime(),
-	'document' => $Document,
-	'query' => $_SERVER['QUERY_STRING'],
-	'get' => $_GET,
-	'post' => array_diff_key($_POST, $StripPostKeys)), 600);
-
-// Locked account constant
-define('STAFF_LOCKED', 1);
-
-$AllowedPages = ['staffpm', 'ajax', 'locked', 'logout', 'login'];
-
-if (isset(G::$LoggedUser['LockedAccount']) && !in_array($Document, $AllowedPages)) {
-	require(SERVER_ROOT . '/sections/locked/index.php');
-} else {
-	require(SERVER_ROOT . '/sections/' . $Document . '/index.php');
-}
-
-$Debug->set_flag('completed module execution');
-
-/* Required in the absence of session_start() for providing that pages will change
-upon hit rather than being browser cached for changing content.
-
-Old versions of Internet Explorer choke when downloading binary files over HTTPS with disabled cache.
-Define the following constant in files that handle file downloads */
-if (!defined('SKIP_NO_CACHE_HEADERS')) {
-	header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
-	header('Pragma: no-cache');
-}
-
-//Flush to user
-ob_end_flush();
-
-$Debug->set_flag('set headers and send to user');
-
-//Attribute profiling
-$Debug->profile();
