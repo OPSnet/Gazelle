@@ -800,13 +800,17 @@ class Logchecker {
 			$this->account('Virtual drive used: ' . $Matches[2], 20, false, false, false, 20);
 			return "<span class=\"log5\">Used Drive$Matches[1]</span>: <span class=\"bad\">$Matches[2]</span>";
 		}
-		$DriveName   = $Matches[2];
-		$DriveName   = preg_replace('/\s+-\s/', ' ', $DriveName);
-		$DriveName   = preg_replace('/\s+/', ' ', $DriveName);
-		$DriveName   = preg_replace('/[^ ]+:.*$/', '', $DriveName);
-		$this->Drive = $DriveName;
-		$Search	  = preg_split('/[^0-9a-z]/i', trim($DriveName));
-		$SearchText  = implode("%' AND Name LIKE '%", $Search);
+		$DriveName = $Matches[2];
+		$DriveName = str_replace('JLMS', 'Lite-ON', $DriveName);
+		$DriveName = str_replace('HL-DT-ST', 'LG Electronics', $DriveName);
+		$DriveName = str_replace(array('Matshita', 'MATSHITA'), 'Panasonic', $DriveName);
+		$DriveName = str_replace('TSSTcorpCD', 'TSSTcorp CD', $DriveName);
+		$DriveName = preg_replace('/\s+-\s/', ' ', $DriveName);
+		$DriveName = preg_replace('/\s+/', ' ', $DriveName);
+		$DriveName = preg_replace('/\(revision [a-zA-Z0-9]*\)/', '', $DriveName);
+		$DriveName = preg_replace('/ Adapter.*$/', '', $DriveName);
+		$Search = array_filter(preg_split('/[^0-9a-z]/i', trim($DriveName)), function($elem) { return strlen($elem) > 0; });
+		$SearchText = implode("%' AND Name LIKE '%", $Search);
 		$DB->query("SELECT Offset,Name FROM drives WHERE Name LIKE '%" . $SearchText . "%'");
 		$this->Drives  = $DB->collect('Name');
 		$Offsets	   = array_unique($DB->collect('Offset'));

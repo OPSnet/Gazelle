@@ -436,6 +436,10 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/development/update_geoip.php');
 		break;
 
+	case 'update_offsets':
+		include(SERVER_ROOT.'/sections/tools/development/update_offsets.php');
+		break;
+
 	case 'dupe_ips':
 		include(SERVER_ROOT.'/sections/tools/misc/dupe_ip.php');
 		break;
