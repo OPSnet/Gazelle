@@ -562,6 +562,11 @@ if (check_perms('users_view_invites')) {
 				?></li>
 <?
 }
+if (Applicant::user_is_applicant($UserID) && (check_perms('admin_manage_applicants') || $OwnProfile)) {
+?>
+				<li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
+<?
+}
 
 if (!isset($SupportFor)) {
 	$DB->query('
