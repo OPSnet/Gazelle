@@ -807,7 +807,7 @@ class Logchecker {
 		$DriveName = str_replace('TSSTcorpCD', 'TSSTcorp CD', $DriveName);
 		$DriveName = preg_replace('/\s+-\s/', ' ', $DriveName);
 		$DriveName = preg_replace('/\s+/', ' ', $DriveName);
-		$DriveName = preg_replace('/\(revision [a-zA-Z0-9]*\)/', '', $DriveName);
+		$DriveName = preg_replace('/\(revision [a-zA-Z0-9\.\,\-]*\)/', '', $DriveName);
 		$DriveName = preg_replace('/ Adapter.*$/', '', $DriveName);
 		$Search = array_filter(preg_split('/[^0-9a-z]/i', trim($DriveName)), function($elem) { return strlen($elem) > 0; });
 		$SearchText = implode("%' AND Name LIKE '%", $Search);
