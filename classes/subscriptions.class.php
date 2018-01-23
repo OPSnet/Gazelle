@@ -270,7 +270,7 @@ class Subscriptions {
 
 	/**
 	 * Clear the subscription cache for all subscribers of a forum thread or artist/collage/request/torrent comments.
-	 * @param type $Page 'forums', 'artist', 'collages', 'requests' or 'torrents'
+	 * @param string $Page 'forums', 'artist', 'collages', 'requests' or 'torrents'
 	 * @param type $PageID TopicID, ArtistID, CollageID, RequestID or GroupID, respectively
 	 */
 	public static function flush_subscriptions($Page, $PageID) {

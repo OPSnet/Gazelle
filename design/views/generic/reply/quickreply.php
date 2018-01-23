@@ -133,12 +133,15 @@
 							<label for="subscribebox">Subscribe</label>
 <?
 		}
-		if ($ThreadInfo['LastPostAuthorID'] == G::$LoggedUser['ID']
-			&& (check_perms('site_forums_double_post')
-				|| in_array($ForumID, $ForumsDoublePost))
-		) {
+
+		if ($ThreadInfo['LastPostAuthorID'] == G::$LoggedUser['ID']) {
+			// Test to see if the post was made an hour ago, if so, auto-check merge box
+			/** @noinspection PhpUnhandledExceptionInspection */
+			$PostDate = date_create($ThreadInfo['LastPostTime'])->add(new DateInterval("PT1H"));
+			$TestDate = date_create();
+			$Checked = ($PostDate >= $TestDate) ? "checked" : "";
 ?>
-							<input id="mergebox" type="checkbox" name="merge" tabindex="2" />
+							<input id="mergebox" type="checkbox" name="merge" tabindex="2" <?= $Checked ?>/>
 							<label for="mergebox">Merge</label>
 <?
 		}

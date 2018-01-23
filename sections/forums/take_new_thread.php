@@ -79,18 +79,20 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
 	}
 }
 
+$sqltime = sqltime();
+
 $DB->query("
 	INSERT INTO forums_topics
 		(Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
 	Values
-		('".db_string($Title)."', '".$LoggedUser['ID']."', '$ForumID', '".sqltime()."', '".$LoggedUser['ID']."', '".sqltime()."')");
+		('".db_string($Title)."', '".$LoggedUser['ID']."', '$ForumID', '".$sqltime."', '".$LoggedUser['ID']."', '".$sqltime."')");
 $TopicID = $DB->inserted_id();
 
 $DB->query("
 	INSERT INTO forums_posts
 		(TopicID, AuthorID, AddedTime, Body)
 	VALUES
-		('$TopicID', '".$LoggedUser['ID']."', '".sqltime()."', '".db_string($Body)."')");
+		('$TopicID', '".$LoggedUser['ID']."', '".$sqltime."', '".db_string($Body)."')");
 
 $PostID = $DB->inserted_id();
 
@@ -102,7 +104,7 @@ $DB->query("
 		LastPostID       = '$PostID',
 		LastPostAuthorID = '".$LoggedUser['ID']."',
 		LastPostTopicID  = '$TopicID',
-		LastPostTime     = '".sqltime()."'
+		LastPostTime     = '".$sqltime."'
 	WHERE ID = '$ForumID'");
 
 $DB->query("
@@ -111,7 +113,7 @@ $DB->query("
 		NumPosts         = NumPosts + 1,
 		LastPostID       = '$PostID',
 		LastPostAuthorID = '".$LoggedUser['ID']."',
-		LastPostTime     = '".sqltime()."'
+		LastPostTime     = '".$sqltime."'
 	WHERE ID = '$TopicID'");
 
 if (isset($_POST['subscribe'])) {
@@ -155,7 +157,7 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
 		'IsSticky' => 0,
 		'NumPosts' => 1,
 		'LastPostID' => $PostID,
-		'LastPostTime' => sqltime(),
+		'LastPostTime' => $sqltime,
 		'LastPostAuthorID' => $LoggedUser['ID'],
 		'NoPoll' => $NoPoll
 	)); // Bumped
@@ -171,7 +173,7 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
 		'LastPostID' => $PostID,
 		'LastPostAuthorID' => $LoggedUser['ID'],
 		'LastPostTopicID' => $TopicID,
-		'LastPostTime' => sqltime(),
+		'LastPostTime' => $sqltime,
 		'Title' => $Title,
 		'IsLocked' => 0,
 		'IsSticky' => 0
@@ -186,7 +188,7 @@ $Cache->begin_transaction("thread_$TopicID".'_catalogue_0');
 $Post = array(
 	'ID' => $PostID,
 	'AuthorID' => $LoggedUser['ID'],
-	'AddedTime' => sqltime(),
+	'AddedTime' => $sqltime,
 	'Body' => $Body,
 	'EditedUserID' => 0,
 	'EditedTime' => '0000-00-00 00:00:00'
@@ -195,7 +197,7 @@ $Cache->insert('', $Post);
 $Cache->commit_transaction(0);
 
 $Cache->begin_transaction("thread_$TopicID".'_info');
-$Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID']));
+$Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $sqltime));
 $Cache->commit_transaction(0);
 
 
