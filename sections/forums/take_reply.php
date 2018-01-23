@@ -67,7 +67,7 @@ if (isset($_POST['subscribe']) && Subscriptions::has_subscribed($TopicID) === fa
 }
 
 //Now lets handle the special case of merging posts, we can skip bumping the thread and all that fun
-if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && ((!check_perms('site_forums_double_post') && !in_array($ForumID, $ForumsDoublePost)) || isset($_POST['merge']))) {
+if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'])) {
 	//Get the id for this post in the database to append
 	$DB->query("
 		SELECT ID, Body
@@ -258,7 +258,7 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && ((!check_perms('site
 
 	//Update the thread info
 	$Cache->begin_transaction("thread_$TopicID".'_info');
-	$Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID']));
+	$Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $SQLTime));
 	$Cache->commit_transaction(0);
 
 	//Increment this now to make sure we redirect to the correct page

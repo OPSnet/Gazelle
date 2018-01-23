@@ -115,7 +115,7 @@ if ($LastID < $PostID) { // Last post in a topic was removed
 			'LastPostAuthorID' => $LastAuthorID,
 			'LastPostTime' => $LastTime);
 	}
-	$UpdateArrayThread = array('Posts' => '-1', 'LastPostAuthorID' => $LastAuthorID);
+	$UpdateArrayThread = array('Posts' => '-1', 'LastPostAuthorID' => $LastAuthorID, 'LastPostTime' => $LastTime);
 } else {
 	$UpdateArrayForums = array('NumPosts' => '-1');
 	$UpdateArrayThread = array('Posts' => '-1');

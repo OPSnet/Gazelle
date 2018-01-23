@@ -31,7 +31,6 @@ $PermissionsArray = array(
 	'site_delete_artist' => 'Can delete artists (must be able to delete torrents+requests).',
 	'site_moderate_forums' => 'Forum moderation access.',
 	'site_admin_forums' => 'Forum administrator access.',
-	'site_forums_double_post' => 'Can double post in the forums.',
 	'site_view_flow' => 'Can view stats and data pools.',
 	'site_view_full_log' => 'Can view old log entries.',
 	'site_view_torrent_snatchlist' => 'Can view torrent snatch lists.',
@@ -160,7 +159,6 @@ function permissions_form() {
 					display_perm('site_proxy_images', 'Proxy images through the server.');
 					display_perm('site_search_many', 'Can go past low limit of search results.');
 					display_perm('site_collages_recover', 'Can recover \'deleted\' collages.');
-					display_perm('site_forums_double_post', 'Can double post in the forums.');
 					display_perm('project_team', 'Part of the project team.');
 					display_perm('site_tag_aliases_read', 'Can view the list of tag aliases.');
 ?>
