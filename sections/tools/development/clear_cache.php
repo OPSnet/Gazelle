@@ -12,9 +12,9 @@ if (isset($_GET['cache'])) {
 		list($Count) = $DB->next_record();
 
 		for ($i = 1; $i <= $Count; $i++) {
-			$Cache->delete_value('users_stats_' . $i);
-			$Cache->delete_value('users_info_' . $i);
-			$Cache->delete_value('users_info_heavy_' . $i);
+			$Cache->delete_value('user_stats_' . $i);
+			$Cache->delete_value('user_info_' . $i);
+			$Cache->delete_value('user_info_heavy_' . $i);
 		}
 		echo "<div class='save_message'>{$Count} users' caches cleared!</div>";
 	}
@@ -82,7 +82,7 @@ $MultiKeyTooltip = 'Enter cache keys delimited by any amount of whitespace.';
 		</tr>
 		<tr>
 			<td rowspan="2">Clear Common Caches:</td>
-			<td><a href="tools.php?action=clear_cache&cache=users">Users</a> (clears out users_stats_*, users_info_*, and users_info_heavy_*)</td>
+			<td><a href="tools.php?action=clear_cache&cache=users">Users</a> (clears out user_stats_*, user_info_*, and user_info_heavy_*)</td>
 		</tr>
 		<tr>
 			<td><a href="tools.php?action=clear_cache&cache=torrent_groups">Torrent Groups</a> (clears out torrent_group_* and groups_artists_*)</td>
