@@ -804,7 +804,7 @@ class Logchecker {
 		$DriveName = str_replace('JLMS', 'Lite-ON', $DriveName);
 		$DriveName = str_replace('HL-DT-ST', 'LG Electronics', $DriveName);
 		$DriveName = str_replace(array('Matshita', 'MATSHITA'), 'Panasonic', $DriveName);
-		$DriveName = str_replace('TSSTcorpCD', 'TSSTcorp CD', $DriveName);
+		$DriveName = str_replace(array('TSSTcorpBD', 'TSSTcorpCD', 'TSSTcorpDVD'), array('TSSTcorp BD', 'TSSTcorp CD', 'TSSTcorp DVD'), $DriveName);
 		$DriveName = preg_replace('/\s+-\s/', ' ', $DriveName);
 		$DriveName = preg_replace('/\s+/', ' ', $DriveName);
 		$DriveName = preg_replace('/\(revision [a-zA-Z0-9\.\,\-]*\)/', '', $DriveName);
