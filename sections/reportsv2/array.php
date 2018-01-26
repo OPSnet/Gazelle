@@ -98,7 +98,6 @@ Your torrent was reported because it contained material from the DNU list or fro
 					'Please list the specific reason(s) the newer torrent trumps the older one.',
 					'Please make sure you are reporting the torrent <strong class="important_text">which has been trumped</strong> and should be deleted, not the torrent that you think should remain on site.'
 				),
-
 				'report_fields' => array(
 					'sitelink' => '1'
 				),
@@ -230,6 +229,24 @@ Your torrent was reported because it was missing tracks.'
 					'pm' => '[rule]2.1.19[/rule]. All music torrents must represent a complete release, and may not be missing tracks (or discs in the case of a multi-disc release).
 [rule]2.1.19.1[/rule]. If an album is released as a multi-disc set (or box set) of CDs or vinyl discs, then it must be uploaded as a single torrent. Preferably, each individual CD rip in a multi-disc set should be organized in its own folder (see [rule]2.3.12[/rule]).
 Your torrent was reported because it was missing discs.'
+				)
+			),
+			'mqa' => array(
+				'priority' => '130',
+				'reason' => '14',
+				'title' => 'MQA Banned',
+				'report_messages' => array(
+					'Please show screenshot proof that this is an MQA-encoded file (unless it is explicitly stated in the Release Description).'
+				),
+				'extra_log' => 'MQA-encoded torrent',
+				'report_fields' => array(
+					'image' => '0'
+				),
+				'resolve_options' => array(
+					'upload' => '0',
+					'warn' => '0',
+					'delete' => '1',
+					'pm' => '[rule]1.2.9[/rule]. You have uploaded material that is currently forbidden. MQA-encoded FLAC torrents are not allowed on ' . SITE_NAME .'. For more information, see [[MQA]].'
 				)
 			),
 			'bonus_tracks' => array(

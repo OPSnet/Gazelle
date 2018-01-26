@@ -145,6 +145,9 @@ View::show_header('Uploading Rules', 'rules');
 				<li id="r1.2.8"><a href="#h1.2"><strong>&uarr;_</strong></a> <a href="#r1.2.8">1.2.8.</a>
 					<strong>DRM-restricted files.</strong> Files must not be encrypted or be in a restricted format that impedes sharing. You are also highly encouraged to remove personal information from any non-DRM protected files (such as iTunes Plus releases).
 				</li>
+				<li id="r1.2.9"><a href="#h1.2"><strong>&uarr;_</strong></a> <a href="#r1.2.9">1.2.9.</a>
+					<strong>MQA-encoded files.</strong> FLAC files encoded using the (proprietary) Master Quality Authenticated technology are not permitted.
+				</li>
 			</ul>
 		</div>
 		<h5 id="h1.3"><a href="#h1.3k"><strong>&uarr;</strong></a> <a href="#h1.3">1.3.</a> Scene Uploads</h5>

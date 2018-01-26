@@ -591,6 +591,8 @@ if (count($Reports) === 0) {
 							$Value .= site_url()."torrents.php?torrentid=$ExtraID ";
 						}
 						echo ' value="'.trim($Value).'"';
+					} elseif (isset($ReportType['extra_log'])) {
+						printf(' value="%s"', $ReportType['extra_log']);
 					} ?>
 						/>
 					</td>
