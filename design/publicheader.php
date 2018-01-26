@@ -15,7 +15,11 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0, user-scalable=no;" />
 	<link href="<?=STATIC_SERVER ?>styles/mobile/style.css?v=<?=filemtime(SERVER_ROOT.'/static/mobile/style.css')?>" rel="stylesheet" type="text/css" />
 <? } else {
-	$styles = array('', 'red', 'green', 'white');
+	$styles = [];
+	list($month, $day) = explode(' ', date('n d'));
+	if (($month == 12 && $day >= 12) || ($month == 1 && $day < 4)) {
+		$styles = array_merge($styles, ['red', 'green', 'white']);
+	}
 	$style = $styles[array_rand($styles)];
 ?>
 	<link href="<?=STATIC_SERVER ?>styles/public/style<?=$style?>.css?v=<?=filemtime(SERVER_ROOT."/static/styles/public/style{$style}.css")?>" rel="stylesheet" type="text/css" />
