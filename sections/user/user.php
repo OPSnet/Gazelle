@@ -3,6 +3,25 @@ if (empty($_GET['id']) || !is_number($_GET['id']) || (!empty($_GET['preview']) &
 	error(404);
 }
 $UserID = (int)$_GET['id'];
+if (!empty($_POST)) {
+	authorize();
+	foreach (['action', 'flsubmit', 'fltype'] as $arg) {
+		if (!isset($_POST[$arg])) {
+			error(403);
+		}
+	}
+	if ($_POST['action'] !== 'fltoken') {
+		error(403);
+	}
+	if ($_POST['flsubmit'] !== 'Send') {
+		error(403);
+	}
+	if (!preg_match('/^(?:1_token|[15]0_tokens)_other$/', $_POST['fltype'])) {
+		error(403);
+	}
+	$FL_OTHER_tokens = explode('_', $_POST['fltype'])[0];
+	$FL_OTHER_success = Bonus::give_token($LoggedUser['ID'], $UserID, $_POST['fltype']);
+}
 $Preview = isset($_GET['preview']) ? $_GET['preview'] : 0;
 if ($UserID == $LoggedUser['ID']) {
 	$OwnProfile = true;
@@ -11,10 +30,12 @@ if ($UserID == $LoggedUser['ID']) {
 		$ParanoiaString = $_GET['paranoia'];
 		$CustomParanoia = explode(',', $ParanoiaString);
 	}
+	$FL_Other = [];
 } else {
 	$OwnProfile = false;
 	//Don't allow any kind of previewing on others' profiles
 	$Preview = 0;
+	$FL_Other = Bonus::get_list_other(G::$LoggedUser['BonusPoints']);
 }
 $EnabledRewards = Donations::get_enabled_rewards($UserID);
 $ProfileRewards = Donations::get_profile_rewards($UserID);
@@ -266,6 +287,55 @@ if ($Avatar && Users::has_avatars_enabled()) {
 			<div align="center">
 <?=				Users::show_avatar($Avatar, $UserID, $Username, $HeavyInfo['DisableAvatars'])?>
 			</div>
+		</div>
+<?
+}
+if ($Enabled == 1 && (count($FL_Other) || isset($FL_OTHER_success))) {
+?>
+		<div class="box box_info box_userinfo_give_FL">
+<?
+	if (isset($FL_OTHER_success)) {
+?>
+			<div class="head colhead_dark">Freeleech Tokens Given</div>
+			<ul class="stats nobullet">
+<?
+		if ($FL_OTHER_success === true) {
+			$s = $FL_OTHER_tokens > 1 ? 's' : '';
+?>
+			<li>You gave <?= $FL_OTHER_tokens ?> token<?= $s ?> to <?= $Username ?>. Your generosity is most appreciated!</li>
+<?
+		} else {
+?>
+			<li>You attempted to give <?= $FL_OTHER_tokens ?> to <?= $Username ?> but something didn't work out.
+			No points were spent.</li>
+<?
+		}
+?>
+			</ul>
+<?
+	}
+	else {
+?>
+			<div class="head colhead_dark">Give Freeleech Tokens</div>
+			<form class="fl_form" name="user" id="fl_form" action="user.php?id=<?= $UserID ?>" method="post">
+				<ul class="stats nobullet">
+<?
+		foreach ($FL_Other as $data) {
+			$label_title = sprintf("This costs %d BP, which will leave you %d afterwards", $data['price'], $data['after']);
+?>
+					<li><input type="radio" name="fltype" id="fl_<?= $data['name'] ?>" value="<?= $data['name'] ?>" />
+				<label title="<?= $label_title ?>" for="fl_<?= $data['name'] ?>"> <?= $data['label'] ?></label></li>
+<?
+		}
+?>
+                <li><input type="submit" name="flsubmit" value="Send" /></li>
+				</ul>
+				<input type="hidden" name="action" value="fltoken" />
+				<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+			</form>
+<?
+	}
+?>
 		</div>
 <?
 }

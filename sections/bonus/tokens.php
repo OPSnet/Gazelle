@@ -41,20 +41,7 @@ if ($Other === 'true') {
 	if ($ID == G::$LoggedUser['ID']) {
 		error('You cannot give yourself tokens.');
 	}
-	$Token = ($Amount > 1) ? "tokens" : "token";
-	$Username = G::$LoggedUser['Username'];
-
-	$Body = "Hello {$User},
-
-{$Username} has sent you {$Amount} freeleech {$Token} for you to use! " .
-"You can use them to download torrents without getting charged any download. " .
-"More details about them can be found on " .
-"[url=".site_url()."wiki.php?action=article&id=57]the wiki[/url].
-
-Enjoy!";
-
-
-	Misc::send_pm($ID, 0, "Here is {$Amount} freeleech {$Token}!", trim($Body));
+    Bonus::send_pm_to_other(G::$LoggedUser['Username'], $ID, $Amount);
 }
 else {
 	$ID = G::$LoggedUser['ID'];
