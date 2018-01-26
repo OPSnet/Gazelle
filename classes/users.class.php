@@ -25,8 +25,11 @@ class Users {
 		return array($Classes, $ClassLevels);
 	}
 
-	public static function user_stats($UserID) {
+	public static function user_stats($UserID, $refresh = false) {
 		global $Cache, $DB;
+		if ($refresh) {
+			$Cache->delete_value('user_stats_'.$UserID);
+		}
 		$UserStats = $Cache->get_value('user_stats_'.$UserID);
 		if (!is_array($UserStats)) {
 			$DB->query("
