@@ -36,7 +36,7 @@ CREATE TEMPORARY TABLE temp_geoip_locations (
 
 // Note: you cannot use a prepared query here for this
 $DB->query("
-LOAD DATA INFILE '{$FileNameLocation}' INTO TABLE temp_geoip_locations
+LOAD DATA LOCAL INFILE '{$FileNameLocation}' INTO TABLE temp_geoip_locations
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '\"' 
 LINES TERMINATED BY '\n'
@@ -54,7 +54,7 @@ CREATE TEMPORARY TABLE temp_geoip_blocks (
 
 // Note: you cannot use a prepared query here for this
 $DB->query("
-LOAD DATA INFILE '{$FileNameBlocks}' INTO TABLE temp_geoip_blocks
+LOAD DATA LOCAL INFILE '{$FileNameBlocks}' INTO TABLE temp_geoip_blocks
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '\"' 
 LINES TERMINATED BY '\n'
