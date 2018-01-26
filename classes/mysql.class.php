@@ -278,6 +278,9 @@ class DB_MYSQL {
 		$this->setup_query();
 		$this->PreparedQuery = $Query;
 		$this->Statement = mysqli_prepare($this->LinkID, $Query);
+		if ($this->Statement === false) {
+			$this->halt('Invalid Query: ' . mysqli_error($this->LinkID));
+		}
 		return $this->Statement;
 	}
 
@@ -318,7 +321,7 @@ class DB_MYSQL {
 		};
 
 		$Query = "Prepared Statement: {$this->PreparedQuery}\n";
-		foreach ( $Parameters as $key => $value ) {
+		foreach ($Parameters as $key => $value) {
 			$Query .= "$key => $value\n";
 		}
 
@@ -348,7 +351,7 @@ class DB_MYSQL {
 
 	private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
 		global $Debug;
-		$QueryStartTime=microtime(true);
+		$QueryStartTime = microtime(true);
 		// In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
 		for ($i = 1; $i < 6; $i++) {
 			$this->QueryID = $Closure();

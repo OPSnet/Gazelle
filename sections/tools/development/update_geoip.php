@@ -2,128 +2,83 @@
 ini_set('memory_limit', '5G');
 set_time_limit(0);
 
-//if (!check_perms('site_debug')) {
-//	error(403);
-//}
+// Data is published on the first Tuesday of every month
+$HaveData = false;
+$FileNameLocation = '/tmp/GeoLiteCity-latest/GeoLiteCity_'.date('Ymd', strtotime('first tuesday '.date('Y-m'))).'/GeoLiteCity-Location.csv';
+$FileNameBlocks = '/tmp/GeoLiteCity-latest/GeoLiteCity_'.date('Ymd', strtotime('first tuesday '.date('Y-m'))).'/GeoLiteCity-Blocks.csv';
+if (file_exists('/tmp/GeoLiteCity-latest')) {
+	if (file_exists($FileNameLocation) && file_exists($FileNameBlocks)) {
+		$HaveData = true;
+	}
+}
+
+if (!$HaveData) {
+	//requires wget, unzip commands to be installed
+	shell_exec('rm -r /tmp/GeoLiteCity-latest*');
+	shell_exec('wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV/GeoLiteCity-latest.zip -O /tmp/GeoLiteCity-latest.zip');
+	shell_exec('unzip /tmp/GeoLiteCity-latest.zip -d /tmp/GeoLiteCity-latest');
+	shell_exec('rm /tmp/GeoLiteCity-latest.zip');
+}
+
+if (!file_exists($FileNameLocation) || !file_exists($FileNameBlocks)) {
+	error('Download or extraction of maxmind database failed');
+}
 
 View::show_header();
 
-//requires wget, unzip commands to be installed
-shell_exec('wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV/GeoLiteCity-latest.zip');
-shell_exec('unzip GeoLiteCity-latest.zip');
-shell_exec('rm GeoLiteCity-latest.zip');
-
-if (($Locations = file("GeoLiteCity_".date('Ym')."05/GeoLiteCity-Location.csv", FILE_IGNORE_NEW_LINES)) === false) {
-	error('Download or extraction of maxmind database failed');
-}
-array_shift($Locations);
-array_shift($Locations);
-
-echo 'There are '.count($Locations).' locations';
-echo '<br />';
-
-$CountryIDs = array();
-foreach ($Locations as $Location) {
-	$Parts = explode(',', $Location);
-	//CountryIDs[1] = "AP";
-	$CountryIDs[trim($Parts[0], '"')] = trim($Parts[1], '"');
-}
-
-echo 'There are '.count($CountryIDs).' CountryIDs';
-echo '<br />';
-
-if (($Blocks = file("GeoLiteCity_".date('Ym')."07/GeoLiteCity-Blocks.csv", FILE_IGNORE_NEW_LINES)) === false) {
-	echo 'Error';
-}
-array_shift($Blocks);
-array_shift($Blocks);
-
-echo 'There are '.count($Blocks).' blocks';
-echo '<br />';
-
-//Because 4,000,000 rows is a lot for any server to handle, we split it into manageable groups of 10,000
-$SplitOn = 10000;
 $DB->query("TRUNCATE TABLE geoip_country");
 
-$Values = array();
-foreach ($Blocks as $Index => $Block) {
-	list($StartIP, $EndIP, $CountryID) = explode(",", $Block);
-	$StartIP = trim($StartIP, '"');
-	$EndIP = trim($EndIP, '"');
-	$CountryID = trim($CountryID, '"');
-	$Values[] = "('$StartIP', '$EndIP', '".$CountryIDs[$CountryID]."')";
-	if ($Index % $SplitOn == 0) {
-		$DB->query('
-			INSERT INTO geoip_country (StartIP, EndIP, Code)
-			VALUES '.implode(', ', $Values));
-		$Values = array();
-	}
-}
+$DB->prepared_query("
+CREATE TEMPORARY TABLE temp_geoip_locations (
+	`ID` int(10) NOT NULL PRIMARY KEY,
+	`Country` varchar(2) NOT NULL
+)");
 
-if (count($Values) > 0) {
-	$DB->query("
-		INSERT INTO geoip_country (StartIP, EndIP, Code)
-		VALUES ".implode(', ', $Values));
-}
+// Note: you cannot use a prepared query here for this
+$DB->query("
+LOAD DATA INFILE '{$FileNameLocation}' INTO TABLE temp_geoip_locations
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '\"' 
+LINES TERMINATED BY '\n'
+IGNORE 2 LINES
+(@ID, @Country, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy, @dummy)
+SET `ID`=@ID, `Country`=@Country;");
 
+
+$DB->prepared_query("
+CREATE TEMPORARY TABLE temp_geoip_blocks (
+	`StartIP` INT(11) UNSIGNED NOT NULL,
+	`EndIP` INT(11) UNSIGNED NOT NULL,
+	`LocID` INT(10) NOT NULL
+)");
+
+// Note: you cannot use a prepared query here for this
+$DB->query("
+LOAD DATA INFILE '{$FileNameBlocks}' INTO TABLE temp_geoip_blocks
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '\"' 
+LINES TERMINATED BY '\n'
+IGNORE 2 LINES
+(`StartIP`,`EndIP`, `LocID`);");
+
+$DB->prepared_query("
+INSERT INTO geoip_country (StartIP, EndIP, Code) 
+	SELECT StartIP, EndIP, Country 
+	FROM temp_geoip_blocks AS tgb
+	LEFT JOIN temp_geoip_locations AS tgl ON tgb.LocID = tgl.ID
+");
+
+print "{$DB->affected_rows()} locations inserted";
+
+$DB->query("INSERT INTO users_geodistribution
+	(Code, Users)
+SELECT g.Code, COUNT(u.ID) AS Users
+FROM geoip_country AS g
+	JOIN users_main AS u ON INET_ATON(u.IP) BETWEEN g.StartIP AND g.EndIP
+WHERE u.Enabled = '1'
+GROUP BY g.Code
+ORDER BY Users DESC");
+
+print "{$DB->affected_rows()} users updated";
 
 View::show_footer();
-
-/*
-	The following way works perfectly fine, we just foung the APNIC data to be to outdated for us.
-*/
-
-/*
-if (!check_perms('admin_update_geoip')) {
-	die();
-}
-enforce_login();
-
-ini_set('memory_limit', 1024 * 1024 * 1024);
-ini_set('max_execution_time', 3600);
-
-header('Content-type: text/plain');
-ob_end_clean();
-restore_error_handler();
-
-$Registries[] = 'http://ftp.apnic.net/stats/afrinic/delegated-afrinic-latest'; //Africa
-$Registries[] = 'http://ftp.apnic.net/stats/apnic/delegated-apnic-latest'; //Asia & Pacific
-$Registries[] = 'http://ftp.apnic.net/stats/arin/delegated-arin-latest'; //North America
-$Registries[] = 'http://ftp.apnic.net/stats/lacnic/delegated-lacnic-latest'; //South America
-$Registries[] = 'http://ftp.apnic.net/stats/ripe-ncc/delegated-ripencc-latest'; //Europe
-
-$Registries[] = 'ftp://ftp.afrinic.net/pub/stats/afrinic/delegated-afrinic-latest'; //Africa
-$Registries[] = 'ftp://ftp.apnic.net/pub/stats/apnic/delegated-apnic-latest'; //Asia & Pacific
-$Registries[] = 'ftp://ftp.arin.net/pub/stats/arin/delegated-arin-latest'; //North America
-$Registries[] = 'ftp://ftp.lacnic.net/pub/stats/lacnic/delegated-lacnic-latest'; //South America
-$Registries[] = 'ftp://ftp.ripe.net/ripe/stats/delegated-ripencc-latest'; //Europe
-
-
-
-$Query = array();
-
-foreach ($Registries as $Registry) {
-	$CountryData = explode("\n",file_get_contents($Registry));
-	foreach ($CountryData as $Country) {
-		if (preg_match('/\|([A-Z]{2})\|ipv4\|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\|(\d+)\|/', $Country, $Matches)) {
-
-			$Start = Tools::ip_to_unsigned($Matches[2]);
-			if ($Start == 2147483647) { continue; }
-
-			if (!isset($Current)) {
-				$Current = array('StartIP' => $Start, 'EndIP' => $Start + $Matches[3],'Code' => $Matches[1]);
-			} elseif ($Current['Code'] == $Matches[1] && $Current['EndIP'] == $Start) {
-				$Current['EndIP'] = $Current['EndIP'] + $Matches[3];
-			} else {
-				$Query[] = "('".$Current['StartIP']."','".$Current['EndIP']."','".$Current['Code']."')";
-				$Current = array('StartIP' => $Start, 'EndIP' => $Start + $Matches[3],'Code' => $Matches[1]);
-			}
-		}
-	}
-}
-$Query[] = "('".$Current['StartIP']."','".$Current['EndIP']."','".$Current['Code']."')";
-
-$DB->query("TRUNCATE TABLE geoip_country");
-$DB->query("INSERT INTO geoip_country (StartIP, EndIP, Code) VALUES ".implode(',', $Query));
-echo $DB->affected_rows();
-*/
