@@ -69,6 +69,6 @@ if (cookie.get('cookie_test') != null) {
 } else {
 	$('#no-cookies').gshow();
 }
-window.onload = function() {document.getElementById("username").focus();
+window.onload = function() {document.getElementById("username").focus();};
 </script>
 <? View::show_footer();
