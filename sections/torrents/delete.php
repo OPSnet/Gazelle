@@ -62,6 +62,7 @@ View::show_header('Delete torrent', 'reportsv2');
 						<option value="Dead">Dead</option>
 						<option value="Dupe">Dupe</option>
 						<option value="Trumped">Trumped</option>
+						<option value="MQA-encoded">MQA-encoded</option>
 						<option value="Rules Broken">Rules broken</option>
 						<option value="" selected="selected">Other</option>
 					</select>
