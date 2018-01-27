@@ -77,7 +77,7 @@ switch ($Document) {
 	case 'staffblog':
 	case 'staffpm':
 	case 'stats':
-	case 'top10.php':
+	case 'top10':
 		$Valid = true;
 		break;
 }
