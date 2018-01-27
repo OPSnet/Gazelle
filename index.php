@@ -51,7 +51,7 @@ switch ($Document) {
 	case 'bonus':
 	case 'captcha':
 	case 'chat':
-	case 'content':
+	case 'contest':
 	case 'donate':
 	case 'enable':
 	case 'error':
