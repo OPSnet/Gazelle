@@ -41,12 +41,12 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 <table class="layout" id="maincontent">
 	<tr>
 		<td align="center" valign="middle">
-			<div id="logo"></div>
-				<ul class="links">
+			<div id="logo">
 <? if (OPEN_REGISTRATION) { ?>
+				<ul>
 					<li><a href="index.php">Home</a></li>
 					<li><a href="login.php">Log in</a></li>
 					<li><a href="register.php">Register</a></li>
-<? } ?>
 				</ul>
-<?
+<? } ?>
+			</div>

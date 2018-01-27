@@ -80,10 +80,9 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 	background-image: url('images/loginlogo.png');
 	background-repeat: no-repeat;
 	background-position: top left;
-	padding: 50px 0px 0px 0px;
+	padding: 50px 0 0 0;
 	text-align: center;
 }
-
 
 #logo ul {
 	float: left;
@@ -96,7 +95,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 	float: left;
 	position: relative;
 	right: 50%;
-	margin: 0 1em 0 0;
+	margin: 9.5em 1em 0 0;
 	list-style: none;
 }
 
