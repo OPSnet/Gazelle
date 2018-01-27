@@ -823,6 +823,66 @@ $Debug->set_flag('upload: sphinx updated');
 // Running total for amount of BP to give
 $BonusPoints = 0;
 
+// Do this here as log score is overwritten later
+if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
+		in_array($Properties['Media'], $PerfectFormats))) {
+	$BonusPoints += 400;
+}
+elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
+	$BonusPoints += 30;
+}
+else {
+	$BonusPoints += 10;
+}
+
+//******************************************************************************//
+//---------------IRC announce and feeds ---------------------------------------//
+$Announce = '';
+
+if ($Type == 'Music') {
+	$Announce .= Artists::display_artists($ArtistForm, false);
+}
+$Announce .= trim($Properties['Title']).' ';
+$Details = "";
+if ($Type == 'Music') {
+	$Announce .= '['.trim($Properties['Year']).']';
+	if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
+		$Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
+	}
+	$Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
+	if ($HasLog == 1) {
+        $Details .= ' / Log'.($LogInDB ? " ({$LogScore}%)" : "");
+	}
+	if ($HasCue == 1) {
+        $Details .= ' / Cue';
+	}
+	$Details .= ' / '.trim($Properties['Media']);
+	if ($Properties['Scene'] == '1') {
+        $Details .= ' / Scene';
+	}
+	if ($T['FreeLeech'] == '1') {
+        $Details .= ' / Freeleech!';
+	}
+}
+
+$Title = $Announce;
+if ($Details !== "") {
+    $Title .= " - ".$Details;
+    $Announce .= "\003 - \00310".$Details."\003";
+}
+
+$AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003";
+//$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
+
+$AnnounceSSL .= " - \00312".trim($Properties['TagList'])."\003";
+$AnnounceSSL .= " - \00304".site_url()."torrents.php?id=$GroupID\003 / \00304".site_url()."torrents.php?action=download&id=$TorrentID\003";
+//$Announce .= ' - '.trim($Properties['TagList']);
+
+// ENT_QUOTES is needed to decode single quotes/apostrophes
+//send_irc('PRIVMSG #'.NONSSL_SITE_URL.' :'.html_entity_decode($Announce, ENT_QUOTES));
+send_irc('PRIVMSG #ANNOUNCE :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));
+$Debug->set_flag('upload: announced on irc');
+
 //******************************************************************************//
 //--------------- Upload Extra torrents ----------------------------------------//
 
@@ -830,7 +890,7 @@ $PerfectFormats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
 	'Blu-ray', 'DAT');
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 	if ($ExtraTorrent['Format'] === 'FLAC' && in_array($Properties['Media'], $PerfectFormats)) {
-		$BonusPoints += 200;
+		$BonusPoints += 400;
 	}
 	elseif ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Encoding'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
 		$BonusPoints += 30;
@@ -905,18 +965,6 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 //--------------- Give Bonus Points  -------------------------------------------//
 
 if (G::$LoggedUser['DisablePoints'] == 0) {
-
-	if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
-			in_array($Properties['Media'], $PerfectFormats))) {
-		$BonusPoints += 400;
-	}
-	elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
-		$BonusPoints += 30;
-	}
-	else {
-		$BonusPoints += 10;
-	}
-
 	$DB->query("UPDATE users_main SET BonusPoints = BonusPoints + {$BonusPoints} WHERE ID=".$LoggedUser['ID']);
 	$Cache->delete_value('user_stats_'.$LoggedUser['ID']);
 }
@@ -985,54 +1033,6 @@ if (function_exists('fastcgi_finish_request')) {
 	flush();
 	ob_start(); // So we don't keep sending data to the client
 }
-
-//******************************************************************************//
-//---------------IRC announce and feeds ---------------------------------------//
-$Announce = '';
-
-if ($Type == 'Music') {
-	$Announce .= Artists::display_artists($ArtistForm, false);
-}
-$Announce .= trim($Properties['Title']).' ';
-$Details = "";
-if ($Type == 'Music') {
-	$Announce .= '['.trim($Properties['Year']).']';
-	if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
-		$Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
-	}
-	$Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
-	if ($HasLog == 1) {
-        $Details .= ' / Log'.($LogInDB ? " ({$LogScore}%)" : "");
-	}
-	if ($HasCue == 1) {
-        $Details .= ' / Cue';
-	}
-	$Details .= ' / '.trim($Properties['Media']);
-	if ($Properties['Scene'] == '1') {
-        $Details .= ' / Scene';
-	}
-	if ($T['FreeLeech'] == '1') {
-        $Details .= ' / Freeleech!';
-	}
-}
-
-$Title = $Announce;
-if ($Details !== "") {
-    $Title .= " - ".$Details;
-    $Announce .= "\003 - \00310".$Details."\003";
-}
-
-$AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003";
-//$Announce .= " - ".site_url()."torrents.php?id=$GroupID / ".site_url()."torrents.php?action=download&id=$TorrentID";
-
-$AnnounceSSL .= " - \00312".trim($Properties['TagList'])."\003";
-$AnnounceSSL .= " - \00304".site_url()."torrents.php?id=$GroupID\003 / \00304".site_url()."torrents.php?action=download&id=$TorrentID\003";
-//$Announce .= ' - '.trim($Properties['TagList']);
-
-// ENT_QUOTES is needed to decode single quotes/apostrophes
-//send_irc('PRIVMSG #'.NONSSL_SITE_URL.' :'.html_entity_decode($Announce, ENT_QUOTES));
-send_irc('PRIVMSG #ANNOUNCE :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));
-$Debug->set_flag('upload: announced on irc');
 
 // Manage notifications
 $UsedFormatBitrates = array();
