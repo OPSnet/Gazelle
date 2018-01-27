@@ -559,7 +559,7 @@ class DB_MYSQL {
 	 */
 	function warnings() {
 		$Warnings = array();
-		if (mysqli_warning_count($this->LinkID)) {
+		if ($this->LinkID !== false && mysqli_warning_count($this->LinkID)) {
 			$e = mysqli_get_warnings($this->LinkID);
 			do {
 				if ($e->errno == 1592) {

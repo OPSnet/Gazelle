@@ -31,7 +31,7 @@ if (!empty($_REQUEST['action'])) {
 			}
 			break;
 		case 'edit':
-			if ($_POST['action']) {
+			if (!empty($_POST['action'])) {
 				include('takeedit.php');
 			} else {
 				include('edit.php');

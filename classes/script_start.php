@@ -361,7 +361,7 @@ function authorize($Ajax = false) {
 $Debug->set_flag('ending function definitions');
 
 //Include /sections/*/index.php
-$Document = basename(parse_url($_SERVER['SCRIPT_FILENAME'], PHP_URL_PATH), '.php');
+$Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
 if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
 	error(404);
 }
@@ -384,8 +384,14 @@ $AllowedPages = ['staffpm', 'ajax', 'locked', 'logout', 'login'];
 
 if (isset(G::$LoggedUser['LockedAccount']) && !in_array($Document, $AllowedPages)) {
 	require(SERVER_ROOT . '/sections/locked/index.php');
-} else {
-	require(SERVER_ROOT . '/sections/' . $Document . '/index.php');
+}
+else {
+	if (!file_exists(SERVER_ROOT . '/sections/' . $Document . '/index.php')) {
+		error(404);
+	}
+	else {
+		require(SERVER_ROOT . '/sections/' . $Document . '/index.php');
+	}
 }
 
 $Debug->set_flag('completed module execution');
