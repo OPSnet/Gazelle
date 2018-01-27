@@ -45,10 +45,14 @@ $DB->query("
 			OR (Media = 'DAT' AND Format = 'FLAC'))
 		AND UserID = '$UserID'");
 list($PerfectFLACs) = $DB->next_record();
+
+$DB->prepared_query("SELECT COUNT(*) FROM forums_topics WHERE AuthorID = ?", $UserID);
+list($ForumTopics) = $DB->fetch_record();
 ?>
 		<div class="box box_info box_userinfo_community">
 			<div class="head colhead_dark">Community</div>
 			<ul class="stats nobullet">
+				<li id="comm_posts">Forum threads: <?=number_format($ForumTopics)?> <a href="userhistory.php?action=topics&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 				<li id="comm_posts">Forum posts: <?=number_format($ForumPosts)?> <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?	if ($Override = check_paranoia_here('torrentcomments+')) { ?>
 				<li id="comm_torrcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Torrent comments: <?=number_format($NumComments)?>

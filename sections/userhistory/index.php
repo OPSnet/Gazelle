@@ -39,8 +39,11 @@ if ($_GET['action']) {
 			include('passkey_history.php');
 			break;
 		case 'posts':
-			//Load ratio history page
+			//Load post history page
 			include('post_history.php');
+			break;
+		case 'topics':
+			include('topic_history.php');
 			break;
 		case 'subscriptions':
 			// View subscriptions
