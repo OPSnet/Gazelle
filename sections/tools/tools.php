@@ -154,7 +154,6 @@ View::show_header('Staff Tools');
 	// begin Developer Sandboxes category
 	$ToolsHTML = "";
 	create_row("BBCode sandbox", "tools.php?action=bbcode_sandbox", check_perms("users_mod"));
-	create_row("Testing", "testing.php", check_perms("users_mod"));
 
 	if ($ToolsHTML) {
 ?>

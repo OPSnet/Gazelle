@@ -18,7 +18,7 @@ $sql = "
 		Author
 	FROM wiki_articles
 	WHERE MinClassRead <= '".$LoggedUser['EffectiveClass']."'";
-if ($Letter !== '1') {
+if (isset($Letter) && $Letter !== '1') {
 	$sql .= " AND LEFT(Title,1) = '".db_string($Letter)."'";
 } else {
 	$Letter = 'All';
@@ -29,7 +29,7 @@ $DB->query($sql);
 
 ?>
 <div class="thin">
-<?	if ($Letter) { ?>
+<?	if (isset($Letter)) { ?>
 	<div class="header">
 		<h2><?=$Title?></h2>
 	</div>

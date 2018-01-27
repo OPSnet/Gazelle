@@ -1,1 +1,0 @@
-<? header('Location: register.php');

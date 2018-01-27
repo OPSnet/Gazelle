@@ -3,7 +3,7 @@ class View {
 	/**
 	 * @var string Path relative to where (P)HTML templates reside
 	 */
-	const IncludePath = './design/views/';
+	const IncludePath = __DIR__.'/../design/views/';
 
 	/**
 	 * This function is to include the header file on a page.
