@@ -26,45 +26,42 @@ View::show_header('Apply', 'apply');
 ?>
 
 <div class="thin">
-
+	<div class="header">
+		<h3>Apply for a role at <?=SITE_NAME?></h3>
 <? if (check_perms('admin_manage_applicants') || Applicant::user_is_applicant($LoggedUser['ID'])) { ?>
-<div class="linkbox">
-<?	if (check_perms('admin_manage_applicants')) { ?>
-	<a href="/apply.php?action=view" class="brackets">Current applications</a>
-	<a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
-	<a href="/apply.php?action=admin" class="brackets">Manage roles</a>
-<?
-	}
-	if (Applicant::user_is_applicant($LoggedUser['ID'])) {
-?>
-	<a href="/apply.php?action=view" class="brackets">View your application</a>
-<?	}
-}
-$Roles = ApplicantRole::get_list();
-?>
-</div>
-
-<h3>Apply for a role at <?=SITE_NAME?></h3>
-
-<? if (count($Roles)) { ?>
-<div class="box">
-	<div class="head">Open Roles</div>
-	<div class="pad">
-		<table>
-<?	foreach ($Roles as $title => $info) { ?>
-			<tr>
-				<td><div class="head"><?= $title ?></div></td>
-			</tr>
-			<tr>
-				<td><div class="pad"><?= Text::full_format($info['description']) ?></div></td>
-			</tr>
-<?	} /* foreach */ ?>
-		</table>
+		<div class="linkbox">
+	<? if (check_perms('admin_manage_applicants')) { ?>
+			<a href="/apply.php?action=view" class="brackets">Current applications</a>
+			<a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
+			<a href="/apply.php?action=admin" class="brackets">Manage roles</a>
+	<? }
+	if (Applicant::user_is_applicant($LoggedUser['ID'])) { ?>
+			<a href="/apply.php?action=view" class="brackets">View your application</a>
+	<? } ?>
+		</div>
+<? } ?>
 	</div>
-</div>
+
+<?php
+$Roles = ApplicantRole::get_list();
+if (count($Roles)) { ?>
+	<div class="box">
+		<div class="head">Open Roles</div>
+		<div class="pad">
+			<table>
+<?	foreach ($Roles as $title => $info) { ?>
+				<tr>
+					<td><div class="head"><?= $title ?></div></td>
+				</tr>
+				<tr>
+					<td><div class="pad"><?= Text::full_format($info['description']) ?></div></td>
+				</tr>
+<?	} /* foreach */ ?>
+			</table>
+		</div>
+	</div>
 <? } ?>
 
-<div class="thin">
 <? if (count($Roles) == 0) { ?>
 	<div class="box pad">
 	<p>Thanks for your interest in helping Apollo! There are
@@ -98,6 +95,7 @@ $Roles = ApplicantRole::get_list();
 				$text = new TEXTAREA_PREVIEW('body', 'body', $Body, 95, 20, false, false);
 				echo $text->preview();
 ?>
+				</div>
 			</div>
 
 			<div id="buttons" class="center">
@@ -110,5 +108,4 @@ $Roles = ApplicantRole::get_list();
 <? } /* else */ ?>
 </div>
 
-</div>
 <? View::show_footer();
