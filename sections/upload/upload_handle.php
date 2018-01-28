@@ -823,6 +823,9 @@ $Debug->set_flag('upload: sphinx updated');
 // Running total for amount of BP to give
 $BonusPoints = 0;
 
+$PerfectFormats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
+	'Blu-ray', 'DAT');
+
 // Do this here as log score is overwritten later
 if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
 		in_array($Properties['Media'], $PerfectFormats))) {
@@ -886,8 +889,6 @@ $Debug->set_flag('upload: announced on irc');
 //******************************************************************************//
 //--------------- Upload Extra torrents ----------------------------------------//
 
-$PerfectFormats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
-	'Blu-ray', 'DAT');
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 	if ($ExtraTorrent['Format'] === 'FLAC' && in_array($Properties['Media'], $PerfectFormats)) {
 		$BonusPoints += 400;
