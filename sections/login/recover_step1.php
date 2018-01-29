@@ -11,7 +11,7 @@ if (empty($Sent) || (!empty($Sent) && $Sent != 1)) {
 ?>
 		<strong class="important_text"><?=$Err ?></strong><br /><br />
 <?	} ?>
-		An email will be sent to your email address with information on how to reset your password.<br /><br />
+		If the email address you gave is in our records, a message will be sent to it, with information on how to reset your password.<br /><br />
 		<table class="layout" cellpadding="2" cellspacing="1" border="0" align="center">
 			<tr valign="top">
 				<td align="right">Email address:&nbsp;</td>
