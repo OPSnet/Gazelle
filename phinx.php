@@ -20,6 +20,15 @@ return
 			'port' => SQLPORT,
 			'charset' => 'utf8'
 		],
+		'gazelle' => [
+			'adapter' => 'mysql',
+			'host' => SQLHOST,
+			'name' => SQLDB,
+			'user' => SQLLOGIN,
+			'pass' => SQLPASS,
+			'port' => SQLPORT,
+			'charset' => 'utf8'
+		],
 		'vagrant' => [
 			'adapter' => 'mysql',
 			'host' => 'localhost',

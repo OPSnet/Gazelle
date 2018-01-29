@@ -2,8 +2,11 @@
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 
+use Gazelle\Util\{Type, Time};
+
 /**
- * Return true if the given string is numeric.
+ * Return true if the given string is an integer. The original Gazelle developers
+ * must have thought the only numbers out there were integers when naming this function.
  *
  * @param mixed $Str
  * @return bool
@@ -23,16 +26,12 @@ if (PHP_INT_SIZE === 4) {
 	}
 } else {
 	function is_number($Str) {
-		return $Str == strval(intval($Str));
+		return Type::isInteger($Str);
 	}
 }
 
 function is_date($Date) {
-	list($Y, $M, $D) = explode('-', $Date);
-	if (checkdate($M, $D, $Y)) {
-		return true;
-	}
-	return false;
+	return Time::isValidDate($Date);
 }
 
 /**
@@ -62,31 +61,7 @@ function assert_numbers(&$Base, $Keys, $Error = 0) {
  *         a bool-like value
  */
 function is_bool_value($Value) {
-	if (is_bool($Value)) {
-		return $Value;
-	}
-	if (is_string($Value)) {
-		switch (strtolower($Value)) {
-			case 'true':
-			case 'yes':
-			case 'on':
-			case '1':
-				return true;
-			case 'false':
-			case 'no':
-			case 'off':
-			case '0':
-				return false;
-		}
-	}
-	if (is_numeric($Value)) {
-		if ($Value == 1) {
-			return true;
-		} elseif ($Value == 0) {
-			return false;
-		}
-	}
-	return null;
+	return Type::isBoolValue($Value);
 }
 
 /**
@@ -240,4 +215,14 @@ function unserialize_array($array) {
  */
 function isset_array_checked($array, $value) {
 	return (isset($array[$value])) ? "checked" : "";
+}
+
+function get_route(\Gazelle\Router $router, $action) {
+	$route = $router->getRoute($action);
+	if ($route === false) {
+		error(-1);
+	}
+	else {
+		require_once($route);
+	}
 }
