@@ -83,10 +83,8 @@ $Enc = new CRYPT;
 // Autoload classes.
 require(SERVER_ROOT.'/classes/classloader.php');
 
-// Note: G::initialize is called twice.
-// This is necessary as the code inbetween (initialization of $LoggedUser) makes use of G::$DB and G::$Cache.
-// TODO: remove one of the calls once we're moving everything into that class
-G::initialize();
+G::$Cache = $Cache;
+G::$DB = $DB;
 
 //Begin browser identification
 
@@ -287,7 +285,7 @@ if (isset($LoginCookie)) {
 	}
 }
 
-G::initialize();
+G::$LoggedUser = $LoggedUser;
 $Debug->set_flag('end user handling');
 
 $Debug->set_flag('start function definitions');
@@ -354,6 +352,17 @@ function authorize($Ajax = false) {
 		send_irc("PRIVMSG ".LAB_CHAN." :".G::$LoggedUser['Username']." just failed authorize on ".$_SERVER['REQUEST_URI'].(!empty($_SERVER['HTTP_REFERER']) ? " coming from ".$_SERVER['HTTP_REFERER'] : ""));
 		error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
 		return false;
+	}
+	return true;
+}
+
+function authorizeIfPost($Ajax = false) {
+	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		if (empty($_POST['auth']) || $_POST['auth'] != G::$LoggedUser['AuthKey']) {
+			send_irc("PRIVMSG " . LAB_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+			error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
+			return false;
+		}
 	}
 	return true;
 }
