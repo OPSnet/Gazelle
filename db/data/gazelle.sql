@@ -238,13 +238,17 @@ CREATE TABLE `concerts` (
 
 CREATE TABLE `contest` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ContestTypeID` int(11) NOT NULL,
   `Name` varchar(80) COLLATE utf8_swedish_ci NOT NULL,
+  `Banner` varchar(128) NOT NULL DEFAULT '',
   `DateBegin` datetime NOT NULL,
   `DateEnd` datetime NOT NULL,
   `Display` int(11) NOT NULL DEFAULT 50,
   `MaxTracked` int(11) NOT NULL DEFAULT 500,
+  `WikiText` mediumtext,
   PRIMARY KEY (`ID`),
-  UNIQUE KEY `Name` (`Name`)
+  UNIQUE KEY `Name` (`Name`),
+  CONSTRAINT `contest_type_fk` FOREIGN KEY (`ContestTypeID`) REFERENCES `contest_type` (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `contest_leaderboard` (
@@ -260,6 +264,13 @@ CREATE TABLE `contest_leaderboard` (
   KEY `flac_upload_idx` (`FlacCount`,`LastUpload`,`UserID`),
   CONSTRAINT `contest_fk` FOREIGN KEY (`ContestID`) REFERENCES `contest` (`ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `contest_type` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(32) NOT NULL,
+  PRIMARY KEY(`ID`),
+  UNIQUE(`Name`)
+);
 
 CREATE TABLE `cover_art` (
   `ID` int(10) NOT NULL AUTO_INCREMENT,
