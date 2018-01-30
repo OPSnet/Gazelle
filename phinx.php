@@ -10,7 +10,7 @@ return
 	],
 	'environments' => [
 		'default_migration_table' => 'phinxlog',
-		'default_database' => 'vagrant',
+		'default_database' => 'gazelle',
 		'apollo' => [
 			'adapter' => 'mysql',
 			'host' => SQLHOST,
