@@ -36,3 +36,4 @@ btcm.php
 sections/btcm/
 
 report/
+.vagrant/machines/
