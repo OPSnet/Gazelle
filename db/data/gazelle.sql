@@ -1303,23 +1303,7 @@ CREATE TABLE `torrents_logs` (
   PRIMARY KEY(`LogID`),
   KEY `TorrentID` (`TorrentID`)
 ) ENGINE=InnoDB CHARSET utf8;
-/*
-Old torrent_logs table
-CREATE TABLE `torrents_logs_new` (
-  `LogID` int(10) NOT NULL AUTO_INCREMENT,
-  `TorrentID` int(10) NOT NULL DEFAULT '0',
-  `Log` mediumtext NOT NULL,
-  `Details` mediumtext NOT NULL,
-  `Score` int(3) NOT NULL,
-  `Revision` int(3) NOT NULL,
-  `Adjusted` enum('1','0') NOT NULL DEFAULT '0',
-  `AdjustedBy` int(10) NOT NULL DEFAULT '0',
-  `NotEnglish` enum('1','0') NOT NULL DEFAULT '0',
-  `AdjustmentReason` text,
-  PRIMARY KEY (`LogID`),
-  KEY `TorrentID` (`TorrentID`)
-) ENGINE=InnoDB CHARSET utf8;
-*/
+
 CREATE TABLE `torrents_lossymaster_approved` (
   `TorrentID` int(10) NOT NULL DEFAULT '0',
   `UserID` int(10) NOT NULL DEFAULT '0',

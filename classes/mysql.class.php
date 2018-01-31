@@ -346,7 +346,6 @@ class DB_MYSQL {
 	function prepared_query($Query, ...$Parameters) {
 		$this->prepare($Query);
 		return $this->execute(...$Parameters);
-
 	}
 
 	private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
