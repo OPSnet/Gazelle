@@ -52,68 +52,32 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 		</table>
 	</div>
 	<br />
-	<div class="box pad" style="padding: 0px 10px 10px 10px;">
-		<h2 style='text-align: left;'>Moderators</h2>
-<?
-	$CurClass = 0;
-	$CloseTable = false;
-	$DevDiv = false;
-	$AdminDiv = false;
-	foreach ($Staff as $StaffMember) {
-		list($ID, $Class, $ClassName, $Username, $Paranoia, $LastAccess, $Remark) = $StaffMember;
-		if ($Class != $CurClass) { // Start new class of staff members
-			$Row = 'a';
-			if ($CloseTable) {
-				$CloseTable = false;
-				// the "\t" and "\n" are used here to make the HTML look pretty
-				echo "\t\t</table>\n\t\t<br />\n";
-			}
-			$CurClass = $Class;
-			$CloseTable = true;
+<?php
 
-			$HTMLID = '';
-			switch ($ClassName) {
-				case 'Forum Moderator':
-				case 'Torrent Moderator':
-				case 'Moderator':
-				case 'Senior Moderator':
-					$HTMLID = 'mods';
-					break;
-				case 'Developer':
-					$HTMLID = 'devs';
-					break;
-				case 'Lead Developer':
-					$HTMLID = 'lead_devs';
-					break;
-				case 'System Administrator':
-					$HTMLID = 'sys_admins';
-					break;
-				case 'Administrator':
-					$HTMLID = 'admins';
-					break;
-				case 'Sysop':
-					$HTMLID = 'sysops';
-					break;
-				default:
-					$HTMLID = '';
-			}
-			switch ($ClassName) {
-				case 'Developer': // fall through
-				case 'Lead Developer':
-					if (!$DevDiv) {
-						printSectionDiv("Development");
-						$DevDiv = true;
-					}
-					break;
-				case 'System Administrator': // fall through
-				case 'Administrator': // fall through
-				case 'Sysop':
-					if (!$AdminDiv) {
-						printSectionDiv("Administration");
-						$AdminDiv = true;
-					}
-			}
-			echo "\t\t<h3 style=\"font-size: 17px;\" id=\"$HTMLID\"><i>".$ClassName."s</i></h3>\n";
+	foreach ($Staff as $SectionName => $StaffSection) {
+		if (count($StaffSection) === 0) {
+			continue;
+		}
+?>
+	<div class="box pad" style="padding: 0px 10px 10px 10px;">
+		<h2 style='text-align: left;'><?=$SectionName?></h2>
+<?
+		$CurClass = 0;
+		$CloseTable = false;
+		foreach ($StaffSection as $StaffMember) {
+			list($ID, $ClassID, $Class, $ClassName, $Username, $Paranoia, $LastAccess, $Remark) = $StaffMember;
+			if ($Class != $CurClass) { // Start new class of staff members
+				$Row = 'a';
+				if ($CloseTable) {
+					$CloseTable = false;
+					// the "\t" and "\n" are used here to make the HTML look pretty
+					echo "\t\t</table>\n\t\t<br />\n";
+				}
+				$CurClass = $Class;
+				$CloseTable = true;
+
+				$HTMLID = str_replace(' ', '_', strtolower($ClassName));
+				echo "\t\t<h3 style=\"font-size: 17px;\" id=\"$HTMLID\"><i>".$ClassName."s</i></h3>\n";
 ?>
 		<table class="staff" width="100%">
 			<tr class="colhead">
@@ -133,6 +97,8 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 		</table>
 
 	</div>
+	<br />
+	<?php } ?>
 </div>
 <?
 View::show_footer();
