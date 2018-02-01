@@ -9,7 +9,7 @@
  * @param $LastAccess datetime the user last browsed the site
  * @param String $Remark the "Staff remark" or FLS' "Support for" text
  * @param String $HiddenBy the text that is displayed when a staff member's
- *                         paranoia hides their LastAccess time
+ *						 paranoia hides their LastAccess time
  * @return string $Row
  */
 function make_staff_row($Row, $ID, $Paranoia, $Class, $LastAccess, $Remark = '', $HiddenBy = 'Hidden by user') {
@@ -62,18 +62,18 @@ function get_fls() {
 	return $FLS;
 }
 
-/*
- * Build the SQL query that will be used for displaying staff members
- *
- * @param $StaffLevel a string for selecting the type of staff being queried
- * @return string the text of the generated SQL query
- */
-function generate_staff_query() {
-	global $Classes;
+function get_staff() {
+	global $Cache, $DB;
+	static $Staff;
+	if (is_array($Staff)) {
+		return $Staff;
+	}
 
-	$SQL = "
+	if (($Staff = $Cache->get_value('staff')) === false) {
+		$DB->query("
 		SELECT
 			m.ID,
+			p.ID as LevelID,
 			p.Level,
 			p.Name,
 			m.Username,
@@ -83,37 +83,35 @@ function generate_staff_query() {
 		FROM users_main AS m
 			JOIN users_info AS i ON m.ID = i.UserID
 			JOIN permissions AS p ON p.ID = m.PermissionID
-		WHERE p.DisplayStaff = '1'
-			AND p.Level >= {$Classes[FORUM_MOD]['Level']}
-		ORDER BY p.Level";
-	if (check_perms('users_mod')) {
-		$SQL .= ', m.LastAccess ASC';
-	} else {
-		$SQL .= ', m.Username';
-	}
-	return $SQL;
-}
-
-function get_staff() {
-	global $Cache, $DB;
-	static $Staff;
-	if (is_array($Staff)) {
-		return $Staff;
-	}
-
-	// sort the lists differently if the viewer is a staff member
-	if (!check_perms('users_mod')) {
-		if (($Staff = $Cache->get_value('staff')) === false) {
-			$DB->query(generate_staff_query());
-			$Staff = $DB->to_array(false, MYSQLI_BOTH, array(4, 'Paranoia'));
-			$Cache->cache_value('staff', $Staff, 180);
+		WHERE p.DisplayStaff = '1' AND Secondary = 0
+		ORDER BY p.Level, m.Username");
+		$TmpStaff = $DB->to_array(false, MYSQLI_BOTH, array(5, 'Paranoia'));
+		$Staff = ['Staff' => [], 'Moderators' => [], 'Development' => [], 'Administration' => []];
+		foreach ($TmpStaff as $Class) {
+			// TODO: We should add a new table that stores Staff Page Sections
+			// TODO: and then link a permission that's shown on staff page to a section
+			switch ($Class['LevelID']) {
+				case 21: // Forum Mod
+				case 22: // Torrent Mod
+				case 11: // Mod
+				case 44: // Senior Mod
+					$Staff['Moderators'][] = $Class;
+					break;
+				case 45: // Junior Dev
+				case 24: // Developer
+				case 43: // Lead Dev
+					$Staff['Development'][] = $Class;
+					break;
+				case 40: // Admin
+				case 15: // Sysop
+					$Staff['Administration'][] = $Class;
+					break;
+				default:
+					$Staff['Staff'][] = $Class;
+					break;
+			}
 		}
-	} else {
-		if (($Staff = $Cache->get_value('staff_mod_view')) === false) {
-			$DB->query(generate_staff_query());
-			$Staff = $DB->to_array(false, MYSQLI_BOTH, array(4, 'Paranoia'));
-			$Cache->cache_value('staff_mod_view', $Staff, 180);
-		}
+		$Cache->cache_value('staff', $Staff, 180);
 	}
 	return $Staff;
 }
