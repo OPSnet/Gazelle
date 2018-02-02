@@ -146,7 +146,7 @@ if (isset($LoginCookie)) {
 		$DB->query("
 			SELECT Enabled
 			FROM users_main
-			WHERE ID = '$LoggedUser[ID]'");
+			WHERE ID = '{$LoggedUser['ID']}'");
 		list($Enabled) = $DB->next_record();
 		$Cache->cache_value('enabled_'.$LoggedUser['ID'], $Enabled, 0);
 	}
@@ -191,7 +191,7 @@ if (isset($LoginCookie)) {
 		$DB->query("
 			UPDATE users_main
 			SET LastAccess = '".sqltime()."'
-			WHERE ID = '$LoggedUser[ID]'");
+			WHERE ID = '{$LoggedUser['ID']}'");
 		$DB->query("
 			UPDATE users_sessions
 			SET
@@ -199,7 +199,7 @@ if (isset($LoginCookie)) {
 				Browser = '$Browser',
 				OperatingSystem = '$OperatingSystem',
 				LastUpdate = '".sqltime()."'
-			WHERE UserID = '$LoggedUser[ID]'
+			WHERE UserID = '{$LoggedUser['ID']}'
 				AND SessionID = '".db_string($SessionID)."'");
 		$Cache->begin_transaction("users_sessions_$UserID");
 		$Cache->delete_row($SessionID);
@@ -220,7 +220,7 @@ if (isset($LoginCookie)) {
 			$DB->query("
 				SELECT ID, Label
 				FROM users_notify_filters
-				WHERE UserID = '$LoggedUser[ID]'");
+				WHERE UserID = '{$LoggedUser['ID']}'");
 			$LoggedUser['Notify'] = $DB->to_array('ID');
 			$Cache->cache_value('notify_filters_'.$LoggedUser['ID'], $LoggedUser['Notify'], 2592000);
 		}
@@ -245,19 +245,19 @@ if (isset($LoginCookie)) {
 			UPDATE users_history_ips
 			SET EndTime = '".sqltime()."'
 			WHERE EndTime IS NULL
-				AND UserID = '$LoggedUser[ID]'
+				AND UserID = '{$LoggedUser['ID']}'
 				AND IP = '$CurIP'");
 		$DB->query("
 			INSERT IGNORE INTO users_history_ips
 				(UserID, IP, StartTime)
 			VALUES
-				('$LoggedUser[ID]', '$NewIP', '".sqltime()."')");
+				('{$LoggedUser['ID']}', '$NewIP', '".sqltime()."')");
 
 		$ipcc = Tools::geoip($NewIP);
 		$DB->query("
 			UPDATE users_main
 			SET IP = '$NewIP', ipcc = '$ipcc'
-			WHERE ID = '$LoggedUser[ID]'");
+			WHERE ID = '{$LoggedUser['ID']}'");
 		$Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
 		$Cache->update_row(false, array('IP' => $_SERVER['REMOTE_ADDR']));
 		$Cache->commit_transaction(0);
