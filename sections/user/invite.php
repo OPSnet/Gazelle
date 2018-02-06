@@ -141,7 +141,7 @@ list($CanLeech) = $DB->next_record();
 		<p><em>Do not send an invite if you have not read or do not understand the information above.</em></p>
 	</div>
 	<div class="box pad">
-		<p><em>Our email system is currently out of order, the invite you send will NOT get sent.</em></p>
+		<p><em>Our email system is currently out of order, the invite you send will NOT be delivered. Please provide your invitee with the link provided to you after sending an invititation.</em></p>
 	</div>
 	<div class="box box2">
 		<form class="send_form pad" name="invite" action="user.php" method="post">
