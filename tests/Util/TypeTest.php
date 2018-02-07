@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 
 class TypeTest extends TestCase {
 	/**
+	 * @param $value
+	 * @param $expected
+	 *
 	 * @dataProvider isIntegerDataProvider
 	 */
 	public function testIsInteger($value, $expected) {
@@ -14,10 +17,15 @@ class TypeTest extends TestCase {
 
 	public function isIntegerDataProvider() {
 		return [
+			[0, true],
 			[3, true],
 			[3.5, false],
-			["3", true],
-			["3.5", false]
+			['3', true],
+			['3.5', false],
+			[-1, true],
+			['-1.5', false],
+			['a', false],
+			[null, false]
 		];
 	}
 
@@ -28,7 +36,7 @@ class TypeTest extends TestCase {
 	 * @dataProvider isBooleanValueDataProvider
 	 */
 	public function testIsBooleanValue($value, $expected) {
-		$this->assertEquals($expected, Type::isBoolValue($value));
+		$this->assertEquals($expected, Type::isBoolValue($value), "Failed asserting that {$value} was {$expected}");
 	}
 
 	public function isBooleanValueDataProvider() {
@@ -37,8 +45,6 @@ class TypeTest extends TestCase {
 			[false, false],
 			['true', true],
 			['TrUe', true],
-			['t', true],
-			['T', true],
 			['yes', true],
 			['YeS', true],
 			['on', true],
@@ -52,10 +58,10 @@ class TypeTest extends TestCase {
 			['OfF', false],
 			['0', false],
 			[1, true],
-			[0, true],
+			[0, false],
+			[null, null],
 			['aaa', null],
-			[2, null],
-			[1.0, null]
+			[2, null]
 		];
 	}
 }

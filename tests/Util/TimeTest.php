@@ -31,16 +31,27 @@ class TimeTest extends TestCase {
 	 *
 	 * @dataProvider providerHours
 	 */
-	function testConvertHours($hours, $expected) {
-		$this->assertEquals($expected, Time::convertHours($hours, 2, false));
+	function testConvertHours($hours, $levels, $expected) {
+		$this->assertEquals($expected, Time::convertHours($hours, $levels, false));
 	}
 
 	function providerHours() {
 		return [
-			[0, 'Never'],
-			[1, '1h'],
-			[24, '1d']
+			[0, 2, 'Never'],
+			[-1, 2, 'Never'],
+			[1, 2, '1h'],
+			[24, 2, '1d'],
+			[26, 2, '1d2h'],
+			[3750, 1, '5mo'],
+			[3750, 2, '5mo4d'],
+			[3750, 3, '5mo4d4h'],
+			[2343542, 5, '267y6mo1w3d2h'],
+			[2000000, 30, '228y3mo3w1d2h']
 		];
+	}
+
+	function testConvertHoursSpan() {
+		$this->assertEquals('<span>228y3mo3w1d2h</span>', Time::convertHours(2000000, 5));
 	}
 
 	function testTimeOffset() {
