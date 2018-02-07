@@ -12,7 +12,8 @@ class Votes {
 	 * @param $Vote The pre-existing vote, if it exists 'Up'|'Down'
 	 */
 	public static function vote_link($GroupID, $Vote = '') {
-		if (!G::$LoggedUser['NoVoteLinks'] && check_perms('site_album_votes')) { ?>
+		if (!G::$LoggedUser['NoVoteLinks'] && check_perms('site_album_votes')) {
+			$GroupVotes = self::get_group_votes($GroupID); ?>
 			<span class="votespan brackets" style="white-space: nowrap;">
 				Vote:
 				<a href="#" onclick="UpVoteGroup(<?=$GroupID?>, '<?=G::$LoggedUser['AuthKey']?>'); return false;" class="tooltip small_upvote vote_link_<?=$GroupID?><?=(!empty($Vote) ? ' hidden' : '')?>" style="font-weight: bolder;" title="Upvote">&and;</a>
@@ -20,6 +21,7 @@ class Votes {
 				<a href="#" onclick="DownVoteGroup(<?=$GroupID?>, '<?=G::$LoggedUser['AuthKey']?>'); return false;" class="tooltip small_downvote vote_link_<?=$GroupID?><?=(!empty($Vote) ? ' hidden' : '')?>" style="font-weight: bolder;" title="Downvote">&or;</a>
 				<span class="tooltip voted_type small_downvoted voted_down_<?=$GroupID?><?=(($Vote == 'Up' || empty($Vote)) ? ' hidden' : '')?>" style="font-weight: bolder;" title="Downvoted">&or;</span>
 				<a href="#" onclick="UnvoteGroup(<?=$GroupID?>, '<?=G::$LoggedUser['AuthKey']?>'); return false;" class="tooltip small_clearvote vote_clear_<?=$GroupID?><?=(empty($Vote) ? ' hidden' : '')?>" title="Clear your vote">x</a>
+				Score: <?=number_format(self::binomial_score($GroupVotes['Ups'], $GroupVotes['Total']) * 100, 1)?>
 			</span>
 <?		}
 	}
