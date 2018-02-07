@@ -20,7 +20,7 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 	if (($month == 12 && $day >= 12) || ($month == 1 && $day < 4)) {
 		$styles = array_merge($styles, ['red', 'green', 'white']);
 	}
-	$style = $styles[array_rand($styles)];
+	$style = (count($styles) > 0) ? $styles[array_rand($styles)] : '';
 ?>
 	<link href="<?=STATIC_SERVER ?>styles/public/style<?=$style?>.css?v=<?=filemtime(SERVER_ROOT."/static/styles/public/style{$style}.css")?>" rel="stylesheet" type="text/css" />
 <? } ?>
