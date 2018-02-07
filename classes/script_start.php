@@ -164,6 +164,7 @@ if (isset($LoginCookie)) {
 
 	// Create LoggedUser array
 	$LoggedUser = array_merge($HeavyInfo, $LightInfo, $UserStats);
+	G::$LoggedUser =& $LoggedUser;
 
 	$LoggedUser['RSS_Auth'] = md5($LoggedUser['ID'] . RSS_HASH . $LoggedUser['torrent_pass']);
 
@@ -285,7 +286,6 @@ if (isset($LoginCookie)) {
 	}
 }
 
-G::$LoggedUser = $LoggedUser;
 $Debug->set_flag('end user handling');
 
 $Debug->set_flag('start function definitions');
