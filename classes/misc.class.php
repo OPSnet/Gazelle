@@ -334,29 +334,6 @@ class Misc {
 	}
 
 	/**
-	 * If the suffix of $Haystack is $Needle
-	 *
-	 * @param string $Haystack String to search in
-	 * @param string $Needle String to search for
-	 * @return boolean True if $Needle is a suffix of $Haystack
-	 */
-	public static function ends_with($Haystack, $Needle) {
-		return substr($Haystack, strlen($Needle) * -1) == $Needle;
-	}
-
-
-	/**
-	 * If the prefix of $Haystack is $Needle
-	 *
-	 * @param string $Haystack String to search in
-	 * @param string $Needle String to search for
-	 * @return boolean True if $Needle is a prefix of $Haystack
-	 */
-	public static function starts_with($Haystack, $Needle) {
-		return strpos($Haystack, $Needle) === 0;
-	}
-
-	/**
 	 * Variant of in_array() with trailing wildcard support
 	 *
 	 * @param string $Needle, array $Haystack

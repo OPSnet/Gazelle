@@ -159,8 +159,19 @@ class Time {
 		}
 	}
 
+	/**
+	 * Converts a numeric amount of hours (though we round down via floor for all levels) into a more human readeable
+	 * string representing the number of years, months, weeks, days, and hours that make up that numeric amount. The
+	 * function then either surrounds the amount with a span or just returns the string. Giving a less than or equal
+	 * 0 hours to the function will return the string 'Never'.
+	 *
+	 * @param $hours
+	 * @param int $levels
+	 * @param bool $span
+	 * @return string
+	 */
 	public static function convertHours($hours, $levels = 2, $span = true) {
-		if ($hours === 0) {
+		if ($hours <= 0) {
 			return 'Never';
 		}
 
