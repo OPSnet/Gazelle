@@ -32,5 +32,7 @@ Vagrant.configure("2") do |config|
 
   # This appears to fix a bug with the vbguest plugin so that it properly
   # installs instead of getting stuck at a user confirmation and dying
-  config.vbguest.installer_arguments = ['--nox11 -- --force']
+  if Vagrant.has_plugin? "vagrant-vbguest"
+      config.vbguest.installer_arguments = ['--nox11 -- --force']
+  end
 end
