@@ -1,0 +1,41 @@
+/*********************************************************
+-------------------------- Haze --------------------------
+Design: apopagasm
+CSS: Exanurous
+Style derived from Gazelle Postmod
+*********************************************************/
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,bold);
+@import url(https://gitcdn.link/cdn/exanurous/haze_pth/master/theme-blue.css);
+
+/* Background Image */
+body {background-image: url('https://i.imgur.com/0YrbXGV.png');}
+#logo a {background: url('https://i.imgur.com/l70oaBu.png') no-repeat top left;}
+
+/*
+#userinfo_major #nav_bonus a {
+	margin-left: -100px
+}
+*/
+
+#userinfo_major {
+	margin-left: 715px;
+}
+
+#nav_staff {
+	margin-left: 663px !important
+}
+
+#userinfo_major #nav_bonus a {
+	background: url('https://i.imgur.com/IRVh2R9.png');
+	background-position: 0 0
+}
+
+#userinfo_major #nav_bonus a:hover {
+	background: url('https://i.imgur.com/IRVh2R9.png');
+	background-position: 0 84px
+}
+
+#userinfo_major #nav_bonus a:active {
+	background: url('https://i.imgur.com/IRVh2R9.png');
+	background-position: 0 42px
+}
