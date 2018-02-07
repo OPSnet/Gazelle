@@ -408,14 +408,16 @@ class DB_MYSQL {
 		}
 	}
 
-	function next_record($Type = MYSQLI_BOTH, $Escape = true) { // $Escape can be true, false, or an array of keys to not escape
+	function next_record($Type = MYSQLI_BOTH, $Escape = true, $Reverse = false) {
+		// $Escape can be true, false, or an array of keys to not escape
+		// If $Reverse is true, then $Escape is an array of keys to escape
 		if ($this->LinkID) {
 			$this->Record = mysqli_fetch_array($this->QueryID, $Type);
 			$this->Row++;
 			if (!is_array($this->Record)) {
 				$this->QueryID = false;
 			} elseif ($Escape !== false) {
-				$this->Record = Misc::display_array($this->Record, $Escape);
+				$this->Record = Misc::display_array($this->Record, $Escape, $Reverse);
 			}
 			return $this->Record;
 		}
@@ -442,7 +444,7 @@ class DB_MYSQL {
 		elseif (count($Escape) === 0) {
 			$Escape = false;
 		}
-		return $this->next_record(MYSQLI_BOTH, $Escape);
+		return $this->next_record(MYSQLI_BOTH, $Escape, true);
 	}
 
 	function close() {

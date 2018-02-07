@@ -462,7 +462,7 @@ class Misc {
 	 * Get a tag ready for database input and display.
 	 *
 	 * @param string $Str
-	 * @return sanitized version of $Str
+	 * @return string sanitized version of $Str
 	 */
 	public static function sanitize_tag($Str) {
 		$Str = strtolower($Str);
@@ -476,15 +476,16 @@ class Misc {
 	/**
 	 * HTML escape an entire array for output.
 	 * @param array $Array, what we want to escape
-	 * @param boolean/array $Escape
+	 * @param boolean|array $Escape
 	 *	if true, all keys escaped
 	 *	if false, no escaping.
 	 *	If array, it's a list of array keys not to escape.
-	 * @return mutated version of $Array with values escaped.
+	 * @param boolean $Reverse reverses $Escape such that then it's an array of keys to escape
+	 * @return array mutated version of $Array with values escaped.
 	 */
-	public static function display_array($Array, $Escape = array()) {
+	public static function display_array($Array, $Escape = array(), $Reverse = false) {
 		foreach ($Array as $Key => $Val) {
-			if ((!is_array($Escape) && $Escape == true) || !in_array($Key, $Escape)) {
+			if ((!is_array($Escape) && $Escape == true) || (!$Reverse && !in_array($Key, $Escape)) || ($Reverse && in_array($Key, $Escape))) {
 				$Array[$Key] = display_str($Val);
 			}
 		}
