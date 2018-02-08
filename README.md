@@ -1,9 +1,10 @@
 # Gazelle
-Gazelle is a web framework geared towards private BitTorrent trackers. Although naturally focusing on music, it can be modified for most needs. Gazelle is written in PHP, JavaScript, and MySQL.
+Gazelle is a web framework geared towards private BitTorrent trackers. Although naturally focusing on music, it can be 
+modified for most needs. Gazelle is written in PHP, JavaScript, and MySQL.
 
 ## Gazelle Runtime Dependencies
 * [Nginx](http://wiki.nginx.org/Main) (recommended)
-* [PHP 5.4 or newer](https://www.php.net/) (required)
+* [PHP 7 or newer](https://www.php.net/) (required)
 * [Memcached](http://memcached.org/) (required)
 * [Sphinx 2.0.6 or newer](http://sphinxsearch.com/) (required)
 * [procps-ng](http://sourceforge.net/projects/procps-ng/) (recommended)
@@ -15,46 +16,39 @@ Gazelle is a web framework geared towards private BitTorrent trackers. Although 
 
 _Note: This list may not be exhaustive._
 
-## Change Log
-You may have noticed that commits in the repository do not have descriptive messages. If you are looking for a change log of Gazelle, it can be [viewed here](https://raw.github.com/WhatCD/Gazelle/master/docs/CHANGES.txt). The change log is generated daily and includes new additions or modifications to Gazelle's source.
-
-## Coding Standards
-Gazelle's code adheres to a set of coding standards that can be found [here](https://github.com/WhatCD/Gazelle/wiki/Coding-Standards). If you plan on sending pull requests, these standards must be followed.
-
 ## Installation
-[This guide](https://github.com/WhatCD/Gazelle/wiki/Gazelle-installation) will walk you through setting up Gazelle on a machine running Gentoo Linux. Although installing Gazelle is relatively straightforward, we recommend a working knowledge of PHP if you plan to modify the source code.
+See the script in `.vagrant/gazelle-setup.sh` to get a gist of what needs to be done to install Gazelle on Debian
+Jessie. You should be able to modify this to whatever distro you want to run it on.
 
-## Gazelle development using Vagrant
-[VagrantGazelle](https://github.com/dr4g0nnn/VagrantGazelle) allows for convenient development of Gazelle, without going through the trouble of setting it all up yourself.
+## Logchecker
+This repository does not come with the necessary binaries to validate checksums for uploaded logs. To get them, please
+follow the below steps. In all cases, you will need to place the necessary files into the `classes/logchecker/` folder.
 
-Vagrant uses virtual machines to allow for easy development in consistent environments. The setup linked above allows for development on your local machine and the Gazelle setup to run without altering your system.
+### EAC
+Install a copy of [EAC](http://www.exactaudiocopy.de/) on a Windows machine or under Wine. You then need to navigate
+to the installed directory and copy `CheckLog.exe` (renaming it to `eac_logchecker.exe`) and `HelperFunctions.dll` into
+`classes/logchecker/`.
 
-Once set up, the Gazelle source files will be present in `src/`, which is shared to `/var/www/` on the machine. A port forward from port 80 on the guest to 8080 on the host will also be established.
+### XLD
+Clone the repository https://github.com/itismadness/xld_sign and build it following the readme. Move the generated
+binary (renaming it to `xld_logchecker`) to `classes/logchecker`.
 
-SQL to run for contests:
+## Gazelle Development
+This repository comes pre-setup to be run through [Vagrant](https://www.vagrantup.com/) for ease of development and 
+without having to modify your local machine. You can look through the docs for how it works, but to start, you
+just need to download Vagrant and VirtualBox (and it's recommended to get the 
+[vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest) plugin) and then simply run:
+```
+vagrant up
+```
 
-CREATE TABLE contest (
-    ID integer not null auto_increment,
-    Name varchar(80) not null,
-    DTBegin datetime not null,
-    DTEnd datetime not null,
-    Primary key (ID),
-    Unique (Name)
-);
+This will build a Debian Jessie on a Virtual Machine and serve this repository through `/var/www` on the machine. It
+will also forward the following ports:
+* 8080 -> 80 (nginx)
+* 36000 -> 3306 (mysql)
+* 34000 -> 34000 (ocelot)
 
-CREATE TABLE contest_leaderboard (
-    ContestID integer not null,
-    UserID integer not null,
-    FlacCount integer not null,
-    LastTorrentID integer not null,
-    LastTorrentName varchar(80) not null,
-    ArtistList varchar(80) not null,
-    ArtistNames varchar(200) not null,
-    LastUpload datetime not null,
-    CONSTRAINT `contest_fk` FOREIGN KEY (`ContestID`) REFERENCES `contest` (`ID`) ON DELETE CASCADE
-);
+You can access the site by going to `http://localhost:8080`
 
-CREATE INDEX flac_upload_idx ON contest_leaderboard (FlacCount DESC, LastUpload, UserID);
-
-INSERT INTO contest (Name, DTBEgin, DTEnd) values ('Euterpe FLAC Challenge', '2017-10-01 00:00:00', '2017-10-31 00:00:00');
-
+Feel free to join #develop on irc.apollo.rip to discuss any questions concerning Gazelle (or any of the repos used by
+Apollo).
