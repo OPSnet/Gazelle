@@ -18,7 +18,12 @@ if (isset($_POST['Username'])) {
 
 	//Make sure all the fields are filled in
 	//Don't allow a username of "0" or "1" because of PHP's type juggling
-	if (!empty($Username) && !empty($Email) && !empty($Password) && $Username != '0' && $Username != '1') {
+	if (!preg_match(USERNAME_REGEX, $Username)) {
+
+		//Give the Error -- Invalid username
+		error('Invalid username');
+
+	} else if (!empty($Username) && !empty($Email) && !empty($Password) && $Username != '0' && $Username != '1') {
 
 		//Create hashes...
 		$Secret = Users::make_secret();
