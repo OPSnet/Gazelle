@@ -53,7 +53,7 @@ while (list($PeerUserID, $Size, $Active, $Connectable, $Uploaded, $Remaining, $U
 ?>
 	<tr>
 <?
-	if (check_perms('users_mod')) {
+	if (check_perms('users_mod') || $PeerUserID == G::$LoggedUser['ID']) {
 ?>
 		<td><?=Users::format_username($PeerUserID, false, false, false)?></td>
 <?	} else {
