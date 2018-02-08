@@ -1,4 +1,4 @@
-CHANGE LOG
+CHANGE LOG (from WCD)
 
 2016-11-01 by Bourbon
 Remove username substring search functionality. Username searches must now be exact to return a result.
@@ -443,7 +443,7 @@ Update OpenDyslexic font files and add OpenDyslexic Mono font
 Added thread notes in forums
 
 2013-10-13 by Ajax
-Added "Ask the Staff" tool for users to ask staff random questions. 
+Added "Ask the Staff" tool for users to ask staff random questions.
 
 2013-10-10 by alderaan
 Users will receive a PM when they get promoted or demoted
@@ -491,7 +491,7 @@ Add an option for the styled tooltips
 Comment subscriptions, quote notifications and quote linking
 
 2013-08-24 by Ajax
-Notifications Manager class and noty.js library to provide popup notifications 
+Notifications Manager class and noty.js library to provide popup notifications
 
 2013-08-24 by Ajax
 Redesigned user settings page
@@ -512,7 +512,7 @@ Drag and Drop ordering on the Do Not Upload page in toolbox
 Search email blacklist
 
 2013-07-30 by Y
-Collage API additions. 
+Collage API additions.
 
 2013-07-23 by draculesti
 New mod button to generate random user passwords
