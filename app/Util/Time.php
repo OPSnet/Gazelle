@@ -316,7 +316,7 @@ class Time {
 	}
 
 	public static function isValidDateTime($date_time, $format = 'Y-m-d H:i') {
-		$formatted_date_time = DateTime::createFromFormat($format, $date_time);
+		$formatted_date_time = \DateTime::createFromFormat($format, $date_time);
 		return $formatted_date_time && $formatted_date_time->format($format) == $date_time;
 	}
 }
