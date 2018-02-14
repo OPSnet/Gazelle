@@ -1,4 +1,5 @@
 <?php
+
 /*-- Script Start Class --------------------------------*/
 /*------------------------------------------------------*/
 /* This isnt really a class but a way to tie other      */
@@ -87,9 +88,11 @@ G::$Cache = $Cache;
 G::$DB = $DB;
 
 //Begin browser identification
-
-$Browser = UserAgent::browser($_SERVER['HTTP_USER_AGENT']);
-$OperatingSystem = UserAgent::operating_system($_SERVER['HTTP_USER_AGENT']);
+$Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
+$Browser = $Result->browser->getName();
+$BrowserVersion = explode('.',$Result->browser->getVersion())[0];
+$OperatingSystem = $Result->os->getName();
+$OperatingSystemVersion = $Result->os->getVersion();
 
 $Debug->set_flag('start user handling');
 
@@ -198,7 +201,9 @@ if (isset($LoginCookie)) {
 			SET
 				IP = '".$_SERVER['REMOTE_ADDR']."',
 				Browser = '$Browser',
+				BrowserVersion = '{$BrowserVersion}',
 				OperatingSystem = '$OperatingSystem',
+				OperatingSystemVersion = '{$OperatingSystemVersion}',
 				LastUpdate = '".sqltime()."'
 			WHERE UserID = '{$LoggedUser['ID']}'
 				AND SessionID = '".db_string($SessionID)."'");
@@ -207,7 +212,9 @@ if (isset($LoginCookie)) {
 		$Cache->insert_front($SessionID,array(
 				'SessionID' => $SessionID,
 				'Browser' => $Browser,
+				'BrowserVersion' => $BrowserVersion,
 				'OperatingSystem' => $OperatingSystem,
+				'OperatingSystemVersion' => $OperatingSystemVersion,
 				'IP' => $_SERVER['REMOTE_ADDR'],
 				'LastUpdate' => sqltime()
 				));
