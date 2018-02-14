@@ -426,8 +426,8 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/data/special_users.php');
 		break;
 
-	case 'browser_support':
-		include(SERVER_ROOT.'/sections/tools/data/browser_support.php');
+	case 'platform_usage':
+		include(SERVER_ROOT.'/sections/tools/data/platform_usage.php');
 		break;
 	//END Data
 

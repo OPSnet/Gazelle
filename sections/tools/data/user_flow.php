@@ -6,6 +6,9 @@ if (!check_perms('site_view_flow')) {
 //Timeline generation
 if (!isset($_GET['page'])) {
 	if (!list($Labels, $InFlow, $OutFlow, $Max) = $Cache->get_value('users_timeline')) {
+		$Labels = [];
+		$InFlow = [];
+		$OutFlow = [];
 		$DB->query("
 			SELECT DATE_FORMAT(JoinDate, '%b \'%y') AS Month, COUNT(UserID)
 			FROM users_info
