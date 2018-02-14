@@ -178,13 +178,14 @@ View::show_header('Staff Tools');
 	create_row("Torrent stats", "tools.php?action=torrent_stats", check_perms("site_view_flow"));
 	create_row("Upscale pool", "tools.php?action=upscale_pool", check_perms("site_view_flow"));
 	create_row("User flow", "tools.php?action=user_flow", check_perms("site_view_flow"));
+	create_row("OS and Browser usage", "tools.php?action=platform_usage", check_perms('site_view_flow'));
 
 	if ($ToolsHTML) {
 ?>
 		<div class="permission_subcontainer">
 			<table class="layout">
 				<tr class="colhead"><td>Site Information</td></tr>
-<?=				$ToolsHTML ?>
+				<?=$ToolsHTML?>
 			</table>
 		</div>
 <?
