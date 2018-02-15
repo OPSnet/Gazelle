@@ -232,8 +232,6 @@ class DB_MYSQL {
 	}
 
 	/**
-	 * @deprecated
-	 *
 	 * Runs a raw query assuming pre-sanitized input. However, attempting to self sanitize (such
 	 * as via db_string) is still not as safe for using prepared statements so for queries
 	 * involving user input, you really should not use this function (instead opting for
@@ -279,11 +277,11 @@ class DB_MYSQL {
 	function prepare($Query) {
 		$this->setup_query();
 		$this->PreparedQuery = $Query;
-		$Statement = mysqli_prepare($this->LinkID, $Query);
+		$this->Statement = $this->LinkID->prepare($Query);
 		if ($this->Statement === false) {
 			$this->halt('Invalid Query: ' . mysqli_error($this->LinkID));
 		}
-		return $Statement;
+		return $this->Statement;
 	}
 
 	/**
@@ -293,14 +291,16 @@ class DB_MYSQL {
 	 * type automatically set for how to bind it to the query (either
 	 * integer (i), double (d), or string (s)).
 	 *
-	 * @param  mysqli_stmt $Statement      Prepared MySQLI statement
-	 * @param  array       $Parameters,... Variables to be bound to our prepared statement
+	 * @param  array $Parameters,... variables for the query
 	 * @return mysqli_result|bool Returns a mysqli_result object
 	 *                            for successful SELECT queries,
 	 *                            or TRUE for other successful DML queries
 	 *                            or FALSE on failure.
 	 */
-	function execute($Statement, ...$Parameters) {
+	function execute(...$Parameters) {
+		/** @var mysqli_stmt $Statement */
+		$Statement =& $this->Statement;
+
 		if (count($Parameters) > 0) {
 			$Binders = "";
 			foreach ($Parameters as $Parameter) {
@@ -346,8 +346,8 @@ class DB_MYSQL {
 	 * @return bool|mysqli_result
 	 */
 	function prepared_query($Query, ...$Parameters) {
-		$Statement = $this->prepare($Query);
-		return $this->execute($Statement, ...$Parameters);
+		$this->prepare($Query);
+		return $this->execute(...$Parameters);
 	}
 
 	private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
@@ -478,7 +478,7 @@ class DB_MYSQL {
 
 	function affected_rows() {
 		if ($this->LinkID) {
-			return mysqli_affected_rows($this->LinkID);
+			return $this->LinkID->affected_rows;
 		}
 	}
 
