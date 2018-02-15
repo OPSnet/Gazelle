@@ -7,7 +7,7 @@ if (isset($_GET['userid']) && check_perms('users_view_ips') && check_perms('user
 	}
 	$UserID = $_GET['userid'];
 } else {
-	$UserID = $LoggedUser['ID'];
+	$UserID = G::$LoggedUser['ID'];
 }
 
 if (isset($_POST['all'])) {
@@ -73,20 +73,20 @@ View::show_header($Username.' &gt; Sessions');
 <?
 	$Row = 'a';
 	foreach ($UserSessions as $Session) {
-		list($ThisSessionID, $Browser, $OperatingSystem, $IP, $LastUpdate) = array_values($Session);
+		//list($ThisSessionID, $Browser, $OperatingSystem, $IP, $LastUpdate) = array_values($Session);
 		$Row = $Row === 'a' ? 'b' : 'a';
 ?>
 			<tr class="row<?=$Row?>">
-				<td class="nobr"><?=$IP?></td>
-				<td><?=$Browser?></td>
-				<td><?=$OperatingSystem?></td>
-				<td><?=time_diff($LastUpdate)?></td>
+				<td class="nobr"><?=$Session['IP']?></td>
+				<td><?=$Session['Browser']?></td>
+				<td><?=$Session['OperatingSystem']?></td>
+				<td><?=time_diff($Session['LastUpdate'])?></td>
 				<td>
 					<form class="delete_form" name="session" action="" method="post">
 						<input type="hidden" name="action" value="sessions" />
 						<input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-						<input type="hidden" name="session" value="<?=$ThisSessionID?>" />
-						<input type="submit" value="<?=(($ThisSessionID == $SessionID) ? 'Current" disabled="disabled' : 'Log out') ?>" />
+						<input type="hidden" name="session" value="<?=$Session['SessionID']?>" />
+						<input type="submit" value="<?=(($Session['SessionID'] === $SessionID) ? 'Current" disabled="disabled' : 'Log out') ?>" />
 					</form>
 				</td>
 			</tr>
