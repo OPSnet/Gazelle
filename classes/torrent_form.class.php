@@ -25,6 +25,9 @@ class TORRENT_FORM {
 	var $Disabled = '';
 	var $DisabledFlag = false;
 
+	private static $TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
+	private static $JSON_INPUT_ACCEPT = ['application/json', '.json'];
+
 	function __construct($Torrent = false, $Error = false, $NewTorrent = true) {
 
 		$this->NewTorrent = $NewTorrent;
@@ -89,11 +92,15 @@ class TORRENT_FORM {
 		<table cellpadding="3" cellspacing="1" border="0" class="layout border" width="100%">
 			<tr>
 				<td class="label">Torrent file:</td>
-				<td><input id="file" type="file" name="file_input" size="50" /></td>
+				<td>
+                    <input id="file" type="file" name="file_input" size="50" accept="<?= implode(',', self::$TORRENT_INPUT_ACCEPT); ?>" />
+                </td>
 			</tr>
 			<tr>
 				<td class="label">JSON file:</td>
-				<td><input type="file" onchange="ParseUploadJson()" id="torrent-json-file" /></td>
+				<td>
+                    <input type="file" onchange="ParseUploadJson()" id="torrent-json-file" accept="<?= implode(',', self::$JSON_INPUT_ACCEPT); ?>" />
+                </td>
 			</tr>
 			<tr>
 				<td class="label">Type:</td>
