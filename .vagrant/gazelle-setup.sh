@@ -9,46 +9,50 @@ touch ~/.runonce
 
 export DEBIAN_FRONTEND=noninteractive
 
+# Don't do this in production
+sudo apt-get install -y eatmydata
+
+
 # Add source for getting PHP 7.0
-sudo apt-get install -qy software-properties-common
+sudo eatmydata apt-get install -qy software-properties-common
 sudo add-apt-repository 'deb http://packages.dotdeb.org jessie all'
 wget https://www.dotdeb.org/dotdeb.gpg -O /tmp/dotdeb.gpg
 sudo apt-key add /tmp/dotdeb.gpg
 rm -f /tmp/dotdeb.gpg
 
-sudo apt-get update
+sudo eatmydata apt-get update
 
 # install basic stuff that we need for potential later operations
-sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libsqlite3-dev libboost-dev libtcmalloc-minimal4 unzip wget curl netcat-openbsd imagemagick
+sudo eatmydata apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libsqlite3-dev libboost-dev libtcmalloc-minimal4 unzip wget curl netcat-openbsd imagemagick
 
 sudo echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
 # Add the i386 architecture so we can install wine32 which is needed to run the eac_log_checker.exe
 sudo dpkg --add-architecture i386
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt-get update
+sudo eatmydata apt-get update
 
 # We can remove the default MTA (exim4) as it doesn't do anything that really helps us on our sever. However, we do
 # want to install sendmail (but not let it run) so that PHP can send mail.
-sudo apt-get remove -y exim4 exim4-base exim4-config exim4-daemon-light
+sudo eatmydata apt-get remove -y exim4 exim4-base exim4-config exim4-daemon-light
 sudo rm -rf /var/log/exim4
-sudo apt-get install -y sendmail-bin
+sudo eatmydata apt-get install -y sendmail-bin
 sudo service sendmail stop
 sudo update-rc.d sendmail remove
 
-sudo apt-get install -y git nginx memcached nodejs
+sudo eatmydata apt-get install -y git nginx memcached nodejs
 
-sudo apt-get install -y python3 python3-pip
+sudo eatmydata apt-get install -y python3 python3-pip
 sudo pip3 install -U pip
 sudo pip3 install chardet
 
-sudo apt-get install -y sphinxsearch
-sudo apt-get install -y php7.0 php7.0-fpm php7.0-memcached php7.0-mcrypt php7.0-mysqlnd php7.0-cli php7.0-xdebug php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip
+sudo eatmydata apt-get install -y sphinxsearch
+sudo eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-memcached php7.0-mcrypt php7.0-mysqlnd php7.0-cli php7.0-xdebug php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip
 
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password password em%G9Lrey4^N'
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password_again password em%G9Lrey4^N'
-sudo apt-get install -y mariadb-server mariadb-client
+sudo eatmydata apt-get install -y mariadb-server mariadb-client
 
-sudo apt-get install -y wine wine32
+sudo eatmydata apt-get install -y wine wine32
 
 # We set the global area for NPM since puppeteer cannot install normally globally
 # even with sudo =S
