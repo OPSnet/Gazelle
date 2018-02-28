@@ -4,12 +4,12 @@
  ************ Torrent form class *************** upload.php and torrents.php ****
  ********************************************************************************
  ** This class is used to create both the upload form, and the 'edit torrent'  **
- ** form. It is broken down into several functions - head(), foot(),           **
- ** music_form() [music], audiobook_form() [Audiobooks and comedy], and	       **
- ** simple_form() [everything else].                                           **
- **                                                                            **
+ ** form. It is broken down into several functions - head(), foot(),		   **
+ ** music_form() [music], audiobook_form() [Audiobooks and comedy], and		   **
+ ** simple_form() [everything else].										   **
+ **																			**
  ** When it is called from the edit page, the forms are shortened quite a bit. **
- **                                                                            **
+ **																			**
  ********************************************************************************/
 
 class TORRENT_FORM {
@@ -24,6 +24,9 @@ class TORRENT_FORM {
 	var $TorrentID = false;
 	var $Disabled = '';
 	var $DisabledFlag = false;
+
+	const TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
+	const JSON_INPUT_ACCEPT = ['application/json', '.json'];
 
 	function __construct($Torrent = false, $Error = false, $NewTorrent = true) {
 
@@ -89,11 +92,15 @@ class TORRENT_FORM {
 		<table cellpadding="3" cellspacing="1" border="0" class="layout border" width="100%">
 			<tr>
 				<td class="label">Torrent file:</td>
-				<td><input id="file" type="file" name="file_input" size="50" /></td>
+				<td>
+					<input id="file" type="file" name="file_input" size="50" accept="<?= implode(',', self::TORRENT_INPUT_ACCEPT); ?>" />
+				</td>
 			</tr>
 			<tr>
 				<td class="label">JSON file:</td>
-				<td><input type="file" onchange="ParseUploadJson()" id="torrent-json-file" /></td>
+				<td>
+					<input type="file" onchange="ParseUploadJson()" id="torrent-json-file" accept="<?= implode(',', self::JSON_INPUT_ACCEPT); ?>" />
+				</td>
 			</tr>
 			<tr>
 				<td class="label">Type:</td>
