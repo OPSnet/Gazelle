@@ -441,6 +441,7 @@ class Users {
 			'31' => 'TC', // Torrent Celebrity
 			'32' => 'D', // Designer
 			'33' => 'ST', // Security Team
+			'34' => 'AR', // Archive Team
 			'36' => 'AT', // Alpha Team
 			'37' => 'BT', // Bravo Team
 			'38' => 'CT', // Charlie Team
