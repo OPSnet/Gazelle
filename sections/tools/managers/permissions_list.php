@@ -39,11 +39,14 @@ if ($DB->has_results()) {
 			<td>User count</td>
 			<td class="center">Actions</td>
 		</tr>
-<?	while (list($ID, $Name, $Level, $Secondary, $UserCount) = $DB->next_record()) { ?>
+<?	while (list($ID, $Name, $Level, $Secondary, $UserCount) = $DB->next_record()) {
+		$part = $Secondary ? 'secclass' : 'class';
+		$link = "user.php?action=search&{$part}={$ID}";
+?>
 		<tr>
 			<td><?=display_str($Name); ?></td>
 			<td><?=($Secondary ? 'Secondary' : $Level) ?></td>
-			<td><?=number_format($UserCount); ?></td>
+			<td><a href="<?=$link; ?>"><?=number_format($UserCount); ?></a></td>
 			<td class="center">
 				<a href="tools.php?action=permissions&amp;id=<?=$ID ?>" class="brackets">Edit</a>
 				<a href="#" onclick="return confirmDelete(<?=$ID?>);" class="brackets">Remove</a>
