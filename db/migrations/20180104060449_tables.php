@@ -11,7 +11,7 @@ SET GROUP_CONCAT_MAX_LEN=32768;
 
 SELECT GROUP_CONCAT('`', table_schema, '`.`', table_name, '`') INTO @tables
 FROM   information_schema.tables
-WHERE  table_schema = (SELECT DATABASE());
+WHERE  table_schema = (SELECT DATABASE()) AND table_name <> 'phinxlog';
 SELECT IFNULL(@tables, '') INTO @tables;
 
 SET        @tables = CONCAT('DROP TABLE IF EXISTS ', @tables);
