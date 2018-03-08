@@ -578,8 +578,7 @@ if ($NewRequest) {
 	} else {
 		$Announce = "\"$Title\" - ".site_url()."requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);
 	}
-	send_irc('PRIVMSG #'.SSL_SITE_URL."-requests :$Announce");
-
+	send_irc("PRIVMSG #requests :{$Announce}");
 } else {
 	$Cache->delete_value("request_$RequestID");
 	$Cache->delete_value("request_artists_$RequestID");
