@@ -183,7 +183,7 @@ class Misc {
 	}
 
 	/**
-	 * Create thread function, things should already be escaped when sent here.
+	 * Create thread function.
 	 *
 	 * @param int $ForumID
 	 * @param int $AuthorID ID of the user creating the post.
@@ -199,10 +199,10 @@ class Misc {
 
 		$QueryID = G::$DB->get_query_id();
 
-		G::$DB->query("
+		G::$DB->prepared_query('
 			SELECT Username
 			FROM users_main
-			WHERE ID = $AuthorID");
+			WHERE ID = ?', $AuthorID);
 		if (!G::$DB->has_results()) {
 			G::$DB->set_query_id($QueryID);
 			return -2;
@@ -213,40 +213,41 @@ class Misc {
 		$ThreadInfo['IsLocked'] = 0;
 		$ThreadInfo['IsSticky'] = 0;
 
-		G::$DB->query("
+		G::$DB->prepared_query('
 			INSERT INTO forums_topics
-				(Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
+				(Title, AuthorID, ForumID, LastPostID, LastPostTime, LastPostAuthorID, CreatedTime)
 			VALUES
-				('$Title', '$AuthorID', '$ForumID', '".sqltime()."', '$AuthorID', '".sqltime()."')");
+				(?, ?, ?, ?, ?, ?, ?)',
+				$Title, $AuthorID, $ForumID, -1, sqltime(), $AuthorID, sqltime());
 		$TopicID = G::$DB->inserted_id();
 		$Posts = 1;
 
-		G::$DB->query("
+		G::$DB->prepared_query('
 			INSERT INTO forums_posts
 				(TopicID, AuthorID, AddedTime, Body)
 			VALUES
-				('$TopicID', '$AuthorID', '".sqltime()."', '$PostBody')");
+				(?, ?, ?, ?)', $TopicID, $AuthorID, sqltime(), $PostBody);
 		$PostID = G::$DB->inserted_id();
 
-		G::$DB->query("
+		G::$DB->prepared_query('
 			UPDATE forums
 			SET
 				NumPosts  = NumPosts + 1,
 				NumTopics = NumTopics + 1,
-				LastPostID = '$PostID',
-				LastPostAuthorID = '$AuthorID',
-				LastPostTopicID = '$TopicID',
-				LastPostTime = '".sqltime()."'
-			WHERE ID = '$ForumID'");
+				LastPostID = ?,
+				LastPostAuthorID = ?,
+				LastPostTopicID = ?,
+				LastPostTime = ?
+			WHERE ID = ?', $PostID, $AuthorID, $TopicID, sqltime(), $ForumID);
 
-		G::$DB->query("
+		G::$DB->prepared_query('
 			UPDATE forums_topics
 			SET
 				NumPosts = NumPosts + 1,
-				LastPostID = '$PostID',
-				LastPostAuthorID = '$AuthorID',
-				LastPostTime = '".sqltime()."'
-			WHERE ID = '$TopicID'");
+				LastPostID = ?,
+				LastPostAuthorID = ?,
+				LastPostTime = ?
+			WHERE ID = ?', $PostID, $AuthorID, sqltime(), $TopicID);
 
 		// Bump this topic to head of the cache
 		list($Forum,,, $Stickies) = G::$Cache->get_value("forums_$ForumID");
@@ -254,10 +255,10 @@ class Misc {
 			if (count($Forum) == TOPICS_PER_PAGE && $Stickies < TOPICS_PER_PAGE) {
 				array_pop($Forum);
 			}
-			G::$DB->query("
+			G::$DB->prepared_query('
 				SELECT IsLocked, IsSticky, NumPosts
 				FROM forums_topics
-				WHERE ID ='$TopicID'");
+				WHERE ID = ?', $TopicID);
 			list($IsLocked, $IsSticky, $NumPosts) = G::$DB->next_record();
 			$Part1 = array_slice($Forum, 0, $Stickies, true); //Stickys
 			$Part2 = array(
