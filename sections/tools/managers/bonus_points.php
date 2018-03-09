@@ -10,7 +10,7 @@ if (isset($_REQUEST['add_points'])) {
 	if ($Points < 0) {
 		error('Please enter a valid number of points.');
 	}
-	var_dump($Points);
+
 	$sql = "
 		UPDATE users_main
 		SET BonusPoints = BonusPoints + {$Points}

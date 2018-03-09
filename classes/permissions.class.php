@@ -111,7 +111,7 @@ class Permissions {
 	}
 
 	public static function is_mod($UserID) {
-        return self::has_permission($UserID, 'users_mod');
+		return self::has_permission($UserID, 'users_mod');
 	}
 
 	public static function has_permission($UserID, $privilege) {

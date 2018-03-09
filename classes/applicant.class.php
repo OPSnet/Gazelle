@@ -125,7 +125,7 @@ class Applicant {
 		G::$Cache->delete_value(self::CACHE_KEY_NEW_COUNT);
 		if ($visibility == 'public' && Permissions::has_permission($poster_id, 'admin_manage_applicants')) {
 			$staff = Users::user_info($poster_id);
-			$mf    = Users::user_info($this->user_id());
+			$user  = Users::user_info($this->user_id());
 			Misc::send_pm(
 				$this->user_id(),
 				0,
@@ -138,7 +138,7 @@ You can view the reply [url=%s]here[/url].
 
 ~APL STAFF <3
 END_MSG
-					, $mf['Username']
+					, $user['Username']
 					, $staff['Username']
 					, $this->role_title()
 					, site_url() . '/apply.php?action=view&id=' . $this->id()

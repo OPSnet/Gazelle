@@ -1,69 +1,65 @@
 <?php
 
-$ID = G::$LoggedUser['ID'];
-$BBCode = (isset($_REQUEST['BBCode']) && $_REQUEST['BBCode'] === 'true') ? 'true' : 'false';
-$Option = (isset($_REQUEST['BBCode']) && $_REQUEST['BBCode'] === 'true') ? 'title_bbcode' : 'title_nobbcode';
-$Item = Bonus::$Items[$Option];
-$Price = Bonus::get_price($Item);
-
-if (isset($_REQUEST['preview'])) {
-	$Title = ($BBCode === 'true') ? Text::full_format($_POST['title']) : Text::strip_bbcode($_POST['title']);
-	print($Title);
+if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST['BBCode'])) {
+	echo $_REQUEST['BBCode'] === 'true'
+		? Text::full_format($_REQUEST['title'])
+		: Text::strip_bbcode($_REQUEST['title']);
 	die();
 }
-if (isset($_REQUEST['Remove']) && $_REQUEST['Remove'] === 'true') {
+
+$ID = G::$LoggedUser['ID'];
+$Label = $_REQUEST['label'];
+if ($Label === 'title-off') {
 	authorize();
-	G::$DB->query("UPDATE users_main SET Title='' WHERE ID={$ID}");
-	G::$Cache->delete_value("user_info_{$ID}");
-	G::$Cache->delete_value("user_stats_{$ID}");
-	header('Location: bonus.php?complete');
+	Users::removeCustomTitle($ID);
+	header('Location: bonus.php?complete=' . urlencode($Label));
 }
-elseif (isset($_POST['confirm'])) {
+if ($Label === 'title-bb-y') {
+	$BBCode = 'true';
+}
+elseif ($Label === 'title-bb-n') {
+	$BBCode = 'false';
+}
+else {
+    error(403);
+}
+
+if (isset($_POST['confirm'])) {
 	authorize();
 	if (!isset($_POST['title'])) {
 		error(403);
 	}
-
-	if ($Price > G::$LoggedUser['BonusPoints']) {
+	if ($Bonus->purchaseTitle($ID, $Label, $_POST['title'], G::$LoggedUser['EffectiveClass'])) {
+		header('Location: bonus.php?complete=' . urlencode($Label));
+	}
+	else {
 		error('You cannot afford this item.');
 	}
-	$Title = ($BBCode === 'true') ? Text::full_format($_POST['title']) : Text::strip_bbcode($_POST['title']);
-	G::$DB->query("UPDATE users_main SET Title='".db_string($Title)."', BonusPoints=BonusPoints - {$Price} WHERE ID={$ID}");
-	G::$Cache->delete_value("user_info_{$ID}");
-	G::$Cache->delete_value("user_stats_{$ID}");
-	header('Location: bonus.php?complete');
-}
-else {
-
-	$Title = ($BBCode !== 'true') ? 'no BBCode allowed' : 'BBCode allowed';
-
-	View::show_header('Bonus Points - Title', 'bonus');
-	?>
-	<div class="thin">
-		<table>
-			<thead>
-			<tr>
-				<td>Custom Title, <?=$Title?> - <?=number_format($Price)?> Points</td>
-			</tr>
-			</thead>
-			<tbody>
-			<tr>
-				<td>
-					<form action="bonus.php?action=title&BBCode=<?=$BBCode?>" method="post">
-						<input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
-						<input type="hidden" name="confirm" value="true" />
-						<input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
-						<input type="submit" onclick="ConfirmPurchase(event, '<?=$Item['Title']?>')" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
-						<div id="preview"></div>
-					</form>
-				</td>
-			</tr>
-			</tbody>
-		</table>
-	</div>
-	<?php
-
-	View::show_footer();
 }
 
+View::show_header('Bonus Points - Title', 'bonus');
 ?>
+<div class="thin">
+	<table>
+		<thead>
+		<tr>
+			<td>Custom Title, <?= ($BBCode === 'true') ? 'BBCode allowed' : 'no BBCode allowed' ?> - <?=number_format($Price)?> Points</td>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>
+				<form action="bonus.php?action=purchase&label=<?= $Label ?>" method="post">
+					<input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
+					<input type="hidden" name="confirm" value="true" />
+					<input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
+					<input type="submit" onclick="ConfirmPurchase(event, '<?=$Item['Title']?>')" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />
+					<div id="preview"></div>
+				</form>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<?  View::show_footer();
