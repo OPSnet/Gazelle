@@ -73,6 +73,19 @@ if (($LoggedUser['ID'] != $Properties['UserID'] && !check_perms('torrents_edit')
 
 View::show_header('Edit torrent', 'upload,torrent');
 
+if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['CategoryID'] == 1)) {
+	if ($Properties['CategoryID'] == 1) {
+?>
+<div class="linkbox">
+	<a class="brackets" href="#group-change">Change Group</a>
+	<a class="brackets" href="#group-split">Split Off into New Group</a>
+<?		if (check_perms('users_mod')) { ?>
+	<a class="brackets" href="#category-change">Change Category</a>
+<?		} ?>
+</div>
+<?	}
+}
+
 if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || check_perms('edit_unknowns')) {
 	if (!isset($Err)) {
 		$Err = false;
@@ -109,7 +122,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
 	if ($Properties['CategoryID'] == 1) {
 ?>
 	<div class="header">
-		<h2>Change group</h2>
+		<h2><a name="group-change">Change group</a></h2>
 	</div>
 	<form class="edit_form" name="torrent_group" action="torrents.php" method="post">
 		<input type="hidden" name="action" value="editgroupid" />
@@ -130,7 +143,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
 			</tr>
 		</table>
 	</form>
-	<h2>Split off into new group</h2>
+	<h2><a name="group-split">Split off into new group</a></h2>
 	<form class="split_form" name="torrent_group" action="torrents.php" method="post">
 		<input type="hidden" name="action" value="newgroup" />
 		<input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
@@ -164,9 +177,9 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
 	</form>
 	<br />
 <?
-	}
+	} /* category == 1 */
 	if (check_perms('users_mod')) { ?>
-	<h2>Change category</h2>
+	<h2><a name="category-change">Change category</a></h2>
 	<form action="torrents.php" method="post">
 		<input type="hidden" name="action" value="changecategory" />
 		<input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />

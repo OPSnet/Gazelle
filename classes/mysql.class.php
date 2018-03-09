@@ -299,7 +299,7 @@ class DB_MYSQL {
 	 */
 	function execute(...$Parameters) {
 		/** @var mysqli_stmt $Statement */
-		$Statement =& $this->Statement;
+		$Statement = &$this->Statement;
 
 		if (count($Parameters) > 0) {
 			$Binders = "";
@@ -327,9 +327,8 @@ class DB_MYSQL {
 			$Query .= "$key => $value\n";
 		}
 
-		$Return = $this->attempt_query($Query, $Closure);
 
-		return $Return;
+		return $this->attempt_query($Query, $Closure);
 	}
 
 	/**
@@ -348,6 +347,37 @@ class DB_MYSQL {
 	function prepared_query($Query, ...$Parameters) {
 		$this->prepare($Query);
 		return $this->execute(...$Parameters);
+	}
+
+	function prepared_query_array($Query, array $args) {
+		$this->prepare($Query);
+		$param = [];
+		$bind = '';
+		$n = count($args);
+		for ($i = 0; $i < $n; ++$i) {
+			if (is_integer($args[$i])) {
+				$bind .= 'i';
+			}
+			elseif (is_double($args[$i])) {
+				$bind .= 'd';
+			}
+			else {
+				$bind .= 's';
+			}
+			$param[] = &$args[$i];
+		}
+		$refbind = &$bind;
+		array_unshift($param, $refbind);
+		$stmt = &$this->Statement;
+		call_user_func_array([$this->Statement, "bind_param"], $param);
+
+		return $this->attempt_query(
+			$Query,
+			function() use ($stmt) {
+				$stmt->execute();
+				return $stmt->get_result();
+			}
+		);
 	}
 
 	private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
@@ -385,14 +415,6 @@ class DB_MYSQL {
 			}
 		}
 
-		/*
-		$QueryType = substr($Query, 0, 6);
-		if ($QueryType === 'DELETE' || $QueryType === 'UPDATE') {
-			if ($this->affected_rows() > 50) {
-				$Debug->analysis($this->affected_rows().' rows altered:', $Query, 3600 * 24);
-			}
-		}
-		*/
 		$this->Row = 0;
 		if ($AutoHandle) {
 			return $this->QueryID;
@@ -575,4 +597,3 @@ class DB_MYSQL {
 		$this->Queries[count($this->Queries) - 1][2] = $Warnings;
 	}
 }
-?>

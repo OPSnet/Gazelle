@@ -16,6 +16,17 @@
  * in takereport.
  */
 
+$ReportCategories = [
+    'master' => 'General',
+    '1' => 'Music',
+    '2' => 'Application',
+    '3' => 'E-Book',
+    '4' => 'Audiobook',
+    '5' => 'E-Learning Video',
+    '6' => 'Comedy',
+    '7' => 'Comics',
+];
+
 $Types = array(
 		'master' => array(
 			'dupe' => array(
@@ -139,7 +150,6 @@ Your torrent was reported because it was trumped by another torrent with improve
 					'<strong class="important_text">Please be as thorough as possible and include as much detail as you can. Refer to specific tracks and time positions to justify your report.</strong>',
 					'Please make sure you are reporting the torrent <strong class="important_text">which has been trumped</strong> and should be deleted, not the torrent that you think should remain on site.'
 				),
-
 				'report_fields' => array(
 					'sitelink' => '1'
 				),
@@ -659,6 +669,7 @@ Your torrent has now been properly scored by the staff.'
 				)
 			)
 		),
+
 		'2' => array( //Applications Rules Broken
 			'missing_crack' => array(
 				'priority' => '70',
@@ -827,6 +838,7 @@ Your torrent was reported because it contained a program that did not work or no
 				)
 			)
 		),
+
 		'3' => array( //Ebook Rules Broken
 			'unrelated' => array(
 				'priority' => '270',
@@ -846,6 +858,7 @@ Your torrent was reported because it contained a collection or pack of ebooks.'
 				)
 			)
 		),
+
 		'4' => array( //Audiobook Rules Broken
 			'skips' => array(
 				'priority' => '210',
@@ -866,7 +879,8 @@ Your torrent was reported because one or more audiobook tracks contain encoding 
 				)
 			)
 		),
-		'5' => array( //E-Learning vidoes Rules Broken
+
+		'5' => array( //E-Learning videos Rules Broken
 			'dissallowed' => array(
 				'priority' => '20',
 				'reason' => '-1',
@@ -886,6 +900,7 @@ Your torrent was reported because it contained a video that has no relevance to 
 				)
 			)
 		),
+
 		'6' => array( //Comedy Rules Broken
 			'talkshow' => array(
 				'priority' => '270',
@@ -901,13 +916,13 @@ Your torrent was reported because it contained a video that has no relevance to 
 					'upload' => '0',
 					'warn' => '1',
 					'delete' => '1',
-
 					'pm' => '[rule]3.3[/rule]. No radio talk shows or podcasts are allowed. Those recordings do not belong in any torrent category.
 Your torrent was reported because it contained audio files sourced from a talk show or podcast.'
 
 				)
 			)
 		),
+
 		'7' => array( //Comics Rules Broken
 			'titles' => array(
 				'priority' => '180',
