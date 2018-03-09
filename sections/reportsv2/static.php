@@ -466,11 +466,11 @@ if (count($Reports) === 0) {
 						$ExtraRemasterDisplayString = Reports::format_reports_remaster_info($ExtraRemastered, $ExtraRemasterTitle, $ExtraRemasterYear);
 
 						if ($ArtistID == 0 && empty($ArtistName)) {
-							$ExtraLinkName = "<a href=\"torrents.php?id=$ExtraGroupID\">$ExtraGroupName".($ExtraYear ? " ($ExtraYear)" : '')."</a> <a href=\"torrents.php?torrentid=$ExtraID\"> [$ExtraFormat/$ExtraEncoding/$ExtraMedia]$ExtraRemasterDisplayString</a> " . ($ExtraHasCue == '1' ? ' (Cue)' : '').($ExtraHasLog == '1' ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log: $ExtraLogScore %)</a>" : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MB)';
+							$ExtraLinkName = "<a href=\"torrents.php?id=$ExtraGroupID\">$ExtraGroupName".($ExtraYear ? " ($ExtraYear)" : '')."</a> <a href=\"torrents.php?torrentid=$ExtraID\"> [$ExtraFormat/$ExtraEncoding/$ExtraMedia]$ExtraRemasterDisplayString</a> " . ($ExtraHasCue == '1' ? ' (Cue)' : '').($ExtraHasLog == '1' ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log: {$ExtraLogScore}%)</a>" : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MB)';
 						} elseif ($ArtistID == 0 && $ArtistName == 'Various Artists') {
-							$ExtraLinkName = "Various Artists - <a href=\"torrents.php?id=$ExtraGroupID\">$ExtraGroupName".($ExtraYear ? " ($ExtraYear)" : '')."</a> <a href=\"torrents.php?torrentid=$ExtraID\"> [$ExtraFormat/$ExtraEncoding/$ExtraMedia]$ExtraRemasterDisplayString</a> " . ($ExtraHasCue == '1' ? ' (Cue)' : '').($ExtraHasLog == '1' ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log: $ExtraLogScore %)</a>" : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MB)';
+							$ExtraLinkName = "Various Artists - <a href=\"torrents.php?id=$ExtraGroupID\">$ExtraGroupName".($ExtraYear ? " ($ExtraYear)" : '')."</a> <a href=\"torrents.php?torrentid=$ExtraID\"> [$ExtraFormat/$ExtraEncoding/$ExtraMedia]$ExtraRemasterDisplayString</a> " . ($ExtraHasCue == '1' ? ' (Cue)' : '').($ExtraHasLog == '1' ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log: {$ExtraLogScore}%)</a>" : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MB)';
 						} else {
-							$ExtraLinkName = "<a href=\"artist.php?id=$ExtraArtistID\">$ExtraArtistName</a> - <a href=\"torrents.php?id=$ExtraGroupID\">$ExtraGroupName".($ExtraYear ? " ($ExtraYear)" : '')."</a> <a href=\"torrents.php?torrentid=$ExtraID\"> [$ExtraFormat/$ExtraEncoding/$ExtraMedia]$ExtraRemasterDisplayString</a> " . ($ExtraHasCue == '1' ? ' (Cue)' : '').($ExtraHasLog == '1' ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log: $ExtraLogScore %)</a>" : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MB)';
+							$ExtraLinkName = "<a href=\"artist.php?id=$ExtraArtistID\">$ExtraArtistName</a> - <a href=\"torrents.php?id=$ExtraGroupID\">$ExtraGroupName".($ExtraYear ? " ($ExtraYear)" : '')."</a> <a href=\"torrents.php?torrentid=$ExtraID\"> [$ExtraFormat/$ExtraEncoding/$ExtraMedia]$ExtraRemasterDisplayString</a> " . ($ExtraHasCue == '1' ? ' (Cue)' : '').($ExtraHasLog == '1' ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log: {$ExtraLogScore}%)</a>" : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MB)';
 						}
 ?>
 						<?=($First ? '' : '<br />')?>
@@ -541,13 +541,7 @@ if (count($Reports) === 0) {
 							<option value="<?=$Type?>"><?=$Data['title']?></option>
 <?				} ?>
 						</select>
-						<span id="options<?=$ReportID?>">
-<?				if (check_perms('users_mod')) { ?>
-							<span class="tooltip" title="Delete torrent?">
-								<label for="delete<?=$ReportID?>"><strong>Delete</strong></label>
-								<input type="checkbox" name="delete" id="delete<?=$ReportID?>" />
-							</span>
-<?				} ?>
+						| <span id="options<?=$ReportID?>">
 							<span class="tooltip" title="Warning length in weeks">
 								<label for="warning<?=$ReportID?>"><strong>Warning</strong></label>
 								<select name="warning" id="warning<?=$ReportID?>">
@@ -555,12 +549,15 @@ if (count($Reports) === 0) {
 									<option value="<?=$i?>"><?=$i?></option>
 <?				} ?>
 								</select>
-							</span>
+							</span> |
+<?				if (check_perms('users_mod')) { ?>
+							<span class="tooltip" title="Delete torrent?">
+								<input type="checkbox" name="delete" id="delete<?=$ReportID?>" />&nbsp;<label for="delete<?=$ReportID?>"><strong>Delete</strong></label>
+							</span> |
+<?				} ?>
 							<span class="tooltip" title="Remove upload privileges?">
-								<label for="upload<?=$ReportID?>"><strong>Remove upload privileges</strong></label>
-								<input type="checkbox" name="upload" id="upload<?=$ReportID?>" />
-							</span>
-							&nbsp;&nbsp;
+								<input type="checkbox" name="upload" id="upload<?=$ReportID?>" />&nbsp;<label for="upload<?=$ReportID?>"><strong>Remove upload privileges</strong></label>
+							</span> |
 							<span class="tooltip" title="Update resolve type">
 								<input type="button" name="update_resolve" id="update_resolve<?=$ReportID?>" value="Update now" onclick="UpdateResolve(<?=$ReportID?>);" />
 							</span>
@@ -572,11 +569,11 @@ if (count($Reports) === 0) {
 						PM
 						<select name="pm_type" id="pm_type<?=$ReportID?>">
 							<option value="Uploader">Uploader</option>
-							<option value="Reporter">Reporter</option>
+							<option value="Reporter" selected="selected">Reporter</option>
 						</select>:
 					</td>
 					<td colspan="3">
-						<textarea name="uploader_pm" id="uploader_pm<?=$ReportID?>" cols="50" rows="1"></textarea>
+						<textarea name="uploader_pm" id="uploader_pm<?=$ReportID?>" cols="50" rows="2"></textarea>
 						<input type="button" value="Send now" onclick="SendPM(<?=$ReportID?>);" />
 					</td>
 				</tr>
@@ -604,13 +601,15 @@ if (count($Reports) === 0) {
 				<tr>
 					<td colspan="4" style="text-align: center;">
 						<input type="button" value="Invalidate report" onclick="Dismiss(<?=$ReportID?>);" />
-						<input type="button" value="Resolve report manually" onclick="ManualResolve(<?=$ReportID?>);" />
+						| <input type="button" value="Resolve report manually" onclick="ManualResolve(<?=$ReportID?>);" />
 <?					if ($Status == 'InProgress' && $LoggedUser['ID'] == $ResolverID) { ?>
 						| <input type="button" value="Unclaim" onclick="GiveBack(<?=$ReportID?>);" />
 <?					} else { ?>
 						| <input id="grab<?=$ReportID?>" type="button" value="Claim" onclick="Grab(<?=$ReportID?>);" />
 <?					}	?>
-						| Multi-resolve <input type="checkbox" name="multi" id="multi<?=$ReportID?>" checked="checked" />
+						| <span class="tooltip" title="All checked reports will be resolved via the Multi-resolve button">
+							<input type="checkbox" name="multi" id="multi<?=$ReportID?>" />&nbsp;<label for="multi">Multi-resolve</label>
+						  </span>
 						| <input type="button" id="submit_<?=$ReportID?>" value="Submit" onclick="TakeResolve(<?=$ReportID?>);" />
 					</td>
 				</tr>
