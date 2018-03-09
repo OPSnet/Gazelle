@@ -596,4 +596,16 @@ class DB_MYSQL {
 		}
 		$this->Queries[count($this->Queries) - 1][2] = $Warnings;
 	}
+
+	function begin_transaction() {
+		mysqli_begin_transaction($this->LinkID);
+	}
+
+	function commit() {
+		mysqli_commit($this->LinkID);
+	}
+
+	function rollback() {
+		mysqli_rollback($this->LinkID);
+	}
 }

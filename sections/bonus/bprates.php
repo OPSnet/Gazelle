@@ -57,6 +57,7 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 <div class="linkbox">
 	<a href="wiki.php?action=article&id=130" class="brackets">About Bonus Points</a>
 	<a href="bonus.php" class="brackets">Bonus Point Shop</a>
+	<a href="bonus.php?action=history" class="brackets">History</a>
 </div>
 <div class="linkbox">
 	<?=$Pages?>

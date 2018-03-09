@@ -25,7 +25,6 @@ function ConfirmPurchase(event, item, next, element) {
 		return false;
 	}
 	check = confirm('Are you sure you want to purchase ' + item + '?');
-	console.log(check);
 	if (!check) {
 		event.preventDefault();
 		return false;

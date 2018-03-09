@@ -42,7 +42,6 @@ class Users {
 		return $UserStats;
 	}
 
-
 	/**
 	 * Get user info, is used for the current user and usernames all over the site.
 	 *
@@ -255,6 +254,31 @@ class Users {
 			G::$Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
 		}
 		return $HeavyInfo;
+	}
+
+	/**
+	 * Return the ID of a Username
+	 * @param string Username
+	 * @return userID if exists, null otherwise
+	 */
+	public static function ID_from_username($name) {
+		$digest = base64_encode(md5($name, true));
+		$key = "username_id_$digest";
+		$ID = G::$Cache->get_value($key);
+		if ($ID == -1) {
+			return null;
+		}
+		elseif ($ID === false) {
+			G::$DB->prepared_query("SELECT ID FROM users_main WHERE Username=?", $name);
+			if (!G::$DB->has_results()) {
+				// cache negative hits for a while
+				G::$Cache->cache_value($key, -1, 300);
+				return null;
+			}
+			list($ID) = G::$DB->next_record();
+			G::$Cache->cache_value($key, $ID, 300);
+		}
+		return $ID;
 	}
 
 	/**
@@ -760,5 +784,51 @@ class Users {
 		$TPL->set('SITE_URL', NONSSL_SITE_URL);
 
 		Misc::send_email($Email, 'Password reset information for ' . SITE_NAME, $TPL->get(), 'noreply');
+	}
+
+	/**
+	 * Removes the custom title of a user
+	 *
+	 * @param integer $ID The id of the user in users_main
+	 */
+	public static function removeCustomTitle($ID) {
+		G::$DB->prepared_query("UPDATE users_main SET Title='' WHERE ID = ? ", $ID);
+		G::$Cache->delete_value("user_info_{$ID}");
+		G::$Cache->delete_value("user_stats_{$ID}");
+	}
+
+	/**
+	 * Purchases the custom title for a user
+	 *
+	 * @param integer $ID The id of the user in users_main
+	 * @param string $Title The text of the title (may contain BBcode)
+	 * @return boolean false if insufficient funds, otherwise true
+	 */
+	public static function setCustomTitle($ID, $Title) {
+		G::$DB->prepared_query("UPDATE users_main SET Title = ? WHERE ID = ?",
+			$Title, $ID);
+		if (G::$DB->affected_rows() == 1) {
+			G::$Cache->delete_value("user_info_{$ID}");
+			G::$Cache->delete_value("user_stats_{$ID}");
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks whether a user is allowed to purchase an invite. User classes up to Elite are capped,
+	 * users above this class will always return true.
+	 *
+	 * @param integer $ID The id of the user in users_main
+	 * @param integer $MinClass Minimum class level necessary to purchase invites
+	 * @return boolean false if insufficient funds, otherwise true
+	 */
+	public static function canPurchaseInvite($ID, $MinClass) {
+		$heavy = self::user_heavy_info($ID);
+		if ($heavy['DisableInvites']) {
+			return false;
+		}
+		$info = self::user_info($ID);
+		return $info['EffectiveClass'] >= $MinClass;
 	}
 }
