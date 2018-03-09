@@ -508,8 +508,8 @@ switch ($_REQUEST['action']) {
 	case 'take_mass_pm':
 		include(SERVER_ROOT.'/sections/tools/managers/take_mass_pm.php');
 		break;
-	case 'weekalbum':
-		include(SERVER_ROOT.'/sections/tools/misc/album_of_week.php');
+	case 'monthalbum':
+		include(SERVER_ROOT.'/sections/tools/misc/album_of_month.php');
 		break;
 	default:
 		include(SERVER_ROOT.'/sections/tools/tools.php');
