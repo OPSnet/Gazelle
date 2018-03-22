@@ -35,6 +35,7 @@ list($GroupIDs, $CollageDataList, $TorrentList) = Users::get_bookmarks($UserID);
 foreach ($GroupIDs as $Idx => $GroupID) {
 	if (!isset($TorrentList[$GroupID])) {
 		unset($GroupIDs[$Idx]);
+		continue;
 	}
 	// Handle stats and stuff
 	$NumGroups++;
@@ -184,8 +185,7 @@ if ($CollageCovers !== 0) { ?>
 			</tr>
 <?php
 foreach ($GroupIDs as $Idx => $GroupID) {
-	$Group = $TorrentList[$GroupID];
-	extract(Torrents::array_group($Group));
+	extract(Torrents::array_group($TorrentList[$GroupID]));
 	/**
 	 * @var int	$GroupID
 	 * @var string $GroupName
