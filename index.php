@@ -16,7 +16,7 @@ if ($PathInfo['dirname'] !== '/') {
 }
 elseif (isset($Redirects[$Document])) {
 	$Seperator = (strpos($Redirects[$Document], "?") === false) ? "?" : "&";
-	$Rest = (!empty($_SERVER['query_string'])) ? $Seperator.$_SERVER['query_string'] : "";
+	$Rest = (!empty($_SERVER['QUERY_STRING'])) ? $Seperator.$_SERVER['QUERY_STRING'] : "";
 	header("Location: {$Redirects[$Document]}{$Rest}");
 }
 elseif (in_array($Document, ['announce', 'scrape'])) {
