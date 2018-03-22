@@ -48,6 +48,8 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 			}
 		}
 	}
+	// We need to append the tag list to the Tags::$all array
+	new Tags($TagList);
 }
 array_values($GroupIDs);
 
@@ -211,7 +213,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 		}
 	}
 
-	$TorrentTags = new Tags($TagList);
+	$TorrentTags = new Tags($TagList, false);
 
 	if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
 		unset($ExtendedArtists[2]);
