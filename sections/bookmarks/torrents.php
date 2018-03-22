@@ -52,7 +52,8 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 	// We need to append the tag list to the Tags::$all array
 	new Tags($TagList);
 }
-array_values($GroupIDs);
+
+$GroupIDs = array_values($GroupIDs);
 
 $CollageCovers = isset($LoggedUser['CollageCovers']) ? (int)$LoggedUser['CollageCovers'] : 25;
 
@@ -153,23 +154,23 @@ if ($CollageCovers !== 0) { ?>
 		</div>
 		<script type="text/javascript">
 <?php
-        $CollagePages = array();
-        for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
-            $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
-            $CollagePages[] = implode('',
-                array_map(
-                    function($GroupID) use ($TorrentList) {
-                        return Bookmarks::collage_cover_row($TorrentList[$GroupID]);
-                    },
-                    $Groups
-                )
-            );
-        }
+		$CollagePages = array();
+		for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
+			$Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
+			$CollagePages[] = implode('',
+				array_map(
+					function($GroupID) use ($TorrentList) {
+						return Bookmarks::collage_cover_row($TorrentList[$GroupID]);
+					},
+					$Groups
+				)
+			);
+		}
 ?>
 			collageShow.init(<?=json_encode($CollagePages)?>);
 		</script>
 <?php
-        unset($CollagePages);
+		unset($CollagePages);
 	}
 }
 ?>
@@ -185,7 +186,8 @@ if ($CollageCovers !== 0) { ?>
 			</tr>
 <?php
 foreach ($GroupIDs as $Idx => $GroupID) {
-	extract(Torrents::array_group($TorrentList[$GroupID]));
+	$Group = $TorrentList[$GroupID];
+	extract(Torrents::array_group($Group));
 	/**
 	 * @var int	$GroupID
 	 * @var string $GroupName
