@@ -374,7 +374,7 @@ foreach ($Properties as $Key => $Value) {
 
 $Tor = new BencodeTorrent($TorrentName, true);
 $PublicTorrent = $Tor->make_private(); // The torrent is now private.
-$UnsourcedTorrent = $Tor->set_source(); // The source is not APL
+$UnsourcedTorrent = $Tor->set_source(); // The source is now APL
 $TorEnc = db_string($Tor->encode());
 $InfoHash = pack('H*', $Tor->info_hash());
 
@@ -1018,7 +1018,21 @@ if ($PublicTorrent || $UnsourcedTorrent) {
 	View::show_header('Warning');
 ?>
 	<h1>Warning</h1>
-	<p><strong>Your torrent has been uploaded; however, you must download your torrent from <a href="torrents.php?id=<?=$GroupID?>">here</a> because you didn't make your torrent using the "private" option or the "source" flag was not set to APL.</strong></p>
+	<p><strong>Your torrent has been uploaded; however, you must download your torrent from <a href="torrents.php?id=<?=$GroupID?>">here</a> because:</strong></p>
+	<ul>
+<?
+	if ($PublicTorrent) {
+?>
+		<li><strong>You didn't make your torrent using the "private" option</strong></li>
+<?
+	}
+	if ($UnsourcedTorrent) {
+?>
+		<li><strong>The "source" flag was not set to APL</strong></li>
+<?
+	}
+?>
+	</ul>
 <?
 	View::show_footer();
 } elseif ($RequestID) {
