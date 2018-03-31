@@ -14,32 +14,23 @@ if (strtotime($BannedUntil) < time()) {
 			SET BannedUntil = '0000-00-00 00:00:00', Attempts = '0'
 			WHERE ID = '" . db_string($AttemptID) . "'");
 			$Attempts = 0;
-		}
-		if (isset($Err)) {
-			?>
-			<span class="warning"><?= $Err ?><br/><br/></span>
-		<? } ?>
-		<? if ($Attempts > 0) { ?>
-			You have <span class="info"><?= (6 - $Attempts) ?></span> attempts remaining.<br/><br/>
-			<strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br/><br/>
-		<? } ?>
-		<table class="layout">
-			<tr>
-				<td>2FA Key&nbsp;</td>
-				<td colspan="2">
-					<input type="text" name="2fa" id="2fa" class="inputtext" required="required"
-						   maxlength="6" pattern="[0-9]{6}" autofocus="autofocus" placeholder="Two-factor Auth Key"/>
-				</td>
-			</tr>
-
-			<tr>
-				<td></td>
-				<td><input type="submit" name="login" value="Log in" class="submit"/></td>
-			</tr>
-		</table>
+		} ?>
+        <div id="login_wrapper">
+            <div id="login_box">
+                <div id="login_box_desc">
+                    <? if (isset($Err)) { printf("%s ", $Err); } ?>
+                    <? if ($Attempts > 0) { ?>You have <strong><?=(6 - $Attempts)?></strong> attempts remaining.<? } ?>
+                </div>
+                <div id="login_box_user"><input class="login_field" size="30" id="2fa" name="2fa" type="text" placeholder="Two-factor Auth Key" about="required="required"
+                    maxlength="6" pattern="[0-9]{6}" autofocus="autofocus""/></div>
+                <a id="login_box_rcvr" href="login.php?act=2fa_recovery" class="tooltip" title="Use 2FA Recovery Code">Use a recovery key?</a>
+                <div id="login_box_sbmt"><input name="submit" value="come on in" type="submit"/></div>
+            </div>
+        <br>
+        <p>Need help? join our irc channel: <u><a href="irc://irc.apollo.rip/#help">#support @ irc.sceneaccess.eu</a></u></p>
+        <p class="small">Note: you will need an IRC client, such as <u><a href="https://www.mirc.com/get.html">mIRC</a></u>, to join our irc server.</p>
+        </div>
 	</form>
-	<br /><br />
-	<a href="login.php?act=2fa_recovery" class="tooltip" title="Use 2FA Recovery Code">Use a recovery key?</a>
 	<?
 } else {
 	?>

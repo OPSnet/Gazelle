@@ -1,0 +1,100 @@
+/* BEGIN copied from original sceneaccess stylesheet
+ * although this is mostly copied, there is some stuff that was removed and modified a bit
+ */
+body {
+	background: #232424 url('images/sceneaccess/bg.gif') repeat fixed;
+	font-family: verdana,arial,tahoma,helvetica,sans-serif;
+	font-size: 8pt;
+	color: #ffffff;
+	padding: 0;
+	margin: 0;
+	text-align: center;
+	min-width: 920px;
+}
+#wrapper {
+	text-align: left;
+	margin: 0 auto;
+	padding: 0;
+	width: 943px;
+}
+#top {
+	width: 100%;
+}
+#login_wrapper {
+	width: 471px;
+	margin: 0 auto;
+	border: 0 solid black;
+	padding: 15% 0;
+}
+#login_box {
+	text-align: left;
+	background: url('images/sceneaccess/login_box_bg.png') no-repeat;
+	width: 311px;
+	height: 136px;
+	padding: 35px 0 0 160px;
+	border: 0 solid black;
+}
+#login-text-head {
+	font-weight: bold;
+	font-size: 10pt;
+	display: block;
+}
+.login_field {
+	width: 244px;
+	margin: 3px 0;
+}
+#login_box_desc,
+.login_field {
+	width: 250px;
+}
+#login_box_rcvr {
+	width: 150px;
+	float: left;
+	display: inline;
+	padding: 5px 0;
+	line-height: 1.9rem;
+}
+#login_box_sbmt {
+	width: 101px;
+	float: left;
+	display: inline;
+	text-align: right;
+	padding: 0;
+}
+#login-url {
+	text-decoration: underline;
+}
+#login_submit {
+	border: 1px solid #262626;
+	width: 100px;
+	background-color: #fff;
+	margin: 0;
+}
+/* END copied code */
+
+/* BEGIN CUSTOM STYLES, not from original sceneaccess.eu stylesheet */
+a {
+	color: white;
+}
+#logo,
+#no-cookies,
+#foot {
+	display: none;
+}
+
+#loginform {
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+}
+#login_box_desc {
+	min-height: 1em;
+}
+label[for=keeplogged] {
+	position: relative;
+	top: -5px;
+}
+/* END CUSTOM STYLES */
