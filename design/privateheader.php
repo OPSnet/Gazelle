@@ -12,7 +12,7 @@ $UseTooltipster = !isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Toolt
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="msapplication-config" content="none" />
 	<meta name="referrer" content="none, no-referrer, same-origin" />
-	<link rel="shortcut icon" href="favicon.ico" />
+	<link rel="shortcut icon" href="favicon-sceneaccess.ico" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Torrents" href="opensearch.php?type=torrents" />
 	<link rel="search" type="application/opensearchdescription+xml" title="<?=SITE_NAME?> Artists" href="opensearch.php?type=artists" />
@@ -91,31 +91,10 @@ if ($UseTooltipster) { ?>
 	<link rel="stylesheet" href="<?=STATIC_SERVER?>styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/tooltipster/style.css')?>" type="text/css" media="screen" />
 <?
 }
-if ($Mobile) { ?>
-	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0, user-scalable=no;" />
-	<link rel="stylesheet" type="text/css" href="<?=STATIC_SERVER ?>styles/mobile/style.css" />
-<?
-} else {
-	if (empty(G::$LoggedUser['StyleURL'])) {
 ?>
-	<link rel="stylesheet" type="text/css" title="<?=G::$LoggedUser['StyleName']?>" media="screen"
-			href="<?=STATIC_SERVER?>styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/'.G::$LoggedUser['StyleName'].'/style.css')?>" />
+    <link rel="stylesheet" type="text/css" media="screen" href="<?=STATIC_SERVER?>styles/scc/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/scc/style.css')?>" />
+
 <?
-	} else {
-		$StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);
-		if (substr(G::$LoggedUser['StyleURL'], -4) == '.css'
-				&& $StyleURLInfo['query'].$StyleURLInfo['fragment'] == ''
-				&& in_array($StyleURLInfo['host'], array(NONSSL_SITE_URL, SSL_SITE_URL))
-				&& file_exists(SERVER_ROOT.$StyleURLInfo['path'])) {
-			$StyleURL = G::$LoggedUser['StyleURL'].'?v='.filemtime(SERVER_ROOT.$StyleURLInfo['path']);
-		} else {
-			$StyleURL = G::$LoggedUser['StyleURL'];
-		}
-?>
-	<link rel="stylesheet" type="text/css" media="screen" href="<?=$StyleURL?>" title="External CSS" />
-<?
-	}
-}
 if (!empty(G::$LoggedUser['UseOpenDyslexic'])) {
 		// load the OpenDyslexic font
 ?>
@@ -229,6 +208,9 @@ if (check_perms('site_send_unlimited_invites')) {
 					<li id="nav_donate" class="brackets<?=Format::add_class($PageID, array('donate'), 'active', false)?>">
 						<a href="donate.php" class='tooltip' title="Donate">Donate</a>
 					</li>
+                    <li id="nav_staff2" class="brackets<?=Format::add_class($PageID, array('staff'), 'active', false)?>">
+                        <a href="staff.php" class='tooltip' title="Staff">Staff</a>
+                    </li>
 
 				</ul>
 				<ul id="userinfo_stats">

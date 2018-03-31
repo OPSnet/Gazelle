@@ -14,43 +14,27 @@ if (strtotime($BannedUntil) < time()) {
 			WHERE ID = '".db_string($AttemptID)."'");
 		$Attempts = 0;
 	}
-	if (isset($Err)) {
 ?>
-	<span class="warning"><?=$Err?><br /><br /></span>
-<?	} ?>
-<?	if ($Attempts > 0) { ?>
-	You have <span class="info"><?=(6 - $Attempts)?></span> attempts remaining.<br /><br />
-	<strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br /><br />
-<?	} ?>
-<?	if (isset($_GET['invalid2fa'])) { ?>
-	<span class="warning">You have entered an invalid two-factor authentication key. Please login again.</span>
-<?	} ?>
-	<table class="layout">
-		<tr>
-			<td>Username&nbsp;</td>
-			<td colspan="2">
-				<input type="text" name="username" id="username" class="inputtext" required="required" maxlength="20" pattern="[A-Za-z0-9_?\.]{1,20}" autofocus="autofocus" placeholder="Username" />
-			</td>
-		</tr>
-		<tr>
-			<td>Password&nbsp;</td>
-			<td colspan="2">
-				<input type="password" name="password" id="password" class="inputtext" required="required" maxlength="100" pattern=".{6,100}" placeholder="Password" />
-			</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td>
-				<input type="checkbox" id="keeplogged" name="keeplogged" value="1"<?=(isset($_REQUEST['keeplogged']) && $_REQUEST['keeplogged']) ? ' checked="checked"' : ''?> />
+	<div id="login_wrapper">
+		<div id="login_box">
+			<div id="login_box_desc">
+				<? if (isset($Err)) { printf("%s ", $Err); } ?>
+				<? if (isset($_GET['invalid2fa'])) { echo '2FA Failed.'; } ?>
+				<? if ($Attempts > 0) { ?>You have <strong><?=(6 - $Attempts)?></strong> attempts remaining.<? } ?>
+			</div>
+			<div id="login_box_user"><input class="login_field" placeholder="username" size="30" name="username" type="text" placeholder="username"/></div>
+			<div id="login_box_pass"><input class="login_field" placeholder="password" size="30" name="password" type="password" placeholder="password"/></div>
+			<div id="login_box_rcvr">
 				<label for="keeplogged">Remember me</label>
-			</td>
-			<td><input type="submit" name="login" value="Log in" class="submit" /></td>
-		</tr>
-	</table>
-	</form>
-<?
-} else {
-?>
+				<input type="checkbox" id="keeplogged" name="keeplogged" value="1"<?=(isset($_REQUEST['keeplogged']) && $_REQUEST['keeplogged']) ? ' checked="checked"' : ''?> />
+			</div>
+			<div id="login_box_sbmt"><input name="submit" value="come on in" type="submit"/></div>
+        </div>
+        <br>
+        <p>Need help? join our irc channel: <u><a href="irc://irc.apollo.rip/#help">#support @ irc.sceneaccess.eu</a></u></p>
+        <p class="small">Note: you will need an IRC client, such as <u><a href="https://www.mirc.com/get.html">mIRC</a></u>, to join our irc server.</p>
+    </div>
+<? } else { ?>
 	<span class="warning">You are banned from logging in for another <?=time_diff($BannedUntil)?>.</span>
 <?
 }
