@@ -16,14 +16,10 @@ class View {
 	public static function show_header($PageTitle = '', $JSIncludes = '', $CSSIncludes = '') {
 		global $Document, $Mobile, $Classes;
 
-		$PageTitle = 'SceneAccess | ' . $PageTitle;
-		/*
 		if ($PageTitle != '') {
 			$PageTitle .= ' :: ';
 		}
 		$PageTitle .= SITE_NAME;
-		*/
-
 		$PageID = array(
 			$Document, // Document
 			empty($_REQUEST['action']) ? false : $_REQUEST['action'], // Action
