@@ -18,17 +18,14 @@ if (is_number($FeaturedAlbum['GroupID'])) {
 	$Artists = Artists::get_artist($FeaturedAlbum['GroupID']);
 ?>
 		<div class="box">
-			<div class="head colhead_dark"><strong>Album of the Month</strong></div>
-			<div class="center pad">
-				<?=Artists::display_artists($Artists, true, true)?><a href="torrents.php?id=<?=$FeaturedAlbum['GroupID']?>"><?=$FeaturedAlbum['Name']?></a>
+			<div class="head colhead_dark">
+				<strong>Album of the Month</strong>
+				<a href="forums.php?action=viewthread&amp;threadid=<?=$FeaturedAlbum['ThreadID']?>">[Discuss]</a>
 			</div>
 			<div class="center pad">
 				<a href="torrents.php?id=<?=$FeaturedAlbum['GroupID']?>" class="tooltip" title="<?=Artists::display_artists($Artists, false, false)?> - <?=$FeaturedAlbum['Name']?>">
 					<img src="<?=ImageTools::process($FeaturedAlbum['WikiImage'], true)?>" alt="<?=Artists::display_artists($Artists, false, false)?> - <?=$FeaturedAlbum['Name']?>" width="100%" />
 				</a>
-			</div>
-			<div class="center pad">
-				<a href="forums.php?action=viewthread&amp;threadid=<?=$FeaturedAlbum['ThreadID']?>"><em>Discuss here</em></a>
 			</div>
 		</div>
 <?
