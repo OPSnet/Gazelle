@@ -1,5 +1,5 @@
 <?
-View::show_header('View', 'apply');
+View::show_header('View Applications', 'apply');
 $IS_STAFF = check_perms('admin_manage_applicants'); /* important for viewing the full story and full applicant list */
 if (isset($_POST['id']) && is_number($_POST['id'])) {
 	authorize();
