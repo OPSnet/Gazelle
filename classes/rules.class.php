@@ -33,7 +33,7 @@ class Rules {
 			  'long' => "Only invite people you know and trust. Do not offer invites via other trackers, forums, social media, or other public locations. Responding to public invite requests is prohibited. Exception: Staff-designated recruiters may offer invites in approved locations." ],
 			[ 'n' => "2.3",
 			  'short' => "Do not request invites or accounts.",
-			  'long' => "Requesting invites to&mdash;or accounts on&mdash;${site_name} or other trackers is prohibited. Invites may be <i>offered</i>, but not requested, in the Invites forum (restricted to the <a href=\"wiki.php?action=article&name=classes\">Power User class</a> and above). You may request invites by messaging users only when they have offered them in the Invites Forum. Unsolicited invite requests, even by private message, are prohibited." ],
+			  'long' => "Requesting invites to&mdash;or accounts on&mdash;${site_name} or other trackers is prohibited. Invites may be <i>offered</i>, but not requested, in the Invites forum (restricted to the <a href=\"wiki.php?action=article&name=classes\">Elite class</a> and above). You may request invites by messaging users only when they have offered them in the Invites Forum. Unsolicited invite requests, even by private message, are prohibited." ],
 			[ 'n' => "3.1",
 			  'short' => "Do not engage in ratio manipulation.",
 			  'long' => "Transferring buffer&mdash;or increasing your buffer&mdash;through unintended uses of the BitTorrent protocol or site features (e.g., <a href=\"rules.php?p=requests\">request abuse</a>) constitutes ratio manipulation. When in doubt, send a ${staffpm} asking for more information." ],
