@@ -116,7 +116,7 @@ if (isset($Results)) {
 		}
 ?>
 			<tr>
-				<td align="right"><a href="/reportsv2.php?view=staff&id=<?= $r['ID'] ?>"><?= $r['ID'] ?></a></td>
+				<td align="right"><a href="/reportsv2.php?view=report&id=<?= $r['ID'] ?>"><?= $r['ID'] ?></a></td>
 				<td><?= $r['UserID'] ? $user_cache[$r['UserID']] : '<i>unknown</i>' ?></td>
 				<td><?= $user_cache[$r['ReporterID']] ?></td>
 				<td><?= $user_cache[$r['ResolverID']] ?></td>
