@@ -33,8 +33,14 @@ if ($Summary['nr'] > 0) {
 </div>
 
 <div class="thin">
+<? if ($Summary['total']) { ?>
 	<h3><?=$WhoSpent ?> <?=number_format($Summary['total']) ?> bonus points to purchase <?=$Summary['nr'] ?> <?=$Summary['nr'] == 1 ? 'item' : 'items' ?>.</h3>
-<? if ($History) { ?>
+<? } else { ?>
+	<h3>No purchase history</h3>
+<?
+}
+if ($History) {
+?>
 	<div class="linkbox">
 		<?= $Pages ?>
 	</div>
