@@ -4,7 +4,7 @@ View::show_header('Two-factor Authentication');
 
 <div class="box pad">
 	<p>Please note that if you lose your 2FA key and all of your backup keys, the <?= SITE_NAME ?> staff cannot help you retrieve your account. Ensure you keep your backup keys in a safe place.</p>
-	
+
 	<p>We've generated a secure secret that only you and me should know. Please import it into your phone, either by
 		scanning the QR key, or copying in the small text below that. We recommend using the Authy app which you can get
 		from the <a href="https://itunes.apple.com/gb/app/authy/id494168017?mt=8">App Store</a> or <a
@@ -28,7 +28,8 @@ View::show_header('Two-factor Authentication');
 						->get('png')
 				);
 			?>">
-			
+            <div style="display: none">Secret Text: <span><?=$_SESSION['private_key']?></span></div>
+
 			<? if(isset($_GET['invalid'])): ?>
 				<p class="warning">Please ensure you've imported the correct key into your authentication app and try again.</p>
 			<? endif; ?>
