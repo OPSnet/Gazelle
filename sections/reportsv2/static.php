@@ -324,7 +324,7 @@ if (count($Reports) === 0) {
 <?			} else { ?>
 						<?=$LinkName?>
 						<a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-						uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> <?=time_diff($Time)?>
+						uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
 						<br />
 <?				if ($ReporterName == '') {
 					$ReporterName = 'System';
@@ -476,7 +476,12 @@ if (count($Reports) === 0) {
 						<?=($First ? '' : '<br />')?>
 						<?=$ExtraLinkName?>
 						<a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-						uploaded by <a href="user.php?id=<?=$ExtraUploaderID?>"><?=$ExtraUploaderName?></a> <?=time_diff($ExtraTime)?> <a href="#" onclick="Switch(<?=$ReportID?>, <?=$TorrentID?>, <?=$ExtraID?>); return false;" class="brackets">Switch</a>
+						uploaded by <a href="user.php?id=<?=$ExtraUploaderID?>"><?=$ExtraUploaderName?></a> on <span title="<?= time_diff($ExtraTime, 3, false) ?>"><?= $ExtraTime ?></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Switch:</td>
+                    <td colspan="3"><a href="#" onclick="Switch(<?=$ReportID?>, <?=$TorrentID?>, <?=$ExtraID?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
 <?
 						$First = false;
 					}
@@ -506,7 +511,7 @@ if (count($Reports) === 0) {
 					<td class="label">User comment:</td>
 					<td colspan="3" class="wrap_overflow"><?=Text::full_format($UserComment)?></td>
 				</tr>
-<?						// END REPORTED STUFF :|: BEGIN MOD STUFF
+<?			// END REPORTED STUFF :|: BEGIN MOD STUFF
 			if ($Status == 'InProgress') { ?>
 				<tr>
 					<td class="label">In progress by:</td>
