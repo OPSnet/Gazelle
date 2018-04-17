@@ -3,7 +3,7 @@ View::show_header('Client Rules');
 
 if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
 	$DB->query('
-		SELECT vstring
+		SELECT vstring, peer_id
 		FROM xbt_client_whitelist
 		WHERE vstring NOT LIKE \'//%\'
 		ORDER BY vstring ASC');
@@ -20,18 +20,20 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
 		<p>Client rules are how we maintain the integrity of our swarms. This allows us to filter out disruptive and dishonest clients that may hurt the performance of either the tracker or individual peers.</p>
 		<table cellpadding="5" cellspacing="1" border="0" class="border" width="100%">
 			<tr class="colhead">
-				<td style="width: 150px;"><strong>Allowed Client</strong></td>
+				<td><strong>Allowed Client</strong></td>
+				<td style="width: 75px"><strong>Peer ID</strong></td>
 				<!-- td style="width: 400px;"><strong>Additional Notes</strong></td> -->
 			</tr>
 <?
 	$Row = 'a';
 	foreach ($WhitelistedClients as $Client) {
 		//list($ClientName, $Notes) = $Client;
-		list($ClientName) = $Client;
+		list($ClientName, $PeerID) = $Client;
 		$Row = $Row === 'a' ? 'b' : 'a';
 ?>
 			<tr class="row<?=$Row?>">
 				<td><?=$ClientName?></td>
+				<td><?=$PeerID?></td>
 			</tr>
 <?	} ?>
 		</table>
