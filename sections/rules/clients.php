@@ -14,7 +14,7 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
 <div class="thin">
 <? include('jump.php'); ?>
 	<div class="header">
-		<h2 class="center">Client Whitelist</h2>
+		<h2 class="general">Client Whitelist</h2>
 	</div>
 	<div class="box pad">
 		<p>Client rules are how we maintain the integrity of our swarms. This allows us to filter out disruptive and dishonest clients that may hurt the performance of either the tracker or individual peers.</p>

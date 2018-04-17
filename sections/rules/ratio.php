@@ -5,7 +5,7 @@ View::show_header('Ratio Requirements');
 <div class="thin">
 <? include('jump.php'); ?>
 	<div class="header">
-		<h2 class="center">Ratio Rules</h2>
+		<h2 class="general">Ratio Rules</h2>
 	</div>
 	<div class="box pad rule_summary">
 		<br />
