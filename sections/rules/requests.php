@@ -5,7 +5,7 @@ View::show_header('Request Rules');
 <div class="thin">
 <? include('jump.php'); ?>
 	<div class="header">
-		<h2 class="center">Requests</h2>
+		<h2 class="general">Requests</h2>
 	</div>
 	<div class="box pad rule_summary" style="padding: 10px 10px 10px 20px;">
 		<ul>
