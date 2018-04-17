@@ -6,10 +6,11 @@ php:
   - '7.0'
   - '7.1'
   - '7.2'
+  - nightly
 
-cache:
-  directories:
-    - $HOME/.composer/cache
+#cache:
+#  directories:
+#    - $HOME/.composer/cache
 
 
 install:
