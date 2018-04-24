@@ -511,6 +511,9 @@ switch ($_REQUEST['action']) {
 	case 'monthalbum':
 		include(SERVER_ROOT.'/sections/tools/misc/album_of_month.php');
 		break;
+	case 'vanityhouse':
+		include(SERVER_ROOT.'/sections/tools/misc/vanity_house.php');
+		break;
 	default:
 		include(SERVER_ROOT.'/sections/tools/tools.php');
 }

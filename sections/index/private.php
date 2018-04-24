@@ -36,8 +36,8 @@ View::show_header('News', 'bbcode,news_ajax');
 <div class="thin">
 	<div class="sidebar">
 <?
-include('feat_merch.php');
-include('feat_album.php');
+include('month_album.php');
+include('vanity_album.php');
 
 if (check_perms('users_mod')) {
 ?>
