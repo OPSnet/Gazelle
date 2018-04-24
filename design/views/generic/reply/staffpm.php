@@ -2,7 +2,7 @@
 			<form class="send_form" name="staff_message" action="staffpm.php" method="post">
 				<input type="hidden" name="action" value="takepost" />
 				<h3><label for="subject">Subject</label></h3>
-				<input size="95" type="text" name="subject" id="subject" />
+				<input size="95" type="text" name="subject" id="subject" required/>
 				<br />
 
 				<h3><label for="message">Message</label></h3>
