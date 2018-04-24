@@ -7,8 +7,8 @@ if (!check_perms('users_mod')) {
 if (isset($_POST['GroupID'])) {
 	authorize();
 
-	//Album of the month forum ID
-	$ForumID = 43;
+	//Vanity House forum ID
+	$ForumID = 18;
 
 	$GroupID = trim($_POST['GroupID']);
 
@@ -36,9 +36,9 @@ if (isset($_POST['GroupID'])) {
 
 		//Make sure album exists
 		if (is_number($Album['ID'])) {
-			//Remove old albums with type = 0 (so we remove the previous AotM)
-			$DB->prepared_query('DELETE FROM featured_albums WHERE Type = 0');
-			$Cache->delete_value('album_of_the_month');
+			//Remove old albums with type = 1, (so we remove previous VH alubm)
+			$DB->prepared_query('DELETE FROM featured_albums WHERE Type = 1');
+			$Cache->delete_value('vanity_house_album');
 
 			//Freeleech torrents
 			if (isset($_POST['FLTorrents'])) {
@@ -96,12 +96,13 @@ if (isset($_POST['GroupID'])) {
 			//Create forum post
 			$ThreadID = Misc::create_thread($ForumID, $LoggedUser[ID], $Title, $Body);
 
-			//Add album of the month
+            //Add VH album
+            $type = 1;
 			$DB->prepared_query('
 				INSERT INTO featured_albums
 					(GroupID,ThreadID,Started,Type)
 				VALUES
-					(?, ?, ?, ?)', db_string($GroupID), $ThreadID, sqltime(), 0);
+					(?, ?, ?, ?)', db_string($GroupID), $ThreadID, sqltime(), 1);
 
 
 			//Redirect to home page
@@ -116,24 +117,24 @@ if (isset($_POST['GroupID'])) {
 } else {
 
 	//Show our beautiful header
-	View::show_header('Album of the Month');
+	View::show_header('Vanity House');
 
 ?>
 	<div class="header">
-		<h2>Album of the Month</h2>
+		<h2>Vanity House</h2>
 	</div>
 
 	<div class="thin box pad">
 	<form class="create_form" name="album" method="post" action="">
 		<div class="pad">
-			<input type="hidden" name="action" value="monthalbum" />
+			<input type="hidden" name="action" value="vanityhouse" />
 			<input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
 			<h3>Album ID</h3>
 			<input type="text" name="GroupID" id="groupid" class="inputtext" />	<br />
 			<h3>Body</h3>
 			(Leave blank to auto generate)
 			<textarea name="Body" cols="95" rows="15"></textarea><br /><br />
-			<input type="checkbox" name="FLTorrents" checked />&nbsp;Mark torrents as&nbsp;
+			<input type="checkbox" name="FLTorrents" />&nbsp;Mark torrents as&nbsp;
             <select name="freeleechtype">
                 <option value="1" selected>FL</option>
                 <option value="2" >NL</option>
@@ -145,7 +146,7 @@ if (isset($_POST['GroupID'])) {
                             <option value="<?=$Key?>" <?=$FLType == 'Staff Pick' ? 'selected' : ''?>><?=$FLType?></option>
 <?      } ?>
             </select><br /><br />
-            <input type="checkbox" name="NLOver" checked />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
+            <input type="checkbox" name="NLOver" />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
             <select name="scale">
                 <option value="k">KB</option>
                 <option value="m">MB</option>
