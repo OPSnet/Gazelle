@@ -93,6 +93,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 				'IP' => '127.0.0.1'
 			]
 		])->saveData();
+
+		$this->table('users_notifications_settings')->insert([['UserID' => 1], ['UserID' => 2]]);
 	}
 
 	private function getRandomDiscogsAlbum() {
@@ -109,7 +111,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 	}
 
 	private function createTorrents() {
-		$bencode = new \Gazelle\Service\BencodeTorrent();
+		$bencode = new ApolloRIP\BencodeTorrent\BencodeTorrent();
 
 		$insert_data = [
 			'artists_group' => [],
@@ -252,7 +254,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 				'HasLogDB' => 0,
 				'LogScore' => 100,
 				'LogChecksum' => 1,
-				'info_hash' => pack('H*', $bencode->getEncodedInfoHash()),
+				'info_hash' => $bencode->getHexInfoHash(),
 				'FileCount' => count($album->tracklist),
 				'FileList' => $file_list,
 				'FilePath' => "{$album->artists[0]->name} - {$album->title} ({$album->year})",
