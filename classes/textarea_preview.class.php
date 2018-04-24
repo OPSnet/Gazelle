@@ -140,6 +140,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER {
 	 * @param bool   $Buttons	add the edit/preview buttons near the textarea
 	 * @param bool   $Buffer	doesn't output the textarea, use getBuffer()
 	 * @param array  $ExtraAttributes	array of attribute="value"
+	 * @param bool   $Required  is this a required textarea
 	 *
 	 * If false for $Preview, $Buttons, or $Buffer, use the appropriate
 	 * methods to add the those elements manually. Alternatively, use getID
@@ -149,7 +150,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER {
 	 */
 	public function __construct($Name, $ID = '', $Value = '', $Cols = 50, $Rows = 10,
 		$Preview = true, $Buttons = true, $Buffer = false,
-		array $ExtraAttributes = array()
+		array $ExtraAttributes = array(), $Required = false
 	) {
 		$this->id = parent::$Textareas;
 		parent::$Textareas += 1;
@@ -176,7 +177,8 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER {
 			'Value' => &$Value,
 			'Cols' => &$Cols,
 			'Rows' => &$Rows,
-			'Attributes' => &$Attributes
+			'Attributes' => &$Attributes,
+			'Required' => ($Required === true) ? 'required' : ''
 		), $Buffer);
 
 		if ($Buttons === true) {

@@ -160,7 +160,7 @@ if (!$IsStaff && !$IsFLS) {
 					<input type="hidden" name="convid" value="<?=$ConvID?>" id="convid" />
 <?
 					if ($Status != 'Resolved') {
-						$TextPrev = new TEXTAREA_PREVIEW('message', 'quickpost', '', 90, 10, true, false);
+						$TextPrev = new TEXTAREA_PREVIEW('message', 'quickpost', '', 90, 10, true, false, false, array(), true);
 					}
 ?>
 					<br />
