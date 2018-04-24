@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "a9872abf1c0f4567b50053a1e607b8e3",
     "packages": [
         {
             "name": "apollorip/bencode-torrent",
-            "version": "v0.9.1",
+            "version": "v0.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ApolloRIP/bencode-torrent.git",
-                "reference": "74929fdac83b8ef318b7c79f3457fc7abae408f8"
+                "reference": "5b94cf10566a37d8fa2cdd9dbfd6ed6d7f659c4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ApolloRIP/bencode-torrent/zipball/74929fdac83b8ef318b7c79f3457fc7abae408f8",
-                "reference": "74929fdac83b8ef318b7c79f3457fc7abae408f8",
+                "url": "https://api.github.com/repos/ApolloRIP/bencode-torrent/zipball/5b94cf10566a37d8fa2cdd9dbfd6ed6d7f659c4a",
+                "reference": "5b94cf10566a37d8fa2cdd9dbfd6ed6d7f659c4a",
                 "shasum": ""
             },
             "require-dev": {
@@ -43,7 +43,7 @@
                 }
             ],
             "description": "PHP Library for decoding and encoding BitTorrent BEncoded data, built for Gazelle",
-            "time": "2018-04-11T12:41:00+00:00"
+            "time": "2018-04-12T20:59:30+00:00"
         },
         {
             "name": "psr/cache",
