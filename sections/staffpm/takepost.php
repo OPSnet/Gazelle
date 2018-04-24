@@ -1,6 +1,6 @@
 <?
 if ($Message = db_string($_POST['message'])) {
-	if ($Subject = db_string($_POST['subject'])) {
+    if ($Subject = db_string($_POST['subject'])) {
 		// New staff PM conversation
 		assert_numbers($_POST, array('level'), 'Invalid recipient');
 		$DB->query("
@@ -72,14 +72,13 @@ if ($Message = db_string($_POST['message'])) {
 		}
 	} else {
 		// Message but no subject or conversation ID
-		header("Location: staffpm.php?action=viewconv&id=$ConvID");
-
+			header("Location: staffpm.php?action=viewconv&id=$ConvID");
 	}
 } elseif ($ConvID = (int)$_POST['convid']) {
 	// No message, but conversation ID
 	header("Location: staffpm.php?action=viewconv&id=$ConvID");
 } else {
 	// No message or conversation ID
-	header('Location: staffpm.php');
+	error('You have not entered a message for your StaffPM. Please go back and do so.');
 }
 ?>
