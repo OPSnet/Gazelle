@@ -55,7 +55,7 @@ if (!$DB->has_results()) {
 	// List messages
 	$Row = 'a';
 	$ShowBox = 1;
-	while (list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $Resolved) = $DB->next_record()) {
+	while (list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread) = $DB->next_record()) {
 		if ($Unread === '1') {
 			$RowClass = 'unreadpm';
 		} else {
