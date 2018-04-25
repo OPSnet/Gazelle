@@ -88,11 +88,26 @@ G::$Cache = $Cache;
 G::$DB = $DB;
 
 //Begin browser identification
-$Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
-$Browser = $Result->browser->getName();
-$BrowserVersion = explode('.',$Result->browser->getVersion())[0];
-$OperatingSystem = $Result->os->getName();
-$OperatingSystemVersion = $Result->os->getVersion();
+if (session_status() === PHP_SESSION_NONE) {
+	session_start();
+}
+
+if (!isset($_SESSION['WhichBrowser'])) {
+	$Debug->set_flag('start parsing user agent');
+	$Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
+	$_SESSION['WhichBrowser'] = [
+		'Browser' => $Result->browser->getName(),
+		'BrowserVersion' => explode('.',$Result->browser->getVersion())[0],
+		'OperatingSystem' => $Result->os->getName(),
+		'OperatingSystemVersion' => $Result->os->getVersion()
+	];
+	$Debug->set_flag('end parsing user agent');
+}
+
+$Browser = $_SESSION['WhichBrowser']['Browser'];
+$BrowserVersion = $_SESSION['WhichBrowser']['BrowserVersion'];
+$OperatingSystem = $_SESSION['WhichBrowser']['OperatingSystem'];
+$OperatingSystemVersion = $_SESSION['WhichBrowser']['OperatingSystemVersion'];
 
 $Debug->set_flag('start user handling');
 
