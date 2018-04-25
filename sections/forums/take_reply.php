@@ -265,6 +265,11 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
 	$ThreadInfo['Posts']++;
 }
 
+if ($ThreadInfo['IsHeadline']) {
+	$FM = new \Gazelle\Manager\Forum($DB, $Cache);
+	$FM->flushHeadlines();
+}
+
 Subscriptions::flush_subscriptions('forums', $TopicID);
 Subscriptions::quote_notify($Body, $PostID, 'forums', $TopicID);
 

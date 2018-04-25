@@ -200,6 +200,10 @@ $Cache->begin_transaction("thread_$TopicID".'_info');
 $Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $sqltime));
 $Cache->commit_transaction(0);
 
+$FM = new \Gazelle\Manager\Forum($DB, $Cache);
+if ($FM->isHeadline($ForumID)) {
+	$FM->flushHeadlines();
+}
 
 header("Location: forums.php?action=viewthread&threadid=$TopicID");
 die();
