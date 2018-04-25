@@ -173,17 +173,6 @@ switch ($_GET['type']) {
 			xbt_files_users AS xfu
 				JOIN torrents AS t ON t.ID = xfu.fid";
 		break;
-	case 'contest':
-		$Time = 'unix_timestamp(t.Time)';
-		$UserField = 't.UserID';
-		$ExtraWhere = "
-			AND t.ID IN (
-					SELECT TorrentID
-					FROM library_contest
-					WHERE UserID = $UserID
-					)";
-		$From = 'torrents AS t';
-		break;
 	case 'leeching':
 		if (!check_paranoia('leeching', $User['Paranoia'], $UserClass, $UserID)) {
 			error(403);

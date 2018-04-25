@@ -48,8 +48,6 @@ $Properties['Lineage'] = (isset($_POST['missing_lineage'])) ? 1 : 0;
 $Properties['CassetteApproved'] = (isset($_POST['cassette_approved']))? 1 : 0;
 $Properties['LossymasterApproved'] = (isset($_POST['lossymaster_approved']))? 1 : 0;
 $Properties['LossywebApproved'] = (isset($_POST['lossyweb_approved'])) ? 1 : 0;
-$Properties['LibraryUpload'] = (isset($_POST['library_upload']))? 1 : 0;
-$Properties['LibraryPoints'] = (isset($_POST['library_points']))? $_POST['library_points'] : 0;
 $Properties['Format'] = $_POST['format'];
 $Properties['Media'] = $_POST['media'];
 $Properties['Bitrate'] = $_POST['bitrate'];
@@ -404,27 +402,6 @@ if (check_perms('users_mod')) {
 	if ($mlID && !$Properties['Lineage']) {
 		$DB->query("
 			DELETE FROM torrents_missing_lineage
-			WHERE TorrentID = '$TorrentID'");
-	}
-
-	$DB->query("
-		SELECT TorrentID
-		FROM library_contest
-		WHERE TorrentID = '$TorrentID'");
-	list($lbID) = $DB->next_record();
-	if (!$lbID && $Properties['LibraryUpload'] && $Properties['LibraryPoints'] > 0) {
-		$DB->query("
-			SELECT UserID
-			FROM torrents
-			WHERE ID = $TorrentID");
-		list($UploaderID) = $DB->next_record();
-		$DB->query("
-			INSERT INTO library_contest
-			VALUES ($UploaderID, $TorrentID, $Properties[LibraryPoints])");
-	}
-	if ($lbID && !$Properties['LibraryUpload']) {
-		$DB->query("
-			DELETE FROM library_contest
 			WHERE TorrentID = '$TorrentID'");
 	}
 
