@@ -132,8 +132,51 @@ for ($i = 0; $i < $Limit; $i++) {
 		</div>
 
 <?
+$FM = new \Gazelle\Manager\Forum($DB, $Cache);
+$topics = $FM->getLatestHeadlineTopics();
+$replies = $FM->getLatestHeadlineReplies();
+if (count($topics) || count($replies)) {
+?>
+		<div class="box">
+<?	if (count($topics)) { ?>
+			<div class="head colhead_dark"><strong>New Forum Threads</strong></div>
+			<ul class="stats nobullet">
+<?		foreach ($topics as $t) {
+			switch ($t['replies']) {
+				case 0:
+					$nr_replies = 'no replies';
+					break;
+				case 1:
+					$nr_replies = '1 reply';
+					break;
+				default:
+					$nr_replies = $t['replies'] . ' replies';
+					break;
+			}
+?>
+				<li><a title="<?= time_diff($t['created_time'], 2, false) ?>" href="forums.php?action=viewthread&amp;threadid=<?= $t['topic_id'] ?>"><?= $t['topic_name'] ?></a>
+					in <a href="forums.php?action=viewforum&amp;forumid=<?= $t['forum_id'] ?>"><?= $t['forum_name'] ?></a>
+					by <a href="user.php?id=<?= $t['author_id'] ?>"><?= Users::format_username($t['author_id'], false, false, false) ?></a> (<?= $nr_replies ?>)</li>
+<?		} ?>
+			</ul>
+<?
+	}
+	if (count($replies)) {
+?>
+			<div class="head colhead_dark"><strong>New Replies</strong></div>
+			<ul class="stats nobullet">
+<?		foreach ($replies as $r) { ?>
+				<li>
+				<a title="in the <?= $r['forum_name'] ?> forum" href="forums.php?action=viewthread&amp;threadid=<?= $r['topic_id'] ?>&amp;postid=<?= $r['post_id']?>#post<?= $r['post_id']?>"><?= $r['topic_title'] ?></a>
+				by <a href="user.php?id=<?= $r['post_author_id'] ?>"><?= Users::format_username($r['post_author_id'], false, false, false) ?></a>
+				(<?= time_diff($r['post_added_time'], 1) ?>)</li>
+<?		} ?>
+			</ul>
+<?	} ?>
+		</div>
+<?
+} /* headlines */
 include('contest_leaderboard.php');
-//SiteHistoryView::render_recent_sidebar(SiteHistory::get_events(null, null, null, null, null, null, 5));
 ?>
 		<div class="box">
 			<div class="head colhead_dark"><strong>Stats</strong></div>
