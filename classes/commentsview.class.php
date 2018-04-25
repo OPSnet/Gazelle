@@ -79,11 +79,13 @@ class CommentsView {
 <?		if ($EditedUserID) { ?>
 						<br />
 						<br />
+                        <span class="last_edited">
 <?			if (check_perms('site_admin_forums')) { ?>
 						<a href="#content<?=$PostID?>" onclick="LoadEdit('<?=substr($Link, 0, strcspn($Link, '.'))?>', <?=$PostID?>, 1); return false;">&laquo;</a>
 <?			} ?>
 						Last edited by
 						<?=Users::format_username($EditedUserID, false, false, false) ?> <?=time_diff($EditedTime, 2, true, true)?>
+                        </span>
 <?		} ?>
 					</div>
 				</td>

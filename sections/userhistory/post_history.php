@@ -269,11 +269,13 @@ if (empty($Results)) {
 <?			if ($EditedUserID) { ?>
 					<br />
 					<br />
+                    <span class="last_edited">
 <?				if (check_perms('site_moderate_forums')) { ?>
 					<a href="#content<?=$PostID?>" onclick="LoadEdit(<?=$PostID?>, 1);">&laquo;</a>
 <? 				} ?>
 					Last edited by
 					<?=Users::format_username($EditedUserID, false, false, false) ?> <?=time_diff($EditedTime, 2, true, true)?>
+                    </span>
 <?			} ?>
 				</div>
 			</td>
