@@ -51,64 +51,56 @@ function Quote(post, user, link) {
 	username = user;
 	postid = post;
 
-	// check if reply_box element exists and that user is in the forums
-	if (!$('#reply_box').length && url.path == "forums") {
-		if ($("#quote_" + postid).text() == "Quote") {
-			original_post = $("#content" + postid).html();
-			$("#quote_" + postid).text("Unquote");
-			$.ajax({
-				type : "POST",
-				url : "ajax.php?action=raw_bbcode",
-				dataType : "json",
-				data : {
-					"postid" : postid
-				}
-			}).done(function(response) {
-				$("#content" + postid).html(response['response']['body']);
-				select_all($("#content" + postid).get(0));
-			});
-		} else {
-			document.getSelection().removeAllRanges();
-			$("#content" + postid).html(original_post);
-			$("#quote_" + postid).text("Quote");
-		}
+	var target = '';
+	var requrl = '';
+	if (url.path == "inbox") {
+		requrl = 'inbox.php?action=get_post&post=' + post;
 	} else {
-		var target = '';
-		var requrl = '';
-		if (url.path == "inbox") {
-			requrl = 'inbox.php?action=get_post&post=' + post;
+		requrl = 'comments.php?action=get&postid=' + post;
+	}
+	if (link == true) {
+		if (url.path == "artist") {
+			// artist comment
+			target = 'a';
+		} else if (url.path == "torrents") {
+			// torrent comment
+			target = 't';
+		} else if (url.path == "collages") {
+			// collage comment
+			target = 'c';
+		} else if (url.path == "requests") {
+			// request comment
+			target = 'r';
 		} else {
-			requrl = 'comments.php?action=get&postid=' + post;
+			// forum post
+			requrl = 'forums.php?action=get_post&post=' + post;
 		}
-		if (link == true) {
-			if (url.path == "artist") {
-				// artist comment
-				target = 'a';
-			} else if (url.path == "torrents") {
-				// torrent comment
-				target = 't';
-			} else if (url.path == "collages") {
-				// collage comment
-				target = 'c';
-			} else if (url.path == "requests") {
-				// request comment
-				target = 'r';
-			} else {
-				// forum post
-				requrl = 'forums.php?action=get_post&post=' + post;
-			}
-			target += post;
+		target += post;
+	}
+
+	// if any text inside of a forum post body is selected, use that instead of Ajax result.
+	// unfortunately, this will not preserve bbcode in the quote. This is an unfortunate necessity, as
+	// doing some sort of weird grepping through the Ajax bbcode for the selected text is overkill.
+	if (getSelection().toString() && inPost(getSelection().anchorNode) && inPost(getSelection().focusNode)) {
+		insertQuote(getSelection().toString());
+	} else {
+		ajax.get(requrl, insertQuote);
+	}
+
+	// DOM element (non-jQuery) -> Bool
+	function inPost(elt) {
+		return $.contains($('#post' + postid)[0],elt);
+	}
+	// Str -> undefined
+	function insertQuote(response) {
+		if ($('#quickpost').raw().value !== '') {
+			$('#quickpost').raw().value += "\n\n";
 		}
-		ajax.get(requrl, function(response) {
-			if ($('#quickpost').raw().value !== '') {
-				$('#quickpost').raw().value = $('#quickpost').raw().value + "\n\n";
-			}
-			$('#quickpost').raw().value = $('#quickpost').raw().value + "[quote=" + username + (link == true ? "|" + target : "") + "]" +
-				//response.replace(/(img|aud)(\]|=)/ig,'url$2').replace(/\[url\=(https?:\/\/[^\s\[\]<>"\'()]+?)\]\[url\](.+?)\[\/url\]\[\/url\]/gi, "[url]$1[/url]")
-				html_entity_decode(response)
-			+ "[/quote]";
-			resize('quickpost');
-		});
+		$('#quickpost').raw().value = $('#quickpost').raw().value + "[quote=" + username + (link == true ? "|" + target : "") + "]" +
+			//response.replace(/(img|aud)(\]|=)/ig,'url$2').replace(/\[url\=(https?:\/\/[^\s\[\]<>"\'()]+?)\]\[url\](.+?)\[\/url\]\[\/url\]/gi, "[url]$1[/url]")
+			html_entity_decode(response)
+		+ "[/quote]";
+		resize('quickpost');
 	}
 }
 
