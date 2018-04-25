@@ -515,11 +515,13 @@ foreach ($Thread as $Key => $Post) {
 <?	if ($EditedUserID) { ?>
 				<br />
 				<br />
+                <span class="last_edited">
 <?		if (check_perms('site_admin_forums')) { ?>
 				<a href="#content<?=$PostID?>" onclick="LoadEdit('forums', <?=$PostID?>, 1); return false;">&laquo;</a>
 <?		} ?>
 				Last edited by
 				<?=Users::format_username($EditedUserID, false, false, false, false, false, $IsDonorForum) ?> <?=time_diff($EditedTime, 2, true, true)?>
+                </span>
 <?	} ?>
 			</div>
 		</td>

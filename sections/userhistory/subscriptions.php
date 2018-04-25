@@ -238,7 +238,7 @@ if (!$NumResults) {
 					<?=Text::full_format($Result['LastReadBody']) ?>
 <?			if ($Result['LastReadEditedUserID']) { ?>
 					<br /><br />
-					Last edited by <?=Users::format_username($Result['LastReadEditedUserID'], false, false, false) ?> <?=time_diff($Result['LastReadEditedTime'])?>
+					<span class="last_edited">Last edited by <?=Users::format_username($Result['LastReadEditedUserID'], false, false, false) ?> <?=time_diff($Result['LastReadEditedTime'])?></span>
 <?			} ?>
 				</div>
 			</td>
