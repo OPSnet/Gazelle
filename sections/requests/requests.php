@@ -49,7 +49,7 @@ $BookmarkView = false;
 
 if (empty($_GET['type'])) {
 	$Title = 'Requests';
-	if (empty($_GET['showall'])) {
+	if ($Submitted && !empty($_GET['showall'])) {
 		$SphQL->where('visible', 1);
 	}
 } else {
@@ -100,7 +100,7 @@ if (empty($_GET['type'])) {
 	}
 }
 
-if ($Submitted && empty($_GET['show_filled'])) {
+if (!$Submitted || empty($_GET['show_filled'])) {
 	$SphQL->where('torrentid', 0);
 }
 
@@ -384,13 +384,13 @@ View::show_header($Title, 'requests');
 			<tr id="include_filled">
 				<td class="label"><label for="include_filled_box">Include filled:</label></td>
 				<td>
-					<input type="checkbox" id="include_filled_box" name="show_filled"<? if (!$Submitted || !empty($_GET['show_filled']) || (!$Submitted && !empty($_GET['type']) && $_GET['type'] === 'filled')) { ?> checked="checked"<? } ?> />
+					<input type="checkbox" id="include_filled_box" name="show_filled"<? if (!empty($_GET['show_filled']) || (!$Submitted && !empty($_GET['type']) && $_GET['type'] === 'filled')) { ?> checked="checked"<? } ?> />
 				</td>
 			</tr>
 			<tr id="include_old">
 				<td class="label"><label for="include_old_box">Include old:</label></td>
 				<td>
-					<input type="checkbox" id="include_old_box" name="showall"<? if (!empty($_GET['showall'])) { ?> checked="checked"<? } ?> />
+					<input type="checkbox" id="include_old_box" name="showall"<? if (!$Submitted || !empty($_GET['showall'])) { ?> checked="checked"<? } ?> />
 				</td>
 			</tr>
 <?		/* ?>
