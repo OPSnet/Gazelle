@@ -77,6 +77,14 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/managers/forum_alter.php');
 		break;
 
+	case 'irc':
+		include(SERVER_ROOT . '/sections/tools/managers/irc_list.php');
+		break;
+
+	case 'irc_alter':
+		include(SERVER_ROOT . '/sections/tools/managers/irc_alter.php');
+		break;
+
 	case 'whitelist':
 		include(SERVER_ROOT.'/sections/tools/managers/whitelist_list.php');
 		break;

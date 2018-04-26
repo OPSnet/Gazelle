@@ -128,7 +128,7 @@ class VALIDATE {
 	function ValidateForm($ValidateArray) {
 		reset($this->Fields);
 		foreach ($this->Fields as $FieldKey => $Field) {
-			$ValidateVar = $ValidateArray[$FieldKey];
+			$ValidateVar = $ValidateArray[$FieldKey] ?? null;
 
 			if ($ValidateVar != '' || !empty($Field['Required']) || $Field['Type'] == 'date') {
 				if ($Field['Type'] == 'string') {
@@ -254,6 +254,13 @@ class VALIDATE {
 
 				} elseif ($Field['Type'] == 'regex') {
 					if (!preg_match($Field['Regex'], $ValidateVar)) {
+
+						return $Field['ErrorMessage'];
+					}
+					elseif (isset($Field['MaxLength']) && strlen($ValidateVar) > $Field['MaxLength']) {
+						return $Field['ErrorMessage'];
+					}
+					elseif (isset($Field['MinLength']) && strlen($ValidateVar) < $Field['MinLength']) {
 						return $Field['ErrorMessage'];
 					}
 				}
