@@ -377,7 +377,7 @@ class NotificationsManager {
 				G::$Cache->cache_value('notifications_new_' . G::$LoggedUser['ID'], $NewNotifications, 0);
 			}
 		}
-		if (isset($NewNotifications) && $NewNotifications > 0) {
+		if ($NewNotifications > 0) {
 			$Title = 'You have ' . ($NewNotifications == 1 ? 'a' : $NewNotifications) . ' new torrent notification' . ($NewNotifications > 1 ? 's' : '');
 			$this->create_notification(self::TORRENTS, 0, $Title, 'torrents.php?action=notify', self::INFO);
 		}

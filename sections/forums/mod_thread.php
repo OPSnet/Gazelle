@@ -43,12 +43,31 @@ $ForumID = (int)$_POST['forumid'];
 $Page = (int)$_POST['page'];
 $Action = '';
 
-$FM = new \Gazelle\Manager\Forum($DB, $Cache);
+
 if ($Locked == 1) {
-	$FM->lockThread($TopicID);
+
+	$DB->query("
+		DELETE FROM forums_last_read_topics
+		WHERE TopicID = '$TopicID'");
 }
 
-list($OldForumID, $OldForumName, $MinClassWrite, $Posts, $ThreadAuthorID, $OldTitle, $OldLocked, $OldSticky, $OldRanking) = $FM->getTopic($TopicID);
+$DB->query("
+	SELECT
+		t.ForumID,
+		f.Name,
+		f.MinClassWrite,
+		COUNT(p.ID) AS Posts,
+		t.AuthorID,
+		t.Title,
+		t.IsLocked,
+		t.IsSticky,
+		t.Ranking
+	FROM forums_topics AS t
+		LEFT JOIN forums_posts AS p ON p.TopicID = t.ID
+		LEFT JOIN forums AS f ON f.ID = t.ForumID
+	WHERE t.ID = '$TopicID'
+	GROUP BY p.TopicID");
+list($OldForumID, $OldForumName, $MinClassWrite, $Posts, $ThreadAuthorID, $OldTitle, $OldLocked, $OldSticky, $OldRanking) = $DB->next_record(MYSQLI_BOTH, false);
 
 if ($MinClassWrite > $LoggedUser['Class']) {
 	error(403);
@@ -60,13 +79,78 @@ if (isset($_POST['delete'])) {
 		error(403);
 	}
 
-	$FM->deleteTopic($TopicID, $ForumID);
+	$DB->query("
+		DELETE FROM forums_posts
+		WHERE TopicID = '$TopicID'");
+	$DB->query("
+		DELETE FROM forums_topics
+		WHERE ID = '$TopicID'");
+
+	$DB->query("
+		SELECT
+			t.ID,
+			t.LastPostID,
+			t.Title,
+			p.AuthorID,
+			um.Username,
+			p.AddedTime,
+			(
+				SELECT COUNT(pp.ID)
+				FROM forums_posts AS pp
+					JOIN forums_topics AS tt ON pp.TopicID = tt.ID
+				WHERE tt.ForumID = '$ForumID'
+			),
+			t.IsLocked,
+			t.IsSticky
+		FROM forums_topics AS t
+			JOIN forums_posts AS p ON p.ID = t.LastPostID
+			LEFT JOIN users_main AS um ON um.ID = p.AuthorID
+		WHERE t.ForumID = '$ForumID'
+		GROUP BY t.ID
+		ORDER BY t.LastPostID DESC
+		LIMIT 1");
+	list($NewLastTopic, $NewLastPostID, $NewLastTitle, $NewLastAuthorID, $NewLastAuthorName, $NewLastAddedTime, $NumPosts, $NewLocked, $NewSticky) = $DB->next_record(MYSQLI_NUM, false);
+
+	$DB->query("
+		UPDATE forums
+		SET
+			NumTopics = NumTopics - 1,
+			NumPosts = NumPosts - '$Posts',
+			LastPostTopicID = '$NewLastTopic',
+			LastPostID = '$NewLastPostID',
+			LastPostAuthorID = '$NewLastAuthorID',
+			LastPostTime = '$NewLastAddedTime'
+		WHERE ID = '$ForumID'");
+	$Cache->delete_value("forums_$ForumID");
+
+	$Cache->delete_value("thread_$TopicID");
+
+	$Cache->begin_transaction('forums_list');
+	$UpdateArray = array(
+		'NumPosts' => $NumPosts,
+		'NumTopics' => '-1',
+		'LastPostID' => $NewLastPostID,
+		'LastPostAuthorID' => $NewLastAuthorID,
+		'LastPostTopicID' => $NewLastTopic,
+		'LastPostTime' => $NewLastAddedTime,
+		'Title' => $NewLastTitle,
+		'IsLocked' => $NewLocked,
+		'IsSticky' => $NewSticky
+		);
+
+	$Cache->update_row($ForumID, $UpdateArray);
+	$Cache->commit_transaction(0);
+	$Cache->delete_value("thread_{$TopicID}_info");
 
 	// subscriptions
 	Subscriptions::move_subscriptions('forums', $TopicID, null);
 
 	// quote notifications
 	Subscriptions::flush_quote_notifications('forums', $TopicID);
+	$DB->query("
+		DELETE FROM users_notify_quoted
+		WHERE Page = 'forums'
+			AND PageID = '$TopicID'");
 
 	header("Location: forums.php?action=viewforum&forumid=$ForumID");
 } else { // If we're just editing it
@@ -78,13 +162,14 @@ if (isset($_POST['delete'])) {
 	}
 
 	$Cache->begin_transaction("thread_{$TopicID}_info");
-	$Cache->update_row(false, [
+	$UpdateArray = array(
 		'IsSticky' => $Sticky,
 		'Ranking' => $Ranking,
 		'IsLocked' => $Locked,
 		'Title' => Format::cut_string($RawTitle, 150, 1, 0),
 		'ForumID' => $ForumID
-	]);
+		);
+	$Cache->update_row(false, $UpdateArray);
 	$Cache->commit_transaction(0);
 
 	$DB->query("
@@ -111,11 +196,12 @@ if (isset($_POST['delete'])) {
 			WHERE ID = '$ForumID'");
 		list($MinClassRead, $MinClassWrite, $ForumName) = $DB->next_record(MYSQLI_NUM, false);
 		$Cache->begin_transaction("thread_{$TopicID}_info");
-		$Cache->update_row(false, [
+		$UpdateArray = array(
 			'ForumName' => $ForumName,
 			'MinClassRead' => $MinClassRead,
 			'MinClassWrite' => $MinClassWrite
-		]);
+			);
+		$Cache->update_row(false, $UpdateArray);
 		$Cache->commit_transaction(3600 * 24 * 5);
 
 		$Cache->begin_transaction('forums_list');
@@ -157,7 +243,8 @@ if (isset($_POST['delete'])) {
 				LastPostTime = '$NewLastAddedTime'
 			WHERE ID = '$OldForumID'");
 
-		$Cache->update_row($OldForumID, [
+
+		$UpdateArray = array(
 			'NumPosts' => $NumPosts,
 			'NumTopics' => '-1',
 			'LastPostID' => $NewLastPostID,
@@ -168,7 +255,10 @@ if (isset($_POST['delete'])) {
 			'IsLocked' => $NewLocked,
 			'IsSticky' => $NewSticky,
 			'Ranking' => $NewRanking
-		]);
+			);
+
+
+		$Cache->update_row($OldForumID, $UpdateArray);
 
 		// Forum we're moving to
 
@@ -205,7 +295,8 @@ if (isset($_POST['delete'])) {
 				LastPostTime = '$NewLastAddedTime'
 			WHERE ID = '$ForumID'");
 
-		$Cache->update_row($ForumID, [
+
+		$UpdateArray = array(
 			'NumPosts' => ($NumPosts + $Posts),
 			'NumTopics' => '+1',
 			'LastPostID' => $NewLastPostID,
@@ -213,12 +304,11 @@ if (isset($_POST['delete'])) {
 			'LastPostTopicID' => $NewLastTopic,
 			'LastPostTime' => $NewLastAddedTime,
 			'Title' => $NewLastTitle
-		]);
-		$Cache->commit_transaction(0);
+			);
 
-		if ($FM->isHeadline($ForumID) || $FM->isHeadline($OldForumID)) {
-			$FM->flushHeadlines();
-		}
+		$Cache->update_row($ForumID, $UpdateArray);
+
+		$Cache->commit_transaction(0);
 
 		if ($ForumID == TRASH_FORUM_ID) {
 			$Action = 'trashing';
@@ -230,13 +320,14 @@ if (isset($_POST['delete'])) {
 			WHERE ID = '$ForumID'");
 		list($LastTopicID) = $DB->next_record();
 		if ($LastTopicID == $TopicID) {
-			$Cache->begin_transaction('forums_list');
-			$Cache->update_row($ForumID, [
+			$UpdateArray = array(
 				'Title' => $RawTitle,
 				'IsLocked' => $Locked,
 				'IsSticky' => $Sticky,
 				'Ranking' => $Ranking
-			]);
+			);
+			$Cache->begin_transaction('forums_list');
+			$Cache->update_row($ForumID, $UpdateArray);
 			$Cache->commit_transaction(0);
 		}
 	}
@@ -267,9 +358,6 @@ if (isset($_POST['delete'])) {
 					$TopicNotes[] = 'Locked';
 				} else {
 					$TopicNotes[] = 'Unlocked';
-				}
-				if ($FM->isHeadline($ForumID)) {
-					$FM->flushHeadlines();
 				}
 			}
 			if ($OldSticky != $Sticky) {
