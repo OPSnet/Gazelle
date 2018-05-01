@@ -23,10 +23,43 @@ if (!check_perms('admin_manage_forums')) {
 	error(403);
 }
 
-$ForumManager = new \Gazelle\Manager\Forum($DB, $Cache);
-$ForumCats  = $ForumManager->getCategoryList();
-
 View::show_header('Forum Management');
+$DB->query('
+	SELECT ID, Name
+	FROM forums
+	ORDER BY Sort');
+$ForumArray = $DB->to_array(); // used for generating the 'parent' drop down list
+
+// Replace the old hard-coded forum categories
+unset($ForumCats);
+$ForumCats = $Cache->get_value('forums_categories');
+if ($ForumCats === false) {
+	$DB->query('
+		SELECT ID, Name
+		FROM forums_categories
+		ORDER BY Sort, Name');
+	$ForumCats = array();
+	while (list($ID, $Name) = $DB->next_record()) {
+		$ForumCats[$ID] = $Name;
+	}
+	$Cache->cache_value('forums_categories', $ForumCats, 0); //Inf cache.
+}
+
+$DB->query('
+	SELECT
+		f.ID,
+		CategoryID,
+		f.Sort,
+		f.Name,
+		Description,
+		MinClassRead,
+		MinClassWrite,
+		MinClassCreate,
+		AutoLock,
+		AutoLockWeeks
+	FROM forums AS f
+	LEFT JOIN forums_categories AS fc ON fc.ID = f.CategoryID
+	ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort, f.Name');
 ?>
 <div class="header">
 	<script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>
@@ -43,14 +76,11 @@ View::show_header('Forum Management');
 		<td>Min class create</td>
 		<td>Auto-lock</td>
 		<td>Auto-lock weeks</td>
-		<td>Headline</td>
 		<td>Submit</td>
 	</tr>
 <?
 $Row = 'b';
-$ForumList  = $ForumManager->getAdminList();
-foreach ($ForumList as $F) {
-    list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinClassWrite, $MinClassCreate, $AutoLock, $AutoLockWeeks, $IsHeadline) = $F;
+while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinClassWrite, $MinClassCreate, $AutoLock, $AutoLockWeeks) = $DB->next_record()) {
 	$Row = $Row === 'a' ? 'b' : 'a';
 ?>
 	<tr class="row<?=$Row?>">
@@ -95,10 +125,7 @@ foreach ($ForumList as $F) {
 				<input type="checkbox" name="autolock"<?=($AutoLock == '1') ? ' checked="checked"' : ''?> />
 			</td>
 			<td>
-				<input type="text" name="autolockweeks" size="4" value="<?=$AutoLockWeeks?>" />
-			</td>
-			<td>
-				<input type="checkbox" name="headline"<?= $IsHeadline ? ' checked="checked"' : ''?> />
+				<input type="text" name="autolockweeks" value="<?=$AutoLockWeeks?>" />
 			</td>
 			<td>
 				<input type="submit" name="submit" value="Edit" />
@@ -111,7 +138,7 @@ foreach ($ForumList as $F) {
 }
 ?>
 	<tr class="colhead">
-		<td colspan="11">Create forum</td>
+		<td colspan="8">Create forum</td>
 	</tr>
 	<tr class="rowa">
 		<form class="create_form" name="forum" action="" method="post">
@@ -153,10 +180,7 @@ foreach ($ForumList as $F) {
 				<input type="checkbox" name="autolock" checked="checked" />
 			</td>
 			<td>
-				<input type="text" name="autolockweeks" size="4" value="4" />
-			</td>
-			<td>
-				<input type="checkbox" name="headline"<?= $IsHeadline ? ' checked="checked"' : ''?> />
+				<input type="text" name="autolockweeks" value="4" />
 			</td>
 			<td>
 				<input type="submit" value="Create" />

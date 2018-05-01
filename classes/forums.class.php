@@ -14,7 +14,7 @@ class Forums {
 	public static function get_thread_info($ThreadID, $Return = true, $SelectiveCache = false) {
 		if ((!$ThreadInfo = G::$Cache->get_value('thread_' . $ThreadID . '_info')) || !isset($ThreadInfo['Ranking'])) {
 			$QueryID = G::$DB->get_query_id();
-			G::$DB->prepared_query("
+			G::$DB->query("
 				SELECT
 					t.Title,
 					t.ForumID,
@@ -26,16 +26,12 @@ class Forums {
 					t.StickyPostID,
 					t.AuthorID as OP,
 					t.Ranking,
-					f.IsHeadline,
 					MAX(fp.AddedTime) as LastPostTime
 				FROM forums_topics AS t
-					INNER JOIN forums AS f ON (f.ID = t.ForumID)
-					INNER JOIN forums_posts AS fp ON (fp.TopicID = t.ID)
-					LEFT JOIN forums_polls AS p ON (p.TopicID = t.ID)
-				WHERE t.ID = ?
-				GROUP BY fp.TopicID
-				", $ThreadID
-			);
+					JOIN forums_posts AS fp ON fp.TopicID = t.ID
+					LEFT JOIN forums_polls AS p ON p.TopicID = t.ID
+				WHERE t.ID = '$ThreadID'
+				GROUP BY fp.TopicID");
 			if (!G::$DB->has_results()) {
 				G::$DB->set_query_id($QueryID);
 				return null;
