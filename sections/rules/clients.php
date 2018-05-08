@@ -29,6 +29,9 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
 	foreach ($WhitelistedClients as $Client) {
 		//list($ClientName, $Notes) = $Client;
 		list($ClientName, $PeerID) = $Client;
+		if (strpos($ClientName, 'HIDDEN') !== false) {
+			continue;
+		}
 		$Row = $Row === 'a' ? 'b' : 'a';
 ?>
 			<tr class="row<?=$Row?>">
