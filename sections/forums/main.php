@@ -29,13 +29,13 @@ foreach ($Forums as $Forum) {
 	</table>
 <? 		} ?>
 <h3><?=$ForumCats[$CategoryID]?></h3>
-	<table class="forum_index">
+	<table class="forum_index m_table">
 		<tr class="colhead">
 			<td style="width: 2%;"></td>
-			<td style="width: 25%;">Forum</td>
+			<td class="m_th_left" style="width: 25%;">Forum</td>
 			<td>Last Post</td>
-			<td style="width: 7%;">Topics</td>
-			<td style="width: 7%;">Posts</td>
+			<td class="m_th_right" style="width: 7%;">Topics</td>
+			<td class="m_th_right" style="width: 7%;">Posts</td>
 		</tr>
 <?
 		$OpenTable = true;
@@ -52,20 +52,20 @@ foreach ($Forums as $Forum) {
 */
 ?>
 	<tr class="row<?=$Row?>">
-		<td class="<?=$Read?> <?=$Tooltip?>" title="<?=ucfirst($Read)?>"></td>
-		<td>
+		<td class="td_read <?=$Read?> <?=$Tooltip?> m_hidden" title="<?=ucfirst($Read)?>"></td>
+		<td class="td_forum">
 			<h4 class="min_padding">
 				<a class="<?=$Tooltip?>" href="forums.php?action=viewforum&amp;forumid=<?=$ForumID?>" title="<?=display_str($ForumDescription)?>"><?=display_str($ForumName)?></a>
 			</h4>
 		</td>
 <? if ($NumPosts == 0) { ?>
-		<td>
+		<td class="td_latest">
 			There are no topics here.<?=(($MinCreate <= $LoggedUser['Class']) ? ' <a href="forums.php?action=new&amp;forumid='.$ForumID.'">Create one!</a>' : '')?>
 		</td>
-		<td class="number_column">0</td>
-		<td class="number_column">0</td>
+		<td class="td_topic_count number_column m_td_right">0</td>
+		<td class="td_post_count number_column m_td_right">0</td>
 <? } else { ?>
-		<td>
+		<td class="td_latest">
 			<span style="float: left;" class="last_topic">
 				<a href="forums.php?action=viewthread&amp;threadid=<?=$LastTopicID?>" class="tooltip" data-title-plain="<?=display_str($LastTopic)?>" <?=((strlen($LastTopic) > 50) ? "title='".display_str($LastTopic)."'" : "")?>><?=display_str(Format::cut_string($LastTopic, 50, 1))?></a>
 			</span>
@@ -76,8 +76,8 @@ foreach ($Forums as $Forum) {
 <? } ?>
 			<span style="float: right;" class="last_poster">by <?=Users::format_username($LastAuthorID, false, false, false)?> <?=time_diff($LastTime, 1)?></span>
 		</td>
-		<td class="number_column"><?=number_format($NumTopics)?></td>
-		<td class="number_column"><?=number_format($NumPosts)?></td>
+		<td class="td_topic_count number_column m_td_right"><?=number_format($NumTopics)?></td>
+		<td class="td_post_count number_column m_td_right"><?=number_format($NumPosts)?></td>
 <? } ?>
 	</tr>
 <? } ?>

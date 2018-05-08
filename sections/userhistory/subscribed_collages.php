@@ -219,11 +219,11 @@ if (!$NumResults) {
 ?>
 	<tr class="torrent<?=$SnatchedTorrentClass?>" id="group_<?=$CollageID . $GroupID?>">
 		<td></td>
-		<td class="center">
+		<td class="td_collage_category center">
 			<div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>">
 			</div>
 		</td>
-		<td class="big_info">
+		<td class="td_info big_info">
 <? if ($LoggedUser['CoverArt']) { ?>
 			<div class="group_image float_left clear">
 				<? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
@@ -241,10 +241,10 @@ if (!$NumResults) {
 				<div class="tags"><?=$TorrentTags->format()?></div>
 			</div>
 		</td>
-		<td class="number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
-		<td class="number_column"><?=number_format($Torrent['Snatched'])?></td>
-		<td class="number_column<?=($Torrent['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Torrent['Seeders'])?></td>
-		<td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
+		<td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
+		<td class="td_snatched m_td_right number_column"><?=number_format($Torrent['Snatched'])?></td>
+		<td class="td_seeders m_td_right number_column<?=($Torrent['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Torrent['Seeders'])?></td>
+		<td class="td_leechers m_td_right number_column"><?=number_format($Torrent['Leechers'])?></td>
 	</tr>
 <?
 			}
@@ -265,10 +265,10 @@ if (!$NumResults) {
 		</tr>
 	</table>
 	<!--</div>-->
-	<table class="torrent_table<?=$ShowAll ? ' hidden' : ''?>" id="discog_table_<?=$CollageID?>">
+	<table class="torrent_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?=$CollageID?>">
 		<tr class="colhead">
 			<td width="1%"><!-- expand/collapse --></td>
-			<td width="70%"><strong>Torrents</strong></td>
+			<td class="m_th_left" width="70%"><strong>Torrents</strong></td>
 			<td>Size</td>
 			<td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
 			<td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>

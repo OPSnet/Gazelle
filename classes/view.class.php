@@ -14,7 +14,7 @@ class View {
 	 *                    example: 'somefile,somedir/somefile'
 	 */
 	public static function show_header($PageTitle = '', $JSIncludes = '', $CSSIncludes = '') {
-		global $Document, $Mobile, $Classes;
+		global $Document, $Classes;
 
 		if ($PageTitle != '') {
 			$PageTitle .= ' :: ';
@@ -42,7 +42,7 @@ class View {
 	 *                 ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
 	 */
 	public static function show_footer($Options = array()) {
-		global $ScriptStartTime, $SessionID, $UserSessions, $Debug, $Time, $Mobile;
+		global $ScriptStartTime, $SessionID, $UserSessions, $Debug, $Time;
 		if (!is_array(G::$LoggedUser) || (isset($Options['recover']) && $Options['recover'] === true)) {
 			require(SERVER_ROOT.'/design/publicfooter.php');
 		} else {

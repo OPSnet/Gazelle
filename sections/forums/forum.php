@@ -153,11 +153,11 @@ $Pages = Format::get_pages($Page, $Forums[$ForumID]['NumTopics'], TOPICS_PER_PAG
 echo $Pages;
 ?>
 	</div>
-	<table class="forum_index" width="100%">
+	<table class="forum_index m_table" width="100%">
 		<tr class="colhead">
 			<td style="width: 2%;"></td>
-			<td>Latest</td>
-			<td style="width: 7%;">Replies</td>
+			<td class="m_th_left">Latest</td>
+			<td class="m_th_right" style="width: 7%;">Replies</td>
 			<td style="width: 14%;">Author</td>
 		</tr>
 <?
@@ -236,8 +236,8 @@ if (count($Forum) === 0) {
 		}
 ?>
 	<tr class="row<?=$Row?>">
-		<td class="<?=$Read?> <?=$Tooltip?>" title="<?=ucwords(str_replace('_', ' ', $Read))?>"></td>
-		<td>
+		<td class="td_read <?=$Read?> <?=$Tooltip?> m_hidden" title="<?=ucwords(str_replace('_', ' ', $Read))?>"></td>
+		<td class="td_latest">
 			<span style="float: left;" class="last_topic">
 <?
 		$TopicLength = 75 - (2 * count($PageLinks));
@@ -260,8 +260,8 @@ if (count($Forum) === 0) {
 				by <?=Users::format_username($LastAuthorID, false, false, false, false, false, $IsDonorForum)?> <?=time_diff($LastTime,1)?>
 			</span>
 		</td>
-		<td class="number_column"><?=number_format($PostCount - 1)?></td>
-		<td><?=Users::format_username($AuthorID, false, false, false, false, false, $IsDonorForum)?></td>
+		<td class="td_replies number_column m_td_right"><?=number_format($PostCount - 1)?></td>
+		<td class="td_author"><?=Users::format_username($AuthorID, false, false, false, false, false, $IsDonorForum)?></td>
 	</tr>
 <?	}
 } ?>

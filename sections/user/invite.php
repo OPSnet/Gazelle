@@ -207,15 +207,15 @@ if (!empty($Pending)) {
 ?>
 	<h3>Invitee list</h3>
 	<div class="box pad">
-		<table width="100%">
+		<table class="invite_table m_table "width="100%">
 			<tr class="colhead">
-				<td><a href="user.php?action=invite&amp;order=username&amp;sort=<?=(($CurrentOrder == 'username') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Username</a></td>
+				<td class="m_th_left"><a href="user.php?action=invite&amp;order=username&amp;sort=<?=(($CurrentOrder == 'username') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Username</a></td>
 				<td><a href="user.php?action=invite&amp;order=email&amp;sort=<?=(($CurrentOrder == 'email') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Email</a></td>
 				<td><a href="user.php?action=invite&amp;order=joined&amp;sort=<?=(($CurrentOrder == 'joined') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Joined</a></td>
 				<td><a href="user.php?action=invite&amp;order=lastseen&amp;sort=<?=(($CurrentOrder == 'lastseen') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Last Seen</a></td>
-				<td><a href="user.php?action=invite&amp;order=uploaded&amp;sort=<?=(($CurrentOrder == 'uploaded') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Uploaded</a></td>
-				<td><a href="user.php?action=invite&amp;order=downloaded&amp;sort=<?=(($CurrentOrder == 'downloaded') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Downloaded</a></td>
-				<td><a href="user.php?action=invite&amp;order=ratio&amp;sort=<?=(($CurrentOrder == 'ratio') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Ratio</a></td>
+				<td class="m_th_right"><a href="user.php?action=invite&amp;order=uploaded&amp;sort=<?=(($CurrentOrder == 'uploaded') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Uploaded</a></td>
+				<td class="m_th_right"><a href="user.php?action=invite&amp;order=downloaded&amp;sort=<?=(($CurrentOrder == 'downloaded') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Downloaded</a></td>
+				<td class="m_th_right"><a href="user.php?action=invite&amp;order=ratio&amp;sort=<?=(($CurrentOrder == 'ratio') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Ratio</a></td>
 			</tr>
 <?
 	$Row = 'a';
@@ -224,13 +224,13 @@ if (!empty($Pending)) {
 		$Row = $Row === 'a' ? 'b' : 'a';
 ?>
 			<tr class="row<?=$Row?>">
-				<td><?=Users::format_username($ID, true, true, true, true)?></td>
-				<td><?=display_str($Email)?></td>
-				<td><?=time_diff($JoinDate, 1)?></td>
-				<td><?=time_diff($LastAccess, 1);?></td>
-				<td><?=Format::get_size($Uploaded)?></td>
-				<td><?=Format::get_size($Downloaded)?></td>
-				<td><?=Format::get_ratio_html($Uploaded, $Downloaded)?></td>
+				<td class="td_username"><?=Users::format_username($ID, true, true, true, true)?></td>
+				<td class="td_email"><?=display_str($Email)?></td>
+				<td class="td_join_date"><?=time_diff($JoinDate, 1)?></td>
+				<td class="td_last_access"><?=time_diff($LastAccess, 1);?></td>
+				<td class="td_up m_td_right"><?=Format::get_size($Uploaded)?></td>
+				<td class="td_dl m_td_right"><?=Format::get_size($Downloaded)?></td>
+				<td class="td_ratio m_td_right"><?=Format::get_ratio_html($Uploaded, $Downloaded)?></td>
 			</tr>
 <?	} ?>
 		</table>

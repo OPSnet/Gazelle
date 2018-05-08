@@ -511,13 +511,13 @@ if (empty($LoggedUser['DisableTagging'])) {
 ?>
 	</div>
 	<div class="main_column">
-		<table class="torrent_table details<?=$GroupFlags['IsSnatched'] ? ' snatched' : ''?>" id="torrent_details">
+		<table class="torrent_table details<?=$GroupFlags['IsSnatched'] ? ' snatched' : ''?> m_table" id="torrent_details">
 			<tr class="colhead_dark">
-				<td width="80%"><strong>Torrents</strong></td>
+				<td class="m_th_left" width="80%"><strong>Torrents</strong></td>
 				<td><strong>Size</strong></td>
-				<td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-				<td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-				<td class="sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+				<td class="m_th_right sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+				<td class="m_th_right sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+				<td class="m_th_right sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
 			</tr>
 <?
 function filelist($Str) {
@@ -673,7 +673,7 @@ foreach ($TorrentList as $Torrent) {
 ?>
 
 			<tr class="torrent_row releases_<?=$ReleaseType?> groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent<?=($IsSnatched ? ' snatched_torrent' : '')?>" style="font-weight: normal;" id="torrent<?=$TorrentID?>">
-				<td>
+				<td class="td_info">
 					<span>[ <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=($HasFile ? 'DL' : 'Missing')?></a>
 <?	if (Torrents::can_use_token($Torrent)) { ?>
 						| <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'])?>');">FL</a>
@@ -690,10 +690,10 @@ foreach ($TorrentList as $Torrent) {
 					]</span>
 					&raquo; <a href="#" onclick="$('#torrent_<?=$TorrentID?>').gtoggle(); return false;"><?=$ExtraInfo; ?></a>
 				</td>
-				<td class="number_column nobr"><?=Format::get_size($Size)?></td>
-				<td class="number_column"><?=number_format($Snatched)?></td>
-				<td class="number_column"><?=number_format($Seeders)?></td>
-				<td class="number_column"><?=number_format($Leechers)?></td>
+				<td class="td_size number_column nobr"><?=Format::get_size($Size)?></td>
+				<td class="td_snatched m_td_right number_column"><?=number_format($Snatched)?></td>
+				<td class="td_seeders m_td_right number_column"><?=number_format($Seeders)?></td>
+				<td class="td_leechers m_td_right number_column"><?=number_format($Leechers)?></td>
 			</tr>
 			<tr class="releases_<?=$ReleaseType?> groupid_<?=$GroupID?> edition_<?=$EditionID?> torrentdetails pad <? if (!isset($_GET['torrentid']) || $_GET['torrentid'] != $TorrentID) { ?>hidden<? } ?>" id="torrent_<?=$TorrentID; ?>">
 				<td colspan="5">

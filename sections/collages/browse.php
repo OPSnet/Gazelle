@@ -299,12 +299,12 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
 		die();
 	}
 ?>
-<table width="100%" class="collage_table">
+<table width="100%" class="collage_table m_table">
 	<tr class="colhead">
-		<td>Category</td>
+		<td class="m_th_left">Category</td>
 		<td>Collage</td>
-		<td>Torrents</td>
-		<td>Subscribers</td>
+		<td class="m_th_right">Torrents</td>
+		<td class="m_th_right">Subscribers</td>
 		<td>Updated</td>
 		<td>Author</td>
 	</tr>
@@ -318,10 +318,10 @@ foreach ($Collages as $Collage) {
 	//Print results
 ?>
 	<tr class="row<?=$Row?><?=($BookmarkView) ? " bookmark_$ID" : ''; ?>">
-		<td>
+		<td class="td_collage_category">
 			<a href="collages.php?action=search&amp;cats[<?=(int)$CategoryID?>]=1"><?=$CollageCats[(int)$CategoryID]?></a>
 		</td>
-		<td>
+		<td class="td_info">
 			<a href="collages.php?id=<?=$ID?>"><?=$Name?></a>
 <?	if ($BookmarkView) { ?>
 			<span style="float: right;">
@@ -330,10 +330,10 @@ foreach ($Collages as $Collage) {
 <?	} ?>
 			<div class="tags"><?=$TorrentTags->format('collages.php?action=search&amp;tags=')?></div>
 		</td>
-		<td class="number_column"><?=number_format((int)$NumTorrents)?></td>
-		<td class="number_column"><?=number_format((int)$Subscribers)?></td>
-		<td class="nobr"><?=time_diff($Updated)?></td>
-		<td><?=Users::format_username($UserID, false, false, false)?></td>
+		<td class="td_torrent_count m_td_right number_column"><?=number_format((int)$NumTorrents)?></td>
+		<td class="td_subscribers m_td_right number_column"><?=number_format((int)$Subscribers)?></td>
+		<td class="td_updated nobr"><?=time_diff($Updated)?></td>
+		<td class="td_author"><?=Users::format_username($UserID, false, false, false)?></td>
 	</tr>
 <?
 }

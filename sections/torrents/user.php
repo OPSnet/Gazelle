@@ -460,23 +460,23 @@ foreach ($Categories as $CatKey => $CatName) {
 	</div>
 <?	} else { ?>
 	<div class="linkbox"><?=$Pages?></div>
-	<table class="torrent_table cats" width="100%">
+	<table class="torrent_table cats m_table" width="100%">
 		<tr class="colhead">
 			<td class="cats_col"></td>
-			<td><a href="<?=header_link('Name', 'ASC')?>">Torrent</a></td>
+			<td class="m_th_left"><a href="<?=header_link('Name', 'ASC')?>">Torrent</a></td>
 			<td><a href="<?=header_link('Time')?>">Time</a></td>
 			<td><a href="<?=header_link('Size')?>">Size</a></td>
-			<td class="sign snatches">
+			<td class="sign snatches m_th_right">
 				<a href="<?=header_link('Snatched')?>">
 					<img src="static/styles/<?=$LoggedUser['StyleName']?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />
 				</a>
 			</td>
-			<td class="sign seeders">
+			<td class="sign seeders m_th_right">
 				<a href="<?=header_link('Seeders')?>">
 					<img src="static/styles/<?=$LoggedUser['StyleName']?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />
 				</a>
 			</td>
-			<td class="sign leechers">
+			<td class="sign leechers m_th_right">
 				<a href="<?=header_link('Leechers')?>">
 					<img src="static/styles/<?=$LoggedUser['StyleName']?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />
 				</a>
@@ -519,7 +519,7 @@ foreach ($Categories as $CatKey => $CatName) {
 			<td class="center cats_col">
 				<div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
 			</td>
-			<td class="big_info">
+			<td class="td_info big_info">
 <?	if ($LoggedUser['CoverArt']) { ?>
 				<div class="group_image float_left clear">
 					<? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
@@ -535,11 +535,11 @@ foreach ($Categories as $CatKey => $CatName) {
 					<div class="tags"><?=$TorrentTags->format('torrents.php?type='.$Action.'&amp;userid='.$UserID.'&amp;tags=')?></div>
 				</div>
 			</td>
-			<td class="nobr"><?=time_diff($Time, 1)?></td>
-			<td class="number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
-			<td class="number_column"><?=number_format($Torrent['Snatched'])?></td>
-			<td class="number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
-			<td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
+			<td class="td_time nobr"><?=time_diff($Time, 1)?></td>
+			<td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
+			<td class="td_snatched m_td_right number_column"><?=number_format($Torrent['Snatched'])?></td>
+			<td class="td_seeders m_td_right number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
+			<td class="td_leechers m_td_right number_column"><?=number_format($Torrent['Leechers'])?></td>
 		</tr>
 <?		}?>
 	</table>

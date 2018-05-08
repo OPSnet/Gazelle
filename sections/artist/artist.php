@@ -325,10 +325,10 @@ foreach ($Importances as $Group) {
 		if ($OpenTable) { ?>
 		</table>
 <?		} ?>
-			<table class="torrent_table grouped release_table" id="torrents_<?=$ReleaseTypeLabel?>">
+			<table class="torrent_table grouped release_table m_table" id="torrents_<?=$ReleaseTypeLabel?>">
 				<tr class="colhead_dark">
 					<td class="small"><!-- expand/collapse --></td>
-					<td width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?=$DisplayName?></strong> (<a href="#" onclick="$('.releases_<?=$ReleaseType?>').gtoggle(true); return false;">View</a>)</td>
+					<td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?=$DisplayName?></strong> (<a href="#" onclick="$('.releases_<?=$ReleaseType?>').gtoggle(true); return false;">View</a>)</td>
 					<td>Size</td>
 					<td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
 					<td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
@@ -384,12 +384,12 @@ foreach ($Importances as $Group) {
 	$SnatchedGroupClass = ($GroupFlags['IsSnatched'] ? ' snatched_group' : '');
 ?>
 			<tr class="releases_<?=$ReleaseType?> group discog<?=$SnatchedGroupClass . $HideDiscog?>">
-				<td class="center">
+				<td class="td_collapse center m_td_left">
 					<div id="showimg_<?=$GroupID?>" class="<?=($ShowGroups ? 'hide' : 'show')?>_torrents">
 						<a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$GroupID?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>
 					</div>
 				</td>
-				<td colspan="5" class="big_info">
+				<td colspan="5" class="td_info big_info">
 <?	if ($LoggedUser['CoverArt']) { ?>
 					<div class="group_image float_left clear">
 						<? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
@@ -452,7 +452,7 @@ foreach ($Importances as $Group) {
 		$LastMedia = $Torrent['Media'];
 ?>
 	<tr class="releases_<?=$ReleaseType?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?=$SnatchedTorrentClass . $SnatchedGroupClass . $HideDiscog . $HideTorrents?>">
-		<td colspan="2">
+		<td class="td_info" colspan="2">
 			<span>
 				[ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=$Torrent['HasFile'] ? 'DL' : 'Missing'?></a>
 <?		if (Torrents::can_use_token($Torrent)) { ?>
@@ -463,10 +463,10 @@ foreach ($Importances as $Group) {
 			</span>
 			&nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?></a>
 		</td>
-		<td class="number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
-		<td class="number_column"><?=number_format($Torrent['Snatched'])?></td>
-		<td class="number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
-		<td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
+		<td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
+		<td class="td_snatched number_column m_td_right"><?=number_format($Torrent['Snatched'])?></td>
+		<td class="td_seeders number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?> m_td_right"><?=number_format($Torrent['Seeders'])?></td>
+		<td class="td_leechers number_column m_td_right"><?=number_format($Torrent['Leechers'])?></td>
 	</tr>
 <?
 	}

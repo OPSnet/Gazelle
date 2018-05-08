@@ -174,11 +174,11 @@ if ($CollageCovers !== 0) { ?>
 	}
 }
 ?>
-		<table class="torrent_table grouping cats" id="torrent_table">
+		<table class="torrent_table grouping cats m_table" id="torrent_table">
 			<tr class="colhead_dark">
 				<td><!-- expand/collapse --></td>
 				<td><!-- Category --></td>
-				<td width="70%"><strong>Torrents</strong></td>
+				<td class="m_th_left m_th_left_collapsable" width="70%"><strong>Torrents</strong></td>
 				<td>Size</td>
 				<td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
 				<td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
@@ -244,17 +244,17 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 		$ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1);
 		?>
 		<tr class="group discog<?= $SnatchedGroupClass ?>" id="group_<?= $GroupID ?>">
-			<td class="center">
+			<td class="td_collapse m_td_left center">
 				<div id="showimg_<?= $GroupID ?>" class="<?= ($ShowGroups ? 'hide' : 'show') ?>_torrents">
 					<a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $GroupID ?>, this, event);"
 					   title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collape all groups on this page."></a>
 				</div>
 			</td>
-			<td class="center">
+			<td class="m_hidden center">
 				<div title="<?= $TorrentTags->title() ?>"
 					 class="tooltip <?= Format::css_category($GroupCategoryID) ?> <?= $TorrentTags->css_name() ?>"></div>
 			</td>
-			<td colspan="5">
+			<td class="td_info" colspan="5">
 				<strong><?= $DisplayName ?></strong>
 				<span style="text-align: right;" class="float_right">
 	<? if (!$Sneaky) { ?>
@@ -296,9 +296,10 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 				?>
 				<tr class="group_torrent groupid_<?= $GroupID ?> edition<?= $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1 ? ' hidden' : '') ?>">
 					<td colspan="7" class="edition_info"><strong><a href="#"
-																	onclick="toggle_edition(<?= $GroupID ?>, <?= $EditionID ?>, this, event)"
-																	class="tooltip"
-																	title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= Torrents::edition_string($Torrent, $Group) ?>
+						onclick="toggle_edition(<?= $GroupID ?>, <?= $EditionID ?>, this, event)"
+						class="tooltip"
+						title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a>
+							<?= Torrents::edition_string($Torrent, $Group) ?>
 						</strong></td>
 				</tr>
 				<?
@@ -310,7 +311,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 			$LastMedia = $Torrent['Media'];
 			?>
 			<tr class="group_torrent torrent_row groupid_<?= $GroupID ?> edition_<?= $EditionID ?><?= $SnatchedTorrentClass . $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1 ? ' hidden' : '') ?>">
-				<td colspan="3">
+				<td class="td_info" colspan="3">
 				<span>[ <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
 						   class="tooltip" title="Download">DL</a>
 					<? if (Torrents::can_use_token($Torrent)) { ?>
@@ -325,10 +326,10 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 					&nbsp;&nbsp;&raquo;&nbsp; <a
 							href="torrents.php?id=<?= $GroupID ?>&amp;torrentid=<?= $TorrentID ?>"><?= Torrents::torrent_info($Torrent) ?></a>
 				</td>
-				<td class="number_column nobr"><?= Format::get_size($Torrent['Size']) ?></td>
-				<td class="number_column"><?= number_format($Torrent['Snatched']) ?></td>
-				<td class="number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
-				<td class="number_column"><?= number_format($Torrent['Leechers']) ?></td>
+				<td class="td_size number_column nobr"><?= Format::get_size($Torrent['Size']) ?></td>
+				<td class="td_snatched m_td_right number_column"><?= number_format($Torrent['Snatched']) ?></td>
+				<td class="td_seeders m_td_right number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
+				<td class="td_leechers m_td_right number_column"><?= number_format($Torrent['Leechers']) ?></td>
 			</tr>
 			<?
 		}
