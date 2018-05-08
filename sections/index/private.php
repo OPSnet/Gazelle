@@ -235,6 +235,17 @@ if (($PerfectCount = $Cache->get_value('stats_perfect_count')) === false) {
 <?
 //End Torrent Stats
 
+if (($CollageCount = $Cache->get_value('stats_collages')) === false) {
+	$DB->query("
+		SELECT COUNT(ID)
+		FROM collages");
+	list($CollageCount) = $DB->next_record();
+	$Cache->cache_value('stats_collages', $CollageCount, 11280); //staggered 1 week cache
+}
+?>
+				<li>Collages: <?=number_format($CollageCount)?></li>
+<?
+
 if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
 	$DB->query("
 		SELECT COUNT(ID)
