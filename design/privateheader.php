@@ -89,19 +89,15 @@ if (isset(G::$LoggedUser['Notify'])) {
 <?
 if ($UseTooltipster) { ?>
 	<link rel="stylesheet" href="<?=STATIC_SERVER?>styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/tooltipster/style.css')?>" type="text/css" media="screen" />
+<? } ?>
+	<meta name="viewport" content="width=device-width" />
 <?
-}
-if ($Mobile) { ?>
-	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0, user-scalable=no;" />
-	<link rel="stylesheet" type="text/css" href="<?=STATIC_SERVER ?>styles/mobile/style.css" />
-<?
-} else {
-	if (empty(G::$LoggedUser['StyleURL'])) {
+if (empty(G::$LoggedUser['StyleURL'])) {
 ?>
 	<link rel="stylesheet" type="text/css" title="<?=G::$LoggedUser['StyleName']?>" media="screen"
 			href="<?=STATIC_SERVER?>styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/'.G::$LoggedUser['StyleName'].'/style.css')?>" />
 <?
-	} else {
+} else {
 		$StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);
 		if (substr(G::$LoggedUser['StyleURL'], -4) == '.css'
 				&& $StyleURLInfo['query'].$StyleURLInfo['fragment'] == ''
@@ -114,7 +110,6 @@ if ($Mobile) { ?>
 ?>
 	<link rel="stylesheet" type="text/css" media="screen" href="<?=$StyleURL?>" title="External CSS" />
 <?
-	}
 }
 if (!empty(G::$LoggedUser['UseOpenDyslexic'])) {
 		// load the OpenDyslexic font
@@ -186,6 +181,11 @@ if ($NotificationsManager->is_skipped(NotificationsManager::SUBSCRIPTIONS)) {
 ?>
 </head>
 <body id="<?=$Document == 'collages' ? 'collage' : $Document?>">
+	<input id="extracb1" class="hidden" type="checkbox">
+	<input id="extracb2" class="hidden" type="checkbox">
+	<input id="extracb3" class="hidden" type="checkbox">
+	<input id="extracb4" class="hidden" type="checkbox">
+	<input id="extracb5" class="hidden" type="checkbox">
 	<div id="wrapper">
 		<h1 class="hidden"><?=SITE_NAME?></h1>
 		<div id="header">
@@ -296,6 +296,9 @@ if (check_perms('site_send_unlimited_invites')) {
 					<li id="nav_better"<?=
 						Format::add_class($PageID, array('better'), 'active', true)?>>
 						<a href="better.php">Better</a></li>
+					<li id="nav_logchecker"<?=
+						Format::add_class($PageID, array('logchecker'), 'active', true)?>>
+						<a href="logchecker.php">Log Checker</a></li>
 					<li id="nav_random"<?=
 						Format::add_class($PageID, array('random'), 'active', true)?>>
 						<a href="random.php">Random Album</a></li>

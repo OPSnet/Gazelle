@@ -11,29 +11,22 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 	<meta name="referrer" content="none, no-referrer, same-origin" />
 	<link rel="shortcut icon" href="favicon.ico" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<? if ($Mobile) { ?>
-	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0, user-scalable=no;" />
-	<link href="<?=STATIC_SERVER ?>styles/mobile/style.css?v=<?=filemtime(SERVER_ROOT.'/static/mobile/style.css')?>" rel="stylesheet" type="text/css" />
-<? } else {
+	<meta name="viewport" content="width=device-width; initial-scale=1.0;" />
+	<?
 	$styles = [];
 	list($month, $day) = explode(' ', date('n d'));
 	if (($month == 12 && $day >= 12) || ($month == 1 && $day < 4)) {
 		$styles = array_merge($styles, ['red', 'green', 'white']);
 	}
 	$style = (count($styles) > 0) ? $styles[array_rand($styles)] : '';
-?>
+	?>
 	<link href="<?=STATIC_SERVER ?>styles/public/style<?=$style?>.css?v=<?=filemtime(SERVER_ROOT."/static/styles/public/style{$style}.css")?>" rel="stylesheet" type="text/css" />
-<? } ?>
 	<script src="<?=STATIC_SERVER?>functions/jquery.js" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/script_start.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/script_start.js')?>" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/ajax.class.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/ajax.class.js')?>" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/cookie.class.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/cookie.class.js')?>" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/storage.class.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/storage.class.js')?>" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/global.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/global.js')?>" type="text/javascript"></script>
-<? if ($Mobile) { ?>
-	<script src="<?=STATIC_SERVER?>styles/mobile/style.js?v=<?=filemtime(SERVER_ROOT.'/static/mobile/style.js')?>" type="text/javascript"></script>
-<? }
-?>
 </head>
 <body>
 <div id="head">

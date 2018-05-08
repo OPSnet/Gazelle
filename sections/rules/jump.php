@@ -1,9 +1,9 @@
 <!-- Other Sections -->
 <h3 id="jump">Rule Sections</h3>
 <div class="box pad rule_table" style="padding: 10px 10px 10px 20px;">
-	<table width="100%">
+	<table class="m_table" width="100%">
 		<tr class="colhead">
-			<td style="width: 150px;">Category</td>
+			<td class="m_th_left" style="width: 150px;">Category</td>
 			<td style="width: 400px;">Additional Information</td>
 		</tr>
 		<tr class="rowb">

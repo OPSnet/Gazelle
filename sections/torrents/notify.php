@@ -225,7 +225,7 @@ if (empty($Results)) {
 <?		} ?>
 </div>
 <form class="manage_form" name="torrents" id="notificationform_<?=$FilterID?>" action="">
-<table class="torrent_table cats checkboxes border">
+<table class="torrent_table cats checkboxes border m_table">
 	<tr class="colhead">
 		<td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$FilterID?>', this, '.notify_box')" /></td>
 		<td class="small cats_col"></td>
@@ -285,13 +285,13 @@ if (empty($Results)) {
 		// print row
 ?>
 	<tr class="torrent torrent_row<?=($TorrentInfo['IsSnatched'] ? ' snatched_torrent' : '') . ($GroupInfo['Flags']['IsSnatched'] ? ' snatched_group' : '') . ($MatchingArtistsText ? ' tooltip" title="'.display_str($MatchingArtistsText) : '')?>" id="torrent<?=$TorrentID?>">
-		<td style="text-align: center;">
+		<td class="m_td_left td_checkbox" style="text-align: center;">
 			<input type="checkbox" class="notify_box notify_box_<?=$FilterID?>" value="<?=$TorrentID?>" id="clear_<?=$TorrentID?>" tabindex="1" />
 		</td>
 		<td class="center cats_col">
 			<div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
 		</td>
-		<td class="big_info">
+		<td class="td_info big_info">
 <? if ($LoggedUser['CoverArt']) { ?>
 			<div class="group_image float_left clear">
 				<? ImageTools::cover_thumb($GroupInfo['WikiImage'], $GroupCategoryID) ?>
@@ -327,12 +327,12 @@ if (empty($Results)) {
 				<div class="tags"><?=$TorrentTags->format()?></div>
 			</div>
 		</td>
-		<td><?=$TorrentInfo['FileCount']?></td>
-		<td class="number_column nobr"><?=time_diff($TorrentInfo['Time'])?></td>
-		<td class="number_column nobr"><?=Format::get_size($TorrentInfo['Size'])?></td>
-		<td class="number_column"><?=number_format($TorrentInfo['Snatched'])?></td>
-		<td class="number_column"><?=number_format($TorrentInfo['Seeders'])?></td>
-		<td class="number_column"><?=number_format($TorrentInfo['Leechers'])?></td>
+		<td class="td_file_count"><?=$TorrentInfo['FileCount']?></td>
+		<td class="td_time number_column nobr"><?=time_diff($TorrentInfo['Time'])?></td>
+		<td class="td_size number_column nobr"><?=Format::get_size($TorrentInfo['Size'])?></td>
+		<td class="td_snatched m_td_right number_column"><?=number_format($TorrentInfo['Snatched'])?></td>
+		<td class="td_seeders m_td_right number_column"><?=number_format($TorrentInfo['Seeders'])?></td>
+		<td class="td_leechers m_td_right number_column"><?=number_format($TorrentInfo['Leechers'])?></td>
 	</tr>
 <?
 		}

@@ -366,11 +366,11 @@ foreach ($TopVotes as $GroupID => $Group) {
 	$TorrentTable .= ob_get_clean();
 }
 ?>
-<table class="torrent_table grouping cats" id="discog_table">
+<table class="torrent_table grouping cats m_table" id="discog_table">
 	<tr class="colhead_dark">
 		<td><!-- expand/collapse --></td>
 		<td class="cats_col"><!-- category --></td>
-		<td width="70%">Torrents</td>
+		<td class="m_th_left" width="70%">Torrents</td>
 		<td>Size</td>
 		<td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
 		<td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>

@@ -225,7 +225,7 @@ class Format {
 	 * @return A sanitized HTML page listing.
 	 */
 	public static function get_pages($StartPage, $TotalRecords, $ItemsPerPage, $ShowPages = 11, $Anchor = '') {
-		global $Document, $Method, $Mobile;
+		global $Document, $Method;
 		$Location = "$Document.php";
 		$StartPage = ceil($StartPage);
 		$TotalPages = 0;
@@ -268,28 +268,24 @@ class Format {
 			}
 			//End change
 
-			if (!$Mobile) {
-				for ($i = $StartPosition; $i <= $StopPage; $i++) {
-					if ($i != $StartPage) {
-						$Pages .= "<a href=\"$Location?page=$i$QueryString$Anchor\">";
-					}
-					$Pages .= '<strong>';
-					if ($i * $ItemsPerPage > $TotalRecords) {
-						$Pages .= ((($i - 1) * $ItemsPerPage) + 1)."-$TotalRecords";
-					} else {
-						$Pages .= ((($i - 1) * $ItemsPerPage) + 1).'-'.($i * $ItemsPerPage);
-					}
-
-					$Pages .= '</strong>';
-					if ($i != $StartPage) {
-						$Pages .= '</a>';
-					}
-					if ($i < $StopPage) {
-						$Pages .= ' | ';
-					}
+			for ($i = $StartPosition; $i <= $StopPage; $i++) {
+				if ($i != $StartPage) {
+					$Pages .= "<a href=\"$Location?page=$i$QueryString$Anchor\">";
 				}
-			} else {
-				$Pages .= $StartPage;
+				$Pages .= '<strong>';
+				if ($i * $ItemsPerPage > $TotalRecords) {
+					$Pages .= ((($i - 1) * $ItemsPerPage) + 1)."-$TotalRecords";
+				} else {
+					$Pages .= ((($i - 1) * $ItemsPerPage) + 1).'-'.($i * $ItemsPerPage);
+				}
+
+				$Pages .= '</strong>';
+				if ($i != $StartPage) {
+					$Pages .= '</a>';
+				}
+				if ($i < $StopPage) {
+					$Pages .= ' | ';
+				}
 			}
 
 			if ($StartPage && $StartPage < $TotalPages) {

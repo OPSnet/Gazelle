@@ -168,7 +168,7 @@ foreach ($GroupIDs as $GroupID) {
 			$LastMedia = $Torrent['Media'];
 ?>
 			<tr class="group_torrent torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . (!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] == 1 ? ' hidden' : '')?>">
-				<td colspan="3">
+				<td class="td_info" colspan="3">
 					<span class="brackets">
 						<a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
 <?			if (Torrents::can_use_token($Torrent)) { ?>
@@ -178,10 +178,10 @@ foreach ($GroupIDs as $GroupID) {
 					</span>
 					&nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?></a>
 				</td>
-				<td class="number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
-				<td class="number_column"><?=number_format($Torrent['Snatched'])?></td>
-				<td class="number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
-				<td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
+				<td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
+				<td class="td_snatched m_td_right number_column"><?=number_format($Torrent['Snatched'])?></td>
+				<td class="td_seeders m_td_right number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
+				<td class="td_leechers m_td_right number_column"><?=number_format($Torrent['Leechers'])?></td>
 			</tr>
 <?
 		}
@@ -206,11 +206,11 @@ foreach ($GroupIDs as $GroupID) {
 ?>
 			<tr class="torrent torrent_row<?=$SnatchedTorrentClass . $SnatchedGroupClass?>" id="group_<?=$GroupID?>">
 				<td></td>
-				<td class="center">
+				<td class="td_collage_category center">
 					<div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>">
 					</div>
 				</td>
-				<td>
+				<td class="td_info">
 					<span class="brackets">
 						<a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
 <?		if (Torrents::can_use_token($Torrent)) { ?>
@@ -222,10 +222,10 @@ foreach ($GroupIDs as $GroupID) {
 <?		Votes::vote_link($GroupID, $UserVote); ?>
 					<div class="tags"><?=$TorrentTags->format()?></div>
 				</td>
-				<td class="number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
-				<td class="number_column"><?=number_format($Torrent['Snatched'])?></td>
-				<td class="number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
-				<td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
+				<td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
+				<td class="td_snatched m_td_right number_column"><?=number_format($Torrent['Snatched'])?></td>
+				<td class="td_seeders m_td_right number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
+				<td class="td_leechers m_td_right number_column"><?=number_format($Torrent['Leechers'])?></td>
 			</tr>
 <?
 	}
@@ -604,11 +604,11 @@ if ($CollageCovers != 0) { ?>
 	}
 }
 ?>
-		<table class="torrent_table grouping cats" id="discog_table">
+		<table class="torrent_table grouping cats m_table" id="discog_table">
 			<tr class="colhead_dark">
 				<td><!-- expand/collapse --></td>
 				<td><!-- Category --></td>
-				<td width="70%"><strong>Torrents</strong></td>
+				<td class="m_th_left" width="70%"><strong>Torrents</strong></td>
 				<td>Size</td>
 				<td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
 				<td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>

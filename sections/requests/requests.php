@@ -515,15 +515,15 @@ View::show_header($Title, 'requests');
 		<?=	$PageLinks?>
 	</div>
 <?		} ?>
-	<table id="request_table" class="request_table border" cellpadding="6" cellspacing="1" border="0" width="100%">
+	<table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
 		<tr class="colhead_dark">
-			<td style="width: 38%;" class="nobr">
+			<td style="width: 38%;" class="m_th_left nobr">
 				<strong>Request Name</strong> / <a href="?order=year&amp;sort=<?=($OrderBy === 'year' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Year</strong></a>
 			</td>
-			<td class="nobr">
+			<td class="m_th_right nobr">
 				<a href="?order=votes&amp;sort=<?=($OrderBy === 'votes' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Votes</strong></a>
 			</td>
-			<td class="nobr">
+			<td class="m_th_right nobr">
 				<a href="?order=bounty&amp;sort=<?=($OrderBy === 'bounty' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Bounty</strong></a>
 			</td>
 			<td class="nobr">
@@ -605,16 +605,16 @@ View::show_header($Title, 'requests');
 					<?=$TagList?>
 				</div>
 			</td>
-			<td class="nobr">
+			<td class="m_td_right nobr">
 				<span id="vote_count_<?=$RequestID?>"><?=number_format($VoteCount)?></span>
 <?	 	if (!$IsFilled && check_perms('site_vote')) { ?>
 				&nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets"><strong>+</strong></a>
 <?		} ?>
 			</td>
-			<td class="number_column nobr">
+			<td class="m_td_right number_column nobr">
 				<?=Format::get_size($Bounty)?>
 			</td>
-			<td class="nobr">
+			<td class="m_hidden nobr">
 <?		if ($IsFilled) { ?>
 				<a href="torrents.php?<?=(strtotime($Request['TimeFilled']) < $TimeCompare ? 'id=' : 'torrentid=') . $Request['TorrentID']?>"><strong><?=time_diff($Request['TimeFilled'], 1)?></strong></a>
 <?		} else { ?>

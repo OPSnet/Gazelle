@@ -412,11 +412,11 @@ function generate_torrent_table($Caption, $Tag, $Details, $Limit) {
 		</small>
 <?	} ?>
 		</h3>
-	<table class="torrent_table cats numbering border">
+	<table class="torrent_table cats numbering border m_table">
 	<tr class="colhead">
 		<td class="center" style="width: 15px;"></td>
 		<td class="cats_col"></td>
-		<td>Name</td>
+		<td class="m_th_left m_th_left_collapsable">Name</td>
 		<td style="text-align: right;">Size</td>
 		<td style="text-align: right;">Data</td>
 		<td style="text-align: right;" class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName']?>/images/snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
@@ -543,9 +543,9 @@ function generate_torrent_table($Caption, $Tag, $Details, $Limit) {
 		// print row
 ?>
 	<tr class="torrent row<?=$Highlight . ($IsBookmarked ? ' bookmarked' : '') . ($IsSnatched ? ' snatched_torrent' : '')?>">
-		<td style="padding: 8px; text-align: center;"><strong><?=$Rank?></strong></td>
-		<td class="center cats_col"><div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div></td>
-		<td class="big_info">
+		<td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$Rank?></strong></td>
+		<td class="center cats_col m_hidden"><div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div></td>
+		<td class="td_info big_info">
 <?		if ($LoggedUser['CoverArt']) { ?>
 			<div class="group_image float_left clear">
 				<? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
@@ -570,12 +570,12 @@ function generate_torrent_table($Caption, $Tag, $Details, $Limit) {
 				<div class="tags"><?=$TorrentTags->format()?></div>
 			</div>
 		</td>
-		<td class="number_column nobr"><?=Format::get_size($Size)?></td>
-		<td class="number_column nobr"><?=Format::get_size($Data)?></td>
-		<td class="number_column"><?=number_format((double)$Snatched)?></td>
-		<td class="number_column"><?=number_format((double)$Seeders)?></td>
-		<td class="number_column"><?=number_format((double)$Leechers)?></td>
-		<td class="number_column"><?=number_format($Seeders + $Leechers)?></td>
+		<td class="td_size number_column nobr"><?=Format::get_size($Size)?></td>
+		<td class="td_data number_column nobr"><?=Format::get_size($Data)?></td>
+		<td class="td_snatched number_column m_td_right"><?=number_format((double)$Snatched)?></td>
+		<td class="td_seeders number_column m_td_right"><?=number_format((double)$Seeders)?></td>
+		<td class="td_leechers number_column m_td_right"><?=number_format((double)$Leechers)?></td>
+		<td class="td_seeders_leechers number_column m_hidden"><?=number_format($Seeders + $Leechers)?></td>
 	</tr>
 <?
 	} //foreach ($Details as $Detail)
