@@ -52,7 +52,7 @@ foreach ($Forums as $Forum) {
 */
 ?>
 	<tr class="row<?=$Row?>">
-		<td class="td_read <?=$Read?> <?=$Tooltip?> m_hidden" title="<?=ucfirst($Read)?>"></td>
+		<td class="td_read <?=$Read?> <?=$Tooltip?>" title="<?=ucfirst($Read)?>"></td>
 		<td class="td_forum">
 			<h4 class="min_padding">
 				<a class="<?=$Tooltip?>" href="forums.php?action=viewforum&amp;forumid=<?=$ForumID?>" title="<?=display_str($ForumDescription)?>"><?=display_str($ForumName)?></a>
