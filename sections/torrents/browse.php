@@ -663,7 +663,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 			</span>
 			&raquo; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Data)?><? if ($Reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><? } ?></a>
 		</td>
-		<td class="td_files"><?=$Data['FileCount']?></td>
+		<td class="td_file_count"><?=$Data['FileCount']?></td>
 		<td class="td_time nobr"><?=time_diff($Data['Time'], 1)?></td>
 		<td class="td_size number_column nobr"><?=Format::get_size($Data['Size'])?></td>
 		<td class="td_snatched number_column m_td_right"><?=number_format($Data['Snatched'])?></td>
@@ -696,10 +696,10 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 <?		if ($GroupResults) { ?>
 		<td></td>
 <?		} ?>
-		<td class="center cats_col">
+		<td class="center cats_col m_cats_col m_td_left">
 			<div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($CategoryID)?> <?=$TorrentTags->css_name()?>"></div>
 		</td>
-		<td class="big_info">
+		<td class="td_info big_info">
 <?		if ($LoggedUser['CoverArt']) { ?>
 			<div class="group_image float_left clear">
 				<?=ImageTools::cover_thumb($GroupInfo['WikiImage'], $CategoryID) ?>
@@ -718,12 +718,12 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 				<div class="tags"><?=$TorrentTags->format("torrents.php?$Action&amp;taglist=")?></div>
 			</div>
 		</td>
-		<td><?=$Data['FileCount']?></td>
-		<td class="nobr"><?=time_diff($Data['Time'], 1)?></td>
-		<td class="number_column nobr"><?=Format::get_size($Data['Size'])?></td>
-		<td class="number_column"><?=number_format($Data['Snatched'])?></td>
-		<td class="number_column<?=($Data['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Data['Seeders'])?></td>
-		<td class="number_column"><?=number_format($Data['Leechers'])?></td>
+		<td class="td_file_count"><?=$Data['FileCount']?></td>
+		<td class="td_time nobr"><?=time_diff($Data['Time'], 1)?></td>
+		<td class="td_size number_column nobr"><?=Format::get_size($Data['Size'])?></td>
+		<td class="td_snatched m_td_right number_column"><?=number_format($Data['Snatched'])?></td>
+		<td class="td_seeders m_td_right number_column<?=($Data['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Data['Seeders'])?></td>
+		<td class="td_leechers m_td_right number_column"><?=number_format($Data['Leechers'])?></td>
 	</tr>
 <?
 	}

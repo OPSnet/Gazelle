@@ -236,7 +236,7 @@ if (count($Forum) === 0) {
 		}
 ?>
 	<tr class="row<?=$Row?>">
-		<td class="td_read <?=$Read?> <?=$Tooltip?> m_hidden" title="<?=ucwords(str_replace('_', ' ', $Read))?>"></td>
+		<td class="td_read <?=$Read?> <?=$Tooltip?>" title="<?=ucwords(str_replace('_', ' ', $Read))?>"></td>
 		<td class="td_latest">
 			<span style="float: left;" class="last_topic">
 <?
