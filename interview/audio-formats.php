@@ -44,12 +44,12 @@ Here&#8217;s an example of how the file size of the same song varies depending o
 <strong>Transparency</strong> is a term used to describe the audible quality of a lossy music file. A lossy file is considered transparent if the average human cannot tell the difference between the lossy file and a lossless file of the same song by just listening to both without knowing which file is which.
 For most people, MP3 192kbps (CBR) is considered transparent.
 <h2>Allowed Formats</h2>
-While there are several types of lossless and lossy music formats, only a few are allowed to be uploaded to What.CD.
+While there are several types of lossless and lossy music formats, only a few are allowed to be uploaded to ' . $SITENAME . '.
 <h3>Allowed Lossless Formats</h3>
 <ul>
 <li>FLAC</li>
 </ul>
-Because lossless formats can be transcoded between each other without a loss in quality, the only allowed lossless format on What.CD is FLAC. However, you can download the FLAC and convert to ALAC (for iTunes) or whatever lossless or lossy format you prefer.
+Because lossless formats can be transcoded between each other without a loss in quality, the only allowed lossless format on ' . $SITENAME . ' is FLAC. However, you can download the FLAC and convert to ALAC (for iTunes) or whatever lossless or lossy format you prefer.
 <h3>Allowed Lossy Formats</h3>
 <ul>
 <li>MP3 (the minimum bitrate for MP3 is 192kbps (CBR))</li>
@@ -57,7 +57,7 @@ Because lossless formats can be transcoded between each other without a loss in 
 <li>AC3 (usually found in DVDs)</li>
 <li>DTS (usually found in DVDs)</li>
 </ul>
-MP3 is the most popular lossy format on What.CD. We allow AAC files bought from the iTunes store because there are often iTunes-specific bonus tracks, and since AAC is lossy it cannot be converted to other formats without a loss in quality. Similarly, AC3 and DTS are music formats often found on DVDs and since they are lossy, they cannot be converted to other formats without a loss in quality.');
+MP3 is the most popular lossy format on ' . $SITENAME . '. We allow AAC files bought from the iTunes store because there are often iTunes-specific bonus tracks, and since AAC is lossy it cannot be converted to other formats without a loss in quality. Similarly, AC3 and DTS are music formats often found on DVDs and since they are lossy, they cannot be converted to other formats without a loss in quality.');
 
 newsbot();
 
