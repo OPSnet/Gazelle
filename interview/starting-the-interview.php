@@ -10,10 +10,10 @@ newsbox('Starting the interview', '
 <h3>Suggested Clients</h3>
 <ul>
 <li>mIRC (Windows)</li>
-<li>X-Chat (Windows, Linux)</li>
+<li>Hexchat (Windows, Linux)</li>
 <li>Colloquy (Mac OS)</li>
-<li><a title="mibbit" href="https://chat.mibbit.com/" target="_blank">mibbit</a> (web browser)</li>
 </ul>
+<strong>Note:</strong> Web-based IRC clients, such as Mibbit, are very unstable, and therefor not recommended to use.<br /><br />
 Once you have downloaded, installed, and set up your IRC client, read on!
 
 <h3>Connecting to ' . $SITENAME . '&#8217;s IRC</h3>
