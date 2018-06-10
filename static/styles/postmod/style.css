@@ -215,6 +215,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 	margin: 30px 0 0 340px;
 	font-family: Helvetica, Arial, sans-serif;
 	font-size: 11pt;
+	min-width: 595px;
 }
 
 #menu a {
