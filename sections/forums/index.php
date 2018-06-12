@@ -9,100 +9,31 @@ if (!empty($LoggedUser['DisableForums'])) {
 $Forums = Forums::get_forums();
 $ForumCats = Forums::get_forum_categories();
 
-if (!empty($_POST['action'])) {
-	switch ($_POST['action']) {
-		case 'reply':
-			require(SERVER_ROOT.'/sections/forums/take_reply.php');
-			break;
-		case 'new':
-			require(SERVER_ROOT.'/sections/forums/take_new_thread.php');
-			break;
-		case 'mod_thread':
-			require(SERVER_ROOT.'/sections/forums/mod_thread.php');
-			break;
-		case 'poll_mod':
-			require(SERVER_ROOT.'/sections/forums/poll_mod.php');
-			break;
-		case 'add_poll_option':
-			require(SERVER_ROOT.'/sections/forums/add_poll_option.php');
-			break;
-		case 'warn':
-			require(SERVER_ROOT.'/sections/forums/warn.php');
-			break;
-		case 'take_warn':
-			require(SERVER_ROOT.'/sections/forums/take_warn.php');
-			break;
-		case 'take_topic_notes':
-			require(SERVER_ROOT.'/sections/forums/take_topic_notes.php');
-			break;
+G::$Router->addGet('', SERVER_ROOT.'/sections/forums/main.php');
 
-		default:
-			error(0);
-	}
-} elseif (!empty($_GET['action'])) {
-	switch ($_GET['action']) {
-		case 'viewforum':
-			// Page that lists all the topics in a forum
-			require(SERVER_ROOT.'/sections/forums/forum.php');
-			break;
-		case 'viewthread':
-		case 'viewtopic':
-			// Page that displays threads
-			require(SERVER_ROOT.'/sections/forums/thread.php');
-			break;
-		case 'ajax_get_edit':
-			// Page that switches edits for mods
-			require(SERVER_ROOT.'/sections/forums/ajax_get_edit.php');
-			break;
-		case 'new':
-			// Create a new thread
-			require(SERVER_ROOT.'/sections/forums/newthread.php');
-			break;
-		case 'takeedit':
-			// Edit posts
-			require(SERVER_ROOT.'/sections/forums/takeedit.php');
-			break;
-		case 'get_post':
-			// Get posts
-			require(SERVER_ROOT.'/sections/forums/get_post.php');
-			break;
-        case 'get_post2':
-            require(SERVER_ROOT.'/sections/forums/get_post2.php');
-            break;
-		case 'delete':
-			// Delete posts
-			require(SERVER_ROOT.'/sections/forums/delete.php');
-			break;
-		case 'catchup':
-			// Catchup
-			require(SERVER_ROOT.'/sections/forums/catchup.php');
-			break;
-		case 'search':
-			// Search posts
-			require(SERVER_ROOT.'/sections/forums/search.php');
-			break;
-		case 'change_vote':
-			// Change poll vote
-			require(SERVER_ROOT.'/sections/forums/change_vote.php');
-			break;
-		case 'delete_poll_option':
-			require(SERVER_ROOT.'/sections/forums/delete_poll_option.php');
-			break;
-		case 'sticky_post':
-			require(SERVER_ROOT.'/sections/forums/sticky_post.php');
-			break;
-		case 'edit_rules':
-			require(SERVER_ROOT.'/sections/forums/edit_rules.php');
-			break;
-		case 'thread_subscribe':
-			break;
-		case 'warn':
-			require(SERVER_ROOT.'/sections/forums/warn.php');
-			break;
-		default:
-			error(404);
-	}
-} else {
-	require(SERVER_ROOT.'/sections/forums/main.php');
-}
+G::$Router->addPost('reply', SERVER_ROOT.'/sections/forums/take_reply.php');
+G::$Router->addPost('new', SERVER_ROOT.'/sections/forums/take_new_thread.php');
+G::$Router->addPost('mod_thread', SERVER_ROOT.'/sections/forums/mod_thread.php');
+G::$Router->addPost('poll_mod', SERVER_ROOT.'/sections/forums/poll_mod.php');
+G::$Router->addPost('add_poll_option', SERVER_ROOT.'/sections/forums/add_poll_option.php');
+G::$Router->addPost('warn', SERVER_ROOT.'/sections/forums/warn.php');
+G::$Router->addPost('take_warn', SERVER_ROOT.'/sections/forums/take_warn.php');
+G::$Router->addPost('take_topic_notes', SERVER_ROOT.'/sections/forums/take_topic_notes.php');
+G::$Router->addPost('takeedit', SERVER_ROOT.'/sections/forums/takeedit.php');
 
+G::$Router->addGet('viewforum', SERVER_ROOT.'/sections/forums/forum.php');
+G::$Router->addGet('viewthread', SERVER_ROOT.'/sections/forums/thread.php');
+G::$Router->addGet('viewtopic', SERVER_ROOT.'/sections/forums/thread.php');
+G::$Router->addGet('ajax_get_edit', SERVER_ROOT.'/sections/forums/ajax_get_edit.php');
+G::$Router->addGet('new', SERVER_ROOT.'/sections/forums/newthread.php');
+G::$Router->addGet('takeedit', SERVER_ROOT.'/sections/forums/takeedit.php');
+G::$Router->addGet('get_post', SERVER_ROOT.'/sections/forums/get_post.php');
+G::$Router->addGet('delete', SERVER_ROOT.'/sections/forums/delete.php');
+G::$Router->addGet('catchup', SERVER_ROOT.'/sections/forums/catchup.php');
+G::$Router->addGet('search', SERVER_ROOT.'/sections/forums/search.php');
+G::$Router->addGet('change_vote', SERVER_ROOT.'/sections/forums/change_vote.php');
+G::$Router->addGet('delete_poll_option', SERVER_ROOT.'/sections/forums/delete_poll_option.php');
+G::$Router->addGet('sticky_post', SERVER_ROOT.'/sections/forums/sticky_post.php');
+G::$Router->addGet('edit_rules', SERVER_ROOT.'/sections/forums/edit_rules.php');
+//G::$Router->addGet('thread_subscribe', '');
+G::$Router->addGet('warn', SERVER_ROOT.'/sections/forums/warn.php');
