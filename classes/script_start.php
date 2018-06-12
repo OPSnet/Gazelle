@@ -413,7 +413,6 @@ define('STAFF_LOCKED', 1);
 
 $AllowedPages = ['staffpm', 'ajax', 'locked', 'logout', 'login'];
 
-G::$Router = new \Gazelle\Router(G::$LoggedUser['AuthKey']);
 if (isset(G::$LoggedUser['LockedAccount']) && !in_array($Document, $AllowedPages)) {
 	require(SERVER_ROOT . '/sections/locked/index.php');
 }
@@ -423,20 +422,6 @@ else {
 	}
 	else {
 		require(SERVER_ROOT . '/sections/' . $Document . '/index.php');
-	}
-}
-
-if (G::$Router->hasRoutes()) {
-	$action = $_REQUEST['action'] ?? '';
-	try {
-		/** @noinspection PhpIncludeInspection */
-		require_once(G::$Router->getRoute($action));
-	}
-	catch (\Gazelle\Exception\RouterException $exception) {
-		error(404);
-	}
-	catch (\Gazelle\Exception\InvalidAccessException $exception) {
-		error(403);
 	}
 }
 

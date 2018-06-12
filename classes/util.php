@@ -216,3 +216,13 @@ function unserialize_array($array) {
 function isset_array_checked($array, $value) {
 	return (isset($array[$value])) ? "checked" : "";
 }
+
+function get_route(\Gazelle\Router $router, $action) {
+	$route = $router->getRoute($action);
+	if ($route === false) {
+		error(-1);
+	}
+	else {
+		require_once($route);
+	}
+}
