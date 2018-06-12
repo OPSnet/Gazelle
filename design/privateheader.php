@@ -151,6 +151,10 @@ foreach ($Scripts as $Script) {
 			type="text/javascript"></script>
 <?
 }
+if ($Mobile) { ?>
+	<script src="<?=STATIC_SERVER?>styles/mobile/style.js" type="text/javascript"></script>
+<?
+}
 
 global $ClassLevels;
 // Get notifications early to change menu items if needed
