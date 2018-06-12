@@ -25,7 +25,7 @@ class Router {
 	 * Router constructor.
 	 * @param string $auth_key Authorization key for a user
 	 */
-	public function __construct($auth_key = '') {
+	public function __construct(string $auth_key = '') {
 		$this->auth_key = $auth_key;
 	}
 
