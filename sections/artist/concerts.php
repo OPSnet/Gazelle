@@ -69,7 +69,7 @@ function get_concert_post_template($Artist, $Event) {
 	} else {
 		$EventTitle = $Event['venue']['name'];
 	}
-	if (!empty($Event['venue']['location']['street']) && !empty($Event['venue']['location']['street']) && !empty($Event['venue']['location']['street'])) {
+	if (!empty($Event['venue']['location']['street']) && !empty($Event['venue']['location']['city']) && !empty($Event['venue']['location']['country'])) {
 		$Location = $Event['venue']['location']['street'] . "\n" . $Event['venue']['location']['city'] . ", " . $Event['venue']['location']['country'];
 	}
 	if (!empty($Event['venue']['name']) && !empty($Event['venue']['city'])) {
