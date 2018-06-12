@@ -4,6 +4,9 @@ class G {
 	public static $DB;
 	/** @var CACHE */
 	public static $Cache;
+	/** @var \Gazelle\Router */
+	public static $Router;
+
 	public static $LoggedUser;
 
 	public static function initialize() {
