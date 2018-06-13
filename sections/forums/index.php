@@ -19,6 +19,7 @@ G::$Router->addPost('add_poll_option', SERVER_ROOT.'/sections/forums/add_poll_op
 G::$Router->addPost('warn', SERVER_ROOT.'/sections/forums/warn.php');
 G::$Router->addPost('take_warn', SERVER_ROOT.'/sections/forums/take_warn.php');
 G::$Router->addPost('take_topic_notes', SERVER_ROOT.'/sections/forums/take_topic_notes.php');
+G::$Router->addPost('takeedit', SERVER_ROOT.'/sections/forums/takeedit.php');
 
 G::$Router->addGet('viewforum', SERVER_ROOT.'/sections/forums/forum.php');
 G::$Router->addGet('viewthread', SERVER_ROOT.'/sections/forums/thread.php');
