@@ -106,7 +106,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 		curl_setopt($ch, CURLOPT_URL, 'https://api.discogs.com/releases/'.$id);
 		$result = curl_exec($ch);
 		curl_close($ch);
-
 		return json_decode($result);
 	}
 
@@ -135,10 +134,13 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 		$i = 0;
 		while ($i < self::TORRENTS) {
+			// Avoid rate limit of 25 albums per minute
+			sleep(2);
 			$album = $this->getRandomDiscogsAlbum();
-			if ((!empty($album->message) && $album->message === 'Release not found.') || $album->year == 0) {
+			if (!property_exists($album, 'year') || (!empty($album->message) && $album->message === 'Release not found.') || $album->year == 0) {
 				continue;
 			}
+			$this->output->writeln("Found torrent {$i}...");
 
 			$artist = $album->artists[0];
 			if (!isset($artists[$artist->name])) {
@@ -280,7 +282,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 	}
 
     public function run() {
-    	$this->createUsers();
-    	$this->createTorrents();
+		$this->output->writeln("Running users...");
+		$this->createUsers();
+		$this->output->writeln("Running torrents...");
+		$this->createTorrents();
     }
 }
