@@ -12,7 +12,7 @@ class Votes {
 	 * @param $Vote The pre-existing vote, if it exists 'Up'|'Down'
 	 */
 	public static function vote_link($GroupID, $Vote = '') {
-		if (!G::$LoggedUser['NoVoteLinks'] && check_perms('site_album_votes')) {
+		if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 			$GroupVotes = self::get_group_votes($GroupID); ?>
 			<span class="votespan brackets" style="white-space: nowrap;">
 				Vote:

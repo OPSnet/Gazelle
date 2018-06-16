@@ -136,7 +136,7 @@ if ($CollageCovers !== 0) { ?>
 			<ul class="collage_images" id="collage_page0">
 <?
 	for ($Idx = 0; $Idx < min($NumGroups, $CollageCovers); $Idx++) {
-		echo Bookmarks::collage_cover_row($TorrentList[$GroupIDs[$Idx]]);
+		echo Collages::collage_cover_row($TorrentList[$GroupIDs[$Idx]]);
 	}
 ?>
 			</ul>
@@ -160,7 +160,7 @@ if ($CollageCovers !== 0) { ?>
 			$CollagePages[] = implode('',
 				array_map(
 					function($GroupID) use ($TorrentList) {
-						return Bookmarks::collage_cover_row($TorrentList[$GroupID]);
+						return Collages::collage_cover_row($TorrentList[$GroupID]);
 					},
 					$Groups
 				)
