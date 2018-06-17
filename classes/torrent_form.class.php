@@ -164,7 +164,7 @@ class TORRENT_FORM {
 				<td colspan="2" style="text-align: center;">
 					<p>Be sure that your torrent is approved by the <a href="rules.php?p=upload" target="_blank">rules</a>. Not doing this will result in a <strong class="important_text">warning</strong> or <strong class="important_text">worse</strong>.</p>
 <?		if ($this->NewTorrent) { ?>
-					<p>After uploading the torrent, you will have a one hour grace period during which no one other than you can fill requests with this torrent. Make use of this time wisely, and <a href="requests.php">search the list of requests</a>.</p>
+					<p>After uploading the torrent, you will have a one hour grace period during which no one other than you can fill requests with this torrent. Make use of this time wisely, and <a href="requests.php" target="_blank">search the list of requests</a>.</p>
 <?		} ?>
 					<input id="post" type="submit"<? if ($this->NewTorrent) { echo ' value="Upload torrent"'; } else { echo ' value="Edit torrent"';} ?> />
 				</td>
