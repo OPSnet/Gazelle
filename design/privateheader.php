@@ -295,7 +295,7 @@ if (check_perms('site_send_unlimited_invites')) {
 					<li id="nav_random"<?=
 						Format::add_class($PageID, array('random'), 'active', true)?>>
 						<a href="random.php">Random Album</a></li>
-					<li id="nav_logchecker" class="hidden"<?=
+					<li id="nav_logchecker" style="display: none"<?=
 						Format::add_class($PageID, array('logchecker'), 'active', true)?>>
 						<a href="logchecker.php">Log Checker</a></li>
 				</ul>
