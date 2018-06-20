@@ -41,7 +41,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 	$Group = $TorrentList[$GroupID];
 	extract(Torrents::array_group($Group));
 	$UserID = $Contributors[$GroupID];
-	$TorrentTags = new Tags($TagList);
+	new Tags($TagList);
 
 	// Handle stats and stuff
 	$Number++;
@@ -446,6 +446,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 	 * @var string $WikiImage
 	 */
 
+	$TorrentTags = new Tags($TagList);
 	$Number++;
 	$DisplayName = "$Number - ";
 
