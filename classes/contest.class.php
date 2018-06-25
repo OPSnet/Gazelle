@@ -102,8 +102,11 @@ class Contest {
 							AND r.TimeAdded < '{$Contest['DateBegin']}'
 						GROUP BY r.FillerID
 					) LAST USING (FillerID)
+					WHERE r.TimeFilled BETWEEN '{$Contest['DateBegin']}' AND '{$Contest['DateEnd']}'
+						AND r.FIllerId != r.UserID
+						AND r.TimeAdded < '{$Contest['DateBegin']}'
 					GROUP BY r.FillerID
-				";
+					";
 				break;
 			default:
 				$sql = null;
