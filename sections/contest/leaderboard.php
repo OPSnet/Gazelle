@@ -66,7 +66,7 @@ if (!count($Leaderboard)) {
         <h3>A grand total of <?=
             G::$Cache->get_value("contest_leaderboard_total_{$Contest['ID']}")
             ?: "<span title=\"We will recalculate the numbers soon\">many, many, many</span>"
-        ?> torrents have been uploaded.</h3>
+        ?> <?= $Contest['ContestType'] == 'request_fill' ? 'requests have been filled' : 'torrents have been uploaded' ?>.</h3>
     </div>
 	<table class="layout">
 
@@ -174,7 +174,8 @@ END_STR
 			}
 			if (!$user_seen) {
 ?>
-				<p>It doesn't look like you're on the leaderboard at all... upload some FLACs for fame and glory!</p>
+				<p>It doesn't look like you're on the leaderboard at all... <?= $Contest['ContestType'] == 'request_fill' ? 'fill some requests' : 'upload some FLACs' ?> for fame and glory!</p>
+
 <?
 			}
 		}
