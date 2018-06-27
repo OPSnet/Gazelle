@@ -90,7 +90,7 @@ class Contest {
 				$sql = "
 					SELECT r.FillerID as userid,
 						count(*) AS nr,
-						max(if(r.TimeFilled = LAST.TimeFilled, TorrentID, NULL)) as last_torrent
+						max(if(r.TimeFilled = LAST.TimeFilled AND r.TimeAdded < '{$Contest['DateBegin']}', TorrentID, NULL)) as last_torrent
 					FROM requests r
 					INNER JOIN (
 						SELECT r.FillerID,
@@ -161,22 +161,42 @@ class Contest {
 				");
 				G::$DB->query("COMMIT");
 				G::$Cache->delete_value('contest_leaderboard_' . $id);
-				G::$DB->prepared_query("
-					SELECT count(*) AS nr
-					FROM torrents t
-					WHERE t.Format = 'FLAC'
-						AND t.Time BETWEEN ? AND ?
-						AND (
-							t.Media IN ('Vinyl', 'WEB')
-							OR (t.Media = 'CD'
-								AND t.HasLog = '1'
-								AND t.HasCue = '1'
-								AND t.LogScore = 100
-								AND t.LogChecksum = '1'
-							)
-						)
-					", $Contest['DateBegin'], $Contest['DateEnd']
-                );
+				switch ($Contest['ContestType']) {
+					case 'upload_flac':
+					case 'upload_flac_strict_rank':
+						G::$DB->prepared_query("
+							SELECT count(*) AS nr
+							FROM torrents t
+							WHERE t.Format = 'FLAC'
+								AND t.Time BETWEEN ? AND ?
+								AND (
+									t.Media IN ('Vinyl', 'WEB')
+									OR (t.Media = 'CD'
+										AND t.HasLog = '1'
+										AND t.HasCue = '1'
+										AND t.LogScore = 100
+										AND t.LogChecksum = '1'
+									)
+								)
+							", $Contest['DateBegin'], $Contest['DateEnd']
+						);
+						break;
+					case 'request_fill':
+						G::$DB->prepared_query("
+							SELECT
+								count(*) AS nr
+							FROM requests r
+							INNER JOIN users_main u ON (r.FillerID = u.ID)
+							WHERE r.TimeFilled BETWEEN ? AND ?
+								AND r.FIllerId != r.UserID
+								AND r.TimeAdded < ?
+							", $Contest['DateBegin'], $Contest['DateEnd'], $Contest['DateBegin']
+						);
+						break;
+					default:
+						G::$DB->prepared_query("SELECT 0");
+						break;
+				}
 				G::$Cache->cache_value(
 					"contest_leaderboard_total_{$Contest['ID']}",
 					G::$DB->has_results() ? G::$DB->next_record()[0] : 0,
