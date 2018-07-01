@@ -146,9 +146,9 @@ class Contest {
 						group_concat(TA.ArtistID),
 						group_concat(AG.Name order by AG.Name separator 0x1),
 						T.Time
-					FROM torrents_artists TA
-					INNER JOIN torrents_group TG ON (TG.ID = TA.GroupID)
-					INNER JOIN artists_group AG ON (AG.ArtistID = TA.ArtistID)
+					FROM torrents_group TG
+					LEFT JOIN torrents_artists TA ON (TA.GroupID = TG.ID)
+					LEFT JOIN artists_group AG ON (AG.ArtistID = TA.ArtistID)
 					INNER JOIN torrents T ON (T.GroupID = TG.ID)
 					INNER JOIN (
 						$subquery
