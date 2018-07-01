@@ -100,6 +100,7 @@ function get_staff() {
 				case 45: // Junior Dev
 				case 24: // Developer
 				case 43: // Lead Dev
+				case 46: // Lead Shitposter
 					$Staff['Development'][] = $Class;
 					break;
 				case 40: // Admin
