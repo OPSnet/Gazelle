@@ -111,20 +111,26 @@ if (!count($Leaderboard)) {
 		$artist_id = explode(',', $row[4]);
 		$artist_name = explode(chr(1), $row[5]);
 		if (count($artist_id) > 2) {
-			$artist_markup = 'Various Artists';
+			$artist_markup = 'Various Artists - ';
 		}
 		elseif (count($artist_id) == 2) {
 			$artist_markup = sprintf(
-				'<a href="/artist.php?id=%d">%s</a> & <a href="/artist.php?id=%d">%s</a>',
+				'<a href="/artist.php?id=%d">%s</a> & <a href="/artist.php?id=%d">%s</a> - ',
 				$artist_id[0], $artist_name[0],
 				$artist_id[1], $artist_name[1]
 			);
 		}
+		//For non-music torrents, $artist_id[0] does exist but has no value. 
 		else {
+			if ((string)$artist_id[0] == '') {
+				$artist_markup = '';
+			}
+			else {
 			$artist_markup = sprintf(
-				'<a href="/artist.php?id=%d">%s</a>',
+				'<a href="/artist.php?id=%d">%s</a> - ',
 				$artist_id[0], $artist_name[0]
 			);
+			}
 		}
 
 		$userinfo = Users::user_info($row[0]);
@@ -132,7 +138,7 @@ if (!count($Leaderboard)) {
 	<tr>
 		<td>%d</td>
 		<td><a href="/user.php?id=%d">%s</a>$user_extra</td>
-		<td>%s - <a href="/torrents.php?torrentid=%d">%s</a></td>
+		<td>%s<a href="/torrents.php?torrentid=%d">%s</a></td>
 		<td>%s</td>
 		<td>%d</td>
 	</tr>
