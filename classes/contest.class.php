@@ -97,6 +97,7 @@ class Contest {
 							MAX(r.TimeFilled) as TimeFilled
 						FROM requests r
 						INNER JOIN users_main u ON (r.FillerID = u.ID)
+						INNER JOIN torrents t ON (r.TorrentID = t.ID)
 						WHERE r.TimeFilled BETWEEN '{$Contest['DateBegin']}' AND '{$Contest['DateEnd']}'
 							AND r.FIllerId != r.UserID
 							AND r.TimeAdded < '{$Contest['DateBegin']}'
