@@ -27,17 +27,17 @@ foreach ($Artists as $i => $Artist) {
 
 if (count($CleanArtists) > 0) {
 	$ArtistsString = implode(',', $ArtistIDs);
-	if ($_POST['manager_action'] == 'delete') {
-		$DB->query("
+	$DB->query("
 			SELECT Name
 			FROM torrents_group
 			WHERE ID = '{$GroupID}'");
-		list($GroupName) = $DB->next_record();
-		$DB->query("
+	list($GroupName) = $DB->next_record();
+	$DB->query("
 			SELECT ArtistID, Name
 			FROM artists_group
 			WHERE ArtistID IN ($ArtistsString)");
-		$ArtistNames = $DB->to_array('ArtistID', MYSQLI_ASSOC, false);
+	$ArtistNames = $DB->to_array('ArtistID', MYSQLI_ASSOC, false);
+	if ($_POST['manager_action'] == 'delete') {
 		foreach ($CleanArtists as $Artist) {
 			list($Importance, $ArtistID) = $Artist;
 			Misc::write_log("Artist ({$ArtistTypes[$Importance]}) {$ArtistID} ({$ArtistNames[$ArtistID]['Name']}) was removed from the group {$GroupID} ({$GroupName}) by user {$LoggedUser['ID']} ('{$LoggedUser['Username']}')");
@@ -62,35 +62,25 @@ if (count($CleanArtists) > 0) {
 		foreach ($EmptyArtists as $ArtistID) {
 			Artists::delete_artist($ArtistID);
 		}
-	} else {
-		$Importance = intval($_POST['importance']);
-		if ($Importance === 0 || !isset($ArtistTypes[$Importance])) {
+	}
+	else {
+		$NewImportance = intval($_POST['importance']);
+		if ($NewImportance === 0 || !isset($ArtistTypes[$NewImportance])) {
 			error(0);
 		}
 		$DB->query("
-			SELECT Name
-			FROM torrents_group
-			WHERE ID = '{$GroupID}'");
-		list($GroupName) = $DB->next_record();
-		$DB->query("
-			SELECT ArtistID, Name
-			FROM artists_group
-			WHERE ArtistID IN ($ArtistsString)");
-		$ArtistNames = $DB->to_array('ArtistID', MYSQLI_ASSOC, false);
-		list($Importance, $ArtistID) = $Artist;
-		$DB->query("
 			UPDATE IGNORE torrents_artists
-			SET Importance = '{$Importance}'
+			SET Importance = '{$NewImportance}'
 			WHERE GroupID = '{$GroupID}'
 				AND ArtistID IN ($ArtistsString)");
 		foreach ($CleanArtists as $Artist) {
 			list($Importance, $ArtistID) = $Artist;
 			// Don't bother logging artists whose importance hasn't changed
-			if ($Importance === $Importance) {
+			if ($Importance === $NewImportance) {
 				continue;
 			}
-			Misc::write_log("Artist ({$ArtistTypes[$Importance]}) $ArtistID ({$ArtistNames[$ArtistID]['Name']}) importance was change to {$ArtistTypes[$Importance]} in group {$GroupID} ({$GroupName}) by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
-			Torrents::write_group_log($GroupID, 0, G::$LoggedUser['ID'], "Importance changed artist {$ArtistNames[$ArtistID]['Name']} ({$ArtistTypes[$Importance]}) to {$ArtistTypes[$Importance]}", 0);
+			Misc::write_log("Artist ({$ArtistTypes[$Importance]}) $ArtistID ({$ArtistNames[$ArtistID]['Name']}) importance was change to {$ArtistTypes[$NewImportance]} in group {$GroupID} ({$GroupName}) by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
+			Torrents::write_group_log($GroupID, 0, G::$LoggedUser['ID'], "Importance changed artist {$ArtistNames[$ArtistID]['Name']} ({$ArtistTypes[$Importance]}) to {$ArtistTypes[$NewImportance]}", 0);
 		}
 	}
 	$Cache->delete_value("groups_artists_$GroupID");
