@@ -46,6 +46,8 @@ View::show_header('Staff Tools');
 	create_row("Permissions manager", "tools.php?action=permissions", check_perms("admin_manage_permissions"));
 	create_row("Special users", "tools.php?action=special_users", check_perms("admin_manage_permissions"));
 	create_row("Manage Bonus Points", "tools.php?action=bonus_points", check_perms("users_mod"));
+	create_row("Database Encryption Key", "tools.php?action=dbkey", check_perms("site_debug"));
+	create_row("Referral Accounts", "tools.php?action=referral_accounts", check_perms("admin_manage_referrals"));
 
 	if ($ToolsHTML) {
 ?>

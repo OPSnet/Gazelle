@@ -1,4 +1,4 @@
-<?
+<?php
 global $LoggedUser, $SSL;
 define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 ?>
@@ -35,11 +35,15 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 	<tr>
 		<td align="center" valign="middle">
 			<div id="logo">
-<? if (OPEN_REGISTRATION) { ?>
+<?php if (OPEN_REGISTRATION || OPEN_EXTERNAL_REFERRALS) { ?>
 				<ul>
 					<li><a href="index.php">Home</a></li>
 					<li><a href="login.php">Log in</a></li>
+<?php if (OPEN_REGISTRATION) { ?>
 					<li><a href="register.php">Register</a></li>
+<?php } if (OPEN_EXTERNAL_REFERRALS) { ?>
+					<li><a href="referral.php">Referrals</a></li>
+<?php } ?>
 				</ul>
 <? } ?>
 			</div>
