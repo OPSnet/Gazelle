@@ -5,7 +5,6 @@ namespace Gazelle\Manager;
 class Referral {
 	private $db;
 	private $cache;
-	private $key;
 	private $accounts;
 	private $proxy;
 
@@ -15,10 +14,9 @@ class Referral {
 	// Do not change the ordering in this array after launch.
 	const ACCOUNT_TYPES = array('Gazelle');
 
-	public function __construct($db, $cache, $key) {
+	public function __construct($db, $cache) {
 		$this->db = $db;
 		$this->cache = $cache;
-		$this->key = $key;
 		$this->accounts = $this->cache->get_value(self::CACHE_ACCOUNTS);
 		$this->proxy = new \Gazelle\Util\Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
 
@@ -129,7 +127,7 @@ class Referral {
 					User = ?,
 					Password = ?,
 					Active = ?,
-					Type = ?,
+					Type = ?
 				WHERE ID = ?", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
 				\Gazelle\Util\Crypto::dbEncrypt($user),	\Gazelle\Util\Crypto::dbEncrypt($password),
 				$active, $type, $id);
