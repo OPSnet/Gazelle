@@ -1,4 +1,7 @@
-<?
+<?php
+
+$_GET['search'] = trim($_GET['search']);
+
 if (!empty($_GET['search'])) {
 	if (preg_match('/^'.IP_REGEX.'$/', $_GET['search'])) {
 		$_GET['ip'] = $_GET['search'];
