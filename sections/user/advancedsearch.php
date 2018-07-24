@@ -1,6 +1,8 @@
 <?php
 
-$_GET['search'] = trim($_GET['search']);
+if (isset($_GET['search'])) {
+    $_GET['search'] = trim($_GET['search']);
+}
 
 if (!empty($_GET['search'])) {
 	if (preg_match('/^'.IP_REGEX.'$/', $_GET['search'])) {
@@ -20,6 +22,12 @@ if (!empty($_GET['search'])) {
 	} else {
 		$_GET['comment'] = $_GET['search'];
 	}
+}
+
+foreach (array('ip', 'email', 'username', 'comment') as $field) {
+    if (isset($_GET[$field])) {
+        $_GET[$field] = trim($_GET[$field]);
+    }
 }
 
 define('USERS_PER_PAGE', 30);
