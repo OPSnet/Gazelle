@@ -27,7 +27,7 @@ $DB->prepared_query("SELECT aa.Name as ArtistName, tg.Name as GroupName, ta.Impo
 			<tr>
 				<td><?=$ArtistName?></td>
 				<td><?=$GroupName?></td>
-				<td><?=($Importance === NULL) ? "NULL" : $Importance?></td>
+				<td><?=var_export($Importance, true)?></td>
 				<td>https://apollo.rip/torrents.php?id=<?=$GroupID?></td>
 				<td>https://apollo.rip/artist.php?id=<?=$ArtistID?></td>
 			</tr>
