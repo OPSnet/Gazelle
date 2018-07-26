@@ -498,6 +498,9 @@ switch ($_REQUEST['action']) {
 	case 'bbcode_sandbox':
 		include(SERVER_ROOT.'/sections/tools/sandboxes/bbcode_sandbox.php');
 		break;
+	case 'artist_importance_sandbox':
+		include(SERVER_ROOT.'/sections/tools/sandboxes/artist_importance_sandbox.php');
+		break;
 	case 'calendar':
 		include(SERVER_ROOT.'/sections/tools/managers/calendar.php');
 		break;
