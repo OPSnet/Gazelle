@@ -5,7 +5,7 @@ if (!check_perms('users_mod')) {
 }
 $Title = "Artist Importance Sandbox";
 View::show_header($Title, 'bbcode_sandbox');
-$DB->prepared_query("SELECT aa.Name as ArtistName, tg.Name as GroupName, ta.Importance, ta.GroupID, ta.ArtistID FROM torrents_artists AS ta LEFT JOIN torrents_group AS tg ON tg.ID = ta.GroupID LEFT JOIN artists_alias AS aa ON aa.ArtistID = ta.ArtistID WHERE ta.ArtistID=? ORDER BY ta.ArtistID, ta.GroupID", 353765);
+$DB->prepared_query("SELECT aa.Name as ArtistName, tg.Name as GroupName, ta.Importance, ta.GroupID, ta.ArtistID FROM torrents_artists AS ta LEFT JOIN torrents_group AS tg ON tg.ID = ta.GroupID LEFT JOIN artists_alias AS aa ON aa.ArtistID = ta.ArtistID WHERE ta.Importance='' ORDER BY ta.ArtistID, ta.GroupID");
 
 ?>
 	<div class="header">
