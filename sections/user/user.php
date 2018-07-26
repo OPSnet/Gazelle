@@ -359,6 +359,11 @@ if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
 				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Downloaded, 5)?>">Downloaded: <?=Format::get_size($Downloaded)?></li>
 <?
 	}
+	if (($Override = (check_paranoia_here('uploaded') && check_paranoia_here('downloaded')))) {
+?>
+				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded - $Downloaded, 5)?>">Buffer: <?=Format::get_size($Uploaded - $Downloaded)?></li>
+<?
+	}
 	if (($Override = check_paranoia_here('ratio'))) {
 ?>
 				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Ratio: <?=Format::get_ratio_html($Uploaded, $Downloaded)?></li>
