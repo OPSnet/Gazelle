@@ -255,7 +255,7 @@ class Torrents {
 				SELECT GroupID, UserID
 				FROM torrents
 				WHERE ID = '$ID'");
-			list($GroupID, $UploaderID) = G::$DB->next_record();
+			list($GroupID, $UserID) = G::$DB->next_record();
 		}
 		if (empty($UserID)) {
 			G::$DB->query("
@@ -358,6 +358,66 @@ class Torrents {
 		G::$Cache->delete_value("torrent_group_$GroupID");
 		G::$Cache->delete_value("torrents_details_$GroupID");
 		G::$DB->set_query_id($QueryID);
+	}
+
+	public static function send_pm($TorrentID, $UploaderID, $Name, $Log, $TrumpID = 0, $PMUploader = false) {
+		global $DB;
+
+		$Subject = 'Torrent deleted: ' . $Name;
+
+		$MessageStart = 'A torrent ';
+		if ($TrumpID > 0) {
+			$MessageEnd = ' has been trumped. You can find the new torrent [url='.site_url().'torrents.php?torrentid='.$TrumpID.']here[/url].';
+		}
+		else {
+			$MessageEnd = ' has been deleted.';
+		}
+		$MessageEnd .= "\n\n[url=".site_url()."log.php?search=Torrent+{$TorrentID}]Log message[/url]: {$Log}.";
+
+		// Uploader
+		if ($PMUploader) {
+			Misc::send_pm($UploaderID, 0, $Subject, $MessageStart.'you uploaded'.$MessageEnd);
+		}
+		$PMedUsers = [$UploaderID];
+
+		// Seeders
+		$Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
+		$DB->prepared_query("
+SELECT DISTINCT(xfu.uid) 
+FROM 
+	xbt_files_users AS xfu
+	JOIN users_info AS ui ON xfu.uid = ui.UserID
+WHERE xfu.fid = ? 
+	AND ui.NotifyOnDeleteSeeding='1' 
+	AND xfu.uid NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
+		$UserIDs = $DB->collect('uid');
+		foreach ($UserIDs as $UserID) {
+			Misc::send_pm($UserID, 0, $Subject, $MessageStart."you're seeding".$MessageEnd);
+		}
+		$PMedUsers = array_merge($PMedUsers, $UserIDs);
+
+		// Snatchers
+		$Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
+		$DB->prepared_query("
+SELECT DISTINCT(xs.uid) 
+FROM xbt_snatched AS xs JOIN users_info AS ui ON xs.uid = ui.UserID 
+WHERE xs.fid=? AND ui.NotifyOnDeleteSnatched='1' AND xs.uid NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
+		$UserIDs = $DB->collect('uid');
+		foreach ($UserIDs as $UserID) {
+			Misc::send_pm($UserID, 0, $Subject, $MessageStart."you've snatched".$MessageEnd);
+		}
+		$PMedUsers = array_merge($PMedUsers, $UserIDs);
+
+		// Downloaders
+		$Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
+		$DB->prepared_query("
+SELECT DISTINCT(ud.UserID)
+FROM users_downloads AS ud JOIN users_info AS ui ON ud.UserID = ui.UserID
+WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
+		$UserIDs = $DB->collect('UserID');
+		foreach ($UserIDs as $UserID) {
+			Misc::send_pm($UserID, 0, $Subject, $MessageStart."you've downloaded".$MessageEnd);
+		}
 	}
 
 
