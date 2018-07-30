@@ -202,9 +202,11 @@ while (list($ID, $Message, $LogTime) = $DB->next_record()) {
 }
 ?>
 	</table>
+	<?	if ($TotalMatches > LOG_ENTRIES_PER_PAGE) { ?>
 	<div class="linkbox">
-		<?=$Pages?>
+		<?=$Pages;?>
 	</div>
+	<?	} ?>
 </div>
 <?
 View::show_footer(); ?>

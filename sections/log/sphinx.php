@@ -26,7 +26,6 @@ if (empty($_GET['search']) || trim($_GET['search']) == '') {
 	}
 	$QueryStatus = 0;
 } else {
-	
 	$Page = min(SPHINX_MAX_MATCHES / TORRENTS_PER_PAGE, $Page);
 	$SphQL = new SphinxqlQuery();
 	$SphQL->select('id')

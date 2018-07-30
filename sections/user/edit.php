@@ -19,12 +19,15 @@ $DB->query("
 		i.UnseededAlerts,
 		i.DownloadAlt,
 		p.Level AS Class,
-		i.InfoTitle
+		i.InfoTitle,
+		i.NotifyOnDeleteSeeding,
+		i.NotifyOnDeleteSnatched,
+		i.NotifyOnDeleteDownloaded
 	FROM users_main AS m
 		JOIN users_info AS i ON i.UserID = m.ID
 		LEFT JOIN permissions AS p ON p.ID = m.PermissionID
 	WHERE m.ID = '".db_string($UserID)."'");
-list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle) = $DB->next_record(MYSQLI_NUM, array(3, 9));
+list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded) = $DB->next_record(MYSQLI_NUM, array(3, 9));
 
 if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Class)) {
 	error(403);
@@ -444,6 +447,27 @@ echo $Val->GenerateJS('userform');
 				<td>
 					<input type="checkbox" name="autosubscribe" id="autosubscribe"<?=!empty($SiteOptions['AutoSubscribe']) ? ' checked="checked"' : ''?> />
 					<label for="autosubscribe">Enable automatic thread subscriptions</label>
+				</td>
+			</tr>
+			<tr id="notif_notifyondeleteseeding_tr">
+				<td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you're seeding is deleted."><strong>Deleted seeding torrent alerts</strong></td>
+				<td>
+					<input type="checkbox" name="notifyondeleteseeding" id="notifyondeleteseeding"<?=!empty($NotifyOnDeleteSeeding) ? ' checked="checked"' : ''?> />
+					<label for="notifyondeleteseeding">Enable PM notification for deleted seeding torrents</label>
+				</td>
+			</tr>
+			<tr id="notif_notifyondeletesnatched_tr">
+				<td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you've snatched is deleted."><strong>Deleted snatched torrent alerts</strong></td>
+				<td>
+					<input type="checkbox" name="notifyondeletesnatched" id="notifyondeletesnatched"<?=!empty($NotifyOnDeleteSnatched) ? ' checked="checked"' : ''?> />
+					<label for="notifyondeletesnatched">Enable PM notification for deleted snatched torrents</label>
+				</td>
+			</tr>
+			<tr id="notif_notifyondeletedownloaded_tr">
+				<td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you've downloaded is deleted."><strong>Deleted downloaded torrent alerts</strong></td>
+				<td>
+					<input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"<?=!empty($NotifyOnDeleteDownloaded) ? ' checked="checked"' : ''?> />
+					<label for="notifyondeletedownloaded">Enable PM notification for deleted downloaded torrents</label>
 				</td>
 			</tr>
 			<tr id="notif_unseeded_tr">

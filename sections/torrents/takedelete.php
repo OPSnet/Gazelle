@@ -19,13 +19,35 @@ $DB->query("
 		tg.Name,
 		ag.Name,
 		t.Time,
+        t.Media,
+		t.Format,
+		t.Encoding,
+        t.HasLog,
+		t.HasCue,
+        t.HasLogDB,
+		t.LogScore,
+        t.Remastered,
+		t.RemasterTitle,
+		t.RemasterYear,
 		COUNT(x.uid)
 	FROM torrents AS t
 		LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
 		LEFT JOIN artists_group AS ag ON ag.ArtistID = tg.ArtistID
 		LEFT JOIN xbt_snatched AS x ON x.fid = t.ID
 	WHERE t.ID = '$TorrentID'");
-list($UserID, $GroupID, $Size, $InfoHash, $Name, $ArtistName, $Time, $Snatches) = $DB->next_record(MYSQLI_NUM, false);
+list($UserID, $GroupID, $Size, $InfoHash, $Name, $ArtistName, $Time, $Media, $Format, $Encoding,
+    $HasLog, $HasCue, $HasLogDB, $LogScore, $Remastered, $RemasterTitle, $RemasterYear, $Snatches) = $DB->next_record(MYSQLI_NUM, false);
+
+$RemasterDisplayString = Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear);
+if ($ArtistID == 0 && empty($ArtistName)) {
+	$RawName = $Name.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+}
+elseif ($ArtistID == 0 && $ArtistName == 'Various Artists') {
+	$RawName = "Various Artists - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+}
+else {
+	$RawName = "$ArtistName - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+}
 
 if (($LoggedUser['ID'] != $UserID || time_ago($Time) > 3600 * 24 * 7 || $Snatches > 4) && !check_perms('torrents_delete')) {
 	error(403);
@@ -46,7 +68,9 @@ if (isset($_SESSION['logged_user']['multi_delete'])) {
 
 $InfoHash = unpack('H*', $InfoHash);
 Torrents::delete_torrent($TorrentID, $GroupID);
-Misc::write_log("Torrent $TorrentID ($Name) (".number_format($Size / (1024 * 1024), 2).' MB) ('.strtoupper($InfoHash[1]).') was deleted by '.$LoggedUser['Username'].': ' .$_POST['reason'].' '.$_POST['extra']);
+$Log = "Torrent $TorrentID ($Name) (".number_format($Size / (1024 * 1024), 2).' MB) ('.strtoupper($InfoHash[1]).') was deleted by '.$LoggedUser['Username'].': ' .$_POST['reason'].' '.$_POST['extra'];
+Torrents::send_pm($TorrentID, $UserID, $RawName, $Log, 0, G::$LoggedUser['ID'] != $UserID);
+Misc::write_log($Log);
 Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'deleted torrent ('.number_format($Size / (1024 * 1024), 2).' MB, '.strtoupper($InfoHash[1]).') for reason: '.$_POST['reason'].' '.$_POST['extra'], 0);
 
 View::show_header('Torrent deleted');
