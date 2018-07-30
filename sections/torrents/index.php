@@ -191,6 +191,16 @@ if (!empty($_REQUEST['action'])) {
 			require(SERVER_ROOT.'/sections/torrents/manage_artists.php');
 			break;
 
+		case 'editrequest':
+			enforce_login();
+			require(SERVER_ROOT . '/sections/torrents/editrequest.php');
+			break;
+
+		case 'takeeditrequest':
+			enforce_login();
+			require(SERVER_ROOT . '/sections/torrents/takeeditrequest.php');
+			break;
+
 		case 'notify_clear':
 		case 'notify_clear_item':
 		case 'notify_clear_items':

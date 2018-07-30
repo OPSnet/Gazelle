@@ -14,6 +14,7 @@ define('WIDTH', 585);
 define('HEIGHT', 400);
 
 enforce_login();
+
 if (!empty($_POST['action'])) {
 	switch ($_POST['action']) {
 		case 'edit':
@@ -39,6 +40,9 @@ if (!empty($_POST['action'])) {
 			break;
 		case 'take_concert_thread':
 			include(SERVER_ROOT . '/sections/artist/take_concert_thread.php');
+			break;
+		case 'takeeditrequest':
+			include(SERVER_ROOT . '/sections/artist/takeeditrequest.php');
 			break;
 		default:
 			error(0);
@@ -84,6 +88,9 @@ if (!empty($_POST['action'])) {
 			break;
 		case 'change_artistid':
 			require(SERVER_ROOT . '/sections/artist/change_artistid.php');
+			break;
+		case 'editrequest':
+			require(SERVER_ROOT . '/sections/artist/editrequest.php');
 			break;
 		default:
 			error(0);

@@ -490,6 +490,7 @@ View::show_header($Name, 'browse,requests,bbcode,comments,voting,recommend,subsc
 	<div class="header">
 		<h2><?=display_str($Name)?><? if ($RevisionID) { ?> (Revision #<?=$RevisionID?>)<? } if ($VanityHouseArtist) { ?> [Vanity House] <? } ?></h2>
 		<div class="linkbox">
+			<a href="artist.php?action=editrequest&amp;artistid=<?=$ArtistID?>" class="brackets">Request an Edit</a>
 <?	if (check_perms('site_submit_requests')) { ?>
 			<a href="requests.php?action=new&amp;artistid=<?=$ArtistID?>" class="brackets">Add request</a>
 <?
