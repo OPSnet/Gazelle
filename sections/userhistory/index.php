@@ -34,6 +34,10 @@ if ($_GET['action']) {
 			//Load email history page
 			include('email_history2.php');
 			break;
+		case 'copypaste':
+			//Load copy-paste page
+			include('copypaste.php');
+			break;
 		case 'passkeys':
 			//Load passkey history page
 			include('passkey_history.php');
