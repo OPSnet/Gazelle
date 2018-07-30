@@ -501,6 +501,9 @@ switch ($_REQUEST['action']) {
 	case 'artist_importance_sandbox':
 		include(SERVER_ROOT.'/sections/tools/sandboxes/artist_importance_sandbox.php');
 		break;
+	case 'db_sandbox':
+		include(SERVER_ROOT.'/sections/tools/sandboxes/db_sandbox.php');
+		break;
 	case 'calendar':
 		include(SERVER_ROOT.'/sections/tools/managers/calendar.php');
 		break;
