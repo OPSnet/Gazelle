@@ -379,10 +379,15 @@ if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
 ?>
 				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Bonus Points: <?=number_format($BonusPoints)?><?
 		if (check_perms('admin_bp_history')) {
-			 printf('&nbsp;<a href="bonus.php?action=history&amp;id=%d" class="brackets">View</a>', $UserID);
+			 printf('&nbsp;<a href="bonus.php?action=history&amp;userid=%d" class="brackets">History</a>', $UserID);
+             $link = '<a href="bonus.php?action=bprates&userid=' . $UserID . '">';
 		}
+        else {
+			 printf('&nbsp;<a href="bonus.php?action=history" class="brackets">History</a>', $UserID);
+             $link = '<a href="bonus.php?action=bprates">';
+        }
                 ?></li>
-				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><a href="bonus.php?action=bprates&userid=<?=$UserID?>">Points Per Hour</a>: <?=number_format($BonusPointsPerHour)?></li>
+				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><?= $link ?>Points Per Hour</a>: <?=number_format($BonusPointsPerHour)?></li>
 <?php
 	}
 	if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {

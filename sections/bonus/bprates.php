@@ -5,7 +5,10 @@ $Page = max(1, $Page);
 $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
-if (!empty($_GET['userid']) && check_perms('users_mod')) {
+if (!empty($_GET['userid'])) {
+    if (!check_perms('admin_bp_history')) {
+		error(403);
+    }
 	$UserID = intval($_GET['userid']);
 	$User = array_merge(Users::user_stats($_GET['userid']), Users::user_info($_GET['userid']), Users::user_heavy_info($_GET['userid']));
 	if (empty($User)) {
@@ -57,10 +60,7 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 <div class="linkbox">
 	<a href="wiki.php?action=article&id=130" class="brackets">About Bonus Points</a>
 	<a href="bonus.php" class="brackets">Bonus Point Shop</a>
-	<a href="bonus.php?action=history" class="brackets">History</a>
-</div>
-<div class="linkbox">
-	<?=$Pages?>
+	<a href="bonus.php?action=history<?= check_perms('admin_bp_history') && $UserID != G::$LoggedUser['ID'] ? "&amp;userid=$UserID" : '' ?>" class="brackets">History</a>
 </div>
 <table>
 	<thead>
@@ -88,6 +88,9 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 </table>
 <br />
 
+<div class="linkbox">
+	<?=$Pages?>
+</div>
 <table>
 	<thead>
 	<tr class="colhead">
@@ -201,7 +204,8 @@ else {
 
 	</tbody>
 </table>
-<?php
-
+<div class="linkbox">
+	<?=$Pages?>
+</div>
+<?
 View::show_footer();
-?>

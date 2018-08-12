@@ -2,8 +2,11 @@
 
 View::show_header('Bonus Points Purchase History', 'bonus');
 
-if (check_perms('admin_bp_history') && isset($_GET['id']) && is_number($_GET['id'])) {
-	$ID = (int)$_GET['id'];
+if (isset($_GET['userid']) && is_number($_GET['userid'])) {
+    if (!check_perms('admin_bp_history')) {
+		error(403);
+    }
+	$ID = (int)$_GET['userid'];
 	$Header = 'Bonus Points Spending History for ' . Users::format_username($ID);
 	$WhoSpent = Users::format_username($ID) . ' has spent';
 }
@@ -29,7 +32,7 @@ if ($Summary['nr'] > 0) {
 <div class="linkbox">
 	<a href="wiki.php?action=article&id=130" class="brackets">About Bonus Points</a>
 	<a href="bonus.php" class="brackets">Bonus Point Shop</a>
-	<a href="bonus.php?action=bprates" class="brackets">Bonus Point Rates</a>
+	<a href="bonus.php?action=bprates<?= check_perms('admin_bp_history') && $ID != G::$LoggedUser['ID'] ? "&amp;userid=$ID" : '' ?>" class="brackets">Bonus Point Rates</a>
 </div>
 
 <div class="thin">
