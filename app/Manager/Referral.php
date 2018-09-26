@@ -12,7 +12,7 @@ class Referral {
 
 	const CACHE_ACCOUNTS = 'referral_accounts';
 	// Do not change the ordering in this array after launch.
-	const ACCOUNT_TYPES = array('Gazelle');
+	const ACCOUNT_TYPES = array('Gazelle', 'Gazelle Games');
 
 	public function __construct($db, $cache) {
 		$this->db = $db;
@@ -147,6 +147,9 @@ class Referral {
 			case 0:
 				return $this->validateGazelleCookie($acc);
 				break;
+			case 1:
+				return true;
+				break;
 		}
 		return false;
 	}
@@ -165,6 +168,9 @@ class Referral {
 		switch ($acc["Type"]) {
 			case 0:
 				return $this->loginGazelleAccount($acc);
+				break;
+			case 1:
+				return true;
 				break;
 		}
 		return false;
@@ -189,8 +195,13 @@ class Referral {
 	}
 
 	public function verifyAccount($acc, $user, $key) {
-		if ($acc["Type"] == 0) {
-			return $this->verifyGazelleAccount($acc, $user, $key);
+		switch ($acc["Type"]) {
+			case 0:
+				return $this->verifyGazelleAccount($acc, $user, $key);
+				break;
+			case 1:
+				return $this->verifyGGNAccount($acc, $user, $key);
+				break;
 		}
 		return "Unrecognised account type";
 	}
@@ -233,6 +244,23 @@ class Referral {
 		}
 
 		return "User not found. Please try again.";
+	}
+
+	private function verifyGGNAccount($acc, $user, $key) {
+		$url = $acc["URL"] . 'api.php';
+
+		$result = $this->proxy->fetch($url, array("request" => "user", "name" => $user,
+			"key" => $acc["Password"]), array(), false);
+		$json = json_decode($result["response"], true);
+
+		$profile = $json["response"]["profileText"];
+		$match = strpos($profile, $key);
+
+		if ($match !== false) {
+			return true;
+		} else {
+			return "Token not found. Please try again.";
+		}
 	}
 
 	public function generateInvite($acc, $username, $email) {
