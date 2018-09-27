@@ -12,7 +12,7 @@ class Referral {
 
 	const CACHE_ACCOUNTS = 'referral_accounts';
 	// Do not change the ordering in this array after launch.
-	const ACCOUNT_TYPES = array('Gazelle', 'Gazelle Games');
+	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles');
 
 	public function __construct($db, $cache) {
 		$this->db = $db;
@@ -150,18 +150,29 @@ class Referral {
 			case 1:
 				return true;
 				break;
+			case 2:
+				return $this->validateTentacleCookie($acc);
+				break;
 		}
 		return false;
 	}
 
 	private function validateGazelleCookie($acc) {
-		$url  = $acc["URL"];
-		$url .= 'ajax.php';
+		$url  = $acc["URL"] . 'ajax.php';
 
 		$result = $this->proxy->fetch($url, array("action" => "index"), $acc["Cookie"], false);
 		$json = json_decode($result["response"], true);
 
 		return $json["status"] === 'success';
+	}
+
+	private function validateTentacleCookie($acc) {
+		$url = $acc["URL"];
+
+		$result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
+		$match = strpos($result["response"], "authkey:");
+
+		return $match !== false;
 	}
 
 	public function loginAccount(&$acc) {
@@ -171,6 +182,9 @@ class Referral {
 				break;
 			case 1:
 				return true;
+				break;
+			case 2:
+				return $this->loginTentacleAccount($acc);
 				break;
 		}
 		return false;
@@ -194,6 +208,24 @@ class Referral {
 		return $result["status"] == 200;
 	}
 
+	private function loginTentacleAccount(&$acc) {
+		if ($this->validateTentacleAccount($acc)) {
+			return true;
+		}
+
+		$url = $acc["URL"] . "user/login";
+
+		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
+			"password" => $acc["Password"], "keeplogged" => "1"), array(), true);
+
+		if ($result["status"] == 200) {
+			$acc["Cookie"] = $result["cookies"];
+			$this->updateCookie($acc["ID"], $acc["Cookie"]);
+		}
+
+		return $result["status"] == 200;
+	}
+
 	public function verifyAccount($acc, $user, $key) {
 		switch ($acc["Type"]) {
 			case 0:
@@ -201,6 +233,9 @@ class Referral {
 				break;
 			case 1:
 				return $this->verifyGGNAccount($acc, $user, $key);
+				break;
+			case 2:
+				return $this->verifyTentacleAccount($acc, $user, $key);
 				break;
 		}
 		return "Unrecognised account type";
@@ -254,6 +289,25 @@ class Referral {
 		$json = json_decode($result["response"], true);
 
 		$profile = $json["response"]["profileText"];
+		$match = strpos($profile, $key);
+
+		if ($match !== false) {
+			return true;
+		} else {
+			return "Token not found. Please try again.";
+		}
+	}
+
+	private function verifyTentacleAccount($acc, $user, $key) {
+		if (!$this->loginTentacleAccount($acc)) {
+			return "Internal error";
+		}
+
+		$url = $acc["URL"] . 'user/profile/' . $user;
+
+		$result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
+
+		$profile = $result["response"];
 		$match = strpos($profile, $key);
 
 		if ($match !== false) {
