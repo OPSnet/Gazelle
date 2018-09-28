@@ -72,11 +72,11 @@
 		<br/>
 		<p id="referral-code"><?=$Token?></p>
 		<br/>
-		<p>Enter the username you use at <?=$Account["Site"]?> exactly as it appears on the site. This is critical in verifying your account.</p>
+		<p>Enter the <?=$Account["UserIsId"] ? "user id" : "username"?> you use at <?=$Account["Site"]?> exactly as it appears on the site. This is critical in verifying your account.</p>
 		<br/>
 		<div class="center">
 			<form name="referral_service" method="post" action="">
-				<label for="username">Username</label><input type="text" name="username" />
+			<label for="username"><?=$Account["UserIsId"] ? "User Id" : "Username"?></label><input type="text" name="username" />
 				<br/>
 				<br/>
 				<label for="Email">Email Address</label><input type="text" name="email" />

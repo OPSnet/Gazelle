@@ -12,7 +12,7 @@ class Referral {
 
 	const CACHE_ACCOUNTS = 'referral_accounts';
 	// Do not change the ordering in this array after launch.
-	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles');
+	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance');
 
 	public function __construct($db, $cache) {
 		$this->db = $db;
@@ -21,8 +21,12 @@ class Referral {
 		$this->proxy = new \Gazelle\Util\Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
 
 		if ($this->accounts === false) {
-			$this->db->query("SELECT ID, Site, Active FROM referral_accounts");
+			$this->db->query("SELECT ID, Site, Active, Type FROM referral_accounts");
 			$this->accounts = $this->db->has_results() ? $this->db->to_array('ID') : [];
+			foreach ($this->accounts as &$acc) {
+				$acc["UserIsId"] = $acc["Type"] == 3;
+				unset($acc);
+			}
 			$this->cache->cache_value(self::CACHE_ACCOUNTS, $this->accounts, 86400 * 30);
 		}
 
@@ -153,6 +157,9 @@ class Referral {
 			case 2:
 				return $this->validateTentacleCookie($acc);
 				break;
+			case 3:
+				return $this->validateLuminanceCookie($acc);
+				break;
 		}
 		return false;
 	}
@@ -175,6 +182,15 @@ class Referral {
 		return $match !== false;
 	}
 
+	private function validateLuminanceCookie($acc) {
+		$url = $acc["URL"];
+
+		$result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
+		$match = strpos($result["response"], "authkey");
+
+		return $match !== false;
+	}
+
 	public function loginAccount(&$acc) {
 		switch ($acc["Type"]) {
 			case 0:
@@ -186,6 +202,8 @@ class Referral {
 			case 2:
 				return $this->loginTentacleAccount($acc);
 				break;
+			case 3:
+				return $this->loginLuminanceAccount($acc);
 		}
 		return false;
 	}
@@ -226,6 +244,24 @@ class Referral {
 		return $result["status"] == 200;
 	}
 
+	private function loginLuminanceAccount(&$acc) {
+		if ($this->validateLuminanceAccount($acc)) {
+			return true;
+		}
+
+		$url = $acc["URL"] . "login";
+
+		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
+			"password" => $acc["Password"], "keeploggedin" => "1"), array(), true);
+
+		if ($result["status"] == 200) {
+			$acc["Cookie"] = $result["cookies"];
+			$this->updateCookie($acc["ID"], $acc["Cookie"]);
+		}
+
+		return $result["status"] == 200;
+	}
+
 	public function verifyAccount($acc, $user, $key) {
 		switch ($acc["Type"]) {
 			case 0:
@@ -236,6 +272,9 @@ class Referral {
 				break;
 			case 2:
 				return $this->verifyTentacleAccount($acc, $user, $key);
+				break;
+			case 3:
+				return $this->verifyLuminanceAccount($acc, $user, $key);
 				break;
 		}
 		return "Unrecognised account type";
@@ -306,6 +345,25 @@ class Referral {
 		$url = $acc["URL"] . 'user/profile/' . $user;
 
 		$result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
+
+		$profile = $result["response"];
+		$match = strpos($profile, $key);
+
+		if ($match !== false) {
+			return true;
+		} else {
+			return "Token not found. Please try again.";
+		}
+	}
+
+	private function verifyLuminanceAccount($acc, $user, $key) {
+		if (!$this->loginLuminanceAccount($acc)) {
+			return "Internal error";
+		}
+
+		$url = $acc["URL"] . 'user' . $user;
+
+		$result = $this->proxy->fetch($url, array("id" => $acc["Username"]), $acc["Cookie"], false);
 
 		$profile = $result["response"];
 		$match = strpos($profile, $key);
