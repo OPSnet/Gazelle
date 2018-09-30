@@ -101,6 +101,10 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/managers/referral_alter.php');
 		break;
 
+	case 'referral_users':
+		include(SERVER_ROOT.'/sections/tools/managers/referral_users.php');
+		break;
+
 	case 'enable_requests':
 		include(SERVER_ROOT.'/sections/tools/managers/enable_requests.php');
 		break;

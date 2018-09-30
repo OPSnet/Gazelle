@@ -66,7 +66,7 @@
 		$Account = $ReferralManager->getAccount($_POST['service']);
 ?>
 		<br/>
-		<h2>Step 1: Paste Your Code</h2>
+		<h2>Step 2: Paste Your Code</h2>
 		<br/>
 		<p>Copy and paste the code below into the profile of your <?=$Account["Site"]?> account. It can go anywhere in your profile body (commonly known as "Profile info 1") as long as it is in one piece.</p>
 		<br/>

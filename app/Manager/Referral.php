@@ -146,6 +146,41 @@ class Referral {
 		$this->cache->delete_value(self::CACHE_ACCOUNTS);
 	}
 
+	public function getReferredUsers($startDate, $endDate, $includeInactive, $limit) {
+		if ($startDate == NULL) {
+			$startDate = \Gazelle\Util\Time::timeOffset(-(3600 * 24 * 30), true);
+		}
+		if ($endDate == NULL) {
+			$endDate = \Gazelle\Util\Time::sqlTime();
+		}
+		if ($includeInactive) {
+			$Active = "";
+		} else {
+			$Active = "AND Active = 1";
+		}
+
+		$qId = $this->db->prepared_query("
+			SELECT SQL_CALC_FOUND_ROWS ID, UserID, Site, Username, Created, Joined, IP, Active
+			FROM referral_users
+			WHERE Joined BETWEEN ? AND ?
+			$Active
+			LIMIT $limit", $startDate, $endDate);
+		$this->db->prepared_query("SELECT FOUND_ROWS()");
+		list($Results) = $this->db->next_record();
+		$this->db->set_query_id($qId);
+
+		$Users = $Results > 0 ? $this->db->to_array('ID', MYSQLI_ASSOC) : [];
+
+		return array("Results" => $Results, "Users" => $Users);
+	}
+
+	public function deleteUserReferral($id) {
+		$this->db->prepared_query("
+			DELETE FROM referral_users
+			WHERE ID = ?",
+			$id);
+	}
+
 	public function validateCookie($acc) {
 		switch ($acc["Type"]) {
 			case 0:
@@ -227,7 +262,7 @@ class Referral {
 	}
 
 	private function loginTentacleAccount(&$acc) {
-		if ($this->validateTentacleAccount($acc)) {
+		if ($this->validateTentacleCookie($acc)) {
 			return true;
 		}
 
@@ -245,14 +280,25 @@ class Referral {
 	}
 
 	private function loginLuminanceAccount(&$acc) {
-		if ($this->validateLuminanceAccount($acc)) {
+		if ($this->validateLuminanceCookie($acc)) {
 			return true;
 		}
 
 		$url = $acc["URL"] . "login";
 
+		$result = $this->proxy->fetch($url, array(), array(), false);
+		$doc = new \DOMDocument();
+		libxml_use_internal_errors(true);
+		@$doc->loadHTML($result["response"]);
+		foreach (libxml_get_errors() as $error) {
+			displayXmlError($error, explode("\n", $result["response"]));
+		}
+		$xpath = new \DOMXPath($doc);
+		$token = $xpath->evaluate("string(//input[@name='token']/@value)");
+
 		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
-			"password" => $acc["Password"], "keeploggedin" => "1"), array(), true);
+			"password" => $acc["Password"], "keeploggedin" => "1",
+			"token" => $token, "cinfo" => "1024|768|24|0"), array(), true);
 
 		if ($result["status"] == 200) {
 			$acc["Cookie"] = $result["cookies"];
@@ -377,8 +423,7 @@ class Referral {
 
 	public function generateInvite($acc, $username, $email) {
 		$InviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
-		$InviteReason = 'This user was referred to membership by their account ' . $username .
-		   ' at ' . $acc["Site"] . '. They verified their account on ' . date('Y-m-d H:i:s');
+		$InviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
 		$InviteKey = db_string(\Users::make_secret());
 		require(SERVER_ROOT . '/classes/templates.class.php');
 		$Tpl = new \TEMPLATE;
@@ -397,6 +442,14 @@ class Referral {
 			VALUES
 				(?, ?, ?, ?, ?)",
 			0, $InviteKey, $email, $InviteExpires, $InviteReason);
+
+		// save to referral history
+		$this->db->prepared_query("
+			INSERT INTO referral_users
+				(Username, Site, IP, InviteKey)
+			VALUES
+				(?, ?, ?, ?)",
+			$username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $InviteKey);
 
 		// send email
 		\Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $Tpl->get(), 'noreply', 'text/plain');
