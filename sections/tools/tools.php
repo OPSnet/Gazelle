@@ -159,6 +159,8 @@ View::show_header('Staff Tools');
 	// begin Developer Sandboxes category
 	$ToolsHTML = "";
 	create_row("BBCode sandbox", "tools.php?action=bbcode_sandbox", check_perms("users_mod"));
+    create_row("Artist Importance Sandbox", "tools.php?action=artist_importance_sandbox", check_perms("users_mod"));
+    create_row("DB Sandbox", "tools.php?action=db_sandbox", check_perms("site_debug"));
 
 	if ($ToolsHTML) {
 ?>

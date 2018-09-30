@@ -254,6 +254,7 @@ if (check_perms('admin_manage_permissions', $Class)) {
 if (check_perms('users_view_ips', $Class)) {
 ?>
 		<a href="user.php?action=sessions&amp;userid=<?=$UserID?>" class="brackets">Sessions</a>
+		<a href="userhistory.php?action=copypaste&amp;userid=<?=$UserID?>" class="brackets">Generate Copy-Paste</a>
 <?
 }
 if (check_perms('admin_reports')) {
@@ -357,6 +358,11 @@ if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
 	if (($Override = check_paranoia_here('downloaded'))) {
 ?>
 				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Downloaded, 5)?>">Downloaded: <?=Format::get_size($Downloaded)?></li>
+<?
+	}
+	if (($Override = (check_paranoia_here('uploaded') && check_paranoia_here('downloaded')))) {
+?>
+				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded - $Downloaded, 5)?>">Buffer: <?=Format::get_size($Uploaded - $Downloaded)?></li>
 <?
 	}
 	if (($Override = check_paranoia_here('ratio'))) {

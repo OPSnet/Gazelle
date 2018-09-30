@@ -253,6 +253,15 @@ if ($DB->affected_rows() > 0 || !$Report) {
 		Misc::write_log($Log);
 		$Log = 'deleted torrent for the reason: '.$ResolveType['title'].'. ( '.$Escaped['log_message'].' )';
 		Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], $Log, 0);
+		$TrumpID = 0;
+		if ($Escaped['resolve_type'] === 'trump') {
+			if (preg_match('/torrentid=([0-9]+)/', $Escaped['log_message'], $Matches) === 1) {
+				$TrumpID = $Matches[1];
+			}
+		}
+
+		Torrents::send_pm($TorrentID, $UploaderID, $RawName, $Log, $TrumpID, (!$Escaped['uploader_pm'] && $Warning <= 0 && !isset($Escaped['delete']) && !$SendPM));
+
 	} else {
 		$Log = "No log message (torrent wasn't deleted).";
 	}

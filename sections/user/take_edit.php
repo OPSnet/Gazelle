@@ -271,6 +271,9 @@ unset($Options['ShowCacheList']);
 
 $DownloadAlt = isset($_POST['downloadalt']) ? 1 : 0;
 $UnseededAlerts = isset($_POST['unseededalerts']) ? 1 : 0;
+$NotifyOnDeleteSeeding = (!empty($_POST['notifyondeleteseeding']) ? 1 : 0);
+$NotifyOnDeleteSnatched = (!empty($_POST['notifyondeletesnatched']) ? 1 : 0);
+$NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? 1 : 0);
 
 
 $LastFMUsername = db_string($_POST['lastfm_username']);
@@ -338,6 +341,9 @@ $SQL = "
 		i.InfoTitle = '".db_string($_POST['profile_title'])."',
 		i.DownloadAlt = '$DownloadAlt',
 		i.UnseededAlerts = '$UnseededAlerts',
+		i.NotifyOnDeleteSeeding = '$NotifyOnDeleteSeeding',
+		i.NotifyOnDeleteSnatched = '$NotifyOnDeleteSnatched',
+		i.NotifyOnDeleteDownloaded = '$NotifyOnDeleteDownloaded',
 		m.Email = '".db_string($_POST['email'])."',
 		m.IRCKey = '".db_string($_POST['irckey'])."',
 		m.Paranoia = '".db_string(serialize($Paranoia))."'";
