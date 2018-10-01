@@ -12,7 +12,7 @@ class Referral {
 
 	const CACHE_ACCOUNTS = 'referral_accounts';
 	// Do not change the ordering in this array after launch.
-	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance');
+	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)');
 
 	public function __construct($db, $cache) {
 		$this->db = $db;
@@ -193,6 +193,7 @@ class Referral {
 				return $this->validateTentacleCookie($acc);
 				break;
 			case 3:
+			case 4:
 				return $this->validateLuminanceCookie($acc);
 				break;
 		}
@@ -212,7 +213,7 @@ class Referral {
 		$url = $acc["URL"];
 
 		$result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
-		$match = strpos($result["response"], "authkey:");
+		$match = strpos($result["response"], "authKey:");
 
 		return $match !== false;
 	}
@@ -239,6 +240,10 @@ class Referral {
 				break;
 			case 3:
 				return $this->loginLuminanceAccount($acc);
+				break;
+			case 4:
+				return $this->loginGazelleHTMLAccount($acc);
+				break;
 		}
 		return false;
 	}
@@ -299,6 +304,24 @@ class Referral {
 		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
 			"password" => $acc["Password"], "keeploggedin" => "1",
 			"token" => $token, "cinfo" => "1024|768|24|0"), array(), true);
+
+		if ($result["status"] == 200) {
+			$acc["Cookie"] = $result["cookies"];
+			$this->updateCookie($acc["ID"], $acc["Cookie"]);
+		}
+
+		return $result["status"] == 200;
+	}
+
+	private function loginGazelleHTMLAccount(&$acc) {
+		if ($this->validateLuminanceCookie($acc)) {
+			return true;
+		}
+
+		$url = $acc["URL"] . "login.php";
+
+		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
+			"password" => $acc["Password"], "keeplogged" => "1"), array(), true);
 
 		if ($result["status"] == 200) {
 			$acc["Cookie"] = $result["cookies"];
@@ -407,9 +430,29 @@ class Referral {
 			return "Internal error";
 		}
 
-		$url = $acc["URL"] . 'user' . $user;
+		$url = $acc["URL"] . 'user.php';
 
 		$result = $this->proxy->fetch($url, array("id" => $acc["Username"]), $acc["Cookie"], false);
+
+		$profile = $result["response"];
+		$match = strpos($profile, $key);
+
+		if ($match !== false) {
+			return true;
+		} else {
+			return "Token not found. Please try again.";
+		}
+	}
+
+	private function verifyGazelleHTMLAccount($acc, $user, $key) {
+		if (!$this->loginGazelleAccount($acc)) {
+			return "Internal error";
+		}
+
+		$url = $acc["URL"] . 'user.php';
+
+		$result = $this->proxy->fetch($url, array("action" => "search", "search" => $user),
+			$acc["Cookie"], false);
 
 		$profile = $result["response"];
 		$match = strpos($profile, $key);
