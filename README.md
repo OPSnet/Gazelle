@@ -50,5 +50,5 @@ will also forward the following ports:
 
 You can access the site by going to `http://localhost:8080`
 
-Feel free to join #develop on irc.apollo.rip to discuss any questions concerning Gazelle (or any of the repos used by
-Apollo).
+Feel free to join #develop on irc.orpheus.network to discuss any questions concerning Gazelle (or any of the repos used by
+Orpheus).

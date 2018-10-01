@@ -36,7 +36,7 @@ View::show_header('Update Drive Offsets');
 </div>
 <div class="thin">
 	<div class="box pad">
-		<p>This page lists all of the stored Drive Offsets on Apollo. We use these offsets to check
+		<p>This page lists all of the stored Drive Offsets on Orpheus. We use these offsets to check
 		the offset listed in a rip log file. This information comes from
 		<a href="http://www.accuraterip.com/driveoffsets.htm" target="_blank" rel="noreferrer nofollow">Accuraterip</a>.
 		<?=($Inserted !== false) ? "<br />{$Inserted} offsets inserted." : ""?>

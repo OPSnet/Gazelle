@@ -25,7 +25,7 @@ echo <<<HTML
 	<a href="logchecker.php?action=update" class="brackets">Update Uploaded Logs</a>
 </div>
 <div class="thin">
-	<h2 class="center">Apollo Logchecker: EAC and XLD.</h2>
+	<h2 class="center">Orpheus Logchecker: EAC and XLD.</h2>
 	<div class="box pad">
 		<p>
 		Use this page to test our logchecker. You can either upload a log or paste it into the

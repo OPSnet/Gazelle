@@ -217,7 +217,7 @@ ul.thin {
 #header {
   width: 100%;
   margin: 0 auto 0 auto;
-  /*background: url(https://apollo.rip/static/styles/postmod/images/bg_header.png) 11px 65px no-repeat;*/
+  /*background: url(https://orpheus.network/static/styles/postmod/images/bg_header.png) 11px 65px no-repeat;*/
   height: 173px;
   padding: 0 0 0 0; }
 
@@ -229,13 +229,13 @@ ul.thin {
   overflow: hidden; }
 
 #alerts {
-  background: transparent url(https://apollo.rip/static/styles/postmod/images/content.png);
+  background: transparent url(https://orpheus.network/static/styles/postmod/images/content.png);
   padding: 4px 9px;
   margin: -19px auto 0 auto;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
 
 #footer {
-  background: transparent url(https://apollo.rip/static/styles/postmod/images/bg_footer.png);
+  background: transparent url(https://orpheus.network/static/styles/postmod/images/bg_footer.png);
   margin-top: 40px;
   width: 100%;
   text-align: center;
@@ -247,7 +247,7 @@ ul.thin {
   color: #f7f7f7; }
 
 #footer:after {
-  content: url(https://apollo.rip/static/styles/postmod/images/gazelle.png); }
+  content: url(https://orpheus.network/static/styles/postmod/images/gazelle.png); }
 
 #disclaimer_container {
   font-size: 7pt;
@@ -423,7 +423,7 @@ li#nav_subscriptions a {
     color: #f7f7f7; }
   #searchbars input:active,
   #searchbars input:focus {
-    /*background: url(https://apollo.rip/static/styles/postmod/images/content.png);*/
+    /*background: url(https://orpheus.network/static/styles/postmod/images/content.png);*/
     /*border: 1px solid #EEE;*/ }
   #searchbars ul {
     margin: 0;
@@ -446,7 +446,7 @@ li#nav_subscriptions a {
         left: 0;
         z-index: 1000;
         border: 1px solid #EEE;
-        background: url(https://apollo.rip/static/styles/postmod/images/content.png);
+        background: url(https://orpheus.network/static/styles/postmod/images/content.png);
         width: 12em;
         margin-top: 12px; }
         #searchbars ul li ul li {
@@ -459,7 +459,7 @@ li#nav_subscriptions a {
           color: #4FD1FF; }
 
 #autocomplete {
-  background: url(https://apollo.rip/static/styles/postmod/images/content.png);
+  background: url(https://orpheus.network/static/styles/postmod/images/content.png);
   border: 1px solid #EEE;
   list-style: none; }
 

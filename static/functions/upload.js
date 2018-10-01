@@ -46,7 +46,7 @@ function Format(skip_bitrate) {
     var format_warning = $('#format_warning');
     if (format_warning.raw()) {
 		if (format.raw().options[format.raw().selectedIndex].value === 'AAC') {
-			format_warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on APOLLO in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
+			format_warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
 		} else {
 			format_warning.raw().innerHTML = '';
 		}

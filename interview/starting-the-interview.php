@@ -19,7 +19,7 @@ Once you have downloaded, installed, and set up your IRC client, read on!
 <h3>Connecting to ' . $SITENAME . '&#8217;s IRC</h3>
 <strong>YOU MAY ONLY INTERVIEW ON YOUR HOME CONNECTION. Proxies, bouncers, shells, office lines, and other non-home connections (including using your friend&#8217;s home connection) are not allowed. You may connect from your university dormitory.<br />
 </strong><br /><br />
-<strong>IRC Server:</strong> irc.apollo.rip<br />
+<strong>IRC Server:</strong> irc.orpheus.network<br />
 <strong>Port:</strong> 6667 (+7000 for SSL)<br /><br />
 
 After you have connected to ' . $SITENAME . '&#8217;s IRC network, type: &#8220;/join ' . $interviewchan . '&#8221; (without the quotation marks) and follow the directions in the topic.
