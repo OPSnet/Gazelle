@@ -14,7 +14,7 @@ In order to receive an invite to ' . $SITENAME . ', you must pass our interview.
 <li><a title="Torrenting" href="torrenting.php" target="_blank"><strong>Torrenting</strong></a> &mdash; BitTorrent vocabulary, ratio, and more!</li>
 <li><a title="Spectral Analysis" href="spectral-analysis.php" target="_blank"><strong>Spectral Analysis</strong></a> &mdash; The best way to determine the bitrate of an unknown music file. (Pretty pictures!)</li>
 <li><a title="CD Burning and CD Ripping" href="cd-burning-and-cd-ripping.php" target="_blank"><strong>CD Burning and CD Ripping</strong> </a> &mdash; How to make the best possible CD rip.</li>
-<li><a title="' . $SITENAME . ' Rules" href="apollo-rules.php" target="_blank"><strong>' . $SITENAME . ' Rules</strong></a> &mdash; Break them and perish.</li>
+<li><a title="' . $SITENAME . ' Rules" href="orpheus-rules.php" target="_blank"><strong>' . $SITENAME . ' Rules</strong></a> &mdash; Break them and perish.</li>
 </ol>
 Luckily, everything you need to know is right on this site! Make sure you carefully read through all of the pages under the Knowledge menu before you even think of queuing in ' . $interviewchan . '. Take notes if you wish, however, you may <strong>NOT</strong> use these notes while taking an interview.');
 

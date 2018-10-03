@@ -18,7 +18,7 @@ Your account has been disabled.<br />
 This is either due to inactivity or rule violation(s).<br /><br /></p>
 <? if (FEATURE_EMAIL_REENABLE) { ?>
 If you believe your account was in good standing and was disabled for inactivity, you may request it be re-enabled via email using the form below.<br />
-Please note that you will need access to the email account associated with your account at APOLLO for this to work;<br />
+Please note that you will need access to the email account associated with your account at Orpheus for this to work;<br />
 if you do not, please see the section after this form.<br /><br />
 <form action="" method="POST">
 	<input type="email" class="inputtext" placeholder="Email Address" name="email" required /> <input type="submit" value="Submit" />

@@ -247,10 +247,10 @@ $SpecialChars = array(
 
 // array to store external site credentials and API URIs, stored in cache to keep user sessions alive
 $ExternalServicesConfig = [
-    "APOLLO" => [
+    "Orpheus" => [
         'type' => 'gazelle',
         'inviter_id' => 1,
-        'base_url' => 'https://apollo.rip/',
+        'base_url' => 'https://orpheus.network/',
         'api_path' => 'ajax.php?action=',
         'login_path' => 'login.php',
         'username' => 'foo',

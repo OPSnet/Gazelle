@@ -27,7 +27,7 @@
 <a href="torrenting.php">Torrenting</a><br />
 <a href="spectral-analysis.php">Spectral analysis</a><br />
 <a href="cd-burning-and-cd-ripping.php">CD burning and CD ripping</a><br />
-<a href="apollo-rules.php"><?=$SITENAME?> rules</a><br />
+<a href="orpheus-rules.php"><?=$SITENAME?> rules</a><br />
 		</div>
 	</div>
 

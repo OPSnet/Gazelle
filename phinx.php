@@ -11,7 +11,7 @@ return
 	'environments' => [
 		'default_migration_table' => 'phinxlog',
 		'default_database' => 'gazelle',
-		'apollo' => [
+		'orpheus' => [
 			'adapter' => 'mysql',
 			'host' => SQLHOST,
 			'name' => SQLDB,

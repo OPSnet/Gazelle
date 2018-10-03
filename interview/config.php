@@ -1,6 +1,6 @@
 <?
 
-$SITENAME = "APOLLO";
+$SITENAME = "Orpheus";
 $interviewchan = "#recruitment";
 
 function newstop() { 

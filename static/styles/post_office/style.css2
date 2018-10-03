@@ -157,7 +157,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 #header {
 	width: 100%;
 	margin: 0 auto 0 auto;
-	/*background: url('https://apollo.rip/static/styles/postmod/images/bg_header.png') 11px 65px no-repeat;*/
+	/*background: url('https://orpheus.network/static/styles/postmod/images/bg_header.png') 11px 65px no-repeat;*/
 	height: 173px;
 	padding: 0 0 0 0;
 }
@@ -171,7 +171,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 }
 
 #alerts {
-	background: transparent url('https://apollo.rip/static/styles/postmod/images/content.png');
+	background: transparent url('https://orpheus.network/static/styles/postmod/images/content.png');
 	padding: 4px 9px;
 	margin: -19px auto 0 auto;
 	-moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
@@ -179,7 +179,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 }
 
 #footer {
-	background: transparent url('https://apollo.rip/static/styles/postmod/images/bg_footer.png');
+	background: transparent url('https://orpheus.network/static/styles/postmod/images/bg_footer.png');
 	margin-top: 40px;
 	width: 100%;
 	text-align: center;
@@ -191,7 +191,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
     color: #f7f7f7;
 }
 #footer:after {
-	content: url('https://apollo.rip/static/styles/postmod/images/gazelle.png');
+	content: url('https://orpheus.network/static/styles/postmod/images/gazelle.png');
 }
 
 #disclaimer_container {
@@ -403,14 +403,14 @@ li#nav_subscriptions a {
     background: #373737;
 }
 #autocomplete {
-	background: url('https://apollo.rip/static/styles/postmod/images/content.png');
+	background: url('https://orpheus.network/static/styles/postmod/images/content.png');
 	border: 1px solid #EEE;
 	list-style: none;
 }
 
 #searchbars input:active,
 #searchbars input:focus {
-	/*background: url('https://apollo.rip/static/styles/postmod/images/content.png');*/
+	/*background: url('https://orpheus.network/static/styles/postmod/images/content.png');*/
 	/*border: 1px solid #EEE;*/
 }
 
@@ -436,7 +436,7 @@ li#nav_subscriptions a {
 	left: 0;
 	z-index: 1000;
 	border: 1px solid #EEE;
-	background: url('https://apollo.rip/static/styles/postmod/images/content.png');
+	background: url('https://orpheus.network/static/styles/postmod/images/content.png');
 	width: 12em;
 	margin-top: 12px;
 }
@@ -1015,9 +1015,9 @@ ul .invitetree {
 .poll li { clear: both; }
 .poll .graph { padding: 0 0 5px 0; }
 .poll .graph span { display: block; height: 19px; float: left; }
-.poll .graph .left_poll { width: 9px; background: url('https://apollo.rip/static/styles/postmod/images/poll_left.png') top left no-repeat; }
-.poll .graph .center_poll { background: url('https://apollo.rip/static/styles/postmod/images/poll_middle.png') top left repeat-x; }
-.poll .graph .right_poll { width: 11px; background: url('https://apollo.rip/static/styles/postmod/images/poll_right.png') top left no-repeat; }
+.poll .graph .left_poll { width: 9px; background: url('https://orpheus.network/static/styles/postmod/images/poll_left.png') top left no-repeat; }
+.poll .graph .center_poll { background: url('https://orpheus.network/static/styles/postmod/images/poll_middle.png') top left repeat-x; }
+.poll .graph .right_poll { width: 11px; background: url('https://orpheus.network/static/styles/postmod/images/poll_right.png') top left no-repeat; }
 
 #musicbrainz_popup a {
 	color: #000;
