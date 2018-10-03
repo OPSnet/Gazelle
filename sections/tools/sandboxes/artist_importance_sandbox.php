@@ -28,8 +28,8 @@ $DB->prepared_query("SELECT ag.Name as ArtistName, tg.Name as GroupName, ta.Impo
 				<td><?=$ArtistName?></td>
 				<td><?=$GroupName?></td>
 				<td><?=var_export($Importance, true)?></td>
-				<td>https://apollo.rip/torrents.php?id=<?=$GroupID?></td>
-				<td>https://apollo.rip/artist.php?id=<?=$ArtistID?></td>
+				<td>https://orpheus.network/torrents.php?id=<?=$GroupID?></td>
+				<td>https://orpheus.network/artist.php?id=<?=$ArtistID?></td>
 			</tr>
 <?php
 		}
