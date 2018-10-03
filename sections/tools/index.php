@@ -93,6 +93,18 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/managers/whitelist_alter.php');
 		break;
 
+	case 'referral_accounts':
+		include(SERVER_ROOT.'/sections/tools/managers/referral_accounts.php');
+		break;
+
+	case 'referral_alter':
+		include(SERVER_ROOT.'/sections/tools/managers/referral_alter.php');
+		break;
+
+	case 'referral_users':
+		include(SERVER_ROOT.'/sections/tools/managers/referral_users.php');
+		break;
+
 	case 'enable_requests':
 		include(SERVER_ROOT.'/sections/tools/managers/enable_requests.php');
 		break;
@@ -527,6 +539,9 @@ switch ($_REQUEST['action']) {
 		break;
 	case 'vanityhouse':
 		include(SERVER_ROOT.'/sections/tools/misc/vanity_house.php');
+		break;
+	case 'dbkey':
+		include(SERVER_ROOT.'/sections/tools/managers/db_key.php');
 		break;
 	default:
 		include(SERVER_ROOT.'/sections/tools/tools.php');

@@ -76,10 +76,10 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 
 #logo {
 	height: 139px;
-	width: 150px;
+	width: 200px;
 	background-image: url('images/loginlogo.png');
 	background-repeat: no-repeat;
-	background-position: top left;
+	background-position: top center;
 	padding: 50px 0 0 0;
 	text-align: center;
 }
@@ -99,6 +99,10 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 	list-style: none;
 }
 
+#logo ul li:last-child {
+	margin: 9.5em 0 0 0;
+}
+
 .poetry {
 	width: 320px;
 	text-align: justify;
@@ -116,4 +120,36 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 .warning {
 	color: red;
 	font-weight: bold;
+}
+
+ol {
+	-webkit-margin-before: 1em;
+	-webkit-margin-after: 1em;
+	-webkit-padding-start: 40px;
+}
+
+label {
+	width: 10em;
+	float: left;
+}
+
+#referral-code {
+	color: #f5f5f5;
+	padding: 10px;
+	background-color: #151515;
+	text-align: center;
+}
+
+.center {
+	text-align: center;
+}
+
+form {
+	display: inline-block;
+	text-align: left;
+}
+
+.submit {
+	display: block;
+	margin: 0 auto;
 }

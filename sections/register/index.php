@@ -161,7 +161,14 @@ if (!empty($_REQUEST['confirm'])) {
 						('$UserID', '".db_string($InviteEmail)."', '".sqltime()."', '".db_string($_SERVER['REMOTE_ADDR'])."')");
 			}
 
-
+			$DB->prepared_query("
+				UPDATE referral_users
+					SET UserID = ?,
+						Joined = ?,
+						Active = 1,
+						InviteKey = ''
+				WHERE InviteKey = ?",
+				$UserID, sqltime(), $_REQUEST['invite']);
 
 			// Manage invite trees, delete invite
 

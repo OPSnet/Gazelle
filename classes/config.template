@@ -21,6 +21,8 @@ define('ENCKEY', ''); //Random key. The key for encryption
 define('SITE_SALT', ''); //Random key. Default site wide salt for passwords, DO NOT LEAVE THIS BLANK/CHANGE AFTER LAUNCH!
 define('SCHEDULE_KEY', ''); // Random key. This key must be the argument to schedule.php for the schedule to work.
 define('RSS_HASH', ''); //Random key. Used for generating unique RSS auth key.
+define('REFERRAL_KEY', hash('sha512', '')); //Random key. Used for encrypting traffic to/from the boucner.
+define('REFERRAL_BOUNCER', ''); // URL to the bouncer including trailing /.
 
 // MySQL details
 define('SQLHOST', 'localhost'); //The MySQL host ip/fqdn

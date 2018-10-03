@@ -67,7 +67,7 @@ pip3 install -U pip
 pip3 install chardet
 
 eatmydata apt-get install -y sphinxsearch
-eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-memcached php7.0-mcrypt php7.0-mysqlnd php7.0-cli php7.0-xdebug php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip
+eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-memcached php7.0-mcrypt php7.0-mysqlnd php7.0-cli php7.0-xdebug php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip php7.0-apcu
 
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password password em%G9Lrey4^N'
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password_again password em%G9Lrey4^N'
