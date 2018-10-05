@@ -460,7 +460,7 @@ class Referral {
 
 		$url = $acc["URL"] . 'user.php';
 
-		$result = $this->proxy->fetch($url, array("id" => $acc["Username"]), $acc["Cookie"], false);
+		$result = $this->proxy->fetch($url, array("id" => $user]), $acc["Cookie"], false);
 
 		$profile = $result["response"];
 		$match = strpos($profile, $key);
