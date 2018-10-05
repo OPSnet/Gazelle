@@ -307,7 +307,7 @@ class Referral {
 
 		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
 			"password" => $acc["Password"], "keeploggedin" => "1",
-			"token" => $token, "cinfo" => "1024|768|24|0"), array(), true);
+			"token" => $token, "cinfo" => "1024|768|24|0"), $result["cookies"], true);
 
 		if ($result["status"] == 200) {
 			$acc["Cookie"] = $result["cookies"];
@@ -352,6 +352,7 @@ class Referral {
 
 		return $result["status"] == 200;
 	}
+
 	public function verifyAccount($acc, $user, $key) {
 		switch ($acc["Type"]) {
 			case 0:
