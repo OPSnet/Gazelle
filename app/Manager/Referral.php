@@ -34,7 +34,7 @@ class Referral {
 	}
 
 	public function generateToken() { 
-		return 'APL:' . \Users::make_secret(64) . ':APL';
+		return 'OPS:' . \Users::make_secret(64) . ':OPS';
 	}
 
 	public function getTypes() {
@@ -344,7 +344,9 @@ class Referral {
 				break;
 			case 3:
 				return $this->verifyLuminanceAccount($acc, $user, $key);
-				break;
+                break;
+            case 4:
+                return $this->verifyGazelleHTMLAccount($acc, $user, $key);
 		}
 		return "Unrecognised account type";
 	}
