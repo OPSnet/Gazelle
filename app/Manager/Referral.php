@@ -24,7 +24,7 @@ class Referral {
 			$this->db->query("SELECT ID, Site, Active, Type FROM referral_accounts");
 			$this->accounts = $this->db->has_results() ? $this->db->to_array('ID') : [];
 			foreach ($this->accounts as &$acc) {
-				$acc["UserIsId"] = in_array($acc["Type"], array(3, 5));
+				$acc["UserIsId"] = in_array($acc["Type"], array(3, 4, 5));
 				unset($acc);
 			}
 			$this->cache->cache_value(self::CACHE_ACCOUNTS, $this->accounts, 86400 * 30);
@@ -498,7 +498,7 @@ class Referral {
 
 		$url = $acc["URL"] . 'user.php';
 
-		$result = $this->proxy->fetch($url, array("action" => "search", "search" => $user),
+		$result = $this->proxy->fetch($url, array("id" => $user),
 			$acc["Cookie"], false);
 
 		$profile = $result["response"];
