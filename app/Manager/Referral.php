@@ -370,7 +370,7 @@ class Referral {
 				return $this->verifyGazelleHTMLAccount($acc, $user, $key);
 				break;
 			case 5:
-				return $this->verifyPTPAccount($acc, $use, $key);
+				return $this->verifyPTPAccount($acc, $user, $key);
 				break;
 		}
 		return "Unrecognised account type";
