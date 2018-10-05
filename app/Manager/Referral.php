@@ -12,7 +12,7 @@ class Referral {
 
 	const CACHE_ACCOUNTS = 'referral_accounts';
 	// Do not change the ordering in this array after launch.
-	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)');
+	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP');
 
 	public function __construct($db, $cache) {
 		$this->db = $db;
@@ -24,7 +24,7 @@ class Referral {
 			$this->db->query("SELECT ID, Site, Active, Type FROM referral_accounts");
 			$this->accounts = $this->db->has_results() ? $this->db->to_array('ID') : [];
 			foreach ($this->accounts as &$acc) {
-				$acc["UserIsId"] = $acc["Type"] == 3;
+				$acc["UserIsId"] = in_array($acc["Type"], array(3, 5));
 				unset($acc);
 			}
 			$this->cache->cache_value(self::CACHE_ACCOUNTS, $this->accounts, 86400 * 30);
@@ -34,7 +34,7 @@ class Referral {
 	}
 
 	public function generateToken() { 
-		return 'OPS:' . \Users::make_secret(64) . ':OPS';
+		return 'OPS|' . \Users::make_secret(64) . '|OPS';
 	}
 
 	public function getTypes() {
@@ -194,6 +194,7 @@ class Referral {
 				break;
 			case 3:
 			case 4:
+			case 5:
 				return $this->validateLuminanceCookie($acc);
 				break;
 		}
@@ -243,6 +244,9 @@ class Referral {
 				break;
 			case 4:
 				return $this->loginGazelleHTMLAccount($acc);
+				break;
+			case 5:
+				return $this->loginPTPAccount($acc);
 				break;
 		}
 		return false;
@@ -331,6 +335,23 @@ class Referral {
 		return $result["status"] == 200;
 	}
 
+	private function loginPTPAccount(&$acc) {
+		if ($this->validateLuminanceCookie($acc)) {
+			return true;
+		}
+
+		$url = $acc["URL"] . "login_finish.php";
+
+		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
+			"password" => $acc["Password"], "keeplogged" => "1"), array(), true);
+
+		if ($result["status"] == 200) {
+			$acc["Cookie"] = $result["cookies"];
+			$this->updateCookie($acc["ID"], $acc["Cookie"]);
+		}
+
+		return $result["status"] == 200;
+	}
 	public function verifyAccount($acc, $user, $key) {
 		switch ($acc["Type"]) {
 			case 0:
@@ -344,9 +365,13 @@ class Referral {
 				break;
 			case 3:
 				return $this->verifyLuminanceAccount($acc, $user, $key);
-                break;
-            case 4:
-                return $this->verifyGazelleHTMLAccount($acc, $user, $key);
+				break;
+			case 4:
+				return $this->verifyGazelleHTMLAccount($acc, $user, $key);
+				break;
+			case 5:
+				return $this->verifyPTPAccount($acc, $use, $key);
+				break;
 		}
 		return "Unrecognised account type";
 	}
@@ -447,7 +472,27 @@ class Referral {
 	}
 
 	private function verifyGazelleHTMLAccount($acc, $user, $key) {
-		if (!$this->loginGazelleAccount($acc)) {
+		if (!$this->loginGazelleHTMLAccount($acc)) {
+			return "Internal error";
+		}
+
+		$url = $acc["URL"] . 'user.php';
+
+		$result = $this->proxy->fetch($url, array("id" => $user),
+			$acc["Cookie"], false);
+
+		$profile = $result["response"];
+		$match = strpos($profile, $key);
+
+		if ($match !== false) {
+			return true;
+		} else {
+			return "Token not found. Please try again.";
+		}
+	}
+
+	private function verifyPTPAccount($acc, $user, $key) {
+		if (!$this->loginPTPAccount($acc)) {
 			return "Internal error";
 		}
 
