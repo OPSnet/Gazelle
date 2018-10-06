@@ -414,7 +414,7 @@ class Referral {
 			}
 		}
 
-		return "User not found. Please try again.";
+		return "Token not found. Please try again.";
 	}
 
 	private function verifyGGNAccount($acc, $user, $key) {
