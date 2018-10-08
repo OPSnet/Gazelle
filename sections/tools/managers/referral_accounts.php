@@ -36,6 +36,7 @@ View::show_header('Referral Accounts');
 		<td>Password</td>
 		<td>Type</td>
 		<td>Active</td>
+		<td>Cookie</td>
 		<td>Submit</td>
 	</tr>
 <?php
@@ -53,13 +54,13 @@ foreach ($ReferralAccounts as $a) {
 				<input type="text" size="10" name="site" value="<?=$Site?>" />
 			</td>
 			<td>
-				<input type="text" size="20" name="url" value="<?=$URL?>" />
+				<input type="text" size="15" name="url" value="<?=$URL?>" />
 			</td>
 			<td>
 				<input type="text" size="10" name="user" value="<?=$User?>" />
 			</td>
 			<td>
-				<input type="password" size="20" name="password" />
+				<input type="password" size="10" name="password" />
 			</td>
 			<td>
 				<select name="type">
@@ -68,6 +69,9 @@ foreach ($ReferralAccounts as $a) {
 			</td>
 			<td>
 				<input type="checkbox" name="active"<?=($Active == '1') ? ' checked="checked"' : ''?> />
+			</td>
+			<td>
+				<input type="text" size="10" name="cookie" />
 			</td>
 			<td>
 				<?php if (!$ReferralManager->readOnly) { ?>
@@ -82,7 +86,7 @@ foreach ($ReferralAccounts as $a) {
 if (!$ReferralManager->readOnly) {
 ?>
 	<tr class="colhead">
-		<td colspan="7">Create Account</td>
+		<td colspan="8">Create Account</td>
 	</tr>
 	<tr class="rowa">
 		<form class="create_form" name="accounts" action="" method="post">
@@ -92,13 +96,13 @@ if (!$ReferralManager->readOnly) {
 				<input type="text" size="10" name="site" />
 			</td>
 			<td>
-				<input type="text" size="20" name="url" />
+				<input type="text" size="15" name="url" />
 			</td>
 			<td>
 				<input type="text" size="10" name="user" />
 			</td>
 			<td>
-				<input type="password" size="20" name="password" />
+				<input type="password" size="10" name="password" />
 			</td>
 			<td>
 				<select name="type">
@@ -107,6 +111,9 @@ if (!$ReferralManager->readOnly) {
 			</td>
 			<td>
 				<input type="checkbox" name="active" checked="checked" />
+			</td>
+			<td>
+				<input type="text" size="10" name="cookie" />
 			</td>
 			<td>
 				<input type="submit" name="submit" value="Create" />

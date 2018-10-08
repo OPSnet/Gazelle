@@ -28,7 +28,7 @@ if ($_POST['submit'] == 'Delete') {
 
 	if ($_POST['submit'] == 'Create') {
 		$ReferralManager->createAccount($P['site'], $P['url'], $P['user'], $P['password'],
-		   	$P['active'] == 'on' ? 1 : 0, $P['type']);
+		   	$P['active'] == 'on' ? 1 : 0, $P['type'], $P['cookie']);
 	} elseif ($_POST['submit'] == 'Edit') {
 		if (!is_number($_POST['id']) || $_POST['id'] == '') {
 			error(0);
@@ -40,7 +40,7 @@ if ($_POST['submit'] == 'Delete') {
 		}
 
 		$ReferralManager->updateAccount($P['id'], $P['site'], $P['url'], $P['user'],
-			$P['password'], $P['active'] == 'on' ? 1 : 0, $P['type']);
+			$P['password'], $P['active'] == 'on' ? 1 : 0, $P['type'], $P['cookie']);
 	}
 }
 
