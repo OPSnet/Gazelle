@@ -1,6 +1,8 @@
 <?php
 
 //------------- Delete dead torrents ------------------------------------//
+//Temporary disabled by ATH//
+/*
 
 sleep(10);
 
@@ -91,3 +93,4 @@ if ($SimilarIDs) {
 			DELETE FROM artists_similar_votes
 			WHERE SimilarID IN($SimilarIDs)");
 }
+*/
