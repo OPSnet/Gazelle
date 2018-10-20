@@ -134,14 +134,12 @@ class Referral {
 			if (json_last_error() != JSON_ERROR_NONE) {
 				$cookie = '[]';
 			}
-			if ($cookie = '[]') {
-				$cookie = $account["Cookie"];
+			if ($cookie == '[]') {
+				$cookie = json_encode($account["Cookie"]);
 			}
-
 			if (strlen($password) == 0) {
 				$password = $account["Password"];
 			}
-
 			$this->db->prepared_query("
 				UPDATE referral_accounts SET
 					Site = ?,
@@ -153,7 +151,7 @@ class Referral {
 					Cookie = ?
 				WHERE ID = ?", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
 				\Gazelle\Util\Crypto::dbEncrypt($user),	\Gazelle\Util\Crypto::dbEncrypt($password),
-				$active, $type, $id, \Gazelle\Util\Crypto::dbEncrypt($cookie));
+				$active, $type, \Gazelle\Util\Crypto::dbEncrypt($cookie), $id);
 
 			$this->cache->delete_value(self::CACHE_ACCOUNTS);
 		}
