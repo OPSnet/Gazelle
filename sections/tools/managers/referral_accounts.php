@@ -42,7 +42,7 @@ View::show_header('Referral Accounts');
 <?php
 $Row = 'b';
 foreach ($ReferralAccounts as $a) {
-	list($ID, $Site, $URL, $User, $Password, $Active, $Type) = array_values($a);
+	list($ID, $Site, $URL, $User, $Password, $Active, $Type, $Cookie) = array_values($a);
 	$Row = $Row === 'a' ? 'b' : 'a';
 ?>
 	<tr class="row<?=$Row?>">
