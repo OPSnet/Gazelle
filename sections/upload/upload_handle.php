@@ -374,7 +374,7 @@ foreach ($Properties as $Key => $Value) {
 
 $Tor = new BencodeTorrent($TorrentName, true);
 $PublicTorrent = $Tor->make_private(); // The torrent is now private.
-$UnsourcedTorrent = $Tor->set_source(); // The source is now APL
+$UnsourcedTorrent = $Tor->set_source(); // The source is now OPS
 $TorEnc = db_string($Tor->encode());
 $InfoHash = pack('H*', $Tor->info_hash());
 
@@ -1028,7 +1028,7 @@ if ($PublicTorrent || $UnsourcedTorrent) {
 	}
 	if ($UnsourcedTorrent) {
 ?>
-		<li><strong>The "source" flag was not set to APL</strong></li>
+		<li><strong>The "source" flag was not set to OPS</strong></li>
 <?
 	}
 ?>
