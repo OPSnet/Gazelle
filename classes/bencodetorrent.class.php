@@ -116,11 +116,11 @@ class BencodeTorrent extends BencodeDecode {
 			return false;
 		}
 
-		if (isset($this->Dec['info']['source']) && $this->Dec['info']['source'] === 'APL') {
+		if (isset($this->Dec['info']['source']) && ($this->Dec['info']['source'] === 'OPS' || $this->Dec['info']['source'] === 'APL')) {
 			return false;
 		}
 
-		$this->Dec['info']['source'] = 'APL';
+		$this->Dec['info']['source'] = 'OPS';
 		ksort($this->Dec['info']);
 		return true;
 	}
