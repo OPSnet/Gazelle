@@ -1,14 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<?
-$SITENAME = "Orpheus";
-?>
 <head>
-<title><?=$SITENAME?> :: Membership recovery</title>
+<title>Orpheus :: Membership recovery</title>
 <meta http-equiv="X-UA-Compatible" content="chrome=1; IE=edge" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link rel="shortcut icon" href="favicon.ico" />
-<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="stylesheet" href="/static/styles/apollostage/style.css" />
 
 <style type="text/css" media="screen">
@@ -24,7 +21,6 @@ h5{padding-top:30px}
 #suggestions a{font-size:14px;margin:0 10px}
     </style>
 </head>
-
 <body>
 <div class="container">
 <?
@@ -94,7 +90,7 @@ function save_screenshot($upload) {
         RECOVERY_PATH, substr($filename, 0, 1), substr($filename, 1, 1), substr($filename, 2, 1), $filename
     );
     if (!move_uploaded_file($file['tmp_name'], $destination)) {
-        return [false, "Unable to persist your upload ($filename = $destination)."];
+        return [false, "Unable to persist your upload."];
     }
     return [true, $filename];
 }
@@ -124,7 +120,7 @@ $key        = "apl-recovery.$ipaddr";
 $rate_limit = 0;
 
 if (G::$Cache->get_value($key)) {
-    $msg = "Rate limiting in force.<br />You tried to save this page too rapidly after the previous save.";
+    $msg = "Rate limiting in force.<br />You tried to save this page too rapidly following the previous save.";
 }
 else {
     $info = validate($_POST);
@@ -165,7 +161,7 @@ G::$Cache->cache_value($key, 1, 300);
 if ($msg == 'ok') {
 ?>
 <h3>Success!</h3>
-<p>Your information has been uploaded and secured. It will be held for the next 30 days and removed afterwards.</p>
+<p>Your information has been uploaded and secured. It will be held for the next 30 days and then removed.</p>
 
 <p>Please save the following token away for future reference. If you need to get in touch with Staff, this is the only
 way you will be able to associate yourself with what you have just uploaded.<p>
@@ -177,7 +173,7 @@ way you will be able to associate yourself with what you have just uploaded.<p>
 } else {
 ?>
 <h3>There was a problem</h3>
-<p>Your information was not saved for the following reason.
+<p>Your information was not saved for the following reason.</p>
 
 <center><b style="font-size: 20pt;"><?= $msg ?></b></center>
 
