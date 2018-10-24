@@ -849,7 +849,7 @@ list($ArtistsAdded) = $DB->next_record();
 			<tr id="acc_2fa_tr">
 				<td class="label"><strong>Two-factor Authentication</strong></td>
 				<td>
-					Two-factor autentication is currently <strong class="<?= $TwoFAKey ? 'r99' : 'warning'; ?>"><?= $TwoFAKey ? 'enabled' : 'disabled'; ?></strong> for your account.
+					Two-factor authentication is currently <strong class="<?= $TwoFAKey ? 'r99' : 'warning'; ?>"><?= $TwoFAKey ? 'enabled' : 'disabled'; ?></strong> for your account.
 
 					<br><br>
 
