@@ -1675,12 +1675,12 @@ blockquote {
 		margin: 4px;
 	}
 	#nav_staff {
-		font-weight: 400;
+		font-weight: 400
 	}
 	#menu>ul>#nav_staff {
 		position: absolute;
 		display: inline;
-		top: 29px;
+		top: 26px;
 		right: 8px
 	}
 
