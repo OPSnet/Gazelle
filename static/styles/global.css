@@ -785,8 +785,8 @@ input[type="search"] {
 .avatar_container > :last-child {
 	opacity: 0;
 }
-.avatar_container:hover > :first-child {
-	opacity: 0;
+.avatar_container > :first-child {
+	opacity: 1;
 }
 .avatar_container:hover > :last-child {
 	opacity: 1;
