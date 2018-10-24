@@ -774,6 +774,7 @@ input[type="search"] {
 
 .avatar_container img {
 	max-height: 400px;
+  	max-width: 150px;
 }
 .avatar_container > div {
 	width: 0;
