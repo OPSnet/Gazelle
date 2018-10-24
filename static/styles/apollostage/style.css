@@ -303,7 +303,7 @@ textarea {
 	height: 32px;
 	border: 1px solid rgba(255, 255, 255, .08);
 	color: #c6c9c9;
-	background: #262E27
+	background: #1b2426
 }
 
 input[type=email]:focus,
@@ -1006,7 +1006,7 @@ table.box2 {
 
 .group_torrent.edition,
 .torrent {
-	background-color: #2B402D
+	background-color: #1b2426
 }
 
 .torrentdetails .linkbox {
@@ -1675,12 +1675,12 @@ blockquote {
 		margin: 4px;
 	}
 	#nav_staff {
-		font-weight: 400
+		font-weight: 400;
 	}
 	#menu>ul>#nav_staff {
 		position: absolute;
 		display: inline;
-		top: 26px;
+		top: 29px;
 		right: 8px
 	}
 
