@@ -77,16 +77,16 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 #logo {
 	height: 139px;
 	width: 200px;
-	background-image: url('images/loginlogo.png');
 	background-repeat: no-repeat;
-	background-position: top center;
+    background-image: url('images/loginlogo.png');
+    background-position: top center;
 	padding: 50px 0 0 0;
 	text-align: center;
 }
 
 #logo ul {
 	float: left;
-	left: 50%;
+	left: 45%;
 	margin: 0 auto;
 	position: relative;
 }
@@ -101,6 +101,10 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 
 #logo ul li:last-child {
 	margin: 9.5em 0 0 0;
+}
+
+.auth_form .layout {
+    padding-right: 40px;
 }
 
 .poetry {

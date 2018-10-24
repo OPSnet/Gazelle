@@ -771,23 +771,3 @@ input[type="search"] {
 	padding-top: 5px;
 	border-top: 1px solid #c7c7c7;
 }
-
-.avatar_container img {
-	max-height: 400px;
-}
-.avatar_container > div {
-	width: 0;
-	overflow: visible;
-	display: inline-block;
-	vertical-align: top;
-	transition: opacity 500ms;
-}
-.avatar_container > :last-child {
-	opacity: 0;
-}
-.avatar_container:hover > :first-child {
-	opacity: 0;
-}
-.avatar_container:hover > :last-child {
-	opacity: 1;
-}

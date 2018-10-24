@@ -290,7 +290,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 #alerts {
 	margin-top: 95px;
 	margin-bottom: -95px;
-	background: #4b5162;
+	background: #383c4a;
 	padding: 20px 0px;
 }
 
@@ -806,6 +806,23 @@ ul .invitetree {
 }
 
 /* Layout (MISC) */
+
+#top10 .rowa,
+#top10 .rowb {
+		background-color: #4b5162;
+}
+
+.snatches .tooltip {
+    font-size: 11px;
+}
+
+.seeders .tooltip {
+    font-size: 11px;
+}
+
+.leechers .tooltip {
+    font-size: 11px;
+}
 
 .left_poll {
 	width: 2px;
