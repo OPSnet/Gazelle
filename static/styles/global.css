@@ -774,6 +774,7 @@ input[type="search"] {
 
 .avatar_container img {
 	max-height: 400px;
+  	max-width: 150px;
 }
 .avatar_container > div {
 	width: 0;
@@ -783,6 +784,7 @@ input[type="search"] {
 	transition: opacity 500ms;
 }
 .avatar_container > :last-child {
+	margin-right: 150px;
 	opacity: 0;
 }
 .avatar_container > :first-child {
@@ -792,5 +794,6 @@ input[type="search"] {
 	opacity: 0;
 }
 .avatar_container:hover > :last-child {
-	opacity: 1;
+	margin-right: 150px;
+  	opacity: 1;
 }
