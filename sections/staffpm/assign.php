@@ -6,10 +6,10 @@ if (!($IsFLS)) {
 
 if ($ConvID = (int)$_GET['convid']) {
 	// FLS, check level of conversation
-	$DB->query("
+	$DB->prepared_query("
 		SELECT Level
 		FROM staff_pm_conversations
-		WHERE ID = $ConvID");
+		WHERE ID = ?", $ConvID);
 	list($Level) = $DB->next_record();
 
 	if ($Level == 0) {
@@ -28,11 +28,11 @@ if ($ConvID = (int)$_GET['convid']) {
 					break;
 			}
 
-			$DB->query("
+			$DB->prepared_query("
 				UPDATE staff_pm_conversations
 				SET Status = 'Unanswered',
-					Level = $Level
-				WHERE ID = $ConvID");
+					Level = ?
+				WHERE ID = ?", $Level, $ConvID);
 			$Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
 			header('Location: staffpm.php');
 		} else {
@@ -45,10 +45,10 @@ if ($ConvID = (int)$_GET['convid']) {
 
 } elseif ($ConvID = (int)$_POST['convid']) {
 	// Staff (via AJAX), get current assign of conversation
-	$DB->query("
+	$DB->prepared_query("
 		SELECT Level, AssignedToUser
 		FROM staff_pm_conversations
-		WHERE ID = $ConvID");
+		WHERE ID = ?", $ConvID);
 	list($Level, $AssignedToUser) = $DB->next_record();
 	
 	$LevelCap = 1000;
@@ -60,12 +60,12 @@ if ($ConvID = (int)$_GET['convid']) {
 
 		if ($LevelType == 'class') {
 			// Assign to class
-			$DB->query("
+			$DB->prepared_query("
 				UPDATE staff_pm_conversations
 				SET Status = 'Unanswered',
-					Level = $NewLevel,
+					Level = ?,
 					AssignedToUser = NULL
-				WHERE ID = $ConvID");
+				WHERE ID = ?", $NewLevel, $ConvID);
 			$Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
 		} else {
 			$UserInfo = Users::user_info($NewLevel);
@@ -75,12 +75,12 @@ if ($ConvID = (int)$_GET['convid']) {
 			}
 
 			// Assign to user
-			$DB->query("
+			$DB->prepared_query("
 				UPDATE staff_pm_conversations
 				SET Status = 'Unanswered',
-					AssignedToUser = $NewLevel,
-					Level = $Level
-				WHERE ID = $ConvID");
+					AssignedToUser = ?,
+					Level = ?
+				WHERE ID = ?", $NewLevel, $Level, $ConvID);
 			$Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
 		}
 		echo '1';
