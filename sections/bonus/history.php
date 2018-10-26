@@ -42,7 +42,7 @@ if ($Summary['nr'] > 0) {
 	<h3>No purchase history</h3>
 <?
 }
-if ($History) {
+if (isset($History)) {
 ?>
 	<div class="linkbox">
 		<?= $Pages ?>
