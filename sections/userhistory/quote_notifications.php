@@ -4,11 +4,11 @@ if (!empty($LoggedUser['DisableForums'])) {
 }
 
 $UnreadSQL = 'AND q.UnRead';
-if ($_GET['showall']) {
+if (isset($_GET['showall']) && $_GET['showall']) {
 	$UnreadSQL = '';
 }
 
-if ($_GET['catchup']) {
+if (isset($_GET['catchup']) && $_GET['catchup']) {
 	$DB->query("UPDATE users_notify_quoted SET UnRead = '0' WHERE UserID = '$LoggedUser[ID]'");
 	$Cache->delete_value('notify_quoted_' . $LoggedUser['ID']);
 	header('Location: userhistory.php?action=quote_notifications');
