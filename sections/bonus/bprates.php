@@ -23,7 +23,7 @@ else {
 $Title = ($UserID === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
 View::show_header($Title);
 
-$DB->query("
+$DB->prepared_query("
 SELECT
 	COUNT(xfu.uid) as TotalTorrents,
 	SUM(t.Size) as TotalSize,
@@ -33,11 +33,11 @@ SELECT
 		)
 	), 0)) AS TotalHourlyPoints
 FROM
-	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}) AS xfu
+	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
 	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
 	JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
-	xfu.uid = {$UserID}");
+	xfu.uid = ?", $UserID, $UserID);
 
 list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $DB->next_record();
 $TotalTorrents = intval($TotalTorrents);
@@ -109,7 +109,7 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 <?php
 
 if ($TotalTorrents > 0) {
-	$DB->query("
+	$DB->prepared_query("
 	SELECT
 		t.ID,
 		t.GroupID,
@@ -133,13 +133,13 @@ if ($TotalTorrents > 0) {
 			)
 		)) AS HourlyPoints
 	FROM
-		(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}) AS xfu
+		(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
 		JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
 		JOIN torrents AS t ON t.ID = xfu.fid
 	WHERE
-		xfu.uid = {$UserID}
-	LIMIT {$Limit}
-	OFFSET {$Offset}");
+		xfu.uid = ?
+	LIMIT ?
+	OFFSET ?", $UserID, $UserID, $Limit, $Offset);
 
 	$GroupIDs = $DB->collect('GroupID');
 	$Groups = Torrents::get_groups($GroupIDs, true, true, false);
