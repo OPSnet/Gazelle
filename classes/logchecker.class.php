@@ -233,7 +233,7 @@ class Logchecker {
 
 			if ($this->ValidateChecksum && $this->Checksum && !empty($this->LogPath)) {
 				if ($EAC) {
-					$CommandExists = !empty(shell_exec(sprintf("which %s", escapeshellarg($cmd))));
+					$CommandExists = !empty(shell_exec(sprintf("which %s", escapeshellarg("eac_logchecker"))));
 					if ($CommandExists) {
 						$Out = shell_exec("eac_logchecker {$this->LogPath}");
 						if (strpos($Out, "Log entry has no checksum!") !== false ||
