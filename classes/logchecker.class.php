@@ -232,19 +232,20 @@ class Logchecker {
 			}
 
 			if ($this->ValidateChecksum && $this->Checksum && !empty($this->LogPath)) {
-				$Exe = ($EAC) ? __DIR__ . "/logchecker/eac_logchecker.exe" : __DIR__ . "/logchecker/eac_logchecker.exe";
-				if (file_exists($Exe)) {
-					if ($EAC) {
-						$Script = "script -q -c 'wine {$Exe} {$this->LogPath}' /dev/null";
-						$Out = shell_exec($Script);
+				if ($EAC) {
+					$CommandExists = !empty(shell_exec(sprintf("which %s", escapeshellarg($cmd))));
+					if ($CommandExists) {
+						$Out = shell_exec("eac_logchecker {$this->LogPath}");
 						if (strpos($Out, "Log entry has no checksum!") !== false ||
 							strpos($Out, "Log entry was modified, checksum incorrect!") !== false ||
 							strpos($Out, "Log entry is fine!") === false) {
 							$this->Checksum = false;
 						}
 					}
-					else {
-						$Exe = __DIR__ . '/logchecker/xld_logchecker';
+				}
+				else {
+					$Exe = __DIR__ . '/logchecker/xld_logchecker';
+					if (file_exists($Exe)) {
 						$Out = shell_exec("{$Exe} {$this->LogPath}");
 						if (strpos($Out, "Malformed") !== false || strpos($Out, "OK") === false) {
 							$this->Checksum = false;
