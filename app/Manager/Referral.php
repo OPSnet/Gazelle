@@ -94,15 +94,22 @@ class Referral {
 		return [];
 	}
 
-	public function createAccount($site, $url, $user, $password, $active, $type) {
+	public function createAccount($site, $url, $user, $password, $active, $type, $cookie) {
 		if (!$this->readOnly) {
+			if (strlen($cookie) < 2) {
+				$cookie = '[]';
+			}
+			json_decode($cookie);
+			if (json_last_error() != JSON_ERROR_NONE) {
+				$cookie = '[]';
+			}
 			$this->db->prepared_query("
 				INSERT INTO referral_accounts
 					(Site, URL, User, Password, Active, Type, Cookie)
 				VALUES
 					(?, ?, ?, ?, ?, ?, ?)", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
 				\Gazelle\Util\Crypto::dbEncrypt($user),	\Gazelle\Util\Crypto::dbEncrypt($password),
-				$active, $type, \Gazelle\Util\Crypto::dbEncrypt('[]'));
+				$active, $type, \Gazelle\Util\Crypto::dbEncrypt($cookie));
 
 			$this->cache->delete_value(self::CACHE_ACCOUNTS);
 		}
@@ -117,13 +124,22 @@ class Referral {
 		}
 	}
 
-	public function updateAccount($id, $site, $url, $user, $password, $active, $type) {
+	public function updateAccount($id, $site, $url, $user, $password, $active, $type, $cookie) {
 		if (!$this->readOnly) {
 			$account = $this->getFullAccount($id);
+			if (strlen($cookie) < 2) {
+				$cookie = '[]';
+			}
+			json_decode($cookie);
+			if (json_last_error() != JSON_ERROR_NONE) {
+				$cookie = '[]';
+			}
+			if ($cookie == '[]') {
+				$cookie = json_encode($account["Cookie"]);
+			}
 			if (strlen($password) == 0) {
 				$password = $account["Password"];
 			}
-
 			$this->db->prepared_query("
 				UPDATE referral_accounts SET
 					Site = ?,
@@ -131,10 +147,11 @@ class Referral {
 					User = ?,
 					Password = ?,
 					Active = ?,
-					Type = ?
+					Type = ?,
+					Cookie = ?
 				WHERE ID = ?", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
 				\Gazelle\Util\Crypto::dbEncrypt($user),	\Gazelle\Util\Crypto::dbEncrypt($password),
-				$active, $type, $id);
+				$active, $type, \Gazelle\Util\Crypto::dbEncrypt($cookie), $id);
 
 			$this->cache->delete_value(self::CACHE_ACCOUNTS);
 		}
@@ -414,7 +431,7 @@ class Referral {
 			}
 		}
 
-		return "User not found. Please try again.";
+		return "Token not found. Please try again.";
 	}
 
 	private function verifyGGNAccount($acc, $user, $key) {
