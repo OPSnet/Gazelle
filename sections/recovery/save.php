@@ -25,96 +25,6 @@ h5{padding-top:30px}
 <div class="container">
 <?
 
-function email_check ($raw) {
-    $raw = strtolower(trim($raw));
-    $parts = explode('@', $raw);
-    if (count($parts) != 2) {
-        return null;
-    }
-    list($lhs, $rhs) = $parts;
-    if ($rhs == 'gmail.com') {
-        $lhs = str_replace('.', '', $lhs);
-    }
-    $lhs = preg_replace('/\+.*$/', '', $lhs);
-    return [$raw, "$lhs@$rhs"];
-}
-
-function validate ($info) {
-    $data = [];
-    foreach (explode(' ', 'username email announce invite info') as $key) {
-        if (!isset($info[$key])) {
-            return [];
-        }
-        switch ($key) {
-            case 'email':
-                $email = email_check($_POST['email']);
-                if (!$email) {
-                    return [];
-                }
-                $data['email']       = $email[0];
-                $data['email_clean'] = $email[1];
-                break;
-
-            default:
-                $data[$key] = trim($info[$key]);
-                break;
-        }
-    }
-    return $data;
-}
-
-function save_screenshot($upload) {
-    if (!isset($upload['screen'])) {
-        return [false, "File form name missing"];
-    }
-    $file = $upload['screen'];
-    if (!isset($file['error']) || is_array($file['error'])) {
-        return [false, "Never received the uploaded file."];
-    }
-    switch ($file['error']) {
-        case UPLOAD_ERR_OK:
-            break;
-        case UPLOAD_ERR_NO_FILE:
-            return [true, null];
-        case UPLOAD_ERR_INI_SIZE:
-        case UPLOAD_ERR_FORM_SIZE:
-            return [false, "File was too large, please make sure it is less than 10MB in size."];
-        default:
-            return [false, "There was a problem with the screenshot file."];
-    }
-    if ($file['size'] > 10 * 1024 * 1024) {
-        return [false, "File was too large, please make sure it is less than 10MB in size."];
-    }
-    $filename = sha1(RECOVERY_SALT . mt_rand(0, 10000000). sha1_file($file['tmp_name']));
-    $destination = sprintf('%s/%s/%s/%s/%s',
-        RECOVERY_PATH, substr($filename, 0, 1), substr($filename, 1, 1), substr($filename, 2, 1), $filename
-    );
-    if (!move_uploaded_file($file['tmp_name'], $destination)) {
-        return [false, "Unable to persist your upload."];
-    }
-    return [true, $filename];
-}
-
-function persist($info) {
-    G::$DB->prepared_query(
-        "INSERT INTO recovery (token, ipaddr, username, passhash, email, email_clean, announce, screenshot, invite, info, state    )
-                       VALUES (?,     ?,      ?,        ?,        ?,     ?,           ?,        ?,          ?,      ?,    'PENDING')",
-        $info['token'],
-        $info['ipaddr'],
-        $info['username'],
-        $info['passhash'],
-        $info['email'],
-        $info['email_clean'],
-        $info['announce'],
-        $info['screenshot'],
-        $info['invite'],
-        $info['info']
-    );
-    return G::$DB->affected_rows();
-}
-
-// ==== here we go ===============================
-
 $ipaddr     = $_SERVER['REMOTE_ADDR'];
 $key        = "apl-recovery.$ipaddr";
 $rate_limit = 0;
@@ -123,12 +33,12 @@ if (G::$Cache->get_value($key)) {
     $msg = "Rate limiting in force.<br />You tried to save this page too rapidly following the previous save.";
 }
 else {
-    $info = validate($_POST);
+    $info = \Gazelle\Recovery::validate($_POST);
     if (count($info)) {
         $info['ipaddr']   = $ipaddr;
-        $info['passhash'] = Users::make_password_hash($_POST['password']);
+        $info['password_ok'] = \Gazelle\Recovery::check_password($info['username'], $_POST['password'], G::$DB);
 
-        list($ok, $filename) = save_screenshot($_FILES);
+        list($ok, $filename) = \Gazelle\Recovery::save_screenshot($_FILES);
         if (!$ok) {
             $msg = $filename; // the reason we were unable to save the screenshot info
         }
@@ -144,7 +54,7 @@ else {
             }
             $info['token'] = $token;
 
-            if (persist($info)) {
+            if (\Gazelle\Recovery::persist($info, G::$DB)) {
                 $msg = 'ok';
             }
             else {

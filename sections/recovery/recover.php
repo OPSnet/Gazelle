@@ -33,7 +33,7 @@ h5{padding-top:30px}
 
 <div class="container">
 <?
-if (defined('RECOVERY')) {
+if (defined('RECOVERY') && RECOVERY) {
     include('sections/recovery/form.php');
 }
 else {
