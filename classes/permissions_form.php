@@ -99,6 +99,7 @@ $PermissionsArray = array(
 	'admin_clear_cache' => 'Can clear cached.',
 	'admin_whitelist' => 'Can manage the list of allowed clients.',
 	'admin_manage_permissions' => 'Can edit permission classes/user permissions.',
+	'admin_recovery' => 'Can manage account recovery.',
 	'admin_schedule' => 'Can run the site schedule.',
 	'admin_login_watch' => 'Can manage login watch.',
 	'admin_manage_wiki' => 'Can manage wiki access.',
@@ -266,6 +267,7 @@ function permissions_form() {
 					display_perm('admin_clear_cache', 'Can clear cached pages');
 					display_perm('admin_whitelist', 'Can manage the list of allowed clients.');
 					display_perm('admin_manage_permissions', 'Can edit permission classes/user permissions.');
+					display_perm('admin_recovery', 'Can manage account recovery.');
 					display_perm('admin_schedule', 'Can run the site schedule.');
 					display_perm('admin_login_watch', 'Can manage login watch.');
 					display_perm('admin_manage_wiki', 'Can manage wiki access.');
