@@ -32,7 +32,7 @@ if (isset($_GET['task'])) {
 
 $Page = (isset($_GET['page']) && (int)$_GET['page'] > 0)
     ? (int)$_GET['page'] : 1;
-$Limit  = 2;
+$Limit  = 100;
 $Offset = $Limit * ($Page-1);
 
 $State = isset($_GET['state']) ? $_GET['state'] : 'pending';
