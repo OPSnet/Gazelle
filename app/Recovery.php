@@ -120,35 +120,29 @@ class Recovery {
 
     static function get_list($limit, $offset, $state, $admin_id, $db) {
         $state = strtoupper($state);
+        $sql_header = 'SELECT recovery_id, username, token, email, announce, created_dt, updated_dt, state FROM recovery';
+        $sql_footer = 'ORDER BY updated_dt DESC LIMIT ? OFFSET ?';
+
         switch ($state) {
             case 'CLAIMED':
-                $db->prepared_query("
-                    SELECT recovery_id, username, token, email, announce, created_dt
-                    FROM recovery
+                $db->prepared_query("$sql_header
                     WHERE admin_user_id = ?
-                    ORDER BY recovery_id
-                    LIMIT ? OFFSET ?
+                    $sql_footer
                     ", $admin_id, $limit, $offset
                 );
                 break;
             case 'PENDING':
-                $db->prepared_query("
-                    SELECT recovery_id, username, token, email, announce, created_dt
-                    FROM recovery
+                $db->prepared_query("$sql_header
                     WHERE (admin_user_id is NULL OR admin_user_id != ?)
                         AND state = ?
-                    ORDER BY recovery_id
-                    LIMIT ? OFFSET ?
+                    $sql_footer
                     ", $admin_id, $state, $limit, $offset
                 );
                 break;
             default:
-                $db->prepared_query("
-                    SELECT recovery_id, username, token, email, announce, created_dt
-                    FROM recovery
+                $db->prepared_query("$sql_header
                     WHERE state = ?
-                    ORDER BY recovery_id
-                    LIMIT ? OFFSET ?
+                    $sql_footer
                     ", $state, $limit, $offset
                 );
                 break;
@@ -163,9 +157,10 @@ class Recovery {
                 updated_dt = now(),
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
+                AND (admin_user_id IS NULL OR admin_user_id != ?)
             ", $admin_id,
                 ("\r\n" . Date('Y-m-d H:i') . " claimed by $admin_username"),
-                $id
+                $id, $admin_id
         );
         return $db->affected_rows();
     }
@@ -187,13 +182,11 @@ class Recovery {
     static function deny ($id, $admin_id, $admin_username, $db) {
         $db->prepared_query("
             UPDATE recovery
-            SET admin_user_id = ?,
-                state = 'DENIED',
+            SET state = 'DENIED',
                 updated_dt = now(),
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
-            ", $admin_id,
-                ("\r\n" . Date('Y-m-d H:i') . " recovery denied by $admin_username"),
+            ", ("\r\n" . Date('Y-m-d H:i') . " recovery denied by $admin_username"),
                 $id
         );
         return $db->affected_rows();
@@ -228,18 +221,18 @@ class Recovery {
             return false;
         }
 
-        $db->prepared_query('select 1 from invites where email = ?', $email);
+        $db->prepared_query('select InviteKey from invites where email = ?', $email);
         if ($db->record_count() > 0) {
-            $key = $db->next_record();
+            list($key) = $db->next_record();
             self::accept_fail($id, "invite key $key already issued to $email", $db);
             return false;
         }
 
         $key = db_string(\Users::make_secret());
         $db->prepared_query("
-             INSERT INTO invites (InviterID, InviteKey, Email,  Expires,                 Reason)
-             VALUES              (?,         ?,         ?,      now() + interval 1 week, 'Account recovery')
-             ",                   $admin_id, $key,      $email
+             INSERT INTO invites (InviterID, InviteKey, Email,  Reason, Expires)
+             VALUES              (?,         ?,         ?,      ?,      now() + interval 1 week)
+             ",                   $admin_id, $key,      $email, "Account recovery id={$id} key={$key}"
         );
 
         require('classes/templates.class.php');
@@ -252,13 +245,11 @@ class Recovery {
 
         $db->prepared_query("
             UPDATE recovery
-            SET admin_user_id = ?,
-                state = 'ACCEPTED',
+            SET state = 'ACCEPTED',
                 updated_dt = now(),
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
-            ", $admin_id,
-                ("\r\n" . Date('Y-m-d H:i') . " recovery accepted by $admin_username"),
+            ", ("\r\n" . Date('Y-m-d H:i') . " recovery accepted by $admin_username invite=$key"),
                 $id
         );
         return true;
