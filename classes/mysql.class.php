@@ -279,7 +279,7 @@ class DB_MYSQL {
 		$this->PreparedQuery = $Query;
 		$this->Statement = $this->LinkID->prepare($Query);
 		if ($this->Statement === false) {
-			$this->halt('Invalid Query: ' . mysqli_error($this->LinkID));
+			$this->halt("Invalid Query: [$Query] " . mysqli_error($this->LinkID));
 		}
 		return $this->Statement;
 	}
@@ -322,7 +322,7 @@ class DB_MYSQL {
 			return $Statement->get_result();
 		};
 
-		$Query = "Prepared Statement: {$this->PreparedQuery}\n";
+		$Query = "$this->PreparedQuery\n";
 		foreach ($Parameters as $key => $value) {
 			$Query .= "$key => $value\n";
 		}

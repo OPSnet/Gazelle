@@ -73,6 +73,7 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 				<th>Email</th>
 				<th>Announce</th>
 				<th>Created</th>
+				<th>Updated</th>
                 <th>Action</th>
 			</tr>
 <? foreach ($Info as $i) { ?>
@@ -83,9 +84,12 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 				<td><?= $i['email'] ?></td>
 				<td><?= $i['announce'] ?></td>
 				<td><?= time_diff($i['created_dt']) ?></td>
+				<td><?= time_diff($i['updated_dt']) ?></td>
                 <td>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
+<?  if ($Info['state'] == 'PENDING') { ?>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a>
+<?  } ?>
                 </td>
 			</tr>
 <? } ?>

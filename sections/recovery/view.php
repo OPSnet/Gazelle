@@ -13,7 +13,7 @@ else {
 
 if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
     $claim_id = (int)$_GET['claim'];
-    if ($claim_id = G::$LoggedUser['ID']) {
+    if ($claim_id == G::$LoggedUser['ID']) {
         \Gazelle\Recovery::claim($ID, $claim_id, G::$LoggedUser['Username'], G::$DB);
     }
 }
@@ -50,7 +50,7 @@ $Candidate = \Gazelle\Recovery::get_candidate($Info['username'], G::$DB);
             </tr>
             <tr>
                 <th>Password verified</th>
-                <td colspan="2"><?= $Info['password_ok'] = 1 ? 'Yes' : 'No' ?></td>
+                <td colspan="2"><?= $Info['password_ok'] ? 'Yes' : 'No' ?></td>
                 <th>Claimed by</th>
                 <td><?= $Info['admin_user_id'] ? Users::format_username($Info['admin_user_id']) : 'nobody' ?></td>
             </tr>
@@ -92,11 +92,25 @@ $Candidate = \Gazelle\Recovery::get_candidate($Info['username'], G::$DB);
                 <td colspan="4"><pre><?= $Info['log'] ?><pre></td>
             </tr>
 		</table>
-
+<? if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
         <h2>Actions</h2>
+<?     if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=accept&amp;id=<?= $ID ?>">Accept</a> - An invite will be emailed to the user</p>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=deny&amp;id=<?= $ID ?>">Deny</a> - The request is denied, no e-mail will be sent</p>
+<?
+    }
+    if ($Info['admin_user_id'] == G::$LoggedUser['ID']) {
+?>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=unclaim&amp;id=<?= $ID ?>">Unclaim</a> - Release the claim on this request, you don't know what to do.</p>
+<?
+    }
+    else {
+?>
+        <p><a class="brackets" href="/recovery.php?action=view&amp;id=<?= $ID ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a> - Claim this request, you need to contact the person via IRC.</p>
+<?
+    }
+}
+?>
 	</div>
 </div>
 
