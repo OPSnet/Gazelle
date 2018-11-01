@@ -23,6 +23,7 @@ $Email = ($Info['email'] == $Info['email_clean'])
     : $Info['email_clean'] . "<br />(cleaned from " . $Info['email'] . ")";
 
 $Candidate = \Gazelle\Recovery::get_candidate($Info['username'], G::$DB);
+$enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
 ?>
 
 <div class="thin">
@@ -48,6 +49,15 @@ $Candidate = \Gazelle\Recovery::get_candidate($Info['username'], G::$DB);
                 <th>state</th>
                 <td><?= $Info['state'] ?></td>
             </tr>
+<? if (count($Candidate)) { ?>
+            <tr>
+                <td><?= $enabled[$Candidate['Enabled']] ?></td>
+                <td><?= \Users::make_class_string($Candidate['Class']) ?></th>
+                <td><?= $Candidate['nr_torrents'] ?> torrents</td>
+                <td><?= Format::get_size($Candidate['Uploaded']) ?> up</td>
+                <td><?= Format::get_size($Candidate['Downloaded']) ?> down</td>
+            </tr>
+<? } ?>
             <tr>
                 <th>Password verified</th>
                 <td colspan="2"><?= $Info['password_ok'] ? 'Yes' : 'No' ?></td>
