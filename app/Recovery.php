@@ -271,7 +271,9 @@ class Recovery {
     static function get_candidate ($username, $db) {
         $db->prepared_query("
             SELECT
-                m.torrent_pass, m.Email, group_concat(DISTINCT(h.IP) ORDER BY h.ip) as ips
+                m.torrent_pass, m.Email, m.Uploaded, m.Downloaded, m.Enabled, m.Class,
+                (SELECT count(t.ID) FROM torrents t WHERE m.ID = t.UserID) as nr_torrents,
+                group_concat(DISTINCT(h.IP) ORDER BY h.ip) as ips
             FROM " . RECOVERY_DB . ".users_main m
             LEFT JOIN " . RECOVERY_DB . ".users_history_ips h ON (m.ID = h.UserID)
             WHERE m.Username = ?
