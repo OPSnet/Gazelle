@@ -34,7 +34,7 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 <table class="layout" id="maincontent">
 	<tr>
 		<td align="center" valign="middle">
-			<div id="logo">
+			<div id="logo" style="width:250px;">
 <?php if (OPEN_REGISTRATION || OPEN_EXTERNAL_REFERRALS) { ?>
 				<ul>
 					<li><a href="index.php">Home</a></li>
@@ -43,6 +43,8 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 					<li><a href="register.php">Register</a></li>
 <?php } if (OPEN_EXTERNAL_REFERRALS) { ?>
 					<li><a href="referral.php">Referrals</a></li>
+<?php } if (RECOVERY) { ?>
+					<li><a title="Obtain a new account by proving your membership on the previous site" href="recovery.php">Recovery</a></li>
 <?php } ?>
 				</ul>
 <? } ?>
