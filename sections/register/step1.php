@@ -72,16 +72,16 @@ if (empty($Sent)) {
 			<td colspan="2" align="right"><input type="submit" name="submit" value="Submit" class="submit" /></td>
 		</tr>
 	</table>
-<? } else {
-?>
-    Congratulations! Your account has been created. You can now log into your account using the <a href="login.php">login</a> page.
-<?
-/*?>
+<? } else { ?>
 	An email has been sent to the address that you provided. After you confirm your email address, you will be able to log into your account.
-<?*/
-    if ($NewInstall) {
-        echo "Since this is a new installation, you can log in directly without having to confirm your account.";
-    }
+        <? 
+	// <strong>Congratulations! Your account has been created.</strong><br />
+        //You can now log into your account using the <a href="login.php">login</a> page. 
+	?>
+
+<? 		if ($NewInstall) {
+			echo "Since this is a new installation, you can log in directly without having to confirm your account.";
+		}
 } ?>
 </div>
 </form>
