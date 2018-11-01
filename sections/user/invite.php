@@ -140,9 +140,6 @@ list($CanLeech) = $DB->next_record();
 		<p>Remember that you are responsible for ALL invitees, and your account and/or privileges may be disabled due to your invitees' actions. You should know and trust the person you're inviting. If you aren't familiar enough with the user to trust them, do not invite them.</p>
 		<p><em>Do not send an invite if you have not read or do not understand the information above.</em></p>
 	</div>
-	<div class="box pad">
-		<p><em>Our email system is currently out of order, the invite you send will NOT be delivered. Please provide your invitee with the link provided to you after sending an invititation.</em></p>
-	</div>
 	<div class="box box2">
 		<form class="send_form pad" name="invite" action="user.php" method="post">
 			<input type="hidden" name="action" value="take_invite" />
