@@ -3,7 +3,12 @@
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'save':
-            require_once(SERVER_ROOT . '/sections/recovery/save.php');
+            if (defined('RECOVERY') && RECOVERY) {
+                require_once(SERVER_ROOT . '/sections/recovery/save.php');
+            }
+            else {
+                require_once(SERVER_ROOT . '/sections/recovery/recover.php');
+            }
             break;
         case 'admin':
             require_once(SERVER_ROOT . '/sections/recovery/admin.php');
