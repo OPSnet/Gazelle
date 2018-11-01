@@ -15,6 +15,8 @@ define('SERVER_ROOT', '/var/www'); //The root of the server, used for includes, 
 define('ANNOUNCE_URL', 'http://'.NONSSL_SITE_URL.':34000'); //Announce URL
 define('ANNOUNCE_HTTP_URL', 'http://localhost:34000');
 define('ANNOUNCE_HTTPS_URL', 'https://localhost:34000');
+define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag
+define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow APL
 
 // Allows you to run static content off another server. Default is usually what you want.
 define('NONSSL_STATIC_SERVER', 'static/');
