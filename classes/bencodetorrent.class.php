@@ -109,14 +109,27 @@ class BencodeTorrent extends BencodeDecode {
 	/**
 	 * Adds thet "source" flag to the torrent to allow for easier cross-seeding
 	 *
-	 * @return bool false if the source flag was already set to APL, else true
+	 * @return bool false if the source flag was already set to OPS, else true
 	 */
 	function set_source() {
 		if (empty($this->Dec)) {
 			return false;
 		}
 
-		if (isset($this->Dec['info']['source']) && ($this->Dec['info']['source'] === 'OPS' || $this->Dec['info']['source'] === 'APL')) {
+		if (isset($this->Dec['info']['source']) && ($this->Dec['info']['source'] === 'OPS')) {
+			return false;
+		}
+
+		// Grandfather APL torrents
+		if (isset($this->Dec['info']['source']) && isset($this->Dec['creation date']) &&
+			($this->Dec['creation date'] <= strtotime('2018-08-21')) && 
+			($this->Dec['info']['source'] === 'APL')) {
+			return false;
+		}
+
+		// Grandfather torrents before source flag was enforced
+		if (isset($this->Dec['creation date']) && !isset($this->Dec['info']['source']) &&
+			($this->Dec['creation date'] <= strtotime('2017-11-25'))) {
 			return false;
 		}
 
