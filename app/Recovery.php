@@ -154,7 +154,7 @@ class Recovery {
         $db->prepared_query("SELECT recovery_id
             FROM recovery r
             INNER JOIN " . RECOVERY_DB . ".users_main m ON (m.torrent_pass = r.announce)
-            WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL
+            WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL AND char_length(r.announce) = 32
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
         while (list($ID) = $db->next_record()) {
@@ -164,7 +164,7 @@ class Recovery {
         $db->prepared_query("SELECT recovery_id
             FROM recovery r
             INNER JOIN " . RECOVERY_DB . ".users_main m ON (m.Email = r.email)
-            WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL
+            WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL AND locate('@', r.email) > 1
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
         while (list($ID) = $db->next_record()) {
