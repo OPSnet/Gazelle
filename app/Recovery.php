@@ -150,6 +150,28 @@ class Recovery {
         return $db->to_array();
     }
 
+    static function validate_pending($db) {
+        $db->prepared_query("SELECT recovery_id
+            FROM recovery r
+            INNER JOIN " . RECOVERY_DB . ".users_main m ON (m.torrent_pass = r.announce)
+            WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL
+            LIMIT ?
+            ", RECOVERY_AUTOVALIDATE_LIMIT);
+        while (list($ID) = $db->next_record()) {
+            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME. $db);
+        }
+
+        $db->prepared_query("SELECT recovery_id
+            FROM recovery r
+            INNER JOIN " . RECOVERY_DB . ".users_main m ON (m.Email = r.email)
+            WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL
+            LIMIT ?
+            ", RECOVERY_AUTOVALIDATE_LIMIT);
+        while (list($ID) = $db->next_record()) {
+            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME. $db);
+        }
+    }
+
     static function claim ($id, $admin_id, $admin_username, $db) {
         $db->prepared_query("
             UPDATE recovery
@@ -245,11 +267,12 @@ class Recovery {
 
         $db->prepared_query("
             UPDATE recovery
-            SET state = 'ACCEPTED',
+            SET state = ?,
                 updated_dt = now(),
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
-            ", ("\r\n" . Date('Y-m-d H:i') . " recovery accepted by $admin_username invite=$key"),
+            ", ($admin_id == RECOVERY_ADMIN_ID ? 'VALIDATED' : 'ACCEPTED'),
+                ("\r\n" . Date('Y-m-d H:i') . " recovery accepted by $admin_username invite=$key"),
                 $id
         );
         return true;
