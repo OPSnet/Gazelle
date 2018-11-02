@@ -158,7 +158,7 @@ class Recovery {
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
         while (list($ID) = $db->next_record()) {
-            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME. $db);
+            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME, $db);
         }
 
         $db->prepared_query("SELECT recovery_id
@@ -168,7 +168,7 @@ class Recovery {
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
         while (list($ID) = $db->next_record()) {
-            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME. $db);
+            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME, $db);
         }
     }
 
