@@ -157,8 +157,9 @@ class Recovery {
             WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL AND char_length(r.announce) = 32
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
-        while (list($ID) = $db->next_record()) {
-            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME, $db);
+        $recover = $db->to_array();
+        foreach ($recover as $r) {
+            self::accept($r['recovery_id'], RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME, $db);
         }
 
         $db->prepared_query("SELECT recovery_id
@@ -167,8 +168,9 @@ class Recovery {
             WHERE r.state = 'PENDING' AND r.admin_user_id IS NULL AND locate('@', r.email) > 1
             LIMIT ?
             ", RECOVERY_AUTOVALIDATE_LIMIT);
-        while (list($ID) = $db->next_record()) {
-            self::accept($ID, RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME, $db);
+        $recover = $db->to_array();
+        foreach ($recover as $r) {
+            self::accept($r['recovery_id'], RECOVERY_ADMIN_ID, RECOVERY_ADMIN_NAME, $db);
         }
     }
 
@@ -257,13 +259,42 @@ class Recovery {
              ",                   $admin_id, $key,      $email, "Account recovery id={$id} key={$key}"
         );
 
-        require('classes/templates.class.php');
-        $TPL = new \TEMPLATE;
-        $TPL->open('templates/recovery.tpl');
-        $TPL->set('InviteKey', $key);
-        $TPL->set('SITE_NAME', SITE_NAME);
-        $TPL->set('SITE_URL',  SITE_URL);
-        \Misc::send_email($email, 'Account recovery confirmation at '.SITE_NAME, $TPL->get(), 'noreply');
+        $SITE_URL  = SITE_URL;
+        $mail = <<<END_EMAIL
+You recently requested to recover your account from a previous tracker in
+order to join Orpheus.
+
+The information you provided was sufficient proof for confirm that you
+did have in fact have an account, and consequently you have been given
+an invitation.
+
+Please note that selling invites, trading invites, and giving invites
+away publicly (e.g. on a forum) is strictly forbidden. If you do any of
+these things with this invitation, do not bother signing up - you will
+be banned, the person who used the invite will be banned and you and they
+lose your chances of ever signing up in the future.
+
+To confirm your invite, click on the following link:
+
+https://$SITE_URL/register.php?invite=$key
+
+After you register, you will be able to use your account. Please take note
+that if you do not use this invite in the next 3 days, it will expire. We
+urge you to read the RULES and the wiki immediately after you join.
+
+MOST IMPORTANT OF ALL:
+
+You should read the following article: https://$SITE_URL/wiki.php?action=article&id=114
+
+This will help you understand what you need to do to begin reseeding
+your old torrents (and avoid downloading them all over again by accident,
+thereby destroying your buffer).
+
+Thank you,
+Orpheus Staff
+END_EMAIL;
+
+        \Misc::send_email($email, 'Account recovery confirmation at '.SITE_NAME, $mail, 'noreply');
 
         $db->prepared_query("
             UPDATE recovery
