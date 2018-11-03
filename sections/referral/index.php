@@ -117,13 +117,16 @@
 		<br />
 		<h2>Step 2: Join</h2>
 		<br />
-<?php if ($Error) { ?>
+<?php 	if ($Error) { ?>
 		<h3>There was an error verifying your account at <?=$Account["Site"]?>. Please refresh the page and try again.</h3>
 		<br />
 		<p><?=$Error?></p>
-<?php } else { ?>
-<!--		<h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. We have sent you an email to the address you specified. Make sure to check your spam folder! Welcome to <?=SITE_NAME?>!</h3> -->
-<h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. <a href="https://<?=SITE_URL?>/register.php?invite=<?=$Invite?>">Click here</a> to register. Welcome to <?=SITE_NAME?></h3>
+<?php 	} else {
+			if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) { ?>
+				<h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. We have sent you an email to the address you specified. Make sure to check your spam folder! Welcome to <?=SITE_NAME?>!</h3>
+<?php		} else { ?>
+				<h3>Congratulations, you have verified your account at <?=$Account["Site"]?>. <a href="https://<?=SITE_URL?>/register.php?invite=<?=$Invite?>">Click here</a> to register. Welcome to <?=SITE_NAME?></h3>
+<?php		} ?>
 	</div>
 <?php
 		}

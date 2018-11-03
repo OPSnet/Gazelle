@@ -15,6 +15,9 @@ define('SERVER_ROOT', '/var/www'); //The root of the server, used for includes, 
 define('ANNOUNCE_URL', 'http://'.NONSSL_SITE_URL.':34000'); //Announce URL
 define('ANNOUNCE_HTTP_URL', 'http://localhost:34000');
 define('ANNOUNCE_HTTPS_URL', 'https://localhost:34000');
+define('REFERRAL_BOUNCER', 'http://127.0.0.1:8888'); // URL to referral bouncer.
+define('REFERRAL_KEY', hash('sha512', '')); // Shared key to encrypt data flowing to bouncer.
+define('REFERRAL_SEND_EMAIL', false); // Whether to send invite emails for referrals.
 define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow APL
 
