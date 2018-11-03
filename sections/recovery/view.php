@@ -6,18 +6,34 @@ View::show_header('Recovery view user');
 
 if (isset($_GET['id']) && (int)$_GET['id'] > 0) {
     $ID = (int)$_GET['id'];
+    $search = false;
+}
+elseif (isset($_GET['action']) && $_GET['action'] == 'search') {
+    $search = true;
 }
 else {
     error(404);
 }
 
-if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
-    $claim_id = (int)$_GET['claim'];
-    if ($claim_id == G::$LoggedUser['ID']) {
-        \Gazelle\Recovery::claim($ID, $claim_id, G::$LoggedUser['Username'], G::$DB);
+if ($search) {
+    $terms = [];
+    foreach (explode(' ', 'token username email announce') as $key) {
+        if (isset($_GET[$key])) {
+            $terms[] = [$key => $_GET[$key]];
+        }
     }
+    $Info = \Gazelle\Recovery::search($terms, G::$DB);
 }
-$Info  = \Gazelle\Recovery::get_details($ID, G::$DB);
+else {
+    if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
+        $claim_id = (int)$_GET['claim'];
+        if ($claim_id == G::$LoggedUser['ID']) {
+            \Gazelle\Recovery::claim($ID, $claim_id, G::$LoggedUser['Username'], G::$DB);
+        }
+    }
+    $Info = \Gazelle\Recovery::get_details($ID, G::$DB);
+}
+
 $Email = ($Info['email'] == $Info['email_clean'])
     ? $Info['email']
     : $Info['email_clean'] . "<br />(cleaned from " . $Info['email'] . ")";
@@ -35,6 +51,24 @@ $enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
 	<a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
 	<a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
 </div>
+
+<? if (!$Info) { ?>
+<h3>Nobody home</h3>
+
+<p>No recovery request matched the search terms<p>
+<blockquote>
+<ul>
+<?
+foreach ($terms as $t) {
+    foreach ($t as $field => $value) {
+        echo "<li>$field: <tt>$value</tt></li>";
+    }
+}
+?>
+</ul>
+</blockquote>
+
+<? } else { ?>
 
 <h3>View recovery details for <?= $Info['username'] ?></h3>
 
@@ -124,6 +158,7 @@ $enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
 	</div>
 </div>
 
+<? } /* $Info */ ?>
 </div>
 <?
 View::show_footer();

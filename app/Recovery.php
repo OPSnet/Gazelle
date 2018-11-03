@@ -291,6 +291,29 @@ class Recovery {
         return $db->next_record();
     }
 
+    static function search ($terms, $db) {
+        $cond = [];
+        $args = [];
+        foreach ($terms as $t) {
+            foreach ($t as $field => $value) {
+                $cond[] = "$field = ?";
+                $args[] = $value;
+            }
+        }
+
+        $condition = implode(' AND ', $cond);
+        $db->prepared_query_array("
+            SELECT
+                recovery_id, state, admin_user_id, created_dt, updated_dt,
+                token, username, ipaddr, password_ok, email, email_clean,
+                announce, screenshot, invite, info, log
+            FROM recovery
+            WHERE $condition
+            ", $args
+        );
+        return $db->next_record();
+    }
+
     static function get_candidate ($username, $db) {
         $db->prepared_query("
             SELECT
