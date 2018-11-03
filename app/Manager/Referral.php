@@ -533,15 +533,6 @@ class Referral {
 		$InviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
 		$InviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
 		$InviteKey = db_string(\Users::make_secret());
-		require(SERVER_ROOT . '/classes/templates.class.php');
-		$Tpl = new \TEMPLATE;
-		$Tpl->open(SERVER_ROOT . '/templates/referral.tpl'); // Password reset template
-		$Tpl->set('Email', $email);
-		$Tpl->set('InviteKey', $InviteKey);
-		$Tpl->set('DISABLED_CHAN', BOT_DISABLED_CHAN);
-		$Tpl->set('IRC_SERVER', BOT_SERVER);
-		$Tpl->set('SITE_NAME', SITE_NAME);
-		$Tpl->set('SITE_URL', SITE_URL);
 
 		// save invite to DB
 		$this->db->prepared_query("
@@ -559,8 +550,19 @@ class Referral {
 				(?, ?, ?, ?)",
 			$username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $InviteKey);
 
-		// send email
-		\Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $Tpl->get(), 'noreply', 'text/plain');
+		if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) {
+			require(SERVER_ROOT . '/classes/templates.class.php');
+			$Tpl = new \TEMPLATE;
+			$Tpl->open(SERVER_ROOT . '/templates/referral.tpl'); // Password reset template
+			$Tpl->set('Email', $email);
+			$Tpl->set('InviteKey', $InviteKey);
+			$Tpl->set('DISABLED_CHAN', BOT_DISABLED_CHAN);
+			$Tpl->set('IRC_SERVER', BOT_SERVER);
+			$Tpl->set('SITE_NAME', SITE_NAME);
+			$Tpl->set('SITE_URL', SITE_URL);
+			// send email
+			\Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $Tpl->get(), 'noreply', 'text/plain');
+		}
 
 		return $InviteKey;
 	}
