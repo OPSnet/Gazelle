@@ -49,7 +49,7 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 				</ul>
 <? } ?>
 			</div>
-			<p>
+			<p style='max-width: 600px; font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;'>
 				Welcome Home!
 				<br /><br />
 				If you had an account on Apollo at the time of the backup (June 2017), please use the recovery page to restore your account.
