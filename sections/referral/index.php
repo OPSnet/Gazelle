@@ -54,6 +54,7 @@
 						<label for="<?=$ID?>"><?=$Account["Site"]?></label>
 					</div>
 					<br/>
+					<br/>
 <?php } ?>
 				<br/>
 				<input type="hidden" name="action" value="account">
@@ -107,14 +108,18 @@
 		$Invite = false;
 		if (filter_var($Email, FILTER_VALIDATE_EMAIL)) {
 			$Account = $ReferralManager->getFullAccount($_POST['service']);
-			$Verified = $ReferralManager->verifyAccount($Account, $_POST['username'], $Token);
-			if ($Verified === true) {
-				$Invite = $ReferralManager->generateInvite($Account, $_POST['username'], $Email);
-				if ($Invite === false) {
-					$Error = "Failed to generate invite.";
-				}
+			if ($Account["UserIsId"] && !preg_match('/^\d+$/', $_POST['username'])) {
+				$Error = "You appear to have entered a username instead of your user id.";
 			} else {
-				$Error = $Verified;
+				$Verified = $ReferralManager->verifyAccount($Account, $_POST['username'], $Token);
+				if ($Verified === true) {
+					$Invite = $ReferralManager->generateInvite($Account, $_POST['username'], $Email);
+					if ($Invite === false) {
+						$Error = "Failed to generate invite.";
+					}
+				} else {
+					$Error = $Verified;
+				}
 			}
 		} else {
 			$Error = "Invalid email address.";

@@ -13,6 +13,8 @@ class Referral {
 	const CACHE_ACCOUNTS = 'referral_accounts';
 	// Do not change the ordering in this array after launch.
 	const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP');
+	// Accounts which use the user ID instead of username.
+	const ID_TYPES = array(3, 4, 5);
 
 	public function __construct($db, $cache) {
 		$this->db = $db;
@@ -24,7 +26,7 @@ class Referral {
 			$this->db->query("SELECT ID, Site, Active, Type FROM referral_accounts");
 			$this->accounts = $this->db->has_results() ? $this->db->to_array('ID') : [];
 			foreach ($this->accounts as &$acc) {
-				$acc["UserIsId"] = in_array($acc["Type"], array(3, 4, 5));
+				$acc["UserIsId"] = in_array($acc["Type"], self::ID_TYPES);
 				unset($acc);
 			}
 			$this->cache->cache_value(self::CACHE_ACCOUNTS, $this->accounts, 86400 * 30);
@@ -68,6 +70,7 @@ class Referral {
 				}
 			}
 			$account["Cookie"] = json_decode($account["Cookie"], true);
+			$account["UserIsId"] = in_array($account["Type"], self::ID_TYPES);
 			return $account;
 		} else {
 			return null;
@@ -88,6 +91,7 @@ class Referral {
 					}
 				}
 				$account["Cookie"] = json_decode($account["Cookie"], true);
+				$account["UserIsId"] = in_array($account["Type"], self::ID_TYPES);
 			}
 			return $accounts;
 		}
