@@ -163,24 +163,26 @@ class Referral {
 		$this->cache->delete_value(self::CACHE_ACCOUNTS);
 	}
 
-	public function getReferredUsers($startDate, $endDate, $includeInactive, $limit) {
+	public function getReferredUsers($startDate, $endDate, $limit, $view) {
 		if ($startDate == NULL) {
 			$startDate = \Gazelle\Util\Time::timeOffset(-(3600 * 24 * 30), true);
 		}
 		if ($endDate == NULL) {
 			$endDate = \Gazelle\Util\Time::sqlTime();
 		}
-		if ($includeInactive) {
-			$Active = "";
-		} else {
-			$Active = "AND Active = 1";
+		$Filter = "";
+		if ($view === 'pending') {
+			$Filter = "AND Active = 0";
+		} else if ($view === 'processed') {
+			$Filter = "AND Active = 1";
 		}
 
 		$qId = $this->db->prepared_query("
 			SELECT SQL_CALC_FOUND_ROWS ID, UserID, Site, Username, Created, Joined, IP, Active
 			FROM referral_users
 			WHERE Joined BETWEEN ? AND ?
-			$Active
+			$Filter
+			ORDER BY Created DESC
 			LIMIT $limit", $startDate, $endDate);
 		$this->db->prepared_query("SELECT FOUND_ROWS()");
 		list($Results) = $this->db->next_record();

@@ -19,7 +19,6 @@ list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
 
 $StartDate = $_GET['start_date'];
 $EndDate = $_GET['end_date'];
-$IncludeInactive = isset($_GET['include_inactive']);
 
 if (!empty($StartDate)) {
 	list($Y, $M, $D) = explode('-', $StartDate);
@@ -39,24 +38,26 @@ if (!empty($EndDate)) {
 	$EndDate = NULL;
 }
 
-$ReferredUsers = $ReferralManager->getReferredUsers($StartDate, $EndDate, $IncludeInactive, $Limit);
+$View = isset($_GET['view']) ? $_GET['view'] : 'all';
+
+$ReferredUsers = $ReferralManager->getReferredUsers($StartDate, $EndDate, $Limit, $View);
 
 View::show_header('Referred Users');
 
-if ($ReferredUsers["Results"] > 0) {
 ?>
-<div class="linkbox">
-<?php
-	$Pages = Format::get_pages($Page, $ReferredUsers["Results"], USERS_PER_PAGE, 11);
-	echo($Pages);
-?>
-</div>
+
 <div class="header">
 	<h2>Referred users</h2>
+</div>
+<div class="linkbox">
+	<a class="brackets" href="tools.php?action=referral_users">All</a>
+	<a class="brackets" href="tools.php?action=referral_users&amp;view=pending">Pending</a>
+	<a class="brackets" href="tools.php?action=referral_users&amp;view=processed">Processed</a>
 </div>
 <div class="thin box">
 	<form class="manage_form" name="users" action="" method="get">
 		<input type="hidden" name="action" value="referral_users" />
+		<input type="hidden" name="view" value="<?=$View?>" />
 		<div class="pad">
 			<table class="layout">
 				<tr>
@@ -67,16 +68,17 @@ if ($ReferredUsers["Results"] > 0) {
 					<td class="label"><label for="end_date">End Date</label></td>
 					<td><input type="text" name="end_date" size="10" value="<?=display_str($_GET['end_date'])?>" placeholder="YYYY-MM-DD" /></td>
 				</tr>
-				<tr>
-					<td class="label"><label for="include_inactive">Include Inactive</label></td>
-					<td><input type="checkbox" name="include_inactive" <?=$IncludeInactive ? 'checked="checked" ' : ''?>/></td>
-				</tr>
 			</table>
 			<div class="center">
 				<input type="submit" name="submit" value="Submit" class="submit" />
 			</div>
 		</div>
 	</form>
+</div>
+
+<?php if ($ReferredUsers["Results"] > 0) { ?>
+<div class="linkbox">
+	<?=Format::get_pages($Page, $ReferredUsers["Results"], USERS_PER_PAGE, 11)?>
 </div>
 <table width="100%">
 	<tr class="colhead">
@@ -119,17 +121,20 @@ $Row = 'b';
 			<td>
 				<input type="checkbox" name="active" disabled="disabled"<?=($Active == '1') ? ' checked="checked"' : ''?> />
 			</td>
-<?php 	if (check_perms('admin_manage_referrals')) { ?>
+<?php	if (check_perms('admin_manage_referrals')) { ?>
 			<td>
 				<input type="submit" name="submit" value="Unlink" onclick="return confirm('Are you sure you want to unlink this account? This is an irreversible action!')" />
 			</td>
-<?php 	} ?>
+<?php	} ?>
 		</form>
 	</tr>
 <?php
 	}
 ?>
 </table>
+<div class="linkbox">
+	<?=Format::get_pages($Page, $ReferredUsers["Results"], USERS_PER_PAGE, 11)?>
+</div>
 <?php
 } else {
 ?>
