@@ -87,7 +87,7 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 				<td><?= time_diff($i['updated_dt']) ?></td>
                 <td>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
-<?  if ($Info['state'] == 'PENDING') { ?>
+<?  if ($i['state'] == 'PENDING') { ?>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a>
 <?  } ?>
                 </td>
