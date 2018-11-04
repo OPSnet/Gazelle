@@ -45,10 +45,16 @@
 		<br/>
 		<div class="center">
 			<form name="referral_service" method="post" action="">
-				<?php
+<?php
 				foreach ($Accounts as $Account) {
-				   echo '<input type="radio" name="service" value="' . $Account["ID"] . '"/><label for="' . $Account["Site"] . '">  ' . $Account["Site"] . '</label><br/><br/>';
-				} ?>
+					$ID = "site" . $Account["ID"];
+?>
+					<div>
+						<input id="<?=$ID?>" type="radio" name="service" value="<?=$Account["ID"]?>"/>
+						<label for="<?=$ID?>"><?=$Account["Site"]?></label>
+					</div>
+					<br/>
+<?php } ?>
 				<br/>
 				<input type="hidden" name="action" value="account">
 				<input type="submit" name="submit" value="Submit" class="submit" />
