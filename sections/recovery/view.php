@@ -1,6 +1,6 @@
 <?
 if (!check_perms('admin_recovery')) {
-	error(403);
+    error(403);
 }
 View::show_header('Recovery view user');
 
@@ -23,6 +23,7 @@ if ($search) {
         }
     }
     $Info = \Gazelle\Recovery::search($terms, G::$DB);
+    $ID = $Info['recovery_id'];
 }
 else {
     if (isset($_GET['claim']) and (int)$_GET['claim'] > 0) {
@@ -45,11 +46,11 @@ $enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
 <div class="thin">
 
 <div class="linkbox">
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
 </div>
 
 <? if (!$Info) { ?>
@@ -73,8 +74,8 @@ foreach ($terms as $t) {
 <h3>View recovery details for <?= $Info['username'] ?></h3>
 
 <div class="box">
-	<div class="head">Registration details</div>
-	<div class="pad">
+    <div class="head">Registration details</div>
+    <div class="pad">
         <table>
             <tr>
                 <th>Username</th>
@@ -86,7 +87,7 @@ foreach ($terms as $t) {
 <? if (count($Candidate)) { ?>
             <tr>
                 <td><?= $enabled[$Candidate['Enabled']] ?></td>
-                <td><?= \Users::make_class_string($Candidate['Class']) ?></th>
+                <td><?= \Users::make_class_string($Candidate['PermissionID']) ?></th>
                 <td><?= $Candidate['nr_torrents'] ?> torrents</td>
                 <td><?= Format::get_size($Candidate['Uploaded']) ?> up</td>
                 <td><?= Format::get_size($Candidate['Downloaded']) ?> down</td>
@@ -135,7 +136,7 @@ foreach ($terms as $t) {
                 <th>log</th>
                 <td colspan="4"><pre><?= $Info['log'] ?><pre></td>
             </tr>
-		</table>
+        </table>
 <? if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
         <h2>Actions</h2>
 <?     if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
@@ -155,7 +156,7 @@ foreach ($terms as $t) {
     }
 }
 ?>
-	</div>
+    </div>
 </div>
 
 <? } /* $Info */ ?>

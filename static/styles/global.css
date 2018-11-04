@@ -797,3 +797,6 @@ input[type="search"] {
 	margin-right: 150px;
   	opacity: 1;
 }
+#recovery table td > pre {
+	max-width: 800px;
+}
