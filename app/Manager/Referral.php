@@ -178,9 +178,9 @@ class Referral {
 		}
 
 		$qId = $this->db->prepared_query("
-			SELECT SQL_CALC_FOUND_ROWS ID, UserID, Site, Username, Created, Joined, IP, Active
+			SELECT SQL_CALC_FOUND_ROWS ID, UserID, Site, Username, Created, Joined, IP, Active, InviteKey
 			FROM referral_users
-			WHERE Joined BETWEEN ? AND ?
+			WHERE Created BETWEEN ? AND ?
 			$Filter
 			ORDER BY Created DESC
 			LIMIT $limit", $startDate, $endDate);
