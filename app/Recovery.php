@@ -133,10 +133,10 @@ class Recovery {
                 break;
             case 'PENDING':
                 $db->prepared_query("$sql_header
-                    WHERE (admin_user_id is NULL OR admin_user_id != ?)
+                    WHERE admin_user_id IS NULL
                         AND state = ?
                     $sql_footer
-                    ", $admin_id, $state, $limit, $offset
+                    ", $state, $limit, $offset
                 );
                 break;
             default:
