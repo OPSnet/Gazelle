@@ -77,7 +77,7 @@ supply will be stored in a holding pen and will be deleted after thirty days (so
 heard back by then, you never will).</p>
 
 <p>On the next page, a unique token will be generated for you. You should make a note of it, as it
-can be used as an identifier on the IRC #registration channel if you need to get in touch with us.
+can be used as an identifier on the IRC #recovery channel if you need to get in touch with us.
 Never paste it in any channel, a Staff member will ask you to send it via a private message.</p>
 
 <input type="submit" value="Send" />
