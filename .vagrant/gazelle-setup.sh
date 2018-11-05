@@ -47,8 +47,6 @@ eatmydata apt-get update
 eatmydata apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libsqlite3-dev libboost-dev libtcmalloc-minimal4 unzip wget curl netcat-openbsd imagemagick
 
 echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
-# Add the i386 architecture so we can install wine32 which is needed to run the eac_log_checker.exe
-dpkg --add-architecture i386
 source <(curl -sL https://deb.nodesource.com/setup_8.x)
 eatmydata apt-get update
 
@@ -65,6 +63,7 @@ eatmydata apt-get install -y git nginx memcached nodejs
 eatmydata apt-get install -y python3 python3-pip
 pip3 install -U pip
 pip3 install chardet
+pip3 install eac-logchecker
 
 eatmydata apt-get install -y sphinxsearch
 eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-memcached php7.0-mcrypt php7.0-mysqlnd php7.0-cli php7.0-xdebug php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip
@@ -72,8 +71,6 @@ eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-memcached php7.0-mcrypt ph
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password password em%G9Lrey4^N'
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password_again password em%G9Lrey4^N'
 eatmydata apt-get install -y mariadb-server mariadb-client
-
-eatmydata apt-get install -y wine wine32
 
 npm install --global --unsafe-perm puppeteer
 chmod -R o+rx /usr/lib/node_modules/puppeteer/.local-chromium
