@@ -37,3 +37,4 @@ sections/btcm/
 
 report/
 .vagrant/machines/
+.vagrant/rgloader/
