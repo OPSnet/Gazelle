@@ -1052,7 +1052,7 @@ class Text {
 		//$Str = preg_replace("/\<a href=\"wiki.php\?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
 		$Str = preg_replace("/\<(\/*)artist\>/", "[\\1artist]", $Str);
 		$Str = preg_replace("/\((\/*)user\>/", "[\\1user]", $Str);
-		$Str = preg_replace("/\<a href=\"(.*)\">/", "[url=\\2]", $Str);
+		$Str = preg_replace("/\<a href=\"([^\"]*)\">/", "[url=\\1]", $Str);
 		$Str = preg_replace("/\<(\/*)a\>/", "[\\1url]", $Str);
 		$Str = preg_replace("/\<img(.*)src=\"(.*)\"(.*)\>/", '[img]\\2[/img]', $Str);
 		$Str = str_replace('<p>', '', $Str);
