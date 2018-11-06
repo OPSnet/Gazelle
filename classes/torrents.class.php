@@ -762,16 +762,18 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 				$Info[] = implode(' ', $EditionInfo);
 			}
 		}
-		if ($Data['IsSnatched']) {
+		if (!empty($Data['IsSnatched'])) {
 			$Info[] = Format::torrent_label('Snatched!');
 		}
-		if ($Data['FreeTorrent'] == '1') {
-			$Info[] = Format::torrent_label('Freeleech!');
+		if (isset($Data['FreeTorrent'])) {
+			if ($Data['FreeTorrent'] == '1') {
+				$Info[] = Format::torrent_label('Freeleech!');
+			}
+			if ($Data['FreeTorrent'] == '2') {
+				$Info[] = Format::torrent_label('Neutral Leech!');
+			}
 		}
-		if ($Data['FreeTorrent'] == '2') {
-			$Info[] = Format::torrent_label('Neutral Leech!');
-		}
-		if ($Data['PersonalFL']) {
+		if (!empty($Data['PersonalFL'])) {
 			$Info[] = Format::torrent_label('Personal Freeleech!');
 		}
 		return implode(' / ', $Info);
