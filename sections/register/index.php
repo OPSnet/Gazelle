@@ -100,7 +100,7 @@ if (!empty($_REQUEST['confirm'])) {
 			} else {
 				$NewInstall = false;
 				$Class = USER;
-				$Enabled = '1';
+				$Enabled = '0';
 			}
 
 			$IPcc = Tools::geoip($_SERVER['REMOTE_ADDR']);
