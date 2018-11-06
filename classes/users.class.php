@@ -636,10 +636,9 @@ class Users {
 	 */
 	public static function show_avatar($Avatar, $UserID, $Username, $Setting, $Size = 150, $ReturnHTML = True) {
 		$Avatar = ImageTools::process($Avatar, false, 'avatar', $UserID);
-		$Style = 'style="max-height: 400px;"';
 		$AvatarMouseOverText = '';
+		$FirstAvatar = '';
 		$SecondAvatar = '';
-		$Class = 'class="double_avatar"';
 		$EnabledRewards = Donations::get_enabled_rewards($UserID);
 
 		if ($EnabledRewards['HasAvatarMouseOverText']) {
@@ -652,22 +651,27 @@ class Users {
 			$AvatarMouseOverText = "alt=\"$Username's avatar\"";
 		}
 		if ($EnabledRewards['HasSecondAvatar'] && !empty($Rewards['SecondAvatar'])) {
-			$SecondAvatar = ' data-gazelle-second-avatar="' . ImageTools::process($Rewards['SecondAvatar'], false, 'avatar2', $UserID) . '"';
+			$SecondAvatar = ImageTools::process($Rewards['SecondAvatar'], false, 'avatar2', $UserID);
 		}
+		$Attrs = "width=\"$Size\" $AvatarMouseOverText";
+		// purpose of the switch is to set $FirstAvatar (URL)
 		// case 1 is avatars disabled
 		switch ($Setting) {
 			case 0:
 				if (!empty($Avatar)) {
-					$ToReturn = ($ReturnHTML ? "<div><img src=\"$Avatar\" width=\"$Size\" $Style $AvatarMouseOverText$SecondAvatar $Class /></div>" : $Avatar);
+					$FirstAvatar = $Avatar;
 				} else {
-					$URL = STATIC_SERVER.'common/avatars/default.png';
-					$ToReturn = ($ReturnHTML ? "<div><img src=\"$URL\" width=\"$Size\" $Style $AvatarMouseOverText$SecondAvatar /></div>" : $URL);
+					$FirstAvatar = STATIC_SERVER.'common/avatars/default.png';
 				}
 				break;
 			case 2:
 				$ShowAvatar = true;
 				// Fallthrough
 			case 3:
+				if ($ShowAvatar && !empty($Avatar)) {
+					$FirstAvatar = $Avatar;
+					break;
+				}
 				switch (G::$LoggedUser['Identicons']) {
 					case 0:
 						$Type = 'identicon';
@@ -698,20 +702,25 @@ class Users {
 				}
 				$Rating = 'pg';
 				if (!$Robot) {
-					$URL = 'https://secure.gravatar.com/avatar/'.md5(strtolower(trim($Username)))."?s=$Size&amp;d=$Type&amp;r=$Rating";
+					$FirstAvatar = 'https://secure.gravatar.com/avatar/'.md5(strtolower(trim($Username)))."?s=$Size&amp;d=$Type&amp;r=$Rating";
 				} else {
-					$URL = 'https://robohash.org/'.md5($Username)."?set=set$Type&amp;size={$Size}x$Size";
-				}
-				if ($ShowAvatar == true && !empty($Avatar)) {
-					$ToReturn = ($ReturnHTML ? "<div><img src=\"$Avatar\" width=\"$Size\" $Style $AvatarMouseOverText$SecondAvatar $Class /></div>" : $Avatar);
-				} else {
-					$ToReturn = ($ReturnHTML ? "<div><img src=\"$URL\" width=\"$Size\" $Style $AvatarMouseOverText$SecondAvatar $Class /></div>" : $URL);
+					$FirstAvatar = 'https://robohash.org/'.md5($Username)."?set=set$Type&amp;size={$Size}x$Size";
 				}
 				break;
 			default:
-				$URL = STATIC_SERVER.'common/avatars/default.png';
-				$ToReturn = ($ReturnHTML ? "<div><img src=\"$URL\" width=\"$Size\" $Style $AvatarMouseOverText$SecondAvatar $Class/></div>" : $URL);
+				$FirstAvatar = STATIC_SERVER.'common/avatars/default.png';
 		}
+		// in this case, $Attrs is actually just a URL
+		if (!$ReturnHTML) {
+			return $FirstAvatar;
+		}
+		$ToReturn = '<div class="avatar_container">';
+		foreach ([$FirstAvatar, $SecondAvatar] as $AvatarNum => $CurAvatar) {
+			if ($CurAvatar) {
+				$ToReturn .= "<div><img $Attrs class=\"avatar_$AvatarNum\" src=\"$CurAvatar\" /></div>";
+			}
+		}
+		$ToReturn .= '</div>';
 		return $ToReturn;
 	}
 

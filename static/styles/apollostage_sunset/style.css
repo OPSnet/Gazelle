@@ -1425,6 +1425,11 @@ ul.collage_images li a>span {
 	float: none!important
 }
 
+#user .avatar_container img {
+	max-height: 400px;
+    max-width: 150px;
+}
+
 #user #userform {
 	background-color: transparent;
 	width: calc(100% - 248px);
@@ -1666,7 +1671,7 @@ blockquote {
 	#menu>ul>#nav_staff {
 		position: absolute;
 		display: inline;
-		top: 26px;
+		top: 29px;
 		right: 8px
 	}
 
