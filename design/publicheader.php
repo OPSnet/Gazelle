@@ -56,9 +56,9 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 				<br /><br />
 				If you are unsure if you are in the backup or not, use the recovery page.
 				<br /><br />
-				If you had an account on Apollo but you signed up after the backup date, you can use either the Referral page (if you are on PTP, BTN, MTV, GGN, EMP or 32P) or the Recovery page. To save us work and to ensure immediate registration, please use the Referral page if you can.
+				If you had an account on Apollo but you signed up after the backup date, you can use either the Referral page (if you are on PTP, BTN, MTV, EMP or 32P) or the Recovery page. To save us work and to ensure immediate registration, please use the Referral page if you can.
 				<br /><br />
-				If you did not have an account on Apollo but you would like to join Orpheus, and you are on PTP, BTN, MTV, GGN, EMP or 32P, feel free to use the referral page and join!
+				If you did not have an account on Apollo but you would like to join Orpheus, and you are on PTP, BTN, MTV, EMP or 32P, feel free to use the referral page and join!
 				<br /><br />
 				See you on the other side.
 			</p>
