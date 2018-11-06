@@ -128,11 +128,6 @@ define('LOG_ENTRIES_PER_PAGE', 50);
 // Cache catalogues
 define('THREAD_CATALOGUE', 500); // Limit to THREAD_CATALOGUE posts per cache key.
 
-// Email delivery method and information
-define('EMAIL_DELIVERY_TYPE', 'local'); // should be either 'mailgun' to use mailgun services or 'local' to use a local SMTP server or relay
-define('MAILGUN_API_KEY', '');
-define('MAILGUN_API_URL', '');
-
 // IRC settings
 define('DISABLE_IRC', true);
 define('BOT_NICK', '');
