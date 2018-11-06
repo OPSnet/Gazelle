@@ -64,9 +64,9 @@ if (count($Roles)) { ?>
 
 <? if (count($Roles) == 0) { ?>
 	<div class="box pad">
-	<p>Thanks for your interest in helping Apollo! There are
+	<p>Thanks for your interest in helping Orpheus! There are
 	no openings at the moment. Keep an eye on the front page
-	or the Apollo forum for announcements in the future.</p>
+	or the Orpheus forum for announcements in the future.</p>
 	</div>
 <?
 } else {

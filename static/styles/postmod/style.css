@@ -70,7 +70,6 @@ a[onclick]:focus {
 
 a[onclick]:active {
 	outline: 0;
-/*	background: url(images/load.gif) 100% 4px no-repeat; */
 }
 
 a[onclick^="AddArtistField"]:focus, a[onclick^="AddArtistField"]:active {
@@ -145,7 +144,6 @@ ul.thin li { margin:0px 0px; padding:0px; }
 #header {
 	width: 950px;
 	margin: 0 auto 0 auto;
-	/*background: url('images/bg_header.png') 11px 65px no-repeat;*/
 	height: 173px;
 	padding: 0 0 0 0;
 }
@@ -188,9 +186,9 @@ ul.thin li { margin:0px 0px; padding:0px; }
 }
 
 #logo {
-	width: 138px;
-	height: 37px;
-	background: url('images/woodlogo.png') no-repeat top left;
+	width: 193px;
+	height: 39px;
+	background: url('data:image/png;base64,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') no-repeat top left;
 	margin: 23px 0 0 11px;
 	position: absolute;
 	z-index: 2;
@@ -198,8 +196,8 @@ ul.thin li { margin:0px 0px; padding:0px; }
 
 #logo a {
 	border: none;
-	width: 138px;
-	height: 37px;
+	width: 193px;
+	height: 39px;
 	display: block;
 }
 
@@ -253,40 +251,6 @@ ul.thin li { margin:0px 0px; padding:0px; }
 #index #nav_index a, #torrents #nav_torrents a, #collage #nav_collages a, #requests #nav_requests a, #forums #nav_forums a, #chat #nav_irc a, #top10 #nav_top10 a, #rules #nav_rules a, #wiki #nav_wiki a, #staff #nav_staff a {
 	border-bottom: 4px solid #111;
 }
-
-/*
-#nav_index a { background-position: 0 0; width: 75px; }
-#nav_index a:hover { background-position: 0 -34px; }
-#index #nav_index a { background-position: 0 -69px; }
-#nav_torrents a { background-position: -75px 0; width: 75px; }
-#nav_torrents a:hover { background-position: -75px -34px; }
-#torrents #nav_torrents a { background-position: -75px -69px; }
-#nav_collages a { background-position: -150px 0; width: 75px; }
-#nav_collages a:hover { background-position: -150px -34px; }
-#collage #nav_collages a { background-position: -150px -69px; }
-#nav_requests a { background-position: -225px 0; width: 75px; }
-#nav_requests a:hover { background-position: -225px -34px; }
-#requests #nav_requests a { background-position: -225px -69px; }
-#nav_forums a { background-position: -300px 0; width: 75px; }
-#nav_forums a:hover { background-position: -300px -34px; }
-#forums #nav_forums a { background-position: -300px -69px; }
-#nav_irc a { background-position: -375px 0; width: 75px; }
-#nav_irc a:hover { background-position: -375px -34px; }
-#irc #nav_irc a { background-position: -375px -69px; }
-#nav_top10 a { background-position: -450px 0; width: 75px; }
-#nav_top10 a:hover { background-position: -450px -34px; }
-#top10 #nav_top10 a { background-position: -450px -69px; }
-#nav_rules a { background-position: -525px 0; width: 75px; }
-#nav_rules a:hover { background-position: -525px -34px; }
-#rules #nav_rules a { background-position: -525px -69px; }
-#nav_wiki a { background-position: -600px 0; width: 75px; }
-#nav_wiki a:hover { background-position: -600px -34px; }
-#wiki #nav_wiki a { background-position: -600px -69px; }
-#nav_staff a { background-position: -675px 0; width: 75px; }
-#nav_staff a:hover { background-position: -675px -34px; }
-#staff #nav_staff a { background-position: -675px -69px; }
-*/
-
 
 #userinfo {
 	position: absolute;
@@ -431,7 +395,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 
 #alerts {
 	width: 230px;
-	margin: 65px 0px 0px 338px;
+	margin: 75px 0px 0px 338px;
 	position: absolute;
 	text-align: center;
 	color: #FFF;
@@ -888,8 +852,6 @@ ul .invitetree {
 	margin: 10px 2px;
 }
 
-/*.thin .body a:hover, .thin .box a:hover, .thin .body a:focus, .thin .box a:focus { background: ; }*/
-
 .head a:hover, .colhead a:hover, .colhead_dark a:hover, .head a:focus, .colhead a:focus, .colhead_dark a:focus {
 	background: transparent !important;
 	outline: 0;
@@ -970,7 +932,6 @@ input[type="button"]:active , input[type="submit"]:active {
 }
 
 input[type="button"]:active, input[type="button"]:focus, input[type="submit"]:active, input[type="submit"]:focus {
-/*	background: #262626 url(images/load.gif) no-repeat center center; */
 	display: inline-block;
 	padding: 3px 6px 4px;
 	margin: 3px;
@@ -1026,11 +987,6 @@ input[disabled="disabled"]:hover, input[disabled="disabled"]:focus, input[disabl
 	background-color: #4F4F4F;
 	color: #DFDFDF;
 }
-
-/*
-textarea[disabled=disabled] { background: #4F4F4F; color: #DFDFDF; }
-textarea[disabled=disabled]:hover, textarea[disabled=disabled]:focus, textarea[disabled=disabled]:active { background-color: #4F4F4F; color: #DFDFDF; }
-*/
 
 select[disabled=disabled] { background: #4F4F4F; color: #DFDFDF; }
 select[disabled=disabled]:hover, select[disabled=disabled]:focus, select[disabled=disabled]:active { background-color: #4F4F4F; color: #DFDFDF; }

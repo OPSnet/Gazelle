@@ -61,8 +61,6 @@ a img {
 }
 
 #footer p:first-child {
-	/* background: url('images/what_logo.png') 15px 0 no-repeat;
-	padding: 0 0 0 130px; */
 	border: 0;
 	width: 180px;
 }
@@ -402,8 +400,8 @@ ul#userinfo_minor a:hover {
 
 #logo a {
 	display: block;
-	height: 120px;
-	background: transparent url('images/xanaxlogo.png') no-repeat top left;
+	height: 110px;
+	background: url('images/logo.png') no-repeat top left;
 	margin-left: -28px;
 	margin-top: -18px;
 }
@@ -449,8 +447,8 @@ ul#userinfo_username {
 
 #alerts {
 	z-index: 1;
-	padding-left: 510px;
-	padding-top: 34px;
+	padding-left: 508px;
+	padding-top: 36px;
 }
 
 /* SEARCH BARS */
@@ -504,7 +502,6 @@ ul#userinfo_username {
 	height: 80px;
 	width: 118px;
 	text-indent: -2000em;
-	/*	background: transparent url('images/what_head3.jpg') no-repeat top left;*/
 	padding: 0;
 	margin: 0;
 	float: left;
@@ -1039,12 +1036,10 @@ tr.torrent .bookmark > a:after {
 
 .torrent_table .pad td {
 	padding: 20px !important;
-	/*background: url('images/download.png') 105% -20px no-repeat;*/
 	background: url('images/download.png') top left no-repeat;
 }
 
 .torrent_table .pad {
-	/*background: url('images/download.png') 105% -20px no-repeat;*/
 	background: url('images/download_bottom.png') bottom left no-repeat;
 }
 
@@ -1795,7 +1790,7 @@ h3 {
 
 #musicbrainz_popup a#mb,
 #musicbrainz_popup a.mb {
-	background: transparent url(https://whatimg.com/i/i7umji.png) no-repeat !important;
+	/* background: transparent url(https://whatimg.com/i/i7umji.png) no-repeat !important; */
 	display: inline-block;
 	text-indent: -5000px;
 	overflow: hidden;

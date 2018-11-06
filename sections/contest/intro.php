@@ -1,6 +1,6 @@
 <?php
 
-View::show_header('Apollo Euterpe FLAC Challenge');
+View::show_header('Orpheus Euterpe FLAC Challenge');
 $Contest = Contest::get_current_contest();
 
 if ($Contest !== false and strlen($Contest['Banner'])) {

@@ -11,7 +11,7 @@
 #   4) Turn off DEBUG_MODE, and set DISABLE_TRACKER and DISABLE_IRC to false if using them
 #   5) Modify your server's php.ini file to what you want, you don't need the one in .vagrant
 #
-# And no, config.php is not the config.php that we run on the live Apollo site.
+# And no, config.php is not the config.php that we run on the live Orpheus site.
 #######
 
 
