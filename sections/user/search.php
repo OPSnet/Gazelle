@@ -24,7 +24,7 @@ if (isset($_GET['username'])) {
 			$Page = 10;
 			$Limit = sprintf("%d, %d", ($Page - 1) * USERS_PER_PAGE, USERS_PER_PAGE);
 		}
-		$DB->query("
+		$DB->prepared_query("
 			SELECT
 				SQL_CALC_FOUND_ROWS
 				ID,
@@ -35,9 +35,9 @@ if (isset($_GET['username'])) {
 				Warned
 			FROM users_main AS um
 				JOIN users_info AS ui ON ui.UserID = um.ID
-			WHERE LCASE(Username) = LCASE('".db_string($_GET['username'])."')
+			WHERE Username = ?
 			ORDER BY Username
-			LIMIT $Limit");
+			LIMIT $Limit", $_GET['username']);
 		$Results = $DB->to_array();
 		$DB->query('SELECT FOUND_ROWS()');
 		list($NumResults) = $DB->next_record();
