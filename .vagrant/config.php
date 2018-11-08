@@ -76,6 +76,7 @@ define('DEBUG_WARNINGS', true); //Set to true if you want to see PHP warnings in
 define('OPEN_REGISTRATION', true); //Set to false to disable open regirstration, true to allow anyone to register
 define('USER_LIMIT', 40000); //The maximum number of users the site can have, 0 for no limit
 define('STARTING_INVITES', 0); //# of invites to give to newly registered users
+define('STARTING_UPLOAD', 32212254720); //Upload given to newly registered users, in bytes using IEC standard (1024 bytes per KiB)
 define('BLOCK_TOR', false); //Set to true to block Tor users
 define('BLOCK_OPERA_MINI', false); //Set to true to block Opera Mini proxy
 define('DONOR_INVITES', 2);
