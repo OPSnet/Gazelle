@@ -3,6 +3,7 @@ html/
 /classes/config.php
 /sphinx.conf
 .DS_Store
+__MACOSX/
 logs/
 !logs/README.txt
 
