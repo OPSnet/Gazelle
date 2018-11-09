@@ -79,6 +79,7 @@ define('STATIC_SERVER', NONSSL_STATIC_SERVER);
 define('CRYPT_HASH_PREFIX', '$2y$07$');
 define('DEBUG_MODE', true); //Set to false if you dont want everyone to see debug information, can be overriden with 'site_debug'
 define('DEBUG_WARNINGS', true); //Set to true if you want to see PHP warnings in the footer
+define('SHOW_PUBLIC_INDEX', true); // Show the public index.php landing page
 define('OPEN_REGISTRATION', true); //Set to false to disable open regirstration, true to allow anyone to register
 define('USER_LIMIT', 40000); //The maximum number of users the site can have, 0 for no limit
 define('STARTING_INVITES', 0); //# of invites to give to newly registered users

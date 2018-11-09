@@ -86,7 +86,7 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 
 #logo ul {
 	float: left;
-	left: 45%;
+	left: 49%;
 	margin: 0 auto;
 	position: relative;
 }
@@ -109,7 +109,6 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 
 .poetry {
 	width: 320px;
-	text-align: justify;
 }
 
 .hidden {
