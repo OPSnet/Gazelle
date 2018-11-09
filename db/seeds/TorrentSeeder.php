@@ -2,7 +2,7 @@
 
 use Phinx\Seed\AbstractSeed;
 
-class InitialSeeder extends AbstractSeed {
+class TorrentSeeder extends AbstractSeed {
 	/**
 	 * To reset and rerun this seed:
 SET FOREIGN_KEY_CHECKS = 0;
@@ -25,77 +25,7 @@ TRUNCATE users_main;
 SET FOREIGN_KEY_CHECKS = 1;
 	 */
 	const DISCOGS_MAX = 11747136;
-	const TORRENTS = 100;
-
-	private function createUsers() {
-		$this->table('users_main')->insert([
-			[
-				'Username' => 'admin',
-				'Email' => 'admin@example.com',
-				'PassHash' => password_hash('password', PASSWORD_DEFAULT),
-				'Class' => 5,
-				'Uploaded' => 3221225472,
-				'Enabled' => '1',
-				'Visible' => 1,
-				'Invites' => 0,
-				'PermissionID' => 15,
-				'can_leech' => 1,
-				'torrent_pass' => '86519d75682397913039534ea21a4e45',
-			],
-			[
-				'Username' => 'user',
-				'Email' => 'user@example.com',
-				'PassHash' => password_hash('password', PASSWORD_DEFAULT),
-				'Class' => 5,
-				'Uploaded' => 3221225472,
-				'Enabled' => '1',
-				'Visible' => 1,
-				'Invites' => 0,
-				'PermissionID' => 2,
-				'can_leech' => 1,
-				'torrent_pass' => '86519d75682397913039534ea21a4e45',
-			],
-		])->saveData();
-
-
-		$this->table('users_info')->insert([
-			[
-				'UserID' => 1,
-				'StyleID' => 18,
-				'TorrentGrouping' => 0,
-				'ShowTags' => 1,
-				'AuthKey' => '7d3b4750ea71502d25051875a250b71a',
-				'JoinDate' => '2018-03-08 15:50:31',
-				'Inviter' => 0,
-			],
-			[
-				'UserID' => 2,
-				'StyleID' => 1,
-				'TorrentGrouping' => 0,
-				'ShowTags' => 1,
-				'AuthKey' => 'a1189fa8554776c6de31b6b4e2d0faea',
-				'JoinDate' => '2018-03-09 05:04:07',
-				'Inviter' => 0,
-			]
-		])->saveData();
-
-		$this->table('users_history_emails')->insert([
-			[
-				'UserID' => 1,
-				'Email' => 'admin@example.com',
-				'Time' => null,
-				'IP' => '127.0.0.1'
-			],
-			[
-				'UserID' => 2,
-				'Email' => 'user@example.com',
-				'Time' => null,
-				'IP' => '127.0.0.1'
-			]
-		])->saveData();
-
-		$this->table('users_notifications_settings')->insert([['UserID' => 1], ['UserID' => 2]]);
-	}
+	const TORRENTS = 20;
 
 	private function getRandomDiscogsAlbum() {
 		$id = rand(1, self::DISCOGS_MAX);
@@ -106,10 +36,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 		curl_setopt($ch, CURLOPT_URL, 'https://api.discogs.com/releases/'.$id);
 		$result = curl_exec($ch);
 		curl_close($ch);
-		return json_decode($result);
+		return json_decode($result, true);
 	}
 
-	private function createTorrents() {
+	public function run() {
 		$bencode = new ApolloRIP\BencodeTorrent\BencodeTorrent();
 
 		$insert_data = [
@@ -280,11 +210,4 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 		$this->execute('UPDATE tags SET Uses = ( SELECT COUNT(*) FROM torrents_tags WHERE torrents_tags.TagID = tags.ID GROUP BY TagID)');
 	}
-
-    public function run() {
-		$this->output->writeln("Running users...");
-		$this->createUsers();
-		$this->output->writeln("Running torrents...");
-		$this->createTorrents();
-    }
 }

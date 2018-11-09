@@ -29,44 +29,34 @@ fi
 touch ~/.runonce
 
 export DEBIAN_FRONTEND=noninteractive
+echo "deb http://ftp.debian.org/debian stretch-backports main" >> /etc/apt/sources.list
 
 # Don't do this in production
 apt-get install -y eatmydata
 
-
-# Add source for getting PHP 7.0
-eatmydata apt-get install -qy software-properties-common
-add-apt-repository 'deb http://packages.dotdeb.org jessie all'
-wget https://www.dotdeb.org/dotdeb.gpg -O /tmp/dotdeb.gpg
-apt-key add /tmp/dotdeb.gpg
-rm -f /tmp/dotdeb.gpg
-
 eatmydata apt-get update
 
 # install basic stuff that we need for potential later operations
-eatmydata apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libsqlite3-dev libboost-dev libtcmalloc-minimal4 unzip wget curl netcat-openbsd imagemagick
+eatmydata apt-get install -y software-properties-common build-essential make libssl-dev zlib1g-dev libbz2-dev libsqlite3-dev libboost-dev libtcmalloc-minimal4 unzip wget curl netcat-openbsd imagemagick
+curl -sL https://deb.nodesource.com/setup_10.x | bash -
+eatmydata apt-get install -y nodejs
 
-echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
-source <(curl -sL https://deb.nodesource.com/setup_8.x)
-eatmydata apt-get update
-
+# TODO: Remove default mailer, install nullmailer and PostOffice
 # We can remove the default MTA (exim4) as it doesn't do anything that really helps us on our sever. However, we do
 # want to install sendmail (but not let it run) so that PHP can send mail.
-eatmydata apt-get remove -y exim4 exim4-base exim4-config exim4-daemon-light
-rm -rf /var/log/exim4
-eatmydata apt-get install -y sendmail-bin
-service sendmail stop
-update-rc.d sendmail remove
+# eatmydata apt-get remove -y exim4 exim4-base exim4-config exim4-daemon-light
+# rm -rf /var/log/exim4
 
 eatmydata apt-get install -y git nginx memcached nodejs
-
-eatmydata apt-get install -y python3 python3-pip
+eatmydata apt-get install -y python3
+wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+python3 /tmp/get-pip.py
+rm -f /tmp/get-pip.py
 pip3 install -U pip
-pip3 install chardet
-pip3 install eac-logchecker
+pip3 install chardet eac-logchecker
 
 eatmydata apt-get install -y sphinxsearch
-eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-memcached php7.0-mcrypt php7.0-mysqlnd php7.0-cli php7.0-xdebug php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip php7.0-apcu
+eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-mcrypt php7.0-mysql php7.0-cli php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip php-memcached php-xdebug php-apcu
 
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password password em%G9Lrey4^N'
 debconf-set-selections <<< 'mariadb-server mysql-server/root_password_again password em%G9Lrey4^N'
@@ -103,7 +93,6 @@ EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig)
 ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', '/tmp/composer-setup.php');")
 if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]; then
     >&2 echo 'ERROR: Invalid installer signature'
-    rm /tmp/composer-setup.php
 else
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     su vagrant -c "composer --version"
@@ -111,9 +100,10 @@ else
     su vagrant -c "composer install"
     su vagrant -c "composer dump-autoload"
     su vagrant -c "vendor/bin/phinx migrate"
+    su vagrant -c "vendor/bin/phinx seed:run -s UserSeeder"
     popd
-    rm /tmp/composer-setup.php
 fi
+rm -f /tmp/composer-setup.php
 
 echo "START=yes" | tee /etc/default/sphinxsearch > /dev/null
 cp /var/www/.vagrant/sphinx.conf /etc/sphinxsearch/sphinx.conf
