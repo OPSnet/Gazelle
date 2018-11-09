@@ -34,12 +34,17 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 <table class="layout" id="maincontent">
 	<tr>
 		<td align="center" valign="middle">
-			<div id="logo">
-<? if (OPEN_REGISTRATION) { ?>
+			<div id="logo" style="width:250px;">
 				<ul>
+<?php if (SHOW_PUBLIC_INDEX) { ?>
 					<li><a href="index.php">Home</a></li>
+<?php } ?>
 					<li><a href="login.php">Log in</a></li>
+<?php if (OPEN_REGISTRATION) { ?>
 					<li><a href="register.php">Register</a></li>
+<?php } ?>
+<?php if (OPEN_EXTERNAL_REFERRALS) { ?>
+					<li><a href="referral.php">Referrals</a></li>
+<?php } ?>
 				</ul>
-<? } ?>
 			</div>

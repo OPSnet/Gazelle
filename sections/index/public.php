@@ -1,10 +1,32 @@
 <?php
 
-header('Location: login.php');
-/*
+if (!SHOW_PUBLIC_INDEX) {
+    header('Location: login.php');
+    exit;
+}
 
-<? View::show_header(); ?>
-<!-- <div class="poetry">You've stumbled upon a door where your mind is the key. There are none who will lend you guidance; these trials are yours to conquer alone. Entering here will take more than mere logic and strategy, but the criteria are just as hidden as what they reveal. Find yourself, and you will find the very thing hidden behind this page. Beyond here is something like a utopia&#8202;&mdash;&#8202;beyond here is Orpheus.</div>
-<span class="center">This is a mirage.</span> -->
-<? View::show_footer(); ?>
-*/
+View::show_header();
+
+echo <<<HTML
+<div class="poetry">
+<p>
+Orpheus with his lute made trees<br />
+And the mountain tops that freeze<br />
+Bow themselves when he did sing:<br />
+To his music plants and flowers<br />
+Ever sprung; as sun and showers<br />
+There had made a lasting spring.<br />
+</p>
+<br />
+<p>
+Every thing that heard him play,<br />
+Even the billows of the sea,<br />
+Hung their heads and then lay by.<br />
+In sweet music is such art,<br />
+Killing care and grief of heart<br />
+Fall asleep, or hearing, die.<br />
+</p>
+</div>
+HTML;
+
+View::show_footer();
