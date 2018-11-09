@@ -1,26 +1,26 @@
 <?
 class Misc {
-		/**
-		 * Send an email.
-		 *
-		 * @param string $To the email address to send it to.
-		 * @param string $Subject
-		 * @param string $Body
-		 * @param string $From The user part of the user@NONSSL_SITE_URL email address.
-		 * @param string $ContentType text/plain or text/html
-		 */
+	/**
+	 * Send an email.
+	 *
+	 * @param string $To the email address to send it to.
+	 * @param string $Subject
+	 * @param string $Body
+	 * @param string $From The user part of the user@NONSSL_SITE_URL email address.
+	 * @param string $ContentType text/plain or text/html
+	 */
 
-		public static function send_email($To, $Subject, $Body, $From, $ContentType) {
-			// remove the next line if you want to send HTML email from some places...
-			$ContentType='text/plain';
-			$Headers = 'MIME-Version: 1.0'."\r\n";
-			$Headers .= 'Content-type: text/plain; charset=iso-8859-1'."\r\n";
-			$Headers .= 'From: '.SITE_NAME.' <'.$From.'@'.NONSSL_SITE_URL.'>'."\r\n";
-			$Headers .= 'Reply-To: '.$From.'@'.NONSSL_SITE_URL."\r\n";
-			$Headers .= 'Message-Id: <'.Users::make_secret().'@'.NONSSL_SITE_URL.">\r\n";
-			$Headers .= 'X-Priority: 3'."\r\n";
-			mail($To, $Subject, $Body, $Headers, "-f $From@".NONSSL_SITE_URL);
-		}
+	public static function send_email($To, $Subject, $Body, $From, $ContentType) {
+		// remove the next line if you want to send HTML email from some places...
+		$ContentType='text/plain';
+		$Headers = 'MIME-Version: 1.0'."\r\n";
+		$Headers .= 'Content-type: text/plain; charset=iso-8859-1'."\r\n";
+		$Headers .= 'From: '.SITE_NAME.' <'.$From.'@'.MAIL_HOST.'>'."\r\n";
+		$Headers .= 'Reply-To: '.$From.'@'.MAIL_HOST."\r\n";
+		$Headers .= 'Message-Id: <'.Users::make_secret().'@'.MAIL_HOST.">\r\n";
+		$Headers .= 'X-Priority: 3'."\r\n";
+		mail($To, $Subject, $Body, $Headers, "-f $From@".MAIL_HOST);
+	}
 
 
 	/**
