@@ -784,7 +784,6 @@ input[type="search"] {
 	transition: opacity 500ms;
 }
 .avatar_container > :last-child {
-	margin-right: 150px;
 	opacity: 0;
 }
 .avatar_container > :first-child {
@@ -794,6 +793,14 @@ input[type="search"] {
 	opacity: 0;
 }
 .avatar_container:hover > :last-child {
-	margin-right: 150px;
   	opacity: 1;
+}
+#user .avatar_container > :last-child {
+	margin-right: 150px
+}
+#user .avatar_container:hover > :last-child {
+	margin-right: 150px
+}
+#recovery table td > pre {
+	max-width: 800px;
 }
