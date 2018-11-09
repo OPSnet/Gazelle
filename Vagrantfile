@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "debian/contrib-jessie64"
+  config.vm.box = "debian/contrib-stretch64"
 
   config.vm.synced_folder ".", "/var/www/"
   # only sync if it exists

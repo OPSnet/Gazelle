@@ -28,8 +28,8 @@ define('RSS_HASH', 'weFQmRVNrfcbhq0TNWZA'); //Random key. Used for generating un
 
 // MySQL details
 define('SQLHOST', 'localhost'); //The MySQL host ip/fqdn
-define('SQLLOGIN', 'root');//The MySQL login
-define('SQLPASS', 'em%G9Lrey4^N'); //The MySQL password
+define('SQLLOGIN', 'gazelle');//The MySQL login
+define('SQLPASS', 'password'); //The MySQL password
 define('SQLDB', 'gazelle'); //The MySQL database to use
 define('SQLPORT', 3306); //The MySQL port to connect on
 define('SQLSOCK', '/var/run/mysqld/mysqld.sock');
