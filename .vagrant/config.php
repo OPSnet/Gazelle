@@ -9,8 +9,9 @@ define('SITE_NAME', 'Orpheus Dev'); //The name of your site
 define('NONSSL_SITE_URL', 'localhost:8080'); //The FQDN of your site
 define('SSL_SITE_URL', 'localhost:8080'); //The FQDN of your site, make this different if you are using a subdomain for ssl
 define('SITE_IP', ''); //The IP address by which your site can be publicly accessed
-define('SITE_HOST', 'orpheus.network');
-define('SITE_URI', 'https://orpheus.network');
+define('SITE_HOST', 'localhost');
+define('SITE_URL', 'http://localhost:8080');
+define('MAIL_HOST', 'mail.'.SITE_HOST); // The host to use for mail delivery (e.g. mail.orpheus.network)
 define('SERVER_ROOT', '/var/www'); //The root of the server, used for includes, purpose is to shorten the path string
 define('ANNOUNCE_URL', 'http://'.NONSSL_SITE_URL.':34000'); //Announce URL
 define('ANNOUNCE_HTTP_URL', 'http://localhost:34000');
