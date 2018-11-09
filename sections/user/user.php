@@ -734,6 +734,7 @@ if (check_paranoia_here('snatched')) {
 				INNER JOIN torrents AS t ON t.ID = s.fid
 				INNER JOIN torrents_group AS g ON t.GroupID = g.ID
 			WHERE s.uid = '$UserID'
+				AND t.UserID != '$UserID'
 				AND g.CategoryID = '1'
 				AND g.WikiImage != ''
 			GROUP BY g.ID
