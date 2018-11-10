@@ -654,6 +654,13 @@ ul#userinfo_username {
 	width: 150px;
 }
 
+#forums .avatar_container > :last-child {
+	margin-right: 150px;
+}
+#forums .avatar_container:hover > :last-child {
+	margin-right: 150px;
+}
+
 #forums .forum_post blockquote,
 #userhistory .forum_post blockquote,
 #collage .forum_post blockquote,
