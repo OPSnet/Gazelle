@@ -77,7 +77,7 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
 			t.Size,
 			t.FreeTorrent,
 			t.info_hash,
-			t.UserID,
+			t.UserID
 		FROM torrents AS t
 			INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
 		WHERE t.ID = '".db_string($TorrentID)."'");
