@@ -359,4 +359,162 @@ END_EMAIL;
         );
         return $db->next_record();
     }
+
+    static function boost_upload ($db, $cache) {
+        $sql = sprintf("
+            SELECT HIST.Username, HIST.MappedID, HIST.UserID, HIST.Uploaded, HIST.Downloaded, HIST.Bounty, HIST.nr_torrents, HIST.userclass,
+                round(
+                    CASE
+                        WHEN HIST.nr_torrents >= 500                            THEN (1.5 * 500 + ((HIST.nr_torrents - 500) * 0.5) - 3) * pow(1024, 3)
+                        WHEN HIST.nr_torrents >=  50 AND HIST.nr_torrents < 500 THEN (1.5 * 100 + ((HIST.nr_torrents -  50) * 0.8) - 3) * pow(1024, 3)
+                        WHEN HIST.nr_torrents >=   5 AND HIST.nr_torrents <  50 THEN (1.5 *  25 + ((HIST.nr_torrents -   5) * 0.5) - 3) * pow(1024, 3)
+                        WHEN HIST.nr_torrents >=   1 AND HIST.nr_torrents <   5 THEN (1.5 *   5 +   HIST.nr_torrents               - 3) * pow(1024, 3)
+                        ELSE 0.0
+                    END + (HIST.Downloaded + HIST.bounty) * 0.5,
+                    0
+                ) as new_up
+            FROM (
+                SELECT uam.MappedID, uam.UserID,
+                    u.Username,
+                    u.Uploaded,
+                    u.Downloaded,
+                    lower(irc.userclass) as userclass,
+                    coalesce(r.Bounty, 0) as Bounty,
+                    count(t.ID) AS nr_torrents
+                FROM       %s.users_main u
+                INNER JOIN %s.users_info ui ON (ui.UserID = u.ID)
+                LEFT  JOIN %s.torrents t    ON ( t.UserID = u.ID)
+                LEFT  JOIN (
+                    SELECT UserID, sum(bounty) as Bounty
+                    FROM %s.requests_votes
+                    GROUP BY UserID
+                ) r ON (r.UserID = u.ID)
+                INNER JOIN %s.%s uam ON (uam.UserID = u.ID)
+                LEFT  JOIN %s.%s irc ON (irc.UserID = u.ID)
+                WHERE NOT uam.buffer
+                    AND uam.UserID > 1
+                GROUP BY u.id
+            ) HIST
+            LIMIT ?
+        ",  RECOVERY_DB,
+            RECOVERY_DB,
+            RECOVERY_DB,
+            RECOVERY_DB,
+            RECOVERY_DB, RECOVERY_MAPPING_TABLE,
+            RECOVERY_DB, RECOVERY_IRC_TABLE
+        );
+        $db->prepared_query($sql, RECOVERY_BUFFER_REASSIGN_LIMIT);
+
+        $rescale = [
+            'member'        =>  10.0 * pow(1024, 3),
+            'poweruser'     =>  25.0 * pow(1024, 3),
+            'elite'         => 100.0 * pow(1024, 3),
+            'torrentmaster' => 500.0 * pow(1024, 3),
+            'powertm'       => 500.0 * pow(1024, 3),
+            'elitetm'       => 500.0 * pow(1024, 3)
+        ];
+
+        $results = $db->to_array();
+        foreach ($results as $r) {
+            list($username, $ops_user_id, $apl_user_id, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass, $final) = $r;
+
+            /* close the gate */
+            $db->prepared_query(sprintf("
+                UPDATE %s.users_apl_mapping
+                SET buffer = true
+                WHERE MappedID = ?
+                ", RECOVERY_DB
+                )
+                , $ops_user_id
+            );
+
+            /* no buffer for you */
+            if ($final < 1.0) {
+                continue;
+            }
+
+            /* upscale from IRC activity */
+            $irc_change = '';
+            if (array_key_exists($irc_userclass, $rescale)) {
+                $rescale_uploaded = 0.0 + $rescale[$irc_userclass];
+                if ($rescale_uploaded > $uploaded) {
+                    $irc_message = "Upscaled from $uploaded to $rescale_uploaded from final irc userclass $irc_userclass";
+                    $final += 1.5 * ($rescale_uploaded - $uploaded);
+                    $irc_change = "\n\nThe above buffer calculation takes into account your final recorded userclass on IRC '$irc_userclass'";
+                }
+                else {
+                    $irc_message = "No change from logged irc userclass $irc_userclass";
+                }
+            }
+            else {
+                $irc_message = 'never joined #APOLLO';
+            }
+
+            $uploaded_fmt   = \Format::get_size($uploaded);
+            $downloaded_fmt = \Format::get_size($downloaded);
+            $bounty_fmt     = \Format::get_size($bounty);
+            $final_fmt      = \Format::get_size($final);
+
+            $to = \Users::user_info($ops_user_id);
+
+            $Body = <<<END_MSG
+Dear {$to['Username']},
+
+Your activity on the previous site has been rewarded. Your details are as follows:
+
+[*] Torrents uploaded: {$nr_torrents}
+[*] Uploaded: {$uploaded_fmt}
+[*] Downloaded: {$downloaded_fmt}
+[*] Bounty: {$bounty_fmt} (requests created and voted upon).
+[*] ... magic ...
+[*] Buffer: $final_fmt
+END_MSG;
+
+            if (strlen($irc_change)) {
+                $Body .= "$irc_change\n";
+            }
+            $Body .= <<<END_MSG
+
+This amount has been added to your existing Uploaded stats.  Don't sit on this buffer,
+go out and use it. You never know what bad news tomorrow will bring.
+
+<3
+--OPS Staff
+END_MSG;
+
+            \Misc::send_pm($ops_user_id, 0, "Your buffer stats have been updated", $Body);
+
+            $admin_comment = sprintf("%s - Upload stats recovery raw: Up=%d Down=%d Bounty=%d Torrents=%d IRC=%s"
+                . "\nformatted: U=%s D=%s B=%s Final=%s (%d) APL_ID=%d RESCALE=%s\n\n",
+                $username, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass,
+                $uploaded_fmt, $downloaded_fmt, $bounty_fmt, $final_fmt, $final, $apl_user_id, $irc_message
+            );
+
+            /* insert this first to avoid a potential reallocation */
+            $db->prepared_query("
+                INSERT INTO users_buffer_log
+                       (opsid, aplid, uploaded, downloaded, bounty, nr_torrents, userclass, final)
+                VALUES (?,     ?,     ?,        ?,          ?,      ?,           ?,         ?)
+                ", $ops_user_id, $apl_user_id, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass, $final
+            );
+
+            /* staff note */
+            $db->prepared_query("
+                UPDATE users_info
+                SET AdminComment = CONCAT(?, AdminComment)
+                WHERE UserID = ?
+                ", $admin_comment, $ops_user_id
+            );
+
+            /* buffer */
+            $db->prepared_query("
+                UPDATE users_main
+                SET Uploaded = Uploaded + ?
+                WHERE ID = ?
+                ", $final, $ops_user_id
+            );
+
+            $cache->delete_value('user_stats_' . $ops_user_id);
+        }
+	}
 }
