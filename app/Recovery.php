@@ -437,9 +437,9 @@ END_EMAIL;
             $irc_change = '';
             if (array_key_exists($irc_userclass, $rescale)) {
                 $rescale_uploaded = 0.0 + $rescale[$irc_userclass];
-                if ($rescale_uploaded > $uploaded) {
+                if ($rescale_uploaded > $final) {
                     $irc_message = "Upscaled from $uploaded to $rescale_uploaded from final irc userclass $irc_userclass";
-                    $final += 1.5 * ($rescale_uploaded - $uploaded);
+                    $final += 1.5 * ($rescale_uploaded - $final);
                     $irc_change = "\n\nThe above buffer calculation takes into account your final recorded userclass on IRC '$irc_userclass'";
                 }
                 else {
