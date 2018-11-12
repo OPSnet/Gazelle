@@ -2,14 +2,15 @@
 
 use Phinx\Seed\AbstractSeed;
 
-class UserSeeder extends AbstractSeed {
-    public function run() {
-        $stmt = $this->query("SELECT COUNT(*) FROM users_main WHERE Username='admin'");
-        if (count($stmt->fetchAll()) > 0) {
-            return;
-        }
+class InitialUserSeeder extends AbstractSeed {
+	public function run() {
+		$stmt = $this->query("SELECT COUNT(*) AS count FROM users_main WHERE Username='admin'");
+		if (((int) $stmt->fetch()['count']) > 0) {
+			return;
+		}
 
-        $this->table('users_main')->insert([
+		$now = (new \DateTime("now"))->format("Y-m-d H:i:s");
+		$this->table('users_main')->insert([
 			[
 				'Username' => 'admin',
 				'Email' => 'admin@example.com',
@@ -22,6 +23,7 @@ class UserSeeder extends AbstractSeed {
 				'PermissionID' => 15,
 				'can_leech' => 1,
 				'torrent_pass' => '86519d75682397913039534ea21a4e45',
+				'LastAccess' => $now
 			],
 			[
 				'Username' => 'user',
@@ -35,6 +37,7 @@ class UserSeeder extends AbstractSeed {
 				'PermissionID' => 2,
 				'can_leech' => 1,
 				'torrent_pass' => '86519d75682397913039534ea21a4e45',
+				'LastAccess' => $now
 			],
 		])->saveData();
 
@@ -76,8 +79,8 @@ class UserSeeder extends AbstractSeed {
 		])->saveData();
 
 		$this->table('users_notifications_settings')->insert([
-            ['UserID' => 1],
-            ['UserID' => 2]
-        ])->saveDate();
-    }
+			['UserID' => 1],
+			['UserID' => 2]
+		])->saveData();
+	}
 }

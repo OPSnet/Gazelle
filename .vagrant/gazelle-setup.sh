@@ -100,7 +100,7 @@ else
     su vagrant -c "composer install"
     su vagrant -c "composer dump-autoload"
     su vagrant -c "vendor/bin/phinx migrate"
-    su vagrant -c "vendor/bin/phinx seed:run -s UserSeeder"
+    su vagrant -c "vendor/bin/phinx seed:run -s InitialUserSeeder"
     popd
 fi
 rm -f /tmp/composer-setup.php
