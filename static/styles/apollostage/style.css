@@ -1454,6 +1454,10 @@ ul.collage_images li a>span {
     max-width: 150px;
 }
 
+#friends .avatar_container {
+	margin-right: 150px
+}
+
 #user #userform {
 	background-color: transparent;
 	width: calc(100% - 248px);
@@ -1767,6 +1771,17 @@ blockquote {
 	}
 	#userform #settings_sections {
 		width: 240px
+	}
+}
+@media only screen and (max-width: 768px) {
+	/* For mobile phones: */
+	#inbox input[type="submit"] {
+		font-size: 10px;
+		padding: 4px
+	}
+	#forums input {
+		font-size: 10px;
+		padding: 4px
 	}
 }
 @media (max-width:480px) {

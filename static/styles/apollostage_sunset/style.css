@@ -1427,7 +1427,7 @@ ul.collage_images li a>span {
 
 #user .avatar_container img {
 	max-height: 400px;
-    max-width: 150px;
+	max-width: 150px;
 }
 
 #user #userform {
@@ -1454,6 +1454,10 @@ ul.collage_images li a>span {
 
 #dnulist tr:not(.colhead):not(.colhead_dark):nth-child(odd) {
 	background-color: #38363d
+}
+
+#friends .avatar_container {
+	margin-right: 150px
 }
 
 #menu>ul a:hover,
@@ -1737,6 +1741,19 @@ blockquote {
 		width: 240px
 	}
 }
+
+@media only screen and (max-width: 768px) {
+	/* For mobile phones: */
+	#inbox input[type="submit"] {
+		font-size: 10px;
+		padding: 4px
+	}
+	#forums input {
+		font-size: 10px;
+		padding: 4px
+	}
+}
+
 @media (max-width:480px) {
 	.m_hidden {
 		display: none !important;
