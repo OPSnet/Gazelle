@@ -476,7 +476,7 @@ END_MSG;
             $Body .= <<<END_MSG
 
 This amount has been added to your existing Uploaded stats.  Don't sit on this buffer,
-go out and use it. You never know what bad news tomorrow will bring.
+go out and use it. You never know what tomorrow will bring.
 
 <3
 --OPS Staff
