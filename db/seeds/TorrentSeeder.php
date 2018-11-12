@@ -21,6 +21,8 @@ TRUNCATE login_attempts;
 TRUNCATE users_sessions;
 TRUNCATE users_info;
 TRUNCATE users_main;
+TRUNCATE users_history_emails;
+TRUNCATE users_notifications_settings;
 
 SET FOREIGN_KEY_CHECKS = 1;
 	 */
@@ -40,6 +42,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 	}
 
 	public function run() {
+		$stmt = $this->query("SELECT COUNT(*) AS count FROM users_main");
+		$user_count  = (int) $stmt->fetch()['count'];
+
 		$bencode = new ApolloRIP\BencodeTorrent\BencodeTorrent();
 
 		$insert_data = [
@@ -70,6 +75,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 			if (!property_exists($album, 'year') || (!empty($album->message) && $album->message === 'Release not found.') || $album->year == 0) {
 				continue;
 			}
+			$user_id = rand(1, $user_count);
 			$this->output->writeln("Found torrent {$i}...");
 
 			$artist = $album->artists[0];
@@ -90,7 +96,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 						'Name' => $genre,
 						'TagType' => 'genre',
 						'Uses' => 1,
-						'UserID' => 1
+						'UserID' => $user_id
 					];
 					$tags[$genre] = ['id' => (count($tags) + 1), 'genre' => $genre, 'idx' => count($insert_data)];
 				}
@@ -118,7 +124,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 				$insert_data['wiki_torrents'][] = [
 					'PageID' => count($groups) + 1,
 					'Body' => $wiki_body,
-					'UserID' => 1,
+					'UserID' => $user_id,
 					'Summary' => 'Uploaded new torrent',
 					'Time' => '2018-03-22 02:24:19',
 					'Image' => ''
@@ -136,7 +142,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 					'GroupID' => count($groups) + 1,
 					'ArtistID' => $artists[$album->artists[0]->name]['id'],
 					'AliasID' => $artists[$album->artists[0]->name]['id'],
-					'UserID' => 1,
+					'UserID' => $user_id,
 					'Importance' => 1
 				];
 				$groups[$album->title] = ['id' => count($groups) + 1, 'album' => $album];
@@ -171,7 +177,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 			]);
 			$insert_data['torrents'][] = [
 				'GroupID' => $groups[$album->title]['id'],
-				'UserID' => 1,
+				'UserID' => $user_id,
 				'Media' => $media,
 				'Format' => 'MP3',
 				'Encoding' => '320',

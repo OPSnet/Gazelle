@@ -76,6 +76,7 @@ cp /var/www/.vagrant/php.ini /etc/php/7.0/cli/php.ini
 cp /var/www/.vagrant/php.ini /etc/php/7.0/fpm/php.ini
 cp /var/www/.vagrant/xdebug.ini /etc/php/7.0/mods-available/xdebug.ini
 cp /var/www/.vagrant/www.conf /etc/php/7.0/fpm/pool.d/www.conf
+cp /var/www/.vagrant/config.php /var/www/classes/config.php
 
 ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf
 
@@ -100,7 +101,7 @@ else
     su vagrant -c "composer install"
     su vagrant -c "composer dump-autoload"
     su vagrant -c "vendor/bin/phinx migrate"
-    su vagrant -c "vendor/bin/phinx seed:run -s UserSeeder"
+    su vagrant -c "vendor/bin/phinx seed:run -s InitialUserSeeder"
     popd
 fi
 rm -f /tmp/composer-setup.php
@@ -113,7 +114,6 @@ cp /var/www/.vagrant/init.d/* /etc/init.d
 chmod +x /etc/init.d/memcached.sock
 update-rc.d memcached.sock defaults
 
-cp /var/www/.vagrant/config.php /var/www/classes/config.php
 crontab /var/www/.vagrant/crontab
 
 if [ -d /var/ocelot ]; then
