@@ -177,6 +177,13 @@ function togglePassKey(key) {
 
 }
 
+function RandomIRCKey() {
+	var irckeyChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	var randIRCKeyLen= 32;
+	var randIRCKey = Array(randIRCKeyLen).fill(irckeyChars).map(function(x) { return x[Math.floor(Math.random() * x.length)] }).join('');
+	irckey.value = randIRCKey;
+}
+
 function commStats(userid) {
 	$('.user_commstats').html('Loading...');
 	ajax.get('ajax.php?action=community_stats&userid=' + userid, function(JSONresponse) {

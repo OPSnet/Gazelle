@@ -804,6 +804,7 @@ list($ArtistsAdded) = $DB->next_record();
 				<td>
 					<div class="field_div">
 						<input type="text" size="50" name="irckey" id="irckey" value="<?=display_str($IRCKey)?>" />
+						<input type="button" onclick="RandomIRCKey();" value="Generate IRC key" />
 					</div>
 					<p class="min_padding">If set, this key will be used instead of your site password when authenticating with <?=BOT_NICK?> on the <a href="wiki.php?action=article&amp;id=5">site's IRC network</a>. <span style="white-space: nowrap;">Please note:</span></p>
 					<ul>
