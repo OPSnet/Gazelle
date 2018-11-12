@@ -1459,6 +1459,14 @@ ul.collage_images li a>span {
 	margin-right: 150px
 }
 
+@media (min-width:1024px) {
+	#reportsv2 form table {
+		table-layout: auto;
+		width: 920px;
+		margin-left: -102px
+	}
+}
+
 #menu>ul a:hover,
 #userinfo_minor:hover a:hover,
 #userinfo_username:hover a:hover {

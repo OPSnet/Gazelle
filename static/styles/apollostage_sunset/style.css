@@ -1456,6 +1456,14 @@ ul.collage_images li a>span {
 	background-color: #38363d
 }
 
+@media (min-width:1024px) {
+	#reportsv2 form table {
+		table-layout: auto;
+		width: 920px;
+		margin-left: -102px
+	}
+}
+
 #friends .avatar_container {
 	margin-right: 150px
 }
