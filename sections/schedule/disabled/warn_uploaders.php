@@ -1,5 +1,7 @@
 <?php
 
+// disabled from weekly
+
 // Send warnings to uploaders of torrents that will be deleted this week
 $DB->query("
 			SELECT
