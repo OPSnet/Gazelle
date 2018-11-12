@@ -10,7 +10,6 @@ threads will linger with the 'Moved' flag until they're knocked off
 the front page.
 
 \*********************************************************************/
-define('TRASH_FORUM_ID', 4);
 
 // Quick SQL injection check
 if (!is_number($_POST['threadid'])) {
@@ -43,9 +42,9 @@ $ForumID = (int)$_POST['forumid'];
 $Page = (int)$_POST['page'];
 $Action = '';
 
+$TrashForumID = ($ForumID === EDITING_FORUM_ID) ? EDITING_TRASH_FORUM_ID : TRASH_FORUM_ID;
 
 if ($Locked == 1) {
-
 	$DB->query("
 		DELETE FROM forums_last_read_topics
 		WHERE TopicID = '$TopicID'");
@@ -157,7 +156,7 @@ if (isset($_POST['delete'])) {
 	$Action = 'editing';
 
 	if (isset($_POST['trash'])) {
-		$ForumID = TRASH_FORUM_ID;
+		$ForumID = $TrashForumID;
 		$Action = 'trashing';
 	}
 
@@ -310,7 +309,7 @@ if (isset($_POST['delete'])) {
 
 		$Cache->commit_transaction(0);
 
-		if ($ForumID == TRASH_FORUM_ID) {
+		if ($ForumID == $TrashForumID) {
 			$Action = 'trashing';
 		}
 	} else { // Editing
