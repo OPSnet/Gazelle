@@ -76,7 +76,8 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
 			tg.CategoryID,
 			t.Size,
 			t.FreeTorrent,
-			t.info_hash
+			t.info_hash,
+			t.UserID
 		FROM torrents AS t
 			INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
 		WHERE t.ID = '".db_string($TorrentID)."'");
@@ -92,7 +93,7 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
 if (!is_array($Info[0])) {
 	error(404);
 }
-list($Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash) = array_shift($Info); // used for generating the filename
+list($Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash, $TorrentUploaderID) = array_shift($Info); // used for generating the filename
 $Artists = $Info['Artists'];
 
 // If he's trying use a token on this, we need to make sure he has one,
@@ -154,7 +155,7 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
 }
 
 //Stupid Recent Snatches On User Page
-if ($CategoryID == '1' && $Image != '') {
+if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
 	$RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
 	if (!empty($RecentSnatches)) {
 		$Snatch = array(
