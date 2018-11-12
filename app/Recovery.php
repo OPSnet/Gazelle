@@ -365,10 +365,10 @@ END_EMAIL;
             SELECT HIST.Username, HIST.MappedID, HIST.UserID, HIST.Uploaded, HIST.Downloaded, HIST.Bounty, HIST.nr_torrents, HIST.userclass,
                 round(
                     CASE
-                        WHEN HIST.nr_torrents >= 500                            THEN (1.5 * 500 + ((HIST.nr_torrents - 500) * 0.5) - 3) * pow(1024, 3)
-                        WHEN HIST.nr_torrents >=  50 AND HIST.nr_torrents < 500 THEN (1.5 * 100 + ((HIST.nr_torrents -  50) * 0.8) - 3) * pow(1024, 3)
-                        WHEN HIST.nr_torrents >=   5 AND HIST.nr_torrents <  50 THEN (1.5 *  25 + ((HIST.nr_torrents -   5) * 0.5) - 3) * pow(1024, 3)
-                        WHEN HIST.nr_torrents >=   1 AND HIST.nr_torrents <   5 THEN (1.5 *   5 +   HIST.nr_torrents               - 3) * pow(1024, 3)
+                        WHEN HIST.nr_torrents >= 500                            THEN (1.5 * (500 + ((HIST.nr_torrents - 500) * 0.5)) - 3) * pow(1024, 3)
+                        WHEN HIST.nr_torrents >=  50 AND HIST.nr_torrents < 500 THEN (1.5 * (100 + ((HIST.nr_torrents -  50) * 0.8)) - 3) * pow(1024, 3)
+                        WHEN HIST.nr_torrents >=   5 AND HIST.nr_torrents <  50 THEN (1.5 *  (25 + ((HIST.nr_torrents -   5) * 0.5)) - 3) * pow(1024, 3)
+                        WHEN HIST.nr_torrents >=   1 AND HIST.nr_torrents <   5 THEN (1.5 *   (5 +   HIST.nr_torrents)               - 3) * pow(1024, 3)
                         ELSE 0.0
                     END + (HIST.Downloaded + HIST.bounty) * 0.5,
                     0
