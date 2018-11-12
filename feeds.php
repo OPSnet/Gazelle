@@ -1,4 +1,4 @@
-<?
+<?php
 /*-- Feed Start Class ----------------------------------*/
 /*------------------------------------------------------*/
 /* Simplified version of script_start, used for the	 */

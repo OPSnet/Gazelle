@@ -1,4 +1,4 @@
-<?
+<?php
 define('MEMORY_EXCEPTION', true);
 define('TIME_EXCEPTION', true);
 define('ERROR_EXCEPTION', true);
