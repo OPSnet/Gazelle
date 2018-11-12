@@ -1454,6 +1454,10 @@ ul.collage_images li a>span {
     max-width: 150px;
 }
 
+#friends .avatar_container {
+	margin-right: 150px
+}
+
 #user #userform {
 	background-color: transparent;
 	width: calc(100% - 248px);
@@ -1479,6 +1483,15 @@ ul.collage_images li a>span {
 #dnulist tr:not(.colhead):not(.colhead_dark):nth-child(odd) {
 	background-color: #33363d
 }
+
+@media (min-width:1024px) {
+	#reportsv2 form table {
+		table-layout: auto;
+		width: 1020px;
+		margin-left: -102px
+	}
+}
+
 
 #menu>ul a:hover,
 #userinfo_minor:hover a:hover,
@@ -1767,6 +1780,17 @@ blockquote {
 	}
 	#userform #settings_sections {
 		width: 240px
+	}
+}
+@media only screen and (max-width: 768px) {
+	/* For mobile phones: */
+	#inbox input[type="submit"] {
+		font-size: 10px;
+		padding: 4px
+	}
+	#forums input {
+		font-size: 10px;
+		padding: 4px
 	}
 }
 @media (max-width:480px) {
