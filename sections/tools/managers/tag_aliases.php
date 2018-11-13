@@ -9,29 +9,29 @@ $orderby = ($_GET['order'] === 'badtags' ? 'BadTag' : 'AliasTag');
 
 if (check_perms('users_mod')) {
 	if (isset($_POST['newalias'])) {
-		$badtag = mysql_escape_string($_POST['badtag']);
-		$aliastag = mysql_escape_string($_POST['aliastag']);
+		$badtag = $_POST['badtag'];
+		$aliastag = $_POST['aliastag'];
 
-		$DB->query("
+		$DB->prepared_query("
 			INSERT INTO tag_aliases (BadTag, AliasTag)
-			VALUES ('$badtag', '$aliastag')");
+			VALUES (?, ?)", $badtag, $aliastag);
 	}
 
 	if (isset($_POST['changealias']) && is_number($_POST['aliasid'])) {
 		$aliasid = $_POST['aliasid'];
-		$badtag = mysql_escape_string($_POST['badtag']);
-		$aliastag = mysql_escape_string($_POST['aliastag']);
+		$badtag = $_POST['badtag'];
+		$aliastag = $_POST['aliastag'];
 
 		if ($_POST['save']) {
-			$DB->query("
+			$DB->prepared_query("
 				UPDATE tag_aliases
-				SET BadTag = '$badtag', AliasTag = '$aliastag'
-				WHERE ID = '$aliasid' ");
+				SET BadTag = ?, AliasTag = ?
+				WHERE ID = ?", $badtag, $aliastag, $aliasid);
 		}
 		if ($_POST['delete']) {
-			$DB->query("
+			$DB->prepared_query("
 				DELETE FROM tag_aliases
-				WHERE ID = '$aliasid'");
+				WHERE ID = ?", $aliasid);
 		}
 	}
 }
@@ -69,7 +69,7 @@ if (check_perms('users_mod')) {
 		</form>
 	</tr>
 <?
-$DB->query("
+$DB->prepared_query("
 	SELECT ID, BadTag, AliasTag
 	FROM tag_aliases
 	ORDER BY $orderby");
