@@ -21,7 +21,7 @@ if (!empty($_REQUEST['action'])) {
 			require(SERVER_ROOT.'/sections/logchecker/take_upload.php');
 			break;
 		default:
-			error(0);
+			error(404);
 	}
 } else {
 	require(SERVER_ROOT.'/sections/logchecker/test.php');
