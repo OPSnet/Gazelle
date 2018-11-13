@@ -9,6 +9,7 @@ if (empty($_GET['id']) || !is_number($_GET['id'])) {
 }
 
 $RequestID = $_GET['id'];
+$RequestTaxPercent = ($RequestTax * 100);
 
 //First things first, lets get the data for the request.
 
@@ -366,7 +367,7 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
 						<option value="gb">GB</option>
 					</select>
 					<input type="button" value="Preview" onclick="Calculate();" />
-					<strong><?=($RequestTax * 100)?>% of this is deducted as tax by the system.</strong>
+					<?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
 				</td>
 			</tr>
 			<tr>
@@ -383,7 +384,7 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
 						<input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
 						<input type="hidden" id="current_rr" value="<?=(float)$LoggedUser['RequiredRatio']?>" />
 						<input id="total_bounty" type="hidden" value="<?=$RequestVotes['TotalBounty']?>" />
-						Bounty after tax: <strong><span id="bounty_after_tax">0.00 MB</span></strong><br />
+						<?= $RequestTax > 0 ? 'Bounty after tax: <strong><span id="bounty_after_tax">90.00 MB</span></strong><br />' : '' ?>
 						If you add the entered <strong><span id="new_bounty">0.00 MB</span></strong> of bounty, your new stats will be: <br />
 						Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
 						Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'],$LoggedUser['BytesDownloaded'])?></span>

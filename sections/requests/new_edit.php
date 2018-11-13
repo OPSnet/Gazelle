@@ -9,6 +9,8 @@
 
 $NewRequest = $_GET['action'] === 'new';
 
+$RequestTaxPercent = ($RequestTax * 100);
+
 if (!$NewRequest) {
 	$RequestID = $_GET['id'];
 	if (!is_number($RequestID)) {
@@ -380,7 +382,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 							<option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GB</option>
 						</select>
 						<input type="button" value="Preview" onclick="Calculate();" />
-						<strong><?=($RequestTax * 100)?>% of this is deducted as tax by the system.</strong>
+						<?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
 					</td>
 				</tr>
 				<tr>
@@ -389,7 +391,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 						<input type="hidden" id="amount" name="amount" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
 						<input type="hidden" id="current_uploaded" value="<?=$LoggedUser['BytesUploaded']?>" />
 						<input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
-						Bounty after tax: <strong><span id="bounty_after_tax">90.00 MB</span></strong><br />
+						<?= $RequestTax > 0 ? 'Bounty after tax: <strong><span id="bounty_after_tax">90.00 MB</span></strong><br />' : '' ?>
 						If you add the entered <strong><span id="new_bounty">100.00 MB</span></strong> of bounty, your new stats will be: <br />
 						Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
 						Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'], $LoggedUser['BytesDownloaded'])?></span>

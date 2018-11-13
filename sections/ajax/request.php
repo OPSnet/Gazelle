@@ -1,5 +1,5 @@
 <?
-$RequestTax = 0.1;
+$RequestTax = REQUEST_TAX;
 
 // Minimum and default amount of upload to remove from the user when they vote.
 // Also change in static/functions/requests.js

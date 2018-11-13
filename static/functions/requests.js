@@ -42,10 +42,14 @@ function Vote(amount, requestid) {
 			if ($('#total_bounty').results() > 0) {
 				totalBounty = parseInt($('#total_bounty').raw().value);
 				totalBounty += (amount * (1 - $('#request_tax').raw().value));
+				var requestTax = $('#request_tax').raw().value;
 				$('#total_bounty').raw().value = totalBounty;
 				$('#formatted_bounty').raw().innerHTML = get_size(totalBounty);
-
-				save_message("Your vote of " + get_size(amount) + ", adding a " + get_size(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
+				if (requestTax > 0) {
+					save_message("Your vote of " + get_size(amount) + ", adding a " + get_size(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
+				} else {
+					save_message("Your vote of " + get_size(amount) + " has been added");
+				}
 				$('#button').raw().disabled = true;
 			} else {
 				save_message("Your vote of " + get_size(amount) + " has been added");
