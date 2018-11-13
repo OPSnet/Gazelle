@@ -80,7 +80,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 				<p>Add some torrents and come back later.</p>
 			</div>
 		</div>
-<?
+<?php
 	}
 
 	/**
@@ -121,7 +121,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 
 	<form action="bookmarks.php" method="post" id="drag_drop_collage_form">
 
-<?			$this->buttons(); ?>
+<?php		$this->buttons(); ?>
 
 		<table id="manage_collage_table">
 			<thead>
@@ -136,7 +136,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 				</tr>
 			</thead>
 			<tbody>
-<?
+<?php
 		}
 	}
 
@@ -150,7 +150,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 			</tbody>
 		</table>
 
-<?			$this->buttons(); ?>
+<?php		$this->buttons(); ?>
 
 		<div>
 			<input type="hidden" name="action" value="mass_edit" />
@@ -160,7 +160,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 	</form>
 </div>
 
-<?
+<?php
 		}
 	}
 
@@ -216,7 +216,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 						<td class="nobr tooltip" title="<?=$DateAdded?>"><?=$DateAdded ? time_diff($DateAdded) : ' '?></td>
 						<td class="center"><input type="checkbox" name="remove[<?=$GroupID?>]" value="" /></td>
 					</tr>
-<?
+<?php
 	}
 
 	/**
@@ -251,7 +251,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 			<input type="submit" name="update" value="Update ranking" title="Save your rank" class="tooltip save_sortable_collage" />
 			<input type="submit" name="delete" value="Delete checked" title="Remove items" class="tooltip save_sortable_collage" />
 		</div>
-<?
+<?php
 	}
 
 

@@ -242,6 +242,6 @@ class ImageTools {
 		}
 ?>
 		<img src="<?=$Src?>" width="90" height="90" alt="Cover" onclick="lightbox.init('<?=$Lightbox?>', 90)" />
-<?
+<?php
 	}
 }
