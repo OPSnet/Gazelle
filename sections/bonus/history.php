@@ -30,9 +30,9 @@ if ($Summary['nr'] > 0) {
 	<h2><?= $Header ?></h2>
 </div>
 <div class="linkbox">
-	<a href="wiki.php?action=article&id=130" class="brackets">About Bonus Points</a>
+	<a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>
 	<a href="bonus.php" class="brackets">Bonus Point Shop</a>
-	<a href="bonus.php?action=bprates<?= check_perms('admin_bp_history') && $ID != G::$LoggedUser['ID'] ? "&amp;userid=$ID" : '' ?>" class="brackets">Bonus Point Rates</a>
+	<a href="bonus.php?action=bprates<?= check_perms('admin_bp_history') && $ID != G::$LoggedUser['ID'] ? "&userid=$ID" : '' ?>" class="brackets">Bonus Point Rates</a>
 </div>
 
 <div class="thin">
