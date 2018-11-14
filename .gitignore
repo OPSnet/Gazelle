@@ -28,13 +28,6 @@ static/userscripts/gazelle-json-export.js.txt
 .profile
 .wine/
 
-donate.php
-sections/donate/
-btcipn.php
-sections/btcipn/
-btcm.php
-sections/btcm/
-
 report/
 .vagrant/machines/
 .vagrant/rgloader/
