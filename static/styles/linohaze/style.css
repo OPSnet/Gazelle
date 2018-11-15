@@ -2316,6 +2316,20 @@ div.sidebar #event_div {
 #reportsv2 .manage_form img {
 	max-width: 622px
 }
+#reportsv2 .manage_form {
+    transform: translatex(-10%);
+    table-layout: fixed;
+    width: 1024px
+}
+
+#reportsv2 #content {
+    width: 1024px;
+}
+
+#reportsv2 .thin>a {
+    font-weight: 600;
+    float: left
+}
 
 input[type="search"] {
 	font-size: 12px;

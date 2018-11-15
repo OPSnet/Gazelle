@@ -1484,15 +1484,6 @@ ul.collage_images li a>span {
 	background-color: #33363d
 }
 
-@media (min-width:1024px) {
-	#reportsv2 form table {
-		table-layout: auto;
-		width: 1020px;
-		margin-left: -102px
-	}
-}
-
-
 #menu>ul a:hover,
 #userinfo_minor:hover a:hover,
 #userinfo_username:hover a:hover {

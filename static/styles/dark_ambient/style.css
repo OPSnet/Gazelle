@@ -1538,6 +1538,19 @@ h3 {
 	margin: 10px 0;
 }
 
+.snatches img {
+	width: 20px;
+	height: 20px;
+	background-size: 100%
+}
+
+.seeders img,
+.leechers img {
+	width: 16px;
+	height 16px;
+	background-size: 100%
+}
+
 /* OINKPLUS */
 
 .OiNK #ArtistName {
