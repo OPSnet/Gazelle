@@ -753,6 +753,13 @@ tr.torrent .bookmark>a:after {
 	max-width: 616px;
 }
 
+@media (min-width:1024px) {
+        #reportsv2 .manage_form {
+                width: 1020px;
+                margin-left: -102px
+        }
+}
+
 /* make Safari treat <input type="search" /> as a regular text box */
 input[type="search"] {
 	-webkit-appearance: textfield;
@@ -801,6 +808,16 @@ input[type="search"] {
 #user .avatar_container:hover > :last-child {
 	margin-right: 150px
 }
+
+@media only screen and (min-width: 768px) {
+	.avatar_container > :last-child {
+	margin-right: 150px
+	}
+	.avatar_container:hover > :last-child {
+	margin-right: 150px
+	}
+}
+
 #recovery table td > pre {
 	max-width: 800px;
 }

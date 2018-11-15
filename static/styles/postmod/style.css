@@ -544,6 +544,10 @@ ul.nobullet {
 	list-style-type: none;
 }
 
+#user .box2 .nobullet a {
+    font-size: 16px
+}
+
 table {
 	width: 100%;
 	border-collapse: collapse;
