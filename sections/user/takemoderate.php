@@ -363,7 +363,7 @@ if ($Username != $Cur['Username'] && check_perms('users_edit_usernames', $Cur['C
 	$DB->query("
 		SELECT ID
 		FROM users_main
-		WHERE Username = '$Username'");
+		WHERE BINARY Username = '$Username'");
 	if ($DB->next_record() > 0) {
 		list($UsedUsernameID) = $DB->next_record();
 		error("Username already in use by <a href=\"user.php?id=$UsedUsernameID\">$Username</a>");
