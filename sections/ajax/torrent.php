@@ -114,6 +114,7 @@ $JsonTorrentList[] = array(
 	'hasCue' => $Torrent['HasCue'] == 1,
 	'logScore' => (int)$Torrent['LogScore'],
 	'logChecksum' => (int)$Torrent['LogChecksum'],
+	'logCount' => (int)$Torrent['LogCount'],
 	'fileCount' => (int)$Torrent['FileCount'],
 	'size' => (int)$Torrent['Size'],
 	'seeders' => (int)$Torrent['Seeders'],

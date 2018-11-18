@@ -90,6 +90,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				ca.TorrentID AS CassetteApproved,
 				lma.TorrentID AS LossymasterApproved,
 				lwa.TorrentID AS LossywebApproved,
+				COUNT(tl.LogID) AS LogCount,
 				t.LastReseedRequest,
 				t.ID AS HasFile
 			FROM torrents AS t
@@ -100,6 +101,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
 				LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
 				LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.ID
+				LEFT JOIN torrents_logs AS tl ON tl.TorrentID = t.ID
 			WHERE t.GroupID = '".db_string($GroupID)."'
 			GROUP BY t.ID
 			ORDER BY t.Remastered ASC,
