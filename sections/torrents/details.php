@@ -539,7 +539,7 @@ foreach ($TorrentList as $Torrent) {
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
 		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved,
-		$LastReseedRequest, $HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
+		$LastReseedRequest, $HasFile, $LogCount, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
 		$FirstUnknown = !isset($FirstUnknown);

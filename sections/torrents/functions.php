@@ -91,7 +91,8 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				lma.TorrentID AS LossymasterApproved,
 				lwa.TorrentID AS LossywebApproved,
 				t.LastReseedRequest,
-				t.ID AS HasFile
+				t.ID AS HasFile,
+				COUNT(tl.LogID) AS LogCount
 			FROM torrents AS t
 				LEFT JOIN torrents_bad_tags AS tbt ON tbt.TorrentID = t.ID
 				LEFT JOIN torrents_bad_folders AS tbf ON tbf.TorrentID = t.ID
@@ -100,6 +101,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
 				LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
 				LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.ID
+				LEFT JOIN torrents_logs AS tl ON tl.TorrentID = t.ID
 			WHERE t.GroupID = '".db_string($GroupID)."'
 			GROUP BY t.ID
 			ORDER BY t.Remastered ASC,
@@ -276,7 +278,7 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 		$Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
 		$FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
 		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
-		$HasFile, $PersonalFL, $IsSnatched) = array_values($Torrent);
+		$HasFile, $LogCount, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
 	if ($Remastered && !$RemasterYear) {
 		$FirstUnknown = !isset($FirstUnknown);
