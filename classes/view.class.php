@@ -124,8 +124,8 @@ class View {
                  $Content = ob_get_contents();
                  ob_end_clean();
                  return $Content;
-                }
+             }
                 return include $Template;
-            }
-     }
+         }
+        }
         }
