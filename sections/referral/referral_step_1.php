@@ -2,7 +2,6 @@
 
 // redirect if referrals are currently closed
 if (!OPEN_EXTERNAL_REFERRALS) {
-
     include('closed.php');
     die();
 }

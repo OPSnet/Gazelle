@@ -54,51 +54,51 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 	<br />
 <?php
 
-	foreach ($Staff as $SectionName => $StaffSection) {
-		if (count($StaffSection) === 0) {
-			continue;
-		}
+foreach ($Staff as $SectionName => $StaffSection) {
+    if (count($StaffSection) === 0) {
+        continue;
+    }
 ?>
-	<div class="box pad" style="padding: 0px 10px 10px 10px;">
-		<h2 style='text-align: left;'><?=$SectionName?></h2>
+<div class="box pad" style="padding: 0px 10px 10px 10px;">
+<h2 style='text-align: left;'><?=$SectionName?></h2>
 <?
-		$CurClass = 0;
-		$CloseTable = false;
-		foreach ($StaffSection as $StaffMember) {
-			list($ID, $ClassID, $Class, $ClassName, $Username, $Paranoia, $LastAccess, $Remark) = $StaffMember;
-			if ($Class != $CurClass) { // Start new class of staff members
-				$Row = 'a';
-				if ($CloseTable) {
-					$CloseTable = false;
-					// the "\t" and "\n" are used here to make the HTML look pretty
-					echo "\t\t</table>\n\t\t<br />\n";
-				}
-				$CurClass = $Class;
-				$CloseTable = true;
+$CurClass = 0;
+$CloseTable = false;
+foreach ($StaffSection as $StaffMember) {
+    list($ID, $ClassID, $Class, $ClassName, $Username, $Paranoia, $LastAccess, $Remark) = $StaffMember;
+    if ($Class != $CurClass) { // Start new class of staff members
+        $Row = 'a';
+        if ($CloseTable) {
+            $CloseTable = false;
+            // the "\t" and "\n" are used here to make the HTML look pretty
+            echo "\t\t</table>\n\t\t<br />\n";
+        }
+        $CurClass = $Class;
+        $CloseTable = true;
 
-				$HTMLID = str_replace(' ', '_', strtolower($ClassName));
-				echo "\t\t<h3 style=\"font-size: 17px;\" id=\"$HTMLID\"><i>".$ClassName."s</i></h3>\n";
+        $HTMLID = str_replace(' ', '_', strtolower($ClassName));
+        echo "\t\t<h3 style=\"font-size: 17px;\" id=\"$HTMLID\"><i>".$ClassName."s</i></h3>\n";
 ?>
-		<table class="staff" width="100%">
-			<tr class="colhead">
-				<td style="width: 130px;">Username</td>
-				<td style="width: 130px;">Last seen</td>
-				<td><strong>Remark</strong></td>
-			</tr>
+<table class="staff" width="100%">
+    <tr class="colhead">
+        <td style="width: 130px;">Username</td>
+        <td style="width: 130px;">Last seen</td>
+        <td><strong>Remark</strong></td>
+    </tr>
 <?
-		} // End new class header
+} // End new class header
 
-		$HiddenBy = 'Hidden by staff member';
+$HiddenBy = 'Hidden by staff member';
 
-		// Display staff members for this class
-		$Row = make_staff_row($Row, $ID, $Paranoia, $Class, $LastAccess, $Remark, $HiddenBy);
+// Display staff members for this class
+$Row = make_staff_row($Row, $ID, $Paranoia, $Class, $LastAccess, $Remark, $HiddenBy);
 
-	} ?>
-		</table>
+} ?>
+</table>
 
-	</div>
-	<br />
-	<?php } ?>
+</div>
+<br />
+<?php } ?>
 </div>
 <?
 View::show_footer();

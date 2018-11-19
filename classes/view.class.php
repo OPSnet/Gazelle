@@ -101,30 +101,31 @@ class View {
 	 * @return boolean|string
 	 *
 	 * @example <pre><?php
-	 *  // box.phtml
-	 *  <p id="<?=$id?>">Data</p>
-	 *
-	 *  // The variable $id within box.phtml will be filled by $some_id
-	 *	View::parse('section/box.phtml', array('id' => $some_id));
-	 *
-	 *  // Parse a template without outputing it
-	 *  $SavedTemplate = View::parse('sec/tion/eg.php', $DataArray, true);
-	 *  // later . . .
-	 *  echo $SavedTemplate; // Output the buffer
-	 * </pre>
-	 */
-	public static function parse($TemplateFile, array $Variables = array(), $Buffer = false) {
-		$Template = self::IncludePath . $TemplateFile;
-		if (file_exists($Template)) {
-			extract($Variables);
-			if ($Buffer) {
-				ob_start();
-				include $Template;
-				$Content = ob_get_contents();
-				ob_end_clean();
-				return $Content;
-			}
-			return include $Template;
-		}
-	}
-}
+     *  // box.phtml
+     *  <p id="<?=$id?>">Data</p>
+     *
+     *  // The variable $id within box.phtml will be filled by $some_id
+     *  View::parse('section/box.phtml', array('id' => $some_id));
+     *
+     *  // Parse a template without outputing it
+     *  $SavedTemplate = View::parse('sec/tion/eg.php', $DataArray, true);
+     *  // later . . .
+     *  echo $SavedTemplate; // Output the buffer
+     * </pre>
+     */
+     public static function parse($TemplateFile, array $Variables = array(), $Buffer = false)
+     {
+         $Template = self::IncludePath . $TemplateFile;
+         if (file_exists($Template)) {
+             extract($Variables);
+             if ($Buffer) {
+                 ob_start();
+                 include $Template;
+                 $Content = ob_get_contents();
+                 ob_end_clean();
+                 return $Content;
+                }
+                return include $Template;
+            }
+     }
+        }

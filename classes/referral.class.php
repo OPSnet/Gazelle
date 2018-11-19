@@ -5,7 +5,8 @@
  * @created 2017-01-02
  *
  */
-class Referral {
+class Referral
+{
 
     // array to store external site credentials and API URIs, stored in cache to keep user sessions alive
     private $ExternalServices;
@@ -19,7 +20,8 @@ class Referral {
      * @author prnd
      * @created 2017-01-02
      */
-    function __construct() {
+    function __construct()
+    {
         // populate services array from cache if it exists, if not then grab from template
         $services_config = $GLOBALS['ExternalServicesConfig'];
         $this->ExternalServices = G::$Cache->get_value('referral_services');
@@ -57,10 +59,11 @@ class Referral {
      * @created 2017-01-02
      * @return array of available services
      */
-    public function services_list() {
+    public function services_list()
+    {
         foreach ($this->ExternalServices as $key => $val) {
             // check if service is up and enabled
-            if ($val['status'] === TRUE && $this->service_is_up($key)) {
+            if ($val['status'] === true && $this->service_is_up($key)) {
                 $response[] = $key;
             }
         }
@@ -72,7 +75,8 @@ class Referral {
      *
      * @return generated token
      */
-    public function generate_token() {
+    public function generate_token()
+    {
 
         $_SESSION['referral_token'] = 'APL:' . Users::make_secret(64) . ':APL';
         return $_SESSION['referral_token'];
@@ -84,9 +88,9 @@ class Referral {
      * @param $service
      * @return bool
      */
-    private function login($service) {
+    private function login($service)
+    {
         switch ($this->ExternalServices[$service]['type']) {
-
             case 'gazelle':
                 return $this->gazelle_login($service);
                 break;
@@ -102,10 +106,10 @@ class Referral {
      * @param $username
      * @return bool
      */
-    public function verify($service, $username) {
+    public function verify($service, $username)
+    {
 
         switch ($this->ExternalServices[$service]['type']) {
-
             case 'gazelle':
                 return $this->gazelle_verify($service, $username);
                 break;
@@ -122,7 +126,8 @@ class Referral {
      * @param $service
      * @return bool
      */
-    private function service_is_up($service) {
+    private function service_is_up($service)
+    {
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
@@ -145,14 +150,15 @@ class Referral {
      * @param $service
      * @return bool
      */
-    private function gazelle_login($service) {
+    private function gazelle_login($service)
+    {
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
         //check if cookie is still valid
         if ($this->gazelle_valid_session($service)) {
             //cookie is valid, so we can continue making requests to the API
-            return TRUE;
+            return true;
         } else {
             $this->ExternalServices[$service]['cookie'] = '';
             $this->ExternalServices[$service]['cookie_expiry'] = 0;
@@ -166,7 +172,7 @@ class Referral {
         $ch = curl_init();
         $this->set_curl($ch);
         curl_setopt($ch, CURLOPT_URL, $this->ExternalServices[$service]['base_url'] . $this->ExternalServices[$service]['login_path']);
-        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($login_fields));
         // do el requesto
@@ -179,11 +185,10 @@ class Referral {
             $this->ExternalServices[$service]['cookie'] = urlencode($cookies['session']);
             $this->ExternalServices[$service]['cookie_expiry'] = time() + $this->CookieExpiry;
             $this->cache_services();
-            return TRUE;
+            return true;
         } else {
-            return FALSE;
+            return false;
         }
-
     }
 
     /**
@@ -191,7 +196,8 @@ class Referral {
      * @param $service
      * @return bool
      */
-    private function gazelle_valid_session($service) {
+    private function gazelle_valid_session($service)
+    {
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
@@ -205,11 +211,11 @@ class Referral {
         $result = curl_exec($ch);
         curl_close($ch);
         // toss json results into array
-        $result = json_decode($result, TRUE);
+        $result = json_decode($result, true);
         if ($result['status'] === 'success') {
-            return TRUE;
+            return true;
         } else {
-            return FALSE;
+            return false;
         }
     }
 
@@ -221,8 +227,9 @@ class Referral {
      * @param $username
      * @return bool
      */
-    private function gazelle_verify($service, $username) {
-        $match = FALSE;
+    private function gazelle_verify($service, $username)
+    {
+        $match = false;
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
@@ -240,7 +247,7 @@ class Referral {
         $result = curl_exec($ch);
         curl_close($ch);
         // toss json results into array
-        $result = json_decode($result, TRUE);
+        $result = json_decode($result, true);
         // fail with error if we get an error message
         if ($result['status'] === 'failure') {
             die('Error: Try again - ' . $result['error']);
@@ -250,11 +257,11 @@ class Referral {
         $user_results = $result['response']['results'];
         if (count($user_results) == 0) {
             $_SESSION['verify_error'] = "User Not Found, Please Try Again";
-            return FALSE;
+            return false;
         }
         foreach ($user_results as $user_result) {
             if ($user_result['username'] === $username) {
-                $match = TRUE;
+                $match = true;
                 $user_id = $user_result['userId'];
                 break;
             }
@@ -264,7 +271,7 @@ class Referral {
             return $this->gazelle_verify_token($service, $user_id);
         } else {
             $_SESSION['verify_error'] = "User Not Found, Please Try Again";
-            return FALSE;
+            return false;
         }
     }
 
@@ -275,7 +282,8 @@ class Referral {
      * @param $user_id
      * @return bool
      */
-    private function gazelle_verify_token($service, $user_id) {
+    private function gazelle_verify_token($service, $user_id)
+    {
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
@@ -293,7 +301,7 @@ class Referral {
         $result = curl_exec($ch);
         curl_close($ch);
         // toss json results into array
-        $result = json_decode($result, TRUE);
+        $result = json_decode($result, true);
         // fail with error if we get an error message
         if ($result['status'] === 'failure') {
             die('Error: Try again - ' . $result['error']);
@@ -304,11 +312,11 @@ class Referral {
         $user_profile_text = $result['response']['profileText'];
         // let's get a match
         $match = strpos($user_profile_text, $_SESSION['referral_token']);
-        if ($match !== FALSE) {
-            return TRUE;
+        if ($match !== false) {
+            return true;
         } else {
             $_SESSION['verify_error'] = "Token Not Found, Please Try Again";
-            return FALSE;
+            return false;
         }
     }
 
@@ -318,7 +326,8 @@ class Referral {
      * @param $result result of a curl post response
      * @return array - an array of cookies set by the request
      */
-    private function parse_cookies($result) {
+    private function parse_cookies($result)
+    {
         preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $result, $matches);
         $cookies = array();
         foreach ($matches[1] as $item) {
@@ -339,7 +348,8 @@ class Referral {
      * @param $username
      * @return bool
      */
-    public function create_invite($service, $email, $username) {
+    public function create_invite($service, $email, $username)
+    {
         if (!array_key_exists($service, $this->ExternalServices)) {
             die("Invalid referral service");
         }
@@ -350,7 +360,7 @@ class Referral {
         $InviteKey = db_string(Users::make_secret());
         $InviterId = $this->ExternalServices[$service]['inviter_id'];
         require(SERVER_ROOT . '/classes/templates.class.php');
-        $Tpl = NEW TEMPLATE;
+        $Tpl = new TEMPLATE;
         $Tpl->open(SERVER_ROOT . '/templates/referral.tpl'); // Password reset template
         $Tpl->set('Email', $email);
         $Tpl->set('InviteKey', $InviteKey);
@@ -373,14 +383,16 @@ class Referral {
     /**
      * Saves the external services array to the global cache.
      */
-    private function cache_services() {
+    private function cache_services()
+    {
         G::$Cache->cache_value('referral_services', $this->ExternalServices);
     }
 
     /**
      * Inits and sets defaults for curl object
      */
-    private function set_curl($ch) {
+    private function set_curl($ch)
+    {
 
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

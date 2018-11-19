@@ -1,7 +1,7 @@
 <?php
 authorize();
 if (!is_number($_GET['friendid'])) {
-	error(404);
+    error(404);
 }
 $FriendID = db_string($_GET['friendid']);
 
@@ -11,7 +11,7 @@ $DB->query("
 	FROM users_main
 	WHERE ID = '$FriendID'");
 if (!$DB->has_results()) {
-	error(404);
+    error(404);
 }
 
 $DB->query("

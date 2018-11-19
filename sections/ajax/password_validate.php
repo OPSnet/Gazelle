@@ -8,11 +8,8 @@ $DB->query("
 	WHERE Password='$Password'");
 
 if (!$DB->has_results()) {
-	$IsGoodPassword = true;
+    $IsGoodPassword = true;
 }
 
 echo ($IsGoodPassword ? 'true' : 'false');
 exit();
-?>
-
-

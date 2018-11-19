@@ -561,304 +561,304 @@ echo $Val->GenerateJS('userform');
 			<tr id="pers_profinfo_tr">
 				<td class="label tooltip" title="You can customize your profile information with text and BBCode. Entering a title will label your profile information section. Unlock additional profile info boxes via Donor Ranks."><strong>Profile info 1</strong></td>
 				<td><?php $textarea = new TEXTAREA_PREVIEW('info', 'info', display_str($Info), 40, 8); ?></td>
-			</tr>
-			<!-- Excuse this numbering confusion, we start numbering our profile info/titles at 1 in the donor_rewards table -->
+            </tr>
+            <!-- Excuse this numbering confusion, we start numbering our profile info/titles at 1 in the donor_rewards table -->
 <?	if ($HasProfileInfo1) { ?>
-			<tr id="pers_proftitle2_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 2</strong></td>
-				<td><input type="text" size="50" name="profile_title_1" id="profile_title_1" value="<?=display_str($ProfileRewards['ProfileInfoTitle1'])?>" />
-				</td>
-			</tr>
-			<tr id="pers_profinfo2_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 2</strong></td>
-				<td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_1', 'profile_info_1', display_str($ProfileRewards['ProfileInfo1']), 40, 8); ?></td>
-			</tr>
+            <tr id="pers_proftitle2_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 2</strong></td>
+                <td><input type="text" size="50" name="profile_title_1" id="profile_title_1" value="<?=display_str($ProfileRewards['ProfileInfoTitle1'])?>" />
+                </td>
+            </tr>
+            <tr id="pers_profinfo2_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 2</strong></td>
+                <td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_1', 'profile_info_1', display_str($ProfileRewards['ProfileInfo1']), 40, 8); ?></td>
+            </tr>
 <?	}
-	if ($HasProfileInfo2) { ?>
-			<tr id="pers_proftitle3_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 3</strong></td>
-				<td><input type="text" size="50" name="profile_title_2" id="profile_title_2" value="<?=display_str($ProfileRewards['ProfileInfoTitle2'])?>" />
-				</td>
-			</tr>
-			<tr id="pers_profinfo3_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 3</strong></td>
-				<td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_2', 'profile_info_2', display_str($ProfileRewards['ProfileInfo2']), 40, 8); ?></td>
-			</tr>
+    if ($HasProfileInfo2) { ?>
+            <tr id="pers_proftitle3_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 3</strong></td>
+                <td><input type="text" size="50" name="profile_title_2" id="profile_title_2" value="<?=display_str($ProfileRewards['ProfileInfoTitle2'])?>" />
+                </td>
+            </tr>
+            <tr id="pers_profinfo3_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 3</strong></td>
+                <td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_2', 'profile_info_2', display_str($ProfileRewards['ProfileInfo2']), 40, 8); ?></td>
+            </tr>
 <?	}
-	if ($HasProfileInfo3) { ?>
-			<tr id="pers_proftitle4_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 4</strong></td>
-				<td><input type="text" size="50" name="profile_title_3" id="profile_title_3" value="<?=display_str($ProfileRewards['ProfileInfoTitle3'])?>" />
-				</td>
-			</tr>
-			<tr id="pers_profinfo4_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 4</strong></td>
-				<td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_3', 'profile_info_3', display_str($ProfileRewards['ProfileInfo3']), 40, 8); ?></td>
-			</tr>
+    if ($HasProfileInfo3) { ?>
+            <tr id="pers_proftitle4_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 4</strong></td>
+                <td><input type="text" size="50" name="profile_title_3" id="profile_title_3" value="<?=display_str($ProfileRewards['ProfileInfoTitle3'])?>" />
+                </td>
+            </tr>
+            <tr id="pers_profinfo4_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 4</strong></td>
+                <td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_3', 'profile_info_3', display_str($ProfileRewards['ProfileInfo3']), 40, 8); ?></td>
+            </tr>
 <?	}
-	if ($HasProfileInfo4) { ?>
-			<tr id="pers_proftitle5_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 5</strong></td>
-				<td><input type="text" size="50" name="profile_title_4" id="profile_title_4" value="<?=display_str($ProfileRewards['ProfileInfoTitle4'])?>" />
-				</td>
-			</tr>
-			<tr id="pers_profinfo5_tr">
-				<td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 5</strong></td>
-				<td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_4', 'profile_info_4', display_str($ProfileRewards['ProfileInfo4']), 40, 8); ?></td>
-			</tr>
+    if ($HasProfileInfo4) { ?>
+            <tr id="pers_proftitle5_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 5</strong></td>
+                <td><input type="text" size="50" name="profile_title_4" id="profile_title_4" value="<?=display_str($ProfileRewards['ProfileInfoTitle4'])?>" />
+                </td>
+            </tr>
+            <tr id="pers_profinfo5_tr">
+                <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 5</strong></td>
+                <td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_4', 'profile_info_4', display_str($ProfileRewards['ProfileInfo4']), 40, 8); ?></td>
+            </tr>
 <?	} ?>
-		</table>
-		<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="paranoia_settings">
-			<tr class="colhead_dark">
-				<td colspan="2">
-					<strong>Paranoia Settings</strong>
-				</td>
-			</tr>
-			<tr>
-				<td class="label">&nbsp;</td>
-				<td>
-					<p><strong>Select the profile elements you wish to display to other users.</strong></p>
-					<p>For example, if you select "Show count" for "Requests (filled)", the number of requests you have filled will be visible. If you select "Show bounty", the amount of request bounty you have received will be visible. If you select "Show list", the full list of requests you have filled will be visible.</p>
-					<p><span class="warning">Note: Paranoia has nothing to do with your security on this site. These settings only determine if others can view your site activity. Some information will remain available in the site log.</span></p>
-				</td>
-			</tr>
-			<tr id="para_lastseen_tr">
-				<td class="label tooltip" title="Enable this to allow others to see when your most recent site activity occurred."><strong>Recent activity</strong></td>
-				<td>
-					<label><input type="checkbox" name="p_lastseen"<?=checked(!in_array('lastseen', $Paranoia))?> /> Last seen</label>
-				</td>
-			</tr>
-			<tr id="para_presets_tr">
-				<td class="label"><strong>Presets</strong></td>
-				<td>
-					<input type="button" onclick="ParanoiaResetOff();" value="Show everything" />
-					<input type="button" onclick="ParanoiaResetStats();" value="Show stats only" />
-					<input type="button" onclick="ParanoiaResetOn();" value="Show nothing" />
-				</td>
-			</tr>
-			<tr id="para_donations_tr">
-				<td class="label"><strong>Donations</strong></td>
-				<td>
-					<input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"<?=$DonorIsVisible ? ' checked="checked"' : ''?> />
-					<label for="p_donor_stats">Show donor stats</label>
-					<input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"<?=checked(!in_array('hide_donor_heart', $Paranoia))?> />
-					<label for="p_donor_heart">Show donor heart</label>
-				</td>
-			</tr>
-			<tr id="para_stats_tr">
-				<td class="label tooltip" title="These settings control the display of your uploaded data amount, downloaded data amount, and ratio."><strong>Statistics</strong></td>
-				<td>
+        </table>
+        <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="paranoia_settings">
+            <tr class="colhead_dark">
+                <td colspan="2">
+                    <strong>Paranoia Settings</strong>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">&nbsp;</td>
+                <td>
+                    <p><strong>Select the profile elements you wish to display to other users.</strong></p>
+                    <p>For example, if you select "Show count" for "Requests (filled)", the number of requests you have filled will be visible. If you select "Show bounty", the amount of request bounty you have received will be visible. If you select "Show list", the full list of requests you have filled will be visible.</p>
+                    <p><span class="warning">Note: Paranoia has nothing to do with your security on this site. These settings only determine if others can view your site activity. Some information will remain available in the site log.</span></p>
+                </td>
+            </tr>
+            <tr id="para_lastseen_tr">
+                <td class="label tooltip" title="Enable this to allow others to see when your most recent site activity occurred."><strong>Recent activity</strong></td>
+                <td>
+                    <label><input type="checkbox" name="p_lastseen"<?=checked(!in_array('lastseen', $Paranoia))?> /> Last seen</label>
+                </td>
+            </tr>
+            <tr id="para_presets_tr">
+                <td class="label"><strong>Presets</strong></td>
+                <td>
+                    <input type="button" onclick="ParanoiaResetOff();" value="Show everything" />
+                    <input type="button" onclick="ParanoiaResetStats();" value="Show stats only" />
+                    <input type="button" onclick="ParanoiaResetOn();" value="Show nothing" />
+                </td>
+            </tr>
+            <tr id="para_donations_tr">
+                <td class="label"><strong>Donations</strong></td>
+                <td>
+                    <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"<?=$DonorIsVisible ? ' checked="checked"' : ''?> />
+                    <label for="p_donor_stats">Show donor stats</label>
+                    <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"<?=checked(!in_array('hide_donor_heart', $Paranoia))?> />
+                    <label for="p_donor_heart">Show donor heart</label>
+                </td>
+            </tr>
+            <tr id="para_stats_tr">
+                <td class="label tooltip" title="These settings control the display of your uploaded data amount, downloaded data amount, and ratio."><strong>Statistics</strong></td>
+                <td>
 <?
 $UploadChecked = checked(!in_array('uploaded', $Paranoia));
 $DownloadChecked = checked(!in_array('downloaded', $Paranoia));
 $RatioChecked = checked(!in_array('ratio', $Paranoia));
 $BonusCheched = checked(!in_array('bonuspoints', $Paranoia));
 ?>
-					<label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"<?=$UploadChecked?> /> Uploaded</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"<?=$DownloadChecked?> /> Downloaded</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"<?=$RatioChecked?> /> Ratio</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_bonuspoints" <?=$BonusCheched?> /> Bonus Points</label>
-				</td>
-			</tr>
-			<tr id="para_reqratio_tr">
-				<td class="label"><strong>Required Ratio</strong></td>
-				<td>
-					<label><input type="checkbox" name="p_requiredratio"<?=checked(!in_array('requiredratio', $Paranoia))?> /> Required Ratio</label>
-				</td>
-			</tr>
-			<tr id="para_comments_tr">
-				<td class="label"><strong>Comments (torrents)</strong></td>
-				<td>
+                    <label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"<?=$UploadChecked?> /> Uploaded</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"<?=$DownloadChecked?> /> Downloaded</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"<?=$RatioChecked?> /> Ratio</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_bonuspoints" <?=$BonusCheched?> /> Bonus Points</label>
+                </td>
+            </tr>
+            <tr id="para_reqratio_tr">
+                <td class="label"><strong>Required Ratio</strong></td>
+                <td>
+                    <label><input type="checkbox" name="p_requiredratio"<?=checked(!in_array('requiredratio', $Paranoia))?> /> Required Ratio</label>
+                </td>
+            </tr>
+            <tr id="para_comments_tr">
+                <td class="label"><strong>Comments (torrents)</strong></td>
+                <td>
 <? display_paranoia('torrentcomments'); ?>
-				</td>
-			</tr>
-			<tr id="para_collstart_tr">
-				<td class="label"><strong>Collages (started)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_collstart_tr">
+                <td class="label"><strong>Collages (started)</strong></td>
+                <td>
 <? display_paranoia('collages'); ?>
-				</td>
-			</tr>
-			<tr id="para_collcontr_tr">
-				<td class="label"><strong>Collages (contributed to)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_collcontr_tr">
+                <td class="label"><strong>Collages (contributed to)</strong></td>
+                <td>
 <? display_paranoia('collagecontribs'); ?>
-				</td>
-			</tr>
-			<tr id="para_reqfill_tr">
-				<td class="label"><strong>Requests (filled)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_reqfill_tr">
+                <td class="label"><strong>Requests (filled)</strong></td>
+                <td>
 <?
 $RequestsFilledCountChecked = checked(!in_array('requestsfilled_count', $Paranoia));
 $RequestsFilledBountyChecked = checked(!in_array('requestsfilled_bounty', $Paranoia));
 $RequestsFilledListChecked = checked(!in_array('requestsfilled_list', $Paranoia));
 ?>
-					<label><input type="checkbox" name="p_requestsfilled_count" onchange="AlterParanoia();"<?=$RequestsFilledCountChecked?> /> Show count</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_requestsfilled_bounty" onchange="AlterParanoia();"<?=$RequestsFilledBountyChecked?> /> Show bounty</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_requestsfilled_list" onchange="AlterParanoia();"<?=$RequestsFilledListChecked?> /> Show list</label>
-				</td>
-			</tr>
-			<tr id="para_reqvote_tr">
-				<td class="label"><strong>Requests (voted for)</strong></td>
-				<td>
+                    <label><input type="checkbox" name="p_requestsfilled_count" onchange="AlterParanoia();"<?=$RequestsFilledCountChecked?> /> Show count</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsfilled_bounty" onchange="AlterParanoia();"<?=$RequestsFilledBountyChecked?> /> Show bounty</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsfilled_list" onchange="AlterParanoia();"<?=$RequestsFilledListChecked?> /> Show list</label>
+                </td>
+            </tr>
+            <tr id="para_reqvote_tr">
+                <td class="label"><strong>Requests (voted for)</strong></td>
+                <td>
 <?
 $RequestsVotedCountChecked = checked(!in_array('requestsvoted_count', $Paranoia));
 $RequestsVotedBountyChecked = checked(!in_array('requestsvoted_bounty', $Paranoia));
 $RequestsVotedListChecked = checked(!in_array('requestsvoted_list', $Paranoia));
 ?>
-					<label><input type="checkbox" name="p_requestsvoted_count" onchange="AlterParanoia();"<?=$RequestsVotedCountChecked?> /> Show count</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_requestsvoted_bounty" onchange="AlterParanoia();"<?=$RequestsVotedBountyChecked?> /> Show bounty</label>&nbsp;&nbsp;
-					<label><input type="checkbox" name="p_requestsvoted_list" onchange="AlterParanoia();"<?=$RequestsVotedListChecked?> /> Show list</label>
-				</td>
-			</tr>
-			<tr id="para_upltor_tr">
-				<td class="label"><strong>Uploaded torrents</strong></td>
-				<td>
+                    <label><input type="checkbox" name="p_requestsvoted_count" onchange="AlterParanoia();"<?=$RequestsVotedCountChecked?> /> Show count</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsvoted_bounty" onchange="AlterParanoia();"<?=$RequestsVotedBountyChecked?> /> Show bounty</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsvoted_list" onchange="AlterParanoia();"<?=$RequestsVotedListChecked?> /> Show list</label>
+                </td>
+            </tr>
+            <tr id="para_upltor_tr">
+                <td class="label"><strong>Uploaded torrents</strong></td>
+                <td>
 <? display_paranoia('uploads'); ?>
-				</td>
-			</tr>
-			<tr id="para_uplunique_tr">
-				<td class="label"><strong>Uploaded torrents (unique groups)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_uplunique_tr">
+                <td class="label"><strong>Uploaded torrents (unique groups)</strong></td>
+                <td>
 <? display_paranoia('uniquegroups'); ?>
-				</td>
-			</tr>
-			<tr id="para_uplpflac_tr">
-				<td class="label"><strong>Uploaded torrents ("perfect" FLACs)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_uplpflac_tr">
+                <td class="label"><strong>Uploaded torrents ("perfect" FLACs)</strong></td>
+                <td>
 <? display_paranoia('perfectflacs'); ?>
-				</td>
-			</tr>
-			<tr id="para_torseed_tr">
-				<td class="label"><strong>Torrents (seeding)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_torseed_tr">
+                <td class="label"><strong>Torrents (seeding)</strong></td>
+                <td>
 <? display_paranoia('seeding'); ?>
-				</td>
-			</tr>
-			<tr id="para_torleech_tr">
-				<td class="label"><strong>Torrents (leeching)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_torleech_tr">
+                <td class="label"><strong>Torrents (leeching)</strong></td>
+                <td>
 <? display_paranoia('leeching'); ?>
-				</td>
-			</tr>
-			<tr id="para_torsnatch_tr">
-				<td class="label"><strong>Torrents (snatched)</strong></td>
-				<td>
+                </td>
+            </tr>
+            <tr id="para_torsnatch_tr">
+                <td class="label"><strong>Torrents (snatched)</strong></td>
+                <td>
 <? display_paranoia('snatched'); ?>
-				</td>
-			</tr>
-			<tr id="para_torsubscr_tr">
-				<td class="label tooltip" title="This option allows other users to subscribe to your torrent uploads."><strong>Torrents (upload subscriptions)</strong></td>
-				<td>
-					<label><input type="checkbox" name="p_notifications"<?=checked(!in_array('notifications', $Paranoia))?> /> Allow torrent upload subscriptions</label>
-				</td>
-			</tr>
+                </td>
+            </tr>
+            <tr id="para_torsubscr_tr">
+                <td class="label tooltip" title="This option allows other users to subscribe to your torrent uploads."><strong>Torrents (upload subscriptions)</strong></td>
+                <td>
+                    <label><input type="checkbox" name="p_notifications"<?=checked(!in_array('notifications', $Paranoia))?> /> Allow torrent upload subscriptions</label>
+                </td>
+            </tr>
 <?
 $DB->query("
-	SELECT COUNT(UserID)
-	FROM users_info
-	WHERE Inviter = '$UserID'");
+    SELECT COUNT(UserID)
+    FROM users_info
+    WHERE Inviter = '$UserID'");
 list($Invited) = $DB->next_record();
 ?>
-			<tr id="para_invited_tr">
-				<td class="label tooltip" title="This option controls the display of your <?=SITE_NAME?> invitees."><strong>Invitees</strong></td>
-				<td>
-					<label><input type="checkbox" name="p_invitedcount"<?=checked(!in_array('invitedcount', $Paranoia))?> /> Show count</label>
-				</td>
-			</tr>
+            <tr id="para_invited_tr">
+                <td class="label tooltip" title="This option controls the display of your <?=SITE_NAME?> invitees."><strong>Invitees</strong></td>
+                <td>
+                    <label><input type="checkbox" name="p_invitedcount"<?=checked(!in_array('invitedcount', $Paranoia))?> /> Show count</label>
+                </td>
+            </tr>
 <?
 $DB->query("
-	SELECT COUNT(ArtistID)
-	FROM torrents_artists
-	WHERE UserID = $UserID");
+    SELECT COUNT(ArtistID)
+    FROM torrents_artists
+    WHERE UserID = $UserID");
 list($ArtistsAdded) = $DB->next_record();
 ?>
-			<tr id="para_artistsadded_tr">
-				<td class="label tooltip" title="This option controls the display of the artists you have added to torrent groups on the site. This number includes artists added via the torrent upload form, as well as artists added via the &quot;Add artists&quot; box on torrent group pages."><strong>Artists added</strong></td>
-				<td>
-					<label><input type="checkbox" name="p_artistsadded"<?=checked(!in_array('artistsadded', $Paranoia))?> /> Show count</label>
-				</td>
-			</tr>
-			<tr id="para_preview_tr">
-				<td></td>
-				<td><a href="#" id="preview_paranoia" class="brackets">Preview paranoia</a></td>
-			</tr>
-		</table>
-		<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="access_settings">
-			<tr class="colhead_dark">
-				<td colspan="2">
-					<strong>Access Settings</strong>
-				</td>
-			</tr>
-			<tr id="acc_resetpk_tr">
-				<td class="label tooltip_interactive" title="For information about the function of your passkey, please &lt;a href=&quot;<?=site_url()?>wiki.php?action=article&amp;amp;name=Passkey&quot;&gt;read this wiki article&lt;/a&gt;." data-title-plain="For information about the function of your passkey, please read the &quot;Passkey&quot; wiki article."><strong>Reset passkey</strong></td>
-				<td>
-					<div class="field_div">
-						<label><input type="checkbox" name="resetpasskey" id="resetpasskey" />
-						Reset your passkey?</label>
-					</div>
-					<p class="min_padding">Any active torrents must be downloaded again to continue leeching/seeding.</p>
-				</td>
-			</tr>
-			<tr id="acc_irckey_tr">
-				<td class="label"><strong>IRC key</strong></td>
-				<td>
-					<div class="field_div">
-						<input type="text" size="50" name="irckey" id="irckey" value="<?=display_str($IRCKey)?>" />
-						<input type="button" onclick="RandomIRCKey();" value="Generate IRC key" />
-					</div>
-					<p class="min_padding">If set, this key will be used instead of your site password when authenticating with <?=BOT_NICK?> on the <a href="wiki.php?action=article&amp;id=5">site's IRC network</a>. <span style="white-space: nowrap;">Please note:</span></p>
-					<ul>
-						<li>This value is stored in plaintext and should not be your password.</li>
-						<li>IRC keys must be between 6 and 32 characters.</li>
-					</ul>
-				</td>
-			</tr>
-			<tr id="acc_email_tr">
-				<td class="label tooltip" title="This is the email address you want associated with your <?=SITE_NAME?> account. It will be used if you forget your password or if an alert needs to be sent to you."><strong>Email address</strong></td>
-				<td>
-					<div class="field_div">
-						<input type="email" size="50" name="email" id="email" value="<?=display_str($Email)?>" />
-					</div>
-					<p class="min_padding">When changing your email address, you must enter your current password in the "Current password" field before saving your changes.</p>
-				</td>
-			</tr>
-			<tr id="acc_password_tr">
-				<td class="label"><strong>Change password</strong></td>
-				<td>
-					<div class="field_div">
-						<label>Current password:<br />
-						<input type="password" size="40" name="cur_pass" id="cur_pass" value="" /></label>
-					</div>
-					<div class="field_div">
-						<label>New password:<br />
-						<input type="password" size="40" name="new_pass_1" id="new_pass_1" value="" /> <strong id="pass_strength"></strong></label>
-					</div>
-					<div class="field_div">
-						<label>Confirm new password:<br />
-						<input type="password" size="40" name="new_pass_2" id="new_pass_2" value="" /> <strong id="pass_match"></strong></label>
-					</div>
-					<div class="setting_description">
-						A strong password:
-						<ul>
-							<li>is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol</li>
-							<li>Or is 20 characters or longer.</li>
-						</ul>
-					</div>
-				</td>
-			</tr>
+            <tr id="para_artistsadded_tr">
+                <td class="label tooltip" title="This option controls the display of the artists you have added to torrent groups on the site. This number includes artists added via the torrent upload form, as well as artists added via the &quot;Add artists&quot; box on torrent group pages."><strong>Artists added</strong></td>
+                <td>
+                    <label><input type="checkbox" name="p_artistsadded"<?=checked(!in_array('artistsadded', $Paranoia))?> /> Show count</label>
+                </td>
+            </tr>
+            <tr id="para_preview_tr">
+                <td></td>
+                <td><a href="#" id="preview_paranoia" class="brackets">Preview paranoia</a></td>
+            </tr>
+        </table>
+        <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="access_settings">
+            <tr class="colhead_dark">
+                <td colspan="2">
+                    <strong>Access Settings</strong>
+                </td>
+            </tr>
+            <tr id="acc_resetpk_tr">
+                <td class="label tooltip_interactive" title="For information about the function of your passkey, please &lt;a href=&quot;<?=site_url()?>wiki.php?action=article&amp;amp;name=Passkey&quot;&gt;read this wiki article&lt;/a&gt;." data-title-plain="For information about the function of your passkey, please read the &quot;Passkey&quot; wiki article."><strong>Reset passkey</strong></td>
+                <td>
+                    <div class="field_div">
+                        <label><input type="checkbox" name="resetpasskey" id="resetpasskey" />
+                        Reset your passkey?</label>
+                    </div>
+                    <p class="min_padding">Any active torrents must be downloaded again to continue leeching/seeding.</p>
+                </td>
+            </tr>
+            <tr id="acc_irckey_tr">
+                <td class="label"><strong>IRC key</strong></td>
+                <td>
+                    <div class="field_div">
+                        <input type="text" size="50" name="irckey" id="irckey" value="<?=display_str($IRCKey)?>" />
+                        <input type="button" onclick="RandomIRCKey();" value="Generate IRC key" />
+                    </div>
+                    <p class="min_padding">If set, this key will be used instead of your site password when authenticating with <?=BOT_NICK?> on the <a href="wiki.php?action=article&amp;id=5">site's IRC network</a>. <span style="white-space: nowrap;">Please note:</span></p>
+                    <ul>
+                        <li>This value is stored in plaintext and should not be your password.</li>
+                        <li>IRC keys must be between 6 and 32 characters.</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr id="acc_email_tr">
+                <td class="label tooltip" title="This is the email address you want associated with your <?=SITE_NAME?> account. It will be used if you forget your password or if an alert needs to be sent to you."><strong>Email address</strong></td>
+                <td>
+                    <div class="field_div">
+                        <input type="email" size="50" name="email" id="email" value="<?=display_str($Email)?>" />
+                    </div>
+                    <p class="min_padding">When changing your email address, you must enter your current password in the "Current password" field before saving your changes.</p>
+                </td>
+            </tr>
+            <tr id="acc_password_tr">
+                <td class="label"><strong>Change password</strong></td>
+                <td>
+                    <div class="field_div">
+                        <label>Current password:<br />
+                        <input type="password" size="40" name="cur_pass" id="cur_pass" value="" /></label>
+                    </div>
+                    <div class="field_div">
+                        <label>New password:<br />
+                        <input type="password" size="40" name="new_pass_1" id="new_pass_1" value="" /> <strong id="pass_strength"></strong></label>
+                    </div>
+                    <div class="field_div">
+                        <label>Confirm new password:<br />
+                        <input type="password" size="40" name="new_pass_2" id="new_pass_2" value="" /> <strong id="pass_match"></strong></label>
+                    </div>
+                    <div class="setting_description">
+                        A strong password:
+                        <ul>
+                            <li>is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol</li>
+                            <li>Or is 20 characters or longer.</li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
 
-			<tr id="acc_2fa_tr">
-				<td class="label"><strong>Two-factor Authentication</strong></td>
-				<td>
-					Two-factor authentication is currently <strong class="<?= $TwoFAKey ? 'r99' : 'warning'; ?>"><?= $TwoFAKey ? 'enabled' : 'disabled'; ?></strong> for your account.
+            <tr id="acc_2fa_tr">
+                <td class="label"><strong>Two-factor Authentication</strong></td>
+                <td>
+                    Two-factor authentication is currently <strong class="<?= $TwoFAKey ? 'r99' : 'warning'; ?>"><?= $TwoFAKey ? 'enabled' : 'disabled'; ?></strong> for your account.
 
-					<br><br>
+                    <br><br>
 
-					<a href="user.php?action=2fa&do=<?= $TwoFAKey ? 'disable' : 'enable'; ?>&userid=<?= G::$LoggedUser['ID'] ?>">Click here to <?= $TwoFAKey ? 'disable' : 'enable'; ?></a>
-				</td>
-			</tr>
-		</table>
-	</div>
-	</form>
+                    <a href="user.php?action=2fa&do=<?= $TwoFAKey ? 'disable' : 'enable'; ?>&userid=<?= G::$LoggedUser['ID'] ?>">Click here to <?= $TwoFAKey ? 'disable' : 'enable'; ?></a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    </form>
 </div>
 <? View::show_footer(); ?>

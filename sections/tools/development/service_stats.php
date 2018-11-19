@@ -28,7 +28,7 @@ View::show_header("Service Stats");
 			</tr>
 			<tr>
 				<td<? if ($DBStats['Threads_connected']['Value'] / $DBStats['Threads_created']['Value'] > 0.7) { echo ' class="invalid" '; } ?>>Database:</td>
-				<td><?=number_format($DBStats['Threads_created']['Value'])?> <span style="float: right;">(<?=number_format(($DBStats['Threads_connected']['Value'] / $DBStats['Threads_created']['Value']) * 100,3)?>%)</span></td>
+				<td><?=number_format($DBStats['Threads_created']['Value'])?> <span style="float: right;">(<?=number_format(($DBStats['Threads_connected']['Value'] / $DBStats['Threads_created']['Value']) * 100, 3)?>%)</span></td>
 			</tr>
 			<tr><td colspan="2"></td></tr>
 			<tr><td colspan="2"><strong>Connections</strong></td></tr>
@@ -181,80 +181,80 @@ View::show_header("Service Stats");
 			<tr><td colspan="2"><strong>Total Reads</strong></td></tr>
 			<tr>
 				<td<? if (($MemStats['cmd_get'] / $MemStats['uptime']) * 5 < $DBStats['Com_select']['Value'] / $DBStats['Uptime']['Value']) { echo ' class="invalid" '; } ?>>Cache:</td>
-				<td><?=number_format($MemStats['cmd_get'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['cmd_get'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Database:</td>
-				<td><?=number_format($DBStats['Com_select']['Value'] / $DBStats['Uptime']['Value'],5)?>/s</td>
+				<td><?=number_format($DBStats['Com_select']['Value'] / $DBStats['Uptime']['Value'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"><strong>Total Writes</strong></td></tr>
 			<tr>
 				<td<? if (($MemStats['cmd_set'] / $MemStats['uptime']) * 5 < ($DBStats['Com_insert']['Value'] + $DBStats['Com_update']['Value']) / $DBStats['Uptime']['Value']) { echo ' class="invalid" '; } ?>>Cache:</td>
-				<td><?=number_format($MemStats['cmd_set'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['cmd_set'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Database:</td>
-				<td><?=number_format(($DBStats['Com_insert']['Value'] + $DBStats['Com_update']['Value']) / $DBStats['Uptime']['Value'],5)?>/s</td>
+				<td><?=number_format(($DBStats['Com_insert']['Value'] + $DBStats['Com_update']['Value']) / $DBStats['Uptime']['Value'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"></td></tr>
 			<tr><td colspan="2"><strong>Get/Select</strong></td></tr>
 			<tr>
 				<td>Cache:</td>
-				<td><?=number_format($MemStats['get_hits'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['get_hits'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Database:</td>
-				<td><?=number_format($DBStats['Com_select']['Value'] / $DBStats['Uptime']['Value'],5)?>/s</td>
+				<td><?=number_format($DBStats['Com_select']['Value'] / $DBStats['Uptime']['Value'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"><strong>Set/Insert</strong></td></tr>
 			<tr>
 				<td>Cache:</td>
-				<td><?=number_format($MemStats['cmd_set'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['cmd_set'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Database:</td>
-				<td><?=number_format($DBStats['Com_insert']['Value'] / $DBStats['Uptime']['Value'],5)?>/s</td>
+				<td><?=number_format($DBStats['Com_insert']['Value'] / $DBStats['Uptime']['Value'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"><strong>Increment/Decrement</strong></td></tr>
 			<tr>
 				<td>Cache Increment:</td>
-				<td><?=number_format($MemStats['incr_hits'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['incr_hits'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Cache Decrement:</td>
-				<td><?=number_format($MemStats['decr_hits'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['decr_hits'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"><strong>CAS/Updates</strong></td></tr>
 			<tr>
 				<td>Cache:</td>
-				<td><?=number_format($MemStats['cas_hits'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['cas_hits'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Database:</td>
-				<td><?=number_format($DBStats['Com_update']['Value'] / $DBStats['Uptime']['Value'],5)?>/s</td>
+				<td><?=number_format($DBStats['Com_update']['Value'] / $DBStats['Uptime']['Value'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"><strong>Deletes</strong></td></tr>
 			<tr>
 				<td>Cache:</td>
-				<td><?=number_format($MemStats['delete_hits'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['delete_hits'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Database:</td>
-				<td><?=number_format($DBStats['Com_delete']['Value'] / $DBStats['Uptime']['Value'],5)?>/s</td>
+				<td><?=number_format($DBStats['Com_delete']['Value'] / $DBStats['Uptime']['Value'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"></td></tr>
 			<tr><td colspan="2"><strong>Special</strong></td></tr>
 			<tr>
 				<td>Cache Flushes:</td>
-				<td><?=number_format($MemStats['cmd_flush'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['cmd_flush'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Cache Evicted:</td>
-				<td><?=number_format($MemStats['evictions'] / $MemStats['uptime'],5)?>/s</td>
+				<td><?=number_format($MemStats['evictions'] / $MemStats['uptime'], 5)?>/s</td>
 			</tr>
 			<tr>
 				<td>Database Slow:</td>
-				<td><?=number_format($DBStats['Slow_queries']['Value'] / $DBStats['Uptime']['Value'],5)?>/s</td>
+				<td><?=number_format($DBStats['Slow_queries']['Value'] / $DBStats['Uptime']['Value'], 5)?>/s</td>
 			</tr>
 			<tr><td colspan="2"></td></tr>
 			<tr><td colspan="2"><strong>Data Read</strong></td></tr>

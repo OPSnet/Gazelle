@@ -70,7 +70,6 @@ class NMA_API
         }
 
         return true; // this shuts my ide up
-
     }
 
 
@@ -119,9 +118,9 @@ class NMA_API
                       'description' => substr($description, 0, 10000),
                       'priority'    => $priority
         );
-		if (!empty($url)) {
-			$post['url'] = substr($url, 0, 2000);
-		}
+        if (!empty($url)) {
+            $post['url'] = substr($url, 0, 2000);
+        }
         if ($this->devKey) {
             $post['developerkey'] = $this->devKey;
         }
@@ -173,7 +172,6 @@ class NMA_API
         if (!$fp) {
             $res = false;
         } else {
-
             if ($this->debug) {
                 $meta = stream_get_meta_data($fp);
                 $this->error('var dump of http headers' . var_dump($meta['wrapper_data']));
@@ -245,12 +243,10 @@ class NMA_API
                 if (isset($obj->error["@attributes"]['resettimer'])) {
                     $this->apiLimitReset = $obj->error["@attributes"]['resettimer'];
                 }
-
             }
             return $this->error($obj->error);
         } else {
             return $this->error("unkown error");
         }
     }
-
 }

@@ -5,11 +5,11 @@
 //Love or hate, this makes things a hell of a lot faster
 
 if ($Hour % 2 == 0) {
-	$DB->query("
+    $DB->query("
 			SELECT COUNT(uid) AS Snatches
 			FROM xbt_snatched");
-	list($SnatchStats) = $DB->next_record();
-	$Cache->cache_value('stats_snatches', $SnatchStats, 0);
+    list($SnatchStats) = $DB->next_record();
+    $Cache->cache_value('stats_snatches', $SnatchStats, 0);
 }
 
 $DB->query("
