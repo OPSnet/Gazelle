@@ -428,7 +428,7 @@ class Users {
 			return false;
 		}
 
-		return password_verify($Password, $Hash);
+		return password_verify(hash('sha256', $Password), $Hash);
 	}
 
 	/**
@@ -439,7 +439,7 @@ class Users {
 	 * @return string hashed password
 	 */
 	public static function make_password_hash($Str) {
-		return password_hash($Str, PASSWORD_DEFAULT);
+		return password_hash(hash('sha256', $Str), PASSWORD_DEFAULT);
 	}
 
 	/**
