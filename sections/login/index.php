@@ -498,12 +498,13 @@ else {
 			list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
 			if (strtotime($BannedUntil) < time()) {
 				if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
-					if (password_needs_rehash($PassHash, PASSWORD_DEFAULT)) {
-						$DB->query("
+					if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($_POST['password'], $PassHash)) {
+						$DB->prepared_query("
 							UPDATE users_main
-							SET passhash = '".db_string(Users::make_password_hash($_POST['password']))."'
-							WHERE ID = $UserID");
+							SET passhash = ?
+							WHERE ID = ?", Users::make_password_hash($_POST['password']), $UserID);
 					}
+
 					if ($Enabled == 1) {
 						$SessionID = Users::make_secret();
 						$Cookie = $Enc->encrypt($Enc->encrypt($SessionID . '|~|' . $UserID));

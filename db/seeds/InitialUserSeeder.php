@@ -14,7 +14,7 @@ class InitialUserSeeder extends AbstractSeed {
 			[
 				'Username' => 'admin',
 				'Email' => 'admin@example.com',
-				'PassHash' => password_hash('password', PASSWORD_DEFAULT),
+				'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
 				'Class' => 5,
 				'Uploaded' => 3221225472,
 				'Enabled' => '1',
@@ -28,7 +28,7 @@ class InitialUserSeeder extends AbstractSeed {
 			[
 				'Username' => 'user',
 				'Email' => 'user@example.com',
-				'PassHash' => password_hash('password', PASSWORD_DEFAULT),
+				'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
 				'Class' => 5,
 				'Uploaded' => 3221225472,
 				'Enabled' => '1',
