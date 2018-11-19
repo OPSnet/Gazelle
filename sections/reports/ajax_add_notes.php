@@ -1,13 +1,13 @@
 <?php
 
 if (!check_perms('site_moderate_forums') || empty($_POST['id'])) {
-	print
-		json_encode(
-			array(
-				'status' => 'failure'
-			)
-		);
-	die();
+    print
+        json_encode(
+            array(
+                'status' => 'failure'
+            )
+        );
+    die();
 }
 
 $ID = (int)$_POST['id'];
@@ -20,9 +20,9 @@ $DB->query("
 	SET Notes = '$Notes'
 	WHERE ID = '$ID'");
 print
-	json_encode(
-		array(
-			'status' => 'success'
-		)
-	);
+    json_encode(
+        array(
+            'status' => 'success'
+        )
+    );
 die();

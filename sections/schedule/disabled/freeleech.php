@@ -12,8 +12,8 @@ $DB->query("
 		AND FreeLeechType = '3'
 		AND Time < '$TimeMinus'");
 while (list($GroupID) = $DB->next_record()) {
-	$Cache->delete_value("torrents_details_$GroupID");
-	$Cache->delete_value("torrent_group_$GroupID");
+    $Cache->delete_value("torrents_details_$GroupID");
+    $Cache->delete_value("torrent_group_$GroupID");
 }
 $DB->query("
 	UPDATE torrents

@@ -2,7 +2,6 @@
 
 // redirect if referrals are currently closed
 if (!OPEN_EXTERNAL_REFERRALS) {
-
     include('closed.php');
     die();
 }
@@ -24,7 +23,7 @@ if ($_POST['token'] !== $_SESSION['referral_token']) {
 
 // verify external user with token match
 $Verify = $Referral->verify($Service, $_POST['username']);
-if ($Verify === TRUE) {
+if ($Verify === true) {
     // success
     $Invited = $Referral->create_invite($Service, $SanitizedEmail, $_POST['username']);
 } else {
@@ -70,11 +69,11 @@ View::show_header('External Tracker Referrals');
         <br/>
         <h2>Step 2: Join <?php echo SITE_NAME; ?></h2>
         <br/>
-        <?php if (!$Verify || $error): ?>
+        <?php if (!$Verify || $error) : ?>
             <h3>There was an error verifying your account at <?php echo $Service; ?>. Please refresh the page and try again.</h3>
             <br/>
             <p><?php echo $error; ?></p>
-        <?php else: ?>
+        <?php else : ?>
             <h3>Congratulations, you have verified your account at <?php echo $Service; ?>. We have sent you an email that has been sent to the address you specified. Make sure to check your spam folder! Welcome to <?php echo SITE_NAME; ?>!</h3
         <?php endif; ?>
         <br/>

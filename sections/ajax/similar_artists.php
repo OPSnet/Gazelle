@@ -1,13 +1,13 @@
 <?php
 
 if (empty($_GET['id']) || !is_number($_GET['id']) || empty($_GET['limit']) || !is_number($_GET['limit'])) {
-	print
-		json_encode(
-			array(
-				'status' => 'failure'
-			)
-		);
-	die();
+    print
+        json_encode(
+            array(
+                'status' => 'failure'
+            )
+        );
+    die();
 }
 
 $artist_id = $_GET["id"];
@@ -27,16 +27,15 @@ $DB->query("
 		LIMIT $artist_limit");
 
 
-		while (list($ArtistID, $Name, $Score) = $DB->next_record(MYSQLI_NUM, false)) {
-			if ($Score < 0) {
-				continue;
-			}
-			$results[] = array(
-					'id' => (int)$ArtistID,
-					'name' => $Name,
-					'score' => (int)$Score);
-		}
+while (list($ArtistID, $Name, $Score) = $DB->next_record(MYSQLI_NUM, false)) {
+    if ($Score < 0) {
+        continue;
+    }
+    $results[] = array(
+    'id' => (int)$ArtistID,
+    'name' => $Name,
+    'score' => (int)$Score);
+}
 
 print json_encode($results);
 exit();
-?>

@@ -64,14 +64,14 @@ $DB->query("
 		WHERE s.NumSnatches > 0");
 
 $RatioRequirements = array(
-	array(80 * 1024 * 1024 * 1024, 0.60, 0.50),
-	array(60 * 1024 * 1024 * 1024, 0.60, 0.40),
-	array(50 * 1024 * 1024 * 1024, 0.60, 0.30),
-	array(40 * 1024 * 1024 * 1024, 0.50, 0.20),
-	array(30 * 1024 * 1024 * 1024, 0.40, 0.10),
-	array(20 * 1024 * 1024 * 1024, 0.30, 0.05),
-	array(10 * 1024 * 1024 * 1024, 0.20, 0.0),
-	array(5 * 1024 * 1024 * 1024, 0.15, 0.0)
+    array(80 * 1024 * 1024 * 1024, 0.60, 0.50),
+    array(60 * 1024 * 1024 * 1024, 0.60, 0.40),
+    array(50 * 1024 * 1024 * 1024, 0.60, 0.30),
+    array(40 * 1024 * 1024 * 1024, 0.50, 0.20),
+    array(30 * 1024 * 1024 * 1024, 0.40, 0.10),
+    array(20 * 1024 * 1024 * 1024, 0.30, 0.05),
+    array(10 * 1024 * 1024 * 1024, 0.20, 0.0),
+    array(5 * 1024 * 1024 * 1024, 0.15, 0.0)
 );
 
 $DownloadBarrier = 100 * 1024 * 1024 * 1024;
@@ -82,22 +82,22 @@ $DB->query("
 
 
 foreach ($RatioRequirements as $Requirement) {
-	list($Download, $Ratio, $MinRatio) = $Requirement;
+    list($Download, $Ratio, $MinRatio) = $Requirement;
 
-	$DB->query("
+    $DB->query("
 			UPDATE users_main
 			SET RequiredRatio = RequiredRatioWork * $Ratio
 			WHERE Downloaded >= '$Download'
 				AND Downloaded < '$DownloadBarrier'");
 
-	$DB->query("
+    $DB->query("
 			UPDATE users_main
 			SET RequiredRatio = $MinRatio
 			WHERE Downloaded >= '$Download'
 				AND Downloaded < '$DownloadBarrier'
 				AND RequiredRatio < $MinRatio");
 
-	/*$DB->query("
+    /*$DB->query("
 		UPDATE users_main
 		SET RequiredRatio = $Ratio
 		WHERE Downloaded >= '$Download'
@@ -105,7 +105,7 @@ foreach ($RatioRequirements as $Requirement) {
 			AND can_leech = '0'
 			AND Enabled = '1'");
 	*/
-	$DownloadBarrier = $Download;
+    $DownloadBarrier = $Download;
 }
 
 $DB->query("

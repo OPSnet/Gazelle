@@ -1,6 +1,6 @@
 <?php
 if (!check_perms('users_mod')) {
-	error(403);
+    error(403);
 }
 
 $TorrentID = intval($_GET['torrentid']);
@@ -8,11 +8,11 @@ $LogID = intval($_GET['logid']);
 
 $DB->query("SELECT GroupID FROM torrents WHERE ID='{$TorrentID}'");
 if (!$DB->has_results()) {
-	error(404);
+    error(404);
 }
 $DB->query("SELECT * FROM torrents_logs WHERE LogID='{$LogID}' AND TorrentID='{$TorrentID}'");
 if (!$DB->has_results()) {
-	error(404);
+    error(404);
 }
 $Log = $DB->next_record(MYSQLI_ASSOC);
 

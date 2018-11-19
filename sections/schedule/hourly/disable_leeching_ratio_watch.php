@@ -14,14 +14,14 @@ $DB->query("
 $Users = $DB->to_pair('torrent_pass', 'ID');
 
 if (count($Users) > 0) {
-	$Subject = 'Leeching Disabled';
-	$Message = 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been disabled. Please reread the rules and refer to this guide on how to improve your ratio ' . site_url() . 'wiki.php?action=article&amp;id=115';
-	foreach ($Users as $TorrentPass => $UserID) {
-		Misc::send_pm($UserID, 0, $Subject, $Message);
-		Tracker::update_tracker('update_user', array('passkey' => $TorrentPass, 'can_leech' => '0'));
-	}
+    $Subject = 'Leeching Disabled';
+    $Message = 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been disabled. Please reread the rules and refer to this guide on how to improve your ratio ' . site_url() . 'wiki.php?action=article&amp;id=115';
+    foreach ($Users as $TorrentPass => $UserID) {
+        Misc::send_pm($UserID, 0, $Subject, $Message);
+        Tracker::update_tracker('update_user', array('passkey' => $TorrentPass, 'can_leech' => '0'));
+    }
 
-	$DB->query("
+    $DB->query("
 			UPDATE users_info AS i
 				JOIN users_main AS m ON m.ID = i.UserID
 			SET m.can_leech = '0',

@@ -384,72 +384,73 @@ if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
                 ?></li>
 				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><a href="bonus.php?action=bprates&userid=<?=$UserID?>">Points Per Hour</a>: <?=number_format($BonusPointsPerHour)?></li>
 <?php
-	}
-	if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {
+    }
+if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {
+}
 ?>
-				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>">Tokens</a>: <?=number_format($FLTokens)?></li>
+                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>">Tokens</a>: <?=number_format($FLTokens)?></li>
 <?
-	}
-	if (($OwnProfile || check_perms('users_mod')) && $Warned != '0000-00-00 00:00:00') {
+    }
+    if (($OwnProfile || check_perms('users_mod')) && $Warned != '0000-00-00 00:00:00') {
 ?>
-				<li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Warning expires in: <?=time_diff((date('Y-m-d H:i', strtotime($Warned))))?></li>
+                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Warning expires in: <?=time_diff((date('Y-m-d H:i', strtotime($Warned))))?></li>
 <?	} ?>
-			</ul>
-		</div>
+            </ul>
+        </div>
 <?
 // Last.fm statistics and comparability
 $LastFMUsername = LastFM::get_lastfm_username($UserID);
 if ($LastFMUsername)  {
-	LastFMView::render_sidebar($LastFMUsername, $UserID, $OwnProfile);
+    LastFMView::render_sidebar($LastFMUsername, $UserID, $OwnProfile);
 }
 
 if (check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty')) {
-	$DB->query("
-		SELECT
-			COUNT(DISTINCT r.ID),
-			SUM(rv.Bounty)
-		FROM requests AS r
-			LEFT JOIN requests_votes AS rv ON r.ID = rv.RequestID
-		WHERE r.FillerID = $UserID");
-	list($RequestsFilled, $TotalBounty) = $DB->next_record();
+    $DB->query("
+        SELECT
+            COUNT(DISTINCT r.ID),
+            SUM(rv.Bounty)
+        FROM requests AS r
+            LEFT JOIN requests_votes AS rv ON r.ID = rv.RequestID
+        WHERE r.FillerID = $UserID");
+    list($RequestsFilled, $TotalBounty) = $DB->next_record();
 } else {
-	$RequestsFilled = $TotalBounty = 0;
+    $RequestsFilled = $TotalBounty = 0;
 }
 
 if (check_paranoia_here('requestsvoted_count') || check_paranoia_here('requestsvoted_bounty')) {
-	$DB->query("
-		SELECT COUNT(RequestID), SUM(Bounty)
-		FROM requests_votes
-		WHERE UserID = $UserID");
-	list($RequestsVoted, $TotalSpent) = $DB->next_record();
-	$DB->query("
-		SELECT COUNT(r.ID), SUM(rv.Bounty)
-		FROM requests AS r
-			LEFT JOIN requests_votes AS rv ON rv.RequestID = r.ID AND rv.UserID = r.UserID
-		WHERE r.UserID = $UserID");
-	list($RequestsCreated, $RequestsCreatedSpent) = $DB->next_record();
+    $DB->query("
+        SELECT COUNT(RequestID), SUM(Bounty)
+        FROM requests_votes
+        WHERE UserID = $UserID");
+    list($RequestsVoted, $TotalSpent) = $DB->next_record();
+    $DB->query("
+        SELECT COUNT(r.ID), SUM(rv.Bounty)
+        FROM requests AS r
+            LEFT JOIN requests_votes AS rv ON rv.RequestID = r.ID AND rv.UserID = r.UserID
+        WHERE r.UserID = $UserID");
+    list($RequestsCreated, $RequestsCreatedSpent) = $DB->next_record();
 } else {
-	$RequestsVoted = $TotalSpent = $RequestsCreated = $RequestsCreatedSpent = 0;
+    $RequestsVoted = $TotalSpent = $RequestsCreated = $RequestsCreatedSpent = 0;
 }
 
 if (check_paranoia_here('uploads+')) {
-	$DB->query("
-		SELECT COUNT(ID)
-		FROM torrents
-		WHERE UserID = '$UserID'");
-	list($Uploads) = $DB->next_record();
+    $DB->query("
+        SELECT COUNT(ID)
+        FROM torrents
+        WHERE UserID = '$UserID'");
+    list($Uploads) = $DB->next_record();
 } else {
-	$Uploads = 0;
+    $Uploads = 0;
 }
 
 if (check_paranoia_here('artistsadded')) {
-	$DB->query("
-		SELECT COUNT(ArtistID)
-		FROM torrents_artists
-		WHERE UserID = $UserID");
-	list($ArtistsAdded) = $DB->next_record();
+    $DB->query("
+        SELECT COUNT(ArtistID)
+        FROM torrents_artists
+        WHERE UserID = $UserID");
+    list($ArtistsAdded) = $DB->next_record();
 } else {
-	$ArtistsAdded = 0;
+    $ArtistsAdded = 0;
 }
 
 //Do the ranks
@@ -462,1070 +463,1070 @@ $BountyRank = UserRank::get_rank('bounty', $TotalSpent);
 $ArtistsRank = UserRank::get_rank('artists', $ArtistsAdded);
 
 if ($Downloaded == 0) {
-	$Ratio = 1;
+    $Ratio = 1;
 } elseif ($Uploaded == 0) {
-	$Ratio = 0.5;
+    $Ratio = 0.5;
 } else {
-	$Ratio = round($Uploaded / $Downloaded, 2);
+    $Ratio = round($Uploaded / $Downloaded, 2);
 }
 $OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio);
 
 ?>
-		<div class="box box_info box_userinfo_percentile">
-			<div class="head colhead_dark">Percentile Rankings (hover for values)</div>
-			<ul class="stats nobullet">
+        <div class="box box_info box_userinfo_percentile">
+            <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
+            <ul class="stats nobullet">
 <?	if (($Override = check_paranoia_here('uploaded'))) { ?>
-				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded)?>">Data uploaded: <?=$UploadedRank === false ? 'Server busy' : number_format($UploadedRank)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded)?>">Data uploaded: <?=$UploadedRank === false ? 'Server busy' : number_format($UploadedRank)?></li>
 <?
-	}
-	if (($Override = check_paranoia_here('downloaded'))) { ?>
-				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Downloaded)?>">Data downloaded: <?=$DownloadedRank === false ? 'Server busy' : number_format($DownloadedRank)?></li>
+    }
+    if (($Override = check_paranoia_here('downloaded'))) { ?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Downloaded)?>">Data downloaded: <?=$DownloadedRank === false ? 'Server busy' : number_format($DownloadedRank)?></li>
 <?
-	}
-	if (($Override = check_paranoia_here('uploads+'))) { ?>
-				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?>">Torrents uploaded: <?=$UploadsRank === false ? 'Server busy' : number_format($UploadsRank)?></li>
+    }
+    if (($Override = check_paranoia_here('uploads+'))) { ?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?>">Torrents uploaded: <?=$UploadsRank === false ? 'Server busy' : number_format($UploadsRank)?></li>
 <?
-	}
-	if (($Override = check_paranoia_here('requestsfilled_count'))) { ?>
-				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($RequestsFilled)?>">Requests filled: <?=$RequestRank === false ? 'Server busy' : number_format($RequestRank)?></li>
+    }
+    if (($Override = check_paranoia_here('requestsfilled_count'))) { ?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($RequestsFilled)?>">Requests filled: <?=$RequestRank === false ? 'Server busy' : number_format($RequestRank)?></li>
 <?
-	}
-	if (($Override = check_paranoia_here('requestsvoted_bounty'))) { ?>
-				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($TotalSpent)?>">Bounty spent: <?=$BountyRank === false ? 'Server busy' : number_format($BountyRank)?></li>
+    }
+    if (($Override = check_paranoia_here('requestsvoted_bounty'))) { ?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($TotalSpent)?>">Bounty spent: <?=$BountyRank === false ? 'Server busy' : number_format($BountyRank)?></li>
 <?	} ?>
-				<li class="tooltip" title="<?=number_format($ForumPosts)?>">Posts made: <?=$PostRank === false ? 'Server busy' : number_format($PostRank)?></li>
+                <li class="tooltip" title="<?=number_format($ForumPosts)?>">Posts made: <?=$PostRank === false ? 'Server busy' : number_format($PostRank)?></li>
 <?	if (($Override = check_paranoia_here('artistsadded'))) { ?>
-				<li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?>">Artists added: <?=$ArtistsRank === false ? 'Server busy' : number_format($ArtistsRank)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?>">Artists added: <?=$ArtistsRank === false ? 'Server busy' : number_format($ArtistsRank)?></li>
 <?
-	}
-	if (check_paranoia_here(array('uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'))) { ?>
-				<li><strong>Overall rank: <?=$OverallRank === false ? 'Server busy' : number_format($OverallRank)?></strong></li>
+    }
+    if (check_paranoia_here(array('uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'))) { ?>
+                <li><strong>Overall rank: <?=$OverallRank === false ? 'Server busy' : number_format($OverallRank)?></strong></li>
 <?	} ?>
-			</ul>
-		</div>
+            </ul>
+        </div>
 <?
-	if (check_perms('users_mod', $Class) || check_perms('users_view_ips', $Class) || check_perms('users_view_keys', $Class)) {
-		$DB->query("
-			SELECT COUNT(*)
-			FROM users_history_passwords
-			WHERE UserID = '$UserID'");
-		list($PasswordChanges) = $DB->next_record();
-		if (check_perms('users_view_keys', $Class)) {
-			$DB->query("
-				SELECT COUNT(*)
-				FROM users_history_passkeys
-				WHERE UserID = '$UserID'");
-			list($PasskeyChanges) = $DB->next_record();
-		}
-		if (check_perms('users_view_ips', $Class)) {
-			$DB->query("
-				SELECT COUNT(DISTINCT IP)
-				FROM users_history_ips
-				WHERE UserID = '$UserID'");
-			list($IPChanges) = $DB->next_record();
-			$DB->query("
-				SELECT COUNT(DISTINCT IP)
-				FROM xbt_snatched
-				WHERE uid = '$UserID'
-					AND IP != ''");
-			list($TrackerIPs) = $DB->next_record();
-		}
-		if (check_perms('users_view_email', $Class)) {
-			$DB->query("
-				SELECT COUNT(*)
-				FROM users_history_emails
-				WHERE UserID = '$UserID'");
-			list($EmailChanges) = $DB->next_record();
-		}
+    if (check_perms('users_mod', $Class) || check_perms('users_view_ips', $Class) || check_perms('users_view_keys', $Class)) {
+        $DB->query("
+            SELECT COUNT(*)
+            FROM users_history_passwords
+            WHERE UserID = '$UserID'");
+        list($PasswordChanges) = $DB->next_record();
+        if (check_perms('users_view_keys', $Class)) {
+            $DB->query("
+                SELECT COUNT(*)
+                FROM users_history_passkeys
+                WHERE UserID = '$UserID'");
+            list($PasskeyChanges) = $DB->next_record();
+        }
+        if (check_perms('users_view_ips', $Class)) {
+            $DB->query("
+                SELECT COUNT(DISTINCT IP)
+                FROM users_history_ips
+                WHERE UserID = '$UserID'");
+            list($IPChanges) = $DB->next_record();
+            $DB->query("
+                SELECT COUNT(DISTINCT IP)
+                FROM xbt_snatched
+                WHERE uid = '$UserID'
+                    AND IP != ''");
+            list($TrackerIPs) = $DB->next_record();
+        }
+        if (check_perms('users_view_email', $Class)) {
+            $DB->query("
+                SELECT COUNT(*)
+                FROM users_history_emails
+                WHERE UserID = '$UserID'");
+            list($EmailChanges) = $DB->next_record();
+        }
 ?>
-		<div class="box box_info box_userinfo_history">
-			<div class="head colhead_dark">History</div>
-			<ul class="stats nobullet">
+        <div class="box box_info box_userinfo_history">
+            <div class="head colhead_dark">History</div>
+            <ul class="stats nobullet">
 <?		if (check_perms('users_view_email', $Class)) { ?>
-				<li>Emails: <?=number_format($EmailChanges)?> <a href="userhistory.php?action=email2&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">Legacy view</a></li>
+                <li>Emails: <?=number_format($EmailChanges)?> <a href="userhistory.php?action=email2&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">Legacy view</a></li>
 <?
-		}
-		if (check_perms('users_view_ips', $Class)) {
+        }
+        if (check_perms('users_view_ips', $Class)) {
 ?>
-				<li>IPs: <?=number_format($IPChanges)?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
+                <li>IPs: <?=number_format($IPChanges)?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
 <?			if (check_perms('users_view_ips', $Class) && check_perms('users_mod', $Class)) { ?>
-				<li>Tracker IPs: <?=number_format($TrackerIPs)?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Tracker IPs: <?=number_format($TrackerIPs)?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?
-			}
-		}
-		if (check_perms('users_view_keys', $Class)) {
+            }
+        }
+        if (check_perms('users_view_keys', $Class)) {
 ?>
-				<li>Passkeys: <?=number_format($PasskeyChanges)?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Passkeys: <?=number_format($PasskeyChanges)?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?
-		}
-		if (check_perms('users_mod', $Class)) {
+        }
+        if (check_perms('users_mod', $Class)) {
 ?>
-				<li>Passwords: <?=number_format($PasswordChanges)?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
-				<li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Passwords: <?=number_format($PasswordChanges)?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?		} ?>
-			</ul>
-		</div>
+            </ul>
+        </div>
 <?	} ?>
-		<div class="box box_info box_userinfo_personal">
-			<div class="head colhead_dark">Personal</div>
-			<ul class="stats nobullet">
-				<li>Class: <?=$ClassLevels[$Class]['Name']?></li>
+        <div class="box box_info box_userinfo_personal">
+            <div class="head colhead_dark">Personal</div>
+            <ul class="stats nobullet">
+                <li>Class: <?=$ClassLevels[$Class]['Name']?></li>
 <?
 $UserInfo = Users::user_info($UserID);
 if (!empty($UserInfo['ExtraClasses'])) {
 ?>
-				<li>
-					<ul class="stats">
+                <li>
+                    <ul class="stats">
 <?
-	foreach ($UserInfo['ExtraClasses'] as $PermID => $Val) {
-		?>
-						<li><?=$Classes[$PermID]['Name']?></li>
+    foreach ($UserInfo['ExtraClasses'] as $PermID => $Val) {
+        ?>
+                        <li><?=$Classes[$PermID]['Name']?></li>
 <?	} ?>
-					</ul>
-				</li>
+                    </ul>
+                </li>
 <?
 }
 // An easy way for people to measure the paranoia of a user, for e.g. contest eligibility
 if ($ParanoiaLevel == 0) {
-	$ParanoiaLevelText = 'Off';
+    $ParanoiaLevelText = 'Off';
 } elseif ($ParanoiaLevel == 1) {
-	$ParanoiaLevelText = 'Very Low';
+    $ParanoiaLevelText = 'Very Low';
 } elseif ($ParanoiaLevel <= 5) {
-	$ParanoiaLevelText = 'Low';
+    $ParanoiaLevelText = 'Low';
 } elseif ($ParanoiaLevel <= 20) {
-	$ParanoiaLevelText = 'High';
+    $ParanoiaLevelText = 'High';
 } else {
-	$ParanoiaLevelText = 'Very high';
+    $ParanoiaLevelText = 'Very high';
 }
 ?>
-				<li>Paranoia level: <span class="tooltip" title="<?=$ParanoiaLevel?>"><?=$ParanoiaLevelText?></span></li>
+                <li>Paranoia level: <span class="tooltip" title="<?=$ParanoiaLevel?>"><?=$ParanoiaLevelText?></span></li>
 <?	if (check_perms('users_view_email', $Class) || $OwnProfile) { ?>
-				<li>Email: <a href="mailto:<?=display_str($Email)?>"><?=display_str($Email)?></a>
+                <li>Email: <a href="mailto:<?=display_str($Email)?>"><?=display_str($Email)?></a>
 <?		if (check_perms('users_view_email', $Class)) { ?>
-					<a href="user.php?action=search&amp;email_history=on&amp;email=<?=display_str($Email)?>" title="Search" class="brackets tooltip">S</a>
+                    <a href="user.php?action=search&amp;email_history=on&amp;email=<?=display_str($Email)?>" title="Search" class="brackets tooltip">S</a>
 <?		} ?>
-				</li>
+                </li>
 <?	}
 
 if (check_perms('users_view_ips', $Class)) {
 ?>
-				<li>IP: <?=Tools::display_ip($IP)?></li>
-				<li>Host: <?=Tools::get_host_by_ajax($IP)?></li>
+                <li>IP: <?=Tools::display_ip($IP)?></li>
+                <li>Host: <?=Tools::get_host_by_ajax($IP)?></li>
 <?
 }
 
 if (check_perms('users_view_keys', $Class) || $OwnProfile) {
 ?>
-				<li>Passkey: <a href="#" id="passkey" onclick="togglePassKey('<?=display_str($torrent_pass)?>'); return false;" class="brackets">View</a></li>
+                <li>Passkey: <a href="#" id="passkey" onclick="togglePassKey('<?=display_str($torrent_pass)?>'); return false;" class="brackets">View</a></li>
 <?
 }
 if (check_perms('users_view_invites')) {
-	if (!$InviterID) {
-		$Invited = '<span style="font-style: italic;">Nobody</span>';
-	} else {
-		$Invited = "<a href=\"user.php?id=$InviterID\">$InviterName</a>";
-	}
+    if (!$InviterID) {
+        $Invited = '<span style="font-style: italic;">Nobody</span>';
+    } else {
+        $Invited = "<a href=\"user.php?id=$InviterID\">$InviterName</a>";
+    }
 
 ?>
-				<li>Invited by: <?=$Invited?></li>
-				<li>Invites: <?
-				$DB->query("
-					SELECT COUNT(InviterID)
-					FROM invites
-					WHERE InviterID = '$UserID'");
-				list($Pending) = $DB->next_record();
-				if ($DisableInvites) {
-					echo 'X';
-				} else {
-					echo number_format($Invites);
-				}
-				echo " ($Pending)"
-				?></li>
+                <li>Invited by: <?=$Invited?></li>
+                <li>Invites: <?
+                $DB->query("
+                    SELECT COUNT(InviterID)
+                    FROM invites
+                    WHERE InviterID = '$UserID'");
+                list($Pending) = $DB->next_record();
+                if ($DisableInvites) {
+                    echo 'X';
+                } else {
+                    echo number_format($Invites);
+                }
+                echo " ($Pending)"
+                ?></li>
 <?
 }
 if (Applicant::user_is_applicant($UserID) && (check_perms('admin_manage_applicants') || $OwnProfile)) {
 ?>
-				<li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
+                <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 <?
 }
 
 if (!isset($SupportFor)) {
-	$DB->query('
-		SELECT SupportFor
-		FROM users_info
-		WHERE UserID = '.$LoggedUser['ID']);
-	list($SupportFor) = $DB->next_record();
+    $DB->query('
+        SELECT SupportFor
+        FROM users_info
+        WHERE UserID = '.$LoggedUser['ID']);
+    list($SupportFor) = $DB->next_record();
 }
 if ($Override = check_perms('users_mod') || $OwnProfile || !empty($SupportFor)) {
 ?>
-				<li<?=(($Override === 2 || $SupportFor) ? ' class="paranoia_override"' : '')?>>Clients: <?
-		$DB->query("
-			SELECT DISTINCT useragent
-			FROM xbt_files_users
-			WHERE uid = $UserID");
-		$Clients = $DB->collect(0);
-		echo implode('; ', $Clients);
-		?></li>
+                <li<?=(($Override === 2 || $SupportFor) ? ' class="paranoia_override"' : '')?>>Clients: <?
+        $DB->query("
+            SELECT DISTINCT useragent
+            FROM xbt_files_users
+            WHERE uid = $UserID");
+        $Clients = $DB->collect(0);
+        echo implode('; ', $Clients);
+        ?></li>
 <?
 }
 
 if ($OwnProfile || check_perms('users_mod')) {
-	$DB->query("SELECT MAX(uhp.ChangeTime), ui.JoinDate
-				FROM users_info ui
-				LEFT JOIN users_history_passwords uhp ON uhp.UserID = $UserID
-				WHERE ui.UserID = $UserID");
-	list($PasswordHistory, $JoinDate) = G::$DB->next_record();
-	$Age = (empty($PasswordHistory)) ? time_diff($JoinDate) : time_diff($PasswordHistory);
-	$PasswordAge = substr($Age, 0, strpos($Age, " ago"));
+    $DB->query("SELECT MAX(uhp.ChangeTime), ui.JoinDate
+                FROM users_info ui
+                LEFT JOIN users_history_passwords uhp ON uhp.UserID = $UserID
+                WHERE ui.UserID = $UserID");
+    list($PasswordHistory, $JoinDate) = G::$DB->next_record();
+    $Age = (empty($PasswordHistory)) ? time_diff($JoinDate) : time_diff($PasswordHistory);
+    $PasswordAge = substr($Age, 0, strpos($Age, " ago"));
 ?>
-	<li>Password age: <?=$PasswordAge?></li>
+    <li>Password age: <?=$PasswordAge?></li>
 <? } ?>
 
-			</ul>
-		</div>
+            </ul>
+        </div>
 <?
 include(SERVER_ROOT.'/sections/user/community_stats.php');
 DonationsView::render_donor_stats($UserID);
 ?>
-	</div>
-	<div class="main_column">
+    </div>
+    <div class="main_column">
 <?
 if ($RatioWatchEnds != '0000-00-00 00:00:00'
-		&& (time() < strtotime($RatioWatchEnds))
-		&& ($Downloaded * $RequiredRatio) > $Uploaded
-		) {
+        && (time() < strtotime($RatioWatchEnds))
+        && ($Downloaded * $RequiredRatio) > $Uploaded
+        ) {
 ?>
-		<div class="box">
-			<div class="head">Ratio watch</div>
-			<div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($Downloaded * $RequiredRatio) - $Uploaded)?> in the next <?=time_diff($RatioWatchEnds)?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($Downloaded - $RatioWatchDownload)?></div>
-		</div>
+        <div class="box">
+            <div class="head">Ratio watch</div>
+            <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($Downloaded * $RequiredRatio) - $Uploaded)?> in the next <?=time_diff($RatioWatchEnds)?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($Downloaded - $RatioWatchDownload)?></div>
+        </div>
 <?
 }
 ?>
-		<div class="box">
-			<div class="head">
-				<?=!empty($InfoTitle) ? $InfoTitle : 'Profile';?>
-				<span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
-			</div>
-			<div class="pad profileinfo" id="profilediv">
+        <div class="box">
+            <div class="head">
+                <?=!empty($InfoTitle) ? $InfoTitle : 'Profile';?>
+                <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
+            </div>
+            <div class="pad profileinfo" id="profilediv">
 <?
 if (!$Info) {
 ?>
-				This profile is currently empty.
+                This profile is currently empty.
 <?
 } else {
-	echo Text::full_format($Info);
+    echo Text::full_format($Info);
 }
 ?>
-			</div>
-		</div>
+            </div>
+        </div>
 <?
 DonationsView::render_profile_rewards($EnabledRewards, $ProfileRewards);
 
 if (check_paranoia_here('snatched')) {
-	$RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
-	if ($RecentSnatches === false) {
-		$DB->query("
-			SELECT
-				g.ID,
-				g.Name,
-				g.WikiImage
-			FROM xbt_snatched AS s
-				INNER JOIN torrents AS t ON t.ID = s.fid
-				INNER JOIN torrents_group AS g ON t.GroupID = g.ID
-			WHERE s.uid = '$UserID'
-				AND t.UserID != '$UserID'
-				AND g.CategoryID = '1'
-				AND g.WikiImage != ''
-			GROUP BY g.ID
-			ORDER BY s.tstamp DESC
-			LIMIT 5");
-		$RecentSnatches = $DB->to_array();
+    $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
+    if ($RecentSnatches === false) {
+        $DB->query("
+            SELECT
+                g.ID,
+                g.Name,
+                g.WikiImage
+            FROM xbt_snatched AS s
+                INNER JOIN torrents AS t ON t.ID = s.fid
+                INNER JOIN torrents_group AS g ON t.GroupID = g.ID
+            WHERE s.uid = '$UserID'
+                AND t.UserID != '$UserID'
+                AND g.CategoryID = '1'
+                AND g.WikiImage != ''
+            GROUP BY g.ID
+            ORDER BY s.tstamp DESC
+            LIMIT 5");
+        $RecentSnatches = $DB->to_array();
 
-		$Artists = Artists::get_artists($DB->collect('ID'));
-		foreach ($RecentSnatches as $Key => $SnatchInfo) {
-			$RecentSnatches[$Key]['Artist'] = Artists::display_artists($Artists[$SnatchInfo['ID']], false, true);
-		}
-		$Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 0); //inf cache
-	}
-	if (!empty($RecentSnatches)) {
+        $Artists = Artists::get_artists($DB->collect('ID'));
+        foreach ($RecentSnatches as $Key => $SnatchInfo) {
+            $RecentSnatches[$Key]['Artist'] = Artists::display_artists($Artists[$SnatchInfo['ID']], false, true);
+        }
+        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 0); //inf cache
+    }
+    if (!empty($RecentSnatches)) {
 ?>
-	<table class="layout recent" id="recent_snatches" cellpadding="0" cellspacing="0" border="0">
-		<tr class="colhead">
-			<td colspan="5">
-				Recent Snatches
-			</td>
-		</tr>
-		<tr>
+    <table class="layout recent" id="recent_snatches" cellpadding="0" cellspacing="0" border="0">
+        <tr class="colhead">
+            <td colspan="5">
+                Recent Snatches
+            </td>
+        </tr>
+        <tr>
 <?		foreach ($RecentSnatches as $RS) { ?>
-			<td>
-				<a href="torrents.php?id=<?=$RS['ID']?>">
-					<img class="tooltip" title="<?=display_str($RS['Artist'])?><?=display_str($RS['Name'])?>" src="<?=ImageTools::process($RS['WikiImage'], true)?>" alt="<?=display_str($RS['Artist'])?><?=display_str($RS['Name'])?>" width="107" />
-				</a>
-			</td>
+            <td>
+                <a href="torrents.php?id=<?=$RS['ID']?>">
+                    <img class="tooltip" title="<?=display_str($RS['Artist'])?><?=display_str($RS['Name'])?>" src="<?=ImageTools::process($RS['WikiImage'], true)?>" alt="<?=display_str($RS['Artist'])?><?=display_str($RS['Name'])?>" width="107" />
+                </a>
+            </td>
 <?		} ?>
-		</tr>
-	</table>
+        </tr>
+    </table>
 <?
-	}
+    }
 }
 
 if (check_paranoia_here('uploads')) {
-	$RecentUploads = $Cache->get_value("recent_uploads_$UserID");
-	if ($RecentUploads === false) {
-		$DB->query("
-			SELECT
-				g.ID,
-				g.Name,
-				g.WikiImage
-			FROM torrents_group AS g
-				INNER JOIN torrents AS t ON t.GroupID = g.ID
-			WHERE t.UserID = '$UserID'
-				AND g.CategoryID = '1'
-				AND g.WikiImage != ''
-			GROUP BY g.ID
-			ORDER BY t.Time DESC
-			LIMIT 5");
-		$RecentUploads = $DB->to_array();
-		$Artists = Artists::get_artists($DB->collect('ID'));
-		foreach ($RecentUploads as $Key => $UploadInfo) {
-			$RecentUploads[$Key]['Artist'] = Artists::display_artists($Artists[$UploadInfo['ID']], false, true);
-		}
-		$Cache->cache_value("recent_uploads_$UserID", $RecentUploads, 0); //inf cache
-	}
-	if (!empty($RecentUploads)) {
+    $RecentUploads = $Cache->get_value("recent_uploads_$UserID");
+    if ($RecentUploads === false) {
+        $DB->query("
+            SELECT
+                g.ID,
+                g.Name,
+                g.WikiImage
+            FROM torrents_group AS g
+                INNER JOIN torrents AS t ON t.GroupID = g.ID
+            WHERE t.UserID = '$UserID'
+                AND g.CategoryID = '1'
+                AND g.WikiImage != ''
+            GROUP BY g.ID
+            ORDER BY t.Time DESC
+            LIMIT 5");
+        $RecentUploads = $DB->to_array();
+        $Artists = Artists::get_artists($DB->collect('ID'));
+        foreach ($RecentUploads as $Key => $UploadInfo) {
+            $RecentUploads[$Key]['Artist'] = Artists::display_artists($Artists[$UploadInfo['ID']], false, true);
+        }
+        $Cache->cache_value("recent_uploads_$UserID", $RecentUploads, 0); //inf cache
+    }
+    if (!empty($RecentUploads)) {
 ?>
-	<table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
-		<tr class="colhead">
-			<td colspan="5">
-				Recent Uploads
-			</td>
-		</tr>
-		<tr>
+    <table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
+        <tr class="colhead">
+            <td colspan="5">
+                Recent Uploads
+            </td>
+        </tr>
+        <tr>
 <?		foreach ($RecentUploads as $RU) { ?>
-			<td>
-				<a href="torrents.php?id=<?=$RU['ID']?>">
-					<img class="tooltip" title="<?=$RU['Artist']?><?=$RU['Name']?>" src="<?=ImageTools::process($RU['WikiImage'], true)?>" alt="<?=$RU['Artist']?><?=$RU['Name']?>" width="107" />
-				</a>
-			</td>
+            <td>
+                <a href="torrents.php?id=<?=$RU['ID']?>">
+                    <img class="tooltip" title="<?=$RU['Artist']?><?=$RU['Name']?>" src="<?=ImageTools::process($RU['WikiImage'], true)?>" alt="<?=$RU['Artist']?><?=$RU['Name']?>" width="107" />
+                </a>
+            </td>
 <?		} ?>
-		</tr>
-	</table>
+        </tr>
+    </table>
 <?
-	}
+    }
 }
 
 $DB->query("
-	SELECT ID, Name
-	FROM collages
-	WHERE UserID = '$UserID'
-		AND CategoryID = '0'
-		AND Deleted = '0'
-	ORDER BY Featured DESC,
-		Name ASC");
+    SELECT ID, Name
+    FROM collages
+    WHERE UserID = '$UserID'
+        AND CategoryID = '0'
+        AND Deleted = '0'
+    ORDER BY Featured DESC,
+        Name ASC");
 $Collages = $DB->to_array(false, MYSQLI_NUM, false);
 $FirstCol = true;
 foreach ($Collages as $CollageInfo) {
-	list($CollageID, $CName) = $CollageInfo;
-	$DB->query("
-		SELECT ct.GroupID,
-			tg.WikiImage,
-			tg.CategoryID
-		FROM collages_torrents AS ct
-			JOIN torrents_group AS tg ON tg.ID = ct.GroupID
-		WHERE ct.CollageID = '$CollageID'
-		ORDER BY ct.Sort
-		LIMIT 5");
-	$Collage = $DB->to_array(false, MYSQLI_ASSOC, false);
+    list($CollageID, $CName) = $CollageInfo;
+    $DB->query("
+        SELECT ct.GroupID,
+            tg.WikiImage,
+            tg.CategoryID
+        FROM collages_torrents AS ct
+            JOIN torrents_group AS tg ON tg.ID = ct.GroupID
+        WHERE ct.CollageID = '$CollageID'
+        ORDER BY ct.Sort
+        LIMIT 5");
+    $Collage = $DB->to_array(false, MYSQLI_ASSOC, false);
 ?>
-	<table class="layout recent" id="collage<?=$CollageID?>_box" cellpadding="0" cellspacing="0" border="0">
-		<tr class="colhead">
-			<td colspan="5">
-				<span style="float: left;">
-					<?=display_str($CName)?> - <a href="collages.php?id=<?=$CollageID?>" class="brackets">See full</a>
-				</span>
-				<span style="float: right;">
-					<a href="#" onclick="$('#collage<?=$CollageID?>_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=$FirstCol ? 'Hide' : 'Show' ?></a>
-				</span>
-			</td>
-		</tr>
-		<tr class="images<?=$FirstCol ? '' : ' hidden'?>">
+    <table class="layout recent" id="collage<?=$CollageID?>_box" cellpadding="0" cellspacing="0" border="0">
+        <tr class="colhead">
+            <td colspan="5">
+                <span style="float: left;">
+                    <?=display_str($CName)?> - <a href="collages.php?id=<?=$CollageID?>" class="brackets">See full</a>
+                </span>
+                <span style="float: right;">
+                    <a href="#" onclick="$('#collage<?=$CollageID?>_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=$FirstCol ? 'Hide' : 'Show' ?></a>
+                </span>
+            </td>
+        </tr>
+        <tr class="images<?=$FirstCol ? '' : ' hidden'?>">
 <?	foreach ($Collage as $C) {
-			$Group = Torrents::get_groups(array($C['GroupID']), true, true, false);
-			extract(Torrents::array_group($Group[$C['GroupID']]));
+            $Group = Torrents::get_groups(array($C['GroupID']), true, true, false);
+            extract(Torrents::array_group($Group[$C['GroupID']]));
 
-			$Name = '';
-			$Name .= Artists::display_artists(array('1' => $Artists), false, true);
-			$Name .= $GroupName;
+            $Name = '';
+            $Name .= Artists::display_artists(array('1' => $Artists), false, true);
+            $Name .= $GroupName;
 ?>
-			<td>
-				<a href="torrents.php?id=<?=$GroupID?>">
-					<img class="tooltip" title="<?=$Name?>" src="<?=ImageTools::process($C['WikiImage'], true)?>" alt="<?=$Name?>" width="107" />
-				</a>
-			</td>
+            <td>
+                <a href="torrents.php?id=<?=$GroupID?>">
+                    <img class="tooltip" title="<?=$Name?>" src="<?=ImageTools::process($C['WikiImage'], true)?>" alt="<?=$Name?>" width="107" />
+                </a>
+            </td>
 <?	} ?>
-		</tr>
-	</table>
+        </tr>
+    </table>
 <?
-	$FirstCol = false;
+    $FirstCol = false;
 }
 ?>
-	<!-- for the "jump to staff tools" button -->
-	<a id="staff_tools"></a>
+    <!-- for the "jump to staff tools" button -->
+    <a id="staff_tools"></a>
 <?
 
 // Linked accounts
 if (check_perms('users_mod')) {
-	include(SERVER_ROOT.'/sections/user/linkedfunctions.php');
-	user_dupes_table($UserID);
+    include(SERVER_ROOT.'/sections/user/linkedfunctions.php');
+    user_dupes_table($UserID);
 }
 
 if ((check_perms('users_view_invites')) && $Invited > 0) {
-	include(SERVER_ROOT.'/classes/invite_tree.class.php');
-	$Tree = new INVITE_TREE($UserID, array('visible' => false));
+    include(SERVER_ROOT.'/classes/invite_tree.class.php');
+    $Tree = new INVITE_TREE($UserID, array('visible' => false));
 ?>
-		<div class="box" id="invitetree_box">
-			<div class="head">
-				Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
-			</div>
-			<div id="invitetree" class="hidden">
+        <div class="box" id="invitetree_box">
+            <div class="head">
+                Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
+            </div>
+            <div id="invitetree" class="hidden">
 <?				$Tree->make_tree(); ?>
-			</div>
-		</div>
+            </div>
+        </div>
 <?
 }
 
 if (check_perms('users_mod')) {
-	DonationsView::render_donation_history(Donations::get_donation_history($UserID));
+    DonationsView::render_donation_history(Donations::get_donation_history($UserID));
 }
 
 // Requests
 if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_list')) {
-	$SphQL = new SphinxqlQuery();
-	$SphQLResult = $SphQL->select('id, votes, bounty')
-		->from('requests, requests_delta')
-		->where('userid', $UserID)
-		->where('torrentid', 0)
-		->order_by('votes', 'desc')
-		->order_by('bounty', 'desc')
-		->limit(0, 100, 100) // Limit to 100 requests
-		->query();
-	if ($SphQLResult->has_results()) {
-		$SphRequests = $SphQLResult->to_array('id', MYSQLI_ASSOC);
+    $SphQL = new SphinxqlQuery();
+    $SphQLResult = $SphQL->select('id, votes, bounty')
+        ->from('requests, requests_delta')
+        ->where('userid', $UserID)
+        ->where('torrentid', 0)
+        ->order_by('votes', 'desc')
+        ->order_by('bounty', 'desc')
+        ->limit(0, 100, 100) // Limit to 100 requests
+        ->query();
+    if ($SphQLResult->has_results()) {
+        $SphRequests = $SphQLResult->to_array('id', MYSQLI_ASSOC);
 ?>
-		<div class="box" id="requests_box">
-			<div class="head">
-				Requests <a href="#" onclick="$('#requests').gtoggle(); return false;" class="brackets">View</a>
-			</div>
-			<div id="requests" class="request_table hidden">
-				<table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
-					<tr class="colhead_dark">
-						<td style="width: 48%;">
-							<strong>Request Name</strong>
-						</td>
-						<td>
-							<strong>Vote</strong>
-						</td>
-						<td>
-							<strong>Bounty</strong>
-						</td>
-						<td>
-							<strong>Added</strong>
-						</td>
-					</tr>
+        <div class="box" id="requests_box">
+            <div class="head">
+                Requests <a href="#" onclick="$('#requests').gtoggle(); return false;" class="brackets">View</a>
+            </div>
+            <div id="requests" class="request_table hidden">
+                <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
+                    <tr class="colhead_dark">
+                        <td style="width: 48%;">
+                            <strong>Request Name</strong>
+                        </td>
+                        <td>
+                            <strong>Vote</strong>
+                        </td>
+                        <td>
+                            <strong>Bounty</strong>
+                        </td>
+                        <td>
+                            <strong>Added</strong>
+                        </td>
+                    </tr>
 <?
-		$Row = 'a';
-		$Requests = Requests::get_requests(array_keys($SphRequests));
-		foreach ($SphRequests as $RequestID => $SphRequest) {
-			$Request = $Requests[$RequestID];
-			$VotesCount = $SphRequest['votes'];
-			$Bounty = $SphRequest['bounty'] * 1024; // Sphinx stores bounty in kB
-			$CategoryName = $Categories[$Request['CategoryID'] - 1];
+        $Row = 'a';
+        $Requests = Requests::get_requests(array_keys($SphRequests));
+        foreach ($SphRequests as $RequestID => $SphRequest) {
+            $Request = $Requests[$RequestID];
+            $VotesCount = $SphRequest['votes'];
+            $Bounty = $SphRequest['bounty'] * 1024; // Sphinx stores bounty in kB
+            $CategoryName = $Categories[$Request['CategoryID'] - 1];
 
-			if ($CategoryName == 'Music') {
-				$ArtistForm = Requests::get_artists($RequestID);
-				$ArtistLink = Artists::display_artists($ArtistForm, true, true);
-				$FullName = "$ArtistLink<a href=\"requests.php?action=view&amp;id=$RequestID\">$Request[Title] [$Request[Year]]</a>";
-			} elseif ($CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
-				$FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\">$Request[Title] [$Request[Year]]</a>";
-			} else {
-				$FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\">$Request[Title]</a>";
-			}
+            if ($CategoryName == 'Music') {
+                $ArtistForm = Requests::get_artists($RequestID);
+                $ArtistLink = Artists::display_artists($ArtistForm, true, true);
+                $FullName = "$ArtistLink<a href=\"requests.php?action=view&amp;id=$RequestID\">$Request[Title] [$Request[Year]]</a>";
+            } elseif ($CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
+                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\">$Request[Title] [$Request[Year]]</a>";
+            } else {
+                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\">$Request[Title]</a>";
+            }
 ?>
-					<tr class="row<?=$Row === 'b' ? 'a' : 'b'?>">
-						<td>
-							<?=$FullName ?>
-							<div class="tags">
+                    <tr class="row<?=$Row === 'b' ? 'a' : 'b'?>">
+                        <td>
+                            <?=$FullName ?>
+                            <div class="tags">
 <?
-			$Tags = $Request['Tags'];
-			$TagList = array();
-			foreach ($Tags as $TagID => $TagName) {
-				$TagList[] = "<a href=\"requests.php?tags=$TagName\">".display_str($TagName).'</a>';
-			}
-			$TagList = implode(', ', $TagList);
+            $Tags = $Request['Tags'];
+            $TagList = array();
+            foreach ($Tags as $TagID => $TagName) {
+                $TagList[] = "<a href=\"requests.php?tags=$TagName\">".display_str($TagName).'</a>';
+            }
+            $TagList = implode(', ', $TagList);
 ?>
-								<?=$TagList?>
-							</div>
-						</td>
-						<td>
-							<span id="vote_count_<?=$RequestID?>"><?=$VotesCount?></span>
+                                <?=$TagList?>
+                            </div>
+                        </td>
+                        <td>
+                            <span id="vote_count_<?=$RequestID?>"><?=$VotesCount?></span>
 <?			if (check_perms('site_vote')) { ?>
-							&nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets">+</a>
+                            &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets">+</a>
 <?			} ?>
-						</td>
-						<td>
-							<span id="bounty_<?=$RequestID?>"><?=Format::get_size($Bounty)?></span>
-						</td>
-						<td>
-							<?=time_diff($Request['TimeAdded']) ?>
-						</td>
-					</tr>
+                        </td>
+                        <td>
+                            <span id="bounty_<?=$RequestID?>"><?=Format::get_size($Bounty)?></span>
+                        </td>
+                        <td>
+                            <?=time_diff($Request['TimeAdded']) ?>
+                        </td>
+                    </tr>
 <?		} ?>
-				</table>
-			</div>
-		</div>
+                </table>
+            </div>
+        </div>
 <?
-	}
+    }
 }
 
 $IsFLS = isset($LoggedUser['ExtraClasses'][FLS_TEAM]);
 if (check_perms('users_mod', $Class) || $IsFLS) {
-	$UserLevel = $LoggedUser['EffectiveClass'];
-	$DB->query("
-		SELECT
-			SQL_CALC_FOUND_ROWS
-			spc.ID,
-			spc.Subject,
-			spc.Status,
-			spc.Level,
-			spc.AssignedToUser,
-			spc.Date,
-			COUNT(spm.ID) AS Resplies,
-			spc.ResolverID
-		FROM staff_pm_conversations AS spc
-		JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
-		WHERE spc.UserID = $UserID
-			AND (spc.Level <= $UserLevel OR spc.AssignedToUser = '".$LoggedUser['ID']."')
-		GROUP BY spc.ID
-		ORDER BY spc.Date DESC");
-	if ($DB->has_results()) {
-		$StaffPMs = $DB->to_array();
+    $UserLevel = $LoggedUser['EffectiveClass'];
+    $DB->query("
+        SELECT
+            SQL_CALC_FOUND_ROWS
+            spc.ID,
+            spc.Subject,
+            spc.Status,
+            spc.Level,
+            spc.AssignedToUser,
+            spc.Date,
+            COUNT(spm.ID) AS Resplies,
+            spc.ResolverID
+        FROM staff_pm_conversations AS spc
+        JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
+        WHERE spc.UserID = $UserID
+            AND (spc.Level <= $UserLevel OR spc.AssignedToUser = '".$LoggedUser['ID']."')
+        GROUP BY spc.ID
+        ORDER BY spc.Date DESC");
+    if ($DB->has_results()) {
+        $StaffPMs = $DB->to_array();
 ?>
-		<div class="box" id="staffpms_box">
-			<div class="head">
-				Staff PMs <a href="#" onclick="$('#staffpms').gtoggle(); return false;" class="brackets">View</a>
-			</div>
-			<table width="100%" class="message_table hidden" id="staffpms">
-				<tr class="colhead">
-					<td>Subject</td>
-					<td>Date</td>
-					<td>Assigned to</td>
-					<td>Replies</td>
-					<td>Resolved by</td>
-				</tr>
+        <div class="box" id="staffpms_box">
+            <div class="head">
+                Staff PMs <a href="#" onclick="$('#staffpms').gtoggle(); return false;" class="brackets">View</a>
+            </div>
+            <table width="100%" class="message_table hidden" id="staffpms">
+                <tr class="colhead">
+                    <td>Subject</td>
+                    <td>Date</td>
+                    <td>Assigned to</td>
+                    <td>Replies</td>
+                    <td>Resolved by</td>
+                </tr>
 <?
-		foreach ($StaffPMs as $StaffPM) {
-			list($ID, $Subject, $Status, $Level, $AssignedToUser, $Date, $Replies, $ResolverID) = $StaffPM;
-			// Get assigned
-			if ($AssignedToUser == '') {
-				// Assigned to class
-				$Assigned = ($Level == 0) ? 'First Line Support' : $ClassLevels[$Level]['Name'];
-				// No + on Sysops
-				if ($Assigned != 'Sysop') {
-					$Assigned .= '+';
-				}
+        foreach ($StaffPMs as $StaffPM) {
+            list($ID, $Subject, $Status, $Level, $AssignedToUser, $Date, $Replies, $ResolverID) = $StaffPM;
+            // Get assigned
+            if ($AssignedToUser == '') {
+                // Assigned to class
+                $Assigned = ($Level == 0) ? 'First Line Support' : $ClassLevels[$Level]['Name'];
+                // No + on Sysops
+                if ($Assigned != 'Sysop') {
+                    $Assigned .= '+';
+                }
 
-			} else {
-				// Assigned to user
-				$Assigned = Users::format_username($UserID, true, true, true, true);
-			}
+            } else {
+                // Assigned to user
+                $Assigned = Users::format_username($UserID, true, true, true, true);
+            }
 
-			if ($ResolverID) {
-				$Resolver = Users::format_username($ResolverID, true, true, true, true);
-			} else {
-				$Resolver = '(unresolved)';
-			}
+            if ($ResolverID) {
+                $Resolver = Users::format_username($ResolverID, true, true, true, true);
+            } else {
+                $Resolver = '(unresolved)';
+            }
 
-			?>
-				<tr>
-					<td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
-					<td><?=time_diff($Date, 2, true)?></td>
-					<td><?=$Assigned?></td>
-					<td><?=$Replies - 1?></td>
-					<td><?=$Resolver?></td>
-				</tr>
+            ?>
+                <tr>
+                    <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
+                    <td><?=time_diff($Date, 2, true)?></td>
+                    <td><?=$Assigned?></td>
+                    <td><?=$Replies - 1?></td>
+                    <td><?=$Resolver?></td>
+                </tr>
 <?		} ?>
-			</table>
-		</div>
+            </table>
+        </div>
 <?
-	}
+    }
 }
 
 // Displays a table of forum warnings viewable only to Forum Moderators
 if ($LoggedUser['Class'] == 650 && check_perms('users_warn', $Class)) {
-	$DB->query("
-		SELECT Comment
-		FROM users_warnings_forums
-		WHERE UserID = '$UserID'");
-	list($ForumWarnings) = $DB->next_record();
-	if ($DB->has_results()) {
+    $DB->query("
+        SELECT Comment
+        FROM users_warnings_forums
+        WHERE UserID = '$UserID'");
+    list($ForumWarnings) = $DB->next_record();
+    if ($DB->has_results()) {
 ?>
 <div class="box">
-	<div class="head">Forum warnings</div>
-	<div class="pad">
-		<div id="forumwarningslinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($ForumWarnings)?></div>
-	</div>
+    <div class="head">Forum warnings</div>
+    <div class="pad">
+        <div id="forumwarningslinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($ForumWarnings)?></div>
+    </div>
 </div>
 <?
-	}
+    }
 }
 if (check_perms('users_mod', $Class)) { ?>
-		<form class="manage_form" name="user" id="form" action="user.php" method="post">
-		<input type="hidden" name="action" value="moderate" />
-		<input type="hidden" name="userid" value="<?=$UserID?>" />
-		<input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+        <form class="manage_form" name="user" id="form" action="user.php" method="post">
+        <input type="hidden" name="action" value="moderate" />
+        <input type="hidden" name="userid" value="<?=$UserID?>" />
+        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
 
-		<div class="box box2" id="staff_notes_box">
-			<div class="head">
-				Staff Notes
-				<a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Edit</a>
-				<a href="#" onclick="$('#staffnotes').gtoggle(); return false;" class="brackets">Toggle</a>
-			</div>
-			<div id="staffnotes" class="pad">
-				<input type="hidden" name="comment_hash" value="<?=$CommentHash?>" />
-				<div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($AdminComment)?></div>
-				<textarea id="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=display_str($AdminComment)?></textarea>
-				<a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Toggle edit</a>
-				<script type="text/javascript">
-					resize('admincomment');
-				</script>
-			</div>
-		</div>
+        <div class="box box2" id="staff_notes_box">
+            <div class="head">
+                Staff Notes
+                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Edit</a>
+                <a href="#" onclick="$('#staffnotes').gtoggle(); return false;" class="brackets">Toggle</a>
+            </div>
+            <div id="staffnotes" class="pad">
+                <input type="hidden" name="comment_hash" value="<?=$CommentHash?>" />
+                <div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($AdminComment)?></div>
+                <textarea id="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=display_str($AdminComment)?></textarea>
+                <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Toggle edit</a>
+                <script type="text/javascript">
+                    resize('admincomment');
+                </script>
+            </div>
+        </div>
 
-		<table class="layout" id="user_info_box">
-			<tr class="colhead">
-				<td colspan="2">
-					User Information
-				</td>
-			</tr>
+        <table class="layout" id="user_info_box">
+            <tr class="colhead">
+                <td colspan="2">
+                    User Information
+                </td>
+            </tr>
 <?	if (check_perms('users_edit_usernames', $Class)) { ?>
-			<tr>
-				<td class="label">Username:</td>
-				<td><input type="text" size="20" name="Username" value="<?=display_str($Username)?>" /></td>
-			</tr>
+            <tr>
+                <td class="label">Username:</td>
+                <td><input type="text" size="20" name="Username" value="<?=display_str($Username)?>" /></td>
+            </tr>
 <?
-	}
-	if (check_perms('users_edit_titles')) {
+    }
+    if (check_perms('users_edit_titles')) {
 ?>
-			<tr>
-				<td class="label">Custom title:</td>
-				<td><input type="text" class="wide_input_text" name="Title" value="<?=display_str($CustomTitle)?>" /></td>
-			</tr>
+            <tr>
+                <td class="label">Custom title:</td>
+                <td><input type="text" class="wide_input_text" name="Title" value="<?=display_str($CustomTitle)?>" /></td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('users_promote_below', $Class) || check_perms('users_promote_to', $Class - 1)) {
+    if (check_perms('users_promote_below', $Class) || check_perms('users_promote_to', $Class - 1)) {
 ?>
-			<tr>
-				<td class="label">Primary class:</td>
-				<td>
-					<select name="Class">
+            <tr>
+                <td class="label">Primary class:</td>
+                <td>
+                    <select name="Class">
 <?
-		foreach ($ClassLevels as $CurClass) {
-			if ($CurClass['Secondary']) {
-				continue;
-			}
-			elseif ($LoggedUser['ID'] != $UserID && !check_perms('users_promote_to', $Class-1) && $CurClass['Level'] == $LoggedUser['EffectiveClass']) {
-				break;
-			}
-			elseif ($CurClass['Level'] > $LoggedUser['EffectiveClass']) {
-				break;
-			}
-			if ($Class === $CurClass['Level']) {
-				$Selected = ' selected="selected"';
-			} else {
-				$Selected = '';
-			}
+        foreach ($ClassLevels as $CurClass) {
+            if ($CurClass['Secondary']) {
+                continue;
+            }
+            elseif ($LoggedUser['ID'] != $UserID && !check_perms('users_promote_to', $Class-1) && $CurClass['Level'] == $LoggedUser['EffectiveClass']) {
+                break;
+            }
+            elseif ($CurClass['Level'] > $LoggedUser['EffectiveClass']) {
+                break;
+            }
+            if ($Class === $CurClass['Level']) {
+                $Selected = ' selected="selected"';
+            } else {
+                $Selected = '';
+            }
 ?>
-						<option value="<?=$CurClass['ID']?>"<?=$Selected?>><?=$CurClass['Name'].' ('.$CurClass['Level'].')'?></option>
+                        <option value="<?=$CurClass['ID']?>"<?=$Selected?>><?=$CurClass['Name'].' ('.$CurClass['Level'].')'?></option>
 <?		} ?>
-					</select>
-				</td>
-			</tr>
+                    </select>
+                </td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('users_give_donor')) {
+    if (check_perms('users_give_donor')) {
 ?>
-			<tr>
-				<td class="label">Donor:</td>
-				<td><input type="checkbox" name="Donor"<? if ($Donor == 1) { ?> checked="checked"<? } ?> /></td>
-			</tr>
+            <tr>
+                <td class="label">Donor:</td>
+                <td><input type="checkbox" name="Donor"<? if ($Donor == 1) { ?> checked="checked"<? } ?> /></td>
+            </tr>
 <?
-	}
-	if (check_perms('users_promote_below') || check_perms('users_promote_to')) { ?>
-		<tr>
-			<td class="label">Secondary classes:</td>
-			<td>
+    }
+    if (check_perms('users_promote_below') || check_perms('users_promote_to')) { ?>
+        <tr>
+            <td class="label">Secondary classes:</td>
+            <td>
 <?
-		$DB->query("
-			SELECT p.ID, p.Name, l.UserID
-			FROM permissions AS p
-				LEFT JOIN users_levels AS l ON l.PermissionID = p.ID AND l.UserID = '$UserID'
-			WHERE p.Secondary = 1
-			ORDER BY p.Name");
-		$i = 0;
-		while (list($PermID, $PermName, $IsSet) = $DB->next_record()) {
-			$i++;
+        $DB->query("
+            SELECT p.ID, p.Name, l.UserID
+            FROM permissions AS p
+                LEFT JOIN users_levels AS l ON l.PermissionID = p.ID AND l.UserID = '$UserID'
+            WHERE p.Secondary = 1
+            ORDER BY p.Name");
+        $i = 0;
+        while (list($PermID, $PermName, $IsSet) = $DB->next_record()) {
+            $i++;
 ?>
-				<input type="checkbox" id="perm_<?=$PermID?>" name="secondary_classes[]" value="<?=$PermID?>"<? if ($IsSet) { ?> checked="checked"<? } ?> />&nbsp;<label for="perm_<?=$PermID?>" style="margin-right: 10px;"><?=$PermName?></label>
+                <input type="checkbox" id="perm_<?=$PermID?>" name="secondary_classes[]" value="<?=$PermID?>"<? if ($IsSet) { ?> checked="checked"<? } ?> />&nbsp;<label for="perm_<?=$PermID?>" style="margin-right: 10px;"><?=$PermName?></label>
 <?			if ($i % 3 == 0) {
-				echo "\t\t\t\t<br />\n";
-			}
-		} ?>
-			</td>
-		</tr>
+                echo "\t\t\t\t<br />\n";
+            }
+        } ?>
+            </td>
+        </tr>
 <?	}
-	if (check_perms('users_make_invisible')) {
+    if (check_perms('users_make_invisible')) {
 ?>
-			<tr>
-				<td class="label">Visible in peer lists:</td>
-				<td><input type="checkbox" name="Visible"<? if ($Visible == 1) { ?> checked="checked"<? } ?> /></td>
-			</tr>
+            <tr>
+                <td class="label">Visible in peer lists:</td>
+                <td><input type="checkbox" name="Visible"<? if ($Visible == 1) { ?> checked="checked"<? } ?> /></td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('users_edit_ratio', $Class) || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])) {
+    if (check_perms('users_edit_ratio', $Class) || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])) {
 ?>
-			<tr>
-				<td class="label tooltip" title="Upload amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Uploaded:</td>
-				<td>
-					<input type="hidden" name="OldUploaded" value="<?=$Uploaded?>" />
-					<input type="text" size="20" name="Uploaded" value="<?=$Uploaded?>" />
-				</td>
-			</tr>
-			<tr>
-				<td class="label tooltip" title="Download amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Downloaded:</td>
-				<td>
-					<input type="hidden" name="OldDownloaded" value="<?=$Downloaded?>" />
-					<input type="text" size="20" name="Downloaded" value="<?=$Downloaded?>" />
-				</td>
-			</tr>
-			<tr>
-				<td class="label tooltip" title="Bonus Points.">Bonus Points:</td>
-				<td>
-					<input type="hidden" name="OldBonusPoints" value="<?=$BonusPoints?>" />
-					<input type="text" size="20" name="BonusPoints" value="<?=$BonusPoints?>" />
-				</td>
-			</tr>
-			<tr>
-				<td class="label tooltip" title="Enter a username.">Merge stats <strong>from:</strong></td>
-				<td>
-					<input type="text" size="40" name="MergeStatsFrom" />
-				</td>
-			</tr>
+            <tr>
+                <td class="label tooltip" title="Upload amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Uploaded:</td>
+                <td>
+                    <input type="hidden" name="OldUploaded" value="<?=$Uploaded?>" />
+                    <input type="text" size="20" name="Uploaded" value="<?=$Uploaded?>" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label tooltip" title="Download amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Downloaded:</td>
+                <td>
+                    <input type="hidden" name="OldDownloaded" value="<?=$Downloaded?>" />
+                    <input type="text" size="20" name="Downloaded" value="<?=$Downloaded?>" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label tooltip" title="Bonus Points.">Bonus Points:</td>
+                <td>
+                    <input type="hidden" name="OldBonusPoints" value="<?=$BonusPoints?>" />
+                    <input type="text" size="20" name="BonusPoints" value="<?=$BonusPoints?>" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label tooltip" title="Enter a username.">Merge stats <strong>from:</strong></td>
+                <td>
+                    <input type="text" size="40" name="MergeStatsFrom" />
+                </td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('users_edit_invites')) {
+    if (check_perms('users_edit_invites')) {
 ?>
-			<tr>
-				<td class="label tooltip" title="Number of invites">Invites:</td>
-				<td><input type="text" size="5" name="Invites" value="<?=$Invites?>" /></td>
-			</tr>
+            <tr>
+                <td class="label tooltip" title="Number of invites">Invites:</td>
+                <td><input type="text" size="5" name="Invites" value="<?=$Invites?>" /></td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('admin_manage_user_fls')) {
+    if (check_perms('admin_manage_user_fls')) {
 ?>
-			<tr>
-				<td class="label tooltip" title="Number of FL tokens">FL Tokens:</td>
-				<td><input type="text" size="5" name="FLTokens" value="<?=$FLTokens?>" /></td>
-			</tr>
+            <tr>
+                <td class="label tooltip" title="Number of FL tokens">FL Tokens:</td>
+                <td><input type="text" size="5" name="FLTokens" value="<?=$FLTokens?>" /></td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('admin_manage_fls') || (check_perms('users_mod') && $OwnProfile)) {
+    if (check_perms('admin_manage_fls') || (check_perms('users_mod') && $OwnProfile)) {
 ?>
-			<tr>
-				<td class="label tooltip" title="This is the message shown in the right-hand column on /staff.php">FLS/Staff remark:</td>
-				<td><input type="text" class="wide_input_text" name="SupportFor" value="<?=display_str($SupportFor)?>" /></td>
-			</tr>
+            <tr>
+                <td class="label tooltip" title="This is the message shown in the right-hand column on /staff.php">FLS/Staff remark:</td>
+                <td><input type="text" class="wide_input_text" name="SupportFor" value="<?=display_str($SupportFor)?>" /></td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('users_edit_reset_keys')) {
+    if (check_perms('users_edit_reset_keys')) {
 ?>
-			<tr>
-				<td class="label">Reset:</td>
-				<td>
-					<input type="checkbox" name="ResetRatioWatch" id="ResetRatioWatch" /> <label for="ResetRatioWatch">Ratio watch</label> |
-					<input type="checkbox" name="ResetPasskey" id="ResetPasskey" /> <label for="ResetPasskey">Passkey</label> |
-					<input type="checkbox" name="ResetAuthkey" id="ResetAuthkey" /> <label for="ResetAuthkey">Authkey</label> |
-					<input type="checkbox" name="ResetIPHistory" id="ResetIPHistory" /> <label for="ResetIPHistory">IP history</label> |
-					<input type="checkbox" name="ResetEmailHistory" id="ResetEmailHistory" /> <label for="ResetEmailHistory">Email history</label>
-					<br />
-					<input type="checkbox" name="ResetSnatchList" id="ResetSnatchList" /> <label for="ResetSnatchList">Snatch list</label> |
-					<input type="checkbox" name="ResetDownloadList" id="ResetDownloadList" /> <label for="ResetDownloadList">Download list</label>
-				</td>
-			</tr>
+            <tr>
+                <td class="label">Reset:</td>
+                <td>
+                    <input type="checkbox" name="ResetRatioWatch" id="ResetRatioWatch" /> <label for="ResetRatioWatch">Ratio watch</label> |
+                    <input type="checkbox" name="ResetPasskey" id="ResetPasskey" /> <label for="ResetPasskey">Passkey</label> |
+                    <input type="checkbox" name="ResetAuthkey" id="ResetAuthkey" /> <label for="ResetAuthkey">Authkey</label> |
+                    <input type="checkbox" name="ResetIPHistory" id="ResetIPHistory" /> <label for="ResetIPHistory">IP history</label> |
+                    <input type="checkbox" name="ResetEmailHistory" id="ResetEmailHistory" /> <label for="ResetEmailHistory">Email history</label>
+                    <br />
+                    <input type="checkbox" name="ResetSnatchList" id="ResetSnatchList" /> <label for="ResetSnatchList">Snatch list</label> |
+                    <input type="checkbox" name="ResetDownloadList" id="ResetDownloadList" /> <label for="ResetDownloadList">Download list</label>
+                </td>
+            </tr>
 <?
-	}
+    }
 
-	if (check_perms('users_edit_password')) {
+    if (check_perms('users_edit_password')) {
 ?>
-			<tr>
-				<td class="label">New password:</td>
-				<td>
-					<input type="text" size="30" id="change_password" name="ChangePassword" />
-					<button type="button" id="random_password">Generate</button>
-				</td>
-			</tr>
+            <tr>
+                <td class="label">New password:</td>
+                <td>
+                    <input type="text" size="30" id="change_password" name="ChangePassword" />
+                    <button type="button" id="random_password">Generate</button>
+                </td>
+            </tr>
 
-			<tr>
-				<td class="label">Two-factor Authentication:</td>
-				<td>
+            <tr>
+                <td class="label">Two-factor Authentication:</td>
+                <td>
 <?      if ($FA_Key) { ?>
-					<a href="user.php?action=2fa&page=user&do=disable&userid=<?= $UserID ?>">Click here to disable</a>
+                    <a href="user.php?action=2fa&page=user&do=disable&userid=<?= $UserID ?>">Click here to disable</a>
 <?      } else { ?>
-					Currently Disabled
+                    Currently Disabled
 <?      } ?>
-				</td>
-			</tr>
+                </td>
+            </tr>
 
 <?	} ?>
-		</table>
+        </table>
 
 <?	if (check_perms('users_warn')) { ?>
-		<table class="layout" id="warn_user_box">
-			<tr class="colhead">
-				<td colspan="2">
-					Warnings
-				</td>
-			</tr>
-			<tr>
-				<td class="label">Warned:</td>
-				<td>
-					<input type="checkbox" name="Warned"<? if ($Warned != '0000-00-00 00:00:00') { ?> checked="checked"<? } ?> />
-				</td>
-			</tr>
+        <table class="layout" id="warn_user_box">
+            <tr class="colhead">
+                <td colspan="2">
+                    Warnings
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Warned:</td>
+                <td>
+                    <input type="checkbox" name="Warned"<? if ($Warned != '0000-00-00 00:00:00') { ?> checked="checked"<? } ?> />
+                </td>
+            </tr>
 <?		if ($Warned == '0000-00-00 00:00:00') { /* user is not warned */ ?>
-			<tr>
-				<td class="label">Expiration:</td>
-				<td>
-					<select name="WarnLength">
-						<option value="">---</option>
-						<option value="1">1 week</option>
-						<option value="2">2 weeks</option>
-						<option value="4">4 weeks</option>
-						<option value="8">8 weeks</option>
-					</select>
-				</td>
-			</tr>
+            <tr>
+                <td class="label">Expiration:</td>
+                <td>
+                    <select name="WarnLength">
+                        <option value="">---</option>
+                        <option value="1">1 week</option>
+                        <option value="2">2 weeks</option>
+                        <option value="4">4 weeks</option>
+                        <option value="8">8 weeks</option>
+                    </select>
+                </td>
+            </tr>
 <?		} else { /* user is warned */ ?>
-			<tr>
-				<td class="label">Extension:</td>
-				<td>
-					<select name="ExtendWarning" onchange="ToggleWarningAdjust(this);">
-						<option>---</option>
-						<option value="1">1 week</option>
-						<option value="2">2 weeks</option>
-						<option value="4">4 weeks</option>
-						<option value="8">8 weeks</option>
-					</select>
-				</td>
-			</tr>
-			<tr id="ReduceWarningTR">
-				<td class="label">Reduction:</td>
-				<td>
-					<select name="ReduceWarning">
-						<option>---</option>
-						<option value="1">1 week</option>
-						<option value="2">2 weeks</option>
-						<option value="4">4 weeks</option>
-						<option value="8">8 weeks</option>
-					</select>
-				</td>
-			</tr>
+            <tr>
+                <td class="label">Extension:</td>
+                <td>
+                    <select name="ExtendWarning" onchange="ToggleWarningAdjust(this);">
+                        <option>---</option>
+                        <option value="1">1 week</option>
+                        <option value="2">2 weeks</option>
+                        <option value="4">4 weeks</option>
+                        <option value="8">8 weeks</option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="ReduceWarningTR">
+                <td class="label">Reduction:</td>
+                <td>
+                    <select name="ReduceWarning">
+                        <option>---</option>
+                        <option value="1">1 week</option>
+                        <option value="2">2 weeks</option>
+                        <option value="4">4 weeks</option>
+                        <option value="8">8 weeks</option>
+                    </select>
+                </td>
+            </tr>
 <?		} ?>
-			<tr>
-				<td class="label tooltip" title="This message *will* be sent to the user in the warning PM!">Warning reason:</td>
-				<td>
-					<input type="text" class="wide_input_text" name="WarnReason" />
-				</td>
-			</tr>
+            <tr>
+                <td class="label tooltip" title="This message *will* be sent to the user in the warning PM!">Warning reason:</td>
+                <td>
+                    <input type="text" class="wide_input_text" name="WarnReason" />
+                </td>
+            </tr>
 <?	} ?>
-		</table>
+        </table>
 <?  if (check_perms('users_disable_any')) { ?>
-		<table class="layout">
-			<tr class="colhead">
-				<td colspan="2">
-					Lock Account
-				</td>
-			</tr>
-			<tr>
-	            <td class="label">Lock Account:</td>
-	            <td>
-	                <input type="checkbox" name="LockAccount" id="LockAccount" <? if($LockedAccount) { ?> checked="checked" <? } ?>/>
-	            </td>
-	        </tr>
-	        <tr>
-	            <td class="label">Reason:</td>
-	            <td>
-	                <select name="LockReason">
-	                    <option value="---">---</option>
-	                    <option value="<?=STAFF_LOCKED?>" <? if ($LockedAccount == STAFF_LOCKED) { ?> selected <? } ?>>Staff Lock</option>
-	                </select>
-	            </td>
-	        </tr>
-		</table>
+        <table class="layout">
+            <tr class="colhead">
+                <td colspan="2">
+                    Lock Account
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Lock Account:</td>
+                <td>
+                    <input type="checkbox" name="LockAccount" id="LockAccount" <? if($LockedAccount) { ?> checked="checked" <? } ?>/>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Reason:</td>
+                <td>
+                    <select name="LockReason">
+                        <option value="---">---</option>
+                        <option value="<?=STAFF_LOCKED?>" <? if ($LockedAccount == STAFF_LOCKED) { ?> selected <? } ?>>Staff Lock</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
 <?  }  ?>
-		<table class="layout" id="user_privs_box">
-			<tr class="colhead">
-				<td colspan="2">
-					User Privileges
-				</td>
-			</tr>
+        <table class="layout" id="user_privs_box">
+            <tr class="colhead">
+                <td colspan="2">
+                    User Privileges
+                </td>
+            </tr>
 <?	if (check_perms('users_disable_posts') || check_perms('users_disable_any')) {
-		$DB->query("
-			SELECT DISTINCT Email, IP
-			FROM users_history_emails
-			WHERE UserID = $UserID
-			ORDER BY Time ASC");
-		$Emails = $DB->to_array();
+        $DB->query("
+            SELECT DISTINCT Email, IP
+            FROM users_history_emails
+            WHERE UserID = $UserID
+            ORDER BY Time ASC");
+        $Emails = $DB->to_array();
 ?>
-			<tr>
-				<td class="label">Disable:</td>
-				<td>
-					<input type="checkbox" name="DisablePosting" id="DisablePosting"<? if ($DisablePosting == 1) { ?> checked="checked"<? } ?> /> <label for="DisablePosting">Posting</label>
+            <tr>
+                <td class="label">Disable:</td>
+                <td>
+                    <input type="checkbox" name="DisablePosting" id="DisablePosting"<? if ($DisablePosting == 1) { ?> checked="checked"<? } ?> /> <label for="DisablePosting">Posting</label>
 <?		if (check_perms('users_disable_any')) { ?> |
-					<input type="checkbox" name="DisableAvatar" id="DisableAvatar"<? if ($DisableAvatar == 1) { ?> checked="checked"<? } ?> /> <label for="DisableAvatar">Avatar</label> |
-					<input type="checkbox" name="DisableForums" id="DisableForums"<? if ($DisableForums == 1) { ?> checked="checked"<? } ?> /> <label for="DisableForums">Forums</label> |
-					<input type="checkbox" name="DisableIRC" id="DisableIRC"<? if ($DisableIRC == 1) { ?> checked="checked"<? } ?> /> <label for="DisableIRC">IRC</label> |
-					<input type="checkbox" name="DisablePM" id="DisablePM"<? if ($DisablePM == 1) { ?> checked="checked"<? } ?> /> <label for="DisablePM">PM</label> |
-					<br /><br />
+                    <input type="checkbox" name="DisableAvatar" id="DisableAvatar"<? if ($DisableAvatar == 1) { ?> checked="checked"<? } ?> /> <label for="DisableAvatar">Avatar</label> |
+                    <input type="checkbox" name="DisableForums" id="DisableForums"<? if ($DisableForums == 1) { ?> checked="checked"<? } ?> /> <label for="DisableForums">Forums</label> |
+                    <input type="checkbox" name="DisableIRC" id="DisableIRC"<? if ($DisableIRC == 1) { ?> checked="checked"<? } ?> /> <label for="DisableIRC">IRC</label> |
+                    <input type="checkbox" name="DisablePM" id="DisablePM"<? if ($DisablePM == 1) { ?> checked="checked"<? } ?> /> <label for="DisablePM">PM</label> |
+                    <br /><br />
 
-					<input type="checkbox" name="DisableLeech" id="DisableLeech"<? if ($DisableLeech == 0) { ?> checked="checked"<? } ?> /> <label for="DisableLeech">Leech</label> |
-					<input type="checkbox" name="DisableRequests" id="DisableRequests"<? if ($DisableRequests == 1) { ?> checked="checked"<? } ?> /> <label for="DisableRequests">Requests</label> |
-					<input type="checkbox" name="DisableUpload" id="DisableUpload"<? if ($DisableUpload == 1) { ?> checked="checked"<? } ?> /> <label for="DisableUpload">Torrent upload</label> |
-					<input type="checkbox" name="DisablePoints" id="DisablePoints"<? if ($DisablePoints == 1) { ?> checked="checked"<? } ?> /> <label for="DisablePoints">Bonus Points</label>
-					<br /><br />
+                    <input type="checkbox" name="DisableLeech" id="DisableLeech"<? if ($DisableLeech == 0) { ?> checked="checked"<? } ?> /> <label for="DisableLeech">Leech</label> |
+                    <input type="checkbox" name="DisableRequests" id="DisableRequests"<? if ($DisableRequests == 1) { ?> checked="checked"<? } ?> /> <label for="DisableRequests">Requests</label> |
+                    <input type="checkbox" name="DisableUpload" id="DisableUpload"<? if ($DisableUpload == 1) { ?> checked="checked"<? } ?> /> <label for="DisableUpload">Torrent upload</label> |
+                    <input type="checkbox" name="DisablePoints" id="DisablePoints"<? if ($DisablePoints == 1) { ?> checked="checked"<? } ?> /> <label for="DisablePoints">Bonus Points</label>
+                    <br /><br />
 
-					<input type="checkbox" name="DisableTagging" id="DisableTagging"<? if ($DisableTagging == 1) { ?> checked="checked"<? } ?> /> <label for="DisableTagging" class="tooltip" title="This only disables a user's ability to delete tags.">Tagging</label> |
-					<input type="checkbox" name="DisableWiki" id="DisableWiki"<? if ($DisableWiki == 1) { ?> checked="checked"<? } ?> /> <label for="DisableWiki">Wiki</label>
-					<br /><br />
+                    <input type="checkbox" name="DisableTagging" id="DisableTagging"<? if ($DisableTagging == 1) { ?> checked="checked"<? } ?> /> <label for="DisableTagging" class="tooltip" title="This only disables a user's ability to delete tags.">Tagging</label> |
+                    <input type="checkbox" name="DisableWiki" id="DisableWiki"<? if ($DisableWiki == 1) { ?> checked="checked"<? } ?> /> <label for="DisableWiki">Wiki</label>
+                    <br /><br />
 
-					<input type="checkbox" name="DisableInvites" id="DisableInvites"<? if ($DisableInvites == 1) { ?> checked="checked"<? } ?> /> <label for="DisableInvites">Invites</label>
-				</td>
-			</tr>
-			<tr>
-				<td class="label">Hacked:</td>
-				<td>
-					<input type="checkbox" name="SendHackedMail" id="SendHackedMail" /> <label for="SendHackedMail">Send hacked account email</label> to
-					<select name="HackedEmail">
+                    <input type="checkbox" name="DisableInvites" id="DisableInvites"<? if ($DisableInvites == 1) { ?> checked="checked"<? } ?> /> <label for="DisableInvites">Invites</label>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Hacked:</td>
+                <td>
+                    <input type="checkbox" name="SendHackedMail" id="SendHackedMail" /> <label for="SendHackedMail">Send hacked account email</label> to
+                    <select name="HackedEmail">
 <?
-			foreach ($Emails as $Email) {
-				list($Address, $IP) = $Email;
+            foreach ($Emails as $Email) {
+                list($Address, $IP) = $Email;
 ?>
-						<option value="<?=display_str($Address)?>"><?=display_str($Address)?> - <?=display_str($IP)?></option>
+                        <option value="<?=display_str($Address)?>"><?=display_str($Address)?> - <?=display_str($IP)?></option>
 <?			} ?>
-					</select>
-				</td>
-			</tr>
+                    </select>
+                </td>
+            </tr>
 
 <?
-		}
-	}
+        }
+    }
 
-	if (check_perms('users_disable_any')) {
+    if (check_perms('users_disable_any')) {
 ?>
-			<tr>
-				<td class="label">Account:</td>
-				<td>
-					<select name="UserStatus">
-						<option value="0"<? if ($Enabled == '0') { ?> selected="selected"<? } ?>>Unconfirmed</option>
-						<option value="1"<? if ($Enabled == '1') { ?> selected="selected"<? } ?>>Enabled</option>
-						<option value="2"<? if ($Enabled == '2') { ?> selected="selected"<? } ?>>Disabled</option>
+            <tr>
+                <td class="label">Account:</td>
+                <td>
+                    <select name="UserStatus">
+                        <option value="0"<? if ($Enabled == '0') { ?> selected="selected"<? } ?>>Unconfirmed</option>
+                        <option value="1"<? if ($Enabled == '1') { ?> selected="selected"<? } ?>>Enabled</option>
+                        <option value="2"<? if ($Enabled == '2') { ?> selected="selected"<? } ?>>Disabled</option>
 <?		if (check_perms('users_delete_users')) { ?>
-						<optgroup label="-- WARNING --">
-							<option value="delete">Delete account</option>
-						</optgroup>
+                        <optgroup label="-- WARNING --">
+                            <option value="delete">Delete account</option>
+                        </optgroup>
 <?		} ?>
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td class="label">User reason:</td>
-				<td>
-					<input type="text" class="wide_input_text" name="UserReason" />
-				</td>
-			</tr>
-			<tr>
-				<td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Restricted forums:</td>
-				<td>
-					<input type="text" class="wide_input_text" name="RestrictedForums" value="<?=display_str($RestrictedForums)?>" />
-				</td>
-			</tr>
-			<tr>
-				<td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Extra forums:</td>
-				<td>
-					<input type="text" class="wide_input_text" name="PermittedForums" value="<?=display_str($PermittedForums)?>" />
-				</td>
-			</tr>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">User reason:</td>
+                <td>
+                    <input type="text" class="wide_input_text" name="UserReason" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Restricted forums:</td>
+                <td>
+                    <input type="text" class="wide_input_text" name="RestrictedForums" value="<?=display_str($RestrictedForums)?>" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Extra forums:</td>
+                <td>
+                    <input type="text" class="wide_input_text" name="PermittedForums" value="<?=display_str($PermittedForums)?>" />
+                </td>
+            </tr>
 
 <?	} ?>
-		</table>
+        </table>
 <?	if (check_perms('users_logout')) { ?>
-		<table class="layout" id="session_box">
-			<tr class="colhead">
-				<td colspan="2">
-					Session
-				</td>
-			</tr>
-			<tr>
-				<td class="label">Reset session:</td>
-				<td><input type="checkbox" name="ResetSession" id="ResetSession" /></td>
-			</tr>
-			<tr>
-				<td class="label">Log out:</td>
-				<td><input type="checkbox" name="LogOut" id="LogOut" /></td>
-			</tr>
-		</table>
+        <table class="layout" id="session_box">
+            <tr class="colhead">
+                <td colspan="2">
+                    Session
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Reset session:</td>
+                <td><input type="checkbox" name="ResetSession" id="ResetSession" /></td>
+            </tr>
+            <tr>
+                <td class="label">Log out:</td>
+                <td><input type="checkbox" name="LogOut" id="LogOut" /></td>
+            </tr>
+        </table>
 <?
-	}
-	if (check_perms('users_mod')) {
-		DonationsView::render_mod_donations($UserID);
-	}
+    }
+    if (check_perms('users_mod')) {
+        DonationsView::render_mod_donations($UserID);
+    }
 ?>
-		<table class="layout" id="submit_box">
-			<tr class="colhead">
-				<td colspan="2">
-					Submit
-				</td>
-			</tr>
-			<tr>
-				<td class="label tooltip" title="This message will be entered into staff notes only.">Reason:</td>
-				<td>
-					<textarea rows="1" cols="35" class="wide_input_text" name="Reason" id="Reason" onkeyup="resize('Reason');"></textarea>
-				</td>
-			</tr>
-			<tr>
-				<td class="label">Paste user stats:</td>
-				<td>
-					<button type="button" id="paster">Paste</button>
-				</td>
-			</tr>
+        <table class="layout" id="submit_box">
+            <tr class="colhead">
+                <td colspan="2">
+                    Submit
+                </td>
+            </tr>
+            <tr>
+                <td class="label tooltip" title="This message will be entered into staff notes only.">Reason:</td>
+                <td>
+                    <textarea rows="1" cols="35" class="wide_input_text" name="Reason" id="Reason" onkeyup="resize('Reason');"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Paste user stats:</td>
+                <td>
+                    <button type="button" id="paster">Paste</button>
+                </td>
+            </tr>
 
-			<tr>
-				<td align="right" colspan="2">
-					<input type="submit" value="Save changes" />
-				</td>
-			</tr>
-		</table>
-		</form>
+            <tr>
+                <td align="right" colspan="2">
+                    <input type="submit" value="Save changes" />
+                </td>
+            </tr>
+        </table>
+        </form>
 <?
 }
 ?>
-	</div>
+    </div>
 </div>
 <? View::show_footer(); ?>

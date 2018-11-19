@@ -4,10 +4,10 @@ $SimilarID = db_string($_GET['similarid']);
 $PrimaryArtistID = intval($_GET['artistid']);
 
 if (!is_number($SimilarID) || !$SimilarID) {
-	error(404);
+    error(404);
 }
 if (!check_perms('site_delete_tag')) {
-	error(403);
+    error(403);
 }
 $DB->query("
 	SELECT ArtistID
@@ -25,9 +25,9 @@ $DB->query("
 	WHERE SimilarID = '$SimilarID'");
 
 foreach ($ArtistIDs as $ArtistID) {
-	list($ArtistID) = $ArtistID;
-	$Cache->delete_value("artist_$ArtistID"); // Delete artist cache
-	$Cache->delete_value("similar_positions_$ArtistID");
+    list($ArtistID) = $ArtistID;
+    $Cache->delete_value("artist_$ArtistID"); // Delete artist cache
+    $Cache->delete_value("similar_positions_$ArtistID");
 }
 
 $Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$PrimaryArtistID}" : $_SERVER['HTTP_REFERER'];

@@ -3,23 +3,23 @@
 //--------------- Delete a recommendation --------------------------------------//
 
 if (!check_perms('site_recommend_own') && !check_perms('site_manage_recommendations')) {
-	error(403);
+    error(403);
 }
 
 $GroupID = $_GET['groupid'];
 if (!$GroupID || !is_number($GroupID)) {
-	error(404);
+    error(404);
 }
 
 if (!check_perms('site_manage_recommendations')) {
-	$DB->query("
+    $DB->query("
 		SELECT UserID
 		FROM torrents_recommended
 		WHERE GroupID = '$GroupID'");
-	list($UserID) = $DB->next_record();
-	if ($UserID != $LoggedUser['ID']) {
-		error(403);
-	}
+    list($UserID) = $DB->next_record();
+    if ($UserID != $LoggedUser['ID']) {
+        error(403);
+    }
 }
 
 $DB->query("
