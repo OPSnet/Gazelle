@@ -75,6 +75,7 @@ class ImageTools
     /**
      * Checks if a link's host is (not) good, otherwise displays an error.
      * @param string $Url Link to an image
+     * @param bool $ShowError
      * @return boolean
      */
     public static function blacklisted($Url, $ShowError = true)
@@ -139,6 +140,8 @@ class ImageTools
 
     /**
      * Checks if URL points to a whatimg thumbnail.
+     * @param $Url
+     * @return bool
      */
     private static function has_whatimg_thumb($Url)
     {
@@ -147,6 +150,8 @@ class ImageTools
 
     /**
      * Cleans up imgur URL if it already has a modifier attached to the end of it.
+     * @param $Url
+     * @return string
      */
     private static function clean_imgur_url($Url)
     {
@@ -165,6 +170,9 @@ class ImageTools
 
     /**
      * Replaces the extension.
+     * @param $String
+     * @param $Extension
+     * @return null|string|string[]
      */
     private static function replace_extension($String, $Extension)
     {
@@ -174,8 +182,9 @@ class ImageTools
     /**
      * Create image proxy URL
      * @param string $Url image URL
-     * @param bool/string $CheckSize - accepts one of false, "avatar", "avatar2", or "donoricon"
-     * @param bool/string/number $UserID - user ID for avatars and donor icons
+     * @param $CheckSize
+     * @param $UserID
+     * @param $ExtraInfo
      * @return image proxy URL
      */
     public static function proxy_url($Url, $CheckSize, $UserID, &$ExtraInfo)

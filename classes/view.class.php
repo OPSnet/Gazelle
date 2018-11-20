@@ -5,14 +5,15 @@ class View {
 	 */
 	const IncludePath = __DIR__.'/../design/views/';
 
-	/**
-	 * This function is to include the header file on a page.
-	 *
-	 * @param $PageTitle the title of the page
-	 * @param $JSIncludes is a comma-separated list of JS files to be included on
-	 *                    the page. ONLY PUT THE RELATIVE LOCATION WITHOUT '.js'
-	 *                    example: 'somefile,somedir/somefile'
-	 */
+    /**
+     * This function is to include the header file on a page.
+     *
+     * @param string $PageTitle the title of the page
+     * @param string $JSIncludes is a comma-separated list of JS files to be included on
+     *                    the page. ONLY PUT THE RELATIVE LOCATION WITHOUT '.js'
+     *                    example: 'somefile,somedir/somefile'
+     * @param string $CSSIncludes
+     */
 	public static function show_header($PageTitle = '', $JSIncludes = '', $CSSIncludes = '') {
 		global $Document, $Classes;
 
@@ -33,15 +34,15 @@ class View {
 		}
 	}
 
-	/**
-	 * This function is to include the footer file on a page.
-	 *
-	 * @param $Options an optional array that you can pass information to the
-	 *                 header through as well as setup certain limitations
-	 *	               Here is a list of parameters that work in the $Options array:
-	 *                 ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
-	 */
-	public static function show_footer($Options = []) {
+    /**
+     * This function is to include the footer file on a page.
+     *
+     * @param array $Options an optional array that you can pass information to the
+     *                 header through as well as setup certain limitations
+     *                   Here is a list of parameters that work in the $Options array:
+     *                 ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
+     */
+    public static function show_footer($Options = []) {
 		global $ScriptStartTime, $SessionID, $UserSessions, $Debug, $Time;
 		if (!is_array(G::$LoggedUser) || (isset($Options['recover']) && $Options['recover'] === true)) {
 			require(SERVER_ROOT.'/design/publicfooter.php');

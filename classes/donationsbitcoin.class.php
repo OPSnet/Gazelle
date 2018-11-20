@@ -166,12 +166,13 @@ class DonationsBitcoin {
 		}
 	}
 
-	/**
-	 * Record a donation in the database
-	 *
-	 * @param string $Address bitcoin address
-	 * @param double $Amount amount of bitcoins transferred
-	 */
+    /**
+     * Record a donation in the database
+     *
+     * @param string $Address bitcoin address
+     * @param double $Amount amount of bitcoins transferred
+     * @return bool
+     */
 	public static function store_donation($Address, $Amount) {
 		if (!is_numeric($Amount) || $Amount <= 0) {
 			// Panic!

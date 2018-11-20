@@ -208,6 +208,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW
      * @param string|int $GroupYear
      * @param string $DisplayName
      * @param string $TorrentLink
+     * @param $DateAdded
      */
     public function row($Sort, $GroupID, $GroupYear, $DisplayName, $TorrentLink, $DateAdded)
     {

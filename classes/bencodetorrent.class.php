@@ -137,9 +137,12 @@ class BencodeTorrent extends BencodeDecode {
 		return sha1($this->encode(false, 'info'));
 	}
 
-	/**
-	 * Add the announce URL to a torrent
-	 */
+    /**
+     * Add the announce URL to a torrent
+     * @param $Data
+     * @param $Url
+     * @return string
+     */
 	public static function add_announce_url($Data, $Url) {
 		return 'd8:announce'.strlen($Url).':'.$Url . substr($Data, 1);
 	}

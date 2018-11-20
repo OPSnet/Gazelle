@@ -88,13 +88,13 @@ class Sphinxql extends mysqli {
 		}
 	}
 
-	/**
-	 * Print a message to privileged users and optionally halt page processing
-	 *
-	 * @param string $Msg message to display
-	 * @param bool $Halt halt page processing. Default is to continue processing the page
-	 * @return Sphinxql object
-	 */
+    /**
+     * Print a message to privileged users and optionally halt page processing
+     *
+     * @param string $Msg message to display
+     * @param bool $Halt halt page processing. Default is to continue processing the page
+     * @return void object
+     */
 	public function error($Msg, $Halt = false) {
 		global $Debug;
 		$ErrorMsg = 'SphinxQL ('.$this->Ident.'): '.strval($Msg);

@@ -30,6 +30,7 @@ class TimeTest extends TestCase
 
     /**
      * @param $hours
+     * @param $levels
      * @param $expected
      *
      * @dataProvider providerHours

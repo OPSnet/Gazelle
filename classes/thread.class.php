@@ -59,6 +59,7 @@ class Thread
      * @param int $user_id The note author
      * @param string $body The note text
      * @param int $visibility 'public' or 'staff'
+     * @return Thread
      */
     public function save_note($user_id, $body, $visibility)
     {
@@ -77,6 +78,7 @@ class Thread
      * @param int $id The id to identify a note
      * @param string $body The note text
      * @param int $visibility 'public' or 'staff'
+     * @return Thread
      */
     public function update_note($id, $body, $visibility)
     {
@@ -92,6 +94,7 @@ class Thread
     /**
      * Delete a note.
      * @param int $note_id The id to identify a note
+     * @return Thread
      */
     public function delete_note($note_id)
     {
@@ -142,7 +145,7 @@ class Thread
     /**
      * Instantiate a new instance of a Thread from an id
      * @param $id int The id of a Thread
-     * @return a Thread object
+     * @return Thread Thread object
      */
     public static function factory($id)
     {

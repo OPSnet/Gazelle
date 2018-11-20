@@ -90,12 +90,13 @@ class Forums {
 		return true;
 	}
 
-	/**
-	 * Gets basic info on a forum.
-	 *
-	 * @param int $ForumID
-	 *        	the forum ID.
-	 */
+    /**
+     * Gets basic info on a forum.
+     *
+     * @param int $ForumID
+     *            the forum ID.
+     * @return array|bool|mixed|null
+     */
 	public static function get_forum_info($ForumID) {
 		$Forum = G::$Cache->get_value("ForumInfo_$ForumID");
 		if (!$Forum) {

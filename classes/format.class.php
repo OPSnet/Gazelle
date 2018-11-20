@@ -137,14 +137,14 @@ class Format {
 		return number_format(max($Dividend / $Divisor - (0.5 / pow(10, $Decimal)), 0), $Decimal);
 	}
 
-	/**
-	 * Gets the query string of the current page, minus the parameters in $Exclude
-	 *
-	 * @param array $Exclude Query string parameters to leave out, or blank to include all parameters.
-	 * @param bool $Escape Whether to return a string prepared for HTML output
-	 * @param bool $Sort Whether to sort the parameters by key
-	 * @return An optionally HTML sanatized query string
-	 */
+    /**
+     * Gets the query string of the current page, minus the parameters in $Exclude
+     *
+     * @param bool $Exclude Query string parameters to leave out, or blank to include all parameters.
+     * @param bool $Escape Whether to return a string prepared for HTML output
+     * @param bool $Sort Whether to sort the parameters by key
+     * @return An optionally HTML sanatized query string
+     */
 	public static function get_url($Exclude = false, $Escape = true, $Sort = false) {
 		if ($Exclude !== false) {
 			$Separator = $Escape ? '&amp;' : '&';
@@ -418,20 +418,20 @@ class Format {
 		}
 	}
 
-	/**
-	 * Return a CSS class name if certain conditions are met. Mainly useful to mark links as 'active'
-	 *
-	 * @param mixed $Target The variable to compare all values against
-	 * @param mixed $Tests The condition values. Type and dimension determines test type
-	 *                 Scalar: $Tests must be equal to $Target for a match
-	 *                 Vector: All elements in $Tests must correspond to equal values in $Target
-	 *                 2-dimensional array: At least one array must be identical to $Target
-	 * @param string $ClassName CSS class name to return
-	 * @param bool $AddAttribute Whether to include the "class" attribute in the output
-	 * @param string $UserIDKey Key in _REQUEST for a user ID parameter, which if given will be compared to G::$LoggedUser[ID]
-	 *
-	 * @return string class name on match, otherwise an empty string
-	 */
+    /**
+     * Return a CSS class name if certain conditions are met. Mainly useful to mark links as 'active'
+     *
+     * @param mixed $Target The variable to compare all values against
+     * @param mixed $Tests The condition values. Type and dimension determines test type
+     *                 Scalar: $Tests must be equal to $Target for a match
+     *                 Vector: All elements in $Tests must correspond to equal values in $Target
+     *                 2-dimensional array: At least one array must be identical to $Target
+     * @param string $ClassName CSS class name to return
+     * @param bool $AddAttribute Whether to include the "class" attribute in the output
+     * @param bool $UserIDKey Key in _REQUEST for a user ID parameter, which if given will be compared to G::$LoggedUser[ID]
+     *
+     * @return string class name on match, otherwise an empty string
+     */
 	public static function add_class($Target, $Tests, $ClassName, $AddAttribute, $UserIDKey = false) {
 		if ($UserIDKey && isset($_REQUEST[$UserIDKey]) && G::$LoggedUser['ID'] != $_REQUEST[$UserIDKey]) {
 			return '';
@@ -499,13 +499,13 @@ class Format {
 		}
 	}
 
-	/**
-	 * Magical function.
-	 *
-	 * @param string $Str function to detect encoding on.
-	 * @return true if the string is in UTF-8.
-	 */
-	public static function is_utf8($Str) {
+    /**
+     * Magical function.
+     *
+     * @param string $Str function to detect encoding on.
+     * @return false|int if the string is in UTF-8.
+     */
+    public static function is_utf8($Str) {
 		return preg_match('%^(?:
 			[\x09\x0A\x0D\x20-\x7E]              // ASCII
 			| [\xC2-\xDF][\x80-\xBF]             // non-overlong 2-byte

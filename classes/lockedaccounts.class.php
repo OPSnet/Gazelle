@@ -38,6 +38,7 @@ class LockedAccounts
      * @param int $UserID The ID of the user to unlock
      * @param int $Type The lock type, should be a constant value. Used for database verification
      *                  to avoid deleting the wrong lock type
+     * @param $Message
      * @param string $Reason The reason for unlock
      * @param int $UnlockedByUserID The ID of the staff member unlocking $UserID's account. 0 for system
      */

@@ -275,18 +275,22 @@ class AutoEnable {
 		return $Err;
 	}
 
-	/**
-	 * Build the search query, from the searchbox inputs
-	 *
-	 * @param int $UserID The user ID
-	 * @param string $IP The IP
-	 * @param string $SubmittedTimestamp The timestamp representing when the request was submitted
-	 * @param int $HandledUserID The ID of the user that handled the request
-	 * @param string $HandledTimestamp The timestamp representing when the request was handled
-	 * @param int $OutcomeSearch The outcome of the request
-	 * @param boolean $Checked Should checked requests be included?
-	 * @return array The WHERE conditions for the query
-	 */
+    /**
+     * Build the search query, from the searchbox inputs
+     *
+     * @param $Username
+     * @param string $IP The IP
+     * @param $SubmittedBetween
+     * @param $SubmittedTimestamp1
+     * @param $SubmittedTimestamp2
+     * @param $HandledUsername
+     * @param $HandledBetween
+     * @param $HandledTimestamp1
+     * @param $HandledTimestamp2
+     * @param int $OutcomeSearch The outcome of the request
+     * @param boolean $Checked Should checked requests be included?
+     * @return array The WHERE conditions for the query
+     */
 	public static function build_search_query($Username, $IP, $SubmittedBetween, $SubmittedTimestamp1, $SubmittedTimestamp2, $HandledUsername, $HandledBetween, $HandledTimestamp1, $HandledTimestamp2, $OutcomeSearch, $Checked) {
 		$Where = [];
 

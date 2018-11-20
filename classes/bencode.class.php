@@ -38,13 +38,13 @@ class Bencode {
 	private $Data;
 	public $Enc;
 
-	/**
-	 * Encode an arbitrary array (usually one that's just been decoded)
-	 *
-	 * @param array $Arg the thing to encode
-	 * @param mixed $Keys string or array with keys in the input array to encode or true to encode everything
-	 * @return bencoded string representing the content of the input array
-	 */
+    /**
+     * Encode an arbitrary array (usually one that's just been decoded)
+     *
+     * @param bool $Arg the thing to encode
+     * @param mixed $Keys string or array with keys in the input array to encode or true to encode everything
+     * @return bencoded string representing the content of the input array
+     */
 	public function encode($Arg = false, $Keys = false) {
 		if ($Arg === false) {
 			$Data =& $this->Dec;

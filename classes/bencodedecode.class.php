@@ -11,13 +11,12 @@ class BencodeDecode extends Bencode {
 	public $ExitOnError = true;
 	const SnipLength = 40;
 
-	/**
-	 * Decode prepararations
-	 *
-	 * @param string $Arg bencoded string or path to bencoded file to decode
-	 * @param bool $IsPath needs to be true if $Arg is a path
-	 * @return decoded data with a suitable structure
-	 */
+    /**
+     * Decode prepararations
+     *
+     * @param bool $Arg bencoded string or path to bencoded file to decode
+     * @param bool $IsPath needs to be true if $Arg is a path
+     */
 	function __construct($Arg = false, $IsPath = false) {
 		if ($Arg === false) {
 			if (empty($this->Enc)) {
@@ -32,12 +31,12 @@ class BencodeDecode extends Bencode {
 		return $this->decode();
 	}
 
-	/**
-	 * Decodes a bencoded file
-	 *
-	 * @param $Path path to bencoded file to decode
-	 * @return decoded data with a suitable structure
-	 */
+    /**
+     * Decodes a bencoded file
+     *
+     * @param bool $Path path to bencoded file to decode
+     * @return decoded data with a suitable structure
+     */
 	public function bdec_file($Path = false) {
 		if (empty($Path)) {
 			return false;
@@ -158,11 +157,12 @@ class BencodeDecode extends Bencode {
 		return $Escape ? htmlentities($Data) : $Data;
 	}
 
-	/**
-	 * Display an error and halt the operation unless the $ExitOnError property is false
-	 *
-	 * @param string $ErrMsg the error message to display
-	 */
+    /**
+     * Display an error and halt the operation unless the $ExitOnError property is false
+     *
+     * @param bool $ErrMsg the error message to display
+     * @return bool
+     */
 	private function error($ErrMsg = false) {
 		static $ErrorPos;
 		if ($this->Pos === $ErrorPos) {

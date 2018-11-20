@@ -109,6 +109,7 @@ function display_array($Array, $Escape = [])
  * Print the site's URL including the appropriate URI scheme, including the trailing slash
  *
  * @param bool $SSL - whether the URL should be crafted for HTTPS or regular HTTP
+ * @return string
  */
 function site_url($SSL = true)
 {

@@ -533,10 +533,11 @@ class Text {
 		return $Array;
 	}
 
-	/**
-	 * Generates a navigation list for TOC
-	 * @param int $Min Minimum number of headlines required for a TOC list
-	 */
+    /**
+     * Generates a navigation list for TOC
+     * @param int $Min Minimum number of headlines required for a TOC list
+     * @return string
+     */
 	public static function parse_toc ($Min = 3) {
 		if (count(self::$Headlines) > $Min) {
 			$list = '<ol class="navigation_list">';

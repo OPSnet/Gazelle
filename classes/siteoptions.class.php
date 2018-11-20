@@ -10,6 +10,7 @@ class SiteOptions {
      *
      * @param string $Name The option name
      * @param string $DefaultValue The value to default to if the name can't be found in the cache
+     * @return bool|mixed|string
      */
     public static function getSiteOption($Name, $DefaultValue) {
         $Value = G::$Cache->get_value('site_option_' . $Name);

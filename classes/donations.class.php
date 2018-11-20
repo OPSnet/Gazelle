@@ -302,9 +302,11 @@ class Donations {
 		return self::get_rank($UserID) >= DONOR_FORUM_RANK || self::get_special_rank($UserID) >= MAX_SPECIAL_RANK;
 	}
 
-	/**
-	 * Put all the common donor info in the same cache key to save some cache calls
-	 */
+    /**
+     * Put all the common donor info in the same cache key to save some cache calls
+     * @param $UserID
+     * @return array|bool|mixed
+     */
 	public static function get_donor_info($UserID) {
 		// Our cache class should prevent identical memcached requests
 		$DonorInfo = G::$Cache->get_value("donor_info_$UserID");

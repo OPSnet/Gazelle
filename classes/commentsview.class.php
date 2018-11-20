@@ -13,19 +13,20 @@ class CommentsView {
 		}
 	}
 
-	/**
-	 * Render one comment
-	 * @param int $AuthorID
-	 * @param int $PostID
-	 * @param string $Body
-	 * @param string $AddedTime
-	 * @param int $EditedUserID
-	 * @param string $EditedTime
-	 * @param string $Link The link to the post elsewhere on the site
-	 * @param string $Header The header used in the post
-	 * @param bool $Tools Whether or not to show [Edit], [Report] etc.
-	 * @todo Find a better way to pass the page (artist, collages, requests, torrents) to this function than extracting it from $Link
-	 */
+    /**
+     * Render one comment
+     * @param int $AuthorID
+     * @param int $PostID
+     * @param string $Body
+     * @param string $AddedTime
+     * @param int $EditedUserID
+     * @param string $EditedTime
+     * @param string $Link The link to the post elsewhere on the site
+     * @param bool $Unread
+     * @param string $Header The header used in the post
+     * @param bool $Tools Whether or not to show [Edit], [Report] etc.
+     * @todo Find a better way to pass the page (artist, collages, requests, torrents) to this function than extracting it from $Link
+     */
 	function render_comment($AuthorID, $PostID, $Body, $AddedTime, $EditedUserID, $EditedTime, $Link, $Unread = false, $Header = '', $Tools = true) {
 		$UserInfo = Users::user_info($AuthorID);
 		$Header = '<strong>' . Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header;

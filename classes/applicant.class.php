@@ -128,6 +128,10 @@ class Applicant
 
     /**
      * Save the applicant thread note (see Thread class)
+     * @param $poster_id
+     * @param $body
+     * @param $visibility
+     * @return Applicant
      */
     public function save_note($poster_id, $body, $visibility)
     {
@@ -176,7 +180,7 @@ END_MSG
     /**
      * Instantiate an instance of an Applicant from an id
      * @param $id int The id of an Applicant
-     * @return an Applicant object
+     * @return Applicant Applicant object
      */
     public static function factory($id)
     {
@@ -220,7 +224,7 @@ END_MSG
      *  last_Username - username of the most recent person to comment in the thread
      *  last_Created  - the timestamp of the most recent comment
      * @param $page int The page number to fetch (50 entries) defaults to 1
-     * @param $resolved int Should resolved applications be included (defaults to no).
+     * @param bool $resolved int Should resolved applications be included (defaults to no).
      * @param $user_id int If non-zero, return applications of this user_id
      * @return a list of Applicant information
      */

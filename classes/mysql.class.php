@@ -261,19 +261,20 @@ class DB_MYSQL {
 		return $this->attempt_query($Query, $Closure, $AutoHandle);
 	}
 
-	/**
-	 * Prepares an SQL statement for execution with data.
-	 *
-	 * Normally, you'll most likely just want to be using
-	 * DB_MYSQL::prepared_query to call both DB_MYSQL::prepare
-	 * and DB_MYSQL::execute for one-off queries, you can use
-	 * this separately in the case where you plan to be running
-	 * this query repeatedly while just changing the bound
-	 * parameters (such as if doing a bulk update or the like).
-	 *
-	 * @return mysqli_stmt|bool Returns a statement object
-	 *                          or FALSE if an error occurred.
-	 */
+    /**
+     * Prepares an SQL statement for execution with data.
+     *
+     * Normally, you'll most likely just want to be using
+     * DB_MYSQL::prepared_query to call both DB_MYSQL::prepare
+     * and DB_MYSQL::execute for one-off queries, you can use
+     * this separately in the case where you plan to be running
+     * this query repeatedly while just changing the bound
+     * parameters (such as if doing a bulk update or the like).
+     *
+     * @param $Query
+     * @return mysqli_stmt|bool Returns a statement object
+     *                          or FALSE if an error occurred.
+     */
 	function prepare($Query) {
 		$this->setup_query();
 		$this->PreparedQuery = $Query;

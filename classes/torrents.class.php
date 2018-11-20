@@ -206,12 +206,12 @@ class Torrents {
         ];
 	}
 
-	/**
-	 * Supplements a torrent array with information that only concerns certain users and therefore cannot be cached
-	 *
-	 * @param array $Torrent torrent array preferably in the form used by Torrents::get_groups() or get_group_info()
-	 * @param int $TorrentID
-	 */
+    /**
+     * Supplements a torrent array with information that only concerns certain users and therefore cannot be cached
+     *
+     * @param array $Torrent torrent array preferably in the form used by Torrents::get_groups() or get_group_info()
+     * @param $Flags
+     */
 	public static function torrent_properties(&$Torrent, &$Flags) {
 		$Torrent['PersonalFL'] = empty($Torrent['FreeTorrent']) && self::has_token($Torrent['ID']);
 		if ($Torrent['IsSnatched'] = self::has_snatched($Torrent['ID'])) {
@@ -241,13 +241,13 @@ class Torrents {
 	}
 
 
-	/**
-	 * Delete a torrent.
-	 *
-	 * @param int $ID The ID of the torrent to delete.
-	 * @param int $GroupID Set it if you have it handy, to save a query. Otherwise, it will be found.
-	 * @param string $OcelotReason The deletion reason for ocelot to report to users.
-	 */
+    /**
+     * Delete a torrent.
+     *
+     * @param int $ID The ID of the torrent to delete.
+     * @param int $GroupID Set it if you have it handy, to save a query. Otherwise, it will be found.
+     * @param int $OcelotReason The deletion reason for ocelot to report to users.
+     */
 	public static function delete_torrent($ID, $GroupID = 0, $OcelotReason = -1) {
 		$QueryID = G::$DB->get_query_id();
 		if (!$GroupID) {
@@ -697,12 +697,12 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		return $File['name'] . '{{{' . $File['size'] . '}}}';
 	}
 
-	/**
-	 * Translate a formatted file info string into a more useful array structure
-	 *
-	 * @param string $File string with the format .EXT sSIZEs NAME DELIMITER
-	 * @return file info array with the keys 'ext', 'size' and 'name'
-	 */
+    /**
+     * Translate a formatted file info string into a more useful array structure
+     *
+     * @param string $File string with the format .EXT sSIZEs NAME DELIMITER
+     * @return array info array with the keys 'ext', 'size' and 'name'
+     */
 	public static function filelist_get_file($File) {
 		// Need this hack because filelists are always display_str()ed
 		$DelimLen = strlen(display_str(self::filelist_delim())) + 1;
@@ -878,12 +878,12 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 	}
 
 
-	/**
-	 * Check if the logged in user can use a freeleech token on this torrent
-	 *
-	 * @param int $Torrent
-	 * @return boolen True if user is allowed to use a token
-	 */
+    /**
+     * Check if the logged in user can use a freeleech token on this torrent
+     *
+     * @param int $Torrent
+     * @return bool True if user is allowed to use a token
+     */
 	public static function can_use_token($Torrent) {
 		if (empty(G::$LoggedUser)) {
 			return false;
@@ -982,12 +982,13 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		return isset($CurSnatchedTorrents[$TorrentID]);
 	}
 
-	/**
-	 * Change the schedule for when the next update to a user's cached snatch list should be performed.
-	 * By default, the change will only be made if the new update would happen sooner than the current
-	 * @param int $Time Seconds until the next update
-	 * @param bool $Force Whether to accept changes that would push back the update
-	 */
+    /**
+     * Change the schedule for when the next update to a user's cached snatch list should be performed.
+     * By default, the change will only be made if the new update would happen sooner than the current
+     * @param $UserID
+     * @param int $Time Seconds until the next update
+     * @param bool $Force Whether to accept changes that would push back the update
+     */
 	public static function set_snatch_update_time($UserID, $Time, $Force = false) {
 		if (!$UpdateTime = G::$Cache->get_value("users_snatched_{$UserID}_time")) {
 			return;
@@ -1014,11 +1015,12 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 	const DISPLAYSTRING_DEFAULT = 63; // HTML|ARTISTS|YEAR|VH|RELEASETYPE|LINKED = 63
 	const DISPLAYSTRING_SHORT = 6; // Very simple format, only artists and year, no linking (e.g. for forum thread titles)
 
-	/**
-	 * Return the display string for a given torrent group $GroupID.
-	 * @param int $GroupID
-	 * @return string
-	 */
+    /**
+     * Return the display string for a given torrent group $GroupID.
+     * @param int $GroupID
+     * @param int $Mode
+     * @return string
+     */
 	public static function display_string($GroupID, $Mode = self::DISPLAYSTRING_DEFAULT) {
 		global $ReleaseTypes; // I hate this
 

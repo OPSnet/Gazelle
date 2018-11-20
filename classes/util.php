@@ -122,10 +122,10 @@ function send_irc($Raw) {
  * Display a critical error and kills the page.
  *
  * @param string $Error Error type. Automatically supported:
- *	403, 404, 0 (invalid input), -1 (invalid request)
- *	If you use your own string for Error, it becomes the error description.
+ *    403, 404, 0 (invalid input), -1 (invalid request)
+ *    If you use your own string for Error, it becomes the error description.
  * @param boolean $NoHTML If true, the header/footer won't be shown, just the description.
- * @param string $Log If true, the user is given a link to search $Log in the site log.
+ * @param bool $Log If true, the user is given a link to search $Log in the site log.
  */
 function error($Error, $NoHTML = false, $Log = false) {
 	global $Debug;
@@ -151,6 +151,8 @@ function check_perms($PermissionName, $MinClass = 0) {
 /**
  * Print JSON status result with an optional message and die.
  * DO NOT USE THIS FUNCTION!
+ * @param $Status
+ * @param $Message
  */
 function json_die($Status, $Message) {
 	json_print($Status, $Message);
@@ -159,6 +161,8 @@ function json_die($Status, $Message) {
 
 /**
  * Print JSON status result with an optional message.
+ * @param $Status
+ * @param $Message
  */
 function json_print($Status, $Message) {
 	if ($Status == 'success' && $Message) {
@@ -210,6 +214,7 @@ function unserialize_array($array) {
 
 /**
  * Utility function for determining if checkbox should be checked if some $value is set or not
+ * @param $array
  * @param $value
  * @return string
  */

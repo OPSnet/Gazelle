@@ -1,10 +1,11 @@
 <?
 class Tools {
-	/**
-	 * Returns true if given IP is banned.
-	 *
-	 * @param string $IP
-	 */
+    /**
+     * Returns true if given IP is banned.
+     *
+     * @param string $IP
+     * @return bool
+     */
 	public static function site_ban_ip($IP) {
 		global $Debug;
 		$A = substr($IP, 0, strcspn($IP, '.'));
@@ -174,12 +175,13 @@ class Tools {
 		return $HTML;
 	}
 
-	/**
-	 * Disable an array of users.
-	 *
-	 * @param array $UserIDs (You can also send it one ID as an int, because fuck types)
-	 * @param BanReason 0 - Unknown, 1 - Manual, 2 - Ratio, 3 - Inactive, 4 - Unused.
-	 */
+    /**
+     * Disable an array of users.
+     *
+     * @param array $UserIDs (You can also send it one ID as an int, because fuck types)
+     * @param $AdminComment
+     * @param int $BanReason
+     */
 	public static function disable_users($UserIDs, $AdminComment, $BanReason = 1) {
 		$QueryID = G::$DB->get_query_id();
 		if (!is_array($UserIDs)) {
@@ -237,13 +239,13 @@ class Tools {
 		G::$DB->set_query_id($QueryID);
 	}
 
-	/**
-	 * Warn a user.
-	 *
-	 * @param int $UserID
-	 * @param int $Duration length of warning in seconds
-	 * @param string $reason
-	 */
+    /**
+     * Warn a user.
+     *
+     * @param int $UserID
+     * @param int $Duration length of warning in seconds
+     * @param $Reason
+     */
 	public static function warn_user($UserID, $Duration, $Reason) {
 		global $Time;
 
@@ -306,14 +308,15 @@ class Tools {
 		G::$DB->set_query_id($QueryID);
 	}
 
-	/**
-	* Check if an IP address is part of a given CIDR range.
-	* @param string $CheckIP the IP address to be looked up
-	* @param string $Subnet the CIDR subnet to be checked against
-	*/
+    /**
+     * Check if an IP address is part of a given CIDR range.
+     * @param string $CheckIP the IP address to be looked up
+     * @param string $Subnet the CIDR subnet to be checked against
+     * @return bool
+     */
 	public static function check_cidr_range($CheckIP, $Subnet) {
 		$IP = ip2long($CheckIP);
-		$CIDR = split('/', $Subnet);
+		$CIDR = explode('/', $Subnet);
 		$SubnetIP = ip2long($CIDR[0]);
 		$SubnetMaskBits = 32 - $CIDR[1];
 
@@ -321,4 +324,4 @@ class Tools {
 	}
 
 }
-?>
+

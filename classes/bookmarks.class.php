@@ -24,6 +24,7 @@ class Bookmarks
      * list($Table, $Col) = bookmark_schema('torrent');
      *
      * @param string $Type the type to get the schema for
+     * @return array
      */
     public static function bookmark_schema($Type)
     {
@@ -77,7 +78,7 @@ class Bookmarks
      *
      * @param string $Type
      *          type of bookmarks to fetch
-     * @param int $UserID
+     * @param bool $UserID
      *          userid whose bookmarks to get
      * @return array the bookmarks
      */

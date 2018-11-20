@@ -14,48 +14,48 @@ class SphinxqlQuery {
 	private $SortBy;
 	private $SortGroupBy;
 
-	/**
-	 * Initialize Sphinxql object
-	 *
-	 * @param string $Server server address or hostname
-	 * @param int $Port listening port
-	 * @param string $Socket Unix socket address, overrides $Server:$Port
-	 */
+    /**
+     * Initialize Sphinxql object
+     *
+     * @param string $Server server address or hostname
+     * @param int $Port listening port
+     * @param bool $Socket Unix socket address, overrides $Server:$Port
+     */
 	public function __construct($Server = SPHINXQL_HOST, $Port = SPHINXQL_PORT, $Socket = SPHINXQL_SOCK) {
 		$this->Sphinxql = Sphinxql::init_connection($Server, $Port, $Socket);
 		$this->reset();
 	}
 
-	/**
-	 * Specify what data the Sphinx query is supposed to return
-	 *
-	 * @param string $Fields Attributes and expressions
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Specify what data the Sphinx query is supposed to return
+     *
+     * @param string $Fields Attributes and expressions
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function select($Fields) {
 		$this->Select = $Fields;
 		return $this;
 	}
 
-	/**
-	 * Specify the indexes to use in the search
-	 *
-	 * @param string $Indexes comma separated list of indexes
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Specify the indexes to use in the search
+     *
+     * @param string $Indexes comma separated list of indexes
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function from($Indexes) {
 		$this->Indexes = $Indexes;
 		return $this;
 	}
 
-	/**
-	 * Add attribute filter. Calling multiple filter functions results in boolean AND between each condition.
-	 *
-	 * @param string $Attribute attribute which the filter will apply to
-	 * @param mixed $Values scalar or array of numerical values. Array uses boolean OR in query condition
-	 * @param bool $Exclude whether to exclude or include matching documents. Default mode is to include matches
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Add attribute filter. Calling multiple filter functions results in boolean AND between each condition.
+     *
+     * @param string $Attribute attribute which the filter will apply to
+     * @param mixed $Values scalar or array of numerical values. Array uses boolean OR in query condition
+     * @param bool $Exclude whether to exclude or include matching documents. Default mode is to include matches
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function where($Attribute, $Values, $Exclude = false) {
 		if (empty($Attribute) || !isset($Values)) {
 			$this->error("Attribute name and filter value are required.");
@@ -89,14 +89,14 @@ class SphinxqlQuery {
 		return $this;
 	}
 
-	/**
-	 * Add attribute less-than filter. Calling multiple filter functions results in boolean AND between each condition.
-	 *
-	 * @param string $Attribute attribute which the filter will apply to
-	 * @param array $Value upper limit for matches
-	 * @param bool $Inclusive whether to use <= or <
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Add attribute less-than filter. Calling multiple filter functions results in boolean AND between each condition.
+     *
+     * @param string $Attribute attribute which the filter will apply to
+     * @param array $Value upper limit for matches
+     * @param bool $Inclusive whether to use <= or <
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function where_lt($Attribute, $Value, $Inclusive = false) {
 		if (empty($Attribute) || !isset($Value) || !is_number($Value)) {
 			$this->error("Attribute name is required and only numeric filters are supported.");
@@ -106,14 +106,14 @@ class SphinxqlQuery {
 		return $this;
 	}
 
-	/**
-	 * Add attribute greater-than filter. Calling multiple filter functions results in boolean AND between each condition.
-	 *
-	 * @param string $Attribute attribute which the filter will apply to
-	 * @param array $Value lower limit for matches
-	 * @param bool $Inclusive whether to use >= or >
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Add attribute greater-than filter. Calling multiple filter functions results in boolean AND between each condition.
+     *
+     * @param string $Attribute attribute which the filter will apply to
+     * @param array $Value lower limit for matches
+     * @param bool $Inclusive whether to use >= or >
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function where_gt($Attribute, $Value, $Inclusive = false) {
 		if (empty($Attribute) || !isset($Value) || !is_number($Value)) {
 			$this->error("Attribute name is required and only numeric filters are supported.");
@@ -123,13 +123,13 @@ class SphinxqlQuery {
 		return $this;
 	}
 
-	/**
-	 * Add attribute range filter. Calling multiple filter functions results in boolean AND between each condition.
-	 *
-	 * @param string $Attribute attribute which the filter will apply to
-	 * @param array $Values pair of numerical values that defines the filter range
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Add attribute range filter. Calling multiple filter functions results in boolean AND between each condition.
+     *
+     * @param string $Attribute attribute which the filter will apply to
+     * @param array $Values pair of numerical values that defines the filter range
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function where_between($Attribute, $Values) {
 		if (empty($Attribute) || empty($Values) || count($Values) != 2 || !is_number($Values[0]) || !is_number($Values[1])) {
 			$this->error("Filter range requires array of two numerical boundaries as values.");
@@ -139,14 +139,15 @@ class SphinxqlQuery {
 		return $this;
 	}
 
-	/**
-	 * Add fulltext query expression. Calling multiple filter functions results in boolean AND between each condition.
-	 * Query expression is escaped automatically
-	 *
-	 * @param string $Expr query expression
-	 * @param string $Field field to match $Expr against. Default is *, which means all available fields
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Add fulltext query expression. Calling multiple filter functions results in boolean AND between each condition.
+     * Query expression is escaped automatically
+     *
+     * @param string $Expr query expression
+     * @param string $Field field to match $Expr against. Default is *, which means all available fields
+     * @param bool $Escape
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function where_match($Expr, $Field = '*', $Escape = true) {
 		if (empty($Expr)) {
 			return $this;
@@ -162,14 +163,14 @@ class SphinxqlQuery {
 		return $this;
 	}
 
-	/**
-	 * Specify the order of the matches. Calling this function multiple times sets secondary priorities
-	 *
-	 * @param string $Attribute attribute to use for sorting.
-	 *     Passing an empty attribute value will clear the current sort settings
-	 * @param string $Mode sort method to apply to the selected attribute
-	 * @return current SphinxqlQuery object
-	 */
+    /**
+     * Specify the order of the matches. Calling this function multiple times sets secondary priorities
+     *
+     * @param bool $Attribute attribute to use for sorting.
+     *     Passing an empty attribute value will clear the current sort settings
+     * @param bool $Mode sort method to apply to the selected attribute
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
 	public function order_by($Attribute = false, $Mode = false) {
 		if (empty($Attribute)) {
 			$this->SortBy = [];
@@ -179,14 +180,14 @@ class SphinxqlQuery {
 		return $this;
 	}
 
-	/**
-	 * Specify how the results are grouped
-	 *
-	 * @param string $Attribute group matches with the same $Attribute value.
-	 *     Passing an empty attribute value will clear the current group settings
-	 * @return current SphinxqlQuery object
-	 */
-	public function group_by($Attribute = false) {
+    /**
+     * Specify how the results are grouped
+     *
+     * @param bool $Attribute group matches with the same $Attribute value.
+     *     Passing an empty attribute value will clear the current group settings
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
+    public function group_by($Attribute = false) {
 		if (empty($Attribute)) {
 			$this->GroupBy = '';
 		} else {
@@ -196,14 +197,14 @@ class SphinxqlQuery {
 	}
 
 	/**
-	 * Specify the order of the results within groups
-	 *
-	 * @param string $Attribute attribute to use for sorting.
-	 *     Passing an empty attribute will clear the current group sort settings
-	 * @param string $Mode sort method to apply to the selected attribute
-	 * @return current SphinxqlQuery object
-	 */
-	public function order_group_by($Attribute = false, $Mode = false) {
+     * Specify the order of the results within groups
+     *
+     * @param bool $Attribute attribute to use for sorting.
+     *     Passing an empty attribute will clear the current group sort settings
+     * @param bool $Mode sort method to apply to the selected attribute
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
+    public function order_group_by($Attribute = false, $Mode = false) {
 		if (empty($Attribute)) {
 			$this->SortGroupBy = '';
 		} else {
@@ -213,27 +214,27 @@ class SphinxqlQuery {
 	}
 
 	/**
-	 * Specify the offset and amount of matches to return
-	 *
-	 * @param int $Offset number of matches to discard
-	 * @param int $Limit number of matches to return
-	 * @param int $MaxMatches number of results to store in the Sphinx server's memory. Must be >= ($Offset+$Limit)
-	 * @return current SphinxqlQuery object
-	 */
-	public function limit($Offset, $Limit, $MaxMatches = SPHINX_MAX_MATCHES) {
+     * Specify the offset and amount of matches to return
+     *
+     * @param int $Offset number of matches to discard
+     * @param int $Limit number of matches to return
+     * @param int $MaxMatches number of results to store in the Sphinx server's memory. Must be >= ($Offset+$Limit)
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
+    public function limit($Offset, $Limit, $MaxMatches = SPHINX_MAX_MATCHES) {
 		$this->Limits = "$Offset, $Limit";
 		$this->set('max_matches', $MaxMatches);
 		return $this;
 	}
 
 	/**
-	 * Tweak the settings to use for the query. Sanity checking shouldn't be needed as Sphinx already does it
-	 *
-	 * @param string $Name setting name
-	 * @param mixed $Value value
-	 * @return current SphinxqlQuery object
-	 */
-	public function set($Name, $Value) {
+     * Tweak the settings to use for the query. Sanity checking shouldn't be needed as Sphinx already does it
+     *
+     * @param string $Name setting name
+     * @param mixed $Value value
+     * @return SphinxqlQuery SphinxqlQuery object
+     */
+    public function set($Name, $Value) {
 		$this->Options[$Name] = $Value;
 		return $this;
 	}
@@ -361,28 +362,29 @@ class SphinxqlQuery {
 	}
 
 	/**
-	 * Fetch and store meta data for the last executed query
-	 *
-	 * @return meta data
-	 */
-	private function get_meta() {
+     * Fetch and store meta data for the last executed query
+     *
+     * @return array data
+     */
+    private function get_meta() {
 		return $this->raw_query("SHOW META", false)->to_pair(0, 1);
 	}
 
 	/**
-	 * Copy attribute filters from another SphinxqlQuery object
-	 *
-	 * @param SphinxqlQuery $SphQLSource object to copy the filters from
-	 * @return current SphinxqlQuery object
-	 */
-	public function copy_attributes_from($SphQLSource) {
+     * Copy attribute filters from another SphinxqlQuery object
+     *
+     * @param SphinxqlQuery $SphQLSource object to copy the filters from
+     * @return void SphinxqlQuery object
+     */
+    public function copy_attributes_from($SphQLSource) {
 		$this->Filters = $SphQLSource->Filters;
 	}
 
 	/**
-	 * Store error messages
-	 */
-	private function error($Msg) {
+     * Store error messages
+     * @param $Msg
+     */
+    private function error($Msg) {
 		$this->Errors[] = $Msg;
 	}
 }

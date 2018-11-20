@@ -1,22 +1,22 @@
 <?
 class Artists {
-	/**
-	 * Given an array of GroupIDs, return their associated artists.
-	 *
-	 * @param array $GroupIDs
-	 * @return an array of the following form:
-	 * 	GroupID => {
-	 *		[ArtistType] => {
-	 *			id, name, aliasid
-	 *		}
-	 *	}
-	 * ArtistType is an int. It can be:
-	 * 1 => Main artist
-	 * 2 => Guest artist
-	 * 4 => Composer
-	 * 5 => Conductor
-	 * 6 => DJ
-	 */
+    /**
+     * Given an array of GroupIDs, return their associated artists.
+     *
+     * @param array $GroupIDs
+     * @return array array of the following form:
+     *    GroupID => {
+     *        [ArtistType] => {
+     *            id, name, aliasid
+     *        }
+     *    }
+     * ArtistType is an int. It can be:
+     * 1 => Main artist
+     * 2 => Guest artist
+     * 4 => Composer
+     * 5 => Conductor
+     * 6 => DJ
+     */
 	public static function get_artists($GroupIDs) {
 		$Results = [];
 		$DBs = [];
@@ -83,15 +83,16 @@ class Artists {
 	}
 
 
-	/**
-	 * Format an array of artists for display.
-	 * TODO: Revisit the logic of this, see if we can helper-function the copypasta.
-	 *
-	 * @param array Artists an array of the form output by get_artists
-	 * @param boolean $MakeLink if true, the artists will be links, if false, they will be text.
-	 * @param boolean $IncludeHyphen if true, appends " - " to the end.
-	 * @param $Escape if true, output will be escaped. Think carefully before setting it false.
-	 */
+    /**
+     * Format an array of artists for display.
+     * TODO: Revisit the logic of this, see if we can helper-function the copypasta.
+     *
+     * @param array Artists an array of the form output by get_artists
+     * @param boolean $MakeLink if true, the artists will be links, if false, they will be text.
+     * @param boolean $IncludeHyphen if true, appends " - " to the end.
+     * @param bool $Escape if true, output will be escaped. Think carefully before setting it false.
+     * @return string
+     */
 	public static function display_artists($Artists, $MakeLink = true, $IncludeHyphen = true, $Escape = true) {
 		if (!empty($Artists)) {
 			$ampersand = ($Escape) ? ' &amp; ' : ' & ';
@@ -267,13 +268,14 @@ class Artists {
 	}
 
 
-	/**
-	 * Remove LRM (left-right-marker) and trims, because people copypaste carelessly.
-	 * If we don't do this, we get seemingly duplicate artist names.
-	 * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation
-	 *
-	 * @param string $ArtistName
-	 */
+    /**
+     * Remove LRM (left-right-marker) and trims, because people copypaste carelessly.
+     * If we don't do this, we get seemingly duplicate artist names.
+     * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation
+     *
+     * @param string $ArtistName
+     * @return string
+     */
 	public static function normalise_artist_name($ArtistName) {
 		// \u200e is &lrm;
 		$ArtistName = trim($ArtistName);

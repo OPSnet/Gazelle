@@ -17,13 +17,12 @@ class TorrentsDL {
 	private $User;
 	private $AnnounceURL;
 
-	/**
-	 * Create a Zip object and store the query results
-	 *
-	 * @param mysqli_result $QueryResult results from a query on the collector pages
-	 * @param string $Title name of the collection that will be created
-	 * @param string $AnnounceURL URL to add to the created torrents
-	 */
+    /**
+     * Create a Zip object and store the query results
+     *
+     * @param mysqli_result $QueryResult results from a query on the collector pages
+     * @param string $Title name of the collection that will be created
+     */
 	public function __construct(&$QueryResult, $Title) {
 		G::$Cache->InternalCache = false; // The internal cache is almost completely useless for this
 		Zip::unlimit(); // Need more memory and longer timeout
@@ -167,15 +166,21 @@ class TorrentsDL {
 			. implode("\r\n", $this->FailedFiles) . "\r\n";
 	}
 
-	/**
-	 * Combine a bunch of torrent info into a standardized file name
-	 *
-	 * @params most input variables are self-explanatory
-	 * @param int $TorrentID if given, append "-TorrentID" to torrent name
-	 * @param bool $Txt whether to use .txt or .torrent as file extension
-	 * @param int $MaxLength maximum file name length
-	 * @return string file name with at most $MaxLength characters
-	 */
+    /**
+     * Combine a bunch of torrent info into a standardized file name
+     *
+     * @params most input variables are self-explanatory
+     * @param $Artist
+     * @param $Album
+     * @param $Year
+     * @param $Media
+     * @param $Format
+     * @param $Encoding
+     * @param bool $TorrentID if given, append "-TorrentID" to torrent name
+     * @param bool $Txt whether to use .txt or .torrent as file extension
+     * @param int $MaxLength maximum file name length
+     * @return string file name with at most $MaxLength characters
+     */
 	public static function construct_file_name($Artist, $Album, $Year, $Media, $Format, $Encoding, $TorrentID = false, $Txt = false, $MaxLength = self::MaxPathLength) {
 		$MaxLength -= ($Txt ? 4 : 8);
 		if ($TorrentID !== false) {

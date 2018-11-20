@@ -41,6 +41,8 @@ abstract class MASS_USER_TORRENTS_EDITOR
 
     /**
      * The extending class must provide a method to send a query and clear the cache
+     * @param $sql
+     * @return
      */
     abstract protected function query_and_clear_cache($sql);
 

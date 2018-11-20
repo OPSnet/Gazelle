@@ -50,15 +50,15 @@ class Requests {
 
 
 
-	/**
-	 * Function to get data from an array of $RequestIDs. Order of keys doesn't matter (let's keep it that way).
-	 *
-	 * @param array $RequestIDs
-	 * @param boolean $Return if set to false, data won't be returned (ie. if we just want to prime the cache.)
-	 * @return The array of requests.
-	 * Format: array(RequestID => Associative array)
-	 * To see what's exactly inside each associate array, peek inside the function. It won't bite.
-	 */
+    /**
+     * Function to get data from an array of $RequestIDs. Order of keys doesn't matter (let's keep it that way).
+     *
+     * @param array $RequestIDs
+     * @param boolean $Return if set to false, data won't be returned (ie. if we just want to prime the cache.)
+     * @return array array of requests.
+     * Format: array(RequestID => Associative array)
+     * To see what's exactly inside each associate array, peek inside the function. It won't bite.
+     */
 	//
 	//In places where the output from this is merged with sphinx filters, it will be in a different order.
 	public static function get_requests($RequestIDs, $Return = true) {

@@ -392,10 +392,11 @@ class Users {
 		}
 	}
 
-	/**
-	 * Returns the default order for the sort list in a JS-friendly string
-	 * @return string
-	 */
+    /**
+     * Returns the default order for the sort list in a JS-friendly string
+     * @param $SiteOptions
+     * @return string
+     */
 	public static function release_order_default_js(&$SiteOptions) {
 		ob_start();
 		self::release_order($SiteOptions, true);
@@ -623,16 +624,16 @@ class Users {
 		return [$GroupIDs, $BookmarkData, $TorrentList];
 	}
 
-	/**
-	 * Generate HTML for a user's avatar or just return the avatar URL
-	 * @param unknown $Avatar
-	 * @param unknown $UserID
-	 * @param unknown $Username
-	 * @param unknown $Setting
-	 * @param number $Size
-	 * @param string $ReturnHTML
-	 * @return string
-	 */
+    /**
+     * Generate HTML for a user's avatar or just return the avatar URL
+     * @param unknown $Avatar
+     * @param unknown $UserID
+     * @param unknown $Username
+     * @param unknown $Setting
+     * @param int $Size
+     * @param bool $ReturnHTML
+     * @return string
+     */
 	public static function show_avatar($Avatar, $UserID, $Username, $Setting, $Size = 150, $ReturnHTML = True) {
 		$Avatar = ImageTools::process($Avatar, false, 'avatar', $UserID);
 		$AvatarMouseOverText = '';

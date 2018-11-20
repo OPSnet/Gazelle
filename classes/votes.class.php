@@ -6,11 +6,11 @@ class Votes {
 	//const Z_VAL = 1.645211440143815; // p-value .95
 	const Z_VAL = 1.281728756502709; // p-value .90
 
-	/**
-	 * Generate voting links for torrent pages, etc.
-	 * @param $GroupID
-	 * @param $Vote The pre-existing vote, if it exists 'Up'|'Down'
-	 */
+    /**
+     * Generate voting links for torrent pages, etc.
+     * @param $GroupID
+     * @param string $Vote The pre-existing vote, if it exists 'Up'|'Down'
+     */
 	public static function vote_link($GroupID, $Vote = '') {
 		if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 			$GroupVotes = self::get_group_votes($GroupID); ?>
@@ -77,11 +77,11 @@ class Votes {
 		return $GroupVotes;
 	}
 
-	/**
-	 * Computes the inverse normal CDF of a p-value
-	 * @param float $GroupID
-	 * @return float Inverse Normal CDF
-	 */
+    /**
+     * Computes the inverse normal CDF of a p-value
+     * @param $p
+     * @return float Inverse Normal CDF
+     */
 	private function inverse_ncdf($p) {
 	/***************************************************************************
 	 *																inverse_ncdf.php

@@ -22,8 +22,7 @@ if (!check_perms('users_mod')) {
  * @param string $Title - the displayed name of the tool
  * @param string $URL - the relative URL of the tool
  * @param bool $HasPermission - whether the user has permission to view/use the tool
- * @param string $Tooltip - optional tooltip
- *
+ * @param bool $Tooltip - optional tooltip
  */
 function create_row($Title, $URL, $HasPermission = false, $Tooltip = false) {
 	if ($HasPermission) {

@@ -346,7 +346,7 @@ class Referral
      * @param $service
      * @param $email
      * @param $username
-     * @return bool
+     * @return void
      */
     public function create_invite($service, $email, $username)
     {
@@ -390,6 +390,7 @@ class Referral
 
     /**
      * Inits and sets defaults for curl object
+     * @param $ch
      */
     private function set_curl($ch)
     {

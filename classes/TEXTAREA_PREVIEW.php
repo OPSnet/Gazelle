@@ -60,16 +60,16 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER
     /**
      * This method creates a textarea
      *
-     * @param string $Name      name attribute
-     * @param string $ID        id attribute
-     * @param string $Value     default text attribute
-     * @param string $Cols      cols attribute
-     * @param string $Rows      rows attribute
-     * @param bool   $Preview   add the preview divs near the textarea
-     * @param bool   $Buttons   add the edit/preview buttons near the textarea
-     * @param bool   $Buffer    doesn't output the textarea, use getBuffer()
-     * @param array  $ExtraAttributes   array of attribute="value"
-     * @param bool   $Required  is this a required textarea
+     * @param string $Name name attribute
+     * @param string $ID id attribute
+     * @param string $Value default text attribute
+     * @param int $Cols cols attribute
+     * @param int $Rows rows attribute
+     * @param bool $Preview add the preview divs near the textarea
+     * @param bool $Buttons add the edit/preview buttons near the textarea
+     * @param bool $Buffer doesn't output the textarea, use getBuffer()
+     * @param array $ExtraAttributes array of attribute="value"
+     * @param bool $Required is this a required textarea
      *
      * If false for $Preview, $Buttons, or $Buffer, use the appropriate
      * methods to add the those elements manually. Alternatively, use getID

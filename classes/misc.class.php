@@ -34,16 +34,16 @@ class Misc {
 	}
 
 
-	/**
-	 * Sends a PM from $FromId to $ToId.
-	 *
-	 * @param string $ToID ID of user to send PM to. If $ToID is an array and $ConvID is empty, a message will be sent to multiple users.
-	 * @param string $FromID ID of user to send PM from, 0 to send from system
-	 * @param string $Subject
-	 * @param string $Body
-	 * @param int $ConvID The conversation the message goes in. Leave blank to start a new conversation.
-	 * @return
-	 */
+    /**
+     * Sends a PM from $FromId to $ToId.
+     *
+     * @param string $ToID ID of user to send PM to. If $ToID is an array and $ConvID is empty, a message will be sent to multiple users.
+     * @param string $FromID ID of user to send PM from, 0 to send from system
+     * @param string $Subject
+     * @param string $Body
+     * @param string $ConvID The conversation the message goes in. Leave blank to start a new conversation.
+     * @return int|string|void
+     */
 	public static function send_pm($ToID, $FromID, $Subject, $Body, $ConvID = '') {
 		global $Time;
 		$UnescapedSubject = $Subject;
@@ -138,15 +138,15 @@ class Misc {
 		return $ConvID;
 	}
 
-	/**
-	 * Create thread function.
-	 *
-	 * @param int $ForumID
-	 * @param int $AuthorID ID of the user creating the post.
-	 * @param string $Title
-	 * @param string $PostBody
-	 * @return -1 on error, -2 on user not existing, thread id on success.
-	 */
+    /**
+     * Create thread function.
+     *
+     * @param int $ForumID
+     * @param int $AuthorID ID of the user creating the post.
+     * @param string $Title
+     * @param string $PostBody
+     * @return int|string -1 on error, -2 on user not existing, thread id on success.
+     */
 	public static function create_thread($ForumID, $AuthorID, $Title, $PostBody) {
 		global $Time;
 		if (!$ForumID || !$AuthorID || !is_number($AuthorID) || !$Title || !$PostBody) {
@@ -290,12 +290,13 @@ class Misc {
 		return $TopicID;
 	}
 
-	/**
-	 * Variant of in_array() with trailing wildcard support
-	 *
-	 * @param string $Needle, array $Haystack
-	 * @return boolean true if (substring of) $Needle exists in $Haystack
-	 */
+    /**
+     * Variant of in_array() with trailing wildcard support
+     *
+     * @param string $Needle , array $Haystack
+     * @param $Haystack
+     * @return boolean true if (substring of) $Needle exists in $Haystack
+     */
 	public static function in_array_partial($Needle, $Haystack) {
 		static $Searches = [];
 		if (array_key_exists($Needle, $Searches)) {
@@ -449,11 +450,14 @@ class Misc {
 		return $Array;
 	}
 
-	/**
-	 * Searches for a key/value pair in an array.
-	 *
-	 * @return array of results
-	 */
+    /**
+     * Searches for a key/value pair in an array.
+     *
+     * @param $Array
+     * @param $Key
+     * @param $Value
+     * @return array of results
+     */
 	public static function search_array($Array, $Key, $Value) {
 		$Results = [];
 		if (is_array($Array))
@@ -481,13 +485,13 @@ class Misc {
 		return (array_search($Needle, explode($Separator, $Haystack), $Strict) !== false);
 	}
 
-	/**
-	 * Check for a ":" in the beginning of a torrent meta data string
-	 * to see if it's stored in the old base64-encoded format
-	 *
-	 * @param string $Torrent the torrent data
-	 * @return true if the torrent is stored in binary format
-	 */
+    /**
+     * Check for a ":" in the beginning of a torrent meta data string
+     * to see if it's stored in the old base64-encoded format
+     *
+     * @param $Data
+     * @return true if the torrent is stored in binary format
+     */
 	public static function is_new_torrent(&$Data) {
 		return strpos(substr($Data, 0, 10), ':') !== false;
 	}

@@ -6,15 +6,16 @@ class Tracker {
 
 	public static $Requests = [];
 
-	/**
-	 * Send a GET request over a socket directly to the tracker
-	 * For example, Tracker::update_tracker('change_passkey', array('oldpasskey' => OLD_PASSKEY, 'newpasskey' => NEW_PASSKEY)) will send the request:
-	 * GET /tracker_32_char_secret_code/update?action=change_passkey&oldpasskey=OLD_PASSKEY&newpasskey=NEW_PASSKEY HTTP/1.1
-	 *
-	 * @param string $Action The action to send
-	 * @param array $Updates An associative array of key->value pairs to send to the tracker
-	 * @param boolean $ToIRC Sends a message to the channel #tracker with the GET URL.
-	 */
+    /**
+     * Send a GET request over a socket directly to the tracker
+     * For example, Tracker::update_tracker('change_passkey', array('oldpasskey' => OLD_PASSKEY, 'newpasskey' => NEW_PASSKEY)) will send the request:
+     * GET /tracker_32_char_secret_code/update?action=change_passkey&oldpasskey=OLD_PASSKEY&newpasskey=NEW_PASSKEY HTTP/1.1
+     *
+     * @param string $Action The action to send
+     * @param array $Updates An associative array of key->value pairs to send to the tracker
+     * @param boolean $ToIRC Sends a message to the channel #tracker with the GET URL.
+     * @return bool
+     */
 	public static function update_tracker($Action, $Updates, $ToIRC = false) {
 		// Build request
 		$Get = TRACKER_SECRET . "/update?action=$Action";
@@ -35,11 +36,11 @@ class Tracker {
 		return true;
 	}
 
-	/**
-	 * Get global peer stats from the tracker
-	 *
-	 * @return [$Leeching, $Seeding] or false if request failed
-	 */
+    /**
+     * Get global peer stats from the tracker
+     *
+     * @return array|bool [$Leeching, $Seeding] or false if request failed
+     */
 	public static function global_peer_count() {
 		$Stats = self::get_stats(self::STATS_MAIN);
 		if (isset($Stats['leechers tracked']) && isset($Stats['seeders tracked'])) {
@@ -72,22 +73,22 @@ class Tracker {
 		return [$Leeching, $Seeding];
 	}
 
-	/**
-	 * Get whatever info the tracker has to report
-	 *
-	 * @return results from get_stats()
-	 */
+    /**
+     * Get whatever info the tracker has to report
+     *
+     * @return array from get_stats()
+     */
 	public static function info() {
 		return self::get_stats(self::STATS_MAIN);
 	}
 
-	/**
-	 * Send a stats request to the tracker and process the results
-	 *
-	 * @param int $Type Stats type to get
-	 * @param array $Params Parameters required by stats type
-	 * @return array with stats in named keys or false if the request failed
-	 */
+    /**
+     * Send a stats request to the tracker and process the results
+     *
+     * @param int $Type Stats type to get
+     * @param bool $Params Parameters required by stats type
+     * @return array with stats in named keys or false if the request failed
+     */
 	private static function get_stats($Type, $Params = false) {
 		if (!defined('TRACKER_REPORTKEY')) {
 			return false;

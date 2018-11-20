@@ -106,7 +106,7 @@ abstract class IRC_BOT {
 
 	protected function get_word($Select = 1) {
 		preg_match('/:.+ PRIVMSG [^:]+ :(.+)/', $this->Data, $Word);
-		$Word = split(' ', $Word[1]);
+		$Word = explode(' ', $Word[1]);
 		return trim($Word[$Select]);
 	}
 
@@ -180,4 +180,4 @@ abstract class IRC_BOT {
 		}
 	}
 }
-?>
+

@@ -298,14 +298,15 @@ class QrCode
 	{
 		return $this->image_type;
 	}
-	
-	/**
-	 * Set image type for rendering via extension.
-	 *
-	 * @param string $extension Image extension
-	 *
-	 * @return QrCode
-	 */
+
+    /**
+     * Set image type for rendering via extension.
+     *
+     * @param string $extension Image extension
+     *
+     * @return QrCode
+     * @throws Exception
+     */
 	public function setExtension($extension)
 	{
 		if ($extension == 'jpg') {
@@ -724,14 +725,15 @@ class QrCode
 		
 		return 'data:image/' . $this->image_type . ';base64,' . base64_encode($contents);
 	}
-	
-	/**
-	 * Render the QR Code then save it to given file name.
-	 *
-	 * @param string $filename File name of the QR Code
-	 *
-	 * @return QrCode
-	 */
+
+    /**
+     * Render the QR Code then save it to given file name.
+     *
+     * @param string $filename File name of the QR Code
+     *
+     * @return QrCode
+     * @throws Exception
+     */
 	public function save($filename)
 	{
 		$this->render($filename);
@@ -823,12 +825,13 @@ class QrCode
 		
 		return $content;
 	}
-	
-	/**
-	 * Create the image.
-	 *
-	 * @throws \OverflowException
-	 */
+
+    /**
+     * Create the image.
+     *
+     * @throws \OverflowException
+     * @throws ReflectionException
+     */
 	public function create()
 	{
 		$image_path = $this->image_path;

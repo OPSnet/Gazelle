@@ -52,6 +52,7 @@ class NMA_API
 
     /**
      * @param array $options
+     * @throws Exception
      */
     function __construct($options = [])
     {
@@ -77,6 +78,7 @@ class NMA_API
      * @param bool $key [optional] if not set the one used on construct is used
      *
      * @return bool|mixed|SimpleXMLElement|string
+     * @throws Exception
      */
     public function verify($key = false)
     {
@@ -102,10 +104,11 @@ class NMA_API
      * @param string $event
      * @param string $description
      * @param string $url
-     * @param int    $priority
-     * @param bool   $apiKeys
+     * @param int $priority
+     * @param bool $apiKeys
      *
      * @return bool|mixed|SimpleXMLElement|string
+     * @throws Exception
      */
     public function notify($application = '', $event = '', $description = '', $url = '', $priority = 0, $apiKeys = false)
     {
@@ -226,6 +229,7 @@ class NMA_API
      * @param SimpleXMLElement $obj
      *
      * @return bool
+     * @throws Exception
      */
     private function process_xml_return(SimpleXMLElement $obj)
     {
