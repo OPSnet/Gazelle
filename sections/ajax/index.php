@@ -12,14 +12,14 @@ enforce_login();
 
 /*	AJAX_LIMIT = array(x,y) = 'x' requests every 'y' seconds.
 	e.g. array(5,10) = 5 requests every 10 seconds	*/
-$AJAX_LIMIT = array(5,10);
-$LimitedPages = array('tcomments','user','forum','top10','browse','usersearch','requests','artist','inbox','subscriptions','bookmarks','announcements','notifications','request','better','similar_artists','userhistory','votefavorite','wiki','torrentgroup','news_ajax','user_recents', 'collage', 'raw_bbcode');
+$AJAX_LIMIT = [5,10];
+$LimitedPages = ['tcomments','user','forum','top10','browse','usersearch','requests','artist','inbox','subscriptions','bookmarks','announcements','notifications','request','better','similar_artists','userhistory','votefavorite','wiki','torrentgroup','news_ajax','user_recents', 'collage', 'raw_bbcode'];
 
 // These users aren't rate limited.
 // This array should contain user IDs.
-$UserExceptions = array(
+$UserExceptions = [
 
-		);
+];
 $UserID = $LoggedUser['ID'];
 header('Content-Type: application/json; charset=utf-8');
 //	Enforce rate limiting everywhere except info.php
@@ -168,10 +168,10 @@ switch ($_GET['action']) {
 function pullmediainfo($Array) {
 	$NewArray = [];
 	foreach ($Array as $Item) {
-		$NewArray[] = array(
+		$NewArray[] = [
 			'id' => (int)$Item['id'],
 			'name' => $Item['name']
-		);
+        ];
 	}
 	return $NewArray;
 }

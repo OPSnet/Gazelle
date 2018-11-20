@@ -18,7 +18,7 @@ if (count($Users) > 0) {
     $Message = 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been disabled. Please reread the rules and refer to this guide on how to improve your ratio ' . site_url() . 'wiki.php?action=article&amp;id=115';
     foreach ($Users as $TorrentPass => $UserID) {
         Misc::send_pm($UserID, 0, $Subject, $Message);
-        Tracker::update_tracker('update_user', array('passkey' => $TorrentPass, 'can_leech' => '0'));
+        Tracker::update_tracker('update_user', ['passkey' => $TorrentPass, 'can_leech' => '0']);
     }
 
     $DB->query("

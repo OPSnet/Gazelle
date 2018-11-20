@@ -26,9 +26,9 @@ echo 'Found '.count($Torrents)." inactive torrents to be deleted.\n";
 $LogEntries = $DeleteNotes = [];
 
 // Exceptions for inactivity deletion
-$InactivityExceptionsMade = array(
+$InactivityExceptionsMade = [
     //UserID => expiry time of exception
-);
+];
 $i = 0;
 foreach ($Torrents as $Torrent) {
     list($ID, $GroupID, $Name, $Format, $Encoding, $UserID, $Media, $InfoHash) = $Torrent;
@@ -47,7 +47,7 @@ foreach ($Torrents as $Torrent) {
     $LogEntries[] = db_string("Torrent $ID ($Name) (".strtoupper($InfoHash).") was deleted for inactivity (unseeded)");
 
     if (!array_key_exists($UserID, $DeleteNotes)) {
-        $DeleteNotes[$UserID] = array('Count' => 0, 'Msg' => '');
+        $DeleteNotes[$UserID] = ['Count' => 0, 'Msg' => ''];
     }
 
     $DeleteNotes[$UserID]['Msg'] .= "\n$Name";

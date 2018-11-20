@@ -47,7 +47,7 @@ if ($DB->has_results()) {
 			unset($ExtendedArtists[3]);
 			$DisplayName = Artists::display_artists($ExtendedArtists);
 		} elseif (!empty($Artists)) {
-			$DisplayName = Artists::display_artists(array(1 => $Artists));
+			$DisplayName = Artists::display_artists([1 => $Artists]);
 		} else {
 			$DisplayName = '';
 		}

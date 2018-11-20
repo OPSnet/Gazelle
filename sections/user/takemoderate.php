@@ -187,7 +187,7 @@ if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
 		WHERE UserID = $UserID");
 	$Cache->delete_value("user_info_$UserID");
 
-	Tracker::update_tracker('remove_user', array('passkey' => $Cur['torrent_pass']));
+	Tracker::update_tracker('remove_user', ['passkey' => $Cur['torrent_pass']]);
 
 	header("Location: log.php?search=User+$UserID");
 	die();
@@ -197,7 +197,7 @@ if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
 
 $UpdateSet = [];
 $EditSummary = [];
-$TrackerUserUpdates = array('passkey' => $Cur['torrent_pass']);
+$TrackerUserUpdates = ['passkey' => $Cur['torrent_pass']];
 
 $QueryID = G::$DB->get_query_id();
 
@@ -685,7 +685,7 @@ if ($EnableUser != $Cur['Enabled'] && check_perms('users_disable_users')) {
 	} elseif ($EnableUser == '1') {
 		$Cache->increment('stats_user_count');
 		$VisibleTrIP = $Visible && $Cur['IP'] != '127.0.0.1' ? '1' : '0';
-		Tracker::update_tracker('add_user', array('id' => $UserID, 'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIP));
+		Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIP]);
 		if (($Cur['Downloaded'] == 0) || ($Cur['Uploaded'] / $Cur['Downloaded'] >= $Cur['RequiredRatio'])) {
 			$UpdateSet[] = "i.RatioWatchEnds = '0000-00-00 00:00:00'";
 			$CanLeech = 1;
@@ -722,7 +722,7 @@ if ($ResetPasskey == 1 && check_perms('users_edit_reset_keys')) {
 			(UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
 		VALUES
 			('$UserID', '".$Cur['torrent_pass']."', '$Passkey', '0.0.0.0', '".sqltime()."')");
-	Tracker::update_tracker('change_passkey', array('oldpasskey' => $Cur['torrent_pass'], 'newpasskey' => $Passkey));
+	Tracker::update_tracker('change_passkey', ['oldpasskey' => $Cur['torrent_pass'], 'newpasskey' => $Passkey]);
 }
 
 if ($ResetAuthkey == 1 && check_perms('users_edit_reset_keys')) {

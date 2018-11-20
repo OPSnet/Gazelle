@@ -1,8 +1,8 @@
 <?
 require(SERVER_ROOT.'/sections/torrents/functions.php');
 
-$GroupAllowed = array('WikiBody', 'WikiImage', 'ID', 'Name', 'Year', 'RecordLabel', 'CatalogueNumber', 'ReleaseType', 'CategoryID', 'Time', 'VanityHouse');
-$TorrentAllowed = array('ID', 'Media', 'Format', 'Encoding', 'Remastered', 'RemasterYear', 'RemasterTitle', 'RemasterRecordLabel', 'RemasterCatalogueNumber', 'Scene', 'HasLog', 'HasCue', 'LogScore', 'FileCount', 'Size', 'Seeders', 'Leechers', 'Snatched', 'FreeTorrent', 'Time', 'Description', 'FileList', 'FilePath', 'UserID', 'Username');
+$GroupAllowed = ['WikiBody', 'WikiImage', 'ID', 'Name', 'Year', 'RecordLabel', 'CatalogueNumber', 'ReleaseType', 'CategoryID', 'Time', 'VanityHouse'];
+$TorrentAllowed = ['ID', 'Media', 'Format', 'Encoding', 'Remastered', 'RemasterYear', 'RemasterTitle', 'RemasterRecordLabel', 'RemasterCatalogueNumber', 'Scene', 'HasLog', 'HasCue', 'LogScore', 'FileCount', 'Size', 'Seeders', 'Leechers', 'Snatched', 'FreeTorrent', 'Time', 'Description', 'FileList', 'FilePath', 'UserID', 'Username'];
 
 $TorrentID = (int)$_GET['id'];
 $TorrentHash = (string)$_GET['hash'];
@@ -48,7 +48,7 @@ if ($TorrentDetails['CategoryID'] == 0) {
 }
 $JsonMusicInfo = [];
 if ($CategoryName == "Music") {
-	$JsonMusicInfo = array(
+	$JsonMusicInfo = [
 		'composers' => $ArtistForm[4] == null ? [] : pullmediainfo($ArtistForm[4]),
 		'dj' => $ArtistForm[6] == null ? [] : pullmediainfo($ArtistForm[6]),
 		'artists' => $ArtistForm[1] == null ? [] : pullmediainfo($ArtistForm[1]),
@@ -56,7 +56,7 @@ if ($CategoryName == "Music") {
 		'conductor' => $ArtistForm[5] == null ? [] : pullmediainfo($ArtistForm[5]),
 		'remixedBy' => $ArtistForm[3] == null ? [] : pullmediainfo($ArtistForm[3]),
 		'producer' => $ArtistForm[7] == null ? [] : pullmediainfo($ArtistForm[7])
-	);
+    ];
 }
 else {
 	$JsonMusicInfo = null;
@@ -64,7 +64,7 @@ else {
 
 $TagList = explode('|', $TorrentDetails['GROUP_CONCAT(DISTINCT tags.Name SEPARATOR \'|\')']);
 
-$JsonTorrentDetails = array(
+$JsonTorrentDetails = [
 	'wikiBody' => Text::full_format($TorrentDetails['WikiBody']),
 	'wikiImage' => $TorrentDetails['WikiImage'],
 	'id' => (int)$TorrentDetails['ID'],
@@ -80,7 +80,7 @@ $JsonTorrentDetails = array(
 	'isBookmarked' => Bookmarks::has_bookmarked('torrent', $GroupID),
 	'musicInfo' => $JsonMusicInfo,
 	'tags' => $TagList
-);
+];
 
 $Torrent = $TorrentList[$TorrentID];
 
@@ -98,7 +98,7 @@ foreach ($FileList as &$File) {
 unset($File);
 $FileList = implode('|||', $FileList);
 $Userinfo = Users::user_info($Torrent['UserID']);
-$JsonTorrentList[] = array(
+$JsonTorrentList[] = [
 	'id' => (int)$Torrent['ID'],
 	'infoHash' => $Torrent['InfoHash'],
 	'media' => $Torrent['Media'],
@@ -127,6 +127,6 @@ $JsonTorrentList[] = array(
 	'filePath' => $Torrent['FilePath'],
 	'userId' => (int)$Torrent['UserID'],
 	'username' => $Userinfo['Username']
-);
+];
 
-json_print("success", array('group' => $JsonTorrentDetails, 'torrent' => array_pop($JsonTorrentList)));
+json_print("success", ['group' => $JsonTorrentDetails, 'torrent' => array_pop($JsonTorrentList)]);

@@ -35,7 +35,7 @@ $DB->query("
 $NumFilters = $DB->record_count();
 
 $Notifications = $DB->to_array();
-$Notifications[] = array(
+$Notifications[] = [
 	'ID' => false,
 	'Label' => '',
 	'Artists' => '',
@@ -51,7 +51,7 @@ $Notifications[] = array(
 	'FromYear' => '',
 	'ToYear' => '',
 	'Users' => ''
-);
+];
 
 $i = 0;
 foreach ($Notifications as $N) { // $N stands for Notifications

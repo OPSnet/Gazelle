@@ -232,7 +232,7 @@ if (isset($LoginCookie)) {
 				AND SessionID = '".db_string($SessionID)."'");
         $Cache->begin_transaction("users_sessions_$UserID");
         $Cache->delete_row($SessionID);
-        $Cache->insert_front($SessionID, array(
+        $Cache->insert_front($SessionID, [
                 'SessionID' => $SessionID,
                 'Browser' => $Browser,
                 'BrowserVersion' => $BrowserVersion,
@@ -240,7 +240,7 @@ if (isset($LoginCookie)) {
                 'OperatingSystemVersion' => $OperatingSystemVersion,
                 'IP' => $_SERVER['REMOTE_ADDR'],
                 'LastUpdate' => sqltime()
-                ));
+        ]);
         $Cache->commit_transaction(0);
     }
 
@@ -289,7 +289,7 @@ if (isset($LoginCookie)) {
 			SET IP = '$NewIP', ipcc = '$ipcc'
 			WHERE ID = '{$LoggedUser['ID']}'");
         $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
-        $Cache->update_row(false, array('IP' => $_SERVER['REMOTE_ADDR']));
+        $Cache->update_row(false, ['IP' => $_SERVER['REMOTE_ADDR']]);
         $Cache->commit_transaction(0);
     }
 
@@ -408,7 +408,7 @@ if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
     error(404);
 }
 
-$StripPostKeys = array_fill_keys(array('password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'), true);
+$StripPostKeys = array_fill_keys(['password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'], true);
 $Cache->cache_value(
     'php_' . getmypid(),
     [

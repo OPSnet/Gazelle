@@ -21,7 +21,7 @@ $DB->query("
 $PeerCount = $DB->to_array(0, MYSQLI_NUM, false);
 $SeederCount = isset($PeerCount['Seeding'][1]) ? $PeerCount['Seeding'][1] : 0;
 $LeecherCount = isset($PeerCount['Leeching'][1]) ? $PeerCount['Leeching'][1] : 0;
-$Cache->cache_value('stats_peers', array($LeecherCount, $SeederCount), 0);
+$Cache->cache_value('stats_peers', [$LeecherCount, $SeederCount], 0);
 
 $DB->query("
 		SELECT COUNT(ID)

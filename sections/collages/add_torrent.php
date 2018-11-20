@@ -86,7 +86,7 @@ if ($MaxGroupsPerUser > 0) {
 }
 
 if ($_REQUEST['action'] == 'add_torrent') {
-	$Val->SetFields('url', '1', 'regex', 'The URL must be a link to a torrent on the site.', array('regex' => '/^'.TORRENT_GROUP_REGEX.'/i'));
+	$Val->SetFields('url', '1', 'regex', 'The URL must be a link to a torrent on the site.', ['regex' => '/^'.TORRENT_GROUP_REGEX.'/i']);
 	$Err = $Val->ValidateForm($_POST);
 
 	if ($Err) {

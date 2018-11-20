@@ -44,7 +44,7 @@ if (!isset($_GET['page'])) {
             list($Label, $Amount) = $Month;
             $OutFlow[] = number_format(($Amount / $Max) * 100, 4);
         }
-        $Cache->cache_value('users_timeline', array($Labels, $InFlow, $OutFlow, $Max), mktime(0, 0, 0, date('n') + 1, 2));
+        $Cache->cache_value('users_timeline', [$Labels, $InFlow, $OutFlow, $Max], mktime(0, 0, 0, date('n') + 1, 2));
     }
 }
 //End timeline generation

@@ -23,7 +23,7 @@ if ($Read > $LoggedUser['EffectiveClass']) {
 Text::$TOC = true;
 $TextBody = Text::full_format($Body, false);
 
-json_print("success", array(
+json_print("success", [
 	'title' => $Title,
 	'bbBody' => $Body,
 	'body' => $TextBody,
@@ -32,4 +32,4 @@ json_print("success", array(
 	'authorName' => $AuthorName,
 	'date' => $Date,
 	'revision' => (int)$Revision
-));
+]);

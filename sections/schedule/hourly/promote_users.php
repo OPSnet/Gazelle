@@ -3,11 +3,11 @@
 //------------- Promote users -------------------------------------------//
 sleep(5);
 $Criteria = [];
-$Criteria[] = array('From' => USER, 'To' => MEMBER,  'MinUpload' => 10 * 1024 * 1024 * 1024,  'MinRatio' => 0.7,  'MinUploads' => 0,  'MaxTime' => time_minus(3600 * 24 * 7));
-$Criteria[] = array('From' => MEMBER, 'To' => POWER, 'MinUpload' => 25 * 1024 * 1024 * 1024,  'MinRatio' => 1.05, 'MinUploads' => 5,  'MaxTime' => time_minus(3600 * 24 * 7 * 2));
-$Criteria[] = array('From' => POWER, 'To' => ELITE,  'MinUpload' => 100 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 50, 'MaxTime' => time_minus(3600 * 24 * 7 * 4));
-$Criteria[] = array('From' => ELITE, 'To' => TORRENT_MASTER, 'MinUpload' => 500 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 500, 'MaxTime' => time_minus(3600 * 24 * 7 * 8));
-$Criteria[] = array(
+$Criteria[] = ['From' => USER, 'To' => MEMBER,  'MinUpload' => 10 * 1024 * 1024 * 1024,  'MinRatio' => 0.7,  'MinUploads' => 0,  'MaxTime' => time_minus(3600 * 24 * 7)];
+$Criteria[] = ['From' => MEMBER, 'To' => POWER, 'MinUpload' => 25 * 1024 * 1024 * 1024,  'MinRatio' => 1.05, 'MinUploads' => 5,  'MaxTime' => time_minus(3600 * 24 * 7 * 2)];
+$Criteria[] = ['From' => POWER, 'To' => ELITE,  'MinUpload' => 100 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 50, 'MaxTime' => time_minus(3600 * 24 * 7 * 4)];
+$Criteria[] = ['From' => ELITE, 'To' => TORRENT_MASTER, 'MinUpload' => 500 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 500, 'MaxTime' => time_minus(3600 * 24 * 7 * 8)];
+$Criteria[] = [
     'From' => TORRENT_MASTER,
     'To' => POWER_TM,
     'MinUpload' => 500 * 1024 * 1024 * 1024,
@@ -19,8 +19,8 @@ $Criteria[] = array(
 					SELECT COUNT(DISTINCT GroupID)
 					FROM torrents
 					WHERE UserID = users_main.ID
-				) >= 500');
-$Criteria[] = array(
+				) >= 500'];
+$Criteria[] = [
     'From' => POWER_TM,
     'To' => ELITE_TM,
     'MinUpload' => 500 * 1024 * 1024 * 1024,
@@ -42,7 +42,7 @@ $Criteria[] = array(
 						OR (Media = 'DAT' AND Format = 'FLAC')
 						)
 						AND UserID = users_main.ID
-				) >= 500");
+				) >= 500"];
 
 foreach ($Criteria as $L) { // $L = Level
     $Query = "

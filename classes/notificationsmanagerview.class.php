@@ -4,11 +4,11 @@ class NotificationsManagerView {
 	private static $Settings;
 
 	public static function load_js() {
-		$JSIncludes = array(
+		$JSIncludes = [
 			'noty/noty.js',
 			'noty/layouts/bottomRight.js',
 			'noty/themes/default.js',
-			'user_notifications.js');
+			'user_notifications.js'];
 		foreach ($JSIncludes as $JSInclude) {
 			$Path = STATIC_SERVER."functions/$JSInclude";
 ?>

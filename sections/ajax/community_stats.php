@@ -4,7 +4,7 @@ if (!isset($_GET['userid']) || !is_number($_GET['userid'])) {
 }
 
 $UserID = $_GET['userid'];
-$CommStats = array(
+$CommStats = [
 	'leeching' => false,
 	'seeding' => false,
 	'snatched' => false,
@@ -12,7 +12,7 @@ $CommStats = array(
 	'downloaded' => false,
 	'udownloaded' => false,
 	'seedingperc' => false,
-);
+];
 
 $User = Users::user_info($UserID);
 

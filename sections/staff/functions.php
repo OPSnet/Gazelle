@@ -56,7 +56,7 @@ function get_fls() {
 				JOIN users_levels AS l ON l.UserID = i.UserID
 			WHERE l.PermissionID = ' . FLS_TEAM . '
 			ORDER BY m.Username');
-		$FLS = $DB->to_array(false, MYSQLI_BOTH, array(3, 'Paranoia'));
+		$FLS = $DB->to_array(false, MYSQLI_BOTH, [3, 'Paranoia']);
 		$Cache->cache_value('fls', $FLS, 180);
 	}
 	return $FLS;
@@ -85,7 +85,7 @@ function get_staff() {
 			JOIN permissions AS p ON p.ID = m.PermissionID
 		WHERE p.DisplayStaff = '1' AND Secondary = 0
 		ORDER BY p.Level, m.Username");
-		$TmpStaff = $DB->to_array(false, MYSQLI_BOTH, array(5, 'Paranoia'));
+		$TmpStaff = $DB->to_array(false, MYSQLI_BOTH, [5, 'Paranoia']);
 		$Staff = ['Staff' => [], 'Moderators' => [], 'Development' => [], 'Administration' => []];
 		foreach ($TmpStaff as $Class) {
 			// TODO: We should add a new table that stores Staff Page Sections
@@ -118,12 +118,12 @@ function get_staff() {
 }
 
 function get_support() {
-	return array(
+	return [
 		get_fls(),
 		get_staff(),
 		'fls' => get_fls(),
 		'staff' => get_staff()
-	);
+    ];
 }
 
 function printSectionDiv($ClassName) {

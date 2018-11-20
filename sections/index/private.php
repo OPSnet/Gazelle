@@ -22,7 +22,7 @@ if (!$News = $Cache->get_value('news')) {
 
 if (count($News) > 0 && $LoggedUser['LastReadNews'] != $News[0][0]) {
     $Cache->begin_transaction("user_info_heavy_$UserID");
-    $Cache->update_row(false, array('LastReadNews' => $News[0][0]));
+    $Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
     $Cache->commit_transaction(0);
     $DB->query("
 		UPDATE users_info
@@ -256,7 +256,7 @@ if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
         FROM requests
         WHERE FillerID > 0");
     list($FilledCount) = $DB->next_record();
-    $Cache->cache_value('stats_requests', array($RequestCount, $FilledCount), 11280);
+    $Cache->cache_value('stats_requests', [$RequestCount, $FilledCount], 11280);
 } else {
     list($RequestCount, $FilledCount) = $RequestStats;
 }
@@ -284,7 +284,7 @@ if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
         $PeerCount = $DB->to_array(0, MYSQLI_NUM, false);
         $SeederCount = $PeerCount['Seeding'][1] ?: 0;
         $LeecherCount = $PeerCount['Leeching'][1] ?: 0;
-        $Cache->cache_value('stats_peers', array($LeecherCount, $SeederCount), 1209600); // 2 week cache
+        $Cache->cache_value('stats_peers', [$LeecherCount, $SeederCount], 1209600); // 2 week cache
         $Cache->delete_value('stats_peers_lock');
     }
 } else {
@@ -323,7 +323,7 @@ if ($TopicID) {
             SELECT Question, Answers, Featured, Closed
             FROM forums_polls
             WHERE TopicID = '$TopicID'");
-        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, array(1));
+        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
         $Answers = unserialize($Answers);
         $DB->query("
             SELECT Vote, COUNT(UserID)
@@ -344,7 +344,7 @@ if ($TopicID) {
                 $Votes[$i] = 0;
             }
         }
-        $Cache->cache_value("polls_$TopicID", array($Question, $Answers, $Votes, $Featured, $Closed), 0);
+        $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
     } else {
         list($Question, $Answers, $Votes, $Featured, $Closed) = $Poll;
     }
@@ -513,7 +513,7 @@ foreach ($News as $NewsItem) {
     </div>
 </div>
 <?
-View::show_footer(array('disclaimer'=>true));
+View::show_footer(['disclaimer'=>true]);
 
 function contest() {
     global $DB, $Cache, $LoggedUser;
@@ -537,7 +537,7 @@ function contest() {
             FROM users_points");
         list($TotalPoints) = $DB->next_record();
 
-        $Cache->cache_value('contest', array($Contest, $TotalPoints), 600);
+        $Cache->cache_value('contest', [$Contest, $TotalPoints], 600);
     }
 
 ?>

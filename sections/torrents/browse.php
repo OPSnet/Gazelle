@@ -13,7 +13,7 @@ function header_link($SortKey, $DefaultWay = 'desc') {
 	} else {
 		$NewWay = $DefaultWay;
 	}
-	return "torrents.php?order_way=$NewWay&amp;order_by=$SortKey&amp;".Format::get_url(array('order_way', 'order_by'));
+	return "torrents.php?order_way=$NewWay&amp;order_by=$SortKey&amp;".Format::get_url(['order_way', 'order_by']);
 }
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
@@ -41,7 +41,7 @@ if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
 
 // Setting default search options
 if (!empty($_GET['setdefault'])) {
-	$UnsetList = array('page', 'setdefault');
+	$UnsetList = ['page', 'setdefault'];
 	$UnsetRegexp = '/(&|^)('.implode('|', $UnsetList).')=.*?(&|$)/i';
 
 	$DB->query("
@@ -58,7 +58,7 @@ if (!empty($_GET['setdefault'])) {
 		SET SiteOptions = '".db_string(serialize($SiteOptions))."'
 		WHERE UserID = '".db_string($LoggedUser['ID'])."'");
 	$Cache->begin_transaction("user_info_heavy_$UserID");
-	$Cache->update_row(false, array('DefaultSearch' => $SiteOptions['DefaultSearch']));
+	$Cache->update_row(false, ['DefaultSearch' => $SiteOptions['DefaultSearch']]);
 	$Cache->commit_transaction(0);
 
 // Clearing default search options
@@ -75,7 +75,7 @@ if (!empty($_GET['setdefault'])) {
 		SET SiteOptions = '".db_string(serialize($SiteOptions))."'
 		WHERE UserID = '".db_string($LoggedUser['ID'])."'");
 	$Cache->begin_transaction("user_info_heavy_$UserID");
-	$Cache->update_row(false, array('DefaultSearch' => ''));
+	$Cache->update_row(false, ['DefaultSearch' => '']);
 	$Cache->commit_transaction(0);
 
 // Use default search options
@@ -543,7 +543,7 @@ foreach ($Results as $Key => $GroupID) {
 		}
 	} else {
 		$TorrentID = $Key;
-		$Torrents = array($TorrentID => $GroupInfo['Torrents'][$TorrentID]);
+		$Torrents = [$TorrentID => $GroupInfo['Torrents'][$TorrentID]];
 	}
 
 	$TorrentTags = new Tags($GroupInfo['TagList']);

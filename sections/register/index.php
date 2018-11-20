@@ -32,14 +32,14 @@ if (!empty($_REQUEST['confirm'])) {
 	}
 
 } elseif (OPEN_REGISTRATION || !empty($_REQUEST['invite'])) {
-	$Val->SetFields('username', true, 'regex', 'You did not enter a valid username.', array('regex' => USERNAME_REGEX));
+	$Val->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
 	$Val->SetFields('email', true, 'email', 'You did not enter a valid email address.');
-	$Val->SetFields('password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', array('regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/'));
-	$Val->SetFields('confirm_password', true, 'compare', 'Your passwords do not match.', array('comparefield' => 'password'));
+	$Val->SetFields('password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
+	$Val->SetFields('confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']);
 	$Val->SetFields('readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.');
 	$Val->SetFields('readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.');
 	$Val->SetFields('agereq', true, 'checkbox', 'You did not select the box that says you are 13 years of age or older.');
-	//$Val->SetFields('captcha', true, 'string', 'You did not enter a captcha code.', array('minlength' => 6, 'maxlength' => 6));
+	//$Val->SetFields('captcha', true, 'string', 'You did not enter a captcha code.', ['minlength' => 6, 'maxlength' => 6]);
 
 	if (!empty($_POST['submit'])) {
 		// User has submitted registration form
@@ -243,7 +243,7 @@ if (!empty($_REQUEST['confirm'])) {
 			$TPL->set('SITE_URL', SITE_URL);
 
 			Misc::send_email($_REQUEST['email'], 'New account confirmation at '.SITE_NAME, $TPL->get(), 'noreply');
-			Tracker::update_tracker('add_user', array('id' => $UserID, 'passkey' => $torrent_pass));
+			Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $torrent_pass]);
 			$Sent = 1;
 
 

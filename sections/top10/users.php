@@ -1,7 +1,7 @@
 <?
 // error out on invalid requests (before caching)
 if (isset($_GET['details'])) {
-	if (in_array($_GET['details'],array('ul','dl','numul','uls','dls'))) {
+	if (in_array($_GET['details'], ['ul','dl','numul','uls','dls'])) {
 		$Details = $_GET['details'];
 	} else {
 		error(404);

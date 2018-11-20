@@ -4,14 +4,14 @@ class Text {
 	 * Array of valid tags; tag => max number of attributes
 	 * @var array $ValidTags
 	 */
-	private static $ValidTags = array('b'=>0, 'u'=>0, 'i'=>0, 's'=>0, '*'=>0, '#'=>0, 'artist'=>0, 'user'=>0, 'n'=>0, 'inlineurl'=>0, 'inlinesize'=>1, 'headline'=>1, 'align'=>1, 'color'=>1, 'colour'=>1, 'size'=>1, 'url'=>1, 'img'=>1, 'quote'=>1, 'pre'=>1, 'code'=>1, 'tex'=>0, 'hide'=>1, 'spoiler' => 1, 'plain'=>0, 'important'=>0, 'torrent'=>0, 'rule'=>0, 'mature'=>1,
-	);
+	private static $ValidTags = ['b'=>0, 'u'=>0, 'i'=>0, 's'=>0, '*'=>0, '#'=>0, 'artist'=>0, 'user'=>0, 'n'=>0, 'inlineurl'=>0, 'inlinesize'=>1, 'headline'=>1, 'align'=>1, 'color'=>1, 'colour'=>1, 'size'=>1, 'url'=>1, 'img'=>1, 'quote'=>1, 'pre'=>1, 'code'=>1, 'tex'=>0, 'hide'=>1, 'spoiler' => 1, 'plain'=>0, 'important'=>0, 'torrent'=>0, 'rule'=>0, 'mature'=>1,
+    ];
 
 	/**
 	 * Array of smilies; code => image file in STATIC_SERVER/common/smileys
 	 * @var array $Smileys
 	 */
-	private static $Smileys = array(
+	private static $Smileys = [
 		':angry:'		=> 'angry.gif',
 		':-D'			=> 'biggrin.gif',
 		':D'			=> 'biggrin.gif',
@@ -58,7 +58,7 @@ class Text {
 		':worried:'		=> 'worried.gif',
 		':wtf:'			=> 'wtf.gif',
 		':wub:'			=> 'wub.gif',
-	);
+    ];
 
 	/**
 	 * Processed version of the $Smileys array, see {@link smileys}
@@ -122,7 +122,7 @@ class Text {
 	 * Depth
 	 * @var array $HeadlineLevels
 	 */
-	private static $HeadlineLevels = array('1', '2', '3', '4');
+	private static $HeadlineLevels = ['1', '2', '3', '4'];
 
 	/**
 	 * TOC enabler
@@ -428,25 +428,25 @@ class Text {
 			// 6) Depending on what type of tag we're dealing with, create an array with the attribute and block.
 			switch ($TagName) {
 				case 'inlineurl':
-					$Array[$ArrayPos] = array('Type'=>'inlineurl', 'Attr'=>$Block, 'Val'=>'');
+					$Array[$ArrayPos] = ['Type'=>'inlineurl', 'Attr'=>$Block, 'Val'=>''];
 					break;
 				case 'url':
-					$Array[$ArrayPos] = array('Type'=>'img', 'Attr'=>$Attrib, 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'img', 'Attr'=>$Attrib, 'Val'=>$Block];
 					if (empty($Attrib)) { // [url]http://...[/url] - always set URL to attribute
-						$Array[$ArrayPos] = array('Type'=>'url', 'Attr'=>$Block, 'Val'=>'');
+						$Array[$ArrayPos] = ['Type'=>'url', 'Attr'=>$Block, 'Val'=>''];
 					} else {
-						$Array[$ArrayPos] = array('Type'=>'url', 'Attr'=>$Attrib, 'Val'=>self::parse($Block));
+						$Array[$ArrayPos] = ['Type'=>'url', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
 					}
 					break;
 				case 'quote':
-					$Array[$ArrayPos] = array('Type'=>'quote', 'Attr'=>self::parse($Attrib), 'Val'=>self::parse($Block));
+					$Array[$ArrayPos] = ['Type'=>'quote', 'Attr'=>self::parse($Attrib), 'Val'=>self::parse($Block)];
 					break;
 				case 'img':
 				case 'image':
 					if (empty($Block)) {
 						$Block = $Attrib;
 					}
-					$Array[$ArrayPos] = array('Type'=>'img', 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'img', 'Val'=>$Block];
 					break;
 				case 'aud':
 				case 'mp3':
@@ -454,27 +454,27 @@ class Text {
 					if (empty($Block)) {
 						$Block = $Attrib;
 					}
-					$Array[$ArrayPos] = array('Type'=>'aud', 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'aud', 'Val'=>$Block];
 					break;
 				case 'user':
-					$Array[$ArrayPos] = array('Type'=>'user', 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'user', 'Val'=>$Block];
 					break;
 				case 'artist':
-					$Array[$ArrayPos] = array('Type'=>'artist', 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'artist', 'Val'=>$Block];
 					break;
 				case 'torrent':
-					$Array[$ArrayPos] = array('Type'=>'torrent', 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'torrent', 'Val'=>$Block];
 					break;
 				case 'tex':
-					$Array[$ArrayPos] = array('Type'=>'tex', 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'tex', 'Val'=>$Block];
 					break;
 				case 'rule':
-					$Array[$ArrayPos] = array('Type'=>'rule', 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>'rule', 'Val'=>$Block];
 					break;
 				case 'pre':
 				case 'code':
 				case 'plain':
-					$Block = strtr($Block, array('[inlineurl]' => ''));
+					$Block = strtr($Block, ['[inlineurl]' => '']);
 
 					$Callback = function ($matches) {
 						$n = $matches[2];
@@ -492,18 +492,18 @@ class Text {
 					$Block = preg_replace('/\[inlinesize\=7\](.*?)\[\/inlinesize\]/i', '==$1==', $Block);
 
 
-					$Array[$ArrayPos] = array('Type'=>$TagName, 'Val'=>$Block);
+					$Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
 					break;
 				case 'spoiler':
 				case 'hide':
-					$Array[$ArrayPos] = array('Type'=>'hide', 'Attr'=>$Attrib, 'Val'=>self::parse($Block));
+					$Array[$ArrayPos] = ['Type'=>'hide', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
 					break;
 				case 'mature':
-					$Array[$ArrayPos] = array('Type'=>'mature', 'Attr'=>$Attrib, 'Val'=>self::parse($Block));
+					$Array[$ArrayPos] = ['Type'=>'mature', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
 					break;
 				case '#':
 				case '*':
-						$Array[$ArrayPos] = array('Type'=>'list');
+						$Array[$ArrayPos] = ['Type'=>'list'];
 						$Array[$ArrayPos]['Val'] = explode("[$TagName]", $Block);
 						$Array[$ArrayPos]['ListType'] = $TagName === '*' ? 'ul' : 'ol';
 						$Array[$ArrayPos]['Tag'] = $TagName;
@@ -516,12 +516,12 @@ class Text {
 					break; // n serves only to disrupt bbcode (backwards compatibility - use [pre])
 				default:
 					if ($WikiLink == true) {
-						$Array[$ArrayPos] = array('Type'=>'wiki','Val'=>$TagName);
+						$Array[$ArrayPos] = ['Type'=>'wiki','Val'=>$TagName];
 					} else {
 
 						// Basic tags, like [b] or [size=5]
 
-						$Array[$ArrayPos] = array('Type'=>$TagName, 'Val'=>self::parse($Block));
+						$Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>self::parse($Block)];
 						if (!empty($Attrib) && $MaxAttribs > 0) {
 							$Array[$ArrayPos]['Attr'] = strtolower($Attrib);
 						}
@@ -658,7 +658,7 @@ class Text {
 					if (preg_match($Pattern, $Block['Val'], $Matches)) {
 						if (isset($Matches[2])) {
 							$GroupID = $Matches[2];
-							$Groups = Torrents::get_groups(array($GroupID), true, true, false);
+							$Groups = Torrents::get_groups([$GroupID], true, true, false);
 							if ($Groups[$GroupID]) {
 								$Group = $Groups[$GroupID];
 								$Str .= Artists::display_artists($Group['ExtendedArtists']).'<a href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';
@@ -694,7 +694,7 @@ class Text {
 					$Str .= '</'.$Block['ListType'].'>';
 					break;
 				case 'align':
-					$ValidAttribs = array('left', 'center', 'right');
+					$ValidAttribs = ['left', 'center', 'right'];
 					if (!in_array($Block['Attr'], $ValidAttribs)) {
 						$Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val']).'[/align]';
 					} else {
@@ -703,7 +703,7 @@ class Text {
 					break;
 				case 'color':
 				case 'colour':
-					$ValidAttribs = array('aqua', 'black', 'blue', 'fuchsia', 'green', 'grey', 'lime', 'maroon', 'navy', 'olive', 'purple', 'red', 'silver', 'teal', 'white', 'yellow');
+					$ValidAttribs = ['aqua', 'black', 'blue', 'fuchsia', 'green', 'grey', 'lime', 'maroon', 'navy', 'olive', 'purple', 'red', 'silver', 'teal', 'white', 'yellow'];
 					if (!in_array($Block['Attr'], $ValidAttribs) && !preg_match('/^#[0-9a-f]{6}$/', $Block['Attr'])) {
 						$Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val']).'[/color]';
 					} else {
@@ -718,7 +718,7 @@ class Text {
 					} else {
 						$id = '_' . crc32($raw . self::$HeadlineID);
 						if (self::$InQuotes === 0) {
-							self::$Headlines[] = array($Block['Attr'], $raw, $id);
+							self::$Headlines[] = [$Block['Attr'], $raw, $id];
 						}
 
 						$Str .= sprintf('<h%1$d id="%3$s">%2$s</h%1$d>', ($Block['Attr'] + 2), $text, $id);
@@ -727,7 +727,7 @@ class Text {
 					break;
 				case 'inlinesize':
 				case 'size':
-					$ValidAttribs = array('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
+					$ValidAttribs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 					if (!in_array($Block['Attr'], $ValidAttribs)) {
 						$Str .= '[size='.$Block['Attr'].']'.self::to_html($Block['Val']).'[/size]';
 					} else {
@@ -743,7 +743,7 @@ class Text {
 					}
 					if (!empty($Block['Attr'])) {
 						$Exploded = explode('|', self::to_html($Block['Attr']));
-						if (isset($Exploded[1]) && (is_numeric($Exploded[1]) || (in_array($Exploded[1][0], array('a', 't', 'c', 'r')) && is_numeric(substr($Exploded[1], 1))))) {
+						if (isset($Exploded[1]) && (is_numeric($Exploded[1]) || (in_array($Exploded[1][0], ['a', 't', 'c', 'r']) && is_numeric(substr($Exploded[1], 1))))) {
 							// the part after | is either a number or starts with a, t, c or r, followed by a number (forum post, artist comment, torrent comment, collage comment or request comment, respectively)
 							$PostID = trim($Exploded[1]);
 							$Str .= '<a href="#" onclick="QuoteJump(event, \''.$PostID.'\'); return false;"><strong class="quoteheader">'.$Exploded[0].'</strong> wrote: </a>';
@@ -964,7 +964,7 @@ class Text {
 			}
 			elseif (strpos($Element->getAttribute('style'), 'color: ') !== false) {
 				$NewElement = $Document->createElement('color', $Element->nodeValue);
-				$NewElement->setAttribute('color', str_replace(array('color: ', ';'), '', $Element->getAttribute('style')));
+				$NewElement->setAttribute('color', str_replace(['color: ', ';'], '', $Element->getAttribute('style')));
 				$Element->parentNode->replaceChild($NewElement, $Element);
 			}
 		}
@@ -1031,8 +1031,8 @@ class Text {
 			}
 		}
 
-		$Str = str_replace(array("<body>\n", "\n</body>", "<body>", "</body>"), "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
-		$Str = str_replace(array("\r\n", "\n"), "", $Str);
+		$Str = str_replace(["<body>\n", "\n</body>", "<body>", "</body>"], "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
+		$Str = str_replace(["\r\n", "\n"], "", $Str);
 		$Str = preg_replace("/\<strong\>([a-zA-Z0-9 ]+)\<\/strong\>\: \<spoiler\>/", "[spoiler=\\1]", $Str);
 		$Str = str_replace("</spoiler>", "[/spoiler]", $Str);
 		$Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*)\<blockquote\>/","[quote=\\1]", $Str);
@@ -1043,9 +1043,9 @@ class Text {
 		$Str = preg_replace("/\<(\/*)important\>/", "[\\1important]", $Str);
 		$Str = preg_replace("/\<color color=\"(.*)\"\>/", "[color=\\1]", $Str);
 		$Str = str_replace("</color>", "[/color]", $Str);
-		$Str = str_replace(array('<number>', '<bullet>'), array('[#]', '[*]'), $Str);
-		$Str = str_replace(array('</number>', '</bullet>'), '<br />', $Str);
-		$Str = str_replace(array('<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'), '', $Str);
+		$Str = str_replace(['<number>', '<bullet>'], ['[#]', '[*]'], $Str);
+		$Str = str_replace(['</number>', '</bullet>'], '<br />', $Str);
+		$Str = str_replace(['<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'], '', $Str);
 		$Str = preg_replace("/\<size size=\"([0-9]+)\"\>/", "[size=\\1]", $Str);
 		$Str = str_replace("</size>", "[/size]", $Str);
 		//$Str = preg_replace("/\<a href=\"rules.php\?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
@@ -1058,7 +1058,7 @@ class Text {
 		$Str = str_replace('<p>', '', $Str);
 		$Str = str_replace('</p>', '<br />', $Str);
 		//return $Str;
-		return str_replace(array("<br />", "<br>"), "\n", $Str);
+		return str_replace(["<br />", "<br>"], "\n", $Str);
 	}
 }
 /*

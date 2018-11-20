@@ -5,9 +5,9 @@ if ($GroupCategoryID == 1) {
 	$LIs = '';
 	// Display information for the return categories of get_ranking()
 	$GroupDecade = $GroupYear - ($GroupYear % 10);
-	$names = array('overall'=>'<a href="top10.php?type=votes">overall</a>',
+	$names = ['overall'=>'<a href="top10.php?type=votes">overall</a>',
 				'decade'=>check_perms('site_advanced_top10') ? 'for the <a href="top10.php?advanced=1&amp;type=votes&amp;year1='.$GroupDecade.'&amp;year2='.($GroupDecade+9).'">'.$GroupDecade.'s</a>' : 'for the '.$GroupDecade.'s',
-				'year'=>check_perms('site_advanced_top10') ? 'for <a href="top10.php?advanced=1&amp;type=votes&amp;year1='.$GroupYear.'&amp;year2=">'.$GroupYear.'</a>' : "for $GroupYear");
+				'year'=>check_perms('site_advanced_top10') ? 'for <a href="top10.php?advanced=1&amp;type=votes&amp;year1='.$GroupYear.'&amp;year2=">'.$GroupYear.'</a>' : "for $GroupYear"];
 
 	foreach ($names as $key => $text) {
 		if ($Rank = $Rankings[$key]) {

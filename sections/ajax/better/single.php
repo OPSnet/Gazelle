@@ -29,27 +29,27 @@ foreach ($Results as $GroupID => $FlacID) {
 	$JsonArtists = [];
 	if (count($Artists) > 0) {
 		foreach ($Artists as $Artist) {
-			$JsonArtists[] = array(
+			$JsonArtists[] = [
 				'id' => (int)$Artist['id'],
 				'name' => $Artist['name'],
 				'aliasId' => (int)$Artist['aliasid']
-			);
+            ];
 		}
 	}
 
-	$JsonResults[] = array(
+	$JsonResults[] = [
 		'torrentId' => (int)$FlacID,
 		'groupId' => (int)$GroupID,
 		'artist' => $JsonArtists,
 		'groupName' => $GroupName,
 		'groupYear' => (int)$GroupYear,
 		'downloadUrl' => "torrents.php?action=download&id=$FlacID&authkey=".$LoggedUser['AuthKey'].'&torrent_pass='.$LoggedUser['torrent_pass']
-	);
+    ];
 }
 
 print json_encode(
-	array(
+	[
 		'status' => 'success',
 		'response' => $JsonResults
-	)
+    ]
 );

@@ -186,7 +186,7 @@ class POLL_GRAPH extends GOOGLE_CHARTS {
 		$Labels = [];
 		foreach ($this->Data as $Key => $Value) {
 			$Data[] = $this->encode(($Value / $Max) * 4095);
-			$Labels[] = '@t'.str_replace(array(' ', ','),array('+', '\,'), $this->Labels[$Key]).',000000,1,'.round((($Key + 1) / $Count) - (12 / $Height), 2).':0,12';
+			$Labels[] = '@t'.str_replace([' ', ','], ['+', '\,'], $this->Labels[$Key]).',000000,1,'.round((($Key + 1) / $Count) - (12 / $Height), 2).':0,12';
 		}
 		$this->URL .= "&amp;chbh=25,0,5&amp;chs=214x$Height&amp;chl=0%|".round($Increment, 1)."%|".round($Increment * 2, 1)."%|".round($Increment * 3, 1)."%|".round($Increment * 4, 1)."%&amp;chm=".implode('|', $Labels).'&amp;chd=e:'.implode('', $Data);
 	}

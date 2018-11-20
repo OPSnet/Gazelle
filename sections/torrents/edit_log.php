@@ -12,7 +12,7 @@ if (!$DB->has_results()) {
     error(404);
 }
 list($GroupID) = $DB->next_record(MYSQLI_NUM);
-$Group = Torrents::array_group(Torrents::get_groups(array($GroupID))[$GroupID]);
+$Group = Torrents::array_group(Torrents::get_groups([$GroupID])[$GroupID]);
 $TorrentTags = new Tags($Group['TagList']);
 
 if (!empty($Group['ExtendedArtists'][1]) || !empty($Group['ExtendedArtists'][4]) || !empty($Group['ExtendedArtists'][5])) {
@@ -20,7 +20,7 @@ if (!empty($Group['ExtendedArtists'][1]) || !empty($Group['ExtendedArtists'][4])
     unset($Group['ExtendedArtists'][3]);
     $DisplayName = Artists::display_artists($Group['ExtendedArtists']);
 } elseif (!empty($Artists)) {
-    $DisplayName = Artists::display_artists(array(1 => $Group['Artists']));
+    $DisplayName = Artists::display_artists([1 => $Group['Artists']]);
 } else {
     $DisplayName = '';
 }
@@ -42,7 +42,7 @@ if (!$DB->has_results()) {
     error(404);
 }
 
-$Log = $DB->next_record(MYSQLI_ASSOC, array('AdjustmentDetails'));
+$Log = $DB->next_record(MYSQLI_ASSOC, ['AdjustmentDetails']);
 
 $Checksum = ($Log['Checksum'] == '1') ? 'Good' : 'Missing/Invalid Checksum';
 $Details = "";
@@ -58,7 +58,7 @@ if (!empty($Log['Details'])) {
 $AdjustedScore = (!isset($Log['AdjustedScore']) || $Log['Adjusted'] == '0') ? $Log['Score'] : $Log['AdjustedScore'];
 $AdjustedUser = (!empty($Log['AdjustedBy'])) ? "(By: ".Users::format_username($Log['AdjustedBy']).")" : "";
 $AdjustedChecksum = ($Log['Adjusted'] == '0') ? $Log['Checksum'] : $Log['AdjustedChecksum'];
-$AdjustmentDetails = array('tracks' => array('crc_mismatches' => 0, 'suspicious_positions' => 0, 'timing_problems' => 0));
+$AdjustmentDetails = ['tracks' => ['crc_mismatches' => 0, 'suspicious_positions' => 0, 'timing_problems' => 0]];
 if (!empty($Log['AdjustmentDetails'])) {
     $AdjustmentDetails = unserialize($Log['AdjustmentDetails']);
 }

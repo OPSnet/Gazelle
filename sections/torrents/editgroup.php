@@ -131,7 +131,7 @@ View::show_header('Edit torrent group');
 						<input type="checkbox" id="neutralleech" name="neutralleech" /><label for="neutralleech"> Neutral Leech</label>
 						 because
 						<select name="freeleechtype">
-<?		$FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
+<?		$FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
 		foreach ($FL as $Key => $FLType) { ?>
 							<option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$FLType?></option>
 <?		} ?>

@@ -19,13 +19,13 @@ if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
 	$UserID = $LoggedUser['ID'];
 }
 
-if (empty($_GET['filter']) || !in_array($_GET['filter'], array('uploaded', 'seeding', 'snatched'))) {
+if (empty($_GET['filter']) || !in_array($_GET['filter'], ['uploaded', 'seeding', 'snatched'])) {
 	$_GET['filter'] = 'all';
 }
-if (empty($_GET['target']) || !in_array($_GET['target'], array('v0', 'v2', '320', 'all'))) {
+if (empty($_GET['target']) || !in_array($_GET['target'], ['v0', 'v2', '320', 'all'])) {
 	$_GET['target'] = 'any';
 }
-$Encodings = array('v0' => 'V0 (VBR)', 'v2' => 'V2 (VBR)', '320' => '320');
+$Encodings = ['v0' => 'V0 (VBR)', 'v2' => 'V2 (VBR)', '320' => '320'];
 
 function transcode_init_sphql() {
 	// Initializes a basic SphinxqlQuery object
@@ -36,7 +36,7 @@ function transcode_init_sphql() {
 		->where_match('FLAC', 'format')
 		->order_by('RAND()')
 		->limit(0, TORRENTS_PER_PAGE, TORRENTS_PER_PAGE);
-	if (in_array($_GET['target'], array('v0', 'v2', '320'))) {
+	if (in_array($_GET['target'], ['v0', 'v2', '320'])) {
 		// V0/V2/320 is missing
 		$SphQL->where_match('!'.$_GET['target'], 'encoding', false);
 	} elseif ($_GET['target'] === 'all') {
@@ -61,14 +61,14 @@ function transcode_parse_groups($Groups) {
 		foreach ($Group['Torrents'] as $TorrentID => $Torrent) {
 			$RemIdent = "$Torrent[Media] $Torrent[RemasterYear] $Torrent[RemasterTitle] $Torrent[RemasterRecordLabel] $Torrent[RemasterCatalogueNumber]";
 			if (!isset($TorrentGroups[$GroupID])) {
-				$TorrentGroups[$GroupID] = array(
+				$TorrentGroups[$GroupID] = [
 					'Year' => $Group['Year'],
 					'ExtendedArtists' => $Group['ExtendedArtists'],
 					'Name' => $Group['Name'],
 					'ReleaseType' => $Group['ReleaseType'],
 					'TagList' => $Group['TagList'],
 					'Editions' => []
-				);
+                ];
 			}
 			if (!isset($TorrentGroups[$GroupID]['Editions'][$RemIdent])) {
 				if ($Torrent['Remastered'] && $Torrent['RemasterYear'] != 0) {
@@ -127,7 +127,7 @@ function transcode_parse_groups($Groups) {
 
 $Groups = [];
 $ResultCount = 0;
-if (in_array($_GET['filter'], array('all', 'uploaded'))) {
+if (in_array($_GET['filter'], ['all', 'uploaded'])) {
 	$SphQL = transcode_init_sphql();
 	if ($_GET['filter'] === 'uploaded') {
 		$SphQL->where('uploader', $UserID);
@@ -141,7 +141,7 @@ if (in_array($_GET['filter'], array('all', 'uploaded'))) {
 		$Groups = transcode_parse_groups($Groups);
 	}
 	unset($SphQL, $SphQLResult, $Results);
-} elseif (in_array($_GET['filter'], array('snatched', 'seeding'))) {
+} elseif (in_array($_GET['filter'], ['snatched', 'seeding'])) {
 	// Read all snatched/seeding torrents
 	$DB->query("
 		SELECT t.GroupID, x.fid
@@ -194,13 +194,13 @@ if (in_array($_GET['filter'], array('all', 'uploaded'))) {
 }
 $Debug->log_var($Groups, 'Groups');
 
-$Counter = array(
+$Counter = [
 	'total' => 0, //how many FLAC torrents can be transcoded?
 	'miss_total' => 0, //how many transcodes are missing?
 	'miss_V0 (VBR)' => 0, //how many V0 transcodes are missing?
 	'miss_V2 (VBR)' => 0, //how many V2 transcodes are missing?
 	'miss_320' => 0, //how many 320 transcodes are missing?
-);
+];
 foreach ($Groups as $GroupID => $Group) {
 	foreach ($Group['Editions'] as $RemIdent => $Edition) {
 		if (count($Edition['FlacIDs']) === 0 //no FLAC in this group

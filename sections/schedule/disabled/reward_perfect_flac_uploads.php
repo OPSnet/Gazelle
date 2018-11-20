@@ -20,7 +20,7 @@ if ($DB->has_results()) {
             $Invites = $Invites + $CurInvites;
             $FLTokens = $FLTokens + $CurFLTokens;
             G::$Cache->begin_transaction('user_info_heavy_'.$UserID);
-            G::$Cache->update_row(false, array('Invites' => $Invites, 'FLTokens' => $FLTokens));
+            G::$Cache->update_row(false, ['Invites' => $Invites, 'FLTokens' => $FLTokens]);
             G::$Cache->commit_transaction(0);
         }
     }

@@ -6,7 +6,7 @@ if (!is_number($GroupID)) {
 
 View::show_header("History for Group $GroupID");
 
-$Groups = Torrents::get_groups(array($GroupID), true, true, false);
+$Groups = Torrents::get_groups([$GroupID], true, true, false);
 if (!empty($Groups[$GroupID])) {
 	$Group = $Groups[$GroupID];
 	$Title = Artists::display_artists($Group['ExtendedArtists']).'<a href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';

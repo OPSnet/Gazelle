@@ -106,11 +106,11 @@ if ($NewRequest && !empty($_GET['artistid']) && is_number($_GET['artistid'])) {
 		WHERE artistid = ".$_GET['artistid']."
 		LIMIT 1");
     list($ArtistName) = $DB->next_record();
-    $ArtistForm = array(
-        1 => array(array('name' => trim($ArtistName))),
+    $ArtistForm = [
+        1 => [['name' => trim($ArtistName)]],
         2 => [],
         3 => []
-    );
+    ];
 } elseif ($NewRequest && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
     $ArtistForm = Artists::get_artist($_GET['groupid']);
     $DB->query("

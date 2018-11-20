@@ -50,8 +50,8 @@ class Artists {
 					ta.Importance ASC,
 					aa.Name ASC;");
 			while (list($GroupID, $ArtistID, $ArtistName, $ArtistImportance, $AliasID) = G::$DB->next_record(MYSQLI_BOTH, false)) {
-				$Results[$GroupID][$ArtistImportance][] = array('id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID);
-				$New[$GroupID][$ArtistImportance][] = array('id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID);
+				$Results[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
+				$New[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
 			}
 			G::$DB->set_query_id($QueryID);
 			foreach ($DBs as $GroupID) {
@@ -78,7 +78,7 @@ class Artists {
 	 * @return array - see get_artists
 	 */
 	public static function get_artist($GroupID) {
-		$Results = Artists::get_artists(array($GroupID));
+		$Results = Artists::get_artists([$GroupID]);
 		return $Results[$GroupID];
 	}
 

@@ -354,7 +354,7 @@ foreach ($Importances as $Group) {
 				unset($ExtendedArtists[3]);
 				$DisplayName = Artists::display_artists($ExtendedArtists).$DisplayName;
 			} elseif (count($GroupArtists) > 0) {
-				$DisplayName = Artists::display_artists(array(1 => $Artists), true, true).$DisplayName;
+				$DisplayName = Artists::display_artists([1 => $Artists], true, true).$DisplayName;
 			}
 			break;
 		case 1022: // Show performers on composer pages
@@ -364,12 +364,12 @@ foreach ($Importances as $Group) {
 				unset($ExtendedArtists[6]);
 				$DisplayName = Artists::display_artists($ExtendedArtists).$DisplayName;
 			} elseif (count($GroupArtists) > 0) {
-				$DisplayName = Artists::display_artists(array(1 => $Artists), true, true).$DisplayName;
+				$DisplayName = Artists::display_artists([1 => $Artists], true, true).$DisplayName;
 			}
 			break;
 		default: // Show composers otherwise
 			if (!empty($ExtendedArtists[4])) {
-				$DisplayName = Artists::display_artists(array(4 => $ExtendedArtists[4]), true, true).$DisplayName;
+				$DisplayName = Artists::display_artists([4 => $ExtendedArtists[4]], true, true).$DisplayName;
 			}
 	}
 

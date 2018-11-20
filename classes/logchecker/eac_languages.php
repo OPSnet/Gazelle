@@ -20,7 +20,7 @@
 
 $EAC_LANG = [];
 
-$EAC_LANG['en'] = array(
+$EAC_LANG['en'] = [
     31 => "Filename will be ignored",
     50 => "Value out of range !",
     51 => "Invalid characters !",
@@ -190,9 +190,9 @@ $EAC_LANG['en'] = array(
     12 => "Apply",
     15 => "Yes",
     16 => "No",
-);
+];
 
-$EAC_LANG['ru'] = array(
+$EAC_LANG['ru'] = [
     31 => "Имя файла игнорируется",
     50 => "Значение вне диапазона.",
     51 => "Недопустимые символы.",
@@ -362,9 +362,9 @@ $EAC_LANG['ru'] = array(
     12 => "Применить",
     15 => "Да",
     16 => "Нет",
-);
+];
 
-$EAC_LANG['bg'] = array(
+$EAC_LANG['bg'] = [
     31 => "Игнориране името на файла",
     50 => "Недопустима стойност !",
     51 => "Невалидни символи !",
@@ -531,9 +531,9 @@ $EAC_LANG['bg'] = array(
     12 => "Приложи",
     15 => "Да",
     16 => "Не",
-);
+];
 
-$EAC_LANG['cs'] = array(
+$EAC_LANG['cs'] = [
     31 => "Název souboru bude ignorován",
     50 => "Hodnota je mimo rozsah!",
     51 => "Neplatné znaky!",
@@ -700,9 +700,9 @@ $EAC_LANG['cs'] = array(
     15 => "Ano",
     16 => "Ne",
 
-);
+];
 
-$EAC_LANG['nl'] = array(
+$EAC_LANG['nl'] = [
     31 => "Bestands naam wordt genegeerd",
     50 => "Waarde buiten bereik!",
     51 => "Ongeldig teken!",
@@ -871,9 +871,9 @@ $EAC_LANG['nl'] = array(
     12 => "Toepassen",
     15 => "Ja",
     16 => "Neen",
-);
+];
 
-$EAC_LANG['de'] = array(
+$EAC_LANG['de'] = [
     31 => "Dateiname wird ignoriert",
     50 => "Wert außerhalb des Bereichs !",
     51 => "Ungültige Zeichen !",
@@ -1042,9 +1042,9 @@ $EAC_LANG['de'] = array(
     12 => "Übernehmen",
     15 => "Ja",
     16 => "Nein",
-);
+];
 
-$EAC_LANG['it'] = array(
+$EAC_LANG['it'] = [
     31 => "Il nome del file sarà ignorato",
     50 => "Valore fuori dall'intervallo!",
     51 => "Caratteri non validi!",
@@ -1213,9 +1213,9 @@ $EAC_LANG['it'] = array(
     12 => "Applica",
     15 => "Sì",
     16 => "No",
-);
+];
 
-$EAC_LANG['pl'] = array(
+$EAC_LANG['pl'] = [
     31 => "Nazwa pliku będzie ignorowana",
     50 => "Wartość poza zakresem!",
     51 => "Nieprawidłowy znak!",
@@ -1384,9 +1384,9 @@ $EAC_LANG['pl'] = array(
     12 => "Zastosuj",
     15 => "Tak",
     16 => "Nie",
-);
+];
 
-$EAC_LANG['zh-Hans'] = array(
+$EAC_LANG['zh-Hans'] = [
     31 => "文件名将被忽略",
     50 => "超出数值范围！",
     51 => "无效的字符！",
@@ -1555,9 +1555,9 @@ $EAC_LANG['zh-Hans'] = array(
     12 => "应用",
     15 => "是",
     16 => "否",
-);
+];
 
-$EAC_LANG['sr'] = array(
+$EAC_LANG['sr'] = [
     31 => "Ime datoteke se ignoriše",
     50 => "Vrednost van opsega !",
     51 => "Nedozvoljeni karakteri !",
@@ -1725,9 +1725,9 @@ $EAC_LANG['sr'] = array(
     12 => "Primeni",
     15 => "Da",
     16 => "Ne",
-);
+];
 
-$EAC_LANG['sk'] = array(
+$EAC_LANG['sk'] = [
     31 => "Názov súboru bude ignorovaný",
     50 => "Hodnota je mimo rozsah !",
     51 => "Nesprávne znaky !",
@@ -1897,9 +1897,9 @@ $EAC_LANG['sk'] = array(
     12 => "Použiť",
     15 => "Áno",
     16 => "Nie",
-);
+];
 
-$EAC_LANG['es'] = array(
+$EAC_LANG['es'] = [
     31 => "El nombre del archivo será ignorado",
     50 => "Valor fuera del rango !",
     51 => "Caracteres inválidos !",
@@ -2067,9 +2067,9 @@ $EAC_LANG['es'] = array(
     12 => "Aplicar",
     15 => "Sí",
     16 => "No",
-);
+];
 
-$EAC_LANG['sv'] = array(
+$EAC_LANG['sv'] = [
     31 => "Filnamnet kommer att ignoreras",
     50 => "Värdet är utom valt område !",
     51 => "Felaktiga tecken !",
@@ -2237,9 +2237,9 @@ $EAC_LANG['sv'] = array(
     12 => "Verkställ",
     15 => "Ja",
     16 => "Nej",
-);
+];
 
-$EAC_LANG['fr'] = array(
+$EAC_LANG['fr'] = [
     31 => "Les Noms de Fichiers seront ignorés",
     50 => "Valeur hors de portée !",
     51 => "Caractères invalides !",
@@ -2408,9 +2408,9 @@ $EAC_LANG['fr'] = array(
     12 => "Appliquer",
     15 => "Oui",
     16 => "Non",
-);
+];
 
-$EAC_LANG['jp'] = array(
+$EAC_LANG['jp'] = [
     31 => "指定されたファイル名は無視されます",
     50 => "範囲外です !",
     51 => "無効な文字です !",
@@ -2545,9 +2545,9 @@ $EAC_LANG['jp'] = array(
     12 => "適用",
     15 => "Yes",
     16 => "No"
-);
+];
 
-$EAC_LANG['jp99_5'] = array(
+$EAC_LANG['jp99_5'] = [
     31 => "指定されたファイル名は無視されます",
     50 => "範囲外です !",
     51 => "無効な文字です !",
@@ -2716,6 +2716,6 @@ $EAC_LANG['jp99_5'] = array(
     12 => "適用",
     15 => "はい",
     16 => "いいえ"
-);
+];
 
 return $EAC_LANG;

@@ -3,8 +3,8 @@ if (!isset($_GET['type']) || !is_number($_GET['type']) || $_GET['type'] > 3) {
 	error(0);
 }
 
-$Options = array('v0', 'v2', '320');
-$Encodings = array('V0 (VBR)', 'V2 (VBR)', '320');
+$Options = ['v0', 'v2', '320'];
+$Encodings = ['V0 (VBR)', 'V2 (VBR)', '320'];
 $EncodingKeys = array_fill_keys($Encodings, true);
 
 if ($_GET['type'] === '3') {
@@ -45,8 +45,8 @@ foreach ($Groups as $GroupID => $Group) {
 	foreach ($Group['Torrents'] as $Torrent) {
 		$TorRemIdent = "$Torrent[Media] $Torrent[RemasterYear] $Torrent[RemasterTitle] $Torrent[RemasterRecordLabel] $Torrent[RemasterCatalogueNumber]";
 		if (!isset($TorrentGroups[$Group['ID']])) {
-			$TorrentGroups[$Group['ID']] = array(
-				$TorRemIdent => array(
+			$TorrentGroups[$Group['ID']] = [
+				$TorRemIdent => [
 					'FlacID' => 0,
 					'Formats' => [],
 					'RemasterTitle' => $Torrent['RemasterTitle'],
@@ -54,10 +54,10 @@ foreach ($Groups as $GroupID => $Group) {
 					'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
 					'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber'],
 					'IsSnatched' => false
-				)
-			);
+                ]
+            ];
 		} elseif (!isset($TorrentGroups[$Group['ID']][$TorRemIdent])) {
-			$TorrentGroups[$Group['ID']][$TorRemIdent] = array(
+			$TorrentGroups[$Group['ID']][$TorRemIdent] = [
 				'FlacID' => 0,
 				'Formats' => [],
 				'RemasterTitle' => $Torrent['RemasterTitle'],
@@ -65,7 +65,7 @@ foreach ($Groups as $GroupID => $Group) {
 				'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
 				'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber'],
 				'IsSnatched' => false
-			);
+            ];
 		}
 		if ($Torrent['Format'] == 'MP3' && isset($EncodingKeys[$Torrent['Encoding']])) {
 			$TorrentGroups[$Group['ID']][$TorRemIdent]['Formats'][$Torrent['Encoding']] = true;

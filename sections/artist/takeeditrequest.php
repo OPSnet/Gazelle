@@ -89,7 +89,7 @@ if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
         $Part1 = [];
         $Part3 = $Forum;
     }
-    $Part2 = array($TopicID => array(
+    $Part2 = [$TopicID => [
         'ID' => $TopicID,
         'Title' => $Title,
         'AuthorID' => $BotID,
@@ -100,14 +100,14 @@ if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
         'LastPostTime' => $sqltime,
         'LastPostAuthorID' => $BotID,
         'NoPoll' => 1
-    )); // Bumped
+    ]]; // Bumped
     $Forum = $Part1 + $Part2 + $Part3;
 
-    $Cache->cache_value("forums_{$EditForumID}", array($Forum, '', 0, $Stickies), 0);
+    $Cache->cache_value("forums_{$EditForumID}", [$Forum, '', 0, $Stickies], 0);
 
     // Update the forum root
     $Cache->begin_transaction('forums_list');
-    $Cache->update_row($EditForumID, array(
+    $Cache->update_row($EditForumID, [
         'NumPosts' => '+1',
         'NumTopics' => '+1',
         'LastPostID' => $PostID,
@@ -117,7 +117,7 @@ if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
         'Title' => $Title,
         'IsLocked' => 0,
         'IsSticky' => 0
-    ));
+    ]);
     $Cache->commit_transaction(0);
 } else {
     // If there's no cache, we have no data, and if there's no data

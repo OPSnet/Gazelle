@@ -46,7 +46,7 @@ if (isset($_POST['action'])) {
 	$Delta['MaxCollages'] = $_POST['maxcollages'];
 
 	$Cache->begin_transaction("user_info_heavy_$UserID");
-	$Cache->update_row(false, array('CustomPermissions' => $Delta));
+	$Cache->update_row(false, ['CustomPermissions' => $Delta]);
 	$Cache->commit_transaction(0);
 	$DB->query("
 		UPDATE users_main

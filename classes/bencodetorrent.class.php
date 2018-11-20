@@ -25,7 +25,7 @@ class BencodeTorrent extends BencodeDecode {
 			$Name = (isset($InfoDict['name.utf-8'])
 				? $InfoDict['name.utf-8']
 				: $InfoDict['name']);
-			$this->Files[] = array($this->Size, $Name);
+			$this->Files[] = [$this->Size, $Name];
 		} else {
 			if (isset($InfoDict['path.utf-8']['files'][0])) {
 				$this->PathKey = 'path.utf-8';
@@ -38,14 +38,14 @@ class BencodeTorrent extends BencodeDecode {
 				$CurSize = (Int64::is_int($File['length'])
 					? Int64::get($File['length'])
 					: $File['length']);
-				$this->Files[] = array($CurSize, implode('/', $TmpPath));
+				$this->Files[] = [$CurSize, implode('/', $TmpPath)];
 				$this->Size += $CurSize;
 			}
 			uasort($this->Files, function($a, $b) {
 					return strnatcasecmp($a[1], $b[1]);
 				});
 		}
-		return array($this->Size, $this->Files);
+		return [$this->Size, $this->Files];
 	}
 
 	/**

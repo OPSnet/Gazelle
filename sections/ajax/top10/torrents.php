@@ -2,10 +2,10 @@
 
 
 if (isset($_GET['details'])) {
-	if (in_array($_GET['details'], array('day','week','overall','snatched','data','seeded'))) {
+	if (in_array($_GET['details'], ['day','week','overall','snatched','data','seeded'])) {
 		$Details = $_GET['details'];
 	} else {
-		print json_encode(array('status' => 'failure'));
+		print json_encode(['status' => 'failure']);
 		die();
 	}
 } else {
@@ -14,7 +14,7 @@ if (isset($_GET['details'])) {
 
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$Limit = in_array($Limit, array(10, 100, 250)) ? $Limit : 10;
+$Limit = in_array($Limit, [10, 100, 250]) ? $Limit : 10;
 
 $WhereSum = (empty($Where)) ? '' : md5($Where);
 $BaseQuery = "SELECT
@@ -141,10 +141,10 @@ if (($Details == 'all' || $Details == 'seeded') && empty($Where)) {
 
 print
 	json_encode(
-		array(
+		[
 			'status' => 'success',
 			'response' => $OuterResults
-		)
+        ]
 	);
 
 
@@ -170,7 +170,7 @@ function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
 		}
 
 		// Append to the existing array.
-		$results[] = array(
+		$results[] = [
 			'torrentId' => (int)$TorrentID,
 			'groupId' => (int)$GroupID,
 			'artist' => $TruncArtist,
@@ -196,14 +196,14 @@ function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
 			'size' => (int)$Size,
 			'wikiImage' => $WikiImage,
 			'releaseType' => $ReleaseType,
-		);
+        ];
 	}
 
-	return array(
+	return [
 		'caption' => $Caption,
 		'tag' => $Tag,
 		'limit' => (int)$Limit,
 		'results' => $results
-		);
+    ];
 }
 ?>

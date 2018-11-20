@@ -95,7 +95,7 @@ if ($Cache->MemcacheDBArray[$Key]['ID'] != $PostID) {
 	$Cache->cancel_transaction();
 	$Cache->delete_value("thread_$TopicID"."_catalogue_$CatalogueID"); //just clear the cache for would be cache-screwer-uppers
 } else {
-	$Cache->update_row($Key, array(
+	$Cache->update_row($Key, [
 			'ID'=>$Cache->MemcacheDBArray[$Key]['ID'],
 			'AuthorID'=>$Cache->MemcacheDBArray[$Key]['AuthorID'],
 			'AddedTime'=>$Cache->MemcacheDBArray[$Key]['AddedTime'],
@@ -103,7 +103,7 @@ if ($Cache->MemcacheDBArray[$Key]['ID'] != $PostID) {
 			'EditedUserID'=>$LoggedUser['ID'],
 			'EditedTime'=>$SQLTime,
 			'Username'=>$LoggedUser['Username']
-			));
+    ]);
 	$Cache->commit_transaction(3600 * 24 * 5);
 }
 $ThreadInfo = Forums::get_thread_info($TopicID);

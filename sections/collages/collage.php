@@ -66,7 +66,7 @@ if ($CollageCategoryID == array_search(ARTIST_COLLAGE, $CollageCats)) {
 }
 
 if (isset($SetCache)) {
-	$CollageData = array(
+	$CollageData = [
 		$Name,
 		$Description,
 		$CommentList,
@@ -77,6 +77,6 @@ if (isset($SetCache)) {
 		(int)$MaxGroups,
 		(int)$MaxGroupsPerUser,
 		$Updated,
-		(int)$Subscribers);
+		(int)$Subscribers];
 	$Cache->cache_value("collage_$CollageID", $CollageData, 3600);
 }

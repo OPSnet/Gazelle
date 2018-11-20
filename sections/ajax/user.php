@@ -49,7 +49,7 @@ if (!$DB->has_results()) { // If user doesn't exist
     json_die("failure", "no such user");
 }
 
-list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass, $DisableLeech, $JoinDate, $Info, $Avatar, $Donor, $Warned, $ForumPosts, $InviterID, $DisableInvites, $InviterName, $RatioWatchEnds, $RatioWatchDownload) = $DB->next_record(MYSQLI_NUM, array(9, 11));
+list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass, $DisableLeech, $JoinDate, $Info, $Avatar, $Donor, $Warned, $ForumPosts, $InviterID, $DisableInvites, $InviterName, $RatioWatchEnds, $RatioWatchDownload) = $DB->next_record(MYSQLI_NUM, [9, 11]);
 
 $Paranoia = unserialize($Paranoia);
 if (!is_array($Paranoia)) {
@@ -167,7 +167,7 @@ if ($Downloaded == 0) {
 } else {
     $Ratio = round($Uploaded / $Downloaded, 2);
 }
-if (check_paranoia_here(array('uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'))) {
+if (check_paranoia_here(['uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'])) {
     $OverallRank = floor(UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio));
 } else {
     $OverallRank = null;
@@ -334,20 +334,20 @@ if ($LastAccess == '0000-00-00 00:00:00') {
 
 header('Content-Type: text/plain; charset=utf-8');
 
-json_print("success", array(
+json_print("success", [
     'username' => $Username,
     'avatar' => $Avatar,
     'isFriend' => $Friend,
     'profileText' => Text::full_format($Info),
-    'stats' => array(
+    'stats' => [
         'joinedDate' => $JoinDate,
         'lastAccess' => $LastAccess,
         'uploaded' => (($Uploaded == null) ? null : (int)$Uploaded),
         'downloaded' => (($Downloaded == null) ? null : (int)$Downloaded),
         'ratio' => $Ratio,
         'requiredRatio' => (($RequiredRatio == null) ? null : (float)$RequiredRatio)
-    ),
-    'ranks' => array(
+    ],
+    'ranks' => [
         'uploaded' => $UploadedRank,
         'downloaded' => $DownloadedRank,
         'uploads' => $UploadsRank,
@@ -356,8 +356,8 @@ json_print("success", array(
         'posts' => $PostRank,
         'artists' => $ArtistsRank,
         'overall' => (($OverallRank == null) ? 0 : $OverallRank)
-    ),
-    'personal' => array(
+    ],
+    'personal' => [
         'class' => $ClassLevels[$Class]['Name'],
         'paranoia' => $ParanoiaLevel,
         'paranoiaText' => $ParanoiaLevelText,
@@ -365,8 +365,8 @@ json_print("success", array(
         'warned' => ($Warned != '0000-00-00 00:00:00'),
         'enabled' => ($Enabled == '1' || $Enabled == '0' || !$Enabled),
         'passkey' => $torrent_pass
-    ),
-    'community' => array(
+    ],
+    'community' => [
         'posts' => (int)$ForumPosts,
         'torrentComments' => (($NumComments == null) ? null : (int)$NumComments),
         'artistComments' => (($NumArtistComments == null) ? null : (int)$NumArtistComments),
@@ -386,5 +386,5 @@ json_print("success", array(
         'snatched' => (($Snatched == null) ? null : (int)$Snatched),
         'invited' => (($Invited == null) ? null : (int)$Invited),
         'artistsAdded' => (($ArtistsAdded == null) ? null : (int)$ArtistsAdded)
-    )
-));
+    ]
+]);

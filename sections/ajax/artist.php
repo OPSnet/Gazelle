@@ -204,7 +204,7 @@ foreach ($GroupIDs as $GroupID) {
 	// $Tags array is for the sidebar on the right
 	foreach ($TagList as $Tag) {
 		if (!isset($Tags[$Tag])) {
-			$Tags[$Tag] = array('name' => $Tag, 'count' => 1);
+			$Tags[$Tag] = ['name' => $Tag, 'count' => 1];
 		} else {
 			$Tags[$Tag]['count']++;
 		}
@@ -216,7 +216,7 @@ foreach ($GroupIDs as $GroupID) {
 		$NumLeechers += $Torrent['Leechers'];
 		$NumSnatches += $Torrent['Snatched'];
 
-		$InnerTorrents[] = array(
+		$InnerTorrents[] = [
 			'id' => (int)$Torrent['ID'],
 			'groupId' => (int)$Torrent['GroupID'],
 			'media' => $Torrent['Media'],
@@ -238,9 +238,9 @@ foreach ($GroupIDs as $GroupID) {
 			'snatched' => (int)$Torrent['Snatched'],
 			'time' => $Torrent['Time'],
 			'hasFile' => (int)$Torrent['HasFile']
-		);
+        ];
 	}
-	$JsonTorrents[] = array(
+	$JsonTorrents[] = [
 		'groupId' => (int)$GroupID,
 		'groupName' => $GroupName,
 		'groupYear' => (int)$GroupYear,
@@ -256,7 +256,7 @@ foreach ($GroupIDs as $GroupID) {
 		'extendedArtists' => $ExtendedArtists,
 		'torrent' => $InnerTorrents,
 
-	);
+    ];
 }
 
 $JsonSimilar = [];
@@ -277,29 +277,29 @@ if (empty($SimilarArray)) {
 	");
 	$SimilarArray = $DB->to_array();
 	foreach ($SimilarArray as $Similar) {
-		$JsonSimilar[] = array(
+		$JsonSimilar[] = [
 			'artistId' => (int)$Similar['ArtistID'],
 			'name' => $Similar['Name'],
 			'score' => (int)$Similar['Score'],
 			'similarId' => (int)$Similar['SimilarID']
-		);
+        ];
 	}
 	$NumSimilar = count($SimilarArray);
 } else {
 	//If data already exists, use it
 	foreach ($SimilarArray as $Similar) {
-		$JsonSimilar[] = array(
+		$JsonSimilar[] = [
 			'artistId' => (int)$Similar['ArtistID'],
 			'name' => $Similar['Name'],
 			'score' => (int)$Similar['Score'],
 			'similarId' => (int)$Similar['SimilarID']
-		);
+        ];
 	}
 }
 
 $JsonRequests = [];
 foreach ($Requests as $RequestID => $Request) {
-	$JsonRequests[] = array(
+	$JsonRequests[] = [
 		'requestId' => (int)$RequestID,
 		'categoryId' => (int)$Request['CategoryID'],
 		'title' => $Request['Title'],
@@ -307,7 +307,7 @@ foreach ($Requests as $RequestID => $Request) {
 		'timeAdded' => $Request['TimeAdded'],
 		'votes' => (int)$Request['Votes'],
 		'bounty' => (int)$Request['Bounty']
-	);
+    ];
 }
 
 //notifications disabled by default
@@ -338,11 +338,11 @@ if ($RevisionID) {
 	$Key = "artist_$ArtistID";
 }
 
-$Data = array(array($Name, $Image, $Body, $NumSimilar, $SimilarArray, [], [], $VanityHouseArtist));
+$Data = [[$Name, $Image, $Body, $NumSimilar, $SimilarArray, [], [], $VanityHouseArtist]];
 
 $Cache->cache_value($Key, $Data, 3600);
 
-json_print("success", array(
+json_print("success", [
 	'id' => (int)$ArtistID,
 	'name' => $Name,
 	'notificationsEnabled' => $notificationsEnabled,
@@ -352,15 +352,15 @@ json_print("success", array(
 	'vanityHouse' => $VanityHouseArtist == 1,
 	'tags' => array_values($Tags),
 	'similarArtists' => $JsonSimilar,
-	'statistics' => array(
+	'statistics' => [
 		'numGroups' => $NumGroups,
 		'numTorrents' => $NumTorrents,
 		'numSeeders' => $NumSeeders,
 		'numLeechers' => $NumLeechers,
 		'numSnatches' => $NumSnatches
-	),
+    ],
 	'torrentgroup' => $JsonTorrents,
 	'requests' => $JsonRequests
-));
+]);
 
 ?>

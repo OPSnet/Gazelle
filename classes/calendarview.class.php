@@ -1,8 +1,8 @@
 <?
 
 class CalendarView {
-	private static $Days = array('S', 'M', 'T', 'W', 'T', 'F', 'S');
-	private static $Headings = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+	private static $Days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+	private static $Headings = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 	private static $Events;
 
 	public static function render_title($Month, $Year) {

@@ -105,7 +105,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 		header("Location: log.php?search=User+$UserID");
 	}
 
-	list($Username,	$Email,	$LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, array(9, 12));
+	list($Username,	$Email,	$LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, [9, 12]);
 } else { // Person viewing is a normal user
 	$DB->query("
 		SELECT
@@ -150,7 +150,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
     list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints,
 $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass,
 $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
-$ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle) = $DB->next_record(MYSQLI_NUM, array(10, 12));
+$ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle) = $DB->next_record(MYSQLI_NUM, [10, 12]);
 }
 
 $DB->query("
@@ -499,7 +499,7 @@ $OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsR
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?>">Artists added: <?=$ArtistsRank === false ? 'Server busy' : number_format($ArtistsRank)?></li>
 <?
     }
-    if (check_paranoia_here(array('uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'))) { ?>
+    if (check_paranoia_here(['uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'])) { ?>
                 <li><strong>Overall rank: <?=$OverallRank === false ? 'Server busy' : number_format($OverallRank)?></strong></li>
 <?	} ?>
             </ul>
@@ -852,11 +852,11 @@ foreach ($Collages as $CollageInfo) {
         </tr>
         <tr class="images<?=$FirstCol ? '' : ' hidden'?>">
 <?	foreach ($Collage as $C) {
-            $Group = Torrents::get_groups(array($C['GroupID']), true, true, false);
+            $Group = Torrents::get_groups([$C['GroupID']], true, true, false);
             extract(Torrents::array_group($Group[$C['GroupID']]));
 
             $Name = '';
-            $Name .= Artists::display_artists(array('1' => $Artists), false, true);
+            $Name .= Artists::display_artists(['1' => $Artists], false, true);
             $Name .= $GroupName;
 ?>
             <td>
@@ -883,7 +883,7 @@ if (check_perms('users_mod')) {
 
 if ((check_perms('users_view_invites')) && $Invited > 0) {
     include(SERVER_ROOT.'/classes/invite_tree.class.php');
-    $Tree = new INVITE_TREE($UserID, array('visible' => false));
+    $Tree = new INVITE_TREE($UserID, ['visible' => false]);
 ?>
         <div class="box" id="invitetree_box">
             <div class="head">

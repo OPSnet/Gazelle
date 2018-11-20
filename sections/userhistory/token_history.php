@@ -48,7 +48,7 @@ if (isset($_GET['expire'])) {
 			WHERE UserID = $UserID
 				AND TorrentID = $TorrentID");
         $Cache->delete_value("users_tokens_$UserID");
-        Tracker::update_tracker('remove_token', array('info_hash' => rawurlencode($InfoHash), 'userid' => $UserID));
+        Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID]);
     }
     header("Location: userhistory.php?action=token_history&userid=$UserID");
 }

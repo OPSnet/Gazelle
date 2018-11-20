@@ -42,13 +42,13 @@ class NMA_API
 
 
     protected $error_codes
-        = array(
+        = [
             200     => 'Notification submitted.',
             400     => 'The data supplied is in the wrong format, invalid length or null.',
             401     => 'None of the API keys provided were valid.',
             402     => 'Maximum number of API calls per hour exceeded.',
             500     => 'Internal server error. Please contact our support if the problem persists.'
-        );
+        ];
 
     /**
      * @param array $options
@@ -113,11 +113,11 @@ class NMA_API
             return $this->error('you must supply a application name, event and long desc');
         }
 
-        $post = array('application' => substr($application, 0, 256),
+        $post = ['application' => substr($application, 0, 256),
                       'event'       => substr($event, 0, 1000),
                       'description' => substr($description, 0, 10000),
                       'priority'    => $priority
-        );
+        ];
         if (!empty($url)) {
             $post['url'] = substr($url, 0, 2000);
         }
@@ -146,12 +146,12 @@ class NMA_API
      */
     protected function makeApiCall($url, $params = null, $verb = 'GET', $format = 'xml')
     {
-        $cparams = array(
-            'http' => array(
+        $cparams = [
+            'http' => [
                 'method'        => $verb,
                 'ignore_errors' => true
-            )
-        );
+            ]
+        ];
         if ($params !== null && !empty($params)) {
             $params = http_build_query($params);
             if ($verb == 'POST') {

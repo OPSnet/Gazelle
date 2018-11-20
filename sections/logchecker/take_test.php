@@ -9,7 +9,7 @@ if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
 	$ValidateChecksum = false;
 	$TmpFile = tempnam('/tmp', 'log_');
 	file_put_contents($TmpFile, $_POST["pastelog"]);
-	$File = array('tmp_name' => $TmpFile, 'name' => $TmpFile);
+	$File = ['tmp_name' => $TmpFile, 'name' => $TmpFile];
 } else {
 	error('No log file uploaded or file is empty.');
 }

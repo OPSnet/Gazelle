@@ -26,7 +26,7 @@ if (count($IDs) > 0) {
 
     foreach ($IDs as $ID) {
         $Cache->begin_transaction("thread_$ID".'_info');
-        $Cache->update_row(false, array('IsLocked' => '1'));
+        $Cache->update_row(false, ['IsLocked' => '1']);
         $Cache->commit_transaction(3600 * 24 * 30);
         $Cache->expire_value("thread_$ID".'_catalogue_0', 3600 * 24 * 30);
         $Cache->expire_value("thread_$ID".'_info', 3600 * 24 * 30);

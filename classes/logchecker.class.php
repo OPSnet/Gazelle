@@ -667,10 +667,10 @@ class Logchecker
                     'test_copy'
                 ],
                     $TrackBody, -1, $EACTC);
-                $TrackBody = preg_replace_callback('/CRC32 hash \(test run\)(\s*:) ([0-9A-F]{8})\n(\s*)CRC32 hash(\s+:) ([0-9A-F]{8})/i', array(
+                $TrackBody = preg_replace_callback('/CRC32 hash \(test run\)(\s*:) ([0-9A-F]{8})\n(\s*)CRC32 hash(\s+:) ([0-9A-F]{8})/i', [
                     $this,
                     'test_copy'
-                ), $TrackBody, -1, $XLDTC);
+                ], $TrackBody, -1, $XLDTC);
                 if (!$EACTC && !$XLDTC && !$Aborted) {
                     $this->account('Test and copy was not used', 10);
                     if (!$this->SecureMode) {
@@ -691,10 +691,10 @@ class Logchecker
                 $TrackBody = preg_replace('/Accurately ripped( +)\(confidence ([0-9]+)\)( +)(\[[0-9A-F]{8}\])/i', '<span class="good">Accurately ripped$1(confidence $2)$3$4</span>', $TrackBody, -1, $Count);
                 $TrackBody = preg_replace("/Cannot be verified as accurate +\(.*/i", '<span class="badish">$0</span>', $TrackBody, -1, $Count);
                 //xld ar
-                $TrackBody = preg_replace_callback('/AccurateRip signature( +): ([0-9A-F]{8})\n(.*?)(Accurately ripped\!?)( +\(A?R?\d?,? ?confidence )([0-9]+\))/i', array(
+                $TrackBody = preg_replace_callback('/AccurateRip signature( +): ([0-9A-F]{8})\n(.*?)(Accurately ripped\!?)( +\(A?R?\d?,? ?confidence )([0-9]+\))/i', [
                     $this,
                     'ar_xld'
-                ), $TrackBody, -1, $Count);
+                ], $TrackBody, -1, $Count);
                 $TrackBody = preg_replace('/AccurateRip signature( +): ([0-9A-F]{8})\n(.*?)(Rip may not be accurate\.?)(.*?)/i', "<span class=\"log4\">AccurateRip signature$1: <span class=\"badish\">$2</span></span>\n$3<span class=\"badish\">$4$5</span>", $TrackBody, -1, $Count);
                 $TrackBody = preg_replace('/(Rip may not be accurate\.?)(.*?)/i', "<span class=\"badish\">$1$2</span>", $TrackBody, -1, $Count);
                 $TrackBody = preg_replace('/AccurateRip signature( +): ([0-9A-F]{8})\n(.*?)(Track not present in AccurateRip database\.?)(.*?)/i', "<span class=\"log4\">AccurateRip signature$1: <span class=\"badish\">$2</span></span>\n$3<span class=\"badish\">$4$5</span>", $TrackBody, -1, $Count);
@@ -849,9 +849,9 @@ class Logchecker
     function drive($Matches)
     {
         global $DB;
-        $FakeDrives = array(
+        $FakeDrives = [
             'Generic DVD-ROM SCSI CdRom Device'
-        );
+        ];
         if (in_array(trim($Matches[2]), $FakeDrives)) {
             $this->account('Virtual drive used: ' . $Matches[2], 20, false, false, false, 20);
             return "<span class=\"log5\">Used Drive$Matches[1]</span>: <span class=\"bad\">$Matches[2]</span>";
@@ -859,8 +859,8 @@ class Logchecker
         $DriveName = $Matches[2];
         $DriveName = str_replace('JLMS', 'Lite-ON', $DriveName);
         $DriveName = str_replace('HL-DT-ST', 'LG Electronics', $DriveName);
-        $DriveName = str_replace(array('Matshita', 'MATSHITA'), 'Panasonic', $DriveName);
-        $DriveName = str_replace(array('TSSTcorpBD', 'TSSTcorpCD', 'TSSTcorpDVD'), array('TSSTcorp BD', 'TSSTcorp CD', 'TSSTcorp DVD'), $DriveName);
+        $DriveName = str_replace(['Matshita', 'MATSHITA'], 'Panasonic', $DriveName);
+        $DriveName = str_replace(['TSSTcorpBD', 'TSSTcorpCD', 'TSSTcorpDVD'], ['TSSTcorp BD', 'TSSTcorp CD', 'TSSTcorp DVD'], $DriveName);
         $DriveName = preg_replace('/\s+-\s/', ' ', $DriveName);
         $DriveName = preg_replace('/\s+/', ' ', $DriveName);
         $DriveName = preg_replace('/\(revision [a-zA-Z0-9\.\,\-]*\)/', '', $DriveName);
@@ -1265,7 +1265,7 @@ class Logchecker
         if (!count($this->Details)) {
             return;
         }
-        $myBad = array('high' => [], 'low' => []);
+        $myBad = ['high' => [], 'low' => []];
         foreach ($this->Details as $Key => $Val) {
             if (preg_match("/(points?\W)|(boosted)\)/i", $Val)) {
                 $myBad['high'][] = $Val;
@@ -1331,12 +1331,12 @@ class Logchecker
 
     function returnParse()
     {
-        return array(
+        return [
             $this->Score,
             $this->Details,
             $this->Checksum,
             $this->Log
-        );
+        ];
     }
 
     public static function get_accept_values()

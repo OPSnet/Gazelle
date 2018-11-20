@@ -20,7 +20,7 @@ $torrents = $DB->to_array('ID', MYSQLI_ASSOC);
 foreach (Artists::get_artists(array_keys($torrents)) as $group_id => $data) {
     $torrents[$group_id]['Artists'] = [];
     $torrents[$group_id]['ExtendedArtists'] = [];
-    foreach (array(1, 4, 6) as $importance) {
+    foreach ([1, 4, 6] as $importance) {
         if (isset($data[$importance])) {
             $torrents[$group_id]['Artists'] = array_merge($torrents[$group_id]['Artists'], $data[$importance]);
         }

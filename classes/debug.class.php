@@ -84,7 +84,7 @@ class DEBUG {
 		$Identifier = Users::make_secret(5);
 		G::$Cache->cache_value(
 			'analysis_'.$Identifier,
-			array(
+			[
 				'url' => $_SERVER['REQUEST_URI'],
 				'message' => $Report,
 				'errors' => $this->get_errors(true),
@@ -95,7 +95,7 @@ class DEBUG {
 				'vars' => $this->get_logged_vars(),
 				'perf' => $this->get_perf(),
 				'ocelot' => $this->get_ocelot_requests()
-			),
+            ],
 			$Time
 		);
 		$RequestURI = !empty($_SERVER['REQUEST_URI']) ? substr($_SERVER['REQUEST_URI'], 1) : '';

@@ -86,7 +86,7 @@ if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
 		FROM requests
 		WHERE FillerID > 0");
 	list($FilledCount) = $DB->next_record();
-	$Cache->cache_value('stats_requests', array($RequestCount, $FilledCount), 11280);
+	$Cache->cache_value('stats_requests', [$RequestCount, $FilledCount], 11280);
 } else {
 	list($RequestCount, $FilledCount) = $RequestStats;
 }
@@ -104,7 +104,7 @@ if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
 		$PeerCount = $DB->to_array(0, MYSQLI_NUM, false);
 		$LeecherCount = isset($PeerCount['Leeching']) ? $PeerCount['Leeching'][1] : 0;
 		$SeederCount = isset($PeerCount['Seeding']) ? $PeerCount['Seeding'][1] : 0;
-		$Cache->cache_value('stats_peers', array($LeecherCount, $SeederCount), 1209600); // 2 week cache
+		$Cache->cache_value('stats_peers', [$LeecherCount, $SeederCount], 1209600); // 2 week cache
 		$Cache->clear_query_lock('peer_stats');
 	} else {
 		$LeecherCount = $SeederCount = 0;
@@ -113,7 +113,7 @@ if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
 	list($LeecherCount, $SeederCount) = $PeerStats;
 }
 
-json_print("success", array(
+json_print("success", [
 	'maxUsers' => USER_LIMIT,
 	'enabledUsers' => (int) $UserCount,
 	'usersActiveThisDay' => (int) $UserStats['Day'],
@@ -130,5 +130,5 @@ json_print("success", array(
 
 	'seederCount' => (int) $SeederCount,
 	'leecherCount' => (int) $LeecherCount
-));
+]);
 ?>

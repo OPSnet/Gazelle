@@ -50,8 +50,8 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
         list($UserID, $Email, $Country, $Expires) = $DB->next_record();
         if ($UserID && strtotime($Expires) > time()) {
         // If the user has requested a password change, and his key has not expired
-            $Validate->SetFields('password', '1', 'regex', 'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', array('regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/'));
-            $Validate->SetFields('verifypassword', '1', 'compare', 'Your passwords did not match.', array('comparefield' => 'password'));
+            $Validate->SetFields('password', '1', 'regex', 'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
+            $Validate->SetFields('verifypassword', '1', 'compare', 'Your passwords did not match.', ['comparefield' => 'password']);
 
             if (!empty($_REQUEST['password'])) {
                 // If the user has entered a password.
@@ -199,13 +199,13 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
 					('$UserID', '" . db_string($SessionID) . "', '$KeepLogged', '$Browser', '$OperatingSystem', '" . db_string($_SERVER['REMOTE_ADDR']) . "', '" . sqltime() . "', '" . db_string($_SERVER['HTTP_USER_AGENT']) . "')");
 
             $Cache->begin_transaction("users_sessions_$UserID");
-            $Cache->insert_front($SessionID, array(
+            $Cache->insert_front($SessionID, [
                 'SessionID' => $SessionID,
                 'Browser' => $Browser,
                 'OperatingSystem' => $OperatingSystem,
                 'IP' => $_SERVER['REMOTE_ADDR'],
                 'LastUpdate' => sqltime()
-            ));
+            ]);
             $Cache->commit_transaction(0);
 
             unset($Recovery[$Key]);
@@ -353,13 +353,13 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
 								('$UserID', '" . db_string($SessionID) . "', '$KeepLogged', '$Browser', '$OperatingSystem', '" . db_string($_SERVER['REMOTE_ADDR']) . "', '" . sqltime() . "', '" . db_string($_SERVER['HTTP_USER_AGENT']) . "')");
 
             $Cache->begin_transaction("users_sessions_$UserID");
-            $Cache->insert_front($SessionID, array(
+            $Cache->insert_front($SessionID, [
                 'SessionID' => $SessionID,
                 'Browser' => $Browser,
                 'OperatingSystem' => $OperatingSystem,
                 'IP' => $_SERVER['REMOTE_ADDR'],
                 'LastUpdate' => sqltime()
-            ));
+            ]);
             $Cache->commit_transaction(0);
 
             $Sql = "
@@ -389,8 +389,8 @@ else {
         exit;
     }
 
-    $Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', array('regex' => USERNAME_REGEX));
-    $Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', array('minlength' => '6', 'maxlength' => '150'));
+    $Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
+    $Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', ['minlength' => '6', 'maxlength' => '150']);
 
     $DB->query("
 		SELECT ID, Attempts, Bans, BannedUntil
@@ -486,7 +486,7 @@ else {
 				FROM users_main
 				WHERE Username = '".db_string($_POST['username'])."'
 					AND Username != ''");
-            $UserData = $DB->next_record(MYSQLI_NUM, array(2, 7));
+            $UserData = $DB->next_record(MYSQLI_NUM, [2, 7]);
             list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
             if (strtotime($BannedUntil) < time()) {
                 if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
@@ -533,13 +533,13 @@ else {
 								('$UserID', '".db_string($SessionID)."', '$KeepLogged', '$Browser', '$OperatingSystem', '".db_string($_SERVER['REMOTE_ADDR'])."', '".sqltime()."', '".db_string($_SERVER['HTTP_USER_AGENT'])."')");
 
                         $Cache->begin_transaction("users_sessions_$UserID");
-                        $Cache->insert_front($SessionID, array(
+                        $Cache->insert_front($SessionID, [
                                 'SessionID' => $SessionID,
                                 'Browser' => $Browser,
                                 'OperatingSystem' => $OperatingSystem,
                                 'IP' => $_SERVER['REMOTE_ADDR'],
                                 'LastUpdate' => sqltime()
-                                ));
+                        ]);
                         $Cache->commit_transaction(0);
 
                         $Sql = "

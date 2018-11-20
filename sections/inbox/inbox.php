@@ -11,7 +11,7 @@ if (empty($_GET['action'])) {
 } else {
     $Section = $_GET['action']; // either 'inbox' or 'sentbox'
 }
-if (!in_array($Section, array('inbox', 'sentbox'))) {
+if (!in_array($Section, ['inbox', 'sentbox'])) {
     error(404);
 }
 

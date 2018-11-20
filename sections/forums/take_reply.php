@@ -113,12 +113,12 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
 
     //Edit the post in the cache
     $Cache->begin_transaction("thread_$TopicID"."_catalogue_$CatalogueID");
-    $Cache->update_row($Key, array(
+    $Cache->update_row($Key, [
             'Body' => $Cache->MemcacheDBArray[$Key]['Body']."\n\n$Body",
             'EditedUserID' => $LoggedUser['ID'],
             'EditedTime' => $SQLTime,
             'Username' => $LoggedUser['Username']
-            ));
+    ]);
     $Cache->commit_transaction(0);
 
 //Now we're dealing with a normal post
@@ -163,7 +163,7 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
             $Thread['LastPostID'] = $PostID; // Set post ID for read/unread
             $Thread['LastPostTime'] = $SQLTime; // Time of last post
             $Thread['LastPostAuthorID'] = $LoggedUser['ID']; // Last poster ID
-            $Part2 = array($TopicID => $Thread); // Bumped thread
+            $Part2 = [$TopicID => $Thread]; // Bumped thread
 
         // if we're bumping from an older page
         } else {
@@ -185,7 +185,7 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
 						LEFT JOIN forums_polls AS p ON p.TopicID = f.ID
 					WHERE f.ID = '$TopicID'");
                 list($AuthorID, $IsLocked, $IsSticky, $NumPosts, $NoPoll) = $DB->next_record();
-                $Part2 = array($TopicID => array(
+                $Part2 = [$TopicID => [
                     'ID' => $TopicID,
                     'Title' => $ThreadInfo['Title'],
                     'AuthorID' => $AuthorID,
@@ -196,7 +196,7 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
                     'LastPostTime' => $SQLTime,
                     'LastPostAuthorID' => $LoggedUser['ID'],
                     'NoPoll' => $NoPoll
-                )); //Bumped
+                ]]; //Bumped
             } else {
                 $Part2 = [];
             }
@@ -219,11 +219,11 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
         } else {
             $Forum = $Part1 + $Part2 + $Part3; //Merge it
         }
-        $Cache->cache_value("forums_$ForumID", array($Forum, '', 0, $Stickies), 0);
+        $Cache->cache_value("forums_$ForumID", [$Forum, '', 0, $Stickies], 0);
 
         //Update the forum root
         $Cache->begin_transaction('forums_list');
-        $Cache->update_row($ForumID, array(
+        $Cache->update_row($ForumID, [
             'NumPosts'=>'+1',
             'LastPostID'=>$PostID,
             'LastPostAuthorID'=>$LoggedUser['ID'],
@@ -232,7 +232,7 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
             'Title'=>$ThreadInfo['Title'],
             'IsLocked'=>$ThreadInfo['IsLocked'],
             'IsSticky'=>$ThreadInfo['IsSticky']
-            ));
+        ]);
         $Cache->commit_transaction(0);
     } else {
         //If there's no cache, we have no data, and if there's no data
@@ -245,7 +245,7 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
 
     //Insert the post into the thread catalogue (block of 500 posts)
     $Cache->begin_transaction("thread_$TopicID"."_catalogue_$CatalogueID");
-    $Cache->insert('', array(
+    $Cache->insert('', [
         'ID'=>$PostID,
         'AuthorID'=>$LoggedUser['ID'],
         'AddedTime'=>$SQLTime,
@@ -253,12 +253,12 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
         'EditedUserID'=>0,
         'EditedTime'=>'0000-00-00 00:00:00',
         'Username'=>$LoggedUser['Username'] //TODO: Remove, it's never used?
-        ));
+    ]);
     $Cache->commit_transaction(0);
 
     //Update the thread info
     $Cache->begin_transaction("thread_$TopicID".'_info');
-    $Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $SQLTime));
+    $Cache->update_row(false, ['Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $SQLTime]);
     $Cache->commit_transaction(0);
 
     //Increment this now to make sure we redirect to the correct page

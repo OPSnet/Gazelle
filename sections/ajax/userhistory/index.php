@@ -8,12 +8,12 @@ if ($_GET['type']) {
 			break;
 		default:
 			print json_encode(
-				array('status' => 'failure')
+				['status' => 'failure']
 				);
 	}
 } else {
 	print json_encode(
-		array('status' => 'failure')
+		['status' => 'failure']
 		);
 }
 

@@ -230,16 +230,16 @@ if (!empty($_POST['oclc'])) {
 if ($CategoryName === 'Music') {
 	$MainArtistCount = 0;
 	$ArtistNames = [];
-	$ArtistForm = array(
+	$ArtistForm = [
 		1 => [],
 		2 => [],
 		3 => []
-	);
+	];
 	for ($i = 0, $il = count($Artists); $i < $il; $i++) {
 		if (trim($Artists[$i]) !== '') {
 			if (!in_array($Artists[$i], $ArtistNames)) {
-				$ArtistForm[$Importance[$i]][] = array('name' => trim($Artists[$i]));
-				if (in_array($Importance[$i], array(1, 4, 5, 6))) {
+				$ArtistForm[$Importance[$i]][] = ['name' => trim($Artists[$i])];
+				if (in_array($Importance[$i], [1, 4, 5, 6])) {
 					$MainArtistCount++;
 				}
 				$ArtistNames[] = trim($Artists[$i]);
@@ -403,7 +403,7 @@ if ($CategoryName === 'Music') {
 					if ($Redirect) {
 						$AliasID = $Redirect;
 					}
-					$ArtistForm[$Importance][$Num] = array('id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName);
+					$ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName];
 					break;
 				}
 			}
@@ -421,7 +421,7 @@ if ($CategoryName === 'Music') {
 					VALUES ($ArtistID, '".db_string($Artist['name'])."')");
 				$AliasID = $DB->inserted_id();
 
-				$ArtistForm[$Importance][$Num] = array('id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']);
+				$ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
 			}
 		}
 	}

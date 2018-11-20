@@ -1,9 +1,9 @@
 <?
 if (isset($_GET['details'])) {
-	if (in_array($_GET['details'],array('ul','dl','numul','uls','dls'))) {
+	if (in_array($_GET['details'], ['ul','dl','numul','uls','dls'])) {
 		$Details = $_GET['details'];
 	} else {
-		print json_encode(array('status' => 'failure'));
+		print json_encode(['status' => 'failure']);
 		die();
 	}
 } else {
@@ -12,7 +12,7 @@ if (isset($_GET['details'])) {
 
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$Limit = in_array($Limit, array(10,100,250)) ? $Limit : 10;
+$Limit = in_array($Limit, [10,100,250]) ? $Limit : 10;
 
 $BaseQuery = "
 	SELECT
@@ -97,16 +97,16 @@ if ($Details == 'all' || $Details == 'dls') {
 
 print
 	json_encode(
-		array(
+		[
 			'status' => 'success',
 			'response' => $OuterResults
-		)
+        ]
 	);
 
 function generate_user_json($Caption, $Tag, $Details, $Limit) {
 	$results = [];
 	foreach ($Details as $Detail) {
-		$results[] = array(
+		$results[] = [
 			'id' => (int)$Detail['ID'],
 			'username' => $Detail['Username'],
 			'uploaded' => (float)$Detail['Uploaded'],
@@ -115,13 +115,13 @@ function generate_user_json($Caption, $Tag, $Details, $Limit) {
 			'downSpeed' => (float)$Detail['DownSpeed'],
 			'numUploads' => (int)$Detail['NumUploads'],
 			'joinDate' => $Detail['JoinDate']
-		);
+        ];
 	}
-	return array(
+	return [
 		'caption' => $Caption,
 		'tag' => $Tag,
 		'limit' => (int)$Limit,
 		'results' => $results
-		);
+    ];
 }
 ?>

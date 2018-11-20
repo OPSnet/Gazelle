@@ -216,7 +216,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
             SELECT Question, Answers, Featured, Closed
             FROM forums_polls
             WHERE TopicID = '$ThreadID'");
-        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, array(1));
+        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
         $Answers = unserialize($Answers);
         $DB->query("
             SELECT Vote, COUNT(UserID)
@@ -236,7 +236,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
                 $Votes[$i] = 0;
             }
         }
-        $Cache->cache_value("polls_$ThreadID", array($Question, $Answers, $Votes, $Featured, $Closed), 0);
+        $Cache->cache_value("polls_$ThreadID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
     }
 
     if (!empty($Votes)) {
@@ -541,13 +541,13 @@ foreach ($Thread as $Key => $Post) {
 <?
 if (!$ThreadInfo['IsLocked'] || check_perms('site_moderate_forums')) {
     if (Forums::check_forumperm($ForumID, 'Write') && !$LoggedUser['DisablePosting']) {
-        View::parse('generic/reply/quickreply.php', array(
+        View::parse('generic/reply/quickreply.php', [
             'InputTitle' => 'Post reply',
             'InputName' => 'thread',
             'InputID' => $ThreadID,
             'ForumID' => $ForumID,
             'TextareaCols' => 90
-        ));
+        ]);
     }
 }
 if (check_perms('site_moderate_forums')) {

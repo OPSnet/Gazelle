@@ -23,9 +23,9 @@ switch ($_REQUEST['type']) {
 	default:
 		print
 			json_encode(
-				array(
+				[
 					'status' => 'failure'
-				)
+                ]
 			);
 		die();
 }

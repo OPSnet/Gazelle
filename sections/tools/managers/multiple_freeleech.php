@@ -54,7 +54,7 @@ if (isset($_POST['torrents'])) {
                     $Size = (int) $_POST['size'];
                     $Units = db_string($_POST['scale']);
 
-                    if (empty($Size) || !in_array($Units, array('k', 'm', 'g'))) {
+                    if (empty($Size) || !in_array($Units, ['k', 'm', 'g'])) {
                         $Err = 'Invalid size or units';
                     } else {
                         $Bytes = Format::get_bytes($Size . $Units);
@@ -101,7 +101,7 @@ if (isset($_POST['torrents'])) {
                 <option value="0" <?=$_POST['freeleechtype'] == '0' ? 'selected' : ''?>>Normal</option>
             </select>
             &nbsp;for reason&nbsp;<select name="freeleechreason">
-<?      $FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
+<?      $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>" <?=$_POST['freeleechreason'] == $Key ? 'selected' : ''?>><?=$FLType?></option>
 <?      } ?>

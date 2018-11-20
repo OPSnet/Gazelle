@@ -144,7 +144,7 @@ class Requests {
 	 * @return request array or false if request doesn't exist. See get_requests for a description of the format
 	 */
 	public static function get_request($RequestID) {
-		$Request = self::get_requests(array($RequestID));
+		$Request = self::get_requests([$RequestID]);
 		if (isset($Request[$RequestID])) {
 			return $Request[$RequestID];
 		}
@@ -171,7 +171,7 @@ class Requests {
 			G::$DB->set_query_id($QueryID);
 			foreach ($ArtistRaw as $ArtistRow) {
 				list($ArtistID, $ArtistName, $ArtistImportance) = $ArtistRow;
-				$Results[$ArtistImportance][] = array('id' => $ArtistID, 'name' => $ArtistName);
+				$Results[$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName];
 			}
 			G::$Cache->cache_value("request_artists_$RequestID", $Results);
 		}
@@ -219,9 +219,9 @@ class Requests {
 				WHERE rv.RequestID = $RequestID
 				ORDER BY rv.Bounty DESC");
 			if (!G::$DB->has_results()) {
-				return array(
+				return [
 					'TotalBounty' => 0,
-					'Voters' => []);
+					'Voters' => []];
 			}
 			$Votes = G::$DB->to_array();
 
@@ -231,7 +231,7 @@ class Requests {
 			foreach ($Votes as $Vote) {
 				list($UserID, $Bounty, $Username) = $Vote;
 				$VoteArray = [];
-				$VotesArray[] = array('UserID' => $UserID, 'Username' => $Username, 'Bounty' => $Bounty);
+				$VotesArray[] = ['UserID' => $UserID, 'Username' => $Username, 'Bounty' => $Bounty];
 			}
 
 			$RequestVotes['Voters'] = $VotesArray;

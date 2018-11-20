@@ -2,14 +2,14 @@
 $SphQL = new SphinxqlQuery();
 $SphQL->select('id, votes, bounty')->from('requests, requests_delta');
 
-$SortOrders = array(
+$SortOrders = [
     'votes' => 'votes',
     'bounty' => 'bounty',
     'lastvote' => 'lastvote',
     'filled' => 'timefilled',
     'year' => 'year',
     'created' => 'timeadded',
-    'random' => false);
+    'random' => false];
 
 if (empty($_GET['order']) || !isset($SortOrders[$_GET['order']])) {
     $_GET['order'] = 'created';
@@ -174,7 +174,7 @@ if (!empty($_GET['bitrates'])) {
 if (!empty($_GET['search'])) {
     $SearchString = trim($_GET['search']);
     if ($SearchString !== '') {
-        $SearchWords = array('include' => [], 'exclude' => []);
+        $SearchWords = ['include' => [], 'exclude' => []];
         $Words = explode(' ', $SearchString);
         foreach ($Words as $Word) {
             $Word = trim($Word);
@@ -205,7 +205,7 @@ if (!isset($_GET['tags_type']) || $_GET['tags_type'] === '1') {
     $_GET['tags_type'] = '0';
 }
 if (!empty($_GET['tags'])) {
-    $SearchTags = array('include' => [], 'exclude' => []);
+    $SearchTags = ['include' => [], 'exclude' => []];
     $Tags = explode(',', $_GET['tags']);
     foreach ($Tags as $Tag) {
         $Tag = trim($Tag);
@@ -321,11 +321,11 @@ if ($NumResults > 0) {
 }
 
 if ($NumResults == 0) {
-    json_print("success", array(
+    json_print("success", [
         'currentPage' => 1,
         'pages' => 1,
         'results' => []
-    ));
+    ]);
 } else {
     $JsonResults = [];
     $TimeCompare = 1267643718; // Requests v2 was implemented 2010-03-03 20:15:18
@@ -351,7 +351,7 @@ if ($NumResults == 0) {
 
         $Tags = $Request['Tags'];
 
-        $JsonResults[] = array(
+        $JsonResults[] = [
             'requestId' => (int)$RequestID,
             'requestorId' => (int)$Requestor['ID'],
             'requestorName' => $Requestor['Username'],
@@ -378,12 +378,12 @@ if ($NumResults == 0) {
             'fillerName' => $Filler ? $Filler['Username'] : '',
             'torrentId' => (int)$Request['TorrentID'],
             'timeFilled' => $Request['TimeFilled'] == 0 ? '' : $Request['TimeFilled']
-        );
+        ];
     }
 
-    json_print("success", array(
+    json_print("success", [
         'currentPage' => intval($Page),
         'pages' => ceil($NumResults / REQUESTS_PER_PAGE),
         'results' => $JsonResults
-    ));
+    ]);
 }

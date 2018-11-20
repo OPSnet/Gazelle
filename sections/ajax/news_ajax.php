@@ -28,12 +28,12 @@ foreach ($News as $NewsItem) {
 	list($NewsID, $Title, $Body, $NewsTime) = $NewsItem;
 	array_push(
 		$NewsResponse,
-		array(
+		[
 			$NewsID,
 			Text::full_format($Title),
 			time_diff($NewsTime),
 			Text::full_format($Body)
-		)
+        ]
 	);
 }
 

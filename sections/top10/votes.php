@@ -176,7 +176,7 @@ foreach ($TopVotes as $GroupID => $Group) {
 			unset($ExtendedArtists[3]);
 			$DisplayName .= Artists::display_artists($ExtendedArtists);
 	} elseif (count($Artists) > 0) {
-			$DisplayName .= Artists::display_artists(array('1' => $Artists));
+			$DisplayName .= Artists::display_artists(['1' => $Artists]);
 	}
 
 	$DisplayName .= '<a href="torrents.php?id='.$GroupID.'" class="tooltip" title="View torrent group" dir="ltr">'.$GroupName.'</a>';

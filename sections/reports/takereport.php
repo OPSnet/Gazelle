@@ -76,7 +76,7 @@ if ($Short === 'request_update') {
 	$Channels[] = '#requestedits';
 	$Cache->increment('num_update_reports');
 }
-if (in_array($Short, array('comment', 'post', 'thread'))) {
+if (in_array($Short, ['comment', 'post', 'thread'])) {
 	$Channels[] = '#forumreports';
 }
 

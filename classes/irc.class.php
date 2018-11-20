@@ -163,7 +163,7 @@ abstract class IRC_BOT {
 		stream_set_timeout($this->Socket, 10000000000);
 		while ($this->State == 1) {
 			$NullSock = null;
-			$Sockets = array($this->Socket, $this->ListenSocket);
+			$Sockets = [$this->Socket, $this->ListenSocket];
 			if (stream_select($Sockets, $NullSock, $NullSock, null) === false) {
 				die();
 			}

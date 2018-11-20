@@ -69,7 +69,7 @@ class TEXTAREA_PREVIEW_SUPER
             $script[] = sprintf('[%s]', $a);
         }
         if (!empty($script)) {
-            View::parse('generic/textarea/script_factory.phtml', array('script' => join(', ', $script)));
+            View::parse('generic/textarea/script_factory.phtml', ['script' => join(', ', $script)]);
         }
     }
 }

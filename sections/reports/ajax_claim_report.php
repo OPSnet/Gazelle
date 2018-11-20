@@ -3,9 +3,9 @@
 if (!check_perms('site_moderate_forums') || empty($_POST['id'])) {
     print
         json_encode(
-            array(
+            [
                 'status' => 'failure'
-            )
+            ]
         );
     die();
 }
@@ -19,9 +19,9 @@ list($ClaimerID) = $DB->next_record();
 if ($ClaimerID) {
     print
         json_encode(
-            array(
+            [
                 'status' => 'dupe'
-            )
+            ]
         );
     die();
 } else {
@@ -32,10 +32,10 @@ if ($ClaimerID) {
 		WHERE ID = '$ID'");
     print
         json_encode(
-            array(
+            [
                 'status' => 'success',
                 'username' => $LoggedUser['Username']
-            )
+            ]
         );
     die();
 }

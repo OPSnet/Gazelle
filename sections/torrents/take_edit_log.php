@@ -30,22 +30,22 @@ if ($AdjustedChecksum != $Log['Checksum']) {
     $AdjustmentDetails['checksum'] = 'Checksum manually '.($AdjustedChecksum == '1' ? 'validated' : 'invalidated');
 }
 
-$Deductions = array(
-    array('read_mode_secure', 'Non-Secure Mode used', 20),
-    array('audio_cache', 'Defeat/disable audio cache should be yes', 10),
-    array('c2_points', 'C2 Pointers enabled', 10),
-    array('drive_offset', 'Incorred drive offset', 5),
-    array('fill_offsets', 'Does not fill up missing offset samples with silence', 5),
-    array('deletes_ofsets', 'Deletes leading and trailing silent blocks', 5),
-    array('gap_handling', 'Gap handling should be appended to previous track', 10),
-    array('test_and_copy', 'Test & Copy not used', 10),
-    array('range_rip', 'Range Rip', 30),
-    array('null_samples', 'Null samples should be used in CRC calculations', 5),
-    array('eac_old', 'EAC older than 0.99', 30),
-    array('id3_tags', 'ID3 tags found', 1),
-    array('foreign_log', 'Unrecognized foreign log'),
-    array('combined_log', 'Combined log')
-);
+$Deductions = [
+    ['read_mode_secure', 'Non-Secure Mode used', 20],
+    ['audio_cache', 'Defeat/disable audio cache should be yes', 10],
+    ['c2_points', 'C2 Pointers enabled', 10],
+    ['drive_offset', 'Incorred drive offset', 5],
+    ['fill_offsets', 'Does not fill up missing offset samples with silence', 5],
+    ['deletes_ofsets', 'Deletes leading and trailing silent blocks', 5],
+    ['gap_handling', 'Gap handling should be appended to previous track', 10],
+    ['test_and_copy', 'Test & Copy not used', 10],
+    ['range_rip', 'Range Rip', 30],
+    ['null_samples', 'Null samples should be used in CRC calculations', 5],
+    ['eac_old', 'EAC older than 0.99', 30],
+    ['id3_tags', 'ID3 tags found', 1],
+    ['foreign_log', 'Unrecognized foreign log'],
+    ['combined_log', 'Combined log']
+];
 
 foreach ($Deductions as $Deduction) {
     if (isset($_POST[$Deduction[0]])) {
@@ -58,11 +58,11 @@ foreach ($Deductions as $Deduction) {
     }
 }
 
-$TrackDeductions = array(
-    array('crc_mismatches', 'CRC mismatches', 30),
-    array('suspicious_positions', 'Suspicious positions', 20),
-    array('timing_problems', 'Timing problems', 20)
-);
+$TrackDeductions = [
+    ['crc_mismatches', 'CRC mismatches', 30],
+    ['suspicious_positions', 'Suspicious positions', 20],
+    ['timing_problems', 'Timing problems', 20]
+];
 
 foreach ($TrackDeductions as $Deduction) {
     $Count = intval($_POST[$Deduction[0]]);

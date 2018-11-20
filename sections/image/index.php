@@ -47,7 +47,7 @@ if (!isset($Data) || !$Data) {
 	}
 
 	if (isset($_GET['c']) && strlen($Data) < 262144) {
-		$Cache->cache_value('image_cache_'.md5($URL), array($Data, $FileType), 3600 * 24 * 7);
+		$Cache->cache_value('image_cache_'.md5($URL), [$Data, $FileType], 3600 * 24 * 7);
 	}
 }
 
@@ -100,7 +100,7 @@ function reset_image($UserID, $Type, $AdminComment, $PrivMessage) {
 
 // Enforce avatar rules
 if (isset($_GET['type']) && isset($_GET['userid'])) {
-	$ValidTypes = array('avatar', 'avatar2', 'donoricon');
+	$ValidTypes = ['avatar', 'avatar2', 'donoricon'];
 	if (!is_number($_GET['userid']) || !in_array($_GET['type'], $ValidTypes)) {
 		die();
 	}
@@ -121,7 +121,7 @@ if (isset($_GET['type']) && isset($_GET['userid'])) {
 	if (strlen($Data) > $MaxFileSize || $Height > $MaxImageHeight) {
 		// Sometimes the cached image we have isn't the actual image
 		if ($Cached) {
-			$Data2 = @file_get_contents($URL, 0, stream_context_create(array('http' => array('timeout' => 15))));
+			$Data2 = @file_get_contents($URL, 0, stream_context_create(['http' => ['timeout' => 15]]));
 		} else {
 			$Data2 = $Data;
 		}

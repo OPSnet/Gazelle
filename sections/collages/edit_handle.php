@@ -41,7 +41,7 @@ foreach ($TagList as $ID => $Tag) {
 }
 $TagList = implode(' ', $TagList);
 
-$Updates = array("Description='".db_string($_POST['description'])."', TagList='".db_string($TagList)."'");
+$Updates = ["Description='".db_string($_POST['description'])."', TagList='".db_string($TagList)."'"];
 
 if (!check_perms('site_collages_delete') && ($CategoryID == 0 && $UserID == $LoggedUser['ID'] && check_perms('site_collages_renamepersonal'))) {
 	if (!stristr($_POST['name'], $LoggedUser['Username'])) {

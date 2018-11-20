@@ -93,25 +93,25 @@ if ($CurrentBlog === false) {
 // Subscriptions
 $NewSubscriptions = Subscriptions::has_new_subscriptions();
 
-json_print("success", array(
+json_print("success", [
 	'username' => $LoggedUser['Username'],
 	'id' => (int)$LoggedUser['ID'],
 	'authkey' => $LoggedUser['AuthKey'],
 	'passkey' => $LoggedUser['torrent_pass'],
-	'notifications' => array(
+	'notifications' => [
 		'messages' => (int)$NewMessages,
 		'notifications' => (int)$NewNotifications,
 		'newAnnouncement' => $MyNews < $CurrentNews,
 		'newBlog' => $MyBlog < $CurrentBlog,
 		'newSubscriptions' => $NewSubscriptions == 1
-	),
-	'userstats' => array(
+    ],
+	'userstats' => [
 		'uploaded' => (int)$LoggedUser['BytesUploaded'],
 		'downloaded' => (int)$LoggedUser['BytesDownloaded'],
 		'ratio' => (float)$Ratio,
 		'requiredratio' => (float)$LoggedUser['RequiredRatio'],
 		'class' => $ClassLevels[$LoggedUser['Class']]['Name']
-	)
-));
+    ]
+]);
 
 ?>

@@ -3,9 +3,9 @@
 if (empty($_GET['id']) || !is_number($_GET['id']) || empty($_GET['limit']) || !is_number($_GET['limit'])) {
     print
         json_encode(
-            array(
+            [
                 'status' => 'failure'
-            )
+            ]
         );
     die();
 }
@@ -31,10 +31,10 @@ while (list($ArtistID, $Name, $Score) = $DB->next_record(MYSQLI_NUM, false)) {
     if ($Score < 0) {
         continue;
     }
-    $results[] = array(
+    $results[] = [
     'id' => (int)$ArtistID,
     'name' => $Name,
-    'score' => (int)$Score);
+    'score' => (int)$Score];
 }
 
 print json_encode($results);

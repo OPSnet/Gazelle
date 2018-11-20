@@ -9,7 +9,7 @@ if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
 	$UserID = $LoggedUser['ID'];
 }
 
-$Encodings = array('V0 (VBR)', 'V2 (VBR)', '320');
+$Encodings = ['V0 (VBR)', 'V2 (VBR)', '320'];
 $EncodingKeys = array_fill_keys($Encodings, true);
 
 // Get list of FLAC uploads
@@ -81,7 +81,7 @@ foreach ($Groups as $GroupID => $Group) {
 				]
 			];
 		} elseif (!isset($TorrentGroups[$Group['ID']][$TorRemIdent])) {
-			$TorrentGroups[$Group['ID']][$TorRemIdent] = array(
+			$TorrentGroups[$Group['ID']][$TorRemIdent] = [
 				'FlacID' => 0,
 				'Formats' => [],
 				'IsSnatched' => $Torrent['IsSnatched'],
@@ -90,7 +90,7 @@ foreach ($Groups as $GroupID => $Group) {
 				'RemasterYear' => $Torrent['RemasterYear'],
 				'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
 				'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber']
-			);
+            ];
 		}
 		if ($Torrent['Format'] == 'MP3' && isset($EncodingKeys[$Torrent['Encoding']])) {
 			$TorrentGroups[$Group['ID']][$TorRemIdent]['Formats'][$Torrent['Encoding']] = true;
@@ -100,13 +100,13 @@ foreach ($Groups as $GroupID => $Group) {
 		}
 	}
 }
-$Counter = array(
+$Counter = [
 	'total' => 0, //how many FLAC torrents can be transcoded?
 	'miss_total' => 0, //how many transcodes are missing?
 	'miss_V0 (VBR)' => 0, //how many V0 transcodes are missing?
 	'miss_V2 (VBR)' => 0, //how many V2 transcodes are missing?
 	'miss_320' => 0, //how many 320 transcodes are missing?
-);
+];
 foreach ($TorrentGroups as $Editions) {
 	foreach ($Editions as $Edition) {
 		if ($Edition['FlacID'] == 0) { // no FLAC in this edition

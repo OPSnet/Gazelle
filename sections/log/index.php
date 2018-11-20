@@ -108,7 +108,7 @@ while (list($ID, $Message, $LogTime) = $DB->next_record()) {
 						$UserID = $MessageParts[++$i];
 					}
 					$URL = "user $UserID (<a href=\"user.php?id=$UserID\">".substr($MessageParts[++$i], 1, -1).'</a>)';
-				} elseif (in_array($MessageParts[$i - 1], array('deleted', 'uploaded', 'edited', 'created', 'recovered'))) {
+				} elseif (in_array($MessageParts[$i - 1], ['deleted', 'uploaded', 'edited', 'created', 'recovered'])) {
 					$User = $MessageParts[++$i];
 					if (substr($User, -1) == ':') {
 						$User = substr($User, 0, -1);

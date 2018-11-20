@@ -77,7 +77,7 @@ $DB->query("
 
 		list($ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID, $ResolverName, $Status, $ReportedTime, $LastChangeTime,
 			$ModComment, $Tracks, $Images, $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID, $Time, $Remastered, $RemasterTitle,
-			$RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $UploaderID, $UploaderName) = $DB->next_record(MYSQLI_BOTH, array("ModComment"));
+			$RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $UploaderID, $UploaderName) = $DB->next_record(MYSQLI_BOTH, ["ModComment"]);
 
 		if (!$GroupID) {
 			//Torrent already deleted

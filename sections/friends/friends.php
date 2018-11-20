@@ -47,7 +47,7 @@ $DB->query("
 	WHERE $Where
 	ORDER BY Username
 	LIMIT $Limit");
-$Friends = $DB->to_array(false, MYSQLI_BOTH, array(6, 'Paranoia'));
+$Friends = $DB->to_array(false, MYSQLI_BOTH, [6, 'Paranoia']);
 
 // Number of results (for pagination)
 $DB->query('SELECT FOUND_ROWS()');

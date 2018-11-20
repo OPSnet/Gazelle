@@ -43,7 +43,7 @@ $RunTasks = null;
 function run_tasks($Dir)
 {
     global $RunTasks, $LineEnd;
-    $Tasks = array_diff(scandir(SERVER_ROOT.'/sections/schedule/'.$Dir, 1), array('.', '..'));
+    $Tasks = array_diff(scandir(SERVER_ROOT.'/sections/schedule/'.$Dir, 1), ['.', '..']);
     sort($Tasks);
     extract($GLOBALS);
     foreach ($Tasks as $Task) {
@@ -70,7 +70,7 @@ if (PHP_SAPI === 'cli') {
                 for (++$i; $i < count($argv); $i++) {
                     $RunTasks[] = $argv[$i];
                 }
-                foreach (array('RunEvery', 'RunHourly', 'RunDaily', 'RunWeekly', 'RunBiweekly', 'RunManual') as $Var) {
+                foreach (['RunEvery', 'RunHourly', 'RunDaily', 'RunWeekly', 'RunBiweekly', 'RunManual'] as $Var) {
                     $$Var = true;
                 }
             }

@@ -353,7 +353,7 @@ class SphinxqlQuery {
 		$this->GroupBy = '';
 		$this->Indexes = '';
 		$this->Limits = [];
-		$this->Options = array('ranker' => 'none');
+		$this->Options = ['ranker' => 'none'];
 		$this->QueryString = '';
 		$this->Select = '*';
 		$this->SortBy = [];

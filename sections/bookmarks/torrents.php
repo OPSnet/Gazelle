@@ -43,7 +43,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 	if ($Artists) {
 		foreach ($Artists as $Artist) {
 			if (!isset($ArtistCount[$Artist['id']])) {
-				$ArtistCount[$Artist['id']] = array('name' => $Artist['name'], 'count' => 1);
+				$ArtistCount[$Artist['id']] = ['name' => $Artist['name'], 'count' => 1];
 			} else {
 				$ArtistCount[$Artist['id']]['count']++;
 			}
@@ -207,7 +207,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 	if ($Artists) {
 		foreach ($Artists as $Artist) {
 			if (!isset($ArtistCount[$Artist['id']])) {
-				$ArtistCount[$Artist['id']] = array('name' => $Artist['name'], 'count' => 1);
+				$ArtistCount[$Artist['id']] = ['name' => $Artist['name'], 'count' => 1];
 			}
 			else {
 				$ArtistCount[$Artist['id']]['count']++;
@@ -223,7 +223,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
 		$DisplayName = Artists::display_artists($ExtendedArtists);
 	}
 	elseif (count($Artists) > 0) {
-		$DisplayName = Artists::display_artists(array('1' => $Artists));
+		$DisplayName = Artists::display_artists(['1' => $Artists]);
 	}
 	else {
 		$DisplayName = '';

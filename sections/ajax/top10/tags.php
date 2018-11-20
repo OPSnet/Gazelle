@@ -3,10 +3,10 @@
 
 // error out on invalid requests (before caching)
 if (isset($_GET['details'])) {
-	if (in_array($_GET['details'],array('ut','ur','v'))) {
+	if (in_array($_GET['details'], ['ut','ur','v'])) {
 		$Details = $_GET['details'];
 	} else {
-		print json_encode(array('status' => 'failure'));
+		print json_encode(['status' => 'failure']);
 		die();
 	}
 } else {
@@ -15,7 +15,7 @@ if (isset($_GET['details'])) {
 
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$Limit = in_array($Limit, array(10, 100, 250)) ? $Limit : 10;
+$Limit = in_array($Limit, [10, 100, 250]) ? $Limit : 10;
 $OuterResults = [];
 
 if ($Details == 'all' || $Details == 'ut') {
@@ -82,27 +82,27 @@ if ($Details == 'all' || $Details == 'v') {
 
 print
 	json_encode(
-		array(
+		[
 			'status' => 'success',
 			'response' => $OuterResults
-		)
+        ]
 	);
 
 function generate_tag_json($Caption, $Tag, $Details, $Limit) {
 	$results = [];
 	foreach ($Details as $Detail) {
-		$results[] = array(
+		$results[] = [
 			'name' => $Detail['Name'],
 			'uses' => (int)$Detail['Uses'],
 			'posVotes' => (int)$Detail['PosVotes'],
 			'negVotes' => (int)$Detail['NegVotes']
-		);
+        ];
 	}
 
-	return array(
+	return [
 		'caption' => $Caption,
 		'tag' => $Tag,
 		'limit' => (int)$Limit,
 		'results' => $results
-		);
+    ];
 }

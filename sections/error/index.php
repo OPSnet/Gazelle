@@ -5,7 +5,7 @@ function notify ($Channel, $Message) {
 	send_irc("PRIVMSG ".$Channel." :".$Message." error by ".(!empty($LoggedUser['ID']) ? site_url()."user.php?id=".$LoggedUser['ID'] ." (".$LoggedUser['Username'].")" : $_SERVER['REMOTE_ADDR']." (".Tools::geoip($_SERVER['REMOTE_ADDR']).")")." accessing https://".SSL_SITE_URL."".$_SERVER['REQUEST_URI'].(!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : ''));
 }
 
-$Errors = array('403','404','413','504');
+$Errors = ['403','404','413','504'];
 
 if (!empty($_GET['e']) && in_array($_GET['e'],$Errors)) {
 	// Web server error i.e. http://sitename/madeupdocument.php
