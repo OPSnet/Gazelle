@@ -5,13 +5,13 @@
  *
  * To include it in a section use this example.
 
-        View::parse('generic/reply/quickreply.php', array(
+        View::parse('generic/reply/quickreply.php', [
             'InputTitle' => 'Post reply',
             'InputName' => 'thread',
             'InputID' => $ThreadID,
             'ForumID' => $ForumID,
             'TextareaCols' => 90
-        ));
+        ]);
 
  * Note that InputName and InputID are the only required variables
  * They're used to construct the $_POST.
@@ -27,13 +27,13 @@
  * comments), add a key 'SubscribeBox' to the array passed to View::parse.
  * Example:
 
-        View::parse('generic/reply/quickreply.php', array(
+        View::parse('generic/reply/quickreply.php', [
             'InputTitle' => 'Post comment',
             'InputName' => 'groupid',
             'InputID' => $GroupID,
             'TextareaCols' => 65,
             'SubscribeBox' => true
-        ));
+        ]);
  */
     global $HeavyInfo, $UserSubscriptions, $ThreadInfo, $ForumsDoublePost, $Document;
 

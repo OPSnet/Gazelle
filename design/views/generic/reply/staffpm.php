@@ -7,7 +7,7 @@
 
 				<h3><label for="message">Message</label></h3>
 <?
-				$TextPrev = new TEXTAREA_PREVIEW('message', 'message', '', 95, 10, true, false, false, array(), true);
+				$TextPrev = new TEXTAREA_PREVIEW('message', 'message', '', 95, 10, true, false, false, [], true);
 ?>
 				<br />
 

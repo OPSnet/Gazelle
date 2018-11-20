@@ -13,7 +13,7 @@ switch ($Type) {
 			if (empty($Tokens)) {
 				error(0);
 			}
-			$Cond = $UserIDs = array();
+			$Cond = $UserIDs = [];
 			foreach ($Tokens as $Key => $Token) {
 				list($UserID, $TorrentID) = explode(':', $Token);
 				if (!is_number($UserID) || !is_number($TorrentID)) {

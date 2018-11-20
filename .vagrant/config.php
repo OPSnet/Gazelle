@@ -1,4 +1,5 @@
 <?php
+
 if (PHP_VERSION_ID < 50400) {
     die("Gazelle requires PHP 5.4 or later to function properly");
 }
@@ -36,10 +37,10 @@ define('SQLPORT', 3306); //The MySQL port to connect on
 define('SQLSOCK', '/var/run/mysqld/mysqld.sock');
 
 // Memcached details
-$MemcachedServers = array(
+$MemcachedServers = [
     // unix sockets are fast, and other people can't telnet into them
-    array('host' => '/var/run/memcached.sock', 'port' => 0),
-);
+    ['host' => '/var/run/memcached.sock', 'port' => 0],
+];
 
 // Sphinx details
 define('SPHINX_HOST', '127.0.0.1');
@@ -172,73 +173,143 @@ define('DONOR_FORUM_RANK', 6);
 define('DONOR_FORUM', 70);
 define('MAX_SPECIAL_RANK', 3);
 
-$ForumsRevealVoters = array();
-$ForumsDoublePost = array();
+$ForumsRevealVoters = [];
+$ForumsDoublePost = [];
 
-$Categories = array('Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics');
-$GroupedCategories = array_intersect(array('Music'), $Categories);
-$CategoryIcons = array('music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png');
+$Categories = [
+    'Music',
+    'Applications',
+    'E-Books',
+    'Audiobooks',
+    'E-Learning Videos',
+    'Comedy',
+    'Comics'
+];
+$GroupedCategories = array_intersect(['Music'], $Categories);
 
-$Formats = array('MP3', 'FLAC', 'AAC', 'AC3', 'DTS');
-$Bitrates = array('192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other');
-$Media = array('CD', 'DVD', 'Vinyl', 'Soundboard', 'SACD', 'DAT', 'Cassette', 'WEB');
+$CategoryIcons = [
+    'music.png',
+    'apps.png',
+    'ebook.png',
+    'audiobook.png',
+    'elearning.png',
+    'comedy.png',
+    'comics.png'
+];
 
-$CollageCats = array(0=>'Personal', 1=>'Theme', 2=>'Genre introduction', 3=>'Discography', 4=>'Label', 5=>'Staff picks', 6=>'Charts', 7=>'Artists');
+$Formats = [
+    'MP3',
+    'FLAC',
+    'AAC',
+    'AC3',
+    'DTS'
+];
 
-$ReleaseTypes = array(1=>'Album', 3=>'Soundtrack', 5=>'EP', 6=>'Anthology', 7=>'Compilation', 9=>'Single', 11=>'Live album', 13=>'Remix', 14=>'Bootleg', 15=>'Interview', 16=>'Mixtape', 21=>'Unknown');
-//$ForumCats = array(1=>'Site', 5=>'Community', 10=>'Help', 8=>'Music', 20=>'Trash'); //No longer needed
+$Bitrates = [
+    '192',
+    'APS (VBR)',
+    'V2 (VBR)',
+    'V1 (VBR)',
+    '256',
+    'APX (VBR)',
+    'V0 (VBR)',
+    'q8.x (VBR)',
+    '320',
+    'Lossless',
+    '24bit Lossless',
+    'Other'
+];
 
-$ZIPGroups = array(
+$Media = [
+    'CD',
+    'DVD',
+    'Vinyl',
+    'Soundboard',
+    'SACD',
+    'DAT',
+    'Cassette',
+    'WEB'
+];
+
+$CollageCats = [
+    0 => 'Personal',
+    1 => 'Theme',
+    2 => 'Genre introduction',
+    3 => 'Discography',
+    4 => 'Label',
+    5 => 'Staff picks',
+    6 => 'Charts',
+    7 => 'Artists'
+];
+
+$ReleaseTypes = [
+    1 => 'Album',
+    3 => 'Soundtrack',
+    5 => 'EP',
+    6 => 'Anthology',
+    7 => 'Compilation',
+    9 => 'Single',
+    11 => 'Live album',
+    13 => 'Remix',
+    14 => 'Bootleg',
+    15 => 'Interview',
+    16 => 'Mixtape',
+    21 => 'Unknown'
+];
+
+//$ForumCats = [1=>'Site', 5=>'Community', 10=>'Help', 8=>'Music', 20=>'Trash'); //No longer needed
+
+$ZIPGroups = [
     0 => 'MP3 (VBR) - High Quality',
     1 => 'MP3 (VBR) - Low Quality',
     2 => 'MP3 (CBR)',
     3 => 'FLAC - Lossless',
     4 => 'Others'
-);
+];
 
 //3D array of attributes, OptionGroup, OptionNumber, Name
-$ZIPOptions = array(
-    '00' => array(0,0,'V0'),
-    '01' => array(0,1,'APX'),
-    '02' => array(0,2,'256'),
-    '03' => array(0,3,'V1'),
-    '10' => array(1,0,'224'),
-    '11' => array(1,1,'V2'),
-    '12' => array(1,2,'APS'),
-    '13' => array(1,3,'192'),
-    '20' => array(2,0,'320'),
-    '21' => array(2,1,'256'),
-    '22' => array(2,2,'224'),
-    '23' => array(2,3,'192'),
-    '30' => array(3,0,'FLAC / 24bit / Vinyl'),
-    '31' => array(3,1,'FLAC / 24bit / DVD'),
-    '32' => array(3,2,'FLAC / 24bit / SACD'),
-    '33' => array(3,3,'FLAC / Log (100) / Cue'),
-    '34' => array(3,4,'FLAC / Log (100)'),
-    '35' => array(3,5,'FLAC / Log'),
-    '36' => array(3,6,'FLAC'),
-    '40' => array(4,0,'DTS'),
-    '41' => array(4,1,'Ogg Vorbis'),
-    '42' => array(4,2,'AAC - 320'),
-    '43' => array(4,3,'AAC - 256'),
-    '44' => array(4,4,'AAC - q5.5'),
-    '45' => array(4,5,'AAC - q5'),
-    '46' => array(4,6,'AAC - 192')
-);
+$ZIPOptions = [
+    '00' => [0,0,'V0'],
+    '01' => [0,1,'APX'],
+    '02' => [0,2,'256'],
+    '03' => [0,3,'V1'],
+    '10' => [1,0,'224'],
+    '11' => [1,1,'V2'],
+    '12' => [1,2,'APS'],
+    '13' => [1,3,'192'],
+    '20' => [2,0,'320'],
+    '21' => [2,1,'256'],
+    '22' => [2,2,'224'],
+    '23' => [2,3,'192'],
+    '30' => [3,0,'FLAC / 24bit / Vinyl'],
+    '31' => [3,1,'FLAC / 24bit / DVD'],
+    '32' => [3,2,'FLAC / 24bit / SACD'],
+    '33' => [3,3,'FLAC / Log (100) / Cue'],
+    '34' => [3,4,'FLAC / Log (100)'],
+    '35' => [3,5,'FLAC / Log'],
+    '36' => [3,6,'FLAC'],
+    '40' => [4,0,'DTS'],
+    '41' => [4,1,'Ogg Vorbis'],
+    '42' => [4,2,'AAC - 320'],
+    '43' => [4,3,'AAC - 256'],
+    '44' => [4,4,'AAC - q5.5'],
+    '45' => [4,5,'AAC - q5'],
+    '46' => [4,6,'AAC - 192']
+];
 
 // Ratio requirements, in descending order
 // Columns: Download amount, required ratio, grace period
-$RatioRequirements = array(
-    array(50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')),
-    array(40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')),
-    array(30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')),
-    array(20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')),
-    array(10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')),
-    array(5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14)))
-);
+$RatioRequirements = [
+    [50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')],
+    [40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')],
+    [30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')],
+    [20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')],
+    [10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')],
+    [5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14))]
+];
 
 //Captcha fonts should be located in /classes/fonts
-$CaptchaFonts = array(
+$CaptchaFonts = [
     'ARIBLK.TTF',
     'IMPACT.TTF',
     'TREBUC.TTF',
@@ -248,9 +319,11 @@ $CaptchaFonts = array(
     'VERDANA.TTF',
     'VERDANAB.TTF',
     'VERDANAI.TTF',
-    'VERDANAZ.TTF');
+    'VERDANAZ.TTF'
+];
+
 //Captcha images should be located in /captcha
-$CaptchaBGs = array(
+$CaptchaBGs = [
     'captcha1.png',
     'captcha2.png',
     'captcha3.png',
@@ -259,10 +332,11 @@ $CaptchaBGs = array(
     'captcha6.png',
     'captcha7.png',
     'captcha8.png',
-    'captcha9.png');
+    'captcha9.png'
+];
 
 // Special characters, and what they should be converted to
 // Used for torrent searching
-$SpecialChars = array(
+$SpecialChars = [
     '&' => 'and'
-);
+];

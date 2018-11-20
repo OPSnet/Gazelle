@@ -101,7 +101,7 @@ if (empty(G::$LoggedUser['StyleURL'])) {
 		$StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);
 		if (substr(G::$LoggedUser['StyleURL'], -4) == '.css'
 				&& $StyleURLInfo['query'].$StyleURLInfo['fragment'] == ''
-				&& in_array($StyleURLInfo['host'], array(NONSSL_SITE_URL, SSL_SITE_URL))
+				&& in_array($StyleURLInfo['host'], [NONSSL_SITE_URL, SSL_SITE_URL])
 				&& file_exists(SERVER_ROOT.$StyleURLInfo['path'])) {
 			$StyleURL = G::$LoggedUser['StyleURL'].'?v='.filemtime(SERVER_ROOT.$StyleURLInfo['path']);
 		} else {
@@ -136,7 +136,7 @@ foreach ($ExtraCSS as $CSS) {
 	</script>
 <?
 
-$Scripts = array_merge(array('jquery', 'script_start', 'ajax.class', 'global', 'jquery.autocomplete', 'autocomplete', 'jquery.countdown.min'), explode(',', $JSIncludes));
+$Scripts = array_merge(['jquery', 'script_start', 'ajax.class', 'global', 'jquery.autocomplete', 'autocomplete', 'jquery.countdown.min'], explode(',', $JSIncludes));
 if ($UseTooltipster) {
 	$Scripts[] = 'tooltipster';
 }
@@ -159,7 +159,7 @@ $NotificationsManager = new NotificationsManager(G::$LoggedUser['ID']);
 $Notifications = $NotificationsManager->get_notifications();
 $UseNoty = $NotificationsManager->use_noty();
 $NewSubscriptions = false;
-$NotificationSpans = array();
+$NotificationSpans = [];
 foreach ($Notifications as $Type => $Notification) {
 	if ($Type === NotificationsManager::SUBSCRIPTIONS) {
 		$NewSubscriptions = true;
@@ -190,13 +190,13 @@ if ($NotificationsManager->is_skipped(NotificationsManager::SUBSCRIPTIONS)) {
 			</div>
 			<div id="userinfo">
 				<ul id="userinfo_username">
-					<li id="nav_userinfo" <?=Format::add_class($PageID, array('user', false, false), 'active', true, 'id')?>>
+					<li id="nav_userinfo" <?=Format::add_class($PageID, ['user', false, false], 'active', true, 'id')?>>
 						<a href="user.php?id=<?=G::$LoggedUser['ID']?>" class="username"><?=G::$LoggedUser['Username']?></a>
 					</li>
 					<li id="nav_userclass">
 						<span class="hidden userclass"><?=$ClassLevels[G::$LoggedUser['Class']]['Name']?></span>
 					</li>
-					<li id="nav_useredit" class="brackets<?=Format::add_class($PageID, array('user','edit'), 'active', false)?>">
+					<li id="nav_useredit" class="brackets<?=Format::add_class($PageID, ['user','edit'], 'active', false)?>">
 						<a href="user.php?action=edit&amp;userid=<?=G::$LoggedUser['ID']?>">Edit</a>
 					</li>
 					<li id="nav_logout" class="brackets">
@@ -204,10 +204,10 @@ if ($NotificationsManager->is_skipped(NotificationsManager::SUBSCRIPTIONS)) {
 					</li>
 				</ul>
 				<ul id="userinfo_major">
-					<li id="nav_upload" class="brackets<?=Format::add_class($PageID, array('upload'), 'active', false)?>">
+					<li id="nav_upload" class="brackets<?=Format::add_class($PageID, ['upload'], 'active', false)?>">
 						<a href="upload.php" title="Upload">Upload</a>
 					</li>
-					<li id="nav_bonus" class="brackets<?=Format::add_class($PageID, array('user', 'bonus'), 'active', false)?>">
+					<li id="nav_bonus" class="brackets<?=Format::add_class($PageID, ['user', 'bonus'], 'active', false)?>">
 						<a href="bonus.php" class='tooltip' title="Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)">Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)</a>
 					</li>
 <?
@@ -219,10 +219,10 @@ if (check_perms('site_send_unlimited_invites')) {
 	$Invites = '';
 }
 ?>
-					<li id="nav_invite" class="brackets<?=Format::add_class($PageID, array('user','invite'), 'active', false)?>">
+					<li id="nav_invite" class="brackets<?=Format::add_class($PageID, ['user','invite'], 'active', false)?>">
 						<a href="user.php?action=invite" class='tooltip' title="Invite<?=$Invites?>">Invite<?=$Invites?></a>
 					</li>
-					<li id="nav_donate" class="brackets<?=Format::add_class($PageID, array('donate'), 'active', false)?>">
+					<li id="nav_donate" class="brackets<?=Format::add_class($PageID, ['donate'], 'active', false)?>">
 						<a href="donate.php" class='tooltip' title="Donate">Donate</a>
 					</li>
 
@@ -256,47 +256,47 @@ if (check_perms('site_send_unlimited_invites')) {
 				</ul>
 				<ul id="userinfo_minor"<?=$NewSubscriptions ? ' class="highlite"' : ''?>>
 					<li id="nav_inbox"<?=
-						Format::add_class($PageID, array('inbox'), 'active', true)?>>
+						Format::add_class($PageID, ['inbox'], 'active', true)?>>
 						<a href="<?=Inbox::get_inbox_link(); ?>">Inbox</a>
 					</li>
 					<li id="nav_staffinbox"<?=
-						Format::add_class($PageID, array('staffpm'), 'active', true)?>>
+						Format::add_class($PageID, ['staffpm'], 'active', true)?>>
 						<a href="staffpm.php">Staff Inbox</a>
 					</li>
 					<li id="nav_uploaded"<?=
-						Format::add_class($PageID, array('torrents', false, 'uploaded'), 'active', true, 'userid')?>>
+						Format::add_class($PageID, ['torrents', false, 'uploaded'], 'active', true, 'userid')?>>
 						<a href="torrents.php?type=uploaded&amp;userid=<?=G::$LoggedUser['ID']?>">Uploads</a>
 					</li>
 					<li id="nav_bookmarks"<?=
-						Format::add_class($PageID, array('bookmarks'), 'active', true)?>>
+						Format::add_class($PageID, ['bookmarks'], 'active', true)?>>
 						<a href="bookmarks.php?type=torrents">Bookmarks</a>
 					</li>
 <?	if (check_perms('site_torrents_notify')) { ?>
 					<li id="nav_notifications"<?=
-						Format::add_class($PageID, array(array('torrents', 'notify'), array('user', 'notify')), 'active', true, 'userid')?>>
+						Format::add_class($PageID, [['torrents', 'notify'], ['user', 'notify']], 'active', true, 'userid')?>>
 						<a href="user.php?action=notify">Notifications</a>
 					</li>
 <?	}
 	$ClassNames = $NewSubscriptions ? 'new-subscriptions' : '';
-	$ClassNames = trim($ClassNames.Format::add_class($PageID, array('userhistory', 'subscriptions'), 'active', false));
+	$ClassNames = trim($ClassNames.Format::add_class($PageID, ['userhistory', 'subscriptions'], 'active', false));
 ?>
 					<li id="nav_subscriptions"<?=$ClassNames ? " class=\"$ClassNames\"" : ''?>>
 						<a href="userhistory.php?action=subscriptions">Subscriptions</a>
 					</li>
 					<li id="nav_comments"<?=
-						Format::add_class($PageID, array('comments'), 'active', true, 'userid')?>>
+						Format::add_class($PageID, ['comments'], 'active', true, 'userid')?>>
 						<a href="comments.php">Comments</a></li>
 					<li id="nav_friends"<?=
-						Format::add_class($PageID, array('friends'), 'active', true)?>>
+						Format::add_class($PageID, ['friends'], 'active', true)?>>
 						<a href="friends.php">Friends</a></li>
 					<li id="nav_better"<?=
-						Format::add_class($PageID, array('better'), 'active', true)?>>
+						Format::add_class($PageID, ['better'], 'active', true)?>>
 						<a href="better.php">Better</a></li>
 					<li id="nav_random"<?=
-						Format::add_class($PageID, array('random'), 'active', true)?>>
+						Format::add_class($PageID, ['random'], 'active', true)?>>
 						<a href="random.php">Random Album</a></li>
 					<li id="nav_logchecker" style="display: none"<?=
-						Format::add_class($PageID, array('logchecker'), 'active', true)?>>
+						Format::add_class($PageID, ['logchecker'], 'active', true)?>>
 						<a href="logchecker.php">Log Checker</a></li>
 				</ul>
 			</div>
@@ -304,51 +304,51 @@ if (check_perms('site_send_unlimited_invites')) {
 				<h4 class="hidden">Site Menu</h4>
 				<ul>
 					<li id="nav_index"<?=
-						Format::add_class($PageID, array('index'), 'active', true)?>>
+						Format::add_class($PageID, ['index'], 'active', true)?>>
 						<a href="index.php">Home</a>
 					</li>
 					<li id="nav_torrents"<?=
-						Format::add_class($PageID, array('torrents', false, false), 'active', true)?>>
+						Format::add_class($PageID, ['torrents', false, false], 'active', true)?>>
 						<a href="torrents.php">Torrents</a>
 					</li>
 					<li id="nav_collages"<?=
-						Format::add_class($PageID, array('collages'), 'active', true)?>>
+						Format::add_class($PageID, ['collages'], 'active', true)?>>
 						<a href="collages.php">Collages</a>
 					</li>
 					<li id="nav_requests"<?=
-						Format::add_class($PageID, array('requests'), 'active', true)?>>
+						Format::add_class($PageID, ['requests'], 'active', true)?>>
 						<a href="requests.php">Requests</a>
 					</li>
 					<li id="nav_forums"<?=
-						Format::add_class($PageID, array('forums'), 'active', true)?>>
+						Format::add_class($PageID, ['forums'], 'active', true)?>>
 						<a href="forums.php">Forums</a>
 					</li>
 					<li id="nav_irc"<?=
-						Format::add_class($PageID, array('chat'), 'active', true)?>>
+						Format::add_class($PageID, ['chat'], 'active', true)?>>
 						<a href="wiki.php?action=article&name=irc">IRC</a>
 					</li>
 					<li id="nav_top10"<?=
-						Format::add_class($PageID, array('top10'), 'active', true)?>>
+						Format::add_class($PageID, ['top10'], 'active', true)?>>
 						<a href="top10.php">Top 10</a>
 					</li>
 					<li id="nav_rules"<?=
-						Format::add_class($PageID, array('rules'), 'active', true)?>>
+						Format::add_class($PageID, ['rules'], 'active', true)?>>
 						<a href="rules.php">Rules</a>
 					</li>
 					<li id="nav_wiki"<?=
-						Format::add_class($PageID, array('wiki'), 'active', true)?>>
+						Format::add_class($PageID, ['wiki'], 'active', true)?>>
 						<a href="wiki.php">Wiki</a>
 					</li>
 					<li id="nav_staff"<?=
-						Format::add_class($PageID, array('staff'), 'active', true)?>>
+						Format::add_class($PageID, ['staff'], 'active', true)?>>
 						<a href="staff.php" title="Staff">Staff</a>
 					</li>
 				</ul>
 			</div>
 <?
 //Start handling alert bars
-$Alerts = array();
-$ModBar = array();
+$Alerts = [];
+$ModBar = [];
 
 // Staff blog
 if (check_perms('users_mod')) {
