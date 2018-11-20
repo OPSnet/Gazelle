@@ -38,7 +38,7 @@ class Tracker {
 	/**
 	 * Get global peer stats from the tracker
 	 *
-	 * @return array(0 => $Leeching, 1 => $Seeding) or false if request failed
+	 * @return [$Leeching, $Seeding] or false if request failed
 	 */
 	public static function global_peer_count() {
 		$Stats = self::get_stats(self::STATS_MAIN);
@@ -48,7 +48,7 @@ class Tracker {
 		} else {
 			return false;
 		}
-		return array($Leechers, $Seeders);
+		return[$Leechers, $Seeders];
 	}
 
 	/**
@@ -69,7 +69,7 @@ class Tracker {
 			// User doesn't exist, but don't tell anyone
 			$Leeching = $Seeding = 0;
 		}
-		return array($Leeching, $Seeding);
+		return [$Leeching, $Seeding];
 	}
 
 	/**

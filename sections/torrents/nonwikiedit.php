@@ -29,7 +29,7 @@ if (check_perms('torrents_freeleech') && (isset($_POST['freeleech']) xor isset($
 		$Free = 0;
 	}
 
-	if (isset($_POST['freeleechtype']) && in_array($_POST['freeleechtype'], array(0, 1, 2, 3))) {
+	if (isset($_POST['freeleechtype']) && in_array($_POST['freeleechtype'], [0, 1, 2, 3])) {
 		$FreeType = $_POST['freeleechtype'];
 	} else {
 		error(404);

@@ -18,7 +18,7 @@ if (isset($_POST['GroupID'])) {
 
 	$FreeLeechType = (int) $_POST['freeleechtype'];
 	$FreeLeechReason = (int) $_POST['freeleechreason'];
-	if (!in_array($FreeLeechType, array(0, 1, 2)) || !in_array($FreeLeechReason, array(0, 1, 2, 3))) {
+	if (!in_array($FreeLeechType, [0, 1, 2]) || !in_array($FreeLeechReason, [0, 1, 2, 3])) {
 		error('Invalid freeleech type or freeleech reason');
 	} else {
 		$DB->prepared_query('
@@ -53,7 +53,7 @@ if (isset($_POST['GroupID'])) {
 					$Size = (int) $_POST['size'];
 					$Units = db_string($_POST['scale']);
 
-					if (empty($Size) || !in_array($Units, array('k', 'm', 'g'))) {
+					if (empty($Size) || !in_array($Units, ['k', 'm', 'g'])) {
 						$Err = 'Invalid size or units';
 					} else {
 						$Bytes = Format::get_bytes($Size . $Units);
@@ -140,7 +140,7 @@ if (isset($_POST['GroupID'])) {
                 <option value="0" >Normal</option>
             </select>
             &nbsp;for reason&nbsp;<select name="freeleechreason">
-<?      $FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
+<?      $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>" <?=$FLType == 'Staff Pick' ? 'selected' : ''?>><?=$FLType?></option>
 <?      } ?>

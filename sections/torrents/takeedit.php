@@ -59,7 +59,7 @@ if ($_POST['album_desc']) {
 }
 if (check_perms('torrents_freeleech')) {
 	$Free = (int)$_POST['freeleech'];
-	if (!in_array($Free, array(0, 1, 2))) {
+	if (!in_array($Free, [0, 1, 2])) {
 		error(404);
 	}
 	$Properties['FreeLeech'] = $Free;
@@ -68,7 +68,7 @@ if (check_perms('torrents_freeleech')) {
 		$FreeType = 0;
 	} else {
 		$FreeType = (int)$_POST['freeleechtype'];
-		if (!in_array($Free, array(0, 1, 2, 3))) {
+		if (!in_array($Free, [0, 1, 2, 3])) {
 			error(404);
 		}
 	}

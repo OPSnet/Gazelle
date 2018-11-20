@@ -56,7 +56,7 @@ if ($DB->has_results()) {
 		if ($GroupYear > 0) {
 			$DisplayName .= " [{$GroupYear}]";
 		}
-		$Info = array();
+		$Info = [];
 		if (!empty($Data['Format'])) {
 			$Info[] = $Data['Format'];
 		}

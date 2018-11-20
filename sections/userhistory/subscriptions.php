@@ -91,7 +91,7 @@ list($NumResults) = $DB->next_record();
 
 $Debug->log_var($Results, 'Results');
 
-$TorrentGroups = $Requests = array();
+$TorrentGroups = $Requests = [];
 foreach ($Results as $Result) {
 	if ($Result['Page'] == 'torrents') {
 		$TorrentGroups[] = $Result['PageID'];

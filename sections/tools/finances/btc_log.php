@@ -77,7 +77,7 @@ if (empty($_GET['email']) && empty($_GET['username']) && empty($_GET['source']) 
 		ORDER BY Time DESC
 		LIMIT 1, 18");
 	$Timeline = array_reverse($DB->to_array());
-	$Area = new AREA_GRAPH(880, 160, array('Break' => 1));
+	$Area = new AREA_GRAPH(880, 160, ['Break' => 1]);
 	foreach ($Timeline as $Entry) {
 		list($Label, $Amount) = $Entry;
 		$Area->add($Label, $Amount);

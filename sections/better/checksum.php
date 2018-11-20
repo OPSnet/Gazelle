@@ -34,11 +34,11 @@ $DB->query("
 	LIMIT {$Limit} OFFSET {$Offset}");
 
 $TorrentsInfo = $DB->to_array('ID', MYSQLI_ASSOC);
-$GroupIDs = array();
+$GroupIDs = [];
 foreach ($TorrentsInfo as $Torrent) {
     $GroupIDs[] = $Torrent['GroupID'];
 }
-$Results = (count($GroupIDs) > 0) ? Torrents::get_groups($GroupIDs) : array();
+$Results = (count($GroupIDs) > 0) ? Torrents::get_groups($GroupIDs) : [];
 ?>
     <div class="header">
         <? if ($Filter === 0) { ?>

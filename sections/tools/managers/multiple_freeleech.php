@@ -36,7 +36,7 @@ if (isset($_POST['torrents'])) {
         $FreeLeechType = (int) $_POST['freeleechtype'];
         $FreeLeechReason = (int) $_POST['freeleechreason'];
 
-        if (!in_array($FreeLeechType, array(0, 1, 2)) || !in_array($FreeLeechReason, array(0, 1, 2, 3))) {
+        if (!in_array($FreeLeechType, [0, 1, 2]) || !in_array($FreeLeechReason, [0, 1, 2, 3])) {
             $Err = 'Invalid freeleech type or freeleech reason';
         } else {
             // Get the torrent IDs

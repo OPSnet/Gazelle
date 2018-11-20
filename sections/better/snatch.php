@@ -71,7 +71,7 @@ if (count($GroupIDs) === 0) {
 }
 
 $Groups = Torrents::get_groups(array_keys($GroupIDs));
-$TorrentGroups = array();
+$TorrentGroups = [];
 foreach ($Groups as $GroupID => $Group) {
 	if (empty($Group['Torrents'])) {
 		unset($Groups[$GroupID]);
@@ -80,29 +80,29 @@ foreach ($Groups as $GroupID => $Group) {
 	foreach ($Group['Torrents'] as $Torrent) {
 		$TorRemIdent = "$Torrent[Media] $Torrent[RemasterYear] $Torrent[RemasterTitle] $Torrent[RemasterRecordLabel] $Torrent[RemasterCatalogueNumber]";
 		if (!isset($TorrentGroups[$Group['ID']])) {
-			$TorrentGroups[$Group['ID']] = array(
-				$TorRemIdent => array(
+			$TorrentGroups[$Group['ID']] = [
+				$TorRemIdent => [
 					'FlacID' => 0,
-					'Formats' => array(),
+					'Formats' => [],
 					'IsSnatched' => $Torrent['IsSnatched'],
 					'Medium' => $Torrent['Media'],
 					'RemasterTitle' => $Torrent['RemasterTitle'],
 					'RemasterYear' => $Torrent['RemasterYear'],
 					'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
 					'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber']
-				)
-			);
+				]
+			];
 		} elseif (!isset($TorrentGroups[$Group['ID']][$TorRemIdent])) {
-			$TorrentGroups[$Group['ID']][$TorRemIdent] = array(
+			$TorrentGroups[$Group['ID']][$TorRemIdent] = [
 				'FlacID' => 0,
-				'Formats' => array(),
+				'Formats' => [],
 				'IsSnatched' => $Torrent['IsSnatched'],
 				'Medium' => $Torrent['Media'],
 				'RemasterTitle' => $Torrent['RemasterTitle'],
 				'RemasterYear' => $Torrent['RemasterYear'],
 				'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
 				'RemasterCatalogueNumber' => $Torrent['RemasterCatalogueNumber']
-			);
+			];
 		}
 		if ($Torrent['Format'] == 'MP3' && isset($EncodingKeys[$Torrent['Encoding']])) {
 			$TorrentGroups[$Group['ID']][$TorRemIdent]['Formats'][$Torrent['Encoding']] = true;
@@ -194,7 +194,7 @@ foreach ($TorrentGroups as $GroupID => $Editions) {
 		}
 		$DisplayName .= ' ['.$Edition['Medium'].']';
 
-		$EditionInfo = array();
+		$EditionInfo = [];
 		if (!empty($Edition['RemasterYear'])) {
 			$ExtraInfo = $Edition['RemasterYear'];
 		} else {

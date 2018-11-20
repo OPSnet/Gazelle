@@ -16,12 +16,12 @@ $Artists = $DB->to_array('ArtistID', MYSQLI_ASSOC);
 
 // Loop through the result set, building up $Collage and $TorrentTable
 // Then we print them.
-$Collage = array();
+$Collage = [];
 $ArtistTable = '';
 
 $NumGroups = count($Artists);
 $NumGroupsByUser = 0;
-$UserAdditions = array();
+$UserAdditions = [];
 
 foreach ($Artists as $Artist) {
 	$UserID = $Artist['UserID'];
@@ -64,7 +64,7 @@ if (!check_perms('site_collages_delete') && ($Locked || ($MaxGroups > 0 && $NumG
 
 // Silly hack for people who are on the old setting
 $CollageCovers = (isset($LoggedUser['CollageCovers']) ? $LoggedUser['CollageCovers'] : 25 * (abs($LoggedUser['HideCollage'] - 1)));
-$CollagePages = array();
+$CollagePages = [];
 
 // Pad it out
 if ($NumGroups > $CollageCovers) {

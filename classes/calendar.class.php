@@ -19,7 +19,7 @@ class Calendar {
 	}
 
 	private static function get_teams_query() {
-		$Teams = array(0);
+		$Teams = [0];
 		$IsMod = check_perms("users_mod");
 		if ($IsMod) {
 			$Teams[] = 1;

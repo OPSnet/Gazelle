@@ -81,11 +81,20 @@ if (!$EconomicStats = $Cache->get_value('new_economic_stats')) {
 				WHERE uid = users_main.ID
 				) > 0");
 	list($TotalPeerUsers) = $DB->next_record();
-	$Cache->cache_value('new_economic_stats',
-				array($TotalUpload, $TotalDownload, $NumUsers, $TotalBounty,
-					$AvailableBounty, $TotalSnatches, $TotalTorrents,
-					$TotalOverallSnatches, $TotalSeeders, $TotalPeers,
-					$TotalPeerUsers), 3600);
+	$Cache->cache_value('new_economic_stats', [
+	        $TotalUpload,
+            $TotalDownload,
+            $NumUsers,
+            $TotalBounty,
+            $AvailableBounty,
+            $TotalSnatches,
+            $TotalTorrents,
+            $TotalOverallSnatches,
+            $TotalSeeders,
+            $TotalPeers,
+            $TotalPeerUsers
+        ], 3600
+    );
 } else {
 	list($TotalUpload, $TotalDownload, $NumUsers, $TotalBounty, $AvailableBounty,
 		$TotalSnatches, $TotalTorrents, $TotalOverallSnatches, $TotalSeeders,

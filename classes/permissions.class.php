@@ -35,7 +35,7 @@ class Permissions {
 				SELECT Level AS Class, `Values` AS Permissions, Secondary, PermittedForums
 				FROM permissions
 				WHERE ID = '$PermissionID'");
-			$Permission = G::$DB->next_record(MYSQLI_ASSOC, array('Permissions'));
+			$Permission = G::$DB->next_record(MYSQLI_ASSOC, ['Permissions']);
 			G::$DB->set_query_id($QueryID);
 			$Permission['Permissions'] = unserialize($Permission['Permissions']);
 			G::$Cache->cache_value("perm_$PermissionID", $Permission, 2592000);
@@ -73,7 +73,7 @@ class Permissions {
 		$Permissions = self::get_permissions($UserInfo['PermissionID']);
 
 		// Manage 'special' inherited permissions
-		$BonusPerms = array();
+		$BonusPerms = [];
 		$BonusCollages = 0;
 		foreach ($UserInfo['ExtraClasses'] as $PermID => $Value) {
 			$ClassPerms = self::get_permissions($PermID);
@@ -83,7 +83,7 @@ class Permissions {
 		}
 
 		if (empty($CustomPermissions)) {
-			$CustomPermissions = array();
+			$CustomPermissions = [];
 		}
 
 		// This is legacy donor cruft
@@ -91,7 +91,7 @@ class Permissions {
 			$DonorPerms = self::get_permissions(DONOR);
 			unset($DonorPerms['Permissions']['MaxCollages']);
 		} else {
-			$DonorPerms = array('Permissions' => array());
+			$DonorPerms = ['Permissions' => []];
 		}
 		$MaxCollages = $BonusCollages;
 		if (isset($Permissions['Permissions']['MaxCollages'])) {

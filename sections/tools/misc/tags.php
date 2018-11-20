@@ -5,8 +5,8 @@ if (!check_perms('users_mod')) {
 }
 
 // validation functions
-$Val->SetFields('tag', true, 'string', 'Enter a single tag to search for.', array('maxlength'=>'200', 'minlength'=>'2'));
-$Val->SetFields('replace', true, 'string', 'Enter a single replacement tag.', array('maxlength'=>'200', 'minlength'=>'2'));
+$Val->SetFields('tag', true, 'string', 'Enter a single tag to search for.', ['maxlength'=>'200', 'minlength'=>'2']);
+$Val->SetFields('replace', true, 'string', 'Enter a single replacement tag.', ['maxlength'=>'200', 'minlength'=>'2']);
 
 echo $Val->GenerateJS('tagform');
 
@@ -101,7 +101,7 @@ if (isset($_GET['tag']) || isset($_GET['replace'])) {
 		list($ReplacementID) = $DB->next_record();
 
 		if ($_GET['list']) {
-			$AffectedTorrents = array();
+			$AffectedTorrents = [];
 			// 3) get a list of affected torrents
 			$DB->query("
 				SELECT

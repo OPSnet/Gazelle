@@ -72,7 +72,7 @@ if ($Data) {
 		json_die("failure");
 	}
 
-	list($Name, $Image, $Body, $VanityHouseArtist) = $DB->next_record(MYSQLI_NUM, array(0));
+	list($Name, $Image, $Body, $VanityHouseArtist) = $DB->next_record(MYSQLI_NUM, [0]);
 }
 
 // Requests

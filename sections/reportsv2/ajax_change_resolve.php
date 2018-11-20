@@ -34,7 +34,7 @@ if (!isset($_GET['type'])) {
 	die();
 }
 
-$Array = array();
+$Array = [];
 $Array[0] = $ReportType['resolve_options']['delete'];
 $Array[1] = $ReportType['resolve_options']['upload'];
 $Array[2] = $ReportType['resolve_options']['warn'];

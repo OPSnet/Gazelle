@@ -53,7 +53,7 @@ function transcode_init_sphql() {
 }
 
 function transcode_parse_groups($Groups) {
-	$TorrentGroups = array();
+	$TorrentGroups = [];
 	foreach ($Groups as $GroupID => $Group) {
 		if (empty($Group['Torrents'])) {
 			continue;
@@ -67,7 +67,7 @@ function transcode_parse_groups($Groups) {
 					'Name' => $Group['Name'],
 					'ReleaseType' => $Group['ReleaseType'],
 					'TagList' => $Group['TagList'],
-					'Editions' => array()
+					'Editions' => []
 				);
 			}
 			if (!isset($TorrentGroups[$GroupID]['Editions'][$RemIdent])) {
@@ -104,13 +104,13 @@ function transcode_parse_groups($Groups) {
 					}
 					$EditionName .= $AddExtra.display_str($Torrent['Media']);
 				}
-				$TorrentGroups[$GroupID]['Editions'][$RemIdent] = array(
-					'FlacIDs' => array(),
-					'MP3s' => array(),
+				$TorrentGroups[$GroupID]['Editions'][$RemIdent] = [
+					'FlacIDs' => [],
+					'MP3s' => [],
 					'Media' => $Torrent['Media'],
 					'EditionName' => $EditionName,
 					'FLACIsSnatched' => false
-				);
+				];
 			}
 
 			if ($Torrent['Format'] == 'MP3') {
@@ -125,7 +125,7 @@ function transcode_parse_groups($Groups) {
 	return $TorrentGroups;
 }
 
-$Groups = array();
+$Groups = [];
 $ResultCount = 0;
 if (in_array($_GET['filter'], array('all', 'uploaded'))) {
 	$SphQL = transcode_init_sphql();
