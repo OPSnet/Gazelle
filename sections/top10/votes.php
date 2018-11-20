@@ -34,7 +34,7 @@ if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
 	$Details = 'all';
 	// defaults to 10 (duh)
 	$Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 25;
-	$Limit = in_array($Limit, array(25, 100, 250)) ? $Limit : 25;
+	$Limit = in_array($Limit, [25, 100, 250]) ? $Limit : 25;
 }
 $Filtered = !empty($Where);
 

@@ -20,11 +20,11 @@ class View {
 			$PageTitle .= ' :: ';
 		}
 		$PageTitle .= SITE_NAME;
-		$PageID = array(
+		$PageID = [
 			$Document, // Document
 			empty($_REQUEST['action']) ? false : $_REQUEST['action'], // Action
 			empty($_REQUEST['type']) ? false : $_REQUEST['type'] // Type
-		);
+		];
 
 		if (!is_array(G::$LoggedUser) || empty(G::$LoggedUser['ID']) || $PageTitle == 'Recover Password :: ' . SITE_NAME) {
 			require(SERVER_ROOT.'/design/publicheader.php');
@@ -105,7 +105,7 @@ class View {
      *  <p id="<?=$id?>">Data</p>
      *
      *  // The variable $id within box.phtml will be filled by $some_id
-     *  View::parse('section/box.phtml', array('id' => $some_id));
+     *  View::parse('section/box.phtml', ['id' => $some_id]);
      *
      *  // Parse a template without outputing it
      *  $SavedTemplate = View::parse('sec/tion/eg.php', $DataArray, true);

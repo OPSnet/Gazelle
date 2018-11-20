@@ -132,7 +132,7 @@ class Logchecker
             }
         }
 
-        $this->Log = str_replace(array("\r\n", "\r"), array("\n", ""), $this->Log);
+        $this->Log = str_replace(["\r\n", "\r"], ["\n", ""], $this->Log);
 
         // Split the log apart
         if (preg_match("/[\=]+\s+Log checksum/i", $this->Log)) { // eac checksum
@@ -251,89 +251,103 @@ class Logchecker
                 }
             }
 
-            $Log = preg_replace_callback("/Used drive( +): (.+)/i", array(
+            $Log = preg_replace_callback("/Used drive( +): (.+)/i", [
                 $this,
                 'drive'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count) {
                 $this->account('Could not verify used drive', 1);
             }
-            $Log = preg_replace_callback("/Media type( +): (.+)/i", array(
+            $Log = preg_replace_callback("/Media type( +): (.+)/i", [
                 $this,
                 'media_type_xld'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if ($XLD && $this->Version && $this->Version >= 20130127 && !$Count) {
                 $this->account('Could not verify media type', 1);
             }
-            $Log = preg_replace_callback('/Read mode( +): ([a-z]+)(.*)?/i', array(
+            $Log = preg_replace_callback('/Read mode( +): ([a-z]+)(.*)?/i', [
                 $this,
                 'read_mode'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $EAC) {
                 $this->account('Could not verify read mode', 1);
             }
-            $Log = preg_replace_callback('/Ripper mode( +): (.*)/i', array(
+            $Log = preg_replace_callback('/Ripper mode( +): (.*)/i', [
                 $this,
                 'ripper_mode_xld'
-            ), $Log, 1, $XLDRipperMode);
-            $Log = preg_replace_callback('/Use cdparanoia mode( +): (.*)/i', array(
+            ],
+                $Log, 1, $XLDRipperMode);
+            $Log = preg_replace_callback('/Use cdparanoia mode( +): (.*)/i', [
                 $this,
                 'cdparanoia_mode_xld'
-            ), $Log, 1, $XLDCDParanoiaMode);
+            ],
+                $Log, 1, $XLDCDParanoiaMode);
             if (!$XLDRipperMode && !$XLDCDParanoiaMode && $XLD) {
                 $this->account('Could not verify read mode', 1);
             }
-            $Log = preg_replace_callback('/Max retry count( +): (\d+)/i', array(
+            $Log = preg_replace_callback('/Max retry count( +): (\d+)/i', [
                 $this,
                 'max_retry_count'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $XLD) {
                 $this->account('Could not verify max retry count');
             }
-            $Log = preg_replace_callback('/Utilize accurate stream( +): (Yes|No)/i', array(
+            $Log = preg_replace_callback('/Utilize accurate stream( +): (Yes|No)/i', [
                 $this,
                 'accurate_stream'
-            ), $Log, 1, $EAC_ac_stream);
-            $Log = preg_replace_callback('/, (|NO )accurate stream/i', array(
+            ],
+                $Log, 1, $EAC_ac_stream);
+            $Log = preg_replace_callback('/, (|NO )accurate stream/i', [
                 $this,
                 'accurate_stream_eac_pre99'
-            ), $Log, 1, $EAC_ac_stream_pre99);
+            ],
+                $Log, 1, $EAC_ac_stream_pre99);
             if (!$EAC_ac_stream && !$EAC_ac_stream_pre99 && !$this->NonSecureMode && $EAC) {
                 $this->account('Could not verify accurate stream');
             }
-            $Log = preg_replace_callback('/Defeat audio cache( +): (Yes|No)/i', array(
+            $Log = preg_replace_callback('/Defeat audio cache( +): (Yes|No)/i', [
                 $this,
                 'defeat_audio_cache'
-            ), $Log, 1, $EAC_defeat_cache);
-            $Log = preg_replace_callback('/ (|NO )disable cache/i', array(
+            ],
+                $Log, 1, $EAC_defeat_cache);
+            $Log = preg_replace_callback('/ (|NO )disable cache/i', [
                 $this,
                 'defeat_audio_cache_eac_pre99'
-            ), $Log, 1, $EAC_defeat_cache_pre99);
+            ],
+                $Log, 1, $EAC_defeat_cache_pre99);
             if (!$EAC_defeat_cache && !$EAC_defeat_cache_pre99 && !$this->NonSecureMode && $EAC) {
                 $this->account('Could not verify defeat audio cache', 1);
             }
-            $Log = preg_replace_callback('/Disable audio cache( +): (.*)/i', array(
+            $Log = preg_replace_callback('/Disable audio cache( +): (.*)/i', [
                 $this,
                 'defeat_audio_cache_xld'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $XLD) {
                 $this->account('Could not verify defeat audio cache', 1);
             }
-            $Log = preg_replace_callback('/Make use of C2 pointers( +): (Yes|No)/i', array(
+            $Log = preg_replace_callback('/Make use of C2 pointers( +): (Yes|No)/i', [
                 $this,
                 'c2_pointers'
-            ), $Log, 1, $C2);
-            $Log = preg_replace_callback('/with (|NO )C2/i', array(
+            ],
+                $Log, 1, $C2);
+            $Log = preg_replace_callback('/with (|NO )C2/i', [
                 $this,
                 'c2_pointers_eac_pre99'
-            ), $Log, 1, $C2_EACpre99);
+            ],
+                $Log, 1, $C2_EACpre99);
             if (!$C2 && !$C2_EACpre99 && !$this->NonSecureMode) {
                 $this->account('Could not verify C2 pointers', 1);
             }
-            $Log = preg_replace_callback('/Read offset correction( +): ([+-]?[0-9]+)/i', array(
+            $Log = preg_replace_callback('/Read offset correction( +): ([+-]?[0-9]+)/i', [
                 $this,
                 'read_offset'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count) {
                 $this->account('Could not verify read offset', 1);
             }
@@ -345,39 +359,44 @@ class Logchecker
             $Log = preg_replace("/(List of \w+ offset correction values) *(\n+)(( *.*confidence .*\) ?\n)+)/i", "<span class=\"log5\">$1</span>$2<span class=\"log4\">$3</span>\n", $Log, 1, $Count);
             $Log = preg_replace("/(List of \w+ offset correction values) *\n( *\# +\| +Absolute +\| +Relative +\| +Confidence) *\n( *\-+) *\n(( *\d+ +\| +\-?\+?\d+ +\| +\-?\+?\d+ +\| +\d+ *\n)+)/i", "<span class=\"log5\">$1</span>\n<span class=\"log4\">$2\n$3\n$4\n</span>", $Log, 1, $Count);
             $Log = preg_replace('/Overread into Lead-In and Lead-Out( +): (Yes|No)/i', '<span class="log5">Overread into Lead-In and Lead-Out$1</span>: <span class="log4">$2</span>', $Log, 1, $Count);
-            $Log = preg_replace_callback('/Fill up missing offset samples with silence( +): (Yes|No)/i', array(
+            $Log = preg_replace_callback('/Fill up missing offset samples with silence( +): (Yes|No)/i', [
                 $this,
                 'fill_offset_samples'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $EAC) {
                 $this->account('Could not verify missing offset samples', 1);
             }
-            $Log = preg_replace_callback('/Delete leading and trailing silent blocks([ \w]*)( +): (Yes|No)/i', array(
+            $Log = preg_replace_callback('/Delete leading and trailing silent blocks([ \w]*)( +): (Yes|No)/i', [
                 $this,
                 'delete_silent_blocks'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $EAC) {
                 $this->account('Could not verify silent blocks', 1);
             }
-            $Log = preg_replace_callback('/Null samples used in CRC calculations( +): (Yes|No)/i', array(
+            $Log = preg_replace_callback('/Null samples used in CRC calculations( +): (Yes|No)/i', [
                 $this,
                 'null_samples'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $EAC) {
                 $this->account('Could not verify null samples');
             }
             $Log = preg_replace('/Used interface( +): ([^\n]+)/i', '<span class="log5">Used interface$1</span>: <span class="log4">$2</span>', $Log, 1, $Count);
-            $Log = preg_replace_callback('/Gap handling( +): ([^\n]+)/i', array(
+            $Log = preg_replace_callback('/Gap handling( +): ([^\n]+)/i', [
                 $this,
                 'gap_handling'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $EAC) {
                 $this->account('Could not verify gap handling', 10);
             }
-            $Log = preg_replace_callback('/Gap status( +): (.*)/i', array(
+            $Log = preg_replace_callback('/Gap status( +): (.*)/i', [
                 $this,
                 'gap_handling_xld'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $XLD) {
                 $this->account('Could not verify gap status', 10);
             }
@@ -386,10 +405,11 @@ class Logchecker
             $Log = preg_replace('/Selected bitrate( +): ([^\n]+)/i', '<span class="log5">Selected bitrate$1</span>: <span class="log4">$2</span>', $Log, 1, $Count);
             $Log = preg_replace('/( +)(\d+ kBit\/s)/i', '<span>$1</span><span class="log4">$2</span>', $Log, 1, $Count);
             $Log = preg_replace('/Quality( +): ([^\n]+)/i', '<span class="log5">Quality$1</span>: <span class="log4">$2</span>', $Log, 1, $Count);
-            $Log = preg_replace_callback('/Add ID3 tag( +): (Yes|No)/i', array(
+            $Log = preg_replace_callback('/Add ID3 tag( +): (Yes|No)/i', [
                 $this,
                 'add_id3_tag'
-            ), $Log, 1, $Count);
+            ],
+                $Log, 1, $Count);
             if (!$Count && $EAC) {
                 $this->account('Could not verify id3 tag setting', 1);
             }
@@ -412,10 +432,10 @@ class Logchecker
             $Log = str_replace('TOC of the extracted CD', '<span class="log4 log5">TOC of the extracted CD</span>', $Log);
             $Log = preg_replace('/( +)Track( +)\|( +)Start( +)\|( +)Length( +)\|( +)Start sector( +)\|( +)End sector( ?)/i', '<strong>$0</strong>', $Log);
             $Log = preg_replace('/-{10,100}/', '<strong>$0</strong>', $Log);
-            $Log = preg_replace_callback('/( +)([0-9]{1,3})( +)\|( +)(([0-9]{1,3}:)?[0-9]{2}[\.:][0-9]{2})( +)\|( +)(([0-9]{1,3}:)?[0-9]{2}[\.:][0-9]{2})( +)\|( +)([0-9]{1,10})( +)\|( +)([0-9]{1,10})( +)\n/i', array(
+            $Log = preg_replace_callback('/( +)([0-9]{1,3})( +)\|( +)(([0-9]{1,3}:)?[0-9]{2}[\.:][0-9]{2})( +)\|( +)(([0-9]{1,3}:)?[0-9]{2}[\.:][0-9]{2})( +)\|( +)([0-9]{1,10})( +)\|( +)([0-9]{1,10})( +)\n/i', [
                 $this,
                 'toc'
-            ), $Log);
+            ], $Log);
             $Log = str_replace('None of the tracks are present in the AccurateRip database', '<span class="badish">None of the tracks are present in the AccurateRip database</span>', $Log);
             $Log = str_replace('Disc not found in AccurateRip DB.', '<span class="badish">Disc not found in AccurateRip DB.</span>', $Log);
             $Log = preg_replace('/No errors occurr?ed/i', '<span class="good">No errors occurred</span>', $Log);
@@ -432,14 +452,16 @@ class Logchecker
             $Log = preg_replace("/No tracks could be verified as accurate\.? *\n/i", '<span class="badish">$0</span>', $Log);
             $Log = preg_replace("/You may have a different pressing.*\n/i", '<span class="goodish">$0</span>', $Log);
             //xld accurip summary
-            $Log = preg_replace_callback("/(Track +\d+ +: +)(OK +)\(A?R?\d?,? ?confidence +(\d+).*?\)(.*)\n/i", array(
+            $Log = preg_replace_callback("/(Track +\d+ +: +)(OK +)\(A?R?\d?,? ?confidence +(\d+).*?\)(.*)\n/i", [
                 $this,
                 'ar_summary_conf_xld'
-            ), $Log);
-            $Log = preg_replace_callback("/(Track +\d+ +: +)(NG|Not Found).*?\n/i", array(
+            ],
+                $Log);
+            $Log = preg_replace_callback("/(Track +\d+ +: +)(NG|Not Found).*?\n/i", [
                 $this,
                 'ar_summary_conf_xld'
-            ), $Log);
+            ],
+                $Log);
             $Log = preg_replace( //Status line
                 "/( *.{2} ?)(\d+ track\(s\).*)\n/i",
                 "$1<span class=\"log4\">$2</span>\n",
@@ -449,10 +471,11 @@ class Logchecker
             //(..) may need additional entries
             //accurip summary (range)
             $Log = preg_replace("/\n( *AccurateRip summary\.?)/i", "\n<span class=\"log4 log5\">$1</span>", $Log);
-            $Log = preg_replace_callback("/(Track +\d+ +.*?accurately ripped\.? *)(\(confidence +)(\d+)\)(.*)\n/i", array(
+            $Log = preg_replace_callback("/(Track +\d+ +.*?accurately ripped\.? *)(\(confidence +)(\d+)\)(.*)\n/i", [
                 $this,
                 'ar_summary_conf'
-            ), $Log);
+            ],
+                $Log);
             $Log = preg_replace("/(Track +\d+ +.*?in database *)\n/i", "<span class=\"badish\">$1</span>\n", $Log, -1, $Count);
             if ($Count) {
                 $this->ARSummary['bad'] = $Count;
@@ -510,40 +533,43 @@ class Logchecker
                 // xld track gain
                 $TrackBody = preg_replace("/( *Track gain\s+:) (.*)?\n(\s*Peak\s+:) (.*)?/i", "<strong>$1 <span class=\"log3\">$2</span>\n$3 <span class=\"log3\">$4</span></strong>", $TrackBody, -1, $Count);
                 $TrackBody = preg_replace('/( +)(Statistics *)\n/i', "$1<span class=\"log5\">$2</span>\n", $TrackBody, -1, $Count);
-                $TrackBody = preg_replace_callback('/(Read error)( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Read error)( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD) {
                     $this->account_track('Could not verify read errors');
                 }
-                $TrackBody = preg_replace_callback('/(Skipped \(treated as error\))( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Skipped \(treated as error\))( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD && !$this->XLDSecureRipper) {
                     $this->account_track('Could not verify skipped errors');
                 }
-                $TrackBody = preg_replace_callback('/(Edge jitter error \(maybe fixed\))( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Edge jitter error \(maybe fixed\))( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD && !$this->XLDSecureRipper) {
                     $this->account_track('Could not verify edge jitter errors');
                 }
-                $TrackBody = preg_replace_callback('/(Atom jitter error \(maybe fixed\))( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Atom jitter error \(maybe fixed\))( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD && !$this->XLDSecureRipper) {
                     $this->account_track('Could not verify atom jitter errors');
                 }
                 $TrackBody = preg_replace_callback( //xld secure ripper
-                    '/(Jitter error \(maybe fixed\))( +:) (\d+)/i',
-                    array(
+                    '/(Jitter error \(maybe fixed\))( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                    ),
+                    ],
                     $TrackBody,
                     -1,
                     $Count
@@ -552,11 +578,10 @@ class Logchecker
                     $this->account_track('Could not verify jitter errors');
                 }
                 $TrackBody = preg_replace_callback( //xld secure ripper
-                    '/(Retry sector count)( +:) (\d+)/i',
-                    array(
+                    '/(Retry sector count)( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                    ),
+                    ],
                     $TrackBody,
                     -1,
                     $Count
@@ -565,11 +590,10 @@ class Logchecker
                     $this->account_track('Could not verify retry sector count');
                 }
                 $TrackBody = preg_replace_callback( //xld secure ripper
-                    '/(Damaged sector count)( +:) (\d+)/i',
-                    array(
+                    '/(Damaged sector count)( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                    ),
+                    ],
                     $TrackBody,
                     -1,
                     $Count
@@ -577,31 +601,35 @@ class Logchecker
                 if (!$Count && $XLD && $this->XLDSecureRipper) {
                     $this->account_track('Could not verify damaged sector count');
                 }
-                $TrackBody = preg_replace_callback('/(Drift error \(maybe fixed\))( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Drift error \(maybe fixed\))( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD && !$this->XLDSecureRipper) {
                     $this->account_track('Could not verify drift errors');
                 }
-                $TrackBody = preg_replace_callback('/(Dropped bytes error \(maybe fixed\))( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Dropped bytes error \(maybe fixed\))( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD && !$this->XLDSecureRipper) {
                     $this->account_track('Could not verify dropped bytes errors');
                 }
-                $TrackBody = preg_replace_callback('/(Duplicated bytes error \(maybe fixed\))( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Duplicated bytes error \(maybe fixed\))( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD && !$this->XLDSecureRipper) {
                     $this->account_track('Could not verify duplicated bytes errors');
                 }
-                $TrackBody = preg_replace_callback('/(Inconsistency in error sectors)( +:) (\d+)/i', array(
+                $TrackBody = preg_replace_callback('/(Inconsistency in error sectors)( +:) (\d+)/i', [
                     $this,
                     'xld_stat'
-                ), $TrackBody, -1, $Count);
+                ],
+                    $TrackBody, -1, $Count);
                 if (!$Count && $XLD && !$this->XLDSecureRipper) {
                     $this->account_track('Could not verify inconsistent error sectors');
                 }
@@ -634,10 +662,11 @@ class Logchecker
                 $TrackBody = preg_replace('/Track quality ([0-9]{1,3}\.[0-9] %)/i', '<span class="log4">Track quality <span class="log3">$1</span></span>', $TrackBody, -1, $Count);
                 $TrackBody = preg_replace('/Range quality ([0-9]{1,3}\.[0-9] %)/i', '<span class="log4">Range quality <span class="log3">$1</span></span>', $TrackBody, -1, $Count);
                 $TrackBody = preg_replace('/CRC32 hash \(skip zero\)(\s*:) ([0-9A-F]{8})/i', '<span class="log4">CRC32 hash (skip zero)$1<span class="log3"> $2</span></span>', $TrackBody, -1, $Count);
-                $TrackBody = preg_replace_callback('/Test CRC ([0-9A-F]{8})\n(\s*)Copy CRC ([0-9A-F]{8})/i', array(
+                $TrackBody = preg_replace_callback('/Test CRC ([0-9A-F]{8})\n(\s*)Copy CRC ([0-9A-F]{8})/i', [
                     $this,
                     'test_copy'
-                ), $TrackBody, -1, $EACTC);
+                ],
+                    $TrackBody, -1, $EACTC);
                 $TrackBody = preg_replace_callback('/CRC32 hash \(test run\)(\s*:) ([0-9A-F]{8})\n(\s*)CRC32 hash(\s+:) ([0-9A-F]{8})/i', array(
                     $this,
                     'test_copy'
@@ -679,13 +708,13 @@ class Logchecker
                 } //no match - no boost
                 $TrackBody          = str_replace('Copy finished', '<span class="log3">Copy finished</span>', $TrackBody);
                 $TrackBody          = preg_replace('/Copy OK/i', '<span class="good">Copy OK</span>', $TrackBody, -1, $Count);
-                $Tracks[$TrackNumber] = array(
+                $Tracks[$TrackNumber] = [
                     'number' => $TrackNumber,
                     'spaces' => $Spaces,
                     'text' => $TrackBody,
                     'decreasescore' => $this->DecreaseScoreTrack,
                     'bad' => $this->BadTrack
-                );
+                ];
                 $FormattedTrackListing .= "\n" . $TrackBody;
                 $this->Tracks[$TrackNumber] = $Tracks[$TrackNumber];
             }
@@ -695,46 +724,56 @@ class Logchecker
             //xld all tracks statistics
             $Log                      = preg_replace('/( +)?(All tracks *)\n/i', "$1<span class=\"log5\">$2</span>\n", $Log, 1);
             $Log                      = preg_replace('/( +)(Statistics *)\n/i', "$1<span class=\"log5\">$2</span>\n", $Log, 1);
-            $Log                      = preg_replace_callback('/(Read error)( +:) (\d+)/i', array(
+            $Log                      = preg_replace_callback('/(Read error)( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Skipped \(treated as error\))( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Skipped \(treated as error\))( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Jitter error \(maybe fixed\))( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Jitter error \(maybe fixed\))( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Edge jitter error \(maybe fixed\))( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Edge jitter error \(maybe fixed\))( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Atom jitter error \(maybe fixed\))( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Atom jitter error \(maybe fixed\))( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Drift error \(maybe fixed\))( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Drift error \(maybe fixed\))( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Dropped bytes error \(maybe fixed\))( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Dropped bytes error \(maybe fixed\))( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Duplicated bytes error \(maybe fixed\))( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Duplicated bytes error \(maybe fixed\))( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Retry sector count)( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Retry sector count)( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
-            $Log                      = preg_replace_callback('/(Damaged sector count)( +:) (\d+)/i', array(
+            ],
+                $Log, 1);
+            $Log                      = preg_replace_callback('/(Damaged sector count)( +:) (\d+)/i', [
                 $this,
                 'xld_all_stat'
-            ), $Log, 1);
+            ],
+                $Log, 1);
             //end xld all tracks statistics
             $this->Logs[$LogArrayKey] = $Log;
             $this->check_tracks();

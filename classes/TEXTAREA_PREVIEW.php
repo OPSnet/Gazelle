@@ -15,7 +15,7 @@
  *  // no buttons or wrap preview divs.
  *  // Buttons and preview divs are generated manually
  *  $text = new TEXTAREA_PREVIEW('body_text', 'body_text', 'default text',
- *                  50, 20, false, false, array('disabled="disabled"', 'class="text"'));
+ *                  50, 20, false, false, ['disabled="disabled"', 'class="text"']);
  *
  *  $text->buttons(); // output buttons
  *
@@ -107,7 +107,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER
             $this->preview();
         }
 
-        $this->buffer = View::parse('generic/textarea/textarea.phtml', array(
+        $this->buffer = View::parse('generic/textarea/textarea.phtml', [
             'ID' => $ID,
             'NID' => $this->id,
             'Name' => &$Name,
@@ -116,7 +116,8 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER
             'Rows' => &$Rows,
             'Attributes' => &$Attributes,
             'Required' => ($Required === true) ? 'required' : ''
-        ), $Buffer);
+        ],
+            $Buffer);
 
         if ($Buttons === true) {
             $this->buttons();
@@ -130,7 +131,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER
     public function preview()
     {
         if (!$this->preview) {
-            View::parse('generic/textarea/preview.phtml', array('ID' => $this->id));
+            View::parse('generic/textarea/preview.phtml', ['ID' => $this->id]);
         }
         $this->preview = true;
     }
@@ -141,7 +142,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER
      */
     public function buttons()
     {
-        View::parse('generic/textarea/buttons.phtml', array('ID' => $this->id));
+        View::parse('generic/textarea/buttons.phtml', ['ID' => $this->id]);
     }
 
     /**

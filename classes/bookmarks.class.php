@@ -10,12 +10,12 @@ class Bookmarks
      */
     public static function can_bookmark($Type)
     {
-        return in_array($Type, array(
+        return in_array($Type, [
                 'torrent',
                 'artist',
                 'collage',
                 'request'
-        ));
+        ]);
     }
 
     /**
@@ -29,28 +29,28 @@ class Bookmarks
     {
         switch ($Type) {
             case 'torrent':
-                return array(
+                return [
                         'bookmarks_torrents',
                         'GroupID'
-                );
+                ];
                 break;
             case 'artist':
-                return array(
+                return [
                         'bookmarks_artists',
                         'ArtistID'
-                );
+                ];
                 break;
             case 'collage':
-                return array(
+                return [
                         'bookmarks_collages',
                         'CollageID'
-                );
+                ];
                 break;
             case 'request':
-                return array(
+                return [
                         'bookmarks_requests',
                         'RequestID'
-                );
+                ];
                 break;
             default:
                 die('HAX');

@@ -17,10 +17,11 @@ $RequestsPerPage = 25;
 list($Page, $Limit) = Format::page_limit($RequestsPerPage);
 
 // How can things be ordered?
-$OrderBys = array(
+$OrderBys = [
     'submitted_timestamp' => 'uer.Timestamp',
     'outcome' => 'uer.Outcome',
-    'handled_timestamp' => 'uer.HandledTimestamp');
+    'handled_timestamp' => 'uer.HandledTimestamp'
+];
 
 $Where = [];
 $Joins = [];

@@ -30,7 +30,7 @@ class GOOGLE_CHARTS {
 	}
 
 	public function title($Title, $Color = '', $Size = '') {
-		$this->URL .= '&amp;chtt='.str_replace(array(' ', "\n"), array('+', '|'), $Title);
+		$this->URL .= '&amp;chtt='.str_replace([' ', "\n"], ['+', '|'], $Title);
 		if (!empty($Color)) {
 			$this->URL .= '&amp;chts='.$Color;
 		}
@@ -42,7 +42,7 @@ class GOOGLE_CHARTS {
 	public function legend($Items, $Placement = '') {
 		$this->URL .= '&amp;chdl='.str_replace(' ', '+', implode('|', $Items));
 		if (!empty($Placement)) {
-			if (!in_array($Placement, array('b', 't', 'r', 'l', 'bv', 'tv'))) {
+			if (!in_array($Placement, ['b', 't', 'r', 'l', 'bv', 'tv'])) {
 				trigger_error('Invalid legend placement.');
 			}
 			$this->URL .= '&amp;chdlp='.$Placement;

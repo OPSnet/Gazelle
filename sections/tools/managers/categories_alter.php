@@ -16,7 +16,7 @@ if ($_POST['submit'] == 'Delete') { //Delete
         error('You must move all forums out of a category before deleting it.');
     }
 } else { //Edit & Create, Shared Validation
-    $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', array('maxlength' => 40, 'minlength' => 1));
+    $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40, 'minlength' => 1]);
     $Val->SetFields('sort', '1', 'number', 'Sort must be set');
     $Err = $Val->ValidateForm($_POST); // Validate the form
     if ($Err) {

@@ -18,7 +18,7 @@ if ($_POST['submit'] == 'Delete') {
 	$DB->query('
 		DELETE FROM xbt_client_whitelist
 		WHERE id = '.$_POST['id']);
-	Tracker::update_tracker('remove_whitelist', array('peer_id' => $PeerID));
+	Tracker::update_tracker('remove_whitelist', ['peer_id' => $PeerID]);
 } else { //Edit & Create, Shared Validation
 
 	if (empty($_POST['client']) || empty($_POST['peer_id'])) {
@@ -44,7 +44,7 @@ if ($_POST['submit'] == 'Delete') {
 					vstring = '$Client',
 					peer_id = '$PeerID'
 				WHERE ID = ".$_POST['id']);
-			Tracker::update_tracker('edit_whitelist', array('old_peer_id' => $OldPeerID, 'new_peer_id' => $PeerID));
+			Tracker::update_tracker('edit_whitelist', ['old_peer_id' => $OldPeerID, 'new_peer_id' => $PeerID]);
 		}
 	} else { //Create
 		$DB->query("
@@ -52,7 +52,7 @@ if ($_POST['submit'] == 'Delete') {
 				(vstring, peer_id)
 			VALUES
 				('$Client', '$PeerID')");
-		Tracker::update_tracker('add_whitelist', array('peer_id' => $PeerID));
+		Tracker::update_tracker('add_whitelist', ['peer_id' => $PeerID]);
 	}
 }
 

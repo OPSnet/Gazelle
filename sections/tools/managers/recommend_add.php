@@ -16,7 +16,7 @@ $Val->SetFields(
     '1',
     'regex',
     'The URL must be a link to a torrent on the site.',
-    array('regex' => '/^'.TORRENT_GROUP_REGEX.'/i')
+    ['regex' => '/^'.TORRENT_GROUP_REGEX.'/i']
 );
 $Err = $Val->ValidateForm($_POST); // Validate the form
 

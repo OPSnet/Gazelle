@@ -22,7 +22,7 @@ View::show_header('Top 10 Users');
 
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$Limit = in_array($Limit, array(10,100,250)) ? $Limit : 10;
+$Limit = in_array($Limit, [10,100,250]) ? $Limit : 10;
 
 $BaseQuery = "
 	SELECT

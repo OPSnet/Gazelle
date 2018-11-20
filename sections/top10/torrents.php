@@ -32,7 +32,7 @@ if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
 } else {
 	// error out on invalid requests (before caching)
 	if (isset($_GET['details'])) {
-		if (in_array($_GET['details'], array('day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year'))) {
+		if (in_array($_GET['details'], ['day', 'week', 'overall', 'snatched', 'data', 'seeded', 'month', 'year'])) {
 			$Details = $_GET['details'];
 		} else {
 			error(404);
@@ -43,7 +43,7 @@ if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
 
 	// defaults to 10 (duh)
 	$Limit = (isset($_GET['limit']) ? intval($_GET['limit']) : 10);
-	$Limit = (in_array($Limit, array(10, 100, 250)) ? $Limit : 10);
+	$Limit = (in_array($Limit, [10, 100, 250]) ? $Limit : 10);
 }
 $Filtered = !empty($Where);
 View::show_header("Top $Limit Torrents");
@@ -98,7 +98,7 @@ if (isset($_GET['freeleech'])) {
 	// Pref id different
 	if ($NewPref != $DisableFreeTorrentTop10) {
 		$DisableFreeTorrentTop10 = $NewPref;
-		Users::update_site_options($LoggedUser['ID'], array('DisableFreeTorrentTop10' => $DisableFreeTorrentTop10));
+		Users::update_site_options($LoggedUser['ID'], ['DisableFreeTorrentTop10' => $DisableFreeTorrentTop10]);
 	}
 }
 
@@ -109,7 +109,7 @@ if ($DisableFreeTorrentTop10) {
 
 // The link should say the opposite of the current setting
 $FreeleechToggleName = ($DisableFreeTorrentTop10 ? 'show' : 'hide');
-$FreeleechToggleQuery = Format::get_url(array('freeleech', 'groups'));
+$FreeleechToggleQuery = Format::get_url(['freeleech', 'groups']);
 
 if (!empty($FreeleechToggleQuery))
 	$FreeleechToggleQuery .= '&amp;';
@@ -117,7 +117,7 @@ if (!empty($FreeleechToggleQuery))
 $FreeleechToggleQuery .= 'freeleech=' . $FreeleechToggleName;
 
 $GroupByToggleName = ($_GET['groups'] == 'show' ? 'hide' : 'show');
-$GroupByToggleQuery = Format::get_url(array('freeleech', 'groups'));
+$GroupByToggleQuery = Format::get_url(['freeleech', 'groups']);
 
 if (!empty($GroupByToggleQuery))
 	$GroupByToggleQuery .= '&amp;';

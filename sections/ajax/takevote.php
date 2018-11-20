@@ -54,7 +54,7 @@ if ($_REQUEST['do'] == 'vote') {
 			Score = IFNULL(binomial_ci(Ups".($Type == 'Up' ? '+1' : '').", Total), 0)".
 				($Type == 'Up' ? ', Ups = Ups + 1' : ''));
 
-	$UserVotes[$GroupID] = array('GroupID' => $GroupID, 'Type' => $Type);
+	$UserVotes[$GroupID] = ['GroupID' => $GroupID, 'Type' => $Type];
 
 	// Update this guy's cache key
 	$Cache->cache_value('voted_albums_'.$LoggedUser['ID'], $UserVotes);
@@ -77,10 +77,11 @@ if ($_REQUEST['do'] == 'vote') {
 						$VotePairs[$Vote['GroupID']]['Ups'] += 1;
 					}
 				} else {
-					$VotePairs[$Vote['GroupID']] = array(
-								'GroupID' => $Vote['GroupID'],
-								'Total' => 1,
-								'Ups' => ($Type == 'Up') ? 1 : 0);
+					$VotePairs[$Vote['GroupID']] = [
+						'GroupID' => $Vote['GroupID'],
+						'Total' => 1,
+						'Ups' => ($Type == 'Up') ? 1 : 0
+					];
 				}
 			}
 		}
@@ -107,10 +108,11 @@ if ($_REQUEST['do'] == 'vote') {
 					$VotePairs[$GroupID]['Ups']++;
 				}
 			} else {
-				$VotePairs[$GroupID] = array(
-							'GroupID' => $GroupID,
-							'Total' => 1,
-							'Ups' => ($Type == 'Up') ? 1 : 0);
+				$VotePairs[$GroupID] = [
+					'GroupID' => $GroupID,
+					'Total' => 1,
+					'Ups' => ($Type == 'Up') ? 1 : 0
+				];
 			}
 			$Cache->cache_value("vote_pairs_$VGID", $VotePairs, 21600);
 		}

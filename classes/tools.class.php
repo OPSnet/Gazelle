@@ -183,7 +183,7 @@ class Tools {
 	public static function disable_users($UserIDs, $AdminComment, $BanReason = 1) {
 		$QueryID = G::$DB->get_query_id();
 		if (!is_array($UserIDs)) {
-			$UserIDs = array($UserIDs);
+			$UserIDs = [$UserIDs];
 		}
 		G::$DB->query("
 			UPDATE users_info AS i
@@ -227,13 +227,13 @@ class Tools {
 		$Concat = '';
 		foreach ($PassKeys as $PassKey) {
 			if (strlen($Concat) > 3950) { // Ocelot's read buffer is 4 KiB and anything exceeding it is truncated
-				Tracker::update_tracker('remove_users', array('passkeys' => $Concat));
+				Tracker::update_tracker('remove_users', ['passkeys' => $Concat]);
 				$Concat = $PassKey;
 			} else {
 				$Concat .= $PassKey;
 			}
 		}
-		Tracker::update_tracker('remove_users', array('passkeys' => $Concat));
+		Tracker::update_tracker('remove_users', ['passkeys' => $Concat]);
 		G::$DB->set_query_id($QueryID);
 	}
 
@@ -276,7 +276,7 @@ class Tools {
 			$WarnTime = time_plus($Duration);
 
 			G::$Cache->begin_transaction("user_info_$UserID");
-			G::$Cache->update_row(false, array('Warned' => $WarnTime));
+			G::$Cache->update_row(false, ['Warned' => $WarnTime]);
 			G::$Cache->commit_transaction(0);
 
 			$AdminComment = date('Y-m-d')." - Warned until $WarnTime by " . G::$LoggedUser['Username'] . "\nReason: $Reason\n\n";

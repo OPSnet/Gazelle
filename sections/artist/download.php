@@ -63,7 +63,7 @@ if (!check_perms('zip_downloader')) {
 	error(403);
 }
 
-$Preferences = array('RemasterTitle DESC', 'Seeders ASC', 'Size ASC');
+$Preferences = ['RemasterTitle DESC', 'Seeders ASC', 'Size ASC'];
 
 $ArtistID = $_REQUEST['artistid'];
 $Preference = $Preferences[$_REQUEST['preference']];
@@ -209,9 +209,9 @@ while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
 	}
 }
 $Collector->finalize();
-$Settings = array(implode(':', $_REQUEST['list']), $_REQUEST['preference']);
+$Settings = [implode(':', $_REQUEST['list']), $_REQUEST['preference']];
 if (!isset($LoggedUser['Collector']) || $LoggedUser['Collector'] != $Settings) {
-	Users::update_site_options($LoggedUser['ID'], array('Collector' => $Settings));
+	Users::update_site_options($LoggedUser['ID'], ['Collector' => $Settings]);
 }
 
 define('SKIP_NO_CACHE_HEADERS', 1);

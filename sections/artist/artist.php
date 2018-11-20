@@ -574,7 +574,7 @@ if (check_perms('zip_downloader')) {
 		list($ZIPList, $ZIPPrefs) = $LoggedUser['Collector'];
 		$ZIPList = explode(':', $ZIPList);
 	} else {
-		$ZIPList = array('00', '11');
+		$ZIPList = ['00', '11'];
 		$ZIPPrefs = 1;
 	}
 ?>
@@ -972,13 +972,13 @@ CommentsView::render_comments($Thread, $LastRead, "artist.php?id=$ArtistID");
 			<?=($Pages)?>
 		</div>
 <?
-	View::parse('generic/reply/quickreply.php', array(
+	View::parse('generic/reply/quickreply.php', [
 		'InputName' => 'pageid',
 		'InputID' => $ArtistID,
 		'Action' => 'comments.php?page=artist',
 		'InputAction' => 'take_post',
 		'SubscribeBox' => true
-	));
+	]);
 ?>
 		</div>
 	</div>

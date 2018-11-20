@@ -2,14 +2,14 @@
 define('LIMIT', 100);
 
 //$Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
-//$Limit = in_array($Limit, array(100, 250, 500)) ? $Limit : 100;
+//$Limit = in_array($Limit, [100, 250, 500]) ? $Limit : 100;
 
 
 $Category = isset($_GET['category']) ? $_GET['category'] : 'weekly';
-$Category = in_array($Category, array('all_time', 'weekly', 'hyped')) ? $Category : 'weekly';
+$Category = in_array($Category, ['all_time', 'weekly', 'hyped']) ? $Category : 'weekly';
 
 $View = isset($_GET['view']) ? $_GET['view'] : 'tiles';
-$View = in_array($View, array('tiles', 'list')) ? $View : 'tiles';
+$View = in_array($View, ['tiles', 'list']) ? $View : 'tiles';
 
 switch ($Category) {
 	case 'weekly':
