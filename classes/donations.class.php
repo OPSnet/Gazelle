@@ -32,7 +32,6 @@ class Donations {
 
 	public static function regular_donate($UserID, $DonationAmount, $Source, $Reason, $Currency = "EUR") {
 		self::donate($UserID, [
-			"Source" => $Source,
 			"Price" => $DonationAmount,
 			"Currency" => $Currency,
 			"Source" => $Source,
