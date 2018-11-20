@@ -18,7 +18,7 @@ if (($Results = $Cache->get_value('better_single_groupids')) === false) {
 
 $Groups = Torrents::get_groups(array_keys($Results));
 
-$JsonResults = array();
+$JsonResults = [];
 foreach ($Results as $GroupID => $FlacID) {
 	if (!isset($Groups[$GroupID])) {
 		continue;
@@ -26,7 +26,7 @@ foreach ($Results as $GroupID => $FlacID) {
 	$Group = $Groups[$GroupID];
 	extract(Torrents::array_group($Group));
 
-	$JsonArtists = array();
+	$JsonArtists = [];
 	if (count($Artists) > 0) {
 		foreach ($Artists as $Artist) {
 			$JsonArtists[] = array(

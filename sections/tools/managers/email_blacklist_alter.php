@@ -20,7 +20,7 @@ if ($_POST['submit'] === 'Delete') { // Delete
 		error($Err);
 	}
 
-	$P = array();
+	$P = [];
 	$P = db_array($_POST); // Sanitize the form
 
 	if ($_POST['submit'] === 'Edit') { // Edit

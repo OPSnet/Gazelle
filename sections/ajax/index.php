@@ -166,7 +166,7 @@ switch ($_GET['action']) {
 }
 
 function pullmediainfo($Array) {
-	$NewArray = array();
+	$NewArray = [];
 	foreach ($Array as $Item) {
 		$NewArray[] = array(
 			'id' => (int)$Item['id'],

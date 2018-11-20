@@ -207,7 +207,7 @@ if ($Properties['Remastered'] && !$Properties['RemasterYear']) {
 
 // Strip out Amazon's padding
 $AmazonReg = '/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i';
-$Matches = array();
+$Matches = [];
 if (preg_match($AmazonReg, $Properties['Image'], $Matches)) {
 	$Properties['Image'] = $Matches[1].'.jpg';
 }
@@ -225,7 +225,7 @@ if ($Err) { // Show the upload form, with the data the user entered
 //--------------- Make variables ready for database input ----------------------//
 
 // Shorten and escape $Properties for database input
-$T = array();
+$T = [];
 foreach ($Properties as $Key => $Value) {
 	$T[$Key] = "'".db_string(trim($Value))."'";
 	if (!$T[$Key]) {
@@ -237,7 +237,7 @@ foreach ($Properties as $Key => $Value) {
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
-$DBTorVals = array();
+$DBTorVals = [];
 $DB->query("
 	SELECT Media, Format, Encoding, RemasterYear, Remastered, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber, Scene, Description
 	FROM torrents

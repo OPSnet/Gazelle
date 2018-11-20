@@ -4,7 +4,7 @@ class Tracker {
 	const STATS_MAIN = 0;
 	const STATS_USER = 1;
 
-	public static $Requests = array();
+	public static $Requests = [];
 
 	/**
 	 * Send a GET request over a socket directly to the tracker
@@ -104,7 +104,7 @@ class Tracker {
 		if ($Response === false) {
 			return false;
 		}
-		$Stats = array();
+		$Stats = [];
 		foreach (explode("\n", $Response) as $Stat) {
 			list($Val, $Key) = explode(" ", $Stat, 2);
 			$Stats[$Key] = $Val;

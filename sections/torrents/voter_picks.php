@@ -22,7 +22,7 @@ if ($Top10 === false || isset($Top10[$GroupID])) {
 		$Cache->cache_value('vote_pairs_'.$GroupID, $VotePairs, 21600);
 	}
 
-	$GroupScores = array();
+	$GroupScores = [];
 	foreach ($VotePairs as $RatingGroup) {
 		// Cutting out the junk should speed the sort significantly
 		$Score = binomial_score($RatingGroup['Ups'], $RatingGroup['Total']);

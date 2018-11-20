@@ -114,7 +114,7 @@ if ($_REQUEST['action'] == 'add_torrent') {
 	add_torrent($CollageID, $GroupID);
 } else {
 	$URLs = explode("\n", $_REQUEST['urls']);
-	$GroupIDs = array();
+	$GroupIDs = [];
 	$Err = '';
 	foreach ($URLs as $Key => &$URL) {
 		$URL = trim($URL);
@@ -134,7 +134,7 @@ if ($_REQUEST['action'] == 'add_torrent') {
 	}
 
 	foreach ($URLs as $URL) {
-		$Matches = array();
+		$Matches = [];
 		if (preg_match('/^'.TORRENT_GROUP_REGEX.'/i', $URL, $Matches)) {
 			$GroupIDs[] = $Matches[4];
 			$GroupID = $Matches[4];

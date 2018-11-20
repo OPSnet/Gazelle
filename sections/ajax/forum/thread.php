@@ -137,14 +137,14 @@ if ($_GET['updatelastread'] !== '0') {
 $UserSubscriptions = Subscriptions::get_subscriptions();
 
 if (empty($UserSubscriptions)) {
-    $UserSubscriptions = array();
+    $UserSubscriptions = [];
 }
 
 if (in_array($ThreadID, $UserSubscriptions)) {
     $Cache->delete_value('subscriptions_user_new_'.$LoggedUser['ID']);
 }
 
-$JsonPoll = array();
+$JsonPoll = [];
 if ($ThreadInfo['NoPoll'] == 0) {
     if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("polls_$ThreadID")) {
         $DB->query("
@@ -160,7 +160,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
 			GROUP BY Vote");
         $VoteArray = $DB->to_array(false, MYSQLI_NUM);
 
-        $Votes = array();
+        $Votes = [];
         foreach ($VoteArray as $VoteSet) {
             list($Key, $Value) = $VoteSet;
             $Votes[$Key] = $Value;
@@ -203,7 +203,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
     $JsonPoll['question'] = $Question;
     $JsonPoll['maxVotes'] = (int)$MaxVotes;
     $JsonPoll['totalVotes'] = $TotalVotes;
-    $JsonPollAnswers = array();
+    $JsonPollAnswers = [];
 
     foreach ($Answers as $i => $Answer) {
         if (!empty($Votes[$i]) && $TotalVotes > 0) {
@@ -239,7 +239,7 @@ if ($ThreadInfo['StickyPostID']) {
     }
 }
 
-$JsonPosts = array();
+$JsonPosts = [];
 foreach ($Thread as $Key => $Post) {
     list($PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime) = array_values($Post);
     list($AuthorID, $Username, $PermissionID, $Paranoia, $Artist, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));

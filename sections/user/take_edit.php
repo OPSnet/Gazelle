@@ -89,7 +89,7 @@ if ($StatsShown == 2) {
     }
 }
 
-$Paranoia = array();
+$Paranoia = [];
 $Checkboxes = array('downloaded', 'uploaded', 'ratio', 'bonuspoints', 'lastseen', 'requiredratio', 'invitedcount', 'artistsadded', 'notifications');
 foreach ($Checkboxes as $C) {
     if (!isset($_POST["p_$C"])) {
@@ -250,7 +250,7 @@ if (!empty($_POST['sorthide'])) {
         $Options['SortHide'][$E[0]] = $E[1];
     }
 } else {
-    $Options['SortHide'] = array();
+    $Options['SortHide'] = [];
 }
 
 if (check_perms('site_advanced_search')) {

@@ -71,7 +71,7 @@ if ($NumResults > $PerPage * ($Page - 1)) {
     $DB->query($sql);
 }
 
-$JsonPosts = array();
+$JsonPosts = [];
 while (list($ForumID, $ForumName, $TopicID, $ThreadTitle, $Body, $LastPostID, $Locked, $Sticky, $PostID, $AuthorID, $AuthorName, $AuthorAvatar, $EditedUserID, $EditedTime, $EditedUsername) = $DB->next_record()) {
     $JsonPost = array(
         'forumId' => (int)$ForumID,

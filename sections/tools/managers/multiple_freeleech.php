@@ -6,7 +6,7 @@ if (!check_perms('users_mod')) {
 View::show_header('Multiple freeleech');
 
 if (isset($_POST['torrents'])) {
-    $GroupIDs = array();
+    $GroupIDs = [];
     $Elements = explode("\r\n", $_POST['torrents']);
     foreach ($Elements as $Element) {
         // Get all of the torrent IDs

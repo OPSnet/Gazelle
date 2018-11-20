@@ -86,7 +86,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER
         $Preview = true,
         $Buttons = true,
         $Buffer = false,
-        array $ExtraAttributes = array(),
+        array $ExtraAttributes = [],
         $Required = false
     ) {
         $this->id = parent::$Textareas;

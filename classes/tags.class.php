@@ -30,7 +30,7 @@ class Tags {
      * @static
      * @var array $All Class Tags
      */
-private static $All = array();
+private static $All = [];
 
     /**
      * All tags in the current instance
@@ -41,7 +41,7 @@ private $Tags = null;
     /**
      * @var array $TagLink Tag link list
      */
-private $TagLink = array();
+private $TagLink = [];
 
     /**
      * @var string $Primary The primary tag
@@ -66,7 +66,7 @@ public function __construct($TagList, $Merge = true)
 
         $this->Primary = $this->Tags[0];
     } else {
-        $this->Tags = array();
+        $this->Tags = [];
     }
 }
 

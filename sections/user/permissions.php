@@ -27,9 +27,9 @@ $DB->query("
 list($Customs) = $DB->next_record(MYSQLI_NUM, false);
 
 
-$Defaults = Permissions::get_permissions_for_user($UserID, array());
+$Defaults = Permissions::get_permissions_for_user($UserID, []);
 
-$Delta = array();
+$Delta = [];
 if (isset($_POST['action'])) {
 	authorize();
 

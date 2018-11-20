@@ -27,7 +27,7 @@ if (!empty($_GET['userid'])) {
 
 $Sneaky = ($UserID != $LoggedUser['ID']);
 
-$JsonBookmarks = array();
+$JsonBookmarks = [];
 
 list($GroupIDs, $CollageDataList, $GroupList) = Users::get_bookmarks($UserID);
 foreach($GroupIDs as $GroupID) {
@@ -35,7 +35,7 @@ foreach($GroupIDs as $GroupID) {
 		continue;
 	}
 	$Group = $GroupList[$GroupID];
-	$JsonTorrents = array();
+	$JsonTorrents = [];
 	foreach ($Group['Torrents'] as $Torrent) {
 		$JsonTorrents[] = array(
 			'id' => (int)$Torrent['ID'],

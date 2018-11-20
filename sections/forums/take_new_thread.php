@@ -60,8 +60,8 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
 } else {
     $NoPoll = 0;
     $Question = trim($_POST['question']);
-    $Answers = array();
-    $Votes = array();
+    $Answers = [];
+    $Votes = [];
 
     //This can cause polls to have answer IDs of 1 3 4 if the second box is empty
     foreach ($_POST['answers'] as $i => $Answer) {
@@ -146,7 +146,7 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
         $Part1 = array_slice($Forum, 0, $Stickies, true); // Stickies
         $Part3 = array_slice($Forum, $Stickies, TOPICS_PER_PAGE - $Stickies - 1, true); // Rest of page
     } else {
-        $Part1 = array();
+        $Part1 = [];
         $Part3 = $Forum;
     }
     $Part2 = array($TopicID => array(

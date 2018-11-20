@@ -29,7 +29,7 @@ $Sneaky = $UserID !== $LoggedUser['ID'];
 $Title = $Sneaky ? "$Username's bookmarked torrent groups" : 'Your bookmarked torrent groups';
 
 $NumGroups = 0;
-$ArtistCount = array();
+$ArtistCount = [];
 
 list($GroupIDs, $CollageDataList, $TorrentList) = Users::get_bookmarks($UserID);
 foreach ($GroupIDs as $Idx => $GroupID) {
@@ -154,7 +154,7 @@ if ($CollageCovers !== 0) { ?>
 		</div>
 		<script type="text/javascript">
 <?php
-		$CollagePages = array();
+		$CollagePages = [];
 		for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
 			$Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
 			$CollagePages[] = implode('',

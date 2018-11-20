@@ -53,7 +53,7 @@ HTML;
 			echo '</blockquote>';
 		}
 
-		$Log['Details'] = (!empty($Log['Details'])) ? explode("\r\n", trim($Log['Details'])) : array();
+		$Log['Details'] = (!empty($Log['Details'])) ? explode("\r\n", trim($Log['Details'])) : [];
 		if ($Log['Adjusted'] === '1' && $Log['Checksum'] !== $Log['AdjustedChecksum']) {
 			$Log['Details'][] = 'Bad/No Checksum(s)';
 		}

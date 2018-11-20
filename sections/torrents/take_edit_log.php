@@ -24,7 +24,7 @@ $AdjustedScore = 100;
 $AdjustedChecksum = isset($_POST['adjusted_checksum']) ? '1' : '0';
 $AdjustedBy = G::$LoggedUser['ID'];
 $AdjustmentReason = $_POST['adjustment_reason'];
-$AdjustmentDetails = array();
+$AdjustmentDetails = [];
 
 if ($AdjustedChecksum != $Log['Checksum']) {
     $AdjustmentDetails['checksum'] = 'Checksum manually '.($AdjustedChecksum == '1' ? 'validated' : 'invalidated');

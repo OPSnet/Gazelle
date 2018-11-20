@@ -4,7 +4,7 @@ function diff($OldText, $NewText) {
 	$LineArrayOld = explode("\n", $OldText);
 	$LineArrayNew = explode("\n", $NewText);
 	$LineOffset = 0;
-	$Result = array();
+	$Result = [];
 
 	foreach ($LineArrayOld as $OldLine => $OldString) {
 		$Key = $OldLine + $LineOffset;

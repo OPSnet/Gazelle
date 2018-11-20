@@ -17,9 +17,9 @@ abstract class IRC_BOT {
 	protected $Socket = false;
 	protected $Data = false;
 	protected $Whois = false;
-	protected $Identified = array();
-	protected $Channels = array();
-	protected $Messages = array();
+	protected $Identified = [];
+	protected $Channels = [];
+	protected $Messages = [];
 	protected $LastChan = false;
 	protected $ListenSocket = false;
 	protected $Listened = false;
@@ -176,7 +176,7 @@ abstract class IRC_BOT {
 				}
 			}
 			G::$DB->LinkID = false;
-			G::$DB->Queries = array();
+			G::$DB->Queries = [];
 		}
 	}
 }

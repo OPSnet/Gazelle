@@ -31,7 +31,7 @@ $DB->query("
 		ResolverID = '".$LoggedUser['ID']."'
 	WHERE ID = '".db_string($ReportID)."'");
 
-$Channels = array();
+$Channels = [];
 
 if ($Type == 'request_update') {
 	$Channels[] = '#requestedits';

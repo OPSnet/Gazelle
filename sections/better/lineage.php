@@ -19,7 +19,7 @@ $DB->query("
 		JOIN torrents AS t ON t.ID = tfi.TorrentID
 	ORDER BY tfi.TimeAdded ASC");
 $TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
-$GroupIDs = array();
+$GroupIDs = [];
 foreach ($TorrentsInfo as $Torrent) {
     $GroupIDs[] = $Torrent['GroupID'];
 }

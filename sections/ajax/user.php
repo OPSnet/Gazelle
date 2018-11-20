@@ -53,7 +53,7 @@ list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $Requi
 
 $Paranoia = unserialize($Paranoia);
 if (!is_array($Paranoia)) {
-    $Paranoia = array();
+    $Paranoia = [];
 }
 $ParanoiaLevel = 0;
 foreach ($Paranoia as $P) {

@@ -21,13 +21,13 @@ if (count($GroupIDs) > 0) {
     $TorrentList = Torrents::get_groups($GroupIDs);
     $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
 } else {
-    $TorrentList = array();
+    $TorrentList = [];
 }
 
 $NumGroups = count($TorrentList);
 $NumGroupsByUser = 0;
-$TopArtists = array();
-$UserAdditions = array();
+$TopArtists = [];
+$UserAdditions = [];
 $Number = 0;
 
 // We loop through all groups building some basic statistics for them
@@ -392,7 +392,7 @@ if ($CollageCovers != 0) { ?>
             <span id="lastpage" class="<?=(ceil($NumGroups / $CollageCovers) == 2 ? 'invisible' : '')?>"> | <a href="#" class="pageslink" onclick="collageShow.page(<?=ceil($NumGroups / $CollageCovers) - 1?>); return false;"><strong>Last &gt;&gt;</strong></a></span>
         </div>
 <?php
-$CollagePages = array();
+$CollagePages = [];
 for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
     $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
     $CollagePages[] = implode(

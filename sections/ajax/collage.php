@@ -57,7 +57,7 @@ $JSON = array(
 
 if ($CollageCategoryID != array_search(ARTIST_COLLAGE, $CollageCats)) {
 	// torrent collage
-	$TorrentGroups = array();
+	$TorrentGroups = [];
 	$DB->query("
 		SELECT
 			ct.GroupID
@@ -73,18 +73,18 @@ if ($CollageCategoryID != array_search(ARTIST_COLLAGE, $CollageCats)) {
 			if ($GroupDetails['GroupCategoryID'] > 0 && $Categories[$GroupDetails['GroupCategoryID'] - 1] == 'Music') {
 				$ArtistForm = $GroupDetails['ExtendedArtists'];
 				$JsonMusicInfo = array(
-					'composers' => isset($ArtistForm[4]) ? pullmediainfo($ArtistForm[4]) : array(),
-					'dj'        => isset($ArtistForm[6]) ? pullmediainfo($ArtistForm[6]) : array(),
-					'artists'   => isset($ArtistForm[1]) ? pullmediainfo($ArtistForm[1]) : array(),
-					'with'      => isset($ArtistForm[2]) ? pullmediainfo($ArtistForm[2]) : array(),
-					'conductor' => isset($ArtistForm[5]) ? pullmediainfo($ArtistForm[5]) : array(),
-					'remixedBy' => isset($ArtistForm[3]) ? pullmediainfo($ArtistForm[3]) : array(),
-					'producer'  => isset($ArtistForm[7]) ? pullmediainfo($ArtistForm[7]) : array()
+					'composers' => isset($ArtistForm[4]) ? pullmediainfo($ArtistForm[4]) : [],
+					'dj'        => isset($ArtistForm[6]) ? pullmediainfo($ArtistForm[6]) : [],
+					'artists'   => isset($ArtistForm[1]) ? pullmediainfo($ArtistForm[1]) : [],
+					'with'      => isset($ArtistForm[2]) ? pullmediainfo($ArtistForm[2]) : [],
+					'conductor' => isset($ArtistForm[5]) ? pullmediainfo($ArtistForm[5]) : [],
+					'remixedBy' => isset($ArtistForm[3]) ? pullmediainfo($ArtistForm[3]) : [],
+					'producer'  => isset($ArtistForm[7]) ? pullmediainfo($ArtistForm[7]) : []
 				);
 			} else {
 				$JsonMusicInfo = null;
 			}
-			$TorrentList = array();
+			$TorrentList = [];
 			foreach ($GroupDetails['Torrents'] as $Torrent) {
 				$TorrentList[] = array(
 					'torrentid'               => (int)$Torrent['ID'],
@@ -139,7 +139,7 @@ if ($CollageCategoryID != array_search(ARTIST_COLLAGE, $CollageCats)) {
 			LEFT JOIN wiki_artists AS aw ON aw.RevisionID = ag.RevisionID
 		WHERE ca.CollageID='$CollageID'
 		ORDER BY ca.Sort");
-	$Artists = array();
+	$Artists = [];
 	while (list($ArtistID, $ArtistName, $ArtistImage) = $DB->next_record()) {
 		$Artists[] = array(
 			'id'    => (int)$ArtistID,

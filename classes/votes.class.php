@@ -33,7 +33,7 @@ class Votes {
 	 */
 	public static function get_user_votes($UserID) {
 		if ((int)$UserID == 0) {
-			return array();
+			return [];
 		}
 
 		$UserVotes = G::$Cache->get_value("voted_albums_$UserID");
@@ -297,7 +297,7 @@ class Votes {
 	 * @return array (<GroupID> => <Rank>)
 	 */
 	public static function calc_ranks($GroupScores) {
-		$Rankings = array();
+		$Rankings = [];
 		$PrevScore = $PrevRank = false;
 		$Rank = 1;
 		foreach ($GroupScores as $GroupID => $Score) {

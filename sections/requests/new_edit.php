@@ -64,14 +64,14 @@ if (!$NewRequest) {
         if ($CategoryName === 'Music') {
             $ArtistForm = Requests::get_artists($RequestID);
 
-            $BitrateArray = array();
+            $BitrateArray = [];
             if ($Request['BitrateList'] == 'Any') {
                 $BitrateArray = array_keys($Bitrates);
             } else {
                 $BitrateArray = array_keys(array_intersect($Bitrates, explode('|', $Request['BitrateList'])));
             }
 
-            $FormatArray = array();
+            $FormatArray = [];
             if ($Request['FormatList'] == 'Any') {
                 $FormatArray = array_keys($Formats);
             } else {
@@ -82,7 +82,7 @@ if (!$NewRequest) {
                 }
             }
 
-            $MediaArray = array();
+            $MediaArray = [];
             if ($Request['MediaList'] == 'Any') {
                 $MediaArray = array_keys($Media);
             } else {
@@ -108,8 +108,8 @@ if ($NewRequest && !empty($_GET['artistid']) && is_number($_GET['artistid'])) {
     list($ArtistName) = $DB->next_record();
     $ArtistForm = array(
         1 => array(array('name' => trim($ArtistName))),
-        2 => array(),
-        3 => array()
+        2 => [],
+        3 => []
     );
 } elseif ($NewRequest && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
     $ArtistForm = Artists::get_artist($_GET['groupid']);

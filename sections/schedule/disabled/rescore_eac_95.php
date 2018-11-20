@@ -11,7 +11,7 @@ $LogQuery = $DB->query("
 				AND t.HasLog = '1'
 				AND LogScore = 100
 				AND Log LIKE 'EAC extraction logfile from%'");
-$Details = array();
+$Details = [];
 $Details[] = "Ripped with EAC v0.95, -1 point [1]";
 $Details = serialize($Details);
 while (list($TorrentID) = $DB->next_record()) {

@@ -15,7 +15,7 @@ class TEXTAREA_PREVIEW_SUPER
      * @static
      * @var array $_ID Array of textarea IDs
      */
-    protected static $_ID = array();
+    protected static $_ID = [];
 
     /**
      * @static
@@ -59,7 +59,7 @@ class TEXTAREA_PREVIEW_SUPER
      */
     private static function iterator()
     {
-        $script = array();
+        $script = [];
         for ($i = 0; $i < self::$Textareas; $i++) {
             if (isset(self::$_ID[$i]) && is_string(self::$_ID[$i])) {
                 $a = sprintf('%d, "%s"', $i, self::$_ID[$i]);

@@ -1,9 +1,9 @@
 <?
 class GOOGLE_CHARTS {
 	protected $URL = 'https://chart.googleapis.com/chart';
-	protected $Labels = array();
-	protected $Data = array();
-	protected $Options = array();
+	protected $Labels = [];
+	protected $Data = [];
+	protected $Options = [];
 
 	public function __construct($Type, $Width, $Height, $Options) {
 		if ($Width * $Height > 300000 || $Height > 1000 || $Width > 1000) {
@@ -72,7 +72,7 @@ class GOOGLE_CHARTS {
 }
 
 class AREA_GRAPH extends GOOGLE_CHARTS {
-	public function __construct ($Width, $Height, $Options = array()) {
+	public function __construct ($Width, $Height, $Options = []) {
 		parent::__construct('lc', $Width, $Height, $Options);
 	}
 
@@ -83,7 +83,7 @@ class AREA_GRAPH extends GOOGLE_CHARTS {
 	public function generate() {
 		$Max = max($this->Data);
 		$Min = ((isset($this->Options['Break'])) ? $Min = min($this->Data) : 0);
-		$Data = array();
+		$Data = [];
 		foreach ($this->Data as $Value) {
 			$Data[] = $this->encode((($Value - $Min) / ($Max - $Min)) * 4095);
 		}
@@ -92,7 +92,7 @@ class AREA_GRAPH extends GOOGLE_CHARTS {
 }
 
 class PIE_CHART extends GOOGLE_CHARTS {
-	public function __construct ($Width, $Height, $Options = array()) {
+	public function __construct ($Width, $Height, $Options = []) {
 		$Type = ((isset($this->Options['3D'])) ? 'p3' : 'p');
 		parent::__construct($Type, $Width, $Height, $Options);
 	}
@@ -110,7 +110,7 @@ class PIE_CHART extends GOOGLE_CHARTS {
 			$this->Data = array_reverse($this->Data);
 		}
 
-		$Data = array();
+		$Data = [];
 		$Labels = $this->Labels;
 		$OtherPercentage = 0.00;
 		$OtherData = 0;
@@ -145,7 +145,7 @@ class PIE_CHART extends GOOGLE_CHARTS {
 
 class LOG_BAR_GRAPH extends GOOGLE_CHARTS {
 	//TODO: Finish.
-	public function __construct ($Base, $Width, $Height, $Options = array()) {
+	public function __construct ($Base, $Width, $Height, $Options = []) {
 		parent::__construct('lc', $Width, $Height, $Options);
 	}
 
@@ -156,7 +156,7 @@ class LOG_BAR_GRAPH extends GOOGLE_CHARTS {
 	public function generate() {
 		$Max = max($this->Data);
 		$Min = ((isset($this->Options['Break'])) ? $Min = min($this->Data) : 0);
-		$Data = array();
+		$Data = [];
 		foreach ($this->Data as $Value) {
 			$Data[] = $this->encode((($Value - $Min) / ($Max - $Min)) * 4095);
 		}
@@ -182,8 +182,8 @@ class POLL_GRAPH extends GOOGLE_CHARTS {
 		$Max = max($this->Data);
 		$Sum = array_sum($this->Data);
 		$Increment = ($Max / $Sum) * 25; // * 100% / 4divisions
-		$Data = array();
-		$Labels = array();
+		$Data = [];
+		$Labels = [];
 		foreach ($this->Data as $Key => $Value) {
 			$Data[] = $this->encode(($Value / $Max) * 4095);
 			$Labels[] = '@t'.str_replace(array(' ', ','),array('+', '\,'), $this->Labels[$Key]).',000000,1,'.round((($Key + 1) / $Count) - (12 / $Height), 2).':0,12';

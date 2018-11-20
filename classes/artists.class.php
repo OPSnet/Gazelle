@@ -18,8 +18,8 @@ class Artists {
 	 * 6 => DJ
 	 */
 	public static function get_artists($GroupIDs) {
-		$Results = array();
-		$DBs = array();
+		$Results = [];
+		$DBs = [];
 		foreach ($GroupIDs as $GroupID) {
 			if (!is_number($GroupID)) {
 				continue;
@@ -59,12 +59,12 @@ class Artists {
 					G::$Cache->cache_value('groups_artists_'.$GroupID, $New[$GroupID]);
 				}
 				else {
-					G::$Cache->cache_value('groups_artists_'.$GroupID, array());
+					G::$Cache->cache_value('groups_artists_'.$GroupID, []);
 				}
 			}
 			$Missing = array_diff($GroupIDs, array_keys($Results));
 			if (!empty($Missing)) {
-				$Results += array_fill_keys($Missing, array());
+				$Results += array_fill_keys($Missing, []);
 			}
 		}
 		return $Results;

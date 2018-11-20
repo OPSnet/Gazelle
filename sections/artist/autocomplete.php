@@ -33,15 +33,15 @@ if (!$AutoSuggest) {
 }
 
 $Matched = 0;
-$ArtistIDs = array();
-$Response = array(
+$ArtistIDs = [];
+$Response = [
 	'query' => $FullName,
-	'suggestions' => array()
-);
+	'suggestions' => []
+];
 foreach ($AutoSuggest as $Suggestion) {
 	list($ID, $Name) = $Suggestion;
 	if (stripos($Name, $FullName) === 0) {
-		$Response['suggestions'][] = array('value' => $Name, 'data' => $ID);
+		$Response['suggestions'][] = ['value' => $Name, 'data' => $ID];
 		if (++$Matched > 9) {
 			break;
 		}

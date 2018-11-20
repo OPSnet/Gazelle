@@ -23,14 +23,14 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
 		DELETE FROM do_not_upload
 		WHERE ID = '.$_POST['id']);
 } else { //Edit & Create, Shared Validation
-	$Val->SetFields('name', '1', 'string', 'The name must be set, have a maximum length of 100 characters, and have a minimum length of 5 characters.', array('maxlength' => 100, 'minlength' => 5));
-	$Val->SetFields('comment', '0', 'string', 'The description has a maximum length of 255 characters.', array('maxlength' => 255));
+	$Val->SetFields('name', '1', 'string', 'The name must be set, have a maximum length of 100 characters, and have a minimum length of 5 characters.', ['maxlength' => 100, 'minlength' => 5]);
+	$Val->SetFields('comment', '0', 'string', 'The description has a maximum length of 255 characters.', ['maxlength' => 255]);
 	$Err = $Val->ValidateForm($_POST); // Validate the form
 	if ($Err) {
 		error($Err);
 	}
 
-	$P = array();
+	$P = [];
 	$P = db_array($_POST); // Sanitize the form
 
 	if ($_POST['submit'] == 'Edit') { //Edit

@@ -46,16 +46,16 @@ if ($TorrentDetails['CategoryID'] == 0) {
 } else {
 	$CategoryName = $Categories[$TorrentDetails['CategoryID'] - 1];
 }
-$JsonMusicInfo = array();
+$JsonMusicInfo = [];
 if ($CategoryName == "Music") {
 	$JsonMusicInfo = array(
-		'composers' => $ArtistForm[4] == null ? array() : pullmediainfo($ArtistForm[4]),
-		'dj' => $ArtistForm[6] == null ? array() : pullmediainfo($ArtistForm[6]),
-		'artists' => $ArtistForm[1] == null ? array() : pullmediainfo($ArtistForm[1]),
-		'with' => $ArtistForm[2] == null ? array() : pullmediainfo($ArtistForm[2]),
-		'conductor' => $ArtistForm[5] == null ? array() : pullmediainfo($ArtistForm[5]),
-		'remixedBy' => $ArtistForm[3] == null ? array() : pullmediainfo($ArtistForm[3]),
-		'producer' => $ArtistForm[7] == null ? array() : pullmediainfo($ArtistForm[7])
+		'composers' => $ArtistForm[4] == null ? [] : pullmediainfo($ArtistForm[4]),
+		'dj' => $ArtistForm[6] == null ? [] : pullmediainfo($ArtistForm[6]),
+		'artists' => $ArtistForm[1] == null ? [] : pullmediainfo($ArtistForm[1]),
+		'with' => $ArtistForm[2] == null ? [] : pullmediainfo($ArtistForm[2]),
+		'conductor' => $ArtistForm[5] == null ? [] : pullmediainfo($ArtistForm[5]),
+		'remixedBy' => $ArtistForm[3] == null ? [] : pullmediainfo($ArtistForm[3]),
+		'producer' => $ArtistForm[7] == null ? [] : pullmediainfo($ArtistForm[7])
 	);
 }
 else {

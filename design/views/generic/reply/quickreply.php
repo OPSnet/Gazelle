@@ -72,10 +72,10 @@ if (!isset($Action)) {
         false,
         false,
         true,
-        array(
+        [
                 'tabindex="1"',
                 'onkeyup="resize(\'quickpost\')"'
-            )
+            ]
     );
 ?>
 

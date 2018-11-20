@@ -7,7 +7,7 @@
 
 class TEMPLATE {
 	var $file = '';
-	var $vars = array();
+	var $vars = [];
 
 	function open($file) {
 		$this->file = file($file);

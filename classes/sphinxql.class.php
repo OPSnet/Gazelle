@@ -4,14 +4,14 @@ if (!extension_loaded('mysqli')) {
 }
 
 class Sphinxql extends mysqli {
-	private static $Connections = array();
+	private static $Connections = [];
 	private $Server;
 	private $Port;
 	private $Socket;
 	private $Ident;
 	private $Connected = false;
 
-	public static $Queries = array();
+	public static $Queries = [];
 	public static $Time = 0.0;
 
 

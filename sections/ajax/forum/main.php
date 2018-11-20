@@ -7,7 +7,7 @@ if (isset($LoggedUser['PostsPerPage'])) {
 }
 
 //We have to iterate here because if one is empty it breaks the query
-$TopicIDs = array();
+$TopicIDs = [];
 foreach ($Forums as $Forum) {
 	if (!empty($Forum['LastPostTopicID'])) {
 		$TopicIDs[] = $Forum['LastPostTopicID'];
@@ -33,7 +33,7 @@ if (!empty($TopicIDs)) {
 			AND l.UserID = '$LoggedUser[ID]'");
 	$LastRead = $DB->to_array('TopicID', MYSQLI_ASSOC);
 } else {
-	$LastRead = array();
+	$LastRead = [];
 }
 
 $DB->query("
@@ -44,9 +44,9 @@ list($RestrictedForums) = $DB->next_record();
 $RestrictedForums = explode(',', $RestrictedForums);
 $PermittedForums = array_keys($LoggedUser['PermittedForums']);
 
-$JsonCategories = array();
-$JsonCategory = array();
-$JsonForums = array();
+$JsonCategories = [];
+$JsonCategory = [];
+$JsonForums = [];
 foreach ($Forums as $Forum) {
 	list($ForumID, $CategoryID, $ForumName, $ForumDescription, $MinRead, $MinWrite, $MinCreate, $NumTopics, $NumPosts, $LastPostID, $LastAuthorID, $LastTopicID, $LastTime, $SpecificRules, $LastTopic, $Locked, $Sticky) = array_values($Forum);
 	if ($LoggedUser['CustomForums'][$ForumID] != 1
@@ -67,7 +67,7 @@ foreach ($Forums as $Forum) {
 			'categoryID' => (int)$CategoryID,
 			'categoryName' => $ForumCats[$CategoryID]
 		);
-		$JsonForums = array();
+		$JsonForums = [];
 	}
 
 	if ((!$Locked || $Sticky)

@@ -229,11 +229,11 @@ if (!empty($_POST['oclc'])) {
 //For refilling on error
 if ($CategoryName === 'Music') {
 	$MainArtistCount = 0;
-	$ArtistNames = array();
+	$ArtistNames = [];
 	$ArtistForm = array(
-		1 => array(),
-		2 => array(),
-		3 => array()
+		1 => [],
+		2 => [],
+		3 => []
 	);
 	for ($i = 0, $il = count($Artists); $i < $il; $i++) {
 		if (trim($Artists[$i]) !== '') {

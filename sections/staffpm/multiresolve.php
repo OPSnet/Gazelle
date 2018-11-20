@@ -1,6 +1,6 @@
 <?
 if ($IDs = $_POST['id']) {
-	$Queries = array();
+	$Queries = [];
 	foreach ($IDs as &$ID) {
 		$ID = (int)$ID;
 

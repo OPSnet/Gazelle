@@ -16,7 +16,7 @@ if (isset($_GET['details'])) {
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $Limit = in_array($Limit, array(10, 100, 250)) ? $Limit : 10;
-$OuterResults = array();
+$OuterResults = [];
 
 if ($Details == 'all' || $Details == 'ut') {
 	if (!$TopUsedTags = $Cache->get_value("topusedtag_$Limit")) {
@@ -89,7 +89,7 @@ print
 	);
 
 function generate_tag_json($Caption, $Tag, $Details, $Limit) {
-	$results = array();
+	$results = [];
 	foreach ($Details as $Detail) {
 		$results[] = array(
 			'name' => $Detail['Name'],

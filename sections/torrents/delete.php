@@ -244,7 +244,7 @@ if (check_perms('admin_reports')) {
 						<select name="resolve_type" id="resolve_type<?=$ReportID?>" onchange="ChangeResolve(<?=$ReportID?>);">
 <?
 $TypeList = $Types['master'] + $Types[$CategoryID];
-$Priorities = array();
+$Priorities = [];
 foreach ($TypeList as $Key => $Value) {
 	$Priorities[$Key] = $Value['priority'];
 }

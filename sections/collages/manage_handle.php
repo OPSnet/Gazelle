@@ -39,7 +39,7 @@ if ($_POST['submit'] === 'Remove') {
     @parse_str($_POST['drag_drop_collage_sort_order'], $Series);
     $Series = @array_shift($Series);
     if (is_array($Series)) {
-        $SQL = array();
+        $SQL = [];
         foreach ($Series as $Sort => $GroupID) {
             if (is_number($Sort) && is_number($GroupID)) {
                 $Sort = ($Sort + 1) * 10;

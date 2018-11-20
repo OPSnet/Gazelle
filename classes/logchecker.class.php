@@ -7,24 +7,24 @@ class Logchecker
 {
     var $Log = '';
     var $LogPath = null;
-    var $Logs = array();
-    var $Tracks = array();
+    var $Logs = [];
+    var $Tracks = [];
     var $Checksum = true;
     var $Score = 100;
-    var $Details = array();
-    var $Offsets = array();
+    var $Details = [];
+    var $Offsets = [];
     var $DriveFound = false;
-    var $Drives = array();
+    var $Drives = [];
     var $Drive = null;
     var $SecureMode = true;
     var $NonSecureMode = null;
-    var $BadTrack = array();
+    var $BadTrack = [];
     var $DecreaseScoreTrack = 0;
     var $RIPPER = null;
     var $Language = null;
     var $Version = null;
     var $TrackNumber = null;
-    var $ARTracks = array();
+    var $ARTracks = [];
     var $Combined = null;
     var $CurrLog = null;
     var $DecreaseBoost = 0;
@@ -32,12 +32,12 @@ class Logchecker
     var $ARSummary = null;
     var $XLDSecureRipper = false;
     var $Limit = 15; //display low prior msg up to this count
-    var $LBA = array();
-    var $FrameReRipConf = array();
-    var $IARTracks = array();
+    var $LBA = [];
+    var $FrameReRipConf = [];
+    var $IARTracks = [];
     var $InvalidateCache = true;
     var $DubiousTracks = 0;
-    var $EAC_LANG = array();
+    var $EAC_LANG = [];
     var $Chardet;
 
     var $ValidateChecksum = true;
@@ -74,24 +74,24 @@ class Logchecker
     function reset()
     {
         $this->LogPath = null;
-        $this->Logs = array();
-        $this->Tracks = array();
+        $this->Logs = [];
+        $this->Tracks = [];
         $this->Checksum = true;
         $this->Score = 100;
-        $this->Details = array();
-        $this->Offsets = array();
+        $this->Details = [];
+        $this->Offsets = [];
         $this->DriveFound = false;
-        $this->Drives = array();
+        $this->Drives = [];
         $this->Drive = null;
         $this->SecureMode = true;
         $this->NonSecureMode = null;
-        $this->BadTrack = array();
+        $this->BadTrack = [];
         $this->DecreaseScoreTrack = 0;
         $this->RIPPER = null;
         $this->Language = null;
         $this->Version = null;
         $this->TrackNumber = null;
-        $this->ARTracks = array();
+        $this->ARTracks = [];
         $this->Combined = null;
         $this->CurrLog = null;
         $this->DecreaseBoost = 0;
@@ -99,9 +99,9 @@ class Logchecker
         $this->ARSummary = null;
         $this->XLDSecureRipper = false;
         $this->Limit = 15;
-        $this->LBA = array();
-        $this->FrameReRipConf = array();
-        $this->IARTracks = array();
+        $this->LBA = [];
+        $this->FrameReRipConf = [];
+        $this->IARTracks = [];
         $this->InvalidateCache = true;
         $this->DubiousTracks = 0;
     }
@@ -486,7 +486,7 @@ class Logchecker
                 $TrackBodies = preg_split('/\n( +)Filename +(.*)/i', $TrackListing, -1);
                 array_shift($TrackBodies);
             }
-            $Tracks = array();
+            $Tracks = [];
             while (list($Key, $TrackBody) = each($TrackBodies)) {
                 // The number of spaces between 'Track' and the number, to keep formatting intact
                 $Spaces                = $FullTracks[($Key * 3)];
@@ -496,7 +496,7 @@ class Logchecker
                 // How much to decrease the overall score by, if this track fails and no attempt at recovery is made later on
                 $this->DecreaseScoreTrack = 0;
                 // List of things that went wrong to add to $this->Bad if this track fails and no attempt at recovery is made later on
-                $this->BadTrack        = array();
+                $this->BadTrack        = [];
                 // The track number is stripped in the preg_split, let's bring it back, eh?
                 if (!$this->Range) {
                     $TrackBody = '<span class="log5">Track</span>' . $Spaces . '<span class="log4 log1">' . $TrackNumber . '</span>' . $TrackBody;
@@ -787,8 +787,8 @@ class Logchecker
                     }
                 }
             }
-            $this->ARTracks   = array();
-            $this->ARSummary     = array();
+            $this->ARTracks   = [];
+            $this->ARSummary     = [];
             $this->DecreaseBoost = 0;
             $this->SecureMode   = true;
             $this->NonSecureMode = null;
@@ -1226,7 +1226,7 @@ class Logchecker
         if (!count($this->Details)) {
             return;
         }
-        $myBad = array('high' => array(), 'low' => array());
+        $myBad = array('high' => [], 'low' => []);
         foreach ($this->Details as $Key => $Val) {
             if (preg_match("/(points?\W)|(boosted)\)/i", $Val)) {
                 $myBad['high'][] = $Val;
@@ -1234,7 +1234,7 @@ class Logchecker
                 $myBad['low'][] = $Val;
             }
         }
-        $this->Details = array();
+        $this->Details = [];
         $this->Details = $myBad['high'];
         if (count($this->Details) < $this->Limit) {
             foreach ($myBad['low'] as $Key => $Val) {

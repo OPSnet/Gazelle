@@ -23,7 +23,7 @@ $DB->query("
 $Torrents = $DB->to_array(false, MYSQLI_NUM, false);
 echo 'Found '.count($Torrents)." inactive torrents to be deleted.\n";
 
-$LogEntries = $DeleteNotes = array();
+$LogEntries = $DeleteNotes = [];
 
 // Exceptions for inactivity deletion
 $InactivityExceptionsMade = array(

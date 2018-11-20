@@ -34,12 +34,12 @@ class CACHE extends Memcached {
 	 */
 	const GROUP_VERSION = 5;
 
-	public $CacheHits = array();
-	public $MemcacheDBArray = array();
+	public $CacheHits = [];
+	public $MemcacheDBArray = [];
 	public $MemcacheDBKey = '';
 	protected $InTransaction = false;
 	public $Time = 0;
-	private $Servers = array();
+	private $Servers = [];
 	private $PersistentKeys = array(
 		'ajax_requests_*',
 		'query_lock_*',
@@ -52,7 +52,7 @@ class CACHE extends Memcached {
 		'global_notification',
 		'notifications_one_reads_*',
 	);
-	private $ClearedKeys = array();
+	private $ClearedKeys = [];
 
 	public $CanClear = false;
 	public $InternalCache = true;
@@ -74,7 +74,7 @@ class CACHE extends Memcached {
 	function __construct($Servers, $PersistantID = 'apl') {
 		parent::__construct($PersistantID);
 		$this->Servers = $Servers;
-		$ServerList = array();
+		$ServerList = [];
 		foreach ($this->getServerList() as $Server) {
 			$ServerList["{$Server['host']}:{$Server['port']}"] = true;
 		}
@@ -221,7 +221,7 @@ class CACHE extends Memcached {
 		$Value = $this->get($Key);
 		if (!is_array($Value)) {
 			$this->InTransaction = false;
-			$this->MemcacheDBKey = array();
+			$this->MemcacheDBKey = [];
 			$this->MemcacheDBKey = '';
 			return false;
 		}
@@ -233,7 +233,7 @@ class CACHE extends Memcached {
 
 	public function cancel_transaction() {
 		$this->InTransaction = false;
-		$this->MemcacheDBKey = array();
+		$this->MemcacheDBKey = [];
 		$this->MemcacheDBKey = '';
 	}
 
@@ -409,7 +409,7 @@ class CACHE extends Memcached {
 	 * @return array (host => bool status, ...)
 	 */
 	public function server_status() {
-		/*$Status = array();
+		/*$Status = [];
 		foreach ($this->Servers as $Server) {
 			$Status["$Server[host]:$Server[port]"] = $this->getServerStatus($Server['host'], $Server['port']);
 		}*/

@@ -451,7 +451,7 @@ if ($NumResults == 0) {
 		GROUP BY tt.TagID
 		ORDER BY Score DESC
 		LIMIT 8");
-	$TagText = array();
+	$TagText = [];
 	while (list($Tag) = $DB->next_record()) {
 		$TagText[] = "<a href='torrents.php?taglist={$Tag}'>{$Tag}</a>";
 	}

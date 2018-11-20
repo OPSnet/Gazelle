@@ -118,7 +118,7 @@ if ($OrderTbl == 'tg') {
     list($TorrentCount) = $DB->next_record();
 }
 
-$GroupIDs = $FilterIDs = $UnReadIDs = array();
+$GroupIDs = $FilterIDs = $UnReadIDs = [];
 foreach ($Results as $Torrent) {
     $GroupIDs[$Torrent['GroupID']] = 1;
     $FilterIDs[$Torrent['FilterID']] = 1;
@@ -196,10 +196,10 @@ if (empty($Results)) {
 </table>
 <?
 } else {
-    $FilterGroups = array();
+    $FilterGroups = [];
     foreach ($Results as $Result) {
         if (!isset($FilterGroups[$Result['FilterID']])) {
-            $FilterGroups[$Result['FilterID']] = array();
+            $FilterGroups[$Result['FilterID']] = [];
             $FilterGroups[$Result['FilterID']]['FilterLabel'] = isset($Filters[$Result['FilterID']])
                 ? $Filters[$Result['FilterID']]['Label']
                 : false;
@@ -252,7 +252,7 @@ if (empty($Results)) {
             // generate torrent's title
             $DisplayName = '';
             if (!empty($GroupInfo['ExtendedArtists'])) {
-                $MatchingArtists = array();
+                $MatchingArtists = [];
                 foreach ($GroupInfo['ExtendedArtists'] as $GroupArtists) {
                     foreach ($GroupArtists as $GroupArtist) {
                         if (isset($Filters[$FilterID]['Artists'][mb_strtolower($GroupArtist['name'], 'UTF-8')])) {

@@ -55,7 +55,7 @@ if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("
 		GROUP BY Vote");
 	$VoteArray = $DB->to_array(false, MYSQLI_NUM);
 
-	$Votes = array();
+	$Votes = [];
 	foreach ($VoteArray as $VoteSet) {
 		list($Key,$Value) = $VoteSet;
 		$Votes[$Key] = $Value;

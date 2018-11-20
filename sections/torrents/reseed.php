@@ -27,7 +27,7 @@ extract(Torrents::array_group($Group[$GroupID]));
 $Name = Artists::display_artists(array('1' => $Artists), false, true);
 $Name .= $GroupName;
 
-$usersToNotify = array();
+$usersToNotify = [];
 
 $DB->query("
 	SELECT s.uid AS id, MAX(s.tstamp) AS tstamp

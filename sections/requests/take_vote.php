@@ -79,7 +79,7 @@ if ($LoggedUser['BytesUploaded'] >= $Amount && $Filled === '0') {
 		FROM requests_votes
 		WHERE RequestID = '$RequestID'
 			AND UserID != '$LoggedUser[ID]'");
-	$UserIDs = array();
+	$UserIDs = [];
 	while (list($UserID) = $DB->next_record()) {
 		$UserIDs[] = $UserID;
 	}

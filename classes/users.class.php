@@ -97,7 +97,7 @@ class Users {
 						'ID' => $UserID,
 						'Username' => '',
 						'PermissionID' => 0,
-						'Paranoia' => array(),
+						'Paranoia' => [],
 						'Artist' => false,
 						'Donor' => false,
 						'Warned' => '0000-00-00 00:00:00',
@@ -113,7 +113,7 @@ class Users {
 				$UserInfo['CatchupTime'] = strtotime($UserInfo['CatchupTime']);
 				$UserInfo['Paranoia'] = unserialize_array($UserInfo['Paranoia']);
 				if ($UserInfo['Paranoia'] === false) {
-					$UserInfo['Paranoia'] = array();
+					$UserInfo['Paranoia'] = [];
 				}
 				$UserInfo['Class'] = $Classes[$UserInfo['PermissionID']]['Level'];
 			}
@@ -125,7 +125,7 @@ class Users {
 			if (!empty($UserInfo['Levels'])) {
 				$UserInfo['ExtraClasses'] = array_fill_keys(explode(',', $UserInfo['Levels']), 1);
 			} else {
-				$UserInfo['ExtraClasses'] = array();
+				$UserInfo['ExtraClasses'] = [];
 			}
 			unset($UserInfo['Levels']);
 			$EffectiveClass = $UserInfo['Class'];
@@ -201,13 +201,13 @@ class Users {
 			if (!empty($HeavyInfo['RestrictedForums'])) {
 				$RestrictedForums = array_map('trim', explode(',', $HeavyInfo['RestrictedForums']));
 			} else {
-				$RestrictedForums = array();
+				$RestrictedForums = [];
 			}
 			unset($HeavyInfo['RestrictedForums']);
 			if (!empty($HeavyInfo['PermittedForums'])) {
 				$PermittedForums = array_map('trim', explode(',', $HeavyInfo['PermittedForums']));
 			} else {
-				$PermittedForums = array();
+				$PermittedForums = [];
 			}
 			unset($HeavyInfo['PermittedForums']);
 
@@ -229,7 +229,7 @@ class Users {
 			}
 
 			if (!empty($PermittedForums) || !empty($RestrictedForums)) {
-				$HeavyInfo['CustomForums'] = array();
+				$HeavyInfo['CustomForums'] = [];
 				foreach ($RestrictedForums as $ForumID) {
 					$HeavyInfo['CustomForums'][$ForumID] = 0;
 				}
@@ -549,7 +549,7 @@ class Users {
 		$Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
 
 		if ($Badges) {
-			$ClassesDisplay = array();
+			$ClassesDisplay = [];
 			foreach (array_intersect_key($SecondaryClasses, $UserInfo['ExtraClasses']) as $PermID => $PermShort) {
 				$ClassesDisplay[] = '<span class="tooltip secondary_class" title="'.$Classes[$PermID]['Name'].'">'.$PermShort.'</span>';
 			}

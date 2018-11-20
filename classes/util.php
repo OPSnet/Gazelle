@@ -162,11 +162,11 @@ function json_die($Status, $Message) {
  */
 function json_print($Status, $Message) {
 	if ($Status == 'success' && $Message) {
-		print json_encode(array('status' => $Status, 'response' => $Message));
+		print json_encode(['status' => $Status, 'response' => $Message]);
 	} elseif ($Message) {
-		print json_encode(array('status' => $Status, 'error' => $Message));
+		print json_encode(['status' => $Status, 'error' => $Message]);
 	} else {
-		print json_encode(array('status' => $Status, 'response' => array()));
+		print json_encode(['status' => $Status, 'response' => []]);
 	}
 }
 
@@ -204,8 +204,8 @@ function FL_confirmation_msg($seeders) {
  * @return array
  */
 function unserialize_array($array) {
-	$array = empty($array) ? array() : unserialize($array);
-	return (empty($array)) ? array() : $array;
+	$array = empty($array) ? [] : unserialize($array);
+	return (empty($array)) ? [] : $array;
 }
 
 /**

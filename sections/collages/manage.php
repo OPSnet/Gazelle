@@ -35,7 +35,7 @@ $CollageDataList = $DB->to_array('GroupID', MYSQLI_ASSOC);
 if (count($GroupIDs) > 0) {
 	$TorrentList = Torrents::get_groups($GroupIDs);
 } else {
-	$TorrentList = array();
+	$TorrentList = [];
 }
 
 View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');

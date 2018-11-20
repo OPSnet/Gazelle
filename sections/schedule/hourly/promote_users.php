@@ -2,7 +2,7 @@
 
 //------------- Promote users -------------------------------------------//
 sleep(5);
-$Criteria = array();
+$Criteria = [];
 $Criteria[] = array('From' => USER, 'To' => MEMBER,  'MinUpload' => 10 * 1024 * 1024 * 1024,  'MinRatio' => 0.7,  'MinUploads' => 0,  'MaxTime' => time_minus(3600 * 24 * 7));
 $Criteria[] = array('From' => MEMBER, 'To' => POWER, 'MinUpload' => 25 * 1024 * 1024 * 1024,  'MinRatio' => 1.05, 'MinUploads' => 5,  'MaxTime' => time_minus(3600 * 24 * 7 * 2));
 $Criteria[] = array('From' => POWER, 'To' => ELITE,  'MinUpload' => 100 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 50, 'MaxTime' => time_minus(3600 * 24 * 7 * 4));

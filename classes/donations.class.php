@@ -229,7 +229,7 @@ class Donations {
 				// 2 hours less than 32 days to account for schedule run times
 
 		if (G::$DB->record_count() > 0) {
-			$UserIDs = array();
+			$UserIDs = [];
 			while (list($UserID, $Rank) = G::$DB->next_record()) {
 				G::$Cache->delete_value("donor_info_$UserID");
 				G::$Cache->delete_value("donor_title_$UserID");
@@ -403,7 +403,7 @@ class Donations {
 
 
 	public static function get_enabled_rewards($UserID) {
-		$Rewards = array();
+		$Rewards = [];
 		$Rank = self::get_rank($UserID);
 		$SpecialRank = self::get_special_rank($UserID);
 		$HasAll = $SpecialRank == 3;
@@ -495,9 +495,9 @@ class Donations {
 		$SpecialRank = self::get_special_rank($UserID);
 		$HasAll = $SpecialRank == 3;
 		$Counter = 0;
-		$Insert = array();
-		$Values = array();
-		$Update = array();
+		$Insert = [];
+		$Values = [];
+		$Update = [];
 
 		$Insert[] = "UserID";
 		$Values[] = "'$UserID'";

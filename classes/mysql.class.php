@@ -135,7 +135,7 @@ function db_string($String, $DisableWildcards = false) {
 	return $String;
 }
 
-function db_array($Array, $DontEscape = array(), $Quote = false) {
+function db_array($Array, $DontEscape = [], $Quote = false) {
 	foreach ($Array as $Key => $Val) {
 		if (!in_array($Key, $DontEscape)) {
 			if ($Quote) {
@@ -154,7 +154,7 @@ class DB_MYSQL {
 	public $LinkID = false;
 	/** @var mysqli_result|bool */
 	protected $QueryID = false;
-	protected $Record = array();
+	protected $Record = [];
 	protected $Row;
 	protected $Errno = 0;
 	protected $Error = '';
@@ -162,7 +162,7 @@ class DB_MYSQL {
 	protected $PreparedQuery = null;
 	protected $Statement = null;
 
-	public $Queries = array();
+	public $Queries = [];
 	public $Time = 0.0;
 
 	protected $Database = '';
@@ -522,7 +522,7 @@ class DB_MYSQL {
 	// If $Key is set, use the $Key column in the result set as the array key
 	// Otherwise, use an integer
 	function to_array($Key = false, $Type = MYSQLI_BOTH, $Escape = true) {
-		$Return = array();
+		$Return = [];
 		while ($Row = mysqli_fetch_array($this->QueryID, $Type)) {
 			if ($Escape !== false) {
 				$Row = Misc::display_array($Row, $Escape);
@@ -539,7 +539,7 @@ class DB_MYSQL {
 
 	//  Loops through the result set, collecting the $ValField column into an array with $KeyField as keys
 	function to_pair($KeyField, $ValField, $Escape = true) {
-		$Return = array();
+		$Return = [];
 		while ($Row = mysqli_fetch_array($this->QueryID)) {
 			if ($Escape) {
 				$Key = display_str($Row[$KeyField]);
@@ -556,7 +556,7 @@ class DB_MYSQL {
 
 	//  Loops through the result set, collecting the $Key column into an array
 	function collect($Key, $Escape = true) {
-		$Return = array();
+		$Return = [];
 		while ($Row = mysqli_fetch_array($this->QueryID)) {
 			$Return[] = $Escape ? display_str($Row[$Key]) : $Row[$Key];
 		}
@@ -583,7 +583,7 @@ class DB_MYSQL {
 	 * and stores them in $this->Queries.
 	 */
 	function warnings() {
-		$Warnings = array();
+		$Warnings = [];
 		if ($this->LinkID !== false && mysqli_warning_count($this->LinkID)) {
 			$e = mysqli_get_warnings($this->LinkID);
 			do {

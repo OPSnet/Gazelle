@@ -6,7 +6,16 @@ if (!check_perms("users_mod")) {
 $Classes = Users::get_classes()[0];
 // If your user base is large, sending a PM to the lower classes will take a long time
 // add the class ID into this array to skip it when presenting the list of classes
-$SkipClassIDs = array(USER, MEMBER, POWER, ELITE, TORRENT_MASTER, DONOR, POWER_TM, ELITE_TM);
+$SkipClassIDs = [
+    USER,
+    MEMBER,
+    POWER,
+    ELITE,
+    TORRENT_MASTER,
+    DONOR,
+    POWER_TM,
+    ELITE_TM
+];
 
 View::show_header('Compose Mass PM', 'inbox,bbcode,jquery.validate,form_validate');
 ?>

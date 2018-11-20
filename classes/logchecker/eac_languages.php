@@ -18,7 +18,7 @@
  * risk the potential for certain string sequences to be messed up.
  */
 
-$EAC_LANG = array();
+$EAC_LANG = [];
 
 $EAC_LANG['en'] = array(
     31 => "Filename will be ignored",

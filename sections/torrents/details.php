@@ -53,7 +53,7 @@ if ($GroupCategoryID == 1) {
     $AltName .= ' ['.$ReleaseTypes[$ReleaseType].']';
 }
 
-$Tags = array();
+$Tags = [];
 if ($TorrentTags != '') {
     $TorrentTags = explode('|', $TorrentTags);
     $TorrentTagIDs = explode('|', $TorrentTagIDs);
@@ -84,7 +84,7 @@ if (!$CoverArt) {
 		FROM cover_art
 		WHERE GroupID = '$GroupID'
 		ORDER BY Time ASC");
-    $CoverArt = array();
+    $CoverArt = [];
     $CoverArt = $DB->to_array();
     if ($DB->has_results()) {
         $Cache->cache_value("torrents_cover_art_$GroupID", $CoverArt, 0);

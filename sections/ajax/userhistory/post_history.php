@@ -156,7 +156,7 @@ if ($ShowGrouped) {
     $DB->set_query_id($Posts);
 }
 
-$JsonResults = array();
+$JsonResults = [];
 while (list($PostID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername, $TopicID, $ThreadTitle, $LastPostID, $LastRead, $Locked, $Sticky) = $DB->next_record()) {
     $JsonResults[] = array(
         'postId' => (int)$PostID,

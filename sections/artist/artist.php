@@ -69,7 +69,7 @@ if ($Data) {
 ob_start();
 
 // Requests
-$Requests = array();
+$Requests = [];
 if (empty($LoggedUser['DisableRequests'])) {
 	$Requests = $Cache->get_value("artists_requests_$ArtistID");
 	if (!is_array($Requests)) {
@@ -93,7 +93,7 @@ if (empty($LoggedUser['DisableRequests'])) {
 		if ($DB->has_results()) {
 			$Requests = $DB->to_array('ID', MYSQLI_ASSOC, false);
 		} else {
-			$Requests = array();
+			$Requests = [];
 		}
 		$Cache->cache_value("artists_requests_$ArtistID", $Requests);
 	}
@@ -113,7 +113,7 @@ if (($Importances = $Cache->get_value("artist_groups_$ArtistID")) === false) {
 	$Importances = $DB->to_array(false, MYSQLI_BOTH, false);
 	$Cache->cache_value("artist_groups_$ArtistID", $Importances, 0);
 } else {
-	$GroupIDs = array();
+	$GroupIDs = [];
 	foreach ($Importances as $Group) {
 		$GroupIDs[] = $Group['GroupID'];
 	}
@@ -121,7 +121,7 @@ if (($Importances = $Cache->get_value("artist_groups_$ArtistID")) === false) {
 if (count($GroupIDs) > 0) {
 	$TorrentList = Torrents::get_groups($GroupIDs, true, true);
 } else {
-	$TorrentList = array();
+	$TorrentList = [];
 }
 $NumGroups = count($TorrentList);
 
@@ -140,7 +140,7 @@ if ($UnknownRT === false) {
 }
 
 // Get list of used release types
-$UsedReleases = array();
+$UsedReleases = [];
 foreach ($Importances as $ID => $Group) {
 	switch ($Importances[$ID]['Importance']) {
 		case '2':
@@ -811,7 +811,7 @@ if ($NumRequests > 0) {
 			}
 
 			if (!empty($Tags[$RequestID])) {
-				$ReqTagList = array();
+				$ReqTagList = [];
 				foreach ($Tags[$RequestID] as $TagID => $TagName) {
 					$ReqTagList[] = "<a href=\"requests.php?tags=$TagName\">".display_str($TagName).'</a>';
 				}
@@ -995,6 +995,6 @@ if ($RevisionID) {
 	$Key = "artist_$ArtistID";
 }
 
-$Data = array(array($Name, $Image, $Body, $NumSimilar, $SimilarArray, array(), array(), $VanityHouseArtist));
+$Data = [[$Name, $Image, $Body, $NumSimilar, $SimilarArray, [], [], $VanityHouseArtist]];
 
 $Cache->cache_value($Key, $Data, 3600);

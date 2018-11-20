@@ -1,6 +1,6 @@
 <?
 $Search = db_string($_GET['email']);
-$JSON = array();
+$JSON = [];
 if (!check_perms('users_view_email') || empty($Search)) {
 	$JSON['status'] = 'error';
 	echo json_encode($JSON);
@@ -22,11 +22,11 @@ $DB->query("
 
 $EmailResults = $DB->to_array(false, MYSQLI_ASSOC, false);
 
-$Results = array();
+$Results = [];
 $Count = $DB->record_count();
 $Results['count'] = $Count;
 
-$Emails = array();
+$Emails = [];
 
 if ($Count > 0) {
 	foreach ($EmailResults as $Email) {

@@ -407,7 +407,7 @@ class Format {
 	 * @param array $Array The array the option is in, defaults to GET.
 	 * @return void
 	 */
-	public static function selected($Name, $Value, $Attribute = 'selected', $Array = array()) {
+	public static function selected($Name, $Value, $Attribute = 'selected', $Array = []) {
 		if (empty($Array)) {
 			$Array = $_GET;
 		}

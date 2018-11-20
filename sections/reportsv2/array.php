@@ -383,7 +383,7 @@ The Uploading Rules require that all uploads be properly tagged. Your torrent ha
 					"Please specify the issue with the folder names.",
 					"Ideally you will replace this torrent with one with fixed folder names and report this with the reason \"Bad Folder Name Trump\"."
 					),
-				'report_fields' => array(),
+				'report_fields' => [],
 				'resolve_options' => array(
 					'upload' => '0',
 					'warn' => '0',

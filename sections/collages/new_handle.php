@@ -4,7 +4,7 @@ authorize();
 include(SERVER_ROOT.'/classes/validate.class.php');
 $Val = new VALIDATE;
 
-$P = array();
+$P = [];
 $P = db_array($_POST);
 
 if ($P['category'] > 0 || check_perms('site_collages_renamepersonal')) {

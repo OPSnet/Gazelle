@@ -25,14 +25,14 @@ if ($Results === false) {
 }
 if ($NumResults == 0) {
 	json_die('success', array(
-		'results' => array(),
-		'youMightLike' => array() // This slow and broken feature has been removed
+		'results' => [],
+		'youMightLike' => [] // This slow and broken feature has been removed
 	));
 }
 
 $Bookmarks = Bookmarks::all_bookmarks('torrent');
 
-$JsonGroups = array();
+$JsonGroups = [];
 foreach ($Results as $Key => $GroupID) {
 	$GroupInfo = $Groups[$GroupID];
 	if (empty($GroupInfo['Torrents'])) {
@@ -61,7 +61,7 @@ foreach ($Results as $Key => $GroupID) {
 	}
 
 	$TagList = explode(' ', str_replace('_', '.', $GroupInfo['TagList']));
-	$JsonArtists = array();
+	$JsonArtists = [];
 	if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
 		unset($ExtendedArtists[2]);
 		unset($ExtendedArtists[3]);
@@ -86,7 +86,7 @@ foreach ($Results as $Key => $GroupID) {
 		$EditionID = 0;
 		unset($FirstUnknown);
 
-		$JsonTorrents = array();
+		$JsonTorrents = [];
 		foreach ($Torrents as $TorrentID => $Data) {
 			// All of the individual torrents in the group
 

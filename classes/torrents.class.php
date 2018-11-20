@@ -64,7 +64,7 @@ class Torrents {
 		}
 		// Make sure there's something in $GroupIDs, otherwise the SQL will break
 		if (count($GroupIDs) === 0) {
-			return array();
+			return [];
 		}
 
 		/*
@@ -77,7 +77,7 @@ class Torrents {
 
 		if (count($NotFound) > 0) {
 			$IDs = implode(',', array_keys($NotFound));
-			$NotFound = array();
+			$NotFound = [];
 			$QueryID = G::$DB->get_query_id();
 			G::$DB->query("
 				SELECT
@@ -87,8 +87,8 @@ class Torrents {
 
 			while ($Group = G::$DB->next_record(MYSQLI_ASSOC, true)) {
 				$NotFound[$Group['ID']] = $Group;
-				$NotFound[$Group['ID']]['Torrents'] = array();
-				$NotFound[$Group['ID']]['Artists'] = array();
+				$NotFound[$Group['ID']]['Torrents'] = [];
+				$NotFound[$Group['ID']]['Artists'] = [];
 			}
 			G::$DB->set_query_id($QueryID);
 
@@ -143,7 +143,7 @@ class Torrents {
 		if ($GetArtists) {
 			$Artists = Artists::get_artists($GroupIDs);
 		} else {
-			$Artists = array();
+			$Artists = [];
 		}
 
 		if ($Return) { // If we're interested in the data, and not just caching it
@@ -200,7 +200,7 @@ class Torrents {
 			'TagList' => $Group['TagList'],
 			'ReleaseType' => $Group['ReleaseType'],
 			'WikiImage' => $Group['WikiImage'],
-			'Torrents' => isset($Group['Torrents']) ? $Group['Torrents'] : array(),
+			'Torrents' => isset($Group['Torrents']) ? $Group['Torrents'] : [],
 			'Artists' => $Group['Artists'],
 			'ExtendedArtists' => $Group['ExtendedArtists']
 		);
@@ -727,7 +727,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 	 * @return string
 	 */
 	public static function torrent_info($Data, $ShowMedia = false, $ShowEdition = false) {
-		$Info = array();
+		$Info = [];
 		if (!empty($Data['Format'])) {
 			$Info[] = $Data['Format'];
 		}
@@ -751,7 +751,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 			$Info[] = 'Scene';
 		}
 		if ($ShowEdition) {
-			$EditionInfo = array();
+			$EditionInfo = [];
 			if (!empty($Data['RemasterYear'])) {
 				$EditionInfo[] = $Data['RemasterYear'];
 			}
@@ -910,7 +910,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		$Buckets = 64;
 		$LastBucket = $Buckets - 1;
 		$BucketID = $TorrentID & $LastBucket;
-		static $SnatchedTorrents = array(), $UpdateTime = array();
+		static $SnatchedTorrents = [], $UpdateTime = [];
 
 		if (empty($SnatchedTorrents)) {
 			$SnatchedTorrents = array_fill(0, $Buckets, false);
@@ -931,11 +931,11 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 			// This bucket hasn't been checked before
 			$CurSnatchedTorrents = G::$Cache->get_value("users_snatched_{$UserID}_$BucketID", true);
 			if ($CurSnatchedTorrents === false || $CurTime > $UpdateTime['next']) {
-				$Updated = array();
+				$Updated = [];
 				$QueryID = G::$DB->get_query_id();
 				if ($CurSnatchedTorrents === false || $UpdateTime['last'] == 0) {
 					for ($i = 0; $i < $Buckets; $i++) {
-						$SnatchedTorrents[$i] = array();
+						$SnatchedTorrents[$i] = [];
 					}
 					// Not found in cache. Since we don't have a suitable index, it's faster to update everything
 					G::$DB->query("
@@ -961,7 +961,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 						if ($SnatchedTorrents[$CurBucketID] === false) {
 							$SnatchedTorrents[$CurBucketID] = G::$Cache->get_value("users_snatched_{$UserID}_$CurBucketID", true);
 							if ($SnatchedTorrents[$CurBucketID] === false) {
-								$SnatchedTorrents[$CurBucketID] = array();
+								$SnatchedTorrents[$CurBucketID] = [];
 							}
 						}
 						$SnatchedTorrents[$CurBucketID][(int)$ID] = true;
@@ -1063,7 +1063,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		return $DisplayName;
 	}
 
-	public static function edition_string(array $Torrent, array $Group = array()) {
+	public static function edition_string(array $Torrent, array $Group = []) {
 		if ($Torrent['Remastered'] && $Torrent['RemasterYear'] != 0) {
 			$EditionName = $Torrent['RemasterYear'];
 			$AddExtra = ' - ';
@@ -1120,7 +1120,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 			G::$Cache->cache_value("reports_torrent_$TorrentID", $Reports, 0);
 		}
 		if (!check_perms('admin_reports')) {
-			$Return = array();
+			$Return = [];
 			foreach ($Reports as $Report) {
 				if ($Report['Type'] !== 'edited') {
 					$Return[] = $Report;

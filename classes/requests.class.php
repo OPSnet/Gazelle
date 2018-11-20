@@ -77,7 +77,7 @@ class Requests {
 		}
 		// Make sure there's something in $RequestIDs, otherwise the SQL will break
 		if (count($RequestIDs) === 0) {
-			return array();
+			return [];
 		}
 		$IDs = implode(',', array_keys($NotFound));
 
@@ -118,7 +118,7 @@ class Requests {
 			$Tags = self::get_tags(G::$DB->collect('ID', false));
 			foreach ($Requests as $Request) {
 				unset($NotFound[$Request['ID']]);
-				$Request['Tags'] = isset($Tags[$Request['ID']]) ? $Tags[$Request['ID']] : array();
+				$Request['Tags'] = isset($Tags[$Request['ID']]) ? $Tags[$Request['ID']] : [];
 				$Found[$Request['ID']] = $Request;
 				G::$Cache->cache_value('request_'.$Request['ID'], $Request, 0);
 			}
@@ -156,7 +156,7 @@ class Requests {
 		if (is_array($Artists)) {
 			$Results = $Artists;
 		} else {
-			$Results = array();
+			$Results = [];
 			$QueryID = G::$DB->get_query_id();
 			G::$DB->query("
 				SELECT
@@ -180,7 +180,7 @@ class Requests {
 
 	public static function get_tags($RequestIDs) {
 		if (empty($RequestIDs)) {
-			return array();
+			return [];
 		}
 		if (is_array($RequestIDs)) {
 			$RequestIDs = implode(',', $RequestIDs);
@@ -197,7 +197,7 @@ class Requests {
 			ORDER BY rt.TagID ASC");
 		$Tags = G::$DB->to_array(false, MYSQLI_NUM, false);
 		G::$DB->set_query_id($QueryID);
-		$Results = array();
+		$Results = [];
 		foreach ($Tags as $TagsRow) {
 			list($RequestID, $TagID, $TagName) = $TagsRow;
 			$Results[$RequestID][$TagID] = $TagName;
@@ -221,16 +221,16 @@ class Requests {
 			if (!G::$DB->has_results()) {
 				return array(
 					'TotalBounty' => 0,
-					'Voters' => array());
+					'Voters' => []);
 			}
 			$Votes = G::$DB->to_array();
 
-			$RequestVotes = array();
+			$RequestVotes = [];
 			$RequestVotes['TotalBounty'] = array_sum(G::$DB->collect('Bounty'));
 
 			foreach ($Votes as $Vote) {
 				list($UserID, $Bounty, $Username) = $Vote;
-				$VoteArray = array();
+				$VoteArray = [];
 				$VotesArray[] = array('UserID' => $UserID, 'Username' => $Username, 'Bounty' => $Bounty);
 			}
 

@@ -143,7 +143,7 @@ class TorrentSearch {
 	/**
 	 * Array with info from all matching torrent groups
 	 */
-	private $Groups = array();
+	private $Groups = [];
 
 	/**
 	 * True if the NOT operator can be used. Sphinx needs at least one positive search condition
@@ -168,24 +168,24 @@ class TorrentSearch {
 	 *     'operator' => self::SPH_BOOL_AND | self::SPH_BOOL_OR
 	 * ]], ...
 	 */
-	private $Terms = array();
+	private $Terms = [];
 
 	/**
 	 * Unprocessed search terms for retrieval
 	 */
-	private $RawTerms = array();
+	private $RawTerms = [];
 
 	/**
 	 * Storage for used torrent-specific attribute filters
 	 * ['Field name' => 'Search expression', ...]
 	 */
-	private $UsedTorrentAttrs = array();
+	private $UsedTorrentAttrs = [];
 
 	/**
 	 * Storage for used torrent-specific fulltext fields
 	 * ['Field name' => 'Search expression', ...]
 	 */
-	private $UsedTorrentFields = array();
+	private $UsedTorrentFields = [];
 
 	/**
 	 * Initialize and configure a TorrentSearch object
@@ -252,7 +252,7 @@ class TorrentSearch {
 	 * @param array $Terms Array containing all search terms (e.g. $_GET)
 	 * @return array List of matching group IDs with torrent ID as key for ungrouped results
 	 */
-	public function query($Terms = array()) {
+	public function query($Terms = []) {
 		$this->process_search_terms($Terms);
 		$this->build_query();
 		$this->run_query();
@@ -309,7 +309,7 @@ class TorrentSearch {
 			if (isset(self::$FormsToFields[$Field])) {
 				$Field = self::$FormsToFields[$Field];
 			}
-			$QueryParts = array('include' => array(), 'exclude' => array());
+			$QueryParts = array('include' => [], 'exclude' => []);
 			if (!$this->EnableNegation && !empty($Words['exclude'])) {
 				$Words['include'] = $Words['exclude'];
 				unset($Words['exclude']);
@@ -414,7 +414,7 @@ class TorrentSearch {
 				if (!is_array($Value)) {
 					$Value = array_fill_keys(explode('|', $Value), 1);
 				}
-				$CategoryFilter = array();
+				$CategoryFilter = [];
 				foreach (array_keys($Value) as $Category) {
 					if (is_number($Category)) {
 						$CategoryFilter[] = $Category;
@@ -486,7 +486,7 @@ class TorrentSearch {
 			if (isset($this->Terms['taglist']['include'])) {
 				$AllTags = $this->Terms['taglist']['include'];
 			} else {
-				$AllTags = array();
+				$AllTags = [];
 			}
 			if (isset($this->Terms['taglist']['exclude'])) {
 				$AllTags = array_merge($AllTags, $this->Terms['taglist']['exclude']);
@@ -677,7 +677,7 @@ class TorrentSearch {
 	 * were used to get primary results and they are grouped
 	 */
 	private function filter_torrents_sph() {
-		$AllTorrents = array();
+		$AllTorrents = [];
 		foreach ($this->Groups as $GroupID => $Group) {
 			if (!empty($Group['Torrents'])) {
 				$AllTorrents += array_fill_keys(array_keys($Group['Torrents']), $GroupID);

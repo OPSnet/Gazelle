@@ -11,7 +11,7 @@ class INVITE_TREE {
 	var $Visible = true;
 
 	// Set things up
-	function __construct($UserID, $Options = array()) {
+	function __construct($UserID, $Options = []) {
 		$this->UserID = $UserID;
 		if (isset($Options['visible']) && $Options['visible'] === false) {
 			$this->Visible = false;
@@ -83,7 +83,7 @@ class INVITE_TREE {
 		$TopLevelUpload = 0;
 		$TopLevelDownload = 0;
 
-		$ClassSummary = array();
+		$ClassSummary = [];
 		global $Classes;
 		foreach ($Classes as $ClassID => $Val) {
 			$ClassSummary[$ClassID] = 0;
@@ -164,7 +164,7 @@ class INVITE_TREE {
 			This tree has <?=number_format($Count)?> entries, <?=number_format($Branches)?> branches, and a depth of <?=number_format($MaxTreeLevel - $OriginalTreeLevel)?>.
 			It has
 <?
-			$ClassStrings = array();
+			$ClassStrings = [];
 			foreach ($ClassSummary as $ClassID => $ClassCount) {
 				if ($ClassCount == 0) {
 					continue;

@@ -198,21 +198,21 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
                     'NoPoll' => $NoPoll
                 )); //Bumped
             } else {
-                $Part2 = array();
+                $Part2 = [];
             }
         }
         if ($Stickies > 0) {
             $Part1 = array_slice($Forum, 0, $Stickies, true); //Stickies
             $Part3 = array_slice($Forum, $Stickies, TOPICS_PER_PAGE - $Stickies - 1, true); //Rest of page
         } else {
-            $Part1 = array();
+            $Part1 = [];
             $Part3 = $Forum;
         }
         if (is_null($Part1)) {
-            $Part1 = array();
+            $Part1 = [];
         }
         if (is_null($Part3)) {
-            $Part3 = array();
+            $Part3 = [];
         }
         if ($ThreadInfo['IsSticky'] == 1) {
             $Forum = $Part2 + $Part1 + $Part3; //Merge it

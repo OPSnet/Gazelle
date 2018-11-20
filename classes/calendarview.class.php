@@ -33,7 +33,7 @@ class CalendarView {
 
 	private static function get_events_on($Day, $Events) {
 		// Linear search, Lol.
-		$Results = array();
+		$Results = [];
 		foreach ($Events as $Event) {
 			if ($Event['StartDay'] == $Day || ($Event['StartDay'] <= $Day && $Event['EndDay'] >= $Day)) {
 				$Results[] = $Event;
@@ -60,7 +60,7 @@ class CalendarView {
 		$DaysInMonth = date('t', mktime(0 ,0 ,0, $Month, 1, $Year));
 		$DaysThisWeek = 1;
 		$DayCounter = 0;
-		$DatesArray = array();
+		$DatesArray = [];
 ?>
 
 		<table class="calendar">

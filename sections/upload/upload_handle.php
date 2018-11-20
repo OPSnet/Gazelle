@@ -32,7 +32,7 @@ define('QUERY_EXCEPTION', true); // Shut up debugging
 // This is used if the form doesn't validate, and when the time comes to enter	//
 // it into the database.														//
 
-$Properties = array();
+$Properties = [];
 $Type = $Categories[(int)$_POST['type']];
 $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
@@ -256,8 +256,8 @@ if (!is_uploaded_file($TorrentName) || !filesize($TorrentName)) {
 
 if ($Type == 'Music') {
     //extra torrent files
-    $ExtraTorrents = array();
-    $DupeNames = array();
+    $ExtraTorrents = [];
+    $DupeNames = [];
     $DupeNames[] = $_FILES['file_input']['name'];
 
     if (isset($_POST['extra_format']) && isset($_POST['extra_bitrate'])) {
@@ -302,14 +302,14 @@ if ($Type == 'Music') {
 $LogName = '';
 if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 	$MainArtistCount = 0;
-	$ArtistNames = array();
+	$ArtistNames = [];
 	$ArtistForm = array(
-		1 => array(),
-		2 => array(),
-		3 => array(),
-		4 => array(),
-		5 => array(),
-		6 => array()
+		1 => [],
+		2 => [],
+		3 => [],
+		4 => [],
+		5 => [],
+		6 => []
 	);
 	for ($i = 0, $il = count($Artists); $i < $il; $i++) {
 		if (trim($Artists[$i]) != '') {
@@ -324,7 +324,7 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 	}
 	if ($MainArtistCount < 1) {
 		$Err = 'Please enter at least one main artist';
-		$ArtistForm = array();
+		$ArtistForm = [];
 	}
 	$LogName .= Artists::display_artists($ArtistForm, false, true, false);
 } elseif ($Type == 'Music' && empty($ArtistForm)) {
@@ -350,7 +350,7 @@ if ($Err) { // Show the upload form, with the data the user entered
 
 // Strip out Amazon's padding
 $AmazonReg = '/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i';
-$Matches = array();
+$Matches = [];
 if (preg_match($RegX, $Properties['Image'], $Matches)) {
 	$Properties['Image'] = $Matches[1].'.jpg';
 }
@@ -360,7 +360,7 @@ ImageTools::blacklisted($Properties['Image']);
 //--------------- Make variables ready for database input ----------------------//
 
 // Shorten and escape $Properties for database input
-$T = array();
+$T = [];
 foreach ($Properties as $Key => $Value) {
 	$T[$Key] = "'".db_string(trim($Value))."'";
 	if (!$T[$Key]) {
@@ -408,8 +408,8 @@ list($TotalSize, $FileList) = $Tor->file_list();
 $NumFiles = count($FileList);
 $HasLog = 0;
 $HasCue = 0;
-$TmpFileList = array();
-$TooLongPaths = array();
+$TmpFileList = [];
+$TooLongPaths = [];
 $DirName = (isset($Tor->Dec['info']['files']) ? Format::make_utf8($Tor->get_name()) : '');
 $IgnoredLogFileNames = array('audiochecker.log', 'sox.log');
 check_name($DirName); // check the folder name against the blacklist
@@ -441,7 +441,7 @@ $FileString = db_string(implode("\n", $TmpFileList));
 $Debug->set_flag('upload: torrent decoded');
 
 if ($Type == 'Music') {
-	$ExtraTorrentsInsert = array();
+	$ExtraTorrentsInsert = [];
 	foreach ($ExtraTorrents as $ExtraTorrent) {
 		$Name = $ExtraTorrent['Name'];
 		$ExtraTorrentsInsert[$Name] = $ExtraTorrent;
@@ -464,7 +464,7 @@ if ($Type == 'Music') {
 		list($ExtraTotalSize, $ExtraFileList) = $ExtraTor->file_list();
 		$ExtraDirName = isset($ExtraTor->Dec['info']['files']) ? Format::make_utf8($ExtraTor->get_name()) : '';
 
-		$ExtraTmpFileList = array();
+		$ExtraTmpFileList = [];
 		foreach ($ExtraFileList as $ExtraFile) {
 			list($ExtraSize, $ExtraName) = $ExtraFile;
 
@@ -630,7 +630,7 @@ $IsNewGroup = !$GroupID;
 //----- Start inserts
 if (!$GroupID && $Type == 'Music') {
 	//array to store which artists we have added already, to prevent adding an artist twice
-	$ArtistsAdded = array();
+	$ArtistsAdded = [];
 	foreach ($ArtistForm as $Importance => $Artists) {
 		foreach ($Artists as $Num => $Artist) {
 			if (!$Artist['id']) {
@@ -746,7 +746,7 @@ if (!$Properties['GroupID']) {
 $LogScore = 100;
 $LogChecksum = 1;
 $LogInDB = 0;
-$LogScores = array();
+$LogScores = [];
 $Logchecker = new Logchecker();
 if ($HasLog) {
 	ini_set('upload_max_filesize', 1000000);
@@ -1050,7 +1050,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 // Manage notifications
-$UsedFormatBitrates = array();
+$UsedFormatBitrates = [];
 
 if (!$IsNewGroup) {
 	// maybe there are torrents in the same release as the new torrent. Let's find out (for notifications)
@@ -1090,8 +1090,8 @@ if (empty($ArtistsUnescaped)) {
 	$ArtistsUnescaped = $ArtistForm;
 }
 if (!empty($ArtistsUnescaped)) {
-	$ArtistNameList = array();
-	$GuestArtistNameList = array();
+	$ArtistNameList = [];
+	$GuestArtistNameList = [];
 	foreach ($ArtistsUnescaped as $Importance => $Artists) {
 		foreach ($Artists as $Artist) {
 			if ($Importance == 1 || $Importance == 4 || $Importance == 5 || $Importance == 6) {
@@ -1121,8 +1121,8 @@ if (!empty($ArtistsUnescaped)) {
 }
 
 reset($Tags);
-$TagSQL = array();
-$NotTagSQL = array();
+$TagSQL = [];
+$NotTagSQL = [];
 foreach ($Tags as $Tag) {
 	$TagSQL[] = " Tags LIKE '%|".db_string(trim($Tag))."|%' ";
 	$NotTagSQL[] = " NotTags LIKE '%|".db_string(trim($Tag))."|%' ";
@@ -1198,7 +1198,7 @@ $DB->query("
 list($Paranoia) = $DB->next_record();
 $Paranoia = unserialize($Paranoia);
 if (!is_array($Paranoia)) {
-	$Paranoia = array();
+	$Paranoia = [];
 }
 if (!in_array('notifications', $Paranoia)) {
 	$SQL .= " AND (Users LIKE '%|".$LoggedUser['ID']."|%' OR Users = '') ";
@@ -1215,7 +1215,7 @@ if ($DB->has_results()) {
 	$InsertSQL = '
 		INSERT IGNORE INTO users_notify_torrents (UserID, GroupID, TorrentID, FilterID)
 		VALUES ';
-	$Rows = array();
+	$Rows = [];
 	foreach ($UserArray as $User) {
 		list($FilterID, $UserID, $Passkey) = $User;
 		$Rows[] = "('$UserID', '$GroupID', '$TorrentID', '$FilterID')";

@@ -7,7 +7,7 @@ class ARTIST {
 	var $Displayed = false;
 	var $x = 0;
 	var $y = 0;
-	var $Similar = array();
+	var $Similar = [];
 
 	function __construct($ID = '', $Name = '') {
 		$this->ID = $ID;
@@ -17,7 +17,7 @@ class ARTIST {
 }
 
 class ARTISTS_SIMILAR extends ARTIST{
-	var $Artists = array();
+	var $Artists = [];
 	var $TotalScore = 0;
 
 	var $xValues = array(WIDTH=>1);
@@ -49,7 +49,7 @@ class ARTISTS_SIMILAR extends ARTIST{
 
 
 		// Get artists that are directly similar to the artist
-		$ArtistIDs = array();
+		$ArtistIDs = [];
 		G::$DB->query("
 			SELECT
 				s2.ArtistID,
@@ -113,7 +113,7 @@ class ARTISTS_SIMILAR extends ARTIST{
 	}
 
 	function set_positions() {
-		$xValues = array(); // Possible x values
+		$xValues = []; // Possible x values
 		$Root = ceil(WIDTH / 4); // Half-way into half of the image
 		$Offset = 4; // Distance from the root (a quarter of the way into the image) to the x value
 
