@@ -391,10 +391,10 @@ END_EMAIL;
                 ) r ON (r.UserID = u.ID)
                 INNER JOIN %s.%s uam ON (uam.UserID = u.ID)
                 LEFT  JOIN %s.%s irc ON (irc.UserID = u.ID)
-                LEFT  JOIN  users_buffer_log ubl ON (ubl.opsid = u.ID)
+                LEFT  JOIN  users_buffer_log ubl ON (ubl.aplid = u.ID)
                 WHERE NOT uam.buffer
                     AND uam.UserID > 1
-                    AND ubl.opsid IS NULL
+                    AND ubl.aplid IS NULL
                 GROUP BY u.id
             ) HIST
             LIMIT ?
