@@ -31,4 +31,4 @@ class CRYPT {
 		}
 	}
 } // class ENCRYPT()
-?>
+

@@ -308,4 +308,4 @@ if (!empty($_REQUEST['action'])) {
 		include(SERVER_ROOT.'/sections/torrents/browse.php');
 	}
 }
-?>
+

@@ -44,4 +44,4 @@ if ($_POST['submit'] === 'Delete') { // Delete
 
 // Go back
 header('Location: tools.php?action=email_blacklist')
-?>
+

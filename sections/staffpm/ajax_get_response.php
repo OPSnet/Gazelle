@@ -34,4 +34,4 @@ if ($ID = (int)$_GET['id']) {
 	// No ID
 	echo '-1';
 }
-?>
+

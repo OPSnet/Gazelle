@@ -117,4 +117,4 @@ EOT;
 }
 
 header('Location: user.php?action=invite');
-?>
+

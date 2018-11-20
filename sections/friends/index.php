@@ -28,4 +28,4 @@ if (!empty($_REQUEST['action'])) {
 } else {
 	include(SERVER_ROOT.'/sections/friends/friends.php');
 }
-?>
+

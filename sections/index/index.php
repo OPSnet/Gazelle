@@ -14,4 +14,4 @@ if (isset($LoggedUser['ID'])) {
 } else {
 	include('public.php');
 }
-?>
+

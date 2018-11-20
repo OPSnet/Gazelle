@@ -32,4 +32,4 @@ list($Body) = $DB->next_record(MYSQLI_NUM);
 
 echo trim($Body);
 
-?>
+

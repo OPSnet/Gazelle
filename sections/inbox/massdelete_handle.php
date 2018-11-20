@@ -60,4 +60,4 @@ if (isset($_POST['delete'])) {
 $Cache->delete_value('inbox_new_'.$UserID);
 
 header('Location: ' . Inbox::get_inbox_link());
-?>
+

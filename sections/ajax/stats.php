@@ -131,4 +131,4 @@ json_print("success", [
 	'seederCount' => (int) $SeederCount,
 	'leecherCount' => (int) $LeecherCount
 ]);
-?>
+

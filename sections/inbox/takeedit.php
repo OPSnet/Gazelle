@@ -43,4 +43,4 @@ if (isset($_POST['delete'])) {
 	}
 }
 header('Location: ' . Inbox::get_inbox_link());
-?>
+

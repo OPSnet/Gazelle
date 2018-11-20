@@ -38,4 +38,4 @@ if (!Forums::check_forumperm($ForumID)) {
 
 echo trim($Body);
 
-?>
+

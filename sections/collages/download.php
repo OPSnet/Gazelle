@@ -165,4 +165,4 @@ if (!isset($LoggedUser['Collector']) || $LoggedUser['Collector'] != $Settings) {
 }
 
 define('SKIP_NO_CACHE_HEADERS', 1);
-?>
+

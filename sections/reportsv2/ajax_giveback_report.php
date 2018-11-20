@@ -18,4 +18,4 @@ if (isset($Status)) {
 		SET Status = 'New', ResolverID = 0
 		WHERE ID = ".$_GET['id']);
 }
-?>
+

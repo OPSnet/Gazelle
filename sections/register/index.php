@@ -268,4 +268,4 @@ if (!empty($_REQUEST['confirm'])) {
 		include('closed.php');
 	}
 }
-?>
+

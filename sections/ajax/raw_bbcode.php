@@ -23,4 +23,4 @@ if (!Forums::check_forumperm($ForumID)) {
 
 json_die("success", ["body" => nl2br($Body)]);
 
-?>
+

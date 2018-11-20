@@ -89,4 +89,4 @@ if ($LoggedUser['BytesUploaded'] >= $Amount && $Filled === '0') {
 	echo 'bankrupt';
 }
 
-?>
+

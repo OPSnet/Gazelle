@@ -48,4 +48,4 @@ if (!$DB->has_results()) {
 	header("Location: inbox.php?action=viewconv&id=$ConvID");
 }
 //View::show_footer();
-?>
+

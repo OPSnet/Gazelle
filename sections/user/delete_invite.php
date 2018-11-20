@@ -33,4 +33,4 @@ if (!check_perms('site_send_unlimited_invites')) {
 	}
 }
 header('Location: user.php?action=invite');
-?>
+

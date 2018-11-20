@@ -31,4 +31,4 @@ $DB->query("
 		PostID = LastPostID");
 $Cache->delete_value('subscriptions_user_new_'.$LoggedUser['ID']);
 header('Location: userhistory.php?action=subscriptions');
-?>
+

@@ -66,4 +66,4 @@ function ajax_success() {
 	echo json_encode(['status' => 'success']);
 	die();
 }
-?>
+

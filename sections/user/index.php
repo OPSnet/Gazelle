@@ -253,4 +253,4 @@ switch ($_REQUEST['action']) {
 			header("Location: user.php?id={$LoggedUser['ID']}");
 		}
 }
-?>
+

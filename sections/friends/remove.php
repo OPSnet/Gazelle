@@ -5,4 +5,4 @@ $DB->query("
 		AND FriendID='$P[friendid]'");
 
 header('Location: friends.php');
-?>
+

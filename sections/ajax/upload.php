@@ -39,4 +39,4 @@ switch ($UploadForm) {
 		echo 'Invalid action!';
 }
 
-?>
+

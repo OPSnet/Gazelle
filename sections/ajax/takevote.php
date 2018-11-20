@@ -213,4 +213,4 @@ if ($_REQUEST['do'] == 'vote') {
 		echo 'success-down';
 	}
 }
-?>
+

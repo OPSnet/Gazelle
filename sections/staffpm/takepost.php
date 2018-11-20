@@ -81,4 +81,4 @@ if ($Message = db_string($_POST['message'])) {
 	// No message or conversation ID
 	error('You have not entered a message for your StaffPM. Please go back and do so.');
 }
-?>
+

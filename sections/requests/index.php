@@ -47,4 +47,4 @@ if (!isset($_REQUEST['action'])) {
 			error(0);
 	}
 }
-?>
+

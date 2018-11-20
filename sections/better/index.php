@@ -51,4 +51,4 @@ if (isset($_GET['method'])) {
 } else {
 	include(SERVER_ROOT.'/sections/better/better.php');
 }
-?>
+

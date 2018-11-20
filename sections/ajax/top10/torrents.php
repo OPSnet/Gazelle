@@ -206,4 +206,4 @@ function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
 		'results' => $results
     ];
 }
-?>
+

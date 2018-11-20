@@ -43,4 +43,4 @@ switch ($_REQUEST['dupeaction']) {
 }
 echo '\o/';
 header("Location: user.php?id=$UserID");
-?>
+

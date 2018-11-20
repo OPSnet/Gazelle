@@ -86,4 +86,4 @@ if (!empty($Updates)) {
 }
 $Cache->delete_value('collage_'.$CollageID);
 header('Location: collages.php?id='.$CollageID);
-?>
+

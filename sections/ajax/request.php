@@ -153,4 +153,4 @@ json_print('success', [
 	'recordLabel' => $Request['RecordLabel'],
 	'oclc' => $Request['OCLC']
 ]);
-?>
+

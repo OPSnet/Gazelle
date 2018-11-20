@@ -25,4 +25,4 @@ if ($_GET['forumid'] == 'all') {
 
 	header('Location: forums.php?action=viewforum&forumid='.$_GET['forumid']);
 }
-?>
+

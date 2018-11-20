@@ -88,4 +88,4 @@ foreach ($Channels as $Channel) {
 $Cache->delete_value('num_other_reports');
 
 header("Location: $Link");
-?>
+

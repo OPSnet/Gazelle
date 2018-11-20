@@ -71,4 +71,4 @@ if (!empty($_REQUEST['action'])) {
 	include('article.php');
 	//include('splash.php');
 }
-?>
+

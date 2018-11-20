@@ -15,4 +15,4 @@ if (!isset($_REQUEST['action'])) {
 			break;
 	}
 }
-?>
+

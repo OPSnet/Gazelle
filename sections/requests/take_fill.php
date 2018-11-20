@@ -225,4 +225,4 @@ $SphQL->raw_query("UPDATE requests, requests_delta SET torrentid = $TorrentID, f
 
 
 header("Location: requests.php?action=view&id=$RequestID");
-?>
+

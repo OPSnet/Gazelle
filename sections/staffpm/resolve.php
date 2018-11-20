@@ -25,4 +25,4 @@ if ($ID = (int)($_GET['id'])) {
 	// No ID
 	header('Location: staffpm.php');
 }
-?>
+

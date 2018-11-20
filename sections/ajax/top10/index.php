@@ -26,4 +26,4 @@ if (empty($_GET['type']) || $_GET['type'] == 'torrents') {
 			break;
 	}
 }
-?>
+

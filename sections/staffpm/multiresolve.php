@@ -37,4 +37,4 @@ if ($IDs = $_POST['id']) {
 	// No ID
 	header("Location: staffpm.php");
 }
-?>
+

@@ -1131,4 +1131,4 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		return $Reports;
 	}
 }
-?>
+

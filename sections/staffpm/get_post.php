@@ -35,4 +35,4 @@ if (($LoggedUser['ID'] == $UserID) || ($IsFLS && $LoggedUser['Class'] >= $Level)
 	error(403);
 }
 
-?>
+

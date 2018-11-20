@@ -74,4 +74,4 @@ if ($GroupID) {
 }
 
 header('Location: requests.php');
-?>
+

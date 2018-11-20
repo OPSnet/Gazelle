@@ -9,4 +9,4 @@ if (empty($_GET['type']) || $_GET['type'] == 'inbox' || $_GET['type'] == 'sentbo
 	die();
 }
 
-?>
+

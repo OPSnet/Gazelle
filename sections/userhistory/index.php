@@ -124,4 +124,4 @@ users_history_stats:
 	timestamp
 
 */
-?>
+

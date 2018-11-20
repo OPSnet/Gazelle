@@ -35,4 +35,4 @@ if (isset($_GET['method'])) {
 } else {
 	print json_encode(['status' => 'failure']);
 }
-?>
+

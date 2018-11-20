@@ -40,4 +40,4 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/reports/reports.php');
 		break;
 }
-?>
+

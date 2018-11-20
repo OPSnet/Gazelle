@@ -137,4 +137,4 @@ $Cache->delete_value("reports_torrent_$TorrentID");
 
 $Cache->increment('num_torrent_reportsv2');
 header("Location: torrents.php?torrentid=$TorrentID");
-?>
+

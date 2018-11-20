@@ -87,4 +87,4 @@ if (count($CleanArtists) > 0) {
 	Torrents::update_hash($GroupID);
 	header("Location: torrents.php?id=$GroupID");
 }
-?>
+

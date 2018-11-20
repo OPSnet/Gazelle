@@ -60,4 +60,4 @@ $Cache->delete_value('whitelisted_clients');
 
 // Go back
 header('Location: tools.php?action=whitelist')
-?>
+

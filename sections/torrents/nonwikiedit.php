@@ -77,4 +77,4 @@ Torrents::update_hash($GroupID);
 $Cache->delete_value("torrents_details_$GroupID");
 
 header("Location: torrents.php?id=$GroupID");
-?>
+

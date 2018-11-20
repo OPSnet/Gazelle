@@ -51,4 +51,4 @@ function make_captcha_img() {
 }
 
 $_SESSION['captcha'] = make_captcha_img();
-?>
+

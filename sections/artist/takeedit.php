@@ -66,4 +66,4 @@ $DB->query("
 // There we go, all done!
 $Cache->delete_value("artist_$ArtistID"); // Delete artist cache
 header("Location: artist.php?id=$ArtistID");
-?>
+

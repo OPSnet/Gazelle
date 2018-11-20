@@ -28,4 +28,4 @@ if ($ID = (int)$_POST['id']) {
 	// No ID
 	echo '-1';
 }
-?>
+

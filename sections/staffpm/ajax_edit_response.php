@@ -55,4 +55,4 @@ if (($Message = db_string($_POST['message'])) && ($Name = db_string($_POST['name
 	// No message/name
 	echo '-1';
 }
-?>
+

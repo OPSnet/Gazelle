@@ -386,4 +386,4 @@ class VALIDATE {
 		return $ReturnJS;
 	}
 }
-?>
+

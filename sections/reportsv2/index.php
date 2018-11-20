@@ -63,4 +63,4 @@ if (isset($_REQUEST['action'])) {
 		include(SERVER_ROOT.'/sections/reportsv2/views.php');
 	}
 }
-?>
+

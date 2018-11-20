@@ -194,4 +194,4 @@ switch ($_GET['feed']) {
 		}
 }
 $Feed->close_feed();
-?>
+

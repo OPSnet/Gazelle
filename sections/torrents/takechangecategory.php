@@ -120,4 +120,4 @@ $DB->query("
 	WHERE GroupID = $OldGroupID");
 
 header("Location: torrents.php?id=$GroupID");
-?>
+

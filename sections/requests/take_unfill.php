@@ -96,4 +96,4 @@ $SphQL->raw_query("
 		WHERE id = $RequestID", false);
 
 header("Location: requests.php?action=view&id=$RequestID");
-?>
+

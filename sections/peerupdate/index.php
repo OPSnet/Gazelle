@@ -103,4 +103,4 @@ if (check_perms('admin_schedule')) {
 	echo '<pre>';
 	View::show_footer();
 }
-?>
+

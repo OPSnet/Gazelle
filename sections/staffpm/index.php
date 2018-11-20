@@ -73,4 +73,4 @@ switch ($_REQUEST['action']) {
 		break;
 }
 
-?>
+

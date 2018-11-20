@@ -190,4 +190,4 @@ if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) !== false
 	$Cache->delete_value('notify_artists_'.$LoggedUser['ID']);
 }
 header('Location: user.php?action=notify');
-?>
+

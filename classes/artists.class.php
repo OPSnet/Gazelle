@@ -282,4 +282,4 @@ class Artists {
 		return trim(preg_replace('/ +/', ' ', $ArtistName));
 	}
 }
-?>
+

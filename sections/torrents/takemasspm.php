@@ -59,4 +59,4 @@ Misc::write_log($LoggedUser['Username']." sent mass notice to snatchers of torre
 
 header("Location: torrents.php?id=$GroupID");
 
-?>
+
