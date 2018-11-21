@@ -274,7 +274,7 @@ input[type=submit] {
 	height: 32px;
 	font-weight: 600;
 	border: none;
-	border-radius: 1.5px;
+	border-radius: 2px;
 	color: #252F32;
 	background: linear-gradient(#f0f0f0, #b8b8b8);
 	cursor: pointer
@@ -1168,7 +1168,7 @@ table.box2 {
 }
 
 .tooltipster-default {
-	border-radius: 2.5px;
+	border-radius: 3px;
 	border: 0 solid #83e4a6;
     color: #c6c9c9;
 	background-color: #041813
@@ -1626,7 +1626,7 @@ blockquote {
 
 #searchbars .search_form input {
 	height: 30px;
-	border-radius: 2.5px;
+	border-radius: 3px;
 	border: none
 }
 

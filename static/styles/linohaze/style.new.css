@@ -795,7 +795,7 @@ logo a:focus {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
-	width: 133.5px;
+	width: 134px;
 	height: 34px;
 	margin: 0;
 	padding: 11px;
@@ -2523,7 +2523,7 @@ body {
 
 select {
 	-moz-appearance: none;
-	text-indent: .01px
+	text-indent: 0px
 }
 
 
