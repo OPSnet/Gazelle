@@ -41,7 +41,7 @@ list($Results) = $DB->next_record();
 $DB->set_query_id($RS);
 
 if ($DB->has_results()) {
-}
+
 ?>
     <div class="linkbox">
 <?
