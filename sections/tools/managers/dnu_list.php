@@ -18,7 +18,7 @@ $DB->query("
 	?>
 	<div class="header">
 		<h2><?=($Title)?></h2>
-		<center><p>Drag and drop table rows to reorder.</p></center>
+		<div style="text-align: center;"><p>Drag and drop table rows to reorder.</p></div>
 	</div>
 	<table id="dnu">
 		<tr class="colhead">

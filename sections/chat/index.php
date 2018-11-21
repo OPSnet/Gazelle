@@ -56,7 +56,8 @@ if (empty($IRCKey)) {
 		<div style="padding: 0 10px 10px 20px;">
 			<p>If you have an IRC client, refer to <a href="wiki.php?action=article&amp;name=IRC+-+How+to+join">this wiki article</a> for information on how to connect. (IRC applet users are automatically identified with Drone.)</p>
 		</div>
-		<applet codebase="static/irc/" code="IRCApplet.class" archive="irc.jar,sbox.jar" width="800" height="600" align="center">
+		<object width="800" height="600" align="center" classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
+                codebase="http://java.sun.com/products/plugin/autodl/jinstall-1_4-windows-i586.cab#Version=1,4,0,0">
 			<param name="nick" value="<?=$nick?>" />
 			<param name="alternatenick" value="WhatGuest????" />
 			<param name="name" value="Java IRC User" />
@@ -69,7 +70,30 @@ if (empty($IRCKey)) {
 			<param name="pixx:highlightnick" value="true" />
 			<param name="pixx:prefixops" value="true" />
 			<param name="sbox:scrollspeed" value="5" />
-		</applet>
+            <param name="codebase" value="static/irc/"/>
+            <param name="code" value="IRCApplet"/>
+            <param name="archive" value="irc.jar,sbox.jar"/>
+
+            <!--[if !IE]> -->
+            <object width="800" height="600" align="center" type="application/x-java-applet">
+                <param name="nick" value="<?=$nick?>"/>
+                <param name="alternatenick" value="WhatGuest????"/>
+                <param name="name" value="Java IRC User"/>
+                <param name="host" value="<?=BOT_SERVER?>"/>
+                <param name="multiserver" value="true"/>
+                <param name="autorejoin" value="false"/>
+
+                <param name="gui" value="sbox"/>
+                <param name="pixx:highlight" value="true"/>
+                <param name="pixx:highlightnick" value="true"/>
+                <param name="pixx:prefixops" value="true"/>
+                <param name="sbox:scrollspeed" value="5"/>
+                <param name="codebase" value="static/irc/"/>
+                <param name="code" value="IRCApplet"/>
+                <param name="archive" value="irc.jar,sbox.jar"/>
+            </object>
+            <!-- <![endif]-->
+        </object>
 	</div>
 </div>
 <?
