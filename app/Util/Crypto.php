@@ -11,25 +11,22 @@ class Crypto {
 	}
 
 	public static function dbEncrypt($plaintext) {
-		if (apcu_exists('DB_KEY')) {
-			return Crypto::encrypt($plaintext, apcu_fetch('DB_KEY'));
-		} else {
-			return false;
-		}
+		return apcu_exists('DB_KEY') ? Crypto::encrypt($plaintext, apcu_fetch('DB_KEY')) : false;
 	}
 
 	public static function decrypt($ciphertext, $key) {
+		if (empty($ciphertext)) {
+			return '';
+		}
+
+		$data = base64_decode($ciphertext);
 		$iv_size = openssl_cipher_iv_length('AES-128-CBC');
-		$iv = substr(base64_decode($ciphertext), 0, $iv_size);
-		$ciphertext = substr(base64_decode($ciphertext), $iv_size);
-		return openssl_decrypt($ciphertext, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
+		$iv = substr($data, 0, $iv_size);
+		return openssl_decrypt(substr($data, $iv_size), 'AES-128-CBC', $key,
+			OPENSSL_RAW_DATA, $iv);
 	}
 
 	public static function dbDecrypt($ciphertext) {
-		if (apcu_exists('DB_KEY')) {
-			return Crypto::decrypt($ciphertext, apcu_fetch('DB_KEY'));
-		} else {
-			return false;
-		}
+		return apcu_exists('DB_KEY') ? Crypto::decrypt($ciphertext, apcu_fetch('DB_KEY')) : false;
 	}
 }

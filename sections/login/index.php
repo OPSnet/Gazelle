@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Crypto;
+
 /*-- TODO ---------------------------//
 Add the JavaScript validation into the display page using the class
 //-----------------------------------*/
@@ -178,7 +180,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
 		$Recovery = (!empty($Recovery)) ? unserialize($Recovery) : array();
 		if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) !== false) {
 			$SessionID = Users::make_secret();
-			$Cookie = $Enc->encrypt($Enc->encrypt($SessionID . '|~|' . $UserID));
+			$Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
 			if ($_SESSION['temp_stay_logged']) {
 				$KeepLogged = 1;
 				setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
@@ -332,7 +334,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
 			header('Location: login.php?invalid2fa');
 		} else {
 			$SessionID = Users::make_secret();
-			$Cookie = $Enc->encrypt($Enc->encrypt($SessionID . '|~|' . $UserID));
+			$Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
 
 			if ($_SESSION['temp_stay_logged']) {
 				$KeepLogged = 1;
@@ -507,7 +509,7 @@ else {
 
 					if ($Enabled == 1) {
 						$SessionID = Users::make_secret();
-						$Cookie = $Enc->encrypt($Enc->encrypt($SessionID . '|~|' . $UserID));
+						$Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
 
 						if ($TFAKey) {
 							// user has TFA enabled! :)

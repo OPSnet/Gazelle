@@ -1,20 +1,20 @@
 <?
+use Gazelle\Util\Crypto;
+
 require 'config.php'; //The config contains all site wide configuration information as well as memcached rules
 require(SERVER_ROOT.'/classes/debug.class.php');
 require(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
-require(SERVER_ROOT.'/classes/encrypt.class.php'); //Require the caching class
 
 $Debug = new DEBUG;
 $Cache = NEW CACHE($MemcachedServers); //Load the caching class
-$Enc = NEW CRYPT; //Load the encryption class
 
 $SSL = $_SERVER['SERVER_PORT'] === '443';
 
 if (isset($_COOKIE['session'])) {
-	$LoginCookie = $Enc->decrypt($_COOKIE['session']);
+	$LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
 }
 if (isset($LoginCookie)) {
-	list($SessionID, $UserID) = explode("|~|", $Enc->decrypt($LoginCookie));
+	list($SessionID, $UserID) = explode("|~|", Crypto::decrypt($LoginCookie, ENCKEY));
 
 	if (!$UserID || !$SessionID) {
 		die('Not logged in!');

@@ -11,6 +11,12 @@
 /*------------------------------------------------------*/
 /********************************************************/
 require 'config.php'; //The config contains all site wide configuration information
+
+// Autoload classes.
+require(SERVER_ROOT.'/classes/classloader.php');
+
+use Gazelle\Util\Crypto;
+
 //Deal with dumbasses
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
 	die('d14:failure reason40:Invalid .torrent, try downloading again.e');
@@ -67,7 +73,6 @@ set_include_path(SERVER_ROOT);
 require(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
 require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
 require(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
-require(SERVER_ROOT.'/classes/encrypt.class.php'); //Require the encryption class
 require(SERVER_ROOT.'/classes/time.class.php'); //Require the time class
 require(SERVER_ROOT.'/classes/paranoia.class.php'); //Require the paranoia check_paranoia function
 require(SERVER_ROOT.'/classes/regex.php');
@@ -79,10 +84,6 @@ $Debug->set_flag('Debug constructed');
 
 $DB = new DB_MYSQL;
 $Cache = new CACHE($MemcachedServers);
-$Enc = new CRYPT;
-
-// Autoload classes.
-require(SERVER_ROOT.'/classes/classloader.php');
 
 G::$Cache = $Cache;
 G::$DB = $DB;
@@ -125,10 +126,10 @@ list($Classes, $ClassLevels) = Users::get_classes();
 // Permissions
 
 if (isset($_COOKIE['session'])) {
-	$LoginCookie = $Enc->decrypt($_COOKIE['session']);
+	$LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
 }
 if (isset($LoginCookie)) {
-	list($SessionID, $LoggedUser['ID']) = explode('|~|', $Enc->decrypt($LoginCookie));
+	list($SessionID, $LoggedUser['ID']) = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
 	$LoggedUser['ID'] = (int)$LoggedUser['ID'];
 
 	$UserID = $LoggedUser['ID']; //TODO: UserID should not be LoggedUser
