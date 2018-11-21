@@ -111,7 +111,7 @@ $DB->query("
 list($NewDNU) = $DB->next_record();
 $HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
 ?>
-<div class="<?=(check_perms('torrents_hide_dnu') ? 'box pad' : '')?>" style="margin: 0px auto; width: 700px;">
+<div class="<?=(check_perms('torrents_hide_dnu') ? 'box pad' : '')?>" style="margin: 0 auto; width: 700px;">
 	<h3 id="dnu_header">Do Not Upload List</h3>
 	<p><?=$NewDNU ? '<strong class="important_text">' : '' ?>Last updated: <?=time_diff($Updated)?><?=$NewDNU ? '</strong>' : '' ?></p>
 	<p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the comment.

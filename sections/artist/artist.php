@@ -548,7 +548,7 @@ if (check_perms('site_torrents_notify')) {
 <?	if ($Image) { ?>
 		<div class="box box_image">
 			<div class="head"><strong><?=$Name?></strong></div>
-			<div style="text-align: center; padding: 10px 0px;">
+			<div style="text-align: center; padding: 10px 0;">
 				<img style="max-width: 220px;" src="<?=ImageTools::process($Image, true)?>" alt="<?=$Name?>" onclick="lightbox.init('<?=ImageTools::process($Image)?>', 220);" />
 			</div>
 		</div>

@@ -13,8 +13,8 @@
 /* Global */
 
 * {
-	padding: 0em;
-	margin: 0em;
+	padding: 0;
+	margin: 0;
 }
 
 html {
@@ -64,7 +64,7 @@ a.similar_artist:hover {
 }
 
 h1,h2,h3,h4 {
-	margin: 5px 0px;
+	margin: 5px 0;
 	font-weight: bold;
 }
 
@@ -159,20 +159,20 @@ span.size10 {
 }
 
 ul.thin {
-	margin: 0px 0px 0px 25px;
-	padding: 0px;
+	margin: 0 0 0 25px;
+	padding: 0;
 }
 
 ul.thin li {
-	margin: 0px 0px;
-	padding: 0px;
+	margin: 0 0;
+	padding: 0;
 }
 
 /* Layout (Every page) */
 
 #header {
 	width: 100%;
-	padding: 0px 0 0 0;
+	padding: 0 0 0 0;
 }
 
 #content {
@@ -187,7 +187,7 @@ ul.thin li {
 
 #wrapper {
 	width: 90%;
-	margin: 0px auto;
+	margin: 0 auto;
 }
 
 #footer {
@@ -202,7 +202,7 @@ ul.thin li {
 	width: 220px;
 	height: 50px;
 	background: url('data:image/png;base64,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') no-repeat center center;
-	margin: 5px auto 0px auto;
+	margin: 5px auto 0 auto;
 }
 
 #logo a {
@@ -232,7 +232,7 @@ ul.thin li {
 	display: inline;
 	background-color: #454545;
 	padding: 6px 0;
-	margin: 0px;
+	margin: 0;
 }
 
 #index #nav_index, #torrents #nav_torrents, #requests #nav_requests, #forums #nav_forums, #top10 #nav_top10, #rules #nav_rules, #wiki #nav_wiki, #staff #nav_staff, #collage #nav_collages, #chat #nav_irc {
@@ -256,7 +256,7 @@ ul.thin li {
 	width: 100%;
 	text-align: center;
 	font-size: 8pt;
-	padding: 3px 0px;
+	padding: 3px 0;
 	z-index: 10;
 	min-width: 850px;
 }
@@ -267,7 +267,7 @@ ul.thin li {
 
 #userinfo ul {
 	display: inline;
-	margin: 0px 0.8%;
+	margin: 0 0.8%;
 	padding: 4px;
 }
 
@@ -315,7 +315,7 @@ ul.thin li {
 	width: 90%;
 	text-align: center;
 	background-color: #303030;
-	padding: 4px 0px;
+	padding: 4px 0;
 	min-width: 850px;
 }
 
@@ -335,7 +335,7 @@ ul.thin li {
 
 #searchbars ul li {
 	display: inline;
-	margin: 0px 1px;
+	margin: 0 1px;
 	list-style: none;
 	position: relative;
 }
@@ -370,7 +370,7 @@ ul.thin li {
 	position: relative;
 	margin-top: 60px;
 	margin-bottom: -60px;
-	padding: 10px 0px;
+	padding: 10px 0;
 	width: 100%;
 	background-color: #303030;
 	min-width: 850px;
@@ -403,7 +403,7 @@ ul.thin li {
 	font-weight: bold;
 	font-size: 0.95em;
 	width: 350px;
-	margin: 0px auto 0px auto;
+	margin: 0 auto 0 auto;
 	padding: 10px;
 }
 
@@ -433,12 +433,12 @@ input.hidden {
 
 .thin {
 	width: 850px;
-	margin: 0px auto;
+	margin: 0 auto;
 }
 
 .widethin { /* overriding the thin class on torrents.php */
 	width: 95% !important;
-	margin: 0px auto;
+	margin: 0 auto;
 }
 
 #userinfo_major .brackets:before {
@@ -463,12 +463,12 @@ div.linkbox {
 }
 
 .min_padding {
-	padding: 0px;
-	margin: 0px 0px;
+	padding: 0;
+	margin: 0 0;
 }
 
 p.min_padding {
-	margin: 2px 0px;
+	margin: 2px 0;
 }
 
 .pad {
@@ -498,8 +498,8 @@ p.min_padding {
 }
 
 .pad h3,.pad h4,.padbox h3,.padbox h4 {
-	margin-top: 0px;
-	padding-top: 0px;
+	margin-top: 0;
+	padding-top: 0;
 }
 
 .sidebar {
@@ -527,7 +527,7 @@ p.min_padding {
 }
 
 .tags {
-	padding: 0px 0px 0px 20px;
+	padding: 0 0 0 20px;
 	font-style: italic;
 }
 
@@ -581,7 +581,7 @@ td.colhead,.colhead td, .colhead th {
 }
 
 .colhead .sign {
-	padding: 0px 8px 0px 8px;
+	padding: 0 8px 0 8px;
 	font-size: 12pt;
 	font-weight: bold;
 	vertical-align: middle;
@@ -609,7 +609,7 @@ table.slice {
 
 .error_message {
 	border: 1px solid #666;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #AF2525;
 	text-align: center;
 	color: white;
@@ -618,7 +618,7 @@ table.slice {
 
 .save_message {
 	border: 1px solid #666;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #F4E649;
 	text-align: center;
 	color: #492802;
@@ -636,12 +636,12 @@ table.slice {
 /* Layout (home page) */
 
 ul.stats li {
-	padding: 0px 0px 1px 0px;
+	padding: 0 0 1px 0;
 }
 
 ul.poll li {
-	padding: 0px 0px 0px 10px;
-	margin: 0px;
+	padding: 0 0 0 10px;
+	margin: 0;
 	clear: left;
 }
 
@@ -694,7 +694,7 @@ ul.poll li.graph {
 }
 
 .colhead .sign, .colhead_dark .sign {
-	padding: 0px 8px 0px 8px;
+	padding: 0 8px 0 8px;
 	vertical-align:middle;
 	text-align:center;
 	font-size: 12pt;
@@ -742,7 +742,7 @@ ul.poll li.graph {
 strong.quoteheader{color: #999; }
 
 table.forum_post {
-	margin: 10px 0px;
+	margin: 10px 0;
 }
 
 table.forum_post td {
@@ -755,7 +755,7 @@ table.forum_unread {
 
 td.avatar {
 	width: 150px;
-	padding: 0px;
+	padding: 0;
 }
 
 table.forum_post td.body {
@@ -799,7 +799,7 @@ tr.unreadpm {
 }
 
 .permission_container input {
-	margin: 0px 3px 5px 0px;
+	margin: 0 3px 5px 0;
 	vertical-align: top;
 }
 
@@ -811,7 +811,7 @@ tr.unreadpm {
 /* Layout (Invite tree) */
 
 ul .invitetree {
-	margin: 0px 0px 0px 25px;
+	margin: 0 0 0 25px;
 }
 
 .invitetree li {
@@ -832,16 +832,16 @@ ul .invitetree {
 	height: 9px;
 	background: url('data:image/gif;base64,R0lGODlhAgAJAJEDAMXR/9Td/8nJyf///yH5BAEAAAMALAAAAAACAAkAAAIHnAQSirxgCgA7') no-repeat center center;
 	float: left;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 }
 
 .center_poll {
 	height: 9px;
 	background: url('data:image/gif;base64,R0lGODlhAgAJAJEAAMnJycXR/9Td/wAAACH5BAAAAAAALAAAAAACAAkAAAIHBBKigsthCgA7') repeat;
 	float: left;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 }
 
 .right_poll {
@@ -849,14 +849,14 @@ ul .invitetree {
 	height: 9px;
 	background: url('data:image/gif;base64,R0lGODlhAgAJAJEDAMXR/9Td/8nJyf///yH5BAEAAAMALAAAAAACAAkAAAIH1CCRgqpoCgA7') no-repeat center center;
 	float: left;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 }
 
 .curtain {
 	position: fixed;
-	top: 0%;
-	left: 0%;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 100%;
 	background-color: black;
@@ -873,7 +873,7 @@ ul .invitetree {
 	left: 5%;
 	width: 90%;
 	height: 90%;
-	padding: 0px;
+	padding: 0;
 	z-index: 1002;
 	overflow: auto;
 }

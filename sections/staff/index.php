@@ -19,7 +19,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 	<div class="header">
 		<h2><?=SITE_NAME?> Staff</h2>
 	</div>
-	<div class="box pad" style="padding: 0px 10px 10px 10px;">
+	<div class="box pad" style="padding: 0 10px 10px 10px;">
 		<br />
 		<h3>Contact Staff</h3>
 		<div id="below_box">
@@ -29,7 +29,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 			<p>If you are looking to ask staff a question which isn't fit for a Staff PM or support area, <a href='questions.php'>you can use our questions feature</a>.</p>
 		</div>
 	</div>
-	<div class="box pad" style="padding: 0px 10px 10px 10px;">
+	<div class="box pad" style="padding: 0 10px 10px 10px;">
 		<? View::parse('generic/reply/staffpm.php', ['Hidden' => true]); ?>
 		<br />
 		<h2 style="text-align: left;">Community Help</h2>
@@ -59,7 +59,7 @@ foreach ($Staff as $SectionName => $StaffSection) {
         continue;
     }
 ?>
-<div class="box pad" style="padding: 0px 10px 10px 10px;">
+<div class="box pad" style="padding: 0 10px 10px 10px;">
 <h2 style='text-align: left;'><?=$SectionName?></h2>
 <?
 $CurClass = 0;

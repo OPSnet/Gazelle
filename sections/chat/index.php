@@ -52,8 +52,8 @@ if (empty($IRCKey)) {
 	<div class="header">
 		<h3 id="general">IRC</h3>
 	</div>
-	<div class="box pad" style="padding: 10px 0px 10px 0px;">
-		<div style="padding: 0px 10px 10px 20px;">
+	<div class="box pad" style="padding: 10px 0 10px 0;">
+		<div style="padding: 0 10px 10px 20px;">
 			<p>If you have an IRC client, refer to <a href="wiki.php?action=article&amp;name=IRC+-+How+to+join">this wiki article</a> for information on how to connect. (IRC applet users are automatically identified with Drone.)</p>
 		</div>
 		<applet codebase="static/irc/" code="IRCApplet.class" archive="irc.jar,sbox.jar" width="800" height="600" align="center">

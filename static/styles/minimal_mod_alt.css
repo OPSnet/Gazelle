@@ -293,8 +293,8 @@ textarea.wbbarea {
 
 #userinfo_stats {
 	position: fixed!important;
-	bottom: 0px!important;
-	right: 0px!important;
+	bottom: 0 !important;
+	right: 0 !important;
 	z-index: 1!important;
 	height: 28px;
 	width: 100%;
@@ -426,7 +426,7 @@ textarea.wbbarea {
 }
 
 #searchbars ul li:last-of-type {
-	margin-right: 0px!important;
+	margin-right: 0 !important;
 }
 
 #searchbars form {

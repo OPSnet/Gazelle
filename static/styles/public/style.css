@@ -29,7 +29,7 @@ a:hover {
 }
 
 input[type="text"], input[type="password"] {
-	padding: 1px 3px 0px 3px;
+	padding: 1px 3px 0 3px;
 	font-family: "tahoma", "arial", "helvetica", "sans-serif";
 	font-size: 8pt;
 	width: 200px;

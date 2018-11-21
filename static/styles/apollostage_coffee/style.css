@@ -592,7 +592,7 @@ table.box2 {
 
 #logo>a {
 	display: block;
-	margin-top: 0px;
+	margin-top: 0;
 	height: 100%;
 	background-size: 200px;
 }

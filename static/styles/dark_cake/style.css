@@ -11,8 +11,8 @@
 .cats_music { width: 28px; height: 28px; background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAM1BMVEVHcEy5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm1IActAAAAEHRSTlMAz2AwQCCfv4DvrxBwUN+PBqZfWQAAAKZJREFUKM+9klkSBCEIQ91x1/uftku0HTIHaP5iSnwElfqyiqtBTziiuCoTTa4kPT+xSJrtz4zSjGD11ODJfaqJRnReTSvN5KSyE3mKlAZ4nIa5xgCegEMbqXIFE3m6QwKIE3ka8nToGoGn5t2uElEwh6fUzCpwlCadmJjAvkozT7rZLoJ+lV8PX8XL/K0BVxqgz+YZ70WOwIBa8y0R/FGa79nvfu8DhMQMryKZcqkAAAAASUVORK5CYII=') no-repeat center center; }
 /* Global */
 * {
-	padding: 0em;
-	margin: 0em;
+	padding: 0;
+	margin: 0;
 }
 
 html {
@@ -42,7 +42,7 @@ a:hover {
 }
 
 h1,h2,h3,h4 {
-	margin: 5px 0px;
+	margin: 5px 0;
 	font-weight: bold;
 }
 
@@ -113,14 +113,14 @@ span.size8 { font-size:2.5em; }
 span.size9 { font-size:2.75em; }
 span.size10 { font-size:3em; }
 
-ul.thin { margin:0px 0px 0px 25px; padding:0px; }
-ul.thin li { margin:0px 0px; padding:0px; }
+ul.thin { margin:0 0 0 25px; padding:0; }
+ul.thin li { margin:0 0; padding:0; }
 
 /* Layout (Every page) */
 
 #header {
 	width: 100%;
-	padding: 0px 0 0 0;
+	padding: 0 0 0 0;
 	background: #383c4a;
 }
 
@@ -194,7 +194,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 	top: 268px;
 	background: #4b5162;
 	color: #A7ADB9;
-	padding: 4px 0px;
+	padding: 4px 0;
 	width: 100%;
 	text-align: center;
 	font-size: 8pt;
@@ -206,7 +206,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 
 #userinfo ul {
 	display: inline;
-	margin: 0px 0.8%;
+	margin: 0 0.8%;
 }
 
 #userinfo ul li {
@@ -214,7 +214,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 	margin: 0 0.1em;
 	line-height: 20px;
 	vertical-align: middle;
-	padding: 0px;
+	padding: 0;
 }
 
 #userinfo a {
@@ -236,7 +236,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 	width: 100%;
 	text-align: center;
 	background-color: #4b5162;
-	padding: 4px 0px;
+	padding: 4px 0;
 }
 
 #searchbars input {
@@ -256,7 +256,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 
 #searchbars ul li {
 	display: inline;
-	margin: 0px 1px;
+	margin: 0 1px;
 	list-style: none;
 	position: relative;
 }
@@ -291,7 +291,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 	margin-top: 95px;
 	margin-bottom: -95px;
 	background: #383c4a;
-	padding: 20px 0px;
+	padding: 20px 0;
 }
 
 #cat-selector ul {
@@ -313,7 +313,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 	font-weight: bold;
 	font-size: 0.95em;
 	width: 350px;
-	margin: 0px auto 0px auto;
+	margin: 0 auto 0 auto;
 	padding: 10px;
 }
 .alertbar a {
@@ -341,12 +341,12 @@ input.hidden {
 
 .thin {
 	width: 850px;
-	margin: 0px auto;
+	margin: 0 auto;
 }
 
 .widethin { /* overriding the thin class on torrents.php */
 	width: 95% !important;
-	margin: 0px auto;
+	margin: 0 auto;
 }
 
 #userinfo_major .brackets:before {
@@ -371,12 +371,12 @@ div.linkbox {
 }
 
 .min_padding {
-	padding: 0px;
-	margin: 0px 0px;
+	padding: 0;
+	margin: 0 0;
 }
 
 p.min_padding {
-	margin: 2px 0px;
+	margin: 2px 0;
 }
 
 .pad {
@@ -402,8 +402,8 @@ p.min_padding {
 }
 
 .pad h3, .pad h4, .padbox h3, .padbox h4 {
-	margin-top: 0px;
-	padding-top: 0px;
+	margin-top: 0;
+	padding-top: 0;
 }
 
 .sidebar {
@@ -431,7 +431,7 @@ p.min_padding {
 }
 
 .tags {
-	padding: 0px 0px 0px 20px;
+	padding: 0 0 0 20px;
 	font-style: italic;
 }
 
@@ -484,7 +484,7 @@ td.colhead, .colhead td, .colhead th {
 }
 
 .colhead .sign, .colhead_dark .sign {
-	padding: 0px 8px 0px 8px;
+	padding: 0 8px 0 8px;
 	vertical-align: middle;
 	text-align: center;
 	font-size: 12pt;
@@ -493,7 +493,7 @@ td.colhead, .colhead td, .colhead th {
 
 
 .colhead .sign {
-	padding: 0px 8px 0px 8px;
+	padding: 0 8px 0 8px;
 	font-size: 12pt;
 	font-weight: bold;
 }
@@ -515,7 +515,7 @@ table.slice {
 
 .error_message {
 	border: 1px solid #5294e2;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #B25D5D;
 	text-align: center;
 	color: white;
@@ -524,7 +524,7 @@ table.slice {
 
 .save_message {
 	border: 1px solid #5294e2;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #49A0F4;
 	text-align: center;
 	color: #004375;
@@ -543,12 +543,12 @@ table.slice {
 /* Layout (home page) */
 
 ul.stats li {
-	padding: 0px 0px 1px 0px;
+	padding: 0 0 1px 0;
 }
 
 ul.poll li {
-	padding: 0px 0px 0px 10px;
-	margin: 0px;
+	padding: 0 0 0 10px;
+	margin: 0;
 	clear: left;
 }
 
@@ -725,7 +725,7 @@ p input {
 strong.quoteheader {color: #7c818c;}
 
 table.forum_post {
-	margin: 10px 0px;
+	margin: 10px 0;
 }
 
 table.forum_post td {
@@ -738,7 +738,7 @@ table.forum_unread {
 
 td.avatar {
 	width: 150px;
-	padding: 0px;
+	padding: 0;
 }
 
 table.forum_post td.body {
@@ -779,7 +779,7 @@ tr.unreadpm {
 	padding: 5px;
 }
 .permission_container input {
-	margin: 0px 3px 5px 0px;
+	margin: 0 3px 5px 0;
 	vertical-align: top;
 }
 
@@ -791,7 +791,7 @@ tr.unreadpm {
 /* Layout (Invite tree) */
 
 ul .invitetree {
-	margin: 0px 0px 0px 25px;
+	margin: 0 0 0 25px;
 }
 
 .invitetree li {
@@ -829,16 +829,16 @@ ul .invitetree {
 	height: 9px;
 	background: url('data:image/gif;base64,R0lGODlhAgAJAKEDAMXR/9Td/8nJyf///yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAMALAAAAAACAAkAAAIEnI6pVgA7') no-repeat center center;
 	float: left;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 }
 
 .center_poll {
 	height: 9px;
 	background: url('data:image/gif;base64,R0lGODlhAgAJAKEDAMnJycXR/9Td/////yH+EUNyZWF0ZWQgd2l0aCBHSU1QACwAAAAAAgAJAAACBISPeQUAOw==') repeat;
 	float: left;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 }
 
 .right_poll {
@@ -846,14 +846,14 @@ ul .invitetree {
 	height: 9px;
 	background: url('data:image/gif;base64,R0lGODlhAgAJAKEDAMXR/9Td/8nJyf///yH+EUNyZWF0ZWQgd2l0aCBHSU1QACH5BAEKAAMALAAAAAACAAkAAAIF1ISpOwUAOw==') no-repeat center center;
 	float: left;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 }
 
 .curtain {
 	position: fixed;
-	top: 0%;
-	left: 0%;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 100%;
 	background-color: black;
@@ -870,7 +870,7 @@ ul .invitetree {
 	left: 5%;
 	width: 90%;
 	height: 90%;
-	padding: 0px;
+	padding: 0;
 	z-index: 1002;
 	overflow: auto;
 }

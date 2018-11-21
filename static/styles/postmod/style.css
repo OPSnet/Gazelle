@@ -13,8 +13,8 @@ This design incorporates some code from the 'Customize Zeal' Greasemonkey script
 @font-face { font-family: Avant; src: url('images/Avant.otf'); }
 
 * {
-	padding: 0em;
-	margin: 0em;
+	padding: 0;
+	margin: 0;
 }
 
 html {
@@ -87,7 +87,7 @@ a[onclick^="AddArtistField"]:focus, a[onclick^="AddArtistField"]:active {
 .forum_post a[href^="http"] img:hover, .forum_post a[href^="https"] img:hover { padding: 0 0 0 0; background: transparent !important; border: none; }
 
 h1, h2, h3 {
-	margin: 5px 0px;
+	margin: 5px 0;
 	color: #DFDFDF;
 	font-family: Akzidenz, sans-serif;
 }
@@ -134,8 +134,8 @@ span.size8 { font-size:2.5em; }
 span.size9 { font-size:2.75em; }
 span.size10 { font-size:3em; }
 
-ul.thin { margin:0px 0px 0px 25px; padding:0px; }
-ul.thin li { margin:0px 0px; padding:0px; }
+ul.thin { margin:0 0 0 25px; padding:0; }
+ul.thin li { margin:0 0; padding:0; }
 
 /* Layout (Every page) */
 #wrapper {
@@ -301,7 +301,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 	margin: 0 0.1em;
 	line-height: 20px;
 	vertical-align: middle;
-	padding: 0px;
+	padding: 0;
 }
 
 #userinfo a, #alerts a {
@@ -395,7 +395,7 @@ ul.thin li { margin:0px 0px; padding:0px; }
 
 #alerts {
 	width: 230px;
-	margin: 75px 0px 0px 338px;
+	margin: 75px 0 0 338px;
 	position: absolute;
 	text-align: center;
 	color: #FFF;
@@ -446,7 +446,7 @@ input.hidden {
 
 .thin {
 	width: 850px;
-	margin: 0px auto;
+	margin: 0 auto;
 	color: #DFDFDF;
 }
 
@@ -465,12 +465,12 @@ input.hidden {
 }
 
 .min_padding {
-	padding: 0px;
-	margin: 0px 0px;
+	padding: 0;
+	margin: 0 0;
 }
 
 p.min_padding {
-	margin: 2px 0px;
+	margin: 2px 0;
 }
 
 .pad {
@@ -498,8 +498,8 @@ p.min_padding {
 }
 
 .pad h3, .pad h4, .padbox h3, .padbox h4 {
-	margin-top: 0px;
-	padding-top: 0px;
+	margin-top: 0;
+	padding-top: 0;
 }
 
 .sidebar {
@@ -524,7 +524,7 @@ p.min_padding {
 }
 
 .tags {
-	padding: 0px 0px 0px 20px;
+	padding: 0 0 0 20px;
 	font-style: italic;
 }
 
@@ -592,7 +592,7 @@ td.colhead, .colhead td, .colhead th {
 }
 
 .colhead .sign, .colhead_dark .sign {
-	padding: 0px 8px 0px 8px;
+	padding: 0 8px 0 8px;
 	vertical-align:middle;
 	text-align:center;
 	font-size: 12pt;
@@ -612,12 +612,12 @@ tr.peer_list {
 }
 
 tr.peer_list td {
-	padding: 2px 0px 2px 2px;
+	padding: 2px 0 2px 2px;
 }
 
 .error_message {
 	border: 1px solid #666;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #AF2525;
 	text-align: center;
 	color: white;
@@ -625,7 +625,7 @@ tr.peer_list td {
 
 .save_message {
 	border: 1px solid #666;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #F4E649;
 	text-align: center;
 	color: #492802;
@@ -643,13 +643,13 @@ tr.peer_list td {
 /* Layout (home page) */
 
 ul.stats li {
-	padding: 0px 0px 1px 0px;
+	padding: 0 0 1px 0;
 	font-size: 8pt;
 }
 
 ul.poll li {
-	padding: 0px 0px 0px 10px;
-	margin: 0px;
+	padding: 0 0 0 10px;
+	margin: 0;
 	clear: left;
 }
 
@@ -763,7 +763,7 @@ tr.torrent td {
 .read{background: url('images/read.png') no-repeat center center;}
 
 table.forum_post {
-	margin: 10px 0px;
+	margin: 10px 0;
 }
 
 table.forum_post td {
@@ -776,7 +776,7 @@ table.forum_unread {
 
 td.avatar {
 	width: 150px;
-	padding: 0px;
+	padding: 0;
 }
 
 table.forum_post td.body {
@@ -832,7 +832,7 @@ tr.unreadpm {
 	padding: 5px;
 }
 .permission_container input {
-	margin: 0px 3px 5px 0px;
+	margin: 0 3px 5px 0;
 	vertical-align: top;
 }
 
@@ -844,7 +844,7 @@ tr.unreadpm {
 /* Layout (Invite tree) */
 
 ul .invitetree {
-	margin: 0px 0px 0px 25px;
+	margin: 0 0 0 25px;
 }
 
 .invitetree li {
@@ -893,7 +893,7 @@ ul .invitetree {
 	left: 5%;
 	width: 90%;
 	height: 90%;
-	padding: 0px;
+	padding: 0;
 	z-index: 1002;
 	overflow: auto;
 }

@@ -629,12 +629,12 @@ table {
 
 #friends table .left input[type="submit"] {
 	min-width: 100%;
-	margin-top: 0px;
+	margin-top: 0;
 	margin-bottom: 5px;
 }
 
 #friends table td.avatar {
-	padding: 0px 0px 5px;
+	padding: 0 0 5px;
 }
 
 #friends br,
@@ -672,7 +672,7 @@ table {
 
 #inbox #preview {
 	padding: 20px;
-	background: transparent url('images/convo.png') 50% 0px no-repeat;
+	background: transparent url('images/convo.png') 50% 0 no-repeat;
 	margin-left: 180px;
 	width: 471px;
 }
@@ -737,12 +737,12 @@ table {
 	border: none;
 	margin: 0 0 10px 0;
 	border-collapse: separate;
-	border-spacing: 0px;
+	border-spacing: 0;
 }
 
 .forum_post .avatar {
 	width: 150px;
-	padding: 0px 13px 0px 0px;
+	padding: 0 13px 0 0;
 }
 
 .forum_post .colhead_dark td {
@@ -937,7 +937,7 @@ strong.quoteheader {
 }
 
 .linkbox {
-	border-top: 0px;
+	border-top: 0;
 }
 
 .show_torrents_link {
@@ -1305,7 +1305,7 @@ tr.torrent .bookmark > a:after {
 .poll {
 	list-style: none;
 	padding: 3px 5px;
-	margin: 0px;
+	margin: 0;
 }
 
 .poll li {
@@ -1458,7 +1458,7 @@ td.r00 {
 	left: 5%;
 	width: 90%;
 	height: 90%;
-	padding: 0px;
+	padding: 0;
 	z-index: 1002;
 	overflow: auto;
 }
@@ -1673,7 +1673,7 @@ h3 {
 }
 
 #user .layout.recent tr:not(.colhead) td {
-	padding: 0px;
+	padding: 0;
 }
 
 #user .layout.recent img {
@@ -1937,7 +1937,7 @@ div.box[style=""] .head {
 
 .forum_post ul,
 .main_column .box ul {
-	margin: 0 0 0px 10px;
+	margin: 0 0 0 10px;
 	list-style-position: inside;
 	padding: 0;
 }

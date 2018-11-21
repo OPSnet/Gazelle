@@ -18,7 +18,7 @@ if (!check_perms('site_collages_delete') && $UserID != $LoggedUser['ID']) {
 View::show_header('Delete collage');
 ?>
 <div class="thin center">
-	<div class="box" style="width: 600px; margin: 0px auto;">
+	<div class="box" style="width: 600px; margin: 0 auto;">
 		<div class="head colhead">
 			Delete collage
 		</div>

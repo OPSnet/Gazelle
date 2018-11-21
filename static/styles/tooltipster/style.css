@@ -230,7 +230,7 @@
 	-o-transition-property: all;
 	-ms-transition-property: all;
 	transition-property: all;
-	top: 0px !important;
+	top: 0 !important;
 	opacity: 0;
 }
 
@@ -256,7 +256,7 @@
 	-o-transition-property: all;
 	-ms-transition-property: all;
 	transition-property: all;
-	left: 0px !important;
+	left: 0 !important;
 	opacity: 0;
 }
 

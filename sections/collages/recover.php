@@ -26,7 +26,7 @@ if ($_POST['collage_id'] && is_number($_POST['collage_id'])) {
 View::show_header('Collage recovery!');
 ?>
 <div class="thin center">
-	<div class="box" style="width: 600px; margin: 0px auto;">
+	<div class="box" style="width: 600px; margin: 0 auto;">
 		<div class="head colhead">
 			Recover deleted collage
 		</div>

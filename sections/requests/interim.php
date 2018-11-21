@@ -27,7 +27,7 @@ if ($Action === 'unfill') {
 View::show_header(ucwords($Action) . ' Request');
 ?>
 <div class="thin center">
-    <div class="box" style="width: 600px; margin: 0px auto;">
+    <div class="box" style="width: 600px; margin: 0 auto;">
         <div class="head colhead">
             <?=ucwords($Action)?> Request
         </div>

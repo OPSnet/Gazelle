@@ -8,8 +8,8 @@ Originally forked from Postmodern, which was based on 'Zeal', a modification of 
 /* Colors */
 /* Layout (Torrents page) */
 * {
-  padding: 0em;
-  margin: 0em; }
+  padding: 0;
+  margin: 0; }
 
 html {
   width: 100%; }
@@ -137,7 +137,7 @@ a[onclick^="AddArtistField"]:active {
 h1,
 h2,
 h3 {
-  margin: 5px 0px;
+  margin: 5px 0;
   color: #9a9a9a;
   font-family: "Lato", sans-serif;
   text-align: center; }
@@ -207,11 +207,11 @@ span.size10 {
   font-size: 3em; }
 
 ul.thin {
-  margin: 0px 0px 0px 25px;
-  padding: 0px; }
+  margin: 0 0 0 25px;
+  padding: 0; }
   ul.thin li {
-    margin: 0px 0px;
-    padding: 0px; }
+    margin: 0 0;
+    padding: 0; }
 
 /* Layout (Every page) */
 #wrapper {
@@ -363,7 +363,7 @@ li#nav_subscriptions a {
   margin: 0 0.1em;
   line-height: 20px;
   vertical-align: middle;
-  padding: 0px; }
+  padding: 0; }
 
 #userinfo a,
 #alerts a {
@@ -435,7 +435,7 @@ li#nav_subscriptions a {
 
 #alerts {
   width: 230px;
-  margin: 72px 0px 0px 250px;
+  margin: 72px 0 0 250px;
   position: absolute;
   text-align: center;
   color: #f7f7f7; }
@@ -498,7 +498,7 @@ input.hidden {
 /* Layout (Any page) */
 .thin {
   width: 100%;
-  margin: 0px auto;
+  margin: 0 auto;
   color: #f7f7f7; }
 
 .linkbox {
@@ -513,11 +513,11 @@ input.hidden {
   text-align: right; }
 
 .min_padding {
-  padding: 0px;
-  margin: 0px 0px; }
+  padding: 0;
+  margin: 0 0; }
 
 p.min_padding {
-  margin: 2px 0px; }
+  margin: 2px 0; }
 
 .pad {
   padding: 1em; }
@@ -552,8 +552,8 @@ tr.colhead_dark td {
 .pad h4,
 .padbox h3,
 .padbox h4 {
-  margin-top: 0px;
-  padding-top: 0px; }
+  margin-top: 0;
+  padding-top: 0; }
 
 #forums .forum_post .body {
   max-width: 700px;
@@ -613,7 +613,7 @@ tr.colhead_dark td {
   font-size: 13px; }
 
 .tags {
-  padding: 0px 0px 0px 20px;
+  padding: 0 0 0 20px;
   font-style: italic; }
 
 .tags a {
@@ -701,7 +701,7 @@ td.colhead,
 
 .colhead .sign,
 .colhead_dark .sign {
-  padding: 0px 8px 0px 8px;
+  padding: 0 8px 0 8px;
   vertical-align: middle;
   text-align: center;
   font-size: 12pt; }
@@ -717,18 +717,18 @@ tr.peer_list {
   font-size: 12px; }
 
 tr.peer_list td {
-  padding: 2px 0px 2px 2px; }
+  padding: 2px 0 2px 2px; }
 
 .error_message {
   border: 1px solid #666;
-  padding: 3px 0px 3px 0px;
+  padding: 3px 0 3px 0;
   background-color: #AF2525;
   text-align: center;
   color: white; }
 
 .save_message {
   border: 1px solid #666;
-  padding: 3px 0px 3px 0px;
+  padding: 3px 0 3px 0;
   background-color: #F4E649;
   text-align: center;
   color: #492802; }
@@ -741,12 +741,12 @@ tr.peer_list td {
 
 /* Layout (home page) */
 ul.stats li {
-  padding: 0px 0px 1px 0px;
+  padding: 0 0 1px 0;
   font-size: 12px; }
 
 ul.poll li {
-  padding: 0px 0px 0px 10px;
-  margin: 0px;
+  padding: 0 0 0 10px;
+  margin: 0;
   clear: left; }
 
 ul.poll li.graph {
@@ -893,7 +893,7 @@ tr.torrent td {
   background-size: 25px 25px; }
 
 table.forum_post {
-  margin: 20px 0px; }
+  margin: 20px 0; }
 
 table.forum_post td {
   /*border: 1px solid #666;*/ }
@@ -905,7 +905,7 @@ table.forum_unread {
 
 td.avatar {
   width: 150px;
-  padding: 0px; }
+  padding: 0; }
 
 div.main_column .forum_post td.body,
 table.forum_post td.body {
@@ -924,7 +924,7 @@ table.forum_post td.body {
   border-color: #1a1a1a;
   text-align: left;
   font-size: 14px;
-  margin-bottom: 0px; }
+  margin-bottom: 0; }
 
 #quickreplypreview .forum_post {
   padding: 5px; }
@@ -964,7 +964,7 @@ tr.unreadpm {
   padding: 5px; }
 
 .permission_container input {
-  margin: 0px 3px 5px 0px;
+  margin: 0 3px 5px 0;
   vertical-align: top; }
 
 .submit_container {
@@ -973,7 +973,7 @@ tr.unreadpm {
 
 /* Layout (Invite tree) */
 ul .invitetree {
-  margin: 0px 0px 0px 25px; }
+  margin: 0 0 0 25px; }
 
 .invitetree li {
   list-style: none;
@@ -1044,7 +1044,7 @@ ul .invitetree {
   left: 5%;
   width: 90%;
   height: 90%;
-  padding: 0px;
+  padding: 0;
   z-index: 1002;
   overflow: auto; }
 
@@ -1069,7 +1069,7 @@ input[type="button"], input[type="submit"] {
     background-color: #444; }
   input[type="button"]:active, input[type="button"]:focus, input[type="submit"]:active, input[type="submit"]:focus {
     background-color: #333;
-    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
     outline: 0; }
 
 input[type="text"], input[type="email"], input[type="password"], input[type="search"] {
@@ -1081,13 +1081,13 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
   font-family: "Lato", sans-serif;
   text-decoration: none;
   border: none;
-  box-shadow: inset 0px -1px 0px #5d5d5d;
+  box-shadow: inset 0 -1px 0 #5d5d5d;
   transition: all 0.2s; }
   input[type="text"]:hover, input[type="email"]:hover, input[type="password"]:hover, input[type="search"]:hover {
     color: #f7f7f7; }
   input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="search"]:focus {
     color: #f7f7f7;
-    box-shadow: inset 0px -1px 0px #b39770;
+    box-shadow: inset 0 -1px 0 #b39770;
     outline: 0; }
 
 input[type="search"] {
@@ -1113,13 +1113,13 @@ textarea {
   font-family: "Lato", sans-serif;
   text-decoration: none;
   border: none;
-  box-shadow: inset 0px -1px 0px #5d5d5d;
+  box-shadow: inset 0 -1px 0 #5d5d5d;
   transition: all 0.2s; }
   textarea:hover {
     color: #f7f7f7; }
   textarea:focus {
     color: #f7f7f7;
-    box-shadow: inset 0px -1px 0px #b39770;
+    box-shadow: inset 0 -1px 0 #b39770;
     outline: 0; }
   textarea[disabled="disabled"] {
     color: #5d5d5d; }
@@ -1129,7 +1129,7 @@ textarea {
 
 table.forum_post input[type="button"] {
   padding: 4px;
-  margin: 0px; }
+  margin: 0; }
 
 /*
 textarea[disabled="disabled"] { background: #444; color: $link-color; }
@@ -1149,7 +1149,7 @@ select {
     background-color: #444; }
   select:active, select:focus {
     background-color: #333;
-    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
     outline: 0; }
   select[disabled="disabled"] {
     color: #5d5d5d; }

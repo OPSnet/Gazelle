@@ -5,8 +5,8 @@
 @font-face { font-family: Anonymous; src: url('http://fonts.googleapis.com/css?family=Anonymous+Pro'); }
 
 * {
-	padding: 0em;
-	margin: 0em;
+	padding: 0;
+	margin: 0;
 }
 
 html {
@@ -79,7 +79,7 @@ a[onclick^="AddArtistField"]:focus, a[onclick^="AddArtistField"]:active {
 .forum_post a[href^="http"] img:hover, .forum_post a[href^="https"] img:hover { padding: 0 0 0 0; background: transparent !important; border: none; }
 
 h1, h2, h3 {
-	margin: 5px 0px;
+	margin: 5px 0;
 	color: #000000;
 	font-family: Anonymous, monospace;
 }
@@ -145,8 +145,8 @@ span.size8 { font-size:2.5em; }
 span.size9 { font-size:2.75em; }
 span.size10 { font-size:3em; }
 
-ul.thin { margin:0px 0px 0px 25px; padding:0px; }
-ul.thin li { margin:0px 0px; padding:0px; }
+ul.thin { margin:0 0 0 25px; padding:0; }
+ul.thin li { margin:0 0; padding:0; }
 
 /* Layout (Every page) */
 #wrapper {
@@ -398,7 +398,7 @@ white-space: normal !important;
 }
 
 #userinfo_stats {
-	margin: 22px 0px 0px 726px;
+	margin: 22px 0 0 726px;
 	width: 114px;
 	position: absolute;
 	background: #eaeaea;
@@ -464,7 +464,7 @@ white-space: normal !important;
 
 #userinfo_minor li {
 	float: left;
-	margin: 0px 3px 3px 3px !important;
+	margin: 0 3px 3px 3px !important;
 	width: 107px;
 	line-height: 20px;
 }
@@ -477,7 +477,7 @@ white-space: normal !important;
 }
 
 #userinfo ul li {
-	margin: 0em;
+	margin: 0;
 	vertical-align: middle;
 	padding: 0;
 	float: left;
@@ -510,7 +510,7 @@ white-space: normal !important;
 
 #searchbars input {
 	width: 114px;
-	padding: 0px 2px 0px 20px;
+	padding: 0 2px 0 20px;
 	font-family: Anonymous, monospace;
 	height: 18px;
 	background: #FFFFFF;
@@ -595,7 +595,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 #alerts {
 	width: 230px;
-	margin: 166px 0px 0px 338px;
+	margin: 166px 0 0 338px;
 	position: absolute;
 	text-align: center;
 	color: #fff;
@@ -646,7 +646,7 @@ input.hidden {
 
 .thin {
 	width: 850px;
-	margin: 0px auto;
+	margin: 0 auto;
 	color: #FFFFFF;
 }
 
@@ -665,12 +665,12 @@ input.hidden {
 }
 
 .min_padding {
-	padding: 0px;
-	margin: 0px 0px;
+	padding: 0;
+	margin: 0 0;
 }
 
 p.min_padding {
-	margin: 2px 0px;
+	margin: 2px 0;
 }
 
 .pad {
@@ -699,8 +699,8 @@ p.min_padding {
 }
 
 .pad h3, .pad h4, .padbox h3, .padbox h4 {
-	margin-top: 0px;
-	padding-top: 0px;
+	margin-top: 0;
+	padding-top: 0;
 }
 
 .sidebar {
@@ -726,7 +726,7 @@ p.min_padding {
 }
 
 .tags {
-	padding: 0px 0px 0px 20px;
+	padding: 0 0 0 20px;
 	font-style: italic;
 }
 
@@ -815,7 +815,7 @@ td.colhead, .colhead td, .colhead th {
 }
 
 .colhead .sign, .colhead_dark .sign {
-	padding: 0px 8px 0px 8px;
+	padding: 0 8px 0 8px;
 	vertical-align:middle;
 	text-align:center;
 	font-size: 14px;
@@ -835,12 +835,12 @@ tr.peer_list {
 }
 
 tr.peer_list td {
-	padding: 2px 0px 2px 2px;
+	padding: 2px 0 2px 2px;
 }
 
 .error_message {
 	border: 1px solid #666;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #AF2525;
 	text-align: center;
 	color: white;
@@ -848,7 +848,7 @@ tr.peer_list td {
 
 .save_message {
 	border: 1px solid #666;
-	padding: 3px 0px 3px 0px;
+	padding: 3px 0 3px 0;
 	background-color: #F4E649;
 	text-align: center;
 	color: #492802;
@@ -866,13 +866,13 @@ tr.peer_list td {
 /* Layout (home page) */
 
 ul.stats li {
-	padding: 0px 0px 1px 0px;
+	padding: 0 0 1px 0;
 	font-size: 12px;
 }
 
 ul.poll li {
-	padding: 0px 0px 0px 10px;
-	margin: 0px;
+	padding: 0 0 0 10px;
+	margin: 0;
 	clear: left;
 }
 
@@ -994,7 +994,7 @@ tr.torrent td {
 .read{background: url('https://what.cd/static/styles/postmod/images/read.png') no-repeat center center;}
 
 table.forum_post {
-	margin: 10px 0px;
+	margin: 10px 0;
 }
 
 table.forum_post td {
@@ -1007,7 +1007,7 @@ table.forum_unread {
 
 td.avatar {
 	width: 150px;
-	padding: 0px;
+	padding: 0;
 }
 
 table.forum_post td.body {
@@ -1063,7 +1063,7 @@ tr.unreadpm {
 	padding:5px;
 }
 .permission_container input {
-	margin:0px 3px 5px 0px;
+	margin:0 3px 5px 0;
 	vertical-align:top;
 }
 
@@ -1075,7 +1075,7 @@ tr.unreadpm {
 /* Layout (Invite tree) */
 
 ul .invitetree {
-	margin: 0px 0px 0px 25px;
+	margin: 0 0 0 25px;
 }
 
 .invitetree li {
@@ -1125,7 +1125,7 @@ ul .invitetree {
 	left: 5%;
 	width: 90%;
 	height: 90%;
-	padding: 0px;
+	padding: 0;
 	z-index: 1002;
 	overflow: auto;
 }

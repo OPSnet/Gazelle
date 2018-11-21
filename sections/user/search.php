@@ -73,7 +73,7 @@ View::show_header('User search');
     </form>
     <br />
     <div class="box pad center">
-        <table style="width: 400px; margin: 0px auto;">
+        <table style="width: 400px; margin: 0 auto;">
             <tr class="colhead">
                 <td width="50%">Username</td>
                 <td>Primary class</td>
