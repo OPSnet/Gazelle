@@ -104,6 +104,10 @@ $Row = 'a';
 			<a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
 <? 	if ($IsStaff) { ?>
 			<a href="staffpm.php?action=scoreboard" class="brackets">View scoreboard</a>
+<?	}
+	
+	if ($IsFLS && !$IsStaff) { ?>
+			<span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff inbox</a></span>
 <?	} ?>
 		</div>
 	</div>
