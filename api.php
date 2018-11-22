@@ -18,7 +18,6 @@ require_once('classes/config.php'); //The config contains all site wide configur
 require_once(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
 require_once(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
 require_once(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
-require_once(SERVER_ROOT.'/classes/encrypt.class.php'); //Require the encryption class
 require_once(SERVER_ROOT.'/classes/time.class.php'); //Require the time class
 require_once(SERVER_ROOT.'/classes/paranoia.class.php'); //Require the paranoia check_paranoia function
 require_once(SERVER_ROOT.'/classes/regex.php');
