@@ -64,6 +64,9 @@ switch ($_REQUEST['action']) {
 	case 'scoreboard':
 		require('scoreboard.php');
 		break;
+	case 'userinbox':
+		require('user_inbox.php');
+		break;
 	default:
 		if ($IsStaff || $IsFLS) {
 			require('staff_inbox.php');
