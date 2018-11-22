@@ -4,6 +4,7 @@ enforce_login();
 
 $TorrentID = intval($_POST['torrentid']);
 $FileCount = count($_FILES['logfiles']['name']);
+$Action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_action'] : 'upload';
 
 $LogScore = 100;
 $LogChecksum = 1;
@@ -54,7 +55,7 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 View::show_header();
 echo <<<HTML
 <div class="thin center">
-	<br><a href="javascript:history.go(-1)">Upload another log file</a>
+	<br><a href="logchecker.php?action={$Action}">Upload another log file</a>
 </div>
 <div class="thin">
 HTML;
