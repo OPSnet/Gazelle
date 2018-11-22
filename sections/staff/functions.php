@@ -42,7 +42,7 @@ function get_fls() {
 		return $FLS;
 	}
 	if (($FLS = $Cache->get_value('fls')) === false) {
-		$DB->query('
+		$DB->prepared_query('
 			SELECT
 				m.ID,
 				p.Level,
@@ -54,8 +54,8 @@ function get_fls() {
 				JOIN users_main AS m ON m.ID = i.UserID
 				JOIN permissions AS p ON p.ID = m.PermissionID
 				JOIN users_levels AS l ON l.UserID = i.UserID
-			WHERE l.PermissionID = ' . FLS_TEAM . '
-			ORDER BY m.Username');
+			WHERE l.PermissionID = ?
+			ORDER BY m.Username', FLS_TEAM);
 		$FLS = $DB->to_array(false, MYSQLI_BOTH, array(3, 'Paranoia'));
 		$Cache->cache_value('fls', $FLS, 180);
 	}
@@ -70,12 +70,13 @@ function get_staff() {
 	}
 
 	if (($Staff = $Cache->get_value('staff')) === false) {
-		$DB->query("
+		$DB->prepared_query("
 		SELECT
 			m.ID,
 			p.ID as LevelID,
 			p.Level,
 			p.Name,
+			IFNULL(sg.Name, '') AS StaffGroup,
 			m.Username,
 			m.Paranoia,
 			m.LastAccess,
@@ -83,34 +84,22 @@ function get_staff() {
 		FROM users_main AS m
 			JOIN users_info AS i ON m.ID = i.UserID
 			JOIN permissions AS p ON p.ID = m.PermissionID
+			INNER JOIN staff_groups AS sg ON sg.ID = p.StaffGroup
 		WHERE p.DisplayStaff = '1' AND Secondary = 0
 		ORDER BY p.Level, m.Username");
-		$TmpStaff = $DB->to_array(false, MYSQLI_BOTH, array(5, 'Paranoia'));
-		$Staff = ['Staff' => [], 'Moderators' => [], 'Development' => [], 'Administration' => []];
+		$TmpStaff = $DB->to_array(false, MYSQLI_BOTH, array(6, 'Paranoia'));
+		$DB->prepared_query("
+			SELECT Name
+			FROM staff_groups
+			ORDER BY Sort");
+		$Groups = $DB->collect('Name');
+		array_unshift($Groups, 'Staff');
+		$Staff = [];
+		foreach ($Groups as $g) {
+			$Staff[$g] = [];
+		}
 		foreach ($TmpStaff as $Class) {
-			// TODO: We should add a new table that stores Staff Page Sections
-			// TODO: and then link a permission that's shown on staff page to a section
-			switch ($Class['LevelID']) {
-				case 21: // Forum Mod
-				case 22: // Torrent Mod
-				case 11: // Mod
-				case 44: // Senior Mod
-					$Staff['Moderators'][] = $Class;
-					break;
-				case 45: // Junior Dev
-				case 24: // Developer
-				case 43: // Lead Dev
-				case 46: // Lead Shitposter
-					$Staff['Development'][] = $Class;
-					break;
-				case 40: // Admin
-				case 15: // Sysop
-					$Staff['Administration'][] = $Class;
-					break;
-				default:
-					$Staff['Staff'][] = $Class;
-					break;
-			}
+			$Staff[$Class['StaffGroup']][] = $Class;
 		}
 		$Cache->cache_value('staff', $Staff, 180);
 	}

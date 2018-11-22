@@ -65,7 +65,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 		$CurClass = 0;
 		$CloseTable = false;
 		foreach ($StaffSection as $StaffMember) {
-			list($ID, $ClassID, $Class, $ClassName, $Username, $Paranoia, $LastAccess, $Remark) = $StaffMember;
+			list($ID, $ClassID, $Class, $ClassName, $StaffGroup, $Username, $Paranoia, $LastAccess, $Remark) = $StaffMember;
 			if ($Class != $CurClass) { // Start new class of staff members
 				$Row = 'a';
 				if ($CloseTable) {

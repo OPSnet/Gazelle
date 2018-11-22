@@ -9,6 +9,12 @@ function display_perm($Key, $Title) {
 	echo "$Perm\n";
 }
 
+$DB->prepared_query("
+	SELECT ID, Name
+	FROM staff_groups
+	ORDER BY Sort");
+$Groups = $DB->to_array(false, MYSQLI_ASSOC);
+
 View::show_header('Manage Permissions', 'validate');
 
 echo $Val->GenerateJS('permissionsform');
@@ -37,6 +43,16 @@ echo $Val->GenerateJS('permissionsform');
 		<tr>
 			<td class="label">Show on staff page</td>
 			<td><input type="checkbox" name="displaystaff" value="1"<?=!empty($DisplayStaff) ? ' checked="checked"' : ''?> /></td>
+		</tr>
+		<tr>
+			<td class="label">Staff page group</td>
+			<td>
+				<select name="staffgroup" id="staffgroup">
+<?php foreach ($Groups as $Group) { ?>
+					<option value="<?=$Group['ID']?>"<?=$Group['ID'] == $StaffGroup ? ' selected="selected"' : ''?>><?=$Group['Name']?></option>
+<?php } ?>
+				</select>
+			</td>
 		</tr>
 		<tr>
 			<td class="label">Maximum number of personal collages</td>
