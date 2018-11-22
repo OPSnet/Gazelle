@@ -1050,6 +1050,8 @@ class Text {
 		$Str = str_replace("</size>", "[/size]", $Str);
 		//$Str = preg_replace("/\<a href=\"rules.php\?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
 		//$Str = preg_replace("/\<a href=\"wiki.php\?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
+		$Str = preg_replace('#/torrents.php\?recordlabel="?(?:[^"]*)#', 'https://'.SITE_URL.'\\0', $Str);
+		$Str = preg_replace('#/torrents.php\?taglist="?(?:[^"]*)#', 'https://'.SITE_URL.'\\0', $Str);
 		$Str = preg_replace("/\<(\/*)artist\>/", "[\\1artist]", $Str);
 		$Str = preg_replace("/\((\/*)user\>/", "[\\1user]", $Str);
 		$Str = preg_replace("/\<a href=\"([^\"]*)\">/", "[url=\\1]", $Str);
