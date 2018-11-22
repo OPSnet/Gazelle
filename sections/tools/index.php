@@ -248,13 +248,13 @@ switch ($_REQUEST['action']) {
 			$Val->SetFields('maxcollages', true, 'number', 'You did not enter a valid number of personal collages.');
 
 			if (is_numeric($_REQUEST['id'])) {
-				$DB->query("
-					SELECT p.ID, p.Name, p.Level, p.Secondary, p.PermittedForums, p.Values, p.DisplayStaff, COUNT(u.ID)
+				$DB->prepared_query("
+					SELECT p.ID, p.Name, p.Level, p.Secondary, p.PermittedForums, p.Values, p.DisplayStaff, p.StaffGroup, COUNT(u.ID)
 					FROM permissions AS p
 						LEFT JOIN users_main AS u ON u.PermissionID = p.ID
-					WHERE p.ID = '".db_string($_REQUEST['id'])."'
-					GROUP BY p.ID");
-				list($ID, $Name, $Level, $Secondary, $Forums, $Values, $DisplayStaff, $UserCount) = $DB->next_record(MYSQLI_NUM, array(5));
+					WHERE p.ID = ?
+					GROUP BY p.ID", $_REQUEST['id']);
+				list($ID, $Name, $Level, $Secondary, $Forums, $Values, $DisplayStaff, $StaffGroup, $UserCount) = $DB->next_record(MYSQLI_NUM, array(5));
 
 				if (!check_perms('admin_manage_permissions', $Level)) {
 					error(403);
@@ -266,10 +266,10 @@ switch ($_REQUEST['action']) {
 				$Err = $Val->ValidateForm($_POST);
 
 				if (!is_numeric($_REQUEST['id'])) {
-					$DB->query("
+					$DB->prepared_query("
 						SELECT ID
 						FROM permissions
-						WHERE Level = '".db_string($_REQUEST['level'])."'");
+						WHERE Level = ?", $_REQUEST['level']);
 					list($DupeCheck)=$DB->next_record();
 
 					if ($DupeCheck) {
@@ -289,40 +289,43 @@ switch ($_REQUEST['action']) {
 				$Secondary = empty($_REQUEST['secondary']) ? 0 : 1;
 				$Forums = $_REQUEST['forums'];
 				$DisplayStaff = $_REQUEST['displaystaff'];
+				$StaffGroup = $_REQUEST['staffgroup'];
+				if (!$StaffGroup) {
+					$StaffGroup = null;
+				}
 				$Values['MaxCollages'] = $_REQUEST['maxcollages'];
 
 				if (!$Err) {
 					if (!is_numeric($_REQUEST['id'])) {
-						$DB->query("
-							INSERT INTO permissions (Level, Name, Secondary, PermittedForums, `Values`, DisplayStaff)
-							VALUES ('".db_string($Level)."',
-									'".db_string($Name)."',
-									$Secondary,
-									'".db_string($Forums)."',
-									'".db_string(serialize($Values))."',
-									'".db_string($DisplayStaff)."')");
+						$DB->prepared_query("
+							INSERT INTO permissions (Level, Name, Secondary, PermittedForums, `Values`, DisplayStaff, StaffGroup)
+							VALUES (?, ?, ?, ?, ?, ?, ?)",
+							$Level, $Name, $Secondary, $Forums, serialize($Values), $DisplayStaff, $StaffGroup);
 					} else {
-						$DB->query("
+						$DB->prepared_query("
 							UPDATE permissions
-							SET Level = '".db_string($Level)."',
-								Name = '".db_string($Name)."',
-								Secondary = $Secondary,
-								PermittedForums = '".db_string($Forums)."',
-								`Values` = '".db_string(serialize($Values))."',
-								DisplayStaff = '".db_string($DisplayStaff)."'
-							WHERE ID = '".db_string($_REQUEST['id'])."'");
+							SET Level = ?,
+								Name = ?,
+								Secondary = ?,
+								PermittedForums = ?,
+								`Values` = ?,
+								DisplayStaff = ?,
+								StaffGroup = ?
+							WHERE ID = ?",
+							$Level, $Name, $Secondary, $Forums, serialize($Values), $DisplayStaff, $StaffGroup, $_REQUEST['id']);
 						$Cache->delete_value('perm_'.$_REQUEST['id']);
 						if ($Secondary) {
-							$DB->query("
+							$DB->prepared_query("
 								SELECT DISTINCT UserID
 								FROM users_levels
-								WHERE PermissionID = ".db_string($_REQUEST['id']));
+								WHERE PermissionID = ?", $_REQUEST['id']);
 							while ($UserID = $DB->next_record()) {
 								$Cache->delete_value("user_info_heavy_$UserID");
 							}
 						}
 					}
 					$Cache->delete_value('classes');
+					$Cache->delete_value('staff');
 				} else {
 					error($Err);
 				}
@@ -332,41 +335,45 @@ switch ($_REQUEST['action']) {
 
 		} else {
 			if (!empty($_REQUEST['removeid'])) {
-				$DB->query("
+				$DB->prepared_query("
 					DELETE FROM permissions
-					WHERE ID = '".db_string($_REQUEST['removeid'])."'");
-				$DB->query("
+					WHERE ID = ?", $_REQUEST['removeid']);
+				$DB->prepared_query("
 					SELECT UserID
 					FROM users_levels
-					WHERE PermissionID = '".db_string($_REQUEST['removeid'])."'");
+					WHERE PermissionID = ?", $_REQUEST['removeid']);
 				while (list($UserID) = $DB->next_record()) {
 					$Cache->delete_value("user_info_$UserID");
 					$Cache->delete_value("user_info_heavy_$UserID");
 				}
-				$DB->query("
+				$DB->prepared_query("
 					DELETE FROM users_levels
-					WHERE PermissionID = '".db_string($_REQUEST['removeid'])."'");
-				$DB->query("
+					WHERE PermissionID = ?", $_REQUEST['removeid']);
+				$DB->prepared_query("
 					SELECT ID
 					FROM users_main
-					WHERE PermissionID = '".db_string($_REQUEST['removeid'])."'");
+					WHERE PermissionID = ?", $_REQUEST['removeid']);
 				while (list($UserID) = $DB->next_record()) {
 					$Cache->delete_value("user_info_$UserID");
 					$Cache->delete_value("user_info_heavy_$UserID");
 				}
-				$DB->query("
+				$DB->prepared_query("
 					UPDATE users_main
-					SET PermissionID = '".USER."'
-					WHERE PermissionID = '".db_string($_REQUEST['removeid'])."'");
+					SET PermissionID = ?
+					WHERE PermissionID = ?", USER, $_REQUEST['removeid']);
 
 				$Cache->delete_value('classes');
 			}
 
 			include(SERVER_ROOT.'/sections/tools/managers/permissions_list.php');
 		}
-
 		break;
-
+	case 'staff_groups_alter':
+		include(SERVER_ROOT.'/sections/tools/managers/staff_groups_alter.php');
+		break;
+	case 'staff_groups':
+		include(SERVER_ROOT.'/sections/tools/managers/staff_groups_list.php');
+		break;
 	case 'ip_ban':
 		//TODO: Clean up DB table ip_bans.
 		include(SERVER_ROOT.'/sections/tools/managers/bans.php');
