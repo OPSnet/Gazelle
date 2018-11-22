@@ -400,42 +400,47 @@ if ($Donor != $Cur['Donor'] && check_perms('users_give_donor')) {
 }
 
 // Secondary classes
-$OldClasses = $Cur['SecondaryClasses'] ? explode(',', $Cur['SecondaryClasses']) : array();
-$DroppedClasses = array_diff($OldClasses, $SecondaryClasses);
-$AddedClasses   = array_diff($SecondaryClasses, $OldClasses);
-if (count($DroppedClasses) > 0) {
-	$ClassChanges = array();
-	foreach ($DroppedClasses as $PermID) {
-		$ClassChanges[] = $Classes[$PermID]['Name'];
+if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
+	$OldClasses = $Cur['SecondaryClasses'] ? explode(',', $Cur['SecondaryClasses']) : array();
+	$DroppedClasses = array_diff($OldClasses, $SecondaryClasses);
+	$AddedClasses   = array_diff($SecondaryClasses, $OldClasses);
+	if (count($DroppedClasses) > 0) {
+		$ClassChanges = array();
+		foreach ($DroppedClasses as $PermID) {
+			$ClassChanges[] = $Classes[$PermID]['Name'];
+		}
+		$EditSummary[] = 'Secondary classes dropped: '.implode(', ', $ClassChanges);
+		$DB->prepared_query("
+			DELETE FROM users_levels
+			WHERE UserID = '$UserID'
+				AND PermissionID IN (".implode(', ', array_fill(0, count($DroppedClasses), '?')).")",
+			...$DroppedClasses);
+		if (count($SecondaryClasses) > 0) {
+			$LightUpdates['ExtraClasses'] = array_fill_keys($SecondaryClasses, 1);
+		} else {
+			$LightUpdates['ExtraClasses'] = array();
+		}
+		$DeleteKeys = true;
 	}
-	$EditSummary[] = 'Secondary classes dropped: '.implode(', ', $ClassChanges);
-	$DB->query("
-		DELETE FROM users_levels
-		WHERE UserID = '$UserID'
-			AND PermissionID IN (".implode(',', $DroppedClasses).')');
-	if (count($SecondaryClasses) > 0) {
-		$LightUpdates['ExtraClasses'] = array_fill_keys($SecondaryClasses, 1);
-	} else {
-		$LightUpdates['ExtraClasses'] = array();
-	}
-	$DeleteKeys = true;
-}
-if (count($AddedClasses) > 0) {
-	$ClassChanges = array();
-	foreach ($AddedClasses as $PermID) {
-		$ClassChanges[] = $Classes[$PermID]['Name'];
-	}
-	$EditSummary[] = "Secondary classes added: ".implode(', ', $ClassChanges);
-	$Values = array();
-	foreach ($AddedClasses as $PermID) {
-		$Values[] = "($UserID, $PermID)";
+	if (count($AddedClasses) > 0) {
+		$ClassChanges = array();
+		foreach ($AddedClasses as $PermID) {
+			$ClassChanges[] = $Classes[$PermID]['Name'];
+		}
+		$EditSummary[] = "Secondary classes added: ".implode(', ', $ClassChanges);
+		$Values = array();
+		foreach ($AddedClasses as $PermID) {
+			$Values[] = $UserID;
+			$Values[] = $PermID;
+		}
 
+		$DB->prepared_query("
+			INSERT INTO users_levels (UserID, PermissionID)
+			VALUES ".implode(', ', array_fill(0, count($Values) / 2, '(?, ?)')),
+			...$Values);
+		//$LightUpdates['ExtraClasses'] = array_fill_keys($SecondaryClasses, 1);
+		$DeleteKeys = true;
 	}
-	$DB->query("
-		INSERT INTO users_levels (UserID, PermissionID)
-		VALUES ".implode(', ', $Values));
-	//$LightUpdates['ExtraClasses'] = array_fill_keys($SecondaryClasses, 1);
-	$DeleteKeys = true;
 }
 
 if ($Visible != $Cur['Visible'] && check_perms('users_make_invisible')) {
