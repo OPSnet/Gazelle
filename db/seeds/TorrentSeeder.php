@@ -45,7 +45,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 		$stmt = $this->query("SELECT COUNT(*) AS count FROM users_main");
 		$user_count  = (int) $stmt->fetch()['count'];
 
-		$bencode = new ApolloRIP\BencodeTorrent\BencodeTorrent();
+		$bencode = new OrpheusNET\BencodeTorrent\BencodeTorrent();
 
 		$insert_data = [
 			'artists_group' => [],
