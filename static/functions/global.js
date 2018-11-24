@@ -140,3 +140,15 @@ function select_all(el) {
 		textRange.select();
 	}
 }
+
+function toggle_display(selector) {
+	let element = document.getElementById(selector);
+	if (!element) {
+		element = document.getElementsByClassName(selector);
+	}
+	if (element.style.display === "none" || element.style.display === '') {
+		element.style.display = "block";
+	} else {
+		element.style.display = "none";
+	}
+}
