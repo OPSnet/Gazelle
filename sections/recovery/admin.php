@@ -56,6 +56,14 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 
 <h3><?= $Total ?> <?= $State ?> recovery requests</h3>
 
+<p>Use the following queries for searching (cut'n'paste as appropriate):</p>
+<ul>
+<li>https://orpheus.network/recovery.php?action=search&announce=aaaadeadbeef</li>
+<li>https://orpheus.network/recovery.php?action=search&email=a@a.a</li>
+<li>https://orpheus.network/recovery.php?action=search&token=aaaa-aaaa-aaaa-aaaa</li>
+<li>https://orpheus.network/recovery.php?action=search&usernamne=aaaaa</li>
+</ul>
+
 <? if (isset($message)) { ?>
 <h5><?= $message ?></h5>
 <? } ?>

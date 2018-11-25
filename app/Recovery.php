@@ -356,7 +356,7 @@ END_EMAIL;
     }
 
     static function get_candidate ($username, $db) {
-        $db->prepared_query(self::get_candidate_sql . "
+        $db->prepared_query(self::get_candidate_sql() . "
             WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
@@ -364,7 +364,7 @@ END_EMAIL;
     }
 
     static function get_candidate_by_username ($username, $db) {
-        $db->prepared_query($sql = self::get_candidate_sql() . "
+        $db->prepared_query(self::get_candidate_sql() . "
             WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
