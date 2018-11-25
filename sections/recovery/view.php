@@ -51,6 +51,8 @@ $enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
     <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
     <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
     <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=browse">Browse</a>
+    <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
 <? if (!$Info) { ?>
@@ -80,7 +82,7 @@ foreach ($terms as $t) {
             <tr>
                 <th>Username</th>
                 <td><?= $Info['username'] ?></td>
-                <td><?= count($Candidate) ? '<font color="#008000">Username matches</font>' : '<font color="#800000">No match for username</font>' ?></td>
+                <td><?= count($Candidate) ? '<font color="#008000">Username matches (ID=' . $Candidate['UserID'] . ')</font>' : '<font color="#800000">No match for username</font>' ?></td>
                 <th>state</th>
                 <td><?= $Info['state'] ?></td>
             </tr>

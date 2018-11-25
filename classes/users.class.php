@@ -282,6 +282,16 @@ class Users {
 	}
 
 	/**
+	 * Does this ID point to an existing user?
+	 * @param integer ID
+	 * @return boolean
+	 */
+	public static function exists($ID) {
+        G::$DB->prepared_query("SELECT 1 FROM users_main WHERE ID = ?", $ID);
+        return G::$DB->has_results();
+	}
+
+	/**
 	 * Default settings to use for SiteOptions
 	 * @return array
 	 */

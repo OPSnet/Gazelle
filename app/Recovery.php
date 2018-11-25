@@ -345,19 +345,83 @@ END_EMAIL;
         return $db->next_record();
     }
 
-    static function get_candidate ($username, $db) {
-        $db->prepared_query("
-            SELECT
-                m.torrent_pass, m.Email, m.Uploaded, m.Downloaded, m.Enabled, m.PermissionID,
-                (SELECT count(t.ID) FROM " . RECOVERY_DB . ".torrents t WHERE m.ID = t.UserID) as nr_torrents,
+    static private function get_candidate_sql () {
+        return sprintf('
+            SELECT m.Username, m.torrent_pass, m.Email, m.Uploaded, m.Downloaded, m.Enabled, m.PermissionID, m.ID as UserID,
+                (SELECT count(t.ID) FROM %s.torrents t WHERE m.ID = t.UserID) as nr_torrents,
                 group_concat(DISTINCT(h.IP) ORDER BY h.ip) as ips
-            FROM " . RECOVERY_DB . ".users_main m
-            LEFT JOIN " . RECOVERY_DB . ".users_history_ips h ON (m.ID = h.UserID)
-            WHERE m.Username = ?
-            GROUP BY m.Username
+            FROM %s.users_main m LEFT JOIN %s.users_history_ips h ON (m.ID = h.UserID)
+            ', RECOVERY_DB, RECOVERY_DB, RECOVERY_DB
+        );
+    }
+
+    static function get_candidate ($username, $db) {
+        $db->prepared_query(self::get_candidate_sql . "
+            WHERE m.Username LIKE ? GROUP BY m.Username
             ", $username
         );
         return $db->next_record();
+    }
+
+    static function get_candidate_by_username ($username, $db) {
+        $db->prepared_query($sql = self::get_candidate_sql() . "
+            WHERE m.Username LIKE ? GROUP BY m.Username
+            ", $username
+        );
+        return $db->to_array();
+    }
+
+    static function get_candidate_by_announce ($announce, $db) {
+        $db->prepared_query(self::get_candidate_sql() . "
+            WHERE m.torrent_pass LIKE ? GROUP BY m.torrent_pass
+            ", $announce
+        );
+        return $db->to_array();
+    }
+
+    static function get_candidate_by_email ($email, $db) {
+        $db->prepared_query(self::get_candidate_sql() . "
+            WHERE m.Email LIKE ? GROUP BY m.Email
+            ", $email
+        );
+        return $db->to_array();
+    }
+
+    static function get_candidate_by_id ($id, $db) {
+        $db->prepared_query(self::get_candidate_sql() . "
+            WHERE m.ID = ? GROUP BY m.ID
+            ", $id
+        );
+        return $db->to_array();
+    }
+
+	public static function is_mapped($ID, $db) {
+        $db->prepared_query(sprintf("SELECT MappedID AS ID FROM %s.%s WHERE UserID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
+        return $db->to_array();
+	}
+
+	public static function is_mapped_local($ID, $db) {
+        $db->prepared_query(sprintf("SELECT UserID AS ID FROM %s.%s WHERE MappedID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
+        return $db->to_array();
+	}
+
+	public static function map_to_previous($ops_user_id, $prev_user_id, $admin_username, $db) {
+        $db->prepared_query(
+            sprintf("INSERT INTO %s.%s (UserID, MappedID) VALUES (?, ?)", RECOVERY_DB, RECOVERY_MAPPING_TABLE),
+            $prev_user_id, $ops_user_id
+        );
+        if ($db->affected_rows() != 1) {
+            return false;
+        }
+
+        /* staff note */
+        $db->prepared_query("
+            UPDATE users_info
+            SET AdminComment = CONCAT(?, AdminComment)
+            WHERE UserID = ?
+            ", sqltime() . " mapped to previous id $prev_user_id by $admin_username\n\n", $ops_user_id
+        );
+        return true;
     }
 
     static function boost_upload ($db, $cache) {
@@ -465,7 +529,6 @@ Dear {$to['Username']},
 Your activity on the previous site has been rewarded. Your details are as follows:
 
 [*] Torrents uploaded: {$nr_torrents}
-[*] Uploaded: {$uploaded_fmt}
 [*] Downloaded: {$downloaded_fmt}
 [*] Bounty: {$bounty_fmt} (requests created and voted upon).
 [*] ... magic ...

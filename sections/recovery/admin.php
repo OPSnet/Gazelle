@@ -45,11 +45,13 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 <div class="thin">
 
 <div class="linkbox">
-	<a href="/recovery.php?action=admin&amp;state=pending" class="brackets">Pending</a>
-	<a href="/recovery.php?action=admin&amp;state=validated" class="brackets">Validated</a>
-	<a href="/recovery.php?action=admin&amp;state=accepted" class="brackets">Accepted</a>
-	<a href="/recovery.php?action=admin&amp;state=denied" class="brackets">Denied</a>
-	<a href="/recovery.php?action=admin&amp;state=claimed" class="brackets">Your claimed</a>
+	<a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
+	<a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
+	<a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
+	<a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
+	<a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=browse">Browse</a>
+    <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
 <h3><?= $Total ?> <?= $State ?> recovery requests</h3>
