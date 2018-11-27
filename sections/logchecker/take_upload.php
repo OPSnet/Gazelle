@@ -2,7 +2,12 @@
 
 enforce_login();
 
-$TorrentID = intval($_POST['torrentid']);
+if (empty($_POST['torrentid'])) {
+	error('No torrent is selected.');
+}
+$TorrentID = intval($_POST['torrentid']) ?? null;
+// Some browsers will report an empty file when you submit, prune those out
+$_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], function($Name) { return !empty($Name); });
 $FileCount = count($_FILES['logfiles']['name']);
 $Action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_action'] : 'upload';
 
@@ -49,7 +54,7 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 	$Cache->delete_value("torrent_group_{$GroupID}");
 	$Cache->delete_value("torrents_details_{$GroupID}");
 } else {
-	error('No log file uploaded or no torrent is selected.');
+	error('No log file uploaded or invalid torrent id was selected.');
 }
 
 View::show_header();
