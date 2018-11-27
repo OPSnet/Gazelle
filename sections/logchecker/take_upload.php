@@ -3,6 +3,8 @@
 enforce_login();
 
 $TorrentID = intval($_POST['torrentid']);
+// Some browsers will report an empty file when you submit, prune those out
+$_FILES = array_filter($_FILES['logfiles'], function($File) { return !empty($File['tmp_name']); });
 $FileCount = count($_FILES['logfiles']['name']);
 $Action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_action'] : 'upload';
 
