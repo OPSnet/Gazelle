@@ -10,7 +10,6 @@ $DB->prepared_query("SELECT
 			VanityHouse
 		FROM artists_group
 		WHERE ArtistID = ?", $ArtistID);
-$DB->query($sql);
 
 if (!$DB->has_results()) {
 	error(404);
@@ -61,7 +60,7 @@ View::show_header("Request an Edit: " . $Name);
 					<input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
 					<textarea name="edit_details" style="width: 95%" required="required"></textarea><br /><br />
 					<input type="submit" value="Submit Edit Request" />
-				</form
+				</form>
 			</div>
 		</div>
 	</div>

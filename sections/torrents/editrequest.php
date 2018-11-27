@@ -76,7 +76,7 @@ View::show_header($Title);
 					<input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
 					<textarea name="edit_details" style="width: 95%" required="required"></textarea><br /><br />
 					<input type="submit" value="Submit Edit Request" />
-				</form
+				</form>
 			</div>
 		</div>
 	</div>
