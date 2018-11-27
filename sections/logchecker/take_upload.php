@@ -4,7 +4,7 @@ enforce_login();
 
 $TorrentID = intval($_POST['torrentid']);
 $FileCount = count($_FILES['logfiles']['name']);
-$Action = (in_array($_POST['from_action'], ['upload, update'])) ? $_POST['from_action'] : 'upload';
+$Action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_action'] : 'upload';
 
 $LogScore = 100;
 $LogChecksum = 1;
