@@ -83,6 +83,7 @@ define('REQUEST_TAX', 0.0); //Percentage Tax (0 - 1) to charge users on making r
 define('BLOCK_TOR', false); //Set to true to block Tor users
 define('BLOCK_OPERA_MINI', false); //Set to true to block Opera Mini proxy
 define('DONOR_INVITES', 2);
+define('SYSTEM_USER_ID', 1);
 define('TRASH_FORUM_ID', 4);
 define('EDITING_FORUM_ID', 34);
 define('EDITING_TRASH_FORUM_ID', 48);

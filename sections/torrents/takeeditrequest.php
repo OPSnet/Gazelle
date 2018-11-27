@@ -6,8 +6,8 @@ if (empty($_POST['groupid']) || !is_numeric($_POST['groupid'])) {
 	error(403);
 }
 
-$EditForumID = 34;
-$BotID = 49892;
+$EditForumID = EDITING_FORUM_ID;
+$BotID = SYSTEM_USER_ID;
 
 $GroupID = intval($_POST['groupid']);
 

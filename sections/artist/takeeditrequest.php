@@ -6,8 +6,8 @@ if (empty($_POST['artistid']) || !is_numeric($_POST['artistid'])) {
 	error(403);
 }
 
-$EditForumID = 34;
-$BotID = 49892;
+$EditForumID = EDITING_FORUM_ID;
+$BotID = SYSTEM_USER_ID;
 
 $ArtistID = intval($_POST['artistid']);
 
