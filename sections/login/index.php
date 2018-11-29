@@ -401,7 +401,7 @@ else {
 	}
 
 	$Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', array('regex' => USERNAME_REGEX));
-	$Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', array('minlength' => '6', 'maxlength' => '150'));
+	$Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', array('minlength' => '6', 'maxlength' => -1));
 
 	$DB->query("
 		SELECT ID, Attempts, Bans, BannedUntil

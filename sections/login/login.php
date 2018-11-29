@@ -35,7 +35,7 @@ if (strtotime($BannedUntil) < time()) {
 		<tr>
 			<td>Password&nbsp;</td>
 			<td colspan="2">
-				<input type="password" name="password" id="password" class="inputtext" required="required" maxlength="100" pattern=".{6,100}" placeholder="Password" />
+				<input type="password" name="password" id="password" class="inputtext" required="required" pattern=".{6,}" placeholder="Password" />
 			</td>
 		</tr>
 		<tr>
