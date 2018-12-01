@@ -30,7 +30,7 @@ echo <<<HTML
 		<p>
 		Use this page to test our logchecker. You can either upload a log or paste it into the
 		text box below. This will then run the file/text against our logchecker displaying to you
-		what it would look like on our site.
+		what it would look like on our site. To verify checksum, you need to upload log file.
 		</p>
 		<table class="forum_post vertical_margin">
 			<tr class="colhead">
@@ -48,7 +48,7 @@ echo <<<HTML
 		</table>
 		<table class="forum_post vertical_margin">
 			<tr class="colhead">
-				<td colspan="2">Paste log</td>
+				<td colspan="2">Paste log (No checksum verification)</td>
 			</tr>
 			<tr>
 				<td>
