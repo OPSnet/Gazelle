@@ -382,7 +382,7 @@ if ($Username != $Cur['Username'] && check_perms('users_edit_usernames', $Cur['C
 
 if ($Title != db_string($Cur['Title']) && check_perms('users_edit_titles')) {
 	// Using the unescaped value for the test to avoid confusion
-	if (strlen($_POST['Title']) > 1024) {
+	if (mb_strlen($_POST['Title']) > 1024) {
 		error("Custom titles have a maximum length of 1,024 characters.");
 		header("Location: user.php?id=$UserID");
 		die();
