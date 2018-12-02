@@ -26,11 +26,10 @@ if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
 
 	// Search by infohash
 	if ($InfoHash = is_valid_torrenthash($InfoHash)) {
-		$InfoHash = db_string(pack('H*', $InfoHash));
-		$DB->query("
+		$DB->prepared_query("
 			SELECT ID, GroupID
 			FROM torrents
-			WHERE info_hash = '$InfoHash'");
+			WHERE info_hash = UNHEX(?)", $InfoHash);
 		if ($DB->has_results()) {
 			list($ID, $GroupID) = $DB->next_record();
 			header("Location: torrents.php?id=$GroupID&torrentid=$ID");

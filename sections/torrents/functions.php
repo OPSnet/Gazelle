@@ -182,10 +182,10 @@ function is_valid_torrenthash($Str) {
 
 function torrenthash_to_torrentid($Str) {
 	global $Cache, $DB;
-	$DB->query("
+	$DB->prepared_query("
 		SELECT ID
 		FROM torrents
-		WHERE HEX(info_hash) = '".db_string($Str)."'");
+		WHERE info_hash = UNHEX(?)", $Str);
 	$TorrentID = (int)array_pop($DB->next_record(MYSQLI_ASSOC));
 	if ($TorrentID) {
 		return $TorrentID;
@@ -198,7 +198,7 @@ function torrenthash_to_groupid($Str) {
 	$DB->query("
 		SELECT GroupID
 		FROM torrents
-		WHERE HEX(info_hash) = '".db_string($Str)."'");
+		WHERE info_hash = UNHEX(?)", $Str);
 	$GroupID = (int)array_pop($DB->next_record(MYSQLI_ASSOC));
 	if ($GroupID) {
 		return $GroupID;
