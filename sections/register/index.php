@@ -27,6 +27,7 @@ if (!empty($_REQUEST['confirm'])) {
 			UPDATE users_main
 			SET Enabled = '1'
 			WHERE ID = '$UserID'");
+		$Cache->delete_value("user_info_{$UserID}");
 		$Cache->increment('stats_user_count');
 		include('step2.php');
 	}
