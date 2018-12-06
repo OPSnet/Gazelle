@@ -467,6 +467,7 @@ class Users {
 			'33' => 'ST', // Security Team
 			'37' => 'AR', // Archive Team
 			'36' => 'AT', // Alpha Team
+			'48' => 'BT', // Beta TEam
 			'38' => 'CT', // Charlie Team
 			'39' => 'DT', // Delta Team
 		 );
