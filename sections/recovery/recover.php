@@ -2,10 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <?
 require('classes/config.php');
-$SITENAME = "Orpheus";
 ?>
 <head>
-<title><?=$SITENAME?> :: Membership recovery</title>
+<title><?= SITE_NAME ?> :: Membership recovery</title>
 <meta http-equiv="X-UA-Compatible" content="chrome=1; IE=edge" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="shortcut icon" href="favicon.ico" />

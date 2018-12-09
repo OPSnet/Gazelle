@@ -3,6 +3,10 @@ if (!check_perms('admin_recovery')) {
     error(403);
 }
 
+function security_checksum($a, $b) {
+    return sha1(implode(chr(1), [RECOVERY_PAIR_SALT, implode(chr(2), $a), implode(chr(3), $b)]));
+}
+
 if (isset($_POST['curr']) && isset($_POST['prev'])) {
     $curr_id = (int)trim($_POST['curr']);
     $found = \Users::exists($curr_id);
@@ -25,9 +29,22 @@ if (isset($_POST['curr']) && isset($_POST['prev'])) {
             $Result = \Users::format_username($curr_id) . " is already mapped to previous id $ID";
         }
         else {
-            $Result = \Gazelle\Recovery::map_to_previous($curr_id, $prev_id, G::$LoggedUser['Username'], G::$DB)
-                ? \Users::format_username($curr_id) . " has been successfully mapped to previous id $prev_id"
-                : "DB Error: did not map $curr_id to $prev_id";
+            list($Prev, $Confirm) = \Gazelle\Recovery::get_pair_confirmation($prev_id, $curr_id, G::$DB);
+            if (!($Prev && $Confirm)) {
+                $Result = "No database information to pair from $prev_id to $curr_id";
+            }
+            if (array_key_exists('check', $_POST)) {
+                if ($_POST['check'] != security_checksum($prev_id, $curr_id)) {
+                    $Result = "Security checksum failed";
+                }
+                else {
+                    $Result = \Gazelle\Recovery::map_to_previous($curr_id, $prev_id, G::$LoggedUser['Username'], G::$DB)
+                        ? \Users::format_username($curr_id) . " has been successfully mapped to previous user " .$Confirm['Username'] . "."
+                        : "DB Error: could not map $curr_id to $prev_id"
+                        ;
+                    unset($Confirm);
+                }
+            }
         }
     }
 }
@@ -49,23 +66,81 @@ View::show_header('Recovery pair users');
 <? if (isset($Result)) { ?>
 <div class="box">
     <div class="head">Result</div>
-
     <div><?= $Result ?></div>
 </div>
-<? } ?>
+<?
+}
+elseif (isset($Confirm)) {
+?>
+<div class="box">
+    <div class="head">Confirm</div>
+
+    <form method="post" action="/recovery.php?action=pair">
+    <p>Please confirm the following pairing:<p>
+    <table>
+        <tr><th></th><th>Previous</th><th><?= SITE_NAME ?></th>
+
+        <tr>
+            <th>ID</th>
+            <td><?= $Prev['ID'] ?></td>
+            <td><?= $Confirm['ID'] ?></td>
+        </tr>
+
+        <tr>
+            <th>Username</th>
+            <td><?= $Prev['Username'] ?></td>
+            <td><?= $Confirm['Username'] ?></td>
+        </tr>
+
+        <tr>
+            <th>Userclass</th>
+            <td><?= $Prev['UserClass'] ?></td>
+            <td><?= $Confirm['UserClass'] ?></td>
+        </tr>
+
+        <tr>
+            <th>Email</th>
+            <td><?= $Prev['Email'] ?></td>
+            <td><?= $Confirm['Email'] ?></td>
+        </tr>
+
+        <tr>
+            <th>Announce</th>
+            <td><?= $Prev['torrent_pass'] ?></td>
+            <td><?= $Confirm['torrent_pass'] ?></td>
+        </tr>
+
+        <tr>
+            <th>Torrents</th>
+            <td><?= $Prev['nr_torrents'] ?></td>
+            <td><?= $Confirm['nr_torrents'] ?></td>
+        </tr>
+
+        <tr>
+            <td colspan="3"><input type="submit" value="Confirm" /></td>
+        </tr>
+
+    </table>
+
+    <input type="hidden" name="curr" value="<?= $curr_id ?>" />
+    <input type="hidden" name="prev" value="<?= $prev_id ?>" />
+    <input type="hidden" name="check" value="<?= security_checksum($prev_id, $curr_id) ?>" />
+    </form>
+</div>
+<? } /* $Confirm */ ?>
 
 <div class="box">
-    <div class="head">Pair Orpheus user</div>
+    <div class="head">Pair <?= SITE_NAME ?> user</div>
 
-    <p>In the following section you will be asked to pair an Orpheus user with their original account on the previous site.
+    <p>In the following section you will be asked to pair a user on <?= SITE_NAME ?> with their original account on the previous site.
     Once this assocation has been recorded, torrents, buffer, bookmarks etc, from the previous account will be assigned to
-    the Orpheus account.</p>
+    the <?= SITE_NAME ?> account.</p>
 
     <div class="pad">
         <form method="post" action="/recovery.php?action=pair">
         <table>
             <tr>
-                <th>Orpheus ID</th>
+                <th><?= SITE_NAME ?> ID</th>
                 <td><input type="text" name="curr" width="10" value="<?= isset($curr_id) ? $curr_id : '' ?>" /></td>
             </tr>
             <tr>

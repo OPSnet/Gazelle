@@ -27,7 +27,7 @@ is valid, assuming it is the the backup.</p>
 <h5>Your Password</h5>
 
 <p>This will be hashed upon reception and compared with the existing hash of your password.
-When you receive an invite to Orpheus, you should not reuse this password.</p>
+When you receive an invite to <?= SITE_NAME ?>, you should not reuse this password.</p>
 
 <input type="password" name="password" />
 

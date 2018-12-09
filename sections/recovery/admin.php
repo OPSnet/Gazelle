@@ -28,6 +28,17 @@ if (isset($_GET['task'])) {
         }
     }
 }
+else {
+    foreach (explode(' ', 'token username announce email') as $field) {
+        if (array_key_exists($field, $_POST)) {
+            $value = trim($_POST[$field]);
+            if (strlen($value)) {
+                header("Location: /recovery.php?action=search&$field=$value");
+                exit;
+            }
+        }
+    }
+}
 
 
 $Page = (isset($_GET['page']) && (int)$_GET['page'] > 0)
@@ -54,15 +65,16 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
     <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
-<h3><?= $Total ?> <?= $State ?> recovery requests</h3>
+<form method="post" action="/recovery.php?action=admin">
+<table>
+<tr><th>Token</th><td><input type="text" width="30" name="token" /></td>
+<th>Username</th><td><input type="text" width="30" name="username" /></td></tr>
+<tr><th>Announce</th><td><input type="text" width="30" name="announce" /></td>
+<th>Email</th><td><input type="text" width="30" name="email" /></td></tr>
+<tr><td></td><td colspan="3"><input type="submit" value="Search" /></td></tr>
+</table>
 
-<p>Use the following queries for searching (cut'n'paste as appropriate):</p>
-<ul>
-<li>https://orpheus.network/recovery.php?action=search&announce=aaaadeadbeef</li>
-<li>https://orpheus.network/recovery.php?action=search&email=a@a.a</li>
-<li>https://orpheus.network/recovery.php?action=search&token=aaaa-aaaa-aaaa-aaaa</li>
-<li>https://orpheus.network/recovery.php?action=search&usernamne=aaaaa</li>
-</ul>
+<h3><?= $Total ?> <?= $State ?> recovery requests</h3>
 
 <? if (isset($message)) { ?>
 <h5><?= $message ?></h5>

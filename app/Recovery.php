@@ -260,9 +260,10 @@ class Recovery {
         );
 
         $SITE_URL  = SITE_URL;
+        $SITE_NAME = SITE_NAME;
         $mail = <<<END_EMAIL
 You recently requested to recover your account from a previous tracker in
-order to join Orpheus.
+order to join <?= $SITE_NAME ?>.
 
 The information you provided was sufficient proof for confirm that you
 did have in fact have an account, and consequently you have been given
@@ -291,7 +292,7 @@ your old torrents (and avoid downloading them all over again by accident,
 thereby destroying your buffer).
 
 Thank you,
-Orpheus Staff
+<?= $SITE_NAME ?> Staff
 END_EMAIL;
 
         \Misc::send_email($email, 'Account recovery confirmation at '.SITE_NAME, $mail, 'noreply');
@@ -395,6 +396,35 @@ END_EMAIL;
         return $db->to_array();
     }
 
+    static private function get_user_details_sql ($schema = null) {
+        if ($schema) {
+            $permission_t = "$schema.permissions";
+            $users_main_t = "$schema.users_main";
+            $torrents_t   = "$schema.torrents";
+        }
+        else {
+            $permission_t = 'permissions';
+            $users_main_t = 'users_main';
+            $torrents_t   = 'torrents';
+        }
+        return "
+            SELECT u.ID, u.Username, u.Email, u.torrent_pass, p.Name as UserClass, count(t.ID) as nr_torrents
+            FROM $users_main_t u
+            INNER JOIN $permission_t p ON (p.ID = u.PermissionID)
+            LEFT JOIN $torrents_t t ON (t.UserID = u.ID)
+            WHERE u.ID = ?
+            GROUP BY u.ID, u.Username, u.Email, u.torrent_pass, p.Name
+        ";
+    }
+
+    static public function get_pair_confirmation($prev_id, $curr_id, $db) {
+        $db->prepared_query(self::get_user_details_sql(RECOVERY_DB), $prev_id);
+        $prev = $db->next_record();
+        $db->prepared_query(self::get_user_details_sql(), $curr_id);
+        $curr = $db->next_record();
+        return [$prev, $curr];
+    }
+
 	public static function is_mapped($ID, $db) {
         $db->prepared_query(sprintf("SELECT MappedID AS ID FROM %s.%s WHERE UserID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
         return $db->to_array();
@@ -494,11 +524,6 @@ END_EMAIL;
                 , $ops_user_id
             );
 
-            /* no buffer for you */
-            if ($final < 1.0) {
-                continue;
-            }
-
             /* upscale from IRC activity */
             $irc_change = '';
             if (array_key_exists($irc_userclass, $rescale)) {
@@ -521,9 +546,18 @@ END_EMAIL;
             $bounty_fmt     = \Format::get_size($bounty);
             $final_fmt      = \Format::get_size($final);
 
-            $to = \Users::user_info($ops_user_id);
+            $admin_comment = sprintf("%s - Upload stats recovery raw: Up=%d Down=%d Bounty=%d Torrents=%d IRC=%s"
+                . "\nformatted: U=%s D=%s B=%s Final=%s (%d) APL_ID=%d RESCALE=%s\n\n",
+                $username, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass,
+                $uploaded_fmt, $downloaded_fmt, $bounty_fmt, $final_fmt, $final, $apl_user_id, $irc_message
+            );
 
-            $Body = <<<END_MSG
+            /* no buffer for you if < 1MB */
+            if ($final >= 1.0) {
+
+                $to = \Users::user_info($ops_user_id);
+
+                $Body = <<<END_MSG
 Dear {$to['Username']},
 
 Your activity on the previous site has been rewarded. Your details are as follows:
@@ -535,10 +569,10 @@ Your activity on the previous site has been rewarded. Your details are as follow
 [*] Buffer: $final_fmt
 END_MSG;
 
-            if (strlen($irc_change)) {
-                $Body .= "$irc_change\n";
-            }
-            $Body .= <<<END_MSG
+                if (strlen($irc_change)) {
+                    $Body .= "$irc_change\n";
+                }
+                $Body .= <<<END_MSG
 
 This amount has been added to your existing Uploaded stats.  Don't sit on this buffer,
 go out and use it. You never know what tomorrow will bring.
@@ -547,13 +581,8 @@ go out and use it. You never know what tomorrow will bring.
 --OPS Staff
 END_MSG;
 
-            \Misc::send_pm($ops_user_id, 0, "Your buffer stats have been updated", $Body);
-
-            $admin_comment = sprintf("%s - Upload stats recovery raw: Up=%d Down=%d Bounty=%d Torrents=%d IRC=%s"
-                . "\nformatted: U=%s D=%s B=%s Final=%s (%d) APL_ID=%d RESCALE=%s\n\n",
-                $username, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass,
-                $uploaded_fmt, $downloaded_fmt, $bounty_fmt, $final_fmt, $final, $apl_user_id, $irc_message
-            );
+                \Misc::send_pm($ops_user_id, 0, "Your buffer stats have been updated", $Body);
+            }
 
             /* insert this first to avoid a potential reallocation */
             $db->prepared_query("
