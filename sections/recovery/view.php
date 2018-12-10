@@ -165,5 +165,3 @@ foreach ($terms as $t) {
 </div>
 <?
 View::show_footer();
-
-

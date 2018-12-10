@@ -152,3 +152,5 @@ elseif (isset($Confirm)) {
         </form>
     </div>
 </div>
+<?
+View::show_footer();

@@ -96,3 +96,5 @@ View::show_header('Recovery browse users');
         </form>
     </div>
 </div>
+<?
+View::show_footer();
