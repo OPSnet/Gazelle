@@ -1,49 +1,40 @@
 <?
-$DB->query("
+$DB->prepared_query("
 	SELECT Page, COUNT(1)
 	FROM comments
-	WHERE AuthorID = $UserID
-	GROUP BY Page");
+	WHERE AuthorID = ?
+	GROUP BY Page", $UserID);
 $Comments = $DB->to_array('Page');
 $NumComments = $Comments['torrents'][1];
 $NumArtistComments = $Comments['artist'][1];
 $NumCollageComments = $Comments['collages'][1];
 $NumRequestComments = $Comments['requests'][1];
 
-$DB->query("
+$DB->prepared_query("
 	SELECT COUNT(ID)
 	FROM collages
 	WHERE Deleted = '0'
-		AND UserID = '$UserID'");
+		AND UserID = ?", $UserID);
 list($NumCollages) = $DB->next_record();
 
-$DB->query("
+$DB->prepared_query("
 	SELECT COUNT(DISTINCT CollageID)
 	FROM collages_torrents AS ct
 		JOIN collages ON CollageID = ID
 	WHERE Deleted = '0'
-		AND ct.UserID = '$UserID'");
+		AND ct.UserID = ?", $UserID);
 list($NumCollageContribs) = $DB->next_record();
 
-$DB->query("
-	SELECT COUNT(DISTINCT GroupID)
-	FROM torrents
-	WHERE UserID = '$UserID'");
+$DB->prepared_query("
+	SELECT IFNULL(Groups, 0)
+	FROM users_summary
+	WHERE UserID = ?", $UserID);
 list($UniqueGroups) = $DB->next_record();
 
-$DB->query("
-	SELECT COUNT(ID)
-	FROM torrents
-	WHERE ((LogScore = 100 AND Format = 'FLAC')
-			OR (Media = 'Vinyl' AND Format = 'FLAC')
-			OR (Media = 'WEB' AND Format = 'FLAC')
-			OR (Media = 'DVD' AND Format = 'FLAC')
-			OR (Media = 'Soundboard' AND Format = 'FLAC')
-			OR (Media = 'Cassette' AND Format = 'FLAC')
-			OR (Media = 'SACD' AND Format = 'FLAC')
-			OR (Media = 'BD' AND Format = 'FLAC')
-			OR (Media = 'DAT' AND Format = 'FLAC'))
-		AND UserID = '$UserID'");
+$DB->prepared_query("
+	SELECT IFNULL(PerfectFlacs, 0)
+	FROM users_summary
+	WHERE UserID = ?", $UserID);
 list($PerfectFLACs) = $DB->next_record();
 
 $DB->prepared_query("SELECT COUNT(*) FROM forums_topics WHERE AuthorID = ?", $UserID);
@@ -95,8 +86,8 @@ list($ForumTopics) = $DB->fetch_record();
 	}
 
 	//Let's see if we can view requests because of reasons
-	$ViewAll    = check_paranoia_here('requestsfilled_list');
-	$ViewCount  = check_paranoia_here('requestsfilled_count');
+	$ViewAll	= check_paranoia_here('requestsfilled_list');
+	$ViewCount	= check_paranoia_here('requestsfilled_count');
 	$ViewBounty = check_paranoia_here('requestsfilled_bounty');
 
 	if ($ViewCount && !$ViewBounty && !$ViewAll) { ?>
@@ -115,8 +106,8 @@ list($ForumTopics) = $DB->fetch_record();
 	}
 
 	//Let's see if we can view requests because of reasons
-	$ViewAll    = check_paranoia_here('requestsvoted_list');
-	$ViewCount  = check_paranoia_here('requestsvoted_count');
+	$ViewAll	= check_paranoia_here('requestsvoted_list');
+	$ViewCount	= check_paranoia_here('requestsvoted_count');
 	$ViewBounty = check_paranoia_here('requestsvoted_bounty');
 
 	if ($ViewCount && !$ViewBounty && !$ViewAll) { ?>
@@ -231,10 +222,10 @@ list($ForumTopics) = $DB->fetch_record();
 <?
 	}
 	if ($Override = check_paranoia_here('invitedcount')) {
-	$DB->query("
+	$DB->prepared_query("
 		SELECT COUNT(UserID)
 		FROM users_info
-		WHERE Inviter = '$UserID'");
+		WHERE Inviter = ?", $UserID);
 	list($Invited) = $DB->next_record();
 ?>
 				<li id="comm_invited">Invited: <?=number_format($Invited)?></li>
