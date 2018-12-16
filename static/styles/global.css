@@ -821,3 +821,9 @@ input[type="search"] {
 #recovery table td > pre {
 	max-width: 800px;
 }
+
+#user .twofa_text {
+    font-size: 14px;
+    margin-top: 10px;
+    font-weight: 600
+}
