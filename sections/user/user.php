@@ -509,6 +509,13 @@ $OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsR
 			</ul>
 		</div>
 <?
+	if ($OwnProfile || check_perms('users_override_paranoia', $Class)) {
+		$DB->prepared_query("
+			SELECT IRCKey
+			FROM users_main
+			WHERE ID = ?", $UserID);
+		list($IRCKey) = $DB->next_record();
+	}
 	if (check_perms('users_mod', $Class) || check_perms('users_view_ips', $Class) || check_perms('users_view_keys', $Class)) {
 		$DB->query("
 			SELECT COUNT(*)
@@ -684,8 +691,10 @@ if ($OwnProfile || check_perms('users_mod')) {
 	$PasswordAge = substr($Age, 0, strpos($Age, " ago"));
 ?>
 	<li>Password age: <?=$PasswordAge?></li>
+<? }
+if ($OwnProfile || check_perms('users_override_paranoia', $Class)) { ?>
+	<li>IRC Key: <?=empty($IRCKey) ? 'No' : 'Yes' ?></li>
 <? } ?>
-
 			</ul>
 		</div>
 <?
