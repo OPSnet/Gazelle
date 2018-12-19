@@ -232,13 +232,16 @@ $CollageCats = [
 ];
 
 $ReleaseTypes = [
-    1 => 'Album',
-    3 => 'Soundtrack',
-    5 => 'EP',
-    6 => 'Anthology',
-    7 => 'Compilation',
-    9 => 'Single',
+    1  => 'Album',
+    3  => 'Soundtrack',
+    5  => 'EP',
+    6  => 'Anthology',
+    7  => 'Compilation',
+    8  => 'Sampler',
+    9  => 'Single',
+    10 => 'Demo',
     11 => 'Live album',
+    12 => 'Split',
     13 => 'Remix',
     14 => 'Bootleg',
     15 => 'Interview',
