@@ -527,6 +527,9 @@ switch ($_REQUEST['action']) {
 	case 'db_sandbox':
 		include(SERVER_ROOT.'/sections/tools/sandboxes/db_sandbox.php');
 		break;
+	case 'referral_sandbox':
+		include(SERVER_ROOT.'/sections/tools/sandboxes/referral_sandbox.php');
+		break;
 	case 'calendar':
 		include(SERVER_ROOT.'/sections/tools/managers/calendar.php');
 		break;
