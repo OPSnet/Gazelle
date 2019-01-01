@@ -136,12 +136,13 @@ Hello %s,
 %s has replied to your application for the role of %s.
 You can view the reply [url=%s]here[/url].
 
-~APL STAFF <3
+~%s Staff <3
 END_MSG
 					, $user['Username']
 					, $staff['Username']
 					, $this->role_title()
 					, site_url() . '/apply.php?action=view&id=' . $this->id()
+					, SITE_NAME
 				)
 			);
 		}
