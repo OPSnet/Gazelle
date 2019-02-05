@@ -1,0 +1,10 @@
+[Unit]
+Description=sphinx searchd SQL full-text search engine
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/searchd --config /etc/sphinxsearch/sphinx.conf
+
+[Install]
+WantedBy=multi-user.target
