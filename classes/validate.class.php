@@ -143,9 +143,9 @@ class VALIDATE {
 						$MinLength = 1;
 					}
 
-					if (strlen($ValidateVar) > $MaxLength) {
+					if ($MaxLength !== -1 && strlen($ValidateVar) > $MaxLength) {
 						return $Field['ErrorMessage'];
-					} elseif (strlen($ValidateVar) < $MinLength) {
+					} elseif ($MinLength !== -1 && strlen($ValidateVar) < $MinLength) {
 						return $Field['ErrorMessage'];
 					}
 
