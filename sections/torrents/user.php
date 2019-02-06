@@ -2,7 +2,7 @@
 
 
 $Orders = array('Time', 'Name', 'Seeders', 'Leechers', 'Snatched', 'Size');
-$Ways = array('ASC' => 'Ascending', 'DESC' => 'Descending');
+$Ways = array('DESC' => 'Descending', 'ASC' => 'Ascending');
 $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
 
 // The "order by x" links on columns headers
