@@ -359,16 +359,18 @@ if ($Classes[$Class]['Level'] != $Cur['Class']
 	$Cache->delete_value("donor_info_$UserID");
 }
 
-if ($Username != $Cur['Username'] && check_perms('users_edit_usernames', $Cur['Class'] - 1)) {
-	$DB->query("
-		SELECT ID
-		FROM users_main
-		WHERE Username = '$Username'");
-	if ($DB->next_record() > 0) {
-		list($UsedUsernameID) = $DB->next_record();
-		error("Username already in use by <a href=\"user.php?id=$UsedUsernameID\">$Username</a>");
-		header("Location: user.php?id=$UserID");
-		die();
+if ($Username !== $Cur['Username'] && check_perms('users_edit_usernames', $Cur['Class'] - 1)) {
+	if (strtolower($Username) !== strtolower($Cur['Username'])) {
+		$DB->prepared_query("
+			SELECT ID
+			FROM users_main
+			WHERE Username = ?", $Username);
+		if ($DB->has_results()) {
+			list($UsedUsernameID) = $DB->next_record();
+			error("Username already in use by <a href=\"user.php?id=$UsedUsernameID\">$Username</a>");
+			header("Location: user.php?id=$UserID");
+			die();
+		}
 	} elseif ($Username == '0' || $Username == '1') {
 		error('You cannot set a username of "0" or "1".');
 		header("Location: user.php?id=$UserID");
