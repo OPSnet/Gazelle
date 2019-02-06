@@ -359,7 +359,9 @@ function show() {
 				</td>
 			</tr>
 <?		} ?>
-            <tr><td colspan="2"><h3>Edit <?= Artists::display_artists(Artists::get_artist($Torrent['GroupID'])) . display_str($Torrent['Title'] )?></h3></td></tr>
+<?	if (!$this->NewTorrent) { ?>
+			<tr><td colspan="2"><h3>Edit <?= Artists::display_artists(Artists::get_artist($Torrent['GroupID'])) . display_str($Torrent['Title'] )?></h3></td></tr>
+<?	} ?>
 			<tr>
 				<td class="label">Edition information:</td>
 				<td>
