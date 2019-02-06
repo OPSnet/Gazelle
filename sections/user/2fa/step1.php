@@ -28,7 +28,7 @@ View::show_header('Two-factor Authentication');
 						->get('png')
 				);
 			?>">
-            <div style="display: none">Secret Text: <span><?=$_SESSION['private_key']?></span></div>
+            <div class="twofa_text">Secret Text: <span><?=$_SESSION['private_key']?></span></div>
 
 			<? if(isset($_GET['invalid'])): ?>
 				<p class="warning">Please ensure you've imported the correct key into your authentication app and try again.</p>
