@@ -222,6 +222,7 @@ View::show_header('Staff Tools');
 	create_row("Rerender stylesheet gallery images", "tools.php?action=rerender_gallery", check_perms("site_debug") || check_perms("users_mod"));
 	create_row("Schedule", "schedule.php?auth=$LoggedUser[AuthKey]", check_perms("site_debug"));
 	create_row("Service stats", "tools.php?action=service_stats", check_perms("site_debug"));
+	create_row("Database specifics", "tools.php?action=database_specifics", check_perms("site_database_specifics"));
 	create_row("Site info","tools.php?action=site_info", check_perms('site_debug'));
 	create_row("Site options", "tools.php?action=site_options", check_perms('users_mod'));
 	create_row("Tracker info", "tools.php?action=ocelot_info", check_perms("users_mod"));

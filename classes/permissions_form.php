@@ -40,6 +40,7 @@ $PermissionsArray = array(
 	'site_disable_ip_history' => 'Disable IP history.',
 	'zip_downloader' => 'Download multiple torrents at once.',
 	'site_debug' => 'Developer access.',
+	'site_database_specifics' => 'Can view database specifics',
 	'site_proxy_images' => 'Image proxy & anti-canary.',
 	'site_search_many' => 'Can go past low limit of search results.',
 	'users_edit_usernames' => 'Can edit usernames.',
@@ -157,6 +158,7 @@ function permissions_form() {
 					display_perm('site_disable_ip_history', 'Disable IP history.');
 					display_perm('zip_downloader', 'Download multiple torrents at once.');
 					display_perm('site_debug', 'View site debug tables.');
+					display_perm('site_database_specifics', 'Can view database specifics.');
 					display_perm('site_proxy_images', 'Proxy images through the server.');
 					display_perm('site_search_many', 'Can go past low limit of search results.');
 					display_perm('site_collages_recover', 'Can recover \'deleted\' collages.');

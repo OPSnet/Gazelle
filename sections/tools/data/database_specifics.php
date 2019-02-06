@@ -1,5 +1,5 @@
 <?
-if (!check_perms('site_debug')) {
+if (!check_perms('site_database_specifics')) {
 	error(403);
 }
 

@@ -11,10 +11,12 @@ $DBStats = $DB->to_array('Variable_name');
 $MemStats = $Cache->getStats();
 
 View::show_header("Service Stats");
+if (check_perms('site_database_specifics')) {
 ?>
 <div class="linkbox">
 	<a href="tools.php?action=database_specifics" class="brackets">Database specifics</a>
 </div>
+<?php } ?>
 <div class="permissions">
 	<div class="permission_container">
 		<table>
