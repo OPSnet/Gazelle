@@ -12,15 +12,7 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
 	<link rel="shortcut icon" href="favicon.ico" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<meta name="viewport" content="width=device-width; initial-scale=1.0;" />
-	<?
-	$styles = [];
-	list($month, $day) = explode(' ', date('n d'));
-	if (($month == 12 && $day >= 12) || ($month == 1 && $day < 4)) {
-		$styles = array_merge($styles, ['red', 'green', 'white']);
-	}
-	$style = (count($styles) > 0) ? $styles[array_rand($styles)] : '';
-	?>
-	<link href="<?=STATIC_SERVER ?>styles/public/style<?=$style?>.css?v=<?=filemtime(SERVER_ROOT."/static/styles/public/style{$style}.css")?>" rel="stylesheet" type="text/css" />
+	<link href="<?=STATIC_SERVER ?>styles/public/style.css?v=<?=filemtime(SERVER_ROOT."/static/styles/public/style.css")?>" rel="stylesheet" type="text/css" />
 	<script src="<?=STATIC_SERVER?>functions/jquery.js" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/script_start.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/script_start.js')?>" type="text/javascript"></script>
 	<script src="<?=STATIC_SERVER?>functions/ajax.class.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/ajax.class.js')?>" type="text/javascript"></script>
