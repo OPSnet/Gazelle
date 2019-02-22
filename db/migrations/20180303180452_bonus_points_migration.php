@@ -36,7 +36,8 @@ class BonusPointsMigration extends AbstractMigration {
 			['Price' =>  24000, 'Amount' => 10, 'Label' => 'other-2', 'Title' => '10 Freeleech Tokens to Other'],
 			['Price' => 115000, 'Amount' => 50, 'Label' => 'other-3', 'Title' => '50 Freeleech Tokens to Other'],
 
-			['Price' =>  20000, 'Amount' =>  1, 'Label' => 'invite', 'MinClass' => 150, 'title' => 'Buy an Invite'],
+			['Price' =>  20000, 'Amount' =>  1, 'Label' => 'invite', 'MinClass' => 150, 'title' => 'One (1) Invite'],
+			/** Makes more sense than 'Buy an invite purchased!' */
 
 			['Price' =>  50000, 'Label' => 'title-bb-n', 'FreeClass' => 400, 'Title' => 'Custom Title (No BBCode)'],
 			['Price' => 150000, 'Label' => 'title-bb-y', 'FreeClass' => 400, 'Title' => 'Custom Title (BBCode Allowed)'],
