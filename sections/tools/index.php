@@ -105,6 +105,14 @@ switch ($_REQUEST['action']) {
 		include(SERVER_ROOT.'/sections/tools/managers/referral_users.php');
 		break;
 
+	case 'payment_alter':
+		include(SERVER_ROOT.'/sections/tools/managers/payment_alter.php');
+		break;
+
+	case 'payment_list':
+		include(SERVER_ROOT.'/sections/tools/managers/payment_list.php');
+		break;
+
 	case 'enable_requests':
 		include(SERVER_ROOT.'/sections/tools/managers/enable_requests.php');
 		break;

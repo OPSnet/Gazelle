@@ -51,6 +51,7 @@ View::show_header('Staff Tools');
 	create_row("Referral Accounts", "tools.php?action=referral_accounts", check_perms("admin_manage_referrals"));
 	create_row("Referred Users", "tools.php?action=referral_users", check_perms("admin_view_referrals"));
 	create_row("User Recovery", "recovery.php?action=admin", check_perms("admin_recovery"));
+	create_row("Payment Dates", "tools.php?action=payment_list", check_perms("admin_manage_payments"));
 
 	if ($ToolsHTML) {
 ?>
