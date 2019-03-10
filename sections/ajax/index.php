@@ -163,6 +163,12 @@ switch ($_GET['action']) {
 	case 'loggy':
 		require(SERVER_ROOT . '/sections/ajax/loggy.php');
 		break;
+	case 'user_stats':
+		require(SERVER_ROOT . '/sections/ajax/stats/users.php');
+		break;
+	case 'torrent_stats':
+		require(SERVER_ROOT . '/sections/ajax/stats/torrents.php');
+		break;
 	default:
 		// If they're screwing around with the query string
 		json_die("failure");
