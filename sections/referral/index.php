@@ -126,8 +126,11 @@
 			} else {
 				$Verified = $ReferralManager->verifyAccount($Account, $_POST['username'], $Token);
 				if ($Verified === true) {
-					$Invite = $ReferralManager->generateInvite($Account, $_POST['username'], $Email);
-					if ($Invite === false) {
+					list($Success, $Invite) = $ReferralManager->generateInvite($Account, $_POST['username'], $Email);
+					if (!$Success) {
+						$Error = $Invite;
+					}
+					else if ($Invite === false) {
 						$Error = "Failed to generate invite.";
 					}
 				} else {

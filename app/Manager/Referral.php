@@ -536,6 +536,15 @@ class Referral {
 	}
 
 	public function generateInvite($acc, $username, $email) {
+		$this->db->prepared_query("
+			SELECT Username
+			FROM referral_users
+			WHERE Username = ? AND Site = ?",
+			$username, $acc["Site"]);
+		if ($this->db->has_results()) {
+			return [false, "Account already used for referral, join " . BOT_DISABLED_CHAN . " on " . BOT_SERVER . " for help."];
+		}
+
 		$InviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
 		$InviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
 		$InviteKey = db_string(\Users::make_secret());
@@ -570,6 +579,6 @@ class Referral {
 			\Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $Tpl->get(), 'noreply', 'text/plain');
 		}
 
-		return $InviteKey;
+		return [true, $InviteKey];
 	}
 }
