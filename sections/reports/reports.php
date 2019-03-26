@@ -1,7 +1,7 @@
 <?
 /************************************************************************
  ************************************************************************/
-if (!check_perms('admin_reports') && !check_perms('project_team') && !check_perms('site_moderate_forums')) {
+if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
 	error(404);
 }
 
@@ -34,13 +34,9 @@ if ($_GET['id'] && is_number($_GET['id'])) {
 }
 
 if (!check_perms('admin_reports')) {
-	if (check_perms('project_team')) {
-		$Where .= " AND Type = 'request_update'";
-	}
 	if (check_perms('site_moderate_forums')) {
 		$Where .= " AND Type IN('comment', 'post', 'thread')";
 	}
-
 }
 
 $Reports = $DB->query("

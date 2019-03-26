@@ -1,7 +1,7 @@
 <?
 authorize();
 
-if (!check_perms('admin_reports') && !check_perms('project_team') && !check_perms('site_moderate_forums')) {
+if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
 	ajax_error();
 }
 
@@ -15,10 +15,6 @@ list($Type) = $DB->next_record();
 if (!check_perms('admin_reports')) {
 	if (check_perms('site_moderate_forums')) {
 		if (!in_array($Type, array('comment', 'post', 'thread'))) {
-			ajax_error();
-		}
-	} elseif (check_perms('project_team')) {
-		if ($Type != 'request_update') {
 			ajax_error();
 		}
 	}
