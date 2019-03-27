@@ -5,25 +5,25 @@
 authorize();
 
 $RequestID = $_POST['id'];
-if (!is_number($RequestID)) {
+if (!intval($RequestID)) {
 	error(0);
 }
 
-$DB->query("
+$DB->prepared_query('
 	SELECT
 		UserID,
 		Title,
 		CategoryID,
 		GroupID
 	FROM requests
-	WHERE ID = $RequestID");
+	WHERE ID = ?', $RequestID);
 list($UserID, $Title, $CategoryID, $GroupID) = $DB->next_record();
 
 if ($LoggedUser['ID'] != $UserID && !check_perms('site_moderate_requests')) {
 	error(403);
 }
 
-$CategoryName = $Categories[$CategoryID - 1];
+$CategoryName = $CategoriesV2[$CategoryID - 1];
 
 //Do we need to get artists?
 if ($CategoryName === 'Music') {
@@ -37,29 +37,29 @@ if ($CategoryName === 'Music') {
 
 
 // Delete request, votes and tags
-$DB->query("DELETE FROM requests WHERE ID = '$RequestID'");
-$DB->query("DELETE FROM requests_votes WHERE RequestID = '$RequestID'");
-$DB->query("DELETE FROM requests_tags WHERE RequestID = '$RequestID'");
+$DB->prepared_query('DELETE FROM requests WHERE ID = ?', $RequestID);
+$DB->prepared_query('DELETE FROM requests_votes WHERE RequestID = ?', $RequestID);
+$DB->prepared_query('DELETE FROM requests_tags WHERE RequestID = ?', $RequestID);
 Comments::delete_page('requests', $RequestID);
 
-$DB->query("
+$DB->prepared_query('
 	SELECT ArtistID
 	FROM requests_artists
-	WHERE RequestID = $RequestID");
+	WHERE RequestID = ?', $RequestID);
 $RequestArtists = $DB->to_array();
 foreach ($RequestArtists as $RequestArtist) {
 	$Cache->delete_value("artists_requests_$RequestArtist");
 }
-$DB->query("
+$DB->prepared_query('
 	DELETE FROM requests_artists
-	WHERE RequestID = '$RequestID'");
+	WHERE RequestID = ?', $RequestID);
 $Cache->delete_value("request_artists_$RequestID");
 
-G::$DB->query("
+G::$DB->prepare_query('
 	REPLACE INTO sphinx_requests_delta
 		(ID)
 	VALUES
-		($RequestID)");
+		(?)', $RequestID);
 
 if ($UserID != $LoggedUser['ID']) {
 	Misc::send_pm($UserID, 0, 'A request you created has been deleted', "The request \"$FullName\" was deleted by [url=".site_url().'user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason'].'[/quote]');
@@ -74,4 +74,3 @@ if ($GroupID) {
 }
 
 header('Location: requests.php');
-?>

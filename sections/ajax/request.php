@@ -49,9 +49,8 @@ if ($CategoryName == 'Music') {
 //Votes time
 $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
-$ProjectCanEdit = (check_perms('project_team') && !$IsFilled && (($CategoryID == 0) || ($CategoryName == 'Music' && $Request['Year'] == 0)));
 $UserCanEdit = (!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2);
-$CanEdit = ($UserCanEdit || $ProjectCanEdit || check_perms('site_moderate_requests'));
+$CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 
 if ($CategoryName == "Music") {
 	$JsonMusicInfo = array(

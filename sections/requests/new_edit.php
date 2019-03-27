@@ -1,4 +1,4 @@
-<?php
+<?
 
 /*
  * Yeah, that's right, edit and new are the same place again.
@@ -6,18 +6,16 @@
  * maintaining 2 copies of almost identical files.
  */
 
-
 $NewRequest = $_GET['action'] === 'new';
 
 $RequestTaxPercent = ($RequestTax * 100);
 
 if (!$NewRequest) {
 	$RequestID = $_GET['id'];
-	if (!is_number($RequestID)) {
+	if (!intval($RequestID)) {
 		error(404);
 	}
 }
-
 
 if ($NewRequest && ($LoggedUser['BytesUploaded'] < 250 * 1024 * 1024 || !check_perms('site_submit_requests'))) {
 	error('You do not have enough uploaded to make a request.');
@@ -51,13 +49,12 @@ if (!$NewRequest) {
 				$MinLogScore = (int)$Matches[0];
 			}
 		}
+		$Checksum = $Request['Checksum'] ? 1 : 0;
 
 		$IsFilled = !empty($Request['TorrentID']);
-		$CategoryName = $Categories[$CategoryID - 1];
+		$CategoryName = $CategoriesV2[$CategoryID - 1];
 
-		$ProjectCanEdit = (check_perms('project_team') && !$IsFilled && ($CategoryID === '0' || ($CategoryName === 'Music' && $Request['Year'] === '0')));
-		$CanEdit = ((!$IsFilled && $LoggedUser['ID'] === $Request['UserID'] && $VoteCount < 2) || $ProjectCanEdit || check_perms('site_moderate_requests'));
-
+		$CanEdit = ((!$IsFilled && $LoggedUser['ID'] === $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
 		if (!$CanEdit) {
 			error(403);
 		}
@@ -65,14 +62,14 @@ if (!$NewRequest) {
 		if ($CategoryName === 'Music') {
 			$ArtistForm = Requests::get_artists($RequestID);
 
-			$BitrateArray = array();
+			$BitrateArray = [];
 			if ($Request['BitrateList'] == 'Any') {
 				$BitrateArray = array_keys($Bitrates);
 			} else {
 				$BitrateArray = array_keys(array_intersect($Bitrates, explode('|', $Request['BitrateList'])));
 			}
 
-			$FormatArray = array();
+			$FormatArray = [];
 			if ($Request['FormatList'] == 'Any') {
 				$FormatArray = array_keys($Formats);
 			} else {
@@ -83,7 +80,7 @@ if (!$NewRequest) {
 				}
 			}
 
-			$MediaArray = array();
+			$MediaArray = [];
 			if ($Request['MediaList'] == 'Any') {
 				$MediaArray = array_keys($Media);
 			} else {
@@ -100,21 +97,23 @@ if (!$NewRequest) {
 	}
 }
 
-if ($NewRequest && !empty($_GET['artistid']) && is_number($_GET['artistid'])) {
-	$DB->query("
+if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
+	$DB->prepared_query('
 		SELECT Name
 		FROM artists_group
-		WHERE artistid = ".$_GET['artistid']."
-		LIMIT 1");
-	list($ArtistName) = $DB->next_record();
-	$ArtistForm = array(
-		1 => array(array('name' => trim($ArtistName))),
-		2 => array(),
-		3 => array()
+		WHERE artistid = ?
+		LIMIT 1',
+		$_GET['artistid']
 	);
-} elseif ($NewRequest && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
+	list($ArtistName) = $DB->next_record();
+	$ArtistForm = [
+		1 => [['name' => trim($ArtistName)]],
+		2 => [],
+		3 => []
+	];
+} elseif ($NewRequest && !empty($_GET['groupid']) && intval($_GET['groupid'])) {
 	$ArtistForm = Artists::get_artist($_GET['groupid']);
-	$DB->query("
+	$DB->prepared_query("
 		SELECT
 			tg.Name,
 			tg.Year,
@@ -123,9 +122,11 @@ if ($NewRequest && !empty($_GET['artistid']) && is_number($_GET['artistid'])) {
 			GROUP_CONCAT(t.Name SEPARATOR ', '),
 			tg.CategoryID
 		FROM torrents_group AS tg
-			JOIN torrents_tags AS tt ON tt.GroupID = tg.ID
-			JOIN tags AS t ON t.ID = tt.TagID
-		WHERE tg.ID = ".$_GET['groupid']);
+		INNER JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
+		INNER JOIN tags AS t ON (t.ID = tt.TagID)
+		WHERE tg.ID = ?",
+		$_GET['groupid']
+	);
 	if (list($Title, $Year, $ReleaseType, $Image, $Tags, $CategoryID) = $DB->next_record()) {
 		$GroupID = trim($_REQUEST['groupid']);
 	}
@@ -159,7 +160,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 					</td>
 					<td>
 						<select id="categories" name="type" onchange="Categories();">
-<?		foreach (Misc::display_array($Categories) as $Cat) { ?>
+<?		foreach (Misc::display_array($CategoriesV2) as $Cat) { ?>
 							<option value="<?=$Cat?>"<?=(!empty($CategoryName) && ($CategoryName === $Cat) ? ' selected="selected"' : '')?>><?=$Cat?></option>
 <?		} ?>
 						</select>
@@ -189,7 +190,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 						<? if ($First) { ?><a href="#" onclick="AddArtistField(); return false;" class="brackets">+</a> <a href="#" onclick="RemoveArtistField(); return false;" class="brackets">&minus;</a><? } $First = false; ?>
 						<br />
 <?
-				    $cnt++;
+					$cnt++;
 				}
 			}
 		} else {
@@ -254,11 +255,13 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 <?
 	$GenreTags = $Cache->get_value('genre_tags');
 	if (!$GenreTags) {
-		$DB->query('
+		$DB->prepared_query('
 			SELECT Name
 			FROM tags
-			WHERE TagType = \'genre\'
-			ORDER BY Name');
+			WHERE TagType = ?
+			ORDER BY Name',
+			'genre'
+		);
 		$GenreTags = $DB->collect('Name');
 		$Cache->cache_value('genre_tags', $GenreTags, 3600 * 6);
 	}
@@ -284,7 +287,6 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 							<option value="0">---</option>
 <?
 		foreach ($ReleaseTypes as $Key => $Val) {
-							//echo '<h1>'.$ReleaseType.'</h1>'; die();
 ?>							<option value="<?=$Key?>"<?=!empty($ReleaseType) ? ($Key == $ReleaseType ? ' selected="selected"' : '') : '' ?>><?=$Val?></option>
 <?
 		}
@@ -335,13 +337,14 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 					</td>
 				</tr>
 				<tr id="logcue_tr" class="hidden">
-					<td class="label">Log / Cue (CD FLAC only)</td>
+					<td class="label">Log / Checksum / Cue<br />(CD FLAC only)</td>
 					<td>
 						<input type="checkbox" id="needlog" name="needlog" onchange="ToggleLogScore()" <?=(!empty($NeedLog) ? 'checked="checked" ' : '')?>/><label for="needlog"> Require log</label>
 						<span id="minlogscore_span" class="hidden">&nbsp;<input type="text" name="minlogscore" id="minlogscore" size="4" value="<?=(!empty($MinLogScore) ? $MinLogScore : '')?>" /> Minimum log score</span>
 						<br />
-						<input type="checkbox" id="needcue" name="needcue" <?=(!empty($NeedCue) ? 'checked="checked" ' : '')?>/><label for="needcue"> Require cue</label>
+						<input type="checkbox" id="needcksum" name="needcksum"<?=$Checksum ? ' checked="checked" ' : ''?>/><label for="needcksum"> Require checksum</label>
 						<br />
+						<input type="checkbox" id="needcue" name="needcue" <?=(!empty($NeedCue) ? 'checked="checked" ' : '')?>/><label for="needcue"> Require cue file</label>
 					</td>
 				</tr>
 <?	} ?>
@@ -383,15 +386,19 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 						</select>
 						<input type="button" value="Preview" onclick="Calculate();" />
 						<?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
+						<p>Bounty must be greater than or equal to 100 MB.</p>
 					</td>
 				</tr>
 				<tr>
-					<td class="label">Post request information</td>
+					<td class="label">Bounty information</td>
 					<td>
 						<input type="hidden" id="amount" name="amount" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
 						<input type="hidden" id="current_uploaded" value="<?=$LoggedUser['BytesUploaded']?>" />
 						<input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
-						<?= $RequestTax > 0 ? 'Bounty after tax: <strong><span id="bounty_after_tax">90.00 MB</span></strong><br />' : '' ?>
+						<?= $RequestTax > 0
+							? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span></strong><br />'
+							: '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span>'
+						?>
 						If you add the entered <strong><span id="new_bounty">100.00 MB</span></strong> of bounty, your new stats will be: <br />
 						Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
 						Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'], $LoggedUser['BytesDownloaded'])?></span>
@@ -417,4 +424,3 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 </div>
 <?
 View::show_footer();
-?>

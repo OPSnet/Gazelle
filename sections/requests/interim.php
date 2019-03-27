@@ -1,5 +1,5 @@
-<?php
-if (!isset($_GET['id']) || !is_number($_GET['id'])) {
+<?
+if (!isset($_GET['id']) || !intval($_GET['id'])) {
 	error(404);
 }
 
@@ -8,10 +8,11 @@ if ($Action !== 'unfill' && $Action !== 'delete') {
 	error(404);
 }
 
-$DB->query("
+$DB->prepared_query('
 	SELECT UserID, FillerID
 	FROM requests
-	WHERE ID = ".$_GET['id']);
+	WHERE ID = ?',
+	$_GET['id']);
 list($RequestorID, $FillerID) = $DB->next_record();
 
 if ($Action === 'unfill') {
@@ -48,4 +49,3 @@ View::show_header(ucwords($Action) . ' Request');
 </div>
 <?
 View::show_footer();
-?>

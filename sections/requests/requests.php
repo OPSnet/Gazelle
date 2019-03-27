@@ -1,4 +1,5 @@
-<?php
+<?
+
 $SphQL = new SphinxqlQuery();
 $SphQL->select('id, votes, bounty')->from('requests, requests_delta');
 
@@ -35,7 +36,7 @@ $Submitted = !empty($_GET['submit']);
 
 //Paranoia
 if (!empty($_GET['userid'])) {
-	if (!is_number($_GET['userid'])) {
+	if (!intval($_GET['userid'])) {
 		error('User ID must be an integer');
 	}
 	$UserInfo = Users::user_info($_GET['userid']);
@@ -259,9 +260,9 @@ if (isset($SearchWords)) {
 
 if (!empty($_GET['filter_cat'])) {
 	$CategoryArray = array_keys($_GET['filter_cat']);
-	if (count($CategoryArray) !== count($Categories)) {
+	if (count($CategoryArray) !== count($CategoriesV2)) {
 		foreach ($CategoryArray as $Key => $Index) {
-			if (!isset($Categories[$Index - 1])) {
+			if (!isset($CategoriesV2[$Index - 1])) {
 				unset($CategoryArray[$Key]);
 			}
 		}
@@ -286,7 +287,7 @@ if (!empty($_GET['releases'])) {
 }
 
 if (!empty($_GET['requestor'])) {
-	if (is_number($_GET['requestor'])) {
+	if (intval($_GET['requestor'])) {
 		$SphQL->where('userid', $_GET['requestor']);
 	} else {
 		error(404);
@@ -294,14 +295,14 @@ if (!empty($_GET['requestor'])) {
 }
 
 if (isset($_GET['year'])) {
-	if (is_number($_GET['year']) || $_GET['year'] === '0') {
+	if (intval($_GET['year']) || $_GET['year'] === '0') {
 		$SphQL->where('year', $_GET['year']);
 	} else {
 		error(404);
 	}
 }
 
-if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
+if (!empty($_GET['page']) && intval($_GET['page']) && $_GET['page'] > 0) {
 	$Page = $_GET['page'];
 	$Offset = ($Page - 1) * REQUESTS_PER_PAGE;
 	$SphQL->limit($Offset, REQUESTS_PER_PAGE, $Offset + REQUESTS_PER_PAGE);
@@ -363,7 +364,7 @@ View::show_header($Title, 'requests');
 		<input type="hidden" name="type" value="<?=$_GET['type']?>" />
 <?		} ?>
 		<input type="hidden" name="submit" value="true" />
-<?		if (!empty($_GET['userid']) && is_number($_GET['userid'])) { ?>
+<?		if (!empty($_GET['userid']) && intval($_GET['userid'])) { ?>
 		<input type="hidden" name="userid" value="<?=$_GET['userid']?>" />
 <?		} ?>
 		<table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
@@ -405,8 +406,8 @@ View::show_header($Title, 'requests');
 		<table class="layout cat_list">
 <?
 		$x = 1;
-		reset($Categories);
-		foreach ($Categories as $CatKey => $CatName) {
+		reset($CategoriesV2);
+		foreach ($CategoriesV2 as $CatKey => $CatName) {
 			if ($x % 8 === 0 || $x === 1) {
 ?>
 				<tr>
@@ -570,7 +571,7 @@ View::show_header($Title, 'requests');
 		if ($Request['CategoryID'] == 0) {
 			$CategoryName = 'Unknown';
 		} else {
-			$CategoryName = $Categories[$Request['CategoryID'] - 1];
+			$CategoryName = $CategoriesV2[$Request['CategoryID'] - 1];
 		}
 
 		if ($Request['TorrentID'] != 0) {

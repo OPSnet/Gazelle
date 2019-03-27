@@ -1,10 +1,10 @@
-<?php
+<?
 
 /*
  * This is the page that displays the request to the end user after being created.
  */
 
-if (empty($_GET['id']) || !is_number($_GET['id'])) {
+if (empty($_GET['id']) || !intval($_GET['id'])) {
 	error(0);
 }
 
@@ -25,58 +25,46 @@ $CanVote = !$IsFilled && check_perms('site_vote');
 if ($Request['CategoryID'] === '0') {
 	$CategoryName = 'Unknown';
 } else {
-	$CategoryName = $Categories[$Request['CategoryID'] - 1];
+	$CategoryName = $CategoriesV2[$Request['CategoryID'] - 1];
 }
 
-//Do we need to get artists?
-if ($CategoryName === 'Music') {
-	$ArtistForm = Requests::get_artists($RequestID);
-	$ArtistName = Artists::display_artists($ArtistForm, false, true);
-	$ArtistLink = Artists::display_artists($ArtistForm, true, true);
+$ArtistForm = Requests::get_artists($RequestID);
+$ArtistName = Artists::display_artists($ArtistForm, false, true);
+$ArtistLink = Artists::display_artists($ArtistForm, true, true);
 
-	if ($IsFilled) {
-		$DisplayLink = "$ArtistLink<a href=\"torrents.php?torrentid=$Request[TorrentID]\" dir=\"ltr\">$Request[Title]</a> [$Request[Year]]";
-	} else {
-		$DisplayLink = $ArtistLink.'<span dir="ltr">'.$Request['Title']."</span> [$Request[Year]]";
-	}
-	$FullName = $ArtistName.$Request['Title']." [$Request[Year]]";
-
-	if ($Request['BitrateList'] != '') {
-		$BitrateString = implode(', ', explode('|', $Request['BitrateList']));
-		$FormatString = implode(', ', explode('|', $Request['FormatList']));
-		$MediaString = implode(', ', explode('|', $Request['MediaList']));
-	} else {
-		$BitrateString = 'Unknown, please read the description.';
-		$FormatString = 'Unknown, please read the description.';
-		$MediaString = 'Unknown, please read the description.';
-	}
-
-	if (empty($Request['ReleaseType'])) {
-		$ReleaseName = 'Unknown';
-	} else {
-		$ReleaseName = $ReleaseTypes[$Request['ReleaseType']];
-	}
-
-} elseif ($CategoryName === 'Audiobooks' || $CategoryName === 'Comedy') {
-	$FullName = "$Request[Title] [$Request[Year]]";
-	$DisplayLink = "<span dir=\"ltr\">$Request[Title]</span> [$Request[Year]]";
+if ($IsFilled) {
+	$DisplayLink = "$ArtistLink<a href=\"torrents.php?torrentid=$Request[TorrentID]\" dir=\"ltr\">$Request[Title]</a> [$Request[Year]]";
 } else {
-	$FullName = $Request['Title'];
-	$DisplayLink = "<span dir=\"ltr\">$Request[Title]</span>";
+	$DisplayLink = $ArtistLink.'<span dir="ltr">'.$Request['Title']."</span> [$Request[Year]]";
+}
+$FullName = $ArtistName.$Request['Title']." [$Request[Year]]";
+
+if ($Request['BitrateList'] != '') {
+	$BitrateString = implode(', ', explode('|', $Request['BitrateList']));
+	$FormatString = implode(', ', explode('|', $Request['FormatList']));
+	$MediaString = implode(', ', explode('|', $Request['MediaList']));
+} else {
+	$BitrateString = 'Unknown, please read the description.';
+	$FormatString = 'Unknown, please read the description.';
+	$MediaString = 'Unknown, please read the description.';
+}
+
+if (empty($Request['ReleaseType'])) {
+	$ReleaseName = 'Unknown';
+} else {
+	$ReleaseName = $ReleaseTypes[$Request['ReleaseType']];
 }
 
 //Votes time
 $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
-$ProjectCanEdit = (check_perms('project_team') && !$IsFilled && ($Request['CategoryID'] === '0' || ($CategoryName === 'Music' && $Request['Year'] === '0')));
 $UserCanEdit = (!$IsFilled && $LoggedUser['ID'] === $Request['UserID'] && $VoteCount < 2);
-$CanEdit = ($UserCanEdit || $ProjectCanEdit || check_perms('site_moderate_requests'));
+$CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 list($NumComments, $Page, $Thread, $LastRead) = Comments::load('requests', $RequestID);
 
 View::show_header("View request: $FullName", 'comments,requests,bbcode,subscriptions');
-
 ?>
 <div class="thin">
 	<div class="header">
@@ -304,10 +292,14 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
 				<td class="label">Acceptable media</td>
 				<td><?=$MediaString?></td>
 			</tr>
-<?		if (!empty($Request['LogCue'])) { ?>
+<?		if (!empty($Request['LogCue']) || !empty($Request['Checksum'])) { ?>
 			<tr>
 				<td class="label">Required CD FLAC only extras</td>
 				<td><?=$Request['LogCue']?></td>
+			</tr>
+			<tr>
+				<td class="label">Required CD FLAC checksum</td>
+				<td><?=$Request['LogCue'] ? 'yes' : 'no'?></td>
 			</tr>
 <?
 		}
@@ -368,10 +360,11 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
 					</select>
 					<input type="button" value="Preview" onclick="Calculate();" />
 					<?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
+					<p>Bounty must be greater than or equal to 100 MB.</p>
 				</td>
 			</tr>
 			<tr>
-				<td class="label">Post vote information</td>
+				<td class="label">Bounty information</td>
 				<td>
 					<form class="add_form" name="request" action="requests.php" method="get" id="request_form">
 						<input type="hidden" name="action" value="vote" />
@@ -384,7 +377,10 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
 						<input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
 						<input type="hidden" id="current_rr" value="<?=(float)$LoggedUser['RequiredRatio']?>" />
 						<input id="total_bounty" type="hidden" value="<?=$RequestVotes['TotalBounty']?>" />
-						<?= $RequestTax > 0 ? 'Bounty after tax: <strong><span id="bounty_after_tax">90.00 MB</span></strong><br />' : '' ?>
+						<?= $RequestTax > 0
+							? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span></strong><br />'
+							: '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span>'
+						?>
 						If you add the entered <strong><span id="new_bounty">0.00 MB</span></strong> of bounty, your new stats will be: <br />
 						Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
 						Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'],$LoggedUser['BytesDownloaded'])?></span>
@@ -397,14 +393,11 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
 				<td class="label">Bounty</td>
 				<td id="formatted_bounty"><?=Format::get_size($RequestVotes['TotalBounty'])?></td>
 			</tr>
-<?
-	if ($IsFilled) {
-		$TimeCompare = 1267643718; // Requests v2 was implemented 2010-03-03 20:15:18
-?>
+<?  if ($IsFilled) { ?>
 			<tr>
 				<td class="label">Filled</td>
 				<td>
-					<strong><a href="torrents.php?<?=(strtotime($Request['TimeFilled']) < $TimeCompare ? 'id=' : 'torrentid=') . $Request['TorrentID']?>">Yes</a></strong>,
+					<strong><a href="torrents.php?torrentid=<?=$Request['TorrentID']?>">Yes</a></strong>,
 					by user <?=Users::format_username($Request['FillerID'], false, false, false)?>
 <?		if ($LoggedUser['ID'] == $Request['UserID'] || $LoggedUser['ID'] == $Request['FillerID'] || check_perms('site_moderate_requests')) { ?>
 						<strong><a href="requests.php?action=unfill&amp;id=<?=$RequestID?>" class="brackets">Unfill</a></strong> Unfilling a request without a valid, nontrivial reason will result in a warning.
@@ -472,4 +465,5 @@ View::parse('generic/reply/quickreply.php', array(
 		</div>
 	</div>
 </div>
-<? View::show_footer(); ?>
+<?
+View::show_footer();
