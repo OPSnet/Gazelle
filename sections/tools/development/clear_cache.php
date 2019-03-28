@@ -3,6 +3,24 @@ if (!check_perms('users_mod') || !check_perms('admin_clear_cache')) {
 	error(403);
 }
 
+if (!empty($_GET['key'])) {
+	if ($_GET['submit'] == 'Multi') {
+		$Keys = array_map('trim', preg_split('/\s+/', $_GET['key']));
+	} else {
+		$Keys = [trim($_GET['key'])];
+	}
+}
+
+if (isset($Keys) && $_GET['type'] == 'view') {
+	foreach ($Keys as $Key) {
+		foreach ($CachePermissions as $k => $v) {
+			if (strpos($Key, $k) !== false && !check_perms($v)) {
+				error(403);
+			}
+		}
+	}
+}
+
 View::show_header('Clear a cache key');
 
 //Make sure the form was sent
@@ -27,13 +45,7 @@ if (isset($_GET['cache'])) {
 		}
 	}
 }
-if (!empty($_GET['key'])) {
-	if ($_GET['submit'] == 'Multi') {
-		$Keys = array_map('trim', preg_split('/\s+/', $_GET['key']));
-	} else {
-		$Keys = [trim($_GET['key'])];
-	}
-}
+
 if (isset($Keys) && $_GET['type'] == 'clear') {
 	foreach ($Keys as $Key) {
 		if (preg_match('/(.*?)(\d+)\.\.(\d+)$/', $Key, $Matches) && is_number($Matches[2]) && is_number($Matches[3])) {
@@ -46,6 +58,7 @@ if (isset($Keys) && $_GET['type'] == 'clear') {
 	}
 	echo '<div class="save_message">Key(s) ' . implode(', ', array_map('display_str', $Keys)) . ' cleared!</div>';
 }
+
 $MultiKeyTooltip = 'Enter cache keys delimited by any amount of whitespace.';
 ?>
 	<div class="header">

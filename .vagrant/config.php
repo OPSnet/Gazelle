@@ -272,3 +272,10 @@ $CaptchaBGs = array(
 $SpecialChars = array(
 	'&' => 'and'
 );
+
+// Deny cache access to keys without specified permission
+$CachePermissions = [
+	'api_apps' => 'site_debug',
+	'catalogue' => 'site_debug'
+];
+

@@ -32,3 +32,5 @@ static/userscripts/gazelle-json-export.js.txt
 report/
 .vagrant/machines/
 .vagrant/rgloader/
+*.swp
+

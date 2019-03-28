@@ -1,54 +1,53 @@
 <?php
 
-require_once(SERVER_ROOT.'/sections/api/AbstractAPI.php');
-
-function getClassObject($name, $db) {
-    $name = str_replace("_", "", ucwords($name, "_"));
-    require_once(SERVER_ROOT."/sections/api/{$name}.php");
-    return new $name($db);
+function getClassObject($name, $db, $cache, $config) {
+	$name = "Gazelle\\API\\".str_replace("_", "", ucwords($name, "_"));
+	return new $name($db, $cache, $config);
 }
 
 $available = array(
-    'generate_invite',
-    'user'
+	'generate_invite',
+	'user',
+	'wiki',
+	'forum',
+	'request',
+	'artist',
+	'collage',
+	'torrent'
 );
 
-switch($_GET['action']) {
-    case 'generate_invite':
-        $class = getClassObject('generate_invite', $DB);
-        break;
-    case 'user':
-        $class = getClassObject('user', $DB);
-        break;
-    default:
-        json_error('invalid action');
+if (in_array($_GET['action'], $available)) {
+	$config = array('Categories' => $Categories, 'CollageCats' => $CollageCats,
+		'ReleaseTypes' => $ReleaseTypes, 'Debug' => $Debug);
+	$class = getClassObject($_GET['action'], $DB, $Cache, $config);
+} else {
+	json_error('invalid action');
 }
 
 if (empty($_GET['aid']) || empty($_GET['token'])) {
-    json_error('invalid parameters');
+	json_error('invalid parameters');
 }
 
 $app_id = intval($_GET['aid']);
-$user_id = intval($_GET['uid']);
 $token = $_GET['token'];
 
 $app = $Cache->get_value("api_apps_{$app_id}");
 if (!is_array($app)) {
-	$DB->query("
+	$DB->prepared_query("
 		SELECT Token, Name
 		FROM api_applications
-		WHERE ID = '{$app_id}'
-		LIMIT 1");
+		WHERE ID = ?
+		LIMIT 1", $app_id);
 	if ($DB->record_count() === 0) {
-	    error('invalid app');
-    }
-    $app = $DB->to_array(false, MYSQLI_ASSOC);
+		json_error('invalid app');
+	}
+	$app = $DB->to_array(false, MYSQLI_ASSOC);
 	$Cache->cache_value("api_apps_{$app_id}", $app, 0);
 }
 $app = $app[0];
 
 if ($app['Token'] !== $token) {
-    json_error('invalid token');
+	json_error('invalid token');
 }
 
 $response = $class->run();

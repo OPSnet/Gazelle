@@ -260,42 +260,9 @@ $SpecialChars = array(
 		'&' => 'and'
 );
 
-// array to store external site credentials and API URIs, stored in cache to keep user sessions alive
-$ExternalServicesConfig = [
-    "Orpheus" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'https://orpheus.network/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ],
-    "VagrantGazelle" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'http://localhost:80/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ],
-    "PassThePopcorn" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'https://passthepopcorn.me/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ]];
-?>
+// Deny cache access to keys without specified permission
+$CachePermissions = [
+	'api_apps' => 'site_debug',
+	'catalogue' => 'site_debug'
+];
+
