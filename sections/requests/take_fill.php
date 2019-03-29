@@ -58,7 +58,7 @@ $FillerUsername = $LoggedUser['Username'];
 
 $Err = [];
 if (!empty($_POST['user']) && check_perms('site_moderate_requests')) {
-	$FillerUsername = $_POST['user'];
+	$FillerUsername = trim($_POST['user']);
 	$DB->prepared_query('
 		SELECT ID
 		FROM users_main
@@ -137,7 +137,7 @@ if (count($Err)) {
 }
 
 //We're all good! Fill!
-$DB->prepared+query('
+$DB->prepared_query('
 	UPDATE requests
 	SET FillerID = ?,
 		TorrentID = ?,

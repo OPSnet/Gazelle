@@ -787,7 +787,25 @@ Sincerely,
 [*]Complete the enclosed form carefully and completely.
 [*]Send a [url='.site_url().'staffpm.php]Staff PM[/url] to request further information about the formatting of your pick, and the time at which it will be posted.
 
+Sincerely,
+'.SITE_NAME.' Staff';
+       }
+
+       private static function get_special_rank_two_pm() {
+               return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #2[/url]! You\'ve been awarded [b]double avatar functionality[/b]! To set a second avatar, please enter a URL leading to a valid image in the new field which has been unlocked in your [b]Personal Settings[/b]. Any avatar you choose must abide by normal avatar rules. When running your cursor over your avatar, it will flip to the alternate choice you\'ve established. Other users will also be able to view both of your avatars using this method.
+
+At this time, we\'d like to thank you for your continued support of the site. The fact that you\'ve reached this milestone is testament to your belief in '.SITE_NAME.' as a project. It\'s dedicated users like you that keep us alive. Have fun with the new toy.
+
+Sincerely,
+'.SITE_NAME.' Staff';
+       }
+
+       private static function get_special_rank_three_pm() {
+               return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #3[/url]! You\'ve been awarded [b]Diamond Rank[/b]! Diamond Rank grants you the benefits associated with every Donor Rank up to and including Gold ([url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789]Donor Rank #5[/url]). But unlike Donor Rank #5 - because Diamond Rank is a Special Rank - it will never expire.
+
+At this time, we\'d like to thank you for your continued support of the site. The fact that you\'ve reached this milestone is testament to your belief in '.SITE_NAME.' as a project. It\'s dedicated users like you that keep us alive. Consider yourself one of our top supporters!
+
+Sincerely,
 '.SITE_NAME.' Staff';
 	}
-
 }

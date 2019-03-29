@@ -120,6 +120,10 @@ class BencodeTorrent extends BencodeDecode {
 			return false;
 		}
 
+		if (isset($this->Dec['info']['source']) && ($this->Dec['info']['source'] === 'APL')) {
+			return false;
+		}
+
 		// Grandfather APL torrents
 		if (isset($this->Dec['info']['source']) && isset($this->Dec['creation date']) &&
 			($this->Dec['creation date'] <= GRANDFATHER_OLD_SOURCE) && 
