@@ -8,7 +8,7 @@ if (isset($_POST['GroupID'])) {
 	authorize();
 
 	//Album of the month forum ID
-	$ForumID = 43;
+	$ForumID = 51;
 
 	$GroupID = trim($_POST['GroupID']);
 
