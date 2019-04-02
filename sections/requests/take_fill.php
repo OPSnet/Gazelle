@@ -43,7 +43,8 @@ $DB->prepared_query("
 		t.LogScore,
 		t.LogChecksum,
 		tg.CategoryID,
-		IF(t.Remastered = '1', t.RemasterCatalogueNumber, tg.CatalogueNumber)
+		IF(t.Remastered = '1', t.RemasterCatalogueNumber, tg.CatalogueNumber),
+        CASE WHEN t.Time + INTERVAL 1 HOUR > now() THEN 1 ELSE 0 END as GracePeriod
 	FROM torrents AS t
 	LEFT JOIN torrents_group AS tg ON (t.GroupID = tg.ID)
 	WHERE t.ID = ?", $TorrentID);
@@ -51,9 +52,9 @@ $DB->prepared_query("
 if (!$DB->has_results()) {
 	error(404);
 }
-list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber) = $DB->next_record();
+list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber, $GracePeriod) = $DB->next_record();
 
-$FillerID = $LoggedUser['ID'];
+$FillerID = intval($LoggedUser['ID']);
 $FillerUsername = $LoggedUser['Username'];
 
 $Err = [];
@@ -70,8 +71,8 @@ if (!empty($_POST['user']) && check_perms('site_moderate_requests')) {
 	}
 }
 
-if (time_ago($UploadTime) < 3600 && $UploaderID !== $FillerID && !check_perms('site_moderate_requests')) {
-	$Err[] = 'There is a one hour grace period for new uploads to allow the torrent\'s uploader to fill the request.';
+if ($GracePeriod && $UploaderID !== $FillerID && !check_perms('site_moderate_requests')) {
+	$Err[] = "There is a one hour grace period for new uploads to allow the uploader ($FillerUsername) to fill the request.";
 }
 
 $DB->prepared_query('
