@@ -1,5 +1,5 @@
 <?
-// TODO: Turn this into a class with nice functions like update_user, delete_torrent, etc.
+// TODO: Turn this into a class with nice functions like update_user, etc.
 class Tracker {
 	const STATS_MAIN = 0;
 	const STATS_USER = 1;

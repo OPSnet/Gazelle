@@ -280,11 +280,17 @@ if (!empty($_REQUEST['action'])) {
 
 	if (!empty($_GET['id'])) {
 		include(SERVER_ROOT.'/sections/torrents/details.php');
-	} elseif (isset($_GET['torrentid']) && is_number($_GET['torrentid'])) {
-		$DB->query("
+	} elseif (isset($_GET['torrentid']) && intval($_GET['torrentid'])) {
+		$torrent_id = (int)$_GET['torrentid'];
+		$DB->prepared_query('
 			SELECT GroupID
 			FROM torrents
-			WHERE ID = ".$_GET['torrentid']);
+			WHERE ID = ?
+			UNION
+			SELECT GroupID
+			FROM deleted_torrents
+			WHERE ID = ?
+			', $torrent_id, $torrent_id);
 		list($GroupID) = $DB->next_record();
 		if ($GroupID) {
 			header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid'].'#torrent'.$_GET['torrentid']);
@@ -294,10 +300,10 @@ if (!empty($_REQUEST['action'])) {
 	} elseif (!empty($_GET['type'])) {
 		include(SERVER_ROOT.'/sections/torrents/user.php');
 	} elseif (!empty($_GET['groupname']) && !empty($_GET['forward'])) {
-		$DB->query("
+		$DB->prepared_query('
 			SELECT ID
 			FROM torrents_group
-			WHERE Name LIKE '".db_string($_GET['groupname'])."'");
+			WHERE Name LIKE ?', trim($_GET['groupname']));
 		list($GroupID) = $DB->next_record();
 		if ($GroupID) {
 			header("Location: torrents.php?id=$GroupID");
@@ -308,4 +314,3 @@ if (!empty($_REQUEST['action'])) {
 		include(SERVER_ROOT.'/sections/torrents/browse.php');
 	}
 }
-?>

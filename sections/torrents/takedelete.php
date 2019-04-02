@@ -10,13 +10,14 @@ if ($Cache->get_value("torrent_{$TorrentID}_lock")) {
 	error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
-$DB->query("
+$DB->prepared_query('
 	SELECT
 		t.UserID,
 		t.GroupID,
 		t.Size,
 		t.info_hash,
 		tg.Name,
+		tg.Year,
 		ag.Name,
 		t.Time,
         t.Media,
@@ -34,15 +35,15 @@ $DB->query("
 		LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
 		LEFT JOIN artists_group AS ag ON ag.ArtistID = tg.ArtistID
 		LEFT JOIN xbt_snatched AS x ON x.fid = t.ID
-	WHERE t.ID = '$TorrentID'");
-list($UserID, $GroupID, $Size, $InfoHash, $Name, $ArtistName, $Time, $Media, $Format, $Encoding,
+	WHERE t.ID = ?', $TorrentID);
+list($UserID, $GroupID, $Size, $InfoHash, $Name, $Year, $ArtistName, $Time, $Media, $Format, $Encoding,
     $HasLog, $HasCue, $HasLogDB, $LogScore, $Remastered, $RemasterTitle, $RemasterYear, $Snatches) = $DB->next_record(MYSQLI_NUM, false);
 
 $RemasterDisplayString = Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear);
-if ($ArtistID == 0 && empty($ArtistName)) {
+if (empty($ArtistName)) {
 	$RawName = $Name.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
 }
-elseif ($ArtistID == 0 && $ArtistName == 'Various Artists') {
+elseif ($ArtistName == 'Various Artists') {
 	$RawName = "Various Artists - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
 }
 else {
