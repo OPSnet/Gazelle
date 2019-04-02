@@ -20,7 +20,7 @@ echo <<<HTML
 
 	<span class="donation_info_title">Donating</span>
 	<div class="box pad donation_info">
-		If you wish to donate, please contact <a href='https://orpheus.network/user.php?action=search&search=Athena'>Athena</a>, and they will handle your donation manually.
+		If you wish to donate, please contact <a href='https://orpheus.network/user.php?action=search&search=Spine'>Spine</a>, and they will handle your donation manually.
 		<br /><br />
 		The minimum amount required for donating is 10 USD, and must be paid in Bitcoin.
 	</div>
