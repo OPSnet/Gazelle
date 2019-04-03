@@ -7,6 +7,8 @@ __MACOSX/
 logs/
 !logs/README.txt
 
+static/local/
+
 static/similar/
 !static/similar/.gitkeep
 
