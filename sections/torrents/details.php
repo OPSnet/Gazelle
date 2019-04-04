@@ -246,7 +246,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
 <?
 				if (check_perms('torrents_edit')) {
 ?>				(<span class="tooltip" title="Artist alias ID"><?= $ArtistManager->get_alias($Artist['id'], $Artist['name']) ?></span>)&nbsp;
-					<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?=$GroupID?>&amp;artistid=<?=$Artist['id']?>&amp;importance=4'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?= $s['role'] ?>">X</a></span>
+					<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?=$GroupID?>&amp;artistid=<?=$Artist['id']?>&amp;importance=<?=$s['offset']?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?= $s['role'] ?>">X</a></span>
 <?				} ?>
 				</li>
 <?
