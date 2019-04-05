@@ -374,7 +374,7 @@ if (check_perms('users_mod')) {
 		);
 	}
 	if ($bfiID && !$Properties['BadFiles']) {
-		$DB->prepared_query('DELETE FROM torrents_bad_files WHERE TorrentID = ', $TorrentID);
+		$DB->prepared_query('DELETE FROM torrents_bad_files WHERE TorrentID = ?', $TorrentID);
 	}
 
 	$DB->prepared_query('SELECT TorrentID FROM torrents_missing_lineage WHERE TorrentID = ?', $TorrentID);
@@ -422,7 +422,7 @@ if (check_perms('users_mod')) {
 		);
 	}
 	if ($lwID && !$Properties['LossywebApproved']) {
-		$DB->prepared_query('DELETE FROM torrents_lossyweb_approved WHERE TorrentID = ', $TorrentID);
+		$DB->prepared_query('DELETE FROM torrents_lossyweb_approved WHERE TorrentID = ?', $TorrentID);
 	}
 }
 
