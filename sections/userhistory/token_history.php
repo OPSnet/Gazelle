@@ -57,7 +57,7 @@ View::show_header('Freeleech token history');
 
 list($Page, $Limit) = Format::page_limit(25);
 
-$DB->query("
+$DB->prepared_query("
 	SELECT
 		SQL_CALC_FOUND_ROWS
 		f.TorrentID,
@@ -68,13 +68,14 @@ $DB->query("
 		f.Uses,
 		g.Name,
 		t.Format,
-		t.Encoding
+		t.Encoding,
+		t.Size
 	FROM users_freeleeches AS f
 		LEFT JOIN torrents AS t ON t.ID = f.TorrentID
 		LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
-	WHERE f.UserID = $UserID
+	WHERE f.UserID = ?
 	ORDER BY f.Time DESC
-	LIMIT $Limit");
+	LIMIT $Limit", $UserID);
 $Tokens = $DB->to_array();
 
 $DB->query('SELECT FOUND_ROWS()');
@@ -93,6 +94,7 @@ $Pages = Format::get_pages($Page, $NumResults, 25);
 		<td>Expired</td>
 <? if (check_perms('users_mod')) { ?>
 		<td>Downloaded</td>
+		<td>Size</td>
 		<td>Tokens used</td>
 <? } ?>
 	</tr>
@@ -105,18 +107,18 @@ $Artists = Artists::get_artists($GroupIDs);
 $i = true;
 foreach ($Tokens as $Token) {
 	$i = !$i;
-	list($TorrentID, $GroupID, $Time, $Expired, $Downloaded, $Uses, $Name, $Format, $Encoding) = $Token;
-    if ($Name != '') {
-        $Name = "<a href=\"torrents.php?torrentid=$TorrentID\">$Name</a>";
-    } else {
-        $Name = "(<i>Deleted torrent <a href=\"log.php?search=Torrent+$TorrentID\">$TorrentID</a></i>)";
-    }
-	$ArtistName = Artists::display_artists($Artists[$GroupID]);
-	if ($ArtistName) {
-		$Name = $ArtistName.$Name;
-	}
-	if ($Format && $Encoding) {
-		$Name .= " [$Format / $Encoding]";
+	list($TorrentID, $GroupID, $Time, $Expired, $Downloaded, $Uses, $Name, $Format, $Encoding, $Size) = $Token;
+	if ($Name != '') {
+		$Name = "<a href=\"torrents.php?torrentid=$TorrentID\">$Name</a>";
+		$ArtistName = Artists::display_artists($Artists[$GroupID]);
+		if ($ArtistName) {
+			$Name = $ArtistName.$Name;
+		}
+		if ($Format && $Encoding) {
+			$Name .= " [$Format / $Encoding]";
+		}
+	} else {
+		$Name = "(<i>Deleted torrent <a href=\"log.php?search=Torrent+$TorrentID\">$TorrentID</a></i>)";
 	}
 ?>
 	<tr class="<?=($i ? 'rowa' : 'rowb')?>">
@@ -126,6 +128,7 @@ foreach ($Tokens as $Token) {
 		</td>
 <?	if (check_perms('users_mod')) { ?>
 		<td><?=Format::get_size($Downloaded)?></td>
+		<td><?=Format::get_size($Size == NULL ? 0 : $Size)?></td>
 		<td><?=$Uses?></td>
 <?	} ?>
 	</tr>
