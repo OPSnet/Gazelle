@@ -285,8 +285,8 @@ if ($_POST['ResetEmailHistory'] && check_perms('users_edit_reset_keys')) {
 		UPDATE users_history_invites AS uhi
 		JOIN users_main um ON um.ID = uhi.InvitedID
 		  AND (
-		    um.IP IN ('127.0.0.1', '0.0.0.0')
-		    OR um.Visible = '0'
+			um.IP IN ('127.0.0.1', '0.0.0.0')
+			OR um.Visible = '0'
 		  )
 		SET uhi.Email = '$Username@".SITE_URL."'
 		WHERE uhi.Email != um.Email
@@ -370,6 +370,10 @@ if ($Username !== $Cur['Username'] && check_perms('users_edit_usernames', $Cur['
 			error("Username already in use by <a href=\"user.php?id=$UsedUsernameID\">$Username</a>");
 			header("Location: user.php?id=$UserID");
 			die();
+		} else {
+			$UpdateSet[] = "Username = '$Username'";
+			$EditSummary[] = "username changed from ".$Cur['Username']." to $Username";
+			$LightUpdates['Username'] = $Username;
 		}
 	} elseif ($Username == '0' || $Username == '1') {
 		error('You cannot set a username of "0" or "1".');
@@ -405,7 +409,7 @@ if ($Donor != $Cur['Donor'] && check_perms('users_give_donor')) {
 if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
 	$OldClasses = $Cur['SecondaryClasses'] ? explode(',', $Cur['SecondaryClasses']) : array();
 	$DroppedClasses = array_diff($OldClasses, $SecondaryClasses);
-	$AddedClasses   = array_diff($SecondaryClasses, $OldClasses);
+	$AddedClasses	= array_diff($SecondaryClasses, $OldClasses);
 	if (count($DroppedClasses) > 0) {
 		$ClassChanges = array();
 		foreach ($DroppedClasses as $PermID) {
@@ -474,14 +478,14 @@ if ($BonusPoints != floatval($Cur['BonusPoints']) && $BonusPoints != floatval($_
 }
 
 if ($FLTokens != $Cur['FLTokens']
-    && (
-        check_perms('users_edit_ratio')
-        || (check_perms('admin_manage_user_fls'))
-        || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])
-    )) {
-        $UpdateSet[] = "FLTokens = $FLTokens";
-        $EditSummary[] = "Freeleech Tokens changed from $Cur[FLTokens] to $FLTokens";
-        $HeavyUpdates['FLTokens'] = $FLTokens;
+	&& (
+		check_perms('users_edit_ratio')
+		|| (check_perms('admin_manage_user_fls'))
+		|| (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])
+	)) {
+		$UpdateSet[] = "FLTokens = $FLTokens";
+		$EditSummary[] = "Freeleech Tokens changed from $Cur[FLTokens] to $FLTokens";
+		$HeavyUpdates['FLTokens'] = $FLTokens;
 }
 
 if ($Invites != $Cur['Invites'] && check_perms('users_edit_invites')) {
