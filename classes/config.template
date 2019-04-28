@@ -88,6 +88,10 @@ define('SYSTEM_USER_ID', 17); // ID for user to create "system" threads under (e
 define('TRASH_FORUM_ID', 4); // ID of forum to send threads to when trash button is pressed
 define('EDITING_FORUM_ID', 34); // ID of forum to send editing requests to
 define('EDITING_TRASH_FORUM_ID', 48); // ID of forum to send editing threads to when trash button is pressed in EDITING_FORUM_ID
+define('HELP_FORUM_ID', 3); // ID of help forum
+define('HELP_RESOLVED_FORUM_ID', 44); // ID of forum to send resolved help threads when resolve button is pressed in HELP_FORUM_ID
+define('BUGS_FORUM_ID', 6); // ID of bug reports forum
+define('BUGS_RESOLVED_FORUM_ID', 14); // ID of forum to send resolved bug reports when resolve button is pressed in BUGS_FORUM_ID
 
 if (!defined('FEATURE_EMAIL_REENABLE')) {
 	define('FEATURE_EMAIL_REENABLE', true);
