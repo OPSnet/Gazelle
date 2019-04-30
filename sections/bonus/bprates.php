@@ -135,6 +135,7 @@ if ($TotalTorrents > 0) {
 		JOIN torrents AS t ON t.ID = xfu.fid
 	WHERE
 		xfu.uid = ?
+	ORDER BY HourlyPoints
 	LIMIT ?
 	OFFSET ?", $UserID, $UserID, $Limit, $Offset);
 
