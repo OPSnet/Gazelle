@@ -331,7 +331,7 @@ if (check_perms('torrents_freeleech')) {
 }
 
 if (check_perms('users_mod')) {
-	if ($T['Format'] == 'FLAC' && $T['Media'] == 'CD') {
+	if ($T['Format'] == "'FLAC'" && $T['Media'] == "'CD'") {
 		$SQL .= "
 			HasLog = $T[HasLog],
 			HasCue = $T[HasCue],";
@@ -340,6 +340,12 @@ if (check_perms('users_mod')) {
 			HasLog = '0',
 			HasCue = '0',";
 	}
+if (check_perms('site_debug')) {
+    //echo "<pre>";
+    //var_dump($T);
+    //echo "$SQL\n";
+    //die();
+}
 
 	$DB->prepared_query('SELECT TorrentID FROM torrents_bad_tags WHERE TorrentID = ?', $TorrentID);
 	list($btID) = $DB->fetch_record();
