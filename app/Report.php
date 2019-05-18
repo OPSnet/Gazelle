@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class Report {
-	public static function search($db, array $filter) {
+	public static function search(\DB_MYSQL $db, array $filter) {
 		$cond = [];
 		$args = [];
 		$delcond = [];
@@ -94,7 +94,7 @@ class Report {
 		return [$result, $count];
 	}
 
-	private static function username2id ($db, $name) {
+	private static function username2id (\DB_MYSQL $db, $name) {
 		$db->prepared_query('SELECT ID FROM users_main WHERE Username = ?', $name);
 		$user = $db->next_record();
 		return $user['ID'];

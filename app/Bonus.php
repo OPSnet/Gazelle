@@ -13,7 +13,7 @@ class Bonus {
 	const CACHE_SUMMARY = 'bonus_summary.';
 	const CACHE_HISTORY = 'bonus_history.';
 
-	public function __construct ($db, $cache) {
+	public function __construct (\DB_MYSQL $db, \CACHE $cache) {
 		$this->db = $db;
 		$this->cache = $cache;
 		$this->items = $this->cache->get_value(self::CACHE_ITEM);

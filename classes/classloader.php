@@ -22,6 +22,9 @@ spl_autoload_register(function ($ClassName) {
 			case 'TEXTAREA_PREVIEW':
 				$FileName = 'textarea_preview.class';
 				break;
+			case 'DB_MYSQL':
+				$FileName = 'mysql.class';
+				break;
 			case 'TORRENT':
 			case 'BENCODE_DICT':
 			case 'BENCODE_LIST':

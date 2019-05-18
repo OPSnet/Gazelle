@@ -11,7 +11,7 @@ class Artist {
 
 	const CACHE_ALIAS = 'artist_alias_%d_%s';
 
-	public function __construct ($db, $cache) {
+	public function __construct (\DB_MYSQL $db, \CACHE $cache) {
 		$this->db = $db;
 		$this->cache = $cache;
 	}

@@ -15,4 +15,9 @@ class G {
 		self::$Cache = $Cache;
 		self::$LoggedUser =& $LoggedUser;
 	}
+
+	public static function init(\DB_MYSQL $db, \Cache $cache) {
+		self::$DB = $db;
+		self::$Cache = $cache;
+	}
 }

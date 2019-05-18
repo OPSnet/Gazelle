@@ -21,6 +21,7 @@
     "robmorgan/phinx": "^0.10.0",
     "yupmin/php-chardet": "^1.0",
     "whichbrowser/parser": "^2.0",
+    "d11wtq/boris": "^1.0",
     "orpheusnet/bencode-torrent": "*"
   },
   "require-dev": {

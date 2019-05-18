@@ -9,7 +9,7 @@ class DB {
 	/** @var \CACHE */
 	private $cache;
 
-	public function __construct ($db, $cache) {
+	public function __construct (\DB_MYSQL $db, \CACHE $cache) {
 		$this->db = $db;
 		$this->cache = $cache;
 	}
