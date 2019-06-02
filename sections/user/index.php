@@ -15,10 +15,10 @@ if (empty($_REQUEST['action'])) {
 
 switch ($_REQUEST['action']) {
 	case 'notify':
-		include('notify_edit.php');
+		include(SERVER_ROOT.'/sections/user/notify_edit.php');
 		break;
 	case 'notify_handle':
-		include('notify_handle.php');
+		include(SERVER_ROOT.'/sections/user/notify_handle.php');
 		break;
 	case 'notify_delete':
 		authorize();
@@ -34,15 +34,15 @@ switch ($_REQUEST['action']) {
 		break;
 	case 'search':// User search
 		if (check_perms('admin_advanced_user_search') && check_perms('users_view_ips') && check_perms('users_view_email')) {
-			include('advancedsearch.php');
+			include(SERVER_ROOT.'/sections/user/advancedsearch.php');
 		}
 		else {
-			include('search.php');
+			include(SERVER_ROOT.'/sections/user/search.php');
 		}
 		break;
 	case 'edit':
 		if (isset($_REQUEST['userid'])) {
-			include('edit.php');
+			include(SERVER_ROOT.'/sections/user/edit.php');
 		}
 		else {
 			header("Location: user.php?action=edit&userid={$LoggedUser['ID']}");
@@ -86,7 +86,7 @@ switch ($_REQUEST['action']) {
 					$_SESSION['private_key'] = (new PHPGangsta_GoogleAuthenticator())->createSecret();
 				}
 
-				include('2fa/step1.php');
+				include(SERVER_ROOT.'/sections/user/2fa/step1.php');
 				break;
 
 			case 'enable2':
@@ -101,7 +101,7 @@ switch ($_REQUEST['action']) {
 				}
 
 				if (empty($_POST['2fa'])) {
-					include('2fa/step2.php');
+					include(SERVER_ROOT.'/sections/user/2fa/step2.php');
 				} else {
 					$works = (new PHPGangsta_GoogleAuthenticator())->verifyCode($_SESSION['private_key'], $_POST['2fa'], 2);
 
@@ -132,7 +132,7 @@ switch ($_REQUEST['action']) {
 					error(404);
 				}
 
-				include('2fa/complete.php');
+				include(SERVER_ROOT.'/sections/user/2fa/complete.php');
 				unset($_SESSION['private_key']);
 				break;
 
@@ -143,7 +143,7 @@ switch ($_REQUEST['action']) {
 				}
 
 				if (empty($_POST['password']) && !check_perms('users_mod')) {
-					include('2fa/password_confirm.php');
+					include(SERVER_ROOT.'/sections/user/2fa/password_confirm.php');
 				} else {
 					if (check_perms('users_edit_password') || Users::check_password($_POST['password'], $PassHash)) {
 						$DB->query("UPDATE users_main SET 2FA_Key = '', Recovery = '' WHERE ID = '{$UserID}'");
@@ -166,35 +166,37 @@ switch ($_REQUEST['action']) {
 		}
 		break;
 	case 'take_edit':
-		include('take_edit.php');
+		include(SERVER_ROOT.'/sections/user/take_edit.php');
 		break;
 	case 'invitetree':
 		include(SERVER_ROOT.'/sections/user/invitetree.php');
 		break;
 	case 'invite':
-		include('invite.php');
+		include(SERVER_ROOT.'/sections/user/invite.php');
 		break;
 	case 'take_invite':
-		include('take_invite.php');
+		include(SERVER_ROOT.'/sections/user/take_invite.php');
 		break;
 	case 'delete_invite':
-		include('delete_invite.php');
+		include(SERVER_ROOT.'/sections/user/delete_invite.php');
+		break;
+	case 'stats':
+		include(SERVER_ROOT.'/sections/user/user_stats.php');
 		break;
 	case 'sessions':
-		include('sessions.php');
+		include(SERVER_ROOT.'/sections/user/sessions.php');
 		break;
 	case 'connchecker':
-		include('connchecker.php');
+		include(SERVER_ROOT.'/sections/user/connchecker.php');
 		break;
-
 	case 'permissions':
-		include('permissions.php');
+		include(SERVER_ROOT.'/sections/user/permissions.php');
 		break;
 	case 'similar':
-		include('similar.php');
+		include(SERVER_ROOT.'/sections/user/similar.php');
 		break;
 	case 'moderate':
-		include('takemoderate.php');
+		include(SERVER_ROOT.'/sections/user/takemoderate.php');
 		break;
 	case 'clearcache':
 		if (!check_perms('admin_clear_cache') || !check_perms('users_override_paranoia')) {

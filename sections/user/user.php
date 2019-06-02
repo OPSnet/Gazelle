@@ -265,6 +265,7 @@ if (check_perms('admin_reports')) {
 if (check_perms('users_mod')) {
 ?>
 		<a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
+		<a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?
 }
 if (check_perms('admin_clear_cache') && check_perms('users_override_paranoia')) {
