@@ -62,26 +62,29 @@ class User extends AbstractAPI {
 				{$where}", ($this->id !== null) ? $this->id : $this->username);
 
 		$user = $this->db->next_record(MYSQLI_ASSOC, array('IRCKey', 'Paranoia'));
-		if (!empty($user['Username'])) {
-			$user['SecondaryClasses'] = array_map("intval", explode(",", $user['SecondaryClasses']));
-			foreach (array('ID', 'Uploaded', 'Downloaded', 'Class', 'Level') as $key) {
-				$user[$key] = intval($user[$key]);
-			}
-			$user['Paranoia'] = unserialize_array($user['Paranoia']);
-
-			$user['Ratio'] = \Format::get_ratio($user['Uploaded'], $user['Downloaded']);
-			$user['DisplayStats'] = array(
-				'Downloaded' => \Format::get_size($user['Downloaded']),
-				'Uploaded' => \Format::get_size($user['Uploaded']),
-				'Ratio' => $user['Ratio']
-			);
-			foreach (array('Downloaded', 'Uploaded', 'Ratio') as $key) {
-				if (in_array(strtolower($key), $user['Paranoia'])) {
-					$user['DisplayStats'][$key] = "Hidden";
-				}
-			}
-			$user['UserPage'] = site_url() . "user.php?id={$user['ID']}";
+		if (empty($user['Username'])) {
+			json_error("User not found");
 		}
+
+		$user['SecondaryClasses'] = array_map("intval", explode(",", $user['SecondaryClasses']));
+		foreach (array('ID', 'Uploaded', 'Downloaded', 'Class', 'Level') as $key) {
+			$user[$key] = intval($user[$key]);
+		}
+		$user['Paranoia'] = unserialize_array($user['Paranoia']);
+
+		$user['Ratio'] = \Format::get_ratio($user['Uploaded'], $user['Downloaded']);
+		$user['DisplayStats'] = array(
+			'Downloaded' => \Format::get_size($user['Downloaded']),
+			'Uploaded' => \Format::get_size($user['Uploaded']),
+			'Ratio' => $user['Ratio']
+		);
+		foreach (array('Downloaded', 'Uploaded', 'Ratio') as $key) {
+			if (in_array(strtolower($key), $user['Paranoia'])) {
+				$user['DisplayStats'][$key] = "Hidden";
+			}
+		}
+		$user['UserPage'] = site_url() . "user.php?id={$user['ID']}";
+
 		return $user;
 	}
 
