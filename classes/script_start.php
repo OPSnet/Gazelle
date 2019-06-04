@@ -10,7 +10,7 @@
 /* generates the page are at the bottom.                */
 /*------------------------------------------------------*/
 /********************************************************/
-require 'config.php'; //The config contains all site wide configuration information
+require 'classes/config.php'; //The config contains all site wide configuration information
 
 // Autoload classes.
 require(SERVER_ROOT.'/classes/classloader.php');

@@ -15,8 +15,8 @@ return
 			'adapter' => 'mysql',
 			'host' => SQLHOST,
 			'name' => SQLDB,
-			'user' => SQLLOGIN,
-			'pass' => SQLPASS,
+			'user' => 'prod',
+			'pass' => '34UJ$!151ykFDcf3yo3ru9**s^spL##1DJdfj!r*WXG^sMfGjxM$u9W!rHATRUN&',
 			'port' => SQLPORT,
 			'charset' => 'utf8'
 		],

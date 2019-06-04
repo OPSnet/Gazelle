@@ -137,25 +137,25 @@ class DEBUG {
 
 	protected function format_args($Array) {
 		$LastKey = -1;
-		$Return = array();
+		$Return = [];
 		foreach ($Array as $Key => $Val) {
 			$Return[$Key] = '';
-			if (!is_int($Key) || $Key != $LastKey + 1) {
+			if (!is_numeric($Key) || !is_numeric($LastKey) || $Key != $LastKey + 1) {
 				$Return[$Key] .= "'$Key' => ";
 			}
-				if ($Val === true) {
-					$Return[$Key] .= 'true';
-				} elseif ($Val === false) {
-					$Return[$Key] .= 'false';
-				} elseif (is_string($Val)) {
-					$Return[$Key] .= "'$Val'";
-				} elseif (is_int($Val)) {
-					$Return[$Key] .= $Val;
-				} elseif (is_object($Val)) {
-					$Return[$Key] .= get_class($Val);
-				} elseif (is_array($Val)) {
-					$Return[$Key] .= 'array('.$this->format_args($Val).')';
-				}
+			if ($Val === true) {
+				$Return[$Key] .= 'true';
+			} elseif ($Val === false) {
+				$Return[$Key] .= 'false';
+			} elseif (is_numeric($Val)) {
+				$Return[$Key] .= $Val;
+			} elseif (is_string($Val)) {
+				$Return[$Key] .= "'$Val'";
+			} elseif (is_object($Val)) {
+				$Return[$Key] .= get_class($Val);
+			} elseif (is_array($Val)) {
+				$Return[$Key] .= '['.$this->format_args($Val).']';
+			}
 			$LastKey = $Key;
 		}
 		return implode(', ', $Return);

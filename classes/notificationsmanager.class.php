@@ -121,11 +121,11 @@ class NotificationsManager {
 			'importance' => $Importance);
 	}
 
-	public static function notify_user($UserID, $Type, $Message, $URL, $Importance) {
+	public static function notify_user($UserID, $Type, $Message, $URL, $Importance = self::INFO) {
 		self::notify_users(array($UserID), $Type, $Message, $URL, $Importance);
 	}
 
-	public static function notify_users($UserIDs, $Type, $Message, $URL, $Importance) {
+	public static function notify_users($UserIDs, $Type, $Message, $URL, $Importance = self::INFO) {
 		/**
 		if (!isset($Importance)) {
 			$Importance = self::INFO;
@@ -425,7 +425,7 @@ class NotificationsManager {
 		}
 	}
 
-	public static function clear_news($News) {
+	public static function clear_news($News = null) {
 		$QueryID = G::$DB->get_query_id();
 		if (!$News) {
 			if (!$News = G::$Cache->get_value('news')) {
@@ -456,7 +456,7 @@ class NotificationsManager {
 		G::$DB->set_query_id($QueryID);
 	}
 
-	public static function clear_blog($Blog) {
+	public static function clear_blog($Blog = null) {
 		$QueryID = G::$DB->get_query_id();
 		if (!$Blog) {
 			if (!$Blog = G::$Cache->get_value('blog')) {
