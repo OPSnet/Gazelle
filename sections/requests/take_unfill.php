@@ -5,11 +5,11 @@
 authorize();
 
 $RequestID = $_POST['id'];
-if (!is_number($RequestID)) {
+if (!intval($RequestID)) {
 	error(0);
 }
 
-$DB->query("
+$DB->prepared_query('
 	SELECT
 		r.CategoryID,
 		r.UserID,
@@ -18,8 +18,8 @@ $DB->query("
 		u.Uploaded,
 		r.GroupID
 	FROM requests AS r
-		LEFT JOIN users_main AS u ON u.ID = FillerID
-	WHERE r.ID = $RequestID");
+	LEFT JOIN users_main AS u ON (u.ID = FillerID)
+	WHERE r.ID = ?', $RequestID);
 list($CategoryID, $UserID, $FillerID, $Title, $Uploaded, $GroupID) = $DB->next_record();
 
 if ((($LoggedUser['ID'] !== $UserID && $LoggedUser['ID'] !== $FillerID) && !check_perms('site_moderate_requests')) || $FillerID === '0') {
@@ -27,42 +27,36 @@ if ((($LoggedUser['ID'] !== $UserID && $LoggedUser['ID'] !== $FillerID) && !chec
 }
 
 // Unfill
-$DB->query("
+$DB->prepared_query('
 	UPDATE requests
 	SET TorrentID = 0,
 		FillerID = 0,
-		TimeFilled = '0000-00-00 00:00:00',
+		TimeFilled = null,
 		Visible = 1
-	WHERE ID = $RequestID");
+	WHERE ID = ?', $RequestID);
 
-$CategoryName = $Categories[$CategoryID - 1];
+$CategoryName = $CategoriesV2[$CategoryID - 1];
 
-if ($CategoryName === 'Music') {
-	$ArtistForm = Requests::get_artists($RequestID);
-	$ArtistName = Artists::display_artists($ArtistForm, false, true);
-	$FullName = $ArtistName.$Title;
-} else {
-	$FullName = $Title;
-}
+$ArtistForm = Requests::get_artists($RequestID);
+$ArtistName = Artists::display_artists($ArtistForm, false, true);
+$FullName = $ArtistName.$Title;
 
 $RequestVotes = Requests::get_votes_array($RequestID);
 
 if ($RequestVotes['TotalBounty'] > $Uploaded) {
 	// If we can't take it all out of upload, zero that out and add whatever is left as download.
-	$DB->query("
+	$DB->prepared_query('
 		UPDATE users_main
-		SET Uploaded = 0
-		WHERE ID = $FillerID");
-	$DB->query('
-		UPDATE users_main
-		SET Downloaded = Downloaded + '.($RequestVotes['TotalBounty'] - $Uploaded)."
-		WHERE ID = $FillerID");
+		SET Uploaded = 0, Downloaded = Downloaded + ?
+		WHERE ID = ?',
+		$RequestVotes['TotalBounty'] - $Uploaded, $FillerID);
 } else {
-	$DB->query('
+	$DB->prepared_query('
 		UPDATE users_main
-		SET Uploaded = Uploaded - '.$RequestVotes['TotalBounty']."
-		WHERE ID = $FillerID");
+		SET Uploaded = Uploaded - ?
+		WHERE ID = ?', $RequestVotes['TotalBounty'], $FillerID);
 }
+
 Misc::send_pm($FillerID, 0, 'A request you filled has been unfilled', "The request \"[url=".site_url()."requests.php?action=view&amp;id=$RequestID]$FullName"."[/url]\" was unfilled by [url=".site_url().'user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason']."[/quote]\nIf you feel like this request was unjustly unfilled, please [url=".site_url()."reports.php?action=report&amp;type=request&amp;id=$RequestID]report the request[/url] and explain why this request should not have been unfilled.");
 
 $Cache->delete_value("user_stats_$FillerID");
@@ -96,4 +90,3 @@ $SphQL->raw_query("
 		WHERE id = $RequestID", false);
 
 header("Location: requests.php?action=view&id=$RequestID");
-?>

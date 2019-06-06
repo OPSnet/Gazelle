@@ -158,9 +158,11 @@ define('MAX_SPECIAL_RANK', 3);
 $ForumsRevealVoters = array();
 $ForumsDoublePost = array();
 
-$Categories = array('Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics');
-$GroupedCategories = array_intersect(array('Music'), $Categories);
-$CategoryIcons = array('music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png');
+$Categories = ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics'];
+$GroupedCategories = array_intersect(['Music'], $Categories);
+$CategoryIcons = ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearning.png', 'comedy.png', 'comics.png'];
+$CategoriesV2 = ['Music'];
+$CategoryV2Icons = ['music.png'];
 
 $Formats = array('MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS');
 $Bitrates = array('192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other');

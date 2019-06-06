@@ -33,8 +33,12 @@ function Vote(amount, requestid) {
 			if (response == 'bankrupt') {
 				error_message("You do not have sufficient upload credit to add " + get_size(amount) + " to this request");
 				return;
-			} else if (response == 'dupesuccess') {
-				//No increment
+			} else if (response == 'missing') {
+				error_message("Cannot find this request");
+				return;
+			} else if (response == 'filled') {
+				error_message("This request has already been filled");
+				return;
 			} else if (response == 'success') {
 				votecount.innerHTML = (parseInt(votecount.innerHTML)) + 1;
 			}
@@ -79,7 +83,7 @@ function Calculate() {
 		$('#new_uploaded').raw().innerHTML = get_size(($('#current_uploaded').raw().value) - amt);
 		$('#new_ratio').raw().innerHTML = ratio($('#current_uploaded').raw().value - amt, $('#current_downloaded').raw().value);
 		$('#new_bounty').raw().innerHTML = get_size(mul * $('#amount_box').raw().value);
-		$('#bounty_after_tax').raw().innerHTML = get_size(mul * 0.9 * $('#amount_box').raw().value);
+		$('#bounty_after_tax').raw().innerHTML = get_size(mul * (1 - $('#request_tax').raw().value) * $('#amount_box').raw().value);
 	}
 }
 
