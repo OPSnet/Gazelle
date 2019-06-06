@@ -157,7 +157,7 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
 //Stupid Recent Snatches On User Page
 if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
 	$RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
-	if (!empty($RecentSnatches)) {
+	if (isset($RecentSnatches)) {
 		$Snatch = array(
 				'ID' => $GroupID,
 				'Name' => $Name,
