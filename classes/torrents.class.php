@@ -1130,5 +1130,53 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		}
 		return $Reports;
 	}
+
+	/**
+	 * Update the logscore of a torrent. The score is the minimum score of any
+	 * log files that are part of the torrent.
+	 */
+	public static function clear_log($TorrentID, $LogID) {
+		G::$DB->prepared_query("
+			DELETE FROM torrents_logs WHERE TorrentID=? AND LogID=?
+			", $TorrentID, $LogID
+		);
+		return G::$DB->affected_rows();
+	}
+
+	public static function set_logscore($TorrentID, $GroupID) {
+		G::$DB->prepared_query("
+			SELECT COUNT(*) FROM torrents_logs WHERE TorrentID=?
+			", $TorrentID
+		);
+
+		list($count) = G::$DB->fetch_record();
+		if (!$count) {
+			G::$DB->prepared_query("
+				UPDATE torrents SET HasLogDB = 0, LogScore = 100, LogChecksum = 1 WHERE ID=?
+				", $TorrentID
+			);
+		}
+		else {
+			G::$DB->prepared_query("
+				UPDATE torrents AS t
+				LEFT JOIN (
+					SELECT
+					  TorrentID,
+					  MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+					  MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+					FROM torrents_logs
+					WHERE TorrentID = ?
+					GROUP BY TorrentID
+				) AS tl ON t.ID = tl.TorrentID
+				SET
+					t.LogScore    = tl.Score,
+					t.LogChecksum = tl.Checksum
+				WHERE t.ID = ?
+		", $TorrentID, $TorrentID);
+		}
+
+		G::$Cache->delete_value("torrent_group_{$GroupID}");
+		G::$Cache->delete_value("torrents_details_{$GroupID}");
+	}
+
 }
-?>

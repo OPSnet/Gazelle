@@ -378,16 +378,16 @@ $UnsourcedTorrent = $Tor->set_source(); // The source is now APL
 $TorEnc = db_string($Tor->encode());
 $InfoHash = pack('H*', $Tor->info_hash());
 
-$DB->query("
+$DB->prepared_query('
 	SELECT ID
 	FROM torrents
-	WHERE info_hash = '".db_string($InfoHash)."'");
+	WHERE info_hash = ?', $InfoHash);
 if ($DB->has_results()) {
 	list($ID) = $DB->next_record();
-	$DB->query("
+	$DB->prepared_query('
 		SELECT TorrentID
 		FROM torrents_files
-		WHERE TorrentID = $ID");
+		WHERE TorrentID = ?', $ID);
 	if ($DB->has_results()) {
 		$Err = '<a href="torrents.php?torrentid='.$ID.'">The exact same torrent file already exists on the site!</a>';
 	} else {
@@ -416,7 +416,7 @@ check_name($DirName); // check the folder name against the blacklist
 foreach ($FileList as $File) {
 	list($Size, $Name) = $File;
 	// add +log to encoding
-	if ($T['Encoding'] == "'Lossless'" && !in_array(strtolower($Name), $IgnoredLogFileNames) && preg_match('/\.log$/i', $Name)) {
+	if ($T['Media'] == "'CD'" && $T['Encoding'] == "'Lossless'" && !in_array(strtolower($Name), $IgnoredLogFileNames) && preg_match('/\.log$/i', $Name)) {
 		$HasLog = 1;
 	}
 	// add +cue to encoding
@@ -494,10 +494,10 @@ if ($Type == 'Music') {
 			WHERE info_hash = '" . db_string($ThisInsert['InfoHash']) . "'");
 		if ($DB->has_results()) {
 			list($ExtraID) = $DB->next_record();
-			$DB->query("
+			$DB->prepared_query('
 				SELECT TorrentID
 				FROM torrents_files
-				WHERE TorrentID = $ExtraID");
+				WHERE TorrentID = ?', $ExtraID);
 			if ($DB->has_results()) {
 				$Err = "<a href=\"torrents.php?torrentid=$ExtraID\">The exact same torrent file already exists on the site!</a>";
 			} else {
