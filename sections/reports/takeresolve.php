@@ -1,7 +1,7 @@
 <?
 authorize();
 
-if (!check_perms('admin_reports') && !check_perms('project_team') && !check_perms('site_moderate_forums')) {
+if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
 	error(403);
 }
 
@@ -16,10 +16,6 @@ if (!check_perms('admin_reports')) {
 	if (check_perms('site_moderate_forums')) {
 		if (!in_array($Type, array('comment', 'post', 'thread'))) {
 			error($Type);
-		}
-	} elseif (check_perms('project_team')) {
-		if ($Type != 'request_update') {
-			error(403);
 		}
 	}
 }

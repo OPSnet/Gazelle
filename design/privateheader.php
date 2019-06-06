@@ -469,21 +469,6 @@ if (check_perms('admin_reports')) {
 	if ($NumOtherReports > 0) {
 		$ModBar[] = '<a href="reports.php">'.$NumOtherReports.(($NumTorrentReports == 1) ? ' Other report' : ' Other reports').'</a>';
 	}
-} elseif (check_perms('project_team')) {
-	$NumUpdateReports = G::$Cache->get_value('num_update_reports');
-	if ($NumUpdateReports === false) {
-		G::$DB->query("
-			SELECT COUNT(ID)
-			FROM reports
-			WHERE Status = 'New'
-				AND Type = 'request_update'");
-		list($NumUpdateReports) = G::$DB->next_record();
-		G::$Cache->cache_value('num_update_reports', $NumUpdateReports, 0);
-	}
-
-	if ($NumUpdateReports > 0) {
-		$ModBar[] = '<a href="reports.php">Request update reports</a>';
-	}
 } elseif (check_perms('site_moderate_forums')) {
 	$NumForumReports = G::$Cache->get_value('num_forum_reports');
 	if ($NumForumReports === false) {
