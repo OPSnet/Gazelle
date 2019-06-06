@@ -99,7 +99,7 @@ foreach ($Results as $Key => $GroupID) {
 						|| $Data['RemasterYear'] != $LastRemasterYear
 						|| $Data['RemasterRecordLabel'] != $LastRemasterRecordLabel
 						|| $Data['RemasterCatalogueNumber'] != $LastRemasterCatalogueNumber)
-					|| $FirstUnknown
+					|| (isset($FirstUnknown) && $FirstUnknown)
 					|| $Data['Media'] != $LastMedia) {
 				$EditionID++;
 

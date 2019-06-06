@@ -636,7 +636,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 						|| $Data['RemasterYear'] != $LastRemasterYear
 						|| $Data['RemasterRecordLabel'] != $LastRemasterRecordLabel
 						|| $Data['RemasterCatalogueNumber'] != $LastRemasterCatalogueNumber)
-					|| $FirstUnknown
+					|| (isset($FirstUnknown) && $FirstUnknown)
 					|| $Data['Media'] != $LastMedia
 			) {
 				$EditionID++;

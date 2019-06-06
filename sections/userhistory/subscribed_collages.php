@@ -168,7 +168,7 @@ if (!$NumResults) {
 						|| $Torrent['RemasterYear'] != $LastRemasterYear
 						|| $Torrent['RemasterRecordLabel'] != $LastRemasterRecordLabel
 						|| $Torrent['RemasterCatalogueNumber'] != $LastRemasterCatalogueNumber
-						|| $FirstUnknown
+						|| (isset($FirstUnknown) && $FirstUnknown)
 						|| $Torrent['Media'] != $LastMedia
 					) {
 						$EditionID++;
