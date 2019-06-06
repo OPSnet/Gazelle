@@ -143,19 +143,19 @@ if (isset($Results)) {
 			</tr>
 			<tr>
 				<td width="150px">Handled by</td>
-				<td><input type="text" name="handler" size="20" value="<?= $_GET['handler'] ?: '' ?>" /></td>
+				<td><input type="text" name="handler" size="20" value="<?= isset($_GET['handler']) ? $_GET['handler'] : '' ?>" /></td>
 			</tr>
 			<tr>
 				<td width="150px">Uploaded by</td>
-				<td><input type="text" name="uploader" size="20" value="<?= $_GET['uploader'] ?: '' ?>" /></td>
+				<td><input type="text" name="uploader" size="20" value="<?= isset($_GET['uploader']) ? $_GET['uploader'] : '' ?>" /></td>
 			</tr>
 			<tr>
 				<td width="150px">Single Torrent</td>
-				<td><input type="text" name="torrent" size="80" value="<?= $_GET['torrent'] ?: '' ?>" /></td>
+				<td><input type="text" name="torrent" size="80" value="<?= isset($_GET['torrent']) ? $_GET['torrent'] : '' ?>" /></td>
 			</tr>
 			<tr>
 				<td width="150px">Torrent Group</td>
-				<td><input type="text" name="group" size="80" value="<?= $_GET['group'] ?: '' ?>" /></td>
+				<td><input type="text" name="group" size="80" value="<?= isset($_GET['group']) ? $_GET['torrent'] : '' ?>" /></td>
 			</tr>
 			<tr>
 				<td width="150px">Report Type</td>

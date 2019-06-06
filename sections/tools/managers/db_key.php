@@ -29,3 +29,8 @@ View::show_header('Database Encryption Key');
 		</div>
 	</form>
 </div>
+
+<?php
+View::show_footer();
+?>
+

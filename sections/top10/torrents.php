@@ -64,8 +64,8 @@ if (check_perms('site_advanced_top10')) {
 				<td class="label">Tags (comma-separated):</td>
 				<td class="ft_taglist">
 					<input type="text" name="tags" id="tags" size="75" value="<? if (!empty($_GET['tags'])) { echo display_str($_GET['tags']);} ?>"<? Users::has_autocomplete_enabled('other'); ?> />&nbsp;
-					<input type="radio" id="rdoAll" name="anyall" value="all"<?=($_GET['anyall']!='any'?' checked="checked"':'')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
-					<input type="radio" id="rdoAny" name="anyall" value="any"<?=($_GET['anyall']=='any'?' checked="checked"':'')?> /><label for="rdoAny"> Any</label>
+					<input type="radio" id="rdoAll" name="anyall" value="all"<?=(empty($_GET['anyall']) || $_GET['anyall'] != 'any' ? ' checked="checked"' : '')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
+					<input type="radio" id="rdoAny" name="anyall" value="any"<?=(!empty($_GET['anyall']) && $_GET['anyall'] == 'any' ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
 				</td>
 			</tr>
 			<tr>
@@ -116,7 +116,7 @@ if (!empty($FreeleechToggleQuery))
 
 $FreeleechToggleQuery .= 'freeleech=' . $FreeleechToggleName;
 
-$GroupByToggleName = ($_GET['groups'] == 'show' ? 'hide' : 'show');
+$GroupByToggleName = (!empty($_GET['groups']) && $_GET['groups'] == 'show' ? 'hide' : 'show');
 $GroupByToggleQuery = Format::get_url(array('freeleech', 'groups'));
 
 if (!empty($GroupByToggleQuery))
@@ -126,7 +126,7 @@ $GroupByToggleQuery .= 'groups=' . $GroupByToggleName;
 
 $GroupBySum = '';
 $GroupBy = '';
-if ($_GET['groups'] == 'show') {
+if (!empty($_GET['groups']) && $_GET['groups'] == 'show') {
 	$GroupBy = ' GROUP BY g.ID ';
 	$GroupBySum = md5($GroupBy);
 }

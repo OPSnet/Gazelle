@@ -5,10 +5,10 @@ $DB->prepared_query("
 	WHERE AuthorID = ?
 	GROUP BY Page", $UserID);
 $Comments = $DB->to_array('Page');
-$NumComments = $Comments['torrents'][1];
-$NumArtistComments = $Comments['artist'][1];
-$NumCollageComments = $Comments['collages'][1];
-$NumRequestComments = $Comments['requests'][1];
+$NumComments = empty($Comments['torrents']) ? 0 : $Comments['torrents'][1];
+$NumArtistComments = empty($Comments['artist']) ? 0 : $Comments['artist'][1];
+$NumCollageComments = empty($Comments['collages']) ? 0 : $Comments['collages'][1];
+$NumRequestComments = empty($Comments['requests']) ? 0 : $Comments['requests'][1];
 
 $DB->prepared_query("
 	SELECT COUNT(ID)

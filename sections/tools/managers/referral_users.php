@@ -17,25 +17,21 @@ if (isset($_POST['id'])) {
 define('USERS_PER_PAGE', 50);
 list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
 
-$StartDate = $_GET['start_date'];
-$EndDate = $_GET['end_date'];
+$StartDate = isset($_GET['start_date']) ? $_GET['start_date'] : NULL;
+$EndDate = isset($_GET['start_date']) ? $_GET['end_date'] : NULL;
 
-if (!empty($StartDate)) {
+if ($StartDate != NULL) {
 	list($Y, $M, $D) = explode('-', $StartDate);
 	if (!checkdate($M, $D, $Y)) {
 		$StartDate = NULL;
 	}
-} else {
-	$StartDate = NULL;
 }
 
-if (!empty($EndDate)) {
+if ($EndDate != NULL) {
 	list($Y, $M, $D) = explode('-', $EndDate);
 	if (!checkdate($M, $D, $Y)) {
 		$EndDate = NULL;
 	}
-} else {
-	$EndDate = NULL;
 }
 
 $View = isset($_GET['view']) ? $_GET['view'] : 'all';
@@ -62,11 +58,11 @@ View::show_header('Referred Users');
 			<table class="layout">
 				<tr>
 					<td class="label"><label for="start_date">Start Date</label></td>
-					<td><input type="text" name="start_date" size="10" value="<?=display_str($_GET['start_date'])?>" placeholder="YYYY-MM-DD" /></td>
+					<td><input type="text" name="start_date" size="10" value="<?=display_str($StartDate)?>" placeholder="YYYY-MM-DD" /></td>
 				</tr>
 				<tr>
 					<td class="label"><label for="end_date">End Date</label></td>
-					<td><input type="text" name="end_date" size="10" value="<?=display_str($_GET['end_date'])?>" placeholder="YYYY-MM-DD" /></td>
+					<td><input type="text" name="end_date" size="10" value="<?=display_str($EndDate)?>" placeholder="YYYY-MM-DD" /></td>
 				</tr>
 			</table>
 			<div class="center">
