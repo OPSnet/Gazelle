@@ -413,7 +413,7 @@ if (check_perms('users_mod')) {
 		$DB->prepared_query('DELETE FROM torrents_lossymaster_approved WHERE TorrentID = ?', $TorrentID);
 	}
 
-	$DB->prepared_query('SELECT TorrentID FROM torrents_lossyweb_approved WHERE TorrentID = ', $TorrentID);
+	$DB->prepared_query('SELECT TorrentID FROM torrents_lossyweb_approved WHERE TorrentID = ?', $TorrentID);
 	list($lwID) = $DB->fetch_record();
 
 	if (!$lwID && $Properties['LossywebApproved']) {
