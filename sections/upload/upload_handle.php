@@ -821,22 +821,8 @@ $Debug->set_flag('upload: sphinx updated');
 
 
 // Running total for amount of BP to give
-$BonusPoints = 0;
-
-$PerfectFormats = array('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD',
-	'Blu-ray', 'DAT');
-
-// Do this here as log score is overwritten later
-if ($Properties['Format'] === 'FLAC' && (($Properties['Media'] === 'CD' && $LogInDB && $LogScore === 100 && $LogChecksum === 1) ||
-		in_array($Properties['Media'], $PerfectFormats))) {
-	$BonusPoints += 400;
-}
-elseif ($Properties['Format'] === 'FLAC' || ($Properties['Format'] === 'MP3' && in_array($Properties['Bitrate'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
-	$BonusPoints += 30;
-}
-else {
-	$BonusPoints += 10;
-}
+$Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
+$BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Bitrate'], $LogInDB, $LogScore, $LogChecksum);
 
 //******************************************************************************//
 //---------------IRC announce and feeds ---------------------------------------//
@@ -890,15 +876,7 @@ $Debug->set_flag('upload: announced on irc');
 //--------------- Upload Extra torrents ----------------------------------------//
 
 foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
-	if ($ExtraTorrent['Format'] === 'FLAC' && in_array($Properties['Media'], $PerfectFormats)) {
-		$BonusPoints += 400;
-	}
-	elseif ($ExtraTorrent['Format'] === 'FLAC' || ($ExtraTorrent['Format'] === 'MP3' && in_array($ExtraTorrent['Encoding'], array('V2 (VBR)', 'V0 (VBR)', '320')))) {
-		$BonusPoints += 30;
-	}
-	else {
-		$BonusPoints += 10;
-	}
+	$BonusPoints += $Bonus->getTorrentValue($ExtraTorrent['Format'], $Properties['Media'], $ExtraTorrent['Encoding']);
 
 	$ExtraHasLog = 0;
 	$ExtraHasCue = 0;
@@ -966,7 +944,9 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 //--------------- Give Bonus Points  -------------------------------------------//
 
 if (G::$LoggedUser['DisablePoints'] == 0) {
-	$DB->query("UPDATE users_main SET BonusPoints = BonusPoints + {$BonusPoints} WHERE ID=".$LoggedUser['ID']);
+	$DB->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?',
+		$BonusPoints, $LoggedUser['ID']
+	);
 	$Cache->delete_value('user_stats_'.$LoggedUser['ID']);
 }
 

@@ -32,6 +32,24 @@ class Bonus {
 		return array_key_exists($label, $this->items) ? $this->items[$label] : null;
 	}
 
+	public function getTorrentValue($format, $media, $encoding, $haslogdb = 0, $logscore = 0, $logchecksum = 0) {
+		if ($format == 'FLAC') {
+			if ($media == 'CD' && $haslogdb && $logscore === 100 && $logchecksum == 1) {
+				return BONUS_AWARD_FLAC_PERFECT;
+			}
+			elseif (in_array($media, ['Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT'])) {
+				return BONUS_AWARD_FLAC_PERFECT;
+			}
+			else {
+				return BONUS_AWARD_FLAC;
+			}
+		}
+		elseif ($format == 'MP3' && in_array($encoding, ['V2 (VBR)', 'V0 (VBR)', '320'])) {
+			return BONUS_AWARD_MP3;
+		}
+		return BONUS_AWARD_OTHER;
+	}
+
 	public function getEffectivePrice($label, $effective_class) {
 		$item  = $this->items[$label];
 		return $effective_class >= $item['FreeClass'] ? 0 : $item['Price'];

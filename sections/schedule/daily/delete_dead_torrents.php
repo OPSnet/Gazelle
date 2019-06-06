@@ -23,12 +23,12 @@ $DB->query("
 $Torrents = $DB->to_array(false, MYSQLI_NUM, false);
 echo 'Found '.count($Torrents)." inactive torrents to be deleted.\n";
 
-$LogEntries = $DeleteNotes = array();
+$LogEntries = $DeleteNotes = [];
 
 // Exceptions for inactivity deletion
-$InactivityExceptionsMade = array(
+$InactivityExceptionsMade = [
 	//UserID => expiry time of exception
-);
+];
 $i = 0;
 foreach ($Torrents as $Torrent) {
 	list($ID, $GroupID, $Name, $Format, $Encoding, $UserID, $Media, $InfoHash) = $Torrent;

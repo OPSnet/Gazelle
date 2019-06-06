@@ -35,26 +35,27 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|'),
 				GROUP_CONCAT(tt.NegativeVotes SEPARATOR '|')
 			FROM torrents_group AS g
-				LEFT JOIN torrents_tags AS tt ON tt.GroupID = g.ID
-				LEFT JOIN tags ON tags.ID = tt.TagID";
+				LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
+				LEFT JOIN tags ON (tags.ID = tt.TagID)";
 
+		$args = [];
 		if ($RevisionID) {
-			$SQL .= "
-				LEFT JOIN wiki_torrents AS w ON w.PageID = '".db_string($GroupID)."'
-						AND w.RevisionID = '".db_string($RevisionID)."' ";
+			$SQL .= '
+				LEFT JOIN wiki_torrents AS w ON (w.PageID = ? AND w.RevisionID = ?)';
+			$args[] = $GroupID;
+			$args[] = $RevisionID;
 		}
 
-		$SQL .= "
-			WHERE g.ID = '".db_string($GroupID)."'
-			GROUP BY NULL";
+		$SQL .= '
+			WHERE g.ID = ?
+			GROUP BY NULL';
+		$args[] = $GroupID;
 
-		$DB->query($SQL);
+		$DB->prepared_query_array($SQL, $args);
 		$TorrentDetails = $DB->next_record(MYSQLI_ASSOC);
 
 		// Fetch the individual torrents
-
-		$DB->query("
-			SELECT
+		$columns = "
 				t.ID,
 				t.Media,
 				t.Format,
@@ -93,27 +94,46 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 				t.LastReseedRequest,
 				t.ID AS HasFile,
 				COUNT(tl.LogID) AS LogCount
+		";
+
+		$DB->prepared_query("
+			SELECT $columns
+				,0 as is_deleted
 			FROM torrents AS t
-				LEFT JOIN torrents_bad_tags AS tbt ON tbt.TorrentID = t.ID
-				LEFT JOIN torrents_bad_folders AS tbf ON tbf.TorrentID = t.ID
-				LEFT JOIN torrents_bad_files AS tfi ON tfi.TorrentID = t.ID
-				LEFT JOIN torrents_missing_lineage AS ml ON ml.TorrentID = t.ID
-				LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
-				LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
-				LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.ID
-				LEFT JOIN torrents_logs AS tl ON tl.TorrentID = t.ID
-			WHERE t.GroupID = '".db_string($GroupID)."'
+				LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
+				LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
+				LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
+				LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+				LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+				LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+				LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
+				LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
+			WHERE t.GroupID = ?
 			GROUP BY t.ID
-			ORDER BY t.Remastered ASC,
-				(t.RemasterYear != 0) DESC,
-				t.RemasterYear ASC,
-				t.RemasterTitle ASC,
-				t.RemasterRecordLabel ASC,
-				t.RemasterCatalogueNumber ASC,
-				t.Media ASC,
-				t.Format,
-				t.Encoding,
-				t.ID");
+			UNION DISTINCT
+			SELECT $columns
+				,1 as is_deleted
+			FROM deleted_torrents AS t
+				LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
+				LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
+				LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
+				LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+				LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+				LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+				LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
+				LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
+			WHERE t.GroupID = ?
+			GROUP BY t.ID
+			ORDER BY Remastered ASC,
+				(RemasterYear != 0) DESC,
+				RemasterYear ASC,
+				RemasterTitle ASC,
+				RemasterRecordLabel ASC,
+				RemasterCatalogueNumber ASC,
+				Media ASC,
+				Format,
+				Encoding,
+				ID", $GroupID, $GroupID);
 
 		$TorrentList = $DB->to_array('ID', MYSQLI_ASSOC);
 		if (count($TorrentList) === 0 && $ApiCall == false) {
@@ -145,7 +165,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 	}
 
 	if ($Return) {
-		return array($TorrentDetails, $TorrentList);
+		return [$TorrentDetails, $TorrentList];
 	}
 }
 
@@ -265,13 +285,6 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 
 	$EditionID = 0;
 	foreach ($TorrentList as $Torrent) {
-	//t.ID,	t.Media, t.Format, t.Encoding, t.Remastered, t.RemasterYear,
-	//t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Scene,
-	//t.HasLog, t.HasCue, t.LogScore, t.FileCount, t.Size, t.Seeders, t.Leechers,
-	//t.Snatched, t.FreeTorrent, t.Time, t.Description, t.FileList,
-	//t.FilePath, t.UserID, t.last_action, HEX(t.info_hash), (bad tags), (bad folders), (bad filenames),
-	//(cassette approved), (lossy master approved), (lossy web approved), t.LastReseedRequest,
-	//LogInDB, (has file), Torrents::torrent_properties()
 	list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
 		$RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
 		$HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
@@ -280,9 +293,7 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
 		$MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved, $LastReseedRequest,
 		$HasFile, $LogCount, $PersonalFL, $IsSnatched) = array_values($Torrent);
 
-	if ($Remastered && !$RemasterYear) {
-		$FirstUnknown = !isset($FirstUnknown);
-	}
+	$FirstUnknown = ($Remastered && !$RemasterYear);
 
 	$Reported = false;
 	$Reports = Torrents::get_reports($TorrentID);

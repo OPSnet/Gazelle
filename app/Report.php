@@ -6,6 +6,8 @@ class Report {
 	public static function search($db, array $filter) {
 		$cond = [];
 		$args = [];
+		$delcond = [];
+		$delargs = [];
 		if (array_key_exists('reporter', $filter) && $filter['reporter']) {
 			$cond[] = 'r.ReporterID = ?';
 			$args[] = self::username2id($db, $filter['reporter']);
@@ -33,16 +35,16 @@ class Report {
 		if (array_key_exists('uploader', $filter) && $filter['uploader']) {
 			$cond[] = 't.UserID = ?';
 			$args[] = self::username2id($db, $filter['uploader']);
-		}
-		if (array_key_exists('torrent', $filter)) {
-			$cond[] = 'r.TorrentID = ?';
-			$args[] = $filter['torrent'];
+			$delcond[] = 'dt.UserID = ?';
+			$delargs[] = self::username2id($db, $filter['uploader']);
 		}
 		if (array_key_exists('group', $filter)) {
 			$cond[] = 't.GroupID = ?';
 			$args[] = $filter['group'];
+			$delcond[] = 'dt.GroupID = ?';
+			$delargs[] = $filter['group'];
 		}
-		if (count($cond) == 0) {
+		if (count($cond) == 0 && count($delcond) == 0) {
 			$cond = ['1 = 1'];
 		}
 		$conds = implode(' AND ', $cond);
@@ -50,9 +52,19 @@ class Report {
 		 * which means that t.GroupID in a condition refers to the same thing in
 		 * the `torrents` table as well. I am not certain this is entirely sane.
 		 */
-		$sql_base = "
+		$sql_where = implode("\n\t\tAND ", array_merge($cond, $delcond));
+		$sql = "
+			SELECT SQL_CALC_FOUND_ROWS
+				r.ID, r.ReporterID, r.ResolverID, r.TorrentID,
+				coalesce(t.UserID, dt.UserID) as UserID,
+				coalesce(t.GroupID, dt.GroupID) as GroupID,
+				coalesce(t.Media, dt.Media) as Media,
+				coalesce(t.Format, dt.Format) as Format,
+				coalesce(t.Encoding, dt.Encoding) as Encoding,
+				coalesce(g.Name, gl.Info) as Name, g.Year, r.Type, r.ReportedTime
 			FROM reportsv2 r
 			LEFT JOIN torrents t ON (t.ID = r.TorrentID)
+			LEFT JOIN deleted_torrents dt ON (dt.ID = r.TorrentID)
 			LEFT JOIN torrents_group g on (g.ID = t.GroupID)
 			LEFT JOIN (
 				SELECT max(t.ID) AS ID, t.TorrentID
@@ -63,29 +75,23 @@ class Report {
 				GROUP BY t.TorrentID
 			) LASTLOG USING (TorrentID)
 			LEFT JOIN group_log gl ON (gl.ID = LASTLOG.ID)
-			WHERE
-				$conds";
-		$sql = "SELECT count(*) $sql_base";
-		$db->prepared_query_array($sql, array_merge($args, $args));
-		list($total_results) = $db->next_record();
-		if (!$total_results) {
-			return [[], $total_results];
-		}
-		$sql = "
-			SELECT r.ID, r.ReporterID, r.ResolverID, r.TorrentID, t.UserID, t.GroupID, t.Media, t.Format, t.Encoding, coalesce(g.Name, gl.Info) as Name, g.Year, r.Type, r.ReportedTime
-			$sql_base
+			WHERE $sql_where
 			ORDER BY r.ReportedTime DESC LIMIT ? OFFSET ?
 		";
 		$args = array_merge(
 			$args,
 			$args,
+			$delargs,
 			[
 				TORRENTS_PER_PAGE, // LIMIT
 				TORRENTS_PER_PAGE * (max($filter['page'], 1) - 1), // OFFSET
 			]
 		);
 		$db->prepared_query_array($sql, $args);
-		return [$db->to_array(), $total_results];
+		$result = $db->to_array();
+		$db->query('SELECT FOUND_ROWS()');
+		list($count) = $db->next_record();
+		return [$result, $count];
 	}
 
 	private static function username2id ($db, $name) {

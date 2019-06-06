@@ -240,123 +240,102 @@ class Torrents {
 		G::$DB->set_query_id($QueryID);
 	}
 
-
 	/**
 	 * Delete a torrent.
 	 *
 	 * @param int $ID The ID of the torrent to delete.
-	 * @param int $GroupID Set it if you have it handy, to save a query. Otherwise, it will be found.
+	 * @param int $GroupID Set it if you have it handy.
 	 * @param string $OcelotReason The deletion reason for ocelot to report to users.
 	 */
 	public static function delete_torrent($ID, $GroupID = 0, $OcelotReason = -1) {
 		$QueryID = G::$DB->get_query_id();
-		if (!$GroupID) {
-			G::$DB->query("
-				SELECT GroupID, UserID
-				FROM torrents
-				WHERE ID = '$ID'");
-			list($GroupID, $UserID) = G::$DB->next_record();
-		}
-		if (empty($UserID)) {
-			G::$DB->query("
-				SELECT UserID
-				FROM torrents
-				WHERE ID = '$ID'");
-			list($UserID) = G::$DB->next_record();
-		}
 
-		$RecentUploads = G::$Cache->get_value("recent_uploads_$UserID");
-		if (is_array($RecentUploads)) {
-			foreach ($RecentUploads as $Key => $Recent) {
-				if ($Recent['ID'] == $GroupID) {
-					G::$Cache->delete_value("recent_uploads_$UserID");
-				}
-			}
-		}
-
-
-		G::$DB->query("
-			SELECT info_hash
+		G::$DB->prepared_query('
+			SELECT GroupID, UserID, info_hash, Format, Media, Encoding, HasLogDB, LogScore, LogChecksum
 			FROM torrents
-			WHERE ID = $ID");
-		list($InfoHash) = G::$DB->next_record(MYSQLI_BOTH, false);
-		G::$DB->query("
-			DELETE FROM torrents
-			WHERE ID = $ID");
-		Tracker::update_tracker('delete_torrent', array('info_hash' => rawurlencode($InfoHash), 'id' => $ID, 'reason' => $OcelotReason));
+			WHERE ID = ?
+			', $ID
+		);
+		list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record(MYSQLI_BOTH, [2, 'info_hash']);
 
+		$Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
+		G::$DB->prepared_query('
+			UPDATE users_main
+			SET BonusPoints = BonusPoints - ?
+			WHERE id = ?
+			', $Bonus->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum), $UserID
+		);
+
+		$manager = new \Gazelle\DB(G::$DB, G::$Cache);
+		list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents', [['ID', $ID]]);
+		if (!$ok) {
+			return $message;
+		}
+		Tracker::update_tracker('delete_torrent', array('info_hash' => rawurlencode($InfoHash), 'id' => $ID, 'reason' => $OcelotReason));
 		G::$Cache->decrement('stats_torrent_count');
 
-		G::$DB->query("
-			SELECT COUNT(ID)
+		G::$DB->prepared_query('
+			SELECT COUNT(*)
 			FROM torrents
-			WHERE GroupID = '$GroupID'");
+			WHERE GroupID = ?', $GroupID);
 		list($Count) = G::$DB->next_record();
-
-		if ($Count == 0) {
-			Torrents::delete_group($GroupID);
-		} else {
+		if ($Count > 0) {
 			Torrents::update_hash($GroupID);
 		}
 
-		// Torrent notifications
-		G::$DB->query("
-			SELECT UserID
-			FROM users_notify_torrents
-			WHERE TorrentID = '$ID'");
-		while (list($UserID) = G::$DB->next_record()) {
-			G::$Cache->delete_value("notifications_new_$UserID");
-		}
-		G::$DB->query("
-			DELETE FROM users_notify_torrents
-			WHERE TorrentID = '$ID'");
+		$manager->soft_delete(SQLDB, 'torrents_files',                [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_bad_files',            [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_bad_folders',          [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_bad_tags',             [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_cassette_approved',    [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_lossymaster_approved', [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',    [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_missing_lineage',      [['TorrentID', $ID]]);
 
-		G::$DB->query("
+		// Tells Sphinx that the group is removed
+		G::$DB->prepared_query('
+			REPLACE INTO sphinx_delta (ID, Time)
+			VALUES (?, now())', $ID);
+
+		G::$DB->prepared_query("
 			UPDATE reportsv2
 			SET
 				Status = 'Resolved',
-				LastChangeTime = '".sqltime()."',
+				LastChangeTime = now(),
 				ModComment = 'Report already dealt with (torrent deleted)'
-			WHERE TorrentID = $ID
-				AND Status != 'Resolved'");
+			WHERE Status != 'Resolved'
+				AND TorrentID = ?", $ID);
 		$Reports = G::$DB->affected_rows();
 		if ($Reports) {
 			G::$Cache->decrement('num_torrent_reportsv2', $Reports);
 		}
 
-		G::$DB->query("
-			DELETE FROM torrents_files
-			WHERE TorrentID = '$ID'");
-		G::$DB->query("
-			DELETE FROM torrents_bad_tags
-			WHERE TorrentID = $ID");
-		G::$DB->query("
-			DELETE FROM torrents_bad_folders
-			WHERE TorrentID = $ID");
-		G::$DB->query("
-			DELETE FROM torrents_bad_files
-			WHERE TorrentID = $ID");
-		G::$DB->query("
-			DELETE FROM torrents_missing_lineage
-			WHERE TorrentID = $ID");
-		G::$DB->query("
-			DELETE FROM torrents_cassette_approved
-			WHERE TorrentID = $ID");
-		G::$DB->query("
-			DELETE FROM torrents_lossymaster_approved
-			WHERE TorrentID = $ID");
-		G::$DB->query("
-			DELETE FROM torrents_lossyweb_approved
-			WHERE TorrentID = $ID");
+		$deleted_keys = [];
+		// Torrent notifications
+		G::$DB->prepared_query('
+			SELECT UserID
+			FROM users_notify_torrents
+			WHERE TorrentID = ?', $ID);
+		while (list($UserID) = G::$DB->next_record()) {
+			$deleted_keys[] = "notifications_new_$UserID";
+		}
+		$manager->soft_delete(SQLDB, 'users_notify_torrents', [['TorrentID', $ID]]);
 
-		// Tells Sphinx that the group is removed
-		G::$DB->query("
-			REPLACE INTO sphinx_delta (ID, Time)
-			VALUES ($ID, UNIX_TIMESTAMP())");
+		$RecentUploads = G::$Cache->get_value("recent_uploads_$UserID");
+		if (is_array($RecentUploads)) {
+			foreach ($RecentUploads as $Key => $Recent) {
+				if ($Recent['ID'] == $GroupID) {
+					$deleted_keys[] = "recent_uploads_$UserID";
+					break;
+				}
+			}
+		}
 
-		G::$Cache->delete_value("torrent_download_$ID");
-		G::$Cache->delete_value("torrent_group_$GroupID");
-		G::$Cache->delete_value("torrents_details_$GroupID");
+		$deleted_keys[] = "torrent_download_$ID";
+		$deleted_keys[] = "torrent_group_$GroupID";
+		$deleted_keys[] = "torrents_details_$GroupID";
+		G::$Cache->deleteMulti($deleted_keys);
+
 		G::$DB->set_query_id($QueryID);
 	}
 

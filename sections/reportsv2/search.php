@@ -139,7 +139,7 @@ if (isset($Results)) {
 		<table>
 			<tr>
 				<td width="150px">Reported by</td>
-				<td><input type="text" name="reporter" size="20" value="<?= $_GET['reporter'] ?: '' ?>" /></td>
+				<td><input type="text" name="reporter" size="20" value="<?= isset($_GET['reporter']) ? $_GET['reporter'] : '' ?>" /></td>
 			</tr>
 			<tr>
 				<td width="150px">Handled by</td>
@@ -164,7 +164,7 @@ if (isset($Results)) {
 						<option value="0">Don't Care</option>
 <?
 foreach ($report_name_cache as $key => $label) {
-	$selected = in_array($key, $_GET['report-type']) ? ' selected="selected"' : '';
+	$selected = array_key_exists('report-type', $_GET) && in_array($key, $_GET['report-type']) ? ' selected="selected"' : '';
 ?>
 						<option value="<?= $key ?>"<?= $selected ?>><?= $label ?></option>
 <?  } ?>

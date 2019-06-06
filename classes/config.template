@@ -155,6 +155,11 @@ define('DONOR_FORUM_RANK', 6);
 define('DONOR_FORUM', 70);
 define('MAX_SPECIAL_RANK', 3);
 
+define('BONUS_AWARD_FLAC_PERFECT', 400);
+define('BONUS_AWARD_FLAC', 30);
+define('BONUS_AWARD_MP3', 30);
+define('BONUS_AWARD_OTHER', 10);
+
 $ForumsRevealVoters = array();
 $ForumsDoublePost = array();
 
@@ -252,43 +257,3 @@ $CaptchaBGs = array(
 $SpecialChars = array(
 		'&' => 'and'
 );
-
-// array to store external site credentials and API URIs, stored in cache to keep user sessions alive
-$ExternalServicesConfig = [
-    "Orpheus" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'https://orpheus.network/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ],
-    "VagrantGazelle" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'http://localhost:80/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ],
-    "PassThePopcorn" => [
-        'type' => 'gazelle',
-        'inviter_id' => 1,
-        'base_url' => 'https://passthepopcorn.me/',
-        'api_path' => 'ajax.php?action=',
-        'login_path' => 'login.php',
-        'username' => 'foo',
-        'password' => 'bar',
-        'cookie' => '',
-        'cookie_expiry' => 0,
-        'status' => TRUE
-    ]];
-?>
