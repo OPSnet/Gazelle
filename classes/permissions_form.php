@@ -88,6 +88,7 @@ $PermissionsArray = array(
 	'admin_manage_fls' => 'Can manage First Line Support (FLS) crew.',
 	'admin_manage_user_fls' => 'Can manage user FL tokens.',
 	'admin_manage_applicants' => 'Can manage job roles and user applications.',
+	'admin_manage_payments' => 'Can manage payments.',
 	'admin_bp_history' => 'Can view bonus points spent by other users.',
 	'admin_reports' => 'Can access reports system.',
 	'admin_advanced_user_search' => 'Can access advanced user search.',
@@ -253,6 +254,7 @@ function permissions_form() {
 					display_perm('admin_manage_fls', 'Can manage First Line Support (FLS) crew.');
 					display_perm('admin_manage_user_fls', 'Can manage user FL tokens');
 					display_perm('admin_manage_applicants', 'Can manage job roles and user applications');
+					display_perm('admin_manage_payments', 'Can manage payments');
 					display_perm('admin_reports', 'Can access reports system');
 					display_perm('admin_bp_history', 'Can view bonus points spent by other users');
 					display_perm('admin_advanced_user_search', 'Can access advanced user search');

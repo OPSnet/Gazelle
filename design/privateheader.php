@@ -533,8 +533,32 @@ if (check_perms('users_mod') && FEATURE_EMAIL_REENABLE) {
 		$ModBar[] = '<a href="tools.php?action=enable_requests">' . $NumEnableRequests . " Enable requests</a>";
 	}
 }
-?>
-<?
+
+if (check_perms('admin_manage_payments')) {
+	$DuePayments = G::$Cache->get_value('due_payments');
+	if ($DuePayments === false) {
+		G::$DB->prepared_query("
+			SELECT Text, Expiry
+			FROM payment_reminders
+			WHERE Active = 1 AND Expiry < ?
+			ORDER BY Expiry",
+			date('Y-m-d', strtotime('+6 days')));
+		$DuePayments = G::$DB->to_array(false, MYSQLI_ASSOC);
+		G::$Cache->cache_value('due_payments', $DuePayments, 60 * 60);
+	}
+
+	if (count($DuePayments) > 0) {
+		$AlertText = '<a href="tools.php?action=payment_list">Payments due</a>';
+		foreach ($DuePayments as $p) {
+			list($Text, $Expiry) = array_values($p);
+			$Color = strtotime($Expiry) < (strtotime('+3 days')) ? 'red' : 'orange';
+			$AlertText .= sprintf(' | <span style="color: %s">%s: %s</span>', $Color, $Text, date('Y-m-d', strtotime($Expiry)));
+		}
+		$Alerts[] = $AlertText;
+	}
+
+}
+
 if (!empty($Alerts) || !empty($ModBar)) { ?>
 			<div id="alerts">
 <?	foreach ($Alerts as $Alert) { ?>

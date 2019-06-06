@@ -47,6 +47,7 @@ View::show_header('Staff Tools');
 	create_row("Staff page group manager", "tools.php?action=staff_groups", check_perms("admin_manage_permissions"));
 	create_row("Special users", "tools.php?action=special_users", check_perms("admin_manage_permissions"));
 	create_row("Manage Bonus Points", "tools.php?action=bonus_points", check_perms("users_mod"));
+	create_row("Payment Dates", "tools.php?action=payment_list", check_perms("admin_manage_payments"));
 
 	if ($ToolsHTML) {
 ?>
