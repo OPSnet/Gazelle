@@ -256,7 +256,7 @@ class Torrents {
 			WHERE ID = ?
 			', $ID
 		);
-		list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record();
+		list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record(MYSQLI_BOTH, [2, 'info_hash']);
 
 		$Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
 		G::$DB->prepared_query('
