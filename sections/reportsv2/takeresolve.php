@@ -326,7 +326,7 @@ if ($DB->affected_rows() > 0 || !$Report) {
 		}
 
 		if ($Warning > 0) {
-			$PM .= "This has resulted in a [url=".site_url()."wiki.php?action=article&amp;id=114]$Warning week warning.[/url]\n\n";
+			$PM .= "This has resulted in a [url=".site_url()."wiki.php?action=article&amp;name=warnings]$Warning week warning.[/url]\n\n";
 		}
 
 		if ($Upload) {
