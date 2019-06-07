@@ -30,11 +30,11 @@ if (check_paranoia_here('seeding+') || check_paranoia_here('leeching+')) {
 			AND x.active = 1
 		GROUP BY Type");
 	$PeerCount = $DB->to_array(0, MYSQLI_NUM, false);
-	if (check_paranoia('seeding+')) {
+	if (check_paranoia_here('seeding+')) {
 		$Seeding = isset($PeerCount['Seeding']) ? $PeerCount['Seeding'][1] : 0;
 		$CommStats['seeding'] = number_format($Seeding);
 	}
-	if (check_paranoia('leeching+')) {
+	if (check_paranoia_here('leeching+')) {
 		$CommStats['leeching'] = isset($PeerCount['Leeching']) ? number_format($PeerCount['Leeching'][1]) : 0;
 	}
 }
