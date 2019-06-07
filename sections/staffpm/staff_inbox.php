@@ -2,7 +2,7 @@
 
 View::show_header('Staff Inbox');
 
-$View = display_str($_GET['view']);
+$View = display_str(empty($_GET['view']) ? '' : $_GET['view']);
 $UserLevel = $LoggedUser['EffectiveClass'];
 
 
@@ -107,7 +107,7 @@ $Row = 'a';
 <?	}
 	
 	if ($IsFLS && !$IsStaff) { ?>
-			<span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff inbox</a></span>
+			<span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
 <?	} ?>
 		</div>
 	</div>

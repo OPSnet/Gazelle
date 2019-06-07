@@ -5,7 +5,7 @@ class Artists {
 	 *
 	 * @param array $GroupIDs
 	 * @return an array of the following form:
-	 * 	GroupID => {
+	 *	GroupID => {
 	 *		[ArtistType] => {
 	 *			id, name, aliasid
 	 *		}
@@ -103,11 +103,17 @@ class Artists {
 			$Conductors		= isset($Artists[5]) ? $Artists[5] : null;
 			$DJs			= isset($Artists[6]) ? $Artists[6] : null;
 
-			if ((count($MainArtists) + count($Conductors) + count($DJs) == 0) && (count($Composers) == 0)) {
+			$MainArtistCount	= $MainArtists == null ? 0 : count($MainArtists);
+			$GuestCount			= $Guests == null ? 0 : count($Guests);
+			$ComposerCount		= $Composers == null ? 0 : count($Composers);
+			$ConductorCount		= $Conductors == null ? 0 : count($Conductors);
+			$DJCount			= $DJs == null ? 0 : count($DJs);
+
+			if (($MainArtistCount + $ConductorCount + $DJCount == 0) && ($ComposerCount == 0)) {
 				return '';
 			}
 			// Various Composers is not needed and is ugly and should die
-			switch (count($Composers)) {
+			switch ($ComposerCount) {
 				case 0:
 					break;
 				case 1:
@@ -118,13 +124,13 @@ class Artists {
 					break;
 			}
 
-			if ((count($Composers) > 0) && (count($Composers) < 3) && (count($MainArtists) > 0)) {
+			if (($ComposerCount > 0) && ($ComposerCount < 3) && ($MainArtistCount > 0)) {
 				$link .= ' performed by ';
 			}
 
 			$ComposerStr = $link;
 
-			switch (count($MainArtists)) {
+			switch ($MainArtistCount) {
 				case 0:
 					break;
 				case 1:
@@ -137,21 +143,10 @@ class Artists {
 					$link .= 'Various Artists';
 			}
 
-			/*if (!empty($Guests) &&  (count($MainArtists) + count($Composers) > 0) && (count($MainArtists) + count($Composers) + count($Conductors) < 3)) {
-				switch (count($Guests)) {
-					case 1:
-						$link .= ' with '.Artists::display_artist($Guests[0], $MakeLink, $Escape);
-						break;
-					case 2:
-						$link .= ' with '.Artists::display_artist($Guests[0], $MakeLink, $Escape).$ampersand.Artists::display_artist($Guests[1], $MakeLink, $Escape);
-						break;
-				}
-			}*/
-
-			if ((count($Conductors) > 0) && (count($MainArtists) + count($Composers) > 0) && (count($Composers) < 3 || count($MainArtists) > 0)) {
+			if (($ConductorCount > 0) && ($MainArtistCount + $ComposerCount > 0) && ($ComposerCount < 3 || $MainArtistCount > 0)) {
 				$link .= ' under ';
 			}
-			switch (count($Conductors)) {
+			switch ($ConductorCount) {
 				case 0:
 					break;
 				case 1:
@@ -164,14 +159,14 @@ class Artists {
 					$link .= ' Various Conductors';
 			}
 
-			if ((count($Composers) > 0) && (count($MainArtists) + count($Conductors) > 3) && (count($MainArtists) > 1) && (count($Conductors) > 1)) {
+			if (($ComposerCount > 0) && ($MainArtistCount + $ConductorCount > 3) && ($MainArtistCount > 1) && ($ConductorCount > 1)) {
 				$link = $ComposerStr . 'Various Artists';
-			} elseif ((count($Composers) > 2) && (count($MainArtists) + count($Conductors) == 0)) {
+			} elseif (($ComposerCount > 2) && ($MainArtistCount + $ConductorCount == 0)) {
 				$link = 'Various Composers';
 			}
 
 			// DJs override everything else
-			switch (count($DJs)) {
+			switch ($DJCount) {
 				case 0:
 					break;
 				case 1:

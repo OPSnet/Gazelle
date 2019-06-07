@@ -146,9 +146,9 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
 <?
 			}
 		}
-		if ((count($ArtistForm[6]) > 0) && (count($ArtistForm[1]) > 0)) {
+		if (!empty($ArtistForm[6]) && !empty($ArtistForm[1]) && (count($ArtistForm[6]) > 0) && (count($ArtistForm[1]) > 0)) {
 			print '				<li class="artists_main"><strong>Artists:</strong></li>';
-		} elseif ((count($ArtistForm[4]) > 0) && (count($ArtistForm[1]) > 0)) {
+		} elseif (!empty($ArtistForm[4]) && !empty($ArtistForm[1]) && (count($ArtistForm[4]) > 0) && (count($ArtistForm[1]) > 0)) {
 			print '				<li class="artists_main"><strong>Performers:</strong></li>';
 		}
 		foreach ($ArtistForm[1] as $Artist) {

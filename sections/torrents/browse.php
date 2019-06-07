@@ -134,13 +134,8 @@ if ($AdvancedSearch) {
 }
 
 View::show_header('Browse Torrents', 'browse');
-//$TimeNow = new DateTime();
-//$TimeUntil = new DateTime('2016-12-16 03:50:00');
-//$Interval = $TimeUntil->diff($TimeNow);
-//$Left = $Interval->format("%i MINS, %s SECONDS");
 ?>
 <div class="thin widethin">
-<!--<div class="alertbar blend" style="font-size: 14pt;">GLOBAL FREELEECH ENDS IN <?= $Left ?></div>-->
 <div class="header">
 	<h2>Torrents</h2>
 </div>
@@ -641,7 +636,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 						|| $Data['RemasterYear'] != $LastRemasterYear
 						|| $Data['RemasterRecordLabel'] != $LastRemasterRecordLabel
 						|| $Data['RemasterCatalogueNumber'] != $LastRemasterCatalogueNumber)
-					|| $FirstUnknown
+					|| (isset($FirstUnknown) && $FirstUnknown)
 					|| $Data['Media'] != $LastMedia
 			) {
 				$EditionID++;
