@@ -80,10 +80,11 @@ foreach ($TrackDeductions as $Deduction) {
 	$AdjustedScore -= $Total;
 }
 
-$DB->query("UPDATE torrents_logs
-    SET Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails ?
-    WHERE LogID = ? AND TorrentID = ?",
-    $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $AdjustedBy, $AdjustmentReason, serialize($AdjustmentDetails),
+$DB->prepared_query('
+    UPDATE torrents_logs
+    SET Adjusted = ?, AdjustedScore = ?, AdjustedChecksum = ?, AdjustedBy = ?, AdjustmentReason = ?, AdjustmentDetails = ?
+    WHERE LogID = ? AND TorrentID = ?
+    ', $Adjusted, max(0, $AdjustedScore), $AdjustedChecksum, $AdjustedBy, $AdjustmentReason, serialize($AdjustmentDetails),
     $LogID, $TorrentID
 );
 
