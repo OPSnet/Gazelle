@@ -652,6 +652,9 @@ if (check_perms('site_moderate_forums')) {
 				<td colspan="2" class="center">
 					<input type="submit" value="Edit thread" tabindex="2" />
 					<span style="float: right;">
+<?					if ($ForumID == HELP_FORUM_ID || $ForumID == BUGS_FORUM_ID) { ?>
+						<input type="submit" name="resolve" value="Resolve" tabindex="2" />
+<?					} ?>
 						<input type="submit" name="trash" value="Trash" tabindex="2" />
 					</span>
 				</td>

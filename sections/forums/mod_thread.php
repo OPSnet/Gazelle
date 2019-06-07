@@ -43,6 +43,7 @@ $Page = (int)$_POST['page'];
 $Action = '';
 
 $TrashForumID = ($ForumID === EDITING_FORUM_ID) ? EDITING_TRASH_FORUM_ID : TRASH_FORUM_ID;
+$ResolveForumID = ($ForumID === HELP_FORUM_ID) ? HELP_RESOLVED_FORUM_ID : (($ForumID === BUGS_FORUM_ID) ? BUGS_RESOLVED_FORUM_ID : '');
 
 if ($Locked == 1) {
 	$DB->query("
@@ -158,6 +159,11 @@ if (isset($_POST['delete'])) {
 	if (isset($_POST['trash'])) {
 		$ForumID = $TrashForumID;
 		$Action = 'trashing';
+	}
+
+	if (isset($_POST['resolve'])) {
+		$ForumID = $ResolveForumID;
+		$Action = 'resolving';
 	}
 
 	$Cache->begin_transaction("thread_{$TopicID}_info");
@@ -312,6 +318,9 @@ if (isset($_POST['delete'])) {
 		if ($ForumID == $TrashForumID) {
 			$Action = 'trashing';
 		}
+		if ($ForumID == $ResolveForumID) {
+			$Action = 'resolving';
+		}
 	} else { // Editing
 		$DB->query("
 			SELECT LastPostTopicID
@@ -376,6 +385,10 @@ if (isset($_POST['delete'])) {
 		case 'trashing':
 			$TopicNotes[] = "Trashed (moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url])";
 			$Notification = "Your thread \"$NewLastTitle\" has been trashed";
+			break;
+		case 'resolving':
+			$TopicNotes[] = "Resolved (moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url])";
+			$Notification = "Your thread \"$NewLastTitle\" has been resolved";
 			break;
 		default:
 			break;
