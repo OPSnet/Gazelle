@@ -54,7 +54,10 @@ if (empty($_GET['type'])) {
 		$SphQL->where('visible', 1);
 	}
 } else {
-	$_GET['show_filled'] = "on";
+	// Show filled defaults to on only for viewing types
+	if (!$Submitted) {
+		$_GET['show_filled'] = "on";
+	}
 	switch ($_GET['type']) {
 		case 'created':
 			if (!empty($UserInfo)) {
@@ -102,6 +105,9 @@ if (empty($_GET['type'])) {
 	}
 }
 
+// We don't want to show filled by default on plain requests.php,
+// but we do show it by default if viewing a $_GET['type'] page
+// by default
 if ((!$Submitted && empty($_GET['type'])) || ($Submitted && empty($_GET['show_filled']))) {
 	$SphQL->where('torrentid', 0);
 }
