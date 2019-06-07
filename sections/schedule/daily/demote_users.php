@@ -9,7 +9,7 @@ $Query = $DB->query('
 		FROM users_main
 		WHERE PermissionID IN(' . implode(', ', $DemoteClasses) . ')
 			AND (
-				Uploaded / Downloaded < 0.95
+				(Downloaded > 0 AND Uploaded / Downloaded < 0.95)
 				OR Uploaded < 25 * 1024 * 1024 * 1024
 			)');
 echo "demoted 1\n";
@@ -22,7 +22,7 @@ $DB->query('
 			ui.AdminComment = CONCAT('" . sqltime() . ' - Class changed to ' . Users::make_class_string(MEMBER) . " by System\n\n', ui.AdminComment)
 		WHERE um.PermissionID IN (" . implode(', ', $DemoteClasses) . ')
 			AND (
-				um.Uploaded / um.Downloaded < 0.95
+				(um.Downloaded > 0 AND um.Uploaded / um.Downloaded < 0.95)
 				OR um.Uploaded < 25 * 1024 * 1024 * 1024
 			)');
 $DB->set_query_id($Query);
@@ -51,7 +51,7 @@ $DB->query('
 			um.PermissionID = ' . USER . ",
 			ui.AdminComment = CONCAT('" . sqltime() . ' - Class changed to ' . Users::make_class_string(USER) . " by System\n\n', ui.AdminComment)
 		WHERE um.PermissionID IN (" . implode(', ', $DemoteClasses) . ')
-			AND um.Uploaded / um.Downloaded < 0.65');
+			AND (um.Downloaded > 0 AND um.Uploaded / um.Downloaded < 0.65)');
 $DB->set_query_id($Query);
 while (list($UserID) = $DB->next_record()) {
 	/*$Cache->begin_transaction("user_info_$UserID");

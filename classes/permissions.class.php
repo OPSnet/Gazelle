@@ -94,7 +94,7 @@ class Permissions {
 			$DonorPerms = array('Permissions' => array());
 		}
 		$MaxCollages = $BonusCollages;
-		if (isset($Permissions['Permissions']['MaxCollages'])) {
+		if (is_numeric($Permissions['Permissions']['MaxCollages'])) {
 			$MaxCollages += $Permissions['Permissions']['MaxCollages'];
 		}
 		if (isset($CustomPermissions['MaxCollages'])) {

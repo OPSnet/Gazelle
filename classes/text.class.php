@@ -148,7 +148,7 @@ class Text {
 		$Str = preg_replace('/'.$URLPrefix.'\s+/i', '$1', $Str);
 		$Str = preg_replace('/(?<!'.$URLPrefix.')http(s)?:\/\//i', '$1[inlineurl]http$2://', $Str);
 		// For anonym.to and archive.org links, remove any [inlineurl] in the middle of the link
-		$callback = create_function('$matches', 'return str_replace("[inlineurl]", "", $matches[0]);');
+		$callback = function($m) {return str_replace('[inlineurl]', '', $m[0]);};
 		$Str = preg_replace_callback('/(?<=\[inlineurl\]|'.$URLPrefix.')(\S*\[inlineurl\]\S*)/m', $callback, $Str);
 
 		if (self::$TOC) {

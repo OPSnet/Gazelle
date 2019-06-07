@@ -10,9 +10,7 @@ class Misc {
 	 * @param string $ContentType text/plain or text/html
 	 */
 
-	public static function send_email($To, $Subject, $Body, $From, $ContentType) {
-		// remove the next line if you want to send HTML email from some places...
-		$ContentType='text/plain';
+	public static function send_email($To, $Subject, $Body, $From, $ContentType = 'text/plain') {
 		$Headers = 'MIME-Version: 1.0'."\r\n";
 		$Headers .= 'Content-type: text/plain; charset=iso-8859-1'."\r\n";
 		$Headers .= 'From: '.SITE_NAME.' <'.$From.'@'.MAIL_HOST.'>'."\r\n";
