@@ -496,7 +496,7 @@ if ($Invites != $Cur['Invites'] && check_perms('users_edit_invites')) {
 
 if ($Warned == 1 && $Cur['Warned'] == '0000-00-00 00:00:00' && check_perms('users_warn')) {
 	$Weeks = 'week' . ($WarnLength === 1 ? '' : 's');
-	Misc::send_pm($UserID, 0, 'You have received a warning', "You have been [url=".site_url()."wiki.php?action=article&amp;id=114]warned for $WarnLength {$Weeks}[/url] by [user]".$LoggedUser['Username']."[/user]. The reason given was:
+	Misc::send_pm($UserID, 0, 'You have received a warning', "You have been [url=".site_url()."wiki.php?action=article&amp;name=warnings]warned for $WarnLength {$Weeks}[/url] by [user]".$LoggedUser['Username']."[/user]. The reason given was:
 [quote]{$WarnReason}[/quote]");
 	$UpdateSet[] = "Warned = '".sqltime()."' + INTERVAL $WarnLength WEEK";
 	$Msg = "warned for $WarnLength $Weeks";
