@@ -54,6 +54,7 @@ if (empty($_GET['type'])) {
 		$SphQL->where('visible', 1);
 	}
 } else {
+	$_GET['show_filled'] = "on";
 	switch ($_GET['type']) {
 		case 'created':
 			if (!empty($UserInfo)) {
@@ -101,7 +102,7 @@ if (empty($_GET['type'])) {
 	}
 }
 
-if (!$Submitted || empty($_GET['show_filled'])) {
+if ((!$Submitted && empty($_GET['type'])) || ($Submitted && empty($_GET['show_filled']))) {
 	$SphQL->where('torrentid', 0);
 }
 
