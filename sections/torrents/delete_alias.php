@@ -1,50 +1,61 @@
 <?
-$ArtistID = db_string($_GET['artistid']);
-$GroupID = db_string($_GET['groupid']);
-$Importance = db_string($_GET['importance']);
+$ArtistID = $_GET['artistid'];
+$GroupID = $_GET['groupid'];
+$Importance = $_GET['importance'];
 
-if (!is_number($ArtistID) || !is_number($GroupID) || !is_number($Importance)) {
+if (!intval($ArtistID) || !intval($GroupID) || !intval($Importance)) {
 	error(404);
 }
 if (!check_perms('torrents_edit')) {
 	error(403);
 }
 
-$DB->query("
+$DB->prepared_query('
 	DELETE FROM torrents_artists
-	WHERE GroupID = '$GroupID'
-		AND ArtistID = '$ArtistID'
-		AND Importance = '$Importance'");
-$DB->query("
+	WHERE GroupID = ?
+		AND ArtistID = ?
+		AND Importance = ?
+	', $GroupID, $ArtistID, $Importance
+);
+echo "$GroupID, $ArtistID, $Importance.<br />";
+$DB->prepared_query('
 	SELECT Name
 	FROM artists_group
-	WHERE ArtistID = $ArtistID");
+	WHERE ArtistID = ?
+	', $ArtistID
+);
 list($ArtistName) = $DB->next_record(MYSQLI_NUM, false);
 
-$DB->query("
+$DB->prepared_query('
 	SELECT Name
 	FROM torrents_group
-	WHERE ID = $GroupID");
+	WHERE ID = ?
+	', $GroupID
+);
 if (!$DB->has_results()) {
 	error(404);
 }
 list($GroupName) = $DB->next_record(MYSQLI_NUM, false);
 
 // Get a count of how many groups or requests use this artist ID
-$DB->query("
-	SELECT ag.ArtistID
+$DB->prepared_query('
+	SELECT count(*)
 	FROM artists_group AS ag
-		LEFT JOIN requests_artists AS ra ON ag.ArtistID = ra.ArtistID
+	LEFT JOIN requests_artists AS ra USING (ArtistID)
 	WHERE ra.ArtistID IS NOT NULL
-		AND ag.ArtistID = $ArtistID");
-$ReqCount = $DB->record_count();
-$DB->query("
-	SELECT ag.ArtistID
+		AND ag.ArtistID = ?
+	', $ArtistID
+);
+list($ReqCount) = $DB->next_record(MYSQLI_NUM, false);
+$DB->prepared_query('
+	SELECT count(*)
 	FROM artists_group AS ag
-		LEFT JOIN torrents_artists AS ta ON ag.ArtistID = ta.ArtistID
+	LEFT JOIN torrents_artists AS ta USING (ArtistID)
 	WHERE ta.ArtistID IS NOT NULL
-		AND ag.ArtistID = $ArtistID");
-$GroupCount = $DB->record_count();
+		AND ag.ArtistID = ?
+	', $ArtistID
+);
+list($GroupCount) = $DB->next_record(MYSQLI_NUM, false);
 if (($ReqCount + $GroupCount) == 0) {
 	// The only group to use this artist
 	Artists::delete_artist($ArtistID);
