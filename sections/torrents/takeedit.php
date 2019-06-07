@@ -331,7 +331,7 @@ if (check_perms('torrents_freeleech')) {
 }
 
 if (check_perms('users_mod')) {
-	if ($T['Format'] == 'FLAC' && $T['Media'] == 'CD') {
+	if ($T['Format'] == "'FLAC'" && $T['Media'] == "'CD'") {
 		$SQL .= "
 			HasLog = $T[HasLog],
 			HasCue = $T[HasCue],";

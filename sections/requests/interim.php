@@ -16,11 +16,11 @@ $DB->prepared_query('
 list($RequestorID, $FillerID) = $DB->next_record();
 
 if ($Action === 'unfill') {
-	if ($LoggedUser['ID'] !== $RequestorID && $LoggedUser['ID'] !== $FillerID && !check_perms('site_moderate_requests')) {
+	if ($LoggedUser['ID'] != $RequestorID && $LoggedUser['ID'] != $FillerID && !check_perms('site_moderate_requests')) {
 		error(403);
 	}
 } elseif ($Action === 'delete') {
-	if ($LoggedUser['ID'] !== $RequestorID && !check_perms('site_moderate_requests')) {
+	if ($LoggedUser['ID'] != $RequestorID && !check_perms('site_moderate_requests')) {
 		error(403);
 	}
 }
