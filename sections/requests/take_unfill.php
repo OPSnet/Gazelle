@@ -22,7 +22,7 @@ $DB->prepared_query('
 	WHERE r.ID = ?', $RequestID);
 list($CategoryID, $UserID, $FillerID, $Title, $Uploaded, $GroupID) = $DB->next_record();
 
-if ((($LoggedUser['ID'] !== $UserID && $LoggedUser['ID'] !== $FillerID) && !check_perms('site_moderate_requests')) || $FillerID === '0') {
+if (((intval($LoggedUser['ID']) !== $UserID && intval($LoggedUser['ID']) !== $FillerID) && !check_perms('site_moderate_requests')) || $FillerID === '0') {
 	error(403);
 }
 

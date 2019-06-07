@@ -50,7 +50,7 @@ else {
 	$RawName = "$ArtistName - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
 }
 
-if (($LoggedUser['ID'] != $UserID || time_ago($Time) > 3600 * 24 * 7 || $Snatches > 4) && !check_perms('torrents_delete')) {
+if ((intval($LoggedUser['ID']) != $UserID || time_ago($Time) > 3600 * 24 * 7 || $Snatches > 4) && !check_perms('torrents_delete')) {
 	error(403);
 }
 
