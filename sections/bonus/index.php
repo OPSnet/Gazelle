@@ -54,6 +54,7 @@ if (isset($_GET['action'])) {
 		case 'history':
 			require_once(SERVER_ROOT . '/sections/bonus/history.php');
 			break;
+		case 'donate':
 		default:
 			require_once(SERVER_ROOT . DEFAULT_PAGE);
 			break;

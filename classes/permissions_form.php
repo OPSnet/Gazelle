@@ -83,6 +83,7 @@ $PermissionsArray = array(
 	'torrents_fix_ghosts' => 'Can fix "ghost" groups on artist pages.',
 	'admin_manage_news' => 'Can manage site news.',
 	'admin_manage_blog' => 'Can manage the site blog.',
+	'admin_manage_contest' => 'Can manage contests.',
 	'admin_manage_polls' => 'Can manage polls.',
 	'admin_manage_forums' => 'Can manage forums (add/edit/delete).',
 	'admin_manage_fls' => 'Can manage First Line Support (FLS) crew.',
@@ -250,6 +251,7 @@ function permissions_form() {
 <?
 					display_perm('admin_manage_news', 'Can manage site news');
 					display_perm('admin_manage_blog', 'Can manage the site blog');
+					display_perm('admin_manage_contest', 'Can manage contests');
 					display_perm('admin_manage_polls', 'Can manage polls');
 					display_perm('admin_manage_forums', 'Can manage forums (add/edit/delete)');
 					display_perm('admin_manage_fls', 'Can manage First Line Support (FLS) crew.');

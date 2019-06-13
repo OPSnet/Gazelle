@@ -1,9 +1,11 @@
 <?php
-$Contest = Contest::get_current_contest();
+$ContestMgr = new \Gazelle\Contest(G::$DB, G::$Cache);
+
+$Contest = $ContestMgr->get_current_contest();
 if (empty($Contest)) {
 	return;
 }
-$Leaderboard = Contest::get_leaderboard($Contest['ID']);
+$Leaderboard = $ContestMgr->get_leaderboard($Contest['ID']);
 if (empty($Leaderboard)) {
 	return;
 }

@@ -10,8 +10,10 @@ class Bonus {
 	private $cache;
 
 	const CACHE_ITEM = 'bonus_item';
+	const CACHE_OPEN_POOL = 'bonus_pool';
 	const CACHE_SUMMARY = 'bonus_summary.';
 	const CACHE_HISTORY = 'bonus_history.';
+	const CACHE_POOL_HISTORY = 'bonus_pool_history.';
 
 	public function __construct (\DB_MYSQL $db, \CACHE $cache) {
 		$this->db = $db;
@@ -70,6 +72,51 @@ class Bonus {
 		return $list_other;
 	}
 
+	public function getOpenPool() {
+		$key = self::CACHE_OPEN_POOL;
+		$pool = $this->cache->get_value($key);
+		if ($pool === false) {
+			$this->db->prepared_query('SELECT Id, Name, Total FROM bonus_pool WHERE now() BETWEEN SinceDate AND UntilDate');
+			$pool = $this->db->next_record();
+			$this->cache->cache_value($key, $pool, 3600);
+		}
+		return $pool;
+	}
+
+	public function donate($pool_id, $value, $user_id, $effective_class) {
+		if ($effective_class < 250) {
+			$taxed_value = $value * BONUS_POOL_TAX_STD;
+		}
+		elseif($effective_class == 250 /* Elite */) {
+			$taxed_value = $value * BONUS_POOL_TAX_ELITE;
+		}
+		elseif($effective_class <= 500 /* EliteTM */) {
+			$taxed_value = $value * BONUS_POOL_TAX_TM;
+		}
+		else {
+			$taxed_value = $value * BONUS_POOL_TAX_STAFF;
+		}
+
+		$this->db->begin_transaction();
+		$this->db->prepared_query(
+			"UPDATE users_main SET BonusPoints = BonusPoints - ? WHERE BonusPoints >= ? AND ID = ?",
+			$value, $value, $user_id
+		);
+		if ($this->db->affected_rows() != 1) {
+			$this->db->rollback();
+			return false;
+		}
+        $pool = new \Gazelle\BonusPool($this->db, $this->cache, $pool_id);
+        $pool->contribute($user_id, $value, $taxed_value);
+		$this->db->commit();
+
+		$this->cache->delete_value(self::CACHE_OPEN_POOL);
+		$this->cache->delete_value(self::CACHE_POOL_HISTORY . $user_id);
+		$this->cache->delete_value('user_stats_' . $user_id);
+		$this->cache->delete_value('user_info_heavy_' . $user_id);
+		return true;
+	}
+
 	public function getUserSummary($user_id) {
 		$key = self::CACHE_SUMMARY . $user_id;
 		$summary = $this->cache->get_value($key);
@@ -102,12 +149,31 @@ class Bonus {
 		return $history;
 	}
 
+	public function getUserPoolHistory($user_id) {
+		$key = self::CACHE_POOL_HISTORY . $user_id;
+		$history = $this->cache->get_value($key);
+		if ($history === false) {
+			$this->db->prepared_query('
+				SELECT sum(c.amountrecv) as Total, p.UntilDate, p.Name
+				FROM bonus_pool_contrib c
+				INNER JOIN bonus_pool p ON (p.ID = c.BonusPoolID)
+				WHERE c.UserID = ?
+				GROUP BY p.UntilDate, p.Name
+				ORDER BY p.UntilDate, p.Name
+				', $user_id
+			);
+			$history = $this->db->has_results() ? $this->db->to_array() : null;
+			$this->cache->cache_value($key, $history, 86400 * 3);
+			/* since we had to fetch this page, invalidate the next one */
+		}
+		return $history;
+	}
+
 	public function purchaseInvite($user_id) {
 		$item = $this->items['invite'];
 		if (!\Users::canPurchaseInvite($user_id, $item['MinClass'])) {
 			return false;
 		}
-
 
 		$this->db->begin_transaction();
 		$this->db->prepared_query(

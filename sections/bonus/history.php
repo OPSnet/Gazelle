@@ -36,10 +36,42 @@ if ($Summary['nr'] > 0) {
 </div>
 
 <div class="thin">
-<? if ($Summary['total']) { ?>
-	<h3><?=$WhoSpent ?> <?=number_format($Summary['total']) ?> bonus points to purchase <?=$Summary['nr'] ?> <?=$Summary['nr'] == 1 ? 'item' : 'items' ?>.</h3>
-<? } else { ?>
-	<h3>No purchase history</h3>
+<?
+$has_spent = 0;
+$PoolSummary = $Bonus->getUserPoolHistory($ID);
+$pool_total = 0;
+if (!is_null($PoolSummary)) {
+	$has_spent++;
+	foreach ($PoolSummary as $p) {
+		$when = (time() < strtotime($p['UntilDate']))
+			? " ending in " . time_diff($p['UntilDate'])
+			: " ended " . time_diff($p['UntilDate']) . ' ago';
+		$pool_total += $p['Total'];
+?>
+	<h4><?= $WhoSpent ?> <?=number_format($p['Total']) ?> bonus points to donate to the <?= $p['Name'] . $when ?>.</h4>
+<?
+	}
+}
+if ($Summary['total']) {
+	$also = ($has_spent) ? 'a further ' : '';
+	$has_spent++;
+?>
+	<h4><?= "$WhoSpent $also" . number_format($Summary['total']) ?> bonus points to purchase <?= $Summary['nr'] ?> <?= $Summary['nr'] == 1 ? 'item' : 'items' ?>.</h4>
+<?
+}
+if ($has_spent == 2) {
+	$total = $pool_total + $Summary['total'];
+	if ($total > 500000) { $adj = 'very '; }
+	elseif ($total >  1000000) { $adj = 'very, very '; }
+	elseif ($total >  5000000) { $adj = 'extremely '; }
+	elseif ($total > 10000000) { $adj = 'exceptionally '; }
+	else { $adj = ''; }
+?>
+	<h4>That makes a grand total of <?= number_format($total) ?> points, <?= $adj ?>well done!</h4>
+<?
+} elseif (!$has_spent) {
+?>
+	<h3>No purchase history.</h3>
 <?
 }
 if (isset($History)) {

@@ -1,4 +1,6 @@
 <?php
 
-Contest::calculate_leaderboard();
-Contest::calculate_request_pairs();
+$ContestMgr = new \Gazelle\Contest(G::$DB, G::$Cache);
+
+$ContestMgr->calculate_leaderboard();
+$ContestMgr->calculate_request_pairs();

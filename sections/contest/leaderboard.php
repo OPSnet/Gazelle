@@ -1,17 +1,17 @@
 <?php
 enforce_login();
 if (isset($_POST['leaderboard']) && is_number($_POST['leaderboard'])) {
-	$Contest = Contest::get_contest(intval($_POST['leaderboard']));
+	$Contest = $ContestMgr->get_contest(intval($_POST['leaderboard']));
 }
 elseif (isset($_GET['id']) && is_number($_GET['id'])) {
-	$Contest = Contest::get_contest(intval($_GET['id']));
+	$Contest = $ContestMgr->get_contest(intval($_GET['id']));
 }
 else {
-	$Contest = Contest::get_current_contest();
+	$Contest = $ContestMgr->get_current_contest();
 }
 
 if (!empty($Contest)) {
-	$Leaderboard = Contest::get_leaderboard($Contest['ID']);
+	$Leaderboard = $ContestMgr->get_leaderboard($Contest['ID']);
 	View::show_header($Contest['Name'].' Leaderboard');
 }
 else {
@@ -28,7 +28,7 @@ if ($Contest['Banner']) {
 ?>
 <div class="linkbox">
 	<a href="contest.php" class="brackets">Intro</a>
-	<?=(check_perms('users_mod')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
+	<?=(check_perms('admin_manage_contest')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
 </div>
 
 <div class="thin">
@@ -36,15 +36,14 @@ if ($Contest['Banner']) {
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
 
 <?
-$Prior = Contest::get_prior_contests();
-$Prior = []; // FIXME: no dropdown to see older contests (Blame Athena <3 )
-if (count($Prior)) {
+$Prior = $ContestMgr->get_prior_contests();
+if (check_perms('admin_manage_contest') && count($Prior)) {
 ?>
 	<form class="edit_form" style="float: right;" action="contest.php?action=leaderboard" method="post">
 		<select name="leaderboard">
 <?
 	foreach ($Prior as $id) {
-		$prior_contest = Contest::get_contest($id[0]);
+		$prior_contest = $ContestMgr->get_contest($id[0]);
 		$selected = $prior_contest['ID'] == $Contest['ID'] ? ' selected' : '';
 ?>
 			<option value="<?= $prior_contest['ID'] ?>"<?= $selected ?>><?= $prior_contest['Name'] ?></option>
@@ -56,13 +55,31 @@ if (count($Prior)) {
 	</form>
 <?
 } /* prior */
+?>
+
+	<div class="head">
+<? if ($Contest['BonusPool'] > 0) {
+    $bp = new \Gazelle\BonusPool($DB, $Cache, $Contest['BonusPool']);
+?>
+        <h3>The Bonus Point pool currently stands at <?= number_format($bp->getTotalSent()) ?> points.</h3>
+<? } ?>
+
+<?
 if (!count($Leaderboard)) {
+    if ($Contest['is_open']) {
+?>
+	<p>The scheduler has not run yet, there are no results to display.<p>
+<?
+    }
+    else {
 ?>
 	<p>That's not supposed to happen. Looks like the contest hasn't begun yet!<p>
 <?
+    }
+?>
+<?
 } else {
 ?>
-	<div class="head">
         <h3>A grand total of <?=
             G::$Cache->get_value("contest_leaderboard_total_{$Contest['ID']}")
             ?: "<span title=\"We will recalculate the numbers soon\">many, many, many</span>"
@@ -71,11 +88,11 @@ if (!count($Leaderboard)) {
 	<table class="layout">
 
 	<tr>
-	<td class="label">Rank</td>
-	<td class="label">Who</td>
-	<td class="label">Most recent <?= $Contest['ContestType'] == 'request_fill' ? 'fill' : 'upload'; ?></td>
-	<td class="label">Most recent time</td>
-	<td class="label"><?= $Contest['ContestType'] == 'request_fill' ? 'Requests Filled' : 'Perfect FLACs'; ?></td>
+	<td class="label" style="text-align:left">Rank</td>
+	<td class="label" style="text-align:left">Who</td>
+	<td class="label" style="text-align:left">Most recent <?= $Contest['ContestType'] == 'request_fill' ? 'fill' : 'upload'; ?></td>
+	<td class="label" style="text-align:left">Most recent time</td>
+	<td class="label" style="text-align:left"><?= $Contest['ContestType'] == 'request_fill' ? 'Requests Filled' : 'Perfect FLACs'; ?></td>
 	</tr>
 <?
 	$rank = 0;
@@ -88,7 +105,7 @@ if (!count($Leaderboard)) {
 				++$rank;
 		}
 		else {
-			if ($score != $prev_score) {
+			if ($prev_score != $score) {
 				++$rank;
 			}
 			$prev_score = $score;
@@ -188,9 +205,7 @@ END_STR
 	}
 }
 ?>
-<!--
-<p>←  <a href="/contest.php">Announcement and rules.</a></p>
--->
 </div>
 
-<? View::show_footer(); ?>
+<?
+View::show_footer();

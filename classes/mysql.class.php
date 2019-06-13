@@ -522,7 +522,7 @@ class DB_MYSQL {
 	// If $Key is set, use the $Key column in the result set as the array key
 	// Otherwise, use an integer
 	function to_array($Key = false, $Type = MYSQLI_BOTH, $Escape = true) {
-		$Return = array();
+		$Return = [];
 		while ($Row = mysqli_fetch_array($this->QueryID, $Type)) {
 			if ($Escape !== false) {
 				$Row = Misc::display_array($Row, $Escape);

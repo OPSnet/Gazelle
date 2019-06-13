@@ -1,7 +1,7 @@
 <?php
 
-View::show_header('Orpheus Euterpe FLAC Challenge');
-$Contest = Contest::get_current_contest();
+View::show_header('Orpheus Uploading Contest');
+$Contest = $ContestMgr->get_current_contest();
 
 if ($Contest !== false and strlen($Contest['Banner'])) {
 ?>
@@ -13,7 +13,7 @@ if ($Contest !== false and strlen($Contest['Banner'])) {
 ?>
 <div class="linkbox">
 	<a href="contest.php?action=leaderboard" class="brackets">Leaderboard</a>
-	<?=(check_perms('users_mod')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
+	<?=(check_perms('admin_manage_contest')) ? '<a href="contest.php?action=admin" class="brackets">Admin</a>' : ''?>
 </div>
 
 <?php
