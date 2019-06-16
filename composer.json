@@ -17,13 +17,14 @@
     }
   },
   "require": {
-    "php": ">=7",
+    "php": ">=7.1",
     "robmorgan/phinx": "^0.10.0",
-    "yupmin/php-chardet": "^1.0",
     "whichbrowser/parser": "^2.0",
-    "orpheusnet/bencode-torrent": "*"
+    "d11wtq/boris": "^1.0",
+    "orpheusnet/bencode-torrent": "^0.11.0",
+    "orpheusnet/logchecker": "^0.8.3"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6|^7"
+    "phpunit/phpunit": "^7.5.12"
   }
 }

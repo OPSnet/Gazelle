@@ -1,4 +1,7 @@
-<?
+<?php
+
+use OrpheusNET\Logchecker\Logchecker;
+
 View::show_header('Logchecker');
 /*
 $DB->query("

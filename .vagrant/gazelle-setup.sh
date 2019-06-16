@@ -53,7 +53,7 @@ wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
 python3 /tmp/get-pip.py
 rm -f /tmp/get-pip.py
 pip3 install -U pip
-pip3 install chardet eac-logchecker
+pip3 install chardet eac-logchecker xld-logchecker
 
 eatmydata apt-get install -y sphinxsearch
 eatmydata apt-get install -y php7.0 php7.0-fpm php7.0-mysql php7.0-cli php7.0-gd php7.0-curl php7.0-mbstring php7.0-xml php7.0-zip php-memcached php-xdebug php-apcu

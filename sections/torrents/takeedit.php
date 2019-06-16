@@ -1,4 +1,7 @@
-<?
+<?php
+
+use OrpheusNET\Logchecker\Logchecker;
+
 //******************************************************************************//
 //--------------- Take edit ----------------------------------------------------//
 // This pages handles the backend of the 'edit torrent' function. It checks		//
