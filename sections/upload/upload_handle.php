@@ -1,4 +1,7 @@
-<?
+<?php
+
+use OrpheusNET\Logchecker\Logchecker;
+
 //******************************************************************************//
 //--------------- Take upload --------------------------------------------------//
 // This pages handles the backend of the torrent upload function. It checks		//

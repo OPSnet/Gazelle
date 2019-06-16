@@ -1,4 +1,6 @@
-<?
+<?php
+
+use OrpheusNET\Logchecker\Logchecker;
 
 enforce_login();
 

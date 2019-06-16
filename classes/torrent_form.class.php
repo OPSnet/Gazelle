@@ -1,4 +1,4 @@
-<?
+<?php
 
 /********************************************************************************
  ************ Torrent form class *************** upload.php and torrents.php ****
@@ -11,6 +11,8 @@
  ** When it is called from the edit page, the forms are shortened quite a bit. **
  **																			**
  ********************************************************************************/
+
+use OrpheusNET\Logchecker\Logchecker;
 
 class TORRENT_FORM {
 	var $UploadForm = '';

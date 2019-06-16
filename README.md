@@ -21,17 +21,10 @@ See the script in `.vagrant/gazelle-setup.sh` to get a gist of what needs to be 
 Jessie. You should be able to modify this to whatever distro you want to run it on.
 
 ## Logchecker
-This repository does not come with the necessary binaries to validate checksums for uploaded logs. To get them, please
-follow the below steps. In all cases, you will need to place the necessary files into the `classes/logchecker/` folder.
-
-### EAC
-Install a copy of [EAC](http://www.exactaudiocopy.de/) on a Windows machine or under Wine. You then need to navigate
-to the installed directory and copy `CheckLog.exe` (renaming it to `eac_logchecker.exe`) and `HelperFunctions.dll` into
-`classes/logchecker/`.
-
-### XLD
-Clone the repository https://github.com/itismadness/xld_sign and build it following the readme. Move the generated
-binary (renaming it to `xld_logchecker`) to `classes/logchecker`.
+To fully utilize the Logchecker, you must install the following depedencies through pip:
+* chardet
+* eac-logchecker
+* xld-logchecker
 
 ## Gazelle Development
 This repository comes pre-setup to be run through [Vagrant](https://www.vagrantup.com/) for ease of development and 

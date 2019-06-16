@@ -1,4 +1,7 @@
-<?
+<?php
+
+use OrpheusNET\Logchecker\Logchecker;
+
 //ini_set('upload_max_filesize',1000000);
 enforce_login();
 
