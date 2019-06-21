@@ -4,7 +4,7 @@ $MusicExtensions = array_fill_keys(
 	array(
 		'ac3', 'accurip', 'azw3', 'chm', 'cue', 'djv', 'djvu', 'doc', 'docx', 'dts', 'epub', 'ffp',
 		'flac', 'gif', 'htm', 'html', 'jpeg', 'jpg', 'lit', 'log', 'm3u', 'm3u8', 'm4a', 'm4b',
-		'md5', 'mobi', 'mp3', 'mp4', 'nfo', 'pdf', 'pls', 'png', 'rtf', 'sfv', 'txt'),
+		'md5', 'mobi', 'mp3', 'mp4', 'nfo', 'pdf', 'pls', 'png', 'rtf', 'sfv', 'txt', 'toc'),
 	true);
 $BadExtensions = array_fill_keys(array(
        'torrent'
