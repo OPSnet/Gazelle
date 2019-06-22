@@ -480,7 +480,7 @@ foreach ($TorrentList as $Torrent) {
 	// similar to Torrents::torrent_info()
 	if ($Format) { $details[] = display_str($Format); }
 	if ($Encoding) { $details[] = display_str($Encoding); }
-	if ($HasLog) { $details[] = 'Log' . ($HasLogDB) ? ' ('.(int)$LogScore.'%)' : ''; }
+	if ($HasLog) { $details[] = 'Log' . ($HasLogDB ? ' ('.(int)$LogScore.'%)' : ''); }
 	if ($HasCue) { $details[] ='Cue'; }
 	if ($Scene) { $details[] = 'Scene'; }
 	if (!count($details)) {
