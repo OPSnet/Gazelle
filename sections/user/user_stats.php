@@ -1,5 +1,5 @@
 <?php
-if (isset($_GET['userid']) && check_perms('users_view_invites')) {
+if (isset($_GET['userid']) && check_perms('users_mod')) {
 	if (!is_number($_GET['userid'])) {
 		error(403);
 	}
@@ -104,6 +104,10 @@ if (check_perms('admin_reports')) {
 if (check_perms('users_mod')) {
 ?>
 		<a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
+<?
+}
+if (check_perms('users_mod') || ($LoggedUser['ID'] == $UserID && check_perms('site_user_stats'))) {
+?>
 		<a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?
 }

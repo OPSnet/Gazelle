@@ -43,6 +43,7 @@ $PermissionsArray = array(
 	'site_database_specifics' => 'Can view database specifics',
 	'site_proxy_images' => 'Image proxy & anti-canary.',
 	'site_search_many' => 'Can go past low limit of search results.',
+	'site_user_stats' => 'Can view own user stat graphs.',
 	'users_edit_usernames' => 'Can edit usernames.',
 	'users_edit_ratio' => 'Can edit anyone\'s upload/download amounts.',
 	'users_edit_own_ratio' => 'Can edit own upload/download amounts.',
@@ -163,6 +164,7 @@ function permissions_form() {
 					display_perm('site_search_many', 'Can go past low limit of search results.');
 					display_perm('site_collages_recover', 'Can recover \'deleted\' collages.');
 					display_perm('site_tag_aliases_read', 'Can view the list of tag aliases.');
+					display_perm('site_user_stats', 'Can view own user stat graphs.');
 ?>
 				</td>
 			</tr>
