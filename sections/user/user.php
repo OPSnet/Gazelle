@@ -265,6 +265,10 @@ if (check_perms('admin_reports')) {
 if (check_perms('users_mod')) {
 ?>
 		<a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
+<?
+}
+if (check_perms('users_mod') || ($LoggedUser['ID'] == $UserID && check_perms('site_user_stats'))) {
+?>
 		<a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?
 }
