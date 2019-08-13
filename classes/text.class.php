@@ -4,7 +4,7 @@ class Text {
 	 * Array of valid tags; tag => max number of attributes
 	 * @var array $ValidTags
 	 */
-	private static $ValidTags = array('b'=>0, 'u'=>0, 'i'=>0, 's'=>0, '*'=>0, '#'=>0, 'artist'=>0, 'user'=>0, 'n'=>0, 'inlineurl'=>0, 'inlinesize'=>1, 'headline'=>1, 'align'=>1, 'color'=>1, 'colour'=>1, 'size'=>1, 'url'=>1, 'img'=>1, 'quote'=>1, 'pre'=>1, 'code'=>1, 'tex'=>0, 'hide'=>1, 'spoiler' => 1, 'plain'=>0, 'important'=>0, 'torrent'=>0, 'rule'=>0, 'mature'=>1,
+	private static $ValidTags = array('b'=>0, 'u'=>0, 'i'=>0, 's'=>0, '*'=>1, '#'=>1, '**'=>1, '##'=>1, '***'=>1, '###'=>1, 'artist'=>0, 'user'=>0, 'n'=>0, 'inlineurl'=>0, 'inlinesize'=>1, 'headline'=>1, 'align'=>1, 'color'=>1, 'colour'=>1, 'size'=>1, 'url'=>1, 'img'=>1, 'quote'=>1, 'pre'=>1, 'code'=>1, 'tex'=>0, 'hide'=>1, 'spoiler' => 1, 'plain'=>0, 'important'=>0, 'torrent'=>0, 'rule'=>0, 'mature'=>1, 'box'=>0
 	);
 
 	/**
@@ -137,7 +137,7 @@ class Text {
 	 * @param int $Min See {@link parse_toc}
 	 * @return string
 	 */
-	public static function full_format($Str, $OutputTOC = true, $Min = 3) {
+	public static function full_format($Str, $OutputTOC = true, $Min = 3, $Rules = false) {
 		global $Debug;
 		$Debug->set_flag('BBCode start');
 		$Str = display_str($Str);
@@ -162,7 +162,7 @@ class Text {
 			$Str = preg_replace('/(\={2})([^=].*)\1/i', '[inlinesize=7]$2[/inlinesize]', $Str);
 		}
 
-		$HTML = nl2br(self::to_html(self::parse($Str)));
+		$HTML = nl2br(self::to_html(self::parse($Str), $Rules));
 
 		if (self::$TOC && $OutputTOC) {
 			$HTML = self::parse_toc($Min) . $HTML;
@@ -276,12 +276,13 @@ class Text {
 	7) Increment array pointer, start again (past the end of the [/close] tag)
 
 	*/
-	private static function parse($Str) {
+	public static function parse($Str, $ListPrefix = '') {
 		$i = 0; // Pointer to keep track of where we are in $Str
 		$Len = strlen($Str);
 		$Array = array();
 		$ArrayPos = 0;
 		$StrLC = strtolower($Str);
+		$ListId = 1;
 
 		while ($i < $Len) {
 			$Block = '';
@@ -341,7 +342,6 @@ class Text {
 			// [*], [img=...], and http:// follow different formats
 			// Thus, we have to handle these before we handle the majority of tags
 
-
 			//5a) Different for different types of tag. Some tags don't close, others are weird like [*]
 			if ($TagName == 'img' && !empty($Tag[3][0])) { //[img=...]
 				$Block = ''; // Nothing inside this tag
@@ -368,12 +368,12 @@ class Text {
 				$i += $CloseTag; // 5d) Move the pointer past the end of the [/close] tag.
 			} elseif ($WikiLink == true || $TagName == 'n') {
 				// Don't need to do anything - empty tag with no closing
-			} elseif ($TagName === '*' || $TagName === '#') {
+			} elseif ($TagName[0] === '*' || $TagName[0] === '#') {
 				// We're in a list. Find where it ends
 				$NewLine = $i;
 				do { // Look for \n[*]
 					$NewLine = strpos($Str, "\n", $NewLine + 1);
-				} while ($NewLine !== false && substr($Str, $NewLine + 1, 3) == "[$TagName]");
+				} while ($NewLine !== false && substr($Str, $NewLine + 1, 1 + strlen($TagName)) == "[$TagName");
 
 				$CloseTag = $NewLine;
 				if ($CloseTag === false) { // block finishes with list
@@ -441,6 +441,9 @@ class Text {
 				case 'quote':
 					$Array[$ArrayPos] = array('Type'=>'quote', 'Attr'=>self::parse($Attrib), 'Val'=>self::parse($Block));
 					break;
+				case 'box':
+					$Array[$ArrayPos] = ['Type'=>'box', 'Val'=>self::parse($Block)];
+					break;
 				case 'img':
 				case 'image':
 					if (empty($Block)) {
@@ -503,13 +506,25 @@ class Text {
 					break;
 				case '#':
 				case '*':
+				case '##':
+				case '**':
+				case '###':
+				case '***':
+						$CurrentId = 1;
 						$Array[$ArrayPos] = array('Type'=>'list');
 						$Array[$ArrayPos]['Val'] = explode("[$TagName]", $Block);
-						$Array[$ArrayPos]['ListType'] = $TagName === '*' ? 'ul' : 'ol';
+						$Array[$ArrayPos]['ListType'] = $TagName[0] === '*' ? 'ul' : 'ol';
 						$Array[$ArrayPos]['Tag'] = $TagName;
-						foreach ($Array[$ArrayPos]['Val'] as $Key=>$Val) {
-							$Array[$ArrayPos]['Val'][$Key] = self::parse(trim($Val));
+						$ChildPrefix = $ListPrefix === '' ? $ListId : $ListPrefix;
+						if ($Attrib !== '') {
+							$ChildPrefix = $Attrib;
 						}
+						foreach ($Array[$ArrayPos]['Val'] as $Key=>$Val) {
+							$Id = $ChildPrefix.'.'.($CurrentId++);
+							$Array[$ArrayPos]['Val'][$Key] = self::parse(trim($Val), $Id);
+							$Array[$ArrayPos]['Val'][$Key]['Id'] = $Id;
+						}
+						$ListId++;
 					break;
 				case 'n':
 					$ArrayPos--;
@@ -537,9 +552,14 @@ class Text {
 	 * Generates a navigation list for TOC
 	 * @param int $Min Minimum number of headlines required for a TOC list
 	 */
-	public static function parse_toc ($Min = 3) {
+	public static function parse_toc ($Min = 3, $RulesTOC = true) {
 		if (count(self::$Headlines) > $Min) {
-			$list = '<ol class="navigation_list">';
+			$tag = $RulesTOC ? 'ul' : 'ol';
+			if ($RulesTOC) {
+				$list = "<$tag>";
+			} else {
+				$list = "<$tag class=\"navigation_list\">";
+			}
 			$i = 0;
 			$level = 0;
 			$off = 0;
@@ -549,14 +569,14 @@ class Text {
 				if ($i === 0 && $n > 1) {
 					$off = $n - $level;
 				}
-				self::headline_level($n, $level, $list, $i, $off);
+				self::headline_level($n, $level, $list, $i, $off, $tag);
 				$list .= sprintf('<li><a href="#%2$s">%1$s</a>', $t[1], $t[2]);
 				$level = $t[0];
 				$off = 0;
 				$i++;
 			}
 
-			$list .= str_repeat('</li></ol>', $level);
+			$list .= str_repeat("</li></$tag>", $level);
 			$list .= "\n\n";
 			return $list;
 		}
@@ -580,24 +600,24 @@ class Text {
 	 * @param int $i Iterator digit
 	 * @param int $Offset If the list doesn't start at level 1
 	 */
-	private static function headline_level (&$ItemLevel, &$Level, &$List, $i, &$Offset) {
+	private static function headline_level (&$ItemLevel, &$Level, &$List, $i, &$Offset, $Tag) {
 		if ($ItemLevel < $Level) {
 			$diff = $Level - $ItemLevel;
-			$List .= '</li>' . str_repeat('</ol></li>', $diff);
+			$List .= '</li>' . str_repeat("</$Tag></li>", $diff);
 		} elseif ($ItemLevel > $Level) {
 			$diff = $ItemLevel - $Level;
-			if ($Offset > 0) $List .= str_repeat('<li><ol>', $Offset - 2);
+			if ($Offset > 0) $List .= str_repeat("<li><$Tag>", $Offset - 2);
 
 			if ($ItemLevel > 1) {
 				$List .= $i === 0 ? '<li>' : '';
-				$List .= "\n<ol>\n";
+				$List .= "\n<$Tag>\n";
 			}
 		} else {
 			$List .= $i > 0 ? '</li>' : '<li>';
 		}
 	}
 
-	private static function to_html ($Array) {
+	private static function to_html ($Array, $Rules) {
 		global $SSL;
 		self::$Levels++;
 		/*
@@ -617,7 +637,15 @@ class Text {
 			return $Block['Val']; // Hax prevention, breaks upon exceeding nests.
 		}
 		$Str = '';
-		foreach ($Array as $Block) {
+
+		if (array_key_exists('Id', $Array) && is_string($Array[0]) && count($Array) == 2) {
+			return self::smileys($Array[0]);
+		}
+
+		foreach ($Array as $Key=>$Block) {
+			if ($Key === 'Id') {
+				continue;
+			}
 			if (is_string($Block)) {
 				$Str .= self::smileys($Block);
 				continue;
@@ -625,19 +653,19 @@ class Text {
 			if (self::$Levels < self::$MaximumNests) {
 			switch ($Block['Type']) {
 				case 'b':
-					$Str .= '<strong>'.self::to_html($Block['Val']).'</strong>';
+					$Str .= '<strong>'.self::to_html($Block['Val'], $Rules).'</strong>';
 					break;
 				case 'u':
-					$Str .= '<span style="text-decoration: underline;">'.self::to_html($Block['Val']).'</span>';
+					$Str .= '<span style="text-decoration: underline;">'.self::to_html($Block['Val'], $Rules).'</span>';
 					break;
 				case 'i':
-					$Str .= '<span style="font-style: italic;">'.self::to_html($Block['Val'])."</span>";
+					$Str .= '<span style="font-style: italic;">'.self::to_html($Block['Val'], $Rules)."</span>";
 					break;
 				case 's':
-					$Str .= '<span style="text-decoration: line-through;">'.self::to_html($Block['Val']).'</span>';
+					$Str .= '<span style="text-decoration: line-through;">'.self::to_html($Block['Val'], $Rules).'</span>';
 					break;
 				case 'important':
-					$Str .= '<strong class="important_text">'.self::to_html($Block['Val']).'</strong>';
+					$Str .= '<strong class="important_text">'.self::to_html($Block['Val'], $Rules).'</strong>';
 					break;
 				case 'user':
 					$Str .= '<a href="user.php?action=search&amp;search='.urlencode($Block['Val']).'">'.$Block['Val'].'</a>';
@@ -647,7 +675,7 @@ class Text {
 					break;
 				case 'rule':
 					$Rule = trim(strtolower($Block['Val']));
-					if ($Rule[0] != 'r' && $Rule[0] != 'h') {
+				if ($Rule[0] != 'r' && $Rule[0] != 'h') {
 						$Rule = 'r'.$Rule;
 					}
 					$Str .= '<a href="rules.php?p=upload#'.urlencode(Format::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
@@ -688,8 +716,7 @@ class Text {
 				case 'list':
 					$Str .= "<$Block[ListType] class=\"postlist\">";
 					foreach ($Block['Val'] as $Line) {
-
-						$Str .= '<li>'.self::to_html($Line).'</li>';
+						$Str .= '<li'.($Rules ? ' id="r'.$Line['Id'].'"' : '').'>'.self::to_html($Line, $Rules).'</li>';
 					}
 					$Str .= '</'.$Block['ListType'].'>';
 					break;
@@ -698,16 +725,16 @@ class Text {
 					if (!in_array($Block['Attr'], $ValidAttribs)) {
 						$Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val']).'[/align]';
 					} else {
-						$Str .= '<div style="text-align: '.$Block['Attr'].';">'.self::to_html($Block['Val']).'</div>';
+						$Str .= '<div style="text-align: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules).'</div>';
 					}
 					break;
 				case 'color':
 				case 'colour':
 					$ValidAttribs = array('aqua', 'black', 'blue', 'fuchsia', 'green', 'grey', 'lime', 'maroon', 'navy', 'olive', 'purple', 'red', 'silver', 'teal', 'white', 'yellow');
 					if (!in_array($Block['Attr'], $ValidAttribs) && !preg_match('/^#[0-9a-f]{6}$/', $Block['Attr'])) {
-						$Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val']).'[/color]';
+						$Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules).'[/color]';
 					} else {
-						$Str .= '<span style="color: '.$Block['Attr'].';">'.self::to_html($Block['Val']).'</span>';
+						$Str .= '<span style="color: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules).'</span>';
 					}
 					break;
 				case 'headline':
@@ -729,9 +756,9 @@ class Text {
 				case 'size':
 					$ValidAttribs = array('1', '2', '3', '4', '5', '6', '7', '8', '9', '10');
 					if (!in_array($Block['Attr'], $ValidAttribs)) {
-						$Str .= '[size='.$Block['Attr'].']'.self::to_html($Block['Val']).'[/size]';
+						$Str .= '[size='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules).'[/size]';
 					} else {
-						$Str .= '<span class="size'.$Block['Attr'].'">'.self::to_html($Block['Val']).'</span>';
+						$Str .= '<span class="size'.$Block['Attr'].'">'.self::to_html($Block['Val'], $Rules).'</span>';
 					}
 					break;
 				case 'quote':
@@ -742,7 +769,7 @@ class Text {
 						$Str .= '<blockquote class="hidden spoiler">';
 					}
 					if (!empty($Block['Attr'])) {
-						$Exploded = explode('|', self::to_html($Block['Attr']));
+						$Exploded = explode('|', self::to_html($Block['Attr'], $Rules));
 						if (isset($Exploded[1]) && (is_numeric($Exploded[1]) || (in_array($Exploded[1][0], array('a', 't', 'c', 'r')) && is_numeric(substr($Exploded[1], 1))))) {
 							// the part after | is either a number or starts with a, t, c or r, followed by a number (forum post, artist comment, torrent comment, collage comment or request comment, respectively)
 							$PostID = trim($Exploded[1]);
@@ -752,22 +779,25 @@ class Text {
 							$Str .= '<strong class="quoteheader">'.$Exploded[0].'</strong> wrote: ';
 						}
 					}
-					$Str .= '<blockquote>'.self::to_html($Block['Val']).'</blockquote>';
+					$Str .= '<blockquote>'.self::to_html($Block['Val'], $Rules).'</blockquote>';
 					if (self::$InQuotes == self::$NestsBeforeHide) { //Close quote the deeply nested quote [hide].
 						$Str .= '</blockquote><br />'; // Ensure new line after quote train hiding
 					}
 					self::$NoImg--;
 					self::$InQuotes--;
 					break;
+				case 'box':
+					$Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">'.self::to_html($Block['Val'], $Rules).'</div>';
+					break;
 				case 'hide':
 					$Str .= '<strong>'.(($Block['Attr']) ? $Block['Attr'] : 'Hidden text').'</strong>: <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
-					$Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val']).'</blockquote>';
+					$Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
 					break;
 				case 'mature':
 					if (G::$LoggedUser['EnableMatureContent']) {
 						if (!empty($Block['Attr'])) {
 							$Str .= '<strong class="mature" style="font-size: 1.2em;">Mature content:</strong><strong> ' . $Block['Attr'] . '</strong><br /> <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
-							$Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val']).'</blockquote>';
+							$Str .= '<blockquote class="hidden spoiler">'.self::to_html($Block['Val'], $Rules).'</blockquote>';
 						}
 						else {
 							$Str .= '<strong>Use of the [mature] tag requires a description.</strong> The correct format is as follows: <strong>[mature=description] ...content... [/mature]</strong>, where "description" is a mandatory description of the post. Misleading descriptions will be penalized. For further information on our mature content policies, please refer to this <a href="wiki.php?action=article&amp;id=1063">wiki</a>.';
@@ -813,7 +843,7 @@ class Text {
 						$Block['Val'] = $Block['Attr'];
 						$NoName = true; // If there isn't a Val for this
 					} else {
-						$Block['Val'] = self::to_html($Block['Val']);
+						$Block['Val'] = self::to_html($Block['Val'], $Rules);
 						$NoName = false;
 					}
 
@@ -834,7 +864,7 @@ class Text {
 					if (!self::valid_url($Block['Attr'], '', true)) {
 						$Array = self::parse($Block['Attr']);
 						$Block['Attr'] = $Array;
-						$Str .= self::to_html($Block['Attr']);
+						$Str .= self::to_html($Block['Attr'], $Rules);
 					}
 
 					else {
