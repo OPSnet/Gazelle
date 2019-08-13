@@ -634,7 +634,7 @@ class Text {
 		 * (Larger than vs. smaller than.)
 		 */
 		if (self::$Levels > self::$MaximumNests) {
-			return $Block['Val']; // Hax prevention, breaks upon exceeding nests.
+			return $Array['Val']; // Hax prevention, breaks upon exceeding nests.
 		}
 		$Str = '';
 
@@ -648,6 +648,7 @@ class Text {
 			}
 			if (is_string($Block)) {
 				$Str .= self::smileys($Block);
+				self::$Levels--;
 				continue;
 			}
 			if (self::$Levels < self::$MaximumNests) {
