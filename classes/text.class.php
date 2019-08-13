@@ -552,7 +552,7 @@ class Text {
 	 * Generates a navigation list for TOC
 	 * @param int $Min Minimum number of headlines required for a TOC list
 	 */
-	public static function parse_toc ($Min = 3, $RulesTOC = true) {
+	public static function parse_toc ($Min = 3, $RulesTOC = false) {
 		if (count(self::$Headlines) > $Min) {
 			$tag = $RulesTOC ? 'ul' : 'ol';
 			if ($RulesTOC) {
@@ -738,7 +738,7 @@ class Text {
 					}
 					break;
 				case 'headline':
-					$text = self::to_html($Block['Val']);
+					$text = self::to_html($Block['Val'], $Rules);
 					$raw = self::raw_text($Block['Val']);
 					if (!in_array($Block['Attr'], self::$HeadlineLevels)) {
 						$Str .= sprintf('%1$s%2$s%1$s', str_repeat('=', $Block['Attr'] + 1), $text);
