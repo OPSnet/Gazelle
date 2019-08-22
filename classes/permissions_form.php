@@ -108,6 +108,7 @@ $PermissionsArray = array(
 	'admin_login_watch' => 'Can manage login watch.',
 	'admin_manage_wiki' => 'Can manage wiki access.',
 	'admin_update_geoip' => 'Can update geoIP data.',
+	'admin_staffpm_stats' => 'Can view Staff PM stats.',
 	'site_collages_recover' => 'Can recover \'deleted\' collages.',
 	'torrents_add_artist' => 'Can add artists to any group.',
 	'edit_unknowns' => 'Can edit unknown release information.',
@@ -278,6 +279,7 @@ function permissions_form() {
 					display_perm('admin_login_watch', 'Can manage login watch.');
 					display_perm('admin_manage_wiki', 'Can manage wiki access.');
 					display_perm('admin_update_geoip', 'Can update geoIP data.');
+					display_perm('admin_staffpm_stats', 'Can view Staff PM stats.');
 ?>
 				</td>
 			</tr>

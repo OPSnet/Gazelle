@@ -109,9 +109,7 @@ function get_staff() {
 function get_support() {
 	return array(
 		get_fls(),
-		get_staff(),
-		'fls' => get_fls(),
-		'staff' => get_staff()
+		get_staff()
 	);
 }
 

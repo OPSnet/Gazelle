@@ -102,8 +102,9 @@ $Row = 'a';
 			<a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
 			<a href="staffpm.php?view=open" class="brackets">View unresolved</a>
 			<a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
-<? 	if ($IsStaff) { ?>
-			<a href="staffpm.php?action=scoreboard" class="brackets">View scoreboard</a>
+<?	if (check_perms('admin_staffpm_stats')) { ?>
+			<a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+			<a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
 <?	}
 	
 	if ($IsFLS && !$IsStaff) { ?>
