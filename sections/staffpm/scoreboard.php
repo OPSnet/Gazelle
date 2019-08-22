@@ -65,7 +65,7 @@ $BaseSQL = sprintf("SELECT
 					LIMIT 50", $EXTRA, $IN,
 					implode(', ', array_fill(0, count($SupportStaff), '?')));
 
-$DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(3600 * 24), \Gazelle\Util\Time::timeOffset(3600 * 24), $LoggedUser['Class'], ...$SupportStaff);
+$DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(-3600 * 24), \Gazelle\Util\Time::timeOffset(-3600 * 24), $LoggedUser['Class'], ...$SupportStaff);
 $Results = $DB->to_array();
 
 ?>
@@ -89,7 +89,7 @@ $Results = $DB->to_array();
 			<br /><br />
 <?php
 
-$DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(3600 * 24 * 7), \Gazelle\Util\Time::timeOffset(3600 * 24 * 7), $LoggedUser['Class'], ...$SupportStaff);
+$DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(-3600 * 24 * 7), \Gazelle\Util\Time::timeOffset(-3600 * 24 * 7), $LoggedUser['Class'], ...$SupportStaff);
 $Results = $DB->to_array();
 
 ?>
@@ -114,7 +114,7 @@ $Results = $DB->to_array();
 		<td>
 <?php
 
-$DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(3600 * 24 * 30), \Gazelle\Util\Time::timeOffset(3600 * 24 * 30), $LoggedUser['Class'], ...$SupportStaff);
+$DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(-3600 * 24 * 30), \Gazelle\Util\Time::timeOffset(-3600 * 24 * 30), $LoggedUser['Class'], ...$SupportStaff);
 $Results = $DB->to_array();
 
 ?>
