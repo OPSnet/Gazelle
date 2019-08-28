@@ -824,23 +824,31 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
      * @param array $TorrentIDs An array of torrent IDs to iterate over
      * @param int $FreeNeutral 0 = normal, 1 = fl, 2 = nl
      * @param int $FreeLeechType 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
+     * @param bool $AllFL true = all torrents are made FL, false = only lossless torrents are made FL
      */
-    public static function freeleech_torrents($TorrentIDs, $FreeNeutral = 1, $FreeLeechType = 0) {
+    public static function freeleech_torrents($TorrentIDs, $FreeNeutral = 1, $FreeLeechType = 0, $AllFL = false) {
         if (!is_array($TorrentIDs)) {
             $TorrentIDs = [$TorrentIDs];
         }
 
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $FL_condition = $AllFL ? '' : "AND Encoding = 'Lossless'";
+        $placeholders = implode(',', array_fill(0, count($TorrentIDs), '?'));
+        G::$DB->prepared_query("
             UPDATE torrents
-            SET FreeTorrent = '$FreeNeutral', FreeLeechType = '$FreeLeechType'
-            WHERE ID IN (".implode(', ', $TorrentIDs).')');
+            SET FreeTorrent = ?, FreeLeechType = ?
+            WHERE ID IN ($placeholders)
+                $FL_condition
+            ", $FreeNeutral, $FreeLeechType, ...$TorrentIDs
+        );
 
-        G::$DB->query('
+        G::$DB->prepared_query("
             SELECT ID, GroupID, info_hash
             FROM torrents
-            WHERE ID IN ('.implode(', ', $TorrentIDs).')
-            ORDER BY GroupID ASC');
+            WHERE ID IN ($placeholders)
+            ORDER BY GroupID ASC
+            ", ...$TorrentIDs
+        );
         $Torrents = G::$DB->to_array(false, MYSQLI_NUM, false);
         $GroupIDs = G::$DB->collect('GroupID');
         G::$DB->set_query_id($QueryID);

@@ -3,7 +3,7 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-View::show_header('Multiple freeleech');
+View::show_header('Multiple Freeleech');
 
 if (isset($_POST['torrents'])) {
     $GroupIDs = [];
@@ -19,13 +19,12 @@ if (isset($_POST['torrents'])) {
             $Data = explode("id=", $Element);
             if (!empty($Data[1])) {
                 $CollageID = (int) $Data[1];
-                $DB->query("
+                $DB->prepared_query('
                     SELECT GroupID
                     FROM collages_torrents
-                    WHERE CollageID = '$CollageID'");
-                while (list($GroupID) = $DB->next_record()) {
-                    $GroupIDs[] = (int) $GroupID;
-                }
+                    WHERE CollageID = ?
+                    ', $CollageID);
+                $GroupIDs = array_merge($GroupIDs, $DB->collect('GroupID'));
             }
         }
     }
@@ -40,10 +39,13 @@ if (isset($_POST['torrents'])) {
             $Err = 'Invalid freeleech type or freeleech reason';
         } else {
             // Get the torrent IDs
-            $DB->query("
+            $placeholders = implode(',', array_fill(0, count($GroupIDs), '?'));
+            $DB->prepared_query("
                 SELECT ID
                 FROM torrents
-                WHERE GroupID IN (".implode(', ', $GroupIDs).")");
+                WHERE GroupID IN ($placeholders)
+                ", ...$GroupIDs
+            );
             $TorrentIDs = $DB->collect('ID');
 
             if (sizeof($TorrentIDs) == 0) {
@@ -57,13 +59,14 @@ if (isset($_POST['torrents'])) {
                     if (empty($Size) || !in_array($Units, ['k', 'm', 'g'])) {
                         $Err = 'Invalid size or units';
                     } else {
-                        $Bytes = Format::get_bytes($Size . $Units);
-
-                        $DB->query("
-                            SELECT ID
-                            FROM torrents
-                            WHERE ID IN (".implode(', ', $TorrentIDs).")
-                              AND Size > '$Bytes'");
+                        $placeholders = implode(',', array_fill(0, count($TorrentIDs), '?'));
+                        $DB->prepared_query("
+                             SELECT ID
+                             FROM torrents
+                             WHERE Size > ?
+                                  AND ID IN ($placeholders)
+                            ", Format::get_bytes($Size . $Units), ...$TorrentIDs
+                        );
                         $LargeTorrents = $DB->collect('ID');
                         $TorrentIDs = array_diff($TorrentIDs, $LargeTorrents);
                     }
@@ -101,7 +104,7 @@ if (isset($_POST['torrents'])) {
                 <option value="0" <?=$_POST['freeleechtype'] == '0' ? 'selected' : ''?>>Normal</option>
             </select>
             &nbsp;for reason&nbsp;<select name="freeleechreason">
-<?php      $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
+<?php   $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>" <?=$_POST['freeleechreason'] == $Key ? 'selected' : ''?>><?=$FLType?></option>
 <?php   } ?>
