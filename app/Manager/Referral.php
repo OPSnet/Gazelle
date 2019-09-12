@@ -167,27 +167,49 @@ class Referral {
 		$this->cache->delete_value(self::CACHE_ACCOUNTS);
 	}
 
-	public function getReferredUsers($startDate, $endDate, $limit, $view) {
+	public function getReferredUsers($startDate, $endDate, $site, $username, $invite, $limit, $view) {
 		if ($startDate == NULL) {
 			$startDate = \Gazelle\Util\Time::timeOffset(-(3600 * 24 * 30), true);
 		}
+
 		if ($endDate == NULL) {
 			$endDate = \Gazelle\Util\Time::sqlTime();
 		}
-		$Filter = "";
+
+		$Filter = ['ru.Created BETWEEN ? AND ?'];
+		$Params = [$startDate, $endDate];
+
 		if ($view === 'pending') {
-			$Filter = "AND Active = 0";
+			$Filter[] = 'ru.Active = 0';
 		} else if ($view === 'processed') {
-			$Filter = "AND Active = 1";
+			$Filter[] = 'ru.Active = 1';
 		}
 
+		if ($site != NULL) {
+			$Filter[] = 'ru.Site LIKE ?';
+			$Params[] = $site;
+		}
+
+		if ($username != NULL) {
+			$Filter[] = '(ru.Username LIKE ? OR um.Username LIKE ?)';
+			$Params[] = $username;
+			$Params[] = $username;
+		}
+
+		if ($invite != NULL) {
+			$Filter[] = 'ru.InviteKey LIKE ?';
+			$Params[] = $invite;
+		}
+
+		$Filter = implode(' AND ', $Filter);
+
 		$qId = $this->db->prepared_query("
-			SELECT SQL_CALC_FOUND_ROWS ID, UserID, Site, Username, Created, Joined, IP, Active, InviteKey
-			FROM referral_users
-			WHERE Created BETWEEN ? AND ?
-			$Filter
-			ORDER BY Created DESC
-			LIMIT $limit", $startDate, $endDate);
+			SELECT SQL_CALC_FOUND_ROWS ru.ID, ru.UserID, ru.Site, ru.Username, ru.Created, ru.Joined, ru.IP, ru.Active, ru.InviteKey
+			FROM referral_users ru
+			LEFT JOIN users_main um ON um.ID = ru.UserID
+			WHERE $Filter
+			ORDER BY ru.Created DESC
+			LIMIT $limit", ...$Params);
 		$this->db->prepared_query("SELECT FOUND_ROWS()");
 		list($Results) = $this->db->next_record();
 		$this->db->set_query_id($qId);
@@ -322,15 +344,13 @@ class Referral {
 		$doc = new \DOMDocument();
 		libxml_use_internal_errors(true);
 		@$doc->loadHTML($result["response"]);
-		foreach (libxml_get_errors() as $error) {
-			displayXmlError($error, explode("\n", $result["response"]));
-		}
 		$xpath = new \DOMXPath($doc);
 		$token = $xpath->evaluate("string(//input[@name='token']/@value)");
 
 		$result = $this->proxy->fetch($url, array("username" => $acc["User"],
 			"password" => $acc["Password"], "keeploggedin" => "1",
-			"token" => $token, "cinfo" => "1024|768|24|0"), $result["cookies"], true);
+			"token" => $token, "cinfo" => "1024|768|24|0",
+			"iplocked" => "1"), $result["cookies"], true);
 
 		if ($result["status"] == 200) {
 			$acc["Cookie"] = $result["cookies"];

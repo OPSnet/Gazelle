@@ -19,6 +19,9 @@ list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
 
 $StartDate = isset($_GET['start_date']) ? $_GET['start_date'] : NULL;
 $EndDate = isset($_GET['start_date']) ? $_GET['end_date'] : NULL;
+$Site = (isset($_GET['site']) && strlen($_GET['site'])) ? $_GET['site'] : NULL;
+$Username = (isset($_GET['username']) && strlen($_GET['username'])) ? $_GET['username'] : NULL;
+$Invite = (isset($_GET['invite']) && strlen($_GET['invite'])) ? $_GET['invite'] : NULL;
 
 if ($StartDate != NULL) {
 	list($Y, $M, $D) = explode('-', $StartDate);
@@ -36,7 +39,7 @@ if ($EndDate != NULL) {
 
 $View = isset($_GET['view']) ? $_GET['view'] : 'all';
 
-$ReferredUsers = $ReferralManager->getReferredUsers($StartDate, $EndDate, $Limit, $View);
+$ReferredUsers = $ReferralManager->getReferredUsers($StartDate, $EndDate, $Site, $Username, $Invite, $Limit, $View);
 
 View::show_header('Referred Users');
 
@@ -63,6 +66,18 @@ View::show_header('Referred Users');
 				<tr>
 					<td class="label"><label for="end_date">End Date</label></td>
 					<td><input type="text" name="end_date" size="10" value="<?=display_str($EndDate)?>" placeholder="YYYY-MM-DD" /></td>
+				</tr>
+				<tr>
+					<td class="label"><label for="site">Site</label></td>
+					<td><input type="text" name="site" size="10" value="<?=display_str($Site)?>" /></td>
+				</tr>
+				<tr>
+					<td class="label"><label for="username">Username</label></td>
+					<td><input type="text" name="username" size="10" value="<?=display_str($Username)?>" /></td>
+				</tr>
+				<tr>
+					<td class="label"><label for="invite">Invite</label></td>
+					<td><input type="text" name="invite" size="10" value="<?=display_str($Invite)?>" /></td>
 				</tr>
 			</table>
 			<div class="center">

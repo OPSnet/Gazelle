@@ -17,6 +17,7 @@ if (isset($_POST['url'])) {
 
 	if (isset($_POST['account'])) {
 		$Account = $ReferralManager->getFullAccount($_POST['account']);
+		$ReferralManager->loginAccount($Account);
 		$Cookie = $Account['Cookie'];
 	} else {
 		$Cookie = $_POST['cookie'];
