@@ -473,7 +473,8 @@ if ($NumResults < ($Page - 1) * TORRENTS_PER_PAGE + 1) {
 <div class="linkbox">Go to page <?=$Pages?></div>
 </div>
 <?
-View::show_footer();die();
+View::show_footer();
+die();
 }
 
 // List of pages
@@ -518,6 +519,7 @@ foreach ($Results as $Key => $GroupID) {
 	if (empty($GroupInfo['Torrents'])) {
 		continue;
 	}
+
 	$CategoryID = $GroupInfo['CategoryID'];
 	$GroupYear = $GroupInfo['Year'];
 	$ExtendedArtists = $GroupInfo['ExtendedArtists'];

@@ -217,6 +217,7 @@ $Index++;
 if ($Categories[$GroupCategoryID - 1] == 'Music') {
 	$ArtistManager = new \Gazelle\Artist(G::$DB, G::$Cache);
 	$ShownWith = false;
+	$title = '';
 	if (!empty($Artists[6]) && !empty($Artists[1])) {
 		$title = 'Artists:';
 	} elseif (!empty($Artists[4]) && !empty($Artists[1])) {
@@ -476,32 +477,7 @@ foreach ($TorrentList as $Torrent) {
 	$FileTable .= '
 	</table>';
 
-	$details = [];
-	// similar to Torrents::torrent_info()
-	if ($Format) { $details[] = display_str($Format); }
-	if ($Encoding) { $details[] = display_str($Encoding); }
-	if ($HasLog) { $details[] = 'Log' . ($HasLogDB ? ' ('.(int)$LogScore.'%)' : ''); }
-	if ($HasCue) { $details[] ='Cue'; }
-	if ($Scene) { $details[] = 'Scene'; }
-	if (!count($details)) {
-		$details[] =  $GroupName;
-	}
-	if ($IsSnatched) { $details[] = Format::torrent_label('Snatched!'); }
-	if ($FreeTorrent == '1') { $details[] = Format::torrent_label('Freeleech!'); }
-	if ($FreeTorrent == '2') { $details[] = Format::torrent_label('Neutral Leech!'); }
-	if ($PersonalFL) { $details[] = Format::torrent_label('Personal Freeleech!'); }
-	if ($Reported) { $details[] = Format::torrent_label('Reported'); }
-
-	if ($HasLog && $HasLogDB && $LogChecksum !== '1') { $details[] = Format::torrent_label('Bad/Missing Checksum'); }
-	if (!empty($BadTags)) { $details[] = Format::torrent_label('Bad Tags'); }
-	if (!empty($BadFolders)) { $details[] = Format::torrent_label('Bad Folders'); }
-	if (!empty($MissingLineage)) { $details[] = Format::torrent_label('Missing Lineage'); }
-	if (!empty($CassetteApproved)) { $details[] = Format::torrent_label('Cassette Approved'); }
-	if (!empty($LossymasterApproved)) { $details[] = Format::torrent_label('Lossy Master Approved'); }
-	if (!empty($LossywebApproved)) { $details[] = Format::torrent_label('Lossy WEB Approved'); }
-	if (!empty($BadFiles)) { $details[] = Format::torrent_label('Bad File Names'); }
-
-	$ExtraInfo = implode(' / ', $details); // String that contains information on the torrent (e.g. format and encoding)
+	$ExtraInfo = Torrents::torrent_info($Torrent, false, false, true, $GroupName);
 
 	if ($GroupCategoryID == 1
 		&& ($RemasterTitle != $LastRemasterTitle
@@ -604,9 +580,9 @@ foreach ($TorrentList as $Torrent) {
 <?	} ?>
 					<div class="linkbox">
 						<a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
-<?  if ($HasLog && $HasLogDB) { ?>
+<?	if ($HasLog && $HasLogDB) { ?>
 						<a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log</a>
-<?  } ?>
+<?	} ?>
 <?	if (check_perms('site_view_torrent_snatchlist')) { ?>
 						<a href="#" class="brackets tooltip" onclick="show_downloads('<?=$TorrentID?>', 0); return false;" title="View the list of users that have clicked the &quot;DL&quot; button.">View download list</a>
 						<a href="#" class="brackets tooltip" onclick="show_snatches('<?=$TorrentID?>', 0); return false;" title="View the list of users that have reported a snatch to the tracker.">View snatch list</a>
