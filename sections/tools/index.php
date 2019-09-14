@@ -565,6 +565,12 @@ switch ($_REQUEST['action']) {
 	case 'dbkey':
 		include(SERVER_ROOT.'/sections/tools/managers/db_key.php');
 		break;
+	case 'navigation_alter':
+		include(SERVER_ROOT.'/sections/tools/managers/navigation_alter.php');
+		break;
+	case 'navigation':
+		include(SERVER_ROOT.'/sections/tools/managers/navigation_list.php');
+		break;
 	default:
 		include(SERVER_ROOT.'/sections/tools/tools.php');
 }

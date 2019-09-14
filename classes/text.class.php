@@ -639,6 +639,7 @@ class Text {
 		$Str = '';
 
 		if (array_key_exists('Id', $Array) && is_string($Array[0]) && count($Array) == 2) {
+			self::$Levels--;
 			return self::smileys($Array[0]);
 		}
 

@@ -92,6 +92,7 @@ $PermissionsArray = array(
 	'admin_manage_applicants' => 'Can manage job roles and user applications.',
 	'admin_manage_referrals' => 'Can manage referrals.',
 	'admin_manage_payments' => 'Can manage payments.',
+	'admin_manage_navigation' => 'Can manage navigation links.',
 	'admin_view_referrals' => 'Can view referred users.',
 	'admin_bp_history' => 'Can view bonus points spent by other users.',
 	'admin_reports' => 'Can access reports system.',
@@ -262,6 +263,7 @@ function permissions_form() {
 					display_perm('admin_manage_applicants', 'Can manage job roles and user applications');
 					display_perm('admin_manage_referrals', 'Can manage referrals');
 					display_perm('admin_manage_payments', 'Can manage payments');
+					display_perm('admin_manage_navigation', 'Can manage navigation links');
 					display_perm('admin_view_referrals', 'Can view referred users');
 					display_perm('admin_reports', 'Can access reports system');
 					display_perm('admin_bp_history', 'Can view bonus points spent by other users');

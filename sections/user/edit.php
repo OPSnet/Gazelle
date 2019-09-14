@@ -22,12 +22,13 @@ $DB->query("
 		i.InfoTitle,
 		i.NotifyOnDeleteSeeding,
 		i.NotifyOnDeleteSnatched,
-		i.NotifyOnDeleteDownloaded
+		i.NotifyOnDeleteDownloaded,
+		i.NavItems
 	FROM users_main AS m
 		JOIN users_info AS i ON i.UserID = m.ID
 		LEFT JOIN permissions AS p ON p.ID = m.PermissionID
 	WHERE m.ID = '".db_string($UserID)."'");
-list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded) = $DB->next_record(MYSQLI_NUM, array(3, 9));
+list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems) = $DB->next_record(MYSQLI_NUM, array(3, 9));
 
 if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Class)) {
 	error(403);
@@ -54,6 +55,10 @@ function checked($Checked) {
 	return ($Checked ? ' checked="checked"' : '');
 }
 
+function disabled($Disabled) {
+	return $Disabled ? ' disabled="disabled"' : '';
+}
+
 $SiteOptions = unserialize_array($SiteOptions);
 $SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
 
@@ -77,6 +82,9 @@ $DB->query("
 	WHERE ID = '$UserID'");
 $LastFMUsername = '';
 list($LastFMUsername) = $DB->next_record();
+
+$NavItems = Users::get_nav_items();
+$UserNavItems = array_map('trim', explode(',', $UserNavItems));
 echo $Val->GenerateJS('userform');
 ?>
 <div class="thin">
@@ -194,6 +202,29 @@ echo $Val->GenerateJS('userform');
 				</td>
 			</tr>
 <?	} ?>
+		</table>
+		<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="navigation_settings">
+			<tr class="colhead_dark">
+				<td colspan="2">
+					<strong>Navigation Settings</strong>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">&nbsp;</td>
+				<td>
+					<p><strong>Select the navigation elements you wish to display at the right of the header.</strong></p>
+				</td>
+			</tr>
+<?php foreach ($NavItems as $n) {
+	list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($n);
+?>
+			<tr id="nav_<?=$Key?>_tr">
+				<td class="label tooltip"><strong><?=$Title?></strong></td>
+				<td>
+					<input type="checkbox" name="n_<?=$Key?>"<?=checked($Mandatory || in_array($ID, $UserNavItems))?><?=disabled($Mandatory)?> />
+				</td>
+			</tr>
+<?php } ?>
 		</table>
 		<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="torrent_settings">
 			<tr class="colhead_dark">

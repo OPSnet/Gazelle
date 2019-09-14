@@ -22,7 +22,8 @@ function header_link($SortKey, $DefaultWay = 'DESC') {
 }
 
 if (!isset($_GET['userid'])) {
-    header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
+	header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
+	die();
 }
 
 $UserID = $_GET['userid'];

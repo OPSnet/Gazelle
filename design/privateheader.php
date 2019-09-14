@@ -174,6 +174,8 @@ if ($UseNoty && !empty($NotificationSpans)) {
 if ($NotificationsManager->is_skipped(NotificationsManager::SUBSCRIPTIONS)) {
 	$NewSubscriptions = Subscriptions::has_new_subscriptions();
 }
+
+$NavItems = Users::get_user_nav_items(G::$LoggedUser['ID']);
 ?>
 </head>
 <body id="<?=$Document == 'collages' ? 'collage' : $Document?>">
@@ -255,49 +257,44 @@ if (check_perms('site_send_unlimited_invites')) {
 <?	} ?>
 				</ul>
 				<ul id="userinfo_minor"<?=$NewSubscriptions ? ' class="highlite"' : ''?>>
-					<li id="nav_inbox"<?=
-						Format::add_class($PageID, array('inbox'), 'active', true)?>>
-						<a href="<?=Inbox::get_inbox_link(); ?>">Inbox</a>
-					</li>
-					<li id="nav_staffinbox"<?=
-						Format::add_class($PageID, array('staffpm'), 'active', true)?>>
-						<a href="staffpm.php">Staff Inbox</a>
-					</li>
-					<li id="nav_uploaded"<?=
-						Format::add_class($PageID, array('torrents', false, 'uploaded'), 'active', true, 'userid')?>>
-						<a href="torrents.php?type=uploaded&amp;userid=<?=G::$LoggedUser['ID']?>">Uploads</a>
-					</li>
-					<li id="nav_bookmarks"<?=
-						Format::add_class($PageID, array('bookmarks'), 'active', true)?>>
-						<a href="bookmarks.php?type=torrents">Bookmarks</a>
-					</li>
-<?	if (check_perms('site_torrents_notify')) { ?>
-					<li id="nav_notifications"<?=
-						Format::add_class($PageID, array(array('torrents', 'notify'), array('user', 'notify')), 'active', true, 'userid')?>>
-						<a href="user.php?action=notify">Notifications</a>
-					</li>
-<?	}
-	$ClassNames = $NewSubscriptions ? 'new-subscriptions' : '';
-	$ClassNames = trim($ClassNames.Format::add_class($PageID, array('userhistory', 'subscriptions'), 'active', false));
+<?php
+		$parseNavItem = function($val) {
+			$val = trim($val);
+			return $val == 'false' ? false : $val;
+		};
+
+		foreach ($NavItems as $n) {
+			list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($n);
+			if (strpos($Tests, ':')) {
+				$Parts = array_map('trim', explode(',', $Tests));
+				$Tests = [];
+
+				foreach ($Parts as $Part) {
+					$Tests[] = array_map($parseNavItem, explode(':', $Part));
+				}
+			} else if (strpos($Tests, ',')) {
+				$Tests = array_map($parseNavItem, explode(',', $Tests));
+			} else {
+				$Tests = [$Tests];
+			}
+			
+			$ClassNames = NULL;
+			if ($Key == 'notifications' && !check_perms('site_torrents_notify')) {
+				continue;
+			} else if ($Key == 'subscriptions') {
+				$ClassNames = $NewSubscriptions ? 'new-subscriptions' : '';
+				$ClassNames = trim($ClassNames.Format::add_class($PageID, array('userhistory', 'subscriptions'), 'active', false));
+			}
+
+			if ($ClassNames == NULL) {
 ?>
-					<li id="nav_subscriptions"<?=$ClassNames ? " class=\"$ClassNames\"" : ''?>>
-						<a href="userhistory.php?action=subscriptions">Subscriptions</a>
+					<li id="nav_<?=$Key?>"<?=Format::add_class($PageID, $Tests, 'active', true, $TestUser ? 'userid' : false)?>>
+<?php 		} else { ?>
+					<li id="nav_<?=$Key?>"<?=$ClassNames ? " class=\"$ClassNames\"" : ''?>>
+<?php 		} ?>
+						<a href="<?=$Target?>"><?=$Title?></a>
 					</li>
-					<li id="nav_comments"<?=
-						Format::add_class($PageID, array('comments'), 'active', true, 'userid')?>>
-						<a href="comments.php">Comments</a></li>
-					<li id="nav_friends"<?=
-						Format::add_class($PageID, array('friends'), 'active', true)?>>
-						<a href="friends.php">Friends</a></li>
-					<li id="nav_better"<?=
-						Format::add_class($PageID, array('better'), 'active', true)?>>
-						<a href="better.php">Better</a></li>
-					<li id="nav_random"<?=
-						Format::add_class($PageID, array('random'), 'active', true)?>>
-						<a href="random.php">Random Album</a></li>
-					<li id="nav_logchecker" style="display: none"<?=
-						Format::add_class($PageID, array('logchecker'), 'active', true)?>>
-						<a href="logchecker.php">Log Checker</a></li>
+<?php } ?>
 				</ul>
 			</div>
 			<div id="menu">
