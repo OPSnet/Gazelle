@@ -96,34 +96,49 @@ class Torrents {
 				$QueryID = G::$DB->get_query_id();
 				G::$DB->query("
 					SELECT
-						ID, 
-						GroupID, 
-						Media, 
-						Format, 
-						Encoding, 
-						RemasterYear, 
-						Remastered, 
-						RemasterTitle,
-						RemasterRecordLabel, 
-						RemasterCatalogueNumber, 
-						Scene, 
-						HasLog, 
-						HasCue, 
-						LogScore,
-						FileCount, 
-						FreeTorrent, 
-						Size, 
-						Leechers, 
-						Seeders, 
-						Snatched, 
-						Time, 
-						ID AS HasFile,
-						HasLogDB,
-						LogChecksum
-					FROM torrents
-					WHERE GroupID IN ($IDs)
-					ORDER BY GroupID, Remastered, (RemasterYear != 0) DESC, RemasterYear, RemasterTitle,
-							RemasterRecordLabel, RemasterCatalogueNumber, Media, Format, Encoding, ID");
+						t.ID,
+						t.GroupID,
+						t.Media,
+						t.Format,
+						t.Encoding,
+						t.RemasterYear,
+						t.Remastered,
+						t.RemasterTitle,
+						t.RemasterRecordLabel,
+						t.RemasterCatalogueNumber,
+						t.Scene,
+						t.HasLog,
+						t.HasCue,
+						t.LogScore,
+						t.FileCount,
+						t.FreeTorrent,
+						t.Size,
+						t.Leechers,
+						t.Seeders,
+						t.Snatched,
+						t.Time,
+						t.ID AS HasFile,
+						t.HasLogDB,
+						t.LogChecksum,
+						tbt.TorrentID AS BadTags,
+						tbf.TorrentID AS BadFolders,
+						tfi.TorrentID AS BadFiles,
+						ml.TorrentID AS MissingLineage,
+						ca.TorrentID AS CassetteApproved,
+						lma.TorrentID AS LossymasterApproved,
+						lwa.TorrentID AS LossywebApproved
+					FROM torrents t
+						LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
+						LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
+						LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
+						LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+						LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+						LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+						LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
+						LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
+					WHERE t.GroupID IN ($IDs)
+					ORDER BY t.GroupID, t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
+							t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID");
 				while ($Torrent = G::$DB->next_record(MYSQLI_ASSOC, true)) {
 					$NotFound[$Torrent['GroupID']]['Torrents'][$Torrent['ID']] = $Torrent;
 				}
@@ -283,14 +298,14 @@ class Torrents {
 			Torrents::update_hash($GroupID);
 		}
 
-		$manager->soft_delete(SQLDB, 'torrents_files',                [['TorrentID', $ID]]);
-		$manager->soft_delete(SQLDB, 'torrents_bad_files',            [['TorrentID', $ID]]);
-		$manager->soft_delete(SQLDB, 'torrents_bad_folders',          [['TorrentID', $ID]]);
-		$manager->soft_delete(SQLDB, 'torrents_bad_tags',             [['TorrentID', $ID]]);
-		$manager->soft_delete(SQLDB, 'torrents_cassette_approved',    [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_files',				  [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_bad_files',			  [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_bad_folders',		  [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_bad_tags',			  [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_cassette_approved',	  [['TorrentID', $ID]]);
 		$manager->soft_delete(SQLDB, 'torrents_lossymaster_approved', [['TorrentID', $ID]]);
-		$manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',    [['TorrentID', $ID]]);
-		$manager->soft_delete(SQLDB, 'torrents_missing_lineage',      [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',	  [['TorrentID', $ID]]);
+		$manager->soft_delete(SQLDB, 'torrents_missing_lineage',	  [['TorrentID', $ID]]);
 
 		// Tells Sphinx that the group is removed
 		G::$DB->prepared_query('
@@ -362,12 +377,12 @@ class Torrents {
 		// Seeders
 		$Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
 		$DB->prepared_query("
-SELECT DISTINCT(xfu.uid) 
-FROM 
+SELECT DISTINCT(xfu.uid)
+FROM
 	xbt_files_users AS xfu
 	JOIN users_info AS ui ON xfu.uid = ui.UserID
-WHERE xfu.fid = ? 
-	AND ui.NotifyOnDeleteSeeding='1' 
+WHERE xfu.fid = ?
+	AND ui.NotifyOnDeleteSeeding='1'
 	AND xfu.uid NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
 		$UserIDs = $DB->collect('uid');
 		foreach ($UserIDs as $UserID) {
@@ -378,8 +393,8 @@ WHERE xfu.fid = ?
 		// Snatchers
 		$Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
 		$DB->prepared_query("
-SELECT DISTINCT(xs.uid) 
-FROM xbt_snatched AS xs JOIN users_info AS ui ON xs.uid = ui.UserID 
+SELECT DISTINCT(xs.uid)
+FROM xbt_snatched AS xs JOIN users_info AS ui ON xs.uid = ui.UserID
 WHERE xs.fid=? AND ui.NotifyOnDeleteSnatched='1' AND xs.uid NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
 		$UserIDs = $DB->collect('uid');
 		foreach ($UserIDs as $UserID) {
@@ -658,7 +673,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 	 */
 	public static function filelist_format_file($File) {
 		list($Size, $Name) = $File;
-		$Name = Format::make_utf8(strtr($Name, "\n\r\t", '   '));
+		$Name = Format::make_utf8(strtr($Name, "\n\r\t", '	 '));
 		$ExtPos = strrpos($Name, '.');
 		// Should not be $ExtPos !== false. Extensionless files that start with a . should not get extensions
 		$Ext = ($ExtPos ? trim(substr($Name, $ExtPos + 1)) : '');
@@ -705,7 +720,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 	 * @param boolean $ShowEdition if false, RemasterYear/RemasterTitle will be omitted
 	 * @return string
 	 */
-	public static function torrent_info($Data, $ShowMedia = false, $ShowEdition = false) {
+	public static function torrent_info($Data, $ShowMedia = false, $ShowEdition = false, $ShowFlags = true, $GroupName = '') {
 		$Info = array();
 		if (!empty($Data['Format'])) {
 			$Info[] = $Data['Format'];
@@ -728,6 +743,9 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		}
 		if (!empty($Data['Scene'])) {
 			$Info[] = 'Scene';
+		}
+		if (!count($Info) && $GroupName != '') {
+			$Info[] = $GroupName;
 		}
 		if ($ShowEdition) {
 			$EditionInfo = array();
@@ -755,6 +773,37 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 		if (!empty($Data['PersonalFL'])) {
 			$Info[] = Format::torrent_label('Personal Freeleech!');
 		}
+		if (!empty($Data['Reported'])) {
+			$Info[] = Format::torrent_label('Reporter');
+		}
+
+		if ($ShowFlags) {
+			if ($Data['HasLog'] && $Data['HasLogDB'] && $Data['LogChecksum'] !== '1') {
+				$Info[] = Format::torrent_label('Bad/Missing Checksum');
+			}
+			if (!empty($Data['BadTags'])) {
+				$Info[] = Format::torrent_label('Bad Tags');
+			}
+			if (!empty($Data['BadFolders'])) {
+				$Info[] = Format::torrent_label('Bad Folders');
+			}
+			if (!empty($Data['MissingLineage'])) {
+				$Info[] = Format::torrent_label('Missing Lineage');
+			}
+			if (!empty($Data['CassetteApproved'])) {
+				$Info[] = Format::torrent_label('Cassette Approved');
+			}
+			if (!empty($Data['LossymasterApproved'])) {
+				$Info[] = Format::torrent_label('Lossy Master Approved');
+			}
+			if (!empty($Data['LossywebApproved'])) {
+				$Info[] = Format::torrent_label('Lossy WEB Approved');
+			}
+			if (!empty($Data['BadFiles'])) {
+				$Info[] = Format::torrent_label('Bad File Names');
+			}
+		}
+
 		return implode(' / ', $Info);
 	}
 
@@ -1148,7 +1197,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 					GROUP BY TorrentID
 				) AS tl ON t.ID = tl.TorrentID
 				SET
-					t.LogScore    = tl.Score,
+					t.LogScore	  = tl.Score,
 					t.LogChecksum = tl.Checksum
 				WHERE t.ID = ?
 		", $TorrentID, $TorrentID);
