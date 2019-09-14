@@ -275,6 +275,15 @@ $NotifyOnDeleteSeeding = (!empty($_POST['notifyondeleteseeding']) ? 1 : 0);
 $NotifyOnDeleteSnatched = (!empty($_POST['notifyondeletesnatched']) ? 1 : 0);
 $NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? 1 : 0);
 
+$NavItems = Users::get_nav_items();
+$UserNavItems = [];
+foreach ($NavItems as $n) {
+	list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($n);
+	if ($Mandatory || (!empty($_POST["n_$Key"]) && $_POST["n_$Key"] == 'on')) {
+		$UserNavItems[] = $ID;
+	}
+}
+$UserNavItems = implode(',', $UserNavItems);
 
 $LastFMUsername = db_string($_POST['lastfm_username']);
 $OldLastFMUsername = '';
@@ -322,56 +331,77 @@ $Cache->begin_transaction("user_info_heavy_$UserID");
 $Cache->update_row(false, array(
 		'StyleID' => $_POST['stylesheet'],
 		'StyleURL' => display_str($_POST['styleurl']),
-		'DownloadAlt' => $DownloadAlt
+		'DownloadAlt' => $DownloadAlt,
+		'NavItems' => explode(',', $UserNavItems)
 		));
 $Cache->update_row(false, $Options);
 $Cache->commit_transaction(0);
-
 
 $SQL = "
 	UPDATE users_main AS m
 		JOIN users_info AS i ON m.ID = i.UserID
 	SET
-		i.StyleID = '".db_string($_POST['stylesheet'])."',
-		i.StyleURL = '".db_string($_POST['styleurl'])."',
-		i.Avatar = '".db_string($_POST['avatar'])."',
-		i.SiteOptions = '".db_string(serialize($Options))."',
-		i.NotifyOnQuote = '".db_string($Options['NotifyOnQuote'])."',
-		i.Info = '".db_string($_POST['info'])."',
-		i.InfoTitle = '".db_string($_POST['profile_title'])."',
-		i.DownloadAlt = '$DownloadAlt',
-		i.UnseededAlerts = '$UnseededAlerts',
-		i.NotifyOnDeleteSeeding = '$NotifyOnDeleteSeeding',
-		i.NotifyOnDeleteSnatched = '$NotifyOnDeleteSnatched',
-		i.NotifyOnDeleteDownloaded = '$NotifyOnDeleteDownloaded',
-		m.Email = '".db_string($_POST['email'])."',
-		m.IRCKey = '".db_string($_POST['irckey'])."',
-		m.Paranoia = '".db_string(serialize($Paranoia))."'";
+		i.StyleID = ?,
+		i.StyleURL = ?,
+		i.Avatar = ?,
+		i.SiteOptions = ?,
+		i.NotifyOnQuote = ?,
+		i.Info = ?,
+		i.InfoTitle = ?,
+		i.DownloadAlt = ?,
+		i.UnseededAlerts = ?,
+		i.NotifyOnDeleteSeeding = ?,
+		i.NotifyOnDeleteSnatched = ?,
+		i.NotifyOnDeleteDownloaded = ?,
+		m.Email = ?,
+		m.IRCKey = ?,
+		m.Paranoia = ?,
+		i.NavItems = ?";
+$Params = [
+	$_POST['stylesheet'],
+	$_POST['styleurl'],
+	$_POST['avatar'],
+	serialize($Options),
+	$Options['NotifyOnQuote'],
+	$_POST['info'],
+	$_POST['profile_title'],
+	$DownloadAlt,
+	$UnseededAlerts,
+	$NotifyOnDeleteSeeding,
+	$NotifyOnDeleteSnatched,
+	$NotifyOnDeleteDownloaded,
+	$_POST['email'],
+	$_POST['irckey'],
+	serialize($Paranoia),
+	$UserNavItems
+];
 
 if ($ResetPassword) {
 	$ChangerIP = db_string($LoggedUser['IP']);
 	$PassHash = Users::make_password_hash($_POST['new_pass_1']);
-	$SQL.= ",m.PassHash = '".db_string($PassHash)."'";
-	$DB->query("
+	$SQL.= ",m.PassHash = ?";
+	$Params[] = $PassHash;
+	$DB->prepared_query("
 		INSERT INTO users_history_passwords
 			(UserID, ChangerIP, ChangeTime)
 		VALUES
-			('$UserID', '$ChangerIP', '".sqltime()."')");
-
+			(?, ?, ?)",
+		$UserID, $ChangerIP, sqltime());
 }
 
 if (isset($_POST['resetpasskey'])) {
-
 	$UserInfo = Users::user_heavy_info($UserID);
 	$OldPassKey = db_string($UserInfo['torrent_pass']);
 	$NewPassKey = db_string(Users::make_secret());
 	$ChangerIP = db_string($LoggedUser['IP']);
-	$SQL .= ",m.torrent_pass = '$NewPassKey'";
-	$DB->query("
+	$SQL .= ",m.torrent_pass = ?";
+	$Params[] = $NewPassKey;
+	$DB->prepared_query("
 		INSERT INTO users_history_passkeys
 			(UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
 		VALUES
-			('$UserID', '$OldPassKey', '$NewPassKey', '$ChangerIP', '".sqltime()."')");
+			(?, ?, ?, ?, ?)",
+		$UserID, $OldPassKey, $NewPassKey, $ChangerIP, sqltime());
 	$Cache->begin_transaction("user_info_heavy_$UserID");
 	$Cache->update_row(false, array('torrent_pass' => $NewPassKey));
 	$Cache->commit_transaction(0);
@@ -380,11 +410,11 @@ if (isset($_POST['resetpasskey'])) {
 	Tracker::update_tracker('change_passkey', array('oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey));
 }
 
-$SQL .= "WHERE m.ID = '".db_string($UserID)."'";
-$DB->query($SQL);
+$SQL .= " WHERE m.ID = ?";
+$Params[] = $UserID;
+$DB->prepared_query($SQL, ...$Params);
 
 if ($ResetPassword) {
-
 	logout_all_sessions();
 }
 

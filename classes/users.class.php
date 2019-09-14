@@ -189,6 +189,7 @@ class Users {
 					i.LastReadBlog,
 					i.RestrictedForums,
 					i.PermittedForums,
+					i.NavItems,
 					m.FLTokens,
 					m.PermissionID
 				FROM users_main AS m
@@ -210,6 +211,12 @@ class Users {
 				$PermittedForums = array();
 			}
 			unset($HeavyInfo['PermittedForums']);
+			if (!empty($HeavyInfo['NavItems'])) {
+				$NavItems = array_map('trim', explode(',', $HeavyInfo['NavItems']));
+			} else {
+				$NavItems = [];
+			}
+			$HeavyInfo['NavItems'] = $NavItems;
 
 			G::$DB->query("
 				SELECT PermissionID
@@ -254,6 +261,40 @@ class Users {
 			G::$Cache->cache_value("user_info_heavy_$UserID", $HeavyInfo, 0);
 		}
 		return $HeavyInfo;
+	}
+
+	public static function get_user_nav_items($userId) {
+		$Info = self::user_heavy_info($userId);
+
+		$UserIds = !empty($Info['NavItems']) ? $Info['NavItems'] : [];
+		$NavItems = self::get_nav_items();
+
+		if (!count($UserIds)) {
+			return $NavItems;
+		}
+
+		$UserItems = [];
+		foreach ($NavItems as $n) {
+			if ($n['Mandatory'] || in_array($n['ID'], $UserIds)) {
+				$UserItems[] = $n;
+			}
+		}
+
+		return $UserItems;
+	}
+
+	public static function get_nav_items() {
+		$Items = G::$Cache->get_value("nav_items");
+		if (!$Items) {
+			$QueryID = G::$DB->get_query_id();
+			G::$DB->prepared_query("
+				SELECT ID, `Key`, Title, Target, Tests, TestUser, Mandatory
+				FROM nav_items");
+			$Items = G::$DB->to_array("ID", MYSQLI_ASSOC);
+			G::$Cache->cache_value("nav_items", $Items, 0);
+			G::$DB->set_query_id($QueryID);
+		}
+		return $Items;
 	}
 
 	/**
