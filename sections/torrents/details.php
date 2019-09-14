@@ -421,7 +421,8 @@ foreach ($TorrentList as $Torrent) {
 		$Reported = false;
 	}
 	else {
-		$Reported = true;
+        $Reported = true;
+        $Torrent['Reported'] = $NumReports;
 		include(SERVER_ROOT.'/sections/reportsv2/array.php');
 		$ReportInfo = '
 		<table class="reportinfo_table">

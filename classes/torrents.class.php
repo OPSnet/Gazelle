@@ -774,7 +774,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 			$Info[] = Format::torrent_label('Personal Freeleech!');
 		}
 		if (!empty($Data['Reported'])) {
-			$Info[] = Format::torrent_label('Reporter');
+			$Info[] = Format::torrent_label('Reported');
 		}
 
 		if ($ShowFlags) {
