@@ -13,8 +13,7 @@ class Rules {
 		$vpns_article = '<a href="wiki.php?action=article&name=vpns">Proxy/VPN Tips</a>';
 		$ips_article = '<a href="wiki.php?action=article&id=95">Multiple IPs</a>';
 		$autofl_article = '<a href="wiki.php?action=article&id=66">Freeleech Autosnatching Policy</a>';
-		$bugs_article = '<a href="wiki.php?action=article&id=67">Responsible Disclosure Policy</a>';
-		$exploit_article = '<a href="wiki.php?action=article&id=68">Exploit Policy</a>';
+		$bugs_article = '<a href="wiki.php?action=article&name=disclosurepolicy">Responsible Disclosure Policy</a>';
 		$golden_rules = array(
 			[ 'n' => "1.1",
 			  'short' => "One account per person, per lifetime.",
@@ -90,7 +89,7 @@ class Rules {
 			  'long' => "Seeking or exploiting bugs in the live site (as opposed to a local development environment) is prohibited. If you discover a critical bug or security vulnerability, immediately report it in accordance with ${site_name}'s ${bugs_article}. Non-critical bugs can be reported in the <a href=\"forums.php?action=viewforum&forumid=6\">Bugs Forum</a>." ],
 			[ 'n' => "6.2",
 			  'short' => "Do not publish exploits.",
-			  'long' => "The publication, organization, dissemination, sharing, technical discussion, or technical facilitation of exploits is prohibited at staff discretion. Exploits are defined as unanticipated or unaccepted uses of internal, external, non-profit, or for-profit services. See ${site_name}'s ${exploit_article} article for more information. Exploits are subject to reclassification at any time." ],
+			  'long' => "The publication, organization, dissemination, sharing, technical discussion, or technical facilitation of exploits is prohibited at staff discretion. Exploits are defined as unanticipated or unaccepted uses of internal, external, non-profit, or for-profit services. Exploits are subject to reclassification at any time." ],
 			[ 'n' => "7.0",
 			  'short' => "Be respectful to all staff members.",
 			  'long' => "Staff on ${site_name} are volunteers who dedicate their time in order to keep the site running, without receiving any compensation. Being disrespectful to them is prohibited, and might result in a warning or worse." ],
