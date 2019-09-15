@@ -330,25 +330,26 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 		$ArtistForm = array();
 	}
 	$LogName .= Artists::display_artists($ArtistForm, false, true, false);
-} elseif ($Type == 'Music' && empty($ArtistForm)) {
-	$DB->query("
-		SELECT ta.ArtistID, aa.Name, ta.Importance
-		FROM torrents_artists AS ta
-			JOIN artists_alias AS aa ON ta.AliasID = aa.AliasID
-		WHERE ta.GroupID = ".$Properties['GroupID']."
-		ORDER BY ta.Importance ASC, aa.Name ASC;");
-	while (list($ArtistID, $ArtistName, $ArtistImportance) = $DB->next_record(MYSQLI_BOTH, false)) {
-		$ArtistForm[$ArtistImportance][] = array('id' => $ArtistID, 'name' => display_str($ArtistName));
-		$ArtistsUnescaped[$ArtistImportance][] = array('name' => $ArtistName);
-	}
-	$LogName .= Artists::display_artists($ArtistsUnescaped, false, true, false);
 }
-
 
 if ($Err) { // Show the upload form, with the data the user entered
 	$UploadForm = $Type;
 	include(SERVER_ROOT.'/sections/upload/upload.php');
 	die();
+}
+
+if (!empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
+	$DB->prepared_query("
+		SELECT ta.ArtistID, aa.Name, ta.Importance
+		FROM torrents_artists AS ta
+			JOIN artists_alias AS aa ON ta.AliasID = aa.AliasID
+		WHERE ta.GroupID = ?
+		ORDER BY ta.Importance ASC, aa.Name ASC;", $Properties['GroupID']);
+	while (list($ArtistID, $ArtistName, $ArtistImportance) = $DB->next_record(MYSQLI_BOTH, false)) {
+		$ArtistForm[$ArtistImportance][] = array('id' => $ArtistID, 'name' => display_str($ArtistName));
+		$ArtistsUnescaped[$ArtistImportance][] = array('name' => $ArtistName);
+	}
+	$LogName .= Artists::display_artists($ArtistsUnescaped, false, true, false);
 }
 
 // Strip out Amazon's padding
@@ -780,12 +781,12 @@ $DB->query("
 	INSERT INTO torrents
 		(GroupID, UserID, Media, Format, Encoding,
 		Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-		Scene, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, info_hash, FileCount, FileList, 
+		Scene, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, info_hash, FileCount, FileList,
 		FilePath, Size, Time, Description, FreeTorrent, FreeLeechType)
 	VALUES
 		($GroupID, $LoggedUser[ID], $T[Media], $T[Format], $T[Encoding],
 		$T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
-		$T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum','".db_string($InfoHash)."', $NumFiles, '$FileString', 
+		$T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum','".db_string($InfoHash)."', $NumFiles, '$FileString',
 		'$FilePath', $TotalSize, '".sqltime()."', $T[TorrentDescription], '$T[FreeLeech]', '$T[FreeLeechType]')");
 
 $Cache->increment('stats_torrent_count');
