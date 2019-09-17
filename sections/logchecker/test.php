@@ -13,10 +13,10 @@ JOIN artists_group a ON a.ArtistID = ta.ArtistID
 WHERE t.HasLog='1' AND t.LogScore=0 AND t.UserID = " . $LoggedUser['ID']);
 
 if ($DB->has_results()) {
-	$output = '';
-	while (list($ID, $AlbumName, $ArtistName, $Year, $Format, $Encoding) = $DB->next_record()) {
-		$output .= "<tr><td style=\"width: 5%\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td><a href=\"/torrents.php?torrentid=$ID\">$ArtistName - $AlbumName [$Year] [$Format/$Encoding]</a></td></tr>";
-	}
+    $output = '';
+    while (list($ID, $AlbumName, $ArtistName, $Year, $Format, $Encoding) = $DB->next_record()) {
+        $output .= "<tr><td style=\"width: 5%\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td><a href=\"/torrents.php?torrentid=$ID\">$ArtistName - $AlbumName [$Year] [$Format/$Encoding]</a></td></tr>";
+    }
 }
 */
 

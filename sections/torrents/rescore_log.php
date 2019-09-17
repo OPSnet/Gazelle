@@ -3,7 +3,7 @@
 use OrpheusNET\Logchecker\Logchecker;
 
 if (!check_perms('users_mod')) {
-	error(403);
+    error(403);
 }
 
 $TorrentID = intval($_GET['torrentid']);
@@ -12,12 +12,12 @@ $LogID = intval($_GET['logid']);
 $DB->prepared_query('SELECT GroupID FROM torrents WHERE ID= ?', $TorrentID);
 list($GroupID) = $DB->fetch_record();
 if (!$GroupID) {
-	error(404);
+    error(404);
 }
 
 $DB->prepared_query('SELECT 1 FROM torrents_logs WHERE LogID = ? AND TorrentID = ?', $LogID, $TorrentID);
 if (!$DB->has_results()) {
-	error(404);
+    error(404);
 }
 
 $Log = new Logchecker();

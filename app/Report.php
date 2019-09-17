@@ -3,57 +3,57 @@
 namespace Gazelle;
 
 class Report {
-	public static function search(\DB_MYSQL $db, array $filter) {
-		$cond = [];
-		$args = [];
-		$delcond = [];
-		$delargs = [];
-		if (array_key_exists('reporter', $filter) && $filter['reporter']) {
-			$cond[] = 'r.ReporterID = ?';
-			$args[] = self::username2id($db, $filter['reporter']);
-		}
-		if (array_key_exists('handler', $filter) && $filter['handler']) {
-			$cond[] = 'r.ResolverID = ?';
-			$args[] = self::username2id($db, $filter['handler']);
-		}
-		if (array_key_exists('report-type', $filter)) {
-			$cond[] = 'r.Type in (' . implode(', ', array_fill(0, count($filter['report-type']), '?')) . ')';
-			$args = array_merge($args, $filter['report-type']);
-		}
-		if (array_key_exists('dt-from', $filter)) {
-			$cond[] = 'r.ReportedTime >= ?';
-			$args[] = $filter['dt-from'];
-		}
-		if (array_key_exists('dt-until', $filter)) {
-			$rpt_cond[] = 'r.ReportedTime <= ? + INTERVAL 1 DAY';
-			$rpt_args[] = $filter['dt-until'];
-		}
-		if (array_key_exists('torrent', $filter)) {
-			$rpt_cond[] = 'r.TorrentID = ?';
-			$rpt_args[] = $filter['torrent'];
-		}
-		if (array_key_exists('uploader', $filter) && $filter['uploader']) {
-			$cond[] = 't.UserID = ?';
-			$args[] = self::username2id($db, $filter['uploader']);
-			$delcond[] = 'dt.UserID = ?';
-			$delargs[] = self::username2id($db, $filter['uploader']);
-		}
-		if (array_key_exists('group', $filter)) {
-			$cond[] = 't.GroupID = ?';
-			$args[] = $filter['group'];
-			$delcond[] = 'dt.GroupID = ?';
-			$delargs[] = $filter['group'];
-		}
-		if (count($cond) == 0 && count($delcond) == 0) {
-			$cond = ['1 = 1'];
-		}
-		$conds = implode(' AND ', $cond);
-		/* The construct below is pretty sick: we alias the group_log table to t
-		 * which means that t.GroupID in a condition refers to the same thing in
-		 * the `torrents` table as well. I am not certain this is entirely sane.
-		 */
-		$sql_where = implode("\n\t\tAND ", array_merge($cond, $delcond));
-		$sql = "
+    public static function search(\DB_MYSQL $db, array $filter) {
+        $cond = [];
+        $args = [];
+        $delcond = [];
+        $delargs = [];
+        if (array_key_exists('reporter', $filter) && $filter['reporter']) {
+            $cond[] = 'r.ReporterID = ?';
+            $args[] = self::username2id($db, $filter['reporter']);
+        }
+        if (array_key_exists('handler', $filter) && $filter['handler']) {
+            $cond[] = 'r.ResolverID = ?';
+            $args[] = self::username2id($db, $filter['handler']);
+        }
+        if (array_key_exists('report-type', $filter)) {
+            $cond[] = 'r.Type in (' . implode(', ', array_fill(0, count($filter['report-type']), '?')) . ')';
+            $args = array_merge($args, $filter['report-type']);
+        }
+        if (array_key_exists('dt-from', $filter)) {
+            $cond[] = 'r.ReportedTime >= ?';
+            $args[] = $filter['dt-from'];
+        }
+        if (array_key_exists('dt-until', $filter)) {
+            $rpt_cond[] = 'r.ReportedTime <= ? + INTERVAL 1 DAY';
+            $rpt_args[] = $filter['dt-until'];
+        }
+        if (array_key_exists('torrent', $filter)) {
+            $rpt_cond[] = 'r.TorrentID = ?';
+            $rpt_args[] = $filter['torrent'];
+        }
+        if (array_key_exists('uploader', $filter) && $filter['uploader']) {
+            $cond[] = 't.UserID = ?';
+            $args[] = self::username2id($db, $filter['uploader']);
+            $delcond[] = 'dt.UserID = ?';
+            $delargs[] = self::username2id($db, $filter['uploader']);
+        }
+        if (array_key_exists('group', $filter)) {
+            $cond[] = 't.GroupID = ?';
+            $args[] = $filter['group'];
+            $delcond[] = 'dt.GroupID = ?';
+            $delargs[] = $filter['group'];
+        }
+        if (count($cond) == 0 && count($delcond) == 0) {
+            $cond = ['1 = 1'];
+        }
+        $conds = implode(' AND ', $cond);
+        /* The construct below is pretty sick: we alias the group_log table to t
+         * which means that t.GroupID in a condition refers to the same thing in
+         * the `torrents` table as well. I am not certain this is entirely sane.
+         */
+        $sql_where = implode("\n\t\tAND ", array_merge($cond, $delcond));
+        $sql = "
 			SELECT SQL_CALC_FOUND_ROWS
 				r.ID, r.ReporterID, r.ResolverID, r.TorrentID,
 				coalesce(t.UserID, dt.UserID) as UserID,
@@ -78,25 +78,25 @@ class Report {
 			WHERE $sql_where
 			ORDER BY r.ReportedTime DESC LIMIT ? OFFSET ?
 		";
-		$args = array_merge(
-			$args,
-			$args,
-			$delargs,
-			[
-				TORRENTS_PER_PAGE, // LIMIT
-				TORRENTS_PER_PAGE * (max($filter['page'], 1) - 1), // OFFSET
-			]
-		);
-		$db->prepared_query_array($sql, $args);
-		$result = $db->to_array();
-		$db->query('SELECT FOUND_ROWS()');
-		list($count) = $db->next_record();
-		return [$result, $count];
-	}
+        $args = array_merge(
+            $args,
+            $args,
+            $delargs,
+            [
+                TORRENTS_PER_PAGE, // LIMIT
+                TORRENTS_PER_PAGE * (max($filter['page'], 1) - 1), // OFFSET
+            ]
+        );
+        $db->prepared_query_array($sql, $args);
+        $result = $db->to_array();
+        $db->query('SELECT FOUND_ROWS()');
+        list($count) = $db->next_record();
+        return [$result, $count];
+    }
 
-	private static function username2id (\DB_MYSQL $db, $name) {
-		$db->prepared_query('SELECT ID FROM users_main WHERE Username = ?', $name);
-		$user = $db->next_record();
-		return $user['ID'];
-	}
+    private static function username2id (\DB_MYSQL $db, $name) {
+        $db->prepared_query('SELECT ID FROM users_main WHERE Username = ?', $name);
+        $user = $db->next_record();
+        return $user['ID'];
+    }
 }

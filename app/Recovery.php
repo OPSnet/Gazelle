@@ -425,17 +425,17 @@ END_EMAIL;
         return [$prev, $curr];
     }
 
-	public static function is_mapped($ID, $db) {
+    public static function is_mapped($ID, $db) {
         $db->prepared_query(sprintf("SELECT MappedID AS ID FROM %s.%s WHERE UserID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
         return $db->to_array();
-	}
+    }
 
-	public static function is_mapped_local($ID, $db) {
+    public static function is_mapped_local($ID, $db) {
         $db->prepared_query(sprintf("SELECT UserID AS ID FROM %s.%s WHERE MappedID = ?", RECOVERY_DB, RECOVERY_MAPPING_TABLE), $ID);
         return $db->to_array();
-	}
+    }
 
-	public static function map_to_previous($ops_user_id, $prev_user_id, $admin_username, $db) {
+    public static function map_to_previous($ops_user_id, $prev_user_id, $admin_username, $db) {
         $db->prepared_query(
             sprintf("INSERT INTO %s.%s (UserID, MappedID) VALUES (?, ?)", RECOVERY_DB, RECOVERY_MAPPING_TABLE),
             $prev_user_id, $ops_user_id
@@ -610,5 +610,5 @@ END_MSG;
 
             $cache->delete_value('user_stats_' . $ops_user_id);
         }
-	}
+    }
 }

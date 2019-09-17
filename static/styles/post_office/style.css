@@ -80,7 +80,7 @@ a[onclick]:focus {
 
 a[onclick]:active {
   outline: 0;
-  /*	background: url(images/load.gif) 100% 4px no-repeat; */ }
+  /*    background: url(images/load.gif) 100% 4px no-repeat; */ }
 
 a[onclick^="AddArtistField"]:focus,
 a[onclick^="AddArtistField"]:active {

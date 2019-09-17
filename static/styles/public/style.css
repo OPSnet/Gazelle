@@ -1,106 +1,106 @@
 * {
-	margin: 0;
-	padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 html, body {
-	height: 100%;
+    height: 100%;
 }
 
 body {
-	background-color: #041813;
-	font-family: Bitstream Vera Sans, Tahoma, sans-serif;
-	font-size: 11px;
-	color: #FFFFFF;
+    background-color: #041813;
+    font-family: Bitstream Vera Sans, Tahoma, sans-serif;
+    font-size: 11px;
+    color: #FFFFFF;
 }
 
 
 table {
-	font-size: inherit;
+    font-size: inherit;
 }
 
 a {
-	color: #757575;
-	text-decoration: none;
+    color: #757575;
+    text-decoration: none;
 }
 
 a:hover {
-	color: #888888;
+    color: #888888;
 }
 
 input[type="text"], input[type="password"] {
-	padding: 1px 3px 0px 3px;
-	font-family: "tahoma", "arial", "helvetica", "sans-serif";
-	font-size: 8pt;
-	width: 200px;
+    padding: 1px 3px 0px 3px;
+    font-family: "tahoma", "arial", "helvetica", "sans-serif";
+    font-size: 8pt;
+    width: 200px;
 }
 
 input[type="text"]:valid, input[type="password"]:valid {
-	border-style: none;
+    border-style: none;
 }
 
 input[type="text"]:invalid, input[type="password"]:invalid {
-	border-top-style: none;
-	border-bottom-style: none;
-	border-left-style: none;
-	border-right-style: solid 2px;
-	border-color: red;
+    border-top-style: none;
+    border-bottom-style: none;
+    border-left-style: none;
+    border-right-style: solid 2px;
+    border-color: red;
 }
 
 #head, #foot {
-	height: 6%;
-	min-height: 25px;
-	width: 100%;
-	background-color: #041813;
-	overflow: hidden;
+    height: 6%;
+    min-height: 25px;
+    width: 100%;
+    background-color: #041813;
+    overflow: hidden;
 }
 
 #foot {
-	text-align: center;
+    text-align: center;
 }
 
 #foot > span,#head > span {
-	top: 35%;
-	position: relative;
-	padding: 20px;
+    top: 35%;
+    position: relative;
+    padding: 20px;
 }
 
 #foot > span {
-	color: #393939;
+    color: #393939;
 }
 
 #maincontent {
-	width: 100%;
-	height: 88%;
+    width: 100%;
+    height: 88%;
 }
 
 #logo {
-	height: 139px;
-	width: 200px;
-	background-repeat: no-repeat;
+    height: 139px;
+    width: 200px;
+    background-repeat: no-repeat;
     background-image: url('images/loginlogo.png');
     background-position: top center;
-	padding: 50px 0 0 0;
-	text-align: center;
+    padding: 50px 0 0 0;
+    text-align: center;
 }
 
 #logo ul {
-	float: left;
-	left: 49%;
-	margin: 0 auto;
-	position: relative;
+    float: left;
+    left: 49%;
+    margin: 0 auto;
+    position: relative;
 }
 
 #logo ul li {
-	float: left;
-	position: relative;
-	right: 50%;
-	margin: 9.5em 1em 0 0;
-	list-style: none;
+    float: left;
+    position: relative;
+    right: 50%;
+    margin: 9.5em 1em 0 0;
+    list-style: none;
 }
 
 #logo ul li:last-child {
-	margin: 9.5em 0 0 0;
+    margin: 9.5em 0 0 0;
 }
 
 .auth_form .layout {
@@ -108,51 +108,51 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 }
 
 .poetry {
-	width: 320px;
+    width: 320px;
 }
 
 .hidden {
-	display: none;
+    display: none;
 }
 
 .info {
-	color: green;
-	font-weight: bold;
+    color: green;
+    font-weight: bold;
 }
 
 .warning {
-	color: red;
-	font-weight: bold;
+    color: red;
+    font-weight: bold;
 }
 
 ol {
-	-webkit-margin-before: 1em;
-	-webkit-margin-after: 1em;
-	-webkit-padding-start: 40px;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-padding-start: 40px;
 }
 
 label {
-	width: 10em;
-	float: left;
+    width: 10em;
+    float: left;
 }
 
 #referral-code {
-	color: #f5f5f5;
-	padding: 10px;
-	background-color: #151515;
-	text-align: center;
+    color: #f5f5f5;
+    padding: 10px;
+    background-color: #151515;
+    text-align: center;
 }
 
 .center {
-	text-align: center;
+    text-align: center;
 }
 
 form {
-	display: inline-block;
-	text-align: left;
+    display: inline-block;
+    text-align: left;
 }
 
 .submit {
-	display: block;
-	margin: 0 auto;
+    display: block;
+    margin: 0 auto;
 }

@@ -15,18 +15,18 @@
 // ==/UserScript==
 
 (function() {
-	'use strict';
+    'use strict';
 
-	var downloadlinkElms = document.querySelectorAll('a[href*="torrents.php"]');
-	for(var i=0,link, l=downloadlinkElms.length;i<l;i++) {
-		if(downloadlinkElms[i].href.indexOf('action=download') != -1 && downloadlinkElms[i].href.indexOf('usetoken=') == -1) {
-			link = document.createElement('a');
-			link.textContent = 'JS';
-			var txtNode = document.createTextNode(' | ');
-			link.href= 'ajax.php?action=torrent&id=' + downloadlinkElms[i].href.replace(/^.*?id=(\d+)&.*?$/,'$1');
-			link.download = document.querySelector('h2').textContent + ' ['+ location.host + '].json';
-			downloadlinkElms[i].parentElement.lastElementChild.after(txtNode);
-			txtNode.after(link);
-		}
-	}
+    var downloadlinkElms = document.querySelectorAll('a[href*="torrents.php"]');
+    for(var i=0,link, l=downloadlinkElms.length;i<l;i++) {
+        if(downloadlinkElms[i].href.indexOf('action=download') != -1 && downloadlinkElms[i].href.indexOf('usetoken=') == -1) {
+            link = document.createElement('a');
+            link.textContent = 'JS';
+            var txtNode = document.createTextNode(' | ');
+            link.href= 'ajax.php?action=torrent&id=' + downloadlinkElms[i].href.replace(/^.*?id=(\d+)&.*?$/,'$1');
+            link.download = document.querySelector('h2').textContent + ' ['+ location.host + '].json';
+            downloadlinkElms[i].parentElement.lastElementChild.after(txtNode);
+            txtNode.after(link);
+        }
+    }
 })();

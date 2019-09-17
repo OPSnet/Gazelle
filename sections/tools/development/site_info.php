@@ -86,75 +86,75 @@ div#phpinfo img {float: right; border: 0;}
 div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 </style>
 <div class="thin">
-	<h3>Timestamps</h3>
-	<div class="box pad">
-		<span style="width: 50px; display: inline-block">PHP:</span> <?=$PHPTimeStamp?><br />
-		<span style="width: 50px; display: inline-block">DB:</span> <?=$DBTimeStamp?>
-	</div>
+    <h3>Timestamps</h3>
+    <div class="box pad">
+        <span style="width: 50px; display: inline-block">PHP:</span> <?=$PHPTimeStamp?><br />
+        <span style="width: 50px; display: inline-block">DB:</span> <?=$DBTimeStamp?>
+    </div>
 
-	<h3>PHP</h3>
-	<div class="box pad">
-		PHP Version: <?=phpversion();?><br />
-		<a onclick="toggle_display('phpinfo')" href='javascript:void(0)'>Toggle PHP Info</a><br />
-		<div id="phpinfo"><?=$Data?></div>
-	</div>
+    <h3>PHP</h3>
+    <div class="box pad">
+        PHP Version: <?=phpversion();?><br />
+        <a onclick="toggle_display('phpinfo')" href='javascript:void(0)'>Toggle PHP Info</a><br />
+        <div id="phpinfo"><?=$Data?></div>
+    </div>
 
-	<h3>Git</h3>
-	<div class="box pad">
-		<span style="width: 150px; display: inline-block;">Branch:</span> <?=$GitBranch?><br />
-		<span style="width: 150px; display: inline-block;">Local Hash:</span> <?=$GitHash?><br />
-		<span style="width: 150px; display: inline-block;">Remote Hash:</span> <?=$RemoteHash?>
-	</div>
+    <h3>Git</h3>
+    <div class="box pad">
+        <span style="width: 150px; display: inline-block;">Branch:</span> <?=$GitBranch?><br />
+        <span style="width: 150px; display: inline-block;">Local Hash:</span> <?=$GitHash?><br />
+        <span style="width: 150px; display: inline-block;">Remote Hash:</span> <?=$RemoteHash?>
+    </div>
 
-	<h3>Composer</h3>
-	<div class="box pad">
-		Composer Version: <?=$ComposerVersion?><br />
-		<table>
-			<tr class="colhead">
-				<td>Package</td>
-				<td>Version</td>
-				<td>Installed</td>
-				<td>Locked</td>
-			</tr>
-		<?php
+    <h3>Composer</h3>
+    <div class="box pad">
+        Composer Version: <?=$ComposerVersion?><br />
+        <table>
+            <tr class="colhead">
+                <td>Package</td>
+                <td>Version</td>
+                <td>Installed</td>
+                <td>Locked</td>
+            </tr>
+        <?php
         foreach ($Packages as $Package) {
             $Installed = $Package['Installed'] ?? '';
             $Locked = $Package['Locked'] ?? '';
             ?>
-			<tr>
-				<td><?=$Package['Name']?></td>
-				<td><?=$Package['Version']?></td>
-				<td><?=$Installed?></td>
-				<td><?=$Locked?></td>
-			</tr>
-			<?php
+            <tr>
+                <td><?=$Package['Name']?></td>
+                <td><?=$Package['Version']?></td>
+                <td><?=$Installed?></td>
+                <td><?=$Locked?></td>
+            </tr>
+            <?php
         }
         ?>
-		</table>
-	</div>
+        </table>
+    </div>
 
-	<h3>Phinx</h3>
-	<div class="box pad">
-		<?=$PhinxVersion?><br />
-		<table>
-			<tr class='colhead'>
-				<td>Status</td>
-				<td>Migration ID</td>
-				<td>Migration Name</td>
-			</tr>
-			<?php
+    <h3>Phinx</h3>
+    <div class="box pad">
+        <?=$PhinxVersion?><br />
+        <table>
+            <tr class='colhead'>
+                <td>Status</td>
+                <td>Migration ID</td>
+                <td>Migration Name</td>
+            </tr>
+            <?php
             foreach($PhinxMigrations as $Migration) {
                 ?>
-			<tr>
-				<td><?=$Migration['migration_status']?></td>
-				<td><?=$Migration['migration_id']?></td>
-				<td><?=$Migration['migration_name']?></td>
-			</tr>
-				<?php
+            <tr>
+                <td><?=$Migration['migration_status']?></td>
+                <td><?=$Migration['migration_id']?></td>
+                <td><?=$Migration['migration_name']?></td>
+            </tr>
+                <?php
             }
             ?>
-		</table>
-	</div>
+        </table>
+    </div>
 </div>
 <?php
 

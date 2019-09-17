@@ -1,51 +1,51 @@
 <?php
 if (!check_perms('site_view_flow')) {
-	error(403);
+    error(403);
 }
 
 //Timeline generation
 if (!isset($_GET['page'])) {
-	if (!list($Labels, $InFlow, $OutFlow, $Max) = $Cache->get_value('users_timeline')) {
-		$Labels = [];
-		$InFlow = [];
-		$OutFlow = [];
-		$DB->query("
+    if (!list($Labels, $InFlow, $OutFlow, $Max) = $Cache->get_value('users_timeline')) {
+        $Labels = [];
+        $InFlow = [];
+        $OutFlow = [];
+        $DB->query("
 			SELECT DATE_FORMAT(JoinDate, '%b \'%y') AS Month, COUNT(UserID)
 			FROM users_info
 			GROUP BY Month
 			ORDER BY JoinDate DESC
 			LIMIT 1, 12");
-		$TimelineIn = array_reverse($DB->to_array());
-		$DB->query("
+        $TimelineIn = array_reverse($DB->to_array());
+        $DB->query("
 			SELECT DATE_FORMAT(BanDate, '%b \'%y') AS Month, COUNT(UserID)
 			FROM users_info
 			GROUP BY Month
 			ORDER BY BanDate DESC
 			LIMIT 1, 12");
-		$TimelineOut = array_reverse($DB->to_array());
-		foreach ($TimelineIn as $Month) {
-			list($Label, $Amount) = $Month;
-			if ($Amount > $Max) {
-				$Max = $Amount;
-			}
-		}
-		foreach ($TimelineOut as $Month) {
-			list($Label, $Amount) = $Month;
-			if ($Amount > $Max) {
-				$Max = $Amount;
-			}
-		}
-		foreach ($TimelineIn as $Month) {
-			list($Label, $Amount) = $Month;
-			$Labels[] = $Label;
-			$InFlow[] = number_format(($Amount / $Max) * 100, 4);
-		}
-		foreach ($TimelineOut as $Month) {
-			list($Label, $Amount) = $Month;
-			$OutFlow[] = number_format(($Amount / $Max) * 100, 4);
-		}
-		$Cache->cache_value('users_timeline', array($Labels, $InFlow, $OutFlow, $Max), mktime(0, 0, 0, date('n') + 1, 2));
-	}
+        $TimelineOut = array_reverse($DB->to_array());
+        foreach ($TimelineIn as $Month) {
+            list($Label, $Amount) = $Month;
+            if ($Amount > $Max) {
+                $Max = $Amount;
+            }
+        }
+        foreach ($TimelineOut as $Month) {
+            list($Label, $Amount) = $Month;
+            if ($Amount > $Max) {
+                $Max = $Amount;
+            }
+        }
+        foreach ($TimelineIn as $Month) {
+            list($Label, $Amount) = $Month;
+            $Labels[] = $Label;
+            $InFlow[] = number_format(($Amount / $Max) * 100, 4);
+        }
+        foreach ($TimelineOut as $Month) {
+            list($Label, $Amount) = $Month;
+            $OutFlow[] = number_format(($Amount / $Max) * 100, 4);
+        }
+        $Cache->cache_value('users_timeline', array($Labels, $InFlow, $OutFlow, $Max), mktime(0, 0, 0, date('n') + 1, 2));
+    }
 }
 //End timeline generation
 
@@ -118,45 +118,45 @@ View::show_header('User Flow');
 $DB->set_query_id($RS);
 ?>
 <div class="thin">
-<?	if (!isset($_GET['page'])) { ?>
-	<div class="box pad">
-		<img src="https://chart.googleapis.com/chart?cht=lc&amp;chs=820x160&amp;chco=000D99,99000D&amp;chg=0,-1,1,1&amp;chxt=y,x&amp;chxs=0,h&amp;chxl=1:|<?=implode('|', $Labels)?>&amp;chxr=0,0,<?=$Max?>&amp;chd=t:<?=implode(',', $InFlow)?>|<?=implode(',', $OutFlow)?>&amp;chls=2,4,0&amp;chdl=New+Registrations|Disabled+Users&amp;chf=bg,s,FFFFFF00" alt="User Flow vs. Time" />
-	</div>
-<?	} ?>
-	<div class="linkbox">
+<?    if (!isset($_GET['page'])) { ?>
+    <div class="box pad">
+        <img src="https://chart.googleapis.com/chart?cht=lc&amp;chs=820x160&amp;chco=000D99,99000D&amp;chg=0,-1,1,1&amp;chxt=y,x&amp;chxs=0,h&amp;chxl=1:|<?=implode('|', $Labels)?>&amp;chxr=0,0,<?=$Max?>&amp;chd=t:<?=implode(',', $InFlow)?>|<?=implode(',', $OutFlow)?>&amp;chls=2,4,0&amp;chdl=New+Registrations|Disabled+Users&amp;chf=bg,s,FFFFFF00" alt="User Flow vs. Time" />
+    </div>
+<?    } ?>
+    <div class="linkbox">
 <?
 $Pages = Format::get_pages($Page, $Results, DAYS_PER_PAGE, 11);
 echo $Pages;
 ?>
-	</div>
-	<table width="100%">
-		<tr class="colhead">
-			<td>Date</td>
-			<td>(+) Joined</td>
-			<td>(-) Manual</td>
-			<td>(-) Ratio</td>
-			<td>(-) Inactivity</td>
-			<td>(-) Total</td>
-			<td>Net Growth</td>
-		</tr>
+    </div>
+    <table width="100%">
+        <tr class="colhead">
+            <td>Date</td>
+            <td>(+) Joined</td>
+            <td>(-) Manual</td>
+            <td>(-) Ratio</td>
+            <td>(-) Inactivity</td>
+            <td>(-) Total</td>
+            <td>Net Growth</td>
+        </tr>
 <?
-	while (list($Date, $Month, $Joined, $Manual, $Ratio, $Inactivity) = $DB->next_record()) {
-		$TotalOut = $Ratio + $Inactivity + $Manual;
-		$TotalGrowth = $Joined - $TotalOut;
+    while (list($Date, $Month, $Joined, $Manual, $Ratio, $Inactivity) = $DB->next_record()) {
+        $TotalOut = $Ratio + $Inactivity + $Manual;
+        $TotalGrowth = $Joined - $TotalOut;
 ?>
-		<tr class="rowb">
-			<td><?=$Date?></td>
-			<td><?=number_format($Joined)?></td>
-			<td><?=number_format($Manual)?></td>
-			<td><?=number_format((float)$Ratio)?></td>
-			<td><?=number_format($Inactivity)?></td>
-			<td><?=number_format($TotalOut)?></td>
-			<td><?=number_format($TotalGrowth)?></td>
-		</tr>
-<?	} ?>
-	</table>
-	<div class="linkbox">
-		<?=$Pages?>
-	</div>
+        <tr class="rowb">
+            <td><?=$Date?></td>
+            <td><?=number_format($Joined)?></td>
+            <td><?=number_format($Manual)?></td>
+            <td><?=number_format((float)$Ratio)?></td>
+            <td><?=number_format($Inactivity)?></td>
+            <td><?=number_format($TotalOut)?></td>
+            <td><?=number_format($TotalGrowth)?></td>
+        </tr>
+<?    } ?>
+    </table>
+    <div class="linkbox">
+        <?=$Pages?>
+    </div>
 </div>
 <? View::show_footer(); ?>

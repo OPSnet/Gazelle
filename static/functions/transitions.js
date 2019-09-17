@@ -12,7 +12,7 @@ function Transitions () {
 // Core defaults for the transitions, you can update these members so that all
 // calls to .add() from that point on use this duration and set of properties
 Transitions.DEFAULTS = {
-  duration : 1,	// default to 1 second
+  duration : 1,    // default to 1 second
   properties : []
 };
 
@@ -42,33 +42,33 @@ Transitions.prototype.add = function (params) {
   var duration = ((params.duration) ? params.duration : Transitions.DEFAULTS.duration) + 's';
   var durations = [];
   for (var i = 0; i < properties.length; i++) {
-	durations.push(duration);
+    durations.push(duration);
   }
   // from/to animation
   if (params.from) {
-	this.addInstantOperation(function () {
-	  style.webkitTransitionProperty = 'none';
-	  for (var i = 0; i < properties.length; i++) {
-		style.setProperty(properties[i], params.from[i], '');
-	  }
-	});
-	this.addDeferredOperation(function () {
-	  style.webkitTransitionProperty = properties.join(', ');
-	  style.webkitTransitionDuration = durations.join(', ');
-	  for (var i = 0; i < properties.length; i++) {
-		style.setProperty(properties[i], params.to[i], '');
-	  }
-	});
+    this.addInstantOperation(function () {
+      style.webkitTransitionProperty = 'none';
+      for (var i = 0; i < properties.length; i++) {
+        style.setProperty(properties[i], params.from[i], '');
+      }
+    });
+    this.addDeferredOperation(function () {
+      style.webkitTransitionProperty = properties.join(', ');
+      style.webkitTransitionDuration = durations.join(', ');
+      for (var i = 0; i < properties.length; i++) {
+        style.setProperty(properties[i], params.to[i], '');
+      }
+    });
   }
   // to-only animation
   else {
-	this.addDeferredOperation(function () {
-	  style.webkitTransitionProperty = properties.join(', ');
-	  style.webkitTransitionDuration = durations.join(', ');
-	  for (var i = 0; i < properties.length; i++) {
-		style.setProperty(properties[i], params.to[i], '');
-	  }
-	});
+    this.addDeferredOperation(function () {
+      style.webkitTransitionProperty = properties.join(', ');
+      style.webkitTransitionDuration = durations.join(', ');
+      for (var i = 0; i < properties.length; i++) {
+        style.setProperty(properties[i], params.to[i], '');
+      }
+    });
   }
 };
 
@@ -76,8 +76,8 @@ Transitions.prototype.add = function (params) {
 Transitions.prototype.addInstantOperation = function (new_operation) {
   var previousInstantOperations = this.instantOperations;
   this.instantOperations = function () {
-	previousInstantOperations();
-	new_operation();
+    previousInstantOperations();
+    new_operation();
   };
 };
 
@@ -85,8 +85,8 @@ Transitions.prototype.addInstantOperation = function (new_operation) {
 Transitions.prototype.addDeferredOperation = function (new_operation) {
   var previousDeferredOperations = this.deferredOperations;
   this.deferredOperations = function () {
-	previousDeferredOperations();
-	new_operation();
+    previousDeferredOperations();
+    new_operation();
   };
 };
 

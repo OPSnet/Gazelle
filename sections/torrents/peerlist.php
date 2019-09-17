@@ -1,15 +1,15 @@
 <?php
 if (!isset($_GET['torrentid']) || !is_number($_GET['torrentid'])) {
-	error(404);
+    error(404);
 }
 $TorrentID = $_GET['torrentid'];
 
 if (!empty($_GET['page']) && is_number($_GET['page'])) {
-	$Page = $_GET['page'];
-	$Limit = (string)(($Page - 1) * 100) .', 100';
+    $Page = $_GET['page'];
+    $Limit = (string)(($Page - 1) * 100) .', 100';
 } else {
-	$Page = 1;
-	$Limit = 100;
+    $Page = 1;
+    $Limit = 100;
 }
 
 $Result = $DB->query("
@@ -40,33 +40,33 @@ $DB->set_query_id($Result);
 <? } ?>
 
 <table>
-	<tr class="colhead_dark" style="font-weight: bold;">
-		<td>User</td>
-		<td>Active</td>
-		<td>Connectable</td>
-		<td class="number_column">Up (this session)</td>
-		<td class="number_column">%</td>
-		<td>Client</td>
-	</tr>
+    <tr class="colhead_dark" style="font-weight: bold;">
+        <td>User</td>
+        <td>Active</td>
+        <td>Connectable</td>
+        <td class="number_column">Up (this session)</td>
+        <td class="number_column">%</td>
+        <td>Client</td>
+    </tr>
 <?
 while (list($PeerUserID, $Size, $Active, $Connectable, $Uploaded, $Remaining, $UserAgent) = $DB->next_record()) {
 ?>
-	<tr>
+    <tr>
 <?
-	if (check_perms('users_mod') || $PeerUserID == G::$LoggedUser['ID']) {
+    if (check_perms('users_mod') || $PeerUserID == G::$LoggedUser['ID']) {
 ?>
-		<td><?=Users::format_username($PeerUserID, false, false, false)?></td>
-<?	} else {
+        <td><?=Users::format_username($PeerUserID, false, false, false)?></td>
+<?    } else {
 ?>
-		<td>Peer</td>
-<?	}
+        <td>Peer</td>
+<?    }
 ?>
-		<td><?=($Active) ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>' ?></td>
-		<td><?= ($Connectable) ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>' ?></td>
-		<td class="number_column"><?=Format::get_size($Uploaded) ?></td>
-		<td class="number_column"><?=number_format(($Size - $Remaining) / $Size * 100, 2)?></td>
-		<td><?=display_str($UserAgent)?></td>
-	</tr>
+        <td><?=($Active) ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>' ?></td>
+        <td><?= ($Connectable) ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>' ?></td>
+        <td class="number_column"><?=Format::get_size($Uploaded) ?></td>
+        <td class="number_column"><?=number_format(($Size - $Remaining) / $Size * 100, 2)?></td>
+        <td><?=display_str($UserAgent)?></td>
+    </tr>
 <?
 }
 ?>

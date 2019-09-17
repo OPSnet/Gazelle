@@ -1,6 +1,6 @@
 <?php
 if (!check_perms('users_view_ips')) {
-	error(403);
+    error(403);
 }
 View::show_header('Dupe IPs');
 define('USERS_PER_PAGE', 50);
@@ -42,40 +42,40 @@ $DB->set_query_id($RS);
 
 if ($DB->has_results()) {
 ?>
-	<div class="linkbox">
+    <div class="linkbox">
 <?
-	$Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11);
-	echo $Pages;
+    $Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11);
+    echo $Pages;
 ?>
-	</div>
-	<table width="100%">
-		<tr class="colhead">
-			<td>User</td>
-			<td>IP address</td>
-			<td>Dupes</td>
-			<td>Registered</td>
-		</tr>
+    </div>
+    <table width="100%">
+        <tr class="colhead">
+            <td>User</td>
+            <td>IP address</td>
+            <td>Dupes</td>
+            <td>Registered</td>
+        </tr>
 <?
-	$Row = 'b';
-	while (list($UserID, $IP, $Username, $PermissionID, $Enabled, $Donor, $Warned, $Joined, $Uses) = $DB->next_record()) {
-	$Row = $Row === 'b' ? 'a' : 'b';
+    $Row = 'b';
+    while (list($UserID, $IP, $Username, $PermissionID, $Enabled, $Donor, $Warned, $Joined, $Uses) = $DB->next_record()) {
+    $Row = $Row === 'b' ? 'a' : 'b';
 ?>
-		<tr class="row<?=$Row?>">
-			<td><?=Users::format_username($UserID, true, true, true, true)?></td>
-			<td>
-				<span style="float: left;"><?=Tools::get_host_by_ajax($IP)." ($IP)"?></span><span style="float: right;"><a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" title="History" class="brackets tooltip">H</a> <a href="user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($IP)?>" title="Search" class="brackets tooltip">S</a></span>
-			</td>
-			<td><?=display_str($Uses)?></td>
-			<td><?=time_diff($Joined)?></td>
-		</tr>
-<?	} ?>
-	</table>
-	<div class="linkbox">
-<?	echo $Pages; ?>
-	</div>
-<?	} else { ?>
-	<h2 align="center">There are currently no users with more than <?=IP_OVERLAPS?> IP overlaps.</h2>
+        <tr class="row<?=$Row?>">
+            <td><?=Users::format_username($UserID, true, true, true, true)?></td>
+            <td>
+                <span style="float: left;"><?=Tools::get_host_by_ajax($IP)." ($IP)"?></span><span style="float: right;"><a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" title="History" class="brackets tooltip">H</a> <a href="user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($IP)?>" title="Search" class="brackets tooltip">S</a></span>
+            </td>
+            <td><?=display_str($Uses)?></td>
+            <td><?=time_diff($Joined)?></td>
+        </tr>
+<?    } ?>
+    </table>
+    <div class="linkbox">
+<?    echo $Pages; ?>
+    </div>
+<?    } else { ?>
+    <h2 align="center">There are currently no users with more than <?=IP_OVERLAPS?> IP overlaps.</h2>
 <?
-	}
+    }
 View::show_footer();
 ?>

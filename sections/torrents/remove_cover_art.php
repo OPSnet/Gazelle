@@ -1,7 +1,7 @@
 <?php
 authorize();
 if (!check_perms('site_edit_wiki')) {
-	error(403);
+    error(403);
 }
 
 $ID = $_GET['id'];
@@ -9,7 +9,7 @@ $GroupID = $_GET['groupid'];
 
 
 if (!is_number($ID) || !is_number($ID) || !is_number($GroupID) || !is_number($GroupID)) {
-	error(404);
+    error(404);
 }
 
 $DB->query("

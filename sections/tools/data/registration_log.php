@@ -1,6 +1,6 @@
 <?php
 if (!check_perms('users_view_ips') || !check_perms('users_view_email')) {
-	error(403);
+    error(403);
 }
 View::show_header('Registration log');
 define('USERS_PER_PAGE', 50);
@@ -10,17 +10,17 @@ $AfterDate = $_POST['after_date'];
 $BeforeDate = $_POST['before_date'];
 $DateSearch = false;
 if (!empty($AfterDate) && !empty($BeforeDate)) {
-	list($Y, $M, $D) = explode('-', $AfterDate);
-	if (!checkdate($M, $D, $Y)) {
-		error('Incorrect "after" date format');
-	}
-	list($Y, $M, $D) = explode('-', $BeforeDate);
-	if (!checkdate($M, $D, $Y)) {
-		error('Incorrect "before" date format');
-	}
-	$AfterDate = db_string($AfterDate);
-	$BeforeDate = db_string($BeforeDate);
-	$DateSearch = true;
+    list($Y, $M, $D) = explode('-', $AfterDate);
+    if (!checkdate($M, $D, $Y)) {
+        error('Incorrect "after" date format');
+    }
+    list($Y, $M, $D) = explode('-', $BeforeDate);
+    if (!checkdate($M, $D, $Y)) {
+        error('Incorrect "before" date format');
+    }
+    $AfterDate = db_string($AfterDate);
+    $BeforeDate = db_string($BeforeDate);
+    $DateSearch = true;
 }
 
 $RS = "
@@ -66,9 +66,9 @@ $RS = "
 		LEFT JOIN users_info AS ii ON i.Inviter = ii.UserID
 	WHERE";
 if ($DateSearch) {
-	$RS .= " i.JoinDate BETWEEN '$AfterDate' AND '$BeforeDate' ";
+    $RS .= " i.JoinDate BETWEEN '$AfterDate' AND '$BeforeDate' ";
 } else {
-	$RS .= " i.JoinDate > '".time_minus(3600 * 24 * 3)."'";
+    $RS .= " i.JoinDate > '".time_minus(3600 * 24 * 3)."'";
 }
 $RS .= "
 	ORDER BY i.Joindate DESC
@@ -80,72 +80,72 @@ $DB->set_query_id($QueryID);
 ?>
 
 <form action="" method="post" acclass="thin box pad">
-	<input type="hidden" name="action" value="registration_log" />
-	Joined after: <input type="date" name="after_date" />
-	Joined before: <input type="date" name="before_date" />
-	<input type="submit" />
+    <input type="hidden" name="action" value="registration_log" />
+    Joined after: <input type="date" name="after_date" />
+    Joined before: <input type="date" name="before_date" />
+    <input type="submit" />
 </form>
 
 <?
 if ($DB->has_results()) {
 ?>
-	<div class="linkbox">
+    <div class="linkbox">
 <?
-	$Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11) ;
-	echo $Pages;
+    $Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11) ;
+    echo $Pages;
 ?>
-	</div>
+    </div>
 
-	<table width="100%">
-		<tr class="colhead">
-			<td>User</td>
-			<td>Ratio</td>
-			<td>Email</td>
-			<td>IP address</td>
-			<td>Country</td>
-			<td>Host</td>
-			<td>Registered</td>
-		</tr>
+    <table width="100%">
+        <tr class="colhead">
+            <td>User</td>
+            <td>Ratio</td>
+            <td>Email</td>
+            <td>IP address</td>
+            <td>Country</td>
+            <td>Host</td>
+            <td>Registered</td>
+        </tr>
 <?
-	while (list($UserID, $IP, $IPCC, $Email, $Username, $PermissionID, $Uploaded, $Downloaded, $Enabled, $Donor, $Warned, $Joined, $Uses, $InviterID, $InviterIP, $InviterIPCC, $InviterEmail, $InviterUsername, $InviterPermissionID, $InviterUploaded, $InviterDownloaded, $InviterEnabled, $InviterDonor, $InviterWarned, $InviterJoined, $InviterUses) = $DB->next_record()) {
-	$Row = $IP === $InviterIP ? 'a' : 'b';
+    while (list($UserID, $IP, $IPCC, $Email, $Username, $PermissionID, $Uploaded, $Downloaded, $Enabled, $Donor, $Warned, $Joined, $Uses, $InviterID, $InviterIP, $InviterIPCC, $InviterEmail, $InviterUsername, $InviterPermissionID, $InviterUploaded, $InviterDownloaded, $InviterEnabled, $InviterDonor, $InviterWarned, $InviterJoined, $InviterUses) = $DB->next_record()) {
+    $Row = $IP === $InviterIP ? 'a' : 'b';
 ?>
-		<tr class="row<?=$Row?>">
-			<td><?=Users::format_username($UserID, true, true, true, true)?><br /><?=Users::format_username($InviterID, true, true, true, true)?></td>
-			<td><?=Format::get_ratio_html($Uploaded, $Downloaded)?><br /><?=Format::get_ratio_html($InviterUploaded, $InviterDownloaded)?></td>
-			<td>
-				<span style="float: left;"><?=display_str($Email)?></span>
-				<span style="float: right;"><a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;email_history=on&amp;email=<?=display_str($Email)?>" title="Search" class="brackets tooltip">S</a></span><br />
-				<span style="float: left;"><?=display_str($InviterEmail)?></span>
-				<span style="float: right;"><a href="userhistory.php?action=email&amp;userid=<?=$InviterID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;email_history=on&amp;email=<?=display_str($InviterEmail)?>" title="Search" class="brackets tooltip">S</a></span><br />
-			</td>
-			<td>
-				<span style="float: left;"><?=display_str($IP)?></span>
-				<span style="float: right;"><?=display_str($Uses)?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($IP)?>" title="Search" class="brackets tooltip">S</a> <a href="http://whatismyipaddress.com/ip/<?=display_str($IP)?>" title="WI" class="brackets tooltip">WI</a></span><br />
-				<span style="float: left;"><?=display_str($InviterIP)?></span>
-				<span style="float: right;"><?=display_str($InviterUses)?> <a href="userhistory.php?action=ips&amp;userid=<?=$InviterID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($InviterIP)?>" title="Search" class="brackets tooltip">S</a> <a href="http://whatismyipaddress.com/ip/<?=display_str($InviterIP)?>" title="WI" class="brackets tooltip">WI</a></span><br />
-			</td>
-			<td>
-				<?=$IPCC?> <br />
-				<?=$InviterIPCC?>
-			</td>
-			<td>
-				<?=Tools::get_host_by_ajax($IP)?><br />
-				<?=Tools::get_host_by_ajax($InviterIP)?>
-			</td>
-			<td>
-				<?=time_diff($Joined)?><br />
-				<?=time_diff($InviterJoined)?>
-			</td>
-		</tr>
-<?	} ?>
-	</table>
-	<div class="linkbox">
+        <tr class="row<?=$Row?>">
+            <td><?=Users::format_username($UserID, true, true, true, true)?><br /><?=Users::format_username($InviterID, true, true, true, true)?></td>
+            <td><?=Format::get_ratio_html($Uploaded, $Downloaded)?><br /><?=Format::get_ratio_html($InviterUploaded, $InviterDownloaded)?></td>
+            <td>
+                <span style="float: left;"><?=display_str($Email)?></span>
+                <span style="float: right;"><a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;email_history=on&amp;email=<?=display_str($Email)?>" title="Search" class="brackets tooltip">S</a></span><br />
+                <span style="float: left;"><?=display_str($InviterEmail)?></span>
+                <span style="float: right;"><a href="userhistory.php?action=email&amp;userid=<?=$InviterID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;email_history=on&amp;email=<?=display_str($InviterEmail)?>" title="Search" class="brackets tooltip">S</a></span><br />
+            </td>
+            <td>
+                <span style="float: left;"><?=display_str($IP)?></span>
+                <span style="float: right;"><?=display_str($Uses)?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($IP)?>" title="Search" class="brackets tooltip">S</a> <a href="http://whatismyipaddress.com/ip/<?=display_str($IP)?>" title="WI" class="brackets tooltip">WI</a></span><br />
+                <span style="float: left;"><?=display_str($InviterIP)?></span>
+                <span style="float: right;"><?=display_str($InviterUses)?> <a href="userhistory.php?action=ips&amp;userid=<?=$InviterID?>" title="History" class="brackets tooltip">H</a> <a href="/user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($InviterIP)?>" title="Search" class="brackets tooltip">S</a> <a href="http://whatismyipaddress.com/ip/<?=display_str($InviterIP)?>" title="WI" class="brackets tooltip">WI</a></span><br />
+            </td>
+            <td>
+                <?=$IPCC?> <br />
+                <?=$InviterIPCC?>
+            </td>
+            <td>
+                <?=Tools::get_host_by_ajax($IP)?><br />
+                <?=Tools::get_host_by_ajax($InviterIP)?>
+            </td>
+            <td>
+                <?=time_diff($Joined)?><br />
+                <?=time_diff($InviterJoined)?>
+            </td>
+        </tr>
+<?    } ?>
+    </table>
+    <div class="linkbox">
 <? echo $Pages; ?>
-	</div>
+    </div>
 <?
 } else { ?>
-	<h2 align="center">There have been no new registrations in the past 72 hours.</h2>
+    <h2 align="center">There have been no new registrations in the past 72 hours.</h2>
 <?
 }
 View::show_footer();

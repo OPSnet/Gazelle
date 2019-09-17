@@ -19,7 +19,7 @@ $UserQuery = $DB->query("
 				AND m.Enabled = '1'");
 $OffRatioWatch = $DB->collect('ID');
 if (count($OffRatioWatch) > 0) {
-	$DB->query("
+    $DB->query("
 			UPDATE users_info AS ui
 				JOIN users_main AS um ON um.ID = ui.UserID
 			SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
@@ -30,16 +30,16 @@ if (count($OffRatioWatch) > 0) {
 }
 
 foreach ($OffRatioWatch as $UserID) {
-	$Cache->begin_transaction("user_info_heavy_$UserID");
-	$Cache->update_row(false, array('RatioWatchEnds' => '0000-00-00 00:00:00', 'RatioWatchDownload' => '0', 'CanLeech' => 1));
-	$Cache->commit_transaction(0);
-	Misc::send_pm($UserID, 0, 'You have been taken off Ratio Watch', "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n");
-	echo "Ratio watch off: $UserID\n";
+    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->update_row(false, array('RatioWatchEnds' => '0000-00-00 00:00:00', 'RatioWatchDownload' => '0', 'CanLeech' => 1));
+    $Cache->commit_transaction(0);
+    Misc::send_pm($UserID, 0, 'You have been taken off Ratio Watch', "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n");
+    echo "Ratio watch off: $UserID\n";
 }
 $DB->set_query_id($UserQuery);
 $Passkeys = $DB->collect('torrent_pass');
 foreach ($Passkeys as $Passkey) {
-	Tracker::update_tracker('update_user', array('passkey' => $Passkey, 'can_leech' => '1'));
+    Tracker::update_tracker('update_user', array('passkey' => $Passkey, 'can_leech' => '1'));
 }
 
 // Take users off ratio watch
@@ -53,7 +53,7 @@ $UserQuery = $DB->query("
 					AND m.Enabled = '1'");
 $OffRatioWatch = $DB->collect('ID');
 if (count($OffRatioWatch) > 0) {
-	$DB->query("
+    $DB->query("
 			UPDATE users_info AS ui
 				JOIN users_main AS um ON um.ID = ui.UserID
 			SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
@@ -63,16 +63,16 @@ if (count($OffRatioWatch) > 0) {
 }
 
 foreach ($OffRatioWatch as $UserID) {
-	$Cache->begin_transaction("user_info_heavy_$UserID");
-	$Cache->update_row(false, array('RatioWatchEnds' => '0000-00-00 00:00:00', 'RatioWatchDownload' => '0', 'CanLeech' => 1));
-	$Cache->commit_transaction(0);
-	Misc::send_pm($UserID, 0, "You have been taken off Ratio Watch", "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n");
-	echo "Ratio watch off: $UserID\n";
+    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->update_row(false, array('RatioWatchEnds' => '0000-00-00 00:00:00', 'RatioWatchDownload' => '0', 'CanLeech' => 1));
+    $Cache->commit_transaction(0);
+    Misc::send_pm($UserID, 0, "You have been taken off Ratio Watch", "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n");
+    echo "Ratio watch off: $UserID\n";
 }
 $DB->set_query_id($UserQuery);
 $Passkeys = $DB->collect('torrent_pass');
 foreach ($Passkeys as $Passkey) {
-	Tracker::update_tracker('update_user', array('passkey' => $Passkey, 'can_leech' => '1'));
+    Tracker::update_tracker('update_user', array('passkey' => $Passkey, 'can_leech' => '1'));
 }
 
 // Put user on ratio watch if he doesn't meet the standards
@@ -89,7 +89,7 @@ $DB->query("
 $OnRatioWatch = $DB->collect('ID');
 
 if (count($OnRatioWatch) > 0) {
-	$DB->query("
+    $DB->query("
 			UPDATE users_info AS i
 				JOIN users_main AS m ON m.ID = i.UserID
 			SET i.RatioWatchEnds = '".time_plus(60 * 60 * 24 * 14)."',
@@ -99,11 +99,11 @@ if (count($OnRatioWatch) > 0) {
 }
 
 foreach ($OnRatioWatch as $UserID) {
-	$Cache->begin_transaction("user_info_heavy_$UserID");
-	$Cache->update_row(false, array('RatioWatchEnds' => time_plus(60 * 60 * 24 * 14), 'RatioWatchDownload' => 0));
-	$Cache->commit_transaction(0);
-	Misc::send_pm($UserID, 0, 'You have been put on Ratio Watch', "This happens when your ratio falls below the requirements we have outlined in the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above.");
-	echo "Ratio watch on: $UserID\n";
+    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->update_row(false, array('RatioWatchEnds' => time_plus(60 * 60 * 24 * 14), 'RatioWatchDownload' => 0));
+    $Cache->commit_transaction(0);
+    Misc::send_pm($UserID, 0, 'You have been put on Ratio Watch', "This happens when your ratio falls below the requirements we have outlined in the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above.");
+    echo "Ratio watch on: $UserID\n";
 }
 
 sleep(5);

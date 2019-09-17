@@ -1,7 +1,7 @@
 <?php
 
 if (!check_perms('users_mod')) {
-	error(403);
+    error(403);
 }
 
 $TorrentID = intval($_POST['torrentid']);
@@ -10,7 +10,7 @@ $LogID = intval($_POST['logid']);
 $DB->prepared_query("SELECT GroupID FROM torrents WHERE ID = ?", $TorrentID);
 list($GroupID) = $DB->fetch_record();
 if (!$GroupID) {
-	error(404);
+    error(404);
 }
 
 $DB->prepared_query("
@@ -20,7 +20,7 @@ $DB->prepared_query("
     $TorrentID, $LogID
 );
 if (!$DB->has_results()) {
-	error(404);
+    error(404);
 }
 
 $Log = $DB->fetch_record(MYSQLI_ASSOC);
@@ -32,52 +32,52 @@ $AdjustmentReason = $_POST['adjustment_reason'];
 $AdjustmentDetails = [];
 
 if ($AdjustedChecksum != $Log['Checksum']) {
-	$AdjustmentDetails['checksum'] = 'Checksum manually '.($AdjustedChecksum == '1' ? 'validated' : 'invalidated');
+    $AdjustmentDetails['checksum'] = 'Checksum manually '.($AdjustedChecksum == '1' ? 'validated' : 'invalidated');
 }
 
 $Deductions = [
-	['read_mode_secure', 'Non-Secure Mode used', 20],
-	['audio_cache', 'Defeat/disable audio cache should be yes', 10],
-	['c2_points', 'C2 Pointers enabled', 10],
-	['drive_offset', 'Incorred drive offset', 5],
-	['fill_offsets', 'Does not fill up missing offset samples with silence', 5],
-	['deletes_ofsets', 'Deletes leading and trailing silent blocks', 5],
-	['gap_handling', 'Gap handling should be appended to previous track', 10],
-	['test_and_copy', 'Test & Copy not used', 10],
-	['range_rip', 'Range Rip', 30],
-	['null_samples', 'Null samples should be used in CRC calculations', 5],
-	['eac_old', 'EAC older than 0.99', 30],
-	['id3_tags', 'ID3 tags found', 1],
-	['foreign_log', 'Unrecognized foreign log'],
-	['combined_log', 'Combined log']
+    ['read_mode_secure', 'Non-Secure Mode used', 20],
+    ['audio_cache', 'Defeat/disable audio cache should be yes', 10],
+    ['c2_points', 'C2 Pointers enabled', 10],
+    ['drive_offset', 'Incorred drive offset', 5],
+    ['fill_offsets', 'Does not fill up missing offset samples with silence', 5],
+    ['deletes_ofsets', 'Deletes leading and trailing silent blocks', 5],
+    ['gap_handling', 'Gap handling should be appended to previous track', 10],
+    ['test_and_copy', 'Test & Copy not used', 10],
+    ['range_rip', 'Range Rip', 30],
+    ['null_samples', 'Null samples should be used in CRC calculations', 5],
+    ['eac_old', 'EAC older than 0.99', 30],
+    ['id3_tags', 'ID3 tags found', 1],
+    ['foreign_log', 'Unrecognized foreign log'],
+    ['combined_log', 'Combined log']
 ];
 
 foreach ($Deductions as $Deduction) {
-	if (isset($_POST[$Deduction[0]])) {
-		$Text = $Deduction[1];
-		if (isset($Deduction[2]) && $Deduction[2] > 0) {
-			$Text .= " (-{$Deduction[2]} points)";
-		}
-		$AdjustmentDetails[$Deduction[0]] = $Text;
-		$AdjustedScore -= $Deduction[2];
-	}
+    if (isset($_POST[$Deduction[0]])) {
+        $Text = $Deduction[1];
+        if (isset($Deduction[2]) && $Deduction[2] > 0) {
+            $Text .= " (-{$Deduction[2]} points)";
+        }
+        $AdjustmentDetails[$Deduction[0]] = $Text;
+        $AdjustedScore -= $Deduction[2];
+    }
 
 }
 
 $TrackDeductions = [
-	['crc_mismatches', 'CRC mismatches', 30],
-	['suspicious_positions', 'Suspicious positions', 20],
-	['timing_problems', 'Timing problems', 20]
+    ['crc_mismatches', 'CRC mismatches', 30],
+    ['suspicious_positions', 'Suspicious positions', 20],
+    ['timing_problems', 'Timing problems', 20]
 ];
 
 foreach ($TrackDeductions as $Deduction) {
-	$Count = intval($_POST[$Deduction[0]]);
-	$Total = $Deduction[2] * $Count;
-	if ($Count > 0) {
-		$AdjustmentDetails[$Deduction[0]] = "{$Count} {$Deduction[1]} (-{$Total} points)";
-	}
-	$AdjustmentDetails['tracks'][$Deduction[0]] = $Count;
-	$AdjustedScore -= $Total;
+    $Count = intval($_POST[$Deduction[0]]);
+    $Total = $Deduction[2] * $Count;
+    if ($Count > 0) {
+        $AdjustmentDetails[$Deduction[0]] = "{$Count} {$Deduction[1]} (-{$Total} points)";
+    }
+    $AdjustmentDetails['tracks'][$Deduction[0]] = $Count;
+    $AdjustedScore -= $Total;
 }
 
 $DB->prepared_query('

@@ -119,9 +119,9 @@ class NMA_API
                       'description' => substr($description, 0, 10000),
                       'priority'    => $priority
         );
-		if (!empty($url)) {
-			$post['url'] = substr($url, 0, 2000);
-		}
+        if (!empty($url)) {
+            $post['url'] = substr($url, 0, 2000);
+        }
         if ($this->devKey) {
             $post['developerkey'] = $this->devKey;
         }

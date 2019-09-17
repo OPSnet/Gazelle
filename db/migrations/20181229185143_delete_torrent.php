@@ -27,7 +27,7 @@ class DeleteTorrent extends AbstractMigration
      * with the Table class.
      */
     public function up() {
-		$this->execute("
+        $this->execute("
 CREATE TABLE `deleted_torrents` (
   `ID` int(10) NOT NULL,
   `GroupID` int(10) NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE `deleted_torrents_missing_lineage` (
     }
 
     public function down() {
-		$this->execute("
+        $this->execute("
 DROP TABLE `deleted_torrents`;
 DROP TABLE `deleted_users_notify_torrents`;
 DROP TABLE `deleted_torrents_files`;

@@ -18,7 +18,7 @@ $DB->query("
 
 $DB->set_query_id($SessionQuery);
 while (list($UserID, $SessionID) = $DB->next_record()) {
-	$Cache->begin_transaction("users_sessions_$UserID");
-	$Cache->delete_row($SessionID);
-	$Cache->commit_transaction(0);
+    $Cache->begin_transaction("users_sessions_$UserID");
+    $Cache->delete_row($SessionID);
+    $Cache->commit_transaction(0);
 }

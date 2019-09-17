@@ -5,10 +5,10 @@ $ArtistID = db_string($_GET['artistid']);
 $Way = db_string($_GET['way']);
 
 if (!is_number($SimilarID) || !is_number($ArtistID)) {
-	error(404);
+    error(404);
 }
 if (!in_array($Way, array('up', 'down'))) {
-	error(404);
+    error(404);
 }
 
 $DB->query("
@@ -18,21 +18,21 @@ $DB->query("
 		AND UserID='$UserID'
 		AND Way='$Way'");
 if (!$DB->has_results()) {
-	if ($Way == 'down') {
-		$Score = 'Score-100';
-	} elseif ($Way == 'up') {
-		$Score = 'Score+100';
-	} else { // Nothing is impossible!
-		$Score = 'Score';
-	}
-	$DB->query("
+    if ($Way == 'down') {
+        $Score = 'Score-100';
+    } elseif ($Way == 'up') {
+        $Score = 'Score+100';
+    } else { // Nothing is impossible!
+        $Score = 'Score';
+    }
+    $DB->query("
 		UPDATE artists_similar_scores
 		SET Score=$Score
 		WHERE SimilarID='$SimilarID'");
-	$DB->query("
+    $DB->query("
 		INSERT INTO artists_similar_votes (SimilarID, UserID, Way)
 		VALUES ('$SimilarID', '$UserID', '$Way')");
-	$Cache->delete_value('artist_'.$ArtistID); // Delete artist cache
+    $Cache->delete_value('artist_'.$ArtistID); // Delete artist cache
 }
 
 $Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$ArtistID}" : $_SERVER['HTTP_REFERER'];

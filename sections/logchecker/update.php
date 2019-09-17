@@ -37,52 +37,52 @@ $DB->query("
 	WHERE HasLog='1' AND HasLogDB='1' AND UserID = " . $LoggedUser['ID']);
 
 if ($DB->has_results()) {
-	$GroupIDs = $DB->collect('GroupID');
-	$TorrentsInfo = $DB->to_array('ID');
-	$Groups = Torrents::get_groups($GroupIDs);
-	foreach ($TorrentsInfo as $TorrentID => $Torrent) {
-		list($ID, $GroupID, $Format, $Encoding, $HasCue, $HasLog, $HasLogDB, $LogScore, $LogChecksum) = $Torrent;
-		$Group = $Groups[(int) $GroupID];
-		$GroupName = $Group['Name'];
-		$GroupYear = $Group['Year'];
-		$ExtendedArtists = $Group['ExtendedArtists'];
-		$Artists = $Group['Artists'];
-		if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
-			unset($ExtendedArtists[2]);
-			unset($ExtendedArtists[3]);
-			$DisplayName = Artists::display_artists($ExtendedArtists);
-		} elseif (!empty($Artists)) {
-			$DisplayName = Artists::display_artists(array(1 => $Artists));
-		} else {
-			$DisplayName = '';
-		}
-		$DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$ID.'" class="tooltip" title="View torrent" dir="ltr">'.$GroupName.'</a>';
-		if ($GroupYear > 0) {
-			$DisplayName .= " [{$GroupYear}]";
-		}
-		$Info = array();
-		if (!empty($Data['Format'])) {
-			$Info[] = $Data['Format'];
-		}
-		if (!empty($Data['Encoding'])) {
-			$Info[] = $Data['Encoding'];
-		}
-		if (!empty($Info)) {
-			$DisplayName .= ' [' . implode('/', $Info) . ']';
-		}
-		if ($HasLog == '1') {
-			$DisplayName .= ' / Log'.($HasLogDB == '1' ? " ({$LogScore}%)" : "");
-		}
-		if ($HasCue == '1') {
-			$DisplayName .= ' / Cue';
-		}
-		if ($LogChecksum == '0') {
-			$DisplayName .= ' / ' . Format::torrent_label('Bad/Missing Checksum');
-		}
-		echo "\t\t\t\t<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
-	}
-	$AcceptValues = Logchecker::get_accept_values();
-	echo <<<HTML
+    $GroupIDs = $DB->collect('GroupID');
+    $TorrentsInfo = $DB->to_array('ID');
+    $Groups = Torrents::get_groups($GroupIDs);
+    foreach ($TorrentsInfo as $TorrentID => $Torrent) {
+        list($ID, $GroupID, $Format, $Encoding, $HasCue, $HasLog, $HasLogDB, $LogScore, $LogChecksum) = $Torrent;
+        $Group = $Groups[(int) $GroupID];
+        $GroupName = $Group['Name'];
+        $GroupYear = $Group['Year'];
+        $ExtendedArtists = $Group['ExtendedArtists'];
+        $Artists = $Group['Artists'];
+        if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
+            unset($ExtendedArtists[2]);
+            unset($ExtendedArtists[3]);
+            $DisplayName = Artists::display_artists($ExtendedArtists);
+        } elseif (!empty($Artists)) {
+            $DisplayName = Artists::display_artists(array(1 => $Artists));
+        } else {
+            $DisplayName = '';
+        }
+        $DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$ID.'" class="tooltip" title="View torrent" dir="ltr">'.$GroupName.'</a>';
+        if ($GroupYear > 0) {
+            $DisplayName .= " [{$GroupYear}]";
+        }
+        $Info = array();
+        if (!empty($Data['Format'])) {
+            $Info[] = $Data['Format'];
+        }
+        if (!empty($Data['Encoding'])) {
+            $Info[] = $Data['Encoding'];
+        }
+        if (!empty($Info)) {
+            $DisplayName .= ' [' . implode('/', $Info) . ']';
+        }
+        if ($HasLog == '1') {
+            $DisplayName .= ' / Log'.($HasLogDB == '1' ? " ({$LogScore}%)" : "");
+        }
+        if ($HasCue == '1') {
+            $DisplayName .= ' / Cue';
+        }
+        if ($LogChecksum == '0') {
+            $DisplayName .= ' / ' . Format::torrent_label('Bad/Missing Checksum');
+        }
+        echo "\t\t\t\t<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"$ID\"></td><td>{$DisplayName}</td></tr>";
+    }
+    $AcceptValues = Logchecker::get_accept_values();
+    echo <<<HTML
 			<tr class="colhead">
 				<td colspan="2">Upload Logs for This Torrent</td>
 			</tr>
@@ -101,7 +101,7 @@ HTML;
 
 }
 else {
-	echo "\t\t\t<tr><td colspan='2'>No uploads found.</td></tr>";
+    echo "\t\t\t<tr><td colspan='2'>No uploads found.</td></tr>";
 }
 print <<<HTML
 		  </table>

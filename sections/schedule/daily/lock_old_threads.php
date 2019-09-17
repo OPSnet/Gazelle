@@ -14,27 +14,27 @@ $IDs = $DB->collect('ID');
 $ForumIDs = $DB->collect('ForumID');
 
 if (count($IDs) > 0) {
-	$LockIDs = implode(',', $IDs);
-	$DB->query("
+    $LockIDs = implode(',', $IDs);
+    $DB->query("
 			UPDATE forums_topics
 			SET IsLocked = '1'
 			WHERE ID IN($LockIDs)");
-	sleep(2);
-	$DB->query("
+    sleep(2);
+    $DB->query("
 			DELETE FROM forums_last_read_topics
 			WHERE TopicID IN($LockIDs)");
 
-	foreach ($IDs as $ID) {
-		$Cache->begin_transaction("thread_$ID".'_info');
-		$Cache->update_row(false, array('IsLocked' => '1'));
-		$Cache->commit_transaction(3600 * 24 * 30);
-		$Cache->expire_value("thread_$ID".'_catalogue_0', 3600 * 24 * 30);
-		$Cache->expire_value("thread_$ID".'_info', 3600 * 24 * 30);
-		Forums::add_topic_note($ID, 'Locked automatically by schedule', 0);
-	}
+    foreach ($IDs as $ID) {
+        $Cache->begin_transaction("thread_$ID".'_info');
+        $Cache->update_row(false, array('IsLocked' => '1'));
+        $Cache->commit_transaction(3600 * 24 * 30);
+        $Cache->expire_value("thread_$ID".'_catalogue_0', 3600 * 24 * 30);
+        $Cache->expire_value("thread_$ID".'_info', 3600 * 24 * 30);
+        Forums::add_topic_note($ID, 'Locked automatically by schedule', 0);
+    }
 
-	$ForumIDs = array_flip(array_flip($ForumIDs));
-	foreach ($ForumIDs as $ForumID) {
-		$Cache->delete_value("forums_$ForumID");
-	}
+    $ForumIDs = array_flip(array_flip($ForumIDs));
+    foreach ($ForumIDs as $ForumID) {
+        $Cache->delete_value("forums_$ForumID");
+    }
 }

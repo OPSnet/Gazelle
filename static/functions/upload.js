@@ -1,17 +1,17 @@
 var ArtistCount = 1;
 
 function Categories() {
-	var dynamic_form = $('#dynamic_form');
+    var dynamic_form = $('#dynamic_form');
     ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
-		dynamic_form.raw().innerHTML = response;
+        dynamic_form.raw().innerHTML = response;
         initMultiButtons();
         // Evaluate the code that generates previews.
         eval($('#dynamic_form script.preview_code').html());
         setTimeout(function() {
-			dynamic_form.data('loaded', true);
-		}, 500);
+            dynamic_form.data('loaded', true);
+        }, 500);
 
-		ArtistCount = 1;
+        ArtistCount = 1;
     });
 }
 
@@ -45,11 +45,11 @@ function Format(skip_bitrate) {
 
     var format_warning = $('#format_warning');
     if (format_warning.raw()) {
-		if (format.raw().options[format.raw().selectedIndex].value === 'AAC') {
-			format_warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
-		} else {
-			format_warning.raw().innerHTML = '';
-		}
+        if (format.raw().options[format.raw().selectedIndex].value === 'AAC') {
+            format_warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
+        } else {
+            format_warning.raw().innerHTML = '';
+        }
     }
 }
 
@@ -277,8 +277,8 @@ function RemoveArtistField() {
 
 
 function CheckVA () {
-	var shown = false;
-	for (var i = 0; i < ArtistCount; i++) {
+    var shown = false;
+    for (var i = 0; i < ArtistCount; i++) {
         var artistId = "#artist_" + i;
         if ($(artistId).raw().value.toLowerCase().trim().match(/^(va|various(\sa|a)rtis(t|ts)|various)$/)) {
             $('#vawarning').gshow();
@@ -288,7 +288,7 @@ function CheckVA () {
     }
     if (!shown) {
         $('#vawarning').ghide();
-	}
+    }
 }
 
 function CheckYear() {
@@ -375,10 +375,10 @@ function AddArtist(array, importance, cnt) {
         var artist_id = (cnt > 0) ? 'artist_' + cnt : 'artist';
         var importance_id = (cnt > 0) ? 'importance_' + cnt : 'importance';
         if (array[i]['name']) {
-			$('#' + artist_id).val(array[i]['name']);
-			$('#' + importance_id).val(importance);
-			AddArtistField();
-			cnt++;
+            $('#' + artist_id).val(array[i]['name']);
+            $('#' + importance_id).val(importance);
+            AddArtistField();
+            cnt++;
         }
     }
     return cnt;
@@ -393,7 +393,7 @@ function ParseEncoding(encoding) {
         setTimeout(function() {
             if (encoding.length > 5 && encoding.substr(-5) === '(VBR)') {
                 encoding = encoding.substr(0, encoding.length - 6);
-				$('#vbr').prop('checked', true);
+                $('#vbr').prop('checked', true);
             }
             $('#other_bitrate').val(encoding);
         }, 50);
@@ -403,44 +403,44 @@ function ParseEncoding(encoding) {
 function ParseMusicJson(group, torrent) {
     var cnt = 0;
 
-	// JSON property to HTML value for importance
-	var mapping = {
-		artists: 1,
-		with: 2,
-		composers: 4,
-		conductor: 5,
-		dj: 6,
-		remixedBy: 3,
-		producer: 7
-	};
+    // JSON property to HTML value for importance
+    var mapping = {
+        artists: 1,
+        with: 2,
+        composers: 4,
+        conductor: 5,
+        dj: 6,
+        remixedBy: 3,
+        producer: 7
+    };
 
     if (group['musicInfo']) {
-		for (var prop in group['musicInfo']) {
-		    if (!group['musicInfo'].hasOwnProperty(prop)) {
-		        continue;
+        for (var prop in group['musicInfo']) {
+            if (!group['musicInfo'].hasOwnProperty(prop)) {
+                continue;
             }
             cnt = AddArtist(group['musicInfo'][prop], mapping[prop], cnt);
-		}
-		RemoveArtistField();
+        }
+        RemoveArtistField();
     }
 
     // HTML ID to JSON key for group data
     mapping = {
-		record_label: 'recordLabel',
-		releasetype: 'releaseType',
-		catalogue_number: 'catalogueNumber'
-	};
-
-	FillInFields(mapping, group);
-
-	// HTML ID to JSON key for torrent data
-	mapping = {
-		format: 'format',
-		media: 'media'
+        record_label: 'recordLabel',
+        releasetype: 'releaseType',
+        catalogue_number: 'catalogueNumber'
     };
-	FillInFields(mapping, torrent);
 
-	ParseEncoding(torrent['encoding']);
+    FillInFields(mapping, group);
+
+    // HTML ID to JSON key for torrent data
+    mapping = {
+        format: 'format',
+        media: 'media'
+    };
+    FillInFields(mapping, torrent);
+
+    ParseEncoding(torrent['encoding']);
 
     if (torrent['scene']) {
         $('#scene').prop('checked', torrent['scene']);
@@ -450,76 +450,76 @@ function ParseMusicJson(group, torrent) {
         $('#remaster').prop('checked', true).triggerHandler('click');
         mapping = {
             remaster_year: 'remasterYear',
-			remaster_title: 'remasterTitle',
-			remaster_record_label: 'remasterRecordLabel',
-			remaster_catalogue_number: 'remasterCatalogueNumber'
+            remaster_title: 'remasterTitle',
+            remaster_record_label: 'remasterRecordLabel',
+            remaster_catalogue_number: 'remasterCatalogueNumber'
         };
         FillInFields(mapping, torrent);
     }
 }
 
 function ParseForm(group, torrent) {
-	var mapping = {
-		title: 'name',
-		year: 'year',
-		image: 'wikiImage'
-	};
-	FillInFields(mapping, group);
+    var mapping = {
+        title: 'name',
+        year: 'year',
+        image: 'wikiImage'
+    };
+    FillInFields(mapping, group);
 
-	if (!group['categoryName'] || group['categoryName'] === 'Music') {
-		ParseMusicJson(group, torrent);
-	}
-	else if (group['categoryName'] === 'Comedy') {
+    if (!group['categoryName'] || group['categoryName'] === 'Music') {
+        ParseMusicJson(group, torrent);
+    }
+    else if (group['categoryName'] === 'Comedy') {
         mapping = {
             format: 'format'
         };
-	    FillInFields(mapping, torrent);
+        FillInFields(mapping, torrent);
         ParseEncoding(torrent['encoding']);
-	}
+    }
 
-	// special columns
-	if (group['tags']) {
-		$('#tags').val(group['tags'].join(','));
-	}
+    // special columns
+    if (group['tags']) {
+        $('#tags').val(group['tags'].join(','));
+    }
 
-	if (group['wikiBody']) {
-		$.post('upload.php?action=parse_html',
-			{
-				'html': group['wikiBody']
-			},
-			function(response) {
-				$('#album_desc').val(response);
-				$('#desc').val(response);
-			}
-		);
-	}
+    if (group['wikiBody']) {
+        $.post('upload.php?action=parse_html',
+            {
+                'html': group['wikiBody']
+            },
+            function(response) {
+                $('#album_desc').val(response);
+                $('#desc').val(response);
+            }
+        );
+    }
 
-	if (torrent['description']) {
-		$.post('upload.php?action=parse_html',
-			{'html': torrent['description']},
-			function(response) {
-				$('#release_desc').val(response);
-			}
-		);
-	}
+    if (torrent['description']) {
+        $.post('upload.php?action=parse_html',
+            {'html': torrent['description']},
+            function(response) {
+                $('#release_desc').val(response);
+            }
+        );
+    }
 
-	// reset the file input
-	var el = $('#torrent-json-file');
-	el.wrap('<form>').closest('form').get(0).reset();
-	el.unwrap();
+    // reset the file input
+    var el = $('#torrent-json-file');
+    el.wrap('<form>').closest('form').get(0).reset();
+    el.unwrap();
 }
 
 function WaitForCategory(callback) {
-	setTimeout(function() {
-		var dynamic_form = $('#dynamic_form');
-		if (dynamic_form.data('loaded') === true) {
-			dynamic_form.data('loaded', false);
-			callback();
-		}
-		else {
-			setTimeout(WaitForCategory(callback), 400);
-		}
-	}, 100);
+    setTimeout(function() {
+        var dynamic_form = $('#dynamic_form');
+        if (dynamic_form.data('loaded') === true) {
+            dynamic_form.data('loaded', false);
+            callback();
+        }
+        else {
+            setTimeout(WaitForCategory(callback), 400);
+        }
+    }, 100);
 }
 
 function ParseUploadJson() {
@@ -527,29 +527,29 @@ function ParseUploadJson() {
 
     reader.addEventListener('load', function() {
         try {
-			var data = JSON.parse(reader.result.toString());
-			var group = data['response']['group'];
-			var torrent = data['response']['torrent'];
+            var data = JSON.parse(reader.result.toString());
+            var group = data['response']['group'];
+            var torrent = data['response']['torrent'];
 
-			var categories_mapping = {
-			    'Music': 0,
+            var categories_mapping = {
+                'Music': 0,
                 'Applications': 1,
-			    'E-Books': 2,
+                'E-Books': 2,
                 'Audiobooks': 3,
                 'E-Learning Videos': 4,
                 'Comedy': 5,
                 'Comics': 6
             };
 
-			var categories = $('#categories');
-			if (!group['categoryName']) {
-				group['categoryName'] = 'Music';
-			}
-			categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
-			// delay for the form to change before filling it
-			WaitForCategory(function() {
-				ParseForm(group, torrent);
-			});
+            var categories = $('#categories');
+            if (!group['categoryName']) {
+                group['categoryName'] = 'Music';
+            }
+            categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
+            // delay for the form to change before filling it
+            WaitForCategory(function() {
+                ParseForm(group, torrent);
+            });
         }
         catch (e) {
             alert("Could not read file. Please try again.");

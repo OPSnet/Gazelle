@@ -1,6 +1,6 @@
 <?php
 if (PHP_VERSION_ID < 50400) {
-	die("Gazelle requires PHP 5.4 or later to function properly");
+    die("Gazelle requires PHP 5.4 or later to function properly");
 }
 date_default_timezone_set('UTC');
 
@@ -42,8 +42,8 @@ define('SQLSOCK', '/var/run/mysqld/mysqld.sock');
 
 // Memcached details
 $MemcachedServers = array(
-	// unix sockets are fast, and other people can't telnet into them
-	array('host' => '/var/run/memcached.sock', 'port' => 0),
+    // unix sockets are fast, and other people can't telnet into them
+    array('host' => '/var/run/memcached.sock', 'port' => 0),
 );
 
 // Sphinx details
@@ -68,11 +68,11 @@ define('SITE_URL', NONSSL_SITE_URL);
 define('STATIC_SERVER', NONSSL_STATIC_SERVER);
 
 /*if (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 80) {
-	define('SITE_URL', NONSSL_SITE_URL);
-	define('STATIC_SERVER', NONSSL_STATIC_SERVER);
+    define('SITE_URL', NONSSL_SITE_URL);
+    define('STATIC_SERVER', NONSSL_STATIC_SERVER);
 } else {
-	define('SITE_URL', SSL_SITE_URL);
-	define('STATIC_SERVER', SSL_STATIC_SERVER);
+    define('SITE_URL', SSL_SITE_URL);
+    define('STATIC_SERVER', SSL_STATIC_SERVER);
 }*/
 
 // Site settings
@@ -95,30 +95,30 @@ define('EDITING_TRASH_FORUM_ID', 48);
 
 
 if (!defined('FEATURE_EMAIL_REENABLE')) {
-	define('FEATURE_EMAIL_REENABLE', true);
+    define('FEATURE_EMAIL_REENABLE', true);
 }
 
 // User class IDs needed for automatic promotions. Found in the 'permissions' table
-// Name of class	Class ID (NOT level)
-define('ADMIN',		    '40');
-define('USER',		    '2');
-define('MEMBER',	    '3');
-define('POWER',		    '4');
-define('ELITE',		    '5');
-define('VIP',		    '26');
+// Name of class    Class ID (NOT level)
+define('ADMIN',            '40');
+define('USER',            '2');
+define('MEMBER',        '3');
+define('POWER',            '4');
+define('ELITE',            '5');
+define('VIP',            '26');
 define('TORRENT_MASTER','25');
-define('LEGEND',	    '27');
-define('CELEB',		    '31');
-define('MOD',		    '11');
-define('CODER',		    '24');
+define('LEGEND',        '27');
+define('CELEB',            '31');
+define('MOD',            '11');
+define('CODER',            '24');
 define('LEAD_DEV',      '43');
-define('SYSOP',		    '15');
-define('ARTIST',	    '19');
-define('DONOR',		    '20');
-define('FLS_TEAM',	    '23');
-define('POWER_TM',	    '29');
-define('ELITE_TM',	    '28');
-define('FORUM_MOD',	    '21');
+define('SYSOP',            '15');
+define('ARTIST',        '19');
+define('DONOR',            '20');
+define('FLS_TEAM',        '23');
+define('POWER_TM',        '29');
+define('ELITE_TM',        '28');
+define('FORUM_MOD',        '21');
 define('TORRENT_MOD',   '22');
 define('INTERVIEWER',   '30');
 define('DESIGNER',      '32');
@@ -195,87 +195,87 @@ $ReleaseTypes = array(1=>'Album', 3=>'Soundtrack', 5=>'EP', 6=>'Anthology', 7=>'
 //$ForumCats = array(1=>'Site', 5=>'Community', 10=>'Help', 8=>'Music', 20=>'Trash'); //No longer needed
 
 $ZIPGroups = array(
-	0 => 'MP3 (VBR) - High Quality',
-	1 => 'MP3 (VBR) - Low Quality',
-	2 => 'MP3 (CBR)',
-	3 => 'FLAC - Lossless',
-	4 => 'Others'
+    0 => 'MP3 (VBR) - High Quality',
+    1 => 'MP3 (VBR) - Low Quality',
+    2 => 'MP3 (CBR)',
+    3 => 'FLAC - Lossless',
+    4 => 'Others'
 );
 
 //3D array of attributes, OptionGroup, OptionNumber, Name
 $ZIPOptions = array(
-	'00' => array(0,0,'V0'),
-	'01' => array(0,1,'APX'),
-	'02' => array(0,2,'256'),
-	'03' => array(0,3,'V1'),
-	'10' => array(1,0,'224'),
-	'11' => array(1,1,'V2'),
-	'12' => array(1,2,'APS'),
-	'13' => array(1,3,'192'),
-	'20' => array(2,0,'320'),
-	'21' => array(2,1,'256'),
-	'22' => array(2,2,'224'),
-	'23' => array(2,3,'192'),
-	'30' => array(3,0,'FLAC / 24bit / Vinyl'),
-	'31' => array(3,1,'FLAC / 24bit / DVD'),
-	'32' => array(3,2,'FLAC / 24bit / SACD'),
-	'33' => array(3,3,'FLAC / Log (100) / Cue'),
-	'34' => array(3,4,'FLAC / Log (100)'),
-	'35' => array(3,5,'FLAC / Log'),
-	'36' => array(3,6,'FLAC'),
-	'40' => array(4,0,'DTS'),
-	'41' => array(4,1,'Ogg Vorbis'),
-	'42' => array(4,2,'AAC - 320'),
-	'43' => array(4,3,'AAC - 256'),
-	'44' => array(4,4,'AAC - q5.5'),
-	'45' => array(4,5,'AAC - q5'),
-	'46' => array(4,6,'AAC - 192')
+    '00' => array(0,0,'V0'),
+    '01' => array(0,1,'APX'),
+    '02' => array(0,2,'256'),
+    '03' => array(0,3,'V1'),
+    '10' => array(1,0,'224'),
+    '11' => array(1,1,'V2'),
+    '12' => array(1,2,'APS'),
+    '13' => array(1,3,'192'),
+    '20' => array(2,0,'320'),
+    '21' => array(2,1,'256'),
+    '22' => array(2,2,'224'),
+    '23' => array(2,3,'192'),
+    '30' => array(3,0,'FLAC / 24bit / Vinyl'),
+    '31' => array(3,1,'FLAC / 24bit / DVD'),
+    '32' => array(3,2,'FLAC / 24bit / SACD'),
+    '33' => array(3,3,'FLAC / Log (100) / Cue'),
+    '34' => array(3,4,'FLAC / Log (100)'),
+    '35' => array(3,5,'FLAC / Log'),
+    '36' => array(3,6,'FLAC'),
+    '40' => array(4,0,'DTS'),
+    '41' => array(4,1,'Ogg Vorbis'),
+    '42' => array(4,2,'AAC - 320'),
+    '43' => array(4,3,'AAC - 256'),
+    '44' => array(4,4,'AAC - q5.5'),
+    '45' => array(4,5,'AAC - q5'),
+    '46' => array(4,6,'AAC - 192')
 );
 
 // Ratio requirements, in descending order
 // Columns: Download amount, required ratio, grace period
 $RatioRequirements = array(
-	array(50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')),
-	array(40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')),
-	array(30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')),
-	array(20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')),
-	array(10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')),
-	array(5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14)))
+    array(50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')),
+    array(40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')),
+    array(30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')),
+    array(20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')),
+    array(10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')),
+    array(5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14)))
 );
 
 //Captcha fonts should be located in /classes/fonts
 $CaptchaFonts = array(
-	'ARIBLK.TTF',
-	'IMPACT.TTF',
-	'TREBUC.TTF',
-	'TREBUCBD.TTF',
-	'TREBUCBI.TTF',
-	'TREBUCIT.TTF',
-	'VERDANA.TTF',
-	'VERDANAB.TTF',
-	'VERDANAI.TTF',
-	'VERDANAZ.TTF');
+    'ARIBLK.TTF',
+    'IMPACT.TTF',
+    'TREBUC.TTF',
+    'TREBUCBD.TTF',
+    'TREBUCBI.TTF',
+    'TREBUCIT.TTF',
+    'VERDANA.TTF',
+    'VERDANAB.TTF',
+    'VERDANAI.TTF',
+    'VERDANAZ.TTF');
 //Captcha images should be located in /captcha
 $CaptchaBGs = array(
-	'captcha1.png',
-	'captcha2.png',
-	'captcha3.png',
-	'captcha4.png',
-	'captcha5.png',
-	'captcha6.png',
-	'captcha7.png',
-	'captcha8.png',
-	'captcha9.png');
+    'captcha1.png',
+    'captcha2.png',
+    'captcha3.png',
+    'captcha4.png',
+    'captcha5.png',
+    'captcha6.png',
+    'captcha7.png',
+    'captcha8.png',
+    'captcha9.png');
 
 // Special characters, and what they should be converted to
 // Used for torrent searching
 $SpecialChars = array(
-	'&' => 'and'
+    '&' => 'and'
 );
 
 // Deny cache access to keys without specified permission
 $CachePermissions = [
-	'api_apps' => 'site_debug',
-	'catalogue' => 'site_debug'
+    'api_apps' => 'site_debug',
+    'catalogue' => 'site_debug'
 ];
 

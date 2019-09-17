@@ -2,8 +2,8 @@
 authorize();
 
 if ($Bonus->purchaseInvite(G::$LoggedUser['ID'])) {
-	header('Location: bonus.php?complete=invite');
+    header('Location: bonus.php?complete=invite');
 }
 else {
-	error(403);
+    error(403);
 }

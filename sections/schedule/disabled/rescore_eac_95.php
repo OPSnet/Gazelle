@@ -15,11 +15,11 @@ $Details = array();
 $Details[] = "Ripped with EAC v0.95, -1 point [1]";
 $Details = serialize($Details);
 while (list($TorrentID) = $DB->next_record()) {
-	$DB->query("
+    $DB->query("
 			UPDATE torrents
 			SET LogScore = 99
 			WHERE ID = $TorrentID");
-	$DB->query("
+    $DB->query("
 			UPDATE torrents_logs_new
 			SET Score = 99, Details = '$Details'
 			WHERE TorrentID = $TorrentID");

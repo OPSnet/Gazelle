@@ -3,12 +3,12 @@
 namespace Gazelle\API;
 
 class Collage extends AbstractAPI {
-	public function run() {
-		if (!isset($_GET['collage_id'])) {
-			json_error('Missing collage id');
-		}
+    public function run() {
+        if (!isset($_GET['collage_id'])) {
+            json_error('Missing collage id');
+        }
 
-		$this->db->prepared_query("
+        $this->db->prepared_query("
 			SELECT
 				ID,
 				Name,
@@ -17,12 +17,12 @@ class Collage extends AbstractAPI {
 				collages
 			WHERE
 				ID = ?", $_GET['collage_id']);
-		if (!$this->db->has_results()) {
-			json_error('Collage not found');
-		}
-		$collage = $this->db->next_record(MYSQLI_ASSOC, false);
-		$collage['Category'] = $this->config['CollageCats'][$collage['CategoryID']];
+        if (!$this->db->has_results()) {
+            json_error('Collage not found');
+        }
+        $collage = $this->db->next_record(MYSQLI_ASSOC, false);
+        $collage['Category'] = $this->config['CollageCats'][$collage['CategoryID']];
 
-		return $collage;
-	}
+        return $collage;
+    }
 }

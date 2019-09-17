@@ -33,7 +33,7 @@ SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE RO
 
 $DB->query("SELECT UserID FROM users_info WHERE DisablePoints = '0'");
 if ($DB->has_results()) {
-	while(list($UserID) = $DB->next_record()) {
-		$Cache->delete_value('user_stats_'.$UserID);
-	}
+    while(list($UserID) = $DB->next_record()) {
+        $Cache->delete_value('user_stats_'.$UserID);
+    }
 }
