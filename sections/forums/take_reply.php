@@ -70,29 +70,29 @@ if (isset($_POST['subscribe']) && Subscriptions::has_subscribed($TopicID) === fa
 if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'])) {
     //Get the id for this post in the database to append
     $DB->query("
-		SELECT ID, Body
-		FROM forums_posts
-		WHERE TopicID = '$TopicID'
-			AND AuthorID = '".$LoggedUser['ID']."'
-		ORDER BY ID DESC
-		LIMIT 1");
+        SELECT ID, Body
+        FROM forums_posts
+        WHERE TopicID = '$TopicID'
+            AND AuthorID = '".$LoggedUser['ID']."'
+        ORDER BY ID DESC
+        LIMIT 1");
     list($PostID, $OldBody) = $DB->next_record(MYSQLI_NUM, false);
 
     //Edit the post
     $DB->query("
-		UPDATE forums_posts
-		SET
-			Body = CONCAT(Body,'\n\n".db_string($Body)."'),
-			EditedUserID = '".$LoggedUser['ID']."',
-			EditedTime = '$SQLTime'
-		WHERE ID = '$PostID'");
+        UPDATE forums_posts
+        SET
+            Body = CONCAT(Body,'\n\n".db_string($Body)."'),
+            EditedUserID = '".$LoggedUser['ID']."',
+            EditedTime = '$SQLTime'
+        WHERE ID = '$PostID'");
 
     //Store edit history
     $DB->query("
-		INSERT INTO comments_edits
-			(Page, PostID, EditUser, EditTime, Body)
-		VALUES
-			('forums', $PostID, ".$LoggedUser['ID'].", '$SQLTime', '".db_string($OldBody)."')");
+        INSERT INTO comments_edits
+            (Page, PostID, EditUser, EditTime, Body)
+        VALUES
+            ('forums', $PostID, ".$LoggedUser['ID'].", '$SQLTime', '".db_string($OldBody)."')");
     $Cache->delete_value("forums_edits_$PostID");
 
     //Get the catalogue it is in
@@ -125,31 +125,31 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
 } else {
     //Insert the post into the posts database
     $DB->query("
-		INSERT INTO forums_posts (TopicID, AuthorID, AddedTime, Body)
-		VALUES ('$TopicID', '".$LoggedUser['ID']."', '$SQLTime', '".db_string($Body)."')");
+        INSERT INTO forums_posts (TopicID, AuthorID, AddedTime, Body)
+        VALUES ('$TopicID', '".$LoggedUser['ID']."', '$SQLTime', '".db_string($Body)."')");
 
     $PostID = $DB->inserted_id();
 
     //This updates the root index
     $DB->query("
-		UPDATE forums
-		SET
-			NumPosts = NumPosts + 1,
-			LastPostID = '$PostID',
-			LastPostAuthorID = '".$LoggedUser['ID']."',
-			LastPostTopicID = '$TopicID',
-			LastPostTime = '$SQLTime'
-		WHERE ID = '$ForumID'");
+        UPDATE forums
+        SET
+            NumPosts = NumPosts + 1,
+            LastPostID = '$PostID',
+            LastPostAuthorID = '".$LoggedUser['ID']."',
+            LastPostTopicID = '$TopicID',
+            LastPostTime = '$SQLTime'
+        WHERE ID = '$ForumID'");
 
     //Update the topic
     $DB->query("
-		UPDATE forums_topics
-		SET
-			NumPosts = NumPosts + 1,
-			LastPostID = '$PostID',
-			LastPostAuthorID = '".$LoggedUser['ID']."',
-			LastPostTime = '$SQLTime'
-		WHERE ID = '$TopicID'");
+        UPDATE forums_topics
+        SET
+            NumPosts = NumPosts + 1,
+            LastPostID = '$PostID',
+            LastPostAuthorID = '".$LoggedUser['ID']."',
+            LastPostTime = '$SQLTime'
+        WHERE ID = '$TopicID'");
 
     // if cache exists modify it, if not, then it will be correct when selected next, and we can skip this block
     if ($Forum = $Cache->get_value("forums_$ForumID")) {
@@ -175,15 +175,15 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
             if ($Stickies < TOPICS_PER_PAGE || $ThreadInfo['IsSticky'] == 1) {
                 //Pull the data for the thread we're bumping
                 $DB->query("
-					SELECT
-						f.AuthorID,
-						f.IsLocked,
-						f.IsSticky,
-						f.NumPosts,
-						ISNULL(p.TopicID) AS NoPoll
-					FROM forums_topics AS f
-						LEFT JOIN forums_polls AS p ON p.TopicID = f.ID
-					WHERE f.ID = '$TopicID'");
+                    SELECT
+                        f.AuthorID,
+                        f.IsLocked,
+                        f.IsSticky,
+                        f.NumPosts,
+                        ISNULL(p.TopicID) AS NoPoll
+                    FROM forums_topics AS f
+                        LEFT JOIN forums_polls AS p ON p.TopicID = f.ID
+                    WHERE f.ID = '$TopicID'");
                 list($AuthorID, $IsLocked, $IsSticky, $NumPosts, $NoPoll) = $DB->next_record();
                 $Part2 = array($TopicID => array(
                     'ID' => $TopicID,

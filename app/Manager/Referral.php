@@ -58,9 +58,9 @@ class Referral {
 
     public function getFullAccount($id) {
         $this->db->prepared_query("
-			SELECT ID, Site, URL, User, Password, Active, Type, Cookie
-			FROM referral_accounts
-			WHERE ID = ?", $id);
+            SELECT ID, Site, URL, User, Password, Active, Type, Cookie
+            FROM referral_accounts
+            WHERE ID = ?", $id);
 
         if ($this->db->has_results()) {
             $account = $this->db->next_record();
@@ -79,8 +79,8 @@ class Referral {
 
     public function getFullAccounts() {
         $this->db->prepared_query("
-			SELECT ID, Site, URL, User, Password, Active, Type, Cookie
-			FROM referral_accounts");
+            SELECT ID, Site, URL, User, Password, Active, Type, Cookie
+            FROM referral_accounts");
 
         if ($this->db->has_results()) {
             $accounts = $this->db->to_array('ID', MYSQLI_ASSOC);
@@ -108,10 +108,10 @@ class Referral {
                 $cookie = '[]';
             }
             $this->db->prepared_query("
-				INSERT INTO referral_accounts
-					(Site, URL, User, Password, Active, Type, Cookie)
-				VALUES
-					(?, ?, ?, ?, ?, ?, ?)", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
+                INSERT INTO referral_accounts
+                    (Site, URL, User, Password, Active, Type, Cookie)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?)", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
                 \Gazelle\Util\Crypto::dbEncrypt($user),    \Gazelle\Util\Crypto::dbEncrypt($password),
                 $active, $type, \Gazelle\Util\Crypto::dbEncrypt($cookie));
 
@@ -122,9 +122,9 @@ class Referral {
     private function updateCookie($id, $cookie) {
         if (!$this->readOnly) {
             $this->db->prepared_query("
-			UPDATE referral_accounts SET
-				Cookie = ?
-			WHERE ID = ?", \Gazelle\Util\Crypto::dbEncrypt(json_encode($cookie)), $id);
+            UPDATE referral_accounts SET
+                Cookie = ?
+            WHERE ID = ?", \Gazelle\Util\Crypto::dbEncrypt(json_encode($cookie)), $id);
         }
     }
 
@@ -145,15 +145,15 @@ class Referral {
                 $password = $account["Password"];
             }
             $this->db->prepared_query("
-				UPDATE referral_accounts SET
-					Site = ?,
-					URL = ?,
-					User = ?,
-					Password = ?,
-					Active = ?,
-					Type = ?,
-					Cookie = ?
-				WHERE ID = ?", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
+                UPDATE referral_accounts SET
+                    Site = ?,
+                    URL = ?,
+                    User = ?,
+                    Password = ?,
+                    Active = ?,
+                    Type = ?,
+                    Cookie = ?
+                WHERE ID = ?", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
                 \Gazelle\Util\Crypto::dbEncrypt($user),    \Gazelle\Util\Crypto::dbEncrypt($password),
                 $active, $type, \Gazelle\Util\Crypto::dbEncrypt($cookie), $id);
 
@@ -204,12 +204,12 @@ class Referral {
         $Filter = implode(' AND ', $Filter);
 
         $qId = $this->db->prepared_query("
-			SELECT SQL_CALC_FOUND_ROWS ru.ID, ru.UserID, ru.Site, ru.Username, ru.Created, ru.Joined, ru.IP, ru.Active, ru.InviteKey
-			FROM referral_users ru
-			LEFT JOIN users_main um ON um.ID = ru.UserID
-			WHERE $Filter
-			ORDER BY ru.Created DESC
-			LIMIT $limit", ...$Params);
+            SELECT SQL_CALC_FOUND_ROWS ru.ID, ru.UserID, ru.Site, ru.Username, ru.Created, ru.Joined, ru.IP, ru.Active, ru.InviteKey
+            FROM referral_users ru
+            LEFT JOIN users_main um ON um.ID = ru.UserID
+            WHERE $Filter
+            ORDER BY ru.Created DESC
+            LIMIT $limit", ...$Params);
         $this->db->prepared_query("SELECT FOUND_ROWS()");
         list($Results) = $this->db->next_record();
         $this->db->set_query_id($qId);
@@ -221,8 +221,8 @@ class Referral {
 
     public function deleteUserReferral($id) {
         $this->db->prepared_query("
-			DELETE FROM referral_users
-			WHERE ID = ?",
+            DELETE FROM referral_users
+            WHERE ID = ?",
             $id);
     }
 
@@ -557,9 +557,9 @@ class Referral {
 
     public function generateInvite($acc, $username, $email) {
         $this->db->prepared_query("
-			SELECT Username
-			FROM referral_users
-			WHERE Username = ? AND Site = ?",
+            SELECT Username
+            FROM referral_users
+            WHERE Username = ? AND Site = ?",
             $username, $acc["Site"]);
         if ($this->db->has_results()) {
             return [false, "Account already used for referral, join " . BOT_DISABLED_CHAN . " on " . BOT_SERVER . " for help."];
@@ -571,18 +571,18 @@ class Referral {
 
         // save invite to DB
         $this->db->prepared_query("
-			INSERT INTO invites
-				(InviterID, InviteKey, Email, Expires, Reason)
-			VALUES
-				(?, ?, ?, ?, ?)",
+            INSERT INTO invites
+                (InviterID, InviteKey, Email, Expires, Reason)
+            VALUES
+                (?, ?, ?, ?, ?)",
             0, $InviteKey, $email, $InviteExpires, $InviteReason);
 
         // save to referral history
         $this->db->prepared_query("
-			INSERT INTO referral_users
-				(Username, Site, IP, InviteKey)
-			VALUES
-				(?, ?, ?, ?)",
+            INSERT INTO referral_users
+                (Username, Site, IP, InviteKey)
+            VALUES
+                (?, ?, ?, ?)",
             $username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $InviteKey);
 
         if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) {

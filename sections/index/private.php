@@ -4,14 +4,14 @@ Text::$TOC = true;
 $NewsCount = 5;
 if (!$News = $Cache->get_value('news')) {
     $DB->query("
-		SELECT
-			ID,
-			Title,
-			Body,
-			Time
-		FROM news
-		ORDER BY Time DESC
-		LIMIT $NewsCount");
+        SELECT
+            ID,
+            Title,
+            Body,
+            Time
+        FROM news
+        ORDER BY Time DESC
+        LIMIT $NewsCount");
     $News = $DB->to_array(false, MYSQLI_NUM, false);
     $Cache->cache_value('news', $News, 3600 * 24 * 30);
     if (count($News) > 0) {
@@ -25,9 +25,9 @@ if (count($News) > 0 && $LoggedUser['LastReadNews'] != $News[0][0]) {
     $Cache->update_row(false, array('LastReadNews' => $News[0][0]));
     $Cache->commit_transaction(0);
     $DB->query("
-		UPDATE users_info
-		SET LastReadNews = '".$News[0][0]."'
-		WHERE UserID = $UserID");
+        UPDATE users_info
+        SET LastReadNews = '".$News[0][0]."'
+        WHERE UserID = $UserID");
     $LoggedUser['LastReadNews'] = $News[0][0];
 }
 

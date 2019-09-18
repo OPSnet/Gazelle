@@ -72,10 +72,10 @@ if ($TorrentTags != '') {
 $CoverArt = $Cache->get_value("torrents_cover_art_$GroupID");
 if (!$CoverArt) {
     $DB->prepared_query('
-		SELECT ID, Image, Summary, UserID, Time
-		FROM cover_art
-		WHERE GroupID = ?
-		ORDER BY Time ASC', $GroupID);
+        SELECT ID, Image, Summary, UserID, Time
+        FROM cover_art
+        WHERE GroupID = ?
+        ORDER BY Time ASC', $GroupID);
     $CoverArt = $DB->to_array();
     if ($DB->has_results()) {
         $Cache->cache_value("torrents_cover_art_$GroupID", $CoverArt, 0);

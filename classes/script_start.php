@@ -141,16 +141,16 @@ if (isset($LoginCookie)) {
     $UserSessions = $Cache->get_value("users_sessions_$UserID");
     if (!is_array($UserSessions)) {
         $DB->query("
-			SELECT
-				SessionID,
-				Browser,
-				OperatingSystem,
-				IP,
-				LastUpdate
-			FROM users_sessions
-			WHERE UserID = '$UserID'
-				AND Active = 1
-			ORDER BY LastUpdate DESC");
+            SELECT
+                SessionID,
+                Browser,
+                OperatingSystem,
+                IP,
+                LastUpdate
+            FROM users_sessions
+            WHERE UserID = '$UserID'
+                AND Active = 1
+            ORDER BY LastUpdate DESC");
         $UserSessions = $DB->to_array('SessionID',MYSQLI_ASSOC);
         $Cache->cache_value("users_sessions_$UserID", $UserSessions, 0);
     }
@@ -163,9 +163,9 @@ if (isset($LoginCookie)) {
     $Enabled = $Cache->get_value('enabled_'.$LoggedUser['ID']);
     if ($Enabled === false) {
         $DB->query("
-			SELECT Enabled
-			FROM users_main
-			WHERE ID = '{$LoggedUser['ID']}'");
+            SELECT Enabled
+            FROM users_main
+            WHERE ID = '{$LoggedUser['ID']}'");
         list($Enabled) = $DB->next_record();
         $Cache->cache_value('enabled_'.$LoggedUser['ID'], $Enabled, 0);
     }
@@ -209,20 +209,20 @@ if (isset($LoginCookie)) {
     // Update LastUpdate every 10 minutes
     if (strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
         $DB->query("
-			UPDATE users_main
-			SET LastAccess = '".sqltime()."'
-			WHERE ID = '{$LoggedUser['ID']}'");
+            UPDATE users_main
+            SET LastAccess = '".sqltime()."'
+            WHERE ID = '{$LoggedUser['ID']}'");
         $DB->query("
-			UPDATE users_sessions
-			SET
-				IP = '".$_SERVER['REMOTE_ADDR']."',
-				Browser = '$Browser',
-				BrowserVersion = '{$BrowserVersion}',
-				OperatingSystem = '$OperatingSystem',
-				OperatingSystemVersion = '{$OperatingSystemVersion}',
-				LastUpdate = '".sqltime()."'
-			WHERE UserID = '{$LoggedUser['ID']}'
-				AND SessionID = '".db_string($SessionID)."'");
+            UPDATE users_sessions
+            SET
+                IP = '".$_SERVER['REMOTE_ADDR']."',
+                Browser = '$Browser',
+                BrowserVersion = '{$BrowserVersion}',
+                OperatingSystem = '$OperatingSystem',
+                OperatingSystemVersion = '{$OperatingSystemVersion}',
+                LastUpdate = '".sqltime()."'
+            WHERE UserID = '{$LoggedUser['ID']}'
+                AND SessionID = '".db_string($SessionID)."'");
         $Cache->begin_transaction("users_sessions_$UserID");
         $Cache->delete_row($SessionID);
         $Cache->insert_front($SessionID,array(
@@ -242,9 +242,9 @@ if (isset($LoginCookie)) {
         $LoggedUser['Notify'] = $Cache->get_value('notify_filters_'.$LoggedUser['ID']);
         if (!is_array($LoggedUser['Notify'])) {
             $DB->query("
-				SELECT ID, Label
-				FROM users_notify_filters
-				WHERE UserID = '{$LoggedUser['ID']}'");
+                SELECT ID, Label
+                FROM users_notify_filters
+                WHERE UserID = '{$LoggedUser['ID']}'");
             $LoggedUser['Notify'] = $DB->to_array('ID');
             $Cache->cache_value('notify_filters_'.$LoggedUser['ID'], $LoggedUser['Notify'], 2592000);
         }
@@ -266,22 +266,22 @@ if (isset($LoginCookie)) {
         $CurIP = db_string($LoggedUser['IP']);
         $NewIP = db_string($_SERVER['REMOTE_ADDR']);
         $DB->query("
-			UPDATE users_history_ips
-			SET EndTime = '".sqltime()."'
-			WHERE EndTime IS NULL
-				AND UserID = '{$LoggedUser['ID']}'
-				AND IP = '$CurIP'");
+            UPDATE users_history_ips
+            SET EndTime = '".sqltime()."'
+            WHERE EndTime IS NULL
+                AND UserID = '{$LoggedUser['ID']}'
+                AND IP = '$CurIP'");
         $DB->query("
-			INSERT IGNORE INTO users_history_ips
-				(UserID, IP, StartTime)
-			VALUES
-				('{$LoggedUser['ID']}', '$NewIP', '".sqltime()."')");
+            INSERT IGNORE INTO users_history_ips
+                (UserID, IP, StartTime)
+            VALUES
+                ('{$LoggedUser['ID']}', '$NewIP', '".sqltime()."')");
 
         $ipcc = Tools::geoip($NewIP);
         $DB->query("
-			UPDATE users_main
-			SET IP = '$NewIP', ipcc = '$ipcc'
-			WHERE ID = '{$LoggedUser['ID']}'");
+            UPDATE users_main
+            SET IP = '$NewIP', ipcc = '$ipcc'
+            WHERE ID = '{$LoggedUser['ID']}'");
         $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
         $Cache->update_row(false, array('IP' => $_SERVER['REMOTE_ADDR']));
         $Cache->commit_transaction(0);
@@ -292,11 +292,11 @@ if (isset($LoginCookie)) {
     $Stylesheets = $Cache->get_value('stylesheets');
     if (!is_array($Stylesheets)) {
         $DB->query('
-			SELECT
-				ID,
-				LOWER(REPLACE(Name, " ", "_")) AS Name,
-				Name AS ProperName
-			FROM stylesheets ORDER BY ID DESC');
+            SELECT
+                ID,
+                LOWER(REPLACE(Name, " ", "_")) AS Name,
+                Name AS ProperName
+            FROM stylesheets ORDER BY ID DESC');
         $Stylesheets = $DB->to_array('ID', MYSQLI_BOTH);
         $Cache->cache_value('stylesheets', $Stylesheets, 0);
     }
@@ -324,9 +324,9 @@ function logout() {
     if ($SessionID) {
 
         G::$DB->query("
-			DELETE FROM users_sessions
-			WHERE UserID = '" . G::$LoggedUser['ID'] . "'
-				AND SessionID = '".db_string($SessionID)."'");
+            DELETE FROM users_sessions
+            WHERE UserID = '" . G::$LoggedUser['ID'] . "'
+                AND SessionID = '".db_string($SessionID)."'");
 
         G::$Cache->begin_transaction('users_sessions_' . G::$LoggedUser['ID']);
         G::$Cache->delete_row($SessionID);
@@ -348,8 +348,8 @@ function logout_all_sessions() {
     $UserID = G::$LoggedUser['ID'];
 
     G::$DB->query("
-		DELETE FROM users_sessions
-		WHERE UserID = '$UserID'");
+        DELETE FROM users_sessions
+        WHERE UserID = '$UserID'");
 
     G::$Cache->delete_value('users_sessions_' . $UserID);
     logout();

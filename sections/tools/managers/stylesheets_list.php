@@ -12,21 +12,21 @@ View::show_header('Manage Stylesheets');
     </div>
     <?php
     $DB->prepared_query("
-	SELECT
-		s.ID,
-		s.Name,
-		s.Description,
-		s.`Default`,
-		IFNULL(ui.`Count`, 0),
-		IFNULL(ud.`Count`, 0)
-	FROM stylesheets AS s
-	LEFT JOIN (
-		SELECT StyleID, COUNT(*) AS Count FROM users_info AS ui JOIN users_main AS um ON ui.UserID = um.ID WHERE um.Enabled='1' GROUP BY StyleID
-	) AS ui ON s.ID=ui.StyleID
-	LEFT JOIN (
-		SELECT StyleID, COUNT(*) AS Count FROM users_info AS ui JOIN users_main AS um ON ui.UserID = um.ID GROUP BY StyleID
-	) AS ud ON s.ID = ud.StyleID
-	ORDER BY s.ID");
+    SELECT
+        s.ID,
+        s.Name,
+        s.Description,
+        s.`Default`,
+        IFNULL(ui.`Count`, 0),
+        IFNULL(ud.`Count`, 0)
+    FROM stylesheets AS s
+    LEFT JOIN (
+        SELECT StyleID, COUNT(*) AS Count FROM users_info AS ui JOIN users_main AS um ON ui.UserID = um.ID WHERE um.Enabled='1' GROUP BY StyleID
+    ) AS ui ON s.ID=ui.StyleID
+    LEFT JOIN (
+        SELECT StyleID, COUNT(*) AS Count FROM users_info AS ui JOIN users_main AS um ON ui.UserID = um.ID GROUP BY StyleID
+    ) AS ud ON s.ID = ud.StyleID
+    ORDER BY s.ID");
     if ($DB->has_results()) {
         ?>
         <table width="100%">
@@ -44,7 +44,7 @@ View::show_header('Manage Stylesheets');
                     <td><?=($Default == '1') ? 'Default' : ''?></td>
                     <td><?=number_format($EnabledCount)?> (<?=number_format($TotalCount)?>)</td>
                 </tr>
-            <?php	} ?>
+            <?php    } ?>
         </table>
         <?php
     } else { ?>

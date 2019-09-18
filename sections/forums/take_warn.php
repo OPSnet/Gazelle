@@ -36,42 +36,42 @@ if ($WarningLength !== 'verbal') {
 }
 
 $DB->query("
-	INSERT INTO users_warnings_forums
-		(UserID, Comment)
-	VALUES
-		('$UserID', '" . db_string($AdminComment) . "')
-	ON DUPLICATE KEY UPDATE
-		Comment = CONCAT('" . db_string($AdminComment) . "', Comment)");
+    INSERT INTO users_warnings_forums
+        (UserID, Comment)
+    VALUES
+        ('$UserID', '" . db_string($AdminComment) . "')
+    ON DUPLICATE KEY UPDATE
+        Comment = CONCAT('" . db_string($AdminComment) . "', Comment)");
 Misc::send_pm($UserID, $LoggedUser['ID'], $Subject, $PrivateMessage);
 
 //edit the post
 $DB->query("
-	SELECT
-		p.Body,
-		p.AuthorID,
-		p.TopicID,
-		t.ForumID,
-		CEIL(
-			(
-				SELECT COUNT(p2.ID)
-				FROM forums_posts AS p2
-				WHERE p2.TopicID = p.TopicID
-					AND p2.ID <= '$PostID'
-			) / " . POSTS_PER_PAGE . "
-		) AS Page
-	FROM forums_posts AS p
-		JOIN forums_topics AS t ON p.TopicID = t.ID
-		JOIN forums AS f ON t.ForumID = f.ID
-	WHERE p.ID = '$PostID'");
+    SELECT
+        p.Body,
+        p.AuthorID,
+        p.TopicID,
+        t.ForumID,
+        CEIL(
+            (
+                SELECT COUNT(p2.ID)
+                FROM forums_posts AS p2
+                WHERE p2.TopicID = p.TopicID
+                    AND p2.ID <= '$PostID'
+            ) / " . POSTS_PER_PAGE . "
+        ) AS Page
+    FROM forums_posts AS p
+        JOIN forums_topics AS t ON p.TopicID = t.ID
+        JOIN forums AS f ON t.ForumID = f.ID
+    WHERE p.ID = '$PostID'");
 list($OldBody, $AuthorID, $TopicID, $ForumID, $Page) = $DB->next_record();
 
 // Perform the update
 $DB->query("
-	UPDATE forums_posts
-	SET Body = '" . db_string($Body) . "',
-		EditedUserID = '$UserID',
-		EditedTime = '$SQLTime'
-	WHERE ID = '$PostID'");
+    UPDATE forums_posts
+    SET Body = '" . db_string($Body) . "',
+        EditedUserID = '$UserID',
+        EditedTime = '$SQLTime'
+    WHERE ID = '$PostID'");
 
 $CatalogueID = floor((POSTS_PER_PAGE * $Page - POSTS_PER_PAGE) / THREAD_CATALOGUE);
 $Cache->begin_transaction("thread_$TopicID" . "_catalogue_$CatalogueID");
@@ -102,10 +102,10 @@ if ($ThreadInfo['StickyPostID'] == $PostID) {
 }
 
 $DB->query("
-	INSERT INTO comments_edits
-		(Page, PostID, EditUser, EditTime, Body)
-	VALUES
-		('forums', $PostID, $UserID, '$SQLTime', '" . db_string($OldBody) . "')");
+    INSERT INTO comments_edits
+        (Page, PostID, EditUser, EditTime, Body)
+    VALUES
+        ('forums', $PostID, $UserID, '$SQLTime', '" . db_string($OldBody) . "')");
 $Cache->delete_value("forums_edits_$PostID");
 
 header("Location: forums.php?action=viewthread&postid=$PostID#post$PostID");

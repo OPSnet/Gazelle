@@ -68,19 +68,19 @@ if ($BookmarkView) {
 }
 
 $BaseSQL = $SQL = "
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		c.ID,
-		c.Name,
-		c.NumTorrents,
-		c.TagList,
-		c.CategoryID,
-		c.UserID,
-		c.Subscribers,
-		c.Updated
-	FROM collages AS c
-		$BookmarkJoin
-	WHERE Deleted = '0'";
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        c.ID,
+        c.Name,
+        c.NumTorrents,
+        c.TagList,
+        c.CategoryID,
+        c.UserID,
+        c.Subscribers,
+        c.Updated
+    FROM collages AS c
+        $BookmarkJoin
+    WHERE Deleted = '0'";
 
 if ($BookmarkView) {
     $SQL .= " AND bc.UserID = '" . $LoggedUser['ID'] . "'";
@@ -123,9 +123,9 @@ if (!empty($_GET['userid'])) {
             error(403);
         }
         $DB->query("
-			SELECT DISTINCT CollageID
-			FROM collages_torrents
-			WHERE UserID = $UserID");
+            SELECT DISTINCT CollageID
+            FROM collages_torrents
+            WHERE UserID = $UserID");
         $CollageIDs = $DB->collect('CollageID');
         if (empty($CollageIDs)) {
             $SQL .= " AND 0";
@@ -148,13 +148,13 @@ if (!empty($Categories)) {
 if (isset($_GET['action']) && $_GET['action'] === 'mine') {
     $SQL = $BaseSQL;
     $SQL .= "
-		AND c.UserID = '".$LoggedUser['ID']."'
-		AND c.CategoryID = 0";
+        AND c.UserID = '".$LoggedUser['ID']."'
+        AND c.CategoryID = 0";
 }
 
 $SQL .= "
-	ORDER BY $Order $Way
-	LIMIT $Limit";
+    ORDER BY $Order $Way
+    LIMIT $Limit";
 $DB->query($SQL);
 $Collages = $DB->to_array();
 $DB->query('SELECT FOUND_ROWS()');

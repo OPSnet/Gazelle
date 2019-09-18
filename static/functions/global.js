@@ -112,10 +112,10 @@ function add_selection() {
     if (selected.disabled === false) {
         var listitem = document.createElement("li");
         listitem.id = 'list' + selected.value;
-        listitem.innerHTML = '						<input type="hidden" name="list[]" value="' + selected.value + '" /> ' +
-'						<span style="float: left;">' + selected.innerHTML + '</span>' +
-'						<a href="#" onclick="remove_selection(\'' + selected.value + '\'); return false;" style="float: right;" class="brackets">X</a>' +
-'						<br style="clear: all;" />';
+        listitem.innerHTML = '                        <input type="hidden" name="list[]" value="' + selected.value + '" /> ' +
+'                        <span style="float: left;">' + selected.innerHTML + '</span>' +
+'                        <a href="#" onclick="remove_selection(\'' + selected.value + '\'); return false;" style="float: right;" class="brackets">X</a>' +
+'                        <br style="clear: all;" />';
         $('#list').raw().appendChild(listitem);
         $('#opt' + selected.value).raw().disabled = true;
     }

@@ -9,33 +9,33 @@ list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
 
 
 $RS = $DB->query("
-		SELECT
-			SQL_CALC_FOUND_ROWS
-			m.ID,
-			m.IP,
-			m.Username,
-			m.PermissionID,
-			m.Enabled,
-			i.Donor,
-			i.Warned,
-			i.JoinDate,
-			(
-				SELECT COUNT(DISTINCT h.UserID)
-				FROM users_history_ips AS h
-				WHERE h.IP = m.IP
-			) AS Uses
-		FROM users_main AS m
-			LEFT JOIN users_info AS i ON i.UserID = m.ID
-		WHERE
-			(
-				SELECT COUNT(DISTINCT h.UserID)
-				FROM users_history_ips AS h
-				WHERE h.IP = m.IP
-			) >= ".IP_OVERLAPS."
-			AND m.Enabled = '1'
-			AND m.IP != '127.0.0.1'
-		ORDER BY Uses DESC
-		LIMIT $Limit");
+        SELECT
+            SQL_CALC_FOUND_ROWS
+            m.ID,
+            m.IP,
+            m.Username,
+            m.PermissionID,
+            m.Enabled,
+            i.Donor,
+            i.Warned,
+            i.JoinDate,
+            (
+                SELECT COUNT(DISTINCT h.UserID)
+                FROM users_history_ips AS h
+                WHERE h.IP = m.IP
+            ) AS Uses
+        FROM users_main AS m
+            LEFT JOIN users_info AS i ON i.UserID = m.ID
+        WHERE
+            (
+                SELECT COUNT(DISTINCT h.UserID)
+                FROM users_history_ips AS h
+                WHERE h.IP = m.IP
+            ) >= ".IP_OVERLAPS."
+            AND m.Enabled = '1'
+            AND m.IP != '127.0.0.1'
+        ORDER BY Uses DESC
+        LIMIT $Limit");
 $DB->query('SELECT FOUND_ROWS()');
 list($Results) = $DB->next_record();
 $DB->set_query_id($RS);

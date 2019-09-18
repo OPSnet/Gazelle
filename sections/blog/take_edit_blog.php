@@ -10,9 +10,9 @@ $ThreadID = !isset($_POST['thread']) || $_POST['thread'] === '' ? '' : max(0, in
 
 if ($ThreadID > 0) {
     $DB->prepared_query("
-		SELECT ForumID
-		FROM forums_topics
-		WHERE ID = ?", $ThreadID);
+        SELECT ForumID
+        FROM forums_topics
+        WHERE ID = ?", $ThreadID);
     if (!$DB->has_results()) {
         error('No such thread exists!');
     }
@@ -31,13 +31,13 @@ $Important = isset($_POST['important']) ? '1' : '0';
 
 if ($BlogID > 0) {
     $DB->prepared_query("
-		UPDATE blog
-		SET
-			Title = ?,
-			Body = ?,
-			ThreadID = ?,
-			Important = ?
-		WHERE ID = ?", $_POST['title'], $_POST['body'], $ThreadID, $Important, $BlogID);
+        UPDATE blog
+        SET
+            Title = ?,
+            Body = ?,
+            ThreadID = ?,
+            Important = ?
+        WHERE ID = ?", $_POST['title'], $_POST['body'], $ThreadID, $Important, $BlogID);
     $Cache->delete_value('blog');
     $Cache->delete_value('feed_blog');
     if ($Important == '1') {
@@ -45,8 +45,8 @@ if ($BlogID > 0) {
     }
     if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
         $DB->prepared_query("
-		INSERT IGNORE INTO users_subscriptions
-		VALUES (?, ?)", G::$LoggedUser['ID'], $ThreadID);
+        INSERT IGNORE INTO users_subscriptions
+        VALUES (?, ?)", G::$LoggedUser['ID'], $ThreadID);
         $Cache->delete_value('subscriptions_user_'.G::$LoggedUser['ID']);
     }
 }

@@ -32,9 +32,9 @@ class Applicant {
         $this->body        = $body;
         $this->resovled = false;
         G::$DB->prepared_query("
-			INSERT INTO applicant (RoleID, UserID, ThreadID, Body)
-			VALUES (?, ?, ?, ?)
-			", $this->role_id, $this->user_id, $this->thread->id(), $this->body
+            INSERT INTO applicant (RoleID, UserID, ThreadID, Body)
+            VALUES (?, ?, ?, ?)
+            ", $this->role_id, $this->user_id, $this->thread->id(), $this->body
         );
         $this->id = G::$DB->inserted_id();
         G::$Cache->delete_value(self::CACHE_KEY_NEW_COUNT);
@@ -95,10 +95,10 @@ class Applicant {
     public function resolve($resolved = true) {
         $this->resolved = $resolved;
         G::$DB->prepared_query("
-			UPDATE applicant
-			SET Resolved = ?
-			WHERE ID = ?
-		", $this->resolved, $this->id);
+            UPDATE applicant
+            SET Resolved = ?
+            WHERE ID = ?
+        ", $this->resolved, $this->id);
         $key = sprintf(self::CACHE_KEY, $this->id);
         $data = G::$Cache->get_value($key);
         if ($data !== false) {
@@ -175,10 +175,10 @@ END_MSG
         $data = G::$Cache->get_value($key);
         if ($data === false) {
             G::$DB->prepared_query("
-				SELECT a.RoleID, a.UserID, a.ThreadID, a.Body, a.Resolved, a.Created, a.Modified
-				FROM applicant a
-				WHERE a.ID = ?
-			", $id);
+                SELECT a.RoleID, a.UserID, a.ThreadID, a.Body, a.Resolved, a.Created, a.Modified
+                FROM applicant a
+                WHERE a.ID = ?
+            ", $id);
             if (G::$DB->has_results()) {
                 $data = G::$DB->next_record();
                 G::$Cache->cache_value($key, $data, 86400);
@@ -224,16 +224,16 @@ END_MSG
             $user_condition = $user_id ? 'a.UserID = ?' : '0 = ? /* manager */';
             G::$DB->prepared_query($sql = <<<END_SQL
 SELECT APP.ID, r.Title as Role, APP.UserID, u.Username, APP.Created, APP.Modified, APP.nr_notes,
-	last.UserID as last_UserID, ulast.Username as last_Username, last.Created as last_Created
+    last.UserID as last_UserID, ulast.Username as last_Username, last.Created as last_Created
 FROM
 (
-	SELECT a.ID as ID, a.RoleID, a.UserID, a.ThreadID, a.Created, a.Modified,
-	count(n.ID) as nr_notes, max(n.ID) as last_noteid
-	FROM applicant a
-	LEFT JOIN thread_note n using (ThreadID)
-	WHERE a.Resolved = ?
-	AND $user_condition
-	GROUP BY a.ID, a.RoleID, a.UserID, a.ThreadID, a.Created, a.Modified
+    SELECT a.ID as ID, a.RoleID, a.UserID, a.ThreadID, a.Created, a.Modified,
+    count(n.ID) as nr_notes, max(n.ID) as last_noteid
+    FROM applicant a
+    LEFT JOIN thread_note n using (ThreadID)
+    WHERE a.Resolved = ?
+    AND $user_condition
+    GROUP BY a.ID, a.RoleID, a.UserID, a.ThreadID, a.Created, a.Modified
 ) APP
 INNER JOIN applicant_role r     ON (r.ID = APP.RoleID)
 INNER JOIN users_main     u     ON (u.ID = APP.UserID)
@@ -241,7 +241,7 @@ LEFT JOIN thread_note     last  USING (ThreadID)
 LEFT JOIN users_main      ulast ON (ulast.ID = last.UserID)
 WHERE (last.ID IS NULL or last.ID = APP.last_noteid)
 ORDER by r.Modified DESC,
-	GREATEST(coalesce(last.Created, '1970-01-01 00:00:00'), APP.Created) DESC
+    GREATEST(coalesce(last.Created, '1970-01-01 00:00:00'), APP.Created) DESC
 LIMIT ? OFFSET ?
 END_SQL
             , $resolved ? 1 : 0, $user_id, self::ENTRIES_PER_PAGE, ($page-1) * self::ENTRIES_PER_PAGE);
@@ -273,15 +273,15 @@ END_SQL
         $applicant_count = G::$Cache->get_value($key);
         if ($applicant_count === false) {
             G::$DB->prepared_query("
-				SELECT count(a.ID) as nr
-				FROM applicant a
-				INNER JOIN thread t ON (a.ThreadID = t.ID
-					AND t.ThreadTypeID = (SELECT ID FROM thread_type WHERE Name = ?)
-				)
-				LEFT JOIN thread_note n ON (n.threadid = t.id)
+                SELECT count(a.ID) as nr
+                FROM applicant a
+                INNER JOIN thread t ON (a.ThreadID = t.ID
+                    AND t.ThreadTypeID = (SELECT ID FROM thread_type WHERE Name = ?)
+                )
+                LEFT JOIN thread_note n ON (n.threadid = t.id)
                 WHERE a.Resolved = 0
                     AND n.id IS NULL
-				", 'staff-role'
+                ", 'staff-role'
             );
             if (G::$DB->has_results()) {
                 $data = G::$DB->next_record();
@@ -297,22 +297,22 @@ END_SQL
         $reply_count = G::$Cache->get_value($key);
         if ($reply_count === false) {
             G::$DB->prepared_query("
-				SELECT count(*) AS nr
-				FROM applicant a
-				INNER JOIN thread_note n USING (ThreadID)
-				INNER JOIN (
-					/* find the last person to comment in an applicant thread */
-					SELECT a.ID, max(n.ID) AS noteid
-					FROM applicant a
-					INNER JOIN thread t ON (a.threadid = t.id
-						AND t.ThreadTypeID = (SELECT ID FROM thread_type WHERE Name = ?)
-					)
-					INNER JOIN thread_note n ON (n.ThreadID = a.ThreadID)
+                SELECT count(*) AS nr
+                FROM applicant a
+                INNER JOIN thread_note n USING (ThreadID)
+                INNER JOIN (
+                    /* find the last person to comment in an applicant thread */
+                    SELECT a.ID, max(n.ID) AS noteid
+                    FROM applicant a
+                    INNER JOIN thread t ON (a.threadid = t.id
+                        AND t.ThreadTypeID = (SELECT ID FROM thread_type WHERE Name = ?)
+                    )
+                    INNER JOIN thread_note n ON (n.ThreadID = a.ThreadID)
                     WHERE a.Resolved = 0
-					GROUP BY a.ID
-				) X ON (n.ID = X.noteid)
-				WHERE a.UserID = n.UserID /* if they are the applicant: not a staff response Q.E.D. */
-				", 'staff-role'
+                    GROUP BY a.ID
+                ) X ON (n.ID = X.noteid)
+                WHERE a.UserID = n.UserID /* if they are the applicant: not a staff response Q.E.D. */
+                ", 'staff-role'
             );
             if (G::$DB->has_results()) {
                 $data = G::$DB->next_record();

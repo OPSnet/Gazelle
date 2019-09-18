@@ -7,26 +7,26 @@ $OnRatioWatch = array();
 
 // Take users off ratio watch and enable leeching
 $UserQuery = $DB->query("
-			SELECT
-				m.ID,
-				torrent_pass
-			FROM users_info AS i
-				JOIN users_main AS m ON m.ID = i.UserID
-			WHERE m.Downloaded > 0
-				AND m.Uploaded / m.Downloaded >= m.RequiredRatio
-				AND i.RatioWatchEnds != '0000-00-00 00:00:00'
-				AND m.can_leech = '0'
-				AND m.Enabled = '1'");
+            SELECT
+                m.ID,
+                torrent_pass
+            FROM users_info AS i
+                JOIN users_main AS m ON m.ID = i.UserID
+            WHERE m.Downloaded > 0
+                AND m.Uploaded / m.Downloaded >= m.RequiredRatio
+                AND i.RatioWatchEnds != '0000-00-00 00:00:00'
+                AND m.can_leech = '0'
+                AND m.Enabled = '1'");
 $OffRatioWatch = $DB->collect('ID');
 if (count($OffRatioWatch) > 0) {
     $DB->query("
-			UPDATE users_info AS ui
-				JOIN users_main AS um ON um.ID = ui.UserID
-			SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
-				ui.RatioWatchDownload = '0',
-				um.can_leech = '1',
-				ui.AdminComment = CONCAT('$sqltime - Leeching re-enabled by adequate ratio.\n\n', ui.AdminComment)
-			WHERE ui.UserID IN(".implode(',', $OffRatioWatch).')');
+            UPDATE users_info AS ui
+                JOIN users_main AS um ON um.ID = ui.UserID
+            SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
+                ui.RatioWatchDownload = '0',
+                um.can_leech = '1',
+                ui.AdminComment = CONCAT('$sqltime - Leeching re-enabled by adequate ratio.\n\n', ui.AdminComment)
+            WHERE ui.UserID IN(".implode(',', $OffRatioWatch).')');
 }
 
 foreach ($OffRatioWatch as $UserID) {
@@ -44,22 +44,22 @@ foreach ($Passkeys as $Passkey) {
 
 // Take users off ratio watch
 $UserQuery = $DB->query("
-				SELECT m.ID, torrent_pass
-				FROM users_info AS i
-					JOIN users_main AS m ON m.ID = i.UserID
-				WHERE m.Downloaded > 0
-					AND m.Uploaded / m.Downloaded >= m.RequiredRatio
-					AND i.RatioWatchEnds != '0000-00-00 00:00:00'
-					AND m.Enabled = '1'");
+                SELECT m.ID, torrent_pass
+                FROM users_info AS i
+                    JOIN users_main AS m ON m.ID = i.UserID
+                WHERE m.Downloaded > 0
+                    AND m.Uploaded / m.Downloaded >= m.RequiredRatio
+                    AND i.RatioWatchEnds != '0000-00-00 00:00:00'
+                    AND m.Enabled = '1'");
 $OffRatioWatch = $DB->collect('ID');
 if (count($OffRatioWatch) > 0) {
     $DB->query("
-			UPDATE users_info AS ui
-				JOIN users_main AS um ON um.ID = ui.UserID
-			SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
-				ui.RatioWatchDownload = '0',
-				um.can_leech = '1'
-			WHERE ui.UserID IN(".implode(',', $OffRatioWatch).')');
+            UPDATE users_info AS ui
+                JOIN users_main AS um ON um.ID = ui.UserID
+            SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
+                ui.RatioWatchDownload = '0',
+                um.can_leech = '1'
+            WHERE ui.UserID IN(".implode(',', $OffRatioWatch).')');
 }
 
 foreach ($OffRatioWatch as $UserID) {
@@ -78,24 +78,24 @@ foreach ($Passkeys as $Passkey) {
 // Put user on ratio watch if he doesn't meet the standards
 sleep(10);
 $DB->query("
-		SELECT m.ID, m.Downloaded
-		FROM users_info AS i
-			JOIN users_main AS m ON m.ID = i.UserID
-		WHERE m.Downloaded > 0
-			AND m.Uploaded / m.Downloaded < m.RequiredRatio
-			AND i.RatioWatchEnds = '0000-00-00 00:00:00'
-			AND m.Enabled = '1'
-			AND m.can_leech = '1'");
+        SELECT m.ID, m.Downloaded
+        FROM users_info AS i
+            JOIN users_main AS m ON m.ID = i.UserID
+        WHERE m.Downloaded > 0
+            AND m.Uploaded / m.Downloaded < m.RequiredRatio
+            AND i.RatioWatchEnds = '0000-00-00 00:00:00'
+            AND m.Enabled = '1'
+            AND m.can_leech = '1'");
 $OnRatioWatch = $DB->collect('ID');
 
 if (count($OnRatioWatch) > 0) {
     $DB->query("
-			UPDATE users_info AS i
-				JOIN users_main AS m ON m.ID = i.UserID
-			SET i.RatioWatchEnds = '".time_plus(60 * 60 * 24 * 14)."',
-				i.RatioWatchTimes = i.RatioWatchTimes + 1,
-				i.RatioWatchDownload = m.Downloaded
-			WHERE m.ID IN(".implode(',', $OnRatioWatch).')');
+            UPDATE users_info AS i
+                JOIN users_main AS m ON m.ID = i.UserID
+            SET i.RatioWatchEnds = '".time_plus(60 * 60 * 24 * 14)."',
+                i.RatioWatchTimes = i.RatioWatchTimes + 1,
+                i.RatioWatchDownload = m.Downloaded
+            WHERE m.ID IN(".implode(',', $OnRatioWatch).')');
 }
 
 foreach ($OnRatioWatch as $UserID) {

@@ -65,18 +65,18 @@ if (!isset($_GET['action']) || $_GET['action'] !== 'editblog') {
     <?php
     if (!$Blog = $Cache->get_value('blog')) {
         $DB->prepared_query("
-		SELECT
-			b.ID,
-			um.Username,
-			b.UserID,
-			b.Title,
-			b.Body,
-			b.Time,
-			b.ThreadID
-		FROM blog AS b
-			LEFT JOIN users_main AS um ON b.UserID = um.ID
-		ORDER BY Time DESC
-		LIMIT 20");
+        SELECT
+            b.ID,
+            um.Username,
+            b.UserID,
+            b.Title,
+            b.Body,
+            b.Time,
+            b.ThreadID
+        FROM blog AS b
+            LEFT JOIN users_main AS um ON b.UserID = um.ID
+        ORDER BY Time DESC
+        LIMIT 20");
         $Blog = $DB->to_array();
         $Cache->cache_value('blog', $Blog, 1209600);
     }
@@ -86,9 +86,9 @@ if (!isset($_GET['action']) || $_GET['action'] !== 'editblog') {
         $Cache->update_row(false, array('LastReadBlog' => $Blog[0][0]));
         $Cache->commit_transaction(0);
         $DB->prepared_query("
-		UPDATE users_info
-		SET LastReadBlog = ?
-		WHERE UserID = ?", $Blog[0][0], G::$LoggedUser['ID']);
+        UPDATE users_info
+        SET LastReadBlog = ?
+        WHERE UserID = ?", $Blog[0][0], G::$LoggedUser['ID']);
         G::$LoggedUser['LastReadBlog'] = $Blog[0][0];
     }
 
@@ -98,17 +98,17 @@ if (!isset($_GET['action']) || $_GET['action'] !== 'editblog') {
         <div id="blog<?=$BlogID?>" class="box blog_post">
             <div class="head">
                 <strong><?=$Title?></strong> - posted <?=time_diff($BlogTime);?> by <a href="user.php?id=<?=$AuthorID?>"><?=$Author?></a>
-                <?php	if (check_perms('admin_manage_blog')) { ?>
+                <?php    if (check_perms('admin_manage_blog')) { ?>
                     - <a href="blog.php?action=editblog&amp;id=<?=$BlogID?>" class="brackets">Edit</a>
                     <a href="blog.php?action=deleteblog&amp;id=<?=$BlogID?>&amp;auth=<?=G::$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
-                <?php	} ?>
+                <?php    } ?>
             </div>
             <div class="pad">
                 <?=Text::full_format($Body)?>
-                <?php	if ($ThreadID) { ?>
+                <?php    if ($ThreadID) { ?>
                     <br /><br />
                     <em><a href="forums.php?action=viewthread&amp;threadid=<?=$ThreadID?>">Discuss this post here</a></em>
-                    <?php	    if (check_perms('admin_manage_blog')) { ?>
+                    <?php        if (check_perms('admin_manage_blog')) { ?>
                         <a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?=G::$LoggedUser['AuthKey']?>" class="brackets">Remove link</a>
                         <?php
                     }

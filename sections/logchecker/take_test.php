@@ -22,11 +22,11 @@ View::show_header('Logchecker');
 
 echo <<<HTML
 <div class="linkbox">
-	<a href="logchecker.php" class="brackets">Test Another Log File</a>
-	<a href="logchecker.php?action=upload" class="brackets">Upload Missing Logs</a>
+    <a href="logchecker.php" class="brackets">Test Another Log File</a>
+    <a href="logchecker.php?action=upload" class="brackets">Upload Missing Logs</a>
 </div>
 <div class="thin">
-	<h2 class="center">Logchecker Test Results</h2>
+    <h2 class="center">Logchecker Test Results</h2>
 HTML;
 
 $Log = new Logchecker();
@@ -53,39 +53,39 @@ else {
 
 if (!$Checksum) {
     echo <<<HTML
-	<blockquote>
-		<strong>Trumpable For:</strong>
-		<br /><br />
-		Bad/No Checksum(s)
-	</blockquote>
+    <blockquote>
+        <strong>Trumpable For:</strong>
+        <br /><br />
+        Bad/No Checksum(s)
+    </blockquote>
 HTML;
 }
 
 echo <<<HTML
-	<blockquote>
-		<strong>Score:</strong> <span style='color:{$Color}'>{$Score}</span> (out of 100)
-	</blockquote>
+    <blockquote>
+        <strong>Score:</strong> <span style='color:{$Color}'>{$Score}</span> (out of 100)
+    </blockquote>
 HTML;
 
 if($Bad){
     echo <<<HTML
-	<blockquote>
-		<h3>Log validation report:</h3>
-		<ul>
+    <blockquote>
+        <h3>Log validation report:</h3>
+        <ul>
 HTML;
     foreach($Bad as $Property) {
         echo "\t\t\t<li>{$Property}</li>";
     }
 echo <<<HTML
-		</ul>
-	</blockquote>
+        </ul>
+    </blockquote>
 HTML;
 }
 
 echo <<<HTML
-	<blockquote>
-		<pre>{$Text}</pre>
-	</blockquote>
+    <blockquote>
+        <pre>{$Text}</pre>
+    </blockquote>
 </div>
 HTML;
 View::show_footer();

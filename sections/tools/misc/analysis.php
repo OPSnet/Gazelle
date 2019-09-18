@@ -1,16 +1,16 @@
 <?
 if (!check_perms('site_debug')) {
-	error(403);
+    error(403);
 }
 
 if (!isset($_GET['case']) || !$Analysis = $Cache->get_value('analysis_'.$_GET['case'])) {
-	error(404);
+    error(404);
 }
 
 View::show_header('Case Analysis');
 ?>
 <div class="header">
-	<h2>Case Analysis (<a href="<?=display_str($Analysis['url'])?>"><?=$_GET['case']?></a>)</h2>
+    <h2>Case Analysis (<a href="<?=display_str($Analysis['url'])?>"><?=$_GET['case']?></a>)</h2>
 </div>
 <pre id="debug_report"><?=display_str($Analysis['message'])?></pre>
 <?

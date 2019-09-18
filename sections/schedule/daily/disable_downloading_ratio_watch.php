@@ -2,28 +2,28 @@
 
 //------------- Disable downloading ability of users on ratio watch
 $UserQuery = $DB->query("
-			SELECT ID, torrent_pass
-			FROM users_info AS i
-				JOIN users_main AS m ON m.ID = i.UserID
-			WHERE i.RatioWatchEnds != '0000-00-00 00:00:00'
-				AND i.RatioWatchEnds < '$sqltime'
-				AND m.Enabled = '1'
-				AND m.can_leech != '0'");
+            SELECT ID, torrent_pass
+            FROM users_info AS i
+                JOIN users_main AS m ON m.ID = i.UserID
+            WHERE i.RatioWatchEnds != '0000-00-00 00:00:00'
+                AND i.RatioWatchEnds < '$sqltime'
+                AND m.Enabled = '1'
+                AND m.can_leech != '0'");
 
 $UserIDs = $DB->collect('ID');
 if (count($UserIDs) > 0) {
     $DB->query("
-			UPDATE users_info AS i
-				JOIN users_main AS m ON m.ID = i.UserID
-			SET	m.can_leech = '0',
-				i.AdminComment = CONCAT('$sqltime - Leeching ability disabled by ratio watch system - required ratio: ', m.RequiredRatio, '\n\n', i.AdminComment)
-			WHERE m.ID IN(".implode(',', $UserIDs).')');
+            UPDATE users_info AS i
+                JOIN users_main AS m ON m.ID = i.UserID
+            SET    m.can_leech = '0',
+                i.AdminComment = CONCAT('$sqltime - Leeching ability disabled by ratio watch system - required ratio: ', m.RequiredRatio, '\n\n', i.AdminComment)
+            WHERE m.ID IN(".implode(',', $UserIDs).')');
 
 
 
     $DB->query("
-			DELETE FROM users_torrent_history
-			WHERE UserID IN (".implode(',', $UserIDs).')');
+            DELETE FROM users_torrent_history
+            WHERE UserID IN (".implode(',', $UserIDs).')');
 }
 
 foreach ($UserIDs as $UserID) {

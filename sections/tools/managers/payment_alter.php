@@ -9,9 +9,9 @@ if ($_POST['submit'] == 'Delete') {
     }
 
     $DB->prepared_query("
-		DELETE
-		FROM payment_reminders
-		WHERE ID = ?", $_POST['id']);
+        DELETE
+        FROM payment_reminders
+        WHERE ID = ?", $_POST['id']);
 } else {
     $Val->SetFields('text', '1', 'string', 'The payment text must be set, and has a max length of 100 characters', ['maxlength' => 100]);
     $Val->SetFields('expiry', '1', 'regex', 'The expiry must be a date in the form of YYYY-MM-DD', ['regex' => '/^\d{4}-\d{2}-\d{2}$/']);
@@ -24,9 +24,9 @@ if ($_POST['submit'] == 'Delete') {
 
     if ($_POST['submit'] == 'Create') {
         $DB->prepared_query("
-			INSERT INTO payment_reminders
-			(Text, Expiry, Active)
-			VALUES (?, ?, ?)",
+            INSERT INTO payment_reminders
+            (Text, Expiry, Active)
+            VALUES (?, ?, ?)",
             $_POST['text'], $_POST['expiry'], $_POST['active'] == 'on' ? 1 : 0);
     } else {
         if (!is_number($_POST['id']) || $_POST['id'] == '') {
@@ -34,9 +34,9 @@ if ($_POST['submit'] == 'Delete') {
         }
 
         $DB->prepared_query("
-			UPDATE payment_reminders
-			SET Text = ?, Expiry = ?, Active = ?
-			WHERE ID = ?",
+            UPDATE payment_reminders
+            SET Text = ?, Expiry = ?, Active = ?
+            WHERE ID = ?",
             $_POST['text'], $_POST['expiry'], $_POST['active'] == 'on' ? 1 : 0,
             $_POST['id']);
     }

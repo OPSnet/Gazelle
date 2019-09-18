@@ -43,9 +43,9 @@ class MASS_USER_BOOKMARKS_EDITOR extends MASS_USER_TORRENTS_EDITOR {
 
         if (!empty($SQL)) {
             $SQL = sprintf('
-					DELETE FROM %s
-					WHERE UserID = %d
-						AND GroupID IN (%s)',
+                    DELETE FROM %s
+                    WHERE UserID = %d
+                        AND GroupID IN (%s)',
                 $this->Table,
                 G::$LoggedUser['ID'],
                 implode(', ', $SQL)
@@ -67,12 +67,12 @@ class MASS_USER_BOOKMARKS_EDITOR extends MASS_USER_TORRENTS_EDITOR {
 
         if (!empty($SQL)) {
             $SQL = sprintf('
-					INSERT INTO %s
-						(GroupID, Sort, UserID)
-					VALUES
-						%s
-					ON DUPLICATE KEY UPDATE
-						Sort = VALUES (Sort)',
+                    INSERT INTO %s
+                        (GroupID, Sort, UserID)
+                    VALUES
+                        %s
+                    ON DUPLICATE KEY UPDATE
+                        Sort = VALUES (Sort)',
                 $this->Table,
                 implode(', ', $SQL));
             $this->query_and_clear_cache($SQL);

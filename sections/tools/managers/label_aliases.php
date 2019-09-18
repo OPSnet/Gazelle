@@ -33,8 +33,8 @@ if (isset($_POST['newalias'])) {
     $AliasLabel = db_string($_POST['AliasLabel']);
 
     $DB->query("
-		INSERT INTO label_aliases (BadLabel, AliasLabel)
-		VALUES ('$BadLabel', '$AliasLabel')");
+        INSERT INTO label_aliases (BadLabel, AliasLabel)
+        VALUES ('$BadLabel', '$AliasLabel')");
 }
 
 if (isset($_POST['changealias']) && is_number($_POST['aliasid'])) {
@@ -44,14 +44,14 @@ if (isset($_POST['changealias']) && is_number($_POST['aliasid'])) {
 
     if ($_POST['save']) {
         $DB->query("
-			UPDATE label_aliases
-			SET BadLabel = '$BadLabel', AliasLabel = '$AliasLabel'
-			WHERE ID = '$AliasID' ");
+            UPDATE label_aliases
+            SET BadLabel = '$BadLabel', AliasLabel = '$AliasLabel'
+            WHERE ID = '$AliasID' ");
     }
     if ($_POST['delete']) {
         $DB->query("
-			DELETE FROM label_aliases
-			WHERE ID = '$AliasID'");
+            DELETE FROM label_aliases
+            WHERE ID = '$AliasID'");
     }
 }
 ?>

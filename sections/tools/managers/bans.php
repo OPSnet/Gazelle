@@ -31,18 +31,18 @@ if (isset($_POST['submit'])) {
                 error(404);
             }
             $DB->query("
-				UPDATE ip_bans
-				SET
-					FromIP=$Start,
-					ToIP='$End',
-					Reason='$Notes'
-				WHERE ID='".$_POST['id']."'");
+                UPDATE ip_bans
+                SET
+                    FromIP=$Start,
+                    ToIP='$End',
+                    Reason='$Notes'
+                WHERE ID='".$_POST['id']."'");
         } else { //Create
             $DB->query("
-				INSERT INTO ip_bans
-					(FromIP, ToIP, Reason)
-				VALUES
-					('$Start','$End', '$Notes')");
+                INSERT INTO ip_bans
+                    (FromIP, ToIP, Reason)
+                VALUES
+                    ('$Start','$End', '$Notes')");
         }
         $Cache->delete_value('ip_bans_'.$IPA);
     }
@@ -52,13 +52,13 @@ define('BANS_PER_PAGE', '20');
 list($Page, $Limit) = Format::page_limit(BANS_PER_PAGE);
 
 $sql = "
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		ID,
-		FromIP,
-		ToIP,
-		Reason
-	FROM ip_bans ";
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        ID,
+        FromIP,
+        ToIP,
+        Reason
+    FROM ip_bans ";
 
 if (!empty($_REQUEST['notes'])) {
     $sql .= "WHERE Reason LIKE '%".db_string($_REQUEST['notes'])."%' ";

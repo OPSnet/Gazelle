@@ -38,15 +38,15 @@ if (isset($_GET['expire'])) {
         error(403);
     }
     $DB->query("
-		SELECT info_hash
-		FROM torrents
-		WHERE ID = $TorrentID");
+        SELECT info_hash
+        FROM torrents
+        WHERE ID = $TorrentID");
     if (list($InfoHash) = $DB->next_record(MYSQLI_NUM, FALSE)) {
         $DB->query("
-			UPDATE users_freeleeches
-			SET Expired = TRUE
-			WHERE UserID = $UserID
-				AND TorrentID = $TorrentID");
+            UPDATE users_freeleeches
+            SET Expired = TRUE
+            WHERE UserID = $UserID
+                AND TorrentID = $TorrentID");
         $Cache->delete_value("users_tokens_$UserID");
         Tracker::update_tracker('remove_token', array('info_hash' => rawurlencode($InfoHash), 'userid' => $UserID));
     }
@@ -58,24 +58,24 @@ View::show_header('Freeleech token history');
 list($Page, $Limit) = Format::page_limit(25);
 
 $DB->prepared_query("
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		f.TorrentID,
-		t.GroupID,
-		f.Time,
-		f.Expired,
-		f.Downloaded,
-		f.Uses,
-		g.Name,
-		t.Format,
-		t.Encoding,
-		t.Size
-	FROM users_freeleeches AS f
-		LEFT JOIN torrents AS t ON t.ID = f.TorrentID
-		LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
-	WHERE f.UserID = ?
-	ORDER BY f.Time DESC
-	LIMIT $Limit", $UserID);
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        f.TorrentID,
+        t.GroupID,
+        f.Time,
+        f.Expired,
+        f.Downloaded,
+        f.Uses,
+        g.Name,
+        t.Format,
+        t.Encoding,
+        t.Size
+    FROM users_freeleeches AS f
+        LEFT JOIN torrents AS t ON t.ID = f.TorrentID
+        LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
+    WHERE f.UserID = ?
+    ORDER BY f.Time DESC
+    LIMIT $Limit", $UserID);
 $Tokens = $DB->to_array();
 
 $DB->query('SELECT FOUND_ROWS()');

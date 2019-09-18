@@ -21,24 +21,24 @@ class Torrent extends AbstractAPI {
         }
 
         $this->db->prepared_query("
-			SELECT
-				tg.ID,
-				tg.Name,
-				tg.Year,
-				tg.ReleaseType AS ReleaseTypeID,
-				t.Media,
-				t.Format,
-				t.HasLog,
-				t.HasLogDB,
-				t.LogScore,
-				t.Snatched,
-				t.Seeders,
-				t.Leechers
-			FROM
-				torrents AS t
-				INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
-			WHERE
-				t.ID = ?", $_GET['torrent_id']);
+            SELECT
+                tg.ID,
+                tg.Name,
+                tg.Year,
+                tg.ReleaseType AS ReleaseTypeID,
+                t.Media,
+                t.Format,
+                t.HasLog,
+                t.HasLogDB,
+                t.LogScore,
+                t.Snatched,
+                t.Seeders,
+                t.Leechers
+            FROM
+                torrents AS t
+                INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
+            WHERE
+                t.ID = ?", $_GET['torrent_id']);
         if (!$this->db->has_results()) {
             json_error('Torrent not found');
         }
@@ -57,15 +57,15 @@ class Torrent extends AbstractAPI {
         }
 
         $this->db->prepared_query("
-			SELECT
-				ID,
-				Name,
-				Year,
-				ReleaseType AS ReleaseTypeID
-			FROM
-				torrents_group
-			WHERE
-				ID = ?", $_GET['group_id']);
+            SELECT
+                ID,
+                Name,
+                Year,
+                ReleaseType AS ReleaseTypeID
+            FROM
+                torrents_group
+            WHERE
+                ID = ?", $_GET['group_id']);
         if (!$this->db->has_results()) {
             json_error('Group not found');
         }

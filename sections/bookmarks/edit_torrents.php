@@ -9,9 +9,9 @@ if (!empty($_GET['userid'])) {
         error(404);
     }
     $DB->query("
-		SELECT Username
-		FROM users_main
-		WHERE ID = '$UserID'");
+        SELECT Username
+        FROM users_main
+        WHERE ID = '$UserID'");
     list($Username) = $DB->next_record();
 } else {
     $UserID = $LoggedUser['ID'];

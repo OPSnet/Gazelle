@@ -10,19 +10,19 @@ if (!check_perms('site_delete_tag')) {
     error(403);
 }
 $DB->query("
-	SELECT ArtistID
-	FROM artists_similar
-	WHERE SimilarID = '$SimilarID'");
+    SELECT ArtistID
+    FROM artists_similar
+    WHERE SimilarID = '$SimilarID'");
 $ArtistIDs = $DB->to_array();
 $DB->query("
-	DELETE FROM artists_similar
-	WHERE SimilarID = '$SimilarID'");
+    DELETE FROM artists_similar
+    WHERE SimilarID = '$SimilarID'");
 $DB->query("
-	DELETE FROM artists_similar_scores
-	WHERE SimilarID = '$SimilarID'");
+    DELETE FROM artists_similar_scores
+    WHERE SimilarID = '$SimilarID'");
 $DB->query("
-	DELETE FROM artists_similar_votes
-	WHERE SimilarID = '$SimilarID'");
+    DELETE FROM artists_similar_votes
+    WHERE SimilarID = '$SimilarID'");
 
 foreach ($ArtistIDs as $ArtistID) {
     list($ArtistID) = $ArtistID;

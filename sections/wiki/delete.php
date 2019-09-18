@@ -2,16 +2,16 @@
 authorize();
 
 if (!check_perms('admin_manage_wiki')) {
-	error(403);
+    error(403);
 }
 
 if (!isset($_GET['id']) || !is_number($_GET['id'])) {
-	error(404);
+    error(404);
 }
 $ID = (int)$_GET['id'];
 
 if ($ID == INDEX_ARTICLE) {
-	error('You cannot delete the main wiki article.');
+    error('You cannot delete the main wiki article.');
 }
 
 $DB->query("SELECT MinClassEdit FROM wiki_articles WHERE ID = '$ID'");
@@ -22,12 +22,12 @@ if ($MinEditClass > $LoggedUser['EffectiveClass']) {
 }
 
 $DB->query("
-	SELECT Title
-	FROM wiki_articles
-	WHERE ID = $ID");
+    SELECT Title
+    FROM wiki_articles
+    WHERE ID = $ID");
 
 if (!$DB->has_results()) {
-	error(404);
+    error(404);
 }
 
 list($Title) = $DB->next_record(MYSQLI_NUM, false);

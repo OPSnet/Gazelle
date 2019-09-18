@@ -16,9 +16,9 @@ $Notes = str_replace("<br />", "\n", $_POST['notes']);
 $Notes = db_string($Notes);
 
 $DB->query("
-	UPDATE reports
-	SET Notes = '$Notes'
-	WHERE ID = '$ID'");
+    UPDATE reports
+    SET Notes = '$Notes'
+    WHERE ID = '$ID'");
 print
     json_encode(
         array(

@@ -2,22 +2,22 @@
 
 if (check_perms('admin_reports') && !empty($_GET['remove']) && is_number($_GET['remove'])) {
     $DB->query('
-		DELETE FROM torrents_missing_lineage
-		WHERE TorrentID = '.$_GET['remove']);
+        DELETE FROM torrents_missing_lineage
+        WHERE TorrentID = '.$_GET['remove']);
     $DB->query('
-		SELECT GroupID
-		FROM torrents
-		WHERE ID = '.$_GET['remove']);
+        SELECT GroupID
+        FROM torrents
+        WHERE ID = '.$_GET['remove']);
     list($GroupID) = $DB->next_record();
     $Cache->delete_value("torrents_details_$GroupID");
 }
 
 View::show_header('Torrents with missing lineage');
 $DB->query("
-	SELECT tfi.TorrentID, t.GroupID
-	FROM torrents_missing_lineage AS tfi
-		JOIN torrents AS t ON t.ID = tfi.TorrentID
-	ORDER BY tfi.TimeAdded ASC");
+    SELECT tfi.TorrentID, t.GroupID
+    FROM torrents_missing_lineage AS tfi
+        JOIN torrents AS t ON t.ID = tfi.TorrentID
+    ORDER BY tfi.TimeAdded ASC");
 $TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
 $GroupIDs = array();
 foreach ($TorrentsInfo as $Torrent) {

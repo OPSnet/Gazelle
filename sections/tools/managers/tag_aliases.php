@@ -13,8 +13,8 @@ if (check_perms('users_mod')) {
         $aliastag = $_POST['aliastag'];
 
         $DB->prepared_query("
-			INSERT INTO tag_aliases (BadTag, AliasTag)
-			VALUES (?, ?)", $badtag, $aliastag);
+            INSERT INTO tag_aliases (BadTag, AliasTag)
+            VALUES (?, ?)", $badtag, $aliastag);
     }
 
     if (isset($_POST['changealias']) && is_number($_POST['aliasid'])) {
@@ -24,14 +24,14 @@ if (check_perms('users_mod')) {
 
         if ($_POST['save']) {
             $DB->prepared_query("
-				UPDATE tag_aliases
-				SET BadTag = ?, AliasTag = ?
-				WHERE ID = ?", $badtag, $aliastag, $aliasid);
+                UPDATE tag_aliases
+                SET BadTag = ?, AliasTag = ?
+                WHERE ID = ?", $badtag, $aliastag, $aliasid);
         }
         if ($_POST['delete']) {
             $DB->prepared_query("
-				DELETE FROM tag_aliases
-				WHERE ID = ?", $aliasid);
+                DELETE FROM tag_aliases
+                WHERE ID = ?", $aliasid);
         }
     }
 }

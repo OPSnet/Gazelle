@@ -134,17 +134,17 @@ $Row = 'b';
             <td>
                 <input type="checkbox" name="active" disabled="disabled"<?=($Active == '1') ? ' checked="checked"' : ''?> />
             </td>
-<?php	if (check_perms('users_view_invites')) { ?>
+<?php    if (check_perms('users_view_invites')) { ?>
             <td>
-<?php	    if (!$Active) { ?>
+<?php        if (!$Active) { ?>
                 <a href="https://<?=SITE_URL?>/register.php?invite=<?=$Invite?>"><?=$Invite?></a>
-<?php	    } ?>
+<?php        } ?>
             </td>
 <?php } if (check_perms('admin_manage_referrals')) { ?>
             <td>
                 <input type="submit" name="submit" value="Unlink" onclick="return confirm('Are you sure you want to unlink this account? This is an irreversible action!')" />
             </td>
-<?php	} ?>
+<?php    } ?>
         </form>
     </tr>
 <?php

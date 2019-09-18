@@ -20,9 +20,9 @@ if (!isset($_GET['threadid']) || !is_number($_GET['threadid'])) {
         $ThreadID = $_GET['topicid'];
     } elseif (isset($_GET['postid']) && is_number($_GET['postid'])) {
         $DB->query("
-			SELECT TopicID
-			FROM forums_posts
-			WHERE ID = $_GET[postid]");
+            SELECT TopicID
+            FROM forums_posts
+            WHERE ID = $_GET[postid]");
         list($ThreadID) = $DB->next_record();
         if ($ThreadID) {
             header("Location: forums.php?action=viewthread&threadid=$ThreadID&postid=$_GET[postid]#post$_GET[postid]");
@@ -68,10 +68,10 @@ if ($ThreadInfo['Posts'] > $PerPage) {
         $PostNum = $_GET['post'];
     } elseif (isset($_GET['postid']) && is_number($_GET['postid']) && $_GET['postid'] != $ThreadInfo['StickyPostID']) {
         $SQL = "
-			SELECT COUNT(ID)
-			FROM forums_posts
-			WHERE TopicID = $ThreadID
-				AND ID <= $_GET[postid]";
+            SELECT COUNT(ID)
+            FROM forums_posts
+            WHERE TopicID = $ThreadID
+                AND ID <= $_GET[postid]";
         if ($ThreadInfo['StickyPostID'] < $_GET['postid']) {
             $SQL .= " AND ID != $ThreadInfo[StickyPostID]";
         }
@@ -92,19 +92,19 @@ list($CatalogueID,$CatalogueLimit) = Format::catalogue_limit($Page, $PerPage, TH
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
 if (!$Catalogue = $Cache->get_value("thread_{$ThreadID}_catalogue_$CatalogueID")) {
     $DB->query("
-		SELECT
-			p.ID,
-			p.AuthorID,
-			p.AddedTime,
-			p.Body,
-			p.EditedUserID,
-			p.EditedTime,
-			ed.Username
-		FROM forums_posts AS p
-			LEFT JOIN users_main AS ed ON ed.ID = p.EditedUserID
-		WHERE p.TopicID = '$ThreadID'
-			AND p.ID != '".$ThreadInfo['StickyPostID']."'
-		LIMIT $CatalogueLimit");
+        SELECT
+            p.ID,
+            p.AuthorID,
+            p.AddedTime,
+            p.Body,
+            p.EditedUserID,
+            p.EditedTime,
+            ed.Username
+        FROM forums_posts AS p
+            LEFT JOIN users_main AS ed ON ed.ID = p.EditedUserID
+        WHERE p.TopicID = '$ThreadID'
+            AND p.ID != '".$ThreadInfo['StickyPostID']."'
+        LIMIT $CatalogueLimit");
     $Catalogue = $DB->to_array(false, MYSQLI_ASSOC);
     if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
         $Cache->cache_value("thread_{$ThreadID}_catalogue_$CatalogueID", $Catalogue, 0);
@@ -124,19 +124,19 @@ if ($ThreadInfo['Posts'] <= $PerPage*$Page && $ThreadInfo['StickyPostID'] > $Las
 if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
 
     $DB->query("
-		SELECT PostID
-		FROM forums_last_read_topics
-		WHERE UserID = '$LoggedUser[ID]'
-			AND TopicID = '$ThreadID'");
+        SELECT PostID
+        FROM forums_last_read_topics
+        WHERE UserID = '$LoggedUser[ID]'
+            AND TopicID = '$ThreadID'");
     list($LastRead) = $DB->next_record();
     if ($LastRead < $LastPost) {
         $DB->query("
-			INSERT INTO forums_last_read_topics
-				(UserID, TopicID, PostID)
-			VALUES
-				('$LoggedUser[ID]', '$ThreadID', '".db_string($LastPost)."')
-			ON DUPLICATE KEY UPDATE
-				PostID = '$LastPost'");
+            INSERT INTO forums_last_read_topics
+                (UserID, TopicID, PostID)
+            VALUES
+                ('$LoggedUser[ID]', '$ThreadID', '".db_string($LastPost)."')
+            ON DUPLICATE KEY UPDATE
+                PostID = '$LastPost'");
     }
 }
 
@@ -155,13 +155,13 @@ if (in_array($ThreadID, $UserSubscriptions)) {
 $QuoteNotificationsCount = $Cache->get_value('notify_quoted_' . $LoggedUser['ID']);
 if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
     $DB->query("
-		UPDATE users_notify_quoted
-		SET UnRead = false
-		WHERE UserID = '$LoggedUser[ID]'
-			AND Page = 'forums'
-			AND PageID = '$ThreadID'
-			AND PostID >= '$FirstPost'
-			AND PostID <= '$LastPost'");
+        UPDATE users_notify_quoted
+        SET UnRead = false
+        WHERE UserID = '$LoggedUser[ID]'
+            AND Page = 'forums'
+            AND PageID = '$ThreadID'
+            AND PostID >= '$FirstPost'
+            AND PostID <= '$LastPost'");
     $Cache->delete_value('notify_quoted_' . $LoggedUser['ID']);
 }
 

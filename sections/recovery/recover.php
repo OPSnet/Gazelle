@@ -22,7 +22,7 @@ h5{padding-top:30px}
 #suggestions{margin-top:35px;color:#fff}
 #suggestions a,p{color:#fff;font-weight:200}
 #suggestions a{font-size:14px;margin:0 10px}
-	</style>
+    </style>
 </head>
 
 <body>

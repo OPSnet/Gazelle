@@ -1,6 +1,6 @@
 <?
 if (!check_perms('admin_recovery')) {
-	error(403);
+    error(403);
 }
 View::show_header('Recovery administration');
 
@@ -56,11 +56,11 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 <div class="thin">
 
 <div class="linkbox">
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
-	<a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=pending">Pending</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=validated">Validated</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=accepted">Accepted</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=denied">Denied</a>
+    <a class="brackets" href="/recovery.php?action=admin&amp;state=claimed">Your claimed</a>
     <a class="brackets" href="/recovery.php?action=browse">Browse</a>
     <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
@@ -81,46 +81,46 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 <? } ?>
 
 <div class="linkbox">
-	<?=$Pages?>
+    <?=$Pages?>
 </div>
 
 <div class="box">
-	<div class="head">Registrations</div>
-	<div class="pad">
-		<table>
-			<tr>
-				<th>ID</th>
-				<th>Username</th>
-				<th>Token</th>
-				<th>Email</th>
-				<th>Announce</th>
-				<th>Created</th>
-				<th>Updated</th>
+    <div class="head">Registrations</div>
+    <div class="pad">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Token</th>
+                <th>Email</th>
+                <th>Announce</th>
+                <th>Created</th>
+                <th>Updated</th>
                 <th>Action</th>
-			</tr>
+            </tr>
 <? foreach ($Info as $i) { ?>
-			<tr>
-				<td><?= $i['recovery_id'] ?></td>
-				<td><?= $i['username'] ?></td>
-				<td><tt><?= $i['token'] ?></tt></td>
-				<td><?= $i['email'] ?></td>
-				<td><?= $i['announce'] ?></td>
-				<td><?= time_diff($i['created_dt']) ?></td>
-				<td><?= time_diff($i['updated_dt']) ?></td>
+            <tr>
+                <td><?= $i['recovery_id'] ?></td>
+                <td><?= $i['username'] ?></td>
+                <td><tt><?= $i['token'] ?></tt></td>
+                <td><?= $i['email'] ?></td>
+                <td><?= $i['announce'] ?></td>
+                <td><?= time_diff($i['created_dt']) ?></td>
+                <td><?= time_diff($i['updated_dt']) ?></td>
                 <td>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
 <?  if ($i['state'] == 'PENDING') { ?>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a>
 <?  } ?>
                 </td>
-			</tr>
+            </tr>
 <? } ?>
-		</table>
-	</div>
+        </table>
+    </div>
 </div>
 
 <div class="linkbox">
-	<?=$Pages?>
+    <?=$Pages?>
 </div>
 
 </div>

@@ -43,14 +43,14 @@ if (!$Way) {
 }
 
 $SQL = "
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		ID,
-		Title,
-		Date,
-		Author
-	FROM wiki_articles
-	WHERE MinClassRead <= '".$LoggedUser['EffectiveClass']."'";
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        ID,
+        Title,
+        Date,
+        Author
+    FROM wiki_articles
+    WHERE MinClassRead <= '".$LoggedUser['EffectiveClass']."'";
 if ($Search != '') {
     $SQL .= " AND $Type LIKE '%";
     $SQL .= implode("%' AND $Type LIKE '%", $Words);
@@ -58,11 +58,11 @@ if ($Search != '') {
 }
 
 $SQL .= "
-	ORDER BY $Order $Way
-	LIMIT $Limit ";
+    ORDER BY $Order $Way
+    LIMIT $Limit ";
 $RS = $DB->query($SQL);
 $DB->query("
-	SELECT FOUND_ROWS()");
+    SELECT FOUND_ROWS()");
 list($NumResults) = $DB->next_record();
 
 View::show_header('Search articles');

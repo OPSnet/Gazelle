@@ -340,11 +340,11 @@ if ($Err) { // Show the upload form, with the data the user entered
 
 if (!empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
     $DB->prepared_query("
-		SELECT ta.ArtistID, aa.Name, ta.Importance
-		FROM torrents_artists AS ta
-			JOIN artists_alias AS aa ON ta.AliasID = aa.AliasID
-		WHERE ta.GroupID = ?
-		ORDER BY ta.Importance ASC, aa.Name ASC;", $Properties['GroupID']);
+        SELECT ta.ArtistID, aa.Name, ta.Importance
+        FROM torrents_artists AS ta
+            JOIN artists_alias AS aa ON ta.AliasID = aa.AliasID
+        WHERE ta.GroupID = ?
+        ORDER BY ta.Importance ASC, aa.Name ASC;", $Properties['GroupID']);
     while (list($ArtistID, $ArtistName, $ArtistImportance) = $DB->next_record(MYSQLI_BOTH, false)) {
         $ArtistForm[$ArtistImportance][] = array('id' => $ArtistID, 'name' => display_str($ArtistName));
         $ArtistsUnescaped[$ArtistImportance][] = array('name' => $ArtistName);
@@ -383,22 +383,22 @@ $TorEnc = db_string($Tor->encode());
 $InfoHash = pack('H*', $Tor->info_hash());
 
 $DB->prepared_query('
-	SELECT ID
-	FROM torrents
-	WHERE info_hash = ?', $InfoHash);
+    SELECT ID
+    FROM torrents
+    WHERE info_hash = ?', $InfoHash);
 if ($DB->has_results()) {
     list($ID) = $DB->next_record();
     $DB->prepared_query('
-		SELECT TorrentID
-		FROM torrents_files
-		WHERE TorrentID = ?', $ID);
+        SELECT TorrentID
+        FROM torrents_files
+        WHERE TorrentID = ?', $ID);
     if ($DB->has_results()) {
         $Err = '<a href="torrents.php?torrentid='.$ID.'">The exact same torrent file already exists on the site!</a>';
     } else {
         // A lost torrent
         $DB->query("
-			INSERT INTO torrents_files (TorrentID, File)
-			VALUES ($ID, '$TorEnc')");
+            INSERT INTO torrents_files (TorrentID, File)
+            VALUES ($ID, '$TorEnc')");
         $Err = '<a href="torrents.php?torrentid='.$ID.'">Thank you for fixing this torrent</a>';
     }
 }
@@ -493,22 +493,22 @@ if ($Type == 'Music') {
 
         $Debug->set_flag('upload: torrent decoded');
         $DB->query("
-			SELECT ID
-			FROM torrents
-			WHERE info_hash = '" . db_string($ThisInsert['InfoHash']) . "'");
+            SELECT ID
+            FROM torrents
+            WHERE info_hash = '" . db_string($ThisInsert['InfoHash']) . "'");
         if ($DB->has_results()) {
             list($ExtraID) = $DB->next_record();
             $DB->prepared_query('
-				SELECT TorrentID
-				FROM torrents_files
-				WHERE TorrentID = ?', $ExtraID);
+                SELECT TorrentID
+                FROM torrents_files
+                WHERE TorrentID = ?', $ExtraID);
             if ($DB->has_results()) {
                 $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">The exact same torrent file already exists on the site!</a>";
             } else {
                 //One of the lost torrents.
                 $DB->query("
-					INSERT INTO torrents_files (TorrentID, File)
-					VALUES ($ExtraID, '$ThisInsert[TorEnc]')");
+                    INSERT INTO torrents_files (TorrentID, File)
+                    VALUES ($ExtraID, '$ThisInsert[TorEnc]')");
                 $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">Thank you for fixing this torrent.</a>";
             }
         }
@@ -537,17 +537,17 @@ if ($Type == 'Music') {
     // Does it belong in a group?
     if ($Properties['GroupID']) {
         $DB->query("
-			SELECT
-				ID,
-				WikiImage,
-				WikiBody,
-				RevisionID,
-				Name,
-				Year,
-				ReleaseType,
-				TagList
-			FROM torrents_group
-			WHERE id = ".$Properties['GroupID']);
+            SELECT
+                ID,
+                WikiImage,
+                WikiBody,
+                RevisionID,
+                Name,
+                Year,
+                ReleaseType,
+                TagList
+            FROM torrents_group
+            WHERE id = ".$Properties['GroupID']);
         if ($DB->has_results()) {
             // Don't escape tg.Name. It's written directly to the log table
             list($GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $Properties['TagList']) = $DB->next_record(MYSQLI_NUM, array(4));
@@ -569,18 +569,18 @@ if ($Type == 'Music') {
         foreach ($ArtistForm as $Importance => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 $DB->query("
-					SELECT
-						tg.id,
-						tg.WikiImage,
-						tg.WikiBody,
-						tg.RevisionID
-					FROM torrents_group AS tg
-						LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID
-						LEFT JOIN artists_group AS ag ON ta.ArtistID = ag.ArtistID
-					WHERE ag.Name = '".db_string($Artist['name'])."'
-						AND tg.Name = ".$T['Title']."
-						AND tg.ReleaseType = ".$T['ReleaseType']."
-						AND tg.Year = ".$T['Year']);
+                    SELECT
+                        tg.id,
+                        tg.WikiImage,
+                        tg.WikiBody,
+                        tg.RevisionID
+                    FROM torrents_group AS tg
+                        LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID
+                        LEFT JOIN artists_group AS ag ON ta.ArtistID = ag.ArtistID
+                    WHERE ag.Name = '".db_string($Artist['name'])."'
+                        AND tg.Name = ".$T['Title']."
+                        AND tg.ReleaseType = ".$T['ReleaseType']."
+                        AND tg.Year = ".$T['Year']);
 
                 if ($DB->has_results()) {
                     list($GroupID, $WikiImage, $WikiBody, $RevisionID) = $DB->next_record();
@@ -601,13 +601,13 @@ if ($Type == 'Music') {
                 } else {
                     // The album hasn't been uploaded. Try to get the artist IDs
                     $DB->query("
-						SELECT
-							ArtistID,
-							AliasID,
-							Name,
-							Redirect
-						FROM artists_alias
-						WHERE Name = '".db_string($Artist['name'])."'");
+                        SELECT
+                            ArtistID,
+                            AliasID,
+                            Name,
+                            Redirect
+                        FROM artists_alias
+                        WHERE Name = '".db_string($Artist['name'])."'");
                     if ($DB->has_results()) {
                         while (list($ArtistID, $AliasID, $AliasName, $Redirect) = $DB->next_record(MYSQLI_NUM, false)) {
                             if (!strcasecmp($Artist['name'], $AliasName)) {
@@ -643,15 +643,15 @@ if (!$GroupID && $Type == 'Music') {
                 } else {
                     // Create artist
                     $DB->query("
-						INSERT INTO artists_group (Name)
-						VALUES ('".db_string($Artist['name'])."')");
+                        INSERT INTO artists_group (Name)
+                        VALUES ('".db_string($Artist['name'])."')");
                     $ArtistID = $DB->inserted_id();
 
                     $Cache->increment('stats_artist_count');
 
                     $DB->query("
-						INSERT INTO artists_alias (ArtistID, Name)
-						VALUES ($ArtistID, '".db_string($Artist['name'])."')");
+                        INSERT INTO artists_alias (ArtistID, Name)
+                        VALUES ($ArtistID, '".db_string($Artist['name'])."')");
                     $AliasID = $DB->inserted_id();
 
                     $ArtistForm[$Importance][$Num] = array('id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']);
@@ -666,17 +666,17 @@ if (!$GroupID && $Type == 'Music') {
 if (!$GroupID) {
     // Create torrent group
     $DB->query("
-		INSERT INTO torrents_group
-			(ArtistID, CategoryID, Name, Year, RecordLabel, CatalogueNumber, Time, WikiBody, WikiImage, ReleaseType, VanityHouse)
-		VALUES
-			(0, $TypeID, ".$T['Title'].", $T[Year], $T[RecordLabel], $T[CatalogueNumber], '".sqltime()."', '".db_string($Body)."', $T[Image], $T[ReleaseType], $T[VanityHouse])");
+        INSERT INTO torrents_group
+            (ArtistID, CategoryID, Name, Year, RecordLabel, CatalogueNumber, Time, WikiBody, WikiImage, ReleaseType, VanityHouse)
+        VALUES
+            (0, $TypeID, ".$T['Title'].", $T[Year], $T[RecordLabel], $T[CatalogueNumber], '".sqltime()."', '".db_string($Body)."', $T[Image], $T[ReleaseType], $T[VanityHouse])");
     $GroupID = $DB->inserted_id();
     if ($Type == 'Music') {
         foreach ($ArtistForm as $Importance => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 $DB->query("
-					INSERT IGNORE INTO torrents_artists (GroupID, ArtistID, AliasID, UserID, Importance)
-					VALUES ($GroupID, ".$Artist['id'].', '.$Artist['aliasid'].', '.$LoggedUser['ID'].", '$Importance')");
+                    INSERT IGNORE INTO torrents_artists (GroupID, ArtistID, AliasID, UserID, Importance)
+                    VALUES ($GroupID, ".$Artist['id'].', '.$Artist['aliasid'].', '.$LoggedUser['ID'].", '$Importance')");
                 $Cache->increment('stats_album_count');
             }
         }
@@ -685,17 +685,17 @@ if (!$GroupID) {
 
 } else {
     $DB->query("
-		UPDATE torrents_group
-		SET Time = '".sqltime()."'
-		WHERE ID = $GroupID");
+        UPDATE torrents_group
+        SET Time = '".sqltime()."'
+        WHERE ID = $GroupID");
     $Cache->delete_value("torrent_group_$GroupID");
     $Cache->delete_value("torrents_details_$GroupID");
     $Cache->delete_value("detail_files_$GroupID");
     if ($Type == 'Music') {
         $DB->query("
-			SELECT ReleaseType
-			FROM torrents_group
-			WHERE ID = '$GroupID'");
+            SELECT ReleaseType
+            FROM torrents_group
+            WHERE ID = '$GroupID'");
         list($Properties['ReleaseType']) = $DB->next_record();
     }
 }
@@ -703,17 +703,17 @@ if (!$GroupID) {
 // Description
 if (!$NoRevision) {
     $DB->query("
-		INSERT INTO wiki_torrents
-			(PageID, Body, UserID, Summary, Time, Image)
-		VALUES
-			($GroupID, $T[GroupDescription], $LoggedUser[ID], 'Uploaded new torrent', '".sqltime()."', $T[Image])");
+        INSERT INTO wiki_torrents
+            (PageID, Body, UserID, Summary, Time, Image)
+        VALUES
+            ($GroupID, $T[GroupDescription], $LoggedUser[ID], 'Uploaded new torrent', '".sqltime()."', $T[Image])");
     $RevisionID = $DB->inserted_id();
 
     // Revision ID
     $DB->query("
-		UPDATE torrents_group
-		SET RevisionID = '$RevisionID'
-		WHERE ID = $GroupID");
+        UPDATE torrents_group
+        SET RevisionID = '$RevisionID'
+        WHERE ID = $GroupID");
 }
 
 // Tags
@@ -724,23 +724,23 @@ if (!$Properties['GroupID']) {
         if (!empty($Tag)) {
         $Tag = Misc::get_alias_tag($Tag);
             $DB->query("
-				INSERT INTO tags
-					(Name, UserID)
-				VALUES
-					('$Tag', $LoggedUser[ID])
-				ON DUPLICATE KEY UPDATE
-					Uses = Uses + 1;
-			");
+                INSERT INTO tags
+                    (Name, UserID)
+                VALUES
+                    ('$Tag', $LoggedUser[ID])
+                ON DUPLICATE KEY UPDATE
+                    Uses = Uses + 1;
+            ");
             $TagID = $DB->inserted_id();
 
             $DB->query("
-				INSERT INTO torrents_tags
-					(TagID, GroupID, UserID, PositiveVotes)
-				VALUES
-					($TagID, $GroupID, $LoggedUser[ID], 10)
-				ON DUPLICATE KEY UPDATE
-					PositiveVotes = PositiveVotes + 1;
-			");
+                INSERT INTO torrents_tags
+                    (TagID, GroupID, UserID, PositiveVotes)
+                VALUES
+                    ($TagID, $GroupID, $LoggedUser[ID], 10)
+                ON DUPLICATE KEY UPDATE
+                    PositiveVotes = PositiveVotes + 1;
+            ");
         }
     }
 }
@@ -778,16 +778,16 @@ $T['FreeLeech'] = 0;
 $T['FreeLeechType'] = 0;
 // Torrent
 $DB->query("
-	INSERT INTO torrents
-		(GroupID, UserID, Media, Format, Encoding,
-		Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-		Scene, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, info_hash, FileCount, FileList,
-		FilePath, Size, Time, Description, FreeTorrent, FreeLeechType)
-	VALUES
-		($GroupID, $LoggedUser[ID], $T[Media], $T[Format], $T[Encoding],
-		$T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
-		$T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum','".db_string($InfoHash)."', $NumFiles, '$FileString',
-		'$FilePath', $TotalSize, '".sqltime()."', $T[TorrentDescription], '$T[FreeLeech]', '$T[FreeLeechType]')");
+    INSERT INTO torrents
+        (GroupID, UserID, Media, Format, Encoding,
+        Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
+        Scene, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, info_hash, FileCount, FileList,
+        FilePath, Size, Time, Description, FreeTorrent, FreeLeechType)
+    VALUES
+        ($GroupID, $LoggedUser[ID], $T[Media], $T[Format], $T[Encoding],
+        $T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
+        $T[Scene], '$HasLog', '$HasCue', '$LogInDB', '$LogScore', '$LogChecksum','".db_string($InfoHash)."', $NumFiles, '$FileString',
+        '$FilePath', $TotalSize, '".sqltime()."', $T[TorrentDescription], '$T[FreeLeech]', '$T[FreeLeechType]')");
 
 $Cache->increment('stats_torrent_count');
 $TorrentID = $DB->inserted_id();
@@ -815,8 +815,8 @@ foreach ($LogScores as $Pos => $Log) {
 //--------------- Write torrent file -------------------------------------------//
 
 $DB->query("
-	INSERT INTO torrents_files (TorrentID, File)
-	VALUES ($TorrentID, '$TorEnc')");
+    INSERT INTO torrents_files (TorrentID, File)
+    VALUES ($TorrentID, '$TorEnc')");
 Misc::write_log("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MB) was uploaded by ' . $LoggedUser['Username']);
 Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MB)', 0);
 
@@ -887,17 +887,17 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
     $LogScore = 0;
     // Torrent
     $DB->query("
-	INSERT INTO torrents
-		(GroupID, UserID, Media, Format, Encoding,
-		Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-		HasLog, HasCue, info_hash, FileCount, FileList, FilePath, Size, Time,
-		Description, LogScore, FreeTorrent, FreeLeechType)
-	VALUES
-		($GroupID, $LoggedUser[ID], $T[Media], '$ExtraTorrent[Format]', '$ExtraTorrent[Encoding]',
-		$T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
-		$ExtraHasLog, $ExtraHasCue, '".db_string($ExtraTorrent['InfoHash'])."', $ExtraTorrent[NumFiles],
-		'$ExtraTorrent[FileString]', '$ExtraTorrent[FilePath]', $ExtraTorrent[TotalSize], '".sqltime()."',
-		'$ExtraTorrent[TorrentDescription]', $LogScore, '$T[FreeLeech]', '$T[FreeLeechType]')");
+    INSERT INTO torrents
+        (GroupID, UserID, Media, Format, Encoding,
+        Remastered, RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
+        HasLog, HasCue, info_hash, FileCount, FileList, FilePath, Size, Time,
+        Description, LogScore, FreeTorrent, FreeLeechType)
+    VALUES
+        ($GroupID, $LoggedUser[ID], $T[Media], '$ExtraTorrent[Format]', '$ExtraTorrent[Encoding]',
+        $T[Remastered], $T[RemasterYear], $T[RemasterTitle], $T[RemasterRecordLabel], $T[RemasterCatalogueNumber],
+        $ExtraHasLog, $ExtraHasCue, '".db_string($ExtraTorrent['InfoHash'])."', $ExtraTorrent[NumFiles],
+        '$ExtraTorrent[FileString]', '$ExtraTorrent[FilePath]', $ExtraTorrent[TotalSize], '".sqltime()."',
+        '$ExtraTorrent[TorrentDescription]', $LogScore, '$T[FreeLeech]', '$T[FreeLeechType]')");
 
     $Cache->increment('stats_torrent_count');
     $ExtraTorrentID = $DB->inserted_id();
@@ -908,10 +908,10 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
     //--------------- Write torrent file -------------------------------------------//
 
     $DB->query("
-		INSERT INTO torrents_files
-			(TorrentID, File)
-		VALUES
-			($ExtraTorrentID, '$ExtraTorrent[TorEnc]')");
+        INSERT INTO torrents_files
+            (TorrentID, File)
+        VALUES
+            ($ExtraTorrentID, '$ExtraTorrent[TorEnc]')");
 
     Misc::write_log("Torrent $ExtraTorrentID ($LogName) (" . number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2) . ' MB) was uploaded by ' . $LoggedUser['Username']);
     Torrents::write_group_log($GroupID, $ExtraTorrentID, $LoggedUser['ID'], 'uploaded (' . number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2) . ' MB)', 0);
@@ -985,10 +985,10 @@ if (trim($Properties['Image']) != '') {
 //--------------- Contest ------------------------------------------------------//
 if ($Properties['LibraryImage'] != '') {
     $DB->query("
-		INSERT INTO reportsv2
-			(ReporterID, TorrentID, Type, UserComment, Status, ReportedTime, Track, Image, ExtraID, Link)
-		VALUES
-			(0, $TorrentID, 'library', '".db_string(($Properties['MultiDisc'] ? 'Multi-disc' : ''))."', 'New', '".sqltime()."', '', '".db_string($Properties['LibraryImage'])."', '', '')");
+        INSERT INTO reportsv2
+            (ReporterID, TorrentID, Type, UserComment, Status, ReportedTime, Track, Image, ExtraID, Link)
+        VALUES
+            (0, $TorrentID, 'library', '".db_string(($Properties['MultiDisc'] ? 'Multi-disc' : ''))."', 'New', '".sqltime()."', '', '".db_string($Properties['LibraryImage'])."', '', '')");
 }
 
 //******************************************************************************//

@@ -3,7 +3,7 @@
 enforce_login();
 
 if (!empty($LoggedUser['DisableForums'])) {
-	error(403);
+    error(403);
 }
 
 $Forums = Forums::get_forums();

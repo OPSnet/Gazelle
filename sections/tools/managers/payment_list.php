@@ -4,8 +4,8 @@ if (!check_perms('admin_manage_payments')) {
 }
 
 $DB->prepared_query("
-		SELECT ID, Text, Expiry, Active
-		FROM payment_reminders");
+        SELECT ID, Text, Expiry, Active
+        FROM payment_reminders");
 
 $Reminders = $DB->has_results() ? $DB->to_array('ID', MYSQLI_ASSOC) : [];
 

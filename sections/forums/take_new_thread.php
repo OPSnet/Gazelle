@@ -82,39 +82,39 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
 $sqltime = sqltime();
 
 $DB->query("
-	INSERT INTO forums_topics
-		(Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
-	Values
-		('".db_string($Title)."', '".$LoggedUser['ID']."', '$ForumID', '".$sqltime."', '".$LoggedUser['ID']."', '".$sqltime."')");
+    INSERT INTO forums_topics
+        (Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
+    Values
+        ('".db_string($Title)."', '".$LoggedUser['ID']."', '$ForumID', '".$sqltime."', '".$LoggedUser['ID']."', '".$sqltime."')");
 $TopicID = $DB->inserted_id();
 
 $DB->query("
-	INSERT INTO forums_posts
-		(TopicID, AuthorID, AddedTime, Body)
-	VALUES
-		('$TopicID', '".$LoggedUser['ID']."', '".$sqltime."', '".db_string($Body)."')");
+    INSERT INTO forums_posts
+        (TopicID, AuthorID, AddedTime, Body)
+    VALUES
+        ('$TopicID', '".$LoggedUser['ID']."', '".$sqltime."', '".db_string($Body)."')");
 
 $PostID = $DB->inserted_id();
 
 $DB->query("
-	UPDATE forums
-	SET
-		NumPosts         = NumPosts + 1,
-		NumTopics        = NumTopics + 1,
-		LastPostID       = '$PostID',
-		LastPostAuthorID = '".$LoggedUser['ID']."',
-		LastPostTopicID  = '$TopicID',
-		LastPostTime     = '".$sqltime."'
-	WHERE ID = '$ForumID'");
+    UPDATE forums
+    SET
+        NumPosts         = NumPosts + 1,
+        NumTopics        = NumTopics + 1,
+        LastPostID       = '$PostID',
+        LastPostAuthorID = '".$LoggedUser['ID']."',
+        LastPostTopicID  = '$TopicID',
+        LastPostTime     = '".$sqltime."'
+    WHERE ID = '$ForumID'");
 
 $DB->query("
-	UPDATE forums_topics
-	SET
-		NumPosts         = NumPosts + 1,
-		LastPostID       = '$PostID',
-		LastPostAuthorID = '".$LoggedUser['ID']."',
-		LastPostTime     = '".$sqltime."'
-	WHERE ID = '$TopicID'");
+    UPDATE forums_topics
+    SET
+        NumPosts         = NumPosts + 1,
+        LastPostID       = '$PostID',
+        LastPostAuthorID = '".$LoggedUser['ID']."',
+        LastPostTime     = '".$sqltime."'
+    WHERE ID = '$TopicID'");
 
 if (isset($_POST['subscribe'])) {
     Subscriptions::subscribe($TopicID);
@@ -122,10 +122,10 @@ if (isset($_POST['subscribe'])) {
 
 if (!$NoPoll) { // god, I hate double negatives...
     $DB->query("
-		INSERT INTO forums_polls
-			(TopicID, Question, Answers)
-		VALUES
-			('$TopicID', '".db_string($Question)."', '".db_string(serialize($Answers))."')");
+        INSERT INTO forums_polls
+            (TopicID, Question, Answers)
+        VALUES
+            ('$TopicID', '".db_string($Question)."', '".db_string(serialize($Answers))."')");
     $Cache->cache_value("polls_$TopicID", array($Question, $Answers, $Votes, '0000-00-00 00:00:00', '0'), 0);
 
     if ($ForumID == STAFF_FORUM) {

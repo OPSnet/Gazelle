@@ -11,9 +11,9 @@ if (!empty($_GET['search'])) {
         $_GET['email'] = $_GET['search'];
     } elseif (preg_match(USERNAME_REGEX,$_GET['search'])) {
         $DB->query("
-			SELECT ID
-			FROM users_main
-			WHERE Username = '".db_string($_GET['search'])."'");
+            SELECT ID
+            FROM users_main
+            WHERE Username = '".db_string($_GET['search'])."'");
         if (list($ID) = $DB->next_record()) {
             header("Location: user.php?id=$ID");
             die();
@@ -232,44 +232,44 @@ if (count($_GET)) {
 
 
         $SQL = '
-				SQL_CALC_FOUND_ROWS
-				um1.ID,
-				um1.Username,
-				um1.Uploaded,
-				um1.Downloaded,';
+                SQL_CALC_FOUND_ROWS
+                um1.ID,
+                um1.Username,
+                um1.Uploaded,
+                um1.Downloaded,';
         if ($_GET['snatched'] == 'off') {
             $SQL .= "'X' AS Snatches,";
         } else {
             $SQL .= "
-				(
-					SELECT COUNT(xs.uid)
-					FROM xbt_snatched AS xs
-					WHERE xs.uid = um1.ID
-				) AS Snatches,";
+                (
+                    SELECT COUNT(xs.uid)
+                    FROM xbt_snatched AS xs
+                    WHERE xs.uid = um1.ID
+                ) AS Snatches,";
         }
         if ($_GET['invitees'] == 'off') {
             $SQL .= "'X' AS Invitees,";
         } else {
             $SQL .= "
-			(
-				SELECT COUNT(ui2.UserID)
-				FROM users_info AS ui2
-				WHERE um1.ID = ui2.Inviter
-  			) AS Invitees,";
+            (
+                SELECT COUNT(ui2.UserID)
+                FROM users_info AS ui2
+                WHERE um1.ID = ui2.Inviter
+              ) AS Invitees,";
         }
         $SQL .= '
-				um1.PermissionID,
-				um1.Email,
-				um1.Enabled,
-				um1.IP,
-				um1.Invites,
-				ui1.DisableInvites,
-				ui1.Warned,
-				ui1.Donor,
-				ui1.JoinDate,
-				um1.LastAccess
-			FROM users_main AS um1
-				JOIN users_info AS ui1 ON ui1.UserID = um1.ID ';
+                um1.PermissionID,
+                um1.Email,
+                um1.Enabled,
+                um1.IP,
+                um1.Invites,
+                ui1.DisableInvites,
+                ui1.Warned,
+                ui1.Donor,
+                ui1.JoinDate,
+                um1.LastAccess
+            FROM users_main AS um1
+                JOIN users_info AS ui1 ON ui1.UserID = um1.ID ';
 
 
         if (!empty($_GET['username'])) {
@@ -288,10 +288,10 @@ if (count($_GET)) {
 
         if (!empty($_GET['email_cnt']) && is_number($_GET['email_cnt'])) {
             $Query = "
-				SELECT UserID
-				FROM users_history_emails
-				GROUP BY UserID
-				HAVING COUNT(DISTINCT Email) ";
+                SELECT UserID
+                FROM users_history_emails
+                GROUP BY UserID
+                HAVING COUNT(DISTINCT Email) ";
             if ($_GET['emails_opt'] === 'equal') {
                 $operator = '=';
             }

@@ -36,23 +36,23 @@ step in properly enforcing coding standards throughout the project.
 
 == TABLE OF CONTENTS ==
 
-1.	FILE FORMATTING
-2.	CODE STYLING
-2.1		Code styling for PHP and JavaScript
-2.2		Code styling for CSS
-2.3		Code styling for SQL
-3.	NAMING CONVENTIONS
-3.1		Function names
-3.2		Variable names
-3.3		Class names
-3.4		SQL names
-3.5		Miscellaneous names
-4.	COMMENTS
-5.	USER INTERFACE
-6.	EXAMPLES
-6.1		PHP examples
-6.2		CSS examples
-6.3		SQL examples
+1.    FILE FORMATTING
+2.    CODE STYLING
+2.1        Code styling for PHP and JavaScript
+2.2        Code styling for CSS
+2.3        Code styling for SQL
+3.    NAMING CONVENTIONS
+3.1        Function names
+3.2        Variable names
+3.3        Class names
+3.4        SQL names
+3.5        Miscellaneous names
+4.    COMMENTS
+5.    USER INTERFACE
+6.    EXAMPLES
+6.1        PHP examples
+6.2        CSS examples
+6.3        SQL examples
 
 
 # FILE FORMATTING
@@ -222,77 +222,77 @@ for the most likely issues to encounter in web design:
 
 ## PHP examples
 
-	if ($Foo >= 0) {
-		$SomeString = "this is a string $DiffString with more text";
-	} elseif ($Foo == 0) {
-		// other things happen
-	} else {
-		// more magic
-	}
+    if ($Foo >= 0) {
+        $SomeString = "this is a string $DiffString with more text";
+    } elseif ($Foo == 0) {
+        // other things happen
+    } else {
+        // more magic
+    }
 
-	function works_magic($Foo, $Bar) {
-		return $Foo;
-	}
+    function works_magic($Foo, $Bar) {
+        return $Foo;
+    }
 
-	echo ($Foo == true ? 'foo is true' : 'foo is false');
+    echo ($Foo == true ? 'foo is true' : 'foo is false');
 
-	if ($Foo == true) {
-		// magic happens
-	}
+    if ($Foo == true) {
+        // magic happens
+    }
 
-	/*
-	 * This is a good, multi-line comment.
-	 *
-	 * Please comment your code!
-	 */
+    /*
+     * This is a good, multi-line comment.
+     *
+     * Please comment your code!
+     */
 
-	// This is a good, single-line comment.
+    // This is a good, single-line comment.
 
 
 ## CSS examples
 
     <a href="foobar.php" style="font-weight: bold;">link text</a>
 
-	.spellcheck {
-		margin: 10px 0;
-		font-size: 1.25em;
-		font-weight: bold;
-	}
+    .spellcheck {
+        margin: 10px 0;
+        font-size: 1.25em;
+        font-weight: bold;
+    }
 
-	.linkbox .brackets:before,
-	.linkbox .brackets:after,
-	.top10_quantity_links .brackets:before,
-	.top10_quantity_links .brackets:after {
-		color: #757575;
-	}
+    .linkbox .brackets:before,
+    .linkbox .brackets:after,
+    .top10_quantity_links .brackets:before,
+    .top10_quantity_links .brackets:after {
+        color: #757575;
+    }
 
 
 # SQL examples
 
-	SELECT
-		r.ID, e.EditionID, r.Title, r.Year, r.CatalogueNumber,
-		l.Name AS Label, r.LabelID, r.Image, r.MusicBrainzID
-	FROM releases AS r
-		JOIN editions AS e ON e.ReleaseID = r.ID
-		LEFT JOIN labels AS l ON l.ID = r.LabelID
-	WHERE r.ID IN ($ReleaseIDsSQL)
-	ORDER BY e.EditionID, r.Year ASC
+    SELECT
+        r.ID, e.EditionID, r.Title, r.Year, r.CatalogueNumber,
+        l.Name AS Label, r.LabelID, r.Image, r.MusicBrainzID
+    FROM releases AS r
+        JOIN editions AS e ON e.ReleaseID = r.ID
+        LEFT JOIN labels AS l ON l.ID = r.LabelID
+    WHERE r.ID IN ($ReleaseIDsSQL)
+    ORDER BY e.EditionID, r.Year ASC
 
 
-	SELECT SQL_CALC_FOUND_ROWS c.ID, c.Subject, cu.Unread, cu.Sticky,
-		cu.ForwardedTo, cu2.UserID, cu.ReceivedDate AS Date
-	FROM pm_conversations AS c
-		LEFT JOIN pm_conversations_users AS cu ON cu.ConvID = c.ID
-			AND cu.UserID = '1'
-		LEFT JOIN pm_conversations_users AS cu2 ON cu2.ConvID = c.ID
-			AND cu2.UserID != '1'
-			AND cu2.ForwardedTo = 0
-		LEFT JOIN users_main AS um ON um.ID = cu2.UserID
-	WHERE um.Username LIKE 'test'
-		AND cu.InInbox = '1'
-	GROUP BY c.ID
-	ORDER BY cu.Sticky, Date DESC
-	LIMIT 25
+    SELECT SQL_CALC_FOUND_ROWS c.ID, c.Subject, cu.Unread, cu.Sticky,
+        cu.ForwardedTo, cu2.UserID, cu.ReceivedDate AS Date
+    FROM pm_conversations AS c
+        LEFT JOIN pm_conversations_users AS cu ON cu.ConvID = c.ID
+            AND cu.UserID = '1'
+        LEFT JOIN pm_conversations_users AS cu2 ON cu2.ConvID = c.ID
+            AND cu2.UserID != '1'
+            AND cu2.ForwardedTo = 0
+        LEFT JOIN users_main AS um ON um.ID = cu2.UserID
+    WHERE um.Username LIKE 'test'
+        AND cu.InInbox = '1'
+    GROUP BY c.ID
+    ORDER BY cu.Sticky, Date DESC
+    LIMIT 25
 
 
-	SELECT RequestID AS ID, UserID FROM bookmarks_requests
+    SELECT RequestID AS ID, UserID FROM bookmarks_requests

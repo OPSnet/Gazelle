@@ -9,13 +9,13 @@ class Artist extends AbstractAPI {
         }
 
         $this->db->prepared_query("
-			SELECT
-				ArtistID,
-				Name
-			FROM
-				artists_group
-			WHERE
-				ArtistID = ?", $_GET['artist_id']);
+            SELECT
+                ArtistID,
+                Name
+            FROM
+                artists_group
+            WHERE
+                ArtistID = ?", $_GET['artist_id']);
         if (!$this->db->has_results()) {
             json_error('Artist not found');
         }

@@ -56,9 +56,9 @@ if (!$ID) {
     switch ($View) {
         case 'staff':
             $DB->query("
-				SELECT Username
-				FROM users_main
-				WHERE ID = $ID");
+                SELECT Username
+                FROM users_main
+                WHERE ID = $ID");
             list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "$Username's in-progress reports";
@@ -66,14 +66,14 @@ if (!$ID) {
                 $Title = "$ID's in-progress reports";
             }
             $Where = "
-				WHERE r.Status = 'InProgress'
-					AND r.ResolverID = $ID";
+                WHERE r.Status = 'InProgress'
+                    AND r.ResolverID = $ID";
             break;
         case 'resolver':
             $DB->query("
-				SELECT Username
-				FROM users_main
-				WHERE ID = $ID");
+                SELECT Username
+                FROM users_main
+                WHERE ID = $ID");
             list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "$Username's resolved reports";
@@ -81,15 +81,15 @@ if (!$ID) {
                 $Title = "$ID's resolved reports";
             }
             $Where = "
-				WHERE r.Status = 'Resolved'
-					AND r.ResolverID = $ID";
+                WHERE r.Status = 'Resolved'
+                    AND r.ResolverID = $ID";
             $Order = 'ORDER BY r.LastChangeTime DESC';
             break;
         case 'group':
             $Title = "Unresolved reports for the group $ID";
             $Where = "
-				WHERE r.Status != 'Resolved'
-					AND tg.ID = $ID";
+                WHERE r.Status != 'Resolved'
+                    AND tg.ID = $ID";
             break;
         case 'torrent':
             $Title = "All reports for the torrent $ID";
@@ -101,9 +101,9 @@ if (!$ID) {
             break;
         case 'reporter':
             $DB->query("
-				SELECT Username
-				FROM users_main
-				WHERE ID = $ID");
+                SELECT Username
+                FROM users_main
+                WHERE ID = $ID");
             list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "All torrents reported by $Username";
@@ -115,9 +115,9 @@ if (!$ID) {
             break;
         case 'uploader':
             $DB->query("
-				SELECT Username
-				FROM users_main
-				WHERE ID = $ID");
+                SELECT Username
+                FROM users_main
+                WHERE ID = $ID");
             list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "All reports for torrents uploaded by $Username";
@@ -125,14 +125,14 @@ if (!$ID) {
                 $Title = "All reports for torrents uploaded by user $ID";
             }
             $Where = "
-				WHERE r.Status != 'Resolved'
-					AND t.UserID = $ID";
+                WHERE r.Status != 'Resolved'
+                    AND t.UserID = $ID";
             break;
         case 'type':
             $Title = 'All new reports for the chosen type';
             $Where = "
-				WHERE r.Status = 'New'
-					AND r.Type = '$ID'";
+                WHERE r.Status = 'New'
+                    AND r.Type = '$ID'";
             break;
             break;
         default:
@@ -143,66 +143,66 @@ if (!$ID) {
 
 
 $DB->query("
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		r.ID,
-		r.ReporterID,
-		reporter.Username,
-		r.TorrentID,
-		r.Type,
-		r.UserComment,
-		r.ResolverID,
-		resolver.Username,
-		r.Status,
-		r.ReportedTime,
-		r.LastChangeTime,
-		r.ModComment,
-		r.Track,
-		r.Image,
-		r.ExtraID,
-		r.Link,
-		r.LogMessage,
-		tg.Name,
-		tg.ID,
-		CASE COUNT(ta.GroupID)
-			WHEN 1 THEN aa.ArtistID
-			WHEN 0 THEN '0'
-			ELSE '0'
-		END AS ArtistID,
-		CASE COUNT(ta.GroupID)
-			WHEN 1 THEN aa.Name
-			WHEN 0 THEN ''
-			ELSE 'Various Artists'
-		END AS ArtistName,
-		tg.Year,
-		tg.CategoryID,
-		t.Time,
-		t.Remastered,
-		t.RemasterTitle,
-		t.RemasterYear,
-		t.Media,
-		t.Format,
-		t.Encoding,
-		t.Size,
-		t.HasLog,
-		t.HasCue,
-		t.HasLogDB,
-		t.LogScore,
-		t.LogChecksum,
-		t.UserID AS UploaderID,
-		uploader.Username
-	FROM reportsv2 AS r
-		LEFT JOIN torrents AS t ON t.ID = r.TorrentID
-		LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
-		LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID AND ta.Importance = '1'
-		LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
-		LEFT JOIN users_main AS resolver ON resolver.ID = r.ResolverID
-		LEFT JOIN users_main AS reporter ON reporter.ID = r.ReporterID
-		LEFT JOIN users_main AS uploader ON uploader.ID = t.UserID
-	$Where
-	GROUP BY r.ID
-	$Order
-	LIMIT $Limit");
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        r.ID,
+        r.ReporterID,
+        reporter.Username,
+        r.TorrentID,
+        r.Type,
+        r.UserComment,
+        r.ResolverID,
+        resolver.Username,
+        r.Status,
+        r.ReportedTime,
+        r.LastChangeTime,
+        r.ModComment,
+        r.Track,
+        r.Image,
+        r.ExtraID,
+        r.Link,
+        r.LogMessage,
+        tg.Name,
+        tg.ID,
+        CASE COUNT(ta.GroupID)
+            WHEN 1 THEN aa.ArtistID
+            WHEN 0 THEN '0'
+            ELSE '0'
+        END AS ArtistID,
+        CASE COUNT(ta.GroupID)
+            WHEN 1 THEN aa.Name
+            WHEN 0 THEN ''
+            ELSE 'Various Artists'
+        END AS ArtistName,
+        tg.Year,
+        tg.CategoryID,
+        t.Time,
+        t.Remastered,
+        t.RemasterTitle,
+        t.RemasterYear,
+        t.Media,
+        t.Format,
+        t.Encoding,
+        t.Size,
+        t.HasLog,
+        t.HasCue,
+        t.HasLogDB,
+        t.LogScore,
+        t.LogChecksum,
+        t.UserID AS UploaderID,
+        uploader.Username
+    FROM reportsv2 AS r
+        LEFT JOIN torrents AS t ON t.ID = r.TorrentID
+        LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
+        LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID AND ta.Importance = '1'
+        LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
+        LEFT JOIN users_main AS resolver ON resolver.ID = r.ResolverID
+        LEFT JOIN users_main AS reporter ON reporter.ID = r.ReporterID
+        LEFT JOIN users_main AS uploader ON uploader.ID = t.UserID
+    $Where
+    GROUP BY r.ID
+    $Order
+    LIMIT $Limit");
 
 $Reports = $DB->to_array();
 

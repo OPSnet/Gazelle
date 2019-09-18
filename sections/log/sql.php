@@ -8,12 +8,12 @@ if (!empty($_GET['search'])) {
 }
 $Words = explode(' ', $Search);
 $SQL = '
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		ID,
-		Message,
-		Time
-	FROM log ';
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        ID,
+        Message,
+        Time
+    FROM log ';
 if ($Search) {
     $SQL .= "WHERE Message LIKE '%";
     $SQL .= implode("%' AND Message LIKE '%", $Words);
@@ -29,8 +29,8 @@ if (!check_perms('site_view_full_log')) {
 }
 
 $SQL .= "
-	ORDER BY ID DESC
-	LIMIT $Limit";
+    ORDER BY ID DESC
+    LIMIT $Limit";
 
 $Log = $DB->query($SQL);
 $DB->query('SELECT FOUND_ROWS()');

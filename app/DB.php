@@ -57,10 +57,10 @@ class DB {
         $arg_list = array_map(function ($c) {return $c[1];}, $condition);
 
         $sql = "INSERT INTO $soft_delete_table
-			      ($column_list)
-			SELECT $column_list
-			FROM $table
-			WHERE $condition_list";
+                  ($column_list)
+            SELECT $column_list
+            FROM $table
+            WHERE $condition_list";
         $this->db->prepared_query_array($sql, $arg_list);
         if ($this->db->affected_rows() == 0) {
             return [false, "condition selected 0 rows"];

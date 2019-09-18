@@ -2,41 +2,41 @@
 
 // Daily top 10 history.
 $DB->query("
-		INSERT INTO top10_history (Date, Type)
-		VALUES ('$sqltime', 'Daily')");
+        INSERT INTO top10_history (Date, Type)
+        VALUES ('$sqltime', 'Daily')");
 $HistoryID = $DB->inserted_id();
 
 $Top10 = $Cache->get_value('top10tor_day_10');
 if ($Top10 === false) {
     $DB->query("
-			SELECT
-				t.ID,
-				g.ID,
-				g.Name,
-				g.CategoryID,
-				g.TagList,
-				t.Format,
-				t.Encoding,
-				t.Media,
-				t.Scene,
-				t.HasLog,
-				t.HasCue,
-				t.HasLogDB,
-				t.LogScore,
-				t.LogChecksum,
-				t.RemasterYear,
-				g.Year,
-				t.RemasterTitle,
-				t.Snatched,
-				t.Seeders,
-				t.Leechers,
-				((t.Size * t.Snatched) + (t.Size * 0.5 * t.Leechers)) AS Data
-			FROM torrents AS t
-				LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
-			WHERE t.Seeders > 0
-				AND t.Time > ('$sqltime' - INTERVAL 1 DAY)
-			ORDER BY (t.Seeders + t.Leechers) DESC
-			LIMIT 10;");
+            SELECT
+                t.ID,
+                g.ID,
+                g.Name,
+                g.CategoryID,
+                g.TagList,
+                t.Format,
+                t.Encoding,
+                t.Media,
+                t.Scene,
+                t.HasLog,
+                t.HasCue,
+                t.HasLogDB,
+                t.LogScore,
+                t.LogChecksum,
+                t.RemasterYear,
+                g.Year,
+                t.RemasterTitle,
+                t.Snatched,
+                t.Seeders,
+                t.Leechers,
+                ((t.Size * t.Snatched) + (t.Size * 0.5 * t.Leechers)) AS Data
+            FROM torrents AS t
+                LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
+            WHERE t.Seeders > 0
+                AND t.Time > ('$sqltime' - INTERVAL 1 DAY)
+            ORDER BY (t.Seeders + t.Leechers) DESC
+            LIMIT 10;");
 
     $Top10 = $DB->to_array();
 }
@@ -105,9 +105,9 @@ foreach ($Top10 as $Torrent) {
     $TagString = str_replace('|', ' ', $TorrentTags);
 
     $DB->query("
-			INSERT INTO top10_history_torrents
-				(HistoryID, Rank, TorrentID, TitleString, TagString)
-			VALUES
-				($HistoryID, $i, $TorrentID, '".db_string($TitleString)."', '".db_string($TagString)."')");
+            INSERT INTO top10_history_torrents
+                (HistoryID, Rank, TorrentID, TitleString, TagString)
+            VALUES
+                ($HistoryID, $i, $TorrentID, '".db_string($TitleString)."', '".db_string($TagString)."')");
     $i++;
 }

@@ -6,13 +6,13 @@ function compare($X, $Y) {
 // Build the data for the collage and the torrent list
 // TODO: Cache this
 $DB->query("
-	SELECT
-		ct.GroupID,
-		ct.UserID
-	FROM collages_torrents AS ct
-		JOIN torrents_group AS tg ON tg.ID = ct.GroupID
-	WHERE ct.CollageID = '$CollageID'
-	ORDER BY ct.Sort");
+    SELECT
+        ct.GroupID,
+        ct.UserID
+    FROM collages_torrents AS ct
+        JOIN torrents_group AS tg ON tg.ID = ct.GroupID
+    WHERE ct.CollageID = '$CollageID'
+    ORDER BY ct.Sort");
 
 $GroupIDs = $DB->collect('GroupID');
 $Contributors = $DB->to_pair('GroupID', 'UserID', false);

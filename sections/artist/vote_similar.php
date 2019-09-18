@@ -12,11 +12,11 @@ if (!in_array($Way, array('up', 'down'))) {
 }
 
 $DB->query("
-	SELECT SimilarID
-	FROM artists_similar_votes
-	WHERE SimilarID='$SimilarID'
-		AND UserID='$UserID'
-		AND Way='$Way'");
+    SELECT SimilarID
+    FROM artists_similar_votes
+    WHERE SimilarID='$SimilarID'
+        AND UserID='$UserID'
+        AND Way='$Way'");
 if (!$DB->has_results()) {
     if ($Way == 'down') {
         $Score = 'Score-100';
@@ -26,12 +26,12 @@ if (!$DB->has_results()) {
         $Score = 'Score';
     }
     $DB->query("
-		UPDATE artists_similar_scores
-		SET Score=$Score
-		WHERE SimilarID='$SimilarID'");
+        UPDATE artists_similar_scores
+        SET Score=$Score
+        WHERE SimilarID='$SimilarID'");
     $DB->query("
-		INSERT INTO artists_similar_votes (SimilarID, UserID, Way)
-		VALUES ('$SimilarID', '$UserID', '$Way')");
+        INSERT INTO artists_similar_votes (SimilarID, UserID, Way)
+        VALUES ('$SimilarID', '$UserID', '$Way')");
     $Cache->delete_value('artist_'.$ArtistID); // Delete artist cache
 }
 

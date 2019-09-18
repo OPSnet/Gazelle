@@ -17,9 +17,9 @@ if (!isset($_GET['threadid']) || !is_number($_GET['threadid'])) {
         $ThreadID = $_GET['topicid'];
     } elseif (isset($_GET['postid']) && is_number($_GET['postid'])) {
         $DB->query("
-			SELECT TopicID
-			FROM forums_posts
-			WHERE ID = $_GET[postid]");
+            SELECT TopicID
+            FROM forums_posts
+            WHERE ID = $_GET[postid]");
         list($ThreadID) = $DB->next_record();
         if ($ThreadID) {
             //Redirect postid to threadid when necessary.
@@ -68,10 +68,10 @@ if ($ThreadInfo['Posts'] > $PerPage) {
         $PostNum = $_GET['post'];
     } elseif (isset($_GET['postid']) && is_number($_GET['postid'])) {
         $DB->query("
-			SELECT COUNT(ID)
-			FROM forums_posts
-			WHERE TopicID = $ThreadID
-				AND ID <= $_GET[postid]");
+            SELECT COUNT(ID)
+            FROM forums_posts
+            WHERE TopicID = $ThreadID
+                AND ID <= $_GET[postid]");
         list($PostNum) = $DB->next_record();
     } else {
         $PostNum = 1;
@@ -88,17 +88,17 @@ list($CatalogueID,$CatalogueLimit) = Format::catalogue_limit($Page, $PerPage, TH
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
 if (!$Catalogue = $Cache->get_value("thread_$ThreadID"."_catalogue_$CatalogueID")) {
     $DB->query("
-		SELECT
-			p.ID,
-			p.AuthorID,
-			p.AddedTime,
-			p.Body,
-			p.EditedUserID,
-			p.EditedTime
-		FROM forums_posts AS p
-		WHERE p.TopicID = '$ThreadID'
-			AND p.ID != '".$ThreadInfo['StickyPostID']."'
-		LIMIT $CatalogueLimit");
+        SELECT
+            p.ID,
+            p.AuthorID,
+            p.AddedTime,
+            p.Body,
+            p.EditedUserID,
+            p.EditedTime
+        FROM forums_posts AS p
+        WHERE p.TopicID = '$ThreadID'
+            AND p.ID != '".$ThreadInfo['StickyPostID']."'
+        LIMIT $CatalogueLimit");
     $Catalogue = $DB->to_array(false, MYSQLI_ASSOC);
     if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
         $Cache->cache_value("thread_$ThreadID"."_catalogue_$CatalogueID", $Catalogue, 0);
@@ -116,19 +116,19 @@ if ($_GET['updatelastread'] !== '0') {
     //Handle last read
     if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
         $DB->query("
-			SELECT PostID
-			FROM forums_last_read_topics
-			WHERE UserID = '$LoggedUser[ID]'
-				AND TopicID = '$ThreadID'");
+            SELECT PostID
+            FROM forums_last_read_topics
+            WHERE UserID = '$LoggedUser[ID]'
+                AND TopicID = '$ThreadID'");
         list($LastRead) = $DB->next_record();
         if ($LastRead < $LastPost) {
             $DB->query("
-				INSERT INTO forums_last_read_topics
-					(UserID, TopicID, PostID)
-				VALUES
-					('$LoggedUser[ID]', '$ThreadID', '".db_string($LastPost)."')
-				ON DUPLICATE KEY UPDATE
-					PostID = '$LastPost'");
+                INSERT INTO forums_last_read_topics
+                    (UserID, TopicID, PostID)
+                VALUES
+                    ('$LoggedUser[ID]', '$ThreadID', '".db_string($LastPost)."')
+                ON DUPLICATE KEY UPDATE
+                    PostID = '$LastPost'");
         }
     }
 }
@@ -148,16 +148,16 @@ $JsonPoll = array();
 if ($ThreadInfo['NoPoll'] == 0) {
     if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("polls_$ThreadID")) {
         $DB->query("
-			SELECT Question, Answers, Featured, Closed
-			FROM forums_polls
-			WHERE TopicID = '$ThreadID'");
+            SELECT Question, Answers, Featured, Closed
+            FROM forums_polls
+            WHERE TopicID = '$ThreadID'");
         list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, array(1));
         $Answers = unserialize($Answers);
         $DB->query("
-			SELECT Vote, COUNT(UserID)
-			FROM forums_polls_votes
-			WHERE TopicID = '$ThreadID'
-			GROUP BY Vote");
+            SELECT Vote, COUNT(UserID)
+            FROM forums_polls_votes
+            WHERE TopicID = '$ThreadID'
+            GROUP BY Vote");
         $VoteArray = $DB->to_array(false, MYSQLI_NUM);
 
         $Votes = array();
@@ -185,10 +185,10 @@ if ($ThreadInfo['NoPoll'] == 0) {
     $RevealVoters = in_array($ForumID, $ForumsRevealVoters);
     //Polls lose the you voted arrow thingy
     $DB->query("
-		SELECT Vote
-		FROM forums_polls_votes
-		WHERE UserID = '".$LoggedUser['ID']."'
-			AND TopicID = '$ThreadID'");
+        SELECT Vote
+        FROM forums_polls_votes
+        WHERE UserID = '".$LoggedUser['ID']."'
+            AND TopicID = '$ThreadID'");
     list($UserResponse) = $DB->next_record();
     if (!empty($UserResponse) && $UserResponse != 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];

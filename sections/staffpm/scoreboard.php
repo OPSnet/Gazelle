@@ -37,32 +37,32 @@ $SupportStaff = array_column($SupportStaff, 'ID');
 if ($View != 'staff') {
     $IN    = "NOT IN";
     $COL   = "PMs";
-    $EXTRA = "(	SELECT COUNT(spc.ID)
-				FROM staff_pm_conversations AS spc
-				WHERE spc.UserID=um.ID
-				AND spc.Date > ?)";
+    $EXTRA = "(    SELECT COUNT(spc.ID)
+                FROM staff_pm_conversations AS spc
+                WHERE spc.UserID=um.ID
+                AND spc.Date > ?)";
 } else {
     $IN    = "IN";
     $COL   = "Resolved";
-    $EXTRA = "(	SELECT COUNT(spc.ID)
-				FROM staff_pm_conversations AS spc
-				WHERE spc.ResolverID=um.ID
-				AND spc.Status = 'Resolved'
-				AND spc.Date > ?)";
+    $EXTRA = "(    SELECT COUNT(spc.ID)
+                FROM staff_pm_conversations AS spc
+                WHERE spc.ResolverID=um.ID
+                AND spc.Status = 'Resolved'
+                AND spc.Date > ?)";
 }
 
 $BaseSQL = sprintf("SELECT
-						um.ID,
-						um.Username,
-						COUNT(spm.ID) AS Num,
-						%s AS Extra
-					FROM staff_pm_messages AS spm
-					INNER JOIN users_main AS um ON um.ID=spm.UserID
-					INNER JOIN permissions p ON p.ID = um.PermissionID
-					WHERE spm.SentDate > ? AND p.Level <= ? AND um.ID %s (%s)
-					GROUP BY spm.UserID
-					ORDER BY Num DESC
-					LIMIT 50", $EXTRA, $IN,
+                        um.ID,
+                        um.Username,
+                        COUNT(spm.ID) AS Num,
+                        %s AS Extra
+                    FROM staff_pm_messages AS spm
+                    INNER JOIN users_main AS um ON um.ID=spm.UserID
+                    INNER JOIN permissions p ON p.ID = um.PermissionID
+                    WHERE spm.SentDate > ? AND p.Level <= ? AND um.ID %s (%s)
+                    GROUP BY spm.UserID
+                    ORDER BY Num DESC
+                    LIMIT 50", $EXTRA, $IN,
                     implode(', ', array_fill(0, count($SupportStaff), '?')));
 
 $DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(-3600 * 24), \Gazelle\Util\Time::timeOffset(-3600 * 24), $LoggedUser['Class'], ...$SupportStaff);

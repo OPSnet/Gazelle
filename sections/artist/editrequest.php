@@ -6,10 +6,10 @@ if (empty($_GET['artistid']) || !is_numeric($_GET['artistid'])) {
 $ArtistID = intval($_GET['artistid']);
 
 $DB->prepared_query("SELECT
-			Name,
-			VanityHouse
-		FROM artists_group
-		WHERE ArtistID = ?", $ArtistID);
+            Name,
+            VanityHouse
+        FROM artists_group
+        WHERE ArtistID = ?", $ArtistID);
 
 if (!$DB->has_results()) {
     error(404);

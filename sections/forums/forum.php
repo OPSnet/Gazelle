@@ -36,28 +36,28 @@ if ($Page == 1) {
 }
 if (!isset($Forum) || !is_array($Forum)) {
     $DB->query("
-		SELECT
-			ID,
-			Title,
-			AuthorID,
-			IsLocked,
-			IsSticky,
-			NumPosts,
-			LastPostID,
-			LastPostTime,
-			LastPostAuthorID
-		FROM forums_topics
-		WHERE ForumID = '$ForumID'
-		ORDER BY Ranking = 0, Ranking ASC, IsSticky DESC, LastPostTime DESC
-		LIMIT $Limit"); // Can be cached until someone makes a new post
+        SELECT
+            ID,
+            Title,
+            AuthorID,
+            IsLocked,
+            IsSticky,
+            NumPosts,
+            LastPostID,
+            LastPostTime,
+            LastPostAuthorID
+        FROM forums_topics
+        WHERE ForumID = '$ForumID'
+        ORDER BY Ranking = 0, Ranking ASC, IsSticky DESC, LastPostTime DESC
+        LIMIT $Limit"); // Can be cached until someone makes a new post
     $Forum = $DB->to_array('ID', MYSQLI_ASSOC, false);
 
     if ($Page == 1) {
         $DB->query("
-			SELECT COUNT(ID)
-			FROM forums_topics
-			WHERE ForumID = '$ForumID'
-				AND IsSticky = '1'");
+            SELECT COUNT(ID)
+            FROM forums_topics
+            WHERE ForumID = '$ForumID'
+                AND IsSticky = '1'");
         list($Stickies) = $DB->next_record();
         $Cache->cache_value("forums_$ForumID", array($Forum, '', 0, $Stickies), 0);
     }

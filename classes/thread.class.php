@@ -21,10 +21,10 @@ class Thread {
         }
         $this->type = $type;
         G::$DB->prepared_query("
-			INSERT INTO thread (ThreadTypeID) VALUES (
-				(SELECT ID FROM thread_type where Name = ?)
-			)
-		", $type);
+            INSERT INTO thread (ThreadTypeID) VALUES (
+                (SELECT ID FROM thread_type where Name = ?)
+            )
+        ", $type);
         $this->id    = G::$DB->inserted_id();
         $this->story = [];
     }
@@ -97,11 +97,11 @@ class Thread {
     private function refresh() {
         $key = "thread_story_" . $this->id;
         G::$DB->prepared_query('
-			SELECT ID, UserID, Visibility, Created, Body
-			FROM thread_note
-			WHERE ThreadID = ?
-			ORDER BY created;
-		', $this->id);
+            SELECT ID, UserID, Visibility, Created, Body
+            FROM thread_note
+            WHERE ThreadID = ?
+            ORDER BY created;
+        ', $this->id);
         $this->story = [];
         if (G::$DB->has_results()) {
             $user_cache = [];
@@ -137,11 +137,11 @@ class Thread {
         $data = G::$Cache->get_value($key);
         if ($data === false) {
             G::$DB->prepared_query("
-				SELECT tt.Name as ThreadType, t.Created
-				FROM thread t
-				INNER JOIN thread_type tt ON (tt.ID = t.ThreadTypeID)
-				WHERE t.ID = ?
-			", $id);
+                SELECT tt.Name as ThreadType, t.Created
+                FROM thread t
+                INNER JOIN thread_type tt ON (tt.ID = t.ThreadTypeID)
+                WHERE t.ID = ?
+            ", $id);
             if (G::$DB->has_results()) {
                 $data = G::$DB->next_record();
                 G::$Cache->cache_value($key, $data, 86400);

@@ -27,9 +27,9 @@ if ($OldGroupID == $GroupID) {
 //Everything is legit, let's just confim they're not retarded
 if (empty($_POST['confirm'])) {
     $DB->query("
-		SELECT Name
-		FROM torrents_group
-		WHERE ID = $OldGroupID");
+        SELECT Name
+        FROM torrents_group
+        WHERE ID = $OldGroupID");
     if (!$DB->has_results()) {
         //Trying to move to an empty group? I think not!
         set_message('The destination torrent group does not exist!');
@@ -39,9 +39,9 @@ if (empty($_POST['confirm'])) {
     }
     list($Name) = $DB->next_record();
     $DB->query("
-		SELECT CategoryID, Name
-		FROM torrents_group
-		WHERE ID = $GroupID");
+        SELECT CategoryID, Name
+        FROM torrents_group
+        WHERE ID = $GroupID");
     list($CategoryID, $NewName) = $DB->next_record();
     if ($Categories[$CategoryID - 1] != 'Music') {
         error('Destination torrent group must be in the "Music" category.');

@@ -9,14 +9,14 @@ class Collage extends AbstractAPI {
         }
 
         $this->db->prepared_query("
-			SELECT
-				ID,
-				Name,
-				CategoryID
-			FROM
-				collages
-			WHERE
-				ID = ?", $_GET['collage_id']);
+            SELECT
+                ID,
+                Name,
+                CategoryID
+            FROM
+                collages
+            WHERE
+                ID = ?", $_GET['collage_id']);
         if (!$this->db->has_results()) {
             json_error('Collage not found');
         }

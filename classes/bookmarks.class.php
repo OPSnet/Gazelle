@@ -86,9 +86,9 @@ class Bookmarks {
             list ($Table, $Col) = self::bookmark_schema($Type);
             $QueryID = G::$DB->get_query_id();
             G::$DB->query("
-				SELECT $Col
-				FROM $Table
-				WHERE UserID = '$UserID'");
+                SELECT $Col
+                FROM $Table
+                WHERE UserID = '$UserID'");
             $Bookmarks = G::$DB->collect($Col);
             G::$DB->set_query_id($QueryID);
             G::$Cache->cache_value($CacheKey, $Bookmarks, 0);

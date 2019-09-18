@@ -6,33 +6,33 @@ View::show_header('Logchecker', 'upload');
 
 echo <<<HTML
 <div class="linkbox">
-	<a href="logchecker.php?action=test" class="brackets">Test Logchecker</a>
-	<a href="logchecker.php?action=update" class="brackets">Update Logs</a>
+    <a href="logchecker.php?action=test" class="brackets">Test Logchecker</a>
+    <a href="logchecker.php?action=update" class="brackets">Update Logs</a>
 </div>
 <div class="thin">
-	<h2 class="center">Upload Missing Logs</h2>
-	<div class="box pad">
-		<p>
-		These torrents are your uploads that state that there are logs within the torrent, but none were
-		uploaded to the site. To fix this, please select a torrent and then some torrents to upload below.
-		<br /><br />
-		If you'd like to upload new logs for your uploaded torrents that have been scored, please go <a href="logchecker.php?action=update">here</a>.
-		Additionally, you can report any torrent to staff for them to be manually rescored by staff.
-		</p>
-		<br />
-		<form action="" method="post" enctype="multipart/form-data">
-			<input type="hidden" name="action" value="take_upload" />
-			<input type="hidden" name="from_action" value="upload" />
-			<table class="form_post vertical_margin">
-				<tr class="colhead">
-					<td colspan="2">Select a Torrent</td>
-				</tr>
+    <h2 class="center">Upload Missing Logs</h2>
+    <div class="box pad">
+        <p>
+        These torrents are your uploads that state that there are logs within the torrent, but none were
+        uploaded to the site. To fix this, please select a torrent and then some torrents to upload below.
+        <br /><br />
+        If you'd like to upload new logs for your uploaded torrents that have been scored, please go <a href="logchecker.php?action=update">here</a>.
+        Additionally, you can report any torrent to staff for them to be manually rescored by staff.
+        </p>
+        <br />
+        <form action="" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="take_upload" />
+            <input type="hidden" name="from_action" value="upload" />
+            <table class="form_post vertical_margin">
+                <tr class="colhead">
+                    <td colspan="2">Select a Torrent</td>
+                </tr>
 HTML;
 $DB->query("
-	SELECT 
-		ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore, LogChecksum
-	FROM torrents
-	WHERE HasLog='1' AND HasLogDB='0' AND UserID = ".$LoggedUser['ID']);
+    SELECT 
+        ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore, LogChecksum
+    FROM torrents
+    WHERE HasLog='1' AND HasLogDB='0' AND UserID = ".$LoggedUser['ID']);
 
 if ($DB->has_results()) {
     $GroupIDs = $DB->collect('GroupID');
@@ -82,20 +82,20 @@ if ($DB->has_results()) {
     }
     $AcceptValues = Logchecker::get_accept_values();
     echo <<<HTML
-				<tr class="colhead">
-					<td colspan="2">Upload Logs for This Torrent</td>
-				</tr>
-				<tr>
-					<td colspan="2" id="logfields">
-						Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-						<input id="file" type="file" accept="<?=$AcceptValues?>" name="logfiles[]" size="50" required /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
-					</td>
-				<tr />
-				<tr>
-					<td colspan="2">
-						<input type="submit" value="Upload Logs!" name="logsubmit" />
-					</td>
-				</tr>
+                <tr class="colhead">
+                    <td colspan="2">Upload Logs for This Torrent</td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="logfields">
+                        Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
+                        <input id="file" type="file" accept="<?=$AcceptValues?>" name="logfiles[]" size="50" required /> <a href="javascript:;" onclick="AddLogField();" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+                    </td>
+                <tr />
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" value="Upload Logs!" name="logsubmit" />
+                    </td>
+                </tr>
 HTML;
 
 }
@@ -103,9 +103,9 @@ else {
     echo "\t\t\t\t<tr><td colspan='2'>No uploads found.</td></tr>";
 }
 echo <<<HTML
-			</table>
-		</form>
-	</div>
+            </table>
+        </form>
+    </div>
 </div>
 HTML;
 

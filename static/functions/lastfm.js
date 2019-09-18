@@ -162,12 +162,12 @@
                                 background = 'rgb('+Math.floor((1-(compatibility-50)/50)*255)+', 255, 0)'
                             }
                             tasteometerHtml += compatibility + '%\r\
-						<li class="lastfm_essential">\r\
-							<div id="lastfm_compatibilitybar_container">\n\
-								<div id="lastfm_compatibilitybar" style="width: '+compatibility+'%; background: '+background+';">\n\
-								</div>\r\
-							</div>\r\
-						</li>';
+                        <li class="lastfm_essential">\r\
+                            <div id="lastfm_compatibilitybar_container">\n\
+                                <div id="lastfm_compatibilitybar" style="width: '+compatibility+'%; background: '+background+';">\n\
+                                </div>\r\
+                            </div>\r\
+                        </li>';
                         }
                         // Only print shared artists if there are any
                         if (j['artists']['matches'] != 0) {

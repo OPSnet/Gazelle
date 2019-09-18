@@ -133,13 +133,13 @@ class Bonus {
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
-				SELECT i.Title, h.Price, h.PurchaseDate, h.OtherUserID
-				FROM bonus_history h
-				INNER JOIN bonus_item i ON i.ID = h.ItemID
-				WHERE h.UserID = ?
-				ORDER BY PurchaseDate DESC
-				LIMIT ? OFFSET ?
-				', $user_id, $items_per_page, $items_per_page * ($page-1)
+                SELECT i.Title, h.Price, h.PurchaseDate, h.OtherUserID
+                FROM bonus_history h
+                INNER JOIN bonus_item i ON i.ID = h.ItemID
+                WHERE h.UserID = ?
+                ORDER BY PurchaseDate DESC
+                LIMIT ? OFFSET ?
+                ', $user_id, $items_per_page, $items_per_page * ($page-1)
             );
             $history = $this->db->has_results() ? $this->db->to_array() : null;
             $this->cache->cache_value($key, $history, 86400 * 3);
@@ -154,13 +154,13 @@ class Bonus {
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
-				SELECT sum(c.amountrecv) as Total, p.UntilDate, p.Name
-				FROM bonus_pool_contrib c
-				INNER JOIN bonus_pool p ON (p.ID = c.BonusPoolID)
-				WHERE c.UserID = ?
-				GROUP BY p.UntilDate, p.Name
-				ORDER BY p.UntilDate, p.Name
-				', $user_id
+                SELECT sum(c.amountrecv) as Total, p.UntilDate, p.Name
+                FROM bonus_pool_contrib c
+                INNER JOIN bonus_pool p ON (p.ID = c.BonusPoolID)
+                WHERE c.UserID = ?
+                GROUP BY p.UntilDate, p.Name
+                ORDER BY p.UntilDate, p.Name
+                ', $user_id
             );
             $history = $this->db->has_results() ? $this->db->to_array() : null;
             $this->cache->cache_value($key, $history, 86400 * 3);

@@ -25,19 +25,19 @@ if (isset($_GET['username'])) {
             $Limit = sprintf("%d, %d", ($Page - 1) * USERS_PER_PAGE, USERS_PER_PAGE);
         }
         $DB->prepared_query("
-			SELECT
-				SQL_CALC_FOUND_ROWS
-				ID,
-				Username,
-				Enabled,
-				PermissionID,
-				Donor,
-				Warned
-			FROM users_main AS um
-				JOIN users_info AS ui ON ui.UserID = um.ID
-			WHERE Username = ?
-			ORDER BY Username
-			LIMIT $Limit", $_GET['username']);
+            SELECT
+                SQL_CALC_FOUND_ROWS
+                ID,
+                Username,
+                Enabled,
+                PermissionID,
+                Donor,
+                Warned
+            FROM users_main AS um
+                JOIN users_info AS ui ON ui.UserID = um.ID
+            WHERE Username = ?
+            ORDER BY Username
+            LIMIT $Limit", $_GET['username']);
         $Results = $DB->to_array();
         $DB->query('SELECT FOUND_ROWS()');
         list($NumResults) = $DB->next_record();

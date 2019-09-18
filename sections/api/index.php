@@ -34,10 +34,10 @@ $token = $_GET['token'];
 $app = $Cache->get_value("api_apps_{$app_id}");
 if (!is_array($app)) {
     $DB->prepared_query("
-		SELECT Token, Name
-		FROM api_applications
-		WHERE ID = ?
-		LIMIT 1", $app_id);
+        SELECT Token, Name
+        FROM api_applications
+        WHERE ID = ?
+        LIMIT 1", $app_id);
     if ($DB->record_count() === 0) {
         json_error('invalid app');
     }

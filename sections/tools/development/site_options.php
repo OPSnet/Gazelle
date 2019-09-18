@@ -39,7 +39,7 @@ if (isset($_POST['submit'])) {
     authorize();
 
     if ($_POST['submit'] == 'Delete') {
-	$Name = db_string($_POST['name']);
+    $Name = db_string($_POST['name']);
         $DB->query("DELETE FROM site_options WHERE Name = '" . $Name . "'");
         $Cache->delete_value('site_option_' . $Name);
     } else {

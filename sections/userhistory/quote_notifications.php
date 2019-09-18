@@ -25,30 +25,30 @@ list($Page, $Limit) = Format::page_limit($PerPage);
 // Get $Limit last quote notifications
 // We deal with the information about torrents and requests later on...
 $sql = "
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		q.Page,
-		q.PageID,
-		q.PostID,
-		q.QuoterID,
-		q.Date,
-		q.UnRead,
-		f.ID as ForumID,
-		f.Name as ForumName,
-		t.Title as ForumTitle,
-		a.Name as ArtistName,
-		c.Name as CollageName
-	FROM users_notify_quoted AS q
-		LEFT JOIN forums_topics AS t ON t.ID = q.PageID
-		LEFT JOIN forums AS f ON f.ID = t.ForumID
-		LEFT JOIN artists_group AS a ON a.ArtistID = q.PageID
-		LEFT JOIN collages AS c ON c.ID = q.PageID
-	WHERE q.UserID = $LoggedUser[ID]
-		AND (q.Page != 'forums' OR " . Forums::user_forums_sql() . ")
-		AND (q.Page != 'collages' OR c.Deleted = '0')
-		$UnreadSQL
-	ORDER BY q.Date DESC
-	LIMIT $Limit";
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        q.Page,
+        q.PageID,
+        q.PostID,
+        q.QuoterID,
+        q.Date,
+        q.UnRead,
+        f.ID as ForumID,
+        f.Name as ForumName,
+        t.Title as ForumTitle,
+        a.Name as ArtistName,
+        c.Name as CollageName
+    FROM users_notify_quoted AS q
+        LEFT JOIN forums_topics AS t ON t.ID = q.PageID
+        LEFT JOIN forums AS f ON f.ID = t.ForumID
+        LEFT JOIN artists_group AS a ON a.ArtistID = q.PageID
+        LEFT JOIN collages AS c ON c.ID = q.PageID
+    WHERE q.UserID = $LoggedUser[ID]
+        AND (q.Page != 'forums' OR " . Forums::user_forums_sql() . ")
+        AND (q.Page != 'collages' OR c.Deleted = '0')
+        $UnreadSQL
+    ORDER BY q.Date DESC
+    LIMIT $Limit";
 $DB->query($sql);
 $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 $DB->query('SELECT FOUND_ROWS()');

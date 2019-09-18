@@ -1,9 +1,9 @@
 <?
 //******************************************************************************//
 //--------------- Take mass PM -------------------------------------------------//
-// This pages handles the backend of the 'Send Mass PM' function. It checks	    //
-// the data, and if it all validates, it sends a PM to everyone who snatched	//
-// the torrent.																    //
+// This pages handles the backend of the 'Send Mass PM' function. It checks        //
+// the data, and if it all validates, it sends a PM to everyone who snatched    //
+// the torrent.                                                                    //
 //******************************************************************************//
 
 authorize();
@@ -23,7 +23,7 @@ $Message = $_POST['message'];
 
 // FIXME: Still need a better perm name
 if (!check_perms('site_moderate_requests')) {
-	error(403);
+    error(403);
 }
 
 $Validate->SetFields('torrentid', '1', 'number', 'Invalid torrent ID.', array('maxlength' => 1000000000, 'minlength' => 1)); // we shouldn't have torrent IDs higher than a billion
@@ -33,26 +33,26 @@ $Validate->SetFields('message', '0', 'string', 'Invalid message.', array('maxlen
 $Err = $Validate->ValidateForm($_POST); // Validate the form
 
 if ($Err) {
-	error($Err);
-	$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=masspm&id={$GroupID}&torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER'];
-	header("Location: {$Location}");
-	die();
+    error($Err);
+    $Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=masspm&id={$GroupID}&torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER'];
+    header("Location: {$Location}");
+    die();
 }
 
 //******************************************************************************//
 //--------------- Send PMs to users --------------------------------------------//
 
 $DB->query("
-	SELECT uid
-	FROM xbt_snatched
-	WHERE fid = $TorrentID");
+    SELECT uid
+    FROM xbt_snatched
+    WHERE fid = $TorrentID");
 
 if ($DB->has_results()) {
-	// Save this because send_pm uses $DB to run its own query... Oops...
-	$Snatchers = $DB->to_array();
-	foreach ($Snatchers as $UserID) {
-		Misc::send_pm($UserID[0], 0, $Subject, $Message);
-	}
+    // Save this because send_pm uses $DB to run its own query... Oops...
+    $Snatchers = $DB->to_array();
+    foreach ($Snatchers as $UserID) {
+        Misc::send_pm($UserID[0], 0, $Subject, $Message);
+    }
 }
 
 Misc::write_log($LoggedUser['Username']." sent mass notice to snatchers of torrent $TorrentID in group $GroupID");

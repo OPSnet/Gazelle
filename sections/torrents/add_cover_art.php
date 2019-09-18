@@ -32,10 +32,10 @@ for ($i = 0; $i < count($Images); $i++) {
     $Image = db_string($Image);
     $Summary = db_string($Summary);
     $DB->query("
-		INSERT IGNORE INTO cover_art
-			(GroupID, Image, Summary, UserID, Time)
-		VALUES
-			('$GroupID', '$Image', '$Summary', '$UserID', '$Time')");
+        INSERT IGNORE INTO cover_art
+            (GroupID, Image, Summary, UserID, Time)
+        VALUES
+            ('$GroupID', '$Image', '$Summary', '$UserID', '$Time')");
 
     if ($DB->affected_rows()) {
         $Changed = true;

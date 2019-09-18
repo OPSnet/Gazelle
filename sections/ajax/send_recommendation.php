@@ -10,14 +10,14 @@ if (empty($FriendID) || empty($Type) || empty($ID)) {
 }
 // Make sure the recipient is on your friends list and not some random dude.
 $DB->query("
-	SELECT f.FriendID, u.Username
-	FROM friends AS f
-		RIGHT JOIN users_enable_recommendations AS r
-			ON r.ID = f.FriendID AND r.Enable = 1
-		RIGHT JOIN users_main AS u
-			ON u.ID = f.FriendID
-	WHERE f.UserID = '$LoggedUser[ID]'
-		AND f.FriendID = '$FriendID'");
+    SELECT f.FriendID, u.Username
+    FROM friends AS f
+        RIGHT JOIN users_enable_recommendations AS r
+            ON r.ID = f.FriendID AND r.Enable = 1
+        RIGHT JOIN users_main AS u
+            ON u.ID = f.FriendID
+    WHERE f.UserID = '$LoggedUser[ID]'
+        AND f.FriendID = '$FriendID'");
 
 if (!$DB->has_results()) {
     echo json_encode(array('status' => 'error', 'response' => 'Not on friend list.'));
@@ -33,24 +33,24 @@ switch ($Type) {
     case 'torrent':
         $Link = "torrents.php?id=$ID";
         $DB->query("
-			SELECT Name
-			FROM torrents_group
-			WHERE ID = '$ID'");
+            SELECT Name
+            FROM torrents_group
+            WHERE ID = '$ID'");
         break;
     case 'artist':
         $Article = 'an';
         $Link = "artist.php?id=$ID";
         $DB->query("
-			SELECT Name
-			FROM artists_group
-			WHERE ArtistID = '$ID'");
+            SELECT Name
+            FROM artists_group
+            WHERE ArtistID = '$ID'");
         break;
     case 'collage':
         $Link = "collages.php?id=$ID";
         $DB->query("
-			SELECT Name
-			FROM collages
-			WHERE ID = '$ID'");
+            SELECT Name
+            FROM collages
+            WHERE ID = '$ID'");
         break;
 }
 list($Name) = $DB->next_record();

@@ -24,9 +24,9 @@ class ApplicantRole {
         $this->created     = strftime('%Y-%m-%d %H:%M:%S', time());
         $this->modified    = $this->created;
         G::$DB->prepared_query("
-			INSERT INTO applicant_role (Title, Description, Published, UserID, Created, Modified)
-			VALUES (?, ?, ?, ?, ?, ?)
-		", $this->title, $this->description, $this->published, $this->user_id, $this->created, $this->modified);
+            INSERT INTO applicant_role (Title, Description, Published, UserID, Created, Modified)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ", $this->title, $this->description, $this->published, $this->user_id, $this->created, $this->modified);
         $this->id = G::$DB->inserted_id();
         G::$Cache->delete_value(self::CACHE_KEY_ALL);
         G::$Cache->delete_value(self::CACHE_KEY_PUBLISHED);
@@ -77,10 +77,10 @@ class ApplicantRole {
         $this->modified    = strftime('%Y-%m-%d %H:%M:%S', time());
 
         G::$DB->prepared_query("
-			UPDATE applicant_role
-			SET Title = ?, Published = ?, Description = ?, Modified = ?
-			WHERE ID = ?
-		", $this->title, $this->published, $this->description, $this->modified,
+            UPDATE applicant_role
+            SET Title = ?, Published = ?, Description = ?, Modified = ?
+            WHERE ID = ?
+        ", $this->title, $this->published, $this->description, $this->modified,
             $this->id);
         G::$Cache->delete_value(self::CACHE_KEY_ALL);
         G::$Cache->delete_value(self::CACHE_KEY_PUBLISHED);
@@ -105,10 +105,10 @@ class ApplicantRole {
         $data = G::$Cache->get_value($key);
         if ($data === false) {
             G::$DB->prepared_query("
-				SELECT Title, Published, Description, UserID, Created, Modified
-				FROM applicant_role
-				WHERE ID = ?
-			", $id);
+                SELECT Title, Published, Description, UserID, Created, Modified
+                FROM applicant_role
+                WHERE ID = ?
+            ", $id);
             if (G::$DB->has_results()) {
                 $data = G::$DB->next_record(MYSQLI_ASSOC);
                 G::$Cache->cache_value($key, $data, 86400);
@@ -145,11 +145,11 @@ class ApplicantRole {
         if ($list === false) {
             $where = $all ? '/* all */' : 'WHERE r.Published = 1';
             G::$DB->query("
-				SELECT r.ID as role_id, r.Title as role, r.Published, r.Description, r.UserID, r.Created, r.Modified
-				FROM applicant_role r
-				$where
-				ORDER BY r.Title
-			");
+                SELECT r.ID as role_id, r.Title as role, r.Published, r.Description, r.UserID, r.Created, r.Modified
+                FROM applicant_role r
+                $where
+                ORDER BY r.Title
+            ");
             $list = [];
             while (($row = G::$DB->next_record(MYSQLI_ASSOC))) {
                 $list[$row['role']] = [

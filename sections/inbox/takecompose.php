@@ -19,10 +19,10 @@ if (isset($_POST['convid']) && is_number($_POST['convid'])) {
         }
     }
     $DB->query("
-		SELECT UserID
-		FROM pm_conversations_users
-		WHERE UserID = '$LoggedUser[ID]'
-			AND ConvID = '$ConvID'");
+        SELECT UserID
+        FROM pm_conversations_users
+        WHERE UserID = '$LoggedUser[ID]'
+            AND ConvID = '$ConvID'");
     if (!$DB->has_results()) {
         error(403);
     }

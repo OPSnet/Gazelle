@@ -13,8 +13,8 @@ if ($_POST['submit'] == 'Delete') {
     }
 
     $DB->prepared_query("
-		DELETE FROM staff_groups
-		WHERE ID = ?", $_POST['id']);
+        DELETE FROM staff_groups
+        WHERE ID = ?", $_POST['id']);
 } else {
     $Val->SetFields('sort', '1', 'number', 'Sort must be set');
     $Val->SetFields('name', '1', 'string', 'Name must be set, and has a max length of 50 characters', ['maxlength' => 50, 'minlength' => 1]);
@@ -25,14 +25,14 @@ if ($_POST['submit'] == 'Delete') {
 
     if ($_POST['submit'] == 'Edit') {
         $DB->prepared_query("
-			UPDATE staff_groups
-			SET Sort = ?,
-				Name = ?
-			WHERE ID = ?", $_POST['sort'], $_POST['name'], $_POST['id']);
+            UPDATE staff_groups
+            SET Sort = ?,
+                Name = ?
+            WHERE ID = ?", $_POST['sort'], $_POST['name'], $_POST['id']);
     } else {
         $DB->prepared_query("
-			INSERT INTO staff_groups (Sort, Name)
-			VALUES (?, ?)", $_POST['sort'], $_POST['name']);
+            INSERT INTO staff_groups (Sort, Name)
+            VALUES (?, ?)", $_POST['sort'], $_POST['name']);
     }
 }
 

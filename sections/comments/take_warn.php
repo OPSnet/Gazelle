@@ -11,9 +11,9 @@ $Length = $_POST['length'];
 $PostID = (int)$_POST['postid'];
 
 $DB->query("
-	SELECT AuthorID
-	FROM comments
-	WHERE ID = $PostID");
+    SELECT AuthorID
+    FROM comments
+    WHERE ID = $PostID");
 if (!$DB->has_results()) {
     error(404);
 }
@@ -39,12 +39,12 @@ if ($Length !== 'verbal') {
     Tools::update_user_notes($AuthorID, $AdminComment);
 }
 $DB->query("
-	INSERT INTO users_warnings_forums
-		(UserID, Comment)
-	VALUES
-		('$AuthorID', '" . db_string($AdminComment) . "')
-	ON DUPLICATE KEY UPDATE
-		Comment = CONCAT('" . db_string($AdminComment) . "', Comment)");
+    INSERT INTO users_warnings_forums
+        (UserID, Comment)
+    VALUES
+        ('$AuthorID', '" . db_string($AdminComment) . "')
+    ON DUPLICATE KEY UPDATE
+        Comment = CONCAT('" . db_string($AdminComment) . "', Comment)");
 Misc::send_pm($AuthorID, $LoggedUser['ID'], $Subject, $PrivateMessage);
 
 Comments::edit($PostID, $Body);

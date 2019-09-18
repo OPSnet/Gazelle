@@ -50,39 +50,39 @@ $Body = <<<POST
 POST;
 
 $DB->prepared_query("
-	INSERT INTO forums_topics
-		(Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
-	Values
-		(?, ?, ?, ?, ?, ?)", $Title, $BotID, $EditForumID, $sqltime, $BotID, $sqltime);
+    INSERT INTO forums_topics
+        (Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
+    Values
+        (?, ?, ?, ?, ?, ?)", $Title, $BotID, $EditForumID, $sqltime, $BotID, $sqltime);
 $TopicID = $DB->inserted_id();
 
 $DB->prepared_query("
-	INSERT INTO forums_posts
-		(TopicID, AuthorID, AddedTime, Body)
-	VALUES
-		(?, ?, ?, ?)", $TopicID, $BotID, $sqltime, $Body);
+    INSERT INTO forums_posts
+        (TopicID, AuthorID, AddedTime, Body)
+    VALUES
+        (?, ?, ?, ?)", $TopicID, $BotID, $sqltime, $Body);
 
 $PostID = $DB->inserted_id();
 
 $DB->prepared_query("
-	UPDATE forums
-	SET
-		NumPosts         = NumPosts + 1,
-		NumTopics        = NumTopics + 1,
-		LastPostID       = ?,
-		LastPostAuthorID = ?,
-		LastPostTopicID  = ?,
-		LastPostTime     = ?
-	WHERE ID = ?", $PostID, $BotID, $TopicID, $sqltime, $EditForumID);
+    UPDATE forums
+    SET
+        NumPosts         = NumPosts + 1,
+        NumTopics        = NumTopics + 1,
+        LastPostID       = ?,
+        LastPostAuthorID = ?,
+        LastPostTopicID  = ?,
+        LastPostTime     = ?
+    WHERE ID = ?", $PostID, $BotID, $TopicID, $sqltime, $EditForumID);
 
 $DB->prepared_query("
-	UPDATE forums_topics
-	SET
-		NumPosts         = NumPosts + 1,
-		LastPostID       = ?,
-		LastPostAuthorID = ?,
-		LastPostTime     = ?
-	WHERE ID = ?", $PostID, $BotID, $sqltime, $TopicID);
+    UPDATE forums_topics
+    SET
+        NumPosts         = NumPosts + 1,
+        LastPostID       = ?,
+        LastPostAuthorID = ?,
+        LastPostTime     = ?
+    WHERE ID = ?", $PostID, $BotID, $sqltime, $TopicID);
 
 // if cache exists modify it, if not, then it will be correct when selected next, and we can skip this block
 if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {

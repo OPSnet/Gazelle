@@ -12,14 +12,14 @@ if (isset($_REQUEST['add_points'])) {
     }
 
     $sql = "
-		UPDATE users_main
-		SET BonusPoints = BonusPoints + {$Points}
-		WHERE Enabled = '1'";
+        UPDATE users_main
+        SET BonusPoints = BonusPoints + {$Points}
+        WHERE Enabled = '1'";
     $DB->query($sql);
     $sql = "
-		SELECT ID
-		FROM users_main
-		WHERE Enabled = '1'";
+        SELECT ID
+        FROM users_main
+        WHERE Enabled = '1'";
     $DB->query($sql);
     while (list($UserID) = $DB->next_record()) {
         $Cache->delete_value("user_stats_{$UserID}");

@@ -20,11 +20,11 @@ Transitions.DEFAULTS = {
 /*
  Adds a CSS transition, parameters are :
 
- element:	 target element for transition
- duration:	duration for all transitions in seconds
+ element:     target element for transition
+ duration:    duration for all transitions in seconds
  properties:  the properties that are transitioned (will be fed to '-webkit-transition-property')
- from:		optional list of initial property values to match properties passed as .properties
- to:		  list of final property values to match properties passed as .properties
+ from:        optional list of initial property values to match properties passed as .properties
+ to:          list of final property values to match properties passed as .properties
 
  The .duration and .properties parameters are optional and can be defined once for
  all upcoming transitions by over-riding the Transition.DEFAULTS properties

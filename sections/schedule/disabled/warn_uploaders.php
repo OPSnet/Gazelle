@@ -4,20 +4,20 @@
 
 // Send warnings to uploaders of torrents that will be deleted this week
 $DB->query("
-			SELECT
-				t.ID,
-				t.GroupID,
-				tg.Name,
-				t.Format,
-				t.Encoding,
-				t.UserID
-			FROM torrents AS t
-				JOIN torrents_group AS tg ON tg.ID = t.GroupID
-				JOIN users_info AS u ON u.UserID = t.UserID
-			WHERE t.last_action < NOW() - INTERVAL 20 DAY
-				AND t.last_action != 0
-				AND u.UnseededAlerts = '1'
-			ORDER BY t.last_action ASC");
+            SELECT
+                t.ID,
+                t.GroupID,
+                tg.Name,
+                t.Format,
+                t.Encoding,
+                t.UserID
+            FROM torrents AS t
+                JOIN torrents_group AS tg ON tg.ID = t.GroupID
+                JOIN users_info AS u ON u.UserID = t.UserID
+            WHERE t.last_action < NOW() - INTERVAL 20 DAY
+                AND t.last_action != 0
+                AND u.UnseededAlerts = '1'
+            ORDER BY t.last_action ASC");
 $TorrentIDs = $DB->to_array();
 $TorrentAlerts = array();
 foreach ($TorrentIDs as $TorrentID) {

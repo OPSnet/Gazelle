@@ -24,8 +24,8 @@ if ($_POST['submit'] == 'Delete') {
 
     if ($_POST['submit'] == 'Create') {
         $DB->prepared_query("
-			INSERT INTO nav_items (`Key`, Title, Target, Tests, TestUser, Mandatory)
-			VALUES                (?,     ?,     ?,      ?,     ?,        ?)",
+            INSERT INTO nav_items (`Key`, Title, Target, Tests, TestUser, Mandatory)
+            VALUES                (?,     ?,     ?,      ?,     ?,        ?)",
             $P['key'], $P['title'], $P['target'], $P['tests'],
             $P['testuser'] == 'on' ? 1 : 0, $P['mandatory'] == 'on' ? 1 : 0
         );
@@ -35,14 +35,14 @@ if ($_POST['submit'] == 'Delete') {
         }
 
         $DB->prepared_query("
-			UPDATE nav_items
-				SET `Key` = ?,
-					Title = ?,
-					Target = ?,
-					Tests = ?,
-					TestUser = ?,
-					Mandatory = ?
-			WHERE ID = ?",
+            UPDATE nav_items
+                SET `Key` = ?,
+                    Title = ?,
+                    Target = ?,
+                    Tests = ?,
+                    TestUser = ?,
+                    Mandatory = ?
+            WHERE ID = ?",
             $P['key'], $P['title'], $P['target'], $P['tests'],
             $P['testuser'] == 'on' ? 1 : 0, $P['mandatory'] == 'on' ? 1 : 0, $P['id']
         );

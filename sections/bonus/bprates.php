@@ -25,19 +25,19 @@ View::show_header($Title);
 
 $DB->prepared_query("
 SELECT
-	COUNT(xfu.uid) as TotalTorrents,
-	SUM(t.Size) as TotalSize,
-	SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
-		0.0433 + (
-			(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
-		)
-	), 0)) AS TotalHourlyPoints
+    COUNT(xfu.uid) as TotalTorrents,
+    SUM(t.Size) as TotalSize,
+    SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
+        0.0433 + (
+            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
+        )
+    ), 0)) AS TotalHourlyPoints
 FROM
-	(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
-	JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-	JOIN torrents AS t ON t.ID = xfu.fid
+    (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
+    JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
+    JOIN torrents AS t ON t.ID = xfu.fid
 WHERE
-	xfu.uid = ?", $UserID, $UserID);
+    xfu.uid = ?", $UserID, $UserID);
 
 list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $DB->next_record();
 $TotalTorrents = intval($TotalTorrents);
@@ -110,36 +110,36 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 
 if ($TotalTorrents > 0) {
     $DB->prepared_query("
-	SELECT
-		t.ID,
-		t.GroupID,
-		t.Size,
-		t.Format,
-		t.Encoding,
-		t.HasLog,
-		t.HasLogDB,
-		t.HasCue,
-		t.LogScore,
-		t.LogChecksum,
-		t.Media,
-		t.Scene,
-		t.RemasterYear,
-		t.RemasterTitle,
-		GREATEST(t.Seeders, 1) AS Seeders,
-		xfh.seedtime AS Seedtime,
-		((t.Size / (1024 * 1024 * 1024)) * (
-			0.0433 + (
-				(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
-			)
-		)) AS HourlyPoints
-	FROM
-		(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
-		JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-		JOIN torrents AS t ON t.ID = xfu.fid
-	WHERE
-		xfu.uid = ?
-	LIMIT ?
-	OFFSET ?", $UserID, $UserID, $Limit, $Offset);
+    SELECT
+        t.ID,
+        t.GroupID,
+        t.Size,
+        t.Format,
+        t.Encoding,
+        t.HasLog,
+        t.HasLogDB,
+        t.HasCue,
+        t.LogScore,
+        t.LogChecksum,
+        t.Media,
+        t.Scene,
+        t.RemasterYear,
+        t.RemasterTitle,
+        GREATEST(t.Seeders, 1) AS Seeders,
+        xfh.seedtime AS Seedtime,
+        ((t.Size / (1024 * 1024 * 1024)) * (
+            0.0433 + (
+                (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
+            )
+        )) AS HourlyPoints
+    FROM
+        (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
+        JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
+        JOIN torrents AS t ON t.ID = xfu.fid
+    WHERE
+        xfu.uid = ?
+    LIMIT ?
+    OFFSET ?", $UserID, $UserID, $Limit, $Offset);
 
     $GroupIDs = $DB->collect('GroupID');
     $Groups = Torrents::get_groups($GroupIDs, true, true, false);

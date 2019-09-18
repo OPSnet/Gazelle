@@ -158,8 +158,8 @@ switch ($_GET['type']) {
         $UserField = 'xs.uid';
         $ExtraWhere = '';
         $From = "
-			xbt_snatched AS xs
-				JOIN torrents AS t ON t.ID = xs.fid";
+            xbt_snatched AS xs
+                JOIN torrents AS t ON t.ID = xs.fid";
         break;
     case 'seeding':
         if (!check_paranoia('seeding', $User['Paranoia'], $UserClass, $UserID)) {
@@ -168,11 +168,11 @@ switch ($_GET['type']) {
         $Time = '(xfu.mtime - xfu.timespent)';
         $UserField = 'xfu.uid';
         $ExtraWhere = '
-			AND xfu.active = 1
-			AND xfu.Remaining = 0';
+            AND xfu.active = 1
+            AND xfu.Remaining = 0';
         $From = "
-			xbt_files_users AS xfu
-				JOIN torrents AS t ON t.ID = xfu.fid";
+            xbt_files_users AS xfu
+                JOIN torrents AS t ON t.ID = xfu.fid";
         break;
     case 'leeching':
         if (!check_paranoia('leeching', $User['Paranoia'], $UserClass, $UserID)) {
@@ -181,11 +181,11 @@ switch ($_GET['type']) {
         $Time = '(xfu.mtime - xfu.timespent)';
         $UserField = 'xfu.uid';
         $ExtraWhere = '
-			AND xfu.active = 1
-			AND xfu.Remaining > 0';
+            AND xfu.active = 1
+            AND xfu.Remaining > 0';
         $From = "
-			xbt_files_users AS xfu
-				JOIN torrents AS t ON t.ID = xfu.fid";
+            xbt_files_users AS xfu
+                JOIN torrents AS t ON t.ID = xfu.fid";
         break;
     case 'uploaded':
         if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !check_paranoia('uploads', $User['Paranoia'], $UserClass, $UserID)) {
@@ -204,8 +204,8 @@ switch ($_GET['type']) {
         $UserField = 'ud.UserID';
         $ExtraWhere = '';
         $From = "
-			users_downloads AS ud
-				JOIN torrents AS t ON t.ID = ud.TorrentID";
+            users_downloads AS ud
+                JOIN torrents AS t ON t.ID = ud.TorrentID";
         break;
     default:
         error(404);
@@ -219,13 +219,13 @@ if (!empty($_GET['filter'])) {
         $ExtraWhere .= " AND t.Format = 'FLAC'";
         if (empty($_GET['media'])) {
             $ExtraWhere .= "
-				AND (
-					t.LogScore = 100 OR
-					t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT')
-					)";
+                AND (
+                    t.LogScore = 100 OR
+                    t.Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'Blu-ray', 'DAT')
+                    )";
         } elseif (strtoupper($_GET['media']) === 'CD' && empty($_GET['log'])) {
             $ExtraWhere .= "
-				AND t.LogScore = 100";
+                AND t.LogScore = 100";
         }
     } elseif ($_GET['filter'] === 'uniquegroup') {
         if (!check_paranoia('uniquegroups', $User['Paranoia'], $UserClass, $UserID)) {
@@ -241,73 +241,73 @@ if (empty($GroupBy)) {
 
 if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name') {
     $SQL = "
-		SELECT
-			SQL_CALC_FOUND_ROWS
-			t.GroupID,
-			t.ID AS TorrentID,
-			$Time AS Time,
-			tg.CategoryID
-		FROM $From
-			JOIN torrents_group AS tg ON tg.ID = t.GroupID
-		WHERE $UserField = '$UserID'
-			$ExtraWhere
-			$SearchWhere
-		GROUP BY $GroupBy
-		ORDER BY $Order $Way
-		LIMIT $Limit";
+        SELECT
+            SQL_CALC_FOUND_ROWS
+            t.GroupID,
+            t.ID AS TorrentID,
+            $Time AS Time,
+            tg.CategoryID
+        FROM $From
+            JOIN torrents_group AS tg ON tg.ID = t.GroupID
+        WHERE $UserField = '$UserID'
+            $ExtraWhere
+            $SearchWhere
+        GROUP BY $GroupBy
+        ORDER BY $Order $Way
+        LIMIT $Limit";
 } else {
     $DB->query("
-		CREATE TEMPORARY TABLE temp_sections_torrents_user (
-			GroupID int(10) unsigned not null,
-			TorrentID int(10) unsigned not null,
-			Time int(12) unsigned not null,
-			CategoryID int(3) unsigned,
-			Seeders int(6) unsigned,
-			Leechers int(6) unsigned,
-			Snatched int(10) unsigned,
-			Name mediumtext,
-			Size bigint(12) unsigned,
-		PRIMARY KEY (TorrentID)) CHARSET=utf8");
+        CREATE TEMPORARY TABLE temp_sections_torrents_user (
+            GroupID int(10) unsigned not null,
+            TorrentID int(10) unsigned not null,
+            Time int(12) unsigned not null,
+            CategoryID int(3) unsigned,
+            Seeders int(6) unsigned,
+            Leechers int(6) unsigned,
+            Snatched int(10) unsigned,
+            Name mediumtext,
+            Size bigint(12) unsigned,
+        PRIMARY KEY (TorrentID)) CHARSET=utf8");
     $DB->query("
-		INSERT IGNORE INTO temp_sections_torrents_user
-			SELECT
-				t.GroupID,
-				t.ID AS TorrentID,
-				$Time AS Time,
-				tg.CategoryID,
-				t.Seeders,
-				t.Leechers,
-				t.Snatched,
-				CONCAT_WS(' ', GROUP_CONCAT(aa.Name SEPARATOR ' '), ' ', tg.Name, ' ', tg.Year, ' ') AS Name,
-				t.Size
-			FROM $From
-				JOIN torrents_group AS tg ON tg.ID = t.GroupID
-				LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID
-				LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
-			WHERE $UserField = '$UserID'
-				$ExtraWhere
-				$SearchWhere
-			GROUP BY TorrentID, Time");
+        INSERT IGNORE INTO temp_sections_torrents_user
+            SELECT
+                t.GroupID,
+                t.ID AS TorrentID,
+                $Time AS Time,
+                tg.CategoryID,
+                t.Seeders,
+                t.Leechers,
+                t.Snatched,
+                CONCAT_WS(' ', GROUP_CONCAT(aa.Name SEPARATOR ' '), ' ', tg.Name, ' ', tg.Year, ' ') AS Name,
+                t.Size
+            FROM $From
+                JOIN torrents_group AS tg ON tg.ID = t.GroupID
+                LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID
+                LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
+            WHERE $UserField = '$UserID'
+                $ExtraWhere
+                $SearchWhere
+            GROUP BY TorrentID, Time");
 
     if (!empty($_GET['search']) && trim($_GET['search']) !== '') {
         $Words = array_unique(explode(' ', db_string($_GET['search'])));
     }
 
     $SQL = "
-		SELECT
-			SQL_CALC_FOUND_ROWS
-			GroupID,
-			TorrentID,
-			Time,
-			CategoryID
-		FROM temp_sections_torrents_user";
+        SELECT
+            SQL_CALC_FOUND_ROWS
+            GroupID,
+            TorrentID,
+            Time,
+            CategoryID
+        FROM temp_sections_torrents_user";
     if (!empty($Words)) {
         $SQL .= "
-		WHERE Name LIKE '%".implode("%' AND Name LIKE '%", $Words)."%'";
+        WHERE Name LIKE '%".implode("%' AND Name LIKE '%", $Words)."%'";
     }
     $SQL .= "
-		ORDER BY $Order $Way
-		LIMIT $Limit";
+        ORDER BY $Order $Way
+        LIMIT $Limit";
 }
 
 $DB->query($SQL);

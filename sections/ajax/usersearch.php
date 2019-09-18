@@ -16,20 +16,20 @@ if (isset($_GET['username'])) {
 
     list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
     $DB->query("
-		SELECT
-			SQL_CALC_FOUND_ROWS
-			ID,
-			Username,
-			Enabled,
-			PermissionID,
-			Donor,
-			Warned,
-			Avatar
-		FROM users_main AS um
-			JOIN users_info AS ui ON ui.UserID = um.ID
-		WHERE Username LIKE '%".db_string($_GET['username'])."%'
-		ORDER BY Username
-		LIMIT $Limit");
+        SELECT
+            SQL_CALC_FOUND_ROWS
+            ID,
+            Username,
+            Enabled,
+            PermissionID,
+            Donor,
+            Warned,
+            Avatar
+        FROM users_main AS um
+            JOIN users_info AS ui ON ui.UserID = um.ID
+        WHERE Username LIKE '%".db_string($_GET['username'])."%'
+        ORDER BY Username
+        LIMIT $Limit");
     $Results = $DB->to_array();
     $DB->query('SELECT FOUND_ROWS();');
     list($NumResults) = $DB->next_record();

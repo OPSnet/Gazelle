@@ -9,10 +9,10 @@ $UserID = (int)$_POST['userid'];
 $Key = (int)$_POST['key'];
 $UserInfo = Users::user_info($UserID);
 $DB->query("
-	SELECT p.Body, t.ForumID
-	FROM forums_posts AS p
-		JOIN forums_topics AS t ON p.TopicID = t.ID
-	WHERE p.ID = '$PostID'");
+    SELECT p.Body, t.ForumID
+    FROM forums_posts AS p
+        JOIN forums_topics AS t ON p.TopicID = t.ID
+    WHERE p.ID = '$PostID'");
 list($PostBody, $ForumID) = $DB -> next_record();
 View::show_header('Warn User');
 ?>

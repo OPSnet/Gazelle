@@ -20,11 +20,11 @@ if ($Charts == false) {
     ];
     $Stats = ['Uploaded', 'Downloaded', 'BonusPoints', 'Torrents', 'PerfectFLACs'];
     $Query = "
-		SELECT Time, Uploaded, Downloaded, BonusPoints, Torrents, PerfectFLACs
-		FROM users_stats_%s
-		WHERE UserID = ?
-		ORDER BY Time DESC
-		LIMIT %d";
+        SELECT Time, Uploaded, Downloaded, BonusPoints, Torrents, PerfectFLACs
+        FROM users_stats_%s
+        WHERE UserID = ?
+        ORDER BY Time DESC
+        LIMIT %d";
 
     foreach ($Charts as &$Chart) {
         $Chart['name'] = strtolower($Chart['Name']);

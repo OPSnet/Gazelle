@@ -42,8 +42,8 @@ switch ($View) {
 }
 
 $WhereCondition = "
-	WHERE (LEAST($LevelCap, spc.Level) <= $UserLevel OR spc.AssignedToUser = '".$LoggedUser['ID']."')
-	  AND spc.Status IN ('$Status')";
+    WHERE (LEAST($LevelCap, spc.Level) <= $UserLevel OR spc.AssignedToUser = '".$LoggedUser['ID']."')
+      AND spc.Status IN ('$Status')";
 
 if ($ViewString == 'Your Unanswered') {
     if ($UserLevel >= $Classes[MOD]['Level']) {
@@ -56,24 +56,24 @@ if ($ViewString == 'Your Unanswered') {
 list($Page, $Limit) = Format::page_limit(MESSAGES_PER_PAGE);
 // Get messages
 $StaffPMs = $DB->query("
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		spc.ID,
-		spc.Subject,
-		spc.UserID,
-		spc.Status,
-		spc.Level,
-		spc.AssignedToUser,
-		spc.Date,
-		spc.Unread,
-		COUNT(spm.ID) AS NumReplies,
-		spc.ResolverID
-	FROM staff_pm_conversations AS spc
-	JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
-	$WhereCondition
-	GROUP BY spc.ID
-	ORDER BY $SortStr spc.Level DESC, spc.Date DESC
-	LIMIT $Limit
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        spc.ID,
+        spc.Subject,
+        spc.UserID,
+        spc.Status,
+        spc.Level,
+        spc.AssignedToUser,
+        spc.Date,
+        spc.Unread,
+        COUNT(spm.ID) AS NumReplies,
+        spc.ResolverID
+    FROM staff_pm_conversations AS spc
+    JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
+    $WhereCondition
+    GROUP BY spc.ID
+    ORDER BY $SortStr spc.Level DESC, spc.Date DESC
+    LIMIT $Limit
 ");
 
 $DB->query('SELECT FOUND_ROWS()');

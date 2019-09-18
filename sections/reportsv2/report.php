@@ -14,10 +14,10 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
 } else {
     $TorrentID = $_GET['id'];
     $DB->query("
-		SELECT tg.CategoryID, t.GroupID
-		FROM torrents_group AS tg
-			LEFT JOIN torrents AS t ON t.GroupID = tg.ID
-		WHERE t.ID = " . $_GET['id']);
+        SELECT tg.CategoryID, t.GroupID
+        FROM torrents_group AS tg
+            LEFT JOIN torrents AS t ON t.GroupID = tg.ID
+        WHERE t.ID = " . $_GET['id']);
     list($CategoryID, $GroupID) = $DB->next_record();
     if (empty($CategoryID) || empty($GroupID)) {
         // Deleted torrent

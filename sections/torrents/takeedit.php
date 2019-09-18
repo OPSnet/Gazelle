@@ -82,9 +82,9 @@ if (check_perms('torrents_freeleech')) {
 //--------------- Validate data in edit form -----------------------------------//
 
 $DB->prepared_query("
-	SELECT UserID, Remastered, RemasterYear, FreeTorrent
-	FROM torrents
-	WHERE ID = ?", $TorrentID
+    SELECT UserID, Remastered, RemasterYear, FreeTorrent
+    FROM torrents
+    WHERE ID = ?", $TorrentID
 );
 if (!$DB->has_results()) {
     error(404);
@@ -243,9 +243,9 @@ foreach ($Properties as $Key => $Value) {
 
 $DBTorVals = array();
 $DB->prepared_query("
-	SELECT Media, Format, Encoding, RemasterYear, Remastered, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber, Scene, Description
-	FROM torrents
-	WHERE ID = ?", $TorrentID
+    SELECT Media, Format, Encoding, RemasterYear, Remastered, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber, Scene, Description
+    FROM torrents
+    WHERE ID = ?", $TorrentID
 );
 $DBTorVals = $DB->to_array(false, MYSQLI_ASSOC);
 $DBTorVals = $DBTorVals[0];
@@ -299,33 +299,33 @@ $SQL = "UPDATE torrents AS t";
 
 if ($AddedLogs) {
     $SQL .= "
-	LEFT JOIN (
-	  SELECT
-		  TorrentID,
-		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-		  MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
-		FROM torrents_logs
-		WHERE TorrentID = {$TorrentID}
-		GROUP BY TorrentID
- 	  ) AS tl ON t.ID = tl.TorrentID
+    LEFT JOIN (
+      SELECT
+          TorrentID,
+          MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+          MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+        FROM torrents_logs
+        WHERE TorrentID = {$TorrentID}
+        GROUP BY TorrentID
+       ) AS tl ON t.ID = tl.TorrentID
 ";
 }
 $SQL .= "
-	SET
-		Media = $T[Media],
-		Format = $T[Format],
-		Encoding = $T[Encoding],
-		RemasterYear = $T[RemasterYear],
-		Remastered = $T[Remastered],
-		RemasterTitle = $T[RemasterTitle],
-		RemasterRecordLabel = $T[RemasterRecordLabel],
-		RemasterCatalogueNumber = $T[RemasterCatalogueNumber],
-		Scene = $T[Scene],";
+    SET
+        Media = $T[Media],
+        Format = $T[Format],
+        Encoding = $T[Encoding],
+        RemasterYear = $T[RemasterYear],
+        Remastered = $T[Remastered],
+        RemasterTitle = $T[RemasterTitle],
+        RemasterRecordLabel = $T[RemasterRecordLabel],
+        RemasterCatalogueNumber = $T[RemasterCatalogueNumber],
+        Scene = $T[Scene],";
 if ($AddedLogs) {
     $SQL .= "
-		LogScore = CASE WHEN tl.Score IS NULL THEN 100 ELSE tl.Score END,
-		LogChecksum = CASE WHEN tl.Checksum IS NULL THEN '1' ELSE tl.Checksum END,
-		HasLogDB = '1',";
+        LogScore = CASE WHEN tl.Score IS NULL THEN 100 ELSE tl.Score END,
+        LogChecksum = CASE WHEN tl.Checksum IS NULL THEN '1' ELSE tl.Checksum END,
+        HasLogDB = '1',";
 }
 
 if (check_perms('torrents_freeleech')) {
@@ -336,12 +336,12 @@ if (check_perms('torrents_freeleech')) {
 if (check_perms('users_mod')) {
     if ($T['Format'] == "'FLAC'" && $T['Media'] == "'CD'") {
         $SQL .= "
-			HasLog = $T[HasLog],
-			HasCue = $T[HasCue],";
+            HasLog = $T[HasLog],
+            HasCue = $T[HasCue],";
     } else {
         $SQL .= "
-			HasLog = '0',
-			HasCue = '0',";
+            HasLog = '0',
+            HasCue = '0',";
     }
 if (check_perms('site_debug')) {
     //echo "<pre>";
@@ -436,8 +436,8 @@ if (check_perms('site_debug')) {
 }
 
 $SQL .= "
-		Description = $T[TorrentDescription]
-	WHERE ID = $TorrentID";
+        Description = $T[TorrentDescription]
+    WHERE ID = $TorrentID";
 $DB->query($SQL);
 
 if (check_perms('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLeech) {
@@ -445,10 +445,10 @@ if (check_perms('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLee
 }
 
 $DB->prepared_query('
-	SELECT g.ID, g.Name, t.Time
-	FROM torrents_group g
-	INNER JOIN torrents t ON (t.GroupID = g.ID)
-	WHERE t.ID = ?', $TorrentID
+    SELECT g.ID, g.Name, t.Time
+    FROM torrents_group g
+    INNER JOIN torrents t ON (t.GroupID = g.ID)
+    WHERE t.ID = ?', $TorrentID
 );
 list($GroupID, $Name, $Time) = $DB->fetch_record();
 

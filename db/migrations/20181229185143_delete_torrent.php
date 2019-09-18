@@ -129,7 +129,7 @@ CREATE TABLE `deleted_torrents_missing_lineage` (
   PRIMARY KEY (`TorrentID`)
 );
 
-		");
+        ");
     }
 
     public function down() {

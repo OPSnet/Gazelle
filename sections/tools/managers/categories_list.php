@@ -6,10 +6,10 @@ if (!check_perms('admin_manage_forums')) {
 
 View::show_header('Forum Category Management');
 $DB->prepared_query('
-	SELECT ID, Name, Sort, IFNULL(f.Count, 0) as Count
-	FROM forums_categories as fc
-	LEFT JOIN (SELECT CategoryID, COUNT(*) AS Count FROM forums GROUP BY CategoryID) AS f ON f.CategoryID = fc.ID
-	ORDER BY Sort');
+    SELECT ID, Name, Sort, IFNULL(f.Count, 0) as Count
+    FROM forums_categories as fc
+    LEFT JOIN (SELECT CategoryID, COUNT(*) AS Count FROM forums GROUP BY CategoryID) AS f ON f.CategoryID = fc.ID
+    ORDER BY Sort');
 
 ?>
 <div class="header">

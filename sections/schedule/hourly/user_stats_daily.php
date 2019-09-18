@@ -7,14 +7,14 @@ FROM users_main um
 LEFT JOIN torrents t ON t.UserID = um.ID
 LEFT JOIN
 (
-	SELECT UserID, COUNT(ID) AS Perfects
-	FROM torrents
-	WHERE( Format = 'FLAC'
-		AND (
-			Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'BD', 'DAT')
-			OR
-			(LogScore = 100 AND Media = 'CD')))
-	GROUP BY UserID
+    SELECT UserID, COUNT(ID) AS Perfects
+    FROM torrents
+    WHERE( Format = 'FLAC'
+        AND (
+            Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'Cassette', 'SACD', 'BD', 'DAT')
+            OR
+            (LogScore = 100 AND Media = 'CD')))
+    GROUP BY UserID
 ) p ON p.UserID = um.ID
 GROUP BY um.ID;");
 

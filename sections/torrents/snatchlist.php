@@ -13,14 +13,14 @@ if (!empty($_GET['page']) && is_number($_GET['page'])) {
 }
 
 $Result = $DB->query("
-			SELECT
-				SQL_CALC_FOUND_ROWS
-				uid,
-				tstamp
-			FROM xbt_snatched
-			WHERE fid = '$TorrentID'
-			ORDER BY tstamp DESC
-			LIMIT $Limit");
+            SELECT
+                SQL_CALC_FOUND_ROWS
+                uid,
+                tstamp
+            FROM xbt_snatched
+            WHERE fid = '$TorrentID'
+            ORDER BY tstamp DESC
+            LIMIT $Limit");
 $Results = $DB->to_array('uid', MYSQLI_ASSOC);
 
 $DB->query('SELECT FOUND_ROWS()');

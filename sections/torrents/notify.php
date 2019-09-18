@@ -60,10 +60,10 @@ if (check_perms('users_mod') && !empty($_GET['userid']) && is_number($_GET['user
 // makes it speedy enough as long as there aren't too many records to create
 if ($OrderTbl == 'tg') {
     $DB->query("
-		SELECT COUNT(*)
-		FROM users_notify_torrents AS unt
-			JOIN torrents AS t ON t.ID=unt.TorrentID
-		WHERE unt.UserID=$UserID".
+        SELECT COUNT(*)
+        FROM users_notify_torrents AS unt
+            JOIN torrents AS t ON t.ID=unt.TorrentID
+        WHERE unt.UserID=$UserID".
         ($FilterID
             ? " AND FilterID=$FilterID"
             : ''));
@@ -73,45 +73,45 @@ if ($OrderTbl == 'tg') {
     }
 
     $DB->query("
-		CREATE TEMPORARY TABLE temp_notify_torrents
-			(TorrentID int, GroupID int, UnRead tinyint, FilterID int, Year smallint, PRIMARY KEY(GroupID, TorrentID), KEY(Year))
-		ENGINE=MyISAM");
+        CREATE TEMPORARY TABLE temp_notify_torrents
+            (TorrentID int, GroupID int, UnRead tinyint, FilterID int, Year smallint, PRIMARY KEY(GroupID, TorrentID), KEY(Year))
+        ENGINE=MyISAM");
     $DB->query("
-		INSERT IGNORE INTO temp_notify_torrents (TorrentID, GroupID, UnRead, FilterID)
-		SELECT t.ID, t.GroupID, unt.UnRead, unt.FilterID
-		FROM users_notify_torrents AS unt
-			JOIN torrents AS t ON t.ID=unt.TorrentID
-		WHERE unt.UserID=$UserID".
+        INSERT IGNORE INTO temp_notify_torrents (TorrentID, GroupID, UnRead, FilterID)
+        SELECT t.ID, t.GroupID, unt.UnRead, unt.FilterID
+        FROM users_notify_torrents AS unt
+            JOIN torrents AS t ON t.ID=unt.TorrentID
+        WHERE unt.UserID=$UserID".
         ($FilterID
             ? " AND unt.FilterID=$FilterID"
             : ''));
     $DB->query("
-		UPDATE temp_notify_torrents AS tnt
-			JOIN torrents_group AS tg ON tnt.GroupID = tg.ID
-		SET tnt.Year = tg.Year");
+        UPDATE temp_notify_torrents AS tnt
+            JOIN torrents_group AS tg ON tnt.GroupID = tg.ID
+        SET tnt.Year = tg.Year");
 
     $DB->query("
-		SELECT TorrentID, GroupID, UnRead, FilterID
-		FROM temp_notify_torrents AS tnt
-		ORDER BY $OrderCol $OrderWay, GroupID $OrderWay
-		LIMIT $Limit");
+        SELECT TorrentID, GroupID, UnRead, FilterID
+        FROM temp_notify_torrents AS tnt
+        ORDER BY $OrderCol $OrderWay, GroupID $OrderWay
+        LIMIT $Limit");
     $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 } else {
     $DB->query("
-		SELECT
-			SQL_CALC_FOUND_ROWS
-			unt.TorrentID,
-			unt.UnRead,
-			unt.FilterID,
-			t.GroupID
-		FROM users_notify_torrents AS unt
-			JOIN torrents AS t ON t.ID = unt.TorrentID
-		WHERE unt.UserID = $UserID".
+        SELECT
+            SQL_CALC_FOUND_ROWS
+            unt.TorrentID,
+            unt.UnRead,
+            unt.FilterID,
+            t.GroupID
+        FROM users_notify_torrents AS unt
+            JOIN torrents AS t ON t.ID = unt.TorrentID
+        WHERE unt.UserID = $UserID".
         ($FilterID
             ? " AND unt.FilterID = $FilterID"
             : '')."
-		ORDER BY $OrderCol $OrderWay
-		LIMIT $Limit");
+        ORDER BY $OrderCol $OrderWay
+        LIMIT $Limit");
     $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
     $DB->query('SELECT FOUND_ROWS()');
     list($TorrentCount) = $DB->next_record();
@@ -134,9 +134,9 @@ if (!empty($GroupIDs)) {
 
     // Get the relevant filter labels
     $DB->query('
-		SELECT ID, Label, Artists
-		FROM users_notify_filters
-		WHERE ID IN ('.implode(',', $FilterIDs).')');
+        SELECT ID, Label, Artists
+        FROM users_notify_filters
+        WHERE ID IN ('.implode(',', $FilterIDs).')');
     $Filters = $DB->to_array('ID', MYSQLI_ASSOC, array('Artists'));
     foreach ($Filters as &$Filter) {
         $Filter['Artists'] = explode('|', trim($Filter['Artists'], '|'));
@@ -150,10 +150,10 @@ if (!empty($GroupIDs)) {
     if (!empty($UnReadIDs)) {
         //Clear before header but after query so as to not have the alert bar on this page load
         $DB->query("
-			UPDATE users_notify_torrents
-			SET UnRead = '0'
-			WHERE UserID = ".$LoggedUser['ID'].'
-				AND TorrentID IN ('.implode(',', $UnReadIDs).')');
+            UPDATE users_notify_torrents
+            SET UnRead = '0'
+            WHERE UserID = ".$LoggedUser['ID'].'
+                AND TorrentID IN ('.implode(',', $UnReadIDs).')');
         $Cache->delete_value('notifications_new_'.$LoggedUser['ID']);
     }
 }

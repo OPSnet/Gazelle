@@ -9,16 +9,16 @@ class Wiki extends AbstractAPI {
         }
 
         $this->db->prepared_query("
-			SELECT
-				wa.Title,
-				wa.MinClassRead,
-				um.Username AS Author,
-				wa.Date
-			FROM
-				wiki_articles AS wa
-				INNER JOIN users_main AS um ON um.ID = wa.Author
-			WHERE
-				wa.ID = ?", $_GET['wiki_id']);
+            SELECT
+                wa.Title,
+                wa.MinClassRead,
+                um.Username AS Author,
+                wa.Date
+            FROM
+                wiki_articles AS wa
+                INNER JOIN users_main AS um ON um.ID = wa.Author
+            WHERE
+                wa.ID = ?", $_GET['wiki_id']);
         if (!$this->db->has_results()) {
             json_error('Wiki article not found');
         }

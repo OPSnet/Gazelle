@@ -7,21 +7,21 @@
 sleep(10);
 
 $DB->query("
-		SELECT
-			t.ID,
-			t.GroupID,
-			tg.Name,
-			t.Format,
-			t.Encoding,
-			t.UserID,
-			t.Media,
-			HEX(t.info_hash) AS InfoHash
-		FROM torrents AS t
-			JOIN torrents_group AS tg ON tg.ID = t.GroupID
-		WHERE
-			(t.last_action < '".time_minus(3600 * 24 * 28)."' AND t.last_action != 0)
-			OR
-			(t.Time < '".time_minus(3600 * 24 * 2)."' AND t.last_action = 0)");
+        SELECT
+            t.ID,
+            t.GroupID,
+            tg.Name,
+            t.Format,
+            t.Encoding,
+            t.UserID,
+            t.Media,
+            HEX(t.info_hash) AS InfoHash
+        FROM torrents AS t
+            JOIN torrents_group AS tg ON tg.ID = t.GroupID
+        WHERE
+            (t.last_action < '".time_minus(3600 * 24 * 28)."' AND t.last_action != 0)
+            OR
+            (t.Time < '".time_minus(3600 * 24 * 2)."' AND t.last_action = 0)");
 $Torrents = $DB->to_array(false, MYSQLI_NUM, false);
 echo 'Found '.count($Torrents)." inactive torrents to be deleted.\n";
 
@@ -71,25 +71,25 @@ unset($DeleteNotes);
 if (count($LogEntries) > 0) {
     $Values = "('".implode("', '$sqltime'), ('", $LogEntries) . "', '$sqltime')";
     $DB->query("
-			INSERT INTO log (Message, Time)
-			VALUES $Values");
+            INSERT INTO log (Message, Time)
+            VALUES $Values");
     echo "\nDeleted $i torrents for inactivity\n";
 }
 
 $DB->query("
-		SELECT SimilarID
-		FROM artists_similar_scores
-		WHERE Score <= 0");
+        SELECT SimilarID
+        FROM artists_similar_scores
+        WHERE Score <= 0");
 $SimilarIDs = implode(',', $DB->collect('SimilarID'));
 
 if ($SimilarIDs) {
     $DB->query("
-			DELETE FROM artists_similar
-			WHERE SimilarID IN($SimilarIDs)");
+            DELETE FROM artists_similar
+            WHERE SimilarID IN($SimilarIDs)");
     $DB->query("
-			DELETE FROM artists_similar_scores
-			WHERE SimilarID IN($SimilarIDs)");
+            DELETE FROM artists_similar_scores
+            WHERE SimilarID IN($SimilarIDs)");
     $DB->query("
-			DELETE FROM artists_similar_votes
-			WHERE SimilarID IN($SimilarIDs)");
+            DELETE FROM artists_similar_votes
+            WHERE SimilarID IN($SimilarIDs)");
 }

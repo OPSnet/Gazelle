@@ -121,7 +121,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
 
     <form action="bookmarks.php" method="post" id="drag_drop_collage_form">
 
-<?php	    $this->buttons(); ?>
+<?php        $this->buttons(); ?>
 
         <table id="manage_collage_table">
             <thead>
@@ -150,7 +150,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
             </tbody>
         </table>
 
-<?php	    $this->buttons(); ?>
+<?php        $this->buttons(); ?>
 
         <div>
             <input type="hidden" name="action" value="mass_edit" />

@@ -39,27 +39,27 @@ class User extends AbstractAPI {
     private function getUser() {
         $where = ($this->id !== null) ? "um.ID = ?" : "um.Username = ?";
         $this->db->prepared_query("
-			SELECT
-				um.ID,
-				um.Username,
-				um.Enabled,
-				um.IRCKey,
-				um.Uploaded,
-				um.Downloaded,
-				um.PermissionID AS Class,
-				um.Paranoia,
-				um.BonusPoints,
-				ui.DisableIRC,
-				p.Name as ClassName,
-				p.Level,
-				GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS SecondaryClasses
-			FROM
-				users_main AS um
-				INNER JOIN users_info AS ui ON ui.UserID = um.ID
-				INNER JOIN permissions AS p ON p.ID = um.PermissionID
-				LEFT JOIN users_levels AS ul ON ul.UserID = um.ID
-			WHERE
-				{$where}", ($this->id !== null) ? $this->id : $this->username);
+            SELECT
+                um.ID,
+                um.Username,
+                um.Enabled,
+                um.IRCKey,
+                um.Uploaded,
+                um.Downloaded,
+                um.PermissionID AS Class,
+                um.Paranoia,
+                um.BonusPoints,
+                ui.DisableIRC,
+                p.Name as ClassName,
+                p.Level,
+                GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS SecondaryClasses
+            FROM
+                users_main AS um
+                INNER JOIN users_info AS ui ON ui.UserID = um.ID
+                INNER JOIN permissions AS p ON p.ID = um.PermissionID
+                LEFT JOIN users_levels AS ul ON ul.UserID = um.ID
+            WHERE
+                {$where}", ($this->id !== null) ? $this->id : $this->username);
 
         $user = $this->db->next_record(MYSQLI_ASSOC, array('IRCKey', 'Paranoia'));
         if (empty($user['Username'])) {
@@ -107,23 +107,23 @@ class User extends AbstractAPI {
     private function enableUser() {
         $where = ($this->id !== null) ? "um.ID = ?" : "um.Username = ?";
         $this->db->prepared_query("
-			SELECT
-				um.ID,
-				um.Username,
-				um.IP,
-				um.Enabled,
-				um.Uploaded,
-				um.Downloaded,
-				um.Visible,
-				ui.AdminComment,
-				um.torrent_pass,
-				um.RequiredRatio,
-				ui.RatioWatchEnds
-			FROM 
-				users_main AS um
-				INNER JOIN users_info AS ui ON ui.UserID = um.ID
-			WHERE
-				{$where}", ($this->id !== null) ? $this->id : $this->username);
+            SELECT
+                um.ID,
+                um.Username,
+                um.IP,
+                um.Enabled,
+                um.Uploaded,
+                um.Downloaded,
+                um.Visible,
+                ui.AdminComment,
+                um.torrent_pass,
+                um.RequiredRatio,
+                ui.RatioWatchEnds
+            FROM 
+                users_main AS um
+                INNER JOIN users_info AS ui ON ui.UserID = um.ID
+            WHERE
+                {$where}", ($this->id !== null) ? $this->id : $this->username);
 
         // TODO: merge this and the version in takemoderate.php
         $UpdateSet = array();
@@ -161,13 +161,13 @@ class User extends AbstractAPI {
         $set = implode(', ', $UpdateSet);
 
         $this->db->prepared_query("
-			UPDATE users_main AS um
-				JOIN users_info AS ui ON um.ID = ui.UserID
-			SET
-				{$set},
-				ui.AdminComment = CONCAT('".sqltime()." - ".$Comment."\n\n', ui.AdminComment)
-			WHERE
-				um.ID = ?", $Cur['ID']);
+            UPDATE users_main AS um
+                JOIN users_info AS ui ON um.ID = ui.UserID
+            SET
+                {$set},
+                ui.AdminComment = CONCAT('".sqltime()." - ".$Comment."\n\n', ui.AdminComment)
+            WHERE
+                um.ID = ?", $Cur['ID']);
 
         return array('enabled' => true, 'user_id' => $Cur['ID'], 'username' => $Cur['Username']);
     }

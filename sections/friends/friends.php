@@ -30,23 +30,23 @@ list($Page, $Limit) = Format::page_limit(FRIENDS_PER_PAGE);
 
 // Main query
 $DB->query("
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		$Select,
-		f.Comment,
-		m.Username,
-		m.Uploaded,
-		m.Downloaded,
-		m.PermissionID,
-		m.Paranoia,
-		m.LastAccess,
-		i.Avatar
-	FROM friends AS f
-		JOIN users_main AS m ON $Join1
-		JOIN users_info AS i ON $Join2
-	WHERE $Where
-	ORDER BY Username
-	LIMIT $Limit");
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        $Select,
+        f.Comment,
+        m.Username,
+        m.Uploaded,
+        m.Downloaded,
+        m.PermissionID,
+        m.Paranoia,
+        m.LastAccess,
+        i.Avatar
+    FROM friends AS f
+        JOIN users_main AS m ON $Join1
+        JOIN users_info AS i ON $Join2
+    WHERE $Where
+    ORDER BY Username
+    LIMIT $Limit");
 $Friends = $DB->to_array(false, MYSQLI_BOTH, array(6, 'Paranoia'));
 
 // Number of results (for pagination)

@@ -2,12 +2,12 @@
 
 if (check_perms('admin_reports') && !empty($_GET['remove']) && is_number($_GET['remove'])) {
     $DB->query('
-		DELETE FROM torrents_bad_files
-		WHERE TorrentID = '.$_GET['remove']);
+        DELETE FROM torrents_bad_files
+        WHERE TorrentID = '.$_GET['remove']);
     $DB->query('
-		SELECT GroupID
-		FROM torrents
-		WHERE ID = '.$_GET['remove']);
+        SELECT GroupID
+        FROM torrents
+        WHERE ID = '.$_GET['remove']);
     list($GroupID) = $DB->next_record();
     $Cache->delete_value("torrents_details_$GroupID");
 }
@@ -23,11 +23,11 @@ if (!empty($_GET['filter']) && $_GET['filter'] == 'all') {
 
 View::show_header('Torrents with bad file names');
 $DB->query("
-	SELECT tfi.TorrentID, t.GroupID
-	FROM torrents_bad_files AS tfi
-		JOIN torrents AS t ON t.ID = tfi.TorrentID
-		$Join
-	ORDER BY tfi.TimeAdded ASC");
+    SELECT tfi.TorrentID, t.GroupID
+    FROM torrents_bad_files AS tfi
+        JOIN torrents AS t ON t.ID = tfi.TorrentID
+        $Join
+    ORDER BY tfi.TimeAdded ASC");
 $TorrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
 foreach ($TorrentsInfo as $Torrent) {
     $GroupIDs[] = $Torrent['GroupID'];

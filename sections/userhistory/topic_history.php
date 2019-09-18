@@ -23,14 +23,14 @@ View::show_header("Threads started by $Username", 'subscriptions,comments,bbcode
 
 $QueryID = $DB->prepared_query("
 SELECT SQL_CALC_FOUND_ROWS
-	t.ID,
-	t.Title,
-	t.CreatedTime,
-	t.LastPostTime,
-	f.ID,
-	f.Name
+    t.ID,
+    t.Title,
+    t.CreatedTime,
+    t.LastPostTime,
+    f.ID,
+    f.Name
 FROM forums_topics AS t
-	LEFT JOIN forums AS f ON f.ID = t.ForumID
+    LEFT JOIN forums AS f ON f.ID = t.ForumID
 WHERE t.AuthorID = ? AND ".Forums::user_forums_sql()."
 ORDER BY t.ID DESC
 LIMIT {$Limit}", $UserID);

@@ -99,8 +99,8 @@ if (check_perms('admin_schedule')) {
 }
 
 $DB->query("
-	SELECT NextHour, NextDay, NextBiWeekly
-	FROM schedule");
+    SELECT NextHour, NextDay, NextBiWeekly
+    FROM schedule");
 list($Hour, $Day, $BiWeek) = $DB->next_record();
 $CurrentHour = date('H');
 $CurrentDay = date('d');
@@ -113,11 +113,11 @@ if (empty($RunTasks) && !$RunManual && !$RunEvery && !$RunHourly && !$RunDaily &
     // not just an individual one (or some collection of tasks)
     $RunEvery = true;
     $DB->query("
-	UPDATE schedule
-	SET
-		NextHour = $CurrentHour,
-		NextDay = $CurrentDay,
-		NextBiWeekly = $CurrentBiWeek");
+    UPDATE schedule
+    SET
+        NextHour = $CurrentHour,
+        NextDay = $CurrentDay,
+        NextBiWeekly = $CurrentBiWeek");
 }
 else {
     $ChooseRun = true;

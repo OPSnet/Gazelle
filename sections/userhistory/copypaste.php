@@ -16,35 +16,35 @@ echo "Username: ". $UserInfo['Username'] . "</br>";
 
 //Display Join Date
 $DB->prepared_query("
-	SELECT ui.JoinDate
-	FROM users_main AS um
-		JOIN users_info AS ui ON um.ID = ui.UserID
-	WHERE um.ID = ?", $UserID);
+    SELECT ui.JoinDate
+    FROM users_main AS um
+        JOIN users_info AS ui ON um.ID = ui.UserID
+    WHERE um.ID = ?", $UserID);
 list($Joined) = $DB->next_record();
 
 echo "Joined: " . $Joined . "</br>";
 
 //Get Emails from the DB.
 $DB->prepared_query("
-	SELECT
-		u.Email,
-		? AS Time,
-		u.IP,
-		c.Code
-	FROM users_main AS u
-		LEFT JOIN geoip_country AS c ON INET_ATON(u.IP) BETWEEN c.StartIP AND c.EndIP
-	WHERE u.ID = ?
-	UNION
-	SELECT
-		h.Email,
-		h.Time,
-		h.IP,
-		c.Code
-	FROM users_history_emails AS h
-		LEFT JOIN geoip_country AS c ON INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP
-	WHERE UserID = ? "
+    SELECT
+        u.Email,
+        ? AS Time,
+        u.IP,
+        c.Code
+    FROM users_main AS u
+        LEFT JOIN geoip_country AS c ON INET_ATON(u.IP) BETWEEN c.StartIP AND c.EndIP
+    WHERE u.ID = ?
+    UNION
+    SELECT
+        h.Email,
+        h.Time,
+        h.IP,
+        c.Code
+    FROM users_history_emails AS h
+        LEFT JOIN geoip_country AS c ON INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP
+    WHERE UserID = ? "
         /*AND Time != '0000-00-00 00:00:00'*/."
-	ORDER BY Time DESC", sqltime(), $UserID, $UserID);
+    ORDER BY Time DESC", sqltime(), $UserID, $UserID);
 $History = $DB->to_array();
 
 //Display the emails.
@@ -57,14 +57,14 @@ foreach ($History as $Key => $Values) {
 
 //Get IPs from the DB and do some stuff to them so we can use it.
 $DB->prepared_query("
-	SELECT
-		SQL_CALC_FOUND_ROWS
-		IP,
-		StartTime,
-		EndTime
-	FROM users_history_ips
-	WHERE UserID = ?
-	ORDER BY StartTime DESC", $UserID);
+    SELECT
+        SQL_CALC_FOUND_ROWS
+        IP,
+        StartTime,
+        EndTime
+    FROM users_history_ips
+    WHERE UserID = ?
+    ORDER BY StartTime DESC", $UserID);
 
 
 if ($DB->has_results()) {
@@ -86,11 +86,11 @@ foreach ($Results as $Index => $Result) {
 
 //Get Tracker IPs from the DB
 $TrackerIps = $DB->prepared_query("
-	SELECT IP, fid, tstamp
-	FROM xbt_snatched
-	WHERE uid = ?
-		AND IP != ''
-	ORDER BY tstamp DESC", $UserID);
+    SELECT IP, fid, tstamp
+    FROM xbt_snatched
+    WHERE uid = ?
+        AND IP != ''
+    ORDER BY tstamp DESC", $UserID);
     
 //Display Tracker IPs
 echo "</br>Tracker IPs:</br>";

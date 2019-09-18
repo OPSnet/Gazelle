@@ -7,7 +7,7 @@ if (isset($_GET['complete'])) {
     $item = $Bonus->getItem($label);
     print <<<HTML
 <div class="alertbar blend">
-	{$item['Title']} purchased!
+    {$item['Title']} purchased!
 </div>
 HTML;
 }
@@ -111,29 +111,29 @@ foreach ($Items as $Label => $Item) {
     $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['EffectiveClass']);
     $FormattedPrice = number_format($Price);
     print <<<HTML
-			<tr class="$RowClass">
-				<td>{$Cnt}</td>
-				<td>{$Item['Title']}</td>
-				<td>{$FormattedPrice}</td>
-				<td>
+            <tr class="$RowClass">
+                <td>{$Cnt}</td>
+                <td>{$Item['Title']}</td>
+                <td>{$FormattedPrice}</td>
+                <td>
 HTML;
 
     if (G::$LoggedUser['BonusPoints'] >= $Price) {
         $NextFunction = preg_match('/^other-\d$/',          $Label) ? 'ConfirmOther' : 'null';
         $OnClick      = preg_match('/^title-bbcode-[yn]$/', $Label) ? "NoOp" : "ConfirmPurchase";
         print <<<HTML
-					<a id="bonusconfirm" href="bonus.php?action=purchase&amp;label={$Label}&amp;auth={$LoggedUser['AuthKey']}" onclick="{$OnClick}(event, '{$Item['Title']}', $NextFunction, this);">Purchase</a>
+                    <a id="bonusconfirm" href="bonus.php?action=purchase&amp;label={$Label}&amp;auth={$LoggedUser['AuthKey']}" onclick="{$OnClick}(event, '{$Item['Title']}', $NextFunction, this);">Purchase</a>
 HTML;
     }
     else {
         print <<<HTML
-					<span style="font-style: italic">Too Expensive</span>
+                    <span style="font-style: italic">Too Expensive</span>
 HTML;
 
     }
     print <<<HTML
-				</td>
-	</tr>
+                </td>
+    </tr>
 HTML;
 }
 ?>

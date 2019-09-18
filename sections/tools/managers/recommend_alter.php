@@ -13,9 +13,9 @@ if (!$GroupID || !is_number($GroupID)) {
 
 if (!check_perms('site_manage_recommendations')) {
     $DB->query("
-		SELECT UserID
-		FROM torrents_recommended
-		WHERE GroupID = '$GroupID'");
+        SELECT UserID
+        FROM torrents_recommended
+        WHERE GroupID = '$GroupID'");
     list($UserID) = $DB->next_record();
     if ($UserID != $LoggedUser['ID']) {
         error(403);
@@ -23,8 +23,8 @@ if (!check_perms('site_manage_recommendations')) {
 }
 
 $DB->query("
-	DELETE FROM torrents_recommended
-	WHERE GroupID = '$GroupID'");
+    DELETE FROM torrents_recommended
+    WHERE GroupID = '$GroupID'");
 
 $Cache->delete_value('recommend');
 $Location = (empty($_SERVER['HTTP_REFERER'])) ? "tools.php?action=recommend" : $_SERVER['HTTP_REFERER'];

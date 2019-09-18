@@ -25,14 +25,14 @@ $Pages = Format::get_pages($Page, $Total, TORRENTS_PER_PAGE);
 
 View::show_header('Torrents with bad/missing checksum');
 $DB->query("
-	SELECT
-		t.ID,
-		t.GroupID
-	FROM torrents AS t
-		{$Join}
-	WHERE t.HasLogDB = '1' AND t.LogChecksum = '0' {$Where}
-	ORDER BY t.ID ASC
-	LIMIT {$Limit} OFFSET {$Offset}");
+    SELECT
+        t.ID,
+        t.GroupID
+    FROM torrents AS t
+        {$Join}
+    WHERE t.HasLogDB = '1' AND t.LogChecksum = '0' {$Where}
+    ORDER BY t.ID ASC
+    LIMIT {$Limit} OFFSET {$Offset}");
 
 $TorrentsInfo = $DB->to_array('ID', MYSQLI_ASSOC);
 $GroupIDs = array();

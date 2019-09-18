@@ -4,9 +4,9 @@
     }
 
     $DB->prepared_query("
-		SELECT ID, Sort, Name
-		FROM staff_groups
-		ORDER BY Sort");
+        SELECT ID, Sort, Name
+        FROM staff_groups
+        ORDER BY Sort");
     $Groups = $DB->to_array(false, MYSQLI_ASSOC);
 
     View::show_header('Staff Group Management');

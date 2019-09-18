@@ -6,9 +6,9 @@ Misc::assert_isset_request($_POST, array('postid'));
 
 $PostID = (int)$_POST['postid'];
 $DB->query("
-	SELECT Body, AuthorID
-	FROM comments
-	WHERE ID = $PostID");
+    SELECT Body, AuthorID
+    FROM comments
+    WHERE ID = $PostID");
 if (!$DB->has_results()) {
     error(404);
 }

@@ -141,16 +141,16 @@ if (isset($_POST['p_donor_stats'])) {
 
 // Email change
 $DB->query("
-	SELECT Email
-	FROM users_main
-	WHERE ID = $UserID");
+    SELECT Email
+    FROM users_main
+    WHERE ID = $UserID");
 list($CurEmail) = $DB->next_record();
 if ($CurEmail != $_POST['email']) {
     if (!check_perms('users_edit_profiles')) { // Non-admins have to authenticate to change email
         $DB->query("
-			SELECT PassHash, Secret
-			FROM users_main
-			WHERE ID = '".db_string($UserID)."'");
+            SELECT PassHash, Secret
+            FROM users_main
+            WHERE ID = '".db_string($UserID)."'");
         list($PassHash,$Secret)=$DB->next_record();
         if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
             $Err = 'You did not enter the correct password.';
@@ -163,15 +163,15 @@ if ($CurEmail != $_POST['email']) {
         //This piece of code will update the time of their last email change to the current time *not* the current change.
         $ChangerIP = db_string($LoggedUser['IP']);
         $DB->query("
-			UPDATE users_history_emails
-			SET Time = '".sqltime()."'
-			WHERE UserID = '$UserID'
-				AND Time = '0000-00-00 00:00:00'");
+            UPDATE users_history_emails
+            SET Time = '".sqltime()."'
+            WHERE UserID = '$UserID'
+                AND Time = '0000-00-00 00:00:00'");
         $DB->query("
-			INSERT INTO users_history_emails
-				(UserID, Email, Time, IP)
-			VALUES
-				('$UserID', '$NewEmail', '0000-00-00 00:00:00', '".db_string($_SERVER['REMOTE_ADDR'])."')");
+            INSERT INTO users_history_emails
+                (UserID, Email, Time, IP)
+            VALUES
+                ('$UserID', '$NewEmail', '0000-00-00 00:00:00', '".db_string($_SERVER['REMOTE_ADDR'])."')");
 
     } else {
         error($Err);
@@ -185,9 +185,9 @@ if ($CurEmail != $_POST['email']) {
 
 if (!$Err && !empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
     $DB->query("
-		SELECT PassHash, Secret
-		FROM users_main
-		WHERE ID = '".db_string($UserID)."'");
+        SELECT PassHash, Secret
+        FROM users_main
+        WHERE ID = '".db_string($UserID)."'");
     list($PassHash, $Secret) = $DB->next_record();
 
     if (Users::check_password($_POST['cur_pass'], $PassHash)) {
@@ -288,27 +288,27 @@ $UserNavItems = implode(',', $UserNavItems);
 $LastFMUsername = db_string($_POST['lastfm_username']);
 $OldLastFMUsername = '';
 $DB->query("
-	SELECT username
-	FROM lastfm_users
-	WHERE ID = '$UserID'");
+    SELECT username
+    FROM lastfm_users
+    WHERE ID = '$UserID'");
 if ($DB->has_results()) {
     list($OldLastFMUsername) = $DB->next_record();
     if ($OldLastFMUsername != $LastFMUsername) {
         if (empty($LastFMUsername)) {
             $DB->query("
-				DELETE FROM lastfm_users
-				WHERE ID = '$UserID'");
+                DELETE FROM lastfm_users
+                WHERE ID = '$UserID'");
         } else {
             $DB->query("
-				UPDATE lastfm_users
-				SET Username = '$LastFMUsername'
-				WHERE ID = '$UserID'");
+                UPDATE lastfm_users
+                SET Username = '$LastFMUsername'
+                WHERE ID = '$UserID'");
         }
     }
 } elseif (!empty($LastFMUsername)) {
     $DB->query("
-		INSERT INTO lastfm_users (ID, Username)
-		VALUES ('$UserID', '$LastFMUsername')");
+        INSERT INTO lastfm_users (ID, Username)
+        VALUES ('$UserID', '$LastFMUsername')");
 }
 G::$Cache->delete_value("lastfm_username_$UserID");
 
@@ -338,25 +338,25 @@ $Cache->update_row(false, $Options);
 $Cache->commit_transaction(0);
 
 $SQL = "
-	UPDATE users_main AS m
-		JOIN users_info AS i ON m.ID = i.UserID
-	SET
-		i.StyleID = ?,
-		i.StyleURL = ?,
-		i.Avatar = ?,
-		i.SiteOptions = ?,
-		i.NotifyOnQuote = ?,
-		i.Info = ?,
-		i.InfoTitle = ?,
-		i.DownloadAlt = ?,
-		i.UnseededAlerts = ?,
-		i.NotifyOnDeleteSeeding = ?,
-		i.NotifyOnDeleteSnatched = ?,
-		i.NotifyOnDeleteDownloaded = ?,
-		m.Email = ?,
-		m.IRCKey = ?,
-		m.Paranoia = ?,
-		i.NavItems = ?";
+    UPDATE users_main AS m
+        JOIN users_info AS i ON m.ID = i.UserID
+    SET
+        i.StyleID = ?,
+        i.StyleURL = ?,
+        i.Avatar = ?,
+        i.SiteOptions = ?,
+        i.NotifyOnQuote = ?,
+        i.Info = ?,
+        i.InfoTitle = ?,
+        i.DownloadAlt = ?,
+        i.UnseededAlerts = ?,
+        i.NotifyOnDeleteSeeding = ?,
+        i.NotifyOnDeleteSnatched = ?,
+        i.NotifyOnDeleteDownloaded = ?,
+        m.Email = ?,
+        m.IRCKey = ?,
+        m.Paranoia = ?,
+        i.NavItems = ?";
 $Params = [
     $_POST['stylesheet'],
     $_POST['styleurl'],
@@ -382,10 +382,10 @@ if ($ResetPassword) {
     $SQL.= ",m.PassHash = ?";
     $Params[] = $PassHash;
     $DB->prepared_query("
-		INSERT INTO users_history_passwords
-			(UserID, ChangerIP, ChangeTime)
-		VALUES
-			(?, ?, ?)",
+        INSERT INTO users_history_passwords
+            (UserID, ChangerIP, ChangeTime)
+        VALUES
+            (?, ?, ?)",
         $UserID, $ChangerIP, sqltime());
 }
 
@@ -397,10 +397,10 @@ if (isset($_POST['resetpasskey'])) {
     $SQL .= ",m.torrent_pass = ?";
     $Params[] = $NewPassKey;
     $DB->prepared_query("
-		INSERT INTO users_history_passkeys
-			(UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
-		VALUES
-			(?, ?, ?, ?, ?)",
+        INSERT INTO users_history_passkeys
+            (UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
+        VALUES
+            (?, ?, ?, ?, ?)",
         $UserID, $OldPassKey, $NewPassKey, $ChangerIP, sqltime());
     $Cache->begin_transaction("user_info_heavy_$UserID");
     $Cache->update_row(false, array('torrent_pass' => $NewPassKey));

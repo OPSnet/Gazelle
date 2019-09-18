@@ -10,24 +10,24 @@
 $DB->query("
 UPDATE users_main AS um
 LEFT JOIN (
-	SELECT
-		xfu.uid AS ID,
-		SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
-			0.0433 + (
-				(0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
-			)
-		), 0)) AS NewPoints
-	FROM
-		(SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)) AS xfu
-		JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-		JOIN users_main AS um ON um.ID = xfu.uid
-		JOIN users_info AS ui ON ui.UserID = xfu.uid
-		JOIN torrents AS t ON t.ID = xfu.fid
-	WHERE
-		um.Enabled = '1' 
-		AND ui.DisablePoints = '0'
-	GROUP BY
-		xfu.uid
+    SELECT
+        xfu.uid AS ID,
+        SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
+            0.0433 + (
+                (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
+            )
+        ), 0)) AS NewPoints
+    FROM
+        (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)) AS xfu
+        JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
+        JOIN users_main AS um ON um.ID = xfu.uid
+        JOIN users_info AS ui ON ui.UserID = xfu.uid
+        JOIN torrents AS t ON t.ID = xfu.fid
+    WHERE
+        um.Enabled = '1' 
+        AND ui.DisablePoints = '0'
+    GROUP BY
+        xfu.uid
 ) AS p ON um.ID = p.ID
 SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE ROUND(p.NewPoints, 5) END");
 

@@ -15,8 +15,8 @@ if (isset($_GET['perform'])) {
         $Notes = db_string($_GET['notes']);
         $IP = Tools::ip_to_unsigned($_GET['ip']); //Sanitized by Validation regex
         $DB->query("
-			INSERT INTO ip_bans (FromIP, ToIP, Reason)
-			VALUES ('$IP','$IP', '$Notes')");
+            INSERT INTO ip_bans (FromIP, ToIP, Reason)
+            VALUES ('$IP','$IP', '$Notes')");
         $Cache->delete_value('ip_bans_'.$IPA);
     }
 }

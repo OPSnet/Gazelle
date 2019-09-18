@@ -18,9 +18,9 @@ $LogChecksum = 1;
 
 $Extra = check_perms('users_mod') ? '' : " AND t.UserID = '{$LoggedUser['ID']}'";
 $DB->query("
-	SELECT t.ID, t.GroupID
-	FROM torrents t
-	WHERE t.ID = {$TorrentID} AND t.HasLog='1'" . $Extra);
+    SELECT t.ID, t.GroupID
+    FROM torrents t
+    WHERE t.ID = {$TorrentID} AND t.HasLog='1'" . $Extra);
 
 $DetailsArray = array();
 $Logchecker = new Logchecker();
@@ -62,7 +62,7 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
 View::show_header();
 echo <<<HTML
 <div class="thin center">
-	<br><a href="logchecker.php?action={$Action}">Upload another log file</a>
+    <br><a href="logchecker.php?action={$Action}">Upload another log file</a>
 </div>
 <div class="thin">
 HTML;
@@ -87,11 +87,11 @@ echo "<blockquote><strong>Score:</strong> <span style=\"color:$Color\">$LogScore
 
 if ($LogChecksum === 0) {
     echo <<<HTML
-	<blockquote>
-		<strong>Trumpable For:</strong>
-		<br /><br />
-		Bad/No Checksum(s)
-	</blockquote>
+    <blockquote>
+        <strong>Trumpable For:</strong>
+        <br /><br />
+        Bad/No Checksum(s)
+    </blockquote>
 HTML;
 }
 
@@ -100,23 +100,23 @@ foreach ($Logs as $Log) {
     if (!empty($Details)) {
         $Details = explode("\r\n", $Details);
         print <<<HTML
-	<blockquote>
-	<h3>Log validation report:</h3>
-	<ul>
+    <blockquote>
+    <h3>Log validation report:</h3>
+    <ul>
 HTML;
         foreach ($Details as $Property) {
             print "\t\t<li>{$Property}</li>";
         }
         print <<<HTML
-	</ul>
-	</blockquote>
+    </ul>
+    </blockquote>
 HTML;
     }
 
     echo <<<HTML
-	<blockquote>
-		<pre>{$Text}</pre>
-	</blockquote>
+    <blockquote>
+        <pre>{$Text}</pre>
+    </blockquote>
 </div>
 HTML;
 

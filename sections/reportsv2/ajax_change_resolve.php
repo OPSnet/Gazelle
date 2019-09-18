@@ -5,33 +5,33 @@
  */
 
 if (!check_perms('admin_reports')) {
-	error(403);
+    error(403);
 }
 
 if (is_number($_GET['id'])) {
-	$ReportID = $_GET['id'];
+    $ReportID = $_GET['id'];
 } else {
-	echo 'HAX on report ID';
-	die();
+    echo 'HAX on report ID';
+    die();
 }
 
 if (!isset($_GET['categoryid'])) {
-	echo 'HAX on categoryid';
-	die();
+    echo 'HAX on categoryid';
+    die();
 } else {
-	$CategoryID = $_GET['categoryid'];
+    $CategoryID = $_GET['categoryid'];
 }
 
 if (!isset($_GET['type'])) {
-	error(404);
+    error(404);
 } elseif (array_key_exists($_GET['type'], $Types[$CategoryID])) {
-	$ReportType = $Types[$CategoryID][$_GET['type']];
+    $ReportType = $Types[$CategoryID][$_GET['type']];
 } elseif (array_key_exists($_GET['type'], $Types['master'])) {
-	$ReportType = $Types['master'][$_GET['type']];
+    $ReportType = $Types['master'][$_GET['type']];
 } else {
-	//There was a type but it wasn't an option!
-	echo 'HAX on section type';
-	die();
+    //There was a type but it wasn't an option!
+    echo 'HAX on section type';
+    die();
 }
 
 $Array = array();

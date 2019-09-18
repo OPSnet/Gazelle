@@ -12,9 +12,9 @@ if (!check_perms('site_moderate_forums') || empty($_POST['id'])) {
 
 $ID = (int)$_POST['id'];
 $DB->query("
-	SELECT ClaimerID
-	FROM reports
-	WHERE ID = '$ID'");
+    SELECT ClaimerID
+    FROM reports
+    WHERE ID = '$ID'");
 list($ClaimerID) = $DB->next_record();
 if ($ClaimerID) {
     print
@@ -27,9 +27,9 @@ if ($ClaimerID) {
 } else {
     $UserID = $LoggedUser['ID'];
     $DB->query("
-		UPDATE reports
-		SET ClaimerID = '$UserID'
-		WHERE ID = '$ID'");
+        UPDATE reports
+        SET ClaimerID = '$UserID'
+        WHERE ID = '$ID'");
     print
         json_encode(
             array(
