@@ -95,7 +95,7 @@ class Calendar {
                         VALUES
                             ('$Title', '$Body', '$Category', '$Importance', '$Team', '$StartDate', '$EndDate', '$UserID')");
         G::$DB->set_query_id($QueryID);
-        send_irc("PRIVMSG " . ADMIN_CHAN . " :!mod New calendar event created! Event: $Title; Starts: $StartDate; Ends: $EndDate.");
+        send_irc("PRIVMSG " . MOD_CHAN . " :!mod New calendar event created! Event: $Title; Starts: $StartDate; Ends: $EndDate.");
     }
 
     public static function update_event($ID, $Title, $Body, $Category, $Importance, $Team, $StartDate, $EndDate = null) {
