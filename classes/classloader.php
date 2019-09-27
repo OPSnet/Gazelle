@@ -16,9 +16,6 @@ spl_autoload_register(function ($ClassName) {
             case 'MASS_USER_TORRENTS_EDITOR':
                 $FileName = 'mass_user_torrents_editor.class';
                 break;
-            case 'MASS_USER_TORRENTS_TABLE_VIEW':
-                $FileName = 'mass_user_torrents_table_view.class';
-                break;
             case 'TEXTAREA_PREVIEW':
                 $FileName = 'textarea_preview.class';
                 break;

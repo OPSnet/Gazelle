@@ -159,7 +159,14 @@ if (empty($_GET['advanced'])) { ?>
 $Number = 0;
 $TorrentTable = '';
 foreach ($TopVotes as $GroupID => $Group) {
-    extract(Torrents::array_group($Group));
+    $GroupName = $Group['Name'];
+    $GroupYear = $Group['Year'];
+    $GroupCategoryID = $Group['CategoryID'];
+    $TorrentTags = new Tags($Group['TagList']);
+    $WikiImage = $Group['WikiImage'];
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
     $UpVotes = $Group['Ups'];
     $TotalVotes = $Group['Total'];
     $Score = $Group['Score'];
@@ -168,7 +175,6 @@ foreach ($TopVotes as $GroupID => $Group) {
     $IsBookmarked = in_array($GroupID, $Bookmarks);
     $UserVote = isset($UserVotes[$GroupID]) ? $UserVotes[$GroupID]['Type'] : '';
 
-    $TorrentTags = new Tags($TagList);
     $DisplayName = "$Group[Rank] - ";
 
     if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])|| !empty($ExtendedArtists[6])) {
@@ -183,7 +189,7 @@ foreach ($TopVotes as $GroupID => $Group) {
     if ($GroupYear > 0) {
         $DisplayName = $DisplayName. " [$GroupYear]";
     }
-    if ($GroupVanityHouse) {
+    if ($Group['VanityHouse']) {
         $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
     }
     // Start an output buffer, so we can store this output in $TorrentTable

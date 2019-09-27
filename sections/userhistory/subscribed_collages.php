@@ -102,11 +102,22 @@ if (!$NumResults) {
                 continue;
             }
             $Group = $TorrentList[$GroupID];
-            extract(Torrents::array_group($Group));
+            $GroupID = $Group['ID'];
+            $GroupName = $Group['Name'];
+            $GroupYear = $Group['Year'];
+            $GroupCategoryID = $Group['CategoryID'];
+            $GroupRecordLabel = $Group['RecordLabel'];
+            $GroupCatalogueNumber = $Group['CatalogueNumber'];
+            $GroupVanityHouse = $Group['VanityHouse'];
+            $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
+            $TorrentTags = new Tags($Group['TagList']);
+            $ReleaseType = $Group['ReleaseType'];
+            $WikiImage = $Group['WikiImage'];
+            $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+            $Artists = $Group['Artists'];
+            $ExtendedArtists = $Group['ExtendedArtists'];
 
             $DisplayName = '';
-
-            $TorrentTags = new Tags($TagList);
 
             if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
                 unset($ExtendedArtists[2]);

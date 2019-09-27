@@ -20,10 +20,12 @@ if ($ArtistID && !is_number($ArtistID)) {
 if (empty($ArtistID)) {
     if (!empty($_GET['artistname'])) {
         $Name = db_string(trim($_GET['artistname']));
-        $DB->query("
+        $DB->prepared_query('
             SELECT ArtistID
             FROM artists_alias
-            WHERE Name LIKE '$Name'");
+            WHERE Name LIKE ?
+            ', $Name
+        );
         if (!(list($ArtistID) = $DB->next_record(MYSQLI_NUM, false))) {
             json_die("failure");
         }
@@ -80,7 +82,7 @@ $Requests = [];
 if (empty($LoggedUser['DisableRequests'])) {
     $Requests = $Cache->get_value("artists_requests_$ArtistID");
     if (!is_array($Requests)) {
-        $DB->query("
+        $DB->prepared_query('
             SELECT
                 r.ID,
                 r.CategoryID,
@@ -90,31 +92,30 @@ if (empty($LoggedUser['DisableRequests'])) {
                 COUNT(rv.UserID) AS Votes,
                 SUM(rv.Bounty) AS Bounty
             FROM requests AS r
-                LEFT JOIN requests_votes AS rv ON rv.RequestID = r.ID
-                LEFT JOIN requests_artists AS ra ON r.ID = ra.RequestID
-            WHERE ra.ArtistID = $ArtistID
+            LEFT JOIN requests_votes AS rv ON (rv.RequestID = r.ID)
+            LEFT JOIN requests_artists AS ra ON (r.ID = ra.RequestID)
+            WHERE ra.ArtistID = ?
                 AND r.TorrentID = 0
             GROUP BY r.ID
-            ORDER BY Votes DESC");
-
-        if ($DB->has_results()) {
-            $Requests = $DB->to_array('ID', MYSQLI_ASSOC, false);
-        } else {
-            $Requests = [];
-        }
+            ORDER BY Votes DESC
+            ', $ArtistID
+        );
+        $Requests = $DB->to_array('ID', MYSQLI_ASSOC, false);
         $Cache->cache_value("artists_requests_$ArtistID", $Requests);
     }
 }
 $NumRequests = count($Requests);
 
 if (($Importances = $Cache->get_value("artist_groups_$ArtistID")) === false) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             DISTINCTROW ta.GroupID, ta.Importance, tg.VanityHouse, tg.Year
         FROM torrents_artists AS ta
-            JOIN torrents_group AS tg ON tg.ID = ta.GroupID
-        WHERE ta.ArtistID = '$ArtistID'
-        ORDER BY tg.Year DESC, tg.Name DESC");
+        INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
+        WHERE ta.ArtistID = ?
+        ORDER BY tg.Year DESC, tg.Name DESC
+        ', $ArtistID
+    );
     $GroupIDs = $DB->collect('GroupID');
     $Importances = $DB->to_array(false, MYSQLI_BOTH, false);
     $Cache->cache_value("artist_groups_$ArtistID", $Importances, 0);
@@ -178,7 +179,10 @@ foreach ($GroupIDs as $GroupID) {
         continue;
     }
     $Group = $TorrentList[$GroupID];
-    extract(Torrents::array_group($Group));
+
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
 
     foreach ($Artists as &$Artist) {
         $Artist['id'] = (int)$Artist['id'];
@@ -197,9 +201,10 @@ foreach ($GroupIDs as $GroupID) {
         continue;
     }
 
+    // $GroupVanityHouse = $Group['VanityHouse'];
     $GroupVanityHouse = $Importances[$GroupID]['VanityHouse'];
 
-    $TagList = explode(' ',str_replace('_', '.', $TagList));
+    $TagList = explode(' ',str_replace('_', '.', $Group['TagList']));
 
     // $Tags array is for the sidebar on the right
     foreach ($TagList as $Tag) {
@@ -242,14 +247,14 @@ foreach ($GroupIDs as $GroupID) {
     }
     $JsonTorrents[] = [
         'groupId' => (int)$GroupID,
-        'groupName' => $GroupName,
-        'groupYear' => (int)$GroupYear,
-        'groupRecordLabel' => $GroupRecordLabel,
-        'groupCatalogueNumber' => $GroupCatalogueNumber,
-        'groupCategoryID' => $GroupCategoryID,
+        'groupName' => $Group['Name'],
+        'groupYear' => (int)$Group['Year'],
+        'groupRecordLabel' => $Group['RecordLabel'],
+        'groupCatalogueNumber' => $Group['CatalogueNumber'],
+        'groupCategoryID' => $Group['CategoryID'],
         'tags' => $TagList,
-        'releaseType' => (int)$ReleaseType,
-        'wikiImage' => $WikiImage,
+        'releaseType' => (int)$Group['ReleaseType'],
+        'wikiImage' => $Group['WikiImage'],
         'groupVanityHouse' => $GroupVanityHouse == 1,
         'hasBookmarked' => Bookmarks::has_bookmarked('torrent', $GroupID),
         'artists' => $Artists,
@@ -261,20 +266,21 @@ foreach ($GroupIDs as $GroupID) {
 
 $JsonSimilar = [];
 if (empty($SimilarArray)) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             s2.ArtistID,
             a.Name,
             ass.Score,
             ass.SimilarID
         FROM artists_similar AS s1
-            JOIN artists_similar AS s2 ON s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID
-            JOIN artists_similar_scores AS ass ON ass.SimilarID = s1.SimilarID
-            JOIN artists_group AS a ON a.ArtistID = s2.ArtistID
-        WHERE s1.ArtistID = '$ArtistID'
+        INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
+        INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
+        INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+        WHERE s1.ArtistID = ?
         ORDER BY ass.Score DESC
-        LIMIT 30
-    ");
+        LIMIT 30,
+        ', $ArtistID
+    );
     $SimilarArray = $DB->to_array();
     foreach ($SimilarArray as $Similar) {
         $JsonSimilar[] = [
@@ -314,12 +320,14 @@ foreach ($Requests as $RequestID => $Request) {
 $notificationsEnabled = false;
 if (check_perms('site_torrents_notify')) {
     if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
-        $DB->query("
+        $DB->prepared_query('
             SELECT ID, Artists
             FROM users_notify_filters
-            WHERE UserID = '$LoggedUser[ID]'
-                AND Label = 'Artist notifications'
-            LIMIT 1");
+            WHERE UserID = ?
+                AND Label = ?
+            LIMIT 1
+            ', $LoggedUser[ID], 'Artist notifications'
+        );
         $Notify = $DB->next_record(MYSQLI_ASSOC, false);
         $Cache->cache_value('notify_artists_'.$LoggedUser['ID'], $Notify, 0);
     }
@@ -362,5 +370,3 @@ json_print("success", [
     'torrentgroup' => $JsonTorrents,
     'requests' => $JsonRequests
 ]);
-
-?>

@@ -39,9 +39,15 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         continue;
     }
     $Group = $TorrentList[$GroupID];
-    extract(Torrents::array_group($Group));
+
+    $GroupName = $Group['Name'];
+    $GroupYear = $Group['Year'];
+    new Tags($Group['TagList']);
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
+
     $UserID = $Contributors[$GroupID];
-    new Tags($TagList);
 
     // Handle stats and stuff
     $Number++;
@@ -446,22 +452,14 @@ if ($CollageCovers != 0) { ?>
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
-    extract(Torrents::array_group($Group));
-    /**
-     * @var int $GroupID
-     * @var string $GroupName
-     * @var string $GroupYear
-     * @var int $GroupCategoryID
-     * @var string $GroupRecordLabel
-     * @var bool $GroupVanityHouse
-     * @var array $GroupFlags
-     * @var array $Artists
-     * @var array $ExtendedArtists
-     * @var string $TagList
-     * @var string $WikiImage
-     */
+    $GroupName = $Group['Name'];
+    $GroupYear = $Group['Year'];
+    $GroupCategoryID = $Group['CategoryID'];
+    $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
 
-    $TorrentTags = new Tags($TagList);
     $Number++;
     $DisplayName = "$Number - ";
 
@@ -482,7 +480,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     if ($GroupYear > 0) {
         $DisplayName = "$DisplayName [$GroupYear]";
     }
-    if ($GroupVanityHouse) {
+    if ($Group['VanityHouse']) {
         $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
     }
     $SnatchedGroupClass = ($GroupFlags['IsSnatched'] ? ' snatched_group' : '');

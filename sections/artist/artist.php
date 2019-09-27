@@ -284,8 +284,15 @@ $OldGroupID = 0;
 $LastReleaseType = 0;
 
 foreach ($Importances as $Group) {
-    extract(Torrents::array_group($TorrentList[$Group['GroupID']]), EXTR_OVERWRITE);
+    $GroupID = $Group['ID'];
+    $GroupName = $Group['Name'];
+    $GroupYear = $Group['Year'];
+    $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
+    $TorrentTags = new Tags($Group['TagList'], false);
     $ReleaseType = $Group['ReleaseType'];
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
 
     if ($GroupID == $OldGroupID && $ReleaseType == $OldReleaseType) {
         continue;
@@ -304,8 +311,6 @@ foreach ($Importances as $Group) {
     } else {
         $HideDiscog = '';
     }
-
-    $TorrentTags = new Tags($TagList, false);
 
     if ($ReleaseType != $LastReleaseType) {
         switch ($ReleaseTypes[$ReleaseType]) {
@@ -345,7 +350,6 @@ foreach ($Importances as $Group) {
         $DisplayName .= ' <a href="torrents.php?action=fix_group&amp;groupid='.$GroupID.'&amp;artistid='.$ArtistID.'&amp;auth='.$LoggedUser['AuthKey'].'" class="brackets tooltip" title="Fix ghost DB entry">Fix</a>';
     }
 
-
     switch ($ReleaseType) {
         case 1023: // Remixes, DJ Mixes, Guest artists, and Producers need the artist name
         case 1024:
@@ -379,7 +383,7 @@ foreach ($Importances as $Group) {
         $DisplayName = "$GroupYear - $DisplayName";
     }
 
-    if ($GroupVanityHouse) {
+    if ($Group['VanityHouse']) {
         $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
     }
 
@@ -395,7 +399,7 @@ foreach ($Importances as $Group) {
 <?php
     if ($LoggedUser['CoverArt']) { ?>
                     <div class="group_image float_left clear">
-                        <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                        <?php ImageTools::cover_thumb($Group['WikiImage'], $Group['CategoryID']) ?>
                     </div>
 <?php
     } ?>

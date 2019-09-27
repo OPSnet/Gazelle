@@ -1,11 +1,13 @@
 <?php
 $TorrentID = (int)$_GET['torrentid'];
 
-$DB->query("
+$DB->prepared_query('
     SELECT tls.last_action, t.LastReseedRequest, t.UserID, t.Time, t.GroupID
     FROM torrents AS t
     INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
-    WHERE ID = '$TorrentID'");
+    WHERE ID = ?
+    ', $TorrentID
+);
 list($LastActive, $LastReseedRequest, $UploaderID, $UploadedTime, $GroupID) = $DB->next_record();
 
 if (!check_perms('users_mod')) {
@@ -17,36 +19,36 @@ if (!check_perms('users_mod')) {
     }
 }
 
-$DB->prepared_query("
+$DB->prepared_query('
     UPDATE torrents
-    SET LastReseedRequest = NOW()
-    WHERE ID = ?", $TorrentID);
+    SET LastReseedRequest = now()
+    WHERE ID = ?
+    ', $TorrentID
+);
 
-$Group = Torrents::get_groups([$GroupID]);
-extract(Torrents::array_group($Group[$GroupID]));
+$Groups = Torrents::get_groups([$GroupID]);
+$Group = $Groups[$GroupID];
 
-$Name = Artists::display_artists(['1' => $Artists], false, true);
-$Name .= $GroupName;
+$Name = Artists::display_artists(['1' => $Group['Artists']], false, true);
+$Name .= $Group['Name'];
 
-$usersToNotify = [];
-
-$DB->query("
+$DB->prepared_query('
     SELECT s.uid AS id, MAX(s.tstamp) AS tstamp
     FROM xbt_snatched as s
-    INNER JOIN users_main as u
-    ON s.uid = u.ID
-    WHERE s.fid = '$TorrentID'
-    AND u.Enabled = '1'
+    INNER JOIN users_main as u ON (s.uid = u.ID)
+    WHERE s.fid = ?
+    AND u.Enabled = ?
     GROUP BY s.uid
-       ORDER BY tstamp DESC
-    LIMIT 100");
+    ORDER BY tstamp DESC
+    LIMIT 100
+    ', $TorrentID, '1'
+);
+
+$usersToNotify = [];
 if ($DB->has_results()) {
     $Users = $DB->to_array();
     foreach ($Users as $User) {
-        $UserID = $User['id'];
-        $TimeStamp = $User['tstamp'];
-
-        $usersToNotify[$UserID] = ["snatched", $TimeStamp];
+        $usersToNotify[$User['id']] = ["snatched", $User['tstamp']];
     }
 }
 
@@ -81,4 +83,3 @@ View::show_header();
 </div>
 <?php
 View::show_footer();
-?>

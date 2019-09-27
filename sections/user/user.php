@@ -878,17 +878,13 @@ foreach ($Collages as $CollageInfo) {
             </td>
         </tr>
         <tr class="images<?=$FirstCol ? '' : ' hidden'?>">
-<?php    foreach ($Collage as $C) {
+<?php   foreach ($Collage as $C) {
             $Group = Torrents::get_groups([$C['GroupID']], true, true, false);
-            extract(Torrents::array_group($Group[$C['GroupID']]));
-
-            $Name = '';
-            $Name .= Artists::display_artists(['1' => $Artists], false, true);
-            $Name .= $GroupName;
+            $Name = Artists::display_artists(['1' => $Group['Artists']], false, true) . $Group['Name'];
 ?>
             <td>
-                <a href="torrents.php?id=<?=$GroupID?>">
-                    <img class="tooltip" title="<?=$Name?>" src="<?=ImageTools::process($C['WikiImage'], true)?>" alt="<?=$Name?>" width="107" />
+                <a href="torrents.php?id=<?= $C['GroupID'] ?>">
+                    <img class="tooltip" title="<?= $Name ?>" src="<?=ImageTools::process($C['WikiImage'], true)?>" alt="<?= $Name ?>" width="107" />
                 </a>
             </td>
 <?php    } ?>

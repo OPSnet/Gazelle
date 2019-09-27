@@ -48,7 +48,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 
         $SQL .= '
             WHERE g.ID = ?
-            GROUP BY NULL';
+            GROUP BY g.ID';
         $args[] = $GroupID;
 
         $DB->prepared_query_array($SQL, $args);

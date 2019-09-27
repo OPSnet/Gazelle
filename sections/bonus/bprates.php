@@ -157,9 +157,10 @@ if ($TotalTorrents > 0) {
         $MonthlyPoints = $DailyPoints * 30.436875;
         $YearlyPoints = $DailyPoints * 365.2425;
 
-        extract(Torrents::array_group($Groups[$Torrent['GroupID']]));
-
-        $TorrentTags = new Tags($TagList);
+        $GroupYear = $Groups[$Torrent['GroupID']]['Year'];
+        $Torrents = isset($Groups[$Torrent['GroupID']]['Torrents']) ? $Groups[$Torrent['GroupID']]['Torrents'] : [];
+        $Artists = $Groups[$Torrent['GroupID']]['Artists'];
+        $ExtendedArtists = $Groups[$Torrent['GroupID']]['ExtendedArtists'];
 
         if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
             unset($ExtendedArtists[2]);
@@ -170,7 +171,7 @@ if ($TotalTorrents > 0) {
         } else {
             $DisplayName = '';
         }
-        $DisplayName .= '<a href="torrents.php?id=' . $GroupID . '&amp;torrentid=' . $Torrent['ID'] . '" class="tooltip" title="View torrent" dir="ltr">' . $GroupName . '</a>';
+        $DisplayName .= '<a href="torrents.php?id=' . $Torrent['GroupID'] . '&amp;torrentid=' . $Torrent['ID'] . '" class="tooltip" title="View torrent" dir="ltr">' . $Groups[$Torrent['GroupID']]['Name'] . '</a>';
         if ($GroupYear > 0) {
             $DisplayName .= " [$GroupYear]";
         }

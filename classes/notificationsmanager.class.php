@@ -363,7 +363,10 @@ class NotificationsManager {
     }
 
     public function load_torrent_notifications() {
-        if (check_perms('site_torrents_notify')) {
+        if (!check_perms('site_torrents_notify')) {
+            $NewNotifications = 0;
+        }
+        else {
             $NewNotifications = G::$Cache->get_value('notifications_new_' . G::$LoggedUser['ID']);
             if ($NewNotifications === false) {
                 $QueryID = G::$DB->get_query_id();

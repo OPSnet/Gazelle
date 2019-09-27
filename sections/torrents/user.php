@@ -496,11 +496,13 @@ foreach ($Categories as $CatKey => $CatName) {
     foreach ($TorrentsInfo as $TorrentID => $Info) {
         list($GroupID, , $Time) = array_values($Info);
 
-        extract(Torrents::array_group($Results[$GroupID]));
+        $GroupCategoryID = $Results[$GroupID]['CategoryID'];
+        $GroupFlags = isset($Results[$GroupID]['Flags']) ? $Results[$GroupID]['Flags'] : ['IsSnatched' => false];
+        $TorrentTags = new Tags($Results[$GroupID]['TagList']);
+        $Torrents = isset($Results[$GroupID]['Torrents']) ? $Results[$GroupID]['Torrents'] : [];
+        $Artists = $Results[$GroupID]['Artists'];
+        $ExtendedArtists = $Results[$GroupID]['ExtendedArtists'];
         $Torrent = $Torrents[$TorrentID];
-
-
-        $TorrentTags = new Tags($TagList);
 
         if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
             unset($ExtendedArtists[2]);
@@ -511,11 +513,11 @@ foreach ($Categories as $CatKey => $CatName) {
         } else {
             $DisplayName = '';
         }
-        $DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$TorrentID.'" class="tooltip" title="View torrent" dir="ltr">'.$GroupName.'</a>';
+        $DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$TorrentID.'" class="tooltip" title="View torrent" dir="ltr">'.$Results[$GroupID]['Name'].'</a>';
         if ($GroupYear > 0) {
             $DisplayName .= " [$GroupYear]";
         }
-        if ($GroupVanityHouse) {
+        if ($Results[$GroupID]['VanityHouse']) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 
@@ -531,7 +533,7 @@ foreach ($Categories as $CatKey => $CatName) {
             <td class="td_info big_info">
 <?php    if ($LoggedUser['CoverArt']) { ?>
                 <div class="group_image float_left clear">
-                    <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                    <?php ImageTools::cover_thumb($Results[$GroupID]['WikiImage'], $GroupCategoryID) ?>
                 </div>
 <?php    } ?>
                 <div class="group_info clear">

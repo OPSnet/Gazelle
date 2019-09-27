@@ -196,10 +196,13 @@ class Torrents {
     /**
      * Returns a reconfigured array from a Torrent Group
      *
-     * Use this with extract() instead of the volatile list($GroupID, ...)
+     * DEPRECATED.
+     * . added to avoid false positive grep matches
+     *
+     * Use this with extract.() instead of the volatile list($GroupID, ...)
      * Then use the variables $GroupID, $GroupName, etc
      *
-     * @example  extract(Torrents::array_group($SomeGroup));
+     * @example  extract.(Torrents::array_group($SomeGroup));
      * @param array $Group torrent group
      * @return array Re-key'd array
      */

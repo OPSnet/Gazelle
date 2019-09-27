@@ -39,7 +39,8 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     }
     // Handle stats and stuff
     $NumGroups++;
-    extract(Torrents::array_group($TorrentList[$GroupID]));
+
+    $Artists = $TorrentList[$GroupID]['Artists'];
     if ($Artists) {
         foreach ($Artists as $Artist) {
             if (!isset($ArtistCount[$Artist['id']])) {
@@ -49,8 +50,6 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             }
         }
     }
-    // We need to append the tag list to the Tags::$all array
-    new Tags($TagList);
 }
 
 $GroupIDs = array_values($GroupIDs);
@@ -191,20 +190,14 @@ if ($CollageCovers !== 0) { ?>
 <?php
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
-    extract(Torrents::array_group($Group));
-    /**
-     * @var int    $GroupID
-     * @var string $GroupName
-     * @var string $GroupYear
-     * @var int    $GroupCategoryID
-     * @var string $GroupRecordLabel
-     * @var bool   $GroupVanityHouse
-     * @var array  $GroupFlags
-     * @var array  $Artists
-     * @var array  $ExtendedArtists
-     * @var string $TagList
-     * @var string $WikiImage
-     */
+    $GroupName = $Group['Name'];
+    $GroupYear = $Group['Year'];
+    $GroupCategoryID = $Group['CategoryID'];
+    $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
+    $TorrentTags = new Tags($Group['TagList'], false);
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
 
     list(, $Sort, $AddedTime) = array_values($CollageDataList[$GroupID]);
 
@@ -218,8 +211,6 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             }
         }
     }
-
-    $TorrentTags = new Tags($TagList, false);
 
     if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
         unset($ExtendedArtists[2]);
@@ -236,7 +227,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     if ($GroupYear > 0) {
         $DisplayName = "$DisplayName [$GroupYear]";
     }
-    if ($GroupVanityHouse) {
+    if ($Group['VanityHouse']) {
         $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
     }
     $SnatchedGroupClass = $GroupFlags['IsSnatched'] ? ' snatched_group' : '';
