@@ -278,7 +278,8 @@ class Torrents {
             UPDATE users_main
             SET BonusPoints = BonusPoints - ?
             WHERE id = ?
-            ', $Bonus->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum), $UserID
+            ', $ID <= MAX_PREV_TORRENT_ID ? 0 : $Bonus->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum),
+                $UserID
         );
 
         $manager = new \Gazelle\DB(G::$DB, G::$Cache);

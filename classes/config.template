@@ -19,6 +19,7 @@ define('REFERRAL_KEY', hash('sha512', '')); // Shared key to encrypt data flowin
 define('REFERRAL_SEND_EMAIL', false); // Whether to send invite emails for referrals.
 define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow APL.
+define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation
 
 // Allows you to run static content off another server. Default is usually what you want.
 define('NONSSL_STATIC_SERVER', 'static/');
