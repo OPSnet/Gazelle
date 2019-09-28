@@ -20,14 +20,19 @@ $Groups = Torrents::get_groups(array_keys($Results));
 
 View::show_header('Single seeder FLACs');
 ?>
-<div class="linkbox">
-    <a href="better.php" class="brackets">Back to better.php list</a>
-</div>
+<br />
 <div class="thin">
-    <table width="100%" class="torrent_table">
-        <tr class="colhead">
-            <td>Torrent</td>
-        </tr>
+    <h2>Single Seeded</h2>
+    <div class="linkbox">
+        <a class="brackets" href="better.php?method=transcode">Transcodes</a>
+        <a class="brackets" href="better.php?method=missing">Missing</a>
+        <a class="brackets" href="better.php?method=single">Single Seeded</a>
+    </div>
+    <div class="box pad">
+        <table width="100%" class="torrent_table">
+            <tr class="colhead">
+                <td>Torrent</td>
+            </tr>
 <?
 foreach ($Results as $GroupID => $FlacID) {
     if (!isset($Groups[$GroupID])) {
@@ -58,17 +63,18 @@ foreach ($Results as $GroupID => $FlacID) {
         $DisplayName .= ' - '.$ExtraInfo;
     }
 ?>
-        <tr class="torrent torrent_row<?=$Torrents[$FlacID]['IsSnatched'] ? ' snatched_torrent' : ''?>">
-            <td>
-                <span class="torrent_links_block">
-                    <a href="torrents.php?action=download&amp;id=<?=$FlacID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                </span>
-                <?=$DisplayName?>
-                <div class="tags"><?=$TorrentTags->format()?></div>
-            </td>
-        </tr>
+            <tr class="torrent torrent_row<?=$Torrents[$FlacID]['IsSnatched'] ? ' snatched_torrent' : ''?>">
+                <td>
+                    <span class="torrent_links_block">
+                        <a href="torrents.php?action=download&amp;id=<?=$FlacID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
+                    </span>
+                    <?=$DisplayName?>
+                    <div class="tags"><?=$TorrentTags->format()?></div>
+                </td>
+            </tr>
 <?    } ?>
-    </table>
+        </table>
+    </div>
 </div>
 <?
 View::show_footer();

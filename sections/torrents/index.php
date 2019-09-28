@@ -218,6 +218,11 @@ if (!empty($_REQUEST['action'])) {
             require(SERVER_ROOT.'/sections/torrents/download.php');
             break;
 
+        case 'collector':
+            enforce_login();
+            require(SERVER_ROOT.'/sections/torrents/collector.php');
+            break;
+
         case 'regen_filelist':
             if (check_perms('users_mod') && !empty($_GET['torrentid']) && is_number($_GET['torrentid'])) {
                 Torrents::regenerate_filelist($_GET['torrentid']);
