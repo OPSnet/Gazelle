@@ -38,12 +38,15 @@ if (!check_perms('admin_manage_permissions')) {
 if (isset($_POST['submit'])) {
     authorize();
 
+    $Name = $_POST['name'];
+    $Value = $_POST['value'];
+    $Comment = $_POST['comment'];
+
     if ($_POST['submit'] == 'Delete') {
-    $Name = db_string($_POST['name']);
-        $DB->query("DELETE FROM site_options WHERE Name = '" . $Name . "'");
+        $DB->prepared_query('DELETE FROM site_options WHERE Name = ?', $Name);
         $Cache->delete_value('site_option_' . $Name);
     } else {
-        $Val->SetFields('name', '1', 'regex', 'The name must be separated by underscores. No spaces are allowed.', array('regex' => '/^[a-z][_a-z0-9]{0,63}$/i'));
+        $Val->SetFields('name', '1', 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', array('regex' => '/^[a-z][-_a-z0-9]{0,63}$/i'));
         $Val->SetFields('value', '1', 'string', 'You must specify a value for the option.');
         $Val->SetFields('comment', '1', 'string', 'You must specify a comment for the option.');
 
@@ -52,42 +55,38 @@ if (isset($_POST['submit'])) {
             error($Error);
         }
 
-        $Name = db_string($_POST['name']);
-        $Value = db_string($_POST['value']);
-        $Comment = db_string($_POST['comment']);
-
         if ($_POST['submit'] == 'Edit') {
-            $DB->query("SELECT Name FROM site_options WHERE ID = '" . db_string($_POST['id']) . "'");
+            $DB->prepared_query('SELECT Name FROM site_options WHERE ID = ?', $_POST['id']);
             list($OldName) = $DB->next_record();
-            $DB->query("
+            $DB->prepared_query('
                 UPDATE site_options
                 SET
-                    Name = '$Name',
-                    Value = '$Value',
-                    Comment = '$Comment'
-                WHERE ID = '" . db_string($_POST['id']) . "'
-            ");
+                    Name = ?, Value = ?, Comment = ?
+                WHERE ID = ?
+                ', $Name, $Value, $Comment, $_POST['id']
+            );
             $Cache->delete_value('site_option_' . $OldName);
+            $Cache->cache_value('site_option_' . $Name, $Value);
         } else {
-            $DB->query("
+            $DB->prepared_query('
                 INSERT INTO site_options (Name, Value, Comment)
-                VALUES ('$Name', '$Value', '$Comment')
-            ");
+                VALUES (?, ?, ?)
+                ', $Name, $Value, $Comment
+            );
+            $Cache->cache_value('site_option_' . $Name, $Value);
         }
-
-        $Cache->delete_value('site_option_' . $Name);
     }
 }
 
-$DB->query("
+$DB->query('
     SELECT
         ID,
         Name,
         Value,
         Comment
     FROM site_options
-    ORDER BY LOWER(Name) DESC
-");
+    ORDER BY LOWER(Name)
+');
 
 View::show_header('Site Options');
 ?>
@@ -98,7 +97,7 @@ View::show_header('Site Options');
 <table width="100%">
     <tr class="colhead">
         <td>
-            <span class="tooltip" title="Words must be separated by underscores">Name</span>
+            <span class="tooltip" title="Words must be separated by dashes or underscores">Name</span>
         </td>
         <td>Value</td>
         <td>Comment</td>
@@ -151,4 +150,5 @@ while (list($ID, $Name, $Value, $Comment) = $DB->next_record()) {
 }
 ?>
 </table>
-<? View::show_footer(); ?>
+<?
+View::show_footer();

@@ -8,21 +8,12 @@ if (isset($_GET['userid']) && check_perms('users_view_invites')) {
     $UserID=$_GET['userid'];
     $Sneaky = true;
 } else {
-    if (!$UserCount = $Cache->get_value('stats_user_count')) {
-        $DB->query("
-            SELECT COUNT(ID)
-            FROM users_main
-            WHERE Enabled = '1'");
-        list($UserCount) = $DB->next_record();
-        $Cache->cache_value('stats_user_count', $UserCount, 0);
-    }
-
+    $UserCount = Users::get_enabled_users_count();
     $UserID = $LoggedUser['ID'];
     $Sneaky = false;
 }
 
 list($UserID, $Username, $PermissionID) = array_values(Users::user_info($UserID));
-
 
 $DB->query("
     SELECT InviteKey, Email, Expires
@@ -236,4 +227,5 @@ if (!empty($Pending)) {
         </table>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?
+View::show_footer();

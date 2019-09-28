@@ -27,21 +27,21 @@ $DB->query("
         SELECT COUNT(ID)
         FROM users_main
         WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24)."'");
+            AND LastAccess > now() - INTERVAL 1 DAY");
 list($UserStats['Day']) = $DB->next_record();
 
 $DB->query("
         SELECT COUNT(ID)
         FROM users_main
         WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24 * 7)."'");
+            AND LastAccess > now() - INTERVAL 1 WEEK");
 list($UserStats['Week']) = $DB->next_record();
 
 $DB->query("
         SELECT COUNT(ID)
         FROM users_main
         WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24 * 30)."'");
+            AND LastAccess > now() - INTERVAL 1 MONTH");
 list($UserStats['Month']) = $DB->next_record();
 
 $Cache->cache_value('stats_users', $UserStats, 0);

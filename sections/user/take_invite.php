@@ -1,24 +1,16 @@
 <?
 
+authorize();
+
 /**
  * Hello there. If you are refactoring this code, please note that this functionality also sort of exists in /classes/referral.class.php
  * Super sorry for doing that, but this is totally not reusable.
  */
 
-if (!$UserCount = $Cache->get_value('stats_user_count')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'");
-    list($UserCount) = $DB->next_record();
-    $Cache->cache_value('stats_user_count', $UserCount, 0);
-}
-
+$UserCount = Users::get_enabled_users_count();
 $UserID = $LoggedUser['ID'];
 
 //This is where we handle things passed to us
-authorize();
-
 $DB->query("
     SELECT can_leech
     FROM users_main
@@ -112,9 +104,6 @@ EOT;
     }
 
     Misc::send_email($CurEmail, 'You have been invited to '.SITE_NAME, $Message, 'noreply');
-
-
 }
 
 header('Location: user.php?action=invite');
-?>

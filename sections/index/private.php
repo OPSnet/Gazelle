@@ -143,15 +143,7 @@ include('contest_leaderboard.php');
 <?
 }
 
-if (($UserCount = $Cache->get_value('stats_user_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'");
-    list($UserCount) = $DB->next_record();
-    $Cache->cache_value('stats_user_count', $UserCount, 0); //inf cache
-}
-$UserCount = (int)$UserCount;
+$UserCount = Users::get_enabled_users_count();
 ?>
                 <li>Enabled users: <?=number_format($UserCount)?> <a href="stats.php?action=users" class="brackets">Details</a></li>
 <?
@@ -560,4 +552,3 @@ function contest() {
     <!-- END contest Section -->
 <?
 } // contest()
-?>

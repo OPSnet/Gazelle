@@ -1,13 +1,6 @@
 <?
 // Begin user stats
-if (($UserCount = $Cache->get_value('stats_user_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'");
-    list($UserCount) = $DB->next_record();
-    $Cache->cache_value('stats_user_count', $UserCount, 0); //inf cache
-}
+$UserCount = Users::get_enabled_users_count();
 
 if (($UserStats = $Cache->get_value('stats_users')) === false) {
     $DB->query("
@@ -91,7 +84,6 @@ if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
     list($RequestCount, $FilledCount) = $RequestStats;
 }
 
-
 // Begin swarm stats
 if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
     //Cache lock!
@@ -131,4 +123,3 @@ json_print("success", array(
     'seederCount' => (int) $SeederCount,
     'leecherCount' => (int) $LeecherCount
 ));
-?>

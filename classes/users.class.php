@@ -899,4 +899,26 @@ class Users {
         $info = self::user_info($ID);
         return $info['EffectiveClass'] >= $MinClass;
     }
+
+    /**
+     * Get the count of enabled users.
+     *
+     * @return integer Number of enabled users (this is cached).
+     */
+    public static function get_enabled_users_count() {
+        $count = G::$Cache->get_value('stats_user_count');
+        if (!$count) {
+            G::$DB->query("SELECT count(*) FROM users_main WHERE Enabled = '1'");
+            list($count) = G::$DB->next_record();
+            G::$Cache->cache_value('stats_user_count', $count, 0);
+        }
+        return $count;
+    }
+
+    /**
+     * Flush the count of enabled users. Call a user is enabled or disabled.
+     */
+    public static function flush_enabled_users_count() {
+        G::$Cache->delete_value('stats_user_count');
+    }
 }

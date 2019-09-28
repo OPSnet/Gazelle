@@ -15,14 +15,12 @@ class SiteOptions {
         $Value = G::$Cache->get_value('site_option_' . $Name);
 
         if ($Value === false) {
-            G::$DB->query("SELECT Value FROM site_options WHERE Name = '" . db_string($Name) . "'");
-
-            if (G::$DB->has_results()) {
-                list($Value) = G::$DB->next_record();
-                G::$Cache->cache_value('site_option_' . $Name, $Value);
+            G::$DB->prepared_query('SELECT Value FROM site_options WHERE Name = ?', $Name);
+            list($Value) = G::$DB->next_record();
+            if (isset($Value)) {
+                G::$Cache->cache_value('site_option_' . $Name, $Value, 3600);
             }
         }
-
-        return ($Value === false ? $DefaultValue : $Value);
+        return (is_null($Value) ? $DefaultValue : $Value);
     }
 }

@@ -154,7 +154,7 @@ class Bonus {
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
-                SELECT sum(c.amountrecv) as Total, p.UntilDate, p.Name
+                SELECT sum(c.amountrecv) AS Total, p.UntilDate, p.Name
                 FROM bonus_pool_contrib c
                 INNER JOIN bonus_pool p ON (p.ID = c.BonusPoolID)
                 WHERE c.UserID = ?
@@ -341,5 +341,11 @@ Enjoy!";
             $item_id, $user_id, $price, $other_user_id
         );
         return $this->db->affected_rows();
+    }
+
+    public function addPoints ($user_id, $amount) {
+        $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $amount, $user_id);
+        $this->cache->delete_value("user_info_heavy_{$user_id}");
+        $this->cache->delete_value("user_stats_{$user_id}");
     }
 }
