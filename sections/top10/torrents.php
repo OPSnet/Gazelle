@@ -23,6 +23,19 @@ if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
 		}
 	}
 
+	if ($_GET['excluded_artists']) {
+		$ArtistWhere = array();
+		$Artists = explode(',', str_replace('.', '_', trim($_GET['excluded_artists'])));
+		foreach ($Artists as $Artist) {
+			if ($Artist != '') {
+				$ArtistWhere[] = "a.Name !='" . db_string($Artist) . "'";
+			}
+		}
+		if (!empty($ArtistWhere)) {
+				$Where[] = '('.implode(' AND ', $ArtistWhere).')';
+		}
+	}
+
 	if ($_GET['format']) {
 		if (in_array($_GET['format'], $Formats)) {
 			$Where[] = "t.Format='".db_string($_GET['format'])."'";
@@ -66,6 +79,12 @@ if (check_perms('site_advanced_top10')) {
 					<input type="text" name="tags" id="tags" size="75" value="<? if (!empty($_GET['tags'])) { echo display_str($_GET['tags']);} ?>"<? Users::has_autocomplete_enabled('other'); ?> />&nbsp;
 					<input type="radio" id="rdoAll" name="anyall" value="all"<?=(empty($_GET['anyall']) || $_GET['anyall'] != 'any' ? ' checked="checked"' : '')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
 					<input type="radio" id="rdoAny" name="anyall" value="any"<?=(!empty($_GET['anyall']) && $_GET['anyall'] == 'any' ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
+				</td>
+			</tr>
+			<tr id="artistfilter">
+				<td class="label">Excluded artists (comma-separated):</td>
+				<td class="ft_artistlist">
+					<input type="text" name="excluded_artists" id="excluded_artists" size="75" value="<? if (!empty($_GET['excluded_artists'])) { echo display_str($_GET['excluded_artists']);} ?>"<? Users::has_autocomplete_enabled('other'); ?> />&nbsp;
 				</td>
 			</tr>
 			<tr>
@@ -171,9 +190,11 @@ $BaseQuery = '
 		t.Leechers,
 		((t.Size * t.Snatched) + (t.Size * 0.5 * t.Leechers)) AS Data,
 		g.ReleaseType,
-		t.Size
+		t.Size,
+		a.Name
 	FROM torrents AS t
-		LEFT JOIN torrents_group AS g ON g.ID = t.GroupID';
+		LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
+	  LEFT JOIN artists_group AS a ON g.ArtistID = a.ArtistID';
 
 if ($Details == 'all' || $Details == 'day') {
 	$TopTorrentsActiveLastDay = $Cache->get_value('top10tor_day_'.$Limit.$WhereSum.$GroupBySum);
