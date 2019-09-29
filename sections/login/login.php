@@ -2,17 +2,11 @@
     <span id="no-cookies" class="hidden warning">You appear to have cookies disabled.<br /><br /></span>
     <noscript><span class="warning"><?=SITE_NAME?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br /><br /></noscript>
     <p style='max-width: 600px; font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;'>
-        Welcome Home!
+        Welcome.
         <br /><br />
-        If you had an account on Apollo at the time of the backup (June 2017),<br />please use the Recovery page to restore your account.
+        If you had an account on Apollo at the time of the backup (June 2017) or have an invite email,<br />please use the Recovery page to restore your account.
         <br /><br />
-        If you are unsure if you are in the backup or not, use the Recovery page.
-        <br /><br />
-        If you had an account on Apollo but you signed up after the backup date, you can use either the Referral page (if you are on PTP, BTN, MTV or EMP) or the Recovery page.
-        <br /><br />
-        If you did not have an account on Apollo but you would like to join Orpheus, and you are on PTP, BTN, MTV or EMP, feel free to use the Referral page and join!
-        <br /><br />
-        See you on the other side.
+        If you would like to join Orpheus and you are on 32P, EMP, MTV or PTP, use the Referral page.
     </p>
     <br />
 <?
