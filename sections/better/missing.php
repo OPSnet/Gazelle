@@ -54,7 +54,7 @@ $joinparams = [];
 switch ($type) {
     case 'checksum':
         $query = '
-            SELECT SQL_CALC_FOUND_ROWS t.ID, t.GroupID
+            SELECT SQL_CALC_FOUND_ROWS t.ID AS TorrentID, t.GroupID
             FROM torrents t
             INNER JOIN torrents_group tg ON tg.ID = t.GroupID';
         $order = 'ORDER BY t.Time ASC';

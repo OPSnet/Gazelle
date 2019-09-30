@@ -243,7 +243,7 @@ function selected($val) {
         <a class="brackets" href="better.php?method=single">Single Seeded</a>
     </div>
     <form class="search_form" name="transcodes" action="" method="get">
-        <input type="hidden" name="method" value="transcode_beta" />
+        <input type="hidden" name="method" value="transcode" />
         <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
             <tr>
                 <td class="label"><strong>Filter</strong></td>
