@@ -29,9 +29,6 @@
             }
         });
         $("input[id^=outcome]").click(function() {
-            if ($(this).val() != 'Discard' && !confirm('Are you sure you wish to do this? This cannot be undone!')) {
-                return false;
-            }
             var id = $(this).data('id');
             if (id !== undefined) {
                 // Only resolving one row
