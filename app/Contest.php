@@ -485,6 +485,7 @@ class Contest {
         $report = fopen(TMPDIR . "/payout-contest-$id.txt", 'a');
         foreach ($participants as $p) {
             if ($p['nr_entries'] == 0) {
+                $total_gain      = $enabled_user_bonus;
                 $total_gain_fmt  = number_format($enabled_user_bonus, 2);
                 $msg = <<<END_MSG
 Dear {$p['Username']},
