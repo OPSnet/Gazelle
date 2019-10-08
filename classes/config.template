@@ -37,6 +37,8 @@ define('REFERRAL_BOUNCER', ''); // URL to the bouncer including trailing /.
 define('SQLHOST', 'localhost'); //The MySQL host ip/fqdn
 define('SQLLOGIN', '');//The MySQL login
 define('SQLPASS', ''); //The MySQL password
+define('SQL_PHINX_USER', ''); // User to use for Phinx migrations
+define('SQL_PHINX_PASS', ''); // Pass to use for Phinx migrations
 define('SQLDB', 'gazelle'); //The MySQL database to use
 define('SQLPORT', 3306); //The MySQL port to connect on
 define('SQLSOCK', '/var/run/mysqld/mysqld.sock');

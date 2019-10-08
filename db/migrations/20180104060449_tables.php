@@ -1,6 +1,7 @@
 <?php
 
 use Phinx\Migration\AbstractMigration;
+use Phinx\Util\Literal;
 
 class Tables extends AbstractMigration {
     public function down() {
@@ -1950,17 +1951,20 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `binomial_ci`(p int, n int) RETURNS f
     SQL SECURITY INVOKER
 RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));");
 
-        $this->insert('contest_type', [['Name' => 'upload_flac'], ['Name' => 'request_fill']]);
+        $this->table('contest_type')->insert([
+          ['Name' => 'upload_flac'], ['Name' => 'request_fill']
+        ])->save();
 
-        $this->insert('forums_categories', [
+        $this->table('forums_categories')->insert([
             ['ID' => 1, 'Name' => 'Site', 'Sort' => 1],
             ['ID' => 21, 'Name' => 'Suggestions', 'Sort' => 3],
             ['ID' => 5, 'Name' => 'Community', 'Sort' => 5],
             ['ID' => 8, 'Name' => 'Music', 'Sort' => 8],
             ['ID' => 10, 'Name' => 'Help', 'Sort' => 10],
-            ['ID' => 20, 'Name' => 'Trash', 'Sort' => 20]]);
+            ['ID' => 20, 'Name' => 'Trash', 'Sort' => 20]
+          ])->save();
 
-        $this->insert('forums', [
+        $this->table('forums')->insert([
             ['ID' => 7, 'CategoryID' => 1, 'Sort' => 100, 'Name' => 'Pharmacy', 'Description' => 'Get your medication dispensed here', 'MinClassRead' => 1000, 'MinClassWrite' => 1000, 'MinClassCreate' => 1000],
             ['ID' => 5, 'CategoryID' => 1, 'Sort' => 200, 'Name' => 'Staff', 'Description' => 'No place like home', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
             ['ID' => 35, 'CategoryID' => 1, 'Sort' => 250, 'Name' => 'Developers', 'Description' => 'Developers forum', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
@@ -2007,9 +2011,9 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
 
             ['ID' => 4, 'CategoryID' => 20, 'Sort' => 5, 'Name' => 'Trash', 'Description' => 'Every thread ends up here eventually', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
             ['ID' => 14, 'CategoryID' => 20, 'Sort' => 101, 'Name' => 'Resolved Bugs', 'Description' => 'The bug I reported has been fixed', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-        ]);
+        ])->save();
 
-        $this->insert('permissions', [
+        $this->table('permissions')->insert([
             [
                 'ID' => 2,
                 'Level' => 100,
@@ -2963,18 +2967,22 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
                 'PermittedForums' => '',
                 'Secondary' => 0
             ],
-        ]);
+        ])->save();
 
-        $this->insert('wiki_articles', [['Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'MinClassRead' => 100, 'MinClassEdit' => 475, 'Date' => 'NOW()', 'Author' => 1]]);
-        $this->insert('wiki_aliases', [['Alias' => 'wiki', 'UserID' => 1, 'ArticleID' => 1]]);
-        $this->insert('wiki_revisions', [['ID' => 1, 'Revision' => 1, 'Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'Date' => 'NOW()', 'Author' => 1]]);
-        $this->insert('tags', [
+        $this->table('wiki_articles')->insert([
+          ['Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'MinClassRead' => 100, 'MinClassEdit' => 475, 'Date' => '2019-01-01 12:59:59', 'Author' => 1]
+        ])->save();
+        $this->table('wiki_aliases')->insert([['Alias' => 'wiki', 'UserID' => 1, 'ArticleID' => 1]])->save();
+        $this->table('wiki_revisions')->insert([
+          ['ID' => 1, 'Revision' => 1, 'Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'Date' => '2019-01-01 12:59:59', 'Author' => 1]
+        ])->save();
+        $this->table('tags')->insert([
             ['Name' => 'rock', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
             ['Name' => 'pop', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
             ['Name' => 'female.fronted.symphonic.death.metal', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1]
-        ]);
+        ])->save();
 
-        $this->insert('stylesheets', [
+        $this->table('stylesheets')->insert([
             ['Name' => 'Layer cake', 'Description' => 'Grey stylesheet by Emm'],
             ['Name' => 'Proton', 'Description' => 'Proton by Protiek'],
             ['Name' => 'postmod', 'Description' => 'Upgrade by anorex'],
@@ -2996,9 +3004,11 @@ RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668
             ['Name' => 'ApolloStage Coffee', 'Description' => 'ApolloStage by burtoo'],
             ['Name' => 'ApolloStage Sunset', 'Description' => 'ApolloStage Sunset by burtoo'],
             ['Name' => 'Apollo Mat', 'Description' => 'Apollo Mat by salem']
-        ]);
+        ])->save();
 
-        $this->insert('schedule', [['NextHour' => 0, 'NextDay' => 0, 'NextBiWeekly' => 0]]);
+        $this->table('schedule')->insert([
+          ['NextHour' => 0, 'NextDay' => 0, 'NextBiWeekly' => 0]
+        ])->save();
 
         $this->execute("SET FOREIGN_KEY_CHECKS = 1;");
     }

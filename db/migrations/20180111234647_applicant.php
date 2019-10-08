@@ -54,11 +54,11 @@ class Applicant extends AbstractMigration {
             ->addForeignKey('UserID', 'users_main', 'ID')
             ->create();
 
-        $this->insert('thread_type', [
+        $this->table('thread_type')->insert([
             ['name' => 'staff-pm'],
             ['name' => 'staff-role'],
             ['name' => 'torrent-report']
-        ]);
+        ])->save();
     }
 
     public function down() {

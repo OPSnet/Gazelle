@@ -54,6 +54,6 @@ class BonusPointPool extends AbstractMigration
             ->addForeignKey('ContestID', 'contest', 'ID')
             ->create();
 
-        $this->insert('contest_type', [['Name' => 'upload_flac_no_single']]);
+        $this->table('contest_type')->insert([['Name' => 'upload_flac_no_single']])->save();
     }
 }

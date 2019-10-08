@@ -28,7 +28,7 @@ class BonusPointsMigration extends AbstractMigration {
             ->addForeignKey('ItemID', 'bonus_item', 'ID', ['constraint' => 'bonus_history_fk_item'])
             ->create();
 
-        $this->insert('bonus_item', [
+        $this->table('bonus_item')->insert([
             ['Price' =>   1000, 'Amount' =>  1, 'Label' => 'token-1', 'Title' => '1 Freeleech Token'],
             ['Price' =>   9500, 'Amount' => 10, 'Label' => 'token-2', 'Title' => '10 Freeleech Tokens'],
             ['Price' =>  45000, 'Amount' => 50, 'Label' => 'token-3', 'Title' => '50 Freeleech Tokens'],
@@ -41,7 +41,7 @@ class BonusPointsMigration extends AbstractMigration {
             ['Price' =>  50000, 'Label' => 'title-bb-n', 'FreeClass' => 400, 'Title' => 'Custom Title (No BBCode)'],
             ['Price' => 150000, 'Label' => 'title-bb-y', 'FreeClass' => 400, 'Title' => 'Custom Title (BBCode Allowed)'],
             ['Price' =>      0, 'Label' => 'title-off',  'Title' => 'Remove Custom Title'],
-        ]);
+        ])->save();
     }
 
     public function down() {

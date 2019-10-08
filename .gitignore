@@ -37,3 +37,4 @@ report/
 .vagrant/rgloader/
 *.swp
 
+.docker/data

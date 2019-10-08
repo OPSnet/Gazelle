@@ -15,18 +15,9 @@ return
             'adapter' => 'mysql',
             'host' => SQLHOST,
             'name' => SQLDB,
-            'user' => 'prod',
-            'pass' => '34UJ$!151ykFDcf3yo3ru9**s^spL##1DJdfj!r*WXG^sMfGjxM$u9W!rHATRUN&',
+            'user' => SQL_PHINX_USER,
+            'pass' => SQL_PHINX_PASS,
             'port' => SQLPORT,
-            'charset' => 'utf8'
-        ],
-        'vagrant_external' => [
-            'adapter' => 'mysql',
-            'host' => '127.0.0.1',
-            'name' => 'gazelle',
-            'user' => 'gazelle',
-            'pass' => 'password',
-            'port' => 36000,
             'charset' => 'utf8'
         ]
     ],
