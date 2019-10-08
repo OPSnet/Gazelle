@@ -269,11 +269,12 @@ unset($Options['ArtistNoRedirect']);
 unset($Options['ShowQueryList']);
 unset($Options['ShowCacheList']);
 
-$DownloadAlt = isset($_POST['downloadalt']) ? 1 : 0;
-$UnseededAlerts = isset($_POST['unseededalerts']) ? 1 : 0;
-$NotifyOnDeleteSeeding = (!empty($_POST['notifyondeleteseeding']) ? 1 : 0);
-$NotifyOnDeleteSnatched = (!empty($_POST['notifyondeletesnatched']) ? 1 : 0);
-$NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? 1 : 0);
+// These are all enums of '0' or '1'
+$DownloadAlt = isset($_POST['downloadalt']) ? '1' : '0';
+$UnseededAlerts = isset($_POST['unseededalerts']) ? '1' : '0';
+$NotifyOnDeleteSeeding = (!empty($_POST['notifyondeleteseeding']) ? '1' : '0');
+$NotifyOnDeleteSnatched = (!empty($_POST['notifyondeletesnatched']) ? '1' : '0');
+$NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? '1' : '0');
 
 $NavItems = Users::get_nav_items();
 $UserNavItems = [];
