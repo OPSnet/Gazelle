@@ -299,7 +299,7 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
             </tr>
             <tr>
                 <td class="label">Required CD FLAC checksum</td>
-                <td><?=$Request['LogCue'] ? 'yes' : 'no'?></td>
+                <td><?=$Request['Checksum'] ? 'yes' : 'no'?></td>
             </tr>
 <?
         }
