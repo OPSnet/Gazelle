@@ -1,0 +1,30 @@
+{
+  "name": "gazelle",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "lint:js": "eslint static/functions",
+    "lint:php": "vendor/bin/phpcs -p",
+    "lint:php:fix": "./.bin/phpcbf",
+    "pre-commit": "npm run lint:php:fix"
+  },
+  "license": "Unlicense",
+  "devDependencies": {
+    "eslint": "^6.5.1",
+    "husky": "^3.0.8",
+    "lint-staged": "^9.4.1"
+  },
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.php": [
+      "bash .bin/phpcbf",
+      "vendor/bin/phpcs",
+      "git add"
+    ]
+  }
+}

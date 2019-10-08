@@ -17,6 +17,7 @@ static/stylespreview/
 
 sections/tools/development/node_modules/
 /vendor/
+node_modules/
 
 static/userscripts/gazelle-json-export.js.txt
 
