@@ -152,7 +152,7 @@ function check_perms($PermissionName, $MinClass = 0) {
  * Print JSON status result with an optional message and die.
  * DO NOT USE THIS FUNCTION!
  */
-function json_die($Status, $Message) {
+function json_die($Status, $Message="bad parameters") {
     json_print($Status, $Message);
     die();
 }
