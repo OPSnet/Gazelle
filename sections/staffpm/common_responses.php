@@ -1,4 +1,4 @@
-<?
+<?php
 if (!($IsFLS)) {
     // Logged in user is not FLS or Staff
     error(403);
@@ -11,15 +11,19 @@ View::show_header('Staff PMs', 'staffpm');
     <div class="header">
         <h2>Staff PMs - Manage common responses</h2>
         <div class="linkbox">
-<?     if ($IsStaff) { ?>
+<?php
+    if ($IsStaff) { ?>
             <a href="staffpm.php" class="brackets">View your unanswered</a>
-<?     } ?>
+<?php
+    } ?>
             <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
             <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
             <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
-<?    if ($ConvID = (int)$_GET['convid']) { ?>
+<?php
+    if ($ConvID = (int)$_GET['convid']) { ?>
             <a href="staffpm.php?action=viewconv&amp;id=<?=$ConvID?>" class="brackets">Back to conversation</a>
-<?    } ?>
+<?php
+    } ?>
         </div>
     </div>
     <br />
@@ -55,7 +59,7 @@ View::show_header('Staff PMs', 'staffpm');
         <div class="center">
             <h3>Edit old responses:</h3>
         </div>
-<?
+<?php
 
 // List common responses
 $DB->query("
@@ -87,9 +91,9 @@ while (list($ID, $Message, $Name) = $DB->next_record()) {
                 </div>
             </form>
         </div>
-<?
+<?php
 }
 ?>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

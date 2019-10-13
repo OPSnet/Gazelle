@@ -29,7 +29,7 @@ View::show_header($Title);
         <input type="submit" value="Query" />
     </form>
 </div>
-<?
+<?php
 
 if (!empty($_POST['query'])) {
     G::$DB->prepared_query($_POST['query']);

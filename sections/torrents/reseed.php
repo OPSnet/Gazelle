@@ -1,4 +1,4 @@
-<?
+<?php
 $TorrentID = (int)$_GET['torrentid'];
 
 $DB->query("
@@ -78,6 +78,6 @@ View::show_header();
         <p>Successfully sent re-seed request for torrent <a href="torrents.php?id=<?=$GroupID?>&torrentid=<?=$TorrentID?>"><?=display_str($Name)?></a> to <?=$NumUsers?> user<?=$NumUsers === 1 ? '' : 's';?>.</p>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 include(SERVER_ROOT.'/sections/torrents/functions.php');
 
 if (!empty($_GET['order_way']) && $_GET['order_way'] == 'asc') {

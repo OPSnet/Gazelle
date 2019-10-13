@@ -1,4 +1,4 @@
-<?
+<?php
 
 define('FOOTER_FILE', SERVER_ROOT.'/design/privatefooter.php');
 $HTTPS = ($_SERVER['SERVER_PORT'] == 443) ? 'ssl_' : '';
@@ -33,7 +33,7 @@ $UseTooltipster = !isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Toolt
     <link rel="alternate" type="application/rss+xml"
             href="feeds.php?feed=torrents_notify_<?=G::$LoggedUser['torrent_pass']?>&amp;user=<?=G::$LoggedUser['ID']?>&amp;auth=<?=G::$LoggedUser['RSS_Auth']?>&amp;passkey=<?=G::$LoggedUser['torrent_pass']?>&amp;authkey=<?=G::$LoggedUser['AuthKey']?>"
             title="<?=SITE_NAME?> - P.T.N." />
-<?
+<?php
 if (isset(G::$LoggedUser['Notify'])) {
     foreach (G::$LoggedUser['Notify'] as $Filter) {
         list($FilterID, $FilterName) = $Filter;
@@ -41,7 +41,7 @@ if (isset(G::$LoggedUser['Notify'])) {
     <link rel="alternate" type="application/rss+xml"
             href="feeds.php?feed=torrents_notify_<?=$FilterID?>_<?=G::$LoggedUser['torrent_pass']?>&amp;user=<?=G::$LoggedUser['ID']?>&amp;auth=<?=G::$LoggedUser['RSS_Auth']?>&amp;passkey=<?=G::$LoggedUser['torrent_pass']?>&amp;authkey=<?=G::$LoggedUser['AuthKey']?>&amp;name=<?=urlencode($FilterName)?>"
             title="<?=SITE_NAME?> - <?=display_str($FilterName)?>" />
-<?
+<?php
     }
 }
 ?>
@@ -86,17 +86,18 @@ if (isset(G::$LoggedUser['Notify'])) {
             title="<?=SITE_NAME?> - 24bit Lossless Torrents" />
     <link rel="stylesheet" type="text/css"
             href="<?=STATIC_SERVER?>styles/global.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/global.css')?>" />
-<?
+<?php
 if ($UseTooltipster) { ?>
     <link rel="stylesheet" href="<?=STATIC_SERVER?>styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/tooltipster/style.css')?>" type="text/css" media="screen" />
-<? } ?>
+<?php
+} ?>
     <meta name="viewport" content="width=device-width" />
-<?
+<?php
 if (empty(G::$LoggedUser['StyleURL'])) {
 ?>
     <link rel="stylesheet" type="text/css" title="<?=G::$LoggedUser['StyleName']?>" media="screen"
             href="<?=STATIC_SERVER?>styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/'.G::$LoggedUser['StyleName'].'/style.css')?>" />
-<?
+<?php
 } else {
         $StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);
         if (substr(G::$LoggedUser['StyleURL'], -4) == '.css'
@@ -109,14 +110,14 @@ if (empty(G::$LoggedUser['StyleURL'])) {
         }
 ?>
     <link rel="stylesheet" type="text/css" media="screen" href="<?=$StyleURL?>" title="External CSS" />
-<?
+<?php
 }
 if (!empty(G::$LoggedUser['UseOpenDyslexic'])) {
         // load the OpenDyslexic font
 ?>
     <link rel="stylesheet" type="text/css" charset="utf-8"
             href="<?=STATIC_SERVER?>styles/opendyslexic/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/opendyslexic/style.css')?>" />
-<?
+<?php
 }
 $ExtraCSS = explode(',', $CSSIncludes);
 foreach ($ExtraCSS as $CSS) {
@@ -125,7 +126,7 @@ foreach ($ExtraCSS as $CSS) {
     }
 ?>
     <link rel="stylesheet" type="text/css" media="screen" href="<?=STATIC_SERVER."styles/$CSS/style.css?v=".filemtime(SERVER_ROOT."/static/styles/$CSS/style.css")?>" />
-<?
+<?php
 }
 ?>
     <script type="text/javascript">
@@ -134,7 +135,7 @@ foreach ($ExtraCSS as $CSS) {
         var userid = <?=G::$LoggedUser['ID']?>;
         //]]>
     </script>
-<?
+<?php
 
 $Scripts = array_merge(array('jquery', 'script_start', 'ajax.class', 'global', 'jquery.autocomplete', 'autocomplete', 'jquery.countdown.min'), explode(',', $JSIncludes));
 if ($UseTooltipster) {
@@ -149,7 +150,7 @@ foreach ($Scripts as $Script) {
     <script
             src="<?=STATIC_SERVER?>functions/<?=$Script?>.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/'.$Script.'.js')?>"
             type="text/javascript"></script>
-<?
+<?php
 }
 
 global $ClassLevels;
@@ -212,7 +213,7 @@ $NavItems = Users::get_user_nav_items(G::$LoggedUser['ID']);
                     <li id="nav_bonus" class="brackets<?=Format::add_class($PageID, array('user', 'bonus'), 'active', false)?>">
                         <a href="bonus.php" class='tooltip' title="Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)">Bonus (<?=number_format(G::$LoggedUser['BonusPoints'])?>)</a>
                     </li>
-<?
+<?php
 if (check_perms('site_send_unlimited_invites')) {
     $Invites = ' (∞)';
 } elseif (G::$LoggedUser['Invites'] > 0) {
@@ -241,12 +242,14 @@ if (check_perms('site_send_unlimited_invites')) {
                     <li id="stats_ratio">
                         Ratio: <span class="stat"><?=Format::get_ratio_html(G::$LoggedUser['BytesUploaded'], G::$LoggedUser['BytesDownloaded'])?></span>
                     </li>
-<?    if (!empty(G::$LoggedUser['RequiredRatio'])) { ?>
+<?php
+    if (!empty(G::$LoggedUser['RequiredRatio'])) { ?>
                     <li id="stats_required">
                         <a href="rules.php?p=ratio">Required</a>:
                         <span class="stat tooltip" title="<?=number_format(G::$LoggedUser['RequiredRatio'], 5)?>"><?=number_format(G::$LoggedUser['RequiredRatio'], 2)?></span>
                     </li>
-<?    }
+<?php
+    }
     if (G::$LoggedUser['FLTokens'] > 0) { ?>
                     <li id="fl_tokens">
                         <a href="wiki.php?action=article&amp;id=57">Tokens</a>:
@@ -254,7 +257,8 @@ if (check_perms('site_send_unlimited_invites')) {
                             <a href="userhistory.php?action=token_history&amp;userid=<?=G::$LoggedUser['ID']?>"><?=G::$LoggedUser['FLTokens']?></a>
                         </span>
                     </li>
-<?    } ?>
+<?php
+    } ?>
                 </ul>
                 <ul id="userinfo_minor"<?=$NewSubscriptions ? ' class="highlite"' : ''?>>
 <?php
@@ -277,7 +281,7 @@ if (check_perms('site_send_unlimited_invites')) {
             } else {
                 $Tests = [$Tests];
             }
-            
+
             $ClassNames = NULL;
             if ($Key == 'notifications' && !check_perms('site_torrents_notify')) {
                 continue;
@@ -289,12 +293,13 @@ if (check_perms('site_send_unlimited_invites')) {
             if ($ClassNames == NULL) {
 ?>
                     <li id="nav_<?=$Key?>"<?=Format::add_class($PageID, $Tests, 'active', true, $TestUser ? 'userid' : false)?>>
-<?php         } else { ?>
+<?php       } else { ?>
                     <li id="nav_<?=$Key?>"<?=$ClassNames ? " class=\"$ClassNames\"" : ''?>>
-<?php         } ?>
+<?php       } ?>
                         <a href="<?=$Target?>"><?=$Title?></a>
                     </li>
-<?php } ?>
+<?php
+    } ?>
                 </ul>
             </div>
             <div id="menu">
@@ -342,7 +347,7 @@ if (check_perms('site_send_unlimited_invites')) {
                     </li>
                 </ul>
             </div>
-<?
+<?php
 //Start handling alert bars
 $Alerts = array();
 $ModBar = array();
@@ -549,17 +554,19 @@ if (check_perms('site_debug')) {
 
 if (!empty($Alerts) || !empty($ModBar)) { ?>
             <div id="alerts">
-<?    foreach ($Alerts as $Alert) { ?>
+<?php
+    foreach ($Alerts as $Alert) { ?>
                 <div class="alertbar"><?=$Alert?></div>
-<?
+<?php
     }
     if (!empty($ModBar)) { ?>
                 <div class="alertbar blend">
                     <?=implode(' | ', $ModBar); echo "\n"?>
                 </div>
-<?    } ?>
+<?php
+    } ?>
             </div>
-<?
+<?php
 }
 //Done handling alertbars
 
@@ -574,9 +581,11 @@ if (isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType']) { // Ad
                     <li id="searchbar_torrents">
                         <span class="hidden">Torrents: </span>
                         <form class="search_form" name="torrents" action="torrents.php" method="get">
-<?    if ($UseAdvancedSearch) { ?>
+<?php
+    if ($UseAdvancedSearch) { ?>
                             <input type="hidden" name="action" value="advanced" />
-<?    } ?>
+<?php
+    } ?>
                             <input id="torrentssearch" accesskey="t" spellcheck="false"
                                     onfocus="if (this.value == 'Torrents') { this.value = ''; }"
                                     onblur="if (this.value == '') { this.value = 'Torrents'; }"

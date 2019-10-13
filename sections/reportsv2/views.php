@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * This page is to outline all of the views built into reports v2.
  * It's used as the main page as it also lists the current reports by type
@@ -24,11 +24,11 @@ $Owner = display_str($Owner);
 ?>
 <div class="header">
     <h2>Reports v2 Information!</h2>
-<?    include('header.php'); ?>
+<?php include('header.php'); ?>
 </div>
 <div class="thin float_clear">
     <div class="two_columns pad">
-<?
+<?php
 $DB->query("
     SELECT
         um.ID,
@@ -47,7 +47,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
 foreach ($Results as $Result) {
     list($UserID, $Username, $Reports) = $Result;
     if ($Username == $LoggedUser['Username']) {
@@ -60,11 +60,11 @@ foreach ($Results as $Result) {
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?
+<?php
 }
 ?>
         </table>
-<?
+<?php
 $DB->query("
     SELECT
         um.ID,
@@ -83,7 +83,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
 foreach ($Results as $Result) {
     list($UserID, $Username, $Reports) = $Result;
     if ($Username == $LoggedUser['Username']) {
@@ -96,11 +96,11 @@ foreach ($Results as $Result) {
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?
+<?php
 }
 ?>
         </table>
-<?
+<?php
 $DB->query("
     SELECT
         um.ID,
@@ -119,7 +119,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
 foreach ($Results as $Result) {
     list($UserID, $Username, $Reports) = $Result;
     if ($Username == $LoggedUser['Username']) {
@@ -132,11 +132,11 @@ foreach ($Results as $Result) {
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?
+<?php
 }
 ?>
         </table>
-<?
+<?php
 $DB->query("
     SELECT
         um.ID,
@@ -154,7 +154,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
 foreach ($Results as $Result) {
     list($UserID, $Username, $Reports) = $Result;
     if ($Username == $LoggedUser['Username']) {
@@ -167,7 +167,7 @@ foreach ($Results as $Result) {
                 <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?
+<?php
 }
 ?>
         </table>
@@ -231,7 +231,7 @@ foreach ($Results as $Result) {
         </div>
     </div>
     <div class="two_columns pad">
-<?
+<?php
     $DB->query("
         SELECT
             r.ResolverID,
@@ -250,7 +250,7 @@ foreach ($Results as $Result) {
                 <td class="colhead_dark">Staff Member</td>
                 <td class="colhead_dark number_column">Current Count</td>
             </tr>
-<?
+<?php
     foreach ($Staff as $Array) {
         if ($Array['Username'] == $LoggedUser['Username']) {
             $RowClass = ' class="rowa"';
@@ -264,10 +264,11 @@ foreach ($Results as $Result) {
                 </td>
                 <td class="number_column"><?=number_format($Array['Count'])?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
         <h3>Different view modes by report type</h3>
-<?
+<?php
     $DB->query("
         SELECT
             Type,
@@ -283,7 +284,7 @@ foreach ($Results as $Result) {
                 <td class="colhead_dark">Type</td>
                 <td class="colhead_dark number_column">Current Count</td>
             </tr>
-<?
+<?php
         foreach ($Current as $Array) {
             //Ugliness
             foreach ($Types as $Category) {
@@ -301,13 +302,13 @@ foreach ($Results as $Result) {
                     <?=number_format($Array['Count'])?>
                 </td>
             </tr>
-<?
+<?php
         }
     }
 ?>
         </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

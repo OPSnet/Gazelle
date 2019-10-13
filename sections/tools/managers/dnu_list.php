@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_dnu')) {
     error(403);
 }
@@ -46,7 +46,8 @@ $DB->query("
             <td>Submit</td>
         </tr>
         <tbody>
-<?    while (list($ID, $Name, $Comment, $UserID, $DNUTime) = $DB->next_record()) { ?>
+<?php
+while (list($ID, $Name, $Comment, $UserID, $DNUTime) = $DB->next_record()) { ?>
             <tr id="item_<?=$ID?>">
                 <form class="manage_form dnu" action="tools.php" method="post">
                     <td>
@@ -60,7 +61,7 @@ $DB->query("
                     </td>
                     <td>
                         <?=Users::format_username($UserID, false, false, false)?><br />
-                        <?    echo time_diff($DNUTime, 1) . "\n"; ?>
+                        <?php    echo time_diff($DNUTime, 1) . "\n"; ?>
                     </td>
                     <td>
                         <input type="submit" name="submit" value="Edit" />
@@ -68,7 +69,8 @@ $DB->query("
                     </td>
                 </form>
             </tr>
-<?    } ?>
+<?php
+} ?>
         </tbody>
     </table>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $ID = $_POST['id'];

@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * This $Types array is hella simple compared to the torrents one, no explanation given
  */

@@ -1,4 +1,4 @@
-<?
+<?php
 // error out on invalid requests (before caching)
 if (isset($_GET['details'])) {
     if (in_array($_GET['details'],array('ut','ur','v'))) {
@@ -15,10 +15,10 @@ View::show_header('Top 10 Tags');
 <div class="thin">
     <div class="header">
         <h2>Top 10 Tags</h2>
-        <? Top10View::render_linkbox("tags"); ?>
+        <?php Top10View::render_linkbox("tags"); ?>
     </div>
 
-<?
+<?php
 
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
@@ -100,23 +100,24 @@ function generate_tag_table($Caption, $Tag, $Details, $Limit, $ShowVotes = true,
 ?>
     <h3>Top <?=$Limit.' '.$Caption?>
         <small class="top10_quantity_links">
-<?
+<?php
     switch ($Limit) {
         case 100: ?>
             - <a href="top10.php?type=tags&amp;details=<?=$Tag?>" class="brackets">Top 10</a>
             - <span class="brackets">Top 100</span>
             - <a href="top10.php?type=tags&amp;limit=250&amp;details=<?=$Tag?>" class="brackets">Top 250</a>
-        <?    break;
+        <?php    break;
         case 250: ?>
             - <a href="top10.php?type=tags&amp;details=<?=$Tag?>" class="brackets">Top 10</a>
             - <a href="top10.php?type=tags&amp;limit=100&amp;details=<?=$Tag?>" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
-        <?    break;
+        <?php    break;
         default: ?>
             - <span class="brackets">Top 10</span>
             - <a href="top10.php?type=tags&amp;limit=100&amp;details=<?=$Tag?>" class="brackets">Top 100</a>
             - <a href="top10.php?type=tags&amp;limit=250&amp;details=<?=$Tag?>" class="brackets">Top 250</a>
-<?    } ?>
+<?php
+    } ?>
         </small>
     </h3>
     <table class="border">
@@ -124,12 +125,14 @@ function generate_tag_table($Caption, $Tag, $Details, $Limit, $ShowVotes = true,
         <td class="center">Rank</td>
         <td>Tag</td>
         <td style="text-align: right;">Uses</td>
-<?    if ($ShowVotes) {    ?>
+<?php
+    if ($ShowVotes) {    ?>
         <td style="text-align: right;">Pos. votes</td>
         <td style="text-align: right;">Neg. votes</td>
-<?    }    ?>
+<?php
+    }    ?>
     </tr>
-<?
+<?php
     // in the unlikely event that query finds 0 rows...
     if (empty($Details)) {
         echo '
@@ -152,12 +155,12 @@ function generate_tag_table($Caption, $Tag, $Details, $Limit, $ShowVotes = true,
         <td class="center"><?=$Rank?></td>
         <td><a href="<?=$URLString?><?=$Detail['Name']?>"><?=$Detail['Name']?></a></td>
         <td class="number_column"><?=number_format($Detail['Uses'])?></td>
-<?        if ($ShowVotes) { ?>
+<?php   if ($ShowVotes) { ?>
         <td class="number_column"><?=number_format($Detail['PosVotes'])?></td>
         <td class="number_column"><?=number_format($Detail['NegVotes'])?></td>
-<?        } ?>
+<?php   } ?>
     </tr>
-<?
+<?php
     }
     echo '</table><br />';
 }

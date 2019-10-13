@@ -1,4 +1,4 @@
-<?
+<?php
 class Wiki {
     /**
      * Normalize an alias

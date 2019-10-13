@@ -83,7 +83,7 @@ if (isset($_POST['changealias']) && is_number($_POST['aliasid'])) {
             </td>
         </form>
     </tr>
-<?
+<?php
 $DB->query("
     SELECT ID, BadLabel, AliasLabel
     FROM label_aliases
@@ -107,8 +107,8 @@ while (list($ID, $BadLabel, $AliasLabel) = $DB->next_record()) {
             </td>
         </form>
     </tr>
-<?
+<?php
 }
 ?>
 </table>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

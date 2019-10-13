@@ -1,10 +1,10 @@
-<?
+<?php
 //Include the header
 View::show_header('Uploading Rules', 'rules');
 ?>
 <!-- Uploading Rules -->
 <div class="thin">
-    <? include('jump.php'); ?>
+    <?php include('jump.php'); ?>
     <div class="header">
         <h2>Uploading Rules</h2>
     </div>
@@ -723,6 +723,6 @@ View::show_header('Uploading Rules', 'rules');
     </div>
 <!-- END Other Sections -->
 </div>
-<?
+<?php
 View::show_footer();
 ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 authorize();
 if (!check_perms('site_moderate_forums')) {

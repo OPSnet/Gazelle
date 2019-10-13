@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (empty($Return)) {
     $ToID = $_GET['to'];
@@ -49,6 +49,6 @@ View::show_header('Compose', 'inbox,bbcode,jquery.validate,form_validate');
         </div>
     </form>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

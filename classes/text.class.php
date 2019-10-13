@@ -1,4 +1,4 @@
-<?
+<?php
 class Text {
     /**
      * Array of valid tags; tag => max number of attributes

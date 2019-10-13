@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 $UserSubscriptions = Subscriptions::get_subscriptions();
 if (!empty($UserSubscriptions)) {

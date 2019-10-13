@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 if (!check_perms('admin_manage_news')) {
     error(403);
@@ -42,15 +42,15 @@ switch ($_GET['action']) {
         <div class="box pad">
             <input type="hidden" name="action" value="<?= ($_GET['action'] == 'news') ? 'takenewnews' : 'takeeditnews';?>" />
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-<? if ($_GET['action'] == 'editnews') { ?>
+<?php if ($_GET['action'] == 'editnews') { ?>
             <input type="hidden" name="newsid" value="<?=$NewsID; ?>" />
-<? } ?>
+<?php } ?>
             <h3>Title</h3>
-            <input type="text" name="title" size="95"<? if (!empty($Title)) { echo ' value="'.display_str($Title).'"'; } ?> />
+            <input type="text" name="title" size="95"<?php if (!empty($Title)) { echo ' value="'.display_str($Title).'"'; } ?> />
 <!-- Why did someone add this?    <input type="datetime" name="datetime" value="<?=sqltime()?>" /> -->
             <br />
             <h3>Body</h3>
-            <textarea name="body" cols="95" rows="15"><? if (!empty($Body)) { echo display_str($Body); } ?></textarea> <br /><br />
+            <textarea name="body" cols="95" rows="15"><?php if (!empty($Body)) { echo display_str($Body); } ?></textarea> <br /><br />
 
 
             <div class="center">
@@ -58,9 +58,9 @@ switch ($_GET['action']) {
             </div>
         </div>
     </form>
-<? if ($_GET['action'] != 'editnews') { ?>
+<?php if ($_GET['action'] != 'editnews') { ?>
     <h2>News archive</h2>
-<?
+<?php
 $DB->query('
     SELECT
         ID,
@@ -81,7 +81,7 @@ while (list($NewsID, $Title, $Body, $NewsTime) = $DB->next_record()) {
         </div>
         <div class="pad"><?=Text::full_format($Body) ?></div>
     </div>
-<?
+<?php
     if (++$Count > ($NewsCount - 1)) {
         break;
     }
@@ -91,6 +91,6 @@ while (list($NewsID, $Title, $Body, $NewsTime) = $DB->next_record()) {
             <em><span><a href="#" onclick="news_ajax(event, 3, <?=$NewsCount?>, 1, '<?=$LoggedUser['AuthKey']?>'); return false;">Click to load more news</a>.</span></em>
         </div>
     </div>
-<? } ?>
+<?php } ?>
 </div>
-<? View::show_footer();?>
+<?php View::show_footer();?>

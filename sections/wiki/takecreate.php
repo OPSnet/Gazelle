@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $P = array();

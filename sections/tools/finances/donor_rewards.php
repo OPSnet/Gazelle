@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -65,7 +65,7 @@ View::show_header($Title);
             <td>Avatar Text</td>
             <td>Second Avatar</td>
         </tr>
-<?
+<?php
     $Row = 'b';
     foreach ($Users as $User) {
         $UserInfo = Users::user_info($User['UserID']);
@@ -80,9 +80,9 @@ View::show_header($Title);
                 <?=$User['IconMouseOverText']?>
             </td>
             <td style="word-wrap: break-word;">
-<?        if (!empty($User['CustomIcon'])) { ?>
+<?php   if (!empty($User['CustomIcon'])) { ?>
                 <img src="<?=ImageTools::process($User['CustomIcon'], false, 'donoricon', $User['UserID'])?>" width="15" height="13" alt="" />
-<?        } ?>
+<?php   } ?>
             </td>
             <td style="word-wrap: break-word;">
                 <?=$User['CustomIconLink']?>
@@ -94,11 +94,11 @@ View::show_header($Title);
                 <?=$User['SecondAvatar']?>
             </td>
         </tr>
-<?
+<?php
         $Row = $Row === 'b' ? 'a' : 'b';
     } // foreach
 ?>
     </table>
     <div class="linkbox"><?=$Pages?></div>
-<?
+<?php
 View::show_footer();

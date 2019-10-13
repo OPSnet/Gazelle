@@ -1,4 +1,4 @@
-<?
+<?php
 class DonationsBitcoin {
     /**
      * Ask bitcoind for a list of all addresses that have received bitcoins

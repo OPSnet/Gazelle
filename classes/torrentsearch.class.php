@@ -1,4 +1,4 @@
-<?
+<?php
 class TorrentSearch {
     const TAGS_ANY = 0;
     const TAGS_ALL = 1;

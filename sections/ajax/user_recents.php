@@ -1,4 +1,4 @@
-<?
+<?php
 $UserID = (int)$_GET['userid'];
 $Limit = (int)$_GET['limit'];
 

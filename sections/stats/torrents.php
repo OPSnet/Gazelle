@@ -1,4 +1,4 @@
-<?
+<?php
 if (!list($Labels, $InFlow, $OutFlow, $NetFlow, $Max) = $Cache->get_value('torrents_timeline')) {
     $DB->query("
         SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
@@ -90,5 +90,5 @@ View::show_header('Detailed torrent statistics');
 <div class="box pad center">
     <img src="<?=$Categories?>" alt="" />
 </div>
-<?
+<?php
 View::show_footer();

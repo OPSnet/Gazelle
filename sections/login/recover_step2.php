@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Recover Password');
 echo $Validate->GenerateJS('recoverform');
 ?>
@@ -8,12 +8,13 @@ echo $Validate->GenerateJS('recoverform');
     <input type="hidden" name="key" value="<?=display_str($_REQUEST['key'])?>" />
     <div style="width: 500px;">
         <span class="titletext">Reset your password - Final Step</span><br /><br />
-<?
+<?php
 if (empty($Reset)) {
     if (!empty($Err)) {
 ?>
         <strong class="important_text"><?=display_str($Err)?></strong><br /><br />
-<?    } ?> A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer.<br /><br />
+<?php
+    } ?> A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer.<br /><br />
         <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center" width="100%">
             <tr valign="top">
                 <td align="right" style="width: 100px;">Password&nbsp;</td>
@@ -27,12 +28,14 @@ if (empty($Reset)) {
                 <td colspan="2" align="right"><input type="submit" name="reset" value="Reset!" class="submit" /></td>
             </tr>
         </table>
-<? } else { ?>
+<?php
+} else { ?>
         Your password has been successfully reset.<br />
         Please <a href="login.php">click here</a> to log in using your new password.
-<? } ?>
+<?php
+} ?>
     </div>
 </form>
-<?
+<?php
 View::show_footer(['recover' => true]);
 ?>

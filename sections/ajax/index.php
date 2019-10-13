@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 AJAX Switch Center
 

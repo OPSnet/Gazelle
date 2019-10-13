@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $TorrentID = $_POST['torrentid'];
@@ -79,5 +79,5 @@ View::show_header('Torrent deleted');
 <div class="thin">
     <h3>Torrent was successfully deleted.</h3>
 </div>
-<?
+<?php
 View::show_footer();

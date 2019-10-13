@@ -1,4 +1,4 @@
-<? View::show_header('Login'); ?>
+<?php View::show_header('Login'); ?>
     <span id="no-cookies" class="hidden warning">You appear to have cookies disabled.<br /><br /></span>
     <noscript><span class="warning"><?=SITE_NAME?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br /><br /></noscript>
     <p style='max-width: 600px; font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;'>
@@ -9,11 +9,11 @@
         If you would like to join Orpheus and you are on 32P, EMP, MTV or PTP, use the Referral page.
     </p>
     <br />
-<?
+<?php
 if (strtotime($BannedUntil) < time()) {
 ?>
     <form class="auth_form" name="login" id="loginform" method="post" action="login.php">
-<?
+<?php
 
     if (!empty($BannedUntil) && $BannedUntil != '0000-00-00 00:00:00') {
         $DB->query("
@@ -25,14 +25,19 @@ if (strtotime($BannedUntil) < time()) {
     if (isset($Err)) {
 ?>
     <span class="warning"><?=$Err?><br /><br /></span>
-<?    } ?>
-<?    if ($Attempts > 0) { ?>
+<?php
+    } ?>
+<?php
+    if ($Attempts > 0) { ?>
     You have <span class="info"><?=(6 - $Attempts)?></span> attempts remaining.<br /><br />
     <strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br /><br />
-<?    } ?>
-<?    if (isset($_GET['invalid2fa'])) { ?>
+<?php
+    } ?>
+<?php
+    if (isset($_GET['invalid2fa'])) { ?>
     <span class="warning">You have entered an invalid two-factor authentication key. Please login again.</span>
-<?    } ?>
+<?php
+    } ?>
     <table class="layout">
         <tr>
             <td>Username&nbsp;</td>
@@ -56,18 +61,18 @@ if (strtotime($BannedUntil) < time()) {
         </tr>
     </table>
     </form>
-<?
+<?php
 } else {
 ?>
     <span class="warning">You are banned from logging in for another <?=time_diff($BannedUntil)?>.</span>
-<?
+<?php
 }
 
 if ($Attempts > 0) {
 ?>
     <br /><br />
     Lost your password? <a href="login.php?act=recover" class="tooltip" title="Recover your password">Recover it here!</a>
-<?
+<?php
 }
 ?>
 <script type="text/javascript">
@@ -79,4 +84,4 @@ if (cookie.get('cookie_test') != null) {
 }
 window.onload = function() {document.getElementById("username").focus();};
 </script>
-<? View::show_footer();
+<?php View::show_footer();

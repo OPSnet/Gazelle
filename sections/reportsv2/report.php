@@ -108,7 +108,7 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode,recommend');
                     <td class="label">Reason:</td>
                     <td>
                         <select id="type" name="type" onchange="ChangeReportType();">
-<?
+<?php
                 if (!empty($Types[$CategoryID])) {
                     $TypeList = $Types['master'] + $Types[$CategoryID];
                     $Priorities = array();
@@ -122,7 +122,7 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode,recommend');
                 foreach ($TypeList as $Type => $Data) {
                     ?>
                             <option value="<?=($Type)?>"><?=($Data['title'])?></option>
-<?                } ?>
+<?php           } ?>
                         </select>
                     </td>
                 </tr>
@@ -133,7 +133,7 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode,recommend');
             <br />
 
             <div id="dynamic_form">
-<?
+<?php
                 /*
                  * THIS IS WHERE SEXY AJAX COMES IN
                  * The following malarky is needed so that if you get sent back here, the fields are filled in.

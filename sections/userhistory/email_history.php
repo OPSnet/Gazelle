@@ -1,4 +1,4 @@
-<?
+<?php
 /************************************************************************
 ||------------|| User email history page ||---------------------------||
 
@@ -94,14 +94,14 @@ $History = $DB->to_array();
         <td>Email</td>
         <td>Set</td>
         <td>IP <a href="userhistory.php?action=ips&amp;userid=<?=$UserID ?>" class="brackets">H</a></td>
-<? if ($UsersOnly == 1) {
+<?php if ($UsersOnly == 1) {
 ?>
     <td>User</td>
-<?
+<?php
 }
 ?>
     </tr>
-<?
+<?php
 foreach ($History as $Key => $Values) {
     if (isset($History[$Key + 1])) {
         $Values['Time'] = $History[$Key + 1]['Time'];
@@ -113,7 +113,7 @@ foreach ($History as $Key => $Values) {
         <td><?=display_str($Values['Email'])?></td>
         <td><?=time_diff($Values['Time'])?></td>
         <td><?=display_str($Values['IP'])?> (<?=display_str($Values['Code'])?>) <a href="user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($Values['IP'])?>" class="brackets tooltip" title="Search">S</a></td>
-<?
+<?php
     if ($UsersOnly == 1) {
         $ueQuery = $DB->query("
                     SELECT
@@ -131,7 +131,7 @@ foreach ($History as $Key => $Values) {
         <td></td>
         <td><?=time_diff($Time)?></td>
         <td><?=display_str($IP)?></td>
-<?
+<?php
             $UserURL = site_url()."user.php?id=$UserID2";
             $DB->query("
                 SELECT Enabled
@@ -142,9 +142,9 @@ foreach ($History as $Key => $Values) {
 ?>
         <td><a href="<?=display_str($UserURL)?>"><?=Users::format_username($UserID2, false, false, true)?></a></td>
     </tr>
-<?
+<?php
         }
     }
 } ?>
 </table>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

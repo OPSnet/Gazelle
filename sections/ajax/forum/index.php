@@ -1,4 +1,4 @@
-<?
+<?php
 // Already done in /sections/ajax/index.php
 //enforce_login();
 

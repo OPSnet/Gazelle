@@ -1,4 +1,4 @@
-<?
+<?php
 $GroupID = $_GET['groupid'];
 if (!is_number($GroupID)) {
     error(404);
@@ -26,7 +26,7 @@ if (!empty($Groups[$GroupID])) {
             <td>User</td>
             <td>Info</td>
         </tr>
-<?
+<?php
     $Log = $DB->query("
             SELECT TorrentID, UserID, Info, Time
             FROM group_log
@@ -38,7 +38,7 @@ if (!empty($Groups[$GroupID])) {
 ?>
         <tr class="rowa">
             <td><?=$Time?></td>
-<?
+<?php
             if ($TorrentID != 0) {
                 $DB->query("
                     SELECT Media, Format, Encoding
@@ -46,23 +46,23 @@ if (!empty($Groups[$GroupID])) {
                     WHERE ID = $TorrentID");
                 list($Media, $Format, $Encoding) = $DB->next_record();
                 if (!$DB->has_results()) { ?>
-                    <td><a href="torrents.php?torrentid=<?=$TorrentID?>"><?=$TorrentID?></a> (Deleted)</td><?
+                    <td><a href="torrents.php?torrentid=<?=$TorrentID?>"><?=$TorrentID?></a> (Deleted)</td><?php
                 } elseif ($Media == '') { ?>
-                    <td><a href="torrents.php?torrentid=<?=$TorrentID?>"><?=$TorrentID?></a></td><?
+                    <td><a href="torrents.php?torrentid=<?=$TorrentID?>"><?=$TorrentID?></a></td><?php
                 } else { ?>
                     <td><a href="torrents.php?torrentid=<?=$TorrentID?>"><?=$TorrentID?></a> (<?=$Format?>/<?=$Encoding?>/<?=$Media?>)</td>
-<?                }
+<?php           }
             } else { ?>
                 <td></td>
-<?            }    ?>
+<?php       }    ?>
             <td><?=Users::format_username($UserID, false, false, false)?></td>
             <td><?=$Info?></td>
         </tr>
-<?
+<?php
     }
 ?>
     </table>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

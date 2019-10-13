@@ -1,4 +1,4 @@
-<?
+<?php
 /* AJAX Previews, simple stuff. */
 Text::$TOC = true;
 if (!empty($_POST['AdminComment'])) {

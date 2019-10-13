@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * The $Types array is the backbone of the reports system and is stored here so it can
  * be included on the pages that need it without clogging up the pages that don't.

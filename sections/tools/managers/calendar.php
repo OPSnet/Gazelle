@@ -1,4 +1,4 @@
-<?
+<?php
 if (!Calendar::can_view()) {
     error(404);
 }
@@ -21,9 +21,9 @@ CalendarView::render_title($Month, $Year);
     <div id="event_div"></div>
 </div>
 <div class="main_column">
-<?
+<?php
     CalendarView::render_calendar($Month, $Year, $Events);
 ?>
 </div>
-<?
+<?php
 View::show_footer();

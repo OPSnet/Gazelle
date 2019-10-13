@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod') || !check_perms('admin_clear_cache')) {
     error(403);
 }
@@ -101,22 +101,22 @@ $MultiKeyTooltip = 'Enter cache keys delimited by any amount of whitespace.';
             <td><a href="tools.php?action=clear_cache&cache=torrent_groups">Torrent Groups</a> (clears out torrent_group_* and groups_artists_*)</td>
         </tr>
     </table>
-<?
+<?php
 if (isset($Keys) && $_GET['type'] == 'view') {
     ?>
     <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center" style="margin-top: 1em;">
-        <?
+        <?php
         foreach ($Keys as $Key) {
             ?>
             <tr>
                 <td><?=display_str($Key)?></td>
                 <td>
-                    <pre><? var_dump($Cache->get_value($Key)); ?></pre>
+                    <pre><?php var_dump($Cache->get_value($Key)); ?></pre>
                 </td>
             </tr>
-        <?    } ?>
+        <?php    } ?>
     </table>
-    <?
+    <?php
 }
 
 View::show_footer();

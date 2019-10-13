@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * Common header linkbox for Reports v2
  */

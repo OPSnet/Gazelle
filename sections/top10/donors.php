@@ -1,12 +1,12 @@
-<?
+<?php
 View::show_header('Top 10 Donors');
 ?>
 <div class="thin">
     <div class="header">
         <h2>Top Donors</h2>
-        <? Top10View::render_linkbox("donors"); ?>
+        <?php Top10View::render_linkbox("donors"); ?>
     </div>
-<?
+<?php
 
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $Limit = in_array($Limit, array(10, 100, 250)) ? $Limit : 10;
@@ -34,23 +34,24 @@ function generate_user_table($Caption, $Results, $Limit) {
 ?>
     <h3>Top <?="$Limit $Caption";?>
         <small class="top10_quantity_links">
-<?
+<?php
     switch ($Limit) {
         case 100: ?>
             - <a href="top10.php?type=donors" class="brackets">Top 10</a>
             - <span class="brackets">Top 100</span>
             - <a href="top10.php?type=donors&amp;limit=250" class="brackets">Top 250</a>
-        <?    break;
+        <?php    break;
         case 250: ?>
             - <a href="top10.php?type=donors" class="brackets">Top 10</a>
             - <a href="top10.php?type=donors&amp;limit=100" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
-        <?    break;
+        <?php    break;
         default: ?>
             - <span class="brackets">Top 10</span>
             - <a href="top10.php?type=donors&amp;limit=100" class="brackets">Top 100</a>
             - <a href="top10.php?type=donors&amp;limit=250" class="brackets">Top 250</a>
-<?    } ?>
+<?php
+    } ?>
         </small>
     </h3>
     <table class="border">
@@ -62,7 +63,7 @@ function generate_user_table($Caption, $Results, $Limit) {
         <td style="text-align: left;">Last Donated</td>
 
     </tr>
-<?
+<?php
     // in the unlikely event that query finds 0 rows...
     if (empty($Results)) {
         echo '
@@ -85,8 +86,9 @@ function generate_user_table($Caption, $Results, $Limit) {
         <td style="text-align: left;"><?=$Result['Hidden'] && !$IsMod ? 'Hidden' : DonationsView::render_rank($Result['Rank'], $Result['SpecialRank'])?></td>
         <td style="text-align: left;"><?=$Result['Hidden'] && !$IsMod ? 'Hidden' : time_diff($Result['DonationTime'])?></td>
     </tr>
-<?    } ?>
+<?php
+    } ?>
 </table><br />
-<?
+<?php
 }
 ?>

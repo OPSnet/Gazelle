@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('View Applications', 'apply');
 $IS_STAFF = check_perms('admin_manage_applicants'); /* important for viewing the full story and full applicant list */
 if (isset($_POST['id']) && is_number($_POST['id'])) {
@@ -44,30 +44,34 @@ $Resolved = (isset($_GET['status']) && $_GET['status'] === 'resolved');
 
 <div class="linkbox">
     <a href="/apply.php" class="brackets">Apply</a>
-<? if (!$IS_STAFF && isset($ID)) { ?>
+<?php
+if (!$IS_STAFF && isset($ID)) { ?>
     <a href="/apply.php?action=view" class="brackets">View your applications</a>
-<?
+<?php
 }
 if ($IS_STAFF) {
     if ($Resolved || (!$Resolved and isset($ID))) {
 ?>
     <a href="/apply.php?action=view" class="brackets">Current applications</a>
-<?
+<?php
     }
     if (!$Resolved) {
 ?>
     <a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
-<?    } ?>
+<?php
+    } ?>
     <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
-<?
+<?php
 }
 ?>
 </div>
 
-<? if (isset($ID)) { ?>
+<?php
+if (isset($ID)) { ?>
 <div class="box">
     <div class="head"<?= $App->is_resolved() ? ' style="font-style: italic;"' : '' ?>><?= $App->role_title() ?>
-<?  if ($IS_STAFF) { ?>
+<?php
+    if ($IS_STAFF) { ?>
         <div style="float: right;">
             <form name="role_resolve" method="POST" action="/apply.php?action=view&amp;id=<?= $ID ?>">
                 <input type="submit" name="resolve" value="<?= $App->is_resolved() ? 'Reopen' : 'Resolve' ?>" />
@@ -76,16 +80,19 @@ if ($IS_STAFF) {
             </form>
         </div>
         <br />Application received from <?= Users::format_username($App->user_id(), true, true, true, true, true, false) ?> received <?= time_diff($App->created(), 2) ?>.
-<?  } ?>
+<?php
+    } ?>
     </div>
 
     <div class="pad">
         <p><?= Text::full_format($App->body()) ?></p>
-<?  if (!$App->is_resolved()) { ?>
+<?php
+    if (!$App->is_resolved()) { ?>
         <form id="thread_note_reply" name="thread_note_replay" method="POST" action="/apply.php?action=view&amp;id=<?= $ID ?>">
-<?  } ?>
+<?php
+    } ?>
         <table class="forum_post wrap_overflow box vertical_margin">
-<?
+<?php
     foreach ($App->get_story() as $note) {
         if (!$IS_STAFF && $note['visibility'] == 'staff') {
             continue;
@@ -102,14 +109,14 @@ if ($IS_STAFF) {
                     <div style="margin: 5px 4px 20px 4px">
                         <?= Text::full_format($note['body']) ?>
                     </div>
-<?        if ($IS_STAFF && !$App->is_resolved()) { ?>
+<?php   if ($IS_STAFF && !$App->is_resolved()) { ?>
                     <div style="float: right; padding-top: 10px 0; margin-bottom: 6px;">
                         <input type="submit" name="note-delete-<?= $note['id'] ?>" value="delete" style="height: 20px; padding: 0 3px;"/>
                     </div>
-<?        } ?>
+<?php   } ?>
                 </td>
             </tr>
-<?
+<?php
     } /* foreach */
     if (!$App->is_resolved()) {
         if ($IS_STAFF) {
@@ -123,11 +130,11 @@ if ($IS_STAFF) {
                     </div>
                 <td>
             </tr>
-<?        } /* $IS_STAFF */ ?>
+<?php   } /* $IS_STAFF */ ?>
             <tr>
                 <td class="label">Reply</td>
                 <td>
-<?
+<?php
                     $reply = new TEXTAREA_PREVIEW('note_reply', 'note_reply', '', 60, 8, false, false);
                     echo $reply->preview();
 ?>
@@ -143,54 +150,56 @@ if ($IS_STAFF) {
                     </div>
                 </td>
             </tr>
-<?  } /* !$App->is_resolved() */ ?>
+<?php
+    } /* !$App->is_resolved() */ ?>
         </table>
         </form>
     </div>
 </div>
-<?
+<?php
 } else { /* no id parameter given -- show list of applicant entries - all if staff, otherwise their own (if any) */
     $Page            = isset($_GET['page']) && is_number($_GET['page']) ? intval($_GET['page']) : 1;
     $UserID          = $IS_STAFF ? 0 : $LoggedUser['ID'];
     $ApplicationList = Applicant::get_list($Page, $Resolved, $UserID);
 ?>
     <h3><?=$Resolved ? 'Resolved' : 'Current' ?> Applications</h3>
-<?  if (count($ApplicationList)) { ?>
+<?php
+    if (count($ApplicationList)) { ?>
     <table>
         <tr>
             <td class="label">Role</td>
-<?        if ($IS_STAFF) { ?>
+<?php   if ($IS_STAFF) { ?>
             <td class="label">Applicant</td>
-<?        } ?>
+<?php   } ?>
             <td class="label">Date Created</td>
             <td class="label">Comments</td>
             <td class="label">Last comment from</td>
             <td class="label">Last comment added</td>
         </tr>
-<?  foreach ($ApplicationList as $appl) { ?>
+<?php  foreach ($ApplicationList as $appl) { ?>
         <tr>
             <td><a href="/apply.php?action=view&amp;id=<?= $appl['ID'] ?>"><?= $appl['Role'] ?></a></td>
-<?        if ($IS_STAFF) { ?>
+<?php        if ($IS_STAFF) { ?>
             <td><a href="/user.php?id=<?= $appl['UserID'] ?>"><?= $appl['Username'] ?></a></td>
-<?        } ?>
+<?php        } ?>
             <td><?= time_diff($appl['Created'], 2) ?></td>
             <td><?= $appl['nr_notes'] ?></td>
             <td><a href="/user.php?id=<?= $appl['last_UserID'] ?>"><?= $appl['last_Username'] ?></a></td>
             <td><?= strlen($appl['last_Created']) ? time_diff($appl['last_Created'], 2) : '' ?></td>
         </tr>
-<?    } /* foreach */ ?>
+<?php    } /* foreach */ ?>
     </table>
-<?
+<?php
     } /* count($ApplicationList) > 0 */
     else {
 ?>
 <div class="box pad">The cupboard is empty. There are no applications to show.</div>
-<?
+<?php
     } /* no applications */
 } /* show list of applicant entries */
 ?>
 
 </div>
 
-<?
+<?php
 View::show_footer();

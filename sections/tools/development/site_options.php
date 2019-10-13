@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_manage_permissions') && !check_perms('users_mod')) {
     error(403);
 }
@@ -16,7 +16,7 @@ if (!check_perms('admin_manage_permissions')) {
             <td>Value</td>
             <td>Comment</td>
         </tr>
-<?
+<?php
     $Row = 'a';
     while (list($Name, $Value, $Comment) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -26,11 +26,11 @@ if (!check_perms('admin_manage_permissions')) {
             <td><?=$Value?></td>
             <td><?=$Comment?></td>
         </tr>
-<?
+<?php
     }
 ?>
     </table>
-<?
+<?php
     View::show_footer();
     die();
 }
@@ -121,7 +121,7 @@ View::show_header('Site Options');
             </td>
         </form>
     </tr>
-<?
+<?php
 $Row = 'a';
 while (list($ID, $Name, $Value, $Comment) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -146,9 +146,9 @@ while (list($ID, $Name, $Value, $Comment) = $DB->next_record()) {
         </td>
     </form>
 </tr>
-<?
+<?php
 }
 ?>
 </table>
-<?
+<?php
 View::show_footer();

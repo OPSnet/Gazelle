@@ -23,7 +23,7 @@ if ($Contest['Banner']) {
 <div class="pad">
     <img border="0" src="<?= $Contest['Banner'] ?>" alt="<?= $Contest['Name'] ?>" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
 </div>
-<?
+<?php
 } /* banner */
 ?>
 <div class="linkbox">
@@ -35,49 +35,51 @@ if ($Contest['Banner']) {
 <h1>Leaderboard</h1>
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
 
-<?
+<?php
 $Prior = $ContestMgr->get_prior_contests();
 if (check_perms('admin_manage_contest') && count($Prior)) {
 ?>
     <form class="edit_form" style="float: right;" action="contest.php?action=leaderboard" method="post">
         <select name="leaderboard">
-<?
+<?php
     foreach ($Prior as $id) {
         $prior_contest = $ContestMgr->get_contest($id[0]);
         $selected = $prior_contest['ID'] == $Contest['ID'] ? ' selected' : '';
 ?>
             <option value="<?= $prior_contest['ID'] ?>"<?= $selected ?>><?= $prior_contest['Name'] ?></option>
-<?
+<?php
     }
 ?>
         </select>
         <input type="submit" id="view" value="view" />
     </form>
-<?
+<?php
 } /* prior */
 ?>
 
     <div class="head">
-<? if ($Contest['BonusPool'] > 0) {
+<?php
+if ($Contest['BonusPool'] > 0) {
     $bp = new \Gazelle\BonusPool($DB, $Cache, $Contest['BonusPool']);
 ?>
         <h3>The Bonus Point pool currently stands at <?= number_format($bp->getTotalSent()) ?> points.</h3>
-<? } ?>
+<?php
+} ?>
 
-<?
+<?php
 if (!count($Leaderboard)) {
     if ($Contest['is_open']) {
 ?>
     <p>The scheduler has not run yet, there are no results to display.<p>
-<?
+<?php
     }
     else {
 ?>
     <p>That's not supposed to happen. Looks like the contest hasn't begun yet!<p>
-<?
+<?php
     }
 ?>
-<?
+<?php
 } else {
 ?>
         <h3>A grand total of <?=
@@ -94,7 +96,7 @@ if (!count($Leaderboard)) {
     <td class="label" style="text-align:left">Most recent time</td>
     <td class="label" style="text-align:left"><?= $Contest['ContestType'] == 'request_fill' ? 'Requests Filled' : 'Perfect FLACs'; ?></td>
     </tr>
-<?
+<?php
     $rank = 0;
     $prev_score = 0;
     $nr_rows = 0;
@@ -137,7 +139,7 @@ if (!count($Leaderboard)) {
                 $artist_id[1], $artist_name[1]
             );
         }
-        //For non-music torrents, $artist_id[0] does exist but has no value. 
+        //For non-music torrents, $artist_id[0] does exist but has no value.
         else {
             if ((string)$artist_id[0] == '') {
                 $artist_markup = '';
@@ -170,7 +172,7 @@ END_STR
     }
 ?>
 </table>
-<?
+<?php
     if ($Contest['is_open']) {
         // if the contest is still open, we will try to motivate them
         if (!$user_seen) {
@@ -190,7 +192,7 @@ END_STR
                 if ($row[0] == $LoggedUser['ID']) {
 ?>
                 <p>With your <?=$score?> upload<?= $score == 1 ? '' : 's' ?>, you are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
-<?
+<?php
                     $user_seen = 1;
                     break;
                 }
@@ -199,7 +201,7 @@ END_STR
 ?>
                 <p>It doesn't look like you're on the leaderboard at all... <?= $Contest['ContestType'] == 'request_fill' ? 'fill some requests' : 'upload some FLACs' ?> for fame and glory!</p>
 
-<?
+<?php
             }
         }
     }
@@ -207,5 +209,5 @@ END_STR
 ?>
 </div>
 
-<?
+<?php
 View::show_footer();

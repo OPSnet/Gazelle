@@ -1,4 +1,4 @@
-<?
+<?php
 $CollageID = $_GET['collageid'];
 if (!is_number($CollageID)) {
     error(0);
@@ -77,7 +77,7 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
             </tr>
         </thead>
         <tbody>
-<?
+<?php
 
     $Number = 0;
     foreach ($GroupIDs as $GroupID) {
@@ -127,7 +127,8 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
                     </td>
                 </form>
             </tr>
-<? } ?>
+<?php
+    } ?>
         </tbody>
     </table>
     <div class="drag_drop_save hidden">
@@ -143,4 +144,4 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
         </div>
     </form>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

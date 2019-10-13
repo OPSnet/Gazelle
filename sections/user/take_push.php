@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 if (!check_perms('users_mod') && $_GET['userid'] != $LoggedUser['ID']) {
     error(403);

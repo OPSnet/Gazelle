@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * This is the outline page for auto reports. It calls the AJAX functions
  * that actually populate the page and shows the proper header and footer.
@@ -12,7 +12,7 @@ View::show_header('Reports V2!', 'reportsv2');
 ?>
 <div class="header">
     <h2>New reports, auto assigned!</h2>
-<? include('header.php'); ?>
+<?php include('header.php'); ?>
 </div>
 <div class="buttonbox pad center">
     <input type="button" onclick="AddMore();" value="Add more" /> <input type="text" name="repop_amount" id="repop_amount" size="2" value="10" />
@@ -22,6 +22,6 @@ View::show_header('Reports V2!', 'reportsv2');
 </div>
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
 </div>
-<?
+<?php
 View::show_footer();
 ?>

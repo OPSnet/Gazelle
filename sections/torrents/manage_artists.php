@@ -1,4 +1,4 @@
-<?
+<?php
 if (empty($_POST['importance']) || empty($_POST['artists']) || empty($_POST['groupid']) || !is_number($_POST['importance']) || !is_number($_POST['groupid'])) {
     error(0);
 }

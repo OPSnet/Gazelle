@@ -1,4 +1,4 @@
-<?
+<?php
 // error out on invalid requests (before caching)
 if (isset($_GET['details'])) {
     if (in_array($_GET['details'],array('ul','dl','numul','uls','dls'))) {
@@ -15,10 +15,10 @@ View::show_header('Top 10 Users');
 <div class="thin">
     <div class="header">
         <h2>Top 10 Users</h2>
-        <? Top10View::render_linkbox("users"); ?>
+        <?php Top10View::render_linkbox("users"); ?>
 
     </div>
-<?
+<?php
 
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
@@ -99,23 +99,24 @@ function generate_user_table($Caption, $Tag, $Details, $Limit) {
 ?>
     <h3>Top <?=$Limit.' '.$Caption;?>
         <small class="top10_quantity_links">
-<?
+<?php
     switch ($Limit) {
         case 100: ?>
             - <a href="top10.php?type=users&amp;details=<?=$Tag?>" class="brackets">Top 10</a>
             - <span class="brackets">Top 100</span>
             - <a href="top10.php?type=users&amp;limit=250&amp;details=<?=$Tag?>" class="brackets">Top 250</a>
-        <?    break;
+        <?php    break;
         case 250: ?>
             - <a href="top10.php?type=users&amp;details=<?=$Tag?>" class="brackets">Top 10</a>
             - <a href="top10.php?type=users&amp;limit=100&amp;details=<?=$Tag?>" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
-        <?    break;
+        <?php    break;
         default: ?>
             - <span class="brackets">Top 10</span>
             - <a href="top10.php?type=users&amp;limit=100&amp;details=<?=$Tag?>" class="brackets">Top 100</a>
             - <a href="top10.php?type=users&amp;limit=250&amp;details=<?=$Tag?>" class="brackets">Top 250</a>
-<?    } ?>
+<?php
+    } ?>
         </small>
     </h3>
     <table class="border">
@@ -130,7 +131,7 @@ function generate_user_table($Caption, $Tag, $Details, $Limit) {
         <td style="text-align: right;">Ratio</td>
         <td style="text-align: right;">Joined</td>
     </tr>
-<?
+<?php
     // in the unlikely event that query finds 0 rows...
     if (empty($Details)) {
         echo '
@@ -158,8 +159,9 @@ function generate_user_table($Caption, $Tag, $Details, $Limit) {
         <td class="number_column"><?=Format::get_ratio_html($Detail['Uploaded'], $Detail['Downloaded'])?></td>
         <td class="number_column"><?=time_diff($Detail['JoinDate'])?></td>
     </tr>
-<?    } ?>
+<?php
+    } ?>
 </table><br />
-<?
+<?php
 }
 ?>

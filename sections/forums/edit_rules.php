@@ -1,4 +1,4 @@
-<?
+<?php
 
 enforce_login();
 if (!check_perms('site_moderate_forums')) {
@@ -64,7 +64,8 @@ View::show_header();
                     <input type="submit" name="add" value="Add thread" />
                 </td>
             </form>
-<?    foreach ($ThreadIDs as $ThreadID) { ?>
+<?php
+foreach ($ThreadIDs as $ThreadID) { ?>
         <tr>
             <td><?=$ThreadID?></td>
             <td>
@@ -74,9 +75,10 @@ View::show_header();
                 </form>
             </td>
         </tr>
-<?    } ?>
+<?php
+} ?>
     </table>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

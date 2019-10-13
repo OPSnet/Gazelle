@@ -1,4 +1,4 @@
-<?
+<?php
 /**************************************************************************/
 /*-- Invite tree class -----------------------------------------------------
 
@@ -24,7 +24,7 @@ class INVITE_TREE {
         $UserID = $this->UserID;
 ?>
         <div class="invitetree pad">
-<?
+<?php
         G::$DB->query("
             SELECT TreePosition, TreeID, TreeLevel
             FROM invite_tree
@@ -130,7 +130,7 @@ class INVITE_TREE {
             $UserClass = $Classes[$Class]['Level'];
 ?>
         <strong><?=Users::format_username($ID, true, true, ($Enabled != 2 ? false : true), true)?></strong>
-<?
+<?php
             if (check_paranoia(array('uploaded', 'downloaded'), $Paranoia, $UserClass)) {
                 $TotalUpload += $Uploaded;
                 $TotalDownload += $Downloaded;
@@ -138,16 +138,16 @@ class INVITE_TREE {
         &nbsp;Uploaded: <strong><?=Format::get_size($Uploaded)?></strong>
         &nbsp;Downloaded: <strong><?=Format::get_size($Downloaded)?></strong>
         &nbsp;Ratio: <strong><?=Format::get_ratio_html($Uploaded, $Downloaded)?></strong>
-<?
+<?php
             } else {
                 $ParanoidCount++;
 ?>
         &nbsp;Hidden
-<?
+<?php
             }
 ?>
 
-<?
+<?php
             $PreviousTreeLevel = $TreeLevel;
             G::$DB->set_query_id($TreeQuery);
         }
@@ -163,7 +163,7 @@ class INVITE_TREE {
         <p style="font-weight: bold;">
             This tree has <?=number_format($Count)?> entries, <?=number_format($Branches)?> branches, and a depth of <?=number_format($MaxTreeLevel - $OriginalTreeLevel)?>.
             It has
-<?
+<?php
             $ClassStrings = array();
             foreach ($ClassSummary as $ClassID => $ClassCount) {
                 if ($ClassCount == 0) {
@@ -238,7 +238,7 @@ class INVITE_TREE {
             <br />
 <?=            $Tree?>
         </div>
-<?
+<?php
         G::$DB->set_query_id($QueryID);
     }
 }

@@ -1,4 +1,4 @@
-<?
+<?php
 class Torrents {
     const FILELIST_DELIM = 0xF7; // Hex for &divide; Must be the same as phrase_boundary in sphinx.conf!
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists

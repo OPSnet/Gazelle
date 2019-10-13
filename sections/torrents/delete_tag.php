@@ -1,4 +1,4 @@
-<?
+<?php
 if (!empty($LoggedUser['DisableTagging']) || !check_perms('site_delete_tag')) {
     error(403);
 }

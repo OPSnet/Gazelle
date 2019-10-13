@@ -1004,20 +1004,20 @@ if ($PublicTorrent || $UnsourcedTorrent) {
     <h1>Warning</h1>
     <p><strong>Your torrent has been uploaded; however, you must download your torrent from <a href="torrents.php?id=<?=$GroupID?>">here</a> because:</strong></p>
     <ul>
-<?
+<?php
     if ($PublicTorrent) {
 ?>
         <li><strong>You didn't make your torrent using the "private" option</strong></li>
-<?
+<?php
     }
     if ($UnsourcedTorrent) {
 ?>
         <li><strong>The "source" flag was not set to OPS</strong></li>
-<?
+<?php
     }
 ?>
     </ul>
-<?
+<?php
     View::show_footer();
 } elseif ($RequestID) {
     header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=".$LoggedUser['AuthKey']);

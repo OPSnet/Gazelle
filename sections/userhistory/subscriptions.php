@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 User subscription page
 */
@@ -109,22 +109,22 @@ $Requests = Requests::get_requests($Requests);
         <h2>Subscriptions<?=$ShowUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
 
         <div class="linkbox">
-<?
+<?php
 if (!$ShowUnread) {
 ?>
             <br /><br />
             <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>&nbsp;&nbsp;&nbsp;
-<?
+<?php
 } else {
 ?>
             <br /><br />
             <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>&nbsp;&nbsp;&nbsp;
-<?
+<?php
 }
 if ($NumResults) {
 ?>
             <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$ShowCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;&nbsp;&nbsp;
-<?
+<?php
 }
 ?>
             <a href="userhistory.php?action=catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
@@ -132,22 +132,22 @@ if ($NumResults) {
             <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>&nbsp;&nbsp;&nbsp;
         </div>
     </div>
-<?
+<?php
 if (!$NumResults) {
 ?>
     <div class="center">
         No subscriptions<?=$ShowUnread ? ' with unread posts' : ''?>
     </div>
-<?
+<?php
 } else {
 ?>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
     echo $Pages;
 ?>
     </div>
-<?
+<?php
     foreach ($Results as $Result) {
         switch ($Result['Page']) {
             case 'artist':
@@ -201,9 +201,9 @@ if (!$NumResults) {
 ?>
     <table class="forum_post box vertical_margin<?=(!Users::has_avatars_enabled() ? ' noavatar' : '')?>">
         <colgroup>
-<?        if (Users::has_avatars_enabled()) { ?>
+<?php   if (Users::has_avatars_enabled()) { ?>
             <col class="col_avatar" />
-<?        } ?>
+<?php   } ?>
             <col class="col_post_body" />
         </colgroup>
         <tr class="colhead_dark notify_<?=$Result['Page']?>">
@@ -214,42 +214,44 @@ if (!$NumResults) {
                 <span style="float: left;" class="tooltip last_read" title="Jump to last read">
                     <a href="<?=$JumpLink?>"></a>
                 </span>
-<?        if ($Result['Page'] == 'forums') { ?>
+<?php   if ($Result['Page'] == 'forums') { ?>
                 <span id="bar<?=$Result['PostID'] ?>" style="float: right;">
                     <a href="#" onclick="Subscribe(<?=$Result['PageID']?>); return false;" id="subscribelink<?=$Result['PageID']?>" class="brackets">Unsubscribe</a>
-<?        } else { ?>
+<?php   } else { ?>
                 <span id="bar_<?=$Result['Page'] . $Result['PostID'] ?>" style="float: right;">
                     <a href="#" onclick="SubscribeComments('<?=$Result['Page']?>', <?=$Result['PageID']?>); return false;" id="subscribelink_<?=$Result['Page'] . $Result['PageID']?>" class="brackets">Unsubscribe</a>
-<?        } ?>
+<?php   } ?>
                     &nbsp;
                     <a href="#">&uarr;</a>
                 </span>
             </td>
         </tr>
-<?        if (!empty($Result['LastReadBody'])) { /* if a user is subscribed to a topic/comments but hasn't accessed the site ever, LastReadBody will be null - in this case we don't display a post. */ ?>
+<?php   if (!empty($Result['LastReadBody'])) { /* if a user is subscribed to a topic/comments but hasn't accessed the site ever, LastReadBody will be null - in this case we don't display a post. */ ?>
         <tr class="row<?=$ShowCollapsed ? ' hidden' : '' ?>">
-<?            if (Users::has_avatars_enabled()) { ?>
+<?php       if (Users::has_avatars_enabled()) { ?>
             <td class="avatar" valign="top">
                 <?=Users::show_avatar($Result['LastReadAvatar'], $Result['LastReadUserID'], $Result['LastReadUsername'], $HeavyInfo['DisableAvatars'])?>
             </td>
-<?            } ?>
+<?php       } ?>
             <td class="body" valign="top">
                 <div class="content3">
                     <?=Text::full_format($Result['LastReadBody']) ?>
-<?            if ($Result['LastReadEditedUserID']) { ?>
+<?php       if ($Result['LastReadEditedUserID']) { ?>
                     <br /><br />
                     <span class="last_edited">Last edited by <?=Users::format_username($Result['LastReadEditedUserID'], false, false, false) ?> <?=time_diff($Result['LastReadEditedTime'])?></span>
-<?            } ?>
+<?php       } ?>
                 </div>
             </td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?    } ?>
+<?php
+    } ?>
     <div class="linkbox">
 <?=$Pages?>
     </div>
-<? }?>
+<?php
+}?>
 </div>
-<?
+<?php
 View::show_footer();

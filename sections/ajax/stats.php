@@ -1,4 +1,4 @@
-<?
+<?php
 // Begin user stats
 $UserCount = Users::get_enabled_users_count();
 

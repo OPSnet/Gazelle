@@ -29,9 +29,9 @@ list($NumResults) = $DB->next_record();
 ?>
 <h4 class="tooltip" title="List of users that have reported a snatch to the tracker">List of Snatchers</h4>
 
-<? if ($NumResults > 100) { ?>
+<?php if ($NumResults > 100) { ?>
 <div class="linkbox"><?=js_pages('show_snatches', $_GET['torrentid'], $NumResults, $Page)?></div>
-<? } ?>
+<?php } ?>
 
 <table>
     <tr class="colhead_dark" style="font-weight: bold;">
@@ -42,7 +42,7 @@ list($NumResults) = $DB->next_record();
         <td>Time</td>
     </tr>
     <tr>
-<?
+<?php
 $i = 0;
 
 foreach ($Results as $ID=>$Data) {
@@ -52,17 +52,17 @@ foreach ($Results as $ID=>$Data) {
 ?>
     </tr>
     <tr>
-<?
+<?php
     }
 ?>
         <td><?=Users::format_username($SnatcherID, true, true, true, true)?></td>
         <td><?=time_diff($Timestamp)?></td>
-<?
+<?php
     $i++;
 }
 ?>
     </tr>
 </table>
-<? if ($NumResults > 100) { ?>
+<?php if ($NumResults > 100) { ?>
 <div class="linkbox"><?=js_pages('show_snatches', $_GET['torrentid'], $NumResults, $Page)?></div>
-<? } ?>
+<?php } ?>

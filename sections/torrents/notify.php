@@ -169,20 +169,24 @@ if ($Sneaky) {
     <h2>Latest notifications</h2>
 </div>
 <div class="linkbox">
-<?    if ($FilterID) { ?>
+<?php
+if ($FilterID) { ?>
     <a href="torrents.php?action=notify<?=($Sneaky ? "&amp;userid=$UserID" : '')?>" class="brackets">View all</a>&nbsp;&nbsp;&nbsp;
-<?    } elseif (!$Sneaky) { ?>
+<?php
+} elseif (!$Sneaky) { ?>
     <a href="torrents.php?action=notify_clear&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Clear all old</a>&nbsp;&nbsp;&nbsp;
     <a href="#" onclick="clearSelected(); return false;" class="brackets">Clear selected</a>&nbsp;&nbsp;&nbsp;
     <a href="torrents.php?action=notify_catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
-<?    } ?>
+<?php
+} ?>
     <a href="user.php?action=notify" class="brackets">Edit filters</a>&nbsp;&nbsp;&nbsp;
 </div>
-<? if ($TorrentCount > NOTIFICATIONS_PER_PAGE) { ?>
+<?php
+if ($TorrentCount > NOTIFICATIONS_PER_PAGE) { ?>
 <div class="linkbox">
     <?=$Pages?>
 </div>
-<?
+<?php
 }
 if (empty($Results)) {
 ?>
@@ -193,7 +197,7 @@ if (empty($Results)) {
         </td>
     </tr>
 </table>
-<?
+<?php
 } else {
     $FilterGroups = array();
     foreach ($Results as $Result) {
@@ -210,19 +214,20 @@ if (empty($Results)) {
 ?>
 <div class="header">
     <h3>
-<?        if ($FilterResults['FilterLabel'] !== false) { ?>
+<?php
+        if ($FilterResults['FilterLabel'] !== false) { ?>
         Matches for <a href="torrents.php?action=notify&amp;filterid=<?=$FilterID.($Sneaky ? "&amp;userid=$UserID" : '')?>"><?=$FilterResults['FilterLabel']?></a>
-<?        } else { ?>
+<?php   } else { ?>
         Matches for unknown filter[<?=$FilterID?>]
-<?        } ?>
+<?php   } ?>
     </h3>
 </div>
 <div class="linkbox notify_filter_links">
-<?        if (!$Sneaky) { ?>
+<?php   if (!$Sneaky) { ?>
     <a href="#" onclick="clearSelected(<?=$FilterID?>); return false;" class="brackets">Clear selected in filter</a>
     <a href="torrents.php?action=notify_clear_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Clear all old in filter</a>
     <a href="torrents.php?action=notify_catchup_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Mark all in filter as read</a>
-<?        } ?>
+<?php   } ?>
 </div>
 <form class="manage_form" name="torrents" id="notificationform_<?=$FilterID?>" action="">
 <table class="torrent_table cats checkboxes border m_table">
@@ -237,7 +242,7 @@ if (empty($Results)) {
         <td class="sign seeders"><a href="<?=header_link('seeders')?>"><img src="static/styles/<?=$LoggedUser['StyleName']?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></a></td>
         <td class="sign leechers"><a href="<?=header_link('leechers')?>"><img src="static/styles/<?=$LoggedUser['StyleName']?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></a></td>
     </tr>
-<?
+<?php
         unset($FilterResults['FilterLabel']);
         foreach ($FilterResults as $Result) {
             $TorrentID = $Result['TorrentID'];
@@ -292,36 +297,36 @@ if (empty($Results)) {
             <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
         </td>
         <td class="td_info big_info">
-<? if ($LoggedUser['CoverArt']) { ?>
+<?php   if ($LoggedUser['CoverArt']) { ?>
             <div class="group_image float_left clear">
-                <? ImageTools::cover_thumb($GroupInfo['WikiImage'], $GroupCategoryID) ?>
+                <?php ImageTools::cover_thumb($GroupInfo['WikiImage'], $GroupCategoryID) ?>
             </div>
-<? } ?>
+<?php   } ?>
             <div class="group_info clear">
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-<?            if (Torrents::can_use_token($TorrentInfo)) { ?>
+<?php   if (Torrents::can_use_token($TorrentInfo)) { ?>
                     | <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($TorrentInfo['Seeders'])?>');">FL</a>
-<?
-            }
-            if (!$Sneaky) { ?>
+<?php
+        }
+        if (!$Sneaky) { ?>
                     | <a href="#" onclick="clearItem(<?=$TorrentID?>); return false;" class="tooltip" title="Remove from notifications list">CL</a>
-<?            } ?> ]
+<?php   } ?> ]
                 </span>
                 <strong><?=$DisplayName?></strong>
                 <div class="torrent_info">
                     <?=$ExtraInfo?>
-                    <? if ($Result['UnRead']) {
-                    echo '<strong class="new">New!</strong>';
+                    <?php if ($Result['UnRead']) {
+                        echo '<strong class="new">New!</strong>';
                     } ?>
-<?                if (Bookmarks::has_bookmarked('torrent', $GroupID)) { ?>
+<?php               if (Bookmarks::has_bookmarked('torrent', $GroupID)) { ?>
                     <span class="remove_bookmark float_right">
                         <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                     </span>
-<?                } else { ?>
+<?php               } else { ?>
                     <span class="add_bookmark float_right">
                         <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?                } ?>
+<?php               } ?>
                     </span>
                 </div>
                 <div class="tags"><?=$TorrentTags->format()?></div>
@@ -334,18 +339,18 @@ if (empty($Results)) {
         <td class="td_seeders m_td_right number_column"><?=number_format($TorrentInfo['Seeders'])?></td>
         <td class="td_leechers m_td_right number_column"><?=number_format($TorrentInfo['Leechers'])?></td>
     </tr>
-<?
+<?php
         }
 ?>
 </table>
 </form>
-<?
+<?php
     }
 }
 
-    if ($Pages) { ?>
+if ($Pages) { ?>
     <div class="linkbox"><?=$Pages?></div>
-<?    } ?>
+<?php } ?>
 </div>
-<?
+<?php
 View::show_footer();

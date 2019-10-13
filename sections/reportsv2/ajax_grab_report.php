@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * This page simply assings a report to the person clicking on
  * the Claim / Claim all button.

@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 $ThreadID = $_GET['threadid'];
 $NewVote = $_GET['vote'];

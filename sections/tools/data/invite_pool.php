@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_view_invites')) {
     error(403);
 }
@@ -68,7 +68,7 @@ $DB->set_query_id($RS);
         </form>
     </div>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $Results, INVITES_PER_PAGE, 11) ;
     echo $Pages;
 ?>
@@ -80,11 +80,13 @@ $DB->set_query_id($RS);
             <td>IP address</td>
             <td>InviteCode</td>
             <td>Expires</td>
-<? if (check_perms('users_edit_invites')) { ?>
+<?php
+    if (check_perms('users_edit_invites')) { ?>
             <td>Controls</td>
-<? } ?>
+<?php
+    } ?>
         </tr>
-<?
+<?php
     $Row = 'b';
     while (list($UserID, $IP, $InviteKey, $Expires, $Email) = $DB->next_record()) {
         $Row = $Row === 'b' ? 'a' : 'b';
@@ -95,7 +97,7 @@ $DB->set_query_id($RS);
             <td><?=Tools::display_ip($IP)?></td>
             <td><?=display_str($InviteKey)?></td>
             <td><?=time_diff($Expires)?></td>
-<?        if (check_perms('users_edit_invites')) { ?>
+<?php   if (check_perms('users_edit_invites')) { ?>
             <td>
                 <form class="delete_form" name="invite" action="" method="post">
                     <input type="hidden" name="action" value="invite_pool" />
@@ -104,11 +106,14 @@ $DB->set_query_id($RS);
                     <input type="submit" value="Delete" />
                 </form>
             </td>
-<?        } ?>
+<?php   } ?>
         </tr>
-<?    } ?>
+<?php
+    } ?>
     </table>
-<?    if ($Pages) { ?>
+<?php
+    if ($Pages) { ?>
     <div class="linkbox pager"><?=($Pages)?></div>
-<?    }
+<?php
+    }
 View::show_footer(); ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 if (!($IsFLS)) {
     // Logged in user is not FLS or Staff
     error(403);

@@ -60,14 +60,14 @@ list($Results) = $DB->next_record();
         <h2>Friends List</h2>
     </div>
     <div class="linkbox">
-<?
+<?php
 // Pagination
 $Pages = Format::get_pages($Page, $Results, FRIENDS_PER_PAGE, 9);
 echo $Pages;
 ?>
     </div>
     <div class="box pad">
-<?
+<?php
 if ($Results == 0) {
     echo '<p>You have no friends! :(</p>';
 }
@@ -81,31 +81,37 @@ foreach ($Friends as $Friend) {
         <tr class="colhead">
             <td colspan="<?=(Users::has_avatars_enabled() ? 3 : 2)?>">
                 <span style="float: left;"><?=Users::format_username($FriendID, true, true, true, true)?>
-<?    if (check_paranoia('ratio', $Paranoia, $Class, $FriendID)) { ?>
+<?php
+    if (check_paranoia('ratio', $Paranoia, $Class, $FriendID)) { ?>
                 &nbsp;Ratio: <strong><?=Format::get_ratio_html($Uploaded, $Downloaded)?></strong>
-<?
+<?php
     }
     if (check_paranoia('uploaded', $Paranoia, $Class, $FriendID)) {
 ?>
                 &nbsp;Up: <strong><?=Format::get_size($Uploaded)?></strong>
-<?
+<?php
     }
     if (check_paranoia('downloaded', $Paranoia, $Class, $FriendID)) {
 ?>
                 &nbsp;Down: <strong><?=Format::get_size($Downloaded)?></strong>
-<?    } ?>
+<?php
+    } ?>
                 </span>
-<?    if (check_paranoia('lastseen', $Paranoia, $Class, $FriendID)) { ?>
+<?php
+    if (check_paranoia('lastseen', $Paranoia, $Class, $FriendID)) { ?>
                 <span style="float: right;"><?=time_diff($LastAccess)?></span>
-<?    } ?>
+<?php
+    } ?>
             </td>
         </tr>
         <tr>
-<?    if (Users::has_avatars_enabled()) { ?>
+<?php
+    if (Users::has_avatars_enabled()) { ?>
             <td class="col_avatar avatar" valign="top">
                 <?=Users::show_avatar($Avatar, $FriendID, $Username, $HeavyInfo['DisableAvatars'])?>
             </td>
-<?    } ?>
+<?php
+    } ?>
             <td valign="top">
                 <input type="hidden" name="friendid" value="<?=$FriendID?>" />
 
@@ -119,7 +125,7 @@ foreach ($Friends as $Friend) {
         </tr>
     </table>
 </form>
-<?
+<?php
 } // while
 
 // close <div class="box pad">
@@ -128,8 +134,8 @@ foreach ($Friends as $Friend) {
     <div class="linkbox">
         <?=$Pages?>
     </div>
-<? /* close <div class="thin"> */ ?>
+<?php /* close <div class="thin"> */ ?>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

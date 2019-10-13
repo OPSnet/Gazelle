@@ -1,4 +1,4 @@
-<?
+<?php
 
 //TODO: restrict to viewing below class, username in h2
 if (isset($_GET['userid']) && check_perms('users_view_ips') && check_perms('users_logout')) {
@@ -70,7 +70,7 @@ View::show_header($Username.' &gt; Sessions');
                     </form>
                 </td>
             </tr>
-<?
+<?php
     $Row = 'a';
     foreach ($UserSessions as $Session) {
         //list($ThisSessionID, $Browser, $OperatingSystem, $IP, $LastUpdate) = array_values($Session);
@@ -90,11 +90,12 @@ View::show_header($Username.' &gt; Sessions');
                     </form>
                 </td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
     </div>
 </div>
-<?
+<?php
 
 View::show_footer();
 ?>

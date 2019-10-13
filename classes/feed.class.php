@@ -1,4 +1,4 @@
-<?
+<?php
 class FEED {
     var $UseSSL = true; // If we're using SSL for blog and news links
 

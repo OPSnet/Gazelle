@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_recovery')) {
     error(403);
 }
@@ -33,9 +33,10 @@ View::show_header('Recovery browse users');
     <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
-<? if (isset($List)) { ?>
+<?php
+if (isset($List)) { ?>
 <div class="box pad">
-<?
+<?php
     if (!count($List)) {
         echo "<p>No $class matched <b>$target</b></p>";
     }
@@ -56,7 +57,8 @@ View::show_header('Recovery browse users');
 <th>Announce</th>
 </tr>
 
-<?      foreach ($List as $r) { ?>
+<?php
+        foreach ($List as $r) { ?>
 <tr>
 <td><?= $r['Username'] ?></td>
 <td><?= $r['UserID'] ?></td>
@@ -67,11 +69,14 @@ View::show_header('Recovery browse users');
 <td><?= $r['nr_torrents'] ?></td>
 <td><?= $r['torrent_pass'] ?></td>
 </tr>
-<?      } /* foreach */ ?>
+<?php
+        } /* foreach */ ?>
 </table>
-<?  } /* count() */ ?>
+<?php
+    } /* count() */ ?>
 </div>
-<? } /* isset() */ ?>
+<?php
+} /* isset() */ ?>
 
 <div class="box">
     <div class="head">Browse recovery details</div>
@@ -96,5 +101,5 @@ View::show_header('Recovery browse users');
         </form>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

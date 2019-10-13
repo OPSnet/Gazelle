@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
  * Generate QR code

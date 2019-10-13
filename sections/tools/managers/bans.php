@@ -139,7 +139,7 @@ $DB->set_query_id($Bans);
             </td>
         </form>
     </tr>
-<?
+<?php
 $Row = 'a';
 while (list($ID, $Start, $End, $Reason) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -164,11 +164,11 @@ while (list($ID, $Start, $End, $Reason) = $DB->next_record()) {
             </td>
         </form>
     </tr>
-<?
+<?php
 }
 ?>
 </table>
 <div class="linkbox">
 <?=$PageLinks?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

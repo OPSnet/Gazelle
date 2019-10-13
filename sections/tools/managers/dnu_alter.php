@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_dnu')) {
     error(403);
 }

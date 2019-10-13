@@ -75,7 +75,7 @@ if (empty($_POST['confirm'])) {
             </form>
         </div>
     </div>
-<?
+<?php
     View::show_footer();
 } else {
     authorize();

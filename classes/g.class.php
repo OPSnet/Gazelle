@@ -1,4 +1,4 @@
-<?
+<?php
 class G {
     /** @var DB_MYSQL */
     public static $DB;

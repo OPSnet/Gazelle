@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Torrent class that contains some convenient functions related to torrent meta data
  */

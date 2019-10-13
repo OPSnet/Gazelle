@@ -1,4 +1,4 @@
-<?
+<?php
 
 // Note: at the time this file is loaded, check_perms is not defined. Don't
 // call check_paranoia in /classes/script_start.php without ensuring check_perms has been defined

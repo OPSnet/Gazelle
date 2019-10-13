@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('site_admin_forums')) {
     error(403);
 }
@@ -62,17 +62,21 @@ if ($Depth != 0) {
                 <br />
                 <br />
                 <span class="last_edited">
-<? if ($Depth < count($Edits)) { ?>
+<?php
+if ($Depth < count($Edits)) { ?>
 
                     <a href="#edit_info_<?=$PostID?>" onclick="LoadEdit('<?=$Type?>', <?=$PostID?>, <?=($Depth + 1)?>); return false;">&laquo;</a>
                     <?=(($Depth == 0) ? 'Last edited by' : 'Edited by')?>
                     <?=Users::format_username($UserID, false, false, false) ?> <?=time_diff($Time, 2, true, true)?>
 
-<? } else { ?>
+<?php
+} else { ?>
                     <em>Original Post</em>
-<? }
+<?php
+}
 
 if ($Depth > 0) { ?>
                     <a href="#edit_info_<?=$PostID?>" onclick="LoadEdit('<?=$Type?>', <?=$PostID?>, <?=($Depth - 1)?>); return false;">&raquo;</a>
-<? } ?>
+<?php
+} ?>
                 </span>

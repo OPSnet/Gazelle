@@ -96,20 +96,20 @@ $Row = 'a';
     <div class="header">
         <h2><?=$ViewString?> Staff PMs</h2>
         <div class="linkbox">
-<?     if ($IsStaff) { ?>
+<?php     if ($IsStaff) { ?>
             <a href="staffpm.php" class="brackets">View your unanswered</a>
-<?     } ?>
+<?php     } ?>
             <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
             <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
             <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
-<?    if (check_perms('admin_staffpm_stats')) { ?>
+<?php    if (check_perms('admin_staffpm_stats')) { ?>
             <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
             <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
-<?    }
+<?php    }
     
     if ($IsFLS && !$IsStaff) { ?>
             <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
-<?    } ?>
+<?php    } ?>
         </div>
     </div>
     <br />
@@ -118,13 +118,13 @@ $Row = 'a';
         <?=$Pages?>
     </div>
     <div class="box pad" id="inbox">
-<?
+<?php
 
 if (!$DB->has_results()) {
     // No messages
 ?>
         <h2>No messages</h2>
-<?
+<?php
 
 } else {
     // Messages, draw table
@@ -134,26 +134,26 @@ if (!$DB->has_results()) {
         <form class="manage_form" name="staff_messages" method="post" action="staffpm.php" id="messageform">
             <input type="hidden" name="action" value="multiresolve" />
             <input type="hidden" name="view" value="<?=strtolower($View)?>" />
-<?
+<?php
     }
 
     // Table head
 ?>
             <table class="message_table<?=($ViewString != 'Resolved' && $IsStaff) ? ' checkboxes' : '' ?>">
                 <tr class="colhead">
-<?     if ($ViewString != 'Resolved' && $IsStaff) { ?>
+<?php     if ($ViewString != 'Resolved' && $IsStaff) { ?>
                     <td width="10"><input type="checkbox" onclick="toggleChecks('messageform', this);" /></td>
-<?     } ?>
+<?php     } ?>
                     <td width="50%">Subject</td>
                     <td>Sender</td>
                     <td>Date</td>
                     <td>Assigned to</td>
                     <td>Replies</td>
-<?    if ($ViewString == 'Resolved') { ?>
+<?php    if ($ViewString == 'Resolved') { ?>
                     <td>Resolved by</td>
-<?    } ?>
+<?php    } ?>
                 </tr>
-<?
+<?php
 
     // List messages
     while (list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID) = $DB->next_record()) {
@@ -188,19 +188,19 @@ if (!$DB->has_results()) {
         // Table row
 ?>
                 <tr class="<?=$RowClass?>">
-<?         if ($ViewString != 'Resolved' && $IsStaff) { ?>
+<?php         if ($ViewString != 'Resolved' && $IsStaff) { ?>
                     <td class="center"><input type="checkbox" name="id[]" value="<?=$ID?>" /></td>
-<?         } ?>
+<?php         } ?>
                     <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
                     <td><?=$UserStr?></td>
                     <td><?=time_diff($Date, 2, true)?></td>
                     <td><?=$Assigned?></td>
                     <td><?=$NumReplies - 1?></td>
-<?        if ($ViewString == 'Resolved') { ?>
+<?php        if ($ViewString == 'Resolved') { ?>
                     <td><?=$ResolverStr?></td>
-<?        } ?>
+<?php        } ?>
                 </tr>
-<?
+<?php
 
         $DB->set_query_id($StaffPMs);
     } //while
@@ -208,12 +208,12 @@ if (!$DB->has_results()) {
     // Close table and multiresolve form
 ?>
             </table>
-<?     if ($ViewString != 'Resolved' && $IsStaff) { ?>
+<?php     if ($ViewString != 'Resolved' && $IsStaff) { ?>
             <div class="submit_div">
                 <input type="submit" value="Resolve selected" />
             </div>
         </form>
-<?
+<?php
     }
 } //if (!$DB->has_results())
 ?>
@@ -222,7 +222,7 @@ if (!$DB->has_results()) {
         <?=$Pages?>
     </div>
 </div>
-<?
+<?php
 
 View::show_footer();
 

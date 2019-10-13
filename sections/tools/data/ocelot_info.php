@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -39,7 +39,7 @@ View::show_header('Tracker info');
                 <form method="get" action="">
                     <input type="hidden" name="action" value="ocelot_info" />
                     <span class="label">Get stats for user</span><br />
-                    <input type="text" name="userid" placeholder="User ID" value="<?Format::form('userid')?>" />
+                    <input type="text" name="userid" placeholder="User ID" value="<?php Format::form('userid'); ?>" />
                     <input type="submit" value="Go" />
                 </form>
             </div>
@@ -49,13 +49,13 @@ View::show_header('Tracker info');
         <div class="box box2">
             <div class="head"><strong>Numbers and such</strong></div>
             <div class="pad">
-<?
+<?php
 if (!empty($UserPeerStats)) {
 ?>
                 User ID: <?=$_GET['userid']?><br />
                 Leeching: <?=$UserPeerStats[0] === false ? "hidden" : number_format($UserPeerStats[0])?><br />
                 Seeding: <?=$UserPeerStats[1] === false ? "hidden" : number_format($UserPeerStats[1])?><br />
-<?
+<?php
 } elseif (!empty($MainStats)) {
     foreach ($MainStats as $Key => $Value) {
         if (is_numeric($Value)) {
@@ -68,25 +68,25 @@ if (!empty($UserPeerStats)) {
         }
 ?>
                 <?="$Value $Key<br />\n"?>
-<?
+<?php
     }
 } elseif (isset($TorrentPass)) {
 ?>
                 Failed to get stats for user <?=$_GET['userid']?>
-<?
+<?php
 } elseif (isset($_GET['userid'])) {
 ?>
                 User <?=display_str($_GET['userid'])?> doesn't exist
-<?
+<?php
 } else {
 ?>
                 Failed to get tracker info
-<?
+<?php
 }
 ?>
             </div>
         </div>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

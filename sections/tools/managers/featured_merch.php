@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 if (!check_perms('users_mod')) {
     error(403);
@@ -73,6 +73,6 @@ View::show_header();
         </table>
     </form>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

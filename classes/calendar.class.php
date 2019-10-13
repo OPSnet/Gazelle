@@ -1,4 +1,4 @@
-<?
+<?php
 class Calendar {
     public static $Categories = array(1 => "IRC Meeting", "IRC Brainstorm", "Poll Deadline", "Feature Release", "Blog Post", "Announcement", "Featured Album", "Product Release", "Staff Picks", "Forum Brainstorm", "Forum Discussion", "Promotion", "Absence", "Task");
     public static $Importances = array(1 => "Critical", "Important", "Average", "Meh");

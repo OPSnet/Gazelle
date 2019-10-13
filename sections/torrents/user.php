@@ -340,7 +340,7 @@ $Pages = Format::get_pages($Page, $TorrentCount, TORRENTS_PER_PAGE);
                     <td>
                         <input type="hidden" name="type" value="<?=$_GET['type']?>" />
                         <input type="hidden" name="userid" value="<?=$UserID?>" />
-                        <input type="search" name="search" size="60" value="<?Format::form('search')?>" />
+                        <input type="search" name="search" size="60" value="<?php Format::form('search'); ?>" />
                     </td>
                 </tr>
                 <tr>
@@ -348,28 +348,28 @@ $Pages = Format::get_pages($Page, $TorrentCount, TORRENTS_PER_PAGE);
                     <td class="nobr" colspan="3">
                         <select id="bitrate" name="bitrate" class="ft_bitrate">
                             <option value="">Bitrate</option>
-<?    foreach ($Bitrates as $BitrateName) { ?>
-                            <option value="<?=display_str($BitrateName); ?>"<?Format::selected('bitrate', $BitrateName)?>><?=display_str($BitrateName); ?></option>
-<?    } ?>                </select>
+<?php    foreach ($Bitrates as $BitrateName) { ?>
+                            <option value="<?=display_str($BitrateName); ?>"<?php Format::selected('bitrate', $BitrateName); ?>><?=display_str($BitrateName); ?></option>
+<?php    } ?>                </select>
 
                         <select name="format" class="ft_format">
                             <option value="">Format</option>
-<?    foreach ($Formats as $FormatName) { ?>
-                            <option value="<?=display_str($FormatName); ?>"<?Format::selected('format', $FormatName)?>><?=display_str($FormatName); ?></option>
-<?    } ?>
-                            <option value="perfectflac"<?Format::selected('filter', 'perfectflac')?>>Perfect FLACs</option>
+<?php    foreach ($Formats as $FormatName) { ?>
+                            <option value="<?=display_str($FormatName); ?>"<?php Format::selected('format', $FormatName); ?>><?=display_str($FormatName); ?></option>
+<?php    } ?>
+                            <option value="perfectflac"<?php Format::selected('filter', 'perfectflac'); ?>>Perfect FLACs</option>
                         </select>
                         <select name="media" class="ft_media">
                             <option value="">Media</option>
-<?    foreach ($Media as $MediaName) { ?>
-                            <option value="<?=display_str($MediaName); ?>"<?Format::selected('media',$MediaName)?>><?=display_str($MediaName); ?></option>
-<?    } ?>
+<?php    foreach ($Media as $MediaName) { ?>
+                            <option value="<?=display_str($MediaName); ?>"<?php Format::selected('media',$MediaName); ?>><?=display_str($MediaName); ?></option>
+<?php    } ?>
                         </select>
                         <select name="releasetype" class="ft_releasetype">
                             <option value="">Release type</option>
-<?    foreach ($ReleaseTypes as $ID=>$Type) { ?>
-                            <option value="<?=display_str($ID); ?>"<?Format::selected('releasetype',$ID)?>><?=display_str($Type); ?></option>
-<?    } ?>
+<?php    foreach ($ReleaseTypes as $ID=>$Type) { ?>
+                            <option value="<?=display_str($ID); ?>"<?php Format::selected('releasetype',$ID); ?>><?=display_str($Type); ?></option>
+<?php    } ?>
                         </select>
                     </td>
                 </tr>
@@ -378,34 +378,34 @@ $Pages = Format::get_pages($Page, $TorrentCount, TORRENTS_PER_PAGE);
                     <td class="nobr" colspan="3">
                         <select name="log" class="ft_haslog">
                             <option value="">Has log</option>
-                            <option value="1"<?Format::selected('log','1')?>>Yes</option>
-                            <option value="0"<?Format::selected('log','0')?>>No</option>
-                            <option value="100"<?Format::selected('log','100')?>>100% only</option>
-                            <option value="-1"<?Format::selected('log','-1')?>>&lt;100%/unscored</option>
+                            <option value="1"<?php Format::selected('log','1'); ?>>Yes</option>
+                            <option value="0"<?php Format::selected('log','0'); ?>>No</option>
+                            <option value="100"<?php Format::selected('log','100'); ?>>100% only</option>
+                            <option value="-1"<?php Format::selected('log','-1'); ?>>&lt;100%/unscored</option>
                         </select>
                         <select name="cue" class="ft_hascue">
                             <option value="">Has cue</option>
-                            <option value="1"<?Format::selected('cue',1)?>>Yes</option>
-                            <option value="0"<?Format::selected('cue',0)?>>No</option>
+                            <option value="1"<?php Format::selected('cue',1); ?>>Yes</option>
+                            <option value="0"<?php Format::selected('cue',0); ?>>No</option>
                         </select>
                         <select name="scene" class="ft_scene">
                             <option value="">Scene</option>
-                            <option value="1"<?Format::selected('scene',1)?>>Yes</option>
-                            <option value="0"<?Format::selected('scene',0)?>>No</option>
+                            <option value="1"<?php Format::selected('scene',1); ?>>Yes</option>
+                            <option value="0"<?php Format::selected('scene',0); ?>>No</option>
                         </select>
                         <select name="vanityhouse" class="ft_vanityhouse">
                             <option value="">Vanity House</option>
-                            <option value="1"<?Format::selected('vanityhouse',1)?>>Yes</option>
-                            <option value="0"<?Format::selected('vanityhouse',0)?>>No</option>
+                            <option value="1"<?php Format::selected('vanityhouse',1); ?>>Yes</option>
+                            <option value="0"<?php Format::selected('vanityhouse',0); ?>>No</option>
                         </select>
                     </td>
                 </tr>
                 <tr>
                     <td class="label"><strong>Tags:</strong></td>
                     <td>
-                        <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?Format::form('tags')?>" />&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?Format::selected('tags_type', 0, 'checked')?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?Format::selected('tags_type', 1, 'checked')?> /><label for="tags_type1"> All</label>
+                        <input type="search" name="tags" size="60" class="tooltip" title="Use !tag to exclude tag" value="<?php Format::form('tags'); ?>" />&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked'); ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked'); ?> /><label for="tags_type1"> All</label>
                     </td>
                 </tr>
 
@@ -413,21 +413,21 @@ $Pages = Format::get_pages($Page, $TorrentCount, TORRENTS_PER_PAGE);
                     <td class="label"><strong>Order by</strong></td>
                     <td>
                         <select name="order" class="ft_order_by">
-<?    foreach ($Orders as $OrderText) { ?>
-                            <option value="<?=$OrderText?>"<?Format::selected('order', $OrderText)?>><?=$OrderText?></option>
-<?    } ?>
+<?php    foreach ($Orders as $OrderText) { ?>
+                            <option value="<?=$OrderText?>"<?php Format::selected('order', $OrderText); ?>><?=$OrderText?></option>
+<?php    } ?>
                         </select>&nbsp;
                         <select name="way" class="ft_order_way">
-<?    foreach ($Ways as $WayKey=>$WayText) { ?>
-                            <option value="<?=$WayKey?>"<?Format::selected('way', $WayKey)?>><?=$WayText?></option>
-<?    } ?>
+<?php    foreach ($Ways as $WayKey=>$WayText) { ?>
+                            <option value="<?=$WayKey?>"<?php Format::selected('way', $WayKey); ?>><?=$WayText?></option>
+<?php    } ?>
                         </select>
                     </td>
                 </tr>
             </table>
 
             <table class="layout cat_list">
-<?
+<?php
 $x = 0;
 reset($Categories);
 foreach ($Categories as $CatKey => $CatName) {
@@ -435,17 +435,17 @@ foreach ($Categories as $CatKey => $CatName) {
         if ($x > 0) {
 ?>
                 </tr>
-<?        } ?>
+<?php   } ?>
                 <tr>
-<?
+<?php
     }
     $x++;
 ?>
                     <td>
-                        <input type="checkbox" name="categories[<?=($CatKey+1)?>]" id="cat_<?=($CatKey+1)?>" value="1"<? if (isset($_GET['categories'][$CatKey + 1])) { ?> checked="checked"<? } ?> />
+                        <input type="checkbox" name="categories[<?=($CatKey+1)?>]" id="cat_<?=($CatKey+1)?>" value="1"<?php if (isset($_GET['categories'][$CatKey + 1])) { ?> checked="checked"<?php } ?> />
                         <label for="cat_<?=($CatKey + 1)?>"><?=$CatName?></label>
                     </td>
-<?
+<?php
 }
 ?>
                 </tr>
@@ -455,11 +455,11 @@ foreach ($Categories as $CatKey => $CatName) {
             </div>
         </form>
     </div>
-<?    if (count($GroupIDs) === 0) { ?>
+<?php    if (count($GroupIDs) === 0) { ?>
     <div class="center">
         Nothing found!
     </div>
-<?    } else { ?>
+<?php    } else { ?>
     <div class="linkbox"><?=$Pages?></div>
     <table class="torrent_table cats m_table" width="100%">
         <tr class="colhead">
@@ -483,7 +483,7 @@ foreach ($Categories as $CatKey => $CatName) {
                 </a>
             </td>
         </tr>
-<?
+<?php
     $PageSize = 0;
     foreach ($TorrentsInfo as $TorrentID => $Info) {
         list($GroupID, , $Time) = array_values($Info);
@@ -521,18 +521,18 @@ foreach ($Categories as $CatKey => $CatName) {
                 <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
             </td>
             <td class="td_info big_info">
-<?    if ($LoggedUser['CoverArt']) { ?>
+<?php    if ($LoggedUser['CoverArt']) { ?>
                 <div class="group_image float_left clear">
-                    <? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                    <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
                 </div>
-<?    } ?>
+<?php    } ?>
                 <div class="group_info clear">
                     <span class="torrent_links_block">
                         [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
                         | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a> ]
                     </span>
-                    <? echo "$DisplayName\n"; ?>
-<?                    Votes::vote_link($GroupID, isset($UserVotes[$GroupID]) ? $UserVotes[$GroupID]['Type'] : ''); ?>
+                    <?php echo "$DisplayName\n"; ?>
+<?php                    Votes::vote_link($GroupID, isset($UserVotes[$GroupID]) ? $UserVotes[$GroupID]['Type'] : ''); ?>
                     <div class="tags"><?=$TorrentTags->format('torrents.php?type='.$Action.'&amp;userid='.$UserID.'&amp;tags=')?></div>
                 </div>
             </td>
@@ -542,9 +542,11 @@ foreach ($Categories as $CatKey => $CatName) {
             <td class="td_seeders m_td_right number_column<?=(($Torrent['Seeders'] == 0) ? ' r00' : '')?>"><?=number_format($Torrent['Seeders'])?></td>
             <td class="td_leechers m_td_right number_column"><?=number_format($Torrent['Leechers'])?></td>
         </tr>
-<?        }?>
+<?php
+    }?>
     </table>
-<?    } ?>
+<?php
+} ?>
     <div class="linkbox"><?=$Pages?></div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

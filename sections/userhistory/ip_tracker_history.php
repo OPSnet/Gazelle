@@ -42,7 +42,7 @@ function ShowIPs(rowname) {
     $('tr[name="'+rowname+'"]').gtoggle();
 }
 </script>
-<?
+<?php
 list($Page, $Limit) = Format::page_limit(IPS_PER_PAGE);
 
 $TrackerIps = $DB->query("
@@ -71,7 +71,7 @@ $Pages = Format::get_pages($Page, $NumResults, IPS_PER_PAGE, 9);
             <td>Torrent</td>
             <td>Time</td>
         </tr>
-<?
+<?php
 $Results = $DB->to_array();
 foreach ($Results as $Index => $Result) {
     list($IP, $TorrentID, $Time) = $Result;
@@ -85,7 +85,7 @@ foreach ($Results as $Index => $Result) {
         <td><a href="torrents.php?torrentid=<?=$TorrentID?>"><?=$TorrentID?></a></td>
         <td><?=date('Y-m-d g:i:s', $Time)?></td>
     </tr>
-<?
+<?php
 }
 ?>
 </table>
@@ -94,6 +94,6 @@ foreach ($Results as $Index => $Result) {
 </div>
 </div>
 
-<?
+<?php
 View::show_footer();
 ?>

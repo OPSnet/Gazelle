@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 if (!check_perms('site_upload')) {
     error(403);

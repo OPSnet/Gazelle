@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Batch Tag Editor', 'validate');
 if (!check_perms('users_mod')) {
     error(403);
@@ -45,7 +45,7 @@ define('MODE_MERGE', 1);
         </table>
     </form>
 <br />
-<?
+<?php
 if (isset($_GET['tag']) || isset($_GET['replace'])) {
 
     // validate input
@@ -253,7 +253,7 @@ if (isset($_GET['tag']) || isset($_GET['replace'])) {
                 Affected torrent groups
             </td>
         </tr>
-<?
+<?php
             if (count($AffectedTorrents)) {
                 foreach ($AffectedTorrents as $Row) {
                     echo "\n\t\t<tr><td>$Row</td></tr>";
@@ -265,7 +265,7 @@ if (isset($_GET['tag']) || isset($_GET['replace'])) {
                 Affected requests
             </td>
         </tr>
-<?
+<?php
             if (count($AffectedRequests)) {
                 foreach ($AffectedRequests as $Row) {
                     echo "\n\t\t<tr><td>$Row</td></tr>";
@@ -273,7 +273,7 @@ if (isset($_GET['tag']) || isset($_GET['replace'])) {
             }
 ?>
     </table>
-<?
+<?php
         }
 
     } // if (!$Err)

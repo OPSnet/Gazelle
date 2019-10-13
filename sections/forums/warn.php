@@ -41,9 +41,9 @@ View::show_header('Warn User');
                             <option value="1">1 week</option>
                             <option value="2">2 weeks</option>
                             <option value="4">4 weeks</option>
-<?                    if (check_perms('users_mod')) { ?>
+<?php               if (check_perms('users_mod')) { ?>
                             <option value="8">8 weeks</option>
-<?                    } ?>
+<?php               } ?>
                         </select>
                     </td>
                 </tr>
@@ -65,4 +65,4 @@ View::show_header('Warn User');
         </form>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 function class_list($Selected = 0) {
     global $Classes;
     $Return = '';
@@ -78,7 +78,7 @@ $DB->query('
         <td>Auto-lock weeks</td>
         <td>Submit</td>
     </tr>
-<?
+<?php
 $Row = 'b';
 while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinClassWrite, $MinClassCreate, $AutoLock, $AutoLockWeeks) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -90,11 +90,12 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <td>
                 <select name="categoryid">
-<?    reset($ForumCats);
+<?php    reset($ForumCats);
     foreach ($ForumCats as $CurCat => $CatName) {
 ?>
-                    <option value="<?=$CurCat?>"<? if ($CurCat == $CategoryID) { echo ' selected="selected"'; } ?>><?=$CatName?></option>
-<?    } ?>
+                    <option value="<?=$CurCat?>"<?php if ($CurCat == $CategoryID) { echo ' selected="selected"'; } ?>><?=$CatName?></option>
+<?php
+    } ?>
                 </select>
             </td>
             <td>
@@ -134,7 +135,7 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
 
         </form>
     </tr>
-<?
+<?php
 }
 ?>
     <tr class="colhead">
@@ -146,10 +147,11 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <td>
                 <select name="categoryid">
-<?    reset($ForumCats);
+<?php    reset($ForumCats);
     while (list($CurCat, $CatName) = each($ForumCats)) { ?>
-                    <option value="<?=$CurCat?>"<? if ($CurCat == $CategoryID) { echo ' selected="selected"'; } ?>><?=$CatName?></option>
-<?    } ?>
+                    <option value="<?=$CurCat?>"<?php if ($CurCat == $CategoryID) { echo ' selected="selected"'; } ?>><?=$CatName?></option>
+<?php
+    } ?>
                 </select>
             </td>
             <td>
@@ -189,4 +191,4 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
         </form>
     </tr>
 </table>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

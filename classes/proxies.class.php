@@ -1,4 +1,4 @@
-<?
+<?php
 //Useful: http://www.robtex.com/cnet/
 $AllowedProxies = array(
     //Opera Turbo (may include Opera-owned IP addresses that aren't used for Turbo, but shouldn't run much risk of exploitation)

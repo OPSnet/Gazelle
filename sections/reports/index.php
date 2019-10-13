@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 
 if (empty($_REQUEST['action'])) {

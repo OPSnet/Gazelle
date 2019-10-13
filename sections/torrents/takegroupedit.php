@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 // Quick SQL injection check
@@ -50,7 +50,7 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
         </form>
     </div>
     </div>
-<?
+<?php
         View::show_footer();
         die();
     }

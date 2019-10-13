@@ -1,4 +1,4 @@
-<?
+<?php
 class Comments {
     /*
      * For all functions:

@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -21,7 +21,7 @@ $OldDonations = G::$DB->to_pair(0, 1, false);
     <div class="box2">
         <div class="pad"><strong>Do not process these donations manually!</strong> The Bitcoin parser <em>will</em> get them sooner or later (poke a developer if something seems broken).</div>
     </div>
-<?
+<?php
 $NewDonations = array();
 $TotalUnproc = 0;
 foreach ($AllDonations as $Address => $Amount) {
@@ -47,7 +47,7 @@ foreach ($AllDonations as $Address => $Amount) {
             <td>Donor Rank</td>
             <td>Special Rank</td>
         </tr>
-<?
+<?php
 if (!empty($NewDonations)) {
     foreach (DonationsBitcoin::get_userids(array_keys($NewDonations)) as $Address => $UserID) {
         $DonationEUR = Donations::currency_exchange($NewDonations[$Address], 'BTC');
@@ -60,13 +60,15 @@ if (!empty($NewDonations)) {
             <td><?=(int)Donations::get_rank($UserID)?></td>
             <td><?=(int)Donations::get_special_rank($UserID)?></td>
         </tr>
-<?    }
+<?php
+    }
 } else { ?>
         <tr>
             <td colspan="7">No unprocessed Bitcoin donations</td>
         </tr>
-<? } ?>
+<?php
+} ?>
     </table>
 </div>
-<?
+<?php
 View::show_footer();

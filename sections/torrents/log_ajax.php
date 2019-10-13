@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 $TorrentID = (int) $_GET['torrentid'];
 if (!isset($TorrentID) || empty($TorrentID)) {

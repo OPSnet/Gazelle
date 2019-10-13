@@ -86,11 +86,11 @@ $DB->set_query_id($QueryID);
     <input type="submit" />
 </form>
 
-<?
+<?php
 if ($DB->has_results()) {
 ?>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11) ;
     echo $Pages;
 ?>
@@ -106,7 +106,7 @@ if ($DB->has_results()) {
             <td>Host</td>
             <td>Registered</td>
         </tr>
-<?
+<?php
     while (list($UserID, $IP, $IPCC, $Email, $Username, $PermissionID, $Uploaded, $Downloaded, $Enabled, $Donor, $Warned, $Joined, $Uses, $InviterID, $InviterIP, $InviterIPCC, $InviterEmail, $InviterUsername, $InviterPermissionID, $InviterUploaded, $InviterDownloaded, $InviterEnabled, $InviterDonor, $InviterWarned, $InviterJoined, $InviterUses) = $DB->next_record()) {
     $Row = $IP === $InviterIP ? 'a' : 'b';
 ?>
@@ -138,15 +138,16 @@ if ($DB->has_results()) {
                 <?=time_diff($InviterJoined)?>
             </td>
         </tr>
-<?    } ?>
+<?php
+    } ?>
     </table>
     <div class="linkbox">
-<? echo $Pages; ?>
+<?php echo $Pages; ?>
     </div>
-<?
+<?php
 } else { ?>
     <h2 align="center">There have been no new registrations in the past 72 hours.</h2>
-<?
+<?php
 }
 View::show_footer();
 ?>

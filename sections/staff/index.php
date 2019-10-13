@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 View::show_header('Staff');
 
@@ -9,11 +9,13 @@ $SupportStaff = get_support();
 list($FrontLineSupport, $Staff) = $SupportStaff;
 ?>
 
-<? if (check_perms('admin_manage_applicants')) { ?>
+<?php
+if (check_perms('admin_manage_applicants')) { ?>
 <div class="linkbox">
     <a href="apply.php">Role applications</a>
 </div>
-<?  } ?>
+<?php
+} ?>
 
 <div class="thin">
     <div class="header">
@@ -30,7 +32,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
         </div>
     </div>
     <div class="box pad" style="padding: 0px 10px 10px 10px;">
-        <? View::parse('generic/reply/staffpm.php', array('Hidden' => true)); ?>
+        <?php View::parse('generic/reply/staffpm.php', array('Hidden' => true)); ?>
         <br />
         <h2 style="text-align: left;">Community Help</h2>
         <h3 style="font-size: 17px;" id="fls"><i>First-Line Support</i></h3>
@@ -41,7 +43,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
                 <td style="width: 130px;">Last seen</td>
                 <td><strong>Support for</strong></td>
             </tr>
-<?
+<?php
     $Row = 'a';
     foreach ($FrontLineSupport as $Support) {
         list($ID, $Class, $Username, $Paranoia, $LastAccess, $SupportFor) = $Support;
@@ -61,7 +63,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
 ?>
     <div class="box pad" style="padding: 0px 10px 10px 10px;">
         <h2 style='text-align: left;'><?=$SectionName?></h2>
-<?
+<?php
         $CurClass = 0;
         $CloseTable = false;
         foreach ($StaffSection as $StaffMember) {
@@ -85,7 +87,7 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
                 <td style="width: 130px;">Last seen</td>
                 <td><strong>Remark</strong></td>
             </tr>
-<?
+<?php
         } // End new class header
 
         $HiddenBy = 'Hidden by staff member';
@@ -100,6 +102,6 @@ list($FrontLineSupport, $Staff) = $SupportStaff;
     <br />
     <?php } ?>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

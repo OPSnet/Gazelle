@@ -1,4 +1,4 @@
-<?
+<?php
 class Collages {
     public static function increase_subscriptions($CollageID) {
         $QueryID = G::$DB->get_query_id();
@@ -79,14 +79,14 @@ class Collages {
         ?>
         <li class="image_group_<?=$GroupID?>">
             <a href="torrents.php?id=<?=$GroupID?>" class="bookmark_<?=$GroupID?>">
-                <?    if ($WikiImage) { ?>
+                <?php    if ($WikiImage) { ?>
                     <img class="tooltip_interactive" src="<?=ImageTools::process($WikiImage, true)?>" alt="<?=$DisplayName?>" title="<?=$DisplayName?> <br /> <?=$Tags?>" data-title-plain="<?="$DisplayName ($PlainTags)"?>" width="118" />
-                <?    } else { ?>
+                <?php    } else { ?>
                     <div style="width: 107px; padding: 5px;"><?=$DisplayName?></div>
-                <?    } ?>
+                <?php    } ?>
             </a>
         </li>
-        <?
+        <?php
         return ob_get_clean();
     }
 }

@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 
 if (!$_GET['postid'] || !is_number($_GET['postid'])) {

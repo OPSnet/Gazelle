@@ -1,4 +1,4 @@
-<?
+<?php
 if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
     enforce_login();
     $TorrentPass = $LoggedUser['torrent_pass'];

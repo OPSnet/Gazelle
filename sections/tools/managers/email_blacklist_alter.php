@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_view_email')) {
     error(403);
 }

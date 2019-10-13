@@ -1,4 +1,4 @@
-<?
+<?php
 class Artists {
     /**
      * Given an array of GroupIDs, return their associated artists.

@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Disabled');
 
 if (isset($_POST['email']) && FEATURE_EMAIL_REENABLE) {
@@ -16,7 +16,8 @@ if ((empty($_POST['submit']) || empty($_POST['username'])) && !isset($Output)) {
 <p class="warning">
 Your account has been disabled.<br />
 This is either due to inactivity or rule violation(s).<br /><br /></p>
-<? if (FEATURE_EMAIL_REENABLE) { ?>
+<?php
+if (FEATURE_EMAIL_REENABLE) { ?>
 If you believe your account was in good standing and was disabled for inactivity, you may request it be re-enabled via email using the form below.<br />
 Please note that you will need access to the email account associated with your account at Orpheus for this to work;<br />
 if you do not, please see the section after this form.<br /><br />
@@ -24,7 +25,8 @@ if you do not, please see the section after this form.<br /><br />
     <input type="email" class="inputtext" placeholder="Email Address" name="email" required /> <input type="submit" value="Submit" />
     <input type="hidden" name="username" value="<?=$_COOKIE['username']?>" />
 </form><br /><br />
-<? } ?>
+<?php
+} ?>
 If you are unsure why your account is disabled, or you wish to discuss this with staff, come to our IRC network at: <?=BOT_SERVER?><br />
 And join <?=BOT_DISABLED_CHAN?><br /><br />
 <strong>Be honest.</strong> At this point, lying will get you nowhere.<br /><br /><br />
@@ -44,7 +46,7 @@ function toggle_visibility(id) {
 </script>
 
 <div id="golden_rules" class="rule_summary" style="width: 35%; font-weight: bold; display: none; text-align: left;">
-<? Rules::display_golden_rules(); ?>
+<?php Rules::display_golden_rules(); ?>
 <br /><br />
 </div>
 
@@ -59,7 +61,7 @@ Please use your <?=SITE_NAME?> username.
     <input type="hidden" name="server" value="<?=BOT_SERVER?>" />
     <input type="submit" name="submit" value="Join WebIRC" />
 </form>
-<?
+<?php
 } else if (!isset($Output)) {
     $Nick = $_POST['username'];
     $Nick = preg_replace('/[^a-zA-Z0-9\[\]\\`\^\{\}\|_]/', '', $Nick);
@@ -95,7 +97,7 @@ Please use your <?=SITE_NAME?> username.
         </applet>
     </div>
 </div>
-<?
+<?php
 } else {
     echo $Output;
 }

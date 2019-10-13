@@ -1,4 +1,4 @@
-<?
+<?php
 class Misc {
     /**
      * Send an email.
@@ -506,7 +506,7 @@ class Misc {
             </div>
             <div class="new" id="recommendation_status"><br /></div>
         </div>
-<?
+<?php
     }
 
     public static function is_valid_url($URL) {

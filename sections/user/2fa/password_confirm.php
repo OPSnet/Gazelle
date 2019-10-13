@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Disable Two-factor Authentication');
 ?>
 
@@ -26,9 +26,9 @@ View::show_header('Disable Two-factor Authentication');
             <td>
                 <input type="password" size="50" name="password" id="password"/>
                 
-                <? if (isset($_GET['invalid'])): ?>
+                <?php if (isset($_GET['invalid'])): ?>
                     <p class="warning">Invalid password.</p>
-                <? endif; ?>
+                <?php endif; ?>
             </td>
         </tr>
 
@@ -41,4 +41,4 @@ View::show_header('Disable Two-factor Authentication');
     </table>
 </form>
 
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

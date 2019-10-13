@@ -1,4 +1,4 @@
-<?
+<?php
 
 if ($_GET['type']) {
     switch ($_GET['type']) {

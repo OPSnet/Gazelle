@@ -1,4 +1,4 @@
-<?
+<?php
 // Show the "This album is number x overall", etc. box for the "Music" category only
 if ($GroupCategoryID == 1) {
     $Rankings = Votes::get_ranking($GroupID, $GroupYear);
@@ -33,7 +33,7 @@ if ($GroupCategoryID == 1) {
                 </ul>
             </div>
         </div>
-<?
+<?php
     }
 }
 ?>

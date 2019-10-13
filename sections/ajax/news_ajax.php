@@ -1,4 +1,4 @@
-<?
+<?php
 //Don't allow bigger queries than specified below regardless of called function
 $SizeLimit = 10;
 

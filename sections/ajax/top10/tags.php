@@ -1,4 +1,4 @@
-<?
+<?php
 
 
 // error out on invalid requests (before caching)

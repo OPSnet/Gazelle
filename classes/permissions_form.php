@@ -1,4 +1,4 @@
-<?
+<?php
 
 /********************************************************************************
  ************ Permissions form ********************** user.php and tools.php ****
@@ -130,7 +130,7 @@ function permissions_form() {
             </tr>
             <tr>
                 <td>
-<?
+<?php
                     display_perm('site_leech','Can leech.');
                     display_perm('site_upload','Can upload.');
                     display_perm('site_vote','Can vote on requests.');
@@ -183,7 +183,7 @@ function permissions_form() {
             </tr>
             <tr>
                 <td>
-<?
+<?php
                     display_perm('users_edit_usernames', 'Can edit usernames.');
                     display_perm('users_edit_ratio', 'Can edit anyone\'s upload/download amounts.');
                     display_perm('users_edit_own_ratio', 'Can edit own upload/download amounts.');
@@ -228,7 +228,7 @@ function permissions_form() {
             </tr>
             <tr>
                 <td>
-<?
+<?php
                     display_perm('torrents_edit', 'Can edit any torrent');
                     display_perm('torrents_delete', 'Can delete torrents');
                     display_perm('torrents_delete_fast', 'Can delete more than 3 torrents at a time.');
@@ -252,7 +252,7 @@ function permissions_form() {
             </tr>
             <tr>
                 <td>
-<?
+<?php
                     display_perm('admin_manage_news', 'Can manage site news');
                     display_perm('admin_manage_blog', 'Can manage the site blog');
                     display_perm('admin_manage_contest', 'Can manage contests');
@@ -289,5 +289,5 @@ function permissions_form() {
     </div>
     <div class="submit_container"><input type="submit" name="submit" value="Save Permission Class" /></div>
 </div>
-<?
+<?php
 }

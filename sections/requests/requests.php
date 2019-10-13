@@ -1,4 +1,4 @@
-<?
+<?php
 
 $SphQL = new SphinxqlQuery();
 $SphQL->select('id, votes, bounty')->from('requests, requests_delta');
@@ -342,66 +342,66 @@ View::show_header($Title, 'requests');
         <h2><?=$Title?></h2>
     </div>
     <div class="linkbox">
-<?    if (!$BookmarkView) {
+<?php    if (!$BookmarkView) {
         if (check_perms('site_submit_requests')) { ?>
         <a href="requests.php?action=new" class="brackets">New request</a>
         <a href="requests.php?type=created" class="brackets">My requests</a>
-<?        }
+<?php        }
         if (check_perms('site_vote')) { ?>
         <a href="requests.php?type=voted" class="brackets">Requests I've voted on</a>
-<?        } ?>
+<?php        } ?>
         <a href="bookmarks.php?type=requests" class="brackets">Bookmarked requests</a>
-<?    } else { ?>
+<?php    } else { ?>
         <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
         <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
         <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
         <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
-<?    } ?>
+<?php    } ?>
     </div>
-<?    if ($BookmarkView && $NumResults === 0) { ?>
+<?php    if ($BookmarkView && $NumResults === 0) { ?>
     <div class="box pad" align="center">
         <h2>You have not bookmarked any requests.</h2>
     </div>
-<?    } else { ?>
+<?php    } else { ?>
     <form class="search_form" name="requests" action="" method="get">
-<?        if ($BookmarkView) { ?>
+<?php        if ($BookmarkView) { ?>
         <input type="hidden" name="action" value="view" />
         <input type="hidden" name="type" value="requests" />
-<?        } elseif (isset($_GET['type'])) { ?>
+<?php        } elseif (isset($_GET['type'])) { ?>
         <input type="hidden" name="type" value="<?=$_GET['type']?>" />
-<?        } ?>
+<?php        } ?>
         <input type="hidden" name="submit" value="true" />
-<?        if (!empty($_GET['userid']) && intval($_GET['userid'])) { ?>
+<?php        if (!empty($_GET['userid']) && intval($_GET['userid'])) { ?>
         <input type="hidden" name="userid" value="<?=$_GET['userid']?>" />
-<?        } ?>
+<?php        } ?>
         <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
             <tr id="search_terms">
                 <td class="label">Search terms:</td>
                 <td>
-                    <input type="search" name="search" size="75" value="<? if (isset($_GET['search'])) { echo display_str($_GET['search']); } ?>" />
+                    <input type="search" name="search" size="75" value="<?php if (isset($_GET['search'])) { echo display_str($_GET['search']); } ?>" />
                 </td>
             </tr>
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td>
-                    <input type="search" name="tags" id="tags" size="60" value="<?=!empty($TagNames) ? display_str($TagNames) : ''?>"<? Users::has_autocomplete_enabled('other'); ?> />&nbsp;
-                    <input type="radio" name="tags_type" id="tags_type0" value="0"<? Format::selected('tags_type', 0, 'checked')?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                    <input type="radio" name="tags_type" id="tags_type1" value="1"<? Format::selected('tags_type', 1, 'checked')?> /><label for="tags_type1"> All</label>
+                    <input type="search" name="tags" id="tags" size="60" value="<?=!empty($TagNames) ? display_str($TagNames) : ''?>"<?php Users::has_autocomplete_enabled('other'); ?> />&nbsp;
+                    <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked')?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+                    <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked')?> /><label for="tags_type1"> All</label>
                 </td>
             </tr>
             <tr id="include_filled">
                 <td class="label"><label for="include_filled_box">Include filled:</label></td>
                 <td>
-                    <input type="checkbox" id="include_filled_box" name="show_filled"<? if (!empty($_GET['show_filled']) || (!$Submitted && !empty($_GET['type']) && $_GET['type'] === 'filled')) { ?> checked="checked"<? } ?> />
+                    <input type="checkbox" id="include_filled_box" name="show_filled"<?php if (!empty($_GET['show_filled']) || (!$Submitted && !empty($_GET['type']) && $_GET['type'] === 'filled')) { ?> checked="checked"<?php } ?> />
                 </td>
             </tr>
             <tr id="include_old">
                 <td class="label"><label for="include_old_box">Include old:</label></td>
                 <td>
-                    <input type="checkbox" id="include_old_box" name="showall"<? if (!$Submitted || !empty($_GET['showall'])) { ?> checked="checked"<? } ?> />
+                    <input type="checkbox" id="include_old_box" name="showall"<?php if (!$Submitted || !empty($_GET['showall'])) { ?> checked="checked"<?php } ?> />
                 </td>
             </tr>
-<?        /* ?>
+<?php        /* ?>
             <tr>
                 <td class="label">Requested by:</td>
                 <td>
@@ -411,21 +411,21 @@ View::show_header($Title, 'requests');
 <?        */ ?>
         </table>
         <table class="layout cat_list">
-<?
+<?php
         $x = 1;
         reset($CategoriesV2);
         foreach ($CategoriesV2 as $CatKey => $CatName) {
             if ($x % 8 === 0 || $x === 1) {
 ?>
                 <tr>
-<?            } ?>
+<?php            } ?>
                     <td>
-                        <input type="checkbox" name="filter_cat[<?=($CatKey + 1) ?>]" id="cat_<?=($CatKey + 1) ?>" value="1"<? if (isset($_GET['filter_cat'][$CatKey + 1])) { ?> checked="checked"<? } ?> />
+                        <input type="checkbox" name="filter_cat[<?=($CatKey + 1) ?>]" id="cat_<?=($CatKey + 1) ?>" value="1"<?php if (isset($_GET['filter_cat'][$CatKey + 1])) { ?> checked="checked"<?php } ?> />
                         <label for="cat_<?=($CatKey + 1) ?>"><?=$CatName?></label>
                     </td>
-<?            if ($x % 7 === 0) { ?>
+<?php            if ($x % 7 === 0) { ?>
                 </tr>
-<?
+<?php
             }
             $x++;
         }
@@ -436,7 +436,7 @@ View::show_header($Title, 'requests');
                 <td class="label">Release types</td>
                 <td>
                     <input type="checkbox" id="toggle_releases" onchange="Toggle('releases', 0);"<?=(!$Submitted || !empty($ReleaseArray) && count($ReleaseArray) === count($ReleaseTypes) ? ' checked="checked"' : '') ?> /> <label for="toggle_releases">All</label>
-<?
+<?php
         $i = 0;
         foreach ($ReleaseTypes as $Key => $Val) {
             if ($i % 8 === 0) {
@@ -446,7 +446,7 @@ View::show_header($Title, 'requests');
                     <input type="checkbox" name="releases[]" value="<?=$Key?>" id="release_<?=$Key?>"
                         <?=(!$Submitted || (!empty($ReleaseArray) && in_array($Key, $ReleaseArray)) ? ' checked="checked" ' : '')?>
                     /> <label for="release_<?=$Key?>"><?=$Val?></label>
-<?
+<?php
             $i++;
         }
 ?>
@@ -459,7 +459,7 @@ View::show_header($Title, 'requests');
                     <label for="toggle_formats">All</label>
                     <input type="checkbox" id="formats_strict" name="formats_strict"<?=(!empty($_GET['formats_strict']) ? ' checked="checked"' : '')?> />
                     <label for="formats_strict">Only specified</label>
-<?
+<?php
         foreach ($Formats as $Key => $Val) {
             if ($Key % 8 === 0) {
                 echo '<br />';
@@ -468,7 +468,7 @@ View::show_header($Title, 'requests');
                     <input type="checkbox" name="formats[]" value="<?=$Key?>" id="format_<?=$Key?>"
                         <?=(!$Submitted || (!empty($FormatArray) && in_array($Key, $FormatArray)) ? ' checked="checked" ' : '')?>
                     /> <label for="format_<?=$Key?>"><?=$Val?></label>
-<?        } ?>
+<?php        } ?>
                 </td>
             </tr>
             <tr id="bitrate_list">
@@ -478,7 +478,7 @@ View::show_header($Title, 'requests');
                     <label for="toggle_bitrates">All</label>
                     <input type="checkbox" id="bitrate_strict" name="bitrate_strict"<?=(!empty($_GET['bitrate_strict']) ? ' checked="checked"' : '') ?> />
                     <label for="bitrate_strict">Only specified</label>
-<?
+<?php
         foreach ($Bitrates as $Key => $Val) {
             if ($Key % 8 === 0) {
                 echo '<br />';
@@ -487,7 +487,7 @@ View::show_header($Title, 'requests');
                     <input type="checkbox" name="bitrates[]" value="<?=$Key?>" id="bitrate_<?=$Key?>"
                         <?=(!$Submitted || (!empty($BitrateArray) && in_array($Key, $BitrateArray)) ? ' checked="checked" ' : '')?>
                     /> <label for="bitrate_<?=$Key?>"><?=$Val?></label>
-<?
+<?php
         }
 ?>
                 </td>
@@ -499,7 +499,7 @@ View::show_header($Title, 'requests');
                     <label for="toggle_media">All</label>
                     <input type="checkbox" id="media_strict" name="media_strict"<?=(!empty($_GET['media_strict']) ? ' checked="checked"' : '')?> />
                     <label for="media_strict">Only specified</label>
-<?
+<?php
         foreach ($Media as $Key => $Val) {
             if ($Key % 8 === 0) {
                 echo '<br />';
@@ -508,7 +508,7 @@ View::show_header($Title, 'requests');
                     <input type="checkbox" name="media[]" value="<?=$Key?>" id="media_<?=$Key?>"
                         <?=(!$Submitted || (!empty($MediaArray) && in_array($Key, $MediaArray)) ? ' checked="checked" ' : '')?>
                     /> <label for="media_<?=$Key?>"><?=$Val?></label>
-<?        } ?>
+<?php        } ?>
                 </td>
             </tr>
             <tr>
@@ -518,11 +518,11 @@ View::show_header($Title, 'requests');
             </tr>
         </table>
     </form>
-<?        if (isset($PageLinks)) { ?>
+<?php        if (isset($PageLinks)) { ?>
     <div class="linkbox">
         <?=    $PageLinks?>
     </div>
-<?        } ?>
+<?php        } ?>
     <table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
         <tr class="colhead_dark">
             <td style="width: 38%;" class="m_th_left nobr">
@@ -550,7 +550,7 @@ View::show_header($Title, 'requests');
                 <a href="?order=lastvote&amp;sort=<?=($OrderBy === 'lastvote' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Last vote</strong></a>
             </td>
         </tr>
-<?
+<?php
         if ($NumResults === 0) {
             // not viewing bookmarks but no requests found
 ?>
@@ -559,13 +559,13 @@ View::show_header($Title, 'requests');
                 Nothing found!
             </td>
         </tr>
-<?        } elseif ($Page === 0) { ?>
+<?php        } elseif ($Page === 0) { ?>
         <tr class="rowb">
             <td colspan="8">
                 The requested page contains no matches!
             </td>
         </tr>
-<?
+<?php
         } else {
 
     $TimeCompare = 1267643718; // Requests v2 was implemented 2010-03-03 20:15:18
@@ -603,7 +603,7 @@ View::show_header($Title, 'requests');
             <td>
                 <?=$FullName?>
                 <div class="tags">
-<?
+<?php
         $TagList = array();
         foreach ($Request['Tags'] as $TagID => $TagName) {
             $TagList[] = '<a href="?tags='.$TagName.($BookmarkView ? '&amp;type=requests' : '').'">'.display_str($TagName).'</a>';
@@ -615,26 +615,26 @@ View::show_header($Title, 'requests');
             </td>
             <td class="m_td_right nobr">
                 <span id="vote_count_<?=$RequestID?>"><?=number_format($VoteCount)?></span>
-<?         if (!$IsFilled && check_perms('site_vote')) { ?>
+<?php         if (!$IsFilled && check_perms('site_vote')) { ?>
                 &nbsp;&nbsp; <a href="javascript:Vote(0, <?=$RequestID?>)" class="brackets"><strong>+</strong></a>
-<?        } ?>
+<?php        } ?>
             </td>
             <td class="m_td_right number_column nobr">
                 <?=Format::get_size($Bounty)?>
             </td>
             <td class="m_hidden nobr">
-<?        if ($IsFilled) { ?>
+<?php        if ($IsFilled) { ?>
                 <a href="torrents.php?<?=(strtotime($Request['TimeFilled']) < $TimeCompare ? 'id=' : 'torrentid=') . $Request['TorrentID']?>"><strong><?=time_diff($Request['TimeFilled'], 1)?></strong></a>
-<?        } else { ?>
+<?php        } else { ?>
                 <strong>No</strong>
-<?        } ?>
+<?php        } ?>
             </td>
             <td>
-<?        if ($IsFilled) { ?>
+<?php        if ($IsFilled) { ?>
                 <a href="user.php?id=<?=$FillerInfo['ID']?>"><?=$FillerInfo['Username']?></a>
-<?        } else { ?>
+<?php        } else { ?>
                 &mdash;
-<?        } ?>
+<?php        } ?>
             </td>
             <td>
                 <a href="user.php?id=<?=$Request['UserID']?>"><?=Users::format_username($Request['UserID'], false, false, false)?></a>
@@ -646,16 +646,16 @@ View::show_header($Title, 'requests');
                 <?=time_diff($Request['LastVote'], 1)?>
             </td>
         </tr>
-<?
+<?php
     } // foreach
         } // else
     } // if ($BookmarkView && $NumResults < 1)
 ?>
     </table>
-<? if (isset($PageLinks)) { ?>
+<?php if (isset($PageLinks)) { ?>
     <div class="linkbox">
         <?=$PageLinks?>
     </div>
-<? } ?>
+<?php } ?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

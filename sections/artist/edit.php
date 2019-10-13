@@ -1,4 +1,4 @@
-<?
+<?php
 /************************************************************************
 ||------------|| Edit artist wiki page ||------------------------------||
 
@@ -60,7 +60,8 @@ View::show_header('Edit artist');
             </div>
         </form>
     </div>
-<? if (check_perms('torrents_edit')) { ?>
+<?php
+    if (check_perms('torrents_edit')) { ?>
     <h2>Rename this artist</h2>
     <div class="box pad">
         <form class="rename_form" name="artist" action="artist.php" method="post">
@@ -101,7 +102,7 @@ View::show_header('Edit artist');
         <div class="pad">
             <ul>
 
-<?
+<?php
     $NonRedirectingAliases = array();
     $DB->query("
         SELECT AliasID, Name, UserID, Redirect
@@ -114,20 +115,20 @@ View::show_header('Edit artist');
 ?>
                 <li>
                     <span class="tooltip" title="Alias ID"><?=$AliasID?></span>. <span class="tooltip" title="Alias name"><?=$AliasName?></span>
-<?        if ($User) { ?>
+<?php   if ($User) { ?>
                     <a href="user.php?id=<?=$User?>" title="Alias creator" class="brackets tooltip">User</a>
-<?        }
+<?php   }
         if ($Redirect) { ?>
                     (writes redirect to <span class="tooltip" title="Target alias ID"><?=$Redirect?></span>)
-<?        }
-        else {
+<?php   } else {
             $NonRedirectingAliases[$AliasID] = $AliasName;
         }
 ?>
 
                     <a href="artist.php?action=delete_alias&amp;aliasid=<?=$AliasID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Delete this alias" class="brackets tooltip">X</a>
                 </li>
-<?    }
+<?php
+    }
 ?>
             </ul>
         </div>
@@ -148,9 +149,11 @@ View::show_header('Edit artist');
                     <span class="label"><strong>Writes redirect to:</strong></span>
                     <select name="redirect">
                         <option value="0">Non-redirecting alias</option>
-<?    foreach($NonRedirectingAliases as $AliasID => $AliasName) { ?>
+<?php
+    foreach($NonRedirectingAliases as $AliasID => $AliasName) { ?>
                         <option value="<?=$AliasID?>"<?=$AliasID == $DefaultRedirectID ? " selected" : ""?>><?=$AliasName?></option>
-<?    } ?>
+<?php
+    } ?>
                     </select><br />
                 </div>
                 <div class="submit_div">
@@ -159,6 +162,7 @@ View::show_header('Edit artist');
             </form>
         </div>
     </div>
-<? } ?>
+<?php
+} ?>
 </div>
-<? View::show_footer() ?>
+<?php View::show_footer() ?>

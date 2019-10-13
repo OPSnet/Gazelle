@@ -1,4 +1,4 @@
-<?
+<?php
 //TODO: rewrite this, make it cleaner, make it work right, add it common stuff
 if (!check_perms('admin_create_users')) {
     error(403);
@@ -122,7 +122,7 @@ if (isset($_POST['Username'])) {
         </table>
     </form>
     </div>
-<?
+<?php
 }
 
 View::show_footer(); ?>

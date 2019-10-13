@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_reports')) {
     error(403);
 }
@@ -64,10 +64,10 @@ if (!isset($dt_until)) {
 
 <div class="header">
     <h2>Search Reports</h2>
-<? include('header.php'); ?>
+<?php include('header.php'); ?>
 </div>
 
-<?
+<?php
 if (isset($Results)) {
     $Page  = max(1, isset($_GET['page']) ? intval($_GET['page']) : 1);
     $Pages = Format::get_pages($Page, $Total, TORRENTS_PER_PAGE);
@@ -89,7 +89,7 @@ if (isset($Results)) {
             </tr>
         </thead>
         <tbody>
-<?
+<?php
     $user_cache = [];
 
     foreach ($Results as $r) {
@@ -124,7 +124,8 @@ if (isset($Results)) {
                 <td><?= $report_name_cache[$r['Type']] ?></td>
                 <td><?= time_diff($r['ReportedTime']) ?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </tbody>
     </table>
 </div>
@@ -132,7 +133,8 @@ if (isset($Results)) {
     <?= $Pages ?>
 </div>
 <br />
-<? } ?>
+<?php
+} ?>
 
 <div class="thin box pad">
     <form method="get" action="/reportsv2.php">
@@ -162,12 +164,13 @@ if (isset($Results)) {
                 <td>
                     <select multiple="multiple" size="8" name="report-type[]">
                         <option value="0">Don't Care</option>
-<?
+<?php
 foreach ($report_name_cache as $key => $label) {
     $selected = array_key_exists('report-type', $_GET) && in_array($key, $_GET['report-type']) ? ' selected="selected"' : '';
 ?>
                         <option value="<?= $key ?>"<?= $selected ?>><?= $label ?></option>
-<?  } ?>
+<?php
+} ?>
                     </select>
                 </td>
             </tr>
@@ -186,5 +189,5 @@ foreach ($report_name_cache as $key => $label) {
         </table>
     </form>
 </div>
-<?
+<?php
 View::show_footer();

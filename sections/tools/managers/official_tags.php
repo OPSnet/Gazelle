@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -73,7 +73,7 @@ View::show_header('Official Tags Manager');
                     <td style="font-weight: bold;">Tag</td>
                     <td style="font-weight: bold;">Uses</td>
                 </tr>
-<?
+<?php
 $i = 0;
 $DB->query("
     SELECT ID, Name, Uses
@@ -93,22 +93,22 @@ for ($i = 0; $i < $TagCount / 3; $i++) {
                     <td style="text-align: center;"><?=number_format($TagUses1)?></td>
                     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     <td style="text-align: center;">
-<?        if ($TagID2) { ?>
+<?php        if ($TagID2) { ?>
                         <input type="checkbox" name="oldtags[]" value="<?=$TagID2?>" />
-<?        } ?>
+<?php        } ?>
                     </td>
                     <td><?=$TagName2?></td>
                     <td style="text-align: center;"><?=number_format($TagUses2)?></td>
                     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     <td style="text-align: center;">
-<?        if ($TagID3) { ?>
+<?php        if ($TagID3) { ?>
                         <input type="checkbox" name="oldtags[]" value="<?=$TagID3?>" />
-<?        } ?>
+<?php        } ?>
                     </td>
                     <td><?=$TagName3?></td>
                     <td style="text-align: center;"><?=number_format($TagUses3)?></td>
                 </tr>
-<?
+<?php
 }
 ?>
                 <tr class="<?=(($i % 2) ? 'rowa' : 'rowb')?>">
@@ -126,4 +126,4 @@ for ($i = 0; $i < $TagCount / 3; $i++) {
         </form>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

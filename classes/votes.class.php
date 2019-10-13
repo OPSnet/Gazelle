@@ -1,4 +1,4 @@
-<?
+<?php
 class Votes {
     /**
      * Confidence level for binomial scoring
@@ -23,7 +23,7 @@ class Votes {
                 <a href="#" onclick="UnvoteGroup(<?=$GroupID?>, '<?=G::$LoggedUser['AuthKey']?>'); return false;" class="tooltip small_clearvote vote_clear_<?=$GroupID?><?=(empty($Vote) ? ' hidden' : '')?>" title="Clear your vote">x</a>
                 Score: <?=number_format(self::binomial_score($GroupVotes['Ups'], $GroupVotes['Total']) * 100, 1)?>
             </span>
-<?        }
+<?php   }
     }
 
     /**

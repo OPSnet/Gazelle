@@ -1,4 +1,4 @@
-<?
+<?php
 class View {
     /**
      * @var string Path relative to where (P)HTML templates reside

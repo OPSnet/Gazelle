@@ -1,4 +1,4 @@
-<?
+<?php
 //******************************************************************************//
 //--------------- Restore all VH-recommended torrents to NL --------------------//
 //---- For use after resetting the FL/NL database (after sitewide freeleech) ---//

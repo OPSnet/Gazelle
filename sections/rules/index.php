@@ -1,4 +1,4 @@
-<?
+<?php
 //Include all the basic stuff...
 enforce_login();
 if (!isset($_GET['p'])) {

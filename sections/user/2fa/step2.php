@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Two-factor Authentication');
 ?>
 
@@ -39,4 +39,4 @@ View::show_header('Two-factor Authentication');
     </table>
 </form>
 
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

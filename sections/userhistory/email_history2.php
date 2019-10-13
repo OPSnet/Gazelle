@@ -1,4 +1,4 @@
-<?
+<?php
 /************************************************************************
 ||------------|| User email history page ||---------------------------||
 
@@ -208,7 +208,7 @@ if ($Old) {
                 <?=Tools::get_host_by_ajax($Current['IP'])?>
             </td>
         </tr>
-<?
+<?php
 if ($CurrentMatches) {
     // Match on the current email
     foreach ($CurrentMatches as $Match) {
@@ -227,7 +227,7 @@ if ($CurrentMatches) {
                 <?=Tools::get_host_by_ajax($Match['IP'])?>
             </td>
         </tr>
-<?
+<?php
     }
 }
 // Old emails
@@ -240,7 +240,7 @@ if ($Old) {
             <td>Elapsed</td>
             <td>Set from IP</td>
         </tr>
-<?
+<?php
     $j = 0;
     // Old email
     foreach ($Old as $Record) {
@@ -268,7 +268,7 @@ if ($Old) {
                 <?=Tools::get_host_by_ajax($Match['IP'])?>
             </td>
         </tr>
-<?
+<?php
             }
         }
 
@@ -291,7 +291,7 @@ if ($Old) {
                 <?=Tools::get_host_by_ajax($Record['IP'])?>
             </td>
         </tr>
-<?
+<?php
         if ($MatchCount > 0) {
             if (isset($Matches)) {
                 echo $Matches;
@@ -310,7 +310,7 @@ if ($Old) {
             <td>Age of account</td>
             <td>Registration IP address</td>
         </tr>
-<?
+<?php
 // Matches on invite email
 if ($OldMatches) {
     $i = 0;
@@ -334,7 +334,7 @@ if ($OldMatches) {
                 <?=Tools::get_host_by_ajax($Match['IP'])?>
             </td>
         </tr>
-<?
+<?php
         }
     }
     $MatchCount = $i;
@@ -356,7 +356,7 @@ if ($OldMatches) {
                 <?=Tools::get_host_by_ajax($Invite['IP'])?>
             </td>
         </tr>
-<?
+<?php
 
 if ($Matches) {
     echo $Matches;
@@ -365,4 +365,4 @@ if ($Matches) {
 ?>
     </table>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 $FeaturedAlbum = $Cache->get_value('vanity_house_album');
 if ($FeaturedAlbum === false) {
     $DB->query('
@@ -25,6 +25,6 @@ if (is_number($FeaturedAlbum['GroupID'])) {
                 </a>
             </div>
         </div>
-<?
+<?php
 }
 ?>

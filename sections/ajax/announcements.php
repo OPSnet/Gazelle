@@ -1,4 +1,4 @@
-<?
+<?php
 if (!$News = $Cache->get_value('news')) {
     $DB->query("
         SELECT

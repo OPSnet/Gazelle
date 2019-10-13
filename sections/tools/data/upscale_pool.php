@@ -40,14 +40,14 @@ $DB->set_query_id($RS);
     <div class="header">
         <h2>Upscale Pool</h2>
     </div>
-<?
+<?php
 if ($DB->has_results()) {
 ?>
     <div class="box pad thin">
         <p>There are currently <?=number_format($Results)?> enabled users on Ratio Watch and <?=number_format($TotalDisabled)?> already disabled.</p>
     </div>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11);
     echo $Pages;
 ?>
@@ -65,7 +65,7 @@ if ($DB->has_results()) {
             <td class="tooltip" title="If the time shown here ends in &quot;ago&quot;, then this is how long the user has been on ratio watch and/or below his or her required ratio. If the time shown here does not end in &quot;ago&quot;, then this is the time until the two week Ratio Watch period expires.">Ratio Watch Ended/Ends</td>
             <td>Lifespan</td>
         </tr>
-<?
+<?php
     while (list($UserID, $Username, $Uploaded, $Downloaded, $PermissionID, $Enabled, $Donor, $Warned, $Joined, $RatioWatchEnds, $RatioWatchDownload, $RequiredRatio) = $DB->next_record()) {
     $Row = $Row === 'b' ? 'a' : 'b';
 
@@ -76,21 +76,22 @@ if ($DB->has_results()) {
             <td class="number_column"><?=Format::get_size($Downloaded)?></td>
             <td class="number_column"><?=Format::get_ratio_html($Uploaded, $Downloaded)?></td>
             <td class="number_column"><?=number_format($RequiredRatio, 2)?></td>
-            <td class="number_column"><? if (($Downloaded * $RequiredRatio) > $Uploaded) { echo Format::get_size(($Downloaded * $RequiredRatio) - $Uploaded);} ?></td>
+            <td class="number_column"><?php if (($Downloaded * $RequiredRatio) > $Uploaded) { echo Format::get_size(($Downloaded * $RequiredRatio) - $Uploaded);} ?></td>
             <td class="number_column"><?=Format::get_size($Downloaded - $RatioWatchDownload)?></td>
             <td><?=time_diff($Joined, 2)?></td>
             <td><?=time_diff($RatioWatchEnds)?></td>
-            <td><?/*time_diff(strtotime($Joined), strtotime($RatioWatchEnds))*/?></td>
+            <td><?php /*time_diff(strtotime($Joined), strtotime($RatioWatchEnds))*/?></td>
         </tr>
-<?    } ?>
+<?php
+    } ?>
     </table>
     <div class="linkbox">
-<?    echo $Pages; ?>
+<?php echo $Pages; ?>
     </div>
-<?
+<?php
 } else { ?>
     <h2 align="center">There are currently no users on ratio watch.</h2>
-<?
+<?php
 }
 
 View::show_footer();

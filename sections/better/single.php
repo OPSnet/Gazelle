@@ -1,4 +1,4 @@
-<?
+<?php
 if (($Results = $Cache->get_value('better_single_groupids')) === false) {
     $DB->query("
         SELECT
@@ -33,7 +33,7 @@ View::show_header('Single seeder FLACs');
             <tr class="colhead">
                 <td>Torrent</td>
             </tr>
-<?
+<?php
 foreach ($Results as $GroupID => $FlacID) {
     if (!isset($Groups[$GroupID])) {
         continue;
@@ -72,10 +72,11 @@ foreach ($Results as $GroupID => $FlacID) {
                     <div class="tags"><?=$TorrentTags->format()?></div>
                 </td>
             </tr>
-<?    } ?>
+<?php
+} ?>
         </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

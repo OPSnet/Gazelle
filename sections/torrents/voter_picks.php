@@ -1,4 +1,4 @@
-<?
+<?php
 //global $Cache, $DB;
 include(SERVER_ROOT.'/sections/torrents/ranking_funcs.php');
 
@@ -41,7 +41,7 @@ if (count($Top10) > 0) {
             <tr class="colhead">
                 <td><a href="#">&uarr;</a>&nbsp;People who like this album also liked... <a href="#" onclick="$('.votes_rows').gtoggle(); return false;">(Show)</a></td>
             </tr>
-<?
+<?php
     $Top10Groups = array_keys($Top10);
 
     $Groups = Torrents::get_groups($Top10Groups, true, true, false);
@@ -57,8 +57,9 @@ if (count($Top10) > 0) {
             <tr class="votes_rows hidden <?=($i & 1) ? 'rowb' : 'rowa'?>">
                 <td><span class="like_ranks"><?=$i?>.</span> <?=$Str?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
-<?
+<?php
 }
 ?>

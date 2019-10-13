@@ -92,13 +92,13 @@ $Pages = Format::get_pages($Page, $NumResults, 25);
         <td>Torrent</td>
         <td>Time</td>
         <td>Expired</td>
-<? if (check_perms('users_mod')) { ?>
+<?php if (check_perms('users_mod')) { ?>
         <td>Downloaded</td>
         <td>Size</td>
         <td>Tokens used</td>
-<? } ?>
+<?php } ?>
     </tr>
-<?
+<?php
 foreach ($Tokens as $Token) {
     $GroupIDs[] = $Token['GroupID'];
 }
@@ -126,17 +126,17 @@ foreach ($Tokens as $Token) {
         <td><?=time_diff($Time)?></td>
         <td><?=($Expired ? 'Yes' : 'No')?><?=(check_perms('users_mod') && !$Expired) ? " <a href=\"userhistory.php?action=token_history&amp;expire=1&amp;userid=$UserID&amp;torrentid=$TorrentID\">(expire)</a>" : ''; ?>
         </td>
-<?    if (check_perms('users_mod')) { ?>
+<?php    if (check_perms('users_mod')) { ?>
         <td><?=Format::get_size($Downloaded)?></td>
         <td><?=Format::get_size($Size == NULL ? 0 : $Size)?></td>
         <td><?=$Uses?></td>
-<?    } ?>
+<?php    } ?>
     </tr>
-<?
+<?php
 }
 ?>
 </table>
 <div class="linkbox"><?=$Pages?></div>
-<?
+<?php
 View::show_footer();
 ?>

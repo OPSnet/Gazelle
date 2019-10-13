@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_whitelist')) {
     error(403);
 }
@@ -40,7 +40,7 @@ $DB->query('
         <td>Submit</td>
     </tr>
 </table>
-<?
+<?php
 $Row = 'b';
 while (list($ID, $Client, $Peer_ID) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -64,6 +64,6 @@ while (list($ID, $Client, $Peer_ID) = $DB->next_record()) {
         </tr>
     </table>
 </form>
-<? } ?>
+<?php } ?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

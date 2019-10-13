@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 if (!isset($_POST['postid']) || !is_number($_POST['postid']) || !isset($_POST['body']) || trim($_POST['body']) === '') {

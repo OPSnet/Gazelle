@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $InviteKey = db_string($_GET['invite']);

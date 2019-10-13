@@ -1,4 +1,4 @@
-<?
+<?php
 if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
     $UserID = $_GET['userid'];
 } else {

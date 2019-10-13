@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 if (!isset($_REQUEST['action'])) {
     include(SERVER_ROOT . '/sections/stats/list.php');

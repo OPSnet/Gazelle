@@ -1,4 +1,4 @@
-<?
+<?php
 if ($ID = (int)($_GET['id'])) {
     // Check if conversation belongs to user
     $DB->query("

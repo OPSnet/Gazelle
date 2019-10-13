@@ -118,13 +118,15 @@ View::show_header('User Flow');
 $DB->set_query_id($RS);
 ?>
 <div class="thin">
-<?    if (!isset($_GET['page'])) { ?>
+<?php
+    if (!isset($_GET['page'])) { ?>
     <div class="box pad">
         <img src="https://chart.googleapis.com/chart?cht=lc&amp;chs=820x160&amp;chco=000D99,99000D&amp;chg=0,-1,1,1&amp;chxt=y,x&amp;chxs=0,h&amp;chxl=1:|<?=implode('|', $Labels)?>&amp;chxr=0,0,<?=$Max?>&amp;chd=t:<?=implode(',', $InFlow)?>|<?=implode(',', $OutFlow)?>&amp;chls=2,4,0&amp;chdl=New+Registrations|Disabled+Users&amp;chf=bg,s,FFFFFF00" alt="User Flow vs. Time" />
     </div>
-<?    } ?>
+<?php
+    } ?>
     <div class="linkbox">
-<?
+<?php
 $Pages = Format::get_pages($Page, $Results, DAYS_PER_PAGE, 11);
 echo $Pages;
 ?>
@@ -139,7 +141,7 @@ echo $Pages;
             <td>(-) Total</td>
             <td>Net Growth</td>
         </tr>
-<?
+<?php
     while (list($Date, $Month, $Joined, $Manual, $Ratio, $Inactivity) = $DB->next_record()) {
         $TotalOut = $Ratio + $Inactivity + $Manual;
         $TotalGrowth = $Joined - $TotalOut;
@@ -153,10 +155,11 @@ echo $Pages;
             <td><?=number_format($TotalOut)?></td>
             <td><?=number_format($TotalGrowth)?></td>
         </tr>
-<?    } ?>
+<?php
+    } ?>
     </table>
     <div class="linkbox">
         <?=$Pages?>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

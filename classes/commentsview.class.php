@@ -1,4 +1,4 @@
-<?
+<?php
 class CommentsView {
     /**
      * Render a thread of comments
@@ -32,64 +32,64 @@ class CommentsView {
 ?>
         <table class="forum_post box vertical_margin<?=(!Users::has_avatars_enabled() ? ' noavatar' : '') . ($Unread ? ' forum_unread' : '')?>" id="post<?=$PostID?>">
             <colgroup>
-<?        if (Users::has_avatars_enabled()) { ?>
+<?php        if (Users::has_avatars_enabled()) { ?>
                 <col class="col_avatar" />
-<?        } ?>
+<?php        } ?>
                 <col class="col_post_body" />
             </colgroup>
             <tr class="colhead_dark">
                 <td colspan="<?=(Users::has_avatars_enabled() ? 2 : 1)?>">
                     <div style="float: left;"><a class="post_id" href="<?=$Link?>">#<?=$PostID?></a>
                         <?=$Header?>
-<?        if ($Tools) { ?>
+<?php           if ($Tools) { ?>
                         - <a href="#quickpost" onclick="Quote('<?=$PostID?>','<?=$UserInfo['Username']?>', true);" class="brackets">Quote</a>
-<?            if ($AuthorID == G::$LoggedUser['ID'] || check_perms('site_moderate_forums')) { ?>
+<?php               if ($AuthorID == G::$LoggedUser['ID'] || check_perms('site_moderate_forums')) { ?>
                         - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>','<?=$Key?>');" class="brackets">Edit</a>
-<?            }
-            if (check_perms('site_moderate_forums')) { ?>
+<?php                }
+                    if (check_perms('site_moderate_forums')) { ?>
                         - <a href="#post<?=$PostID?>" onclick="Delete('<?=$PostID?>');" class="brackets">Delete</a>
-<?            } ?>
+<?php               } ?>
                     </div>
                     <div id="bar<?=$PostID?>" style="float: right;">
                         <a href="reports.php?action=report&amp;type=comment&amp;id=<?=$PostID?>" class="brackets">Report</a>
-<?
-            if (check_perms('users_warn') && $AuthorID != G::$LoggedUser['ID'] && G::$LoggedUser['Class'] >= $UserInfo['Class']) {
+<?php
+                    if (check_perms('users_warn') && $AuthorID != G::$LoggedUser['ID'] && G::$LoggedUser['Class'] >= $UserInfo['Class']) {
 ?>
                         <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="comments.php" method="post">
                             <input type="hidden" name="action" value="warn" />
                             <input type="hidden" name="postid" value="<?=$PostID?>" />
                         </form>
                         - <a href="#" onclick="$('#warn<?=$PostID?>').raw().submit(); return false;" class="brackets">Warn</a>
-<?            } ?>
+<?php               } ?>
                         &nbsp;
                         <a href="#">&uarr;</a>
-<?        } ?>
+<?php           } ?>
                     </div>
                 </td>
             </tr>
             <tr>
-<?        if (Users::has_avatars_enabled()) { ?>
+<?php       if (Users::has_avatars_enabled()) { ?>
                 <td class="avatar" valign="top">
                 <?=Users::show_avatar($UserInfo['Avatar'], $AuthorID, $UserInfo['Username'], G::$LoggedUser['DisableAvatars'])?>
                 </td>
-<?        } ?>
+<?php       } ?>
                 <td class="body" valign="top">
                     <div id="content<?=$PostID?>">
                         <?=Text::full_format($Body)?>
-<?        if ($EditedUserID) { ?>
+<?php       if ($EditedUserID) { ?>
                         <br />
                         <br />
                         <span class="last_edited">
-<?            if (check_perms('site_admin_forums')) { ?>
+<?php           if (check_perms('site_admin_forums')) { ?>
                         <a href="#content<?=$PostID?>" onclick="LoadEdit('<?=substr($Link, 0, strcspn($Link, '.'))?>', <?=$PostID?>, 1); return false;">&laquo;</a>
-<?            } ?>
+<?php           } ?>
                         Last edited by
                         <?=Users::format_username($EditedUserID, false, false, false) ?> <?=time_diff($EditedTime, 2, true, true)?>
                         </span>
-<?        } ?>
+<?php       } ?>
                     </div>
                 </td>
             </tr>
         </table>
-<?    }
+<?php   }
 }

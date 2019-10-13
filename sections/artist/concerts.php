@@ -1,4 +1,4 @@
-<?
+<?php
 $Concerts = '';
 ob_start();
 
@@ -33,7 +33,7 @@ $Concerts .= ob_get_clean();
     </div>
 </div>
 
-<?
+<?php
 function make_concert_link($Event, $Name) {
     // The event doesn't have a start date (this should never happen)
     if ($Event['startDate'] == '') {
@@ -51,7 +51,7 @@ function make_concert_link($Event, $Name) {
         <input type="hidden" name="concert_template" value="<?=get_concert_post_template($Name, $Event)?>" />
     </form>
     <li><?=$Concert?> - <a href="#" class="brackets" onclick="$('#concert<?=$Event['id']?>').raw().submit(); return false;">Go to thread</a></li>
-<?
+<?php
 }
 
 function get_concert_post_template($Artist, $Event) {

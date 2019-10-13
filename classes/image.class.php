@@ -1,4 +1,4 @@
-<?
+<?php
 if (!extension_loaded('gd')) {
     error('GD Extension not loaded.');
 }

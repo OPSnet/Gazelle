@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 if (!defined('LOG_ENTRIES_PER_PAGE')) {
     define('LOG_ENTRIES_PER_PAGE', 100);
@@ -26,23 +26,27 @@ include(SERVER_ROOT.'/sections/log/sphinx.php');
         </form>
     </div>
 
-<?    if ($TotalMatches > LOG_ENTRIES_PER_PAGE) { ?>
+<?php
+    if ($TotalMatches > LOG_ENTRIES_PER_PAGE) { ?>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $TotalMatches, LOG_ENTRIES_PER_PAGE, 9);
     echo $Pages;?>
     </div>
-<?    } ?>
+<?php
+    } ?>
     <table cellpadding="6" cellspacing="1" border="0" class="log_table border" id="log_table" width="100%">
         <tr class="colhead">
             <td style="width: 180px;"><strong>Time</strong></td>
             <td><strong>Message</strong></td>
         </tr>
-<?    if ($QueryStatus) { ?>
+<?php
+    if ($QueryStatus) { ?>
     <tr class="nobr"><td colspan="2">Search request failed (<?=$QueryError?>).</td></tr>
-<?    } elseif (!$DB->has_results()) { ?>
+<?php
+    } elseif (!$DB->has_results()) { ?>
     <tr class="nobr"><td colspan="2">Nothing found!</td></tr>
-<?
+<?php
     }
 $Row = 'a';
 $Usernames = array();
@@ -195,18 +199,18 @@ while (list($ID, $Message, $LogTime) = $DB->next_record()) {
                 <?=time_diff($LogTime)?>
             </td>
             <td>
-                <span<? if ($Color) { ?> style="color: <?=$Color?>;"<? } ?>><?=$Message?></span>
+                <span<?php if ($Color) { ?> style="color: <?=$Color?>;"<?php } ?>><?=$Message?></span>
             </td>
         </tr>
-<?
+<?php
 }
 ?>
     </table>
-    <?    if ($TotalMatches > LOG_ENTRIES_PER_PAGE) { ?>
+    <?php    if ($TotalMatches > LOG_ENTRIES_PER_PAGE) { ?>
     <div class="linkbox">
         <?=$Pages;?>
     </div>
-    <?    } ?>
+    <?php    } ?>
 </div>
-<?
+<?php
 View::show_footer(); ?>

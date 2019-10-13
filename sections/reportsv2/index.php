@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
  * This is the index page, it is pretty much reponsible only for the switch statement.

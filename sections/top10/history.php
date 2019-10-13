@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(404);
 }
@@ -10,7 +10,7 @@ View::show_header('Top 10 Torrents history!');
 <div class="thin">
     <div class="header">
         <h2>Top 10 Torrents</h2>
-        <? Top10View::render_linkbox(); ?>
+        <?php Top10View::render_linkbox(); ?>
     </div>
     <div class="pad box">
         <form class="search_form" name="top10" method="get" action="">
@@ -36,7 +36,7 @@ View::show_header('Top 10 Torrents history!');
             </table>
         </form>
     </div>
-<?
+<?php
 if (!empty($_GET['date'])) {
     $Date = $_GET['date'];
     $SQLTime = $Date.' 00:00:00';
@@ -102,7 +102,7 @@ if (!empty($_GET['date'])) {
         <td class="center"></td>
         <td><strong>Name</strong></td>
     </tr>
-<?
+<?php
     foreach ($Details as $Detail) {
         list($Rank, $TitleString, $TagString, $TorrentID, $GroupID, $GroupName, $GroupCategoryID, $TorrentTags,
             $Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear,
@@ -183,13 +183,13 @@ if (!empty($_GET['date'])) {
             <div class="tags"><?=$TorrentTags->format()?></div>
         </td>
     </tr>
-<?
+<?php
     } //foreach ($Details as $Detail)
 ?>
     </table><br />
 </div>
 </div>
-<?
+<?php
 }
 View::show_footer();
 ?>

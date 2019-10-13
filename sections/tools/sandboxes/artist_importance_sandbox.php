@@ -36,5 +36,5 @@ $DB->prepared_query("SELECT ag.Name as ArtistName, tg.Name as GroupName, ta.Impo
 ?>
         </table>
     </div>
-<?
+<?php
 View::show_footer();

@@ -1,4 +1,4 @@
-<?
+<?php
 if (!extension_loaded('mysqli')) {
     error('Mysqli Extension not loaded.');
 }

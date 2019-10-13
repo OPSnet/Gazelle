@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (!check_perms("users_mod")) {
     error(404);
@@ -34,9 +34,9 @@ $Expiration = $GlobalNotification['Expiration'] ? $GlobalNotification['Expiratio
                 <td class="label">Importance</td>
                 <td>
                     <select name="importance" id="importance">
-<?        foreach (NotificationsManager::$Importances as $Key => $Value) { ?>
+<?php   foreach (NotificationsManager::$Importances as $Key => $Value) { ?>
                         <option value="<?=$Value?>"<?=$Value == $GlobalNotification['Importance'] ? ' selected="selected"' : ''?>><?=ucfirst($Key)?></option>
-<?        } ?>
+<?php   } ?>
                     </select>
                 </td>
             </tr>
@@ -50,15 +50,15 @@ $Expiration = $GlobalNotification['Expiration'] ? $GlobalNotification['Expiratio
                 <td>
                     <input type="submit" name="set" value="Create Notification" />
                 </td>
-<?        if ($GlobalNotification) { ?>
+<?php   if ($GlobalNotification) { ?>
                 <td>
                     <input type="submit" name="delete" value="Delete Notification" />
                 </td>
-<?        } ?>
+<?php   } ?>
             </tr>
         </table>
     </form>
 </div>
 
-<?
+<?php
 View::show_footer();

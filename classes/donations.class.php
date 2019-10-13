@@ -1,4 +1,4 @@
-<?
+<?php
 
 define('BTC_API_URL', 'https://api.bitcoinaverage.com/ticker/global/EUR/');
 define('USD_API_URL', 'http://www.google.com/ig/calculator?hl=en&q=1USD=?EUR');

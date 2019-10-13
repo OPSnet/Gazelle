@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (!empty($_GET['userid'])) {
     if (!check_perms('users_override_paranoia')) {

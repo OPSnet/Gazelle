@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $ArticleID = Wiki::alias_to_id($_GET['alias']);

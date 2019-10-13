@@ -1,4 +1,4 @@
-<?
+<?php
 // We keep torrent groups cached. However, the peer counts change ofter, so our solutions are to not cache them for long, or to update them. Here is where we updated them.
 
 if ((!isset($argv[1]) || $argv[1]!=SCHEDULE_KEY) && !check_perms('admin_schedule')) { // authorization, Fix to allow people with perms hit this page.

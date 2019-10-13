@@ -1,4 +1,4 @@
-<?
+<?php
 if (!isset($_GET['id']) || !is_number($_GET['id']) || !isset($_GET['torrentid']) || !is_number($_GET['torrentid'])) {
     error(0);
 }
@@ -72,4 +72,4 @@ if (!check_perms('site_moderate_requests')) {
         </table>
     </form>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

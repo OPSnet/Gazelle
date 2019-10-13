@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 // Quick SQL injection check
 if (!isset($_GET['postid']) || !is_number($_GET['postid'])) {

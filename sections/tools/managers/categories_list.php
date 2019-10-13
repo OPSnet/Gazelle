@@ -23,7 +23,7 @@ $DB->prepared_query('
         <td>Forums</td>
         <td>Submit</td>
     </tr>
-    <?
+    <?php
     $Row = 'b';
     while (list($ID, $Name, $Sort, $Count) = $DB->fetch_record()) {
         $Row = $Row === 'a' ? 'b' : 'a';
@@ -51,7 +51,7 @@ $DB->prepared_query('
 
             </form>
         </tr>
-        <?
+        <?php
     }
     ?>
     <tr class="colhead">
@@ -73,4 +73,4 @@ $DB->prepared_query('
         </form>
     </tr>
 </table>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 /***********************************************
  * This file displays the list of available tools in the staff toolbox.
  *
@@ -38,7 +38,7 @@ View::show_header('Staff Tools');
 <div class="permissions">
     <div class="permission_container">
     <!-- begin left column -->
-<?
+<?php
     // begin Administration category
     $ToolsHTML = "";
     create_row("Client whitelist", "tools.php?action=whitelist", check_perms("admin_whitelist"));
@@ -61,7 +61,7 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?
+<?php
     }
 
     // begin Announcements category
@@ -83,7 +83,7 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?
+<?php
     }
 
     // begin Community category
@@ -102,7 +102,7 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?
+<?php
     }
 
     // begin Finances category
@@ -120,12 +120,13 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?    } ?>
+<?php
+    } ?>
     <!-- end left column -->
     </div>
     <div class="permission_container">
     <!-- begin middle column -->
-<?
+<?php
     // begin Queue category
     $ToolsHTML = "";
     create_row("Auto-Enable requests", "tools.php?action=enable_requests", check_perms("users_mod"));
@@ -139,7 +140,7 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?
+<?php
     }
 
     // begin Managers category
@@ -158,7 +159,7 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?
+<?php
     }
 
     // begin Developer Sandboxes category
@@ -176,12 +177,13 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?    } ?>
+<?php
+    } ?>
     <!-- end middle column -->
     </div>
     <div class="permission_container">
     <!-- begin right column -->
-<?
+<?php
     // begin Site Information category
     $ToolsHTML = "";
     create_row("Economic stats", "tools.php?action=economic_stats", check_perms("site_view_flow"));
@@ -201,7 +203,7 @@ View::show_header('Staff Tools');
                 <?=$ToolsHTML?>
             </table>
         </div>
-<?
+<?php
     }
 
     // begin Torrents category
@@ -223,7 +225,7 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?
+<?php
     }
 
     // begin Development category
@@ -248,8 +250,9 @@ View::show_header('Staff Tools');
 <?=                $ToolsHTML ?>
             </table>
         </div>
-<?    } ?>
+<?php
+    } ?>
     <!-- end right column -->
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

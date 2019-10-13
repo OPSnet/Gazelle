@@ -26,11 +26,14 @@ View::show_header('contest admin');
         <div class="linkbox">
             <a href="contest.php" class="brackets">Intro</a>
             <a href="contest.php?action=leaderboard" class="brackets">Leaderboard</a>
-<? if (!$Create) { ?>
+<?php
+if (!$Create) { ?>
             <a href="contest.php?action=create" class="brackets">Create</a>
-<? } else { ?>
+<?php
+} else { ?>
             <a href="contest.php?action=admin" class="brackets">Admin</a>
-<? } ?>
+<?php
+} ?>
         </div>
     </div>
 
@@ -75,12 +78,12 @@ if ($Create || !empty($Contest)) {
 ?>
     <div class="box pad">
         <h2>Request pairs</h2>
-<?
+<?php
         $Pairs = $ContestMgr->get_request_pairs();
         if (!count($Pairs)) {
 ?>
         <p>No members have filled out more than one request for the same member.</p>
-<?
+<?php
         }
         else {
 ?>
@@ -91,7 +94,7 @@ if ($Create || !empty($Contest)) {
                 <td>Request creator</td>
                 <td>Filled</td>
             </tr>
-<?
+<?php
             foreach ($Pairs as $p) {
                 $filler  = Users::user_info($p['FillerID']);
                 $creator = Users::user_info($p['UserID']);
@@ -101,17 +104,18 @@ if ($Create || !empty($Contest)) {
                 <td><?= $creator['Username'] ?></td>
                 <td><?= $p['nr'] ?></td>
             </tr>
-<?
+<?php
             }
 ?>
         </table>
-<?
+<?php
         }
 ?>
     </div>
-<?  } /* request_fill */ ?>
+<?php
+    } /* request_fill */ ?>
     <form class="edit_form" name="contest" id="contestform" action="<?= $Create ? 'contest.php?action=create' : 'contest.php?action=admin&amp;id=' . $Contest['ID'] ?>" method="post">
-<?
+<?php
 if ($Contest['BonusPool']) {
     $Contest = $ContestMgr->get_contest($Contest['ID']);
     $total = $ContestMgr->calculate_pool_payout($Contest['ID']);
@@ -125,12 +129,13 @@ if ($Contest['BonusPool']) {
             <tr><td>Contest participation</td><td><?= number_format($bonus * 0.1 / $total['user'], 2) ?></td></tr>
             <tr><td>Per entry added</td><td><?= number_format($bonus * 0.85 / $total['torrent'], 2) ?></td></tr>
             <tr><td>Status of payout</td><td><?= $Contest['BonusStatus'] ?></td></tr>
-<? if ($Contest['payout_ready']) { ?>
+<?php if ($Contest['payout_ready']) { ?>
             <tr><td>Payout is ready</td><td><input type="submit" name="payment" value="Initiate payment"/></td></tr>
-<? } ?>
+<?php } ?>
         </table>
     </div>
-<? } /* BonusPool */ ?>
+<?php
+} /* BonusPool */ ?>
         <table>
             <tr>
                 <td class="label">Contest name:</td>
@@ -145,7 +150,7 @@ if ($Contest['BonusPool']) {
                 <td>
                     <p>Edit the type of the contest</p>
                     <select name="type">
-<?
+<?php
                         foreach ($ContestType as $t) {
                             printf('                    <option value="%d"%s>%s</option>',
                                 $t['ID'],
@@ -222,13 +227,16 @@ if ($Contest['BonusPool']) {
         </table>
         <input type="hidden" name="userid" value="<?= $UserID ?>"/>
         <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>"/>
-<? if ($Create) { ?>
+<?php
+if ($Create) { ?>
         <input type="hidden" name="new" value="1"/>
         <input type="submit" id="submit" value="Create contest"/>
-<? } else { ?>
+<?php
+} else { ?>
         <input type="hidden" name="cid" value="<?= $Contest['ID'] ?>"/>
         <input type="submit" id="submit" value="Save contest"/>
-<? } ?>
+<?php
+} ?>
     </form>
 </div>
 

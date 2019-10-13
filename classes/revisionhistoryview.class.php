@@ -1,4 +1,4 @@
-<?
+<?php
 class RevisionHistoryView {
     /**
      * Render the revision history
@@ -14,7 +14,7 @@ class RevisionHistoryView {
             <td>User</td>
             <td>Summary</td>
         </tr>
-<?
+<?php
         $Row = 'a';
         foreach ($RevisionHistory as $Entry) {
             list($RevisionID, $Summary, $Time, $UserID) = $Entry;
@@ -34,8 +34,8 @@ class RevisionHistoryView {
                 <?=($Summary ? $Summary : '(empty)')?>
             </td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 }

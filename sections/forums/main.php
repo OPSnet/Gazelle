@@ -1,11 +1,11 @@
-<?
+<?php
 $LastRead = Forums::get_last_read($Forums);
 View::show_header('Forums');
 ?>
 <div class="thin">
     <h2>Forums</h2>
     <div class="forum_list">
-<?
+<?php
 
 $Row = 'a';
 $LastCategoryID = 0;
@@ -27,7 +27,7 @@ foreach ($Forums as $Forum) {
         $LastCategoryID = $CategoryID;
         if ($OpenTable) { ?>
     </table>
-<?         } ?>
+<?php   } ?>
 <h3><?=$ForumCats[$CategoryID]?></h3>
     <table class="forum_index m_table">
         <tr class="colhead">
@@ -37,7 +37,7 @@ foreach ($Forums as $Forum) {
             <td class="m_th_right" style="width: 7%;">Topics</td>
             <td class="m_th_right" style="width: 7%;">Posts</td>
         </tr>
-<?
+<?php
         $OpenTable = true;
     }
 
@@ -58,32 +58,38 @@ foreach ($Forums as $Forum) {
                 <a class="<?=$Tooltip?>" href="forums.php?action=viewforum&amp;forumid=<?=$ForumID?>" title="<?=display_str($ForumDescription)?>"><?=display_str($ForumName)?></a>
             </h4>
         </td>
-<? if ($NumPosts == 0) { ?>
+<?php
+    if ($NumPosts == 0) { ?>
         <td class="td_latest">
             There are no topics here.<?=(($MinCreate <= $LoggedUser['Class']) ? ' <a href="forums.php?action=new&amp;forumid='.$ForumID.'">Create one!</a>' : '')?>
         </td>
         <td class="td_topic_count number_column m_td_right">0</td>
         <td class="td_post_count number_column m_td_right">0</td>
-<? } else { ?>
+<?php
+    } else { ?>
         <td class="td_latest">
             <span style="float: left;" class="last_topic">
                 <a href="forums.php?action=viewthread&amp;threadid=<?=$LastTopicID?>" class="tooltip" data-title-plain="<?=display_str($LastTopic)?>" <?=((strlen($LastTopic) > 50) ? "title='".display_str($LastTopic)."'" : "")?>><?=display_str(Format::cut_string($LastTopic, 50, 1))?></a>
             </span>
-<? if (!empty($LastRead[$LastTopicID])) { ?>
+<?php
+    if (!empty($LastRead[$LastTopicID])) { ?>
             <span style="float: left;" class="<?=$Tooltip?> last_read" title="Jump to last read">
                 <a href="forums.php?action=viewthread&amp;threadid=<?=$LastTopicID?>&amp;page=<?=$LastRead[$LastTopicID]['Page']?>#post<?=$LastRead[$LastTopicID]['PostID']?>"></a>
             </span>
-<? } ?>
+<?php
+    } ?>
             <span style="float: right;" class="last_poster">by <?=Users::format_username($LastAuthorID, false, false, false)?> <?=time_diff($LastTime, 1)?></span>
         </td>
         <td class="td_topic_count number_column m_td_right"><?=number_format($NumTopics)?></td>
         <td class="td_post_count number_column m_td_right"><?=number_format($NumPosts)?></td>
-<? } ?>
+<?php
+} ?>
     </tr>
-<? } ?>
+<?php
+} ?>
     </table>
     </div>
     <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=all&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a></div>
 </div>
 
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

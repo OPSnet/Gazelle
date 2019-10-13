@@ -1,4 +1,4 @@
-<?
+<?php
 include(SERVER_ROOT.'/classes/feed.class.php'); // RSS feeds
 
 authorize();

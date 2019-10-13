@@ -1,4 +1,4 @@
-<?
+<?php
 //Diff function by Leto of StC.
 function diff($OldText, $NewText) {
     $LineArrayOld = explode("\n", $OldText);
@@ -99,9 +99,9 @@ $Diff1 = get_body($ArticleID, $_GET['old']);
         <h2>Compare <a href="wiki.php?action=article&amp;id=<?=$ArticleID?>"><?=$Title?></a> Revisions</h2>
     </div>
     <div class="box center_revision" id="center">
-        <div class="body"><? foreach (diff($Diff1, $Diff2) AS $Line) { echo $Line; } ?></div>
+        <div class="body"><?php foreach (diff($Diff1, $Diff2) AS $Line) { echo $Line; } ?></div>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

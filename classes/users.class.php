@@ -1,4 +1,4 @@
-<?
+<?php
 class Users {
     /**
      * Get $Classes (list of classes keyed by ID) and $ClassLevels
@@ -439,7 +439,7 @@ class Users {
                             <li class="sortable_item">
                                 <label><input type="checkbox"<?=$Checked?> id="<?=$ID?>" /> <?=$Val?></label>
                             </li>
-<?
+<?php
         }
     }
 

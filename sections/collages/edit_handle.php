@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $CollageID = $_POST['collageid'];

@@ -35,7 +35,7 @@ View::show_header('News', 'bbcode,news_ajax');
 ?>
 <div class="thin">
     <div class="sidebar">
-<?
+<?php
 include('month_album.php');
 include('vanity_album.php');
 
@@ -45,7 +45,7 @@ if (check_perms('users_mod')) {
             <div class="head colhead_dark">
                 <strong><a href="staffblog.php">Latest staff blog posts</a></strong>
             </div>
-<?
+<?php
 if (($Blog = $Cache->get_value('staff_blog')) === false) {
     $DB->query("
         SELECT
@@ -74,7 +74,7 @@ if (($SBlogReadTime = $Cache->get_value('staff_blog_read_'.$LoggedUser['ID'])) =
 }
 ?>
             <ul class="stats nobullet">
-<?
+<?php
 $End = min(count($Blog), 5);
 for ($i = 0; $i < $End; $i++) {
     list($BlogID, $Author, $Title, $Body, $BlogTime) = $Blog[$i];
@@ -85,15 +85,15 @@ for ($i = 0; $i < $End; $i++) {
                     <a href="staffblog.php#blog<?=$BlogID?>"><?=$Title?></a>
                     <?=$SBlogReadTime < $BlogTime ? '</strong>' : ''?>
                 </li>
-<?
+<?php
 }
 ?>
             </ul>
         </div>
-<?    } ?>
+<?php    } ?>
         <div class="box">
             <div class="head colhead_dark"><strong><a href="blog.php">Latest blog posts</a></strong></div>
-<?
+<?php
 if (($Blog = $Cache->get_value('blog')) === false) {
     $DB->query("
         SELECT
@@ -113,7 +113,7 @@ if (($Blog = $Cache->get_value('blog')) === false) {
 }
 ?>
             <ul class="stats nobullet">
-<?
+<?php
 if (count($Blog) < 5) {
     $Limit = count($Blog);
 } else {
@@ -125,28 +125,28 @@ for ($i = 0; $i < $Limit; $i++) {
                 <li>
                     <?=($i + 1)?>. <a href="blog.php#blog<?=$BlogID?>"><?=$Title?></a>
                 </li>
-<?
+<?php
 }
 ?>
             </ul>
         </div>
 
-<?
+<?php
 include('contest_leaderboard.php');
 //SiteHistoryView::render_recent_sidebar(SiteHistory::get_events(null, null, null, null, null, null, 5));
 ?>
         <div class="box">
             <div class="head colhead_dark"><strong>Stats</strong></div>
             <ul class="stats nobullet">
-<? if (USER_LIMIT > 0) { ?>
+<?php if (USER_LIMIT > 0) { ?>
                 <li>Maximum users: <?=number_format(USER_LIMIT) ?></li>
-<?
+<?php
 }
 
 $UserCount = Users::get_enabled_users_count();
 ?>
                 <li>Enabled users: <?=number_format($UserCount)?> <a href="stats.php?action=users" class="brackets">Details</a></li>
-<?
+<?php
 
 if (($UserStats = $Cache->get_value('stats_users')) === false) {
     $DB->query("
@@ -176,7 +176,7 @@ if (($UserStats = $Cache->get_value('stats_users')) === false) {
                 <li>Users active today: <?=number_format($UserStats['Day'])?> (<?=number_format($UserStats['Day'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this week: <?=number_format($UserStats['Week'])?> (<?=number_format($UserStats['Week'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this month: <?=number_format($UserStats['Month'])?> (<?=number_format($UserStats['Month'] / $UserCount * 100, 2)?>%)</li>
-<?
+<?php
 
 if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {
     $DB->query("
@@ -224,7 +224,7 @@ if (($PerfectCount = $Cache->get_value('stats_perfect_count')) === false) {
                 <li>Releases: <?=number_format($AlbumCount)?></li>
                 <li>Artists: <?=number_format($ArtistCount)?></li>
                 <li>"Perfect" FLACs: <?=number_format($PerfectCount)?></li>
-<?
+<?php
 //End Torrent Stats
 
 if (($CollageCount = $Cache->get_value('stats_collages')) === false) {
@@ -236,7 +236,7 @@ if (($CollageCount = $Cache->get_value('stats_collages')) === false) {
 }
 ?>
                 <li>Collages: <?=number_format($CollageCount)?></li>
-<?
+<?php
 
 if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
     $DB->query("
@@ -255,12 +255,12 @@ if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
 $RequestPercentage = $RequestCount > 0 ? $FilledCount / $RequestCount * 100: 0;
 ?>
                 <li>Requests: <?=number_format($RequestCount)?> (<?=number_format($RequestPercentage, 2)?>% filled)</li>
-<?
+<?php
 
 if ($SnatchStats = $Cache->get_value('stats_snatches')) {
 ?>
                 <li>Snatches: <?=number_format($SnatchStats)?></li>
-<?
+<?php
 }
 
 if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
@@ -299,7 +299,7 @@ if (!$PeerStatsLocked) {
                 <li>Seeder/leecher ratio: <?=$Ratio?></li>
             </ul>
         </div>
-<?
+<?php
 if (($TopicID = $Cache->get_value('polls_featured')) === false) {
     $DB->query("
         SELECT TopicID
@@ -361,12 +361,12 @@ if ($TopicID) {
 
 ?>
         <div class="box">
-            <div class="head colhead_dark"><strong>Poll<? if ($Closed) { echo ' [Closed]'; } ?></strong></div>
+            <div class="head colhead_dark"><strong>Poll<?php if ($Closed) { echo ' [Closed]'; } ?></strong></div>
             <div class="pad">
                 <p><strong><?=display_str($Question)?></strong></p>
-<?    if ($UserResponse !== null || $Closed) { ?>
+<?php    if ($UserResponse !== null || $Closed) { ?>
                 <ul class="poll nobullet">
-<?        foreach ($Answers as $i => $Answer) {
+<?php        foreach ($Answers as $i => $Answer) {
             if ($TotalVotes > 0) {
                 $Ratio = $Votes[$i] / $MaxVotes;
                 $Percent = $Votes[$i] / $TotalVotes;
@@ -381,34 +381,34 @@ if ($TopicID) {
                         <span class="right_poll"></span>
                         <br />
                     </li>
-<?        } ?>
+<?php        } ?>
                 </ul>
                 <strong>Votes:</strong> <?=number_format($TotalVotes)?><br />
-<?     } else { ?>
+<?php     } else { ?>
                 <div id="poll_container">
                 <form class="vote_form" name="poll" id="poll" action="">
                     <input type="hidden" name="action" value="poll" />
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                     <input type="hidden" name="topicid" value="<?=$TopicID?>" />
-<?         foreach ($Answers as $i => $Answer) { ?>
+<?php         foreach ($Answers as $i => $Answer) { ?>
                     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
                     <label for="answer_<?=$i?>"><?=display_str($Answers[$i])?></label><br />
-<?         } ?>
+<?php         } ?>
                     <br /><input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&#8202;&mdash;&#8202;Show the results!</label><br /><br />
                     <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response } );" value="Vote" />
                 </form>
                 </div>
-<?     } ?>
+<?php     } ?>
                 <br /><strong>Topic:</strong> <a href="forums.php?action=viewthread&amp;threadid=<?=$TopicID?>">Visit</a>
             </div>
         </div>
-<?
+<?php
 }
 //polls();
 ?>
     </div>
     <div class="main_column">
-<?
+<?php
 
 $Recommend = $Cache->get_value('recommend');
 $Recommend_artists = $Cache->get_value('recommend_artists');
@@ -443,7 +443,7 @@ $Cache->increment('usage_index');
         </div>
 
         <table class="torrent_table hidden" id="vanityhouse">
-<?
+<?php
     foreach ($Recommend as $Recommendations) {
         list($GroupID, $UserID, $Username, $GroupName, $TagList) = $Recommendations;
         $TagsStr = '';
@@ -467,11 +467,11 @@ $Cache->increment('usage_index');
                     <?=$TagStr?>
                 </td>
             </tr>
-<?    } ?>
+<?php    } ?>
         </table>
     </div>
 <!-- END recommendations section -->
-<?
+<?php
 }
 $Count = 0;
 foreach ($News as $NewsItem) {
@@ -483,15 +483,15 @@ foreach ($News as $NewsItem) {
         <div id="news<?=$NewsID?>" class="box news_post">
             <div class="head">
                 <strong><?=Text::full_format($Title)?></strong> <?=time_diff($NewsTime);?>
-<?    if (check_perms('admin_manage_news')) { ?>
+<?php    if (check_perms('admin_manage_news')) { ?>
                 - <a href="tools.php?action=editnews&amp;id=<?=$NewsID?>" class="brackets">Edit</a>
-<?    } ?>
+<?php    } ?>
             <span style="float: right;"><a href="#" onclick="$('#newsbody<?=$NewsID?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
             </div>
 
             <div id="newsbody<?=$NewsID?>" class="pad"><?=Text::full_format($Body)?></div>
         </div>
-<?
+<?php
     if (++$Count > ($NewsCount - 1)) {
         break;
     }
@@ -504,7 +504,7 @@ foreach ($News as $NewsItem) {
         </div>
     </div>
 </div>
-<?
+<?php
 View::show_footer(array('disclaimer'=>true));
 
 function contest() {
@@ -538,17 +538,17 @@ function contest() {
             <div class="head colhead_dark"><strong>Quality time scoreboard</strong></div>
             <div class="pad">
                 <ol style="padding-left: 5px;">
-<?
+<?php
     foreach ($Contest as $User) {
         list($UserID, $Points, $Username) = $User;
 ?>
                     <li><?=Users::format_username($UserID, false, false, false)?> (<?=number_format($Points)?>)</li>
-<?    } ?>
+<?php    } ?>
                 </ol>
                 Total uploads: <?=$TotalPoints?><br />
                 <a href="index.php?action=scoreboard">Full scoreboard</a>
             </div>
         </div>
     <!-- END contest Section -->
-<?
+<?php
 } // contest()

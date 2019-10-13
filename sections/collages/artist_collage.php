@@ -1,4 +1,4 @@
-<?
+<?php
 // TODO: Cache this
 $DB->query("
     SELECT
@@ -39,21 +39,24 @@ foreach ($Artists as $Artist) {
             <tr>
                 <td><a href="artist.php?id=<?=$Artist['ArtistID']?>"><?=$Artist['Name']?></a></td>
             </tr>
-<?
+<?php
     $ArtistTable .= ob_get_clean();
 
     ob_start();
     ?>
                 <li class="image_group_<?=$Artist['ArtistID']?>">
                     <a href="artist.php?id=<?=$Artist['ArtistID']?>">
-<?    if ($Artist['Image']) { ?>
+<?php
+    if ($Artist['Image']) { ?>
                         <img class="tooltip" src="<?=ImageTools::process($Artist['Image'], true)?>" alt="<?=$Artist['Name']?>" title="<?=$Artist['Name']?>" width="118" />
-<?    } else { ?>
+<?php
+    } else { ?>
                         <span style="width: 107px; padding: 5px;"><?=$Artist['Name']?></span>
-<?    } ?>
+<?php
+    } ?>
                     </a>
                 </li>
-<?
+<?php
     $Collage[] = ob_get_clean();
 }
 
@@ -90,36 +93,44 @@ View::show_header($Name, 'browse,collage,bbcode,voting,recommend');
         <h2><?=$Name?></h2>
         <div class="linkbox">
             <a href="collages.php" class="brackets">List of collages</a>
-<?    if (check_perms('site_collages_create')) { ?>
+<?php
+    if (check_perms('site_collages_create')) { ?>
             <a href="collages.php?action=new" class="brackets">New collage</a>
-<?    } ?>
+<?php
+    } ?>
             <br /><br />
-<?    if (check_perms('site_collages_subscribe')) { ?>
+<?php
+    if (check_perms('site_collages_subscribe')) { ?>
             <a href="#" id="subscribelink<?=$CollageID?>" class="brackets" onclick="CollageSubscribe(<?=$CollageID?>); return false;"><?=(in_array($CollageID, $CollageSubscriptions) ? 'Unsubscribe' : 'Subscribe')?></a>
-<?
+<?php
     }
     if (check_perms('site_collages_delete') || (check_perms('site_edit_wiki') && !$Locked)) {
 ?>
             <a href="collages.php?action=edit&amp;collageid=<?=$CollageID?>" class="brackets">Edit description</a>
-<?    } else { ?>
+<?php
+    } else { ?>
             <span class="brackets">Locked</span>
-<?
+<?php
     }
     if (Bookmarks::has_bookmarked('collage', $CollageID)) {
 ?>
             <a href="#" id="bookmarklink_collage_<?=$CollageID?>" class="brackets" onclick="Unbookmark('collage', <?=$CollageID?>, 'Bookmark'); return false;">Remove bookmark</a>
-<?    } else { ?>
+<?php
+    } else { ?>
             <a href="#" id="bookmarklink_collage_<?=$CollageID?>" class="brackets" onclick="Bookmark('collage', <?=$CollageID?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?
+<?php
     }
     if (check_perms('site_collages_manage') && !$Locked) {
 ?>
             <a href="collages.php?action=manage_artists&amp;collageid=<?=$CollageID?>" class="brackets">Manage artists</a>
-<?    } ?>
+<?php
+    } ?>
             <a href="reports.php?action=report&amp;type=collage&amp;id=<?=$CollageID?>" class="brackets">Report collage</a>
-<?    if (check_perms('site_collages_delete') || $CreatorID == $LoggedUser['ID']) { ?>
+<?php
+    if (check_perms('site_collages_delete') || $CreatorID == $LoggedUser['ID']) { ?>
             <a href="collages.php?action=delete&amp;collageid=<?=$CollageID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to delete this collage?');">Delete</a>
-<?    } ?>
+<?php
+    } ?>
         </div>
     </div>
     <div class="sidebar">
@@ -144,7 +155,7 @@ View::show_header($Name, 'browse,collage,bbcode,voting,recommend');
             <div class="head"><strong>Top Contributors</strong></div>
             <div class="pad">
                 <ol style="padding-left: 5px;">
-<?
+<?php
 arsort($UserAdditions);
 $i = 0;
 foreach ($UserAdditions as $UserID => $Additions) {
@@ -154,13 +165,14 @@ foreach ($UserAdditions as $UserID => $Additions) {
     }
 ?>
                     <li><?=Users::format_username($UserID, false, false, false)?> (<?=number_format($Additions)?>)</li>
-<?
+<?php
 }
 ?>
                 </ol>
             </div>
         </div>
-<? if (check_perms('site_collages_manage') && !isset($PreventAdditions)) { ?>
+<?php
+if (check_perms('site_collages_manage') && !isset($PreventAdditions)) { ?>
         <div class="box box_addartist">
             <div class="head"><strong>Add Artists</strong><span class="float_right"><a href="#" onclick="$('.add_artist_container').toggle_class('hidden'); this.innerHTML = (this.innerHTML == 'Batch add' ? 'Individual add' : 'Batch add'); return false;" class="brackets">Batch add</a></span></div>
             <div class="pad add_artist_container">
@@ -169,7 +181,7 @@ foreach ($UserAdditions as $UserID => $Additions) {
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                     <input type="hidden" name="collageid" value="<?=$CollageID?>" />
                     <div class="field_div">
-                        <input type="text" id="artist" size="20" name="url"<? Users::has_autocomplete_enabled('other'); ?> />
+                        <input type="text" id="artist" size="20" name="url"<?php Users::has_autocomplete_enabled('other'); ?> />
                     </div>
                     <div class="submit_div">
                         <input type="submit" value="Add" />
@@ -192,9 +204,11 @@ foreach ($UserAdditions as $UserID => $Additions) {
                 </form>
             </div>
         </div>
-<? } ?>
+<?php
+}
+ ?>
         <h3>Comments</h3>
-<?
+<?php
 if ($CommentList === null) {
     $DB->query("
         SELECT
@@ -222,13 +236,13 @@ foreach ($CommentList as $Comment) {
             </div>
             <div class="pad"><?=Text::full_format($Body)?></div>
         </div>
-<?
+<?php
 }
 ?>
         <div class="box pad">
             <a href="collages.php?action=comments&amp;collageid=<?=$CollageID?>" class="brackets">View all comments</a>
         </div>
-<?
+<?php
 if (!$LoggedUser['DisablePosting']) {
 ?>
         <div class="box box_addcomment">
@@ -248,18 +262,18 @@ if (!$LoggedUser['DisablePosting']) {
                 </div>
             </form>
         </div>
-<?
+<?php
 }
 ?>
     </div>
     <div class="main_column">
-<?
+<?php
 if ($CollageCovers != 0) {
 ?>
         <div id="coverart" class="box">
             <div class="head" id="coverhead"><strong>Cover Art</strong></div>
             <ul class="collage_images" id="collage_page0">
-<?
+<?php
     $Page1 = array_slice($Collage, 0, $CollageCovers);
     foreach ($Page1 as $Group) {
         echo $Group;
@@ -267,13 +281,15 @@ if ($CollageCovers != 0) {
 ?>
             </ul>
         </div>
-<?    if ($NumGroups > $CollageCovers) { ?>
+<?php
+    if ($NumGroups > $CollageCovers) { ?>
         <div class="linkbox pager" style="clear: left;" id="pageslinksdiv">
             <span id="firstpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.page(0); return false;"><strong>&lt;&lt; First</strong></a> | </span>
             <span id="prevpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.prevPage(); return false;"><strong>&lt; Prev</strong></a> | </span>
-<?        for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) { ?>
+<?php
+        for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) { ?>
             <span id="pagelink<?=$i?>" class="<?=($i > 4 ? 'hidden' : '')?><?=($i == 0 ? 'selected' : '')?>"><a href="#" class="pageslink" onclick="collageShow.page(<?=$i?>, this); return false;"><strong><?=$CollageCovers * $i + 1?>-<?=min($NumGroups, $CollageCovers * ($i + 1))?></strong></a><?=(($i != ceil($NumGroups / $CollageCovers) - 1) ? ' | ' : '')?></span>
-<?        } ?>
+<?php   } ?>
             <span id="nextbar" class="<?=($NumGroups / $CollageCovers > 5) ? 'hidden' : ''?>"> | </span>
             <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;"><strong>Next &gt;</strong></a></span>
             <span id="lastpage" class="<?=(ceil($NumGroups / $CollageCovers) == 2 ? 'invisible' : '')?>"> | <a href="#" class="pageslink" onclick="collageShow.page(<?=ceil($NumGroups / $CollageCovers) - 1?>); return false;"><strong>Last &gt;&gt;</strong></a></span>
@@ -281,7 +297,7 @@ if ($CollageCovers != 0) {
         <script type="text/javascript">//<![CDATA[
             collageShow.init(<?=json_encode($CollagePages)?>);
         //]]></script>
-<?
+<?php
     }
 }
 ?>
@@ -293,6 +309,6 @@ if ($CollageCovers != 0) {
         </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

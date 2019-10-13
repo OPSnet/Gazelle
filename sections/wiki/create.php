@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Create an article');
 ?>
 <div class="thin">
@@ -9,7 +9,7 @@ View::show_header('Create an article');
             <div>
                 <h3>Title</h3>
                 <input type="text" name="title" size="92" maxlength="100" />
-<? /* if ($_GET['alias']) { ?>
+<?php /* if ($_GET['alias']) { ?>
                 <input type="hidden" name="alias" value="<?=display_str(alias($_GET['alias']))?>" />
 <? } else { ?>
                 <h3>Alias</h3>
@@ -17,7 +17,7 @@ View::show_header('Create an article');
                 <input type="text" name="alias" size="50" maxlength="50" />
 <? } */?>
                 <h3>Body </h3>
-<?
+<?php
     $ReplyText = new TEXTAREA_PREVIEW('body', 'body', '', 91, 22, true, false);
 
     if (check_perms('admin_manage_wiki')) { ?>
@@ -25,7 +25,7 @@ View::show_header('Create an article');
                 <p>There are some situations in which the viewing or editing of an article should be restricted to a certain class.</p>
                 <strong>Restrict read:</strong> <select name="minclassread"><?=class_list()?></select>
                 <strong>Restrict edit:</strong> <select name="minclassedit"><?=class_list()?></select>
-<?    } ?>
+<?php    } ?>
                 <div style="text-align: center;">
                     <input type="button" value="Preview" class="hidden button_preview_<?=$ReplyText->getID()?>" tabindex="1" />
                     <input type="submit" value="Submit" />
@@ -34,4 +34,4 @@ View::show_header('Create an article');
         </form>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

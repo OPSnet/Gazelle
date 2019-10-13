@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms("users_mod")) {
     error(404);
 }
@@ -42,11 +42,12 @@ list($TotalQuestions) = $DB->next_record();
 View::show_header('Ask the Staff', 'questions,bbcode');
 if ($TotalQuestions > QUESTIONS_PER_PAGE) { ?>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $TotalQuestions, QUESTIONS_PER_PAGE);
     echo $Pages;?>
     </div>
-<? } ?>
+<?php
+} ?>
 <div class="thin">
     <div class="header">
         <h2>User Questions</h2>
@@ -56,7 +57,8 @@ if ($TotalQuestions > QUESTIONS_PER_PAGE) { ?>
         <a class="brackets" href="questions.php?action=answers">View staff answers</a>
         <a class="brackets" href="questions.php?action=popular_questions">Popular questions</a>
     </div>
-<?    foreach($Questions as $Question) { ?>
+<?php
+foreach($Questions as $Question) { ?>
     <div id="question<?=$Question['ID']?>" class="box box2">
         <div class="head">
             <span>
@@ -64,10 +66,12 @@ if ($TotalQuestions > QUESTIONS_PER_PAGE) { ?>
                 <?=Users::format_username($Question['UserID'])?> - <?=time_diff($Question['Date'])?>
             </span>
             <span style="float: right;">
-<?                if ($Question['Responses'] > 0) { ?>
+<?php
+    if ($Question['Responses'] > 0) { ?>
                     <a href="#" id="<?=$Question['ID']?>" class="view_responses brackets"><?=$Question['Responses'] == 1 ? ("View " . $Question['Responses'] . " response") : ("View " . $Question['Responses'] . " responses")?></a>
                     -
-<?                } ?>
+<?php
+    } ?>
                 <form class="hidden" id="delete_<?=$Question['ID']?>" method="post" action="">
                     <input type="hidden" name="action" value="take_remove_question" />
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
@@ -85,10 +89,11 @@ if ($TotalQuestions > QUESTIONS_PER_PAGE) { ?>
         </div>
     </div>
     <div id="answer<?=$Question['ID']?>" class="hidden center box pad">
-        <? new TEXTAREA_PREVIEW("replybox_" . $Question['ID'], "replybox_" . $Question['ID'], '', 40, 8); ?>
+        <?php new TEXTAREA_PREVIEW("replybox_" . $Question['ID'], "replybox_" . $Question['ID'], '', 40, 8); ?>
         <input type="submit" class="submit submit_button" id="<?=$Question['ID']?>" value="Answer" />
     </div>
-<?    } ?>
+<?php
+} ?>
 </div>
-<?
+<?php
 View::show_footer();

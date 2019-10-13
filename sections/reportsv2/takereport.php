@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * This page handles the backend from when a user submits a report.
  * It checks for (in order):

@@ -164,13 +164,17 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
 ?>
 <div class="thin">
     <div class="header">
-<?    if ($BookmarkView) { ?>
+<?php
+    if ($BookmarkView) { ?>
         <h2>Your bookmarked collages</h2>
-<?    } else { ?>
+<?php
+    } else { ?>
         <h2>Browse collages<?=(!empty($UserLink) ? (isset($CollageIDs) ? " with contributions by $UserLink" : " started by $UserLink") : '')?></h2>
-<?    } ?>
+<?php
+    } ?>
     </div>
-<?    if (!$BookmarkView) { ?>
+<?php
+    if (!$BookmarkView) { ?>
     <div>
         <form class="search_form" name="collages" action="" method="get">
             <div><input type="hidden" name="action" value="search" /></div>
@@ -184,39 +188,39 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
                 <tr id="tagfilter">
                     <td class="label">Tags (comma-separated):</td>
                     <td>
-                        <input type="text" id="tags" name="tags" size="70" value="<?=(!empty($_GET['tags']) ? display_str($_GET['tags']) : '')?>"<? Users::has_autocomplete_enabled('other'); ?> />&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?Format::selected('tags_type', 0, 'checked')?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?Format::selected('tags_type', 1, 'checked')?> /><label for="tags_type1"> All</label>
+                        <input type="text" id="tags" name="tags" size="70" value="<?=(!empty($_GET['tags']) ? display_str($_GET['tags']) : '')?>"<?php Users::has_autocomplete_enabled('other'); ?> />&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked'); ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked'); ?> /><label for="tags_type1"> All</label>
                     </td>
                 </tr>
                 <tr id="categories">
                     <td class="label">Categories:</td>
                     <td>
-<?        foreach ($CollageCats as $ID => $Cat) { ?>
-                        <input type="checkbox" value="1" name="cats[<?=$ID?>]" id="cats_<?=$ID?>"<? if (in_array($ID, $Categories)) { echo ' checked="checked"'; } ?> />
+<?php   foreach ($CollageCats as $ID => $Cat) { ?>
+                        <input type="checkbox" value="1" name="cats[<?=$ID?>]" id="cats_<?=$ID?>"<?php if (in_array($ID, $Categories)) { echo ' checked="checked"'; } ?> />
                         <label for="cats_<?=$ID?>"><?=$Cat?></label>&nbsp;&nbsp;
-<?        } ?>
+<?php   } ?>
                     </td>
                 </tr>
                 <tr id="search_name_description">
                     <td class="label">Search in:</td>
                     <td>
-                        <input type="radio" name="type" value="c.name" <? if ($Type === 'c.name') { echo 'checked="checked" '; } ?>/> Names&nbsp;&nbsp;
-                        <input type="radio" name="type" value="description" <? if ($Type === 'description') { echo 'checked="checked" '; } ?>/> Descriptions
+                        <input type="radio" name="type" value="c.name" <?php if ($Type === 'c.name') { echo 'checked="checked" '; } ?>/> Names&nbsp;&nbsp;
+                        <input type="radio" name="type" value="description" <?php if ($Type === 'description') { echo 'checked="checked" '; } ?>/> Descriptions
                     </td>
                 </tr>
                 <tr id="order_by">
                     <td class="label">Order by:</td>
                     <td>
                         <select name="order_by" class="ft_order_by">
-<?        foreach ($OrderVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<? if (isset($_GET['order_by']) && $_GET['order_by'] === $Cur || (!isset($_GET['order_by']) && $Cur === 'Time')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?        } ?>
+<?php   foreach ($OrderVals as $Cur) { ?>
+                            <option value="<?=$Cur?>"<?php if (isset($_GET['order_by']) && $_GET['order_by'] === $Cur || (!isset($_GET['order_by']) && $Cur === 'Time')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
+<?php   } ?>
                         </select>
                         <select name="order_way" class="ft_order_way">
-<?        foreach ($WayVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<? if (isset($_GET['order_way']) && $_GET['order_way'] === $Cur || (!isset($_GET['order_way']) && $Cur === 'Descending')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?        } ?>
+<?php   foreach ($WayVals as $Cur) { ?>
+                            <option value="<?=$Cur?>"<?php if (isset($_GET['order_way']) && $_GET['order_way'] === $Cur || (!isset($_GET['order_way']) && $Cur === 'Descending')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
+<?php   } ?>
                         </select>
                     </td>
                 </tr>
@@ -228,14 +232,15 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
             </table>
         </form>
     </div>
-<?    } /* if (!$BookmarkView) */ ?>
+<?php
+    } /* if (!$BookmarkView) */ ?>
     <div class="linkbox">
-<?
+<?php
     if (!$BookmarkView) {
         if (check_perms('site_collages_create')) {
 ?>
         <a href="collages.php?action=new" class="brackets">New collage</a>
-<?
+<?php
         }
         if (check_perms('site_collages_personal')) {
 
@@ -251,51 +256,51 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
                 list($CollageID) = $DB->next_record();
 ?>
         <a href="collages.php?id=<?=$CollageID?>" class="brackets">Personal collage</a>
-<?            } elseif ($CollageCount > 1) { ?>
+<?php       } elseif ($CollageCount > 1) { ?>
         <a href="collages.php?action=mine" class="brackets">Personal collages</a>
-<?
+<?php
             }
         }
         if (check_perms('site_collages_subscribe')) {
 ?>
         <a href="userhistory.php?action=subscribed_collages" class="brackets">Subscribed collages</a>
-<?        } ?>
+<?php   } ?>
         <a href="bookmarks.php?type=collages" class="brackets">Bookmarked collages</a>
-<?        if (check_perms('site_collages_recover')) { ?>
+<?php   if (check_perms('site_collages_recover')) { ?>
         <a href="collages.php?action=recover" class="brackets">Recover collage</a>
-<?
-        }
+<?php   }
         if (check_perms('site_collages_create') || check_perms('site_collages_personal') || check_perms('site_collages_recover')) {
 ?>
         <br />
-<?        } ?>
+<?php   } ?>
         <a href="collages.php?userid=<?=$LoggedUser['ID']?>" class="brackets">Collages you started</a>
         <a href="collages.php?userid=<?=$LoggedUser['ID']?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
         <a href="random.php?action=collage" class="brackets">Random collage</a>
         <br /><br />
-<?    } else { ?>
+<?php    } else { ?>
         <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
         <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
         <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
         <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
         <br /><br />
-<?
+<?php
     }
     $Pages = Format::get_pages($Page, $NumResults, COLLAGES_PER_PAGE, 9);
     echo $Pages;
 ?>
     </div>
-<?    if (count($Collages) === 0) { ?>
+<?php
+    if (count($Collages) === 0) { ?>
 <div class="box pad" align="center">
-<?        if ($BookmarkView) { ?>
+<?php   if ($BookmarkView) { ?>
     <h2>You have not bookmarked any collages.</h2>
-<?        } else { ?>
+<?php   } else { ?>
     <h2>Your search did not match anything.</h2>
     <p>Make sure all names are spelled correctly, or try making your search less specific.</p>
-<?        } ?>
+<?php   } ?>
 </div><!--box-->
 </div><!--content-->
-<?        View::show_footer();
+<?php   View::show_footer();
         die();
     }
 ?>
@@ -308,7 +313,7 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
         <td>Updated</td>
         <td>Author</td>
     </tr>
-<?
+<?php
 $Row = 'a'; // For the pretty colours
 foreach ($Collages as $Collage) {
     list($ID, $Name, $NumTorrents, $TagList, $CategoryID, $UserID, $Subscribers, $Updated) = $Collage;
@@ -323,11 +328,13 @@ foreach ($Collages as $Collage) {
         </td>
         <td class="td_info">
             <a href="collages.php?id=<?=$ID?>"><?=$Name?></a>
-<?    if ($BookmarkView) { ?>
+<?php
+    if ($BookmarkView) { ?>
             <span style="float: right;">
                 <a href="#" onclick="Unbookmark('collage', <?=$ID?>, ''); return false;" class="brackets">Remove bookmark</a>
             </span>
-<?    } ?>
+<?php
+    } ?>
             <div class="tags"><?=$TorrentTags->format('collages.php?action=search&amp;tags=')?></div>
         </td>
         <td class="td_torrent_count m_td_right number_column"><?=number_format((int)$NumTorrents)?></td>
@@ -335,10 +342,10 @@ foreach ($Collages as $Collage) {
         <td class="td_updated nobr"><?=time_diff($Updated)?></td>
         <td class="td_author"><?=Users::format_username($UserID, false, false, false)?></td>
     </tr>
-<?
+<?php
 }
 ?>
 </table>
     <div class="linkbox"><?=$Pages?></div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

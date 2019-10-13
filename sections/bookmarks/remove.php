@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 if (!Bookmarks::can_bookmark($_GET['type'])) {

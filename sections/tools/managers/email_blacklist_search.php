@@ -1,4 +1,4 @@
-<?
+<?php
 $Search = db_string($_GET['email']);
 $JSON = array();
 if (!check_perms('users_view_email') || empty($Search)) {

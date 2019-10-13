@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Create a collage');
 
 if (!check_perms('site_collages_renamepersonal')) {
@@ -10,11 +10,11 @@ if (!check_perms('site_collages_renamepersonal') && $Category === '0') {
 }
 ?>
 <div class="thin">
-<?
+<?php
 if (isset($Err)) { ?>
     <div class="save_message error"><?=$Err?></div>
     <br />
-<?
+<?php
 } ?>
     <form class="create_form" name="collage" action="collages.php" method="post">
         <input type="hidden" name="action" value="new_handle" />
@@ -31,12 +31,12 @@ if (isset($Err)) { ?>
                 <td class="label"><strong>Category</strong></td>
                 <td>
                     <select name="category"<?=$ChangeJS?>>
-<?
+<?php
 array_shift($CollageCats);
 
 foreach ($CollageCats as $CatID=>$CatName) { ?>
                         <option value="<?=$CatID + 1 ?>"<?=(($CatID + 1 == $Category) ? ' selected="selected"' : '')?>><?=$CatName?></option>
-<?
+<?php
 }
 
 $DB->query("
@@ -48,7 +48,7 @@ $DB->query("
 list($CollageCount) = $DB->next_record();
 if (($CollageCount < $LoggedUser['Permissions']['MaxCollages']) && check_perms('site_collages_personal')) { ?>
                         <option value="0"<?=(($Category === '0') ? ' selected="selected"' : '')?>>Personal</option>
-<?
+<?php
 } ?>
                     </select>
                     <br />
@@ -59,10 +59,11 @@ if (($CollageCount < $LoggedUser['Permissions']['MaxCollages']) && check_perms('
                         <li><strong>Label</strong> - A collage containing all the releases of a particular record label.</li>
                         <li><strong>Staff picks</strong> - A listing of recommendations picked by the staff on special occasions.</li>
                         <li><strong>Charts</strong> - Contains all the releases that comprise a certain type of chart (e.g. Billboard Top 100, Pitchfork Top 100, <?=SITE_NAME?> Top 10, etc.).</li>
-<?
+<?php
     if (($CollageCount < $LoggedUser['Permissions']['MaxCollages']) && check_perms('site_collages_personal')) { ?>
                         <li><strong>Personal</strong> - You can put whatever you want here. It is your own personal collage.</li>
-<?    } ?>
+<?php
+    } ?>
                     </ul>
                 </td>
             </tr>
@@ -89,4 +90,4 @@ if (($CollageCount < $LoggedUser['Permissions']['MaxCollages']) && check_perms('
         </table>
     </form>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

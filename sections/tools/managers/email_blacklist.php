@@ -1,4 +1,4 @@
-<?
+<?php
 define('EMAILS_PER_PAGE', 25);
 if (!check_perms('users_view_email')) {
     error(403);
@@ -48,7 +48,7 @@ list ($NumResults) = $DB->next_record();
 </form>
 <div class="linkbox pager">
     <br />
-<?
+<?php
     $Pages = Format::get_pages($Page, $NumResults, TOPICS_PER_PAGE, 9);
     echo $Pages;
 ?>
@@ -72,7 +72,7 @@ list ($NumResults) = $DB->next_record();
             <td><input type="submit" value="Create" /></td>
         </form>
     </tr>
-<?
+<?php
     foreach ($Results as $Result) {
 ?>
     <tr>
@@ -91,10 +91,11 @@ list ($NumResults) = $DB->next_record();
             </td>
         </form>
     </tr>
-<?    } ?>
+<?php
+    } ?>
 </table>
 <div class="linkbox pager">
     <br />
     <?=$Pages?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

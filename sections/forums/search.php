@@ -1,4 +1,4 @@
-<?
+<?php
 //TODO: Clean up this fucking mess
 /*
 Forums search result page
@@ -115,19 +115,19 @@ View::show_header('Forums &gt; Search', 'bbcode,forum_search,datetime_picker', '
                     <input type="text" class="date_picker" name="thread_created_before" id="thread_created_before" value="<?=$ThreadBeforeDate?>" />
                 </td>
             </tr>
-<?
+<?php
 if (empty($ThreadID)) {
 ?>
             <tr>
                 <td><strong>Search in:</strong></td>
                 <td>
-                    <input type="radio" name="type" id="type_title" value="title"<? if ($Type == 'title') { echo ' checked="checked"'; } ?> />
+                    <input type="radio" name="type" id="type_title" value="title"<?php if ($Type == 'title') { echo ' checked="checked"'; } ?> />
                     <label for="type_title">Titles</label>
-                    <input type="radio" name="type" id="type_body" value="body"<? if ($Type == 'body') { echo ' checked="checked"'; } ?> />
+                    <input type="radio" name="type" id="type_body" value="body"<?php if ($Type == 'body') { echo ' checked="checked"'; } ?> />
                     <label for="type_body">Post bodies</label>
                 </td>
             </tr>
-            <tr id="post_created_row" <? if ($Type == 'title') { echo "class='hidden'"; } ?>>
+            <tr id="post_created_row" <?php if ($Type == 'title') { echo "class='hidden'"; } ?>>
                 <td><strong>Post created:</strong></td>
                 <td>
                     After:
@@ -142,7 +142,7 @@ if (empty($ThreadID)) {
         <table id="forum_search_cat_list" class="cat_list layout">
 
 
-<?
+<?php
     // List of forums
     $Open = false;
     $LastCategoryID = -1;
@@ -160,12 +160,12 @@ if (empty($ThreadID)) {
             if ($Open) {
                 if ($Columns % 5) { ?>
                 <td colspan="<?=(5 - ($Columns % 5))?>"></td>
-<?
+<?php
                 }
 
 ?>
             </tr>
-<?
+<?php
             }
             $Columns = 0;
             $Open = true;
@@ -178,23 +178,23 @@ if (empty($ThreadID)) {
                 </td>
             </tr>
             <tr>
-<?        } elseif ($Columns % 5 == 0) { ?>
+<?php        } elseif ($Columns % 5 == 0) { ?>
             </tr>
             <tr>
-<?        } ?>
+<?php        } ?>
                 <td>
-                    <input type="checkbox" name="forums[]" value="<?=$Forum['ID']?>" data-category="forum_category_<?=$i?>" id="forum_<?=$Forum['ID']?>"<? if (isset($_GET['forums']) && in_array($Forum['ID'], $_GET['forums'])) { echo ' checked="checked"';} ?> />
+                    <input type="checkbox" name="forums[]" value="<?=$Forum['ID']?>" data-category="forum_category_<?=$i?>" id="forum_<?=$Forum['ID']?>"<?php if (isset($_GET['forums']) && in_array($Forum['ID'], $_GET['forums'])) { echo ' checked="checked"';} ?> />
                     <label for="forum_<?=$Forum['ID']?>"><?=htmlspecialchars($Forum['Name'])?></label>
                 </td>
-<?     }
+<?php     }
     if ($Columns % 5) { ?>
                 <td colspan="<?=(5 - ($Columns % 5))?>"></td>
-<?    } ?>
+<?php    } ?>
             </tr>
         </table>
-<? } else { ?>
+<?php } else { ?>
                         <input type="hidden" name="threadid" value="<?=$ThreadID?>" />
-<? } ?>
+<?php } ?>
                     </td>
                 </tr>
                 <tr>
@@ -205,7 +205,7 @@ if (empty($ThreadID)) {
             </table>
         </form>
     <div class="linkbox">
-<?
+<?php
 
 // Break search string down into individual words
 $Words = explode(' ', db_string($Search));
@@ -315,9 +315,9 @@ echo $Pages;
         <td>Topic creation time</td>
         <td>Last post time</td>
     </tr>
-<? if (!$DB->has_results()) { ?>
+<?php if (!$DB->has_results()) { ?>
         <tr><td colspan="4">Nothing found<?=((isset($AuthorID) && $AuthorID == 0) ? ' (unknown username)' : '')?>!</td></tr>
-<? }
+<?php }
 
 $Row = 'a'; // For the pretty colours
 while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $ThreadCreatedTime) = $DB->next_record()) {
@@ -329,15 +329,15 @@ while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $Threa
                 <a href="forums.php?action=viewforum&amp;forumid=<?=$ForumID?>"><?=$ForumName?></a>
             </td>
             <td>
-<?    if (empty($ThreadID)) { ?>
+<?php    if (empty($ThreadID)) { ?>
                 <a href="forums.php?action=viewthread&amp;threadid=<?=$ID?>"><?=Format::cut_string($Title, 80); ?></a>
-<?    } else { ?>
+<?php    } else { ?>
                 <?=Format::cut_string($Title, 80); ?>
-<?
+<?php
     }
     if ($Type == 'body') { ?>
-                <a href="#" onclick="$('#post_<?=$PostID?>_text').gtoggle(); return false;">(Show)</a> <span style="float: right;" class="tooltip last_read" title="Jump to post"><a href="forums.php?action=viewthread&amp;threadid=<?=$ID?><? if (!empty($PostID)) { echo "&amp;postid=$PostID#post$PostID"; } ?>"></a></span>
-<?    } ?>
+                <a href="#" onclick="$('#post_<?=$PostID?>_text').gtoggle(); return false;">(Show)</a> <span style="float: right;" class="tooltip last_read" title="Jump to post"><a href="forums.php?action=viewthread&amp;threadid=<?=$ID?><?php if (!empty($PostID)) { echo "&amp;postid=$PostID#post$PostID"; } ?>"></a></span>
+<?php    } ?>
             </td>
             <td>
                 <?=time_diff($ThreadCreatedTime)?>
@@ -346,11 +346,11 @@ while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $Threa
                 <?=time_diff($LastTime)?>
             </td>
         </tr>
-<?    if ($Type == 'body') { ?>
+<?php    if ($Type == 'body') { ?>
         <tr class="row<?=$Row?> hidden" id="post_<?=$PostID?>_text">
             <td colspan="4"><?=Text::full_format($Body)?></td>
         </tr>
-<?    }
+<?php    }
 }
 ?>
     </table>
@@ -359,4 +359,4 @@ while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $Threa
         <?=$Pages?>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

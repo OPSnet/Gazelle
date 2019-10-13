@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('site_database_specifics')) {
     error(403);
 }
@@ -101,7 +101,7 @@ View::show_header('Database Specifics');
         <td><a href="tools.php?action=database_specifics&amp;order_by=totalsize&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'totalsize' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Total Size</td>
         <td>Tools</td>
     </tr>
-<?
+<?php
 $TotalRows = 0;
 $TotalDataSize = 0;
 $TotalIndexSize = 0;
@@ -124,7 +124,7 @@ foreach ($Tables as $Table) {
         <td><?=Format::get_size($DataSize + $IndexSize)?></td>
         <td><a href="tools.php?action=database_specifics&amp;table=<?=display_str($Name)?>" class="brackets">Schema</a></td>
     </tr>
-<?
+<?php
 }
 ?>
     <tr>
@@ -138,5 +138,5 @@ foreach ($Tables as $Table) {
         <td></td>
     </tr>
 </table>
-<?
+<?php
 View::show_footer();

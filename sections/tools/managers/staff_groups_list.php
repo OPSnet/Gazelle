@@ -26,7 +26,7 @@
         list($ID, $Sort, $Name) = array_values($g);
         $Row = $Row === 'a' ? 'b' : 'a';
 ?>
-    <tr class="row<?$Row?>">
+    <tr class="row<?php $Row?>">
         <form class="manage_form" name="accounts" action="" method="post">
             <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="action" value="staff_groups_alter" />

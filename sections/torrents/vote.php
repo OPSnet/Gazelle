@@ -1,4 +1,4 @@
-<?
+<?php
     $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
     $GroupVotes = Votes::get_group_votes($GroupID);
 
@@ -25,9 +25,9 @@
         <br /><br />
         <span id="upvoted"<?=(($Voted != 'Up') ? ' class="hidden"' : '')?>>You have upvoted.<br /><br /></span>
         <span id="downvoted"<?=(($Voted != 'Down') ? ' class="hidden"' : '')?>>You have downvoted.<br /><br /></span>
-<?    if (check_perms('site_album_votes')) { ?>
+<?php    if (check_perms('site_album_votes')) { ?>
         <span<?=($Voted ? ' class="hidden"' : '')?> id="vote_message"><a href="#" class="brackets upvote" onclick="UpVoteGroup(<?=$GroupID?>, '<?=$LoggedUser['AuthKey']?>'); return false;">Upvote</a> - <a href="#" class="brackets downvote" onclick="DownVoteGroup(<?=$GroupID?>, '<?=$LoggedUser['AuthKey']?>'); return false;">Downvote</a></span>
-<?    } ?>
+<?php    } ?>
         <span<?=($Voted ? '' : ' class="hidden"')?> id="unvote_message">
             Changed your mind?
             <br />

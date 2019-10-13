@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Class for functions related to the features involving torrent downloads
  */

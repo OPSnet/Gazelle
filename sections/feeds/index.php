@@ -1,4 +1,4 @@
-<?
+<?php
 // Main feeds page
 // The feeds don't use script_start.php, their code resides entirely in feeds.php in the document root
 // Bear this in mind when you try to use script_start functions.

@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_manage_applicants')) {
     error(403);
 }
@@ -55,16 +55,19 @@ if (isset($_POST['auth'])) {
 <div class="box">
     <div class="head">Current Roles</div>
     <div class="pad">
-<?  if ($Saved) { ?>
+<?php
+    if ($Saved) { ?>
         <p>The role <?= $AppRole->title() ?> was <?= $Saved ?>.</p>
-<? } ?>
+<?php
+    } ?>
 
-<? if (!$EDIT_ID) {
+<?php
+    if (!$EDIT_ID) {
     $Roles = ApplicantRole::get_list(true);
     if (count($Roles)) {
 ?>
         <table>
-<?        foreach ($Roles as $title => $info) { ?>
+<?php   foreach ($Roles as $title => $info) { ?>
             <tr>
                 <td>
                     <div class="head">
@@ -83,11 +86,13 @@ if (isset($_POST['auth'])) {
             <tr>
                 <td><div class="pad"><?= Text::full_format($info['description']) ?></div></td>
             </tr>
-<?        } /* foreach */ ?>
+<?php   } /* foreach */ ?>
         </table>
-<?    } else { ?>
+<?php
+    } else { ?>
         <p>There are no current roles. Create one using the form below.</p>
-<?    }
+<?php
+    }
 } /* !$EDIT_ID */ ?>
     </div>
 </div>
@@ -96,7 +101,7 @@ if (isset($_POST['auth'])) {
     <div class="head"><?= $EDIT_ID ? 'Edit' : 'New' ?> Role</div>
     <div class="pad">
 
-<?
+<?php
 if (isset($App)) {
     $checked_published = $AppRole->is_published() ? ' checked' : '';
     $checked_archived  = $AppRole->is_published() ? '' : ' checked';
@@ -121,15 +126,17 @@ else {
             <tr>
                 <td class="label">Description</td>
                 <td>
-<?
+<?php
                     $text = new TEXTAREA_PREVIEW('description', 'description', $EDIT_ID ? $AppRole->description() : '', 60, 8, true, false);
                     $id = $text->getID();
                     echo $text->preview();
 ?>
                     <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>"/>
-<?  if ($EDIT_ID) { ?>
+<?php
+    if ($EDIT_ID) { ?>
                     <input type="hidden" name="edit" value="<?= $EDIT_ID ?>"/>
-<?  } ?>
+<?php
+    } ?>
                     <input type="hidden" name="user_id" value="<?= $LoggedUser['ID'] ?>"/>
                     <input type="button" value="Preview" class="hidden button_preview_<?= $text->getId() ?>" />
                     <input type="submit" id="submit" value="Save Role"/>
@@ -142,5 +149,5 @@ else {
 </form>
 
 </div>
-<?
+<?php
 View::show_footer();

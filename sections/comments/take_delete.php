@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 // Quick SQL injection check

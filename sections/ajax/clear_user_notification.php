@@ -1,4 +1,4 @@
-<?
+<?php
 
 $Type = $_POST['type'];
 

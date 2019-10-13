@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     json_error(403);
 }

@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('site_debug')) {
     error(403);
 }
@@ -19,7 +19,7 @@ $Debug->log_var($PIDs, 'PIDs');
                 <?=count($PIDs) . ' processes'?>
             </td>
         </tr>
-<?
+<?php
 foreach ($PIDs as $PID) {
     $PID = trim($PID);
     if (!$ProcessInfo = $Cache->get_value("php_$PID")) {
@@ -31,11 +31,12 @@ foreach ($PIDs as $PID) {
                 <?=$PID?>
             </td>
             <td>
-                <pre><?print_r($ProcessInfo)?></pre>
+                <pre><?php print_r($ProcessInfo); ?></pre>
             </td>
         </tr>
-<? } ?>
+<?php
+} ?>
     </table>
 </div>
-<?
+<?php
 View::show_footer();

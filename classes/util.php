@@ -1,4 +1,4 @@
-<?
+<?php
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 

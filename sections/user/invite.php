@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (isset($_GET['userid']) && check_perms('users_view_invites')) {
     if (!is_number($_GET['userid'])) {
@@ -93,14 +93,14 @@ View::show_header('Invites');
     <div class="header">
         <h2><?=Users::format_username($UserID, false, false, false)?> &gt; Invites</h2>
         <div class="linkbox">
-            <a href="user.php?action=invitetree<? if ($Sneaky) { echo '&amp;userid='.$UserID; } ?>" class="brackets">Invite tree</a>
+            <a href="user.php?action=invitetree<?php if ($Sneaky) { echo '&amp;userid='.$UserID; } ?>" class="brackets">Invite tree</a>
         </div>
     </div>
-<? if ($UserCount >= USER_LIMIT && !check_perms('site_can_invite_always')) { ?>
+<?php if ($UserCount >= USER_LIMIT && !check_perms('site_can_invite_always')) { ?>
     <div class="box pad notice">
         <p>Because the user limit has been reached you are unable to send invites at this time.</p>
     </div>
-<? }
+<?php }
 
 /*
     Users cannot send invites if they:
@@ -142,28 +142,30 @@ list($CanLeech) = $DB->next_record();
                     <input type="submit" value="Invite" />
                 </div>
             </div>
-<?    if (check_perms('users_invite_notes')) { ?>
+<?php
+    if (check_perms('users_invite_notes')) { ?>
             <div class="field_div">
                 <div class="label">Staff Note:</div>
                 <div class="input">
                     <input type="text" name="reason" size="60" maxlength="255" />
                 </div>
             </div>
-<?    } ?>
+<?php
+    } ?>
         </form>
     </div>
 
-<?
+<?php
 } elseif (!empty($LoggedUser['DisableInvites'])) { ?>
     <div class="box pad" style="text-align: center;">
         <strong class="important_text">Your invites have been disabled. Please read <a href="wiki.php?action=article&amp;id=116">this article</a> for more information.</strong>
     </div>
-<?
+<?php
 } elseif ($LoggedUser['RatioWatch'] || !$CanLeech) { ?>
     <div class="box pad" style="text-align: center;">
         <strong class="important_text">You may not send invites while on Ratio Watch or while your leeching privileges are disabled. Please read <a href="wiki.php?action=article&amp;id=116">this article</a> for more information.</strong>
     </div>
-<?
+<?php
 }
 
 if (!empty($Pending)) {
@@ -177,7 +179,7 @@ if (!empty($Pending)) {
                 <td>Invite link</td>
                 <td>Delete invite</td>
             </tr>
-<?
+<?php
     $Row = 'a';
     foreach ($Pending as $Invite) {
         list($InviteKey, $Email, $Expires) = $Invite;
@@ -189,10 +191,11 @@ if (!empty($Pending)) {
                 <td><a href="register.php?invite=<?=$InviteKey?>">Invite link</a></td>
                 <td><a href="user.php?action=delete_invite&amp;invite=<?=$InviteKey?>&amp;auth=<?=$LoggedUser['AuthKey']?>" onclick="return confirm('Are you sure you want to delete this invite?');">Delete invite</a></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
     </div>
-<?
+<?php
 }
 
 ?>
@@ -208,7 +211,7 @@ if (!empty($Pending)) {
                 <td class="m_th_right"><a href="user.php?action=invite&amp;order=downloaded&amp;sort=<?=(($CurrentOrder == 'downloaded') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Downloaded</a></td>
                 <td class="m_th_right"><a href="user.php?action=invite&amp;order=ratio&amp;sort=<?=(($CurrentOrder == 'ratio') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Ratio</a></td>
             </tr>
-<?
+<?php
     $Row = 'a';
     foreach ($Invited as $User) {
         list($ID, $Email, $Uploaded, $Downloaded, $JoinDate, $LastAccess) = $User;
@@ -223,9 +226,10 @@ if (!empty($Pending)) {
                 <td class="td_dl m_td_right"><?=Format::get_size($Downloaded)?></td>
                 <td class="td_ratio m_td_right"><?=Format::get_ratio_html($Uploaded, $Downloaded)?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

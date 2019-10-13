@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -21,5 +21,5 @@ View::show_header($Title, 'bbcode_sandbox');
         </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

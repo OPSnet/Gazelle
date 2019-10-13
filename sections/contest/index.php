@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 
 $ContestMgr = new \Gazelle\Contest(G::$DB, G::$Cache);

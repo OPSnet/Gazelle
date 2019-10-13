@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Two-factor Authentication');
 ?>
 
@@ -16,7 +16,7 @@ View::show_header('Two-factor Authentication');
 <div class="box box2">
     <div class="center pad">
         <div>
-            <img src="data:image/png;base64,<?
+            <img src="data:image/png;base64,<?php
                 echo base64_encode(
                     (new QrCode())->setText('otpauth://totp/' . SITE_NAME . '?secret=' . $_SESSION['private_key'])
                         ->setSize(300)
@@ -30,13 +30,13 @@ View::show_header('Two-factor Authentication');
             ?>">
             <div class="twofa_text">Secret Text: <span><?=$_SESSION['private_key']?></span></div>
 
-            <? if(isset($_GET['invalid'])): ?>
+            <?php if(isset($_GET['invalid'])): ?>
                 <p class="warning">Please ensure you've imported the correct key into your authentication app and try again.</p>
-            <? endif; ?>
+            <?php endif; ?>
         </div>
 
         <a href="user.php?action=2fa&do=enable2&userid=<?= G::$LoggedUser['ID'] ?>" id="pad_next">Next &raquo;</a>
     </div>
 </div>
 
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

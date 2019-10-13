@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * New transcode module:
  * $_GET['filter'] determines which torrents should be shown and can be empty/all (default), uploaded, snatched or seeding
@@ -280,13 +280,15 @@ function selected($val) {
             Number of perfect FLACs you can transcode: <?=number_format($counter['total'])?><br />
             Number of missing transcodes: <?=number_format($counter['miss_total'])?><br />
             Number of missing V2 / V0 / 320 transcodes: <?=number_format($counter['miss_V2 (VBR)'])?> / <?=number_format($counter['miss_V0 (VBR)'])?> / <?=number_format($counter['miss_320'])?>
-<?php if (check_perms('zip_downloader') && count($counter['ids']) > 1) {
+<?php
+if (check_perms('zip_downloader') && count($counter['ids']) > 1) {
     $idList = implode(',', $counter['ids']);
 ?>
             <br />
             <br />
             <a class="brackets" href="torrents.php?action=collector&amp;title=better&amp;ids=<?=$idList?>" onclick="return confirm('If you do not have the content, your ratio WILL be affected; be sure to check the size of all torrents before downloading.');">Download All</a>
-<?php } ?>
+<?php
+} ?>
         </p>
     </div>
     <h3>List</h3>
@@ -297,11 +299,10 @@ function selected($val) {
             <td>V0</td>
             <td>320</td>
         </tr>
-<?
-if ($resultCount == 0) {
-?>
+<?php
+if ($resultCount == 0) { ?>
         <tr><td colspan="4">No results found!</td></tr>
-<?
+<?php
 } else {
     foreach ($groups as $groupID => $group) {
         $groupYear = $group['Year'];
@@ -346,13 +347,13 @@ if ($resultCount == 0) {
             <td><?=(isset($edition['MP3s']['V0 (VBR)']) ? '<strong class="important_text_alt">YES</strong>' : '<strong class="important_text">NO</strong>')?></td>
             <td><?=(isset($edition['MP3s']['320']) ? '<strong class="important_text_alt">YES</strong>' : '<strong class="important_text">NO</strong>')?></td>
         </tr>
-<?
+<?php
         }
     }
 }
 ?>
     </table>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

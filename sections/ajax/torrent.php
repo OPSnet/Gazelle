@@ -1,4 +1,4 @@
-<?
+<?php
 require(SERVER_ROOT.'/sections/torrents/functions.php');
 
 $GroupAllowed = array('WikiBody', 'WikiImage', 'ID', 'Name', 'Year', 'RecordLabel', 'CatalogueNumber', 'ReleaseType', 'CategoryID', 'Time', 'VanityHouse');

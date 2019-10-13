@@ -1,4 +1,4 @@
-<?
+<?php
 switch ($_GET['action']) {
     case 'notify_clear':
         $DB->query("DELETE FROM users_notify_torrents WHERE UserID = '$LoggedUser[ID]' AND UnRead = '0'");

@@ -1,4 +1,4 @@
-<?
+<?php
 if (($Results = $Cache->get_value('better_single_groupids')) === false) {
     $DB->query("
         SELECT

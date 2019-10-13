@@ -1,4 +1,4 @@
-<?
+<?php
 class Permissions {
     /**
      * Check to see if a user has the permission to perform an action

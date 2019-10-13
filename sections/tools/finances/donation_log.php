@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (!check_perms('admin_donor_log')) {
     error(403);
@@ -98,7 +98,8 @@ if (empty($_GET['email']) && empty($_GET['source']) && empty($_GET['username']) 
     <img src="<?=$DonationTimeline?>" alt="Donation timeline. The &quot;y&quot; axis is donation amount." />
 </div>
 <br />
-<? } ?>
+<?php
+} ?>
 <div>
     <form class="search_form" name="donation_log" action="" method="get">
         <input type="hidden" name="action" value="donation_log" />
@@ -106,19 +107,19 @@ if (empty($_GET['email']) && empty($_GET['source']) && empty($_GET['username']) 
             <tr>
                 <td class="label"><strong>Username:</strong></td>
                 <td>
-                    <input type="search" name="username" size="60" value="<? if (!empty($_GET['username'])) { echo display_str($_GET['username']); } ?>" />
+                    <input type="search" name="username" size="60" value="<?php if (!empty($_GET['username'])) { echo display_str($_GET['username']); } ?>" />
                 </td>
             </tr>
             <tr>
                 <td class="label"><strong>Email:</strong></td>
                 <td>
-                    <input type="search" name="email" size="60" value="<? if (!empty($_GET['email'])) { echo display_str($_GET['email']); } ?>" />
+                    <input type="search" name="email" size="60" value="<?php if (!empty($_GET['email'])) { echo display_str($_GET['email']); } ?>" />
                 </td>
             </tr>
             <tr>
                 <td class="label"><strong>Source:</strong></td>
                 <td>
-                    <input type="search" name="source" size="60" value="<? if (!empty($_GET['source'])) { echo display_str($_GET['source']); } ?>" />
+                    <input type="search" name="source" size="60" value="<?php if (!empty($_GET['source'])) { echo display_str($_GET['source']); } ?>" />
                 </td>
             </tr>
             <tr>
@@ -138,7 +139,7 @@ if (empty($_GET['email']) && empty($_GET['source']) && empty($_GET['username']) 
 </div>
 <br />
 <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $Results, DONATIONS_PER_PAGE, 11);
     echo $Pages;
 ?>
@@ -152,7 +153,7 @@ if (empty($_GET['email']) && empty($_GET['source']) && empty($_GET['username']) 
         <td>Reason</td>
         <td>Time</td>
     </tr>
-<?
+<?php
     $PageTotal = 0;
     foreach ($Donations as $Donation) {
         $PageTotal += $Donation['Amount']; ?>
@@ -164,7 +165,8 @@ if (empty($_GET['email']) && empty($_GET['source']) && empty($_GET['username']) 
             <td><?=display_str($Donation['Reason'])?></td>
             <td><?=time_diff($Donation['Time'])?></td>
         </tr>
-<?    } ?>
+<?php
+    } ?>
 <tr class="colhead">
     <td>Page Total</td>
     <td><?=$PageTotal?></td>
@@ -175,4 +177,4 @@ if (empty($_GET['email']) && empty($_GET['source']) && empty($_GET['username']) 
 <div class="linkbox">
     <?=$Pages?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

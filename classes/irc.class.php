@@ -1,4 +1,4 @@
-<?
+<?php
 class IRC_DB extends DB_MYSQL {
     function halt($Msg) {
         global $Bot;

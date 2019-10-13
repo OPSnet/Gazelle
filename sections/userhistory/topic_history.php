@@ -45,17 +45,17 @@ $DB->set_query_id($QueryID);
     <div class="header">
         <h2>Threads started by <a href="user.php?id=<?=$UserID?>"><?=$Username?></a></h2>
     </div>
-    <?
+    <?php
     if (empty($Results)) {
         ?>
         <div class="center">
             No topics
         </div>
-        <?
+        <?php
     } else {
         ?>
         <div class="linkbox">
-            <?
+            <?php
             $Pages = Format::get_pages($Page, $Results, $PerPage, 11);
             echo $Pages;
             ?>
@@ -67,7 +67,7 @@ $DB->set_query_id($QueryID);
                 <td>Topic Creation Time</td>
                 <td>Last Post Time</td>
             </tr>
-        <?
+        <?php
         $QueryID = $DB->get_query_id();
         while (list($TopicID, $Title, $CreatedTime, $LastPostTime, $ForumID, $ForumTitle) = $DB->fetch_record(1)) {
             ?>
@@ -77,11 +77,11 @@ $DB->set_query_id($QueryID);
                 <td><?=time_diff($CreatedTime)?></td>
                 <td><?=time_diff($LastPostTime)?></td>
             </tr>
-        <?     } ?>
+        <?php     } ?>
         </table>
         <div class="linkbox">
             <?=$Pages?>
         </div>
-    <? } ?>
+    <?php } ?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

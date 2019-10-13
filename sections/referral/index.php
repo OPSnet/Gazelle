@@ -36,7 +36,7 @@
             <li>Join <?php echo SITE_NAME; ?>!</li>
         </ol>
 
-<?php 
+<?php
     if (empty($_POST['action'])) {
         if (!empty($Accounts)) {
 ?>
@@ -46,7 +46,7 @@
         <div class="center">
             <form name="referral_service" method="post" action="">
 <?php
-                foreach ($Accounts as $Account) {
+            foreach ($Accounts as $Account) {
                     $ID = "site" . $Account["ID"];
 ?>
                     <div>
@@ -55,13 +55,14 @@
                     </div>
                     <br/>
                     <br/>
-<?php } ?>
+<?php       } ?>
                 <br/>
                 <input type="hidden" name="action" value="account">
                 <input type="submit" name="submit" value="Submit" class="submit" />
             </form>
         </div>
-    <?php } else { ?>
+    <?php
+        } else { ?>
         <br/>
         <h2>Sorry, we aren't accepting external tracker referrals at this time. Please try again later.</h2>
         <br/>

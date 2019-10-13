@@ -1,4 +1,4 @@
-<?
+<?php
 
 if ($ConvID = (int)$_GET['id']) {
     // Get conversation info
@@ -45,34 +45,34 @@ if ($ConvID = (int)$_GET['id']) {
         <h2>Staff PM - <?=display_str($Subject)?></h2>
         <div class="linkbox">
 
-<?
+<?php
 if ($IsStaff) {
 ?>
     <a href="staffpm.php" class="brackets">View your unanswered</a>
-<?
+<?php
 }
 if ($IsFLS) {
 ?>
 <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
 <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
 <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
-<?
+<?php
 }
 if ($IsStaff) { ?>
     <a href="staffpm.php?action=scoreboard" class="brackets">View scoreboard</a>
-<?
+<?php
 }
 if (!$IsStaff && !$IsFLS) {
 ?>
     <a href="staffpm.php" class="brackets">Back to inbox</a>
-<?
+<?php
 }
 ?>        </div>
     </div>
     <br />
     <br />
     <div id="inbox">
-<?
+<?php
     // Get messages
     $StaffPMs = $DB->query("
         SELECT UserID, SentDate, Message, ID
@@ -94,20 +94,20 @@ if (!$IsStaff && !$IsFLS) {
 ?>
         <div class="box vertical_space" id="post<?=$MessageID?>">
             <div class="head">
-<?                /* TODO: the inline style in the <a> tag is an ugly hack. get rid of it. */ ?>
+<?php                /* TODO: the inline style in the <a> tag is an ugly hack. get rid of it. */ ?>
                 <a class="postid" href="staffpm.php?action=viewconv&amp;id=<?=$ConvID?>#post<?=$MessageID?>" style="font-weight: normal;">#<?=$MessageID?></a>
                 <strong>
                     <?=$UserString?>
                 </strong>
                 <?=time_diff($SentDate, 2, true)?>
-<?        if ($Status != 'Resolved') { ?>
+<?php   if ($Status != 'Resolved') { ?>
                 - <a href="#quickpost" onclick="Quote('<?=$MessageID?>', '<?=$Username?>');" class="brackets">Quote</a>
-<?        } ?>
+<?php   } ?>
             </div>
             <div class="body"><?=Text::full_format($Message)?></div>
         </div>
         <div align="center" style="display: none;"></div>
-<?
+<?php
         $DB->set_query_id($StaffPMs);
     }
 
@@ -125,7 +125,7 @@ if (!$IsStaff && !$IsFLS) {
             <div class="center">
                 <select id="common_answers_select" onchange="UpdateMessage();">
                     <option id="first_common_response">Select a message</option>
-<?
+<?php
         // List common responses
         $DB->query("
             SELECT ID, Name
@@ -134,20 +134,20 @@ if (!$IsStaff && !$IsFLS) {
         while (list($ID, $Name) = $DB->next_record()) {
 ?>
                     <option value="<?=$ID?>"><?=$Name?></option>
-<?        } ?>
+<?php   } ?>
                 </select>
                 <input type="button" value="Set message" onclick="SetMessage();" />
                 <input type="button" value="Create new / Edit" onclick="location.href='staffpm.php?action=responses&amp;convid=<?=$ConvID?>';" />
             </div>
         </div>
-<?
+<?php
     }
 
     // Ajax assign response div
     if ($IsStaff) {
 ?>
         <div id="ajax_message" class="hidden center alertbar"></div>
-<?
+<?php
     }
 
     // Reply box and buttons
@@ -158,37 +158,37 @@ if (!$IsStaff && !$IsFLS) {
                 <form class="manage_form" name="staff_messages" action="staffpm.php" method="post" id="messageform">
                     <input type="hidden" name="action" value="takepost" />
                     <input type="hidden" name="convid" value="<?=$ConvID?>" id="convid" />
-<?
+<?php
                     if ($Status != 'Resolved') {
                         $TextPrev = new TEXTAREA_PREVIEW('message', 'quickpost', '', 90, 10, true, false, false, array(), true);
                     }
 ?>
                     <br />
-<?
+<?php
     // Assign to
     if ($IsStaff) {
         // Staff assign dropdown
 ?>
                     <select id="assign_to" name="assign">
                         <optgroup label="User classes">
-<?        // FLS "class"
+<?php        // FLS "class"
         $Selected = ((!$AssignedToUser && $PMLevel == 0) ? ' selected="selected"' : '');
 ?>
                             <option value="class_0"<?=$Selected?>>First Line Support</option>
-<?        // Staff classes
+<?php        // Staff classes
         foreach ($ClassLevels as $Class) {
             // Create one <option> for each staff user class
             if ($Class['Level'] >= 650) {
                 $Selected = ((!$AssignedToUser && ($PMLevel == $Class['Level'])) ? ' selected="selected"' : '');
 ?>
                             <option value="class_<?=$Class['Level']?>"<?=$Selected?>><?=$Class['Name']?></option>
-<?
+<?php
             }
         }
 ?>
                         </optgroup>
                         <optgroup label="Staff">
-<?        // Staff members
+<?php        // Staff members
         $DB->query("
             SELECT
                 m.ID,
@@ -203,10 +203,10 @@ if (!$IsStaff && !$IsFLS) {
             $Selected = (($AssignedToUser == $ID) ? ' selected="selected"' : '');
 ?>
                             <option value="user_<?=$ID?>"<?=$Selected?>><?=$Name?></option>
-<?        } ?>
+<?php   } ?>
                         </optgroup>
                         <optgroup label="First Line Support">
-<?
+<?php
         // FLS users
         $DB->query("
             SELECT
@@ -224,33 +224,37 @@ if (!$IsStaff && !$IsFLS) {
             $Selected = (($AssignedToUser == $ID) ? ' selected="selected"' : '');
 ?>
                             <option value="user_<?=$ID?>"<?=$Selected?>><?=$Name?></option>
-<?        } ?>
+<?php   } ?>
                         </optgroup>
                     </select>
                     <input type="button" onclick="Assign();" value="Assign" />
-<?    } elseif ($IsFLS) {    /* FLS assign button */ ?>
+<?php
+    } elseif ($IsFLS) {    /* FLS assign button */ ?>
                     <input type="button" value="Assign to staff" onclick="location.href='staffpm.php?action=assign&amp;to=staff&amp;convid=<?=$ConvID?>';" />
                     <input type="button" value="Assign to forum staff" onclick="location.href='staffpm.php?action=assign&amp;to=forum&amp;convid=<?=$ConvID?>';" />
-<?
+<?php
     }
 
     if ($Status != 'Resolved') { ?>
                     <input type="button" value="Resolve" onclick="location.href='staffpm.php?action=resolve&amp;id=<?=$ConvID?>';" />
-<?        if ($IsFLS) { /* Moved by request */ ?>
+<?php   if ($IsFLS) { /* Moved by request */ ?>
                     <input type="button" value="Common answers" onclick="$('#common_answers').gtoggle();" />
-<?        } ?>
+<?php   } ?>
                     <input type="button" id="previewbtn" value="Preview" class="hidden button_preview_<?=$TextPrev->getID()?>" />
                     <input type="submit" value="Send message" />
-<?    } else { ?>
+<?php
+    } else { ?>
                     <input type="button" value="Unresolve" onclick="location.href='staffpm.php?action=unresolve&amp;id=<?=$ConvID?>';" />
-<?
+<?php
     }
     if (check_perms('users_give_donor')) { ?>
                     <br />
                     <input type="button" value="Make Donor" onclick="$('#make_donor_form').gtoggle(); return false;" />
-<?    } ?>
+<?php
+    } ?>
                 </form>
-<?    if (check_perms('users_give_donor')) { ?>
+<?php
+    if (check_perms('users_give_donor')) { ?>
                 <div id="make_donor_form" class="hidden">
                     <form action="staffpm.php" method="post">
                         <input type="hidden" name="action" value="make_donor" />
@@ -271,12 +275,13 @@ if (!$IsStaff && !$IsFLS) {
                         <input type="submit" value="Submit" />
                     </form>
                 </div>
-<?    } ?>
+<?php
+    } ?>
             </div>
         </div>
     </div>
 </div>
-<?
+<?php
 
     View::show_footer();
 } else {

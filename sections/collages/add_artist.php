@@ -1,4 +1,4 @@
-<?
+<?php
 //NumTorrents is actually the number of things in the collage, the name just isn't generic.
 
 authorize();

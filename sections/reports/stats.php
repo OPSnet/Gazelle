@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
     error(403);
@@ -16,7 +16,7 @@ View::show_header('Other reports stats');
 </div>
 <div class="thin float_clear">
     <div class="two_columns pad">
-<?
+<?php
 if (check_perms('admin_reports')) {
 $DB->query("
     SELECT um.Username,
@@ -35,7 +35,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
         if ($Username == $LoggedUser['Username']) {
@@ -48,9 +48,10 @@ $Results = $DB->to_array();
                 <td><?=$Username?></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
-<?
+<?php
 $DB->query("
     SELECT um.Username,
         COUNT(r.ID) AS Reports
@@ -68,7 +69,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
         if ($Username == $LoggedUser['Username']) {
@@ -81,9 +82,10 @@ $Results = $DB->to_array();
                 <td><?=$Username?></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
-<?
+<?php
 $DB->query("
     SELECT um.Username,
         COUNT(r.ID) AS Reports
@@ -101,7 +103,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
         if ($Username == $LoggedUser['Username']) {
@@ -114,9 +116,10 @@ $Results = $DB->to_array();
                 <td><?=$Username?></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
-<?
+<?php
 $DB->query("
     SELECT um.Username,
         COUNT(r.ID) AS Reports
@@ -132,7 +135,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
-<?
+<?php
     foreach ($Results as $Result) {
         list($Username, $Reports) = $Result;
         if ($Username == $LoggedUser['Username']) {
@@ -145,13 +148,14 @@ $Results = $DB->to_array();
                 <td><?=$Username?></td>
                 <td class="number_column"><?=number_format($Reports)?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
-<?
+<?php
 } /* if (check_perms('admin_reports')) */ ?>
     </div>
     <div class="two_columns pad">
-<?
+<?php
 
     $TrashForumIDs = '12';
 
@@ -173,7 +177,7 @@ $Results = $DB->to_array();
                 <td class="colhead_dark">Username</td>
                 <td class="colhead_dark number_column">Trashed</td>
             </tr>
-<?
+<?php
     $i = 1;
     foreach ($Results as $Result) {
         list($Username, $Trashed) = $Result;
@@ -188,13 +192,13 @@ $Results = $DB->to_array();
                 <td><?=$Username?></td>
                 <td class="number_column"><?=number_format($Trashed)?></td>
             </tr>
-<?
+<?php
         $i++;
     }
 ?>
         </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

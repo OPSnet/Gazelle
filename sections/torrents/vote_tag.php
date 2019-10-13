@@ -1,4 +1,4 @@
-<?
+<?php
 $UserID = $LoggedUser['ID'];
 $TagID = db_string($_GET['tagid']);
 $GroupID = db_string($_GET['groupid']);

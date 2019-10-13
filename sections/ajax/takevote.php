@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $GroupID = $_REQUEST['groupid'];

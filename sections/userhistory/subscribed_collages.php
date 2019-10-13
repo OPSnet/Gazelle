@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 User collage subscription page
 */
@@ -46,29 +46,29 @@ $CollageSubs = $DB->to_array();
         <h2>Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
 
         <div class="linkbox">
-<?
+<?php
 if ($ShowAll) {
 ?>
             <br /><br />
             <a href="userhistory.php?action=subscribed_collages&amp;showall=0" class="brackets">Only display collages with new additions</a>&nbsp;&nbsp;&nbsp;
-<?
+<?php
 } else {
 ?>
             <br /><br />
             <a href="userhistory.php?action=subscribed_collages&amp;showall=1" class="brackets">Show all subscribed collages</a>&nbsp;&nbsp;&nbsp;
-<?
+<?php
 }
 ?>
             <a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
         </div>
     </div>
-<?
+<?php
 if (!$NumResults) {
 ?>
     <div class="center">
         No subscribed collages<?=($ShowAll ? '' : ' with new additions')?>
     </div>
-<?
+<?php
 } else {
     $HideGroup = '';
     $ActionTitle = 'Hide';
@@ -136,18 +136,18 @@ if (!$NumResults) {
                     </div>
                 </td>
                 <td colspan="5" class="big_info">
-<? if ($LoggedUser['CoverArt']) { ?>
+<?php if ($LoggedUser['CoverArt']) { ?>
                     <div class="group_image float_left clear">
-                        <? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                        <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
                     </div>
-<? } ?>
+<?php } ?>
                     <div class="group_info clear">
                         <strong><?=$DisplayName?></strong>
                         <div class="tags"><?=$TorrentTags->format()?></tags>
                     </div>
                 </td>
             </tr>
-<?
+<?php
                 $LastRemasterYear = '-';
                 $LastRemasterTitle = '';
                 $LastRemasterRecordLabel = '';
@@ -176,7 +176,7 @@ if (!$NumResults) {
     <tr class="group_torrent groupid_<?=$CollageID . $GroupID?> edition<?=$SnatchedGroupClass?> hidden">
         <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$CollageID?><?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
     </tr>
-<?
+<?php
                     }
                     $LastRemasterTitle = $Torrent['RemasterTitle'];
                     $LastRemasterYear = $Torrent['RemasterYear'];
@@ -188,9 +188,9 @@ if (!$NumResults) {
         <td colspan="2">
             <span>
                 [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                <? if (Torrents::can_use_token($Torrent)) { ?>
+                <?php if (Torrents::can_use_token($Torrent)) { ?>
                     | <a href="torrents.php?action=download&id=<?=$TorrentID?>&authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" title="Use a FL Token" class="tooltip" onclick="return confirm(<?=FL_confirmation_msg($Torrent['Seeders'])?>);">FL</a>
-                <? } ?>
+                <?php } ?>
                 ]
             </span>
             &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?></a>
@@ -200,7 +200,7 @@ if (!$NumResults) {
         <td class="number_column<?=($Torrent['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Torrent['Seeders'])?></td>
         <td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
     </tr>
-<?
+<?php
                 }
             } else {
                 // Viewing a type that does not require grouping
@@ -224,17 +224,17 @@ if (!$NumResults) {
             </div>
         </td>
         <td class="td_info big_info">
-<? if ($LoggedUser['CoverArt']) { ?>
+<?php if ($LoggedUser['CoverArt']) { ?>
             <div class="group_image float_left clear">
-                <? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
             </div>
-<? } ?>
+<?php } ?>
             <div class="group_info clear">
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-                <? if (Torrents::can_use_token($Torrent)) { ?>
+                <?php if (Torrents::can_use_token($Torrent)) { ?>
                     | <a href="torrents.php?action=download&id=<?=$TorrentID?>&authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" title="Use a FL Token" class="tooltip" onclick="return confirm(<?=FL_confirmation_msg($Torrent['Seeders'])?>);">FL</a>
-                <? } ?>
+                <?php } ?>
                     | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a> ]
                 </span>
                 <strong><?=$DisplayName?></strong>
@@ -246,7 +246,7 @@ if (!$NumResults) {
         <td class="td_seeders m_td_right number_column<?=($Torrent['Seeders'] == 0) ? ' r00' : ''?>"><?=number_format($Torrent['Seeders'])?></td>
         <td class="td_leechers m_td_right number_column"><?=number_format($Torrent['Leechers'])?></td>
     </tr>
-<?
+<?php
             }
             $TorrentTable .= ob_get_clean();
         } ?>
@@ -276,12 +276,12 @@ if (!$NumResults) {
         </tr>
 <?=$TorrentTable?>
     </table>
-<?
+<?php
     } // foreach ()
 } // else -- if (empty($NumResults))
 ?>
 </div>
-<?
+<?php
 
 View::show_footer();
 

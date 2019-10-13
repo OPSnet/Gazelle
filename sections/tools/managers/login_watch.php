@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_login_watch')) {
     error(403);
 }
@@ -36,11 +36,13 @@ $DB->query('
             <td>Bans</td>
             <td>Remaining</td>
             <td>Submit</td>
-<?    if (check_perms('admin_manage_ipbans')) { ?>
+<?php
+if (check_perms('admin_manage_ipbans')) { ?>
             <td>Submit</td>
-<?    } ?>
+<?php
+} ?>
         </tr>
-<?
+<?php
 $Row = 'b';
 while (list($ID, $IP, $UserID, $LastAttempt, $Attempts, $BannedUntil, $Bans) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -50,7 +52,7 @@ while (list($ID, $IP, $UserID, $LastAttempt, $Attempts, $BannedUntil, $Bans) = $
                 <?=$IP?>
             </td>
             <td>
-                <? if ($UserID != 0) { echo Users::format_username($UserID, true, true, true, true); } ?>
+                <?php if ($UserID != 0) { echo Users::format_username($UserID, true, true, true, true); } ?>
             </td>
             <td>
                 <?=$Bans?>
@@ -66,7 +68,8 @@ while (list($ID, $IP, $UserID, $LastAttempt, $Attempts, $BannedUntil, $Bans) = $
                     <input type="submit" name="submit" value="Unban" />
                 </form>
             </td>
-<? if (check_perms('admin_manage_ipbans')) { ?>
+<?php
+if (check_perms('admin_manage_ipbans')) { ?>
             <td>
                 <form class="manage_form" name="bans" action="" method="post">
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
@@ -78,11 +81,12 @@ while (list($ID, $IP, $UserID, $LastAttempt, $Attempts, $BannedUntil, $Bans) = $
                     <input type="submit" name="submit" value="IP Ban" />
                 </form>
             </td>
-<? } ?>
+<?php
+} ?>
         </tr>
-<?
+<?php
 }
 ?>
     </table>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

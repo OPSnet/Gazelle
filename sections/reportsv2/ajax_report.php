@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * The backend to changing the report type when making a report.
  * It prints out the relevant report_messages from the array, then
@@ -8,7 +8,7 @@ authorize();
 
 ?>
 <ul>
-<?
+<?php
 $CategoryID = $_POST['categoryid'];
 
 if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
@@ -23,13 +23,13 @@ if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
 foreach ($ReportType['report_messages'] as $Message) {
 ?>
     <li><?=$Message?></li>
-<?
+<?php
 }
 ?>
 </ul>
 <br />
 <table class="layout border" cellpadding="3" cellspacing="1" border="0" width="100%">
-<?
+<?php
 if (array_key_exists('image', $ReportType['report_fields'])) {
 ?>
     <tr>
@@ -40,7 +40,7 @@ if (array_key_exists('image', $ReportType['report_fields'])) {
             <input id="image" type="text" name="image" size="50" value="<?=(!empty($_POST['image']) ? display_str($_POST['image']) : '')?>" />
         </td>
     </tr>
-<?
+<?php
 }
 if (array_key_exists('track', $ReportType['report_fields'])) {
 ?>
@@ -52,7 +52,7 @@ if (array_key_exists('track', $ReportType['report_fields'])) {
             <input id="track" type="text" name="track" size="8" value="<?=(!empty($_POST['track']) ? display_str($_POST['track']) : '')?>" /><?=($ReportType['report_fields']['track'] == '1' ? '<input id="all_tracks" type="checkbox" onclick="AllTracks()" /> All' : '')?>
         </td>
     </tr>
-<?
+<?php
 }
 if (array_key_exists('link', $ReportType['report_fields'])) {
 ?>
@@ -64,7 +64,7 @@ if (array_key_exists('link', $ReportType['report_fields'])) {
             <input id="link" type="text" name="link" size="50" value="<?=(!empty($_POST['link']) ? display_str($_POST['link']) : '')?>" />
         </td>
     </tr>
-<?
+<?php
 }
 if (array_key_exists('sitelink', $ReportType['report_fields'])) {
 ?>
@@ -77,7 +77,7 @@ if (array_key_exists('sitelink', $ReportType['report_fields'])) {
         </td>
     </tr>
 
-<?
+<?php
 }
 if (array_key_exists('proofimages', $ReportType['report_fields'])) {
 ?>
@@ -89,7 +89,7 @@ if (array_key_exists('proofimages', $ReportType['report_fields'])) {
             <input id="image" type="text" name="image" size="50" value="<?=(!empty($_POST['proofimages']) ? display_str($_POST['proofimages']) : '')?>" />
         </td>
     </tr>
-<?
+<?php
 }
 ?>
     <tr>

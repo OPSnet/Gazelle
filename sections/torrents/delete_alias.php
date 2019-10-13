@@ -1,4 +1,4 @@
-<?
+<?php
 $ArtistID = $_GET['artistid'];
 $GroupID = $_GET['groupid'];
 $Importance = $_GET['importance'];

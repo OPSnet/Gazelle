@@ -1,4 +1,4 @@
-<?
+<?php
 
 /* replace
 $UserID = $LoggedUser['ID'];

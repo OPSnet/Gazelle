@@ -55,7 +55,8 @@ foreach ($Items as $i) {
             </td>
         </form>
     </tr>
-<?php } ?>
+<?php
+} ?>
     <tr>
         <td colspan="5">Create Link</td>
     </tr>

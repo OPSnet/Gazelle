@@ -1,4 +1,4 @@
-<?
+<?php
 if (!isset($_GET['torrentid']) || !is_number($_GET['torrentid']) || !check_perms('site_view_torrent_snatchlist')) {
     error(404);
 }
@@ -46,9 +46,9 @@ if (count($UserIDs) > 0) {
 }
 ?>
 <h4 class="tooltip" title="List of users that have clicked the &quot;DL&quot; button">List of Downloaders</h4>
-<? if ($NumResults > 100) { ?>
+<?php if ($NumResults > 100) { ?>
 <div class="linkbox"><?=js_pages('show_downloads', $_GET['torrentid'], $NumResults, $Page)?></div>
-<? } ?>
+<?php } ?>
 <table>
     <tr class="colhead_dark" style="font-weight: bold;">
         <td>User</td>
@@ -58,7 +58,7 @@ if (count($UserIDs) > 0) {
         <td>Time</td>
     </tr>
     <tr>
-<?
+<?php
 $i = 0;
 
 foreach ($Results as $ID=>$Data) {
@@ -75,17 +75,17 @@ foreach ($Results as $ID=>$Data) {
     if ($i % 2 == 0 && $i > 0) { ?>
     </tr>
     <tr>
-<?
+<?php
     }
 ?>
         <td><?=$User?></td>
         <td><?=time_diff($Timestamp)?></td>
-<?
+<?php
     $i++;
 }
 ?>
     </tr>
 </table>
-<? if ($NumResults > 100) { ?>
+<?php if ($NumResults > 100) { ?>
 <div class="linkbox"><?=js_pages('show_downloads', $_GET['torrentid'], $NumResults, $Page)?></div>
-<? } ?>
+<?php } ?>

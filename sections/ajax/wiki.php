@@ -1,4 +1,4 @@
-<?
+<?php
 if (!empty($_GET['id']) && is_number($_GET['id'])) { //Visiting article via ID
     $ArticleID = $_GET['id'];
 } elseif ($_GET['name'] != '') { //Retrieve article ID via alias.

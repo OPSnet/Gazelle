@@ -1,4 +1,4 @@
-<?
+<?php
 if (!function_exists('imagettftext')) {
     die('Captcha requires both the GD library and the FreeType library.');
 }

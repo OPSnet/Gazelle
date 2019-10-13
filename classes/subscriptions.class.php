@@ -1,4 +1,4 @@
-<?
+<?php
 class Subscriptions {
     /**
      * Parse a post/comment body for quotes and notify all quoted users that have quote notifications enabled.

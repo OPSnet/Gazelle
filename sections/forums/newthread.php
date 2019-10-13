@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 New post page
 
@@ -33,7 +33,8 @@ View::show_header('Forums &gt; '.$Forum['Name'].' &gt; New Topic', 'comments,bbc
                 <a href="#" onclick="return false;" class="brackets"><?=!empty($HeavyInfo['AutoSubscribe']) ? 'Unsubscribe' : 'Subscribe'?></a>
             </div>
         </div>
-<?    if (check_perms('forums_polls_create')) { ?>
+<?php
+    if (check_perms('forums_polls_create')) { ?>
         <div class="box thin clear hidden" id="pollpreview">
             <div class="head colhead_dark"><strong>Poll</strong> <a href="#" onclick="$('#threadpoll').gtoggle(); return false;" class="brackets">View</a></div>
             <div class="pad" id="threadpoll">
@@ -43,12 +44,15 @@ View::show_header('Forums &gt; '.$Forum['Name'].' &gt; New Topic', 'comments,bbc
                 <input type="button" style="float: left;" value="Vote" />
             </div>
         </div>
-<?    } ?>
+<?php
+    } ?>
         <table class="forum_post box vertical_margin" style="text-align: left;">
             <colgroup>
-<?    if (Users::has_avatars_enabled()) { ?>
+<?php
+    if (Users::has_avatars_enabled()) { ?>
                 <col class="col_avatar" />
-<?    } ?>
+<?php
+    } ?>
                 <col class="col_post_body" />
             </colgroup>
             <tr class="colhead_dark">
@@ -65,11 +69,13 @@ View::show_header('Forums &gt; '.$Forum['Name'].' &gt; New Topic', 'comments,bbc
                 </td>
             </tr>
             <tr>
-<?    if (Users::has_avatars_enabled()) { ?>
+<?php
+    if (Users::has_avatars_enabled()) { ?>
                 <td class="avatar" valign="top">
                     <?=Users::show_avatar($LoggedUser['Avatar'], $LoggedUser['ID'], $LoggedUser['Username'], $HeavyInfo['DisableAvatars'])?>
                 </td>
-<?    } ?>
+<?php
+    } ?>
                 <td class="body" valign="top">
                     <div id="contentpreview" style="text-align: left;"></div>
                 </td>
@@ -97,7 +103,7 @@ View::show_header('Forums &gt; '.$Forum['Name'].' &gt; New Topic', 'comments,bbc
                         <label for="subscribebox">Subscribe to topic</label>
                     </td>
                 </tr>
-<? 
+<?php
 if (check_perms('forums_polls_create')) {
 ?>
                 <script type="text/javascript">//<![CDATA[
@@ -150,7 +156,8 @@ if (check_perms('forums_polls_create')) {
                         <a href="#" onclick="RemoveAnswerField();return false;" class="brackets">&minus;</a>
                     </td>
                 </tr>
-<? } ?>
+<?php
+} ?>
             </table>
             <div id="subscribediv" class="hidden">
                 <input id="subscribeboxpreview" type="checkbox" name="subscribe"<?=!empty($HeavyInfo['AutoSubscribe']) ? ' checked="checked"' : '' ?> />
@@ -164,4 +171,4 @@ if (check_perms('forums_polls_create')) {
         </form>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 if (isset($_SERVER['http_if_modified_since'])) {
     header('Status: 304 Not Modified');
     die();

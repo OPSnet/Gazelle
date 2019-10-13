@@ -1,4 +1,4 @@
-<?
+<?php
 /**********|| Page to show individual threads || ********************************\
 
 Things to expect in $_GET:
@@ -35,7 +35,7 @@ View::show_header("Comments for collage $Name", 'comments,bbcode,subscriptions')
         </h2>
         <div class="linkbox">
             <a href="#" id="subscribelink_collages<?=$CollageID?>" class="brackets" onclick="SubscribeComments('collages', <?=$CollageID?>); return false;"><?=Subscriptions::has_subscribed_comments('collages', $CollageID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
-<?
+<?php
 $Pages = Format::get_pages($Page, $NumComments, TORRENT_COMMENTS_PER_PAGE, 9);
 if ($Pages) {
     echo '<br /><br />' . $Pages;
@@ -43,7 +43,7 @@ if ($Pages) {
 ?>
         </div>
     </div>
-<?
+<?php
 
 //---------- Begin printing
 CommentsView::render_comments($Thread, $LastRead, "collages.php?action=comments&amp;collageid=$CollageID");
@@ -64,4 +64,4 @@ if (!$ThreadInfo['IsLocked'] || check_perms('site_moderate_forums')) {
         <?=$Pages?>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

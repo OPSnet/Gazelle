@@ -1,4 +1,4 @@
-<?
+<?php
 class Tools {
     /**
      * Returns true if given IP is banned.

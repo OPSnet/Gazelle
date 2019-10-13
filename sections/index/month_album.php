@@ -1,4 +1,4 @@
-<?
+<?php
 $FeaturedAlbum = $Cache->get_value('album_of_the_month');
 if ($FeaturedAlbum === false) {
     $DB->query('
@@ -28,6 +28,6 @@ if (is_number($FeaturedAlbum['GroupID'])) {
                 </a>
             </div>
         </div>
-<?
+<?php
 }
 ?>

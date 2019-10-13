@@ -1,4 +1,4 @@
-<?
+<?php
 define('LIMIT', 100);
 
 //$Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
@@ -27,32 +27,32 @@ View::show_header("Last.fm", "jquery.imagesloaded,jquery.wookmark,top10", "tiles
 <div class="thin">
     <div class="header">
         <h2>Last.fm</h2>
-<?        Top10View::render_linkbox("lastfm"); ?>
+<?php   Top10View::render_linkbox("lastfm"); ?>
     </div>
-<?    Top10View::render_artist_links($Category, $View); ?>
-<?    Top10View::render_artist_controls($Category, $View); ?>
-<?    if ($View == 'tiles') { ?>
+<?php    Top10View::render_artist_links($Category, $View); ?>
+<?php    Top10View::render_artist_controls($Category, $View); ?>
+<?php   if ($View == 'tiles') { ?>
         <div class="tiles_container">
             <ul class="tiles">
-<?
-        foreach ($Artists as $Artist) {
-                Top10View::render_artist_tile($Artist, $Category);
-        }
+<?php
+            foreach ($Artists as $Artist) {
+                    Top10View::render_artist_tile($Artist, $Category);
+            }
 ?>
             </ul>
         </div>
-<?    } else { ?>
+<?php    } else { ?>
         <div class="list_container">
             <ul class="top_artist_list">
-<?
-        foreach ($Artists as $Artist) {
-                Top10View::render_artist_list($Artist, $Category);
-        }
+<?php
+            foreach ($Artists as $Artist) {
+                    Top10View::render_artist_list($Artist, $Category);
+            }
 ?>
             </ul>
         </div>
-<?    } ?>
+<?php   } ?>
     </div>
-<?
+<?php
 View::show_footer();
 ?>

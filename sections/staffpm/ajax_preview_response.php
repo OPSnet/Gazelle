@@ -1,4 +1,4 @@
-<?
+<?php
 /* AJAX Previews, simple stuff. */
 
 if (!empty($_POST['message'])) {

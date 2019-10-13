@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 
 if (!check_perms('site_top10')) {
@@ -7,7 +7,7 @@ if (!check_perms('site_top10')) {
 <div class="content_basiccontainer">
     You do not have access to view this feature.
 </div>
-<?
+<?php
     View::show_footer();
     die();
 }

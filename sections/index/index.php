@@ -1,4 +1,4 @@
-<?
+<?php
 if (isset($LoggedUser['ID'])) {
     if (!isset($_REQUEST['action'])) {
         include('private.php');

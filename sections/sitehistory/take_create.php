@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 if (!check_perms('users_mod') ) {
     error(403);

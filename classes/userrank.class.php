@@ -1,4 +1,4 @@
-<?
+<?php
 class UserRank {
     const PREFIX = 'percentiles_'; // Prefix for memcache keys, to make life easier
 

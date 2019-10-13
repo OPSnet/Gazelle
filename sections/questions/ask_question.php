@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header("Ask the Staff");
 ?>
 <div class="thin">
@@ -19,5 +19,5 @@ View::show_header("Ask the Staff");
         </form>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

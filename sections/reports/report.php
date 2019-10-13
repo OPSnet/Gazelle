@@ -1,4 +1,4 @@
-<?
+<?php
 
 include(SERVER_ROOT.'/sections/reports/array.php');
 
@@ -135,19 +135,21 @@ View::show_header('Report a '.$Type['title'], 'bbcode,jquery.validate,form_valid
     <div class="box pad">
         <p>Following these guidelines will help the moderators deal with your report in a timely fashion. </p>
         <ul>
-<?    foreach ($Type['guidelines'] as $Guideline) { ?>
+<?php
+foreach ($Type['guidelines'] as $Guideline) { ?>
             <li><?=$Guideline?></li>
-<?    } ?>
+<?php
+} ?>
         </ul>
         <p>In short, please include as much detail as possible when reporting. Thank you. </p>
     </div>
-<?
+<?php
 
 switch ($Short) {
     case 'user':
 ?>
     <p>You are reporting the user <strong><?=display_str($Username)?></strong></p>
-<?
+<?php
         break;
     case 'request_update':
 ?>
@@ -185,9 +187,9 @@ switch ($Short) {
                     <td>
                         <select id="releasetype" name="releasetype">
                             <option value="0">---</option>
-<?        foreach ($ReleaseTypes as $Key => $Val) { ?>
+<?php   foreach ($ReleaseTypes as $Key => $Val) { ?>
                             <option value="<?=$Key?>"<?=(!empty($ReleaseType) ? ($Key == $ReleaseType ? ' selected="selected"' : '') : '')?>><?=$Val?></option>
-<?        } ?>
+<?php   } ?>
                         </select>
                     </td>
                 </tr>
@@ -203,7 +205,7 @@ switch ($Short) {
             <input type="submit" value="Submit report" />
         </form>
     </div>
-<?
+<?php
         break;
     case 'request':
 ?>
@@ -220,7 +222,7 @@ switch ($Short) {
             <td><strong><?=($Filled == 0 ? 'No' : 'Yes')?></strong></td>
         </tr>
     </table>
-<?
+<?php
         break;
     case 'collage':
 ?>
@@ -235,7 +237,7 @@ switch ($Short) {
             <td><?=Text::full_format($Desc)?></td>
         </tr>
     </table>
-<?
+<?php
         break;
     case 'thread':
 ?>
@@ -250,7 +252,7 @@ switch ($Short) {
             <td><?=display_str($Title)?></td>
         </tr>
     </table>
-<?
+<?php
         break;
     case 'post':
 ?>
@@ -265,7 +267,7 @@ switch ($Short) {
             <td><?=Text::full_format($Body)?></td>
         </tr>
     </table>
-<?
+<?php
         break;
     case 'comment':
 ?>
@@ -280,7 +282,7 @@ switch ($Short) {
             <td><?=Text::full_format($Body)?></td>
         </tr>
     </table>
-<?
+<?php
     break;
 }
 if (empty($NoReason)) {
@@ -296,9 +298,9 @@ if (empty($NoReason)) {
             <input type="submit" value="Submit report" />
         </form>
     </div>
-<?
-} /* close <div class="thin"> */ ?>
+<?php
+} ?>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

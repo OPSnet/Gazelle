@@ -1,4 +1,4 @@
-<?
+<?php
 //TODO: Redo HTML
 if (!isset($_REQUEST['userid']) || !is_number($_REQUEST['userid'])) {
     error(404);
@@ -106,8 +106,8 @@ function reset() {
     <input type="hidden" name="action" value="permissions" />
     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
     <input type="hidden" name="id" value="<?=$_REQUEST['userid']?>" />
-<?
+<?php
 permissions_form();
 ?>
 </form>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

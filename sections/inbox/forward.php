@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $UserID = $LoggedUser['ID'];

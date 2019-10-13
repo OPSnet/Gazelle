@@ -1,4 +1,4 @@
-<?
+<?php
 
 class LastFMView {
 
@@ -21,7 +21,7 @@ class LastFMView {
                 </div>
                 <li>
                     <a href="#" id="lastfm_expand" onclick="return false;" class="brackets">Show more info</a>
-<?
+<?php
         //Append the reload stats button only if allowed on the current user page.
         $Response = G::$Cache->get_value("lastfm_clear_cache_$UserID");
         if (empty($Response)) {
@@ -29,10 +29,10 @@ class LastFMView {
                     <span id="lastfm_reload_container">
                         <a href="#" id="lastfm_reload" onclick="return false;" class="brackets">Reload stats</a>
                     </span>
-<?        } ?>
+<?php   } ?>
                 </li>
             </ul>
         </div>
-<?
+<?php
     }
 }

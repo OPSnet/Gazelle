@@ -89,33 +89,34 @@ foreach ($Charts as $Chart) {
         <h2><?=Users::format_username($UserID, true, true, true, false, true)?></h2>
     </div>
     <div class="linkbox">
-<?
+<?php
 if (!$OwnProfile) {
 ?>
         <a href="inbox.php?action=compose&amp;to=<?=$UserID?>" class="brackets">Send message</a>
         <a href="reports.php?action=report&amp;type=user&amp;id=<?=$UserID?>" class="brackets">Report user</a>
-<?
+<?php
 }
 if (check_perms('admin_reports')) {
 ?>
         <a href="reportsv2.php?view=reporter&amp;id=<?=$UserID?>" class="brackets">Reports</a>
-<?
+<?php
 }
 if (check_perms('users_mod')) {
 ?>
         <a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
-<?
+<?php
 }
 if (check_perms('users_mod') || ($LoggedUser['ID'] == $UserID && check_perms('site_user_stats'))) {
 ?>
         <a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
-<?
+<?php
 }
 ?>
     </div>
 </div>
 
-<?php foreach ($Charts as $Chart) { ?>
+<?php
+foreach ($Charts as $Chart) { ?>
 <div class="box">
     <div class="head">
         <?=$Chart['Name']?> Stats
@@ -127,12 +128,13 @@ if (check_perms('users_mod') || ($LoggedUser['ID'] == $UserID && check_perms('si
         <div id="<?=$Chart['name']?>-bp" style="width: 100%; height: 400px"></div>
         <br />
         <div id="<?=$Chart['name']?>-upload" style="width: 100%; height: 400px"></div>
-<? } else { ?>
+<?php } else { ?>
         No stats available.
 <?php } ?>
     </div>
 </div>
-<?php } ?>
+<?php
+} ?>
 
 <?php
 

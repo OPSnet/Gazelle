@@ -1,4 +1,4 @@
-<?
+<?php
 Text::$TOC = true;
 
 $ArticleID = false;
@@ -26,7 +26,7 @@ if (!$ArticleID) { //No article found
         </ul>
     </div>
 </div>
-<?
+<?php
     View::show_footer();
     die();
 }
@@ -47,13 +47,13 @@ View::show_header($Title,'wiki,bbcode');
         <h2><?=$Title?></h2>
         <div class="linkbox">
             <a href="wiki.php?action=create" class="brackets">Create</a>
-<? if ($Edit <= $LoggedUser['EffectiveClass']) { ?>
+<?php if ($Edit <= $LoggedUser['EffectiveClass']) { ?>
             <a href="wiki.php?action=edit&amp;id=<?=$ArticleID?>" class="brackets">Contribute</a>
             <a href="wiki.php?action=revisions&amp;id=<?=$ArticleID?>" class="brackets">History</a>
-    <? if (check_perms('admin_manage_wiki') && $_GET['id'] != INDEX_ARTICLE) { ?>
+<?php   if (check_perms('admin_manage_wiki') && $_GET['id'] != INDEX_ARTICLE) { ?>
             <a href="wiki.php?action=delete&amp;id=<?=$ArticleID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to delete?\nYes, DELETE, not as in \'Oh hey, if this is wrong we can get someone to magically undelete it for us later\' it will be GONE.\nGiven this new information, do you still want to DELETE this article and all its revisions and all its alias\' and act like it never existed?')">Delete</a>
-    <? } ?>
-<? } ?>
+<?php   }
+    } ?>
             <!--<a href="reports.php?action=submit&amp;type=wiki&amp;article=<?=$ArticleID ?>" class="brackets">Report</a>-->
         </div>
     </div>
@@ -96,15 +96,15 @@ View::show_header($Title,'wiki,bbcode');
                 <li>
                     <strong>Aliases:</strong>
                     <ul>
-<?
+<?php
 if ($Aliases != $Title) {
     $AliasArray = explode(',', $Aliases);
     $UserArray = explode(',', $UserIDs);
     $i = 0;
     foreach ($AliasArray as $AliasItem) {
 ?>
-                        <li id="alias_<?=$AliasItem?>"><a href="wiki.php?action=article&amp;name=<?=$AliasItem?>"><?=Format::cut_string($AliasItem, 20, 1)?></a><? if (check_perms('admin_manage_wiki')) { ?> <a href="#" onclick="Remove_Alias('<?=$AliasItem?>'); return false;" class="brackets tooltip" title="Delete alias">X</a> <a href="user.php?id=<?=$UserArray[$i]?>" class="brackets tooltip" title="View user">U</a><? } ?></li>
-<?        $i++;
+                        <li id="alias_<?=$AliasItem?>"><a href="wiki.php?action=article&amp;name=<?=$AliasItem?>"><?=Format::cut_string($AliasItem, 20, 1)?></a><?php if (check_perms('admin_manage_wiki')) { ?> <a href="#" onclick="Remove_Alias('<?=$AliasItem?>'); return false;" class="brackets tooltip" title="Delete alias">X</a> <a href="user.php?id=<?=$UserArray[$i]?>" class="brackets tooltip" title="View user">U</a><?php } ?></li>
+<?php        $i++;
     }
 }
 ?>
@@ -112,7 +112,7 @@ if ($Aliases != $Title) {
                 </li>
             </ul>
         </div>
-<? if ($Edit <= $LoggedUser['EffectiveClass']) { ?>
+<?php if ($Edit <= $LoggedUser['EffectiveClass']) { ?>
         <div class="box box_addalias">
             <div style="padding: 5px;">
                 <form class="add_form" name="aliases" action="wiki.php" method="post">
@@ -128,7 +128,7 @@ if ($Aliases != $Title) {
                 </form>
             </div>
         </div>
-<? } ?>
+<?php } ?>
     </div>
     <div class="main_column">
     <div class="box wiki_article">
@@ -136,4 +136,4 @@ if ($Aliases != $Title) {
     </div>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

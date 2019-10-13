@@ -1,4 +1,4 @@
-<?
+<?php
 // Debug info for developers
 ini_set('max_execution_time',600);
 define('MAX_TIME', 20000); //Maximum execution time in ms
@@ -329,18 +329,18 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_perf" class="debug_table hidden" width="100%">
-<?
+<?php
         foreach ($Perf as $Stat => $Value) {
 ?>
         <tr valign="top">
             <td class="debug_perf_stat"><?=$Stat?></td>
             <td class="debug_perf_data"><?=$Value?></td>
         </tr>
-<?
+<?php
         }
 ?>
     </table>
-<?
+<?php
     }
 
     public function include_table($Includes = false) {
@@ -354,17 +354,17 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_include" class="debug_table hidden" width="100%">
-<?
+<?php
         foreach ($Includes as $File) {
 ?>
         <tr valign="top">
             <td><?=$File?></td>
         </tr>
-<?
+<?php
         }
 ?>
     </table>
-<?
+<?php
     }
 
     public function class_table($Classes = false) {
@@ -381,12 +381,12 @@ class DEBUG {
         <tr>
             <td align="left">
                 <pre>
-<?                    print_r($Classes); echo "\n"; ?>
+<?php               print_r($Classes); echo "\n"; ?>
                 </pre>
             </td>
         </tr>
     </table>
-<?
+<?php
     }
 
     public function extension_table() {
@@ -400,12 +400,12 @@ class DEBUG {
         <tr>
             <td align="left">
                 <pre>
-<?                    print_r($this->get_extensions()); echo "\n"; ?>
+<?php               print_r($this->get_extensions()); echo "\n"; ?>
                 </pre>
             </td>
         </tr>
     </table>
-<?
+<?php
     }
 
     public function flag_table($Flags = false) {
@@ -425,26 +425,26 @@ class DEBUG {
         <tr valign="top">
             <td align="left" class="debug_flags_event"><strong>Event</strong></td>
             <td align="left" class="debug_flags_time"><strong>Page time</strong></td>
-<?        if ($Flags[0][3] !== false) { ?>
+<?php        if ($Flags[0][3] !== false) { ?>
             <td align="left" class="debug_flags_time"><strong>CPU time</strong></td>
-<?        } ?>
+<?php        } ?>
             <td align="left" class="debug_flags_memory"><strong>Memory</strong></td>
         </tr>
-<?
+<?php
         foreach ($Flags as $Flag) {
             list($Event, $MicroTime, $Memory, $CPUTime) = $Flag;
 ?>
         <tr valign="top">
             <td align="left"><?=$Event?></td>
             <td align="left"><?=number_format($MicroTime, 3)?> ms</td>
-<?            if ($CPUTime !== false) { ?>
+<?php       if ($CPUTime !== false) { ?>
             <td align="left"><?=number_format($CPUTime / 1000, 3)?> ms</td>
-<?            } ?>
+<?php       } ?>
             <td align="left"><?=Format::get_size($Memory)?></td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 
     public function constant_table($Constants = false) {
@@ -466,7 +466,7 @@ class DEBUG {
             </td>
         </tr>
     </table>
-<?
+<?php
     }
 
     public function ocelot_table($OcelotRequests = false) {
@@ -483,7 +483,7 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_ocelot" class="debug_table hidden" width="100%">
-<?        foreach ($OcelotRequests as $i => $Request) { ?>
+<?php   foreach ($OcelotRequests as $i => $Request) { ?>
         <tr>
             <td align="left" class="debug_data debug_ocelot_data">
                 <a href="#" onclick="$('#debug_ocelot_<?=$i?>').gtoggle(); return false"><?=display_str($Request['path'])?></a>
@@ -496,9 +496,9 @@ class DEBUG {
                 <?=number_format($Request['time'], 5)?> ms
             </td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 
     public function cache_table($CacheKeys = false) {
@@ -519,7 +519,7 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_cache" class="debug_table hidden" width="100%">
-<?         foreach ($CacheKeys as $Key) { ?>
+<?php   foreach ($CacheKeys as $Key) { ?>
         <tr>
             <td class="label nobr debug_info debug_cache_key">
                 <a href="#" onclick="$('#debug_cache_<?=$Key?>').gtoggle(); return false;"><?=display_str($Key)?></a>
@@ -531,9 +531,9 @@ class DEBUG {
                 </pre>
             </td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 
     public function error_table($Errors = false) {
@@ -550,7 +550,7 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_error" class="debug_table hidden" width="100%">
-<?
+<?php
         foreach ($Errors as $Error) {
             list($Error, $Location, $Call, $Args) = $Error;
 ?>
@@ -565,9 +565,9 @@ class DEBUG {
                 <?=display_str($Location)?>
             </td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 
     public function query_table($Queries=false) {
@@ -587,7 +587,7 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_database" class="debug_table hidden" width="100%">
-<?
+<?php
         foreach ($Queries as $Query) {
             list($SQL, $Time, $Warnings) = $Query;
             if ($Warnings !== null) {
@@ -599,9 +599,9 @@ class DEBUG {
             <td class="rowa debug_info debug_query_time" style="width: 130px;" align="left"><?=number_format($Time, 5)?> ms</td>
             <td class="rowa debug_info debug_query_warnings"><?=$Warnings?></td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 
     public function sphinx_table($Queries = false) {
@@ -621,7 +621,7 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_sphinx" class="debug_table hidden" width="100%">
-<?
+<?php
         foreach ($Queries as $Query) {
             list($Params, $Time) = $Query;
 ?>
@@ -629,9 +629,9 @@ class DEBUG {
             <td class="debug_data debug_sphinx_data"><pre><?=str_replace("\t", '    ', $Params)?></pre></td>
             <td class="rowa debug_info debug_sphinx_time" style="width: 130px;" align="left"><?=number_format($Time, 5)?> ms</td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 
     public function vars_table($Vars = false) {
@@ -651,7 +651,7 @@ class DEBUG {
         </tr>
     </table>
     <table id="debug_loggedvars" class="debug_table hidden" width="100%">
-<?
+<?php
         foreach ($Vars as $ID => $Var) {
             list($Key, $Data) = each($Var);
             $Size = count($Data['data']);
@@ -667,8 +667,8 @@ class DEBUG {
                 </pre>
             </td>
         </tr>
-<?        } ?>
+<?php   } ?>
     </table>
-<?
+<?php
     }
 }

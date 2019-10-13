@@ -8,7 +8,7 @@ if ($Contest !== false and strlen($Contest['Banner'])) {
 <div class="pad">
     <img border="0" src="<?=$Contest['Banner'] ?>" alt="<?=$Contest['Name'] ?>" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
 </div>
-<?
+<?php
 }
 ?>
 <div class="linkbox">

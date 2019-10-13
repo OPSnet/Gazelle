@@ -1,4 +1,4 @@
-<?
+<?php
 
 class SiteHistory {
     private static $Categories = array(1 => "Code", "Event", "Milestone", "Policy", "Release", "Staff Change");

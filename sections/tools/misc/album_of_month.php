@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -140,10 +140,10 @@ if (isset($_POST['GroupID'])) {
                 <option value="0" >Normal</option>
             </select>
             &nbsp;for reason&nbsp;<select name="freeleechreason">
-<?      $FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
+<?php      $FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>" <?=$FLType == 'Staff Pick' ? 'selected' : ''?>><?=$FLType?></option>
-<?      } ?>
+<?php   } ?>
             </select><br /><br />
             <input type="checkbox" name="NLOver" checked />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
             <select name="scale">
@@ -158,7 +158,7 @@ if (isset($_POST['GroupID'])) {
         </div>
     </form>
     </div>
-<?
+<?php
 
      View::show_footer();
 }

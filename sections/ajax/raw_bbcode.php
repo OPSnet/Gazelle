@@ -1,4 +1,4 @@
-<?
+<?php
 
 $PostID = (int)$_POST['postid'];
 

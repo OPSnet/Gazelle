@@ -1,4 +1,4 @@
-<?
+<?php
 class Requests {
     /**
      * Update the sphinx requests delta table for a request.

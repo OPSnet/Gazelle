@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_recovery')) {
     error(403);
 }
@@ -76,9 +76,11 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 
 <h3><?= $Total ?> <?= $State ?> recovery requests</h3>
 
-<? if (isset($message)) { ?>
+<?php
+if (isset($message)) { ?>
 <h5><?= $message ?></h5>
-<? } ?>
+<?php
+} ?>
 
 <div class="linkbox">
     <?=$Pages?>
@@ -98,7 +100,8 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
                 <th>Updated</th>
                 <th>Action</th>
             </tr>
-<? foreach ($Info as $i) { ?>
+<?php
+foreach ($Info as $i) { ?>
             <tr>
                 <td><?= $i['recovery_id'] ?></td>
                 <td><?= $i['username'] ?></td>
@@ -109,12 +112,15 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
                 <td><?= time_diff($i['updated_dt']) ?></td>
                 <td>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>">View</a>
-<?  if ($i['state'] == 'PENDING') { ?>
+<?php
+    if ($i['state'] == 'PENDING') { ?>
                     <a class="brackets" href="/recovery.php?action=view&amp;id=<?= $i['recovery_id'] ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a>
-<?  } ?>
+<?php
+    } ?>
                 </td>
             </tr>
-<? } ?>
+<?php
+} ?>
         </table>
     </div>
 </div>
@@ -124,6 +130,6 @@ $Pages = Format::get_pages($Page, $Total, $Limit);
 </div>
 
 </div>
-<?
+<?php
 View::show_footer();
 

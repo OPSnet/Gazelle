@@ -61,25 +61,28 @@ View::show_header($Title, 'browse,collage');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><? if (!$Sneaky) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=$LoggedUser['torrent_pass']?>&amp;user=<?=$LoggedUser['ID']?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?=$LoggedUser['torrent_pass']?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;name=<?=urlencode(SITE_NAME.': Bookmarked Torrents')?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<? } ?><?=$Title?></h2>
+        <h2><?php if (!$Sneaky) { ?><a href="feeds.php?feed=torrents_bookmarks_t_<?=$LoggedUser['torrent_pass']?>&amp;user=<?=$LoggedUser['ID']?>&amp;auth=<?=$LoggedUser['RSS_Auth']?>&amp;passkey=<?=$LoggedUser['torrent_pass']?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;name=<?=urlencode(SITE_NAME.': Bookmarked Torrents')?>"><img src="<?=STATIC_SERVER?>/common/symbols/rss.png" alt="RSS feed" /></a>&nbsp;<?php } ?><?=$Title?></h2>
         <div class="linkbox">
             <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
             <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
             <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
             <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
-<? if (count($TorrentList) > 0) { ?>
+<?php
+if (count($TorrentList) > 0) { ?>
             <br /><br />
             <a href="bookmarks.php?action=remove_snatched&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to remove the bookmarks for all items you\'ve snatched?');">Remove snatched</a>
             <a href="bookmarks.php?action=edit&amp;type=torrents" class="brackets">Manage torrents</a>
-<? } ?>
+<?php
+} ?>
         </div>
     </div>
-<? if (count($TorrentList) === 0) { ?>
+<?php
+if (count($TorrentList) === 0) { ?>
     <div class="box pad" align="center">
         <h2>You have not bookmarked any torrents.</h2>
     </div>
 </div><!--content-->
-<?
+<?php
     View::show_footer();
     die();
 } ?>
@@ -95,14 +98,14 @@ View::show_header($Title, 'browse,collage');
             <div class="head"><strong>Top Tags</strong></div>
             <div class="pad">
                 <ol style="padding-left: 5px;">
-<? Tags::format_top(5) ?>
+<?php Tags::format_top(5) ?>
                 </ol>
             </div>
         </div>
         <div class="box box_artists">
             <div class="head"><strong>Top Artists</strong></div>
             <div class="pad">
-<?
+<?php
     $Indent = "\t\t\t\t";
     if (count($ArtistCount) > 0) {
         echo "$Indent<ol style=\"padding-left: 5px;\">\n";
@@ -115,7 +118,7 @@ View::show_header($Title, 'browse,collage');
             }
 ?>
                     <li><a href="artist.php?id=<?=$ID?>"><?=display_str($Artist['name'])?></a> (<?=$Artist['count']?>)</li>
-<?
+<?php
         }
         echo "$Indent</ol>\n";
     } else {
@@ -128,26 +131,27 @@ View::show_header($Title, 'browse,collage');
         </div>
     </div>
     <div class="main_column">
-<?
+<?php
 
 if ($CollageCovers !== 0) { ?>
         <div id="coverart" class="box">
             <div class="head" id="coverhead"><strong>Cover art</strong></div>
             <ul class="collage_images" id="collage_page0">
-<?
+<?php
     for ($Idx = 0; $Idx < min($NumGroups, $CollageCovers); $Idx++) {
         echo Collages::collage_cover_row($TorrentList[$GroupIDs[$Idx]]);
     }
 ?>
             </ul>
         </div>
-<?    if ($NumGroups > $CollageCovers) { ?>
+<?php
+    if ($NumGroups > $CollageCovers) { ?>
         <div class="linkbox pager" style="clear: left;" id="pageslinksdiv">
             <span id="firstpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.page(0); return false;">&lt;&lt; First</a> | </span>
             <span id="prevpage" class="invisible"><a href="#" id="prevpage" class="pageslink" onclick="collageShow.prevPage(); return false;">&lt; Prev</a> | </span>
-<?        for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) { ?>
+<?php   for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) { ?>
             <span id="pagelink<?=$i?>" class="<?=(($i > 4) ? 'hidden' : '')?><?=(($i === 0) ? ' selected' : '')?>"><a href="#" class="pageslink" onclick="collageShow.page(<?=$i?>, this); return false;"><?=($CollageCovers * $i + 1)?>-<?=min($NumGroups, $CollageCovers * ($i + 1))?></a><?=(($i !== ceil($NumGroups / $CollageCovers) - 1) ? ' | ' : '')?></span>
-<?        } ?>
+<?php   } ?>
             <!--<span id="nextbar" class="<?=(($NumGroups / $CollageCovers > 5) ? 'hidden' : '')?>"> | </span>-->
             <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;">Next &gt;</a></span>
             <span id="lastpage" class="<?=(ceil($NumGroups / $CollageCovers) === 2 ? 'invisible' : '')?>"> | <a href="#" id="lastpage" class="pageslink" onclick="collageShow.page(<?=(ceil($NumGroups / $CollageCovers) - 1)?>); return false;">Last &gt;&gt;</a></span>
@@ -257,17 +261,17 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td class="td_info" colspan="5">
                 <strong><?= $DisplayName ?></strong>
                 <span style="text-align: right;" class="float_right">
-    <? if (!$Sneaky) { ?>
+    <?php if (!$Sneaky) { ?>
         <a href="#group_<?= $GroupID ?>" class="brackets remove_bookmark"
            onclick="Unbookmark('torrent', <?= $GroupID ?>, ''); return false;">Remove bookmark</a>
         <br/>
-    <? } ?>
+    <?php } ?>
                     <?= time_diff($AddedTime); ?>
                         </span>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
         </tr>
-        <?
+        <?php
         $LastRemasterYear = '-';
         $LastRemasterTitle = '';
         $LastRemasterRecordLabel = '';
@@ -302,7 +306,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                             <?= Torrents::edition_string($Torrent, $Group) ?>
                         </strong></td>
                 </tr>
-                <?
+                <?php
             }
             $LastRemasterTitle = $Torrent['RemasterTitle'];
             $LastRemasterYear = $Torrent['RemasterYear'];
@@ -314,12 +318,12 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 <td class="td_info" colspan="3">
                 <span>[ <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
                            class="tooltip" title="Download">DL</a>
-                    <? if (Torrents::can_use_token($Torrent)) { ?>
+                    <?php if (Torrents::can_use_token($Torrent)) { ?>
                         |
                         <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
                            class="tooltip" title="Use a FL Token"
                            onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders']) ?>');">FL</a>
-                    <? } ?>
+                    <?php } ?>
                     | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip"
                          title="Report">RP</a> ]
                 </span>
@@ -331,7 +335,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 <td class="td_seeders m_td_right number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
                 <td class="td_leechers m_td_right number_column"><?= number_format($Torrent['Leechers']) ?></td>
             </tr>
-            <?
+            <?php
         }
     }
     else {
@@ -366,22 +370,22 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
                          class="tooltip" title="Download">DL</a>
-                    <? if (Torrents::can_use_token($Torrent)) { ?>
+                    <?php if (Torrents::can_use_token($Torrent)) { ?>
                         |
                         <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
                            class="tooltip" title="Use a FL Token"
                            onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders']) ?>');">FL</a>
-                    <? } ?>
+                    <?php } ?>
                     | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip"
                          title="Report">RP</a> ]
                 </span>
                 <strong><?= $DisplayName ?></strong>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
-                <? if (!$Sneaky) { ?>
+                <?php if (!$Sneaky) { ?>
                     <span class="float_right float_clear"><a href="#group_<?= $GroupID ?>"
                                                              class="brackets remove_bookmark"
                                                              onclick="Unbookmark('torrent', <?= $GroupID ?>, ''); return false;">Remove bookmark</a></span>
-                <? } ?>
+                <?php } ?>
                 <span class="float_right float_clear"><?= time_diff($AddedTime); ?></span>
 
             </td>
@@ -390,7 +394,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td class="number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
             <td class="number_column"><?= number_format($Torrent['Leechers']) ?></td>
         </tr>
-        <?
+        <?php
     }
     echo ob_get_clean();
 }

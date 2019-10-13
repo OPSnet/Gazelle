@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('site_view_flow')) {
     error(403);
 }
@@ -68,6 +68,6 @@ if (!$TorrentStats = $Cache->get_value('new_torrent_stats')) {
         </div>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

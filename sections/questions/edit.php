@@ -1,4 +1,4 @@
-<?
+<?php
 
 $ID = $_GET['id'];
 
@@ -39,9 +39,9 @@ View::show_header('Ask the Staff', 'bbcode');
         <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
         <input type="hidden" name="id" value="<?=$ID?>" />
         <input type="hidden" name="userid" value="<?=$UserID?>" />
-        <? new TEXTAREA_PREVIEW("edit", "edit", $Answer, 40, 8); ?>
+        <?php new TEXTAREA_PREVIEW("edit", "edit", $Answer, 40, 8); ?>
         <input type="submit" class="submit" value="Answer" />
     </form>
 </div>
-<?
+<?php
 View::show_footer();

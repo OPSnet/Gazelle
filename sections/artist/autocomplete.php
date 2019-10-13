@@ -1,4 +1,4 @@
-<?
+<?php
 if (empty($_GET['query'])) {
     error(0);
 }

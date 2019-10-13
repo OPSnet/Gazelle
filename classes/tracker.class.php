@@ -1,4 +1,4 @@
-<?
+<?php
 // TODO: Turn this into a class with nice functions like update_user, etc.
 class Tracker {
     const STATS_MAIN = 0;

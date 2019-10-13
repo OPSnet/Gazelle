@@ -1,4 +1,4 @@
-<?
+<?php
 if (empty($_GET['id']) || !is_number($_GET['id'])) {
     json_die("failure");
 }

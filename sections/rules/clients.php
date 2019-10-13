@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Client Rules');
 
 if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
@@ -12,7 +12,7 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
 }
 ?>
 <div class="thin">
-<? include('jump.php'); ?>
+<?php include('jump.php'); ?>
     <div class="header">
         <h2 class="general">Client Whitelist</h2>
     </div>
@@ -24,7 +24,7 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
                 <td style="width: 75px"><strong>Peer ID</strong></td>
                 <!-- td style="width: 400px;"><strong>Additional Notes</strong></td> -->
             </tr>
-<?
+<?php
     $Row = 'a';
     foreach ($WhitelistedClients as $Client) {
         //list($ClientName, $Notes) = $Client;
@@ -38,8 +38,9 @@ if (!$WhitelistedClients = $Cache->get_value('whitelisted_clients')) {
                 <td><?=$ClientName?></td>
                 <td><?=$PeerID?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </table>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

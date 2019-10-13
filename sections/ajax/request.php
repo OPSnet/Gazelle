@@ -1,4 +1,4 @@
-<?
+<?php
 $RequestTax = REQUEST_TAX;
 
 // Minimum and default amount of upload to remove from the user when they vote.

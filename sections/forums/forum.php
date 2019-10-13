@@ -85,9 +85,9 @@ View::show_header('Forums &gt; '. $Forums[$ForumID]['Name'], '', $IsDonorForum ?
 <div class="thin">
     <h2><a href="forums.php">Forums</a> &gt; <?=$ForumName?></h2>
     <div class="linkbox">
-<? if (Forums::check_forumperm($ForumID, 'Write') && Forums::check_forumperm($ForumID, 'Create')) { ?>
+<?php if (Forums::check_forumperm($ForumID, 'Write') && Forums::check_forumperm($ForumID, 'Create')) { ?>
         <a href="forums.php?action=new&amp;forumid=<?=$ForumID?>" class="brackets">New thread</a>
-<? } ?>
+<?php } ?>
         <a href="#" onclick="$('#searchforum').gtoggle(); this.innerHTML = (this.innerHTML == 'Search this forum' ? 'Hide search' : 'Search this forum'); return false;" class="brackets">Search this forum</a>
         <div id="searchforum" class="hidden center">
             <div style="display: inline-block;">
@@ -128,15 +128,15 @@ View::show_header('Forums &gt; '. $Forums[$ForumID]['Name'], '', $IsDonorForum ?
             </div>
         </div>
     </div>
-<?    if (check_perms('site_moderate_forums')) { ?>
+<?php    if (check_perms('site_moderate_forums')) { ?>
     <div class="linkbox">
         <a href="forums.php?action=edit_rules&amp;forumid=<?=$ForumID?>" class="brackets">Change specific rules</a>
     </div>
-<?    } ?>
-<?    if (!empty($Forums[$ForumID]['SpecificRules'])) { ?>
+<?php    } ?>
+<?php    if (!empty($Forums[$ForumID]['SpecificRules'])) { ?>
     <div class="linkbox">
             <strong>Forum Specific Rules</strong>
-<?        foreach ($Forums[$ForumID]['SpecificRules'] as $ThreadIDs) {
+<?php        foreach ($Forums[$ForumID]['SpecificRules'] as $ThreadIDs) {
             $Thread = Forums::get_thread_info($ThreadIDs);
             if ($Thread === null) {
                 error(404);
@@ -144,11 +144,11 @@ View::show_header('Forums &gt; '. $Forums[$ForumID]['Name'], '', $IsDonorForum ?
 ?>
         <br />
         <a href="forums.php?action=viewthread&amp;threadid=<?=$ThreadIDs?>" class="brackets"><?=display_str($Thread['Title'])?></a>
-<?        } ?>
+<?php        } ?>
     </div>
-<?    } ?>
+<?php    } ?>
     <div class="linkbox pager">
-<?
+<?php
 $Pages = Format::get_pages($Page, $Forums[$ForumID]['NumTopics'], TOPICS_PER_PAGE, 9);
 echo $Pages;
 ?>
@@ -160,7 +160,7 @@ echo $Pages;
             <td class="m_th_right" style="width: 7%;">Replies</td>
             <td style="width: 14%;">Author</td>
         </tr>
-<?
+<?php
 // Check that we have content to process
 if (count($Forum) === 0) {
 ?>
@@ -169,7 +169,7 @@ if (count($Forum) === 0) {
                 No threads to display in this forum!
             </td>
         </tr>
-<?
+<?php
 } else {
     // forums_last_read_topics is a record of the last post a user read in a topic, and what page that was on
     $DB->query("
@@ -239,7 +239,7 @@ if (count($Forum) === 0) {
         <td class="td_read <?=$Read?> <?=$Tooltip?>" title="<?=ucwords(str_replace('_', ' ', $Read))?>"></td>
         <td class="td_latest">
             <span style="float: left;" class="last_topic">
-<?
+<?php
         $TopicLength = 75 - (2 * count($PageLinks));
         unset($PageLinks);
         $Title = display_str($Title);
@@ -251,11 +251,11 @@ if (count($Forum) === 0) {
                 </strong>
                 <?=$PagesText?>
             </span>
-<?        if (!empty($LastRead[$TopicID])) { ?>
+<?php        if (!empty($LastRead[$TopicID])) { ?>
             <span style="float: left;" class="<?=$Tooltip?> last_read" title="Jump to last read">
                 <a href="forums.php?action=viewthread&amp;threadid=<?=$TopicID?>&amp;page=<?=$LastRead[$TopicID]['Page']?>#post<?=$LastRead[$TopicID]['PostID']?>"></a>
             </span>
-<?        } ?>
+<?php        } ?>
             <span style="float: right;" class="last_poster">
                 by <?=Users::format_username($LastAuthorID, false, false, false, false, false, $IsDonorForum)?> <?=time_diff($LastTime,1)?>
             </span>
@@ -263,7 +263,7 @@ if (count($Forum) === 0) {
         <td class="td_replies number_column m_td_right"><?=number_format($PostCount - 1)?></td>
         <td class="td_author"><?=Users::format_username($AuthorID, false, false, false, false, false, $IsDonorForum)?></td>
     </tr>
-<?    }
+<?php    }
 } ?>
 </table>
 <!--<div class="breadcrumbs">
@@ -274,4 +274,4 @@ if (count($Forum) === 0) {
     </div>
     <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=<?=$ForumID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a></div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

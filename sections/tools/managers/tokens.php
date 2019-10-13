@@ -97,7 +97,7 @@ if (isset($_REQUEST['addtokens'])) {
         <input type="submit" name="cleartokens" value="Set token total" />
     </form>
 </div>
-<?
+<?php
 
 View::show_footer()
 ?>

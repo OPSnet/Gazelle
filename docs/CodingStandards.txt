@@ -93,8 +93,10 @@ only one statement.
 In loops and conditional blocks, the statement(s) shall be placed on the
 following lines.
 
-When opening a PHP statement, `<?` shall be used instead of `<?php`. In
-other words, use PHP's short tags.
+When opening a PHP statement, `<?php` shall be used instead of `<?`. In
+other words, use PHP's regular tags. The short tags are deprecated and removed in newer php versions.
+
+When declaring an array, the short syntax `[]` shall be used, instead of the longer `array()`.
 
 Switch cases in index files shall not contain substantial code. The use
 of include statements is acceptable.

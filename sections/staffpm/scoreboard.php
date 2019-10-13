@@ -10,17 +10,21 @@ $Action = isset($_REQUEST['action']) ? $_REQUEST['action'] : 'stats';
 ?>
     <div class="thin">
         <div class="linkbox">
-<?    if ($IsStaff) { ?>
+<?php
+if ($IsStaff) { ?>
             <a href="staffpm.php" class="brackets">View your unanswered</a>
-<?    } ?>
+<?php
+} ?>
             <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
             <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
             <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
             <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
             <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
-<?    if ($IsFLS && !$IsStaff) { ?>
+<?php
+if ($IsFLS && !$IsStaff) { ?>
             <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
-<?    } ?>
+<?php
+} ?>
         </div>
         <div class="head">Statistics</div>
         <div class="box pad">
@@ -76,7 +80,8 @@ $Results = $DB->to_array();
                     <td>Replies</td>
                     <td><?=$COL?></td>
                 </tr>
-<?php  foreach ($Results as $Result) {
+<?php
+foreach ($Results as $Result) {
     list($UserID, $Username, $Num, $Extra) = $Result;
 ?>
                 <tr>
@@ -84,7 +89,8 @@ $Results = $DB->to_array();
                     <td><?=$Num?></td>
                     <td><?=$Extra?></td>
                 </tr>
-<?php  } ?>
+<?php
+} ?>
             </table>
             <br /><br />
 <?php
@@ -100,7 +106,8 @@ $Results = $DB->to_array();
                     <td>Replies</td>
                     <td><?=$COL?></td>
                 </tr>
-<?php  foreach ($Results as $Result) {
+<?php
+foreach ($Results as $Result) {
     list($UserID, $Username, $Num, $Extra) = $Result;
 ?>
                 <tr>
@@ -108,7 +115,8 @@ $Results = $DB->to_array();
                     <td><?=$Num?></td>
                     <td><?=$Extra?></td>
                 </tr>
-<?php  } ?>
+<?php
+} ?>
             </table>
         </td>
         <td>
@@ -125,7 +133,8 @@ $Results = $DB->to_array();
                 <td>Replies</td>
                 <td><?=$COL?></td>
             </tr>
-<?php  foreach ($Results as $Result) {
+<?php
+foreach ($Results as $Result) {
     list($UserID, $Username, $Num, $Extra) = $Result;
 ?>
             <tr>
@@ -133,7 +142,8 @@ $Results = $DB->to_array();
                 <td><?=$Num?></td>
                 <td><?=$Extra?></td>
             </tr>
-<?php  } ?>
+<?php
+} ?>
         </table>
         <br /><br />
 <?php
@@ -149,7 +159,8 @@ $Results = $DB->to_array();
                     <td>Replies</td>
                     <td><?=$COL?></td>
                 </tr>
-<?php  foreach ($Results as $Result) {
+<?php
+foreach ($Results as $Result) {
     list($UserID, $Username, $Num, $Extra) = $Result;
 ?>
                 <tr>
@@ -157,7 +168,8 @@ $Results = $DB->to_array();
                     <td><?=$Num?></td>
                     <td><?=$Extra?></td>
                 </tr>
-<?php  } ?>
+<?php
+} ?>
             </table>
         </td></tr>
         </table>

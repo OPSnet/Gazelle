@@ -1,4 +1,4 @@
-<?
+<?php
 
 class DonationsView {
     public static function render_mod_donations($UserID) {
@@ -55,7 +55,7 @@ class DonationsView {
                 </td>
             </tr>
         </table>
-<?
+<?php
     }
 
     public static function render_donor_stats($UserID) {
@@ -65,14 +65,13 @@ class DonationsView {
             <div class="box box_info box_userinfo_donor_stats">
                 <div class="head colhead_dark">Donor Statistics</div>
                 <ul class="stats nobullet">
-<?
+<?php
             if (Donations::is_donor($UserID)) {
-                if (check_perms('users_mod') || $OwnProfile) {
-?>
+                if (check_perms('users_mod') || $OwnProfile) { ?>
                     <li>
                         Total donor points: <?=Donations::get_total_rank($UserID)?>
                     </li>
-<?                } ?>
+<?php           } ?>
                     <li>
                         Current donor rank: <?=self::render_rank(Donations::get_rank($UserID), Donations::get_special_rank($UserID), true)?>
                     </li>
@@ -85,14 +84,14 @@ class DonationsView {
                     <li>
                         Rank expires: <?=(Donations::get_rank_expiration($UserID))?>
                     </li>
-<?            } else { ?>
+<?php            } else { ?>
                     <li>
                         This user hasn't donated.
                     </li>
-<?            } ?>
+<?php            } ?>
                 </ul>
             </div>
-<?
+<?php
         }
     }
 
@@ -106,10 +105,10 @@ class DonationsView {
                     <span style="float: right;"><a href="#" onclick="$('#profilediv_<?=$i?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
                 </div>
                 <div class="pad profileinfo" id="profilediv_<?=$i?>">
-<?                    echo Text::full_format($ProfileRewards['ProfileInfo' . $i]); ?>
+<?php                    echo Text::full_format($ProfileRewards['ProfileInfo' . $i]); ?>
                 </div>
             </div>
-<?
+<?php
             }
         }
     }
@@ -123,7 +122,7 @@ class DonationsView {
             <div class="head">
                 Donation History <a href="#" onclick="$('#donation_history').gtoggle(); return false;" class="brackets">View</a>
             </div>
-<?        $Row = 'b'; ?>
+<?php        $Row = 'b'; ?>
             <div class="hidden" id="donation_history">
                 <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
                     <tbody>
@@ -150,7 +149,7 @@ class DonationsView {
                             <strong>Reason</strong>
                         </td>
                     </tr>
-<?        foreach ($DonationHistory as $Donation) { ?>
+<?php           foreach ($DonationHistory as $Donation) { ?>
                     <tr class="row<?=$Row?>">
                         <td>
                             <?=display_str($Donation['Source'])?> (<?=Users::format_username($Donation['AddedBy'])?>)
@@ -174,15 +173,15 @@ class DonationsView {
                             <?=display_str($Donation['Reason'])?>
                         </td>
                     </tr>
-<?
-            $Row = $Row === 'b' ? 'a' : 'b';
-        }
+<?php
+                    $Row = $Row === 'b' ? 'a' : 'b';
+                }
 ?>
                     </tbody>
                 </table>
             </div>
         </div>
-<?
+<?php
     }
 
     public static function render_rank($Rank, $SpecialRank, $ShowOverflow = false) {
@@ -212,5 +211,4 @@ class DonationsView {
         }
         echo $Display;
     }
-
 }

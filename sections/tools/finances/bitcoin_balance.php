@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_donor_log')) {
     error(403);
 }
@@ -14,11 +14,11 @@ $Balance = DonationsBitcoin::get_balance() . ' BTC';
     <div class="header">
         <h3><?=$Balance?></h3>
     </div>
-<?
+<?php
 if (empty($_GET['list'])) {
 ?>
     <a href="?action=<?=$_REQUEST['action']?>&amp;list=1" class="brackets">Show donor list</a>
-<?
+<?php
 } else {
     $BitcoinAddresses = DonationsBitcoin::get_received();
     $DB->query("
@@ -34,7 +34,7 @@ if (empty($_GET['list'])) {
         <th>Receiving Bitcoin Address</th>
         <th>Amount</th>
     </tr>
-<?
+<?php
     while (list($UserID, $BitcoinAddress) = $DB->next_record(MYSQLI_NUM, false)) {
         if (!isset($BitcoinAddresses[$BitcoinAddress])) {
             continue;
@@ -45,12 +45,12 @@ if (empty($_GET['list'])) {
         <td><tt><?=$BitcoinAddress?></tt></td>
         <td><?=$BitcoinAddresses[$BitcoinAddress]?> BTC</td>
     </tr>
-<?
+<?php
     }
 ?>
     </table>
-<?
+<?php
 }
 ?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

@@ -72,7 +72,7 @@ function UnBan(ip, id, elemID) {
 */
 //]]>
 </script>
-<?
+<?php
 list($Page, $Limit) = Format::page_limit(IPS_PER_PAGE);
 
 if ($UsersOnly) {
@@ -173,17 +173,20 @@ $Pages = Format::get_pages($Page, $NumResults, IPS_PER_PAGE, 9);
     <div class="header">
         <h2>IP address history for <a href="user.php?id=<?=$UserID?>"><?=$UserInfo['Username']?></a></h2>
         <div class="linkbox">
-<? 
+<?php
 if ($UsersOnly) { ?>
             <a href="userhistory.php?<?=Format::get_url(array('usersonly'))?>" class="brackets">View all IP addresses</a>
-<?    } else { ?>
+<?php
+} else { ?>
             <a href="userhistory.php?<?=Format::get_url()?>&amp;usersonly=1" class="brackets">View IP addresses with users</a>
-<?    } ?>
+<?php
+} ?>
         </div>
-<?    
-    if ($Pages) { ?>
+<?php
+if ($Pages) { ?>
         <div class="linkbox pager"><?=$Pages?></div>
-<?    } ?>
+<?php
+} ?>
     </div>
     <table>
         <tr class="colhead">
@@ -194,9 +197,11 @@ if ($UsersOnly) { ?>
             <form class="search_form" name="ip_log" method="get" action="">
                 <input type="hidden" name="action" value="<?=$_GET['action']?>" />
                 <input type="hidden" name="userid" value="<?=$UserID?>" />
-<?    if ($UsersOnly) { ?>
+<?php
+if ($UsersOnly) { ?>
                 <input type="hidden" name="usersonly" value="1" />
-<?    } ?>
+<?php
+} ?>
                 <input type="text" name="ip" value="<?=Format::form('ip')?>" />
                 <input type="submit" value="Search" />
                 Wildcard (*) search examples: 127.0.* or 1*2.0.*.1 or *.*.*.*
@@ -212,7 +217,7 @@ if ($UsersOnly) { ?>
             <td class="hidden">Ended</td>
             <td>Elapsed</td>
         </tr>
-<?
+<?php
 $Counter = 0;
 $IPBanChecks = array();
 $PrintedIPs = array();
@@ -233,19 +238,19 @@ foreach ($Results as $Index => $Result) {
 ?>
         <tr class="rowa" <?=$FirstOccurrence ? "id=\"$ElementID\"" : ''?>>
             <td>
-                <?=$IP?> (<?=Tools::get_country_code_by_ajax($IP)?>)<?
+                <?=$IP?> (<?=Tools::get_country_code_by_ajax($IP)?>)<?php
     if ($CanManageIPBans) {
         if (!isset($IPBanChecks[$IP])) {
             if (Tools::site_ban_ip($IP)) {
                 $IPBanChecks[$IP] = true;
 ?>
                 <strong>[Banned]</strong>
-<?
+<?php
             } else {
                 $IPBanChecks[$IP] = false;
 ?>
                 <a id="<?=$Counter?>" href="#" onclick="Ban('<?=$IP?>', '<?=$Counter?>'); this.onclick = null; return false;" class="brackets">Ban</a>
-<?
+<?php
             }
             $Counter++;
         }
@@ -253,21 +258,21 @@ foreach ($Results as $Index => $Result) {
 ?>
                 <br />
                 <?=Tools::get_host_by_ajax($IP)?>
-<?
+<?php
     if (!empty($OtherUsers)) {
         if ($FirstOccurrence || count($OtherUsers) <= 100) {
 ?>
                 <a href="#" onclick="$('.otherusers' + <?=$Index?>).gtoggle(); return false;">(<?=count($OtherUsers)?>)</a>
-<?
+<?php
         } else {
 ?>
                 <a href="#<?=$ElementID?>" onclick="$('.otherusers' + <?=$IPIndexes[$IP]?>).gshow();">(<?=count($OtherUsers)?>)</a>
-<?
+<?php
         }
     } else {
 ?>
                 (0)
-<?
+<?php
     }
 ?>
             </td>
@@ -279,9 +284,9 @@ foreach ($Results as $Index => $Result) {
                 <span class="reltime"><?=time_diff($EndTime)?></span>
                 <span class="abstime hidden"><?=$EndTime?></span>
             </td>
-            <td><?/*time_diff(strtotime($StartTime), strtotime($EndTime));*/ ?></td>
+            <td><?php /*time_diff(strtotime($StartTime), strtotime($EndTime));*/ ?></td>
         </tr>
-<?
+<?php
     if (!empty($OtherUsers) && ($FirstOccurrence || count($OtherUsers) < 100)) {
         $HideMe = (count($OtherUsers) > 10);
         foreach ($OtherUsers as $OtherUser) {
@@ -299,9 +304,9 @@ foreach ($Results as $Index => $Result) {
                 <span class="reltime"><?=time_diff($OtherUser['EndTime'])?></span>
                 <span class="hidden abstime"><?=$OtherUser['EndTime']?></span>
             </td>
-            <td><?/*time_diff(strtotime($OtherUser['StartTime']), strtotime($OtherUser['EndTime'])); */ ?></td>
+            <td><?php /*time_diff(strtotime($OtherUser['StartTime']), strtotime($OtherUser['EndTime'])); */ ?></td>
         </tr>
-<?
+<?php
         }
         if (isset($IPMatchesIgnored[$IP])) {
             foreach ($IPMatchesIgnored[$IP] as $OtherUserID => $MatchCount) {
@@ -309,7 +314,7 @@ foreach ($Results as $Index => $Result) {
         <tr class="rowb otherusers<?=$Index?><?=($HideMe ? ' hidden' : '')?>">
             <td colspan="4">&nbsp;&nbsp;&#187;&nbsp;<?=$MatchCount?> matches skipped for <?=Users::format_username($OtherUserID, false, false, false)?></td>
         </tr>
-<?
+<?php
             }
         }
     }
@@ -320,5 +325,5 @@ foreach ($Results as $Index => $Result) {
         <?=$Pages?>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

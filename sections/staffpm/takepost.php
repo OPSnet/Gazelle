@@ -1,4 +1,4 @@
-<?
+<?php
 if ($Message = db_string($_POST['message'])) {
     if ($Subject = db_string($_POST['subject'])) {
         // New staff PM conversation

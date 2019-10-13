@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('site_torrents_notify')) {
     error(403);
 }

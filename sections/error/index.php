@@ -1,4 +1,4 @@
-<?
+<?php
 
 function notify ($Channel, $Message) {
     global $LoggedUser;
@@ -57,7 +57,7 @@ if (!empty($_GET['e']) && in_array($_GET['e'],$Errors)) {
             <p><?=$Description?></p>
         </div>
     </div>
-<?
+<?php
         View::show_footer();
     } else {
         echo $Description;

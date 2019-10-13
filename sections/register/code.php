@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Register');
 ?>
 <div style="width: 500px;">
@@ -15,6 +15,6 @@ View::show_header('Register');
     </table>
     </form>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

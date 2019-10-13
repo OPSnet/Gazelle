@@ -86,4 +86,4 @@ $DB->prepared_query('SELECT ID, `Name`, Sort, MinLevel, Classes FROM irc_channel
         </tr>
     </form>
 </table>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

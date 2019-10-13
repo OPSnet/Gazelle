@@ -1,4 +1,4 @@
-<?
+<?php
 $Key = $_REQUEST['key'];
 $Type = $_REQUEST['type'];
 

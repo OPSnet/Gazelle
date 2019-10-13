@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 if (!isset($_GET['forumid']) || ($_GET['forumid'] != 'all' && !is_number($_GET['forumid']))) {
     error(403);

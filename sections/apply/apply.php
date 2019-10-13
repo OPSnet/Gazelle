@@ -1,4 +1,4 @@
-<?
+<?php
 if (isset($_POST['auth'])) {
     authorize();
     $Role = array_key_exists('role', $_POST) ? trim($_POST['role']) : '';
@@ -28,18 +28,20 @@ View::show_header('Apply', 'apply');
 <div class="thin">
     <div class="header">
         <h3>Apply for a role at <?=SITE_NAME?></h3>
-<? if (check_perms('admin_manage_applicants') || Applicant::user_is_applicant($LoggedUser['ID'])) { ?>
+<?php
+    if (check_perms('admin_manage_applicants') || Applicant::user_is_applicant($LoggedUser['ID'])) { ?>
         <div class="linkbox">
-    <? if (check_perms('admin_manage_applicants')) { ?>
+    <?php if (check_perms('admin_manage_applicants')) { ?>
             <a href="/apply.php?action=view" class="brackets">Current applications</a>
             <a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
             <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
-    <? }
+    <?php }
     if (Applicant::user_is_applicant($LoggedUser['ID'])) { ?>
             <a href="/apply.php?action=view" class="brackets">View your application</a>
-    <? } ?>
+    <?php } ?>
         </div>
-<? } ?>
+<?php
+    } ?>
     </div>
 
 <?php
@@ -49,31 +51,35 @@ if (count($Roles)) { ?>
         <div class="head">Open Roles</div>
         <div class="pad">
             <table>
-<?    foreach ($Roles as $title => $info) { ?>
+<?php
+    foreach ($Roles as $title => $info) { ?>
                 <tr>
                     <td><div class="head"><?= $title ?></div></td>
                 </tr>
                 <tr>
                     <td><div class="pad"><?= Text::full_format($info['description']) ?></div></td>
                 </tr>
-<?    } /* foreach */ ?>
+<?php
+    } /* foreach */ ?>
             </table>
         </div>
     </div>
-<? } ?>
+<?php
+} ?>
 
-<? if (count($Roles) == 0) { ?>
+<?php
+if (count($Roles) == 0) { ?>
     <div class="box pad">
     <p>Thanks for your interest in helping Orpheus! There are
     no openings at the moment. Keep an eye on the front page
     or the Orpheus forum for announcements in the future.</p>
     </div>
-<?
+<?php
 } else {
     if ($Error) {
 ?>
     <div class="important"><?=$Error?></div>
-<?
+<?php
     }
 ?>
     <form class="send_form" id="applicationform" name="apply" action="/apply.php?action=save" method="post">
@@ -84,14 +90,16 @@ if (count($Roles)) { ?>
                     <div>Choose a role from the following list:</div>
                     <select name="role">
                         <option value="">---</option>
-<?    foreach (array_keys($Roles) as $title) { ?>
+<?php
+    foreach (array_keys($Roles) as $title) { ?>
                         <option value="<?=$title?>"<?=$Role == $title ? ' selected' : ''?>><?=$title?></option>
-<?    } ?>
+<?php
+    } ?>
                     </select>
                 </div>
                 <div class="head">Your cover letter</div>
                 <div class="pad">At least 80 characters, now convince us!
-<?
+<?php
                 $text = new TEXTAREA_PREVIEW('body', 'body', $Body, 95, 20, false, false);
                 echo $text->preview();
 ?>
@@ -105,7 +113,8 @@ if (count($Roles)) { ?>
             </div>
         </div>
     </form>
-<? } /* else */ ?>
+<?php
+} /* else */ ?>
 </div>
 
-<? View::show_footer();
+<?php View::show_footer();

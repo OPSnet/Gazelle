@@ -1,4 +1,4 @@
-<?
+<?php
 define('DEFAULT_LIMIT', 10);
 
 $Limit = DEFAULT_LIMIT;
@@ -32,21 +32,21 @@ View::show_header("Site History");
 ?>
 <div class="header">
     <h2><a href="sitehistory.php">Site History</a> <?=$Month && $Year ? date("- F, Y", mktime(0, 0, 0, $Month, 1, $Year)) : '' ?></h2>
-<?
+<?php
     SiteHistoryView::render_linkbox();
 ?>
 </div>
 <div class="sidebar">
-<?
+<?php
     SiteHistoryView::render_search();
     SiteHistoryView::render_months($Months);
 ?>
 </div>
 <div class="main_column">
-<?
+<?php
     SiteHistoryView::render_events($Events);
 ?>
 </div>
-<?
+<?php
 View::show_footer();
 

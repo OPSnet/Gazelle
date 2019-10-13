@@ -1,12 +1,12 @@
-<? View::show_header('Two-factor Authentication'); ?>
+<?php View::show_header('Two-factor Authentication'); ?>
 <span id="no-cookies" class="hidden warning">You appear to have cookies disabled.<br/><br/></span>
 <noscript><span class="warning"><?= SITE_NAME ?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br/><br/>
 </noscript>
-<?
+<?php
 if (strtotime($BannedUntil) < time()) {
     ?>
     <form class="auth_form" name="login" id="loginform" method="post" action="login.php?act=2fa">
-        <?
+        <?php
 
         if (!empty($BannedUntil) && $BannedUntil != '0000-00-00 00:00:00') {
             $DB->query("
@@ -18,11 +18,11 @@ if (strtotime($BannedUntil) < time()) {
         if (isset($Err)) {
             ?>
             <span class="warning"><?= $Err ?><br/><br/></span>
-        <? } ?>
-        <? if ($Attempts > 0) { ?>
+        <?php } ?>
+        <?php if ($Attempts > 0) { ?>
             You have <span class="info"><?= (6 - $Attempts) ?></span> attempts remaining.<br/><br/>
             <strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br/><br/>
-        <? } ?>
+        <?php } ?>
         <table class="layout">
             <tr>
                 <td>2FA Key&nbsp;</td>
@@ -40,11 +40,11 @@ if (strtotime($BannedUntil) < time()) {
     </form>
     <br /><br />
     <a href="login.php?act=2fa_recovery" class="tooltip" title="Use 2FA Recovery Code">Use a recovery key?</a>
-    <?
+    <?php
 } else {
     ?>
     <span class="warning">You are banned from logging in for another <?= time_diff($BannedUntil) ?>.</span>
-    <?
+    <?php
 }
 
 ?>
@@ -56,4 +56,4 @@ if (strtotime($BannedUntil) < time()) {
         $('#no-cookies').gshow();
     }
 </script>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (!empty($_GET['userid'])) {
     if (!check_perms('users_override_paranoia')) {
@@ -47,11 +47,12 @@ View::show_header($Title, 'browse');
         </div>
     </div>
     <div class="box pad" align="center">
-<? if (count($ArtistList) === 0) { ?>
+<?php
+if (count($ArtistList) === 0) { ?>
         <h2>You have not bookmarked any artists.</h2>
     </div>
 </div><!--content-->
-<?
+<?php
     View::show_footer();
     die();
 } ?>
@@ -59,7 +60,7 @@ View::show_header($Title, 'browse');
         <tr class="colhead">
             <td>Artist</td>
         </tr>
-<?
+<?php
 $Row = 'a';
 foreach ($ArtistList as $Artist) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -69,7 +70,7 @@ foreach ($ArtistList as $Artist) {
             <td>
                 <a href="artist.php?id=<?=$ArtistID?>"><?=$Name?></a>
                 <span style="float: right;">
-<?
+<?php
     if (check_perms('site_torrents_notify')) {
         if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
             $DB->query("
@@ -84,11 +85,11 @@ foreach ($ArtistList as $Artist) {
         if (stripos($Notify['Artists'], "|$Name|") === false) {
 ?>
                     <a href="artist.php?action=notify&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Notify of new uploads</a>
-<?
+<?php
         } else {
 ?>
                     <a href="artist.php?action=notifyremove&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Do not notify of new uploads</a>
-<?
+<?php
         }
     }
 ?>
@@ -96,13 +97,13 @@ foreach ($ArtistList as $Artist) {
                 </span>
             </td>
         </tr>
-<?
+<?php
 }
 ?>
     </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 $Cache->cache_value('bookmarks_'.$UserID, serialize(array(array($Username, $TorrentList, $CollageDataList))), 3600);
 ?>

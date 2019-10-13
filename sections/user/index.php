@@ -1,4 +1,4 @@
-<?
+<?php
 //TODO
 /*****************************************************************
 Finish removing the take[action] pages and utilize the index correctly

@@ -1,4 +1,4 @@
-<?
+<?php
 // We need these to do our rankification
 include(SERVER_ROOT.'/sections/torrents/ranking_funcs.php');
 
@@ -92,9 +92,9 @@ View::show_header("Top $Limit Voted Groups",'browse,voting');
 <div class="thin">
     <div class="header">
         <h2>Top <?=$Limit?> Voted Groups</h2>
-        <? Top10View::render_linkbox("votes"); ?>
+        <?php Top10View::render_linkbox("votes"); ?>
     </div>
-<?
+<?php
 
 if (check_perms('site_advanced_top10')) { ?>
     <form class="search_form" name="votes" action="" method="get">
@@ -104,7 +104,7 @@ if (check_perms('site_advanced_top10')) { ?>
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td class="ft_taglist">
-                    <input type="text" name="tags" size="75" value="<? if (!empty($_GET['tags'])) { echo display_str($_GET['tags']);} ?>" />&nbsp;
+                    <input type="text" name="tags" size="75" value="<?php if (!empty($_GET['tags'])) { echo display_str($_GET['tags']);} ?>" />&nbsp;
                     <input type="radio" id="rdoAll" name="anyall" value="all"<?=(!isset($TagsAny) ? ' checked="checked"' : '')?> /><label for="rdoAll"> All</label>&nbsp;&nbsp;
                     <input type="radio" id="rdoAny" name="anyall" value="any"<?=(isset($TagsAny) ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
                 </td>
@@ -112,9 +112,9 @@ if (check_perms('site_advanced_top10')) { ?>
             <tr id="yearfilter">
                 <td class="label">Year:</td>
                 <td class="ft_year">
-                    <input type="text" name="year1" size="4" value="<? if (!empty($_GET['year1'])) { echo display_str($_GET['year1']);} ?>" />
+                    <input type="text" name="year1" size="4" value="<?php if (!empty($_GET['year1'])) { echo display_str($_GET['year1']);} ?>" />
                     to
-                    <input type="text" name="year2" size="4" value="<? if (!empty($_GET['year2'])) { echo display_str($_GET['year2']);} ?>" />
+                    <input type="text" name="year2" size="4" value="<?php if (!empty($_GET['year2'])) { echo display_str($_GET['year2']);} ?>" />
                 </td>
             </tr>
             <tr>
@@ -124,37 +124,37 @@ if (check_perms('site_advanced_top10')) { ?>
             </tr>
         </table>
     </form>
-<?
+<?php
 }
 
 $Bookmarks = Bookmarks::all_bookmarks('torrent');
 ?>
     <h3>Top <?=$Limit?>
-<?
+<?php
 if (empty($_GET['advanced'])) { ?>
         <small class="top10_quantity_links">
-<?
+<?php
     switch ($Limit) {
         case 100: ?>
             - <a href="top10.php?type=votes" class="brackets">Top 25</a>
             - <span class="brackets">Top 100</span>
             - <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
-<?            break;
+<?php            break;
         case 250: ?>
             - <a href="top10.php?type=votes" class="brackets">Top 25</a>
             - <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
-<?            break;
+<?php            break;
         default: ?>
             - <span class="brackets">Top 25</span>
             - <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
             - <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
-<?    } ?>
+<?php    } ?>
         </small>
-<?
+<?php
 } ?>
     </h3>
-<?
+<?php
 
 $Number = 0;
 $TorrentTable = '';
@@ -210,23 +210,23 @@ foreach ($TopVotes as $GroupID => $Group) {
                         <div title="<?=$TorrentTags->title()?>" class="tooltip <?=Format::css_category($GroupCategoryID)?> <?=$TorrentTags->css_name()?>"></div>
                     </td>
                     <td class="big_info">
-<?        if ($LoggedUser['CoverArt']) { ?>
+<?php        if ($LoggedUser['CoverArt']) { ?>
                         <div class="group_image float_left clear">
-                            <? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                            <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
                         </div>
-<?        } ?>
+<?php        } ?>
                         <div class="group_info clear">
 
-                            <strong><?=$DisplayName?></strong> <!--<?Votes::vote_link($GroupID, $UserVote);?>-->
-<?        if ($IsBookmarked) { ?>
+                            <strong><?=$DisplayName?></strong> <!--<?php Votes::vote_link($GroupID, $UserVote); ?>-->
+<?php        if ($IsBookmarked) { ?>
                             <span class="remove_bookmark float_right">
                                 <a href="#" class="bookmarklink_torrent_<?=$GroupID?> brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>
-<?        } else { ?>
+<?php        } else { ?>
                             <span class="add_bookmark float_right">
                                 <a href="#" class="bookmarklink_torrent_<?=$GroupID?> brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
                             </span>
-<?        } ?>
+<?php        } ?>
                             <div class="tags"><?=$TorrentTags->format()?></div>
 
                         </div>
@@ -247,7 +247,7 @@ foreach ($TopVotes as $GroupID => $Group) {
                         </span>
                     </td>
                 </tr>
-<?
+<?php
         $LastRemasterYear = '-';
         $LastRemasterTitle = '';
         $LastRemasterRecordLabel = '';
@@ -281,7 +281,7 @@ foreach ($TopVotes as $GroupID => $Group) {
         <tr class="group_torrent groupid_<?=$GroupID?> edition<?=$SnatchedGroupClass?> hidden">
             <td colspan="7" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
         </tr>
-<?
+<?php
             }
             $LastRemasterTitle = $Torrent['RemasterTitle'];
             $LastRemasterYear = $Torrent['RemasterYear'];
@@ -293,19 +293,19 @@ foreach ($TopVotes as $GroupID => $Group) {
             <td colspan="3">
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-<?            if (Torrents::can_use_token($Torrent)) { ?>
+<?php            if (Torrents::can_use_token($Torrent)) { ?>
                     | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'])?>');">FL</a>
-<?            } ?>
+<?php            } ?>
                     | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a> ]
                 </span>
-                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?><? if ($Reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><? } ?></a>
+                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?><?php if ($Reported) { ?> / <strong class="torrent_label tl_reported">Reported</strong><?php } ?></a>
             </td>
             <td class="number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
             <td class="number_column"><?=number_format($Torrent['Snatched'])?></td>
             <td class="number_column<?=($Torrent['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($Torrent['Seeders'])?></td>
             <td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
         </tr>
-<?
+<?php
         }
     } else { //if (count($Torrents) > 1 || $GroupCategoryID == 1)
         // Viewing a type that does not require grouping
@@ -333,26 +333,26 @@ foreach ($TopVotes as $GroupID => $Group) {
                 </div>
             </td>
             <td class="nobr big_info">
-<?        if ($LoggedUser['CoverArt']) { ?>
+<?php        if ($LoggedUser['CoverArt']) { ?>
                 <div class="group_image float_left clear">
-                    <? ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                    <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
                 </div>
-<?        } ?>
+<?php        } ?>
                 <div class="group_info clear">
                     <span>
                         [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download">DL</a>
-<?        if (Torrents::can_use_token($Torrent)) { ?>
+<?php        if (Torrents::can_use_token($Torrent)) { ?>
                         | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'])?>');">FL</a>
-<?        } ?>
+<?php        } ?>
                         | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a>
-<?        if ($IsBookmarked) { ?>
+<?php        if ($IsBookmarked) { ?>
                         | <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="remove_bookmark" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
-<?        } else { ?>
+<?php        } else { ?>
                         | <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="add_bookmark" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?        } ?>
+<?php        } ?>
                         ]
                     </span>
-                    <strong><?=$DisplayName?></strong> <!--<?Votes::vote_link($GroupID, $UserVote);?>-->
+                    <strong><?=$DisplayName?></strong> <!--<?php Votes::vote_link($GroupID, $UserVote); ?>-->
                     <div class="tags"><?=$TorrentTags->format()?></div>
                 </div>
             </td>
@@ -361,7 +361,7 @@ foreach ($TopVotes as $GroupID => $Group) {
             <td class="number_column<?=($Torrent['Seeders'] == 0) ? ' r00' : '' ?>"><?=number_format($Torrent['Seeders'])?></td>
             <td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
         </tr>
-<?
+<?php
     } //if (count($Torrents) > 1 || $GroupCategoryID == 1)
     $TorrentTable .= ob_get_clean();
 }
@@ -376,22 +376,22 @@ foreach ($TopVotes as $GroupID => $Group) {
         <td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
         <td class="sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
     </tr>
-<?
+<?php
 if ($TopVotes === false) { ?>
     <tr>
         <td colspan="7" class="center">Server is busy processing another top list request. Please try again in a minute.</td>
     </tr>
-<?
+<?php
 } elseif (count($TopVotes) === 0) { ?>
     <tr>
         <td colspan="7" class="center">No torrents were found that meet your criteria.</td>
     </tr>
-<?
+<?php
 } else {
     echo $TorrentTable;
 }
 ?>
 </table>
 </div>
-<?
+<?php
 View::show_footer();

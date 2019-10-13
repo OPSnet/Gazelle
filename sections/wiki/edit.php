@@ -1,4 +1,4 @@
-<?
+<?php
 if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     error(404);
 }
@@ -23,7 +23,7 @@ View::show_header('Edit '.$Title);
                 <h3>Title</h3>
                 <input type="text" name="title" size="92" maxlength="100" value="<?=$Title?>" />
                 <h3>Body </h3>
-<?
+<?php
     $ReplyText = new TEXTAREA_PREVIEW('body', 'body', $Body, 91, 22, true, false);
 
     if (check_perms('admin_manage_wiki')) {
@@ -32,7 +32,7 @@ View::show_header('Edit '.$Title);
                 <p>There are some situations in which the viewing or editing of an article should be restricted to a certain class.</p>
                 <strong>Restrict read:</strong> <select name="minclassread"><?=class_list($Read)?></select>
                 <strong>Restrict edit:</strong> <select name="minclassedit"><?=class_list($Edit)?></select>
-<?    } ?>
+<?php    } ?>
                 <div style="text-align: center;">
                     <input type="button" value="Preview" class="hidden button_preview_<?=$ReplyText->getID()?>" tabindex="1" />
                     <input type="submit" value="Submit" />
@@ -41,4 +41,4 @@ View::show_header('Edit '.$Title);
         </form>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

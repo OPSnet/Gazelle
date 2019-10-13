@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 if (!empty($LoggedUser['DisableTagging'])) {
     error(403);

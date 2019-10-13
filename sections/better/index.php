@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 if (isset($_GET['method'])) {
     switch ($_GET['method']) {

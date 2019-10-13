@@ -1,4 +1,4 @@
-<?
+<?php
 Text::$TOC = true;
 if (!check_perms("users_mod")) {
     error(403);
@@ -49,5 +49,5 @@ View::show_header('Ask the Staff', 'bbcode');
         </form>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

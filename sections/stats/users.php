@@ -1,4 +1,4 @@
-<?
+<?php
 if (!list($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements) = $Cache->get_value('geodistribution')) {
     include_once(SERVER_ROOT.'/classes/charts.class.php');
     $DB->query('
@@ -185,5 +185,5 @@ View::show_header('Detailed User Statistics');
     <br />
     <img src="https://chart.googleapis.com/chart?chxt=y,x&amp;chg=0,-1,1,1&amp;chxs=0,h&amp;cht=bvs&amp;chco=76A4FB&amp;chs=880x300&amp;chd=t:<?=implode(',', array_slice($CountryUsers, 0, 31))?>&amp;chxl=1:|<?=implode('|', array_slice($Countries, 0, 31))?>|0:|<?=implode('|', $LogIncrements)?>&amp;chf=bg,s,FFFFFF00" alt="Number of users by country" />
 </div>
-<?
+<?php
 View::show_footer();

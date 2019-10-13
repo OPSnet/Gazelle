@@ -15,9 +15,9 @@
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
     </rule>
     -->
-    <!--<rule ref="Generic.PHP.DisallowShortOpenTag">
+    <rule ref="Generic.PHP.DisallowShortOpenTag">
         <exclude name="Generic.PHP.DisallowShortOpenTag.EchoFound"/>
-    </rule>-->
+    </rule>
     <rule ref="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
     <rule ref="Generic.WhiteSpace.DisallowTabIndent.NonIndentTabsUsed" />
     <rule ref="Generic.PHP.ForbiddenFunctions">

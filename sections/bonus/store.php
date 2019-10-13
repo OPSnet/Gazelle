@@ -22,29 +22,29 @@ HTML;
     <a href="bonus.php?action=history" class="brackets">History</a>
 </div>
 
-<?
+<?php
 if (isset($_GET['action']) && $_GET['action'] == 'donate') {
     authorize();
     $value = $_POST['donate'];
     if (G::$LoggedUser['ID'] != $_POST['userid']) {
 ?>
 <div class="alertbar blend">User error, no bonus points donated.</div>
-<?
+<?php
     }
     elseif (G::$LoggedUser['BonusPoints'] < $value) {
 ?>
 <div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format(G::$LoggedUser['BonusPoints']) ?> points.</div>
-<?
+<?php
     }
     elseif ($Bonus->donate($_POST['poolid'], $value, G::$LoggedUser['ID'], G::$LoggedUser['EffectiveClass'])) {
 ?>
 <div class="alertbar blend">Success! Your donation to the Bonus Point pool has been recorded.</div>
-<?
+<?php
     }
     else {
 ?>
 <div class="alertbar blend">No bonus points donated, insufficient funds.</div>
-<?
+<?php
     }
 }
 
@@ -82,7 +82,7 @@ if (count($pool) > 0) {
         </form>
     </div>
 </div>
-<?
+<?php
 } /* pool */
 ?>
 

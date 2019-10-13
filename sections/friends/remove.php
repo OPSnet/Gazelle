@@ -1,4 +1,4 @@
-<?
+<?php
 $DB->query("
     DELETE FROM friends
     WHERE UserID='$LoggedUser[ID]'

@@ -1,4 +1,4 @@
-<?
+<?php
 class Forums {
     /**
      * Get information on a thread.

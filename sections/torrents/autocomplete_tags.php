@@ -1,4 +1,4 @@
-<?
+<?php
 header('Content-Type: application/json; charset=utf-8');
 
 $FullName = rawurldecode($_GET['query']);

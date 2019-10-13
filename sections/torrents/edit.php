@@ -1,4 +1,4 @@
-<?
+<?php
 //**********************************************************************//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Edit form ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 // This page relies on the TORRENT_FORM class. All it does is call        //
@@ -79,11 +79,12 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
 <div class="linkbox">
     <a class="brackets" href="#group-change">Change Group</a>
     <a class="brackets" href="#group-split">Split Off into New Group</a>
-<?        if (check_perms('users_mod')) { ?>
+<?php   if (check_perms('users_mod')) { ?>
     <a class="brackets" href="#category-change">Change Category</a>
-<?        } ?>
+<?php   } ?>
 </div>
-<?    }
+<?php
+    }
 }
 
 if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || check_perms('edit_unknowns')) {
@@ -118,7 +119,7 @@ if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || check_perms(
 if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['CategoryID'] == 1)) {
 ?>
 <div class="thin">
-<?
+<?php
     if ($Properties['CategoryID'] == 1) {
 ?>
     <div class="header">
@@ -176,7 +177,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
         </table>
     </form>
     <br />
-<?
+<?php
     } /* category == 1 */
     if (check_perms('users_mod')) { ?>
     <h2><a name="category-change">Change category</a></h2>
@@ -192,18 +193,18 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
                 <td class="label">Change category</td>
                 <td>
                     <select id="newcategoryid" name="newcategoryid" onchange="ChangeCategory(this.value);">
-<?        foreach ($Categories as $CatID => $CatName) { ?>
-                        <option value="<?=($CatID + 1)?>"<?Format::selected('CategoryID', $CatID + 1, 'selected', $Properties)?>><?=($CatName)?></option>
-<?        } ?>
+<?php   foreach ($Categories as $CatID => $CatName) { ?>
+                        <option value="<?=($CatID + 1)?>"<?php Format::selected('CategoryID', $CatID + 1, 'selected', $Properties); ?>><?=($CatName)?></option>
+<?php   } ?>
                     </select>
                 </td>
             <tr id="split_releasetype">
                 <td class="label">Release type</td>
                 <td>
                     <select name="releasetype">
-<?        foreach ($ReleaseTypes as $RTID => $ReleaseType) { ?>
+<?php   foreach ($ReleaseTypes as $RTID => $ReleaseType) { ?>
                         <option value="<?=($RTID)?>"><?=($ReleaseType)?></option>
-<?        } ?>
+<?php   } ?>
                     </select>
                 </td>
             </tr>
@@ -233,11 +234,11 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
         </table>
         <script type="text/javascript">ChangeCategory($('#newcategoryid').raw().value);</script>
     </form>
-<?
+<?php
     }
 ?>
 </div>
-<?
+<?php
 } // if check_perms('torrents_edit')
 
 View::show_footer(); ?>

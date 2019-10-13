@@ -1,4 +1,4 @@
-<?
+<?php
 class GOOGLE_CHARTS {
     protected $URL = 'https://chart.googleapis.com/chart';
     protected $Labels = array();

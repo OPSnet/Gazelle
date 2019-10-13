@@ -1,4 +1,4 @@
-<?
+<?php
 function link_users($UserID, $TargetID, $IgnoreComments) {
 
     global $DB, $LoggedUser;
@@ -208,7 +208,7 @@ function user_dupes_table($UserID) {
                 </div>
                 <table width="100%" class="layout hidden linkedaccounts">
                     <?=($DupeCount ? "<tr>\n" : '')?>
-<?
+<?php
     $i = 0;
     foreach ($Dupes as $Dupe) {
         $i++;
@@ -218,7 +218,7 @@ function user_dupes_table($UserID) {
                         <td align="left"><?=Users::format_username($DupeID, true, true, true, true)?>
                             <a href="user.php?action=dupes&amp;dupeaction=remove&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;userid=<?=$UserID?>&amp;removeid=<?=$DupeID?>" onclick="return confirm('Are you sure you wish to remove <?=$DupeInfo['Username']?> from this group?');" class="brackets tooltip" title="Remove linked account">X</a>
                         </td>
-<?
+<?php
         if ($i == 4) {
             $i = 0;
             echo "\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n";
@@ -232,7 +232,8 @@ function user_dupes_table($UserID) {
         }
 ?>
                     </tr>
-<?    }    ?>
+<?php
+    }    ?>
                     <tr>
                         <td colspan="5" align="left" style="border-top: thin solid;"><strong>Comments:</strong></td>
                     </tr>
@@ -255,6 +256,6 @@ function user_dupes_table($UserID) {
                 </div>
             </div>
         </form>
-<?
+<?php
 }
 ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 This page is something of a hack so those
 easily scared off by funky solutions, don't

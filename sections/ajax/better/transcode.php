@@ -1,4 +1,4 @@
-<?
+<?php
 if (!isset($_GET['type']) || !is_number($_GET['type']) || $_GET['type'] > 3) {
     error(0);
 }

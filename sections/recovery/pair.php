@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_recovery')) {
     error(403);
 }
@@ -63,12 +63,13 @@ View::show_header('Recovery pair users');
     <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
-<? if (isset($Result)) { ?>
+<?php
+if (isset($Result)) { ?>
 <div class="box">
     <div class="head">Result</div>
     <div><?= $Result ?></div>
 </div>
-<?
+<?php
 }
 elseif (isset($Confirm)) {
 ?>
@@ -127,7 +128,8 @@ elseif (isset($Confirm)) {
     <input type="hidden" name="check" value="<?= security_checksum($prev_id, $curr_id) ?>" />
     </form>
 </div>
-<? } /* $Confirm */ ?>
+<?php
+} /* $Confirm */ ?>
 
 <div class="box">
     <div class="head">Pair <?= SITE_NAME ?> user</div>
@@ -152,5 +154,5 @@ elseif (isset($Confirm)) {
         </form>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

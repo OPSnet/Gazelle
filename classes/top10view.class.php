@@ -1,4 +1,4 @@
-<?
+<?php
 
 class Top10View {
 
@@ -13,7 +13,7 @@ class Top10View {
             <a href="top10.php?type=donors" class="brackets"><?=self::get_selected_link("Donors", $Selected == "donors")?></a>
             
         </div>
-<?
+<?php
     }
 
     public static function render_artist_links($Selected, $View) {
@@ -23,7 +23,7 @@ class Top10View {
             <a href="top10.php?type=lastfm&amp;category=hyped&amp;view=<?=$View?>" class="brackets tooltip" title="These are the the fastest rising artists on Last.fm this week"><?=self::get_selected_link("Hyped Artists", $Selected == "hyped")?></a>
 
         </div>
-<?
+<?php
     }
 
     public static function render_artist_controls($Selected, $View) {
@@ -32,7 +32,7 @@ class Top10View {
             <a href="top10.php?type=lastfm&amp;category=<?=$Selected?>&amp;view=tiles" class="brackets"><?=self::get_selected_link("Tiles", $View == "tiles")?></a>
             <a href="top10.php?type=lastfm&amp;category=<?=$Selected?>&amp;view=list" class="brackets"><?=self::get_selected_link("List", $View == "list")?></a>
         </div>
-<?
+<?php
     }
 
     private static function get_selected_link($String, $Selected) {
@@ -65,7 +65,7 @@ class Top10View {
                     <img class="tooltip large_tile" alt="<?=$Name?>" title="<?=$Name?>" src="<?=ImageTools::process($Image)?>" />
                 </a>
             </li>
-<?
+<?php
         }
     }
 
@@ -94,7 +94,7 @@ class Top10View {
             <li>
                 <a class="tooltip_image" data-title-plain="<?=$Name?>" <?=$Title?> href="<?=$Url?><?=$Name?>"><?=$Name?></a>
             </li>
-<?
+<?php
         }
     }
 

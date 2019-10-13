@@ -91,20 +91,20 @@ $DB->set_query_id($RS);
                 <tr>
                     <td class="label"><strong>Search in:</strong></td>
                     <td>
-                        <label><input type="radio" name="type" value="Title" <? if ($Type == 'Title') { echo 'checked="checked" '; } ?>/> Title</label>
-                        <label><input type="radio" name="type" value="Body" <? if ($Type == 'Body') { echo 'checked="checked" '; } ?>/> Body</label>
+                        <label><input type="radio" name="type" value="Title" <?php if ($Type == 'Title') { echo 'checked="checked" '; } ?>/> Title</label>
+                        <label><input type="radio" name="type" value="Body" <?php if ($Type == 'Body') { echo 'checked="checked" '; } ?>/> Body</label>
                     </td>
                     <td class="label"><strong>Order by:</strong></td>
                     <td>
                         <select name="order">
-<?                    foreach ($OrderVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<? if ($_GET['order'] == $Cur || (!$_GET['order'] && $Cur == 'Time')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?                    } ?>
+<?php                    foreach ($OrderVals as $Cur) { ?>
+                            <option value="<?=$Cur?>"<?php if ($_GET['order'] == $Cur || (!$_GET['order'] && $Cur == 'Time')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
+<?php                    } ?>
                         </select>
                         <select name="way">
-<?                    foreach ($WayVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<? if ($_GET['way'] == $Cur || (!$_GET['way'] && $Cur == 'Descending')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?                    } ?>
+<?php                    foreach ($WayVals as $Cur) { ?>
+                            <option value="<?=$Cur?>"<?php if ($_GET['way'] == $Cur || (!$_GET['way'] && $Cur == 'Descending')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
+<?php                    } ?>
                         </select>
                     </td>
                 </tr>
@@ -117,25 +117,27 @@ $DB->set_query_id($RS);
         </form>
     </div>
     <br />
-<?
+<?php
     $Pages = Format::get_pages($Page, $NumResults, ARTICLES_PER_PAGE);
     if ($Pages) { ?>
     <div class="linkbox pager"><?=($Pages)?></div>
-<?    } ?>
+<?php
+    } ?>
 <table width="100%">
     <tr class="colhead">
         <td>Article</td>
         <td>Last updated on</td>
         <td>Last edited by</td>
     </tr>
-<?    while (list($ID, $Title, $Date, $UserID) = $DB->next_record()) { ?>
+<?php
+    while (list($ID, $Title, $Date, $UserID) = $DB->next_record()) { ?>
     <tr>
         <td><a href="wiki.php?action=article&amp;id=<?=$ID?>"><?=$Title?></a></td>
         <td><?=$Date?></td>
         <td><?=Users::format_username($UserID, false, false, false)?></td>
     </tr>
-<?    } ?>
+<?php } ?>
 </table>
     <div class="linkbox"><?=$Pages?></div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

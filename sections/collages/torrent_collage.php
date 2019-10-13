@@ -104,40 +104,49 @@ View::show_header($Name, 'browse,collage,bbcode,voting,recommend');
         <h2><?=$Name?></h2>
         <div class="linkbox">
             <a href="collages.php" class="brackets">List of collages</a>
-<?    if (check_perms('site_collages_create')) { ?>
+<?php
+if (check_perms('site_collages_create')) { ?>
             <a href="collages.php?action=new" class="brackets">New collage</a>
-<?    } ?>
+<?php
+} ?>
             <br /><br />
-<?    if (check_perms('site_collages_subscribe')) { ?>
+<?php
+if (check_perms('site_collages_subscribe')) { ?>
             <a href="#" id="subscribelink<?=$CollageID?>" class="brackets" onclick="CollageSubscribe(<?=$CollageID?>); return false;"><?=(in_array($CollageID, $CollageSubscriptions) ? 'Unsubscribe' : 'Subscribe')?></a>
-<?
-    }
-    if (check_perms('site_collages_delete') || (check_perms('site_edit_wiki') && !$Locked)) {
+<?php
+}
+if (check_perms('site_collages_delete') || (check_perms('site_edit_wiki') && !$Locked)) {
 ?>
             <a href="collages.php?action=edit&amp;collageid=<?=$CollageID?>" class="brackets">Edit description</a>
-<?    } else { ?>
+<?php
+} else { ?>
             <span class="brackets">Locked</span>
-<?
-    }
-    if (Bookmarks::has_bookmarked('collage', $CollageID)) {
+<?php
+}
+if (Bookmarks::has_bookmarked('collage', $CollageID)) {
 ?>
             <a href="#" id="bookmarklink_collage_<?=$CollageID?>" class="brackets" onclick="Unbookmark('collage', <?=$CollageID?>, 'Bookmark'); return false;">Remove bookmark</a>
-<?    } else { ?>
+<?php
+} else { ?>
             <a href="#" id="bookmarklink_collage_<?=$CollageID?>" class="brackets" onclick="Bookmark('collage', <?=$CollageID?>, 'Remove bookmark'); return false;">Bookmark</a>
-<?    } ?>
+<?php
+} ?>
 <!-- <a href="#" id="recommend" class="brackets">Recommend</a> -->
-<?
-    if (check_perms('site_collages_manage') && !$Locked) {
+<?php
+if (check_perms('site_collages_manage') && !$Locked) {
 ?>
             <a href="collages.php?action=manage&amp;collageid=<?=$CollageID?>" class="brackets">Manage torrents</a>
-<?    } ?>
+<?php
+} ?>
             <a href="reports.php?action=report&amp;type=collage&amp;id=<?=$CollageID?>" class="brackets">Report collage</a>
-<?    if (check_perms('site_collages_delete') || $CreatorID == $LoggedUser['ID']) { ?>
+<?php
+if (check_perms('site_collages_delete') || $CreatorID == $LoggedUser['ID']) { ?>
             <a href="collages.php?action=delete&amp;collageid=<?=$CollageID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to delete this collage?');">Delete</a>
-<?    } ?>
+<?php
+} ?>
         </div>
     </div>
-<? /* Misc::display_recommend($CollageID, "collage"); */ ?>
+<?php /* Misc::display_recommend($CollageID, "collage"); */ ?>
     <div class="sidebar">
         <div class="box box_category">
             <div class="head"><strong>Category</strong></div>
@@ -147,7 +156,7 @@ View::show_header($Name, 'browse,collage,bbcode,voting,recommend');
             <div class="head"><strong>Description</strong></div>
             <div class="pad"><?=Text::full_format($Description)?></div>
         </div>
-<?
+<?php
 if (check_perms('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
         list($ZIPList, $ZIPPrefs) = $LoggedUser['Collector'];
@@ -165,58 +174,61 @@ if (check_perms('zip_downloader')) {
                 <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                 <input type="hidden" name="collageid" value="<?=$CollageID?>" />
                 <ul id="list" class="nobullet">
-<? foreach ($ZIPList as $ListItem) { ?>
+<?php
+    foreach ($ZIPList as $ListItem) { ?>
                     <li id="list<?=$ListItem?>">
                         <input type="hidden" name="list[]" value="<?=$ListItem?>" />
                         <span class="float_left"><?=$ZIPOptions[$ListItem]['2']?></span>
                         <span class="remove remove_collector"><a href="#" onclick="remove_selection('<?=$ListItem?>'); return false;" class="float_right brackets">X</a></span>
                         <br style="clear: both;" />
                     </li>
-<? } ?>
+<?php
+    } ?>
                 </ul>
                 <select id="formats" style="width: 180px;">
-<?
+<?php
 $OpenGroup = false;
 $LastGroupID = -1;
 
-foreach ($ZIPOptions as $Option) {
-    list($GroupID, $OptionID, $OptName) = $Option;
+    foreach ($ZIPOptions as $Option) {
+        list($GroupID, $OptionID, $OptName) = $Option;
 
-    if ($GroupID != $LastGroupID) {
-        $LastGroupID = $GroupID;
-        if ($OpenGroup) {
+        if ($GroupID != $LastGroupID) {
+            $LastGroupID = $GroupID;
+            if ($OpenGroup) {
 ?>
                     </optgroup>
-<?        } ?>
+<?php        } ?>
                     <optgroup label="<?=$ZIPGroups[$GroupID]?>">
-<?
+<?php
         $OpenGroup = true;
-    }
+        }
 ?>
-                        <option id="opt<?=$GroupID.$OptionID?>" value="<?=$GroupID.$OptionID?>"<? if (in_array($GroupID.$OptionID, $ZIPList)) { echo ' disabled="disabled"'; }?>><?=$OptName?></option>
-<?
-}
+                        <option id="opt<?=$GroupID.$OptionID?>" value="<?=$GroupID.$OptionID?>"<?php if (in_array($GroupID.$OptionID, $ZIPList)) { echo ' disabled="disabled"'; }?>><?=$OptName?></option>
+<?php
+    }
 ?>
                     </optgroup>
                 </select>
                 <button type="button" onclick="add_selection();">+</button>
                 <select name="preference" style="width: 210px;">
-                    <option value="0"<? if ($ZIPPrefs == 0) { echo ' selected="selected"'; } ?>>Prefer Original</option>
-                    <option value="1"<? if ($ZIPPrefs == 1) { echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
-                    <option value="2"<? if ($ZIPPrefs == 2) { echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
+                    <option value="0"<?php if ($ZIPPrefs == 0) { echo ' selected="selected"'; } ?>>Prefer Original</option>
+                    <option value="1"<?php if ($ZIPPrefs == 1) { echo ' selected="selected"'; } ?>>Prefer Best Seeded</option>
+                    <option value="2"<?php if ($ZIPPrefs == 2) { echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
                 </select>
                 <input type="submit" style="width: 210px;" value="Download" />
                 </form>
             </div>
         </div>
-<? } ?>
+<?php
+} ?>
         <div class="box box_info box_statistics_collage_torrents">
             <div class="head"><strong>Statistics</strong></div>
             <ul class="stats nobullet">
                 <li>Torrents: <?=number_format($NumGroups)?></li>
-<? if (!empty($TopArtists)) { ?>
+<?php if (!empty($TopArtists)) { ?>
                 <li>Artists: <?=number_format(count($TopArtists))?></li>
-<? } ?>
+<?php } ?>
                 <li>Subscribers: <?=number_format((int)$Subscribers)?></li>
                 <li>Built by <?=number_format(count($UserAdditions))?> user<?=(count($UserAdditions) > 1 ? 's' : '')?></li>
                 <li>Last updated: <?=time_diff($Updated)?></li>
@@ -226,18 +238,19 @@ foreach ($ZIPOptions as $Option) {
             <div class="head"><strong>Top Tags</strong></div>
             <div class="pad">
                 <ol style="padding-left: 5px;">
-<?
+<?php
                 Tags::format_top(5, 'collages.php?action=search&amp;tags=');
 ?>
                 </ol>
             </div>
         </div>
-<?    if (!empty($TopArtists)) { ?>
+<?php
+    if (!empty($TopArtists)) { ?>
         <div class="box box_artists">
             <div class="head"><strong>Top Artists</strong></div>
             <div class="pad">
                 <ol style="padding-left: 5px;">
-<?
+<?php
         uasort($TopArtists, 'compare');
         $i = 0;
         foreach ($TopArtists as $ID => $Artist) {
@@ -247,18 +260,17 @@ foreach ($ZIPOptions as $Option) {
             }
 ?>
                     <li><a href="artist.php?id=<?=$ID?>"><?=$Artist['name']?></a> (<?=number_format($Artist['count'])?>)</li>
-<?
-        }
-?>
+<?php   } ?>
                 </ol>
             </div>
         </div>
-<?    } ?>
+<?php
+    } ?>
         <div class="box box_contributors">
             <div class="head"><strong>Top Contributors</strong></div>
             <div class="pad">
                 <ol style="padding-left: 5px;">
-<?
+<?php
 arsort($UserAdditions);
 $i = 0;
 foreach ($UserAdditions as $UserID => $Additions) {
@@ -268,13 +280,14 @@ foreach ($UserAdditions as $UserID => $Additions) {
     }
 ?>
                     <li><?=Users::format_username($UserID, false, false, false)?> (<?=number_format($Additions)?>)</li>
-<?
+<?php
 }
 ?>
                 </ol>
             </div>
         </div>
-<? if (check_perms('site_collages_manage') && !isset($PreventAdditions)) { ?>
+<?php
+if (check_perms('site_collages_manage') && !isset($PreventAdditions)) { ?>
         <div class="box box_addtorrent">
             <div class="head"><strong>Add torrent group</strong><span class="float_right"><a href="#" onclick="$('.add_torrent_container').toggle_class('hidden'); this.innerHTML = (this.innerHTML == 'Batch add' ? 'Individual add' : 'Batch add'); return false;" class="brackets">Batch add</a></span></div>
             <div class="pad add_torrent_container">
@@ -306,9 +319,10 @@ foreach ($UserAdditions as $UserID => $Additions) {
                 </form>
             </div>
         </div>
-<? } ?>
+<?php
+} ?>
         <h3>Comments</h3>
-<?
+<?php
 if ($CommentList === null) {
     $DB->query("
         SELECT
@@ -336,13 +350,13 @@ foreach ($CommentList as $Comment) {
             </div>
             <div class="pad"><?=Text::full_format($Body)?></div>
         </div>
-<?
+<?php
 }
 ?>
         <div class="box pad">
             <a href="collages.php?action=comments&amp;collageid=<?=$CollageID?>" class="brackets">View all comments</a>
         </div>
-<?
+<?php
 if (!$LoggedUser['DisablePosting']) {
 ?>
         <div class="box box_addcomment">
@@ -362,57 +376,58 @@ if (!$LoggedUser['DisablePosting']) {
                 </div>
             </form>
         </div>
-<?
+<?php
 }
 ?>
     </div>
     <div class="main_column">
-<?
+<?php
 if ($CollageCovers != 0) { ?>
         <div id="coverart" class="box">
             <div class="head" id="coverhead"><strong>Cover Art</strong></div>
             <ul class="collage_images" id="collage_page0">
-<?
+<?php
     for ($Idx = 0; $Idx < min($NumGroups, $CollageCovers); $Idx++) {
         echo Collages::collage_cover_row($TorrentList[$GroupIDs[$Idx]]);
     }
 ?>
             </ul>
         </div>
-<?    if ($NumGroups > $CollageCovers) { ?>
+<?php
+    if ($NumGroups > $CollageCovers) { ?>
         <div class="linkbox pager" style="clear: left;" id="pageslinksdiv">
             <span id="firstpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.page(0); return false;"><strong>&lt;&lt; First</strong></a> | </span>
             <span id="prevpage" class="invisible"><a href="#" class="pageslink" onclick="collageShow.prevPage(); return false;"><strong>&lt; Prev</strong></a> | </span>
-<?        for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) { ?>
+<?php   for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) { ?>
             <span id="pagelink<?=$i?>" class="<?=(($i > 4) ? 'hidden' : '')?><?=(($i == 0) ? 'selected' : '')?>"><a href="#" class="pageslink" onclick="collageShow.page(<?=$i?>, this); return false;"><strong><?=$CollageCovers * $i + 1?>-<?=min($NumGroups, $CollageCovers * ($i + 1))?></strong></a><?=(($i != ceil($NumGroups / $CollageCovers) - 1) ? ' | ' : '')?></span>
-<?        } ?>
+<?php   } ?>
             <span id="nextbar" class="<?=($NumGroups / $CollageCovers > 5) ? 'hidden' : ''?>"> | </span>
             <span id="nextpage"><a href="#" class="pageslink" onclick="collageShow.nextPage(); return false;"><strong>Next &gt;</strong></a></span>
             <span id="lastpage" class="<?=(ceil($NumGroups / $CollageCovers) == 2 ? 'invisible' : '')?>"> | <a href="#" class="pageslink" onclick="collageShow.page(<?=ceil($NumGroups / $CollageCovers) - 1?>); return false;"><strong>Last &gt;&gt;</strong></a></span>
         </div>
 <?php
-$CollagePages = array();
-for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
-    $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
-    $CollagePages[] = implode('',
-        array_map(
-            function($GroupID) use ($TorrentList) {
-                return Collages::collage_cover_row($TorrentList[$GroupID]);
-            },
-            $Groups
-        )
-    );
-}
-if ($NumGroups > $CollageCovers) {
-    for ($i = $NumGroups + 1; $i <= ceil($NumGroups / $CollageCovers) * $CollageCovers; $i++) {
-        $CollagePages[count($CollagePages) - 1] .= '<li></li>';
-    }
-}
+        $CollagePages = []];
+        for ($i = 0; $i < $NumGroups / $CollageCovers; $i++) {
+            $Groups = array_slice($GroupIDs, $i * $CollageCovers, $CollageCovers);
+            $CollagePages[] = implode('',
+                array_map(
+                    function($GroupID) use ($TorrentList) {
+                        return Collages::collage_cover_row($TorrentList[$GroupID]);
+                    },
+                    $Groups
+                )
+            );
+        }
+        if ($NumGroups > $CollageCovers) {
+            for ($i = $NumGroups + 1; $i <= ceil($NumGroups / $CollageCovers) * $CollageCovers; $i++) {
+                $CollagePages[count($CollagePages) - 1] .= '<li></li>';
+            }
+        }
 ?>
         <script type="text/javascript">//<![CDATA[
             collageShow.init(<?=json_encode($CollagePages)?>);
         //]]></script>
-<?
+<?php
         unset($CollagePages);
     }
 }
@@ -490,26 +505,26 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             </td>
             <td colspan="5">
                 <strong><?= $DisplayName ?></strong>
-                <? if (Bookmarks::has_bookmarked('torrent', $GroupID)) { ?>
+                <?php if (Bookmarks::has_bookmarked('torrent', $GroupID)) { ?>
                     <span class="remove_bookmark float_right">
                         <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $GroupID ?>"
                            class="remove_bookmark brackets"
                            onclick="Unbookmark('torrent', <?= $GroupID ?>, 'Bookmark'); return false;">Remove bookmark</a>
                     </span>
-                <? } else { ?>
+                <?php } else { ?>
                     <span class="add_bookmark float_right">
                         <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $GroupID ?>"
                            class="add_bookmark brackets"
                            onclick="Bookmark('torrent', <?= $GroupID ?>, 'Remove bookmark'); return false;">Bookmark</a>
                     </span>
-                    <?
+                    <?php
                 }
                 Votes::vote_link($GroupID, $UserVote);
                 ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
         </tr>
-        <?
+        <?php
         $LastRemasterYear = '-';
         $LastRemasterTitle = '';
         $LastRemasterRecordLabel = '';
@@ -542,7 +557,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                                                                     title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?= Torrents::edition_string($Torrent, $Group) ?>
                         </strong></td>
                 </tr>
-                <?
+                <?php
             }
             $LastRemasterTitle = $Torrent['RemasterTitle'];
             $LastRemasterYear = $Torrent['RemasterYear'];
@@ -555,12 +570,12 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                     <span class="brackets">
                         <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
                            class="tooltip" title="Download">DL</a>
-                        <? if (Torrents::can_use_token($Torrent)) { ?>
+                        <?php if (Torrents::can_use_token($Torrent)) { ?>
                             | <a
                                 href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
                                 class="tooltip" title="Use a FL Token"
                                 onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders']) ?>');">FL</a>
-                        <? } ?>
+                        <?php } ?>
                         | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
                     </span>
                     &nbsp;&nbsp;&raquo;&nbsp; <a
@@ -571,7 +586,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                 <td class="td_seeders m_td_right number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
                 <td class="td_leechers m_td_right number_column"><?= number_format($Torrent['Leechers']) ?></td>
             </tr>
-            <?
+            <?php
         }
     }
     else {
@@ -606,16 +621,16 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                     <span class="brackets">
                         <a href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>"
                            class="tooltip" title="Download">DL</a>
-                        <? if (Torrents::can_use_token($Torrent)) { ?>
+                        <?php if (Torrents::can_use_token($Torrent)) { ?>
                             | <a
                                 href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
                                 class="tooltip" title="Use a FL Token"
                                 onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders']) ?>');">FL</a>
-                        <? } ?>
+                        <?php } ?>
                         | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
                     </span>
                 <strong><?= $DisplayName ?></strong>
-                <? Votes::vote_link($GroupID, $UserVote); ?>
+                <?php Votes::vote_link($GroupID, $UserVote); ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
             <td class="td_size number_column nobr"><?= Format::get_size($Torrent['Size']) ?></td>
@@ -623,12 +638,12 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             <td class="td_seeders m_td_right number_column<?= (($Torrent['Seeders'] == 0) ? ' r00' : '') ?>"><?= number_format($Torrent['Seeders']) ?></td>
             <td class="td_leechers m_td_right number_column"><?= number_format($Torrent['Leechers']) ?></td>
         </tr>
-        <?
+        <?php
     }
 }
 ?>
         </table>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

@@ -1,4 +1,4 @@
-<?
+<?php
 
 class CalendarView {
     private static $Days = array('S', 'M', 'T', 'W', 'T', 'F', 'S');
@@ -28,7 +28,7 @@ class CalendarView {
         </h1>
         <input type="hidden" id="month" value="<?=$Month?>" />
         <input type="hidden" id="year" value="<?=$Year?>" />
-<?
+<?php
     }
 
     private static function get_events_on($Day, $Events) {
@@ -51,7 +51,7 @@ class CalendarView {
             $Tooltip = $Event['Title'] . " - " . Calendar::$Categories[$Event['Category']] . " - " . Calendar::$Importances[$Event['Importance']];
 ?>
             <p><a href="#" class="event_day tooltip" title="<?=$Tooltip?>" data-gazelle-id="<?=$Event['ID']?>" style="color: <?=$Color?>;"><?=Format::cut_string($Event['Title'], 8, true)?></a></p>
-<?
+<?php
         }
     }
 
@@ -65,17 +65,17 @@ class CalendarView {
 
         <table class="calendar">
             <tr>
-<?        foreach (self::$Headings as $Heading) { ?>
+<?php        foreach (self::$Headings as $Heading) { ?>
                 <td class="calendar-row calendar-heading">
                     <strong><?=$Heading?></strong>
                 </td>
-<?        } ?>
+<?php        } ?>
             </tr>
             <tr class="calendar-row">
 
-<?        for ($x = 0; $x < $RunningDay; $x++) { ?>
+<?php        for ($x = 0; $x < $RunningDay; $x++) { ?>
                 <td class="calendar-day-np"></td>
-<?
+<?php
             $DaysThisWeek++;
         }
 
@@ -83,17 +83,17 @@ class CalendarView {
 ?>
                 <td class="calendar-day">
                     <div class="day-events">
-<?                        self::render_events_day($i, $Events); ?>
+<?php                   self::render_events_day($i, $Events); ?>
                     </div>
                     <div class="day-number">
                         <?=$i?>
                     </div>
                 </td>
-<?            if ($RunningDay == 6) { ?>
+<?php       if ($RunningDay == 6) { ?>
             </tr>
-<?                if (($DayCounter + 1) != $DaysInMonth) { ?>
+<?php           if (($DayCounter + 1) != $DaysInMonth) { ?>
             <tr class="calendar-row">
-<?
+<?php
                 }
                 $RunningDay = -1;
                 $DaysThisWeek = 0;
@@ -107,14 +107,14 @@ class CalendarView {
             for ($x = 1; $x <= (8 - $DaysThisWeek); $x++) {
 ?>
                 <td class="calendar-day-np"></td>
-<?
+<?php
             }
         }
 ?>
             </tr>
 
         </table>
-<?
+<?php
         echo $Calendar;
     }
 }

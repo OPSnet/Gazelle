@@ -23,7 +23,7 @@ h5{padding-top:30px}
 </head>
 <body>
 <div class="container">
-<?
+<?php
 
 $ipaddr     = $_SERVER['REMOTE_ADDR'];
 $key        = "apl-recovery.$ipaddr";
@@ -87,7 +87,7 @@ recheck your spam folder), join the <tt>#recovery</tt> channel on IRC.</p>
 Port: 6667 or +7000 for SSL</p>
 </blockquote>
 
-<?
+<?php
 } else {
 ?>
 <h3>There was a problem</h3>
@@ -96,7 +96,7 @@ Port: 6667 or +7000 for SSL</p>
 <center><b style="font-size: 20pt;"><?= $msg ?></b></center>
 
 <p>Please wait five minutes and try again.</p>
-<?
+<?php
 }
 ?>
 </div>

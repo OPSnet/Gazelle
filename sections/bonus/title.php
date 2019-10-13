@@ -62,4 +62,4 @@ View::show_header('Bonus Points - Title', 'bonus');
     </table>
 </div>
 
-<?  View::show_footer();
+<?php  View::show_footer();

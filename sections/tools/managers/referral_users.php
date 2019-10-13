@@ -87,7 +87,8 @@ View::show_header('Referred Users');
     </form>
 </div>
 
-<?php if ($ReferredUsers["Results"] > 0) { ?>
+<?php
+if ($ReferredUsers["Results"] > 0) { ?>
 <div class="linkbox">
     <?=Format::get_pages($Page, $ReferredUsers["Results"], USERS_PER_PAGE, 11)?>
 </div>
@@ -99,11 +100,14 @@ View::show_header('Referred Users');
         <td>Referred</td>
         <td>Joined</td>
         <td>Active</td>
-<?php if (check_perms('users_view_invites')) { ?>
+<?php
+    if (check_perms('users_view_invites')) { ?>
         <td>Invite</td>
-<?php } if (check_perms('admin_manage_referrals')) { ?>
+<?php
+    } if (check_perms('admin_manage_referrals')) { ?>
         <td></td>
-<?php } ?>
+<?php
+} ?>
     </tr>
 <?php
 $Row = 'b';
@@ -134,17 +138,18 @@ $Row = 'b';
             <td>
                 <input type="checkbox" name="active" disabled="disabled"<?=($Active == '1') ? ' checked="checked"' : ''?> />
             </td>
-<?php    if (check_perms('users_view_invites')) { ?>
+<?php   if (check_perms('users_view_invites')) { ?>
             <td>
-<?php        if (!$Active) { ?>
+<?php       if (!$Active) { ?>
                 <a href="https://<?=SITE_URL?>/register.php?invite=<?=$Invite?>"><?=$Invite?></a>
-<?php        } ?>
+<?php       } ?>
             </td>
-<?php } if (check_perms('admin_manage_referrals')) { ?>
+<?php   }
+        if (check_perms('admin_manage_referrals')) { ?>
             <td>
                 <input type="submit" name="submit" value="Unlink" onclick="return confirm('Are you sure you want to unlink this account? This is an irreversible action!')" />
             </td>
-<?php    } ?>
+<?php   } ?>
         </form>
     </tr>
 <?php

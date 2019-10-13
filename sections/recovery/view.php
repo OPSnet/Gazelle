@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('admin_recovery')) {
     error(403);
 }
@@ -55,23 +55,25 @@ $enabled = ['Unconfirmed', 'Enabled', 'Disabled'];
     <a class="brackets" href="/recovery.php?action=pair">Pair</a>
 </div>
 
-<? if (!$Info) { ?>
+<?php
+if (!$Info) { ?>
 <h3>Nobody home</h3>
 
 <p>No recovery request matched the search terms<p>
 <blockquote>
 <ul>
-<?
-foreach ($terms as $t) {
-    foreach ($t as $field => $value) {
-        echo "<li>$field: <tt>$value</tt></li>";
+<?php
+    foreach ($terms as $t) {
+        foreach ($t as $field => $value) {
+            echo "<li>$field: <tt>$value</tt></li>";
+        }
     }
-}
 ?>
 </ul>
 </blockquote>
 
-<? } else { ?>
+<?php
+} else { ?>
 
 <h3>View recovery details for <?= $Info['username'] ?></h3>
 
@@ -86,7 +88,8 @@ foreach ($terms as $t) {
                 <th>state</th>
                 <td><?= $Info['state'] ?></td>
             </tr>
-<? if (count($Candidate)) { ?>
+<?php
+    if (count($Candidate)) { ?>
             <tr>
                 <td><?= $enabled[$Candidate['Enabled']] ?></td>
                 <td><?= \Users::make_class_string($Candidate['PermissionID']) ?></th>
@@ -94,7 +97,8 @@ foreach ($terms as $t) {
                 <td><?= Format::get_size($Candidate['Uploaded']) ?> up</td>
                 <td><?= Format::get_size($Candidate['Downloaded']) ?> down</td>
             </tr>
-<? } ?>
+<?php
+    } ?>
             <tr>
                 <th>Password verified</th>
                 <td colspan="2"><?= $Info['password_ok'] ? 'Yes' : 'No' ?></td>
@@ -139,29 +143,30 @@ foreach ($terms as $t) {
                 <td colspan="4"><pre><?= $Info['log'] ?><pre></td>
             </tr>
         </table>
-<? if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
+<?php
+    if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
         <h2>Actions</h2>
-<?     if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
+<?php   if (in_array($Info['state'], ['PENDING', 'VALIDATED'])) { ?>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=accept&amp;id=<?= $ID ?>">Accept</a> - An invite will be emailed to the user</p>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=deny&amp;id=<?= $ID ?>">Deny</a> - The request is denied, no e-mail will be sent</p>
-<?
-    }
-    if ($Info['admin_user_id'] == G::$LoggedUser['ID']) {
+<?php
+        }
+        if ($Info['admin_user_id'] == G::$LoggedUser['ID']) {
 ?>
         <p><a class="brackets" href="/recovery.php?action=admin&amp;task=unclaim&amp;id=<?= $ID ?>">Unclaim</a> - Release the claim on this request, you don't know what to do.</p>
-<?
-    }
-    else {
+<?php
+        } else {
 ?>
         <p><a class="brackets" href="/recovery.php?action=view&amp;id=<?= $ID ?>&amp;claim=<?= G::$LoggedUser['ID'] ?>">Claim</a> - Claim this request, you need to contact the person via IRC.</p>
-<?
+<?php
+        }
     }
-}
 ?>
     </div>
 </div>
 
-<? } /* $Info */ ?>
+<?php
+} /* $Info */ ?>
 </div>
-<?
+<?php
 View::show_footer();

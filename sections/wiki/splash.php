@@ -1,4 +1,4 @@
-<?View::show_header('Wiki');?>
+<?php View::show_header('Wiki'); ?>
 <div class="thin">
     <div class="header">
         <h2>Wiki</h2>
@@ -42,4 +42,4 @@
         </span>
     </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

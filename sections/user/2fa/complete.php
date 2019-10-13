@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Two-factor Authentication');
 
 $UserID = $_REQUEST['userid'];
@@ -22,10 +22,10 @@ list($Recovery) = $DB->next_record(MYSQLI_NUM, false);
     <p>Two-factor authentication has now been enabled on your account. Please note down the following recovery keys, they are the only way you will be able to recover your account if you lose your hardware device.</p>
 
     <ul class="pad">
-        <? foreach(unserialize($Recovery) as $r): ?>
+        <?php foreach(unserialize($Recovery) as $r): ?>
             <li><?= $r ?></li>
-        <? endforeach; ?>
+        <?php endforeach; ?>
     </ul>
 </div>
 
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

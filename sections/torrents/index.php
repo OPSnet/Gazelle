@@ -1,4 +1,4 @@
-<?
+<?php
 
 //Function used for pagination of peer/snatch/download lists on details.php
 function js_pages($Action, $TorrentID, $NumResults, $CurrentPage) {

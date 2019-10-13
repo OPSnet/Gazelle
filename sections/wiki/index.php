@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 
 

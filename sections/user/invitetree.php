@@ -1,4 +1,4 @@
-<?
+<?php
 if (isset($_GET['userid']) && check_perms('users_view_invites')) {
     if (!is_number($_GET['userid'])) {
         error(403);
@@ -24,8 +24,8 @@ View::show_header($Username.' &gt; Invites &gt; Tree');
         <h2><?=Users::format_username($UserID, false, false, false)?> &gt; <a href="user.php?action=invite&amp;userid=<?=$UserID?>">Invites</a> &gt; Tree</h2>
     </div>
     <div class="box pad">
-<?    $Tree->make_tree(); ?>
+<?php    $Tree->make_tree(); ?>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

@@ -1,4 +1,4 @@
-<?
+<?php
 if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     error(404);
 }
@@ -39,7 +39,7 @@ View::show_header("Revisions of ".$Title);
                 <td><input type="radio" name="old" value="<?=$Revision?>" disabled="disabled" /></td>
                 <td><input type="radio" name="new" value="<?=$Revision?>" checked="checked" /></td>
             </tr>
-<?
+<?php
 $DB->query("
     SELECT
         Revision,
@@ -58,7 +58,7 @@ while (list($Revision, $Title, $AuthorID, $Date) = $DB->next_record()) { ?>
                 <td><input type="radio" name="old" value="<?=$Revision?>" /></td>
                 <td><input type="radio" name="new" value="<?=$Revision?>" /></td>
             </tr>
-<? } ?>
+<?php } ?>
             <tr>
                 <td class="center" colspan="6">
                     <input type="submit" value="Compare" />
@@ -67,4 +67,4 @@ while (list($Revision, $Title, $AuthorID, $Date) = $DB->next_record()) { ?>
         </table>
     </form>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

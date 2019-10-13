@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * $_REQUEST['action'] is artist, collages, requests or torrents (default torrents)
  * $_REQUEST['type'] depends on the page:
@@ -234,16 +234,18 @@ View::show_header($Title, 'bbcode,comments');
 ?><div class="thin">
     <div class="header">
         <h2><?=$Header?></h2>
-<? if ($Links !== '') { ?>
+<?php
+    if ($Links !== '') { ?>
         <div class="linkbox">
             <?=$Links?>
         </div>
-<? } ?>
+<?php
+    } ?>
     </div>
     <div class="linkbox">
         <?=$Pages?>
     </div>
-<?
+<?php
 if ($Count > 0) {
     $DB->set_query_id($Comments);
     while (list($AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID) = $DB->next_record()) {
@@ -266,10 +268,11 @@ if ($Count > 0) {
     }
 } else { ?>
     <div class="center">No results.</div>
-<? } ?>
+<?php
+} ?>
     <div class="linkbox">
         <?=$Pages?>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

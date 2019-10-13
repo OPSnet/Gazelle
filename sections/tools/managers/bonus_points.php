@@ -43,7 +43,7 @@ View::show_header('Add tokens sitewide');
     </form>
 </div>
 <br />
-<?
+<?php
 
 View::show_footer();
 ?>

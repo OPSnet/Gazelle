@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (!check_perms('site_proxy_images')) {
     img_error('forbidden');

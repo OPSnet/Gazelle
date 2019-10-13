@@ -1,4 +1,4 @@
-<?
+<?php
 // perform the back end of updating a resolve type
 
 if (!check_perms('admin_reports')) {

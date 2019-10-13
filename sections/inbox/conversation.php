@@ -1,4 +1,4 @@
-<?
+<?php
 $ConvID = $_GET['id'];
 if (!$ConvID || !is_number($ConvID)) {
     error(404);
@@ -80,16 +80,18 @@ $DB->query("
     <div class="linkbox">
         <a href="<?=Inbox::get_inbox_link(); ?>" class="brackets">Back to inbox</a>
     </div>
-<?
+<?php
 
 while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) { ?>
     <div class="box vertical_space">
         <div class="head" style="overflow: hidden;">
             <div style="float: left;">
                 <strong><?=$Users[(int)$SenderID]['UserStr']?></strong> <?=time_diff($SentDate)?>
-<?    if ($SenderID > 0) { ?>
+<?php
+    if ($SenderID > 0) { ?>
                     - <a href="#quickpost" onclick="Quote('<?=$MessageID?>','<?=$Users[(int)$SenderID]['Username']?>');" class="brackets">Quote</a>
-<?    } ?>
+<?php
+    } ?>
             </div>
             <div style="float: right;"><a href="#">&uarr;</a> <a href="#messageform">&darr;</a></div>
         </div>
@@ -97,7 +99,7 @@ while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) { ?>
             <?=Text::full_format($Body)?>
         </div>
     </div>
-<?
+<?php
 }
 $DB->query("
     SELECT UserID
@@ -125,7 +127,7 @@ if (!empty($ReceiverIDs) && (empty($LoggedUser['DisablePM']) || array_intersect(
             </div>
         </div>
     </form>
-<?
+<?php
 }
 ?>
     <h3>Manage conversation</h3>
@@ -139,7 +141,7 @@ if (!empty($ReceiverIDs) && (empty($LoggedUser['DisablePM']) || array_intersect(
                 <tr>
                     <td class="label"><label for="sticky">Sticky</label></td>
                     <td>
-                        <input type="checkbox" id="sticky" name="sticky"<? if ($Sticky) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" id="sticky" name="sticky"<?php if ($Sticky) { echo ' checked="checked"'; } ?> />
                     </td>
                     <td class="label"><label for="mark_unread">Mark as unread</label></td>
                     <td>
@@ -157,7 +159,7 @@ if (!empty($ReceiverIDs) && (empty($LoggedUser['DisablePM']) || array_intersect(
             </table>
         </div>
     </form>
-<?
+<?php
 $DB->query("
     SELECT SupportFor
     FROM users_info
@@ -173,26 +175,26 @@ if ((check_perms('users_mod') || $FLS != '') && (!$ForwardedID || $ForwardedID =
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <label for="receiverid">Forward to</label>
             <select id="receiverid" name="receiverid">
-<?
+<?php
     foreach ($StaffIDs as $StaffID => $StaffName) {
         if ($StaffID == $LoggedUser['ID'] || in_array($StaffID, $ReceiverIDs)) {
             continue;
         }
 ?>
                 <option value="<?=$StaffID?>"><?=$StaffName?></option>
-<?
+<?php
     }
 ?>
             </select>
             <input type="submit" value="Forward" />
         </div>
     </form>
-<?
+<?php
 }
 
 //And we're done!
 ?>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

@@ -207,5 +207,5 @@ else {
 <div class="linkbox">
     <?=$Pages?>
 </div>
-<?
+<?php
 View::show_footer();

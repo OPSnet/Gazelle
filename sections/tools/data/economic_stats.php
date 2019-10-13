@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 Tools necessary for economic management
 1. Current overall stats (!economy)
@@ -142,6 +142,6 @@ $TotalLeechers = $TotalPeers - $TotalSeeders;
         </div>
     </div>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

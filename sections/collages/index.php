@@ -1,4 +1,4 @@
-<?
+<?php
 define('ARTIST_COLLAGE', 'Artists');
 enforce_login();
 

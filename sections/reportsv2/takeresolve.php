@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * This is the backend of the AJAXy reports resolve (When you press the shiny submit button).
  * This page shouldn't output anything except in error. If you do want output, it will be put
@@ -98,7 +98,7 @@ if (($Escaped['resolve_type'] == 'manual' || $Escaped['resolve_type'] == 'dismis
             </td>
         </tr>
     </table>
-<?
+<?php
     }
     die();
 }
@@ -363,5 +363,5 @@ if ($DB->affected_rows() > 0 || !$Report) {
 ?>
 <a href="reportsv2.php?view=report&amp;id=<?=$ReportID?>">Somebody has already resolved this report</a>
 <input type="button" value="Clear" onclick="ClearReport(<?=$ReportID?>);" />
-<?
+<?php
 }

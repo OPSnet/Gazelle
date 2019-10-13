@@ -36,7 +36,7 @@ if ($Summary['nr'] > 0) {
 </div>
 
 <div class="thin">
-<?
+<?php
 $has_spent = 0;
 $PoolSummary = $Bonus->getUserPoolHistory($ID);
 $pool_total = 0;
@@ -49,7 +49,7 @@ if (!is_null($PoolSummary)) {
         $pool_total += $p['Total'];
 ?>
     <h4><?= $WhoSpent ?> <?=number_format($p['Total']) ?> bonus points to donate to the <?= $p['Name'] . $when ?>.</h4>
-<?
+<?php
     }
 }
 if ($Summary['total']) {
@@ -57,7 +57,7 @@ if ($Summary['total']) {
     $has_spent++;
 ?>
     <h4><?= "$WhoSpent $also" . number_format($Summary['total']) ?> bonus points to purchase <?= $Summary['nr'] ?> <?= $Summary['nr'] == 1 ? 'item' : 'items' ?>.</h4>
-<?
+<?php
 }
 if ($has_spent == 2) {
     $total = $pool_total + $Summary['total'];
@@ -68,11 +68,11 @@ if ($has_spent == 2) {
     else { $adj = ''; }
 ?>
     <h4>That makes a grand total of <?= number_format($total) ?> points, <?= $adj ?>well done!</h4>
-<?
+<?php
 } elseif (!$has_spent) {
 ?>
     <h3>No purchase history.</h3>
-<?
+<?php
 }
 if (isset($History)) {
 ?>
@@ -89,21 +89,24 @@ if (isset($History)) {
             </tr>
         </thead>
         <tbody>
-<?    foreach ($History as $Item) { ?>
+<?php
+    foreach ($History as $Item) { ?>
             <tr>
                 <td><?= $Item['Title'] ?></td>
                 <td align="right"><?= number_format($Item['Price']) ?></td>
                 <td><?= time_diff($Item['PurchaseDate']) ?></td>
                 <td><?= !$Item['OtherUserID'] ? '&nbsp;' : Users::format_username($Item['OtherUserID']) ?></td>
             </tr>
-<?    } ?>
+<?php
+    } ?>
         </tbody>
     </table>
-<? } ?>
+<?php
+} ?>
     <div class="linkbox">
         <?=$Pages?>
     </div>
 </div>
-<?
+<?php
 
 View::show_footer();

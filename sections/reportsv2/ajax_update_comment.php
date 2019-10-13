@@ -1,4 +1,4 @@
-<?
+<?php
 // perform the back end of updating a report comment
 
 authorize();

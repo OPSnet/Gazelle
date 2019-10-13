@@ -1,4 +1,4 @@
-<?
+<?php
 //**********************************************************************//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Upload form ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 // This page relies on the TORRENT_FORM class. All it does is call        //
@@ -115,32 +115,33 @@ $HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
     <h3 id="dnu_header">Do Not Upload List</h3>
     <p><?=$NewDNU ? '<strong class="important_text">' : '' ?>Last updated: <?=time_diff($Updated)?><?=$NewDNU ? '</strong>' : '' ?></p>
     <p>The following releases are currently forbidden from being uploaded to the site. Do not upload them unless your torrent meets a condition specified in the comment.
-<?    if ($HideDNU) { ?>
+<?php    if ($HideDNU) { ?>
     <span id="showdnu"><a href="#" onclick="$('#dnulist').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Show</a></span>
-<?    } ?>
+<?php    } ?>
     </p>
     <table id="dnulist" class="<?=($HideDNU ? 'hidden' : '')?>">
         <tr class="colhead">
             <td width="50%"><strong>Name</strong></td>
             <td><strong>Comment</strong></td>
         </tr>
-<?     $TimeDiff = strtotime('-1 month', strtotime('now'));
+<?php     $TimeDiff = strtotime('-1 month', strtotime('now'));
     foreach ($DNU as $BadUpload) {
         list($Name, $Comment, $Updated) = $BadUpload;
 ?>
         <tr>
             <td>
                 <?=Text::full_format($Name) . "\n" ?>
-<?        if ($TimeDiff < strtotime($Updated)) { ?>
+<?php   if ($TimeDiff < strtotime($Updated)) { ?>
                 <strong class="important_text">(New!)</strong>
-<?        } ?>
+<?php   } ?>
             </td>
             <td><?=Text::full_format($Comment)?></td>
         </tr>
-<? } ?>
+<?php
+    } ?>
     </table>
 </div><?=($HideDNU ? '<br />' : '')?>
-<?
+<?php
 $TorrentForm->head();
 switch ($UploadForm) {
     case 'Music':

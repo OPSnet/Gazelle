@@ -152,7 +152,7 @@ if ($ShowGrouped) {
 <div class="thin">
     <div class="header">
         <h2>
-<?
+<?php
     if ($ShowGrouped) {
         echo 'Grouped '.($ShowUnread ? 'unread ' : '')."post history for <a href=\"user.php?id=$UserID\">$Username</a>";
     }
@@ -166,60 +166,60 @@ if ($ShowGrouped) {
         </h2>
         <div class="linkbox">
             <br /><br />
-<?
+<?php
 if ($ViewingOwn) {
     $UserSubscriptions = Subscriptions::get_subscriptions();
 
     if (!$ShowUnread) {
         if ($ShowGrouped) { ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>&amp;showunread=0&amp;group=0" class="brackets">Show all posts</a>&nbsp;&nbsp;&nbsp;
-<?        } else { ?>
+<?php   } else { ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>&amp;showunread=0&amp;group=1" class="brackets">Show all posts (grouped)</a>&nbsp;&nbsp;&nbsp;
-<?        } ?>
+<?php   } ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>&amp;showunread=1&amp;group=1" class="brackets">Only display posts with unread replies (grouped)</a>&nbsp;&nbsp;&nbsp;
-<?    } else { ?>
+<?php   } else { ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>&amp;showunread=0&amp;group=0" class="brackets">Show all posts</a>&nbsp;&nbsp;&nbsp;
-<?        if (!$ShowGrouped) { ?>
+<?php       if (!$ShowGrouped) { ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>&amp;showunread=1&amp;group=1" class="brackets">Only display posts with unread replies (grouped)</a>&nbsp;&nbsp;&nbsp;
-<?        } else { ?>
+<?php        } else { ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>&amp;showunread=1&amp;group=0" class="brackets">Only display posts with unread replies</a>&nbsp;&nbsp;&nbsp;
-<?        }
-    }
+<?php        }
+        }
 ?>
             <a href="userhistory.php?action=subscriptions" class="brackets">Go to subscriptions</a>
-<?
-} else {
+<?php
+    } else {
 ?>
             <a href="forums.php?action=search&amp;type=body&amp;user=<?=$Username?>" class="brackets">Search</a>
-<?
-}
+<?php
+    }
 ?>
         </div>
     </div>
-<?
-if (empty($Results)) {
+<?php
+    if (empty($Results)) {
 ?>
     <div class="center">
         No topics<?=$ShowUnread ? ' with unread posts' : '' ?>
     </div>
-<?
-} else {
+<?php
+    } else {
 ?>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $Results, $PerPage, 11);
     echo $Pages;
 ?>
     </div>
-<?
+<?php
     $QueryID = $DB->get_query_id();
     while (list($PostID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername, $TopicID, $ThreadTitle, $LastPostID, $LastRead, $Locked, $Sticky) = $DB->next_record()) {
 ?>
     <table class="forum_post vertical_margin<?=!Users::has_avatars_enabled() ? ' noavatar' : '' ?>" id="post<?=$PostID ?>">
         <colgroup>
-<?        if (Users::has_avatars_enabled()) { ?>
+<?php   if (Users::has_avatars_enabled()) { ?>
             <col class="col_avatar" />
-<?         } ?>
+<?php   } ?>
             <col class="col_post_body" />
         </colgroup>
         <tr class="colhead_dark">
@@ -227,67 +227,67 @@ if (empty($Results)) {
                 <span style="float: left;">
                     <?=time_diff($AddedTime) ?>
                     in <a href="forums.php?action=viewthread&amp;threadid=<?=$TopicID?>&amp;postid=<?=$PostID?>#post<?=$PostID?>" class="tooltip" title="<?=display_str($ThreadTitle)?>"><?=Format::cut_string($ThreadTitle, 75)?></a>
-<?
+<?php
         if ($ViewingOwn) {
             if ((!$Locked || $Sticky) && (!$LastRead || $LastRead < $LastPostID)) { ?>
                     <span class="new">(New!)</span>
-<?
+<?php
             }
 ?>
                 </span>
-<?            if (!empty($LastRead)) { ?>
+<?php            if (!empty($LastRead)) { ?>
                 <span style="float: left;" class="tooltip last_read" title="Jump to last read">
                     <a href="forums.php?action=viewthread&amp;threadid=<?=$TopicID?>&amp;postid=<?=$LastRead?>#post<?=$LastRead?>"></a>
                 </span>
-<?            }
+<?php            }
         } else {
 ?>
                 </span>
-<?        }
+<?php   }
 ?>
                 <span id="bar<?=$PostID ?>" style="float: right;">
-<?         if ($ViewingOwn && !in_array($TopicID, $UserSubscriptions)) { ?>
+<?php   if ($ViewingOwn && !in_array($TopicID, $UserSubscriptions)) { ?>
                     <a href="#" onclick="Subscribe(<?=$TopicID?>); $('.subscribelink<?=$TopicID?>').remove(); return false;" class="brackets subscribelink<?=$TopicID?>">Subscribe</a>
                     &nbsp;
-<?         } ?>
+<?php   } ?>
                     <a href="#">&uarr;</a>
                 </span>
             </td>
         </tr>
-<?
+<?php
         if (!$ShowGrouped) {
 ?>
         <tr>
-<?    if (Users::has_avatars_enabled()) { ?>
+<?php       if (Users::has_avatars_enabled()) { ?>
             <td class="avatar" valign="top">
                 <?=Users::show_avatar($Avatar, $UserID, $Username, $HeavyInfo['DisableAvatars'])?>
             </td>
-<?    } ?>
+<?php       } ?>
             <td class="body" valign="top">
                 <div id="content<?=$PostID?>">
                     <?=Text::full_format($Body)?>
-<?            if ($EditedUserID) { ?>
+<?php           if ($EditedUserID) { ?>
                     <br />
                     <br />
                     <span class="last_edited">
-<?                if (check_perms('site_moderate_forums')) { ?>
+<?php               if (check_perms('site_moderate_forums')) { ?>
                     <a href="#content<?=$PostID?>" onclick="LoadEdit(<?=$PostID?>, 1);">&laquo;</a>
-<?                 } ?>
+<?php                } ?>
                     Last edited by
                     <?=Users::format_username($EditedUserID, false, false, false) ?> <?=time_diff($EditedTime, 2, true, true)?>
                     </span>
-<?            } ?>
+<?php           } ?>
                 </div>
             </td>
         </tr>
-<?        }
+<?php       }
     $DB->set_query_id($QueryID);
 ?>
     </table>
-<?     } ?>
+<?php   } ?>
     <div class="linkbox">
 <?=$Pages?>
     </div>
-<? } ?>
+<?php } ?>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

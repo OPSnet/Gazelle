@@ -1,4 +1,4 @@
-<?
+<?php
 class RevisionHistory {
     /**
      * Read the revision history of an artist or torrent page

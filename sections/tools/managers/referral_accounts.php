@@ -120,7 +120,8 @@ if (!$ReferralManager->readOnly) {
             </td>
         </form>
     </tr>
-<?php } ?>
+<?php
+} ?>
 </table>
 <?php
     View::show_footer();

@@ -1,4 +1,4 @@
-<?
+<?php
 
 
 /**********|| Page to show individual forums || ********************************\

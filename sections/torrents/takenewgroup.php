@@ -1,4 +1,4 @@
-<?
+<?php
 /***************************************************************
 * This page handles the backend of the "new group" function
 * which splits a torrent off into a new group.
@@ -44,7 +44,7 @@ if (empty($_POST['confirm'])) {
         </form>
     </div>
     </div>
-<?
+<?php
     View::show_footer();
 } else {
     $DB->query("

@@ -1,4 +1,4 @@
-<?
+<?php
 use Gazelle\Util\Crypto;
 
 require 'config.php'; //The config contains all site wide configuration information as well as memcached rules

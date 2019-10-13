@@ -1,4 +1,4 @@
-<?
+<?php
 DEFINE('MAX_QUESTIONS', 50);
 
 authorize();

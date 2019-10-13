@@ -1,4 +1,4 @@
-<?
+<?php
 $DB->query("
     UPDATE friends
     SET Comment='$P[comment]'

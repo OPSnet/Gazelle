@@ -1,4 +1,4 @@
-<?
+<?php
 View::show_header('Connectability Checker');
 ?>
 <div class="thin">
@@ -8,4 +8,4 @@ View::show_header('Connectability Checker');
     <div class="linkbox"></div>
     <div class="box pad">This page has been disabled because the results have been inaccurate. Try a smarter and more reliable service, like <a href="http://www.canyouseeme.org">http://www.canyouseeme.org</a>.</div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>

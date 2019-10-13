@@ -320,9 +320,9 @@ switch ($mode) {
                     <a href="torrents.php?action=download&amp;id=<?=$torrent?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="brackets tooltip" title="Download">DL</a>
                 </span>
                         <?=$displayName?>
-                        <?  if (check_perms('admin_reports')) { ?>
+                        <?php  if (check_perms('admin_reports')) { ?>
                             <a href="better.php?method=missing&amp;type=<?=$type?>&amp;remove=<?=$torrent?>&amp;filter=<?=$filter?>&amp;search=<?=$search?>" class="brackets">X</a>
-                        <?  } ?>
+                        <?php  } ?>
                         <div class="tags"><?=$tags->format()?></div>
                     </td>
                 </tr>

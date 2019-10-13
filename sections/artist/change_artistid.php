@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 if (!check_perms('torrents_edit')) {
@@ -189,7 +189,7 @@ if (isset($_POST['confirm'])) {
             <input type="submit" value="Confirm" />
         </div>
     </form>
-<?
+<?php
     View::show_footer();
 }
 ?>

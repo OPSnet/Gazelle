@@ -1,4 +1,4 @@
-<?
+<?php
 class ARTIST {
     var $ID = 0;
     var $Name = 0;
@@ -309,7 +309,7 @@ class ARTISTS_SIMILAR extends ARTIST{
         <div style="position: absolute; bottom: <?=($this->y - 10)?>px; left: <?=($this->x - $this->NameLength * 4)?>px; font-size: 13pt; white-space: nowrap;" class="similar_artist_header">
             <?=($this->Name)?>
         </div>
-<?
+<?php
         foreach ($this->Artists as $Artist) {
             if ($Artist->ID == $this->ID) {
                 continue;
@@ -335,7 +335,7 @@ class ARTISTS_SIMILAR extends ARTIST{
         <div style="position: absolute; top: <?=($Artist->y - 5)?>px; left: <?=$xPosition?>px; font-size: <?=$FontSize?>pt; white-space: nowrap;">
             <a href="artist.php?id=<?=($Artist->ID)?>" class="similar_artist"><?=($Artist->Name)?></a>
         </div>
-<?
+<?php
         }
         reset($this->Artists);
     }

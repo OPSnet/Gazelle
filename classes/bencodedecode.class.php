@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * The decode class is simple and straightforward. The only thing to
  * note is that empty dictionaries are represented by boolean trues

@@ -1,4 +1,4 @@
-<?
+<?php
 enforce_login();
 
 if (!check_perms('users_mod')) {
@@ -91,16 +91,16 @@ if (check_perms('admin_manage_blog')) {
                 <div id="postform" class="pad<?=(!isset($_REQUEST['action']) || $_REQUEST['action'] != 'editblog') ? ' hidden' : '' ?>">
                     <input type="hidden" name="action" value="<?=((empty($_GET['action'])) ? 'takenewblog' : 'takeeditblog')?>" />
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-<?        if (!empty($_GET['action']) && $_GET['action'] == 'editblog') { ?>
+<?php   if (!empty($_GET['action']) && $_GET['action'] == 'editblog') { ?>
                     <input type="hidden" name="blogid" value="<?=$BlogID; ?>" />
-<?        } ?>
+<?php   } ?>
                     <div class="field_div">
                         <h3>Title</h3>
-                        <input type="text" name="title" size="95"<? if (!empty($Title)) { echo ' value="'.display_str($Title).'"'; } ?> />
+                        <input type="text" name="title" size="95"<?php if (!empty($Title)) { echo ' value="'.display_str($Title).'"'; } ?> />
                     </div>
                     <div class="field_div">
                         <h3>Body</h3>
-                        <textarea name="body" cols="95" rows="15"><? if (!empty($Body)) { echo display_str($Body); } ?></textarea> <br />
+                        <textarea name="body" cols="95" rows="15"><?php if (!empty($Body)) { echo display_str($Body); } ?></textarea> <br />
                     </div>
                     <div class="submit_div center">
                         <input type="submit" value="<?=((!isset($_GET['action'])) ? 'Create blog post' : 'Edit blog post') ?>" />
@@ -108,13 +108,13 @@ if (check_perms('admin_manage_blog')) {
                 </div>
             </form>
         </div>
-<?
+<?php
 } else {
     View::show_header('Staff Blog','bbcode');
 }
 ?>
 <div class="thin">
-<?
+<?php
 if (($Blog = $Cache->get_value('staff_blog')) === false) {
     $DB->query("
         SELECT
@@ -137,19 +137,19 @@ foreach ($Blog as $BlogItem) {
             <div id="blog<?=$BlogID?>" class="box box2 blog_post">
                 <div class="head">
                     <strong><?=$Title?></strong> - posted <?=time_diff($BlogTime);?> by <?=$Author?>
-<?            if (check_perms('admin_manage_blog')) { ?>
+<?php       if (check_perms('admin_manage_blog')) { ?>
                     - <a href="staffblog.php?action=editblog&amp;id=<?=$BlogID?>" class="brackets">Edit</a>
                     <a href="staffblog.php?action=deleteblog&amp;id=<?=$BlogID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" onclick="return confirm('Do you want to delete this?');" class="brackets">Delete</a>
-<?            } ?>
+<?php       } ?>
                 </div>
                 <div class="pad">
                     <?=Text::full_format($Body)?>
                 </div>
             </div>
-<?
+<?php
 }
 ?>
 </div>
-<?
+<?php
 View::show_footer();
 ?>

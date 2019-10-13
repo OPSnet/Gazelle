@@ -1,4 +1,4 @@
-<?
+<?php
 $ID = (int)$_GET['id'];
 if (empty($ID)) {
     die();
@@ -30,6 +30,6 @@ foreach($Answers as $Answer) {
 <?=            Text::full_format($Answer['Answer'])?>
         </div>
     </div>
-<?
+<?php
 }
 ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 include(SERVER_ROOT.'/sections/user/linkedfunctions.php');
 

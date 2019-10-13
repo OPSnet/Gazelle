@@ -1,4 +1,4 @@
-<?
+<?php
 if (check_perms('users_mod') || $OwnProfile || Donations::is_visible($UserID)) { ?>
     <div class="box box_info box_userinfo_donor_stats">
         <div class="head colhead_dark">Donor Statistics</div>
@@ -14,5 +14,5 @@ if (check_perms('users_mod') || $OwnProfile || Donations::is_visible($UserID)) {
             </li>
         </ul>
     </div>
-<?
+<?php
 }

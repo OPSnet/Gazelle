@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 if (!check_perms('admin_manage_forums')) {

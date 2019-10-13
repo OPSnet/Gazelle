@@ -137,7 +137,7 @@ class Rules {
 
             <li><strong>You should be able to build up a list of tags using only the official tags <?=($OnUpload ? 'to the left of the text box' : 'on <a href="upload.php">the torrent upload page</a>')?>. If you are in any doubt about whether or not a tag is acceptable, do not add it.</strong></li>
         </ul>
-<?
+<?php
     }
 
     /**
@@ -217,7 +217,7 @@ class Rules {
                 Threads created for the exclusive purpose of posting mature imagery will be trashed. Mature content (including graphic album art) should be contextually relevant to the thread and/or forum you're posting in. If you are in doubt as to whether a post is appropriate, send a <a href="staffpm.php">Staff PM to the Forum Moderators</a> and wait for a reply before proceeding.
             </li>
         </ol>
-<?
+<?php
     }
 
     /**
@@ -244,6 +244,6 @@ class Rules {
             <li>The creation of non-official channels on the IRC network is prohibited. Please send a <a href="staffpm.php">Staff PM</a> if you want to add a channel to our network.
             <li><strong>Read the channel topic before asking questions.</strong></li>
         </ol>
-<?
+<?php
     }
 }
