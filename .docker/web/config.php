@@ -33,14 +33,14 @@ define('SCHEDULE_KEY', 'OL9n0m2JxhBxYyMvXWJg'); // Random key. This key must be 
 define('RSS_HASH', 'weFQmRVNrfcbhq0TNWZA'); //Random key. Used for generating unique RSS auth key.
 
 // MySQL details
-define('SQLHOST', 'localhost'); //The MySQL host ip/fqdn
+define('SQLHOST', 'mysql'); //The MySQL host ip/fqdn
 define('SQLLOGIN', 'gazelle');//The MySQL login
 define('SQLPASS', 'password'); //The MySQL password
 define('SQLDB', 'gazelle'); //The MySQL database to use
 define('SQL_PHINX_USER', 'gazelle');
 define('SQL_PHINX_PASS', 'password');
 define('SQLPORT', 3306); //The MySQL port to connect on
-define('SQLSOCK', '/var/run/mysqld/mysqld.sock');
+define('SQLSOCK', null);
 
 // Memcached details
 $MemcachedServers = array(
@@ -50,9 +50,9 @@ $MemcachedServers = array(
 );
 
 // Sphinx details
-define('SPHINX_HOST', '127.0.0.1');
+define('SPHINX_HOST', 'sphinxsearch');
 define('SPHINX_PORT', 9312);
-define('SPHINXQL_HOST', '127.0.0.1');
+define('SPHINXQL_HOST', 'sphinxsearch');
 define('SPHINXQL_PORT', 9306);
 define('SPHINXQL_SOCK', false);
 define('SPHINX_MAX_MATCHES', 1000); // Must be <= the server's max_matches variable (default 1000)
