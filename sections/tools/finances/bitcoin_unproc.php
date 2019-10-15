@@ -22,7 +22,7 @@ $OldDonations = G::$DB->to_pair(0, 1, false);
         <div class="pad"><strong>Do not process these donations manually!</strong> The Bitcoin parser <em>will</em> get them sooner or later (poke a developer if something seems broken).</div>
     </div>
 <?php
-$NewDonations = array();
+$NewDonations = [];
 $TotalUnproc = 0;
 foreach ($AllDonations as $Address => $Amount) {
     if (isset($OldDonations[$Address])) {

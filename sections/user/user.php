@@ -179,14 +179,14 @@ if (check_perms('site_proxy_images') && !empty($CustomTitle)) {
 
 if ($Preview == 1) {
     if (strlen($ParanoiaString) == 0) {
-        $Paranoia = array();
+        $Paranoia = [];
     } else {
         $Paranoia = $CustomParanoia;
     }
 } else {
     $Paranoia = unserialize($Paranoia);
     if (!is_array($Paranoia)) {
-        $Paranoia = array();
+        $Paranoia = [];
     }
 }
 $ParanoiaLevel = 0;
@@ -977,7 +977,7 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
                             <div class="tags">
 <?php
             $Tags = $Request['Tags'];
-            $TagList = array();
+            $TagList = [];
             foreach ($Tags as $TagID => $TagName) {
                 $TagList[] = "<a href=\"requests.php?tags=$TagName\">".display_str($TagName).'</a>';
             }

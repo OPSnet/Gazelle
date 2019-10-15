@@ -23,7 +23,7 @@ $DB->query("
         LIMIT $Offset, $Count");
 $News = $DB->to_array(false, MYSQLI_NUM, false);
 
-$NewsResponse = array();
+$NewsResponse = [];
 foreach ($News as $NewsItem) {
     list($NewsID, $Title, $Body, $NewsTime) = $NewsItem;
     array_push(

@@ -160,7 +160,7 @@ $NotificationsManager = new NotificationsManager(G::$LoggedUser['ID']);
 $Notifications = $NotificationsManager->get_notifications();
 $UseNoty = $NotificationsManager->use_noty();
 $NewSubscriptions = false;
-$NotificationSpans = array();
+$NotificationSpans = [];
 foreach ($Notifications as $Type => $Notification) {
     if ($Type === NotificationsManager::SUBSCRIPTIONS) {
         $NewSubscriptions = true;
@@ -349,8 +349,8 @@ if (check_perms('site_send_unlimited_invites')) {
             </div>
 <?php
 //Start handling alert bars
-$Alerts = array();
-$ModBar = array();
+$Alerts = [];
+$ModBar = [];
 
 // Staff blog
 if (check_perms('users_mod')) {

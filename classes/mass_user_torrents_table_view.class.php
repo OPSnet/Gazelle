@@ -171,17 +171,17 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
     public function body () {
         if ($this->HasTorrents)
             foreach ($this->TorrentList as $GroupID => $Group) {
-                $Artists = array();
+                $Artists = [];
                 extract($Group);
                 extract($this->CollageDataList[$GroupID]);
 
                 $this->NumGroups++;
 
                 if (!is_array($ExtendedArtists)) {
-                    $ExtendedArtists = array();
+                    $ExtendedArtists = [];
                 }
                 if (!is_array($Artists)) {
-                    $Artists = array();
+                    $Artists = [];
                 }
                 $DisplayName = self::display_name($ExtendedArtists, $Artists, $VanityHouse);
                 $TorrentLink = '<a href="torrents.php?id='.$GroupID.'" class="tooltip" title="View torrent">'.$Name.'</a>';

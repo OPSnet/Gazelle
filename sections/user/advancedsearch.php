@@ -67,7 +67,7 @@ function wrap($String, $ForceMatch = '', $IPSearch = false) {
 function date_compare($Field, $Operand, $Date1, $Date2 = '') {
     $Date1 = db_string($Date1);
     $Date2 = db_string($Date2);
-    $Return = array();
+    $Return = [];
 
     switch ($Operand) {
         case 'on':
@@ -99,7 +99,7 @@ function num_compare($Field, $Operand, $Num1, $Num2 = '') {
         $Num2 = db_string($Num2);
     }
 
-    $Return = array();
+    $Return = [];
 
     switch ($Operand) {
         case 'equal':
@@ -149,8 +149,8 @@ if (count($_GET)) {
     }
     $DateRegex = array('regex' => '/\d{4}-\d{2}-\d{2}/');
 
-    $ClassIDs = array();
-    $SecClassIDs = array();
+    $ClassIDs = [];
+    $SecClassIDs = [];
     foreach ($Classes as $ClassID => $Value) {
         if ($Value['Secondary']) {
             $SecClassIDs[] = $ClassID;
@@ -223,10 +223,10 @@ if (count($_GET)) {
 
         $WayTable = array('Ascending'=>'ASC', 'Descending'=>'DESC');
 
-        $Where = array();
-        $Having = array();
-        $Join = array();
-        $Group = array();
+        $Where = [];
+        $Having = [];
+        $Join = [];
+        $Group = [];
         $Distinct = '';
         $Order = '';
 
@@ -593,7 +593,8 @@ View::show_header('User search');
                 <td>
                     <select name="secclass">
                         <option value=""<?php if ($_GET['secclass'] === '') { echo ' selected="selected"'; } ?>>Don't Care</option>
-<?php    $Secondaries = array();
+<?php
+    $Secondaries = [];
     // Neither level nor ID is particularly useful when searching secondary classes, so let's do some
     // kung-fu to sort them alphabetically.
     $fnc = function($Class1, $Class2) { return strcmp($Class1['Name'], $Class2['Name']); };

@@ -72,7 +72,7 @@ if ($TopVotes === false) {
 
         $Groups = Torrents::get_groups(array_keys($Results));
 
-        $TopVotes = array();
+        $TopVotes = [];
         foreach ($Results as $GroupID => $Votes) {
             $TopVotes[$GroupID] = $Groups[$GroupID];
             $TopVotes[$GroupID]['Ups'] = $Votes['Ups'];

@@ -1,6 +1,6 @@
 <?php
 
-$Skip = array();
+$Skip = [];
 $Skip[] = db_string($_GET['skip']);
 $NotificationsManager = new NotificationsManager($LoggedUser['ID'], $Skip);
 

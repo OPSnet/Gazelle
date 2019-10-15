@@ -54,7 +54,7 @@ $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 $DB->query('SELECT FOUND_ROWS()');
 list($NumResults) = $DB->next_record();
 
-$TorrentGroups = $Requests = array();
+$TorrentGroups = $Requests = [];
 foreach ($Results as $Result) {
     if ($Result['Page'] == 'torrents') {
         $TorrentGroups[] = $Result['PageID'];

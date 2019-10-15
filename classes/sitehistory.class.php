@@ -107,7 +107,7 @@ class SiteHistory {
         $SubCategory = (int)$SubCategory;
         $Tags = db_string($Tags);
         $Limit = (int)$Limit;
-        $Where = array();
+        $Where = [];
         if (!empty($Month)) {
             $Where[] = " MONTH(Date) = '$Month' ";
         }

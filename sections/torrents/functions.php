@@ -254,7 +254,7 @@ function set_torrent_logscore($TorrentID) {
 
 function get_group_requests($GroupID) {
     if (empty($GroupID) || !is_number($GroupID)) {
-        return array();
+        return [];
     }
     global $DB, $Cache;
 

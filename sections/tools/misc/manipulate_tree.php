@@ -53,7 +53,7 @@ if ($_POST['id']) {
                 AND TreePosition < $MaxPosition
                 AND TreeLevel > $TreeLevel
             ORDER BY TreePosition");
-    $BanList = array();
+    $BanList = [];
 
     while (list ($Invitee) = $DB->next_record()) {
         $BanList[] = $Invitee;

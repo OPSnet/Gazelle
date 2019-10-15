@@ -64,7 +64,7 @@ class Text {
      * Processed version of the $Smileys array, see {@link smileys}
      * @var array $ProcessedSmileys
      */
-    private static $ProcessedSmileys = array();
+    private static $ProcessedSmileys = [];
 
     /**
      * Whether or not to turn images into URLs (used inside [quote] tags).
@@ -141,7 +141,7 @@ class Text {
         global $Debug;
         $Debug->set_flag('BBCode start');
         $Str = display_str($Str);
-        self::$Headlines = array();
+        self::$Headlines = [];
 
         //Inline links
         $URLPrefix = '(\[url\]|\[url\=|\[img\=|\[img\])';
@@ -279,7 +279,7 @@ class Text {
     public static function parse($Str, $ListPrefix = '') {
         $i = 0; // Pointer to keep track of where we are in $Str
         $Len = strlen($Str);
-        $Array = array();
+        $Array = [];
         $ArrayPos = 0;
         $StrLC = strtolower($Str);
         $ListId = 1;
@@ -684,7 +684,7 @@ class Text {
                     break;
                 case 'torrent':
                     $Pattern = '/('.NONSSL_SITE_URL.'\/torrents\.php.*[\?&]id=)?(\d+)($|&|\#).*/i';
-                    $Matches = array();
+                    $Matches = [];
                     if (preg_match($Pattern, $Block['Val'], $Matches)) {
                         if (isset($Matches[2])) {
                             $GroupID = $Matches[2];

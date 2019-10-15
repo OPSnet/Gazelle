@@ -70,7 +70,7 @@ $DB->prepared_query("
 if ($DB->has_results()) {
     $Results = $DB->to_array(false, MYSQLI_ASSOC);
 } else {
-    $Results = array();
+    $Results = [];
 }
 //Display the results.
 echo "</br>Site IP's:</br>";
@@ -91,7 +91,7 @@ $TrackerIps = $DB->prepared_query("
     WHERE uid = ?
         AND IP != ''
     ORDER BY tstamp DESC", $UserID);
-    
+
 //Display Tracker IPs
 echo "</br>Tracker IPs:</br>";
 $Results = $DB->to_array();

@@ -10,9 +10,9 @@ class DonationsBitcoin {
             $Donations = BitcoinRpc::listreceivedbyaddress();
         }
         if (empty($Donations)) {
-            return array();
+            return [];
         }
-        $BTCUsers = array();
+        $BTCUsers = [];
         foreach ($Donations as $Account) {
             $BTCUsers[$Account->address] = $Account->amount;
         }
@@ -108,7 +108,7 @@ class DonationsBitcoin {
         if (G::$DB->has_results()) {
             $UserIDs = G::$DB->to_pair(0, 1);
         } else {
-            $UserIDs = array();
+            $UserIDs = [];
         }
         G::$DB->set_query_id($QueryID);
         return $UserIDs;

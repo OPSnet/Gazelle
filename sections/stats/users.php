@@ -133,7 +133,7 @@ if (!list($Labels, $InFlow, $OutFlow, $Max) = $Cache->get_value('users_timeline'
         }
     }
 
-    $Labels = array();
+    $Labels = [];
     foreach ($TimelineIn as $Month) {
         list($Label, $Amount) = $Month;
         $Labels[] = $Label;

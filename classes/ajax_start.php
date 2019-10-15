@@ -100,7 +100,7 @@ function is_utf8($Str) {
     );
 }
 
-function display_array($Array, $DontEscape = array()) {
+function display_array($Array, $DontEscape = []) {
     foreach ($Array as $Key => $Val) {
         if (!in_array($Key, $DontEscape)) {
             $Array[$Key] = display_str($Val);

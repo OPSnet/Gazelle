@@ -81,7 +81,7 @@ $DB->query("
 if (!$DB->has_results()) {
     error(404);
 }
-$ArtistRoles = array();
+$ArtistRoles = [];
 while (list($GroupID, $Importance) = $DB->next_record(MYSQLI_NUM, false)) {
     // Get the highest importances to place the .torrents in the most relevant folders
     if (!isset($ArtistRoles[$GroupID]) || $Importance < $ArtistRoles[$GroupID]) {

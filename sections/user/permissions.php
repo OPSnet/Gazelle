@@ -5,7 +5,7 @@ if (!isset($_REQUEST['userid']) || !is_number($_REQUEST['userid'])) {
 }
 
 // Get the user class of the user being edited to ensure that the logged in user has permission
-$DB->query("SELECT p.Level 
+$DB->query("SELECT p.Level
             FROM permissions p
             JOIN users_main AS um ON um.PermissionID = p.ID
             WHERE um.ID = '" . $_REQUEST['userid'] . "'");
@@ -27,9 +27,9 @@ $DB->query("
 list($Customs) = $DB->next_record(MYSQLI_NUM, false);
 
 
-$Defaults = Permissions::get_permissions_for_user($UserID, array());
+$Defaults = Permissions::get_permissions_for_user($UserID, []);
 
-$Delta = array();
+$Delta = [];
 if (isset($_POST['action'])) {
     authorize();
 

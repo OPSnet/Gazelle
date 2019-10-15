@@ -33,7 +33,7 @@ $BaseQuery = "
         AND (Paranoia IS NULL OR (Paranoia NOT LIKE '%\"uploaded\"%' AND Paranoia NOT LIKE '%\"downloaded\"%'))
     GROUP BY u.ID";
 
-$OuterResults = array();
+$OuterResults = [];
 
 if ($Details == 'all' || $Details == 'ul') {
     if (!$TopUserUploads = $Cache->get_value("topuser_ul_$Limit")) {
@@ -104,7 +104,7 @@ print
     );
 
 function generate_user_json($Caption, $Tag, $Details, $Limit) {
-    $results = array();
+    $results = [];
     foreach ($Details as $Detail) {
         $results[] = array(
             'id' => (int)$Detail['ID'],

@@ -49,7 +49,7 @@ include(SERVER_ROOT.'/sections/log/sphinx.php');
 <?php
     }
 $Row = 'a';
-$Usernames = array();
+$Usernames = [];
 while (list($ID, $Message, $LogTime) = $DB->next_record()) {
     $MessageParts = explode(' ', $Message);
     $Message = '';

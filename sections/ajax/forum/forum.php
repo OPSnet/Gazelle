@@ -78,7 +78,7 @@ if ($LoggedUser['CustomForums'][$ForumID] != 1 && $Forums[$ForumID]['MinClassRea
 }
 
 $ForumName = display_str($Forums[$ForumID]['Name']);
-$JsonSpecificRules = array();
+$JsonSpecificRules = [];
 foreach ($Forums[$ForumID]['SpecificRules'] as $ThreadIDs) {
     $Thread = Forums::get_thread_info($ThreadIDs);
     $JsonSpecificRules[] = array(
@@ -95,7 +95,7 @@ if (count($Forum) === 0) {
             array(
                 'status' => 'success',
                 'forumName' => $ForumName,
-                'threads' => array()
+                'threads' => []
             )
         );
 } else {
@@ -122,7 +122,7 @@ if (count($Forum) === 0) {
     // don't have to make a database query for each topic on the page
     $LastRead = $DB->to_array('TopicID');
 
-    $JsonTopics = array();
+    $JsonTopics = [];
     foreach ($Forum as $Topic) {
         list($TopicID, $Title, $AuthorID, $Locked, $Sticky, $PostCount, $LastID, $LastTime, $LastAuthorID) = array_values($Topic);
 

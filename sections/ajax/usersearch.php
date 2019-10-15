@@ -36,7 +36,7 @@ if (isset($_GET['username'])) {
 
 }
 
-$JsonUsers = array();
+$JsonUsers = [];
 foreach ($Results as $Result) {
     list($UserID, $Username, $Enabled, $PermissionID, $Donor, $Warned, $Avatar) = $Result;
 

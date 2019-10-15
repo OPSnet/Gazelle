@@ -7,7 +7,7 @@ class BencodeDecode extends Bencode {
     private $Data;
     private $Length;
     private $Pos = 0;
-    public $Dec = array();
+    public $Dec = [];
     public $ExitOnError = true;
     const SnipLength = 40;
 
@@ -91,7 +91,7 @@ class BencodeDecode extends Bencode {
                 return Int64::make($Value);
 
             case 'l':
-                $Value = array();
+                $Value = [];
                 $this->Pos++;
                 while ($this->Data[$this->Pos] != 'e') {
                     if ($this->Pos >= $this->Length) {
@@ -103,7 +103,7 @@ class BencodeDecode extends Bencode {
                 return $Value;
 
             case 'd':
-                $Value = array();
+                $Value = [];
                 $this->Pos++;
                 while ($this->Data[$this->Pos] != 'e') {
                     $Length = substr($this->Data, $this->Pos, strpos($this->Data, ':', $this->Pos) - $this->Pos);
@@ -146,10 +146,10 @@ class BencodeDecode extends Bencode {
             return Int64::get($Data);
         }
         if (is_bool($Data)) {
-            return array();
+            return [];
         }
         if (is_array($Data)) {
-            $Output = array();
+            $Output = [];
             foreach ($Data as $Key => $Val) {
                 $Output[$Key] = $this->dump($Escape, $Val);
             }

@@ -42,7 +42,7 @@ $DB->query("
 
 $ArtistList = $DB->to_array();
 
-$JsonArtists = array();
+$JsonArtists = [];
 foreach ($ArtistList as $Artist) {
     list($ArtistID, $Name) = $Artist;
     $JsonArtists[] = array(

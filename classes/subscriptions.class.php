@@ -17,11 +17,11 @@ class Subscriptions {
          * different Page are: forums: TopicID artist: ArtistID collages:
          * CollageID requests: RequestID torrents: GroupID
          */
-        $Matches = array();
+        $Matches = [];
         preg_match_all('/\[quote(?:=(.*)(?:\|.*)?)?]|\[\/quote]/iU', $Body, $Matches, PREG_SET_ORDER);
 
         if (count($Matches)) {
-            $Usernames = array();
+            $Usernames = [];
             $Level = 0;
             foreach ($Matches as $M) {
                 if ($M[0] != '[/quote]') {

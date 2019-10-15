@@ -11,7 +11,7 @@ class Proxy {
         $this->bouncer = $bouncer;
     }
 
-    public function fetch($url, $params, $cookies, $post, $headers = array()) {
+    public function fetch($url, $params, $cookies, $post, $headers = []) {
         $data = Crypto::encrypt(json_encode(array('url' => $url, 'params' => $params,
             'cookies' => $cookies, 'post' => $post, 'action' => 'fetch', 'headers' => $headers),
             JSON_UNESCAPED_SLASHES), $this->key);

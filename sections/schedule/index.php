@@ -65,7 +65,7 @@ if (PHP_SAPI === 'cli') {
     for ($i = 2; $i < count($argv); $i++) {
         if ($argv[$i] === 'run_tasks') {
             if ($i < count($argv) - 1) {
-                $RunTasks = array();
+                $RunTasks = [];
                 for (++$i; $i < count($argv); $i++) {
                     $RunTasks[] = $argv[$i];
                 }

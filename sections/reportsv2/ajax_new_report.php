@@ -345,7 +345,7 @@ $DB->query("
                             <select name="resolve_type" id="resolve_type<?=$ReportID?>" onchange="ChangeResolve(<?=$ReportID?>);">
 <?php
     $TypeList = $Types['master'] + $Types[$CategoryID];
-    $Priorities = array();
+    $Priorities = [];
     foreach ($TypeList as $Key => $Value) {
         $Priorities[$Key] = $Value['priority'];
     }

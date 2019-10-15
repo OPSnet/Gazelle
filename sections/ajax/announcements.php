@@ -42,7 +42,7 @@ if (($Blog = $Cache->get_value('blog')) === false) {
     $Blog = $DB->to_array();
     $Cache->cache_value('blog', $Blog, 1209600);
 }
-$JsonBlog = array();
+$JsonBlog = [];
 for ($i = 0; $i < 5; $i++) {
     list($BlogID, $Author, $AuthorID, $Title, $Body, $BlogTime, $ThreadID) = $Blog[$i];
     $JsonBlog[] = array(
@@ -56,7 +56,7 @@ for ($i = 0; $i < 5; $i++) {
     );
 }
 
-$JsonAnnouncements = array();
+$JsonAnnouncements = [];
 $Count = 0;
 foreach ($News as $NewsItem) {
     list($NewsID, $Title, $Body, $NewsTime) = $NewsItem;

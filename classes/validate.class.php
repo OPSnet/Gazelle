@@ -27,7 +27,7 @@ Finish the GenerateJS stuff
  * such as email and link for sure.
  */
 class VALIDATE {
-    var $Fields = array();
+    var $Fields = [];
 
     /**
      * Add a new field to be validated (or used for JS form generation) from the associated array to be validated.
@@ -69,7 +69,7 @@ class VALIDATE {
      * @param string $ErrorMessage
      * @param array  $Options
      */
-    function SetFields($FieldName, $Required, $FieldType, $ErrorMessage, $Options = array()) {
+    function SetFields($FieldName, $Required, $FieldType, $ErrorMessage, $Options = []) {
         $this->Fields[$FieldName]['Type'] = strtolower($FieldType);
         $this->Fields[$FieldName]['Required'] = $Required;
         $this->Fields[$FieldName]['ErrorMessage'] = $ErrorMessage;

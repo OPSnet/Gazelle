@@ -305,7 +305,7 @@ switch ($_REQUEST['action']) {
                     }
                 }
 
-                $Values = array();
+                $Values = [];
                 foreach ($_REQUEST as $Key => $Perms) {
                     if (substr($Key, 0, 5) == 'perm_') {
                         $Values[substr($Key, 5)] = (int)$Perms;

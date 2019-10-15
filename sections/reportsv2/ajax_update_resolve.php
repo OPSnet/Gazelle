@@ -16,7 +16,7 @@ $NewType = $_GET['newresolve'];
 
 if (!empty($Types[$CategoryID])) {
     $TypeList = $Types['master'] + $Types[$CategoryID];
-    $Priorities = array();
+    $Priorities = [];
     foreach ($TypeList as $Key => $Value) {
         $Priorities[$Key] = $Value['priority'];
     }

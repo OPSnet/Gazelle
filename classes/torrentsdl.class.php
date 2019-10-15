@@ -9,7 +9,7 @@ class TorrentsDL {
     private $QueryRowNum = 0;
     private $Zip;
     private $IDBoundaries;
-    private $FailedFiles = array();
+    private $FailedFiles = [];
     private $NumAdded = 0;
     private $NumFound = 0;
     private $Size = 0;
@@ -42,7 +42,7 @@ class TorrentsDL {
      * @return array with results and torrent group IDs or false if there are no results left
      */
     public function get_downloads($Key) {
-        $GroupIDs = $Downloads = array();
+        $GroupIDs = $Downloads = [];
         $OldQuery = G::$DB->get_query_id();
         G::$DB->set_query_id($this->QueryResult);
         if (!isset($this->IDBoundaries)) {
@@ -186,7 +186,7 @@ class TorrentsDL {
         if ($Year > 0) {
             $TorrentName .= " - $Year";
         }
-        $TorrentInfo = array();
+        $TorrentInfo = [];
         if ($Media != '') {
             $TorrentInfo[] = $Media;
         }

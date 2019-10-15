@@ -201,7 +201,7 @@ if (count($Forum) === 0) {
         $Row = $Row === 'a' ? 'b' : 'a';
         // Build list of page links
         // Only do this if there is more than one page
-        $PageLinks = array();
+        $PageLinks = [];
         $ShownEllipses = false;
         $PagesText = '';
         $TopicPages = ceil($PostCount / $PerPage);

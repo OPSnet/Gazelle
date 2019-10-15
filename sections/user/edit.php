@@ -36,7 +36,7 @@ if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Class))
 
 $Paranoia = unserialize($Paranoia);
 if (!is_array($Paranoia)) {
-    $Paranoia = array();
+    $Paranoia = [];
 }
 
 function paranoia_level($Setting) {

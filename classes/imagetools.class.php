@@ -9,7 +9,7 @@ class ImageTools {
      * Store processed links to avoid repetition
      * @var array 'URL' => 'Parsed URL'
      */
-    private static $Storage = array();
+    private static $Storage = [];
 
     /**
      * We use true as an extra property to make the domain an array key
@@ -52,14 +52,14 @@ class ImageTools {
      * Array of user IDs whose avatars have been checked for size
      * @var array $CheckedAvatars
      */
-    private static $CheckedAvatars = array();
-    private static $CheckedAvatars2 = array();
+    private static $CheckedAvatars = [];
+    private static $CheckedAvatars2 = [];
 
     /**
      * Array of user IDs whose donor icons have been checked for size
      * @var array $CheckedDonorIcons
      */
-    private static $CheckedDonorIcons = array();
+    private static $CheckedDonorIcons = [];
 
     /**
      * Checks from our list of valid hosts

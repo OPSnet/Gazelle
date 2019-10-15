@@ -30,8 +30,8 @@ print <<<HTML
 HTML;
 
 $DB->query("
-    SELECT 
-        ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore, 
+    SELECT
+        ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore,
         LogChecksum
     FROM torrents
     WHERE HasLog='1' AND HasLogDB='1' AND UserID = " . $LoggedUser['ID']);
@@ -60,7 +60,7 @@ if ($DB->has_results()) {
         if ($GroupYear > 0) {
             $DisplayName .= " [{$GroupYear}]";
         }
-        $Info = array();
+        $Info = [];
         if (!empty($Data['Format'])) {
             $Info[] = $Data['Format'];
         }

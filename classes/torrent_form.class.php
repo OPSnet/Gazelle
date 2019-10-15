@@ -16,12 +16,12 @@ use OrpheusNET\Logchecker\Logchecker;
 
 class TORRENT_FORM {
     var $UploadForm = '';
-    var $Categories = array();
-    var $Formats = array();
-    var $Bitrates = array();
-    var $Media = array();
+    var $Categories = [];
+    var $Formats = [];
+    var $Bitrates = [];
+    var $Media = [];
     var $NewTorrent = false;
-    var $Torrent = array();
+    var $Torrent = [];
     var $Error = false;
     var $TorrentID = false;
     var $Disabled = '';

@@ -8,7 +8,7 @@ if (empty($UserID) || $Limit > 50) {
 if (empty($Limit)) {
     $Limit = 15;
 }
-$Results = array();
+$Results = [];
 if (check_paranoia_here('snatched')) {
     $DB->query("
         SELECT

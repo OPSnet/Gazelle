@@ -114,7 +114,7 @@ if ($_REQUEST['action'] == 'add_artist') {
     add_artist($CollageID, $ArtistID);
 } else {
     $URLs = explode("\n", $_REQUEST['urls']);
-    $ArtistIDs = array();
+    $ArtistIDs = [];
     $Err = '';
     foreach ($URLs as $Key => &$URL) {
         $URL = trim($URL);
@@ -134,7 +134,7 @@ if ($_REQUEST['action'] == 'add_artist') {
     }
 
     foreach ($URLs as $URL) {
-        $Matches = array();
+        $Matches = [];
         if (preg_match('/^'.ARTIST_REGEX.'/i', $URL, $Matches)) {
             $ArtistIDs[] = $Matches[4];
             $ArtistID = $Matches[4];

@@ -103,7 +103,7 @@ View::show_header('Edit artist');
             <ul>
 
 <?php
-    $NonRedirectingAliases = array();
+    $NonRedirectingAliases = [];
     $DB->query("
         SELECT AliasID, Name, UserID, Redirect
         FROM artists_alias

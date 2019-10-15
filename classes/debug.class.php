@@ -7,14 +7,14 @@ define('MAX_MEMORY', 80 * 1024 * 1024); //Maximum memory used per pageload
 define('MAX_QUERIES', 30); //Maxmimum queries
 
 class DEBUG {
-    public $Errors = array();
-    public $Flags = array();
-    public $Perf = array();
-    private $LoggedVars = array();
+    public $Errors = [];
+    public $Flags = [];
+    public $Perf = [];
+    private $LoggedVars = [];
 
     public function profile($Automatic = '') {
         global $ScriptStartTime;
-        $Reason = array();
+        $Reason = [];
 
         if (!empty($Automatic)) {
             $Reason[] = $Automatic;

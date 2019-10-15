@@ -52,7 +52,7 @@ if (!empty($_GET['user'])) {
 
 // Are we looking in individual forums?
 if (isset($_GET['forums']) && is_array($_GET['forums'])) {
-    $ForumArray = array();
+    $ForumArray = [];
     foreach ($_GET['forums'] as $Forum) {
         if (is_number($Forum)) {
             $ForumArray[] = $Forum;

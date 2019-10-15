@@ -61,7 +61,7 @@ class SphinxqlQuery {
             $this->error("Attribute name and filter value are required.");
             return $this;
         }
-        $Filters = array();
+        $Filters = [];
         if (is_array($Values)) {
             foreach ($Values as $Value) {
                 if (!is_number($Value)) {
@@ -172,7 +172,7 @@ class SphinxqlQuery {
      */
     public function order_by($Attribute = false, $Mode = false) {
         if (empty($Attribute)) {
-            $this->SortBy = array();
+            $this->SortBy = [];
         } else {
             $this->SortBy[] = "$Attribute $Mode";
         }
@@ -244,7 +244,7 @@ class SphinxqlQuery {
      * @return string of options
      */
     private function build_options() {
-        $Options = array();
+        $Options = [];
         foreach ($this->Options as $Option => $Value) {
             $Options[] = "$Option = $Value";
         }
@@ -347,16 +347,16 @@ class SphinxqlQuery {
      * Reset all query options and conditions
      */
     public function reset() {
-        $this->Errors = array();
-        $this->Expressions = array();
-        $this->Filters = array();
+        $this->Errors = [];
+        $this->Expressions = [];
+        $this->Filters = [];
         $this->GroupBy = '';
         $this->Indexes = '';
-        $this->Limits = array();
+        $this->Limits = [];
         $this->Options = array('ranker' => 'none');
         $this->QueryString = '';
         $this->Select = '*';
-        $this->SortBy = array();
+        $this->SortBy = [];
         $this->SortGroupBy = '';
     }
 

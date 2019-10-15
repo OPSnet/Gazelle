@@ -91,7 +91,7 @@ if (!$NumResults) {
         if (count($GroupIDs) > 0) {
             $TorrentList = Torrents::get_groups($GroupIDs);
         } else {
-            $TorrentList = array();
+            $TorrentList = [];
         }
 
         $Artists = Artists::get_artists($GroupIDs);

@@ -48,7 +48,7 @@ class Tools {
      * @return the country of origin
      */
     public static function geoip($IP) {
-        static $IPs = array();
+        static $IPs = [];
         if (isset($IPs[$IP])) {
             return $IPs[$IP];
         }
@@ -103,7 +103,7 @@ class Tools {
      * @return a span with JavaScript code
      */
     public static function get_host_by_ajax($IP) {
-        static $IPs = array();
+        static $IPs = [];
         $Class = strtr($IP, '.', '-');
         $HTML = '<span class="host_'.$Class.'">Resolving host...';
         if (!isset($IPs[$IP])) {
@@ -157,7 +157,7 @@ class Tools {
     }
 
     public static function get_country_code_by_ajax($IP) {
-        static $IPs = array();
+        static $IPs = [];
         $Class = strtr($IP, '.', '-');
         $HTML = '<span class="cc_'.$Class.'">Resolving CC...';
         if (!isset($IPs[$IP])) {

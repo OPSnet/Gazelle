@@ -27,7 +27,7 @@ require(SERVER_ROOT.'/classes/charts.class.php');
 $Pie = new PIE_CHART(750,400,array('Other'=>1,'Percentage'=>1,'Sort'=>1));
 
 //Begin sorting
-$Sort = array();
+$Sort = [];
 switch (empty($_GET['order_by']) ? '' : $_GET['order_by']) {
     case 'name':
         foreach ($Tables as $Key => $Value) {

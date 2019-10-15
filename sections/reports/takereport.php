@@ -70,7 +70,7 @@ $DB->query('
         ('.db_string($LoggedUser['ID']).", $ID, '$Short', '".sqltime()."', '".db_string($Reason)."')");
 $ReportID = $DB->inserted_id();
 
-$Channels = array();
+$Channels = [];
 
 if ($Short === 'request_update') {
     $Channels[] = '#requestedits';

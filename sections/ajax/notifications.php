@@ -39,16 +39,16 @@ if (count($GroupIDs)) {
 
 $DB->set_query_id($Results);
 
-$JsonNotifications = array();
+$JsonNotifications = [];
 $NumNew = 0;
 
-$FilterGroups = array();
+$FilterGroups = [];
 while ($Result = $DB->next_record(MYSQLI_ASSOC)) {
     if (!$Result['FilterID']) {
         $Result['FilterID'] = 0;
     }
     if (!isset($FilterGroups[$Result['FilterID']])) {
-        $FilterGroups[$Result['FilterID']] = array();
+        $FilterGroups[$Result['FilterID']] = [];
         $FilterGroups[$Result['FilterID']]['FilterLabel'] = ($Result['Label'] ? $Result['Label'] : false);
     }
     array_push($FilterGroups[$Result['FilterID']], $Result);

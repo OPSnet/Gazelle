@@ -37,7 +37,7 @@ if ($TorrentCount == 0) {
 $Results = $SphQLResult->to_array('groupid');
 $Groups = Torrents::get_groups(array_keys($Results));
 
-$TorrentGroups = array();
+$TorrentGroups = [];
 foreach ($Groups as $GroupID => $Group) {
     if (empty($Group['Torrents'])) {
         unset($Groups[$GroupID]);
@@ -49,7 +49,7 @@ foreach ($Groups as $GroupID => $Group) {
             $TorrentGroups[$Group['ID']] = array(
                 $TorRemIdent => array(
                     'FlacID' => 0,
-                    'Formats' => array(),
+                    'Formats' => [],
                     'RemasterTitle' => $Torrent['RemasterTitle'],
                     'RemasterYear' => $Torrent['RemasterYear'],
                     'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
@@ -60,7 +60,7 @@ foreach ($Groups as $GroupID => $Group) {
         } elseif (!isset($TorrentGroups[$Group['ID']][$TorRemIdent])) {
             $TorrentGroups[$Group['ID']][$TorRemIdent] = array(
                 'FlacID' => 0,
-                'Formats' => array(),
+                'Formats' => [],
                 'RemasterTitle' => $Torrent['RemasterTitle'],
                 'RemasterYear' => $Torrent['RemasterYear'],
                 'RemasterRecordLabel' => $Torrent['RemasterRecordLabel'],
@@ -77,7 +77,7 @@ foreach ($Groups as $GroupID => $Group) {
     }
 }
 
-$JsonResults = array();
+$JsonResults = [];
 foreach ($TorrentGroups as $GroupID => $Editions) {
     $GroupInfo = $Groups[$GroupID];
     $GroupYear = $GroupInfo['Year'];
@@ -95,9 +95,9 @@ foreach ($TorrentGroups as $GroupID => $Editions) {
         $ArtistNames = '';
     }
 
-    $TagList = array();
+    $TagList = [];
     $TagList = explode(' ', str_replace('_', '.', $GroupInfo['TagList']));
-    $TorrentTags = array();
+    $TorrentTags = [];
     foreach ($TagList as $Tag) {
         $TorrentTags[] = "<a href=\"torrents.php?taglist=$Tag\">$Tag</a>";
     }

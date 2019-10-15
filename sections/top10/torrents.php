@@ -1,12 +1,12 @@
 <?php
-$Where = array();
+$Where = [];
 
 if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
     $Details = 'all';
     $Limit = 10;
 
     if ($_GET['tags']) {
-        $TagWhere = array();
+        $TagWhere = [];
         $Tags = explode(',', str_replace('.', '_', trim($_GET['tags'])));
         foreach ($Tags as $Tag) {
             $Tag = preg_replace('/[^a-z0-9_]/', '', $Tag);

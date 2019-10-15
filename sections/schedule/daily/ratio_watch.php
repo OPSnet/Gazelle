@@ -2,8 +2,8 @@
 
 // Here is where we manage ratio watch
 
-$OffRatioWatch = array();
-$OnRatioWatch = array();
+$OffRatioWatch = [];
+$OnRatioWatch = [];
 
 // Take users off ratio watch and enable leeching
 $UserQuery = $DB->query("

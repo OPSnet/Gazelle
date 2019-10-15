@@ -24,7 +24,7 @@ if ($_POST['formid'] && is_number($_POST['formid'])) {
 
 if ($_POST['artists'.$FormID]) {
     $Artists = explode(',', $_POST['artists'.$FormID]);
-    $ParsedArtists = array();
+    $ParsedArtists = [];
     foreach ($Artists as $Artist) {
         if (trim($Artist) != '') {
             $ParsedArtists[] = db_string(trim($Artist));
@@ -122,7 +122,7 @@ if ($_POST['fromyear'.$FormID] && is_number($_POST['fromyear'.$FormID])) {
 
 if ($_POST['users'.$FormID]) {
     $Usernames = explode(',', $_POST['users'.$FormID]);
-    $EscapedUsernames = array();
+    $EscapedUsernames = [];
     foreach ($Usernames as $Username) {
         $EscapedUsernames[] = db_string(trim($Username));;
     }

@@ -119,14 +119,14 @@ class User extends AbstractAPI {
                 um.torrent_pass,
                 um.RequiredRatio,
                 ui.RatioWatchEnds
-            FROM 
+            FROM
                 users_main AS um
                 INNER JOIN users_info AS ui ON ui.UserID = um.ID
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 
         // TODO: merge this and the version in takemoderate.php
-        $UpdateSet = array();
+        $UpdateSet = [];
         $Cur = $this->db->next_record(MYSQLI_ASSOC, false);
         $Comment = 'Enabled via API';
 

@@ -83,7 +83,7 @@ if (empty($CurURL)) {
 
 $Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
 
-$JsonMessages = array();
+$JsonMessages = [];
 while (list($ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $ForwardedName, $SenderID, $Username, $Donor, $Warned, $Enabled, $Avatar, $Date) = $DB->next_record()) {
     $JsonMessage = array(
         'convId' => (int)$ConvID,

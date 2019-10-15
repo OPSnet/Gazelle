@@ -4,7 +4,7 @@
  */
 class BencodeTorrent extends BencodeDecode {
     private $PathKey = 'path';
-    public $Files = array();
+    public $Files = [];
     public $Size = 0;
 
     /**
@@ -31,7 +31,7 @@ class BencodeTorrent extends BencodeDecode {
                 $this->PathKey = 'path.utf-8';
             }
             foreach ($InfoDict['files'] as $File) {
-                $TmpPath = array();
+                $TmpPath = [];
                 foreach ($File[$this->PathKey] as $SubPath) {
                     $TmpPath[] = $SubPath;
                 }
@@ -126,7 +126,7 @@ class BencodeTorrent extends BencodeDecode {
 
         // Grandfather APL torrents
         if (isset($this->Dec['info']['source']) && isset($this->Dec['creation date']) &&
-            ($this->Dec['creation date'] <= GRANDFATHER_OLD_SOURCE) && 
+            ($this->Dec['creation date'] <= GRANDFATHER_OLD_SOURCE) &&
             ($this->Dec['info']['source'] === 'APL')) {
             return false;
         }

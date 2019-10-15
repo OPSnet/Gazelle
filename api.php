@@ -33,7 +33,7 @@ require(SERVER_ROOT.'/classes/classloader.php');
 G::initialize();
 
 function json_error($Code) {
-    echo json_encode(array('status' => 400, 'error' => $Code, 'response' => array()));
+    echo json_encode(array('status' => 400, 'error' => $Code, 'response' => []));
     die();
 }
 
@@ -76,7 +76,7 @@ function is_utf8($Str) {
     );
 }
 
-function display_array($Array, $Escape = array()) {
+function display_array($Array, $Escape = []) {
     foreach ($Array as $Key => $Val) {
         if ((!is_array($Escape) && $Escape == true) || !in_array($Key, $Escape)) {
             $Array[$Key] = display_str($Val);

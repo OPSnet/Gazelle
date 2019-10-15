@@ -19,7 +19,7 @@ $DB->query("
                 AND u.UnseededAlerts = '1'
             ORDER BY t.last_action ASC");
 $TorrentIDs = $DB->to_array();
-$TorrentAlerts = array();
+$TorrentAlerts = [];
 foreach ($TorrentIDs as $TorrentID) {
     list($ID, $GroupID, $Name, $Format, $Encoding, $UserID) = $TorrentID;
 

@@ -52,7 +52,7 @@ if ($GroupCategoryID == 1) {
     $AltName .= ' ['.$ReleaseTypes[$ReleaseType].']';
 }
 
-$Tags = array();
+$Tags = [];
 if ($TorrentTags != '') {
     $TorrentTags = explode('|', $TorrentTags);
     $TorrentTagIDs = explode('|', $TorrentTagIDs);

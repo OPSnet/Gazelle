@@ -12,8 +12,8 @@ if ($GroupID === 0) {
     error(0);
 }
 $Artists = explode(',', $_POST['artists']);
-$CleanArtists = array();
-$ArtistIDs = array();
+$CleanArtists = [];
+$ArtistIDs = [];
 $ArtistsString = '0';
 $LoggedUser = G::$LoggedUser;
 

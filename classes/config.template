@@ -181,8 +181,8 @@ define('BONUS_POOL_TAX_STAFF', 0.5);
 
 define('TMPDIR', '/tmp');
 
-$ForumsRevealVoters = array();
-$ForumsDoublePost = array();
+$ForumsRevealVoters = [];
+$ForumsDoublePost = [];
 
 $Categories = ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics'];
 $GroupedCategories = array_intersect(['Music'], $Categories);

@@ -101,7 +101,7 @@ if (isset($_GET['tag']) || isset($_GET['replace'])) {
         list($ReplacementID) = $DB->next_record();
 
         if ($_GET['list']) {
-            $AffectedTorrents = array();
+            $AffectedTorrents = [];
             // 3) get a list of affected torrents
             $DB->query("
                 SELECT

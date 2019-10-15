@@ -34,7 +34,7 @@ class MASS_USER_BOOKMARKS_EDITOR extends MASS_USER_TORRENTS_EDITOR {
      * Uses an IN() to match multiple items in one query.
      */
     public function mass_remove() {
-        $SQL = array();
+        $SQL = [];
         foreach ($_POST['remove'] as $GroupID => $K) {
             if (is_number($GroupID)) {
                 $SQL[] = sprintf('%d', $GroupID);
@@ -58,7 +58,7 @@ class MASS_USER_BOOKMARKS_EDITOR extends MASS_USER_TORRENTS_EDITOR {
      * Uses $_POST['sort'] values to update the DB.
      */
     public function mass_update() {
-        $SQL = array();
+        $SQL = [];
         foreach ($_POST['sort'] as $GroupID => $Sort) {
             if (is_number($Sort) && is_number($GroupID)) {
                 $SQL[] = sprintf('(%d, %d, %d)', $GroupID, $Sort, G::$LoggedUser['ID']);

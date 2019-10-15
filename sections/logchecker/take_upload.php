@@ -22,7 +22,7 @@ $DB->query("
     FROM torrents t
     WHERE t.ID = {$TorrentID} AND t.HasLog='1'" . $Extra);
 
-$DetailsArray = array();
+$DetailsArray = [];
 $Logchecker = new Logchecker();
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
     list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);

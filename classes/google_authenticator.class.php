@@ -12,7 +12,7 @@
 class PHPGangsta_GoogleAuthenticator
 {
     protected $_codeLength = 6;
-    
+
     /**
      * Create new secret.
      * 16 characters, randomly chosen from the allowed base32 characters.
@@ -24,7 +24,7 @@ class PHPGangsta_GoogleAuthenticator
     public function createSecret($secretLength = 16)
     {
         $validChars = $this->_getBase32LookupTable();
-        
+
         // Valid secret lengths are 80 to 640 bits
         if ($secretLength < 16 || $secretLength > 128) {
             throw new Exception('Bad secret length');
@@ -48,10 +48,10 @@ class PHPGangsta_GoogleAuthenticator
         } else {
             throw new Exception('No source of secure random');
         }
-        
+
         return $secret;
     }
-    
+
     /**
      * Calculate the code, with given secret and point in time.
      *
@@ -65,9 +65,9 @@ class PHPGangsta_GoogleAuthenticator
         if ($timeSlice === null) {
             $timeSlice = floor(time() / 30);
         }
-        
+
         $secretkey = $this->_base32Decode($secret);
-        
+
         // Pack time into binary string
         $time = chr(0) . chr(0) . chr(0) . chr(0) . pack('N*', $timeSlice);
         // Hash it with users secret key
@@ -76,18 +76,18 @@ class PHPGangsta_GoogleAuthenticator
         $offset = ord(substr($hm, -1)) & 0x0F;
         // grab 4 bytes of the result
         $hashpart = substr($hm, $offset, 4);
-        
+
         // Unpak binary value
         $value = unpack('N', $hashpart);
         $value = $value[1];
         // Only 32 bits
         $value = $value & 0x7FFFFFFF;
-        
+
         $modulo = pow(10, $this->_codeLength);
-        
+
         return str_pad($value % $modulo, $this->_codeLength, '0', STR_PAD_LEFT);
     }
-    
+
     /**
      * Get QR-Code URL for image, from google charts.
      *
@@ -98,20 +98,20 @@ class PHPGangsta_GoogleAuthenticator
      *
      * @return string
      */
-    public function getQRCodeGoogleUrl($name, $secret, $title = null, $params = array())
+    public function getQRCodeGoogleUrl($name, $secret, $title = null, $params = [])
     {
         $width = !empty($params['width']) && (int)$params['width'] > 0 ? (int)$params['width'] : 200;
         $height = !empty($params['height']) && (int)$params['height'] > 0 ? (int)$params['height'] : 200;
         $level = !empty($params['level']) && array_search($params['level'], array('L', 'M', 'Q', 'H')) !== false ? $params['level'] : 'M';
-        
+
         $urlencoded = urlencode('otpauth://totp/' . $name . '?secret=' . $secret . '');
         if (isset($title)) {
             $urlencoded .= urlencode('&issuer=' . urlencode($title));
         }
-        
+
         return 'https://chart.googleapis.com/chart?chs=' . $width . 'x' . $height . '&chld=' . $level . '|0&cht=qr&chl=' . $urlencoded . '';
     }
-    
+
     /**
      * Check if the code is correct. This will accept codes starting from $discrepancy*30sec ago to $discrepancy*30sec from now.
      *
@@ -127,21 +127,21 @@ class PHPGangsta_GoogleAuthenticator
         if ($currentTimeSlice === null) {
             $currentTimeSlice = floor(time() / 30);
         }
-        
+
         if (strlen($code) != 6) {
             return false;
         }
-        
+
         for ($i = -$discrepancy; $i <= $discrepancy; ++$i) {
             $calculatedCode = $this->getCode($secret, $currentTimeSlice + $i);
             if ($this->timingSafeEquals($calculatedCode, $code)) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Set the code length, should be >=6.
      *
@@ -152,10 +152,10 @@ class PHPGangsta_GoogleAuthenticator
     public function setCodeLength($length)
     {
         $this->_codeLength = $length;
-        
+
         return $this;
     }
-    
+
     /**
      * Helper class to decode base32.
      *
@@ -168,10 +168,10 @@ class PHPGangsta_GoogleAuthenticator
         if (empty($secret)) {
             return '';
         }
-        
+
         $base32chars = $this->_getBase32LookupTable();
         $base32charsFlipped = array_flip($base32chars);
-        
+
         $paddingCharCount = substr_count($secret, $base32chars[32]);
         $allowedValues = array(6, 4, 3, 1, 0);
         if (!in_array($paddingCharCount, $allowedValues)) {
@@ -200,10 +200,10 @@ class PHPGangsta_GoogleAuthenticator
                 $binaryString .= (($y = chr(base_convert($eightBits[$z], 2, 10))) || ord($y) == 48) ? $y : '';
             }
         }
-        
+
         return $binaryString;
     }
-    
+
     /**
      * Get array with all 32 characters for decoding from/encoding to base32.
      *
@@ -219,7 +219,7 @@ class PHPGangsta_GoogleAuthenticator
             '=',  // padding char
         );
     }
-    
+
     /**
      * A timing safe equals comparison
      * more info here: http://blog.ircmaxell.com/2014/11/its-all-about-time.html.
@@ -236,17 +236,17 @@ class PHPGangsta_GoogleAuthenticator
         }
         $safeLen = strlen($safeString);
         $userLen = strlen($userString);
-        
+
         if ($userLen != $safeLen) {
             return false;
         }
-        
+
         $result = 0;
-        
+
         for ($i = 0; $i < $userLen; ++$i) {
             $result |= (ord($safeString[$i]) ^ ord($userString[$i]));
         }
-        
+
         // They are only identical strings if $result is exactly 0...
         return $result === 0;
     }

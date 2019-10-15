@@ -41,7 +41,7 @@ class View {
      *                   Here is a list of parameters that work in the $Options array:
      *                 ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
      */
-    public static function show_footer($Options = array()) {
+    public static function show_footer($Options = []) {
         global $ScriptStartTime, $SessionID, $UserSessions, $Debug, $Time;
         if (!is_array(G::$LoggedUser) || (isset($Options['recover']) && $Options['recover'] === true)) {
             require(SERVER_ROOT.'/design/publicfooter.php');
@@ -113,7 +113,7 @@ class View {
      *  echo $SavedTemplate; // Output the buffer
      * </pre>
      */
-    public static function parse($TemplateFile, array $Variables = array(), $Buffer = false) {
+    public static function parse($TemplateFile, array $Variables = [], $Buffer = false) {
         $Template = self::IncludePath . $TemplateFile;
         if (file_exists($Template)) {
             extract($Variables);

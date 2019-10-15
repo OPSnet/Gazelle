@@ -56,7 +56,7 @@ if (!isset($_REQUEST['type'])) {
 }
 
 // Construct the SQL query
-$Conditions = $Join = array();
+$Conditions = $Join = [];
 switch ($Action) {
     case 'artist':
         $Field1 = 'artists_group.ArtistID';
@@ -167,7 +167,7 @@ $Pages = Format::get_pages($Page, $Results, $PerPage, 11);
 $DB->set_query_id($Comments);
 if ($Action == 'requests') {
     $RequestIDs = array_flip(array_flip($DB->collect('PageID')));
-    $Artists = array();
+    $Artists = [];
     foreach ($RequestIDs as $RequestID) {
         $Artists[$RequestID] = Requests::get_artists($RequestID);
     }
@@ -179,7 +179,7 @@ if ($Action == 'requests') {
 }
 
 $LinkID = (!$Self ? '&amp;id=' . $UserID : '');
-$ActionLinks = $TypeLinks = array();
+$ActionLinks = $TypeLinks = [];
 if ($Action != 'artist') {
     $ActionLinks[] = '<a href="comments.php?action=artist' . $LinkID . '" class="brackets">Artist comments</a>';
 }

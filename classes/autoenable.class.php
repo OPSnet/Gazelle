@@ -97,7 +97,7 @@ class AutoEnable {
             error(404);
         }
 
-        $UserInfo = array();
+        $UserInfo = [];
         $IDs = (!is_array($IDs)) ? [$IDs] : $IDs;
 
         if (count($IDs) == 0) {
@@ -288,7 +288,7 @@ class AutoEnable {
      * @return array The WHERE conditions for the query
      */
     public static function build_search_query($Username, $IP, $SubmittedBetween, $SubmittedTimestamp1, $SubmittedTimestamp2, $HandledUsername, $HandledBetween, $HandledTimestamp1, $HandledTimestamp2, $OutcomeSearch, $Checked) {
-        $Where = array();
+        $Where = [];
 
         if (!empty($Username)) {
             $Where[] = "um1.Username = '$Username'";

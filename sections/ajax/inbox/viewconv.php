@@ -76,7 +76,7 @@ $DB->query("
     WHERE ConvID = '$ConvID'
     ORDER BY ID");
 
-$JsonMessages = array();
+$JsonMessages = [];
 while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) {
     $JsonMessage = array(
         'messageId' => (int)$MessageID,

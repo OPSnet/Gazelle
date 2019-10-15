@@ -178,8 +178,8 @@ define('DONOR_FORUM_RANK', 6);
 define('DONOR_FORUM', 70);
 define('MAX_SPECIAL_RANK', 3);
 
-$ForumsRevealVoters = array();
-$ForumsDoublePost = array();
+$ForumsRevealVoters = [];
+$ForumsDoublePost = [];
 
 $Categories = array('Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics');
 $GroupedCategories = array_intersect(array('Music'), $Categories);

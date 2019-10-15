@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-$P = array();
+$P = [];
 $P = db_array($_POST);
 
 include(SERVER_ROOT.'/classes/validate.class.php');

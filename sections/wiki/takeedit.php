@@ -14,7 +14,7 @@ if ($Err) {
     error($Err);
 }
 
-$P = array();
+$P = [];
 $P = db_array($_POST);
 
 $Article = Wiki::get_article($ArticleID);

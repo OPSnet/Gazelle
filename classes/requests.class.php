@@ -78,7 +78,7 @@ class Requests {
         }
         // Make sure there's something in $RequestIDs, otherwise the SQL will break
         if (count($RequestIDs) === 0) {
-            return array();
+            return [];
         }
         $IDs = implode(',', array_keys($NotFound));
 
@@ -200,7 +200,7 @@ class Requests {
             ORDER BY rt.TagID ASC");
         $Tags = G::$DB->to_array(false, MYSQLI_NUM, false);
         G::$DB->set_query_id($QueryID);
-        $Results = array();
+        $Results = [];
         foreach ($Tags as $TagsRow) {
             list($RequestID, $TagID, $TagName) = $TagsRow;
             $Results[$RequestID][$TagID] = $TagName;

@@ -83,7 +83,7 @@ if ($UsersOnly) {
             $SearchIPQuery");
 
     if ($DB->has_results()) {
-        $UserIPs = db_array($DB->collect('IP'), array(), true);
+        $UserIPs = db_array($DB->collect('IP'), [], true);
         $DB->query("
             SELECT DISTINCT IP
             FROM users_history_ips
@@ -92,7 +92,7 @@ if ($UsersOnly) {
         unset($UserIPs);
 
         if ($DB->has_results()) {
-            $OtherIPs = db_array($DB->collect('IP'), array(), true);
+            $OtherIPs = db_array($DB->collect('IP'), [], true);
             $QueryID = $DB->query("
                 SELECT
                     SQL_CALC_FOUND_ROWS
@@ -127,14 +127,14 @@ if (isset($QueryID)) {
     list($NumResults) = $DB->next_record();
     $DB->set_query_id($QueryID);
     $Results = $DB->to_array(false, MYSQLI_ASSOC);
-    $IPMatches = $IPMatchesUser = $IPMatchesIgnored = array();
+    $IPMatches = $IPMatchesUser = $IPMatchesIgnored = [];
 } else {
     $NumResults = 0;
-    $Results = array();
+    $Results = [];
 }
 
 if (!empty($Results)) {
-    $IPs = db_array($DB->collect('IP'), array(), true);
+    $IPs = db_array($DB->collect('IP'), [], true);
     $DB->query("
         SELECT
             UserID,
@@ -219,8 +219,8 @@ if ($UsersOnly) { ?>
         </tr>
 <?php
 $Counter = 0;
-$IPBanChecks = array();
-$PrintedIPs = array();
+$IPBanChecks = [];
+$PrintedIPs = [];
 $CanManageIPBans = check_perms('admin_manage_ipbans');
 foreach ($Results as $Index => $Result) {
     $IP = $Result['IP'];
@@ -229,7 +229,7 @@ foreach ($Results as $Index => $Result) {
     if (!$Result['EndTime']) {
         $EndTime = sqltime();
     }
-    $OtherUsers = isset($IPMatches[$IP]) ? $IPMatches[$IP] : array();
+    $OtherUsers = isset($IPMatches[$IP]) ? $IPMatches[$IP] : [];
     $ElementID = 'ip_' . strtr($IP, '.', '-');
     $FirstOccurrence = !isset($IPIndexes[$IP]);
     if ($FirstOccurrence) {

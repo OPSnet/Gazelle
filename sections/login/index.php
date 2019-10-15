@@ -177,7 +177,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
     }
     else {
         list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
-        $Recovery = (!empty($Recovery)) ? unserialize($Recovery) : array();
+        $Recovery = (!empty($Recovery)) ? unserialize($Recovery) : [];
         if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) !== false) {
             $SessionID = Users::make_secret();
             $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);

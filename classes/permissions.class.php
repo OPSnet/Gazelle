@@ -73,7 +73,7 @@ class Permissions {
         $Permissions = self::get_permissions($UserInfo['PermissionID']);
 
         // Manage 'special' inherited permissions
-        $BonusPerms = array();
+        $BonusPerms = [];
         $BonusCollages = 0;
         foreach ($UserInfo['ExtraClasses'] as $PermID => $Value) {
             $ClassPerms = self::get_permissions($PermID);
@@ -83,7 +83,7 @@ class Permissions {
         }
 
         if (empty($CustomPermissions)) {
-            $CustomPermissions = array();
+            $CustomPermissions = [];
         }
 
         // This is legacy donor cruft
@@ -91,7 +91,7 @@ class Permissions {
             $DonorPerms = self::get_permissions(DONOR);
             unset($DonorPerms['Permissions']['MaxCollages']);
         } else {
-            $DonorPerms = array('Permissions' => array());
+            $DonorPerms = array('Permissions' => []);
         }
         $MaxCollages = $BonusCollages;
         if (is_numeric($Permissions['Permissions']['MaxCollages'])) {

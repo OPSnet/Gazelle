@@ -35,7 +35,7 @@ class Referral {
         $this->readOnly = !apcu_exists('DB_KEY');
     }
 
-    public function generateToken() { 
+    public function generateToken() {
         return 'OPS|' . \Users::make_secret(64) . '|OPS';
     }
 
@@ -258,7 +258,7 @@ class Referral {
     private function validateTentacleCookie($acc) {
         $url = $acc["URL"];
 
-        $result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
+        $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
         $match = strpos($result["response"], "authKey:");
 
         return $match !== false;
@@ -267,7 +267,7 @@ class Referral {
     private function validateLuminanceCookie($acc) {
         $url = $acc["URL"];
 
-        $result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
+        $result = $this->proxy->fetch($url, [] $acc["Cookie"], false);
         $match = strpos($result["response"], "authkey");
 
         return $match !== false;
@@ -305,7 +305,7 @@ class Referral {
         $url = $acc["URL"] . "login.php";
 
         $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), array(), true);
+            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -323,7 +323,7 @@ class Referral {
         $url = $acc["URL"] . "user/login";
 
         $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), array(), true);
+            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -340,7 +340,7 @@ class Referral {
 
         $url = $acc["URL"] . "login";
 
-        $result = $this->proxy->fetch($url, array(), array(), false);
+        $result = $this->proxy->fetch($url, [], [], false);
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
         @$doc->loadHTML($result["response"]);
@@ -368,7 +368,7 @@ class Referral {
         $url = $acc["URL"] . "login.php";
 
         $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), array(), true);
+            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -386,7 +386,7 @@ class Referral {
         $url = $acc["URL"] . "login_finish.php";
 
         $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), array(), true);
+            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -464,7 +464,7 @@ class Referral {
         $url = $acc["URL"] . 'api.php';
 
         $result = $this->proxy->fetch($url, array("request" => "user", "name" => $user,
-            "key" => $acc["Password"]), array(), false);
+            "key" => $acc["Password"]), [], false);
         $json = json_decode($result["response"], true);
 
         $profile = $json["response"]["profileText"];
@@ -484,7 +484,7 @@ class Referral {
 
         $url = $acc["URL"] . 'user/profile/' . $user;
 
-        $result = $this->proxy->fetch($url, array(), $acc["Cookie"], false);
+        $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
 
         $profile = $result["response"];
         $match = strpos($profile, $key);

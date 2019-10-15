@@ -44,7 +44,7 @@ $BaseQuery = "SELECT
     FROM torrents AS t
     LEFT JOIN torrents_group AS g ON g.ID = t.GroupID ";
 
-$OuterResults = array();
+$OuterResults = [];
 
 if ($Details == 'all' || $Details == 'day') {
     if (!$TopTorrentsActiveLastDay = $Cache->get_value('top10tor_day_'.$Limit.$WhereSum)) {
@@ -149,7 +149,7 @@ print
 
 function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
     global $LoggedUser, $Categories;
-    $results = array();
+    $results = [];
     foreach ($Details as $Detail) {
         list($TorrentID, $GroupID, $GroupName, $GroupCategoryID, $WikiImage, $TorrentTags,
             $Format, $Encoding, $Media, $Scene, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Year, $GroupYear,
@@ -158,7 +158,7 @@ function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
         $Artist = Artists::display_artists(Artists::get_artist($GroupID), false, true);
         $TruncArtist = substr($Artist, 0, strlen($Artist) - 3);
 
-        $TagList = array();
+        $TagList = [];
 
         if ($TorrentTags != '') {
             $TorrentTags = explode(' ', $TorrentTags);

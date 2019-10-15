@@ -51,7 +51,7 @@ if (!empty($_GET['way']) && array_key_exists($_GET['way'], $Ways)) {
     $Way = 'DESC';
 }
 
-$SearchWhere = array();
+$SearchWhere = [];
 if (!empty($_GET['format'])) {
     if (in_array($_GET['format'], $Formats)) {
         $SearchWhere[] = "t.Format = '".db_string($_GET['format'])."'";
@@ -97,7 +97,7 @@ if (isset($_GET['log']) && in_array($_GET['log'], array('1', '0', '100', '-1')))
 }
 
 if (!empty($_GET['categories'])) {
-    $Cats = array();
+    $Cats = [];
     foreach (array_keys($_GET['categories']) as $Cat) {
         if (!is_number($Cat)) {
             error(0);
@@ -113,7 +113,7 @@ if (!isset($_GET['tags_type'])) {
 
 if (!empty($_GET['tags'])) {
     $Tags = explode(',', $_GET['tags']);
-    $TagList = array();
+    $TagList = [];
     foreach ($Tags as $Tag) {
         $Tag = trim(str_replace('.', '_', $Tag));
         if (empty($Tag)) {

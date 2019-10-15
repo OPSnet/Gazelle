@@ -193,7 +193,7 @@ function user_dupes_table($UserID) {
         $Dupes = $DB->to_array();
     } else {
         $DupeCount = 0;
-        $Dupes = array();
+        $Dupes = [];
     }
 ?>
         <form class="manage_form" name="user" method="post" id="linkedform" action="">

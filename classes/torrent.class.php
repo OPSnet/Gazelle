@@ -240,7 +240,7 @@ class TORRENT extends BENCODE_DICT {
     To use this, please remove the announce-list unset in make_private and be sure to still set_announce_url for backwards compatibility
     function set_multi_announce() {
         $Trackers = func_get_args();
-        $AnnounceList = new BENCODE_LIST(array(),true);
+        $AnnounceList = new BENCODE_LIST([],true);
         foreach ($Trackers as $Tracker) {
             $SubList = new BENCODE_LIST(array($Tracker),true);
             unset($SubList->Str);
@@ -259,13 +259,13 @@ class TORRENT extends BENCODE_DICT {
     //     * the files in the torrent
     //    * the total size of files described therein
     function file_list() {
-        $FileList = array();
+        $FileList = [];
         if (!isset($this->Val['info']->Val['files'])) { // Single file mode
             $TotalSize = $this->Val['info']->Val['length'];
             $FileList[] = array($TotalSize, $this->get_name());
         } else { // Multiple file mode
-            $FileNames = array();
-            $FileSizes = array();
+            $FileNames = [];
+            $FileSizes = [];
             $TotalSize = 0;
             $Files = $this->Val['info']->Val['files']->Val;
             if (isset($Files[0]->Val['path.utf-8'])) {

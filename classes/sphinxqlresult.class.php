@@ -47,7 +47,7 @@ class SphinxqlResult {
      * @return array with the $Key value of all results
      */
     public function collect($Key) {
-        $Return = array();
+        $Return = [];
         while ($Row = $this->fetch_array()) {
             $Return[] = $Row[$Key];
         }
@@ -63,7 +63,7 @@ class SphinxqlResult {
      * @return array with all available data for the matches
      */
     public function to_array($Key, $ResultType = MYSQLI_ASSOC) {
-        $Return = array();
+        $Return = [];
         while ($Row = $this->fetch_array($ResultType)) {
             if ($Key !== false) {
                 $Return[$Row[$Key]] = $Row;
@@ -83,7 +83,7 @@ class SphinxqlResult {
      * @return array with $Key1 => $Key2 pairs for matches
      */
     public function to_pair($Key1, $Key2) {
-        $Return = array();
+        $Return = [];
         while ($Row = $this->fetch_array()) {
             $Return[$Row[$Key1]] = $Row[$Key2];
         }
@@ -100,7 +100,7 @@ class SphinxqlResult {
     public function get_meta($Keys = false) {
         if ($Keys !== false) {
             if (is_array($Keys)) {
-                $Return = array();
+                $Return = [];
                 foreach ($Keys as $Key) {
                     if (!isset($this->Meta[$Key])) {
                         continue;
@@ -125,7 +125,7 @@ class SphinxqlResult {
     public function get_result_info($Keys = false) {
         if ($Keys !== false) {
             if (is_array($Keys)) {
-                $Return = array();
+                $Return = [];
                 foreach ($Keys as $Key) {
                     if (!isset($this->Result->$Key)) {
                         continue;
