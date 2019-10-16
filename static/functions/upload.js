@@ -484,9 +484,7 @@ function ParseForm(group, torrent) {
 
     if (group['wikiBody']) {
         $.post('upload.php?action=parse_html',
-            {
-                'html': group['wikiBody']
-            },
+            {'html': group['wikiBody']},
             function(response) {
                 $('#album_desc').val(response);
                 $('#desc').val(response);
@@ -495,12 +493,8 @@ function ParseForm(group, torrent) {
     }
 
     if (torrent['description']) {
-        $.post('upload.php?action=parse_html',
-            {'html': torrent['description']},
-            function(response) {
-                $('#release_desc').val(response);
-            }
-        );
+        // This does not get converted to HTML in the ajax endpoint
+        $('#release_desc').val(torrent['description']);
     }
 
     // reset the file input
