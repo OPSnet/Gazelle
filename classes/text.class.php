@@ -969,33 +969,63 @@ class Text {
     /**
      * Given a String that is composed of HTML, attempt to convert it back
      * into BBCode. Useful when we're trying to deal with the output from
-     * some other site's metadata
+     * some other site's metadata. This also should reverse the HTML encoding
+     * that display_str does so we do not have to call reverse_display_str on the
+     * result.
      *
      * @param String $Html
      * @return String
      */
     public static function parse_html($Html) {
         $Document = new DOMDocument();
-        $Document->loadHtml($Html);
+        $Document->loadHtml(stripslashes($Html));
+
+        // For any manipulation that we do on the DOM tree, always go in reverse order or
+        // else you end up with broken array pointers and missed elements
+        $CopyNode = function ($OriginalElement, $NewElement) {
+            for ($i = count($OriginalElement->childNodes) - 1; $i >= 0; $i--) {
+                if (count($NewElement->childNodes) > 0) {
+                    $NewElement->insertBefore($OriginalElement->childNodes[$i], $NewElement->childNodes[0]);
+                }
+                else {
+                    $NewElement->appendChild($OriginalElement->childNodes[$i]);
+                }
+            }
+        };
+
+        $Elements = $Document->getElementsByTagName('div');
+        for ($i = $Elements->length - 1; $i >= 0; $i--) {
+            $Element = $Elements->item($i);
+            if (strpos($Element->getAttribute('style'), 'text-align') !== false) {
+                $NewElement = $Document->createElement('align');
+                $CopyNode($Element, $NewElement);
+                $NewElement->setAttribute('align', str_replace('text-align: ', '', $Element->getAttribute('style')));
+                $Element->parentNode->replaceChild($NewElement, $Element);
+            }
+        }
+
         $Elements = $Document->getElementsByTagName('span');
-        // When removing elements, you have to iterate over the list backwards
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             $Element = $Elements->item($i);
             if (strpos($Element->getAttribute('class'), 'size') !== false) {
-                $NewElement = $Document->createElement('size', $Element->nodeValue);
+                $NewElement = $Document->createElement('size');
+                $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('size', str_replace('size', '', $Element->getAttribute('class')));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
             elseif (strpos($Element->getAttribute('style'), 'font-style: italic') !== false) {
-                $NewElement = $Document->createElement('italic', $Element->nodeValue);
+                $NewElement = $Document->createElement('italic');
+                $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
             elseif (strpos($Element->getAttribute('style'), 'text-decoration: underline') !== false) {
-                $NewElement = $Document->createElement('underline', $Element->nodeValue);
+                $NewElement = $Document->createElement('underline');
+                $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
             elseif (strpos($Element->getAttribute('style'), 'color: ') !== false) {
-                $NewElement = $Document->createElement('color', $Element->nodeValue);
+                $NewElement = $Document->createElement('color');
+                $CopyNode($Element, $NewElement);
                 $NewElement->setAttribute('color', str_replace(array('color: ', ';'), '', $Element->getAttribute('style')));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
@@ -1006,7 +1036,8 @@ class Text {
             $InnerElements = $Elements->item($i)->getElementsByTagName('li');
             for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
                 $Element = $InnerElements->item($j);
-                $NewElement = $Document->createElement('bullet', $Element->nodeValue);
+                $NewElement = $Document->createElement('bullet');
+                $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }
@@ -1016,7 +1047,8 @@ class Text {
             $InnerElements = $Elements->item($i)->getElementsByTagName('li');
             for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
                 $Element = $InnerElements->item($j);
-                $NewElement = $Document->createElement('number', $Element->nodeValue);
+                $NewElement = $Document->createElement('number');
+                $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }
@@ -1025,7 +1057,8 @@ class Text {
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
             $Element = $Elements->item($i);
             if ($Element->hasAttribute('class') === 'important_text') {
-                $NewElement = $Document->createElement('important', $Element->nodeValue);
+                $NewElement = $Document->createElement('important');
+                $CopyNode($Element, $NewElement);
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
         }
@@ -1045,7 +1078,8 @@ class Text {
                     for ($j = $Spoilers->length - 1; $j >= 0; $j--) {
                         $Spoiler = $Spoilers->item($j);
                         if ($Spoiler->hasAttribute('class') && $Spoiler->getAttribute('class') === 'hidden spoiler') {
-                            $NewElement = $Document->createElement('spoiler', $Spoiler->nodeValue);
+                            $NewElement = $Document->createElement('spoiler');
+                            $CopyNode($Spoiler, $NewElement);
                             $Element->parentNode->replaceChild($NewElement, $Element);
                             $Spoiler->parentNode->removeChild($Spoiler);
                             break;
@@ -1053,11 +1087,13 @@ class Text {
                     }
                 }
                 elseif (substr($Element->getAttribute('href'), 0, 22) === 'artist.php?artistname=') {
-                    $NewElement = $Document->createElement('artist', $Element->nodeValue);
+                    $NewElement = $Document->createElement('artist');
+                    $CopyNode($Element, $NewElement);
                     $Element->parentNode->replaceChild($NewElement, $Element);
                 }
                 elseif (substr($Element->getAttribute('href'), 0, 30) === 'user.php?action=search&search=') {
-                    $NewElement = $Document->createElement('user', $Element->nodeValue);
+                    $NewElement = $Document->createElement('user');
+                    $CopyNode($Element, $NewElement);
                     $Element->parentNode->replaceChild($NewElement, $Element);
                 }
             }
@@ -1073,11 +1109,15 @@ class Text {
         $Str = preg_replace("/\<(\/*)italic\>/", "[\\1i]", $Str);
         $Str = preg_replace("/\<(\/*)underline\>/", "[\\1u]", $Str);
         $Str = preg_replace("/\<(\/*)important\>/", "[\\1important]", $Str);
+        $Str = preg_replace("/\<(\/*)code\>/", "[\\1code]", $Str);
+        $Str = preg_replace("/\<(\/*)pre\>/", "[\\1pre]", $Str);
         $Str = preg_replace("/\<color color=\"(.*)\"\>/", "[color=\\1]", $Str);
         $Str = str_replace("</color>", "[/color]", $Str);
         $Str = str_replace(array('<number>', '<bullet>'), array('[#]', '[*]'), $Str);
         $Str = str_replace(array('</number>', '</bullet>'), '<br />', $Str);
         $Str = str_replace(array('<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'), '', $Str);
+        $Str = preg_replace("/\<align align=\"([a-z]+);\">/", "[align=\\1]", $Str);
+        $Str = str_replace("</align>", "[/align]", $Str);
         $Str = preg_replace("/\<size size=\"([0-9]+)\"\>/", "[size=\\1]", $Str);
         $Str = str_replace("</size>", "[/size]", $Str);
         //$Str = preg_replace("/\<a href=\"rules.php\?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
@@ -1095,22 +1135,12 @@ class Text {
         return str_replace(array("<br />", "<br>"), "\n", $Str);
     }
 }
-/*
 
-// Uncomment this part to test the class via command line:
-function display_str($Str) {
-    return $Str;
-}
-function check_perms($Perm) {
-    return true;
-}
-$Str = "hello
-[pre]http://anonym.to/?http://whatshirts.portmerch.com/
-====hi====
-===hi===
-==hi==[/pre]
-====hi====
-hi";
-echo Text::full_format($Str);
-echo "\n"
+/*
+define("SITE_URL", 'https://orpheus.network');
+
+$Str = "<div style=\"text-align: center;\"><span class=\"size3\"><span style=\"text-decoration: underline;\"><strong>Album Information<br \/>\r\nInterstellar Rift Original Soundtrack<\/strong><\/span><\/span><\/div><br \/>\r\n<br \/>\r\n<ul class=\"postlist\"><li><strong>Catalog Number:<\/strong>\tN\/A<\/li><li><strong>Release Date:<\/strong>\tMay 29, 2017<\/li><li><strong>Publish Format:<\/strong>\tCommercial<\/li><li><strong>Release Price:<\/strong>\t13.00 AUD<\/li><li><strong>Media Format:<\/strong>\tDigital<\/li><li><strong>Classification:<\/strong>\tOriginal Soundtrack<\/li><li><strong>Published by:<\/strong>\tBoss Battle Records (distributed by Bandcamp)<\/li><li><strong>Composed by:<\/strong>\tCurtis Schweitzer<\/li><li><strong>Arranged by:<\/strong><\/li><\/ul><br \/>\n\r<br \/>\n<div style=\"text-align: center;\"><pre>Tracklist<br \/>\r\n01\tInterstellar Rift\t\t2:38<br \/>\r\n02\tShipmaking\t\t\t4:16<br \/>\r\n03\tGalaxy Dawn\t\t\t2:55<br \/>\r\n04\tInterloper\t\t\t2:32<br \/>\r\n05\tShipbreaking\t\t\t2:06<br \/>\r\n06\tHorizon Wake\t\t\t4:24<br \/>\r\n07\tSky Harvest\t\t\t3:50<br \/>\r\n08\tTwilight Discord\t\t2:42<br \/>\r\n09\tLanguid Constellations\t\t2:45<br \/>\r\n10\tHurles Co.\t\t\t2:43<br \/>\r\n11\tGalactic Trade Federation\t2:46<br \/>\r\n12\tSentinel Security Systems\t4:08<br \/>\r\n13\tDrifters\t\t\t3:18<\/pre><\/div><br \/>\r\n<br \/>\r\n<div style=\"text-align: left;\"><pre>Notes<br \/>\r\nComposed by Curtis Schweitzer<br \/>\r\nMastered by Aaron Edwards<br \/>\r\nSoundtrack curated by The Otherworld Agency<\/pre><\/div>";
+//echo $Str;
+echo Text::parse_html($Str);
+echo "\n";
 */

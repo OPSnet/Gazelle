@@ -483,13 +483,8 @@ function ParseForm(group, torrent) {
     }
 
     if (group['wikiBody']) {
-        $.post('upload.php?action=parse_html',
-            {'html': group['wikiBody']},
-            function(response) {
-                $('#album_desc').val(response);
-                $('#desc').val(response);
-            }
-        );
+        $('#album_desc').val(group['wikiBody']);
+        $('#desc').val(group['wikiBody']);
     }
 
     if (torrent['description']) {
@@ -516,38 +511,56 @@ function WaitForCategory(callback) {
     }, 100);
 }
 
+function insertParsedJson(data) {
+    var group = data['response']['group'];
+    var torrent = data['response']['torrent'];
+
+    var categories_mapping = {
+        'Music': 0,
+        'Applications': 1,
+        'E-Books': 2,
+        'Audiobooks': 3,
+        'E-Learning Videos': 4,
+        'Comedy': 5,
+        'Comics': 6
+    };
+
+    var categories = $('#categories');
+    if (!group['categoryName']) {
+        group['categoryName'] = 'Music';
+    }
+    categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
+    // delay for the form to change before filling it
+    WaitForCategory(function() {
+        ParseForm(group, torrent);
+    });
+}
+
 function ParseUploadJson() {
     var reader = new FileReader();
 
     reader.addEventListener('load', function() {
         try {
             var data = JSON.parse(reader.result.toString());
-            var group = data['response']['group'];
-            var torrent = data['response']['torrent'];
+            $.post('upload.php?action=parse_json',
+                {'data': data}
+            ).done((response) => {
+                if (response && response.status === 'success') {
+                    insertParsedJson(response);
+                }
+                else {
+                    alert("Failed to parse JSON.");
+                }
 
-            var categories_mapping = {
-                'Music': 0,
-                'Applications': 1,
-                'E-Books': 2,
-                'Audiobooks': 3,
-                'E-Learning Videos': 4,
-                'Comedy': 5,
-                'Comics': 6
-            };
-
-            var categories = $('#categories');
-            if (!group['categoryName']) {
-                group['categoryName'] = 'Music';
-            }
-            categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
-            // delay for the form to change before filling it
-            WaitForCategory(function() {
-                ParseForm(group, torrent);
-            });
+            }).error((xhr) => {
+                alert("Error with server response.");
+                const err = JSON.parse(xhr);
+                console.error(err.Message);
+            })
         }
         catch (e) {
             alert("Could not read file. Please try again.");
-            console.log(e);
+            console.error(e);
         }
     }, false);
 

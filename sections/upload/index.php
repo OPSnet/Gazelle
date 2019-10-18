@@ -9,8 +9,8 @@ if ($LoggedUser['DisableUpload']) {
 
 if (!empty($_GET['action'])) {
     switch($_GET['action']) {
-        case 'parse_html':
-            include SERVER_ROOT.'/sections/upload/parse_html.php';
+        case 'parse_json':
+            include SERVER_ROOT.'/sections/upload/parse_json.php';
             break;
         default:
             error(404);

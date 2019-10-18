@@ -101,6 +101,41 @@ function display_str($Str) {
     return $Str;
 }
 
+/**
+ * Un-HTML-escape a string for output.
+ *
+ * It's like the above function, but in reverse.
+ *
+ * @param string $Str
+ * @return string unescaped string
+ */
+function reverse_display_str($Str) {
+    if ($Str === null || $Str === false || is_array($Str)) {
+        return '';
+    }
+    if ($Str != '' && !is_number($Str)) {
+        $Replace = array(
+            '&#39;','&quot;','&lt;','&gt;',
+            '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
+            '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
+            '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
+            '&#339;','&#382;','&#376;'
+        );
+
+        $With = array(
+            "'",'"',"<",">",
+            '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
+            '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
+            '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
+            '&#156;','&#158;','&#159;'
+        );
+        $Str = str_replace($Replace, $With, $Str);
+
+        $Str = str_replace("&amp;", "&", $Str);
+        $Str = mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
+    }
+    return $Str;
+}
 
 /**
  * Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
