@@ -33,7 +33,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
     }
     elseif (G::$LoggedUser['BonusPoints'] < $value) {
 ?>
-<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format(G::$LoggedUser['BonusPoints']) ?> points.</div>
+<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int) G::$LoggedUser['BonusPoints']) ?> points.</div>
 <?php
     }
     elseif ($Bonus->donate($_POST['poolid'], $value, G::$LoggedUser['ID'], G::$LoggedUser['EffectiveClass'])) {
@@ -65,7 +65,7 @@ if (count($pool) > 0) {
                 <thead>
                 <tbody>
                     <tr>
-                        <td><?= number_format(G::$LoggedUser['BonusPoints']) ?></td>
+                        <td><?=number_format((int) G::$LoggedUser['BonusPoints']) ?></td>
                         <td><input type="text" width="10" name="donate" />
                             <input type="hidden" name="poolid" value="<?= $pool['Id'] ?>"/>
                             <input type="hidden" name="userid" value="<?= G::$LoggedUser['ID'] ?>"/>
