@@ -9,6 +9,11 @@ if ($LoggedUser['DisableUpload']) {
 
 if (!empty($_GET['action'])) {
     switch($_GET['action']) {
+        // This is only used for GazelleSync. This should be moved into an endpoint
+        // under ajax.php that is "public facing".
+        case 'parse_html':
+            include SERVER_ROOT.'/sections/upload/parse_html.php';
+            break;
         case 'parse_json':
             include SERVER_ROOT.'/sections/upload/parse_json.php';
             break;
