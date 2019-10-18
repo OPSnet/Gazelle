@@ -267,7 +267,7 @@ class Referral {
     private function validateLuminanceCookie($acc) {
         $url = $acc["URL"];
 
-        $result = $this->proxy->fetch($url, [] $acc["Cookie"], false);
+        $result = $this->proxy->fetch($url, [], $acc["Cookie"], false);
         $match = strpos($result["response"], "authkey");
 
         return $match !== false;
@@ -567,7 +567,7 @@ class Referral {
 
         $InviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
         $InviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
-        $InviteKey = db_string(\Users::make_secret());
+        $InviteKey = \Users::make_secret();
 
         // save invite to DB
         $this->db->prepared_query("
