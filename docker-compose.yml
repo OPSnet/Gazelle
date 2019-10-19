@@ -10,7 +10,6 @@ services:
       - mysql
     volumes:
       - .:/var/www
-      - ./.docker/web/config.php:/var/www/classes/config.php
 
   memcached:
     image: memcached:1.5-alpine

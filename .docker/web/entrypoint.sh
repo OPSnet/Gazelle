@@ -11,6 +11,10 @@ while ! mysql -h mysql -ugazelle -ppassword -e "show databases;" > /dev/null 2>&
     fi;
 done
 
+if [ ! -f /srv/www/classes/config.php ]; then
+    cp /var/www/.docker/web/config.php /var/www/classes/config.php
+fi
+
 echo "Run migrate..."
 /var/www/vendor/bin/phinx migrate
 
