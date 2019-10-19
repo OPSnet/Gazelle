@@ -571,6 +571,12 @@ switch ($_REQUEST['action']) {
     case 'navigation':
         include(SERVER_ROOT.'/sections/tools/managers/navigation_list.php');
         break;
+    case 'forum_transitions':
+        include(SERVER_ROOT.'/sections/tools/managers/forum_transitions_list.php');
+        break;
+    case 'forum_transitions_alter':
+        include(SERVER_ROOT.'/sections/tools/managers/forum_transitions_alter.php');
+        break;
     default:
         include(SERVER_ROOT.'/sections/tools/tools.php');
 }

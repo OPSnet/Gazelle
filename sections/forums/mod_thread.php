@@ -19,8 +19,8 @@ if ($_POST['title'] == '') {
     error(0);
 }
 // End injection check
-// Make sure they are moderators
-if (!check_perms('site_moderate_forums')) {
+// Make sure they are moderators or are auto transitioning
+if (!check_perms('site_moderate_forums') && empty($_POST['transition'])) {
     error(403);
 }
 authorize();
@@ -42,10 +42,7 @@ $ForumID = (int)$_POST['forumid'];
 $Page = (int)$_POST['page'];
 $Action = '';
 
-$TrashForumID = ($ForumID === EDITING_FORUM_ID) ? EDITING_TRASH_FORUM_ID : TRASH_FORUM_ID;
-$ResolveForumID = ($ForumID === HELP_FORUM_ID) ? HELP_RESOLVED_FORUM_ID : (($ForumID === BUGS_FORUM_ID) ? BUGS_RESOLVED_FORUM_ID : '');
-
-if ($Locked == 1) {
+if ($Locked == 1 && check_perms('site_moderate_forums')) {
     $DB->query("
         DELETE FROM forums_last_read_topics
         WHERE TopicID = '$TopicID'");
@@ -71,6 +68,31 @@ list($OldForumID, $OldForumName, $MinClassWrite, $Posts, $ThreadAuthorID, $OldTi
 
 if ($MinClassWrite > $LoggedUser['Class']) {
     error(403);
+}
+
+if (isset($_POST['transition'])) {
+    if (is_number($_POST['transition'])) {
+        // Permissions are handled inside forums.class.php
+        $transitions = Forums::get_transitions();
+        $Debug->log_var($transitions);
+        if (isset($transitions[$_POST['transition']])) {
+            $transition = $transitions[$_POST['transition']];
+            if ($transition['source'] != $OldForumID) {
+                error(403);
+            }
+            $ForumID = $transition['destination'];
+            $Sticky = $OldSticky;
+            $Locked = $OldLocked;
+            $Ranking = $OldRanking;
+            $Title = db_string($OldTitle);
+            $RawTitle = $OldTitle;
+            $Action = 'transitioning';
+        } else {
+            error(0);
+        }
+    } else {
+        error(0);
+    }
 }
 
 // If we're deleting a thread
@@ -154,16 +176,8 @@ if (isset($_POST['delete'])) {
 
     header("Location: forums.php?action=viewforum&forumid=$ForumID");
 } else { // If we're just editing it
-    $Action = 'editing';
-
-    if (isset($_POST['trash'])) {
-        $ForumID = $TrashForumID;
-        $Action = 'trashing';
-    }
-
-    if (isset($_POST['resolve'])) {
-        $ForumID = $ResolveForumID;
-        $Action = 'resolving';
+    if ($Action == '') {
+        $Action = 'editing';
     }
 
     $Cache->begin_transaction("thread_{$TopicID}_info");
@@ -189,7 +203,7 @@ if (isset($_POST['delete'])) {
 
     // always clear cache when editing a thread.
     // if a thread title, etc. is changed, this cache key must be cleared so the thread listing
-    //        properly shows the new thread title.
+    // properly shows the new thread title.
     $Cache->delete_value("forums_$ForumID");
 
     if ($ForumID != $OldForumID) { // If we're moving a thread, change the forum stats
@@ -314,13 +328,6 @@ if (isset($_POST['delete'])) {
         $Cache->update_row($ForumID, $UpdateArray);
 
         $Cache->commit_transaction(0);
-
-        if ($ForumID == $TrashForumID) {
-            $Action = 'trashing';
-        }
-        if ($ForumID == $ResolveForumID) {
-            $Action = 'resolving';
-        }
     } else { // Editing
         $DB->query("
             SELECT LastPostTopicID
@@ -389,6 +396,9 @@ if (isset($_POST['delete'])) {
         case 'resolving':
             $TopicNotes[] = "Resolved (moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url])";
             $Notification = "Your thread \"$NewLastTitle\" has been resolved";
+            break;
+        case 'transitioning':
+            $TopicNotes[] = "Moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url] (" . $transition['label'] . " transition)";
             break;
         default:
             break;

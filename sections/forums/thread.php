@@ -548,6 +548,31 @@ if (!$ThreadInfo['IsLocked'] || check_perms('site_moderate_forums')) {
         ));
     }
 }
+$transitions = Forums::get_thread_transitions($ForumID);
+if (count($transitions) > 0 && !check_perms('site_moderate_forums')) {
+?>
+    <h3>Edit thread</h3>
+    <table class="layout border">
+        <tr>
+            <td>
+<?php
+    foreach ($transitions as $transition) {
+?>
+                <form action="forums.php" method="post" style="display: inline-block">
+                    <input type="hidden" name="action" value="mod_thread" />
+                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="threadid" value="<?=$ThreadID?>" />
+                    <input type="hidden" name="page" value="<?=$Page?>" />
+                    <input type="hidden" name="title" value="<?=display_str($ThreadInfo['Title'])?>" />
+                    <input type="hidden" name="transition" value="<?=$transition['id']?>" />
+                    <input type="submit" value="<?=$transition['label']?>" />
+                </form>
+<?php } ?>
+            </td>
+        </tr>
+    </table>
+<?php
+}
 if (check_perms('site_moderate_forums')) {
     G::$DB->query("
             SELECT ID, AuthorID, AddedTime, Body
@@ -651,18 +676,37 @@ if (check_perms('site_moderate_forums')) {
             <tr>
                 <td colspan="2" class="center">
                     <input type="submit" value="Edit thread" tabindex="2" />
-                    <span style="float: right;">
-<?php                    if ($ForumID == HELP_FORUM_ID || $ForumID == BUGS_FORUM_ID) { ?>
-                        <input type="submit" name="resolve" value="Resolve" tabindex="2" />
-<?php                    } ?>
-                        <input type="submit" name="trash" value="Trash" tabindex="2" />
-                    </span>
                 </td>
             </tr>
-
+<?php
+        if (count($transitions) > 0) {
+?>
+            <tr>
+                <td colspan="2" class="center">
+<?php
+            foreach ($transitions as $transition) {
+?>
+                    <div style="display: inline-block">
+                        <input form="transition_<?=$transition['id']?>" type="hidden" name="action" value="mod_thread" />
+                        <input form="transition_<?=$transition['id']?>" type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input form="transition_<?=$transition['id']?>" type="hidden" name="threadid" value="<?=$ThreadID?>" />
+                        <input form="transition_<?=$transition['id']?>" type="hidden" name="page" value="<?=$Page?>" />
+                        <input form="transition_<?=$transition['id']?>" type="hidden" name="title" value="<?=display_str($ThreadInfo['Title'])?>" />
+                        <input form="transition_<?=$transition['id']?>" type="hidden" name="transition" value="<?=$transition['id']?>" />
+                        <input form="transition_<?=$transition['id']?>" type="submit" value="<?=$transition['label']?>" />
+                    </div>
+<?php       } ?>
+                </td>
+            </tr>
+<?php   } ?>
         </table>
     </form>
 <?php
+        foreach ($transitions as $transition) {
+?>
+    <form action="forums.php" method="post" id="transition_<?=$transition['id']?>"></form>
+<?php
+        }
 } // If user is moderator
 ?>
 </div>

@@ -316,4 +316,42 @@ class Forums {
         $SQL .= ')';
         return $SQL;
     }
+
+    public static function get_transitions() {
+        $items = G::$Cache->get_value('forum_transitions');
+        if (!$items) {
+            $queryId = G::$DB->get_query_id();
+            G::$DB->prepared_query('
+                SELECT forums_transitions_id AS id, source, destination, label, permission_levels
+                FROM forums_transitions');
+            $items = G::$DB->to_array('id', MYSQLI_ASSOC);
+            G::$Cache->cache_value('forum_transitions', $items);
+            G::$DB->set_query_id($queryId);
+        }
+
+        if (check_perms('site_moderate_forums')) {
+            return $items;
+        }
+
+        return array_filter($items, function ($item) {
+            $perms = array_fill_keys(explode(',', $item['permission_levels']), 1);
+            if (count(array_intersect_key($perms, Users::user_info(G::$LoggedUser['ID'])['ExtraClasses'])) > 0) {
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public static function get_thread_transitions($forum) {
+        $transitions = self::get_transitions();
+
+        $filtered = [];
+        foreach ($transitions as $transition) {
+            if ($transition['source'] == $forum) {
+                $filtered[] = $transition;
+            }
+        }
+
+        return $filtered;
+    }
 }
