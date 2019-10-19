@@ -22,6 +22,7 @@
   },
   "lint-staged": {
     "*.php": [
+      "php -l",
       "bash .bin/phpcbf",
       "vendor/bin/phpcs",
       "git add"
