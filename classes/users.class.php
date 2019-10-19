@@ -269,13 +269,11 @@ class Users {
         $UserIds = !empty($Info['NavItems']) ? $Info['NavItems'] : [];
         $NavItems = self::get_nav_items();
 
-        if (!count($UserIds)) {
-            return $NavItems;
-        }
 
         $UserItems = [];
         foreach ($NavItems as $n) {
-            if ($n['Mandatory'] || in_array($n['ID'], $UserIds)) {
+            if (($n['mandatory'] || in_array($n['id'], $UserIds)) ||
+                (!count($UserIds) && $n['initial'])) {
                 $UserItems[] = $n;
             }
         }
@@ -288,9 +286,9 @@ class Users {
         if (!$Items) {
             $QueryID = G::$DB->get_query_id();
             G::$DB->prepared_query("
-                SELECT ID, `Key`, Title, Target, Tests, TestUser, Mandatory
+                SELECT id, tag, title, target, tests, test_user, mandatory, initial
                 FROM nav_items");
-            $Items = G::$DB->to_array("ID", MYSQLI_ASSOC);
+            $Items = G::$DB->to_array("id", MYSQLI_ASSOC);
             G::$Cache->cache_value("nav_items", $Items, 0);
             G::$DB->set_query_id($QueryID);
         }

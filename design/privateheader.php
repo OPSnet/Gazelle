@@ -298,8 +298,7 @@ if (check_perms('site_send_unlimited_invites')) {
 <?php       } ?>
                         <a href="<?=$Target?>"><?=$Title?></a>
                     </li>
-<?php
-    } ?>
+<?php   } ?>
                 </ul>
             </div>
             <div id="menu">

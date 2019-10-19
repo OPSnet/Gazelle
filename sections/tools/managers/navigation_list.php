@@ -12,18 +12,19 @@ View::show_header('Navigation Links');
 </div>
 <table>
     <tr class="colhead">
-        <td>Key</td>
+        <td>Tag</td>
         <td>Title</td>
         <td>Target</td>
         <td>Tests</td>
         <td>Test User</td>
         <td>Mandatory</td>
+        <td>Default</td>
         <td>Submit</td>
     </tr>
 <?php
 $Row = 'b';
 foreach ($Items as $i) {
-    list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($i);
+    list($ID, $Tag, $Title, $Target, $Tests, $TestUser, $Mandatory, $Initial) = array_values($i);
     $Row = $Row === 'a' ? 'b' : 'a';
 ?>
     <tr class="row<?=$Row?>">
@@ -32,7 +33,7 @@ foreach ($Items as $i) {
             <input type="hidden" name="action" value="navigation_alter" />
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <td>
-                <input type="text" name="key" value="<?=$Key?>" />
+                <input type="text" name="tag" value="<?=$Tag?>" />
             </td>
             <td>
                 <input type="text" name="title" value="<?=$Title?>" />
@@ -50,6 +51,9 @@ foreach ($Items as $i) {
                 <input type="checkbox" name="mandatory"<?=($Mandatory == '1') ? ' checked="checked"' : ''?> />
             </td>
             <td>
+                <input type="checkbox" name="default"<?=($Initial == '1') ? ' checked="checked"' : ''?> />
+            </td>
+            <td>
                 <input type="submit" name="submit" value="Edit" />
                 <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this link? This is an irreversible action!')" />
             </td>
@@ -65,7 +69,7 @@ foreach ($Items as $i) {
             <input type="hidden" name="action" value="navigation_alter" />
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <td>
-                <input type="text" name="key" />
+                <input type="text" name="tag" />
             </td>
             <td>
                 <input type="text" name="title" />
@@ -81,6 +85,9 @@ foreach ($Items as $i) {
             </td>
             <td>
                 <input type="checkbox" name="mandatory" />
+            </td>
+            <td>
+                <input type="checkbox" name="default" />
             </td>
             <td>
                 <input type="submit" name="submit" value="Create" />

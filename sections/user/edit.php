@@ -84,7 +84,14 @@ $LastFMUsername = '';
 list($LastFMUsername) = $DB->next_record();
 
 $NavItems = Users::get_nav_items();
-$UserNavItems = array_map('trim', explode(',', $UserNavItems));
+$UserNavItems = array_filter(array_map('trim', explode(',', $UserNavItems)));
+
+if (!count($UserNavItems)) {
+    $UserNavItems = array_keys(array_filter($NavItems, function($v) {
+        return $v['initial'];
+    }));
+}
+
 echo $Val->GenerateJS('userform');
 ?>
 <div class="thin">
@@ -215,8 +222,8 @@ echo $Val->GenerateJS('userform');
                     <p><strong>Select the navigation elements you wish to display at the right of the header.</strong></p>
                 </td>
             </tr>
-<?php   foreach ($NavItems as $n) {
-    list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($n);
+<?php foreach ($NavItems as $n) {
+    list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory, $Initial) = array_values($n);
 ?>
             <tr id="nav_<?=$Key?>_tr">
                 <td class="label tooltip"><strong><?=$Title?></strong></td>
