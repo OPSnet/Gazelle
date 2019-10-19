@@ -22,7 +22,7 @@
     <rule ref="Generic.WhiteSpace.DisallowTabIndent.NonIndentTabsUsed" />
     <rule ref="Generic.PHP.ForbiddenFunctions">
         <properties>
-            <property name="forbiddenFunctions" type="array" value="db_string=>null" />
+            <property name="forbiddenFunctions" type="array" value="db_string=>null,db_array=>null" />
         </properties>
     </rule>
 </ruleset>
