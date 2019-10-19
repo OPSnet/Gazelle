@@ -159,33 +159,31 @@ if (!$NumResults) {
                 $JumpLink = 'collages.php?action=comments&collageid=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 break;
             case 'requests':
-                if (!isset($Requests[$Result['PageID']])) {
-                    continue;
-                }
-                $Request = $Requests[$Result['PageID']];
-                $CategoryName = $Categories[$CategoryID - 1];
+                if (isset($Requests[$Result['PageID']])) {
+                    $Request = $Requests[$Result['PageID']];
+                    $CategoryName = $Categories[$CategoryID - 1];
 
-                $Links = 'Request: ';
-                if ($CategoryName == 'Music' || $CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
-                    $Links .= ($CategoryName == 'Music' ? Artists::display_artists(Requests::get_artists($Result['PageID'])) : '') . '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '" dir="ltr">' . $Request['Title'] . " [" . $Request['Year'] . "]</a>";
-                } else {
-                    $Links .= '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '">' . $Request['Title'] . "</a>";
+                    $Links = 'Request: ';
+                    if ($CategoryName == 'Music' || $CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
+                        $Links .= ($CategoryName == 'Music' ? Artists::display_artists(Requests::get_artists($Result['PageID'])) : '') . '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '" dir="ltr">' . $Request['Title'] . " [" . $Request['Year'] . "]</a>";
+                    } else {
+                        $Links .= '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '">' . $Request['Title'] . "</a>";
+                    }
+                    $JumpLink = 'requests.php?action=view&amp;id=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 }
-                $JumpLink = 'requests.php?action=view&amp;id=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 break;
             case 'torrents':
-                if (!isset($TorrentGroups[$Result['PageID']])) {
-                    continue;
+                if (isset($TorrentGroups[$Result['PageID']])) {
+                    $GroupInfo = $TorrentGroups[$Result['PageID']];
+                    $Links = 'Torrent: ' . Artists::display_artists($GroupInfo['ExtendedArtists']) . '<a href="torrents.php?id=' . $GroupInfo['ID'] . '" dir="ltr">' . $GroupInfo['Name'] . '</a>';
+                    if ($GroupInfo['Year'] > 0) {
+                        $Links .= " [" . $GroupInfo['Year'] . "]";
+                    }
+                    if ($GroupInfo['ReleaseType'] > 0) {
+                        $Links .= " [" . $ReleaseTypes[$GroupInfo['ReleaseType']] . "]";
+                    }
+                    $JumpLink = 'torrents.php?id=' . $GroupInfo['ID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 }
-                $GroupInfo = $TorrentGroups[$Result['PageID']];
-                $Links = 'Torrent: ' . Artists::display_artists($GroupInfo['ExtendedArtists']) . '<a href="torrents.php?id=' . $GroupInfo['ID'] . '" dir="ltr">' . $GroupInfo['Name'] . '</a>';
-                if ($GroupInfo['Year'] > 0) {
-                    $Links .= " [" . $GroupInfo['Year'] . "]";
-                }
-                if ($GroupInfo['ReleaseType'] > 0) {
-                    $Links .= " [" . $ReleaseTypes[$GroupInfo['ReleaseType']] . "]";
-                }
-                $JumpLink = 'torrents.php?id=' . $GroupInfo['ID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 break;
             case 'forums':
                 $Links = 'Forums: <a href="forums.php?action=viewforum&amp;forumid=' . $Result['ForumID'] . '">' . display_str($Result['ForumName']) . '</a> &gt; ' .
