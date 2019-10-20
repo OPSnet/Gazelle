@@ -8,6 +8,9 @@
                 <h3><label for="message">Message</label></h3>
 <?php
                 $TextPrev = new TEXTAREA_PREVIEW('message', 'message', '', 95, 10, true, false, false, [], true);
+                list($Classes, $ClassLevels) = Users::get_classes();
+                $ForumMod = $Classes[FORUM_MOD]['Level'];
+                $Staff = $Classes[MOD]['Level'];
 ?>
                 <br />
 
@@ -15,9 +18,9 @@
                 <select name="level">
 <?php           if (!isset(G::$LoggedUser['LockedAccount'])) { ?>
                     <option value="0" selected="selected">First Line Support</option>
-                    <option value="650">Forum Moderators</option>
+                    <option value="<?=$ForumMod?>">Forum Moderators</option>
 <?php           } ?>
-                    <option value="700">Staff</option>
+                    <option value="<?=$Staff?>">Staff</option>
                 </select>
 
                 <input type="button" value="Preview" class="hidden button_preview_<?=$TextPrev->getID()?>" />
