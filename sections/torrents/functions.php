@@ -82,7 +82,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
                 t.FileList,
                 t.FilePath,
                 t.UserID,
-                t.last_action,
+                tls.last_action,
                 HEX(t.info_hash) AS InfoHash,
                 tbt.TorrentID AS BadTags,
                 tbf.TorrentID AS BadFolders,

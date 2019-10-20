@@ -12,12 +12,13 @@ $DB->query("
 		t.UserID,
 		t.Media,
 		HEX(t.info_hash) AS InfoHash
-	FROM torrents AS t
+    FROM torrents AS t
+    INNER JOIN torrents_leech_stats AS tls ON (tl.TorrentID = t.ID)
 	INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
 	WHERE
-		(t.last_action != 0 AND t.last_action < now() - INTERVAL 28 DAY AND t.last_action != 0)
+		(tls.last_action != 0 AND tls.last_action < now() - INTERVAL 28 DAY AND t.last_action != 0)
 		OR
-		(t.last_action =  0 AND t.Time < now() - INTERVAL 2 DAY)
+		(tls.last_action =  0 AND tls.Time < now() - INTERVAL 2 DAY)
 	LIMIT 8000
 ");
 $Torrents = $DB->to_array(false, MYSQLI_NUM, false);

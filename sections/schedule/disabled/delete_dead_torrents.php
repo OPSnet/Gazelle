@@ -17,11 +17,12 @@ $DB->query("
             t.Media,
             HEX(t.info_hash) AS InfoHash
         FROM torrents AS t
-            JOIN torrents_group AS tg ON tg.ID = t.GroupID
+            INNER JOIN torrents_leech_stats AS tls ON tls.TorrentID = tls.ID
+            INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
         WHERE
-            (t.last_action < '".time_minus(3600 * 24 * 28)."' AND t.last_action != 0)
+            (tls.last_action < '".time_minus(3600 * 24 * 28)."' AND tls.last_action != 0)
             OR
-            (t.Time < '".time_minus(3600 * 24 * 2)."' AND t.last_action = 0)");
+            (t.Time < '".time_minus(3600 * 24 * 2)."' AND tls.last_action = 0)");
 $Torrents = $DB->to_array(false, MYSQLI_NUM, false);
 echo 'Found '.count($Torrents)." inactive torrents to be deleted.\n";
 

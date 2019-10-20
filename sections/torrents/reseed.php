@@ -2,8 +2,9 @@
 $TorrentID = (int)$_GET['torrentid'];
 
 $DB->query("
-    SELECT last_action, LastReseedRequest, UserID, Time, GroupID
-    FROM torrents
+    SELECT t.last_action, t.LastReseedRequest, t.UserID, t.Time, t.GroupID
+    FROM torrents AS t
+    INNER JOIN torrents_leech_stats AS tls ON (t.TorrentID = t.ID)
     WHERE ID = '$TorrentID'");
 list($LastActive, $LastReseedRequest, $UploaderID, $UploadedTime, $GroupID) = $DB->next_record();
 

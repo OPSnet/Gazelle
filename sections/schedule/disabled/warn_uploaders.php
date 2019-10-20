@@ -12,12 +12,13 @@ $DB->query("
                 t.Encoding,
                 t.UserID
             FROM torrents AS t
+                INNER JOIN torrents_leech_stats AS tls ON tls.TorrentID = t.ID
                 JOIN torrents_group AS tg ON tg.ID = t.GroupID
                 JOIN users_info AS u ON u.UserID = t.UserID
-            WHERE t.last_action < NOW() - INTERVAL 20 DAY
-                AND t.last_action != 0
+            WHERE tls.last_action < NOW() - INTERVAL 20 DAY
+                AND tls.last_action != 0
                 AND u.UnseededAlerts = '1'
-            ORDER BY t.last_action ASC");
+            ORDER BY tls.last_action ASC");
 $TorrentIDs = $DB->to_array();
 $TorrentAlerts = [];
 foreach ($TorrentIDs as $TorrentID) {
