@@ -18,7 +18,7 @@ $Criteria[] = array(
                 (
                     SELECT COUNT(DISTINCT GroupID)
                     FROM torrents
-                    WHERE UserID = users_main.ID
+                    WHERE UserID = um.ID
                 ) >= 500');
 $Criteria[] = array(
     'From' => POWER_TM,
@@ -41,15 +41,15 @@ $Criteria[] = array(
                         OR (Media = 'Blu-ray' AND Format = 'FLAC')
                         OR (Media = 'DAT' AND Format = 'FLAC')
                         )
-                        AND UserID = users_main.ID
+                        AND UserID = um.ID
                 ) >= 500");
 
 foreach ($Criteria as $L) { // $L = Level
     $Query = "
-                SELECT ID
-                FROM users_main um
+                SELECT um.ID
+                FROM users_main AS um
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                INNER JOIN users_info ui ON (ui.UserID = um.ID)
+                INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
                 WHERE um.PermissionID = ".$L['From']."
                     AND ui.Warned = '0000-00-00 00:00:00'
                     AND uls.Uploaded >= '$L[MinUpload]'
