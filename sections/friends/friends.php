@@ -18,35 +18,32 @@ View::show_header('Friends','comments');
 
 $UserID = $LoggedUser['ID'];
 
-
-$Select = "f.FriendID";
-$Where = "f.UserID = '$UserID'";
-$Join1 = "f.FriendID = m.ID";
-$Join2 = "f.FriendID = i.UserID";
-
-
+$Where = "";
 
 list($Page, $Limit) = Format::page_limit(FRIENDS_PER_PAGE);
 
 // Main query
-$DB->query("
+$DB->prepared_query('
     SELECT
         SQL_CALC_FOUND_ROWS
-        $Select,
+        f.FriendID,
         f.Comment,
         m.Username,
-        m.Uploaded,
-        m.Downloaded,
+        uls.Uploaded,
+        uls.Downloaded,
         m.PermissionID,
         m.Paranoia,
         m.LastAccess,
         i.Avatar
     FROM friends AS f
-        JOIN users_main AS m ON $Join1
-        JOIN users_info AS i ON $Join2
-    WHERE $Where
-    ORDER BY Username
-    LIMIT $Limit");
+    INNER JOIN users_main AS m ON (m.ID = f.FriendID)
+    INNER JOIN users_info AS i ON (i.UserID = f.FriendID)
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = f.FriendID)
+    WHERE f.UserID = ?
+    ORDER BY m.Username
+    LIMIT ?
+    ', $UserID, $Limit
+);
 $Friends = $DB->to_array(false, MYSQLI_BOTH, array(6, 'Paranoia'));
 
 // Number of results (for pagination)

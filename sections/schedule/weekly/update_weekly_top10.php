@@ -26,15 +26,16 @@ if ($Top10 === false) {
                     t.RemasterYear,
                     g.Year,
                     t.RemasterTitle,
-                    t.Snatched,
-                    t.Seeders,
-                    t.Leechers,
-                    ((t.Size * t.Snatched) + (t.Size * 0.5 * t.Leechers)) AS Data
+                    tls.Snatched,
+                    tls.Seeders,
+                    tls.Leechers,
+                    ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
                 FROM torrents AS t
-                    LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
-                WHERE t.Seeders > 0
-                    AND t.Time > ('$sqltime' - INTERVAL 1 WEEK)
-                ORDER BY (t.Seeders + t.Leechers) DESC
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
+                WHERE tls.Seeders > 0
+                    AND t.Time > (now() - INTERVAL 1 WEEK)
+                ORDER BY (tls.Seeders + tls.Leechers) DESC
                 LIMIT 10;");
 
     $Top10 = $DB->to_array();

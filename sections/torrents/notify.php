@@ -9,9 +9,9 @@ define('NOTIFICATIONS_MAX_SLOWSORT', 10000);
 $OrderBys = array(
         'time'     => array('unt' => 'unt.TorrentID'),
         'size'     => array('t'   => 't.Size'),
-        'snatches' => array('t'   => 't.Snatched'),
-        'seeders'  => array('t'   => 't.Seeders'),
-        'leechers' => array('t'   => 't.Leechers'),
+        'snatches' => array('t'   => 'tls.Snatched'),
+        'seeders'  => array('t'   => 'tls.Seeders'),
+        'leechers' => array('t'   => 'tls.Leechers'),
         'year'     => array('tg'  => 'tnt.Year'));
 
 if (empty($_GET['order_by']) || !isset($OrderBys[$_GET['order_by']])) {
@@ -62,7 +62,8 @@ if ($OrderTbl == 'tg') {
     $DB->query("
         SELECT COUNT(*)
         FROM users_notify_torrents AS unt
-            JOIN torrents AS t ON t.ID=unt.TorrentID
+        INNER JOIN torrents AS t ON (t.ID=unt.TorrentID)
+        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
         WHERE unt.UserID=$UserID".
         ($FilterID
             ? " AND FilterID=$FilterID"
@@ -75,12 +76,13 @@ if ($OrderTbl == 'tg') {
     $DB->query("
         CREATE TEMPORARY TABLE temp_notify_torrents
             (TorrentID int, GroupID int, UnRead tinyint, FilterID int, Year smallint, PRIMARY KEY(GroupID, TorrentID), KEY(Year))
-        ENGINE=MyISAM");
+        ENGINE=InnoDB");
     $DB->query("
         INSERT IGNORE INTO temp_notify_torrents (TorrentID, GroupID, UnRead, FilterID)
         SELECT t.ID, t.GroupID, unt.UnRead, unt.FilterID
         FROM users_notify_torrents AS unt
-            JOIN torrents AS t ON t.ID=unt.TorrentID
+        INNER JOIN torrents AS t ON t.ID=unt.TorrentID
+        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
         WHERE unt.UserID=$UserID".
         ($FilterID
             ? " AND unt.FilterID=$FilterID"

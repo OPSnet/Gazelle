@@ -8,15 +8,16 @@ $OnRatioWatch = [];
 // Take users off ratio watch and enable leeching
 $UserQuery = $DB->query("
             SELECT
-                m.ID,
-                torrent_pass
+                um.ID,
+                um.torrent_pass
             FROM users_info AS i
-                JOIN users_main AS m ON m.ID = i.UserID
-            WHERE m.Downloaded > 0
-                AND m.Uploaded / m.Downloaded >= m.RequiredRatio
+            INNER JOIN users_main AS um ON (um.ID = i.UserID)
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            WHERE uls.Downloaded > 0
+                AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
                 AND i.RatioWatchEnds != '0000-00-00 00:00:00'
-                AND m.can_leech = '0'
-                AND m.Enabled = '1'");
+                AND um.can_leech = '0'
+                AND um.Enabled = '1'");
 $OffRatioWatch = $DB->collect('ID');
 if (count($OffRatioWatch) > 0) {
     $DB->query("
@@ -44,13 +45,14 @@ foreach ($Passkeys as $Passkey) {
 
 // Take users off ratio watch
 $UserQuery = $DB->query("
-                SELECT m.ID, torrent_pass
+                SELECT um.ID, um.torrent_pass
                 FROM users_info AS i
-                    JOIN users_main AS m ON m.ID = i.UserID
-                WHERE m.Downloaded > 0
-                    AND m.Uploaded / m.Downloaded >= m.RequiredRatio
+                INNER JOIN users_main AS um ON (um.ID = i.UserID)
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                WHERE uls.Downloaded > 0
+                    AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
                     AND i.RatioWatchEnds != '0000-00-00 00:00:00'
-                    AND m.Enabled = '1'");
+                    AND um.Enabled = '1'");
 $OffRatioWatch = $DB->collect('ID');
 if (count($OffRatioWatch) > 0) {
     $DB->query("
@@ -80,29 +82,31 @@ sleep(10);
 $DB->query("
         SELECT m.ID, m.Downloaded
         FROM users_info AS i
-            JOIN users_main AS m ON m.ID = i.UserID
-        WHERE m.Downloaded > 0
-            AND m.Uploaded / m.Downloaded < m.RequiredRatio
+        INNER JOIN users_main AS um ON (um.ID = i.UserID)
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        WHERE uls.Downloaded > 0
+            AND uls.Uploaded / uls.Downloaded < um.RequiredRatio
             AND i.RatioWatchEnds = '0000-00-00 00:00:00'
-            AND m.Enabled = '1'
-            AND m.can_leech = '1'");
+            AND um.Enabled = '1'
+            AND um.can_leech = '1'");
 $OnRatioWatch = $DB->collect('ID');
 
 if (count($OnRatioWatch) > 0) {
     $DB->query("
             UPDATE users_info AS i
-                JOIN users_main AS m ON m.ID = i.UserID
+            INNER JOIN users_main AS um ON (um.ID = i.UserID)
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             SET i.RatioWatchEnds = '".time_plus(60 * 60 * 24 * 14)."',
                 i.RatioWatchTimes = i.RatioWatchTimes + 1,
-                i.RatioWatchDownload = m.Downloaded
-            WHERE m.ID IN(".implode(',', $OnRatioWatch).')');
+                i.RatioWatchDownload = uls.Downloaded
+            WHERE um.ID IN(".implode(',', $OnRatioWatch).')');
 }
 
 foreach ($OnRatioWatch as $UserID) {
     $Cache->begin_transaction("user_info_heavy_$UserID");
     $Cache->update_row(false, array('RatioWatchEnds' => time_plus(60 * 60 * 24 * 14), 'RatioWatchDownload' => 0));
     $Cache->commit_transaction(0);
-    Misc::send_pm($UserID, 0, 'You have been put on Ratio Watch', "This happens when your ratio falls below the requirements we have outlined in the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above.");
+    Misc::send_pm($UserID, 0, 'You have been put on Ratio Watch', "This happens when your ratio falls below the requirements outlined in the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above.");
     echo "Ratio watch on: $UserID\n";
 }
 

@@ -12,15 +12,15 @@ if ($UserID == $LoggedUser['ID']) {
 }
 
 // Always view as a normal user.
-$DB->query("
+$DB->prepared_query('
     SELECT
         m.Username,
         m.Email,
         m.LastAccess,
         m.IP,
         p.Level AS Class,
-        m.Uploaded,
-        m.Downloaded,
+        uls.Uploaded,
+        uls.Downloaded,
         m.RequiredRatio,
         m.Enabled,
         m.Paranoia,
@@ -38,12 +38,14 @@ $DB->query("
         i.DisableInvites,
         inviter.username
     FROM users_main AS m
-        JOIN users_info AS i ON i.UserID = m.ID
-        LEFT JOIN permissions AS p ON p.ID = m.PermissionID
-        LEFT JOIN users_main AS inviter ON i.Inviter = inviter.ID
-        LEFT JOIN forums_posts AS posts ON posts.AuthorID = m.ID
-    WHERE m.ID = $UserID
-    GROUP BY AuthorID");
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
+    INNER JOIN users_info AS i ON (i.UserID = m.ID)
+    LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+    LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
+    LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
+    WHERE m.ID = ?
+    GROUP BY AuthorID
+    ', $UserID);
 
 if (!$DB->has_results()) { // If user doesn't exist
     json_die("failure", "no such user");

@@ -448,9 +448,9 @@ if ($NewRequest) {
         $RequestID, $LoggedUser['ID'], $Bytes * (1 - $RequestTax));
 
     $DB->prepared_query('
-        UPDATE users_main
+        UPDATE users_leech_status
         SET Uploaded = (Uploaded - ?)
-        WHERE ID = ?',
+        WHERE UserID = ?',
         $Bytes, $LoggedUser['ID']);
     $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
 

@@ -56,13 +56,13 @@ switch ($CurrentOrder) {
         $OrderBy = "um.LastAccess";
         break;
     case 'uploaded':
-        $OrderBy = "um.Uploaded";
+        $OrderBy = "uls.Uploaded";
         break;
     case 'downloaded':
-        $OrderBy = "um.Downloaded";
+        $OrderBy = "uls.Downloaded";
         break;
     case 'ratio':
-        $OrderBy = "(um.Uploaded / um.Downloaded)";
+        $OrderBy = "(uls.Uploaded / uls.Downloaded)";
         break;
     default:
         $OrderBy = "um.ID";
@@ -73,14 +73,15 @@ $CurrentURL = Format::get_url(array('action', 'order', 'sort'));
 
 $DB->query("
     SELECT
-        ID,
-        Email,
-        Uploaded,
-        Downloaded,
-        JoinDate,
-        LastAccess
+        um.ID,
+        um.Email,
+        uls.Uploaded,
+        uls.Downloaded,
+        ui.JoinDate,
+        um.LastAccess
     FROM users_main AS um
-        LEFT JOIN users_info AS ui ON ui.UserID = um.ID
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+    INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
     WHERE ui.Inviter = '$UserID'
     ORDER BY $OrderBy $CurrentSort");
 

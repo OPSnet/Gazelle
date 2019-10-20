@@ -170,28 +170,29 @@ $BaseQuery = '
         t.RemasterYear,
         g.Year,
         t.RemasterTitle,
-        t.Snatched,
-        t.Seeders,
-        t.Leechers,
-        ((t.Size * t.Snatched) + (t.Size * 0.5 * t.Leechers)) AS Data,
+        tls.Snatched,
+        tls.Seeders,
+        tls.Leechers,
+        ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data,
         g.ReleaseType,
         t.Size
     FROM torrents AS t
-        LEFT JOIN torrents_group AS g ON g.ID = t.GroupID';
+    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+    INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)';
 
 if ($Details == 'all' || $Details == 'day') {
     $TopTorrentsActiveLastDay = $Cache->get_value('top10tor_day_'.$Limit.$WhereSum.$GroupBySum);
     if ($TopTorrentsActiveLastDay === false) {
         if ($Cache->get_query_lock('top10')) {
             $DayAgo = time_minus(86400);
-            $Query = $BaseQuery.' WHERE t.Seeders>0 AND ';
+            $Query = $BaseQuery.' WHERE tls.Seeders>0 AND ';
             if (!empty($Where)) {
                 $Query .= $Where.' AND ';
             }
             $Query .= "
                 t.Time>'$DayAgo'
                 $GroupBy
-                ORDER BY (t.Seeders + t.Leechers) DESC
+                ORDER BY (tls.Seeders + tls.Leechers) DESC
                 LIMIT $Limit;";
             $DB->query($Query);
             $TopTorrentsActiveLastDay = $DB->to_array(false, MYSQLI_NUM);
@@ -215,7 +216,7 @@ if ($Details == 'all' || $Details == 'week') {
             $Query .= "
                 t.Time>'$WeekAgo'
                 $GroupBy
-                ORDER BY (t.Seeders + t.Leechers) DESC
+                ORDER BY (tls.Seeders + tls.Leechers) DESC
                 LIMIT $Limit;";
             $DB->query($Query);
             $TopTorrentsActiveLastWeek = $DB->to_array(false, MYSQLI_NUM);
@@ -237,9 +238,9 @@ if ($Details == 'all' || $Details == 'month') {
                 $Query .= $Where.' AND ';
             }
             $Query .= "
-                t.Time>'".sqltime()."' - INTERVAL 1 MONTH
+                t.Time > now() - INTERVAL 1 MONTH
                 $GroupBy
-                ORDER BY (t.Seeders + t.Leechers) DESC
+                ORDER BY (tls.Seeders + tls.Leechers) DESC
                 LIMIT $Limit;";
             $DB->query($Query);
             $TopTorrentsActiveLastMonth = $DB->to_array(false, MYSQLI_NUM);
@@ -256,10 +257,10 @@ if ($Details == 'all' || $Details == 'year') {
     $TopTorrentsActiveLastYear = $Cache->get_value('top10tor_year_'.$Limit.$WhereSum.$GroupBySum);
     if ($TopTorrentsActiveLastYear === false) {
         if ($Cache->get_query_lock('top10')) {
-            // IMPORTANT NOTE - we use WHERE t.Seeders>200 in order to speed up this query. You should remove it!
+            // IMPORTANT NOTE - we use WHERE tls.Seeders>200 in order to speed up this query. You should remove it!
             $Query = $BaseQuery.' WHERE ';
             if ($Details == 'all' && !$Filtered) {
-                $Query .= 't.Seeders>=200 AND ';
+                $Query .= 'tls.Seeders > ' . TOP10_YEAR_THRESHOLD . ' AND ';
                 if (!empty($Where)) {
                     $Query .= $Where.' AND ';
                 }
@@ -267,9 +268,9 @@ if ($Details == 'all' || $Details == 'year') {
                 $Query .= $Where.' AND ';
             }
             $Query .= "
-                t.Time>'".sqltime()."' - INTERVAL 1 YEAR
+                t.Time > now() - INTERVAL 1 YEAR
                 $GroupBy
-                ORDER BY (t.Seeders + t.Leechers) DESC
+                ORDER BY (tls.Seeders + tls.Leechers) DESC
                 LIMIT $Limit;";
             $DB->query($Query);
             $TopTorrentsActiveLastYear = $DB->to_array(false, MYSQLI_NUM);
@@ -286,10 +287,10 @@ if ($Details == 'all' || $Details == 'overall') {
     $TopTorrentsActiveAllTime = $Cache->get_value('top10tor_overall_'.$Limit.$WhereSum.$GroupBySum);
     if ($TopTorrentsActiveAllTime === false) {
         if ($Cache->get_query_lock('top10')) {
-            // IMPORTANT NOTE - we use WHERE t.Seeders>500 in order to speed up this query. You should remove it!
+            // IMPORTANT NOTE - we use WHERE tls.Seeders>500 in order to speed up this query. You should remove it!
             $Query = $BaseQuery;
             if ($Details=='all' && !$Filtered) {
-                $Query .= " WHERE t.Seeders>=500 ";
+                $Query .= ' WHERE tls.Seeders > ' . TOP10_ALL_TIME_THRESHOLD;
                 if (!empty($Where)) {
                     $Query .= ' AND '.$Where;
                 }
@@ -298,7 +299,7 @@ if ($Details == 'all' || $Details == 'overall') {
             }
             $Query .= "
                 $GroupBy
-                ORDER BY (t.Seeders + t.Leechers) DESC
+                ORDER BY (tls.Seeders + tls.Leechers) DESC
                 LIMIT $Limit;";
             $DB->query($Query);
             $TopTorrentsActiveAllTime = $DB->to_array(false, MYSQLI_NUM);
@@ -321,7 +322,7 @@ if (($Details == 'all' || $Details == 'snatched') && !$Filtered) {
             }
             $Query .= "
                 $GroupBy
-                ORDER BY t.Snatched DESC
+                ORDER BY tls.Snatched DESC
                 LIMIT $Limit;";
             $DB->query($Query);
             $TopTorrentsSnatched = $DB->to_array(false, MYSQLI_NUM);
@@ -338,10 +339,10 @@ if (($Details == 'all' || $Details == 'data') && !$Filtered) {
     $TopTorrentsTransferred = $Cache->get_value('top10tor_data_'.$Limit.$WhereSum.$GroupBySum);
     if ($TopTorrentsTransferred === false) {
         if ($Cache->get_query_lock('top10')) {
-            // IMPORTANT NOTE - we use WHERE t.Snatched>100 in order to speed up this query. You should remove it!
+            // IMPORTANT NOTE - we use WHERE tls.Snatched>100 in order to speed up this query. You should remove it!
             $Query = $BaseQuery;
             if ($Details=='all') {
-                $Query .= " WHERE t.Snatched>=100 ";
+                $Query .= ' WHERE tls.Snatched > ' . TOP10_DATA_THRESHOLD;
                 if (!empty($Where)) {
                     $Query .= ' AND '.$Where;
                 }
@@ -371,7 +372,7 @@ if (($Details == 'all' || $Details == 'seeded') && !$Filtered) {
             }
             $Query .= "
                 $GroupBy
-                ORDER BY t.Seeders DESC
+                ORDER BY tls.Seeders DESC
                 LIMIT $Limit;";
             $DB->query($Query);
             $TopTorrentsSeeded = $DB->to_array(false, MYSQLI_NUM);
@@ -589,4 +590,3 @@ function generate_torrent_table($Caption, $Tag, $Details, $Limit) {
     </table><br />
 <?php
 }
-?>

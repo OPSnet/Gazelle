@@ -9,22 +9,23 @@ list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
 $RS = $DB->query("
     SELECT
         SQL_CALC_FOUND_ROWS
-        m.ID,
-        m.Username,
-        m.Uploaded,
-        m.Downloaded,
-        m.PermissionID,
-        m.Enabled,
+        um.ID,
+        um.Username,
+        uls.Uploaded,
+        uls.Downloaded,
+        um.PermissionID,
+        um.Enabled,
         i.Donor,
         i.Warned,
         i.JoinDate,
         i.RatioWatchEnds,
         i.RatioWatchDownload,
-        m.RequiredRatio
-    FROM users_main AS m
-        LEFT JOIN users_info AS i ON i.UserID = m.ID
+        um.RequiredRatio
+    FROM users_main AS um
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+    INNER JOIN users_info AS i ON (i.UserID = um.ID)
     WHERE i.RatioWatchEnds != '0000-00-00 00:00:00'
-        AND m.Enabled = '1'
+        AND um.Enabled = '1'
     ORDER BY i.RatioWatchEnds ASC
     LIMIT $Limit");
 $DB->query('SELECT FOUND_ROWS()');

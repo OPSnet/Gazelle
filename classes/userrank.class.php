@@ -44,62 +44,64 @@ class UserRank {
         switch ($TableName) {
             case 'uploaded':
                 $Query =  "
-                    SELECT Uploaded
-                    FROM users_main
-                    WHERE Enabled = '1'
-                        AND Uploaded > 0
-                    ORDER BY Uploaded;";
+                    SELECT uls.Uploaded
+                    FROM users_main um
+                    INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                    WHERE um.Enabled = '1'
+                        AND uls.Uploaded > 0
+                    ORDER BY uls.Uploaded";
                 break;
             case 'downloaded':
                 $Query =  "
-                    SELECT Downloaded
-                    FROM users_main
-                    WHERE Enabled = '1'
-                        AND Downloaded > 0
-                    ORDER BY Downloaded;";
+                    SELECT uls.Downloaded
+                    FROM users_main um
+                    INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                    WHERE um.Enabled = '1'
+                        AND uls.Downloaded > 0
+                    ORDER BY uls.Downloaded";
                 break;
             case 'uploads':
                 $Query = "
-                    SELECT COUNT(t.ID) AS Uploads
+                    SELECT count(*) AS Uploads
                     FROM users_main AS um
-                        JOIN torrents AS t ON t.UserID = um.ID
+                    INNER JOIN torrents AS t ON (t.UserID = um.ID)
                     WHERE um.Enabled = '1'
                     GROUP BY um.ID
-                    ORDER BY Uploads;";
+                    ORDER BY Uploads";
                 break;
             case 'requests':
                 $Query = "
-                    SELECT COUNT(r.ID) AS Requests
+                    SELECT count(*) AS Requests
                     FROM users_main AS um
-                        JOIN requests AS r ON r.FillerID = um.ID
+                    INNER JOIN requests AS r ON (r.FillerID = um.ID)
                     WHERE um.Enabled = '1'
                     GROUP BY um.ID
-                    ORDER BY Requests;";
+                    ORDER BY Requests";
                 break;
             case 'posts':
                 $Query = "
-                    SELECT COUNT(p.ID) AS Posts
+                    SELECT count(*) AS Posts
                     FROM users_main AS um
-                        JOIN forums_posts AS p ON p.AuthorID = um.ID
+                    INNER JOIN forums_posts AS p ON (p.AuthorID = um.ID)
                     WHERE um.Enabled = '1'
                     GROUP BY um.ID
-                    ORDER BY Posts;";
+                    ORDER BY Posts";
                 break;
             case 'bounty':
                 $Query = "
                     SELECT SUM(rv.Bounty) AS Bounty
                     FROM users_main AS um
-                        JOIN requests_votes AS rv ON rv.UserID = um.ID
-                    WHERE um.Enabled = '1' " .
-                    "GROUP BY um.ID
-                    ORDER BY Bounty;";
+                    INNER JOIN requests_votes AS rv ON (rv.UserID = um.ID)
+                    WHERE um.Enabled = '1'
+                    GROUP BY um.ID
+                    ORDER BY Bounty";
                 break;
             case 'artists':
                 $Query = "
-                    SELECT COUNT(ta.ArtistID) AS Artists
+                    SELECT count(*) AS Artists
                     FROM torrents_artists AS ta
-                        JOIN torrents_group AS tg ON tg.ID = ta.GroupID
-                        JOIN torrents AS t ON t.GroupID = tg.ID
+                    INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
+                    INNER JOIN torrents AS t ON (t.GroupID = tg.ID)
                     WHERE t.UserID != ta.UserID
                     GROUP BY tg.ID
                     ORDER BY Artists ASC";

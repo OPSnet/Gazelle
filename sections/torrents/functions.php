@@ -73,9 +73,9 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
                 t.LogChecksum,
                 t.FileCount,
                 t.Size,
-                t.Seeders,
-                t.Leechers,
-                t.Snatched,
+                tls.Seeders,
+                tls.Leechers,
+                tls.Snatched,
                 t.FreeTorrent,
                 t.Time,
                 t.Description,
@@ -100,28 +100,30 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
             SELECT $columns
                 ,0 as is_deleted
             FROM torrents AS t
-                LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
-                LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
-                LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
-                LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
-                LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
-                LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
-                LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
-                LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
+            LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
+            LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
+            LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+            LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+            LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+            LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
+            LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
             WHERE t.GroupID = ?
             GROUP BY t.ID
             UNION DISTINCT
             SELECT $columns
                 ,1 as is_deleted
             FROM deleted_torrents AS t
-                LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
-                LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
-                LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
-                LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
-                LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
-                LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
-                LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
-                LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
+            INNER JOIN deleted_torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            LEFT JOIN deleted_torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
+            LEFT JOIN deleted_torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
+            LEFT JOIN deleted_torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
+            LEFT JOIN deleted_torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+            LEFT JOIN deleted_torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+            LEFT JOIN deleted_torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+            LEFT JOIN deleted_torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
+            LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
             WHERE t.GroupID = ?
             GROUP BY t.ID
             ORDER BY Remastered ASC,

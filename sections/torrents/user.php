@@ -194,7 +194,8 @@ switch ($_GET['type']) {
         $Time = 'unix_timestamp(t.Time)';
         $UserField = 't.UserID';
         $ExtraWhere = '';
-        $From = "torrents AS t";
+        $From = "torrents AS t
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'downloaded':
         if (!check_perms('site_view_torrent_snatchlist')) {
@@ -203,9 +204,9 @@ switch ($_GET['type']) {
         $Time = 'unix_timestamp(ud.Time)';
         $UserField = 'ud.UserID';
         $ExtraWhere = '';
-        $From = "
-            users_downloads AS ud
-                JOIN torrents AS t ON t.ID = ud.TorrentID";
+        $From = "users_downloads AS ud
+            INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     default:
         error(404);
@@ -275,9 +276,9 @@ if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name'
                 t.ID AS TorrentID,
                 $Time AS Time,
                 tg.CategoryID,
-                t.Seeders,
-                t.Leechers,
-                t.Snatched,
+                tls.Seeders,
+                tls.Leechers,
+                tls.Snatched,
                 CONCAT_WS(' ', GROUP_CONCAT(aa.Name SEPARATOR ' '), ' ', tg.Name, ' ', tg.Year, ' ') AS Name,
                 t.Size
             FROM $From

@@ -58,9 +58,9 @@ $DB->prepared_query('
 
 // Subtract amount from user
 $DB->prepared_query('
-    UPDATE users_main
+    UPDATE users_leech_status
     SET Uploaded = Uploaded - ?
-    WHERE ID = ?', $Amount, $LoggedUser['ID']);
+    WHERE UserID = ?', $Amount, $LoggedUser['ID']);
 $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
 
 Requests::update_sphinx_requests($RequestID);

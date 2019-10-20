@@ -16,7 +16,6 @@ class InitialUserSeeder extends AbstractSeed {
                 'Email' => 'admin@example.com',
                 'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
                 'Class' => 5,
-                'Uploaded' => 3221225472,
                 'Enabled' => '1',
                 'Visible' => 1,
                 'Invites' => 0,
@@ -30,7 +29,6 @@ class InitialUserSeeder extends AbstractSeed {
                 'Email' => 'user@example.com',
                 'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
                 'Class' => 5,
-                'Uploaded' => 3221225472,
                 'Enabled' => '1',
                 'Visible' => 1,
                 'Invites' => 0,
@@ -41,6 +39,16 @@ class InitialUserSeeder extends AbstractSeed {
             ],
         ])->saveData();
 
+        $this->table('users_leech_stats')->insert([
+            [
+                'UserID' => 1,
+                'Uploaded' => STARTING_UPLOAD
+            ],
+            [
+                'UserID' => 2,
+                'Uploaded' => STARTING_UPLOAD
+            ]
+        ])->saveData();
 
         $this->table('users_info')->insert([
             [

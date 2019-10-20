@@ -64,7 +64,7 @@ class Torrents {
         }
         // Make sure there's something in $GroupIDs, otherwise the SQL will break
         if (count($GroupIDs) === 0) {
-            return array();
+            return [];
         }
 
         /*
@@ -77,7 +77,7 @@ class Torrents {
 
         if (count($NotFound) > 0) {
             $IDs = implode(',', array_keys($NotFound));
-            $NotFound = array();
+            $NotFound = [];
             $QueryID = G::$DB->get_query_id();
             G::$DB->query("
                 SELECT
@@ -87,8 +87,8 @@ class Torrents {
 
             while ($Group = G::$DB->next_record(MYSQLI_ASSOC, true)) {
                 $NotFound[$Group['ID']] = $Group;
-                $NotFound[$Group['ID']]['Torrents'] = array();
-                $NotFound[$Group['ID']]['Artists'] = array();
+                $NotFound[$Group['ID']]['Torrents'] = [];
+                $NotFound[$Group['ID']]['Artists'] = [];
             }
             G::$DB->set_query_id($QueryID);
 
@@ -113,11 +113,11 @@ class Torrents {
                         t.FileCount,
                         t.FreeTorrent,
                         t.Size,
-                        t.Leechers,
-                        t.Seeders,
-                        t.Snatched,
+                        tls.Leechers,
+                        tls.Seeders,
+                        tls.Snatched,
                         t.Time,
-                        t.ID AS HasFile,
+                        t.ID AS HasFile, /* wtf? always true */
                         t.HasLogDB,
                         t.LogChecksum,
                         tbt.TorrentID AS BadTags,
@@ -128,6 +128,7 @@ class Torrents {
                         lma.TorrentID AS LossymasterApproved,
                         lwa.TorrentID AS LossywebApproved
                     FROM torrents t
+                    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
                         LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
                         LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
                         LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
@@ -158,7 +159,7 @@ class Torrents {
         if ($GetArtists) {
             $Artists = Artists::get_artists($GroupIDs);
         } else {
-            $Artists = array();
+            $Artists = [];
         }
 
         if ($Return) { // If we're interested in the data, and not just caching it
@@ -300,10 +301,8 @@ class Torrents {
         }
 
         $manager->soft_delete(SQLDB, 'torrents_files',                  [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_files',              [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_folders',          [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_tags',              [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $ID]]);
+        $manager->soft_delete(SQLDB, 'torrents_files',                [['TorrentID', $ID]]);
+        $manager->soft_delete(SQLDB, 'torrents_leech_stats',          [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_lossymaster_approved', [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_missing_lineage',      [['TorrentID', $ID]]);
@@ -591,14 +590,15 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
                 HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
                 RemasterRecordLabel, RemasterCatalogueNumber, FileList, VoteScore, ArtistName)
             SELECT
-                t.ID, g.ID, Name, TagList, Year, CategoryID, UNIX_TIMESTAMP(t.Time), ReleaseType,
-                RecordLabel, CatalogueNumber, VanityHouse, Size, Snatched, Seeders,
-                Leechers, LogScore, CAST(Scene AS CHAR), CAST(HasLog AS CHAR), CAST(HasCue AS CHAR),
-                CAST(FreeTorrent AS CHAR), Media, Format, Encoding, Description,
-                RemasterYear, RemasterTitle, RemasterRecordLabel, RemasterCatalogueNumber,
-                REPLACE(REPLACE(FileList, '_', ' '), '/', ' ') AS FileList, $VoteScore, '".db_string($ArtistName)."'
+                t.ID, g.ID, g.Name, g.TagList, g.Year, g.CategoryID, UNIX_TIMESTAMP(t.Time), g.ReleaseType,
+                g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
+                tls.Leechers, t.LogScore, CAST(t.Scene AS CHAR), CAST(t.HasLog AS CHAR), CAST(t.HasCue AS CHAR),
+                CAST(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
+                t.RemasterYear, t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
+                REPLACE(REPLACE(t.FileList, '_', ' '), '/', ' ') AS FileList, $VoteScore, '".db_string($ArtistName)."'
             FROM torrents AS t
-                JOIN torrents_group AS g ON g.ID = t.GroupID
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
             WHERE g.ID = $GroupID");
 
         G::$Cache->delete_value("torrents_details_$GroupID");

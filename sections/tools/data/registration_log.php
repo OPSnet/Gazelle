@@ -26,22 +26,22 @@ if (!empty($AfterDate) && !empty($BeforeDate)) {
 $RS = "
     SELECT
         SQL_CALC_FOUND_ROWS
-        m.ID,
-        m.IP,
-        m.ipcc,
-        m.Email,
-        m.Username,
-        m.PermissionID,
-        m.Uploaded,
-        m.Downloaded,
-        m.Enabled,
+        um.ID,
+        um.IP,
+        um.ipcc,
+        um.Email,
+        um.Username,
+        um.PermissionID,
+        uls.Uploaded,
+        uls.Downloaded,
+        um.Enabled,
         i.Donor,
         i.Warned,
         i.JoinDate,
         (
             SELECT COUNT(h1.UserID)
             FROM users_history_ips AS h1
-            WHERE h1.IP = m.IP
+            WHERE h1.IP = um.IP
         ) AS Uses,
         im.ID,
         im.IP,
@@ -49,8 +49,8 @@ $RS = "
         im.Email,
         im.Username,
         im.PermissionID,
-        im.Uploaded,
-        im.Downloaded,
+        ils.Uploaded,
+        ils.Downloaded,
         im.Enabled,
         ii.Donor,
         ii.Warned,
@@ -60,10 +60,12 @@ $RS = "
             FROM users_history_ips AS h2
             WHERE h2.IP = im.IP
         ) AS InviterUses
-    FROM users_main AS m
-        LEFT JOIN users_info AS i ON i.UserID = m.ID
-        LEFT JOIN users_main AS im ON i.Inviter = im.ID
-        LEFT JOIN users_info AS ii ON i.Inviter = ii.UserID
+    FROM users_main AS um
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+    INNER JOIN users_info AS i ON (i.UserID = um.ID)
+    LEFT JOIN users_main AS im ON (i.Inviter = im.ID)
+    LEFT JOIN users_leech_stats AS ils ON (ils.UserID = im.ID)
+    LEFT JOIN users_info AS ii ON (i.Inviter = ii.UserID)
     WHERE";
 if ($DateSearch) {
     $RS .= " i.JoinDate BETWEEN '$AfterDate' AND '$BeforeDate' ";

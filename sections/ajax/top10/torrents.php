@@ -35,25 +35,26 @@ $BaseQuery = "SELECT
     t.RemasterYear,
     g.Year,
     t.RemasterTitle,
-    t.Snatched,
-    t.Seeders,
-    t.Leechers,
-    ((t.Size * t.Snatched) + (t.Size * 0.5 * t.Leechers)) AS Data,
+    tls.Snatched,
+    tls.Seeders,
+    tls.Leechers,
+    ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data,
     g.ReleaseType,
     t.Size
     FROM torrents AS t
-    LEFT JOIN torrents_group AS g ON g.ID = t.GroupID ";
+    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+    INNER JOIN torrents_group AS g ON (g.ID = t.GroupID) ";
 
 $OuterResults = [];
 
 if ($Details == 'all' || $Details == 'day') {
     if (!$TopTorrentsActiveLastDay = $Cache->get_value('top10tor_day_'.$Limit.$WhereSum)) {
         $DayAgo = time_minus(86400);
-        $Query = $BaseQuery.' WHERE t.Seeders>0 AND ';
+        $Query = $BaseQuery.' WHERE tls.Seeders>0 AND ';
         if (!empty($Where)) { $Query .= $Where.' AND '; }
         $Query .= "
             t.Time>'$DayAgo'
-            ORDER BY (t.Seeders + t.Leechers) DESC
+            ORDER BY (tls.Seeders + tls.Leechers) DESC
             LIMIT $Limit;";
         $DB->query($Query);
         $TopTorrentsActiveLastDay = $DB->to_array(); // TODO: MYSQLI_NUM to avoid duplicate data in the cache (does that break something with generate_torrent_json?)
@@ -68,7 +69,7 @@ if ($Details == 'all' || $Details == 'week') {
         if (!empty($Where)) { $Query .= $Where.' AND '; }
         $Query .= "
             t.Time>'$WeekAgo'
-            ORDER BY (t.Seeders + t.Leechers) DESC
+            ORDER BY (tls.Seeders + tls.Leechers) DESC
             LIMIT $Limit;";
         $DB->query($Query);
         $TopTorrentsActiveLastWeek = $DB->to_array();
@@ -79,15 +80,15 @@ if ($Details == 'all' || $Details == 'week') {
 
 if ($Details == 'all' || $Details == 'overall') {
     if (!$TopTorrentsActiveAllTime = $Cache->get_value("top10tor_overall_$Limit$WhereSum")) {
-        // IMPORTANT NOTE - we use WHERE t.Seeders>500 in order to speed up this query. You should remove it!
+        // IMPORTANT NOTE - we use WHERE tls.Seeders>500 in order to speed up this query. You should remove it!
         $Query = $BaseQuery;
         if (!empty($Where)) {
             $Query .= " WHERE $Where";
         } elseif ($Details == 'all') {
-            $Query .= " WHERE t.Seeders > 500 ";
+            $Query .= ' WHERE tls.Seeders > ' . TOP10_ALL_TIME_THRESHOLD;
         }
         $Query .= "
-            ORDER BY (t.Seeders + t.Leechers) DESC
+            ORDER BY (tls.Seeders + tls.Leechers) DESC
             LIMIT $Limit;";
         $DB->query($Query);
         $TopTorrentsActiveAllTime = $DB->to_array();
@@ -100,7 +101,7 @@ if (($Details == 'all' || $Details == 'snatched') && empty($Where)) {
     if (!$TopTorrentsSnatched = $Cache->get_value("top10tor_snatched_$Limit$WhereSum")) {
         $Query = $BaseQuery;
         $Query .= "
-            ORDER BY t.Snatched DESC
+            ORDER BY tls.Snatched DESC
             LIMIT $Limit;";
         $DB->query($Query);
         $TopTorrentsSnatched = $DB->to_array();
@@ -114,7 +115,7 @@ if (($Details == 'all' || $Details == 'data') && empty($Where)) {
         // IMPORTANT NOTE - we use WHERE t.Snatched>100 in order to speed up this query. You should remove it!
         $Query = $BaseQuery;
         if ($Details == 'all') {
-            $Query .= " WHERE t.Snatched > 100 ";
+            $Query .= ' WHERE tls.Snatched > ' . TOP10_DATA_THRESHOLD;
         }
         $Query .= "
             ORDER BY Data DESC
@@ -129,7 +130,7 @@ if (($Details == 'all' || $Details == 'data') && empty($Where)) {
 if (($Details == 'all' || $Details == 'seeded') && empty($Where)) {
     if (!$TopTorrentsSeeded = $Cache->get_value("top10tor_seeded_$Limit$WhereSum")) {
         $Query = $BaseQuery."
-            ORDER BY t.Seeders DESC
+            ORDER BY tls.Seeders DESC
             LIMIT $Limit;";
         $DB->query($Query);
         $TopTorrentsSeeded = $DB->to_array();
@@ -205,4 +206,3 @@ function generate_torrent_json($Caption, $Tag, $Details, $Limit) {
         'results' => $results
         );
 }
-?>

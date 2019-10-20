@@ -105,7 +105,7 @@ $LightUpdates = array();
 
 // Get user info from the database
 
-$DB->query("
+$DB->prepared_query("
     SELECT
         m.Username,
         m.IP,
@@ -114,8 +114,8 @@ $DB->query("
         p.Level AS Class,
         m.Title,
         m.Enabled,
-        m.Uploaded,
-        m.Downloaded,
+        uls.Uploaded,
+        uls.Downloaded,
         m.BonusPoints,
         m.Invites,
         m.can_leech,
@@ -145,12 +145,15 @@ $DB->query("
         SHA1(i.AdminComment) AS CommentHash,
         GROUP_CONCAT(l.PermissionID SEPARATOR ',') AS SecondaryClasses
     FROM users_main AS m
-        JOIN users_info AS i ON i.UserID = m.ID
-        LEFT JOIN permissions AS p ON p.ID = m.PermissionID
-        LEFT JOIN users_levels AS l ON l.UserID = m.ID
-        LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
-    WHERE m.ID = $UserID
-    GROUP BY m.ID");
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
+    INNER JOIN users_info AS i ON (i.UserID = m.ID)
+    LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+    LEFT JOIN users_levels AS l ON (l.UserID = m.ID)
+    LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
+    WHERE m.ID = ?
+    GROUP BY m.ID
+    ", $UserID
+);
 
 if (!$DB->has_results()) { // If user doesn't exist
     header("Location: log.php?search=User+$UserID");
@@ -759,17 +762,18 @@ Please visit us soon so we can help you resolve this matter.', 'noreply');
 
 if ($MergeStatsFrom && check_perms('users_edit_ratio')) {
     $DB->query("
-        SELECT ID, Uploaded, Downloaded
-        FROM users_main
-        WHERE Username LIKE '$MergeStatsFrom'");
+        SELECT um.ID, uls.Uploaded, uls.Downloaded
+        FROM users_main um
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        WHERE um.Username LIKE '$MergeStatsFrom'");
     if ($DB->has_results()) {
         list($MergeID, $MergeUploaded, $MergeDownloaded) = $DB->next_record();
         $DB->query("
-            UPDATE users_main AS um
-                JOIN users_info AS ui ON um.ID = ui.UserID
+            UPDATE users_info AS ui
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = ui.ID)
             SET
-                um.Uploaded = 0,
-                um.Downloaded = 0,
+                uls.Uploaded = 0,
+                uls.Downloaded = 0,
                 ui.AdminComment = CONCAT('".sqltime().' - Stats (Uploaded: '.Format::get_size($MergeUploaded).', Downloaded: '.Format::get_size($MergeDownloaded).', Ratio: '.Format::get_ratio($MergeUploaded, $MergeDownloaded).') merged into '.site_url()."user.php?id=$UserID (".$Cur['Username'].') by '.$LoggedUser['Username']."\n\n', ui.AdminComment)
             WHERE ID = $MergeID");
         $UpdateSet[] = "Uploaded = Uploaded + '$MergeUploaded'";

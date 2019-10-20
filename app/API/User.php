@@ -44,8 +44,8 @@ class User extends AbstractAPI {
                 um.Username,
                 um.Enabled,
                 um.IRCKey,
-                um.Uploaded,
-                um.Downloaded,
+                uls.Uploaded,
+                uls.Downloaded,
                 um.PermissionID AS Class,
                 um.Paranoia,
                 um.BonusPoints,
@@ -55,9 +55,10 @@ class User extends AbstractAPI {
                 GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS SecondaryClasses
             FROM
                 users_main AS um
-                INNER JOIN users_info AS ui ON ui.UserID = um.ID
-                INNER JOIN permissions AS p ON p.ID = um.PermissionID
-                LEFT JOIN users_levels AS ul ON ul.UserID = um.ID
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+                INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+                LEFT JOIN users_levels AS ul ON (ul.UserID = um.ID)
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 
@@ -112,8 +113,8 @@ class User extends AbstractAPI {
                 um.Username,
                 um.IP,
                 um.Enabled,
-                um.Uploaded,
-                um.Downloaded,
+                uls.Uploaded,
+                uls.Downloaded,
                 um.Visible,
                 ui.AdminComment,
                 um.torrent_pass,
@@ -121,7 +122,8 @@ class User extends AbstractAPI {
                 ui.RatioWatchEnds
             FROM
                 users_main AS um
-                INNER JOIN users_info AS ui ON ui.UserID = um.ID
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 

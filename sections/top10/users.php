@@ -26,20 +26,21 @@ $Limit = in_array($Limit, array(10,100,250)) ? $Limit : 10;
 
 $BaseQuery = "
     SELECT
-        u.ID,
+        um.ID,
         ui.JoinDate,
-        u.Uploaded,
-        u.Downloaded,
-        ABS(u.Uploaded-".STARTING_UPLOAD.") / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS UpSpeed,
-        u.Downloaded / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS DownSpeed,
-        COUNT(t.ID) AS NumUploads
-    FROM users_main AS u
-        JOIN users_info AS ui ON ui.UserID = u.ID
-        LEFT JOIN torrents AS t ON t.UserID=u.ID
-    WHERE u.Enabled='1'
-        AND Uploaded>'". 5 * 1024 * 1024 * 1024 ."'
-        AND Downloaded>'". 5 * 1024 * 1024 * 1024 ."'
-        AND (Paranoia IS NULL OR (Paranoia NOT LIKE '%\"uploaded\"%' AND Paranoia NOT LIKE '%\"downloaded\"%'))
+        uls.Uploaded,
+        ulsDownloaded,
+        ABS(uls.Uploaded-".STARTING_UPLOAD.") / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS UpSpeed,
+        uls.Downloaded / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS DownSpeed,
+        count(t.ID) AS NumUploads
+    FROM users_main AS um
+    INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+    LEFT JOIN torrents AS t ON (t.UserID = um.ID)
+    WHERE um.Enabled='1'
+        AND uls.Uploaded>'". 5 * 1024 * 1024 * 1024 ."'
+        AND uls.Downloaded>'". 5 * 1024 * 1024 * 1024 ."'
+        AND (um.Paranoia IS NULL OR (um.Paranoia NOT LIKE '%\"uploaded\"%' AND um.Paranoia NOT LIKE '%\"downloaded\"%'))
     GROUP BY u.ID";
 
     if ($Details == 'all' || $Details == 'ul') {

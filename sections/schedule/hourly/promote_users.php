@@ -47,19 +47,20 @@ $Criteria[] = array(
 foreach ($Criteria as $L) { // $L = Level
     $Query = "
                 SELECT ID
-                FROM users_main
-                    JOIN users_info ON users_main.ID = users_info.UserID
-                WHERE PermissionID = ".$L['From']."
-                    AND Warned = '0000-00-00 00:00:00'
-                    AND Uploaded >= '$L[MinUpload]'
-                    AND (Uploaded / Downloaded >= '$L[MinRatio]' OR (Uploaded / Downloaded IS NULL))
-                    AND JoinDate < '$L[MaxTime]'
+                FROM users_main um
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                INNER JOIN users_info ui ON (ui.UserID = um.ID)
+                WHERE um.PermissionID = ".$L['From']."
+                    AND ui.Warned = '0000-00-00 00:00:00'
+                    AND uls.Uploaded >= '$L[MinUpload]'
+                    AND (uls.Uploaded / uls.Downloaded >= '$L[MinRatio]' OR (uls.Uploaded / uls.Downloaded IS NULL))
+                    AND ui.JoinDate < '$L[MaxTime]'
                     AND (
-                        SELECT COUNT(ID)
+                        SELECT count(*)
                         FROM torrents
-                        WHERE UserID = users_main.ID
+                        WHERE UserID = um.ID
                         ) >= '$L[MinUploads]'
-                    AND Enabled = '1'";
+                    AND um.Enabled = '1'";
     if (!empty($L['Extra'])) {
         $Query .= ' AND '.$L['Extra'];
     }
@@ -93,21 +94,22 @@ foreach ($Criteria as $L) { // $L = Level
 
     $Query = "
             SELECT ID
-            FROM users_main
-                JOIN users_info ON users_main.ID = users_info.UserID
-            WHERE PermissionID = '$L[To]'
-                AND ( Uploaded < '$L[MinUpload]'
+            FROM users_main um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            WHERE um.PermissionID = '$L[To]'
+                AND ( uls.Uploaded < '$L[MinUpload]'
                     OR (
-                        SELECT COUNT(ID)
+                        SELECT count(*)
                         FROM torrents
-                        WHERE UserID = users_main.ID
+                        WHERE UserID = um.ID
                         ) < '$L[MinUploads]'";
     if (!empty($L['Extra'])) {
         $Query .= ' OR NOT '.$L['Extra'];
     }
     $Query .= "
                     )
-                AND Enabled = '1'";
+                AND um.Enabled = '1'";
 
     $DB->query($Query);
     $UserIDs = $DB->collect('ID');

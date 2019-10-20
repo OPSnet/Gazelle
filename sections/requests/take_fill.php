@@ -165,9 +165,9 @@ Misc::write_log("Request $RequestID ($FullName) was filled by user $FillerID ($F
 
 // Give bounty
 $DB->prepared_query('
-    UPDATE users_main
+    UPDATE users_leech_status
     SET Uploaded = Uploaded + ?
-    WHERE ID = ?', $RequestVotes['TotalBounty'], $FillerID);
+    WHERE UserID = ?', $RequestVotes['TotalBounty'], $FillerID);
 
 $Cache->delete_value("user_stats_$FillerID");
 $Cache->delete_value("request_$RequestID");

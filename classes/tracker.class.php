@@ -48,7 +48,7 @@ class Tracker {
         } else {
             return false;
         }
-        return array($Leechers, $Seeders);
+        return [$Leechers, $Seeders];
     }
 
     /**

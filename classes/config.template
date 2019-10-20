@@ -323,3 +323,7 @@ $ExternalServicesConfig = [
         'cookie_expiry' => 0,
         'status' => TRUE
     ]];
+
+define('TOP10_ALL_TIME_THRESHOLD', 150);
+define('TOP10_YEAR_THRESHOLD', 80);
+define('TOP10_DATA_THRESHOLD', 50);

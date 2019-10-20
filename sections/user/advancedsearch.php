@@ -215,8 +215,8 @@ if (count($_GET)) {
                 'Email' => 'um1.Email',
                 'IP' => 'um1.IP',
                 'Last Seen' => 'um1.LastAccess',
-                'Uploaded' => 'um1.Uploaded',
-                'Downloaded' => 'um1.Downloaded',
+                'Uploaded' => 'uls1.Uploaded',
+                'Downloaded' => 'uls1.Downloaded',
                 'Ratio' => '(um1.Uploaded / um1.Downloaded)',
                 'Invites' => 'um1.Invites',
                 'Snatches' => 'Snatches');
@@ -235,8 +235,8 @@ if (count($_GET)) {
                 SQL_CALC_FOUND_ROWS
                 um1.ID,
                 um1.Username,
-                um1.Uploaded,
-                um1.Downloaded,';
+                uls1.Uploaded,
+                uls1.Downloaded,';
         if ($_GET['snatched'] == 'off') {
             $SQL .= "'X' AS Snatches,";
         } else {
@@ -269,7 +269,8 @@ if (count($_GET)) {
                 ui1.JoinDate,
                 um1.LastAccess
             FROM users_main AS um1
-                JOIN users_info AS ui1 ON ui1.UserID = um1.ID ';
+            INNER JOIN users_leech_stats AS uls1 ON (uls1.UserID = um1.ID)
+            INNER JOIN users_info AS ui1 ON (ui1.UserID = um1.ID) ';
 
 
         if (!empty($_GET['username'])) {
@@ -401,16 +402,16 @@ if (count($_GET)) {
             if (!$Decimals) {
                 $Decimals = 0;
             }
-            $Where[] = implode(' AND ', num_compare("ROUND(Uploaded/Downloaded,$Decimals)", $_GET['ratio'], $_GET['ratio1'], $_GET['ratio2']));
+            $Where[] = implode(' AND ', num_compare("ROUND(uls1.Uploaded/uls1.Downloaded,$Decimals)", $_GET['ratio'], $_GET['ratio1'], $_GET['ratio2']));
         }
 
         if (strlen($_GET['uploaded1'])) {
             $Upload1 = round($_GET['uploaded1']);
             $Upload2 = round($_GET['uploaded2']);
             if ($_GET['uploaded'] != 'buffer') {
-                $Where[] = implode(' AND ', num_compare('ROUND(Uploaded / 1024 / 1024 / 1024)', $_GET['uploaded'], $Upload1, $Upload2));
+                $Where[] = implode(' AND ', num_compare('ROUND(uls1.Uploaded / 1024 / 1024 / 1024)', $_GET['uploaded'], $Upload1, $Upload2));
             } else {
-                $Where[] = implode(' AND ', num_compare('ROUND((Uploaded / 1024 / 1024 / 1024) - (Downloaded / 1024 / 1024 / 1023))', 'between', $Upload1 * 0.9, $Upload1 * 1.1));
+                $Where[] = implode(' AND ', num_compare('ROUND((uls1.Uploaded / 1024 / 1024 / 1024) - (Downloaded / 1024 / 1024 / 1023))', 'between', $Upload1 * 0.9, $Upload1 * 1.1));
             }
         }
 

@@ -6,24 +6,26 @@ sleep(10);
 $DemoteClasses = [POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM];
 $Query = $DB->query('
         SELECT ID
-        FROM users_main
-        WHERE PermissionID IN(' . implode(', ', $DemoteClasses) . ')
+        FROM users_main um
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        WHERE um.PermissionID IN(' . implode(', ', $DemoteClasses) . ')
             AND (
-                (Downloaded > 0 AND Uploaded / Downloaded < 0.95)
-                OR Uploaded < 25 * 1024 * 1024 * 1024
+                (uls.Downloaded > 0 AND uls.Uploaded / uls.Downloaded < 0.95)
+                OR uls.Uploaded < 25 * 1024 * 1024 * 1024
             )');
 echo "demoted 1\n";
 
 $DB->query('
         UPDATE users_info AS ui
-            JOIN users_main AS um ON um.ID = ui.UserID
+        INNER JOIN users_main AS um ON (um.ID = ui.UserID)
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
         SET
             um.PermissionID = ' . MEMBER . ",
             ui.AdminComment = CONCAT('" . sqltime() . ' - Class changed to ' . Users::make_class_string(MEMBER) . " by System\n\n', ui.AdminComment)
         WHERE um.PermissionID IN (" . implode(', ', $DemoteClasses) . ')
             AND (
-                (um.Downloaded > 0 AND um.Uploaded / um.Downloaded < 0.95)
-                OR um.Uploaded < 25 * 1024 * 1024 * 1024
+                (uls.Downloaded > 0 AND uls.Uploaded / uls.Downloaded < 0.95)
+                OR uls.Uploaded < 25 * 1024 * 1024 * 1024
             )');
 $DB->set_query_id($Query);
 while (list($UserID) = $DB->next_record()) {
@@ -40,18 +42,20 @@ echo "demoted 2\n";
 $DemoteClasses = [MEMBER, POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM];
 $Query = $DB->query('
         SELECT ID
-        FROM users_main
-        WHERE PermissionID IN(' . implode(', ', $DemoteClasses) . ')
-            AND Uploaded / Downloaded < 0.65');
+        FROM users_main um
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        WHERE um.PermissionID IN(' . implode(', ', $DemoteClasses) . ')
+            AND uls.Uploaded / uls.Downloaded < 0.65');
 echo "demoted 3\n";
 $DB->query('
         UPDATE users_info AS ui
-            JOIN users_main AS um ON um.ID = ui.UserID
+        INNER JOIN users_main AS um ON (um.ID = ui.UserID
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
         SET
             um.PermissionID = ' . USER . ",
             ui.AdminComment = CONCAT('" . sqltime() . ' - Class changed to ' . Users::make_class_string(USER) . " by System\n\n', ui.AdminComment)
         WHERE um.PermissionID IN (" . implode(', ', $DemoteClasses) . ')
-            AND (um.Downloaded > 0 AND um.Uploaded / um.Downloaded < 0.65)');
+            AND (uls.Downloaded > 0 AND uls.Uploaded / uls.Downloaded < 0.65)');
 $DB->set_query_id($Query);
 while (list($UserID) = $DB->next_record()) {
     /*$Cache->begin_transaction("user_info_$UserID");

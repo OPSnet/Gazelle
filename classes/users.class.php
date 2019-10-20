@@ -32,10 +32,17 @@ class Users {
         }
         $UserStats = $Cache->get_value('user_stats_'.$UserID);
         if (!is_array($UserStats)) {
-            $DB->query("
-            SELECT Uploaded AS BytesUploaded, Downloaded AS BytesDownloaded, BonusPoints, RequiredRatio
-            FROM users_main
-            WHERE ID = '$UserID'");
+            $DB->prepared_query('
+                SELECT
+                    uls.Uploaded AS BytesUploaded,
+                    uls.Downloaded AS BytesDownloaded,
+                    um.BonusPoints,
+                    um.RequiredRatio
+                FROM users_main um
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                WHERE um.ID = ?
+                ', $UserID
+            );
             $UserStats = $DB->next_record(MYSQLI_ASSOC);
             $Cache->cache_value('user_stats_'.$UserID, $UserStats, 3600);
         }

@@ -41,11 +41,12 @@ SELECT
     a.Name,
     t.Size
 FROM torrents AS t
-    INNER JOIN collages_torrents AS c ON t.GroupID = c.GroupID AND c.CollageID = '8'
-    INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID AND tg.CategoryID = '1'
-    LEFT JOIN artists_group AS a ON a.ArtistID = tg.ArtistID
-    LEFT JOIN torrents_files AS f ON t.ID = f.TorrentID
-ORDER BY t.GroupID ASC, Rank DESC, t.Seeders ASC
+INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+INNER JOIN collages_torrents AS c ON t.GroupID = c.GroupID AND c.CollageID = '8'
+INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID AND tg.CategoryID = '1'
+LEFT JOIN artists_group AS a ON a.ArtistID = tg.ArtistID
+LEFT JOIN torrents_files AS f ON t.ID = f.TorrentID
+ORDER BY t.GroupID ASC, Rank DESC, tls.Seeders ASC
 */
 
 if (
@@ -63,15 +64,17 @@ if (!check_perms('zip_downloader')) {
     error(403);
 }
 
-$Preferences = array('RemasterTitle DESC', 'Seeders ASC', 'Size ASC');
+$Preferences = array('t.RemasterTitle DESC', 'tls.Seeders ASC', 't.Size ASC');
 
 $CollageID = $_REQUEST['collageid'];
 $Preference = $Preferences[$_REQUEST['preference']];
 
-$DB->query("
+$DB->prepared_query('
     SELECT Name
     FROM collages
-    WHERE ID = '$CollageID'");
+    WHERE ID = ?
+    ', $CollageID
+);
 list($CollageName) = $DB->next_record(MYSQLI_NUM, false);
 
 $SQL = 'SELECT CASE ';
@@ -124,9 +127,10 @@ $SQL .= "
     tg.Name,
     t.Size
 FROM torrents AS t
-    INNER JOIN collages_torrents AS c ON t.GroupID = c.GroupID AND c.CollageID = '$CollageID'
-    INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID AND tg.CategoryID = '1'
-ORDER BY t.GroupID ASC, Rank DESC, t.$Preference";
+INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID) /* FIXME: only needed if sorting by Seeders */
+INNER JOIN collages_torrents AS c ON (t.GroupID = c.GroupID AND c.CollageID = '$CollageID')
+INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID AND tg.CategoryID = '1')
+ORDER BY t.GroupID ASC, Rank DESC, $Preference";
 
 $DownloadsQ = $DB->query($SQL);
 $Collector = new TorrentsDL($DownloadsQ, $CollageName);
@@ -165,4 +169,3 @@ if (!isset($LoggedUser['Collector']) || $LoggedUser['Collector'] != $Settings) {
 }
 
 define('SKIP_NO_CACHE_HEADERS', 1);
-?>

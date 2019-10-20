@@ -43,15 +43,15 @@ $ProfileRewards = Donations::get_profile_rewards($UserID);
 $FA_Key = null;
 
 if (check_perms('users_mod')) { // Person viewing is a staff member
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             m.Username,
             m.Email,
             m.LastAccess,
             m.IP,
             p.Level AS Class,
-            m.Uploaded,
-            m.Downloaded,
+            uls.Uploaded,
+            uls.Downloaded,
             m.BonusPoints,
             m.RequiredRatio,
             m.Title,
@@ -86,20 +86,23 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.DisableWiki,
             i.DisablePM,
             i.DisableIRC,
-            i.DisableRequests," . "
+            i.DisableRequests,
             m.FLTokens,
             m.2FA_Key,
             SHA1(i.AdminComment),
             i.InfoTitle,
             la.Type AS LockedAccount
         FROM users_main AS m
-            JOIN users_info AS i ON i.UserID = m.ID
-            LEFT JOIN users_main AS inviter ON i.Inviter = inviter.ID
-            LEFT JOIN permissions AS p ON p.ID = m.PermissionID
-            LEFT JOIN forums_posts AS posts ON posts.AuthorID = m.ID
-            LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
-        WHERE m.ID = '$UserID'
-        GROUP BY AuthorID");
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
+        INNER JOIN users_info AS i ON (i.UserID = m.ID)
+        LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
+        LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+        LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
+        LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
+        WHERE m.ID = ?
+        GROUP BY AuthorID
+        ', $UserID
+    );
 
     if (!$DB->has_results()) { // If user doesn't exist
         header("Location: log.php?search=User+$UserID");
@@ -107,15 +110,15 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 
     list($Username,    $Email,    $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, array(9, 12));
 } else { // Person viewing is a normal user
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             m.Username,
             m.Email,
             m.LastAccess,
             m.IP,
             p.Level AS Class,
-            m.Uploaded,
-            m.Downloaded,
+            uls.Uploaded,
+            uls.Downloaded,
             m.BonusPoints,
             m.RequiredRatio,
             m.Enabled,
@@ -136,12 +139,15 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             inviter.username,
             i.InfoTitle
         FROM users_main AS m
-            JOIN users_info AS i ON i.UserID = m.ID
-            LEFT JOIN permissions AS p ON p.ID = m.PermissionID
-            LEFT JOIN users_main AS inviter ON i.Inviter = inviter.ID
-            LEFT JOIN forums_posts AS posts ON posts.AuthorID = m.ID
-        WHERE m.ID = $UserID
-        GROUP BY AuthorID");
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
+        INNER JOIN users_info AS i ON (i.UserID = m.ID)
+        LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+        LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
+        LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
+        WHERE m.ID = ?
+        GROUP BY AuthorID
+        ', $UserID
+    );
 
     if (!$DB->has_results()) { // If user doesn't exist
         header("Location: log.php?search=User+$UserID");
@@ -157,13 +163,15 @@ $DB->query("
 SELECT
     IFNULL(SUM((t.Size / (1024 * 1024 * 1024)) * (
         0.0433 + (
-            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
+            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
         )
     )),0)
-FROM
-    (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}) AS xfu
-    JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-    JOIN torrents AS t ON t.ID = xfu.fid
+FROM (
+    SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}
+) AS xfu
+INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
 WHERE
     xfu.uid = {$UserID}");
 list($BonusPointsPerHour) = $DB->next_record(MYSQLI_NUM);
@@ -1160,7 +1168,7 @@ if (check_perms('users_mod', $Class)) { ?>
             elseif ($CurClass['Level'] > $LoggedUser['EffectiveClass']) {
                 break;
             }
-            if ($Class === $CurClass['Level']) {
+            if ($Class == $CurClass['Level']) {
                 $Selected = ' selected="selected"';
             } else {
                 $Selected = '';

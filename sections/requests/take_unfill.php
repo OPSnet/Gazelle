@@ -15,10 +15,10 @@ $DB->prepared_query('
         r.UserID,
         r.FillerID,
         r.Title,
-        u.Uploaded,
+        uls.Uploaded,
         r.GroupID
     FROM requests AS r
-    LEFT JOIN users_main AS u ON (u.ID = FillerID)
+    LEFT JOIN users_leech_stats AS uls ON (uls.UserID = r.FillerID)
     WHERE r.ID = ?', $RequestID);
 list($CategoryID, $UserID, $FillerID, $Title, $Uploaded, $GroupID) = $DB->next_record();
 
@@ -46,15 +46,15 @@ $RequestVotes = Requests::get_votes_array($RequestID);
 if ($RequestVotes['TotalBounty'] > $Uploaded) {
     // If we can't take it all out of upload, zero that out and add whatever is left as download.
     $DB->prepared_query('
-        UPDATE users_main
+        UPDATE users_leech_status
         SET Uploaded = 0, Downloaded = Downloaded + ?
-        WHERE ID = ?',
+        WHERE UserID = ?',
         $RequestVotes['TotalBounty'] - $Uploaded, $FillerID);
 } else {
     $DB->prepared_query('
-        UPDATE users_main
+        UPDATE users_leech_status
         SET Uploaded = Uploaded - ?
-        WHERE ID = ?', $RequestVotes['TotalBounty'], $FillerID);
+        WHERE UserID = ?', $RequestVotes['TotalBounty'], $FillerID);
 }
 
 Misc::send_pm($FillerID, 0, 'A request you filled has been unfilled', "The request \"[url=".site_url()."requests.php?action=view&amp;id=$RequestID]$FullName"."[/url]\" was unfilled by [url=".site_url().'user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason']."[/quote]\nIf you feel like this request was unjustly unfilled, please [url=".site_url()."reports.php?action=report&amp;type=request&amp;id=$RequestID]report the request[/url] and explain why this request should not have been unfilled.");

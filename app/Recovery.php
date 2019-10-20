@@ -602,7 +602,7 @@ END_MSG;
 
             /* buffer */
             $db->prepared_query("
-                UPDATE users_main
+                UPDATE users_leech_stats
                 SET Uploaded = Uploaded + ?
                 WHERE ID = ?
                 ", $final, $ops_user_id

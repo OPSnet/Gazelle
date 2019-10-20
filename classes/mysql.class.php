@@ -235,7 +235,7 @@ class DB_MYSQL {
      * Runs a raw query assuming pre-sanitized input. However, attempting to self sanitize (such
      * as via db_string) is still not as safe for using prepared statements so for queries
      * involving user input, you really should not use this function (instead opting for
-     * prepare_query) {@See DB_MYSQL::prepare_query}
+     * prepared_query) {@See DB_MYSQL::prepared_query}
      *
      * When running a batch of queries using the same statement
      * with a variety of inputs, it's more performant to reuse the statement

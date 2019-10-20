@@ -104,21 +104,38 @@ if (!empty($_REQUEST['confirm'])) {
                 $Enabled = '0';
             }
 
-            $IPcc = Tools::geoip($_SERVER['REMOTE_ADDR']);
-
-            $DB->query("
+            $DB->prepared_query('
                 INSERT INTO users_main
-                    (Username, Email, PassHash, torrent_pass, IP, PermissionID, Enabled, Invites, Uploaded, ipcc)
-                VALUES
-                    ('".db_string(trim($_POST['username']))."', '".db_string($_POST['email'])."', '".db_string(Users::make_password_hash($_POST['password']))."', '".db_string($torrent_pass)."', '".db_string($_SERVER['REMOTE_ADDR'])."', '$Class', '$Enabled', '".STARTING_INVITES."', '".STARTING_UPLOAD."', '$IPcc')");
-
+                       (Username, Email, PassHash, torrent_pass, IP, PermissionID, Enabled, Invites, ipcc)
+                VALUES (?,        ?,     ?,        ?,            ?,  ?,            ?,       ?,       ?)
+                ',
+                    trim($_POST['username']),
+                    trim($_POST['email']),
+                    Users::make_password_hash($_POST['password']),
+                    $torrent_pass,
+                    $_SERVER['REMOTE_ADDR'],
+                    $Class,
+                    $Enabled,
+                    STARTING_INVITES,
+                    Tools::geoip($_SERVER['REMOTE_ADDR'])
+            );
             $UserID = $DB->inserted_id();
 
-
             // User created, delete invite. If things break after this point, then it's better to have a broken account to fix than a 'free' invite floating around that can be reused
-            $DB->query("
+            $DB->prepared_query('
                 DELETE FROM invites
-                WHERE InviteKey = '".db_string($_REQUEST['invite'])."'");
+                WHERE InviteKey = ?
+                ', $_REQUEST['invite']
+            );
+
+            $DB->prepared_query('
+                INSERT INTO users_leech_stats
+                       (UserID, Uploaded)
+                VALUES (?,      ?)
+                ',
+                    $UserID,
+                    STARTING_UPLOAD
+            );
 
             $DB->query("
                 SELECT ID
@@ -130,36 +147,38 @@ if (!empty($_REQUEST['confirm'])) {
             if ($InviteReason !== '') {
                 $InviteReason = db_string(sqltime()." - $InviteReason");
             }
-            $DB->query("
+            $DB->prepared_query('
                 INSERT INTO users_info
-                    (UserID, StyleID, AuthKey, Inviter, JoinDate, AdminComment)
-                VALUES
-                    ('$UserID', '$StyleID', '".db_string($AuthKey)."', '$InviterID', '".sqltime()."', '$InviteReason')");
-
-            $DB->query("
+                       (UserID, StyleID, AuthKey, Inviter, AdminComment, JoinDate)
+                VALUES (?,      ?,       ?,       ?,       ?,            now())
+                ', $UserID, $StyleID, $AuthKey, $InviterID, $InviteReason
+            );
+            $DB->prepared_query('
                 INSERT INTO users_history_ips
-                    (UserID, IP, StartTime)
-                VALUES
-                    ('$UserID', '".db_string($_SERVER['REMOTE_ADDR'])."', '".sqltime()."')");
-            $DB->query("
+                       (UserID, IP, StartTime)
+                VALUES (?,      ?,  now())
+                ', $UserID, $_SERVER['REMOTE_ADDR']
+            );
+            $DB->prepared_query('
                 INSERT INTO users_notifications_settings
-                    (UserID)
-                VALUES
-                    ('$UserID')");
-
-
-            $DB->query("
+                       (UserID)
+                VALUES (?)
+                ', $UserID
+            );
+            $DB->prepared_query('
                 INSERT INTO users_history_emails
-                    (UserID, Email, Time, IP)
-                VALUES
-                    ('$UserID', '".db_string($_REQUEST['email'])."', '0000-00-00 00:00:00', '".db_string($_SERVER['REMOTE_ADDR'])."')");
+                       (UserID, Email, IP)
+                VALUES (?,      ?,     ?)
+                ', $UserID, trim($_REQUEST['email']), $_SERVER['REMOTE_ADDR']
+            );
 
             if ($_REQUEST['email'] != $InviteEmail) {
-                $DB->query("
+                $DB->prepared_query('
                     INSERT INTO users_history_emails
-                        (UserID, Email, Time, IP)
-                    VALUES
-                        ('$UserID', '".db_string($InviteEmail)."', '".sqltime()."', '".db_string($_SERVER['REMOTE_ADDR'])."')");
+                           (UserID, Email, IP, Time)
+                    VALUES (?,      ?,     ?,  now())
+                    ', $UserID, trim($InviteEmail), $_SERVER['REMOTE_ADDR']
+                );
             }
 
             $DB->prepared_query("

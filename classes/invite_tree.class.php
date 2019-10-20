@@ -50,17 +50,18 @@ class INVITE_TREE {
         $TreeQuery = G::$DB->query("
             SELECT
                 it.UserID,
-                Enabled,
-                PermissionID,
-                Donor,
-                Uploaded,
-                Downloaded,
-                Paranoia,
-                TreePosition,
-                TreeLevel
+                um.Enabled,
+                um.PermissionID,
+                ui.Donor,
+                uls.Uploaded,
+                uls.Downloaded,
+                um.Paranoia,
+                it.TreePosition,
+                it.TreeLevel
             FROM invite_tree AS it
-                JOIN users_main AS um ON um.ID = it.UserID
-                JOIN users_info AS ui ON ui.UserID = it.UserID
+            INNER JOIN users_main AS um ON (um.ID = it.UserID)
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = it.UserID)
+            INNER JOIN users_info AS ui ON (ui.UserID = it.UserID)
             WHERE TreeID = $TreeID
                 AND TreePosition > $TreePosition".
                 ($MaxPosition ? " AND TreePosition < $MaxPosition" : '')."

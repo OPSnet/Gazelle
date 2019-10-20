@@ -29,13 +29,15 @@ SELECT
     SUM(t.Size) as TotalSize,
     SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
         0.0433 + (
-            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
+            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
         )
     ), 0)) AS TotalHourlyPoints
-FROM
-    (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
-    JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-    JOIN torrents AS t ON t.ID = xfu.fid
+FROM (
+    SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+) AS xfu
+INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
 WHERE
     xfu.uid = ?", $UserID, $UserID);
 
@@ -125,17 +127,19 @@ if ($TotalTorrents > 0) {
         t.Scene,
         t.RemasterYear,
         t.RemasterTitle,
-        GREATEST(t.Seeders, 1) AS Seeders,
+        GREATEST(tls.Seeders, 1) AS Seeders,
         xfh.seedtime AS Seedtime,
         ((t.Size / (1024 * 1024 * 1024)) * (
             0.0433 + (
-                (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(t.Seeders, 1), 0.35))
+                (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
             )
         )) AS HourlyPoints
-    FROM
-        (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
-        JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-        JOIN torrents AS t ON t.ID = xfu.fid
+    FROM (
+        SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+    ) AS xfu
+    INNER JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
+    INNER JOIN torrents AS t ON t.ID = xfu.fid
+    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
     WHERE
         xfu.uid = ?
     LIMIT ?

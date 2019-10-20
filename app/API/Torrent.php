@@ -31,12 +31,13 @@ class Torrent extends AbstractAPI {
                 t.HasLog,
                 t.HasLogDB,
                 t.LogScore,
-                t.Snatched,
-                t.Seeders,
-                t.Leechers
+                tls.Snatched,
+                tls.Seeders,
+                tls.Leechers
             FROM
                 torrents AS t
-                INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
             WHERE
                 t.ID = ?", $_GET['torrent_id']);
         if (!$this->db->has_results()) {

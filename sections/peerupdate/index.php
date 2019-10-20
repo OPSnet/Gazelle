@@ -19,8 +19,9 @@ $Cache->InternalCache = false; // We don't want PHP to cache all results interna
 $DB->query("TRUNCATE TABLE torrents_peerlists_compare");
 $DB->query("
     INSERT INTO torrents_peerlists_compare
-    SELECT ID, GroupID, Seeders, Leechers, Snatched
-    FROM torrents
+    SELECT t.ID, t.GroupID, tls.Seeders, tls.Leechers, tls.Snatched
+    FROM torrents t
+    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
     ON DUPLICATE KEY UPDATE
         Seeders = VALUES(Seeders),
         Leechers = VALUES(Leechers),
