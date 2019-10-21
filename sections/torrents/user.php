@@ -282,7 +282,8 @@ if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name'
                 CONCAT_WS(' ', GROUP_CONCAT(aa.Name SEPARATOR ' '), ' ', tg.Name, ' ', tg.Year, ' ') AS Name,
                 t.Size
             FROM $From
-                JOIN torrents_group AS tg ON tg.ID = t.GroupID
+                INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
+                INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
                 LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID
                 LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
             WHERE $UserField = '$UserID'
