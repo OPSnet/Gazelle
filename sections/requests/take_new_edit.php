@@ -448,7 +448,7 @@ if ($NewRequest) {
         $RequestID, $LoggedUser['ID'], $Bytes * (1 - $RequestTax));
 
     $DB->prepared_query('
-        UPDATE users_leech_status
+        UPDATE users_leech_stats
         SET Uploaded = (Uploaded - ?)
         WHERE UserID = ?',
         $Bytes, $LoggedUser['ID']);

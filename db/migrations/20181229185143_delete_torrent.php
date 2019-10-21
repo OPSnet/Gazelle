@@ -27,7 +27,13 @@ class DeleteTorrent extends AbstractMigration
      * with the Table class.
      */
     public function up() {
+      $this->table('torrents')
+        ->changeColumn('last_action', 'datetime', ['null' => true])
+        ->save();
+
         $this->execute("
+UPDATE torrents SET last_action = NULL WHERE last_action='0000-00-00 00:00:00';
+
 CREATE TABLE `deleted_torrents` (
   `ID` int(10) NOT NULL,
   `GroupID` int(10) NOT NULL,
@@ -53,7 +59,7 @@ CREATE TABLE `deleted_torrents` (
   `Size` bigint(12) NOT NULL,
   `Leechers` int(6) NOT NULL,
   `Seeders` int(6) NOT NULL,
-  `last_action` datetime NOT NULL,
+  `last_action` datetime,
   `FreeTorrent` enum('0','1','2') NOT NULL,
   `FreeLeechType` enum('0','1','2','3','4','5','6','7') NOT NULL,
   `Time` datetime NOT NULL,

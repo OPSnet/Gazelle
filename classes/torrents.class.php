@@ -284,7 +284,11 @@ class Torrents {
         );
 
         $manager = new \Gazelle\DB(G::$DB, G::$Cache);
-        list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents', [['ID', $ID]]);
+        list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
+        if (!$ok) {
+            return $message;
+        }
+        list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents',             [['ID', $ID]]);
         if (!$ok) {
             return $message;
         }
@@ -302,7 +306,6 @@ class Torrents {
 
         $manager->soft_delete(SQLDB, 'torrents_files',                  [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_files',                [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_leech_stats',          [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_lossymaster_approved', [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_missing_lineage',      [['TorrentID', $ID]]);

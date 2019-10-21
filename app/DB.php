@@ -20,9 +20,10 @@ class DB {
      * @param string $table the table name
      * @param array $condition Must be an array of arrays, e.g. [[column_name, column_value]] or [[col1, val1], [col2, val2]]
      *                         Will be used to identify the row (or rows) to delete
+     * @param boolean $delete whether to delete the matched rows
      * @return array 2 elements, true/false and message if false
      */
-    public function soft_delete($schema, $table, array $condition) {
+    public function soft_delete($schema, $table, array $condition, $delete = true) {
         $sql = 'SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER BY 1';
         $this->db->prepared_query($sql, $schema, $table);
         $t1 = $this->db->to_array();
@@ -64,6 +65,10 @@ class DB {
         $this->db->prepared_query_array($sql, $arg_list);
         if ($this->db->affected_rows() == 0) {
             return [false, "condition selected 0 rows"];
+        }
+
+        if (!$delete) {
+            return [true, "rows affected: " . $this->db->affected_rows()];
         }
 
         $sql = "DELETE FROM $table WHERE $condition_list";

@@ -46,11 +46,13 @@ class TorrentStatsTables extends AbstractMigration
              ->addColumn('Seeders', 'integer', ['limit' => 6, 'signed' => false, 'default' => 0])
              ->addColumn('Leechers', 'integer', ['limit' => 6, 'signed' => false, 'default' => 0])
              ->addColumn('Snatched', 'integer', ['limit' => 6, 'signed' => false, 'default' => 0])
-             ->addColumn('Balance', 'biginteger', ['limit' => 20, 'signed' => false, 'default' => 0])
+             ->addColumn('Balance', 'biginteger', ['limit' => 20, 'default' => 0])
+             ->addColumn('last_action', 'datetime', ['null' => true])
              ->addIndex(['Seeders'], ['name' => 'tls_seeders_idx'])
              ->addIndex(['Leechers'], ['name' => 'tls_leechers_idx'])
              ->addIndex(['Snatched'], ['name' => 'tls_snatched_idx'])
-             ->addForeignKey('TorrentID', 'torrents', 'ID')
+             ->addIndex(['last_action'], ['name' => 'tls_last_action_idx'])
+             ->addForeignKey('TorrentID', 'torrents', 'ID', ['delete' => 'CASCADE'])
              ->create();
 
         $this->table('deleted_torrents_leech_stats', ['id' => false, 'primary_key' => 'TorrentID'])
@@ -58,7 +60,8 @@ class TorrentStatsTables extends AbstractMigration
              ->addColumn('Seeders', 'integer', ['limit' => 6, 'signed' => false, 'default' => 0])
              ->addColumn('Leechers', 'integer', ['limit' => 6, 'signed' => false, 'default' => 0])
              ->addColumn('Snatched', 'integer', ['limit' => 6, 'signed' => false, 'default' => 0])
-             ->addColumn('Balance', 'biginteger', ['limit' => 20, 'signed' => false, 'default' => 0])
+             ->addColumn('Balance', 'biginteger', ['limit' => 20, 'default' => 0])
+             ->addColumn('last_action', 'datetime', ['null' => true])
              ->create();
     }
 }

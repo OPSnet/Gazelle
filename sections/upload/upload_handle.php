@@ -792,6 +792,10 @@ $DB->query("
 $Cache->increment('stats_torrent_count');
 $TorrentID = $DB->inserted_id();
 
+$DB->prepared_query("
+    INSERT INTO torrents_leech_stats (TorrentID)
+    VALUES (?)", $TorrentID);
+
 Tracker::update_tracker('add_torrent', array('id' => $TorrentID, 'info_hash' => rawurlencode($InfoHash), 'freetorrent' => $T['FreeLeech']));
 $Debug->set_flag('upload: ocelot updated');
 
