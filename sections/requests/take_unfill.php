@@ -46,13 +46,13 @@ $RequestVotes = Requests::get_votes_array($RequestID);
 if ($RequestVotes['TotalBounty'] > $Uploaded) {
     // If we can't take it all out of upload, zero that out and add whatever is left as download.
     $DB->prepared_query('
-        UPDATE users_leech_status
+        UPDATE users_leech_stats
         SET Uploaded = 0, Downloaded = Downloaded + ?
         WHERE UserID = ?',
         $RequestVotes['TotalBounty'] - $Uploaded, $FillerID);
 } else {
     $DB->prepared_query('
-        UPDATE users_leech_status
+        UPDATE users_leech_stats
         SET Uploaded = Uploaded - ?
         WHERE UserID = ?', $RequestVotes['TotalBounty'], $FillerID);
 }

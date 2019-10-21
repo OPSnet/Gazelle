@@ -165,7 +165,7 @@ Misc::write_log("Request $RequestID ($FullName) was filled by user $FillerID ($F
 
 // Give bounty
 $DB->prepared_query('
-    UPDATE users_leech_status
+    UPDATE users_leech_stats
     SET Uploaded = Uploaded + ?
     WHERE UserID = ?', $RequestVotes['TotalBounty'], $FillerID);
 

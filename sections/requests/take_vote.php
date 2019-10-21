@@ -58,7 +58,7 @@ $DB->prepared_query('
 
 // Subtract amount from user
 $DB->prepared_query('
-    UPDATE users_leech_status
+    UPDATE users_leech_stats
     SET Uploaded = Uploaded - ?
     WHERE UserID = ?', $Amount, $LoggedUser['ID']);
 $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
