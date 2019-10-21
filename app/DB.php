@@ -49,7 +49,7 @@ class DB {
         for ($i = 0; $i < $n1; ++$i) {
             // a column does not have the same name or datatype
             if (strtolower($t1[$i][0]) != strtolower($t2[$i][0]) || $t1[$i][1] != $t2[$i][1]) {
-                return [false, "column {$t1[$i][0]} name or datatype mismatch {$t1[$i][0]}:{$t2[$i][0]} {$t1[$i][1]}:{$t2[$i][1]}"];
+                return [false, "{$table}: column {$t1[$i][0]} name or datatype mismatch {$t1[$i][0]}:{$t2[$i][0]} {$t1[$i][1]}:{$t2[$i][1]}"];
             }
             $column[] = $t1[$i][0];
         }

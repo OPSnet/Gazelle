@@ -305,7 +305,10 @@ class Torrents {
         }
 
         $manager->soft_delete(SQLDB, 'torrents_files',                  [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_files',                [['TorrentID', $ID]]);
+        $manager->soft_delete(SQLDB, 'torrents_bad_files',              [['TorrentID', $ID]]);
+        $manager->soft_delete(SQLDB, 'torrents_bad_folders',          [['TorrentID', $ID]]);
+        $manager->soft_delete(SQLDB, 'torrents_bad_tags',              [['TorrentID', $ID]]);
+        $manager->soft_delete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_lossymaster_approved', [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
         $manager->soft_delete(SQLDB, 'torrents_missing_lineage',      [['TorrentID', $ID]]);
