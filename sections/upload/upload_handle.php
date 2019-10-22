@@ -906,6 +906,10 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
     $Cache->increment('stats_torrent_count');
     $ExtraTorrentID = $DB->inserted_id();
 
+    $DB->prepared_query("
+        INSERT INTO torrents_leech_stats (TorrentID)
+        VALUES (?)", $ExtraTorrentID);
+
     Tracker::update_tracker('add_torrent', array('id' => $ExtraTorrentID, 'info_hash' => rawurlencode($ExtraTorrent['InfoHash']), 'freetorrent' => $T['FreeLeech']));
 
     //******************************************************************************//
