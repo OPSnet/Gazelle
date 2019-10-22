@@ -15,15 +15,10 @@ enforce_login();
 $AJAX_LIMIT = array(5,10);
 $LimitedPages = array('tcomments','user','forum','top10','browse','usersearch','requests','artist','inbox','subscriptions','bookmarks','announcements','notifications','request','better','similar_artists','userhistory','votefavorite','wiki','torrentgroup','news_ajax','user_recents', 'collage', 'raw_bbcode');
 
-// These users aren't rate limited.
-// This array should contain user IDs.
-$UserExceptions = array(
-
-        );
 $UserID = $LoggedUser['ID'];
 header('Content-Type: application/json; charset=utf-8');
 //    Enforce rate limiting everywhere except info.php
-if (!in_array($UserID, $UserExceptions) && isset($_GET['action']) && in_array($_GET['action'], $LimitedPages)) {
+if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && in_array($_GET['action'], $LimitedPages)) {
     if (!$UserRequests = $Cache->get_value('ajax_requests_'.$UserID)) {
         $UserRequests = 0;
         $Cache->cache_value('ajax_requests_'.$UserID, '0', $AJAX_LIMIT[1]);
