@@ -363,7 +363,7 @@ $Params = [
     $_POST['styleurl'],
     $_POST['avatar'],
     serialize($Options),
-    $Options['NotifyOnQuote'],
+    strval($Options['NotifyOnQuote']),
     $_POST['info'],
     $_POST['profile_title'],
     $DownloadAlt,
