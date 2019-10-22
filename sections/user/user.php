@@ -360,7 +360,7 @@ if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
             <ul class="stats nobullet">
                 <li>Joined: <?=$JoinedDate?></li>
 <?php    if (($Override = check_paranoia_here('lastseen'))) { ?>
-                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Last seen: <?=$LastAccess?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Last seen: <?=$LastAccess?></li>
 <?php
     }
     if (($Override = check_paranoia_here('uploaded'))) {
@@ -380,38 +380,38 @@ if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
     }
     if (($Override = check_paranoia_here('ratio'))) {
 ?>
-                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Ratio: <?=Format::get_ratio_html($Uploaded, $Downloaded)?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Ratio: <?=Format::get_ratio_html($Uploaded, $Downloaded)?></li>
 <?php
     }
     if (($Override = check_paranoia_here('requiredratio')) && isset($RequiredRatio)) {
 ?>
-                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Required Ratio: <span class="tooltip" title="<?=number_format((double)$RequiredRatio, 5)?>"><?=number_format((double)$RequiredRatio, 2)?></span></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Required Ratio: <span class="tooltip" title="<?=number_format((double)$RequiredRatio, 5)?>"><?=number_format((double)$RequiredRatio, 2)?></span></li>
 <?php
     }
     if (($Override = check_paranoia_here('bonuspoints')) && isset($BonusPoints)) {
 ?>
-                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Bonus Points: <?=number_format($BonusPoints)?><?php
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Bonus Points: <?=number_format($BonusPoints)?><?php
         if (check_perms('admin_bp_history')) {
              printf('&nbsp;<a href="bonus.php?action=history&amp;userid=%d" class="brackets">History</a>', $UserID);
-             $link = '<a href="bonus.php?action=bprates&userid=' . $UserID . '">';
+             $text = '<a href="bonus.php?action=bprates&userid=' . $UserID . '">Points Per Hour</a>';
         } else if ($OwnProfile) {
              printf('&nbsp;<a href="bonus.php?action=history" class="brackets">History</a>', $UserID);
-             $link = '<a href="bonus.php?action=bprates">';
+             $text = '<a href="bonus.php?action=bprates">Points Per Hour</a>';
         } else {
-            $link = '';
+            $text = 'Points Per Hour';
         }
                 ?></li>
-                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><?= $link ?>Points Per Hour</a>: <?=number_format($BonusPointsPerHour)?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><?= $text ?>: <?=number_format($BonusPointsPerHour)?></li>
 <?php
     }
     if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {
 ?>
-                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>">Tokens</a>: <?=number_format($FLTokens)?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>">Tokens</a>: <?=number_format($FLTokens)?></li>
 <?php
     }
     if (($OwnProfile || check_perms('users_mod')) && $Warned != '0000-00-00 00:00:00') {
 ?>
-                <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Warning expires in: <?=time_diff((date('Y-m-d H:i', strtotime($Warned))))?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Warning expires in: <?=time_diff((date('Y-m-d H:i', strtotime($Warned))))?></li>
 <?php    } ?>
             </ul>
         </div>
