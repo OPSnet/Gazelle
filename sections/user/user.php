@@ -394,10 +394,11 @@ if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
         if (check_perms('admin_bp_history')) {
              printf('&nbsp;<a href="bonus.php?action=history&amp;userid=%d" class="brackets">History</a>', $UserID);
              $link = '<a href="bonus.php?action=bprates&userid=' . $UserID . '">';
-        }
-        else {
+        } else if ($OwnProfile) {
              printf('&nbsp;<a href="bonus.php?action=history" class="brackets">History</a>', $UserID);
              $link = '<a href="bonus.php?action=bprates">';
+        } else {
+            $link = '';
         }
                 ?></li>
                 <li<?=($Override === 2 ? ' class="paranoia_override"' : '')?>><?= $link ?>Points Per Hour</a>: <?=number_format($BonusPointsPerHour)?></li>
