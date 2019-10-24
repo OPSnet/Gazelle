@@ -157,7 +157,7 @@ if (isset($Results)) {
             </tr>
             <tr>
                 <td width="150px">Torrent Group</td>
-                <td><input type="text" name="group" size="80" value="<?= isset($_GET['group']) ? $_GET['torrent'] : '' ?>" /></td>
+                <td><input type="text" name="group" size="80" value="<?= isset($_GET['group']) ? $_GET['group'] : '' ?>" /></td>
             </tr>
             <tr>
                 <td width="150px">Report Type</td>

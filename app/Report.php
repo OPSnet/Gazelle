@@ -25,12 +25,12 @@ class Report {
             $args[] = $filter['dt-from'];
         }
         if (array_key_exists('dt-until', $filter)) {
-            $rpt_cond[] = 'r.ReportedTime <= ? + INTERVAL 1 DAY';
-            $rpt_args[] = $filter['dt-until'];
+            $delcond[] = 'r.ReportedTime <= ? + INTERVAL 1 DAY';
+            $delargs[] = $filter['dt-until'];
         }
         if (array_key_exists('torrent', $filter)) {
-            $rpt_cond[] = 'r.TorrentID = ?';
-            $rpt_args[] = $filter['torrent'];
+            $delcond[] = 'r.TorrentID = ?';
+            $delargs[] = $filter['torrent'];
         }
         if (array_key_exists('uploader', $filter) && $filter['uploader']) {
             $cond[] = 't.UserID = ?';
@@ -87,7 +87,7 @@ class Report {
                 TORRENTS_PER_PAGE * (max($filter['page'], 1) - 1), // OFFSET
             ]
         );
-        $db->prepared_query_array($sql, $args);
+        $db->prepared_query($sql, ...$args);
         $result = $db->to_array();
         $db->query('SELECT FOUND_ROWS()');
         list($count) = $db->next_record();
