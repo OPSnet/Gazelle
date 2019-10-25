@@ -2,8 +2,9 @@
 
 $DB->prepared_query("
 INSERT INTO users_stats_yearly (UserID, Uploaded, Downloaded, BonusPoints, Torrents, PerfectFLACs)
-SELECT um.ID, um.Uploaded, um.Downloaded, um.BonusPoints, COUNT(t.ID) AS Torrents, COALESCE(p.Perfects, 0) AS PerfectFLACs
+SELECT um.ID, uls.Uploaded, uls.Downloaded, um.BonusPoints, COUNT(t.ID) AS Torrents, COALESCE(p.Perfects, 0) AS PerfectFLACs
 FROM users_main um
+INNER JOIN users_leech_stats uls ON uls.UserID = um.ID
 LEFT JOIN torrents t ON t.UserID = um.ID
 LEFT JOIN
 (
