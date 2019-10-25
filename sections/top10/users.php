@@ -41,11 +41,11 @@ $BaseQuery = "
         AND uls.Uploaded>'". 5 * 1024 * 1024 * 1024 ."'
         AND uls.Downloaded>'". 5 * 1024 * 1024 * 1024 ."'
         AND (um.Paranoia IS NULL OR (um.Paranoia NOT LIKE '%\"uploaded\"%' AND um.Paranoia NOT LIKE '%\"downloaded\"%'))
-    GROUP BY u.ID";
+    GROUP BY um.ID";
 
     if ($Details == 'all' || $Details == 'ul') {
         if (!$TopUserUploads = $Cache->get_value('topuser_ul_'.$Limit)) {
-            $DB->query("$BaseQuery ORDER BY u.Uploaded DESC LIMIT $Limit;");
+            $DB->query("$BaseQuery ORDER BY uls.Uploaded DESC LIMIT $Limit;");
             $TopUserUploads = $DB->to_array();
             $Cache->cache_value('topuser_ul_'.$Limit,$TopUserUploads, 3600 * 12);
         }
@@ -54,7 +54,7 @@ $BaseQuery = "
 
     if ($Details == 'all' || $Details == 'dl') {
         if (!$TopUserDownloads = $Cache->get_value('topuser_dl_'.$Limit)) {
-            $DB->query("$BaseQuery ORDER BY u.Downloaded DESC LIMIT $Limit;");
+            $DB->query("$BaseQuery ORDER BY uls.Downloaded DESC LIMIT $Limit;");
             $TopUserDownloads = $DB->to_array();
             $Cache->cache_value('topuser_dl_'.$Limit,$TopUserDownloads, 3600 * 12);
         }
