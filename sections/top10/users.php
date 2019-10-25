@@ -29,7 +29,7 @@ $BaseQuery = "
         um.ID,
         ui.JoinDate,
         uls.Uploaded,
-        ulsDownloaded,
+        uls.Downloaded,
         ABS(uls.Uploaded-".STARTING_UPLOAD.") / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS UpSpeed,
         uls.Downloaded / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS DownSpeed,
         count(t.ID) AS NumUploads
