@@ -13,7 +13,7 @@ $DB->prepared_query("
         t.Media,
         HEX(t.info_hash) AS InfoHash
     FROM torrents AS t
-    INNER JOIN torrents_leech_stats AS tls ON (tl.TorrentID = t.ID)
+    INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
     INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
     WHERE
         (tls.last_action IS NOT NULL AND tls.last_action < now() - INTERVAL 28 DAY)
