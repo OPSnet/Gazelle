@@ -2,9 +2,9 @@
 $TorrentID = (int)$_GET['torrentid'];
 
 $DB->query("
-    SELECT t.last_action, t.LastReseedRequest, t.UserID, t.Time, t.GroupID
+    SELECT tls.last_action, t.LastReseedRequest, t.UserID, t.Time, t.GroupID
     FROM torrents AS t
-    INNER JOIN torrents_leech_stats AS tls ON (t.TorrentID = t.ID)
+    INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
     WHERE ID = '$TorrentID'");
 list($LastActive, $LastReseedRequest, $UploaderID, $UploadedTime, $GroupID) = $DB->next_record();
 
@@ -17,10 +17,10 @@ if (!check_perms('users_mod')) {
     }
 }
 
-$DB->query("
+$DB->prepared_query("
     UPDATE torrents
     SET LastReseedRequest = NOW()
-    WHERE ID = '$TorrentID'");
+    WHERE ID = ?", $TorrentID);
 
 $Group = Torrents::get_groups(array($GroupID));
 extract(Torrents::array_group($Group[$GroupID]));
