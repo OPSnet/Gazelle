@@ -80,7 +80,7 @@ foreach ($Passkeys as $Passkey) {
 // Put user on ratio watch if he doesn't meet the standards
 sleep(10);
 $DB->query("
-        SELECT m.ID, m.Downloaded
+        SELECT um.ID, um.Downloaded
         FROM users_info AS i
         INNER JOIN users_main AS um ON (um.ID = i.UserID)
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
