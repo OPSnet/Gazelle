@@ -95,10 +95,10 @@ foreach ($RatioRequirements as $Requirement) {
     $DB->prepared_query("
             UPDATE users_main AS um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-            SET RequiredRatio = ?
-            WHERE Downloaded >= ?
-                AND Downloaded < ?
-                AND RequiredRatio < ?", $MinRatio, $Download, $DownloadBarrier, $MinRatio);
+            SET um.RequiredRatio = ?
+            WHERE uls.Downloaded >= ?
+                AND uls.Downloaded < ?
+                AND um.RequiredRatio < ?", $MinRatio, $Download, $DownloadBarrier, $MinRatio);
 
     /*$DB->query("
         UPDATE users_main
