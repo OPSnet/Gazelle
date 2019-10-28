@@ -75,27 +75,30 @@ $RatioRequirements = array(
 );
 
 $DownloadBarrier = 100 * 1024 * 1024 * 1024;
-$DB->query("
-        UPDATE users_main
-        SET RequiredRatio = 0.60
-        WHERE Downloaded > $DownloadBarrier");
+$DB->prepared_query("
+        UPDATE users_main AS um
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        SET um.RequiredRatio = 0.60
+        WHERE uls.Downloaded > ?", $DownloadBarrier);
 
 
 foreach ($RatioRequirements as $Requirement) {
     list($Download, $Ratio, $MinRatio) = $Requirement;
 
-    $DB->query("
-            UPDATE users_main
-            SET RequiredRatio = RequiredRatioWork * $Ratio
-            WHERE Downloaded >= '$Download'
-                AND Downloaded < '$DownloadBarrier'");
+    $DB->prepared_query("
+            UPDATE users_main AS um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            SET um.RequiredRatio = um.RequiredRatioWork * ?
+            WHERE uls.Downloaded >= ?
+            AND uls.Downloaded < ?", $Ratio, $Download, $DownloadBarrier);
 
-    $DB->query("
-            UPDATE users_main
-            SET RequiredRatio = $MinRatio
-            WHERE Downloaded >= '$Download'
-                AND Downloaded < '$DownloadBarrier'
-                AND RequiredRatio < $MinRatio");
+    $DB->prepared_query("
+            UPDATE users_main AS um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            SET RequiredRatio = ?
+            WHERE Downloaded >= ?
+                AND Downloaded < ?
+                AND RequiredRatio < ?", $MinRatio, $Download, $DownloadBarrier, $MinRatio);
 
     /*$DB->query("
         UPDATE users_main

@@ -49,7 +49,7 @@ $Query = $DB->query('
 echo "demoted 3\n";
 $DB->query('
         UPDATE users_info AS ui
-        INNER JOIN users_main AS um ON (um.ID = ui.UserID
+        INNER JOIN users_main AS um ON (um.ID = ui.UserID)
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
         SET
             um.PermissionID = ' . USER . ",
