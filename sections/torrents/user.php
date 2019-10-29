@@ -159,7 +159,8 @@ switch ($_GET['type']) {
         $ExtraWhere = '';
         $From = "
             xbt_snatched AS xs
-                JOIN torrents AS t ON t.ID = xs.fid";
+                INNER JOIN torrents AS t ON t.ID = xs.fid
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'seeding':
         if (!check_paranoia('seeding', $User['Paranoia'], $UserClass, $UserID)) {
@@ -172,7 +173,8 @@ switch ($_GET['type']) {
             AND xfu.Remaining = 0';
         $From = "
             xbt_files_users AS xfu
-                JOIN torrents AS t ON t.ID = xfu.fid";
+                INNER JOIN torrents AS t ON t.ID = xfu.fid
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'leeching':
         if (!check_paranoia('leeching', $User['Paranoia'], $UserClass, $UserID)) {
@@ -185,7 +187,8 @@ switch ($_GET['type']) {
             AND xfu.Remaining > 0';
         $From = "
             xbt_files_users AS xfu
-                JOIN torrents AS t ON t.ID = xfu.fid";
+                INNER JOIN torrents AS t ON t.ID = xfu.fid
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'uploaded':
         if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !check_paranoia('uploads', $User['Paranoia'], $UserClass, $UserID)) {
