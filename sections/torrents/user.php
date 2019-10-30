@@ -244,8 +244,9 @@ if (empty($GroupBy)) {
 }
 
 if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name') {
+    $QueryOrder = $Order;
     if (in_array($Order, ['Seeders', 'Leechers', 'Snatched'])) {
-        $Order = "tls.$Order";
+        $QueryOrder = "tls.$QueryOrder";
     }
     $SQL = "
         SELECT
@@ -260,7 +261,7 @@ if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name'
             $ExtraWhere
             $SearchWhere
         GROUP BY $GroupBy
-        ORDER BY $Order $Way
+        ORDER BY $QueryOrder $Way
         LIMIT $Limit";
 } else {
     $DB->query("
