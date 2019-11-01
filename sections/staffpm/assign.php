@@ -18,10 +18,10 @@ if ($ConvID = (int)$_GET['convid']) {
             $Level = 0;
             switch ($_GET['to']) {
                 case 'forum':
-                    $Level = 650;
+                    $Level = $Classes[FORUM_MOD]['Level'];
                     break;
                 case 'staff':
-                    $Level = 700;
+                    $Level = $Classes[MOD]['Level'];
                     break;
                 default:
                     error(404);
@@ -56,7 +56,7 @@ if ($ConvID = (int)$_GET['convid']) {
 
     if ($LoggedUser['EffectiveClass'] >= min($Level, $LevelCap) || $AssignedToUser == $LoggedUser['ID']) {
         // Staff member is allowed to assign conversation, assign
-        list($LevelType, $NewLevel) = explode('_', db_string($_POST['assign']));
+        list($LevelType, $NewLevel) = explode('_', $_POST['assign']);
 
         if ($LevelType == 'class') {
             // Assign to class
