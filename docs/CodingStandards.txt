@@ -59,7 +59,7 @@ step in properly enforcing coding standards throughout the project.
 
 Tabs shall always be used for indentation.
 
-Files shall be encoded in ASCII.
+Files shall be encoded in UTF-8.
 
 Files shall always use Unix-style line endings (LF). The program dos2unix
 will take care of this for you, if you have files that use Windows-style
@@ -150,15 +150,14 @@ Function, variable, and class names shall always be descriptive.
 
 ## Function names
 
-PHP function names shall be written in `lowercase_with_underscores`.
+PHP function names shall be written in `camelCase`.
 
 JavaScript function names shall be written in `camelCase` with a leading
 lowercase letter.
 
 ## Variable names
 
-PHP variable names shall be written in `CamelCase` with a leading
-uppercase letter.
+PHP variable names shall be written in `camelCase`.
 
 JavaScript global-scope variables shall be written in `camelCase` with a
 leading lowercase letter.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\Top10;
 
 class Donor {
     /** @var \DB_MYSQL */
@@ -10,7 +10,7 @@ class Donor {
         $this->db = $db;
     }
 
-    public function get_top_donors($limit) {
+    public function getTopDonors($limit) {
         return $this->db->prepared_query('
             SELECT UserID, TotalRank, Rank, SpecialRank, DonationTime, Hidden
             FROM users_donor_ranks
