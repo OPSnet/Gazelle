@@ -50,19 +50,17 @@ VALUES ('{$interviewer_id}', '{$key}', '{$email}', '{$expires}', '{$reason}')");
         $site_url .= "://" . SITE_URL . "/register.php?invite={$key}";
 
         if (!empty($_GET['email'])) {
-            include(SERVER_ROOT.'/classes/templates.class.php');
-            $TPL = NEW TEMPLATE;
-            $TPL->open(SERVER_ROOT.'/templates/invite.tpl');
+            $body = $this->twig->render('emails/invite.twig', [
+                'InviterName' => $interviewer_name,
+                'InviteKey' => $key,
+                'Email' => $_GET['email'],
+                'SITE_NAME' => SITE_NAME,
+                'SITE_URL' => SITE_URL,
+                'IRC_SERVER' => BOT_SERVER,
+                'DISABLED_CHAN' => BOT_DISABLED_CHAN
+            ]);
 
-            $TPL->set('InviterName', $interviewer_name);
-            $TPL->set('InviteKey', $key);
-            $TPL->set('Email', $_GET['email']);
-            $TPL->set('SITE_NAME', SITE_NAME);
-            $TPL->set('SITE_URL', SITE_URL);
-            $TPL->set('IRC_SERVER', BOT_SERVER);
-            $TPL->set('DISABLED_CHAN', BOT_DISABLED_CHAN);
-
-            Misc::send_email($_GET['email'], 'New account confirmation at '.SITE_NAME, $TPL->get(), 'noreply');
+            Misc::send_email($_GET['email'], 'New account confirmation at '.SITE_NAME, $body, 'noreply');
         }
 
         return array("key" => $key, "invite_url" => $site_url);

@@ -19,7 +19,7 @@ $available = array(
 if (in_array($_GET['action'], $available)) {
     $config = array('Categories' => $Categories, 'CollageCats' => $CollageCats,
         'ReleaseTypes' => $ReleaseTypes, 'Debug' => $Debug);
-    $class = getClassObject($_GET['action'], $DB, $Cache, $config);
+    $class = getClassObject($_GET['action'], $DB, $Cache, $Twig, $config);
 } else {
     json_error('invalid action');
 }

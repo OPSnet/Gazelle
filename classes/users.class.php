@@ -839,24 +839,22 @@ class Users {
     public static function resetPassword($UserID, $Username, $Email)
     {
         $ResetKey = Users::make_secret();
-        G::$DB->query("
+        G::$DB->prepared_query("
             UPDATE users_info
             SET
-                ResetKey = '" . db_string($ResetKey) . "',
-                ResetExpires = '" . time_plus(60 * 60) . "'
-            WHERE UserID = '$UserID'");
+                ResetKey = ?,
+                ResetExpires = ?
+            WHERE UserID = ?", $ResetKey, time_plus(60 * 60), $UserID);
 
-        require(SERVER_ROOT . '/classes/templates.class.php');
-        $TPL = NEW TEMPLATE;
-        $TPL->open(SERVER_ROOT . '/templates/password_reset.tpl'); // Password reset template
+        $template = G::$Twig->render('emails/password_reset.twig', [
+            'Username' => $Username,
+            'ResetKey' => $ResetKey,
+            'IP' => $_SERVER['REMOTE_ADDR'],
+            'SITE_NAME' => SITE_NAME,
+            'SITE_URL' => SITE_URL
+        ]);
 
-        $TPL->set('Username', $Username);
-        $TPL->set('ResetKey', $ResetKey);
-        $TPL->set('IP', $_SERVER['REMOTE_ADDR']);
-        $TPL->set('SITE_NAME', SITE_NAME);
-        $TPL->set('SITE_URL', NONSSL_SITE_URL);
-
-        Misc::send_email($Email, 'Password reset information for ' . SITE_NAME, $TPL->get(), 'noreply');
+        Misc::send_email($Email, 'Password reset information for ' . SITE_NAME, $template, 'noreply');
     }
 
     /**

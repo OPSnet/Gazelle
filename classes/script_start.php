@@ -16,6 +16,8 @@ require __DIR__.'/config.php'; //The config contains all site wide configuration
 require(SERVER_ROOT.'/classes/classloader.php');
 
 use Gazelle\Util\Crypto;
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
 
 //Deal with dumbasses
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
@@ -87,6 +89,10 @@ $Cache = new CACHE($MemcachedServers);
 
 G::$Cache = $Cache;
 G::$DB = $DB;
+G::$Twig = new Environment(
+    new FilesystemLoader(__DIR__.'/../templates'),
+    ['cache' => __DIR__.'/../cache/twig']
+);
 
 //Begin browser identification
 if (session_status() === PHP_SESSION_NONE) {

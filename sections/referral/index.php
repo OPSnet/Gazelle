@@ -114,7 +114,7 @@
             } else {
                 $Verified = $ReferralManager->verifyAccount($Account, $_POST['username'], $Token);
                 if ($Verified === true) {
-                    list($Success, $Invite) = $ReferralManager->generateInvite($Account, $_POST['username'], $Email);
+                    list($Success, $Invite) = $ReferralManager->generateInvite($Account, $_POST['username'], $Email, G::$Twig);
                     if (!$Success) {
                         $Error = $Invite;
                     }

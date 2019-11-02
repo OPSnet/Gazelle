@@ -38,3 +38,4 @@ report/
 *.swp
 
 .docker/data
+cache/

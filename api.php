@@ -26,6 +26,10 @@ require_once(SERVER_ROOT.'/classes/util.php');
 $Cache = NEW CACHE($MemcachedServers); //Load the caching class
 $DB = new DB_MYSQL;
 $Debug = new DEBUG;
+$Twig = new Environment(
+    new FilesystemLoader(__DIR__.'/templates'),
+    ['cache' => __DIR__.'/cache/twig']
+);
 $Debug->handle_errors();
 
 require(SERVER_ROOT.'/classes/classloader.php');

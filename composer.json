@@ -22,7 +22,8 @@
     "whichbrowser/parser": "^2.0",
     "d11wtq/boris": "^1.0",
     "orpheusnet/bencode-torrent": "^0.11.0",
-    "orpheusnet/logchecker": "^0.8.6"
+    "orpheusnet/logchecker": "^0.8.6",
+    "twig/twig": "^2.12"
   },
   "require-dev": {
     "phpunit/phpunit": "^7.5.12",

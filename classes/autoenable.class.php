@@ -118,16 +118,15 @@ class AutoEnable {
 
         if ($Status != self::DISCARDED) {
             // Prepare email
-            require(SERVER_ROOT . '/classes/templates.class.php');
-            $TPL = NEW TEMPLATE;
+            $context = [];
             if ($Status == self::APPROVED) {
-                $TPL->open(SERVER_ROOT . '/templates/enable_request_accepted.tpl');
-                $TPL->set('SITE_URL', NONSSL_SITE_URL);
+                $template = 'enable_request_accepted.twig';
+                $context['SITE_URL'] = SITE_URL;
             } else {
-                $TPL->open(SERVER_ROOT . '/templates/enable_request_denied.tpl');
+                $template = 'enable_request_denied.twig';
             }
 
-            $TPL->set('SITE_NAME', SITE_NAME);
+            $context['SITE_NAME'] = SITE_NAME;
 
             foreach ($Results as $Result) {
                 list($Email, $ID, $UserID) = $Result;
@@ -135,19 +134,19 @@ class AutoEnable {
 
                 if ($Status == self::APPROVED) {
                     // Generate token
-                    $Token = db_string(Users::make_secret());
-                    G::$DB->query("
+                    $Token = Users::make_secret();
+                    G::$DB->prepared_query("
                         UPDATE users_enable_requests
-                        SET Token = '$Token'
-                        WHERE ID = '$ID'");
-                    $TPL->set('TOKEN', $Token);
+                        SET Token = ?
+                        WHERE ID = ?", $Token, $ID);
+                    $context['TOKEN'] = $Token;
                 }
 
                 // Send email
                 $Subject = "Your enable request for " . SITE_NAME . " has been ";
                 $Subject .= ($Status == self::APPROVED) ? 'approved' : 'denied';
 
-                Misc::send_email($Email, $Subject, $TPL->get(), 'noreply');
+                Misc::send_email($Email, $Subject, G::$Twig->render("emails/".template, $context), 'noreply');
             }
         } else {
             foreach ($Results as $Result) {

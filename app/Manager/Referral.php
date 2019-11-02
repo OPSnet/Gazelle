@@ -555,7 +555,7 @@ class Referral {
         }
     }
 
-    public function generateInvite($acc, $username, $email) {
+    public function generateInvite($acc, $username, $email, $twig) {
         $this->db->prepared_query("
             SELECT Username
             FROM referral_users
@@ -586,17 +586,16 @@ class Referral {
             $username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $InviteKey);
 
         if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) {
-            require(SERVER_ROOT . '/classes/templates.class.php');
-            $Tpl = new \TEMPLATE;
-            $Tpl->open(SERVER_ROOT . '/templates/referral.tpl'); // Password reset template
-            $Tpl->set('Email', $email);
-            $Tpl->set('InviteKey', $InviteKey);
-            $Tpl->set('DISABLED_CHAN', BOT_DISABLED_CHAN);
-            $Tpl->set('IRC_SERVER', BOT_SERVER);
-            $Tpl->set('SITE_NAME', SITE_NAME);
-            $Tpl->set('SITE_URL', SITE_URL);
+            $message = $twig->render('emails/referral.twig', [
+                'Email' => $email,
+                'InviteKey' => $InviteKey,
+                'DISABLED_CHAN' => BOT_DISABLED_CHAN,
+                'IRC_SERVER' => BOT_SERVER,
+                'SITE_NAME' => SITE_NAME,
+                'SITE_URL' => SITE_URL
+            ]);
             // send email
-            \Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $Tpl->get(), 'noreply', 'text/plain');
+            \Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $message, 'noreply', 'text/plain');
         }
 
         return [true, $InviteKey];
