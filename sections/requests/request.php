@@ -353,12 +353,11 @@ $google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist
             <tr id="voting">
                 <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MB in 1 GB.">Custom vote (MB)</td>
                 <td>
-                    <input type="text" id="amount_box" size="8" onchange="Calculate();" />
+                    <input type="text" id="amount_box" size="8" />
                     <select id="unit" name="unit" onchange="Calculate();">
                         <option value="mb">MB</option>
                         <option value="gb">GB</option>
                     </select>
-                    <input type="button" value="Preview" onclick="Calculate();" />
                     <?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
                     <p>Bounty must be greater than or equal to 100 MB.</p>
                 </td>
