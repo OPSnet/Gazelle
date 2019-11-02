@@ -3,7 +3,7 @@ function Vote(amount, requestid) {
         amount = parseInt($('#amount').raw().value);
     }
     if (amount == 0) {
-         amount = 20 * 1024 * 1024;
+        amount = 20 * 1024 * 1024;
     }
 
     var index;
@@ -30,36 +30,35 @@ function Vote(amount, requestid) {
     }
 
     ajax.get('requests.php?action=takevote&id=' + requestid + '&auth=' + authkey + '&amount=' + amount, function (response) {
-            if (response == 'bankrupt') {
-                error_message("You do not have sufficient upload credit to add " + get_size(amount) + " to this request");
-                return;
-            } else if (response == 'missing') {
-                error_message("Cannot find this request");
-                return;
-            } else if (response == 'filled') {
-                error_message("This request has already been filled");
-                return;
-            } else if (response == 'success') {
-                votecount.innerHTML = (parseInt(votecount.innerHTML)) + 1;
-            }
+        if (response == 'bankrupt') {
+            error_message("You do not have sufficient upload credit to add " + get_size(amount) + " to this request");
+            return;
+        } else if (response == 'missing') {
+            error_message("Cannot find this request");
+            return;
+        } else if (response == 'filled') {
+            error_message("This request has already been filled");
+            return;
+        } else if (response == 'success') {
+            votecount.innerHTML = (parseInt(votecount.innerHTML)) + 1;
+        }
 
-            if ($('#total_bounty').results() > 0) {
-                totalBounty = parseInt($('#total_bounty').raw().value);
-                totalBounty += (amount * (1 - $('#request_tax').raw().value));
-                var requestTax = $('#request_tax').raw().value;
-                $('#total_bounty').raw().value = totalBounty;
-                $('#formatted_bounty').raw().innerHTML = get_size(totalBounty);
-                if (requestTax > 0) {
-                    save_message("Your vote of " + get_size(amount) + ", adding a " + get_size(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
-                } else {
-                    save_message("Your vote of " + get_size(amount) + " has been added");
-                }
-                $('#button').raw().disabled = true;
+        if ($('#total_bounty').results() > 0) {
+            totalBounty = parseInt($('#total_bounty').raw().value);
+            totalBounty += (amount * (1 - $('#request_tax').raw().value));
+            var requestTax = $('#request_tax').raw().value;
+            $('#total_bounty').raw().value = totalBounty;
+            $('#formatted_bounty').raw().innerHTML = get_size(totalBounty);
+            if (requestTax > 0) {
+                save_message("Your vote of " + get_size(amount) + ", adding a " + get_size(amount * (1 - $('#request_tax').raw().value)) + " bounty, has been added");
             } else {
                 save_message("Your vote of " + get_size(amount) + " has been added");
             }
+            $('#button').raw().disabled = true;
+        } else {
+            save_message("Your vote of " + get_size(amount) + " has been added");
         }
-    );
+    });
 }
 
 function Calculate() {
@@ -142,18 +141,18 @@ function CheckVA () {
 }
 
 function RemoveArtistField() {
-        var ArtistCount = document.getElementsByName("artists[]").length;
-        if (ArtistCount === 1) {
-            return;
-        }
-        var x = $('#artistfields').raw();
+    var ArtistCount = document.getElementsByName("artists[]").length;
+    if (ArtistCount === 1) {
+        return;
+    }
+    var x = $('#artistfields').raw();
 
-        while (x.lastChild.tagName !== "INPUT") {
-            x.removeChild(x.lastChild);
-        }
+    while (x.lastChild.tagName !== "INPUT") {
         x.removeChild(x.lastChild);
-        x.removeChild(x.lastChild); //Remove trailing new line.
-        ArtistCount--;
+    }
+    x.removeChild(x.lastChild);
+    x.removeChild(x.lastChild); //Remove trailing new line.
+    ArtistCount--;
 }
 
 function Categories() {
