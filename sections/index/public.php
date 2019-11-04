@@ -9,6 +9,7 @@ View::show_header();
 
 echo <<<HTML
 <div class="poetry">
+<img="https://ptpimg.me/sb5086.png" />
 <p>
 Orpheus with his lute made trees<br />
 And the mountain tops that freeze<br />
