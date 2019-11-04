@@ -78,7 +78,6 @@ class DEBUG {
 
     public function analysis($Message, $Report = '', $Time = 43200) {
         global $Document;
-        return;
         if (empty($Report)) {
             $Report = $Message;
         }
