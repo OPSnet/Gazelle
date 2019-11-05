@@ -6,6 +6,9 @@
 /*--------------------------------------------------*/
 /****************************************************/
 
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
+
 $ScriptStartTime=microtime(true); //To track how long a page takes to create
 
 //Lets prevent people from clearing feeds
@@ -14,6 +17,8 @@ if (isset($_GET['clearcache'])) {
 }
 
 require_once('classes/config.php'); //The config contains all site wide configuration information as well as memcached rules
+
+require(SERVER_ROOT.'/classes/classloader.php');
 
 require_once(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
 require_once(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
@@ -31,8 +36,6 @@ $Twig = new Environment(
     ['cache' => __DIR__.'/cache/twig']
 );
 $Debug->handle_errors();
-
-require(SERVER_ROOT.'/classes/classloader.php');
 
 G::initialize();
 

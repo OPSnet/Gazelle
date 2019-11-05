@@ -1,8 +1,8 @@
 <?php
 
-function getClassObject($name, $db, $cache, $config) {
+function getClassObject($name, $db, $cache, $twig, $config) {
     $name = "Gazelle\\API\\".str_replace("_", "", ucwords($name, "_"));
-    return new $name($db, $cache, $config);
+    return new $name($db, $cache, $twig, $config);
 }
 
 $available = array(
