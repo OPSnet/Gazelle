@@ -641,8 +641,10 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         if (G::$DB->has_results()) {
             list($GroupID, $Contents) = G::$DB->next_record(MYSQLI_NUM, false);
             if (Misc::is_new_torrent($Contents)) {
-                $Tor = new BencodeTorrent($Contents);
-                $FilePath = (isset($Tor->Dec['info']['files']) ? Format::make_utf8($Tor->get_name()) : '');
+                $Tor = new OrpheusNET\BencodeTorrent\BencodeTorrent();
+                $Tor->decodeString($Contents);
+                $TorData = $Tor->getData();
+                $FilePath = (isset($TorData['info']['files']) ? Format::make_utf8($Tor->getName()) : '');
             } else {
                 $Tor = new TORRENT(unserialize(base64_decode($Contents)), true);
                 $FilePath = (isset($Tor->Val['info']->Val['files']) ? Format::make_utf8($Tor->get_name()) : '');

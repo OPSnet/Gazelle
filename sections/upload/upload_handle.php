@@ -1,6 +1,7 @@
 <?php
 
 use OrpheusNET\Logchecker\Logchecker;
+use OrpheusNET\BencodeTorrent\BencodeTorrent;
 
 //******************************************************************************//
 //--------------- Take upload --------------------------------------------------//
@@ -376,11 +377,12 @@ foreach ($Properties as $Key => $Value) {
 //******************************************************************************//
 //--------------- Generate torrent file ----------------------------------------//
 
-$Tor = new BencodeTorrent($TorrentName, true);
-$PublicTorrent = $Tor->make_private(); // The torrent is now private.
-$UnsourcedTorrent = $Tor->set_source(); // The source is now OPS
-$TorEnc = db_string($Tor->encode());
-$InfoHash = pack('H*', $Tor->info_hash());
+$Tor = new BencodeTorrent();
+$Tor->decodeFile($TorrentName);
+$PublicTorrent = $Tor->makePrivate(); // The torrent is now private.
+$UnsourcedTorrent = $Tor->setSource('OPS'); // The source is now OPS
+$TorEnc = db_string($Tor->getEncode());
+$InfoHash = $Tor->getHexInfoHash();
 
 $DB->prepared_query('
     SELECT ID
@@ -450,23 +452,25 @@ if ($Type == 'Music') {
         $Name = $ExtraTorrent['Name'];
         $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
         $ThisInsert =& $ExtraTorrentsInsert[$Name];
-        $ExtraTor = new BencodeTorrent($Name, true);
-        if (isset($ExtraTor->Dec['encrypted_files'])) {
+		$ExtraTor = new BencodeTorrent();
+		$ExtraTor->decodeFile($Name);
+		$ExtraTorData = $ExtraTor->getData();
+		if (isset($ExtraTorData['encrypted_files'])) {
             $Err = 'At least one of the torrents contain an encrypted file list which is not supported here';
             break;
         }
-        if (!$ExtraTor->is_private()) {
-            $ExtraTor->make_private(); // The torrent is now private.
+        if (!$ExtraTor->isPrivate()) {
+            $ExtraTor->makePrivate(); // The torrent is now private.
             $PublicTorrent = true;
         }
 
-        if ($ExtraTor->set_source()) {
+        if ($ExtraTor->setSource('OPS')) {
             $UnsourcedTorrent = true;
         }
 
         // File list and size
-        list($ExtraTotalSize, $ExtraFileList) = $ExtraTor->file_list();
-        $ExtraDirName = isset($ExtraTor->Dec['info']['files']) ? Format::make_utf8($ExtraTor->get_name()) : '';
+		list($ExtraTotalSize, $ExtraFileList) = $ExtraTor->getFileList();
+		$ExtraDirName = isset($ExtraTorData['info']['files']) ? Format::make_utf8($ExtraTor->getName()) : '';
 
         $ExtraTmpFileList = [];
         foreach ($ExtraFileList as $ExtraFile) {
@@ -486,9 +490,9 @@ if ($Type == 'Music') {
         // To be stored in the database
         $ThisInsert['FilePath'] = db_string($ExtraDirName);
         $ThisInsert['FileString'] = db_string(implode("\n", $ExtraTmpFileList));
-        $ThisInsert['InfoHash'] = pack('H*', $ExtraTor->info_hash());
-        $ThisInsert['NumFiles'] = count($ExtraFileList);
-        $ThisInsert['TorEnc'] = db_string($ExtraTor->encode());
+		$ThisInsert['InfoHash'] = $ExtraTor->getHexInfoHash();
+		$ThisInsert['NumFiles'] = count($ExtraFileList);
+		$ThisInsert['TorEnc'] = db_string($ExtraTor->getEncode());
         $ThisInsert['TotalSize'] = $ExtraTotalSize;
 
         $Debug->set_flag('upload: torrent decoded');
