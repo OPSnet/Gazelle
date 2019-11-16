@@ -198,7 +198,8 @@ if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
 
 // User was not deleted. Perform other stuff.
 
-$UpdateSet = array();
+$UpdateSet = [];
+$LeechUpdateSet = [];
 $EditSummary = array();
 $TrackerUserUpdates = array('passkey' => $Cur['torrent_pass']);
 
@@ -461,14 +462,14 @@ if ($Visible != $Cur['Visible'] && check_perms('users_make_invisible')) {
 
 if ($Uploaded != $Cur['Uploaded'] && $Uploaded != $_POST['OldUploaded'] && (check_perms('users_edit_ratio')
     || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {
-        $UpdateSet[] = "Uploaded = '$Uploaded'";
+        $LeechUpdateSet['Uploaded'] = $Uploaded;
         $EditSummary[] = "uploaded changed from ".Format::get_size($Cur['Uploaded']).' to '.Format::get_size($Uploaded);
         $Cache->delete_value("user_stats_$UserID");
 }
 
 if ($Downloaded != $Cur['Downloaded'] && $Downloaded != $_POST['OldDownloaded'] && (check_perms('users_edit_ratio')
     || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {
-        $UpdateSet[] = "Downloaded = '$Downloaded'";
+        $LeechUpdateSet['Downloaded'] = $Downloaded;
         $EditSummary[] = "downloaded changed from ".Format::get_size($Cur['Downloaded']).' to '.Format::get_size($Downloaded);
         $Cache->delete_value("user_stats_$UserID");
 }
@@ -877,6 +878,18 @@ $SQL = "
 // Perform update
 //die($SQL);
 $DB->query($SQL);
+
+if (!empty($LeechUpdateSet)) {
+    $SET = implode(', ', array_map(function($key) { return "$key = ?"; }, array_keys($LeechUpdateSet)));
+    $Params = array_values($LeechUpdateSet);
+    $Params[] = $UserID;
+
+    $SQL = "
+    UPDATE users_leech_stats
+    SET $SET
+    WHERE UserID = ?";
+    $DB->prepared_query($SQL, ...$Params);
+}
 
 if (isset($ClearStaffIDCache)) {
     $Cache->delete_value('staff_ids');
