@@ -217,7 +217,7 @@ function torrenthash_to_torrentid($Str) {
 
 function torrenthash_to_groupid($Str) {
     global $Cache, $DB;
-    $DB->query("
+    $DB->prepared_query("
         SELECT GroupID
         FROM torrents
         WHERE info_hash = UNHEX(?)", $Str);
@@ -230,10 +230,10 @@ function torrenthash_to_groupid($Str) {
 
 function torrentid_to_groupid($TorrentID) {
     global $Cache, $DB;
-    $DB->query("
+    $DB->prepared_query("
         SELECT GroupID
         FROM torrents
-        WHERE ID = '".db_string($TorrentID)."'");
+        WHERE ID = ?", $TorrentID);
     $GroupID = (int)array_pop($DB->next_record(MYSQLI_ASSOC));
     if ($GroupID) {
         return $GroupID;
