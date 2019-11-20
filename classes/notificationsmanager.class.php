@@ -735,9 +735,7 @@ class NotificationsManager {
                 list($PushService, $PushOptions) = G::$DB->next_record(MYSQLI_NUM, false);
                 $PushOptions = unserialize($PushOptions);
                 switch ($PushService) {
-                    case '1':
-                        $Service = "NMA";
-                        break;
+                    // Case 1 is missing because NMA is dead.
                     case '2':
                         $Service = "Prowl";
                         break;
