@@ -26,21 +26,34 @@ class Torrent {
         $topTorrents = $this->cache->get_value($cacheKey);
 
         if ($topTorrents !== false) return $topTorrents;
-        if ($this->cache->get_query_lock('top10')) return false;
+        if (!$this->cache->get_query_lock($cacheKey)) return false;
 
         $where = [];
-        if (isset($getParameters['tags'])) $where[] = $this->tagWhere($getParameters['tags']);
+        $anyTags = isset($tagParameter['anyall']) && $tagParameter['anyall'] == 'any';
+        if (isset($getParameters['tags'])) $where[] = $this->tagWhere($getParameters['tags'], $anyTags);
         if (isset($getParameters['format'])) $where[] = $this->formatWhere($getParameters['format']);
         if (isset($getParameters['freeleech'])) $where[] = $this->freeleechWhere($getParameters['freeleech']);
         if (isset($getParameters['details'])) $where[] = $this->detailsWhere($details);
-        # TODO, CHANGE TO > 0
-        $where[] = ["parameters" => null, "where" => "tls.Seeders >= 0"];
+
+        $where[] = ["parameters" => null, "where" => "tls.Seeders > 0"];
         
-        $whereFilter = function($value){ return $value["where"]; };
-        $parameterFilter = function($value){ return $value["parameters"]; };
+        $whereFilter = function($value){ 
+            if (!isset($value["where"])) { 
+                return null;
+            }; 
+            return $value["where"]; 
+        };
+
+        $parameterFilter = function($value){ 
+            if (!isset($value["parameters"])) { 
+                return null;
+            }; 
+            return $value["parameters"]; 
+        };
+        
         $filteredWhere = array_filter(array_map($whereFilter, $where));
-        $parameters = array_filter(array_map($parameterFilter, $where), 'strlen');
-        
+        $parameters = $this->flatten(array_filter(array_map($parameterFilter, $where)));
+
         $query = $this->baseQuery . ' WHERE ' . implode(" AND ", $filteredWhere);
         $query = $query . (isset($getParameters['groups']) && $getParameters['groups'] == 'show' ? ' GROUP BY g.ID ' : '');
         $query = $query . ' ORDER BY ' . $this->orderBy($details);
@@ -50,7 +63,7 @@ class Torrent {
         $topTorrents = $this->db->to_array();
 
         $this->cache->cache_value($cacheKey, $topTorrents, 3600 * 6);
-        $this->cache->clear_query_lock('top10');
+        $this->cache->clear_query_lock($cacheKey);
         return $topTorrents;
     }
 
@@ -129,21 +142,30 @@ class Torrent {
         return [];
     }
 
-    private function tagWhere($tagParameter) {
+    private function tagWhere($tagParameter, $any = false) {
         if (isset($tagParameter) && !empty($tagParameter)) {
             $tags = explode(',', str_replace('.', '_', trim($tagParameter)));
             $replace = function($tag) { return preg_replace('/[^a-z0-9_]/', '', $tag); };
             $tags = array_map($replace, $tags);
             $tags = array_filter($tags);
 
-            $whereKeyword = $tagParameter['anyall'] == 'any' ? 'OR' : 'AND';
-            $filler = array_fill(0,  count($tags), "g.TagList REGEXP '[[:<:]]?[[:>:]]'");
-            $where = '(' . implode(" $whereKeyword ", $filler) . ')';
+            # This is to make the prepared query work.
+            $likePrepare = function($tag) { return "%{$tag}%"; };
+            $tags = array_map($likePrepare, $tags);
 
+            $whereKeyword = $any ? 'OR' : 'AND';
+            $filler = array_fill(0,  count($tags), "g.TagList LIKE ? ");
+            $where = '(' . implode(" $whereKeyword ", $filler) . ')';
             return ["parameters" => $tags, "where" => $where];
         }
 
         return [];
+    }
+
+    private function flatten(array $array) {
+        $return = [];
+        array_walk_recursive($array, function($a) use (&$return) { $return[] = $a; });
+        return $return;
     }
 
     private $baseQuery = '
