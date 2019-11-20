@@ -1,5 +1,5 @@
 {
-  "name": "apollorip/gazelle",
+  "name": "orpheusnet/gazelle",
   "description": "Web framework for private BitTorrent trackers using Ocelot",
   "type": "project",
   "license": "Unlicense",
@@ -9,6 +9,9 @@
     },
     {
       "name": "Apollo"
+    },
+    {
+      "name": "Orpheus"
     }
   ],
   "autoload": {
@@ -21,6 +24,7 @@
     "robmorgan/phinx": "^0.11.0",
     "whichbrowser/parser": "^2.0",
     "d11wtq/boris": "^1.0",
+    "maennchen/zipstream-php": "^1.2",
     "orpheusnet/bencode-torrent": "^0.11.0",
     "orpheusnet/logchecker": "^0.8.6",
     "twig/twig": "^2.12"

@@ -26,13 +26,14 @@ class TorrentsDL {
      */
     public function __construct(&$QueryResult, $Title) {
         G::$Cache->InternalCache = false; // The internal cache is almost completely useless for this
-        Zip::unlimit(); // Need more memory and longer timeout
         $this->QueryResult = $QueryResult;
         $this->Title = $Title;
         $this->User = G::$LoggedUser;
         $AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
         $this->AnnounceURL = $AnnounceURL . '/' . G::$LoggedUser['torrent_pass'] . '/announce';
-        $this->Zip = new Zip(Misc::file_string($Title));
+        $options = new ZipStream\Option\Archive;
+        $options->setSendHttpHeaders(true);
+        $this->Zip = new ZipStream\ZipStream(Misc::file_string($Title) . '.zip', $options);
     }
 
     /**
@@ -85,7 +86,7 @@ class TorrentsDL {
         $FileName = self::construct_file_name($Info['Artist'], $Info['Name'], $Info['Year'], $Info['Media'], $Info['Format'], $Info['Encoding'], $Info['TorrentID'], false, $MaxPathLength);
         $this->Size += $Info['Size'];
         $this->NumAdded++;
-        $this->Zip->add_file(self::get_file($TorrentData, $this->AnnounceURL, $Info['TorrentID']), ($FolderName ? "$FolderName/" : "") . $FileName);
+        $this->Zip->addFile(($FolderName ? "$FolderName/" : "") . $FileName, self::get_file($TorrentData, $this->AnnounceURL, $Info['TorrentID']));
         usleep(25000); // We don't want to send much faster than the client can receive
     }
 
@@ -113,18 +114,18 @@ class TorrentsDL {
      * @param bool $FilterStats whether to include filter stats in the report
      */
     public function finalize($FilterStats = true) {
-        $this->Zip->add_file($this->summary($FilterStats), "Summary.txt");
+        $this->Zip->addFile("Summary.txt", $this->summary($FilterStats));
         if (!empty($this->FailedFiles)) {
-            $this->Zip->add_file($this->errors(), "Errors.txt");
+            $this->Zip->addFile("Errors.txt", $this->errors());
         }
-        $this->Zip->close_stream();
+        $this->Zip->finish();
     }
 
     /**
      * Produce a summary text over the collector results
      *
      * @param bool $FilterStats whether to include filter stats in the report
-     * @return summary text
+     * @return string summary text
      */
     public function summary($FilterStats) {
         global $ScriptStartTime;
@@ -143,22 +144,22 @@ class TorrentsDL {
             . "\r\n"
             . ($FilterStats !== false
                 ? "Torrent groups analyzed:    $this->NumFound\r\n"
-                    . "Torrent groups filtered:    $NumSkipped\r\n"
+                . "Torrent groups filtered:    $NumSkipped\r\n"
                 : "")
             . "Torrents downloaded:        $this->NumAdded\r\n"
             . "\r\n"
-            . "Total size of torrents (ratio hit): ".Format::get_size($this->Size)."\r\n"
+            . "Total size of torrents (ratio hit): " . Format::get_size($this->Size) . "\r\n"
             . ($NumSkipped
                 ? "\r\n"
-                    . "Albums unavailable within your criteria (consider making a request for your desired format):\r\n"
-                    . implode("\r\n", $this->SkippedFiles) . "\r\n"
+                . "Albums unavailable within your criteria (consider making a request for your desired format):\r\n"
+                . implode("\r\n", $this->SkippedFiles) . "\r\n"
                 : "");
     }
 
     /**
      * Compile a list of files that could not be added to the archive
      *
-     * @return list of files
+     * @return string list of files
      */
     public function errors() {
         return "A server error occurred. Please try again at a later time.\r\n"
