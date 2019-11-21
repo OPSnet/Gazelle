@@ -50,13 +50,13 @@ class Torrent {
             }; 
             return $value["parameters"]; 
         };
-        
+
         $filteredWhere = array_filter(array_map($whereFilter, $where));
         $parameters = $this->flatten(array_filter(array_map($parameterFilter, $where)));
 
         $query = $this->baseQuery . ' WHERE ' . implode(" AND ", $filteredWhere);
         $query = $query . (isset($getParameters['groups']) && $getParameters['groups'] == 'show' ? ' GROUP BY g.ID ' : '');
-        $query = $query . ' ORDER BY ' . $this->orderBy($details);
+        $query = $query . ' ORDER BY ' . $this->orderBy($details) . ' DESC';
         $query = $query . " LIMIT $limit";
 
         $this->db->prepared_query($query, ...$parameters);
