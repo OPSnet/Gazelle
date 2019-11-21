@@ -33,7 +33,7 @@ class Torrent {
         if (isset($getParameters['tags'])) $where[] = $this->tagWhere($getParameters['tags'], $anyTags);
         if (isset($getParameters['format'])) $where[] = $this->formatWhere($getParameters['format']);
         if (isset($getParameters['freeleech'])) $where[] = $this->freeleechWhere($getParameters['freeleech']);
-        if (isset($getParameters['details'])) $where[] = $this->detailsWhere($details);
+        $where[] = $this->detailsWhere($details);
 
         $where[] = ["parameters" => null, "where" => "tls.Seeders > 0"];
         
@@ -91,31 +91,27 @@ class Torrent {
             default:
                 return '(tls.Seeders + tls.Leechers)';
                 break;
-
         }
     }
 
     private function detailsWhere($detailsParameters) {
-        if (isset($detailsParameters)) {
-            switch($detailsParameters) {
-                case 'day':
-                    return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 DAY"];
-                    break;
-                case 'week':
-                    return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 WEEK"];
-                    break;
-                case 'month':
-                    return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 MONTH"];
-                    break;
-                case 'year':
-                    return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 YEAR"];
-                    break;
-                default:
-                    return [];
-                    break;
-            }
+        switch($detailsParameters) {
+            case 'day':
+                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 DAY"];
+                break;
+            case 'week':
+                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 WEEK"];
+                break;
+            case 'month':
+                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 MONTH"];
+                break;
+            case 'year':
+                return ["parameters" => null, "where" => "t.Time > now() - INTERVAL 1 YEAR"];
+                break;
+            default:
+                return [];
+                break;
         }
-        return [];
     }
 
     private function formatWhere($formatParameters) {
