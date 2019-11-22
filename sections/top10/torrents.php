@@ -234,7 +234,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             $displayName .= ' [' . $ReleaseTypes[$releaseType] . ']';
         }
 
-        $torrentInformation = Torrents::torrent_info($torrentID);
+        $torrentInformation = Torrents::torrent_info($detail);
 
         $torrentTags = new Tags($tagsList);
 
