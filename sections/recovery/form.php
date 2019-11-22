@@ -8,6 +8,8 @@ little more complicated. We will consider any proof you may be able to supply, s
 signup email, or screenshots of your profile page. Staff has the final say in whether the proof is
 sufficient.</p>
 
+<p><b>You can fill out and send this form only once.</b></p>
+
 <form enctype="multipart/form-data" method="post" action="/recovery.php?action=save">
 
 <h5>Your username</h5>

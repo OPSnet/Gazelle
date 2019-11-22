@@ -4,12 +4,12 @@ authorize(true);
 
 print
     json_encode(
-        array(
+        [
             'status' => 'success',
-            'response' => array(
+            'response' => [
                 'loadAverage' => sys_getloadavg()
-            )
-        )
+            ]
+        ]
     );
 
 ?>

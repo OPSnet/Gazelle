@@ -118,25 +118,27 @@ $FirstPost = $FirstPost['ID'];
 if ($ThreadInfo['Posts'] <= $PerPage*$Page && $ThreadInfo['StickyPostID'] > $LastPost) {
     $LastPost = $ThreadInfo['StickyPostID'];
 }
+$transitions = Forums::get_thread_transitions($ForumID);
 
 //Handle last read
 
 if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
 
-    $DB->query("
+    $DB->prepared_query("
         SELECT PostID
         FROM forums_last_read_topics
-        WHERE UserID = '$LoggedUser[ID]'
-            AND TopicID = '$ThreadID'");
+        WHERE UserID = ? AND TopicID = ?",
+        $LoggedUser['ID'], $ThreadID);
     list($LastRead) = $DB->next_record();
     if ($LastRead < $LastPost) {
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO forums_last_read_topics
                 (UserID, TopicID, PostID)
             VALUES
-                ('$LoggedUser[ID]', '$ThreadID', '".db_string($LastPost)."')
+                (?,      ?,       ?)
             ON DUPLICATE KEY UPDATE
-                PostID = '$LastPost'");
+                PostID = ?",
+            $LoggedUser['ID'], $ThreadID, $LastPost, $LastPost);
     }
 }
 
@@ -211,13 +213,37 @@ echo $Pages;
 ?>
     </div>
 <?php
+if (count($transitions) > 0) {
+?>
+    <table class="layout border">
+        <tr>
+            <td class="label">Move thread</td>
+            <td>
+<?php
+    foreach ($transitions as $transition) {
+?>
+                <form action="forums.php" method="post" style="display: inline-block">
+                    <input type="hidden" name="action" value="mod_thread" />
+                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="threadid" value="<?=$ThreadID?>" />
+                    <input type="hidden" name="page" value="<?=$Page?>" />
+                    <input type="hidden" name="title" value="<?=display_str($ThreadInfo['Title'])?>" />
+                    <input type="hidden" name="transition" value="<?=$transition['id']?>" />
+                    <input type="submit" value="<?=$transition['label']?>" />
+                </form>
+<?php } ?>
+            </td>
+        </tr>
+    </table>
+<?php
+}
 if ($ThreadInfo['NoPoll'] == 0) {
     if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("polls_$ThreadID")) {
         $DB->query("
             SELECT Question, Answers, Featured, Closed
             FROM forums_polls
             WHERE TopicID = '$ThreadID'");
-        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, array(1));
+        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
         $Answers = unserialize($Answers);
         $DB->query("
             SELECT Vote, COUNT(UserID)
@@ -237,7 +263,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
                 $Votes[$i] = 0;
             }
         }
-        $Cache->cache_value("polls_$ThreadID", array($Question, $Answers, $Votes, $Featured, $Closed), 0);
+        $Cache->cache_value("polls_$ThreadID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
     }
 
     if (!empty($Votes)) {
@@ -308,8 +334,10 @@ if ($ThreadInfo['NoPoll'] == 0) {
             $Staff = get_staff();
 
             $StaffNames = [];
-            foreach ($Staff as $Staffer) {
-                $StaffNames[] = $Staffer['Username'];
+            foreach ($Staff as $Group) {
+                foreach ($Group as $Staffer) {
+                    $StaffNames[] = $Staffer['Username'];
+                }
             }
 
             $DB->query("
@@ -539,21 +567,20 @@ foreach ($Thread as $Key => $Post) {
 <?php
 if (!$ThreadInfo['IsLocked'] || check_perms('site_moderate_forums')) {
     if (Forums::check_forumperm($ForumID, 'Write') && !$LoggedUser['DisablePosting']) {
-        View::parse('generic/reply/quickreply.php', array(
+        View::parse('generic/reply/quickreply.php', [
             'InputTitle' => 'Post reply',
             'InputName' => 'thread',
             'InputID' => $ThreadID,
             'ForumID' => $ForumID,
             'TextareaCols' => 90
-        ));
+        ]);
     }
 }
-$transitions = Forums::get_thread_transitions($ForumID);
 if (count($transitions) > 0 && !check_perms('site_moderate_forums')) {
 ?>
-    <h3>Edit thread</h3>
     <table class="layout border">
         <tr>
+            <td class="label">Move thread</td>
             <td>
 <?php
     foreach ($transitions as $transition) {

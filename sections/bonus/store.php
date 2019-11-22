@@ -114,7 +114,7 @@ foreach ($Items as $Label => $Item) {
             <tr class="$RowClass">
                 <td>{$Cnt}</td>
                 <td>{$Item['Title']}</td>
-                <td>{$FormattedPrice}</td>
+                <td style="text-align:right">{$FormattedPrice}</td>
                 <td>
 HTML;
 

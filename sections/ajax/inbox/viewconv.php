@@ -1,7 +1,7 @@
 <?php
 $ConvID = $_GET['id'];
 if (!$ConvID || !is_number($ConvID)) {
-    print json_encode(array('status' => 'failure'));
+    print json_encode(['status' => 'failure']);
     die();
 }
 
@@ -14,7 +14,7 @@ $DB->query("
     WHERE UserID = '$UserID'
         AND ConvID = '$ConvID'");
 if (!$DB->has_results()) {
-    print json_encode(array('status' => 'failure'));
+    print json_encode(['status' => 'failure']);
     die();
 }
 list($InInbox, $InSentbox) = $DB->next_record();
@@ -23,7 +23,7 @@ list($InInbox, $InSentbox) = $DB->next_record();
 
 
 if (!$InInbox && !$InSentbox) {
-    print json_encode(array('status' => 'failure'));
+    print json_encode(['status' => 'failure']);
     die();
 }
 
@@ -78,7 +78,7 @@ $DB->query("
 
 $JsonMessages = [];
 while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) {
-    $JsonMessage = array(
+    $JsonMessage = [
         'messageId' => (int)$MessageID,
         'senderId' => (int)$SenderID,
         'senderName' => $Users[(int)$SenderID]['Username'],
@@ -86,20 +86,20 @@ while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) {
         'avatar' => $Users[(int)$SenderID]['Avatar'],
         'bbBody' => $Body,
         'body' => Text::full_format($Body)
-    );
+    ];
     $JsonMessages[] = $JsonMessage;
 }
 
 print
     json_encode(
-        array(
+        [
             'status' => 'success',
-            'response' => array(
+            'response' => [
                 'convId' => (int)$ConvID,
                 'subject' => $Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : ''),
                 'sticky' => $Sticky == 1,
                 'messages' => $JsonMessages
-            )
-        )
+            ]
+        ]
     );
 ?>

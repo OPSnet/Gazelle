@@ -93,13 +93,13 @@ if ($LastID < $PostID) { // Last post in a topic was removed
                 LastPostTime = '$LastTopicPostTime'
             WHERE ID = '$ForumID'
                 AND LastPostTopicID = '$TopicID'");
-        $UpdateArrayForums = array(
+        $UpdateArrayForums = [
             'NumPosts' => '-1',
             'LastPostID' => $LastTopicPostID,
             'LastPostAuthorID' => $LastTopicAuthorID,
             'LastPostTime' => $LastTopicPostTime,
             'LastPostTopicID' => $LastTopicID,
-            'Title' => $LastTopicTitle);
+            'Title' => $LastTopicTitle];
     } else { // Topic is still the most recent in its forum
         $DB->query("
             UPDATE forums
@@ -109,16 +109,16 @@ if ($LastID < $PostID) { // Last post in a topic was removed
                 LastPostTime = '$LastTime'
             WHERE ID = '$ForumID'
                 AND LastPostTopicID = '$TopicID'");
-        $UpdateArrayForums = array(
+        $UpdateArrayForums = [
             'NumPosts' => '-1',
             'LastPostID' => $LastID,
             'LastPostAuthorID' => $LastAuthorID,
-            'LastPostTime' => $LastTime);
+            'LastPostTime' => $LastTime];
     }
-    $UpdateArrayThread = array('Posts' => '-1', 'LastPostAuthorID' => $LastAuthorID, 'LastPostTime' => $LastTime);
+    $UpdateArrayThread = ['Posts' => '-1', 'LastPostAuthorID' => $LastAuthorID, 'LastPostTime' => $LastTime];
 } else {
-    $UpdateArrayForums = array('NumPosts' => '-1');
-    $UpdateArrayThread = array('Posts' => '-1');
+    $UpdateArrayForums = ['NumPosts' => '-1'];
+    $UpdateArrayThread = ['Posts' => '-1'];
 }
 
 if ($StickyPostID == $PostID) {

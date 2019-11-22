@@ -14,8 +14,8 @@ if (isset($_POST['submit'])) {
         $DB->query('DELETE FROM ip_bans WHERE ID='.$_POST['id']);
         $Cache->delete_value('ip_bans_'.$IPA);
     } else { //Edit & Create, Shared Validation
-        $Val->SetFields('start', '1','regex','You must include the starting IP address.',array('regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i'));
-        $Val->SetFields('end', '1','regex','You must include the ending IP address.',array('regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i'));
+        $Val->SetFields('start', '1','regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
+        $Val->SetFields('end', '1','regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
         $Val->SetFields('notes', '1','string','You must include the reason for the ban.');
         $Err=$Val->ValidateForm($_POST); // Validate the form
         if ($Err) {

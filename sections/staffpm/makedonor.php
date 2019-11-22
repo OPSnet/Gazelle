@@ -9,11 +9,13 @@ if (!is_number($_POST['id']) || !is_numeric($_POST['donation_amount']) || empty(
 
 $ConvID = (int)$_POST['id'];
 
-$DB->query("
+$DB->prepared_query('
     SELECT c.Subject, c.UserID, c.Level, c.AssignedToUser, c.Unread, c.Status, u.Donor
     FROM staff_pm_conversations AS c
-        JOIN users_info AS u ON u.UserID = c.UserID
-    WHERE ID = $ConvID");
+    INNER JOIN users_info USING (UserID)
+    WHERE ID = ?
+    ', $ConvID
+);
 list($Subject, $UserID, $Level, $AssignedToUser, $Unread, $Status, $Donor) = $DB->next_record();
 if ($DB->record_count() == 0) {
     error(404);
@@ -26,26 +28,22 @@ if ((int)$Donor === 0) {
 } else {
     $Message .= ' ';
 }
-/*
-$DB->query("
-    INSERT INTO staff_pm_messages
-        (UserID, SentDate, Message, ConvID)
-    VALUES
-        (".$LoggedUser['ID'].", '".sqltime()."', '".db_string($Message)."', $ConvID)");
-*/
-$DB->query("
+$DB->prepared_query('
     UPDATE staff_pm_conversations
-    SET Date = '".sqltime()."',
+    SET Date = now()
         Unread = true,
-        Status = 'Resolved',
-        ResolverID = ".$LoggedUser['ID']."
-    WHERE ID = $ConvID");
+        Status = ?
+        ResolverID = ?
+    WHERE ID = ?
+    ', 'Resolved', $LoggedUser['ID'], $ConvID
+);
 
-Donations::donate($UserID, array(
-                            "Source" => "Staff PM",
-                            "Price" => $_POST['donation_amount'],
-                            "Currency" => $_POST['donation_currency'],
-                            "Reason" => $_POST['donation_reason'],
-                            "SendPM" => true));
+Donations::donate($UserID, [
+    "Reason" => trim($_POST['donation_reason']),
+    "Source" => "Staff PM",
+    "Price" => trim($_POST['donation_amount']),
+    "Currency" => trim($_POST['donation_currency']),
+    "SendPM" => true
+]);
 
 header('Location: staffpm.php');

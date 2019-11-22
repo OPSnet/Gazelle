@@ -28,8 +28,8 @@ class Int64 {
  * note is that empty dictionaries are represented by boolean trues
  */
 class Bencode {
-    private $DefaultKeys = array( // Get rid of everything except these keys to save some space
-            'created by', 'creation date', 'encoding', 'info');
+    private $DefaultKeys = [ // Get rid of everything except these keys to save some space
+            'created by', 'creation date', 'encoding', 'info'];
     private $Data;
     public $Enc;
 

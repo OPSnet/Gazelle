@@ -4,7 +4,7 @@ define('BTC_API_URL', 'https://api.bitcoinaverage.com/ticker/global/EUR/');
 define('USD_API_URL', 'http://www.google.com/ig/calculator?hl=en&q=1USD=?EUR');
 
 class Donations {
-    private static $ForumDescriptions = array(
+    private static $ForumDescriptions = [
         "I want only two houses, rather than seven... I feel like letting go of things",
         "A billion here, a billion there, sooner or later it adds up to real money.",
         "I've cut back, because I'm buying a house in the West Village.",
@@ -26,75 +26,66 @@ class Donations {
         "What's a soup kitchen?",
         "I work very hard and I’m worth every cent!",
         "To all my Barbies out there who date Benjamin Franklin, George Washington, Abraham Lincoln, you'll be better off in life. Get that money."
-        );
+    ];
 
     private static $IsSchedule = false;
 
     public static function regular_donate($UserID, $DonationAmount, $Source, $Reason, $Currency = "EUR") {
-        self::donate($UserID, array(
+        self::donate($UserID, [
+            "Reason" => $Reason,
             "Source" => $Source,
             "Price" => $DonationAmount,
             "Currency" => $Currency,
-            "Source" => $Source,
-            "Reason" => $Reason,
-            "SendPM" => true));
+            "SendPM" => true
+        ]);
     }
 
-    public static function donate($UserID, $Args) {
+    public static function donate($UserID, array $Args) {
         $UserID = (int)$UserID;
         $QueryID = G::$DB->get_query_id();
 
-        G::$DB->query("
+        G::$DB->prepared_query('
             SELECT 1
             FROM users_main
-            WHERE ID = '$UserID'
-            LIMIT 1");
+            WHERE ID = ?
+            ', $UserID
+        );
         if (G::$DB->has_results()) {
             G::$Cache->InternalCache = false;
-            foreach ($Args as &$Arg) {
-                $Arg = db_string($Arg);
-            }
-            extract($Args);
-
-            // We don't always get a date passed in.
-            if (empty($Date)) {
-                $Date = sqltime();
-            }
-
-            // Get the ID of the staff member making the edit
-            $AddedBy = 0;
-            if (!self::$IsSchedule) {
-                $AddedBy = G::$LoggedUser['ID'];
-            }
 
             // Legacy donor, should remove at some point
-            G::$DB->query("
+            G::$DB->prepared_query('
                 UPDATE users_info
-                SET Donor = '1'
-                WHERE UserID = '$UserID'");
-            // Give them the extra invite
-            $ExtraInvite = G::$DB->affected_rows();
+                SET Donor = ?
+                WHERE UserID = ?
+                ', '1', $UserID
+            );
+            // Give them an invite the first time they donate
+            $FirstInvite = G::$DB->affected_rows();
 
             // A staff member is directly manipulating donor points
-            if (isset($Manipulation) && $Manipulation === "Direct") {
-                $DonorPoints = $Rank;
-                $AdjustedRank = $Rank >= MAX_EXTRA_RANK ? MAX_EXTRA_RANK : $Rank;
-                G::$DB->query("
+            if (isset($Args['Manipulation']) && $Args['Manipulation'] === "Direct") {
+                $DonorPoints = $Args['Rank'];
+                $AdjustedRank = $Args['Rank'] >= MAX_EXTRA_RANK ? MAX_EXTRA_RANK : $Args['Rank'];
+                $ConvertedPrice = 0;
+                G::$DB->prepared_query('
                     INSERT INTO users_donor_ranks
-                        (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
-                    VALUES
-                        ('$UserID', '$AdjustedRank', '$TotalRank', '$Date', NOW())
+                           (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
+                    VALUES (?,      ?,    ?,         now(),        now())
                     ON DUPLICATE KEY UPDATE
-                        Rank = '$AdjustedRank',
-                        TotalRank = '$TotalRank',
-                        DonationTime = '$Date',
-                        RankExpirationTime = NOW()");
+                        Rank = ?,
+                        TotalRank = ?,
+                        DonationTime = now(),
+                        RankExpirationTime = now()
+                    ', $UserID, $AdjustedRank, $Args['TotalRank'],
+                        $AdjustedRank, $Args['TotalRank']
+                );
             } else {
                 // Donations from the store get donor points directly, no need to calculate them
-                if ($Source == "Store Parser") {
-                    $ConvertedPrice = self::currency_exchange($Amount * $Price, $Currency);
+                if (isset($Args['Source']) && $Args['Source'] == "Store Parser") {
+                    $ConvertedPrice = self::currency_exchange($Args['Amount'] * $Args['Price'], $Args['Currency']);
                 } else {
-                    $ConvertedPrice = self::currency_exchange($Price, $Currency);
+                    $ConvertedPrice = self::currency_exchange($Args['Price'], $Args['Currency']);
                     $DonorPoints = self::calculate_rank($ConvertedPrice);
                 }
                 $IncreaseRank = $DonorPoints;
@@ -109,16 +100,18 @@ class Donations {
                 } else {
                     $AdjustedRank = $CurrentRank + $DonorPoints;
                 }
-                G::$DB->query("
+                G::$DB->prepared_query('
                     INSERT INTO users_donor_ranks
-                        (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
-                    VALUES
-                        ('$UserID', '$AdjustedRank', '$DonorPoints', '$Date', NOW())
+                           (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
+                    VALUES (?,      ?,    ?,         now(),        now())
                     ON DUPLICATE KEY UPDATE
-                        Rank = '$AdjustedRank',
-                        TotalRank = TotalRank + '$DonorPoints',
-                        DonationTime = '$Date',
-                        RankExpirationTime = NOW()");
+                        Rank = ?,
+                        TotalRank = TotalRank + ?,
+                        DonationTime = now(),
+                        RankExpirationTime = now()
+                    ', $UserID, $AdjustedRank, $DonorPoints,
+                        $AdjustedRank, $DonorPoints
+                );
             }
             // Donor cache key is outdated
             G::$Cache->delete_value("donor_info_$UserID");
@@ -131,39 +124,47 @@ class Donations {
             self::calculate_special_rank($UserID);
 
             // Hand out invites
-            G::$DB->query("
-                    SELECT InvitesRecievedRank
-                    FROM users_donor_ranks
-                    WHERE UserID = '$UserID'");
-            list($InvitesRecievedRank) = G::$DB->next_record();
+            G::$DB->prepared_query('
+                SELECT InvitesReceivedRank
+                FROM users_donor_ranks
+                WHERE UserID = ?
+                ', $UserID
+            );
+            list($InvitesReceivedRank) = G::$DB->next_record();
             $AdjustedRank = $Rank >= MAX_RANK ? (MAX_RANK - 1) : $Rank;
-            $InviteRank = $AdjustedRank - $InvitesRecievedRank;
+            $InviteRank = $AdjustedRank - $InvitesReceivedRank;
             if ($InviteRank > 0) {
-                $Invites = $ExtraInvite ? ($InviteRank + 1) : $InviteRank;
-                G::$DB->query("
-                        UPDATE users_main
-                        SET Invites = Invites + '$Invites'
-                        WHERE ID = $UserID");
-                G::$DB->query("
-                        UPDATE users_donor_ranks
-                        SET InvitesRecievedRank = '$AdjustedRank'
-                        WHERE UserID = '$UserID'");
+                G::$DB->prepared_query('
+                    UPDATE users_main
+                    SET Invites = Invites + ?
+                    WHERE ID = ?
+                    ', $FirstInvite + $InviteRank, $UserID
+                );
+                G::$DB->prepared_query('
+                    UPDATE users_donor_ranks
+                    SET InvitesReceivedRank = ?
+                    WHERE UserID = ?
+                    ', $AdjustedRank, $UserID);
             }
 
             // Send them a thank you PM
-            if ($SendPM) {
-                $Subject = "Your contribution has been received and credited. Thank you!";
-                $Body = self::get_pm_body($Source, $Currency, $Price, $IncreaseRank, $Rank);
-                Misc::send_pm($UserID, 0, $Subject, $Body);
+            if ($Args['SendPM']) {
+                Misc::send_pm(
+                    $UserID,
+                    0,
+                    'Your contribution has been received and credited. Thank you!',
+                    self::get_pm_body($Args['Source'], $Args['Currency'], $Args['Price'], $IncreaseRank, $Rank)
+                );
             }
 
             // Lastly, add this donation to our history
-            G::$DB->query("
+            G::$DB->prepared_query('
                 INSERT INTO donations
-                    (UserID, Amount, Source, Reason, Currency, Email, Time, AddedBy, Rank, TotalRank)
-                VALUES
-                    ('$UserID', '$ConvertedPrice', '$Source', '$Reason', '$Currency', '', '$Date', '$AddedBy', '$DonorPoints', '$TotalRank')");
-
+                       (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, Time)
+                VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         now())
+                ', $UserID, $ConvertedPrice, $Args['Source'], $Args['Reason'], $Args['Currency'],
+                    self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $DonorPoints, $TotalRank
+            );
 
             // Clear their user cache keys because the users_info values has been modified
             G::$Cache->delete_value("user_info_$UserID");
@@ -178,10 +179,12 @@ class Donations {
         $UserID = (int)$UserID;
         $QueryID = G::$DB->get_query_id();
         // Are they are special?
-        G::$DB->query("
+        G::$DB->prepared_query('
             SELECT TotalRank, SpecialRank
             FROM users_donor_ranks
-            WHERE UserID = '$UserID'");
+            WHERE UserID = ?
+            ', $UserID
+        );
         if (G::$DB->has_results()) {
             // Adjust their special rank depending on the total rank.
             list($TotalRank, $SpecialRank) = G::$DB->next_record();
@@ -201,10 +204,12 @@ class Donations {
                 $SpecialRank = 3;
             }
             // Make them special
-            G::$DB->query("
+            G::$DB->prepared_query('
                 UPDATE users_donor_ranks
-                SET SpecialRank = '$SpecialRank'
-                WHERE UserID = '$UserID'");
+                SET SpecialRank = ?
+                WHERE UserID = ?
+                ', $SpecialRank, $UserID
+            );
             G::$Cache->delete_value("donor_info_$UserID");
         }
         G::$DB->set_query_id($QueryID);
@@ -253,46 +258,52 @@ class Donations {
         $Rank = (int)$Rank;
         $TotalRank = (int)$TotalRank;
 
-        self::donate($UserID, array(
-            "Manipulation" => "Direct",
-            "Rank" => $Rank,
-            "TotalRank" => $TotalRank,
+        self::donate($UserID, [
             "Reason" => $Reason,
             "Source" => "Modify Values",
-            "Currency" => "EUR"));
+            "Currency" => "EUR",
+            "SendPM" => false,
+            "Manipulation" => "Direct",
+            "Rank" => $Rank,
+            "TotalRank" => $TotalRank
+        ]);
     }
 
     public static function hide_stats($UserID) {
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        G::$DB->prepared_query('
             INSERT INTO users_donor_ranks
-                (UserID, Hidden)
-            VALUES
-                ('$UserID', '1')
+                   (UserID, Hidden)
+            VALUES (?,      ?)
             ON DUPLICATE KEY UPDATE
-                Hidden = '1'");
+                Hidden = ?
+            ', $UserID, '1', '1'
+        );
         G::$DB->set_query_id($QueryID);
     }
 
     public static function show_stats($UserID) {
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        G::$DB->prepared_query('
             INSERT INTO users_donor_ranks
-                (UserID, Hidden)
-            VALUES
-                ('$UserID', '0')
+                   (UserID, Hidden)
+            VALUES (?,      ?)
             ON DUPLICATE KEY UPDATE
-                Hidden = '0'");
+                Hidden = ?
+            ', $UserID, '0', '0'
+        );
         G::$DB->set_query_id($QueryID);
     }
 
     public static function is_visible($UserID) {
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        G::$DB->prepared_query('
             SELECT Hidden
             FROM users_donor_ranks
-            WHERE Hidden = '0'
-                AND UserID = '$UserID'");
+            WHERE UserID = ?
+                AND Hidden = ?
+            ', $UserID, '0'
+        );
         $HasResults = G::$DB->has_results();
         G::$DB->set_query_id($QueryID);
         return $HasResults;
@@ -310,7 +321,7 @@ class Donations {
         $DonorInfo = G::$Cache->get_value("donor_info_$UserID");
         if ($DonorInfo === false) {
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query('
                 SELECT
                     Rank,
                     SpecialRank,
@@ -318,7 +329,9 @@ class Donations {
                     DonationTime,
                     RankExpirationTime + INTERVAL 766 HOUR
                 FROM users_donor_ranks
-                WHERE UserID = '$UserID'");
+                WHERE UserID = ?
+                ', $UserID
+            );
                 // 2 hours less than 32 days to account for schedule run times
             if (G::$DB->has_results()) {
                 list($Rank, $SpecialRank, $TotalRank, $DonationTime, $ExpireTime) = G::$DB->next_record(MYSQLI_NUM, false);
@@ -335,7 +348,7 @@ class Donations {
                 $Rank = MAX_EXTRA_RANK;
                 $SpecialRank = MAX_SPECIAL_RANK;
             }
-            G::$DB->query("
+            G::$DB->prepared_query('
                 SELECT
                     IconMouseOverText,
                     AvatarMouseOverText,
@@ -343,17 +356,20 @@ class Donations {
                     CustomIconLink,
                     SecondAvatar
                 FROM donor_rewards
-                WHERE UserID = '$UserID'");
+                WHERE UserID = ?
+                ', $UserID
+            );
             $Rewards = G::$DB->next_record(MYSQLI_ASSOC);
             G::$DB->set_query_id($QueryID);
 
-            $DonorInfo = array(
+            $DonorInfo = [
                 'Rank' => (int)$Rank,
                 'SRank' => (int)$SpecialRank,
                 'TotRank' => (int)$TotalRank,
                 'Time' => $DonationTime,
                 'ExpireTime' => $ExpireTime,
-                'Rewards' => $Rewards);
+                'Rewards' => $Rewards
+            ];
             G::$Cache->cache_value("donor_info_$UserID", $DonorInfo, 0);
         }
         return $DonorInfo;
@@ -389,10 +405,12 @@ class Donations {
         $Results = G::$Cache->get_value("donor_title_$UserID");
         if ($Results === false) {
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query('
                 SELECT Prefix, Suffix, UseComma
                 FROM donor_forum_usernames
-                WHERE UserID = '$UserID'");
+                WHERE UserID = ?
+                ', $UserID
+            );
             $Results = G::$DB->next_record();
             G::$DB->set_query_id($QueryID);
             G::$Cache->cache_value("donor_title_$UserID", $Results, 0);
@@ -408,7 +426,7 @@ class Donations {
         $SpecialRank = self::get_special_rank($UserID);
         $HasAll = $SpecialRank == 3;
 
-        $Rewards = array(
+        $Rewards = [
             'HasAvatarMouseOverText' => false,
             'HasCustomDonorIcon' => false,
             'HasDonorForum' => false,
@@ -418,11 +436,9 @@ class Donations {
             'HasProfileInfo2' => false,
             'HasProfileInfo3' => false,
             'HasProfileInfo4' => false,
-            'HasSecondAvatar' => false);
+            'HasSecondAvatar' => false
+        ];
 
-//        if ($Rank >= 1 || $HasAll) {
-//
-//        }
         if ($Rank >= 2 || $HasAll) {
             $Rewards["HasDonorIconMouseOverText"] = true;
             $Rewards["HasProfileInfo1"] = true;
@@ -454,7 +470,7 @@ class Donations {
         $Results = G::$Cache->get_value("donor_profile_rewards_$UserID");
         if ($Results === false) {
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query('
                 SELECT
                     ProfileInfo1,
                     ProfileInfoTitle1,
@@ -465,7 +481,9 @@ class Donations {
                     ProfileInfo4,
                     ProfileInfoTitle4
                 FROM donor_rewards
-                WHERE UserID = '$UserID'");
+                WHERE UserID = ?
+                ', $UserID
+            );
             $Results = G::$DB->next_record();
             G::$DB->set_query_id($QueryID);
             G::$Cache->cache_value("donor_profile_rewards_$UserID", $Results, 0);
@@ -582,22 +600,21 @@ class Donations {
 
     public static function update_titles($UserID, $Prefix, $Suffix, $UseComma) {
         $QueryID = G::$DB->get_query_id();
-        $Prefix = trim(db_string($Prefix));
-        $Suffix = trim(db_string($Suffix));
+        $Prefix = trim($Prefix);
+        $Suffix = trim($Suffix);
         $UseComma = empty($UseComma) ? true : false;
-        G::$DB->query("
+        G::$DB->prepared_query('
             INSERT INTO donor_forum_usernames
-                (UserID, Prefix, Suffix, UseComma)
-            VALUES
-                ('$UserID', '$Prefix', '$Suffix', '$UseComma')
+                   (UserID, Prefix, Suffix, UseComma)
+            VALUES (?,      ?,      ?,      ?)
             ON DUPLICATE KEY UPDATE
-                Prefix = '$Prefix',
-                Suffix = '$Suffix',
-                UseComma = '$UseComma'");
+                Prefix = ?, Suffix = ?, UseComma = ?
+            ', $UserID, $Prefix, $Suffix, $UseComma,
+                $Prefix, $Suffix, $UseComma
+        );
         G::$Cache->delete_value("donor_title_$UserID");
         G::$DB->set_query_id($QueryID);
     }
-
 
     public static function get_donation_history($UserID) {
         $UserID = (int)$UserID;
@@ -605,11 +622,13 @@ class Donations {
             error(404);
         }
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
-            SELECT Amount, Email, Time, Currency, Reason, Source, AddedBy, Rank, TotalRank
+        G::$DB->prepared_query('
+            SELECT Amount, Time, Currency, Reason, Source, AddedBy, Rank, TotalRank
             FROM donations
-            WHERE UserID = '$UserID'
-            ORDER BY Time DESC");
+            WHERE UserID = ?
+            ORDER BY Time DESC
+            ', $UserID
+        );
         $DonationHistory = G::$DB->to_array(false, MYSQLI_ASSOC, false);
         G::$DB->set_query_id($QueryID);
         return $DonationHistory;
@@ -699,10 +718,12 @@ class Donations {
 
     public static function get_stored_conversion_rate($Currency) {
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        G::$DB->prepared_query('
             SELECT Rate
             FROM currency_conversion_rates
-            WHERE Currency = '$Currency'");
+            WHERE Currency = ?
+            ', $Currency
+        );
         list($Rate) = G::$DB->next_record(MYSQLI_NUM, false);
         G::$DB->set_query_id($QueryID);
         return $Rate;
@@ -710,11 +731,12 @@ class Donations {
 
     private static function set_stored_conversion_rate($Currency, $Rate) {
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        G::$DB->prepared_query('
             REPLACE INTO currency_conversion_rates
-                (Currency, Rate, Time)
-            VALUES
-                ('$Currency', $Rate, NOW())");
+                   (Currency, Rate, Time)
+            VALUES (?,        ?,    now())
+            ', $Currency, $Rate
+        );
         if ($Currency == 'USD') {
             $KeyName = 'usd_rate';
         } elseif ($Currency == 'BTC') {
@@ -735,12 +757,12 @@ class Donations {
         }
         if ($USD = file_get_contents(USD_API_URL)) {
             // Valid JSON isn't returned so we make it valid.
-            $Replace = array(
+            $Replace = [
                 'lhs' => '"lhs"',
                 'rhs' => '"rhs"',
                 'error' => '"error"',
                 'icc' => '"icc"'
-            );
+            ];
 
             $USD = str_replace(array_keys($Replace), array_values($Replace), $USD);
             $USD = json_decode($USD, true);

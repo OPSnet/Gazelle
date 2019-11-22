@@ -17,10 +17,10 @@ $RequestsPerPage = 25;
 list($Page, $Limit) = Format::page_limit($RequestsPerPage);
 
 // How can things be ordered?
-$OrderBys = array(
+$OrderBys = [
     'submitted_timestamp' => 'uer.Timestamp',
     'outcome' => 'uer.Outcome',
-    'handled_timestamp' => 'uer.HandledTimestamp');
+    'handled_timestamp' => 'uer.HandledTimestamp'];
 
 $Where = [];
 $Joins = [];
@@ -125,11 +125,11 @@ $DB->set_query_id($QueryID);
 </div>
 <div align="center">
     <a class="brackets tooltip" href="tools.php?action=enable_requests" title="Default view">Main</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=perfect&amp;<?=Format::get_url(array('view', 'action'))?>" title="Valid username, matching email, current IP with no matches, and inactivity disabled">Perfect</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=minus_ip&amp;<?=Format::get_url(array('view', 'action'))?>" title="Valid username, matching email, and inactivity disabled">Perfect Minus IP</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=invalid_email&amp;<?=Format::get_url(array('view', 'action'))?>" title="Non-matching email address">Invalid Email</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=ip_overlap&amp;<?=Format::get_url(array('view', 'action'))?>" title="Requests with IP matches to other accounts">IP Overlap</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=manual_disable&amp;<?=Format::get_url(array('view', 'action'))?>" title="Requests for accounts that were not disabled for inactivity">Manual Disable</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=perfect&amp;<?=Format::get_url(['view', 'action'])?>" title="Valid username, matching email, current IP with no matches, and inactivity disabled">Perfect</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=minus_ip&amp;<?=Format::get_url(['view', 'action'])?>" title="Valid username, matching email, and inactivity disabled">Perfect Minus IP</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=invalid_email&amp;<?=Format::get_url(['view', 'action'])?>" title="Non-matching email address">Invalid Email</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=ip_overlap&amp;<?=Format::get_url(['view', 'action'])?>" title="Requests with IP matches to other accounts">IP Overlap</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=manual_disable&amp;<?=Format::get_url(['view', 'action'])?>" title="Requests for accounts that were not disabled for inactivity">Manual Disable</a>
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#search_form').gtoggle(); return false;">Search</a>
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#scores').gtoggle(); return false;">Scores</a>
 </div><br />

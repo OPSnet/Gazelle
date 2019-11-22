@@ -10,7 +10,7 @@ View::show_header('Top 10 Donors');
 <?php
 
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$limit = in_array($limit,[10, 100, 250]) ? $limit : 10;
+$limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 $isMod = check_perms("users_mod");
 

@@ -32,7 +32,7 @@ if (check_perms('admin_manage_applicants')) { ?>
         </div>
     </div>
     <div class="box pad" style="padding: 0px 10px 10px 10px;">
-        <?php View::parse('generic/reply/staffpm.php', array('Hidden' => true)); ?>
+        <?php View::parse('generic/reply/staffpm.php', ['Hidden' => true]); ?>
         <br />
         <h2 style="text-align: left;">Community Help</h2>
         <h3 style="font-size: 17px;" id="fls"><i>First-Line Support</i></h3>

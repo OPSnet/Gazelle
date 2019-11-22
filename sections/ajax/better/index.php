@@ -29,10 +29,10 @@ if (isset($_GET['method'])) {
             include(SERVER_ROOT.'/sections/ajax/better/upload.php');
             break;
         default:
-            print json_encode(array('status' => 'failure'));
+            print json_encode(['status' => 'failure']);
             break;
     }
 } else {
-    print json_encode(array('status' => 'failure'));
+    print json_encode(['status' => 'failure']);
 }
 ?>

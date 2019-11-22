@@ -1,12 +1,10 @@
-function InitialiseChart(target, title, startDate, interval, bytes, data) {
-    var series = [].concat(data || []).map(x => {
-        return {
-            name: x.name,
-            data: x.data
-        }
-    });
+function initialiseChart(target, title, series, opt) {
+    var options = {
+        bytes: false
+    }
+    Object.assign(options, opt);
 
-    if (bytes) {
+    if (options.bytes) {
         var tickPositioner = function(min, max) {
             var interval = Math.pow(2, Math.ceil(Math.log(this.tickInterval) / Math.log(2)));
 
@@ -44,7 +42,7 @@ function InitialiseChart(target, title, startDate, interval, bytes, data) {
             },
             type: 'datetime'
         },
-        yAxis: {
+        yAxis: (options.yAxis || {
             title: {
                 text: undefined
             },
@@ -52,7 +50,7 @@ function InitialiseChart(target, title, startDate, interval, bytes, data) {
             labels: {
                 formatter: formatter
             }
-        },
+        }),
         plotOptions: {
             line: {
                 marker: {
@@ -69,7 +67,56 @@ function InitialiseChart(target, title, startDate, interval, bytes, data) {
         tooltip: {
             pointFormatter: tooltipFormatter
         },
-        series: series
+        series
+    });
+}
+
+function initialiseBarChart(target, title, series, opt) {
+    options = {
+        categories: 'auto'
+    }
+    Object.assign(options, opt);
+
+    if (options.categories === 'auto') {
+        var categories = series[0].data.map(function(v) {
+            return v[0];
+        });
+    } else if (Array.isArray(options.categories)) {
+        var categories = options.categories;
+    }
+
+    Highcharts.chart(target, {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: title
+        },
+        xAxis: {
+            title: {
+                text: 'Task'
+            },
+            categories
+        },
+        yAxis: (options.yAxis || {
+            title: {
+                text: undefined
+            },
+        }),
+        plotOptions: {
+            line: {
+                marker: {
+                    enabled: false
+                }
+            },
+        },
+        credits: {
+            enabled: false
+        },
+        legend: {
+            enabled: series.length > 1
+        },
+        series
     });
 }
 

@@ -53,7 +53,7 @@ $UserCanEdit = (!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCo
 $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 
 if ($CategoryName == "Music") {
-    $JsonMusicInfo = array(
+    $JsonMusicInfo = [
         /*'composers' => $ArtistForm[4] != null ? $ArtistForm[4] : [],
         'dj'        => $ArtistForm[6] != null ? $ArtistForm[6] : [],
         'artists'   => $ArtistForm[1] != null ? $ArtistForm[1] : [],
@@ -67,7 +67,7 @@ if ($CategoryName == "Music") {
         'conductor' => isset($ArtistForm[5]) ? pullmediainfo($ArtistForm[5]) : [],
         'remixedBy' => isset($ArtistForm[3]) ? pullmediainfo($ArtistForm[3]) : [],
         'producer'  => isset($ArtistForm[7]) ? pullmediainfo($ArtistForm[7]) : []
-    );
+    ];
 } else {
     $JsonMusicInfo = new stdClass; //json_encodes into an empty object: {}
 }
@@ -76,11 +76,11 @@ $JsonTopContributors = [];
 $VoteMax = ($VoteCount < 5 ? $VoteCount : 5);
 for ($i = 0; $i < $VoteMax; $i++) {
     $User = array_shift($RequestVotes['Voters']);
-    $JsonTopContributors[] = array(
+    $JsonTopContributors[] = [
         'userId' => (int)$User['UserID'],
         'userName' => $User['Username'],
         'bounty' => (int)$User['Bounty']
-    );
+    ];
 }
 reset($RequestVotes['Voters']);
 
@@ -90,7 +90,7 @@ $JsonRequestComments = [];
 foreach ($Thread as $Key => $Post) {
     list($PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername) = array_values($Post);
     list($AuthorID, $Username, $PermissionID, $Paranoia, $Artist, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
-    $JsonRequestComments[] = array(
+    $JsonRequestComments[] = [
         'postId' => (int)$PostID,
         'authorId' => (int)$AuthorID,
         'name' => $Username,
@@ -104,14 +104,14 @@ foreach ($Thread as $Key => $Post) {
         'editedUserId' => (int)$EditedUserID,
         'editedUsername' => $EditedUsername,
         'editedTime' => $EditedTime
-    );
+    ];
 }
 
 $JsonTags = [];
 foreach ($Request['Tags'] as $Tag) {
     $JsonTags[] = $Tag;
 }
-json_print('success', array(
+json_print('success', [
     'requestId' => (int)$RequestID,
     'requestorId' => (int)$Request['UserID'],
     'requestorName' => $Requestor['Username'],
@@ -151,5 +151,5 @@ json_print('success', array(
     'commentPages' => (int)ceil($NumComments / TORRENT_COMMENTS_PER_PAGE),
     'recordLabel' => $Request['RecordLabel'],
     'oclc' => $Request['OCLC']
-));
+]);
 ?>

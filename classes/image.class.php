@@ -31,12 +31,12 @@ class IMAGE {
         }
         $k = ($y2 - $y1) / ($x2 - $x1); //y = kx + q
         $a = $t / sqrt(1 + pow($k, 2));
-        $Points = array(
+        $Points = [
             round($x1 - (1 + $k) * $a), round($y1 + (1 - $k) * $a),
             round($x1 - (1 - $k) * $a), round($y1 - (1 + $k) * $a),
             round($x2 + (1 + $k) * $a), round($y2 - (1 - $k) * $a),
             round($x2 + (1 - $k) * $a), round($y2 + (1 + $k) * $a),
-        );
+        ];
         imagefilledpolygon($this->Image, $Points, 4, $Color);
         return imagepolygon($this->Image, $Points, 4, $Color);
     }

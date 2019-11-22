@@ -10,10 +10,7 @@ class Permissions {
      * @return bool
      */
     public static function check_perms($PermissionName, $MinClass = 0) {
-
-        $OverrideClass = 1000;
-
-        $Override = G::$LoggedUser['EffectiveClass'] >= $OverrideClass;
+        $Override = self::has_override(G::$LoggedUser['EffectiveClass']);
         return ($PermissionName === null ||
             (isset(G::$LoggedUser['Permissions'][$PermissionName]) && G::$LoggedUser['Permissions'][$PermissionName]))
             && (G::$LoggedUser['Class'] >= $MinClass
@@ -35,7 +32,7 @@ class Permissions {
                 SELECT Level AS Class, `Values` AS Permissions, Secondary, PermittedForums
                 FROM permissions
                 WHERE ID = '$PermissionID'");
-            $Permission = G::$DB->next_record(MYSQLI_ASSOC, array('Permissions'));
+            $Permission = G::$DB->next_record(MYSQLI_ASSOC, ['Permissions']);
             G::$DB->set_query_id($QueryID);
             $Permission['Permissions'] = unserialize($Permission['Permissions']);
             G::$Cache->cache_value("perm_$PermissionID", $Permission, 2592000);
@@ -91,7 +88,7 @@ class Permissions {
             $DonorPerms = self::get_permissions(DONOR);
             unset($DonorPerms['Permissions']['MaxCollages']);
         } else {
-            $DonorPerms = array('Permissions' => []);
+            $DonorPerms = ['Permissions' => []];
         }
         $MaxCollages = $BonusCollages;
         if (is_numeric($Permissions['Permissions']['MaxCollages'])) {
@@ -117,5 +114,9 @@ class Permissions {
     public static function has_permission($UserID, $privilege) {
         $Permissions = self::get_permissions_for_user($UserID);
         return isset($Permissions[$privilege]) && $Permissions[$privilege];
+    }
+
+    public static function has_override($Level) {
+        return $Level >= 1000;
     }
 }

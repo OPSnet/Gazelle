@@ -1,31 +1,17 @@
-* {
-    margin: 0;
-    padding: 0;
-}
-
-html, body {
-    height: 100%;
-}
-
 body {
     background-color: #041813;
     font-family: Bitstream Vera Sans, Tahoma, sans-serif;
-    font-size: 11px;
-    color: #FFFFFF;
-}
-
-
-table {
-    font-size: inherit;
+    color: #e0e0e0;
 }
 
 a {
-    color: #757575;
+    color: #178c36;
     text-decoration: none;
 }
 
 a:hover {
-    color: #888888;
+    color: #1fd54f;
+    text-decoration:underline;
 }
 
 input[type="text"], input[type="password"] {
@@ -48,67 +34,124 @@ input[type="text"]:invalid, input[type="password"]:invalid {
 }
 
 #head, #foot {
-    height: 6%;
-    min-height: 25px;
+    height: 3%;
+    min-height: 10px;
     width: 100%;
     background-color: #041813;
     overflow: hidden;
 }
 
-#foot {
-    text-align: center;
-}
-
-#foot > span,#head > span {
-    top: 35%;
-    position: relative;
-    padding: 20px;
-}
-
-#foot > span {
-    color: #393939;
-}
-
 #maincontent {
     width: 100%;
-    height: 88%;
+    height: 94%;
+    margin-bottom: 50px;
 }
 
 #logo {
-    height: 139px;
-    width: 200px;
-    background-repeat: no-repeat;
-    background-image: url('images/loginlogo.png');
-    background-position: top center;
-    padding: 50px 0 0 0;
+    height: 170px;
+    width: 100%;
+    margin-top: 60px;
     text-align: center;
 }
 
-#logo ul {
-    float: left;
-    left: 49%;
+.action {
+    width: 100%;
+}
+
+.action-bar {
+    display: block;
+    width: max-content;
+    margin: 20px auto;
+    font-size: 0.8em;
+}
+
+.pwrecover {
+    width: max-content;
+    margin: 20px auto;
+}
+
+.action-bar a {
+    padding: 0 10px;
+}
+
+.main {
+    width: 100%;
+}
+
+.referral {
+    width: 80%;
     margin: 0 auto;
-    position: relative;
 }
 
-#logo ul li {
-    float: left;
-    position: relative;
-    right: 50%;
-    margin: 9.5em 1em 0 0;
-    list-style: none;
+.para {
+    width: max-content;
+    margin: 0 auto;
+    font-size: 0.9em;
+    line-height: 1.2em;
+    padding-top: 18px;
 }
 
-#logo ul li:last-child {
-    margin: 9.5em 0 0 0;
+.enter {
+    width: 100%;
+    margin: 20px 0;
 }
 
-.auth_form .layout {
-    padding-right: 40px;
+.enter a {
+    display: block;
+    width: max-content;
+    margin: 0 auto;
+    font-size: 1.2em;
 }
 
-.poetry {
-    width: 320px;
+#foot {
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    min-height: 20px;
+}
+
+.links {
+    font-size: 0.8em;
+}
+
+.auth {
+    width: max-content;
+    margin: 0 auto;
+}
+
+.main label {
+    font-size: 0.85em;
+    width: 75px;
+    display: inline-block;
+    line-height: 1.8em;
+}
+
+.main .submit {
+    margin: 10px 0 0 80px;
+}
+
+.auth_form a {
+    display: block;
+    font-size: 0.7em;
+    padding-top: 10px;
+    margin-left: 80px;
+}
+
+.referral label {
+    width: 130px;
+    display: inline-block;
+    line-height: 1.8em;
+}
+
+.referral > .submit {
+    margin: 10px 0;
+}
+
+#referral-code {
+    color: #f5f5f5;
+    padding: 10px;
+    background-color: #151515;
+    text-align: center;
 }
 
 .hidden {
@@ -125,34 +168,6 @@ input[type="text"]:invalid, input[type="password"]:invalid {
     font-weight: bold;
 }
 
-ol {
-    -webkit-margin-before: 1em;
-    -webkit-margin-after: 1em;
-    -webkit-padding-start: 40px;
-}
-
-label {
-    width: 10em;
-    float: left;
-}
-
-#referral-code {
-    color: #f5f5f5;
-    padding: 10px;
-    background-color: #151515;
-    text-align: center;
-}
-
 .center {
     text-align: center;
-}
-
-form {
-    display: inline-block;
-    text-align: left;
-}
-
-.submit {
-    display: block;
-    margin: 0 auto;
 }

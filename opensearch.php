@@ -1,10 +1,10 @@
 <?php
 header('Content-type: application/opensearchdescription+xml');
-require('classes/config.php');
+require_once(__DIR__.'/classes/config.php');
 
 $SSL = ($_SERVER['SERVER_PORT'] === '443');
 
-$Type = ((!empty($_GET['type']) && in_array($_GET['type'],array('torrents','artists','requests','forums','users','wiki','log')))?$_GET['type']:'artists');
+$Type = ((!empty($_GET['type']) && in_array($_GET['type'],['torrents','artists','requests','forums','users','wiki','log']))?$_GET['type']:'artists');
 
 /*
 $FH = fopen(SERVER_ROOT.'/favicon.ico','r');

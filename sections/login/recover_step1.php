@@ -2,6 +2,14 @@
 View::show_header('Recover Password','validate');
 echo $Validate->GenerateJS('recoverform');
 ?>
+
+<div id="logo">
+<a href="/"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
+</div>
+
+<div id="main">
+<div class="pwrecover">
+
 <form class="auth_form" name="recovery" id="recoverform" method="post" action="" onsubmit="return formVal();">
     <div style="width: 320px;">
         <span class="titletext">Reset your password - Step 1</span><br /><br />
@@ -27,8 +35,8 @@ if (empty($Sent) || (!empty($Sent) && $Sent != 1)) {
     An email has been sent to you; please follow the directions in that email to reset your password.
 <?php
 } ?>
-    </div>
 </form>
+</div>
+</div>
 <?php
 View::show_footer(['recover' => true]);
-?>

@@ -1,9 +1,12 @@
 <?php
+
+use \Gazelle\Util\Irc;
+
 if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
     enforce_login();
     $TorrentPass = $LoggedUser['torrent_pass'];
     $DownloadAlt = $LoggedUser['DownloadAlt'];
-    $UserID    = $LoggedUser['ID'];
+    $UserID = $LoggedUser['ID'];
     $AuthKey = $LoggedUser['AuthKey'];
     $HttpsTracker = $LoggedUser['HttpsTracker'];
 } else {
@@ -13,19 +16,20 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
 
     $UserInfo = $Cache->get_value('user_'.$_REQUEST['torrent_pass']);
     if (!is_array($UserInfo)) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT ID, DownloadAlt, SiteOptions, la.UserID
             FROM users_main AS m
-                INNER JOIN users_info AS i ON i.UserID = m.ID
-                LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
-            WHERE m.torrent_pass = '".db_string($_REQUEST['torrent_pass'])."'
-                AND m.Enabled = '1'");
-        $UserInfo = $DB->next_record(MYSQLI_NUM, array(2));
+            INNER JOIN users_info AS i ON (i.UserID = m.ID)
+            LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
+            WHERE m.Enabled = '1' AND m.torrent_pass = ?
+            ", $_REQUEST['torrent_pass']
+        );
+        $UserInfo = $DB->next_record(MYSQLI_NUM, [2]);
         $SiteOptions = array_merge(Users::default_site_options(), unserialize_array($UserInfo[2]));
         $UserInfo[2] = $SiteOptions['HttpsTracker'];
         $Cache->cache_value('user_'.$_REQUEST['torrent_pass'], $UserInfo, 3600);
     }
-    $UserInfo = array($UserInfo);
+    $UserInfo = [$UserInfo];
     list($UserID, $DownloadAlt, $HttpsTracker, $Locked) = array_shift($UserInfo);
     if (!$UserID) {
         error(0);
@@ -45,18 +49,15 @@ if (!is_number($TorrentID)) {
     error(0);
 }
 
+$User = new \Gazelle\User($DB, $Cache, $LoggedUser['ID']);
+
 /* uTorrent Remote and various scripts redownload .torrent files periodically.
-    To prevent this retardation from blowing bandwidth etc., let's block it
-    if the .torrent file has been downloaded four times before */
-$ScriptUAs = array('BTWebClient*', 'Python-urllib*', 'python-requests*', 'uTorrent*');
+ * To prevent this retardation from blowing bandwidth etc., let's block it
+ * if the .torrent file has been downloaded four times before.
+ */
+$ScriptUAs = ['BTWebClient*', 'Python-urllib*', 'python-requests*', 'uTorrent*'];
 if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
-    $DB->query("
-        SELECT 1
-        FROM users_downloads
-        WHERE UserID = $UserID
-            AND TorrentID = $TorrentID
-        LIMIT 4");
-    if ($DB->record_count() === 4) {
+    if ($User->torrentDownloadCount($TorrentID) > 3) {
         error('You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.', true);
         die();
     }
@@ -64,7 +65,7 @@ if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
 
 $Info = $Cache->get_value('torrent_download_'.$TorrentID);
 if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[10])) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             t.Media,
             t.Format,
@@ -79,12 +80,14 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
             t.info_hash,
             t.UserID
         FROM torrents AS t
-            INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
-        WHERE t.ID = '".db_string($TorrentID)."'");
+        INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+        WHERE t.ID = ?
+        ', $TorrentID
+    );
     if (!$DB->has_results()) {
         error(404);
     }
-    $Info = array($DB->next_record(MYSQLI_NUM, array(4, 5, 6, 10)));
+    $Info = [$DB->next_record(MYSQLI_NUM, [4, 5, 6, 10])];
     $Artists = Artists::get_artist($Info[0][4]);
     $Info['Artists'] = Artists::display_artists($Artists, false, true);
     $Info['PlainArtists'] = Artists::display_artists($Artists, false, true, false);
@@ -93,11 +96,49 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
 if (!is_array($Info[0])) {
     error(404);
 }
-list($Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash, $TorrentUploaderID) = array_shift($Info); // used for generating the filename
+list($Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash, $TorrentUploaderID)
+    = array_shift($Info); // used for generating the filename
 $Artists = $Info['Artists'];
 
-// If he's trying use a token on this, we need to make sure he has one,
-// deduct it, add this to the FLs table, and update his cache key.
+/* If this is not their torrent, then see if they have downloaded too
+ * many files, compared to completely snatched items. If that is too
+ * high, and they have already downloaded too many files recently, then
+ * stop them. Exception: always allowed if they are using FL tokens.
+ */
+if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploaderID != $LoggedUser['ID']) {
+    $PRL = new \Gazelle\PermissionRateLimit($DB, $Cache);
+    if (!$PRL->safeFactor($User)) {
+        if (!$PRL->safeOvershoot($User)) {
+            $DB->prepared_query('
+                INSERT INTO ratelimit_torrent
+                       (user_id, torrent_id)
+                VALUES (?,       ?)
+                ', $UserID, $TorrentID
+            );
+            if (G::$Cache->get_value('user_flood_' . $LoggedUser['ID'])) {
+                G::$Cache->increment('user_flood_' . $LoggedUser['ID']);
+            } else {
+                Irc::sendChannel(
+                    "user.php?id=" . $UserID
+                    . " (" . $LoggedUser['Username'] . ")"
+                    . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
+                    . " accessing https://"
+                    . SSL_SITE_URL . $_SERVER['REQUEST_URI']
+                    . (!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : '')
+                    . ' hit download rate limit',
+                    STATUS_CHAN
+                );
+                G::$Cache->cache_value('user_429_flood_' . $LoggedUser['ID'], 1, 3600);
+            }
+            error(429);
+        }
+    }
+}
+
+/* If they are trying use a token on this, we need to make sure they
+ * have enough. If so, deduct the number required, note it in the freeleech
+ * table and update their cache key.
+ */
 if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     if (isset($LoggedUser)) {
         $FLTokens = $LoggedUser['FLTokens'];
@@ -114,39 +155,48 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     }
 
     // First make sure this isn't already FL, and if it is, do nothing
-
     if (!Torrents::has_token($TorrentID)) {
-        if ($FLTokens <= 0) {
-            error('You do not have any freeleech tokens left. Please use the regular DL link.');
-        }
-        if ($Size >= 2147483648) {
+        if (!STACKABLE_FREELEECH_TOKENS && $Size >= BYTES_PER_FREELEECH_TOKEN) {
             error('This torrent is too large. Please use the regular DL link.');
+        }
+        $TokensToUse = ceil($Size / BYTES_PER_FREELEECH_TOKEN);
+        $DB->prepared_query('
+            UPDATE users_main
+            SET FLTokens = FLTokens - ?
+            WHERE FLTokens >= ? AND ID = ?
+            ', $TokensToUse, $TokensToUse, $UserID
+        );
+        if ($DB->affected_rows() == 0) {
+            error('You do not have any freeleech tokens left. Please use the regular DL link.');
         }
 
         // Let the tracker know about this
-        if (!Tracker::update_tracker('add_token', array('info_hash' => rawurlencode($InfoHash), 'userid' => $UserID))) {
+        if (!Tracker::update_tracker('add_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID])) {
             error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
+            // recredit the tokens we just subtracted
+            $DB->prepared_query('
+                UPDATE users_main
+                SET FLTokens = FLTokens + ?
+                WHERE ID = ?
+                ', $TokensToUse, $UserID
+            );
         }
 
         if (!Torrents::has_token($TorrentID)) {
-            $DB->query("
-                INSERT INTO users_freeleeches (UserID, TorrentID, Time)
-                VALUES ($UserID, $TorrentID, NOW())
+            $DB->prepared_query("
+                INSERT INTO users_freeleeches (UserID, TorrentID, Uses, Time)
+                VALUES (?, ?, ?, now())
                 ON DUPLICATE KEY UPDATE
                     Time = VALUES(Time),
                     Expired = FALSE,
-                    Uses = Uses + 1");
-            $DB->query("
-                UPDATE users_main
-                SET FLTokens = FLTokens - 1
-                WHERE ID = $UserID");
+                    Uses = Uses + ?", $UserID, $TorrentID, $TokensToUse, $TokensToUse);
 
             // Fix for downloadthemall messing with the cached token count
             $UInfo = Users::user_heavy_info($UserID);
             $FLTokens = $UInfo['FLTokens'];
 
             $Cache->begin_transaction("user_info_heavy_$UserID");
-            $Cache->update_row(false, array('FLTokens' => ($FLTokens - 1)));
+            $Cache->update_row(false, ['FLTokens' => ($FLTokens - $TokensToUse)]);
             $Cache->commit_transaction(0);
 
             $Cache->delete_value("users_tokens_$UserID");
@@ -154,38 +204,41 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     }
 }
 
-//Stupid Recent Snatches On User Page
+// Stupid Recent Snatches On User Page
 if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
     $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
     if (isset($RecentSnatches)) {
-        $Snatch = array(
-                'ID' => $GroupID,
-                'Name' => $Name,
-                'Artist' => $Artists,
-                'WikiImage' => $Image);
+        $Snatch = [
+            'ID' => $GroupID,
+            'Name' => $Name,
+            'Artist' => $Artists,
+            'WikiImage' => $Image
+        ];
         if (!in_array($Snatch, $RecentSnatches)) {
             if (count($RecentSnatches) === 5) {
                 array_pop($RecentSnatches);
             }
             array_unshift($RecentSnatches, $Snatch);
         } elseif (!is_array($RecentSnatches)) {
-            $RecentSnatches = array($Snatch);
+            $RecentSnatches = [$Snatch];
         }
-        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 0);
+        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 86400 * 3);
     }
 }
 
-$DB->query("
+$DB->prepared_query("
     INSERT IGNORE INTO users_downloads (UserID, TorrentID, Time)
-    VALUES ('$UserID', '$TorrentID', '".sqltime()."')");
+    VALUES (?, ?, now())
+    ", $UserID, $TorrentID);
 
-$DB->query("
+$DB->prepared_query("
     SELECT File
     FROM torrents_files
-    WHERE TorrentID = '$TorrentID'");
+    WHERE TorrentID = ?", $TorrentID);
 
 Torrents::set_snatch_update_time($UserID, Torrents::SNATCHED_UPDATE_AFTERDL);
 list($Contents) = $DB->next_record(MYSQLI_NUM, false);
+$Cache->delete_value('user_rlim_' . $UserID);
 
 $FileName = TorrentsDL::construct_file_name($Info['PlainArtists'], $Name, $Year, $Media, $Format, $Encoding, $TorrentID, $DownloadAlt);
 $AnnounceURL = ($HttpsTracker) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;

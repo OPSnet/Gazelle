@@ -66,7 +66,7 @@ class TEXTAREA_PREVIEW_SUPER {
             $script[] = sprintf('[%s]', $a);
         }
         if (!empty($script)) {
-            View::parse('generic/textarea/script_factory.phtml', array('script' => join(', ', $script)));
+            View::parse('generic/textarea/script_factory.phtml', ['script' => join(', ', $script)]);
         }
     }
 }
@@ -170,7 +170,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER {
             $this->preview();
         }
 
-        $this->buffer = View::parse('generic/textarea/textarea.phtml', array(
+        $this->buffer = View::parse('generic/textarea/textarea.phtml', [
             'ID' => $ID,
             'NID' => $this->id,
             'Name' => &$Name,
@@ -179,7 +179,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER {
             'Rows' => &$Rows,
             'Attributes' => &$Attributes,
             'Required' => ($Required === true) ? 'required' : ''
-        ), $Buffer);
+        ], $Buffer);
 
         if ($Buttons === true) {
             $this->buttons();
@@ -192,7 +192,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER {
      */
     public function preview() {
         if (!$this->preview) {
-            View::parse('generic/textarea/preview.phtml', array('ID' => $this->id));
+            View::parse('generic/textarea/preview.phtml', ['ID' => $this->id]);
         }
         $this->preview = true;
     }
@@ -202,7 +202,7 @@ class TEXTAREA_PREVIEW extends TEXTAREA_PREVIEW_SUPER {
      * Can be called many times to place buttons in different areas
      */
     public function buttons() {
-        View::parse('generic/textarea/buttons.phtml', array('ID' => $this->id));
+        View::parse('generic/textarea/buttons.phtml', ['ID' => $this->id]);
     }
 
     /**

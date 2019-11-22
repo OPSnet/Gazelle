@@ -15,12 +15,16 @@ class Bonus {
     const CACHE_HISTORY = 'bonus_history.';
     const CACHE_POOL_HISTORY = 'bonus_pool_history.';
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
+    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
         $this->db = $db;
         $this->cache = $cache;
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
         if ($this->items === false) {
-            $this->db->query("SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title FROM bonus_item");
+            $this->db->query("
+                SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title
+                FROM bonus_item
+                ORDER BY FIELD(label, 'token-1', 'token-4', 'token-2', 'token-3', 'other-1', 'other-4', 'other-2', 'other-3', 'title-bb-n', 'title-bb-y', 'title-off', 'invite')
+            ");
             $this->items = $this->db->has_results() ? $this->db->to_array('Label') : [];
             $this->cache->cache_value(self::CACHE_ITEM, $this->items, 86400 * 30);
         }
@@ -278,6 +282,11 @@ class Bonus {
         if ($From['Enabled'] != 1 || $To['Enabled'] != 1) {
             return 0;
         }
+        $AcceptFL = \Users::user_heavy_info($toID)['AcceptFL'];
+        if (!$AcceptFL) {
+            return 0;
+        }
+
         // get the bonus points of the giver from the database
         // verify they could be legally spent, and then update the receiver
         $stats = \Users::user_stats($fromID, true);
@@ -343,9 +352,166 @@ Enjoy!";
         return $this->db->affected_rows();
     }
 
-    public function addPoints ($user_id, $amount) {
+    public function addPoints($user_id, $amount) {
         $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $amount, $user_id);
         $this->cache->delete_value("user_info_heavy_{$user_id}");
         $this->cache->delete_value("user_stats_{$user_id}");
+    }
+
+    public function userHourlyRate($id) {
+        $this->db->prepared_query('
+            SELECT
+                IFNULL(SUM((t.Size / (1024 * 1024 * 1024)) * (
+                    0.0433 + (
+                        (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                    )
+                )),0) as Rate
+            FROM (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
+            INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+            INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            WHERE
+                xfu.uid = ?
+                ', $id, $id
+        );
+        list($rate) = $this->db->next_record(MYSQLI_NUM);
+        return $rate;
+    }
+
+    public function userTotals($id) {
+        $this->db->prepared_query("
+            SELECT
+                COUNT(xfu.uid) as TotalTorrents,
+                SUM(t.Size) as TotalSize,
+                SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
+                    0.0433 + (
+                        (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                    )
+                ), 0)) AS TotalHourlyPoints
+            FROM (
+                SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+            ) AS xfu
+            INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+            INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            WHERE
+                xfu.uid = ?
+            ", $id, $id
+        );
+        list($total, $size, $hourly) = $this->db->next_record();
+        return [intval($total), floatval($size), floatval($hourly)];
+    }
+
+    public function userDetails($id, $orderBy, $orderWay, $limit, $offset) {
+        $this->db->prepared_query("
+            SELECT
+                t.ID,
+                t.GroupID,
+                t.Size,
+                t.Format,
+                t.Encoding,
+                t.HasLog,
+                t.HasLogDB,
+                t.HasCue,
+                t.LogScore,
+                t.LogChecksum,
+                t.Media,
+                t.Scene,
+                t.RemasterYear,
+                t.RemasterTitle,
+                GREATEST(tls.Seeders, 1) AS Seeders,
+                xfh.seedtime AS Seedtime,
+                ((t.Size / (1024 * 1024 * 1024)) * (
+                    0.0433 + (
+                        (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                    )
+                )) AS HourlyPoints
+            FROM (
+                SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+            ) AS xfu
+            INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+            INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            WHERE
+                xfu.uid = ?
+            ORDER BY $orderBy $orderWay
+            LIMIT ?
+            OFFSET ?
+            ", $id, $id, $limit, $offset
+        );
+        return [$this->db->collect('GroupID'), $this->db->to_array('ID', MYSQLI_ASSOC)];
+    }
+
+    public function givePoints() {
+        //------------------------ Update Bonus Points -------------------------//
+        // calcuation:
+        // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))
+        // Size (convert from bytes to GB) is in torrents
+        // Seedtime (convert from hours to days) is in xbt_snatched
+        // Seeders is in torrents
+
+        $userId = 1;
+        $chunk = 200;
+        $processed = 0;
+        $more = true;
+        while ($more) {
+            /* update a block of users at a time, to minimize locking contention */
+            $this->db->prepared_query("
+                UPDATE users_main AS um
+                INNER JOIN (
+                    SELECT
+                        xfu.uid AS ID,
+                        sum(t.Size / pow(1024, 3)
+                            * (0.0433 + (0.07 * ln(1 + xfh.seedtime/24)) / pow(greatest(tls.Seeders, 1), 0.35))
+                        ) as new
+                    FROM (
+                        SELECT DISTINCT uid, fid
+                        FROM xbt_files_users
+                        WHERE active = '1'
+                            AND remaining = 0
+                            AND mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
+                            AND uid BETWEEN ? AND ?
+                    ) xfu
+                    INNER JOIN xbt_files_history AS xfh USING (uid, fid)
+                    INNER JOIN users_main AS um ON (um.ID = xfu.uid)
+                    INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
+                    INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                    WHERE ui.DisablePoints = '0'
+                        AND um.Enabled = '1'
+                        AND um.ID BETWEEN ? AND ?
+                    GROUP BY
+                        xfu.uid
+                ) AS p USING (ID)
+                SET um.BonusPoints = um.BonusPoints + p.new
+                ", $userId, $userId + $chunk - 1, $userId, $userId + $chunk - 1
+            );
+            $processed += $this->db->affected_rows();
+
+            /* flush their stats */
+            $this->db->prepared_query("
+                SELECT concat('user_stats_', um.ID) as ck
+                FROM users_main um
+                INNER JOIN users_info ui ON (ui.UserID = um.ID)
+                WHERE ui.DisablePoints = '0'
+                    AND um.Enabled = '1'
+                    AND um.ID BETWEEN ? AND ?
+                ", $userId, $userId + $chunk - 1
+            );
+            if ($this->db->has_results()) {
+                $this->cache->deleteMulti($this->db->collect('ck', false));
+            }
+            $userId += $chunk;
+
+            /* see if there are some more users to process */
+            $this->db->prepared_query('
+                SELECT 1
+                FROM users_main
+                WHERE ID >= ?
+                ', $userId
+            );
+            $more = $this->db->has_results();
+        }
+        return $processed;
     }
 }

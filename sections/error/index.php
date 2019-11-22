@@ -2,10 +2,20 @@
 
 function notify ($Channel, $Message) {
     global $LoggedUser;
-    send_irc("PRIVMSG ".$Channel." :".$Message." error by ".(!empty($LoggedUser['ID']) ? site_url()."user.php?id=".$LoggedUser['ID'] ." (".$LoggedUser['Username'].")" : $_SERVER['REMOTE_ADDR']." (".Tools::geoip($_SERVER['REMOTE_ADDR']).")")." accessing https://".SSL_SITE_URL."".$_SERVER['REQUEST_URI'].(!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : ''));
+    $UserID = empty($LoggedUser['ID']) ? false : $LoggedUser['ID'];
+    send_irc("PRIVMSG "
+        . $Channel . " :" . $Message . " error by "
+        . ($UserID
+                ? site_url() . "user.php?id=" . $UserID . " (" . $LoggedUser['Username'] . ")"
+                : $_SERVER['REMOTE_ADDR']
+          )
+        . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
+        . " accessing https://" . SSL_SITE_URL . $_SERVER['REQUEST_URI']
+        . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
+    );
 }
 
-$Errors = array('403','404','413','504');
+$Errors = ['403','404','413','504'];
 
 if (!empty($_GET['e']) && in_array($_GET['e'],$Errors)) {
     // Web server error i.e. http://sitename/madeupdocument.php
@@ -16,12 +26,16 @@ if (!empty($_GET['e']) && in_array($_GET['e'],$Errors)) {
 
         case '403':
             $Title = "Error 403";
-            $Description = "You just tried to go to a page that you don't have enough permission to view.";
-            notify(STATUS_CHAN,'403');
+            $Description = "You tried to go to a page that you don't have enough permission to view.";
+            notify(STATUS_CHAN, 403);
             break;
         case '404':
             $Title = "Error 404";
-            $Description = "You just tried to go to a page that doesn't exist.";
+            $Description = "You tried to go to a page that doesn't exist.";
+            break;
+        case '429':
+            $Title = "Error 429";
+            $Description = "You tried to do something too frequently.";
             break;
         case '0':
             $Title = "Invalid Input";

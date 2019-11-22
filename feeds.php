@@ -11,13 +11,11 @@ if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-require 'classes/config.php'; // The config contains all site-wide configuration information as well as memcached rules
+require_once(__DIR__.'/classes/config.php');
+require_once(__DIR__.'/classes/classloader.php');
 
-require(SERVER_ROOT.'/classes/misc.class.php'); // Require the misc class
-require(SERVER_ROOT.'/classes/cache.class.php'); // Require the caching class
-require(SERVER_ROOT.'/classes/feed.class.php'); // Require the feeds class
-$Cache = NEW CACHE($MemcachedServers); // Load the caching class
-$Feed = NEW FEED; // Load the time class
+$Cache = new CACHE($MemcachedServers);
+$Feed = new Feed;
 
 function check_perms() {
     return false;
@@ -37,21 +35,21 @@ function display_str($Str) {
         $Str = mb_convert_encoding($Str, 'HTML-ENTITIES', 'UTF-8');
         $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,5};)/m", '&amp;', $Str);
 
-        $Replace = array(
+        $Replace = [
             "'",'"',"<",">",
             '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
             '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
             '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
             '&#156;','&#158;','&#159;'
-        );
+        ];
 
-        $With = array(
+        $With = [
             '&#39;','&quot;','&lt;','&gt;',
             '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
             '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
             '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
             '&#339;','&#382;','&#376;'
-        );
+        ];
 
         $Str = str_replace($Replace, $With, $Str);
     }

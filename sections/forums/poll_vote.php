@@ -45,7 +45,7 @@ if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("
             Closed
         FROM forums_polls
         WHERE TopicID = '$TopicID'");
-    list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, array(1));
+    list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
     $Answers = unserialize($Answers);
     $DB->query("
         SELECT Vote, COUNT(UserID)
@@ -66,7 +66,7 @@ if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("
             $Votes[$i] = 0;
         }
     }
-    $Cache->cache_value("polls_$TopicID", array($Question, $Answers, $Votes, $Featured, $Closed), 0);
+    $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
 }
 
 
@@ -115,7 +115,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
             ($TopicID, " . $LoggedUser['ID'] . ", $Vote)");
     if ($DB->affected_rows() == 1 && $Vote != 0) {
         $Cache->begin_transaction("polls_$TopicID");
-        $Cache->update_row(2, array($Vote => '+1'));
+        $Cache->update_row(2, [$Vote => '+1']);
         $Cache->commit_transaction(0);
         $Votes[$Vote]++;
         $TotalVotes++;

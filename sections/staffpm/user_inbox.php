@@ -29,7 +29,7 @@ $StaffPMs = $DB->query("
     </div>
     <br />
     <br />
-    <?php View::parse('generic/reply/staffpm.php', array('Hidden' => true)); ?>
+    <?php View::parse('generic/reply/staffpm.php', ['Hidden' => true]); ?>
     <div class="box pad" id="inbox">
 <?php
 

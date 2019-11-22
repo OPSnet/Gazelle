@@ -379,12 +379,11 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                 <tr id="voting">
                     <td class="label">Bounty (MB)</td>
                     <td>
-                        <input type="text" id="amount_box" size="8" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" onchange="Calculate();" />
+                        <input type="text" id="amount_box" size="8" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
                         <select id="unit" name="unit" onchange="Calculate();">
                             <option value="mb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'mb' ? ' selected="selected"' : '') ?>>MB</option>
                             <option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GB</option>
                         </select>
-                        <input type="button" value="Preview" onclick="Calculate();" />
                         <?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
                         <p>Bounty must be greater than or equal to 100 MB.</p>
                     </td>

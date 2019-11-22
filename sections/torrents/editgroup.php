@@ -136,7 +136,7 @@ if ($CategoryID == 1) { ?>
                         <input type="checkbox" id="neutralleech" name="neutralleech" /><label for="neutralleech"> Neutral Leech</label>
                          because
                         <select name="freeleechtype">
-<?php        $FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
+<?php        $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$FLType?></option>
 <?php

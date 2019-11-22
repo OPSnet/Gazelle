@@ -37,7 +37,7 @@ View::show_header('Manage Stylesheets');
                 <td>Count</td>
             </tr>
             <?php
-            while (list($ID, $Name, $Description, $Default, $EnabledCount, $TotalCount) = $DB->next_record(MYSQLI_NUM, array(1, 2))) { ?>
+            while (list($ID, $Name, $Description, $Default, $EnabledCount, $TotalCount) = $DB->next_record(MYSQLI_NUM, [1, 2])) { ?>
                 <tr>
                     <td><?=$Name?></td>
                     <td><?=$Description?></td>

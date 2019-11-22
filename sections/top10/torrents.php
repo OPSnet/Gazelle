@@ -33,6 +33,12 @@ if (check_perms('site_advanced_top10')) {
                     <input type="radio" id="rdoAny" name="anyall" value="any"<?=(!empty($_GET['anyall']) && $_GET['anyall'] == 'any' ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
                 </td>
             </tr>
+            <tr id="artistfilter">
+                <td class="label">Exclude Artists (one on each line):</td>
+                <td>
+                    <textarea name="excluded_artists" rows="3" cols="25" style="width: 95%"><?php if (!empty($_GET['excluded_artists'])) echo display_str($_GET['excluded_artists']) ?></textarea>&nbsp;
+                </td>
+            </tr>
             <tr>
                 <td class="label">Format:</td>
                 <td>
@@ -75,7 +81,7 @@ if (!empty($freeleechToggleQuery))
 $freeleechToggleQuery .= 'freeleech=' . $freeleechToggleName;
 
 $groupByToggleName = (!empty($_GET['groups']) && $_GET['groups'] == 'show' ? 'hide' : 'show');
-$groupByToggleQuery = Format::get_url(array('freeleech', 'groups'));
+$groupByToggleQuery = Format::get_url(['freeleech', 'groups']);
 if (!empty($groupByToggleQuery)) {
   $groupByToggleQuery .= '&amp;';
 }
@@ -203,7 +209,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
 <?php
         return;
     }
-    
+
     foreach ($details as $detail) {
         $groupIDS[] = $detail[1];
     }
@@ -234,7 +240,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             $displayName .= ' [' . $ReleaseTypes[$releaseType] . ']';
         }
 
-        $torrentInformation = Torrents::torrent_info($torrentID);
+        $torrentInformation = Torrents::torrent_info($detail);
 
         $torrentTags = new Tags($tagsList);
 
@@ -255,7 +261,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             <div class="group_info clear">
                 <span>
                   <a href="torrents.php?action=download&amp;id=<?=$torrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                  <a href="torrents.php?action=download&amp;id=<?=$torrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($seeders)?>');">FL</a>
+                  <a href="torrents.php?action=download&amp;id=<?=$torrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($seeders, $size)?>');">FL</a>
                 </span>
 
                 <strong><?=$displayName?></strong> <?=$torrentInformation?><?php if ($reported) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>

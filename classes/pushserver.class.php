@@ -2,7 +2,6 @@
 define("PUSH_SOCKET_LISTEN_ADDRESS", "127.0.0.1");
 define("PUSH_SOCKET_LISTEN_PORT", 6789);
 
-require 'NMA_API.php';
 require 'config.php';
 class PushServer {
     private $ListenSocket = false;
@@ -40,9 +39,6 @@ class PushServer {
         $JSON = json_decode($Data, true);
         $Service = strtolower($JSON['service']);
         switch ($Service) {
-            case 'nma':
-                $this->push_nma($JSON['user']['key'], $JSON['message']['title'], $JSON['message']['body'], $JSON['message']['url']);
-                break;
             case 'prowl':
                 $this->push_prowl($JSON['user']['key'], $JSON['message']['title'], $JSON['message']['body'], $JSON['message']['url']);
                 break;
@@ -67,12 +63,12 @@ class PushServer {
 
     private function push_prowl($Key, $Title, $Message, $URL) {
         $API = "https://api.prowlapp.com/publicapi/add";
-        $Fields = array(
+        $Fields = [
                 'apikey' => urlencode($Key),
                 'application' => urlencode(SITE_NAME),
                 'event' => urlencode($Title),
                 'description' => urlencode($Message)
-        );
+        ];
         if (!empty($URL)) {
             $Fields['url'] = $URL;
         }
@@ -96,11 +92,11 @@ class PushServer {
         if (!empty($URL)) {
             $Message = $Message . " " . $URL;
         }
-        $Fields = array(
+        $Fields = [
                 'title' => urlencode($Title),
                 'text' => urlencode($Message),
                 'sender' => urlencode(SITE_NAME)
-        );
+        ];
         $FieldsString = "";
         foreach ($Fields as $key => $value) {
             $FieldsString .= $key . '=' . $value . '&';
@@ -116,28 +112,17 @@ class PushServer {
         echo "Push sent to Toasty";
     }
 
-    private function push_nma($Key, $Title, $Message, $URL) {
-        $NMA = new NMA_API(array(
-                'apikey' => $Key
-        ));
-        if ($NMA->verify()) {
-            if ($NMA->notify(SITE_NAME, $Title, $Message, $URL)) {
-                echo "Push sent to NMA";
-            }
-        }
-    }
-
     private function push_pushover($UserKey, $Title, $Message, $URL) {
-        curl_setopt_array($ch = curl_init(), array(
+        curl_setopt_array($ch = curl_init(), [
                 CURLOPT_URL => "https://api.pushover.net/1/messages.json",
-                CURLOPT_POSTFIELDS => array(
+                CURLOPT_POSTFIELDS => [
                         "token" => PUSHOVER_KEY,
                         "user" => $UserKey,
                         "title" => $Title,
                         "message" => $Message,
                         "url" => $URL
-                )
-        ));
+                ]
+        ]);
         curl_exec($ch);
         curl_close($ch);
         echo "Push sent to Pushover";
@@ -158,18 +143,18 @@ class PushServer {
             $Message .= ' ' . $URL;
         }
 
-        curl_setopt_array($Curl = curl_init(), array(
+        curl_setopt_array($Curl = curl_init(), [
             CURLOPT_URL => 'https://api.pushbullet.com/api/pushes',
-            CURLOPT_POSTFIELDS => array(
+            CURLOPT_POSTFIELDS => [
                 'type' => 'note',
                 'title' => $Title,
                 'body' => $Message,
                 'device_iden' => $DeviceID
-            ),
+            ],
             CURLOPT_USERPWD => $UserKey . ':',
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
             CURLOPT_RETURNTRANSFER => True
-        ));
+        ]);
 
         $Result = curl_exec($Curl);
         echo "Push sent to Pushbullet";
@@ -181,4 +166,3 @@ class PushServer {
 }
 
 $PushServer = new PushServer();
-?>

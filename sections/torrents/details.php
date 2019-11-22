@@ -223,7 +223,6 @@ $Index++;
     </div>
 <?php
 if ($Categories[$GroupCategoryID - 1] == 'Music') {
-    $ArtistManager = new \Gazelle\Artist(G::$DB, G::$Cache);
     $ShownWith = false;
     $title = '';
     if (!empty($Artists[6]) && !empty($Artists[1])) {
@@ -254,7 +253,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                     <?= Artists::display_artist($Artist) ?>&lrm;
 <?php
                     if (check_perms('torrents_edit')) {
-    ?>                (<span class="tooltip" title="Artist alias ID"><?= $ArtistManager->get_alias($Artist['id'], $Artist['name']) ?></span>)&nbsp;
+    ?>                (<span class="tooltip" title="Artist alias ID"><?php $a = new \Gazelle\Artist(G::$DB, G::$Cache, $Artist['id']); echo $a->get_alias($Artist['name']) ?></span>)&nbsp;
                         <span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?=$GroupID?>&amp;artistid=<?=$Artist['id']?>&amp;importance=<?=$s['offset']?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?= $s['role'] ?>">X</a></span>
     <?php           } ?>
                 </li>
@@ -534,7 +533,7 @@ foreach ($TorrentList as $Torrent) {
 ?>
                     <span>[ <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=($HasFile ? 'DL' : 'Missing')?></a>
 <?php   if (Torrents::can_use_token($Torrent)) { ?>
-                        | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'])?>');">FL</a>
+                        | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size'])?>');">FL</a>
 <?php   } ?>
                         | <a href="reportsv2.php?action=report&amp;id=<?=$TorrentID?>" class="tooltip" title="Report">RP</a>
 <?php   if ($CanEdit) { ?>
@@ -594,7 +593,7 @@ foreach ($TorrentList as $Torrent) {
                     <div class="linkbox">
                         <a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
 <?php
-    if ($HasLog && $HasLogDB) { ?>
+    if ($Media === 'CD' && $HasLog && $HasLogDB) { ?>
                         <a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log</a>
 <?php
     }
@@ -806,14 +805,14 @@ CommentsView::render_comments($Thread, $LastRead, "torrents.php?id=$GroupID");
             <?=$Pages?>
         </div>
 <?php
-    View::parse('generic/reply/quickreply.php', array(
+    View::parse('generic/reply/quickreply.php', [
         'InputName' => 'pageid',
         'InputID' => $GroupID,
         'Action' => 'comments.php?page=torrents',
         'InputAction' => 'take_post',
         'TextareaCols' => 65,
         'SubscribeBox' => true
-    ));
+    ]);
 ?>
         </div>
     </div>

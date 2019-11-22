@@ -2,7 +2,7 @@
 if (!check_perms('users_warn')) {
     error(404);
 }
-Misc::assert_isset_request($_POST, array('reason', 'privatemessage', 'body', 'length', 'postid'));
+Misc::assert_isset_request($_POST, ['reason', 'privatemessage', 'body', 'length', 'postid']);
 
 $Reason = $_POST['reason'];
 $PrivateMessage = $_POST['privatemessage'];

@@ -59,7 +59,7 @@ if (!isset($Forum) || !is_array($Forum)) {
             WHERE ForumID = '$ForumID'
                 AND IsSticky = '1'");
         list($Stickies) = $DB->next_record();
-        $Cache->cache_value("forums_$ForumID", array($Forum, '', 0, $Stickies), 0);
+        $Cache->cache_value("forums_$ForumID", [$Forum, '', 0, $Stickies], 0);
     }
 }
 

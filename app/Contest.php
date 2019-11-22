@@ -15,7 +15,7 @@ class Contest {
 
     private $type;
 
-    public function __construct ($db, $cache) {
+    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
         $this->db = $db;
         $this->cache = $cache;
         $this->type = $this->cache->get_value(self::CACHE_CONTEST_TYPE);

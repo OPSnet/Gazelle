@@ -216,10 +216,10 @@ function displayCommStats(stats) {
                 $(baseid + x).html(stats[x]);
                 break;
             case 'usnatched':
-                $(baseid + x).html('(' + stats[x] + ')');
+                $(baseid + x).html('(' + stats[x] + ' distinct)');
                 break;
             case 'udownloaded':
-                $(baseid + x).html('(' + stats[x] + ')');
+                $(baseid + x).html('(' + stats[x] + ' distinct)');
                 break;
             case 'seedingperc':
                 $(baseid + x).html('(' + stats[x] + '%)');

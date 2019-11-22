@@ -3,7 +3,7 @@
 if (!check_perms('users_warn')) {
     error(404);
 }
-Misc::assert_isset_request($_POST, array('postid', 'userid', 'key'));
+Misc::assert_isset_request($_POST, ['postid', 'userid', 'key']);
 $PostID = (int)$_POST['postid'];
 $UserID = (int)$_POST['userid'];
 $Key = (int)$_POST['key'];

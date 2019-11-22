@@ -48,7 +48,7 @@ if (isset($_GET['expire'])) {
             WHERE UserID = $UserID
                 AND TorrentID = $TorrentID");
         $Cache->delete_value("users_tokens_$UserID");
-        Tracker::update_tracker('remove_token', array('info_hash' => rawurlencode($InfoHash), 'userid' => $UserID));
+        Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID]);
     }
     header("Location: userhistory.php?action=token_history&userid=$UserID");
 }
@@ -92,7 +92,7 @@ $Pages = Format::get_pages($Page, $NumResults, 25);
         <td>Torrent</td>
         <td>Time</td>
         <td>Expired</td>
-<?php if (check_perms('users_mod')) { ?>
+<?php if ($LoggedUser['ID'] == $UserID || check_perms('users_mod')) { ?>
         <td>Downloaded</td>
         <td>Size</td>
         <td>Tokens used</td>
@@ -126,7 +126,7 @@ foreach ($Tokens as $Token) {
         <td><?=time_diff($Time)?></td>
         <td><?=($Expired ? 'Yes' : 'No')?><?=(check_perms('users_mod') && !$Expired) ? " <a href=\"userhistory.php?action=token_history&amp;expire=1&amp;userid=$UserID&amp;torrentid=$TorrentID\">(expire)</a>" : ''; ?>
         </td>
-<?php    if (check_perms('users_mod')) { ?>
+<?php    if ($LoggedUser['ID'] == $UserID || check_perms('users_mod')) { ?>
         <td><?=Format::get_size($Downloaded)?></td>
         <td><?=Format::get_size($Size == NULL ? 0 : $Size)?></td>
         <td><?=$Uses?></td>

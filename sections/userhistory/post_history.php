@@ -21,9 +21,8 @@ if (isset($LoggedUser['PostsPerPage'])) {
 list($Page, $Limit) = Format::page_limit($PerPage);
 
 $UserInfo = Users::user_info($UserID);
-extract(array_intersect_key($UserInfo, array_flip(array('Username', 'Enabled', 'Title', 'Avatar', 'Donor', 'Warned'))));
 
-View::show_header("Post history for $Username", 'subscriptions,comments,bbcode');
+View::show_header('Post history for ' . $UserInfo['Username'], 'subscriptions,comments,bbcode');
 
 $ViewingOwn = ($UserID == $LoggedUser['ID']);
 $ShowUnread = ($ViewingOwn && (!isset($_GET['showunread']) || !!$_GET['showunread']));
@@ -260,7 +259,7 @@ if ($ViewingOwn) {
         <tr>
 <?php       if (Users::has_avatars_enabled()) { ?>
             <td class="avatar" valign="top">
-                <?=Users::show_avatar($Avatar, $UserID, $Username, $HeavyInfo['DisableAvatars'])?>
+                <?=Users::show_avatar($UserInfo['Avatar'], $UserID, $Username, $HeavyInfo['DisableAvatars'])?>
             </td>
 <?php       } ?>
             <td class="body" valign="top">

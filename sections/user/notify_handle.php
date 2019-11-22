@@ -23,7 +23,7 @@ if ($_POST['formid'] && is_number($_POST['formid'])) {
 }
 
 if ($_POST['artists'.$FormID]) {
-    $Artists = explode(',', $_POST['artists'.$FormID]);
+    $Artists = preg_split('/\r\n|\r|\n/', $_POST['artists'.$FormID]);
     $ParsedArtists = [];
     foreach ($Artists as $Artist) {
         if (trim($Artist) != '') {
@@ -52,16 +52,16 @@ if ($_POST['newgroupsonly'.$FormID]) {
 
 if ($_POST['tags'.$FormID]) {
     $TagList = '|';
-    $Tags = explode(',', $_POST['tags'.$FormID]);
+    $Tags = preg_split('/\r\n|\r|\n/', $_POST['tags'.$FormID]);
     foreach ($Tags as $Tag) {
-        $TagList.=db_string(trim($Tag)).'|';
+        $TagList .= db_string(trim($Tag)).'|';
     }
     $HasFilter = true;
 }
 
 if ($_POST['nottags'.$FormID]) {
     $NotTagList = '|';
-    $Tags = explode(',', $_POST['nottags'.$FormID]);
+    $Tags = preg_split('/\r\n|\r|\n/', $_POST['nottags'.$FormID]);
     foreach ($Tags as $Tag) {
         $NotTagList.=db_string(trim($Tag)).'|';
     }
@@ -121,7 +121,7 @@ if ($_POST['fromyear'.$FormID] && is_number($_POST['fromyear'.$FormID])) {
 
 
 if ($_POST['users'.$FormID]) {
-    $Usernames = explode(',', $_POST['users'.$FormID]);
+    $Usernames = preg_split('/\r\n|\r|\n/', $_POST['users'.$FormID]);
     $EscapedUsernames = [];
     foreach ($Usernames as $Username) {
         $EscapedUsernames[] = db_string(trim($Username));;

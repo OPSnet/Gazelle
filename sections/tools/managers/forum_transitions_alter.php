@@ -32,9 +32,9 @@ if ($_POST['submit'] === 'Delete') {
     }
     if ($_POST['submit'] === 'Create') {
         $DB->prepared_query("
-            INSERT INTO forums_transitions (source, destination, label, permission_levels)
-            VALUES                         (?,      ?,           ?,     ?)",
-            $P['source'], $P['destination'], $P['label'], $P['permissions']);
+            INSERT INTO forums_transitions (source, destination, label, permission_levels, permission_class, permissions, user_ids)
+            VALUES                         (?,      ?,           ?,     ?,                 ?,                ?,           ?)",
+            $P['source'], $P['destination'], $P['label'], $P['secondary_classes'], $P['permission_class'], $P['permissions'], $P['user_ids']);
     } elseif ($_POST['submit'] === 'Edit') {
         if (!is_number($_POST['id']) || $_POST['id'] == '') {
             error(0);
@@ -45,9 +45,13 @@ if ($_POST['submit'] === 'Delete') {
                 SET source = ?,
                     destination = ?,
                     label = ?,
-                    permission_levels = ?
+                    permission_levels = ?,
+                    permission_class = ?,
+                    permissions = ?,
+                    user_ids = ?
             WHERE forums_transitions_id = ?",
-            $P['source'], $P['destination'], $P['label'], $P['permissions'], $P['id']);
+            $P['source'], $P['destination'], $P['label'], $P['secondary_classes'], $P['permission_class'],
+            $P['permissions'], $P['user_ids'], $P['id']);
     }
 }
 

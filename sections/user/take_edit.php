@@ -27,21 +27,21 @@ if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Permiss
 }
 
 $Val->SetFields('stylesheet', 1, "number", "You forgot to select a stylesheet.");
-$Val->SetFields('styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", array('regex' => '/^'.CSS_REGEX.'$/i'));
+$Val->SetFields('styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => '/^'.CSS_REGEX.'$/i']);
 // The next two are commented out because the drop-down menus were replaced with a check box and radio buttons
 //$Val->SetFields('disablegrouping', 0, "number", "You forgot to select your torrent grouping option.");
 //$Val->SetFields('torrentgrouping', 0, "number", "You forgot to select your torrent grouping option.");
-$Val->SetFields('discogview', 1, "number", "You forgot to select your discography view option.", array('minlength' => 0, 'maxlength' => 1));
-$Val->SetFields('postsperpage', 1, "number", "You forgot to select your posts per page option.", array('inarray' => array(25, 50, 100)));
+$Val->SetFields('discogview', 1, "number", "You forgot to select your discography view option.", ['minlength' => 0, 'maxlength' => 1]);
+$Val->SetFields('postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]);
 //$Val->SetFields('hidecollage', 1, "number", "You forgot to select your collage option.", array('minlength' => 0, 'maxlength' => 1));
 $Val->SetFields('collagecovers', 1, "number", "You forgot to select your collage option.");
-$Val->SetFields('avatar', 0, "regex", "You did not enter a valid avatar URL.", array('regex' => "/^".IMAGE_REGEX."$/i"));
+$Val->SetFields('avatar', 0, "regex", "You did not enter a valid avatar URL.", ['regex' => "/^".IMAGE_REGEX."$/i"]);
 $Val->SetFields('email', 1, "email", "You did not enter a valid email address.");
-$Val->SetFields('irckey', 0, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", array('minlength' => 6, 'maxlength' => 32));
-$Val->SetFields('new_pass_1', 0, "regex", "You did not enter a valid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol.", array('regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/'));
-$Val->SetFields('new_pass_2', 1, "compare", "Your passwords do not match.", array('comparefield' => 'new_pass_1'));
+$Val->SetFields('irckey', 0, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['minlength' => 6, 'maxlength' => 32]);
+$Val->SetFields('new_pass_1', 0, "regex", "You did not enter a valid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol.", ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
+$Val->SetFields('new_pass_2', 1, "compare", "Your passwords do not match.", ['comparefield' => 'new_pass_1']);
 if (check_perms('site_advanced_search')) {
-    $Val->SetFields('searchtype', 1, "number", "You forgot to select your default search preference.", array('minlength' => 0, 'maxlength' => 1));
+    $Val->SetFields('searchtype', 1, "number", "You forgot to select your default search preference.", ['minlength' => 0, 'maxlength' => 1]);
 }
 
 $Err = $Val->ValidateForm($_POST);
@@ -77,7 +77,7 @@ if (isset($_POST['p_snatched_c']) && isset($_POST['p_seeding_c']) && isset($_POS
 
 // if showing exactly 2 of stats, show all 3 of stats
 $StatsShown = 0;
-$Stats = array('downloaded', 'uploaded', 'ratio');
+$Stats = ['downloaded', 'uploaded', 'ratio'];
 foreach ($Stats as $S) {
     if (isset($_POST["p_$S"])) {
         $StatsShown++;
@@ -91,14 +91,14 @@ if ($StatsShown == 2) {
 }
 
 $Paranoia = [];
-$Checkboxes = array('downloaded', 'uploaded', 'ratio', 'bonuspoints', 'lastseen', 'requiredratio', 'invitedcount', 'artistsadded', 'notifications');
+$Checkboxes = ['downloaded', 'uploaded', 'ratio', 'bonuspoints', 'lastseen', 'requiredratio', 'invitedcount', 'artistsadded', 'notifications'];
 foreach ($Checkboxes as $C) {
     if (!isset($_POST["p_$C"])) {
         $Paranoia[] = $C;
     }
 }
 
-$SimpleSelects = array('torrentcomments', 'collages', 'collagecontribs', 'uploads', 'uniquegroups', 'perfectflacs', 'seeding', 'leeching', 'snatched');
+$SimpleSelects = ['torrentcomments', 'collages', 'collagecontribs', 'uploads', 'uniquegroups', 'perfectflacs', 'seeding', 'leeching', 'snatched'];
 foreach ($SimpleSelects as $S) {
     if (!isset($_POST["p_$S".'_c']) && !isset($_POST["p_$S".'_l'])) {
         // Very paranoid - don't show count or list
@@ -109,7 +109,7 @@ foreach ($SimpleSelects as $S) {
     }
 }
 
-$Bounties = array('requestsfilled', 'requestsvoted');
+$Bounties = ['requestsfilled', 'requestsvoted'];
 foreach ($Bounties as $B) {
     if (isset($_POST["p_$B".'_list'])) {
         $_POST["p_$B".'_count'] = 'on';
@@ -159,7 +159,6 @@ if ($CurEmail != $_POST['email']) {
     if (!$Err) {
         $NewEmail = db_string($_POST['email']);
 
-
         //This piece of code will update the time of their last email change to the current time *not* the current change.
         $ChangerIP = db_string($LoggedUser['IP']);
         $DB->query("
@@ -178,8 +177,6 @@ if ($CurEmail != $_POST['email']) {
         header("Location: user.php?action=edit&userid=$UserID");
         die();
     }
-
-
 }
 //End email change
 
@@ -238,6 +235,7 @@ $Options['NotifyOnQuote']       = (!empty($_POST['notifications_Quotes_popup']) 
 $Options['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
 $Options['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
 $Options['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);
+$Options['AcceptFL']            = (!empty($_POST['acceptfltoken']) ? 1 : 0);
 $Options['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
 $Options['CoverArt']            = (int)!empty($_POST['coverart']);
 $Options['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
@@ -264,11 +262,6 @@ if (check_perms('site_advanced_search')) {
     unset($Options['SearchType']);
 }
 
-//TODO: Remove the following after a significant amount of time
-unset($Options['ArtistNoRedirect']);
-unset($Options['ShowQueryList']);
-unset($Options['ShowCacheList']);
-
 // These are all enums of '0' or '1'
 $DownloadAlt = isset($_POST['downloadalt']) ? '1' : '0';
 $UnseededAlerts = isset($_POST['unseededalerts']) ? '1' : '0';
@@ -286,33 +279,42 @@ foreach ($NavItems as $n) {
 }
 $UserNavItems = implode(',', $UserNavItems);
 
-$LastFMUsername = db_string($_POST['lastfm_username']);
+$LastFMUsername = $_POST['lastfm_username'];
 $OldLastFMUsername = '';
-$DB->query("
+$DB->prepared_query('
     SELECT username
     FROM lastfm_users
-    WHERE ID = '$UserID'");
+    WHERE ID = ?
+    ', $UserID
+);
 if ($DB->has_results()) {
     list($OldLastFMUsername) = $DB->next_record();
     if ($OldLastFMUsername != $LastFMUsername) {
         if (empty($LastFMUsername)) {
-            $DB->query("
+            $DB->prepared_query('
                 DELETE FROM lastfm_users
-                WHERE ID = '$UserID'");
+                WHERE ID = ?
+                ', $UserID
+            );
         } else {
-            $DB->query("
+            $DB->prepared_query('
                 UPDATE lastfm_users
-                SET Username = '$LastFMUsername'
-                WHERE ID = '$UserID'");
+                SET Username = ?
+                WHERE ID = ?
+                ', $LastFMUsername, $UserID
+            );
         }
     }
 } elseif (!empty($LastFMUsername)) {
-    $DB->query("
+    $DB->prepared_query('
         INSERT INTO lastfm_users (ID, Username)
-        VALUES ('$UserID', '$LastFMUsername')");
+        VALUES (?, ?)
+        ', $UserID, $LastFMUsername
+    );
 }
 G::$Cache->delete_value("lastfm_username_$UserID");
 
+Users::toggleAcceptFL($UserID, $Options['AcceptFL']);
 Donations::update_rewards($UserID);
 NotificationsManager::save_settings($UserID);
 
@@ -322,23 +324,23 @@ if ($DownloadAlt != $UH['DownloadAlt'] || $Options['HttpsTracker'] != $UH['Https
 }
 
 $Cache->begin_transaction("user_info_$UserID");
-$Cache->update_row(false, array(
+$Cache->update_row(false, [
         'Avatar' => display_str($_POST['avatar']),
         'Paranoia' => $Paranoia
-));
+]);
 $Cache->commit_transaction(0);
 
 $Cache->begin_transaction("user_info_heavy_$UserID");
-$Cache->update_row(false, array(
+$Cache->update_row(false, [
         'StyleID' => $_POST['stylesheet'],
         'StyleURL' => display_str($_POST['styleurl']),
         'DownloadAlt' => $DownloadAlt,
         'NavItems' => explode(',', $UserNavItems)
-        ));
+        ]);
 $Cache->update_row(false, $Options);
 $Cache->commit_transaction(0);
 
-$SQL = "
+$SQL = '
     UPDATE users_main AS m
         JOIN users_info AS i ON m.ID = i.UserID
     SET
@@ -357,7 +359,9 @@ $SQL = "
         m.Email = ?,
         m.IRCKey = ?,
         m.Paranoia = ?,
-        i.NavItems = ?";
+        i.NavItems = ?
+';
+
 $Params = [
     $_POST['stylesheet'],
     $_POST['styleurl'],
@@ -378,41 +382,42 @@ $Params = [
 ];
 
 if ($ResetPassword) {
-    $ChangerIP = db_string($LoggedUser['IP']);
-    $PassHash = Users::make_password_hash($_POST['new_pass_1']);
-    $SQL.= ",m.PassHash = ?";
-    $Params[] = $PassHash;
-    $DB->prepared_query("
+    $SQL .= ',m.PassHash = ?';
+    $Params[] = Users::make_password_hash($_POST['new_pass_1']);
+    $DB->prepared_query('
         INSERT INTO users_history_passwords
             (UserID, ChangerIP, ChangeTime)
         VALUES
-            (?, ?, ?)",
-        $UserID, $ChangerIP, sqltime());
+            (?, ?, now())
+        ', $UserID, $LoggedUser['IP']
+    );
 }
 
 if (isset($_POST['resetpasskey'])) {
     $UserInfo = Users::user_heavy_info($UserID);
-    $OldPassKey = db_string($UserInfo['torrent_pass']);
-    $NewPassKey = db_string(Users::make_secret());
-    $ChangerIP = db_string($LoggedUser['IP']);
-    $SQL .= ",m.torrent_pass = ?";
+    $OldPassKey = $UserInfo['torrent_pass'];
+    $NewPassKey = Users::make_secret();
+    $ChangerIP = $LoggedUser['IP'];
+    $SQL .= ',m.torrent_pass = ?';
     $Params[] = $NewPassKey;
-    $DB->prepared_query("
+    $DB->prepared_query('
         INSERT INTO users_history_passkeys
             (UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
         VALUES
-            (?, ?, ?, ?, ?)",
-        $UserID, $OldPassKey, $NewPassKey, $ChangerIP, sqltime());
+            (?, ?, ?, ?, now())
+        ', $UserID, $OldPassKey, $NewPassKey, $ChangerIP
+    );
     $Cache->begin_transaction("user_info_heavy_$UserID");
-    $Cache->update_row(false, array('torrent_pass' => $NewPassKey));
+    $Cache->update_row(false, ['torrent_pass' => $NewPassKey]);
     $Cache->commit_transaction(0);
     $Cache->delete_value("user_$OldPassKey");
 
-    Tracker::update_tracker('change_passkey', array('oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey));
+    Tracker::update_tracker('change_passkey', ['oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey]);
 }
 
-$SQL .= " WHERE m.ID = ?";
+$SQL .= ' WHERE m.ID = ?';
 $Params[] = $UserID;
+
 $DB->prepared_query($SQL, ...$Params);
 
 if ($ResetPassword) {

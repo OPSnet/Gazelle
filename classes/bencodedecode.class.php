@@ -171,7 +171,7 @@ class BencodeDecode extends Bencode {
         }
         if ($ErrMsg === false) {
             printf("Malformed string. Invalid character at pos 0x%X: %s\n",
-                    $this->Pos, str_replace(array("\r","\n"), array('',' '), htmlentities(substr($this->Data, $this->Pos, self::SnipLength))));
+                    $this->Pos, str_replace(["\r","\n"], ['',' '], htmlentities(substr($this->Data, $this->Pos, self::SnipLength))));
         } else {
             echo $ErrMsg;
         }

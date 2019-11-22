@@ -18,11 +18,11 @@ class Users {
             $Classes = G::$DB->to_array('ID');
             $ClassLevels = G::$DB->to_array('Level');
             G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('classes', array($Classes, $ClassLevels), 0);
+            G::$Cache->cache_value('classes', [$Classes, $ClassLevels], 0);
         }
         $Debug->set_flag('Loaded permissions');
 
-        return array($Classes, $ClassLevels);
+        return [$Classes, $ClassLevels];
     }
 
     public static function user_stats($UserID, $refresh = false) {
@@ -100,7 +100,7 @@ class Users {
                 GROUP BY m.ID");
 
             if (!G::$DB->has_results()) { // Deleted user, maybe?
-                $UserInfo = array(
+                $UserInfo = [
                         'ID' => $UserID,
                         'Username' => '',
                         'PermissionID' => 0,
@@ -114,9 +114,9 @@ class Users {
                         'CatchupTime' => 0,
                         'Visible' => '1',
                         'Levels' => '',
-                        'Class' => 0);
+                        'Class' => 0];
             } else {
-                $UserInfo = G::$DB->next_record(MYSQLI_ASSOC, array('Paranoia', 'Title'));
+                $UserInfo = G::$DB->next_record(MYSQLI_ASSOC, ['Paranoia', 'Title']);
                 $UserInfo['CatchupTime'] = strtotime($UserInfo['CatchupTime']);
                 $UserInfo['Paranoia'] = unserialize_array($UserInfo['Paranoia']);
                 if ($UserInfo['Paranoia'] === false) {
@@ -166,7 +166,7 @@ class Users {
         if (empty($HeavyInfo)) {
 
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query('
                 SELECT
                     m.Invites,
                     m.torrent_pass,
@@ -189,7 +189,7 @@ class Users {
                     i.DisableRequests,
                     i.DisableForums,
                     i.DisableIRC,
-                    i.DisableTagging," . "
+                    i.DisableTagging,
                     i.SiteOptions,
                     i.DownloadAlt,
                     i.LastReadNews,
@@ -198,11 +198,16 @@ class Users {
                     i.PermittedForums,
                     i.NavItems,
                     m.FLTokens,
-                    m.PermissionID
+                    m.PermissionID,
+                    CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
                 FROM users_main AS m
-                    INNER JOIN users_info AS i ON i.UserID = m.ID
-                WHERE m.ID = '$UserID'");
-            $HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, array('CustomPermissions', 'SiteOptions'));
+                INNER JOIN users_info AS i ON (i.UserID = m.ID)
+                LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
+                LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
+                WHERE m.ID = ?
+                ', 'no-fl-gifts', $UserID
+            );
+            $HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, ['CustomPermissions', 'SiteOptions']);
 
             $HeavyInfo['CustomPermissions'] = unserialize_array($HeavyInfo['CustomPermissions']);
 
@@ -342,9 +347,9 @@ class Users {
      * @return array
      */
     public static function default_site_options() {
-        return array(
+        return [
             'HttpsTracker' => true
-        );
+        ];
     }
 
     /**
@@ -381,10 +386,12 @@ class Users {
         $HeavyInfo = array_merge($HeavyInfo, $NewOptions);
 
         // Update DB
-        G::$DB->query("
+        G::$DB->prepared_query('
             UPDATE users_info
-            SET SiteOptions = '".db_string(serialize($SiteOptions))."'
-            WHERE UserID = $UserID");
+            SET SiteOptions = ?
+            WHERE UserID = ?
+            ', $UserID, serialize($SiteOptions)
+        );
         G::$DB->set_query_id($QueryID);
 
         // Update cache
@@ -406,11 +413,11 @@ class Users {
     public static function release_order(&$SiteOptions, $Default = false) {
         global $ReleaseTypes;
 
-        $RT = $ReleaseTypes + array(
+        $RT = $ReleaseTypes + [
             1024 => 'Guest Appearance',
             1023 => 'Remixed By',
             1022 => 'Composition',
-            1021 => 'Produced By');
+            1021 => 'Produced By'];
 
         if ($Default || empty($SiteOptions['SortHide'])) {
             $Sort =& $RT;
@@ -523,7 +530,7 @@ class Users {
 
         // This array is a hack that should be made less retarded, but whatevs
         //                           PermID => ShortForm
-        $SecondaryClasses = array(
+        $SecondaryClasses = [
             '23' => 'FLS', // First Line Support
             '30' => 'IN', // Interviewer
             '31' => 'TC', // Torrent Celebrity
@@ -534,7 +541,7 @@ class Users {
             '48' => 'BT', // Beta TEam
             '38' => 'CT', // Charlie Team
             '39' => 'DT', // Delta Team
-         );
+         ];
 
         if ($UserID == 0) {
             return 'System';
@@ -680,12 +687,12 @@ class Users {
             $BookmarkData = G::$DB->to_array('GroupID', MYSQLI_ASSOC);
             G::$DB->set_query_id($QueryID);
             G::$Cache->cache_value("bookmarks_group_ids_$UserID",
-                array($GroupIDs, $BookmarkData), 3600);
+                [$GroupIDs, $BookmarkData], 3600);
         }
 
         $TorrentList = Torrents::get_groups($GroupIDs);
 
-        return array($GroupIDs, $BookmarkData, $TorrentList);
+        return [$GroupIDs, $BookmarkData, $TorrentList];
     }
 
     /**
@@ -790,7 +797,7 @@ class Users {
 
     public static function has_avatars_enabled() {
         global $HeavyInfo;
-        return $HeavyInfo['DisableAvatars'] != 1;
+        return isset($HeavyInfo['DisableAvatars']) && $HeavyInfo['DisableAvatars'] != 1;
     }
 
     /**
@@ -924,4 +931,134 @@ class Users {
     public static function flush_enabled_users_count() {
         G::$Cache->delete_value('stats_user_count');
     }
+
+    public static function get_promotion_criteria() {
+        $criteria = [];
+        $criteria[] = ['From' => USER,   'To' => MEMBER,         'MinUpload' => 10 * 1024 * 1024 * 1024,  'MinRatio' => 0.7,  'MinUploads' => 0,   'Weeks' => 1];
+        $criteria[] = ['From' => MEMBER, 'To' => POWER,          'MinUpload' => 25 * 1024 * 1024 * 1024,  'MinRatio' => 1.05, 'MinUploads' => 5,   'Weeks' => 2];
+        $criteria[] = ['From' => POWER,  'To' => ELITE,          'MinUpload' => 100 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 50,  'Weeks' => 4];
+        $criteria[] = ['From' => ELITE,  'To' => TORRENT_MASTER, 'MinUpload' => 500 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 500, 'Weeks' => 8];
+        $criteria[] = [
+            'From' => TORRENT_MASTER,
+            'To' => POWER_TM,
+            'MinUpload' => 500 * 1024 * 1024 * 1024,
+            'MinRatio' => 1.05,
+            'MinUploads' => 500,
+            'Weeks' => 8,
+            'Extra' => '
+                        (
+                            SELECT count(DISTINCT GroupID)
+                            FROM torrents
+                            WHERE UserID = users_main.ID
+                        ) >= 500'];
+        $criteria[] = [
+            'From' => POWER_TM,
+            'To' => ELITE_TM,
+            'MinUpload' => 500 * 1024 * 1024 * 1024,
+            'MinRatio' => 1.05,
+            'MinUploads' => 500,
+            'Weeks' => 8,
+            'Extra' => "
+                        (
+                            SELECT count(ID)
+                            FROM torrents
+                            WHERE ((LogScore = 100 AND Format = 'FLAC')
+                                OR (Media = 'Vinyl' AND Format = 'FLAC')
+                                OR (Media = 'WEB' AND Format = 'FLAC')
+                                OR (Media = 'DVD' AND Format = 'FLAC')
+                                OR (Media = 'Soundboard' AND Format = 'FLAC')
+                                OR (Media = 'Cassette' AND Format = 'FLAC')
+                                OR (Media = 'SACD' AND Format = 'FLAC')
+                                OR (Media = 'Blu-ray' AND Format = 'FLAC')
+                                OR (Media = 'DAT' AND Format = 'FLAC')
+                                )
+                                AND UserID = users_main.ID
+                        ) >= 500"];
+        $criteria[] = [
+            'From' => ELITE_TM,
+            'To' => ULTIMATE_TM,
+            'MinUpload' => 2 * 1024 * 1024 * 1024 * 1024,
+            'MinRatio' => 1.05,
+            'MinUploads' => 2000,
+            'Weeks' => 12,
+            'Extra' => sprintf("
+                        ((
+                            SELECT count(DISTINCT t.GroupID, t.RemasterYear, t.RemasterCatalogueNumber, t.RemasterRecordLabel, t.RemasterTitle, t.Media)
+                            FROM torrents t
+                            WHERE t.Format = 'FLAC'
+                                AND (t.LogScore = 100
+                                    OR t.Media IN ('Cassette', 'DAT')
+                                    OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless'))
+                                AND t.UserID = users_main.ID
+                        ) >= 2000 AND
+                        (
+                            SELECT uls.Uploaded + IFNULL(b.Bounty, 0) - IFNULL(ubl.final, 0)
+                            FROM users_leech_stats uls
+                            LEFT JOIN %s.users_buffer_log ubl ON (ubl.opsid = uls.UserID)
+                            WHERE uls.UserID = users_main.ID
+                        ) >= 2 * 1024 * 1024 * 1024 * 1024)", RECOVERY_DB)];
+
+        return $criteria;
+    }
+
+    /**
+     * toggle Accept FL token setting
+     * If user accepts FL tokens and the refusal attribute is found, delete it.
+     * If user refuses FL tokens and the attribute is not found, insert it.
+     */
+    public static function toggleAcceptFL($id, $acceptFL) {
+        G::$DB->prepared_query('
+            SELECT ua.ID
+            FROM user_has_attr uha
+            INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID)
+            WHERE uha.UserID = ?
+                AND ua.Name = ?
+            ', $id, 'no-fl-gifts'
+        );
+        $found = G::$DB->has_results();
+        if ($acceptFL && $found) {
+            list($attr_id) = G::$DB->next_record();
+            G::$DB->prepared_query('
+                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
+                ', $id, $attr_id
+            );
+        }
+        elseif (!$acceptFL && !$found) {
+            G::$DB->prepared_query('
+                INSERT INTO user_has_attr (UserID, UserAttrID)
+                    SELECT ?, ID FROM user_attr WHERE Name = ?
+                ', $id, 'no-fl-gifts'
+            );
+        }
+    }
+
+    /**
+     * toggle Unlimited Download setting
+     */
+    public static function toggleUnlimitedDownload($id, $flag) {
+        G::$DB->prepared_query('
+            SELECT ua.ID
+            FROM user_has_attr uha
+            INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID)
+            WHERE uha.UserID = ?
+                AND ua.Name = ?
+            ', $id, 'unlimited-download'
+        );
+        $found = G::$DB->has_results();
+        if (!$flag && $found) {
+            list($attr_id) = G::$DB->next_record();
+            G::$DB->prepared_query('
+                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
+                ', $id, $attr_id
+            );
+        }
+        elseif ($flag && !$found) {
+            G::$DB->prepared_query('
+                INSERT INTO user_has_attr (UserID, UserAttrID)
+                    SELECT ?, ID FROM user_attr WHERE Name = ?
+                ', $id, 'unlimited-download'
+            );
+        }
+    }
+
 }

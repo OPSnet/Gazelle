@@ -39,29 +39,28 @@ foreach ($Results as $GroupID => $FlacID) {
         continue;
     }
     $Group = $Groups[$GroupID];
-    extract(Torrents::array_group($Group));
-    $TorrentTags = new Tags($TagList);
 
-    if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
-        unset($ExtendedArtists[2]);
-        unset($ExtendedArtists[3]);
-        $DisplayName = Artists::display_artists($ExtendedArtists);
+    if (!empty($Group['ExtendedArtists'][1]) || !empty($Group['ExtendedArtists'][4]) || !empty($Group['ExtendedArtists'][5]) || !empty($Group['ExtendedArtists'][6])) {
+        unset($Group['ExtendedArtists'][2]);
+        unset($Group['ExtendedArtists'][3]);
+        $DisplayName = Artists::display_artists($Group['ExtendedArtists']);
     } else {
         $DisplayName = '';
     }
 
-    $DisplayName .= "<a href=\"torrents.php?id=$GroupID&amp;torrentid=$FlacID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">$GroupName</a>";
-    if ($GroupYear > 0) {
-        $DisplayName .= " [$GroupYear]";
+    $DisplayName .= "<a href=\"torrents.php?id=$GroupID&amp;torrentid=$FlacID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">" . $Group['GroupName'] . '</a>';
+    if ($Group['GroupYear'] > 0) {
+        $DisplayName .= ' [' . $Group['GroupYear'] . ']';
     }
-    if ($ReleaseType > 0) {
-        $DisplayName .= " [".$ReleaseTypes[$ReleaseType]."]";
+    if ($Group['ReleaseType'] > 0) {
+        $DisplayName .= ' [' . $ReleaseTypes[$Group['ReleaseType']] . ']';
     }
 
     $ExtraInfo = Torrents::torrent_info($Torrents[$FlacID]);
     if ($ExtraInfo) {
-        $DisplayName .= ' - '.$ExtraInfo;
+        $DisplayName .= ' - ' . $ExtraInfo;
     }
+    $TorrentTags = new Tags($Group['TagList']);
 ?>
             <tr class="torrent torrent_row<?=$Torrents[$FlacID]['IsSnatched'] ? ' snatched_torrent' : ''?>">
                 <td>
@@ -79,4 +78,3 @@ foreach ($Results as $GroupID => $FlacID) {
 </div>
 <?php
 View::show_footer();
-?>

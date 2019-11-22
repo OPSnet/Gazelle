@@ -11,7 +11,7 @@ if (empty($_GET['action'])) {
 } else {
     $Section = $_GET['action']; // either 'inbox' or 'sentbox'
 }
-if (!in_array($Section, array('inbox', 'sentbox'))) {
+if (!in_array($Section, ['inbox', 'sentbox'])) {
     error(404);
 }
 
@@ -100,7 +100,7 @@ echo "\t\t$Pages\n";
         $ToggleTitle = 'Temporary toggle switch for sorting PMs. To permanently change the sorting behavior, edit the setting in your profile.';
         $BaseURL = "inbox.php?action={$_GET['action']}";
 
-        if ($_GET['sort'] === 'unread') { ?>
+        if (isset($_GET['sort']) && $_GET['sort'] === 'unread') { ?>
                     <a href="<?=$BaseURL?>" class="brackets tooltip" title="<?=$ToggleTitle?>">List latest first</a>
 <?php        } else { ?>
                     <a href="<?=$BaseURL?>&sort=unread" class="brackets tooltip" title="<?=$ToggleTitle?>">List unread first</a>

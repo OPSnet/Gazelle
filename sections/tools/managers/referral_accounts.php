@@ -24,7 +24,7 @@ View::show_header('Referral Accounts');
     <h2>Referral account manager</h2>
 <?php if ($ReferralManager->readOnly) { ?>
     <p>
-        <strong class="important_text">DB key not loaded - editing disabled</strong>
+        <strong class="important_text">DB key not loaded or incorrect - editing disabled</strong>
     </p>
 <?php } ?>
 </div>

@@ -4,7 +4,7 @@ if (!is_number($UserID)) {
     error(404);
 }
 
-$DB->query("
+$DB->prepared_query('
     SELECT
         m.Username,
         m.Email,
@@ -23,12 +23,20 @@ $DB->query("
         i.NotifyOnDeleteSeeding,
         i.NotifyOnDeleteSnatched,
         i.NotifyOnDeleteDownloaded,
-        i.NavItems
+        i.NavItems,
+        CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
+        CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
     FROM users_main AS m
-        JOIN users_info AS i ON i.UserID = m.ID
-        LEFT JOIN permissions AS p ON p.ID = m.PermissionID
-    WHERE m.ID = '".db_string($UserID)."'");
-list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems) = $DB->next_record(MYSQLI_NUM, array(3, 9));
+    INNER JOIN users_info AS i ON (i.UserID = m.ID)
+    LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+    LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = m.ID)
+    LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
+    LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = m.ID)
+    LEFT JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
+    WHERE m.ID = ?
+    ', 'no-fl-gifts', 'unlimited-download', $UserID
+);
+list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [3, 9]);
 
 if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Class)) {
     error(403);
@@ -71,15 +79,17 @@ if ($DonorIsVisible === null) {
     $DonorIsVisible = true;
 }
 
-extract(Donations::get_enabled_rewards($UserID));
+$EnabledReward = Donations::get_enabled_rewards($UserID);
 $Rewards = Donations::get_rewards($UserID);
 $ProfileRewards = Donations::get_profile_rewards($UserID);
 $DonorTitles = Donations::get_titles($UserID);
 
-$DB->query("
+$DB->prepared_query('
     SELECT username
     FROM lastfm_users
-    WHERE ID = '$UserID'");
+    WHERE ID = ?
+    ', $UserID
+);
 $LastFMUsername = '';
 list($LastFMUsername) = $DB->next_record();
 
@@ -473,6 +483,13 @@ echo $Val->GenerateJS('userform');
                     <label for="disableautosave">Disable text auto-saving</label>
                 </td>
             </tr>
+            <tr id="comm_acceptfl_tr">
+                <td class="label tooltip" title="If unchecked, other members will not have the option to gift you FL tokens."><strong>FL Tokens</strong></td>
+                <td>
+                    <input type="checkbox" name="acceptfltoken" id="acceptfltoken"<?= $AcceptFL ? ' checked="checked"' : ''?> />
+                    <label for="Accept FL Tokens">Accept FL Tokens from members</label>
+                </td>
+            </tr>
         </table>
         <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="notification_settings">
             <tr class="colhead_dark">
@@ -529,47 +546,57 @@ echo $Val->GenerateJS('userform');
                     <input type="text" size="50" name="avatar" id="avatar" value="<?=display_str($Avatar)?>" />
                 </td>
             </tr>
-<?php   if ($HasSecondAvatar) { ?>
+<?php if ($EnabledReward['HasSecondAvatar']) { ?>
             <tr id="pers_avatar2_tr">
                 <td class="label tooltip_interactive" title="Congratulations! You've unlocked this option by reaching Special Rank #2. Thanks for donating. Your normal avatar will &quot;flip&quot; to this one when someone runs their mouse over the image. Please link to an avatar which follows the &lt;a href=&quot;rules.php&quot;&gt;site rules&lt;/a&gt;. The avatar width should be 150 pixels and will be resized if necessary." data-title-plain="Congratulations! You've unlocked this option by reaching Special Rank #2. Thanks for donating. Your normal avatar will &quot;flip&quot; to this one when someone runs their mouse over the image. Please link to an avatar which follows the site rules. The avatar width should be 150 pixels and will be resized if necessary."><strong>Second avatar URL</strong></td>
                 <td>
                     <input type="text" size="50" name="second_avatar" id="second_avatar" value="<?=$Rewards['SecondAvatar']?>" />
                 </td>
             </tr>
-<?php   }
-        if ($HasAvatarMouseOverText) { ?>
+<?php
+    }
+    if ($EnabledReward['HasAvatarMouseOverText']) {
+ ?>
             <tr id="pers_avatarhover_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. Text you enter in this field will appear when someone mouses over your avatar. All text should follow site rules. 200 character limit."><strong>Avatar mouseover text</strong></td>
                 <td>
                     <input type="text" size="50" name="avatar_mouse_over_text" id="avatar_mouse_over_text" value="<?=$Rewards['AvatarMouseOverText']?>" />
                 </td>
             </tr>
-<?php   }
-        if ($HasDonorIconMouseOverText) { ?>
+<?php
+    }
+    if ($EnabledReward['HasDonorIconMouseOverText']) {
+?>
             <tr id="pers_donorhover_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. Text you enter in this field will appear when someone mouses over your donor icon. All text should follow site rules. 200 character limit."><strong>Donor icon mouseover text</strong></td>
                 <td>
                     <input type="text" size="50" name="donor_icon_mouse_over_text" id="donor_icon_mouse_over_text" value="<?=$Rewards['IconMouseOverText']?>" />
                 </td>
             </tr>
-<?php   }
-        if ($HasDonorIconLink) { ?>
+<?php
+    }
+    if ($EnabledReward['HasDonorIconLink']) {
+ ?>
             <tr id="pers_donorlink_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. Links you enter in this field will be accessible when your donor icon is clicked. All links should follow site rules."><strong>Donor icon link</strong></td>
                 <td>
                     <input type="text" size="50" name="donor_icon_link" id="donor_icon_link" value="<?=$Rewards['CustomIconLink']?>" />
                 </td>
             </tr>
-<?php   }
-        if ($HasCustomDonorIcon) { ?>
+<?php
+    }
+    if ($EnabledReward['HasCustomDonorIcon']) {
+?>
             <tr id="pers_donoricon_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. Please link to an icon which you'd like to replace your default donor icon with. Icons must be 15 pixels wide by 13 pixels tall. Icons of any other size will be automatically resized."><strong>Custom donor icon URL</strong></td>
                 <td>
                     <input type="text" size="50" name="donor_icon_custom_url" id="donor_icon_custom_url" value="<?=$Rewards['CustomIcon']?>" />
                 </td>
             </tr>
-<?php   }
-        if ($HasDonorForum) { ?>
+<?php
+    }
+    if ($EnabledReward['HasDonorForum']) {
+?>
             <tr id="pers_donorforum_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You may select a prefix and suffix which will be used in the Donor Forum you now have access to."><strong>Donor forum honorific</strong></td>
                 <td>
@@ -601,7 +628,7 @@ echo $Val->GenerateJS('userform');
                 <td><?php $textarea = new TEXTAREA_PREVIEW('info', 'info', display_str($Info), 40, 8); ?></td>
             </tr>
             <!-- Excuse this numbering confusion, we start numbering our profile info/titles at 1 in the donor_rewards table -->
-<?php   if ($HasProfileInfo1) { ?>
+<?php if ($EnabledReward['HasProfileInfo1']) { ?>
             <tr id="pers_proftitle2_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 2</strong></td>
                 <td><input type="text" size="50" name="profile_title_1" id="profile_title_1" value="<?=display_str($ProfileRewards['ProfileInfoTitle1'])?>" />
@@ -611,8 +638,10 @@ echo $Val->GenerateJS('userform');
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #2. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 2</strong></td>
                 <td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_1', 'profile_info_1', display_str($ProfileRewards['ProfileInfo1']), 40, 8); ?></td>
             </tr>
-<?php   }
-        if ($HasProfileInfo2) { ?>
+<?php
+    }
+    if ($EnabledReward['HasProfileInfo2']) {
+?>
             <tr id="pers_proftitle3_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 3</strong></td>
                 <td><input type="text" size="50" name="profile_title_2" id="profile_title_2" value="<?=display_str($ProfileRewards['ProfileInfoTitle2'])?>" />
@@ -622,8 +651,10 @@ echo $Val->GenerateJS('userform');
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #3. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 3</strong></td>
                 <td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_2', 'profile_info_2', display_str($ProfileRewards['ProfileInfo2']), 40, 8); ?></td>
             </tr>
-<?php   }
-        if ($HasProfileInfo3) { ?>
+<?php
+    }
+    if ($EnabledReward['HasProfileInfo3']) {
+?>
             <tr id="pers_proftitle4_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 4</strong></td>
                 <td><input type="text" size="50" name="profile_title_3" id="profile_title_3" value="<?=display_str($ProfileRewards['ProfileInfoTitle3'])?>" />
@@ -633,8 +664,10 @@ echo $Val->GenerateJS('userform');
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #4. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile info 4</strong></td>
                 <td><?php $textarea = new TEXTAREA_PREVIEW('profile_info_3', 'profile_info_3', display_str($ProfileRewards['ProfileInfo3']), 40, 8); ?></td>
             </tr>
-<?php   }
-        if ($HasProfileInfo4) { ?>
+<?php
+    }
+    if ($EnabledReward['HasProfileInfo4']) {
+?>
             <tr id="pers_proftitle5_tr">
                 <td class="label tooltip" title="Congratulations! You've unlocked this option by reaching Donor Rank #5. Thanks for donating. You can customize your profile information with text and BBCode. Entering a title will label your profile information section."><strong>Profile title 5</strong></td>
                 <td><input type="text" size="50" name="profile_title_4" id="profile_title_4" value="<?=display_str($ProfileRewards['ProfileInfoTitle4'])?>" />
@@ -899,4 +932,5 @@ list($ArtistsAdded) = $DB->next_record();
     </div>
     </form>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

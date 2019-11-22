@@ -12,7 +12,7 @@ $URL = trim($_POST['url']);
 // Make sure the URL they entered is on our site, and is a link to a torrent
 $URLRegex = '/^https?:\/\/(www\.|ssl\.)?'.NONSSL_SITE_URL.'\/torrents\.php\?id=([0-9]+)$/i';
 $Val->SetFields('url',
-            '1','regex','The URL must be a link to a torrent on the site.',array('regex' => '/^'.TORRENT_GROUP_REGEX.'/i'));
+            '1','regex','The URL must be a link to a torrent on the site.',['regex' => '/^'.TORRENT_GROUP_REGEX.'/i']);
 $Err = $Val->ValidateForm($_POST); // Validate the form
 
 $Location = (empty($_SERVER['HTTP_REFERER'])) ? "tools.php?action=recommend" : $_SERVER['HTTP_REFERER'];

@@ -48,7 +48,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 
         $SQL .= '
             WHERE g.ID = ?
-            GROUP BY NULL';
+            GROUP BY g.ID';
         $args[] = $GroupID;
 
         $DB->prepared_query_array($SQL, $args);
@@ -151,7 +151,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
         }
         // Store it all in cache
         if (!$RevisionID) {
-            $Cache->cache_value("torrents_details_$GroupID", array($TorrentDetails, $TorrentList), $CacheTime);
+            $Cache->cache_value("torrents_details_$GroupID", [$TorrentDetails, $TorrentList], $CacheTime);
         }
     } else { // If we're reading from cache
         $TorrentDetails = $TorrentCache[0];
@@ -160,7 +160,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 
     if ($PersonalProperties) {
         // Fetch all user specific torrent and group properties
-        $TorrentDetails['Flags'] = array('IsSnatched' => false);
+        $TorrentDetails['Flags'] = ['IsSnatched' => false];
         foreach ($TorrentList as &$Torrent) {
             Torrents::torrent_properties($Torrent, $TorrentDetails['Flags']);
         }
@@ -487,7 +487,7 @@ function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $G
                         <span>[ <a href="torrents.php?action=download&amp;id=<?=($TorrentID)?>&amp;authkey=<?=($LoggedUser['AuthKey'])?>&amp;torrent_pass=<?=($LoggedUser['torrent_pass'])?>" class="tooltip" title="Download"><?=($HasFile ? 'DL' : 'Missing')?></a>
 <?php
     if (Torrents::can_use_token($Torrent)) { ?>
-                            | <a href="torrents.php?action=download&amp;id=<?=($TorrentID)?>&amp;authkey=<?=($LoggedUser['AuthKey'])?>&amp;torrent_pass=<?=($LoggedUser['torrent_pass'])?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'])?>');">FL</a>
+                            | <a href="torrents.php?action=download&amp;id=<?=($TorrentID)?>&amp;authkey=<?=($LoggedUser['AuthKey'])?>&amp;torrent_pass=<?=($LoggedUser['torrent_pass'])?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size'])?>');">FL</a>
 <?php
     } ?>
                             | <a href="reportsv2.php?action=report&amp;id=<?=($TorrentID)?>" class="tooltip" title="Report">RP</a>

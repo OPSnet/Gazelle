@@ -9,16 +9,11 @@ list($Page, $Limit) = Format::page_limit(INVITES_PER_PAGE);
 
 if (!empty($_POST['invitekey']) && check_perms('users_edit_invites')) {
     authorize();
-
-    $DB->query("
+    $DB->prepared_query('
         DELETE FROM invites
-        WHERE InviteKey = '".db_string($_POST['invitekey'])."'");
-}
-
-if (!empty($_GET['search'])) {
-    $Search = db_string($_GET['search']);
-} else {
-    $Search = '';
+        WHERE InviteKey = ?
+        ', trim($_POST['invitekey'])
+    );
 }
 
 $sql = "
@@ -30,15 +25,28 @@ $sql = "
         i.Expires,
         i.Email
     FROM invites AS i
-        JOIN users_main AS um ON um.ID = i.InviterID ";
-if ($Search) {
-    $sql .= "
-    WHERE i.Email LIKE '%$Search%' ";
+    JOIN users_main AS um ON (um.ID = i.InviterID)
+";
+
+
+if (empty($_GET['search'])) {
+    $args = [];
 }
-$sql .= "
-    ORDER BY i.Expires DESC
-    LIMIT $Limit";
-$RS = $DB->query($sql);
+else {
+    $sql .= " WHERE i.Email LIKE concat('%', ?, '%')";
+    $args[] = trim($_GET['search']);
+}
+
+if (strpos($Limit, ',') !== false) {
+    list($lim, $off) = explode(',', $Limit);
+    $sql .= ' ORDER BY i.Expires DESC LIMIT ? OFFSET ?';
+    $args[] = trim($lim);
+    $args[] = trim($off);
+} else {
+    $sql .= ' ORDER BY i.Expires DESC LIMIT ?';
+    $args[] = $Limit;
+}
+$RS = $DB->prepared_query($sql, ...$args);
 
 $DB->query('SELECT FOUND_ROWS()');
 list($Results) = $DB->next_record();
@@ -78,13 +86,11 @@ $DB->set_query_id($RS);
             <td>Inviter</td>
             <td>Email address</td>
             <td>IP address</td>
-            <td>InviteCode</td>
+            <td>Invite link</td>
             <td>Expires</td>
-<?php
-    if (check_perms('users_edit_invites')) { ?>
+<?php if (check_perms('users_edit_invites')) { ?>
             <td>Controls</td>
-<?php
-    } ?>
+<?php } ?>
         </tr>
 <?php
     $Row = 'b';
@@ -95,7 +101,7 @@ $DB->set_query_id($RS);
             <td><?=Users::format_username($UserID, true, true, true, true)?></td>
             <td><?=display_str($Email)?></td>
             <td><?=Tools::display_ip($IP)?></td>
-            <td><?=display_str($InviteKey)?></td>
+            <td><a href="register.php?invite=<?= $InviteKey ?>"><?= $InviteKey ?></a></td>
             <td><?=time_diff($Expires)?></td>
 <?php   if (check_perms('users_edit_invites')) { ?>
             <td>
@@ -108,12 +114,10 @@ $DB->set_query_id($RS);
             </td>
 <?php   } ?>
         </tr>
-<?php
-    } ?>
+<?php } ?>
     </table>
-<?php
-    if ($Pages) { ?>
+<?php if ($Pages) { ?>
     <div class="linkbox pager"><?=($Pages)?></div>
 <?php
-    }
-View::show_footer(); ?>
+}
+View::show_footer();
