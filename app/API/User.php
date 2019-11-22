@@ -62,24 +62,24 @@ class User extends AbstractAPI {
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 
-        $user = $this->db->next_record(MYSQLI_ASSOC, array('IRCKey', 'Paranoia'));
+        $user = $this->db->next_record(MYSQLI_ASSOC, ['IRCKey', 'Paranoia']);
         if (empty($user['Username'])) {
             json_error("User not found");
         }
 
         $user['SecondaryClasses'] = array_map("intval", explode(",", $user['SecondaryClasses']));
-        foreach (array('ID', 'Uploaded', 'Downloaded', 'Class', 'Level') as $key) {
+        foreach (['ID', 'Uploaded', 'Downloaded', 'Class', 'Level'] as $key) {
             $user[$key] = intval($user[$key]);
         }
         $user['Paranoia'] = unserialize_array($user['Paranoia']);
 
         $user['Ratio'] = \Format::get_ratio($user['Uploaded'], $user['Downloaded']);
-        $user['DisplayStats'] = array(
+        $user['DisplayStats'] = [
             'Downloaded' => \Format::get_size($user['Downloaded']),
             'Uploaded' => \Format::get_size($user['Uploaded']),
             'Ratio' => $user['Ratio']
-        );
-        foreach (array('Downloaded', 'Uploaded', 'Ratio') as $key) {
+        ];
+        foreach (['Downloaded', 'Uploaded', 'Ratio'] as $key) {
             if (in_array(strtolower($key), $user['Paranoia'])) {
                 $user['DisplayStats'][$key] = "Hidden";
             }
@@ -102,7 +102,7 @@ class User extends AbstractAPI {
         }
 
         \Tools::disable_users($this->id, 'Disabled via API', 1);
-        return array('disabled' => true, 'user_id' => $this->id, 'username' => $this->username);
+        return ['disabled' => true, 'user_id' => $this->id, 'username' => $this->username];
     }
 
     private function enableUser() {
@@ -140,8 +140,8 @@ class User extends AbstractAPI {
 
         $this->cache->increment('stats_user_count');
         $VisibleTrIp = $Cur['Visible'] && $Cur['IP'] != '127.0.0.1' ? '1' : '0';
-        \Tracker::update_tracker('add_user', array('id' => $this->id,
-            'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIp));
+        \Tracker::update_tracker('add_user', ['id' => $this->id,
+            'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIp]);
         if (($Cur['Downloaded'] == 0) || ($Cur['Uploaded'] / $Cur['Downloaded'] >=
             $Cur['RequiredRatio'])) {
             $UpdateSet[] = "ui.RatioWatchEnds = '0000-00-00 00:00:00'";
@@ -154,8 +154,8 @@ class User extends AbstractAPI {
                 $Comment .= ' (Ratio: '.\Format::get_ratio_html($Cur['Uploaded'],
                     $Cur['Downloaded'], false).', RR: '.number_format($Cur['RequiredRatio'], 2).')';
             }
-            \Tracker::update_tracker('update_user', array('passkey' => $Cur['torrent_pass'],
-                'can_leech' => 0));
+            \Tracker::update_tracker('update_user', ['passkey' => $Cur['torrent_pass'],
+                'can_leech' => 0]);
         }
         $UpdateSet[] = "ui.BanReason = '0'";
         $UpdateSet[] = "um.Enabled = '1'";
@@ -171,6 +171,6 @@ class User extends AbstractAPI {
             WHERE
                 um.ID = ?", $Cur['ID']);
 
-        return array('enabled' => true, 'user_id' => $Cur['ID'], 'username' => $Cur['Username']);
+        return ['enabled' => true, 'user_id' => $Cur['ID'], 'username' => $Cur['Username']];
     }
 }

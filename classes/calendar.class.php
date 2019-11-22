@@ -1,25 +1,25 @@
 <?php
 class Calendar {
-    public static $Categories = array(1 => "IRC Meeting", "IRC Brainstorm", "Poll Deadline", "Feature Release", "Blog Post", "Announcement", "Featured Album", "Product Release", "Staff Picks", "Forum Brainstorm", "Forum Discussion", "Promotion", "Absence", "Task");
-    public static $Importances = array(1 => "Critical", "Important", "Average", "Meh");
-    public static $Colors = array(
+    public static $Categories = [1 => "IRC Meeting", "IRC Brainstorm", "Poll Deadline", "Feature Release", "Blog Post", "Announcement", "Featured Album", "Product Release", "Staff Picks", "Forum Brainstorm", "Forum Discussion", "Promotion", "Absence", "Task"];
+    public static $Importances = [1 => "Critical", "Important", "Average", "Meh"];
+    public static $Colors = [
                                     "Critical" => "red",
                                     "Important" => "yellow",
                                     "Average" => "green",
-                                    "Meh" => "blue");
+                                    "Meh" => "blue"];
 
-    public static $Teams = array(
+    public static $Teams = [
                                     0 => "Everyone",
                                     1 => "Staff"
 
-                                    );
+                                    ];
 
     public static function can_view() {
         return check_perms('users_mod');
     }
 
     private static function get_teams_query() {
-        $Teams = array(0);
+        $Teams = [0];
         $IsMod = check_perms("users_mod");
         if ($IsMod) {
             $Teams[] = 1;

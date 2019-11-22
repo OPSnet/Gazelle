@@ -83,7 +83,7 @@ if (isset($List)) { ?>
 
     <div class="pad">
         <form method="post" action="/recovery.php?action=browse">
-        <p>Enter one of the following fields to search (Use <tt>%</tt> as a wildcard character, <i>e.g.</i> <tt>C17%</tt>).</p>
+        <p>Enter one of the following fields to search for members in the backup (Use <tt>%</tt> as a wildcard character, <i>e.g.</i> <tt>C17%</tt>).</p>
         <table>
             <tr>
                 <th>Username</th>
@@ -96,8 +96,12 @@ if (isset($List)) { ?>
             <tr>
                 <th>Announce</th>
                 <td><input type="text" name="announce" width="20" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="Browse" /></td>
+            </tr>
         </table>
-        <input type="submit" value="Browse" />
         </form>
     </div>
 </div>

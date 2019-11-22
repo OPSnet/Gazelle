@@ -11,16 +11,16 @@ if (empty($_GET['nojump'])) {
 define('ARTICLES_PER_PAGE', 25);
 list($Page, $Limit) = Format::page_limit(ARTICLES_PER_PAGE);
 
-$OrderVals = array('Title', 'Created', 'Edited');
-$WayVals = array('Ascending', 'Descending');
-$TypeTable = array('Title'=>'Title', 'Body'=>'Body');
-$OrderTable = array('Title'=>'Title', 'Created'=>'ID', 'Edited'=>'Date');
-$WayTable = array('Ascending'=>'ASC', 'Descending'=>'DESC');
+$OrderVals = ['Title', 'Created', 'Edited'];
+$WayVals = ['Ascending', 'Descending'];
+$TypeTable = ['Title'=>'Title', 'Body'=>'Body'];
+$OrderTable = ['Title'=>'Title', 'Created'=>'ID', 'Edited'=>'Date'];
+$WayTable = ['Ascending'=>'ASC', 'Descending'=>'DESC'];
 
 // What are we looking for? Let's make sure it isn't dangerous.
 $Search = db_string(trim($_GET['search']));
 
-if (!in_array($Type, array('Title', 'Body'))) {
+if (!in_array($Type, ['Title', 'Body'])) {
     $Type = 'Title';
 }
 

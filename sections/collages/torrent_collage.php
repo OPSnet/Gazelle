@@ -39,9 +39,15 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         continue;
     }
     $Group = $TorrentList[$GroupID];
-    extract(Torrents::array_group($Group));
+
+    $GroupName = $Group['Name'];
+    $GroupYear = $Group['Year'];
+    new Tags($Group['TagList']);
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
+
     $UserID = $Contributors[$GroupID];
-    new Tags($TagList);
 
     // Handle stats and stuff
     $Number++;
@@ -62,7 +68,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     if ($CountArtists) {
         foreach ($CountArtists as $Artist) {
             if (!isset($TopArtists[$Artist['id']])) {
-                $TopArtists[$Artist['id']] = array('name' => $Artist['name'], 'count' => 1);
+                $TopArtists[$Artist['id']] = ['name' => $Artist['name'], 'count' => 1];
             } else {
                 $TopArtists[$Artist['id']]['count']++;
             }
@@ -162,7 +168,7 @@ if (check_perms('zip_downloader')) {
         list($ZIPList, $ZIPPrefs) = $LoggedUser['Collector'];
         $ZIPList = explode(':', $ZIPList);
     } else {
-        $ZIPList = array('00', '11');
+        $ZIPList = ['00', '11'];
         $ZIPPrefs = 1;
     }
 ?>
@@ -446,22 +452,15 @@ if ($CollageCovers != 0) { ?>
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
-    extract(Torrents::array_group($Group));
-    /**
-     * @var int $GroupID
-     * @var string $GroupName
-     * @var string $GroupYear
-     * @var int $GroupCategoryID
-     * @var string $GroupRecordLabel
-     * @var bool $GroupVanityHouse
-     * @var array $GroupFlags
-     * @var array $Artists
-     * @var array $ExtendedArtists
-     * @var string $TagList
-     * @var string $WikiImage
-     */
+    $GroupName = $Group['Name'];
+    $GroupYear = $Group['Year'];
+    $GroupCategoryID = $Group['CategoryID'];
+    $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $TorrentTags = new Tags($Group['TagList']);
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
 
-    $TorrentTags = new Tags($TagList);
     $Number++;
     $DisplayName = "$Number - ";
 
@@ -475,14 +474,14 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         $DisplayName .= Artists::display_artists($ExtendedArtists);
     }
     elseif (count($GroupArtists) > 0) {
-        $DisplayName .= Artists::display_artists(array('1' => $GroupArtists));
+        $DisplayName .= Artists::display_artists(['1' => $GroupArtists]);
     }
 
     $DisplayName .= "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">$GroupName</a>";
     if ($GroupYear > 0) {
         $DisplayName = "$DisplayName [$GroupYear]";
     }
-    if ($GroupVanityHouse) {
+    if ($Group['VanityHouse']) {
         $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
     }
     $SnatchedGroupClass = ($GroupFlags['IsSnatched'] ? ' snatched_group' : '');
@@ -574,7 +573,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                             | <a
                                 href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
                                 class="tooltip" title="Use a FL Token"
-                                onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders']) ?>');">FL</a>
+                                onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size']) ?>');">FL</a>
                         <?php } ?>
                         | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
                     </span>
@@ -625,7 +624,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                             | <a
                                 href="torrents.php?action=download&amp;id=<?= $TorrentID ?>&amp;authkey=<?= $LoggedUser['AuthKey'] ?>&amp;torrent_pass=<?= $LoggedUser['torrent_pass'] ?>&amp;usetoken=1"
                                 class="tooltip" title="Use a FL Token"
-                                onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders']) ?>');">FL</a>
+                                onclick="return confirm('<?= FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size']) ?>');">FL</a>
                         <?php } ?>
                         | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
                     </span>

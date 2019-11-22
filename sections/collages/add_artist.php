@@ -3,8 +3,7 @@
 
 authorize();
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-$Val = new VALIDATE;
+$Val = new Validate;
 
 function add_artist($CollageID, $ArtistID) {
     global $Cache, $LoggedUser, $DB;
@@ -86,7 +85,7 @@ if ($MaxGroupsPerUser > 0) {
 }
 
 if ($_REQUEST['action'] == 'add_artist') {
-    $Val->SetFields('url', '1', 'regex', 'The URL must be a link to a artist on the site.', array('regex' => '/^'.ARTIST_REGEX.'/i'));
+    $Val->SetFields('url', '1', 'regex', 'The URL must be a link to a artist on the site.', ['regex' => '/^'.ARTIST_REGEX.'/i']);
     $Err = $Val->ValidateForm($_POST);
 
     if ($Err) {

@@ -2,7 +2,7 @@
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 
-use Gazelle\Util\{Type, Time};
+use Gazelle\Util\{Type, Time, Irc};
 
 /**
  * Return true if the given string is an integer. The original Gazelle developers
@@ -80,21 +80,21 @@ function display_str($Str) {
         $Str = mb_convert_encoding($Str, 'HTML-ENTITIES', 'UTF-8');
         $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,6};)/m", '&amp;', $Str);
 
-        $Replace = array(
+        $Replace = [
             "'",'"',"<",">",
             '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
             '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
             '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
             '&#156;','&#158;','&#159;'
-        );
+        ];
 
-        $With = array(
+        $With = [
             '&#39;','&quot;','&lt;','&gt;',
             '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
             '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
             '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
             '&#339;','&#382;','&#376;'
-        );
+        ];
 
         $Str = str_replace($Replace, $With, $Str);
     }
@@ -114,21 +114,21 @@ function reverse_display_str($Str) {
         return '';
     }
     if ($Str != '' && !is_number($Str)) {
-        $Replace = array(
+        $Replace = [
             '&#39;','&quot;','&lt;','&gt;',
             '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
             '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
             '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
             '&#339;','&#382;','&#376;'
-        );
+        ];
 
-        $With = array(
+        $With = [
             "'",'"',"<",">",
             '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
             '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
             '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
             '&#156;','&#158;','&#159;'
-        );
+        ];
         $Str = str_replace($Replace, $With, $Str);
 
         $Str = str_replace("&amp;", "&", $Str);
@@ -143,13 +143,7 @@ function reverse_display_str($Str) {
  * @param string $Raw An IRC protocol snippet to send.
  */
 function send_irc($Raw) {
-    if (defined('DISABLE_IRC') && DISABLE_IRC === true) {
-        return;
-    }
-    $IRCSocket = fsockopen(SOCKET_LISTEN_ADDRESS, SOCKET_LISTEN_PORT);
-    $Raw = str_replace(array("\n", "\r"), '', $Raw);
-    fwrite($IRCSocket, $Raw);
-    fclose($IRCSocket);
+    Irc::sendRaw($Raw);
 }
 
 
@@ -197,11 +191,11 @@ function json_die($Status, $Message="bad parameters") {
  */
 function json_print($Status, $Message) {
     if ($Status == 'success' && $Message) {
-        print json_encode(array('status' => $Status, 'response' => $Message));
+        print json_encode(['status' => $Status, 'response' => $Message]);
     } elseif ($Message) {
-        print json_encode(array('status' => $Status, 'error' => $Message));
+        print json_encode(['status' => $Status, 'error' => $Message]);
     } else {
-        print json_encode(array('status' => $Status, 'response' => []));
+        print json_encode(['status' => $Status, 'response' => []]);
     }
 }
 
@@ -221,13 +215,14 @@ function site_url($SSL = true) {
  * @param integer $seeders - number of seeders for the torrent
  * @return string Warns if there are no seeders on the torrent
  */
-function FL_confirmation_msg($seeders) {
+function FL_confirmation_msg($seeders, $size) {
+    $TokensToUse = ceil($size / BYTES_PER_FREELEECH_TOKEN);
     /* Coder Beware: this text is emitted as part of a Javascript single quoted string.
      * Any apostrophes should be avoided or escaped appropriately (with \\').
      */
     return ($seeders == 0)
-        ? 'Warning! This torrent is not seeded at the moment, are you sure you want to use a Freeleech token here?'
-        : 'Are you sure you want to use a Freeleech token here?';
+        ? 'Warning! This torrent is not seeded at the moment, are you sure you want to use '.$TokensToUse.' Freeleech token(s) here?'
+        : 'Are you sure you want to use '.$TokensToUse.' Freeleech token(s) here?';
 }
 
 /**

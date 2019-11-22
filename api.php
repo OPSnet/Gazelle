@@ -16,19 +16,14 @@ if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-require_once('classes/config.php'); //The config contains all site wide configuration information as well as memcached rules
+require_once(__DIR__.'/classes/config.php');
+require_once(__DIR__.'/classes/classloader.php');
+require_once(__DIR__.'/classes/time.class.php');
+require_once(__DIR__.'/classes/paranoia.class.php');
+require_once(__DIR__.'/classes/regex.php');
+require_once(__DIR__.'/classes/util.php');
 
-require(SERVER_ROOT.'/classes/classloader.php');
-
-require_once(SERVER_ROOT.'/classes/debug.class.php'); //Require the debug class
-require_once(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-require_once(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
-require_once(SERVER_ROOT.'/classes/time.class.php'); //Require the time class
-require_once(SERVER_ROOT.'/classes/paranoia.class.php'); //Require the paranoia check_paranoia function
-require_once(SERVER_ROOT.'/classes/regex.php');
-require_once(SERVER_ROOT.'/classes/util.php');
-
-$Cache = NEW CACHE($MemcachedServers); //Load the caching class
+$Cache = new CACHE($MemcachedServers);
 $DB = new DB_MYSQL;
 $Debug = new DEBUG;
 $Twig = new Environment(
@@ -40,7 +35,7 @@ $Debug->handle_errors();
 G::initialize();
 
 function json_error($Code) {
-    echo json_encode(array('status' => 400, 'error' => $Code, 'response' => []));
+    echo json_encode(['status' => 400, 'error' => $Code, 'response' => []]);
     die();
 }
 

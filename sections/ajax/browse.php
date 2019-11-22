@@ -24,10 +24,10 @@ if ($Results === false) {
     json_die('error', 'Search returned an error. Make sure all parameters are valid and of the expected types.');
 }
 if ($NumResults == 0) {
-    json_die('success', array(
+    json_die('success', [
         'results' => [],
         'youMightLike' => [] // This slow and broken feature has been removed
-    ));
+    ]);
 }
 
 $Bookmarks = Bookmarks::all_bookmarks('torrent');
@@ -57,7 +57,7 @@ foreach ($Results as $Key => $GroupID) {
         }
     } else {
         $TorrentID = $Key;
-        $Torrents = array($TorrentID => $GroupInfo['Torrents'][$TorrentID]);
+        $Torrents = [$TorrentID => $GroupInfo['Torrents'][$TorrentID]];
     }
 
     $TagList = explode(' ', str_replace('_', '.', $GroupInfo['TagList']));
@@ -67,10 +67,10 @@ foreach ($Results as $Key => $GroupID) {
         unset($ExtendedArtists[3]);
         $DisplayName = Artists::display_artists($ExtendedArtists, false, false, false);
         foreach ($ExtendedArtists[1] as $Artist) {
-            $JsonArtists[] = array(
+            $JsonArtists[] = [
                 'id' => (int)$Artist['id'],
                 'name' => $Artist['name'],
-                'aliasid' => (int)$Artist['aliasid']);
+                'aliasid' => (int)$Artist['aliasid']];
         }
     } else {
         $DisplayName = '';
@@ -144,7 +144,7 @@ foreach ($Results as $Key => $GroupID) {
             $LastRemasterCatalogueNumber = $Data['RemasterCatalogueNumber'];
             $LastMedia = $Data['Media'];
 
-            $JsonTorrents[] = array(
+            $JsonTorrents[] = [
                 'torrentId' => (int)$TorrentID,
                 'editionId' => (int)$EditionID,
                 'artists' => $JsonArtists,
@@ -171,10 +171,10 @@ foreach ($Results as $Key => $GroupID) {
                 'isPersonalFreeleech' => $Data['PersonalFL'],
                 'canUseToken' => Torrents::can_use_token($Data),
                 'hasSnatched' => $Data['IsSnatched']
-            );
+            ];
         }
 
-        $JsonGroups[] = array(
+        $JsonGroups[] = [
             'groupId' => (int)$GroupID,
             'groupName' => $GroupName,
             'artist' => $DisplayName,
@@ -190,13 +190,13 @@ foreach ($Results as $Key => $GroupID) {
             'totalSeeders' => (int)$TotalSeeders,
             'totalLeechers' => (int)$TotalLeechers,
             'torrents' => $JsonTorrents
-        );
+        ];
     } else {
         // Viewing a type that does not require grouping
 
         list($TorrentID, $Data) = each($Torrents);
 
-        $JsonGroups[] = array(
+        $JsonGroups[] = [
             'groupId' => (int)$GroupID,
             'groupName' => $GroupName,
             'torrentId' => (int)$TorrentID,
@@ -213,10 +213,10 @@ foreach ($Results as $Key => $GroupID) {
             'isPersonalFreeleech' => $Data['PersonalFL'],
             'canUseToken' => Torrents::can_use_token($Data),
             'hasSnatched' => $Data['IsSnatched']
-        );
+        ];
     }
 }
-json_print('success', array(
+json_print('success', [
     'currentPage' => intval($Page),
     'pages' => ceil($NumResults / TORRENTS_PER_PAGE),
-    'results' => $JsonGroups));
+    'results' => $JsonGroups]);

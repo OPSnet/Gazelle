@@ -1,14 +1,13 @@
 <?php
 authorize();
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-$Val = new VALIDATE;
+$Val = new Validate;
 
 $P = [];
 $P = db_array($_POST);
 
 if ($P['category'] > 0 || check_perms('site_collages_renamepersonal')) {
-    $Val->SetFields('name', '1', 'string', 'The name must be between 3 and 100 characters', array('maxlength' => 100, 'minlength' => 3));
+    $Val->SetFields('name', '1', 'string', 'The name must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
 } else {
     // Get a collage name and make sure it's unique
     $name = $LoggedUser['Username']."'s personal collage";
@@ -27,7 +26,7 @@ if ($P['category'] > 0 || check_perms('site_collages_renamepersonal')) {
         $i++;
     }
 }
-$Val->SetFields('description', '1', 'string', 'The description must be between 10 and 65535 characters', array('maxlength' => 65535, 'minlength' => 10));
+$Val->SetFields('description', '1', 'string', 'The description must be between 10 and 65535 characters', ['maxlength' => 65535, 'minlength' => 10]);
 
 $Err = $Val->ValidateForm($_POST);
 
@@ -92,4 +91,3 @@ $CollageID = $DB->inserted_id();
 $Cache->delete_value("collage_$CollageID");
 Misc::write_log("Collage $CollageID (".$_POST['name'].') was created by '.$LoggedUser['Username']);
 header("Location: collages.php?id=$CollageID");
-?>

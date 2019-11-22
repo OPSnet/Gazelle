@@ -9,10 +9,12 @@ if (strtotime($BannedUntil) < time()) {
         <?php
 
         if (!empty($BannedUntil) && $BannedUntil != '0000-00-00 00:00:00') {
-            $DB->query("
-            UPDATE login_attempts
-            SET BannedUntil = '0000-00-00 00:00:00', Attempts = '0'
-            WHERE ID = '" . db_string($AttemptID) . "'");
+            $DB->prepared_query("
+                UPDATE login_attempts
+                SET BannedUntil = '0000-00-00 00:00:00', Attempts = '0'
+                WHERE ID = ?
+                ", $AttemptID
+            );
             $Attempts = 0;
         }
         if (isset($Err)) {

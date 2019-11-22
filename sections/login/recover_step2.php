@@ -38,4 +38,3 @@ if (empty($Reset)) {
 </form>
 <?php
 View::show_footer(['recover' => true]);
-?>

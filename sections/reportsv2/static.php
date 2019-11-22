@@ -249,7 +249,7 @@ if (count($Reports) === 0) {
 
         list($ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID, $ResolverName, $Status, $ReportedTime, $LastChangeTime,
             $ModComment, $Tracks, $Images, $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID, $Time, $Remastered, $RemasterTitle,
-            $RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $UploaderID, $UploaderName) = Misc::display_array($Report, array('ModComment'));
+            $RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $UploaderID, $UploaderName) = Misc::display_array($Report, ['ModComment']);
 
         if (!$GroupID && $Status != 'Resolved') {
             //Torrent already deleted

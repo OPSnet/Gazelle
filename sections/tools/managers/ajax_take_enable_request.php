@@ -40,9 +40,9 @@ if ($Type == "resolve") {
     json_error("Invalid type");
 }
 
-echo json_encode(array("status" => "success"));
+echo json_encode(["status" => "success"]);
 
 function json_error($Message) {
-    echo json_encode(array("status" => $Message));
+    echo json_encode(["status" => $Message]);
     die();
 }

@@ -4,9 +4,9 @@ if (!empty($_GET['userid'])) {
     if (!check_perms('users_override_paranoia')) {
         print
             json_encode(
-                array(
+                [
                     'status' => 'failure'
-                )
+                ]
             );
         die();
     }
@@ -15,9 +15,9 @@ if (!empty($_GET['userid'])) {
     if (!is_number($UserID)) {
         print
             json_encode(
-                array(
+                [
                     'status' => 'failure'
-                )
+                ]
             );
         die();
     }
@@ -45,20 +45,20 @@ $ArtistList = $DB->to_array();
 $JsonArtists = [];
 foreach ($ArtistList as $Artist) {
     list($ArtistID, $Name) = $Artist;
-    $JsonArtists[] = array(
+    $JsonArtists[] = [
         'artistId' => (int)$ArtistID,
         'artistName' => $Name
-    );
+    ];
 }
 
 print
     json_encode(
-        array(
+        [
             'status' => 'success',
-            'response' => array(
+            'response' => [
                 'artists' => $JsonArtists
-            )
-        )
+            ]
+        ]
     );
 
 ?>

@@ -1,7 +1,7 @@
 <?php
 $FeaturedAlbum = $Cache->get_value('album_of_the_month');
 if ($FeaturedAlbum === false) {
-    $DB->query('
+    $DB->prepared_query('
         SELECT
             fa.GroupID,
             tg.Name,
@@ -9,10 +9,11 @@ if ($FeaturedAlbum === false) {
             fa.ThreadID,
             fa.Title
         FROM featured_albums AS fa
-            JOIN torrents_group AS tg ON tg.ID = fa.GroupID
-        WHERE Ended = 0 AND type = 0');
+        INNER JOIN torrents_group AS tg ON (tg.ID = fa.GroupID)
+        WHERE Ended = 0 AND type = 0
+    ');
     $FeaturedAlbum = $DB->next_record();
-    $Cache->cache_value('album_of_the_month', $FeaturedAlbum, 0);
+    $Cache->cache_value('album_of_the_month', $FeaturedAlbum, 86400 * 3);
 }
 if (is_number($FeaturedAlbum['GroupID'])) {
     $Artists = Artists::get_artist($FeaturedAlbum['GroupID']);
@@ -30,4 +31,3 @@ if (is_number($FeaturedAlbum['GroupID'])) {
         </div>
 <?php
 }
-?>

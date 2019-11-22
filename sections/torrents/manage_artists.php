@@ -20,7 +20,7 @@ $LoggedUser = G::$LoggedUser;
 foreach ($Artists as $i => $Artist) {
     list($Importance, $ArtistID) = explode(';', $Artist);
     if (is_number($ArtistID) && is_number($Importance)) {
-        $CleanArtists[] = array($Importance, $ArtistID);
+        $CleanArtists[] = [$Importance, $ArtistID];
         $ArtistIDs[] = $ArtistID;
     }
 }

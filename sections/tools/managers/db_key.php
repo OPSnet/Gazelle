@@ -8,6 +8,9 @@ if (isset($_POST['dbkey'])) {
     authorize();
     apcu_store('DB_KEY', hash('sha512', $_POST['dbkey']));
 }
+$fingerprint = (apcu_exists('DB_KEY') && apcu_fetch('DB_KEY'))
+    ? '0x' . substr(apcu_fetch('DB_KEY'), 0, 4)
+    : false;
 
 View::show_header('Database Encryption Key');
 ?>
@@ -16,7 +19,7 @@ View::show_header('Database Encryption Key');
     <h2>Database Encryption Key</h2>
 </div>
 <div class="thin box pad">
-    <h3>DB key <?=((apcu_exists('DB_KEY') && apcu_fetch('DB_KEY')) ? "loaded" : "not loaded")?></h3>
+    <h3>DB key <?= $fingerprint ? " $fingerprint loaded" : "not loaded" ?></h3>
     <form class="create_form" name="db_key" method="post" action="">
         <div class="pad">
             <input type="hidden" name="action" value="dbkey" />
@@ -32,5 +35,3 @@ View::show_header('Database Encryption Key');
 
 <?php
 View::show_footer();
-?>
-

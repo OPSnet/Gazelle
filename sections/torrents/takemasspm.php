@@ -10,8 +10,7 @@ authorize();
 
 enforce_login();
 
-require(SERVER_ROOT.'/classes/validate.class.php');
-$Validate = new VALIDATE;
+$Validate = new Validate;
 
 $TorrentID = (int)$_POST['torrentid'];
 $GroupID = (int)$_POST['groupid'];
@@ -26,10 +25,10 @@ if (!check_perms('site_moderate_requests')) {
     error(403);
 }
 
-$Validate->SetFields('torrentid', '1', 'number', 'Invalid torrent ID.', array('maxlength' => 1000000000, 'minlength' => 1)); // we shouldn't have torrent IDs higher than a billion
-$Validate->SetFields('groupid', '1', 'number', 'Invalid group ID.', array('maxlength' => 1000000000, 'minlength' => 1)); // we shouldn't have group IDs higher than a billion either
-$Validate->SetFields('subject', '0', 'string', 'Invalid subject.', array('maxlength' => 1000, 'minlength' => 1));
-$Validate->SetFields('message', '0', 'string', 'Invalid message.', array('maxlength' => 10000, 'minlength' => 1));
+$Validate->SetFields('torrentid', '1', 'number', 'Invalid torrent ID.', ['maxlength' => 1000000000, 'minlength' => 1]); // we shouldn't have torrent IDs higher than a billion
+$Validate->SetFields('groupid', '1', 'number', 'Invalid group ID.', ['maxlength' => 1000000000, 'minlength' => 1]); // we shouldn't have group IDs higher than a billion either
+$Validate->SetFields('subject', '0', 'string', 'Invalid subject.', ['maxlength' => 1000, 'minlength' => 1]);
+$Validate->SetFields('message', '0', 'string', 'Invalid message.', ['maxlength' => 10000, 'minlength' => 1]);
 $Err = $Validate->ValidateForm($_POST); // Validate the form
 
 if ($Err) {
@@ -56,7 +55,4 @@ if ($DB->has_results()) {
 }
 
 Misc::write_log($LoggedUser['Username']." sent mass notice to snatchers of torrent $TorrentID in group $GroupID");
-
 header("Location: torrents.php?id=$GroupID");
-
-?>

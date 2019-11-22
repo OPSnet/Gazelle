@@ -1,7 +1,7 @@
 <?php
 // error out on invalid requests (before caching)
 if (isset($_GET['details'])) {
-    if (in_array($_GET['details'],array('ul','dl','numul','uls','dls'))) {
+    if (in_array($_GET['details'],['ul','dl','numul','uls','dls'])) {
         $Details = $_GET['details'];
     } else {
         error(404);
@@ -22,7 +22,7 @@ View::show_header('Top 10 Users');
 
 // defaults to 10 (duh)
 $Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
-$Limit = in_array($Limit, array(10,100,250)) ? $Limit : 10;
+$Limit = in_array($Limit, [10,100,250]) ? $Limit : 10;
 
 $BaseQuery = "
     SELECT

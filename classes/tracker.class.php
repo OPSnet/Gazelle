@@ -58,7 +58,7 @@ class Tracker {
      * @return array(0 => $Leeching, 1 => $Seeding) or false if the request failed
      */
     public static function user_peer_count($TorrentPass) {
-        $Stats = self::get_stats(self::STATS_USER, array('key' => $TorrentPass));
+        $Stats = self::get_stats(self::STATS_USER, ['key' => $TorrentPass]);
         if ($Stats === false) {
             return false;
         }
@@ -69,7 +69,7 @@ class Tracker {
             // User doesn't exist, but don't tell anyone
             $Leeching = $Seeding = 0;
         }
-        return array($Leeching, $Seeding);
+        return [$Leeching, $Seeding];
     }
 
     /**
@@ -165,12 +165,12 @@ class Tracker {
                 $Success = true;
             }
         }
-        $Request = array(
+        $Request = [
             'path' => substr($Get, strpos($Get, '/')),
             'response' => ($Success ? $Data : $Response),
             'status' => ($Success ? 'ok' : 'failed'),
             'time' => 1000 * (microtime(true) - $StartTime)
-        );
+        ];
         self::$Requests[] = $Request;
         if ($Success) {
             return $Data;

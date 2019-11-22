@@ -1,6 +1,6 @@
 <?php
 /*-- TODO ---------------------------//
-Writeup how to use the VALIDATE class, add in support for form id checks
+Writeup how to use the Validate class, add in support for form id checks
 Complete the number and date validation
 Finish the GenerateJS stuff
 //-----------------------------------*/
@@ -11,7 +11,7 @@ Finish the GenerateJS stuff
  * This class is used to validate the contents of an associated array (most likely $_POST).
  *
  * Basic usage of the class would be:
- * $Validate = new VALIDATE();
+ * $Validate = new Validate();
  * $Validate->SetFields('username', true, 'string', 'You need to set a username');
  * $Validate->SetFields('password', true, 'string', 'You need to set a password');
  *
@@ -26,7 +26,7 @@ Finish the GenerateJS stuff
  * TODO: investigate how much we can replace in this class with usage of filter_var and its validation flags,
  * such as email and link for sure.
  */
-class VALIDATE {
+class Validate {
     var $Fields = [];
 
     /**
@@ -393,4 +393,3 @@ class VALIDATE {
         return $ReturnJS;
     }
 }
-?>

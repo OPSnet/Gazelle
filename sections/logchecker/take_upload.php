@@ -44,7 +44,7 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
         $DetailsArray[] = $Details;
         $LogScore = min($LogScore, $Score);
         $LogChecksum = min(intval($Checksum), $LogChecksum);
-        $Logs[] = array($Details, $LogText);
+        $Logs[] = [$Details, $LogText];
         $DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')");
         $LogID = $DB->inserted_id();
         if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {

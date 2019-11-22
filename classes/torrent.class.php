@@ -262,7 +262,7 @@ class TORRENT extends BENCODE_DICT {
         $FileList = [];
         if (!isset($this->Val['info']->Val['files'])) { // Single file mode
             $TotalSize = $this->Val['info']->Val['length'];
-            $FileList[] = array($TotalSize, $this->get_name());
+            $FileList[] = [$TotalSize, $this->get_name()];
         } else { // Multiple file mode
             $FileNames = [];
             $FileSizes = [];
@@ -283,10 +283,10 @@ class TORRENT extends BENCODE_DICT {
             }
             natcasesort($FileNames);
             foreach ($FileNames as $Index => $FileName) {
-                $FileList[] = array($FileSizes[$Index], $FileName);
+                $FileList[] = [$FileSizes[$Index], $FileName];
             }
         }
-        return array($TotalSize, $FileList);
+        return [$TotalSize, $FileList];
     }
 
     function get_name() {

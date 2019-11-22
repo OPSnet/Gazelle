@@ -8,12 +8,12 @@ if (empty($_GET['type'])) {
 } else {
     $Section = $_GET['type']; // either 'inbox' or 'sentbox'
 }
-if (!in_array($Section, array('inbox', 'sentbox'))) {
+if (!in_array($Section, ['inbox', 'sentbox'])) {
     print
         json_encode(
-            array(
+            [
                 'status' => 'failure'
-            )
+            ]
         );
     die();
 }
@@ -74,7 +74,7 @@ $DB->query('SELECT FOUND_ROWS()');
 list($NumResults) = $DB->next_record();
 $DB->set_query_id($Results);
 
-$CurURL = Format::get_url(array('sort'));
+$CurURL = Format::get_url(['sort']);
 if (empty($CurURL)) {
     $CurURL = "inbox.php?";
 } else {
@@ -85,7 +85,7 @@ $Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
 
 $JsonMessages = [];
 while (list($ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $ForwardedName, $SenderID, $Username, $Donor, $Warned, $Enabled, $Avatar, $Date) = $DB->next_record()) {
-    $JsonMessage = array(
+    $JsonMessage = [
         'convId' => (int)$ConvID,
         'subject' => $Subject,
         'unread' => $Unread == 1,
@@ -99,19 +99,19 @@ while (list($ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $ForwardedName, $
         'warned' => $Warned == 1,
         'enabled' => $Enabled == 2 ? false : true,
         'date' => $Date
-    );
+    ];
     $JsonMessages[] = $JsonMessage;
 }
 
 print
     json_encode(
-        array(
+        [
             'status' => 'success',
-            'response' => array(
+            'response' => [
                 'currentPage' => (int)$Page,
                 'pages' => ceil($NumResults / MESSAGES_PER_PAGE),
                 'messages' => $JsonMessages
-            )
-        )
+            ]
+        ]
     );
 ?>

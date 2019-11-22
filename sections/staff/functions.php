@@ -56,7 +56,7 @@ function get_fls() {
                 JOIN users_levels AS l ON l.UserID = i.UserID
             WHERE l.PermissionID = ?
             ORDER BY m.Username', FLS_TEAM);
-        $FLS = $DB->to_array(false, MYSQLI_BOTH, array(3, 'Paranoia'));
+        $FLS = $DB->to_array(false, MYSQLI_BOTH, [3, 'Paranoia']);
         $Cache->cache_value('fls', $FLS, 180);
     }
     return $FLS;
@@ -87,7 +87,7 @@ function get_staff() {
             INNER JOIN staff_groups AS sg ON sg.ID = p.StaffGroup
         WHERE p.DisplayStaff = '1' AND Secondary = 0
         ORDER BY p.Level, m.Username");
-        $TmpStaff = $DB->to_array(false, MYSQLI_BOTH, array(6, 'Paranoia'));
+        $TmpStaff = $DB->to_array(false, MYSQLI_BOTH, [6, 'Paranoia']);
         $DB->prepared_query("
             SELECT Name
             FROM staff_groups
@@ -107,10 +107,10 @@ function get_staff() {
 }
 
 function get_support() {
-    return array(
+    return [
         get_fls(),
         get_staff()
-    );
+    ];
 }
 
 function printSectionDiv($ClassName) {

@@ -15,7 +15,7 @@ class Format {
      *
      * @var array Strings
      */
-    private static $TorrentLabels = array(
+    private static $TorrentLabels = [
         'default'  => 'tl_notice',
         'snatched' => 'tl_snatched',
 
@@ -31,7 +31,7 @@ class Format {
         'cassette approved'        => 'tl_approved tl_cassete',
         'lossy master approved'    => 'tl_approved tl_lossy_master',
         'lossy web approved'    => 'tl_approved tl_lossy_web'
-    );
+    ];
 
     /**
      * Shorten a string
@@ -138,28 +138,28 @@ class Format {
     }
 
     /**
-     * Gets the query string of the current page, minus the parameters in $Exclude
+     * Gets the query string of the current page, minus the parameters in $Exclude,
+     * plus the parameters in $NewParams
      *
      * @param array $Exclude Query string parameters to leave out, or blank to include all parameters.
      * @param bool $Escape Whether to return a string prepared for HTML output
      * @param bool $Sort Whether to sort the parameters by key
-     * @return An optionally HTML sanatized query string
+     * @param array $NewParams New query items to insert into the URL
+     * @return string A query string, optionally HTML-sanitized
      */
-    public static function get_url($Exclude = false, $Escape = true, $Sort = false) {
-        if ($Exclude !== false) {
-            $Separator = $Escape ? '&amp;' : '&';
-            $QueryItems = NULL;
-            parse_str($_SERVER['QUERY_STRING'], $QueryItems);
-            foreach ($Exclude as $Key) {
-                unset($QueryItems[$Key]);
-            }
-            if ($Sort) {
-                ksort($QueryItems);
-            }
-            return http_build_query($QueryItems, '', $Separator);
-        } else {
-            return $Escape ? display_str($_SERVER['QUERY_STRING']) : $_SERVER['QUERY_STRING'];
+    public static function get_url(array $Exclude = [], $Escape = true, $Sort = false, array $NewParams = []) {
+        $QueryItems = NULL;
+        parse_str($_SERVER['QUERY_STRING'], $QueryItems);
+
+        foreach ($Exclude as $Key) {
+            unset($QueryItems[$Key]);
         }
+        if ($Sort) {
+            ksort($QueryItems);
+        }
+
+        $NewQuery = http_build_query(array_merge($QueryItems, $NewParams), '');
+        return $Escape ? display_str($NewQuery) : $NewQuery;
     }
 
 
@@ -191,7 +191,7 @@ class Format {
             }
             $Limit = $PerPage * $Page - $PerPage . ", $PerPage";
         }
-        return array($Page, $Limit);
+        return [$Page, $Limit];
     }
 
     // A9 magic. Some other poor soul can write the phpdoc.
@@ -199,7 +199,7 @@ class Format {
     public static function catalogue_limit($Page, $PerPage, $CatalogueSize = 500) {
         $CatalogueID = floor(($PerPage * $Page - $PerPage) / $CatalogueSize);
         $CatalogueLimit = ($CatalogueID * $CatalogueSize).", $CatalogueSize";
-        return array($CatalogueID, $CatalogueLimit);
+        return [$CatalogueID, $CatalogueLimit];
     }
 
     public static function catalogue_select($Catalogue, $Page, $PerPage, $CatalogueSize = 500) {
@@ -255,7 +255,7 @@ class Format {
 
             $StartPosition = max($StartPosition, 1);
 
-            $QueryString = self::get_url(array('page', 'post'));
+            $QueryString = self::get_url(['page', 'post']);
             if ($QueryString != '') {
                 $QueryString = "&amp;$QueryString";
             }
@@ -309,7 +309,7 @@ class Format {
      * @return string formatted number.
      */
     public static function get_size($Size, $Levels = 2) {
-        $Units = array(' B', ' KB', ' MB', ' GB', ' TB', ' PB', ' EB', ' ZB', ' YB');
+        $Units = [' B', ' KB', ' MB', ' GB', ' TB', ' PB', ' EB', ' ZB', ' YB'];
         $Size = (double)$Size;
         for ($Steps = 0; abs($Size) >= 1024; $Size /= 1024, $Steps++) {
         }
@@ -562,7 +562,7 @@ class Format {
      */
     public static function css_category($CategoryID = 1) {
         global $Categories;
-        return 'cats_' . strtolower(str_replace(array('-', ' '), '',
+        return 'cats_' . strtolower(str_replace(['-', ' '], '',
                 $Categories[$CategoryID - 1]));
     }
 }

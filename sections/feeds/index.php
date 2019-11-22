@@ -24,11 +24,13 @@ $User = (int)$_GET['user'];
 
 if (!$Enabled = $Cache->get_value("enabled_$User")) {
     require(SERVER_ROOT.'/classes/mysql.class.php');
-    $DB = NEW DB_MYSQL; //Load the database wrapper
-    $DB->query("
+    $DB = new DB_MYSQL; //Load the database wrapper
+    $DB->prepared_query('
         SELECT Enabled
         FROM users_main
-        WHERE ID = '$User'");
+        WHERE ID = ?
+        ', $User
+    );
     list($Enabled) = $DB->next_record();
     $Cache->cache_value("enabled_$User", $Enabled, 0);
 }
@@ -47,7 +49,7 @@ switch ($_GET['feed']) {
         $Feed->channel('News', 'RSS feed for site news.');
         if (!$News = $Cache->get_value('news')) {
             require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-            $DB = NEW DB_MYSQL; //Load the database wrapper
+            $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
                     ID,
@@ -76,7 +78,7 @@ switch ($_GET['feed']) {
         $Feed->channel('Blog', 'RSS feed for site blog.');
         if (!$Blog = $Cache->get_value('blog')) {
             require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-            $DB = NEW DB_MYSQL; //Load the database wrapper
+            $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
                     b.ID,
@@ -87,7 +89,7 @@ switch ($_GET['feed']) {
                     b.Time,
                     b.ThreadID
                 FROM blog AS b
-                    LEFT JOIN users_main AS um ON b.UserID = um.ID
+                LEFT JOIN users_main AS um ON (b.UserID = um.ID)
                 ORDER BY Time DESC
                 LIMIT 20");
             $Blog = $DB->to_array();
@@ -106,9 +108,8 @@ switch ($_GET['feed']) {
         $Feed->channel('Gazelle Change Log', 'RSS feed for Gazelle\'s changelog.');
         if (!$Changelog = $Cache->get_value('changelog')) {
             require(SERVER_ROOT.'/classes/mysql.class.php');
-            require(SERVER_ROOT.'/classes/misc.class.php');
 
-            $DB = NEW DB_MYSQL;
+            $DB = new DB_MYSQL;
             $DB->query("
                 SELECT Message, Author, Date(Time)
                 FROM changelog
@@ -194,4 +195,3 @@ switch ($_GET['feed']) {
         }
 }
 $Feed->close_feed();
-?>

@@ -68,7 +68,7 @@ class TorrentsDL {
         if (empty($Downloads)) {
             return false;
         }
-        return array($Downloads, $GroupIDs);
+        return [$Downloads, $GroupIDs];
     }
 
     /**

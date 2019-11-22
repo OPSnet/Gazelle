@@ -2,7 +2,7 @@
 class G {
     /** @var DB_MYSQL */
     public static $DB;
-    /** @var CACHE */
+    /** @var \CACHE */
     public static $Cache;
     /** @var \Gazelle\Router */
     public static $Router;
@@ -19,7 +19,7 @@ class G {
         self::$LoggedUser =& $LoggedUser;
     }
 
-    public static function init(\DB_MYSQL $db, \Cache $cache) {
+    public static function init(\DB_MYSQL $db, \CACHE $cache) {
         self::$DB = $db;
         self::$Cache = $cache;
     }

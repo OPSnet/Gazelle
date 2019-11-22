@@ -72,7 +72,7 @@ $StaffPMs = $DB->query("
     JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
     $WhereCondition
     GROUP BY spc.ID
-    ORDER BY $SortStr spc.Level DESC, spc.Date DESC
+    ORDER BY $SortStr spc.Date DESC
     LIMIT $Limit
 ");
 
@@ -106,7 +106,7 @@ $Row = 'a';
             <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
             <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
 <?php    }
-    
+
     if ($IsFLS && !$IsStaff) { ?>
             <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
 <?php    } ?>

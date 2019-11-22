@@ -15,7 +15,7 @@ Things to expect in $_GET:
 // Check for lame SQL injection attempts
 $ForumID = $_GET['forumid'];
 if (!is_number($ForumID)) {
-    print json_encode(array('status' => 'failure'));
+    print json_encode(['status' => 'failure']);
     die();
 }
 
@@ -60,7 +60,7 @@ if (!isset($Forum) || !is_array($Forum)) {
             WHERE ForumID = '$ForumID'
                 AND IsSticky = '1'");
         list($Stickies) = $DB->next_record();
-        $Cache->cache_value("forums_$ForumID", array($Forum, '', 0, $Stickies), 0);
+        $Cache->cache_value("forums_$ForumID", [$Forum, '', 0, $Stickies], 0);
     }
 }
 
@@ -81,10 +81,10 @@ $ForumName = display_str($Forums[$ForumID]['Name']);
 $JsonSpecificRules = [];
 foreach ($Forums[$ForumID]['SpecificRules'] as $ThreadIDs) {
     $Thread = Forums::get_thread_info($ThreadIDs);
-    $JsonSpecificRules[] = array(
+    $JsonSpecificRules[] = [
         'threadId' => (int)$ThreadIDs,
         'thread' => display_str($Thread['Title'])
-    );
+    ];
 }
 
 $Pages = Format::get_pages($Page, $Forums[$ForumID]['NumTopics'], TOPICS_PER_PAGE, 9);
@@ -92,11 +92,11 @@ $Pages = Format::get_pages($Page, $Forums[$ForumID]['NumTopics'], TOPICS_PER_PAG
 if (count($Forum) === 0) {
     print
         json_encode(
-            array(
+            [
                 'status' => 'success',
                 'forumName' => $ForumName,
                 'threads' => []
-            )
+            ]
         );
 } else {
     // forums_last_read_topics is a record of the last post a user read in a topic, and what page that was on
@@ -144,7 +144,7 @@ if (count($Forum) === 0) {
             $LastTime = '';
         }
 
-        $JsonTopics[] = array(
+        $JsonTopics[] = [
             'topicId' => (int)$TopicID,
             'title' => display_str($Title),
             'authorId' => (int)$AuthorID,
@@ -159,21 +159,21 @@ if (count($Forum) === 0) {
             'lastReadPage' => ($LastRead[$TopicID]['Page'] == null) ? 0 : (int)$LastRead[$TopicID]['Page'],
             'lastReadPostId' => ($LastRead[$TopicID]['PostID'] == null) ? 0 : (int)$LastRead[$TopicID]['PostID'],
             'read' => $Read == 'read'
-        );
+        ];
     }
 
     print
         json_encode(
-            array(
+            [
                 'status' => 'success',
-                'response' => array(
+                'response' => [
                     'forumName' => $ForumName,
                     'specificRules' => $JsonSpecificRules,
                     'currentPage' => (int)$Page,
                     'pages' => ceil($Forums[$ForumID]['NumTopics'] / TOPICS_PER_PAGE),
                     'threads' => $JsonTopics
-                )
-            )
+                ]
+            ]
         );
 }
 ?>

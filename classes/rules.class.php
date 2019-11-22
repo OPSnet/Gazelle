@@ -14,7 +14,7 @@ class Rules {
         $ips_article = '<a href="wiki.php?action=article&id=95">Multiple IPs</a>';
         $autofl_article = '<a href="wiki.php?action=article&id=66">Freeleech Autosnatching Policy</a>';
         $bugs_article = '<a href="wiki.php?action=article&name=disclosurepolicy">Responsible Disclosure Policy</a>';
-        $golden_rules = array(
+        $golden_rules = [
             [ 'n' => "1.1",
               'short' => "One account per person, per lifetime.",
               'long' => "Users are allowed one account per lifetime. If your account is disabled, contact staff in ${disabled_channel} on ${irc}. Never make another account, you will be disabled without question." ],
@@ -96,7 +96,7 @@ class Rules {
             [ 'n' => "7.1",
               'short' => "Staff have the final word on rule interpretations.",
               'long' => "All rules on ${site_name} may be subject to different interpretations. Since the staff wrote these rules, their interpretation is final. If you need clarification on a rule, or if you think a rule should be restated, please send a ${staffpm}." ]
-        );
+        ];
         echo "<ul class=\"rules golden_rules\">\n";
         foreach($golden_rules as $gr) {
             $r_link = "gr${gr['n']}";

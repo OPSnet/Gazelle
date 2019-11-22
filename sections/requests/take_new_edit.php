@@ -371,7 +371,7 @@ foreach ($ArtistForm as $Importance => $Artists) {
                 if ($Redirect) {
                     $AliasID = $Redirect;
                 }
-                $ArtistForm[$Importance][$Num] = array('id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName);
+                $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName];
                 break;
             }
         }

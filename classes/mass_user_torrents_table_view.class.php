@@ -10,7 +10,7 @@
  *
  * It can be used for Bookmarks, Collages, or anywhere where torrents are managed.
  */
-class MASS_USER_TORRENTS_TABLE_VIEW {
+class mass_user_torrents_table_view {
     /**
      * Used to set text the page heading (h2 tag)
      * @var string $Heading
@@ -171,24 +171,23 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
     public function body () {
         if ($this->HasTorrents)
             foreach ($this->TorrentList as $GroupID => $Group) {
-                $Artists = [];
-                extract($Group);
-                extract($this->CollageDataList[$GroupID]);
-
                 $this->NumGroups++;
 
-                if (!is_array($ExtendedArtists)) {
-                    $ExtendedArtists = [];
+                if (!is_array($Group['ExtendedArtists'])) {
+                    $Group['ExtendedArtists'] = [];
                 }
-                if (!is_array($Artists)) {
-                    $Artists = [];
+                if (!is_array($Group['Artists'])) {
+                    $Group['Artists'] = [];
                 }
-                $DisplayName = self::display_name($ExtendedArtists, $Artists, $VanityHouse);
-                $TorrentLink = '<a href="torrents.php?id='.$GroupID.'" class="tooltip" title="View torrent">'.$Name.'</a>';
-                $Year = $Year > 0 ? $Year : '';
-                $DateAdded = date($Time);
 
-                $this->row($Sort, $GroupID, $Year, $DisplayName, $TorrentLink, $DateAdded);
+                $this->row(
+                    $this->CollageDataList[$GroupID]['Sort'],
+                    $GroupID,
+                    $Group['Year'] > 0 ? $Group['Year'] : '',
+                    self::display_name($Group['ExtendedArtists'], $Group['Artists'], $Group['VanityHouse']),
+                    sprintf('<a href="torrents.php?id=%d" class="tooltip" title="View torrent">%s</a>', $GroupID, $Group['Name']),
+                    date($this->CollageDataList[$GroupID]['Time'])
+                );
             }
     }
 
@@ -234,7 +233,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
             unset($ExtendedArtists[2], $ExtendedArtists[3]);
             $DisplayName = Artists::display_artists($ExtendedArtists, true, false);
         } elseif (count($Artists) > 0) {
-            $DisplayName = Artists::display_artists(array('1'=>$Artists), true, false);
+            $DisplayName = Artists::display_artists(['1'=>$Artists], true, false);
         }
         if ($VanityHouse) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';

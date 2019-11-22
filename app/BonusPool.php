@@ -11,7 +11,7 @@ class BonusPool {
 
     const CACHE_SENT = 'bonuspool-sent.%d';
 
-    public function __construct ($db, $cache, $id) {
+    public function __construct (\DB_MYSQL $db, \CACHE $cache, $id) {
         $this->db = $db;
         $this->cache = $cache;
         $this->id = $id;

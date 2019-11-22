@@ -174,7 +174,7 @@ class Requests {
             G::$DB->set_query_id($QueryID);
             foreach ($ArtistRaw as $ArtistRow) {
                 list($ArtistID, $ArtistName, $ArtistImportance) = $ArtistRow;
-                $Results[$ArtistImportance][] = array('id' => $ArtistID, 'name' => $ArtistName);
+                $Results[$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName];
             }
             G::$Cache->cache_value("request_artists_$RequestID", $Results);
         }

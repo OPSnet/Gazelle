@@ -13,8 +13,8 @@ if ($_POST['submit'] == 'Delete') { //Delete
         DELETE FROM forums
         WHERE ID = '.$_POST['id']);
 } else { //Edit & Create, Shared Validation
-    $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', array('maxlength' => 40, 'minlength' => 1));
-    $Val->SetFields('description', '0', 'string', 'The description has a max length of 255 characters', array('maxlength' => 255));
+    $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40, 'minlength' => 1]);
+    $Val->SetFields('description', '0', 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]);
     $Val->SetFields('sort', '1', 'number', 'Sort must be set');
     $Val->SetFields('categoryid', '1', 'number', 'Category must be set');
     $Val->SetFields('minclassread', '1', 'number', 'MinClassRead must be set');

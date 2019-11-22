@@ -19,8 +19,12 @@
     }
 
     $Load = sys_getloadavg();
+    $Y = date('Y');
+    if ($Y != SITE_LAUNCH_YEAR) {
+        $Y = SITE_LAUNCH_YEAR . "-$Y";
+    }
 ?>
-    <p>Site and design &copy; <?=date('Y')?> <?=SITE_NAME?></p>
+    <p>Site and design &copy; <?= $Y ?> <?=SITE_NAME?></p>
 <?php
     if (!empty($LastActive)) { ?>
     <p>

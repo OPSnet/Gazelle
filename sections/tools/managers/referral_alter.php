@@ -15,10 +15,10 @@ if ($_POST['submit'] == 'Delete') {
 
     $ReferralManager->deleteAccount($_POST['id']);
 } else {
-    $Val->SetFields('site', '1', 'string', 'The site must be set, and has a max length of 30 characters', array('maxlength' => 30));
-    $Val->SetFields('url', '1', 'string', 'The URL must be set, and has a max length of 30 characters', array('maxlength' => 30));
-    $Val->SetFields('user', '1', 'string', 'The username must be set, and has a max length of 20 characters', array('maxlength' => 20));
-    $Val->SetFields('password', '0', 'string', 'The password must be set, and has a max length of 128 characters', array('maxlength' => 128));
+    $Val->SetFields('site', '1', 'string', 'The site must be set, and has a max length of 30 characters', ['maxlength' => 30]);
+    $Val->SetFields('url', '1', 'string', 'The URL must be set, and has a max length of 30 characters', ['maxlength' => 30]);
+    $Val->SetFields('user', '1', 'string', 'The username must be set, and has a max length of 20 characters', ['maxlength' => 20]);
+    $Val->SetFields('password', '0', 'string', 'The password must be set, and has a max length of 128 characters', ['maxlength' => 128]);
     $Val->SetFields('active', '1', 'checkbox', '');
     $Err = $Val->ValidateForm($_POST);
 

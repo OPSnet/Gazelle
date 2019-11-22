@@ -3,7 +3,7 @@
 //enforce_login();
 
 if (!empty($LoggedUser['DisableForums'])) {
-    print json_encode(array('status' => 'failure'));
+    print json_encode(['status' => 'failure']);
     die();
 } else {
     // Replace the old hard-coded forum categories
@@ -23,7 +23,7 @@ if (!empty($LoggedUser['DisableForums'])) {
                 include(SERVER_ROOT.'/sections/ajax/forum/thread.php');
                 break;
             default:
-                print json_encode(array('status' => 'failure'));
+                print json_encode(['status' => 'failure']);
                 break;
         }
     }

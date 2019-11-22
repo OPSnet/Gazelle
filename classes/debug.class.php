@@ -29,28 +29,12 @@ class DEBUG {
         if ($Errors > MAX_ERRORS && !defined('ERROR_EXCEPTION')) {
             $Reason[] = $Errors.' PHP errors';
         }
-        /*
-        $Queries = count($this->get_queries());
-        if ($Queries > MAX_QUERIES && !defined('QUERY_EXCEPTION')) {
-            $Reason[] = $Queries.' Queries';
-        }
-        */
         $Ram = memory_get_usage(true);
         if ($Ram > MAX_MEMORY && !defined('MEMORY_EXCEPTION')) {
             $Reason[] = Format::get_size($Ram).' RAM used';
         }
 
         G::$DB->warnings(); // see comment in MYSQL::query
-        /*$Queries = $this->get_queries();
-        $DBWarningCount = 0;
-        foreach ($Queries as $Query) {
-            if (!empty($Query[2])) {
-                $DBWarningCount += count($Query[2]);
-            }
-        }
-        if ($DBWarningCount) {
-            $Reason[] = $DBWarningCount . ' DB warning(s)';
-        }*/
 
         $CacheStatus = G::$Cache->server_status();
         if (in_array(0, $CacheStatus) && !G::$Cache->get_value('cache_fail_reported')) {
@@ -84,7 +68,7 @@ class DEBUG {
         $Identifier = Users::make_secret(5);
         G::$Cache->cache_value(
             'analysis_'.$Identifier,
-            array(
+            [
                 'url' => $_SERVER['REQUEST_URI'],
                 'message' => $Report,
                 'errors' => $this->get_errors(true),
@@ -95,7 +79,7 @@ class DEBUG {
                 'vars' => $this->get_logged_vars(),
                 'perf' => $this->get_perf(),
                 'ocelot' => $this->get_ocelot_requests()
-            ),
+            ],
             $Time
         );
         $RequestURI = !empty($_SERVER['REQUEST_URI']) ? substr($_SERVER['REQUEST_URI'], 1) : '';
@@ -118,20 +102,20 @@ class DEBUG {
         if (!$VarName) {
             $VarName = $ID;
         }
-        $File = array('path' => substr($BackTrace[0]['file'], strlen(SERVER_ROOT)), 'line' => $BackTrace[0]['line']);
-        $this->LoggedVars[$ID] = array($VarName => array('bt' => $File, 'data' => $Var));
+        $File = ['path' => substr($BackTrace[0]['file'], strlen(SERVER_ROOT)), 'line' => $BackTrace[0]['line']];
+        $this->LoggedVars[$ID] = [$VarName => ['bt' => $File, 'data' => $Var]];
     }
 
     public function set_flag($Event) {
         global $ScriptStartTime;
-        $this->Flags[] = array($Event, (microtime(true) - $ScriptStartTime) * 1000, memory_get_usage(true), $this->get_cpu_time());
+        $this->Flags[] = [$Event, (microtime(true) - $ScriptStartTime) * 1000, memory_get_usage(true), $this->get_cpu_time()];
     }
 
     //This isn't in the constructor because $this is not available, and the function cannot be made static
     public function handle_errors() {
         //error_reporting(E_ALL ^ E_STRICT | E_WARNING | E_DEPRECATED | E_ERROR | E_PARSE); //E_STRICT disabled
         error_reporting(E_WARNING | E_ERROR | E_PARSE);
-        set_error_handler(array($this, 'php_error_handler'));
+        set_error_handler([$this, 'php_error_handler']);
     }
 
     protected function format_args($Array) {
@@ -214,7 +198,7 @@ class DEBUG {
         $Error = str_replace(SERVER_ROOT, '', $Error);
 
         if (DEBUG_WARNINGS) {
-            $this->Errors[] = array($Error, $File.':'.$Line, $Call, $Args);
+            $this->Errors[] = [$Error, $File.':'.$Line, $Call, $Args];
         }
         return true;
     }
@@ -226,9 +210,9 @@ class DEBUG {
             global $ScriptStartTime;
             $PageTime = (microtime(true) - $ScriptStartTime);
             $CPUTime = $this->get_cpu_time();
-            $Perf = array(
+            $Perf = [
                 'Memory usage' => Format::get_size(memory_get_usage(true)),
-                'Page process time' => number_format($PageTime, 3).' s');
+                'Page process time' => number_format($PageTime, 3).' s'];
             if ($CPUTime) {
                 $Perf['CPU time'] = number_format($CPUTime / 1000000, 3).' s';
             }

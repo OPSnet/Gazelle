@@ -85,7 +85,9 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
             continue;
         }
         $Group = $TorrentList[$GroupID];
-        extract(Torrents::array_group($Group));
+        $GroupYear = $Group['Year'];
+        $Artists = $Group['Artists'];
+        $ExtendedArtists = $Group['ExtendedArtists'];
         list(, $UserID, $Username, $Sort, $CatNum) = array_values($CollageDataList[$GroupID]);
 
         $Number++;
@@ -94,13 +96,13 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
         if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
             unset($ExtendedArtists[2]);
             unset($ExtendedArtists[3]);
-            $DisplayName .= Artists::display_artists($ExtendedArtists, true, false);
+            $DisplayName = Artists::display_artists($ExtendedArtists, true, false);
         } elseif (count($Artists) > 0) {
-            $DisplayName .= Artists::display_artists(array('1' => $Artists), true, false);
+            $DisplayName = Artists::display_artists(['1' => $Artists], true, false);
         }
-        $TorrentLink = "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\">$GroupName</a>";
+        $TorrentLink = "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\">" . $Group['Name'] . '</a>';
         $GroupYear = $GroupYear > 0 ? $GroupYear : '';
-        if ($GroupVanityHouse) {
+        if ($Group['VanityHouse']) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 
@@ -144,4 +146,5 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
         </div>
     </form>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

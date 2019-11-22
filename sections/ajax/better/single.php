@@ -13,7 +13,7 @@ if (($Results = $Cache->get_value('better_single_groupids')) === false) {
         LIMIT 30");
 
     $Results = $DB->to_pair('GroupID', 'TorrentID', false);
-    $Cache->cache_value('better_single_groupids', $Results, 30 * 60);
+    $Cache->cache_value('better_single_groupids', $Results, 3600);
 }
 
 $Groups = Torrents::get_groups(array_keys($Results));
@@ -24,32 +24,31 @@ foreach ($Results as $GroupID => $FlacID) {
         continue;
     }
     $Group = $Groups[$GroupID];
-    extract(Torrents::array_group($Group));
 
     $JsonArtists = [];
-    if (count($Artists) > 0) {
-        foreach ($Artists as $Artist) {
-            $JsonArtists[] = array(
+    if (count($Group['Artists'])) {
+        foreach ($Group['Artists'] as $Artist) {
+            $JsonArtists[] = [
                 'id' => (int)$Artist['id'],
                 'name' => $Artist['name'],
                 'aliasId' => (int)$Artist['aliasid']
-            );
+            ];
         }
     }
 
-    $JsonResults[] = array(
+    $JsonResults[] = [
         'torrentId' => (int)$FlacID,
         'groupId' => (int)$GroupID,
         'artist' => $JsonArtists,
-        'groupName' => $GroupName,
-        'groupYear' => (int)$GroupYear,
+        'groupName' => $Group['GroupName'],
+        'groupYear' => (int)$Group['GroupYear'],
         'downloadUrl' => "torrents.php?action=download&id=$FlacID&authkey=".$LoggedUser['AuthKey'].'&torrent_pass='.$LoggedUser['torrent_pass']
-    );
+    ];
 }
 
 print json_encode(
-    array(
+    [
         'status' => 'success',
         'response' => $JsonResults
-    )
+    ]
 );

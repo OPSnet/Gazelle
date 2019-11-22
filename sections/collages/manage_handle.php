@@ -2,74 +2,92 @@
 
 authorize();
 
-$CollageID = $_POST['collageid'];
-if (!is_number($CollageID)) {
+$collageID = $_POST['collageid'];
+if (!is_number($collageID)) {
     error(404);
 }
 
-$DB->query("
+$DB->prepared_query("
     SELECT UserID, CategoryID
     FROM collages
-    WHERE ID = '$CollageID'");
-list($UserID, $CategoryID) = $DB->next_record();
-if ($CategoryID === '0' && $UserID !== $LoggedUser['ID'] && !check_perms('site_collages_delete')) {
+    WHERE ID = ?",
+    $collageID);
+list($userID, $categoryID) = $DB->next_record();
+if ($categoryID === 0 && $userID != $LoggedUser['ID'] && !check_perms('site_collages_delete')) {
     error(403);
 }
 
+function parse_args($args) {
+    $arr = [];
+    $pairs = explode('&', $args);
 
-$GroupID = $_POST['groupid'];
-if (!is_number($GroupID)) {
+    foreach ($pairs as $i) {
+        list($name, $value) = explode('=', $i, 2);
+
+        if (isset($arr[$name])) {
+            if (!is_array($arr[$name])) {
+                $arr[$name] = [$arr[$name]];
+            }
+                $arr[$name][] = $value;
+        } else {
+            $arr[$name] = $value;
+        }
+    }
+
+    return $arr;
+}
+
+$groupID = $_POST['groupid'];
+if (!is_number($groupID)) {
     error(404);
 }
 
-if ($_POST['submit'] === 'Remove') {
-    $DB->query("
+if (isset($_POST['submit']) && $_POST['submit'] === 'Remove') {
+    $DB->prepared_query("
         DELETE FROM collages_torrents
-        WHERE CollageID = '$CollageID'
-            AND GroupID = '$GroupID'");
-    $Rows = $DB->affected_rows();
-    $DB->query("
+        WHERE CollageID = ?
+            AND GroupID = ?",
+        $collageID, $groupID);
+    $rows = $DB->affected_rows();
+    $DB->prepared_query("
         UPDATE collages
-        SET NumTorrents = NumTorrents - $Rows
-        WHERE ID = '$CollageID'");
-    $Cache->delete_value("torrents_details_$GroupID");
-    $Cache->delete_value("torrent_collages_$GroupID");
-    $Cache->delete_value("torrent_collages_personal_$GroupID");
+        SET NumTorrents = NumTorrents - ?
+        WHERE ID = ?",
+        $rows, $collageID);
+    $Cache->delete_value("torrents_details_$groupID");
+    $Cache->delete_value("torrent_collages_$groupID");
+    $Cache->delete_value("torrent_collages_personal_$groupID");
 } elseif (isset($_POST['drag_drop_collage_sort_order'])) {
+    $series = parse_args($_POST['drag_drop_collage_sort_order']);
+    $series = array_shift($series);
+    if (is_array($series)) {
+        $sql = array_fill(0, count($series), '(?, ?, ?)');
+        $params = array_merge(...array_map(function ($sort, $groupID) use ($collageID) {
+            return [$groupID, ($sort + 1) * 10, $collageID];
+        }, array_keys($series), $series));
 
-    @parse_str($_POST['drag_drop_collage_sort_order'], $Series);
-    $Series = @array_shift($Series);
-    if (is_array($Series)) {
-        $SQL = [];
-        foreach ($Series as $Sort => $GroupID) {
-            if (is_number($Sort) && is_number($GroupID)) {
-                $Sort = ($Sort + 1) * 10;
-                $SQL[] = sprintf('(%d, %d, %d)', $GroupID, $Sort, $CollageID);
-            }
-        }
-
-        $SQL = '
+        $sql = '
             INSERT INTO collages_torrents
-                (GroupID, Sort, CollageID)
+                (GroupID, sort, CollageID)
             VALUES
-                ' . implode(', ', $SQL) . '
+                ' . implode(', ', $sql) . '
             ON DUPLICATE KEY UPDATE
-                Sort = VALUES (Sort)';
+                sort = VALUES (sort)';
 
-        $DB->query($SQL);
+      $DB->prepared_query($sql, ...$params);
     }
-
 } else {
-    $Sort = $_POST['sort'];
-    if (!is_number($Sort)) {
+    $sort = $_POST['sort'];
+    if (!is_number($sort)) {
         error(404);
     }
-    $DB->query("
+    $DB->prepared_query("
         UPDATE collages_torrents
-        SET Sort = '$Sort'
-        WHERE CollageID = '$CollageID'
-            AND GroupID = '$GroupID'");
+        SET sort = ?
+        WHERE CollageID = ?
+            AND GroupID = ?",
+        $sort, $collageID, $groupID);
 }
 
-$Cache->delete_value("collage_$CollageID");
-header("Location: collages.php?action=manage&collageid=$CollageID");
+$Cache->delete_value("collage_$collageID");
+header("Location: collages.php?action=manage&collageid=$collageID");

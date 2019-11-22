@@ -16,7 +16,7 @@
  * Tags::format_top();
  * ?></pre>
  * e.g.:
- *    pop (2)
+ *  pop (2)
  *  rock (2)
  *  hip.hop (1)
  *  indie (1)
@@ -67,6 +67,15 @@ class Tags {
         } else {
             $this->Tags = [];
         }
+    }
+
+    /**
+     * Reset the internal state to create a new tagset
+     * TODO: rewrite this shit to hold state per-object
+     *       instead of per-class.
+     */
+    public static function reset() {
+        self::$All = [];
     }
 
     /**
@@ -142,6 +151,32 @@ class Tags {
         return implode(', ', $this->TagLink);
     }
 
+    /** Render the HTML of the list of top tags
+     *
+     * @param int $Max Max number of items to get
+     * @param string $Link  Page query where more items of this tag type can be found
+     * @param string $ArtistName Optional artist
+     * @return set of HTML <li> elements
+     */
+    public static function topAsHTML($Max = 5, $Link = 'torrents.php?taglist=', $ArtistName = '') {
+        if (empty(self::$All)) {
+            return '<li>No torrent tags</li>';
+        }
+        if (!empty($ArtistName)) {
+            $ArtistName = '&amp;artistname=' . urlencode($ArtistName)
+                . '&amp;action=advanced&amp;searchsubmit=1';
+        }
+        $html = '';
+        foreach (array_slice(self::sorted(), 0, $Max) as $TagName => $Total) {
+            $html .= sprintf('<li><a href="%s">%s</a> (%s)</li>' . "\n",
+                $Link . display_str($TagName) . $ArtistName,
+                display_str($TagName),
+                $Total
+            );
+        }
+        return $html;
+    }
+
     /**
      * Format a list of top tags
      * @param int $Max Max number of items to get
@@ -149,17 +184,7 @@ class Tags {
      * @param string $ArtistName Optional artist
      */
     public static function format_top($Max = 5, $Link = 'torrents.php?taglist=', $ArtistName = '') {
-        if (empty(self::$All)) { ?>
-            <li>No torrent tags</li>
-<?php
-            return;
-        }
-        if (!empty($ArtistName)) {
-            $ArtistName = '&amp;artistname=' . urlencode($ArtistName) . '&amp;action=advanced&amp;searchsubmit=1';
-        }
-        foreach (array_slice(self::sorted(), 0, $Max) as $TagName => $Total) { ?>
-            <li><a href="<?=$Link . display_str($TagName) . $ArtistName?>"><?=display_str($TagName)?></a> (<?=$Total?>)</li>
-<?php   }
+        echo self::topAsHTML($Max, $Link, $ArtistName);
     }
 
     /**

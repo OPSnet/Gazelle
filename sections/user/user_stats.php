@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
 foreach ($Charts as $Chart) {
     if (count($Chart['Downloaded']) > 1) {
 ?>
-    InitialiseChart('<?=$Chart['name']?>-stats', 'Stats', <?=strtotime($Chart['Start']) * 1000?>, <?=$Chart['Interval'] * 3600 * 1000?>, true, [
+    initialiseChart('<?=$Chart['name']?>-stats', 'Stats', [
     {
         name: 'Downloaded',
         data: [<?=implode(',', $Chart['Downloaded'])?>]
@@ -64,15 +64,15 @@ foreach ($Charts as $Chart) {
     },{
         name: 'Buffer',
         data: [<?=implode(',', $Chart['Buffer'])?>]
-    }]);
+    }], {bytes: true});
 
-    InitialiseChart('<?=$Chart['name']?>-bp', 'Bonus Points', <?=strtotime($Chart['Start']) * 1000?>, <?=$Chart['Interval'] * 3600 * 1000?>, false, [
+    initialiseChart('<?=$Chart['name']?>-bp', 'Bonus Points', [
     {
         name: 'Bonus Points',
         data: [<?=implode(',', $Chart['BonusPoints'])?>]
     }]);
 
-    InitialiseChart('<?=$Chart['name']?>-upload', 'Uploads', <?=strtotime($Chart['Start']) * 1000?>, <?=$Chart['Interval'] * 3600 * 1000?>, false, [
+    initialiseChart('<?=$Chart['name']?>-upload', 'Uploads', [
     {
         name: 'Torrents',
         data: [<?=implode(',', $Chart['Torrents'])?>]
@@ -137,7 +137,4 @@ foreach ($Charts as $Chart) { ?>
 } ?>
 
 <?php
-
 View::show_footer();
-
-?>

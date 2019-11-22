@@ -15,7 +15,7 @@ if (!isset($_GET['depth']) || !is_number($_GET['depth'])) {
 
 $Depth = $_GET['depth'];
 
-if (empty($_GET['type']) || !in_array($_GET['type'], array('forums', 'collages', 'requests', 'torrents', 'artist'))) {
+if (empty($_GET['type']) || !in_array($_GET['type'], ['forums', 'collages', 'requests', 'torrents', 'artist'])) {
     die();
 }
 $Type = $_GET['type'];

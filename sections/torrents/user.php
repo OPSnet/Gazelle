@@ -1,8 +1,8 @@
 <?php
 
 
-$Orders = array('Time', 'Name', 'Seeders', 'Leechers', 'Snatched', 'Size');
-$Ways = array('DESC' => 'Descending', 'ASC' => 'Ascending');
+$Orders = ['Time', 'Name', 'Seeders', 'Leechers', 'Snatched', 'Size'];
+$Ways = ['DESC' => 'Descending', 'ASC' => 'Ascending'];
 $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
 
 // The "order by x" links on columns headers
@@ -18,7 +18,7 @@ function header_link($SortKey, $DefaultWay = 'DESC') {
         $NewWay = $DefaultWay;
     }
 
-    return "torrents.php?way=$NewWay&amp;order=$SortKey&amp;" . Format::get_url(array('way','order'));
+    return "torrents.php?way=$NewWay&amp;order=$SortKey&amp;" . Format::get_url(['way','order']);
 }
 
 if (!isset($_GET['userid'])) {
@@ -72,19 +72,19 @@ if (!empty($_GET['releasetype']) && array_key_exists($_GET['releasetype'], $Rele
     $SearchWhere[] = "tg.ReleaseType = '".db_string($_GET['releasetype'])."'";
 }
 
-if (isset($_GET['scene']) && in_array($_GET['scene'], array('1', '0'))) {
+if (isset($_GET['scene']) && in_array($_GET['scene'], ['1', '0'])) {
     $SearchWhere[] = "t.Scene = '".db_string($_GET['scene'])."'";
 }
 
-if (isset($_GET['vanityhouse']) && in_array($_GET['vanityhouse'], array('1', '0'))) {
+if (isset($_GET['vanityhouse']) && in_array($_GET['vanityhouse'], ['1', '0'])) {
     $SearchWhere[] = "tg.VanityHouse = '".db_string($_GET['vanityhouse'])."'";
 }
 
-if (isset($_GET['cue']) && in_array($_GET['cue'], array('1', '0'))) {
+if (isset($_GET['cue']) && in_array($_GET['cue'], ['1', '0'])) {
     $SearchWhere[] = "t.HasCue = '".db_string($_GET['cue'])."'";
 }
 
-if (isset($_GET['log']) && in_array($_GET['log'], array('1', '0', '100', '-1'))) {
+if (isset($_GET['log']) && in_array($_GET['log'], ['1', '0', '100', '-1'])) {
     if ($_GET['log'] === '100') {
         $SearchWhere[] = "t.HasLog = '1'";
         $SearchWhere[] = "t.LogScore = '100'";
@@ -201,7 +201,7 @@ switch ($_GET['type']) {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'downloaded':
-        if (!check_perms('site_view_torrent_snatchlist')) {
+        if (!($UserID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist'))) {
             error(403);
         }
         $Time = 'unix_timestamp(ud.Time)';
@@ -496,26 +496,28 @@ foreach ($Categories as $CatKey => $CatName) {
     foreach ($TorrentsInfo as $TorrentID => $Info) {
         list($GroupID, , $Time) = array_values($Info);
 
-        extract(Torrents::array_group($Results[$GroupID]));
+        $GroupCategoryID = $Results[$GroupID]['CategoryID'];
+        $GroupFlags = isset($Results[$GroupID]['Flags']) ? $Results[$GroupID]['Flags'] : ['IsSnatched' => false];
+        $TorrentTags = new Tags($Results[$GroupID]['TagList']);
+        $Torrents = isset($Results[$GroupID]['Torrents']) ? $Results[$GroupID]['Torrents'] : [];
+        $Artists = $Results[$GroupID]['Artists'];
+        $ExtendedArtists = $Results[$GroupID]['ExtendedArtists'];
         $Torrent = $Torrents[$TorrentID];
-
-
-        $TorrentTags = new Tags($TagList);
 
         if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
             unset($ExtendedArtists[2]);
             unset($ExtendedArtists[3]);
             $DisplayName = Artists::display_artists($ExtendedArtists);
         } elseif (!empty($Artists)) {
-            $DisplayName = Artists::display_artists(array(1 => $Artists));
+            $DisplayName = Artists::display_artists([1 => $Artists]);
         } else {
             $DisplayName = '';
         }
-        $DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$TorrentID.'" class="tooltip" title="View torrent" dir="ltr">'.$GroupName.'</a>';
+        $DisplayName .= '<a href="torrents.php?id='.$GroupID.'&amp;torrentid='.$TorrentID.'" class="tooltip" title="View torrent" dir="ltr">'.$Results[$GroupID]['Name'].'</a>';
         if ($GroupYear > 0) {
             $DisplayName .= " [$GroupYear]";
         }
-        if ($GroupVanityHouse) {
+        if ($Results[$GroupID]['VanityHouse']) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 
@@ -531,7 +533,7 @@ foreach ($Categories as $CatKey => $CatName) {
             <td class="td_info big_info">
 <?php    if ($LoggedUser['CoverArt']) { ?>
                 <div class="group_image float_left clear">
-                    <?php ImageTools::cover_thumb($WikiImage, $GroupCategoryID) ?>
+                    <?php ImageTools::cover_thumb($Results[$GroupID]['WikiImage'], $GroupCategoryID) ?>
                 </div>
 <?php    } ?>
                 <div class="group_info clear">

@@ -15,7 +15,7 @@ turned off by setting $Escape to false in next_record or to_array.
 * Creating the object.
 
 require(SERVER_ROOT.'/classes/mysql.class.php');
-$DB = NEW DB_MYSQL;
+$DB = new DB_MYSQL;
 -----
 
 * Making a query
@@ -130,7 +130,7 @@ function db_string($String, $DisableWildcards = false) {
     $String = $DB->escape_str($String);
     //Remove user input wildcards
     if ($DisableWildcards) {
-        $String = str_replace(array('%','_'), array('\%','\_'), $String);
+        $String = str_replace(['%','_'], ['\%','\_'], $String);
     }
     return $String;
 }
@@ -386,7 +386,7 @@ class DB_MYSQL {
         // In the event of a MySQL deadlock, we sleep allowing MySQL time to unlock, then attempt again for a maximum of 5 tries
         for ($i = 1; $i < 6; $i++) {
             $this->QueryID = $Closure();
-            if (!in_array(mysqli_errno($this->LinkID), array(1213, 1205))) {
+            if (!in_array(mysqli_errno($this->LinkID), [1213, 1205])) {
                 break;
             }
             $Debug->analysis('Non-Fatal Deadlock:', $Query, 3600 * 24);
@@ -399,7 +399,7 @@ class DB_MYSQL {
         if (($Len = strlen($Query))>16384) {
             $Query = substr($Query, 0, 16384).'... '.($Len-16384).' bytes trimmed';
         }
-        $this->Queries[] = array($Query, ($QueryEndTime - $QueryStartTime) * 1000, null);
+        $this->Queries[] = [$Query, ($QueryEndTime - $QueryStartTime) * 1000, null];
         $this->Time += ($QueryEndTime - $QueryStartTime) * 1000;
 
         // Update/Insert/etc statements for prepared queries don't return a QueryID,

@@ -26,11 +26,11 @@ if (!isset($_GET['threadid']) || !is_number($_GET['threadid'])) {
             header("Location: ajax.php?action=forum&type=viewthread&threadid=$ThreadID&postid=$_GET[postid]");
             die();
         } else {
-            print json_encode(array('status' => 'failure'));
+            print json_encode(['status' => 'failure']);
             die();
         }
     } else {
-        print json_encode(array('status' => 'failure'));
+        print json_encode(['status' => 'failure']);
         die();
     }
 } else {
@@ -58,7 +58,7 @@ $ForumID = $ThreadInfo['ForumID'];
 
 // Make sure they're allowed to look at the page
 if (!Forums::check_forumperm($ForumID)) {
-    print json_encode(array('status' => 'failure'));
+    print json_encode(['status' => 'failure']);
     die();
 }
 
@@ -151,7 +151,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
             SELECT Question, Answers, Featured, Closed
             FROM forums_polls
             WHERE TopicID = '$ThreadID'");
-        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, array(1));
+        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
         $Answers = unserialize($Answers);
         $DB->query("
             SELECT Vote, COUNT(UserID)
@@ -171,7 +171,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
                 $Votes[$i] = 0;
             }
         }
-        $Cache->cache_value("polls_$ThreadID", array($Question, $Answers, $Votes, $Featured, $Closed), 0);
+        $Cache->cache_value("polls_$ThreadID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
     }
 
     if (!empty($Votes)) {
@@ -213,11 +213,11 @@ if ($ThreadInfo['NoPoll'] == 0) {
             $Ratio = 0;
             $Percent = 0;
         }
-        $JsonPollAnswers[] = array(
+        $JsonPollAnswers[] = [
             'answer' => $Answer,
             'ratio' => $Ratio,
             'percent' => $Percent
-        );
+        ];
     }
 
     if ($UserResponse !== null || $Closed || $ThreadInfo['IsLocked'] || $LoggedUser['Class'] < $Forums[$ForumID]['MinClassWrite']) {
@@ -247,7 +247,7 @@ foreach ($Thread as $Key => $Post) {
 
 
     $UserInfo = Users::user_info($EditedUserID);
-    $JsonPosts[] = array(
+    $JsonPosts[] = [
         'postId' => (int)$PostID,
         'addedTime' => $AddedTime,
         'bbBody' => $Body,
@@ -255,7 +255,7 @@ foreach ($Thread as $Key => $Post) {
         'editedUserId' => (int)$EditedUserID,
         'editedTime' => $EditedTime,
         'editedUsername' => $UserInfo['Username'],
-        'author' => array(
+        'author' => [
             'authorId' => (int)$AuthorID,
             'authorName' => $Username,
             'paranoia' => $Paranoia,
@@ -265,16 +265,16 @@ foreach ($Thread as $Key => $Post) {
             'avatar' => $Avatar,
             'enabled' => $Enabled === '2' ? false : true,
             'userTitle' => $UserTitle
-        ),
+        ],
 
-    );
+    ];
 }
 
 print
     json_encode(
-        array(
+        [
             'status' => 'success',
-            'response' => array(
+            'response' => [
                 'forumId' => (int)$ForumID,
                 'forumName' => $Forums[$ForumID]['Name'],
                 'threadId' => (int)$ThreadID,
@@ -286,6 +286,6 @@ print
                 'pages' => ceil($ThreadInfo['Posts'] / $PerPage),
                 'poll' => empty($JsonPoll) ? null : $JsonPoll,
                 'posts' => $JsonPosts
-            )
-        )
+            ]
+        ]
     );

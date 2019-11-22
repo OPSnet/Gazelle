@@ -7,7 +7,7 @@
  ** user custom permissions form.                                              **
  ********************************************************************************/
 
-$PermissionsArray = array(
+$PermissionsArray = [
     'site_leech' => 'Can leech (Does this work?).',
     'site_upload' => 'Upload torrent access.',
     'site_vote' => 'Request vote access.',
@@ -100,6 +100,7 @@ $PermissionsArray = array(
     'admin_advanced_user_search' => 'Can access advanced user search.',
     'admin_create_users' => 'Can create users through an administrative form.',
     'admin_donor_log' => 'Can view the donor log.',
+    'admin_manage_stylesheets' => 'Can manage stylesheets.',
     'admin_manage_ipbans' => 'Can manage IP bans.',
     'admin_dnu' => 'Can manage do not upload list.',
     'admin_clear_cache' => 'Can clear cached.',
@@ -111,6 +112,10 @@ $PermissionsArray = array(
     'admin_manage_wiki' => 'Can manage wiki access.',
     'admin_update_geoip' => 'Can update geoIP data.',
     'admin_staffpm_stats' => 'Can view Staff PM stats.',
+    'admin_periodic_task_manage' => 'Can manage periodic tasks.',
+    'admin_periodic_task_view' => 'Can view periodic task logs.',
+    'admin_rate_limit_manage' => 'Can manage rate limiting.',
+    'admin_rate_limit_view' => 'Can view rate limiting.',
     'site_collages_recover' => 'Can recover \'deleted\' collages.',
     'torrents_add_artist' => 'Can add artists to any group.',
     'edit_unknowns' => 'Can edit unknown release information.',
@@ -119,7 +124,7 @@ $PermissionsArray = array(
     'torrents_edit_vanityhouse' => 'Can mark groups as part of Vanity House.',
     'artist_edit_vanityhouse' => 'Can mark artists as part of Vanity House.',
     'site_tag_aliases_read' => 'Can view the list of tag aliases.'
-);
+];
 
 function permissions_form() {
 ?>
@@ -266,6 +271,10 @@ function permissions_form() {
                     display_perm('admin_manage_referrals', 'Can manage referrals');
                     display_perm('admin_manage_payments', 'Can manage payments');
                     display_perm('admin_manage_navigation', 'Can manage navigation links');
+                    display_perm('admin_periodic_task_manage', 'Can manage periodic tasks');
+                    display_perm('admin_periodic_task_view', 'Can view periodic task logs');
+                    display_perm('admin_rate_limit_manage', 'Can manage rate limiting');
+                    display_perm('admin_rate_limit_view', 'Can view rate limiting');
                     display_perm('admin_view_referrals', 'Can view referred users');
                     display_perm('admin_reports', 'Can access reports system');
                     display_perm('admin_bp_history', 'Can view bonus points spent by other users');

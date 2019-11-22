@@ -344,7 +344,7 @@ class Comments {
 
         G::$DB->set_query_id($QueryID);
 
-        return array($NumComments, $CommPage, $Thread, $LastRead);
+        return [$NumComments, $CommPage, $Thread, $LastRead];
     }
 
     /**

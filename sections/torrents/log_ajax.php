@@ -16,7 +16,7 @@ if($DB->record_count() > 0) {
         </td></tr>";
     }
 
-    while ($Log = $DB->next_record(MYSQLI_ASSOC, array('AdjustmentDetails'))) {
+    while ($Log = $DB->next_record(MYSQLI_ASSOC, ['AdjustmentDetails'])) {
         echo "<tr class='log_section'><td>";
         if (check_perms('users_mod')) {
             echo "<a class='brackets' href='torrents.php?action=editlog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Edit Log</a>&nbsp;";

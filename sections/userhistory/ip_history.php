@@ -175,7 +175,7 @@ $Pages = Format::get_pages($Page, $NumResults, IPS_PER_PAGE, 9);
         <div class="linkbox">
 <?php
 if ($UsersOnly) { ?>
-            <a href="userhistory.php?<?=Format::get_url(array('usersonly'))?>" class="brackets">View all IP addresses</a>
+            <a href="userhistory.php?<?=Format::get_url(['usersonly'])?>" class="brackets">View all IP addresses</a>
 <?php
 } else { ?>
             <a href="userhistory.php?<?=Format::get_url()?>&amp;usersonly=1" class="brackets">View IP addresses with users</a>

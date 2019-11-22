@@ -4,15 +4,15 @@ define('COLLAGES_PER_PAGE', 25);
 list($Page, $Limit) = Format::page_limit(COLLAGES_PER_PAGE);
 
 
-$OrderVals = array('Time', 'Name', 'Subscribers', 'Torrents', 'Updated');
-$WayVals = array('Ascending', 'Descending');
-$OrderTable = array('Time' => 'ID', 'Name' => 'c.Name', 'Subscribers' => 'c.Subscribers', 'Torrents' => 'NumTorrents', 'Updated' => 'c.Updated');
-$WayTable = array('Ascending' => 'ASC', 'Descending' => 'DESC');
+$OrderVals = ['Time', 'Name', 'Subscribers', 'Torrents', 'Updated'];
+$WayVals = ['Ascending', 'Descending'];
+$OrderTable = ['Time' => 'ID', 'Name' => 'c.Name', 'Subscribers' => 'c.Subscribers', 'Torrents' => 'NumTorrents', 'Updated' => 'c.Updated'];
+$WayTable = ['Ascending' => 'ASC', 'Descending' => 'DESC'];
 
 // Are we searching in bodies, or just names?
 if (!empty($_GET['type'])) {
     $Type = $_GET['type'];
-    if (!in_array($Type, array('c.name', 'description'))) {
+    if (!in_array($Type, ['c.name', 'description'])) {
         $Type = 'c.name';
     }
 } else {
@@ -42,7 +42,7 @@ if (!empty($_GET['cats'])) {
     }
     $Categories = array_keys($Categories);
 } else {
-    $Categories = array(1, 2, 3, 4, 5, 6, 7);
+    $Categories = [1, 2, 3, 4, 5, 6, 7];
 }
 
 // Ordering

@@ -28,7 +28,7 @@ class Misc {
      * @return the string with all banned characters removed.
      */
     public static function file_string($EscapeStr) {
-        return str_replace(array('"', '*', '/', ':', '<', '>', '?', '\\', '|'), '', $EscapeStr);
+        return str_replace(['"', '*', '/', ':', '<', '>', '?', '\\', '|'], '', $EscapeStr);
     }
 
 
@@ -73,7 +73,7 @@ class Misc {
                     VALUES
                         ('$FromID', '$ConvID', '0','1','".sqltime()."', '".sqltime()."', '0')");
             }
-            $ToID = array($ToID);
+            $ToID = [$ToID];
         } else {
             // Update the pre-existing conversations.
             G::$DB->query("
@@ -215,8 +215,8 @@ class Misc {
                 WHERE ID = ?', $TopicID);
             list($IsLocked, $IsSticky, $NumPosts) = G::$DB->next_record();
             $Part1 = array_slice($Forum, 0, $Stickies, true); //Stickys
-            $Part2 = array(
-                $TopicID => array(
+            $Part2 = [
+                $TopicID => [
                     'ID' => $TopicID,
                     'Title' => $Title,
                     'AuthorID' => $AuthorID,
@@ -226,8 +226,8 @@ class Misc {
                     'LastPostID' => $PostID,
                     'LastPostTime' => sqltime(),
                     'LastPostAuthorID' => $AuthorID,
-                    )
-                ); //Bumped thread
+                    ]
+                ]; //Bumped thread
             $Part3 = array_slice($Forum, $Stickies, TOPICS_PER_PAGE, true); //Rest of page
             if ($Stickies > 0) {
                 $Part1 = array_slice($Forum, 0, $Stickies, true); //Stickies
@@ -243,12 +243,12 @@ class Misc {
                 $Part3 = [];
             }
             $Forum = $Part1 + $Part2 + $Part3;
-            G::$Cache->cache_value("forums_$ForumID", array($Forum, '', 0, $Stickies), 0);
+            G::$Cache->cache_value("forums_$ForumID", [$Forum, '', 0, $Stickies], 0);
         }
 
         //Update the forum root
         G::$Cache->begin_transaction('forums_list');
-        $UpdateArray = array(
+        $UpdateArray = [
             'NumPosts' => '+1',
             'NumTopics' => '+1',
             'LastPostID' => $PostID,
@@ -258,7 +258,7 @@ class Misc {
             'Title' => $Title,
             'IsLocked' => $ThreadInfo['IsLocked'],
             'IsSticky' => $ThreadInfo['IsSticky']
-            );
+            ];
 
         $UpdateArray['NumTopics'] = '+1';
 
@@ -267,7 +267,7 @@ class Misc {
 
         $CatalogueID = floor((POSTS_PER_PAGE * ceil($Posts / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
         G::$Cache->begin_transaction('thread_'.$TopicID.'_catalogue_'.$CatalogueID);
-        $Post = array(
+        $Post = [
             'ID' => $PostID,
             'AuthorID' => G::$LoggedUser['ID'],
             'AddedTime' => sqltime(),
@@ -275,12 +275,12 @@ class Misc {
             'EditedUserID' => 0,
             'EditedTime' => '0000-00-00 00:00:00',
             'Username' => ''
-            );
+            ];
         G::$Cache->insert('', $Post);
         G::$Cache->commit_transaction(0);
 
         G::$Cache->begin_transaction('thread_'.$TopicID.'_info');
-        G::$Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $AuthorID));
+        G::$Cache->update_row(false, ['Posts' => '+1', 'LastPostAuthorID' => $AuthorID]);
         G::$Cache->commit_transaction(0);
 
         G::$DB->set_query_id($QueryID);

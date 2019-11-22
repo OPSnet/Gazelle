@@ -15,19 +15,20 @@ if (isset($_GET['userid']) && check_perms('users_view_invites')) {
 
 list($UserID, $Username, $PermissionID) = array_values(Users::user_info($UserID));
 
-$DB->query("
+$DB->prepared_query('
     SELECT InviteKey, Email, Expires
     FROM invites
-    WHERE InviterID = '$UserID'
-    ORDER BY Expires");
-$Pending =     $DB->to_array();
-
-$OrderWays = array('username', 'email',    'joined', 'lastseen', 'uploaded', 'downloaded', 'ratio');
+    WHERE InviterID = ?
+    ORDER BY Expires
+    ', $UserID
+);
+$Pending = $DB->to_array();
+$OrderWays = ['username', 'email', 'joined', 'lastseen', 'uploaded', 'downloaded', 'ratio'];
 
 if (empty($_GET['order'])) {
-    $CurrentOrder = 'id';
-    $CurrentSort = 'asc';
-    $NewSort = 'desc';
+    $CurrentOrder = 'joined';
+    $CurrentSort = 'desc';
+    $NewSort = 'asc';
 } else {
     if (in_array($_GET['order'], $OrderWays)) {
         $CurrentOrder = $_GET['order'];
@@ -69,9 +70,9 @@ switch ($CurrentOrder) {
         break;
 }
 
-$CurrentURL = Format::get_url(array('action', 'order', 'sort'));
+$CurrentURL = Format::get_url(['action', 'order', 'sort']);
 
-$DB->query("
+$DB->prepared_query("
     SELECT
         um.ID,
         um.Email,
@@ -82,9 +83,10 @@ $DB->query("
     FROM users_main AS um
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
-    WHERE ui.Inviter = '$UserID'
-    ORDER BY $OrderBy $CurrentSort");
-
+    WHERE ui.Inviter = ?
+    ORDER BY $OrderBy $CurrentSort
+    ", $UserID
+);
 $Invited = $DB->to_array();
 
 View::show_header('Invites');
@@ -112,12 +114,13 @@ View::show_header('Invites');
         -Cannot 'invite always' and the user limit is reached
 */
 
-$DB->query("
+$DB->prepared_query('
     SELECT can_leech
     FROM users_main
-    WHERE ID = $UserID");
+    WHERE ID = ?
+    ', $UserID
+);
 list($CanLeech) = $DB->next_record();
-
 
     if (!$Sneaky
         && !$LoggedUser['RatioWatch']
@@ -143,16 +146,14 @@ list($CanLeech) = $DB->next_record();
                     <input type="submit" value="Invite" />
                 </div>
             </div>
-<?php
-    if (check_perms('users_invite_notes')) { ?>
+<?php if (check_perms('users_invite_notes')) { ?>
             <div class="field_div">
                 <div class="label">Staff Note:</div>
                 <div class="input">
                     <input type="text" name="reason" size="60" maxlength="255" />
                 </div>
             </div>
-<?php
-    } ?>
+<?php } ?>
         </form>
     </div>
 

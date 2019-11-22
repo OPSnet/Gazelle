@@ -1,9 +1,9 @@
 <?php
 
 class SiteHistory {
-    private static $Categories = array(1 => "Code", "Event", "Milestone", "Policy", "Release", "Staff Change");
-    private static $SubCategories = array(1 => "Announcement", "Blog Post", "Change Log", "Forum Post", "Wiki", "Other", "External Source");
-    private static $Tags = array(
+    private static $Categories = [1 => "Code", "Event", "Milestone", "Policy", "Release", "Staff Change"];
+    private static $SubCategories = [1 => "Announcement", "Blog Post", "Change Log", "Forum Post", "Wiki", "Other", "External Source"];
+    private static $Tags = [
                                 "api",
                                 "celebration",
                                 "class.primary",
@@ -62,7 +62,7 @@ class SiteHistory {
                                 "vanity.house",
                                 "voting",
                                 "whitelist",
-                                "wiki");
+                                "wiki"];
 
     public static function get_months() {
         $Results = G::$Cache->get_value("site_history_months");

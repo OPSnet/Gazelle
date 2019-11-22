@@ -1,6 +1,216 @@
+<?php View::show_header('Detailed User Statistics'); ?>
+
+<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+
+<?php
+if (!$flow = $Cache->get_value('stat-user-timeline')) {
+    $flow = [];
+    /* Mysql does not implement a full outer join, so if there is a month with
+     * no joiners, any banned users in that same month will not appear.
+     * Mysql does not implement sequence generators as in Postgres, so if there
+     * is a month without any joiners or banned, it will not appear at all.
+     * Deal with it. - Spine
+     */
+    $DB->query("
+        SELECT J.Mon, J.n as Joined, coalesce(D.n, 0) as Disabled
+        FROM (
+            SELECT DATE_FORMAT(JoinDate,'%Y%m') as M, DATE_FORMAT(JoinDate, '%b %Y') AS Mon, count(*) AS n
+            FROM users_info
+            WHERE JoinDate BETWEEN last_day(now()) - INTERVAL 13 MONTH + INTERVAL 1 DAY
+                AND last_day(now()) - INTERVAL 1 MONTH
+            GROUP BY M) J
+        LEFT JOIN (
+            SELECT DATE_FORMAT(BanDate, '%Y%m') AS M, DATE_FORMAT(BanDate, '%b %Y') AS Mon, count(*) AS n
+            FROM users_info
+            WHERE BanDate BETWEEN last_day(now()) - INTERVAL 13 MONTH + INTERVAL 1 DAY
+                AND last_day(now()) - INTERVAL 1 MONTH
+            GROUP By M
+        ) D USING (M)
+        ORDER BY J.M;
+    ");
+    $flow = $DB->to_array('Mon');
+    $Cache->cache_value('stat-user-timeline', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
+}
+?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('user-flow', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Flow',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    xAxis: {
+        categories: [<?= implode(',', array_map(function ($x) { return "'$x'"; }, array_keys($flow))) ?>],
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    plotOptions: {
+        column: { stacking: 'normal' }
+    },
+    series: [
+        { name: 'Enabled',  data: [<?= implode(',', array_map(function ($x) use ($flow) { return  $flow[$x][1]; }, array_keys($flow))) ?>] },
+        { name: 'Disabled', data: [<?= implode(',', array_map(function ($x) use ($flow) { return -$flow[$x][2]; }, array_keys($flow))) ?>] },
+    ]
+})});
+</script>
+
+<?php
+if (!$ClassDistribution = $Cache->get_value('stat-user-class')) {
+    $DB->query("
+        SELECT p.Name, count(*) AS Users
+        FROM users_main AS m
+        INNER JOIN permissions AS p ON (m.PermissionID = p.ID)
+        WHERE m.Enabled = '1'
+        GROUP BY p.Name
+        ORDER BY Users DESC
+    ");
+    $ClassDistribution = $DB->to_array('Name');
+    $Cache->cache_value('stat-user-class', $ClassDistribution, 86400);
+}
+?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('user-class', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Classes',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Classes',
+        data: [
+<?php foreach ($ClassDistribution as $label => $value) { ?>
+            { name: '<?= $value[0] ?>', y: <?= $value[1] ?> },
+<?php } ?>
+        ]
+    }],
+})});
+</script>
+
+<?php
+if (!$PlatformDistribution = $Cache->get_value('stat-user-platform')) {
+    $DB->query("
+        SELECT OperatingSystem, count(*) AS Users
+        FROM users_sessions
+        GROUP BY OperatingSystem
+        ORDER BY Users DESC
+    ");
+    $PlatformDistribution = $DB->to_array();
+    $Cache->cache_value('stat-user-platform', $PlatformDistribution, 86400);
+} 
+?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('user-platform', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Platforms',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Platforms',
+        data: [
+<?php foreach ($PlatformDistribution as $label => $value) { ?>
+            { name: '<?= $value[0] ?>', y: <?= $value[1] ?> },
+<?php } ?>
+        ]
+    }],
+})});
+</script>
+
+<?php
+if (!$Browsers = $Cache->get_value('stat-user-browser')) {
+    $DB->query("
+        SELECT Browser, count(*) AS Users
+        FROM users_sessions
+        GROUP BY Browser
+        ORDER BY Users DESC
+    ");
+    $Browsers = $DB->to_array();
+    $Cache->cache_value('stat-user-browser', $Browsers, 86400);
+}
+?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('user-browser', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'Browsers',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Browsers',
+        data: [
+<?php foreach ($Browsers as $label => $value) { ?>
+            { name: '<?= $value[0] ?>', y: <?= $value[1] ?> },
+<?php } ?>
+        ]
+    }],
+})});
+</script>
+
 <?php
 if (!list($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements) = $Cache->get_value('geodistribution')) {
-    include_once(SERVER_ROOT.'/classes/charts.class.php');
     $DB->query('
         SELECT Code, Users
         FROM users_geodistribution');
@@ -16,7 +226,7 @@ if (!list($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrem
     $CountryMax = ceil(log(Max(1, $Data[0][1])) / log(2)) + 1;
     $CountryMin = floor(log(Max(1, $Data[$CountryMinThreshold][1])) / log(2));
 
-    $CountryRegions = array('RS' => array('RS-KM')); // Count Kosovo as Serbia as it doesn't have a TLD
+    $CountryRegions = ['RS' => ['RS-KM']]; // Count Kosovo as Serbia as it doesn't have a TLD
     foreach ($Data as $Key => $Item) {
         list($Country, $UserCount) = $Item;
         $Countries[] = $Country;
@@ -35,155 +245,24 @@ if (!list($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrem
     for ($i = $CountryMin; $i <= $CountryMax; $i++) {
         $LogIncrements[] = Format::human_format(pow(2, $i));
     }
-    $Cache->cache_value('geodistribution', array($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements), 0);
+    $Cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 0);
 }
-
-if (!$ClassDistribution = $Cache->get_value('class_distribution')) {
-    include_once(SERVER_ROOT.'/classes/charts.class.php');
-    $DB->query("
-        SELECT p.Name, COUNT(m.ID) AS Users
-        FROM users_main AS m
-            JOIN permissions AS p ON m.PermissionID = p.ID
-        WHERE m.Enabled = '1'
-        GROUP BY p.Name
-        ORDER BY Users DESC");
-    $ClassSizes = $DB->to_array();
-    $Pie = new PIE_CHART(750, 400, array('Other' => 1, 'Percentage' => 1));
-    foreach ($ClassSizes as $ClassSize) {
-        list($Label, $Users) = $ClassSize;
-        $Pie->add($Label, $Users);
-    }
-    $Pie->transparent();
-    $Pie->color('FF33CC');
-    $Pie->generate();
-    $ClassDistribution = $Pie->url();
-    $Cache->cache_value('class_distribution', $ClassDistribution, 3600 * 24 * 14);
-}
-if (!$PlatformDistribution = $Cache->get_value('platform_distribution')) {
-    include_once(SERVER_ROOT.'/classes/charts.class.php');
-
-    $DB->query("
-        SELECT OperatingSystem, COUNT(UserID) AS Users
-        FROM users_sessions
-        GROUP BY OperatingSystem
-        ORDER BY Users DESC");
-
-    $Platforms = $DB->to_array();
-    $Pie = new PIE_CHART(750, 400, array('Other' => 1, 'Percentage' => 1));
-    foreach ($Platforms as $Platform) {
-        list($Label, $Users) = $Platform;
-        $Pie->add($Label, $Users);
-    }
-    $Pie->transparent();
-    $Pie->color('8A00B8');
-    $Pie->generate();
-    $PlatformDistribution = $Pie->url();
-    $Cache->cache_value('platform_distribution', $PlatformDistribution, 3600 * 24 * 14);
-}
-
-if (!$BrowserDistribution = $Cache->get_value('browser_distribution')) {
-    include_once(SERVER_ROOT.'/classes/charts.class.php');
-
-    $DB->query("
-        SELECT Browser, COUNT(UserID) AS Users
-        FROM users_sessions
-        GROUP BY Browser
-        ORDER BY Users DESC");
-
-    $Browsers = $DB->to_array();
-    $Pie = new PIE_CHART(750, 400, array('Other' => 1, 'Percentage' => 1));
-    foreach ($Browsers as $Browser) {
-        list($Label, $Users) = $Browser;
-        $Pie->add($Label, $Users);
-    }
-    $Pie->transparent();
-    $Pie->color('008AB8');
-    $Pie->generate();
-    $BrowserDistribution = $Pie->url();
-    $Cache->cache_value('browser_distribution', $BrowserDistribution, 3600 * 24 * 14);
-}
-
-
-//Timeline generation
-if (!list($Labels, $InFlow, $OutFlow, $Max) = $Cache->get_value('users_timeline')) {
-    $DB->query("
-        SELECT DATE_FORMAT(JoinDate,'%b \\'%y') AS Month, COUNT(UserID)
-        FROM users_info
-        GROUP BY Month
-        ORDER BY JoinDate DESC
-        LIMIT 1, 12");
-    $TimelineIn = array_reverse($DB->to_array());
-    $DB->query("
-        SELECT DATE_FORMAT(BanDate,'%b \\'%y') AS Month, COUNT(UserID)
-        FROM users_info
-        GROUP BY Month
-        ORDER BY BanDate DESC
-        LIMIT 1, 12");
-    $TimelineOut = array_reverse($DB->to_array());
-    foreach ($TimelineIn as $Month) {
-        list($Label, $Amount) = $Month;
-        if ($Amount > $Max) {
-            $Max = $Amount;
-        }
-    }
-    foreach ($TimelineOut as $Month) {
-        list($Label, $Amount) = $Month;
-        if ($Amount > $Max) {
-            $Max = $Amount;
-        }
-    }
-
-    $Labels = [];
-    foreach ($TimelineIn as $Month) {
-        list($Label, $Amount) = $Month;
-        $Labels[] = $Label;
-        $InFlow[] = number_format(($Amount / $Max) * 100, 4);
-    }
-    foreach ($TimelineOut as $Month) {
-        list($Label, $Amount) = $Month;
-        $OutFlow[] = number_format(($Amount / $Max) * 100, 4);
-    }
-    $Cache->cache_value('users_timeline', array($Labels, $InFlow, $OutFlow, $Max), mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
-}
-//End timeline generation
-
-View::show_header('Detailed User Statistics');
 ?>
+
 <div class="linkbox">
     <a href="stats.php?action=torrents" class="brackets">Torrent Stats</a>
 </div>
-<h1 id="User_Flow"><a href="#User_Flow">User Flow</a></h1>
+
 <div class="box pad center">
-    <img src="https://chart.googleapis.com/chart?cht=lc&amp;chs=880x160&amp;chco=000D99,99000D&amp;chg=0,-1,1,1&amp;chxt=y,x&amp;chxs=0,h&amp;chxl=1:|<?=implode('|', $Labels)?>&amp;chxr=0,0,<?=$Max?>&amp;chd=t:<?=implode(',', $InFlow)?>|<?=implode(',', $OutFlow)?>&amp;chls=2,4,0&amp;chdl=New+Registrations|Disabled+Users&amp;chf=bg,s,FFFFFF00" alt="User Flow Chart" />
-</div>
-<br />
-<h1 id="User_Classes"><a href="#User_Classes">User Classes</a></h1>
-<div class="box pad center">
-    <img src="<?=$ClassDistribution?>" alt="User Class Distribution" />
-</div>
-<br />
-<h1 id="User_Platforms"><a href="#User_Platforms">User Platforms</a></h1>
-<div class="box pad center">
-    <img src="<?=$PlatformDistribution?>" alt="User Platform Distribution" />
-</div>
-<br />
-<h1 id="User_Browsers"><a href="#User_Browsers">User Browsers</a></h1>
-<div class="box pad center">
-    <img src="<?=$BrowserDistribution?>" alt="User Browsers Market Share" />
-</div>
-<br />
-<h1 id="Geo_Dist_Map"><a href="#Geo_Dist_Map">Geographical Distribution Map</a></h1>
-<div class="box center">
-    <img src="https://chart.googleapis.com/chart?cht=map:fixed=-55,-180,73,180&amp;chs=440x220&amp;chd=t:<?=implode(',', $Rank)?>&amp;chco=FFFFFF,EDEDED,1F0066&amp;chld=<?=implode('|', $Countries)?>&amp;chf=bg,s,CCD6FF" alt="Geographical Distribution Map - Worldwide" />
-    <img src="https://chart.googleapis.com/chart?cht=map:fixed=37,-26,65,67&amp;chs=440x220&amp;chs=440x220&amp;chd=t:<?=implode(',', $Rank)?>&amp;chco=FFFFFF,EDEDED,1F0066&amp;chld=<?=implode('|', $Countries)?>&amp;chf=bg,s,CCD6FF" alt="Geographical Distribution Map - Europe" />
+    <figure class="highcharts-figure"><div id="user-flow"></div></figure>
     <br />
-    <img src="https://chart.googleapis.com/chart?cht=map:fixed=-46,-132,24,21.5&amp;chs=440x220&amp;chd=t:<?=implode(',', $Rank)?>&amp;chco=FFFFFF,EDEDED,1F0066&amp;chld=<?=implode('|', $Countries)?>&amp;chf=bg,s,CCD6FF" alt="Geographical Distribution Map - South America" />
-    <img src="https://chart.googleapis.com/chart?cht=map:fixed=-11,22,50,160&amp;chs=440x220&amp;chd=t:<?=implode(',', $Rank)?>&amp;chco=FFFFFF,EDEDED,1F0066&amp;chld=<?=implode('|', $Countries)?>&amp;chf=bg,s,CCD6FF" alt="Geographical Distribution Map - Asia" />
+    <figure class="highcharts-figure"><div id="user-class"></div></figure>
     <br />
-    <img src="https://chart.googleapis.com/chart?cht=map:fixed=-36,-57,37,100&amp;chs=440x220&amp;chd=t:<?=implode(',', $Rank)?>&amp;chco=FFFFFF,EDEDED,1F0066&amp;chld=<?=implode('|', $Countries)?>&amp;chf=bg,s,CCD6FF" alt="Geographical Distribution Map - Africa" />
-    <img src="https://chart.googleapis.com/chart?cht=map:fixed=14.8,15,45,86&amp;chs=440x220&amp;chd=t:<?=implode(',', $Rank)?>&amp;chco=FFFFFF,EDEDED,1F0066&amp;chld=<?=implode('|', $Countries)?>&amp;chf=bg,s,CCD6FF" alt="Geographical Distribution Map - Middle East" />
+    <figure class="highcharts-figure"><div id="user-platform"></div></figure>
     <br />
-    <img src="https://chart.googleapis.com/chart?chxt=y,x&amp;chg=0,-1,1,1&amp;chxs=0,h&amp;cht=bvs&amp;chco=76A4FB&amp;chs=880x300&amp;chd=t:<?=implode(',', array_slice($CountryUsers, 0, 31))?>&amp;chxl=1:|<?=implode('|', array_slice($Countries, 0, 31))?>|0:|<?=implode('|', $LogIncrements)?>&amp;chf=bg,s,FFFFFF00" alt="Number of users by country" />
+    <figure class="highcharts-figure"><div id="user-browser"></div></figure>
+    <br />
+    <figure class="highcharts-figure"><div id="user-world"></div></figure>
 </div>
 <?php
 View::show_footer();

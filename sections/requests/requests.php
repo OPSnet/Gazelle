@@ -3,14 +3,14 @@
 $SphQL = new SphinxqlQuery();
 $SphQL->select('id, votes, bounty')->from('requests, requests_delta');
 
-$SortOrders = array(
+$SortOrders = [
     'votes' => 'votes',
     'bounty' => 'bounty',
     'lastvote' => 'lastvote',
     'filled' => 'timefilled',
     'year' => 'year',
     'created' => 'timeadded',
-    'random' => false);
+    'random' => false];
 
 if (empty($_GET['order']) || !isset($SortOrders[$_GET['order']])) {
     $_GET['order'] = 'created';
@@ -50,9 +50,6 @@ $BookmarkView = false;
 
 if (empty($_GET['type'])) {
     $Title = 'Requests';
-    if ($Submitted && !empty($_GET['showall'])) {
-        $SphQL->where('visible', 1);
-    }
 } else {
     // Show filled defaults to on only for viewing types
     if (!$Submitted) {
@@ -103,6 +100,10 @@ if (empty($_GET['type'])) {
         default:
             error(404);
     }
+}
+
+if ($Submitted && empty($_GET['showall'])) {
+    $SphQL->where('visible', 1);
 }
 
 // We don't want to show filled by default on plain requests.php,
@@ -183,7 +184,7 @@ if (!empty($_GET['search'])) {
     $SearchString = trim($_GET['search']);
 
     if ($SearchString !== '') {
-        $SearchWords = array('include' => [], 'exclude' => []);
+        $SearchWords = ['include' => [], 'exclude' => []];
         $Words = explode(' ', $SearchString);
         foreach ($Words as $Word) {
             $Word = trim($Word);
@@ -215,7 +216,7 @@ if (!isset($_GET['tags_type']) || $_GET['tags_type'] === '1') {
 }
 
 if (!empty($_GET['tags'])) {
-    $SearchTags = array('include' => [], 'exclude' => []);
+    $SearchTags = ['include' => [], 'exclude' => []];
     $Tags = explode(',', str_replace('.', '_', $_GET['tags']));
     foreach ($Tags as $Tag) {
         $Tag = trim($Tag);
@@ -333,7 +334,7 @@ if ($NumResults > 0) {
     }
 }
 
-$CurrentURL = Format::get_url(array('order', 'sort', 'page'));
+$CurrentURL = Format::get_url(['order', 'sort', 'page']);
 View::show_header($Title, 'requests');
 
 ?>

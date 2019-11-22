@@ -20,6 +20,7 @@
     </rule>
     <rule ref="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
     <rule ref="Generic.WhiteSpace.DisallowTabIndent.NonIndentTabsUsed" />
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
     <rule ref="Generic.PHP.ForbiddenFunctions">
         <properties>
             <property name="forbiddenFunctions" type="array" value="db_string=>null,db_array=>null" />

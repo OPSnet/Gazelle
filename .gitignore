@@ -12,6 +12,8 @@ static/local/
 static/similar/
 !static/similar/.gitkeep
 
+preview.html
+
 static/stylespreview/
 !static/stylespreview/.gitkeep
 
@@ -36,6 +38,8 @@ report/
 .vagrant/machines/
 .vagrant/rgloader/
 *.swp
+*.bak
+*~
 
 .docker/data
 cache/

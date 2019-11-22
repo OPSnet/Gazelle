@@ -1,5 +1,5 @@
 <?php
-class FEED {
+class Feed {
     var $UseSSL = true; // If we're using SSL for blog and news links
 
     function open_feed() {
@@ -54,7 +54,7 @@ class FEED {
             $Entries = [];
         } else {
             foreach ($Entries as $Item) {
-                echo str_replace(array('[[PASSKEY]]', '[[AUTHKEY]]'), array(display_str($PassKey), display_str($AuthKey)), $Item);
+                echo str_replace(['[[PASSKEY]]', '[[AUTHKEY]]'], [display_str($PassKey), display_str($AuthKey)], $Item);
             }
         }
     }

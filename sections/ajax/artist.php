@@ -1,12 +1,6 @@
 <?php
 //For sorting tags
-function compare($X, $Y) {
-    return($Y['count'] - $X['count']);
-}
-
-if (!empty($_GET['artistreleases'])) {
-    $OnlyArtistReleases = true;
-}
+$OnlyArtistReleases = !empty($_GET['artistreleases']);
 
 if ($_GET['id'] && $_GET['artistname']) {
     json_die("failure", "bad parameters");
@@ -19,11 +13,13 @@ if ($ArtistID && !is_number($ArtistID)) {
 
 if (empty($ArtistID)) {
     if (!empty($_GET['artistname'])) {
-        $Name = db_string(trim($_GET['artistname']));
-        $DB->query("
+        $DB->prepared_query('
             SELECT ArtistID
             FROM artists_alias
-            WHERE Name LIKE '$Name'");
+            WHERE Name LIKE ?
+            LIMIT 1
+            ', trim($_GET['artistname'])
+        );
         if (!(list($ArtistID) = $DB->next_record(MYSQLI_NUM, false))) {
             json_die("failure");
         }
@@ -31,90 +27,75 @@ if (empty($ArtistID)) {
     }
 }
 
+
 if (!empty($_GET['revisionid'])) { // if they're viewing an old revision
     $RevisionID = $_GET['revisionid'];
     if (!is_number($RevisionID)) {
-        error(0);
+        json_die("failure", "bad parameters");
     }
-    $Data = $Cache->get_value("artist_$ArtistID"."_revision_$RevisionID");
 } else { // viewing the live version
-    $Data = $Cache->get_value("artist_$ArtistID");
     $RevisionID = false;
 }
-if ($Data) {
-    list($K, list($Name, $Image, $Body, $NumSimilar, $SimilarArray, , , $VanityHouseArtist)) = each($Data);
-} else {
-    if ($RevisionID) {
-        $sql = "
-            SELECT
-                a.Name,
-                wiki.Image,
-                wiki.body,
-                a.VanityHouse
-            FROM wiki_artists AS wiki
-                LEFT JOIN artists_group AS a ON wiki.RevisionID = a.RevisionID
-            WHERE wiki.RevisionID = '$RevisionID' ";
-    } else {
-        $sql = "
-            SELECT
-                a.Name,
-                wiki.Image,
-                wiki.body,
-                a.VanityHouse
-            FROM artists_group AS a
-                LEFT JOIN wiki_artists AS wiki ON wiki.RevisionID = a.RevisionID
-            WHERE a.ArtistID = '$ArtistID' ";
-    }
-    $sql .= " GROUP BY a.ArtistID";
-    $DB->query($sql);
 
+$Artist = new \Gazelle\Artist($DB, $Cache, $ArtistID, $Revision);
+$cacheKey = $Artist->cacheKey();
+$Data = $Cache->get_value($cacheKey);
+if ($Data) {
+    list($Name, $Image, $Body, $VanityHouseArtist, $SimilarArray) = $Data;
+} else {
+    $sql = 'SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse
+        FROM artists_group AS ag
+        LEFT JOIN wiki_artists AS wa USING (RevisionID)
+        WHERE ';
+    if ($RevisionID) {
+        $sql .= 'wa.RevisionID = ?';
+        $queryId = $RevisionID;
+    } else {
+        $sql .= 'ag.ArtistID = ?';
+        $queryId = $ArtistID;
+    }
+
+    $DB->prepared_query($sql, $queryId);
     if (!$DB->has_results()) {
         json_die("failure");
     }
+    list($Name, $Image, $Body, $VanityHouseArtist)
+        = $DB->next_record(MYSQLI_NUM);
 
-    list($Name, $Image, $Body, $VanityHouseArtist) = $DB->next_record(MYSQLI_NUM, array(0));
+    $DB->prepared_query('
+        SELECT
+            s2.ArtistID,
+            a.Name,
+            ass.Score,
+            ass.SimilarID
+        FROM artists_similar AS s1
+        INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
+        INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
+        INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+        WHERE s1.ArtistID = ?
+        ORDER BY ass.Score DESC
+        LIMIT 30
+        ', $ArtistID
+    );
+    $SimilarArray = $DB->to_array();
+    $Cache->cache_value($cacheKey,
+        [$Name, $Image, $Body, $VanityHouseArtist, $SimilarArray], 3600);
 }
 
 // Requests
-$Requests = [];
-if (empty($LoggedUser['DisableRequests'])) {
-    $Requests = $Cache->get_value("artists_requests_$ArtistID");
-    if (!is_array($Requests)) {
-        $DB->query("
-            SELECT
-                r.ID,
-                r.CategoryID,
-                r.Title,
-                r.Year,
-                r.TimeAdded,
-                COUNT(rv.UserID) AS Votes,
-                SUM(rv.Bounty) AS Bounty
-            FROM requests AS r
-                LEFT JOIN requests_votes AS rv ON rv.RequestID = r.ID
-                LEFT JOIN requests_artists AS ra ON r.ID = ra.RequestID
-            WHERE ra.ArtistID = $ArtistID
-                AND r.TorrentID = 0
-            GROUP BY r.ID
-            ORDER BY Votes DESC");
-
-        if ($DB->has_results()) {
-            $Requests = $DB->to_array('ID', MYSQLI_ASSOC, false);
-        } else {
-            $Requests = [];
-        }
-        $Cache->cache_value("artists_requests_$ArtistID", $Requests);
-    }
-}
+$Requests = $LoggedUser['DisableRequests'] ? [] : $Artist->requests();
 $NumRequests = count($Requests);
 
 if (($Importances = $Cache->get_value("artist_groups_$ArtistID")) === false) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             DISTINCTROW ta.GroupID, ta.Importance, tg.VanityHouse, tg.Year
         FROM torrents_artists AS ta
-            JOIN torrents_group AS tg ON tg.ID = ta.GroupID
-        WHERE ta.ArtistID = '$ArtistID'
-        ORDER BY tg.Year DESC, tg.Name DESC");
+        INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
+        WHERE ta.ArtistID = ?
+        ORDER BY tg.Year DESC, tg.Name DESC
+        ', $ArtistID
+    );
     $GroupIDs = $DB->collect('GroupID');
     $Importances = $DB->to_array(false, MYSQLI_BOTH, false);
     $Cache->cache_value("artist_groups_$ArtistID", $Importances, 0);
@@ -178,7 +159,10 @@ foreach ($GroupIDs as $GroupID) {
         continue;
     }
     $Group = $TorrentList[$GroupID];
-    extract(Torrents::array_group($Group));
+
+    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $Artists = $Group['Artists'];
+    $ExtendedArtists = $Group['ExtendedArtists'];
 
     foreach ($Artists as &$Artist) {
         $Artist['id'] = (int)$Artist['id'];
@@ -193,18 +177,19 @@ foreach ($GroupIDs as $GroupID) {
     }
 
     $Found = Misc::search_array($Artists, 'id', $ArtistID);
-    if (isset($OnlyArtistReleases) && empty($Found)) {
+    if ($OnlyArtistReleases && empty($Found)) {
         continue;
     }
 
+    // $GroupVanityHouse = $Group['VanityHouse'];
     $GroupVanityHouse = $Importances[$GroupID]['VanityHouse'];
 
-    $TagList = explode(' ',str_replace('_', '.', $TagList));
+    $TagList = explode(' ',str_replace('_', '.', $Group['TagList']));
 
     // $Tags array is for the sidebar on the right
     foreach ($TagList as $Tag) {
         if (!isset($Tags[$Tag])) {
-            $Tags[$Tag] = array('name' => $Tag, 'count' => 1);
+            $Tags[$Tag] = ['name' => $Tag, 'count' => 1];
         } else {
             $Tags[$Tag]['count']++;
         }
@@ -216,7 +201,7 @@ foreach ($GroupIDs as $GroupID) {
         $NumLeechers += $Torrent['Leechers'];
         $NumSnatches += $Torrent['Snatched'];
 
-        $InnerTorrents[] = array(
+        $InnerTorrents[] = [
             'id' => (int)$Torrent['ID'],
             'groupId' => (int)$Torrent['GroupID'],
             'media' => $Torrent['Media'],
@@ -238,68 +223,40 @@ foreach ($GroupIDs as $GroupID) {
             'snatched' => (int)$Torrent['Snatched'],
             'time' => $Torrent['Time'],
             'hasFile' => (int)$Torrent['HasFile']
-        );
+        ];
     }
-    $JsonTorrents[] = array(
+    $JsonTorrents[] = [
         'groupId' => (int)$GroupID,
-        'groupName' => $GroupName,
-        'groupYear' => (int)$GroupYear,
-        'groupRecordLabel' => $GroupRecordLabel,
-        'groupCatalogueNumber' => $GroupCatalogueNumber,
-        'groupCategoryID' => $GroupCategoryID,
+        'groupName' => $Group['Name'],
+        'groupYear' => (int)$Group['Year'],
+        'groupRecordLabel' => $Group['RecordLabel'],
+        'groupCatalogueNumber' => $Group['CatalogueNumber'],
+        'groupCategoryID' => $Group['CategoryID'],
         'tags' => $TagList,
-        'releaseType' => (int)$ReleaseType,
-        'wikiImage' => $WikiImage,
+        'releaseType' => (int)$Group['ReleaseType'],
+        'wikiImage' => $Group['WikiImage'],
         'groupVanityHouse' => $GroupVanityHouse == 1,
         'hasBookmarked' => Bookmarks::has_bookmarked('torrent', $GroupID),
         'artists' => $Artists,
         'extendedArtists' => $ExtendedArtists,
         'torrent' => $InnerTorrents,
 
-    );
+    ];
 }
 
 $JsonSimilar = [];
-if (empty($SimilarArray)) {
-    $DB->query("
-        SELECT
-            s2.ArtistID,
-            a.Name,
-            ass.Score,
-            ass.SimilarID
-        FROM artists_similar AS s1
-            JOIN artists_similar AS s2 ON s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID
-            JOIN artists_similar_scores AS ass ON ass.SimilarID = s1.SimilarID
-            JOIN artists_group AS a ON a.ArtistID = s2.ArtistID
-        WHERE s1.ArtistID = '$ArtistID'
-        ORDER BY ass.Score DESC
-        LIMIT 30
-    ");
-    $SimilarArray = $DB->to_array();
-    foreach ($SimilarArray as $Similar) {
-        $JsonSimilar[] = array(
-            'artistId' => (int)$Similar['ArtistID'],
-            'name' => $Similar['Name'],
-            'score' => (int)$Similar['Score'],
-            'similarId' => (int)$Similar['SimilarID']
-        );
-    }
-    $NumSimilar = count($SimilarArray);
-} else {
-    //If data already exists, use it
-    foreach ($SimilarArray as $Similar) {
-        $JsonSimilar[] = array(
-            'artistId' => (int)$Similar['ArtistID'],
-            'name' => $Similar['Name'],
-            'score' => (int)$Similar['Score'],
-            'similarId' => (int)$Similar['SimilarID']
-        );
-    }
+foreach ($SimilarArray as $Similar) {
+    $JsonSimilar[] = [
+        'artistId' => (int)$Similar['ArtistID'],
+        'name' => $Similar['Name'],
+        'score' => (int)$Similar['Score'],
+        'similarId' => (int)$Similar['SimilarID']
+    ];
 }
 
 $JsonRequests = [];
 foreach ($Requests as $RequestID => $Request) {
-    $JsonRequests[] = array(
+    $JsonRequests[] = [
         'requestId' => (int)$RequestID,
         'categoryId' => (int)$Request['CategoryID'],
         'title' => $Request['Title'],
@@ -307,19 +264,21 @@ foreach ($Requests as $RequestID => $Request) {
         'timeAdded' => $Request['TimeAdded'],
         'votes' => (int)$Request['Votes'],
         'bounty' => (int)$Request['Bounty']
-    );
+    ];
 }
 
 //notifications disabled by default
 $notificationsEnabled = false;
 if (check_perms('site_torrents_notify')) {
     if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
-        $DB->query("
+        $DB->prepared_query('
             SELECT ID, Artists
             FROM users_notify_filters
-            WHERE UserID = '$LoggedUser[ID]'
-                AND Label = 'Artist notifications'
-            LIMIT 1");
+            WHERE UserID = ?
+                AND Label = ?
+            LIMIT 1
+            ', $LoggedUser[ID], 'Artist notifications'
+        );
         $Notify = $DB->next_record(MYSQLI_ASSOC, false);
         $Cache->cache_value('notify_artists_'.$LoggedUser['ID'], $Notify, 0);
     }
@@ -330,19 +289,7 @@ if (check_perms('site_torrents_notify')) {
     }
 }
 
-// Cache page for later use
-
-if ($RevisionID) {
-    $Key = "artist_$ArtistID"."_revision_$RevisionID";
-} else {
-    $Key = "artist_$ArtistID";
-}
-
-$Data = array(array($Name, $Image, $Body, $NumSimilar, $SimilarArray, [], [], $VanityHouseArtist));
-
-$Cache->cache_value($Key, $Data, 3600);
-
-json_print("success", array(
+json_print("success", [
     'id' => (int)$ArtistID,
     'name' => $Name,
     'notificationsEnabled' => $notificationsEnabled,
@@ -352,15 +299,13 @@ json_print("success", array(
     'vanityHouse' => $VanityHouseArtist == 1,
     'tags' => array_values($Tags),
     'similarArtists' => $JsonSimilar,
-    'statistics' => array(
+    'statistics' => [
         'numGroups' => $NumGroups,
         'numTorrents' => $NumTorrents,
         'numSeeders' => $NumSeeders,
         'numLeechers' => $NumLeechers,
         'numSnatches' => $NumSnatches
-    ),
+    ],
     'torrentgroup' => $JsonTorrents,
     'requests' => $JsonRequests
-));
-
-?>
+]);

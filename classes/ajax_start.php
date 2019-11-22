@@ -1,12 +1,11 @@
 <?php
-use Gazelle\Util\Crypto;
+use Gazelle\Util\{Crypto, Irc};
 
-require 'config.php'; //The config contains all site wide configuration information as well as memcached rules
-require(SERVER_ROOT.'/classes/debug.class.php');
-require(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
+require_once(__DIR__.'/config.php');
+require_once(__DIR__.'/classloader.php');
 
 $Debug = new DEBUG;
-$Cache = NEW CACHE($MemcachedServers); //Load the caching class
+$Cache = new CACHE($MemcachedServers);
 
 $SSL = $_SERVER['SERVER_PORT'] === '443';
 
@@ -22,7 +21,7 @@ if (isset($LoginCookie)) {
 
     if (!$Enabled = $Cache->get_value("enabled_$UserID")) {
         require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-        $DB = NEW DB_MYSQL; //Load the database wrapper
+        $DB = new DB_MYSQL; //Load the database wrapper
         $DB->query("
             SELECT Enabled
             FROM users_main
@@ -52,15 +51,15 @@ function display_str($Str) {
         $Str = mb_convert_encoding($Str, 'HTML-ENTITIES', 'UTF-8');
         $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,5};)/m", '&amp;', $Str);
 
-        $Replace = array(
+        $Replace = [
             "'",'"',"<",">",
             '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;','&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;','&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;','&#156;','&#158;','&#159;'
-        );
+        ];
 
-        $With = array(
+        $With = [
             '&#39;','&quot;','&lt;','&gt;',
             '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;','&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;','&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;','&#339;','&#382;','&#376;'
-        );
+        ];
 
         $Str = str_replace($Replace, $With, $Str);
     }
@@ -117,11 +116,5 @@ function make_secret($Length = 32) {
 
 // Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
 function send_irc($Raw) {
-    if (defined('DISABLE_IRC') && DISABLE_IRC === true) {
-        return;
-    }
-    $IRCSocket = fsockopen(SOCKET_LISTEN_ADDRESS, SOCKET_LISTEN_PORT);
-    $Raw = str_replace(array("\n", "\r"), '', $Raw);
-    fwrite($IRCSocket, $Raw);
-    fclose($IRCSocket);
+    \Gazelle\Util\Irc::sendRaw($Raw);
 }

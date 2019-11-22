@@ -13,9 +13,11 @@ class Artists {
      * ArtistType is an int. It can be:
      * 1 => Main artist
      * 2 => Guest artist
+     * 3 => Remixer
      * 4 => Composer
      * 5 => Conductor
      * 6 => DJ
+     * 7 => Producer
      */
     public static function get_artists($GroupIDs) {
         $Results = [];
@@ -50,8 +52,8 @@ class Artists {
                     ta.Importance ASC,
                     aa.Name ASC;");
             while (list($GroupID, $ArtistID, $ArtistName, $ArtistImportance, $AliasID) = G::$DB->next_record(MYSQLI_BOTH, false)) {
-                $Results[$GroupID][$ArtistImportance][] = array('id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID);
-                $New[$GroupID][$ArtistImportance][] = array('id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID);
+                $Results[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
+                $New[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
             }
             G::$DB->set_query_id($QueryID);
             foreach ($DBs as $GroupID) {
@@ -78,7 +80,7 @@ class Artists {
      * @return array - see get_artists
      */
     public static function get_artist($GroupID) {
-        $Results = Artists::get_artists(array($GroupID));
+        $Results = Artists::get_artists([$GroupID]);
         return $Results[$GroupID];
     }
 
@@ -97,19 +99,19 @@ class Artists {
             $ampersand = ($Escape) ? ' &amp; ' : ' & ';
             $link = '';
 
-            $MainArtists    = isset($Artists[1]) ? $Artists[1] : null;
-            $Guests            = isset($Artists[2]) ? $Artists[2] : null;
-            $Composers        = isset($Artists[4]) ? $Artists[4] : null;
-            $Conductors        = isset($Artists[5]) ? $Artists[5] : null;
-            $DJs            = isset($Artists[6]) ? $Artists[6] : null;
+            $MainArtists = isset($Artists[1]) ? $Artists[1] : [];
+            $Guests      = isset($Artists[2]) ? $Artists[2] : [];
+            $Composers   = isset($Artists[4]) ? $Artists[4] : [];
+            $Conductors  = isset($Artists[5]) ? $Artists[5] : [];
+            $DJs         = isset($Artists[6]) ? $Artists[6] : [];
 
-            $MainArtistCount    = $MainArtists == null ? 0 : count($MainArtists);
-            $GuestCount            = $Guests == null ? 0 : count($Guests);
-            $ComposerCount        = $Composers == null ? 0 : count($Composers);
-            $ConductorCount        = $Conductors == null ? 0 : count($Conductors);
-            $DJCount            = $DJs == null ? 0 : count($DJs);
+            $MainArtistCount = count($MainArtists);
+            $GuestCount      = count($Guests);
+            $ComposerCount   = count($Composers);
+            $ConductorCount  = count($Conductors);
+            $DJCount         = count($DJs);
 
-            if (($MainArtistCount + $ConductorCount + $DJCount == 0) && ($ComposerCount == 0)) {
+            if ($MainArtistCount + $ConductorCount + $DJCount + $ComposerCount == 0) {
                 return '';
             }
             // Various Composers is not needed and is ugly and should die

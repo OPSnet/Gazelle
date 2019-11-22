@@ -42,7 +42,7 @@ $InviteReason = check_perms('users_invite_notes') ? db_string($_POST['reason']) 
 if (strpos($Email, '|') !== false && check_perms('site_send_unlimited_invites')) {
     $Emails = explode('|', $Email);
 } else {
-    $Emails = array($Email);
+    $Emails = [$Email];
 }
 
 foreach ($Emails as $CurEmail) {
@@ -99,7 +99,7 @@ EOT;
             SET Invites = GREATEST(Invites, 1) - 1
             WHERE ID = '$LoggedUser[ID]'");
         $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
-        $Cache->update_row(false, array('Invites' => '-1'));
+        $Cache->update_row(false, ['Invites' => '-1']);
         $Cache->commit_transaction(0);
     }
 

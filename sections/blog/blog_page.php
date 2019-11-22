@@ -83,7 +83,7 @@ if (!isset($_GET['action']) || $_GET['action'] !== 'editblog') {
 
     if (count($Blog) > 0 && G::$LoggedUser['LastReadBlog'] < $Blog[0][0]) {
         $Cache->begin_transaction('user_info_heavy_'.G::$LoggedUser['ID']);
-        $Cache->update_row(false, array('LastReadBlog' => $Blog[0][0]));
+        $Cache->update_row(false, ['LastReadBlog' => $Blog[0][0]]);
         $Cache->commit_transaction(0);
         $DB->prepared_query("
         UPDATE users_info

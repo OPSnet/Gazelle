@@ -40,11 +40,8 @@ if (substr($_REQUEST['action'],0,16) == 'rerender_gallery' && !isset($argv[1])) 
     }
 }
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-$Val = new VALIDATE;
-
-include(SERVER_ROOT.'/classes/feed.class.php');
-$Feed = new FEED;
+$Val = new Validate;
+$Feed = new Feed;
 
 switch ($_REQUEST['action']) {
     case 'phpinfo':
@@ -176,11 +173,12 @@ switch ($_REQUEST['action']) {
             error(403);
         }
         if (is_number($_POST['newsid'])) {
-            $DB->query("
+            $DB->prepared_query("
                 UPDATE news
-                SET Title = '".db_string($_POST['title'])."',
-                    Body = '".db_string($_POST['body'])."'
-                WHERE ID = '".db_string($_POST['newsid'])."'");
+                SET Title = ?,
+                    Body = ?
+                WHERE ID = ?
+            ", $_POST['title'], $_POST['body'], $_POST['newsid']);
             $Cache->delete_value('news');
             $Cache->delete_value('feed_news');
         }
@@ -193,9 +191,10 @@ switch ($_REQUEST['action']) {
         }
         if (is_number($_GET['id'])) {
             authorize();
-            $DB->query("
+            $DB->prepared_query("
                 DELETE FROM news
-                WHERE ID = '".db_string($_GET['id'])."'");
+                WHERE ID = ?
+            ", $_GET['id']);
             $Cache->delete_value('news');
             $Cache->delete_value('feed_news');
 
@@ -214,14 +213,13 @@ switch ($_REQUEST['action']) {
             error(403);
         }
 
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO news (UserID, Title, Body, Time)
-            VALUES ('$LoggedUser[ID]', '".db_string($_POST['title'])."', '".db_string($_POST['body'])."', '".sqltime()."')");
+            VALUES (?, ?, ?, now())
+        ", $LoggedUser['ID'], $_POST['title'], $_POST['body']);
         $Cache->delete_value('news_latest_id');
         $Cache->delete_value('news_latest_title');
         $Cache->delete_value('news');
-
-
 
         NotificationsManager::send_push(NotificationsManager::get_push_enabled_users(), $_POST['title'], $_POST['body'], site_url() . 'index.php', NotificationsManager::NEWS);
 
@@ -282,7 +280,7 @@ switch ($_REQUEST['action']) {
                         LEFT JOIN users_main AS u ON u.PermissionID = p.ID
                     WHERE p.ID = ?
                     GROUP BY p.ID", $_REQUEST['id']);
-                list($ID, $Name, $Level, $Secondary, $Forums, $Values, $DisplayStaff, $StaffGroup, $UserCount) = $DB->next_record(MYSQLI_NUM, array(5));
+                list($ID, $Name, $Level, $Secondary, $Forums, $Values, $DisplayStaff, $StaffGroup, $UserCount) = $DB->next_record(MYSQLI_NUM, [5]);
 
                 if (!check_perms('admin_manage_permissions', $Level)) {
                     error(403);
@@ -316,7 +314,7 @@ switch ($_REQUEST['action']) {
                 $Level = $_REQUEST['level'];
                 $Secondary = empty($_REQUEST['secondary']) ? 0 : 1;
                 $Forums = $_REQUEST['forums'];
-                $DisplayStaff = $_REQUEST['displaystaff'];
+                $DisplayStaff = empty($_REQUEST['displaystaff']) ? '0' : '1';
                 $StaffGroup = $_REQUEST['staffgroup'];
                 if (!$StaffGroup) {
                     $StaffGroup = null;
@@ -511,8 +509,33 @@ switch ($_REQUEST['action']) {
         include(SERVER_ROOT.'/sections/tools/development/process_info.php');
         break;
 
+    case 'rate_limit':
+        include(__DIR__.'/managers/rate_limit.php');
+        break;
+
     case 'rerender_gallery':
         include(SERVER_ROOT.'/sections/tools/development/rerender_gallery.php');
+        break;
+
+    case 'periodic':
+        $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : 'view';
+        switch ($mode) {
+            case 'view':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_view.php');
+                break;
+            case 'detail':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_detail.php');
+                break;
+            case 'stats':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_stats.php');
+                break;
+            case 'edit':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_edit.php');
+                break;
+            case 'alter':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_alter.php');
+                break;
+        }
         break;
 
     case 'public_sandbox':
@@ -580,4 +603,3 @@ switch ($_REQUEST['action']) {
     default:
         include(SERVER_ROOT.'/sections/tools/tools.php');
 }
-?>

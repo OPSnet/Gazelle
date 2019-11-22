@@ -4,11 +4,11 @@ class NotificationsManagerView {
     private static $Settings;
 
     public static function load_js() {
-        $JSIncludes = array(
+        $JSIncludes = [
             'noty/noty.js',
             'noty/layouts/bottomRight.js',
             'noty/themes/default.js',
-            'user_notifications.js');
+            'user_notifications.js'];
         foreach ($JSIncludes as $JSInclude) {
             $Path = STATIC_SERVER."functions/$JSInclude";
 ?>
@@ -29,7 +29,7 @@ class NotificationsManagerView {
             <td>
                 <select name="pushservice" id="pushservice">
                     <option value="0"<?php if (empty($PushService)) { ?> selected="selected"<?php } ?>>Disable push notifications</option>
-                    <option value="1"<?php if ($PushService == 1) { ?> selected="selected"<?php } ?>>Notify My Android</option>
+<!--                        No option 1, Notify My Android died. -->
                     <option value="2"<?php if ($PushService == 2) { ?> selected="selected"<?php } ?>>Prowl</option>
 <!--                        No option 3, notifo died. -->
                     <option value="4"<?php if ($PushService == 4) { ?> selected="selected"<?php } ?>>Super Toasty</option>

@@ -6,19 +6,19 @@ class BitcoinRpc {
             return false;
         }
         $MessageID = mt_rand();
-        $Params = json_encode(array(
+        $Params = json_encode([
             'method' => $Method,
             'params' => $Args,
-            'id' => $MessageID)
+            'id' => $MessageID]
         );
 
-        $Request = array(
-            'http' => array(
+        $Request = [
+            'http' => [
                 'method' => 'POST',
                 'header' => 'Content-type: application/json',
                 'content' => $Params
-                )
-            );
+                ]
+            ];
 
         if (!$Response = file_get_contents(BITCOIN_RPC_URL, false, stream_context_create($Request))) {
             return false;

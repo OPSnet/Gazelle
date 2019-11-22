@@ -16,7 +16,9 @@
     "husky": "^3.0.8",
     "lint-staged": "^9.4.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "puppeteer": "^2.1.1"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"

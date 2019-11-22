@@ -28,7 +28,7 @@ class SphinxqlResult {
      * @return whatever the parent function returns
      */
     public function __call($Name, $Arguments) {
-        return call_user_func_array(array($this->Result, $Name), $Arguments);
+        return call_user_func_array([$this->Result, $Name], $Arguments);
     }
 
     /**

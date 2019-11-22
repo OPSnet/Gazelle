@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_view_flow')) {
+if (!check_perms('site_debug')) {
     error(403);
 }
 
@@ -17,7 +17,7 @@ View::show_header('OS and Browser Usage');
     </tr>
 
 <?php
-G::$DB->prepared_query("SELECT OperatingSystem, OperatingSystemVersion, COUNT(*) FROM users_sessions GROUP BY OperatingSystem, OperatingSystemVersion ORDER BY COUNT(*) DESC");
+G::$DB->prepared_query("SELECT OperatingSystem, OperatingSystemVersion, COUNT(*) FROM users_sessions WHERE OperatingSystem IS NOT NULL GROUP BY OperatingSystem, OperatingSystemVersion ORDER BY COUNT(*) DESC");
 while (list($OperatingSystem, $OperatingSystemVersion, $Count) = G::$DB->fetch_record(0, 'OperatingSystem', 1, 'OperatingSystemVersion')) {
     ?>
     <tr>
@@ -38,7 +38,7 @@ while (list($OperatingSystem, $OperatingSystemVersion, $Count) = G::$DB->fetch_r
     </tr>
 
 <?php
-G::$DB->prepared_query("SELECT Browser, BrowserVersion, COUNT(*) FROM users_sessions GROUP BY Browser, BrowserVersion ORDER BY COUNT(*) DESC");
+G::$DB->prepared_query("SELECT Browser, BrowserVersion, COUNT(*) FROM users_sessions WHERE Browser IS NOT NULL GROUP BY Browser, BrowserVersion ORDER BY COUNT(*) DESC");
 while (list($Browser, $BrowserVersion, $Count) = G::$DB->fetch_record(0, 'Browser', 1, 'BrowserVersion')) {
     ?>
     <tr>

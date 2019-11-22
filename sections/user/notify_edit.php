@@ -35,7 +35,7 @@ $DB->query("
 $NumFilters = $DB->record_count();
 
 $Notifications = $DB->to_array();
-$Notifications[] = array(
+$Notifications[] = [
     'ID' => false,
     'Label' => '',
     'Artists' => '',
@@ -51,15 +51,15 @@ $Notifications[] = array(
     'FromYear' => '',
     'ToYear' => '',
     'Users' => ''
-);
+];
 
 $i = 0;
 foreach ($Notifications as $N) { // $N stands for Notifications
     $i++;
     $NewFilter = $N['ID'] === false;
-    $N['Artists']        = implode(', ', explode('|', substr($N['Artists'], 1, -1)));
-    $N['Tags']            = implode(', ', explode('|', substr($N['Tags'], 1, -1)));
-    $N['NotTags']        = implode(', ', explode('|', substr($N['NotTags'], 1, -1)));
+    $N['Artists']        = implode("\n", explode('|', substr($N['Artists'], 1, -1)));
+    $N['Tags']            = implode("\n", explode('|', substr($N['Tags'], 1, -1)));
+    $N['NotTags']        = implode("\n", explode('|', substr($N['NotTags'], 1, -1)));
     $N['ReleaseTypes']     = explode('|', substr($N['ReleaseTypes'], 1, -1));
     $N['Categories']     = explode('|', substr($N['Categories'], 1, -1));
     $N['Formats']         = explode('|', substr($N['Formats'], 1, -1));
@@ -67,12 +67,12 @@ foreach ($Notifications as $N) { // $N stands for Notifications
     $N['Media']         = explode('|', substr($N['Media'], 1, -1));
     $N['Users']         = explode('|', substr($N['Users'], 1, -1));
 
-    $Usernames = '';
+    $Usernames = [];
     foreach ($N['Users'] as $UserID) {
         $UserInfo = Users::user_info($UserID);
-        $Usernames .= $UserInfo['Username'] . ', ';
+        $Usernames[] = $UserInfo['Username'];
     }
-    $Usernames = rtrim($Usernames, ', ');
+    $Usernames = implode("\n", $Usernames);
 
     if ($N['FromYear'] == 0) {
         $N['FromYear'] = '';
@@ -124,7 +124,7 @@ foreach ($Notifications as $N) { // $N stands for Notifications
                 <td class="label"><strong>One of these artists</strong></td>
                 <td>
                     <textarea name="artists<?=$i?>" style="width: 100%;" rows="5"><?=display_str($N['Artists'])?></textarea>
-                    <p class="min_padding">Comma-separated list&#8202;&mdash;&#8202;e.g. <em>Pink Floyd, Led Zeppelin, Neil Young</em></p>
+                    <p class="min_padding">Newline-separated list of artists</p>
                     <input type="checkbox" name="excludeva<?=$i?>" id="excludeva_<?=$N['ID']?>"<?php if ($N['ExcludeVA'] == '1') { echo ' checked="checked"';} ?> />
                     <label for="excludeva_<?=$N['ID']?>">Exclude Various Artists releases</label>
                 </td>
@@ -133,21 +133,21 @@ foreach ($Notifications as $N) { // $N stands for Notifications
                 <td class="label"><strong>One of these users</strong></td>
                 <td>
                     <textarea name="users<?=$i?>" style="width: 100%;" rows="5"><?=display_str($Usernames)?></textarea>
-                    <p class="min_padding">Comma-separated list of usernames</p>
+                    <p class="min_padding">Newline-separated list of usernames</p>
                 </td>
             </tr>
             <tr>
                 <td class="label"><strong>At least one of these tags</strong></td>
                 <td>
                     <textarea name="tags<?=$i?>" style="width: 100%;" rows="2"><?=display_str($N['Tags'])?></textarea>
-                    <p class="min_padding">Comma-separated list&#8202;&mdash;&#8202;e.g. <em>rock, jazz, pop</em></p>
+                    <p class="min_padding">Newline-separated list</p>
                 </td>
             </tr>
             <tr>
                 <td class="label"><strong>None of these tags</strong></td>
                 <td>
                     <textarea name="nottags<?=$i?>" style="width: 100%;" rows="2"><?=display_str($N['NotTags'])?></textarea>
-                    <p class="min_padding">Comma-separated list&#8202;&mdash;&#8202;e.g. <em>rock, jazz, pop</em></p>
+                    <p class="min_padding">Newline-separated list</p>
                 </td>
             </tr>
             <tr>
