@@ -1,0 +1,2 @@
+*         *  *   *    *       /usr/bin/indexer -c /var/lib/sphinxsearch/conf/sphinx.conf --rotate delta
+5         *  *   *    *       /usr/bin/indexer -c /var/lib/sphinxsearch/conf/sphinx.conf --rotate --all

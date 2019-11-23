@@ -1,20 +1,20 @@
 <?php
 // ugly UserID code that should be turned into a function . . .
 if (!empty($_GET['userid'])) {
-	if (!check_perms('users_override_paranoia')) {
-		error(403);
-	}
-	$UserID = $_GET['userid'];
-	if (!is_number($UserID)) {
-		error(404);
-	}
-	$DB->query("
-		SELECT Username
-		FROM users_main
-		WHERE ID = '$UserID'");
-	list($Username) = $DB->next_record();
+    if (!check_perms('users_override_paranoia')) {
+        error(403);
+    }
+    $UserID = $_GET['userid'];
+    if (!is_number($UserID)) {
+        error(404);
+    }
+    $DB->query("
+        SELECT Username
+        FROM users_main
+        WHERE ID = '$UserID'");
+    list($Username) = $DB->next_record();
 } else {
-	$UserID = $LoggedUser['ID'];
+    $UserID = $LoggedUser['ID'];
 }
 
 // Finally we start

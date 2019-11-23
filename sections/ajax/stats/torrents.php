@@ -6,42 +6,42 @@ if (!$ByMonth = $Cache->get_value('stats_torrents_upload')) {
     $OutFlow = [];
     $NetFlow = [];
 
-	$DB->prepared_query("
-		SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
-		FROM log
-		WHERE Message LIKE 'Torrent % was uploaded by %'
-		GROUP BY Month
-		ORDER BY Time DESC
-		LIMIT 1, 12");
-	$TimelineIn = array_reverse($DB->to_array(false, MYSQLI_BOTH, false));
-	$DB->prepared_query("
-		SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
-		FROM log
-		WHERE Message LIKE 'Torrent % was deleted %'
-		GROUP BY Month
-		ORDER BY Time DESC
-		LIMIT 1, 12");
-	$TimelineOut = array_reverse($DB->to_array(false, MYSQLI_BOTH, false));
-	$DB->prepared_query("
-		SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
-		FROM torrents
-		GROUP BY Month
-		ORDER BY Time DESC
-		LIMIT 1, 12");
-	$TimelineNet = array_reverse($DB->to_array(false, MYSQLI_BOTH, false));
+    $DB->prepared_query("
+        SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
+        FROM log
+        WHERE Message LIKE 'Torrent % was uploaded by %'
+        GROUP BY Month
+        ORDER BY Time DESC
+        LIMIT 1, 12");
+    $TimelineIn = array_reverse($DB->to_array(false, MYSQLI_BOTH, false));
+    $DB->prepared_query("
+        SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
+        FROM log
+        WHERE Message LIKE 'Torrent % was deleted %'
+        GROUP BY Month
+        ORDER BY Time DESC
+        LIMIT 1, 12");
+    $TimelineOut = array_reverse($DB->to_array(false, MYSQLI_BOTH, false));
+    $DB->prepared_query("
+        SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
+        FROM torrents
+        GROUP BY Month
+        ORDER BY Time DESC
+        LIMIT 1, 12");
+    $TimelineNet = array_reverse($DB->to_array(false, MYSQLI_BOTH, false));
 
-	foreach ($TimelineIn as $Month) {
-		list($Label, $Amount) = $Month;
-		$Labels[] = $Label;
-		$InFlow[$Label] = $Amount;
-	}
-	foreach ($TimelineOut as $Month) {
-		list($Label, $Amount) = $Month;
-		$OutFlow[$Label] = $Amount;
-	}
-	foreach ($TimelineNet as $Month) {
-		list($Label, $Amount) = $Month;
-		$NetFlow[$Label] = $Amount;
+    foreach ($TimelineIn as $Month) {
+        list($Label, $Amount) = $Month;
+        $Labels[] = $Label;
+        $InFlow[$Label] = $Amount;
+    }
+    foreach ($TimelineOut as $Month) {
+        list($Label, $Amount) = $Month;
+        $OutFlow[$Label] = $Amount;
+    }
+    foreach ($TimelineNet as $Month) {
+        list($Label, $Amount) = $Month;
+        $NetFlow[$Label] = $Amount;
     }
     $ByMonth = [];
     for ($i = 0; $i < count($Labels); $i++) {
@@ -52,7 +52,7 @@ if (!$ByMonth = $Cache->get_value('stats_torrents_upload')) {
             'remaining' => isset($NetFlow[$Label]) ? $NetFlow[$Label] : 0
         ];
     }
-	$Cache->cache_value('stats_torrents_upload', $ByMonth, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
+    $Cache->cache_value('stats_torrents_upload', $ByMonth, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
 }
 
 if (!$ByCategory = $Cache->get_value('stats_torrents_category')) {

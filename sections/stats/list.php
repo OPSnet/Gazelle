@@ -1,11 +1,11 @@
 <?php
 
-View::show_header('Stats');
+View::show_header('Inbox');
 
 ?>
 
 <div class="thin">
-    <h3 id="general">Site Statistics</h3>
+    <h3 id="general">Pursuit of Perfection</h3>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
         <ul>
             <li><a href='stats.php?action=users'>User Stats</a>

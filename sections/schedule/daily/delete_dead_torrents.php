@@ -2,92 +2,100 @@
 
 //------------- Delete dead torrents ------------------------------------//
 
-sleep(10);
+$DB->prepared_query("
+    SELECT
+        t.ID,
+        t.GroupID,
+        tg.Name,
+        t.Format,
+        t.Encoding,
+        t.UserID,
+        t.Media,
+        HEX(t.info_hash) AS InfoHash
+    FROM torrents AS t
+    INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
+    INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+    WHERE
+        (tls.last_action IS NOT NULL AND tls.last_action < now() - INTERVAL 28 DAY)
+        OR
+        (tls.last_action IS NULL AND t.Time < now() - INTERVAL 2 DAY)
+    LIMIT 8000
+");
+$torrents = $DB->to_array(false, MYSQLI_NUM, false);
+echo('Found '.count($torrents)." inactive torrents to be deleted.\n");
 
-$DB->query("
-		SELECT
-			t.ID,
-			t.GroupID,
-			tg.Name,
-			t.Format,
-			t.Encoding,
-			t.UserID,
-			t.Media,
-			HEX(t.info_hash) AS InfoHash
-		FROM torrents AS t
-			JOIN torrents_group AS tg ON tg.ID = t.GroupID
-		WHERE
-			(t.last_action < '".time_minus(3600 * 24 * 28)."' AND t.last_action != 0)
-			OR
-			(t.Time < '".time_minus(3600 * 24 * 2)."' AND t.last_action = 0)");
-$Torrents = $DB->to_array(false, MYSQLI_NUM, false);
-echo 'Found '.count($Torrents)." inactive torrents to be deleted.\n";
-
-$LogEntries = $DeleteNotes = [];
+$logEntries = $deleteNotes = [];
 
 // Exceptions for inactivity deletion
-$InactivityExceptionsMade = [
-	//UserID => expiry time of exception
+$inactivityExceptionsMade = [
+    //UserID => expiry time of exception
 ];
 $i = 0;
-foreach ($Torrents as $Torrent) {
-	list($ID, $GroupID, $Name, $Format, $Encoding, $UserID, $Media, $InfoHash) = $Torrent;
-	if (array_key_exists($UserID, $InactivityExceptionsMade) && (time() < $InactivityExceptionsMade[$UserID])) {
-		// don't delete the torrent!
-		continue;
-	}
-	$ArtistName = Artists::display_artists(Artists::get_artist($GroupID), false, false, false);
-	if ($ArtistName) {
-		$Name = "$ArtistName - $Name";
-	}
-	if ($Format && $Encoding) {
-		$Name .= ' ['.(empty($Media) ? '' : "$Media / ") . "$Format / $Encoding]";
-	}
-	Torrents::delete_torrent($ID, $GroupID);
-	$LogEntries[] = db_string("Torrent $ID ($Name) (".strtoupper($InfoHash).") was deleted for inactivity (unseeded)");
+foreach ($torrents as $torrent) {
+    list($id, $groupID, $name, $format, $encoding, $userID, $media, $infoHash) = $torrent;
+    if (array_key_exists($userID, $inactivityExceptionsMade) && (time() < $inactivityExceptionsMade[$userID])) {
+        // don't delete the torrent!
+        continue;
+    }
+    $artistName = Artists::display_artists(Artists::get_artist($groupID), false, false, false);
+    if ($artistName) {
+        $name = "$artistName - $name";
+    }
+    if ($format && $encoding) {
+        $name .= ' ['.(empty($media) ? '' : "$media / ") . "$format / $encoding]";
+    }
+    Torrents::delete_torrent($id, $groupID);
+    $logEntries[] = "Torrent $id ($name) (".strtoupper($infoHash).") was deleted for inactivity (unseeded)";
 
-	if (!array_key_exists($UserID, $DeleteNotes)) {
-		$DeleteNotes[$UserID] = array('Count' => 0, 'Msg' => '');
-	}
+    if (!array_key_exists($userID, $deleteNotes)) {
+        $deleteNotes[$userID] = ['Count' => 0, 'Msg' => ''];
+    }
 
-	$DeleteNotes[$UserID]['Msg'] .= "\n$Name";
-	$DeleteNotes[$UserID]['Count']++;
+    $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=torrents.php?id=%s]%s[/url]", $groupID, $name);
+    $deleteNotes[$userID]['Count']++;
 
-	++$i;
-	if ($i % 500 == 0) {
-		echo "$i inactive torrents removed.\n";
-	}
+    ++$i;
+    if ($i % 500 == 0) {
+        echo("$i inactive torrents removed.\n");
+    }
 }
-echo "$i torrents deleted for inactivity.\n";
+echo("$i torrents deleted for inactivity.\n");
 
-foreach ($DeleteNotes as $UserID => $MessageInfo) {
-	$Singular = (($MessageInfo['Count'] == 1) ? true : false);
-	Misc::send_pm($UserID, 0, $MessageInfo['Count'].' of your torrents '.($Singular ? 'has' : 'have').' been deleted for inactivity', ($Singular ? 'One' : 'Some').' of your uploads '.($Singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($Singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($Singular ? 'it' : 'them').".\n\nThe following torrent".($Singular ? ' was' : 's were').' deleted:'.$MessageInfo['Msg']);
+foreach ($deleteNotes as $userID => $messageInfo) {
+    $singular = (($messageInfo['Count'] == 1) ? true : false);
+    Misc::send_pm($userID, 0, $messageInfo['Count'].' of your torrents '.($singular ? 'has' : 'have').' been deleted for inactivity', ($singular ? 'One' : 'Some').' of your uploads '.($singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($singular ? 'it' : 'them').".\n\nThe following torrent".($singular ? ' was' : 's were').' deleted:'.$messageInfo['Msg']);
 }
-unset($DeleteNotes);
+unset($deleteNotes);
 
-if (count($LogEntries) > 0) {
-	$Values = "('".implode("', '$sqltime'), ('", $LogEntries) . "', '$sqltime')";
-	$DB->query("
-			INSERT INTO log (Message, Time)
-			VALUES $Values");
-	echo "\nDeleted $i torrents for inactivity\n";
+if (count($logEntries) > 0) {
+    $chunks = array_chunk($logEntries, 100);
+    foreach ($chunks as $messages) {
+        $placeholders = array_fill(0, count($messages), '(?, now())');
+        $DB->prepared_query("
+                INSERT INTO log (Message, Time)
+                VALUES " . implode(', ', $placeholders), ...$messages);
+        echo("\nDeleted $i torrents for inactivity\n");
+    }
 }
 
-$DB->query("
-		SELECT SimilarID
-		FROM artists_similar_scores
-		WHERE Score <= 0");
-$SimilarIDs = implode(',', $DB->collect('SimilarID'));
+$DB->prepared_query("
+        SELECT SimilarID
+        FROM artists_similar_scores
+        WHERE Score <= 0");
+$similarIDs = $DB->collect('SimilarID');
 
-if ($SimilarIDs) {
-	$DB->query("
-			DELETE FROM artists_similar
-			WHERE SimilarID IN($SimilarIDs)");
-	$DB->query("
-			DELETE FROM artists_similar_scores
-			WHERE SimilarID IN($SimilarIDs)");
-	$DB->query("
-			DELETE FROM artists_similar_votes
-			WHERE SimilarID IN($SimilarIDs)");
+if ($similarIDs) {
+    $placeholders = implode(', ', array_fill(0, count($similarIDs), '(?)'));
+    $DB->prepared_query("
+            DELETE FROM artists_similar
+            WHERE SimilarID IN ($placeholders)",
+            $similarIDs);
+    $DB->prepared_query("
+            DELETE FROM artists_similar_scores
+            WHERE SimilarID IN ($placeholders)",
+            $similarIDs);
+    $DB->prepared_query("
+            DELETE FROM artists_similar_votes
+            WHERE SimilarID IN ($placeholders)",
+            $similarIDs);
 }

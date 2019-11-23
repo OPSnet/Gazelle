@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - 8080:80
+    depends_on:
+      - memcached
+      - mysql
+    volumes:
+      - .:/var/www
+
+  memcached:
+    image: memcached:1.5-alpine
+
+  mysql:
+    image: mariadb:10.3
+    volumes:
+      - ./.docker/mysql/mysqld_sql_mode.cnf:/etc/mysql/conf.d/mysqld_sql_mode.cnf
+      - ./.docker/data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=gazelle
+      - MYSQL_USER=gazelle
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=em%G9Lrey4^N
+
+  sphinxsearch:
+    build: ./.docker/sphinxsearch
+    depends_on:
+      - mysql
+      - web
+    volumes:
+      - ./.docker/data/sphinxsearch:/var/lib/sphinxsearch/data/
+      - ./.docker/sphinxsearch/sphinx.conf:/var/lib/sphinxsearch/conf/sphinx.conf

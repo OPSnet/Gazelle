@@ -3,7 +3,7 @@
 use Gazelle\Util\Time;
 
 function time_ago($TimeStamp) {
-	return Time::timeAgo($TimeStamp);
+    return Time::timeAgo($TimeStamp);
 }
 
 /*
@@ -11,7 +11,7 @@ function time_ago($TimeStamp) {
  * difference in text (e.g. "16 hours and 28 minutes", "1 day, 18 hours").
  */
 function time_diff($TimeStamp, $Levels = 2, $Span = true, $Lowercase = false, $StartTime = false) {
-	return Time::timeDiff($TimeStamp, $Levels, $Span, $Lowercase, $StartTime);
+    return Time::timeDiff($TimeStamp, $Levels, $Span, $Lowercase, $StartTime);
 }
 
 /**
@@ -24,35 +24,35 @@ function time_diff($TimeStamp, $Levels = 2, $Span = true, $Lowercase = false, $S
  * @return string
  */
 function convert_hours($Hours,$Levels=2,$Span=true) {
-	return Time::convertHours($Hours, $Levels, $Span);
+    return Time::convertHours($Hours, $Levels, $Span);
 }
 
 /* SQL utility functions */
 
 function time_plus($Offset) {
-	return Time::timePlus($Offset);
+    return Time::timePlus($Offset);
 }
 
 function time_minus($Offset, $Fuzzy = false) {
-	return Time::timeMinus($Offset, $Fuzzy);
+    return Time::timeMinus($Offset, $Fuzzy);
 }
 
 function sqltime($timestamp = false) {
-	return Time::sqlTime($timestamp);
+    return Time::sqlTime($timestamp);
 }
 
 function validDate($DateString) {
-	return Time::validDate($DateString);
+    return Time::validDate($DateString);
 }
 
 function is_valid_date($Date) {
-	return Time::isValidDate($Date);
+    return Time::isValidDate($Date);
 }
 
 function is_valid_time($Time) {
-	return Time::isValidTime($Time);
+    return Time::isValidTime($Time);
 }
 
 function is_valid_datetime($DateTime, $Format = 'Y-m-d H:i') {
-	return Time::isValidDateTime($DateTime, $Format);
+    return Time::isValidDateTime($DateTime, $Format);
 }

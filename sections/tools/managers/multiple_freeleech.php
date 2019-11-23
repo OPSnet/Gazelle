@@ -1,4 +1,4 @@
-<?
+<?php
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -6,7 +6,7 @@ if (!check_perms('users_mod')) {
 View::show_header('Multiple freeleech');
 
 if (isset($_POST['torrents'])) {
-    $GroupIDs = array();
+    $GroupIDs = [];
     $Elements = explode("\r\n", $_POST['torrents']);
     foreach ($Elements as $Element) {
         // Get all of the torrent IDs
@@ -85,9 +85,9 @@ if (isset($_POST['torrents'])) {
 ?>
 <div class="thin">
     <div class="box pad box2">
-<?  if (isset($Err)) { ?>
+<?php  if (isset($Err)) { ?>
         <strong class="important_text"><?=$Err?></strong><br />
-<?  } ?>
+<?php  } ?>
         Paste a list of collage or torrent group URLs
     </div>
     <div class="box pad">
@@ -101,10 +101,10 @@ if (isset($_POST['torrents'])) {
                 <option value="0" <?=$_POST['freeleechtype'] == '0' ? 'selected' : ''?>>Normal</option>
             </select>
             &nbsp;for reason&nbsp;<select name="freeleechreason">
-<?      $FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
+<?php      $FL = array('N/A', 'Staff Pick', 'Perma-FL', 'Vanity House');
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>" <?=$_POST['freeleechreason'] == $Key ? 'selected' : ''?>><?=$FLType?></option>
-<?      } ?>
+<?php   } ?>
             </select><br /><br />
             <input type="checkbox" name="NLOver" checked />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
             <select name="scale">
@@ -116,5 +116,5 @@ if (isset($_POST['torrents'])) {
         </form>
     </div>
 </div>
-<?
+<?php
 View::show_footer();

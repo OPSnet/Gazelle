@@ -1,0 +1,71 @@
+#! /usr/bin/env php
+<?php
+
+/* Ensure that the following functions are removed from the `disable_functions`
+ * directive in cli/php.ini
+ *
+ *   pcntl_fork
+ *   pcntl_signal
+ *   pcntl_signal_dispatch
+ *   pcntl_waitpid
+ *
+ * boris won't function unless these functions are enabled in the PHP interpreter.
+ *
+ * The following variables are defined:
+ *
+ *   $db     - database connection
+ *   $cache  - memcache connection
+ *   $artist - \Gazelle\Artist instance
+ *   $bonus  - \Gazelle\Bonus instance
+ *
+ * More can be added when implemented.
+ */
+
+define('SERVER_ROOT', __DIR__);
+
+require_once(SERVER_ROOT.'/classes/config.php');
+require_once(SERVER_ROOT.'/classes/classloader.php');
+
+require_once(SERVER_ROOT.'/classes/time.class.php');
+require_once(SERVER_ROOT.'/classes/regex.php');
+require_once(SERVER_ROOT.'/classes/util.php');
+
+$Cache = new \CACHE($MemcachedServers);
+$DB = new \DB_MYSQL;
+$Debug = new \DEBUG;
+$Debug->handle_errors();
+
+G::init($DB, $Cache);
+
+define('BORIS', 1);
+require_once(SERVER_ROOT.'/vendor/d11wtq/boris/lib/autoload.php');
+$b = new \Boris\Boris(SITE_NAME . '> ');
+$b->setLocal([
+    'cache'  => $Cache,
+    'db'     => $DB,
+    'artist' => new \Gazelle\Artist($DB, $Cache),
+    'bonus'  => new \Gazelle\Bonus($DB, $Cache)
+]);
+
+$b->start();
+
+/*
+ * Sample usage:
+ *
+    vagrant@contrib-jessie:/var/www$ ./boris
+    [1] ops> $db->query('select count(*) from torrents');
+    // object(mysqli_result)(
+    //   'current_field' => NULL,
+    //   'field_count' => NULL,
+    //   'lengths' => NULL,
+    //   'num_rows' => NULL,
+    //   'type' => NULL
+    // )
+    [2] ops> $db->to_array();
+    // array(
+    //   0 => array(
+    //     0 => '14',
+    //     'count(*)' => '14'
+    //   )
+    // )
+*/

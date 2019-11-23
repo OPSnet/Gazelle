@@ -53,7 +53,7 @@ class NMA_API
     /**
      * @param array $options
      */
-    function __construct($options = array())
+    function __construct($options = [])
     {
         if (!isset($options['apikey'])) {
             return $this->error('You must supply a API Key');
@@ -82,7 +82,7 @@ class NMA_API
     public function verify($key = false)
     {
 
-        $options = array();
+        $options = [];
 
         if ($key !== false) {
             $options['apikey'] = $key;
@@ -119,9 +119,9 @@ class NMA_API
                       'description' => substr($description, 0, 10000),
                       'priority'    => $priority
         );
-		if (!empty($url)) {
-			$post['url'] = substr($url, 0, 2000);
-		}
+        if (!empty($url)) {
+            $post['url'] = substr($url, 0, 2000);
+        }
         if ($this->devKey) {
             $post['developerkey'] = $this->devKey;
         }

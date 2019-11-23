@@ -1,4 +1,4 @@
-<?
+<?php
 authorize();
 
 $GroupID = $_POST['groupid'];
@@ -6,27 +6,27 @@ $OldGroupID = $GroupID;
 $NewName = $_POST['name'];
 
 if (!$GroupID || !is_number($GroupID)) {
-	error(404);
+    error(404);
 }
 
 if (empty($NewName)) {
-	error('Torrent groups must have a name');
+    error('Torrent groups must have a name');
 }
 
 if (!check_perms('torrents_edit')) {
-	error(403);
+    error(403);
 }
 
 $DB->query("
-	SELECT Name
-	FROM torrents_group
-	WHERE ID = $GroupID");
+    SELECT Name
+    FROM torrents_group
+    WHERE ID = $GroupID");
 list($OldName) = $DB->next_record(MYSQLI_NUM, false);
 
 $DB->query("
-	UPDATE torrents_group
-	SET Name = '".db_string($NewName)."'
-	WHERE ID = '$GroupID'");
+    UPDATE torrents_group
+    SET Name = '".db_string($NewName)."'
+    WHERE ID = '$GroupID'");
 $Cache->delete_value("torrents_details_$GroupID");
 
 Torrents::update_hash($GroupID);
