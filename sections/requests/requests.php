@@ -50,9 +50,6 @@ $BookmarkView = false;
 
 if (empty($_GET['type'])) {
     $Title = 'Requests';
-    if ($Submitted && !empty($_GET['showall'])) {
-        $SphQL->where('visible', 1);
-    }
 } else {
     // Show filled defaults to on only for viewing types
     if (!$Submitted) {
@@ -103,6 +100,10 @@ if (empty($_GET['type'])) {
         default:
             error(404);
     }
+}
+
+if ($Submitted && empty($_GET['showall'])) {
+    $SphQL->where('visible', 1);
 }
 
 // We don't want to show filled by default on plain requests.php,
