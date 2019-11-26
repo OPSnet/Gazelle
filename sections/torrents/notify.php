@@ -6,13 +6,13 @@ if (!check_perms('site_torrents_notify')) {
 define('NOTIFICATIONS_PER_PAGE', 50);
 define('NOTIFICATIONS_MAX_SLOWSORT', 10000);
 
-$OrderBys = array(
-        'time'     => array('unt' => 'unt.TorrentID'),
-        'size'     => array('t'   => 't.Size'),
-        'snatches' => array('t'   => 'tls.Snatched'),
-        'seeders'  => array('t'   => 'tls.Seeders'),
-        'leechers' => array('t'   => 'tls.Leechers'),
-        'year'     => array('tg'  => 'tnt.Year'));
+$OrderBys = [
+        'time'     => ['unt' => 'unt.TorrentID'],
+        'size'     => ['t'   => 't.Size'],
+        'snatches' => ['t'   => 'tls.Snatched'],
+        'seeders'  => ['t'   => 'tls.Seeders'],
+        'leechers' => ['t'   => 'tls.Leechers'],
+        'year'     => ['tg'  => 'tnt.Year']];
 
 if (empty($_GET['order_by']) || !isset($OrderBys[$_GET['order_by']])) {
     $_GET['order_by'] = 'time';
@@ -45,7 +45,7 @@ function header_link($SortKey, $DefaultWay = 'desc') {
     } else {
         $NewWay = $DefaultWay;
     }
-    return "?action=notify&amp;order_way=$NewWay&amp;order_by=$SortKey&amp;".Format::get_url(array('page', 'order_way', 'order_by'));
+    return "?action=notify&amp;order_way=$NewWay&amp;order_by=$SortKey&amp;".Format::get_url(['page', 'order_way', 'order_by']);
 }
 //Perhaps this should be a feature at some point
 if (check_perms('users_mod') && !empty($_GET['userid']) && is_number($_GET['userid']) && $_GET['userid'] != $LoggedUser['ID']) {
@@ -139,7 +139,7 @@ if (!empty($GroupIDs)) {
         SELECT ID, Label, Artists
         FROM users_notify_filters
         WHERE ID IN ('.implode(',', $FilterIDs).')');
-    $Filters = $DB->to_array('ID', MYSQLI_ASSOC, array('Artists'));
+    $Filters = $DB->to_array('ID', MYSQLI_ASSOC, ['Artists']);
     foreach ($Filters as &$Filter) {
         $Filter['Artists'] = explode('|', trim($Filter['Artists'], '|'));
         foreach ($Filter['Artists'] as &$FilterArtist) {

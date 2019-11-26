@@ -15,38 +15,38 @@ class ImageTools {
      * We use true as an extra property to make the domain an array key
      * @var array $Hosts Array of image hosts
      */
-    private static $Hosts = array(
+    private static $Hosts = [
         'whatimg.com' => true,
         'imgur.com' => true
-    );
+    ];
 
     /**
      * Blacklisted sites
      * @var array $Blacklist Array of blacklisted hosts
      */
-    private static $Blacklist = array(
+    private static $Blacklist = [
         'tinypic.com'
-    );
+    ];
 
     /**
      * Array of image hosts that provide thumbnailing
      * @var array $Thumbs
      */
-    private static $Thumbs = array(
+    private static $Thumbs = [
         'i.imgur.com' => true,
         'whatimg.com' => true
-    );
+    ];
 
     /**
      * Array of extensions
      * @var array $Extensions
      */
-    private static $Extensions = array(
+    private static $Extensions = [
         'jpg' => true,
         'jpeg' => true,
         'png' => true,
         'gif' => true
-    );
+    ];
 
     /**
      * Array of user IDs whose avatars have been checked for size

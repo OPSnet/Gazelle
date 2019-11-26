@@ -1,8 +1,8 @@
 <?php
 
 
-$Orders = array('Time', 'Name', 'Seeders', 'Leechers', 'Snatched', 'Size');
-$Ways = array('DESC' => 'Descending', 'ASC' => 'Ascending');
+$Orders = ['Time', 'Name', 'Seeders', 'Leechers', 'Snatched', 'Size'];
+$Ways = ['DESC' => 'Descending', 'ASC' => 'Ascending'];
 $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
 
 // The "order by x" links on columns headers
@@ -18,7 +18,7 @@ function header_link($SortKey, $DefaultWay = 'DESC') {
         $NewWay = $DefaultWay;
     }
 
-    return "torrents.php?way=$NewWay&amp;order=$SortKey&amp;" . Format::get_url(array('way','order'));
+    return "torrents.php?way=$NewWay&amp;order=$SortKey&amp;" . Format::get_url(['way','order']);
 }
 
 if (!isset($_GET['userid'])) {
@@ -72,19 +72,19 @@ if (!empty($_GET['releasetype']) && array_key_exists($_GET['releasetype'], $Rele
     $SearchWhere[] = "tg.ReleaseType = '".db_string($_GET['releasetype'])."'";
 }
 
-if (isset($_GET['scene']) && in_array($_GET['scene'], array('1', '0'))) {
+if (isset($_GET['scene']) && in_array($_GET['scene'], ['1', '0'])) {
     $SearchWhere[] = "t.Scene = '".db_string($_GET['scene'])."'";
 }
 
-if (isset($_GET['vanityhouse']) && in_array($_GET['vanityhouse'], array('1', '0'))) {
+if (isset($_GET['vanityhouse']) && in_array($_GET['vanityhouse'], ['1', '0'])) {
     $SearchWhere[] = "tg.VanityHouse = '".db_string($_GET['vanityhouse'])."'";
 }
 
-if (isset($_GET['cue']) && in_array($_GET['cue'], array('1', '0'))) {
+if (isset($_GET['cue']) && in_array($_GET['cue'], ['1', '0'])) {
     $SearchWhere[] = "t.HasCue = '".db_string($_GET['cue'])."'";
 }
 
-if (isset($_GET['log']) && in_array($_GET['log'], array('1', '0', '100', '-1'))) {
+if (isset($_GET['log']) && in_array($_GET['log'], ['1', '0', '100', '-1'])) {
     if ($_GET['log'] === '100') {
         $SearchWhere[] = "t.HasLog = '1'";
         $SearchWhere[] = "t.LogScore = '100'";
@@ -507,7 +507,7 @@ foreach ($Categories as $CatKey => $CatName) {
             unset($ExtendedArtists[3]);
             $DisplayName = Artists::display_artists($ExtendedArtists);
         } elseif (!empty($Artists)) {
-            $DisplayName = Artists::display_artists(array(1 => $Artists));
+            $DisplayName = Artists::display_artists([1 => $Artists]);
         } else {
             $DisplayName = '';
         }

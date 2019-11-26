@@ -29,7 +29,7 @@ foreach ($AllDonations as $Address => $Amount) {
         if ($Amount == $OldDonations[$Address]) { // Direct comparison should be fine as everything comes from bitcoind
             continue;
         }
-        $Debug->log_var(array('old' => $OldDonations[$Address], 'new' => $Amount), "New donations from $Address");
+        $Debug->log_var(['old' => $OldDonations[$Address], 'new' => $Amount], "New donations from $Address");
         // PHP doesn't do fixed-point math, and json_decode has already botched the precision
         // so let's just round this off to satoshis and pray that we're on a 64 bit system
         $Amount = round($Amount - $OldDonations[$Address], 8);

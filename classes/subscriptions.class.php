@@ -126,7 +126,7 @@ class Subscriptions {
                     (UserID, Page, PageID)
                 VALUES
                     ($UserID, '" . db_string($Page) . "', " . db_string($PageID) . ")");
-            array_push($UserCommentSubscriptions, array($Page, $PageID));
+            array_push($UserCommentSubscriptions, [$Page, $PageID]);
         }
         G::$Cache->replace_value("subscriptions_comments_user_$UserID", $UserCommentSubscriptions, 0);
         G::$Cache->delete_value("subscriptions_comments_user_new_$UserID");
@@ -265,7 +265,7 @@ class Subscriptions {
      */
     public static function has_subscribed_comments($Page, $PageID) {
         $UserCommentSubscriptions = self::get_comment_subscriptions();
-        return array_search(array($Page, $PageID), $UserCommentSubscriptions);
+        return array_search([$Page, $PageID], $UserCommentSubscriptions);
     }
 
     /**

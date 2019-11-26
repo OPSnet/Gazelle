@@ -21,7 +21,7 @@ class LastFM {
     public static function get_artist_events($ArtistID, $Artist, $Limit = 15) {
         $ArtistEvents = G::$Cache->get_value("artist_events_$ArtistID");
         if (empty($ArtistEvents)) {
-            $ArtistEvents = self::lastfm_request("artist.getEvents", array("artist" => $Artist, "limit" => $Limit));
+            $ArtistEvents = self::lastfm_request("artist.getEvents", ["artist" => $Artist, "limit" => $Limit]);
             G::$Cache->cache_value("artist_events_$ArtistID", $ArtistEvents, 432000);
         }
         return $ArtistEvents;
@@ -30,7 +30,7 @@ class LastFM {
     public static function get_user_info($Username) {
         $Response = G::$Cache->get_value("lastfm_user_info_$Username");
         if (empty($Response)) {
-            $Response = self::lastfm_request("user.getInfo", array("user" => $Username));
+            $Response = self::lastfm_request("user.getInfo", ["user" => $Username]);
             G::$Cache->cache_value("lastfm_user_info_$Username", $Response, 86400);
         }
         return $Response;
@@ -52,7 +52,7 @@ class LastFM {
             }
             $Response = G::$Cache->get_value("lastfm_compare_$Username1" . "_$Username2");
             if (empty($Response)) {
-                $Response = self::lastfm_request("tasteometer.compare", array("type1" => "user", "type2" => "user", "value1" => $Username1, "value2" => $Username2, "limit" => $Limit));
+                $Response = self::lastfm_request("tasteometer.compare", ["type1" => "user", "type2" => "user", "value1" => $Username1, "value2" => $Username2, "limit" => $Limit]);
                 $Response = json_encode($Response);
                 G::$Cache->cache_value("lastfm_compare_$Username1" . "_$Username2", $Response, 86400);
             }
@@ -66,7 +66,7 @@ class LastFM {
     public static function get_last_played_track($Username) {
         $Response = G::$Cache->get_value("lastfm_last_played_track_$Username");
         if (empty($Response)) {
-            $Response = self::lastfm_request("user.getRecentTracks", array("user" => $Username, "limit" => 1));
+            $Response = self::lastfm_request("user.getRecentTracks", ["user" => $Username, "limit" => 1]);
             // Take the single last played track out of the response.
             $Response = $Response['recenttracks']['track'];
             $Response = json_encode($Response);
@@ -79,7 +79,7 @@ class LastFM {
         $Response = G::$Cache->get_value("lastfm_top_artists_$Username");
         if (empty($Response)) {
             sleep(1);
-            $Response = self::lastfm_request("user.getTopArtists", array("user" => $Username, "limit" => $Limit));
+            $Response = self::lastfm_request("user.getTopArtists", ["user" => $Username, "limit" => $Limit]);
             $Response = json_encode($Response);
             G::$Cache->cache_value("lastfm_top_artists_$Username", $Response, 86400);
         }
@@ -90,7 +90,7 @@ class LastFM {
         $Response = G::$Cache->get_value("lastfm_top_albums_$Username");
         if (empty($Response)) {
             sleep(2);
-            $Response = self::lastfm_request("user.getTopAlbums", array("user" => $Username, "limit" => $Limit));
+            $Response = self::lastfm_request("user.getTopAlbums", ["user" => $Username, "limit" => $Limit]);
             $Response = json_encode($Response);
             G::$Cache->cache_value("lastfm_top_albums_$Username", $Response, 86400);
         }
@@ -101,7 +101,7 @@ class LastFM {
         $Response = G::$Cache->get_value("lastfm_top_tracks_$Username");
         if (empty($Response)) {
             sleep(3);
-            $Response = self::lastfm_request("user.getTopTracks", array("user" => $Username, "limit" => $Limit));
+            $Response = self::lastfm_request("user.getTopTracks", ["user" => $Username, "limit" => $Limit]);
             $Response = json_encode($Response);
             G::$Cache->cache_value("lastfm_top_tracks_$Username", $Response, 86400);
         }
@@ -111,7 +111,7 @@ class LastFM {
     public static function get_user_artist_chart($Username, $From = '', $To = '') {
         $Response = G::$Cache->get_value("lastfm_artist_chart_$Username");
         if (empty($Response)) {
-            $Response = self::lastfm_request("user.getWeeklyArtistChart", array("user" => $Username));
+            $Response = self::lastfm_request("user.getWeeklyArtistChart", ["user" => $Username]);
             $Response = json_encode($Response);
             G::$Cache->cache_value("lastfm_artist_chart_$Username", $Response, 86400);
         }
@@ -121,7 +121,7 @@ class LastFM {
     public static function get_weekly_artists($Limit = 100) {
         $Response = G::$Cache->get_value("lastfm_top_artists_$Limit");
         if (empty($Response)) {
-            $Response = self::lastfm_request("chart.getTopArtists", array("limit" => $Limit));
+            $Response = self::lastfm_request("chart.getTopArtists", ["limit" => $Limit]);
             $Response = json_encode($Response);
             G::$Cache->cache_value("lastfm_top_artists_$Limit", $Response, 86400);
         }
@@ -131,7 +131,7 @@ class LastFM {
     public static function get_hyped_artists($Limit = 100) {
         $Response = G::$Cache->get_value("lastfm_hyped_artists_$Limit");
         if (empty($Response)) {
-            $Response = self::lastfm_request("chart.getHypedArtists", array("limit" => $Limit));
+            $Response = self::lastfm_request("chart.getHypedArtists", ["limit" => $Limit]);
             $Response = json_encode($Response);
             G::$Cache->cache_value("lastfm_hyped_artists_$Limit", $Response, 86400);
         }

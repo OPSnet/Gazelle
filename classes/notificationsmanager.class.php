@@ -15,11 +15,11 @@ class NotificationsManager {
     const WARNING = 'warning';
     const INFO = 'confirmation';
 
-    public static $Importances = array(
+    public static $Importances = [
         'important' => self::IMPORTANT,
         'critical' => self::CRITICAL,
         'warning' => self::WARNING,
-        'info' => self::INFO);
+        'info' => self::INFO];
 
     // Types. These names must correspond to column names in users_notifications_settings
     const NEWS = 'News';
@@ -38,7 +38,7 @@ class NotificationsManager {
     const TORRENTALERTS = 'TorrentAlerts';
     const GLOBALNOTICE = 'Global';
 
-    public static $Types = array(
+    public static $Types = [
         'News',
         'Blog',
         'StaffPM',
@@ -51,16 +51,16 @@ class NotificationsManager {
         'ForumAlerts',
         'RequestAlerts',
         'CollageAlerts',
-        'TorrentAlerts');
+        'TorrentAlerts'];
 
     private $UserID;
     private $Notifications;
     private $Settings;
     private $Skipped;
 
-    function __construct($UserID, $Skip = array(), $Load = true, $AutoSkip = true) {
+    function __construct($UserID, $Skip = [], $Load = true, $AutoSkip = true) {
         $this->UserID = $UserID;
-        $this->Notifications = array();
+        $this->Notifications = [];
         $this->Settings = self::get_settings($UserID);
         $this->Skipped = $Skip;
         if ($AutoSkip) {
@@ -110,19 +110,19 @@ class NotificationsManager {
 
     public function clear_notifications_array() {
         unset($this->Notifications);
-        $this->Notifications = array();
+        $this->Notifications = [];
     }
 
     private function create_notification($Type, $ID, $Message, $URL, $Importance) {
-        $this->Notifications[$Type] = array(
+        $this->Notifications[$Type] = [
             'id' => (int)$ID,
             'message' => $Message,
             'url' => $URL,
-            'importance' => $Importance);
+            'importance' => $Importance];
     }
 
     public static function notify_user($UserID, $Type, $Message, $URL, $Importance = self::INFO) {
-        self::notify_users(array($UserID), $Type, $Message, $URL, $Importance);
+        self::notify_users([$UserID], $Type, $Message, $URL, $Importance);
     }
 
     public static function notify_users($UserIDs, $Type, $Message, $URL, $Importance = self::INFO) {
@@ -170,7 +170,7 @@ class NotificationsManager {
             FROM users_notifications_settings
             WHERE $Type != 0
                 $UserWhere");
-        $IDs = array();
+        $IDs = [];
         while (list($ID) = G::$DB->next_record()) {
             $IDs[] = $ID;
         }
@@ -216,7 +216,7 @@ class NotificationsManager {
         if (empty($Message) || empty($Expiration)) {
             error('Error setting notification');
         }
-        G::$Cache->cache_value('global_notification', array("Message" => $Message, "URL" => $URL, "Importance" => $Importance, "Expiration" => $Expiration), $Expiration);
+        G::$Cache->cache_value('global_notification', ["Message" => $Message, "URL" => $URL, "Importance" => $Importance, "Expiration" => $Expiration], $Expiration);
     }
 
     public static function delete_global_notification() {
@@ -445,7 +445,7 @@ class NotificationsManager {
 
         if (G::$LoggedUser['LastReadNews'] != $News[0][0]) {
             G::$Cache->begin_transaction('user_info_heavy_' . G::$LoggedUser['ID']);
-            G::$Cache->update_row(false, array('LastReadNews' => $News[0][0]));
+            G::$Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
             G::$Cache->commit_transaction(0);
             G::$DB->query("
                 UPDATE users_info
@@ -478,7 +478,7 @@ class NotificationsManager {
         }
         if (G::$LoggedUser['LastReadBlog'] < $Blog[0][0]) {
             G::$Cache->begin_transaction('user_info_heavy_' . G::$LoggedUser['ID']);
-            G::$Cache->update_row(false, array('LastReadBlog' => $Blog[0][0]));
+            G::$Cache->update_row(false, ['LastReadBlog' => $Blog[0][0]]);
             G::$Cache->commit_transaction(0);
             G::$DB->query("
                 UPDATE users_info
@@ -496,7 +496,7 @@ class NotificationsManager {
             FROM staff_pm_conversations
             WHERE Unread = true
                 AND UserID = " . G::$LoggedUser['ID']);
-        $IDs = array();
+        $IDs = [];
         while (list($ID) = G::$DB->next_record()) {
             $IDs[] = $ID;
         }
@@ -518,7 +518,7 @@ class NotificationsManager {
             FROM pm_conversations_users
             WHERE Unread = '1'
                 AND UserID = " . G::$LoggedUser['ID']);
-        $IDs = array();
+        $IDs = [];
         while (list($ID) = G::$DB->next_record()) {
             $IDs[] = $ID;
         }
@@ -541,7 +541,7 @@ class NotificationsManager {
             FROM users_notify_torrents
             WHERE UserID = ' " . G::$LoggedUser['ID'] . "'
                 AND UnRead = '1'");
-        $IDs = array();
+        $IDs = [];
         while (list($ID) = G::$DB->next_record()) {
             $IDs[] = $ID;
         }
@@ -644,7 +644,7 @@ class NotificationsManager {
             // A little cheat technique, gets all keys in the $_POST array starting with 'notifications_'
             $Settings = array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST))));
         }
-        $Update = array();
+        $Update = [];
         foreach (self::$Types as $Type) {
             $Popup = array_key_exists("notifications_{$Type}_popup", $Settings);
             $Traditional = array_key_exists("notifications_{$Type}_traditional", $Settings);
@@ -668,7 +668,7 @@ class NotificationsManager {
             WHERE UserID = '$UserID'");
 
         $PushService = (int) $_POST['pushservice'];
-        $PushOptionsArray = array("PushKey" => $_POST['pushkey']);
+        $PushOptionsArray = ["PushKey" => $_POST['pushkey']];
         if ($PushService === 6) { //pushbullet
             $PushOptionsArray['PushDevice'] = $_POST['pushdevice'];
         }
@@ -714,7 +714,7 @@ class NotificationsManager {
      */
     public static function send_push($UserIDs, $Title, $Body, $URL = '', $Type = self::GLOBALNOTICE) {
         if (!is_array($UserIDs)) {
-            $UserIDs = array($UserIDs);
+            $UserIDs = [$UserIDs];
         }
         foreach($UserIDs as $UserID) {
             $UserID = (int) $UserID;
@@ -755,9 +755,9 @@ class NotificationsManager {
                         break;
                     }
                     if (!empty($Service) && !empty($PushOptions['PushKey'])) {
-                        $Options = array("service" => strtolower($Service),
-                                        "user" => array("key" => $PushOptions['PushKey']),
-                                        "message" => array("title" => $Title, "body" => $Body, "url" => $URL));
+                        $Options = ["service" => strtolower($Service),
+                                        "user" => ["key" => $PushOptions['PushKey']],
+                                        "message" => ["title" => $Title, "body" => $Body, "url" => $URL]];
 
                         if ($Service === 'PushBullet') {
                             $Options["user"]["device"] = $PushOptions['PushDevice'];

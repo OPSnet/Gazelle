@@ -66,7 +66,7 @@ class Collages {
             unset($ExtendedArtists[3]);
             $DisplayName .= Artists::display_artists($ExtendedArtists, false);
         } elseif (count($Artists) > 0) {
-            $DisplayName .= Artists::display_artists(array('1' => $Artists), false);
+            $DisplayName .= Artists::display_artists(['1' => $Artists], false);
         }
         $DisplayName .= $GroupName;
         if ($GroupYear > 0) {

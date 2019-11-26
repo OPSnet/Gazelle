@@ -147,7 +147,7 @@ class Torrents {
             }
 
             foreach ($NotFound as $GroupID => $GroupInfo) {
-                G::$Cache->cache_value($Key . $GroupID, array('ver' => CACHE::GROUP_VERSION, 'd' => $GroupInfo), 0);
+                G::$Cache->cache_value($Key . $GroupID, ['ver' => CACHE::GROUP_VERSION, 'd' => $GroupInfo], 0);
             }
 
             $Found = $NotFound + $Found;
@@ -181,7 +181,7 @@ class Torrents {
             // Fetch all user specific torrent properties
             if ($Torrents) {
                 foreach ($Found as &$Group) {
-                    $Group['Flags'] = array('IsSnatched' => false);
+                    $Group['Flags'] = ['IsSnatched' => false];
                     if (!empty($Group['Torrents'])) {
                         foreach ($Group['Torrents'] as &$Torrent) {
                             self::torrent_properties($Torrent, $Group['Flags']);
@@ -204,7 +204,7 @@ class Torrents {
      * @return array Re-key'd array
      */
     public static function array_group(array &$Group) {
-        return array(
+        return [
             'GroupID' => $Group['ID'],
             'GroupName' => $Group['Name'],
             'GroupYear' => $Group['Year'],
@@ -212,14 +212,14 @@ class Torrents {
             'GroupRecordLabel' => $Group['RecordLabel'],
             'GroupCatalogueNumber' => $Group['CatalogueNumber'],
             'GroupVanityHouse' => $Group['VanityHouse'],
-            'GroupFlags' => isset($Group['Flags']) ? $Group['Flags'] : array('IsSnatched' => false),
+            'GroupFlags' => isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false],
             'TagList' => $Group['TagList'],
             'ReleaseType' => $Group['ReleaseType'],
             'WikiImage' => $Group['WikiImage'],
-            'Torrents' => isset($Group['Torrents']) ? $Group['Torrents'] : array(),
+            'Torrents' => isset($Group['Torrents']) ? $Group['Torrents'] : [],
             'Artists' => $Group['Artists'],
             'ExtendedArtists' => $Group['ExtendedArtists']
-        );
+        ];
     }
 
     /**
@@ -292,7 +292,7 @@ class Torrents {
         if (!$ok) {
             return $message;
         }
-        Tracker::update_tracker('delete_torrent', array('info_hash' => rawurlencode($InfoHash), 'id' => $ID, 'reason' => $OcelotReason));
+        Tracker::update_tracker('delete_torrent', ['info_hash' => rawurlencode($InfoHash), 'id' => $ID, 'reason' => $OcelotReason]);
         G::$Cache->decrement('stats_torrent_count');
 
         G::$DB->prepared_query('
@@ -711,11 +711,11 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         if ($Spaces = strspn($Name, ' ')) {
             $Name = str_replace(' ', '&nbsp;', substr($Name, 0, $Spaces)) . substr($Name, $Spaces);
         }
-        return array(
+        return [
                     'ext' => $FileExt,
                     'size' => substr($Size, 1, -1),
                     'name' => substr($Name, 0, -$DelimLen)
-                    );
+                    ];
     }
 
     /**
@@ -728,7 +728,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
      * @return string
      */
     public static function torrent_info($Data, $ShowMedia = false, $ShowEdition = false, $ShowFlags = true, $GroupName = '') {
-        $Info = array();
+        $Info = [];
         if (!empty($Data['Format'])) {
             $Info[] = $Data['Format'];
         }
@@ -755,7 +755,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             $Info[] = $GroupName;
         }
         if ($ShowEdition) {
-            $EditionInfo = array();
+            $EditionInfo = [];
             if (!empty($Data['RemasterYear'])) {
                 $EditionInfo[] = $Data['RemasterYear'];
             }
@@ -824,7 +824,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
      */
     public static function freeleech_torrents($TorrentIDs, $FreeNeutral = 1, $FreeLeechType = 0) {
         if (!is_array($TorrentIDs)) {
-            $TorrentIDs = array($TorrentIDs);
+            $TorrentIDs = [$TorrentIDs];
         }
 
         $QueryID = G::$DB->get_query_id();
@@ -844,7 +844,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 
         foreach ($Torrents as $Torrent) {
             list($TorrentID, $GroupID, $InfoHash) = $Torrent;
-            Tracker::update_tracker('update_torrent', array('info_hash' => rawurlencode($InfoHash), 'freetorrent' => $FreeNeutral));
+            Tracker::update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $FreeNeutral]);
             G::$Cache->delete_value("torrent_download_$TorrentID");
             Misc::write_log(G::$LoggedUser['Username']." marked torrent $TorrentID freeleech type $FreeLeechType!");
             Torrents::write_group_log($GroupID, $TorrentID, G::$LoggedUser['ID'], "marked as freeleech type $FreeLeechType!", 0);
@@ -867,7 +867,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         $QueryID = G::$DB->get_query_id();
 
         if (!is_array($GroupIDs)) {
-            $GroupIDs = array($GroupIDs);
+            $GroupIDs = [$GroupIDs];
         }
 
         G::$DB->query('
@@ -945,15 +945,15 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         $Buckets = 64;
         $LastBucket = $Buckets - 1;
         $BucketID = $TorrentID & $LastBucket;
-        static $SnatchedTorrents = array(), $UpdateTime = array();
+        static $SnatchedTorrents = [], $UpdateTime = [];
 
         if (empty($SnatchedTorrents)) {
             $SnatchedTorrents = array_fill(0, $Buckets, false);
             $UpdateTime = G::$Cache->get_value("users_snatched_{$UserID}_time");
             if ($UpdateTime === false) {
-                $UpdateTime = array(
+                $UpdateTime = [
                     'last' => 0,
-                    'next' => 0);
+                    'next' => 0];
             }
         } elseif (isset($SnatchedTorrents[$BucketID][$TorrentID])) {
             return true;
@@ -966,11 +966,11 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             // This bucket hasn't been checked before
             $CurSnatchedTorrents = G::$Cache->get_value("users_snatched_{$UserID}_$BucketID", true);
             if ($CurSnatchedTorrents === false || $CurTime > $UpdateTime['next']) {
-                $Updated = array();
+                $Updated = [];
                 $QueryID = G::$DB->get_query_id();
                 if ($CurSnatchedTorrents === false || $UpdateTime['last'] == 0) {
                     for ($i = 0; $i < $Buckets; $i++) {
-                        $SnatchedTorrents[$i] = array();
+                        $SnatchedTorrents[$i] = [];
                     }
                     // Not found in cache. Since we don't have a suitable index, it's faster to update everything
                     G::$DB->query("
@@ -996,7 +996,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
                         if ($SnatchedTorrents[$CurBucketID] === false) {
                             $SnatchedTorrents[$CurBucketID] = G::$Cache->get_value("users_snatched_{$UserID}_$CurBucketID", true);
                             if ($SnatchedTorrents[$CurBucketID] === false) {
-                                $SnatchedTorrents[$CurBucketID] = array();
+                                $SnatchedTorrents[$CurBucketID] = [];
                             }
                         }
                         $SnatchedTorrents[$CurBucketID][(int)$ID] = true;
@@ -1057,7 +1057,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
     public static function display_string($GroupID, $Mode = self::DISPLAYSTRING_DEFAULT) {
         global $ReleaseTypes; // I hate this
 
-        $GroupInfo = self::get_groups(array($GroupID), true, true, false)[$GroupID];
+        $GroupInfo = self::get_groups([$GroupID], true, true, false)[$GroupID];
         $ExtendedArtists = $GroupInfo['ExtendedArtists'];
 
         if ($Mode & self::DISPLAYSTRING_ARTISTS) {
@@ -1098,7 +1098,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         return $DisplayName;
     }
 
-    public static function edition_string(array $Torrent, array $Group = array()) {
+    public static function edition_string(array $Torrent, array $Group = []) {
         if ($Torrent['Remastered'] && $Torrent['RemasterYear'] != 0) {
             $EditionName = $Torrent['RemasterYear'];
             $AddExtra = ' - ';
@@ -1155,7 +1155,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             G::$Cache->cache_value("reports_torrent_$TorrentID", $Reports, 0);
         }
         if (!check_perms('admin_reports')) {
-            $Return = array();
+            $Return = [];
             foreach ($Reports as $Report) {
                 if ($Report['Type'] !== 'edited') {
                     $Return[] = $Report;

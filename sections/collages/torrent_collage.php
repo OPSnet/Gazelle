@@ -62,7 +62,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     if ($CountArtists) {
         foreach ($CountArtists as $Artist) {
             if (!isset($TopArtists[$Artist['id']])) {
-                $TopArtists[$Artist['id']] = array('name' => $Artist['name'], 'count' => 1);
+                $TopArtists[$Artist['id']] = ['name' => $Artist['name'], 'count' => 1];
             } else {
                 $TopArtists[$Artist['id']]['count']++;
             }
@@ -162,7 +162,7 @@ if (check_perms('zip_downloader')) {
         list($ZIPList, $ZIPPrefs) = $LoggedUser['Collector'];
         $ZIPList = explode(':', $ZIPList);
     } else {
-        $ZIPList = array('00', '11');
+        $ZIPList = ['00', '11'];
         $ZIPPrefs = 1;
     }
 ?>
@@ -475,7 +475,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         $DisplayName .= Artists::display_artists($ExtendedArtists);
     }
     elseif (count($GroupArtists) > 0) {
-        $DisplayName .= Artists::display_artists(array('1' => $GroupArtists));
+        $DisplayName .= Artists::display_artists(['1' => $GroupArtists]);
     }
 
     $DisplayName .= "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">$GroupName</a>";

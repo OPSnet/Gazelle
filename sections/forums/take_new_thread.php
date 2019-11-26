@@ -126,7 +126,7 @@ if (!$NoPoll) { // god, I hate double negatives...
             (TopicID, Question, Answers)
         VALUES
             ('$TopicID', '".db_string($Question)."', '".db_string(serialize($Answers))."')");
-    $Cache->cache_value("polls_$TopicID", array($Question, $Answers, $Votes, '0000-00-00 00:00:00', '0'), 0);
+    $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, '0000-00-00 00:00:00', '0'], 0);
 
     if ($ForumID == STAFF_FORUM) {
         send_irc('PRIVMSG '.ADMIN_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".site_url()."forums.php?action=viewthread&threadid=$TopicID");
@@ -149,7 +149,7 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
         $Part1 = [];
         $Part3 = $Forum;
     }
-    $Part2 = array($TopicID => array(
+    $Part2 = [$TopicID => [
         'ID' => $TopicID,
         'Title' => $Title,
         'AuthorID' => $LoggedUser['ID'],
@@ -160,14 +160,14 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
         'LastPostTime' => $sqltime,
         'LastPostAuthorID' => $LoggedUser['ID'],
         'NoPoll' => $NoPoll
-    )); // Bumped
+    ]]; // Bumped
     $Forum = $Part1 + $Part2 + $Part3;
 
-    $Cache->cache_value("forums_$ForumID", array($Forum, '', 0, $Stickies), 0);
+    $Cache->cache_value("forums_$ForumID", [$Forum, '', 0, $Stickies], 0);
 
     // Update the forum root
     $Cache->begin_transaction('forums_list');
-    $Cache->update_row($ForumID, array(
+    $Cache->update_row($ForumID, [
         'NumPosts' => '+1',
         'NumTopics' => '+1',
         'LastPostID' => $PostID,
@@ -177,7 +177,7 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
         'Title' => $Title,
         'IsLocked' => 0,
         'IsSticky' => 0
-        ));
+        ]);
     $Cache->commit_transaction(0);
 } else {
     // If there's no cache, we have no data, and if there's no data
@@ -185,19 +185,19 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
 }
 
 $Cache->begin_transaction("thread_$TopicID".'_catalogue_0');
-$Post = array(
+$Post = [
     'ID' => $PostID,
     'AuthorID' => $LoggedUser['ID'],
     'AddedTime' => $sqltime,
     'Body' => $Body,
     'EditedUserID' => 0,
     'EditedTime' => '0000-00-00 00:00:00'
-    );
+    ];
 $Cache->insert('', $Post);
 $Cache->commit_transaction(0);
 
 $Cache->begin_transaction("thread_$TopicID".'_info');
-$Cache->update_row(false, array('Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $sqltime));
+$Cache->update_row(false, ['Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $sqltime]);
 $Cache->commit_transaction(0);
 
 

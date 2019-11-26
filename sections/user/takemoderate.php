@@ -25,7 +25,7 @@ $Title = db_string($_POST['Title']);
 $AdminComment = db_string($_POST['AdminComment']);
 $Donor = isset($_POST['Donor']) ? 1 : 0;
 $Artist = isset($_POST['Artist']) ? 1 : 0;
-$SecondaryClasses = isset($_POST['secondary_classes']) ? $_POST['secondary_classes'] : array();
+$SecondaryClasses = isset($_POST['secondary_classes']) ? $_POST['secondary_classes'] : [];
 foreach ($SecondaryClasses as $i => $Val) {
     if (!is_number($Val)) {
         unset($SecondaryClasses[$i]);
@@ -100,8 +100,8 @@ if ($SendHackedMail && !empty($_POST['HackedEmail'])) {
 }
 $MergeStatsFrom = db_string($_POST['MergeStatsFrom']);
 $Reason = db_string($_POST['Reason']);
-$HeavyUpdates = array();
-$LightUpdates = array();
+$HeavyUpdates = [];
+$LightUpdates = [];
 
 // Get user info from the database
 
@@ -190,7 +190,7 @@ if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
         WHERE UserID = $UserID");
     $Cache->delete_value("user_info_$UserID");
 
-    Tracker::update_tracker('remove_user', array('passkey' => $Cur['torrent_pass']));
+    Tracker::update_tracker('remove_user', ['passkey' => $Cur['torrent_pass']]);
 
     header("Location: log.php?search=User+$UserID");
     die();
@@ -200,8 +200,8 @@ if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
 
 $UpdateSet = [];
 $LeechUpdateSet = [];
-$EditSummary = array();
-$TrackerUserUpdates = array('passkey' => $Cur['torrent_pass']);
+$EditSummary = [];
+$TrackerUserUpdates = ['passkey' => $Cur['torrent_pass']];
 
 $QueryID = G::$DB->get_query_id();
 
@@ -411,11 +411,11 @@ if ($Donor != $Cur['Donor'] && check_perms('users_give_donor')) {
 
 // Secondary classes
 if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
-    $OldClasses = $Cur['SecondaryClasses'] ? explode(',', $Cur['SecondaryClasses']) : array();
+    $OldClasses = $Cur['SecondaryClasses'] ? explode(',', $Cur['SecondaryClasses']) : [];
     $DroppedClasses = array_diff($OldClasses, $SecondaryClasses);
     $AddedClasses    = array_diff($SecondaryClasses, $OldClasses);
     if (count($DroppedClasses) > 0) {
-        $ClassChanges = array();
+        $ClassChanges = [];
         foreach ($DroppedClasses as $PermID) {
             $ClassChanges[] = $Classes[$PermID]['Name'];
         }
@@ -428,17 +428,17 @@ if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
         if (count($SecondaryClasses) > 0) {
             $LightUpdates['ExtraClasses'] = array_fill_keys($SecondaryClasses, 1);
         } else {
-            $LightUpdates['ExtraClasses'] = array();
+            $LightUpdates['ExtraClasses'] = [];
         }
         $DeleteKeys = true;
     }
     if (count($AddedClasses) > 0) {
-        $ClassChanges = array();
+        $ClassChanges = [];
         foreach ($AddedClasses as $PermID) {
             $ClassChanges[] = $Classes[$PermID]['Name'];
         }
         $EditSummary[] = "Secondary classes added: ".implode(', ', $ClassChanges);
-        $Values = array();
+        $Values = [];
         foreach ($AddedClasses as $PermID) {
             $Values[] = $UserID;
             $Values[] = $PermID;
@@ -564,7 +564,7 @@ if ($RestrictedForums != db_string($Cur['RestrictedForums']) && check_perms('use
 
 if ($PermittedForums != db_string($Cur['PermittedForums']) && check_perms('users_mod')) {
     $ForumSet = explode(',', $PermittedForums);
-    $ForumList = array();
+    $ForumList = [];
     foreach ($ForumSet as $ForumID) {
         if ($Forums[$ForumID]['MinClassCreate'] <= $LoggedUser['EffectiveClass']) {
             $ForumList[] = $ForumID;
@@ -696,11 +696,11 @@ if ($EnableUser != $Cur['Enabled'] && check_perms('users_disable_users')) {
     $EnableStr = 'account '.translateUserStatus($Cur['Enabled']).'->'.translateUserStatus($EnableUser);
     if ($EnableUser == '2') {
         Tools::disable_users($UserID, '', 1);
-        $TrackerUserUpdates = array();
+        $TrackerUserUpdates = [];
     } elseif ($EnableUser == '1') {
         $Cache->increment('stats_user_count');
         $VisibleTrIP = $Visible && $Cur['IP'] != '127.0.0.1' ? '1' : '0';
-        Tracker::update_tracker('add_user', array('id' => $UserID, 'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIP));
+        Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIP]);
         if (($Cur['Downloaded'] == 0) || ($Cur['Uploaded'] / $Cur['Downloaded'] >= $Cur['RequiredRatio'])) {
             $UpdateSet[] = "i.RatioWatchEnds = '0000-00-00 00:00:00'";
             $CanLeech = 1;
@@ -737,7 +737,7 @@ if ($ResetPasskey == 1 && check_perms('users_edit_reset_keys')) {
             (UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
         VALUES
             ('$UserID', '".$Cur['torrent_pass']."', '$Passkey', '0.0.0.0', '".sqltime()."')");
-    Tracker::update_tracker('change_passkey', array('oldpasskey' => $Cur['torrent_pass'], 'newpasskey' => $Passkey));
+    Tracker::update_tracker('change_passkey', ['oldpasskey' => $Cur['torrent_pass'], 'newpasskey' => $Passkey]);
 }
 
 if ($ResetAuthkey == 1 && check_perms('users_edit_reset_keys')) {

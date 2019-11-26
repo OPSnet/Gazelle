@@ -46,7 +46,7 @@ if (isset($_POST['submit'])) {
         $DB->prepared_query('DELETE FROM site_options WHERE Name = ?', $Name);
         $Cache->delete_value('site_option_' . $Name);
     } else {
-        $Val->SetFields('name', '1', 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', array('regex' => '/^[a-z][-_a-z0-9]{0,63}$/i'));
+        $Val->SetFields('name', '1', 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', ['regex' => '/^[a-z][-_a-z0-9]{0,63}$/i']);
         $Val->SetFields('value', '1', 'string', 'You must specify a value for the option.');
         $Val->SetFields('comment', '1', 'string', 'You must specify a comment for the option.');
 

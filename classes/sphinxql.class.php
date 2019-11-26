@@ -116,7 +116,7 @@ class Sphinxql extends mysqli {
      * @return string escaped string
      */
     public static function sph_escape_string($String) {
-        return strtr(strtolower($String), array(
+        return strtr(strtolower($String), [
             '('=>'\\\\(',
             ')'=>'\\\\)',
             '|'=>'\\\\|',
@@ -132,7 +132,7 @@ class Sphinxql extends mysqli {
             '*'=>'\\\\*',
             '$'=>'\\\\$',
             '^'=>'\\\\^',
-            '\\'=>'\\\\\\\\')
+            '\\'=>'\\\\\\\\']
         );
     }
 
@@ -143,7 +143,7 @@ class Sphinxql extends mysqli {
      * @param param $QueryProcessTime time building and processing the query
      */
     public static function register_query($QueryString, $QueryProcessTime) {
-        self::$Queries[] = array($QueryString, $QueryProcessTime);
+        self::$Queries[] = [$QueryString, $QueryProcessTime];
         self::$Time += $QueryProcessTime;
     }
 }

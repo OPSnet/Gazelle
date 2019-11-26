@@ -4,7 +4,7 @@ User post history page
 */
 
 function error_out($reason = '') {
-    $error = array('status' => 'failure');
+    $error = ['status' => 'failure'];
     if ($reason !== '')
         $error['reason'] = $reason;
     print $error;
@@ -29,7 +29,7 @@ if (isset($LoggedUser['PostsPerPage'])) {
 list($Page, $Limit) = Format::page_limit($PerPage);
 
 $UserInfo = Users::user_info($UserID);
-extract(array_intersect_key($UserInfo, array_flip(array('Username', 'Enabled', 'Title', 'Avatar', 'Donor', 'Warned'))));
+extract(array_intersect_key($UserInfo, array_flip(['Username', 'Enabled', 'Title', 'Avatar', 'Donor', 'Warned'])));
 
 $ViewingOwn = ($UserID === $LoggedUser['ID']);
 $ShowUnread = ($ViewingOwn && (!isset($_GET['showunread']) || !!$_GET['showunread']));
@@ -156,7 +156,7 @@ if ($ShowGrouped) {
 
 $JsonResults = [];
 while (list($PostID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername, $TopicID, $ThreadTitle, $LastPostID, $LastRead, $Locked, $Sticky) = $DB->next_record()) {
-    $JsonResults[] = array(
+    $JsonResults[] = [
         'postId' => (int)$PostID,
         'topicId' => (int)$TopicID,
         'threadTitle' => $ThreadTitle,
@@ -170,16 +170,16 @@ while (list($PostID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsern
         'editedUserId' => (int)$EditedUserID,
         'editedTime' => $EditedTime,
         'editedUsername' => $EditedUsername
-        );
+        ];
 }
 
 print json_encode(
-    array(
+    [
         'status' => 'success',
-        'response' => array(
+        'response' => [
             'currentPage' => (int)$Page,
             'pages' => ceil($Results / $PerPage),
             'threads' => $JsonResults
-            )
-        )
+            ]
+        ]
     );

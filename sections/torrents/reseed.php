@@ -22,10 +22,10 @@ $DB->prepared_query("
     SET LastReseedRequest = NOW()
     WHERE ID = ?", $TorrentID);
 
-$Group = Torrents::get_groups(array($GroupID));
+$Group = Torrents::get_groups([$GroupID]);
 extract(Torrents::array_group($Group[$GroupID]));
 
-$Name = Artists::display_artists(array('1' => $Artists), false, true);
+$Name = Artists::display_artists(['1' => $Artists], false, true);
 $Name .= $GroupName;
 
 $usersToNotify = [];
@@ -46,11 +46,11 @@ if ($DB->has_results()) {
         $UserID = $User['id'];
         $TimeStamp = $User['tstamp'];
 
-        $usersToNotify[$UserID] = array("snatched", $TimeStamp);
+        $usersToNotify[$UserID] = ["snatched", $TimeStamp];
     }
 }
 
-$usersToNotify[$UploaderID] = array("uploaded", strtotime($UploadedTime));
+$usersToNotify[$UploaderID] = ["uploaded", strtotime($UploadedTime)];
 
 foreach ($usersToNotify as $UserID => $info) {
     $Username = Users::user_info($UserID)['Username'];

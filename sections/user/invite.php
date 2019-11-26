@@ -22,7 +22,7 @@ $DB->query("
     ORDER BY Expires");
 $Pending =     $DB->to_array();
 
-$OrderWays = array('username', 'email',    'joined', 'lastseen', 'uploaded', 'downloaded', 'ratio');
+$OrderWays = ['username', 'email',    'joined', 'lastseen', 'uploaded', 'downloaded', 'ratio'];
 
 if (empty($_GET['order'])) {
     $CurrentOrder = 'id';
@@ -69,7 +69,7 @@ switch ($CurrentOrder) {
         break;
 }
 
-$CurrentURL = Format::get_url(array('action', 'order', 'sort'));
+$CurrentURL = Format::get_url(['action', 'order', 'sort']);
 
 $DB->query("
     SELECT

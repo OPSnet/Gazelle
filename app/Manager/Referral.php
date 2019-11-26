@@ -12,9 +12,9 @@ class Referral {
 
     const CACHE_ACCOUNTS = 'referral_accounts';
     // Do not change the ordering in this array after launch.
-    const ACCOUNT_TYPES = array('Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP');
+    const ACCOUNT_TYPES = ['Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP'];
     // Accounts which use the user ID instead of username.
-    const ID_TYPES = array(3, 4, 5);
+    const ID_TYPES = [3, 4, 5];
 
     public function __construct($db, $cache) {
         $this->db = $db;
@@ -64,7 +64,7 @@ class Referral {
 
         if ($this->db->has_results()) {
             $account = $this->db->next_record();
-            foreach (array('URL', 'User', 'Password', 'Cookie') as $key) {
+            foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
                 if (array_key_exists($key, $account)) {
                     $account[$key] = \Gazelle\Util\Crypto::dbDecrypt($account[$key]);
                 }
@@ -85,7 +85,7 @@ class Referral {
         if ($this->db->has_results()) {
             $accounts = $this->db->to_array('ID', MYSQLI_ASSOC);
             foreach ($accounts as &$account) {
-                foreach (array('URL', 'User', 'Password', 'Cookie') as $key) {
+                foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
                     if (array_key_exists($key, $account)) {
                         $account[$key] = \Gazelle\Util\Crypto::dbDecrypt($account[$key]);
                     }
@@ -216,7 +216,7 @@ class Referral {
 
         $Users = $Results > 0 ? $this->db->to_array('ID', MYSQLI_ASSOC) : [];
 
-        return array("Results" => $Results, "Users" => $Users);
+        return ["Results" => $Results, "Users" => $Users];
     }
 
     public function deleteUserReferral($id) {
@@ -249,7 +249,7 @@ class Referral {
     private function validateGazelleCookie($acc) {
         $url  = $acc["URL"] . 'ajax.php';
 
-        $result = $this->proxy->fetch($url, array("action" => "index"), $acc["Cookie"], false);
+        $result = $this->proxy->fetch($url, ["action" => "index"], $acc["Cookie"], false);
         $json = json_decode($result["response"], true);
 
         return $json["status"] === 'success';
@@ -304,8 +304,8 @@ class Referral {
 
         $url = $acc["URL"] . "login.php";
 
-        $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
+        $result = $this->proxy->fetch($url, ["username" => $acc["User"],
+            "password" => $acc["Password"], "keeplogged" => "1"], [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -322,8 +322,8 @@ class Referral {
 
         $url = $acc["URL"] . "user/login";
 
-        $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
+        $result = $this->proxy->fetch($url, ["username" => $acc["User"],
+            "password" => $acc["Password"], "keeplogged" => "1"], [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -347,10 +347,10 @@ class Referral {
         $xpath = new \DOMXPath($doc);
         $token = $xpath->evaluate("string(//input[@name='token']/@value)");
 
-        $result = $this->proxy->fetch($url, array("username" => $acc["User"],
+        $result = $this->proxy->fetch($url, ["username" => $acc["User"],
             "password" => $acc["Password"], "keeploggedin" => "1",
             "token" => $token, "cinfo" => "1024|768|24|0",
-            "iplocked" => "1"), $result["cookies"], true);
+            "iplocked" => "1"], $result["cookies"], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -367,8 +367,8 @@ class Referral {
 
         $url = $acc["URL"] . "login.php";
 
-        $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
+        $result = $this->proxy->fetch($url, ["username" => $acc["User"],
+            "password" => $acc["Password"], "keeplogged" => "1"], [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -385,8 +385,8 @@ class Referral {
 
         $url = $acc["URL"] . "login_finish.php";
 
-        $result = $this->proxy->fetch($url, array("username" => $acc["User"],
-            "password" => $acc["Password"], "keeplogged" => "1"), [], true);
+        $result = $this->proxy->fetch($url, ["username" => $acc["User"],
+            "password" => $acc["Password"], "keeplogged" => "1"], [], true);
 
         if ($result["status"] == 200) {
             $acc["Cookie"] = $result["cookies"];
@@ -427,7 +427,7 @@ class Referral {
 
         $url = $acc["URL"] . 'ajax.php';
 
-        $result = $this->proxy->fetch($url, array("action" => "usersearch", "search" => $user),
+        $result = $this->proxy->fetch($url, ["action" => "usersearch", "search" => $user],
             $acc["Cookie"], false);
         $json = json_decode($result["response"], true);
 
@@ -442,7 +442,7 @@ class Referral {
             }
 
             if ($match) {
-                $result = $this->proxy->fetch($url, array("action" => "user", "id" => $userId),
+                $result = $this->proxy->fetch($url, ["action" => "user", "id" => $userId],
                     $acc["Cookie"], false);
                 $json = json_decode($result["response"], true);
 
@@ -463,8 +463,8 @@ class Referral {
     private function verifyGGNAccount($acc, $user, $key) {
         $url = $acc["URL"] . 'api.php';
 
-        $result = $this->proxy->fetch($url, array("request" => "user", "name" => $user,
-            "key" => $acc["Password"]), [], false);
+        $result = $this->proxy->fetch($url, ["request" => "user", "name" => $user,
+            "key" => $acc["Password"]], [], false);
         $json = json_decode($result["response"], true);
 
         $profile = $json["response"]["profileText"];
@@ -503,7 +503,7 @@ class Referral {
 
         $url = $acc["URL"] . 'user.php';
 
-        $result = $this->proxy->fetch($url, array("id" => $user), $acc["Cookie"], false);
+        $result = $this->proxy->fetch($url, ["id" => $user], $acc["Cookie"], false);
 
         $profile = $result["response"];
         $match = strpos($profile, $key);
@@ -522,7 +522,7 @@ class Referral {
 
         $url = $acc["URL"] . 'user.php';
 
-        $result = $this->proxy->fetch($url, array("id" => $user),
+        $result = $this->proxy->fetch($url, ["id" => $user],
             $acc["Cookie"], false);
 
         $profile = $result["response"];
@@ -542,7 +542,7 @@ class Referral {
 
         $url = $acc["URL"] . 'user.php';
 
-        $result = $this->proxy->fetch($url, array("id" => $user),
+        $result = $this->proxy->fetch($url, ["id" => $user],
             $acc["Cookie"], false);
 
         $profile = $result["response"];

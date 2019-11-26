@@ -62,7 +62,7 @@ if ($_POST['album_desc']) {
 }
 if (check_perms('torrents_freeleech')) {
     $Free = (int)$_POST['freeleech'];
-    if (!in_array($Free, array(0, 1, 2))) {
+    if (!in_array($Free, [0, 1, 2])) {
         error(404);
     }
     $Properties['FreeLeech'] = $Free;
@@ -71,7 +71,7 @@ if (check_perms('torrents_freeleech')) {
         $FreeType = 0;
     } else {
         $FreeType = (int)$_POST['freeleechtype'];
-        if (!in_array($Free, array(0, 1, 2, 3))) {
+        if (!in_array($Free, [0, 1, 2, 3])) {
             error(404);
         }
     }
@@ -107,7 +107,7 @@ if ($Properties['UnknownRelease'] && !($Remastered == '1' && !$RemasterYear) && 
     }
 }
 
-$Validate->SetFields('type', '1', 'number', 'Not a valid type.', array('maxlength' => count($Categories), 'minlength' => 1));
+$Validate->SetFields('type', '1', 'number', 'Not a valid type.', ['maxlength' => count($Categories), 'minlength' => 1]);
 switch ($Type) {
     case 'Music':
         if (!empty($Properties['Remastered']) && !$Properties['UnknownRelease']) {
@@ -122,7 +122,7 @@ switch ($Type) {
             die();
         }
 
-        $Validate->SetFields('remaster_title', '0', 'string', 'Remaster title must be between 2 and 80 characters.', array('maxlength' => 80, 'minlength' => 2));
+        $Validate->SetFields('remaster_title', '0', 'string', 'Remaster title must be between 2 and 80 characters.', ['maxlength' => 80, 'minlength' => 2]);
 
         if ($Properties['RemasterTitle'] == 'Original Release') {
             error('"Original Release" is not a valid remaster title.');
@@ -130,19 +130,19 @@ switch ($Type) {
             die();
         }
 
-        $Validate->SetFields('remaster_record_label', '0', 'string', 'Remaster record label must be between 2 and 80 characters.', array('maxlength' => 80, 'minlength' => 2));
+        $Validate->SetFields('remaster_record_label', '0', 'string', 'Remaster record label must be between 2 and 80 characters.', ['maxlength' => 80, 'minlength' => 2]);
 
-        $Validate->SetFields('remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 2 and 80 characters.', array('maxlength' => 80, 'minlength' => 2));
+        $Validate->SetFields('remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 2 and 80 characters.', ['maxlength' => 80, 'minlength' => 2]);
 
 
-        $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', array('inarray' => $Formats));
+        $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]);
 
-        $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', array('inarray' => $Bitrates));
+        $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
 
 
         // Handle 'other' bitrates
         if ($Properties['Encoding'] == 'Other') {
-            $Validate->SetFields('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', array('maxlength' => 9));
+            $Validate->SetFields('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $enc = trim($_POST['other_bitrate']);
             if (isset($_POST['vbr'])) {
                 $enc .= ' (VBR)';
@@ -151,12 +151,12 @@ switch ($Type) {
             $Properties['Encoding'] = $enc;
             $Properties['Bitrate'] = $enc;
         } else {
-            $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', array('inarray' => $Bitrates));
+            $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
         }
 
-        $Validate->SetFields('media', '1', 'inarray', 'Not a valid media.', array('inarray' => $Media));
+        $Validate->SetFields('media', '1', 'inarray', 'Not a valid media.', ['inarray' => $Media]);
 
-        $Validate->SetFields('release_desc', '0', 'string', 'Invalid release description.', array('maxlength' => 1000000, 'minlength' => 0));
+        $Validate->SetFields('release_desc', '0', 'string', 'Invalid release description.', ['maxlength' => 1000000, 'minlength' => 0]);
 
         break;
 
@@ -166,14 +166,14 @@ switch ($Type) {
         ^ this is commented out because there is no title field on these pages*/
         $Validate->SetFields('year', '1', 'number', 'The year of the release must be entered.');
 
-        $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', array('inarray' => $Formats));
+        $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]);
 
-        $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', array('inarray' => $Bitrates));
+        $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
 
 
         // Handle 'other' bitrates
         if ($Properties['Encoding'] == 'Other') {
-            $Validate->SetFields('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', array('maxlength' => 9));
+            $Validate->SetFields('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $enc = trim($_POST['other_bitrate']);
             if (isset($_POST['vbr'])) {
                 $enc .= ' (VBR)';
@@ -182,10 +182,10 @@ switch ($Type) {
             $Properties['Encoding'] = $enc;
             $Properties['Bitrate'] = $enc;
         } else {
-            $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', array('inarray' => $Bitrates));
+            $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
         }
 
-        $Validate->SetFields('release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', array('maxlength' => 1000000, 'minlength' => 10));
+        $Validate->SetFields('release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', ['maxlength' => 1000000, 'minlength' => 10]);
 
         break;
 

@@ -55,7 +55,7 @@ if (!list($Labels, $InFlow, $OutFlow, $NetFlow, $Max) = $Cache->get_value('torre
         list($Label, $Amount) = $Month;
         $NetFlow[] = number_format(($Amount / $Max) * 100, 4);
     }
-    $Cache->cache_value('torrents_timeline', array($Labels, $InFlow, $OutFlow, $NetFlow, $Max), mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
+    $Cache->cache_value('torrents_timeline', [$Labels, $InFlow, $OutFlow, $NetFlow, $Max], mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
 }
 
 include_once(SERVER_ROOT.'/classes/charts.class.php');
@@ -66,7 +66,7 @@ $DB->query("
     GROUP BY tg.CategoryID
     ORDER BY Torrents DESC");
 $Groups = $DB->to_array();
-$Pie = new PIE_CHART(750, 400, array('Other' => 1, 'Percentage' => 1));
+$Pie = new PIE_CHART(750, 400, ['Other' => 1, 'Percentage' => 1]);
 foreach ($Groups as $Group) {
     list($CategoryID, $Torrents) = $Group;
     $CategoryName = $Categories[$CategoryID - 1];

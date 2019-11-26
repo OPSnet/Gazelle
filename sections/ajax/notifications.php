@@ -69,7 +69,7 @@ foreach ($FilterGroups as $FilterID => $FilterResults) {
             $NumNew++;
         }
 
-        $JsonNotifications[] = array(
+        $JsonNotifications[] = [
             'torrentId' => (int)$TorrentID,
             'groupId' => (int)$GroupID,
             'groupName' => $GroupName,
@@ -95,13 +95,13 @@ foreach ($FilterGroups as $FilterID => $FilterResults) {
             'freeTorrent' => $TorrentInfo['FreeTorrent'] == 1,
             'logInDb' => $TorrentInfo['HasLog'] == 1,
             'unread' => $Result['UnRead'] == 1
-        );
+        ];
     }
 }
 
-json_print("success", array(
+json_print("success", [
     'currentPages' => intval($Page),
     'pages' => ceil($TorrentCount / NOTIFICATIONS_PER_PAGE),
     'numNew' => $NumNew,
     'results' => $JsonNotifications
-));
+]);

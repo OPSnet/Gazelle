@@ -24,7 +24,7 @@ if (!empty($_GET['search'])) {
     }
 }
 
-foreach (array('ip', 'email', 'username', 'comment') as $field) {
+foreach (['ip', 'email', 'username', 'comment'] as $field) {
     if (isset($_GET[$field])) {
         $_GET[$field] = trim($_GET[$field]);
     }
@@ -124,12 +124,12 @@ function num_compare($Field, $Operand, $Num1, $Num2 = '') {
 
 // Arrays, regexes, and all that fun stuff we can use for validation, form generation, etc
 
-$DateChoices = array('inarray'=>array('on', 'before', 'after', 'between'));
-$SingleDateChoices = array('inarray'=>array('on', 'before', 'after'));
-$NumberChoices = array('inarray'=>array('equal', 'above', 'below', 'between', 'buffer'));
-$YesNo = array('inarray'=>array('any', 'yes', 'no'));
-$OrderVals = array('inarray'=>array('Username', 'Ratio', 'IP', 'Email', 'Joined', 'Last Seen', 'Uploaded', 'Downloaded', 'Invites', 'Snatches'));
-$WayVals = array('inarray'=>array('Ascending', 'Descending'));
+$DateChoices = ['inarray'=>['on', 'before', 'after', 'between']];
+$SingleDateChoices = ['inarray'=>['on', 'before', 'after']];
+$NumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer']];
+$YesNo = ['inarray'=>['any', 'yes', 'no']];
+$OrderVals = ['inarray'=>['Username', 'Ratio', 'IP', 'Email', 'Joined', 'Last Seen', 'Uploaded', 'Downloaded', 'Invites', 'Snatches']];
+$WayVals = ['inarray'=>['Ascending', 'Descending']];
 
 $email_history_checked = true;
 $ip_history_checked = true;
@@ -147,7 +147,7 @@ if (count($_GET)) {
             $ip_history_checked = false;
         }
     }
-    $DateRegex = array('regex' => '/\d{4}-\d{2}-\d{2}/');
+    $DateRegex = ['regex' => '/\d{4}-\d{2}-\d{2}/'];
 
     $ClassIDs = [];
     $SecClassIDs = [];
@@ -159,7 +159,7 @@ if (count($_GET)) {
         }
     }
 
-    $Val->SetFields('comment', '0', 'string', 'Comment is too long.', array('maxlength' => 512));
+    $Val->SetFields('comment', '0', 'string', 'Comment is too long.', ['maxlength' => 512]);
     $Val->SetFields('disabled_invites', '0', 'inarray', 'Invalid disabled_invites field', $YesNo);
 
 
@@ -176,13 +176,13 @@ if (count($_GET)) {
     $Val->SetFields('downloaded', '0', 'inarray', 'Invalid downloaded field', $NumberChoices);
     //$Val->SetFields('snatched', '0', 'inarray', 'Invalid snatched field', $NumberChoices);
 
-    $Val->SetFields('matchtype', '0', 'inarray', 'Invalid matchtype field', array('inarray' => array('strict', 'fuzzy', 'regex')));
+    $Val->SetFields('matchtype', '0', 'inarray', 'Invalid matchtype field', ['inarray' => ['strict', 'fuzzy', 'regex']]);
 
-    $Val->SetFields('lockedaccount', '0', 'inarray', 'Invalid locked account field', array('inarray' => array('any', 'locked', 'unlocked')));
+    $Val->SetFields('lockedaccount', '0', 'inarray', 'Invalid locked account field', ['inarray' => ['any', 'locked', 'unlocked']]);
 
-    $Val->SetFields('enabled', '0', 'inarray', 'Invalid enabled field', array('inarray' => array('', 0, 1, 2)));
-    $Val->SetFields('class', '0', 'inarray', 'Invalid class', array('inarray' => $ClassIDs));
-    $Val->SetFields('secclass', '0', 'inarray', 'Invalid class', array('inarray' => $SecClassIDs));
+    $Val->SetFields('enabled', '0', 'inarray', 'Invalid enabled field', ['inarray' => ['', 0, 1, 2]]);
+    $Val->SetFields('class', '0', 'inarray', 'Invalid class', ['inarray' => $ClassIDs]);
+    $Val->SetFields('secclass', '0', 'inarray', 'Invalid class', ['inarray' => $SecClassIDs]);
     $Val->SetFields('donor', '0', 'inarray', 'Invalid donor field', $YesNo);
     $Val->SetFields('warned', '0', 'inarray', 'Invalid warned field', $YesNo);
     $Val->SetFields('disabled_uploads', '0', 'inarray', 'Invalid disabled_uploads field', $YesNo);
@@ -190,10 +190,10 @@ if (count($_GET)) {
     $Val->SetFields('order', '0', 'inarray', 'Invalid ordering', $OrderVals);
     $Val->SetFields('way', '0', 'inarray', 'Invalid way', $WayVals);
 
-    $Val->SetFields('passkey', '0', 'string', 'Invalid passkey', array('maxlength' => 32));
-    $Val->SetFields('avatar', '0', 'string', 'Avatar URL too long', array('maxlength' => 512));
+    $Val->SetFields('passkey', '0', 'string', 'Invalid passkey', ['maxlength' => 32]);
+    $Val->SetFields('avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]);
     $Val->SetFields('stylesheet', '0', 'inarray', 'Invalid stylesheet', array_unique(array_keys($Stylesheets)));
-    $Val->SetFields('cc', '0', 'inarray', 'Invalid Country Code', array('maxlength' => 2));
+    $Val->SetFields('cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]);
 
     $Err = $Val->ValidateForm($_GET);
 
@@ -209,7 +209,7 @@ if (count($_GET)) {
             $Match = ' LIKE ';
         }
 
-        $OrderTable = array(
+        $OrderTable = [
                 'Username' => 'um1.Username',
                 'Joined' => 'ui1.JoinDate',
                 'Email' => 'um1.Email',
@@ -219,9 +219,9 @@ if (count($_GET)) {
                 'Downloaded' => 'uls1.Downloaded',
                 'Ratio' => '(um1.Uploaded / um1.Downloaded)',
                 'Invites' => 'um1.Invites',
-                'Snatches' => 'Snatches');
+                'Snatches' => 'Snatches'];
 
-        $WayTable = array('Ascending'=>'ASC', 'Descending'=>'DESC');
+        $WayTable = ['Ascending'=>'ASC', 'Descending'=>'DESC'];
 
         $Where = [];
         $Having = [];

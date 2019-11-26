@@ -40,7 +40,7 @@ class CACHE extends Memcached {
     protected $InTransaction = false;
     public $Time = 0;
     private $Servers = [];
-    private $PersistentKeys = array(
+    private $PersistentKeys = [
         'ajax_requests_*',
         'query_lock_*',
         'stats_*',
@@ -51,7 +51,7 @@ class CACHE extends Memcached {
         // Cache-based features
         'global_notification',
         'notifications_one_reads_*',
-    );
+    ];
     private $ClearedKeys = [];
 
     public $CanClear = false;
@@ -336,7 +336,7 @@ class CACHE extends Memcached {
         if ($Key === '') {
             array_unshift($this->MemcacheDBArray, $Value);
         } else {
-            $this->MemcacheDBArray = array($Key=>$Value) + $this->MemcacheDBArray;
+            $this->MemcacheDBArray = [$Key=>$Value] + $this->MemcacheDBArray;
         }
     }
 
@@ -348,7 +348,7 @@ class CACHE extends Memcached {
         if ($Key === '') {
             array_push($this->MemcacheDBArray, $Value);
         } else {
-            $this->MemcacheDBArray = $this->MemcacheDBArray + array($Key=>$Value);
+            $this->MemcacheDBArray = $this->MemcacheDBArray + [$Key=>$Value];
         }
 
     }

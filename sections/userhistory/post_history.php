@@ -21,7 +21,7 @@ if (isset($LoggedUser['PostsPerPage'])) {
 list($Page, $Limit) = Format::page_limit($PerPage);
 
 $UserInfo = Users::user_info($UserID);
-extract(array_intersect_key($UserInfo, array_flip(array('Username', 'Enabled', 'Title', 'Avatar', 'Donor', 'Warned'))));
+extract(array_intersect_key($UserInfo, array_flip(['Username', 'Enabled', 'Title', 'Avatar', 'Donor', 'Warned'])));
 
 View::show_header("Post history for $Username", 'subscriptions,comments,bbcode');
 

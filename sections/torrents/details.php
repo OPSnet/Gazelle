@@ -806,14 +806,14 @@ CommentsView::render_comments($Thread, $LastRead, "torrents.php?id=$GroupID");
             <?=$Pages?>
         </div>
 <?php
-    View::parse('generic/reply/quickreply.php', array(
+    View::parse('generic/reply/quickreply.php', [
         'InputName' => 'pageid',
         'InputID' => $GroupID,
         'Action' => 'comments.php?page=torrents',
         'InputAction' => 'take_post',
         'TextareaCols' => 65,
         'SubscribeBox' => true
-    ));
+    ]);
 ?>
         </div>
     </div>

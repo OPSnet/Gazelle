@@ -143,7 +143,7 @@ class TORRENT_FORM {
                 <td>
                     <select name="freeleech">
 <?php
-                $FL = array("Normal", "Free", "Neutral");
+                $FL = ["Normal", "Free", "Neutral"];
                 foreach ($FL as $Key => $Name) {
 ?>
                         <option value="<?=$Key?>"<?=($Key == $Torrent['FreeTorrent'] ? ' selected="selected"' : '')?>><?=$Name?></option>
@@ -152,7 +152,7 @@ class TORRENT_FORM {
                     because
                     <select name="freeleechtype">
 <?php
-                $FL = array("N/A", "Staff Pick", "Perma-FL", "Vanity House");
+                $FL = ["N/A", "Staff Pick", "Perma-FL", "Vanity House"];
                 foreach ($FL as $Key => $Name) {
 ?>
                         <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$Name?></option>
@@ -613,7 +613,7 @@ function show() {
             <tr>
                 <td class="label">Album description:</td>
                 <td>
-<?php new TEXTAREA_PREVIEW('album_desc', 'album_desc', display_str($Torrent['GroupDescription']), 60, 8, true, true, false, array($this->Disabled)); ?>
+<?php new TEXTAREA_PREVIEW('album_desc', 'album_desc', display_str($Torrent['GroupDescription']), 60, 8, true, true, false, [$this->Disabled]); ?>
                     <p class="min_padding">Contains background information such as album history and maybe a review.</p>
                 </td>
             </tr>

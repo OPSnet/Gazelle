@@ -60,7 +60,7 @@ if ($Data) {
         error(404);
     }
 
-    list($Name, $Image, $Body, $VanityHouseArtist) = $DB->next_record(MYSQLI_NUM, array(0));
+    list($Name, $Image, $Body, $VanityHouseArtist) = $DB->next_record(MYSQLI_NUM, [0]);
 }
 
 
@@ -356,7 +356,7 @@ foreach ($Importances as $Group) {
                 unset($ExtendedArtists[3]);
                 $DisplayName = Artists::display_artists($ExtendedArtists).$DisplayName;
             } elseif (count($GroupArtists) > 0) {
-                $DisplayName = Artists::display_artists(array(1 => $Artists), true, true).$DisplayName;
+                $DisplayName = Artists::display_artists([1 => $Artists], true, true).$DisplayName;
             }
             break;
         case 1022: // Show performers on composer pages
@@ -366,12 +366,12 @@ foreach ($Importances as $Group) {
                 unset($ExtendedArtists[6]);
                 $DisplayName = Artists::display_artists($ExtendedArtists).$DisplayName;
             } elseif (count($GroupArtists) > 0) {
-                $DisplayName = Artists::display_artists(array(1 => $Artists), true, true).$DisplayName;
+                $DisplayName = Artists::display_artists([1 => $Artists], true, true).$DisplayName;
             }
             break;
         default: // Show composers otherwise
             if (!empty($ExtendedArtists[4])) {
-                $DisplayName = Artists::display_artists(array(4 => $ExtendedArtists[4]), true, true).$DisplayName;
+                $DisplayName = Artists::display_artists([4 => $ExtendedArtists[4]], true, true).$DisplayName;
             }
     }
 
@@ -594,7 +594,7 @@ if (check_perms('zip_downloader')) {
         list($ZIPList, $ZIPPrefs) = $LoggedUser['Collector'];
         $ZIPList = explode(':', $ZIPList);
     } else {
-        $ZIPList = array('00', '11');
+        $ZIPList = ['00', '11'];
         $ZIPPrefs = 1;
     }
 ?>
@@ -998,13 +998,13 @@ CommentsView::render_comments($Thread, $LastRead, "artist.php?id=$ArtistID");
             <?=($Pages)?>
         </div>
 <?php
-    View::parse('generic/reply/quickreply.php', array(
+    View::parse('generic/reply/quickreply.php', [
         'InputName' => 'pageid',
         'InputID' => $ArtistID,
         'Action' => 'comments.php?page=artist',
         'InputAction' => 'take_post',
         'SubscribeBox' => true
-    ));
+    ]);
 ?>
         </div>
     </div>
@@ -1021,6 +1021,6 @@ if ($RevisionID) {
     $Key = "artist_$ArtistID";
 }
 
-$Data = array(array($Name, $Image, $Body, $NumSimilar, $SimilarArray, [], [], $VanityHouseArtist));
+$Data = [[$Name, $Image, $Body, $NumSimilar, $SimilarArray, [], [], $VanityHouseArtist]];
 
 $Cache->cache_value($Key, $Data, 3600);

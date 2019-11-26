@@ -282,7 +282,7 @@ switch ($_REQUEST['action']) {
                         LEFT JOIN users_main AS u ON u.PermissionID = p.ID
                     WHERE p.ID = ?
                     GROUP BY p.ID", $_REQUEST['id']);
-                list($ID, $Name, $Level, $Secondary, $Forums, $Values, $DisplayStaff, $StaffGroup, $UserCount) = $DB->next_record(MYSQLI_NUM, array(5));
+                list($ID, $Name, $Level, $Secondary, $Forums, $Values, $DisplayStaff, $StaffGroup, $UserCount) = $DB->next_record(MYSQLI_NUM, [5]);
 
                 if (!check_perms('admin_manage_permissions', $Level)) {
                     error(403);

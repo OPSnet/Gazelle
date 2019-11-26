@@ -2,7 +2,7 @@
 if (!check_perms('users_warn')) {
     error(404);
 }
-Misc::assert_isset_request($_POST, array('postid'));
+Misc::assert_isset_request($_POST, ['postid']);
 
 $PostID = (int)$_POST['postid'];
 $DB->query("

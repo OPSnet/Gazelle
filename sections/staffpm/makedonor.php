@@ -41,11 +41,11 @@ $DB->query("
         ResolverID = ".$LoggedUser['ID']."
     WHERE ID = $ConvID");
 
-Donations::donate($UserID, array(
+Donations::donate($UserID, [
                             "Source" => "Staff PM",
                             "Price" => $_POST['donation_amount'],
                             "Currency" => $_POST['donation_currency'],
                             "Reason" => $_POST['donation_reason'],
-                            "SendPM" => true));
+                            "SendPM" => true]);
 
 header('Location: staffpm.php');

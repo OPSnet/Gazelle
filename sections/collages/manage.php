@@ -96,7 +96,7 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
             unset($ExtendedArtists[3]);
             $DisplayName .= Artists::display_artists($ExtendedArtists, true, false);
         } elseif (count($Artists) > 0) {
-            $DisplayName .= Artists::display_artists(array('1' => $Artists), true, false);
+            $DisplayName .= Artists::display_artists(['1' => $Artists], true, false);
         }
         $TorrentLink = "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\">$GroupName</a>";
         $GroupYear = $GroupYear > 0 ? $GroupYear : '';

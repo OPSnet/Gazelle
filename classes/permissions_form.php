@@ -7,7 +7,7 @@
  ** user custom permissions form.                                              **
  ********************************************************************************/
 
-$PermissionsArray = array(
+$PermissionsArray = [
     'site_leech' => 'Can leech (Does this work?).',
     'site_upload' => 'Upload torrent access.',
     'site_vote' => 'Request vote access.',
@@ -119,7 +119,7 @@ $PermissionsArray = array(
     'torrents_edit_vanityhouse' => 'Can mark groups as part of Vanity House.',
     'artist_edit_vanityhouse' => 'Can mark artists as part of Vanity House.',
     'site_tag_aliases_read' => 'Can view the list of tag aliases.'
-);
+];
 
 function permissions_form() {
 ?>

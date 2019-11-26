@@ -148,7 +148,7 @@ if (isset($_POST['delete'])) {
     $Cache->delete_value("thread_$TopicID");
 
     $Cache->begin_transaction('forums_list');
-    $UpdateArray = array(
+    $UpdateArray = [
         'NumPosts' => $NumPosts,
         'NumTopics' => '-1',
         'LastPostID' => $NewLastPostID,
@@ -158,7 +158,7 @@ if (isset($_POST['delete'])) {
         'Title' => $NewLastTitle,
         'IsLocked' => $NewLocked,
         'IsSticky' => $NewSticky
-        );
+        ];
 
     $Cache->update_row($ForumID, $UpdateArray);
     $Cache->commit_transaction(0);
@@ -181,13 +181,13 @@ if (isset($_POST['delete'])) {
     }
 
     $Cache->begin_transaction("thread_{$TopicID}_info");
-    $UpdateArray = array(
+    $UpdateArray = [
         'IsSticky' => $Sticky,
         'Ranking' => $Ranking,
         'IsLocked' => $Locked,
         'Title' => Format::cut_string($RawTitle, 150, 1, 0),
         'ForumID' => $ForumID
-        );
+        ];
     $Cache->update_row(false, $UpdateArray);
     $Cache->commit_transaction(0);
 
@@ -215,11 +215,11 @@ if (isset($_POST['delete'])) {
             WHERE ID = '$ForumID'");
         list($MinClassRead, $MinClassWrite, $ForumName) = $DB->next_record(MYSQLI_NUM, false);
         $Cache->begin_transaction("thread_{$TopicID}_info");
-        $UpdateArray = array(
+        $UpdateArray = [
             'ForumName' => $ForumName,
             'MinClassRead' => $MinClassRead,
             'MinClassWrite' => $MinClassWrite
-            );
+            ];
         $Cache->update_row(false, $UpdateArray);
         $Cache->commit_transaction(3600 * 24 * 5);
 
@@ -263,7 +263,7 @@ if (isset($_POST['delete'])) {
             WHERE ID = '$OldForumID'");
 
 
-        $UpdateArray = array(
+        $UpdateArray = [
             'NumPosts' => $NumPosts,
             'NumTopics' => '-1',
             'LastPostID' => $NewLastPostID,
@@ -274,7 +274,7 @@ if (isset($_POST['delete'])) {
             'IsLocked' => $NewLocked,
             'IsSticky' => $NewSticky,
             'Ranking' => $NewRanking
-            );
+            ];
 
 
         $Cache->update_row($OldForumID, $UpdateArray);
@@ -315,7 +315,7 @@ if (isset($_POST['delete'])) {
             WHERE ID = '$ForumID'");
 
 
-        $UpdateArray = array(
+        $UpdateArray = [
             'NumPosts' => ($NumPosts + $Posts),
             'NumTopics' => '+1',
             'LastPostID' => $NewLastPostID,
@@ -323,7 +323,7 @@ if (isset($_POST['delete'])) {
             'LastPostTopicID' => $NewLastTopic,
             'LastPostTime' => $NewLastAddedTime,
             'Title' => $NewLastTitle
-            );
+            ];
 
         $Cache->update_row($ForumID, $UpdateArray);
 
@@ -335,12 +335,12 @@ if (isset($_POST['delete'])) {
             WHERE ID = '$ForumID'");
         list($LastTopicID) = $DB->next_record();
         if ($LastTopicID == $TopicID) {
-            $UpdateArray = array(
+            $UpdateArray = [
                 'Title' => $RawTitle,
                 'IsLocked' => $Locked,
                 'IsSticky' => $Sticky,
                 'Ranking' => $Ranking
-            );
+            ];
             $Cache->begin_transaction('forums_list');
             $Cache->update_row($ForumID, $UpdateArray);
             $Cache->commit_transaction(0);

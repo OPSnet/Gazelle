@@ -130,7 +130,7 @@ class AutoEnable {
 
             foreach ($Results as $Result) {
                 list($Email, $ID, $UserID) = $Result;
-                $UserInfo[] = array($ID, $UserID);
+                $UserInfo[] = [$ID, $UserID];
 
                 if ($Status == self::APPROVED) {
                     // Generate token
@@ -151,7 +151,7 @@ class AutoEnable {
         } else {
             foreach ($Results as $Result) {
                 list(, $ID, $UserID) = $Result;
-                $UserInfo[] = array($ID, $UserID);
+                $UserInfo[] = [$ID, $UserID];
             }
         }
 
@@ -264,7 +264,7 @@ class AutoEnable {
                 G::$DB->query("UPDATE users_info SET BanReason = '0' WHERE UserID = '$UserID'");
                 G::$DB->query("SELECT torrent_pass FROM users_main WHERE ID='{$UserID}'");
                 list($TorrentPass) = G::$DB->next_record();
-                Tracker::update_tracker('add_user', array('id' => $UserID, 'passkey' => $TorrentPass));
+                Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $TorrentPass]);
                 $Err = "Your account has been enabled. You may now log in.";
             }
         } else {

@@ -132,7 +132,7 @@ class INVITE_TREE {
 ?>
         <strong><?=Users::format_username($ID, true, true, ($Enabled != 2 ? false : true), true)?></strong>
 <?php
-            if (check_paranoia(array('uploaded', 'downloaded'), $Paranoia, $UserClass)) {
+            if (check_paranoia(['uploaded', 'downloaded'], $Paranoia, $UserClass)) {
                 $TotalUpload += $Uploaded;
                 $TotalDownload += $Downloaded;
 ?>

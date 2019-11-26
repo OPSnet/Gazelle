@@ -15,7 +15,7 @@ if (!list($Question,$Answers,$Votes,$Featured,$Closed) = $Cache->get_value('poll
         SELECT Question, Answers, Featured, Closed
         FROM forums_polls
         WHERE TopicID='".$TopicID."'");
-    list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, array(1));
+    list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
     $Answers = unserialize($Answers);
     $DB->query("
         SELECT Vote, COUNT(UserID)
@@ -57,7 +57,7 @@ if (isset($_POST['close'])) {
         WHERE TopicID=\''.$TopicID.'\'');
 }
 
-$Cache->cache_value('polls_'.$TopicID, array($Question,$Answers,$Votes,$Featured,$Closed), 0);
+$Cache->cache_value('polls_'.$TopicID, [$Question,$Answers,$Votes,$Featured,$Closed], 0);
 
 $Location = (empty($_SERVER['HTTP_REFERER'])) ? "forums.php?action=viewthread&threadid={$TopicID}" : $_SERVER['HTTP_REFERER'];
 header("Location: {$Location}");

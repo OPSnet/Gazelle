@@ -42,7 +42,7 @@ if (isset($_POST['Username'])) {
         //Grab the userID
         $UserID = $DB->inserted_id();
 
-        Tracker::update_tracker('add_user', array('id' => $UserID, 'passkey' => $torrent_pass));
+        Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $torrent_pass]);
 
         //Default stylesheet
         $DB->query("

@@ -12,8 +12,8 @@ class Proxy {
     }
 
     public function fetch($url, $params, $cookies, $post, $headers = []) {
-        $data = Crypto::encrypt(json_encode(array('url' => $url, 'params' => $params,
-            'cookies' => $cookies, 'post' => $post, 'action' => 'fetch', 'headers' => $headers),
+        $data = Crypto::encrypt(json_encode(['url' => $url, 'params' => $params,
+            'cookies' => $cookies, 'post' => $post, 'action' => 'fetch', 'headers' => $headers],
             JSON_UNESCAPED_SLASHES), $this->key);
 
         $curl = curl_init();
@@ -21,7 +21,7 @@ class Proxy {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_URL, $this->bouncer);
         curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
         curl_setopt($curl, CURLOPT_POSTFIELDS, self::urlEncode($data));
         $result = curl_exec($curl);
         $json = json_decode(Crypto::decrypt(self::urlDecode($result), $this->key), true);

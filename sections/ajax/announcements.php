@@ -16,7 +16,7 @@ if (!$News = $Cache->get_value('news')) {
 
 if ($LoggedUser['LastReadNews'] != $News[0][0]) {
     $Cache->begin_transaction("user_info_heavy_$UserID");
-    $Cache->update_row(false, array('LastReadNews' => $News[0][0]));
+    $Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
     $Cache->commit_transaction(0);
     $DB->query("
         UPDATE users_info
@@ -45,7 +45,7 @@ if (($Blog = $Cache->get_value('blog')) === false) {
 $JsonBlog = [];
 for ($i = 0; $i < 5; $i++) {
     list($BlogID, $Author, $AuthorID, $Title, $Body, $BlogTime, $ThreadID) = $Blog[$i];
-    $JsonBlog[] = array(
+    $JsonBlog[] = [
         'blogId' => (int)$BlogID,
         'author' => $Author,
         'title' => $Title,
@@ -53,7 +53,7 @@ for ($i = 0; $i < 5; $i++) {
         'body' => Text::full_format($Body),
         'blogTime' => $BlogTime,
         'threadId' => (int)$ThreadID
-    );
+    ];
 }
 
 $JsonAnnouncements = [];
@@ -64,20 +64,20 @@ foreach ($News as $NewsItem) {
         continue;
     }
 
-    $JsonAnnouncements[] = array(
+    $JsonAnnouncements[] = [
         'newsId' => (int)$NewsID,
         'title' => $Title,
         'bbBody' => $Body,
         'body' => Text::full_format($Body),
         'newsTime' => $NewsTime
-    );
+    ];
 
     if (++$Count > 4) {
         break;
     }
 }
 
-json_print("success", array(
+json_print("success", [
     'announcements' => $JsonAnnouncements,
     'blogPosts' => $JsonBlog
-));
+]);

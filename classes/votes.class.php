@@ -57,7 +57,7 @@ class Votes {
      */
     public static function get_group_votes($GroupID) {
         if (!is_number($GroupID)) {
-            return array('Ups' => 0, 'Total' => 0);
+            return ['Ups' => 0, 'Total' => 0];
         }
         $GroupVotes = G::$Cache->get_value("votes_$GroupID");
         if ($GroupVotes === false) {
@@ -67,7 +67,7 @@ class Votes {
                 FROM torrents_votes
                 WHERE GroupID = $GroupID");
             if (!G::$DB->has_results()) {
-                $GroupVotes = array('Ups' => 0, 'Total' => 0);
+                $GroupVotes = ['Ups' => 0, 'Total' => 0];
             } else {
                 $GroupVotes = G::$DB->next_record(MYSQLI_ASSOC, false);
             }
@@ -105,20 +105,20 @@ class Votes {
         //Input paramater is $p - probability - where 0 < p < 1.
 
         //Coefficients in rational approximations
-        $a = array(1 => -3.969683028665376e+01, 2 => 2.209460984245205e+02,
+        $a = [1 => -3.969683028665376e+01, 2 => 2.209460984245205e+02,
                    3 => -2.759285104469687e+02, 4 => 1.383577518672690e+02,
-                   5 => -3.066479806614716e+01, 6 => 2.506628277459239e+00);
+                   5 => -3.066479806614716e+01, 6 => 2.506628277459239e+00];
 
-        $b = array(1 => -5.447609879822406e+01, 2 => 1.615858368580409e+02,
+        $b = [1 => -5.447609879822406e+01, 2 => 1.615858368580409e+02,
                    3 => -1.556989798598866e+02, 4 => 6.680131188771972e+01,
-                   5 => -1.328068155288572e+01);
+                   5 => -1.328068155288572e+01];
 
-        $c = array(1 => -7.784894002430293e-03, 2 => -3.223964580411365e-01,
+        $c = [1 => -7.784894002430293e-03, 2 => -3.223964580411365e-01,
                    3 => -2.400758277161838e+00, 4 => -2.549732539343734e+00,
-                   5 => 4.374664141464968e+00,  6 => 2.938163982698783e+00);
+                   5 => 4.374664141464968e+00,  6 => 2.938163982698783e+00];
 
-        $d = array(1 => 7.784695709041462e-03, 2 => 3.224671290700398e-01,
-                   3 => 2.445134137142996e+00, 4 => 3.754408661907416e+00);
+        $d = [1 => 7.784695709041462e-03, 2 => 3.224671290700398e-01,
+                   3 => 2.445134137142996e+00, 4 => 3.754408661907416e+00];
 
         //Define break-points.
         $p_low  = 0.02425;                                     //Use lower region approx. below this
@@ -191,10 +191,10 @@ class Votes {
             return false;
         }
 
-        return array(
+        return [
                 'overall' => Votes::get_rank_all($GroupID),
                 'year'    => Votes::get_rank_year($GroupID, $Year),
-                'decade'  => Votes::get_rank_decade($GroupID, $Year));
+                'decade'  => Votes::get_rank_decade($GroupID, $Year)];
     }
 
     /**

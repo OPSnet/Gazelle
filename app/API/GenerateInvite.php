@@ -63,6 +63,6 @@ VALUES ('{$interviewer_id}', '{$key}', '{$email}', '{$expires}', '{$reason}')");
             Misc::send_email($_GET['email'], 'New account confirmation at '.SITE_NAME, $body, 'noreply');
         }
 
-        return array("key" => $key, "invite_url" => $site_url);
+        return ["key" => $key, "invite_url" => $site_url];
     }
 }

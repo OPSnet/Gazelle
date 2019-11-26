@@ -1,18 +1,18 @@
 <?php
-$ComicsExtensions = array_fill_keys(array('cbr', 'cbz', 'gif', 'jpeg', 'jpg', 'pdf', 'png'), true);
+$ComicsExtensions = array_fill_keys(['cbr', 'cbz', 'gif', 'jpeg', 'jpg', 'pdf', 'png'], true);
 $MusicExtensions = array_fill_keys(
-    array(
+    [
         'ac3', 'accurip', 'azw3', 'chm', 'cue', 'djv', 'djvu', 'doc', 'docx', 'dts', 'epub', 'ffp',
         'flac', 'gif', 'htm', 'html', 'jpeg', 'jpg', 'lit', 'log', 'm3u', 'm3u8', 'm4a', 'm4b',
-        'md5', 'mobi', 'mp3', 'mp4', 'nfo', 'pdf', 'pls', 'png', 'rtf', 'sfv', 'txt', 'toc'),
+        'md5', 'mobi', 'mp3', 'mp4', 'nfo', 'pdf', 'pls', 'png', 'rtf', 'sfv', 'txt', 'toc'],
     true);
-$BadExtensions = array_fill_keys(array(
+$BadExtensions = array_fill_keys([
        'torrent'
-   ), true);
-$Keywords = array(
+   ], true);
+$Keywords = [
     'ahashare.com', 'demonoid.com', 'demonoid.me', 'djtunes.com', 'h33t', 'housexclusive.net',
     'limetorrents.com', 'mixesdb.com', 'mixfiend.blogstop', 'mixtapetorrent.blogspot',
-    'plixid.com', 'reggaeme.com' , 'scc.nfo', 'thepiratebay.org', 'torrentday');
+    'plixid.com', 'reggaeme.com' , 'scc.nfo', 'thepiratebay.org', 'torrentday'];
 
 function check_file($Type, $Name) {
     check_name($Name);

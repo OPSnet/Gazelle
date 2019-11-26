@@ -36,7 +36,7 @@ list($Name) = $DB->next_record();
 
 // Everything is legit, let's just confim they're not retarded
 if (empty($_POST['confirm'])) {
-    $Artists = Artists::get_artists(array($GroupID, $NewGroupID));
+    $Artists = Artists::get_artists([$GroupID, $NewGroupID]);
 
     View::show_header();
 ?>

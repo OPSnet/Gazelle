@@ -64,10 +64,10 @@
 
 
     $ReplyText = new TEXTAREA_PREVIEW('body', 'quickpost', '',
-            $TextareaCols, $TextareaRows, false, false, true, array(
+            $TextareaCols, $TextareaRows, false, false, true, [
                 'tabindex="1"',
                 'onkeyup="resize(\'quickpost\')"'
-            ));
+            ]);
 ?>
 
             <br />

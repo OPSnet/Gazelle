@@ -18,11 +18,11 @@ class Users {
             $Classes = G::$DB->to_array('ID');
             $ClassLevels = G::$DB->to_array('Level');
             G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('classes', array($Classes, $ClassLevels), 0);
+            G::$Cache->cache_value('classes', [$Classes, $ClassLevels], 0);
         }
         $Debug->set_flag('Loaded permissions');
 
-        return array($Classes, $ClassLevels);
+        return [$Classes, $ClassLevels];
     }
 
     public static function user_stats($UserID, $refresh = false) {
@@ -100,7 +100,7 @@ class Users {
                 GROUP BY m.ID");
 
             if (!G::$DB->has_results()) { // Deleted user, maybe?
-                $UserInfo = array(
+                $UserInfo = [
                         'ID' => $UserID,
                         'Username' => '',
                         'PermissionID' => 0,
@@ -114,9 +114,9 @@ class Users {
                         'CatchupTime' => 0,
                         'Visible' => '1',
                         'Levels' => '',
-                        'Class' => 0);
+                        'Class' => 0];
             } else {
-                $UserInfo = G::$DB->next_record(MYSQLI_ASSOC, array('Paranoia', 'Title'));
+                $UserInfo = G::$DB->next_record(MYSQLI_ASSOC, ['Paranoia', 'Title']);
                 $UserInfo['CatchupTime'] = strtotime($UserInfo['CatchupTime']);
                 $UserInfo['Paranoia'] = unserialize_array($UserInfo['Paranoia']);
                 if ($UserInfo['Paranoia'] === false) {
@@ -202,7 +202,7 @@ class Users {
                 FROM users_main AS m
                     INNER JOIN users_info AS i ON i.UserID = m.ID
                 WHERE m.ID = '$UserID'");
-            $HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, array('CustomPermissions', 'SiteOptions'));
+            $HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, ['CustomPermissions', 'SiteOptions']);
 
             $HeavyInfo['CustomPermissions'] = unserialize_array($HeavyInfo['CustomPermissions']);
 
@@ -342,9 +342,9 @@ class Users {
      * @return array
      */
     public static function default_site_options() {
-        return array(
+        return [
             'HttpsTracker' => true
-        );
+        ];
     }
 
     /**
@@ -406,11 +406,11 @@ class Users {
     public static function release_order(&$SiteOptions, $Default = false) {
         global $ReleaseTypes;
 
-        $RT = $ReleaseTypes + array(
+        $RT = $ReleaseTypes + [
             1024 => 'Guest Appearance',
             1023 => 'Remixed By',
             1022 => 'Composition',
-            1021 => 'Produced By');
+            1021 => 'Produced By'];
 
         if ($Default || empty($SiteOptions['SortHide'])) {
             $Sort =& $RT;
@@ -523,7 +523,7 @@ class Users {
 
         // This array is a hack that should be made less retarded, but whatevs
         //                           PermID => ShortForm
-        $SecondaryClasses = array(
+        $SecondaryClasses = [
             '23' => 'FLS', // First Line Support
             '30' => 'IN', // Interviewer
             '31' => 'TC', // Torrent Celebrity
@@ -534,7 +534,7 @@ class Users {
             '48' => 'BT', // Beta TEam
             '38' => 'CT', // Charlie Team
             '39' => 'DT', // Delta Team
-         );
+         ];
 
         if ($UserID == 0) {
             return 'System';
@@ -680,12 +680,12 @@ class Users {
             $BookmarkData = G::$DB->to_array('GroupID', MYSQLI_ASSOC);
             G::$DB->set_query_id($QueryID);
             G::$Cache->cache_value("bookmarks_group_ids_$UserID",
-                array($GroupIDs, $BookmarkData), 3600);
+                [$GroupIDs, $BookmarkData], 3600);
         }
 
         $TorrentList = Torrents::get_groups($GroupIDs);
 
-        return array($GroupIDs, $BookmarkData, $TorrentList);
+        return [$GroupIDs, $BookmarkData, $TorrentList];
     }
 
     /**

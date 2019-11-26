@@ -105,5 +105,5 @@ foreach ($ArtistList as $Artist) {
 </div>
 <?php
 View::show_footer();
-$Cache->cache_value('bookmarks_'.$UserID, serialize(array(array($Username, $TorrentList, $CollageDataList))), 3600);
+$Cache->cache_value('bookmarks_'.$UserID, serialize([[$Username, $TorrentList, $CollageDataList]]), 3600);
 ?>

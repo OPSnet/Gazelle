@@ -35,7 +35,7 @@ class Permissions {
                 SELECT Level AS Class, `Values` AS Permissions, Secondary, PermittedForums
                 FROM permissions
                 WHERE ID = '$PermissionID'");
-            $Permission = G::$DB->next_record(MYSQLI_ASSOC, array('Permissions'));
+            $Permission = G::$DB->next_record(MYSQLI_ASSOC, ['Permissions']);
             G::$DB->set_query_id($QueryID);
             $Permission['Permissions'] = unserialize($Permission['Permissions']);
             G::$Cache->cache_value("perm_$PermissionID", $Permission, 2592000);
@@ -91,7 +91,7 @@ class Permissions {
             $DonorPerms = self::get_permissions(DONOR);
             unset($DonorPerms['Permissions']['MaxCollages']);
         } else {
-            $DonorPerms = array('Permissions' => []);
+            $DonorPerms = ['Permissions' => []];
         }
         $MaxCollages = $BonusCollages;
         if (is_numeric($Permissions['Permissions']['MaxCollages'])) {

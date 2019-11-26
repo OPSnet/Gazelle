@@ -21,6 +21,6 @@ if (!Forums::check_forumperm($ForumID)) {
     json_die("error", "assholes");
 }
 
-json_die("success", array("body" => nl2br($Body)));
+json_die("success", ["body" => nl2br($Body)]);
 
 ?>

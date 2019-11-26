@@ -49,10 +49,10 @@ if (($details == 'all' || $details == 'seeded')) {
 
 print
     json_encode(
-        array(
+        [
             'status' => 'success',
             'response' => $OuterResults
-        )
+        ]
     );
 
 

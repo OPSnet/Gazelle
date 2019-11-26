@@ -47,7 +47,7 @@ if (empty($_POST['confirm'])) {
         error('Destination torrent group must be in the "Music" category.');
     }
 
-    $Artists = Artists::get_artists(array($OldGroupID, $GroupID));
+    $Artists = Artists::get_artists([$OldGroupID, $GroupID]);
 
     View::show_header();
 ?>

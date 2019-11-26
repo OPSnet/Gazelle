@@ -2,7 +2,7 @@
 if (!check_perms('users_warn')) {
     error(404);
 }
-Misc::assert_isset_request($_POST, array('reason', 'privatemessage', 'body', 'length', 'postid', 'userid'));
+Misc::assert_isset_request($_POST, ['reason', 'privatemessage', 'body', 'length', 'postid', 'userid']);
 
 $Reason = $_POST['reason'];
 $PrivateMessage = $_POST['privatemessage'];
@@ -80,14 +80,14 @@ if ($Cache->MemcacheDBArray[$Key]['ID'] != $PostID) {
     $Cache->delete_value("thread_$TopicID" . "_catalogue_$CatalogueID");
     //just clear the cache for would be cache-screwer-uppers
 } else {
-    $Cache->update_row($Key, array(
+    $Cache->update_row($Key, [
                         'ID' => $Cache->MemcacheDBArray[$Key]['ID'],
                         'AuthorID' => $Cache->MemcacheDBArray[$Key]['AuthorID'],
                         'AddedTime' => $Cache->MemcacheDBArray[$Key]['AddedTime'],
                         'Body' => $Body, //Don't url decode.
                         'EditedUserID' => $LoggedUser['ID'],
                         'EditedTime' => $SQLTime,
-                        'Username' => $LoggedUser['Username']));
+                        'Username' => $LoggedUser['Username']]);
     $Cache->commit_transaction(3600 * 24 * 5);
 }
 $ThreadInfo = Forums::get_thread_info($TopicID);

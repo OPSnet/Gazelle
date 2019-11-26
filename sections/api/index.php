@@ -5,7 +5,7 @@ function getClassObject($name, $db, $cache, $twig, $config) {
     return new $name($db, $cache, $twig, $config);
 }
 
-$available = array(
+$available = [
     'generate_invite',
     'user',
     'wiki',
@@ -14,11 +14,15 @@ $available = array(
     'artist',
     'collage',
     'torrent'
-);
+];
 
 if (in_array($_GET['action'], $available)) {
-    $config = array('Categories' => $Categories, 'CollageCats' => $CollageCats,
-        'ReleaseTypes' => $ReleaseTypes, 'Debug' => $Debug);
+    $config = [
+        'Categories' => $Categories,
+        'CollageCats' => $CollageCats,
+        'ReleaseTypes' => $ReleaseTypes,
+        'Debug' => $Debug
+    ];
     $class = getClassObject($_GET['action'], $DB, $Cache, $Twig, $config);
 } else {
     json_error('invalid action');
@@ -51,5 +55,5 @@ if ($app['Token'] !== $token) {
 }
 
 $response = $class->run();
-print(json_encode(array('status' => 200, 'response' => $response), JSON_UNESCAPED_SLASHES));
+print(json_encode(['status' => 200, 'response' => $response], JSON_UNESCAPED_SLASHES));
 //$Debug->profile();

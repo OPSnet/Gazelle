@@ -63,10 +63,10 @@ foreach ($Forums as $Forum) {
             $JsonCategories[] = $JsonCategory;
         }
         $LastCategoryID = $CategoryID;
-        $JsonCategory = array(
+        $JsonCategory = [
             'categoryID' => (int)$CategoryID,
             'categoryName' => $ForumCats[$CategoryID]
-        );
+        ];
         $JsonForums = [];
     }
 
@@ -81,7 +81,7 @@ foreach ($Forums as $Forum) {
     }
     $UserInfo = Users::user_info($LastAuthorID);
 
-    $JsonForums[] = array(
+    $JsonForums[] = [
         'forumId' => (int)$ForumID,
         'forumName' => $ForumName,
         'forumDescription' => $ForumDescription,
@@ -97,7 +97,7 @@ foreach ($Forums as $Forum) {
         'read' => $Read == 1,
         'locked' => $Locked == 1,
         'sticky' => $Sticky == 1
-    );
+    ];
 }
 // ...And an extra one to catch the last category.
 if (!empty($JsonForums) && !empty($JsonCategory)) {
@@ -106,10 +106,10 @@ if (!empty($JsonForums) && !empty($JsonCategory)) {
 }
 
 print json_encode(
-    array(
+    [
         'status' => 'success',
-        'response' => array(
+        'response' => [
             'categories' => $JsonCategories
-        )
-    )
+        ]
+    ]
 );

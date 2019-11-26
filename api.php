@@ -40,7 +40,7 @@ $Debug->handle_errors();
 G::initialize();
 
 function json_error($Code) {
-    echo json_encode(array('status' => 400, 'error' => $Code, 'response' => []));
+    echo json_encode(['status' => 400, 'error' => $Code, 'response' => []]);
     die();
 }
 

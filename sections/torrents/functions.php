@@ -151,7 +151,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
         }
         // Store it all in cache
         if (!$RevisionID) {
-            $Cache->cache_value("torrents_details_$GroupID", array($TorrentDetails, $TorrentList), $CacheTime);
+            $Cache->cache_value("torrents_details_$GroupID", [$TorrentDetails, $TorrentList], $CacheTime);
         }
     } else { // If we're reading from cache
         $TorrentDetails = $TorrentCache[0];
@@ -160,7 +160,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
 
     if ($PersonalProperties) {
         // Fetch all user specific torrent and group properties
-        $TorrentDetails['Flags'] = array('IsSnatched' => false);
+        $TorrentDetails['Flags'] = ['IsSnatched' => false];
         foreach ($TorrentList as &$Torrent) {
             Torrents::torrent_properties($Torrent, $TorrentDetails['Flags']);
         }

@@ -5,7 +5,7 @@ $ID = (int)$_POST['id'];
 $Note = $_POST['note'];
 
 if (empty($FriendID) || empty($Type) || empty($ID)) {
-    echo json_encode(array('status' => 'error', 'response' => 'Error.'));
+    echo json_encode(['status' => 'error', 'response' => 'Error.']);
     die();
 }
 // Make sure the recipient is on your friends list and not some random dude.
@@ -20,7 +20,7 @@ $DB->query("
         AND f.FriendID = '$FriendID'");
 
 if (!$DB->has_results()) {
-    echo json_encode(array('status' => 'error', 'response' => 'Not on friend list.'));
+    echo json_encode(['status' => 'error', 'response' => 'Not on friend list.']);
     die();
 }
 
@@ -61,5 +61,5 @@ if (!empty($Note)) {
 }
 
 Misc::send_pm($FriendID, $LoggedUser['ID'], $Subject, $Body);
-echo json_encode(array('status' => 'success', 'response' => 'Sent!'));
+echo json_encode(['status' => 'success', 'response' => 'Sent!']);
 die();

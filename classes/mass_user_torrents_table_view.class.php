@@ -234,7 +234,7 @@ class MASS_USER_TORRENTS_TABLE_VIEW {
             unset($ExtendedArtists[2], $ExtendedArtists[3]);
             $DisplayName = Artists::display_artists($ExtendedArtists, true, false);
         } elseif (count($Artists) > 0) {
-            $DisplayName = Artists::display_artists(array('1'=>$Artists), true, false);
+            $DisplayName = Artists::display_artists(['1'=>$Artists], true, false);
         }
         if ($VanityHouse) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';

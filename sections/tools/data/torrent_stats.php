@@ -14,10 +14,10 @@ if (!$TorrentStats = $Cache->get_value('new_torrent_stats')) {
     list($WeekNum, $WeekSize, $WeekFiles) = $DB->next_record();
     $DB->query("SELECT COUNT(*), SUM(Size), SUM(FileCount) FROM torrents WHERE Time > now() - INTERVAL 1 MONTH)");
     list($MonthNum, $MonthSize, $MonthFiles) = $DB->next_record();
-    $Cache->cache_value('new_torrent_stats', array($TorrentCount, $TotalSize, $TotalFiles,
+    $Cache->cache_value('new_torrent_stats', [$TorrentCount, $TotalSize, $TotalFiles,
                         $NumUsers, $DayNum, $DaySize, $DayFiles,
                         $WeekNum, $WeekSize, $WeekFiles, $MonthNum,
-                        $MonthSize, $MonthFiles), 3600);
+                        $MonthSize, $MonthFiles], 3600);
 } else {
     list($TorrentCount, $TotalSize, $TotalFiles, $NumUsers, $DayNum, $DaySize, $DayFiles,
         $WeekNum, $WeekSize, $WeekFiles, $MonthNum, $MonthSize, $MonthFiles) = $TorrentStats;

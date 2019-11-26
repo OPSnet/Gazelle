@@ -16,7 +16,7 @@ if (!list($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrem
     $CountryMax = ceil(log(Max(1, $Data[0][1])) / log(2)) + 1;
     $CountryMin = floor(log(Max(1, $Data[$CountryMinThreshold][1])) / log(2));
 
-    $CountryRegions = array('RS' => array('RS-KM')); // Count Kosovo as Serbia as it doesn't have a TLD
+    $CountryRegions = ['RS' => ['RS-KM']]; // Count Kosovo as Serbia as it doesn't have a TLD
     foreach ($Data as $Key => $Item) {
         list($Country, $UserCount) = $Item;
         $Countries[] = $Country;
@@ -35,7 +35,7 @@ if (!list($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrem
     for ($i = $CountryMin; $i <= $CountryMax; $i++) {
         $LogIncrements[] = Format::human_format(pow(2, $i));
     }
-    $Cache->cache_value('geodistribution', array($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements), 0);
+    $Cache->cache_value('geodistribution', [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements], 0);
 }
 
 if (!$ClassDistribution = $Cache->get_value('class_distribution')) {
@@ -48,7 +48,7 @@ if (!$ClassDistribution = $Cache->get_value('class_distribution')) {
         GROUP BY p.Name
         ORDER BY Users DESC");
     $ClassSizes = $DB->to_array();
-    $Pie = new PIE_CHART(750, 400, array('Other' => 1, 'Percentage' => 1));
+    $Pie = new PIE_CHART(750, 400, ['Other' => 1, 'Percentage' => 1]);
     foreach ($ClassSizes as $ClassSize) {
         list($Label, $Users) = $ClassSize;
         $Pie->add($Label, $Users);
@@ -69,7 +69,7 @@ if (!$PlatformDistribution = $Cache->get_value('platform_distribution')) {
         ORDER BY Users DESC");
 
     $Platforms = $DB->to_array();
-    $Pie = new PIE_CHART(750, 400, array('Other' => 1, 'Percentage' => 1));
+    $Pie = new PIE_CHART(750, 400, ['Other' => 1, 'Percentage' => 1]);
     foreach ($Platforms as $Platform) {
         list($Label, $Users) = $Platform;
         $Pie->add($Label, $Users);
@@ -91,7 +91,7 @@ if (!$BrowserDistribution = $Cache->get_value('browser_distribution')) {
         ORDER BY Users DESC");
 
     $Browsers = $DB->to_array();
-    $Pie = new PIE_CHART(750, 400, array('Other' => 1, 'Percentage' => 1));
+    $Pie = new PIE_CHART(750, 400, ['Other' => 1, 'Percentage' => 1]);
     foreach ($Browsers as $Browser) {
         list($Label, $Users) = $Browser;
         $Pie->add($Label, $Users);
@@ -143,7 +143,7 @@ if (!list($Labels, $InFlow, $OutFlow, $Max) = $Cache->get_value('users_timeline'
         list($Label, $Amount) = $Month;
         $OutFlow[] = number_format(($Amount / $Max) * 100, 4);
     }
-    $Cache->cache_value('users_timeline', array($Labels, $InFlow, $OutFlow, $Max), mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
+    $Cache->cache_value('users_timeline', [$Labels, $InFlow, $OutFlow, $Max], mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
 }
 //End timeline generation
 

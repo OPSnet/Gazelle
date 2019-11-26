@@ -1,6 +1,6 @@
 <?php
 //Useful: http://www.robtex.com/cnet/
-$AllowedProxies = array(
+$AllowedProxies = [
     //Opera Turbo (may include Opera-owned IP addresses that aren't used for Turbo, but shouldn't run much risk of exploitation)
     '64.255.180.*', //Norway
     '64.255.164.*', //Norway
@@ -11,7 +11,7 @@ $AllowedProxies = array(
     '94.246.127.*', //Norway
     '195.189.142.*', //Norway
     '195.189.143.*', //Norway
-);
+];
 
 function proxyCheck($IP) {
     global $AllowedProxies;

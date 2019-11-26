@@ -20,12 +20,12 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
                 LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
             WHERE m.torrent_pass = '".db_string($_REQUEST['torrent_pass'])."'
                 AND m.Enabled = '1'");
-        $UserInfo = $DB->next_record(MYSQLI_NUM, array(2));
+        $UserInfo = $DB->next_record(MYSQLI_NUM, [2]);
         $SiteOptions = array_merge(Users::default_site_options(), unserialize_array($UserInfo[2]));
         $UserInfo[2] = $SiteOptions['HttpsTracker'];
         $Cache->cache_value('user_'.$_REQUEST['torrent_pass'], $UserInfo, 3600);
     }
-    $UserInfo = array($UserInfo);
+    $UserInfo = [$UserInfo];
     list($UserID, $DownloadAlt, $HttpsTracker, $Locked) = array_shift($UserInfo);
     if (!$UserID) {
         error(0);
@@ -48,7 +48,7 @@ if (!is_number($TorrentID)) {
 /* uTorrent Remote and various scripts redownload .torrent files periodically.
     To prevent this retardation from blowing bandwidth etc., let's block it
     if the .torrent file has been downloaded four times before */
-$ScriptUAs = array('BTWebClient*', 'Python-urllib*', 'python-requests*', 'uTorrent*');
+$ScriptUAs = ['BTWebClient*', 'Python-urllib*', 'python-requests*', 'uTorrent*'];
 if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
     $DB->query("
         SELECT 1
@@ -84,7 +84,7 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
     if (!$DB->has_results()) {
         error(404);
     }
-    $Info = array($DB->next_record(MYSQLI_NUM, array(4, 5, 6, 10)));
+    $Info = [$DB->next_record(MYSQLI_NUM, [4, 5, 6, 10])];
     $Artists = Artists::get_artist($Info[0][4]);
     $Info['Artists'] = Artists::display_artists($Artists, false, true);
     $Info['PlainArtists'] = Artists::display_artists($Artists, false, true, false);
@@ -124,7 +124,7 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
         }
 
         // Let the tracker know about this
-        if (!Tracker::update_tracker('add_token', array('info_hash' => rawurlencode($InfoHash), 'userid' => $UserID))) {
+        if (!Tracker::update_tracker('add_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID])) {
             error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
         }
 
@@ -146,7 +146,7 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
             $FLTokens = $UInfo['FLTokens'];
 
             $Cache->begin_transaction("user_info_heavy_$UserID");
-            $Cache->update_row(false, array('FLTokens' => ($FLTokens - 1)));
+            $Cache->update_row(false, ['FLTokens' => ($FLTokens - 1)]);
             $Cache->commit_transaction(0);
 
             $Cache->delete_value("users_tokens_$UserID");
@@ -158,18 +158,18 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
 if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
     $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
     if (isset($RecentSnatches)) {
-        $Snatch = array(
+        $Snatch = [
                 'ID' => $GroupID,
                 'Name' => $Name,
                 'Artist' => $Artists,
-                'WikiImage' => $Image);
+                'WikiImage' => $Image];
         if (!in_array($Snatch, $RecentSnatches)) {
             if (count($RecentSnatches) === 5) {
                 array_pop($RecentSnatches);
             }
             array_unshift($RecentSnatches, $Snatch);
         } elseif (!is_array($RecentSnatches)) {
-            $RecentSnatches = array($Snatch);
+            $RecentSnatches = [$Snatch];
         }
         $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 0);
     }

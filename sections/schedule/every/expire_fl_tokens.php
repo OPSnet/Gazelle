@@ -20,7 +20,7 @@ if ($DB->has_results()) {
         WHERE uf.Expired = FALSE
             AND uf.Time < '$sqltime' - INTERVAL 4 DAY");
     while (list($UserID, $InfoHash) = $DB->next_record(MYSQLI_NUM, false)) {
-        Tracker::update_tracker('remove_token', array('info_hash' => rawurlencode($InfoHash), 'userid' => $UserID));
+        Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID]);
     }
     $DB->query("
         UPDATE users_freeleeches

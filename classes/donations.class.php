@@ -4,7 +4,7 @@ define('BTC_API_URL', 'https://api.bitcoinaverage.com/ticker/global/EUR/');
 define('USD_API_URL', 'http://www.google.com/ig/calculator?hl=en&q=1USD=?EUR');
 
 class Donations {
-    private static $ForumDescriptions = array(
+    private static $ForumDescriptions = [
         "I want only two houses, rather than seven... I feel like letting go of things",
         "A billion here, a billion there, sooner or later it adds up to real money.",
         "I've cut back, because I'm buying a house in the West Village.",
@@ -26,18 +26,18 @@ class Donations {
         "What's a soup kitchen?",
         "I work very hard and I’m worth every cent!",
         "To all my Barbies out there who date Benjamin Franklin, George Washington, Abraham Lincoln, you'll be better off in life. Get that money."
-        );
+        ];
 
     private static $IsSchedule = false;
 
     public static function regular_donate($UserID, $DonationAmount, $Source, $Reason, $Currency = "EUR") {
-        self::donate($UserID, array(
+        self::donate($UserID, [
             "Source" => $Source,
             "Price" => $DonationAmount,
             "Currency" => $Currency,
             "Source" => $Source,
             "Reason" => $Reason,
-            "SendPM" => true));
+            "SendPM" => true]);
     }
 
     public static function donate($UserID, $Args) {
@@ -253,13 +253,13 @@ class Donations {
         $Rank = (int)$Rank;
         $TotalRank = (int)$TotalRank;
 
-        self::donate($UserID, array(
+        self::donate($UserID, [
             "Manipulation" => "Direct",
             "Rank" => $Rank,
             "TotalRank" => $TotalRank,
             "Reason" => $Reason,
             "Source" => "Modify Values",
-            "Currency" => "EUR"));
+            "Currency" => "EUR"]);
     }
 
     public static function hide_stats($UserID) {
@@ -347,13 +347,13 @@ class Donations {
             $Rewards = G::$DB->next_record(MYSQLI_ASSOC);
             G::$DB->set_query_id($QueryID);
 
-            $DonorInfo = array(
+            $DonorInfo = [
                 'Rank' => (int)$Rank,
                 'SRank' => (int)$SpecialRank,
                 'TotRank' => (int)$TotalRank,
                 'Time' => $DonationTime,
                 'ExpireTime' => $ExpireTime,
-                'Rewards' => $Rewards);
+                'Rewards' => $Rewards];
             G::$Cache->cache_value("donor_info_$UserID", $DonorInfo, 0);
         }
         return $DonorInfo;
@@ -408,7 +408,7 @@ class Donations {
         $SpecialRank = self::get_special_rank($UserID);
         $HasAll = $SpecialRank == 3;
 
-        $Rewards = array(
+        $Rewards = [
             'HasAvatarMouseOverText' => false,
             'HasCustomDonorIcon' => false,
             'HasDonorForum' => false,
@@ -418,7 +418,7 @@ class Donations {
             'HasProfileInfo2' => false,
             'HasProfileInfo3' => false,
             'HasProfileInfo4' => false,
-            'HasSecondAvatar' => false);
+            'HasSecondAvatar' => false];
 
 //        if ($Rank >= 1 || $HasAll) {
 //
@@ -735,12 +735,12 @@ class Donations {
         }
         if ($USD = file_get_contents(USD_API_URL)) {
             // Valid JSON isn't returned so we make it valid.
-            $Replace = array(
+            $Replace = [
                 'lhs' => '"lhs"',
                 'rhs' => '"rhs"',
                 'error' => '"error"',
                 'icc' => '"icc"'
-            );
+            ];
 
             $USD = str_replace(array_keys($Replace), array_values($Replace), $USD);
             $USD = json_decode($USD, true);

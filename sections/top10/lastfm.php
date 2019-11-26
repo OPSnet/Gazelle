@@ -6,10 +6,10 @@ define('LIMIT', 100);
 
 
 $Category = isset($_GET['category']) ? $_GET['category'] : 'weekly';
-$Category = in_array($Category, array('all_time', 'weekly', 'hyped')) ? $Category : 'weekly';
+$Category = in_array($Category, ['all_time', 'weekly', 'hyped']) ? $Category : 'weekly';
 
 $View = isset($_GET['view']) ? $_GET['view'] : 'tiles';
-$View = in_array($View, array('tiles', 'list')) ? $View : 'tiles';
+$View = in_array($View, ['tiles', 'list']) ? $View : 'tiles';
 
 switch ($Category) {
     case 'weekly':

@@ -13,7 +13,7 @@ authorize();
 
 
 //Don't escape: Log message, Admin message
-$Escaped = db_array($_POST, array('log_message', 'admin_message', 'raw_name'));
+$Escaped = db_array($_POST, ['log_message', 'admin_message', 'raw_name']);
 
 //If we're here from the delete torrent page instead of the reports page.
 if (!isset($Escaped['from_delete'])) {
@@ -269,7 +269,7 @@ if ($DB->affected_rows() > 0 || !$Report) {
     //Warnings / remove upload
     if ($Upload) {
         $Cache->begin_transaction("user_info_heavy_$UploaderID");
-        $Cache->update_row(false, array('DisableUpload' => '1'));
+        $Cache->update_row(false, ['DisableUpload' => '1']);
         $Cache->commit_transaction(0);
 
         $DB->query("

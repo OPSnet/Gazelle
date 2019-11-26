@@ -20,8 +20,8 @@ class ARTISTS_SIMILAR extends ARTIST{
     var $Artists = [];
     var $TotalScore = 0;
 
-    var $xValues = array(WIDTH=>1);
-    var $yValues = array(HEIGHT=>1);
+    var $xValues = [WIDTH=>1];
+    var $yValues = [HEIGHT=>1];
 
     var $LargestDecimal = 0;
     var $LowestDecimal = 1;
@@ -29,7 +29,7 @@ class ARTISTS_SIMILAR extends ARTIST{
 
 
     function dump_data() {
-        return serialize(array(time(), $this->Name, $this->x, $this->y, serialize($this->Artists), serialize($this->Similar)));
+        return serialize([time(), $this->Name, $this->x, $this->y, serialize($this->Artists), serialize($this->Similar)]);
     }
 
     function load_data($Data) {
@@ -73,7 +73,7 @@ class ARTISTS_SIMILAR extends ARTIST{
                 continue;
             }
             $this->Artists[$ArtistID] = new ARTIST($ArtistID, $Name);
-            $this->Similar[$ArtistID] = array('ID' => $ArtistID, 'Score' => $Score);
+            $this->Similar[$ArtistID] = ['ID' => $ArtistID, 'Score' => $Score];
             $this->TotalScore += $Score;
             $ArtistIDs[] = $ArtistID;
         }
@@ -92,7 +92,7 @@ class ARTISTS_SIMILAR extends ARTIST{
 
         // Build into array
         while (list($Artist1ID, $Artist2ID) = G::$DB->next_record()) {
-            $this->Artists[$Artist1ID]->Similar[$Artist2ID] = array('ID'=>$Artist2ID);
+            $this->Artists[$Artist1ID]->Similar[$Artist2ID] = ['ID'=>$Artist2ID];
         }
 
         // Calculate decimal point scores between artists

@@ -75,7 +75,7 @@ if (!empty($freeleechToggleQuery))
 $freeleechToggleQuery .= 'freeleech=' . $freeleechToggleName;
 
 $groupByToggleName = (!empty($_GET['groups']) && $_GET['groups'] == 'show' ? 'hide' : 'show');
-$groupByToggleQuery = Format::get_url(array('freeleech', 'groups'));
+$groupByToggleQuery = Format::get_url(['freeleech', 'groups']);
 if (!empty($groupByToggleQuery)) {
   $groupByToggleQuery .= '&amp;';
 }
@@ -203,7 +203,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
 <?php
         return;
     }
-    
+
     foreach ($details as $detail) {
         $groupIDS[] = $detail[1];
     }

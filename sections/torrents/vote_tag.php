@@ -7,7 +7,7 @@ $Way = db_string($_GET['way']);
 if (!is_number($TagID) || !is_number($GroupID)) {
     error(404);
 }
-if (!in_array($Way, array('up', 'down'))) {
+if (!in_array($Way, ['up', 'down'])) {
     error(404);
 }
 

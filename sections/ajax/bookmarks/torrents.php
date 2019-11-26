@@ -37,7 +37,7 @@ foreach($GroupIDs as $GroupID) {
     $Group = $GroupList[$GroupID];
     $JsonTorrents = [];
     foreach ($Group['Torrents'] as $Torrent) {
-        $JsonTorrents[] = array(
+        $JsonTorrents[] = [
             'id' => (int)$Torrent['ID'],
             'groupId' => (int)$Torrent['GroupID'],
             'media' => $Torrent['Media'],
@@ -60,9 +60,9 @@ foreach($GroupIDs as $GroupID) {
             'snatched' => (int)$Torrent['Snatched'],
             'time' => $Torrent['Time'],
             'hasFile' => (int)$Torrent['HasFile']
-        );
+        ];
     }
-    $JsonBookmarks[] = array(
+    $JsonBookmarks[] = [
         'id' => (int)$Group['ID'],
         'name' => $Group['Name'],
         'year' => (int)$Group['Year'],
@@ -73,15 +73,15 @@ foreach($GroupIDs as $GroupID) {
         'vanityHouse' => $Group['VanityHouse'] == 1,
         'image' => $Group['WikiImage'],
         'torrents' => $JsonTorrents
-    );
+    ];
 }
 
 print
     json_encode(
-        array(
+        [
             'status' => 'success',
-            'response' => array(
+            'response' => [
                 'bookmarks' => $JsonBookmarks
-            )
-        )
+            ]
+        ]
     );

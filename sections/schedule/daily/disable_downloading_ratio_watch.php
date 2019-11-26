@@ -28,7 +28,7 @@ if (count($UserIDs) > 0) {
 
 foreach ($UserIDs as $UserID) {
     $Cache->begin_transaction("user_info_heavy_$UserID");
-    $Cache->update_row(false, array('RatioWatchDownload' => 0, 'CanLeech' => 0));
+    $Cache->update_row(false, ['RatioWatchDownload' => 0, 'CanLeech' => 0]);
     $Cache->commit_transaction(0);
     Misc::send_pm($UserID, 0, 'Your downloading privileges have been disabled', "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio.");
     echo "Ratio watch disabled: $UserID\n";
@@ -37,5 +37,5 @@ foreach ($UserIDs as $UserID) {
 $DB->set_query_id($UserQuery);
 $Passkeys = $DB->collect('torrent_pass');
 foreach ($Passkeys as $Passkey) {
-    Tracker::update_tracker('update_user', array('passkey' => $Passkey, 'can_leech' => '0'));
+    Tracker::update_tracker('update_user', ['passkey' => $Passkey, 'can_leech' => '0']);
 }
