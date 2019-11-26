@@ -101,13 +101,50 @@ if (session_status() === PHP_SESSION_NONE) {
 
 if (!isset($_SESSION['WhichBrowser'])) {
     $Debug->set_flag('start parsing user agent');
-    $Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
-    $_SESSION['WhichBrowser'] = [
-        'Browser' => $Result->browser->getName(),
-        'BrowserVersion' => explode('.',$Result->browser->getVersion())[0],
-        'OperatingSystem' => $Result->os->getName(),
-        'OperatingSystemVersion' => $Result->os->getVersion()
-    ];
+    if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+        $OS = explode(" ", $Matches[2]);
+        $_SESSION['WhichBrowser'] = [
+            'Browser' => 'Lidarr',
+            'BrowserVersion' => substr($Matches[1], 0, strrpos($Matches[1], '.')),
+            'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
+            'OperatingSystemVersion' => $OS[1] ?? null
+        ];
+    }
+    elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+        $_SESSION['WhichBrowser'] = [
+            'Browser' => 'VarroaMusica',
+            'BrowserVersion' => str_replace('dev', '', $Matches[1]),
+            'OperatingSystem' => null,
+            'OperatingSystemVersion' => null
+        ];
+    }
+    elseif (in_array($_SERVER['HTTP_USER_AGENT'], ['Headphones/None', 'whatapi [isaaczafuta]'])) {
+        $_SESSION['WhichBrowser'] = [
+            'Browser' => $_SERVER['HTTP_USER_AGENT'],
+            'BrowserVersion' => null,
+            'OperatingSystem' => null,
+            'OperatingSystemVersion' => null
+        ];
+    }
+    else {
+        $Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
+        $Browser = $Result->browser;
+        if (empty($Browser->getName()) && !empty($Browser->using)) {
+            $Browser = $Browser->using;
+        }
+        $_SESSION['WhichBrowser'] = [
+            'Browser' => $Browser->getName(),
+            'BrowserVersion' => explode('.', $Browser->getVersion())[0],
+            'OperatingSystem' => $Result->os->getName(),
+            'OperatingSystemVersion' => $Result->os->getVersion()
+        ];
+    }
+    foreach (['Browser', 'BrowserVersion', 'OperatingSystem', 'OperatingSystemVersion'] as $Key) {
+        if ($_SESSION['WhichBrowser'][$Key] === "") {
+            $_SESSION['WhichBrowser'][$Key] = null;
+        }
+    }
+
     $Debug->set_flag('end parsing user agent');
 }
 
@@ -214,32 +251,34 @@ if (isset($LoginCookie)) {
 
     // Update LastUpdate every 10 minutes
     if (strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
-        $DB->query("
+        $DB->prepared_query("
             UPDATE users_main
-            SET LastAccess = '".sqltime()."'
-            WHERE ID = '{$LoggedUser['ID']}'");
-        $DB->query("
+            SET LastAccess = ?
+            WHERE ID = ?", sqltime(), $LoggedUser['ID']);
+        $DB->prepared_query("
             UPDATE users_sessions
             SET
-                IP = '".$_SERVER['REMOTE_ADDR']."',
-                Browser = '$Browser',
-                BrowserVersion = '{$BrowserVersion}',
-                OperatingSystem = '$OperatingSystem',
-                OperatingSystemVersion = '{$OperatingSystemVersion}',
-                LastUpdate = '".sqltime()."'
-            WHERE UserID = '{$LoggedUser['ID']}'
-                AND SessionID = '".db_string($SessionID)."'");
+                IP = ?,
+                Browser = ?,
+                BrowserVersion = ?,
+                OperatingSystem = ?,
+                OperatingSystemVersion = ?,
+                LastUpdate = ?
+            WHERE UserID = ?
+                AND SessionID = ?",
+            $_SERVER['REMOTE_ADDR'], $Browser, $BrowserVersion, $OperatingSystem,
+            $OperatingSystemVersion, sqltime(), $LoggedUser['ID'], $SessionID);
         $Cache->begin_transaction("users_sessions_$UserID");
         $Cache->delete_row($SessionID);
         $Cache->insert_front($SessionID,[
-                'SessionID' => $SessionID,
-                'Browser' => $Browser,
-                'BrowserVersion' => $BrowserVersion,
-                'OperatingSystem' => $OperatingSystem,
-                'OperatingSystemVersion' => $OperatingSystemVersion,
-                'IP' => $_SERVER['REMOTE_ADDR'],
-                'LastUpdate' => sqltime()
-                ]);
+            'SessionID' => $SessionID,
+            'Browser' => $Browser,
+            'BrowserVersion' => $BrowserVersion,
+            'OperatingSystem' => $OperatingSystem,
+            'OperatingSystemVersion' => $OperatingSystemVersion,
+            'IP' => $_SERVER['REMOTE_ADDR'],
+            'LastUpdate' => sqltime()
+        ]);
         $Cache->commit_transaction(0);
     }
 
