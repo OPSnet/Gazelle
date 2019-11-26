@@ -316,7 +316,7 @@ switch ($_REQUEST['action']) {
                 $Level = $_REQUEST['level'];
                 $Secondary = empty($_REQUEST['secondary']) ? 0 : 1;
                 $Forums = $_REQUEST['forums'];
-                $DisplayStaff = $_REQUEST['displaystaff'];
+                $DisplayStaff = empty($_REQUEST['displaystaff']) ? '0' : '1';
                 $StaffGroup = $_REQUEST['staffgroup'];
                 if (!$StaffGroup) {
                     $StaffGroup = null;
