@@ -7,7 +7,7 @@ if (!check_perms('site_debug')) {
 if (!empty($_POST['query'])) {
     $_POST['query'] = trim($_POST['query']);
     if (strtolower(substr($_POST['query'], 0, 7)) !== 'select ' ||
-        preg_match('/^select ([^--]*) from /i', $_POST['query']) !== 1) {
+        preg_match('/^select([^--]*)from/i', $_POST['query']) !== 1) {
         error(0);
     }
 }
