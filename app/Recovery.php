@@ -604,7 +604,7 @@ END_MSG;
             $db->prepared_query("
                 UPDATE users_leech_stats
                 SET Uploaded = Uploaded + ?
-                WHERE ID = ?
+                WHERE UserID = ?
                 ", $final, $ops_user_id
             );
 
