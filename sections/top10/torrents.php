@@ -255,7 +255,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             <div class="group_info clear">
                 <span>
                   <a href="torrents.php?action=download&amp;id=<?=$torrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                  <a href="torrents.php?action=download&amp;id=<?=$torrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($seeders)?>');">FL</a>
+                  <a href="torrents.php?action=download&amp;id=<?=$torrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($seeders, $size)?>');">FL</a>
                 </span>
 
                 <strong><?=$displayName?></strong> <?=$torrentInformation?><?php if ($reported) { ?> - <strong class="torrent_label tl_reported">Reported</strong><?php } ?>

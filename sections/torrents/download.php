@@ -13,13 +13,13 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
 
     $UserInfo = $Cache->get_value('user_'.$_REQUEST['torrent_pass']);
     if (!is_array($UserInfo)) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT ID, DownloadAlt, SiteOptions, la.UserID
             FROM users_main AS m
                 INNER JOIN users_info AS i ON i.UserID = m.ID
                 LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
-            WHERE m.torrent_pass = '".db_string($_REQUEST['torrent_pass'])."'
-                AND m.Enabled = '1'");
+            WHERE m.torrent_pass = ?
+                AND m.Enabled = '1'", $_REQUEST['torrent_pass']);
         $UserInfo = $DB->next_record(MYSQLI_NUM, [2]);
         $SiteOptions = array_merge(Users::default_site_options(), unserialize_array($UserInfo[2]));
         $UserInfo[2] = $SiteOptions['HttpsTracker'];
@@ -50,12 +50,12 @@ if (!is_number($TorrentID)) {
     if the .torrent file has been downloaded four times before */
 $ScriptUAs = ['BTWebClient*', 'Python-urllib*', 'python-requests*', 'uTorrent*'];
 if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT 1
         FROM users_downloads
-        WHERE UserID = $UserID
-            AND TorrentID = $TorrentID
-        LIMIT 4");
+        WHERE UserID = ?
+            AND TorrentID = ?
+        LIMIT 4", $UserID, $TorrentID);
     if ($DB->record_count() === 4) {
         error('You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.', true);
         die();
@@ -64,7 +64,7 @@ if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
 
 $Info = $Cache->get_value('torrent_download_'.$TorrentID);
 if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[10])) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT
             t.Media,
             t.Format,
@@ -80,7 +80,7 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
             t.UserID
         FROM torrents AS t
             INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
-        WHERE t.ID = '".db_string($TorrentID)."'");
+        WHERE t.ID = ?", $TorrentID);
     if (!$DB->has_results()) {
         error(404);
     }
@@ -116,11 +116,14 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     // First make sure this isn't already FL, and if it is, do nothing
 
     if (!Torrents::has_token($TorrentID)) {
-        if ($FLTokens <= 0) {
-            error('You do not have any freeleech tokens left. Please use the regular DL link.');
-        }
-        if ($Size >= 2147483648) {
+        if (!STACKABLE_FREELEECH_TOKENS && $Size >= BYTES_PER_FREELEECH_TOKEN) {
             error('This torrent is too large. Please use the regular DL link.');
+        }
+
+        $TokensToUse = ceil($Size / BYTES_PER_FREELEECH_TOKEN);
+
+        if ($FLTokens < $TokensToUse) {
+            error('You do not have enough freeleech tokens left. Please use the regular DL link.');
         }
 
         // Let the tracker know about this
@@ -129,24 +132,24 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
         }
 
         if (!Torrents::has_token($TorrentID)) {
-            $DB->query("
-                INSERT INTO users_freeleeches (UserID, TorrentID, Time)
-                VALUES ($UserID, $TorrentID, NOW())
+            $DB->prepared_query("
+                INSERT INTO users_freeleeches (UserID, TorrentID, Time, Uses)
+                VALUES (?, ?, NOW(), ?)
                 ON DUPLICATE KEY UPDATE
                     Time = VALUES(Time),
                     Expired = FALSE,
-                    Uses = Uses + 1");
-            $DB->query("
+                    Uses = Uses + ?", $UserID, $TorrentID, $TokensToUse, $TokensToUse);
+            $DB->prepared_query("
                 UPDATE users_main
-                SET FLTokens = FLTokens - 1
-                WHERE ID = $UserID");
+                SET FLTokens = FLTokens - ?
+                WHERE ID = ?", $TokensToUse, $UserID);
 
             // Fix for downloadthemall messing with the cached token count
             $UInfo = Users::user_heavy_info($UserID);
             $FLTokens = $UInfo['FLTokens'];
 
             $Cache->begin_transaction("user_info_heavy_$UserID");
-            $Cache->update_row(false, ['FLTokens' => ($FLTokens - 1)]);
+            $Cache->update_row(false, ['FLTokens' => ($FLTokens - $TokensToUse)]);
             $Cache->commit_transaction(0);
 
             $Cache->delete_value("users_tokens_$UserID");
@@ -175,14 +178,14 @@ if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
     }
 }
 
-$DB->query("
+$DB->prepared_query("
     INSERT IGNORE INTO users_downloads (UserID, TorrentID, Time)
-    VALUES ('$UserID', '$TorrentID', '".sqltime()."')");
+    VALUES (?, ?, ?)", $UserID, $TorrentID, sqltime());
 
-$DB->query("
+$DB->prepared_query("
     SELECT File
     FROM torrents_files
-    WHERE TorrentID = '$TorrentID'");
+    WHERE TorrentID = ?", $TorrentID);
 
 Torrents::set_snatch_update_time($UserID, Torrents::SNATCHED_UPDATE_AFTERDL);
 list($Contents) = $DB->next_record(MYSQLI_NUM, false);

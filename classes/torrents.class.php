@@ -923,8 +923,9 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         if (empty(G::$LoggedUser)) {
             return false;
         }
-        return (G::$LoggedUser['FLTokens'] > 0
-            && $Torrent['Size'] < 2147483648
+
+        return (G::$LoggedUser['FLTokens'] >= ceil($Torrent['Size'] / BYTES_PER_FREELEECH_TOKEN)
+            && (STACKABLE_FREELEECH_TOKENS || $Torrent['Size'] < BYTES_PER_FREELEECH_TOKEN)
             && !$Torrent['PersonalFL']
             && empty($Torrent['FreeTorrent'])
             && G::$LoggedUser['CanLeech'] == '1');
