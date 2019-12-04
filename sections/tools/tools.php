@@ -167,7 +167,7 @@ View::show_header('Staff Tools');
     $ToolsHTML = "";
     create_row("BBCode sandbox", "tools.php?action=bbcode_sandbox", check_perms("users_mod"));
     create_row("Artist Importance Sandbox", "tools.php?action=artist_importance_sandbox", check_perms("users_mod"));
-    create_row("DB Sandbox", "tools.php?action=db_sandbox", check_perms("site_debug"));
+    create_row("DB Sandbox", "tools.php?action=db_sandbox", check_perms("site_database_specifics"));
     create_row("Referral Sandbox", "tools.php?action=referral_sandbox", check_perms("site_debug") && check_perms("admin_manage_referrals"));
 
     if ($ToolsHTML) {
@@ -194,7 +194,7 @@ View::show_header('Staff Tools');
     create_row("Torrent stats", "tools.php?action=torrent_stats", check_perms("site_view_flow"));
     create_row("Upscale pool", "tools.php?action=upscale_pool", check_perms("site_view_flow"));
     create_row("User flow", "tools.php?action=user_flow", check_perms("site_view_flow"));
-    create_row("OS and Browser usage", "tools.php?action=platform_usage", check_perms('site_view_flow'));
+    create_row("OS and Browser usage", "tools.php?action=platform_usage", check_perms('site_debug'));
 
     if ($ToolsHTML) {
 ?>

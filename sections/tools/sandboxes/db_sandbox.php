@@ -1,14 +1,13 @@
 <?php
 
-if (!check_perms('site_debug')) {
+if (!check_perms('site_database_specifics')) {
     error(403);
 }
 
 if (!empty($_POST['query'])) {
     $_POST['query'] = trim($_POST['query']);
-    if (strtolower(substr($_POST['query'], 0, 7)) !== 'select ' ||
-        preg_match('/^select([^--]*)from/i', $_POST['query']) !== 1) {
-        error(0);
+    if (preg_match('/^select[\s]+([^--]*)[\s]+from/i', $_POST['query']) !== 1) {
+        error('Invalid query');
     }
 }
 
@@ -25,7 +24,7 @@ View::show_header($Title);
 </div>
 <div class="thin pad box">
     <form action="tools.php?action=db_sandbox" method='POST'>
-        <textarea style="width: 98%;" name="query" cols="90" rows="8"><?=$_POST['query']?></textarea><br />
+        <textarea style="width: 98%;" name="query" cols="90" rows="8"><?=$_POST['query']?></textarea><br /><br />
         <input type="submit" value="Query" />
     </form>
 </div>

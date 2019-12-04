@@ -1,6 +1,6 @@
 <?php
 
-if (!check_perms('site_view_flow')) {
+if (!check_perms('site_debug')) {
     error(403);
 }
 
