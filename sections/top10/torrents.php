@@ -33,6 +33,12 @@ if (check_perms('site_advanced_top10')) {
                     <input type="radio" id="rdoAny" name="anyall" value="any"<?=(!empty($_GET['anyall']) && $_GET['anyall'] == 'any' ? ' checked="checked"' : '')?> /><label for="rdoAny"> Any</label>
                 </td>
             </tr>
+            <tr id="artistfilter">
+                <td class="label">Exclude Artists (one on each line):</td>
+                <td>
+                    <textarea name="excluded_artists" rows="3" cols="25" style="width: 95%"><?php if (!empty($_GET['excluded_artists'])) echo display_str($_GET['excluded_artists']) ?></textarea>&nbsp;
+                </td>
+            </tr>
             <tr>
                 <td class="label">Format:</td>
                 <td>

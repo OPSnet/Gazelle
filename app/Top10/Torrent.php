@@ -29,32 +29,41 @@ class Torrent {
         if (!$this->cache->get_query_lock($cacheKey)) return false;
 
         $where = [];
-        $anyTags = isset($tagParameter['anyall']) && $tagParameter['anyall'] == 'any';
+        $anyTags = isset($getParameters['anyall']) && $getParameters['anyall'] == 'any';
         if (isset($getParameters['tags'])) $where[] = $this->tagWhere($getParameters['tags'], $anyTags);
         if (isset($getParameters['format'])) $where[] = $this->formatWhere($getParameters['format']);
-        if (isset($getParameters['freeleech'])) $where[] = $this->freeleechWhere($getParameters['freeleech']);
+        $where[] = $this->freeleechWhere($getParameters);
         $where[] = $this->detailsWhere($details);
 
         $where[] = ["parameters" => null, "where" => "tls.Seeders > 0"];
-        
-        $whereFilter = function($value){ 
-            if (!isset($value["where"])) { 
+
+        $whereFilter = function($value) {
+            if (!isset($value["where"])) {
                 return null;
-            }; 
-            return $value["where"]; 
+            };
+            return $value["where"];
         };
 
-        $parameterFilter = function($value){ 
-            if (!isset($value["parameters"])) { 
+        $parameterFilter = function($value) {
+            if (!isset($value["parameters"])) {
                 return null;
-            }; 
-            return $value["parameters"]; 
+            };
+            return $value["parameters"];
         };
 
         $filteredWhere = array_filter(array_map($whereFilter, $where));
         $parameters = $this->flatten(array_filter(array_map($parameterFilter, $where)));
 
-        $query = $this->baseQuery . ' WHERE ' . implode(" AND ", $filteredWhere);
+        $query = $this->baseQuery;
+
+        if (!empty($getParameters['excluded_artists'])) {
+            list($clause, $artists) = $this->excludedArtistClause($getParameters['excluded_artists']);
+            $query .= $clause;
+            $parameters = array_merge($artists, $parameters);
+            $filteredWhere[] = "ta.ArtistCount IS NULL";
+        }
+
+        $query .= " WHERE " . implode(" AND ", $filteredWhere);
         $query = $query . (isset($getParameters['groups']) && $getParameters['groups'] == 'show' ? ' GROUP BY g.ID ' : '');
         $query = $query . ' ORDER BY ' . $this->orderBy($details) . ' DESC';
         $query = $query . " LIMIT $limit";
@@ -114,21 +123,40 @@ class Torrent {
         }
     }
 
-    private function formatWhere($formatParameters) {
-        if (isset($formatParameters)) {
-            if (in_array($formatParameters, $this->formats)) {
-                return ["parameters" => $formatParameters, "where" => "t.Format = '?'"];
-            }
+    private function excludedArtistClause($artistParameter) {
+        if (!empty($artistParameter)) {
+            $artists = preg_split('/\r\n|\r|\n/', trim($artistParameter));
+
+            $artistPrepare = function($artist) { return trim($artist); };
+            $artists = array_map($artistPrepare, $artists);
+
+            $filler = array_fill(0,  count($artists), "?");
+            $where = "(".implode(", ", $filler).")";
+            $sql = "
+            LEFT JOIN (
+                SELECT COUNT(*) AS ArtistCount, ta.GroupID
+                FROM torrents_artists AS ta
+                INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
+                WHERE ta.Importance != '2' AND aa.Name IN {$where}
+                GROUP BY ta.GroupID
+            ) AS ta ON (g.ID = ta.GroupID)";
+            return [$sql, $artists];
         }
 
-        return [];
+        return ['', []];
     }
 
-    private function freeleechWhere($freeleechParameters) {
+    private function formatWhere($formatParameters) {
+        if (in_array($formatParameters, $this->formats)) {
+            return ["parameters" => $formatParameters, "where" => "t.Format = ?"];
+        }
+    }
+
+    private function freeleechWhere($getParameters) {
         $disableFreeTorrentTop10 = isset($this->currentUser['DisableFreeTorrentTop10']) ? $this->currentUser['DisableFreeTorrentTop10'] : 0;
 
-        if (isset($freeleechParameters)) {
-            $disableFreeTorrentTop10 = ($freeleechParameters == 'hide' ? 1 : 0);
+        if (isset($getParameters['freeleech'])) {
+            $disableFreeTorrentTop10 = ($getParameters['freeleech'] == 'hide' ? 1 : 0);
         }
 
         if ($disableFreeTorrentTop10) {
@@ -138,9 +166,9 @@ class Torrent {
         return [];
     }
 
-    private function tagWhere($tagParameter, $any = false) {
-        if (isset($tagParameter) && !empty($tagParameter)) {
-            $tags = explode(',', str_replace('.', '_', trim($tagParameter)));
+    private function tagWhere($getParameters, $any = false) {
+        if (!empty($getParameters)) {
+            $tags = explode(',', str_replace('.', '_', trim($getParameters)));
             $replace = function($tag) { return preg_replace('/[^a-z0-9_]/', '', $tag); };
             $tags = array_map($replace, $tags);
             $tags = array_filter($tags);
