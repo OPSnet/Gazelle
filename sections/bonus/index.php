@@ -22,8 +22,8 @@ if (isset($_GET['action'])) {
                         error('You cannot afford this item.');
                     }
                     switch($Label)  {
-                        case 'token-1': case 'token-2': case 'token-3':
-                        case 'other-1': case 'other-2': case 'other-3':
+                        case 'token-1': case 'token-2': case 'token-3': case 'token-4':
+                        case 'other-1': case 'other-2': case 'other-3': case 'other-4':
                             require_once(SERVER_ROOT . '/sections/bonus/tokens.php');
                             break;
                         case 'invite':
