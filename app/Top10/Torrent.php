@@ -160,7 +160,7 @@ class Torrent {
         }
 
         if ($disableFreeTorrentTop10) {
-            return ["parameters" => null, "where" => "t.FreeTorrent = 0"];
+            return ["parameters" => null, "where" => "t.FreeTorrent = '0'"];
         }
 
         return [];
