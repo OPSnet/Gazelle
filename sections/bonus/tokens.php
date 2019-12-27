@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-if (!preg_match('/^(token|other)-[123]$/', $Label, $match)) {
+if (!preg_match('/^(token|other)-[1-4]$/', $Label, $match)) {
     error(403);
 }
 
