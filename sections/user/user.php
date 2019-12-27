@@ -18,7 +18,7 @@ if (!empty($_POST)) {
     if ($_POST['flsubmit'] !== 'Send') {
         error(403);
     }
-    if (!preg_match('/^fl-(other-[123])$/', $_POST['fltype'], $match)) {
+    if (!preg_match('/^fl-(other-[1-4])$/', $_POST['fltype'], $match)) {
         error(403);
     }
     $FL_OTHER_tokens = $Bonus->purchaseTokenOther($LoggedUser['ID'], $UserID, $match[1], $LoggedUser);
