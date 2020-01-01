@@ -121,7 +121,7 @@ if ($_POST['fromyear'.$FormID] && is_number($_POST['fromyear'.$FormID])) {
 
 
 if ($_POST['users'.$FormID]) {
-    $Tags = preg_split('/\r\n|\r|\n/', $_POST['users'.$FormID]);
+    $Usernames = preg_split('/\r\n|\r|\n/', $_POST['users'.$FormID]);
     $EscapedUsernames = [];
     foreach ($Usernames as $Username) {
         $EscapedUsernames[] = db_string(trim($Username));;
