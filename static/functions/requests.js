@@ -239,4 +239,5 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('amount_box').addEventListener('input', function() {
         Calculate();
     });
+    Calculate();
 });
