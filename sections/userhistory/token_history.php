@@ -92,7 +92,7 @@ $Pages = Format::get_pages($Page, $NumResults, 25);
         <td>Torrent</td>
         <td>Time</td>
         <td>Expired</td>
-<?php if (check_perms('users_mod')) { ?>
+<?php if ($LoggedUser['ID'] == $UserID || check_perms('users_mod')) { ?>
         <td>Downloaded</td>
         <td>Size</td>
         <td>Tokens used</td>
