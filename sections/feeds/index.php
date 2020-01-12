@@ -25,10 +25,12 @@ $User = (int)$_GET['user'];
 if (!$Enabled = $Cache->get_value("enabled_$User")) {
     require(SERVER_ROOT.'/classes/mysql.class.php');
     $DB = NEW DB_MYSQL; //Load the database wrapper
-    $DB->query("
+    $DB->prepared_query('
         SELECT Enabled
         FROM users_main
-        WHERE ID = '$User'");
+        WHERE ID = ?
+        ', $User
+    );
     list($Enabled) = $DB->next_record();
     $Cache->cache_value("enabled_$User", $Enabled, 0);
 }
@@ -87,7 +89,7 @@ switch ($_GET['feed']) {
                     b.Time,
                     b.ThreadID
                 FROM blog AS b
-                    LEFT JOIN users_main AS um ON b.UserID = um.ID
+                LEFT JOIN users_main AS um ON (b.UserID = um.ID)
                 ORDER BY Time DESC
                 LIMIT 20");
             $Blog = $DB->to_array();
@@ -106,7 +108,6 @@ switch ($_GET['feed']) {
         $Feed->channel('Gazelle Change Log', 'RSS feed for Gazelle\'s changelog.');
         if (!$Changelog = $Cache->get_value('changelog')) {
             require(SERVER_ROOT.'/classes/mysql.class.php');
-            require(SERVER_ROOT.'/classes/misc.class.php');
 
             $DB = NEW DB_MYSQL;
             $DB->query("
@@ -194,4 +195,3 @@ switch ($_GET['feed']) {
         }
 }
 $Feed->close_feed();
-?>
