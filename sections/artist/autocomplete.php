@@ -17,7 +17,7 @@ $autoSuggest = $Cache->get('autocomplete_artist_' . $keySize . '_' . $letters);
 
 if (!$autoSuggest) {
     $limit = (($keySize === $maxKeySize) ? 250 : 10);
-    $DB->query("
+    $DB->prepared_query("
         SELECT
             a.ArtistID,
             a.Name
