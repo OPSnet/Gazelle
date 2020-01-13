@@ -623,7 +623,7 @@ class Donations {
         }
         $QueryID = G::$DB->get_query_id();
         G::$DB->prepared_query('
-            SELECT Amount, Email, Time, Currency, Reason, Source, AddedBy, Rank, TotalRank
+            SELECT Amount, Time, Currency, Reason, Source, AddedBy, Rank, TotalRank
             FROM donations
             WHERE UserID = ?
             ORDER BY Time DESC
