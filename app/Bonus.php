@@ -20,7 +20,11 @@ class Bonus {
         $this->cache = $cache;
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
         if ($this->items === false) {
-            $this->db->query("SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title FROM bonus_item");
+            $this->db->query("
+                SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title
+                FROM bonus_item
+                ORDER BY FIELD(label, 'token-1', 'token-4', 'token-2', 'token-3', 'other-1', 'other-4', 'other-2', 'other-3', 'title-bb-n', 'title-bb-y', 'title-off', 'invite')
+            ");
             $this->items = $this->db->has_results() ? $this->db->to_array('Label') : [];
             $this->cache->cache_value(self::CACHE_ITEM, $this->items, 86400 * 30);
         }
