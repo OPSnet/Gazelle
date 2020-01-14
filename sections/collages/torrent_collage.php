@@ -457,6 +457,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     $GroupCategoryID = $Group['CategoryID'];
     $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
     $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
+    $TorrentTags = new Tags($Group['TagList']);
     $Artists = $Group['Artists'];
     $ExtendedArtists = $Group['ExtendedArtists'];
 

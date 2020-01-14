@@ -3,7 +3,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class UserDonorRank extends AbstractMigration
+class DropDonationEmail extends AbstractMigration
 {
     /**
      * Change Method.

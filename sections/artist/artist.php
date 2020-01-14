@@ -283,16 +283,19 @@ $HideTorrents = ($ShowGroups ? '' : ' hidden');
 $OldGroupID = 0;
 $LastReleaseType = 0;
 
+// TODO: Make this hop-skip-jump group nonsense a little saner
 foreach ($Importances as $Group) {
-    $GroupID = $Group['ID'];
-    $GroupName = $Group['Name'];
-    $GroupYear = $Group['Year'];
-    $GroupFlags = isset($Group['Flags']) ? $Group['Flags'] : ['IsSnatched' => false];
-    $TorrentTags = new Tags($Group['TagList'], false);
-    $ReleaseType = $Group['ReleaseType'];
-    $Torrents = isset($Group['Torrents']) ? $Group['Torrents'] : [];
-    $Artists = $Group['Artists'];
-    $ExtendedArtists = $Group['ExtendedArtists'];
+    $Gp = $TorrentList[$Group['GroupID']];
+
+    $GroupID = $Gp['ID'];
+    $GroupName = $Gp['Name'];
+    $GroupYear = $Gp['Year'];
+    $GroupFlags = isset($Gp['Flags']) ? $Gp['Flags'] : ['IsSnatched' => false];
+    $TorrentTags = new Tags($Gp['TagList'], false);
+    $ReleaseType = $Gp['ReleaseType'];
+    $Torrents = isset($Gp['Torrents']) ? $Gp['Torrents'] : [];
+    $Artists = $Gp['Artists'];
+    $ExtendedArtists = $Gp['ExtendedArtists'];
 
     if ($GroupID == $OldGroupID && $ReleaseType == $OldReleaseType) {
         continue;
@@ -383,7 +386,7 @@ foreach ($Importances as $Group) {
         $DisplayName = "$GroupYear - $DisplayName";
     }
 
-    if ($Group['VanityHouse']) {
+    if ($Gp['VanityHouse']) {
         $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
     }
 
@@ -399,7 +402,7 @@ foreach ($Importances as $Group) {
 <?php
     if ($LoggedUser['CoverArt']) { ?>
                     <div class="group_image float_left clear">
-                        <?php ImageTools::cover_thumb($Group['WikiImage'], $Group['CategoryID']) ?>
+                        <?php ImageTools::cover_thumb($Gp['WikiImage'], $Gp['CategoryID']) ?>
                     </div>
 <?php
     } ?>
@@ -452,7 +455,7 @@ foreach ($Importances as $Group) {
 
 ?>
     <tr class="releases_<?=$ReleaseType?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $HideDiscog . $HideTorrents?>">
-        <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $TorrentList[$Group['GroupID']])?></strong></td>
+        <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $TorrentList[$GroupID])?></strong></td>
     </tr>
 <?php
         }

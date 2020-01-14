@@ -278,7 +278,7 @@ if (empty($SimilarArray)) {
         INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
         WHERE s1.ArtistID = ?
         ORDER BY ass.Score DESC
-        LIMIT 30,
+        LIMIT 30
         ', $ArtistID
     );
     $SimilarArray = $DB->to_array();
