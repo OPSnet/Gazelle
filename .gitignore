@@ -36,6 +36,8 @@ report/
 .vagrant/machines/
 .vagrant/rgloader/
 *.swp
+*.bak
+*~
 
 .docker/data
 cache/
