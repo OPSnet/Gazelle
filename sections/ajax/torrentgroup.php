@@ -78,6 +78,10 @@ $JsonTorrentDetails = [
 
 $JsonTorrentList = [];
 foreach ($TorrentList as $Torrent) {
+    if ($Torrent['is_deleted']) {
+        continue;
+    }
+
     // Convert file list back to the old format
     $FileList = explode("\n", $Torrent['FileList']);
     foreach ($FileList as &$File) {
