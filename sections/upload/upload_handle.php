@@ -1020,7 +1020,7 @@ if ($PublicTorrent || $UnsourcedTorrent) {
     }
     if ($UnsourcedTorrent) {
 ?>
-        <li><strong>The "source" flag was not set to OPS</strong></li>
+        <li><strong>The "source" flag was not set to OPS. Please read the <a href="/wiki.php?action=article&id=<?= SOURCE_FLAG_WIKI_PAGE_ID ?>">wiki page about source flags</a> to find out why this is important. </strong></li>
 <?php
     }
 ?>
