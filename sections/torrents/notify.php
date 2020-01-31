@@ -107,7 +107,8 @@ if ($OrderTbl == 'tg') {
             unt.FilterID,
             t.GroupID
         FROM users_notify_torrents AS unt
-            JOIN torrents AS t ON t.ID = unt.TorrentID
+        INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
+        INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = unt.TorrentID)
         WHERE unt.UserID = $UserID".
         ($FilterID
             ? " AND unt.FilterID = $FilterID"
