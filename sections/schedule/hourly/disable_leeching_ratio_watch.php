@@ -6,9 +6,10 @@
 $DB->query("
         SELECT ID, torrent_pass
         FROM users_info AS i
-            JOIN users_main AS m ON m.ID = i.UserID
+        INNER JOIN users_main AS m ON (m.ID = i.UserID)
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = i.UserID)
         WHERE i.RatioWatchEnds != '0000-00-00 00:00:00'
-            AND i.RatioWatchDownload + 10 * 1024 * 1024 * 1024 < m.Downloaded
+            AND i.RatioWatchDownload + 10 * 1024 * 1024 * 1024 < uls.Downloaded
             AND m.Enabled = '1'
             AND m.can_leech = '1'");
 $Users = $DB->to_pair('torrent_pass', 'ID');
