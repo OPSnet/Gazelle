@@ -112,6 +112,7 @@ foreach ($RatioRequirements as $Requirement) {
 }
 
 $DB->query("
-        UPDATE users_main
-        SET RequiredRatio = 0.00
-        WHERE Downloaded < 5 * 1024 * 1024 * 1024");
+        UPDATE users_main AS um
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        SET um.RequiredRatio = 0.00
+        WHERE uls.Downloaded < 5 * 1024 * 1024 * 1024");
