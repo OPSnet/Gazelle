@@ -19,8 +19,6 @@ if (count($UserIDs) > 0) {
                 i.AdminComment = CONCAT('$sqltime - Leeching ability disabled by ratio watch system - required ratio: ', m.RequiredRatio, '\n\n', i.AdminComment)
             WHERE m.ID IN(".implode(',', $UserIDs).')');
 
-
-
     $DB->query("
             DELETE FROM users_torrent_history
             WHERE UserID IN (".implode(',', $UserIDs).')');
