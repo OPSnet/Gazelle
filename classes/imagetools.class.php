@@ -94,7 +94,7 @@ class ImageTools {
      */
     private static function thumbnailable($Url) {
         $ParsedUrl = parse_url($Url);
-        return !empty(self::$Thumbs[$ParsedUrl['host']]);
+        return isset($ParsedUrl['host']) && !empty(self::$Thumbs[$ParsedUrl['host']]);
     }
 
     /**

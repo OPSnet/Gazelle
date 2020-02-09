@@ -308,10 +308,7 @@ class Text {
     public static function resolve_url($url) {
         $rawurl = str_replace('&amp;', '&', $url); // unfuck aggressive escaping
         $info = parse_url($rawurl);
-        if (!$info) {
-            return null;
-        }
-        if ($info['host'] != SITE_HOST) {
+        if (!$info || !isset($info['host']) || $info['host'] != SITE_HOST) {
             return null;
         }
         parse_str($info['query'], $args);
