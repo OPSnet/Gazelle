@@ -46,17 +46,17 @@ if (!$TorrentStats = $Cache->get_value('new_torrent_stats')) {
             <div class="pad">
                 <table>
                 <tr>
-                    <td>Total torrents:</td><td><?=number_format($TorrentCount)?></td>
-                    <td>Mean torrents per user:</td><td><?=number_format($TorrentCount / $NumUsers)?></td>
-                    <td>Mean files per torrent:</td><td><?=number_format($TotalFiles / $TorrentCount)?></td>
+                    <td>Total torrents:</td><td class="number_column"><?=number_format($TorrentCount)?></td>
+                    <td style="padding-left:50px">Mean torrents per user:</td><td class="number_column"><?=number_format($TorrentCount / $NumUsers)?></td>
+                    <td style="padding-left:50px">Mean files per torrent:</td><td class="number_column"><?=number_format($TotalFiles / $TorrentCount)?></td>
                 </tr>
                 <tr>
-                    <td>Total size:</td><td><?=Format::get_size($TotalSize)?></td>
-                    <td>Mean torrent size:</td><td><?=Format::get_size($TotalSize / $TorrentCount)?></td>
-                    <td>Mean filesize:</td><td><?=Format::get_size($TotalSize / $TotalFiles)?></td>
+                    <td>Total size:</td><td class="number_column"><?=Format::get_size($TotalSize)?></td>
+                    <td style="padding-left:50px">Mean torrent size:</td><td class="number_column"><?=Format::get_size($TotalSize / $TorrentCount)?></td>
+                    <td style="padding-left:50px">Mean filesize:</td><td class="number_column"><?=Format::get_size($TotalSize / $TotalFiles)?></td>
                 </tr>
                 <tr>
-                    <td>Total files:</td><td><?=number_format($TotalFiles)?></td>
+                    <td>Total files:</td><td class="number_column"><?=number_format($TotalFiles)?></td>
                 </tr>
                 </table>
             </div>
@@ -79,35 +79,35 @@ if (!$TorrentStats = $Cache->get_value('new_torrent_stats')) {
 
                     <tr>
                     <th>Torrents</th>
-                    <td align="right"><?=number_format($DayNum)?></td>
-                    <td align="right"><?=number_format($WeekNum)?></td>
-                    <td align="right"><?=number_format($WeekNum / 7)?></td>
-                    <td align="right"><?=number_format($MonthNum)?></td>
-                    <td align="right"><?=number_format($MonthNum / 30)?></td>
-                    <td align="right"><?=number_format($QuartNum)?></td>
-                    <td align="right"><?=number_format($QuartNum / 120)?></td>
+                    <td class="number_column"><?=number_format($DayNum)?></td>
+                    <td class="number_column"><?=number_format($WeekNum)?></td>
+                    <td class="number_column"><?=number_format($WeekNum / 7)?></td>
+                    <td class="number_column"><?=number_format($MonthNum)?></td>
+                    <td class="number_column"><?=number_format($MonthNum / 30)?></td>
+                    <td class="number_column"><?=number_format($QuartNum)?></td>
+                    <td class="number_column"><?=number_format($QuartNum / 120)?></td>
                     </tr>
 
                     <tr>
                     <th>Size</th>
-                    <td align="right"><?=number_format($DaySize)?></td>
-                    <td align="right"><?=number_format($WeekSize)?></td>
-                    <td align="right"><?=number_format($WeekSize / 7)?></td>
-                    <td align="right"><?=number_format($MonthSize)?></td>
-                    <td align="right"><?=number_format($MonthSize / 30)?></td>
-                    <td align="right"><?=number_format($QuartSize)?></td>
-                    <td align="right"><?=number_format($QuartSize / 120)?></td>
+                    <td class="number_column"><?=Format::get_size($DaySize)?></td>
+                    <td class="number_column"><?=Format::get_size($WeekSize)?></td>
+                    <td class="number_column"><?=Format::get_size($WeekSize / 7)?></td>
+                    <td class="number_column"><?=Format::get_size($MonthSize)?></td>
+                    <td class="number_column"><?=Format::get_size($MonthSize / 30)?></td>
+                    <td class="number_column"><?=Format::get_size($QuartSize)?></td>
+                    <td class="number_column"><?=Format::get_size($QuartSize / 120)?></td>
                     </tr>
 
                     <tr>
                     <th>Files</th>
-                    <td align="right"><?=number_format($DayFiles)?></td>
-                    <td align="right"><?=number_format($WeekFiles)?></td>
-                    <td align="right"><?=number_format($WeekFiles / 7)?></td>
-                    <td align="right"><?=number_format($MonthFiles)?></td>
-                    <td align="right"><?=number_format($MonthFiles / 30)?></td>
-                    <td align="right"><?=number_format($QuartFiles)?></td>
-                    <td align="right"><?=number_format($QuartFiles / 120)?></td>
+                    <td class="number_column"><?=number_format($DayFiles)?></td>
+                    <td class="number_column"><?=number_format($WeekFiles)?></td>
+                    <td class="number_column"><?=number_format($WeekFiles / 7)?></td>
+                    <td class="number_column"><?=number_format($MonthFiles)?></td>
+                    <td class="number_column"><?=number_format($MonthFiles / 30)?></td>
+                    <td class="number_column"><?=number_format($QuartFiles)?></td>
+                    <td class="number_column"><?=number_format($QuartFiles / 120)?></td>
                     </tr>
                 </table>
         </div>
