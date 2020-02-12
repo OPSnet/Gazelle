@@ -129,7 +129,7 @@ if (!$NoPoll) { // god, I hate double negatives...
     $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, '0000-00-00 00:00:00', '0'], 0);
 
     if ($ForumID == STAFF_FORUM) {
-        send_irc('PRIVMSG '.ADMIN_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".site_url()."forums.php?action=viewthread&threadid=$TopicID");
+        send_irc('PRIVMSG '.MOD_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".site_url()."forums.php?action=viewthread&threadid=$TopicID");
     }
 }
 
