@@ -308,8 +308,10 @@ if ($ThreadInfo['NoPoll'] == 0) {
             $Staff = get_staff();
 
             $StaffNames = [];
-            foreach ($Staff as $Staffer) {
-                $StaffNames[] = $Staffer['Username'];
+            foreach ($Staff as $Group) {
+                foreach ($Group as $Staffer) {
+                    $StaffNames[] = $Staffer['Username'];
+                }
             }
 
             $DB->query("
