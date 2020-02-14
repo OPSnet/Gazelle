@@ -332,3 +332,5 @@ $ExternalServicesConfig = [
 define('TOP10_ALL_TIME_THRESHOLD', 150);
 define('TOP10_YEAR_THRESHOLD', 80);
 define('TOP10_DATA_THRESHOLD', 50);
+
+define('SITE_LAUNCH_YEAR', 2018);
