@@ -580,4 +580,3 @@ switch ($_REQUEST['action']) {
     default:
         include(SERVER_ROOT.'/sections/tools/tools.php');
 }
-?>
