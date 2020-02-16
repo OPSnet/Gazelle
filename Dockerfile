@@ -67,5 +67,8 @@ RUN composer --version \
 
 USER root
 
-EXPOSE 80
+EXPOSE 80/tcp
+EXPOSE 3306/tcp
+EXPOSE 34000/tcp
+
 CMD ["/bin/bash", "/var/www/.docker/web/entrypoint.sh"]
