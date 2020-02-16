@@ -270,11 +270,12 @@ class Forums {
             $UserID = G::$LoggedUser['ID'];
         }
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        G::$DB->prepared_query("
             INSERT INTO forums_topic_notes
-                (TopicID, AuthorID, AddedTime, Body)
+                (TopicID, AuthorID, Body)
             VALUES
-                ($TopicID, $UserID, '" . sqltime() . "', '" . db_string($Note) . "')");
+                (?,       ?,        ?)",
+            $TopicID, $UserID, $Note);
         G::$DB->set_query_id($QueryID);
         return (bool)G::$DB->affected_rows();
     }
@@ -317,27 +318,73 @@ class Forums {
         return $SQL;
     }
 
-    public static function get_transitions() {
+    public static function get_transitions($user = 0) {
+        if (!$user) {
+            $user = G::$LoggedUser['ID'];
+        }
+        $info = Users::user_info($user);
+
+        if ($user != G::$LoggedUser['ID'] && !check_perms('users_mod', $info['Class'])) {
+            error(403);
+        }
+
         $items = G::$Cache->get_value('forum_transitions');
         if (!$items) {
             $queryId = G::$DB->get_query_id();
             G::$DB->prepared_query('
-                SELECT forums_transitions_id AS id, source, destination, label, permission_levels
+                SELECT forums_transitions_id AS id, source, destination, label, permission_levels,
+                       permission_class, permissions, user_ids
                 FROM forums_transitions');
             $items = G::$DB->to_array('id', MYSQLI_ASSOC);
             G::$Cache->cache_value('forum_transitions', $items);
             G::$DB->set_query_id($queryId);
         }
 
-        if (check_perms('site_moderate_forums')) {
+        if ($user == G::$LoggedUser['ID'] && Permissions::has_override(G::$LoggedUser['EffectiveClass'])) {
             return $items;
         }
 
-        return array_filter($items, function ($item) {
-            $perms = array_fill_keys(explode(',', $item['permission_levels']), 1);
-            if (count(array_intersect_key($perms, Users::user_info(G::$LoggedUser['ID'])['ExtraClasses'])) > 0) {
+        $heavyInfo = Users::user_heavy_info($user);
+        $info = array_merge($info, $heavyInfo);
+        $info['Permissions'] = Permissions::get_permissions_for_user($user, $info['CustomPermissions']);
+
+        $info['ExtraClassesOff'] = array_flip(array_map(function ($i) { return -$i; }, array_keys($info['ExtraClasses'])));
+        $info['PermissionsOff'] = array_flip(array_map(function ($i) { return "-$i"; }, array_keys($info['Permissions'])));
+
+        return array_filter($items, function ($item) use ($info, $user) {
+            $userClass = $item['permission_class'];
+            $secondaryClasses = array_fill_keys(explode(',', $item['permission_levels']), 1);
+            $permissions = array_fill_keys(explode(',', $item['permissions']), 1);
+            $users = array_fill_keys(explode(',', $item['user_ids']), 1);
+
+            if (count(array_intersect_key($secondaryClasses, $info['ExtraClassesOff'])) > 0) {
+                return false;
+            }
+
+            if (count(array_intersect_key($permissions, $info['PermissionsOff'])) > 0) {
+                return false;
+            }
+
+            if (count(array_intersect_key($users, [-$user => 1])) > 0) {
+                return false;
+            }
+
+            if (count(array_intersect_key($secondaryClasses, $info['ExtraClasses'])) > 0) {
                 return true;
             }
+
+            if (count(array_intersect_key($permissions, $info['Permissions'])) > 0) {
+                return true;
+            }
+
+            if (count(array_intersect_key($users, [$user => 1])) > 0) {
+                return true;
+            }
+
+            if ($info['EffectiveClass'] >= $userClass) {
+                return true;
+            }
+
             return false;
         });
     }

@@ -10,10 +10,7 @@ class Permissions {
      * @return bool
      */
     public static function check_perms($PermissionName, $MinClass = 0) {
-
-        $OverrideClass = 1000;
-
-        $Override = G::$LoggedUser['EffectiveClass'] >= $OverrideClass;
+        $Override = self::has_override(G::$LoggedUser['EffectiveClass']);
         return ($PermissionName === null ||
             (isset(G::$LoggedUser['Permissions'][$PermissionName]) && G::$LoggedUser['Permissions'][$PermissionName]))
             && (G::$LoggedUser['Class'] >= $MinClass
@@ -117,5 +114,9 @@ class Permissions {
     public static function has_permission($UserID, $privilege) {
         $Permissions = self::get_permissions_for_user($UserID);
         return isset($Permissions[$privilege]) && $Permissions[$privilege];
+    }
+
+    public static function has_override($Level) {
+        return $Level >= 1000;
     }
 }

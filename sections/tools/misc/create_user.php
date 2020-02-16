@@ -12,37 +12,38 @@ if (isset($_POST['Username'])) {
     authorize();
 
     //Create variables for all the fields
-    $Username = trim($_POST['Username']);
-    $Email = trim($_POST['Email']);
-    $Password = $_POST['Password'];
+    $username = trim($_POST['Username']);
+    $email = trim($_POST['Email']);
+    $password = $_POST['Password'];
 
     //Make sure all the fields are filled in
     //Don't allow a username of "0" or "1" because of PHP's type juggling
-    if (!preg_match(USERNAME_REGEX, $Username)) {
+    if (!preg_match(USERNAME_REGEX, $username)) {
 
         //Give the Error -- Invalid username
         error('Invalid username');
 
-    } else if (!empty($Username) && !empty($Email) && !empty($Password) && $Username != '0' && $Username != '1') {
+    } else if (!empty($username) && !empty($email) && !empty($password) && $username != '0' && $username != '1') {
 
         //Create hashes...
-        $Secret = Users::make_secret();
-        $torrent_pass = Users::make_secret();
+        $secret = Users::make_secret();
+        $torrentPass = Users::make_secret();
 
         //Create the account
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO users_main
                 (Username, Email, PassHash, torrent_pass, Enabled, PermissionID)
             VALUES
-                ('".db_string($Username)."', '".db_string($Email)."', '".db_string(Users::make_password_hash($Password))."', '".db_string($torrent_pass)."', '1', '".USER."')");
+                (?,        ?,     ?,        ?,            '1',     ?)",
+            $username, $email, Users::make_password_hash($password), $torrentPass, USER);
 
         //Increment site user count
         $Cache->increment('stats_user_count');
 
         //Grab the userID
-        $UserID = $DB->inserted_id();
+        $userId = $DB->inserted_id();
 
-        Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $torrent_pass]);
+        Tracker::update_tracker('add_user', ['id' => $userId, 'passkey' => $torrentPass]);
 
         //Default stylesheet
         $DB->query("
@@ -51,33 +52,41 @@ if (isset($_POST['Username'])) {
         list($StyleID) = $DB->next_record();
 
         //Auth key
-        $AuthKey = Users::make_secret();
+        $authKey = Users::make_secret();
 
         //Give them a row in users_info
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO users_info
                 (UserID, StyleID, AuthKey, JoinDate)
             VALUES
-                ('".db_string($UserID)."', '".db_string($StyleID)."', '".db_string($AuthKey)."', '".sqltime()."')");
+                (?,      ?,       ?,       now())",
+            $userId, $StyleID, $authKey);
 
         // Give the notification settings
-        $DB->query("INSERT INTO users_notifications_settings (UserID) VALUES ('$UserID')");
+        $DB->prepared_query("INSERT INTO users_notifications_settings (UserID) VALUES (?)", $userId);
+
+        $DB->prepared_query("
+            INSERT INTO users_leech_stats
+                (UserID, Uploaded)
+            VALUES
+                (?,      ?)",
+            $userId, STARTING_UPLOAD); 
 
         //Redirect to users profile
-        header ("Location: user.php?id=$UserID");
+        header ("Location: user.php?id=$userId");
 
     //What to do if we don't have a username, email, or password
-    } elseif (empty($Username)) {
+    } elseif (empty($username)) {
 
         //Give the Error -- We do not have a username
         error('Please supply a username');
 
-    } elseif (empty($Email)) {
+    } elseif (empty($email)) {
 
         //Give the Error -- We do not have an email address
         error('Please supply an email address');
 
-    } elseif (empty($Password)) {
+    } elseif (empty($password)) {
 
         //Give the Error -- We do not have a password
         error('Please supply a password');
