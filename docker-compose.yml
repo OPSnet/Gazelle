@@ -5,6 +5,8 @@ services:
     build: .
     ports:
       - 8080:80
+      - 36000:3306
+      - 34000:34000
     depends_on:
       - memcached
       - mysql
