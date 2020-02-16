@@ -1,6 +1,7 @@
 # Gazelle
-Gazelle is a web framework geared towards private BitTorrent trackers. Although naturally focusing on music, it can be
-modified for most needs. Gazelle is written in PHP, JavaScript, and MySQL.
+Gazelle is a web framework geared towards private BitTorrent trackers.
+Although naturally focusing on music, it can be modified for most
+needs. Gazelle is written in PHP, JavaScript, and MySQL.
 
 ## Gazelle Runtime Dependencies
 * [Nginx](http://wiki.nginx.org/Main) (recommended)
@@ -16,47 +17,63 @@ modified for most needs. Gazelle is written in PHP, JavaScript, and MySQL.
 
 _Note: This list may not be exhaustive._
 
-## Installation
-See the script in `.vagrant/gazelle-setup.sh` to get a gist of what needs to be done to install Gazelle on Debian
-Jessie. You should be able to modify this to whatever distro you want to run it on.
-
 ## Logchecker
-To fully utilize the Logchecker, you must install the following depedencies through pip:
+To fully utilize the Logchecker, you must install the following
+depedencies through `pip`:
 * chardet
 * eac-logchecker
 * xld-logchecker
 
 ## Gazelle Development
-Gazelle can be run through Docker (container) or Vagrant (Virtual Machine). Historically, Vagrant was used, but recently Docker support was added and is the preferred method of development.
+Gazelle can be run through Docker (container) or Vagrant (Virtual
+Machine). Historically, Vagrant was used, but recently Docker support
+was added and is the preferred method of development.
 
 ### Docker (Recommended)
-Install docker for your preferred system and start using the following command:
+Install Docker for your preferred system and run the following
+command:
 
 ```
 docker-compose up
 ```
+This will build and pull the needed images to run Gazlle on Debian
+buster. A volume is mounted from the base of the git repository at
+`/var/www` in the container. Changes to the source code are
+immediately served without rebuilding or restarting.
 
-This will build and pull the needed images. A volume is created between the source code and `/var/www`. This way, changes to the sourcecode are immediately served without rebuilding or restarting. 
+If you want to poke around inside the web container, open a shell:
+
+`docker exec -it $(docker ps|awk '$2 ~ /web$/ {print $1}') /bin/bash`
+
+You may want to install additional packages:
+* apt update
+* apt install less procps vim
 
 ### Vagrant (Legacy)
-This repository comes pre-setup to be run through [Vagrant](https://www.vagrantup.com/) for ease of development and
-without having to modify your local machine. You can look through the docs for how it works, but to start, you
-just need to download Vagrant and VirtualBox (and it's recommended to get the
-[vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest) plugin) and then simply run:
-```
-vagrant up
-```
+This repository comes pre-setup to be run through
+[Vagrant](https://www.vagrantup.com/) for ease of development and
+without having to modify your local machine. You can look through
+the docs for how it works, but to start, you just need to download
+Vagrant and VirtualBox (and it's recommended to get the
+[vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest)
+plugin) and then simply run: ``` vagrant up ```
 
-This will build a Debian Jessie on a Virtual Machine and serve this repository through `/var/www` on the machine.
+This will build a Debian Jessie on a Virtual Machine and serve this
+repository through `/var/www` on the machine.
 
 ### Forwarded Ports
 Both Docker and Vagrant will forward the following ports:
-* 8080 -> 80 (nginx)
-* 36000 -> 3306 (mysql)
+* 80 -> 8080 (web)
+* 3306 -> 36000 (mysql)
 * 34000 -> 34000 (ocelot)
 
 You can access the site by going to `http://localhost:8080`
 
 ## Contact and Discussion
-Feel free to join #develop on irc.orpheus.network to discuss any questions concerning Gazelle (or any of the repos used by
+Feel free to join #develop on irc.orpheus.network to discuss any
+questions concerning Gazelle (or any of the repos published by
 Orpheus).
+
+## Open source
+Open issues at https://github.com/OPSnet.
+Patches welcome!
