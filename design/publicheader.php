@@ -21,25 +21,4 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
     <script src="<?=STATIC_SERVER?>functions/global.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/global.js')?>" type="text/javascript"></script>
 </head>
 <body>
-<div id="head">
-</div>
-<table class="layout" id="maincontent">
-    <tr>
-        <td align="center" valign="middle">
-            <div id="logo" style="width:250px;">
-                <ul>
-<?php if (SHOW_PUBLIC_INDEX) { ?>
-                    <li><a href="index.php">Home</a></li>
-<?php } ?>
-                    <li><a href="login.php">Log in</a></li>
-<?php if (OPEN_REGISTRATION) { ?>
-                    <li><a href="register.php">Register</a></li>
-<?php } ?>
-<?php if (OPEN_EXTERNAL_REFERRALS) { ?>
-                    <li><a href="referral.php">Referrals</a></li>
-<?php } ?>
-<?php if (RECOVERY) { ?>
-                    <li><a title="Obtain a new account by proving your membership on the previous site" href="recovery.php">Recovery</a></li>
-<?php } ?>
-                </ul>
-            </div>
+<div id="maincontent">
