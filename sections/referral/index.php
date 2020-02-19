@@ -6,7 +6,7 @@ if (isset($LoggedUser["ID"])) {
 ?>
 
 <div id="logo">
-<a href="/"><img src="static/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
+<a href="/"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
 </div>
 
 <?php

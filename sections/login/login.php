@@ -3,7 +3,7 @@
 <noscript><span class="warning"><?=SITE_NAME?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br /><br /></noscript>
 
 <div id="logo">
-<a href="/"><img src="static/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
+<a href="/"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
 </div>
 
 <div class="main">
