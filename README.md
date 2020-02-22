@@ -54,16 +54,17 @@ just need to download Docker Desktop and then simply run:
 ```
 docker-compose up
 ```
-Also, if you want to seed the database with some dummy data, run:
-```
-docker exec -t gazelle_web_1 bash -c "vendor/bin/phinx seed:run"
-```
 
 This will build a Debian Buster in a container and serve this repository through `/var/www` in the container. It
 will also forward the following ports:
 * 8080 -> 80 (nginx)
 
 You can access the site by going to `http://localhost:8080`
+
+Also, if you want to seed the database with some dummy data, run:
+```
+docker exec -t gazelle_web_1 bash -c "vendor/bin/phinx seed:run"
+```
 
 #### Production
 
