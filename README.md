@@ -1,5 +1,5 @@
 # Gazelle
-Gazelle is a web framework geared towards private BitTorrent trackers. Although naturally focusing on music, it can be 
+Gazelle is a web framework geared towards private BitTorrent trackers. Although naturally focusing on music, it can be
 modified for most needs. Gazelle is written in PHP, JavaScript, and MySQL.
 
 ## Gazelle Runtime Dependencies
@@ -27,9 +27,12 @@ To fully utilize the Logchecker, you must install the following depedencies thro
 * xld-logchecker
 
 ## Gazelle Development
-This repository comes pre-setup to be run through [Vagrant](https://www.vagrantup.com/) for ease of development and 
+
+### Vagrant
+
+This repository comes pre-setup to be run through [Vagrant](https://www.vagrantup.com/) for ease of development and
 without having to modify your local machine. You can look through the docs for how it works, but to start, you
-just need to download Vagrant and VirtualBox (and it's recommended to get the 
+just need to download Vagrant and VirtualBox (and it's recommended to get the
 [vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest) plugin) and then simply run:
 ```
 vagrant up
@@ -42,6 +45,33 @@ will also forward the following ports:
 * 34000 -> 34000 (ocelot)
 
 You can access the site by going to `http://localhost:8080`
+
+### Docker
+
+This repository comes pre-setup to be run through [Docker](https://www.docker.com/) for ease of development and
+without having to modify your local machine. You can look through the docs for how it works, but to start, you
+just need to download Docker Desktop and then simply run:
+```
+docker-compose up
+```
+Also, if you want to seed the database with some dummy data, run:
+```
+docker exec -t gazelle_web_1 bash -c "vendor/bin/phinx seed:run"
+```
+
+This will build a Debian Buster in a container and serve this repository through `/var/www` in the container. It
+will also forward the following ports:
+* 8080 -> 80 (nginx)
+
+You can access the site by going to `http://localhost:8080`
+
+#### Production
+
+In order to run this in a production Docker environment, just run the following commands instead:
+```
+docker-compose build --build-arg BuildMode=prod
+docker-compose up
+```
 
 Feel free to join #develop on irc.orpheus.network to discuss any questions concerning Gazelle (or any of the repos used by
 Orpheus).
