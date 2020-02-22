@@ -38,7 +38,7 @@ SET FOREIGN_KEY_CHECKS = 1;
         curl_setopt($ch, CURLOPT_URL, 'https://api.discogs.com/releases/'.$id);
         $result = curl_exec($ch);
         curl_close($ch);
-        return json_decode($result, true);
+        return json_decode($result);
     }
 
     public function run() {
