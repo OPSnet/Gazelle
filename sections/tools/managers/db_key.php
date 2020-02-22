@@ -9,7 +9,7 @@ if (isset($_POST['dbkey'])) {
     apcu_store('DB_KEY', hash('sha512', $_POST['dbkey']));
 }
 $fingerprint = (apcu_exists('DB_KEY') && apcu_fetch('DB_KEY'))
-    ? '0x' . substr(apcu_fetch('DB_KEY')), 0, 4)
+    ? '0x' . substr(apcu_fetch('DB_KEY'), 0, 4)
     : false;
 
 View::show_header('Database Encryption Key');
@@ -35,5 +35,3 @@ View::show_header('Database Encryption Key');
 
 <?php
 View::show_footer();
-?>
-
