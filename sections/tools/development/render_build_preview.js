@@ -1,4 +1,5 @@
-var fs = require('fs');
+const fs = require('fs');
+const puppeteer = require('puppeteer');
 var rootPath = process.argv[2];
 var staticPath = process.argv[3];
 var style = process.argv[4];
@@ -11,9 +12,10 @@ if (!fs.existsSync(rootPath + '/' + staticPath + 'styles/' + style)) {
 var preview = rootPath + '/' + staticPath + 'styles/' + style + '/preview.html';
 var output = rootPath + '/' + staticPath + 'stylespreview/full_' + style + '.png';
 
-fs.createReadStream(toolsMiscPath + '/render_base.html').pipe(fs.createWriteStream(preview));
-
-const puppeteer = require('puppeteer');
+// fs.createReadStream(toolsMiscPath + '/render_base.html').pipe(fs.createWriteStream(preview));
+fs.copyFileSync(toolsMiscPath + '/render_base.html', preview, (err) => {
+    if (err) throw err;
+});
 
 (async () => {
     const browser = await puppeteer.launch({args: ['--no-sandbox']});
@@ -24,4 +26,3 @@ const puppeteer = require('puppeteer');
     await browser.close();
     fs.unlink(preview);
 })();
-

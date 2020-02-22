@@ -21,8 +21,8 @@ $ImagePath = SERVER_ROOT . '/' . STATIC_SERVER . 'stylespreview';
         <div class="box box_info">
             <div class="head colhead_dark">Rendering parameters</div>
             <ul class="stats nobullet">
-                <li>Server root: <?= var_dump(SERVER_ROOT); ?></li>
-                <li>Static server: <?= var_dump(STATIC_SERVER); ?></li>
+                <li>Server root: <?=SERVER_ROOT; ?></li>
+                <li>Static server: <?=STATIC_SERVER; ?></li>
                 <li>Whoami: <?php echo(shell_exec('whoami')); ?></li>
                 <li>Path: <?php echo dirname(__FILE__); ?></li>
                 <li>NodeJS: <?php echo (shell_exec('node -v;')); ?></li>
@@ -47,13 +47,12 @@ foreach ($Styles as $Style) {
 ?>
                 <div class="box">
                     <h6><?= $Style['Name'] ?></h6>
-                    <p>Build preview:<br />
+                    <p>Build preview:
 <?php
-    $CmdLine = '/usr/bin/node "' . dirname(__FILE__) . '/render_build_preview.js" "' . SERVER_ROOT . '" "' . STATIC_SERVER . '" "' . $Style['Name'] . '" "' . dirname(__FILE__) . '" &';
-    echo $CmdLine . "<br />";
-    echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+    $CmdLine = '/usr/bin/node "' . dirname(__FILE__) . '/render_build_preview.js" "' . SERVER_ROOT . '" "' . STATIC_SERVER . '" "' . $Style['Name'] . '" "' . dirname(__FILE__) . '"';
+    // echo $CmdLine . '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
     $BuildResult = trim(shell_exec(escapeshellcmd($CmdLine)));
-    echo (empty($BuildResult)) ? 'Success.' : "Error occured: {$BuildResult}.";
+    echo (empty($BuildResult)) ? 'Success.' : "Error occured: {$BuildResult}";
 ?>
                     </p>
 <?php
@@ -63,8 +62,9 @@ foreach ($Styles as $Style) {
                     <p>Converting Image:
 <?php
         $CmdLine = '/usr/bin/convert "' . $ImagePath . '/full_' . $Style['Name'] . '.png" -filter Box -resize 40% -quality 94 "' . $ImagePath . '/thumb_' . $Style['Name'] . '.png"';
+        // echo $CmdLine . '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
         $ConvertResult = shell_exec(escapeshellcmd($CmdLine));
-        echo (empty($ConvertResult)) ? 'Success.' : "Error occured: {$ConvertResult}.";
+        echo (empty($ConvertResult)) ? 'Success.' : "Error occured: {$ConvertResult}";
 ?>
                     </p>
 <?php
