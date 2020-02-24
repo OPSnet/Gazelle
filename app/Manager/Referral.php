@@ -422,7 +422,7 @@ class Referral {
 
     private function verifyGazelleAccount($acc, $user, $key) {
         if (!$this->loginGazelleAccount($acc)) {
-            return "Internal error";
+            return "Internal error 10";
         }
 
         $url = $acc["URL"] . 'ajax.php';
@@ -479,7 +479,7 @@ class Referral {
 
     private function verifyTentacleAccount($acc, $user, $key) {
         if (!$this->loginTentacleAccount($acc)) {
-            return "Internal error";
+            return "Internal error 11";
         }
 
         $url = $acc["URL"] . 'user/profile/' . $user;
@@ -498,7 +498,7 @@ class Referral {
 
     private function verifyLuminanceAccount($acc, $user, $key) {
         if (!$this->loginLuminanceAccount($acc)) {
-            return "Internal error";
+            return "Internal error 12";
         }
 
         $url = $acc["URL"] . 'user.php';
@@ -517,7 +517,7 @@ class Referral {
 
     private function verifyGazelleHTMLAccount($acc, $user, $key) {
         if (!$this->loginGazelleHTMLAccount($acc)) {
-            return "Internal error";
+            return "Internal error 13";
         }
 
         $url = $acc["URL"] . 'user.php';
@@ -537,7 +537,7 @@ class Referral {
 
     private function verifyPTPAccount($acc, $user, $key) {
         if (!$this->loginPTPAccount($acc)) {
-            return "Internal error";
+            return "Internal error 14";
         }
 
         $url = $acc["URL"] . 'user.php';
