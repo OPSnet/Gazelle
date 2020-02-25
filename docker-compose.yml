@@ -12,6 +12,8 @@ services:
       - mysql
     volumes:
       - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
 
   memcached:
     image: memcached:1.5-alpine
