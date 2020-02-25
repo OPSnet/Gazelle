@@ -33,21 +33,26 @@ was added and is the preferred method of development.
 Install Docker for your preferred system and run the following
 command:
 
-```
-docker-compose up
-```
-This will build and pull the needed images to run Gazlle on Debian
-buster. A volume is mounted from the base of the git repository at
+`docker-compose up`
+
+This will build and pull the needed images to run Gazelle on Debian
+Buster. A volume is mounted from the base of the git repository at
 `/var/www` in the container. Changes to the source code are
 immediately served without rebuilding or restarting.
 
 If you want to poke around inside the web container, open a shell:
 
-`docker exec -it $(docker ps|awk '$2 ~ /web$/ {print $1}') /bin/bash`
+`docker exec -it $(docker ps|awk '$2 ~ /web$/ {print $1}') bash`
 
 You may want to install additional packages:
-* apt update
-* apt install less procps vim
+* `apt update`
+* `apt install less procps vim`
+
+#### Production Mode (not fully baked yet)
+In order to have Docker build the container using the production mode commands
+for both Composer and NPM, run this before powering it up:
+
+`docker-compose build --build-arg BuildMode=prod`
 
 ### Vagrant (Legacy)
 This repository comes pre-setup to be run through

@@ -100,6 +100,7 @@ $PermissionsArray = [
     'admin_advanced_user_search' => 'Can access advanced user search.',
     'admin_create_users' => 'Can create users through an administrative form.',
     'admin_donor_log' => 'Can view the donor log.',
+    'admin_manage_stylesheets' => 'Can manage stylesheets.',
     'admin_manage_ipbans' => 'Can manage IP bans.',
     'admin_dnu' => 'Can manage do not upload list.',
     'admin_clear_cache' => 'Can clear cached.',
