@@ -179,7 +179,7 @@ switch ($Type) {
             '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
 
         $Validate->SetFields('release_desc',
-            '0','string','The release description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
+            '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
 
         $Validate->SetFields('groupid', '0', 'number', 'Group ID was not numeric');
 
@@ -218,7 +218,7 @@ switch ($Type) {
             '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
 
         $Validate->SetFields('release_desc',
-            '0','string','The release description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
+            '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
 
         $Validate->SetFields('image',
             '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
@@ -235,7 +235,7 @@ switch ($Type) {
             '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
 
         $Validate->SetFields('release_desc',
-            '0','string','The release description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
+            '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
 
         $Validate->SetFields('image',
             '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
