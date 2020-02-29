@@ -71,7 +71,7 @@ $DB->query("
 $DB->query('
     CREATE TEMPORARY TABLE tmp_snatch (
         UserID int unsigned PRIMARY KEY,
-        NumSnatches int(10) unsigned NOT NULL DEFAULT 0,
+        NumSnatches int(10) unsigned NOT NULL DEFAULT 0
     ) ENGINE=InnoDB
 ');
 
