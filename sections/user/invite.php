@@ -26,9 +26,9 @@ $Pending = $DB->to_array();
 $OrderWays = ['username', 'email', 'joined', 'lastseen', 'uploaded', 'downloaded', 'ratio'];
 
 if (empty($_GET['order'])) {
-    $CurrentOrder = 'id';
-    $CurrentSort = 'asc';
-    $NewSort = 'desc';
+    $CurrentOrder = 'joined';
+    $CurrentSort = 'desc';
+    $NewSort = 'asc';
 } else {
     if (in_array($_GET['order'], $OrderWays)) {
         $CurrentOrder = $_GET['order'];
