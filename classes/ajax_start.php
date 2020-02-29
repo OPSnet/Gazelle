@@ -1,12 +1,11 @@
 <?php
 use Gazelle\Util\Crypto;
 
-require 'config.php'; //The config contains all site wide configuration information as well as memcached rules
-require(SERVER_ROOT.'/classes/debug.class.php');
-require(SERVER_ROOT.'/classes/cache.class.php'); //Require the caching class
+require_once(__DIR__.'/config.php');
+require_once(__DIR__.'/classloader.php');
 
 $Debug = new DEBUG;
-$Cache = NEW CACHE($MemcachedServers); //Load the caching class
+$Cache = new CACHE($MemcachedServers);
 
 $SSL = $_SERVER['SERVER_PORT'] === '443';
 
@@ -22,7 +21,7 @@ if (isset($LoginCookie)) {
 
     if (!$Enabled = $Cache->get_value("enabled_$UserID")) {
         require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-        $DB = NEW DB_MYSQL; //Load the database wrapper
+        $DB = new DB_MYSQL; //Load the database wrapper
         $DB->query("
             SELECT Enabled
             FROM users_main

@@ -88,4 +88,4 @@ if (!$Valid) {
     $_SERVER['SCRIPT_FILENAME'] = 'error.php';
     $Error = 404;
 }
-require('classes/script_start.php');
+require_once(__DIR__.'/classes/script_start.php');

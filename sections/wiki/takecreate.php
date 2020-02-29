@@ -4,11 +4,9 @@ authorize();
 $P = [];
 $P = db_array($_POST);
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-$Val = new VALIDATE;
+$Val = new Validate;
 
 $Val->SetFields('title', '1', 'string', 'The title must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
-//$Val->SetFields('alias', '1', 'string', 'Please include at least 1 alias, the entire string should be between 2 and 100 characters.', array('maxlength' => 100, 'minlength' => 2));
 $Err = $Val->ValidateForm($_POST);
 
 if (!$Err) {

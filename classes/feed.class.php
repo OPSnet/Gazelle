@@ -1,5 +1,5 @@
 <?php
-class FEED {
+class Feed {
     var $UseSSL = true; // If we're using SSL for blog and news links
 
     function open_feed() {

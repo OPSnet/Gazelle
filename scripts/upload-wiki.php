@@ -6,24 +6,20 @@ define('MEMORY_EXCEPTION', true);
 define('TIME_EXCEPTION', true);
 define('ERROR_EXCEPTION', true);
 
-require __DIR__.'/classes/config.php';
-require(SERVER_ROOT.'/classes/classloader.php');
+require_once(__DIR__.'/../classes/config.php');
+require_once(__DIR__.'/../classes/classloader.php');
 
 use Gazelle\Util\Crypto;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
-require(SERVER_ROOT.'/classes/proxies.class.php');
+require('classes/proxies.class.php');
 
 set_include_path(SERVER_ROOT);
 
-require(SERVER_ROOT.'/classes/debug.class.php');
-require(SERVER_ROOT.'/classes/mysql.class.php');
-require(SERVER_ROOT.'/classes/cache.class.php');
-require(SERVER_ROOT.'/classes/time.class.php');
-require(SERVER_ROOT.'/classes/paranoia.class.php');
-require(SERVER_ROOT.'/classes/regex.php');
-require(SERVER_ROOT.'/classes/util.php');
+require_once(SERVER_ROOT.'classes/time.class.php');
+require_once(SERVER_ROOT.'classes/regex.php');
+require_once(SERVER_ROOT.'classes/util.php');
 
 $Debug = new DEBUG;
 $Debug->handle_errors();

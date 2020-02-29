@@ -15,7 +15,7 @@ turned off by setting $Escape to false in next_record or to_array.
 * Creating the object.
 
 require(SERVER_ROOT.'/classes/mysql.class.php');
-$DB = NEW DB_MYSQL;
+$DB = new DB_MYSQL;
 -----
 
 * Making a query

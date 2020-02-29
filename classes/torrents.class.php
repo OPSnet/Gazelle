@@ -423,7 +423,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         }
     }
 
-
     /**
      * Delete a group, called after all of its torrents have been deleted.
      * IMPORTANT: Never call this unless you're certain the group is no longer used by any torrents
@@ -444,8 +443,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             G::$Cache->decrement('stats_album_count');
         }
         G::$Cache->decrement('stats_group_count');
-
-
 
         // Collages
         G::$DB->query("
@@ -546,7 +543,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         G::$Cache->delete_value("groups_artists_$GroupID");
         G::$DB->set_query_id($QueryID);
     }
-
 
     /**
      * Update the cache and sphinx delta index to keep everything up-to-date.

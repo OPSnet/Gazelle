@@ -25,8 +25,7 @@ if (Tools::site_ban_ip($_SERVER['REMOTE_ADDR'])) {
     error('Your IP address has been banned.');
 }
 
-require(SERVER_ROOT.'/classes/validate.class.php');
-$Validate = NEW VALIDATE;
+$Validate = new Validate;
 
 if (array_key_exists('action', $_GET) && $_GET['action'] == 'disabled') {
     require('disabled.php');

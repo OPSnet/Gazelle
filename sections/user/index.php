@@ -5,9 +5,9 @@ Finish removing the take[action] pages and utilize the index correctly
 Should the advanced search really only show if they match 3 perms?
 Make sure all constants are defined in config.php and not in random files
 *****************************************************************/
+
 enforce_login();
-include(SERVER_ROOT."/classes/validate.class.php");
-$Val = NEW VALIDATE;
+$Val = new Validate;
 
 if (empty($_REQUEST['action'])) {
     $_REQUEST['action'] = '';
@@ -255,4 +255,3 @@ switch ($_REQUEST['action']) {
             header("Location: user.php?id={$LoggedUser['ID']}");
         }
 }
-?>

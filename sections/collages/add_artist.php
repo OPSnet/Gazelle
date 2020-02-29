@@ -3,8 +3,7 @@
 
 authorize();
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-$Val = new VALIDATE;
+$Val = new Validate;
 
 function add_artist($CollageID, $ArtistID) {
     global $Cache, $LoggedUser, $DB;

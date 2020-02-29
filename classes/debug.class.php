@@ -29,28 +29,12 @@ class DEBUG {
         if ($Errors > MAX_ERRORS && !defined('ERROR_EXCEPTION')) {
             $Reason[] = $Errors.' PHP errors';
         }
-        /*
-        $Queries = count($this->get_queries());
-        if ($Queries > MAX_QUERIES && !defined('QUERY_EXCEPTION')) {
-            $Reason[] = $Queries.' Queries';
-        }
-        */
         $Ram = memory_get_usage(true);
         if ($Ram > MAX_MEMORY && !defined('MEMORY_EXCEPTION')) {
             $Reason[] = Format::get_size($Ram).' RAM used';
         }
 
         G::$DB->warnings(); // see comment in MYSQL::query
-        /*$Queries = $this->get_queries();
-        $DBWarningCount = 0;
-        foreach ($Queries as $Query) {
-            if (!empty($Query[2])) {
-                $DBWarningCount += count($Query[2]);
-            }
-        }
-        if ($DBWarningCount) {
-            $Reason[] = $DBWarningCount . ' DB warning(s)';
-        }*/
 
         $CacheStatus = G::$Cache->server_status();
         if (in_array(0, $CacheStatus) && !G::$Cache->get_value('cache_fail_reported')) {

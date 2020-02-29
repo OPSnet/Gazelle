@@ -1,1 +1,1 @@
-<?php require('gazelle.php');
+<?php require_once('gazelle.php');

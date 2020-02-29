@@ -1,17 +1,6 @@
 <?php
 
-/*
-if (isset($LoggedUser)) {
-
-    //Silly user, what are you doing here!
-    header('Location: index.php');
-    die();
-}
-*/
-
-include(SERVER_ROOT.'/classes/validate.class.php');
-
-$Val = NEW VALIDATE;
+$Val = new Validate;
 
 if (!empty($_REQUEST['confirm'])) {
     // Confirm registration
@@ -293,4 +282,3 @@ if (!empty($_REQUEST['confirm'])) {
         include('closed.php');
     }
 }
-?>

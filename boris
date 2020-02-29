@@ -21,14 +21,13 @@
  * More can be added when implemented.
  */
 
-define('SERVER_ROOT', __DIR__);
-
-require_once(SERVER_ROOT.'/classes/config.php');
-require_once(SERVER_ROOT.'/classes/classloader.php');
-
-require_once(SERVER_ROOT.'/classes/time.class.php');
-require_once(SERVER_ROOT.'/classes/regex.php');
-require_once(SERVER_ROOT.'/classes/util.php');
+define('BORIS', 1);
+require_once(__DIR__.'/classes/config.php');
+require_once(__DIR__.'/classes/classloader.php');
+require_once(__DIR__.'/classes/time.class.php');
+require_once(__DIR__.'/classes/regex.php');
+require_once(__DIR__.'/classes/util.php');
+require_once(__DIR__.'/vendor/d11wtq/boris/lib/autoload.php');
 
 $Cache = new \CACHE($MemcachedServers);
 $DB = new \DB_MYSQL;
@@ -37,8 +36,6 @@ $Debug->handle_errors();
 
 G::init($DB, $Cache);
 
-define('BORIS', 1);
-require_once(SERVER_ROOT.'/vendor/d11wtq/boris/lib/autoload.php');
 $b = new \Boris\Boris(SITE_NAME . '> ');
 $b->setLocal([
     'cache'  => $Cache,

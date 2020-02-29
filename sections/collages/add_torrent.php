@@ -2,8 +2,7 @@
 
 authorize();
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-$Val = new VALIDATE;
+$Val = new Validate;
 
 function add_torrent($CollageID, $GroupID) {
     global $Cache, $LoggedUser, $DB;

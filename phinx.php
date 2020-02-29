@@ -1,6 +1,6 @@
 <?php
 
-require(__DIR__.'/classes/config.php');
+require_once(__DIR__.'/classes/config.php');
 
 return
 [

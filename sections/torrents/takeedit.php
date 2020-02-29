@@ -12,9 +12,7 @@ use OrpheusNET\Logchecker\Logchecker;
 enforce_login();
 authorize();
 
-require(SERVER_ROOT.'/classes/validate.class.php');
-
-$Validate = new VALIDATE;
+$Validate = new Validate;
 
 //******************************************************************************//
 //--------------- Set $Properties array ----------------------------------------//

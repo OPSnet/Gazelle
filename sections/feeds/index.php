@@ -24,7 +24,7 @@ $User = (int)$_GET['user'];
 
 if (!$Enabled = $Cache->get_value("enabled_$User")) {
     require(SERVER_ROOT.'/classes/mysql.class.php');
-    $DB = NEW DB_MYSQL; //Load the database wrapper
+    $DB = new DB_MYSQL; //Load the database wrapper
     $DB->prepared_query('
         SELECT Enabled
         FROM users_main
@@ -49,7 +49,7 @@ switch ($_GET['feed']) {
         $Feed->channel('News', 'RSS feed for site news.');
         if (!$News = $Cache->get_value('news')) {
             require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-            $DB = NEW DB_MYSQL; //Load the database wrapper
+            $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
                     ID,
@@ -78,7 +78,7 @@ switch ($_GET['feed']) {
         $Feed->channel('Blog', 'RSS feed for site blog.');
         if (!$Blog = $Cache->get_value('blog')) {
             require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
-            $DB = NEW DB_MYSQL; //Load the database wrapper
+            $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
                     b.ID,
@@ -109,7 +109,7 @@ switch ($_GET['feed']) {
         if (!$Changelog = $Cache->get_value('changelog')) {
             require(SERVER_ROOT.'/classes/mysql.class.php');
 
-            $DB = NEW DB_MYSQL;
+            $DB = new DB_MYSQL;
             $DB->query("
                 SELECT Message, Author, Date(Time)
                 FROM changelog

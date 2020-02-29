@@ -1,8 +1,7 @@
 <?php
 authorize();
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-$Val = new VALIDATE;
+$Val = new Validate;
 
 $P = [];
 $P = db_array($_POST);
@@ -92,4 +91,3 @@ $CollageID = $DB->inserted_id();
 $Cache->delete_value("collage_$CollageID");
 Misc::write_log("Collage $CollageID (".$_POST['name'].') was created by '.$LoggedUser['Username']);
 header("Location: collages.php?id=$CollageID");
-?>

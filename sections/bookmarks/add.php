@@ -1,12 +1,10 @@
 <?php
-include(SERVER_ROOT.'/classes/feed.class.php'); // RSS feeds
-
 authorize();
 
 if (!Bookmarks::can_bookmark($_GET['type'])) {
     error(404);
 }
-$Feed = new FEED;
+$Feed = new Feed;
 
 $Type = $_GET['type'];
 

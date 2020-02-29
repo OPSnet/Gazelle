@@ -16,17 +16,14 @@ use OrpheusNET\Logchecker\Logchecker;
 ini_set('max_file_uploads', 100);
 define('MAX_FILENAME_LENGTH', 255);
 
-include(SERVER_ROOT.'/classes/validate.class.php');
-include(SERVER_ROOT.'/classes/feed.class.php');
 include(SERVER_ROOT.'/sections/torrents/functions.php');
 include(SERVER_ROOT.'/classes/file_checker.class.php');
 
 enforce_login();
 authorize();
 
-
-$Validate = new VALIDATE;
-$Feed = new FEED;
+$Validate = new Validate;
+$Feed = new Feed;
 
 define('QUERY_EXCEPTION', true); // Shut up debugging
 
