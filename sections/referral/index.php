@@ -14,7 +14,7 @@ if (isset($LoggedUser["ID"])) {
 $ReferralManager = new Gazelle\Manager\Referral($DB, $Cache);
 $Accounts = $ReferralManager->getActiveAccounts();
 
-if (!OPEN_EXTERNAL_REFERRALS || !count($Accounts)) {
+if (!defined('OPEN_EXTERNAL_REFERRALS') || !OPEN_EXTERNAL_REFERRALS || !count($Accounts) || $ReferralManager->readOnly) {
     View::show_header("Referrals are closed");
 ?>
 <div class="thin" style="text-align: center;">

@@ -33,6 +33,15 @@ class Referral {
         }
 
         $this->readOnly = !apcu_exists('DB_KEY');
+
+        if (!$this->readOnly) {
+            $this->db->prepared_query("SELECT URL FROM referral_accounts LIMIT 1");
+            if ($this->db->has_results()) {
+                list($url) = array_values($this->db->next_record());
+                $url = \Gazelle\Util\Crypto::dbDecrypt($url);
+                $this->readOnly = $url == null;
+            }
+        }
     }
 
     public function generateToken() {
