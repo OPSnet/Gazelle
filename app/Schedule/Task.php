@@ -1,0 +1,98 @@
+<?php
+
+namespace Gazelle\Schedule;
+
+use \Gazelle\Util\Irc;
+
+abstract class Task {
+    protected $db;
+    protected $cache;
+    protected $taskId;
+    protected $name;
+    protected $isDebug;
+    protected $startTime;
+    protected $historyId;
+
+    protected $events;
+    protected $processed;
+
+    public function __construct(\DB_MYSQL $db, \CACHE $cache, int $taskId, string $name, bool $isDebug) {
+        $this->db = $db;
+        $this->cache = $cache;
+        $this->taskId = $taskId;
+        $this->name = $name;
+        $this->isDebug = $isDebug;
+        $this->events = [];
+        $this->processed = 0;
+    }
+
+    public function begin() {
+        $this->startTime = microtime(true); 
+        $this->db->prepared_query('
+            INSERT INTO periodic_task_history
+                   (periodic_task_id)
+            VALUES (?)
+        ', $this->taskId);
+
+        $this->historyId = $this->db->inserted_id();
+    }
+
+    public function end(bool $sane) {
+        $elapsed = (microtime(true) - $this->startTime) * 1000;
+        $errorCount = count(array_filter($this->events, function ($event) { return $event->severity === 'error'; }));
+        $this->db->prepared_query('
+            UPDATE periodic_task_history
+            SET status = ?,
+                num_errors = ?,
+                num_items = ?,
+                duration_ms = ?
+            WHERE periodic_task_history_id = ?
+        ', 'completed', $errorCount, $this->processed, $elapsed, $this->historyId);
+
+        foreach ($this->events as $event) {
+            echo(sprintf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event));
+            $this->db->prepared_query('
+                INSERT INTO periodic_task_history_event
+                       (periodic_task_history_id, severity, event_time, event, reference)
+                VALUES (?,                        ?,        ?,          ?,     ?)
+            ', $this->historyId, $event->severity, $event->timestamp, $event->event, $event->reference);
+        }
+
+        if ($errorCount > 0 && $sane) {
+            $this->db->prepared_query('
+                UPDATE periodic_task
+                SET is_sane = FALSE
+                WHERE periodic_task_id = ?
+            ', $this->taskId);
+            $this->cache->delete_value(Scheduler::CACHE_TASKS);
+
+            Irc::sendChannel('Task '.$this->name.' is no longer sane '.site_url().'tools.php?action=periodic&amp;mode=detail&amp;id='.$this->taskId, LAB_CHAN);
+            // todo: send notifications to appropriate users
+        } else if ($errorCount = 0 && !$sane) {
+            $this->cache->delete_value(Scheduler::CACHE_TASKS);
+
+            Irc::sendChannel('Task '.$this->name.' is now sane', LAB_CHAN);
+        }
+    }
+
+    public function log(string $message, string $severity = 'info', int $reference = 0) {
+        if (!$this->isDebug && $severity === 'debug') {
+            return;
+        }
+        $this->events[] = new Event($severity, $message, $reference);
+    }
+
+    public function debug(string $message, int $reference = 0) {
+        $this->log($message, 'debug', $reference);
+    }
+
+    public function info(string $message, int $reference = 0) {
+        $this->log($message, 'info', $reference);
+    }
+
+    public function error(string $message, int $reference = 0) {
+        $this->log($message, 'error', $reference);
+    }
+
+    abstract public function run();
+}

@@ -173,11 +173,12 @@ switch ($_REQUEST['action']) {
             error(403);
         }
         if (is_number($_POST['newsid'])) {
-            $DB->query("
+            $DB->prepared_query("
                 UPDATE news
-                SET Title = '".db_string($_POST['title'])."',
-                    Body = '".db_string($_POST['body'])."'
-                WHERE ID = '".db_string($_POST['newsid'])."'");
+                SET Title = ?,
+                    Body = ?
+                WHERE ID = ?
+            ", $_POST['title'], $_POST['body'], $_POST['newsid']);
             $Cache->delete_value('news');
             $Cache->delete_value('feed_news');
         }
@@ -190,9 +191,10 @@ switch ($_REQUEST['action']) {
         }
         if (is_number($_GET['id'])) {
             authorize();
-            $DB->query("
+            $DB->prepared_query("
                 DELETE FROM news
-                WHERE ID = '".db_string($_GET['id'])."'");
+                WHERE ID = ?
+            ", $_GET['id']);
             $Cache->delete_value('news');
             $Cache->delete_value('feed_news');
 
@@ -211,14 +213,13 @@ switch ($_REQUEST['action']) {
             error(403);
         }
 
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO news (UserID, Title, Body, Time)
-            VALUES ('$LoggedUser[ID]', '".db_string($_POST['title'])."', '".db_string($_POST['body'])."', '".sqltime()."')");
+            VALUES (?, ?, ?, now())
+        ", $LoggedUser['ID'], $_POST['title'], $_POST['body']);
         $Cache->delete_value('news_latest_id');
         $Cache->delete_value('news_latest_title');
         $Cache->delete_value('news');
-
-
 
         NotificationsManager::send_push(NotificationsManager::get_push_enabled_users(), $_POST['title'], $_POST['body'], site_url() . 'index.php', NotificationsManager::NEWS);
 
@@ -510,6 +511,27 @@ switch ($_REQUEST['action']) {
 
     case 'rerender_gallery':
         include(SERVER_ROOT.'/sections/tools/development/rerender_gallery.php');
+        break;
+
+    case 'periodic':
+        $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : 'view';
+        switch ($mode) {
+            case 'view':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_view.php');
+                break;
+            case 'detail':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_detail.php');
+                break;
+            case 'stats':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_stats.php');
+                break;
+            case 'edit':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_edit.php');
+                break;
+            case 'alter':
+                include(SERVER_ROOT.'/sections/tools/development/periodic_alter.php');
+                break;
+        }
         break;
 
     case 'public_sandbox':

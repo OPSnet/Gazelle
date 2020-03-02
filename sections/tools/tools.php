@@ -177,16 +177,19 @@ Category('Developer Sandboxes', [
 ]);
 
 Category('Development', [
-    Item('Cache key management', 'tools.php?action=clear_cache',        All(['users_mod'])),
-    Item('Database info',        'tools.php?action=database_specifics', All(['site_database_specifics'])),
-    Item('PHP processes',        'tools.php?action=process_info',       All(['site_debug'])),
-    Item('Service stats',        'tools.php?action=service_stats',      All(['site_debug'])),
-    Item('Site info',            'tools.php?action=site_info',          All(['site_debug'])),
-    Item('Site options',         'tools.php?action=site_options',       All(['users_mod'])),
-    Item('Schedule',             'schedule.php?auth=' . $LoggedUser['AuthKey'], All(['site_debug'])),
-    Item('Tracker info',         'tools.php?action=ocelot_info',        All(['users_mod'])),
-    Item('Update GeoIP',         'tools.php?action=update_geoip',       All(['admin_update_geoip'])),
-    Item('Update drive offsets', 'tools.php?action=update_offsets',     All(['users_mod'])),
+    Item('Cache key management',  'tools.php?action=clear_cache',                          All(['users_mod'])),
+    Item('Database info',         'tools.php?action=database_specifics',                   All(['site_database_specifics'])),
+    Item('PHP processes',         'tools.php?action=process_info',                         All(['site_debug'])),
+    Item('Service stats',         'tools.php?action=service_stats',                        All(['site_debug'])),
+    Item('Site info',             'tools.php?action=site_info',                            All(['site_debug'])),
+    Item('Site options',          'tools.php?action=site_options',                         All(['users_mod'])),
+    Item('Schedule',              'schedule.php?auth='.$LoggedUser['AuthKey'].'&amp;new=', All(['admin_schedule'])),
+    Item('Schedule - Logs',       'tools.php?action=periodic&amp;mode=view',               All(['admin_periodic_task_view'])),
+    Item('Schedule - Manage',     'tools.php?action=periodic&amp;mode=edit',               All(['admin_periodic_task_manage'])),
+    Item('Schedule - Legacy',     'schedule.php?auth='.$LoggedUser['AuthKey'],             All(['admin_schedule'])),
+    Item('Tracker info',          'tools.php?action=ocelot_info',                          All(['users_mod'])),
+    Item('Update GeoIP',          'tools.php?action=update_geoip',                         All(['admin_update_geoip'])),
+    Item('Update drive offsets',  'tools.php?action=update_offsets',                       All(['users_mod'])),
 ]);
 
 ?>

@@ -1,5 +1,5 @@
 <?php
-use Gazelle\Util\Crypto;
+use Gazelle\Util\{Crypto, Irc};
 
 require_once(__DIR__.'/config.php');
 require_once(__DIR__.'/classloader.php');
@@ -116,11 +116,5 @@ function make_secret($Length = 32) {
 
 // Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
 function send_irc($Raw) {
-    if (defined('DISABLE_IRC') && DISABLE_IRC === true) {
-        return;
-    }
-    $IRCSocket = fsockopen(SOCKET_LISTEN_ADDRESS, SOCKET_LISTEN_PORT);
-    $Raw = str_replace(["\n", "\r"], '', $Raw);
-    fwrite($IRCSocket, $Raw);
-    fclose($IRCSocket);
+    \Gazelle\Util\Irc::sendRaw($Raw);
 }

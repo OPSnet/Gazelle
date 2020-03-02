@@ -6,6 +6,10 @@
  * @param string $ClassName class name
  */
 spl_autoload_register(function ($ClassName) {
+    if (strpos($ClassName, 'Gazelle\\') === 0) {
+        return;
+    }
+
     $FilePath = __DIR__ . '/' . strtolower($ClassName) . '.class.php';
     if (!file_exists($FilePath)) {
         // TODO: Rename the following classes to conform with the code guidelines

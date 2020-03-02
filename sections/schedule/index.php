@@ -62,6 +62,13 @@ if (PHP_SAPI === 'cli') {
     if (!isset($argv[1]) || $argv[1] != SCHEDULE_KEY) {
         error(403);
     }
+
+    if (count($argv) > 2 && $argv[2] === "new") {
+        $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
+        $scheduler->run();
+        die();
+    }
+
     for ($i = 2; $i < count($argv); $i++) {
         if ($argv[$i] === 'run_tasks') {
             if ($i < count($argv) - 1) {
@@ -89,6 +96,23 @@ else {
     }
     if (!check_perms('admin_schedule')) {
         error(403);
+    }
+
+    if (isset($_GET['new'])) {
+        authorize();
+        View::show_header();
+        $canEdit = check_perms('admin_periodic_task_manage');
+        include(SERVER_ROOT.'/sections/tools/development/periodic_links.php');
+        echo('<pre>');
+        $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
+        if (isset($_GET['id'])) {
+            $scheduler->runTask(intval($_GET['id']));
+        } else {
+            $scheduler->run();
+        }
+        echo('</pre>');
+        View::show_footer();
+        die();
     }
 }
 

@@ -2,7 +2,7 @@
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 
-use Gazelle\Util\{Type, Time};
+use Gazelle\Util\{Type, Time, Irc};
 
 /**
  * Return true if the given string is an integer. The original Gazelle developers
@@ -143,13 +143,7 @@ function reverse_display_str($Str) {
  * @param string $Raw An IRC protocol snippet to send.
  */
 function send_irc($Raw) {
-    if (defined('DISABLE_IRC') && DISABLE_IRC === true) {
-        return;
-    }
-    $IRCSocket = fsockopen(SOCKET_LISTEN_ADDRESS, SOCKET_LISTEN_PORT);
-    $Raw = str_replace(["\n", "\r"], '', $Raw);
-    fwrite($IRCSocket, $Raw);
-    fclose($IRCSocket);
+    Irc::sendRaw($Raw);
 }
 
 
