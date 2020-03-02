@@ -9,7 +9,8 @@ class RemoveExpiredWarnings extends \Gazelle\Schedule\Task
         $queryId = $this->db->prepared_query("
             SELECT UserID
             FROM users_info
-            WHERE Warned < now()");
+            WHERE Warned < now()
+              AND Warned != '0000-00-00 00:00:00'");
 
         $this->db->prepared_query("
             UPDATE users_info
