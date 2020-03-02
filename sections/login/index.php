@@ -37,17 +37,19 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
     if (!empty($_REQUEST['key'])) {
         // User has entered a new password, use step 2
 
-        $DB->query("
+        $DB->prepared_query("
             SELECT
                 m.ID,
                 m.Email,
                 m.ipcc,
                 i.ResetExpires
             FROM users_main as m
-                INNER JOIN users_info AS i ON i.UserID = m.ID
-            WHERE i.ResetKey = '".db_string($_REQUEST['key'])."'
+            INNER JOIN users_info AS i ON (i.UserID = m.ID)
+            WHERE m.Enabled = '1'
                 AND i.ResetKey != ''
-                AND m.Enabled = '1'");
+                AND i.ResetKey = ?
+                ", $_REQUEST['key']
+        );
         list($UserID, $Email, $Country, $Expires) = $DB->next_record();
         if ($UserID && strtotime($Expires) > time()) {
 
@@ -61,21 +63,24 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 $Err = $Validate->ValidateForm($_REQUEST);
                 if ($Err == '') {
                     // Form validates without error, set new secret and password.
-                    $DB->query("
+                    $DB->prepared_query("
                         UPDATE
                             users_main AS m,
                             users_info AS i
                         SET
-                            m.PassHash = '".db_string(Users::make_password_hash($_REQUEST['password']))."',
                             i.ResetKey = '',
-                            i.ResetExpires = '0000-00-00 00:00:00'
-                        WHERE m.ID = '$UserID'
-                            AND i.UserID = m.ID");
-                    $DB->query("
+                            i.ResetExpires = '0000-00-00 00:00:00',
+                            m.PassHash = ?
+                        WHERE i.UserID = m.ID
+                            AND m.ID = ?
+                        ", Users::make_password_hash($_REQUEST['password']), $UserID
+                    );
+                    $DB->prepared_query('
                         INSERT INTO users_history_passwords
-                            (UserID, ChangerIP, ChangeTime)
-                        VALUES
-                            ('$UserID', '$_SERVER[REMOTE_ADDR]', '".sqltime()."')");
+                               (UserID, ChangerIP, ChangeTime)
+                        VALUES (?,      ?,         now())
+                        ', $UserID, $_SERVER['REMOTE_ADDR']
+                    );
                     $Reset = true; // Past tense form of "to reset", meaning that password has now been reset
                     $LoggedUser['ID'] = $UserID; // Set $LoggedUser['ID'] for logout_all_sessions() to work
 
@@ -91,11 +96,13 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             // Either his key has expired, or he hasn't requested a pass change at all
             if (strtotime($Expires) < time() && $UserID) {
                 // If his key has expired, clear all the reset information
-                $DB->query("
-                    UPDATE users_info
-                    SET ResetKey = '',
+                $DB->prepared_query("
+                    UPDATE users_info SET
+                        ResetKey = '',
                         ResetExpires = '0000-00-00 00:00:00'
-                    WHERE UserID = '$UserID'");
+                    WHERE UserID = ?
+                    ", $UserID
+                );
                 $_SESSION['reseterr'] = 'The link you were given has expired.'; // Error message to display on form
             }
             // Show him the first form (enter email address)
@@ -114,14 +121,16 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
 
             if (!$Err) {
                 // Form validates correctly
-                $DB->query("
+                $DB->prepared_query("
                     SELECT
                         ID,
                         Username,
                         Email
                     FROM users_main
-                    WHERE Email = '".db_string($_REQUEST['email'])."'
-                        AND Enabled = '1'");
+                    WHERE Enabled = '1'
+                        AND Email = ?
+                    ", $_REQUEST['email']
+                );
                 list($UserID, $Username, $Email) = $DB->next_record();
 
                 if ($UserID) {
@@ -137,18 +146,21 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                     $Cache->delete_value("user_stats_$UserID");
                     $Cache->delete_value("enabled_$UserID");
 
-                    $DB->query("
+                    $DB->prepared_query('
                         SELECT SessionID
                         FROM users_sessions
-                        WHERE UserID = '$UserID'");
+                        WHERE UserID = ?
+                        ', $UserID
+                    );
                     while (list($SessionID) = $DB->next_record()) {
                         $Cache->delete_value("session_$UserID"."_$SessionID");
                     }
-                    $DB->query("
-                        UPDATE users_sessions
-                        SET Active = 0
-                        WHERE UserID = '$UserID'
-                            AND Active = 1");
+                    $DB->prepared_query('
+                        UPDATE users_sessions SET
+                            Active = 0
+                        WHERE Active = 1 AND UserID = ?
+                        ', $UserID
+                    );
                 }
                 $Err = "Email sent with further instructions.";
             }
@@ -200,11 +212,12 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
                 $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
             }
 
-            $DB->query("
+            $DB->prepared_query('
                 INSERT INTO users_sessions
-                    (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, LastUpdate, FullUA)
-                VALUES
-                    ('$UserID', '" . db_string($SessionID) . "', '$KeepLogged', '$Browser', '$OperatingSystem', '" . db_string($_SERVER['REMOTE_ADDR']) . "', '" . sqltime() . "', '" . db_string($_SERVER['HTTP_USER_AGENT']) . "')");
+                       (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
+                VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
+                ', $UserID, $SessionID, $KeepLogged, $Browser, $OperatingSystem, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']
+            );
 
             $Cache->begin_transaction("users_sessions_$UserID");
             $Cache->insert_front($SessionID, [
@@ -217,16 +230,14 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
             $Cache->commit_transaction(0);
 
             unset($Recovery[$Key]);
-            $Recovery = serialize($Recovery);
-            $Sql = "
-                UPDATE users_main
-                SET
-                    LastLogin = '" . sqltime() . "',
-                    LastAccess = '" . sqltime() . "',
-                    Recovery = '" . db_string($Recovery) . "'
-                WHERE ID = '" . db_string($UserID) . "'";
-
-            $DB->query($Sql);
+            $DB->prepared_query('
+                UPDATE users_main SET
+                    LastLogin = now(),
+                    LastAccess = now(),
+                    Recovery = ?
+                WHERE ID = ?
+                ', serialize($Recovery), $UserID
+            );
 
             if (!empty($_COOKIE['redirect'])) {
                 $URL = $_COOKIE['redirect'];
@@ -239,10 +250,12 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
             }
         }
         else {
-            $DB->query("
+            $DB->prepared_query('
                 SELECT ID, Attempts, Bans, BannedUntil
                 FROM login_attempts
-                WHERE IP = '".db_string($_SERVER['REMOTE_ADDR'])."'");
+                WHERE IP = ?
+                ', $_SERVER['REMOTE_ADDR']
+            );
             list($AttemptID, $Attempts, $Bans, $BannedUntil) = $DB->next_record();
 
             // Function to log a user's login attempt
@@ -255,57 +268,65 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
                     $Attempts++;
                     if ($Attempts > 5) { // Only 6 allowed login attempts, ban user's IP
                         $BannedUntil = time_plus(60 * 60 * 6);
-                        $DB->query("
-                    UPDATE login_attempts
-                    SET
-                        LastAttempt = '".sqltime()."',
-                        Attempts = '".db_string($Attempts)."',
-                        BannedUntil = '".db_string($BannedUntil)."',
-                        Bans = Bans + 1
-                    WHERE ID = '".db_string($AttemptID)."'");
+                        $DB->prepared_query('
+                            UPDATE login_attempts SET
+                                Bans = Bans + 1,
+                                LastAttempt = now(),
+                                Attempts = ?,
+                                BannedUntil = ?
+                            WHERE ID = ?
+                            ', $Attempts, $BannedUntil, $AttemptID
+                        );
 
                         if ($Bans > 9) { // Automated bruteforce prevention
-                            $DB->query("
-                        SELECT Reason
-                        FROM ip_bans
-                        WHERE $IP BETWEEN FromIP AND ToIP");
+                            $DB->prepared_query('
+                                SELECT Reason
+                                FROM ip_bans
+                                WHERE ? BETWEEN FromIP AND ToIP
+                                ', $IP
+                            );
                             if ($DB->has_results()) {
                                 //Ban exists already, only add new entry if not for same reason
                                 list($Reason) = $DB->next_record(MYSQLI_BOTH, false);
                                 if ($Reason != 'Automated ban per >60 failed login attempts') {
-                                    $DB->query("
-                                UPDATE ip_bans
-                                SET Reason = CONCAT('Automated ban per >60 failed login attempts AND ', Reason)
-                                WHERE FromIP = $IP
-                                    AND ToIP = $IP");
+                                    $DB->prepared_query("
+                                        UPDATE ip_bans SET
+                                            Reason = CONCAT('Automated ban per >60 failed login attempts AND ', Reason)
+                                        WHERE FromIP = ?
+                                            AND ToIP = ?
+                                        ", $IP, $IP
+                                    );
                                 }
                             } else {
                                 //No ban
-                                $DB->query("
-                            INSERT IGNORE INTO ip_bans
-                                (FromIP, ToIP, Reason)
-                            VALUES
-                                ('$IP','$IP', 'Automated ban per >60 failed login attempts')");
+                                $DB->prepared_query("
+                                    INSERT IGNORE INTO ip_bans
+                                           (FromIP, ToIP, Reason)
+                                    VALUES (?,      ?,    'Automated ban per >60 failed login attempts'
+                                    ", $IP, $IP
+                                );
                                 $Cache->delete_value("ip_bans_$IPA");
                             }
                         }
                     } else {
                         // User has attempted fewer than 6 logins
-                        $DB->query("
-                    UPDATE login_attempts
-                    SET
-                        LastAttempt = '".sqltime()."',
-                        Attempts = '".db_string($Attempts)."',
-                        BannedUntil = '0000-00-00 00:00:00'
-                    WHERE ID = '".db_string($AttemptID)."'");
+                        $DB->prepared_query('
+                            UPDATE login_attempts SET
+                                LastAttempt = now(),
+                                BannedUntil = ?,
+                                Attempts = ?
+                            WHERE ID = ?
+                            ', '0000-00-00 00:00:00', $Attempts, $AttemptID
+                        );
                     }
                 } else { // User has not attempted to log in recently
                     $Attempts = 1;
-                    $DB->query("
-                INSERT INTO login_attempts
-                    (UserID, IP, LastAttempt, Attempts)
-                VALUES
-                    ('".db_string($UserID)."', '".db_string($IPStr)."', '".sqltime()."', 1)");
+                    $DB->prepared_query('
+                        INSERT INTO login_attempts
+                               (UserID, IP, Attempts, LastAttempt)
+                        VALUES (?,      ?,  ?,        now())
+                        ', $UserID, $IPStr, 1
+                    );
                 }
             } // end log_attempt function
             log_attempt($UserID);
@@ -355,11 +376,12 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
                 $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
             }
 
-            $DB->query("
-                            INSERT INTO users_sessions
-                                (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, LastUpdate, FullUA)
-                            VALUES
-                                ('$UserID', '" . db_string($SessionID) . "', '$KeepLogged', '$Browser', '$OperatingSystem', '" . db_string($_SERVER['REMOTE_ADDR']) . "', '" . sqltime() . "', '" . db_string($_SERVER['HTTP_USER_AGENT']) . "')");
+            $DB->prepared_query('
+                INSERT INTO users_sessions
+                       (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
+                VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
+                ', $UserID, $SessionID, $KeepLogged, $Browser, $OperatingSystem, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']
+            );
 
             $Cache->begin_transaction("users_sessions_$UserID");
             $Cache->insert_front($SessionID, [
@@ -371,14 +393,13 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
             ]);
             $Cache->commit_transaction(0);
 
-            $Sql = "
-                            UPDATE users_main
-                            SET
-                                LastLogin = '" . sqltime() . "',
-                                LastAccess = '" . sqltime() . "'
-                            WHERE ID = '" . db_string($UserID) . "'";
-
-            $DB->query($Sql);
+            $DB->prepared_query('
+                UPDATE users_main SET
+                    LastLogin = now(),
+                    LastAccess = now()
+                WHERE ID = ?
+                ', $UserID
+            );
 
             if (!empty($_COOKIE['redirect'])) {
                 $URL = $_COOKIE['redirect'];
@@ -402,10 +423,12 @@ else {
     $Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
     $Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', ['minlength' => '6', 'maxlength' => -1]);
 
-    $DB->query("
+    $DB->prepared_query('
         SELECT ID, Attempts, Bans, BannedUntil
         FROM login_attempts
-        WHERE IP = '".db_string($_SERVER['REMOTE_ADDR'])."'");
+        WHERE IP = ?
+        ', $_SERVER['REMOTE_ADDR']
+    );
     list($AttemptID, $Attempts, $Bans, $BannedUntil) = $DB->next_record();
 
     // Function to log a user's login attempt
@@ -418,57 +441,65 @@ else {
             $Attempts++;
             if ($Attempts > 5) { // Only 6 allowed login attempts, ban user's IP
                 $BannedUntil = time_plus(60 * 60 * 6);
-                $DB->query("
-                    UPDATE login_attempts
-                    SET
-                        LastAttempt = '".sqltime()."',
-                        Attempts = '".db_string($Attempts)."',
-                        BannedUntil = '".db_string($BannedUntil)."',
-                        Bans = Bans + 1
-                    WHERE ID = '".db_string($AttemptID)."'");
+                $DB->prepared_query('
+                    UPDATE login_attempts SET
+                        Bans = Bans + 1,
+                        LastAttempt = now(),
+                        Attempts = ?,
+                        BannedUntil = now() + INTERVAL 6 HOUR
+                    WHERE ID = ?
+                    ', $Attempts, $BannedUntil, $AttemptID
+                );
 
                 if ($Bans > 9) { // Automated bruteforce prevention
-                    $DB->query("
+                    $DB->prepared_query('
                         SELECT Reason
                         FROM ip_bans
-                        WHERE $IP BETWEEN FromIP AND ToIP");
+                        WHERE ? BETWEEN FromIP AND ToIP
+                        ', $IP
+                    );
                     if ($DB->has_results()) {
                         //Ban exists already, only add new entry if not for same reason
                         list($Reason) = $DB->next_record(MYSQLI_BOTH, false);
                         if ($Reason != 'Automated ban per >60 failed login attempts') {
-                            $DB->query("
+                            $DB->prepared_query("
                                 UPDATE ip_bans
                                 SET Reason = CONCAT('Automated ban per >60 failed login attempts AND ', Reason)
-                                WHERE FromIP = $IP
-                                    AND ToIP = $IP");
+                                WHERE FromIP = ?
+                                    AND ToIP = ?
+                                ", $IP, $IP
+                            );
                         }
                     } else {
                         //No ban
-                        $DB->query("
+                        $DB->prepared_query("
                             INSERT IGNORE INTO ip_bans
-                                (FromIP, ToIP, Reason)
-                            VALUES
-                                ('$IP','$IP', 'Automated ban per >60 failed login attempts')");
+                                   (FromIP, ToIP, Reason)
+                            VALUES (?,      ?,    'Automated ban per >60 failed login attempts'
+                            ", $IP, $IP
+                        );
                         $Cache->delete_value("ip_bans_$IPA");
                     }
                 }
             } else {
                 // User has attempted fewer than 6 logins
-                $DB->query("
-                    UPDATE login_attempts
-                    SET
-                        LastAttempt = '".sqltime()."',
-                        Attempts = '".db_string($Attempts)."',
-                        BannedUntil = '0000-00-00 00:00:00'
-                    WHERE ID = '".db_string($AttemptID)."'");
+                $DB->prepared_query('
+                    UPDATE login_attempts SET
+                        LastAttempt = now(),
+                        BannedUntil = ?,
+                        Attempts = ?
+                    WHERE ID = ?
+                    ', '0000-00-00 00:00:00', $Attempts, $AttemptID
+                );
             }
         } else { // User has not attempted to log in recently
             $Attempts = 1;
-            $DB->query("
+            $DB->prepared_query('
                 INSERT INTO login_attempts
-                    (UserID, IP, LastAttempt, Attempts)
-                VALUES
-                    ('".db_string($UserID)."', '".db_string($IPStr)."', '".sqltime()."', 1)");
+                       (UserID, IP, Attempts, LastAttempt)
+                VALUES (?,      ?,   1,        now())
+                ', $UserID, $IPStr
+            );
         }
     } // end log_attempt function
 
@@ -482,7 +513,7 @@ else {
 
         if (!$Err) {
             // Passes preliminary validation (username and password "look right")
-            $DB->query("
+            $DB->prepared_query("
                 SELECT
                     ID,
                     PermissionID,
@@ -493,17 +524,20 @@ else {
                     2FA_Key,
                     Recovery
                 FROM users_main
-                WHERE Username = '".db_string($_POST['username'])."'
-                    AND Username != ''");
+                WHERE Username != '' and Username = ?
+                ", $_POST['username']
+            );
             $UserData = $DB->next_record(MYSQLI_NUM, [2, 7]);
             list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
             if (strtotime($BannedUntil) < time()) {
                 if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
                     if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($_POST['password'], $PassHash)) {
-                        $DB->prepared_query("
-                            UPDATE users_main
-                            SET passhash = ?
-                            WHERE ID = ?", Users::make_password_hash($_POST['password']), $UserID);
+                        $DB->prepared_query('
+                            UPDATE users_main SET
+                                passhash = ?
+                            WHERE ID = ?
+                            ', Users::make_password_hash($_POST['password']), $UserID
+                        );
                     }
 
                     if ($Enabled == 1) {
@@ -536,31 +570,29 @@ else {
                             $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
                         }
 
-                        $DB->query("
+                        $DB->prepared_query('
                             INSERT INTO users_sessions
-                                (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, LastUpdate, FullUA)
-                            VALUES
-                                ('$UserID', '".db_string($SessionID)."', '$KeepLogged', '$Browser', '$OperatingSystem', '".db_string($_SERVER['REMOTE_ADDR'])."', '".sqltime()."', '".db_string($_SERVER['HTTP_USER_AGENT'])."')");
-
+                                   (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
+                            VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
+                            ', $UserID, $SessionID, $KeepLogged, $Browser, $OperatingSystem, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']
+                        );
                         $Cache->begin_transaction("users_sessions_$UserID");
                         $Cache->insert_front($SessionID, [
-                                'SessionID' => $SessionID,
-                                'Browser' => $Browser,
-                                'OperatingSystem' => $OperatingSystem,
-                                'IP' => $_SERVER['REMOTE_ADDR'],
-                                'LastUpdate' => sqltime()
-                                ]);
+                            'SessionID' => $SessionID,
+                            'Browser' => $Browser,
+                            'OperatingSystem' => $OperatingSystem,
+                            'IP' => $_SERVER['REMOTE_ADDR'],
+                            'LastUpdate' => sqltime()
+                        ]);
                         $Cache->commit_transaction(0);
 
-                        $Sql = "
-                            UPDATE users_main
-                            SET
-                                LastLogin = '".sqltime()."',
-                                LastAccess = '".sqltime()."'
-                            WHERE ID = '".db_string($UserID)."'";
-
-                        $DB->query($Sql);
-
+                        $DB->prepared_query('
+                            UPDATE users_main SET
+                                LastLogin = now(),
+                                LastAccess = now()
+                            WHERE ID = ?
+                            ', $UserID
+                        );
                         if (!empty($_COOKIE['redirect'])) {
                             $URL = $_COOKIE['redirect'];
                             setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
