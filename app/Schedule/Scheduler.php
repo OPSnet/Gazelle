@@ -109,6 +109,7 @@ class Scheduler {
                 GROUP BY pth.periodic_task_history_id
             ) events ON (pt.periodic_task_id = events.periodic_task_id)
             LEFT JOIN periodic_task_history pth ON (stats.latest = pth.periodic_task_history_id)
+            ORDER BY pt.is_enabled DESC, pt.period, pt.periodic_task_id
         ");
 
         $tasks = $this->db->has_results() ? $this->db->to_array('periodic_task_id', MYSQLI_ASSOC) : [];
@@ -181,7 +182,7 @@ class Scheduler {
         if ($task === null) {
             return;
         }
-        echo('Running task '.$task['name']."...\n");
+        echo('Running task '.$task['name']."...");
 
         $taskRunner = $this->createRunner($id, $task['name'], $task['classname'], $task['is_debug']);
         if ($taskRunner === null) {

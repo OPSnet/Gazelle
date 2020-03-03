@@ -7,8 +7,11 @@ class PromoteUsers extends \Gazelle\Schedule\Task
     public function run()
     {
         $criteria = \Users::get_promotion_criteria();
-        $promoted = [];
         foreach ($criteria as $l) { // $l = Level
+            $fromClass = \Users::make_class_string($l['From']);
+            $toClass = \Users::make_class_string($l['To']);
+            $this->debug("Begin promoting users from $fromClass to $toClass");
+
             $query = "
                         SELECT ID
                         FROM users_main
@@ -40,7 +43,8 @@ class PromoteUsers extends \Gazelle\Schedule\Task
             $userIds = $this->db->collect('ID');
 
             if (count($userIds) > 0) {
-                $promoted[$l['To']] = $userIds;
+                $this->info(sprintf('Promoting %d users from %s to %s', count($userIds), $fromClass, $toClass));
+                $this->processed += count($userIds);
 
                 $params = array_merge([$l['To']], $userIds);
                 $placeholders = implode(', ', array_fill(0, count($userIds), '?'));
@@ -52,11 +56,13 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                 );
 
                 foreach ($userIds as $userId) {
-                    $cache->delete_value("user_info_$userId");
-                    $cache->delete_value("user_info_heavy_$userId");
-                    $cache->delete_value("user_stats_$userId");
-                    $cache->delete_value("enabled_$userId");
-                    $comment = sprintf("%s - Class changed to %s by System\n\n", sqltime(), \Users::make_class_string($l['To']));
+                    $this->debug(sprintf('Promoting %d from %s to %s', $userId, $fromClass, $toClass), $userId);
+
+                    $this->cache->delete_value("user_info_$userId");
+                    $this->cache->delete_value("user_info_heavy_$userId");
+                    $this->cache->delete_value("user_stats_$userId");
+                    $this->cache->delete_value("enabled_$userId");
+                    $comment = sprintf("%s - Class changed to %s by System\n\n", sqltime(), $toClass);
                     $this->db->prepared_query("
                         UPDATE users_info
                         SET AdminComment = CONCAT(?, AdminComment)
@@ -64,17 +70,8 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                         ", $comment, $userId
                     );
 
-                    \Misc::send_pm($userId, 0, 'You have been promoted to '.\Users::make_class_string($l['To']), 'Congratulations on your promotion to '.\Users::make_class_string($l['To'])."!\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".site_url()."wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
+                    \Misc::send_pm($userId, 0, "You have been promoted to $toClass", "Congratulations on your promotion to $toClass!\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".site_url()."wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
                 }
-            }
-        }
-
-        foreach ($promoted as $class => $users) {
-            $this->processed += count($users);
-            $className = \Users::make_class_string($class);
-            $this->info(sprintf('Promoted %d users to %s', count($users), $className));
-            foreach ($users as $id) {
-                $this->debug(sprintf('Promoted %d to %s', $id, $className), $id);
             }
         }
     }

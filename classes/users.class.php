@@ -989,9 +989,9 @@ class Users {
                         (
                             SELECT uls.Uploaded + IFNULL(b.Bounty, 0) - IFNULL(ubl.final, 0)
                             FROM users_leech_stats uls
-                            LEFT JOIN %s ubl ON (ubl.opsid = uls.UserID)
+                            LEFT JOIN %s.users_buffer_log ubl ON (ubl.opsid = uls.UserID)
                             WHERE uls.UserID = users_main.ID
-                        ) >= 2 * 1024 * 1024 * 1024 * 1024)", RECOVERY_MAPPING_TABLE)];
+                        ) >= 2 * 1024 * 1024 * 1024 * 1024)", RECOVERY_DB)];
 
         return $criteria;
     }

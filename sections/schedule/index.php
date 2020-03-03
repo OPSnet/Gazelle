@@ -63,6 +63,9 @@ if (PHP_SAPI === 'cli') {
     }
 
     if (count($argv) > 2 && $argv[2] === "new") {
+        $sqltime = sqltime();
+        echo("Current Time: $sqltime{$LineEnd}{$LineEnd}");
+
         $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
         $scheduler->run();
         die();

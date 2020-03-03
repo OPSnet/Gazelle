@@ -47,7 +47,11 @@ abstract class Task {
                 num_items = ?,
                 duration_ms = ?
             WHERE periodic_task_history_id = ?
-        ', 'completed', $errorCount, $this->processed, $elapsed, $this->historyId);
+            ', 'completed', $errorCount, $this->processed, $elapsed, $this->historyId
+        );
+
+        echo("DONE! (".number_format(microtime(true) - $this->startTime, 3).")\n");
+
 
         foreach ($this->events as $event) {
             echo(sprintf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event));
