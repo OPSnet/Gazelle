@@ -2,7 +2,6 @@
 define("PUSH_SOCKET_LISTEN_ADDRESS", "127.0.0.1");
 define("PUSH_SOCKET_LISTEN_PORT", 6789);
 
-require 'NMA_API.php';
 require 'config.php';
 class PushServer {
     private $ListenSocket = false;
@@ -40,9 +39,6 @@ class PushServer {
         $JSON = json_decode($Data, true);
         $Service = strtolower($JSON['service']);
         switch ($Service) {
-            case 'nma':
-                $this->push_nma($JSON['user']['key'], $JSON['message']['title'], $JSON['message']['body'], $JSON['message']['url']);
-                break;
             case 'prowl':
                 $this->push_prowl($JSON['user']['key'], $JSON['message']['title'], $JSON['message']['body'], $JSON['message']['url']);
                 break;
@@ -116,17 +112,6 @@ class PushServer {
         echo "Push sent to Toasty";
     }
 
-    private function push_nma($Key, $Title, $Message, $URL) {
-        $NMA = new NMA_API([
-                'apikey' => $Key
-        ]);
-        if ($NMA->verify()) {
-            if ($NMA->notify(SITE_NAME, $Title, $Message, $URL)) {
-                echo "Push sent to NMA";
-            }
-        }
-    }
-
     private function push_pushover($UserKey, $Title, $Message, $URL) {
         curl_setopt_array($ch = curl_init(), [
                 CURLOPT_URL => "https://api.pushover.net/1/messages.json",
@@ -181,4 +166,3 @@ class PushServer {
 }
 
 $PushServer = new PushServer();
-?>
