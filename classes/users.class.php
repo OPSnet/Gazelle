@@ -381,10 +381,12 @@ class Users {
         $HeavyInfo = array_merge($HeavyInfo, $NewOptions);
 
         // Update DB
-        G::$DB->query("
+        G::$DB->prepared_query('
             UPDATE users_info
-            SET SiteOptions = '".db_string(serialize($SiteOptions))."'
-            WHERE UserID = $UserID");
+            SET SiteOptions = ?
+            WHERE UserID = ?
+            ', $UserID, serialize($SiteOptions)
+        );
         G::$DB->set_query_id($QueryID);
 
         // Update cache
@@ -923,5 +925,74 @@ class Users {
      */
     public static function flush_enabled_users_count() {
         G::$Cache->delete_value('stats_user_count');
+    }
+
+    public static function get_promotion_criteria() {
+        $criteria = [];
+        $criteria[] = ['From' => USER,   'To' => MEMBER,         'MinUpload' => 10 * 1024 * 1024 * 1024,  'MinRatio' => 0.7,  'MinUploads' => 0,   'Weeks' => 1];
+        $criteria[] = ['From' => MEMBER, 'To' => POWER,          'MinUpload' => 25 * 1024 * 1024 * 1024,  'MinRatio' => 1.05, 'MinUploads' => 5,   'Weeks' => 2];
+        $criteria[] = ['From' => POWER,  'To' => ELITE,          'MinUpload' => 100 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 50,  'Weeks' => 4];
+        $criteria[] = ['From' => ELITE,  'To' => TORRENT_MASTER, 'MinUpload' => 500 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 500, 'Weeks' => 8];
+        $criteria[] = [
+            'From' => TORRENT_MASTER,
+            'To' => POWER_TM,
+            'MinUpload' => 500 * 1024 * 1024 * 1024,
+            'MinRatio' => 1.05,
+            'MinUploads' => 500,
+            'Weeks' => 8,
+            'Extra' => '
+                        (
+                            SELECT count(DISTINCT GroupID)
+                            FROM torrents
+                            WHERE UserID = users_main.ID
+                        ) >= 500'];
+        $criteria[] = [
+            'From' => POWER_TM,
+            'To' => ELITE_TM,
+            'MinUpload' => 500 * 1024 * 1024 * 1024,
+            'MinRatio' => 1.05,
+            'MinUploads' => 500,
+            'Weeks' => 8,
+            'Extra' => "
+                        (
+                            SELECT count(ID)
+                            FROM torrents
+                            WHERE ((LogScore = 100 AND Format = 'FLAC')
+                                OR (Media = 'Vinyl' AND Format = 'FLAC')
+                                OR (Media = 'WEB' AND Format = 'FLAC')
+                                OR (Media = 'DVD' AND Format = 'FLAC')
+                                OR (Media = 'Soundboard' AND Format = 'FLAC')
+                                OR (Media = 'Cassette' AND Format = 'FLAC')
+                                OR (Media = 'SACD' AND Format = 'FLAC')
+                                OR (Media = 'Blu-ray' AND Format = 'FLAC')
+                                OR (Media = 'DAT' AND Format = 'FLAC')
+                                )
+                                AND UserID = users_main.ID
+                        ) >= 500"];
+        $criteria[] = [
+            'From' => ELITE_TM,
+            'To' => ULTIMATE_TM,
+            'MinUpload' => 2 * 1024 * 1024 * 1024 * 1024,
+            'MinRatio' => 1.05,
+            'MinUploads' => 2000,
+            'Weeks' => 12,
+            'Extra' => sprintf("
+                        ((
+                            SELECT count(DISTINCT t.GroupID, t.RemasterYear, t.RemasterCatalogueNumber, t.RemasterRecordLabel, t.RemasterTitle, t.Media)
+                            FROM torrents t
+                            WHERE t.Format = 'FLAC'
+                                AND (t.LogScore = 100
+                                    OR t.Media IN ('Cassette', 'DAT')
+                                    OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless'))
+                                AND t.UserID = users_main.ID
+                        ) >= 2000 AND
+                        (
+                            SELECT uls.Uploaded + IFNULL(b.Bounty, 0) - IFNULL(ubl.final, 0)
+                            FROM users_leech_stats uls
+                            LEFT JOIN %s ubl ON (ubl.opsid = uls.UserID)
+                            WHERE uls.UserID = users_main.ID
+                        ) >= 2 * 1024 * 1024 * 1024 * 1024)", RECOVERY_MAPPING_TABLE)];
+
+        return $criteria;
     }
 }

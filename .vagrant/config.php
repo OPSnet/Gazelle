@@ -132,6 +132,7 @@ define('BRAVO',         '37');
 define('CHARLIE',       '38');
 define('DELTA',         '39');
 define('RECRUITER',     '41');
+define('ULTIMATE_TM',   '48');
 
 // Pagination
 define('TORRENT_COMMENTS_PER_PAGE', 10);

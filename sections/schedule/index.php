@@ -10,8 +10,7 @@ set_time_limit(50000);
 ob_end_flush();
 gc_enable();
 
-$LineEnd = check_perms('admin_schedule') ? "<br />" : "\n";
-
+$LineEnd = "\n";
 /*
  * Use this if your version of pgrep does not support the '-c' option.
  * The '-c' option requires procps-ng.
@@ -90,7 +89,7 @@ if (PHP_SAPI === 'cli') {
 else {
     foreach($_GET as $Key => $Value) {
         if (substr($Key, 0, 4) === 'run_') {
-            $Key = str_replace('_', '', ucwords($argv[$i]));
+            $Key = str_replace('_', '', ucwords($Key, '_'));
             $$Key = true;
         }
     }
