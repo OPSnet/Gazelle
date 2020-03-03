@@ -41,7 +41,7 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                 $demoted[$l['To']] = $userIds;
 
                 $params = array_merge([$l['From']], $userIds);
-                $placeholders = implode(' ', array_fill(0, count($userIds), '?'));
+                $placeholders = implode(', ', array_fill(0, count($userIds), '?'));
                 $this->db->prepared_query("
                     UPDATE users_main
                     SET PermissionID = ?

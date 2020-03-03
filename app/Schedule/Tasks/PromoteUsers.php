@@ -43,7 +43,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                 $promoted[$l['To']] = $userIds;
 
                 $params = array_merge([$l['To']], $userIds);
-                $placeholders = implode(' ', array_fill(0, count($userIds), '?'));
+                $placeholders = implode(', ', array_fill(0, count($userIds), '?'));
                 $this->db->prepared_query("
                     UPDATE users_main
                     SET PermissionID = ?
