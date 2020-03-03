@@ -5,6 +5,16 @@ $Page = max(1, $Page);
 $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
+$SortOrders = [
+    'size' => 't.Size',
+    'seeders' => 'Seeders',
+    'seedtime' => 'SeedTime',
+    'hourlypoints' => 'HourlyPoints',
+];
+$OrderWay = (empty($_GET['sort']) || strtolower($_GET['sort']) == 'desc') ? 'desc' : 'asc';
+$NewSort = ($OrderWay == 'desc') ? 'asc' : 'desc';
+$OrderBy = (!empty($_GET['order']) && isset($SortOrders[$_GET['order']])) ? $SortOrders[$_GET['order']] : 'HourlyPoints';
+
 if (!empty($_GET['userid'])) {
     if (!check_perms('admin_bp_history')) {
         error(403);
@@ -97,10 +107,10 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
     <thead>
     <tr class="colhead">
         <td>Torrent</td>
-        <td>Size</td>
-        <td>Seeders</td>
-        <td>Seedtime</td>
-        <td>BP/hour</td>
+        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'size', 'sort' => ($OrderBy == 't.Size') ? $NewSort : 'desc']) ?>">Size</td>
+        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'seeders', 'sort' => ($OrderBy == 'Seeders') ? $NewSort : 'desc']) ?>">Seeders</a></td>
+        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'seedtime', 'sort' => ($OrderBy == 'SeedTime') ? $NewSort : 'desc']) ?>">Seedtime</a></td>
+        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'hourlypoints', 'sort' => ($OrderBy == 'HourlyPoints') ? $NewSort : 'desc']) ?>">BP/hour</a></td>
         <td>BP/day</td>
         <td>BP/week</td>
         <td>BP/month</td>
@@ -142,8 +152,9 @@ if ($TotalTorrents > 0) {
     INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
     WHERE
         xfu.uid = ?
+    ORDER BY ? ?
     LIMIT ?
-    OFFSET ?", $UserID, $UserID, $Limit, $Offset);
+    OFFSET ?", $UserID, $UserID, $OrderBy, strtoupper($OrderWay), $Limit, $Offset);
 
     $GroupIDs = $DB->collect('GroupID');
     $Groups = Torrents::get_groups($GroupIDs, true, true, false);

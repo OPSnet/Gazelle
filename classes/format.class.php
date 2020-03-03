@@ -138,28 +138,28 @@ class Format {
     }
 
     /**
-     * Gets the query string of the current page, minus the parameters in $Exclude
+     * Gets the query string of the current page, minus the parameters in $Exclude,
+     * plus the parameters in $NewParams
      *
      * @param array $Exclude Query string parameters to leave out, or blank to include all parameters.
      * @param bool $Escape Whether to return a string prepared for HTML output
      * @param bool $Sort Whether to sort the parameters by key
-     * @return An optionally HTML sanatized query string
+     * @param array $NewParams New query items to insert into the URL
+     * @return string A query string, optionally HTML-sanitized
      */
-    public static function get_url($Exclude = false, $Escape = true, $Sort = false) {
-        if ($Exclude !== false) {
-            $Separator = $Escape ? '&amp;' : '&';
-            $QueryItems = NULL;
-            parse_str($_SERVER['QUERY_STRING'], $QueryItems);
-            foreach ($Exclude as $Key) {
-                unset($QueryItems[$Key]);
-            }
-            if ($Sort) {
-                ksort($QueryItems);
-            }
-            return http_build_query($QueryItems, '', $Separator);
-        } else {
-            return $Escape ? display_str($_SERVER['QUERY_STRING']) : $_SERVER['QUERY_STRING'];
+    public static function get_url(array $Exclude = [], $Escape = true, $Sort = false, array $NewParams = []) {
+        $QueryItems = NULL;
+        parse_str($_SERVER['QUERY_STRING'], $QueryItems);
+
+        foreach ($Exclude as $Key) {
+            unset($QueryItems[$Key]);
         }
+        if ($Sort) {
+            ksort($QueryItems);
+        }
+
+        $NewQuery = http_build_query(array_merge($QueryItems, $NewParams), '');
+        return $Escape ? display_str($NewQuery) : $NewQuery;
     }
 
 
