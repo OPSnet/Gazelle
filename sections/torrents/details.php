@@ -594,7 +594,7 @@ foreach ($TorrentList as $Torrent) {
                     <div class="linkbox">
                         <a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
 <?php
-    if ($HasLog && $HasLogDB) { ?>
+    if ($Media === 'CD' && $HasLog && $HasLogDB) { ?>
                         <a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log</a>
 <?php
     }
