@@ -16,13 +16,13 @@ else {
     }
     $ID = Users::ID_from_username(urldecode($_GET['user']));
     if (is_null($ID)) {
-        error('Invalid username. Please select a valid user');
+        error('Nobody with that name found at ' . SITE_NAME . '. Are you certain the spelling is right?');
     }
     elseif ($ID == G::$LoggedUser['ID']) {
-        error('You cannot give yourself tokens.');
+        error('You cannot give yourself tokens. (Nice try :)');
     }
     if (!$Bonus->purchaseTokenOther(G::$LoggedUser['ID'], $ID, $Label, G::$LoggedUser)) {
-        error('Purchase for other not concluded.');
+        error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
     }
 }
 

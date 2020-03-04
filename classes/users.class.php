@@ -166,7 +166,7 @@ class Users {
         if (empty($HeavyInfo)) {
 
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query('
                 SELECT
                     m.Invites,
                     m.torrent_pass,
@@ -189,7 +189,7 @@ class Users {
                     i.DisableRequests,
                     i.DisableForums,
                     i.DisableIRC,
-                    i.DisableTagging," . "
+                    i.DisableTagging,
                     i.SiteOptions,
                     i.DownloadAlt,
                     i.LastReadNews,
@@ -198,10 +198,15 @@ class Users {
                     i.PermittedForums,
                     i.NavItems,
                     m.FLTokens,
-                    m.PermissionID
+                    m.PermissionID,
+                    CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
                 FROM users_main AS m
-                    INNER JOIN users_info AS i ON i.UserID = m.ID
-                WHERE m.ID = '$UserID'");
+                INNER JOIN users_info AS i ON (i.UserID = m.ID)
+                LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
+                LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
+                WHERE m.ID = ?
+                ', 'no-fl-gifts', $UserID
+            );
             $HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, ['CustomPermissions', 'SiteOptions']);
 
             $HeavyInfo['CustomPermissions'] = unserialize_array($HeavyInfo['CustomPermissions']);
@@ -994,5 +999,36 @@ class Users {
                         ) >= 2 * 1024 * 1024 * 1024 * 1024)", RECOVERY_DB)];
 
         return $criteria;
+    }
+
+    /**
+     * toggle Accept FL token setting
+     * If user accepts FL tokens and the refusal attribute is found, delete it.
+     * If user refuses FL tokens and the attribute is not found, insert it.
+     */
+    public static function toggleAcceptFL($id, $acceptFL) {
+        G::$DB->prepared_query('
+            SELECT ua.ID
+            FROM user_has_attr uha
+            INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID)
+            WHERE uha.UserID = ?
+                AND ua.Name = ?
+            ', $id, 'no-fl-gifts'
+        );
+        $found = G::$DB->has_results();
+        if ($acceptFL && $found) {
+            list($attr_id) = G::$DB->next_record();
+            G::$DB->prepared_query('
+                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
+                ', $id, $attr_id
+            );
+        }
+        elseif (!$acceptFL && !$found) {
+            G::$DB->prepared_query('
+                INSERT INTO user_has_attr (UserID, UserAttrID)
+                    SELECT ?, ID FROM user_attr WHERE Name = ?
+                ', $id, 'no-fl-gifts'
+            );
+        }
     }
 }

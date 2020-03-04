@@ -91,7 +91,8 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             m.2FA_Key,
             SHA1(i.AdminComment),
             i.InfoTitle,
-            la.Type AS LockedAccount
+            la.Type AS LockedAccount,
+            CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
         FROM users_main AS m
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
         INNER JOIN users_info AS i ON (i.UserID = m.ID)
@@ -99,16 +100,18 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
         LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
+        LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
+        LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
         WHERE m.ID = ?
         GROUP BY AuthorID
-        ', $UserID
+        ', 'no-fl-gifts', $UserID
     );
 
     if (!$DB->has_results()) { // If user doesn't exist
         header("Location: log.php?search=User+$UserID");
     }
 
-    list($Username,    $Email,    $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount) = $DB->next_record(MYSQLI_NUM, [9, 12]);
+    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [9, 12]);
 } else { // Person viewing is a normal user
     $DB->prepared_query('
         SELECT
@@ -137,16 +140,19 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.Inviter,
             i.DisableInvites,
             inviter.username,
-            i.InfoTitle
+            i.InfoTitle,
+            CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
         FROM users_main AS m
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
         INNER JOIN users_info AS i ON (i.UserID = m.ID)
         LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
+        LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
+        LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
         WHERE m.ID = ?
         GROUP BY AuthorID
-        ', $UserID
+        ', 'no-fl-gifts', $UserID
     );
 
     if (!$DB->has_results()) { // If user doesn't exist
@@ -154,26 +160,26 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
     }
 
     list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints,
-$RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass,
-$DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
-$ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle) = $DB->next_record(MYSQLI_NUM, [10, 12]);
+        $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass,
+        $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
+        $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [10, 12]);
 }
 
-$DB->query("
+$DB->prepared_query('
 SELECT
     IFNULL(SUM((t.Size / (1024 * 1024 * 1024)) * (
         0.0433 + (
             (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
         )
     )),0)
-FROM (
-    SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = {$UserID}
-) AS xfu
+FROM (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
 INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
 WHERE
-    xfu.uid = {$UserID}");
+    xfu.uid = ?
+    ', $UserID, $UserID
+);
 list($BonusPointsPerHour) = $DB->next_record(MYSQLI_NUM);
 
 // Image proxy CTs
@@ -298,7 +304,7 @@ if ($Avatar && Users::has_avatars_enabled()) {
         </div>
 <?php
 }
-if ($Enabled == 1 && (count($FL_Items) || isset($FL_OTHER_tokens))) {
+if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens))) {
 ?>
         <div class="box box_info box_userinfo_give_FL">
 <?php

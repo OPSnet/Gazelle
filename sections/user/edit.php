@@ -4,7 +4,7 @@ if (!is_number($UserID)) {
     error(404);
 }
 
-$DB->query("
+$DB->prepared_query('
     SELECT
         m.Username,
         m.Email,
@@ -23,12 +23,17 @@ $DB->query("
         i.NotifyOnDeleteSeeding,
         i.NotifyOnDeleteSnatched,
         i.NotifyOnDeleteDownloaded,
-        i.NavItems
+        i.NavItems,
+        CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
     FROM users_main AS m
-        JOIN users_info AS i ON i.UserID = m.ID
-        LEFT JOIN permissions AS p ON p.ID = m.PermissionID
-    WHERE m.ID = '".db_string($UserID)."'");
-list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems) = $DB->next_record(MYSQLI_NUM, [3, 9]);
+    INNER JOIN users_info AS i ON (i.UserID = m.ID)
+    LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+    LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
+    LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
+    WHERE m.ID = ?
+    ', 'no-fl-gifts', $UserID
+);
+list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [3, 9]);
 
 if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Class)) {
     error(403);
@@ -475,6 +480,13 @@ echo $Val->GenerateJS('userform');
                     <label for="disableautosave">Disable text auto-saving</label>
                 </td>
             </tr>
+            <tr id="comm_acceptfl_tr">
+                <td class="label tooltip" title="If unchecked, other members will not have the option to gift you FL tokens."><strong>FL Tokens</strong></td>
+                <td>
+                    <input type="checkbox" name="acceptfltoken" id="acceptfltoken"<?= $AcceptFL ? ' checked="checked"' : ''?> />
+                    <label for="Accept FL Tokens">Accept FL Tokens from members</label>
+                </td>
+            </tr>
         </table>
         <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="notification_settings">
             <tr class="colhead_dark">
@@ -917,4 +929,5 @@ list($ArtistsAdded) = $DB->next_record();
     </div>
     </form>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

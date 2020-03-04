@@ -159,7 +159,6 @@ if ($CurEmail != $_POST['email']) {
     if (!$Err) {
         $NewEmail = db_string($_POST['email']);
 
-
         //This piece of code will update the time of their last email change to the current time *not* the current change.
         $ChangerIP = db_string($LoggedUser['IP']);
         $DB->query("
@@ -178,8 +177,6 @@ if ($CurEmail != $_POST['email']) {
         header("Location: user.php?action=edit&userid=$UserID");
         die();
     }
-
-
 }
 //End email change
 
@@ -238,6 +235,7 @@ $Options['NotifyOnQuote']       = (!empty($_POST['notifications_Quotes_popup']) 
 $Options['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
 $Options['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
 $Options['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);
+$Options['AcceptFL']            = (!empty($_POST['acceptfltoken']) ? 1 : 0);
 $Options['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
 $Options['CoverArt']            = (int)!empty($_POST['coverart']);
 $Options['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
@@ -264,11 +262,6 @@ if (check_perms('site_advanced_search')) {
     unset($Options['SearchType']);
 }
 
-//TODO: Remove the following after a significant amount of time
-unset($Options['ArtistNoRedirect']);
-unset($Options['ShowQueryList']);
-unset($Options['ShowCacheList']);
-
 // These are all enums of '0' or '1'
 $DownloadAlt = isset($_POST['downloadalt']) ? '1' : '0';
 $UnseededAlerts = isset($_POST['unseededalerts']) ? '1' : '0';
@@ -286,33 +279,42 @@ foreach ($NavItems as $n) {
 }
 $UserNavItems = implode(',', $UserNavItems);
 
-$LastFMUsername = db_string($_POST['lastfm_username']);
+$LastFMUsername = $_POST['lastfm_username'];
 $OldLastFMUsername = '';
-$DB->query("
+$DB->prepared_query('
     SELECT username
     FROM lastfm_users
-    WHERE ID = '$UserID'");
+    WHERE ID = ?
+    ', $UserID
+);
 if ($DB->has_results()) {
     list($OldLastFMUsername) = $DB->next_record();
     if ($OldLastFMUsername != $LastFMUsername) {
         if (empty($LastFMUsername)) {
-            $DB->query("
+            $DB->prepared_query('
                 DELETE FROM lastfm_users
-                WHERE ID = '$UserID'");
+                WHERE ID = ?
+                ', $UserID
+            );
         } else {
-            $DB->query("
+            $DB->prepared_query('
                 UPDATE lastfm_users
-                SET Username = '$LastFMUsername'
-                WHERE ID = '$UserID'");
+                SET Username = ?
+                WHERE ID = ?
+                ', $LastFMUsername, $UserID
+            );
         }
     }
 } elseif (!empty($LastFMUsername)) {
-    $DB->query("
+    $DB->prepared_query('
         INSERT INTO lastfm_users (ID, Username)
-        VALUES ('$UserID', '$LastFMUsername')");
+        VALUES (?, ?)
+        ', $UserID, $LastFMUsername
+    );
 }
 G::$Cache->delete_value("lastfm_username_$UserID");
 
+Users::toggleAcceptFL($UserID, $Options['AcceptFL']);
 Donations::update_rewards($UserID);
 NotificationsManager::save_settings($UserID);
 
@@ -338,7 +340,7 @@ $Cache->update_row(false, [
 $Cache->update_row(false, $Options);
 $Cache->commit_transaction(0);
 
-$SQL = "
+$SQL = '
     UPDATE users_main AS m
         JOIN users_info AS i ON m.ID = i.UserID
     SET
@@ -357,7 +359,9 @@ $SQL = "
         m.Email = ?,
         m.IRCKey = ?,
         m.Paranoia = ?,
-        i.NavItems = ?";
+        i.NavItems = ?
+';
+
 $Params = [
     $_POST['stylesheet'],
     $_POST['styleurl'],
@@ -378,31 +382,31 @@ $Params = [
 ];
 
 if ($ResetPassword) {
-    $ChangerIP = db_string($LoggedUser['IP']);
-    $PassHash = Users::make_password_hash($_POST['new_pass_1']);
-    $SQL.= ",m.PassHash = ?";
-    $Params[] = $PassHash;
-    $DB->prepared_query("
+    $SQL .= ',m.PassHash = ?';
+    $Params[] = Users::make_password_hash($_POST['new_pass_1']);
+    $DB->prepared_query('
         INSERT INTO users_history_passwords
             (UserID, ChangerIP, ChangeTime)
         VALUES
-            (?, ?, ?)",
-        $UserID, $ChangerIP, sqltime());
+            (?, ?, now())
+        ', $UserID, $LoggedUser['IP']
+    );
 }
 
 if (isset($_POST['resetpasskey'])) {
     $UserInfo = Users::user_heavy_info($UserID);
-    $OldPassKey = db_string($UserInfo['torrent_pass']);
-    $NewPassKey = db_string(Users::make_secret());
-    $ChangerIP = db_string($LoggedUser['IP']);
-    $SQL .= ",m.torrent_pass = ?";
+    $OldPassKey = $UserInfo['torrent_pass'];
+    $NewPassKey = Users::make_secret();
+    $ChangerIP = $LoggedUser['IP'];
+    $SQL .= ',m.torrent_pass = ?';
     $Params[] = $NewPassKey;
-    $DB->prepared_query("
+    $DB->prepared_query('
         INSERT INTO users_history_passkeys
             (UserID, OldPassKey, NewPassKey, ChangerIP, ChangeTime)
         VALUES
-            (?, ?, ?, ?, ?)",
-        $UserID, $OldPassKey, $NewPassKey, $ChangerIP, sqltime());
+            (?, ?, ?, ?, now())
+        ', $UserID, $OldPassKey, $NewPassKey, $ChangerIP
+    );
     $Cache->begin_transaction("user_info_heavy_$UserID");
     $Cache->update_row(false, ['torrent_pass' => $NewPassKey]);
     $Cache->commit_transaction(0);
@@ -411,8 +415,9 @@ if (isset($_POST['resetpasskey'])) {
     Tracker::update_tracker('change_passkey', ['oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey]);
 }
 
-$SQL .= " WHERE m.ID = ?";
+$SQL .= ' WHERE m.ID = ?';
 $Params[] = $UserID;
+
 $DB->prepared_query($SQL, ...$Params);
 
 if ($ResetPassword) {

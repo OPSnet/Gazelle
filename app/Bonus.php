@@ -282,6 +282,11 @@ class Bonus {
         if ($From['Enabled'] != 1 || $To['Enabled'] != 1) {
             return 0;
         }
+        $AcceptFL = \Users::user_heavy_info($toID)['AcceptFL'];
+        if (!$AcceptFL) {
+            return 0;
+        }
+
         // get the bonus points of the giver from the database
         // verify they could be legally spent, and then update the receiver
         $stats = \Users::user_stats($fromID, true);
