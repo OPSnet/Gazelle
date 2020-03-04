@@ -218,6 +218,7 @@ function check_paranoia_here($Setting) {
 }
 
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
+$User = new \Gazelle\User($DB, $Cache, $UserID);
 
 ?>
 <div class="thin">
@@ -229,19 +230,11 @@ View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,re
 if (!$OwnProfile) {
 ?>
         <a href="inbox.php?action=compose&amp;to=<?=$UserID?>" class="brackets">Send message</a>
-<?php
-    $DB->query("
-        SELECT FriendID
-        FROM friends
-        WHERE UserID = '$LoggedUser[ID]'
-            AND FriendID = '$UserID'");
-    if (!$DB->has_results()) {
-?>
+<?php if (!$User->isFriend($LoggedUser['ID'])) { ?>
         <a href="friends.php?action=add&amp;friendid=<?=$UserID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Add to friends</a>
-<?php    } ?>
+<?php } ?>
         <a href="reports.php?action=report&amp;type=user&amp;id=<?=$UserID?>" class="brackets">Report user</a>
 <?php
-
 }
 
 if (check_perms('users_edit_profiles', $Class) || $LoggedUser['ID'] == $UserID) {
@@ -423,50 +416,25 @@ if ($LastFMUsername)  {
 }
 
 if (check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty')) {
-    $DB->query("
-        SELECT
-            COUNT(DISTINCT r.ID),
-            SUM(rv.Bounty)
-        FROM requests AS r
-            LEFT JOIN requests_votes AS rv ON r.ID = rv.RequestID
-        WHERE r.FillerID = $UserID");
-    list($RequestsFilled, $TotalBounty) = $DB->next_record();
+    list($RequestsFilled, $TotalBounty) = $User->requestsBounty();
 } else {
     $RequestsFilled = $TotalBounty = 0;
 }
-
 if (check_paranoia_here('requestsvoted_count') || check_paranoia_here('requestsvoted_bounty')) {
-    $DB->query("
-        SELECT COUNT(RequestID), SUM(Bounty)
-        FROM requests_votes
-        WHERE UserID = $UserID");
-    list($RequestsVoted, $TotalSpent) = $DB->next_record();
-    $DB->query("
-        SELECT COUNT(r.ID), SUM(rv.Bounty)
-        FROM requests AS r
-            LEFT JOIN requests_votes AS rv ON rv.RequestID = r.ID AND rv.UserID = r.UserID
-        WHERE r.UserID = $UserID");
-    list($RequestsCreated, $RequestsCreatedSpent) = $DB->next_record();
+    list($RequestsVoted, $TotalSpent) = $User->requestsVotes();
+    list($RequestsCreated, $RequestsCreatedSpent) = $User->requestsCreated();
 } else {
     $RequestsVoted = $TotalSpent = $RequestsCreated = $RequestsCreatedSpent = 0;
 }
 
 if (check_paranoia_here('uploads+')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM torrents
-        WHERE UserID = '$UserID'");
-    list($Uploads) = $DB->next_record();
+    $Uploads = $User->uploadCount();
 } else {
     $Uploads = 0;
 }
 
 if (check_paranoia_here('artistsadded')) {
-    $DB->query("
-        SELECT COUNT(ArtistID)
-        FROM torrents_artists
-        WHERE UserID = $UserID");
-    list($ArtistsAdded) = $DB->next_record();
+    $ArtistsAdded = $User->artistsAdded();
 } else {
     $ArtistsAdded = 0;
 }
@@ -524,44 +492,19 @@ $OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsR
         </div>
 <?php
     if ($OwnProfile || check_perms('users_override_paranoia', $Class)) {
-        $DB->prepared_query("
-            SELECT IRCKey
-            FROM users_main
-            WHERE ID = ?", $UserID);
-        list($IRCKey) = $DB->next_record();
+        $IRCKey = $User->IRCKey();
     }
     if (check_perms('users_mod', $Class) || check_perms('users_view_ips', $Class) || check_perms('users_view_keys', $Class)) {
-        $DB->query("
-            SELECT COUNT(*)
-            FROM users_history_passwords
-            WHERE UserID = '$UserID'");
-        list($PasswordChanges) = $DB->next_record();
+        $PasswordChanges = $User->passwordCount();
         if (check_perms('users_view_keys', $Class)) {
-            $DB->query("
-                SELECT COUNT(*)
-                FROM users_history_passkeys
-                WHERE UserID = '$UserID'");
-            list($PasskeyChanges) = $DB->next_record();
+            $PasskeyChanges = $User->passkeyCount();
         }
         if (check_perms('users_view_ips', $Class)) {
-            $DB->query("
-                SELECT COUNT(DISTINCT IP)
-                FROM users_history_ips
-                WHERE UserID = '$UserID'");
-            list($IPChanges) = $DB->next_record();
-            $DB->query("
-                SELECT COUNT(DISTINCT IP)
-                FROM xbt_snatched
-                WHERE uid = '$UserID'
-                    AND IP != ''");
-            list($TrackerIPs) = $DB->next_record();
+            $IPChanges = $User->siteIPCount();
+            $TrackerIPs = $User->trackerIPCount();
         }
         if (check_perms('users_view_email', $Class)) {
-            $DB->query("
-                SELECT COUNT(*)
-                FROM users_history_emails
-                WHERE UserID = '$UserID'");
-            list($EmailChanges) = $DB->next_record();
+            $EmailChanges = $User->emailCount();
         }
 ?>
         <div class="box box_info box_userinfo_history">
@@ -651,22 +594,10 @@ if (check_perms('users_view_invites')) {
     } else {
         $Invited = "<a href=\"user.php?id=$InviterID\">$InviterName</a>";
     }
-
 ?>
                 <li>Invited by: <?=$Invited?></li>
-                <li>Invites: <?php
-                $DB->query("
-                    SELECT COUNT(InviterID)
-                    FROM invites
-                    WHERE InviterID = '$UserID'");
-                list($Pending) = $DB->next_record();
-                if ($DisableInvites) {
-                    echo 'X';
-                } else {
-                    echo number_format($Invites);
-                }
-                echo " ($Pending)"
-                ?></li>
+                <li>Invites: <?= ($DisableInvites ? 'X' : number_format($Invites)) ?>
+                    <?= '(' . $User->pendingInviteCount() . ' in use)' ?></li>
 <?php
 }
 if (Applicant::user_is_applicant($UserID) && (check_perms('admin_manage_applicants') || $OwnProfile)) {
@@ -676,35 +607,18 @@ if (Applicant::user_is_applicant($UserID) && (check_perms('admin_manage_applican
 }
 
 if (!isset($SupportFor)) {
-    $DB->query('
-        SELECT SupportFor
-        FROM users_info
-        WHERE UserID = '.$LoggedUser['ID']);
-    list($SupportFor) = $DB->next_record();
+    $SupportFor = $User->supportFor();
 }
 if ($Override = check_perms('users_mod') || $OwnProfile || !empty($SupportFor)) {
 ?>
-                <li<?=(($Override === 2 || $SupportFor) ? ' class="paranoia_override"' : '')?>>Clients: <?php
-        $DB->query("
-            SELECT DISTINCT useragent
-            FROM xbt_files_users
-            WHERE uid = $UserID");
-        $Clients = $DB->collect(0);
-        echo implode('; ', $Clients);
-        ?></li>
+                <li<?=(($Override === 2 || $SupportFor) ? ' class="paranoia_override"' : '')?>>Clients: <?=
+                    implode('; ', $User->clients()) ?></li>
 <?php
 }
 
 if ($OwnProfile || check_perms('users_mod')) {
-    $DB->query("SELECT MAX(uhp.ChangeTime), ui.JoinDate
-                FROM users_info ui
-                LEFT JOIN users_history_passwords uhp ON uhp.UserID = $UserID
-                WHERE ui.UserID = $UserID");
-    list($PasswordHistory, $JoinDate) = G::$DB->next_record();
-    $Age = (empty($PasswordHistory)) ? time_diff($JoinDate) : time_diff($PasswordHistory);
-    $PasswordAge = substr($Age, 0, strpos($Age, " ago"));
 ?>
-    <li>Password age: <?=$PasswordAge?></li>
+    <li>Password age: <?= $User->passwordAge() ?></li>
 <?php }
 if ($OwnProfile || check_perms('users_override_paranoia', $Class)) { ?>
     <li>IRC Key: <?=empty($IRCKey) ? 'No' : 'Yes' ?></li>
@@ -719,17 +633,15 @@ DonationsView::render_donor_stats($UserID);
     <div class="main_column">
 <?php
 if ($RatioWatchEnds != '0000-00-00 00:00:00'
-        && (time() < strtotime($RatioWatchEnds))
-        && ($Downloaded * $RequiredRatio) > $Uploaded
-        ) {
+    && (time() < strtotime($RatioWatchEnds))
+    && ($Downloaded * $RequiredRatio) > $Uploaded
+) {
 ?>
         <div class="box">
             <div class="head">Ratio watch</div>
             <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($Downloaded * $RequiredRatio) - $Uploaded)?> in the next <?=time_diff($RatioWatchEnds)?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($Downloaded - $RatioWatchDownload)?></div>
         </div>
-<?php
-}
-?>
+<?php } ?>
         <div class="box">
             <div class="head">
                 <?=!empty($InfoTitle) ? $InfoTitle : 'Profile';?>
@@ -753,28 +665,30 @@ DonationsView::render_profile_rewards($EnabledRewards, $ProfileRewards);
 if (check_paranoia_here('snatched')) {
     $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
     if ($RecentSnatches === false) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT
                 g.ID,
                 g.Name,
                 g.WikiImage
             FROM xbt_snatched AS s
-                INNER JOIN torrents AS t ON t.ID = s.fid
-                INNER JOIN torrents_group AS g ON t.GroupID = g.ID
-            WHERE s.uid = '$UserID'
-                AND t.UserID != '$UserID'
+            INNER JOIN torrents AS t ON (t.ID = s.fid)
+            INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
+            WHERE s.uid = ?
+                AND t.UserID != ?
                 AND g.CategoryID = '1'
                 AND g.WikiImage != ''
             GROUP BY g.ID
             ORDER BY s.tstamp DESC
-            LIMIT 5");
+            LIMIT 5
+            ", $UserID, $UserID
+        );
         $RecentSnatches = $DB->to_array();
 
         $Artists = Artists::get_artists($DB->collect('ID'));
         foreach ($RecentSnatches as $Key => $SnatchInfo) {
             $RecentSnatches[$Key]['Artist'] = Artists::display_artists($Artists[$SnatchInfo['ID']], false, true);
         }
-        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 0); //inf cache
+        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 86400 * 3);
     }
     if (!empty($RecentSnatches)) {
 ?>
@@ -801,25 +715,27 @@ if (check_paranoia_here('snatched')) {
 if (check_paranoia_here('uploads')) {
     $RecentUploads = $Cache->get_value("recent_uploads_$UserID");
     if ($RecentUploads === false) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT
                 g.ID,
                 g.Name,
                 g.WikiImage
             FROM torrents_group AS g
-                INNER JOIN torrents AS t ON t.GroupID = g.ID
-            WHERE t.UserID = '$UserID'
+            INNER JOIN torrents AS t ON (t.GroupID = g.ID)
+            WHERE t.UserID = ?
                 AND g.CategoryID = '1'
                 AND g.WikiImage != ''
             GROUP BY g.ID
             ORDER BY t.Time DESC
-            LIMIT 5");
+            LIMIT 5
+            ", $UserID
+        );
         $RecentUploads = $DB->to_array();
         $Artists = Artists::get_artists($DB->collect('ID'));
         foreach ($RecentUploads as $Key => $UploadInfo) {
             $RecentUploads[$Key]['Artist'] = Artists::display_artists($Artists[$UploadInfo['ID']], false, true);
         }
-        $Cache->cache_value("recent_uploads_$UserID", $RecentUploads, 0); //inf cache
+        $Cache->cache_value("recent_uploads_$UserID", $RecentUploads, 86400 * 3);
     }
     if (!empty($RecentUploads)) {
 ?>
@@ -843,27 +759,21 @@ if (check_paranoia_here('uploads')) {
     }
 }
 
-$DB->query("
-    SELECT ID, Name
-    FROM collages
-    WHERE UserID = '$UserID'
-        AND CategoryID = '0'
-        AND Deleted = '0'
-    ORDER BY Featured DESC,
-        Name ASC");
-$Collages = $DB->to_array(false, MYSQLI_NUM, false);
+$Collages = $User->personalCollages();
 $FirstCol = true;
 foreach ($Collages as $CollageInfo) {
     list($CollageID, $CName) = $CollageInfo;
-    $DB->query("
+    $DB->prepared_query('
         SELECT ct.GroupID,
             tg.WikiImage,
             tg.CategoryID
         FROM collages_torrents AS ct
-            JOIN torrents_group AS tg ON tg.ID = ct.GroupID
-        WHERE ct.CollageID = '$CollageID'
+        INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
+        WHERE ct.CollageID = ?
         ORDER BY ct.Sort
-        LIMIT 5");
+        LIMIT 5
+        ', $CollageID
+    );
     $Collage = $DB->to_array(false, MYSQLI_ASSOC, false);
 ?>
     <table class="layout recent" id="collage<?=$CollageID?>_box" cellpadding="0" cellspacing="0" border="0">
@@ -1015,7 +925,7 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
 $IsFLS = isset($LoggedUser['ExtraClasses'][FLS_TEAM]);
 if (check_perms('users_mod', $Class) || $IsFLS) {
     $UserLevel = $LoggedUser['EffectiveClass'];
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             SQL_CALC_FOUND_ROWS
             spc.ID,
@@ -1028,10 +938,12 @@ if (check_perms('users_mod', $Class) || $IsFLS) {
             spc.ResolverID
         FROM staff_pm_conversations AS spc
         JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
-        WHERE spc.UserID = $UserID
-            AND (spc.Level <= $UserLevel OR spc.AssignedToUser = '".$LoggedUser['ID']."')
+        WHERE spc.UserID = ?
+            AND (spc.Level <= ? OR spc.AssignedToUser = ?)
         GROUP BY spc.ID
-        ORDER BY spc.Date DESC");
+        ORDER BY spc.Date DESC
+        ', $UserID, $UserLevel, $LoggedUser['ID']
+    );
     if ($DB->has_results()) {
         $StaffPMs = $DB->to_array();
 ?>
@@ -1087,12 +999,8 @@ if (check_perms('users_mod', $Class) || $IsFLS) {
 
 // Displays a table of forum warnings viewable only to Forum Moderators
 if ($LoggedUser['Class'] == 650 && check_perms('users_warn', $Class)) {
-    $DB->query("
-        SELECT Comment
-        FROM users_warnings_forums
-        WHERE UserID = '$UserID'");
-    list($ForumWarnings) = $DB->next_record();
-    if ($DB->has_results()) {
+    $ForumWarnings = $User->forumWarning();
+    if ($ForumWarnings) {
 ?>
 <div class="box">
     <div class="head">Forum warnings</div>
@@ -1192,12 +1100,14 @@ if (check_perms('users_mod', $Class)) { ?>
             <td class="label">Secondary classes:</td>
             <td>
 <?php
-        $DB->query("
+        $DB->prepared_query('
             SELECT p.ID, p.Name, l.UserID
             FROM permissions AS p
-                LEFT JOIN users_levels AS l ON l.PermissionID = p.ID AND l.UserID = '$UserID'
+            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
             WHERE p.Secondary = 1
-            ORDER BY p.Name");
+            ORDER BY p.Name
+            ', $UserID
+        );
         $i = 0;
         while (list($PermID, $PermName, $IsSet) = $DB->next_record()) {
             $i++;
@@ -1411,12 +1321,7 @@ if (check_perms('users_mod', $Class)) { ?>
                 </td>
             </tr>
 <?php    if (check_perms('users_disable_posts') || check_perms('users_disable_any')) {
-        $DB->query("
-            SELECT DISTINCT Email, IP
-            FROM users_history_emails
-            WHERE UserID = $UserID
-            ORDER BY Time ASC");
-        $Emails = $DB->to_array();
+        $Emails = $User->emailHistory();
 ?>
             <tr>
                 <td class="label">Disable:</td>
