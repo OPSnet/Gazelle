@@ -175,7 +175,7 @@ if (($UserStats = $Cache->get_value('stats_users')) === false) {
 <?php
 
 if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {
-    $DB->preapred_query('
+    $DB->prepared_query('
         SELECT count(*)
         FROM torrents
     ');
