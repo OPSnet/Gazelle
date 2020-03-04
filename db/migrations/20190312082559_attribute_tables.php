@@ -67,39 +67,37 @@ class AttributeTables extends AbstractMigration
             ->addForeignKey('UserID', 'users_main', 'ID')
             ->create();
 
-        $this->table('collage_attr')->insert([
-            ['Name' => 'sort-newest', 'Description' => 'New additions appear at the top of list']
-        ]);
+        $this->table('collage_attr')
+             ->insert([
+                ['Name' => 'sort-newest', 'Description' => 'New additions appear at the top of list']
+             ])
+             ->save();
 
-        $this->table('torrent_group_attr')->insert([
-            ['Name' => 'no-cover-art', 'Description' => 'This release has no official artwork']
-        ]);
+        $this->table('torrent_group_attr')
+             ->insert([
+                ['Name' => 'no-cover-art', 'Description' => 'This release has no official artwork']
+             ])
+             ->save();
 
-        $this->table('user_attr')->insert([
-            ['Name' => 'no-fl-gifts', 'Description' => 'This user does not want to receive FL token gifts']
-        ]);
+        $this->table('user_attr')
+             ->insert([
+                ['Name' => 'no-fl-gifts', 'Description' => 'This user does not want to receive FL token gifts']
+             ])
+             ->save();
     }
 
     public function down()
     {
-        $this->table('collage_has_attr')
-             ->drop();
-        $this->table('collage_attr')
-             ->drop();
+        $this->table('collage_has_attr')->drop()->save();
+        $this->table('collage_attr')->drop()->save();
 
-        $this->table('torrent_group_has_attr')
-             ->drop();
-        $this->table('torrent_group_attr')
-             ->drop();
+        $this->table('torrent_group_has_attr')->drop()->save();
+        $this->table('torrent_group_attr')->drop()->save();
 
-        $this->table('torrent_has_attr')
-             ->drop();
-        $this->table('torrent_attr')
-             ->drop();
+        $this->table('torrent_has_attr')->drop()->save();
+        $this->table('torrent_attr')->drop()->save();
 
-        $this->table('user_has_attr')
-             ->drop();
-        $this->table('user_attr')
-             ->drop();
+        $this->table('user_has_attr')->drop()->save();
+        $this->table('user_attr')->drop()->save();
     }
 }
