@@ -3,7 +3,7 @@ Text::$TOC = true;
 
 $NewsCount = 5;
 if (!$News = $Cache->get_value('news')) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             ID,
             Title,
@@ -11,9 +11,11 @@ if (!$News = $Cache->get_value('news')) {
             Time
         FROM news
         ORDER BY Time DESC
-        LIMIT $NewsCount");
+        LIMIT ?
+        ', $NewsCount
+    );
     $News = $DB->to_array(false, MYSQLI_NUM, false);
-    $Cache->cache_value('news', $News, 3600 * 24 * 30);
+    $Cache->cache_value('news', $News, 3600);
     if (count($News) > 0) {
         $Cache->cache_value('news_latest_id', $News[0][0], 0);
         $Cache->cache_value('news_latest_title', $News[0][1], 0);
@@ -24,10 +26,12 @@ if (count($News) > 0 && $LoggedUser['LastReadNews'] != $News[0][0]) {
     $Cache->begin_transaction("user_info_heavy_$UserID");
     $Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
     $Cache->commit_transaction(0);
-    $DB->query("
+    $DB->prepared_query('
         UPDATE users_info
-        SET LastReadNews = '".$News[0][0]."'
-        WHERE UserID = $UserID");
+        SET LastReadNews = ?
+        WHERE UserID = ?
+        ', $News[0][0], $UserID
+    );
     $LoggedUser['LastReadNews'] = $News[0][0];
 }
 
@@ -47,7 +51,7 @@ if (check_perms('users_mod')) {
             </div>
 <?php
 if (($Blog = $Cache->get_value('staff_blog')) === false) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             b.ID,
             um.Username,
@@ -55,22 +59,25 @@ if (($Blog = $Cache->get_value('staff_blog')) === false) {
             b.Body,
             b.Time
         FROM staff_blog AS b
-            LEFT JOIN users_main AS um ON b.UserID = um.ID
-        ORDER BY Time DESC");
+        LEFT JOIN users_main AS um ON (b.UserID = um.ID)
+        ORDER BY Time DESC
+    ');
     $Blog = $DB->to_array(false, MYSQLI_NUM);
-    $Cache->cache_value('staff_blog', $Blog, 1209600);
+    $Cache->cache_value('staff_blog', $Blog, 86400);
 }
 if (($SBlogReadTime = $Cache->get_value('staff_blog_read_'.$LoggedUser['ID'])) === false) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT Time
         FROM staff_blog_visits
-        WHERE UserID = ".$LoggedUser['ID']);
+        WHERE UserID = ?
+        ', $LoggedUser['ID']
+    );
     if (list($SBlogReadTime) = $DB->next_record()) {
         $SBlogReadTime = strtotime($SBlogReadTime);
     } else {
         $SBlogReadTime = 0;
     }
-    $Cache->cache_value('staff_blog_read_'.$LoggedUser['ID'], $SBlogReadTime, 1209600);
+    $Cache->cache_value('staff_blog_read_'.$LoggedUser['ID'], $SBlogReadTime, 86400);
 }
 ?>
             <ul class="stats nobullet">
@@ -95,7 +102,7 @@ for ($i = 0; $i < $End; $i++) {
             <div class="head colhead_dark"><strong><a href="blog.php">Latest blog posts</a></strong></div>
 <?php
 if (($Blog = $Cache->get_value('blog')) === false) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             b.ID,
             um.Username,
@@ -105,9 +112,10 @@ if (($Blog = $Cache->get_value('blog')) === false) {
             b.Time,
             b.ThreadID
         FROM blog AS b
-            LEFT JOIN users_main AS um ON b.UserID = um.ID
+        LEFT JOIN users_main AS um ON (b.UserID = um.ID)
         ORDER BY Time DESC
-        LIMIT 20");
+        LIMIT 20
+    ');
     $Blog = $DB->to_array();
     $Cache->cache_value('blog', $Blog, 1209600);
 }
@@ -147,30 +155,18 @@ $UserCount = Users::get_enabled_users_count();
 ?>
                 <li>Enabled users: <?=number_format($UserCount)?> <a href="stats.php?action=users" class="brackets">Details</a></li>
 <?php
-
 if (($UserStats = $Cache->get_value('stats_users')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
+    $DB->prepared_query("
+        SELECT
+            sum(LastAccess >= now() - INTERVAL 1 DAY) as d,
+            sum(LastAccess >= now() - INTERVAL 1 WEEK) as w,
+            sum(LastAccess >= now() - INTERVAL 1 MONTH) as m
         FROM users_main
         WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24)."'");
-    list($UserStats['Day']) = $DB->next_record();
-
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24 * 7)."'");
-    list($UserStats['Week']) = $DB->next_record();
-
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24 * 30)."'");
-    list($UserStats['Month']) = $DB->next_record();
-
-    $Cache->cache_value('stats_users', $UserStats, 0);
+            AND LastAccess >= now() - INTERVAL 1 MONTH
+    ");
+    list($UserStats['Day'], $UserStats['Week'], $UserStats['Month']) = $DB->next_record();
+    $Cache->cache_value('stats_users', $UserStats, 43200 + rand(0, 3600)); // half day plus fuzz
 }
 ?>
                 <li>Users active today: <?=number_format($UserStats['Day'])?> (<?=number_format($UserStats['Day'] / $UserCount * 100, 2)?>%)</li>
@@ -179,45 +175,46 @@ if (($UserStats = $Cache->get_value('stats_users')) === false) {
 <?php
 
 if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM torrents");
+    $DB->preapred_query('
+        SELECT count(*)
+        FROM torrents
+    ');
     list($TorrentCount) = $DB->next_record();
-    $Cache->cache_value('stats_torrent_count', $TorrentCount, 604800); // staggered 1 week cache
+    $Cache->cache_value('stats_torrent_count', $TorrentCount, 86400 + rand(0, 3600));
 }
 
 if (($AlbumCount = $Cache->get_value('stats_album_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
+    $DB->prepared_query("
+        SELECT count(*)
         FROM torrents_group
-        WHERE CategoryID = '1'");
+        WHERE CategoryID = '1'
+    ");
     list($AlbumCount) = $DB->next_record();
-    $Cache->cache_value('stats_album_count', $AlbumCount, 604830); // staggered 1 week cache
+    $Cache->cache_value('stats_album_count', $AlbumCount, 86400 + rand(0, 3600));
 }
 
 if (($ArtistCount = $Cache->get_value('stats_artist_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ArtistID)
-        FROM artists_group");
+    $DB->prepared_query('
+        SELECT count(*)
+        FROM artists_group
+    ');
     list($ArtistCount) = $DB->next_record();
-    $Cache->cache_value('stats_artist_count', $ArtistCount, 604860); // staggered 1 week cache
+    $Cache->cache_value('stats_artist_count', $ArtistCount, 86400 + rand(0, 3600));
 }
 
 if (($PerfectCount = $Cache->get_value('stats_perfect_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
+    $DB->prepared_query("
+        SELECT count(*)
         FROM torrents
-        WHERE ((LogScore = 100 AND Format = 'FLAC')
-            OR (Media = 'Vinyl' AND Format = 'FLAC')
-            OR (Media = 'WEB' AND Format = 'FLAC')
-            OR (Media = 'DVD' AND Format = 'FLAC')
-            OR (Media = 'Soundboard' AND Format = 'FLAC')
-                        OR (Media = 'BD' AND Format = 'FLAC')
-                        OR (Media = 'SASD' AND Format = 'FLAC')
-                        OR (Media = 'BD' AND Format = 'FLAC')
-            )");
+        WHERE Format = 'FLAC'
+            AND (
+                (Media = 'CD' AND LogScore = 100)
+                OR
+                (Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'BD', 'SACD', 'BD'))
+            )
+    ");
     list($PerfectCount) = $DB->next_record();
-    $Cache->cache_value('stats_perfect_count', $PerfectCount, 3600); // staggered 1 week cache
+    $Cache->cache_value('stats_perfect_count', $PerfectCount, 86400 + rand(0, 3600)); // half a day plus fuzz
 }
 ?>
                 <li>Torrents: <?=number_format($TorrentCount)?></li>
@@ -228,31 +225,28 @@ if (($PerfectCount = $Cache->get_value('stats_perfect_count')) === false) {
 //End Torrent Stats
 
 if (($CollageCount = $Cache->get_value('stats_collages')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM collages");
+    $DB->prepared_query('
+        SELECT count(*)
+        FROM collages
+    ');
     list($CollageCount) = $DB->next_record();
-    $Cache->cache_value('stats_collages', $CollageCount, 11280); //staggered 1 week cache
+    $Cache->cache_value('stats_collages', $CollageCount, 86400 + rand(0, 3600));
 }
 ?>
                 <li>Collages: <?=number_format($CollageCount)?></li>
 <?php
 
 if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM requests");
-    list($RequestCount) = $DB->next_record();
-    $DB->query("
-        SELECT COUNT(ID)
+    $DB->prepared_query('
+        SELECT count(*), sum(FillerID > 0)
         FROM requests
-        WHERE FillerID > 0");
-    list($FilledCount) = $DB->next_record();
-    $Cache->cache_value('stats_requests', [$RequestCount, $FilledCount], 11280);
+    ');
+    list($RequestCount, $FilledCount) = $DB->next_record();
+    $Cache->cache_value('stats_requests', [$RequestCount, $FilledCount], 3600 * 3 + rand(0, 1800)); // three hours plus fuzz
 } else {
     list($RequestCount, $FilledCount) = $RequestStats;
 }
-$RequestPercentage = $RequestCount > 0 ? $FilledCount / $RequestCount * 100: 0;
+$RequestPercentage = $RequestCount > 0 ? $FilledCount / $RequestCount * 100 : 0;
 ?>
                 <li>Requests: <?=number_format($RequestCount)?> (<?=number_format($RequestPercentage, 2)?>% filled)</li>
 <?php
@@ -268,11 +262,12 @@ if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
     $PeerStatsLocked = $Cache->get_value('stats_peers_lock');
     if (!$PeerStatsLocked) {
         $Cache->cache_value('stats_peers_lock', 1, 30);
-        $DB->query("
+        $DB->prepared_query("
             SELECT IF(remaining=0,'Seeding','Leeching') AS Type, COUNT(uid)
             FROM xbt_files_users
             WHERE active = 1
-            GROUP BY Type");
+            GROUP BY Type
+        ");
         $PeerCount = $DB->to_array(0, MYSQLI_NUM, false);
         $SeederCount = $PeerCount['Seeding'][1] ?: 0;
         $LeecherCount = $PeerCount['Leeching'][1] ?: 0;
@@ -301,28 +296,33 @@ if (!$PeerStatsLocked) {
         </div>
 <?php
 if (($TopicID = $Cache->get_value('polls_featured')) === false) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT TopicID
         FROM forums_polls
         ORDER BY Featured DESC
-        LIMIT 1");
+        LIMIT 1
+    ');
     list($TopicID) = $DB->next_record();
-    $Cache->cache_value('polls_featured', $TopicID, 0);
+    $Cache->cache_value('polls_featured', $TopicID, 3600 * 6);
 }
 if ($TopicID) {
     if (($Poll = $Cache->get_value("polls_$TopicID")) === false) {
-        $DB->query("
+        $DB->prepared_query('
             SELECT Question, Answers, Featured, Closed
             FROM forums_polls
-            WHERE TopicID = '$TopicID'");
+            WHERE TopicID = ?
+            ', $TopicID
+        );
         list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
         $Answers = unserialize($Answers);
-        $DB->query("
-            SELECT Vote, COUNT(UserID)
+        $DB->prepared_query("
+            SELECT Vote, count(*)
             FROM forums_polls_votes
-            WHERE TopicID = '$TopicID'
-                AND Vote != '0'
-            GROUP BY Vote");
+            WHERE Vote != '0'
+                AND TopicID = ?
+            GROUP BY Vote
+            ", $TopicID
+        );
         $VoteArray = $DB->to_array(false, MYSQLI_NUM);
 
         $Votes = [];
@@ -336,7 +336,7 @@ if ($TopicID) {
                 $Votes[$i] = 0;
             }
         }
-        $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
+        $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, $Featured, $Closed], 86400 + rand(0, 3600));
     } else {
         list($Question, $Answers, $Votes, $Featured, $Closed) = $Poll;
     }
@@ -349,16 +349,17 @@ if ($TopicID) {
         $MaxVotes = 0;
     }
 
-    $DB->query("
+    $DB->prepared_query('
         SELECT Vote
         FROM forums_polls_votes
-        WHERE UserID = '".$LoggedUser['ID']."'
-            AND TopicID = '$TopicID'");
+        WHERE UserID = ?
+            AND TopicID = ?
+        ', $LoggedUser['ID'], $TopicID
+    );
     list($UserResponse) = $DB->next_record();
     if (!empty($UserResponse) && $UserResponse != 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     }
-
 ?>
         <div class="box">
             <div class="head colhead_dark"><strong>Poll<?php if ($Closed) { echo ' [Closed]'; } ?></strong></div>
@@ -404,7 +405,6 @@ if ($TopicID) {
         </div>
 <?php
 }
-//polls();
 ?>
     </div>
     <div class="main_column">
@@ -414,7 +414,7 @@ $Recommend = $Cache->get_value('recommend');
 $Recommend_artists = $Cache->get_value('recommend_artists');
 
 if (!is_array($Recommend) || !is_array($Recommend_artists)) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT
             tr.GroupID,
             tr.UserID,
@@ -422,15 +422,16 @@ if (!is_array($Recommend) || !is_array($Recommend_artists)) {
             tg.Name,
             tg.TagList
         FROM torrents_recommended AS tr
-            JOIN torrents_group AS tg ON tg.ID = tr.GroupID
-            LEFT JOIN users_main AS u ON u.ID = tr.UserID
+        INNER JOIN torrents_group AS tg ON (tg.ID = tr.GroupID)
+        LEFT JOIN users_main AS u ON (u.ID = tr.UserID)
         ORDER BY tr.Time DESC
-        LIMIT 10");
+        LIMIT 10
+    ');
     $Recommend = $DB->to_array();
-    $Cache->cache_value('recommend', $Recommend, 1209600);
+    $Cache->cache_value('recommend', $Recommend, 86400 + rand(0, 3600));
 
     $Recommend_artists = Artists::get_artists($DB->collect('GroupID'));
-    $Cache->cache_value('recommend_artists', $Recommend_artists, 1209600);
+    $Cache->cache_value('recommend_artists', $Recommend_artists, 86400 + rand(0, 3600));
 }
 
 if (count($Recommend) >= 4) {
