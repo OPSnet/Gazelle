@@ -254,7 +254,7 @@ class Torrents {
     public static function write_group_log($GroupID, $TorrentID, $UserID, $Message, $Hidden) {
         global $Time;
         $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared-query("
+        G::$DB->prepared_query("
             INSERT INTO group_log
                 (GroupID, TorrentID, UserID, Info, Hidden, Time)
             VALUES
