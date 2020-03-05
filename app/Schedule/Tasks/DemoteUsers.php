@@ -24,7 +24,7 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                         GROUP BY UserID
                     ) b ON (b.UserID = users_main.ID)
                     WHERE users_main.PermissionID = ?
-                    AND ( uls.Uploaded + IFNULL(b.Bounty, 0) < ?
+                    AND (uls.Uploaded + IFNULL(b.Bounty, 0) < ?
                             OR (
                                 SELECT count(ID)
                                 FROM torrents

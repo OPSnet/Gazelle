@@ -106,7 +106,7 @@ class Scheduler {
                 FROM periodic_task_history_event pthe
                 INNER JOIN periodic_task_history pth ON (pthe.periodic_task_history_id = pth.periodic_task_history_id)
                 WHERE pth.launch_time > (now() - INTERVAL 14 DAY)
-                GROUP BY pth.periodic_task_history_id
+                GROUP BY pth.periodic_task_id
             ) events ON (pt.periodic_task_id = events.periodic_task_id)
             LEFT JOIN periodic_task_history pth ON (stats.latest = pth.periodic_task_history_id)
             ORDER BY pt.is_enabled DESC, pt.period, pt.periodic_task_id
