@@ -26,7 +26,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                         WHERE users_main.PermissionID = ?
                         AND ui.Warned = '0000-00-00 00:00:00'
                         AND uls.Uploaded + IFNULL(b.Bounty, 0) >= ?
-                        AND (uls.Download = 0 OR uls.Uploaded / uls.Downloaded >= ?)
+                        AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
                         AND ui.JoinDate < now() - INTERVAL ? WEEK
                         AND (
                             SELECT count(ID)
