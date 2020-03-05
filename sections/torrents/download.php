@@ -16,10 +16,11 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
         $DB->prepared_query("
             SELECT ID, DownloadAlt, SiteOptions, la.UserID
             FROM users_main AS m
-                INNER JOIN users_info AS i ON i.UserID = m.ID
-                LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
-            WHERE m.torrent_pass = ?
-                AND m.Enabled = '1'", $_REQUEST['torrent_pass']);
+            INNER JOIN users_info AS i ON (i.UserID = m.ID)
+            LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
+            WHERE m.Enabled = '1' AND m.torrent_pass = ?
+            ", $_REQUEST['torrent_pass']
+        );
         $UserInfo = $DB->next_record(MYSQLI_NUM, [2]);
         $SiteOptions = array_merge(Users::default_site_options(), unserialize_array($UserInfo[2]));
         $UserInfo[2] = $SiteOptions['HttpsTracker'];
@@ -64,7 +65,7 @@ if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
 
 $Info = $Cache->get_value('torrent_download_'.$TorrentID);
 if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[10])) {
-    $DB->prepared_query("
+    $DB->prepared_query('
         SELECT
             t.Media,
             t.Format,
@@ -79,8 +80,10 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
             t.info_hash,
             t.UserID
         FROM torrents AS t
-            INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID
-        WHERE t.ID = ?", $TorrentID);
+        INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+        WHERE t.ID = ?
+        ', $TorrentID
+    );
     if (!$DB->has_results()) {
         error(404);
     }
@@ -119,16 +122,27 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
         if (!STACKABLE_FREELEECH_TOKENS && $Size >= BYTES_PER_FREELEECH_TOKEN) {
             error('This torrent is too large. Please use the regular DL link.');
         }
-
         $TokensToUse = ceil($Size / BYTES_PER_FREELEECH_TOKEN);
-
-        if ($FLTokens < $TokensToUse) {
-            error('You do not have enough freeleech tokens left. Please use the regular DL link.');
+        $DB->prepared_query('
+            UPDATE users_main
+            SET FLTokens = FLTokens - ?
+            WHERE FLTokens >= ? AND ID = ?
+            ', $TokensToUse, $TokensToUse, $UserID
+        );
+        if ($DB->affected_rows() == 0) {
+            error('You do not have any freeleech tokens left. Please use the regular DL link.');
         }
 
         // Let the tracker know about this
         if (!Tracker::update_tracker('add_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID])) {
             error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
+            // recredit the tokens we just subtracted
+            $DB->prepared_query('
+                UPDATE users_main
+                SET FLTokens = FLTokens + ?
+                WHERE ID = ?
+                ', $TokensToUse, $UserID
+            );
         }
 
         if (!Torrents::has_token($TorrentID)) {
@@ -139,10 +153,6 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
                     Time = VALUES(Time),
                     Expired = FALSE,
                     Uses = Uses + ?", $UserID, $TorrentID, $TokensToUse, $TokensToUse);
-            $DB->prepared_query("
-                UPDATE users_main
-                SET FLTokens = FLTokens - ?
-                WHERE ID = ?", $TokensToUse, $UserID);
 
             // Fix for downloadthemall messing with the cached token count
             $UInfo = Users::user_heavy_info($UserID);
@@ -157,15 +167,16 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     }
 }
 
-//Stupid Recent Snatches On User Page
+// Stupid Recent Snatches On User Page
 if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
     $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
     if (isset($RecentSnatches)) {
         $Snatch = [
-                'ID' => $GroupID,
-                'Name' => $Name,
-                'Artist' => $Artists,
-                'WikiImage' => $Image];
+            'ID' => $GroupID,
+            'Name' => $Name,
+            'Artist' => $Artists,
+            'WikiImage' => $Image
+        ];
         if (!in_array($Snatch, $RecentSnatches)) {
             if (count($RecentSnatches) === 5) {
                 array_pop($RecentSnatches);
@@ -174,7 +185,7 @@ if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
         } elseif (!is_array($RecentSnatches)) {
             $RecentSnatches = [$Snatch];
         }
-        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 0);
+        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 86400 * 3);
     }
 }
 
