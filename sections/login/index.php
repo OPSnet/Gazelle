@@ -494,10 +494,13 @@ else {
             }
         } else { // User has not attempted to log in recently
             $Attempts = 1;
+            if (!$UserID) {
+                $UserID = 0;
+            }
             $DB->prepared_query('
                 INSERT INTO login_attempts
                        (UserID, IP, Attempts, LastAttempt)
-                VALUES (?,      ?,   1,        now())
+                VALUES (?,      ?,  1,        now())
                 ', $UserID, $IPStr
             );
         }
