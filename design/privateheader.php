@@ -551,6 +551,13 @@ if (check_perms('site_debug')) {
     }
 }
 
+if (check_perms('admin_periodic_task_view')) {
+    $scheduler = new \Gazelle\Schedule\Scheduler(G::$DB, G::$Cache);
+    if ($insane = $scheduler->getInsaneTasks()) {
+        $Alerts[] = sprintf('<a href="tools.php?action=periodic&amp;mode=view">There are %d insane tasks</a>', $insane);
+    }
+}
+
 if (!empty($Alerts) || !empty($ModBar)) { ?>
             <div id="alerts">
 <?php

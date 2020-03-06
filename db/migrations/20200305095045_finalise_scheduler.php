@@ -28,6 +28,17 @@ class FinaliseScheduler extends AbstractMigration
                  ]
              ])
              ->save();
+
+        $this->table('periodic_task_history')
+             ->changeColumn('status', 'enum', ['default' => 'running', 'values' => ['running', 'completed', 'failed']])
+             ->save();
+
+        $this->execute("
+            UPDATE periodic_task_history
+            SET status = 'failed'
+            WHERE status = 'running'
+              AND launch_time < now() - INTERVAL 15 MINUTE
+        ");
     }
 
     public function down()
@@ -38,5 +49,15 @@ class FinaliseScheduler extends AbstractMigration
                     return $exp->in('classname', ['TorrentHistory', 'RatioRequirements', 'DemoteUsersRatio']);
                 })
                 ->execute();
+
+        $this->execute("
+            UPDATE periodic_task_history
+            SET status = 'running'
+            WHERE status = 'failed'
+        ");
+
+        $this->table('periodic_task_history')
+             ->changeColumn('status', 'enum', ['default' => 'running', 'values' => ['running', 'completed']])
+             ->save();
     }
 }

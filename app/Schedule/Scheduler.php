@@ -28,10 +28,18 @@ class Scheduler {
             ');
 
             $tasks = $this->db->has_results() ? $this->db->to_array('periodic_task_id', MYSQLI_ASSOC) : [];
-            $this->cache->cache_value(self::CACHE_TASKS, $tasks, 86400 * 30);
+            $this->cache->cache_value(self::CACHE_TASKS, $tasks, 3600);
         }
 
         return $tasks;
+    }
+
+    public function getInsaneTasks() {
+        return count(array_filter($this->getTasks(),
+            function($v) {
+                return !$v['is_sane'];
+            }
+        ));
     }
 
     public static function isClassValid(string $class) {
