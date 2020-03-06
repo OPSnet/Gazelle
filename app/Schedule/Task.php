@@ -72,7 +72,7 @@ abstract class Task {
 
             Irc::sendChannel('Task '.$this->name.' is no longer sane '.site_url().'tools.php?action=periodic&amp;mode=detail&amp;id='.$this->taskId, LAB_CHAN);
             // todo: send notifications to appropriate users
-        } else if ($errorCount = 0 && !$sane) {
+        } else if ($errorCount == 0 && !$sane) {
             $this->db->prepared_query('
                 UPDATE periodic_task
                 SET is_sane = TRUE

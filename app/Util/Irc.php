@@ -15,7 +15,7 @@ class Irc
     }
 
     public static function sendChannel(string $message, string $channel = null) {
-        if ($channel = null) {
+        if ($channel == null) {
             $channel = MOD_CHAN;
         }
 
