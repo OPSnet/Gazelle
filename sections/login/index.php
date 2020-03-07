@@ -193,10 +193,10 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
             $SessionID = Users::make_secret();
             $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
             if ($_SESSION['temp_stay_logged']) {
-                $KeepLogged = 1;
+                $KeepLogged = '1';
                 setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
             } else {
-                $KeepLogged = 0;
+                $KeepLogged = '0';
                 setcookie('session', $Cookie, 0, '/', '', $SSL, true);
             }
 
@@ -357,10 +357,10 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
             $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
 
             if ($_SESSION['temp_stay_logged']) {
-                $KeepLogged = 1;
+                $KeepLogged = '1';
                 setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
             } else {
-                $KeepLogged = 0;
+                $KeepLogged = '0';
                 setcookie('session', $Cookie, 0, '/', '', $SSL, true);
             }
 
@@ -556,10 +556,10 @@ else {
                         }
 
                         if (isset($_POST['keeplogged']) && $_POST['keeplogged']) {
-                            $KeepLogged = 1;
+                            $KeepLogged = '1';
                             setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
                         } else {
-                            $KeepLogged = 0;
+                            $KeepLogged = '0';
                             setcookie('session', $Cookie, 0, '/', '', $SSL, true);
                         }
 
