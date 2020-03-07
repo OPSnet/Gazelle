@@ -5,7 +5,7 @@ if (!check_perms('site_database_specifics')) {
 
 // View table definition
 if (!empty($_GET['table'])) {
-    if (preg_match('/([\w-]_)/', $_GET['table'], $match)) {
+    if (preg_match('/([\w-]+)/', $_GET['table'], $match)) {
         $DB->prepared_query('SHOW CREATE TABLE ' . $match[1]);
         list(,$definition) = $DB->next_record(MYSQLI_NUM, false);
         header('Content-type: text/plain');
