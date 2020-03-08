@@ -4,7 +4,7 @@
 <script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
 
 <?php
-if (!$flow = $Cache->get_value('users_timeline_xx')) {
+if (!$flow = $Cache->get_value('stat-user-timeline')) {
     $flow = [];
     /* Mysql does not implement a full outer join, so if there is a month with
      * no joiners, any banned users in that same month will not appear.
