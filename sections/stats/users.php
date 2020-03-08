@@ -58,7 +58,7 @@ Highcharts.chart('user-flow', {
     },
     series: [
         { name: 'Enabled',  data: [<?= implode(',', array_map(function ($x) use ($flow) { return  $flow[$x][1]; }, array_keys($flow))) ?>] },
-        { name: 'Disabled', data: [<?= implode(',', array_map(function ($x) use ($flow) { return -$flow[$x][1]; }, array_keys($flow))) ?>] },
+        { name: 'Disabled', data: [<?= implode(',', array_map(function ($x) use ($flow) { return -$flow[$x][2]; }, array_keys($flow))) ?>] },
     ]
 })});
 </script>
