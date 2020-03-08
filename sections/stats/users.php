@@ -30,7 +30,7 @@ if (!$flow = $Cache->get_value('users_timeline_xx')) {
         ORDER BY J.M;
     ");
     $flow = $DB->to_array('Mon');
-    $Cache->cache_value('users_timeline_x', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
+    $Cache->cache_value('stat-user-timeline', $flow, mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for Dec -> Jan
 }
 ?>
 <script>
@@ -64,7 +64,7 @@ Highcharts.chart('user-flow', {
 </script>
 
 <?php
-if (!$ClassDistribution = $Cache->get_value('class_distribution_xxx')) {
+if (!$ClassDistribution = $Cache->get_value('stat-user-class')) {
     $DB->query("
         SELECT p.Name, count(*) AS Users
         FROM users_main AS m
@@ -74,7 +74,7 @@ if (!$ClassDistribution = $Cache->get_value('class_distribution_xxx')) {
         ORDER BY Users DESC
     ");
     $ClassDistribution = $DB->to_array('Name');
-    $Cache->cache_value('class_distribution', $ClassDistribution, 86400);
+    $Cache->cache_value('stat-user-class', $ClassDistribution, 86400);
 }
 ?>
 <script>
@@ -114,7 +114,7 @@ Highcharts.chart('user-class', {
 </script>
 
 <?php
-if (!$PlatformDistribution = $Cache->get_value('platform_distribution_x')) {
+if (!$PlatformDistribution = $Cache->get_value('stat-user-platform')) {
     $DB->query("
         SELECT OperatingSystem, count(*) AS Users
         FROM users_sessions
@@ -122,7 +122,7 @@ if (!$PlatformDistribution = $Cache->get_value('platform_distribution_x')) {
         ORDER BY Users DESC
     ");
     $PlatformDistribution = $DB->to_array();
-    $Cache->cache_value('platform_distribution', $PlatformDistribution, 86400);
+    $Cache->cache_value('stat-user-platform', $PlatformDistribution, 86400);
 } 
 ?>
 <script>
@@ -162,7 +162,7 @@ Highcharts.chart('user-platform', {
 </script>
 
 <?php
-if (!$Browsers = $Cache->get_value('browser_distribution_x')) {
+if (!$Browsers = $Cache->get_value('stat-user-browser')) {
     $DB->query("
         SELECT Browser, count(*) AS Users
         FROM users_sessions
@@ -170,7 +170,7 @@ if (!$Browsers = $Cache->get_value('browser_distribution_x')) {
         ORDER BY Users DESC
     ");
     $Browsers = $DB->to_array();
-    $Cache->cache_value('browser_distribution', $Browsers, 86400);
+    $Cache->cache_value('stat-user-browser', $Browsers, 86400);
 }
 ?>
 <script>
