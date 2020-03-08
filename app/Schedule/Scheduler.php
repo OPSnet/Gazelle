@@ -92,8 +92,8 @@ class Scheduler {
         $this->clearCache();
     }
 
-    public function getTaskDetails() {
-        $this->db->query("
+    public function getTaskDetails(int $days = 7) {
+        $this->db->prepared_query("
             SELECT pt.periodic_task_id, name, description, period, is_enabled, is_sane,
                    coalesce(stats.runs, 0) runs, coalesce(stats.processed, 0) processed,
                    coalesce(stats.errors, 0) errors, coalesce(events.events, 0) events,
@@ -105,7 +105,7 @@ class Scheduler {
                 SELECT periodic_task_id, max(periodic_task_history_id) AS latest, count(*) AS runs,
                        sum(num_errors) AS errors, sum(num_items) AS processed
                 FROM periodic_task_history
-                WHERE launch_time > (now() - INTERVAL 14 DAY)
+                WHERE launch_time > (now() - INTERVAL ? DAY)
                 GROUP BY periodic_task_id
             ) stats USING (periodic_task_id)
             LEFT JOIN
@@ -113,12 +113,12 @@ class Scheduler {
                 SELECT pth.periodic_task_id, count(*) AS events
                 FROM periodic_task_history_event pthe
                 INNER JOIN periodic_task_history pth ON (pthe.periodic_task_history_id = pth.periodic_task_history_id)
-                WHERE pth.launch_time > (now() - INTERVAL 14 DAY)
+                WHERE pth.launch_time > (now() - INTERVAL ? DAY)
                 GROUP BY pth.periodic_task_id
             ) events ON (pt.periodic_task_id = events.periodic_task_id)
             LEFT JOIN periodic_task_history pth ON (stats.latest = pth.periodic_task_history_id)
             ORDER BY pt.is_enabled DESC, pt.period, pt.periodic_task_id
-        ");
+        ", $days, $days);
 
         $tasks = $this->db->has_results() ? $this->db->to_array('periodic_task_id', MYSQLI_ASSOC) : [];
         return $tasks;
@@ -163,6 +163,112 @@ class Scheduler {
         }
 
         return $task;
+    }
+
+    private function constructAxes(array $data, string $key, array $axes, bool $time) {
+        $result = [];
+
+        foreach ($axes as $axis) {
+            if (is_array($axis)) {
+                $id = $axis[0];
+                $name = $axis[1];
+            } else {
+                $id = $axis;
+                $name = $axis;
+            }
+
+            $result[] = [
+                'name' => $name,
+                'data' => array_map(
+                    function ($v) use ($id, $key, $time) {
+                        if ($time)
+                            return sprintf('[%d, %d]', strtotime($v[$key]) * 1000, $v[$id]);
+
+                        return sprintf("['%s', %d]", $v[$key], $v[$id]);
+                    },
+                    $data
+                )
+            ];
+        }
+
+        return $result;
+    }
+
+    public function getRuntimeStats(int $days = 28) {
+        $this->db->prepared_query("
+            SELECT date_format(pth.launch_time, '%Y-%m-%d %H:00:00') AS date,
+                   sum(pth.duration_ms) AS duration,
+                   sum(pth.num_items) AS processed
+            FROM periodic_task pt
+            INNER JOIN periodic_task_history pth USING (periodic_task_id)
+            WHERE pt.is_enabled IS TRUE
+              AND pth.launch_time >= now() - INTERVAL 1 DAY
+            GROUP BY 1
+            ORDER BY 1
+        ");
+        $hourly = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
+
+        $this->db->prepared_query("
+            SELECT cast(pth.launch_time AS DATE) AS date,
+                   sum(pth.duration_ms) AS duration,
+                   sum(pth.num_items) AS processed
+                   FROM periodic_task pt
+            INNER JOIN periodic_task_history pth USING (periodic_task_id)
+            WHERE pt.is_enabled IS TRUE
+              AND pth.launch_time >= now() - INTERVAL ? DAY
+            GROUP BY 1
+            ORDER BY 1
+            ", $days
+        );
+        $daily = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
+
+        $this->db->prepared_query("
+            SELECT pt.name,
+                   cast(avg(pth.duration_ms) AS INTEGER) AS duration_avg,
+                   cast(avg(pth.num_items) AS INTEGER) AS processed_avg
+            FROM periodic_task pt
+            INNER JOIN periodic_task_history pth USING (periodic_task_id)
+            WHERE pt.is_enabled IS TRUE
+              AND pth.launch_time >= now() - INTERVAL ? DAY
+            GROUP BY 1
+            ORDER BY 1
+            ", $days
+        );
+        $tasks = $this->constructAxes($this->db->to_array('name', MYSQLI_ASSOC), 'name', ['duration_avg', 'processed_avg'], false);
+
+        // where the fuck was i going with this
+        $averages = [
+            'hourly' => 0,
+            'daily' => 0,
+            'weekly' => 0,
+            'monthly' => 0
+        ];
+
+        $this->db->prepared_query("
+            SELECT count(pth.periodic_task_history_id) AS runs,
+                   sum(pth.duration_ms) AS duration,
+                   sum(pth.num_items) AS processed,
+                   count(pthe.periodic_task_history_event_id) AS events,
+                   sum(pth.num_errors) AS errors
+            FROM periodic_task pt
+            INNER JOIN periodic_task_history pth USING (periodic_task_id)
+            LEFT JOIN periodic_task_history_event pthe USING (periodic_task_history_id)
+            WHERE pt.is_enabled IS TRUE
+              AND pth.launch_time >= now() - INTERVAL ? DAY
+            ", $days
+        );
+        $totals = $this->db->next_record(MYSQLI_ASSOC);
+
+        return [
+            'hourly' => $hourly,
+            'daily' => $daily,
+            'tasks' => $tasks,
+            'averages' => $averages,
+            'totals' => $totals
+        ];
+    }
+
+    public function getTaskRuntimeStats(int $days = 7) {
     }
 
     public function run() {
