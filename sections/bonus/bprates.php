@@ -11,7 +11,7 @@ $SortOrders = [
     'seedtime' => 'SeedTime',
     'hourlypoints' => 'HourlyPoints',
 ];
-$OrderWay = (empty($_GET['sort']) || strtolower($_GET['sort']) == 'desc') ? 'desc' : 'asc';
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == 'desc') ? 'desc' : 'asc';
 $NewSort = ($OrderWay == 'desc') ? 'asc' : 'desc';
 $OrderBy = (!empty($_GET['order']) && isset($SortOrders[$_GET['order']])) ? $SortOrders[$_GET['order']] : 'HourlyPoints';
 
@@ -152,9 +152,9 @@ if ($TotalTorrents > 0) {
     INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
     WHERE
         xfu.uid = ?
-    ORDER BY ? ?
+    ORDER BY $OrderBy $OrderWay
     LIMIT ?
-    OFFSET ?", $UserID, $UserID, $OrderBy, strtoupper($OrderWay), $Limit, $Offset);
+    OFFSET ?", $UserID, $UserID, $Limit, $Offset);
 
     $GroupIDs = $DB->collect('GroupID');
     $Groups = Torrents::get_groups($GroupIDs, true, true, false);
