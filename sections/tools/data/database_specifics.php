@@ -116,9 +116,8 @@ Highcharts.chart('statistics', {
             color: '#c0c0c0',
         },
     },
-    tooltip: {
-        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
     plotOptions: {
         pie: {
             allowPointSelect: true,
