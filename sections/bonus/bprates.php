@@ -84,14 +84,25 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 <div class="linkbox">
     <?=$Pages?>
 </div>
+<?php
+$qsSize     = Format::get_url(['page'], true, false, ['order' => 'size', 'sort' => ($OrderBy == 't.Size') ? $NewSort : 'desc']);
+$qsSeeders  = Format::get_url(['page'], true, false, ['order' => 'seeders', 'sort' => ($OrderBy == 'Seeders') ? $NewSort : 'desc']);
+$qsSeedTime = Format::get_url(['page'], true, false, ['order' => 'seedtime', 'sort' => ($OrderBy == 'SeedTime') ? $NewSort : 'desc']);
+$qsHourlyPoints = Format::get_url(['page'], true, false, ['order' => 'hourlypoints', 'sort' => ($OrderBy == 'HourlyPoints') ? $NewSort : 'desc']);
+$arrows = ['asc' => ' &uarr;', 'desc' => ' &darr;'];
+$arrowSize         = ($OrderBy == 't.Size') ? ' ' . $arrows[$OrderWay] : '';
+$arrowSeeders      = ($OrderBy == 'Seeders') ? ' ' . $arrows[$OrderWay] : '';
+$arrowSeedTime     = ($OrderBy == 'SeedTime') ? ' ' . $arrows[$OrderWay] : '';
+$arrowHourlyPoints = ($OrderBy == 'HourlyPoints') ? ' ' . $arrows[$OrderWay] : '';
+?>
 <table>
     <thead>
     <tr class="colhead">
         <td>Torrent</td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'size', 'sort' => ($OrderBy == 't.Size') ? $NewSort : 'desc']) ?>">Size</td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'seeders', 'sort' => ($OrderBy == 'Seeders') ? $NewSort : 'desc']) ?>">Seeders</a></td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'seedtime', 'sort' => ($OrderBy == 'SeedTime') ? $NewSort : 'desc']) ?>">Seedtime</a></td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'hourlypoints', 'sort' => ($OrderBy == 'HourlyPoints') ? $NewSort : 'desc']) ?>">BP/hour</a></td>
+        <td><a href="bonus.php?<?= $qsSize ?>">Size</a><?= $arrowSize ?></td>
+        <td><a href="bonus.php?<?= $qsSeeders ?>">Seeders</a><?= $arrowSeeders ?></td>
+        <td><a href="bonus.php?<?= $qsSeedTime ?>">Seedtime</a><?= $arrowSeedTime ?></td>
+        <td><a href="bonus.php?<?= $qsHourlyPoints ?>">BP/hour</a><?= $arrowHourlyPoints ?></td>
         <td>BP/day</td>
         <td>BP/week</td>
         <td>BP/month</td>
