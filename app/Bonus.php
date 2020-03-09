@@ -15,7 +15,7 @@ class Bonus {
     const CACHE_HISTORY = 'bonus_history.';
     const CACHE_POOL_HISTORY = 'bonus_pool_history.';
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
+    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
         $this->db = $db;
         $this->cache = $cache;
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
@@ -352,9 +352,129 @@ Enjoy!";
         return $this->db->affected_rows();
     }
 
-    public function addPoints ($user_id, $amount) {
+    public function addPoints($user_id, $amount) {
         $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $amount, $user_id);
         $this->cache->delete_value("user_info_heavy_{$user_id}");
         $this->cache->delete_value("user_stats_{$user_id}");
+    }
+
+    public function userHourlyRate($id) {
+        $this->db->prepared_query('
+            SELECT
+                IFNULL(SUM((t.Size / (1024 * 1024 * 1024)) * (
+                    0.0433 + (
+                        (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                    )
+                )),0) as Rate
+            FROM (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
+            INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+            INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            WHERE
+                xfu.uid = ?
+                ', $id, $id
+        );
+        list($rate) = $this->db->next_record(MYSQLI_NUM);
+        return $rate;
+    }
+
+    public function userTotals($id) {
+        $this->db->prepared_query("
+            SELECT
+                COUNT(xfu.uid) as TotalTorrents,
+                SUM(t.Size) as TotalSize,
+                SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
+                    0.0433 + (
+                        (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                    )
+                ), 0)) AS TotalHourlyPoints
+            FROM (
+                SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+            ) AS xfu
+            INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+            INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            WHERE
+                xfu.uid = ?
+            ", $id, $id
+        );
+        list($total, $size, $hourly) = $this->db->next_record();
+        return [intval($total), floatval($size), floatval($hourly)];
+    }
+
+    public function userDetails($id, $orderBy, $orderWay, $limit, $offset) {
+        $this->db->prepared_query("
+            SELECT
+                t.ID,
+                t.GroupID,
+                t.Size,
+                t.Format,
+                t.Encoding,
+                t.HasLog,
+                t.HasLogDB,
+                t.HasCue,
+                t.LogScore,
+                t.LogChecksum,
+                t.Media,
+                t.Scene,
+                t.RemasterYear,
+                t.RemasterTitle,
+                GREATEST(tls.Seeders, 1) AS Seeders,
+                xfh.seedtime AS Seedtime,
+                ((t.Size / (1024 * 1024 * 1024)) * (
+                    0.0433 + (
+                        (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                    )
+                )) AS HourlyPoints
+            FROM (
+                SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
+            ) AS xfu
+            INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+            INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+            WHERE
+                xfu.uid = ?
+            ORDER BY $orderBy $orderWay
+            LIMIT ?
+            OFFSET ?
+            ", $id, $id, $limit, $offset
+        );
+        return [$this->db->collect('GroupID'), $this->db->to_array('ID', MYSQLI_ASSOC)];
+    }
+
+    public function givePoints() {
+        //------------------------ Update Bonus Points -------------------------//
+        // calcuation:
+        // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))
+        // Size (convert from bytes to GB) is in torrents
+        // Seedtime (convert from hours to days) is in xbt_snatched
+        // Seeders is in torrents
+
+        $this->db->prepared_query("
+            UPDATE users_main AS um
+            LEFT JOIN (
+                SELECT
+                    xfu.uid AS ID,
+                    SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
+                        0.0433 + (
+                            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                        )
+                    ), 0)) AS NewPoints
+                FROM (
+                    SELECT DISTINCT uid, fid FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)
+                ) AS xfu
+                INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+                INNER JOIN users_main AS um ON (um.ID = xfu.uid)
+                INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
+                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                WHERE
+                    um.Enabled = '1'
+                    AND ui.DisablePoints = '0'
+                GROUP BY
+                    xfu.uid
+            ) AS p ON um.ID = p.ID
+            SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE ROUND(p.NewPoints, 5) END
+        ");
     }
 }

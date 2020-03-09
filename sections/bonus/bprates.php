@@ -33,28 +33,9 @@ else {
 $Title = ($UserID === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
 View::show_header($Title);
 
-$DB->prepared_query("
-SELECT
-    COUNT(xfu.uid) as TotalTorrents,
-    SUM(t.Size) as TotalSize,
-    SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
-        0.0433 + (
-            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
-        )
-    ), 0)) AS TotalHourlyPoints
-FROM (
-    SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
-) AS xfu
-INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
-INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-WHERE
-    xfu.uid = ?", $UserID, $UserID);
+$Bonus = new \Gazelle\Bonus($DB, $Cache);
 
-list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $DB->next_record();
-$TotalTorrents = intval($TotalTorrents);
-$TotalSize = floatval($TotalSize);
-$TotalHourlyPoints = floatval($TotalHourlyPoints);
+list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $Bonus->userTotals($UserID);
 $TotalDailyPoints = $TotalHourlyPoints * 24;
 $TotalWeeklyPoints = $TotalDailyPoints * 7;
 // The mean number of days in a month in the Gregorian calendar,
@@ -121,44 +102,9 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 <?php
 
 if ($TotalTorrents > 0) {
-    $DB->prepared_query("
-    SELECT
-        t.ID,
-        t.GroupID,
-        t.Size,
-        t.Format,
-        t.Encoding,
-        t.HasLog,
-        t.HasLogDB,
-        t.HasCue,
-        t.LogScore,
-        t.LogChecksum,
-        t.Media,
-        t.Scene,
-        t.RemasterYear,
-        t.RemasterTitle,
-        GREATEST(tls.Seeders, 1) AS Seeders,
-        xfh.seedtime AS Seedtime,
-        ((t.Size / (1024 * 1024 * 1024)) * (
-            0.0433 + (
-                (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
-            )
-        )) AS HourlyPoints
-    FROM (
-        SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
-    ) AS xfu
-    INNER JOIN xbt_files_history AS xfh ON xfh.uid = xfu.uid AND xfh.fid = xfu.fid
-    INNER JOIN torrents AS t ON t.ID = xfu.fid
-    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-    WHERE
-        xfu.uid = ?
-    ORDER BY $OrderBy $OrderWay
-    LIMIT ?
-    OFFSET ?", $UserID, $UserID, $Limit, $Offset);
-
-    $GroupIDs = $DB->collect('GroupID');
+    list($GroupIDs, $Torrents) = $Bonus->userDetails($UserID, $OrderBy, $OrderWay, $Limit, $Offset);
     $Groups = Torrents::get_groups($GroupIDs, true, true, false);
-    while ($Torrent = $DB->next_record(MYSQLI_ASSOC)) {
+    foreach ($Torrents as $Torrent) {
         // list($TorrentID, $GroupID, $Size, $Format, $Encoding, $HasLog, $HasLogDB, $HasCue, $LogScore, $LogChecksum, $Media, $Scene, $Seeders, $Seedtime, $HourlyPoints)
         $Size = intval($Torrent['Size']);
         $Seeders = intval($Torrent['Seeders']);

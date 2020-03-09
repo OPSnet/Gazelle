@@ -165,22 +165,8 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [10, 12]);
 }
 
-$DB->prepared_query('
-SELECT
-    IFNULL(SUM((t.Size / (1024 * 1024 * 1024)) * (
-        0.0433 + (
-            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
-        )
-    )),0)
-FROM (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
-INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
-INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-WHERE
-    xfu.uid = ?
-    ', $UserID, $UserID
-);
-list($BonusPointsPerHour) = $DB->next_record(MYSQLI_NUM);
+$Bonus = new \Gazelle\Bonus($DB, $Cache);
+$BonusPointsPerHour = $Bonus->userHourlyRate($UserID);
 
 // Image proxy CTs
 $DisplayCustomTitle = $CustomTitle;
