@@ -90,10 +90,10 @@ $qsSeeders  = Format::get_url(['page'], true, false, ['order' => 'seeders', 'sor
 $qsSeedTime = Format::get_url(['page'], true, false, ['order' => 'seedtime', 'sort' => ($OrderBy == 'SeedTime') ? $NewSort : 'desc']);
 $qsHourlyPoints = Format::get_url(['page'], true, false, ['order' => 'hourlypoints', 'sort' => ($OrderBy == 'HourlyPoints') ? $NewSort : 'desc']);
 $arrows = ['asc' => ' &uarr;', 'desc' => ' &darr;'];
-$arrowSize         = ($OrderBy == 't.Size') ? ' ' . $arrows[$OrderWay] : '';
-$arrowSeeders      = ($OrderBy == 'Seeders') ? ' ' . $arrows[$OrderWay] : '';
-$arrowSeedTime     = ($OrderBy == 'SeedTime') ? ' ' . $arrows[$OrderWay] : '';
-$arrowHourlyPoints = ($OrderBy == 'HourlyPoints') ? ' ' . $arrows[$OrderWay] : '';
+$arrowSize         = ($OrderBy == 't.Size') ? $arrows[$OrderWay] : '';
+$arrowSeeders      = ($OrderBy == 'Seeders') ? $arrows[$OrderWay] : '';
+$arrowSeedTime     = ($OrderBy == 'SeedTime') ? $arrows[$OrderWay] : '';
+$arrowHourlyPoints = ($OrderBy == 'HourlyPoints') ? $arrows[$OrderWay] : '';
 ?>
 <table>
     <thead>

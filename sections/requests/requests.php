@@ -523,20 +523,32 @@ View::show_header($Title, 'requests');
     <div class="linkbox">
         <?=    $PageLinks?>
     </div>
-<?php        } ?>
+<?php        }
+$arrows = ['asc' => '&uarr;', 'desc' => '&darr;'];
+$arrowYear     = ($OrderBy === 'year') ? $arrows[$OrderWay] : '';
+$arrowVotes    = ($OrderBy === 'votes') ? $arrows[$OrderWay] : '';
+$arrowBounty   = ($OrderBy === 'bounty') ? $arrows[$OrderWay] : '';
+$arrowFilled   = ($OrderBy === 'filled') ? $arrows[$OrderWay] : '';
+$arrowCreated  = ($OrderBy === 'created') ? $arrows[$OrderWay] : '';
+$arrowLastvote = ($OrderBy === 'lastvote') ? $arrows[$OrderWay] : '';
+?>
     <table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
         <tr class="colhead_dark">
             <td style="width: 38%;" class="m_th_left nobr">
                 <strong>Request Name</strong> / <a href="?order=year&amp;sort=<?=($OrderBy === 'year' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Year</strong></a>
+                <?= $arrowYear ?>
             </td>
             <td class="m_th_right nobr">
                 <a href="?order=votes&amp;sort=<?=($OrderBy === 'votes' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Votes</strong></a>
+                <?= $arrowVotes ?>
             </td>
             <td class="m_th_right nobr">
                 <a href="?order=bounty&amp;sort=<?=($OrderBy === 'bounty' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Bounty</strong></a>
+                <?= $arrowBounty ?>
             </td>
             <td class="nobr">
                 <a href="?order=filled&amp;sort=<?=($OrderBy === 'filled' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Filled</strong></a>
+                <?= $arrowFilled ?>
             </td>
             <td class="nobr">
                 <strong>Filled by</strong>
@@ -546,9 +558,11 @@ View::show_header($Title, 'requests');
             </td>
             <td class="nobr">
                 <a href="?order=created&amp;sort=<?=($OrderBy === 'created' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Created</strong></a>
+                <?= $arrowCreated ?>
             </td>
             <td class="nobr">
                 <a href="?order=lastvote&amp;sort=<?=($OrderBy === 'lastvote' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Last vote</strong></a>
+                <?= $arrowLastvote ?>
             </td>
         </tr>
 <?php

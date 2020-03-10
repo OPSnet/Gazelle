@@ -146,16 +146,27 @@ Highcharts.chart('statistics', {
 </figure>
 </div>
 <br />
+<?php
+$arrows = ['ASC' => ' &uarr;', 'DESC' => ' &darr;'];
+$arrowName       = ($orderArg == 'name') ? $arrows[$orderWay] : '';
+$arrowRows       = ($orderArg == 'rows') ? $arrows[$orderWay] : '';
+$arrowRowsize    = ($orderArg == 'rowsize') ? $arrows[$orderWay] : '';
+$arrowDatasize   = ($orderArg == 'datasize') ? $arrows[$orderWay] : '';
+$arrowIndexsize  = ($orderArg == 'indexsize') ? $arrows[$orderWay] : '';
+$arrowDatafree   = ($orderArg == 'datafree') ? $arrows[$orderWay] : '';
+$arrowDataratio  = ($orderArg == 'dataratio') ? $arrows[$orderWay] : '';
+$arrowTotalsize  = ($orderArg == 'totalsize') ? $arrows[$orderWay] : '';
+?>
 <table>
     <tr class="colhead">
-        <td><a href="<?= $urlStem ?>order_by=name&amp;order_way=<?= urlSort($orderArg == 'name', $orderWay) ?>">Name</a></td>
-        <td><a href="<?= $urlStem ?>order_by=rows&amp;order_way=<?= urlSort($orderArg == 'rows', $orderWay) ?>">Rows</td>
-        <td><a href="<?= $urlStem ?>order_by=rowsize&amp;order_way=<?= urlSort($orderArg == 'rowsize', $orderWay) ?>">Row Size</a></td>
-        <td><a href="<?= $urlStem ?>order_by=datasize&amp;order_way=<?= urlSort($orderArg == 'datasize', $orderWay) ?>">Data Size</a></td>
-        <td><a href="<?= $urlStem ?>order_by=indexsize&amp;order_way=<?= urlSort($orderArg == 'indexsize', $orderWay) ?>">Index Size</a></td>
-        <td><a href="<?= $urlStem ?>order_by=datafree&amp;order_way=<?= urlSort($orderArg == 'datafree', $orderWay) ?>">Free Size</td>
-        <td><a href="<?= $urlStem ?>order_by=dataratio&amp;order_way=<?= urlSort($orderArg == 'dataratio', $orderWay) ?>">Bloat %</td>
-        <td><a href="<?= $urlStem ?>order_by=totalsize&amp;order_way=<?= urlSort($orderArg == 'totalsize', $orderWay) ?>">Total Size</td>
+        <td><a href="<?= $urlStem ?>order_by=name&amp;order_way=<?= urlSort($orderArg == 'name', $orderWay) ?>">Name</a><?= $arrowName ?></td>
+        <td><a href="<?= $urlStem ?>order_by=rows&amp;order_way=<?= urlSort($orderArg == 'rows', $orderWay) ?>">Rows</a><?= $arrowRows ?></td>
+        <td><a href="<?= $urlStem ?>order_by=rowsize&amp;order_way=<?= urlSort($orderArg == 'rowsize', $orderWay) ?>">Row Size</a><?= $arrowRowsize ?></td>
+        <td><a href="<?= $urlStem ?>order_by=datasize&amp;order_way=<?= urlSort($orderArg == 'datasize', $orderWay) ?>">Data Size</a><?= $arrowDatasize ?></td>
+        <td><a href="<?= $urlStem ?>order_by=indexsize&amp;order_way=<?= urlSort($orderArg == 'indexsize', $orderWay) ?>">Index Size</a><?= $arrowIndexsize ?></td>
+        <td><a href="<?= $urlStem ?>order_by=datafree&amp;order_way=<?= urlSort($orderArg == 'datafree', $orderWay) ?>">Free Size</a><?= $arrowDatafree ?></td>
+        <td><a href="<?= $urlStem ?>order_by=dataratio&amp;order_way=<?= urlSort($orderArg == 'dataratio', $orderWay) ?>">Bloat %</a><?= $arrowDataratio ?></td>
+        <td><a href="<?= $urlStem ?>order_by=totalsize&amp;order_way=<?= urlSort($orderArg == 'totalsize', $orderWay) ?>">Total Size</a><?= $arrowTotalsize ?></td>
     </tr>
 <?php
 $TotalRows = 0;
