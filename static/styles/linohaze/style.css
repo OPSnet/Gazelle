@@ -1807,7 +1807,12 @@ ul .invitetree {
 }
 
 .poll .graph .center_poll {
-    background: rgba(255, 255, 255, 0.4)
+    background: rgba(255, 255, 255, 0.4);
+    max-width: 800px;
+}
+
+#index .poll .graph .center_poll {
+    max-width: 125px;
 }
 
 .poll .graph .right_poll {

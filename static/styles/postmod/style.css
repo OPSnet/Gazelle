@@ -875,7 +875,8 @@ ul .invitetree {
 .poll .graph { padding: 0 0 15px 0; }
 .poll .graph span { display: block; height: 19px; float: left; }
 .poll .graph .left_poll { width: 9px; background: url('images/poll_left.png') top left no-repeat; }
-.poll .graph .center_poll { background: url('images/poll_middle.png') top left repeat-x; }
+.poll .graph .center_poll { background: url('images/poll_middle.png') top left repeat-x; max-width: 730px; }
+#index .poll .graph .center_poll { max-width: 135px; }
 .poll .graph .right_poll { width: 11px; background: url('images/poll_right.png') top left no-repeat; }
 
 .curtain {

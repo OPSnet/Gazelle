@@ -5,12 +5,6 @@ if (!isset($_POST['topicid']) || !is_number($_POST['topicid'])) {
 }
 $TopicID = $_POST['topicid'];
 
-if (!empty($_POST['large'])) {
-    $Size = 750;
-} else {
-    $Size = 140;
-}
-
 if (!$ThreadInfo = $Cache->get_value("thread_$TopicID".'_info')) {
     $DB->query("
         SELECT
@@ -142,7 +136,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
                     <li><?=display_str($Answers[$i])?> (<?=number_format($Percent * 100, 2)?>%)</li>
                     <li class="graph">
                         <span class="left_poll"></span>
-                        <span class="center_poll" style="width: <?=round($Ratio * $Size)?>px;"></span>
+                        <span class="center_poll" style="width: <?=number_format($Ratio * 100, 2)?>%;"></span>
                         <span class="right_poll"></span>
                     </li>
 <?php

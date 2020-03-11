@@ -1018,7 +1018,11 @@ ul .invitetree {
 
 .poll .graph .center_poll {
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAmCAIAAACK3mZQAAAABnRSTlMA/wD/AP83WBt9AAAAF0lEQVR4AWP4//8/Trx5egE1McJswhgAdcNYU4m5NAEAAAAASUVORK5CYII=') top left repeat-x;
-  background-size: 1px 19px; }
+  background-size: 1px 19px;
+  max-width: 870px; }
+
+#index .poll .graph .center_poll {
+  max-width: 155px; }
 
 .poll .graph .right_poll {
   width: 11px;

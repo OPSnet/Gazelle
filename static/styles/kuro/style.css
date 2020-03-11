@@ -843,6 +843,11 @@ ul .invitetree {
     float: left;
     margin: 0px;
     padding: 0px;
+    max-width: 780px;
+}
+
+#index .center_poll {
+    max-width: 175px;
 }
 
 .right_poll {

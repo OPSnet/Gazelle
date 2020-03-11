@@ -366,7 +366,7 @@ if ($TopicID) {
 ?>                    <li><?=display_str($Answers[$i])?> (<?=number_format($Percent * 100, 2)?>%)</li>
                     <li class="graph">
                         <span class="left_poll"></span>
-                        <span class="center_poll" style="width: <?=round($Ratio * 140)?>px;"></span>
+                        <span class="center_poll" style="width: <?=number_format($Ratio * 100, 2)?>%;"></span>
                         <span class="right_poll"></span>
                         <br />
                     </li>

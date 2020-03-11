@@ -1211,6 +1211,11 @@ strong.quoteheader {
 
 .poll .graph .center_poll {
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAAPCAIAAACuiOKTAAAAa0lEQVR4AR2LhRnCQAyF/15DvmMYWIqpWLHuPavH8yTj9yc6Xlb4frAKCNmB97ggrOG+VA1tS9qYZrlXWvCr4Fbc8ni7ClHSJHh3Y2ExBMfcQmZYeo78YoRDiPHRJa6FsTlvxXespTBWPHECakU73sfMB9EAAAAASUVORK5CYII=') top left repeat-x;
+    max-width: 870px;
+}
+
+#index .poll .graph .center_poll {
+    max-width: 190px;
 }
 
 .poll .graph .right_poll {
