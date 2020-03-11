@@ -341,14 +341,14 @@ if (count($_GET)) {
             $Args = array_merge($Args, [$Decimals, $_GET['ratio1']], ($op === 'between' ? [$_GET['ratio2']] : []));
         }
 
-        if (strlen($_GET['downloads1'])) {
+        if ($_GET['downloads'] !== 'off' && strlen($_GET['downloads1'])) {
             $Having[] = $m->op('Downloads', $_GET['downloads']);
             $HavingArgs = array_merge($HavingArgs, [$_GET['downloads1']], ($op === 'between' ? [$_GET['downloads2']] : []));
         }
 
-        if (strlen($_GET['snatched1'])) {
-            $Where[] = $m->op('Snatches', $_GET['snatched']);
-            $Args = array_merge($Args, [$_GET['snatched1']], ($op === 'between' ? [$_GET['snatched2']] : []));
+        if ($_GET['snatched'] !== 'off' && strlen($_GET['snatched1'])) {
+            $Having[] = $m->op('Snatches', $_GET['snatched']);
+            $HavingArgs = array_merge($HavingArgs, [$_GET['snatched1']], ($op === 'between' ? [$_GET['snatched2']] : []));
         }
 
         if (strlen($_GET['uploaded1'])) {
@@ -358,7 +358,7 @@ if (count($_GET)) {
                 $Args = array_merge($Args, [0.9 * $_GET['uploaded1'] * 1024 ** 3, 1.1 * $_GET['uploaded1'] * 1024 ** 3]);
             } else {
                 $Where[] = $m->op('uls1.Uploaded', $op);
-                $Args[] = $_GET['uploaded1'];
+                $Args[] = $_GET['uploaded1'] * 1024 ** 3;
                 if ($op === 'on') {
                     $Args[] = $_GET['uploaded1'] * 1024 ** 3;
                 }
@@ -371,7 +371,7 @@ if (count($_GET)) {
         if (strlen($_GET['downloaded1'])) {
             $op = $_GET['downloaded'];
             $Where[] = $m->op('uls1.Uploaded', $op);
-            $Args[] = $_GET['downloaded1'];
+            $Args[] = $_GET['downloaded1'] * 1024 ** 3;
             if ($op === 'on') {
                 $Args[] = $_GET['downloaded1'] * 1024 ** 3;
             }
