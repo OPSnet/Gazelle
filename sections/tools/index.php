@@ -509,6 +509,10 @@ switch ($_REQUEST['action']) {
         include(SERVER_ROOT.'/sections/tools/development/process_info.php');
         break;
 
+    case 'rate_limit':
+        include(__DIR__.'/managers/rate_limit.php');
+        break;
+
     case 'rerender_gallery':
         include(SERVER_ROOT.'/sections/tools/development/rerender_gallery.php');
         break;

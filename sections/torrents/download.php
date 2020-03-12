@@ -3,7 +3,7 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
     enforce_login();
     $TorrentPass = $LoggedUser['torrent_pass'];
     $DownloadAlt = $LoggedUser['DownloadAlt'];
-    $UserID    = $LoggedUser['ID'];
+    $UserID = $LoggedUser['ID'];
     $AuthKey = $LoggedUser['AuthKey'];
     $HttpsTracker = $LoggedUser['HttpsTracker'];
 } else {
@@ -46,18 +46,15 @@ if (!is_number($TorrentID)) {
     error(0);
 }
 
+$User = new \Gazelle\User($DB, $Cache, $LoggedUser['ID']);
+
 /* uTorrent Remote and various scripts redownload .torrent files periodically.
-    To prevent this retardation from blowing bandwidth etc., let's block it
-    if the .torrent file has been downloaded four times before */
+ * To prevent this retardation from blowing bandwidth etc., let's block it
+ * if the .torrent file has been downloaded four times before.
+ */
 $ScriptUAs = ['BTWebClient*', 'Python-urllib*', 'python-requests*', 'uTorrent*'];
 if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
-    $DB->prepared_query("
-        SELECT 1
-        FROM users_downloads
-        WHERE UserID = ?
-            AND TorrentID = ?
-        LIMIT 4", $UserID, $TorrentID);
-    if ($DB->record_count() === 4) {
+    if ($User->torrentDownloadCount($TorrentID) > 3) {
         error('You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.', true);
         die();
     }
@@ -96,11 +93,28 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
 if (!is_array($Info[0])) {
     error(404);
 }
-list($Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash, $TorrentUploaderID) = array_shift($Info); // used for generating the filename
+list($Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash, $TorrentUploaderID)
+    = array_shift($Info); // used for generating the filename
 $Artists = $Info['Artists'];
 
-// If he's trying use a token on this, we need to make sure he has one,
-// deduct it, add this to the FLs table, and update his cache key.
+/* If this is not their torrent, then see if they have downloaded too
+ * many files, compared to completely snatched items. If that is too
+ * high, and they have already downloaded too many files recently, then
+ * stop them. Exception: always allowed if they are using FL tokens.
+ */
+if (!$_REQUEST['usetoken'] && $TorrentUploaderID != $LoggedUser['ID']) {
+    $PRL = new \Gazelle\PermissionRateLimit($DB, $Cache);
+    if (!$PRL->safeFactor($User->downloadSnatchFactor(), $LoggedUser['ID'])) {
+        if (!$PRL->safeOvershoot($User->torrentRecentDownloadCount(), $LoggedUser['ID'])) {
+            error(429);
+        }
+    }
+}
+
+/* If they are trying use a token on this, we need to make sure they
+ * have enough. If so, deduct the number required, note it in the freeleech
+ * table and update their cache key.
+ */
 if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     if (isset($LoggedUser)) {
         $FLTokens = $LoggedUser['FLTokens'];
@@ -117,7 +131,6 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     }
 
     // First make sure this isn't already FL, and if it is, do nothing
-
     if (!Torrents::has_token($TorrentID)) {
         if (!STACKABLE_FREELEECH_TOKENS && $Size >= BYTES_PER_FREELEECH_TOKEN) {
             error('This torrent is too large. Please use the regular DL link.');
@@ -147,8 +160,8 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
 
         if (!Torrents::has_token($TorrentID)) {
             $DB->prepared_query("
-                INSERT INTO users_freeleeches (UserID, TorrentID, Time, Uses)
-                VALUES (?, ?, NOW(), ?)
+                INSERT INTO users_freeleeches (UserID, TorrentID, Uses, Time)
+                VALUES (?, ?, ?, now())
                 ON DUPLICATE KEY UPDATE
                     Time = VALUES(Time),
                     Expired = FALSE,
@@ -191,7 +204,8 @@ if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
 
 $DB->prepared_query("
     INSERT IGNORE INTO users_downloads (UserID, TorrentID, Time)
-    VALUES (?, ?, ?)", $UserID, $TorrentID, sqltime());
+    VALUES (?, ?, now())
+    ", $UserID, $TorrentID);
 
 $DB->prepared_query("
     SELECT File
@@ -200,6 +214,7 @@ $DB->prepared_query("
 
 Torrents::set_snatch_update_time($UserID, Torrents::SNATCHED_UPDATE_AFTERDL);
 list($Contents) = $DB->next_record(MYSQLI_NUM, false);
+$Cache->delete_value('user_rlim_' . $UserID);
 
 $FileName = TorrentsDL::construct_file_name($Info['PlainArtists'], $Name, $Year, $Media, $Format, $Encoding, $TorrentID, $DownloadAlt);
 $AnnounceURL = ($HttpsTracker) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;

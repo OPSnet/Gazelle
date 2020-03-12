@@ -92,7 +92,8 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             SHA1(i.AdminComment),
             i.InfoTitle,
             la.Type AS LockedAccount,
-            CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
+            CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
+            CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
         FROM users_main AS m
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
         INNER JOIN users_info AS i ON (i.UserID = m.ID)
@@ -100,18 +101,28 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
         LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
-        LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
-        LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
+        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = m.ID)
+        LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
+        LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = m.ID)
+        LEFT JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
         WHERE m.ID = ?
         GROUP BY AuthorID
-        ', 'no-fl-gifts', $UserID
+        ', 'no-fl-gifts', 'unlimited-download', $UserID
     );
 
     if (!$DB->has_results()) { // If user doesn't exist
         header("Location: log.php?search=User+$UserID");
     }
 
-    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia, $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor, $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID, $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar, $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging, $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens, $FA_Key, $CommentHash, $InfoTitle, $LockedAccount, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [9, 12]);
+    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
+    $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia,
+    $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor,
+    $Artist, $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID,
+    $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar,
+    $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging,
+    $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens,
+    $FA_Key, $CommentHash, $InfoTitle, $LockedAccount, $AcceptFL, $UnlimitedDownload)
+        = $DB->next_record(MYSQLI_NUM, [9, 12]);
 } else { // Person viewing is a normal user
     $DB->prepared_query('
         SELECT
@@ -141,15 +152,15 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.DisableInvites,
             inviter.username,
             i.InfoTitle,
-            CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
+            CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
         FROM users_main AS m
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
         INNER JOIN users_info AS i ON (i.UserID = m.ID)
         LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
-        LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
-        LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
+        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = m.ID)
+        LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
         WHERE m.ID = ?
         GROUP BY AuthorID
         ', 'no-fl-gifts', $UserID
@@ -159,13 +170,14 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         header("Location: log.php?search=User+$UserID");
     }
 
-    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $BonusPoints,
-        $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass,
-        $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
-        $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [10, 12]);
+    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
+    $BonusPoints, $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle,
+    $torrent_pass, $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
+    $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle, $AcceptFL)
+        = $DB->next_record(MYSQLI_NUM, [10, 12]);
+    $UnlimitedDownload = null;
 }
 
-$Bonus = new \Gazelle\Bonus($DB, $Cache);
 $BonusPointsPerHour = $Bonus->userHourlyRate($UserID);
 
 // Image proxy CTs
@@ -483,45 +495,31 @@ $OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsR
             </ul>
         </div>
 <?php
-    if ($OwnProfile || check_perms('users_override_paranoia', $Class)) {
-        $IRCKey = $User->IRCKey();
-    }
     if (check_perms('users_mod', $Class) || check_perms('users_view_ips', $Class) || check_perms('users_view_keys', $Class)) {
-        $PasswordChanges = $User->passwordCount();
-        if (check_perms('users_view_keys', $Class)) {
-            $PasskeyChanges = $User->passkeyCount();
-        }
-        if (check_perms('users_view_ips', $Class)) {
-            $IPChanges = $User->siteIPCount();
-            $TrackerIPs = $User->trackerIPCount();
-        }
-        if (check_perms('users_view_email', $Class)) {
-            $EmailChanges = $User->emailCount();
-        }
 ?>
         <div class="box box_info box_userinfo_history">
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
 <?php        if (check_perms('users_view_email', $Class)) { ?>
-                <li>Emails: <?=number_format($EmailChanges)?> <a href="userhistory.php?action=email2&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">Legacy view</a></li>
+                <li>Emails: <?=number_format($User->emailCount())?> <a href="userhistory.php?action=email2&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">Legacy view</a></li>
 <?php
         }
         if (check_perms('users_view_ips', $Class)) {
 ?>
-                <li>IPs: <?=number_format($IPChanges)?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
+                <li>IPs: <?=number_format($User->siteIPCount())?> <a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$UserID?>&amp;usersonly=1" class="brackets">View users</a></li>
 <?php            if (check_perms('users_view_ips', $Class) && check_perms('users_mod', $Class)) { ?>
-                <li>Tracker IPs: <?=number_format($TrackerIPs)?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Tracker IPs: <?=number_format($User->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
             }
         }
         if (check_perms('users_view_keys', $Class)) {
 ?>
-                <li>Passkeys: <?=number_format($PasskeyChanges)?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Passkeys: <?=number_format($User->passkeyCount())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
         }
         if (check_perms('users_mod', $Class)) {
 ?>
-                <li>Passwords: <?=number_format($PasswordChanges)?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
+                <li>Passwords: <?=number_format($User->passwordCount())?> <a href="userhistory.php?action=passwords&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
                 <li>Stats: N/A <a href="userhistory.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php        } ?>
             </ul>
@@ -568,8 +566,7 @@ if ($ParanoiaLevel == 0) {
                 </li>
 <?php    }
 
-if (check_perms('users_view_ips', $Class)) {
-?>
+if (check_perms('users_view_ips', $Class)) { ?>
                 <li>IP: <?=Tools::display_ip($IP)?></li>
                 <li>Host: <?=Tools::get_host_by_ajax($IP)?></li>
 <?php
@@ -613,18 +610,19 @@ if ($OwnProfile || check_perms('users_mod')) {
     <li>Password age: <?= $User->passwordAge() ?></li>
 <?php }
 if ($OwnProfile || check_perms('users_override_paranoia', $Class)) { ?>
-    <li>IRC Key: <?=empty($IRCKey) ? 'No' : 'Yes' ?></li>
+    <li>IRC Key: <?=strlen($User->IRCKey()) ? 'Yes' : 'No' ?></li>
 <?php } ?>
             </ul>
         </div>
 <?php
-include(SERVER_ROOT.'/sections/user/community_stats.php');
+include(__DIR__.'/community_stats.php');
 DonationsView::render_donor_stats($UserID);
 ?>
     </div>
     <div class="main_column">
 <?php
-if ($RatioWatchEnds != '0000-00-00 00:00:00'
+if (isset($RatioWatchEnds)
+    && $RatioWatchEnds != '0000-00-00 00:00:00'
     && (time() < strtotime($RatioWatchEnds))
     && ($Downloaded * $RequiredRatio) > $Uploaded
 ) {
@@ -802,12 +800,12 @@ foreach ($Collages as $CollageInfo) {
 
 // Linked accounts
 if (check_perms('users_mod')) {
-    include(SERVER_ROOT.'/sections/user/linkedfunctions.php');
+    include(__DIR__ . '/linkedfunctions.php');
     user_dupes_table($UserID);
 }
 
 if ((check_perms('users_view_invites')) && $Invited > 0) {
-    include(SERVER_ROOT.'/classes/invite_tree.class.php');
+    include(__DIR__  . '/../../classes/invite_tree.class.php');
     $Tree = new INVITE_TREE($UserID, ['visible' => false]);
 ?>
         <div class="box" id="invitetree_box">
@@ -1111,15 +1109,21 @@ if (check_perms('users_mod', $Class)) { ?>
         } ?>
             </td>
         </tr>
-<?php    }
-    if (check_perms('users_make_invisible')) {
-?>
+<?php }
+
+    if (check_perms('users_make_invisible')) { ?>
             <tr>
                 <td class="label">Visible in peer lists:</td>
                 <td><input type="checkbox" name="Visible"<?php if ($Visible == 1) { ?> checked="checked"<?php } ?> /></td>
             </tr>
-<?php
-    }
+<?php }
+
+    if (check_perms('admin_rate_limit_manage')) { ?>
+            <tr id="comm_unlimited_download">
+                <td class="label tooltip" title="If checked, user is allowed to download unlimited torrent files.">Unlimited Torrent Downloads</td>
+                <td><input type="checkbox" name="unlimitedDownload" id="unlimitedDownload"<?= $UnlimitedDownload ? ' checked="checked"' : ''?> /></td>
+            </tr>
+<?php }
 
     if (check_perms('users_edit_ratio', $Class) || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])) {
 ?>
@@ -1449,4 +1453,5 @@ if (check_perms('users_mod', $Class)) { ?>
 ?>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

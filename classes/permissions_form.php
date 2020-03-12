@@ -114,6 +114,8 @@ $PermissionsArray = [
     'admin_staffpm_stats' => 'Can view Staff PM stats.',
     'admin_periodic_task_manage' => 'Can manage periodic tasks.',
     'admin_periodic_task_view' => 'Can view periodic task logs.',
+    'admin_rate_limit_manage' => 'Can manage rate limiting.',
+    'admin_rate_limit_view' => 'Can view rate limiting.',
     'site_collages_recover' => 'Can recover \'deleted\' collages.',
     'torrents_add_artist' => 'Can add artists to any group.',
     'edit_unknowns' => 'Can edit unknown release information.',
@@ -271,6 +273,8 @@ function permissions_form() {
                     display_perm('admin_manage_navigation', 'Can manage navigation links');
                     display_perm('admin_periodic_task_manage', 'Can manage periodic tasks');
                     display_perm('admin_periodic_task_view', 'Can view periodic task logs');
+                    display_perm('admin_rate_limit_manage', 'Can manage rate limiting');
+                    display_perm('admin_rate_limit_view', 'Can view rate limiting');
                     display_perm('admin_view_referrals', 'Can view referred users');
                     display_perm('admin_reports', 'Can access reports system');
                     display_perm('admin_bp_history', 'Can view bonus points spent by other users');

@@ -137,7 +137,4 @@ foreach ($Charts as $Chart) { ?>
 } ?>
 
 <?php
-
 View::show_footer();
-
-?>

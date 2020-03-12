@@ -24,14 +24,17 @@ $DB->prepared_query('
         i.NotifyOnDeleteSnatched,
         i.NotifyOnDeleteDownloaded,
         i.NavItems,
-        CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
+        CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
+        CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
     FROM users_main AS m
     INNER JOIN users_info AS i ON (i.UserID = m.ID)
     LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
-    LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
-    LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
+    LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = m.ID)
+    LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
+    LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = m.ID)
+    LEFT JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
     WHERE m.ID = ?
-    ', 'no-fl-gifts', $UserID
+    ', 'no-fl-gifts', 'unlimited-download', $UserID
 );
 list($Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt, $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems, $AcceptFL) = $DB->next_record(MYSQLI_NUM, [3, 9]);
 

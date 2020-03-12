@@ -1,9 +1,6 @@
 <?php
 /*************************************************************************\
 //--------------Take moderation -----------------------------------------//
-
-
-
 \*************************************************************************/
 
 // Are they being tricky blighters?
@@ -32,6 +29,7 @@ foreach ($SecondaryClasses as $i => $Val) {
     }
 }
 $Visible = isset($_POST['Visible']) ? 1 : 0;
+$unlimitedDownload = isset($_POST['unlimitedDownload']) ? 1 : 0;
 $Invites = (int)$_POST['Invites'];
 $SupportFor = db_string($_POST['SupportFor']);
 $Pass = $_POST['ChangePassword'];
@@ -143,16 +141,19 @@ $DB->prepared_query("
         i.RatioWatchEnds,
         la.Type,
         SHA1(i.AdminComment) AS CommentHash,
-        GROUP_CONCAT(l.PermissionID SEPARATOR ',') AS SecondaryClasses
+        GROUP_CONCAT(l.PermissionID SEPARATOR ',') AS SecondaryClasses,
+        CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS unlimitedDownload
     FROM users_main AS m
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
     INNER JOIN users_info AS i ON (i.UserID = m.ID)
     LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
     LEFT JOIN users_levels AS l ON (l.UserID = m.ID)
     LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
+    LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = m.ID)
+    LEFT JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
     WHERE m.ID = ?
     GROUP BY m.ID
-    ", $UserID
+    ", 'unlimited-download', $UserID
 );
 
 if (!$DB->has_results()) { // If user doesn't exist
@@ -176,7 +177,6 @@ if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) &&
 } elseif (!empty($_POST['donor_values_submit'])) {
     Donations::update_rank($UserID, $_POST['donor_rank'], $_POST['total_donor_rank'], $_POST['reason']);
 }
-
 
 // If we're deleting the user, we can ignore all the other crap
 
@@ -333,7 +333,6 @@ if (($_POST['ResetSession'] || $_POST['LogOut']) && check_perms('users_logout'))
         $DB->query("
             DELETE FROM users_sessions
             WHERE UserID = '$UserID'");
-
     }
 }
 
@@ -458,6 +457,12 @@ if ($Visible != $Cur['Visible'] && check_perms('users_make_invisible')) {
     $EditSummary[] = 'visibility changed';
     $LightUpdates['Visible'] = $Visible;
     $TrackerUserUpdates['visible'] = $Visible;
+}
+
+if ($unlimitedDownload != $Cur['unlimitedDownload'] && check_perms('admin_rate_limit_manage')) {
+    $EditSummary[] = "Unlimited Download = $unlimitedDownload";
+    Users::toggleUnlimitedDownload($UserID, $unlimitedDownload);
+    $LightUpdates['unlimited download'] = $unlimitedDownload;
 }
 
 if ($Uploaded != $Cur['Uploaded'] && $Uploaded != $_POST['OldUploaded'] && (check_perms('users_edit_ratio')

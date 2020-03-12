@@ -1,44 +1,55 @@
 <?php
-$DB->prepared_query("
-    SELECT Page, COUNT(1)
-    FROM comments
-    WHERE AuthorID = ?
-    GROUP BY Page", $UserID);
-$Comments = $DB->to_array('Page');
+if (($Comments = $Cache->get_value('user_comment_count_' . $UserID)) === false) {
+    $DB->prepared_query("
+        SELECT Page, count(*)
+        FROM comments
+        WHERE AuthorID = ?
+        GROUP BY Page", $UserID);
+    $Comments = $DB->to_array('Page', MYSQLI_NUM);
+    $Cache->cache_value('user_comment_count_' . $UserID, $Comments, 3600);
+}
 $NumComments = empty($Comments['torrents']) ? 0 : $Comments['torrents'][1];
 $NumArtistComments = empty($Comments['artist']) ? 0 : $Comments['artist'][1];
 $NumCollageComments = empty($Comments['collages']) ? 0 : $Comments['collages'][1];
 $NumRequestComments = empty($Comments['requests']) ? 0 : $Comments['requests'][1];
 
-$DB->prepared_query("
-    SELECT COUNT(ID)
-    FROM collages
-    WHERE Deleted = '0'
-        AND UserID = ?", $UserID);
-list($NumCollages) = $DB->next_record();
+if (($participationStats = $Cache->get_value('user_participation_stats_' . $UserID)) === false) {
+    $DB->prepared_query("
+        SELECT count(*)
+        FROM collages
+        WHERE Deleted = '0'
+            AND UserID = ?", $UserID);
+    list($NumCollages) = $DB->next_record();
 
-$DB->prepared_query("
-    SELECT COUNT(DISTINCT CollageID)
-    FROM collages_torrents AS ct
-        JOIN collages ON CollageID = ID
-    WHERE Deleted = '0'
-        AND ct.UserID = ?", $UserID);
-list($NumCollageContribs) = $DB->next_record();
+    $DB->prepared_query("
+        SELECT count(DISTINCT ct.CollageID)
+        FROM collages_torrents AS ct
+        INNER JOIN collages c ON (c.ID = ct.CollageID)
+        WHERE c.Deleted = '0'
+            AND ct.UserID = ?", $UserID);
+    list($NumCollageContribs) = $DB->next_record();
 
-$DB->prepared_query("
-    SELECT IFNULL(Groups, 0)
-    FROM users_summary
-    WHERE UserID = ?", $UserID);
-list($UniqueGroups) = $DB->next_record();
+    $DB->prepared_query("
+        SELECT IFNULL(Groups, 0)
+        FROM users_summary
+        WHERE UserID = ?", $UserID);
+    list($UniqueGroups) = $DB->next_record();
 
-$DB->prepared_query("
-    SELECT IFNULL(PerfectFlacs, 0)
-    FROM users_summary
-    WHERE UserID = ?", $UserID);
-list($PerfectFLACs) = $DB->next_record();
+    $DB->prepared_query("
+        SELECT IFNULL(PerfectFlacs, 0)
+        FROM users_summary
+        WHERE UserID = ?", $UserID);
+    list($PerfectFLACs) = $DB->next_record();
 
-$DB->prepared_query("SELECT COUNT(*) FROM forums_topics WHERE AuthorID = ?", $UserID);
-list($ForumTopics) = $DB->fetch_record();
+    $DB->prepared_query("
+        SELECT count(*)
+        FROM forums_topics
+        WHERE AuthorID = ?", $UserID);
+    list($ForumTopics) = $DB->fetch_record();
+    $participationStats = [$NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopics];
+    $Cache->cache_value('user_participation_stats_' . $UserID, $participationStats, 3600);
+}
+list($NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopics) = $participationStats;
 ?>
         <div class="box box_info box_userinfo_community">
             <div class="head colhead_dark">Community</div>
@@ -87,7 +98,7 @@ list($ForumTopics) = $DB->fetch_record();
 
     //Let's see if we can view requests because of reasons
     $ViewAll    = check_paranoia_here('requestsfilled_list');
-    $ViewCount    = check_paranoia_here('requestsfilled_count');
+    $ViewCount  = check_paranoia_here('requestsfilled_count');
     $ViewBounty = check_paranoia_here('requestsfilled_bounty');
 
     if ($ViewCount && !$ViewBounty && !$ViewAll) { ?>
@@ -110,7 +121,7 @@ list($ForumTopics) = $DB->fetch_record();
 
     //Let's see if we can view requests because of reasons
     $ViewAll    = check_paranoia_here('requestsvoted_list');
-    $ViewCount    = check_paranoia_here('requestsvoted_count');
+    $ViewCount  = check_paranoia_here('requestsvoted_count');
     $ViewBounty = check_paranoia_here('requestsvoted_bounty');
 
     if ($ViewCount && !$ViewBounty && !$ViewAll) { ?>
@@ -218,7 +229,7 @@ list($ForumTopics) = $DB->fetch_record();
                 </li>
 <?php
     }
-    if (check_perms('site_view_torrent_snatchlist', $Class)) {
+    if ($UserID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist', $Class)) {
 ?>
                 <li id="comm_downloaded">Downloaded:
                     <span class="user_commstats" id="user_commstats_downloaded"><a href="#" class="brackets" onclick="commStats(<?=$UserID?>); return false;">Show stats</a></span>
@@ -228,13 +239,8 @@ list($ForumTopics) = $DB->fetch_record();
 <?php
     }
     if ($Override = check_paranoia_here('invitedcount')) {
-    $DB->prepared_query("
-        SELECT COUNT(UserID)
-        FROM users_info
-        WHERE Inviter = ?", $UserID);
-    list($Invited) = $DB->next_record();
 ?>
-                <li id="comm_invited">Invited: <?=number_format($Invited)?></li>
+                <li id="comm_invited">Invited: <?=number_format($User->invitedCount())?></li>
 <?php
     }
 ?>

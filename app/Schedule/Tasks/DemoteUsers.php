@@ -59,6 +59,7 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                     $this->cache->delete_value("user_info_$userId");
                     $this->cache->delete_value("user_info_heavy_$userId");
                     $this->cache->delete_value("user_stats_$userId");
+                    $this->cache->delete_value("user_rlim_$userId");
                     $this->cache->delete_value("enabled_$userId");
                     $comment = sprintf("%s - Class changed to %s by System\n\n", sqltime(), $toClass);
                     $this->db->prepared_query("

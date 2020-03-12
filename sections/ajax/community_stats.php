@@ -4,6 +4,13 @@ if (!isset($_GET['userid']) || !is_number($_GET['userid'])) {
 }
 
 $UserID = $_GET['userid'];
+$User = new \Gazelle\User($DB, $Cache, $UserID);
+$UInfo = Users::user_info($UserID);
+
+function check_paranoia_here($info, $setting) {
+    return check_paranoia($setting, $info['Paranoia'], $info['Class'], $info['ID']);
+}
+
 $CommStats = [
     'leeching' => false,
     'seeding' => false,
@@ -14,52 +21,28 @@ $CommStats = [
     'seedingperc' => false,
 ];
 
-$User = Users::user_info($UserID);
-
-function check_paranoia_here($Setting) {
-    global $User;
-    return check_paranoia($Setting, $User['Paranoia'], $User['Class'], $User['ID']);
-}
-
-if (check_paranoia_here('seeding+') || check_paranoia_here('leeching+')) {
-    $DB->query("
-        SELECT IF(remaining = 0, 'Seeding', 'Leeching') AS Type, COUNT(x.uid)
-        FROM xbt_files_users AS x
-            INNER JOIN torrents AS t ON t.ID = x.fid
-        WHERE x.uid = '$UserID'
-            AND x.active = 1
-        GROUP BY Type");
-    $PeerCount = $DB->to_array(0, MYSQLI_NUM, false);
-    if (check_paranoia_here('seeding+')) {
-        $Seeding = isset($PeerCount['Seeding']) ? $PeerCount['Seeding'][1] : 0;
+if (check_paranoia_here($UInfo, 'seeding+') || check_paranoia_here($UInfo, 'leeching+')) {
+    $peerCounts = $User->peerCounts();
+    if (check_paranoia_here($UInfo, 'seeding+')) {
+        $Seeding = $peerCounts['seeding'];
         $CommStats['seeding'] = number_format($Seeding);
     }
-    if (check_paranoia_here('leeching+')) {
-        $CommStats['leeching'] = isset($PeerCount['Leeching']) ? number_format($PeerCount['Leeching'][1]) : 0;
+    if (check_paranoia_here($Uinfo, 'leeching+')) {
+        $CommStats['leeching'] = $peerCounts['leeching'];
     }
 }
-if (check_paranoia_here('snatched+')) {
-    $DB->query("
-        SELECT COUNT(x.uid), COUNT(DISTINCT x.fid)
-        FROM xbt_snatched AS x
-            INNER JOIN torrents AS t ON t.ID = x.fid
-        WHERE x.uid = '$UserID'");
-    list($Snatched, $UniqueSnatched) = $DB->next_record(MYSQLI_NUM, false);
+if (check_paranoia_here($Uinfo, 'snatched+')) {
+    list($Snatched, $UniqueSnatched) = $User->snatchCounts();
     $CommStats['snatched'] = number_format($Snatched);
-    if (check_perms('site_view_torrent_snatchlist', $User['Class'])) {
+    if (check_perms('site_view_torrent_snatchlist', $UInfo['Class'])) {
         $CommStats['usnatched'] = number_format($UniqueSnatched);
     }
-    if (check_paranoia_here('seeding+') && check_paranoia_here('snatched+') && $UniqueSnatched > 0) {
+    if (check_paranoia_here($Uinfo, 'seeding+') && check_paranoia_here($Uinfo, 'snatched+') && $UniqueSnatched > 0) {
         $CommStats['seedingperc'] = 100 * min(1, round($Seeding / $UniqueSnatched, 2));
     }
 }
-if (check_perms('site_view_torrent_snatchlist', $Class)) {
-    $DB->query("
-        SELECT COUNT(ud.UserID), COUNT(DISTINCT ud.TorrentID)
-        FROM users_downloads AS ud
-            JOIN torrents AS t ON t.ID = ud.TorrentID
-        WHERE ud.UserID = '$UserID'");
-    list($NumDownloads, $UniqueDownloads) = $DB->next_record(MYSQLI_NUM, false);
+if ($UserID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist', $Class)) {
+    list($NumDownloads, $UniqueDownloads) = $User->downloadCounts();
     $CommStats['downloaded'] = number_format($NumDownloads);
     $CommStats['udownloaded'] = number_format($UniqueDownloads);
 }

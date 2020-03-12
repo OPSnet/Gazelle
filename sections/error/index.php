@@ -16,12 +16,16 @@ if (!empty($_GET['e']) && in_array($_GET['e'],$Errors)) {
 
         case '403':
             $Title = "Error 403";
-            $Description = "You just tried to go to a page that you don't have enough permission to view.";
+            $Description = "You tried to go to a page that you don't have enough permission to view.";
             notify(STATUS_CHAN,'403');
             break;
         case '404':
             $Title = "Error 404";
-            $Description = "You just tried to go to a page that doesn't exist.";
+            $Description = "You tried to go to a page that doesn't exist.";
+            break;
+        case '429':
+            $Title = "Error 429";
+            $Description = "You tried to do something too frequently.";
             break;
         case '0':
             $Title = "Invalid Input";
