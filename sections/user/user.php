@@ -152,7 +152,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.DisableInvites,
             inviter.username,
             i.InfoTitle,
-            CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
+            CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
         FROM users_main AS m
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
         INNER JOIN users_info AS i ON (i.UserID = m.ID)
