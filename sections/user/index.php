@@ -124,7 +124,7 @@ switch ($_REQUEST['action']) {
 
                         $DB->prepared_query('
                             UPDATE users_main SET
-                                2FA_Key = ?
+                                2FA_Key = ?,
                                 Recovery = ?
                             WHERE ID = ?
                             ', $_SESSION['private_key'], serialize($recovery), $UserID
