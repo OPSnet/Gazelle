@@ -1,19 +1,24 @@
 <?php
 
+use Gazelle\Util\SortableTableHeader;
+
 $Page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
 $Page = max(1, $Page);
 $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
-$SortOrders = [
-    'size' => 't.Size',
-    'seeders' => 'Seeders',
-    'seedtime' => 'SeedTime',
-    'hourlypoints' => 'HourlyPoints',
+$SortOrderMap = [
+    'size' => ['t.Size', 'desc'],
+    'seeders' => ['Seeders', 'desc'],
+    'seedtime' => ['SeedTime', 'desc'],
+    'hourlypoints' => ['HourlyPoints', 'desc'],
 ];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == 'desc') ? 'desc' : 'asc';
-$NewSort = ($OrderWay == 'desc') ? 'asc' : 'desc';
-$OrderBy = (!empty($_GET['order']) && isset($SortOrders[$_GET['order']])) ? $SortOrders[$_GET['order']] : 'HourlyPoints';
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'hourlypoints';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$flipOrderMap = ['asc' => 'desc', 'desc' => 'asc'];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : $flipOrderMap[$SortOrderMap[$SortOrder][1]];
 
 if (!empty($_GET['userid'])) {
     if (!check_perms('admin_bp_history')) {
@@ -85,24 +90,21 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
     <?=$Pages?>
 </div>
 <?php
-$qsSize     = Format::get_url(['page'], true, false, ['order' => 'size', 'sort' => ($OrderBy == 't.Size') ? $NewSort : 'desc']);
-$qsSeeders  = Format::get_url(['page'], true, false, ['order' => 'seeders', 'sort' => ($OrderBy == 'Seeders') ? $NewSort : 'desc']);
-$qsSeedTime = Format::get_url(['page'], true, false, ['order' => 'seedtime', 'sort' => ($OrderBy == 'SeedTime') ? $NewSort : 'desc']);
-$qsHourlyPoints = Format::get_url(['page'], true, false, ['order' => 'hourlypoints', 'sort' => ($OrderBy == 'HourlyPoints') ? $NewSort : 'desc']);
-$arrows = ['asc' => ' &uarr;', 'desc' => ' &darr;'];
-$arrowSize         = ($OrderBy == 't.Size') ? $arrows[$OrderWay] : '';
-$arrowSeeders      = ($OrderBy == 'Seeders') ? $arrows[$OrderWay] : '';
-$arrowSeedTime     = ($OrderBy == 'SeedTime') ? $arrows[$OrderWay] : '';
-$arrowHourlyPoints = ($OrderBy == 'HourlyPoints') ? $arrows[$OrderWay] : '';
+$header = new SortableTableHeader([
+    'size' => 'Size',
+    'seeders' => 'Seeders',
+    'seedtime' => 'Seedtime',
+    'hourlypoints' => 'BP/hour',
+], $SortOrder, $OrderWay);
 ?>
 <table>
     <thead>
     <tr class="colhead">
         <td>Torrent</td>
-        <td><a href="bonus.php?<?= $qsSize ?>">Size</a><?= $arrowSize ?></td>
-        <td><a href="bonus.php?<?= $qsSeeders ?>">Seeders</a><?= $arrowSeeders ?></td>
-        <td><a href="bonus.php?<?= $qsSeedTime ?>">Seedtime</a><?= $arrowSeedTime ?></td>
-        <td><a href="bonus.php?<?= $qsHourlyPoints ?>">BP/hour</a><?= $arrowHourlyPoints ?></td>
+        <td><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
+        <td><?= $header->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
+        <td><?= $header->emit('seedtime', $SortOrderMap['seedtime'][1]) ?></td>
+        <td><?= $header->emit('hourlypoints', $SortOrderMap['hourlypoints'][1]) ?></td>
         <td>BP/day</td>
         <td>BP/week</td>
         <td>BP/month</td>

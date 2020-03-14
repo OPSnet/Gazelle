@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\SortableTableHeader;
+
 if (!check_perms('site_database_specifics')) {
     error(403);
 }
@@ -13,46 +16,22 @@ if (!empty($_GET['table'])) {
     }
 }
 
-$orderArg = empty($_GET['order_by']) ? '' : trim($_GET['order_by']);
-switch ($orderArg) {
-    case 'datafree':
-        $orderBy = 'data_free';
-        $label = 'free space';
-        break;
-    case 'datasize':
-        $orderBy = 'data_length';
-        $label = 'table size';
-        break;
-    case 'freeratio':
-        $orderBy = 'CASE WHEN data_length = 0 THEN = data_free / data_length END';
-        $label = 'table bloat';
-        break;
-    case 'indexsize':
-        $orderBy = 'index_length';
-        $label = 'index size';
-        break;
-    case 'name':
-        $orderBy = 'table_name';
-        $label = 'name';
-        break;
-    case 'rows':
-        $orderBy = 'table_rows';
-        $label = 'row counts';
-        break;
-    case 'rowsize':
-        $orderBy = 'avg_row_length';
-        $label = 'mean row length';
-        break;
-    case 'totalsize':
-    default:
-        $orderArg = 'totalsize';
-        $orderBy = 'data_length + index_length';
-        $label = 'total table size';
-        break;
-}
-
-$orderWay = (!empty ($_GET['order_way']) && $_GET['order_way'] == 'asc')
-    ? 'ASC' : 'DESC';
+$SortOrderMap = [
+    'datafree' => ['data_free', 'desc', 'free space'],
+    'datasize' => ['data_length', 'desc', 'table size'],
+    'freeratio' => ['CASE WHEN data_length = 0 THEN data_free / data_length END', 'desc', 'table bloat'],
+    'indexsize' => ['index_length', 'desc', 'index size'],
+    'name' => ['table_name', 'desc', 'name'],
+    'rows' => ['table_rows', 'desc', 'row counts'],
+    'rowsize' => ['avg_row_length', 'desc', 'mean row length'],
+    'totalsize' => ['data_length + index_length', 'desc', 'total table size'],
+];
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'totalsize';
+$orderBy = $SortOrderMap[$SortOrder][0];
+$flipOrderMap = ['asc' => 'desc', 'desc' => 'asc'];
+$orderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : $flipOrderMap[$SortOrderMap[$SortOrder][1]];
 
 $DB->prepared_query("
     SELECT table_name, engine, table_rows, avg_row_length, data_length, index_length, data_free
@@ -65,37 +44,19 @@ $Tables = $DB->to_array('table_name', MYSQLI_ASSOC);
 
 $data = [];
 foreach ($Tables as $name => $info) {
-    switch ($orderArg) {
-        case 'datafree':
-            $data[$name] = $info['data_free'];
-            break;
-        case 'datasize':
-            $data[$name] = $info['data_length'];
-            break;
+    switch ($SortOrder) {
         case 'freeratio':
             $data[$name] = round($info['data_length'] == 0 ? 0 : $info['data_free'] / $info['data_length'], 2);
             break;
-        case 'indexsize':
-            $data[$name] = $info['index_length'];
-            break;
-        case 'rows':
-            $data[$name] = $info['table_rows'];
-            break;
-        case 'rowsize':
-            $data[$name] = $info['avg_row_length'];
-            break;
         case 'totalsize':
-        default:
             $data[$name] = $info['data_length'] + $info['index_length'];
             break;
-        }
+        default:
+            $data[$name] = $info[$SortOrderMap[$SortOrder][0]];
+    }
 }
 
 View::show_header('Database Specifics');
-$urlStem = 'tools.php?action=database_specifics&amp;';
-function urlSort ($isThisColumn, $way) {
-    return ($isThisColumn && $way == 'DESC') ? 'ASC' : 'DESC';
-}
 ?>
 
 <script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
@@ -111,7 +72,7 @@ Highcharts.chart('statistics', {
         plotShadow: true,
     },
     title: {
-        text: '<?= SITE_NAME ?> database breakdown by <?= $label ?>',
+        text: '<?= SITE_NAME ?> database breakdown by <?= $SortOrderMap[$SortOrder][2] ?>',
         style: {
             color: '#c0c0c0',
         },
@@ -147,26 +108,27 @@ Highcharts.chart('statistics', {
 </div>
 <br />
 <?php
-$arrows = ['ASC' => ' &uarr;', 'DESC' => ' &darr;'];
-$arrowName       = ($orderArg == 'name') ? $arrows[$orderWay] : '';
-$arrowRows       = ($orderArg == 'rows') ? $arrows[$orderWay] : '';
-$arrowRowsize    = ($orderArg == 'rowsize') ? $arrows[$orderWay] : '';
-$arrowDatasize   = ($orderArg == 'datasize') ? $arrows[$orderWay] : '';
-$arrowIndexsize  = ($orderArg == 'indexsize') ? $arrows[$orderWay] : '';
-$arrowDatafree   = ($orderArg == 'datafree') ? $arrows[$orderWay] : '';
-$arrowDataratio  = ($orderArg == 'dataratio') ? $arrows[$orderWay] : '';
-$arrowTotalsize  = ($orderArg == 'totalsize') ? $arrows[$orderWay] : '';
+$header = new SortableTableHeader([
+    'datafree' => 'Free Size',
+    'datasize' => 'Data Size',
+    'freeratio' => 'Bloat %',
+    'indexsize' => 'Index Size',
+    'name' => 'Name',
+    'rows' => 'Rows',
+    'rowsize' => 'Row Size',
+    'totalsize' => 'Total Size',
+], $SortOrder, $orderWay);
 ?>
 <table>
-    <tr class="colhead">
-        <td><a href="<?= $urlStem ?>order_by=name&amp;order_way=<?= urlSort($orderArg == 'name', $orderWay) ?>">Name</a><?= $arrowName ?></td>
-        <td><a href="<?= $urlStem ?>order_by=rows&amp;order_way=<?= urlSort($orderArg == 'rows', $orderWay) ?>">Rows</a><?= $arrowRows ?></td>
-        <td><a href="<?= $urlStem ?>order_by=rowsize&amp;order_way=<?= urlSort($orderArg == 'rowsize', $orderWay) ?>">Row Size</a><?= $arrowRowsize ?></td>
-        <td><a href="<?= $urlStem ?>order_by=datasize&amp;order_way=<?= urlSort($orderArg == 'datasize', $orderWay) ?>">Data Size</a><?= $arrowDatasize ?></td>
-        <td><a href="<?= $urlStem ?>order_by=indexsize&amp;order_way=<?= urlSort($orderArg == 'indexsize', $orderWay) ?>">Index Size</a><?= $arrowIndexsize ?></td>
-        <td><a href="<?= $urlStem ?>order_by=datafree&amp;order_way=<?= urlSort($orderArg == 'datafree', $orderWay) ?>">Free Size</a><?= $arrowDatafree ?></td>
-        <td><a href="<?= $urlStem ?>order_by=dataratio&amp;order_way=<?= urlSort($orderArg == 'dataratio', $orderWay) ?>">Bloat %</a><?= $arrowDataratio ?></td>
-        <td><a href="<?= $urlStem ?>order_by=totalsize&amp;order_way=<?= urlSort($orderArg == 'totalsize', $orderWay) ?>">Total Size</a><?= $arrowTotalsize ?></td>
+    <tr class="colhead" style="text-align:right">
+        <td style="text-align:left"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
+        <td><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
+        <td><?= $header->emit('rowsize', $SortOrderMap['rowsize'][1]) ?></td>
+        <td><?= $header->emit('datasize', $SortOrderMap['datasize'][1]) ?></td>
+        <td><?= $header->emit('indexsize', $SortOrderMap['indexsize'][1]) ?></td>
+        <td><?= $header->emit('datafree', $SortOrderMap['datafree'][1]) ?></td>
+        <td><?= $header->emit('freeratio', $SortOrderMap['freeratio'][1]) ?></td>
+        <td><?= $header->emit('totalsize', $SortOrderMap['totalsize'][1]) ?></td>
     </tr>
 <?php
 $TotalRows = 0;
@@ -185,7 +147,7 @@ foreach ($Tables as $t) {
 ?>
     <tr class="row<?= $Row ?>">
         <td>
-            <a href="<?= $urlStem ?>table=<?= display_str($t['table_name']) ?>" title="engine: <?= $t['engine'] ?>">
+            <a href="?<?= Format::get_url(['order', 'sort'], true, false, ['table' => display_str($t['table_name'])]) ?>" title="engine: <?= $t['engine'] ?>">
             <?= $t['engine'] != 'InnoDB' ? '<span style="color: tomato;">' : '' ?>
             <?= display_str($t['table_name']) ?>
             <?= $t['table_name'] == 'email' ? '</span>' : '' ?>
