@@ -41,35 +41,35 @@ class PermissionRateLimit {
         return $this->db->affected_rows();
     }
 
-    public function safeFactor($factor, $userId) {
+    public function safeFactor(\Gazelle\User $user) {
          $this->db->prepared_query('
             SELECT factor
             FROM permission_rate_limit prl
             INNER JOIN permissions p ON (p.ID = prl.permission_id)
             INNER JOIN users_main um ON (um.PermissionID = prl.permission_id)
             WHERE um.ID = ?
-            ', $userId
+            ', $user->id()
         );
         if (!$this->db->has_results()) {
             return true;
         }
         list($classFactor) = $this->db->next_record(MYSQLI_NUM, false);
-        return $factor <= $classFactor;
+        return $user->downloadSnatchFactor() <= $classFactor;
     }
 
-    public function safeOvershoot($overshoot, $userId) {
+    public function safeOvershoot(\Gazelle\User $user) {
          $this->db->prepared_query('
             SELECT overshoot
             FROM permission_rate_limit prl
             INNER JOIN permissions p ON (p.ID = prl.permission_id)
             INNER JOIN users_main um ON (um.PermissionID = prl.permission_id)
             WHERE um.ID = ?
-            ', $userId
+            ', $user->id()
         );
         if (!$this->db->has_results()) {
             return true;
         }
         list($classOvershoot) = $this->db->next_record(MYSQLI_NUM, false);
-        return $overshoot <= $classOvershoot;
+        return $user->torrentRecentDownloadCount() <= $classOvershoot;
     }
 }

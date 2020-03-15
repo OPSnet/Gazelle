@@ -201,7 +201,7 @@ switch ($_GET['type']) {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'downloaded':
-        if (!check_perms('site_view_torrent_snatchlist')) {
+        if (!($UserID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist'))) {
             error(403);
         }
         $Time = 'unix_timestamp(ud.Time)';

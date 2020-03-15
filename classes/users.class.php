@@ -797,7 +797,7 @@ class Users {
 
     public static function has_avatars_enabled() {
         global $HeavyInfo;
-        return $HeavyInfo['DisableAvatars'] != 1;
+        return isset($HeavyInfo['DisableAvatars']) && $HeavyInfo['DisableAvatars'] != 1;
     }
 
     /**

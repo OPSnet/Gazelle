@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Util\Irc;
+
 if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
     enforce_login();
     $TorrentPass = $LoggedUser['torrent_pass'];
@@ -102,10 +105,31 @@ $Artists = $Info['Artists'];
  * high, and they have already downloaded too many files recently, then
  * stop them. Exception: always allowed if they are using FL tokens.
  */
-if (!$_REQUEST['usetoken'] && $TorrentUploaderID != $LoggedUser['ID']) {
+if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploaderID != $LoggedUser['ID']) {
     $PRL = new \Gazelle\PermissionRateLimit($DB, $Cache);
-    if (!$PRL->safeFactor($User->downloadSnatchFactor(), $LoggedUser['ID'])) {
-        if (!$PRL->safeOvershoot($User->torrentRecentDownloadCount(), $LoggedUser['ID'])) {
+    if (!$PRL->safeFactor($User)) {
+        if (!$PRL->safeOvershoot($User)) {
+            $DB->prepared_query('
+                INSERT INTO ratelimit_torrent
+                       (user_id, torrent_id)
+                VALUES (?,       ?)
+                ', $UserID, $TorrentID
+            );
+            if (G::$Cache->get_value('user_flood_' . $LoggedUser['ID'])) {
+                G::$Cache->increment('user_flood_' . $LoggedUser['ID']);
+            } else {
+                Irc::sendChannel(
+                    "user.php?id=" . $UserID
+                    . " (" . $LoggedUser['Username'] . ")"
+                    . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
+                    . " accessing https://"
+                    . SSL_SITE_URL . $_SERVER['REQUEST_URI']
+                    . (!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : '')
+                    . ' hit download rate limit',
+                    STATUS_CHAN
+                );
+                G::$Cache->cache_value('user_429_flood_' . $LoggedUser['ID'], 1, 3600);
+            }
             error(429);
         }
     }

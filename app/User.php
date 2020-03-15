@@ -17,6 +17,10 @@ class User {
         $this->id = $id;
     }
     
+    public function id() {
+        return $this->id;
+    }
+
     public function personalCollages() {
         $this->db->prepared_query("
             SELECT ID, Name
