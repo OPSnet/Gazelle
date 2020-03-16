@@ -58,8 +58,9 @@ if ($IsFLS) {
 <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
 <?php
 }
-if ($IsStaff) { ?>
-    <a href="staffpm.php?action=scoreboard" class="brackets">View scoreboard</a>
+if (check_perms('admin_staffpm_stats')) { ?>
+    <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+    <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
 <?php
 }
 if (!$IsStaff && !$IsFLS) {
