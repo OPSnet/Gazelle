@@ -60,11 +60,14 @@ if (!empty($Artist2ID)) { // artist was found in the database
             VALUES ('$SimilarID', '$UserID', 'up')");
     }
 
-    $Cache->delete_value("artist_$Artist1ID"); // Delete artist cache
-    $Cache->delete_value("artist_$Artist2ID"); // Delete artist cache
+    $artist = new \Gazelle\Artist($DB, $Cache, $Artist1ID);
+    $artist->flushCache();
+    $artist = new \Gazelle\Artist($DB, $Cache, $Artist2ID);
+    $artist->flushCache();
     $Cache->delete_value("similar_positions_$Artist1ID"); // Delete artist's similar map cache
     $Cache->delete_value("similar_positions_$Artist2ID"); // Delete artist's similar map cache
 }
 
-$Location = (empty($_SERVER['HTTP_REFERER'])) ? "artist.php?id={$Artist1ID}" : $_SERVER['HTTP_REFERER'];
-header("Location: {$Location}");
+header("Location: " .
+    (empty($_SERVER['HTTP_REFERER']) ? "artist.php?id={$Artist1ID}" : $_SERVER['HTTP_REFERER'])
+);

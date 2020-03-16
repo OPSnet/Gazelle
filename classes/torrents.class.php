@@ -48,6 +48,9 @@ class Torrents {
      *    }
      */
     public static function get_groups($GroupIDs, $Return = true, $GetArtists = true, $Torrents = true) {
+        if (count($GroupIDs) === 0) {
+            return [];
+        }
         $Found = $NotFound = array_fill_keys($GroupIDs, false);
         $Key = $Torrents ? 'torrent_group_' : 'torrent_group_light_';
 

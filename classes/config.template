@@ -357,3 +357,11 @@ define('TOP10_YEAR_THRESHOLD', 80);
 define('TOP10_DATA_THRESHOLD', 50);
 
 define('SITE_LAUNCH_YEAR', 2018);
+
+define('ARTIST_MAIN', 1);
+define('ARTIST_GUEST', 2);
+define('ARTIST_REMIXER', 3);
+define('ARTIST_COMPOSER', 4);
+define('ARTIST_CONDUCTOR', 5);
+define('ARTIST_DJ', 6);
+define('ARTIST_PRODUCER', 7);

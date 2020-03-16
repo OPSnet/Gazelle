@@ -15,7 +15,6 @@
  *
  *   $db     - database connection
  *   $cache  - memcache connection
- *   $artist - \Gazelle\Artist instance
  *   $bonus  - \Gazelle\Bonus instance
  *
  * More can be added when implemented.
@@ -40,10 +39,8 @@ $b = new \Boris\Boris(SITE_NAME . '> ');
 $b->setLocal([
     'cache'  => $Cache,
     'db'     => $DB,
-    'artist' => new \Gazelle\Artist($DB, $Cache),
     'bonus'  => new \Gazelle\Bonus($DB, $Cache)
 ]);
-
 $b->start();
 
 /*

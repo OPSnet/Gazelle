@@ -20,7 +20,6 @@ if (check_perms('artist_edit_vanityhouse')) {
     $VanityHouse = isset($_POST['vanity_house']) ? 1 : 0 ;
 }
 
-
 if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     authorize();
     $RevisionID = $_GET['revisionid'];
@@ -64,6 +63,6 @@ $DB->query("
     WHERE ArtistID = '$ArtistID'");
 
 // There we go, all done!
-$Cache->delete_value("artist_$ArtistID"); // Delete artist cache
+$artist = new \Gazelle\Artist($DB, $Cache, $ArtistID);
+$artist->flushCache();
 header("Location: artist.php?id=$ArtistID");
-?>

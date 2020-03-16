@@ -158,8 +158,10 @@ if (isset($_POST['confirm'])) {
         }
     }
 
-    $Cache->delete_value("artist_$ArtistID");
-    $Cache->delete_value("artist_$NewArtistID");
+    $artist = new \Gazelle\Artist($DB, $Cache, $ArtistID);
+    $artist->flushCache();
+    $artist = new \Gazelle\Artist($DB, $Cache, $NewArtistID);
+    $artist->flushCache();
     $Cache->delete_value("artist_groups_$ArtistID");
     $Cache->delete_value("artist_groups_$NewArtistID");
 
@@ -192,4 +194,3 @@ if (isset($_POST['confirm'])) {
 <?php
     View::show_footer();
 }
-?>

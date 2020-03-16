@@ -26,7 +26,8 @@ $DB->query("
 
 foreach ($ArtistIDs as $ArtistID) {
     list($ArtistID) = $ArtistID;
-    $Cache->delete_value("artist_$ArtistID"); // Delete artist cache
+    $artist = new \Gazelle\Artist($DB, $Cache, $ArtistID);
+    $artist->flushCache();
     $Cache->delete_value("similar_positions_$ArtistID");
 }
 
