@@ -143,6 +143,9 @@ class Text {
         $Str = display_str($Str);
         self::$Headlines = [];
 
+        // @mention
+        $Str = preg_replace('/@('.USERNAME_REGEX_SHORT.')/i', '[user]@$1[/user]', $Str);
+
         //Inline links
         $URLPrefix = '(\[url\]|\[url\=|\[img\=|\[img\])';
         $Str = preg_replace('/'.$URLPrefix.'\s+/i', '$1', $Str);
@@ -670,7 +673,7 @@ class Text {
                     $Str .= '<strong class="important_text">'.self::to_html($Block['Val'], $Rules).'</strong>';
                     break;
                 case 'user':
-                    $Str .= '<a href="user.php?action=search&amp;search='.urlencode($Block['Val']).'">'.$Block['Val'].'</a>';
+                    $Str .= '<a href="user.php?action=search&amp;search='.urlencode(trim($Block['Val'], '@')).'">'.$Block['Val'].'</a>';
                     break;
                 case 'artist':
                     $Str .= '<a href="artist.php?artistname='.urlencode(Format::undisplay_str($Block['Val'])).'">'.$Block['Val'].'</a>';
