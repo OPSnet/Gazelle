@@ -11,21 +11,21 @@ class Artist {
 
     const CACHE_ALIAS = 'artist_alias_%d_%s';
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
+    public function __construct (\DB_MYSQL $db, \CACHE $cache, $id) {
         $this->db = $db;
         $this->cache = $cache;
+        $this->id = $id;
     }
 
-    public function get_alias($id, $name) {
-        $key = sprintf(self::CACHE_ALIAS, $id, $name); // use this later on
+    public function get_alias($name) {
         $this->db->prepared_query('
             SELECT AliasID
             FROM artists_alias
             WHERE ArtistID = ?
                 AND ArtistID != AliasID
                 AND Name = ?',
-            $id, $name);
+            $this->id, $name);
         list($alias) = $this->db->next_record();
-        return empty($alias) ? $id : $alias;
+        return empty($alias) ? $this->id : $alias;
     }
 }
