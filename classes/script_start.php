@@ -10,10 +10,9 @@
 /* generates the page are at the bottom.                */
 /*------------------------------------------------------*/
 /********************************************************/
-require __DIR__.'/config.php'; //The config contains all site wide configuration information
 
-// Autoload classes.
-require(SERVER_ROOT.'/classes/classloader.php');
+require_once(__DIR__ . '/config.php'); //The config contains all site wide configuration information
+require_once(__DIR__ . '/classloader.php');
 
 use Gazelle\Util\Crypto;
 use Twig\Loader\FilesystemLoader;
@@ -24,7 +23,7 @@ if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
     die('d14:failure reason40:Invalid .torrent, try downloading again.e');
 }
 
-require(SERVER_ROOT.'/classes/proxies.class.php');
+require_once(__DIR__ . '/proxies.class.php');
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
@@ -40,28 +39,6 @@ else if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])
     $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
 }
 
-$SSL = (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
-if (!isset($argv) && !empty($_SERVER['HTTP_HOST'])) {
-//Skip this block if running from cli or if the browser is old and shitty
-    if (!$SSL && $_SERVER['HTTP_HOST'] == 'www.'.NONSSL_SITE_URL) {
-        header('Location: http://'.NONSSL_SITE_URL.$_SERVER['REQUEST_URI']); die();
-    }
-    if ($SSL && $_SERVER['HTTP_HOST'] == 'www.'.NONSSL_SITE_URL) {
-        header('Location: https://'.SSL_SITE_URL.$_SERVER['REQUEST_URI']); die();
-    }
-    if (SSL_SITE_URL != NONSSL_SITE_URL) {
-        if (!$SSL && $_SERVER['HTTP_HOST'] == SSL_SITE_URL) {
-            header('Location: https://'.SSL_SITE_URL.$_SERVER['REQUEST_URI']); die();
-        }
-        if ($SSL && $_SERVER['HTTP_HOST'] == NONSSL_SITE_URL) {
-            header('Location: https://'.SSL_SITE_URL.$_SERVER['REQUEST_URI']); die();
-        }
-    }
-    if ($_SERVER['HTTP_HOST'] == 'www.m.'.NONSSL_SITE_URL) {
-        header('Location: http://m.'.NONSSL_SITE_URL.$_SERVER['REQUEST_URI']); die();
-    }
-}
-
 $ScriptStartTime = microtime(true); //To track how long a page takes to create
 if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
     $RUsage = getrusage();
@@ -72,10 +49,10 @@ ob_start(); //Start a buffer, mainly in case there is a mysql error
 
 set_include_path(SERVER_ROOT);
 
-require(SERVER_ROOT.'/classes/time.class.php'); //Require the time class
-require(SERVER_ROOT.'/classes/paranoia.class.php'); //Require the paranoia check_paranoia function
-require(SERVER_ROOT.'/classes/regex.php');
-require(SERVER_ROOT.'/classes/util.php');
+require(__DIR__ . '/time.class.php'); //Require the time class
+require(__DIR__ . '/paranoia.class.php'); //Require the paranoia check_paranoia function
+require(__DIR__ . '/regex.php');
+require(__DIR__ . '/util.php');
 
 $Debug = new DEBUG;
 $Debug->handle_errors();
@@ -87,8 +64,8 @@ $Cache = new CACHE($MemcachedServers);
 G::$Cache = $Cache;
 G::$DB = $DB;
 G::$Twig = new Environment(
-    new FilesystemLoader(__DIR__.'/../templates'),
-    ['cache' => __DIR__.'/../cache/twig']
+    new FilesystemLoader(__DIR__ . '/../templates'),
+    ['cache' => __DIR__ . '/../cache/twig']
 );
 
 //Begin browser identification
@@ -172,60 +149,54 @@ if (isset($LoginCookie)) {
     list($SessionID, $LoggedUser['ID']) = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
     $LoggedUser['ID'] = (int)$LoggedUser['ID'];
 
-    $UserID = $LoggedUser['ID']; //TODO: UserID should not be LoggedUser
-
     if (!$LoggedUser['ID'] || !$SessionID) {
-        logout();
+        logout($LoggedUser['ID'], $SessionID);
     }
 
-    $UserSessions = $Cache->get_value("users_sessions_$UserID");
-    if (!is_array($UserSessions)) {
-        $DB->query("
-            SELECT
-                SessionID,
-                Browser,
-                OperatingSystem,
-                IP,
-                LastUpdate
-            FROM users_sessions
-            WHERE UserID = '$UserID'
-                AND Active = 1
-            ORDER BY LastUpdate DESC");
-        $UserSessions = $DB->to_array('SessionID',MYSQLI_ASSOC);
-        $Cache->cache_value("users_sessions_$UserID", $UserSessions, 0);
-    }
+    $User = new \Gazelle\User($DB, $Cache, $LoggedUser['ID']);
+    $Session = new \Gazelle\Session($DB, $Cache, $LoggedUser['ID']);
 
+    $UserSessions = $Session->sessions();
     if (!array_key_exists($SessionID, $UserSessions)) {
-        logout();
+        logout($LoggedUser['ID'], $SessionID);
     }
 
-    // Check if user is enabled
-    $Enabled = $Cache->get_value('enabled_'.$LoggedUser['ID']);
-    if ($Enabled === false) {
-        $DB->query("
-            SELECT Enabled
-            FROM users_main
-            WHERE ID = '{$LoggedUser['ID']}'");
-        list($Enabled) = $DB->next_record();
-        $Cache->cache_value('enabled_'.$LoggedUser['ID'], $Enabled, 0);
-    }
-    if ($Enabled == 2) {
-
-        logout();
+    if ($User->isDisabled()) {
+        logout($LoggedUser['ID'], $SessionID);
     }
 
-    // Up/Down stats
-    $UserStats = Users::user_stats($LoggedUser['ID']);
-
-    // Get info such as username
+    // TODO: These globals need to die, and just use $LoggedUser
+    // TODO: And then instantiate $LoggedUser from \Gazelle\Session when needed
     $LightInfo = Users::user_info($LoggedUser['ID']);
+    if (empty($LightInfo['Username'])) { // Ghost
+        logout($LoggedUser['ID'], $SessionID);
+    }
+
+    $UserStats = Users::user_stats($LoggedUser['ID']);
     $HeavyInfo = Users::user_heavy_info($LoggedUser['ID']);
 
-    // Create LoggedUser array
     $LoggedUser = array_merge($HeavyInfo, $LightInfo, $UserStats);
     G::$LoggedUser =& $LoggedUser;
 
+    // No conditions will force a logout from this point, can hit the DB more.
+    // Complete the $LoggedUser array
+    $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($LoggedUser['ID'], $LoggedUser['CustomPermissions']);
+    $LoggedUser['Permissions']['MaxCollages'] += Donations::get_personal_collages($LoggedUser['ID']);
     $LoggedUser['RSS_Auth'] = md5($LoggedUser['ID'] . RSS_HASH . $LoggedUser['torrent_pass']);
+
+    // Notifications
+    if (isset($LoggedUser['Permissions']['site_torrents_notify'])) {
+        $LoggedUser['Notify'] = $User->notifyFilters();
+    }
+
+    // Stylesheet
+    $Stylesheets = new \Gazelle\Stylesheet($DB, $Cache);
+    $LoggedUser['StyleName'] = $Stylesheets->getName($LoggedUser['StyleID']);
+
+    // We've never had to disable the wiki privs of anyone.
+    if ($LoggedUser['DisableWiki']) {
+        unset($LoggedUser['Permissions']['site_edit_wiki']);
+    }
 
     // $LoggedUser['RatioWatch'] as a bool to disable things for users on Ratio Watch
     $LoggedUser['RatioWatch'] = (
@@ -233,10 +204,6 @@ if (isset($LoginCookie)) {
         && time() < strtotime($LoggedUser['RatioWatchEnds'])
         && ($LoggedUser['BytesDownloaded'] * $LoggedUser['RequiredRatio']) > $LoggedUser['BytesUploaded']
     );
-
-    // Load in the permissions
-    $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($LoggedUser['ID'], $LoggedUser['CustomPermissions']);
-    $LoggedUser['Permissions']['MaxCollages'] += Donations::get_personal_collages($LoggedUser['ID']);
 
     // Change necessary triggers in external components
     $Cache->CanClear = check_perms('admin_clear_cache');
@@ -246,162 +213,69 @@ if (isset($LoginCookie)) {
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
     }
 
-    // Update LastUpdate every 10 minutes
-    if (strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
-        $DB->prepared_query("
-            UPDATE users_main
-            SET LastAccess = ?
-            WHERE ID = ?", sqltime(), $LoggedUser['ID']);
-        $DB->prepared_query("
-            UPDATE users_sessions
-            SET
-                IP = ?,
-                Browser = ?,
-                BrowserVersion = ?,
-                OperatingSystem = ?,
-                OperatingSystemVersion = ?,
-                LastUpdate = ?
-            WHERE UserID = ?
-                AND SessionID = ?",
-            $_SERVER['REMOTE_ADDR'], $Browser, $BrowserVersion, $OperatingSystem,
-            $OperatingSystemVersion, sqltime(), $LoggedUser['ID'], $SessionID);
-        $Cache->begin_transaction("users_sessions_$UserID");
-        $Cache->delete_row($SessionID);
-        $Cache->insert_front($SessionID,[
-            'SessionID' => $SessionID,
-            'Browser' => $Browser,
-            'BrowserVersion' => $BrowserVersion,
-            'OperatingSystem' => $OperatingSystem,
-            'OperatingSystemVersion' => $OperatingSystemVersion,
-            'IP' => $_SERVER['REMOTE_ADDR'],
-            'LastUpdate' => sqltime()
-        ]);
-        $Cache->commit_transaction(0);
-    }
-
-    // Notifications
-    if (isset($LoggedUser['Permissions']['site_torrents_notify'])) {
-        $LoggedUser['Notify'] = $Cache->get_value('notify_filters_'.$LoggedUser['ID']);
-        if (!is_array($LoggedUser['Notify'])) {
-            $DB->query("
-                SELECT ID, Label
-                FROM users_notify_filters
-                WHERE UserID = '{$LoggedUser['ID']}'");
-            $LoggedUser['Notify'] = $DB->to_array('ID');
-            $Cache->cache_value('notify_filters_'.$LoggedUser['ID'], $LoggedUser['Notify'], 2592000);
-        }
-    }
-
-    // We've never had to disable the wiki privs of anyone.
-    if ($LoggedUser['DisableWiki']) {
-        unset($LoggedUser['Permissions']['site_edit_wiki']);
-    }
-
     // IP changed
-
     if ($LoggedUser['IP'] != $_SERVER['REMOTE_ADDR'] && !check_perms('site_disable_ip_history')) {
-
         if (Tools::site_ban_ip($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
-
-        $CurIP = db_string($LoggedUser['IP']);
-        $NewIP = db_string($_SERVER['REMOTE_ADDR']);
-        $DB->query("
-            UPDATE users_history_ips
-            SET EndTime = '".sqltime()."'
-            WHERE EndTime IS NULL
-                AND UserID = '{$LoggedUser['ID']}'
-                AND IP = '$CurIP'");
-        $DB->query("
-            INSERT IGNORE INTO users_history_ips
-                (UserID, IP, StartTime)
-            VALUES
-                ('{$LoggedUser['ID']}', '$NewIP', '".sqltime()."')");
-
-        $ipcc = Tools::geoip($NewIP);
-        $DB->query("
-            UPDATE users_main
-            SET IP = '$NewIP', ipcc = '$ipcc'
-            WHERE ID = '{$LoggedUser['ID']}'");
-        $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
-        $Cache->update_row(false, ['IP' => $_SERVER['REMOTE_ADDR']]);
-        $Cache->commit_transaction(0);
+        $User->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);
     }
 
-
-    // Get stylesheets
-    $Stylesheets = $Cache->get_value('stylesheets');
-    if (!is_array($Stylesheets)) {
-        $DB->query('
-            SELECT
-                ID,
-                LOWER(REPLACE(Name, " ", "_")) AS Name,
-                Name AS ProperName
-            FROM stylesheets ORDER BY ID DESC');
-        $Stylesheets = $DB->to_array('ID', MYSQLI_BOTH);
-        $Cache->cache_value('stylesheets', $Stylesheets, 0);
-    }
-
-    //A9 TODO: Clean up this messy solution
-    $LoggedUser['StyleName'] = $Stylesheets[$LoggedUser['StyleID']]['Name'];
-
-    if (empty($LoggedUser['Username'])) {
-        logout(); // Ghost
+    // Update LastUpdate every 10 minutes
+    if (strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
+        $Session->update([
+            'ip-address'      => $_SERVER['REMOTE_ADDR'],
+            'browser'         => $Browser,
+            'browser-version' => $BrowserVersion,
+            'os'              => $OperatingSystem,
+            'os-version'      => $OperatingSystemVersion,
+            'session-id'      => $SessionID
+        ]);
     }
 }
 
 $Debug->set_flag('end user handling');
-
 $Debug->set_flag('start function definitions');
 
 /**
  * Log out the current session
  */
-function logout() {
-    global $SessionID;
-    setcookie('session', '', time() - 60 * 60 * 24 * 365, '/', '', false);
-    setcookie('keeplogged', '', time() - 60 * 60 * 24 * 365, '/', '', false);
-    setcookie('session', '', time() - 60 * 60 * 24 * 365, '/', '', false);
-    if ($SessionID) {
-
-        G::$DB->query("
-            DELETE FROM users_sessions
-            WHERE UserID = '" . G::$LoggedUser['ID'] . "'
-                AND SessionID = '".db_string($SessionID)."'");
-
-        G::$Cache->begin_transaction('users_sessions_' . G::$LoggedUser['ID']);
-        G::$Cache->delete_row($SessionID);
-        G::$Cache->commit_transaction(0);
+function logout($userId, $sessionId = false) {
+    $epoch = time() - 60 * 60 * 24 * 365;
+    setcookie('session', '',    $epoch, '/', '', false);
+    setcookie('keeplogged', '', $epoch, '/', '', false);
+    setcookie('session', '',    $epoch, '/', '', false);
+    if ($sessionId) {
+        $session = new \Gazelle\Session($DB, $Cache, $userId);
+        $session->drop($sessionId);
     }
-    G::$Cache->delete_value('user_info_' . G::$LoggedUser['ID']);
-    G::$Cache->delete_value('user_stats_' . G::$LoggedUser['ID']);
-    G::$Cache->delete_value('user_info_heavy_' . G::$LoggedUser['ID']);
+
+    G::$Cache->delete_value('user_info_' . $userId);
+    G::$Cache->delete_value('user_stats_' . $userId);
+    G::$Cache->delete_value('user_info_heavy_' . $userId);
 
     header('Location: login.php');
-
     die();
 }
 
 /**
  * Logout all sessions
  */
-function logout_all_sessions() {
-    $UserID = G::$LoggedUser['ID'];
-
-    G::$DB->query("
-        DELETE FROM users_sessions
-        WHERE UserID = '$UserID'");
-
-    G::$Cache->delete_value('users_sessions_' . $UserID);
-    logout();
+function logout_all_sessions($userId) {
+    $session = new \Gazelle\Session($DB, $Cache, $userId);
+    $session->dropAll();
+    logout($userId);
 }
 
 function enforce_login() {
+    if (!G::$LoggedUser) {
+        header('Location: login.php');
+        die();
+    }
     global $SessionID;
-    if (!$SessionID || !G::$LoggedUser) {
+    if (!$SessionID) {
         setcookie('redirect', $_SERVER['REQUEST_URI'], time() + 60 * 30, '/', '', false);
-        logout();
+        logout(G::$LoggedUser['ID']);
     }
 }
 
@@ -434,38 +308,36 @@ function authorizeIfPost($Ajax = false) {
 
 $Debug->set_flag('ending function definitions');
 
-//Include /sections/*/index.php
+// load the appropriate /sections/*/index.php
 $Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
 if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
     error(404);
 }
 
-$StripPostKeys = array_fill_keys(['password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'], true);
 $Cache->cache_value('php_' . getmypid(),
     [
         'start' => sqltime(),
         'document' => $Document,
         'query' => $_SERVER['QUERY_STRING'],
         'get' => $_GET,
-        'post' => array_diff_key($_POST, $StripPostKeys)
+        'post' => array_diff_key(
+            $_POST,
+            array_fill_keys(['password', 'cur_pass', 'new_pass_1', 'new_pass_2', 'verifypassword', 'confirm_password', 'ChangePassword', 'Password'], true)
+        )
     ], 600
 );
 
-// Locked account constant
-define('STAFF_LOCKED', 1);
-
-$AllowedPages = ['staffpm', 'ajax', 'locked', 'logout', 'login'];
-
-G::$Router = new \Gazelle\Router(G::$LoggedUser['AuthKey']);
-if (isset(G::$LoggedUser['LockedAccount']) && !in_array($Document, $AllowedPages)) {
-    require(SERVER_ROOT . '/sections/locked/index.php');
+G::$Router = new \Gazelle\Router($LoggedUser['AuthKey']);
+if (isset($LoggedUser['LockedAccount']) && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
+    require(__DIR__ . '/../sections/locked/index.php');
 }
 else {
-    if (!file_exists(SERVER_ROOT . '/sections/' . $Document . '/index.php')) {
+    $file = __DIR__ . '/../sections/' . $Document . '/index.php';
+    if (!file_exists($file)) {
         error(404);
     }
     else {
-        require(SERVER_ROOT . '/sections/' . $Document . '/index.php');
+        require($file);
     }
 }
 

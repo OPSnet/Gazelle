@@ -39,7 +39,7 @@ switch ($_REQUEST['action']) {
                 JOIN snatched_groups_temp AS s
             USING(GroupID)
             WHERE b.UserID = '$LoggedUser[ID]'");
-        $Cache->delete_value("bookmarks_group_ids_$UserID");
+        $Cache->delete_value("bookmarks_group_ids_" . $LoggedUser['ID']);
         header('Location: bookmarks.php');
         die();
         break;

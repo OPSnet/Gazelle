@@ -148,6 +148,9 @@ define('ELITE_TM',      '23');
 define('FORUM_MOD',     '28');
 define('ULTIMATE_TM',   '48');
 
+// Locked account constant
+define('STAFF_LOCKED', 1);
+
 // Pagination
 define('TORRENT_COMMENTS_PER_PAGE', 10);
 define('POSTS_PER_PAGE', 25);

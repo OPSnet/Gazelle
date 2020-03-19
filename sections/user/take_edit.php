@@ -421,7 +421,7 @@ $Params[] = $UserID;
 $DB->prepared_query($SQL, ...$Params);
 
 if ($ResetPassword) {
-    logout_all_sessions();
+    logout_all_sessions($UserID);
 }
 
 header("Location: user.php?action=edit&userid=$UserID");

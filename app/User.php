@@ -21,6 +21,61 @@ class User {
         return $this->id;
     }
 
+    public function updateIP($oldIP, $newIP) {
+        $this->db->prepared_query('
+            UPDATE users_history_ips SET
+                EndTime = now()
+            WHERE EndTime IS NULL
+                AND UserID = ?  AND IP = ?
+                ', $this->id, $oldIP
+        );
+        $this->db->prepared_query('
+            INSERT IGNORE INTO users_history_ips
+                   (UserID, IP, StartTime)
+            VALUES (?,      ?,  now())
+            ', $this->id, $newIP
+        );
+        $this->db->prepared_query('
+            UPDATE users_main SET
+                IP = ?, ipcc = ?
+            WHERE ID = ?
+            ', $newIP, Tools::geoip($newIP), $this->id
+        );
+        $this->cache->begin_transaction('user_info_heavy_' . $this->id);
+        $this->cache->update_row(false, ['IP' => $newIP]);
+        $this->cache->commit_transaction(0);
+    }
+
+    public function notifyFilters() {
+        if (($filters = $this->cache->get_value('notify_filters_' . $this->id)) === false) {
+            $this->db->prepared_query('
+                SELECT ID, Label
+                FROM users_notify_filters
+                WHERE UserID = ?
+                ', $this->id
+            );
+            $filters = $this->db->to_array('ID');
+            $this->cache->cache_value('notify_filters_' . $this->id, $filters, 2592000);
+        }
+        return $filters;
+    }
+
+    protected function enabledState() {
+        if (($enabled = $this->cache->get_value('enabled_' . $this->id)) === false) {
+            $this->db->prepared_query("
+                SELECT Enabled FROM users_main WHERE ID = ?
+                ", $this->id()
+            );
+            list($enabled) = $this->db->to_array(MYSQLI_NUM);
+            $this->cache->cache_value('enabled_' . $this->id, $enabled, 86400 * 3);
+        }
+        return (int)$enabled;
+    }
+
+    public function isUnconfirmed() { return $this->enabledState() == 0; }
+    public function isEnabled()     { return $this->enabledState() == 1; }
+    public function isDisabled()    { return $this->enabledState() == 2; }
+
     public function personalCollages() {
         $this->db->prepared_query("
             SELECT ID, Name

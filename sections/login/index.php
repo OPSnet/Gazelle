@@ -82,9 +82,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                         ', $UserID, $_SERVER['REMOTE_ADDR']
                     );
                     $Reset = true; // Past tense form of "to reset", meaning that password has now been reset
-                    $LoggedUser['ID'] = $UserID; // Set $LoggedUser['ID'] for logout_all_sessions() to work
-
-                    logout_all_sessions();
+                    logout_all_sessions($UserID);
                 }
             }
 
