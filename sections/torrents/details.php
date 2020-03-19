@@ -223,7 +223,6 @@ $Index++;
     </div>
 <?php
 if ($Categories[$GroupCategoryID - 1] == 'Music') {
-    $ArtistManager = new \Gazelle\Artist(G::$DB, G::$Cache, $Artist['id']);
     $ShownWith = false;
     $title = '';
     if (!empty($Artists[6]) && !empty($Artists[1])) {
@@ -254,7 +253,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                     <?= Artists::display_artist($Artist) ?>&lrm;
 <?php
                     if (check_perms('torrents_edit')) {
-    ?>                (<span class="tooltip" title="Artist alias ID"><?= $ArtistManager->get_alias($Artist['name']) ?></span>)&nbsp;
+    ?>                (<span class="tooltip" title="Artist alias ID"><?php $a = new \Gazelle\Artist(G::$DB, G::$Cache, $Artist['id']); echo $a->get_alias($Artist['name']) ?></span>)&nbsp;
                         <span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?=$GroupID?>&amp;artistid=<?=$Artist['id']?>&amp;importance=<?=$s['offset']?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?= $s['role'] ?>">X</a></span>
     <?php           } ?>
                 </li>
