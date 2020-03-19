@@ -45,6 +45,12 @@ class Session {
             WHERE ID = ?
             ', $this->id
         );
+        $this->db->prepared_query('
+            UPDATE user_last_access
+            SET last_access = now()
+            WHERE user_id = ?
+            ', $this->id
+        );
         $sessionId = $args['session-id'];
         $now = sqltime(); // keep db and cache synchronized
         $this->db->prepared_query('

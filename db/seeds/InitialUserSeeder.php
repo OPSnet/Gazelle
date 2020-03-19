@@ -39,6 +39,17 @@ class InitialUserSeeder extends AbstractSeed {
             ],
         ])->saveData();
 
+        $this->table('user_last_access')->insert([
+            [
+                'user_id' => 1,
+                'last_access' => $now,
+            ],
+            [
+                'user_id' => 2,
+                'last_access' => $now,
+            ],
+        ])->saveData();
+
         $this->table('users_leech_stats')->insert([
             [
                 'UserID' => 1,

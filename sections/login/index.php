@@ -230,11 +230,17 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
             unset($Recovery[$Key]);
             $DB->prepared_query('
                 UPDATE users_main SET
-                    LastLogin = now(),
                     LastAccess = now(),
                     Recovery = ?
                 WHERE ID = ?
                 ', serialize($Recovery), $UserID
+            );
+            $DB->prepared_query('
+                INSERT INTO user_last_access
+                       (user_id, last_access)
+                VALUES (?, now())
+                ON DUPLICATE KEY UPDATE last_access = now()
+                ', $UserID
             );
 
             if (!empty($_COOKIE['redirect'])) {
@@ -393,9 +399,15 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
 
             $DB->prepared_query('
                 UPDATE users_main SET
-                    LastLogin = now(),
                     LastAccess = now()
                 WHERE ID = ?
+                ', $UserID
+            );
+            $DB->prepared_query('
+                INSERT INTO user_last_access
+                       (user_id, last_access)
+                VALUES (?, now())
+                ON DUPLICATE KEY UPDATE last_access = now()
                 ', $UserID
             );
 
@@ -589,9 +601,15 @@ else {
 
                         $DB->prepared_query('
                             UPDATE users_main SET
-                                LastLogin = now(),
                                 LastAccess = now()
                             WHERE ID = ?
+                            ', $UserID
+                        );
+                        $DB->prepared_query('
+                            INSERT INTO user_last_access
+                                   (user_id, last_access)
+                            VALUES (?, now())
+                            ON DUPLICATE KEY UPDATE last_access = now()
                             ', $UserID
                         );
                         if (!empty($_COOKIE['redirect'])) {
