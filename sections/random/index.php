@@ -3,47 +3,58 @@
 enforce_login();
 
 switch ($_REQUEST['action']) {
-    case 'collage':
-        $DB->query("
-SELECT r1.ID
-FROM collages AS r1 JOIN
-   (SELECT (RAND() *
-                 (SELECT MAX(ID)
-                    FROM collages)) AS ID)
-    AS r2
-WHERE r1.ID >= r2.ID
-ORDER BY r1.ID ASC
-LIMIT 1");
-        $collage = $DB->next_record();
-        header("Location: collages.php?id={$collage['ID']}");
-        break;
     case 'artist':
-        $DB->query("
-SELECT r1.ArtistID
-FROM artists_group AS r1 JOIN
-   (SELECT (RAND() *
-                 (SELECT MAX(ArtistID)
-                    FROM artists_group)) AS ArtistID)
-    AS r2
-WHERE r1.ArtistID >= r2.ArtistID
-ORDER BY r1.ArtistID ASC
-LIMIT 1");
-        $artist = $DB->next_record();
-        header("Location: artist.php?id={$artist['ArtistID']}");
+        $page = 'artist';
+        $DB->prepared_query("
+            SELECT r1.ArtistID
+            FROM artists_group AS r1
+            INNER JOIN torrents_artists ta ON (ta.ArtistID = r1.ArtistID AND ta.Importance IN ('1', '3', '4', '5', '6', '7')) /* exclude as guest */
+            INNER JOIN (SELECT (RAND() * (SELECT MAX(ArtistID) FROM artists_group)) AS ArtistID) AS r2
+            WHERE r1.ArtistID BETWEEN r2.ArtistID and r2.ArtistID + 100
+            GROUP BY r1.ArtistID
+            HAVING count(*) >= ?
+            ORDER BY r1.ArtistID ASC
+            LIMIT 1
+            ", RANDOM_ARTIST_MIN_ENTRIES
+        );
         break;
+
+    case 'collage':
+        $page = 'collages';
+        $DB->prepared_query("
+            SELECT r1.ID
+            FROM collages AS r1
+            INNER JOIN collages_torrents ct ON (ct.CollageID = r1.ID)
+            INNER JOIN (SELECT (RAND() * (SELECT MAX(ID) FROM collages)) AS ID) AS r2
+            WHERE r1.ID BETWEEN r2.ID and r2.ID + 100
+                AND r1.Deleted = '0'
+            GROUP BY r1.ID
+            HAVING count(*) >= ?
+            ORDER BY r1.ID ASC
+            LIMIT 1
+            ", RANDOM_COLLAGE_MIN_ENTRIES
+        );
+        break;
+
     case 'torrent':
     default:
-    $DB->query("
-SELECT r1.ID
-FROM torrents_group AS r1 JOIN
-   (SELECT (RAND() *
-                 (SELECT MAX(ID)
-                    FROM torrents_group)) AS ID)
-    AS r2
-WHERE r1.ID >= r2.ID
-ORDER BY r1.ID ASC
-LIMIT 1");
-    $torrent = $DB->next_record();
-    header("Location: torrents.php?id={$torrent['ID']}");
+        $page = 'torrents';
+        $DB->prepared_query("
+            SELECT r1.ID
+            FROM torrents_group AS r1
+            INNER JOIN torrents t ON (r1.ID = t.GroupID)
+            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID AND tls.Seeders >= ?)
+            INNER JOIN (SELECT (RAND() * (SELECT MAX(ID) FROM torrents_group)) AS ID) AS r2
+            WHERE r1.ID BETWEEN r2.ID and r2.ID + 200
+            ORDER BY r1.ID ASC
+            LIMIT 1
+            ", RANDOM_TORRENT_MIN_SEEDS
+        );
         break;
 }
+
+if (!$DB->has_results()) {
+    error(404); /* only likely to happen on a brand new installation */
+}
+list($id) = $DB->next_record();
+header("Location: $page.php?id=$id");
