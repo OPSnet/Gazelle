@@ -87,7 +87,7 @@ class BencodeTorrent extends BencodeDecode {
         if (empty($this->Dec)) {
             return false;
         }
-        return isset($this->Dec['info']['private']) && Int64::get($this->Dec['info']['private']) == 1;
+        return isset($this->Dec['info']['private']) && Int64::is_int($this->Dec['info']['private']) && Int64::get($this->Dec['info']['private']) == 1;
     }
     /**
      * Add the "private" flag to the torrent
