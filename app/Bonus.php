@@ -450,65 +450,31 @@ Enjoy!";
         // Seedtime (convert from hours to days) is in xbt_snatched
         // Seeders is in torrents
 
-        $userId = 1;
-        $chunk = 200;
-        $processed = 0;
-        $more = true;
-        while ($more) {
-            /* update a block of users at a time, to minimize locking contention */
-            $this->db->prepared_query("
-                UPDATE users_main AS um
-                INNER JOIN (
-                    SELECT
-                        xfu.uid AS ID,
-                        SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
-                            0.0433 + (
-                                (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
-                            )
-                        ), 0)) AS NewPoints
-                    FROM (
-                        SELECT DISTINCT uid, fid FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)
-                    ) AS xfu
-                    INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
-                    INNER JOIN users_main AS um ON (um.ID = xfu.uid)
-                    INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
-                    INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-                    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                    WHERE ui.DisablePoints = '0'
-                        AND um.Enabled = '1'
-                        AND um.ID BETWEEN ? AND ?
-                    GROUP BY
-                        xfu.uid
-                ) AS p USING (ID)
-                SET um.BonusPoints = um.BonusPoints + p.NewPoints
-                ", $userId, $userId + $chunk
-            );
-            $processed += $this->db->affected_rows();
-
-            /* flush their stats */
-            $this->db->prepared_query("
-                SELECT concat('user_stats_', um.ID) as ck
-                FROM users_main um
-                INNER JOIN users_info ui ON (ui.UserID = um.ID)
-                WHERE ui.DisablePoints = '0'
-                    AND um.Enabled = '1'
-                    AND um.ID BETWEEN ? AND ?
-                ", $userId, $userId + $chunk
-            );
-            if ($this->db->has_results()) {
-                $this->cache->deleteMulti($db->collect('ck', false));
-            }
-            $userId += $chunk;
-
-            /* see if there are some more users to process */
-            $this->db->prepared_query('
-                SELECT 1
-                FROM users_main
-                WHERE ID >= ?
-                ', $userId
-            );
-            $more = $this->db->has_results();
-        }
-        return $processed;
+        $this->db->prepared_query("
+            UPDATE users_main AS um
+            LEFT JOIN (
+                SELECT
+                    xfu.uid AS ID,
+                    SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
+                        0.0433 + (
+                            (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
+                        )
+                    ), 0)) AS NewPoints
+                FROM (
+                    SELECT DISTINCT uid, fid FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)
+                ) AS xfu
+                INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+                INNER JOIN users_main AS um ON (um.ID = xfu.uid)
+                INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
+                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                WHERE
+                    um.Enabled = '1'
+                    AND ui.DisablePoints = '0'
+                GROUP BY
+                    xfu.uid
+            ) AS p ON um.ID = p.ID
+            SET um.BonusPoints=um.BonusPoints + CASE WHEN p.NewPoints IS NULL THEN 0 ELSE ROUND(p.NewPoints, 5) END
+        ");
     }
 }
