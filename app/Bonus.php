@@ -461,15 +461,18 @@ Enjoy!";
                 INNER JOIN (
                     SELECT
                         xfu.uid AS ID,
-                        SUM(IFNULL((t.Size / (1024 * 1024 * 1024)) * (
-                            0.0433 + (
-                                (0.07 * LN(1 + (xfh.seedtime / (24)))) / (POW(GREATEST(tls.Seeders, 1), 0.35))
-                            )
-                        ), 0)) AS NewPoints
+                        sum(t.Size / pow(1024, 3)
+                            * (0.0433 + (0.07 * ln(1 + xfh.seedtime/24)) / pow(greatest(tls.Seeders, 1), 0.35))
+                        ) as new
                     FROM (
-                        SELECT DISTINCT uid, fid FROM xbt_files_users WHERE active='1' AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR)
-                    ) AS xfu
-                    INNER JOIN xbt_files_history AS xfh ON (xfh.uid = xfu.uid AND xfh.fid = xfu.fid)
+                        SELECT DISTINCT uid, fid
+                        FROM xbt_files_users
+                        WHERE active = '1'
+                            AND remaining = 0
+                            AND mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
+                            AND uid BETWEEN ? AND ?
+                    ) xfu
+                    INNER JOIN xbt_files_history AS xfh USING (uid, fid)
                     INNER JOIN users_main AS um ON (um.ID = xfu.uid)
                     INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
                     INNER JOIN torrents AS t ON (t.ID = xfu.fid)
@@ -480,8 +483,8 @@ Enjoy!";
                     GROUP BY
                         xfu.uid
                 ) AS p USING (ID)
-                SET um.BonusPoints = um.BonusPoints + p.NewPoints
-                ", $userId, $userId + $chunk
+                SET um.BonusPoints = um.BonusPoints + p.new
+                ", $userId, $userId + $chunk - 1, $userId, $userId + $chunk - 1
             );
             $processed += $this->db->affected_rows();
 
@@ -493,7 +496,7 @@ Enjoy!";
                 WHERE ui.DisablePoints = '0'
                     AND um.Enabled = '1'
                     AND um.ID BETWEEN ? AND ?
-                ", $userId, $userId + $chunk
+                ", $userId, $userId + $chunk - 1
             );
             if ($this->db->has_results()) {
                 $this->cache->deleteMulti($db->collect('ck', false));
