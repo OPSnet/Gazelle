@@ -1,17 +1,13 @@
 <?php
-if (($Comments = $Cache->get_value('user_comment_count_' . $UserID)) === false) {
+if (($Comments = $Cache->get_value('user_nrcomment_' . $UserID)) === false) {
     $DB->prepared_query("
-        SELECT Page, count(*)
+        SELECT Page, count(*) as n
         FROM comments
         WHERE AuthorID = ?
         GROUP BY Page", $UserID);
-    $Comments = $DB->to_array('Page', MYSQLI_NUM);
-    $Cache->cache_value('user_comment_count_' . $UserID, $Comments, 3600);
+    $Comments = $DB->to_pair('Page', 'n', false);
+    $Cache->cache_value('user_nrcomment_' . $UserID, $Comments, 3600);
 }
-$NumComments = empty($Comments['torrents']) ? 0 : $Comments['torrents'][1];
-$NumArtistComments = empty($Comments['artist']) ? 0 : $Comments['artist'][1];
-$NumCollageComments = empty($Comments['collages']) ? 0 : $Comments['collages'][1];
-$NumRequestComments = empty($Comments['requests']) ? 0 : $Comments['requests'][1];
 
 if (($participationStats = $Cache->get_value('user_participation_stats_' . $UserID)) === false) {
     $DB->prepared_query("
@@ -57,22 +53,22 @@ list($NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopi
                 <li id="comm_posts">Forum threads: <?=number_format($ForumTopics)?> <a href="userhistory.php?action=topics&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
                 <li id="comm_posts">Forum posts: <?=number_format($ForumPosts)?> <a href="userhistory.php?action=posts&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php   if ($Override = check_paranoia_here('torrentcomments+')) { ?>
-                <li id="comm_torrcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Torrent comments: <?=number_format($NumComments)?>
+                <li id="comm_torrcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Torrent comments: <?=number_format($Comments['torrents'] ?? 0)?>
 <?php       if ($Override = check_paranoia_here('torrentcomments')) { ?>
                     <a href="comments.php?id=<?=$UserID?>" class="brackets<?=($Override === 2 ? ' paranoia_override' : '')?>">View</a>
 <?php       } ?>
                 </li>
-                <li id="comm_artcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Artist comments: <?=number_format($NumArtistComments)?>
+                <li id="comm_artcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Artist comments: <?=number_format($Comments['artists'] ?? 0)?>
 <?php       if ($Override = check_paranoia_here('torrentcomments')) { ?>
                     <a href="comments.php?id=<?=$UserID?>&amp;action=artist" class="brackets<?=($Override === 2 ? ' paranoia_override' : '')?>">View</a>
 <?php       } ?>
                 </li>
-                <li id="comm_collcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Collage comments: <?=number_format($NumCollageComments)?>
+                <li id="comm_collcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Collage comments: <?=number_format($Comments['collages'] ?? 0)?>
 <?php       if ($Override = check_paranoia_here('torrentcomments')) { ?>
                     <a href="comments.php?id=<?=$UserID?>&amp;action=collages" class="brackets<?=($Override === 2 ? ' paranoia_override' : '')?>">View</a>
 <?php       } ?>
                 </li>
-                <li id="comm_reqcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Request comments: <?=number_format($NumRequestComments)?>
+                <li id="comm_reqcomm"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Request comments: <?=number_format($Comments['requests'] ?? 0)?>
 <?php       if ($Override = check_paranoia_here('torrentcomments')) { ?>
                     <a href="comments.php?id=<?=$UserID?>&amp;action=requests" class="brackets<?=($Override === 2 ? ' paranoia_override' : '')?>">View</a>
 <?php        } ?>
