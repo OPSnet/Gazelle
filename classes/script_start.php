@@ -51,7 +51,6 @@ set_include_path(SERVER_ROOT);
 
 require(__DIR__ . '/time.class.php'); //Require the time class
 require(__DIR__ . '/paranoia.class.php'); //Require the paranoia check_paranoia function
-require(__DIR__ . '/regex.php');
 require(__DIR__ . '/util.php');
 
 $Debug = new DEBUG;
