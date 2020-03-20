@@ -360,7 +360,7 @@ Enjoy!";
 
     public function userHourlyRate($id) {
         $this->db->prepared_query('
-            SELECT coalesce(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders), 0) as Rate
+            SELECT coalesce(sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)), 0) as Rate
             FROM (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
             INNER JOIN xbt_files_history AS xfh USING (uid, fid)
             INNER JOIN torrents AS t ON (t.ID = xfu.fid)
@@ -378,7 +378,7 @@ Enjoy!";
             SELECT
                 COUNT(xfu.uid) as TotalTorrents,
                 SUM(t.Size) as TotalSize,
-                coalesce(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders), 0) AS TotalHourlyPoints
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)), 0) AS TotalHourlyPoints
             FROM (
                 SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
             ) AS xfu
@@ -412,7 +412,7 @@ Enjoy!";
                 t.RemasterTitle,
                 GREATEST(tls.Seeders, 1) AS Seeders,
                 xfh.seedtime AS Seedtime,
-                coalesce(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders), 0) AS HourlyPoints
+                bonus_accrual(t.Size, xfh.seedtime, tls.Seeders) AS HourlyPoints
             FROM (
                 SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
             ) AS xfu
