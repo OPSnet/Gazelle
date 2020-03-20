@@ -1,4 +1,4 @@
-<?
+<?php
 $TorrentID = $_GET['torrentid'];
 
 if (!$TorrentID || !is_number($TorrentID)) {

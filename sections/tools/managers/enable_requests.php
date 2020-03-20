@@ -1,4 +1,4 @@
-<?
+<?php
 
 if (!check_perms('users_mod')) {
     error(403);
@@ -17,10 +17,10 @@ $RequestsPerPage = 25;
 list($Page, $Limit) = Format::page_limit($RequestsPerPage);
 
 // How can things be ordered?
-$OrderBys = array(
+$OrderBys = [
     'submitted_timestamp' => 'uer.Timestamp',
     'outcome' => 'uer.Outcome',
-    'handled_timestamp' => 'uer.HandledTimestamp');
+    'handled_timestamp' => 'uer.HandledTimestamp'];
 
 $Where = [];
 $Joins = [];
@@ -125,11 +125,11 @@ $DB->set_query_id($QueryID);
 </div>
 <div align="center">
     <a class="brackets tooltip" href="tools.php?action=enable_requests" title="Default view">Main</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=perfect&amp;<?=Format::get_url(array('view', 'action'))?>" title="Valid username, matching email, current IP with no matches, and inactivity disabled">Perfect</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=minus_ip&amp;<?=Format::get_url(array('view', 'action'))?>" title="Valid username, matching email, and inactivity disabled">Perfect Minus IP</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=invalid_email&amp;<?=Format::get_url(array('view', 'action'))?>" title="Non-matching email address">Invalid Email</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=ip_overlap&amp;<?=Format::get_url(array('view', 'action'))?>" title="Requests with IP matches to other accounts">IP Overlap</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=manual_disable&amp;<?=Format::get_url(array('view', 'action'))?>" title="Requests for accounts that were not disabled for inactivity">Manual Disable</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=perfect&amp;<?=Format::get_url(['view', 'action'])?>" title="Valid username, matching email, current IP with no matches, and inactivity disabled">Perfect</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=minus_ip&amp;<?=Format::get_url(['view', 'action'])?>" title="Valid username, matching email, and inactivity disabled">Perfect Minus IP</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=invalid_email&amp;<?=Format::get_url(['view', 'action'])?>" title="Non-matching email address">Invalid Email</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=ip_overlap&amp;<?=Format::get_url(['view', 'action'])?>" title="Requests with IP matches to other accounts">IP Overlap</a>
+    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=manual_disable&amp;<?=Format::get_url(['view', 'action'])?>" title="Requests for accounts that were not disabled for inactivity">Manual Disable</a>
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#search_form').gtoggle(); return false;">Search</a>
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#scores').gtoggle(); return false;">Scores</a>
 </div><br />
@@ -139,7 +139,7 @@ $DB->set_query_id($QueryID);
             <th>Username</th>
             <th>Checked</th>
         </tr>
-<?  $DB->query("
+<?php  $DB->query("
         SELECT COUNT(CheckedBy), CheckedBy
         FROM users_enable_requests
         WHERE CheckedBy IS NOT NULL
@@ -151,7 +151,7 @@ $DB->set_query_id($QueryID);
                 <td><?=Users::format_username($UserID)?></td>
                 <td><?=$Checked?></td>
             </tr>
-<?     }
+<?php   }
     $DB->set_query_id($QueryID); ?>
     </table>
     <form action="" method="GET" id="search_form" <?=!isset($_GET['search']) ? 'class="hidden"' : ''?>>
@@ -232,10 +232,10 @@ $DB->set_query_id($QueryID);
         </table>
     </form>
 </div>
-<?
+<?php
 if ($NumResults > 0) { ?>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $NumResults, $RequestsPerPage);
     echo $Pages;
 ?>
@@ -251,55 +251,55 @@ if ($NumResults > 0) { ?>
             <td>Ban Reason</td>
             <td>Comment<?=$ShowChecked ? '/Checked By' : ''?></td>
             <td>Submit<?=$ShowChecked ? '/Checked Date' : ''?></td>
-<?      if ($ShowChecked) { ?>
+<?php   if ($ShowChecked) { ?>
             <td>Outcome</td>
-<?      } ?>
+<?php   } ?>
         </tr>
-    <?
+    <?php
     $Row = 'a';
     while (list($ID, $UserID, $Email, $IP, $UserAgent, $Timestamp, $BanReason, $CheckedBy, $HandledTimestamp, $Outcome) = $DB->next_record()) {
         $Row = $Row === 'a' ? 'b' : 'a';
 ?>
         <tr class="row<?=$Row?>" id="row_<?=$ID?>">
             <td class="center">
-<?          if (!$HandledTimestamp) { ?>
+<?php   if (!$HandledTimestamp) { ?>
                 <input type="checkbox" id="multi" data-id="<?=$ID?>" />
-<?          } ?>
+<?php   } ?>
             </td>
             <td><?=Users::format_username($UserID)?></td>
-            <td><?=display_str($Email)?></td> 
-            
+            <td><?=display_str($Email)?></td>
+
             <td><?=display_str($IP)?></td>
-            
+
             <td><?=display_str($UserAgent)?></td>
             <td><?=time_diff($Timestamp)?></td>
             <td><?=($BanReason == 3) ? '<b>Inactivity</b>' : 'Other'?></td>
-<?      if (!$HandledTimestamp) { ?>
+<?php   if (!$HandledTimestamp) { ?>
             <td><input class="inputtext" type="text" id="comment<?=$ID?>" placeholder="Comment" /></td>
             <td>
                 <input type="submit" id="outcome" value="Approve" data-id="<?=$ID?>" />
                 <input type="submit" id="outcome" value="Reject" data-id="<?=$ID?>" />
                 <input type="submit" id="outcome" value="Discard" data-id="<?=$ID?>" />
             </td>
-<?      } else { ?>
+<?php   } else { ?>
             <td><?=Users::format_username($CheckedBy);?></td>
             <td><?=$HandledTimestamp?></td>
-<?      }
+<?php   }
 
         if ($ShowChecked) { ?>
             <td><?=AutoEnable::get_outcome_string($Outcome)?>
-<?          if ($Outcome == AutoEnable::DISCARDED) { ?>
+<?php       if ($Outcome == AutoEnable::DISCARDED) { ?>
                 <a href="" id="unresolve" onclick="return false;" class="brackets" data-id="<?=$ID?>">Unresolve</a>
-<?          } ?>
+<?php       } ?>
             </td>
-<?      } ?>
+<?php   } ?>
         </tr>
-    <?
+    <?php
     }
     ?>
     </table>
     <div class="linkbox">
-<?
+<?php
     $Pages = Format::get_pages($Page, $NumResults, $RequestsPerPage);
     echo $Pages;
 ?>
@@ -309,7 +309,9 @@ if ($NumResults > 0) { ?>
     <input type="submit" id="outcome" value="Reject Selected" />
     <input type="submit" id="outcome" value="Discard Selected" />
 </div>
-<? } else { ?>
+<?php
+} else { ?>
     <h2 align="center">No new pending auto enable requests<?=isset($_GET['view']) ? ' in this view' : ''?></h2>
-<? }
+<?php
+}
 View::show_footer();

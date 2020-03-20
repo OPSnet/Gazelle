@@ -9,9 +9,9 @@ var tags = new Object();
 
 function isValidTag(value) {
 var toReturn = false;
-	if (tags[value] == true) {
-		toReturn = true;
-	}
+    if (tags[value] == true) {
+        toReturn = true;
+    }
 return toReturn;
 }
 

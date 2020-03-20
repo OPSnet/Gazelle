@@ -1,16 +1,26 @@
-<?
-/***********************************************
- * This file displays the list of available tools in the staff toolbox.
- *
- * Because there are various subcontainers and various permissions, it
- * is possible to have empty subcontainers. The $ToolsHTML variable is
- * used to display only non-empty subcontainers.
- *
- ***********************************************
- */
+<?php
+/* This file displays the list of available tools in the staff toolbox. */
 
 if (!check_perms('users_mod')) {
-	error(403);
+    error(403);
+}
+
+function All(array $permlist) {
+    foreach ($permlist as $p) {
+        if (!check_perms($p)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function Any(array $permlist) {
+    foreach ($permlist as $p) {
+        if (check_perms($p)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -25,215 +35,166 @@ if (!check_perms('users_mod')) {
  * @param string $Tooltip - optional tooltip
  *
  */
-function create_row($Title, $URL, $HasPermission = false, $Tooltip = false) {
-	if ($HasPermission) {
-		global $ToolsHTML;
-		$TooltipHTML = $Tooltip !== false ? " class=\"tooltip\" title=\"$Tooltip\"" : "";
-		$ToolsHTML .= "\t\t\t\t<tr><td><a href=\"$URL\"$TooltipHTML>$Title</a></td></tr>\n";
-	}
+
+function Item($Title, $URL, $HasPermission = false, $Tooltip = false) {
+    return $HasPermission
+        ? sprintf('<tr><td><a href="%s"%s>%s</a></td></tr>',
+            $URL,
+            ($Tooltip ? " class=\"tooltip\" title=\"$Tooltip\"" : ''),
+            $Title
+        )
+        : '';
+}
+
+function Category($Title, array $Entries) {
+    $html = '';
+    foreach ($Entries as $e) {
+        $html .= $e;
+    }
+    if (strlen($html)) {
+?>
+        <div class="permission_subcontainer">
+            <table class="layout">
+                <tr class="colhead"><td><?= $Title ?></td></tr>
+                <?= $html ?>
+            </table>
+        </div>
+<?php
+    }
 }
 
 View::show_header('Staff Tools');
 ?>
 <div class="permissions">
-	<div class="permission_container">
-	<!-- begin left column -->
-<?
-	// begin Administration category
-	$ToolsHTML = "";
-	create_row("Client whitelist", "tools.php?action=whitelist", check_perms("admin_whitelist"));
-	create_row("Create user", "tools.php?action=create_user", check_perms("admin_create_users"));
-	create_row("Permissions manager", "tools.php?action=permissions", check_perms("admin_manage_permissions"));
-	create_row("Special users", "tools.php?action=special_users", check_perms("admin_manage_permissions"));
-	create_row("Manage Bonus Points", "tools.php?action=bonus_points", check_perms("users_mod"));
+    <div class="permission_container">
+    <!-- begin left column -->
+<?php
 
-	if ($ToolsHTML) {
+Category('Administration', [
+    Item('Permissions manager',      'tools.php?action=permissions',     All(['admin_manage_permissions'])),
+    Item('Staff page group manager', 'tools.php?action=staff_groups',    All(['admin_manage_permissions'])),
+    Item('Torrent client whitelist', 'tools.php?action=whitelist',       All(['admin_whitelist'])),
+    Item('Payment dates',            'tools.php?action=payment_list',    All(['admin_manage_payments'])),
+    Item('Database encryption key',  'tools.php?action=dbkey',           All(['site_debug'])),
+    Item('Auto-Enable requests',     'tools.php?action=enable_requests', All(['users_mod'])),
+    Item('Login watch',              'tools.php?action=login_watch',     All(['admin_login_watch'])),
+]);
+
+Category('Announcements', [
+    Item('News post',           'tools.php?action=news',                All(['admin_manage_news'])),
+    Item('Global notification', 'tools.php?action=global_notification', All(['users_mod'])),
+    Item('Mass PM',             'tools.php?action=mass_pm',             All(['users_mod'])),
+    Item('Change log',          'tools.php?action=change_log',          All(['users_mod'])),
+    Item('Calendar',            'tools.php?action=calendar',            Calendar::can_view()),
+    Item('Vanity House',        'tools.php?action=vanityhouse',         All(['users_mod'])),
+    Item('Album of the Month',  'tools.php?action=monthalbum',          All(['users_mod'])),
+]);
+
+Category('Community', [
+    Item('Category manager',         'tools.php?action=categories',        All(['admin_manage_forums'])),
+    Item('Contest manager',          'contest.php?action=admin',           All(['admin_manage_contest'])),
+    Item('Forum manager',            'tools.php?action=forum',             All(['admin_manage_forums'])),
+    Item('Forum transition manager', 'tools.php?action=forum_transitions', All(['admin_manage_forums'])),
+    Item('Navigation link manager',  'tools.php?action=navigation',        All(['admin_manage_navigation'])),
+    Item('IRC manager',              'tools.php?action=irc',               All(['admin_manage_forums'])),
+]);
+
+Category('Stylesheets', [
+    Item('Stylesheet usage',          'tools.php?action=stylesheets',      All(['admin_manage_stylesheets'])),
+    Item('Render stylesheet gallery', 'tools.php?action=rerender_gallery', Any(['site_debug', 'users_mod'])),
+]);
+
 ?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Administration</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?
-	}
+    <!-- end left column -->
+    </div>
+    <div class="permission_container">
+    <!-- begin middle column -->
+<?php
 
-	// begin Announcements category
-	$ToolsHTML = "";
-	create_row("Calendar", "tools.php?action=calendar", Calendar::can_view());
-	create_row("Change log", "tools.php?action=change_log", check_perms("users_mod"));
-	create_row("Global notification", "tools.php?action=global_notification", check_perms("users_mod"));
-	create_row("Mass PM", "tools.php?action=mass_pm", check_perms("users_mod"));
-	create_row("News post", "tools.php?action=news", check_perms("admin_manage_news"));
-	create_row("Vanity House additions", "tools.php?action=recommend", check_perms("site_recommend_own") || check_perms("site_manage_recommendations"));
-	create_row("Album of the Week", "tools.php?action=weekalbum", check_perms("users_mod"));
+Category('User management', [
+    Item('Create user',        'tools.php?action=create_user',       All(['admin_create_users'])),
+    Item('Special users',      'tools.php?action=special_users',     All(['admin_manage_permissions'])),
+    Item('Referral accounts',  'tools.php?action=referral_accounts', All(['admin_manage_referrals'])),
+    Item('Referred users',     'tools.php?action=referral_users',    All(['admin_view_referrals'])),
+    Item('User recovery',      'recovery.php?action=admin',          All(['admin_recovery'])),
+    Item('User flow',          'tools.php?action=user_flow',         All(['site_view_flow'])),
+    Item('Registration log',   'tools.php?action=registration_log',  All(['users_view_ips', 'users_view_email'])),
+    Item('Invite pool',        'tools.php?action=invite_pool',       All(['users_view_invites'])),
+    Item('Manage invite tree', 'tools.php?action=manipulate_tree',   All(['users_mod'])),
+]);
 
-	if ($ToolsHTML) {
+Category('Rewards', [
+    Item('Manage bonus points',     'tools.php?action=bonus_points',       All(['users_mod'])),
+    Item('Multiple freeleech',      'tools.php?action=multiple_freeleech', All(['users_mod'])),
+    Item('Manage freeleech tokens', 'tools.php?action=tokens',             All(['users_mod'])),
+]);
+
+Category('Managers', [
+    Item('IP address bans',        'tools.php?action=ip_ban',          All(['admin_manage_ipbans'])),
+    Item('Duplicate IP addresses', 'tools.php?action=dupe_ips',        All(['users_view_ips'])),
+    Item('Email blacklist',        'tools.php?action=email_blacklist', All(['users_view_email'])),
+]);
+
+Category('Torrents', [
+    Item('Rate limiting',        'tools.php?action=rate_limit',    Any(['admin_rate_limit_view', 'admin_rate_limit_manage'])),
+    Item('Recommended torrents', 'tools.php?action=recommend',     Any(['site_recommend_own', 'site_manage_recommendations'])),
+    Item('Collage recovery',     'collages.php?action=recover',    All(['site_collages_recover'])),
+    Item('"Do Not Upload" list', 'tools.php?action=dnu',           All(['admin_dnu'])),
+    Item('Label aliases',        'tools.php?action=label_aliases', All(['users_mod'])),
+]);
+
+Category('Tags', [
+    Item('Tag aliases',           'tools.php?action=tag_aliases',   All(['users_mod'])),
+    Item('Batch tag editor',      'tools.php?action=edit_tags',     All(['users_mod'])),
+    Item('Official tags manager', 'tools.php?action=official_tags', All(['users_mod'])),
+]);
+
 ?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Announcements</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?
-	}
+    <!-- end middle column -->
+    </div>
+    <div class="permission_container">
+    <!-- begin right column -->
+<?php
 
-	// begin Community category
-	$ToolsHTML = "";
-	create_row("Category manager", "tools.php?action=categories", check_perms("admin_manage_forums"));
-	create_row("Forum manager", "tools.php?action=forum", check_perms("admin_manage_forums"));
+Category('Site Information', [
+    Item('Economic stats',       'tools.php?action=economic_stats', All(['site_view_flow'])),
+    Item('Torrent stats',        'tools.php?action=torrent_stats',  All(['site_view_flow'])),
+    Item('Ratio watch',          'tools.php?action=upscale_pool',   All(['site_view_flow'])),
+    Item('OS and browser usage', 'tools.php?action=platform_usage', All(['site_debug'])),
+]);
 
-	if ($ToolsHTML) {
+Category('Finances', [
+    Item('Bitcoin (balance)',     'tools.php?action=bitcoin_balance', All(['admin_donor_log'])),
+    Item('Bitcoin (unprocessed)', 'tools.php?action=bitcoin_unproc',  All(['admin_donor_log'])),
+    Item('Donation log',          'tools.php?action=donation_log',    All(['admin_donor_log'])),
+    Item('Donor rewards',         'tools.php?action=donor_rewards',   All(['users_mod'])),
+]);
+
+Category('Developer Sandboxes', [
+    Item('Artist Importance', 'tools.php?action=artist_importance_sandbox', All(['users_mod'])),
+    Item('BBCode sandbox',    'tools.php?action=bbcode_sandbox',            All(['users_mod'])),
+    Item('DB Sandbox',        'tools.php?action=db_sandbox',                All(['site_database_specifics'])),
+    Item('Referral sandbox',  'tools.php?action=referral_sandbox',          All(['site_debug', 'admin_manage_referrals'])),
+]);
+
+Category('Development', [
+    Item('Cache key management',  'tools.php?action=clear_cache',              All(['users_mod'])),
+    Item('Database info',         'tools.php?action=database_specifics',       All(['site_database_specifics'])),
+    Item('PHP processes',         'tools.php?action=process_info',             All(['site_debug'])),
+    Item('Service stats',         'tools.php?action=service_stats',            All(['site_debug'])),
+    Item('Site info',             'tools.php?action=site_info',                All(['site_debug'])),
+    Item('Site options',          'tools.php?action=site_options',             All(['users_mod'])),
+    Item('Schedule',              'schedule.php?auth='.$LoggedUser['AuthKey'], All(['admin_schedule'])),
+    Item('Schedule - Logs',       'tools.php?action=periodic&amp;mode=view',   All(['admin_periodic_task_view'])),
+    Item('Schedule - Manage',     'tools.php?action=periodic&amp;mode=edit',   All(['admin_periodic_task_manage'])),
+    Item('Tracker info',          'tools.php?action=ocelot_info',              All(['users_mod'])),
+    Item('Update GeoIP',          'tools.php?action=update_geoip',             All(['admin_update_geoip'])),
+    Item('Update drive offsets',  'tools.php?action=update_offsets',           All(['users_mod'])),
+]);
+
 ?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Community</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?
-	}
-
-	// begin Finances category
-	$ToolsHTML = "";
-	create_row("Bitcoin donations (balance)", "tools.php?action=bitcoin_balance", check_perms("admin_donor_log"));
-	create_row("Bitcoin donations (unprocessed)", "tools.php?action=bitcoin_unproc", check_perms("admin_donor_log"));
-	//create_row("Donation log", "tools.php?action=donation_log", check_perms("admin_donor_log"));
-	create_row("Donor rewards", "tools.php?action=donor_rewards", check_perms("users_mod"));
-
-	if ($ToolsHTML) {
-?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Finances</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?	} ?>
-	<!-- end left column -->
-	</div>
-	<div class="permission_container">
-	<!-- begin middle column -->
-<?
-	// begin Queue category
-	$ToolsHTML = "";
-	create_row("Auto-Enable requests", "tools.php?action=enable_requests", check_perms("users_mod"));
-	create_row("Login watch", "tools.php?action=login_watch", check_perms("admin_login_watch"));
-
-	if ($ToolsHTML) {
-?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Queue</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?
-	}
-
-	// begin Managers category
-	$ToolsHTML = "";
-	create_row("Stylesheets", "tools.php?action=stylesheets", check_perms("admin_manage_stylesheets"));
-	create_row("Email blacklist", "tools.php?action=email_blacklist", check_perms("users_view_email"));
-	create_row("IP address bans", "tools.php?action=ip_ban", check_perms("admin_manage_ipbans"));
-	create_row("Duplicate IP addresses", "tools.php?action=dupe_ips", check_perms("users_view_ips"));
-	create_row("Manipulate invite tree", "tools.php?action=manipulate_tree", check_perms("users_mod"));
-
-	if ($ToolsHTML) {
-?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Managers</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?
-	}
-
-	// begin Developer Sandboxes category
-	$ToolsHTML = "";
-	create_row("BBCode sandbox", "tools.php?action=bbcode_sandbox", check_perms("users_mod"));
-
-	if ($ToolsHTML) {
-?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Developer Sandboxes</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?	} ?>
-	<!-- end middle column -->
-	</div>
-	<div class="permission_container">
-	<!-- begin right column -->
-<?
-	// begin Site Information category
-	$ToolsHTML = "";
-	create_row("Economic stats", "tools.php?action=economic_stats", check_perms("site_view_flow"));
-
-	create_row("Invite pool", "tools.php?action=invite_pool", check_perms("users_view_invites"));
-	create_row("Registration log", "tools.php?action=registration_log", check_perms("users_view_ips") && check_perms("users_view_email"));
-	create_row("Torrent stats", "tools.php?action=torrent_stats", check_perms("site_view_flow"));
-	create_row("Upscale pool", "tools.php?action=upscale_pool", check_perms("site_view_flow"));
-	create_row("User flow", "tools.php?action=user_flow", check_perms("site_view_flow"));
-
-	if ($ToolsHTML) {
-?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Site Information</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?
-	}
-
-	// begin Torrents category
-	$ToolsHTML = "";
-	create_row("Collage recovery", "collages.php?action=recover", check_perms("site_collages_recover"));
-	create_row("\"Do Not Upload\" list", "tools.php?action=dnu", check_perms("admin_dnu"));
-	create_row("Manage freeleech tokens", "tools.php?action=tokens", check_perms("users_mod"));
-	create_row("Multiple freeleech", "tools.php?action=multiple_freeleech", check_perms("users_mod"));
-	create_row("Label aliases", "tools.php?action=label_aliases", check_perms("users_mod"));
-	create_row("Tag aliases", "tools.php?action=tag_aliases", check_perms("users_mod"));
-	create_row("Batch tag editor", "tools.php?action=edit_tags", check_perms("users_mod"));
-	create_row("Official tags manager", "tools.php?action=official_tags", check_perms("users_mod"));
-
-	if ($ToolsHTML) {
-?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Torrents</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?
-	}
-
-	// begin Development category
-	$ToolsHTML = "";
-	create_row("Clear/view a cache key", "tools.php?action=clear_cache", check_perms("users_mod"));
-	create_row("PHP processes", "tools.php?action=process_info", check_perms("site_debug"));
-	create_row("Rerender stylesheet gallery images", "tools.php?action=rerender_gallery", check_perms("site_debug") || check_perms("users_mod"));
-	create_row("Schedule", "schedule.php?auth=$LoggedUser[AuthKey]", check_perms("site_debug"));
-	create_row("Service stats", "tools.php?action=service_stats", check_perms("site_debug"));
-	create_row("Site options", "tools.php?action=site_options", check_perms('users_mod'));
-	create_row("Tracker info", "tools.php?action=ocelot_info", check_perms("users_mod"));
-	create_row("Update GeoIP", "tools.php?action=update_geoip", check_perms("admin_update_geoip"));
-	create_row("Update Drive Offsets", "tools.php?action=update_offsets", check_perms("users_mod"));
-
-	if ($ToolsHTML) {
-?>
-		<div class="permission_subcontainer">
-			<table class="layout">
-				<tr class="colhead"><td>Development</td></tr>
-<?=				$ToolsHTML ?>
-			</table>
-		</div>
-<?	} ?>
-	<!-- end right column -->
-	</div>
+    <!-- end right column -->
+    </div>
 </div>
-<? View::show_footer(); ?>
+<?php
+View::show_footer();

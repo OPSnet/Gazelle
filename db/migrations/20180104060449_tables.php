@@ -1,17 +1,18 @@
 <?php
 
 use Phinx\Migration\AbstractMigration;
+use Phinx\Util\Literal;
 
 class Tables extends AbstractMigration {
-	public function down() {
-		$this->execute("
+    public function down() {
+        $this->execute("
 SET FOREIGN_KEY_CHECKS = 0;
 SET @tables = NULL;
 SET GROUP_CONCAT_MAX_LEN=32768;
 
 SELECT GROUP_CONCAT('`', table_schema, '`.`', table_name, '`') INTO @tables
 FROM   information_schema.tables
-WHERE  table_schema = (SELECT DATABASE());
+WHERE  table_schema = (SELECT DATABASE()) AND table_name <> 'phinxlog';
 SELECT IFNULL(@tables, '') INTO @tables;
 
 SET        @tables = CONCAT('DROP TABLE IF EXISTS ', @tables);
@@ -20,88 +21,88 @@ EXECUTE    stmt;
 DEALLOCATE PREPARE stmt;
 SET        FOREIGN_KEY_CHECKS = 1;
 DROP FUNCTION binomial_ci;");
-	}
+    }
 
-	/**
-	 * TODO: Migrate from gazelle.sql to a proper change() method
-	 */
-	public function up() {
-		$this->execute("SET FOREIGN_KEY_CHECKS = 0;");
+    /**
+     * TODO: Migrate from gazelle.sql to a proper change() method
+     */
+    public function up() {
+        $this->execute("SET FOREIGN_KEY_CHECKS = 0;");
 
-		$this->table('api_applications', ['id' => false, 'primary_key' => 'ID'])
-			->addColumn('ID', 'integer', ['limit' => 10, 'identity' => true])
-			->addColumn('UserID', 'integer', ['limit' => 10])
-			->addColumn('Token', 'char', ['limit' => 32])
-			->addColumn('Name', 'string', ['limit' => 50])
-			->create();
+        $this->table('api_applications', ['id' => false, 'primary_key' => 'ID'])
+            ->addColumn('ID', 'integer', ['limit' => 10, 'identity' => true])
+            ->addColumn('UserID', 'integer', ['limit' => 10])
+            ->addColumn('Token', 'char', ['limit' => 32])
+            ->addColumn('Name', 'string', ['limit' => 50])
+            ->create();
 
-		$this->table('api_users', ['id' => false, 'primary_key' => ['UserID', 'AppID']])
-			->addColumn('UserID', 'integer', ['limit' => 10])
-			->addColumn('AppID', 'integer', ['limit' => 10])
-			->addColumn('Token', 'char', ['limit' => 32])
-			->addColumn('State', 'enum', ['values' => ['0', '1', '2'], 'default' => '0'])
-			->addColumn('Time', 'timestamp')
-			->addColumn('Access', 'text')
-			->create();
+        $this->table('api_users', ['id' => false, 'primary_key' => ['UserID', 'AppID']])
+            ->addColumn('UserID', 'integer', ['limit' => 10])
+            ->addColumn('AppID', 'integer', ['limit' => 10])
+            ->addColumn('Token', 'char', ['limit' => 32])
+            ->addColumn('State', 'enum', ['values' => ['0', '1', '2'], 'default' => '0'])
+            ->addColumn('Time', 'timestamp')
+            ->addColumn('Access', 'text')
+            ->create();
 
-		$this->table('artists_alias', ['id' => false, 'primary_key' => 'AliasID'])
-			->addColumn('AliasID', 'integer', ['limit' => 10, 'identity' => true])
-			->addColumn('ArtistID', 'integer', ['limit' => 10])
-			->addColumn('Name', 'string', ['limit' => 200, 'null' => true, 'default' => null])
-			->addColumn('Redirect', 'integer', ['limit' => 10, 'default' => 0])
-			->addColumn('UserID', 'integer', ['limit' => 10, 'signed' => false, 'default' => 0])
-			->addIndex(['ArtistID', 'Name'])
-			->create();
+        $this->table('artists_alias', ['id' => false, 'primary_key' => 'AliasID'])
+            ->addColumn('AliasID', 'integer', ['limit' => 10, 'identity' => true])
+            ->addColumn('ArtistID', 'integer', ['limit' => 10])
+            ->addColumn('Name', 'string', ['limit' => 200, 'null' => true, 'default' => null])
+            ->addColumn('Redirect', 'integer', ['limit' => 10, 'default' => 0])
+            ->addColumn('UserID', 'integer', ['limit' => 10, 'signed' => false, 'default' => 0])
+            ->addIndex(['ArtistID', 'Name'])
+            ->create();
 
-		$this->table('artists_group', ['id' => false, 'primary_key' => 'ArtistID'])
-			->addColumn('ArtistID', 'integer', ['limit' => 10, 'identity' => true])
-			->addColumn('Name', 'string', ['limit' => 200, 'null' => true, 'default' => null])
-			->addColumn('RevisionID', 'integer', ['limit' => 12, 'null' => true, 'default' => null])
-			->addColumn('VanityHouse', 'boolean')
-			->addColumn('LastCommentID', 'integer', ['limit' => 10, 'default' => 0])
-			->addIndex(['Name', 'RevisionID'])
-			->create();
+        $this->table('artists_group', ['id' => false, 'primary_key' => 'ArtistID'])
+            ->addColumn('ArtistID', 'integer', ['limit' => 10, 'identity' => true])
+            ->addColumn('Name', 'string', ['limit' => 200, 'null' => true, 'default' => null])
+            ->addColumn('RevisionID', 'integer', ['limit' => 12, 'null' => true, 'default' => null])
+            ->addColumn('VanityHouse', 'boolean')
+            ->addColumn('LastCommentID', 'integer', ['limit' => 10, 'default' => 0])
+            ->addIndex(['Name', 'RevisionID'])
+            ->create();
 
-		$this->table('artists_similar', ['id' => false, 'primary_key' => ['ArtistID', 'SimilarID']])
-			->addColumn('ArtistID', 'integer', ['limit' => 10, 'default' => 0])
-			->addColumn('SimilarID', 'integer', ['limit' => 12, 'default' => 0])
-			->addIndex(['ArtistID', 'SimilarID'])
-			->create();
+        $this->table('artists_similar', ['id' => false, 'primary_key' => ['ArtistID', 'SimilarID']])
+            ->addColumn('ArtistID', 'integer', ['limit' => 10, 'default' => 0])
+            ->addColumn('SimilarID', 'integer', ['limit' => 12, 'default' => 0])
+            ->addIndex(['ArtistID', 'SimilarID'])
+            ->create();
 
-		$this->table('artists_similar_scores', ['id' => false, 'primary_key' => 'SimilarID'])
-			->addColumn('SimilarID', 'integer', ['limit' => 12, 'identity' => true])
-			->addColumn('Score', 'integer', ['limit' => 10, 'default' => 0])
-			->addIndex('Score')
-			->create();
+        $this->table('artists_similar_scores', ['id' => false, 'primary_key' => 'SimilarID'])
+            ->addColumn('SimilarID', 'integer', ['limit' => 12, 'identity' => true])
+            ->addColumn('Score', 'integer', ['limit' => 10, 'default' => 0])
+            ->addIndex('Score')
+            ->create();
 
-		$this->table('artists_similar_votes', ['id' => false, 'primary_key' => ['SimilarID', 'UserID', 'Way']])
-			->addColumn('SimilarID', 'integer', ['limit' => 12])
-			->addColumn('UserID', 'integer', ['limit' => 10])
-			->addColumn('Way', 'enum', ['values' => ['up', 'down'], 'default' => 'up'])
-			->create();
+        $this->table('artists_similar_votes', ['id' => false, 'primary_key' => ['SimilarID', 'UserID', 'Way']])
+            ->addColumn('SimilarID', 'integer', ['limit' => 12])
+            ->addColumn('UserID', 'integer', ['limit' => 10])
+            ->addColumn('Way', 'enum', ['values' => ['up', 'down'], 'default' => 'up'])
+            ->create();
 
-		$this->table('artists_tags', ['id' => false, 'primary_key' => ['TagID', 'ArtistID']])
-			->addColumn('TagID', 'integer', ['limit' => 10, 'default' => 0])
-			->addColumn('ArtistID', 'integer', ['limit' => 10, 'default' => 0])
-			->addColumn('PositiveVotes', 'integer', ['limit' => 6, 'default' => 1])
-			->addColumn('NegativeVotes', 'integer', ['limit' => 6, 'default' => 1])
-			->addColumn('UserID', 'integer', ['limit' => 10, 'default' => null])
-			->addIndex(['TagID', 'ArtistID', 'PositiveVotes', 'NegativeVotes', 'UserID'])
-			->create();
+        $this->table('artists_tags', ['id' => false, 'primary_key' => ['TagID', 'ArtistID']])
+            ->addColumn('TagID', 'integer', ['limit' => 10, 'default' => 0])
+            ->addColumn('ArtistID', 'integer', ['limit' => 10, 'default' => 0])
+            ->addColumn('PositiveVotes', 'integer', ['limit' => 6, 'default' => 1])
+            ->addColumn('NegativeVotes', 'integer', ['limit' => 6, 'default' => 1])
+            ->addColumn('UserID', 'integer', ['limit' => 10, 'default' => null])
+            ->addIndex(['TagID', 'ArtistID', 'PositiveVotes', 'NegativeVotes', 'UserID'])
+            ->create();
 
-		$this->table('bad_passwords', ['id' => false, 'primary_key' => 'Password'])
-			->addColumn('Password', 'char', ['limit' => 32])
-			->create();
+        $this->table('bad_passwords', ['id' => false, 'primary_key' => 'Password'])
+            ->addColumn('Password', 'char', ['limit' => 32])
+            ->create();
 
-		/*
-		$this->table('blog', ['id' => false, 'primary_key' => 'ID'])
-			->addColumn('ID', 'integer', ['limit' => 10, 'signed' => false, 'identity' => true])
-			->addColumn('UserID', 'integer', ['limit' => 10, 'signed' => false])
-			->addColumn('Title', 'string', ['limit' => 255])
-			->addColumn('Body', 'text')
-		*/
+        /*
+        $this->table('blog', ['id' => false, 'primary_key' => 'ID'])
+            ->addColumn('ID', 'integer', ['limit' => 10, 'signed' => false, 'identity' => true])
+            ->addColumn('UserID', 'integer', ['limit' => 10, 'signed' => false])
+            ->addColumn('Title', 'string', ['limit' => 255])
+            ->addColumn('Body', 'text')
+        */
 
-		$this->execute("
+        $this->execute("
 CREATE TABLE `blog` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `UserID` int(10) unsigned NOT NULL,
@@ -1325,28 +1326,28 @@ CREATE TABLE `torrents_logs` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `torrents_lossymaster_approved` (
-	`TorrentID` int(10) NOT NULL DEFAULT '0',
+    `TorrentID` int(10) NOT NULL DEFAULT '0',
   `UserID` int(10) NOT NULL DEFAULT '0',
   `TimeAdded` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   KEY `TimeAdded` (`TimeAdded`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `torrents_lossyweb_approved` (
-		`TorrentID` int(10) NOT NULL DEFAULT '0',
+        `TorrentID` int(10) NOT NULL DEFAULT '0',
   `UserID` int(10) NOT NULL DEFAULT '0',
   `TimeAdded` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   KEY `TimeAdded` (`TimeAdded`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE torrents_missing_lineage (
-			`TorrentID` int(10) NOT NULL DEFAULT '0',
+            `TorrentID` int(10) NOT NULL DEFAULT '0',
   `UserID` int(10) NOT NULL DEFAULT '0',
   `TimeAdded` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   KEY TimeAdded (TimeAdded)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `torrents_peerlists` (
-		`TorrentID` int(11) NOT NULL,
+        `TorrentID` int(11) NOT NULL,
   `GroupID` int(11) DEFAULT NULL,
   `Seeders` int(11) DEFAULT NULL,
   `Leechers` int(11) DEFAULT NULL,
@@ -1357,7 +1358,7 @@ CREATE TABLE `torrents_peerlists` (
 ) ENGINE=MyISAM CHARSET utf8;
 
 CREATE TABLE `torrents_peerlists_compare` (
-		`TorrentID` int(11) NOT NULL,
+        `TorrentID` int(11) NOT NULL,
   `GroupID` int(11) DEFAULT NULL,
   `Seeders` int(11) DEFAULT NULL,
   `Leechers` int(11) DEFAULT NULL,
@@ -1368,7 +1369,7 @@ CREATE TABLE `torrents_peerlists_compare` (
 ) ENGINE=MyISAM CHARSET utf8;
 
 CREATE TABLE `torrents_recommended` (
-		`GroupID` int(10) NOT NULL,
+        `GroupID` int(10) NOT NULL,
   `UserID` int(10) NOT NULL,
   `Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`GroupID`),
@@ -1376,7 +1377,7 @@ CREATE TABLE `torrents_recommended` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `torrents_tags` (
-		`TagID` int(10) NOT NULL DEFAULT '0',
+        `TagID` int(10) NOT NULL DEFAULT '0',
   `GroupID` int(10) NOT NULL DEFAULT '0',
   `PositiveVotes` int(6) NOT NULL DEFAULT '1',
   `NegativeVotes` int(6) NOT NULL DEFAULT '1',
@@ -1390,7 +1391,7 @@ CREATE TABLE `torrents_tags` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `torrents_tags_votes` (
-		`GroupID` int(10) NOT NULL,
+        `GroupID` int(10) NOT NULL,
   `TagID` int(10) NOT NULL,
   `UserID` int(10) NOT NULL,
   `Way` enum('up','down') NOT NULL DEFAULT 'up',
@@ -1398,7 +1399,7 @@ CREATE TABLE `torrents_tags_votes` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `torrents_votes` (
-		`GroupID` int(10) NOT NULL,
+        `GroupID` int(10) NOT NULL,
   `Ups` int(10) unsigned NOT NULL DEFAULT '0',
   `Total` int(10) unsigned NOT NULL DEFAULT '0',
   `Score` float NOT NULL DEFAULT '0',
@@ -1408,7 +1409,7 @@ CREATE TABLE `torrents_votes` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `upload_contest` (
-		`TorrentID` int(10) unsigned NOT NULL,
+        `TorrentID` int(10) unsigned NOT NULL,
   `UserID` int(10) unsigned NOT NULL,
   PRIMARY KEY (`TorrentID`),
   KEY `UserID` (`UserID`),
@@ -1416,7 +1417,7 @@ CREATE TABLE `upload_contest` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `user_questions` (
-		`ID` int(10) NOT NULL AUTO_INCREMENT,
+        `ID` int(10) NOT NULL AUTO_INCREMENT,
   `Question` mediumtext NOT NULL,
   `UserID` int(10) NOT NULL,
   `Date` datetime NOT NULL,
@@ -1425,7 +1426,7 @@ CREATE TABLE `user_questions` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_collage_subs` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `CollageID` int(10) NOT NULL,
   `LastVisit` datetime DEFAULT NULL,
   PRIMARY KEY (`UserID`,`CollageID`),
@@ -1433,7 +1434,7 @@ CREATE TABLE `users_collage_subs` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_comments_last_read` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `Page` enum('artist','collages','requests','torrents') NOT NULL,
   `PageID` int(10) NOT NULL,
   `PostID` int(10) NOT NULL,
@@ -1442,7 +1443,7 @@ CREATE TABLE `users_comments_last_read` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_donor_ranks` (
-		`UserID` int(10) NOT NULL DEFAULT '0',
+        `UserID` int(10) NOT NULL DEFAULT '0',
   `Rank` tinyint(2) NOT NULL DEFAULT '0',
   `DonationTime` datetime DEFAULT NULL,
   `Hidden` tinyint(2) NOT NULL DEFAULT '0',
@@ -1458,7 +1459,7 @@ CREATE TABLE `users_donor_ranks` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_downloads` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `TorrentID` int(1) NOT NULL,
   `Time` datetime NOT NULL,
   PRIMARY KEY (`UserID`,`TorrentID`,`Time`),
@@ -1467,7 +1468,7 @@ CREATE TABLE `users_downloads` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_dupes` (
-		`GroupID` int(10) unsigned NOT NULL,
+        `GroupID` int(10) unsigned NOT NULL,
   `UserID` int(10) unsigned NOT NULL,
   UNIQUE KEY `UserID` (`UserID`),
   KEY `GroupID` (`GroupID`),
@@ -1476,14 +1477,14 @@ CREATE TABLE `users_dupes` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_enable_recommendations` (
-		`ID` int(10) NOT NULL,
+        `ID` int(10) NOT NULL,
   `Enable` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`ID`),
   KEY `Enable` (`Enable`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_enable_requests` (
-		`ID` int(11) NOT NULL AUTO_INCREMENT,
+        `ID` int(11) NOT NULL AUTO_INCREMENT,
   `UserID` int(10) unsigned NOT NULL,
   `Email` varchar(255) NOT NULL,
   `IP` varchar(15) NOT NULL DEFAULT '0.0.0.0',
@@ -1501,7 +1502,7 @@ CREATE TABLE `users_enable_requests` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_freeleeches` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `TorrentID` int(10) NOT NULL,
   `Time` datetime NOT NULL,
   `Expired` tinyint(1) NOT NULL DEFAULT '0',
@@ -1513,12 +1514,12 @@ CREATE TABLE `users_freeleeches` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_geodistribution` (
-		`Code` varchar(2) NOT NULL,
+        `Code` varchar(2) NOT NULL,
   `Users` int(10) NOT NULL
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_history_emails` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `Email` varchar(255) DEFAULT NULL,
   `Time` datetime DEFAULT NULL,
   `IP` varchar(15) DEFAULT NULL,
@@ -1526,7 +1527,7 @@ CREATE TABLE `users_history_emails` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_history_ips` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `IP` varchar(15) NOT NULL DEFAULT '0.0.0.0',
   `StartTime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `EndTime` datetime DEFAULT NULL,
@@ -1538,7 +1539,7 @@ CREATE TABLE `users_history_ips` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_history_passkeys` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `OldPassKey` varchar(32) DEFAULT NULL,
   `NewPassKey` varchar(32) DEFAULT NULL,
   `ChangeTime` datetime DEFAULT NULL,
@@ -1546,14 +1547,14 @@ CREATE TABLE `users_history_passkeys` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_history_passwords` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `ChangeTime` datetime DEFAULT NULL,
   `ChangerIP` varchar(15) DEFAULT NULL,
   KEY `User_Time` (`UserID`,`ChangeTime`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_info` (
-		`UserID` int(10) unsigned NOT NULL,
+        `UserID` int(10) unsigned NOT NULL,
   `StyleID` int(10) unsigned NOT NULL,
   `StyleURL` varchar(255) DEFAULT NULL,
   `Info` text NOT NULL,
@@ -1615,14 +1616,14 @@ CREATE TABLE `users_info` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_levels` (
-		`UserID` int(10) unsigned NOT NULL,
+        `UserID` int(10) unsigned NOT NULL,
   `PermissionID` int(10) unsigned NOT NULL,
   PRIMARY KEY (`UserID`,`PermissionID`),
   KEY `PermissionID` (`PermissionID`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_main` (
-		`ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Username` varchar(20) NOT NULL,
   `Email` varchar(255) NOT NULL,
   `PassHash` varchar(60) NOT NULL,
@@ -1670,7 +1671,7 @@ CREATE TABLE `users_main` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_notifications_settings` (
-		`UserID` int(10) NOT NULL DEFAULT '0',
+        `UserID` int(10) NOT NULL DEFAULT '0',
   `Inbox` tinyint(1) DEFAULT '1',
   `StaffPM` tinyint(1) DEFAULT '1',
   `News` tinyint(1) DEFAULT '1',
@@ -1688,7 +1689,7 @@ CREATE TABLE `users_notifications_settings` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_notify_filters` (
-		`ID` int(12) NOT NULL AUTO_INCREMENT,
+        `ID` int(12) NOT NULL AUTO_INCREMENT,
   `UserID` int(10) NOT NULL,
   `Label` varchar(128) NOT NULL DEFAULT '',
   `Artists` mediumtext NOT NULL,
@@ -1712,7 +1713,7 @@ CREATE TABLE `users_notify_filters` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_notify_quoted` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `QuoterID` int(10) NOT NULL,
   `Page` enum('forums','artist','collages','requests','torrents') NOT NULL,
   `PageID` int(10) NOT NULL,
@@ -1723,7 +1724,7 @@ CREATE TABLE `users_notify_quoted` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_notify_torrents` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `FilterID` int(10) NOT NULL,
   `GroupID` int(10) NOT NULL,
   `TorrentID` int(10) NOT NULL,
@@ -1734,7 +1735,7 @@ CREATE TABLE `users_notify_torrents` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_points` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `GroupID` int(10) NOT NULL,
   `Points` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`UserID`,`GroupID`),
@@ -1743,7 +1744,7 @@ CREATE TABLE `users_points` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_points_requests` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `RequestID` int(10) NOT NULL,
   `Points` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`RequestID`),
@@ -1752,14 +1753,14 @@ CREATE TABLE `users_points_requests` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_push_notifications` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `PushService` tinyint(1) NOT NULL DEFAULT '0',
   `PushOptions` text NOT NULL,
   PRIMARY KEY (`UserID`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_sessions` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `SessionID` char(32) NOT NULL,
   `KeepLogged` enum('0','1') NOT NULL DEFAULT '0',
   `Browser` varchar(40) DEFAULT NULL,
@@ -1776,20 +1777,20 @@ CREATE TABLE `users_sessions` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_subscriptions` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `TopicID` int(10) NOT NULL,
   PRIMARY KEY (`UserID`,`TopicID`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_subscriptions_comments` (
-		`UserID` int(10) NOT NULL,
+        `UserID` int(10) NOT NULL,
   `Page` enum('artist','collages','requests','torrents') NOT NULL,
   `PageID` int(10) NOT NULL,
   PRIMARY KEY (`UserID`,`Page`,`PageID`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_torrent_history` (
-		`UserID` int(10) unsigned NOT NULL,
+        `UserID` int(10) unsigned NOT NULL,
   `NumTorrents` int(6) unsigned NOT NULL,
   `Date` int(8) unsigned NOT NULL,
   `Time` int(11) unsigned NOT NULL DEFAULT '0',
@@ -1802,14 +1803,14 @@ CREATE TABLE `users_torrent_history` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_torrent_history_snatch` (
-		`UserID` int(10) unsigned NOT NULL,
+        `UserID` int(10) unsigned NOT NULL,
   `NumSnatches` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`UserID`),
   KEY `NumSnatches` (`NumSnatches`)
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_torrent_history_temp` (
-		`UserID` int(10) unsigned NOT NULL,
+        `UserID` int(10) unsigned NOT NULL,
   `NumTorrents` int(6) unsigned NOT NULL DEFAULT '0',
   `SumTime` bigint(20) unsigned NOT NULL DEFAULT '0',
   `SeedingAvg` int(6) unsigned NOT NULL DEFAULT '0',
@@ -1817,7 +1818,7 @@ CREATE TABLE `users_torrent_history_temp` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_votes` (
-		`UserID` int(10) unsigned NOT NULL,
+        `UserID` int(10) unsigned NOT NULL,
   `GroupID` int(10) NOT NULL,
   `Type` enum('Up','Down') DEFAULT NULL,
   `Time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1831,7 +1832,7 @@ CREATE TABLE `users_votes` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `users_warnings_forums` (
-		`UserID` int(10) unsigned NOT NULL,
+        `UserID` int(10) unsigned NOT NULL,
   `Comment` text NOT NULL,
   PRIMARY KEY (`UserID`)
 ) ENGINE=InnoDB CHARSET utf8;
@@ -1856,7 +1857,7 @@ CREATE TABLE `wiki_articles` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `wiki_artists` (
-		`RevisionID` int(12) NOT NULL AUTO_INCREMENT,
+        `RevisionID` int(12) NOT NULL AUTO_INCREMENT,
   `PageID` int(10) NOT NULL DEFAULT '0',
   `Body` text,
   `UserID` int(10) NOT NULL DEFAULT '0',
@@ -1870,7 +1871,7 @@ CREATE TABLE `wiki_artists` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `wiki_revisions` (
-		`ID` int(10) NOT NULL,
+        `ID` int(10) NOT NULL,
   `Revision` int(10) NOT NULL,
   `Title` varchar(100) DEFAULT NULL,
   `Body` mediumtext,
@@ -1880,7 +1881,7 @@ CREATE TABLE `wiki_revisions` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `wiki_torrents` (
-		`RevisionID` int(12) NOT NULL AUTO_INCREMENT,
+        `RevisionID` int(12) NOT NULL AUTO_INCREMENT,
   `PageID` int(10) NOT NULL DEFAULT '0',
   `Body` text,
   `UserID` int(10) NOT NULL DEFAULT '0',
@@ -1894,7 +1895,7 @@ CREATE TABLE `wiki_torrents` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `xbt_client_whitelist` (
-		`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `peer_id` varchar(20) DEFAULT NULL,
   `vstring` varchar(200) DEFAULT '',
   PRIMARY KEY (`id`),
@@ -1902,7 +1903,7 @@ CREATE TABLE `xbt_client_whitelist` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `xbt_files_history` (
-		`uid` int(11) NOT NULL,
+        `uid` int(11) NOT NULL,
   `fid` int(11) NOT NULL,
   `seedtime` int(11) NOT NULL DEFAULT '0',
   `downloaded` bigint(20) NOT NULL DEFAULT '0',
@@ -1910,7 +1911,7 @@ CREATE TABLE `xbt_files_history` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `xbt_files_users` (
-		`uid` int(11) NOT NULL,
+        `uid` int(11) NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `announced` int(11) NOT NULL DEFAULT '0',
   `completed` tinyint(1) NOT NULL DEFAULT '0',
@@ -1935,7 +1936,7 @@ CREATE TABLE `xbt_files_users` (
 ) ENGINE=InnoDB CHARSET utf8;
 
 CREATE TABLE `xbt_snatched` (
-		`uid` int(11) NOT NULL DEFAULT '0',
+        `uid` int(11) NOT NULL DEFAULT '0',
   `tstamp` int(11) NOT NULL,
   `fid` int(11) NOT NULL,
   `IP` varchar(15) NOT NULL,
@@ -1950,1056 +1951,1065 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `binomial_ci`(p int, n int) RETURNS f
     SQL SECURITY INVOKER
 RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));");
 
-		$this->insert('contest_type', [['Name' => 'upload_flac'], ['Name' => 'request_fill']]);
+        $this->table('contest_type')->insert([
+          ['Name' => 'upload_flac'], ['Name' => 'request_fill']
+        ])->save();
 
-		$this->insert('forums_categories', [
-			['ID' => 1, 'Name' => 'Site', 'Sort' => 1],
-			['ID' => 21, 'Name' => 'Suggestions', 'Sort' => 3],
-			['ID' => 5, 'Name' => 'Community', 'Sort' => 5],
-			['ID' => 8, 'Name' => 'Music', 'Sort' => 8],
-			['ID' => 10, 'Name' => 'Help', 'Sort' => 10],
-			['ID' => 20, 'Name' => 'Trash', 'Sort' => 20]]);
+        $this->table('forums_categories')->insert([
+            ['ID' => 1, 'Name' => 'Site', 'Sort' => 1],
+            ['ID' => 21, 'Name' => 'Suggestions', 'Sort' => 3],
+            ['ID' => 5, 'Name' => 'Community', 'Sort' => 5],
+            ['ID' => 8, 'Name' => 'Music', 'Sort' => 8],
+            ['ID' => 10, 'Name' => 'Help', 'Sort' => 10],
+            ['ID' => 20, 'Name' => 'Trash', 'Sort' => 20]
+          ])->save();
 
-		$this->insert('forums', [
-			['ID' => 7, 'CategoryID' => 1, 'Sort' => 100, 'Name' => 'Pharmacy', 'Description' => 'Get your medication dispensed here', 'MinClassRead' => 1000, 'MinClassWrite' => 1000, 'MinClassCreate' => 1000],
-			['ID' => 5, 'CategoryID' => 1, 'Sort' => 200, 'Name' => 'Staff', 'Description' => 'No place like home', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-			['ID' => 35, 'CategoryID' => 1, 'Sort' => 250, 'Name' => 'Developers', 'Description' => 'Developers forum', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-			['ID' => 33, 'CategoryID' => 1, 'Sort' => 750, 'Name' => 'Designers', 'Description' => 'Designers', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-			['ID' => 28, 'CategoryID' => 1, 'Sort' => 800, 'Name' => 'First Line Support', 'Description' => 'Special Support Operations Command (SSOC)', 'MinClassRead' => 900, 'MinClassWrite' => 900, 'MinClassCreate' => 900],
-			['ID' => 30, 'CategoryID' => 1, 'Sort' => 900, 'Name' => 'Interviewers', 'Description' => 'The Candidates', 'MinClassRead' => 900, 'MinClassWrite' => 900, 'MinClassCreate' => 900],
+        $this->table('forums')->insert([
+            ['ID' => 7, 'CategoryID' => 1, 'Sort' => 100, 'Name' => 'Pharmacy', 'Description' => 'Get your medication dispensed here', 'MinClassRead' => 1000, 'MinClassWrite' => 1000, 'MinClassCreate' => 1000],
+            ['ID' => 5, 'CategoryID' => 1, 'Sort' => 200, 'Name' => 'Staff', 'Description' => 'No place like home', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 35, 'CategoryID' => 1, 'Sort' => 250, 'Name' => 'Developers', 'Description' => 'Developers forum', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 33, 'CategoryID' => 1, 'Sort' => 750, 'Name' => 'Designers', 'Description' => 'Designers', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 28, 'CategoryID' => 1, 'Sort' => 800, 'Name' => 'First Line Support', 'Description' => 'Special Support Operations Command (SSOC)', 'MinClassRead' => 900, 'MinClassWrite' => 900, 'MinClassCreate' => 900],
+            ['ID' => 30, 'CategoryID' => 1, 'Sort' => 900, 'Name' => 'Interviewers', 'Description' => 'The Candidates', 'MinClassRead' => 900, 'MinClassWrite' => 900, 'MinClassCreate' => 900],
 
-			['ID' => 31, 'CategoryID' => 1, 'Sort' => 1000, 'Name' => 'Charlie Team', 'Description' => 'Quality Assurance', 'MinClassRead' => 850, 'MinClassWrite' => 850, 'MinClassCreate' => 850],
-			['ID' => 1, 'CategoryID' => 1, 'Sort' => 300, 'Name' => 'APOLLO', 'Description' => 'apollo.rip', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 12, 'CategoryID' => 1, 'Sort' => 600, 'Name' => 'Announcements', 'Description' => 'Public service announcements', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 800],
-			['ID' => 6, 'CategoryID' => 1, 'Sort' => 400, 'Name' => 'Bugs', 'Description' => 'I found a non critical bug', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 24, 'CategoryID' => 5, 'Sort' => 2000, 'Name' => 'Projects', 'Description' => 'I\'m working on a project', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 31, 'CategoryID' => 1, 'Sort' => 1000, 'Name' => 'Charlie Team', 'Description' => 'Quality Assurance', 'MinClassRead' => 850, 'MinClassWrite' => 850, 'MinClassCreate' => 850],
+            ['ID' => 1, 'CategoryID' => 1, 'Sort' => 300, 'Name' => 'APOLLO', 'Description' => 'apollo.rip', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 12, 'CategoryID' => 1, 'Sort' => 600, 'Name' => 'Announcements', 'Description' => 'Public service announcements', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 800],
+            ['ID' => 6, 'CategoryID' => 1, 'Sort' => 400, 'Name' => 'Bugs', 'Description' => 'I found a non critical bug', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 24, 'CategoryID' => 5, 'Sort' => 2000, 'Name' => 'Projects', 'Description' => 'I\'m working on a project', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
 
-			['ID' => 13, 'CategoryID' => 21, 'Sort' => 2990, 'Name' => 'Suggestions', 'Description' => 'I have an idea', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 36, 'CategoryID' => 21, 'Sort' => 3000, 'Name' => 'Approved', 'Description' => 'Self explanatory...', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 800],
-			['ID' => 37, 'CategoryID' => 21, 'Sort' => 3400, 'Name' => 'Implemented', 'Description' => 'The Suggestion I made has been implemented', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-			['ID' => 15, 'CategoryID' => 21, 'Sort' => 3500, 'Name' => 'Denied', 'Description' => 'The Suggestion I made has been denied', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 13, 'CategoryID' => 21, 'Sort' => 2990, 'Name' => 'Suggestions', 'Description' => 'I have an idea', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 36, 'CategoryID' => 21, 'Sort' => 3000, 'Name' => 'Approved', 'Description' => 'Self explanatory...', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 800],
+            ['ID' => 37, 'CategoryID' => 21, 'Sort' => 3400, 'Name' => 'Implemented', 'Description' => 'The Suggestion I made has been implemented', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 15, 'CategoryID' => 21, 'Sort' => 3500, 'Name' => 'Denied', 'Description' => 'The Suggestion I made has been denied', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
 
-			['ID' => 2, 'CategoryID' => 5, 'Sort' => 1200, 'Name' => 'Chat', 'Description' => 'General chat', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 25, 'CategoryID' => 5, 'Sort' => 2100, 'Name' => 'Games', 'Description' => 'I\'m a gamer', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 27, 'CategoryID' => 5, 'Sort' => 1100, 'Name' => 'Serious Discussions', 'Description' => 'The Library', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 29, 'CategoryID' => 5, 'Sort' => 1300, 'Name' => 'Power User', 'Description' => 'PU Forum <3', 'MinClassRead' => 200, 'MinClassWrite' => 200, 'MinClassCreate' => 200],
-			['ID' => 11, 'CategoryID' => 5, 'Sort' => 1600, 'Name' => 'Elites', 'Description' => 'I\'m 1337', 'MinClassRead' => 250, 'MinClassWrite' => 250, 'MinClassCreate' => 250],
-			['ID' => 40, 'CategoryID' => 5, 'Sort' => 1610, 'Name' => 'Torrent Masters', 'Description' => 'The Holy Grail', 'MinClassRead' => 400, 'MinClassWrite' => 400, 'MinClassCreate' => 400],
-			['ID' => 38, 'CategoryID' => 5, 'Sort' => 1650, 'Name' => 'VIP', 'Description' => 'Very Important Phorum', 'MinClassRead' => 601, 'MinClassWrite' => 601, 'MinClassCreate' => 601],
-			['ID' => 10, 'CategoryID' => 5, 'Sort' => 1500, 'Name' => 'Donors', 'Description' => 'I have a heart', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-			['ID' => 39, 'CategoryID' => 5, 'Sort' => 1670, 'Name' => 'Invitations', 'Description' => 'Stairway to Heaven', 'MinClassRead' => 250, 'MinClassWrite' => 250, 'MinClassCreate' => 250],
-			['ID' => 22, 'CategoryID' => 5, 'Sort' => 1800, 'Name' => 'Comics', 'Description' => 'I read comics', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 23, 'CategoryID' => 5, 'Sort' => 1900, 'Name' => 'Technology', 'Description' => 'I like technology', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 2, 'CategoryID' => 5, 'Sort' => 1200, 'Name' => 'Chat', 'Description' => 'General chat', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 25, 'CategoryID' => 5, 'Sort' => 2100, 'Name' => 'Games', 'Description' => 'I\'m a gamer', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 27, 'CategoryID' => 5, 'Sort' => 1100, 'Name' => 'Serious Discussions', 'Description' => 'The Library', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 29, 'CategoryID' => 5, 'Sort' => 1300, 'Name' => 'Power User', 'Description' => 'PU Forum <3', 'MinClassRead' => 200, 'MinClassWrite' => 200, 'MinClassCreate' => 200],
+            ['ID' => 11, 'CategoryID' => 5, 'Sort' => 1600, 'Name' => 'Elites', 'Description' => 'I\'m 1337', 'MinClassRead' => 250, 'MinClassWrite' => 250, 'MinClassCreate' => 250],
+            ['ID' => 40, 'CategoryID' => 5, 'Sort' => 1610, 'Name' => 'Torrent Masters', 'Description' => 'The Holy Grail', 'MinClassRead' => 400, 'MinClassWrite' => 400, 'MinClassCreate' => 400],
+            ['ID' => 38, 'CategoryID' => 5, 'Sort' => 1650, 'Name' => 'VIP', 'Description' => 'Very Important Phorum', 'MinClassRead' => 601, 'MinClassWrite' => 601, 'MinClassCreate' => 601],
+            ['ID' => 10, 'CategoryID' => 5, 'Sort' => 1500, 'Name' => 'Donors', 'Description' => 'I have a heart', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 39, 'CategoryID' => 5, 'Sort' => 1670, 'Name' => 'Invitations', 'Description' => 'Stairway to Heaven', 'MinClassRead' => 250, 'MinClassWrite' => 250, 'MinClassCreate' => 250],
+            ['ID' => 22, 'CategoryID' => 5, 'Sort' => 1800, 'Name' => 'Comics', 'Description' => 'I read comics', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 23, 'CategoryID' => 5, 'Sort' => 1900, 'Name' => 'Technology', 'Description' => 'I like technology', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
 
-			['ID' => 8, 'CategoryID' => 8, 'Sort' => 30, 'Name' => 'Music', 'Description' => 'For the masses', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 18, 'CategoryID' => 8, 'Sort' => 31, 'Name' => 'Vanity House', 'Description' => 'I have some of my work to share', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 32, 'CategoryID' => 8, 'Sort' => 20, 'Name' => 'Audiophile', 'Description' => 'For the audiophile', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 19, 'CategoryID' => 8, 'Sort' => 32, 'Name' => 'The Studio', 'Description' => 'I\'m a DJ', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 26, 'CategoryID' => 8, 'Sort' => 34, 'Name' => 'Vinyl', 'Description' => 'Vinyl \'s are here to stay', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 20, 'CategoryID' => 8, 'Sort' => 33, 'Name' => 'Offered', 'Description' => 'I have some music to offer', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 9, 'CategoryID' => 5, 'Sort' => 1400, 'Name' => 'Artists', 'Description' => 'For the artistics', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-			['ID' => 21, 'CategoryID' => 5, 'Sort' => 1700, 'Name' => 'Concerts and Events', 'Description' => 'I\'m off to a gig', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 8, 'CategoryID' => 8, 'Sort' => 30, 'Name' => 'Music', 'Description' => 'For the masses', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 18, 'CategoryID' => 8, 'Sort' => 31, 'Name' => 'Vanity House', 'Description' => 'I have some of my work to share', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 32, 'CategoryID' => 8, 'Sort' => 20, 'Name' => 'Audiophile', 'Description' => 'For the audiophile', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 19, 'CategoryID' => 8, 'Sort' => 32, 'Name' => 'The Studio', 'Description' => 'I\'m a DJ', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 26, 'CategoryID' => 8, 'Sort' => 34, 'Name' => 'Vinyl', 'Description' => 'Vinyl \'s are here to stay', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 20, 'CategoryID' => 8, 'Sort' => 33, 'Name' => 'Offered', 'Description' => 'I have some music to offer', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 9, 'CategoryID' => 5, 'Sort' => 1400, 'Name' => 'Artists', 'Description' => 'For the artistics', 'MinClassRead' => 800, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 21, 'CategoryID' => 5, 'Sort' => 1700, 'Name' => 'Concerts and Events', 'Description' => 'I\'m off to a gig', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
 
-			['ID' => 3, 'CategoryID' => 10, 'Sort' => 40, 'Name' => 'Help!', 'Description' => 'I fell down and I cant get up', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 34, 'CategoryID' => 10, 'Sort' => 41, 'Name' => 'Editing', 'Description' => 'Quality Control', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 16, 'CategoryID' => 10, 'Sort' => 42, 'Name' => 'Tutorials', 'Description' => 'I would like to share my knowledge', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
-			['ID' => 17, 'CategoryID' => 10, 'Sort' => 43, 'Name' => 'BitTorrent', 'Description' => 'I need to talk about BitTorrent', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 3, 'CategoryID' => 10, 'Sort' => 40, 'Name' => 'Help!', 'Description' => 'I fell down and I cant get up', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 34, 'CategoryID' => 10, 'Sort' => 41, 'Name' => 'Editing', 'Description' => 'Quality Control', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 16, 'CategoryID' => 10, 'Sort' => 42, 'Name' => 'Tutorials', 'Description' => 'I would like to share my knowledge', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
+            ['ID' => 17, 'CategoryID' => 10, 'Sort' => 43, 'Name' => 'BitTorrent', 'Description' => 'I need to talk about BitTorrent', 'MinClassRead' => 100, 'MinClassWrite' => 100, 'MinClassCreate' => 100],
 
-			['ID' => 4, 'CategoryID' => 20, 'Sort' => 5, 'Name' => 'Trash', 'Description' => 'Every thread ends up here eventually', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-			['ID' => 14, 'CategoryID' => 20, 'Sort' => 101, 'Name' => 'Resolved Bugs', 'Description' => 'The bug I reported has been fixed', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
-		]);
+            ['ID' => 4, 'CategoryID' => 20, 'Sort' => 5, 'Name' => 'Trash', 'Description' => 'Every thread ends up here eventually', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+            ['ID' => 14, 'CategoryID' => 20, 'Sort' => 101, 'Name' => 'Resolved Bugs', 'Description' => 'The bug I reported has been fixed', 'MinClassRead' => 100, 'MinClassWrite' => 800, 'MinClassCreate' => 800],
+        ])->save();
 
-		$this->insert('permissions', [
-			[
-				'ID' => 2,
-				'Level' => 100,
-				'Name' => 'User',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_album_votes' => 1,
-					'site_edit_wiki' => 1,
-					'torrents_add_artist' => 1,
-					'MaxCollages' => 0
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 3,
-				'Level' => 150,
-				'Name' => 'Member',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'zip_downloader' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'MaxCollages' => 0
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 4,
-				'Level' => 200,
-				'Name' => 'Power User',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'forums_polls_create' => 1,
-					'zip_downloader' => 1,
-					'torrents_add_artist' => 1,
-					'MaxCollages' => 1,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 5,
-				'Level' => 250,
-				'Name' => 'Elite',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'forums_polls_create' => 1,
-					'site_delete_tag' => 1,
-					'zip_downloader' => 1,
-					'torrents_edit' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'MaxCollages' => 3,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 19,
-				'Level' => 201,
-				'Name' => 'Artist',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_recommend_own' => 1,
-					'MaxCollages' => 0,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '9',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 20,
-				'Level' => 202,
-				'Name' => 'Donor',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'forums_polls_create' => 1,
-					'zip_downloader' => 1,
-					'MaxCollages' => 1,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '10',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 42,
-				'Level' => 205,
-				'Name' => 'Donor',
-				'Values' => serialize([
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'forums_polls_create' => 1,
-					'zip_downloader' => 1,
-					'MaxCollages' => 1,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '10',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 23,
-				'Level' => 255,
-				'Name' => 'First Line Support',
-				'Values' => serialize([
-					'site_collages_personal' => 1,
-					'site_advanced_top10' => 1,
-					'MaxCollages' => 1,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '28',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 41,
-				'Level' => 257,
-				'Name' => 'Recruiter',
-				'Values' => serialize([
-					'site_send_unlimited_invites' => 1,
-					'MaxCollages' => 0,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 30,
-				'Level' => 300,
-				'Name' => 'Interviewer',
-				'Values' => serialize([
-					'MaxCollages' => 0
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '30',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 31,
-				'Level' => 310,
-				'Name' => 'Torrent Celebrity',
-				'Values' => serialize([
-					'MaxCollages' => 0
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 32,
-				'Level' => 320,
-				'Name' => 'Designer',
-				'Values' => serialize([
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'forums_polls_create' => 1,
-					'MaxCollages' => 5,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '33',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 33,
-				'Level' => 330,
-				'Name' => 'Security Team',
-				'Values' => serialize([
-					'site_send_unlimited_invites' => 1,
-					'forums_polls_create' => 1,
-					'MaxCollages' => 5,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 34,
-				'Level' => 340,
-				'Name' => 'IRC Team',
-				'Values' => serialize([
-					'MaxCollages' => 0
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 35,
-				'Level' => 350,
-				'Name' => 'Shadow Team',
-				'Values' => serialize([
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_advanced_top10' => 1,
-					'site_can_invite_always' => 1,
-					'site_send_unlimited_invites' => 1,
-					'site_disable_ip_history' => 1,
-					'users_edit_profiles' => 1,
-					'users_view_friends' => 1,
-					'users_disable_users' => 1,
-					'users_disable_posts' => 1,
-					'users_disable_any' => 1,
-					'users_view_invites' => 1,
-					'users_view_email' => 1,
-					'users_mod' => 1,
-					'admin_advanced_user_search' => 1,
-					'MaxCollages' => 0,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 36,
-				'Level' => 360,
-				'Name' => 'Alpha Team',
-				'Values' => serialize([
-					'admin_reports' => 1,
-					'MaxCollages' => 0,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 37,
-				'Level' => 370,
-				'Name' => 'Bravo Team',
-				'Values' => serialize([
-					'MaxCollages' => 0
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 38,
-				'Level' => 380,
-				'Name' => 'Charlie Team',
-				'Values' => serialize([
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_moderate_requests' => 1,
-					'site_delete_artist' => 1,
-					'site_delete_tag' => 1,
-					'zip_downloader' => 1,
-					'site_tag_aliases_read' => 1,
-					'torrents_edit' => 1,
-					'torrents_delete' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'torrents_fix_ghosts' => 1,
-					'MaxCollages' => 2,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '31',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 39,
-				'Level' => 395,
-				'Name' => 'Delta Team',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_can_invite_always' => 1,
-					'MaxCollages' => 1,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '35',
-				'Secondary' => 1
-			],
-			[
-				'ID' => 25,
-				'Level' => 400,
-				'Name' => 'Torrent Master',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'forums_polls_create' => 1,
-					'site_delete_tag' => 1,
-					'zip_downloader' => 1,
-					'torrents_edit' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'MaxCollages' => 6,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 29,
-				'Level' => 450,
-				'Name' => 'Power TM',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'forums_polls_create' => 1,
-					'site_delete_tag' => 1,
-					'zip_downloader' => 1,
-					'torrents_edit' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'MaxCollages' => 5,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 28,
-				'Level' => 500,
-				'Name' => 'Elite TM',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_send_unlimited_invites' => 1,
-					'forums_polls_create' => 1,
-					'site_delete_tag' => 1,
-					'zip_downloader' => 1,
-					'torrents_edit' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'MaxCollages' => 6,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 26,
-				'Level' => 601,
-				'Name' => 'VIP',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_send_unlimited_invites' => 1,
-					'forums_polls_create' => 1,
-					'site_delete_tag' => 1,
-					'zip_downloader' => 1,
-					'torrents_edit' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'MaxCollages' => 6,
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 27,
-				'Level' => 605,
-				'Name' => 'Legend',
-				'Values' => serialize([
-					'MaxCollages' => 1
-				]),
-				'DisplayStaff' => '0',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 21,
-				'Level' => 800,
-				'Name' => 'Forum Moderator',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_send_unlimited_invites' => 1,
-					'forums_polls_create' => 1,
-					'site_moderate_forums' => 1,
-					'site_admin_forums' => 1,
-					'site_delete_tag' => 1,
-					'site_disable_ip_history' => 1,
-					'zip_downloader' => 1,
-					'site_proxy_images' => 1,
-					'site_search_many' => 1,
-					'site_forums_double_post' => 1,
-					'project_team' => 1,
-					'site_tag_aliases_read' => 1,
-					'users_edit_titles' => 1,
-					'users_edit_avatars' => 1,
-					'users_warn' => 1,
-					'users_disable_posts' => 1,
-					'users_override_paranoia' => 1,
-					'torrents_edit' => 1,
-					'torrents_delete' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'torrents_fix_ghosts' => 1,
-					'admin_reports' => 1,
-					'MaxCollages' => 6,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 22,
-				'Level' => 850,
-				'Name' => 'Torrent Moderator',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_send_unlimited_invites' => 1,
-					'site_delete_artist' => 1,
-					'forums_polls_create' => 1,
-					'site_moderate_forums' => 1,
-					'site_admin_forums' => 1,
-					'site_view_torrent_snatchlist' => 1,
-					'site_delete_tag' => 1,
-					'site_disable_ip_history' => 1,
-					'zip_downloader' => 1,
-					'site_proxy_images' => 1,
-					'site_search_many' => 1,
-					'site_forums_double_post' => 1,
-					'project_team' => 1,
-					'site_tag_aliases_read' => 1,
-					'users_edit_avatars' => 1,
-					'users_edit_reset_keys' => 1,
-					'users_view_friends' => 1,
-					'users_warn' => 1,
-					'users_disable_users' => 1,
-					'users_disable_posts' => 1,
-					'users_view_seedleech' => 1,
-					'users_view_uploaded' => 1,
-					'users_view_keys' => 1,
-					'users_view_ips' => 1,
-					'users_view_email' => 1,
-					'users_invite_notes' => 1,
-					'users_override_paranoia' => 1,
-					'users_mod' => 1,
-					'torrents_edit' => 1,
-					'torrents_delete' => 1,
-					'torrents_delete_fast' => 1,
-					'torrents_search_fast' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'torrents_fix_ghosts' => 1,
-					'admin_reports' => 1,
-					'admin_advanced_user_search' => 1,
-					'admin_clear_cache' => 1,
-					'admin_whitelist' => 1,
-					'MaxCollages' => 6,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 11,
-				'Level' => 900,
-				'Name' => 'Moderator',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_delete' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_send_unlimited_invites' => 1,
-					'site_moderate_requests' => 1,
-					'site_delete_artist' => 1,
-					'forums_polls_create' => 1,
-					'site_moderate_forums' => 1,
-					'site_admin_forums' => 1,
-					'site_view_torrent_snatchlist' => 1,
-					'site_delete_tag' => 1,
-					'site_disable_ip_history' => 1,
-					'zip_downloader' => 1,
-					'site_proxy_images' => 1,
-					'site_search_many' => 1,
-					'site_forums_double_post' => 1,
-					'project_team' => 1,
-					'site_tag_aliases_read' => 1,
-					'users_edit_titles' => 1,
-					'users_edit_avatars' => 1,
-					'users_edit_invites' => 1,
-					'users_edit_reset_keys' => 1,
-					'users_view_friends' => 1,
-					'users_warn' => 1,
-					'users_disable_users' => 1,
-					'users_disable_posts' => 1,
-					'users_disable_any' => 1,
-					'users_view_invites' => 1,
-					'users_view_seedleech' => 1,
-					'users_view_uploaded' => 1,
-					'users_view_keys' => 1,
-					'users_view_ips' => 1,
-					'users_view_email' => 1,
-					'users_invite_notes' => 1,
-					'users_override_paranoia' => 1,
-					'users_logout' => 1,
-					'users_mod' => 1,
-					'torrents_edit' => 1,
-					'torrents_delete' => 1,
-					'torrents_delete_fast' => 1,
-					'torrents_freeleech' => 1,
-					'torrents_search_fast' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'torrents_fix_ghosts' => 1,
-					'admin_manage_fls' => 1,
-					'admin_reports' => 1,
-					'admin_advanced_user_search' => 1,
-					'admin_clear_cache' => 1,
-					'admin_whitelist' => 1,
-					'MaxCollages' => 6,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 24,
-				'Level' => 950,
-				'Name' => 'Developer',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_can_invite_always' => 1,
-					'site_send_unlimited_invites' => 1,
-					'forums_polls_create' => 1,
-					'site_view_flow' => 1,
-					'site_view_full_log' => 1,
-					'site_view_torrent_snatchlist' => 1,
-					'site_recommend_own' => 1,
-					'site_manage_recommendations' => 1,
-					'site_delete_tag' => 1,
-					'zip_downloader' => 1,
-					'site_forums_double_post' => 1,
-					'MaxCollages' => 1,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '35',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 40,
-				'Level' => 980,
-				'Name' => 'Administrator',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_delete' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_can_invite_always' => 1,
-					'site_send_unlimited_invites' => 1,
-					'site_moderate_requests' => 1,
-					'site_delete_artist' => 1,
-					'forums_polls_create' => 1,
-					'forums_polls_moderate' => 1,
-					'site_moderate_forums' => 1,
-					'site_admin_forums' => 1,
-					'site_view_flow' => 1,
-					'site_view_full_log' => 1,
-					'site_view_torrent_snatchlist' => 1,
-					'site_recommend_own' => 1,
-					'site_manage_recommendations' => 1,
-					'site_delete_tag' => 1,
-					'site_disable_ip_history' => 1,
-					'zip_downloader' => 1,
-					'site_proxy_images' => 1,
-					'site_search_many' => 1,
-					'site_collages_recover' => 1,
-					'site_forums_double_post' => 1,
-					'project_team' => 1,
-					'site_tag_aliases_read' => 1,
-					'users_edit_ratio' => 1,
-					'users_edit_titles' => 1,
-					'users_edit_avatars' => 1,
-					'users_edit_invites' => 1,
-					'users_edit_watch_hours' => 1,
-					'users_edit_reset_keys' => 1,
-					'users_edit_profiles' => 1,
-					'users_view_friends' => 1,
-					'users_reset_own_keys' => 1,
-					'users_edit_password' => 1,
-					'users_promote_below' => 1,
-					'users_warn' => 1,
-					'users_disable_users' => 1,
-					'users_disable_posts' => 1,
-					'users_disable_any' => 1,
-					'users_delete_users' => 1,
-					'users_view_invites' => 1,
-					'users_view_seedleech' => 1,
-					'users_view_uploaded' => 1,
-					'users_view_keys' => 1,
-					'users_view_ips' => 1,
-					'users_view_email' => 1,
-					'users_invite_notes' => 1,
-					'users_override_paranoia' => 1,
-					'users_logout' => 1,
-					'users_mod' => 1,
-					'torrents_edit' => 1,
-					'torrents_delete' => 1,
-					'torrents_delete_fast' => 1,
-					'torrents_freeleech' => 1,
-					'torrents_search_fast' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'torrents_edit_vanityhouse' => 1,
-					'artist_edit_vanityhouse' => 1,
-					'torrents_fix_ghosts' => 1,
-					'admin_manage_blog' => 1,
-					'admin_manage_fls' => 1,
-					'admin_reports' => 1,
-					'admin_advanced_user_search' => 1,
-					'admin_manage_ipbans' => 1,
-					'admin_dnu' => 1,
-					'admin_clear_cache' => 1,
-					'admin_whitelist' => 1,
-					'admin_manage_wiki' => 1,
-					'MaxCollages' => 5,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-			[
-				'ID' => 15,
-				'Level' => 1000,
-				'Name' => 'Sysop',
-				'Values' => serialize([
-					'site_leech' => 1,
-					'site_upload' => 1,
-					'site_vote' => 1,
-					'site_submit_requests' => 1,
-					'site_advanced_search' => 1,
-					'site_top10' => 1,
-					'site_advanced_top10' => 1,
-					'site_album_votes' => 1,
-					'site_torrents_notify' => 1,
-					'site_collages_create' => 1,
-					'site_collages_manage' => 1,
-					'site_collages_delete' => 1,
-					'site_collages_subscribe' => 1,
-					'site_collages_personal' => 1,
-					'site_collages_renamepersonal' => 1,
-					'site_make_bookmarks' => 1,
-					'site_edit_wiki' => 1,
-					'site_can_invite_always' => 1,
-					'site_send_unlimited_invites' => 1,
-					'site_moderate_requests' => 1,
-					'site_delete_artist' => 1,
-					'site_moderate_forums' => 1,
-					'site_admin_forums' => 1,
-					'site_forums_double_post' => 1,
-					'site_view_flow' => 1,
-					'site_view_full_log' => 1,
-					'site_view_torrent_snatchlist' => 1,
-					'site_recommend_own' => 1,
-					'site_manage_recommendations' => 1,
-					'site_delete_tag' => 1,
-					'site_disable_ip_history' => 1,
-					'zip_downloader' => 1,
-					'site_debug' => 1,
-					'site_proxy_images' => 1,
-					'site_search_many' => 1,
-					'users_edit_usernames' => 1,
-					'users_edit_ratio' => 1,
-					'users_edit_own_ratio' => 1,
-					'users_edit_titles' => 1,
-					'users_edit_avatars' => 1,
-					'users_edit_invites' => 1,
-					'users_edit_watch_hours' => 1,
-					'users_edit_reset_keys' => 1,
-					'users_edit_profiles' => 1,
-					'users_view_friends' => 1,
-					'users_reset_own_keys' => 1,
-					'users_edit_password' => 1,
-					'users_promote_below' => 1,
-					'users_promote_to' => 1,
-					'users_give_donor' => 1,
-					'users_warn' => 1,
-					'users_disable_users' => 1,
-					'users_disable_posts' => 1,
-					'users_disable_any' => 1,
-					'users_delete_users' => 1,
-					'users_view_invites' => 1,
-					'users_view_seedleech' => 1,
-					'users_view_uploaded' => 1,
-					'users_view_keys' => 1,
-					'users_view_ips' => 1,
-					'users_view_email' => 1,
-					'users_invite_notes' => 1,
-					'users_override_paranoia' => 1,
-					'users_logout' => 1,
-					'users_make_invisible' => 1,
-					'users_mod' => 1,
-					'torrents_edit' => 1,
-					'torrents_delete' => 1,
-					'torrents_delete_fast' => 1,
-					'torrents_freeleech' => 1,
-					'torrents_search_fast' => 1,
-					'torrents_hide_dnu' => 1,
-					'torrents_fix_ghosts' => 1,
-					'admin_manage_news' => 1,
-					'admin_manage_blog' => 1,
-					'admin_manage_polls' => 1,
-					'admin_manage_forums' => 1,
-					'admin_manage_fls' => 1,
-					'admin_reports' => 1,
-					'admin_advanced_user_search' => 1,
-					'admin_create_users' => 1,
-					'admin_donor_log' => 1,
-					'admin_manage_ipbans' => 1,
-					'admin_dnu' => 1,
-					'admin_clear_cache' => 1,
-					'admin_whitelist' => 1,
-					'admin_manage_permissions' => 1,
-					'admin_schedule' => 1,
-					'admin_login_watch' => 1,
-					'admin_manage_wiki' => 1,
-					'admin_update_geoip' => 1,
-					'site_collages_recover' => 1,
-					'torrents_add_artist' => 1,
-					'edit_unknowns' => 1,
-					'forums_polls_create' => 1,
-					'forums_polls_moderate' => 1,
-					'project_team' => 1,
-					'torrents_edit_vanityhouse' => 1,
-					'artist_edit_vanityhouse' => 1,
-					'site_tag_aliases_read' => 1,
-				]),
-				'DisplayStaff' => '1',
-				'PermittedForums' => '',
-				'Secondary' => 0
-			],
-		]);
+        $this->table('permissions')->insert([
+            [
+                'ID' => 2,
+                'Level' => 100,
+                'Name' => 'User',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_edit_wiki' => 1,
+                    'torrents_add_artist' => 1,
+                    'MaxCollages' => 0
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 3,
+                'Level' => 150,
+                'Name' => 'Member',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'zip_downloader' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'MaxCollages' => 0
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 4,
+                'Level' => 200,
+                'Name' => 'Power User',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'forums_polls_create' => 1,
+                    'zip_downloader' => 1,
+                    'torrents_add_artist' => 1,
+                    'MaxCollages' => 1,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 5,
+                'Level' => 250,
+                'Name' => 'Elite',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'forums_polls_create' => 1,
+                    'site_delete_tag' => 1,
+                    'zip_downloader' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'MaxCollages' => 3,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 19,
+                'Level' => 201,
+                'Name' => 'Artist',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_recommend_own' => 1,
+                    'MaxCollages' => 0,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '9',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 20,
+                'Level' => 202,
+                'Name' => 'Donor',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'forums_polls_create' => 1,
+                    'zip_downloader' => 1,
+                    'MaxCollages' => 1,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '10',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 42,
+                'Level' => 205,
+                'Name' => 'Donor',
+                'Values' => serialize([
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'forums_polls_create' => 1,
+                    'zip_downloader' => 1,
+                    'MaxCollages' => 1,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '10',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 23,
+                'Level' => 255,
+                'Name' => 'First Line Support',
+                'Values' => serialize([
+                    'site_collages_personal' => 1,
+                    'site_advanced_top10' => 1,
+                    'MaxCollages' => 1,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '28',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 41,
+                'Level' => 257,
+                'Name' => 'Recruiter',
+                'Values' => serialize([
+                    'site_send_unlimited_invites' => 1,
+                    'MaxCollages' => 0,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 30,
+                'Level' => 300,
+                'Name' => 'Interviewer',
+                'Values' => serialize([
+                    'MaxCollages' => 0
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '30',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 31,
+                'Level' => 310,
+                'Name' => 'Torrent Celebrity',
+                'Values' => serialize([
+                    'MaxCollages' => 0
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 32,
+                'Level' => 320,
+                'Name' => 'Designer',
+                'Values' => serialize([
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'forums_polls_create' => 1,
+                    'MaxCollages' => 5,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '33',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 33,
+                'Level' => 330,
+                'Name' => 'Security Team',
+                'Values' => serialize([
+                    'site_send_unlimited_invites' => 1,
+                    'forums_polls_create' => 1,
+                    'MaxCollages' => 5,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 34,
+                'Level' => 340,
+                'Name' => 'IRC Team',
+                'Values' => serialize([
+                    'MaxCollages' => 0
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 35,
+                'Level' => 350,
+                'Name' => 'Shadow Team',
+                'Values' => serialize([
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_can_invite_always' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'site_disable_ip_history' => 1,
+                    'users_edit_profiles' => 1,
+                    'users_view_friends' => 1,
+                    'users_disable_users' => 1,
+                    'users_disable_posts' => 1,
+                    'users_disable_any' => 1,
+                    'users_view_invites' => 1,
+                    'users_view_email' => 1,
+                    'users_mod' => 1,
+                    'admin_advanced_user_search' => 1,
+                    'MaxCollages' => 0,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 36,
+                'Level' => 360,
+                'Name' => 'Alpha Team',
+                'Values' => serialize([
+                    'admin_reports' => 1,
+                    'MaxCollages' => 0,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 37,
+                'Level' => 370,
+                'Name' => 'Bravo Team',
+                'Values' => serialize([
+                    'MaxCollages' => 0
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 38,
+                'Level' => 380,
+                'Name' => 'Charlie Team',
+                'Values' => serialize([
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_moderate_requests' => 1,
+                    'site_delete_artist' => 1,
+                    'site_delete_tag' => 1,
+                    'zip_downloader' => 1,
+                    'site_tag_aliases_read' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_delete' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'torrents_fix_ghosts' => 1,
+                    'MaxCollages' => 2,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '31',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 39,
+                'Level' => 395,
+                'Name' => 'Delta Team',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_can_invite_always' => 1,
+                    'MaxCollages' => 1,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '35',
+                'Secondary' => 1
+            ],
+            [
+                'ID' => 25,
+                'Level' => 400,
+                'Name' => 'Torrent Master',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'forums_polls_create' => 1,
+                    'site_delete_tag' => 1,
+                    'zip_downloader' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'MaxCollages' => 6,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 29,
+                'Level' => 450,
+                'Name' => 'Power TM',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'forums_polls_create' => 1,
+                    'site_delete_tag' => 1,
+                    'zip_downloader' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'MaxCollages' => 5,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 28,
+                'Level' => 500,
+                'Name' => 'Elite TM',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'forums_polls_create' => 1,
+                    'site_delete_tag' => 1,
+                    'zip_downloader' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'MaxCollages' => 6,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 26,
+                'Level' => 601,
+                'Name' => 'VIP',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'forums_polls_create' => 1,
+                    'site_delete_tag' => 1,
+                    'zip_downloader' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'MaxCollages' => 6,
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 27,
+                'Level' => 605,
+                'Name' => 'Legend',
+                'Values' => serialize([
+                    'MaxCollages' => 1
+                ]),
+                'DisplayStaff' => '0',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 21,
+                'Level' => 800,
+                'Name' => 'Forum Moderator',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'forums_polls_create' => 1,
+                    'site_moderate_forums' => 1,
+                    'site_admin_forums' => 1,
+                    'site_delete_tag' => 1,
+                    'site_disable_ip_history' => 1,
+                    'zip_downloader' => 1,
+                    'site_proxy_images' => 1,
+                    'site_search_many' => 1,
+                    'site_forums_double_post' => 1,
+                    'project_team' => 1,
+                    'site_tag_aliases_read' => 1,
+                    'users_edit_titles' => 1,
+                    'users_edit_avatars' => 1,
+                    'users_warn' => 1,
+                    'users_disable_posts' => 1,
+                    'users_override_paranoia' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_delete' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'torrents_fix_ghosts' => 1,
+                    'admin_reports' => 1,
+                    'MaxCollages' => 6,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 22,
+                'Level' => 850,
+                'Name' => 'Torrent Moderator',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'site_delete_artist' => 1,
+                    'forums_polls_create' => 1,
+                    'site_moderate_forums' => 1,
+                    'site_admin_forums' => 1,
+                    'site_view_torrent_snatchlist' => 1,
+                    'site_delete_tag' => 1,
+                    'site_disable_ip_history' => 1,
+                    'zip_downloader' => 1,
+                    'site_proxy_images' => 1,
+                    'site_search_many' => 1,
+                    'site_forums_double_post' => 1,
+                    'project_team' => 1,
+                    'site_tag_aliases_read' => 1,
+                    'users_edit_avatars' => 1,
+                    'users_edit_reset_keys' => 1,
+                    'users_view_friends' => 1,
+                    'users_warn' => 1,
+                    'users_disable_users' => 1,
+                    'users_disable_posts' => 1,
+                    'users_view_seedleech' => 1,
+                    'users_view_uploaded' => 1,
+                    'users_view_keys' => 1,
+                    'users_view_ips' => 1,
+                    'users_view_email' => 1,
+                    'users_invite_notes' => 1,
+                    'users_override_paranoia' => 1,
+                    'users_mod' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_delete' => 1,
+                    'torrents_delete_fast' => 1,
+                    'torrents_search_fast' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'torrents_fix_ghosts' => 1,
+                    'admin_reports' => 1,
+                    'admin_advanced_user_search' => 1,
+                    'admin_clear_cache' => 1,
+                    'admin_whitelist' => 1,
+                    'MaxCollages' => 6,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 11,
+                'Level' => 900,
+                'Name' => 'Moderator',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_delete' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'site_moderate_requests' => 1,
+                    'site_delete_artist' => 1,
+                    'forums_polls_create' => 1,
+                    'site_moderate_forums' => 1,
+                    'site_admin_forums' => 1,
+                    'site_view_torrent_snatchlist' => 1,
+                    'site_delete_tag' => 1,
+                    'site_disable_ip_history' => 1,
+                    'zip_downloader' => 1,
+                    'site_proxy_images' => 1,
+                    'site_search_many' => 1,
+                    'site_forums_double_post' => 1,
+                    'project_team' => 1,
+                    'site_tag_aliases_read' => 1,
+                    'users_edit_titles' => 1,
+                    'users_edit_avatars' => 1,
+                    'users_edit_invites' => 1,
+                    'users_edit_reset_keys' => 1,
+                    'users_view_friends' => 1,
+                    'users_warn' => 1,
+                    'users_disable_users' => 1,
+                    'users_disable_posts' => 1,
+                    'users_disable_any' => 1,
+                    'users_view_invites' => 1,
+                    'users_view_seedleech' => 1,
+                    'users_view_uploaded' => 1,
+                    'users_view_keys' => 1,
+                    'users_view_ips' => 1,
+                    'users_view_email' => 1,
+                    'users_invite_notes' => 1,
+                    'users_override_paranoia' => 1,
+                    'users_logout' => 1,
+                    'users_mod' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_delete' => 1,
+                    'torrents_delete_fast' => 1,
+                    'torrents_freeleech' => 1,
+                    'torrents_search_fast' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'torrents_fix_ghosts' => 1,
+                    'admin_manage_fls' => 1,
+                    'admin_reports' => 1,
+                    'admin_advanced_user_search' => 1,
+                    'admin_clear_cache' => 1,
+                    'admin_whitelist' => 1,
+                    'MaxCollages' => 6,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 24,
+                'Level' => 950,
+                'Name' => 'Developer',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_can_invite_always' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'forums_polls_create' => 1,
+                    'site_view_flow' => 1,
+                    'site_view_full_log' => 1,
+                    'site_view_torrent_snatchlist' => 1,
+                    'site_recommend_own' => 1,
+                    'site_manage_recommendations' => 1,
+                    'site_delete_tag' => 1,
+                    'zip_downloader' => 1,
+                    'site_forums_double_post' => 1,
+                    'MaxCollages' => 1,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '35',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 40,
+                'Level' => 980,
+                'Name' => 'Administrator',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_delete' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_can_invite_always' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'site_moderate_requests' => 1,
+                    'site_delete_artist' => 1,
+                    'forums_polls_create' => 1,
+                    'forums_polls_moderate' => 1,
+                    'site_moderate_forums' => 1,
+                    'site_admin_forums' => 1,
+                    'site_view_flow' => 1,
+                    'site_view_full_log' => 1,
+                    'site_view_torrent_snatchlist' => 1,
+                    'site_recommend_own' => 1,
+                    'site_manage_recommendations' => 1,
+                    'site_delete_tag' => 1,
+                    'site_disable_ip_history' => 1,
+                    'zip_downloader' => 1,
+                    'site_proxy_images' => 1,
+                    'site_search_many' => 1,
+                    'site_collages_recover' => 1,
+                    'site_forums_double_post' => 1,
+                    'project_team' => 1,
+                    'site_tag_aliases_read' => 1,
+                    'users_edit_ratio' => 1,
+                    'users_edit_titles' => 1,
+                    'users_edit_avatars' => 1,
+                    'users_edit_invites' => 1,
+                    'users_edit_watch_hours' => 1,
+                    'users_edit_reset_keys' => 1,
+                    'users_edit_profiles' => 1,
+                    'users_view_friends' => 1,
+                    'users_reset_own_keys' => 1,
+                    'users_edit_password' => 1,
+                    'users_promote_below' => 1,
+                    'users_warn' => 1,
+                    'users_disable_users' => 1,
+                    'users_disable_posts' => 1,
+                    'users_disable_any' => 1,
+                    'users_delete_users' => 1,
+                    'users_view_invites' => 1,
+                    'users_view_seedleech' => 1,
+                    'users_view_uploaded' => 1,
+                    'users_view_keys' => 1,
+                    'users_view_ips' => 1,
+                    'users_view_email' => 1,
+                    'users_invite_notes' => 1,
+                    'users_override_paranoia' => 1,
+                    'users_logout' => 1,
+                    'users_mod' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_delete' => 1,
+                    'torrents_delete_fast' => 1,
+                    'torrents_freeleech' => 1,
+                    'torrents_search_fast' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'torrents_edit_vanityhouse' => 1,
+                    'artist_edit_vanityhouse' => 1,
+                    'torrents_fix_ghosts' => 1,
+                    'admin_manage_blog' => 1,
+                    'admin_manage_fls' => 1,
+                    'admin_reports' => 1,
+                    'admin_advanced_user_search' => 1,
+                    'admin_manage_ipbans' => 1,
+                    'admin_dnu' => 1,
+                    'admin_clear_cache' => 1,
+                    'admin_whitelist' => 1,
+                    'admin_manage_wiki' => 1,
+                    'MaxCollages' => 5,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+            [
+                'ID' => 15,
+                'Level' => 1000,
+                'Name' => 'Sysop',
+                'Values' => serialize([
+                    'site_leech' => 1,
+                    'site_upload' => 1,
+                    'site_vote' => 1,
+                    'site_submit_requests' => 1,
+                    'site_advanced_search' => 1,
+                    'site_top10' => 1,
+                    'site_advanced_top10' => 1,
+                    'site_album_votes' => 1,
+                    'site_torrents_notify' => 1,
+                    'site_collages_create' => 1,
+                    'site_collages_manage' => 1,
+                    'site_collages_delete' => 1,
+                    'site_collages_subscribe' => 1,
+                    'site_collages_personal' => 1,
+                    'site_collages_renamepersonal' => 1,
+                    'site_make_bookmarks' => 1,
+                    'site_edit_wiki' => 1,
+                    'site_can_invite_always' => 1,
+                    'site_send_unlimited_invites' => 1,
+                    'site_moderate_requests' => 1,
+                    'site_delete_artist' => 1,
+                    'site_moderate_forums' => 1,
+                    'site_admin_forums' => 1,
+                    'site_forums_double_post' => 1,
+                    'site_view_flow' => 1,
+                    'site_view_full_log' => 1,
+                    'site_view_torrent_snatchlist' => 1,
+                    'site_recommend_own' => 1,
+                    'site_manage_recommendations' => 1,
+                    'site_delete_tag' => 1,
+                    'site_disable_ip_history' => 1,
+                    'zip_downloader' => 1,
+                    'site_debug' => 1,
+                    'site_proxy_images' => 1,
+                    'site_search_many' => 1,
+                    'users_edit_usernames' => 1,
+                    'users_edit_ratio' => 1,
+                    'users_edit_own_ratio' => 1,
+                    'users_edit_titles' => 1,
+                    'users_edit_avatars' => 1,
+                    'users_edit_invites' => 1,
+                    'users_edit_watch_hours' => 1,
+                    'users_edit_reset_keys' => 1,
+                    'users_edit_profiles' => 1,
+                    'users_view_friends' => 1,
+                    'users_reset_own_keys' => 1,
+                    'users_edit_password' => 1,
+                    'users_promote_below' => 1,
+                    'users_promote_to' => 1,
+                    'users_give_donor' => 1,
+                    'users_warn' => 1,
+                    'users_disable_users' => 1,
+                    'users_disable_posts' => 1,
+                    'users_disable_any' => 1,
+                    'users_delete_users' => 1,
+                    'users_view_invites' => 1,
+                    'users_view_seedleech' => 1,
+                    'users_view_uploaded' => 1,
+                    'users_view_keys' => 1,
+                    'users_view_ips' => 1,
+                    'users_view_email' => 1,
+                    'users_invite_notes' => 1,
+                    'users_override_paranoia' => 1,
+                    'users_logout' => 1,
+                    'users_make_invisible' => 1,
+                    'users_mod' => 1,
+                    'torrents_edit' => 1,
+                    'torrents_delete' => 1,
+                    'torrents_delete_fast' => 1,
+                    'torrents_freeleech' => 1,
+                    'torrents_search_fast' => 1,
+                    'torrents_hide_dnu' => 1,
+                    'torrents_fix_ghosts' => 1,
+                    'admin_manage_news' => 1,
+                    'admin_manage_blog' => 1,
+                    'admin_manage_polls' => 1,
+                    'admin_manage_forums' => 1,
+                    'admin_manage_fls' => 1,
+                    'admin_reports' => 1,
+                    'admin_advanced_user_search' => 1,
+                    'admin_create_users' => 1,
+                    'admin_donor_log' => 1,
+                    'admin_manage_ipbans' => 1,
+                    'admin_dnu' => 1,
+                    'admin_clear_cache' => 1,
+                    'admin_whitelist' => 1,
+                    'admin_manage_permissions' => 1,
+                    'admin_schedule' => 1,
+                    'admin_login_watch' => 1,
+                    'admin_manage_wiki' => 1,
+                    'admin_update_geoip' => 1,
+                    'site_collages_recover' => 1,
+                    'torrents_add_artist' => 1,
+                    'edit_unknowns' => 1,
+                    'forums_polls_create' => 1,
+                    'forums_polls_moderate' => 1,
+                    'project_team' => 1,
+                    'torrents_edit_vanityhouse' => 1,
+                    'artist_edit_vanityhouse' => 1,
+                    'site_tag_aliases_read' => 1,
+                ]),
+                'DisplayStaff' => '1',
+                'PermittedForums' => '',
+                'Secondary' => 0
+            ],
+        ])->save();
 
-		$this->insert('wiki_articles', [['Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'MinClassRead' => 100, 'MinClassEdit' => 475, 'Date' => 'NOW()', 'Author' => 1]]);
-		$this->insert('wiki_aliases', [['Alias' => 'wiki', 'UserID' => 1, 'ArticleID' => 1]]);
-		$this->insert('wiki_revisions', [['ID' => 1, 'Revision' => 1, 'Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'Date' => 'NOW()', 'Author' => 1]]);
-		$this->insert('tags', [
-			['Name' => 'rock', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
-			['Name' => 'pop', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
-			['Name' => 'female.fronted.symphonic.death.metal', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1]
-		]);
+        $this->table('wiki_articles')->insert([
+          ['Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'MinClassRead' => 100, 'MinClassEdit' => 475, 'Date' => '2019-01-01 12:59:59', 'Author' => 1]
+        ])->save();
+        $this->table('wiki_aliases')->insert([['Alias' => 'wiki', 'UserID' => 1, 'ArticleID' => 1]])->save();
+        $this->table('wiki_revisions')->insert([
+          ['ID' => 1, 'Revision' => 1, 'Title' => 'Wiki', 'Body' => 'Welcome to your new wiki! Hope this works.', 'Date' => '2019-01-01 12:59:59', 'Author' => 1]
+        ])->save();
+        $this->table('tags')->insert([
+            ['Name' => 'rock', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
+            ['Name' => 'pop', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1],
+            ['Name' => 'female.fronted.symphonic.death.metal', 'TagType' => 'genre', 'Uses' => 0, 'UserID' => 1]
+        ])->save();
 
-		$this->insert('stylesheets', [
-			['Name' => 'Layer cake', 'Description' => 'Grey stylesheet by Emm'],
-			['Name' => 'Proton', 'Description' => 'Proton by Protiek'],
-			['Name' => 'postmod', 'Description' => 'Upgrade by anorex'],
-			['Name' => 'Hydro', 'Description' => 'Hydro'],
-			['Name' => 'Kuro', 'Description' => 'Kuro'],
-			['Name' => 'Anorex', 'Description' => 'Anorex'],
-			['Name' => 'Mono', 'Description' => 'Mono'],
-			['Name' => 'Shiro', 'Description' => 'Shiro'],
-			['Name' => 'Minimal', 'Description' => 'Minimal'],
-			['Name' => 'Whatlove', 'Description' => 'Whatlove'],
-			['Name' => 'White.cd', 'Description' => 'White.cd'],
-			['Name' => 'GTFO Spaceship', 'Description' => 'gtfo spaceship'],
-			['Name' => 'Dark Ambient', 'Description' => 'dark ambient'],
-			['Name' => 'Xanax cake', 'Description' => 'Xanax cake'],
-			['Name' => 'Haze', 'Description' => 'Haze by Exanurous & apopagasm'],
-			['Name' => 'Post Office', 'Description' => 'Post Office by dannymichel'],
-			['Name' => 'LinoHaze', 'Description' => 'LinoHaze by linotype'],
-			['Name' => 'ApolloStage', 'Description' => 'ApolloStage by burtoo', 'Default' => '1'],
-			['Name' => 'ApolloStage Coffee', 'Description' => 'ApolloStage by burtoo'],
-			['Name' => 'ApolloStage Sunset', 'Description' => 'ApolloStage Sunset by burtoo'],
-			['Name' => 'Apollo Mat', 'Description' => 'Apollo Mat by salem']
-		]);
+        $this->table('stylesheets')->insert([
+            ['Name' => 'Layer cake', 'Description' => 'Grey stylesheet by Emm'],
+            ['Name' => 'Proton', 'Description' => 'Proton by Protiek'],
+            ['Name' => 'postmod', 'Description' => 'Upgrade by anorex'],
+            ['Name' => 'Hydro', 'Description' => 'Hydro'],
+            ['Name' => 'Kuro', 'Description' => 'Kuro'],
+            ['Name' => 'Anorex', 'Description' => 'Anorex'],
+            ['Name' => 'Mono', 'Description' => 'Mono'],
+            ['Name' => 'Shiro', 'Description' => 'Shiro'],
+            ['Name' => 'Minimal', 'Description' => 'Minimal'],
+            ['Name' => 'Whatlove', 'Description' => 'Whatlove'],
+            ['Name' => 'White.cd', 'Description' => 'White.cd'],
+            ['Name' => 'GTFO Spaceship', 'Description' => 'gtfo spaceship'],
+            ['Name' => 'Dark Ambient', 'Description' => 'dark ambient'],
+            ['Name' => 'Xanax cake', 'Description' => 'Xanax cake'],
+            ['Name' => 'Haze', 'Description' => 'Haze by Exanurous & apopagasm'],
+            ['Name' => 'Post Office', 'Description' => 'Post Office by dannymichel'],
+            ['Name' => 'LinoHaze', 'Description' => 'LinoHaze by linotype'],
+            ['Name' => 'ApolloStage', 'Description' => 'ApolloStage by burtoo', 'Default' => '1'],
+            ['Name' => 'ApolloStage Coffee', 'Description' => 'ApolloStage by burtoo'],
+            ['Name' => 'ApolloStage Sunset', 'Description' => 'ApolloStage Sunset by burtoo'],
+            ['Name' => 'Apollo Mat', 'Description' => 'Apollo Mat by salem']
+        ])->save();
 
-		$this->insert('schedule', [['NextHour' => 0, 'NextDay' => 0, 'NextBiWeekly' => 0]]);
+        $this->table('schedule')->insert([
+          ['NextHour' => 0, 'NextDay' => 0, 'NextBiWeekly' => 0]
+        ])->save();
 
-		$this->execute("SET FOREIGN_KEY_CHECKS = 1;");
-	}
+        $this->execute("SET FOREIGN_KEY_CHECKS = 1;");
+    }
 }

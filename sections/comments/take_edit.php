@@ -1,12 +1,12 @@
-<?
+<?php
 authorize();
 
 if (!isset($_POST['postid']) || !is_number($_POST['postid']) || !isset($_POST['body']) || trim($_POST['body']) === '') {
-	error(0, true);
+    error(0, true);
 }
 
 if ($LoggedUser['DisablePosting']) {
-	error('Your posting privileges have been removed.', true);
+    error('Your posting privileges have been removed.', true);
 }
 
 $SendPM = isset($_POST['pm']) && $_POST['pm'];

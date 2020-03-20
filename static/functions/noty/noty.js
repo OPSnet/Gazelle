@@ -214,9 +214,9 @@ if (typeof Object.create !== 'function') {
                         $.notyRenderer.render();
                     }
 
-					if (self.options.maxVisible > 0 && self.options.dismissQueue) {
-						$.notyRenderer.render();
-					}
+                    if (self.options.maxVisible > 0 && self.options.dismissQueue) {
+                        $.notyRenderer.render();
+                    }
                 })
 
         }, // end close
@@ -283,15 +283,15 @@ if (typeof Object.create !== 'function') {
 
         if ($.type(instance) === 'object') {
             if (instance.options.dismissQueue) {
-				if (instance.options.maxVisible > 0) {
-					if ($(instance.options.layout.container.selector + ' li').length < instance.options.maxVisible) {
-						$.notyRenderer.show($.noty.queue.shift());
-					} else {
+                if (instance.options.maxVisible > 0) {
+                    if ($(instance.options.layout.container.selector + ' li').length < instance.options.maxVisible) {
+                        $.notyRenderer.show($.noty.queue.shift());
+                    } else {
 
-					}
-				} else {
-					$.notyRenderer.show($.noty.queue.shift());
-				}
+                    }
+                } else {
+                    $.notyRenderer.show($.noty.queue.shift());
+                }
             } else {
                 if ($.noty.ontap) {
                     $.notyRenderer.show($.noty.queue.shift());

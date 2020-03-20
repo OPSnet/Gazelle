@@ -1,0 +1,20 @@
+language: php
+sudo: true
+dist: trusty
+
+php:
+  - '7.0'
+  - '7.1'
+  - '7.2'
+  - nightly
+
+#cache:
+#  directories:
+#    - $HOME/.composer/cache
+
+
+install:
+  - composer install
+
+script:
+  - vendor/bin/phpunit

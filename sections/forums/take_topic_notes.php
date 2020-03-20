@@ -1,12 +1,12 @@
-<?
+<?php
 authorize();
 
 if (!check_perms('site_moderate_forums')) {
-	error(403);
+    error(403);
 }
 
 if (!isset($_POST['topicid'], $_POST['body']) || !is_number($_POST['topicid']) || $_POST['body'] == '') {
-	error(404);
+    error(404);
 }
 
 $TopicID = (int)$_POST['topicid'];

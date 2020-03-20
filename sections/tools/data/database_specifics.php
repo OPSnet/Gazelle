@@ -1,142 +1,206 @@
-<?
-if (!check_perms('site_debug')) {
-	error(403);
+<?php
+if (!check_perms('site_database_specifics')) {
+    error(403);
 }
 
-//View schemas
+// View table definition
 if (!empty($_GET['table'])) {
-	$DB->query('SHOW TABLES');
-	$Tables =$DB->collect('Tables_in_'.SQLDB);
-	if (!in_array($_GET['table'], $Tables)) {
-		error(0);
-	}
-	$DB->query('SHOW CREATE TABLE '.db_string($_GET['table']));
-	list(,$Schema) = $DB->next_record(MYSQLI_NUM, false);
-	header('Content-type: text/plain');
-	die($Schema);
+    if (preg_match('/([\w-]+)/', $_GET['table'], $match)) {
+        $DB->prepared_query('SHOW CREATE TABLE ' . $match[1]);
+        list(,$definition) = $DB->next_record(MYSQLI_NUM, false);
+        header('Content-type: text/plain');
+        die($definition);
+    }
 }
 
-//Cache the tables for 4 hours, makes sorting faster
-if (!$Tables = $Cache->get_value('database_table_stats')) {
-	$DB->query('SHOW TABLE STATUS');
-	$Tables =$DB->to_array();
-	$Cache->cache_value('database_table_stats', $Tables, 3600 * 4);
+$orderArg = empty($_GET['order_by']) ? '' : trim($_GET['order_by']);
+switch ($orderArg) {
+    case 'datafree':
+        $orderBy = 'data_free';
+        $label = 'free space';
+        break;
+    case 'datasize':
+        $orderBy = 'data_length';
+        $label = 'table size';
+        break;
+    case 'freeratio':
+        $orderBy = 'CASE WHEN data_length = 0 THEN = data_free / data_length END';
+        $label = 'table bloat';
+        break;
+    case 'indexsize':
+        $orderBy = 'index_length';
+        $label = 'index size';
+        break;
+    case 'name':
+        $orderBy = 'table_name';
+        $label = 'name';
+        break;
+    case 'rows':
+        $orderBy = 'table_rows';
+        $label = 'row counts';
+        break;
+    case 'rowsize':
+        $orderBy = 'avg_row_length';
+        $label = 'mean row length';
+        break;
+    case 'totalsize':
+    default:
+        $orderArg = 'totalsize';
+        $orderBy = 'data_length + index_length';
+        $label = 'total table size';
+        break;
 }
 
-require(SERVER_ROOT.'/classes/charts.class.php');
-$Pie = new PIE_CHART(750,400,array('Other'=>1,'Percentage'=>1,'Sort'=>1));
+$orderWay = (!empty ($_GET['order_way']) && $_GET['order_way'] == 'asc')
+    ? 'ASC' : 'DESC';
 
-//Begin sorting
-$Sort = array();
-switch (empty($_GET['order_by']) ? '' : $_GET['order_by']) {
-	case 'name':
-		foreach ($Tables as $Key => $Value) {
-			$Pie->add($Value[0], $Value[6] + $Value[8]);
-			$Sort[$Key] = $Value[0];
-		}
-		break;
-	case 'engine':
-		foreach ($Tables as $Key => $Value) {
-			$Pie->add($Value[0], $Value[6] + $Value[8]);
-			$Sort[$Key] = $Value[1];
-		}
-		break;
-	case 'rows':
-		foreach ($Tables as $Key => $Value) {
-			$Pie->add($Value[0], $Value[4]);
-			$Sort[$Key] = $Value[4];
-		}
-		break;
-	case 'rowsize':
-		foreach ($Tables as $Key => $Value) {
-			$Pie->add($Value[0], $Value[5]);
-			$Sort[$Key] = $Value[5];
-		}
-		break;
-	case 'datasize':
-		foreach ($Tables as $Key => $Value) {
-			$Pie->add($Value[0], $Value[6]);
-			$Sort[$Key] = $Value[6];
-		}
-		break;
-	case 'indexsize':
-		foreach ($Tables as $Key => $Value) {
-			$Pie->add($Value[0], $Value[8]);
-			$Sort[$Key] = $Value[8];
-		}
-		break;
-	case 'totalsize':
-	default:
-		foreach ($Tables as $Key => $Value) {
-			$Pie->add($Value[0], $Value[6] + $Value[8]);
-			$Sort[$Key] = $Value[6] + $Value[8];
-		}
+$DB->prepared_query("
+    SELECT table_name, engine, table_rows, avg_row_length, data_length, index_length, data_free
+    FROM information_schema.tables
+    WHERE table_schema = ?
+    ORDER by $orderBy $orderWay
+    ", SQLDB
+);
+$Tables = $DB->to_array('table_name', MYSQLI_ASSOC);
+
+$data = [];
+foreach ($Tables as $name => $info) {
+    switch ($orderArg) {
+        case 'datafree':
+            $data[$name] = $info['data_free'];
+            break;
+        case 'datasize':
+            $data[$name] = $info['data_length'];
+            break;
+        case 'freeratio':
+            $data[$name] = round($info['data_length'] == 0 ? 0 : $info['data_free'] / $info['data_length'], 2);
+            break;
+        case 'indexsize':
+            $data[$name] = $info['index_length'];
+            break;
+        case 'rows':
+            $data[$name] = $info['table_rows'];
+            break;
+        case 'rowsize':
+            $data[$name] = $info['avg_row_length'];
+            break;
+        case 'totalsize':
+        default:
+            $data[$name] = $info['data_length'] + $info['index_length'];
+            break;
+        }
 }
-$Pie->generate();
-
-if (!empty ($_GET['order_way']) && $_GET['order_way'] == 'asc') {
-	$SortWay = SORT_ASC;
-} else {
-	$SortWay = SORT_DESC;
-}
-
-array_multisort($Sort, $SortWay, $Tables);
-//End sorting
 
 View::show_header('Database Specifics');
+$urlStem = 'tools.php?action=database_specifics&amp;';
+function urlSort ($isThisColumn, $way) {
+    return ($isThisColumn && $way == 'DESC') ? 'ASC' : 'DESC';
+}
 ?>
-<h3>Breakdown</h3>
+
+<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('statistics', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+        plotBorderWidth: null,
+        plotShadow: true,
+    },
+    title: {
+        text: '<?= SITE_NAME ?> database breakdown by <?= $label ?>',
+        style: {
+            color: '#c0c0c0',
+        },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Tables',
+        data: [
+<?php foreach ($data as $table => $value) { ?>
+            { name: '<?= $table ?>', y: <?= $value ?> },
+<?php } ?>
+        ]
+    }]
+})});
+</script>
+
 <div class="box pad center">
-	<img src="<?=$Pie->url()?>" />
+<figure class="highcharts-figure">
+    <div id="statistics"></div>
+</figure>
 </div>
 <br />
 <table>
-	<tr class="colhead">
-		<td><a href="tools.php?action=database_specifics&amp;order_by=name&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'name' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Name</a></td>
-		<td><a href="tools.php?action=database_specifics&amp;order_by=engine&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'engine' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Engine</a></td>
-		<td><a href="tools.php?action=database_specifics&amp;order_by=rows&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'rows' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Rows</td>
-		<td><a href="tools.php?action=database_specifics&amp;order_by=rowsize&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'rowsize' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Row Size</a></td>
-		<td><a href="tools.php?action=database_specifics&amp;order_by=datasize&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'datasize' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Data Size</a></td>
-		<td><a href="tools.php?action=database_specifics&amp;order_by=indexsize&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'indexsize' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Index Size</a></td>
-		<td><a href="tools.php?action=database_specifics&amp;order_by=totalsize&amp;order_way=<?=(!empty($_GET['order_by']) && $_GET['order_by'] == 'totalsize' && !empty($_GET['order_way']) && $_GET['order_way'] == 'desc') ? 'asc' : 'desc'?>">Total Size</td>
-		<td>Tools</td>
-	</tr>
-<?
+    <tr class="colhead">
+        <td><a href="<?= $urlStem ?>order_by=name&amp;order_way=<?= urlSort($orderArg == 'name', $orderWay) ?>">Name</a></td>
+        <td><a href="<?= $urlStem ?>order_by=rows&amp;order_way=<?= urlSort($orderArg == 'rows', $orderWay) ?>">Rows</td>
+        <td><a href="<?= $urlStem ?>order_by=rowsize&amp;order_way=<?= urlSort($orderArg == 'rowsize', $orderWay) ?>">Row Size</a></td>
+        <td><a href="<?= $urlStem ?>order_by=datasize&amp;order_way=<?= urlSort($orderArg == 'datasize', $orderWay) ?>">Data Size</a></td>
+        <td><a href="<?= $urlStem ?>order_by=indexsize&amp;order_way=<?= urlSort($orderArg == 'indexsize', $orderWay) ?>">Index Size</a></td>
+        <td><a href="<?= $urlStem ?>order_by=datafree&amp;order_way=<?= urlSort($orderArg == 'datafree', $orderWay) ?>">Free Size</td>
+        <td><a href="<?= $urlStem ?>order_by=dataratio&amp;order_way=<?= urlSort($orderArg == 'dataratio', $orderWay) ?>">Bloat %</td>
+        <td><a href="<?= $urlStem ?>order_by=totalsize&amp;order_way=<?= urlSort($orderArg == 'totalsize', $orderWay) ?>">Total Size</td>
+    </tr>
+<?php
 $TotalRows = 0;
 $TotalDataSize = 0;
+$TotalFreeSize = 0;
 $TotalIndexSize = 0;
 $Row = 'a';
-foreach ($Tables as $Table) {
-	list($Name,$Engine,,,$Rows,$RowSize,$DataSize,,$IndexSize) = $Table;
-	$Row = $Row === 'a' ? 'b' : 'a';
+foreach ($Tables as $t) {
+    $Row = $Row === 'a' ? 'b' : 'a';
 
-	$TotalRows += $Rows;
-	$TotalDataSize += $DataSize;
-	$TotalIndexSize += $IndexSize;
+    // table_name, engine, table_rows, avg_row_length, data_length, index_length, data_free
+    $TotalRows += $t['table_rows'];
+    $TotalDataSize += $t['data_length'];
+    $TotalIndexSize += $t['index_length'];
+    $TotalFreeSize += $t['data_free'];
 ?>
-	<tr class="row<?=$Row?>">
-		<td><?=display_str($Name)?></td>
-		<td><?=display_str($Engine)?></td>
-		<td><?=number_format($Rows)?></td>
-		<td><?=Format::get_size($RowSize)?></td>
-		<td><?=Format::get_size($DataSize)?></td>
-		<td><?=Format::get_size($IndexSize)?></td>
-		<td><?=Format::get_size($DataSize + $IndexSize)?></td>
-		<td><a href="tools.php?action=database_specifics&amp;table=<?=display_str($Name)?>" class="brackets">Schema</a></td>
-	</tr>
-<?
+    <tr class="row<?= $Row ?>">
+        <td>
+            <a href="<?= $urlStem ?>table=<?= display_str($t['table_name']) ?>" title="engine: <?= $t['engine'] ?>">
+            <?= $t['engine'] != 'InnoDB' ? '<span style="color: tomato;">' : '' ?>
+            <?= display_str($t['table_name']) ?>
+            <?= $t['table_name'] == 'email' ? '</span>' : '' ?>
+            </a>
+        </td>
+        <td class="number_column"><?= number_format($t['table_rows']) ?></td>
+        <td class="number_column"><?= Format::get_size($t['avg_row_length']) ?></td>
+        <td class="number_column"><?= Format::get_size($t['data_length']) ?></td>
+        <td class="number_column"><?= Format::get_size($t['index_length']) ?></td>
+        <td class="number_column"><?= Format::get_size($t['data_free']) ?></td>
+        <td class="number_column"><?= round($t['data_length'] == 0 ? 0 : ($t['data_free'] / $t['data_length']) * 100, 2) ?></td>
+        <td class="number_column"><?= Format::get_size($t['data_length'] + $t['index_length']) ?></td>
+    </tr>
+<?php
 }
 ?>
-	<tr>
-		<td></td>
-		<td></td>
-		<td><?=number_format($TotalRows)?></td>
-		<td></td>
-		<td><?=Format::get_size($TotalDataSize)?></td>
-		<td><?=Format::get_size($TotalIndexSize)?></td>
-		<td><?=Format::get_size($TotalDataSize + $TotalIndexSize)?></td>
-		<td></td>
-	</tr>
+    <tr>
+        <td></td>
+        <td class="number_column"><?= number_format($TotalRows) ?></td>
+        <td></td>
+        <td class="number_column"><?= Format::get_size($TotalDataSize) ?></td>
+        <td class="number_column"><?= Format::get_size($TotalIndexSize) ?></td>
+        <td class="number_column"><?= Format::get_size($TotalFreeSize) ?></td>
+        <td class="number_column"><?= round($TotalDataSize == 0 ? 0 : ($TotalFreeSize / $tTotalDataSize) * 100, 2) ?></td>
+        <td class="number_column"><?= Format::get_size($TotalDataSize + $TotalIndexSize) ?></td>
+    </tr>
 </table>
-<?
+<?php
 View::show_footer();

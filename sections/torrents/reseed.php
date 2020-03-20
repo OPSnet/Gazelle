@@ -1,61 +1,64 @@
-<?
+<?php
 $TorrentID = (int)$_GET['torrentid'];
 
-$DB->query("
-	SELECT last_action, LastReseedRequest, UserID, Time, GroupID
-	FROM torrents
-	WHERE ID = '$TorrentID'");
+$DB->prepared_query('
+    SELECT tls.last_action, t.LastReseedRequest, t.UserID, t.Time, t.GroupID
+    FROM torrents AS t
+    INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
+    WHERE ID = ?
+    ', $TorrentID
+);
 list($LastActive, $LastReseedRequest, $UploaderID, $UploadedTime, $GroupID) = $DB->next_record();
 
 if (!check_perms('users_mod')) {
-	if (time() - strtotime($LastReseedRequest) < 864000) {
-		error('There was already a re-seed request for this torrent within the past 10 days.');
-	}
-	if ($LastActive == '0000-00-00 00:00:00' || time() - strtotime($LastActive) < 345678) {
-		error(403);
-	}
+    if (time() - strtotime($LastReseedRequest) < 864000) {
+        error('There was already a re-seed request for this torrent within the past 10 days.');
+    }
+    if ($LastActive == '0000-00-00 00:00:00' || time() - strtotime($LastActive) < 345678) {
+        error(403);
+    }
 }
 
-$DB->query("
-	UPDATE torrents
-	SET LastReseedRequest = NOW()
-	WHERE ID = '$TorrentID'");
+$DB->prepared_query('
+    UPDATE torrents
+    SET LastReseedRequest = now()
+    WHERE ID = ?
+    ', $TorrentID
+);
 
-$Group = Torrents::get_groups(array($GroupID));
-extract(Torrents::array_group($Group[$GroupID]));
+$Groups = Torrents::get_groups([$GroupID]);
+$Group = $Groups[$GroupID];
 
-$Name = Artists::display_artists(array('1' => $Artists), false, true);
-$Name .= $GroupName;
+$Name = Artists::display_artists(['1' => $Group['Artists']], false, true);
+$Name .= $Group['Name'];
 
-$usersToNotify = array();
+$DB->prepared_query('
+    SELECT s.uid AS id, MAX(s.tstamp) AS tstamp
+    FROM xbt_snatched as s
+    INNER JOIN users_main as u ON (s.uid = u.ID)
+    WHERE s.fid = ?
+    AND u.Enabled = ?
+    GROUP BY s.uid
+    ORDER BY tstamp DESC
+    LIMIT 100
+    ', $TorrentID, '1'
+);
 
-$DB->query("
-	SELECT s.uid AS id, MAX(s.tstamp) AS tstamp
-	FROM xbt_snatched as s
-	INNER JOIN users_main as u
-	ON s.uid = u.ID
-	WHERE s.fid = '$TorrentID'
-	AND u.Enabled = '1'
-	GROUP BY s.uid
-       ORDER BY tstamp DESC
-	LIMIT 100");
+$usersToNotify = [];
 if ($DB->has_results()) {
-	$Users = $DB->to_array();
-	foreach ($Users as $User) {
-		$UserID = $User['id'];
-		$TimeStamp = $User['tstamp'];
-
-		$usersToNotify[$UserID] = array("snatched", $TimeStamp);
-	}
+    $Users = $DB->to_array();
+    foreach ($Users as $User) {
+        $usersToNotify[$User['id']] = ["snatched", $User['tstamp']];
+    }
 }
 
-$usersToNotify[$UploaderID] = array("uploaded", strtotime($UploadedTime));
+$usersToNotify[$UploaderID] = ["uploaded", strtotime($UploadedTime)];
 
 foreach ($usersToNotify as $UserID => $info) {
-	$Username = Users::user_info($UserID)['Username'];
-	list($action, $TimeStamp) = $info;
+    $Username = Users::user_info($UserID)['Username'];
+    list($action, $TimeStamp) = $info;
 
-	$Request = "Hi $Username,
+    $Request = "Hi $Username,
 
 The user [url=".site_url()."user.php?id=$LoggedUser[ID]]$LoggedUser[Username][/url] has requested a re-seed for the torrent [url=".site_url()."torrents.php?id=$GroupID&torrentid=$TorrentID]{$Name}[/url], which you ".$action." on ".date('M d Y', $TimeStamp).". The torrent is now un-seeded, and we need your help to resurrect it!
 
@@ -63,7 +66,7 @@ The exact process for re-seeding a torrent is slightly different for each client
 
 Thanks!";
 
-	Misc::send_pm($UserID, 0, "Re-seed request for torrent $Name", $Request);
+    Misc::send_pm($UserID, 0, "Re-seed request for torrent $Name", $Request);
 }
 
 $NumUsers = count($usersToNotify);
@@ -71,13 +74,12 @@ $NumUsers = count($usersToNotify);
 View::show_header();
 ?>
 <div class="thin">
-	<div class="header">
-		<h2>Successfully sent re-seed request</h2>
-	</div>
-	<div class="box pad thin">
-		<p>Successfully sent re-seed request for torrent <a href="torrents.php?id=<?=$GroupID?>&torrentid=<?=$TorrentID?>"><?=display_str($Name)?></a> to <?=$NumUsers?> user<?=$NumUsers === 1 ? '' : 's';?>.</p>
-	</div>
+    <div class="header">
+        <h2>Successfully sent re-seed request</h2>
+    </div>
+    <div class="box pad thin">
+        <p>Successfully sent re-seed request for torrent <a href="torrents.php?id=<?=$GroupID?>&torrentid=<?=$TorrentID?>"><?=display_str($Name)?></a> to <?=$NumUsers?> user<?=$NumUsers === 1 ? '' : 's';?>.</p>
+    </div>
 </div>
-<?
+<?php
 View::show_footer();
-?>

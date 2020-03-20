@@ -75,9 +75,9 @@
 }
 
 * {
-	font-family: 'opendyslexicregular', sans-serif !important;
+    font-family: 'opendyslexicregular', sans-serif !important;
 }
 
 code, pre, samp, tt {
-	font-family: 'opendyslexicmonoregular', monospace !important;
+    font-family: 'opendyslexicmonoregular', monospace !important;
 }

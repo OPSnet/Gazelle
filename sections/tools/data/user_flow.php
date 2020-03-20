@@ -1,159 +1,187 @@
 <?php
 if (!check_perms('site_view_flow')) {
-	error(403);
+    error(403);
 }
 
-//Timeline generation
 if (!isset($_GET['page'])) {
-	if (!list($Labels, $InFlow, $OutFlow, $Max) = $Cache->get_value('users_timeline')) {
-		$DB->query("
-			SELECT DATE_FORMAT(JoinDate, '%b \'%y') AS Month, COUNT(UserID)
-			FROM users_info
-			GROUP BY Month
-			ORDER BY JoinDate DESC
-			LIMIT 1, 12");
-		$TimelineIn = array_reverse($DB->to_array());
-		$DB->query("
-			SELECT DATE_FORMAT(BanDate, '%b \'%y') AS Month, COUNT(UserID)
-			FROM users_info
-			GROUP BY Month
-			ORDER BY BanDate DESC
-			LIMIT 1, 12");
-		$TimelineOut = array_reverse($DB->to_array());
-		foreach ($TimelineIn as $Month) {
-			list($Label, $Amount) = $Month;
-			if ($Amount > $Max) {
-				$Max = $Amount;
-			}
-		}
-		foreach ($TimelineOut as $Month) {
-			list($Label, $Amount) = $Month;
-			if ($Amount > $Max) {
-				$Max = $Amount;
-			}
-		}
-		foreach ($TimelineIn as $Month) {
-			list($Label, $Amount) = $Month;
-			$Labels[] = $Label;
-			$InFlow[] = number_format(($Amount / $Max) * 100, 4);
-		}
-		foreach ($TimelineOut as $Month) {
-			list($Label, $Amount) = $Month;
-			$OutFlow[] = number_format(($Amount / $Max) * 100, 4);
-		}
-		$Cache->cache_value('users_timeline', array($Labels, $InFlow, $OutFlow, $Max), mktime(0, 0, 0, date('n') + 1, 2));
-	}
+    if (!list($Timeline) = $Cache->get_value('userflow')) {
+        $DB->query("
+            SELECT J.Week, J.n as Joined, coalesce(D.n, 0) as Disabled
+            FROM (
+                SELECT DATE_FORMAT(JoinDate, '%X-%V') AS Week, count(*) AS n
+                FROM users_info
+                GROUP BY Week
+                ORDER BY 1 DESC
+                LIMIT 52) J
+            LEFT JOIN (
+                SELECT DATE_FORMAT(BanDate, '%X-%V') AS Week, count(*) AS n
+                FROM users_info
+                GROUP By Week
+                ORDER BY 1 DESC
+                LIMIT 52) D USING (Week)
+            ORDER BY 1
+        ");
+        $Timeline = $DB->to_array();
+        $Cache->cache_value('userflow', [$Timeline], 3600);
+    }
 }
-//End timeline generation
-
 
 define('DAYS_PER_PAGE', 100);
 list($Page, $Limit) = Format::page_limit(DAYS_PER_PAGE);
 
 $RS = $DB->query("
-		SELECT
-			SQL_CALC_FOUND_ROWS
-			j.Date,
-			DATE_FORMAT(j.Date, '%Y-%m') AS Month,
-			CASE ISNULL(j.Flow)
-				WHEN 0 THEN j.Flow
-				ELSE '0'
-			END AS Joined,
-			CASE ISNULL(m.Flow)
-				WHEN 0 THEN m.Flow
-				ELSE '0'
-			END AS Manual,
-			CASE ISNULL(r.Flow)
-				WHEN 0 THEN r.Flow
-				ELSE '0'
-			END AS Ratio,
-			CASE ISNULL(i.Flow)
-				WHEN 0 THEN i.Flow
-				ELSE '0'
-			END AS Inactivity
-		FROM (
-				SELECT
-					DATE_FORMAT(JoinDate, '%Y-%m-%d') AS Date,
-					COUNT(UserID) AS Flow
-				FROM users_info
-				WHERE JoinDate != '0000-00-00 00:00:00'
-				GROUP BY Date
-			) AS j
-			LEFT JOIN (
-				SELECT
-					DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
-					COUNT(UserID) AS Flow
-				FROM users_info
-				WHERE BanDate != '0000-00-00 00:00:00'
-					AND BanReason = '1'
-				GROUP BY Date
-			) AS m ON j.Date = m.Date
-			LEFT JOIN (
-				SELECT
-					DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
-					COUNT(UserID) AS Flow
-				FROM users_info
-				WHERE BanDate != '0000-00-00 00:00:00'
-					AND BanReason = '2'
-				GROUP BY Date
-			) AS r ON j.Date = r.Date
-			LEFT JOIN (
-				SELECT
-					DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
-					COUNT(UserID) AS Flow
-				FROM users_info
-				WHERE BanDate != '0000-00-00 00:00:00'
-					AND BanReason = '3'
-				GROUP BY Date
-			) AS i ON j.Date = i.Date
-		ORDER BY j.Date DESC
-		LIMIT $Limit");
+        SELECT
+            SQL_CALC_FOUND_ROWS
+            j.Date,
+            DATE_FORMAT(j.Date, '%Y-%m') AS Month,
+            coalesce(j.Flow, 0) as Joined,
+            coalesce(m.Flow, 0) as Manual,
+            coalesce(r.Flow, 0) as Ratio,
+            coalesce(i.Flow, 0) as Inactivity
+        FROM (
+                SELECT
+                    DATE_FORMAT(JoinDate, '%Y-%m-%d') AS Date,
+                    COUNT(*) AS Flow
+                FROM users_info
+                WHERE JoinDate != '0000-00-00 00:00:00'
+                GROUP BY Date
+            ) AS j
+            LEFT JOIN (
+                SELECT
+                    DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
+                    COUNT(*) AS Flow
+                FROM users_info
+                WHERE BanDate != '0000-00-00 00:00:00'
+                    AND BanReason = '1'
+                GROUP BY Date
+            ) AS m ON j.Date = m.Date
+            LEFT JOIN (
+                SELECT
+                    DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
+                    COUNT(*) AS Flow
+                FROM users_info
+                WHERE BanDate != '0000-00-00 00:00:00'
+                    AND BanReason = '2'
+                GROUP BY Date
+            ) AS r ON j.Date = r.Date
+            LEFT JOIN (
+                SELECT
+                    DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
+                    COUNT(*) AS Flow
+                FROM users_info
+                WHERE BanDate != '0000-00-00 00:00:00'
+                    AND BanReason = '3'
+                GROUP BY Date
+            ) AS i ON j.Date = i.Date
+        ORDER BY j.Date DESC
+        LIMIT $Limit");
 $DB->query('SELECT FOUND_ROWS()');
 list($Results) = $DB->next_record();
 
 View::show_header('User Flow');
 $DB->set_query_id($RS);
 ?>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Week', 'New Registrations', 'Disabled Users', 'Change'],
+<?  foreach ($Timeline as $t) { ?>
+['<?= $t[0] ?>', <?= $t[1] ?>, <?= $t[2] ?>, <?= $t[1] - $t[2] ?>],
+<? } ?>
+    ]);
+    var options = {
+      backgroundColor: '#303030',
+      colors: ['chartreuse', 'orangered', 'steelblue'],
+      title: 'User Flow',
+      titleTextStyle: {
+        color: '#e0e0e0',
+      },
+      chartArea: {
+        left: 40,
+        top: 50,
+        width: 780,
+        height: 210,
+      },
+      legend: {
+        position: 'bottom',
+        textStyle: {
+          color: '#e0e0e0',
+        },
+      },
+      vAxis: {
+        gridlines: {
+          count: 2,
+        },
+        textStyle: {
+          color: '#e0e0e0',
+        },
+      },
+      hAxis: {
+        baselineColor: '#e0e0e0',
+        textStyle: {
+          color: '#e0e0e0',
+          fontSize: 11,
+        },
+        titleTextStyle: {
+          color: '#e0e0e0',
+        },
+        slantedText: true,
+        slantedTextAngle: 90,
+        title: 'Week'
+      }
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('user_flow'));
+    chart.draw(data, options);
+  }
+</script>
+
 <div class="thin">
-<?	if (!isset($_GET['page'])) { ?>
-	<div class="box pad">
-		<img src="https://chart.googleapis.com/chart?cht=lc&amp;chs=820x160&amp;chco=000D99,99000D&amp;chg=0,-1,1,1&amp;chxt=y,x&amp;chxs=0,h&amp;chxl=1:|<?=implode('|', $Labels)?>&amp;chxr=0,0,<?=$Max?>&amp;chd=t:<?=implode(',', $InFlow)?>|<?=implode(',', $OutFlow)?>&amp;chls=2,4,0&amp;chdl=New+Registrations|Disabled+Users&amp;chf=bg,s,FFFFFF00" alt="User Flow vs. Time" />
-	</div>
-<?	} ?>
-	<div class="linkbox">
-<?
+<?php
+    if (!isset($_GET['page'])) { ?>
+    <div class="box pad">
+        <div id="user_flow" style="width: 830px; height: 390px"></div>
+    </div>
+<?php
+    } ?>
+    <div class="linkbox">
+<?php
 $Pages = Format::get_pages($Page, $Results, DAYS_PER_PAGE, 11);
 echo $Pages;
 ?>
-	</div>
-	<table width="100%">
-		<tr class="colhead">
-			<td>Date</td>
-			<td>(+) Joined</td>
-			<td>(-) Manual</td>
-			<td>(-) Ratio</td>
-			<td>(-) Inactivity</td>
-			<td>(-) Total</td>
-			<td>Net Growth</td>
-		</tr>
-<?
-	while (list($Date, $Month, $Joined, $Manual, $Ratio, $Inactivity) = $DB->next_record()) {
-		$TotalOut = $Ratio + $Inactivity + $Manual;
-		$TotalGrowth = $Joined - $TotalOut;
+    </div>
+    <table width="100%">
+        <tr class="colhead">
+            <td>Date</td>
+            <td>(+) Joined</td>
+            <td>(-) Manual</td>
+            <td>(-) Ratio</td>
+            <td>(-) Inactivity</td>
+            <td>(-) Total</td>
+            <td>Net Growth</td>
+        </tr>
+<?php
+    while (list($Date, $Month, $Joined, $Manual, $Ratio, $Inactivity) = $DB->next_record()) {
+        $TotalOut = $Ratio + $Inactivity + $Manual;
+        $TotalGrowth = $Joined - $TotalOut;
 ?>
-		<tr class="rowb">
-			<td><?=$Date?></td>
-			<td><?=number_format($Joined)?></td>
-			<td><?=number_format($Manual)?></td>
-			<td><?=number_format((float)$Ratio)?></td>
-			<td><?=number_format($Inactivity)?></td>
-			<td><?=number_format($TotalOut)?></td>
-			<td><?=number_format($TotalGrowth)?></td>
-		</tr>
-<?	} ?>
-	</table>
-	<div class="linkbox">
-		<?=$Pages?>
-	</div>
+        <tr class="rowb">
+            <td><?=$Date?></td>
+            <td><?=number_format($Joined)?></td>
+            <td><?=number_format($Manual)?></td>
+            <td><?=number_format((float)$Ratio)?></td>
+            <td><?=number_format($Inactivity)?></td>
+            <td><?=number_format($TotalOut)?></td>
+            <td><?=number_format($TotalGrowth)?></td>
+        </tr>
+<?php
+    } ?>
+    </table>
+    <div class="linkbox">
+        <?=$Pages?>
+    </div>
 </div>
-<? View::show_footer(); ?>
+<?php View::show_footer(); ?>
