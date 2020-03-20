@@ -118,6 +118,7 @@ if ($TotalTorrents > 0) {
         $Torrents = isset($Groups[$Torrent['GroupID']]['Torrents']) ? $Groups[$Torrent['GroupID']]['Torrents'] : [];
         $Artists = $Groups[$Torrent['GroupID']]['Artists'];
         $ExtendedArtists = $Groups[$Torrent['GroupID']]['ExtendedArtists'];
+        $VanityHouse = $Groups[$Torrent['GroupID']]['VanityHouse'];
 
         if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
             unset($ExtendedArtists[2]);
@@ -132,7 +133,7 @@ if ($TotalTorrents > 0) {
         if ($GroupYear > 0) {
             $DisplayName .= " [$GroupYear]";
         }
-        if ($GroupVanityHouse) {
+        if ($VanityHouse) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 
