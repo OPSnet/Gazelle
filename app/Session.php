@@ -59,7 +59,7 @@ class Session {
                 OperatingSystem = ?, OperatingSystemVersion = ?, LastUpdate = ?
             WHERE UserID = ? AND SessionID = ?
             ', $args['ip-address'], $args['browser'], $args['browser-version'],
-                $args['os'], $args['os-version'], $args[''], $now,
+                $args['os'], $args['os-version'], $now,
                 /* where */ $this->id, $sessionId
         );
         $this->cache->begin_transaction('users_sessions_' . $this->id);
