@@ -16,7 +16,6 @@
  *   $db         - database connection
  *   $cache      - memcache connection
  *   $bonus      - \Gazelle\Bonus instance
- *   $session    - \Gazelle\Session instance
  *   $stylesheet - \Gazelle\Stylesheet instance
  *
  * More can be added when implemented.
