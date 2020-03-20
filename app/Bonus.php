@@ -499,7 +499,7 @@ Enjoy!";
                 ", $userId, $userId + $chunk - 1
             );
             if ($this->db->has_results()) {
-                $this->cache->deleteMulti($db->collect('ck', false));
+                $this->cache->deleteMulti($this->db->collect('ck', false));
             }
             $userId += $chunk;
 
