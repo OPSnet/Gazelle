@@ -39,7 +39,7 @@ class User {
             UPDATE users_main SET
                 IP = ?, ipcc = ?
             WHERE ID = ?
-            ', $newIP, Tools::geoip($newIP), $this->id
+            ', $newIP, \Tools::geoip($newIP), $this->id
         );
         $this->cache->begin_transaction('user_info_heavy_' . $this->id);
         $this->cache->update_row(false, ['IP' => $newIP]);
