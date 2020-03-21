@@ -36,7 +36,7 @@ function ArtistManager() {
         elArtistList.id = 'artistmanager_list';
         for (var i = 0; i < elArtistList.children.length; i++) {
             switch (elArtistList.children[i].className) {
-                case 'artist_main':
+                case 'artists_main':
                     importance = 1;
                     break;
                 case 'artists_with':
