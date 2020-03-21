@@ -42,11 +42,21 @@ immediately served without rebuilding or restarting.
 
 If you want to poke around inside the web container, open a shell:
 
-`docker exec -it $(docker ps|awk '$2 ~ /web$/ {print $1}') bash`
+`export WEBCONT=$(docker ps|awk '$2 ~ /web$/ {print $1}')`
+
+`docker exec -it $WEBCONT bash`
 
 To keep an eye on PHP errors during development:
 
-`docker exec -it $(docker ps|awk '$2 ~ /web$/ {print $1}') tail -n 20 -f /var/log/nginx/error.log`
+`docker exec -it $WEBCONT tail -n 20 -f /var/log/nginx/error.log`
+
+To create a Phinx migration:
+
+`docker exec -it $WEBCONT vendor/bin/phinx create MyNewMigration`
+
+Edit the resulting file and then apply it:
+
+`docker exec -it $WEBCONT vendor/bin/phinx migrate`
 
 You may want to install additional packages:
 * `apt update`
@@ -64,7 +74,7 @@ following inside the web container:
 
 You can then run Boris directly:
 
-`docker exec -it $(docker ps|awk '$2 ~ /web$/ {print $1}') /var/www/boris`
+`docker exec -it $WEBCONT /var/www/boris`
 
 To access the database, save the following in `~root/.my.cnf` of
 the database container:
@@ -78,6 +88,8 @@ the database container:
 
 And then:
 `docker exec -it $(docker ps|awk '$2 ~ /^mariadb/ {print $1}') mysql`
+
+In the same vein, you can use `mysqldump` to perform a backup.
 
 #### Production Mode (not fully baked yet)
 In order to have Docker build the container using the production mode commands

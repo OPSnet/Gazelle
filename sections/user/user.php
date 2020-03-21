@@ -45,22 +45,22 @@ $FA_Key = null;
 if (check_perms('users_mod')) { // Person viewing is a staff member
     $DB->prepared_query('
         SELECT
-            m.Username,
-            m.Email,
-            m.LastAccess,
-            m.IP,
+            um.Username,
+            um.Email,
+            ula.last_access,
+            um.IP,
             p.Level AS Class,
             uls.Uploaded,
             uls.Downloaded,
-            m.BonusPoints,
-            m.RequiredRatio,
-            m.Title,
-            m.torrent_pass,
-            m.Enabled,
-            m.Paranoia,
-            m.Invites,
-            m.can_leech,
-            m.Visible,
+            um.BonusPoints,
+            um.RequiredRatio,
+            um.Title,
+            um.torrent_pass,
+            um.Enabled,
+            um.Paranoia,
+            um.Invites,
+            um.can_leech,
+            um.Visible,
             i.JoinDate,
             i.Info,
             i.Avatar,
@@ -87,25 +87,26 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.DisablePM,
             i.DisableIRC,
             i.DisableRequests,
-            m.FLTokens,
-            m.2FA_Key,
+            um.FLTokens,
+            um.2FA_Key,
             SHA1(i.AdminComment),
             i.InfoTitle,
             la.Type AS LockedAccount,
             CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
             CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
-        FROM users_main AS m
-        INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
-        INNER JOIN users_info AS i ON (i.UserID = m.ID)
+        FROM users_main AS um
+        LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        INNER JOIN users_info AS i ON (i.UserID = um.ID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
-        LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
-        LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
-        LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
-        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = m.ID)
+        LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
+        LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
+        LEFT JOIN locked_accounts AS la ON (la.UserID = um.ID)
+        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
         LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
-        LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = m.ID)
+        LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = um.ID)
         LEFT JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
-        WHERE m.ID = ?
+        WHERE um.ID = ?
         GROUP BY AuthorID
         ', 'no-fl-gifts', 'unlimited-download', $UserID
     );
@@ -126,25 +127,25 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
 } else { // Person viewing is a normal user
     $DB->prepared_query('
         SELECT
-            m.Username,
-            m.Email,
-            m.LastAccess,
-            m.IP,
+            um.Username,
+            um.Email,
+            ula.last_access,
+            um.IP,
             p.Level AS Class,
             uls.Uploaded,
             uls.Downloaded,
-            m.BonusPoints,
-            m.RequiredRatio,
-            m.Enabled,
-            m.Paranoia,
-            m.Invites,
-            m.Title,
-            m.torrent_pass,
-            m.can_leech,
+            um.BonusPoints,
+            um.RequiredRatio,
+            um.Enabled,
+            um.Paranoia,
+            um.Invites,
+            um.Title,
+            um.torrent_pass,
+            um.can_leech,
             i.JoinDate,
             i.Info,
             i.Avatar,
-            m.FLTokens,
+            um.FLTokens,
             i.Donor,
             i.Warned,
             COUNT(posts.id) AS ForumPosts,
@@ -153,15 +154,16 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             inviter.username,
             i.InfoTitle,
             CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
-        FROM users_main AS m
-        INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
-        INNER JOIN users_info AS i ON (i.UserID = m.ID)
-        LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+        FROM users_main AS um
+        LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+        INNER JOIN users_info AS i ON (i.UserID = um.ID)
+        LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
-        LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
-        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = m.ID)
+        LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
+        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
         LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
-        WHERE m.ID = ?
+        WHERE um.ID = ?
         GROUP BY AuthorID
         ', 'no-fl-gifts', $UserID
     );
@@ -210,7 +212,6 @@ foreach ($Paranoia as $P) {
 }
 
 $JoinedDate = time_diff($JoinDate);
-$LastAccess = time_diff($LastAccess);
 
 function check_paranoia_here($Setting) {
     global $Paranoia, $Class, $UserID, $Preview;
@@ -357,7 +358,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
             <ul class="stats nobullet">
                 <li>Joined: <?=$JoinedDate?></li>
 <?php    if (($Override = check_paranoia_here('lastseen'))) { ?>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Last seen: <?=$LastAccess?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Last seen: <?= time_diff($LastAccess) ?></li>
 <?php
     }
     if (($Override = check_paranoia_here('uploaded'))) {

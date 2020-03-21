@@ -11,10 +11,7 @@ much.
 define('FRIENDS_PER_PAGE', '20');
 include_once(SERVER_ROOT.'/classes/paranoia.class.php');
 
-
-
 View::show_header('Friends','comments');
-
 
 $UserID = $LoggedUser['ID'];
 
@@ -28,19 +25,20 @@ $DB->prepared_query('
         SQL_CALC_FOUND_ROWS
         f.FriendID,
         f.Comment,
-        m.Username,
+        um.Username,
         uls.Uploaded,
         uls.Downloaded,
-        m.PermissionID,
-        m.Paranoia,
-        m.LastAccess,
+        um.PermissionID,
+        um.Paranoia,
+        ula.last_access,
         i.Avatar
     FROM friends AS f
-    INNER JOIN users_main AS m ON (m.ID = f.FriendID)
+    INNER JOIN users_main AS um ON (um.ID = f.FriendID)
+    INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
     INNER JOIN users_info AS i ON (i.UserID = f.FriendID)
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = f.FriendID)
     WHERE f.UserID = ?
-    ORDER BY m.Username
+    ORDER BY um.Username
     LIMIT ?
     ', $UserID, $Limit
 );
@@ -135,4 +133,3 @@ foreach ($Friends as $Friend) {
 </div>
 <?php
 View::show_footer();
-?>

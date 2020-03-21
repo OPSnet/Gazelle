@@ -98,7 +98,7 @@ $OrderTable = [
     'Joined' => 'ui1.JoinDate',
     'Email' => 'um1.Email',
     'IP' => 'um1.IP',
-    'Last Seen' => 'um1.LastAccess',
+    'Last Seen' => 'ula.last_access',
     'Downloads' => 'Downloads',
     'Snatches' => 'Snatches',
     'Uploaded' => 'uls1.Uploaded',
@@ -212,8 +212,9 @@ if (count($_GET)) {
             ui1.Warned,
             ui1.Donor,
             ui1.JoinDate,
-            um1.LastAccess
+            ula.last_access
         FROM users_main AS um1
+        LEFT JOIN user_last_access AS ula ON (ula.user_id = um1.ID)
         INNER JOIN users_leech_stats AS uls1 ON (uls1.UserID = um1.ID)
         INNER JOIN users_info AS ui1 ON (ui1.UserID = um1.ID)
         ";
@@ -321,7 +322,7 @@ if (count($_GET)) {
 
         if ($_GET['lastactive1']) {
             $op = $_GET['lastactive'];
-            $Where[] = $m->date('um1.LastAccess', $op);
+            $Where[] = $m->date('ula.last_access', $op);
             $Args[] = $_GET['lastactive1'];
             if ($op === 'on') {
                 $Args[] = $_GET['lastactive1'];

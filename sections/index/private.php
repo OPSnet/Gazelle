@@ -155,19 +155,7 @@ $UserCount = Users::get_enabled_users_count();
 ?>
                 <li>Enabled users: <?=number_format($UserCount)?> <a href="stats.php?action=users" class="brackets">Details</a></li>
 <?php
-if (($UserStats = $Cache->get_value('stats_users')) === false) {
-    $DB->prepared_query("
-        SELECT
-            sum(LastAccess >= now() - INTERVAL 1 DAY) as d,
-            sum(LastAccess >= now() - INTERVAL 1 WEEK) as w,
-            sum(LastAccess >= now() - INTERVAL 1 MONTH) as m
-        FROM users_main
-        WHERE Enabled = '1'
-            AND LastAccess >= now() - INTERVAL 1 MONTH
-    ");
-    list($UserStats['Day'], $UserStats['Week'], $UserStats['Month']) = $DB->next_record();
-    $Cache->cache_value('stats_users', $UserStats, 43200 + rand(0, 3600)); // half day plus fuzz
-}
+$UserStats = \Gazelle\User::globalActivityStats($DB, $Cache);
 ?>
                 <li>Users active today: <?=number_format($UserStats['Day'])?> (<?=number_format($UserStats['Day'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this week: <?=number_format($UserStats['Week'])?> (<?=number_format($UserStats['Week'] / $UserCount * 100, 2)?>%)</li>

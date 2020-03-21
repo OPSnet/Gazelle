@@ -383,4 +383,22 @@ class User {
         }
         return (1 + $stats['download']) / (1 + $stats['snatch']);
     }
+
+    public static function globalActivityStats($db, $cache) {
+        if (($stats = $cache->get_value('stats_users')) === false) {
+            $db->prepared_query("
+                SELECT
+                    sum(ula.last_access > now() - INTERVAL 1 DAY) AS Day,
+                    sum(ula.last_access > now() - INTERVAL 1 WEEK) AS Week,
+                    sum(ula.last_access > now() - INTERVAL 1 MONTH) AS Month
+                FROM users_main um
+                INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+                WHERE um.Enabled = '1'
+                    AND ula.last_access > now() - INTERVAL 1 MONTH
+            ");
+            $stats = $db->next_record(MYSQLI_ASSOC);
+            $cache->cache_value('stats_users', $stats, 7200);
+        }
+        return $stats;
+    }
 }

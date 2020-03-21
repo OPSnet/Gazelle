@@ -44,18 +44,19 @@ function get_fls() {
     if (($FLS = $Cache->get_value('fls')) === false) {
         $DB->prepared_query('
             SELECT
-                m.ID,
+                um.ID,
                 p.Level,
-                m.Username,
-                m.Paranoia,
-                m.LastAccess,
+                um.Username,
+                um.Paranoia,
+                ula.last_access,
                 i.SupportFor
             FROM users_info AS i
-                JOIN users_main AS m ON m.ID = i.UserID
-                JOIN permissions AS p ON p.ID = m.PermissionID
-                JOIN users_levels AS l ON l.UserID = i.UserID
+            INNER JOIN users_main AS um ON (um.ID = i.UserID)
+            INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+            INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+            INNER JOIN users_levels AS l ON (l.UserID = i.UserID)
             WHERE l.PermissionID = ?
-            ORDER BY m.Username', FLS_TEAM);
+            ORDER BY um.Username', FLS_TEAM);
         $FLS = $DB->to_array(false, MYSQLI_BOTH, [3, 'Paranoia']);
         $Cache->cache_value('fls', $FLS, 180);
     }
@@ -72,21 +73,22 @@ function get_staff() {
     if (($Staff = $Cache->get_value('staff')) === false) {
         $DB->prepared_query("
         SELECT
-            m.ID,
+            um.ID,
             p.ID as LevelID,
             p.Level,
             p.Name,
             IFNULL(sg.Name, '') AS StaffGroup,
-            m.Username,
-            m.Paranoia,
-            m.LastAccess,
+            um.Username,
+            um.Paranoia,
+            ula.last_access,
             i.SupportFor
-        FROM users_main AS m
-            JOIN users_info AS i ON m.ID = i.UserID
-            JOIN permissions AS p ON p.ID = m.PermissionID
-            INNER JOIN staff_groups AS sg ON sg.ID = p.StaffGroup
+        FROM users_main AS um
+        INNER JOIN users_info AS i ON (um.ID = i.UserID)
+        INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+        INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+        INNER JOIN staff_groups AS sg ON (sg.ID = p.StaffGroup)
         WHERE p.DisplayStaff = '1' AND Secondary = 0
-        ORDER BY p.Level, m.Username");
+        ORDER BY p.Level, um.Username");
         $TmpStaff = $DB->to_array(false, MYSQLI_BOTH, [6, 'Paranoia']);
         $DB->prepared_query("
             SELECT Name
