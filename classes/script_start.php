@@ -246,7 +246,7 @@ function logout($userId, $sessionId = false) {
     setcookie('keeplogged', '', $epoch, '/', '', false);
     setcookie('session', '',    $epoch, '/', '', false);
     if ($sessionId) {
-        $session = new \Gazelle\Session($DB, $Cache, $userId);
+        $session = new \Gazelle\Session(G::$DB, G::$Cache, $userId);
         $session->drop($sessionId);
     }
 
@@ -262,7 +262,7 @@ function logout($userId, $sessionId = false) {
  * Logout all sessions
  */
 function logout_all_sessions($userId) {
-    $session = new \Gazelle\Session($DB, $Cache, $userId);
+    $session = new \Gazelle\Session(G::$DB, G::$Cache, $userId);
     $session->dropAll();
     logout($userId);
 }
