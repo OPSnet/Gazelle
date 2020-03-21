@@ -40,12 +40,6 @@ class Session {
 
     public function update($args) {
         $this->db->prepared_query('
-            UPDATE users_main
-            SET LastAccess = now()
-            WHERE ID = ?
-            ', $this->id
-        );
-        $this->db->prepared_query('
             UPDATE user_last_access
             SET last_access = now()
             WHERE user_id = ?

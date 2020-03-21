@@ -38,7 +38,7 @@ $DB->prepared_query('
         i.DisableInvites,
         inviter.username
     FROM users_main AS um
-    INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+    LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS i ON (i.UserID = um.ID)
     LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
@@ -297,7 +297,7 @@ if (!$OwnProfile) {
 
 // Run through some paranoia stuff to decide what we can send out.
 if (!check_paranoia_here('lastseen')) {
-    $LastAccess = '';
+    $LastAccess = null;
 }
 if (check_paranoia_here('ratio')) {
     $Ratio = Format::get_ratio($Uploaded, $Downloaded, 5);
@@ -325,11 +325,6 @@ if ($ParanoiaLevel == 0) {
     $ParanoiaLevelText = 'Very high';
 }
 
-//Bugfix for no access time available
-if ($LastAccess == '0000-00-00 00:00:00') {
-    $LastAccess = '';
-}
-
 header('Content-Type: text/plain; charset=utf-8');
 
 json_print("success", [
@@ -339,7 +334,7 @@ json_print("success", [
     'profileText' => Text::full_format($Info),
     'stats' => [
         'joinedDate' => $JoinDate,
-        'lastAccess' => $LastAccess,
+        'lastAccess' => $LastAccess ?? '',
         'uploaded' => (($Uploaded == null) ? null : (int)$Uploaded),
         'downloaded' => (($Downloaded == null) ? null : (int)$Downloaded),
         'ratio' => $Ratio,

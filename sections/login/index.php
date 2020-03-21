@@ -230,7 +230,6 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
             unset($Recovery[$Key]);
             $DB->prepared_query('
                 UPDATE users_main SET
-                    LastAccess = now(),
                     Recovery = ?
                 WHERE ID = ?
                 ', serialize($Recovery), $UserID
@@ -397,12 +396,6 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
             ]);
             $Cache->commit_transaction(0);
 
-            $DB->prepared_query('
-                UPDATE users_main SET
-                    LastAccess = now()
-                WHERE ID = ?
-                ', $UserID
-            );
             $DB->prepared_query('
                 INSERT INTO user_last_access
                        (user_id, last_access)
@@ -599,12 +592,6 @@ else {
                         ]);
                         $Cache->commit_transaction(0);
 
-                        $DB->prepared_query('
-                            UPDATE users_main SET
-                                LastAccess = now()
-                            WHERE ID = ?
-                            ', $UserID
-                        );
                         $DB->prepared_query('
                             INSERT INTO user_last_access
                                    (user_id, last_access)
