@@ -285,13 +285,7 @@ class Torrents {
         list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record(MYSQLI_BOTH, [2, 'info_hash']);
 
         $Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
-        G::$DB->prepared_query('
-            UPDATE users_main
-            SET BonusPoints = BonusPoints - ?
-            WHERE id = ?
-            ', $ID <= MAX_PREV_TORRENT_ID ? 0 : $Bonus->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum),
-                $UserID
-        );
+        $Bonus->removePoints($UserID, [$Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum]);
 
         $manager = new \Gazelle\DB(G::$DB, G::$Cache);
         list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);

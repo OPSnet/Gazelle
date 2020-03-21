@@ -110,6 +110,10 @@ class Bonus {
             $this->db->rollback();
             return false;
         }
+        $this->db->prepared_query(
+            "UPDATE user_bonus SET points = points - ? WHERE points >= ? AND user_id = ?",
+            $value, $value, $user_id
+        );
         $pool = new \Gazelle\BonusPool($this->db, $this->cache, $pool_id);
         $pool->contribute($user_id, $value, $taxed_value);
         $this->db->commit();
@@ -188,6 +192,10 @@ class Bonus {
             $this->db->rollback();
             return false;
         }
+        $this->db->prepared_query(
+            "UPDATE user_bonus SET points = points - ? WHERE points >= ? AND user_id = ?",
+            $item['Price'], $item['Price'], $user_id
+        );
 
         $this->addPurchaseHistory($item['ID'], $user_id, $item['Price']);
         $this->db->commit();
@@ -216,6 +224,10 @@ class Bonus {
                 $this->db->rollback();
                 return false;
             }
+            $this->db->prepared_query(
+                'UPDATE user_bonus SET points = points - ? WHERE points >= ? AND user_id = ?',
+                $price, $price, $user_id
+            );
             // Sanity check
             $new_stats = \Users::user_stats($user_id, true);
             if (!($new_stats['BonusPoints'] >= 0 && $new_stats['BonusPoints'] < $stats['BonusPoints'])) {
@@ -253,6 +265,10 @@ class Bonus {
             $this->db->rollback();
             return false;
         }
+        $this->db->prepared_query(
+            'UPDATE user_bonus SET points = points - ? WHERE points >= ? AND user_id = ?',
+            $amount, $price, $price, $user_id
+        );
         $new_stats = \Users::user_stats($user_id, true);
         if (!($new_stats['BonusPoints'] >= 0 && $new_stats['BonusPoints'] < $stats['BonusPoints'])) {
             $this->db->rollback();
@@ -299,6 +315,7 @@ class Bonus {
             $this->db->rollback();
             return 0;
         }
+        $this->db->prepared_query('UPDATE user_bonus SET points = points - ? WHERE points >= 0 AND user_id = ?', $price, $fromID);
         $new_stats = \Users::user_stats($fromID, true);
         if (!($new_stats['BonusPoints'] >= 0 && $new_stats['BonusPoints'] < $stats['BonusPoints'])) {
             $this->db->rollback();
@@ -354,8 +371,26 @@ Enjoy!";
 
     public function addPoints($user_id, $amount) {
         $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $amount, $user_id);
+        $this->db->prepared_query('UPDATE user_bonus SET points = points + ? WHERE user_id = ?', $amount, $user_id);
         $this->cache->delete_value("user_info_heavy_{$user_id}");
         $this->cache->delete_value("user_stats_{$user_id}");
+    }
+
+    public function removePoints($UserID, array $torrentDetails) {
+        list($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = $torrentDetails;
+        $value = $this->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum);
+        $this->db->prepared_query('
+            UPDATE users_main
+            SET BonusPoints = BonusPoints - ?
+            WHERE ID = ?
+            ', $ID <= MAX_PREV_TORRENT_ID ? 0 : $value, $UserID
+        );
+        $this->db->prepared_query('
+            UPDATE user_bonus
+            SET points = points - ?
+            WHERE user_id = ?
+            ', $ID <= MAX_PREV_TORRENT_ID ? 0 : $value, $UserID
+        );
     }
 
     public function userHourlyRate($id) {
@@ -472,6 +507,33 @@ Enjoy!";
                 ", $userId, $userId + $chunk - 1, $userId, $userId + $chunk - 1
             );
             $processed += $this->db->affected_rows();
+
+            $this->db->prepared_query("
+                INSERT INTO user_bonus
+                SELECT
+                    xfu.uid AS ID,
+                    sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)) as new
+                FROM (
+                    SELECT DISTINCT uid, fid
+                    FROM xbt_files_users
+                    WHERE active = '1'
+                        AND remaining = 0
+                        AND mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
+                        AND uid BETWEEN ? AND ?
+                ) xfu
+                INNER JOIN xbt_files_history AS xfh USING (uid, fid)
+                INNER JOIN users_main AS um ON (um.ID = xfu.uid)
+                INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
+                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                WHERE ui.DisablePoints = '0'
+                    AND um.Enabled = '1'
+                    AND um.ID BETWEEN ? AND ?
+                GROUP BY
+                    xfu.uid
+                ON DUPLICATE KEY UPDATE points = points + new
+                ", $userId, $userId + $chunk - 1, $userId, $userId + $chunk - 1
+            );
 
             /* flush their stats */
             $this->db->prepared_query("
