@@ -164,7 +164,11 @@ echo $Val->GenerateJS('userform');
                 <td class="label tooltip" title="Selecting a stylesheet will change <?=SITE_NAME?>'s visual appearance."><strong>Stylesheet</strong></td>
                 <td>
                     <select name="stylesheet" id="stylesheet">
-<?php   foreach ($Stylesheets as $Style) { ?>
+<?php
+    $StylesheetsManager = new \Gazelle\Stylesheet($DB, $Cache);
+    $Stylesheets = $StylesheetsManager->list();
+
+    foreach ($Stylesheets as $Style) { ?>
                         <option value="<?=($Style['ID'])?>"<?=$Style['ID'] == $StyleID ? ' selected="selected"' : ''?>><?=($Style['ProperName'])?></option>
 <?php   } ?>
                     </select>&nbsp;&nbsp;

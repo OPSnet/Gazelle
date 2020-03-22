@@ -29,6 +29,10 @@ class Stylesheet {
         }
     }
 
+    public function list () {
+        return $this->stylesheets;
+    }
+
     public function getName($id) {
         return $this->stylesheets[$id]['Name'];
     }
