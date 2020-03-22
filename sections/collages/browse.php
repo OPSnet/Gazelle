@@ -1,28 +1,28 @@
 <?php
+
+use Gazelle\Util\SortableTableHeader;
+
 define('COLLAGES_PER_PAGE', 25);
 
 list($Page, $Limit) = Format::page_limit(COLLAGES_PER_PAGE);
 
-$orderVals = ['Time', 'Name', 'Subscribers', 'Torrents', 'Updated'];
-$orderTable = [
-    'Time' => 'ID',
-    'Name' => 'c.Name',
-    'Subscribers' => 'c.Subscribers',
-    'Torrents' => 'NumTorrents',
-    'Updated' => 'c.Updated'
+$SortOrderMap = [
+    'time'        => ['ID', 'desc'],
+    'name'        => ['c.Name', 'asc'],
+    'subscribers' => ['c.Subscribers', 'desc'],
+    'torrents'    => ['NumTorrents', 'desc'],
+    'updated'     => ['c.Updated', 'desc'],
 ];
-$wayTable = [
-    'Ascending' => 'ASC',
-    'Descending' => 'DESC'
-];
-$wayVals = array_keys($wayTable);
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$flipOrderMap = ['asc' => 'desc', 'desc' => 'asc'];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : $flipOrderMap[$SortOrderMap[$SortOrder][1]];
 
 // Are we searching in bodies, or just names?
-if (!empty($_GET['type'])) {
+if (!empty($_GET['type']) && in_array($_GET['type'], ['c.name', 'description'])) {
     $searchField = $_GET['type'];
-    if (!in_array($searchField, ['c.name', 'description'])) {
-        $searchField = 'c.name';
-    }
 } else {
     $searchField = 'c.name';
 }
@@ -44,19 +44,6 @@ if (empty($_GET['cats'])) {
         }
     }
     $Categories = array_keys($Categories);
-}
-
-// Ordering
-if (!empty($_GET['order_by']) && !empty($orderTable[$_GET['order_by']])) {
-    $Order = $orderTable[$_GET['order_by']];
-} else {
-    $Order = 'ID';
-}
-
-if (!empty($_GET['order_way']) && !empty($wayTable[$_GET['order_way']])) {
-    $Way = $wayTable[$_GET['order_way']];
-} else {
-    $Way = 'DESC';
 }
 
 $BookmarkView = !empty($_GET['bookmarks']);
@@ -160,7 +147,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
     }
 }
 
-$SQL .= "\nORDER BY $Order $Way LIMIT $Limit";
+$SQL .= "\nORDER BY $OrderBy $OrderWay LIMIT $Limit";
 $DB->prepared_query($SQL, ...$Args);
 $Collages = $DB->to_array();
 $DB->query('SELECT FOUND_ROWS()');
@@ -230,15 +217,16 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
                 <tr id="order_by">
                     <td class="label">Order by:</td>
                     <td>
-                        <select name="order_by" class="ft_order_by">
-<?php   foreach ($orderVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<?php if (isset($_GET['order_by']) && $_GET['order_by'] === $Cur || (!isset($_GET['order_by']) && $Cur === 'Time')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?php   } ?>
+                        <select name="order" class="ft_order_by">
+                            <option value="time"<?php Format::selected('order', 'time'); ?>>Time</option>
+                            <option value="name"<?php Format::selected('order', 'name'); ?>>Name</option>
+                            <option value="subscribers"<?php Format::selected('order', 'subscribers'); ?>>Subscribers</option>
+                            <option value="torrents"<?php Format::selected('order', 'torrents'); ?>>Torrents</option>
+                            <option value="updated"<?php Format::selected('order', 'updated'); ?>>Updated</option>
                         </select>
-                        <select name="order_way" class="ft_order_way">
-<?php   foreach ($wayVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<?php if (isset($_GET['order_way']) && $_GET['order_way'] === $Cur || (!isset($_GET['order_way']) && $Cur === 'Descending')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?php   } ?>
+                        <select name="sort" class="ft_order_way">
+                            <option value="desc"<?php Format::selected('sort', 'desc'); ?>>Descending</option>
+                            <option value="asc"<?php Format::selected('sort', 'asc'); ?>>Ascending</option>
                         </select>
                     </td>
                 </tr>
@@ -321,14 +309,23 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
 <?php   View::show_footer();
         die();
     }
+
+$header = new SortableTableHeader([
+    'time'        => 'Created',
+    'name'        => 'Collage',
+    'subscribers' => 'Subscribers',
+    'torrents'    => 'Torrents',
+    'updated'     => 'Updated',
+], $SortOrder, $OrderWay);
+
 ?>
 <table width="100%" class="collage_table m_table">
     <tr class="colhead">
         <td class="m_th_left">Category</td>
-        <td>Collage</td>
-        <td class="m_th_right">Torrents</td>
-        <td class="m_th_right">Subscribers</td>
-        <td>Updated</td>
+        <td><?= $header->emit('name', $SortOrderMap['name'][1]) ?> / <?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
+        <td class="m_th_right"><?= $header->emit('torrents', $SortOrderMap['torrents'][1]) ?></td>
+        <td class="m_th_right"><?= $header->emit('subscribers', $SortOrderMap['subscribers'][1]) ?></td>
+        <td><?= $header->emit('updated', $SortOrderMap['updated'][1]) ?></td>
         <td>Author</td>
     </tr>
 <?php

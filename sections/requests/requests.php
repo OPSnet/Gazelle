@@ -6,13 +6,13 @@ $SphQL = new SphinxqlQuery();
 $SphQL->select('id, votes, bounty')->from('requests, requests_delta');
 
 $SortOrderMap = [
-    'votes' => ['votes', 'desc'],
-    'bounty' => ['bounty', 'desc'],
+    'votes'    => ['votes', 'desc'],
+    'bounty'   => ['bounty', 'desc'],
     'lastvote' => ['lastvote', 'desc'],
-    'filled' => ['timefilled', 'desc'],
-    'year' => ['year', 'desc'],
-    'created' => ['timeadded', 'desc'],
-    'random' => ['RAND()', ''],
+    'filled'   => ['timefilled', 'desc'],
+    'year'     => ['year', 'desc'],
+    'created'  => ['timeadded', 'desc'],
+    'random'   => ['RAND()', ''],
 ];
 $SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
 $OrderBy = $SortOrderMap[$SortOrder][0];
@@ -519,11 +519,11 @@ View::show_header($Title, 'requests');
     </div>
 <?php        }
 $header = new SortableTableHeader([
-    'year' => '<strong>Year</strong>',
-    'votes' => '<strong>Votes</strong>',
-    'bounty' => '<strong>Bounty</strong>',
-    'filled' => '<strong>Filled</strong>',
-    'created' => '<strong>Created</strong>',
+    'year'     => '<strong>Year</strong>',
+    'votes'    => '<strong>Votes</strong>',
+    'bounty'   => '<strong>Bounty</strong>',
+    'filled'   => '<strong>Filled</strong>',
+    'created'  => '<strong>Created</strong>',
     'lastvote' => '<strong>Last Vote</strong>',
 ], $SortOrder, $OrderWay);
 ?>

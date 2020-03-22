@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\SortableTableHeader;
+
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -17,17 +19,20 @@ $RequestsPerPage = 25;
 list($Page, $Limit) = Format::page_limit($RequestsPerPage);
 
 // How can things be ordered?
-$OrderBys = [
-    'submitted_timestamp' => 'uer.Timestamp',
-    'outcome' => 'uer.Outcome',
-    'handled_timestamp' => 'uer.HandledTimestamp'];
+$SortOrderMap = [
+    'submitted_timestamp' => ['uer.Timestamp', 'desc'],
+    'outcome'             => ['uer.Outcome', 'desc'],
+    'handled_timestamp'   => ['uer.HandledTimestamp', 'desc'],
+];
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'submitted_timestamp';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$flipOrderMap = ['asc' => 'desc', 'desc' => 'asc'];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : $flipOrderMap[$SortOrderMap[$SortOrder][1]];
 
 $Where = [];
 $Joins = [];
-
-// Default orderings
-$OrderBy = "uer.Timestamp";
-$OrderWay = "DESC";
 
 // Build query for different views
 if ($_GET['view'] == 'perfect') {
@@ -65,14 +70,6 @@ if (isset($_GET['search'])) {
     $HandledTimestamp2 = db_string($_GET['handled_timestamp2']);
     $OutcomeSearch = (int) $_GET['outcome_search'];
     $Checked = (isset($_GET['show_checked']));
-
-    if (array_key_exists($_GET['order'], $OrderBys)) {
-        $OrderBy = $OrderBys[$_GET['order']];
-    }
-
-    if ($_GET['way'] == "asc" || $_GET['way'] == "desc") {
-        $OrderWay = $_GET['way'];
-    }
 
     if (!empty($Username)) {
         $Joins[] = "JOIN users_main um1 ON um1.ID = uer.UserID";
@@ -124,12 +121,12 @@ $DB->set_query_id($QueryID);
     <h2>Auto-Enable Requests</h2>
 </div>
 <div align="center">
-    <a class="brackets tooltip" href="tools.php?action=enable_requests" title="Default view">Main</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=perfect&amp;<?=Format::get_url(['view', 'action'])?>" title="Valid username, matching email, current IP with no matches, and inactivity disabled">Perfect</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=minus_ip&amp;<?=Format::get_url(['view', 'action'])?>" title="Valid username, matching email, and inactivity disabled">Perfect Minus IP</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=invalid_email&amp;<?=Format::get_url(['view', 'action'])?>" title="Non-matching email address">Invalid Email</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=ip_overlap&amp;<?=Format::get_url(['view', 'action'])?>" title="Requests with IP matches to other accounts">IP Overlap</a>
-    <a class="brackets tooltip" href="tools.php?action=enable_requests&amp;view=manual_disable&amp;<?=Format::get_url(['view', 'action'])?>" title="Requests for accounts that were not disabled for inactivity">Manual Disable</a>
+    <a class="brackets tooltip" href="?<?= Format::get_url(['view']) ?>" title="Default view">Main</a>
+    <a class="brackets tooltip" href="?<?= Format::get_url([], true, false, ['view' => 'perfect']) ?>" title="Valid username, matching email, current IP with no matches, and inactivity disabled">Perfect</a>
+    <a class="brackets tooltip" href="?<?= Format::get_url([], true, false, ['view' => 'minus_ip']) ?>" title="Valid username, matching email, and inactivity disabled">Perfect Minus IP</a>
+    <a class="brackets tooltip" href="?<?= Format::get_url([], true, false, ['view' => 'invalid_email']) ?>" title="Non-matching email address">Invalid Email</a>
+    <a class="brackets tooltip" href="?<?= Format::get_url([], true, false, ['view' => 'ip_overlap']) ?>" title="Requests with IP matches to other accounts">IP Overlap</a>
+    <a class="brackets tooltip" href="?<?= Format::get_url([], true, false, ['view' => 'manual_disable']) ?>" title="Requests for accounts that were not disabled for inactivity">Manual Disable</a>
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#search_form').gtoggle(); return false;">Search</a>
     <a class="brackets tooltip" href="" title="Show/Hide Search" onclick="$('#scores').gtoggle(); return false;">Scores</a>
 </div><br />
@@ -216,13 +213,13 @@ $DB->set_query_id($QueryID);
                 <td class="label">Order By</td>
                 <td>
                     <select name="order">
-                        <option value="submitted_timestamp" <?=$_GET['order'] == 'submitted_timestamp' ? 'selected' : '' ?>>Submitted Timestamp</option>
-                        <option value="outcome" <?=$_GET['order'] == 'outcome' ? 'selected' : '' ?>>Outcome</option>
-                        <option value="handled_timestamp" <?=$_GET['order'] == 'handled_timestamp' ? 'selected' : '' ?>>Handled Timestamp</option>
+                        <option value="submitted_timestamp"<?php Format::selected('order', 'submitted_timestamp'); ?>>Submitted Timestamp</option>
+                        <option value="outcome"<?php Format::selected('order', 'outcome'); ?>>Outcome</option>
+                        <option value="handled_timestamp"<?php Format::selected('order', 'handled_timestamp'); ?>>Handled Timestamp</option>
                     </select>&nbsp;
-                    <select name="way">
-                        <option value="asc" <?=$_GET['way'] == 'asc' ? 'selected' : '' ?>>Ascending</option>
-                        <option value="desc" <?=!isset($_GET['way']) || $_GET['way'] == 'desc' ? 'selected' : '' ?>>Descending</option>
+                    <select name="sort">
+                        <option value="desc"<?php Format::selected('sort', 'desc'); ?>>Descending</option>
+                        <option value="asc"<?php Format::selected('sort', 'asc'); ?>>Ascending</option>
                     </select>
                 </td>
             </tr>
@@ -238,6 +235,12 @@ if ($NumResults > 0) { ?>
 <?php
     $Pages = Format::get_pages($Page, $NumResults, $RequestsPerPage);
     echo $Pages;
+
+    $header = new SortableTableHeader([
+        'submitted_timestamp' => 'Age',
+        'handled_timestamp'   => ($ShowChecked) ? ' / Checked Date' : '',
+        'outcome'             => 'Outcome',
+    ], $SortOrder, $OrderWay);
 ?>
     </div>
     <table width="100%">
@@ -247,12 +250,12 @@ if ($NumResults > 0) { ?>
             <td>Email Address</td>
             <td>IP Address</td>
             <td>User Agent</td>
-            <td>Age</td>
+            <td><?= $header->emit('submitted_timestamp', $SortOrderMap['submitted_timestamp'][1]) ?></td>
             <td>Ban Reason</td>
-            <td>Comment<?=$ShowChecked ? '/Checked By' : ''?></td>
-            <td>Submit<?=$ShowChecked ? '/Checked Date' : ''?></td>
+            <td>Comment<?= $ShowChecked ? ' / Checked By' : ''?></td>
+            <td>Submit<?= $header->emit('handled_timestamp', $SortOrderMap['handled_timestamp'][1]) ?></td>
 <?php   if ($ShowChecked) { ?>
-            <td>Outcome</td>
+            <td><?= $header->emit('outcome', $SortOrderMap['outcome'][1]) ?></td>
 <?php   } ?>
         </tr>
     <?php
@@ -268,9 +271,7 @@ if ($NumResults > 0) { ?>
             </td>
             <td><?=Users::format_username($UserID)?></td>
             <td><?=display_str($Email)?></td>
-
             <td><?=display_str($IP)?></td>
-
             <td><?=display_str($UserAgent)?></td>
             <td><?=time_diff($Timestamp)?></td>
             <td><?=($BanReason == 3) ? '<b>Inactivity</b>' : 'Other'?></td>

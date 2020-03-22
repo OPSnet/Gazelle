@@ -8,9 +8,9 @@ $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
 $SortOrderMap = [
-    'size' => ['t.Size', 'desc'],
-    'seeders' => ['Seeders', 'desc'],
-    'seedtime' => ['SeedTime', 'desc'],
+    'size'         => ['t.Size', 'desc'],
+    'seeders'      => ['Seeders', 'desc'],
+    'seedtime'     => ['SeedTime', 'desc'],
     'hourlypoints' => ['HourlyPoints', 'desc'],
 ];
 $SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'hourlypoints';
@@ -91,9 +91,9 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 </div>
 <?php
 $header = new SortableTableHeader([
-    'size' => 'Size',
-    'seeders' => 'Seeders',
-    'seedtime' => 'Seedtime',
+    'size'         => 'Size',
+    'seeders'      => 'Seeders',
+    'seedtime'     => 'Seedtime',
     'hourlypoints' => 'BP/hour',
 ], $SortOrder, $OrderWay);
 ?>
