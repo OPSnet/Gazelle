@@ -886,7 +886,7 @@ $SQL = "
 $DB->query($SQL);
 
 if ($newBonusPoints !== false) {
-    $Bonus = \Gazelle\Bonus($DB, $Cache);
+    $Bonus = new \Gazelle\Bonus($DB, $Cache);
     $Bonus->setPoints($UserID, $newBonusPoints);
 }
 
