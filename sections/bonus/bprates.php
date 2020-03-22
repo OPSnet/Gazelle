@@ -147,9 +147,9 @@ if ($TotalTorrents > 0) {
         <td><?= Format::get_size($Torrent['Size']) ?></td>
         <td><?= number_format($Seeders) ?></td>
         <td><?= convert_hours($Torrent['Seedtime'], 2) ?></td>
-        <td><?= number_format($HourlyPoints, 2) ?></td>
-        <td><?= number_format($DailyPoints, 2) ?></td>
-        <td><?= number_format($WeeklyPoints, 2) ?></td>
+        <td><?= number_format($HourlyPoints, 3) ?></td>
+        <td><?= number_format($DailyPoints, 3) ?></td>
+        <td><?= number_format($WeeklyPoints, 3) ?></td>
         <td><?= number_format($MonthlyPoints, 2) ?></td>
         <td><?= number_format($YearlyPoints, 2) ?></td>
     </tr>
