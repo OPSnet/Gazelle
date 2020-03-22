@@ -114,7 +114,7 @@ $DB->prepared_query("
         m.Enabled,
         uls.Uploaded,
         uls.Downloaded,
-        m.BonusPoints,
+        coalesce(ub.points, 0) as BonusPoints,
         m.Invites,
         m.can_leech,
         m.Visible,
@@ -146,6 +146,7 @@ $DB->prepared_query("
     FROM users_main AS m
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
     INNER JOIN users_info AS i ON (i.UserID = m.ID)
+    LEFT JOIN user_bonus ub ON (ub.user_id = m.ID)
     LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
     LEFT JOIN users_levels AS l ON (l.UserID = m.ID)
     LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)

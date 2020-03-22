@@ -182,6 +182,10 @@ class Bonus {
             $this->db->rollback();
             return false;
         }
+        $this->db->prepared_query(
+            "UPDATE users_main SET Invites = Invites + 1 WHERE AND ID = ?",
+            $user_id
+        );
         $this->addPurchaseHistory($item['ID'], $userId, $item['Price']);
         $this->db->commit();
         $this->cache->delete_value('user_stats_' . $userId);
@@ -224,6 +228,11 @@ class Bonus {
             $this->db->rollback();
             return false;
         }
+        $this->db->prepared_query(
+            'UPDATE users_main SET FLTokens = FLTokens + ? WHERE ID = ?',
+            $amount, $user_id
+        );
+
         $this->db->commit();
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->cache->delete_value('user_info_heavy_' . $userId);
@@ -320,6 +329,33 @@ Enjoy!";
         $this->db->prepared_query('UPDATE user_bonus SET points = points + ? WHERE user_id = ?', $points, $userId);
         $this->cache->delete_value("user_info_heavy_{$userId}");
         $this->cache->delete_value("user_stats_{$userId}");
+    }
+
+    public function addGlobalPoints($points) {
+        $this->db->prepared_query("
+            INSERT INTO user_bonus
+            SELECT um.ID, ?
+            FROM users_main um
+            INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            WHERE ui.DisablePoints = '0'
+                AND um.Enabled = '1'
+            ON DUPLICATE KEY UPDATE points = points + ?
+            ", $points, $points
+        );
+
+        $this->db->prepared_query("
+            SELECT concat('user_stats_', um.ID) as ck
+            FROM users_main um
+            INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            WHERE ui.DisablePoints = '0'
+                AND um.Enabled = '1'
+        ");
+        if ($this->db->has_results()) {
+            $keys = $this->db->collect('ck', false);
+            $this->cache->deleteMulti($keys);
+            return count($keys);
+        }
+        return 0;
     }
 
     public function removePointsForUpload($userId, array $torrentDetails) {

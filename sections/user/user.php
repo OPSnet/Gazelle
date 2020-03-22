@@ -52,7 +52,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             p.Level AS Class,
             uls.Uploaded,
             uls.Downloaded,
-            um.BonusPoints,
+            coalesce(ub.points, 0) as BonusPoints,
             um.RequiredRatio,
             um.Title,
             um.torrent_pass,
@@ -98,6 +98,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
         INNER JOIN users_info AS i ON (i.UserID = um.ID)
+        LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
         LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
@@ -134,7 +135,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             p.Level AS Class,
             uls.Uploaded,
             uls.Downloaded,
-            um.BonusPoints,
+            coalesce(ub.points, 0) as BonusPoints,
             um.RequiredRatio,
             um.Enabled,
             um.Paranoia,
@@ -158,6 +159,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
         INNER JOIN users_info AS i ON (i.UserID = um.ID)
+        LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
         LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
