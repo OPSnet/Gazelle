@@ -953,10 +953,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 //--------------- Give Bonus Points  -------------------------------------------//
 
 if (G::$LoggedUser['DisablePoints'] == 0) {
-    $DB->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?',
-        $BonusPoints, $LoggedUser['ID']
-    );
-    $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
+    $Bonus->addPoints($LoggedUser['ID'], $BonusPoints);
 }
 
 //******************************************************************************//

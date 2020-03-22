@@ -479,11 +479,13 @@ if ($Downloaded != $Cur['Downloaded'] && $Downloaded != $_POST['OldDownloaded'] 
         $Cache->delete_value("user_stats_$UserID");
 }
 
+$newBonusPoints = false;
 if ($BonusPoints != floatval($Cur['BonusPoints']) && $BonusPoints != floatval($_POST['OldBonusPoints'])
     && (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {
     $UpdateSet[] = "BonusPoints = '{$BonusPoints}'";
     $EditSummary[] = "bonus points changed from {$Cur['BonusPoints']} to {$BonusPoints}";
     $Cache->delete_value("user_stats_{$UserID}");
+    $newBonusPoints = $BonusPoints;
 }
 
 if ($FLTokens != $Cur['FLTokens']
@@ -881,8 +883,12 @@ $SQL = "
     WHERE m.ID = '$UserID'";
 
 // Perform update
-//die($SQL);
 $DB->query($SQL);
+
+if ($newBonusPoints !== false) {
+    $Bonus = \Gazelle\Bonus($DB, $Cache);
+    $Bonus->setPoints($UserID, $newBonusPoints);
+}
 
 if (!empty($LeechUpdateSet)) {
     $SET = implode(', ', array_map(function($key) { return "$key = ?"; }, array_keys($LeechUpdateSet)));

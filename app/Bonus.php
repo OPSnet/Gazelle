@@ -308,9 +308,16 @@ Enjoy!";
         return $this->db->affected_rows();
     }
 
-    public function addPoints($userId, $amount) {
-        $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $amount, $userId);
-        $this->db->prepared_query('UPDATE user_bonus SET points = points + ? WHERE userId = ?', $amount, $userId);
+    public function setPoints($userId, $points) {
+        $this->db->prepared_query('UPDATE users_main SET BonusPoints = ? WHERE ID = ?', $points, $userId);
+        $this->db->prepared_query('UPDATE user_bonus SET points = ? WHERE userId = ?', $points, $userId);
+        $this->cache->delete_value("user_info_heavy_{$userId}");
+        $this->cache->delete_value("user_stats_{$userId}");
+    }
+
+    public function addPoints($userId, $points) {
+        $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $points, $userId);
+        $this->db->prepared_query('UPDATE user_bonus SET points = points + ? WHERE userId = ?', $points, $userId);
         $this->cache->delete_value("user_info_heavy_{$userId}");
         $this->cache->delete_value("user_stats_{$userId}");
     }
@@ -349,6 +356,8 @@ Enjoy!";
                 return false;
             }
         }
+        $this->cache->delete_value("user_info_heavy_{$userId}");
+        $this->cache->delete_value("user_stats_{$userId}");
         return true;
     }
 
