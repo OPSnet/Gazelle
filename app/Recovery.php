@@ -541,13 +541,20 @@ END_EMAIL;
                 $irc_message = 'never joined #APOLLO';
             }
 
+            $reclaimed = self::reclaimPreviousUpload($db, $ops_user_id);
+            if ($reclaimed == -1) {
+                $reclaimMsg = "There were no torrents available to recover from the backup.";
+            } else {
+                $reclaimMsg = "Number of torrents still alive from the backup: $reclaimed.";
+            }
+
             $uploaded_fmt   = \Format::get_size($uploaded);
             $downloaded_fmt = \Format::get_size($downloaded);
             $bounty_fmt     = \Format::get_size($bounty);
             $final_fmt      = \Format::get_size($final);
 
             $admin_comment = sprintf("%s - Upload stats recovery raw: Up=%d Down=%d Bounty=%d Torrents=%d IRC=%s"
-                . "\nformatted: U=%s D=%s B=%s Final=%s (%d) APL_ID=%d RESCALE=%s\n\n",
+                . "\nformatted: U=%s D=%s B=%s Final=%s (%d) APL_ID=%d RESCALE=%s reclaim=$reclaimed\n\n",
                 $username, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass,
                 $uploaded_fmt, $downloaded_fmt, $bounty_fmt, $final_fmt, $final, $apl_user_id, $irc_message
             );
@@ -560,7 +567,9 @@ END_EMAIL;
                 $Body = <<<END_MSG
 Dear {$to['Username']},
 
-Your activity on the previous site has been rewarded. Your details are as follows:
+Your activity on the previous site has been rewarded.
+$reclaimMsg
+Your details are as follows:
 
 [*] Torrents uploaded: {$nr_torrents}
 [*] Downloaded: {$downloaded_fmt}
@@ -610,5 +619,34 @@ END_MSG;
 
             $cache->delete_value('user_stats_' . $ops_user_id);
         }
+    }
+
+    public static function reclaimPreviousUpload($db, $userId) {
+        $db->prepared_query(
+            sprintf('
+                UPDATE torrents curr
+                INNER JOIN %s.torrents prev USING (ID)
+                SET
+                    curr.UserID = ?
+                WHERE prev.UserID = (
+                    SELECT userid
+                    FROM %s.%s
+                    WHERE MappedID = ?
+                        AND mapped = 0
+                )
+                ', RECOVERY_DB, RECOVERY_DB, RECOVERY_MAPPING_TABLE
+            ),  $userId, $userId
+        );
+        $reclaimed = $db->affected_rows();
+        if ($reclaimed == 0) {
+            $reclaimed = -1;
+        }
+        $db->prepared_query(
+            sprintf('
+                UPDATE %s.users_apl_mapping SET mapped = ? WHERE MappedID = ?
+                ', RECOVERY_DB
+            ), $reclaimed, $userId
+        );
+        return $reclaimed;
     }
 }
