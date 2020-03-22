@@ -337,8 +337,11 @@ Enjoy!";
             SELECT um.ID, ?
             FROM users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
+            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
             WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
+                AND uhafl.UserID IS NULL
             ON DUPLICATE KEY UPDATE points = points + ?
             ", $points, $points
         );
@@ -347,8 +350,11 @@ Enjoy!";
             SELECT concat('user_stats_', um.ID) as ck
             FROM users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
+            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
             WHERE ui.DisablePoints = '0'
                 AND um.Enabled = '1'
+                AND uhafl.UserID IS NULL
         ");
         if ($this->db->has_results()) {
             $keys = $this->db->collect('ck', false);
