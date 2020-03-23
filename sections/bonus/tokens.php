@@ -1,13 +1,19 @@
 <?php
+
+enforce_login();
 authorize();
 
 if (!preg_match('/^(token|other)-[1-4]$/', $Label, $match)) {
     error(403);
 }
 
-if  ($match[1] === 'token'){
-    if (!$Bonus->purchaseToken(G::$LoggedUser['ID'], $Label, G::$LoggedUser)) {
-        error('Purchase not concluded.');
+if ($match[1] === 'token') {
+    try {
+        $Bonus->purchaseToken($LoggedUser['ID'], $Label);
+    }
+    catch (\Exception $e) {
+        $message = $e->getMessage();
+        error("Purchase not concluded ($message).");
     }
 }
 else {
@@ -21,7 +27,7 @@ else {
     elseif ($ID == G::$LoggedUser['ID']) {
         error('You cannot give yourself tokens. (Nice try :)');
     }
-    if (!$Bonus->purchaseTokenOther(G::$LoggedUser['ID'], $ID, $Label, G::$LoggedUser)) {
+    if (!$Bonus->purchaseTokenOther(G::$LoggedUser['ID'], $ID, $Label)) {
         error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
     }
 }

@@ -30,6 +30,13 @@ class Bonus {
         }
     }
 
+    public function flushUserCache($userId) {
+        $this->cache->deleteMulti([
+            'user_info_heavy_' . $userId,
+            'user_stats_' . $userId,
+        ]);
+    }
+
     public function getList() {
         return $this->items;
     }
@@ -111,10 +118,12 @@ class Bonus {
         $pool->contribute($userId, $value, $taxedValue);
         $this->db->commit();
 
-        $this->cache->delete_value(self::CACHE_OPEN_POOL);
-        $this->cache->delete_value(self::CACHE_POOL_HISTORY . $userId);
-        $this->cache->delete_value('user_stats_' . $userId);
-        $this->cache->delete_value('user_info_heavy_' . $userId);
+        $this->cache->deleteMulti([
+            self::CACHE_OPEN_POOL,
+            self::CACHE_POOL_HISTORY . $userId,
+            'user_info_heavy_' . $userId,
+            'user_stats_' . $userId,
+        ]);
         return true;
     }
 
@@ -148,7 +157,7 @@ class Bonus {
             $history = $this->db->has_results() ? $this->db->to_array() : null;
             $this->cache->cache_value($key, $history, 86400 * 3);
             /* since we had to fetch this page, invalidate the next one */
-            $this->cache->delete_value(self::CACHE_HISTORY . "{$userId}." . ($page+1));
+            $this->cache->delete_value(self::CACHE_HISTORY . $userId . ($page+1));
         }
         return $history;
     }
@@ -174,22 +183,27 @@ class Bonus {
 
     public function purchaseInvite($userId) {
         $item = $this->items['invite'];
+        $price = $item['Price'];
         if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
-            return false;
+            throw new \Exception('Bonus:invite:minclass');
         }
         $this->db->begin_transaction();
         if (!$this->removePoints($userId, $price)) {
             $this->db->rollback();
-            return false;
+            throw new \Exception('Bonus:invite:nofunds');
         }
-        $this->db->prepared_query(
-            "UPDATE users_main SET Invites = Invites + 1 WHERE AND ID = ?",
-            $userId
+        $this->db->prepared_query('
+            UPDATE user_bonus ub
+            INNER JOIN users_main um ON (um.ID = ub.user_id) SET
+                ub.points = ub.points - ?,
+                um.Invites = um.Invites + 1
+            WHERE ub.user_id = ?
+                AND ub.points >= ?
+            ', $price, $userID, $price
         );
-        $this->addPurchaseHistory($item['ID'], $userId, $item['Price']);
+        $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->db->commit();
-        $this->cache->delete_value('user_stats_' . $userId);
-        $this->cache->delete_value('user_info_heavy_' . $userId);
+        $this->flushUserCache($UserId);
         return true;
     }
 
@@ -203,84 +217,90 @@ class Bonus {
         if ($price > 0) {
             if (!$this->removePoints($userId, $price)) {
                 $this->db->rollback();
-                return false;
+                throw new \Exception('Bonus:title:nofunds');
             }
         }
         if (!\Users::setCustomTitle($userId, $title)) {
             $this->db->rollback();
+            throw new \Exception('Bonus:title:set');
             return false;
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->db->commit();
-        $this->cache->delete_value('user_info_heavy_' . $userId);
+        $this->flushUserCache($UserId);
         return true;
     }
 
     public function purchaseToken($userId, $label) {
         if (!array_key_exists($label, $this->items)) {
-            return false;
+            throw new \Exception('Bonus:selfToken:badlabel');
         }
         $item   = $this->items[$label];
         $amount = $item['Amount'];
         $price  = $item['Price'];
-        $this->db->begin_transaction();
-        if (!$this->removePoints($userId, $price)) {
-            $this->db->rollback();
-            return false;
-        }
-        $this->db->prepared_query(
-            'UPDATE users_main SET FLTokens = FLTokens + ? WHERE ID = ?',
-            $amount, $userId
+        $this->db->prepared_query('
+            UPDATE user_bonus ub
+            INNER JOIN users_main um ON (um.ID = ub.user_id) SET
+                ub.points = ub.points - ?,
+                um.FLTokens = um.FLTokens + ?
+            WHERE ub.user_id = ?
+                AND ub.points >= ?
+            ', $price, $amount, $userId, $price
         );
-
-        $this->db->commit();
+        if ($this->db->affected_rows() != 2) {
+            throw new \Exception('Bonus:selfToken:funds');
+        }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->cache->delete_value('user_info_heavy_' . $userId);
-        return true;
+        $this->flushUserCache($UserId);
+        return $amount;
     }
 
-    public function purchaseTokenOther($fromID, $toID, $label, &$logged_user) {
+    public function purchaseTokenOther($fromID, $toID, $label) {
         if ($fromID === $toID) {
-            return 0;
+            throw new \Exception('Bonus:otherToken:self');
         }
         if (!array_key_exists($label, $this->items)) {
-            return 0;
+            throw new \Exception('Bonus:otherToken:badlabel');
         }
         $item  = $this->items[$label];
         $amount = $item['Amount'];
         $price  = $item['Price'];
-        if (!isset($price) and !($price > 0)) {
-            return 0;
-        }
-        $From = \Users::user_info($fromID);
-        $To = \Users::user_info($toID);
-        if ($From['Enabled'] != 1 || $To['Enabled'] != 1) {
-            return 0;
-        }
-        $AcceptFL = \Users::user_heavy_info($toID)['AcceptFL'];
-        if (!$AcceptFL) {
-            return 0;
-        }
 
-        // Burn the bonus points of the giver from the database and then update the receiver
+        /* Take the bonus points from the giver and give tokens
+         * to the receiver, unless the latter have asked to
+         * refuse receiving tokens.
+         */
         $this->db->begin_transaction();
-        if (!$this->removePoints($fromID, $price)) {
+        $this->db->prepared_query("
+            UPDATE user_bonus ub
+            INNER JOIN users_main self ON (self.ID = ub.user_id),
+                users_main other
+                LEFT JOIN user_has_attr noFL ON (noFL.UserID = other.ID AND noFL.UserAttrId
+                    = (SELECT ua.ID FROM user_attr ua WHERE ua.Name = 'no-fl-gifts')
+                )
+            SET
+                ub.points = ub.points - ?,
+                other.FLTokens = other.FLTokens + ?
+            WHERE noFL.UserID IS NULL
+                AND other.Enabled = '1'
+                AND other.ID = ?
+                AND self.ID = ?
+                AND ub.points >= ?
+            ", $price, $amount, $toID, $fromID, $price
+        );
+        if ($this->db->affected_rows() != 2) {
             $this->db->rollback();
-            return 0;
-        }
-        $this->db->prepared_query("UPDATE users_main SET FLTokens = FLTokens + ? WHERE ID=?", $amount, $toID);
-        if ($this->db->affected_rows() != 1) {
-            $this->db->rollback();
-            return 0;
+            throw new \Exception('Bonus:otherToken:nofunds');
         }
         $this->addPurchaseHistory($item['ID'], $fromID, $price, $toID);
         $this->db->commit();
 
-        $this->cache->delete_value("user_info_heavy_{$fromID}");
-        $this->cache->delete_value("user_info_heavy_{$toID}");
-        // the calling code may not know this has been invalidated, so we cheat
-        $stats = \Users::user_stats($fromID, true);
-        $logged_user['BonusPoints'] = $stats['BonusPoints'];
+        $this->cache->deleteMulti([
+            'user_info_heavy_' . $fromID,
+            'user_info_heavy_' . $toID,
+            'user_stats_' . $fromID,
+            'user_stats_' . $toID,
+        ]);
         self::sendPmToOther($From['Username'], $toID, $amount);
 
         return $amount;
@@ -320,15 +340,13 @@ Enjoy!";
     public function setPoints($userId, $points) {
         $this->db->prepared_query('UPDATE users_main SET BonusPoints = ? WHERE ID = ?', $points, $userId);
         $this->db->prepared_query('UPDATE user_bonus SET points = ? WHERE user_id = ?', $points, $userId);
-        $this->cache->delete_value("user_info_heavy_{$userId}");
-        $this->cache->delete_value("user_stats_{$userId}");
+        $this->flushUserCache($userId);
     }
 
     public function addPoints($userId, $points) {
         $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $points, $userId);
         $this->db->prepared_query('UPDATE user_bonus SET points = points + ? WHERE user_id = ?', $points, $userId);
-        $this->cache->delete_value("user_info_heavy_{$userId}");
-        $this->cache->delete_value("user_stats_{$userId}");
+        $this->flushUserCache($userId);
     }
 
     public function addGlobalPoints($points) {
@@ -398,8 +416,7 @@ Enjoy!";
                 return false;
             }
         }
-        $this->cache->delete_value("user_info_heavy_{$userId}");
-        $this->cache->delete_value("user_stats_{$userId}");
+        $this->flushUserCache($userId);
         return true;
     }
 

@@ -29,10 +29,11 @@ if (isset($_POST['confirm'])) {
     if (!isset($_POST['title'])) {
         error(403);
     }
-    if ($Bonus->purchaseTitle($ID, $Label, $_POST['title'], G::$LoggedUser['EffectiveClass'])) {
+    try {
+        $Bonus->purchaseTitle($ID, $Label, $_POST['title'], G::$LoggedUser['EffectiveClass']);
         header('Location: bonus.php?complete=' . urlencode($Label));
     }
-    else {
+    catch (\Exception $e) {
         error('You cannot afford this item.');
     }
 }
