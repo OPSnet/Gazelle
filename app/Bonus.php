@@ -474,7 +474,7 @@ Enjoy!";
         return [$this->db->collect('GroupID'), $this->db->to_array('ID', MYSQLI_ASSOC)];
     }
 
-    public function givePoints(\Gazelle\Schedule\Tasks $task = null) {
+    public function givePoints(\Gazelle\Schedule\Task $task = null) {
         //------------------------ Update Bonus Points -------------------------//
         // calcuation:
         // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))
