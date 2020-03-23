@@ -184,7 +184,7 @@ class Bonus {
         }
         $this->db->prepared_query(
             "UPDATE users_main SET Invites = Invites + 1 WHERE AND ID = ?",
-            $user_id
+            $userId
         );
         $this->addPurchaseHistory($item['ID'], $userId, $item['Price']);
         $this->db->commit();
@@ -230,7 +230,7 @@ class Bonus {
         }
         $this->db->prepared_query(
             'UPDATE users_main SET FLTokens = FLTokens + ? WHERE ID = ?',
-            $amount, $user_id
+            $amount, $userId
         );
 
         $this->db->commit();
@@ -482,77 +482,52 @@ Enjoy!";
         // Seedtime (convert from hours to days) is in xbt_snatched
         // Seeders is in torrents
 
+        // precalculate the users we update this run
+        $this->db->prepared_query("
+            CREATE TEMPORARY TABLE xbt_unique (
+                uid int(11) NOT NULL,
+                fid int(11) NOT NULL,
+                PRIMARY KEY (uid, fid)
+            )
+            SELECT DISTINCT uid, fid
+            FROM xbt_files_users xfu
+            INNER JOIN users_main AS um ON (um.ID = xfu.uid)
+            INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
+            WHERE xfu.active = 1
+                AND xfu.remaining = 0
+                AND xfu.mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
+                AND um.Enabled = '1'
+                AND ui.DisablePoints = '0'
+        ");
+
         $userId = 1;
-        $chunk = 200;
+        $chunk = 150;
         $processed = 0;
         $more = true;
         while ($more) {
             /* update a block of users at a time, to minimize locking contention */
             $this->db->prepared_query("
-                UPDATE users_main AS um
-                INNER JOIN (
-                    SELECT
-                        xfu.uid AS ID,
-                        sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)) as new
-                    FROM (
-                        SELECT DISTINCT uid, fid
-                        FROM xbt_files_users
-                        WHERE active = '1'
-                            AND remaining = 0
-                            AND mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
-                            AND uid BETWEEN ? AND ?
-                    ) xfu
-                    INNER JOIN xbt_files_history AS xfh USING (uid, fid)
-                    INNER JOIN users_main AS um ON (um.ID = xfu.uid)
-                    INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
-                    INNER JOIN torrents AS t ON (t.ID = xfu.fid)
-                    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                    WHERE ui.DisablePoints = '0'
-                        AND um.Enabled = '1'
-                        AND um.ID BETWEEN ? AND ?
-                    GROUP BY
-                        xfu.uid
-                ) AS p USING (ID)
-                SET um.BonusPoints = um.BonusPoints + p.new
-                ", $userId, $userId + $chunk - 1, $userId, $userId + $chunk - 1
-            );
-            $processed += $this->db->affected_rows();
-
-            $this->db->prepared_query("
                 INSERT INTO user_bonus
                 SELECT
                     xfu.uid AS ID,
                     sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)) as new
-                FROM (
-                    SELECT DISTINCT uid, fid
-                    FROM xbt_files_users
-                    WHERE active = '1'
-                        AND remaining = 0
-                        AND mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
-                        AND uid BETWEEN ? AND ?
-                ) xfu
+                FROM xbt_unique xfu
                 INNER JOIN xbt_files_history AS xfh USING (uid, fid)
-                INNER JOIN users_main AS um ON (um.ID = xfu.uid)
-                INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
                 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                WHERE ui.DisablePoints = '0'
-                    AND um.Enabled = '1'
-                    AND um.ID BETWEEN ? AND ?
+                WHERE xfu.uid BETWEEN ? AND ?
                 GROUP BY
                     xfu.uid
                 ON DUPLICATE KEY UPDATE points = points + VALUES(points)
-                ", $userId, $userId + $chunk - 1, $userId, $userId + $chunk - 1
+                ", $userId, $userId + $chunk - 1
             );
+            $processed += $this->db->affected_rows();
 
             /* flush their stats */
             $this->db->prepared_query("
-                SELECT concat('user_stats_', um.ID) as ck
-                FROM users_main um
-                INNER JOIN users_info ui ON (ui.UserID = um.ID)
-                WHERE ui.DisablePoints = '0'
-                    AND um.Enabled = '1'
-                    AND um.ID BETWEEN ? AND ?
+                SELECT concat('user_stats_', xfu.ID) as ck
+                FROM xbt_unique xfu
+                WHERE xfu.uid BETWEEN ? AND ?
                 ", $userId, $userId + $chunk - 1
             );
             if ($this->db->has_results()) {
@@ -563,8 +538,8 @@ Enjoy!";
             /* see if there are some more users to process */
             $this->db->prepared_query('
                 SELECT 1
-                FROM users_main
-                WHERE ID >= ?
+                FROM xbt_unique
+                WHERE uid >= ?
                 ', $userId
             );
             $more = $this->db->has_results();
