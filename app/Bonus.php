@@ -474,7 +474,7 @@ Enjoy!";
         return [$this->db->collect('GroupID'), $this->db->to_array('ID', MYSQLI_ASSOC)];
     }
 
-    public function givePoints() {
+    public function givePoints(\Gazelle\Schedule\Tasks $task = null) {
         //------------------------ Update Bonus Points -------------------------//
         // calcuation:
         // Size * (0.0754 + (0.1207 * ln(1 + seedtime)/ (seeders ^ 0.55)))
@@ -483,6 +483,11 @@ Enjoy!";
         // Seeders is in torrents
 
         // precalculate the users we update this run
+        if ($task) {
+            $task->info('begin');
+        } else {
+            echo "begin\n";
+        }
         $this->db->prepared_query("
             CREATE TEMPORARY TABLE xbt_unique (
                 uid int(11) NOT NULL,
@@ -499,6 +504,11 @@ Enjoy!";
                 AND um.Enabled = '1'
                 AND ui.DisablePoints = '0'
         ");
+        if ($task) {
+            $task->info('xbt_unique constructed');
+        } else {
+            echo "xbt_unique constructed\n";
+        }
 
         $userId = 1;
         $chunk = 150;
@@ -525,7 +535,7 @@ Enjoy!";
 
             /* flush their stats */
             $this->db->prepared_query("
-                SELECT concat('user_stats_', xfu.ID) as ck
+                SELECT concat('user_stats_', xfu.uid) as ck
                 FROM xbt_unique xfu
                 WHERE xfu.uid BETWEEN ? AND ?
                 ", $userId, $userId + $chunk - 1
@@ -533,9 +543,14 @@ Enjoy!";
             if ($this->db->has_results()) {
                 $this->cache->deleteMulti($this->db->collect('ck', false));
             }
-            $userId += $chunk;
+            if ($task) {
+                $task->info('chunk done', $userId);
+            } else {
+                echo "chunk done $userId\n";
+            }
 
             /* see if there are some more users to process */
+            $userId += $chunk;
             $this->db->prepared_query('
                 SELECT 1
                 FROM xbt_unique
