@@ -8,7 +8,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
 }
 $id = intval($_GET['id']);
 
-define('TASKS_PER_PAGE', 10);
+define('TASKS_PER_PAGE', 100);
 list($page, $limit) = Format::page_limit(TASKS_PER_PAGE);
 
 $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
@@ -20,7 +20,7 @@ View::show_header('Periodic Task Details');
 <div class="header">
 <h2>Periodic Task Details - <?=$task->name?></h2>
 </div>
-<?php include(SERVER_ROOT.'/sections/tools/development/periodic_links.php');
+<?php include(__DIR__ . '/periodic_links.php');
 if ($task->count > 0) { ?>
 <br />
 <div class="linkbox">
@@ -30,9 +30,9 @@ if ($task->count > 0) { ?>
     <tr class="colhead">
         <td>Launch Time <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
         <td>Duration</td>
-        <td>Status</td>
-        <td>Processed</td>
-        <td>Errors</td>
+        <td width="10%">Status</td>
+        <td width="10%">Processed</td>
+        <td width="10%">Errors</td>
     </tr>
 <?php
     foreach ($task->items as $item) {
@@ -86,4 +86,3 @@ if ($task->count > 0) { ?>
 <?php
 }
 View::show_footer();
-?>

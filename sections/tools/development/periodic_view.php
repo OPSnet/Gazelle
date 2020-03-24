@@ -17,14 +17,11 @@ View::show_header('Periodic Task Status');
 <div class="header">
     <h2>Periodic Task Status</h2>
 </div>
-<?php include(SERVER_ROOT.'/sections/tools/development/periodic_links.php'); ?>
+<?php include(__DIR__ . '/periodic_links.php'); ?>
 <table width="100%" id="tasks">
     <tr class="colhead">
         <td>Name</td>
-        <td>Description</td>
         <td>Interval</td>
-        <td>Enabled</td>
-        <td>Sane</td>
         <td>Last Run <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
         <td>Duration</td>
         <td>Next Run</td>
@@ -58,13 +55,22 @@ foreach ($tasks as $task) {
     $period = time_diff(sqltime(time() + $period), 2, false);
 
     $row = $row === 'a' ? 'b' : 'a';
+    $prefix = '';
+    $color = null;
+    if (!$isSane) {
+        $color = " color:tomato;";
+        $prefix .= 'Insane: ';
+    }
+    if (!$isEnabled) {
+        $color = " color:sandybrown;";
+        $prefix .= 'Disabled: ';
+    }
 ?>
     <tr class="row<?=$row?>">
-        <td><?=$name?></td>
-        <td><?=$description?></td>
+        <td title="<?= $description ?>">
+            <a style="<?= $color ?? '' ?>" href="tools.php?action=periodic&amp;mode=detail&amp;id=<?=$id?>"><?= $prefix . $name ?></a>
+        </td>
         <td><?=$period?></td>
-        <td><?=formatBool($isEnabled)?></td>
-        <td><?=formatBool($isSane)?></td>
         <td>
             <span class="reltime"><?=time_diff($lastRun)?></span>
             <span class="abstime hidden"><?=$lastRun?></span>
@@ -74,13 +80,12 @@ foreach ($tasks as $task) {
             <span class="reltime"><?=time_diff($nextRun)?></span>
             <span class="abstime hidden"><?=$nextRun?></span>
         </td>
-        <td><?=$status?></td>
-        <td><?=$runs?></td>
-        <td><?=$processed?></td>
-        <td><?=$errors?></td>
-        <td><?=$events?></td>
+        <td><?= $status ?></td>
+        <td class="number_column"><?= number_format($runs) ?></td>
+        <td class="number_column"><?= number_format($processed) ?></td>
+        <td class="number_column"><?= number_format($errors) ?></td>
+        <td class="number_column"><?= number_format($events) ?></td>
         <td>
-            <a class="brackets" href="tools.php?action=periodic&amp;mode=detail&amp;id=<?=$id?>">Details</a>
 <?php if ($canLaunch) { ?>
             <a class="brackets" href="schedule.php?auth=<?=$LoggedUser['AuthKey']?>&amp;new=&amp;id=<?=$id?>">Run Now</a>
 <?php } ?>
@@ -89,5 +94,4 @@ foreach ($tasks as $task) {
 <?php } ?>
 </table>
 <?php
-    View::show_footer();
-?>
+View::show_footer();
