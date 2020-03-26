@@ -203,7 +203,7 @@ class Bonus {
         );
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->db->commit();
-        $this->flushUserCache($UserId);
+        $this->flushUserCache($userId);
         return true;
     }
 
@@ -227,7 +227,7 @@ class Bonus {
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->db->commit();
-        $this->flushUserCache($UserId);
+        $this->flushUserCache($userId);
         return true;
     }
 
@@ -251,7 +251,7 @@ class Bonus {
             throw new \Exception('Bonus:selfToken:funds');
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->flushUserCache($UserId);
+        $this->flushUserCache($userId);
         return $amount;
     }
 
