@@ -17,7 +17,7 @@ $DB->prepared_query('
         um.Username,
         um.Email,
         ula.last_access,
-        m.IP,
+        um.IP,
         p.Level AS Class,
         uls.Uploaded,
         uls.Downloaded,
