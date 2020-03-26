@@ -187,20 +187,19 @@ class Bonus {
         if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
             throw new \Exception('Bonus:invite:minclass');
         }
-        $this->db->begin_transaction();
-        if (!$this->removePoints($userId, $price)) {
-            $this->db->rollback();
-            throw new \Exception('Bonus:invite:nofunds');
-        }
         $this->db->prepared_query('
             UPDATE user_bonus ub
             INNER JOIN users_main um ON (um.ID = ub.user_id) SET
                 ub.points = ub.points - ?,
                 um.Invites = um.Invites + 1
-            WHERE ub.user_id = ?
-                AND ub.points >= ?
-            ', $price, $userID, $price
+            WHERE ub.points >= ?
+                AND ub.user_id = ?
+            ', $price, $price, $userID
         );
+        if ($this->db->affected_rows() != 2) {
+            $this->db->rollback();
+            throw new \Exception('Bonus:invite:nofunds');
+        }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->db->commit();
         $this->flushUserCache($userId);
@@ -338,13 +337,11 @@ Enjoy!";
     }
 
     public function setPoints($userId, $points) {
-        $this->db->prepared_query('UPDATE users_main SET BonusPoints = ? WHERE ID = ?', $points, $userId);
         $this->db->prepared_query('UPDATE user_bonus SET points = ? WHERE user_id = ?', $points, $userId);
         $this->flushUserCache($userId);
     }
 
     public function addPoints($userId, $points) {
-        $this->db->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?', $points, $userId);
         $this->db->prepared_query('UPDATE user_bonus SET points = points + ? WHERE user_id = ?', $points, $userId);
         $this->flushUserCache($userId);
     }
@@ -392,22 +389,11 @@ Enjoy!";
         if ($force) {
         // allow points to go negative
             $this->db->prepared_query('
-                UPDATE users_main SET BonusPoints = BonusPoints - ?  WHERE ID = ?
-                ', $points, $userId
-            );
-            $this->db->prepared_query('
                 UPDATE user_bonus SET points = points - ?  WHERE user_id = ?
                 ', $points, $userId
             );
         } else {
             // Fail if points would go negative
-            $this->db->prepared_query('
-                UPDATE users_main SET BonusPoints = BonusPoints - ?  WHERE BonusPoints >= ?  AND ID = ?
-                ', $points, $points, $userId
-            );
-            if ($this->db->affected_rows() != 1) {
-                return false;
-            }
             $this->db->prepared_query('
                 UPDATE user_bonus SET points = points - ?  WHERE points >= ?  AND user_id = ?
                 ', $points, $points, $userId
