@@ -460,7 +460,10 @@ Enjoy!";
                 t.RemasterTitle,
                 GREATEST(tls.Seeders, 1) AS Seeders,
                 xfh.seedtime AS Seedtime,
-                bonus_accrual(t.Size, xfh.seedtime, tls.Seeders) AS HourlyPoints
+                bonus_accrual(t.Size, xfh.seedtime,                      tls.Seeders) AS HourlyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + 1,                  tls.Seeders) * 12 AS DailyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + 365.256363004 / 12, tls.Seeders) * 365.256363004 / 12 AS MonthlyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + 365.256363004,      tls.Seeders) * 365.256363004 AS YearlyPoints
             FROM (
                 SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
             ) AS xfu
