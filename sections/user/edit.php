@@ -297,7 +297,7 @@ echo $Val->GenerateJS('userform');
                 </td>
             </tr>
             <tr id="tor_gdisp_artist_tr">
-                <td class="label tooltip" title="On artist pages, &quot;open&quot; will expand release type sections by default, and &quot;closed&quot; will collapse release type sections by default."><strong>Release type display (artist pages)</strong></td>
+                <td class="label tooltip" title="On artist pages, &quot;open&quot; will expand release type sections by default, and &quot;closed&quot; will collapse release type sections by default."><strong>Release type display<br />(artist pages)</strong></td>
                 <td>
                     <ul class="options_list nobullet">
                         <li>
@@ -312,7 +312,7 @@ echo $Val->GenerateJS('userform');
                 </td>
             </tr>
             <tr id="tor_reltype_tr">
-                <td class="label tooltip" title="Any selected release type will be collapsed by default on artist pages."><strong>Release type display (artist pages)</strong></td>
+                <td class="label tooltip" title="Any selected release type will be collapsed by default on artist pages."><strong>Release type display<br />(artist pages)</strong></td>
                 <td>
                     <a href="#" id="toggle_sortable" class="brackets">Expand</a>
                     <div id="sortable_container" style="display: none;">

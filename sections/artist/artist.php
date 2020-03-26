@@ -309,7 +309,6 @@ Tags::reset();
 if ($sections = $Artist->sections()) {
     /* Move the sections to the way the viewer wants to see them. */
     if (isset($LoggedUser['SortHide'])) {
-        $sortHide = $LoggedUser['SortHide'];
         $reorderedSections = [];
         foreach (array_keys($LoggedUser['SortHide']) as $reltype) {
             if (array_key_exists($reltype, $sections)) {
@@ -342,26 +341,27 @@ if ($sections = $Artist->sections()) {
 ?>
     </div>
 <?php
-    if (!empty($LoggedUser['DiscogView']) || (isset($LoggedUser['SortHide']) && array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 1)) {
-        $HideDiscog = ' hidden';
-    } else {
-        $HideDiscog = '';
-    }
 
     $ShowGroups = !isset($LoggedUser['TorrentGrouping']) || $LoggedUser['TorrentGrouping'] == 0;
-    $HideTorrents = ($ShowGroups ? '' : ' hidden');
 ?>
             <table class="torrent_table grouped release_table m_table" id="torrents_<?= $sectionLabel ?>">
 <?php
+    $stylePath = SSL_STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images/';
+
     foreach ($sections as $section => $Groups) {
+        if (!empty($LoggedUser['DiscogView']) || (isset($LoggedUser['SortHide'][$section]) && $LoggedUser['SortHide'][$section] == 1)) {
+            $sectionVisible = ' hidden';
+        } else {
+            $sectionVisible = ($ShowGroups ? '' : ' hidden');
+        }
 ?>
                 <tr class="colhead_dark">
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?= sectionTitle($section) ?></strong> (<a href="#" onclick="$('.releases_<?= $section ?>').gtoggle(true); return false;">View</a>)</td>
                     <td>Size</td>
-                    <td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                    <td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                    <td class="sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                    <td class="sign snatches"><img src="<?= $stylePath ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                    <td class="sign seeders"><img src="<?= $stylePath ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                    <td class="sign leechers"><img src="<?= $stylePath ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
                 </tr>
 <?php
     foreach ($Groups as $Group) {
@@ -413,7 +413,7 @@ if ($sections = $Artist->sections()) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 ?>
-            <tr class="releases_<?=$section?> group discog<?= ($isSnatched ? ' snatched_group' : '') . $HideDiscog?>">
+            <tr class="releases_<?=$section?> group discog<?= ($isSnatched ? ' snatched_group' : '') . $sectionVisible ?>">
                     <td class="td_collapse center m_td_left">
                         <div id="showimg_<?=$GroupID?>" class="<?=($ShowGroups ? 'hide' : 'show')?>_torrents">
                             <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$GroupID?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>
@@ -469,14 +469,14 @@ if ($sections = $Artist->sections()) {
             if ($prevEdition != $torrentEdition) {
                 $EditionID++;
 ?>
-        <tr class="releases_<?= $section ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $HideDiscog . $HideTorrents?>">
+        <tr class="releases_<?= $section ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $sectionVisible ?>">
             <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
         </tr>
 <?php
             }
             $prevEdition = $torrentEdition;
 ?>
-        <tr class="releases_<?=$section?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?=$SnatchedTorrentClass . $SnatchedGroupClass . $HideDiscog . $HideTorrents?>">
+        <tr class="releases_<?=$section?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?=$SnatchedTorrentClass . $SnatchedGroupClass . $sectionVisible ?>">
             <td class="td_info" colspan="2">
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=$Torrent['HasFile'] ? 'DL' : 'Missing'?></a>
@@ -650,7 +650,7 @@ if ($Artist->similarArtists()) {
                 <strong id="flipper_title">Similar Artist Map</strong>
                 <a id="flip_to" class="brackets" href="#" onclick="flipView(); return false;">Switch to cloud</a>
             </div>
-            <div id="flip_view_1" style="display: block; width: <?=(WIDTH)?>px; height: <?=(HEIGHT)?>px; position: relative; background-image: url(static/similar/<?=($ArtistID)?>.png?t=<?=(time())?>);">
+            <div id="flip_view_1" style="display: block; width: <?=(WIDTH)?>px; height: <?=(HEIGHT)?>px; position: relative; background-image: url(<?= SSL_STATIC_SERVER ?>similar/<?=($ArtistID)?>.png?t=<?=(time())?>);">
 <?php
     $Similar->write_artists();
 ?>
@@ -677,8 +677,8 @@ function flipView() {
         document.getElementById('flip_to').innerHTML = 'Switch to map';
 
         if (!cloudLoaded) {
-            require("static/functions/tagcanvas.js", function () {
-                require("static/functions/artist_cloud.js", function () {
+            require("<?= SSL_STATIC_SERVER ?>functions/tagcanvas.js", function () {
+                require("<?= SSL_STATIC_SERVER ?>functions/artist_cloud.js", function () {
                 });
             });
             cloudLoaded = true;
