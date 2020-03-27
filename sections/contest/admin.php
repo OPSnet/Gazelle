@@ -225,7 +225,7 @@ if ($Contest['BonusPool']) {
             </tr>
 
         </table>
-        <input type="hidden" name="userid" value="<?= $UserID ?>"/>
+        <input type="hidden" name="userid" value="<?= $LoggedUser['ID'] ?>"/>
         <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>"/>
 <?php
 if ($Create) { ?>

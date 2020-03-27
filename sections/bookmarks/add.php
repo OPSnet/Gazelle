@@ -60,7 +60,7 @@ if (!$DB->has_results()) {
         list($GroupTitle, $Year, $Body, $TagList) = $DB->next_record();
         $TagList = str_replace('_', '.', $TagList);
 
-        $DB->query('
+        $DB->prepared_query('
             SELECT ID, Format, Encoding, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, Media, Scene, FreeTorrent, UserID
             FROM torrents
             WHERE GroupID = ?

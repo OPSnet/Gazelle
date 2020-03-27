@@ -160,7 +160,6 @@ if (!$DB->has_results()) {
         $Row = $Row === 'a' ? 'b' : 'a';
         $RowClass = "row$Row";
 
-        //$UserInfo = Users::user_info($UserID);
         $UserStr = Users::format_username($UserID, true, true, true, true);
 
         // Get assigned
@@ -174,14 +173,12 @@ if (!$DB->has_results()) {
 
         } else {
             // Assigned to user
-            // $UserInfo = Users::user_info($AssignedToUser);
             $Assigned = Users::format_username($AssignedToUser, true, true, true, true);
 
         }
 
         // Get resolver
         if ($ViewString == 'Resolved') {
-            //$UserInfo = Users::user_info($ResolverID);
             $ResolverStr = Users::format_username($ResolverID, true, true, true, true);
         }
 

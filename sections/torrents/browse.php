@@ -56,7 +56,7 @@ if (!empty($_GET['setdefault'])) {
         UPDATE users_info
         SET SiteOptions = '".db_string(serialize($SiteOptions))."'
         WHERE UserID = '".db_string($LoggedUser['ID'])."'");
-    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['DefaultSearch' => $SiteOptions['DefaultSearch']]);
     $Cache->commit_transaction(0);
 
@@ -73,7 +73,7 @@ if (!empty($_GET['setdefault'])) {
         UPDATE users_info
         SET SiteOptions = '".db_string(serialize($SiteOptions))."'
         WHERE UserID = '".db_string($LoggedUser['ID'])."'");
-    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['DefaultSearch' => '']);
     $Cache->commit_transaction(0);
 
