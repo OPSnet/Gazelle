@@ -108,15 +108,11 @@ class Bonus {
             $taxedValue = $value * BONUS_POOL_TAX_STAFF;
         }
 
-        $this->db->begin_transaction();
         if (!$this->removePoints($fromID, $price)) {
-            $this->db->rollback();
             return false;
         }
-
         $pool = new \Gazelle\BonusPool($this->db, $this->cache, $poolId);
         $pool->contribute($userId, $value, $taxedValue);
-        $this->db->commit();
 
         $this->cache->deleteMulti([
             self::CACHE_OPEN_POOL,
@@ -197,11 +193,9 @@ class Bonus {
             ', $price, $price, $userId
         );
         if ($this->db->affected_rows() != 2) {
-            $this->db->rollback();
             throw new \Exception('Bonus:invite:nofunds');
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->db->commit();
         $this->flushUserCache($userId);
         return true;
     }
@@ -211,21 +205,17 @@ class Bonus {
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
         $price = $this->getEffectivePrice($label, $effectiveClass);
 
-        $this->db->begin_transaction();
         /* if the price is 0, nothing changes so avoid hitting the db */
         if ($price > 0) {
             if (!$this->removePoints($userId, $price)) {
-                $this->db->rollback();
                 throw new \Exception('Bonus:title:nofunds');
             }
         }
         if (!\Users::setCustomTitle($userId, $title)) {
-            $this->db->rollback();
             throw new \Exception('Bonus:title:set');
             return false;
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
-        $this->db->commit();
         $this->flushUserCache($userId);
         return true;
     }
@@ -269,7 +259,6 @@ class Bonus {
          * to the receiver, unless the latter have asked to
          * refuse receiving tokens.
          */
-        $this->db->begin_transaction();
         $this->db->prepared_query("
             UPDATE user_bonus ub
             INNER JOIN users_main self ON (self.ID = ub.user_id),
@@ -288,12 +277,9 @@ class Bonus {
             ", $price, $amount, $toID, $fromID, $price
         );
         if ($this->db->affected_rows() != 2) {
-            $this->db->rollback();
             throw new \Exception('Bonus:otherToken:no-gift-funds');
         }
         $this->addPurchaseHistory($item['ID'], $fromID, $price, $toID);
-        $this->db->commit();
-
         $this->cache->deleteMulti([
             'user_info_heavy_' . $fromID,
             'user_info_heavy_' . $toID,
