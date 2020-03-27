@@ -100,7 +100,6 @@ $FileList = implode('|||', $FileList);
 $Userinfo = Users::user_info($Torrent['UserID']);
 $JsonTorrentList[] = [
     'id' => (int)$Torrent['ID'],
-    'infoHash' => $Torrent['InfoHash'],
     'media' => $Torrent['Media'],
     'format' => $Torrent['Format'],
     'encoding' => $Torrent['Encoding'],
