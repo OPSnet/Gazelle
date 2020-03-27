@@ -11,7 +11,7 @@ class SortableTableHeader {
     private $currentSortDir;
 
     /** @var array Key is sort direction, value is symbol to output */
-    private $arrowMap = ['asc' => '&uarr;', 'desc' => '&darr;'];
+    private $arrowMap = ['asc' => '&darr;', 'desc' => '&uarr;'];
 
     public function __construct(array $labelMap, $currentSortKey, $currentSortDir, array $arrowMap = []) {
         $this->labelMap = $labelMap;
