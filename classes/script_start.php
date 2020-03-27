@@ -148,6 +148,8 @@ if (isset($LoginCookie)) {
     list($SessionID, $LoggedUser['ID']) = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
     $LoggedUser['ID'] = (int)$LoggedUser['ID'];
 
+    $UserID = $LoggedUser['ID']; // TODO: convert all usages of this shit to $LoggedUser['ID'].
+
     if (!$LoggedUser['ID'] || !$SessionID) {
         logout($LoggedUser['ID'], $SessionID);
     }

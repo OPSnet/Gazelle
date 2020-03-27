@@ -960,7 +960,7 @@ if (G::$LoggedUser['DisablePoints'] == 0) {
 //--------------- Stupid Recent Uploads ----------------------------------------//
 
 if (trim($Properties['Image']) != '') {
-    $RecentUploads = $Cache->get_value("recent_uploads_$UserID");
+    $RecentUploads = $Cache->get_value('recent_uploads_'.$LoggedUser['ID']);
     if (is_array($RecentUploads)) {
         do {
             foreach ($RecentUploads as $Item) {
@@ -978,7 +978,7 @@ if (trim($Properties['Image']) != '') {
                         'Name' => trim($Properties['Title']),
                         'Artist' => Artists::display_artists($ArtistForm, false, true),
                         'WikiImage' => trim($Properties['Image'])]);
-            $Cache->cache_value("recent_uploads_$UserID", $RecentUploads, 0);
+            $Cache->cache_value('recent_uploads_'.$LoggedUser['ID'], $RecentUploads, 0);
         } while (0);
     }
 }
