@@ -1,5 +1,4 @@
 <?php
-$UserID = $LoggedUser['ID'];
 if (($Comments = $Cache->get_value('user_nrcomment_' . $UserID)) === false) {
     $DB->prepared_query("
         SELECT Page, count(*) as n
