@@ -230,7 +230,7 @@ class Contest {
             if ($subquery) {
                 $this->db->query("BEGIN");
                 $this->db->prepared_query('DELETE FROM contest_leaderboard WHERE ContestID = ?', $id);
-                $this->db->prepared_query_array("
+                $this->db->prepared_query("
                     INSERT INTO contest_leaderboard
                     SELECT ?, LADDER.userid,
                         LADDER.nr,
@@ -251,7 +251,7 @@ class Contest {
                         T.ID,
                         TG.Name,
                         T.Time
-                ", $args);
+                ", ...$args);
                 $this->db->query("COMMIT");
                 $this->cache->delete_value('contest_leaderboard_' . $id);
                 switch ($Contest['ContestType']) {

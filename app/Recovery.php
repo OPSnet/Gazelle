@@ -334,14 +334,14 @@ END_EMAIL;
         }
 
         $condition = implode(' AND ', $cond);
-        $db->prepared_query_array("
+        $db->prepared_query("
             SELECT
                 recovery_id, state, admin_user_id, created_dt, updated_dt,
                 token, username, ipaddr, password_ok, email, email_clean,
                 announce, screenshot, invite, info, log
             FROM recovery
             WHERE $condition
-            ", $args
+            ", ...$args
         );
         return $db->next_record();
     }

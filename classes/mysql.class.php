@@ -349,37 +349,6 @@ class DB_MYSQL {
         return $this->execute(...$Parameters);
     }
 
-    function prepared_query_array($Query, array $args) {
-        $this->prepare($Query);
-        $param = [];
-        $bind = '';
-        $n = count($args);
-        for ($i = 0; $i < $n; ++$i) {
-            if (is_integer($args[$i])) {
-                $bind .= 'i';
-            }
-            elseif (is_double($args[$i])) {
-                $bind .= 'd';
-            }
-            else {
-                $bind .= 's';
-            }
-            $param[] = &$args[$i];
-        }
-        $refbind = &$bind;
-        array_unshift($param, $refbind);
-        $stmt = &$this->Statement;
-        call_user_func_array([$this->Statement, "bind_param"], $param);
-
-        return $this->attempt_query(
-            $Query,
-            function() use ($stmt) {
-                $stmt->execute();
-                return $stmt->get_result();
-            }
-        );
-    }
-
     private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
         global $Debug;
         $QueryStartTime = microtime(true);

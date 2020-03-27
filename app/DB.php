@@ -2,14 +2,15 @@
 
 namespace Gazelle;
 
-class DB {
+class DB
+{
     /** @var \DB_MYSQL */
     private $db;
 
     /** @var \CACHE */
     private $cache;
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
+    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
         $this->db = $db;
         $this->cache = $cache;
     }
@@ -23,14 +24,14 @@ class DB {
      * @param boolean $delete whether to delete the matched rows
      * @return array 2 elements, true/false and message if false
      */
-    public function soft_delete($schema, $table, array $condition, $delete = true) {
+    public function softDelete($schema, $table, array $condition, $delete = true) {
         $sql = 'SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER BY 1';
         $this->db->prepared_query($sql, $schema, $table);
         $t1 = $this->db->to_array();
         $n1 = count($t1);
 
-        $soft_delete_table = 'deleted_' . $table;
-        $this->db->prepared_query($sql, $schema, $soft_delete_table);
+        $softDeleteTable = 'deleted_' . $table;
+        $this->db->prepared_query($sql, $schema, $softDeleteTable);
         $t2 = $this->db->to_array();
         $n2 = count($t2);
 
@@ -38,11 +39,11 @@ class DB {
             return [false, "No such table $table"];
         }
         elseif (!$n2) {
-            return [false, "No such table $soft_delete_table"];
+            return [false, "No such table $softDeleteTable"];
         }
         elseif ($n1 != $n2) {
             // tables do not have the same number of columns
-            return [false, "$table and $soft_delete_table column count mismatch ($n1 != $n2)"];
+            return [false, "$table and $softDeleteTable column count mismatch ($n1 != $n2)"];
         }
 
         $column = [];
@@ -53,16 +54,16 @@ class DB {
             }
             $column[] = $t1[$i][0];
         }
-        $column_list = implode(', ', $column);
-        $condition_list = implode(' AND ', array_map(function ($c) {return "{$c[0]} = ?";}, $condition));
-        $arg_list = array_map(function ($c) {return $c[1];}, $condition);
+        $columnList = implode(', ', $column);
+        $conditionList = implode(' AND ', array_map(function ($c) {return "{$c[0]} = ?";}, $condition));
+        $argList = array_map(function ($c) {return $c[1];}, $condition);
 
-        $sql = "INSERT INTO $soft_delete_table
-                  ($column_list)
-            SELECT $column_list
+        $sql = "INSERT INTO $softDeleteTable
+                  ($columnList)
+            SELECT $columnList
             FROM $table
-            WHERE $condition_list";
-        $this->db->prepared_query_array($sql, $arg_list);
+            WHERE $conditionList";
+        $this->db->prepared_query($sql, ...$argList);
         if ($this->db->affected_rows() == 0) {
             return [false, "condition selected 0 rows"];
         }
@@ -71,8 +72,8 @@ class DB {
             return [true, "rows affected: " . $this->db->affected_rows()];
         }
 
-        $sql = "DELETE FROM $table WHERE $condition_list";
-        $this->db->prepared_query_array($sql, $arg_list);
+        $sql = "DELETE FROM $table WHERE $conditionList";
+        $this->db->prepared_query($sql, ...$argList);
         return [true, "rows deleted: " . $this->db->affected_rows()];
     }
 }

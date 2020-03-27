@@ -51,7 +51,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
             GROUP BY g.ID';
         $args[] = $GroupID;
 
-        $DB->prepared_query_array($SQL, $args);
+        $DB->prepared_query($SQL, ...$args);
         $TorrentDetails = $DB->next_record(MYSQLI_ASSOC);
 
         // Fetch the individual torrents

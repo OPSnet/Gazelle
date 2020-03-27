@@ -290,11 +290,11 @@ class Torrents {
         }
 
         $manager = new \Gazelle\DB(G::$DB, G::$Cache);
-        list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
+        list($ok, $message) = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
         if (!$ok) {
             return $message;
         }
-        list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents',             [['ID', $ID]]);
+        list($ok, $message) = $manager->softDelete(SQLDB, 'torrents',             [['ID', $ID]]);
         if (!$ok) {
             return $message;
         }
@@ -310,14 +310,14 @@ class Torrents {
             Torrents::update_hash($GroupID);
         }
 
-        $manager->soft_delete(SQLDB, 'torrents_files',                  [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_files',              [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_folders',          [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_tags',              [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_lossymaster_approved', [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_missing_lineage',      [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_files',                  [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_files',              [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_folders',            [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_tags',               [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_lossymaster_approved',   [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_missing_lineage',        [['TorrentID', $ID]]);
 
         // Tells Sphinx that the group is removed
         G::$DB->prepared_query('
@@ -346,7 +346,7 @@ class Torrents {
         while (list($UserID) = G::$DB->next_record()) {
             $deleted_keys[] = "notifications_new_$UserID";
         }
-        $manager->soft_delete(SQLDB, 'users_notify_torrents', [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $ID]]);
 
         $RecentUploads = G::$Cache->get_value("recent_uploads_$UserID");
         if (is_array($RecentUploads)) {
