@@ -494,12 +494,12 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
                 WHERE ra.ArtistID IS NOT NULL
                     AND ag.ArtistID = ?", $ArtistID);
             list($ReqCount) = G::$DB->next_record();
-            G::$DB->prepared_query("
+            G::$DB->prepared_query('
                 SELECT COUNT(ag.ArtistID)
                 FROM artists_group AS ag
                     LEFT JOIN torrents_artists AS ta ON ag.ArtistID = ta.ArtistID
                 WHERE ta.ArtistID IS NOT NULL
-                    AND ag.ArtistID = ?, $ArtistID");
+                    AND ag.ArtistID = ?', $ArtistID);
             list($GroupCount) = G::$DB->next_record();
             if (($ReqCount + $GroupCount) == 0) {
                 //The only group to use this artist
