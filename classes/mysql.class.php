@@ -327,7 +327,6 @@ class DB_MYSQL {
             $Query .= "$key => $value\n";
         }
 
-
         return $this->attempt_query($Query, $Closure);
     }
 
@@ -470,6 +469,10 @@ class DB_MYSQL {
     function affected_rows() {
         if ($this->LinkID) {
             return $this->LinkID->affected_rows;
+        }
+        /* why the fuck is this necessary for \Gazelle\Bonus\purchaseInvite() ?! */
+        if ($this->Statement) {
+            return $this->Statement->affected_rows;
         }
     }
 

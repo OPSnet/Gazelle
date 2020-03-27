@@ -194,7 +194,7 @@ class Bonus {
                 um.Invites = um.Invites + 1
             WHERE ub.points >= ?
                 AND ub.user_id = ?
-            ', $price, $price, $userID
+            ', $price, $price, $userId
         );
         if ($this->db->affected_rows() != 2) {
             $this->db->rollback();
@@ -251,7 +251,7 @@ class Bonus {
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->flushUserCache($userId);
-        return $amount;
+        return (int)$amount;
     }
 
     public function purchaseTokenOther($fromID, $toID, $label) {
@@ -289,7 +289,7 @@ class Bonus {
         );
         if ($this->db->affected_rows() != 2) {
             $this->db->rollback();
-            throw new \Exception('Bonus:otherToken:nofunds');
+            throw new \Exception('Bonus:otherToken:no-gift-funds');
         }
         $this->addPurchaseHistory($item['ID'], $fromID, $price, $toID);
         $this->db->commit();
@@ -302,7 +302,7 @@ class Bonus {
         ]);
         self::sendPmToOther($From['Username'], $toID, $amount);
 
-        return $amount;
+        return (int)$amount;
     }
 
     public function sendPmToOther($from, $toID, $amount) {
