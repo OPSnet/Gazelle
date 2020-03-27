@@ -315,8 +315,8 @@ foreach ($TopVotes as $GroupID => $Group) {
         }
     } else { //if (count($Torrents) > 1 || $GroupCategoryID == 1)
         // Viewing a type that does not require grouping
-
-        list($TorrentID, $Torrent) = each($Torrents);
+        $TorrentID = key($Torrents);
+        $Torrent = current($Torrents);
         $Torrent['IsSnatched'] = Torrents::has_snatched($TorrentID);
 
         $DisplayName = $Number .' - <a href="torrents.php?id='.$GroupID.'" class="tooltip" title="View torrent group" dir="ltr">'.$GroupName.'</a>';

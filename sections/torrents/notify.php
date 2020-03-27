@@ -17,7 +17,8 @@ $OrderBys = [
 if (empty($_GET['order_by']) || !isset($OrderBys[$_GET['order_by']])) {
     $_GET['order_by'] = 'time';
 }
-list($OrderTbl, $OrderCol) = each($OrderBys[$_GET['order_by']]);
+$OrderTbl = key($OrderBys[$_GET['order_by']]);
+$OrderCol = current($OrderBys[$_GET['order_by']]);
 
 if (!empty($_GET['order_way']) && $_GET['order_way'] == 'asc') {
     $OrderWay = 'ASC';

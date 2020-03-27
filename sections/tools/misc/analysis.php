@@ -1,5 +1,5 @@
 <?php
-if (!check_perms('site_debug')) {
+if (!check_perms('site_analysis')) {
     error(403);
 }
 
@@ -16,13 +16,17 @@ View::show_header('Case Analysis');
 <?php
 $Debug->perf_table($Analysis['perf']);
 $Debug->flag_table($Analysis['flags']);
-$Debug->include_table($Analysis['includes']);
+$Debug->include_table($Analysis['includes'], !check_perms('site_debug'));
 $Debug->error_table($Analysis['errors']);
 $Debug->query_table($Analysis['queries']);
-$Debug->cache_table($Analysis['cache']);
-$Debug->class_table();
-$Debug->extension_table();
-$Debug->constant_table();
+if (check_perms('admin_clear_cache')) {
+    $Debug->cache_table($Analysis['cache']);
+}
+if (check_perms('site_debug')) {
+    $Debug->class_table();
+    $Debug->extension_table();
+    $Debug->constant_table();
+}
 $Debug->vars_table($Analysis['vars']);
 View::show_footer();
 ?>

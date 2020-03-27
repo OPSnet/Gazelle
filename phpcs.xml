@@ -23,7 +23,7 @@
     <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
     <rule ref="Generic.PHP.ForbiddenFunctions">
         <properties>
-            <property name="forbiddenFunctions" type="array" value="db_string=>null,db_array=>null" />
+            <property name="forbiddenFunctions" type="array" value="db_string=>null,db_array=>null,each=>null" />
         </properties>
     </rule>
 </ruleset>
