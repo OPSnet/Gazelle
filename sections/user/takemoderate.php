@@ -301,17 +301,21 @@ if ($_POST['ResetEmailHistory'] && check_perms('users_edit_reset_keys')) {
 }
 
 if ($_POST['ResetSnatchList'] && check_perms('users_edit_reset_keys')) {
-    $DB->query("
+    $DB->prepared_query('
         DELETE FROM xbt_snatched
-        WHERE uid = '$UserID'");
+        WHERE uid = ?
+        ', $UserID
+    );
     $EditSummary[] = 'Snatch list cleared';
-    $Cache->delete_value("recent_snatches_$UserID");
+    $Cache->delete_value("user_recent_snatch_$UserID");
 }
 
 if ($_POST['ResetDownloadList'] && check_perms('users_edit_reset_keys')) {
-    $DB->query("
+    $DB->prepared_query('
         DELETE FROM users_downloads
-        WHERE UserID = '$UserID'");
+        WHERE UserID = ?
+        ', $UserID
+    );
     $EditSummary[] = 'Download list cleared';
 }
 

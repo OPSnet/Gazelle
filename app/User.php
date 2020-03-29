@@ -4,21 +4,30 @@ namespace Gazelle;
 
 class User {
     /** @var \DB_MYSQL */
-    private $db;
+    protected  $db;
 
     /** @var \CACHE */
-    private $cache;
+    protected  $cache;
 
-    private $id;
+    /** @var int */
+    protected  $forceCacheFlush;
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache, $id) {
+    /** @var int */
+    protected  $id;
+
+    public function __construct(\DB_MYSQL $db, \CACHE $cache, int $id) {
         $this->db = $db;
         $this->cache = $cache;
         $this->id = $id;
+        $this->forceCacheFlush = false;
     }
-    
+
     public function id() {
         return $this->id;
+    }
+
+    public function forceCacheFlush($flush = true) {
+        return $this->forceCacheFlush = $flush;
     }
 
     public function updateIP($oldIP, $newIP) {
@@ -46,8 +55,24 @@ class User {
         $this->cache->commit_transaction(0);
     }
 
+    public function updatePassword($pw, $ipAddr) {
+        $this->db->prepared_query('
+            INSERT INTO users_history_passwords
+                   (UserID, ChangerIP, ChangeTime)
+            VALUES (?,      ?,         now())
+            ', $this->id, $ipaddr
+        );
+        $this->db->prepared_query('
+            UPDATE users_main SET
+                PassHash = ?
+            WHERE ID = ?
+            ', \Users::make_password_hash($pw), $this->id
+        );
+        return $this->db->affected_rows();
+    }
+
     public function notifyFilters() {
-        if (($filters = $this->cache->get_value('notify_filters_' . $this->id)) === false) {
+        if ($this->forceCacheFlush || ($filters = $this->cache->get_value('notify_filters_' . $this->id)) === false) {
             $this->db->prepared_query('
                 SELECT ID, Label
                 FROM users_notify_filters
@@ -61,13 +86,13 @@ class User {
     }
 
     protected function enabledState() {
-        if (($enabled = $this->cache->get_value('enabled_' . $this->id)) === false) {
+        if ($this->forceCacheFlush || ($enabled = $this->cache->get_value('enabled_' . $this->id)) === false) {
             $this->db->prepared_query("
                 SELECT Enabled FROM users_main WHERE ID = ?
                 ", $this->id()
             );
-            list($enabled) = $this->db->to_array(MYSQLI_NUM);
-            $this->cache->cache_value('enabled_' . $this->id, $enabled, 86400 * 3);
+            list($enabled) = $this->db->next_record(MYSQLI_NUM);
+            $this->cache->cache_value('enabled_' . $this->id, (int)$enabled, 86400 * 3);
         }
         return (int)$enabled;
     }
@@ -120,7 +145,7 @@ class User {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            list($filled, $bounty) = $this->db->next_record();
+            list($filled, $bounty) = $this->db->next_record(MYSQLI_NUM);
         } else {
             $filled = $bounty = 0;
         }
@@ -135,7 +160,7 @@ class User {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            list($voted, $bounty) = $this->db->next_record();
+            list($voted, $bounty) = $this->db->next_record(MYSQLI_NUM);
         } else {
             $voted = $bounty = 0;
         }
@@ -151,7 +176,7 @@ class User {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            list($created, $bounty) = $this->db->next_record();
+            list($created, $bounty) = $this->db->next_record(MYSQLI_NUM);
         } else {
             $created = $bounty = 0;
         }
@@ -168,14 +193,18 @@ class User {
         return $this->db->collect(0);
     }
 
-    protected function getSingleValue($query) {
-        $this->db->prepared_query($query, $this->id);
-        list($value) = $this->db->next_record();
+    protected function getSingleValue($cacheKey, $query) {
+        $cacheKey .= '.' . $this->id;
+        if ($this->forceCacheFlush || ($value = $this->cache->get_value($cacheKey)) === false) {
+            $this->db->prepared_query($query, $this->id);
+            list($value) = $this->db->next_record(MYSQLI_NUM);
+            $this->cache->cache_value($cacheKey, $value, 3600);
+        }
         return $value;
     }
 
     public function uploadCount() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-upload-count', '
             SELECT count(*)
             FROM torrents
             WHERE UserID = ?
@@ -183,7 +212,7 @@ class User {
     }
 
     public function artistsAdded() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-artists-count', '
             SELECT count(*)
             FROM torrents_artists
             WHERE UserID = ?
@@ -191,7 +220,7 @@ class User {
     }
 
     public function IRCKey() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-irckey', '
             SELECT IRCKey
             FROM users_main
             WHERE ID = ?
@@ -199,7 +228,7 @@ class User {
     }
 
     public function passwordCount() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-pw-count', '
             SELECT count(*)
             FROM users_history_passwords
             WHERE UserID = ?
@@ -207,7 +236,7 @@ class User {
     }
 
     public function passkeyCount() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-passkey-count', '
             SELECT count(*)
             FROM users_history_passkeys
             WHERE UserID = ?
@@ -215,7 +244,7 @@ class User {
     }
 
     public function siteIPCount() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-siteip-count', '
             SELECT count(DISTINCT IP)
             FROM users_history_ips
             WHERE UserID = ?
@@ -223,7 +252,7 @@ class User {
     }
 
     public function trackerIPCount() {
-        return $this->getSingleValue("
+        return $this->getSingleValue('user-trackip-count', "
             SELECT count(DISTINCT IP)
             FROM xbt_snatched
             WHERE uid = ? AND IP != ''
@@ -231,7 +260,7 @@ class User {
     }
 
     public function emailCount() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-email-count', '
             SELECT count(*)
             FROM users_history_emails
             WHERE UserID = ?
@@ -239,7 +268,7 @@ class User {
     }
 
     public function pendingInviteCount() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-inv-pending', '
             SELECT count(*)
             FROM invites
             WHERE InviterID = ?
@@ -248,7 +277,7 @@ class User {
 
     public function passwordAge() {
         $age = time_diff(
-            $this->getSingleValue('
+            $this->getSingleValue('user-pw-age', '
                 SELECT coalesce(max(uhp.ChangeTime), ui.JoinDate)
                 FROM users_info ui
                 LEFT JOIN users_history_passwords uhp USING (UserID)
@@ -259,7 +288,7 @@ class User {
     }
 
     public function supportFor() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-support', '
             SELECT SupportFor
             FROM users_info
             WHERE UserID = ?
@@ -267,7 +296,7 @@ class User {
     }
 
     public function forumWarning() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-forumwarn', '
             SELECT Comment
             FROM users_warnings_forums
             WHERE UserID = ?
@@ -275,7 +304,7 @@ class User {
     }
 
     public function invitedCount() {
-        return $this->getSingleValue('
+        return $this->getSingleValue('user-invites', '
             SELECT count(*)
             FROM users_info
             WHERE Inviter = ?
@@ -309,6 +338,64 @@ class User {
         );
         list($total, $unique) = $this->db->next_record(MYSQLI_NUM, false);
         return [$total, $unique];
+    }
+
+    public function recentSnatches(int $limit = 5) {
+        if (($recent = $this->cache->get_value('user_recent_snatch_' . $this->id)) === false) {
+            $this->db->prepared_query("
+                SELECT
+                    g.ID,
+                    g.Name,
+                    g.WikiImage
+                FROM xbt_snatched AS s
+                INNER JOIN torrents AS t ON (t.ID = s.fid)
+                INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
+                WHERE g.CategoryID = '1'
+                    AND g.WikiImage != ''
+                    AND t.UserID != s.uid
+                    AND s.uid = ?
+                GROUP BY g.ID
+                ORDER BY s.tstamp DESC
+                LIMIT ?
+                ", $this->id, $limit
+            );
+            $recent = $this->db->to_array() ?? [];
+            $artists = \Artists::get_artists($this->db->collect('ID'));
+            foreach ($recent as $id => $info) {
+                $recent[$id]['Name'] = \Artists::display_artists($artists[$info['ID']], false, true)
+                    . $recent[$id]['Name'];
+            }
+            $this->cache->cache_value('user_recent_snatch_' . $this->id, $recent, 86400 * 3);
+        }
+        return $recent;
+    }
+
+    public function recentUploads(int $limit = 5) {
+        if (($recent = $this->cache->get_value('user_recent_up_' . $this->id)) === false) {
+            $this->db->prepared_query("
+                SELECT
+                    g.ID,
+                    g.Name,
+                    g.WikiImage
+                FROM torrents_group AS g
+                INNER JOIN torrents AS t ON (t.GroupID = g.ID)
+                WHERE g.WikiImage != ''
+                    AND g.CategoryID = '1'
+                    AND t.UserID = ?
+                GROUP BY g.ID
+                ORDER BY t.Time DESC
+                LIMIT ?
+                ", $this->id, $limit
+            );
+            $recent = $this->db->to_array() ?? [];
+            $artists = \Artists::get_artists($this->db->collect('ID'));
+            foreach ($recent as $id => $info) {
+                $recent[$id]['Name'] = \Artists::display_artists($artists[$info['ID']], false, true)
+                    . $recent[$id]['Name'];
+            }
+            $this->cache->cache_value('user_recent_ip_' . $this->id, $recent, 86400 * 3);
+        }
+        return $recent;
     }
 
     public function downloadCounts() {
@@ -376,7 +463,7 @@ class User {
                 ", $this->id, $this->id, $this->id
             );
             $stats = ['download' => 0, 'snatch' => 0];
-            while (list($key, $count) = $this->db->next_record()) {
+            while (list($key, $count) = $this->db->next_record(MYSQLI_ASSOC)) {
                 $stats[$key] = $count;
             }
             $stats = $this->cache->cache_value('user_rlim_' . $this->id, $stats, 3600);

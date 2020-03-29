@@ -204,26 +204,8 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     }
 }
 
-// Stupid Recent Snatches On User Page
 if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
-    $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
-    if (isset($RecentSnatches)) {
-        $Snatch = [
-            'ID' => $GroupID,
-            'Name' => $Name,
-            'Artist' => $Artists,
-            'WikiImage' => $Image
-        ];
-        if (!in_array($Snatch, $RecentSnatches)) {
-            if (count($RecentSnatches) === 5) {
-                array_pop($RecentSnatches);
-            }
-            array_unshift($RecentSnatches, $Snatch);
-        } elseif (!is_array($RecentSnatches)) {
-            $RecentSnatches = [$Snatch];
-        }
-        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 86400 * 3);
-    }
+    $Cache->delete_value("user_recent_snatch_$UserID");
 }
 
 $DB->prepared_query("

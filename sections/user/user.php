@@ -226,6 +226,7 @@ function check_paranoia_here($Setting) {
 
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
 $User = new \Gazelle\User($DB, $Cache, $UserID);
+$User->forceCacheFlush($UserID == $LoggedUser['ID']);
 
 ?>
 <div class="thin">
@@ -656,46 +657,18 @@ if (!$Info) {
 DonationsView::render_profile_rewards($EnabledRewards, $ProfileRewards);
 
 if (check_paranoia_here('snatched')) {
-    $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
-    if ($RecentSnatches === false) {
-        $DB->prepared_query("
-            SELECT
-                g.ID,
-                g.Name,
-                g.WikiImage
-            FROM xbt_snatched AS s
-            INNER JOIN torrents AS t ON (t.ID = s.fid)
-            INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
-            WHERE s.uid = ?
-                AND t.UserID != ?
-                AND g.CategoryID = '1'
-                AND g.WikiImage != ''
-            GROUP BY g.ID
-            ORDER BY s.tstamp DESC
-            LIMIT 5
-            ", $UserID, $UserID
-        );
-        $RecentSnatches = $DB->to_array();
-
-        $Artists = Artists::get_artists($DB->collect('ID'));
-        foreach ($RecentSnatches as $Key => $SnatchInfo) {
-            $RecentSnatches[$Key]['Artist'] = Artists::display_artists($Artists[$SnatchInfo['ID']], false, true);
-        }
-        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 86400 * 3);
-    }
-    if (!empty($RecentSnatches)) {
+    $RecentSnatches = $User->recentSnatches();
+    if (count($RecentSnatches)) {
 ?>
     <table class="layout recent" id="recent_snatches" cellpadding="0" cellspacing="0" border="0">
         <tr class="colhead">
-            <td colspan="5">
-                Recent Snatches
-            </td>
+            <td colspan="5">Recent Snatches</td>
         </tr>
         <tr>
-<?php        foreach ($RecentSnatches as $RS) { ?>
+<?php        foreach ($RecentSnatches as $recent) { ?>
             <td>
-                <a href="torrents.php?id=<?=$RS['ID']?>">
-                    <img class="tooltip" title="<?=display_str($RS['Artist'])?><?=display_str($RS['Name'])?>" src="<?=ImageTools::process($RS['WikiImage'], true)?>" alt="<?=display_str($RS['Artist'])?><?=display_str($RS['Name'])?>" width="107" />
+                <a href="torrents.php?id=<?= $recent['ID'] ?>">
+                    <img class="tooltip" title="<?= $recent['Name'] ?>" alt="<?= $recent['Name'] ?>" src="<?= ImageTools::process($recent['WikiImage'], true) ?>" width="107" />
                 </a>
             </td>
 <?php        } ?>
@@ -706,43 +679,18 @@ if (check_paranoia_here('snatched')) {
 }
 
 if (check_paranoia_here('uploads')) {
-    $RecentUploads = $Cache->get_value("recent_uploads_$UserID");
-    if ($RecentUploads === false) {
-        $DB->prepared_query("
-            SELECT
-                g.ID,
-                g.Name,
-                g.WikiImage
-            FROM torrents_group AS g
-            INNER JOIN torrents AS t ON (t.GroupID = g.ID)
-            WHERE t.UserID = ?
-                AND g.CategoryID = '1'
-                AND g.WikiImage != ''
-            GROUP BY g.ID
-            ORDER BY t.Time DESC
-            LIMIT 5
-            ", $UserID
-        );
-        $RecentUploads = $DB->to_array();
-        $Artists = Artists::get_artists($DB->collect('ID'));
-        foreach ($RecentUploads as $Key => $UploadInfo) {
-            $RecentUploads[$Key]['Artist'] = Artists::display_artists($Artists[$UploadInfo['ID']], false, true);
-        }
-        $Cache->cache_value("recent_uploads_$UserID", $RecentUploads, 86400 * 3);
-    }
-    if (!empty($RecentUploads)) {
+    $RecentUploads = $User->recentUploads();
+    if (count($RecentUploads)) {
 ?>
     <table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
         <tr class="colhead">
-            <td colspan="5">
-                Recent Uploads
-            </td>
+            <td colspan="5">Recent Uploads</td>
         </tr>
         <tr>
-<?php        foreach ($RecentUploads as $RU) { ?>
+<?php        foreach ($RecentUploads as $recent) { ?>
             <td>
-                <a href="torrents.php?id=<?=$RU['ID']?>">
-                    <img class="tooltip" title="<?=$RU['Artist']?><?=$RU['Name']?>" src="<?=ImageTools::process($RU['WikiImage'], true)?>" alt="<?=$RU['Artist']?><?=$RU['Name']?>" width="107" />
+                <a href="torrents.php?id=<?= $recent['ID'] ?>">
+                    <img class="tooltip" title="<?= $recent['Name'] ?>" alt="<?= $recent['Name'] ?>" src="<?= ImageTools::process($recent['WikiImage'], true) ?>" width="107" />
                 </a>
             </td>
 <?php        } ?>

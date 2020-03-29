@@ -143,67 +143,39 @@ if ($OldVH != $VanityHouse && check_perms('torrents_edit_vanityhouse')) {
 // There we go, all done!
 
 $Cache->delete_value('torrents_details_'.$GroupID);
-$DB->query("
-    SELECT CollageID
+$DB->prepared_query("
+    SELECT concat('collage_', CollageID) as ck
     FROM collages_torrents
-    WHERE GroupID = '$GroupID'");
-if ($DB->has_results()) {
-    while (list($CollageID) = $DB->next_record()) {
-        $Cache->delete_value('collage_'.$CollageID);
-    }
-}
+    WHERE GroupID = ?
+    ", $GroupID
+);
+$Cache->deleteMulti($DB->collect('ck', false));
 
 //Fix Recent Uploads/Downloads for image change
-$DB->query("
-    SELECT DISTINCT UserID
+$DB->prepared_query("
+    SELECT DISTINCT concat('user_recent_upload_' , UserID) as ck
     FROM torrents AS t
-        LEFT JOIN torrents_group AS tg ON t.GroupID=tg.ID
-    WHERE tg.ID = $GroupID");
+    LEFT JOIN torrents_group AS tg ON (t.GroupID = tg.ID)
+    WHERE tg.ID = ?
+    ", $GroupID
+);
+$Cache->deleteMulti($DB->collect('ck', false));
 
-$UserIDs = $DB->collect('UserID');
-foreach ($UserIDs as $UserID) {
-    $RecentUploads = $Cache->get_value('recent_uploads_'.$UserID);
-    if (is_array($RecentUploads)) {
-        foreach ($RecentUploads as $Key => $Recent) {
-            if ($Recent['ID'] == $GroupID) {
-                if ($Recent['WikiImage'] != $Image) {
-                    $Recent['WikiImage'] = $Image;
-                    $Cache->begin_transaction('recent_uploads_'.$UserID);
-                    $Cache->update_row($Key, $Recent);
-                    $Cache->commit_transaction(0);
-                }
-            }
-        }
-    }
-}
-
-$DB->query("
-    SELECT ID
-    FROM torrents
-    WHERE GroupID = $GroupID");
+$DB->prepared_query('
+    SELECT ID FROM torrents WHERE GroupID = ?
+    ', $GroupID
+);
 if ($DB->has_results()) {
-    $TorrentIDs = implode(',', $DB->collect('ID'));
-    $DB->query("
-        SELECT DISTINCT uid
-        FROM xbt_snatched
-        WHERE fid IN ($TorrentIDs)");
-    $Snatchers = $DB->collect('uid');
-    foreach ($Snatchers as $UserID) {
-        $RecentSnatches = $Cache->get_value('recent_snatches_'.$UserID);
-        if (is_array($RecentSnatches)) {
-            foreach ($RecentSnatches as $Key => $Recent) {
-                if ($Recent['ID'] == $GroupID) {
-                    if ($Recent['WikiImage'] != $Image) {
-                        $Recent['WikiImage'] = $Image;
-                        $Cache->begin_transaction('recent_snatches_'.$UserID);
-                        $Cache->update_row($Key, $Recent);
-                        $Cache->commit_transaction(0);
-                    }
-                }
-            }
-        }
-    }
+    $IDs = $DB->collect('ID');
+    $DB->prepared_query(
+        sprintf("
+            SELECT DISTINCT concat('user_recent_snatch_', uid) as ck
+            FROM xbt_snatched
+            WHERE fid IN (%s)
+            ", implode(', ', array_fill(0, count($IDs), '?'))
+        ), ...$IDs
+    );
+    $Cache->deleteMulti($DB->collect('ck', false));
 }
 
 header("Location: torrents.php?id=$GroupID");
-?>
