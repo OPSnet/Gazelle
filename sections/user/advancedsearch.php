@@ -133,11 +133,13 @@ $YesNo = ['inarray'=>['any', 'yes', 'no']];
 $emailHistoryChecked = false;
 $ipHistoryChecked = false;
 $disabledIpChecked = false;
+$trackerLiveSource = true;
 
 if (count($_GET)) {
     $emailHistoryChecked = !empty($_GET['email_history']);
     $disabledIpChecked = !empty($_GET['disabled_ip']);
     $ipHistoryChecked = !empty($_GET['ip_history']);
+    $trackerLiveSource = ($_GET['tracker-src'] ?? 'live') == 'live';
     $DateRegexp = ['regexp' => '/\d{4}-\d{2}-\d{2}/'];
     $ClassIDs = [];
     $SecClassIDs = [];
@@ -276,7 +278,9 @@ if (count($_GET)) {
 
         if (!empty($_GET['tracker_ip'])) {
             $Distinct = true;
-            $Join['xfu'] = 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)';
+            $Join['xfu'] = $trackerLiveSource
+                ? 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)'
+                : 'INNER JOIN xbt_snatched AS xfu ON (um1.ID = xfu.uid)';
             $Where[] = $m->left_match('xfu.ip');
             $Args[] = trim($_GET['tracker_ip']);
         }
@@ -294,12 +298,14 @@ if (count($_GET)) {
         }
 
         if (strlen($_GET['invites1'])) {
-            $Where[] = $m->op('um1.Invites', $_GET['invites']);
+            $op = $_GET['invites'];
+            $Where[] = $m->op('um1.Invites', $op);
             $Args = array_merge($Args, [$_GET['invites1']], ($op === 'between' ? [$_GET['invites2']] : []));
         }
 
         if (strlen($_GET['invitees1']) && $_GET['invitees'] !== 'off') {
-            $Having[] = $m->op('Invitees', $_GET['invitees']);
+            $op = $_GET['invitees'];
+            $Having[] = $m->op('Invitees', $op);
             $HavingArgs = array_merge($HavingArgs, [$_GET['invitees1']], ($op === 'between' ? [$_GET['invitees2']] : []));
         }
 
@@ -348,12 +354,14 @@ if (count($_GET)) {
         }
 
         if ($_GET['downloads'] !== 'off' && strlen($_GET['downloads1'])) {
-            $Having[] = $m->op('Downloads', $_GET['downloads']);
+            $op = $_GET['downloads'];
+            $Having[] = $m->op('Downloads', $op);
             $HavingArgs = array_merge($HavingArgs, [$_GET['downloads1']], ($op === 'between' ? [$_GET['downloads2']] : []));
         }
 
         if ($_GET['snatched'] !== 'off' && strlen($_GET['snatched1'])) {
-            $Having[] = $m->op('Snatches', $_GET['snatched']);
+            $op = $_GET['snatched'];
+            $Having[] = $m->op('Snatches', $op);
             $HavingArgs = array_merge($HavingArgs, [$_GET['snatched1']], ($op === 'between' ? [$_GET['snatched2']] : []));
         }
 
@@ -444,10 +452,14 @@ if (count($_GET)) {
         }
 
         //---------- Build the query
-        $SQL = 'SELECT' . ($Distinct ? ' DISTINCT ' : ' ') . $SQL . implode("\n", $Join);
+        $SQL = 'SELECT ' . $SQL . implode("\n", $Join);
 
         if (count($Where)) {
             $SQL .= "\nWHERE " . implode("\nAND ", $Where);
+        }
+
+        if ($Distinct) {
+            $SQL .= "\nGROUP BY um1.ID";
         }
 
         if (count($Having)) {
@@ -492,7 +504,14 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
-                <td class="label nobr">Tracker IP:</td>
+                <td class="label nobr">Tracker IP:<br />
+                  <div style="padding-left: 20px; text-align: left;">
+                    <input type="radio" name="tracker-src" id="tracker-src-live" value="live"<?= $trackerLiveSource ? ' checked="checked"' : '' ?> />
+                    <label class="tooltip" for="tracker-src" title="Search for client ip addresses currently connecting to the tracker" for="tracker-src-live">Live</label><br />
+                    <input type="radio" name="tracker-src" id="tracker-src-hist" value="hist"<?= !$trackerLiveSource ? ' checked="checked"' : '' ?> />
+                    <label class="tooltip" for="tracker-src" title="Search for ip addresses that have been seen by the tracker (but may be not connected at this time)" for="tracker-src-hist">Historical</label>
+                  </div>
+                </td>
                 <td>
                     <input type="text" name="tracker_ip" size="20" value="<?=display_str($_GET['tracker_ip'])?>" />
                 </td>
@@ -522,7 +541,7 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
-                <td class="label tooltip nobr" title="Supports partial URL matching, e.g. entering &quot;&#124;https://whatimg.com&quot; will search for avatars hosted on https://whatimg.com">Avatar URL:</td>
+                <td class="label tooltip nobr" title="Supports partial URL matching, e.g. entering &quot;&#124;https://ptpimg.me&quot; will search for avatars hosted on https://phpimg.me">Avatar URL:</td>
                 <td>
                     <input type="text" name="avatar" size="20" value="<?=display_str($_GET['avatar'])?>" />
                 </td>
