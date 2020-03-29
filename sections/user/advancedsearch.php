@@ -53,6 +53,18 @@ class SQLMatcher {
         }
     }
 
+    public function left_match($field) {
+        switch ($this->key) {
+            case 'regexp':
+                return "$field REGEXP ?";
+            case 'strict':
+                return "$field = ?";
+            case 'fuzzy':
+            default:
+                return "$field LIKE concat(?, '%')";
+        }
+    }
+
     public function op($field, $compare) {
         switch ($compare) {
             case 'above':
@@ -118,24 +130,15 @@ $NumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer']];
 $OffNumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer', 'off']];
 $YesNo = ['inarray'=>['any', 'yes', 'no']];
 
-$email_history_checked = true;
-$ip_history_checked = true;
-$disabled_ip_checked = true;
+$emailHistoryChecked = false;
+$ipHistoryChecked = false;
+$disabledIpChecked = false;
 
 if (count($_GET)) {
-    if (!empty($_GET['email_history']) || !empty($_GET['disabled_id']) || !empty($_GET['ip_history'])) {
-        if (empty($_GET['email_history'])) {
-            $email_history_checked = false;
-        }
-        if (empty($_GET['disabled_ip'])) {
-            $disabled_ip_checked = false;
-        }
-        if (empty($_GET['ip_history'])) {
-            $ip_history_checked = false;
-        }
-    }
+    $emailHistoryChecked = !empty($_GET['email_history']);
+    $disabledIpChecked = !empty($_GET['disabled_ip']);
+    $ipHistoryChecked = !empty($_GET['ip_history']);
     $DateRegexp = ['regexp' => '/\d{4}-\d{2}-\d{2}/'];
-
     $ClassIDs = [];
     $SecClassIDs = [];
     foreach ($Classes as $ClassID => $Value) {
@@ -248,12 +251,12 @@ if (count($_GET)) {
         }
 
         if (!empty($_GET['ip'])) {
-            if (isset($_GET['ip_history'])) {
+            if ($ipHistoryChecked) {
                 $Distinct = true;
                 $Join['hi'] = 'INNER JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
-                $Where[] = $m->match('hi.IP');
+                $Where[] = $m->left_match('hi.IP');
             } else {
-                $Where[] = $m->match('um1.IP');
+                $Where[] = $m->left_match('um1.IP');
             }
             $Args[] = trim($_GET['ip']);
         }
@@ -274,7 +277,7 @@ if (count($_GET)) {
         if (!empty($_GET['tracker_ip'])) {
             $Distinct = true;
             $Join['xfu'] = 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)';
-            $Where[] = $m->match('xfu.ip');
+            $Where[] = $m->left_match('xfu.ip');
             $Args[] = trim($_GET['tracker_ip']);
         }
 
@@ -409,9 +412,9 @@ if (count($_GET)) {
             $Args[] = '0000-00-00 00:00:00';
         }
 
-        if ($_GET['disabled_ip']) {
+        if ($disabledIpChecked) {
             $Distinct = true;
-            if ($_GET['ip_history']) {
+            if ($ipHistoryChecked) {
                 if (!isset($Join['hi'])) {
                     $Join['hi'] = 'LEFT JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
                 }
@@ -444,7 +447,7 @@ if (count($_GET)) {
         $SQL = 'SELECT' . ($Distinct ? ' DISTINCT ' : ' ') . $SQL . implode("\n", $Join);
 
         if (count($Where)) {
-            $SQL .= "WHERE " . implode("\nAND ", $Where);
+            $SQL .= "\nWHERE " . implode("\nAND ", $Where);
         }
 
         if (count($Having)) {
@@ -533,19 +536,19 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
-                <td class="label nobr" colspan="2">
+                <td class="nobr" colspan="2">
                 <h4>Extra</h4>
                 <ul class="options_list nobullet">
                     <li title="Only display users that have a disabled account linked by IP address">
-                        <input type="checkbox" name="disabled_ip" id="disabled_ip"<?php if ($disabled_ip_checked) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" name="disabled_ip" id="disabled_ip"<?= $disabledIpChecked ?' checked="checked"' : '' ?> />
                         <label for="disabled_ip">Disabled accounts linked by IP</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="ip_history" id="ip_history"<?php if ($ip_history_checked) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" name="ip_history" id="ip_history"<?= $ipHistoryChecked ? ' checked="checked"' : '' ?> />
                         <label title="Disabled accounts linked by IP must also be checked" for="ip_history">IP history</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="email_history" id="email_history"<?php if ($email_history_checked) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" name="email_history" id="email_history"<?= $emailHistoryChecked ? ' checked="checked"' : '' ?> />
                         <label title="Also search the email addresses the member used in the past" for="email_history">Email history</label>
                     </li>
                 </ul>
@@ -711,7 +714,7 @@ View::show_header('User search');
                         </li>
                         <li>
                             <input type="radio" name="matchtype" id="regexp_match_type" value="regexp"<?php if ($_GET['matchtype'] == 'regexp') { echo ' checked="checked"'; } ?> />
-                            <label class="tooltip" title="A &quot;regexp&quot; search uses MySQL's regular expression syntax." for="regexp_match_type">Regex</label>
+                            <label class="tooltip" title="A &quot;regexp&quot; search uses MySQL's regular expression syntax." for="regexp_match_type">Regexp</label>
                         </li>
                     </ul>
                 </td>
