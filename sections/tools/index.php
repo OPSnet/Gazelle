@@ -520,6 +520,7 @@ switch ($_REQUEST['action']) {
     case 'periodic':
         $mode = isset($_REQUEST['mode']) ? $_REQUEST['mode'] : 'view';
         switch ($mode) {
+            case 'run_now':
             case 'view':
                 include(SERVER_ROOT.'/sections/tools/development/periodic_view.php');
                 break;

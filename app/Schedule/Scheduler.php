@@ -23,7 +23,7 @@ class Scheduler {
     public function getTasks() {
         if (!$tasks = $this->cache->get_value(self::CACHE_TASKS)) {
             $this->db->prepared_query('
-                SELECT periodic_task_id, name, classname, description, period, is_enabled, is_sane, is_debug
+                SELECT periodic_task_id, name, classname, description, period, is_enabled, is_sane, is_debug, run_now
                 FROM periodic_task
             ');
 
@@ -84,6 +84,16 @@ class Scheduler {
         $this->clearCache();
     }
 
+    public function runNow(int $id) {
+        $this->db->prepared_query('
+            UPDATE periodic_task
+            SET run_now = 1 - run_now
+            WHERE periodic_task_id = ?
+            ', $id
+        );
+        $this->clearCache();
+    }
+
     public function deleteTask(int $id) {
         $this->db->prepared_query('
             DELETE FROM periodic_task
@@ -94,7 +104,7 @@ class Scheduler {
 
     public function getTaskDetails(int $days = 7) {
         $this->db->prepared_query("
-            SELECT pt.periodic_task_id, name, description, period, is_enabled, is_sane,
+            SELECT pt.periodic_task_id, name, description, period, is_enabled, is_sane, run_now,
                    coalesce(stats.runs, 0) runs, coalesce(stats.processed, 0) processed,
                    coalesce(stats.errors, 0) errors, coalesce(events.events, 0) events,
                    coalesce(pth.launch_time, '') last_run, coalesce(pth.duration_ms, 0) duration,
@@ -117,7 +127,7 @@ class Scheduler {
                 GROUP BY pth.periodic_task_id
             ) events ON (pt.periodic_task_id = events.periodic_task_id)
             LEFT JOIN periodic_task_history pth ON (stats.latest = pth.periodic_task_history_id)
-            ORDER BY pt.is_enabled DESC, pt.period, pt.periodic_task_id
+            ORDER BY pt.run_now DESC, pt.is_enabled DESC, pt.period, pt.periodic_task_id
         ", $days, $days);
 
         $tasks = $this->db->has_results() ? $this->db->to_array('periodic_task_id', MYSQLI_ASSOC) : [];
@@ -281,7 +291,7 @@ class Scheduler {
                     FROM periodic_task_history pth
                     WHERE pth.periodic_task_id = pt.periodic_task_id
                         AND now() < (pth.launch_time + INTERVAL ((pth.duration_ms / 1000) + pt.period) SECOND)
-                )
+                ) OR pt.run_now IS TRUE
         ');
 
         $toRun = $this->db->collect('periodic_task_id');
@@ -291,14 +301,14 @@ class Scheduler {
         }
     }
 
-    public function runTask(int $id) {
+    public function runTask(int $id, bool $debug = false) {
         $task = $this->getTask($id);
         if ($task === null) {
             return;
         }
         echo('Running task '.$task['name']."...");
 
-        $taskRunner = $this->createRunner($id, $task['name'], $task['classname'], $task['is_debug']);
+        $taskRunner = $this->createRunner($id, $task['name'], $task['classname'], $task['is_debug'] || $debug);
         if ($taskRunner === null) {
             Irc::sendChannel('Failed to construct task '.$task['name'], LAB_CHAN);
             return;
@@ -311,6 +321,15 @@ class Scheduler {
             $taskRunner->log('Caught exception: ' . $e->getMessage(), 'error');
         } finally {
             $taskRunner->end($task['is_sane']);
+        }
+
+        if ($task['run_now']) {
+            $this->db->prepared_query('
+                UPDATE periodic_task
+                SET run_now = FALSE
+                WHERE periodic_task_id = ?
+                ', $task['periodic_task_id']
+            );
         }
     }
 

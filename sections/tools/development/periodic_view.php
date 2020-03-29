@@ -8,6 +8,15 @@ if (!check_perms('admin_periodic_task_view')) {
 }
 
 $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
+
+if ($_REQUEST['mode'] === 'run_now' && isset($_REQUEST['id'])) {
+    authorize();
+    if (!check_perms('admin_schedule')) {
+        error(403);
+    }
+    $scheduler->runNow(intval($_REQUEST['id']));
+}
+
 $tasks = $scheduler->getTaskDetails();
 $canEdit = check_perms('admin_periodic_task_manage');
 $canLaunch = check_perms('admin_schedule');
@@ -35,16 +44,16 @@ View::show_header('Periodic Task Status');
 <?php
 $row = 'b';
 foreach ($tasks as $task) {
-    list($id, $name, $description, $period, $isEnabled, $isSane, $runs, $processed, $errors, $events, $lastRun, $duration, $status) = array_values($task);
+    list($id, $name, $description, $period, $isEnabled, $isSane, $runNow, $runs, $processed, $errors, $events, $lastRun, $duration, $status) = array_values($task);
 
     if ($runs == 0) {
         $lastRun = 'Never';
         $nextRun = sqltime();
         $duration = '-';
         $status = '-';
-        $processed = '-';
-        $errors = '-';
-        $events = '-';
+        $processed = '0';
+        $errors = '0';
+        $events = '0';
     } else {
         $duration .= 'ms';
         $nextRun = sqltime(strtotime($lastRun) + $period);
@@ -61,9 +70,13 @@ foreach ($tasks as $task) {
         $color = " color:tomato;";
         $prefix .= 'Insane: ';
     }
-    if (!$isEnabled) {
+    if (!$isEnabled && !$runNow) {
         $color = " color:sandybrown;";
         $prefix .= 'Disabled: ';
+    }
+    if ($runNow) {
+        $color = " color:green;";
+        $prefix .= 'Run Now: ';
     }
 ?>
     <tr class="row<?=$row?>">
@@ -87,7 +100,8 @@ foreach ($tasks as $task) {
         <td class="number_column"><?= number_format($events) ?></td>
         <td>
 <?php if ($canLaunch) { ?>
-            <a class="brackets" href="schedule.php?auth=<?=$LoggedUser['AuthKey']?>&amp;new=&amp;id=<?=$id?>">Run Now</a>
+            <a class="brackets" href="tools.php?action=periodic&amp;mode=run_now&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;id=<?=$id?>">Run Now</a>
+            <a class="brackets" href="schedule.php?auth=<?=$LoggedUser['AuthKey']?>&amp;id=<?=$id?>">Debug</a>
 <?php } ?>
         </td>
     </tr>
