@@ -149,8 +149,8 @@ foreach ($Results as $Index => $Result) {
     <tr class="rowa">
         <td>
 <?php if ($userId) { ?>
-            <?=$ipAddr?> (<?=Tools::get_country_code_by_ajax($ipAddr)?>)<br /><?=Tools::get_host_by_ajax($ipAddr)?>
-            <a href="http://whatismyipaddress.com/ip/<?=display_str($ipAddr)?>" class="brackets tooltip" title="Search WIMIA.com">WI</a>
+            <?= $value ?> (<?=Tools::get_country_code_by_ajax($value) ?>)<br /><?= Tools::get_host_by_ajax($value) ?>
+            <a href="http://whatismyipaddress.com/ip/<?= display_str($value) ?>" class="brackets tooltip" title="Search WIMIA.com">WI</a>
 <?php } else { ?>
             <a href="<?= $urlStem . $value ?>"><?= Users::user_info($value)['Username'] ?></a>
 <?php } ?>
