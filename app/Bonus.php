@@ -476,7 +476,7 @@ Enjoy!";
 
         // precalculate the users we update this run
         if ($task) {
-            $task->info('begin');
+            $task->debug('begin');
         } else {
             echo "begin\n";
         }
@@ -497,7 +497,7 @@ Enjoy!";
                 AND ui.DisablePoints = '0'
         ");
         if ($task) {
-            $task->info('xbt_unique constructed');
+            $task->debug('xbt_unique constructed');
         } else {
             echo "xbt_unique constructed\n";
         }
@@ -536,7 +536,7 @@ Enjoy!";
                 $this->cache->deleteMulti($this->db->collect('ck', false));
             }
             if ($task) {
-                $task->info('chunk done', $userId);
+                $task->debug('chunk done', $userId);
             } else {
                 echo "chunk done $userId\n";
             }
