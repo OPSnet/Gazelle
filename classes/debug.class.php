@@ -69,7 +69,7 @@ class DEBUG {
         G::$Cache->cache_value(
             'analysis_'.$Identifier,
             [
-                'url' => $_SERVER['REQUEST_URI'],
+                'url' => $_SERVER['REQUEST_URI'] ?? 'cli',
                 'message' => $Report,
                 'errors' => $this->get_errors(true),
                 'queries' => $this->get_queries(),

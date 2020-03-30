@@ -29,7 +29,7 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
                 g.CategoryID,
                 g.Time,
                 g.VanityHouse,
-                GROUP_CONCAT(DISTINCT tags.Name SEPARATOR '|'),
+                GROUP_CONCAT(DISTINCT tags.Name SEPARATOR '|') as tagNames,
                 GROUP_CONCAT(DISTINCT tags.ID SEPARATOR '|'),
                 GROUP_CONCAT(tt.UserID SEPARATOR '|'),
                 GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|'),

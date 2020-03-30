@@ -1,10 +1,52 @@
 <?php
+
+require_once(__DIR__ . '/util.php');
+require_once(__DIR__ . '/../sections/torrents/functions.php');
+
 class Text {
     /**
      * Array of valid tags; tag => max number of attributes
      * @var array $ValidTags
      */
-    private static $ValidTags = ['b'=>0, 'u'=>0, 'i'=>0, 's'=>0, '*'=>1, '#'=>1, '**'=>1, '##'=>1, '***'=>1, '###'=>1, 'artist'=>0, 'user'=>0, 'n'=>0, 'inlineurl'=>0, 'inlinesize'=>1, 'headline'=>1, 'align'=>1, 'color'=>1, 'colour'=>1, 'size'=>1, 'url'=>1, 'img'=>1, 'quote'=>1, 'pre'=>1, 'code'=>1, 'tex'=>0, 'hide'=>1, 'spoiler' => 1, 'plain'=>0, 'important'=>0, 'torrent'=>0, 'rule'=>0, 'mature'=>1, 'box'=>0
+    private static $ValidTags = [
+        '###'        => 1,
+        '##'         => 1,
+        '#'          => 1,
+        '*'          => 1,
+        '**'         => 1,
+        '***'        => 1,
+        'align'      => 1,
+        'artist'     => 0,
+        'b'          => 0,
+        'box'        => 0,
+        'code'       => 1,
+        'collage'    => 1,
+        'color'      => 1,
+        'colour'     => 1,
+        'forum'      => 0,
+        'headline'   => 1,
+        'hide'       => 1,
+        'i'          => 0,
+        'img'        => 1,
+        'important'  => 0,
+        'inlinesize' => 1,
+        'inlineurl'  => 0,
+        'mature'     => 1,
+        'n'          => 0,
+        'pl'         => 1,
+        'plain'      => 0,
+        'pre'        => 1,
+        'quote'      => 1,
+        'rule'       => 0,
+        's'          => 0,
+        'size'       => 1,
+        'spoiler'    => 1,
+        'tex'        => 0,
+        'thread'     => 0,
+        'torrent'    => 1,
+        'u'          => 0,
+        'url'        => 1,
+        'user'       => 0,
     ];
 
     /**
@@ -60,6 +102,33 @@ class Text {
         ':|'         => 'blank.gif',
         ';-)'        => 'wink.gif',
         //':\\'      => 'hmm.gif',
+    ];
+
+    private static $ColorName = [
+        'aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque',
+        'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood',
+        'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk',
+        'crimson', 'cyan', 'darkblue', 'darkcyan', 'darkgoldenrod', 'darkgray',
+        'darkgreen', 'darkkhaki', 'darkmagenta', 'darkolivegreen', 'darkorange',
+        'darkorchid', 'darkred', 'darksalmon', 'darkseagreen', 'darkslateblue',
+        'darkslategray', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue',
+        'dimgray', 'dodgerblue', 'firebrick', 'floralwhite', 'forestgreen', 'fuchsia',
+        'gainsboro', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'greenyellow',
+        'honeydew', 'hotpink', 'indianred', 'indigo', 'ivory', 'khaki', 'lavender',
+        'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral',
+        'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen', 'lightpink',
+        'lightsalmon', 'lightseagreen', 'lightskyblue', 'lightslategray',
+        'lightsteelblue', 'lightyellow', 'lime', 'limegreen', 'linen', 'magenta',
+        'maroon', 'mediumaquamarine', 'mediumblue', 'mediumorchid', 'mediumpurple',
+        'mediumseagreen', 'mediumslateblue', 'mediumspringgreen', 'mediumturquoise',
+        'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin',
+        'navajowhite', 'navy', 'oldlace', 'olive', 'olivedrab', 'orange', 'orangered',
+        'orchid', 'palegoldenrod', 'palegreen', 'paleturquoise', 'palevioletred',
+        'papayawhip', 'peachpuff', 'peru', 'pink', 'plum', 'powderblue', 'purple',
+        'red', 'rosybrown', 'royalblue', 'saddlebrown', 'salmon', 'sandybrown',
+        'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue', 'slategray',
+        'snow', 'springgreen', 'steelblue', 'tan', 'teal', 'thistle', 'tomato',
+        'turquoise', 'violet', 'wheat', 'white', 'whitesmoke', 'yellow', 'yellowgreen',
     ];
 
     /**
@@ -186,34 +255,29 @@ class Text {
         return nl2br(self::raw_text(self::parse($Str)));
     }
 
-
     private static function valid_url($Str, $Extension = '', $Inline = false) {
-        $Regex = '/^';
-        $Regex .= '(https?|ftps?|irc):\/\/'; // protocol
-        $Regex .= '(\w+(:\w+)?@)?'; // user:pass@
-        $Regex .= '(';
-        $Regex .= '(([0-9]{1,3}\.){3}[0-9]{1,3})|'; // IP or...
-        $Regex .= '(localhost(\:[0-9]{1,5})?)|'; // locahost or...
-        $Regex .= '(([a-z0-9\-\_]+\.)+\w{2,6})'; // sub.sub.sub.host.com
-        $Regex .= ')';
-        $Regex .= '(:[0-9]{1,5})?'; // port
-        $Regex .= '\/?'; // slash?
-        $Regex .= '(\/?[0-9a-z\-_.,&=@~%\/:;()+|!#]+)*'; // /file
-        if (!empty($Extension)) {
-            $Regex.=$Extension;
-        }
+        $re = '/^'
+            . '(https?|ftps?|irc):\/\/' // protocol
+            . '(\w+(:\w+)?@)?' // user:pass@
+            . '('
+                . '(([0-9]{1,3}\.){3}[0-9]{1,3})|' // IP or...
+                . '(localhost(\:[0-9]{1,5})?)|' // locahost or...
+                . '(([a-z0-9\-\_]+\.)+\w{2,6})' // sub.sub.sub.host.com
+            . ')'
+            . '(:[0-9]{1,5})?' // port
+            . '\/?' // slash?
+            . '(\/?[0-9a-z\-_.,&=@~%\/:;()+|!#]+)*' // /file
+            . (empty($Extension) ? '' : $Extension)
+            . ($Inline
+                ? '(\?([0-9a-z\-_.,%\/\@~&=:;()+*\^$!#|?]|\[\d*\])*)?'
+                : '(\?[0-9a-z\-_.,%\/\@[\]~&=:;()+*\^$!#|?]*)?')
+            . '(#[a-z0-9\-_.,%\/\@[\]~&=:;()+*\^$!]*)?' // #anchor
+            . '$/i';
+        return preg_match($re, $Str, $Matches);
+    }
 
-        // query string
-        if ($Inline) {
-            $Regex .= '(\?([0-9a-z\-_.,%\/\@~&=:;()+*\^$!#|?]|\[\d*\])*)?';
-        } else {
-            $Regex .= '(\?[0-9a-z\-_.,%\/\@[\]~&=:;()+*\^$!#|?]*)?';
-        }
-
-        $Regex .= '(#[a-z0-9\-_.,%\/\@[\]~&=:;()+*\^$!]*)?'; // #anchor
-        $Regex .= '$/i';
-
-        return preg_match($Regex, $Str, $Matches);
+    private static function relative_url($str) {
+        return !preg_match('~^https?://~', $str);
     }
 
     public static function local_url($Str) {
@@ -241,6 +305,67 @@ class Text {
         }
     }
 
+    public static function resolve_url($url) {
+        $rawurl = str_replace('&amp;', '&', $url); // unfuck aggressive escaping
+        $info = parse_url($rawurl);
+        if (!$info) {
+            return null;
+        }
+        if ($info['host'] != SITE_HOST) {
+            return null;
+        }
+        parse_str($info['query'], $args);
+        $fragment = isset($info['fragment']) ? '#' . $info['fragment'] : '';
+        switch ($info['path']) {
+            case '/artist.php':
+                list($name) = G::$DB->lookup('SELECT Name FROM artists_group WHERE ArtistID = ?',
+                    $args['id'] ?? 0);
+                return $name
+                    ? sprintf('<a href="%s?%s">%s</a>', $info['path'], $info['query'], $name)
+                    : null;
+
+            case '/collages.php':
+                return \Collages::bbcodeUrl($args['id'] ?? $args['collageid'], $url) ?? null;
+
+            case '/forums.php':
+                if (!isset($args['action'])) {
+                    return null;
+                }
+                switch ($args['action']) {
+                    case 'viewforum':
+                        return \Forums::bbcodeForumUrl($args['forumid'], $url) ?? null;
+                    case 'viewthread':
+                        return \Forums::bbcodeThreadUrl($args['threadid'], $url) ?? null;
+                }
+                return null;
+
+            case '/torrents.php':
+                if (isset($args['torrentid'])) {
+                    list($GroupID) = G::$DB->lookup('
+                        SELECT tg.ID FROM torrents_group tg INNER JOIN torrents t ON (t.GroupID = tg.ID) WHERE t.ID = ?
+                        ', (int)$args['torrentid']
+                    );
+                } else {
+                    list($GroupID) = G::$DB->lookup('
+                        SELECT ID FROM torrents_group WHERE ID = ?
+                        ', $args['id'] ?? 0
+                    );
+                }
+                if (!$GroupID) {
+                    return null;
+                }
+                $Group = Torrents::get_groups([$GroupID], true, true, false)[$GroupID];
+                $tagNames = implode(', ',
+                    array_map(function ($x) { return '#' . htmlentities($x); },
+                        explode(' ', $Group['TagList'])));
+                return Artists::display_artists($Group['ExtendedArtists'])
+                    . sprintf('<a title="%s" href="%s?%s%s">%s</a>',
+                        $tagNames, $info['path'], $info['query'], $fragment, $Group['Name']);
+
+            default:
+                return null;
+        }
+    }
 
     /*
     How parsing works
@@ -398,7 +523,6 @@ class Text {
                 }
                 $InOpenRegex .= '\]/i';
 
-
                 // Every time we find an internal open tag of the same type, search for the next close tag
                 // (as the first close tag won't do - it's been opened again)
                 do {
@@ -421,12 +545,10 @@ class Text {
 
                 } while ($NumInOpens > $NumInCloses);
 
-
                 // Find the internal block inside the tag
                 $Block = substr($Str, $i, $CloseTag - $i); // 5c) Get the contents between [open] and [/close] and call it the block.
 
                 $i = $CloseTag + strlen($TagName) + 3; // 5d) Move the pointer past the end of the [/close] tag.
-
             }
 
             // 6) Depending on what type of tag we're dealing with, create an array with the attribute and block.
@@ -463,20 +585,18 @@ class Text {
                     }
                     $Array[$ArrayPos] = ['Type'=>'aud', 'Val'=>$Block];
                     break;
-                case 'user':
-                    $Array[$ArrayPos] = ['Type'=>'user', 'Val'=>$Block];
-                    break;
                 case 'artist':
-                    $Array[$ArrayPos] = ['Type'=>'artist', 'Val'=>$Block];
-                    break;
-                case 'torrent':
-                    $Array[$ArrayPos] = ['Type'=>'torrent', 'Val'=>$Block];
-                    break;
+                case 'collage':
+                case 'forum':
                 case 'tex':
-                    $Array[$ArrayPos] = ['Type'=>'tex', 'Val'=>$Block];
-                    break;
+                case 'thread':
                 case 'rule':
-                    $Array[$ArrayPos] = ['Type'=>'rule', 'Val'=>$Block];
+                case 'user':
+                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
+                    break;
+                case 'pl':
+                case 'torrent':
+                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block, 'Attr'=>$Attrib];
                     break;
                 case 'pre':
                 case 'code':
@@ -497,16 +617,12 @@ class Text {
                     $Block = preg_replace('/\[inlinesize\=3\](.*?)\[\/inlinesize\]/i', '====$1====', $Block);
                     $Block = preg_replace('/\[inlinesize\=5\](.*?)\[\/inlinesize\]/i', '===$1===', $Block);
                     $Block = preg_replace('/\[inlinesize\=7\](.*?)\[\/inlinesize\]/i', '==$1==', $Block);
-
-
                     $Array[$ArrayPos] = ['Type'=>$TagName, 'Val'=>$Block];
                     break;
-                case 'spoiler':
                 case 'hide':
-                    $Array[$ArrayPos] = ['Type'=>'hide', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
-                    break;
                 case 'mature':
-                    $Array[$ArrayPos] = ['Type'=>'mature', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
+                case 'spoiler':
+                    $Array[$ArrayPos] = ['Type'=>$TagName, 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
                     break;
                 case '#':
                 case '*':
@@ -686,6 +802,18 @@ class Text {
                     }
                     $Str .= '<a href="rules.php?p=upload#'.urlencode(Format::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
                     break;
+                case 'collage':
+                    $Str .= \Collages::bbcodeUrl($Block['Val']);
+                    break;
+                case 'forum':
+                    $Str .= \Forums::bbcodeForumUrl($Block['Val']);
+                    break;
+                case 'thread':
+                    $Str .= \Forums::bbcodeThreadUrl($Block['Val']);
+                    break;
+                case 'pl':
+                    $Str .= \Torrents::bbcodeUrl($Block['Val'], $Block['Attr']);
+                    break;
                 case 'torrent':
                     $Pattern = '/('.NONSSL_SITE_URL.'\/torrents\.php.*[\?&]id=)?(\d+)($|&|\#).*/i';
                     $Matches = [];
@@ -695,7 +823,13 @@ class Text {
                             $Groups = Torrents::get_groups([$GroupID], true, true, false);
                             if ($Groups[$GroupID]) {
                                 $Group = $Groups[$GroupID];
-                                $Str .= Artists::display_artists($Group['ExtendedArtists']).'<a href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';
+                                $tagNames = implode(', ',
+                                    array_map(function ($x) { return '#' . htmlentities($x); },
+                                        explode(' ', $Group['TagList'])));
+                                if (strpos($Block['Attr'], 'noartist') === false) {
+                                    $Str .= Artists::display_artists($Group['ExtendedArtists']);
+                                }
+                                $Str .= '<a title="' . $tagNames . '" href="torrents.php?id='.$GroupID.'">'.$Group['Name'].'</a>';
                             } else {
                                 $Str .= '[torrent]'.str_replace('[inlineurl]', '', $Block['Val']).'[/torrent]';
                             }
@@ -704,6 +838,7 @@ class Text {
                         $Str .= '[torrent]'.str_replace('[inlineurl]', '', $Block['Val']).'[/torrent]';
                     }
                     break;
+
                 case 'wiki':
                     $Str .= '<a href="wiki.php?action=article&amp;name='.urlencode($Block['Val']).'">'.$Block['Val'].'</a>';
                     break;
@@ -736,8 +871,8 @@ class Text {
                     break;
                 case 'color':
                 case 'colour':
-                    $ValidAttribs = ['aqua', 'black', 'blue', 'fuchsia', 'green', 'grey', 'lime', 'maroon', 'navy', 'olive', 'purple', 'red', 'silver', 'teal', 'white', 'yellow'];
-                    if (!in_array($Block['Attr'], $ValidAttribs) && !preg_match('/^#[0-9a-f]{6}$/', $Block['Attr'])) {
+                    $Block['Attr'] = strtolower($Block['Attr']);
+                    if (!in_array($Block['Attr'], self::$ColorName) && !preg_match('/^#[0-9a-f]{6}$/', $Block['Attr'])) {
                         $Str .= '[color='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules).'[/color]';
                     } else {
                         $Str .= '<span style="color: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules).'</span>';
@@ -854,14 +989,36 @@ class Text {
                     }
 
                     if (!self::valid_url($Block['Attr'])) {
-                        $Str .= '[url='.$Block['Attr'].']'.$Block['Val'].'[/url]';
+                        if (!self::relative_url($Block['Attr'])) {
+                            $Str .= '[url=' . $Block['Attr'] . ']' . $Block['Val'] . '[/url]';
+                        } else {
+                            if (substr($Block['Val'], 0, 1) != '/') {
+                                $Block['Val'] = '/' . $Block['Val'];
+                            }
+                            $url = self::resolve_url('https://' . SITE_URL . $Block['Val']);
+                            if ($url) {
+                                $Str .= $url;
+                            } else {
+                                $Str .= '[url=' . $Block['Attr'] . ']' . $Block['Val'] . '[/url]';
+                            }
+                        }
                     } else {
                         $LocalURL = self::local_url($Block['Attr']);
                         if ($LocalURL) {
-                            if ($NoName) { $Block['Val'] = substr($LocalURL,1); }
-                            $Str .= '<a href="'.$LocalURL.'">'.$Block['Val'].'</a>';
+                            if ($NoName) {
+                                $Block['Val'] = substr($LocalURL, 1);
+                            }
+                            if ($resolved = self::resolve_url($Block['Val'])) {
+                                $Str .= $resolved;
+                            } else {
+                                $Str .= '<a href="' . $LocalURL . '">' . $Block['Val'] . '</a>';
+                            }
                         } else {
-                            $Str .= '<a rel="noreferrer" target="_blank" href="'.$Block['Attr'].'">'.$Block['Val'].'</a>';
+                            if ($resolved = self::resolve_url($Block['Val'])) {
+                                $Str .= $resolved;
+                            } else {
+                                $Str .= '<a rel="noreferrer" target="_blank" href="' . $Block['Attr'] . '">' . $Block['Val'] . '</a>';
+                            }
                         }
                     }
                     break;
@@ -872,13 +1029,14 @@ class Text {
                         $Block['Attr'] = $Array;
                         $Str .= self::to_html($Block['Attr'], $Rules);
                     }
-
                     else {
                         $LocalURL = self::local_url($Block['Attr']);
                         if ($LocalURL) {
-                            $Str .= '<a href="'.$LocalURL.'">'.substr($LocalURL,1).'</a>';
+                            $Str .= self::resolve_url($Block['Attr'])
+                                ?? ('<a href="' . $LocalURL . '">' . ($title ? $title : substr($LocalURL, 1)) . '</a>');
                         } else {
-                            $Str .= '<a rel="noreferrer" target="_blank" href="'.$Block['Attr'].'">'.$Block['Attr'].'</a>';
+                            $Str .= self::resolve_url($Block['Attr'])
+                                ?? sprintf('<a rel="noreferrer" target="_blank" href="%s">%s</a>', $Block['Attr'], $Block['Attr']);
                         }
                     }
 
@@ -1139,12 +1297,3 @@ class Text {
         return str_replace(["<br />", "<br>"], "\n", $Str);
     }
 }
-
-/*
-define("SITE_URL", 'https://orpheus.network');
-
-$Str = "<div style=\"text-align: center;\"><span class=\"size3\"><span style=\"text-decoration: underline;\"><strong>Album Information<br \/>\r\nInterstellar Rift Original Soundtrack<\/strong><\/span><\/span><\/div><br \/>\r\n<br \/>\r\n<ul class=\"postlist\"><li><strong>Catalog Number:<\/strong>\tN\/A<\/li><li><strong>Release Date:<\/strong>\tMay 29, 2017<\/li><li><strong>Publish Format:<\/strong>\tCommercial<\/li><li><strong>Release Price:<\/strong>\t13.00 AUD<\/li><li><strong>Media Format:<\/strong>\tDigital<\/li><li><strong>Classification:<\/strong>\tOriginal Soundtrack<\/li><li><strong>Published by:<\/strong>\tBoss Battle Records (distributed by Bandcamp)<\/li><li><strong>Composed by:<\/strong>\tCurtis Schweitzer<\/li><li><strong>Arranged by:<\/strong><\/li><\/ul><br \/>\n\r<br \/>\n<div style=\"text-align: center;\"><pre>Tracklist<br \/>\r\n01\tInterstellar Rift\t\t2:38<br \/>\r\n02\tShipmaking\t\t\t4:16<br \/>\r\n03\tGalaxy Dawn\t\t\t2:55<br \/>\r\n04\tInterloper\t\t\t2:32<br \/>\r\n05\tShipbreaking\t\t\t2:06<br \/>\r\n06\tHorizon Wake\t\t\t4:24<br \/>\r\n07\tSky Harvest\t\t\t3:50<br \/>\r\n08\tTwilight Discord\t\t2:42<br \/>\r\n09\tLanguid Constellations\t\t2:45<br \/>\r\n10\tHurles Co.\t\t\t2:43<br \/>\r\n11\tGalactic Trade Federation\t2:46<br \/>\r\n12\tSentinel Security Systems\t4:08<br \/>\r\n13\tDrifters\t\t\t3:18<\/pre><\/div><br \/>\r\n<br \/>\r\n<div style=\"text-align: left;\"><pre>Notes<br \/>\r\nComposed by Curtis Schweitzer<br \/>\r\nMastered by Aaron Edwards<br \/>\r\nSoundtrack curated by The Otherworld Agency<\/pre><\/div>";
-//echo $Str;
-echo Text::parse_html($Str);
-echo "\n";
-*/

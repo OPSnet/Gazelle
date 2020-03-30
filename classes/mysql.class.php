@@ -536,6 +536,23 @@ class DB_MYSQL {
         return $Return;
     }
 
+    /**
+     * Runs a prepared_query using a single placeholder and returns the matched
+     * row. Stashes the current query id so that this can be used within a block
+     * that is looping over an active resultset.
+     *
+     * @param string  $sql The parameterized query to run
+     * @param int     $id  The value of the placeholder
+     * @return array  resultset or null
+     */
+    function lookup($sql, $id) {
+        $qid = $this->get_query_id();
+        $this->prepared_query($sql, $id);
+        $result = $this->next_record(MYSQLI_NUM);
+        $this->set_query_id($qid);
+        return $result;
+    }
+
     function set_query_id(&$ResultSet) {
         $this->QueryID = $ResultSet;
         $this->Row = 0;

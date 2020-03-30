@@ -1239,4 +1239,62 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         G::$Cache->delete_value("torrents_details_{$GroupID}");
     }
 
+    public static function bbcodeUrl($val, $attr) {
+        $cacheKey = 'bbcode-collage.' . $id . '.' . $attr;
+        if (($url = G::$Cache->get_value($cacheKey)) === false) {
+            $url = self::bbcodeUrlBuild($val, $attr);
+            G::$Cache->cache_value($key, $url, 86400 + rand(1, 3600));
+        }
+        return $url;
+    }
+
+    protected static function bbcodeUrlBuild($val, $attr) {
+        $id = (int)$val;
+        list($groupId) = G::$DB->lookup('SELECT GroupID FROM torrents WHERE ID = ?', $id);
+        if (!$groupId) {
+            return ($attr ? "[pl=$attr]" : '[pl]') . $id . '[/pl]';
+        }
+        list ($info, $list) = get_torrent_info($id, true, 0, false);
+        $tagNames = implode(', ',
+            array_map(function ($x) { return '#' . htmlentities($x); },
+                explode('|', $info['tagNames'])));
+        $attr = preg_split('/\s*,\s*/m', strtolower($attr), -1, PREG_SPLIT_NO_EMPTY);
+        $year = in_array('noyear', $attr) || in_array('title', $attr)
+            ? '' : ' [' . $info['Year'] . ']';
+        if (in_array('noreleasetype', $attr) || in_array('title', $attr)) {
+            $releaseType = '';
+        } else {
+            global $ReleaseTypes;
+            $releaseType = ' [' . $ReleaseTypes[$info['ReleaseType']] . ']';
+        }
+        $release = $list[$id];
+        if (in_array('nometa', $attr) || in_array('title', $attr)) {
+            $meta = '';
+        } else {
+            $details = [
+                $release['Format'],
+                $release['Encoding'],
+                $release['Media'],
+            ];
+            if ($release['HasCue']) {
+                $details[] = 'Cue';
+            }
+            if ($release['HasLog']) {
+                $log = 'Log';
+                if ($release['HasLogDB']) {
+                    $log .= ' ' . $release['LogScore'] . '%';
+                }
+                $details[] = "$log";
+            }
+            $meta = ' (' . implode('/', $details) . ')';
+        }
+        $url = '';
+        if (!(in_array('noartist', $attr) || in_array('title', $attr))) {
+            $Group = Torrents::get_groups([$groupId], true, true, false)[$groupId];
+            $url = Artists::display_artists($Group['ExtendedArtists']);
+        }
+        return $url . sprintf('<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s%s%s</a>',
+            $tagNames, $groupId, $id, $id, $info['Name'], $year, $releaseType, $meta
+        );
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 class Forums {
+    const PADLOCK = "\xF0\x9F\x94\x92";
     /**
      * Get information on a thread.
      *
@@ -400,5 +401,32 @@ class Forums {
         }
 
         return $filtered;
+    }
+
+    public function bbcodeForumUrl($val) {
+        $cacheKey = 'bbcode-forum.' . $val;
+        list($id, $name) = G::$Cache->get_value($cacheKey);
+        if (is_null($id)) {
+            list($id, $name) = (int)$val > 0
+                ? G::$DB->lookup('SELECT ID, Name FROM forums WHERE ID = ?', $val)
+                : G::$DB->lookup('SELECT ID, Name FROM forums WHERE Name = ?', $val);
+            G::$Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
+        }
+        return $name
+            ? sprintf('<a href="forums.php?action=viewforum&forumid=%d">%s</a>', $id, $name)
+            : '[forum]' . $val . '[/forum]';
+    }
+
+    public function bbcodeThreadUrl($val) {
+        $cacheKey = 'bbcode-thread.' . $id;
+        list($id, $name, $isLocked) = G::$Cache->get_value($cacheKey);
+        if (is_null($id)) {
+            list($id, $name, $isLocked) = G::$DB->lookup('SELECT ID, Title, IsLocked FROM forums_topics WHERE ID = ?', $val);
+            G::$Cache->cache_value($cacheKey, [$id, $name, $isLocked], 86400 + rand(1, 3600));
+        }
+        return $id
+            ? sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
+                $id, ($isLocked ? self::PADLOCK . ' ' : ''), $name)
+            : '[thread]' .  $val . '[/thread]';
     }
 }

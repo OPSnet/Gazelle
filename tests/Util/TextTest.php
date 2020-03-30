@@ -4,7 +4,7 @@ namespace Gazelle\Util;
 
 use PHPUnit\Framework\TestCase;
 
-class TextTest extends TestCase {
+class UtilTextTest extends TestCase {
     /**
      * @param $string
      * @param $substr
@@ -62,5 +62,4 @@ class TextTest extends TestCase {
             [null, '', true, true]
         ];
     }
-
 }
