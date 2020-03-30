@@ -9,24 +9,16 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         // Clear old seed time history
         $this->db->prepared_query('
             DELETE FROM users_torrent_history
-            WHERE Date < DATE(now() - INTERVAL 7 DAY) + 0
+            WHERE Date < DATE(now() - INTERVAL 7 DAY)
         ');
 
         // Store total seeded time for each user in a temp table
         $this->db->prepared_query('
             CREATE TEMPORARY TABLE tmp_history_time (
                 UserID int(10) unsigned NOT NULL PRIMARY KEY,
-                NumTorrents int(6) unsigned NOT NULL DEFAULT 0,
-                SumTime bigint(20) unsigned NOT NULL DEFAULT 0,
-                SeedingAvg int(6) unsigned NOT NULL DEFAULT 0,
-                KEY numtorrents_idx (NumTorrents)
+                SumTime bigint(20) unsigned NOT NULL DEFAULT 0
             ) ENGINE=InnoDB
-        ');
-
-        $this->db->prepared_query('
-            INSERT INTO tmp_history_time
-                (UserID, SumTime)
-            SELECT UserID, SUM(Time)
+            SELECT UserID, SUM(Time) as SumTime
             FROM users_torrent_history
             GROUP BY UserID
         ');
@@ -45,6 +37,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         $this->db->prepared_query('
             UPDATE users_torrent_history
             SET Weight = NumTorrents * Time
+            WHERE Weight != NumTorrents * Time
         ');
 
         // Calculate average time spent seeding each of the currently active torrents.
@@ -52,26 +45,18 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         $this->db->prepared_query('
             CREATE TEMPORARY TABLE tmp_history_weight_time (
                 UserID int(10) unsigned NOT NULL PRIMARY KEY,
-                NumTorrents int(6) unsigned NOT NULL DEFAULT 0,
-                SumTime bigint(20) unsigned NOT NULL DEFAULT 0,
-                SeedingAvg int(6) unsigned NOT NULL DEFAULT 0,
-                KEY numtorrents_idx (NumTorrents)
+                SeedingAvg int(6) unsigned NOT NULL DEFAULT 0
             ) ENGINE=InnoDB
-        ');
-
-        $this->db->prepared_query('
-            INSERT INTO tmp_history_weight_time
-                (UserID, SeedingAvg)
-            SELECT UserID, SUM(Weight) / SUM(Time)
+            SELECT UserID, SUM(Weight) / SUM(Time) as SeedingAvg
             FROM users_torrent_history
             GROUP BY UserID
         ');
 
         // Remove dummy entry for torrents seeded less than 72 hours
-        $this->db->prepared_query("
+        $this->db->prepared_query('
             DELETE FROM users_torrent_history
-            WHERE NumTorrents = '0'
-        ");
+            WHERE NumTorrents = 0
+        ');
 
         // Get each user's amount of snatches of existing torrents
         $this->db->prepared_query('
@@ -79,11 +64,7 @@ class RatioRequirements extends \Gazelle\Schedule\Task
                 UserID int unsigned PRIMARY KEY,
                 NumSnatches int(10) unsigned NOT NULL DEFAULT 0
             ) ENGINE=InnoDB
-        ');
-
-        $this->db->prepared_query('
-            INSERT INTO tmp_snatch (UserID, NumSnatches)
-            SELECT xs.uid, COUNT(DISTINCT xs.fid)
+            SELECT xs.uid as UserID, COUNT(DISTINCT xs.fid) as NumSnatches
             FROM xbt_snatched AS xs
             INNER JOIN torrents AS t ON (t.ID = xs.fid)
             GROUP BY xs.uid
@@ -92,11 +73,13 @@ class RatioRequirements extends \Gazelle\Schedule\Task
         // Get the fraction of snatched torrents seeded for at least 72 hours this week
         // Essentially take the total number of hours seeded this week and divide that by 72 hours * <NumSnatches>
         $this->db->prepared_query('
-            UPDATE users_main AS um
-            INNER JOIN tmp_history_weight_time AS t ON (t.UserID = um.ID)
-            INNER JOIN tmp_snatch AS s ON (s.UserID = um.ID)
-            SET um.RequiredRatioWork = (1 - (t.SeedingAvg / s.NumSnatches))
-            WHERE s.NumSnatches > 0
+            CREATE TEMPORARY TABLE tmp_snatch_weight (
+                UserID int unsigned PRIMARY KEY,
+                fraction float(10) NOT NULL
+            ) ENGINE=InnoDB
+            SELECT t.UserID, 1 - (t.SeedingAvg / s.NumSnatches) as fraction
+            FROM tmp_history_weight_time AS t
+            INNER JOIN tmp_snatch AS s USING (UserID)
         ');
 
         $ratioRequirements = [
@@ -125,9 +108,10 @@ class RatioRequirements extends \Gazelle\Schedule\Task
             $this->db->prepared_query('
                 UPDATE users_main AS um
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                SET um.RequiredRatio = um.RequiredRatioWork * ?
+                INNER JOIN tmp_snatch_weight AS tsw ON (uls.UserID = um.ID)
+                SET um.RequiredRatio = tsw.fraction * ?
                 WHERE uls.Downloaded >= ?
-                AND uls.Downloaded < ?
+                    AND uls.Downloaded < ?
                 ', $ratio, $download, $downloadBarrier
             );
 
