@@ -30,8 +30,8 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
             ) b ON (b.UserID = um.ID)
             WHERE um.PermissionID IN ($placeholders)
                 AND (
-                    (uls.Downloaded > 0 AND (uls.Uploaded + ifnull(b.Bounty, 0)) / uls.Downloaded < ?)
-                    OR uls.Uploaded < ?
+                    (uls.Downloaded > 0 AND uls.Uploaded / uls.Downloaded < ?)
+                    OR (uls.Uploaded + ifnull(b.Bounty, 0)) < ?
                 )
             ", ...array_merge($demoteClasses, [$ratio, $upload])
         );
@@ -51,8 +51,8 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
                 ui.AdminComment = CONCAT(now(), ' - Class changed to ', ?, ' by System\n\n', ui.AdminComment)
             WHERE um.PermissionID IN ($placeholders)
                 AND (
-                    (uls.Downloaded > 0 AND (uls.Uploaded + ifnull(b.Bounty, 0)) / uls.Downloaded < ?)
-                    OR uls.Uploaded < ?
+                    (uls.Downloaded > 0 AND uls.Uploaded / uls.Downloaded < ?)
+                    OR (uls.Uploaded + ifnull(b.Bounty, 0)) < ?
                 )
             ", ...array_merge([$newClass, $classString], $demoteClasses, [$ratio, $upload])
         );
