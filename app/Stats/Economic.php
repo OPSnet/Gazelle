@@ -79,7 +79,7 @@ class Economic {
                 SELECT count(distinct uid)
                 FROM xbt_files_users xfu
                 WHERE remaining = 0
-                    AND completed = 1
+                    AND active = 1
             ');
 
             $this->cache->cache_value(self::CACHE_KEY, $this->stats, 3600);
