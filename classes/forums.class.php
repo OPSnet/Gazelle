@@ -418,7 +418,7 @@ class Forums {
     }
 
     public function bbcodeThreadUrl($val) {
-        $cacheKey = 'bbcode-thread.' . $id;
+        $cacheKey = 'bbcode-thread.' . $val;
         list($id, $name, $isLocked) = G::$Cache->get_value($cacheKey);
         if (is_null($id)) {
             list($id, $name, $isLocked) = G::$DB->lookup('SELECT ID, Title, IsLocked FROM forums_topics WHERE ID = ?', $val);
