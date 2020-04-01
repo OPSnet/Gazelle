@@ -917,6 +917,7 @@ strong.quoteheader {
     font-weight: bold;
     border-top: 1px solid #1f1f1f !important;
     border-bottom: 1px solid #1f1f1f !important;
+    white-space: nowrap;
 }
 
 #torrent_table .group_torrent td {
