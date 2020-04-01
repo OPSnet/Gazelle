@@ -3,22 +3,26 @@
 namespace Gazelle\Util;
 
 class SortableTableHeader {
-    /** @var array Key is sortkey, value is human-readable column name */
+    const SORT_DIRS = ['asc' => 'desc', 'desc' => 'asc'];
+
+    /** @var array sortkey => human-readable column name */
     private $labelMap = [];
 
+    /** @var string */
     private $currentSortKey;
 
+    /** @var string */
     private $currentSortDir;
 
-    /** @var array Key is sort direction, value is symbol to output */
+    /** @var array sort direction => symbol to output */
     private $arrowMap = ['asc' => '&darr;', 'desc' => '&uarr;'];
 
     public function __construct(array $labelMap, $currentSortKey, $currentSortDir, array $arrowMap = []) {
-        $this->labelMap = $labelMap;
+        $this->labelMap       = $labelMap;
         $this->currentSortKey = $currentSortKey;
         $this->currentSortDir = $currentSortDir;
         if (!empty($arrowMap)) {
-            $this->arrowMap = $arrowMap;
+            $this->arrowMap   = $arrowMap;
         }
     }
 
@@ -29,17 +33,21 @@ class SortableTableHeader {
         }
 
         // Fail gracefully if we got invalid input
-        if (!isset($this->arrowMap[$defaultSortDir])) {
+        if (!isset(self::SORT_DIRS[$defaultSortDir])
+            || !isset(self::SORT_DIRS[$this->currentSortDir])
+        ) {
             return $this->labelMap[$outputKey];
         }
 
-        $sortDirs = array_keys($this->arrowMap);
-        $flippedSortDir = ($this->currentSortDir === $sortDirs[0]) ? $sortDirs[1] : $sortDirs[0];
-        $outputSortDir = ($outputKey === $this->currentSortKey) ? $flippedSortDir : $defaultSortDir;
+        $isCurrentKey  = ($outputKey === $this->currentSortKey);
+        $outputSortDir = $isCurrentKey ? self::SORT_DIRS[$this->currentSortDir] : $defaultSortDir;
+        $outputArrow   = $isCurrentKey ? $this->arrowMap[$this->currentSortDir] : '';
 
-        return '<a href="?'
-            . \Format::get_url(['page'], true, false, ['order' => $outputKey, 'sort' => $outputSortDir])
-            . '">' . $this->labelMap[$outputKey] . '</a> '
-            . (($outputKey === $this->currentSortKey) ? $this->arrowMap[$this->currentSortDir] : '');
+        return sprintf(
+            '<a href="?%s">%s</a> %s',
+            \Format::get_url(['page'], true, false, ['order' => $outputKey, 'sort' => $outputSortDir]),
+            $this->labelMap[$outputKey],
+            $outputArrow
+        );
     }
 }
