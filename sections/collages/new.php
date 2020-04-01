@@ -44,7 +44,7 @@ if (isset($Err)) { ?>
         continue;
     }
 ?>
-                        <option value="<?= $CatID + 1 ?>"<?= ($CatID + 1 == $Category) ? ' selected="selected"' : '' ?>><?= $CatName ?></option>
+                        <option value="<?= $CatID ?>"<?= ($CatID == $Category) ? ' selected="selected"' : '' ?>><?= $CatName ?></option>
 <?php } ?>
                     </select>
                     <br />

@@ -8,22 +8,26 @@ $P = db_array($_POST);
 
 if ($P['category'] > 0 || check_perms('site_collages_renamepersonal')) {
     $Val->SetFields('name', '1', 'string', 'The name must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
+    $name = trim($_POST['name']);
 } else {
     // Get a collage name and make sure it's unique
-    $name = $LoggedUser['Username']."'s personal collage";
-    $P['name'] = db_string($name);
-    $DB->query("
+    $name = $LoggedUser['Username'] . "'s personal collage";
+    $DB->prepared_query('
         SELECT ID
         FROM collages
-        WHERE Name = '".$P['name']."'");
-    $i = 2;
+        WHERE Name = ?
+        ', $name
+    );
+    $i = 1;
+    $basename = $name;
     while ($DB->has_results()) {
-        $P['name'] = db_string("$name no. $i");
-        $DB->query("
+        $name = "$basename no. " . ++$i;
+        $DB->prepared_query('
             SELECT ID
             FROM collages
-            WHERE Name = '".$P['name']."'");
-        $i++;
+            WHERE Name = ?
+            ', $name
+        );
     }
 }
 $Val->SetFields('description', '1', 'string', 'The description must be between 10 and 65535 characters', ['maxlength' => 65535, 'minlength' => 10]);
@@ -32,7 +36,7 @@ $Err = $Val->ValidateForm($_POST);
 
 if (!$Err && $P['category'] === '0') {
     $DB->query("
-        SELECT COUNT(ID)
+        SELECT count(*)
         FROM collages
         WHERE UserID = '$LoggedUser[ID]'
             AND CategoryID = '0'
@@ -46,10 +50,12 @@ if (!$Err && $P['category'] === '0') {
 }
 
 if (!$Err) {
-    $DB->query("
+    $DB->prepared_query('
         SELECT ID, Deleted
         FROM collages
-        WHERE Name = '$P[name]'");
+        WHERE Name = ?
+        ', $name
+    );
     if ($DB->has_results()) {
         list($ID, $Deleted) = $DB->next_record();
         if ($Deleted) {
@@ -67,11 +73,11 @@ if (!$Err) {
 }
 
 if ($Err) {
-    $Name = $_POST['name'];
+    $Name = $name;
     $Category = $_POST['category'];
     $Tags = $_POST['tags'];
     $Description = $_POST['description'];
-    include(SERVER_ROOT.'/sections/collages/new.php');
+    include(__DIR__ . '/new.php');
     die();
 }
 
@@ -79,14 +85,13 @@ $TagList = explode(',', $_POST['tags']);
 foreach ($TagList as $ID => $Tag) {
     $TagList[$ID] = Misc::sanitize_tag($Tag);
 }
-$TagList = implode(' ', $TagList);
 
-$DB->query("
+$DB->prepared_query('
     INSERT INTO collages
-        (Name, Description, UserID, TagList, CategoryID)
-    VALUES
-        ('$P[name]', '$P[description]', $LoggedUser[ID], '$TagList', '$P[category]')");
-
+           (Name, Description, UserID, TagList, CategoryID)
+    VALUES (?,    ?,           ?,      ?,       ?)
+    ', $name, trim($_POST['description']), $LoggedUser['ID'], implode(' ', $TagList), (int)$_POST['category']
+);
 $CollageID = $DB->inserted_id();
 $Cache->delete_value("collage_$CollageID");
 Misc::write_log("Collage $CollageID (".$_POST['name'].') was created by '.$LoggedUser['Username']);
