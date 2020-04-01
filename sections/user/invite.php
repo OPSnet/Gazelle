@@ -38,10 +38,9 @@ $SortOrderMap = [
 ];
 $SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'joined';
 $OrderBy = $SortOrderMap[$SortOrder][0];
-$flipOrderMap = ['asc' => 'desc', 'desc' => 'asc'];
 $OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
     ? $SortOrderMap[$SortOrder][1]
-    : $flipOrderMap[$SortOrderMap[$SortOrder][1]];
+    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 
 $DB->prepared_query("
     SELECT
