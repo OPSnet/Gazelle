@@ -1,8 +1,11 @@
 <?php
+
 $UserID = $_REQUEST['userid'];
 if (!is_number($UserID)) {
     error(404);
 }
+
+$User = new \Gazelle\User($DB, $Cache, $UserID);
 
 $DB->prepared_query('
     SELECT
@@ -72,26 +75,10 @@ $SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
 
 View::show_header("$Username &gt; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
 
-$DonorRank = Donations::get_rank($UserID);
-$DonorIsVisible = Donations::is_visible($UserID);
-
-if ($DonorIsVisible === null) {
-    $DonorIsVisible = true;
-}
-
 $EnabledReward = Donations::get_enabled_rewards($UserID);
 $Rewards = Donations::get_rewards($UserID);
 $ProfileRewards = Donations::get_profile_rewards($UserID);
 $DonorTitles = Donations::get_titles($UserID);
-
-$DB->prepared_query('
-    SELECT username
-    FROM lastfm_users
-    WHERE ID = ?
-    ', $UserID
-);
-$LastFMUsername = '';
-list($LastFMUsername) = $DB->next_record();
 
 $NavItems = Users::get_nav_items();
 $UserNavItems = array_filter(array_map('trim', explode(',', $UserNavItems)));
@@ -271,8 +258,10 @@ echo $Val->GenerateJS('userform');
             </tr>
 <?php   } ?>
             <tr id="tor_group_tr">
-                <td class="label tooltip" title="Enabling torrent grouping will place multiple formats of the same torrent group together beneath a common header."><strong>Torrent grouping</strong></td>
+                <td style="vertical-align: top;" class="label"><strong>Torrent grouping</strong></td>
                 <td>
+                    <p class="min_padding">Enabling torrent grouping will place multiple
+                    formats of the same torrent group together beneath a common header.</p>
                     <div class="option_group">
                         <input type="checkbox" name="disablegrouping" id="disablegrouping"<?=$SiteOptions['DisableGrouping2'] == 0 ? ' checked="checked"' : ''?> />
                         <label for="disablegrouping">Enable torrent grouping</label>
@@ -280,10 +269,12 @@ echo $Val->GenerateJS('userform');
                 </td>
             </tr>
             <tr id="tor_gdisp_search_tr">
-                <td class="label tooltip" title="In torrent search results and on artist pages, &quot;open&quot; will expand torrent groups by default, and &quot;closed&quot; will collapse torrent groups by default."><strong>Torrent group display</strong></td>
+                <td style="vertical-align: top;" class="label"><strong>Torrent group display</strong></td>
                 <td>
                     <div class="option_group">
                         <ul class="options_list nobullet">
+                            <p class="min_padding">In torrent search results and on artist pages, &quot;open&quot;
+                            will expand torrent groups by default, and &quot;closed&quot; will collapse torrent groups by default.</p>
                             <li>
                                 <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"<?=$SiteOptions['TorrentGrouping'] == 0 ? ' checked="checked"' : ''?> />
                                 <label for="torrent_grouping_open">Open</label>
@@ -296,36 +287,19 @@ echo $Val->GenerateJS('userform');
                     </div>
                 </td>
             </tr>
-            <tr id="tor_gdisp_artist_tr">
-                <td class="label tooltip" title="On artist pages, &quot;open&quot; will expand release type sections by default, and &quot;closed&quot; will collapse release type sections by default."><strong>Release type display<br />(artist pages)</strong></td>
-                <td>
-                    <ul class="options_list nobullet">
-                        <li>
-                            <input type="radio" name="discogview" id="discog_view_open" value="0"<?=$SiteOptions['DiscogView'] == 0 ? ' checked="checked"' : ''?> />
-                            <label for="discog_view_open">Open</label>
-                        </li>
-                        <li>
-                            <input type="radio" name="discogview" id="discog_view_closed" value="1"<?=$SiteOptions['DiscogView'] == 1 ? ' checked="checked"' : ''?> />
-                            <label for="discog_view_closed">Closed</label>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
             <tr id="tor_reltype_tr">
-                <td class="label tooltip" title="Any selected release type will be collapsed by default on artist pages."><strong>Release type display<br />(artist pages)</strong></td>
+                <td style="vertical-align: top;" class="label"><strong>Order of release types<br />(artist pages)</strong></td>
                 <td>
-                    <a href="#" id="toggle_sortable" class="brackets">Expand</a>
-                    <div id="sortable_container" style="display: none;">
-                        <a href="#" id="reset_sortable" class="brackets">Reset to default</a>
-                        <p class="min_padding">Drag and drop release types to change their order.</p>
-                        <ul class="sortable_list" id="sortable">
-                            <?php Users::release_order($SiteOptions); ?>
-                        </ul>
-                        <script type="text/javascript" id="sortable_default">//<![CDATA[
-                            var sortable_list_default = <?=Users::release_order_default_js($SiteOptions)?>;
-                            //]]>
-                        </script>
-                    </div>
+                    <p class="min_padding">Drag and drop release types to change the order of display on artist pages.<br />
+                    Check the box of a release type if it should be collapsed when an artist page is viewed.</p>
+                    <a href="#" id="reset_sortable" class="brackets">Reset to default</a>
+                    <ul class="sortable_list" id="sortable">
+                        <?php Users::release_order($SiteOptions); ?>
+                    </ul>
+                    <script type="text/javascript" id="sortable_default">//<![CDATA[
+                        var sortable_list_default = <?=Users::release_order_default_js($SiteOptions)?>;
+                        //]]>
+                    </script>
                     <input type="hidden" id="sorthide" name="sorthide" value="" />
                 </td>
             </tr>
@@ -619,7 +593,7 @@ echo $Val->GenerateJS('userform');
 <?php   } ?>
             <tr id="pers_lastfm_tr">
                 <td class="label tooltip_interactive" title="This is used to display &lt;a href=&quot;http://www.last.fm/&quot;&gt;Last.fm&lt;/a&gt; information on your profile. Entering your Last.fm username will allow others to see your Last.fm account." data-title-plain="This is used to display Last.fm information on your profile. Entering your Last.fm username will allow others to see your Last.fm account."><strong>Last.fm username</strong></td>
-                <td><input type="text" size="50" name="lastfm_username" id="lastfm_username" value="<?=display_str($LastFMUsername)?>" />
+                <td><input type="text" size="50" name="lastfm_username" id="lastfm_username" value="<?= display_str($User->LastFMusername() ?? '') ?>" />
                 </td>
             </tr>
             <tr id="pers_proftitle_tr">
@@ -714,7 +688,7 @@ echo $Val->GenerateJS('userform');
             <tr id="para_donations_tr">
                 <td class="label"><strong>Donations</strong></td>
                 <td>
-                    <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"<?=$DonorIsVisible ? ' checked="checked"' : ''?> />
+                    <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"<?= Donations::is_visible($UserID) ? ' checked="checked"' : ''?> />
                     <label for="p_donor_stats">Show donor stats</label>
                     <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"<?=checked(!in_array('hide_donor_heart', $Paranoia))?> />
                     <label for="p_donor_heart">Show donor heart</label>

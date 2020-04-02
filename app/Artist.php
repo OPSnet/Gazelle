@@ -82,7 +82,7 @@ class Artist {
 
     public function cacheKey() {
         // TODO: change to protected when sections/ajax/artist.php is refactored
-        if ($revision === false) {
+        if ($this->revision) {
             return self::CACHE_PREFIX . $this->id . '_r' . $this->revision;
         } else {
             return self::CACHE_PREFIX . $this->id;

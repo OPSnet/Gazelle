@@ -31,7 +31,6 @@ $Val->SetFields('styleurl', 0, "regex", "You did not enter a valid stylesheet UR
 // The next two are commented out because the drop-down menus were replaced with a check box and radio buttons
 //$Val->SetFields('disablegrouping', 0, "number", "You forgot to select your torrent grouping option.");
 //$Val->SetFields('torrentgrouping', 0, "number", "You forgot to select your torrent grouping option.");
-$Val->SetFields('discogview', 1, "number", "You forgot to select your discography view option.", ['minlength' => 0, 'maxlength' => 1]);
 $Val->SetFields('postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]);
 //$Val->SetFields('hidecollage', 1, "number", "You forgot to select your collage option.", array('minlength' => 0, 'maxlength' => 1));
 $Val->SetFields('collagecovers', 1, "number", "You forgot to select your collage option.");
@@ -216,9 +215,7 @@ if (!empty($LoggedUser['DefaultSearch'])) {
 }
 $Options['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
 $Options['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
-$Options['DiscogView']          = (!empty($_POST['discogview']) ? 1 : 0);
 $Options['PostsPerPage']        = (int)$_POST['postsperpage'];
-//$Options['HideCollage']         = (!empty($_POST['hidecollage']) ? 1 : 0);
 $Options['CollageCovers']       = (empty($_POST['collagecovers']) ? 0 : $_POST['collagecovers']);
 $Options['ShowTorFilter']       = (empty($_POST['showtfilter']) ? 0 : 1);
 $Options['ShowTags']            = (!empty($_POST['showtags']) ? 1 : 0);

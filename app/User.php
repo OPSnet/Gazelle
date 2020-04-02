@@ -85,6 +85,22 @@ class User {
         return $filters;
     }
 
+    public function hasArtistNotification($name) {
+        if (($list = $this->cache->get_value('notify_artists_' . $this->id)) === false) {
+            $this->db->prepared_query('
+                SELECT ID, Artists
+                FROM users_notify_filters
+                WHERE Label = ?
+                    AND UserID = ?
+                LIMIT 1
+                ', 'Artist notifications', $this->id
+            );
+            $list = $this->db->next_record(MYSQLI_ASSOC, false);
+            $this->cache->cache_value('notify_artists_' . $this->id, $list, 0);
+        }
+        return stripos($list['Artists'], $name) !== false;
+    }
+
     protected function enabledState() {
         if ($this->forceCacheFlush || ($enabled = $this->cache->get_value('enabled_' . $this->id)) === false) {
             $this->db->prepared_query("
@@ -100,6 +116,16 @@ class User {
     public function isUnconfirmed() { return $this->enabledState() == 0; }
     public function isEnabled()     { return $this->enabledState() == 1; }
     public function isDisabled()    { return $this->enabledState() == 2; }
+
+    public function LastFMUsername() {
+        $name = $this->db->lookup('
+            SELECT username
+            FROM lastfm_users
+            WHERE ID = ?
+            ', $this->id
+        );
+        return $name;
+    }
 
     public function personalCollages() {
         $this->db->prepared_query("
