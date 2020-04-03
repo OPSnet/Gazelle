@@ -26,7 +26,7 @@ View::show_header('Manage Stylesheets');
     LEFT JOIN (
         SELECT StyleID, COUNT(*) AS Count FROM users_info AS ui JOIN users_main AS um ON ui.UserID = um.ID GROUP BY StyleID
     ) AS ud ON s.ID = ud.StyleID
-    ORDER BY s.ID");
+    ORDER BY s.ID ASC");
     if ($DB->has_results()) {
         ?>
         <table width="100%">
