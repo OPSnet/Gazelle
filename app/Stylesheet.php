@@ -22,7 +22,7 @@ class Stylesheet {
                     lower(replace(Name, ' ', '_')) AS Name,
                     Name AS ProperName
                 FROM stylesheets
-                ORDER BY ID DESC
+                ORDER BY ID ASC
             ");
             $this->stylesheets = $this->db->to_array('ID', MYSQLI_BOTH);
             $this->cache->cache_value('stylesheets', $this->stylesheets, 86400 * 7);
