@@ -5,7 +5,7 @@ if (isset($LoggedUser['ID'])) {
     } else {
         switch ($_REQUEST['action']) {
             case 'poll':
-                include(SERVER_ROOT.'/sections/forums/poll_vote.php');
+                include(__DIR__ . '/../forums/poll_vote.php');
                 break;
             default:
                 error(0);

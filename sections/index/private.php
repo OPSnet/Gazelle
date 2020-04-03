@@ -139,10 +139,8 @@ for ($i = 0; $i < $Limit; $i++) {
             </ul>
         </div>
 
-<?php
-include('contest_leaderboard.php');
-//SiteHistoryView::render_recent_sidebar(SiteHistory::get_events(null, null, null, null, null, null, 5));
-?>
+<?php include('contest_leaderboard.php'); ?>
+
         <div class="box">
             <div class="head colhead_dark"><strong>Stats</strong></div>
             <ul class="stats nobullet">
@@ -495,49 +493,3 @@ foreach ($News as $NewsItem) {
 </div>
 <?php
 View::show_footer(['disclaimer'=>true]);
-
-function contest() {
-    global $DB, $Cache, $LoggedUser;
-
-    list($Contest, $TotalPoints) = $Cache->get_value('contest');
-    if (!$Contest) {
-        $DB->query("
-            SELECT
-                UserID,
-                SUM(Points),
-                Username
-            FROM users_points AS up
-                JOIN users_main AS um ON um.ID = up.UserID
-            GROUP BY UserID
-            ORDER BY SUM(Points) DESC
-            LIMIT 20");
-        $Contest = $DB->to_array();
-
-        $DB->query("
-            SELECT SUM(Points)
-            FROM users_points");
-        list($TotalPoints) = $DB->next_record();
-
-        $Cache->cache_value('contest', [$Contest, $TotalPoints], 600);
-    }
-
-?>
-<!-- Contest Section -->
-        <div class="box box_contest">
-            <div class="head colhead_dark"><strong>Quality time scoreboard</strong></div>
-            <div class="pad">
-                <ol style="padding-left: 5px;">
-<?php
-    foreach ($Contest as $User) {
-        list($UserID, $Points, $Username) = $User;
-?>
-                    <li><?=Users::format_username($UserID, false, false, false)?> (<?=number_format($Points)?>)</li>
-<?php    } ?>
-                </ol>
-                Total uploads: <?=$TotalPoints?><br />
-                <a href="index.php?action=scoreboard">Full scoreboard</a>
-            </div>
-        </div>
-    <!-- END contest Section -->
-<?php
-} // contest()
