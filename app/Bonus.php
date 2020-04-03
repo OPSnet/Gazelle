@@ -286,12 +286,12 @@ class Bonus {
             'user_stats_' . $fromID,
             'user_stats_' . $toID,
         ]);
-        self::sendPmToOther($From['Username'], $toID, $amount);
+        $this->sendPmToOther($fromID, $toID, $amount);
 
         return (int)$amount;
     }
 
-    public function sendPmToOther($from, $toID, $amount) {
+    public function sendPmToOther($fromID, $toID, $amount) {
         if ($amount > 1) {
             $is_are = 'are';
             $s = 's';
@@ -300,16 +300,16 @@ class Bonus {
             $is_are = 'is';
             $s = '';
         }
-        $to = \Users::user_info($toID);
-        $Body = "Hello {$to['Username']},
-
-{$from} has sent you {$amount} freeleech token{$s} for you to use! " .
-"You can use them to download torrents without getting charged any download. " .
-"More details about them can be found on " .
-"[url=".site_url()."wiki.php?action=article&id=57]the wiki[/url].
-
-Enjoy!";
-        \Misc::send_pm($toID, 0, "Here {$is_are} {$amount} freeleech token{$s}!", trim($Body));
+        \Misc::send_pm($toID, 0, "Here {$is_are} {$amount} freeleech token{$s}!",
+            \G::$Twig->render('bonus/token-other.twig', [
+                'TO'       => \Users::user_info($toID)['Username'],
+                'FROM'     => \Users::user_info($fromID)['Username'],
+                'AMOUNT'   => $amount,
+                'PLURAL'   => $s,
+                'SITE_URL' => SITE_URL,
+                'WIKI_ID'  => 57,
+            ])
+        );
     }
 
     private function addPurchaseHistory($item_id, $userId, $price, $other_userId = null) {

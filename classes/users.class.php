@@ -126,7 +126,7 @@ class Users {
                 $UserInfo['Class'] = $Classes[$UserInfo['PermissionID']]['Level'];
             }
 
-            if ($UserInfo['LockedAccount'] == "") {
+            if (isset($UserInfo['LockedAccount'])) {
                 unset($UserInfo['LockedAccount']);
             }
 
