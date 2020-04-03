@@ -23,7 +23,7 @@ if (!empty($SortOrderMap[$SortOrder][1])) {
         : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 }
 
-$SphQL->order_by($SortOrderMap[$OrderBy], $OrderWay);
+$SphQL->order_by($OrderBy, $OrderWay);
 
 $Submitted = !empty($_GET['submit']);
 

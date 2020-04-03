@@ -87,14 +87,14 @@ $DB->set_query_id($RS);
                 <tr>
                     <td class="label"><strong>Search in:</strong></td>
                     <td>
-                        <label><input type="radio" name="type" value="title"<?php Format::selected('type', 'title', 'checked'); ?> /> Title</label>
-                        <label><input type="radio" name="type" value="body"<?php Format::selected('type', 'body', 'checked'); ?> /> Body</label>
+                        <label><input type="radio" name="type" value="title"<?= ($Type == 'Title') ? ' checked="checked"' : '' ?> /> Title</label>
+                        <label><input type="radio" name="type" value="body"<?= ($Type == 'Body') ? ' checked="checked"' : '' ?> /> Body</label>
                     </td>
                     <td class="label"><strong>Order by:</strong></td>
                     <td>
                         <select name="order">
-                            <option value="title"<?php Format::selected('order', 'title'); ?>>Title</option>
                             <option value="created"<?php Format::selected('order', 'created'); ?>>Created</option>
+                            <option value="title"<?php Format::selected('order', 'title'); ?>>Title</option>
                             <option value="edited"<?php Format::selected('order', 'edited'); ?>>Edited</option>
                         </select>
                         <select name="sort">
