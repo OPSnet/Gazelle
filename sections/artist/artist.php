@@ -312,7 +312,7 @@ if ($sections = $Artist->sections()) {
             $ToggleStr = '';
         }
 ?>
-        <a href="#torrents_<?=str_replace(' ', '_', strtolower($ReleaseTypes[$section]))?>" class="brackets"<?=$ToggleStr?>><?=$sectionTitle?></a>
+        <a href="#torrents_<?= $sectionLabel ?>" class="brackets"<?=$ToggleStr?>><?=$sectionTitle?></a>
 <?php
     }
 
@@ -324,11 +324,12 @@ if ($sections = $Artist->sections()) {
     }
 ?>
     </div>
-    <table class="torrent_table grouped release_table m_table" id="torrents_<?= $sectionLabel ?>">
+    <table class="torrent_table grouped release_table m_table">
 <?php
     $stylePath = SSL_STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images/';
 
     foreach ($sections as $section => $Groups) {
+        $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
         $sectionClosed = isset($LoggedUser['SortHide']) && array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 0
             ? 0 : 1;
         $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 1) == 1 ? 1 : 0;
@@ -337,7 +338,7 @@ if ($sections = $Artist->sections()) {
         $groupsHidden = ($sectionClosed || $groupsClosed) ? ' hidden' : '';
         $formatsHidden = ($sectionClosed || $groupsClosed || $formatsClosed) ? ' hidden' : '';
 ?>
-                <tr class="colhead_dark">
+                <tr class="colhead_dark" id="torrents_<?= $sectionLabel ?>">
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?= sectionTitle($section) ?></strong> (<a href="#" onclick="$('.releases_<?= $section ?>').gtoggle(true); return false;">View</a>)</td>
                     <td>Size</td>
