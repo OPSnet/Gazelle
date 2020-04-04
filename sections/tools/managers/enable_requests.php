@@ -246,13 +246,13 @@ if ($NumResults > 0) { ?>
         <tr class="colhead">
             <td class="center"><input type="checkbox" id="check_all" /></td>
             <td>Username</td>
-            <td>Email Address</td>
-            <td>IP Address</td>
-            <td>User Agent</td>
-            <td><?= $header->emit('submitted_timestamp', $SortOrderMap['submitted_timestamp'][1]) ?></td>
-            <td>Ban Reason</td>
-            <td>Comment<?= $ShowChecked ? ' / Checked By' : ''?></td>
-            <td>Submit<?= $header->emit('handled_timestamp', $SortOrderMap['handled_timestamp'][1]) ?></td>
+            <td class="nobr">Email Address</td>
+            <td class="nobr">IP Address</td>
+            <td class="nobr">User Agent</td>
+            <td class="nobr"><?= $header->emit('submitted_timestamp', $SortOrderMap['submitted_timestamp'][1]) ?></td>
+            <td class="nobr">Ban Reason</td>
+            <td class="nobr">Comment<?= $ShowChecked ? ' / Checked By' : ''?></td>
+            <td class="nobr">Submit<?= $header->emit('handled_timestamp', $SortOrderMap['handled_timestamp'][1]) ?></td>
 <?php   if ($ShowChecked) { ?>
             <td><?= $header->emit('outcome', $SortOrderMap['outcome'][1]) ?></td>
 <?php   } ?>

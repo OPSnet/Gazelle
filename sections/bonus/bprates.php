@@ -100,10 +100,10 @@ $header = new SortableTableHeader([
     <thead>
     <tr class="colhead">
         <td>Torrent</td>
-        <td><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
-        <td><?= $header->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
-        <td><?= $header->emit('seedtime', $SortOrderMap['seedtime'][1]) ?></td>
-        <td><?= $header->emit('hourlypoints', $SortOrderMap['hourlypoints'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('seedtime', $SortOrderMap['seedtime'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('hourlypoints', $SortOrderMap['hourlypoints'][1]) ?></td>
         <td>BP/day</td>
         <td>BP/week</td>
         <td>BP/month</td>

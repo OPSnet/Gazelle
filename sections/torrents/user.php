@@ -468,12 +468,12 @@ foreach ($Categories as $CatKey => $CatName) {
     <table class="torrent_table cats m_table" width="100%">
         <tr class="colhead">
             <td class="cats_col"></td>
-            <td class="m_th_left"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
-            <td><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
-            <td><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
-            <td class="sign snatches m_th_right"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
-            <td class="sign seeders m_th_right"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
-            <td class="sign leechers m_th_right"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
+            <td class="m_th_left nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
+            <td class="nobr"><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
+            <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
+            <td class="sign nobr snatches m_th_right"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
+            <td class="sign nobr seeders m_th_right"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
+            <td class="sign nobr leechers m_th_right"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
         </tr>
 <?php
     $PageSize = 0;

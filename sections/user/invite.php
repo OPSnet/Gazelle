@@ -184,13 +184,13 @@ $header = new SortableTableHeader([
     <div class="box pad">
         <table class="invite_table m_table "width="100%">
             <tr class="colhead">
-                <td class="m_th_left"><?= $header->emit('username', $SortOrderMap['username'][1]) ?></td>
-                <td><?= $header->emit('email', $SortOrderMap['email'][1]) ?></td>
-                <td><?= $header->emit('joined', $SortOrderMap['joined'][1]) ?></td>
-                <td><?= $header->emit('lastseen', $SortOrderMap['lastseen'][1]) ?></td>
-                <td class="m_th_right"><?= $header->emit('uploaded', $SortOrderMap['uploaded'][1]) ?></td>
-                <td class="m_th_right"><?= $header->emit('downloaded', $SortOrderMap['downloaded'][1]) ?></td>
-                <td class="m_th_right"><?= $header->emit('ratio', $SortOrderMap['ratio'][1]) ?></td>
+                <td class="m_th_left nobr"><?= $header->emit('username', $SortOrderMap['username'][1]) ?></td>
+                <td class="nobr"><?= $header->emit('email', $SortOrderMap['email'][1]) ?></td>
+                <td class="nobr"><?= $header->emit('joined', $SortOrderMap['joined'][1]) ?></td>
+                <td class="nobr"><?= $header->emit('lastseen', $SortOrderMap['lastseen'][1]) ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('uploaded', $SortOrderMap['uploaded'][1]) ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('downloaded', $SortOrderMap['downloaded'][1]) ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('ratio', $SortOrderMap['ratio'][1]) ?></td>
             </tr>
 <?php
     $Row = 'a';

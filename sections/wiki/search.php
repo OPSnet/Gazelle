@@ -126,8 +126,8 @@ $header = new SortableTableHeader([
 ?>
 <table width="100%">
     <tr class="colhead">
-        <td><?= $header->emit('title', $SortOrderMap['title'][1]) ?></td>
-        <td><?= $header->emit('edited', $SortOrderMap['edited'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('title', $SortOrderMap['title'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('edited', $SortOrderMap['edited'][1]) ?></td>
         <td>Last edited by</td>
     </tr>
 <?php

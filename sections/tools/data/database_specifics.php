@@ -120,14 +120,14 @@ $header = new SortableTableHeader([
 ?>
 <table>
     <tr class="colhead" style="text-align:right">
-        <td style="text-align:left"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
-        <td><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
-        <td><?= $header->emit('rowsize', $SortOrderMap['rowsize'][1]) ?></td>
-        <td><?= $header->emit('datasize', $SortOrderMap['datasize'][1]) ?></td>
-        <td><?= $header->emit('indexsize', $SortOrderMap['indexsize'][1]) ?></td>
-        <td><?= $header->emit('datafree', $SortOrderMap['datafree'][1]) ?></td>
-        <td><?= $header->emit('freeratio', $SortOrderMap['freeratio'][1]) ?></td>
-        <td><?= $header->emit('totalsize', $SortOrderMap['totalsize'][1]) ?></td>
+        <td style="text-align:left" class="nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
+        <td class="nobr"></td><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('rowsize', $SortOrderMap['rowsize'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('datasize', $SortOrderMap['datasize'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('indexsize', $SortOrderMap['indexsize'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('datafree', $SortOrderMap['datafree'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('freeratio', $SortOrderMap['freeratio'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('totalsize', $SortOrderMap['totalsize'][1]) ?></td>
     </tr>
 <?php
 $TotalRows = 0;

@@ -578,7 +578,6 @@ td, th {
 td.colhead,.colhead td, .colhead th {
     padding-left: 10px;
     padding-right: 10px;
-    white-space: nowrap;
 }
 
 .colhead .sign {

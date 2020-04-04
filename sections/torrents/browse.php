@@ -488,13 +488,13 @@ $headerIcons = new SortableTableHeader([
         <td class="small"></td>
 <?php    } ?>
         <td class="small cats_col"></td>
-        <td class="m_th_left m_th_left_collapsable" width="100%">Name / <?= $header->emit('year', $SortOrderMap['year'][1]) ?></td>
+        <td class="m_th_left m_th_left_collapsable nobr" width="100%">Name / <?= $header->emit('year', $SortOrderMap['year'][1]) ?></td>
         <td>Files</td>
-        <td><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
-        <td><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
-        <td class="sign snatches"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
-        <td class="sign seeders"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
-        <td class="sign leechers"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
+        <td class="sign nobr snatches"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
+        <td class="sign nobr seeders"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
+        <td class="sign nobr leechers"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
     </tr>
 <?php
 

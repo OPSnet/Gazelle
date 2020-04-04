@@ -518,18 +518,18 @@ View::show_header($Title, 'requests');
     </div>
 <?php        }
 $header = new SortableTableHeader([
-    'year'     => '<strong>Year</strong>',
-    'votes'    => '<strong>Votes</strong>',
-    'bounty'   => '<strong>Bounty</strong>',
-    'filled'   => '<strong>Filled</strong>',
-    'created'  => '<strong>Created</strong>',
-    'lastvote' => '<strong>Last Vote</strong>',
+    'year'     => 'Year',
+    'votes'    => 'Votes',
+    'bounty'   => 'Bounty',
+    'filled'   => 'Filled',
+    'created'  => 'Created',
+    'lastvote' => 'Last Vote',
 ], $SortOrder, $OrderWay);
 ?>
     <table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
         <tr class="colhead_dark">
             <td style="width: 38%;" class="m_th_left nobr">
-                <strong>Request Name</strong> / <?= $header->emit('year', $SortOrderMap['year'][1]) ?>
+                Request Name / <?= $header->emit('year', $SortOrderMap['year'][1]) ?>
             </td>
             <td class="m_th_right nobr">
                 <?= $header->emit('votes', $SortOrderMap['votes'][1]) ?>
@@ -541,10 +541,10 @@ $header = new SortableTableHeader([
                 <?= $header->emit('filled', $SortOrderMap['filled'][1]) ?>
             </td>
             <td class="nobr">
-                <strong>Filled by</strong>
+                Filled by
             </td>
             <td class="nobr">
-                <strong>Requested by</strong>
+                Requested by
             </td>
             <td class="nobr">
                 <?= $header->emit('created', $SortOrderMap['created'][1]) ?>

@@ -1022,7 +1022,6 @@ strong.quoteheader {
     font-weight: bold;
     border-top: 1px solid #cccccc !important;
     border-bottom: 1px solid #cccccc !important;
-    white-space: nowrap;
 }
 
 tr.torrent .bookmark > a:before {

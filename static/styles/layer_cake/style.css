@@ -524,7 +524,6 @@ td.colhead,
 .colhead th {
   padding-left: 10px;
   padding-right: 10px;
-  white-space: nowrap;
 }
 
 .colhead .sign,

@@ -321,10 +321,10 @@ $header = new SortableTableHeader([
 <table width="100%" class="collage_table m_table">
     <tr class="colhead">
         <td class="m_th_left">Category</td>
-        <td><?= $header->emit('name', $SortOrderMap['name'][1]) ?> / <?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
-        <td class="m_th_right"><?= $header->emit('torrents', $SortOrderMap['torrents'][1]) ?></td>
-        <td class="m_th_right"><?= $header->emit('subscribers', $SortOrderMap['subscribers'][1]) ?></td>
-        <td><?= $header->emit('updated', $SortOrderMap['updated'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?> / <?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
+        <td class="m_th_right nobr"><?= $header->emit('torrents', $SortOrderMap['torrents'][1]) ?></td>
+        <td class="m_th_right nobr"><?= $header->emit('subscribers', $SortOrderMap['subscribers'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('updated', $SortOrderMap['updated'][1]) ?></td>
         <td>Author</td>
     </tr>
 <?php
