@@ -23,7 +23,7 @@ if (
 $User = (int)$_GET['user'];
 
 if (!$Enabled = $Cache->get_value("enabled_$User")) {
-    require(SERVER_ROOT.'/classes/mysql.class.php');
+    require_once(__DIR__ . '/../classes/mysql.class.php');
     $DB = new DB_MYSQL; //Load the database wrapper
     $DB->prepared_query('
         SELECT Enabled
@@ -42,13 +42,13 @@ if (md5($User.RSS_HASH.$_GET['passkey']) !== $_GET['auth'] || $Enabled != 1) {
     die();
 }
 
-require(SERVER_ROOT.'/classes/text.class.php');
+require_once(__DIR__ . '/../classes/text.class.php');
 $Feed->open_feed();
 switch ($_GET['feed']) {
     case 'feed_news':
         $Feed->channel('News', 'RSS feed for site news.');
         if (!$News = $Cache->get_value('news')) {
-            require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
+            require_once(__DIR__ . '/../classes/mysql.class.php'); //Require the database wrapper
             $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
@@ -77,7 +77,7 @@ switch ($_GET['feed']) {
     case 'feed_blog':
         $Feed->channel('Blog', 'RSS feed for site blog.');
         if (!$Blog = $Cache->get_value('blog')) {
-            require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
+            require_once(__DIR__ . '/../classes/mysql.class.php'); //Require the database wrapper
             $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
@@ -107,7 +107,7 @@ switch ($_GET['feed']) {
     case 'feed_changelog':
         $Feed->channel('Gazelle Change Log', 'RSS feed for Gazelle\'s changelog.');
         if (!$Changelog = $Cache->get_value('changelog')) {
-            require(SERVER_ROOT.'/classes/mysql.class.php');
+            require_once(__DIR__ . '/../classes/mysql.class.php');
 
             $DB = new DB_MYSQL;
             $DB->query("
