@@ -168,16 +168,3 @@ switch ($_GET['action']) {
         // If they're screwing around with the query string
         json_die("failure");
 }
-
-function pullmediainfo($Array) {
-    $NewArray = [];
-    foreach ($Array as $Item) {
-        $NewArray[] = [
-            'id' => (int)$Item['id'],
-            'name' => $Item['name']
-        ];
-    }
-    return $NewArray;
-}
-
-?>

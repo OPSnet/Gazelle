@@ -181,6 +181,41 @@ class Requests {
         return $Results;
     }
 
+    /**
+     * Return artists of a group as an array of types (main, composer, guest, ...)
+     * @param int $GroupID
+     * @return array - associative array with the keys:
+     *    (composers, dj, artists, with, conductor, remixedBy, producer)
+     *    If there are no artists of a given type, the array will be empty,
+     *    otherwise each artist is represented as an [id, name] array.
+     * TODO: This is copypasta from the Artists class.
+     */
+    public static function get_artist_by_type($RequestID) {
+        $map = [
+            1 => 'artists',
+            2 => 'with',
+            3 => 'remixedBy',
+            4 => 'composers',
+            5 => 'conductor',
+            6 => 'dj',
+            7 => 'producer',
+        ];
+        $artist = self::get_artists($RequestID);
+
+        $result = [];
+        foreach ($map as $type => $label) {
+            $result[$label] = !isset($artist[$type])
+                ? []
+                : array_map(
+                    function ($x) {
+                        return ['id' => $x['id'], 'name' => $x['name']];
+                    },
+                    $artist[$type]
+                );
+        }
+        return $result;
+    }
+
     public static function get_tags($RequestIDs) {
         if (empty($RequestIDs)) {
             return [];
