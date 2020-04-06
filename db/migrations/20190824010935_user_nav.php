@@ -134,6 +134,6 @@ class UserNav extends AbstractMigration
              ->removeColumn('NavItems')
              ->save();
 
-        $this->dropTable('nav_items');
+        $this->table('nav_items')->drop()->update();
     }
 }

@@ -181,7 +181,7 @@ if (!empty($_REQUEST['confirm'])) {
 
             // Manage invite trees, delete invite
 
-            if ($InviterID !== null) {
+            if ($InviterID !== 0) {
                 $DB->query("
                     SELECT TreePosition, TreeID, TreeLevel
                     FROM invite_tree
@@ -259,8 +259,6 @@ if (!empty($_REQUEST['confirm'])) {
             Misc::send_email($_REQUEST['email'], 'New account confirmation at '.SITE_NAME, $message, 'noreply');
             Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $torrent_pass]);
             $Sent = 1;
-
-
         }
     } elseif ($_GET['invite']) {
         // If they haven't submitted the form, check to see if their invite is good

@@ -26,13 +26,13 @@ class ReleaseType extends AbstractMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change()
+    public function up()
     {
         $table = $this->table('release_type', ['id' => false, 'primary_key' => 'ID'])
-            ->addColumn('ID', 'integer', ['limit' => 10, 'identity' => true])
-            ->addColumn('Name', 'string', ['limit' => 50])
-            ->addIndex(['Name'], ['unique' => true])
-            ->create();
+                      ->addColumn('ID', 'integer', ['limit' => 10, 'identity' => true])
+                      ->addColumn('Name', 'string', ['limit' => 50])
+                      ->addIndex(['Name'], ['unique' => true])
+                      ->create();
 
         $data = [
             ['ID' =>  1, 'Name' => 'Album'],
@@ -52,6 +52,11 @@ class ReleaseType extends AbstractMigration
             ['ID' => 21, 'Name' => 'Unknown']
         ];
 
-        $this->table('release_type')->insert($data)->save();
+        $this->table('release_type')->insert($data)->update();
+    }
+
+    public function down()
+    {
+        $this->table('release_type')->drop()->update();
     }
 }

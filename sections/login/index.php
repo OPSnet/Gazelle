@@ -185,7 +185,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
         require('2fa_recovery.php');
     }
     else {
-        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
         $Recovery = (!empty($Recovery)) ? unserialize($Recovery) : [];
         if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) !== false) {
             $SessionID = Users::make_secret();
@@ -349,7 +349,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
     } else {
         include(SERVER_ROOT . '/classes/google_authenticator.class.php');
 
-        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
 
         if (!(new PHPGangsta_GoogleAuthenticator())->verifyCode($TFAKey, $_POST['2fa'], 2)) {
             // invalid 2fa key, log the user completely out
@@ -525,7 +525,6 @@ else {
                     PermissionID,
                     CustomPermissions,
                     PassHash,
-                    Secret,
                     Enabled,
                     2FA_Key,
                     Recovery
@@ -533,8 +532,8 @@ else {
                 WHERE Username != '' and Username = ?
                 ", $_POST['username']
             );
-            $UserData = $DB->next_record(MYSQLI_NUM, [2, 7]);
-            list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
+            $UserData = $DB->next_record(MYSQLI_NUM, [2, 6]);
+            list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey) = $UserData;
             if (strtotime($BannedUntil) < time()) {
                 if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
                     if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($_POST['password'], $PassHash)) {

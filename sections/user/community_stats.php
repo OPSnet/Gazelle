@@ -241,7 +241,7 @@ list($NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopi
     }
 ?>
             </ul>
-<?php   if ($LoggedUser['AutoloadCommStats']) { ?>
+<?php   if (array_key_exists('AutoloadCommStats', $LoggedUser) && $LoggedUser['AutoloadCommStats']) { ?>
             <script type="text/javascript">
                 commStats(<?=$UserID?>);
             </script>

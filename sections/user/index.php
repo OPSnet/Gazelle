@@ -24,9 +24,11 @@ switch ($_REQUEST['action']) {
         authorize();
         if ($_GET['id'] && is_number($_GET['id'])) {
             $DB->prepared_query('
-                DELETE FROM users_notify_filters WHERE ID = ? AND UserID = ?
-                ', $_GET['id'], $LoggedUser[ID]
+                DELETE FROM users_notify_filters
+                WHERE ID = ? AND UserID = ?
+                ', $_GET['id'], $LoggedUser['ID']
             );
+
             $ArtistNotifications = $Cache->get_value('notify_artists_'.$LoggedUser['ID']);
             if (is_array($ArtistNotifications) && $ArtistNotifications['ID'] == $_GET['id']) {
                 $Cache->delete_value('notify_artists_'.$LoggedUser['ID']);
@@ -71,13 +73,14 @@ switch ($_REQUEST['action']) {
         }
 
         $DB->prepared_query('
-            SELECT m.PassHash, m.Secret, m.2FA_Key, p.Level
+            SELECT m.PassHash, m.2FA_Key, p.Level
             FROM users_main AS m
             LEFT JOIN permissions AS p ON (p.ID = PermissionID)
             WHERE m.ID = ?
             ', $UserID
         );
-        list($PassHash, $Secret, $TFAKey, $Level) = $DB->next_record(MYSQLI_NUM);
+
+        list($PassHash, $TFAKey, $Level) = $DB->next_record(MYSQLI_NUM);
 
         if ($UserID != $LoggedUser['ID'] && !check_perms('users_mod')) {
             error(403);
@@ -154,13 +157,14 @@ switch ($_REQUEST['action']) {
                     include(__DIR__ . '/2fa/password_confirm.php');
                 } else {
                     if (check_perms('users_edit_password') || Users::check_password($_POST['password'], $PassHash)) {
-                        $DB->prepared_query('
+                        $DB->prepared_query("
                             UPDATE users_main SET
-                                2FA_Key = ?,
-                                Recovery = ?
+                                2FA_Key = '',
+                                Recovery = ''
                             WHERE ID = ?
-                            ', '', '', $UserID
+                            ", $UserID
                         );
+
                         if (isset($_GET['page']) && $_GET['page'] === 'user') {
                             $action = '';
                             $ID = $UserID;

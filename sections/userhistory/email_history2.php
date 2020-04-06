@@ -29,8 +29,6 @@ if (!check_perms('users_view_email', $Class)) {
     error(403);
 }
 
-$UsersOnly = $_GET['usersonly'];
-
 $DB->query("
     SELECT Username
     FROM users_main
@@ -58,7 +56,7 @@ $DB->query("
         LEFT JOIN users_info AS i ON i.UserID = h.UserID
     WHERE m.ID = '$UserID'"
 );
-$CurrentEmail = array_shift($DB->to_array());
+$CurrentEmail = $DB->next_record();
 
 // Get historic emails (and matches)
 $DB->query("
@@ -156,7 +154,7 @@ if (count($History) === 1) {
 }
 
 // Clean up arrays
-if ($Old) {
+if (isset($Old)) {
     $Old = array_reverse(array_reverse($Old));
     $LastOld = count($Old) - 1;
     if ($Old[$LastOld]['StartTime'] != $Invite['EndTime']) {
@@ -209,7 +207,7 @@ if ($Old) {
             </td>
         </tr>
 <?php
-if ($CurrentMatches) {
+if (isset($CurrentMatches)) {
     // Match on the current email
     foreach ($CurrentMatches as $Match) {
 ?>
@@ -231,7 +229,7 @@ if ($CurrentMatches) {
     }
 }
 // Old emails
-if ($Old) {
+if (isset($Old)) {
 ?>
         <tr class="colhead">
             <td>Old emails</td>
@@ -312,7 +310,7 @@ if ($Old) {
         </tr>
 <?php
 // Matches on invite email
-if ($OldMatches) {
+if (isset($OldMatches)) {
     $i = 0;
     ob_start();
     foreach ($OldMatches as $Match) {
@@ -343,7 +341,7 @@ if ($OldMatches) {
 }
 ?>
         <tr class="rowa">
-            <td><?=display_str($Invite['Email'])?><?=(($MatchCount > 0) ? ' <a href="#" onclick="$(\'#matches_invite\').gtoggle(); return false;">('.$MatchCount.')</a>' : '')?></td>
+            <td><?=display_str($Invite['Email'])?><?=((isset($MatchCount)) ? ' <a href="#" onclick="$(\'#matches_invite\').gtoggle(); return false;">('.$MatchCount.')</a>' : '')?></td>
             <td>Never</td>
             <td><?=time_diff($Invite['EndTime'])?></td>
             <td><?=time_diff($Invite['AccountAge'])?></td>
@@ -358,7 +356,7 @@ if ($OldMatches) {
         </tr>
 <?php
 
-if ($Matches) {
+if (isset($Matches)) {
     echo $Matches;
 }
 
