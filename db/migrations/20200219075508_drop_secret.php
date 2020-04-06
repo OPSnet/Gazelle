@@ -2,35 +2,19 @@
 
 use Phinx\Migration\AbstractMigration;
 
+/**
+ * On a small site, or if the site is offline it is safe to run this
+ * migration directly. If you are sure, then set the environment variable
+ * LOCK_MY_DATABASE to a value that evaluates as truth, e.g. 1 and then run
+ * again.
+ */
 class DropSecret extends AbstractMigration
 {
-    /**
-     * Change Method.
-     *
-     * Write your reversible migrations using this method.
-     *
-     * More information on writing migrations is available here:
-     * http://docs.phinx.org/en/latest/migrations.html#the-abstractmigration-class
-     *
-     * The following commands can be used in this method and Phinx will
-     * automatically reverse them when rolling back:
-     *
-     *    createTable
-     *    renameTable
-     *    addColumn
-     *    addCustomColumn
-     *    renameColumn
-     *    addIndex
-     *    addForeignKey
-     *
-     * Any other destructive changes will result in an error when trying to
-     * rollback the migration.
-     *
-     * Remember to call "create()" or "update()" and NOT "save()" when working
-     * with the Table class.
-     */
     public function up()
     {
+        if (!getenv('LOCK_MY_DATABASE')) {
+            die("Migration cannot proceed, use the source: " . __FILE__ . "\n");
+        }
         $this->table('users_main')
              ->removeColumn('Secret')
              ->changeColumn('Title', 'string', ['limit' => 255, 'default' => ''])
@@ -65,6 +49,9 @@ class DropSecret extends AbstractMigration
 
     public function down()
     {
+        if (!getenv('LOCK_MY_DATABASE')) {
+            die("Migration cannot proceed, use the source: " . __FILE__ . "\n");
+        }
         $this->table('users_main')
             ->addColumn('Secret', 'char', [
                 'null' => false,
