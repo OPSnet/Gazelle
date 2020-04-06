@@ -71,16 +71,7 @@ if ($CollageCategoryID != array_search(ARTIST_COLLAGE, $CollageCats)) {
         if (!empty($GroupList[$GroupID])) {
             $GroupDetails = Torrents::array_group($GroupList[$GroupID]);
             if ($GroupDetails['GroupCategoryID'] > 0 && $Categories[$GroupDetails['GroupCategoryID'] - 1] == 'Music') {
-                $ArtistForm = $GroupDetails['ExtendedArtists'];
-                $JsonMusicInfo = [
-                    'composers' => isset($ArtistForm[4]) ? pullmediainfo($ArtistForm[4]) : [],
-                    'dj'        => isset($ArtistForm[6]) ? pullmediainfo($ArtistForm[6]) : [],
-                    'artists'   => isset($ArtistForm[1]) ? pullmediainfo($ArtistForm[1]) : [],
-                    'with'      => isset($ArtistForm[2]) ? pullmediainfo($ArtistForm[2]) : [],
-                    'conductor' => isset($ArtistForm[5]) ? pullmediainfo($ArtistForm[5]) : [],
-                    'remixedBy' => isset($ArtistForm[3]) ? pullmediainfo($ArtistForm[3]) : [],
-                    'producer'  => isset($ArtistForm[7]) ? pullmediainfo($ArtistForm[7]) : []
-                ];
+                $JsonMusicInfo = Artists::get_artist_by_type($GroupID);
             } else {
                 $JsonMusicInfo = null;
             }

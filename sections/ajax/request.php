@@ -37,8 +37,6 @@ if ($CategoryID == 0) {
 
 //Do we need to get artists?
 if ($CategoryName == 'Music') {
-    $ArtistForm = Requests::get_artists($RequestID);
-
     if (empty($Request['ReleaseType'])) {
         $ReleaseName = 'Unknown';
     } else {
@@ -51,26 +49,6 @@ $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
 $UserCanEdit = (!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2);
 $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
-
-if ($CategoryName == "Music") {
-    $JsonMusicInfo = [
-        /*'composers' => $ArtistForm[4] != null ? $ArtistForm[4] : [],
-        'dj'        => $ArtistForm[6] != null ? $ArtistForm[6] : [],
-        'artists'   => $ArtistForm[1] != null ? $ArtistForm[1] : [],
-        'with'      => $ArtistForm[2] != null ? $ArtistForm[2] : [],
-        'conductor' => $ArtistForm[5] != null ? $ArtistForm[5] : [],
-        'remixedBy' => $ArtistForm[3] != null ? $ArtistForm[3] : []*/
-        'composers' => isset($ArtistForm[4]) ? pullmediainfo($ArtistForm[4]) : [],
-        'dj'        => isset($ArtistForm[6]) ? pullmediainfo($ArtistForm[6]) : [],
-        'artists'   => isset($ArtistForm[1]) ? pullmediainfo($ArtistForm[1]) : [],
-        'with'      => isset($ArtistForm[2]) ? pullmediainfo($ArtistForm[2]) : [],
-        'conductor' => isset($ArtistForm[5]) ? pullmediainfo($ArtistForm[5]) : [],
-        'remixedBy' => isset($ArtistForm[3]) ? pullmediainfo($ArtistForm[3]) : [],
-        'producer'  => isset($ArtistForm[7]) ? pullmediainfo($ArtistForm[7]) : []
-    ];
-} else {
-    $JsonMusicInfo = new stdClass; //json_encodes into an empty object: {}
-}
 
 $JsonTopContributors = [];
 $VoteMax = ($VoteCount < 5 ? $VoteCount : 5);
@@ -132,7 +110,8 @@ json_print('success', [
     'image' => $Request['Image'],
     'bbDescription' => $Request['Description'],
     'description' => Text::full_format($Request['Description']),
-    'musicInfo' => $JsonMusicInfo,
+    'musicInfo' => $CategoryName != "Music"
+        ? new stdClass : Requests::get_artist_by_type($RequestID),
     'catalogueNumber' => $Request['CatalogueNumber'],
     'releaseType' => (int)$Request['ReleaseType'],
     'releaseName' => $ReleaseName,
@@ -152,4 +131,3 @@ json_print('success', [
     'recordLabel' => $Request['RecordLabel'],
     'oclc' => $Request['OCLC']
 ]);
-?>
