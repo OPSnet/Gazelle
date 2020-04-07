@@ -9,7 +9,7 @@ if (
     || empty($_GET['auth'])
     || empty($_GET['passkey'])
     || empty($_GET['user'])
-    || !is_int($_GET['user'])
+    || !is_numeric($_GET['user'])
     || strlen($_GET['authkey']) !== 32
     || strlen($_GET['passkey']) !== 32
     || strlen($_GET['auth']) !== 32
