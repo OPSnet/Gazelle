@@ -6,8 +6,8 @@ View::show_header('Registration log');
 define('USERS_PER_PAGE', 50);
 list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
 
-$AfterDate = $_POST['after_date'];
-$BeforeDate = $_POST['before_date'];
+$AfterDate = $_POST['after_date'] ?? null;
+$BeforeDate = $_POST['before_date'] ?? null;
 $DateSearch = false;
 if (!empty($AfterDate) && !empty($BeforeDate)) {
     list($Y, $M, $D) = explode('-', $AfterDate);
