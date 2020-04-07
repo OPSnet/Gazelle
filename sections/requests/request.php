@@ -88,21 +88,15 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
 <?php    }
     if (!$IsFilled && ($Request['CategoryID'] === '0' || ($CategoryName === 'Music' && $Request['Year'] === '0'))) { ?>
             <a href="reports.php?action=report&amp;type=request_update&amp;id=<?=$RequestID?>" class="brackets">Request update</a>
-<?php } ?>
+<?php }
 
-<?php
-// Create a search URL to WorldCat and Google based on title
 $encoded_title = urlencode(preg_replace("/\([^\)]+\)/", '', $Request['Title']));
 $encoded_artist = substr(str_replace('&amp;', 'and', $ArtistName), 0, -3);
 $encoded_artist = str_ireplace('Performed By', '', $encoded_artist);
-$encoded_artist = preg_replace("/\([^\)]+\)/", '', $encoded_artist);
-$encoded_artist = urlencode($encoded_artist);
-
-$worldcat_url = 'https://www.worldcat.org/search?qt=worldcat_org_all&amp;q=' . "$encoded_artist%20$encoded_title";
-$google_url = 'https://www.google.com/search?tbm=shop&amp;q=' . "$encoded_artist%20$encoded_title";
+$encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
 ?>
-            <a href="<?php echo $worldcat_url; ?>" class="brackets">Find in library</a>
-            <a href="<?php echo $google_url; ?>" class="brackets">Find in stores</a>
+            <a href="<?= "https://www.worldcat.org/search?qt=worldcat_org_all&amp;q=$encoded_artist%20$encoded_title" ?>" class="brackets">Find in library</a>
+            <a href="<?= "https://www.discogs.com/search/?q=$encoded_artist+$encoded_title&amp;type=release" ?>" class="brackets">Find on Discogs</a>
         </div>
     </div>
     <div class="sidebar">
