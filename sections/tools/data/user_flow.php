@@ -21,8 +21,8 @@ if (!isset($_GET['page'])) {
                 LIMIT 52) D USING (Week)
             ORDER BY 1
         ");
-        $Timeline = $DB->to_array();
-        $Cache->cache_value('userflow', [$Timeline], 3600);
+        $Timeline = $DB->to_array('Week', MYSQLI_ASSOC);
+        $Cache->cache_value('userflow', $Timeline, 3600);
     }
 }
 
@@ -81,69 +81,42 @@ list($Results) = $DB->next_record();
 View::show_header('User Flow');
 $DB->set_query_id($RS);
 ?>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-  google.charts.load('current', {'packages':['corechart']});
-  google.charts.setOnLoadCallback(drawChart);
-
-  function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-      ['Week', 'New Registrations', 'Disabled Users', 'Change'],
-<?  foreach ($Timeline as $t) { ?>
-['<?= $t[0] ?>', <?= $t[1] ?>, <?= $t[2] ?>, <?= $t[1] - $t[2] ?>],
-<? } ?>
-    ]);
-    var options = {
-      backgroundColor: '#303030',
-      colors: ['chartreuse', 'orangered', 'steelblue'],
-      title: 'User Flow',
-      titleTextStyle: {
-        color: '#e0e0e0',
-      },
-      chartArea: {
-        left: 40,
-        top: 50,
-        width: 780,
-        height: 210,
-      },
-      legend: {
-        position: 'bottom',
-        textStyle: {
-          color: '#e0e0e0',
-        },
-      },
-      vAxis: {
-        gridlines: {
-          count: 2,
-        },
-        textStyle: {
-          color: '#e0e0e0',
-        },
-      },
-      hAxis: {
-        baselineColor: '#e0e0e0',
-        textStyle: {
-          color: '#e0e0e0',
-          fontSize: 11,
-        },
-        titleTextStyle: {
-          color: '#e0e0e0',
-        },
-        slantedText: true,
-        slantedTextAngle: 90,
-        title: 'Week'
-      }
-    };
-    var chart = new google.visualization.LineChart(document.getElementById('user_flow'));
-    chart.draw(data, options);
-  }
+<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('user-flow', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'User Flow',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    xAxis: {
+        categories: [<?= implode(',', array_map(function ($x) { return "'$x'"; }, array_keys($Timeline))) ?>],
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    plotOptions: {
+        column: { stacking: 'normal' }
+    },
+    series: [
+        { name: 'Enabled',  data: [<?= implode(',', array_map(function ($x) use ($Timeline) { return  $Timeline[$x]['Joined']; }, array_keys($Timeline))) ?>] },
+        { name: 'Disabled', data: [<?= implode(',', array_map(function ($x) use ($Timeline) { return -$Timeline[$x]['Disabled']; }, array_keys($Timeline))) ?>] },
+    ]
+})});
 </script>
-
 <div class="thin">
 <?php
     if (!isset($_GET['page'])) { ?>
-    <div class="box pad">
-        <div id="user_flow" style="width: 830px; height: 390px"></div>
+    <div class="box pad center">
+        <figure class="highcharts-figure"><div id="user-flow"></div></figure>
     </div>
 <?php
     } ?>
