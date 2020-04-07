@@ -9,7 +9,7 @@ if (!check_perms('admin_reports')) {
     error(403);
 }
 
-View::show_header('Reports V2!', 'reportsv2');
+View::show_header('Reports V2', 'reportsv2');
 
 
 //Grab owner's ID, just for examples
@@ -23,7 +23,7 @@ $Owner = display_str($Owner);
 
 ?>
 <div class="header">
-    <h2>Reports v2 Information!</h2>
+    <h2>Reports V2 Information</h2>
 <?php include('header.php'); ?>
 </div>
 <div class="thin float_clear">
@@ -148,7 +148,7 @@ $DB->query("
     ORDER BY Reports DESC");
 $Results = $DB->to_array();
 ?>
-        <h3>Reports resolved since Reports v2 (2009-07-27)</h3>
+        <h3>Total reports resolved</h3>
         <table class="box border">
             <tr class="colhead">
                 <td class="colhead_dark">Username</td>
@@ -227,7 +227,7 @@ foreach ($Results as $Result) {
                     <a href="reportsv2.php?view=resolver&amp;id=<?=$OwnerID?>"><?=site_url()?>reportsv2.php?view=resolver&amp;id=<?=$OwnerID?></a>
                 </li>
             </ul>
-            <strong>For browsing anything more complicated than these, use the search feature.</strong>
+            <strong>User the search feature for anything more specific.</strong>
         </div>
     </div>
     <div class="two_columns pad">
@@ -311,4 +311,3 @@ foreach ($Results as $Result) {
 </div>
 <?php
 View::show_footer();
-?>

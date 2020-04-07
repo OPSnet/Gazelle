@@ -273,6 +273,25 @@ function get_group_requests($GroupID) {
     return Requests::get_requests($Requests);
 }
 
+// Count the number of audio files in a torrent file list per audio type
+function audio_file_map($fileList) {
+    $map = [];
+    foreach (explode("\n", strtolower($fileList)) as $file) {
+        $info = Torrents::filelist_get_file($file);
+        if (!isset($info['ext'])) {
+            continue;
+        }
+        $ext = substr($info['ext'], 1); // skip over period
+        if (in_array($ext, ['flac', 'mp3', 'ac3'])) {
+            if (!isset($map[$ext])) {
+                $map[$ext] = 0;
+            }
+            ++$map[$ext];
+        }
+    }
+    return $map;
+}
+
 //Used by both sections/torrents/details.php and sections/reportsv2/report.php
 function build_torrents_table($Cache, $DB, $LoggedUser, $GroupID, $GroupName, $GroupCategoryID, $ReleaseType, $TorrentList, $Types) {
 

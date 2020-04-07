@@ -8,7 +8,7 @@ if (!check_perms('admin_reports')) {
     error(403);
 }
 
-View::show_header('Reports V2!', 'reportsv2');
+View::show_header('Reports V2', 'reportsv2');
 ?>
 <div class="header">
     <h2>New reports, auto assigned!</h2>
@@ -24,4 +24,3 @@ View::show_header('Reports V2!', 'reportsv2');
 </div>
 <?php
 View::show_footer();
-?>
