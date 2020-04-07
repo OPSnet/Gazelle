@@ -30,7 +30,7 @@ if ($IsFLS && !$IsStaff) { ?>
         <div class="box pad">
         <table>
         <tr>
-            <td style="width: 50%;">
+            <td style="width: 50%; vertical-align: top;">
 <?php
 
 $SupportStaff = get_support();
@@ -118,34 +118,34 @@ foreach ($Results as $Result) {
 <?php
 } ?>
             </table>
-        </td>
-        <td>
+        <br /><br />
 <?php
 
 $DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(-3600 * 24 * 30), \Gazelle\Util\Time::timeOffset(-3600 * 24 * 30), $LoggedUser['Class'], ...$SupportStaff);
 $Results = $DB->to_array();
 
 ?>
-        <strong>Inbox actions in the last month</strong>
-        <table class="noborder">
-            <tr class="colhead">
-                <td>Username</td>
-                <td>Replies</td>
-                <td><?=$COL?></td>
-            </tr>
+            <strong>Inbox actions in the last month</strong>
+            <table class="noborder">
+                <tr class="colhead">
+                    <td>Username</td>
+                    <td>Replies</td>
+                    <td><?=$COL?></td>
+                </tr>
 <?php
 foreach ($Results as $Result) {
     list($UserID, $Username, $Num, $Extra) = $Result;
 ?>
-            <tr>
-                <td><a href="/reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
-                <td><?=$Num?></td>
-                <td><?=$Extra?></td>
-            </tr>
+                <tr>
+                    <td><a href="/reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
+                    <td><?=$Num?></td>
+                    <td><?=$Extra?></td>
+                </tr>
 <?php
 } ?>
-        </table>
-        <br /><br />
+            </table>
+        </td>
+        <td style="vertical-align: top;">
 <?php
 
 $DB->prepared_query($BaseSQL, '0000-00-00 00:00:00', '0000-00-00 00:00:00', $LoggedUser['Class'], ...$SupportStaff);
@@ -174,7 +174,6 @@ foreach ($Results as $Result) {
         </td></tr>
         </table>
         </div>
-         <br/>
     </div>
 
 <?php

@@ -1143,11 +1143,11 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             $AddExtra = ' / ';
             if (!$Torrent['Remastered']) {
                 $EditionName = 'Original Release';
-                if ($Group['RecordLabel']) {
+                if (!empty($Group['RecordLabel'])) {
                     $EditionName .= $AddExtra . $Group['RecordLabel'];
                     $AddExtra = ' / ';
                 }
-                if ($Group['CatalogueNumber']) {
+                if (!empty($Group['CatalogueNumber'])) {
                     $EditionName .= $AddExtra . $Group['CatalogueNumber'];
                     $AddExtra = ' / ';
                 }
