@@ -9,7 +9,7 @@ if (
     || empty($_GET['auth'])
     || empty($_GET['passkey'])
     || empty($_GET['user'])
-    || !is_number($_GET['user'])
+    || !is_numeric($_GET['user'])
     || strlen($_GET['authkey']) !== 32
     || strlen($_GET['passkey']) !== 32
     || strlen($_GET['auth']) !== 32
@@ -20,10 +20,36 @@ if (
     die();
 }
 
+function disp($Str) {
+    if ($Str != '') {
+        $Str = make_utf8($Str);
+        $Str = mb_convert_encoding($Str, 'HTML-ENTITIES', 'UTF-8');
+        $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,5};)/m", '&amp;', $Str);
+
+        $Replace = [
+            "'",'"',"<",">",
+            '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
+            '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
+            '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
+            '&#156;','&#158;','&#159;'
+        ];
+
+        $With = [
+            '&#39;','&quot;','&lt;','&gt;',
+            '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
+            '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
+            '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
+            '&#339;','&#382;','&#376;'
+        ];
+
+        $Str = str_replace($Replace, $With, $Str);
+    }
+    return $Str;
+}
+
 $User = (int)$_GET['user'];
 
 if (!$Enabled = $Cache->get_value("enabled_$User")) {
-    require(SERVER_ROOT.'/classes/mysql.class.php');
     $DB = new DB_MYSQL; //Load the database wrapper
     $DB->prepared_query('
         SELECT Enabled
@@ -42,13 +68,11 @@ if (md5($User.RSS_HASH.$_GET['passkey']) !== $_GET['auth'] || $Enabled != 1) {
     die();
 }
 
-require(SERVER_ROOT.'/classes/text.class.php');
 $Feed->open_feed();
 switch ($_GET['feed']) {
     case 'feed_news':
         $Feed->channel('News', 'RSS feed for site news.');
         if (!$News = $Cache->get_value('news')) {
-            require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
             $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
@@ -77,7 +101,6 @@ switch ($_GET['feed']) {
     case 'feed_blog':
         $Feed->channel('Blog', 'RSS feed for site blog.');
         if (!$Blog = $Cache->get_value('blog')) {
-            require(SERVER_ROOT.'/classes/mysql.class.php'); //Require the database wrapper
             $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
@@ -107,8 +130,6 @@ switch ($_GET['feed']) {
     case 'feed_changelog':
         $Feed->channel('Gazelle Change Log', 'RSS feed for Gazelle\'s changelog.');
         if (!$Changelog = $Cache->get_value('changelog')) {
-            require(SERVER_ROOT.'/classes/mysql.class.php');
-
             $DB = new DB_MYSQL;
             $DB->query("
                 SELECT Message, Author, Date(Time)
@@ -183,7 +204,7 @@ switch ($_GET['feed']) {
             $Feed->retrieve($_GET['feed'], $_GET['authkey'], $_GET['passkey']);
         } elseif (!empty($_GET['name']) && substr($_GET['feed'], 0, 16) == 'torrents_notify_') {
             // Specific personalized torrent notification channel
-            $Feed->channel(display_str($_GET['name']), 'Personal RSS feed: '.display_str($_GET['name']));
+            $Feed->channel(disp($_GET['name']), 'Personal RSS feed: '.disp($_GET['name']));
             $Feed->retrieve($_GET['feed'], $_GET['authkey'], $_GET['passkey']);
         } elseif (!empty($_GET['name']) && substr($_GET['feed'], 0, 21) == 'torrents_bookmarks_t_') {
             // Bookmarks

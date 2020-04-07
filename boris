@@ -13,20 +13,21 @@
  *
  * The following variables are defined:
  *
- *   $db     - database connection
- *   $cache  - memcache connection
- *   $bonus  - \Gazelle\Bonus instance
+ *   $db         - database connection
+ *   $cache      - memcache connection
+ *   $bonus      - \Gazelle\Bonus instance
+ *   $stylesheet - \Gazelle\Stylesheet instance
  *
  * More can be added when implemented.
  */
 
 define('BORIS', 1);
-require_once(__DIR__.'/classes/config.php');
-require_once(__DIR__.'/classes/classloader.php');
-require_once(__DIR__.'/classes/time.class.php');
-require_once(__DIR__.'/classes/regex.php');
-require_once(__DIR__.'/classes/util.php');
-require_once(__DIR__.'/vendor/d11wtq/boris/lib/autoload.php');
+
+require_once(__DIR__ . '/classes/config.php');
+require_once(__DIR__ . '/classes/classloader.php');
+require_once(__DIR__ . '/classes/time.class.php');
+require_once(__DIR__ . '/classes/util.php');
+require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 
 $Cache = new \CACHE($MemcachedServers);
 $DB = new \DB_MYSQL;
@@ -36,11 +37,14 @@ $Debug->handle_errors();
 G::init($DB, $Cache);
 
 $b = new \Boris\Boris(SITE_NAME . '> ');
-$b->setLocal([
-    'cache'  => $Cache,
-    'db'     => $DB,
-    'bonus'  => new \Gazelle\Bonus($DB, $Cache)
-]);
+$preload = [
+    'cache'      => $Cache,
+    'db'         => $DB,
+    'bonus'      => new \Gazelle\Bonus($DB, $Cache),
+    'stylesheet' => new \Gazelle\Stylesheet($DB, $Cache),
+];
+printf("** preloaded objects:\n** %s\n", implode(', ', array_keys($preload)));
+$b->setLocal($preload);
 $b->start();
 
 /*

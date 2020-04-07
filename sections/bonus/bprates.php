@@ -1,19 +1,23 @@
 <?php
 
+use Gazelle\Util\SortableTableHeader;
+
 $Page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
 $Page = max(1, $Page);
 $Limit = TORRENTS_PER_PAGE;
 $Offset = TORRENTS_PER_PAGE * ($Page-1);
 
-$SortOrders = [
-    'size' => 't.Size',
-    'seeders' => 'Seeders',
-    'seedtime' => 'SeedTime',
-    'hourlypoints' => 'HourlyPoints',
+$SortOrderMap = [
+    'size'         => ['t.Size', 'desc'],
+    'seeders'      => ['Seeders', 'desc'],
+    'seedtime'     => ['SeedTime', 'desc'],
+    'hourlypoints' => ['HourlyPoints', 'desc'],
 ];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == 'desc') ? 'desc' : 'asc';
-$NewSort = ($OrderWay == 'desc') ? 'asc' : 'desc';
-$OrderBy = (!empty($_GET['order']) && isset($SortOrders[$_GET['order']])) ? $SortOrders[$_GET['order']] : 'HourlyPoints';
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'hourlypoints';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 
 if (!empty($_GET['userid'])) {
     if (!check_perms('admin_bp_history')) {
@@ -84,14 +88,22 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 <div class="linkbox">
     <?=$Pages?>
 </div>
+<?php
+$header = new SortableTableHeader([
+    'size'         => 'Size',
+    'seeders'      => 'Seeders',
+    'seedtime'     => 'Seedtime',
+    'hourlypoints' => 'BP/hour',
+], $SortOrder, $OrderWay);
+?>
 <table>
     <thead>
     <tr class="colhead">
         <td>Torrent</td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'size', 'sort' => ($OrderBy == 't.Size') ? $NewSort : 'desc']) ?>">Size</td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'seeders', 'sort' => ($OrderBy == 'Seeders') ? $NewSort : 'desc']) ?>">Seeders</a></td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'seedtime', 'sort' => ($OrderBy == 'SeedTime') ? $NewSort : 'desc']) ?>">Seedtime</a></td>
-        <td><a href="bonus.php?<?= Format::get_url(['page'], true, false, ['order' => 'hourlypoints', 'sort' => ($OrderBy == 'HourlyPoints') ? $NewSort : 'desc']) ?>">BP/hour</a></td>
+        <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('seedtime', $SortOrderMap['seedtime'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('hourlypoints', $SortOrderMap['hourlypoints'][1]) ?></td>
         <td>BP/day</td>
         <td>BP/week</td>
         <td>BP/month</td>
@@ -118,6 +130,7 @@ if ($TotalTorrents > 0) {
         $Torrents = isset($Groups[$Torrent['GroupID']]['Torrents']) ? $Groups[$Torrent['GroupID']]['Torrents'] : [];
         $Artists = $Groups[$Torrent['GroupID']]['Artists'];
         $ExtendedArtists = $Groups[$Torrent['GroupID']]['ExtendedArtists'];
+        $VanityHouse = $Groups[$Torrent['GroupID']]['VanityHouse'];
 
         if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
             unset($ExtendedArtists[2]);
@@ -132,7 +145,7 @@ if ($TotalTorrents > 0) {
         if ($GroupYear > 0) {
             $DisplayName .= " [$GroupYear]";
         }
-        if ($GroupVanityHouse) {
+        if ($VanityHouse) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 
@@ -146,9 +159,9 @@ if ($TotalTorrents > 0) {
         <td><?= Format::get_size($Torrent['Size']) ?></td>
         <td><?= number_format($Seeders) ?></td>
         <td><?= convert_hours($Torrent['Seedtime'], 2) ?></td>
-        <td><?= number_format($HourlyPoints, 2) ?></td>
-        <td><?= number_format($DailyPoints, 2) ?></td>
-        <td><?= number_format($WeeklyPoints, 2) ?></td>
+        <td><?= number_format($HourlyPoints, 3) ?></td>
+        <td><?= number_format($DailyPoints, 3) ?></td>
+        <td><?= number_format($WeeklyPoints, 3) ?></td>
         <td><?= number_format($MonthlyPoints, 2) ?></td>
         <td><?= number_format($YearlyPoints, 2) ?></td>
     </tr>

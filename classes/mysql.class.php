@@ -327,7 +327,6 @@ class DB_MYSQL {
             $Query .= "$key => $value\n";
         }
 
-
         return $this->attempt_query($Query, $Closure);
     }
 
@@ -347,37 +346,6 @@ class DB_MYSQL {
     function prepared_query($Query, ...$Parameters) {
         $this->prepare($Query);
         return $this->execute(...$Parameters);
-    }
-
-    function prepared_query_array($Query, array $args) {
-        $this->prepare($Query);
-        $param = [];
-        $bind = '';
-        $n = count($args);
-        for ($i = 0; $i < $n; ++$i) {
-            if (is_integer($args[$i])) {
-                $bind .= 'i';
-            }
-            elseif (is_double($args[$i])) {
-                $bind .= 'd';
-            }
-            else {
-                $bind .= 's';
-            }
-            $param[] = &$args[$i];
-        }
-        $refbind = &$bind;
-        array_unshift($param, $refbind);
-        $stmt = &$this->Statement;
-        call_user_func_array([$this->Statement, "bind_param"], $param);
-
-        return $this->attempt_query(
-            $Query,
-            function() use ($stmt) {
-                $stmt->execute();
-                return $stmt->get_result();
-            }
-        );
     }
 
     private function attempt_query($Query, Callable $Closure, $AutoHandle=1) {
@@ -502,6 +470,10 @@ class DB_MYSQL {
         if ($this->LinkID) {
             return $this->LinkID->affected_rows;
         }
+        /* why the fuck is this necessary for \Gazelle\Bonus\purchaseInvite() ?! */
+        if ($this->Statement) {
+            return $this->Statement->affected_rows;
+        }
     }
 
     function info() {
@@ -562,6 +534,23 @@ class DB_MYSQL {
         }
         mysqli_data_seek($this->QueryID, 0);
         return $Return;
+    }
+
+    /**
+     * Runs a prepared_query using placeholders and returns the matched row.
+     * Stashes the current query id so that this can be used within a block
+     * that is looping over an active resultset.
+     *
+     * @param string  $sql The parameterized query to run
+     * @param mixed   $args  The values of the placeholders
+     * @return array  resultset or null
+     */
+    function lookup($sql, ...$args) {
+        $qid = $this->get_query_id();
+        $this->prepared_query($sql, ...$args);
+        $result = $this->next_record(MYSQLI_NUM);
+        $this->set_query_id($qid);
+        return $result;
     }
 
     function set_query_id(&$ResultSet) {

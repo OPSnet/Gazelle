@@ -10,6 +10,20 @@ function Add(input) {
     }
 }
 
+function checkCollageCats(value) {
+    var e = document.getElementsByClassName('collagecat');
+    for(var i = 0; i < e.length; i++) {
+        e[i].checked = value;
+    }
+}
+
+function invertCollageCats() {
+    var e = document.getElementsByClassName('collagecat');
+    for(var i = 0; i < e.length; i++) {
+        e[i].checked = !e[i].checked;
+    }
+}
+
 function Cancel() {
     var e=document.getElementsByTagName("input");
     for (i = 0; i < e.length; i++) {

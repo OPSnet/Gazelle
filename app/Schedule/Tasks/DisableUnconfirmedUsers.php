@@ -11,7 +11,8 @@ class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task
             SELECT UserID
             FROM users_info AS ui
             INNER JOIN users_main AS um ON (um.ID = ui.UserID)
-            WHERE um.LastAccess = '0000-00-00 00:00:00'
+            LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+            WHERE ula.user_id IS NULL
                 AND ui.JoinDate < now() - INTERVAL 7 DAY
                 AND um.Enabled != '2'");
         $userIDs = $this->db->collect('UserID');
@@ -20,11 +21,12 @@ class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task
         $this->db->query("
             UPDATE users_info AS ui
             INNER JOIN users_main AS um ON (um.ID = ui.UserID)
+            LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
             SET um.Enabled = '2',
                 ui.BanDate = now(),
                 ui.BanReason = '3',
                 ui.AdminComment = CONCAT(now(), ' - Disabled for inactivity (never logged in)\n\n', ui.AdminComment)
-            WHERE um.LastAccess = '0000-00-00 00:00:00'
+            WHERE ula.user_id IS NULL
                 AND ui.JoinDate < now() - INTERVAL 7 DAY
                 AND um.Enabled != '2'");
         if ($this->db->has_results()) {

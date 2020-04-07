@@ -16,7 +16,6 @@ class ImageTools {
      * @var array $Hosts Array of image hosts
      */
     private static $Hosts = [
-        'whatimg.com' => true,
         'imgur.com' => true
     ];
 
@@ -34,7 +33,6 @@ class ImageTools {
      */
     private static $Thumbs = [
         'i.imgur.com' => true,
-        'whatimg.com' => true
     ];
 
     /**
@@ -131,13 +129,6 @@ class ImageTools {
     }
 
     /**
-     * Checks if URL points to a whatimg thumbnail.
-     */
-    private static function has_whatimg_thumb($Url) {
-        return (strpos($Url, '_thumb') !== false);
-    }
-
-    /**
      * Cleans up imgur URL if it already has a modifier attached to the end of it.
      */
     private static function clean_imgur_url($Url) {
@@ -209,9 +200,7 @@ class ImageTools {
         if ($Thumb) {
             $Extension = pathinfo($Url, PATHINFO_EXTENSION);
             if (self::thumbnailable($Url) && self::valid_extension($Extension)) {
-                if (strpos($Url, 'whatimg') !== false && !self::has_whatimg_thumb($Url)) {
-                    $ProcessedUrl = self::replace_extension($Url, '_thumb.' . $Extension);
-                } elseif (strpos($Url, 'imgur') !== false) {
+                if (strpos($Url, 'imgur') !== false) {
                     $ProcessedUrl = self::replace_extension(self::clean_imgur_url($Url), 'm.' . $Extension);
                 }
             }

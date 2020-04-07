@@ -29,72 +29,11 @@ Tools necessary for economic management
 if (!check_perms('site_view_flow')) {
     error(403);
 }
+
 View::show_header('Economy');
-
-if (!$EconomicStats = $Cache->get_value('new_economic_stats')) {
-    $DB->query("
-        SELECT sum(uls.Uploaded), sum(uls.Downloaded), count(*)
-        FROM users_main um
-        INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-        WHERE um.Enabled = '1'");
-    list($TotalUpload, $TotalDownload, $NumUsers) = $DB->next_record();
-    $DB->query("
-        SELECT SUM(Bounty)
-        FROM requests_votes");
-    list($TotalBounty) = $DB->next_record();
-    $DB->query("
-        SELECT SUM(rv.Bounty)
-        FROM requests_votes AS rv
-            JOIN requests AS r ON r.ID = rv.RequestID
-        WHERE TorrentID > 0");
-    list($AvailableBounty) = $DB->next_record();
-    $DB->query("
-        SELECT sum(tls.Snatched), count(*)
-        FROM torrents_leech_stats tls
-    ");
-    list($TotalSnatches, $TotalTorrents) = $DB->next_record(); // This is the total number of snatches for torrents that still exist
-
-    $DB->query("
-        SELECT count(*)
-        FROM xbt_snatched");
-    list($TotalOverallSnatches) = $DB->next_record();
-
-    if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
-        $DB->query("
-            SELECT count(*)
-            FROM xbt_files_users
-            WHERE remaining = 0");
-        list($TotalSeeders) = $DB->next_record();
-        $DB->query("
-            SELECT count(*)
-            FROM xbt_files_users
-            WHERE remaining > 0");
-        list($TotalLeechers) = $DB->next_record();
-    } else {
-        list($TotalLeechers,$TotalSeeders) = $PeerStats;
-    }
-    $TotalPeers = $TotalLeechers + $TotalSeeders;
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE (
-                SELECT count(*)
-                FROM xbt_files_users
-                WHERE uid = users_main.ID
-                ) > 0");
-    list($TotalPeerUsers) = $DB->next_record();
-    $Cache->cache_value('new_economic_stats',
-                [$TotalUpload, $TotalDownload, $NumUsers, $TotalBounty,
-                    $AvailableBounty, $TotalSnatches, $TotalTorrents,
-                    $TotalOverallSnatches, $TotalSeeders, $TotalPeers,
-                    $TotalPeerUsers], 3600);
-} else {
-    list($TotalUpload, $TotalDownload, $NumUsers, $TotalBounty, $AvailableBounty,
-        $TotalSnatches, $TotalTorrents, $TotalOverallSnatches, $TotalSeeders,
-        $TotalPeers, $TotalPeerUsers) = $EconomicStats;
-}
-
-$TotalLeechers = $TotalPeers - $TotalSeeders;
+$Eco = new \Gazelle\Stats\Economic($DB, $Cache);
+$totalEnabled = $Eco->get('totalEnabled');
+$totalPeerUsers = $Eco->get('totalPeerUsers');
 
 ?>
 <div class="thin">
@@ -102,17 +41,17 @@ $TotalLeechers = $TotalPeers - $TotalSeeders;
         <div class="head">Overall stats</div>
         <div class="pad">
             <ul class="stats nobullet">
-                <li><strong>Total upload: </strong><?=Format::get_size($TotalUpload)?></li>
-                <li><strong>Total download: </strong><?=Format::get_size($TotalDownload)?></li>
-                <li><strong>Total buffer: </strong><?=Format::get_size($TotalUpload - $TotalDownload)?></li>
+                <li><strong>Total upload: </strong><?= Format::get_size($Eco->get('totalUpload')) ?></li>
+                <li><strong>Total download: </strong><?= Format::get_size($Eco->get('totalDownload')) ?></li>
+                <li><strong>Total buffer: </strong><?= Format::get_size($Eco->get('totalUpload') - $Eco->get('totalDownload')) ?></li>
                 <br />
-                <li><strong>Mean ratio: </strong><?=Format::get_ratio_html($TotalUpload, $TotalDownload)?></li>
-                <li><strong>Mean upload: </strong><?=Format::get_size($TotalUpload / $NumUsers)?></li>
-                <li><strong>Mean download: </strong><?=Format::get_size($TotalDownload / $NumUsers)?></li>
-                <li><strong>Mean buffer: </strong><?=Format::get_size(($TotalUpload - $TotalDownload) / $NumUsers)?></li>
+                <li><strong>Mean ratio: </strong><?= Format::get_ratio_html($Eco->get('totalUpload'), $Eco->get('totalDownload')) ?></li>
+                <li><strong>Mean upload: </strong><?= Format::get_size($Eco->get('totalUpload') / $totalEnabled) ?></li>
+                <li><strong>Mean download: </strong><?= Format::get_size($Eco->get('totalDownload') / $totalEnabled) ?></li>
+                <li><strong>Mean buffer: </strong><?= Format::get_size(($Eco->get('totalUpload') - $Eco->get('totalDownload')) / $totalEnabled) ?></li>
                 <br />
-                <li><strong>Total request bounty: </strong><?=Format::get_size($TotalBounty)?></li>
-                <li><strong>Available request bounty: </strong><?=Format::get_size($AvailableBounty)?></li>
+                <li><strong>Total request bounty: </strong><?= Format::get_size($Eco->get('totalBounty')) ?></li>
+                <li><strong>Available request bounty: </strong><?= Format::get_size($Eco->get('availableBounty')) ?></li>
             </ul>
         </div>
     </div>
@@ -120,30 +59,38 @@ $TotalLeechers = $TotalPeers - $TotalSeeders;
     <div class="box">
         <div class="head">Swarms and snatches</div>
         <div class="pad">
+            <table>
+            <tr>
+            <td style="vertical-align:top;" width="50%">
             <ul class="stats nobullet">
-                <li><strong>Total seeders: </strong><?=number_format($TotalSeeders)?></li>
-                <li><strong>Total leechers: </strong><?=number_format($TotalLeechers)?></li>
-                <li><strong>Total peers: </strong><?=number_format($TotalSeeders + $TotalLeechers)?></li>
-                <li><strong>Total snatches: </strong><?=number_format($TotalOverallSnatches)?></li>
-                <li><strong>Seeder/leecher ratio: </strong><?=Format::get_ratio_html($TotalSeeders, $TotalLeechers)?></li>
-                <li><strong>Seeder/snatch ratio: </strong><?=Format::get_ratio_html($TotalSeeders, $TotalOverallSnatches)?></li>
+                <li><strong>Total seeders: </strong><?= number_format($Eco->get('totalSeeders')) ?></li>
+                <li><strong>Total leechers: </strong><?= number_format($Eco->get('totalLeechers')) ?></li>
+                <li><strong>Total peers: </strong><?= number_format($Eco->get('totalSeeders') + $Eco->get('totalLeechers')) ?></li>
+                <li><strong>Total snatches: </strong><?= number_format($Eco->get('totalOverallSnatches')) ?></li>
+                <li><strong>Seeder/leecher ratio: </strong><?= Format::get_ratio_html($Eco->get('totalSeeders'), $Eco->get('totalLeechers')) ?></li>
+                <li><strong>Seeder/snatch ratio: </strong><?= Format::get_ratio_html($Eco->get('totalSeeders'), $Eco->get('totalOverallSnatches')) ?></li>
                 <br />
-                <li><strong>Mean seeders per torrent: </strong><?=number_format($TotalSeeders / $TotalTorrents, 2)?></li>
-                <li><strong>Mean leechers per torrent: </strong><?=number_format($TotalLeechers / $TotalTorrents, 2)?></li>
-                <li><strong>Mean snatches per torrent: </strong><?=number_format($TotalSnatches / $TotalTorrents, 2)?></li>
-                <br />
-                <li><strong>Mean seeding per user: </strong><?=number_format($TotalSeeders / $NumUsers, 2)?></li>
-                <li><strong>Mean leeching per user: </strong><?=number_format($TotalLeechers / $NumUsers, 2)?></li>
-                <li><strong>Mean snatches per user: </strong><?=number_format($TotalOverallSnatches / $NumUsers, 2)?></li>
-                <br />
-                <li><strong>Total users in at least 1 swarm: </strong><?=number_format($TotalPeerUsers)?></li>
-                <li><strong>Mean seeding per user in at least 1 swarm: </strong><?=number_format($TotalSeeders / $TotalPeerUsers, 2)?></li>
-                <li><strong>Mean leeching per user in at least 1 swarm: </strong><?=number_format($TotalLeechers / $TotalPeerUsers, 2)?></li>
-                <li><strong>Mean snatches per user in at least 1 swarm: </strong><?=number_format($TotalSnatches / $TotalPeerUsers, 2)?></li>
+                <li><strong>Total users in at least 1 swarm: </strong><?= number_format($totalPeerUsers) ?></li>
+                <li><strong>Mean seeding per user in at least 1 swarm: </strong><?= number_format($Eco->get('totalSeeders') / $totalPeerUsers, 2) ?></li>
+                <li><strong>Mean leeching per user in at least 1 swarm: </strong><?= number_format($Eco->get('totalLeechers') / $totalPeerUsers, 2) ?></li>
+                <li><strong>Mean snatches per user in at least 1 swarm: </strong><?= number_format($Eco->get('totalSnatches') / $totalPeerUser, 2) ?></li>
             </ul>
+            </td>
+            <td style="vertical-align:top;" width="50%">
+            <ul class="stats nobullet">
+                <li><strong>Mean seeders per torrent: </strong><?= number_format($Eco->get('totalSeeders') / $Eco->get('totalTorrents'), 2) ?></li>
+                <li><strong>Mean leechers per torrent: </strong><?= number_format($Eco->get('totalLeechers') / $Eco->get('totalTorrents'), 2) ?></li>
+                <li><strong>Mean snatches per torrent: </strong><?= number_format($Eco->get('totalSnatches') / $Eco->get('totalTorrents'), 2) ?></li>
+                <br />
+                <li><strong>Mean seeding per user: </strong><?= number_format($Eco->get('totalSeeders') / $totalEnabled, 2) ?></li>
+                <li><strong>Mean leeching per user: </strong><?= number_format($Eco->get('totalLeechers') / $totalEnabled, 2) ?></li>
+                <li><strong>Mean snatches per user: </strong><?= number_format($Eco->get('totalOverallSnatches') / $totalEnabled, 2) ?></li>
+            </ul>
+            </td>
+            </tr>
+            </table>
         </div>
     </div>
 </div>
 <?php
 View::show_footer();
-?>

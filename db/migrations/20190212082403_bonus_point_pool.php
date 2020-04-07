@@ -26,7 +26,7 @@ class BonusPointPool extends AbstractMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change()
+    public function up()
     {
         $this->table('bonus_pool', ['id' => false, 'primary_key' => 'ID'])
             ->addColumn('ID', 'integer', ['limit' => 6, 'signed' => false, 'identity' => true])
@@ -54,6 +54,22 @@ class BonusPointPool extends AbstractMigration
             ->addForeignKey('ContestID', 'contest', 'ID')
             ->create();
 
-        $this->table('contest_type')->insert([['Name' => 'upload_flac_no_single']])->save();
+        $rows = $this->getQueryBuilder()
+                     ->select('ID')
+                     ->from('contest_type')
+                     ->where(['Name' => 'upload_flac_no_single'])
+                     ->execute()
+                     ->fetchAll('assoc');
+
+        if (count($rows) === 0) {
+            $this->table('contest_type')->insert([['Name' => 'upload_flac_no_single']])->save();
+        }
+    }
+
+    public function down()
+    {
+        $this->table('bonus_pool_contrib')->drop()->update();
+        $this->table('contest_has_bonus_pool')->drop()->update();
+        $this->table('bonus_pool')->drop()->update();
     }
 }

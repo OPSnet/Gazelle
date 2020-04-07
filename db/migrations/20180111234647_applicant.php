@@ -62,10 +62,10 @@ class Applicant extends AbstractMigration {
     }
 
     public function down() {
-        $this->dropTable('applicant');
-        $this->dropTable('applicant_role');
-        $this->dropTable('thread_note');
-        $this->dropTable('thread');
-        $this->dropTable('thread_type');
+        $this->table('applicant')->drop()->update();
+        $this->table('applicant_role')->drop()->update();
+        $this->table('thread_note')->drop()->update();
+        $this->table('thread')->drop()->update();
+        $this->table('thread_type')->drop()->update();
     }
 }

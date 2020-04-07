@@ -1238,7 +1238,7 @@ td.colhead,
 td.colhead_dark,
 .colhead_dark td,
 .colhead th {
-    padding: 12px 5px
+    padding: 12px 5px;
 }
 
 #forums tr.colhead td[style="width: 7%;"] {

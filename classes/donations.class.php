@@ -598,6 +598,7 @@ class Donations {
 
     }
 
+    // TODO: make $UseComma more sane
     public static function update_titles($UserID, $Prefix, $Suffix, $UseComma) {
         $QueryID = G::$DB->get_query_id();
         $Prefix = trim($Prefix);
@@ -609,8 +610,8 @@ class Donations {
             VALUES (?,      ?,      ?,      ?)
             ON DUPLICATE KEY UPDATE
                 Prefix = ?, Suffix = ?, UseComma = ?
-            ', $UserID, $Prefix, $Suffix, $UseComma,
-                $Prefix, $Suffix, $UseComma
+            ', $UserID, $Prefix, $Suffix, $UseComma !== null ? 1 : 0,
+                $Prefix, $Suffix, $UseComma !== null ? 1 : 0
         );
         G::$Cache->delete_value("donor_title_$UserID");
         G::$DB->set_query_id($QueryID);

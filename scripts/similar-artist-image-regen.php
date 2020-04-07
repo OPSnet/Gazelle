@@ -13,7 +13,6 @@ use Twig\Environment;
 
 require_once(__DIR__.'/../classes/time.class.php'); //Require the time class
 require_once(__DIR__.'/../classes/paranoia.class.php'); //Require the paranoia check_paranoia function
-require_once(__DIR__.'/../classes/regex.php');
 require_once(__DIR__.'/../classes/util.php');
 require_once(__DIR__.'/../classes/image.class.php');
 

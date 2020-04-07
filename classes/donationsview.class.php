@@ -142,9 +142,6 @@ class DonationsView {
                         <td>
                             <strong>Total Points</strong>
                         </td>
-                        <td>
-                            <strong>Email</strong>
-                        </td>
                         <td style="width: 30%;">
                             <strong>Reason</strong>
                         </td>
@@ -165,9 +162,6 @@ class DonationsView {
                         </td>
                         <td>
                             <?=$Donation['TotalRank']?>
-                        </td>
-                        <td>
-                            <?=display_str($Donation['Email'])?>
                         </td>
                         <td>
                             <?=display_str($Donation['Reason'])?>

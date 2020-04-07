@@ -15,13 +15,15 @@ if (!$News = $Cache->get_value('news')) {
 }
 
 if ($LoggedUser['LastReadNews'] != $News[0][0]) {
-    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
     $Cache->commit_transaction(0);
-    $DB->query("
+    $DB->prepared_query('
         UPDATE users_info
-        SET LastReadNews = '".$News[0][0]."'
-        WHERE UserID = $UserID");
+        SET LastReadNews = ?
+        WHERE UserID = ?
+        ', $News[0][0], $LoggedUser['ID']
+    );
     $LoggedUser['LastReadNews'] = $News[0][0];
 }
 

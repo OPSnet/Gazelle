@@ -1,36 +1,29 @@
 <?php
 
+use Gazelle\Util\SortableTableHeader;
+
 $SphQL = new SphinxqlQuery();
 $SphQL->select('id, votes, bounty')->from('requests, requests_delta');
 
-$SortOrders = [
-    'votes' => 'votes',
-    'bounty' => 'bounty',
-    'lastvote' => 'lastvote',
-    'filled' => 'timefilled',
-    'year' => 'year',
-    'created' => 'timeadded',
-    'random' => false];
-
-if (empty($_GET['order']) || !isset($SortOrders[$_GET['order']])) {
-    $_GET['order'] = 'created';
+$SortOrderMap = [
+    'votes'    => ['votes', 'desc'],
+    'bounty'   => ['bounty', 'desc'],
+    'lastvote' => ['lastvote', 'desc'],
+    'filled'   => ['timefilled', 'desc'],
+    'year'     => ['year', 'desc'],
+    'created'  => ['timeadded', 'desc'],
+    'random'   => ['RAND()', ''],
+];
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$OrderWay = '';
+if (!empty($SortOrderMap[$SortOrder][1])) {
+    $OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+        ? $SortOrderMap[$SortOrder][1]
+        : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 }
-$OrderBy = $_GET['order'];
 
-if (!empty($_GET['sort']) && $_GET['sort'] === 'asc') {
-    $OrderWay = 'asc';
-} else {
-    $_GET['sort'] = 'desc';
-    $OrderWay = 'desc';
-}
-$NewSort = $_GET['sort'] === 'asc' ? 'desc' : 'asc';
-
-if ($OrderBy === 'random') {
-    $SphQL->order_by('RAND()', '');
-    unset($_GET['page']);
-} else {
-    $SphQL->order_by($SortOrders[$OrderBy], $OrderWay);
-}
+$SphQL->order_by($OrderBy, $OrderWay);
 
 $Submitted = !empty($_GET['submit']);
 
@@ -310,7 +303,7 @@ if (isset($_GET['year'])) {
     }
 }
 
-if (!empty($_GET['page']) && intval($_GET['page']) && $_GET['page'] > 0) {
+if ($OrderBy !== 'random' && isset($_GET['page']) && intval($_GET['page']) && $_GET['page'] > 0) {
     $Page = $_GET['page'];
     $Offset = ($Page - 1) * REQUESTS_PER_PAGE;
     $SphQL->limit($Offset, REQUESTS_PER_PAGE, $Offset + REQUESTS_PER_PAGE);
@@ -523,32 +516,41 @@ View::show_header($Title, 'requests');
     <div class="linkbox">
         <?=    $PageLinks?>
     </div>
-<?php        } ?>
+<?php        }
+$header = new SortableTableHeader([
+    'year'     => 'Year',
+    'votes'    => 'Votes',
+    'bounty'   => 'Bounty',
+    'filled'   => 'Filled',
+    'created'  => 'Created',
+    'lastvote' => 'Last Vote',
+], $SortOrder, $OrderWay);
+?>
     <table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
         <tr class="colhead_dark">
             <td style="width: 38%;" class="m_th_left nobr">
-                <strong>Request Name</strong> / <a href="?order=year&amp;sort=<?=($OrderBy === 'year' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Year</strong></a>
+                Request Name / <?= $header->emit('year', $SortOrderMap['year'][1]) ?>
             </td>
             <td class="m_th_right nobr">
-                <a href="?order=votes&amp;sort=<?=($OrderBy === 'votes' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Votes</strong></a>
+                <?= $header->emit('votes', $SortOrderMap['votes'][1]) ?>
             </td>
             <td class="m_th_right nobr">
-                <a href="?order=bounty&amp;sort=<?=($OrderBy === 'bounty' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Bounty</strong></a>
+                <?= $header->emit('bounty', $SortOrderMap['bounty'][1]) ?>
             </td>
             <td class="nobr">
-                <a href="?order=filled&amp;sort=<?=($OrderBy === 'filled' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Filled</strong></a>
+                <?= $header->emit('filled', $SortOrderMap['filled'][1]) ?>
             </td>
             <td class="nobr">
-                <strong>Filled by</strong>
+                Filled by
             </td>
             <td class="nobr">
-                <strong>Requested by</strong>
+                Requested by
             </td>
             <td class="nobr">
-                <a href="?order=created&amp;sort=<?=($OrderBy === 'created' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Created</strong></a>
+                <?= $header->emit('created', $SortOrderMap['created'][1]) ?>
             </td>
             <td class="nobr">
-                <a href="?order=lastvote&amp;sort=<?=($OrderBy === 'lastvote' ? $NewSort : 'desc')?>&amp;<?=$CurrentURL?>"><strong>Last vote</strong></a>
+                <?= $header->emit('lastvote', $SortOrderMap['lastvote'][1]) ?>
             </td>
         </tr>
 <?php

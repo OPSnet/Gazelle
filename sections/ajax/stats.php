@@ -2,30 +2,7 @@
 // Begin user stats
 $UserCount = Users::get_enabled_users_count();
 
-if (($UserStats = $Cache->get_value('stats_users')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24)."'");
-    list($UserStats['Day']) = $DB->next_record();
-
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24 * 7)."'");
-    list($UserStats['Week']) = $DB->next_record();
-
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM users_main
-        WHERE Enabled = '1'
-            AND LastAccess > '".time_minus(3600 * 24 * 30)."'");
-    list($UserStats['Month']) = $DB->next_record();
-
-    $Cache->cache_value('stats_users', $UserStats, 0);
-}
+$UserStats = \Gazelle\User::globalActivityStats($DB, $Cache);
 
 // Begin torrent stats
 if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {

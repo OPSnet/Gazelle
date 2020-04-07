@@ -32,7 +32,7 @@ if (PHP_SAPI === 'cli') {
 
     $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
     if (isset($argv[2])) {
-        $scheduler->runTask(intval($argv[2]));
+        $scheduler->runTask(intval($argv[2]), true);
     } else {
         $scheduler->run();
     }
@@ -48,7 +48,7 @@ if (PHP_SAPI === 'cli') {
     echo('<pre>');
     $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
     if (isset($_GET['id'])) {
-        $scheduler->runTask(intval($_GET['id']));
+        $scheduler->runTask(intval($_GET['id']), true);
     } else {
         $scheduler->run();
     }

@@ -53,6 +53,18 @@ class SQLMatcher {
         }
     }
 
+    public function left_match($field) {
+        switch ($this->key) {
+            case 'regexp':
+                return "$field REGEXP ?";
+            case 'strict':
+                return "$field = ?";
+            case 'fuzzy':
+            default:
+                return "$field LIKE concat(?, '%')";
+        }
+    }
+
     public function op($field, $compare) {
         switch ($compare) {
             case 'above':
@@ -98,7 +110,7 @@ $OrderTable = [
     'Joined' => 'ui1.JoinDate',
     'Email' => 'um1.Email',
     'IP' => 'um1.IP',
-    'Last Seen' => 'um1.LastAccess',
+    'Last Seen' => 'ula.last_access',
     'Downloads' => 'Downloads',
     'Snatches' => 'Snatches',
     'Uploaded' => 'uls1.Uploaded',
@@ -118,24 +130,17 @@ $NumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer']];
 $OffNumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer', 'off']];
 $YesNo = ['inarray'=>['any', 'yes', 'no']];
 
-$email_history_checked = true;
-$ip_history_checked = true;
-$disabled_ip_checked = true;
+$emailHistoryChecked = false;
+$ipHistoryChecked = false;
+$disabledIpChecked = false;
+$trackerLiveSource = true;
 
 if (count($_GET)) {
-    if (!empty($_GET['email_history']) || !empty($_GET['disabled_id']) || !empty($_GET['ip_history'])) {
-        if (empty($_GET['email_history'])) {
-            $email_history_checked = false;
-        }
-        if (empty($_GET['disabled_ip'])) {
-            $disabled_ip_checked = false;
-        }
-        if (empty($_GET['ip_history'])) {
-            $ip_history_checked = false;
-        }
-    }
+    $emailHistoryChecked = !empty($_GET['email_history']);
+    $disabledIpChecked = !empty($_GET['disabled_ip']);
+    $ipHistoryChecked = !empty($_GET['ip_history']);
+    $trackerLiveSource = ($_GET['tracker-src'] ?? 'live') == 'live';
     $DateRegexp = ['regexp' => '/\d{4}-\d{2}-\d{2}/'];
-
     $ClassIDs = [];
     $SecClassIDs = [];
     foreach ($Classes as $ClassID => $Value) {
@@ -145,6 +150,8 @@ if (count($_GET)) {
             $ClassIDs[] = $ClassID;
         }
     }
+    $StylesheetsManager = new \Gazelle\Stylesheet($DB, $Cache);
+    $Stylesheets = $StylesheetsManager->list();
 
     $Val->SetFields('avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]);
     $Val->SetFields('cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]);
@@ -212,8 +219,9 @@ if (count($_GET)) {
             ui1.Warned,
             ui1.Donor,
             ui1.JoinDate,
-            um1.LastAccess
+            ula.last_access
         FROM users_main AS um1
+        LEFT JOIN user_last_access AS ula ON (ula.user_id = um1.ID)
         INNER JOIN users_leech_stats AS uls1 ON (uls1.UserID = um1.ID)
         INNER JOIN users_info AS ui1 ON (ui1.UserID = um1.ID)
         ";
@@ -245,12 +253,12 @@ if (count($_GET)) {
         }
 
         if (!empty($_GET['ip'])) {
-            if (isset($_GET['ip_history'])) {
+            if ($ipHistoryChecked) {
                 $Distinct = true;
                 $Join['hi'] = 'INNER JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
-                $Where[] = $m->match('hi.IP');
+                $Where[] = $m->left_match('hi.IP');
             } else {
-                $Where[] = $m->match('um1.IP');
+                $Where[] = $m->left_match('um1.IP');
             }
             $Args[] = trim($_GET['ip']);
         }
@@ -270,8 +278,10 @@ if (count($_GET)) {
 
         if (!empty($_GET['tracker_ip'])) {
             $Distinct = true;
-            $Join['xfu'] = 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)';
-            $Where[] = $m->match('xfu.ip');
+            $Join['xfu'] = $trackerLiveSource
+                ? 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)'
+                : 'INNER JOIN xbt_snatched AS xfu ON (um1.ID = xfu.uid)';
+            $Where[] = $m->left_match('xfu.ip');
             $Args[] = trim($_GET['tracker_ip']);
         }
 
@@ -288,12 +298,14 @@ if (count($_GET)) {
         }
 
         if (strlen($_GET['invites1'])) {
-            $Where[] = $m->op('um1.Invites', $_GET['invites']);
+            $op = $_GET['invites'];
+            $Where[] = $m->op('um1.Invites', $op);
             $Args = array_merge($Args, [$_GET['invites1']], ($op === 'between' ? [$_GET['invites2']] : []));
         }
 
         if (strlen($_GET['invitees1']) && $_GET['invitees'] !== 'off') {
-            $Having[] = $m->op('Invitees', $_GET['invitees']);
+            $op = $_GET['invitees'];
+            $Having[] = $m->op('Invitees', $op);
             $HavingArgs = array_merge($HavingArgs, [$_GET['invitees1']], ($op === 'between' ? [$_GET['invitees2']] : []));
         }
 
@@ -321,7 +333,7 @@ if (count($_GET)) {
 
         if ($_GET['lastactive1']) {
             $op = $_GET['lastactive'];
-            $Where[] = $m->date('um1.LastAccess', $op);
+            $Where[] = $m->date('ula.last_access', $op);
             $Args[] = $_GET['lastactive1'];
             if ($op === 'on') {
                 $Args[] = $_GET['lastactive1'];
@@ -342,12 +354,14 @@ if (count($_GET)) {
         }
 
         if ($_GET['downloads'] !== 'off' && strlen($_GET['downloads1'])) {
-            $Having[] = $m->op('Downloads', $_GET['downloads']);
+            $op = $_GET['downloads'];
+            $Having[] = $m->op('Downloads', $op);
             $HavingArgs = array_merge($HavingArgs, [$_GET['downloads1']], ($op === 'between' ? [$_GET['downloads2']] : []));
         }
 
         if ($_GET['snatched'] !== 'off' && strlen($_GET['snatched1'])) {
-            $Having[] = $m->op('Snatches', $_GET['snatched']);
+            $op = $_GET['snatched'];
+            $Having[] = $m->op('Snatches', $op);
             $HavingArgs = array_merge($HavingArgs, [$_GET['snatched1']], ($op === 'between' ? [$_GET['snatched2']] : []));
         }
 
@@ -406,9 +420,9 @@ if (count($_GET)) {
             $Args[] = '0000-00-00 00:00:00';
         }
 
-        if ($_GET['disabled_ip']) {
+        if ($disabledIpChecked) {
             $Distinct = true;
-            if ($_GET['ip_history']) {
+            if ($ipHistoryChecked) {
                 if (!isset($Join['hi'])) {
                     $Join['hi'] = 'LEFT JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
                 }
@@ -438,10 +452,14 @@ if (count($_GET)) {
         }
 
         //---------- Build the query
-        $SQL = 'SELECT' . ($Distinct ? ' DISTINCT ' : ' ') . $SQL . implode("\n", $Join);
+        $SQL = 'SELECT ' . $SQL . implode("\n", $Join);
 
         if (count($Where)) {
-            $SQL .= "WHERE " . implode("\nAND ", $Where);
+            $SQL .= "\nWHERE " . implode("\nAND ", $Where);
+        }
+
+        if ($Distinct) {
+            $SQL .= "\nGROUP BY um1.ID";
         }
 
         if (count($Having)) {
@@ -486,7 +504,14 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
-                <td class="label nobr">Tracker IP:</td>
+                <td class="label nobr">Tracker IP:<br />
+                  <div style="padding-left: 20px; text-align: left;">
+                    <input type="radio" name="tracker-src" id="tracker-src-live" value="live"<?= $trackerLiveSource ? ' checked="checked"' : '' ?> />
+                    <label class="tooltip" for="tracker-src" title="Search for client ip addresses currently connecting to the tracker" for="tracker-src-live">Live</label><br />
+                    <input type="radio" name="tracker-src" id="tracker-src-hist" value="hist"<?= !$trackerLiveSource ? ' checked="checked"' : '' ?> />
+                    <label class="tooltip" for="tracker-src" title="Search for ip addresses that have been seen by the tracker (but may be not connected at this time)" for="tracker-src-hist">Historical</label>
+                  </div>
+                </td>
                 <td>
                     <input type="text" name="tracker_ip" size="20" value="<?=display_str($_GET['tracker_ip'])?>" />
                 </td>
@@ -516,7 +541,7 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
-                <td class="label tooltip nobr" title="Supports partial URL matching, e.g. entering &quot;&#124;https://whatimg.com&quot; will search for avatars hosted on https://whatimg.com">Avatar URL:</td>
+                <td class="label tooltip nobr" title="Supports partial URL matching, e.g. entering &quot;&#124;https://ptpimg.me&quot; will search for avatars hosted on https://phpimg.me">Avatar URL:</td>
                 <td>
                     <input type="text" name="avatar" size="20" value="<?=display_str($_GET['avatar'])?>" />
                 </td>
@@ -530,19 +555,19 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
-                <td class="label nobr" colspan="2">
+                <td class="nobr" colspan="2">
                 <h4>Extra</h4>
                 <ul class="options_list nobullet">
                     <li title="Only display users that have a disabled account linked by IP address">
-                        <input type="checkbox" name="disabled_ip" id="disabled_ip"<?php if ($disabled_ip_checked) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" name="disabled_ip" id="disabled_ip"<?= $disabledIpChecked ?' checked="checked"' : '' ?> />
                         <label for="disabled_ip">Disabled accounts linked by IP</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="ip_history" id="ip_history"<?php if ($ip_history_checked) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" name="ip_history" id="ip_history"<?= $ipHistoryChecked ? ' checked="checked"' : '' ?> />
                         <label title="Disabled accounts linked by IP must also be checked" for="ip_history">IP history</label>
                     </li>
                     <li>
-                        <input type="checkbox" name="email_history" id="email_history"<?php if ($email_history_checked) { echo ' checked="checked"'; } ?> />
+                        <input type="checkbox" name="email_history" id="email_history"<?= $emailHistoryChecked ? ' checked="checked"' : '' ?> />
                         <label title="Also search the email addresses the member used in the past" for="email_history">Email history</label>
                     </li>
                 </ul>
@@ -708,7 +733,7 @@ View::show_header('User search');
                         </li>
                         <li>
                             <input type="radio" name="matchtype" id="regexp_match_type" value="regexp"<?php if ($_GET['matchtype'] == 'regexp') { echo ' checked="checked"'; } ?> />
-                            <label class="tooltip" title="A &quot;regexp&quot; search uses MySQL's regular expression syntax." for="regexp_match_type">Regex</label>
+                            <label class="tooltip" title="A &quot;regexp&quot; search uses MySQL's regular expression syntax." for="regexp_match_type">Regexp</label>
                         </li>
                     </ul>
                 </td>

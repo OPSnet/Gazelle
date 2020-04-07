@@ -1329,6 +1329,11 @@ tr.torrent .bookmark > a:after {
 
 .poll .graph .center_poll {
     background: url('images/poll_middle.png') top left repeat-x;
+    max-width: 865px;
+}
+
+#index .poll .graph .center_poll {
+    max-width: 185px;
 }
 
 .poll .graph .right_poll {

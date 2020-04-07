@@ -1671,7 +1671,7 @@ blockquote {
  * .m_th_right: table headers that will be "floated" to the right. Max of 3
  * .m_td_left: will be left-aligned, and expanded vertically. Mainly for collapse button
  * .m_td_right: tables cells which will be put on the right with absolute positioning, to correspond with .m_th_right headers. Max of 3
- * 
+ *
  * forum posts, although they share some of the styles, do not actually use
  * these classes, because:
  * - they are not tabular data, so for semantics
@@ -1684,7 +1684,7 @@ blockquote {
  * Portrait phones, and sometimes landscape
  * TODO: currently, responsive is optimized for either desktop or portrait phone
  * We need to handle landscape phones as well
- * 
+ *
  * this stuff can *probably* be mostly copy-pasted into other stylesheets
  * then tweaked a bit. Ideally, before that happens, the whole styling system
  * should be made to use a CSS preprocessor so that we can have reusable styles
@@ -1744,7 +1744,7 @@ blockquote {
     padding: 0 8px;
     width: 150px;
   }
-  
+
   #userinfo_minor:hover:before {
     margin-left: 100px;
   }
@@ -2058,7 +2058,7 @@ blockquote {
     right: 4px;
     text-align: left;
   }
-  
+
   .td_snatched.m_td_right:before,
   .td_seeders.m_td_right:before,
   .td_leechers.m_td_right:before {
@@ -2075,7 +2075,7 @@ blockquote {
   .td_seeders.m_td_right:before {
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAeCAYAAAAo5+5WAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAC7SURBVHja7NQxrgFBHMDh2afQ6V6r13OD5wTcwB04gztwA0dwAwfQK3VUJBufZhIJdo1dmpf9JZNJZub/lZMhJDaJ+zLpNVLWAGec0E+ZSUF/sXNrF89qwS2sPbaOd5XhueLmVeExLiXwBaN34R6OXneIb5PgDrbS28aZUjjDyvut4mwhPFO9aRE8RF4DzvF3D3exV799tEJAGxufa4N2wMLnW2Qlv1vqt5c9O/wJX6qBG7iBG/h/wtcBAOg295pvUXkVAAAAAElFTkSuQmCC');
   }
-  
+
   .td_leechers.m_td_right:before {
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAeCAYAAAAo5+5WAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAADYSURBVHja7NaxTQMxFAbgd1Cko6OlTw8bwASwQXYgM2SHsEFGyAYZIH3KdFCBdMqXxpFOpzvH5EKD7pcsS8/+v9JyhehJ70ErVdfwJv4oIzzCIzzC/xdepre3vUrT1V0GJti4XjaYBAIP2F8B3ScrTnDgGfUAtMbLyWvCgfcB8LxpteEKqwvQVer2woE7bH+BblMnzsGBKT4L0K90N0rhwCsOGfSAt75+Dg4sMvAi1z0H32Ldga7T2cVw4B67BrpLsxgKBx7xjR88lXSqzKewnVnaP0ouHwcAK5Gr6If/uhgAAAAASUVORK5CYII=');
   }
@@ -2090,7 +2090,7 @@ blockquote {
     flex-direction: column;
     padding: 5px 0 0 22px;
   }
-  
+
   /* it would be nice to use flex for all group_torrents, but we can't de display:flex
    * on any old table cell. It only works here because our trs aren't using the normal
    * table display anyways. */
@@ -2116,7 +2116,7 @@ blockquote {
     padding-bottom: 5px;
     text-align: left;
   }
-  
+
   /* artist view page */
   #torrents_album .edition_1 td:nth-child(n+2) {
     padding-left: 15px;
@@ -2162,7 +2162,7 @@ blockquote {
     display: flex;
     flex-direction: column;
   }
-  
+
   .m_table .td_collage_category:before {
     content: 'Category: ';
   }
@@ -2171,11 +2171,11 @@ blockquote {
     order: 2;
     padding-top: 0;
   }
-  
+
   .collage_table .td_info {
     padding-bottom: 0;
   }
-  
+
   .collage_table .td_updated:before {
     content: 'Updated: ';
   }
@@ -2183,7 +2183,7 @@ blockquote {
   .collage_table .td_updated {
     order: 3;
   }
-  
+
   .collage_table .td_author:before {
     content: 'Author: ';
   }
@@ -2191,7 +2191,7 @@ blockquote {
   .collage_table .td_author {
     order: 3;
   }
-  
+
   .collage_table .td_torrent_count:before {
     content: 'T: ';
   }
@@ -2300,11 +2300,11 @@ blockquote {
     padding-left: 54px;
   }
 
-  .forum_post tr.colhead_dark span, 
+  .forum_post tr.colhead_dark span,
   .forum_post tr.colhead_dark strong {
     color: #d1d1d1;
   }
-  
+
   .forum_post tr.colhead_dark div {
     display: inline;
     float: none !important;
@@ -2318,7 +2318,7 @@ blockquote {
   .forum_post tr.colhead_dark div:nth-child(2) {
     padding-left: 8px;
   }
-  
+
   .forum_post .avatar {
     left: 5px;
     position: absolute;
@@ -2346,7 +2346,7 @@ blockquote {
     white-space: unset;
   }
   /* END rules */
-  
+
   /* BEGIN site header */
   #header {
     background: #ab718d;

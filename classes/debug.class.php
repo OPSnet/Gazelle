@@ -69,7 +69,7 @@ class DEBUG {
         G::$Cache->cache_value(
             'analysis_'.$Identifier,
             [
-                'url' => $_SERVER['REQUEST_URI'],
+                'url' => $_SERVER['REQUEST_URI'] ?? 'cli',
                 'message' => $Report,
                 'errors' => $this->get_errors(true),
                 'queries' => $this->get_queries(),
@@ -326,7 +326,7 @@ class DEBUG {
 <?php
     }
 
-    public function include_table($Includes = false) {
+    public function include_table($Includes = false, $StripPaths = false) {
         if (!is_array($Includes)) {
             $Includes = $this->get_includes();
         }
@@ -339,6 +339,9 @@ class DEBUG {
     <table id="debug_include" class="debug_table hidden" width="100%">
 <?php
         foreach ($Includes as $File) {
+            if ($StripPaths) {
+                $File = str_replace(SERVER_ROOT, '', $File);
+            }
 ?>
         <tr valign="top">
             <td><?=$File?></td>
@@ -636,7 +639,8 @@ class DEBUG {
     <table id="debug_loggedvars" class="debug_table hidden" width="100%">
 <?php
         foreach ($Vars as $ID => $Var) {
-            list($Key, $Data) = each($Var);
+            $Key = key($Var);
+            $Data = current($Var);
             $Size = count($Data['data']);
 ?>
         <tr>

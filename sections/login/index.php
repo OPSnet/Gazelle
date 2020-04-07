@@ -82,9 +82,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                         ', $UserID, $_SERVER['REMOTE_ADDR']
                     );
                     $Reset = true; // Past tense form of "to reset", meaning that password has now been reset
-                    $LoggedUser['ID'] = $UserID; // Set $LoggedUser['ID'] for logout_all_sessions() to work
-
-                    logout_all_sessions();
+                    logout_all_sessions($UserID);
                 }
             }
 
@@ -187,7 +185,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
         require('2fa_recovery.php');
     }
     else {
-        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
         $Recovery = (!empty($Recovery)) ? unserialize($Recovery) : [];
         if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) !== false) {
             $SessionID = Users::make_secret();
@@ -232,11 +230,16 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
             unset($Recovery[$Key]);
             $DB->prepared_query('
                 UPDATE users_main SET
-                    LastLogin = now(),
-                    LastAccess = now(),
                     Recovery = ?
                 WHERE ID = ?
                 ', serialize($Recovery), $UserID
+            );
+            $DB->prepared_query('
+                INSERT INTO user_last_access
+                       (user_id, last_access)
+                VALUES (?, now())
+                ON DUPLICATE KEY UPDATE last_access = now()
+                ', $UserID
             );
 
             if (!empty($_COOKIE['redirect'])) {
@@ -346,7 +349,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
     } else {
         include(SERVER_ROOT . '/classes/google_authenticator.class.php');
 
-        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
 
         if (!(new PHPGangsta_GoogleAuthenticator())->verifyCode($TFAKey, $_POST['2fa'], 2)) {
             // invalid 2fa key, log the user completely out
@@ -394,10 +397,10 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
             $Cache->commit_transaction(0);
 
             $DB->prepared_query('
-                UPDATE users_main SET
-                    LastLogin = now(),
-                    LastAccess = now()
-                WHERE ID = ?
+                INSERT INTO user_last_access
+                       (user_id, last_access)
+                VALUES (?, now())
+                ON DUPLICATE KEY UPDATE last_access = now()
                 ', $UserID
             );
 
@@ -522,7 +525,6 @@ else {
                     PermissionID,
                     CustomPermissions,
                     PassHash,
-                    Secret,
                     Enabled,
                     2FA_Key,
                     Recovery
@@ -530,8 +532,8 @@ else {
                 WHERE Username != '' and Username = ?
                 ", $_POST['username']
             );
-            $UserData = $DB->next_record(MYSQLI_NUM, [2, 7]);
-            list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Secret, $Enabled, $TFAKey) = $UserData;
+            $UserData = $DB->next_record(MYSQLI_NUM, [2, 6]);
+            list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey) = $UserData;
             if (strtotime($BannedUntil) < time()) {
                 if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
                     if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($_POST['password'], $PassHash)) {
@@ -590,10 +592,10 @@ else {
                         $Cache->commit_transaction(0);
 
                         $DB->prepared_query('
-                            UPDATE users_main SET
-                                LastLogin = now(),
-                                LastAccess = now()
-                            WHERE ID = ?
+                            INSERT INTO user_last_access
+                                   (user_id, last_access)
+                            VALUES (?, now())
+                            ON DUPLICATE KEY UPDATE last_access = now()
                             ', $UserID
                         );
                         if (!empty($_COOKIE['redirect'])) {

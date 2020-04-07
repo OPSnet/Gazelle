@@ -1229,7 +1229,7 @@ td.colhead,
 td.colhead_dark,
 .colhead_dark td,
 .colhead th {
-    padding: 12px 5px
+    padding: 12px 5px;
 }
 
 #forums tr.colhead td[style="width: 7%;"] {
@@ -1806,7 +1806,12 @@ ul .invitetree {
 }
 
 .poll .graph .center_poll {
-    background: rgba(255, 255, 255, 0.4)
+    background: rgba(255, 255, 255, 0.4);
+    max-width: 800px;
+}
+
+#index .poll .graph .center_poll {
+    max-width: 125px;
 }
 
 .poll .graph .right_poll {

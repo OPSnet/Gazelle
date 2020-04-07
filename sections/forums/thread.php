@@ -311,7 +311,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
                     <li><?=display_str($Answer)?> (<?=number_format($Percent * 100, 2)?>%)</li>
                     <li class="graph">
                         <span class="left_poll"></span>
-                        <span class="center_poll" style="width: <?=round($Ratio * 750)?>px;"></span>
+                        <span class="center_poll" style="width: <?=number_format($Ratio * 100, 2)?>%;"></span>
                         <span class="right_poll"></span>
                     </li>
 <?php            }
@@ -320,7 +320,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
                 <li><?=($UserResponse == '0' ? '&raquo; ' : '')?>(Blank) (<?=number_format((float)($Votes[0] / $TotalVotes * 100), 2)?>%)</li>
                 <li class="graph">
                     <span class="left_poll"></span>
-                    <span class="center_poll" style="width: <?=round(($Votes[0] / $MaxVotes) * 750)?>px;"></span>
+                    <span class="center_poll" style="width: <?=number_format((float)($Votes[0] / $MaxVotes * 100), 2)?>%;"></span>
                     <span class="right_poll"></span>
                 </li>
 <?php            } ?>

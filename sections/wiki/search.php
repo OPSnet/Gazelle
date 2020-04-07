@@ -1,4 +1,8 @@
 <?php
+
+use Cake\Collection\Iterator\SortIterator;
+use Gazelle\Util\SortableTableHeader;
+
 if (empty($_GET['nojump'])) {
     $ArticleID = Wiki::alias_to_id($_GET['search']);
     if ($ArticleID) {
@@ -11,36 +15,28 @@ if (empty($_GET['nojump'])) {
 define('ARTICLES_PER_PAGE', 25);
 list($Page, $Limit) = Format::page_limit(ARTICLES_PER_PAGE);
 
-$OrderVals = ['Title', 'Created', 'Edited'];
-$WayVals = ['Ascending', 'Descending'];
-$TypeTable = ['Title'=>'Title', 'Body'=>'Body'];
-$OrderTable = ['Title'=>'Title', 'Created'=>'ID', 'Edited'=>'Date'];
-$WayTable = ['Ascending'=>'ASC', 'Descending'=>'DESC'];
+$SortOrderMap = [
+    'title'   => ['Title', 'asc'],
+    'created' => ['ID', 'desc'],
+    'edited'  => ['Date', 'desc'],
+];
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+
+$TypeMap = [
+    'title' => 'Title',
+    'body'  => 'Body',
+];
+$Type = (!empty($_GET['type']) && isset($TypeMap[$_GET['type']])) ? $TypeMap[$_GET['type']] : 'Title';
 
 // What are we looking for? Let's make sure it isn't dangerous.
 $Search = db_string(trim($_GET['search']));
 
-if (!in_array($Type, ['Title', 'Body'])) {
-    $Type = 'Title';
-}
-
 // Break search string down into individual words
 $Words = explode(' ', $Search);
-
-$Type = $TypeTable[$_GET['type']];
-if (!$Type) {
-    $Type = 'Title';
-}
-
-$Order = $OrderTable[$_GET['order']];
-if (!$Order) {
-    $Order = 'ID';
-}
-
-$Way = $WayTable[$_GET['way']];
-if (!$Way) {
-    $Way = 'DESC';
-}
 
 $SQL = "
     SELECT
@@ -58,7 +54,7 @@ if ($Search != '') {
 }
 
 $SQL .= "
-    ORDER BY $Order $Way
+    ORDER BY $OrderBy $OrderWay
     LIMIT $Limit ";
 $RS = $DB->query($SQL);
 $DB->query("
@@ -91,20 +87,19 @@ $DB->set_query_id($RS);
                 <tr>
                     <td class="label"><strong>Search in:</strong></td>
                     <td>
-                        <label><input type="radio" name="type" value="Title" <?php if ($Type == 'Title') { echo 'checked="checked" '; } ?>/> Title</label>
-                        <label><input type="radio" name="type" value="Body" <?php if ($Type == 'Body') { echo 'checked="checked" '; } ?>/> Body</label>
+                        <label><input type="radio" name="type" value="title"<?= ($Type == 'Title') ? ' checked="checked"' : '' ?> /> Title</label>
+                        <label><input type="radio" name="type" value="body"<?= ($Type == 'Body') ? ' checked="checked"' : '' ?> /> Body</label>
                     </td>
                     <td class="label"><strong>Order by:</strong></td>
                     <td>
                         <select name="order">
-<?php                    foreach ($OrderVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<?php if ($_GET['order'] == $Cur || (!$_GET['order'] && $Cur == 'Time')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?php                    } ?>
+                            <option value="created"<?php Format::selected('order', 'created'); ?>>Created</option>
+                            <option value="title"<?php Format::selected('order', 'title'); ?>>Title</option>
+                            <option value="edited"<?php Format::selected('order', 'edited'); ?>>Edited</option>
                         </select>
-                        <select name="way">
-<?php                    foreach ($WayVals as $Cur) { ?>
-                            <option value="<?=$Cur?>"<?php if ($_GET['way'] == $Cur || (!$_GET['way'] && $Cur == 'Descending')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?php                    } ?>
+                        <select name="sort">
+                            <option value="desc"<?php Format::selected('sort', 'desc'); ?>>Descending</option>
+                            <option value="asc"<?php Format::selected('sort', 'asc'); ?>>Ascending</option>
                         </select>
                     </td>
                 </tr>
@@ -122,11 +117,17 @@ $DB->set_query_id($RS);
     if ($Pages) { ?>
     <div class="linkbox pager"><?=($Pages)?></div>
 <?php
-    } ?>
+    }
+
+$header = new SortableTableHeader([
+    'title'  => 'Article',
+    'edited' => 'Last updated on',
+], $SortOrder, $OrderWay);
+?>
 <table width="100%">
     <tr class="colhead">
-        <td>Article</td>
-        <td>Last updated on</td>
+        <td class="nobr"><?= $header->emit('title', $SortOrderMap['title'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('edited', $SortOrderMap['edited'][1]) ?></td>
         <td>Last edited by</td>
     </tr>
 <?php

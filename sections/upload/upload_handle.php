@@ -953,17 +953,14 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 //--------------- Give Bonus Points  -------------------------------------------//
 
 if (G::$LoggedUser['DisablePoints'] == 0) {
-    $DB->prepared_query('UPDATE users_main SET BonusPoints = BonusPoints + ? WHERE ID = ?',
-        $BonusPoints, $LoggedUser['ID']
-    );
-    $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
+    $Bonus->addPoints($LoggedUser['ID'], $BonusPoints);
 }
 
 //******************************************************************************//
 //--------------- Stupid Recent Uploads ----------------------------------------//
 
 if (trim($Properties['Image']) != '') {
-    $RecentUploads = $Cache->get_value("recent_uploads_$UserID");
+    $RecentUploads = $Cache->get_value('recent_uploads_'.$LoggedUser['ID']);
     if (is_array($RecentUploads)) {
         do {
             foreach ($RecentUploads as $Item) {
@@ -981,7 +978,7 @@ if (trim($Properties['Image']) != '') {
                         'Name' => trim($Properties['Title']),
                         'Artist' => Artists::display_artists($ArtistForm, false, true),
                         'WikiImage' => trim($Properties['Image'])]);
-            $Cache->cache_value("recent_uploads_$UserID", $RecentUploads, 0);
+            $Cache->cache_value('recent_uploads_'.$LoggedUser['ID'], $RecentUploads, 0);
         } while (0);
     }
 }

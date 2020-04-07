@@ -23,14 +23,14 @@ if (!$News = $Cache->get_value('news')) {
 }
 
 if (count($News) > 0 && $LoggedUser['LastReadNews'] != $News[0][0]) {
-    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
     $Cache->commit_transaction(0);
     $DB->prepared_query('
         UPDATE users_info
         SET LastReadNews = ?
         WHERE UserID = ?
-        ', $News[0][0], $UserID
+        ', $News[0][0], $LoggedUser['ID']
     );
     $LoggedUser['LastReadNews'] = $News[0][0];
 }
@@ -139,10 +139,8 @@ for ($i = 0; $i < $Limit; $i++) {
             </ul>
         </div>
 
-<?php
-include('contest_leaderboard.php');
-//SiteHistoryView::render_recent_sidebar(SiteHistory::get_events(null, null, null, null, null, null, 5));
-?>
+<?php include('contest_leaderboard.php'); ?>
+
         <div class="box">
             <div class="head colhead_dark"><strong>Stats</strong></div>
             <ul class="stats nobullet">
@@ -155,19 +153,7 @@ $UserCount = Users::get_enabled_users_count();
 ?>
                 <li>Enabled users: <?=number_format($UserCount)?> <a href="stats.php?action=users" class="brackets">Details</a></li>
 <?php
-if (($UserStats = $Cache->get_value('stats_users')) === false) {
-    $DB->prepared_query("
-        SELECT
-            sum(LastAccess >= now() - INTERVAL 1 DAY) as d,
-            sum(LastAccess >= now() - INTERVAL 1 WEEK) as w,
-            sum(LastAccess >= now() - INTERVAL 1 MONTH) as m
-        FROM users_main
-        WHERE Enabled = '1'
-            AND LastAccess >= now() - INTERVAL 1 MONTH
-    ");
-    list($UserStats['Day'], $UserStats['Week'], $UserStats['Month']) = $DB->next_record();
-    $Cache->cache_value('stats_users', $UserStats, 43200 + rand(0, 3600)); // half day plus fuzz
-}
+$UserStats = \Gazelle\User::globalActivityStats($DB, $Cache);
 ?>
                 <li>Users active today: <?=number_format($UserStats['Day'])?> (<?=number_format($UserStats['Day'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this week: <?=number_format($UserStats['Week'])?> (<?=number_format($UserStats['Week'] / $UserCount * 100, 2)?>%)</li>
@@ -378,7 +364,7 @@ if ($TopicID) {
 ?>                    <li><?=display_str($Answers[$i])?> (<?=number_format($Percent * 100, 2)?>%)</li>
                     <li class="graph">
                         <span class="left_poll"></span>
-                        <span class="center_poll" style="width: <?=round($Ratio * 140)?>px;"></span>
+                        <span class="center_poll" style="width: <?=number_format($Ratio * 100, 2)?>%;"></span>
                         <span class="right_poll"></span>
                         <br />
                     </li>
@@ -507,49 +493,3 @@ foreach ($News as $NewsItem) {
 </div>
 <?php
 View::show_footer(['disclaimer'=>true]);
-
-function contest() {
-    global $DB, $Cache, $LoggedUser;
-
-    list($Contest, $TotalPoints) = $Cache->get_value('contest');
-    if (!$Contest) {
-        $DB->query("
-            SELECT
-                UserID,
-                SUM(Points),
-                Username
-            FROM users_points AS up
-                JOIN users_main AS um ON um.ID = up.UserID
-            GROUP BY UserID
-            ORDER BY SUM(Points) DESC
-            LIMIT 20");
-        $Contest = $DB->to_array();
-
-        $DB->query("
-            SELECT SUM(Points)
-            FROM users_points");
-        list($TotalPoints) = $DB->next_record();
-
-        $Cache->cache_value('contest', [$Contest, $TotalPoints], 600);
-    }
-
-?>
-<!-- Contest Section -->
-        <div class="box box_contest">
-            <div class="head colhead_dark"><strong>Quality time scoreboard</strong></div>
-            <div class="pad">
-                <ol style="padding-left: 5px;">
-<?php
-    foreach ($Contest as $User) {
-        list($UserID, $Points, $Username) = $User;
-?>
-                    <li><?=Users::format_username($UserID, false, false, false)?> (<?=number_format($Points)?>)</li>
-<?php    } ?>
-                </ol>
-                Total uploads: <?=$TotalPoints?><br />
-                <a href="index.php?action=scoreboard">Full scoreboard</a>
-            </div>
-        </div>
-    <!-- END contest Section -->
-<?php
-} // contest()

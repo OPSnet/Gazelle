@@ -922,6 +922,11 @@ ul .invitetree {
   height: 9px;
   margin: 0;
   padding: 0;
+  max-width: 780px;
+}
+
+#index .center_poll {
+  max-width: 175px;
 }
 
 .right_poll {
@@ -1052,4 +1057,3 @@ ol {
 #forum_search_cat_list {
   border: none;
 }
-

@@ -22,7 +22,6 @@ class InitialUserSeeder extends AbstractSeed {
                 'PermissionID' => 15,
                 'can_leech' => 1,
                 'torrent_pass' => '86519d75682397913039534ea21a4e45',
-                'LastAccess' => $now
             ],
             [
                 'Username' => 'user',
@@ -35,7 +34,17 @@ class InitialUserSeeder extends AbstractSeed {
                 'PermissionID' => 2,
                 'can_leech' => 1,
                 'torrent_pass' => '86519d75682397913039534ea21a4e45',
-                'LastAccess' => $now
+            ],
+        ])->saveData();
+
+        $this->table('user_last_access')->insert([
+            [
+                'user_id' => 1,
+                'last_access' => $now,
+            ],
+            [
+                'user_id' => 2,
+                'last_access' => $now,
             ],
         ])->saveData();
 

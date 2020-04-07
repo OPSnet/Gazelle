@@ -5,35 +5,6 @@ NOTE: The standards defined in this document will likely differ from
 what is actually seen in the Gazelle code. This document is the first
 step in properly enforcing coding standards throughout the project.
 
-# Table of Contents
-
-1. FILE FORMATTING
-2. CODE STYLING
-    1. Code styling for PHP and JavaScript
-    2. Code styling for CSS
-    3. Code styling for SQL
-3. NAMING CONVENTIONS
-    1. Function names
-    2. Variable names
-    3. Class names
-    4. SQL names
-    5. Miscellaneous names
-4. COMMENTS
-5. USER INTERFACE
-6. EXAMPLES
-    1. PHP examples
-    2. CSS examples
-    3. SQL examples
-
-
-This document contains the coding standards for Gazelle.
-This document is a work-in-progress and is subject to change.
-
-NOTE: The standards defined in this document will likely differ from
-what is actually seen in the Gazelle code. This document is the first
-step in properly enforcing coding standards throughout the project.
-
-
 == TABLE OF CONTENTS ==
 
 1.    FILE FORMATTING
@@ -57,7 +28,7 @@ step in properly enforcing coding standards throughout the project.
 
 # FILE FORMATTING
 
-Tabs shall always be used for indentation.
+Spaces shall always be used for indentation. 4-space indents are used.
 
 Files shall be encoded in UTF-8.
 
@@ -65,8 +36,10 @@ Files shall always use Unix-style line endings (LF). The program dos2unix
 will take care of this for you, if you have files that use Windows-style
 line endings (CR+LF) or old Mac-style line endings (CR).
 
-File names for PHP, CSS, and JavaScript files shall be all lowercase and
-use underscores instead of spaces.
+Files must end with a new-line character. Use a proper editor that
+performs this automatically.
+
+File names for PHP, CSS, and JavaScript files may not contain spaces.
 
 
 # CODE STYLING
@@ -81,6 +54,8 @@ brace in function definitions.
 There shall be a space between a control structure statement (e.g. `if`,
 `elseif` in PHP, `for`) and the following parenthesis.
 
+PHP files shall not end with a trailing `?>`.
+
 There shall be a space around conditional operators.
 
 When using ternary operators, spaces shall be used around the operators.
@@ -90,13 +65,29 @@ For PHP conditional blocks, `elseif` is to be used instead of `else if`.
 In loops and conditional blocks, there shall be braces even if there is
 only one statement.
 
-In loops and conditional blocks, the statement(s) shall be placed on the
-following lines.
+In loops and conditional blocks, the statement(s) shall be placed on
+separate lines.
 
 When opening a PHP statement, `<?php` shall be used instead of `<?`. In
-other words, use PHP's regular tags. The short tags are deprecated and removed in newer php versions.
+other words, short tags are forbidden. When using <?= ... ?> there shall
+be spaces at either end of the block (so that it is easy to grab the
+contents in vim with e.g. `yE`).
 
-When declaring an array, the short syntax `[]` shall be used, instead of the longer `array()`.
+When declaring an array, the short syntax `[]` shall be used, instead
+of the longer `array()`.
+
+In general, any syntax as of PHP 7.3 is permitted, and probably
+recommended, in the interest of brevity and clarity. Trailing commas
+in lists are allowed, and recommended.
+
+Use indents as appropriate to aid readability. When functions with
+many parameters are laid out over multiple lines, the subsequent lines
+are indented 4 characters (and not to the opening parenthesis above).
+
+    $result = someFunction(
+        anotherFunc(1, 2, 3),
+        yetAnotherFunc(4, 5 6),
+    );
 
 Switch cases in index files shall not contain substantial code. The use
 of include statements is acceptable.
@@ -123,26 +114,47 @@ Long SQL queries shall be separated on multiple lines.
 
 Short SQL queries may be on a single line.
 
-All SQL keywords shall be uppercase.
+All SQL keywords shall be uppercase. `count()`, `sum()`, `now()` are not
+keywords, they are functions.
+
+All queries that have external inputs shall use placeholders.
 
 Aliases shall be used to refer to any columns whenever multiple tables are
 joined in an SQL query. They shall be using the `tbl_name AS alias_name`
-syntax. No table aliases shall be used for single-table queries.
+syntax. Table aliases must be used for single-table queries (because one
+day a second table will be added to the query). Table aliases can be
+constructed from the first letter of each word in the name (`users_main`
+becomes `um`).
 
-The primary SQL keywords should be at the same indentation level unless
-part of a JOIN or other complex statement.
+The primary SQL keywords should be at the same indentation level.
+(`SELECT`, `FROM`, 'INNER JOIN`, `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`).
 
-Use indents as appropriate to aid readability.
+The SQL keywords `INNER JOIN`, `RIGHT JOIN`, `LEFT JOIN` are at the same
+level as the `SELECT` statement. The `JOIN` abbreviation for `INNER JOIN`
+is not accepted. `NATURAL JOIN` is forbidden.
 
-The SQL keywords `JOIN`, `RIGHT JOIN`, `LEFT JOIN` must be indented once from
-the `SELECT` statement.
+Join clauses must be parenthesized: `a INNER JOIN b IN (a.foo = b.kek)`
+When the column names match `USING` is preferred `a INNER JOIN b USING (kek)`.
 
 The SQL keyword `AND` must be indented once from the `WHERE` (and similar)
 statements.
 
+`UPDATE` that update multiple columns have one column per line.
+
 The "not equal to" operator `!=` must be used instead of the alternative
 operator `<>`.
 
+## Naming conventions for new tables
+
+(Legacy tables are exempt).
+
+Names are always singular.
+
+The primary key is named `<table>_id`.
+
+Zero dates are forbidden.
+
+Numeric enums (`'0', '1', '2'`) are forbidden. Use descriptive names.
 
 # NAMING CONVENTIONS
 
@@ -173,25 +185,26 @@ letter.
 PHP class constants shall be written in `CamelCase` with a leading
 uppercase letter.
 
+PHP global constants shall be written in `ALL_CAPS`.
+
+PHP constants `true`, `false`, and `null` shall be written in all lowercase.
+
 ## SQL names
 
 All SQL keywords shall be written in all UPPERCASE.
 
 All SQL table names shall be written in `lowercase_with_underscores`.
 
-All SQL column names shall be written in `CamelCase` with a leading
+All legacy SQL column names are be written in `CamelCase` with a leading
 uppercase letter.
 
-All automatically-incremented ID columns shall be named `ID`, while the
-other columns for Identification numbers shall have names like `RequestID`, `TorrentID`,
-etc.
+All new column names shall be written in `lowercase_with_underscores`.
+
+All automatically-incremented ID columns shall be named `<table>_id`,
+while the other columns for ids shall have names like `collage_id`,
+`user_id`.  etc.
 
 ## Miscellaneous names
-
-PHP global constants shall be written in `ALL_CAPS`.
-
-PHP constants `true`, `false`, and `null` shall be written in all lowercase.
-
 
 # COMMENTS
 
@@ -223,21 +236,21 @@ for the most likely issues to encounter in web design:
 
 ## PHP examples
 
-    if ($Foo >= 0) {
-        $SomeString = "this is a string $DiffString with more text";
-    } elseif ($Foo == 0) {
+    if ($foo >= 0) {
+        $someString = "this is a string $diffString with more text";
+    } elseif ($foo == 0) {
         // other things happen
     } else {
         // more magic
     }
 
-    function works_magic($Foo, $Bar) {
-        return $Foo;
+    function worksMagic($foo, $bar) {
+        return $foo;
     }
 
-    echo ($Foo == true ? 'foo is true' : 'foo is false');
+    echo ($foo == true ? 'foo is true' : 'foo is false');
 
-    if ($Foo == true) {
+    if ($foo == true) {
         // magic happens
     }
 
@@ -274,26 +287,23 @@ for the most likely issues to encounter in web design:
         r.ID, e.EditionID, r.Title, r.Year, r.CatalogueNumber,
         l.Name AS Label, r.LabelID, r.Image, r.MusicBrainzID
     FROM releases AS r
-        JOIN editions AS e ON e.ReleaseID = r.ID
-        LEFT JOIN labels AS l ON l.ID = r.LabelID
-    WHERE r.ID IN ($ReleaseIDsSQL)
+    INNER JOIN editions AS e ON (e.ReleaseID = r.ID)
+    LEFT JOIN labels AS l ON (l.ID = r.LabelID)
+    WHERE r.ID IN (?, ?, ?)
     ORDER BY e.EditionID, r.Year ASC
-
 
     SELECT SQL_CALC_FOUND_ROWS c.ID, c.Subject, cu.Unread, cu.Sticky,
         cu.ForwardedTo, cu2.UserID, cu.ReceivedDate AS Date
     FROM pm_conversations AS c
-        LEFT JOIN pm_conversations_users AS cu ON cu.ConvID = c.ID
-            AND cu.UserID = '1'
-        LEFT JOIN pm_conversations_users AS cu2 ON cu2.ConvID = c.ID
-            AND cu2.UserID != '1'
-            AND cu2.ForwardedTo = 0
-        LEFT JOIN users_main AS um ON um.ID = cu2.UserID
+    LEFT JOIN pm_conversations_users AS cu
+        ON (cu.ConvID = c.ID AND cu.UserID = '1')
+    LEFT JOIN pm_conversations_users AS cu2
+        ON (cu2.ConvID = c.ID AND cu2.UserID != '1' AND cu2.ForwardedTo = 0)
+    LEFT JOIN users_main AS um ON (um.ID = cu2.UserID)
     WHERE um.Username LIKE 'test'
         AND cu.InInbox = '1'
     GROUP BY c.ID
     ORDER BY cu.Sticky, Date DESC
     LIMIT 25
 
-
-    SELECT RequestID AS ID, UserID FROM bookmarks_requests
+    SELECT RequestID AS ID, UserID FROM bookmarks_requests br

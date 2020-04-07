@@ -30,7 +30,7 @@ class TorrentStatsTables extends AbstractMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change()
+    public function up()
     {
         $this->table('users_leech_stats', ['id' => false, 'primary_key' => 'UserID'])
             ->addColumn('UserID', 'integer', ['limit' => 10, 'signed' => false])
@@ -67,5 +67,12 @@ class TorrentStatsTables extends AbstractMigration
 
         $this->execute("INSERT INTO torrents_leech_stats (TorrentID, Seeders, Leechers, Snatched, Balance, last_action) SELECT ID, Seeders, Leechers, Snatched, balance, last_action FROM torrents");
         $this->execute("INSERT INTO users_leech_stats (UserID, Uploaded, Downloaded) SELECT ID, Uploaded, Downloaded FROM users_main");
+    }
+
+    public function down()
+    {
+        $this->table('users_leech_stats')->drop()->update();
+        $this->table('torrents_leech_stats')->drop()->update();
+        $this->table('deleted_torrents_leech_stats')->drop()->update();
     }
 }

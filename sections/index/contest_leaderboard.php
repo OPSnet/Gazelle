@@ -2,11 +2,17 @@
 $ContestMgr = new \Gazelle\Contest(G::$DB, G::$Cache);
 
 $Contest = $ContestMgr->get_current_contest();
+
 if (empty($Contest)) {
     return;
 }
 $Leaderboard = $ContestMgr->get_leaderboard($Contest['ID']);
 if (empty($Leaderboard)) {
+    return;
+}
+
+/* Stop showing the contest results after two weeks */
+if ((time() - strtotime($Contest['DateEnd'])) / 86400 > 15) {
     return;
 }
 ?>

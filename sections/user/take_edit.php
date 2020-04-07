@@ -31,7 +31,6 @@ $Val->SetFields('styleurl', 0, "regex", "You did not enter a valid stylesheet UR
 // The next two are commented out because the drop-down menus were replaced with a check box and radio buttons
 //$Val->SetFields('disablegrouping', 0, "number", "You forgot to select your torrent grouping option.");
 //$Val->SetFields('torrentgrouping', 0, "number", "You forgot to select your torrent grouping option.");
-$Val->SetFields('discogview', 1, "number", "You forgot to select your discography view option.", ['minlength' => 0, 'maxlength' => 1]);
 $Val->SetFields('postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]);
 //$Val->SetFields('hidecollage', 1, "number", "You forgot to select your collage option.", array('minlength' => 0, 'maxlength' => 1));
 $Val->SetFields('collagecovers', 1, "number", "You forgot to select your collage option.");
@@ -140,38 +139,48 @@ if (isset($_POST['p_donor_stats'])) {
 
 
 // Email change
-$DB->query("
+$DB->prepared_query('
     SELECT Email
     FROM users_main
-    WHERE ID = $UserID");
+    WHERE ID = ?
+    ', $UserID
+);
+
 list($CurEmail) = $DB->next_record();
 if ($CurEmail != $_POST['email']) {
     if (!check_perms('users_edit_profiles')) { // Non-admins have to authenticate to change email
-        $DB->query("
-            SELECT PassHash, Secret
+        $DB->prepared_query('
+            SELECT PassHash
             FROM users_main
-            WHERE ID = '".db_string($UserID)."'");
-        list($PassHash,$Secret)=$DB->next_record();
+            WHERE ID = ?
+            ', $UserID
+        );
+
+        list($PassHash) = $DB->next_record();
         if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
             $Err = 'You did not enter the correct password.';
         }
     }
     if (!$Err) {
-        $NewEmail = db_string($_POST['email']);
+        $NewEmail = $_POST['email'];
 
         //This piece of code will update the time of their last email change to the current time *not* the current change.
-        $ChangerIP = db_string($LoggedUser['IP']);
-        $DB->query("
+        $ChangerIP = $LoggedUser['IP'];
+        $DB->prepared_query("
             UPDATE users_history_emails
-            SET Time = '".sqltime()."'
-            WHERE UserID = '$UserID'
-                AND Time = '0000-00-00 00:00:00'");
-        $DB->query("
-            INSERT INTO users_history_emails
-                (UserID, Email, Time, IP)
-            VALUES
-                ('$UserID', '$NewEmail', '0000-00-00 00:00:00', '".db_string($_SERVER['REMOTE_ADDR'])."')");
+            SET Time = now()
+            WHERE UserID = ? 
+                AND Time = '0000-00-00 00:00:00'
+            ", $UserID
+        );
 
+        $DB->prepared_query("
+            INSERT INTO users_history_emails
+                (UserID, Email, IP, Time)
+            VALUES
+                (?,      ?,     ?, '0000-00-00 00:00:00')
+            ", $UserID, $NewEmail, $_SERVER['REMOTE_ADDR']
+        );
     } else {
         error($Err);
         header("Location: user.php?action=edit&userid=$UserID");
@@ -181,11 +190,14 @@ if ($CurEmail != $_POST['email']) {
 //End email change
 
 if (!$Err && !empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
-    $DB->query("
-        SELECT PassHash, Secret
+    $DB->prepared_query('
+        SELECT PassHash
         FROM users_main
-        WHERE ID = '".db_string($UserID)."'");
-    list($PassHash, $Secret) = $DB->next_record();
+        WHERE ID = ? 
+        ', $UserID
+    );
+
+    list($PassHash) = $DB->next_record();
 
     if (Users::check_password($_POST['cur_pass'], $PassHash)) {
         if ($_POST['cur_pass'] == $_POST['new_pass_1']) {
@@ -216,9 +228,7 @@ if (!empty($LoggedUser['DefaultSearch'])) {
 }
 $Options['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
 $Options['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
-$Options['DiscogView']          = (!empty($_POST['discogview']) ? 1 : 0);
 $Options['PostsPerPage']        = (int)$_POST['postsperpage'];
-//$Options['HideCollage']         = (!empty($_POST['hidecollage']) ? 1 : 0);
 $Options['CollageCovers']       = (empty($_POST['collagecovers']) ? 0 : $_POST['collagecovers']);
 $Options['ShowTorFilter']       = (empty($_POST['showtfilter']) ? 0 : 1);
 $Options['ShowTags']            = (!empty($_POST['showtags']) ? 1 : 0);
@@ -228,7 +238,7 @@ $Options['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0
 $Options['UseOpenDyslexic']     = (!empty($_POST['useopendyslexic']) ? 1 : 0);
 $Options['Tooltipster']         = (!empty($_POST['usetooltipster']) ? 1 : 0);
 $Options['AutoloadCommStats']   = (check_perms('users_mod') && !empty($_POST['autoload_comm_stats']) ? 1 : 0);
-$Options['DisableAvatars']      = db_string($_POST['disableavatars']);
+$Options['DisableAvatars']      = (!empty($_POST['disableavatars']) ? (int)$_POST['disableavatars'] : 0);
 $Options['Identicons']          = (!empty($_POST['identicons']) ? (int)$_POST['identicons'] : 0);
 $Options['DisablePMAvatars']    = (!empty($_POST['disablepmavatars']) ? 1 : 0);
 $Options['NotifyOnQuote']       = (!empty($_POST['notifications_Quotes_popup']) ? 1 : 0);
@@ -287,6 +297,7 @@ $DB->prepared_query('
     WHERE ID = ?
     ', $UserID
 );
+
 if ($DB->has_results()) {
     list($OldLastFMUsername) = $DB->next_record();
     if ($OldLastFMUsername != $LastFMUsername) {
@@ -421,7 +432,7 @@ $Params[] = $UserID;
 $DB->prepared_query($SQL, ...$Params);
 
 if ($ResetPassword) {
-    logout_all_sessions();
+    logout_all_sessions($UserID);
 }
 
 header("Location: user.php?action=edit&userid=$UserID");

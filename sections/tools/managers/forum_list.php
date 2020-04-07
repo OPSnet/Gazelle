@@ -147,8 +147,7 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <td>
                 <select name="categoryid">
-<?php    reset($ForumCats);
-    while (list($CurCat, $CatName) = each($ForumCats)) { ?>
+<?php foreach ($ForumCats as $CurCat => $CatName) { ?>
                     <option value="<?=$CurCat?>"<?php if ($CurCat == $CategoryID) { echo ' selected="selected"'; } ?>><?=$CatName?></option>
 <?php
     } ?>

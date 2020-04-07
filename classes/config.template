@@ -1,6 +1,6 @@
 <?php
-if (PHP_VERSION_ID < 50400) {
-    die("Gazelle requires PHP 5.4 or later to function properly");
+if (PHP_VERSION_ID < 70300) {
+    die("Gazelle (Orpheus fork) requires PHP 7.3 or later to function properly");
 }
 date_default_timezone_set('UTC');
 
@@ -20,8 +20,8 @@ define('REFERRAL_SEND_EMAIL', false); // Whether to send invite emails for refer
 define('REFERRAL_SITES', ['ABC', 'DEF']);
 define('RECOVERY', false);
 define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
-define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow APL.
-define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation
+define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow source flag from previous site.
+define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation.
 
 // Allows you to run static content off another server. Default is usually what you want.
 define('NONSSL_STATIC_SERVER', 'static/');
@@ -148,6 +148,9 @@ define('ELITE_TM',      '23');
 define('FORUM_MOD',     '28');
 define('ULTIMATE_TM',   '48');
 
+// Locked account constant
+define('STAFF_LOCKED', 1);
+
 // Pagination
 define('TORRENT_COMMENTS_PER_PAGE', 10);
 define('POSTS_PER_PAGE', 25);
@@ -222,10 +225,24 @@ $Formats = array('MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS');
 $Bitrates = array('192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other');
 $Media = array('CD', 'DVD', 'Vinyl', 'Blu-ray', 'Soundboard', 'SACD', 'DAT', 'Cassette', 'WEB');
 
-$CollageCats = array(0=>'Personal', 1=>'Theme', 2=>'Genre introduction', 3=>'Discography', 4=>'Label', 5=>'Staff picks', 6=>'Charts', 7=>'Artists');
+define('ICON_ALL',    "\xe2\x9c\x85");
+define('ICON_NONE',   "\xf0\x9f\x9a\xab");
+define('ICON_TOGGLE', "\xf0\x9f\x94\x81");
+
+$CollageCats = [
+    0 => 'Personal',
+    1 => 'Theme',
+    2 => 'Genre Introduction',
+    3 => 'Discography',
+    4 => 'Label',
+    5 => 'Staff picks',
+    6 => 'Charts',
+    7 => 'Artists',
+    8 => 'Awards',
+    9 => 'Series',
+];
 
 $ReleaseTypes = array(1=>'Album', 3=>'Soundtrack', 5=>'EP', 6=>'Anthology', 7=>'Compilation', 9=>'Single', 11=>'Live album', 13=>'Remix', 14=>'Bootleg', 15=>'Interview', 16=>'Mixtape', 17=>'DJ Mix', 18=>'Concert recording', 21=>'Unknown');
-//$ForumCats = array(1=>'Site', 5=>'Community', 10=>'Help', 8=>'Music', 20=>'Trash'); //No longer needed
 
 $ZIPGroups = array(
     0 => 'MP3 (VBR) - High Quality',
@@ -369,3 +386,19 @@ define('ARTIST_PRODUCER', 7);
 define('RANDOM_ARTIST_MIN_ENTRIES', 1);
 define('RANDOM_COLLAGE_MIN_ENTRIES', 1);
 define('RANDOM_TORRENT_MIN_SEEDS', 0);
+
+//resource_type://username:password@domain:port/path?query_string#anchor
+define('RESOURCE_REGEX', '(https?|ftps?):\/\/');
+define('IP_REGEX', '(\d{1,3}\.){3}\d{1,3}');
+define('DOMAIN_REGEX', '([a-z0-9\-\_]+\.)*[a-z0-9\-\_]+');
+define('PORT_REGEX', ':\d{1,5}');
+define('URL_REGEX', '('.RESOURCE_REGEX.')('.IP_REGEX.'|'.DOMAIN_REGEX.')('.PORT_REGEX.')?(\/\S*)*');
+define('USERNAME_REGEX_SHORT', '[a-z0-9_?\.]{1,20}');
+define('USERNAME_REGEX', '/^'.USERNAME_REGEX_SHORT.'$/iD');
+define('EMAIL_REGEX','[_a-z0-9-]+([.+][_a-z0-9-]+)*@'.DOMAIN_REGEX);
+define('IMAGE_REGEX', URL_REGEX.'\/\S+\.(jpg|jpeg|tif|tiff|png|gif|bmp)(\?\S*)?');
+define('CSS_REGEX', URL_REGEX.'\/\S+\.css(\?\S*)?');
+define('SITELINK_REGEX', RESOURCE_REGEX.'(ssl.)?'.preg_quote(NONSSL_SITE_URL, '/'));
+define('TORRENT_REGEX', SITELINK_REGEX.'\/torrents\.php\?(.*&)?torrentid=(\d+)'); // torrentid = group 4
+define('TORRENT_GROUP_REGEX', SITELINK_REGEX.'\/torrents\.php\?(.*&)?id=(\d+)'); // id = group 4
+define('ARTIST_REGEX', SITELINK_REGEX.'\/artist\.php\?(.*&)?id=(\d+)'); // id = group 4

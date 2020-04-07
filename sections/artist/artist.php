@@ -67,88 +67,74 @@ function torrentEdition($title, $year, $recordLabel, $catlogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catlogueNumber, $media]);
 }
 
+$User = new \Gazelle\User($DB, $Cache, $LoggedUser['ID']);
+
 View::show_header($Artist->name(), 'browse,requests,bbcode,comments,voting,recommend,subscriptions');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=display_str($Artist->name())?><?php if ($RevisionID) { ?> (Revision #<?=$RevisionID?>)<?php } if ($Artist->vanityHouse()) { ?> [Vanity House] <?php } ?></h2>
+        <h2><?=display_str($Artist->name())?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
         <div class="linkbox">
             <a href="artist.php?action=editrequest&amp;artistid=<?=$ArtistID?>" class="brackets">Request an Edit</a>
 <?php
-    if (check_perms('site_submit_requests')) { ?>
+if (check_perms('site_submit_requests')) { ?>
             <a href="requests.php?action=new&amp;artistid=<?=$ArtistID?>" class="brackets">Add request</a>
 <?php
-    }
+}
 
 if (check_perms('site_torrents_notify')) {
-    if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
-        $DB->query("
-            SELECT ID, Artists
-            FROM users_notify_filters
-            WHERE UserID = '$LoggedUser[ID]'
-                AND Label = 'Artist notifications'
-            LIMIT 1");
-        $Notify = $DB->next_record(MYSQLI_ASSOC, false);
-        $Cache->cache_value('notify_artists_'.$LoggedUser['ID'], $Notify, 0);
-    }
-    if (stripos($Notify['Artists'], "|" . $Artist->name() . "|") === false) {
+    $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $ArtistID, $LoggedUser['AuthKey']);
+    if ($User->hasArtistNotification($Artist->name())) {
 ?>
-            <a href="artist.php?action=notify&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Notify of new uploads</a>
+            <a href="<?= $urlStem ?>&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
 <?php
     } else { ?>
-            <a href="artist.php?action=notifyremove&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Do not notify of new uploads</a>
+            <a href="<?= $urlStem ?>&amp;action=notify" class="brackets">Notify of new uploads</a>
 <?php
     }
 }
 
-    if (Bookmarks::has_bookmarked('artist', $ArtistID)) {
-?>
-            <a href="#" id="bookmarklink_artist_<?=$ArtistID?>" onclick="Unbookmark('artist', <?=$ArtistID?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
+if (Bookmarks::has_bookmarked('artist', $ArtistID)) { ?>
+            <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Unbookmark('artist', <?= $ArtistID ?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
+<?php } else { ?>
+            <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
+<?php } ?>
+            <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?= $ArtistID ?>);return false;"><?=Subscriptions::has_subscribed_comments('artist', $ArtistID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
 <?php
-    } else { ?>
-            <a href="#" id="bookmarklink_artist_<?=$ArtistID?>" onclick="Bookmark('artist', <?=$ArtistID?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
+
+if (check_perms('site_edit_wiki')) { ?>
+            <a href="artist.php?action=edit&amp;artistid=<?= $ArtistID ?>" class="brackets">Edit</a>
+<?php } ?>
+            <a href="artist.php?action=history&amp;artistid=<?= $ArtistID ?>" class="brackets">View history</a>
 <?php
-    } ?>
-            <a href="#" id="subscribelink_artist<?=$ArtistID?>" class="brackets" onclick="SubscribeComments('artist', <?=$ArtistID?>);return false;"><?=Subscriptions::has_subscribed_comments('artist', $ArtistID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
-<!--    <a href="#" id="recommend" class="brackets">Recommend</a> -->
-<?php
-    if (check_perms('site_edit_wiki')) {
-?>
-            <a href="artist.php?action=edit&amp;artistid=<?=$ArtistID?>" class="brackets">Edit</a>
-<?php
-    } ?>
-            <a href="artist.php?action=history&amp;artistid=<?=$ArtistID?>" class="brackets">View history</a>
-<?php
-    if ($RevisionID && check_perms('site_edit_wiki')) { ?>
+
+if ($RevisionID && check_perms('site_edit_wiki')) { ?>
             <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Revert to this revision</a>
-<?php
-    } ?>
+<?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#info" class="brackets">Info</a>
 <?php
-    if (defined('LASTFM_API_KEY')) { ?>
+
+if (defined('LASTFM_API_KEY')) { ?>
             <a href="artist.php?id=<?=$ArtistID?>#concerts" class="brackets">Concerts</a>
-<?php
-    } ?>
+<?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#artistcomments" class="brackets">Comments</a>
 <?php
-    if (check_perms('site_delete_artist') && check_perms('torrents_delete')) { ?>
+if (check_perms('site_delete_artist') && check_perms('torrents_delete')) { ?>
             <a href="artist.php?action=delete&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
-<?php
-    } ?>
+<?php } ?>
         </div>
     </div>
-<?php /* Misc::display_recommend($ArtistID, "artist"); */ ?>
     <div class="sidebar">
 <?php
-    if ($Artist->image()) { ?>
+
+if ($Artist->image()) { ?>
         <div class="box box_image">
             <div class="head"><strong><?= $Artist->name() ?></strong></div>
             <div style="text-align: center; padding: 10px 0px;">
                 <img style="max-width: 220px;" src="<?= ImageTools::process($Artist->image(), true) ?>" alt="<?= $Artist->name()?>" onclick="lightbox.init('<?= ImageTools::process($Artist->image()) ?>', 220);" />
             </div>
         </div>
-<?php
-    } ?>
+<?php } ?>
 
         <div class="box box_search">
             <div class="head"><strong>File Lists Search</strong></div>
@@ -191,8 +177,7 @@ if (check_perms('zip_downloader')) {
                             <span class="remove remove_collector"><a href="#" onclick="remove_selection('<?=$ListItem?>'); return false;" style="float: right;" class="brackets tooltip" title="Remove format from the Collector">X</a></span>
                             <br style="clear: all;" />
                         </li>
-<?php
-    } ?>
+<?php } /* foreach */ ?>
                     </ul>
                     <select id="formats" style="width: 180px;">
 <?php
@@ -211,8 +196,7 @@ foreach ($ZIPOptions as $Option) {
     }
 ?>
                             <option id="opt<?=$GroupID.$OptionID?>" value="<?=$GroupID.$OptionID?>"<?php if (in_array($GroupID.$OptionID, $ZIPList)) { echo ' disabled="disabled"'; } ?>><?=$OptName?></option>
-<?php
-} ?>
+<?php } /* foreach */ ?>
                         </optgroup>
                     </select>
                     <button type="button" onclick="add_selection()">+</button>
@@ -258,18 +242,19 @@ Tags::reset();
             <div class="head"><strong>Similar Artists</strong></div>
             <ul class="stats nobullet">
 <?php
-    if (!$Artist->similarArtists()) { ?>
+
+if (!$Artist->similarArtists()) { ?>
                 <li><span style="font-style: italic;">None found</span></li>
 <?php
+}
+$Max = null;
+foreach ($Artist->similarArtists() as $SimilarArtist) {
+    list($Artist2ID, $Artist2Name, $Score, $SimilarID) = $SimilarArtist;
+    $Score = $Score / 100;
+    if (is_null($Max)) {
+        $Max = $Score + 1;
     }
-    $Max = null;
-    foreach ($Artist->similarArtists() as $SimilarArtist) {
-        list($Artist2ID, $Artist2Name, $Score, $SimilarID) = $SimilarArtist;
-        $Score = $Score / 100;
-        if (is_null($Max)) {
-            $Max = $Score + 1;
-        }
-        $FontSize = (ceil(((($Score - 2) / $Max - 2) * 4))) + 8;
+    $FontSize = ceil(((($Score - 2) / $Max - 2) * 4)) + 8;
 ?>
                 <li>
                     <span class="tooltip" title="<?=$Score?>"><a href="artist.php?id=<?=$Artist2ID?>" style="float: left; display: block;"><?=$Artist2Name?></a></span>
@@ -283,7 +268,7 @@ Tags::reset();
                     <br style="clear: both;" />
                 </li>
 <?php
-    } /* foreach ($Artist->similarArtists()) */ ?>
+} /* foreach ($Artist->similarArtists()) */ ?>
             </ul>
         </div>
         <div class="box box_addartists box_addartists_similar">
@@ -309,7 +294,6 @@ Tags::reset();
 if ($sections = $Artist->sections()) {
     /* Move the sections to the way the viewer wants to see them. */
     if (isset($LoggedUser['SortHide'])) {
-        $sortHide = $LoggedUser['SortHide'];
         $reorderedSections = [];
         foreach (array_keys($LoggedUser['SortHide']) as $reltype) {
             if (array_key_exists($reltype, $sections)) {
@@ -322,14 +306,13 @@ if ($sections = $Artist->sections()) {
     foreach ($sections as $section => $Groups) {
         $sectionTitle = sectionTitle($section);
         $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
-
-        if (!empty($LoggedUser['DiscogView']) || (isset($LoggedUser['SortHide'][$section]) && $LoggedUser['SortHide'][$section] == 1)) {
+        if (isset($LoggedUser['SortHide'][$section]) && $LoggedUser['SortHide'][$section] == 1) {
             $ToggleStr = " onclick=\"$('.releases_$section').gshow(); return true;\"";
         } else {
             $ToggleStr = '';
         }
 ?>
-        <a href="#torrents_<?=str_replace(' ', '_', strtolower($ReleaseTypes[$section]))?>" class="brackets"<?=$ToggleStr?>><?=$sectionTitle?></a>
+        <a href="#torrents_<?= $sectionLabel ?>" class="brackets"<?=$ToggleStr?>><?=$sectionTitle?></a>
 <?php
     }
 
@@ -341,27 +324,27 @@ if ($sections = $Artist->sections()) {
     }
 ?>
     </div>
+    <table class="torrent_table grouped release_table m_table">
 <?php
-    if (!empty($LoggedUser['DiscogView']) || (isset($LoggedUser['SortHide']) && array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 1)) {
-        $HideDiscog = ' hidden';
-    } else {
-        $HideDiscog = '';
-    }
+    $stylePath = SSL_STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images/';
 
-    $ShowGroups = !isset($LoggedUser['TorrentGrouping']) || $LoggedUser['TorrentGrouping'] == 0;
-    $HideTorrents = ($ShowGroups ? '' : ' hidden');
-?>
-            <table class="torrent_table grouped release_table m_table" id="torrents_<?= $sectionLabel ?>">
-<?php
     foreach ($sections as $section => $Groups) {
+        $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
+        $sectionClosed = isset($LoggedUser['SortHide']) && array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 0
+            ? 0 : 1;
+        $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 1) == 1 ? 1 : 0;
+        $formatsClosed = ($LoggedUser['DisableGrouping2'] ?? 1) == 1 ? 0 : 1;
+        $sectionHidden = $sectionClosed ? ' hidden' : '';
+        $groupsHidden = ($sectionClosed || $groupsClosed) ? ' hidden' : '';
+        $formatsHidden = ($sectionClosed || $groupsClosed || $formatsClosed) ? ' hidden' : '';
 ?>
-                <tr class="colhead_dark">
+                <tr class="colhead_dark" id="torrents_<?= $sectionLabel ?>">
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?= sectionTitle($section) ?></strong> (<a href="#" onclick="$('.releases_<?= $section ?>').gtoggle(true); return false;">View</a>)</td>
                     <td>Size</td>
-                    <td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-                    <td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-                    <td class="sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+                    <td class="sign snatches"><img src="<?= $stylePath ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+                    <td class="sign seeders"><img src="<?= $stylePath ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+                    <td class="sign leechers"><img src="<?= $stylePath ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
                 </tr>
 <?php
     foreach ($Groups as $Group) {
@@ -413,10 +396,10 @@ if ($sections = $Artist->sections()) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 ?>
-            <tr class="releases_<?=$section?> group discog<?= ($isSnatched ? ' snatched_group' : '') . $HideDiscog?>">
+            <tr class="releases_<?=$section?> group discog<?= $sectionHidden . ($isSnatched ? ' snatched_group' : '') ?>">
                     <td class="td_collapse center m_td_left">
-                        <div id="showimg_<?=$GroupID?>" class="<?=($ShowGroups ? 'hide' : 'show')?>_torrents">
-                            <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$GroupID?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>
+                        <div id="showimg_<?=$GroupID?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
+                            <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $GroupID ?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>
                         </div>
                     </td>
                     <td colspan="5" class="td_info big_info">
@@ -451,32 +434,31 @@ if ($sections = $Artist->sections()) {
                     </td>
                 </tr>
 <?php
+        $SnatchedGroupClass = ($Group['Flags']['IsSnatched'] ? ' snatched_group' : '');
         $prevEdition = torrentEdition('', '-', '', '', '');
         $EditionID = 0;
 
         foreach ($Torrents as $TorrentID => $Torrent) {
-            if ($Torrent['Remastered'] && !$Torrent['RemasterYear']) {
-                $FirstUnknown = !isset($FirstUnknown);
-            }
-            $SnatchedTorrentClass = ($Torrent['IsSnatched'] ? ' snatched_torrent' : '');
-
             $torrentEdition = torrentEdition(
                 $Torrent['RemasterTitle'], $Torrent['RemasterYear'], $Torrent['RemasterRecordLabel'],
                 $Torrent['RemasterCatalogueNumber'], $Torrent['Media']
             );
+            if ($Torrent['Remastered'] && !$Torrent['RemasterYear']) {
+                $FirstUnknown = !isset($FirstUnknown);
+            }
 
-            $SnatchedGroupClass = ($Group['Flags']['IsSnatched'] ? ' snatched_group' : '');
             if ($prevEdition != $torrentEdition) {
                 $EditionID++;
 ?>
-        <tr class="releases_<?= $section ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $HideDiscog . $HideTorrents?>">
-            <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
+        <tr class="releases_<?= $section ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $groupsHidden ?>">
+            <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group."><?= $formatsClosed ? '+' : '&minus;' ?></a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
         </tr>
 <?php
             }
             $prevEdition = $torrentEdition;
+            $SnatchedTorrentClass = ($Torrent['IsSnatched'] ? ' snatched_torrent' : '');
 ?>
-        <tr class="releases_<?=$section?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?=$SnatchedTorrentClass . $SnatchedGroupClass . $HideDiscog . $HideTorrents?>">
+        <tr class="releases_<?=$section?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $formatsHidden ?>">
             <td class="td_info" colspan="2">
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=$Torrent['HasFile'] ? 'DL' : 'Missing'?></a>
@@ -486,7 +468,7 @@ if ($sections = $Artist->sections()) {
                             | <a href="ajax.php?action=torrent&amp;id=<?=($TorrentID)?>" download="<?= $Artist->name() . " - " . $GroupName . ' ['. $GroupYear .']' ?> [<?=($TorrentID)?>] [orpheus.network].json" class="tooltip" title="Download JSON">JS</a>
                     ]
                 </span>
-                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?=Torrents::torrent_info($Torrent)?></a>
+                &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?= Torrents::torrent_info($Torrent) ?></a>
             </td>
             <td class="td_size number_column nobr"><?=Format::get_size($Torrent['Size'])?></td>
             <td class="td_snatched number_column m_td_right"><?=number_format($Torrent['Snatched'])?></td>
@@ -650,7 +632,7 @@ if ($Artist->similarArtists()) {
                 <strong id="flipper_title">Similar Artist Map</strong>
                 <a id="flip_to" class="brackets" href="#" onclick="flipView(); return false;">Switch to cloud</a>
             </div>
-            <div id="flip_view_1" style="display: block; width: <?=(WIDTH)?>px; height: <?=(HEIGHT)?>px; position: relative; background-image: url(static/similar/<?=($ArtistID)?>.png?t=<?=(time())?>);">
+            <div id="flip_view_1" style="display: block; width: <?=(WIDTH)?>px; height: <?=(HEIGHT)?>px; position: relative; background-image: url(<?= SSL_STATIC_SERVER ?>similar/<?=($ArtistID)?>.png?t=<?=(time())?>);">
 <?php
     $Similar->write_artists();
 ?>
@@ -677,8 +659,8 @@ function flipView() {
         document.getElementById('flip_to').innerHTML = 'Switch to map';
 
         if (!cloudLoaded) {
-            require("static/functions/tagcanvas.js", function () {
-                require("static/functions/artist_cloud.js", function () {
+            require("<?= SSL_STATIC_SERVER ?>functions/tagcanvas.js", function () {
+                require("<?= SSL_STATIC_SERVER ?>functions/artist_cloud.js", function () {
                 });
             });
             cloudLoaded = true;

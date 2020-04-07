@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\SortableTableHeader;
+
 if (isset($_GET['userid']) && check_perms('users_view_invites')) {
     if (!is_number($_GET['userid'])) {
         error(403);
@@ -23,54 +25,22 @@ $DB->prepared_query('
     ', $UserID
 );
 $Pending = $DB->to_array();
-$OrderWays = ['username', 'email', 'joined', 'lastseen', 'uploaded', 'downloaded', 'ratio'];
 
-if (empty($_GET['order'])) {
-    $CurrentOrder = 'joined';
-    $CurrentSort = 'desc';
-    $NewSort = 'asc';
-} else {
-    if (in_array($_GET['order'], $OrderWays)) {
-        $CurrentOrder = $_GET['order'];
-        if ($_GET['sort'] == 'asc' || $_GET['sort'] == 'desc') {
-            $CurrentSort = $_GET['sort'];
-            $NewSort = ($_GET['sort'] == 'asc' ? 'desc' : 'asc');
-        } else {
-            error(404);
-        }
-    } else {
-        error(404);
-    }
-}
-
-switch ($CurrentOrder) {
-    case 'username':
-        $OrderBy = "um.Username";
-        break;
-    case 'email':
-        $OrderBy = "um.Email";
-        break;
-    case 'joined':
-        $OrderBy = "ui.JoinDate";
-        break;
-    case 'lastseen':
-        $OrderBy = "um.LastAccess";
-        break;
-    case 'uploaded':
-        $OrderBy = "uls.Uploaded";
-        break;
-    case 'downloaded':
-        $OrderBy = "uls.Downloaded";
-        break;
-    case 'ratio':
-        $OrderBy = "(uls.Uploaded / uls.Downloaded)";
-        break;
-    default:
-        $OrderBy = "um.ID";
-        break;
-}
-
-$CurrentURL = Format::get_url(['action', 'order', 'sort']);
+$SortOrderMap = [
+    'username'   => ['um.Username', 'desc'],
+    'email'      => ['um.Email', 'desc'],
+    'joined'     => ['ui.JoinDate', 'desc'],
+    'lastseen'   => ['ula.last_access', 'desc'],
+    'uploaded'   => ['uls.Uploaded', 'desc'],
+    'downloaded' => ['uls.Downloaded', 'desc'],
+    'ratio'      => ['(uls.Uploaded / uls.Downloaded)', 'desc'],
+    'id'         => ['um.ID', 'desc'],
+];
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'joined';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 
 $DB->prepared_query("
     SELECT
@@ -79,12 +49,13 @@ $DB->prepared_query("
         uls.Uploaded,
         uls.Downloaded,
         ui.JoinDate,
-        um.LastAccess
+        ula.last_access
     FROM users_main AS um
+    INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
     WHERE ui.Inviter = ?
-    ORDER BY $OrderBy $CurrentSort
+    ORDER BY $OrderBy $OrderWay
     ", $UserID
 );
 $Invited = $DB->to_array();
@@ -199,19 +170,27 @@ if (!empty($Pending)) {
     </div>
 <?php
 }
-
+$header = new SortableTableHeader([
+    'username'   => 'Username',
+    'email'      => 'Email',
+    'joined'     => 'Joined',
+    'lastseen'   => 'Last Seen',
+    'uploaded'   => 'Uploaded',
+    'downloaded' => 'Downloaded',
+    'ratio'      => 'Ratio',
+], $SortOrder, $OrderWay);
 ?>
     <h3>Invitee list</h3>
     <div class="box pad">
         <table class="invite_table m_table "width="100%">
             <tr class="colhead">
-                <td class="m_th_left"><a href="user.php?action=invite&amp;order=username&amp;sort=<?=(($CurrentOrder == 'username') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Username</a></td>
-                <td><a href="user.php?action=invite&amp;order=email&amp;sort=<?=(($CurrentOrder == 'email') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Email</a></td>
-                <td><a href="user.php?action=invite&amp;order=joined&amp;sort=<?=(($CurrentOrder == 'joined') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Joined</a></td>
-                <td><a href="user.php?action=invite&amp;order=lastseen&amp;sort=<?=(($CurrentOrder == 'lastseen') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Last Seen</a></td>
-                <td class="m_th_right"><a href="user.php?action=invite&amp;order=uploaded&amp;sort=<?=(($CurrentOrder == 'uploaded') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Uploaded</a></td>
-                <td class="m_th_right"><a href="user.php?action=invite&amp;order=downloaded&amp;sort=<?=(($CurrentOrder == 'downloaded') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Downloaded</a></td>
-                <td class="m_th_right"><a href="user.php?action=invite&amp;order=ratio&amp;sort=<?=(($CurrentOrder == 'ratio') ? $NewSort : 'desc')?>&amp;<?=$CurrentURL ?>">Ratio</a></td>
+                <td class="m_th_left nobr"><?= $header->emit('username', $SortOrderMap['username'][1]) ?></td>
+                <td class="nobr"><?= $header->emit('email', $SortOrderMap['email'][1]) ?></td>
+                <td class="nobr"><?= $header->emit('joined', $SortOrderMap['joined'][1]) ?></td>
+                <td class="nobr"><?= $header->emit('lastseen', $SortOrderMap['lastseen'][1]) ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('uploaded', $SortOrderMap['uploaded'][1]) ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('downloaded', $SortOrderMap['downloaded'][1]) ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('ratio', $SortOrderMap['ratio'][1]) ?></td>
             </tr>
 <?php
     $Row = 'a';

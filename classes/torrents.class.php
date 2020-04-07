@@ -284,21 +284,17 @@ class Torrents {
         );
         list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record(MYSQLI_BOTH, [2, 'info_hash']);
 
-        $Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
-        G::$DB->prepared_query('
-            UPDATE users_main
-            SET BonusPoints = BonusPoints - ?
-            WHERE id = ?
-            ', $ID <= MAX_PREV_TORRENT_ID ? 0 : $Bonus->getTorrentValue($Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum),
-                $UserID
-        );
+        if ($ID > MAX_PREV_TORRENT_ID) {
+            $Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
+            $Bonus->removePointsForUpload($UserID, [$Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum]);
+        }
 
         $manager = new \Gazelle\DB(G::$DB, G::$Cache);
-        list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
+        list($ok, $message) = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
         if (!$ok) {
             return $message;
         }
-        list($ok, $message) = $manager->soft_delete(SQLDB, 'torrents',             [['ID', $ID]]);
+        list($ok, $message) = $manager->softDelete(SQLDB, 'torrents',             [['ID', $ID]]);
         if (!$ok) {
             return $message;
         }
@@ -314,14 +310,14 @@ class Torrents {
             Torrents::update_hash($GroupID);
         }
 
-        $manager->soft_delete(SQLDB, 'torrents_files',                  [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_files',              [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_folders',          [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_bad_tags',              [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_lossymaster_approved', [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
-        $manager->soft_delete(SQLDB, 'torrents_missing_lineage',      [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_files',                  [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_files',              [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_folders',            [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_tags',               [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_lossymaster_approved',   [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'torrents_missing_lineage',        [['TorrentID', $ID]]);
 
         // Tells Sphinx that the group is removed
         G::$DB->prepared_query('
@@ -350,7 +346,7 @@ class Torrents {
         while (list($UserID) = G::$DB->next_record()) {
             $deleted_keys[] = "notifications_new_$UserID";
         }
-        $manager->soft_delete(SQLDB, 'users_notify_torrents', [['TorrentID', $ID]]);
+        $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $ID]]);
 
         $RecentUploads = G::$Cache->get_value("recent_uploads_$UserID");
         if (is_array($RecentUploads)) {
@@ -498,12 +494,12 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
                 WHERE ra.ArtistID IS NOT NULL
                     AND ag.ArtistID = ?", $ArtistID);
             list($ReqCount) = G::$DB->next_record();
-            G::$DB->prepared_query("
+            G::$DB->prepared_query('
                 SELECT COUNT(ag.ArtistID)
                 FROM artists_group AS ag
                     LEFT JOIN torrents_artists AS ta ON ag.ArtistID = ta.ArtistID
                 WHERE ta.ArtistID IS NOT NULL
-                    AND ag.ArtistID = ?, $ArtistID");
+                    AND ag.ArtistID = ?', $ArtistID);
             list($GroupCount) = G::$DB->next_record();
             if (($ReqCount + $GroupCount) == 0) {
                 //The only group to use this artist
@@ -1243,4 +1239,62 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         G::$Cache->delete_value("torrents_details_{$GroupID}");
     }
 
+    public static function bbcodeUrl($val, $attr) {
+        $cacheKey = 'bbcode-collage.' . $id . '.' . $attr;
+        if (($url = G::$Cache->get_value($cacheKey)) === false) {
+            $url = self::bbcodeUrlBuild($val, $attr);
+            G::$Cache->cache_value($key, $url, 86400 + rand(1, 3600));
+        }
+        return $url;
+    }
+
+    protected static function bbcodeUrlBuild($val, $attr) {
+        $id = (int)$val;
+        list($groupId) = G::$DB->lookup('SELECT GroupID FROM torrents WHERE ID = ?', $id);
+        if (!$groupId) {
+            return ($attr ? "[pl=$attr]" : '[pl]') . $id . '[/pl]';
+        }
+        list ($info, $list) = get_torrent_info($id, true, 0, false);
+        $tagNames = implode(', ',
+            array_map(function ($x) { return '#' . htmlentities($x); },
+                explode('|', $info['tagNames'])));
+        $attr = preg_split('/\s*,\s*/m', strtolower($attr), -1, PREG_SPLIT_NO_EMPTY);
+        $year = in_array('noyear', $attr) || in_array('title', $attr)
+            ? '' : ' [' . $info['Year'] . ']';
+        if (in_array('noreleasetype', $attr) || in_array('title', $attr)) {
+            $releaseType = '';
+        } else {
+            global $ReleaseTypes;
+            $releaseType = ' [' . $ReleaseTypes[$info['ReleaseType']] . ']';
+        }
+        $release = $list[$id];
+        if (in_array('nometa', $attr) || in_array('title', $attr)) {
+            $meta = '';
+        } else {
+            $details = [
+                $release['Format'],
+                $release['Encoding'],
+                $release['Media'],
+            ];
+            if ($release['HasCue']) {
+                $details[] = 'Cue';
+            }
+            if ($release['HasLog']) {
+                $log = 'Log';
+                if ($release['HasLogDB']) {
+                    $log .= ' ' . $release['LogScore'] . '%';
+                }
+                $details[] = "$log";
+            }
+            $meta = ' (' . implode('/', $details) . ')';
+        }
+        $url = '';
+        if (!(in_array('noartist', $attr) || in_array('title', $attr))) {
+            $Group = Torrents::get_groups([$groupId], true, true, false)[$groupId];
+            $url = Artists::display_artists($Group['ExtendedArtists']);
+        }
+        return $url . sprintf('<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s%s%s</a>',
+            $tagNames, $groupId, $id, $id, $info['Name'], $year, $releaseType, $meta
+        );
+    }
 }

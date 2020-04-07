@@ -49,7 +49,7 @@ if (!is_number($TorrentID)) {
     error(0);
 }
 
-$User = new \Gazelle\User($DB, $Cache, $LoggedUser['ID']);
+$User = new \Gazelle\User($DB, $Cache, $UserID);
 
 /* uTorrent Remote and various scripts redownload .torrent files periodically.
  * To prevent this retardation from blowing bandwidth etc., let's block it
@@ -105,7 +105,7 @@ $Artists = $Info['Artists'];
  * high, and they have already downloaded too many files recently, then
  * stop them. Exception: always allowed if they are using FL tokens.
  */
-if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploaderID != $LoggedUser['ID']) {
+if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploaderID != $UserID) {
     $PRL = new \Gazelle\PermissionRateLimit($DB, $Cache);
     if (!$PRL->safeFactor($User)) {
         if (!$PRL->safeOvershoot($User)) {
@@ -115,12 +115,12 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
                 VALUES (?,       ?)
                 ', $UserID, $TorrentID
             );
-            if (G::$Cache->get_value('user_flood_' . $LoggedUser['ID'])) {
-                G::$Cache->increment('user_flood_' . $LoggedUser['ID']);
+            if (G::$Cache->get_value('user_flood_' . $UserID)) {
+                G::$Cache->increment('user_flood_' . $UserID);
             } else {
                 Irc::sendChannel(
                     "user.php?id=" . $UserID
-                    . " (" . $LoggedUser['Username'] . ")"
+                    . " (" . Users::user_info($UserID)['Username'] . ")"
                     . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
                     . " accessing https://"
                     . SSL_SITE_URL . $_SERVER['REQUEST_URI']
@@ -128,7 +128,7 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
                     . ' hit download rate limit',
                     STATUS_CHAN
                 );
-                G::$Cache->cache_value('user_429_flood_' . $LoggedUser['ID'], 1, 3600);
+                G::$Cache->cache_value('user_429_flood_' . $UserID, 1, 3600);
             }
             error(429);
         }
@@ -204,26 +204,8 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     }
 }
 
-// Stupid Recent Snatches On User Page
 if ($CategoryID == '1' && $Image != '' && $TorrentUploaderID != $UserID) {
-    $RecentSnatches = $Cache->get_value("recent_snatches_$UserID");
-    if (isset($RecentSnatches)) {
-        $Snatch = [
-            'ID' => $GroupID,
-            'Name' => $Name,
-            'Artist' => $Artists,
-            'WikiImage' => $Image
-        ];
-        if (!in_array($Snatch, $RecentSnatches)) {
-            if (count($RecentSnatches) === 5) {
-                array_pop($RecentSnatches);
-            }
-            array_unshift($RecentSnatches, $Snatch);
-        } elseif (!is_array($RecentSnatches)) {
-            $RecentSnatches = [$Snatch];
-        }
-        $Cache->cache_value("recent_snatches_$UserID", $RecentSnatches, 86400 * 3);
-    }
+    $Cache->delete_value("user_recent_snatch_$UserID");
 }
 
 $DB->prepared_query("

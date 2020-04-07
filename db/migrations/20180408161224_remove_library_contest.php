@@ -8,4 +8,7 @@ class RemoveLibraryContest extends AbstractMigration {
             $this->table('library_contest')->drop()->update();
         }
     }
+
+    public function down() {
+    }
 }

@@ -1,7 +1,6 @@
 <?php
-
-
 use Phinx\Migration\AbstractMigration;
+use Phinx\Db\Adapter\MysqlAdapter;
 
 class DeleteTorrent extends AbstractMigration
 {
@@ -27,129 +26,118 @@ class DeleteTorrent extends AbstractMigration
      * with the Table class.
      */
     public function up() {
-      $this->table('torrents')
-        ->changeColumn('last_action', 'datetime', ['null' => true])
-        ->save();
+        $this->table('torrents')
+             ->changeColumn('last_action', 'datetime', ['null' => true])
+             ->update();
+        $this->execute("UPDATE torrents SET last_action = NULL WHERE last_action = '0000-00-00 00:00:00'");
 
-        $this->execute("
-UPDATE torrents SET last_action = NULL WHERE last_action='0000-00-00 00:00:00';
+        $this->table('deleted_torrents', ['id' => false, 'primary_key' => 'ID'])
+             ->addColumn('ID', 'integer', ['length' => 10])
+             ->addColumn('GroupID', 'integer', ['length' => 10])
+             ->addColumn('UserID', 'integer', ['length' => 10, 'null' => true])
+             ->addColumn('Media', 'string', ['length' => 20, 'null' => true])
+             ->addColumn('Format', 'string', ['length' => 10, 'null' => true])
+             ->addColumn('Encoding', 'string', ['length' => 15, 'null' => true])
+             ->addColumn('Remastered', 'enum', ['values' => ['0','1']])
+             ->addColumn('RemasterYear', 'integer', ['length' => 4, 'null' => true])
+             ->addColumn('RemasterTitle', 'string', ['length' => 80])
+             ->addColumn('RemasterCatalogueNumber', 'string', ['length' => 80])
+             ->addColumn('RemasterRecordLabel', 'string', ['length' => 80])
+             ->addColumn('Scene', 'enum', ['values' => ['0','1']])
+             ->addColumn('HasLog', 'enum', ['values' => ['0','1']])
+             ->addColumn('HasCue', 'enum', ['values' => ['0','1']])
+             ->addColumn('HasLogDB', 'enum', ['values' => ['0','1']])
+             ->addColumn('LogScore', 'integer', ['length' => 6])
+             ->addColumn('LogChecksum', 'enum', ['values' => ['0','1']])
+             ->addColumn('info_hash', 'blob')
+             ->addColumn('FileCount', 'integer', ['length' => 6])
+             ->addColumn('FileList', 'text', ['length' => MysqlAdapter::TEXT_MEDIUM])
+             ->addColumn('FilePath', 'string', ['length' => 255])
+             ->addColumn('Size', 'biginteger', ['length' => 12])
+             ->addColumn('Leechers', 'integer', ['length' => 6])
+             ->addColumn('Seeders', 'integer', ['length' => 6])
+             ->addColumn('last_action', 'timestamp', ['null' => true])
+             ->addColumn('FreeTorrent', 'enum', ['values' => ['0','1','2']])
+             ->addColumn('FreeLeechType', 'enum', ['values' => ['0','1','2','3','4','5','6','7']])
+             ->addColumn('Time', 'timestamp')
+             ->addColumn('Description', 'text', ['null' => true])
+             ->addColumn('Snatched', 'integer', ['length' => 10, 'signed' => false])
+             ->addColumn('balance', 'biginteger', ['length' => 20])
+             ->addColumn('LastReseedRequest', 'timestamp')
+             ->addColumn('TranscodedFrom', 'integer', ['length' => 10])
+             ->create();
 
-CREATE TABLE `deleted_torrents` (
-  `ID` int(10) NOT NULL,
-  `GroupID` int(10) NOT NULL,
-  `UserID` int(10),
-  `Media` varchar(20),
-  `Format` varchar(10),
-  `Encoding` varchar(15),
-  `Remastered` enum('0','1') NOT NULL,
-  `RemasterYear` int(4),
-  `RemasterTitle` varchar(80) NOT NULL,
-  `RemasterCatalogueNumber` varchar(80) NOT NULL,
-  `RemasterRecordLabel` varchar(80) NOT NULL,
-  `Scene` enum('0','1') NOT NULL,
-  `HasLog` enum('0','1') NOT NULL,
-  `HasCue` enum('0','1') NOT NULL,
-  `HasLogDB` enum('0','1') NOT NULL,
-  `LogScore` int(6) NOT NULL,
-  `LogChecksum` enum('0','1') NOT NULL,
-  `info_hash` blob NOT NULL,
-  `FileCount` int(6) NOT NULL,
-  `FileList` mediumtext NOT NULL,
-  `FilePath` varchar(255) NOT NULL,
-  `Size` bigint(12) NOT NULL,
-  `Leechers` int(6) NOT NULL,
-  `Seeders` int(6) NOT NULL,
-  `last_action` datetime,
-  `FreeTorrent` enum('0','1','2') NOT NULL,
-  `FreeLeechType` enum('0','1','2','3','4','5','6','7') NOT NULL,
-  `Time` datetime NOT NULL,
-  `Description` text,
-  `Snatched` int(10) unsigned NOT NULL,
-  `balance` bigint(20) NOT NULL,
-  `LastReseedRequest` datetime NOT NULL,
-  `TranscodedFrom` int(10) NOT NULL,
-  PRIMARY KEY (`ID`)
-);
+        $this->table('deleted_users_notify_torrents', ['id' => false, 'primary_key' => ['UserID', 'TorrentID']])
+             ->addColumn('UserID', 'integer', ['length' => 10])
+             ->addColumn('FilterID', 'integer', ['length' => 10])
+             ->addColumn('GroupID', 'integer', ['length' => 10])
+             ->addColumn('TorrentID', 'integer', ['length' => 10])
+             ->addColumn('UnRead', 'integer', ['length' => 4])
+             ->create();
 
-CREATE TABLE `deleted_users_notify_torrents` (
-  `UserID` int(10) NOT NULL,
-  `FilterID` int(10) NOT NULL,
-  `GroupID` int(10) NOT NULL,
-  `TorrentID` int(10) NOT NULL,
-  `UnRead` tinyint(4) NOT NULL,
-  PRIMARY KEY (`UserID`,`TorrentID`)
-);
+        $this->table('deleted_torrents_files', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 10])
+             ->addColumn('File', 'blob', ['length' => MysqlAdapter::BLOB_MEDIUM])
+             ->create();
 
-CREATE TABLE `deleted_torrents_files` (
-  `TorrentID` int(10) NOT NULL,
-  `File` mediumblob NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
+        $this->table('deleted_torrents_bad_files', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 11])
+             ->addColumn('UserID', 'integer', ['length' => 11])
+             ->addColumn('TimeAdded', 'timestamp')
+             ->create();
 
-CREATE TABLE `deleted_torrents_bad_files` (
-  `TorrentID` int(11) NOT NULL,
-  `UserID` int(11) NOT NULL,
-  `TimeAdded` datetime NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
+        $this->table('deleted_torrents_bad_folders', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 11])
+             ->addColumn('UserID', 'integer', ['length' => 11])
+             ->addColumn('TimeAdded', 'timestamp')
+             ->create();
 
-CREATE TABLE `deleted_torrents_bad_folders` (
-  `TorrentID` int(11) NOT NULL,
-  `UserID` int(11) NOT NULL,
-  `TimeAdded` datetime NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
+        $this->table('deleted_torrents_bad_tags', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 11])
+             ->addColumn('UserID', 'integer', ['length' => 11])
+             ->addColumn('TimeAdded', 'timestamp')
+             ->create();
 
-CREATE TABLE `deleted_torrents_bad_tags` (
-  `TorrentID` int(11) NOT NULL,
-  `UserID` int(11) NOT NULL,
-  `TimeAdded` datetime NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
+        $this->table('deleted_torrents_cassette_approved', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 10])
+             ->addColumn('UserID', 'integer', ['length' => 10])
+             ->addColumn('TimeAdded', 'timestamp')
+             ->create();
 
-CREATE TABLE `deleted_torrents_cassette_approved` (
-  `TorrentID` int(10) NOT NULL,
-  `UserID` int(10) NOT NULL,
-  `TimeAdded` datetime NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
+        $this->table('deleted_torrents_lossymaster_approved', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 10])
+             ->addColumn('UserID', 'integer', ['length' => 10])
+             ->addColumn('TimeAdded', 'timestamp')
+             ->create();
 
-CREATE TABLE `deleted_torrents_lossymaster_approved` (
-  `TorrentID` int(10) NOT NULL,
-  `UserID` int(10) NOT NULL,
-  `TimeAdded` datetime NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
+        $this->table('deleted_torrents_lossyweb_approved', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 10])
+             ->addColumn('UserID', 'integer', ['length' => 10])
+             ->addColumn('TimeAdded', 'timestamp')
+             ->create();
 
-CREATE TABLE `deleted_torrents_lossyweb_approved` (
-  `TorrentID` int(10) NOT NULL,
-  `UserID` int(10) NOT NULL,
-  `TimeAdded` datetime NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
-
-CREATE TABLE `deleted_torrents_missing_lineage` (
-  `TorrentID` int(11) NOT NULL,
-  `UserID` int(11) NOT NULL,
-  `TimeAdded` datetime NOT NULL,
-  PRIMARY KEY (`TorrentID`)
-);
-
-        ");
+        $this->table('deleted_torrents_missing_lineage', ['id' => false, 'primary_key' => 'TorrentID'])
+             ->addColumn('TorrentID', 'integer', ['length' => 11])
+             ->addColumn('UserID', 'integer', ['length' => 11])
+             ->addColumn('TimeAdded', 'timestamp')
+             ->create();
     }
 
     public function down() {
-        $this->execute("
-DROP TABLE `deleted_torrents`;
-DROP TABLE `deleted_users_notify_torrents`;
-DROP TABLE `deleted_torrents_files`;
-DROP TABLE `deleted_torrents_bad_files`;
-DROP TABLE `deleted_torrents_bad_folders`;
-DROP TABLE `deleted_torrents_bad_tags`;
-DROP TABLE `deleted_torrents_cassette_approved`;
-DROP TABLE `deleted_torrents_lossymaster_approved`;
-DROP TABLE `deleted_torrents_lossyweb_approved`;
-DROP TABLE `deleted_torrents_missing_lineage`;
-        ");
+        $this->execute("UPDATE torrents SET last_action = '0000-00-00 00:00:00' WHERE last_action IS NULL");
+        $this->table('torrents')
+             ->changeColumn('last_action', 'datetime', ['null' => false])
+             ->update();
+
+        $this->table('deleted_users_notify_torrents')->drop()->update();
+        $this->table('deleted_torrents_files')->drop()->update();
+        $this->table('deleted_torrents_bad_files')->drop()->update();
+        $this->table('deleted_torrents_bad_folders')->drop()->update();
+        $this->table('deleted_torrents_bad_tags')->drop()->update();
+        $this->table('deleted_torrents_cassette_approved')->drop()->update();
+        $this->table('deleted_torrents_lossymaster_approved')->drop()->update();
+        $this->table('deleted_torrents_lossyweb_approved')->drop()->update();
+        $this->table('deleted_torrents_missing_lineage')->drop()->update();
+        $this->table('deleted_torrents')->drop()->update();
     }
 }

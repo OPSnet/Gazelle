@@ -1,6 +1,6 @@
 @import url(https://fonts.googleapis.com/css?family=Lato:400,900italic,900,700italic,700,400italic,300italic,300,100italic,100);
 /*
-apollo-theme-post-office: A continuation of the original wcd-theme-post-office by dannymichel, 
+apollo-theme-post-office: A continuation of the original wcd-theme-post-office by dannymichel,
 with various fixes and updated image resources for apollo.rip.
 Originally forked from Postmodern, which was based on 'Zeal', a modification of the original 'Teal' by pellad.
 */
@@ -1017,7 +1017,11 @@ ul .invitetree {
 
 .poll .graph .center_poll {
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAmCAIAAACK3mZQAAAABnRSTlMA/wD/AP83WBt9AAAAF0lEQVR4AWP4//8/Trx5egE1McJswhgAdcNYU4m5NAEAAAAASUVORK5CYII=') top left repeat-x;
-  background-size: 1px 19px; }
+  background-size: 1px 19px;
+  max-width: 870px; }
+
+#index .poll .graph .center_poll {
+  max-width: 155px; }
 
 .poll .graph .right_poll {
   width: 11px;

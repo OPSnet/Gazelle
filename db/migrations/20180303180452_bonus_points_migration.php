@@ -45,7 +45,7 @@ class BonusPointsMigration extends AbstractMigration {
     }
 
     public function down() {
-        $this->dropTable('bonus_history');
-        $this->dropTable('bonus_item');
+        $this->table('bonus_history')->drop()->update();
+        $this->table('bonus_item')->drop()->update();
     }
 }

@@ -48,7 +48,7 @@ class User extends AbstractAPI {
                 uls.Downloaded,
                 um.PermissionID AS Class,
                 um.Paranoia,
-                um.BonusPoints,
+                coalesce(ub.points, 0) as BonusPoints,
                 ui.DisableIRC,
                 p.Name as ClassName,
                 p.Level,
@@ -59,6 +59,7 @@ class User extends AbstractAPI {
                 INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
                 INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
                 LEFT JOIN users_levels AS ul ON (ul.UserID = um.ID)
+                LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 

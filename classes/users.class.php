@@ -36,10 +36,11 @@ class Users {
                 SELECT
                     uls.Uploaded AS BytesUploaded,
                     uls.Downloaded AS BytesDownloaded,
-                    um.BonusPoints,
+                    coalesce(ub.points, 0) as BonusPoints,
                     um.RequiredRatio
                 FROM users_main um
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
                 WHERE um.ID = ?
                 ', $UserID
             );
@@ -125,7 +126,7 @@ class Users {
                 $UserInfo['Class'] = $Classes[$UserInfo['PermissionID']]['Level'];
             }
 
-            if ($UserInfo['LockedAccount'] == "") {
+            if (isset($UserInfo['LockedAccount'])) {
                 unset($UserInfo['LockedAccount']);
             }
 

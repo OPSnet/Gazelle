@@ -14,7 +14,7 @@ class Feed {
     }
 
     function channel($Title, $Description, $Section = '') {
-        $Site = $this->UseSSL ? site_url() : site_url(false);
+        $Site = 'https://' . SSL_SITE_URL . '/';
         echo "\t\t<title>$Title :: ". SITE_NAME. "</title>\n";
         echo "\t\t<link>$Site$Section</link>\n";
         echo "\t\t<description>$Description</description>\n";
@@ -30,7 +30,7 @@ class Feed {
         } else {
             $Date = date('r', strtotime($Date));
         }
-        $Site = $this->UseSSL ? site_url() : site_url(false);
+        $Site = 'https://' . SSL_SITE_URL . '/';
         $Item = "\t\t<item>\n";
         $Item .= "\t\t\t<title><![CDATA[$Title]]></title>\n";
         $Item .= "\t\t\t<description><![CDATA[$Description]]></description>\n";
@@ -54,7 +54,7 @@ class Feed {
             $Entries = [];
         } else {
             foreach ($Entries as $Item) {
-                echo str_replace(['[[PASSKEY]]', '[[AUTHKEY]]'], [display_str($PassKey), display_str($AuthKey)], $Item);
+                echo str_replace(['[[PASSKEY]]', '[[AUTHKEY]]'], [disp($PassKey), disp($AuthKey)], $Item);
             }
         }
     }

@@ -1,28 +1,25 @@
 <?php
-include(SERVER_ROOT.'/sections/torrents/functions.php');
 
-// The "order by x" links on columns headers
-function header_link($SortKey, $DefaultWay = 'desc') {
-    global $OrderBy, $OrderWay;
-    if ($SortKey == $OrderBy) {
-        if ($OrderWay == 'desc') {
-            $NewWay = 'asc';
-        } else {
-            $NewWay = 'desc';
-        }
-    } else {
-        $NewWay = $DefaultWay;
-    }
-    return "torrents.php?order_way=$NewWay&amp;order_by=$SortKey&amp;".Format::get_url(['order_way', 'order_by']);
+use Gazelle\Util\SortableTableHeader;
+
+include(SERVER_ROOT . '/sections/torrents/functions.php');
+
+$SortOrderMap = [];
+foreach (TorrentSearch::$SortOrders as $key => $val) {
+    $SortOrderMap[$key] = [$key, 'desc'];
+}
+
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$OrderWay = '';
+if (!empty($SortOrderMap[$SortOrder][1])) {
+    $OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+        ? $SortOrderMap[$SortOrder][1]
+        : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 }
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
-    if (!empty($_GET['searchstr'])) {
-        $InfoHash = $_GET['searchstr'];
-
-    } else {
-        $InfoHash = $_GET['groupname'];
-    }
+    $InfoHash = (!empty($_GET['searchstr'])) ? $_GET['searchstr'] : $_GET['groupname'];
 
     // Search by infohash
     if ($InfoHash = is_valid_torrenthash($InfoHash)) {
@@ -56,7 +53,7 @@ if (!empty($_GET['setdefault'])) {
         UPDATE users_info
         SET SiteOptions = '".db_string(serialize($SiteOptions))."'
         WHERE UserID = '".db_string($LoggedUser['ID'])."'");
-    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['DefaultSearch' => $SiteOptions['DefaultSearch']]);
     $Cache->commit_transaction(0);
 
@@ -73,7 +70,7 @@ if (!empty($_GET['setdefault'])) {
         UPDATE users_info
         SET SiteOptions = '".db_string(serialize($SiteOptions))."'
         WHERE UserID = '".db_string($LoggedUser['ID'])."'");
-    $Cache->begin_transaction("user_info_heavy_$UserID");
+    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['DefaultSearch' => '']);
     $Cache->commit_transaction(0);
 
@@ -94,18 +91,6 @@ if (isset($_GET['searchsubmit'])) {
     $GroupResults = !empty($_GET['group_results']);
 } else {
     $GroupResults = !$LoggedUser['DisableGrouping2'];
-}
-
-if (!empty($_GET['order_way']) && $_GET['order_way'] == 'asc') {
-    $OrderWay = 'asc';
-} else {
-    $OrderWay = 'desc';
-}
-
-if (empty($_GET['order_by']) || !isset(TorrentSearch::$SortOrders[$_GET['order_by']])) {
-    $OrderBy = 'time'; // For header links
-} else {
-    $OrderBy = $_GET['order_by'];
 }
 
 $Page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
@@ -310,18 +295,18 @@ if (Format::form('remastertitle', true) == ''
             <tr id="order">
                 <td class="label">Order by:</td>
                 <td colspan="3" class="ft_order">
-                    <select name="order_by" style="width: auto;" class="ft_order_by">
-                        <option value="time"<?php Format::selected('order_by', 'time'); ?>>Time added</option>
-                        <option value="year"<?php Format::selected('order_by', 'year'); ?>>Year</option>
-                        <option value="size"<?php Format::selected('order_by', 'size'); ?>>Size</option>
-                        <option value="snatched"<?php Format::selected('order_by', 'snatched'); ?>>Snatched</option>
-                        <option value="seeders"<?php Format::selected('order_by', 'seeders'); ?>>Seeders</option>
-                        <option value="leechers"<?php Format::selected('order_by', 'leechers'); ?>>Leechers</option>
-                        <option value="random"<?php Format::selected('order_by', 'random'); ?>>Random</option>
+                    <select name="order" style="width: auto;" class="ft_order_by">
+                        <option value="time"<?php Format::selected('order', 'time'); ?>>Time added</option>
+                        <option value="year"<?php Format::selected('order', 'year'); ?>>Year</option>
+                        <option value="size"<?php Format::selected('order', 'size'); ?>>Size</option>
+                        <option value="snatched"<?php Format::selected('order', 'snatched'); ?>>Snatched</option>
+                        <option value="seeders"<?php Format::selected('order', 'seeders'); ?>>Seeders</option>
+                        <option value="leechers"<?php Format::selected('order', 'leechers'); ?>>Leechers</option>
+                        <option value="random"<?php Format::selected('order', 'random'); ?>>Random</option>
                     </select>
-                    <select name="order_way" class="ft_order_way">
-                        <option value="desc"<?php Format::selected('order_way', 'desc'); ?>>Descending</option>
-                        <option value="asc"<?php Format::selected('order_way', 'asc'); ?>>Ascending</option>
+                    <select name="sort" class="ft_order_way">
+                        <option value="desc"<?php Format::selected('sort', 'desc'); ?>>Descending</option>
+                        <option value="asc"<?php Format::selected('sort', 'asc'); ?>>Ascending</option>
                     </select>
                 </td>
             </tr>
@@ -481,6 +466,18 @@ die();
 $Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 
 $Bookmarks = Bookmarks::all_bookmarks('torrent');
+
+$header = new SortableTableHeader([
+    'year' => 'Year',
+    'time' => 'Time',
+    'size' => 'Size',
+], $SortOrder, $OrderWay);
+
+$headerIcons = new SortableTableHeader([
+    'snatched' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
+    'seeders'  => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
+    'leechers' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
+], $SortOrder, $OrderWay, ['asc' => '', 'desc' => '']);
 ?>
 
 <div class="linkbox"><?=$Pages?></div>
@@ -491,25 +488,13 @@ $Bookmarks = Bookmarks::all_bookmarks('torrent');
         <td class="small"></td>
 <?php    } ?>
         <td class="small cats_col"></td>
-        <td class="m_th_left m_th_left_collapsable" width="100%">Name / <a href="<?=header_link('year')?>">Year</a></td>
+        <td class="m_th_left m_th_left_collapsable nobr" width="100%">Name / <?= $header->emit('year', $SortOrderMap['year'][1]) ?></td>
         <td>Files</td>
-        <td><a href="<?=header_link('time')?>">Time</a></td>
-        <td><a href="<?=header_link('size')?>">Size</a></td>
-        <td class="sign snatches">
-            <a href="<?=header_link('snatched')?>">
-                <img src="static/styles/<?=$LoggedUser['StyleName']?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />
-            </a>
-        </td>
-        <td class="sign seeders">
-            <a href="<?=header_link('seeders')?>">
-                <img src="static/styles/<?=$LoggedUser['StyleName']?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />
-            </a>
-        </td>
-        <td class="sign leechers">
-            <a href="<?=header_link('leechers')?>">
-                <img src="static/styles/<?=$LoggedUser['StyleName']?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />
-            </a>
-        </td>
+        <td class="nobr"><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
+        <td class="sign nobr snatches"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
+        <td class="sign nobr seeders"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
+        <td class="sign nobr leechers"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
     </tr>
 <?php
 
@@ -678,7 +663,8 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
     } else {
         // Viewing a type that does not require grouping
 
-        list($TorrentID, $Data) = each($Torrents);
+        $TorrentID = key($Torrents);
+        $Data = current($Torrents);
         $DisplayName .= "<a href=\"torrents.php?id=$GroupID&amp;torrentid=$TorrentID#torrent$TorrentID\" class=\"tooltip\" title=\"View torrent\" dir=\"ltr\">$GroupName</a>";
         if (isset($GroupedCategories[$CategoryID - 1])) {
             if ($GroupYear) {

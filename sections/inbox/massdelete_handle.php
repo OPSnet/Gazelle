@@ -1,9 +1,7 @@
 <?php
 
-/* replace
+enforce_login();
 $UserID = $LoggedUser['ID'];
-authorize();
-replace */
 
 if (!isset($_POST['messages']) || !is_array($_POST['messages'])) {
     $Message = 'to delete';
@@ -60,4 +58,3 @@ if (isset($_POST['delete'])) {
 $Cache->delete_value('inbox_new_'.$UserID);
 
 header('Location: ' . Inbox::get_inbox_link());
-?>

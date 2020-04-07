@@ -28,7 +28,7 @@ if (!check_perms('users_view_email', $Class)) {
     error(403);
 }
 
-$UsersOnly = $_GET['usersonly'];
+$UsersOnly = isset($_GET['usersonly']);
 
 $DB->query("
     SELECT Username
@@ -37,7 +37,7 @@ $DB->query("
 list($Username)= $DB->next_record();
 View::show_header("Email history for $Username");
 
-if ($UsersOnly == 1) {
+if ($UsersOnly) {
     $DB->query("
         SELECT
             u.Email,
@@ -94,7 +94,7 @@ $History = $DB->to_array();
         <td>Email</td>
         <td>Set</td>
         <td>IP <a href="userhistory.php?action=ips&amp;userid=<?=$UserID ?>" class="brackets">H</a></td>
-<?php if ($UsersOnly == 1) {
+<?php if ($UsersOnly) {
 ?>
     <td>User</td>
 <?php
@@ -114,7 +114,7 @@ foreach ($History as $Key => $Values) {
         <td><?=time_diff($Values['Time'])?></td>
         <td><?=display_str($Values['IP'])?> (<?=display_str($Values['Code'])?>) <a href="user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($Values['IP'])?>" class="brackets tooltip" title="Search">S</a></td>
 <?php
-    if ($UsersOnly == 1) {
+    if ($UsersOnly) {
         $ueQuery = $DB->query("
                     SELECT
                         ue.UserID,

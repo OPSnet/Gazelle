@@ -26,7 +26,7 @@ class StaffGroups extends AbstractMigration
      * Remember to call "create()" or "update()" and NOT "save()" when working
      * with the Table class.
      */
-    public function change()
+    public function up()
     {
         $this->table('staff_groups', ['id' => false, 'primary_key' => 'ID'])
              ->addColumn('ID', 'integer', ['limit' => 3, 'signed' => false, 'identity' => true])
@@ -39,5 +39,17 @@ class StaffGroups extends AbstractMigration
              ->addColumn('StaffGroup', 'integer', ['limit' => 3, 'null' => true, 'default' => null, 'signed' => false])
              ->addForeignKey('StaffGroup', 'staff_groups', 'ID', ['delete' => 'SET_NULL', 'update' => 'CASCADE'])
              ->update();
+    }
+
+    public function down()
+    {
+        $this->table('permissions')
+             ->dropForeignKey('StaffGroup')
+             ->update();
+        $this->table('permissions')
+             ->removeColumn('StaffGroup')
+             ->update();
+
+        $this->table('staff_groups')->drop()->update();
     }
 }

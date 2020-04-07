@@ -14,20 +14,20 @@ if ($UserID == $LoggedUser['ID']) {
 // Always view as a normal user.
 $DB->prepared_query('
     SELECT
-        m.Username,
-        m.Email,
-        m.LastAccess,
-        m.IP,
+        um.Username,
+        um.Email,
+        ula.last_access,
+        um.IP,
         p.Level AS Class,
         uls.Uploaded,
         uls.Downloaded,
-        m.RequiredRatio,
-        m.Enabled,
-        m.Paranoia,
-        m.Invites,
-        m.Title,
-        m.torrent_pass,
-        m.can_leech,
+        um.RequiredRatio,
+        um.Enabled,
+        um.Paranoia,
+        um.Invites,
+        um.Title,
+        um.torrent_pass,
+        um.can_leech,
         i.JoinDate,
         i.Info,
         i.Avatar,
@@ -37,13 +37,14 @@ $DB->prepared_query('
         i.Inviter,
         i.DisableInvites,
         inviter.username
-    FROM users_main AS m
-    INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
-    INNER JOIN users_info AS i ON (i.UserID = m.ID)
-    LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+    FROM users_main AS um
+    LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+    INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+    INNER JOIN users_info AS i ON (i.UserID = um.ID)
+    LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
     LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
-    LEFT JOIN forums_posts AS posts ON (posts.AuthorID = m.ID)
-    WHERE m.ID = ?
+    LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
+    WHERE um.ID = ?
     GROUP BY AuthorID
     ', $UserID);
 
@@ -64,10 +65,6 @@ foreach ($Paranoia as $P) {
         $ParanoiaLevel++;
     }
 }
-
-// Raw time is better for JSON.
-//$JoinedDate = time_diff($JoinDate);
-//$LastAccess = time_diff($LastAccess);
 
 function check_paranoia_here($Setting) {
     global $Paranoia, $Class, $UserID;
@@ -300,7 +297,7 @@ if (!$OwnProfile) {
 
 // Run through some paranoia stuff to decide what we can send out.
 if (!check_paranoia_here('lastseen')) {
-    $LastAccess = '';
+    $LastAccess = null;
 }
 if (check_paranoia_here('ratio')) {
     $Ratio = Format::get_ratio($Uploaded, $Downloaded, 5);
@@ -328,11 +325,6 @@ if ($ParanoiaLevel == 0) {
     $ParanoiaLevelText = 'Very high';
 }
 
-//Bugfix for no access time available
-if ($LastAccess == '0000-00-00 00:00:00') {
-    $LastAccess = '';
-}
-
 header('Content-Type: text/plain; charset=utf-8');
 
 json_print("success", [
@@ -342,7 +334,7 @@ json_print("success", [
     'profileText' => Text::full_format($Info),
     'stats' => [
         'joinedDate' => $JoinDate,
-        'lastAccess' => $LastAccess,
+        'lastAccess' => $LastAccess ?? '',
         'uploaded' => (($Uploaded == null) ? null : (int)$Uploaded),
         'downloaded' => (($Downloaded == null) ? null : (int)$Downloaded),
         'ratio' => $Ratio,
@@ -389,4 +381,3 @@ json_print("success", [
         'artistsAdded' => (($ArtistsAdded == null) ? null : (int)$ArtistsAdded)
     ]
 ]);
-?>

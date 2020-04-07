@@ -1,25 +1,22 @@
 <?php
 
+use Gazelle\Util\SortableTableHeader;
 
-$Orders = ['Time', 'Name', 'Seeders', 'Leechers', 'Snatched', 'Size'];
-$Ways = ['DESC' => 'Descending', 'ASC' => 'Ascending'];
+$SortOrderMap = [
+    'time'     => ['Time', 'desc'],
+    'name'     => ['Name', 'asc'],
+    'seeders'  => ['tls.Seeders', 'desc'],
+    'leechers' => ['tls.Leechers', 'desc'],
+    'snatched' => ['tls.Snatched', 'desc'],
+    'size'     => ['Size', 'desc'],
+];
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+
 $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
-
-// The "order by x" links on columns headers
-function header_link($SortKey, $DefaultWay = 'DESC') {
-    global $Order, $Way;
-    if ($SortKey == $Order) {
-        if ($Way == 'DESC') {
-            $NewWay = 'ASC';
-        } else {
-            $NewWay = 'DESC';
-        }
-    } else {
-        $NewWay = $DefaultWay;
-    }
-
-    return "torrents.php?way=$NewWay&amp;order=$SortKey&amp;" . Format::get_url(['way','order']);
-}
 
 if (!isset($_GET['userid'])) {
     header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
@@ -37,18 +34,6 @@ if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
 } else {
     $Page = 1;
     $Limit = TORRENTS_PER_PAGE;
-}
-
-if (!empty($_GET['order']) && in_array($_GET['order'], $Orders)) {
-    $Order = $_GET['order'];
-} else {
-    $Order = 'Time';
-}
-
-if (!empty($_GET['way']) && array_key_exists($_GET['way'], $Ways)) {
-    $Way = $_GET['way'];
-} else {
-    $Way = 'DESC';
 }
 
 $SearchWhere = [];
@@ -243,11 +228,7 @@ if (empty($GroupBy)) {
     $GroupBy = 't.ID';
 }
 
-if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name') {
-    $QueryOrder = $Order;
-    if (in_array($Order, ['Seeders', 'Leechers', 'Snatched'])) {
-        $QueryOrder = "tls.$QueryOrder";
-    }
+if ((empty($_GET['search']) || trim($_GET['search']) === '') && $SortOrder != 'name') {
     $SQL = "
         SELECT
             SQL_CALC_FOUND_ROWS
@@ -261,7 +242,7 @@ if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name'
             $ExtraWhere
             $SearchWhere
         GROUP BY $GroupBy
-        ORDER BY $QueryOrder $Way
+        ORDER BY $OrderBy $OrderWay
         LIMIT $Limit";
 } else {
     $DB->query("
@@ -314,7 +295,7 @@ if ((empty($_GET['search']) || trim($_GET['search']) === '') && $Order != 'Name'
         WHERE Name LIKE '%".implode("%' AND Name LIKE '%", $Words)."%'";
     }
     $SQL .= "
-        ORDER BY $Order $Way
+        ORDER BY $OrderBy $OrderWay
         LIMIT $Limit";
 }
 
@@ -421,14 +402,16 @@ $Pages = Format::get_pages($Page, $TorrentCount, TORRENTS_PER_PAGE);
                     <td class="label"><strong>Order by</strong></td>
                     <td>
                         <select name="order" class="ft_order_by">
-<?php    foreach ($Orders as $OrderText) { ?>
-                            <option value="<?=$OrderText?>"<?php Format::selected('order', $OrderText); ?>><?=$OrderText?></option>
-<?php    } ?>
-                        </select>&nbsp;
-                        <select name="way" class="ft_order_way">
-<?php    foreach ($Ways as $WayKey=>$WayText) { ?>
-                            <option value="<?=$WayKey?>"<?php Format::selected('way', $WayKey); ?>><?=$WayText?></option>
-<?php    } ?>
+                            <option value="time"<?php Format::selected('order', 'time'); ?>>Time</option>
+                            <option value="name"<?php Format::selected('order', 'name'); ?>>Name</option>
+                            <option value="seeders"<?php Format::selected('order', 'seeders'); ?>>Seeders</option>
+                            <option value="leechers"<?php Format::selected('order', 'leechers'); ?>>Leechers</option>
+                            <option value="snatched"<?php Format::selected('order', 'snatched'); ?>>Snatched</option>
+                            <option value="size"<?php Format::selected('order', 'size'); ?>>Size</option>
+                        </select>
+                        <select name="sort" class="ft_order_way">
+                            <option value="desc"<?php Format::selected('sort', 'desc'); ?>>Descending</option>
+                            <option value="asc"<?php Format::selected('sort', 'asc'); ?>>Ascending</option>
                         </select>
                     </td>
                 </tr>
@@ -467,29 +450,30 @@ foreach ($Categories as $CatKey => $CatName) {
     <div class="center">
         Nothing found!
     </div>
-<?php    } else { ?>
+<?php    } else {
+
+    $header = new SortableTableHeader([
+        'name' => 'Torrent',
+        'time' => 'Time',
+        'size' => 'Size',
+    ], $SortOrder, $OrderWay);
+
+    $headerIcons = new SortableTableHeader([
+        'snatched' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
+        'seeders'  => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
+        'leechers' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
+    ], $SortOrder, $OrderWay, ['asc' => '', 'desc' => '']);
+    ?>
     <div class="linkbox"><?=$Pages?></div>
     <table class="torrent_table cats m_table" width="100%">
         <tr class="colhead">
             <td class="cats_col"></td>
-            <td class="m_th_left"><a href="<?=header_link('Name', 'ASC')?>">Torrent</a></td>
-            <td><a href="<?=header_link('Time')?>">Time</a></td>
-            <td><a href="<?=header_link('Size')?>">Size</a></td>
-            <td class="sign snatches m_th_right">
-                <a href="<?=header_link('Snatched')?>">
-                    <img src="static/styles/<?=$LoggedUser['StyleName']?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />
-                </a>
-            </td>
-            <td class="sign seeders m_th_right">
-                <a href="<?=header_link('Seeders')?>">
-                    <img src="static/styles/<?=$LoggedUser['StyleName']?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />
-                </a>
-            </td>
-            <td class="sign leechers m_th_right">
-                <a href="<?=header_link('Leechers')?>">
-                    <img src="static/styles/<?=$LoggedUser['StyleName']?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />
-                </a>
-            </td>
+            <td class="m_th_left nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
+            <td class="nobr"><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
+            <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
+            <td class="sign nobr snatches m_th_right"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
+            <td class="sign nobr seeders m_th_right"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
+            <td class="sign nobr leechers m_th_right"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
         </tr>
 <?php
     $PageSize = 0;

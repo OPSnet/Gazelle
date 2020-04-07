@@ -82,4 +82,17 @@ class Collages {
 <?php
         return ob_get_clean();
     }
+
+    public static function bbcodeUrl($id, $url = null) {
+        $cacheKey = 'bbcode-collage.' . $id;
+        if (($name = G::$Cache->get_value($cacheKey)) === false) {
+            list($name) = G::$DB->lookup('SELECT Name FROM collages WHERE id = ?', $id);
+            G::$Cache->cache_value($key, $name, 86400 + rand(1, 3600));
+        }
+        return $name
+            ? $url
+                ? sprintf('<a href="%s">%s</a>', $url, $name)
+                : sprintf('<a href="collages.php?id=%d">%s</a>', $id, $name)
+            : "[collage]{$id}[/collage]";
+    }
 }

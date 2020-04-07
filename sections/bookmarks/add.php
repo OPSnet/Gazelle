@@ -15,47 +15,60 @@ if (!is_number($_GET['id'])) {
 }
 $PageID = $_GET['id'];
 
-$DB->query("
+$DB->prepared_query("
     SELECT UserID
     FROM $Table
-    WHERE UserID = '$LoggedUser[ID]'
-        AND $Col = $PageID");
+    WHERE UserID = ?
+        AND $Col = ?
+    ", $LoggedUser['ID'], $PageID
+);
 if (!$DB->has_results()) {
     if ($Type === 'torrent') {
-        $DB->query("
-            SELECT MAX(Sort)
-            FROM `bookmarks_torrents`
-            WHERE UserID = $LoggedUser[ID]");
+        $DB->prepared_query('
+            SELECT max(Sort)
+            FROM bookmarks_torrents
+            WHERE UserID = ?
+            ', $LoggedUser['ID']
+        );
         list($Sort) = $DB->next_record();
         if (!$Sort) {
             $Sort = 0;
         }
         $Sort += 1;
-        $DB->query("
-            INSERT IGNORE INTO $Table (UserID, $Col, Time, Sort)
-            VALUES ('$LoggedUser[ID]', $PageID, '".sqltime()."', $Sort)");
+        $DB->prepared_query("
+            INSERT IGNORE INTO $Table (UserID, $Col, Sort, Time)
+            VALUES (?, ?, ?, now())
+            ", $LoggedUser['ID'], $PageID, $Sort
+        );
     } else {
-        $DB->query("
+        $DB->prepared_query("
             INSERT IGNORE INTO $Table (UserID, $Col, Time)
-            VALUES ('$LoggedUser[ID]', $PageID, '".sqltime()."')");
+            VALUES (?, ?, now())
+            ", $LoggedUser['ID'], $PageID
+        );
     }
     $Cache->delete_value('bookmarks_'.$Type.'_'.$LoggedUser['ID']);
     if ($Type == 'torrent') {
-        $Cache->delete_value("bookmarks_group_ids_$UserID");
+        $Cache->delete_value('bookmarks_group_ids_'.$LoggedUser['ID']);
 
-        $DB->query("
+        $DB->prepared_query('
             SELECT Name, Year, WikiBody, TagList
             FROM torrents_group
-            WHERE ID = $PageID");
+            WHERE ID = ?
+            ', $PageID
+        );
         list($GroupTitle, $Year, $Body, $TagList) = $DB->next_record();
         $TagList = str_replace('_', '.', $TagList);
 
-        $DB->query("
+        $DB->prepared_query('
             SELECT ID, Format, Encoding, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, Media, Scene, FreeTorrent, UserID
             FROM torrents
-            WHERE GroupID = $PageID");
+            WHERE GroupID = ?
+            ', $PageID
+        );
         // RSS feed stuff
         while ($Torrent = $DB->next_record()) {
+            // TODO: pretty sure this already exists in a class somewhere
             $Title = $GroupTitle;
             list($TorrentID, $Format, $Bitrate, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Media, $Scene, $Freeleech, $UploaderID) = $Torrent;
             $Title .= " [$Year] - ";
@@ -90,10 +103,12 @@ if (!$DB->has_results()) {
             $Feed->populate('torrents_bookmarks_t_'.$LoggedUser['torrent_pass'], $Item);
         }
     } elseif ($Type == 'request') {
-        $DB->query("
+        $DB->prepared_query("
             SELECT UserID
             FROM $Table
-            WHERE $Col = '".db_string($PageID)."'");
+            WHERE $Col = ?
+            ", $PageID
+        );
         if ($DB->record_count() < 100) {
             // Sphinx doesn't like huge MVA updates. Update sphinx_requests_delta
             // and live with the <= 1 minute delay if we have more than 100 bookmarkers
