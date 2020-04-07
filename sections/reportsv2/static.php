@@ -13,7 +13,8 @@ if (!check_perms('admin_reports')) {
     error(403);
 }
 
-include(SERVER_ROOT.'/classes/reports.class.php');
+include(__DIR__ . '/../../classes/reports.class.php');
+include(__DIR__ . '/../torrents/functions.php');
 
 define('REPORTS_PER_PAGE', '10');
 list($Page, $Limit) = Format::page_limit(REPORTS_PER_PAGE);
@@ -40,7 +41,7 @@ $Order = 'ORDER BY r.ReportedTime ASC';
 if (!$ID) {
     switch ($View) {
         case 'resolved':
-            $Title = 'All the old smelly reports';
+            $Title = 'Resolved reports';
             $Where = "WHERE r.Status = 'Resolved'";
             $Order = 'ORDER BY r.LastChangeTime DESC';
             break;
@@ -141,13 +142,12 @@ if (!$ID) {
     }
 }
 
-
 $DB->query("
     SELECT
         SQL_CALC_FOUND_ROWS
         r.ID,
         r.ReporterID,
-        reporter.Username,
+        coalesce(reporter.Username, 'System'),
         r.TorrentID,
         r.Type,
         r.UserComment,
@@ -177,6 +177,8 @@ $DB->query("
         tg.Year,
         tg.CategoryID,
         t.Time,
+        t.Description,
+        t.FileList,
         t.Remastered,
         t.RemasterTitle,
         t.RemasterYear,
@@ -189,16 +191,18 @@ $DB->query("
         t.HasLogDB,
         t.LogScore,
         t.LogChecksum,
+        tls.last_action,
         t.UserID AS UploaderID,
         uploader.Username
     FROM reportsv2 AS r
-        LEFT JOIN torrents AS t ON t.ID = r.TorrentID
-        LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
-        LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID AND ta.Importance = '1'
-        LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
-        LEFT JOIN users_main AS resolver ON resolver.ID = r.ResolverID
-        LEFT JOIN users_main AS reporter ON reporter.ID = r.ReporterID
-        LEFT JOIN users_main AS uploader ON uploader.ID = t.UserID
+    LEFT JOIN torrents AS t ON (t.ID = r.TorrentID)
+    LEFT JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
+    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
+    LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
+    LEFT JOIN users_main AS resolver ON (resolver.ID = r.ResolverID)
+    LEFT JOIN users_main AS reporter ON (reporter.ID = r.ReporterID)
+    LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)
     $Where
     GROUP BY r.ID
     $Order
@@ -210,7 +214,7 @@ $DB->query('SELECT FOUND_ROWS()');
 list($Results) = $DB->next_record();
 $PageLinks = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
 
-View::show_header('Reports V2!', 'reportsv2,bbcode');
+View::show_header('Reports V2', 'reportsv2,bbcode,torrent');
 ?>
 <div class="header">
     <h2><?=$Title?></h2>
@@ -247,9 +251,13 @@ if (count($Reports) === 0) {
 } else {
     foreach ($Reports as $Report) {
 
-        list($ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID, $ResolverName, $Status, $ReportedTime, $LastChangeTime,
-            $ModComment, $Tracks, $Images, $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID, $Time, $Remastered, $RemasterTitle,
-            $RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $UploaderID, $UploaderName) = Misc::display_array($Report, ['ModComment']);
+        list($ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID,
+            $ResolverName, $Status, $ReportedTime, $LastChangeTime, $ModComment, $Tracks, $Images,
+            $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year,
+            $CategoryID, $Time, $Description, $FileList, $Remastered, $RemasterTitle, $RemasterYear,
+            $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum,
+            $LastAction, $UploaderID, $UploaderName)
+                = Misc::display_array($Report, ['ModComment']);
 
         if (!$GroupID && $Status != 'Resolved') {
             //Torrent already deleted
@@ -330,12 +338,22 @@ if (count($Reports) === 0) {
 <?php       } else { ?>
                         <?=$LinkName?>
                         <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                        uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
-                        <br />
-<?php           if ($ReporterName == '') {
-                    $ReporterName = 'System';
-                } ?>
-                        <div style="text-align: right;">was reported by <a href="user.php?id=<?=$ReporterID?>"><?=$ReporterName?></a> <?=time_diff($ReportedTime)?> for the reason: <strong><?=$ReportType['title']?></strong></div>
+                        <br /><span class="report_reporter">reported by <a href="user.php?id=<?=$ReporterID?>"><?= $ReporterName ?></a> <?=time_diff($ReportedTime)?> for the reason: <strong><?=$ReportType['title']?></strong></span>
+                        <br />uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
+                        <br />Last action: <?= $LastAction ?: 'Never' ?>
+                        <br /><span class="report_torrent_file_ext">Audio files present:
+<?php                   $extMap = audio_file_map($FileList);
+                        if (count($extMap) == 0) {
+?>
+                            <span class="file_ext_none">none</span>
+<?php                   } else { ?>
+                            <span class="file_ext_map"><?= implode(', ', array_map(function ($x) use ($extMap) { return "$x:" . $extMap[$x]; }, array_keys($extMap))) ?></span>
+<?php                   } ?>
+                        </span>
+<?php                   if (strlen($Description)) { ?>
+                        <br /><span class="report_torrent_info" title="Release description of reported torrent">Release info: <?= Text::full_format($Description) ?></span>
+<?php                   } ?>
+
 <?php           if ($Status != 'Resolved') {
                     $DB->query("
                         SELECT r.ID
@@ -428,7 +446,7 @@ if (count($Reports) === 0) {
                 $First = true;
                 $Extras = explode(' ', $ExtraIDs);
                 foreach ($Extras as $ExtraID) {
-                    $DB->query("
+                    $DB->prepared_query("
                         SELECT
                             tg.Name,
                             tg.ID,
@@ -444,6 +462,8 @@ if (count($Reports) === 0) {
                             END AS ArtistName,
                             tg.Year,
                             t.Time,
+                            t.Description,
+                            t.Filelist,
                             t.Remastered,
                             t.RemasterTitle,
                             t.RemasterYear,
@@ -454,18 +474,26 @@ if (count($Reports) === 0) {
                             t.HasCue,
                             t.HasLog,
                             t.LogScore,
+                            tls.last_action,
                             t.UserID AS UploaderID,
                             uploader.Username
                         FROM torrents AS t
-                            LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
-                            LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID AND ta.Importance = '1'
-                            LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
-                            LEFT JOIN users_main AS uploader ON uploader.ID = t.UserID
-                        WHERE t.ID = '$ExtraID'
-                        GROUP BY tg.ID");
+                        LEFT JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
+                        LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+                        LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
+                        LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
+                        LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)
+                        WHERE t.ID = ?
+                        GROUP BY tg.ID
+                        ", $ExtraID
+                    );
 
-                    list($ExtraGroupName, $ExtraGroupID, $ExtraArtistID, $ExtraArtistName, $ExtraYear, $ExtraTime, $ExtraRemastered, $ExtraRemasterTitle,
-                        $ExtraRemasterYear, $ExtraMedia, $ExtraFormat, $ExtraEncoding, $ExtraSize, $ExtraHasCue, $ExtraHasLog, $ExtraLogScore, $ExtraUploaderID, $ExtraUploaderName) = Misc::display_array($DB->next_record());
+                    list($ExtraGroupName, $ExtraGroupID, $ExtraArtistID, $ExtraArtistName,
+                        $ExtraYear, $ExtraTime, $ExtraDescription, $ExtraFileList, $ExtraRemastered,
+                        $ExtraRemasterTitle, $ExtraRemasterYear, $ExtraMedia, $ExtraFormat,
+                        $ExtraEncoding, $ExtraSize, $ExtraHasCue, $ExtraHasLog, $ExtraLogScore,
+                        $ExtraLastAction, $ExtraUploaderID, $ExtraUploaderName)
+                            = Misc::display_array($DB->next_record());
 
                     if ($ExtraGroupName) {
                         $ExtraRemasterDisplayString = Reports::format_reports_remaster_info($ExtraRemastered, $ExtraRemasterTitle, $ExtraRemasterYear);
@@ -481,9 +509,89 @@ if (count($Reports) === 0) {
                         <?=($First ? '' : '<br />')?>
                         <?=$ExtraLinkName?>
                         <a href="torrents.php?action=download&amp;id=<?=$ExtraID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                        uploaded by <a href="user.php?id=<?=$ExtraUploaderID?>"><?=$ExtraUploaderName?></a> on <span title="<?= time_diff($ExtraTime, 3, false) ?>"><?= $ExtraTime ?></span>
+                        <br />uploaded by <a href="user.php?id=<?=$ExtraUploaderID?>"><?=$ExtraUploaderName?></a> on <span title="<?=
+                            time_diff($ExtraTime, 3, false) ?>"><?= $ExtraTime ?> (<?=
+                            strtotime($ExtraTime) < strtotime($Time) ? 'older upload' : 'more recent upload' ?>)</span>
+                        <br />Last action: <?= $ExtraLastAction ?: 'Never' ?>
+                        <br /><span>Audio files present:
+<?php                   $extMap = audio_file_map($ExtraFileList);
+                        if (count($extMap) == 0) {
+?>
+                            <span class="file_ext_none">none</span>
+<?php                   } else { ?>
+                            <span class="file_ext_map"><?= implode(', ', array_map(function ($x) use ($extMap) { return "$x:" . $extMap[$x]; }, array_keys($extMap))) ?></span>
+<?php                   } ?>
+                        </span>
+<?php                   if (strlen($ExtraDescription)) { ?>
+                        <br /><span class="report_other_torrent_info" title="Release description of other torrent">Release info: <?= Text::full_format($ExtraDescription) ?></span>
+<?php                   } ?>
                     </td>
                 </tr>
+<?php           if ($HasLog || $ExtraHasLog) { ?>
+                <tr>
+                    <td class="label">Logfiles:</td>
+                    <td>
+                        <table><tr><td>Reported</td><td>Relevant</td></tr><tr>
+                            <td width="50%" style="vertical-align: top;">
+<?php               $log = new \Gazelle\Torrent\Log($DB, $Cache, $TorrentID);
+                    $details = $log->logDetails(); ?>
+                                <ul class="nobullet logdetails">
+<?php               if (!count($details)) { ?>
+                                <li class="nobr">No logs</li>
+<?php               } else {
+                        foreach ($details as $logId => $info) {
+                            if ($info['adjustment']) {
+                                $adj = $info['adjustment']; ?>
+                                <li class="nobr">Log adjusted by <?= Users::format_username($adj['userId'])
+                                    ?> from score <?= $adj['score']
+                                    ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
+<?php                       }
+                            if (isset($info['status']['tracks'])) {
+                                $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
+                            }
+                            foreach ($info['status'] as $s) { ?>
+                                <li class="nobr"><?= $s ?></li>
+<?php                       } ?>
+                                <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
+                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= file_get_contents(sprintf("%s/logs/%d_%d.log", SERVER_ROOT_LIVE, $TorrentID, $logId)) ?></pre></li>
+                                <li><span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>:
+                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= $info['log'] ?></pre></li>
+<?php                   }
+                    } ?>
+                                </ul>
+                            </td>
+                            <td width="50%" style="vertical-align: top;">
+<?php               $log = new \Gazelle\Torrent\Log($DB, $Cache, $ExtraID);
+                    $details = $log->logDetails(); ?>
+                                <ul class="nobullet logdetails">
+<?php               if (!count($details)) { ?>
+                                <li class="nobr">No logs</li>
+<?php               } else {
+                        foreach ($details as $logId => $info) {
+                            if ($info['adjustment']) {
+                                $adj = $info['adjustment']; ?>
+                                <li class="nobr">Log adjusted by <?= Users::format_username($adj['userId'])
+                                    ?> from score <?= $adj['score']
+                                    ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
+<?php                       }
+                            if (isset($info['status']['tracks'])) {
+                                $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
+                            }
+                            foreach ($info['status'] as $s) { ?>
+                                <li class="nobr"><?= $s ?></li>
+<?php                       } ?>
+                                <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
+                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= file_get_contents(sprintf("%s/logs/%d_%d.log", SERVER_ROOT_LIVE, $ExtraID, $logId)) ?></pre></li>
+                                <li><span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>:
+                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= $info['log'] ?></pre></li>
+<?php                   }
+                    } ?>
+                                </ul>
+                            </td>
+                        </tr></table>
+                    </td>
+                </tr>
+<?php           }  ?>
                 <tr>
                     <td class="label">Switch:</td>
                     <td colspan="3"><a href="#" onclick="Switch(<?=$ReportID?>, <?=$TorrentID?>, <?=$ExtraID?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
@@ -673,5 +781,5 @@ if (count($Reports) === 0) {
 if ($PageLinks) { ?>
 <div class="linkbox pager"><?=$PageLinks?></div>
 <?php
-} ?>
-<?php View::show_footer(); ?>
+}
+View::show_footer();

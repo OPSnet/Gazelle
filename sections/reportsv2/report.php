@@ -153,4 +153,3 @@ View::show_header('Report', 'reportsv2,browse,torrent,bbcode,recommend');
 </div>
 <?php
 View::show_footer();
-?>

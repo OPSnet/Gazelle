@@ -16,28 +16,27 @@ switch ($_REQUEST['action']) {
         include('takeresolve.php');
         break;
     case 'stats':
-        include(SERVER_ROOT.'/sections/reports/stats.php');
+        include(__DIR__ . '/stats.php');
         break;
     case 'compose':
-        include(SERVER_ROOT.'/sections/reports/compose.php');
+        include(__DIR__ . '/compose.php');
         break;
     case 'takecompose':
-        include(SERVER_ROOT.'/sections/reports/takecompose.php');
+        include(__DIR__ . '/takecompose.php');
         break;
     case 'add_notes':
-        include(SERVER_ROOT.'/sections/reports/ajax_add_notes.php');
+        include(__DIR__ . '/ajax_add_notes.php');
         break;
     case 'claim':
-        include(SERVER_ROOT.'/sections/reports/ajax_claim_report.php');
+        include(__DIR__ . '/ajax_claim_report.php');
         break;
     case 'unclaim':
-        include(SERVER_ROOT.'/sections/reports/ajax_unclaim_report.php');
+        include(__DIR__ . '/ajax_unclaim_report.php');
         break;
     case 'resolve':
-        include(SERVER_ROOT.'/sections/reports/ajax_resolve_report.php');
+        include(__DIR__ . '/ajax_resolve_report.php');
         break;
     default:
-        include(SERVER_ROOT.'/sections/reports/reports.php');
+        include(__DIR__ . '/reports.php');
         break;
 }
-?>

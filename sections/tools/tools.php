@@ -78,6 +78,7 @@ Category('Administration', [
     Item('Database encryption key',  'tools.php?action=dbkey',           All(['site_debug'])),
     Item('Auto-Enable requests',     'tools.php?action=enable_requests', All(['users_mod'])),
     Item('Login watch',              'tools.php?action=login_watch',     All(['admin_login_watch'])),
+    Item('Reports V1',               'reports.php',                      Any(['admin_reports', 'site_moderate_forums'])),
 ]);
 
 Category('Announcements', [

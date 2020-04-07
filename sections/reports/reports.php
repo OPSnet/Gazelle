@@ -249,4 +249,3 @@ $DB->set_query_id($Reports);
 </div>
 <?php
 View::show_footer();
-?>
