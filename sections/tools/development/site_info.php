@@ -63,6 +63,14 @@ $Data = ob_get_contents();
 ob_end_clean();
 $Data = substr($Data, strpos($Data, '<body>') + 6, strpos($Data, '</body>'));
 
+function uid ($id) {
+    return sprintf("%s(%d)", posix_getpwuid($id)['name'], $id);
+}
+
+function gid ($id) {
+    return sprintf("%s(%d)", posix_getgrgid($id)['name'], $id);
+}
+
 View::show_header('Site Information');
 ?>
 <style type="text/css">
@@ -86,6 +94,13 @@ div#phpinfo img {float: right; border: 0;}
 div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 </style>
 <div class="thin">
+    <h3>OS</h3>
+    <div class="box pad">
+        <span style="width: 100px; display: inline-block">User:</span> <?= uid(posix_getuid()) ?><br />
+        <span style="width: 100px; display: inline-block">Group:</span> <?= gid(posix_getgid()) ?><br />
+        <span style="width: 100px; display: inline-block">Effective User:</span> <?= uid(posix_geteuid()) ?><br />
+        <span style="width: 100px; display: inline-block">Effective Group:</span> <?= gid(posix_getegid()) ?>
+    </div>
     <h3>Timestamps</h3>
     <div class="box pad">
         <span style="width: 50px; display: inline-block">PHP:</span> <?=$PHPTimeStamp?><br />
