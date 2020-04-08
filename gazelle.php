@@ -79,6 +79,7 @@ switch ($Document) {
     case 'staffpm':
     case 'stats':
     case 'top10':
+    case 'view':
         $Valid = true;
         break;
 }
