@@ -25,7 +25,7 @@ class Log {
      *      - userId (staff userid who made the last adjustment)
      *      - score (the original score of the torrent)
      *      - adjusted (adjusted score)
-     *      - reason reason (reason given by the adjuster for adjusting the log)
+     *      - reason (reason given by the adjuster for adjusting the log)
      *    The 'status' key points to an unserialized array of AdjustmentDetails
      */
     public function logDetails() {
