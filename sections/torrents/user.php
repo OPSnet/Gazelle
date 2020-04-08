@@ -282,6 +282,10 @@ if ((empty($_GET['search']) || trim($_GET['search']) === '') && $SortOrder != 'n
         $Words = array_unique(explode(' ', db_string($_GET['search'])));
     }
 
+    if (($dotpos = strpos($OrderBy, '.')) !== false) {
+        $OrderBy = substr($OrderBy, $dotpos + 1);
+    }
+
     $SQL = "
         SELECT
             SQL_CALC_FOUND_ROWS
