@@ -61,7 +61,13 @@ class DEBUG {
     }
 
     public function analysis($Message, $Report = '', $Time = 43200) {
-        global $Document;
+        $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
+        if (PHP_SAPI === 'cli'
+            || in_array($RequestURI, ['tools.php?action=db_sandbox'])
+        ) {
+            // Don't spam IRC from Boris or these pages
+            return;
+        }
         if (empty($Report)) {
             $Report = $Message;
         }
@@ -69,20 +75,20 @@ class DEBUG {
         G::$Cache->cache_value(
             'analysis_'.$Identifier,
             [
-                'url' => $_SERVER['REQUEST_URI'] ?? 'cli',
-                'message' => $Report,
-                'errors' => $this->get_errors(true),
-                'queries' => $this->get_queries(),
-                'flags' => $this->get_flags(),
+                'url'      => $_SERVER['REQUEST_URI'] ?? 'cli',
+                'message'  => $Report,
+                'errors'   => $this->get_errors(true),
+                'queries'  => $this->get_queries(),
+                'flags'    => $this->get_flags(),
                 'includes' => $this->get_includes(),
-                'cache' => $this->get_cache_keys(),
-                'vars' => $this->get_logged_vars(),
-                'perf' => $this->get_perf(),
-                'ocelot' => $this->get_ocelot_requests()
+                'cache'    => $this->get_cache_keys(),
+                'vars'     => $this->get_logged_vars(),
+                'perf'     => $this->get_perf(),
+                'ocelot'   => $this->get_ocelot_requests()
             ],
             $Time
         );
-        $RequestURI = !empty($_SERVER['REQUEST_URI']) ? substr($_SERVER['REQUEST_URI'], 1) : '';
+        global $Document;
         send_irc('PRIVMSG '.LAB_CHAN." :{$Message} $Document ".site_url()."tools.php?action=analysis&case=$Identifier ".site_url().$RequestURI);
     }
 
