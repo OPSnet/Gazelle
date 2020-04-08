@@ -13,6 +13,8 @@ define('SITE_HOST', ''); // The host for your site (e.g. localhost, orpheus.netw
 define('SITE_URL', 'https://'.SITE_HOST); // The base URL to access the site (e.g. http://localhost:8080, https://orpheus.network)
 define('MAIL_HOST', 'mail.'.SITE_HOST); // The host to use for mail delivery (e.g. mail.orpheus.network)
 define('SERVER_ROOT', '/path'); //The root of the server, used for includes, purpose is to shorten the path string
+define('SERVER_ROOT_LIVE', '/path'); //Only needed on the beta site when accessing unmocked resources, otherwise == SERVER_ROOT
+define('BETA', false); //Only needed on the beta site when different code paths are necessary
 define('ANNOUNCE_URL', 'http://'.NONSSL_SITE_URL.':2710'); //Announce URL
 define('REFERRAL_BOUNCER', 'http://127.0.0.1:8888'); // URL to referral bouncer.
 define('REFERRAL_KEY', hash('sha512', '')); // Shared key to encrypt data flowing to bouncer.
@@ -214,6 +216,10 @@ define('TMPDIR', '/tmp');
 
 $ForumsRevealVoters = [];
 $ForumsDoublePost = [];
+
+define('STORAGE_PATH_TORRENT', '/var/lib/gazelle/torrent');
+define('STORAGE_PATH_RIPLOG', '/var/lib/gazelle/riplog');
+define('STORAGE_PATH_RIPLOGHTML', '/var/lib/gazelle/riploghtml');
 
 $Categories = ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics'];
 $GroupedCategories = array_intersect(['Music'], $Categories);

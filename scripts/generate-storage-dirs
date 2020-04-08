@@ -1,0 +1,25 @@
+#! /usr/bin/perl
+
+use strict;
+use warnings;
+use File::Path;
+
+my $path  = shift or die "No path specified (e.g. /path/to/dirs) on command line\n";
+my $depth = shift or die "No depth specified (e.g 2, 3) on command line\n";
+my $width = shift or die "No width specified (e.g 10, 100) on command line\n";
+
+sub gen {
+    my $path = shift;
+    my $width = shift;
+    my $depth = shift;
+    my $wide  = length($width);
+    $wide -= 1 if $width / 10 == int($width / 10);
+
+    my @new;
+    for my $p (@$path) {
+        push @new, map {sprintf '%s/%0*d', $p, $wide, $_} 0..$width-1;
+    }
+    return --$depth ? gen(\@new, $width, $depth) : \@new;
+}
+
+mkpath(gen([$path], $width, $depth), 0, 0711);
