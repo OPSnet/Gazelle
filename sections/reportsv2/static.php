@@ -532,7 +532,7 @@ if (count($Reports) === 0) {
                     <td class="label">Logfiles:</td>
                     <td>
                         <table><tr><td>Reported</td><td>Relevant</td></tr><tr>
-                            <td width="50%" style="vertical-align: top; max-width=500px">
+                            <td width="50%" style="vertical-align: top; max-width: 500px;">
 <?php               $log = new \Gazelle\Torrent\Log($DB, $Cache, $TorrentID);
                     $details = $log->logDetails(); ?>
                                 <ul class="nobullet logdetails">
@@ -560,7 +560,7 @@ if (count($Reports) === 0) {
                     } ?>
                                 </ul>
                             </td>
-                            <td width="50%" style="vertical-align: top; max-width=500px">
+                            <td width="50%" style="vertical-align: top; max-width: 500px;">
 <?php               $log = new \Gazelle\Torrent\Log($DB, $Cache, $ExtraID);
                     $details = $log->logDetails(); ?>
                                 <ul class="nobullet logdetails">
