@@ -846,7 +846,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             SET FreeTorrent = ?, FreeLeechType = ?
             WHERE ID IN ($placeholders)
                 $FL_condition
-            ", $FreeNeutral, $FreeLeechType, ...$TorrentIDs
+            ", (string) $FreeNeutral, (string) $FreeLeechType, ...$TorrentIDs
         );
 
         G::$DB->prepared_query("
