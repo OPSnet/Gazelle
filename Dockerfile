@@ -4,19 +4,16 @@ ARG BuildMode=dev
 
 WORKDIR /var/www
 
+# Misc software layer
 RUN useradd -ms /bin/bash gazelle \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
-        curl \
-        software-properties-common \
-        wget
-
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
-    && apt-get install -y --no-install-recommends \
         cron \
+        curl \
         git \
+        gnupg \
         imagemagick \
         libboost-dev \
         libbz2-dev \
@@ -25,16 +22,21 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
         libtcmalloc-minimal4 \
         make \
         mariadb-client \
-        nodejs \
+        netcat-openbsd \
         nginx \
         python3 \
         python3-pip \
         python3-setuptools \
         python3-wheel \
-        netcat-openbsd \
+        software-properties-common \
         unzip \
+        wget \
         zlib1g-dev
 
+# Python tools layer
+RUN pip3 install chardet eac-logchecker xld-logchecker
+
+# PHP layer
 RUN apt-get install -y --no-install-recommends \
         php7.3-cli \
         php7.3-curl \
@@ -49,31 +51,32 @@ RUN apt-get install -y --no-install-recommends \
         php-xdebug \
         composer
 
-RUN pip3 install chardet eac-logchecker xld-logchecker
+# NodeJS layer
+# Nodesource setup comes after yarnpkg because it runs `apt-get update`
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && curl -sL https://deb.nodesource.com/setup_12.x | bash - \
+    && apt-get install -y --no-install-recommends \
+        nodejs \
+        yarn
 
+# Puppeteer layer
 # Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
 # Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
 # installs, work.
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \
-    && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY . /var/www
-
-RUN chown -R gazelle:gazelle /var/www \
-    && cp /var/www/.docker/web/php.ini /etc/php/7.3/cli/php.ini \
-    && cp /var/www/.docker/web/php.ini /etc/php/7.3/fpm/php.ini \
-    && cp /var/www/.docker/web/xdebug.ini /etc/php/7.3/mods-available/xdebug.ini \
-    && cp /var/www/.docker/web/www.conf /etc/php/7.3/fpm/pool.d/www.conf \
-    && cp /var/www/.docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
-    && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
-    && rm -f /etc/nginx/sites-enabled/default \
+    && apt-get install -y --no-install-recommends \
+        google-chrome-unstable \
+        fonts-ipafont-gothic \
+        fonts-wqy-zenhei \
+        fonts-thai-tlwg \
+        fonts-kacst \
+        fonts-freefont-ttf \
+    && rm -rf /var/lib/apt/lists/* \
     && groupadd -r pptruser \
     && usermod -aG pptruser,audio,video gazelle
-    # Adds user so we don't need --no-sandbox.
 
 # If running Docker >= 1.13.0 use docker run's --init arg to reap zombie processes, otherwise
 # uncomment the following lines to have `dumb-init` as PID 1
@@ -86,14 +89,27 @@ RUN chown -R gazelle:gazelle /var/www \
 #     browser.launch({executablePath: 'google-chrome-unstable'})
 # ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
+COPY . /var/www
+
+# Permissions and configuration layer
+RUN chown -R gazelle:gazelle /var/www \
+    && cp /var/www/.docker/web/php.ini /etc/php/7.3/cli/php.ini \
+    && cp /var/www/.docker/web/php.ini /etc/php/7.3/fpm/php.ini \
+    && cp /var/www/.docker/web/xdebug.ini /etc/php/7.3/mods-available/xdebug.ini \
+    && cp /var/www/.docker/web/www.conf /etc/php/7.3/fpm/pool.d/www.conf \
+    && cp /var/www/.docker/web/nginx.conf /etc/nginx/sites-available/gazelle.conf \
+    && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
+    && rm -f /etc/nginx/sites-enabled/default
+
 USER gazelle
 
+# Build/run deps install layer
 RUN if [ "$BuildMode" = "prod" ]; then \
         composer --version && composer install --no-dev --optimize-autoloader --no-suggest; \
-        npm i --production; \
+        yarn --prod; \
     else \
         composer --version && composer install; \
-        npm i; \
+        yarn; \
     fi
 
 USER root
