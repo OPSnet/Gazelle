@@ -1,5 +1,10 @@
 <?php
 
+if (PHP_VERSION_ID < 70300) {
+    die("Gazelle (Orpheus fork) requires PHP 7.3 or later to function properly");
+}
+date_default_timezone_set('UTC');
+
 $Redirects = [
     'browse'  => 'torrents.php',
     'collage' => 'collages.php',
