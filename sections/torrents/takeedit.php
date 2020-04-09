@@ -59,17 +59,17 @@ if ($_POST['album_desc']) {
     $Properties['GroupDescription'] = $_POST['album_desc'];
 }
 if (check_perms('torrents_freeleech')) {
-    $Free = (int)$_POST['freeleech'];
-    if (!in_array($Free, [0, 1, 2])) {
+    $Free = $_POST['freeleechtype'];
+    if (!in_array($Free, ['0', '1', '2'])) {
         error(404);
     }
     $Properties['FreeLeech'] = $Free;
 
-    if ($Free == 0) {
-        $FreeType = 0;
+    if ($Free == '0') {
+        $FreeType = '0';
     } else {
-        $FreeType = (int)$_POST['freeleechtype'];
-        if (!in_array($Free, [0, 1, 2, 3])) {
+        $FreeType = $_POST['freeleechreason'];
+        if (!in_array($FreeType, ['0', '1', '2', '3'])) {
             error(404);
         }
     }

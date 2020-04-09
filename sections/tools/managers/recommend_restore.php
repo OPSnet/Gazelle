@@ -12,6 +12,6 @@ $DB->query('
     SELECT GroupID
     FROM torrents_recommended');
 $ToNL = $DB->next_record();
-Torrents::freeleech_groups($ToNL, 2, 3);
+Torrents::freeleech_groups($ToNL, '2', '3');
 ?>
 Done

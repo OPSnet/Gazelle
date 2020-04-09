@@ -131,11 +131,12 @@ if ($CategoryID == 1) { ?>
                 <tr>
                     <td class="label">Torrent <strong>group</strong> leech status</td>
                     <td>
-                        <input type="checkbox" id="unfreeleech" name="unfreeleech" /><label for="unfreeleech"> Reset</label>
-                        <input type="checkbox" id="freeleech" name="freeleech" /><label for="freeleech"> Freeleech</label>
-                        <input type="checkbox" id="neutralleech" name="neutralleech" /><label for="neutralleech"> Neutral Leech</label>
+<?php       $Leech = ['Normal', 'Freeleech', 'Neutral Leech'];
+        foreach ($Leech as $Key => $Type) { ?>
+                        <label><input type="radio" name="freeleechtype" value="<?=$Key?>"<?=($Key == $Torrent['FreeTorrent'] ? ' checked="checked"' : '')?> /> <?=$Type?></label>
+<?php   } ?>
                          because
-                        <select name="freeleechtype">
+                        <select name="freeleechreason">
 <?php        $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$FLType?></option>

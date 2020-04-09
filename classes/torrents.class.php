@@ -829,11 +829,11 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
      * Will freeleech / neutral leech / normalise a set of torrents
      *
      * @param array $TorrentIDs An array of torrent IDs to iterate over
-     * @param int $FreeNeutral 0 = normal, 1 = fl, 2 = nl
-     * @param int $FreeLeechType 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
+     * @param string $FreeNeutral 0 = normal, 1 = fl, 2 = nl
+     * @param string $FreeLeechType 0 = Unknown, 1 = Staff picks, 2 = Perma-FL (Toolbox, etc.), 3 = Vanity House
      * @param bool $AllFL true = all torrents are made FL, false = only lossless torrents are made FL
      */
-    public static function freeleech_torrents($TorrentIDs, $FreeNeutral = 1, $FreeLeechType = 0, $AllFL = false) {
+    public static function freeleech_torrents($TorrentIDs, $FreeNeutral = '1', $FreeLeechType = '0', $AllFL = false) {
         if (!is_array($TorrentIDs)) {
             $TorrentIDs = [$TorrentIDs];
         }
@@ -878,17 +878,17 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
      * Convenience function to allow for passing groups to Torrents::freeleech_torrents()
      *
      * @param array $GroupIDs the groups in question
-     * @param int $FreeNeutral see Torrents::freeleech_torrents()
-     * @param int $FreeLeechType see Torrents::freeleech_torrents()
+     * @param string $FreeNeutral see Torrents::freeleech_torrents()
+     * @param string $FreeLeechType see Torrents::freeleech_torrents()
      */
-    public static function freeleech_groups($GroupIDs, $FreeNeutral = 1, $FreeLeechType = 0) {
+    public static function freeleech_groups($GroupIDs, $FreeNeutral = '1', $FreeLeechType = '0') {
         $QueryID = G::$DB->get_query_id();
 
         if (!is_array($GroupIDs)) {
             $GroupIDs = [$GroupIDs];
         }
 
-        $paramString = implode(', ', array_fill(0, len($TorrentIDs), '?'));
+        $paramString = implode(', ', array_fill(0, count($GroupIDs), '?'));
 
         G::$DB->prepared_query("
             SELECT ID

@@ -32,10 +32,10 @@ if (isset($_POST['torrents'])) {
     if (sizeof($GroupIDs) == 0) {
         $Err = 'Please enter properly formatted URLs';
     } else {
-        $FreeLeechType = (int) $_POST['freeleechtype'];
-        $FreeLeechReason = (int) $_POST['freeleechreason'];
+        $FreeLeechType = $_POST['freeleechtype'];
+        $FreeLeechReason = $_POST['freeleechreason'];
 
-        if (!in_array($FreeLeechType, [0, 1, 2]) || !in_array($FreeLeechReason, [0, 1, 2, 3])) {
+        if (!in_array($FreeLeechType, ['0', '1', '2']) || !in_array($FreeLeechReason, ['0', '1', '2', '3'])) {
             $Err = 'Invalid freeleech type or freeleech reason';
         } else {
             // Get the torrent IDs
@@ -51,7 +51,7 @@ if (isset($_POST['torrents'])) {
             if (sizeof($TorrentIDs) == 0) {
                 $Err = 'Invalid group IDs';
             } else {
-                if (isset($_POST['NLOver']) && $FreeLeechType == 1) {
+                if (isset($_POST['NLOver']) && $FreeLeechType == '1') {
                     // Only use this checkbox if freeleech is selected
                     $Size = (int) $_POST['size'];
                     $Units = db_string($_POST['scale']);
@@ -77,7 +77,7 @@ if (isset($_POST['torrents'])) {
                 }
 
                 if (isset($LargeTorrents) && sizeof($LargeTorrents) > 0) {
-                    Torrents::freeleech_torrents($LargeTorrents, 2, $FreeLeechReason);
+                    Torrents::freeleech_torrents($LargeTorrents, '2', $FreeLeechReason);
                 }
 
                 $Err = 'Done!';
