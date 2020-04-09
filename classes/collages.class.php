@@ -87,7 +87,7 @@ class Collages {
         $cacheKey = 'bbcode-collage.' . $id;
         if (($name = G::$Cache->get_value($cacheKey)) === false) {
             $name = G::$DB->scalar('SELECT Name FROM collages WHERE id = ?', $id);
-            G::$Cache->cache_value($key, $name, 86400 + rand(1, 3600));
+            G::$Cache->cache_value($cacheKey, $name, 86400 + rand(1, 3600));
         }
         return $name
             ? $url

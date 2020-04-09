@@ -330,9 +330,9 @@ class Text {
                 }
                 switch ($args['action']) {
                     case 'viewforum':
-                        return \Forums::bbcodeForumUrl($args['forumid'], $url) ?? null;
+                        return \Forums::bbcodeForumUrl($args['forumid']) ?? null;
                     case 'viewthread':
-                        return \Forums::bbcodeThreadUrl($args['threadid'], $url) ?? null;
+                        return \Forums::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null) ?? null;
                 }
                 return null;
 
