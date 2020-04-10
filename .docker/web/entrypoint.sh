@@ -16,7 +16,7 @@ if [ ! -f /srv/www/classes/config.php ]; then
 fi
 
 echo "Run migrate..."
-/var/www/vendor/bin/phinx migrate
+LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate
 
 if [ ! -f /srv/gazelle.txt ]; then
     touch /srv/gazelle.txt
