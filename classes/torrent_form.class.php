@@ -139,9 +139,9 @@ class TORRENT_FORM {
             if (check_perms('torrents_freeleech')) {
 ?>
             <tr id="freetorrent">
-                <td class="label">Freeleech</td>
+                <td class="label">Leech Type</td>
                 <td>
-                    <select name="freeleech">
+                    <select name="freeleechtype">
 <?php
                 $FL = ["Normal", "Free", "Neutral"];
                 foreach ($FL as $Key => $Name) {
@@ -150,7 +150,7 @@ class TORRENT_FORM {
 <?php           } ?>
                     </select>
                     because
-                    <select name="freeleechtype">
+                    <select name="freeleechreason">
 <?php
                 $FL = ["N/A", "Staff Pick", "Perma-FL", "Vanity House"];
                 foreach ($FL as $Key => $Name) {

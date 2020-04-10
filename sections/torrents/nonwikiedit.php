@@ -20,17 +20,15 @@ if (!check_perms('torrents_edit')) {
 }
 
 
-if (check_perms('torrents_freeleech') && (isset($_POST['freeleech']) xor isset($_POST['neutralleech']) xor isset($_POST['unfreeleech']))) {
-    if (isset($_POST['freeleech'])) {
-        $Free = 1;
-    } elseif (isset($_POST['neutralleech'])) {
-        $Free = 2;
+if (isset($_POST['freeleechtype']) && check_perms('torrents_freeleech')) {
+    if (in_array($_POST['freeleechtype'], ['0', '1', '2'])) {
+        $Free = $_POST['freeleechtype'];
     } else {
-        $Free = 0;
+        $Free = '0';
     }
 
-    if (isset($_POST['freeleechtype']) && in_array($_POST['freeleechtype'], [0, 1, 2, 3])) {
-        $FreeType = $_POST['freeleechtype'];
+    if (isset($_POST['freeleechreason']) && in_array($_POST['freeleechreason'], ['0', '1', '2', '3'])) {
+        $FreeType = $_POST['freeleechreason'];
     } else {
         error(404);
     }
