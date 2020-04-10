@@ -109,6 +109,7 @@ $PermissionsArray = [
     'admin_manage_permissions' => 'Can edit permission classes/user permissions.',
     'admin_recovery' => 'Can manage account recovery.',
     'admin_schedule' => 'Can run the site schedule.',
+    'admin_site_debug' => 'Can access sensitive debug information.',
     'admin_login_watch' => 'Can manage login watch.',
     'admin_manage_wiki' => 'Can manage wiki access.',
     'admin_update_geoip' => 'Can update geoIP data.',

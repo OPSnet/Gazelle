@@ -25,6 +25,8 @@ if (check_perms('admin_clear_cache')) {
 if (check_perms('site_debug')) {
     $Debug->class_table();
     $Debug->extension_table();
+}
+if (check_perms('admin_site_debug')) {
     $Debug->constant_table();
 }
 $Debug->vars_table($Analysis['vars']);
