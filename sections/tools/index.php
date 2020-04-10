@@ -44,12 +44,6 @@ $Val = new Validate;
 $Feed = new Feed;
 
 switch ($_REQUEST['action']) {
-    case 'phpinfo':
-        if (!check_perms('site_debug')) {
-            error(403);
-        }
-        phpinfo();
-        break;
     //Services
     case 'get_host':
         include(SERVER_ROOT.'/sections/tools/services/get_host.php');

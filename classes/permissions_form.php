@@ -109,6 +109,7 @@ $PermissionsArray = [
     'admin_manage_permissions' => 'Can edit permission classes/user permissions.',
     'admin_recovery' => 'Can manage account recovery.',
     'admin_schedule' => 'Can run the site schedule.',
+    'admin_site_debug' => 'Can access sensitive debug information.',
     'admin_login_watch' => 'Can manage login watch.',
     'admin_manage_wiki' => 'Can manage wiki access.',
     'admin_update_geoip' => 'Can update geoIP data.',
@@ -291,6 +292,7 @@ function permissions_form() {
                     display_perm('admin_manage_permissions', 'Can edit permission classes/user permissions.');
                     display_perm('admin_recovery', 'Can manage account recovery.');
                     display_perm('admin_schedule', 'Can run the site schedule.');
+                    display_perm('admin_site_debug', 'Can access sensitive debug information.');
                     display_perm('admin_login_watch', 'Can manage login watch.');
                     display_perm('admin_manage_wiki', 'Can manage wiki access.');
                     display_perm('admin_update_geoip', 'Can update geoIP data.');

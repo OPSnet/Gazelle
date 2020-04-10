@@ -545,7 +545,7 @@ if (check_perms('admin_manage_payments')) {
 
 }
 
-if (check_perms('site_debug')) {
+if (check_perms('admin_site_debug')) {
     if (!apcu_exists('DB_KEY') || !apcu_fetch('DB_KEY')) {
         $Alerts[] = '<a href="tools.php?action=dbkey"><span style="color: red">DB key not loaded</span></a>';
     }
