@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "lint:js": "eslint static/functions",
     "lint:php:internal": "find . -path './vendor' -prune -o -path ./node_modules -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v \"No syntax errors detected\" )",
     "lint:php:phpcs": "vendor/bin/phpcs -p",
     "lint:php": "npm run lint:php:internal && npm run lint:php:phpcs",
@@ -12,9 +11,8 @@
   },
   "license": "Unlicense",
   "devDependencies": {
-    "eslint": "^6.5.1",
-    "husky": "^3.0.8",
-    "lint-staged": "^9.4.1"
+    "husky": "^4.2.5",
+    "lint-staged": "^9.5.0"
   },
   "dependencies": {
     "puppeteer": "^2.1.1"
@@ -28,8 +26,7 @@
     "*.php": [
       "php -l",
       "bash .bin/phpcbf",
-      "vendor/bin/phpcs",
-      "git add"
+      "vendor/bin/phpcs"
     ]
   }
 }
