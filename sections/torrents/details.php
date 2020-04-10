@@ -406,6 +406,7 @@ foreach ($TorrentList as $t) {
 }
 
 $LastMedia = null;
+$UnknownCounter = 0;
 foreach ($TorrentList as $Torrent) {
     list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
         $RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
@@ -418,7 +419,9 @@ foreach ($TorrentList as $Torrent) {
     if ($is_deleted && count($TorrentList) > 1) {
         continue;
     }
-    $FirstUnknown = ($Remastered && !$RemasterYear);
+    if ($Remastered && !$RemasterYear) {
+        $UnknownCounter++;
+    }
 
     unset($ReportedTimes);
     $Reports = Torrents::get_reports($TorrentID);
@@ -492,11 +495,10 @@ foreach ($TorrentList as $Torrent) {
         || $RemasterYear != $LastRemasterYear
         || $RemasterRecordLabel != $LastRemasterRecordLabel
         || $RemasterCatalogueNumber != $LastRemasterCatalogueNumber
-        || $FirstUnknown
+        || $UnknownCounter === 1
         || $Media != $LastMedia)) {
 
         $EditionID++;
-
 ?>
         <tr class="releases_<?=$ReleaseType?> groupid_<?=$GroupID?> edition group_torrent">
             <td colspan="5" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group." class="tooltip">&minus;</a> <?=Torrents::edition_string($Torrent, $TorrentDetails)?></strong></td>
@@ -566,6 +568,7 @@ foreach ($TorrentList as $Torrent) {
         if (time() - strtotime($LastActive) > 1576800000) { ?>
                             <br />Last active: Never
 <?php
+        // If last active is >= 2 weeks ago, output in bold
         } elseif ($LastActive != '0000-00-00 00:00:00' && time() - strtotime($LastActive) >= 1209600) { ?>
                             <br /><strong>Last active: <?=time_diff($LastActive); ?></strong>
 <?php   } else { ?>
