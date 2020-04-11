@@ -183,7 +183,7 @@ Category('Development', [
     Item('Database info',         'tools.php?action=database_specifics',       All(['site_database_specifics'])),
     Item('PHP processes',         'tools.php?action=process_info',             All(['site_debug'])),
     Item('Service stats',         'tools.php?action=service_stats',            All(['site_debug'])),
-    Item('Site info',             'tools.php?action=site_info',                All(['site_debug'])),
+    Item('Site info',             'tools.php?action=site_info',                All(['admin_site_debug'])),
     Item('Site options',          'tools.php?action=site_options',             All(['users_mod'])),
     Item('Scheduler',             'tools.php?action=periodic&amp;mode=view',   All(['admin_periodic_task_view'])),
     Item('Scheduler (legacy)',    'schedule.php?auth='.$LoggedUser['AuthKey'], All(['admin_schedule'])),

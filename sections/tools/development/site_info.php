@@ -12,10 +12,8 @@ function composer_exec($CMD) {
     return shell_exec($CMD);
 }
 
-if (!defined('DEBUG_MODE') || DEBUG_MODE !== true) {
-    if (!check_perms('site_debug')) {
-        error(403);
-    }
+if ((!defined('DEBUG_MODE') || DEBUG_MODE !== true) && !check_perms('admin_site_debug')) {
+    error(403);
 }
 
 $Debug->set_flag('Start Git');
