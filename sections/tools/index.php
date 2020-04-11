@@ -45,7 +45,7 @@ $Feed = new Feed;
 
 switch ($_REQUEST['action']) {
     case 'phpinfo':
-        if (!check_perms('site_debug')) {
+        if (!check_perms('admin_site_debug')) {
             error(403);
         }
         phpinfo();
