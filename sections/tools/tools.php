@@ -125,9 +125,9 @@ Category('User management', [
 ]);
 
 Category('Rewards', [
-    Item('Manage bonus points',     'tools.php?action=bonus_points',       All(['users_mod'])),
-    Item('Multiple freeleech',      'tools.php?action=multiple_freeleech', All(['users_mod'])),
-    Item('Manage freeleech tokens', 'tools.php?action=tokens',             All(['users_mod'])),
+    Item('Manage bonus points',         'tools.php?action=bonus_points',       All(['users_mod'])),
+    Item('Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', All(['users_mod'])),
+    Item('Manage freeleech tokens',     'tools.php?action=tokens',             All(['users_mod'])),
 ]);
 
 Category('Managers', [

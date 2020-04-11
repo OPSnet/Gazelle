@@ -87,7 +87,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.DisablePM,
             i.DisableIRC,
             i.DisableRequests,
-            um.FLTokens,
+            um.FLTokens, /* TODO: read from user_flt in next phase */
             um.2FA_Key,
             SHA1(i.AdminComment),
             i.InfoTitle,

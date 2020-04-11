@@ -229,14 +229,16 @@ class Bonus {
         $price  = $item['Price'];
         $this->db->prepared_query('
             UPDATE user_bonus ub
-            INNER JOIN users_main um ON (um.ID = ub.user_id) SET
+            INNER JOIN users_main um ON (um.ID = ub.user_id)
+            INNER JOIN user_flt uf USING (user_id) SET
                 ub.points = ub.points - ?,
-                um.FLTokens = um.FLTokens + ?
+                um.FLTokens = um.FLTokens + ?,
+                uf.tokens = uf.tokens + ?
             WHERE ub.user_id = ?
                 AND ub.points >= ?
-            ', $price, $amount, $userId, $price
+            ', $price, $amount, $amount, $userId, $price
         );
-        if ($this->db->affected_rows() != 2) {
+        if ($this->db->affected_rows() != 2 + 1) {
             throw new \Exception('Bonus:selfToken:funds');
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
@@ -263,20 +265,22 @@ class Bonus {
             UPDATE user_bonus ub
             INNER JOIN users_main self ON (self.ID = ub.user_id),
                 users_main other
+                INNER JOIN user_flt other_uf ON (other_uf.user_id = other.ID)
                 LEFT JOIN user_has_attr noFL ON (noFL.UserID = other.ID AND noFL.UserAttrId
                     = (SELECT ua.ID FROM user_attr ua WHERE ua.Name = 'no-fl-gifts')
                 )
             SET
                 ub.points = ub.points - ?,
-                other.FLTokens = other.FLTokens + ?
+                other.FLTokens = other.FLTokens + ?,
+                other_uf.tokens = other_uf.tokens + ?
             WHERE noFL.UserID IS NULL
                 AND other.Enabled = '1'
                 AND other.ID = ?
                 AND self.ID = ?
                 AND ub.points >= ?
-            ", $price, $amount, $toID, $fromID, $price
+            ", $price, $amount, $amount, $toID, $fromID, $price
         );
-        if ($this->db->affected_rows() != 2) {
+        if ($this->db->affected_rows() != 2 + 1) {
             throw new \Exception('Bonus:otherToken:no-gift-funds');
         }
         $this->addPurchaseHistory($item['ID'], $fromID, $price, $toID);

@@ -3,101 +3,109 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
+$Tokens = (int)$_REQUEST['numtokens'];
+
 if (isset($_REQUEST['addtokens'])) {
     authorize();
-    $Tokens = $_REQUEST['numtokens'];
 
-    if (!is_number($Tokens) || ($Tokens < 0)) {
+    if ($Tokens < 1) {
         error('Please enter a valid number of tokens.');
     }
     $sql = "
-        UPDATE users_main
-        SET FLTokens = FLTokens + $Tokens
-        WHERE Enabled = '1'";
+        UPDATE users_main um
+        INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
+            um.FLTokens = um.FLTokens + ?,
+            uf.tokens = uf.tokens + ?
+        WHERE um.Enabled = '1'";
     if (!isset($_REQUEST['leechdisabled'])) {
         $sql .= "
-            AND can_leech = 1";
+            AND um.can_leech = 1";
     }
-    $DB->query($sql);
-    $sql = "
-        SELECT ID
-        FROM users_main
-        WHERE Enabled = '1'";
-    if (!isset($_REQUEST['leechdisabled'])) {
-        $sql .= "
-            AND can_leech = 1";
-    }
-    $DB->query($sql);
-    while (list($UserID) = $DB->next_record()) {
-        $Cache->delete_value("user_info_heavy_$UserID");
-    }
-    $message = '<strong>' . number_format($Tokens) . 'freeleech tokens added to all enabled users' . (!isset($_REQUEST['leechdisabled']) ? ' with enabled leeching privs' : '') . '.</strong><br /><br />';
+    $DB->prepared_query($sql, $Tokens, $Tokens);
+
+    $DB->prepared_query("
+        SELECT concat('user_info_heavy_', ID) as cacheKey FROM users_main
+        WHERE Enabled = '1'
+        " . (isset($_REQUEST['leechdisabled']) ? '' : ' AND can_leech = 1')
+    );
+    $ck = $DB->collect('cacheKey');
+    $Cache->deleteMulti($ck);
+
+    $message = '<div class="box pad">'
+        . '<strong>' . number_format($Tokens) . ' freeleech tokens added to '
+        . number_format(count($ck)) . ' enabled users'
+        . (!isset($_REQUEST['leechdisabled']) ? ' with leeching privileges enabled' : '')
+        . '.</strong></div>';
+
 } elseif (isset($_REQUEST['cleartokens'])) {
     authorize();
-    $Tokens = $_REQUEST['numtokens'];
 
-    if (!is_number($Tokens) || ($Tokens < 0)) {
+    if ($Tokens < 1) {
         error('Please enter a valid number of tokens.');
     }
 
     if (isset($_REQUEST['onlydrop'])) {
-        $Where = "WHERE FLTokens > $Tokens";
+        $where = "WHERE FLTokens > ?";
     } elseif (!isset($_REQUEST['leechdisabled'])) {
-        $Where = "WHERE (Enabled = '1' AND can_leech = 1) OR FLTokens > $Tokens";
+        $where = "WHERE (Enabled = '1' AND can_leech = 1) OR FLTokens > ?";
     } else {
-        $Where = "WHERE Enabled = '1' OR FLTokens > $Tokens";
-    }
-    $DB->query("
-        SELECT ID
-        FROM users_main
-        $Where");
-    $Users = $DB->to_array();
-    $DB->query("
-        UPDATE users_main
-        SET FLTokens = $Tokens
-        $Where");
-
-    foreach ($Users as $UserID) {
-        list($UserID) = $UserID;
-        $Cache->delete_value("user_info_heavy_$UserID");
+        $where = "WHERE Enabled = '1' OR FLTokens > ?";
     }
 
-    $where = '';
+    $DB->prepared_query("SELECT concat('user_info_heavy_', ID) as cacheKey FROM users_main $where", $Tokens);
+    $ck = $DB->collect('cacheKey');
+    $Cache->deleteMulti($ck);
+
+    $DB->prepared_query("UPDATE users_main SET FLTokens = ? $where",
+        $Tokens, $Tokens);
+
+    $message = '<div class="box pad">'
+        . '<strong>Freeleech tokens reduced to ' . number_format($Tokens)
+        . ' for ' . number_format(count($ck)) . ' enabled users'
+        . (!isset($_REQUEST['leechdisabled']) ? ' with leeching privileges enabled' : '')
+        . '.</strong></div>';
 }
 
-
-    View::show_header('Add tokens sitewide');
-
+View::show_header('Add sitewide tokens');
 ?>
 <div class="header">
-    <h2>Add freeleech tokens to all enabled users</h2>
-    <div class="linkbox">
-        <a href="tools.php?action=tokens&amp;showabusers=1" class="brackets">Show abusers</a>
-    </div>
+<h2>Manage freeleech token amounts</h2>
 </div>
-<div class="box pad" style="margin-left: auto; margin-right: auto; text-align: center; max-width: 40%;">
-    <?=$message?>
+
+<?= $message ?>
+
+<table><tr><td style="vertical-align:top;" width="50%">
+<div class="box pad">
     <form class="add_form" name="fltokens" action="" method="post">
+        <input type="checkbox" id="leechdisabled" name="leechdisabled" value="1" />
+        <label for="leechdisabled">Grant tokens to users whose leeching privileges are suspended?</label><br />
+
+        Tokens to add: <input type="text" name="numtokens" size="5" /><br /><br />
+
         <input type="hidden" name="action" value="tokens" />
         <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-        Tokens to add: <input type="text" name="numtokens" size="5" style="text-align: right;" value="0" /><br /><br />
-        <label for="leechdisabled">Grant tokens to leech disabled users: </label><input type="checkbox" id="leechdisabled" name="leechdisabled" value="1" /><br /><br />
         <input type="submit" name="addtokens" value="Add tokens" />
     </form>
 </div>
-<br />
-<div class="box pad" style="margin-left: auto; margin-right: auto; text-align: center; max-width: 40%;">
-    <?=$message?>
+</td><td style="vertical-align:top;" width="50%">
+<div class="box pad">
     <form class="manage_form" name="fltokens" action="" method="post">
+        <span id="droptokens">
+        <input type="checkbox" id="onlydrop" name="onlydrop" value="1" onchange="$('#disabled').gtoggle(); return true;" />
+        <label for="onlydrop">Include disabled users?</label></span><br />
+
+        <span id="disabled">
+        <input type="checkbox" id="leechdisabled" name="leechdisabled" value="1" onchange="$('#droptokens').gtoggle(); return true;" />
+        <label for="leechdisabled">Include users whose leeching privileges are disabled?</label></span><br /><br />
+
+        Maximum token limit: <input type="text" name="numtokens" size="5" /><br />
+        Members with more tokens will have their total reduced to this limit.<br /><br />
+
         <input type="hidden" name="action" value="tokens" />
         <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-        Tokens to set: <input type="text" name="numtokens" size="5" style="text-align: right;" value="0" /><br /><br />
-        <span id="droptokens" class=""><label for="onlydrop">Only affect users with at least this many tokens: </label><input type="checkbox" id="onlydrop" name="onlydrop" value="1" onchange="$('#disabled').gtoggle(); return true;" /></span><br />
-        <span id="disabled" class=""><label for="leechdisabled">Also add tokens (as needed) to leech disabled users: </label><input type="checkbox" id="leechdisabled" name="leechdisabled" value="1" onchange="$('#droptokens').gtoggle(); return true;" /></span><br /><br />
-        <input type="submit" name="cleartokens" value="Set token total" />
+        <input type="submit" name="cleartokens" value="Set maximum token limit" />
     </form>
 </div>
+</td></tr></table>
 <?php
-
-View::show_footer()
-?>
+View::show_footer();
