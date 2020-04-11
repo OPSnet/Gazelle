@@ -163,10 +163,12 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
         }
         $TokensToUse = ceil($Size / BYTES_PER_FREELEECH_TOKEN);
         $DB->prepared_query('
-            UPDATE users_main
-            SET FLTokens = FLTokens - ?
-            WHERE FLTokens >= ? AND ID = ?
-            ', $TokensToUse, $TokensToUse, $UserID
+            UPDATE users_main um
+            INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
+                um.FLTokens = um.FLTokens - ?,
+                uf.tokens = uf.tokens - ?
+            WHERE um.FLTokens >= ? AND um.ID = ?
+            ', $TokensToUse, $TokensToUse, $TokensToUse, $UserID
         );
         if ($DB->affected_rows() == 0) {
             error('You do not have any freeleech tokens left. Please use the regular DL link.');
@@ -177,10 +179,12 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
             error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
             // recredit the tokens we just subtracted
             $DB->prepared_query('
-                UPDATE users_main
-                SET FLTokens = FLTokens + ?
-                WHERE ID = ?
-                ', $TokensToUse, $UserID
+                UPDATE users_main um
+                INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
+                    um.FLTokens = um.FLTokens + ?,
+                    uf.tokens = uf.tokens + ?
+                WHERE um.ID = ?
+                ', $TokensToUse, $TokensToUse, $UserID
             );
         }
 
@@ -193,14 +197,7 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
                     Expired = FALSE,
                     Uses = Uses + ?", $UserID, $TorrentID, $TokensToUse, $TokensToUse);
 
-            // Fix for downloadthemall messing with the cached token count
-            $UInfo = Users::user_heavy_info($UserID);
-            $FLTokens = $UInfo['FLTokens'];
-
-            $Cache->begin_transaction("user_info_heavy_$UserID");
-            $Cache->update_row(false, ['FLTokens' => ($FLTokens - $TokensToUse)]);
-            $Cache->commit_transaction(0);
-
+            $Cache->delete_value("user_info_heavy_$UserID");
             $Cache->delete_value("users_tokens_$UserID");
         }
     }

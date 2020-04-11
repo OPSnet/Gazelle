@@ -121,10 +121,10 @@ class User extends AbstractAPI {
                 um.torrent_pass,
                 um.RequiredRatio,
                 ui.RatioWatchEnds
-            FROM
-                users_main AS um
-                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+            FROM users_main AS um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            INNER JOIN users_info        AS ui  ON (ui.UserID = um.ID)
+            INNER JOIN user_flt          AS uf  ON (uf.user_id = um.ID)
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 
@@ -136,6 +136,7 @@ class User extends AbstractAPI {
         if ($this->clear_tokens) {
             $UpdateSet[] = "um.Invites = '0'";
             $UpdateSet[] = "um.FLTokens = '0'";
+            $UpdateSet[] = "uf.tokens = 0";
             $Comment = 'Tokens and invites reset, enabled via API';
         }
 
@@ -165,7 +166,8 @@ class User extends AbstractAPI {
 
         $this->db->prepared_query("
             UPDATE users_main AS um
-                JOIN users_info AS ui ON um.ID = ui.UserID
+            INNER users_info AS ui ON (ui.UserID = um.ID)
+            INNER user_flt   AS uf ON (uf.user_id = um.ID)
             SET
                 {$set},
                 ui.AdminComment = CONCAT('".sqltime()." - ".$Comment."\n\n', ui.AdminComment)

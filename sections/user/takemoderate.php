@@ -137,7 +137,7 @@ $DB->prepared_query("
         DisableIRC,
         DisableRequests,
         m.RequiredRatio,
-        m.FLTokens,
+        m.FLTokens, /* TODO: normally no-one will moderate tokens during the migration process */
         i.RatioWatchEnds,
         la.Type,
         SHA1(i.AdminComment) AS CommentHash,
