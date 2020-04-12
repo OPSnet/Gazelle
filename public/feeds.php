@@ -13,6 +13,7 @@ if (isset($_GET['clearcache'])) {
 
 require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../classes/classloader.php');
+require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new CACHE($MemcachedServers);
 $Feed = new Feed;

@@ -25,8 +25,8 @@ $Cache = new CACHE($MemcachedServers);
 G::$Cache = $Cache;
 G::$DB = $DB;
 G::$Twig = new Environment(
-    new FilesystemLoader(__DIR__.'/templates'),
-    ['cache' => __DIR__.'/cache/twig']
+    new FilesystemLoader(__DIR__.'/../templates'),
+    ['cache' => __DIR__.'/../cache/twig']
 );
 
 define('WIDTH', 585);
