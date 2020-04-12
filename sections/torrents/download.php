@@ -43,6 +43,8 @@ if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
     }
 }
 
+$HttpsTracker = $HttpsTracker || isset($_REQUEST['ssl']);
+
 $TorrentID = $_REQUEST['id'];
 
 if (!is_number($TorrentID)) {
