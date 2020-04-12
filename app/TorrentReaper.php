@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-class Torrents
+class TorrentReaper
 {
     protected $db;
     protected $cache;
