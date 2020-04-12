@@ -1,6 +1,6 @@
 <?php
 header('Content-type: application/opensearchdescription+xml');
-require_once(__DIR__.'/classes/config.php');
+require_once(__DIR__.'/../classes/config.php');
 
 $SSL = ($_SERVER['SERVER_PORT'] === '443');
 

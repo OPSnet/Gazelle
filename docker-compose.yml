@@ -14,6 +14,7 @@ services:
       - .:/var/www
       - /var/www/vendor
       - /var/www/node_modules
+      - .docker/web/nginx.conf:/etc/nginx/sites-available/gazelle.conf
 
   memcached:
     image: memcached:1.5-alpine

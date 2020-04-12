@@ -16,7 +16,7 @@ if (!extension_loaded('gd')) {
 
 function img_error($Type) {
     header('Content-type: image/gif');
-    die(file_get_contents(SERVER_ROOT.'/sections/image/'.$Type.'.gif'));
+    die(file_get_contents(__DIR__.'/../sections/image/'.$Type.'.gif'));
 }
 
 function invisible($Image) {
@@ -98,4 +98,4 @@ function image_height($Type, $Data) {
 }
 
 define('SKIP_NO_CACHE_HEADERS', 1);
-require_once(__DIR__.'/classes/script_start.php');
+require_once(__DIR__.'/../classes/script_start.php');

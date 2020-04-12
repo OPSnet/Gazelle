@@ -11,8 +11,9 @@ if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-require_once(__DIR__.'/classes/config.php');
-require_once(__DIR__.'/classes/classloader.php');
+require_once(__DIR__.'/../classes/config.php');
+require_once(__DIR__.'/../classes/classloader.php');
+require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new CACHE($MemcachedServers);
 $Feed = new Feed;
@@ -65,4 +66,4 @@ header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
 header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');
 
 $Feed->UseSSL = (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
-require(__DIR__ . '/sections/feeds/index.php');
+require(__DIR__ . '/../sections/feeds/index.php');
