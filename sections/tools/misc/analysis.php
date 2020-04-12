@@ -16,9 +16,12 @@ View::show_header('Case Analysis');
 <?php
 $Debug->perf_table($Analysis['perf']);
 $Debug->flag_table($Analysis['flags']);
-$Debug->include_table($Analysis['includes'], !check_perms('site_debug'));
+$Debug->include_table($Analysis['includes'], !check_perms('admin_site_debug'));
 $Debug->error_table($Analysis['errors']);
 $Debug->query_table($Analysis['queries']);
+if (check_perms('admin_periodic_task_view')) {
+    $Debug->task_table($Analysis['perf']);
+}
 if (check_perms('admin_clear_cache')) {
     $Debug->cache_table($Analysis['cache']);
 }

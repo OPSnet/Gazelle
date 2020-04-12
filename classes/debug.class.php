@@ -61,6 +61,7 @@ class DEBUG {
     }
 
     public function analysis($Message, $Report = '', $Time = 43200) {
+        global $ScriptStartTime;
         $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
         if (PHP_SAPI === 'cli'
             || in_array($RequestURI, ['tools.php?action=db_sandbox'])
@@ -218,7 +219,10 @@ class DEBUG {
             $CPUTime = $this->get_cpu_time();
             $Perf = [
                 'Memory usage' => Format::get_size(memory_get_usage(true)),
-                'Page process time' => number_format($PageTime, 3).' s'];
+                'Page process time' => number_format($PageTime, 3).' s',
+                'Script start' => $ScriptStartTime,
+                'Script end' => microtime(true)
+            ];
             if ($CPUTime) {
                 $Perf['CPU time'] = number_format($CPUTime / 1000000, 3).' s';
             }
@@ -590,6 +594,48 @@ class DEBUG {
             <td class="debug_data debug_query_data"><div><?=str_replace("\t", '&nbsp;&nbsp;', nl2br(display_str(trim($SQL))))?></div></td>
             <td class="rowa debug_info debug_query_time" style="width: 130px;" align="left"><?=number_format($Time, 5)?> ms</td>
             <td class="rowa debug_info debug_query_warnings"><?=$Warnings?></td>
+        </tr>
+<?php   } ?>
+    </table>
+<?php
+    }
+
+    public function task_table($Perf) {
+        if (!array_key_exists('Script start', $Perf)) {
+            return;
+        }
+
+        $Scheduler = new \Gazelle\Schedule\Scheduler(G::$DB, G::$Cache);
+        $Header = 'Tasks';
+        $Tasks = $Scheduler->getTaskSnapshot($Perf['Script start'], $Perf['Script end']);
+
+        if (empty($Tasks)) {
+            return;
+        }
+
+        $Header = ' '.number_format(count($Tasks))." $Header:";
+?>
+    <table class="layout" width="100%">
+        <tr>
+            <td align="left"><strong><a href="#" onclick="$(this).parents('.layout').next('#debug_tasks').gtoggle(); return false;" class="brackets">View</a><?=$Header?></strong></td>
+        </tr>
+    </table>
+    <table id="debug_tasks" class="debug_table hidden" width="100%">
+        <tr class="colhead">
+            <td>Task</td>
+            <td>Start</td>
+            <td>Duration</td>
+            <td>Processed</td>
+        </tr>
+<?php
+        foreach ($Tasks as $Task) {
+            list($Id, $Name, $LaunchTime, $Status, $NumErrors, $NumItems, $Duration) = $Task;
+?>
+        <tr valign="top">
+            <td class="debug_data debug_task_data"><a href="tools.php?action=periodic&amp;mode=detail&amp;id=<?=$Id?>"><?=$Name?></a></td>
+            <td class="rowa debug_info debug_task_start"><?=$LaunchTime?></td>
+            <td class="rowa debug_info debug_task_time" style="width: 130px;" align="left"><?=number_format($Duration, 5)?> ms</td>
+            <td class="rowa debug_info debug_task_processed"><?=$NumItems?>/<?=$NumErrors?></td>
         </tr>
 <?php   } ?>
     </table>
