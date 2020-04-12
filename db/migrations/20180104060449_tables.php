@@ -28,9 +28,8 @@ DROP FUNCTION binomial_ci;");
         $this->execute("ALTER DATABASE CHARACTER SET 'utf8';");
         $this->execute("ALTER DATABASE COLLATE='utf8_swedish_ci';");
         $this->execute("
-CREATE DEFINER=`root`@`localhost` FUNCTION `binomial_ci`(p int, n int) RETURNS float
+CREATE FUNCTION `binomial_ci`(p int, n int) RETURNS float
     DETERMINISTIC
-    SQL SECURITY INVOKER
 RETURN IF(n = 0,0.0,((p + 1.35336) / n - 1.6452 * SQRT((p * (n-p)) / n + 0.67668) / n) / (1 + 2.7067 / n));");
 
         $this->table('lastfm_users', [
