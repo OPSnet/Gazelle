@@ -1057,7 +1057,7 @@ if (!empty($ArtistsUnescaped)) {
     if (count($ArtistNameList) > 2 || $Artist['name'] == 'Various Artists') {
         $SQL .= " AND (ExcludeVA = '0' AND (";
         $SQL .= implode(' OR ', array_merge($ArtistNameList, $GuestArtistNameList));
-        $SQL .= " OR Artists = '')) AND (";
+        $SQL .= " OR Artists = ''))";
     } else {
         $SQL .= " AND (";
         if (!empty($GuestArtistNameList)) {
