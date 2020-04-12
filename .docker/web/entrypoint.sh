@@ -4,8 +4,8 @@
 counter=1
 while ! mysql -h mysql -ugazelle -ppassword -e "show databases;" > /dev/null 2>&1; do
     sleep 1
-    counter=`expr $counter + 1`
-    if [ $(($counter % 20)) -eq 0 ]; then
+    counter=$((counter + 1))
+    if [ $((counter % 20)) -eq 0 ]; then
         mysql -h mysql -ugazelle -ppassword -e "show databases;"
         >&2 echo "Still waiting for MySQL (Count: ${counter})."
     fi;
