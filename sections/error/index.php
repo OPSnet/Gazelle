@@ -36,11 +36,12 @@ if (!empty($_GET['e']) && in_array($_GET['e'],$Errors)) {
         case '429':
             $Title = "Error 429";
             $Description = "You tried to do something too frequently.";
+            notify(STATUS_CHAN, 429);
             break;
         case '0':
             $Title = "Invalid Input";
             $Description = "Something was wrong with the input provided with your request, and the server is refusing to fulfill it.";
-            notify(STATUS_CHAN,'PHP-0');
+            notify(STATUS_CHAN, 'PHP-0');
             break;
         case '-1':
             $Title = "Invalid request";
