@@ -139,12 +139,12 @@ if (!empty($FormatArray) && in_array(array_search('FLAC', $Formats), $FormatArra
     $NeedLog = empty($_POST['needlog']) ? false : true;
     if ($NeedLog) {
         if ($_POST['minlogscore']) {
-            $MinLogScore = trim($_POST['minlogscore']);
+            $MinLogScore = intval(trim($_POST['minlogscore']));
         } else {
             $MinLogScore = 0;
         }
-        if (!intval($MinLogScore)) {
-            $Err = 'You have entered a minimum log score that is not a number.';
+        if ($MinLogScore < 0 || $MinLogScore > 100) {
+            $Err = 'You have entered a minimum log score that is not between 0 and 100 inclusive.';
         }
     }
     $NeedCue = empty($_POST['needcue']) ? false : true;
