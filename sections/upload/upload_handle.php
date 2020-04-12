@@ -1066,10 +1066,10 @@ if (!empty($ArtistsUnescaped)) {
             $SQL .= ')) OR ';
         }
         $SQL .= implode(' OR ', $ArtistNameList);
-        $SQL .= " OR Artists = '') AND (";
+        $SQL .= " OR Artists = '')";
     }
 } else {
-    $SQL .= "AND (Artists = '') AND (";
+    $SQL .= "AND (Artists = '')";
 }
 
 $TagSQL = [];
@@ -1078,11 +1078,12 @@ foreach ($Properties['TagList'] as $Tag) {
     $TagSQL[] = " Tags LIKE '%|".db_string(trim($Tag))."|%' ";
     $NotTagSQL[] = " NotTags LIKE '%|".db_string(trim($Tag))."|%' ";
 }
-$TagSQL[] = "Tags = ''";
-$SQL .= implode(' OR ', $TagSQL);
-
-$SQL .= ") AND !(".implode(' OR ', $NotTagSQL).')';
-
+if (count($TagSQL)) {
+    $SQL .= ' AND (' . implode(' OR ', $TagSQL) . ')';
+}
+if (count($NotTagSQL)) {
+    $SQL .= " AND !(" . implode(' OR ', $NotTagSQL) . ')';
+}
 $SQL .= " AND (Categories LIKE '%|".db_string(trim($Type))."|%' OR Categories = '') ";
 
 if ($Properties['ReleaseType']) {
