@@ -138,11 +138,14 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
                 ID", $GroupID, $GroupID);
 
         $TorrentList = $DB->to_array('ID', MYSQLI_ASSOC);
-        if (count($TorrentList) === 0 && $ApiCall == false) {
-            header('Location: log.php?search='.(empty($_GET['torrentid']) ? "Group+$GroupID" : "Torrent+$_GET[torrentid]"));
-            die();
-        } elseif (count($TorrentList) === 0 && $ApiCall == true) {
-            return null;
+        if (empty($TorrentDetails) || empty($TorrentList)) {
+            if ($ApiCall === false) {
+                header('Location: log.php?search='.(empty($_GET['torrentid']) ? "Group+$GroupID" : "Torrent+$_GET[torrentid]"));
+                die();
+            }
+            else {
+                return null;
+            }
         }
         if (in_array(0, $DB->collect('Seeders'))) {
             $CacheTime = 600;
