@@ -315,7 +315,7 @@ class Text {
         $fragment = isset($info['fragment']) ? '#' . $info['fragment'] : '';
         switch ($info['path']) {
             case '/artist.php':
-                list($name) = G::$DB->lookup('SELECT Name FROM artists_group WHERE ArtistID = ?',
+                $name = G::$DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?',
                     $args['id'] ?? 0);
                 return $name
                     ? sprintf('<a href="%s?%s">%s</a>', $info['path'], $info['query'], $name)
@@ -338,12 +338,12 @@ class Text {
 
             case '/torrents.php':
                 if (isset($args['torrentid'])) {
-                    list($GroupID) = G::$DB->lookup('
+                    $GroupID = G::$DB->scalar('
                         SELECT tg.ID FROM torrents_group tg INNER JOIN torrents t ON (t.GroupID = tg.ID) WHERE t.ID = ?
                         ', (int)$args['torrentid']
                     );
                 } else {
-                    list($GroupID) = G::$DB->lookup('
+                    $GroupID = G::$DB->scalar('
                         SELECT ID FROM torrents_group WHERE ID = ?
                         ', $args['id'] ?? 0
                     );
