@@ -51,7 +51,7 @@ $DB->prepared_query("
         ui.JoinDate,
         ula.last_access
     FROM users_main AS um
-    INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
+    LEFT  JOIN user_last_access AS ula ON (ula.user_id = um.ID)
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
     WHERE ui.Inviter = ?
