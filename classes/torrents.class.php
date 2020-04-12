@@ -1250,7 +1250,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 
     protected static function bbcodeUrlBuild($val, $attr) {
         $id = (int)$val;
-        list($groupId) = G::$DB->lookup('SELECT GroupID FROM torrents WHERE ID = ?', $id);
+        $groupId = G::$DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $id);
         if (!$groupId) {
             return ($attr ? "[pl=$attr]" : '[pl]') . $id . '[/pl]';
         }

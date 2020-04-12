@@ -545,12 +545,30 @@ class DB_MYSQL {
      * @param mixed   $args  The values of the placeholders
      * @return array  resultset or null
      */
-    function lookup($sql, ...$args) {
+    function row($sql, ...$args) {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
-        $result = $this->next_record(MYSQLI_NUM);
+        $result = $this->next_record(MYSQLI_NUM, false);
         $this->set_query_id($qid);
         return $result;
+    }
+
+    /**
+     * Runs a prepared_query using placeholders and returns the first element
+     * of the first row.
+     * Stashes the current query id so that this can be used within a block
+     * that is looping over an active resultset.
+     *
+     * @param string  $sql The parameterized query to run
+     * @param mixed   $args  The values of the placeholders
+     * @return mixed  value or null
+     */
+    function scalar($sql, ...$args) {
+        $qid = $this->get_query_id();
+        $this->prepared_query($sql, ...$args);
+        $result = $this->has_results() ? $this->next_record(MYSQLI_NUM, false) : [null];
+        $this->set_query_id($qid);
+        return $result[0];
     }
 
     function set_query_id(&$ResultSet) {

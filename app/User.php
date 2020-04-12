@@ -118,7 +118,7 @@ class User {
     public function isDisabled()    { return $this->enabledState() == 2; }
 
     public function LastFMUsername() {
-        $name = $this->db->lookup('
+        $name = $this->db->scalar('
             SELECT username
             FROM lastfm_users
             WHERE ID = ?

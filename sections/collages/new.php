@@ -7,7 +7,7 @@ if (!check_perms('site_collages_renamepersonal')) {
 
 $NoName = !check_perms('site_collages_renamepersonal') && $Category === '0';
 
-$collageCount = $DB->lookup("
+$collageCount = $DB->scalar("
     SELECT count(*)
     FROM collages
     WHERE CategoryID = 0

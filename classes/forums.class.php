@@ -408,8 +408,8 @@ class Forums {
         list($id, $name) = G::$Cache->get_value($cacheKey);
         if (is_null($id)) {
             list($id, $name) = (int)$val > 0
-                ? G::$DB->lookup('SELECT ID, Name FROM forums WHERE ID = ?', $val)
-                : G::$DB->lookup('SELECT ID, Name FROM forums WHERE Name = ?', $val);
+                ? G::$DB->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
+                : G::$DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
             G::$Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
         }
         return $name
@@ -421,7 +421,7 @@ class Forums {
         $cacheKey = 'bbcode-thread.' . $val;
         list($id, $name, $isLocked) = G::$Cache->get_value($cacheKey);
         if (is_null($id)) {
-            list($id, $name, $isLocked) = G::$DB->lookup('SELECT ID, Title, IsLocked FROM forums_topics WHERE ID = ?', $val);
+            list($id, $name, $isLocked) = G::$DB->row('SELECT ID, Title, IsLocked FROM forums_topics WHERE ID = ?', $val);
             G::$Cache->cache_value($cacheKey, [$id, $name, $isLocked], 86400 + rand(1, 3600));
         }
         return $id

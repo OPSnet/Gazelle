@@ -31,7 +31,7 @@ class Economic {
                 $this->stats['totalUpload'],
                 $this->stats['totalDownload'],
                 $this->stats['totalEnabled'],
-            ) = $this->db->lookup('
+            ) = $this->db->row('
                 SELECT sum(uls.Uploaded), sum(uls.Downloaded), count(*)
                 FROM users_main um
                 INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
@@ -39,12 +39,12 @@ class Economic {
                 ', '1'
             );
 
-            list($this->stats['totalBounty']) = $this->db->lookup('
+            $this->stats['totalBounty'] = $this->db->scalar('
                 SELECT SUM(Bounty)
                 FROM requests_votes
             ');
 
-            list($this->stats['availableBounty']) = $this->db->lookup('
+            $this->stats['availableBounty'] = $this->db->scalar('
                 SELECT SUM(rv.Bounty)
                 FROM requests_votes AS rv
                 INNER JOIN requests AS r ON (r.ID = rv.RequestID)
@@ -53,12 +53,12 @@ class Economic {
             list(
                 $this->stats['totalLiveSnatches'],
                 $this->stats['totalTorrents'],
-            ) = $this->db->lookup('
+            ) = $this->db->row('
                 SELECT sum(tls.Snatched), count(*)
                 FROM torrents_leech_stats tls
             ');
 
-            list($this->stats['totalOverallSnatches']) = $this->db->lookup('
+            $this->stats['totalOverallSnatches'] = $this->db->scalar('
                 SELECT count(*)
                 FROM xbt_snatched
             ');
@@ -67,7 +67,7 @@ class Economic {
                 $this->stats['totalSeeders'],
                 $this->stats['totalLeechers'],
                 $this->stats['totalPeers'],
-            ) = $this->db->lookup('
+            ) = $this->db->row('
                 SELECT
                     coalesce(sum(remaining = 0), 0) as seeders,
                     coalesce(sum(remaining > 0), 0) as leechers,
@@ -75,7 +75,7 @@ class Economic {
                 FROM xbt_files_users
             ');
 
-            list($this->stats['totalPeerUsers']) = $this->db->lookup('
+            $this->stats['totalPeerUsers'] = $this->db->scalar('
                 SELECT count(distinct uid)
                 FROM xbt_files_users xfu
                 WHERE remaining = 0
