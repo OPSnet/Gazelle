@@ -1,5 +1,7 @@
 <?php
 
+// NOTE: When editing this file, please make-sure to update the generate-config.sh file for docker!
+
 // Main settings
 define('SITE_NAME', ''); //The name of your site
 define('NONSSL_SITE_URL', ''); //The FQDN of your site
@@ -11,9 +13,10 @@ define('MAIL_HOST', 'mail.'.SITE_HOST); // The host to use for mail delivery (e.
 define('SERVER_ROOT', '/path'); //The root of the server, used for includes, purpose is to shorten the path string
 define('SERVER_ROOT_LIVE', '/path'); //Only needed on the beta site when accessing unmocked resources, otherwise == SERVER_ROOT
 define('BETA', false); //Only needed on the beta site when different code paths are necessary
-define('ANNOUNCE_URL', 'http://'.NONSSL_SITE_URL.':2710'); //Announce URL
-define('REFERRAL_BOUNCER', 'http://127.0.0.1:8888'); // URL to referral bouncer.
-define('REFERRAL_KEY', hash('sha512', '')); // Shared key to encrypt data flowing to bouncer.
+define('ANNOUNCE_HTTP_URL', '');
+define('ANNOUNCE_HTTPS_URL', '');
+define('REFERRAL_BOUNCER', ''); // URL to the bouncer including trailing /.
+define('REFERRAL_KEY', hash('sha512', '')); //Random key. Used for encrypting traffic to/from the boucner.
 define('REFERRAL_SEND_EMAIL', false); // Whether to send invite emails for referrals.
 define('REFERRAL_SITES', ['ABC', 'DEF']);
 define('RECOVERY', false);
@@ -30,8 +33,6 @@ define('ENCKEY', ''); //Random key. The key for encryption
 define('SITE_SALT', ''); //Random key. Default site wide salt for passwords, DO NOT LEAVE THIS BLANK/CHANGE AFTER LAUNCH!
 define('SCHEDULE_KEY', ''); // Random key. This key must be the argument to schedule.php for the schedule to work.
 define('RSS_HASH', ''); //Random key. Used for generating unique RSS auth key.
-define('REFERRAL_KEY', hash('sha512', '')); //Random key. Used for encrypting traffic to/from the boucner.
-define('REFERRAL_BOUNCER', ''); // URL to the bouncer including trailing /.
 
 // MySQL details
 define('SQLHOST', 'localhost'); //The MySQL host ip/fqdn
@@ -41,13 +42,13 @@ define('SQL_PHINX_USER', ''); // User to use for Phinx migrations
 define('SQL_PHINX_PASS', ''); // Pass to use for Phinx migrations
 define('SQLDB', 'gazelle'); //The MySQL database to use
 define('SQLPORT', 3306); //The MySQL port to connect on
-define('SQLSOCK', '/var/run/mysqld/mysqld.sock');
+define('SQLSOCK', false); // Socket mysql is listening on, usually /var/run/mysqld/mysqld.sock
 
 // Memcached details
-$MemcachedServers = array(
+$MemcachedServers = [
     // unix sockets are fast, and other people can't telnet into them
-    array('host' => 'unix:///var/run/memcached.sock', 'port' => 0, 'buckets' => 1),
-);
+    ['host' => 'unix:///var/run/memcached.sock', 'port' => 0, 'buckets' => 1],
+];
 
 // Sphinx details
 define('SPHINX_HOST', 'localhost');
@@ -59,12 +60,15 @@ define('SPHINX_MAX_MATCHES', 1000); // Must be <= the server's max_matches varia
 define('SPHINX_INDEX', 'torrents');
 
 // Ocelot details
-// define('DISABLE_TRACKER', false);
+define('DISABLE_TRACKER', false);
 define('TRACKER_HOST', 'localhost');
 define('TRACKER_PORT', 2710);
 define('TRACKER_SECRET', ''); // Must be 32 characters and match site_password in Ocelot's config.cpp
 define('TRACKER_REPORTKEY', ''); // Must be 32 characters and match report_password in Ocelot's config.cpp
 
+define('STATIC_SERVER', SSL_STATIC_SERVER);
+
+/*
 if (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 80) {
     define('SITE_URL', NONSSL_SITE_URL);
     define('STATIC_SERVER', NONSSL_STATIC_SERVER);
@@ -72,6 +76,7 @@ if (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 80) {
     define('SITE_URL', SSL_SITE_URL);
     define('STATIC_SERVER', SSL_STATIC_SERVER);
 }
+*/
 
 // Site settings
 define('CRYPT_HASH_PREFIX', '$2y$07$');
@@ -79,7 +84,7 @@ define('DEBUG_MODE', false); //Set to false if you dont want everyone to see deb
 define('DEBUG_WARNINGS', true); //Set to true if you want to see PHP warnings in the footer
 define('SHOW_PUBLIC_INDEX', true); // Show the public index.php landing page
 define('OPEN_REGISTRATION', true); //Set to false to disable open registration, true to allow anyone to register
-define('OPEN_EXTERNAL_REFERRALS', true); //Set to false to disable external tracker referrals, true to allow them
+define('OPEN_EXTERNAL_REFERRALS', false); //Set to false to disable external tracker referrals, true to allow them
 define('USER_LIMIT', 5000); //The maximum number of users the site can have, 0 for no limit
 define('STARTING_UPLOAD', 3221225472); //Upload given to newly registered users, in bytes using IEC standard (1024 bytes per KiB)
 define('BYTES_PER_FREELEECH_TOKEN', 536870912); // Amount of bytes to use per token
@@ -104,26 +109,6 @@ if (!defined('FEATURE_EMAIL_REENABLE')) {
 }
 
 // User class IDs needed for automatic promotions. Found in the 'permissions' table
-// Name of class    Class ID (NOT level)
-define('ADMIN',        '1');
-define('USER',        '2');
-define('MEMBER',    '3');
-define('POWER',        '4');
-define('ELITE',        '5');
-define('VIP',        '6');
-define('TORRENT_MASTER','7');
-define('LEGEND',    '8');
-define('CELEB',        '9');
-define('MOD',        '11');
-define('DESIGNER',    '13');
-define('CODER',        '14');
-define('SYSOP',        '15');
-define('ARTIST',    '19');
-define('DONOR',        '20');
-define('FLS_TEAM',    '21');
-define('POWER_TM',    '22');
-define('ELITE_TM',    '23');
-define('FORUM_MOD',    '28');
 // Name of class        Class ID (NOT level)
 define('ADMIN',         '1');
 define('USER',          '2');
@@ -223,9 +208,9 @@ $CategoryIcons = ['music.png', 'apps.png', 'ebook.png', 'audiobook.png', 'elearn
 $CategoriesV2 = ['Music'];
 $CategoryV2Icons = ['music.png'];
 
-$Formats = array('MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS');
-$Bitrates = array('192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other');
-$Media = array('CD', 'DVD', 'Vinyl', 'Blu-ray', 'Soundboard', 'SACD', 'DAT', 'Cassette', 'WEB');
+$Formats = ['MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS'];
+$Bitrates = ['192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other'];
+$Media = ['CD', 'DVD', 'Vinyl', 'Blu-ray', 'Soundboard', 'SACD', 'DAT', 'Cassette', 'WEB'];
 
 define('ICON_ALL',    "\xe2\x9c\x85");
 define('ICON_NONE',   "\xf0\x9f\x9a\xab");
@@ -244,87 +229,105 @@ $CollageCats = [
     9 => 'Series',
 ];
 
-$ReleaseTypes = array(1=>'Album', 3=>'Soundtrack', 5=>'EP', 6=>'Anthology', 7=>'Compilation', 9=>'Single', 11=>'Live album', 13=>'Remix', 14=>'Bootleg', 15=>'Interview', 16=>'Mixtape', 17=>'DJ Mix', 18=>'Concert recording', 21=>'Unknown');
+$ReleaseTypes = [
+    1 => 'Album',
+    3 => 'Soundtrack',
+    5 => 'EP',
+    6 => 'Anthology',
+    7 => 'Compilation',
+    9 => 'Single',
+    11 => 'Live album',
+    13 => 'Remix',
+    14 => 'Bootleg',
+    15 => 'Interview',
+    16 => 'Mixtape',
+    17 => 'DJ Mix',
+    18 => 'Concert recording',
+    21 => 'Unknown',
+];
 
-$ZIPGroups = array(
+$ZIPGroups = [
     0 => 'MP3 (VBR) - High Quality',
     1 => 'MP3 (VBR) - Low Quality',
     2 => 'MP3 (CBR)',
     3 => 'FLAC - Lossless',
-    4 => 'Others'
-);
+    4 => 'Others',
+];
 
 //3D array of attributes, OptionGroup, OptionNumber, Name
-$ZIPOptions = array(
-    '00' => array(0, 0, 'V0'),
-    '01' => array(0, 1, 'APX'),
-    '02' => array(0, 2, '256'),
-    '03' => array(0, 3, 'V1'),
-    '10' => array(1, 0, '224'),
-    '11' => array(1, 1, 'V2'),
-    '12' => array(1, 2, 'APS'),
-    '13' => array(1, 3, '192'),
-    '20' => array(2, 0, '320'),
-    '21' => array(2, 1, '256'),
-    '22' => array(2, 2, '224'),
-    '23' => array(2, 3, '192'),
-    '30' => array(3, 0, 'FLAC / 24bit / Vinyl'),
-    '31' => array(3, 1, 'FLAC / 24bit / DVD'),
-    '32' => array(3, 2, 'FLAC / 24bit / SACD'),
-    '33' => array(3, 3, 'FLAC / 24bit / WEB'),
-    '34' => array(3, 4, 'FLAC / Log (100) / Cue'),
-    '35' => array(3, 5, 'FLAC / Log (100)'),
-    '36' => array(3, 6, 'FLAC / Log'),
-    '37' => array(3, 7, 'FLAC'),
-    '40' => array(4, 0, 'DTS'),
-    '41' => array(4, 1, 'Ogg Vorbis'),
-    '42' => array(4, 2, 'AAC - 320'),
-    '43' => array(4, 3, 'AAC - 256'),
-    '44' => array(4, 4, 'AAC - q5.5'),
-    '45' => array(4, 5, 'AAC - q5'),
-    '46' => array(4, 6, 'AAC - 192')
-);
+$ZIPOptions = [
+    '00' => [0, 0, 'V0'],
+    '01' => [0, 1, 'APX'],
+    '02' => [0, 2, '256'],
+    '03' => [0, 3, 'V1'],
+    '10' => [1, 0, '224'],
+    '11' => [1, 1, 'V2'],
+    '12' => [1, 2, 'APS'],
+    '13' => [1, 3, '192'],
+    '20' => [2, 0, '320'],
+    '21' => [2, 1, '256'],
+    '22' => [2, 2, '224'],
+    '23' => [2, 3, '192'],
+    '30' => [3, 0, 'FLAC / 24bit / Vinyl'],
+    '31' => [3, 1, 'FLAC / 24bit / DVD'],
+    '32' => [3, 2, 'FLAC / 24bit / SACD'],
+    '33' => [3, 3, 'FLAC / 24bit / WEB'],
+    '34' => [3, 4, 'FLAC / Log (100) / Cue'],
+    '35' => [3, 5, 'FLAC / Log (100)'],
+    '36' => [3, 6, 'FLAC / Log'],
+    '37' => [3, 7, 'FLAC'],
+    '40' => [4, 0, 'DTS'],
+    '41' => [4, 1, 'Ogg Vorbis'],
+    '42' => [4, 2, 'AAC - 320'],
+    '43' => [4, 3, 'AAC - 256'],
+    '44' => [4, 4, 'AAC - q5.5'],
+    '45' => [4, 5, 'AAC - q5'],
+    '46' => [4, 6, 'AAC - 192'],
+];
 
 // Ratio requirements, in descending order
 // Columns: Download amount, required ratio, grace period
-$RatioRequirements = array(
-    array(50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')),
-    array(40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')),
-    array(30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')),
-    array(20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')),
-    array(10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')),
-    array(5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14)))
-);
+$RatioRequirements = [
+    [50 * 1024 * 1024 * 1024, 0.60, date('Y-m-d H:i:s')],
+    [40 * 1024 * 1024 * 1024, 0.50, date('Y-m-d H:i:s')],
+    [30 * 1024 * 1024 * 1024, 0.40, date('Y-m-d H:i:s')],
+    [20 * 1024 * 1024 * 1024, 0.30, date('Y-m-d H:i:s')],
+    [10 * 1024 * 1024 * 1024, 0.20, date('Y-m-d H:i:s')],
+    [5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14))]
+];
 
 //Captcha fonts should be located in /classes/fonts
-$CaptchaFonts = array(
-        'ARIBLK.TTF',
-        'IMPACT.TTF',
-        'TREBUC.TTF',
-        'TREBUCBD.TTF',
-        'TREBUCBI.TTF',
-        'TREBUCIT.TTF',
-        'VERDANA.TTF',
-        'VERDANAB.TTF',
-        'VERDANAI.TTF',
-        'VERDANAZ.TTF');
+$CaptchaFonts = [
+    'ARIBLK.TTF',
+    'IMPACT.TTF',
+    'TREBUC.TTF',
+    'TREBUCBD.TTF',
+    'TREBUCBI.TTF',
+    'TREBUCIT.TTF',
+    'VERDANA.TTF',
+    'VERDANAB.TTF',
+    'VERDANAI.TTF',
+    'VERDANAZ.TTF'
+];
+
 //Captcha images should be located in /captcha
-$CaptchaBGs = array(
-        'captcha1.png',
-        'captcha2.png',
-        'captcha3.png',
-        'captcha4.png',
-        'captcha5.png',
-        'captcha6.png',
-        'captcha7.png',
-        'captcha8.png',
-        'captcha9.png');
+$CaptchaBGs = [
+    'captcha1.png',
+    'captcha2.png',
+    'captcha3.png',
+    'captcha4.png',
+    'captcha5.png',
+    'captcha6.png',
+    'captcha7.png',
+    'captcha8.png',
+    'captcha9.png'
+];
 
 // Special characters, and what they should be converted to
 // Used for torrent searching
-$SpecialChars = array(
-        '&' => 'and'
-);
+$SpecialChars = [
+    '&' => 'and'
+];
 
 // Deny cache access to keys without specified permission
 $CachePermissions = [

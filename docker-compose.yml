@@ -15,6 +15,10 @@ services:
       - /var/www/vendor
       - /var/www/node_modules
       - .docker/web/nginx.conf:/etc/nginx/sites-available/gazelle.conf
+    environment:
+      # These should match what you set for your mysql container below
+      - MYSQL_USER=gazelle
+      - MYSQL_PASSWORD=password
 
   memcached:
     image: memcached:1.5-alpine
