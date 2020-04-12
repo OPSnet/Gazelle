@@ -85,10 +85,10 @@ if (isset(G::$LoggedUser['Notify'])) {
             href="feeds.php?feed=torrents_lossless24&amp;user=<?=G::$LoggedUser['ID']?>&amp;auth=<?=G::$LoggedUser['RSS_Auth']?>&amp;passkey=<?=G::$LoggedUser['torrent_pass']?>&amp;authkey=<?=G::$LoggedUser['AuthKey']?>"
             title="<?=SITE_NAME?> - 24bit Lossless Torrents" />
     <link rel="stylesheet" type="text/css"
-            href="<?=STATIC_SERVER?>styles/global.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/global.css')?>" />
+            href="<?=STATIC_SERVER?>styles/global.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/global.css')?>" />
 <?php
 if ($UseTooltipster) { ?>
-    <link rel="stylesheet" href="<?=STATIC_SERVER?>styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/tooltipster/style.css')?>" type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?=STATIC_SERVER?>styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/tooltipster/style.css')?>" type="text/css" media="screen" />
 <?php
 } ?>
     <meta name="viewport" content="width=device-width" />
@@ -96,7 +96,7 @@ if ($UseTooltipster) { ?>
 if (empty(G::$LoggedUser['StyleURL'])) {
 ?>
     <link rel="stylesheet" type="text/css" title="<?=G::$LoggedUser['StyleName']?>" media="screen"
-            href="<?=STATIC_SERVER?>styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/'.G::$LoggedUser['StyleName'].'/style.css')?>" />
+            href="<?=STATIC_SERVER?>styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/'.G::$LoggedUser['StyleName'].'/style.css')?>" />
 <?php
 } else {
         $StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);
@@ -104,7 +104,7 @@ if (empty(G::$LoggedUser['StyleURL'])) {
                 && $StyleURLInfo['query'].$StyleURLInfo['fragment'] == ''
                 && in_array($StyleURLInfo['host'], [NONSSL_SITE_URL, SSL_SITE_URL])
                 && file_exists(SERVER_ROOT.$StyleURLInfo['path'])) {
-            $StyleURL = G::$LoggedUser['StyleURL'].'?v='.filemtime(SERVER_ROOT.$StyleURLInfo['path']);
+            $StyleURL = G::$LoggedUser['StyleURL'].'?v='.filemtime(SERVER_ROOT.'/public/'.$StyleURLInfo['path']);
         } else {
             $StyleURL = G::$LoggedUser['StyleURL'];
         }
@@ -116,7 +116,7 @@ if (!empty(G::$LoggedUser['UseOpenDyslexic'])) {
         // load the OpenDyslexic font
 ?>
     <link rel="stylesheet" type="text/css" charset="utf-8"
-            href="<?=STATIC_SERVER?>styles/opendyslexic/style.css?v=<?=filemtime(SERVER_ROOT.'/static/styles/opendyslexic/style.css')?>" />
+            href="<?=STATIC_SERVER?>styles/opendyslexic/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/opendyslexic/style.css')?>" />
 <?php
 }
 $ExtraCSS = explode(',', $CSSIncludes);
@@ -125,7 +125,7 @@ foreach ($ExtraCSS as $CSS) {
         continue;
     }
 ?>
-    <link rel="stylesheet" type="text/css" media="screen" href="<?=STATIC_SERVER."styles/$CSS/style.css?v=".filemtime(SERVER_ROOT."/static/styles/$CSS/style.css")?>" />
+    <link rel="stylesheet" type="text/css" media="screen" href="<?=STATIC_SERVER."styles/$CSS/style.css?v=".filemtime(SERVER_ROOT."/public/static/styles/$CSS/style.css")?>" />
 <?php
 }
 ?>
@@ -148,7 +148,7 @@ foreach ($Scripts as $Script) {
     }
 ?>
     <script
-            src="<?=STATIC_SERVER?>functions/<?=$Script?>.js?v=<?=filemtime(SERVER_ROOT.'/static/functions/'.$Script.'.js')?>"
+            src="<?=STATIC_SERVER?>functions/<?=$Script?>.js?v=<?=filemtime(SERVER_ROOT.'/public/static/functions/'.$Script.'.js')?>"
             type="text/javascript"></script>
 <?php
 }

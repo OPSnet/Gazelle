@@ -1,21 +1,48 @@
 <?php
-/*-- Feed Start Class ----------------------------------*/
-/*------------------------------------------------------*/
-/* Simplified version of script_start, used for the     */
-/* sitewide RSS system.                                 */
-/*------------------------------------------------------*/
-/********************************************************/
+/*-- API Start Class -------------------------------*/
+/*--------------------------------------------------*/
+/* Simplified version of script_start, used for the    */
+/* site API calls                                    */
+/*--------------------------------------------------*/
+/****************************************************/
 
-// Let's prevent people from clearing feeds
+use Twig\Loader\FilesystemLoader;
+use Twig\Environment;
+
+$ScriptStartTime=microtime(true); //To track how long a page takes to create
+
+//Lets prevent people from clearing feeds
 if (isset($_GET['clearcache'])) {
     unset($_GET['clearcache']);
 }
 
-require_once(__DIR__.'/classes/config.php');
-require_once(__DIR__.'/classes/classloader.php');
+require_once(__DIR__.'/../classes/config.php');
+require_once(__DIR__.'/../classes/classloader.php');
+require_once(__DIR__.'/../classes/time.class.php');
+require_once(__DIR__.'/../classes/paranoia.class.php');
+require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new CACHE($MemcachedServers);
-$Feed = new Feed;
+$DB = new DB_MYSQL;
+$Debug = new DEBUG;
+$Twig = new Environment(
+    new FilesystemLoader(__DIR__.'/templates'),
+    ['cache' => __DIR__.'/cache/twig']
+);
+$Debug->handle_errors();
+
+G::initialize();
+
+function json_error($Code) {
+    echo json_encode(['status' => 400, 'error' => $Code, 'response' => []]);
+    die();
+}
+
+function make_secret($Length = 32) {
+    $NumBytes = (int) round($Length / 2);
+    $Secret = bin2hex(openssl_random_pseudo_bytes($NumBytes));
+    return substr($Secret, 0, $Length);
+}
 
 function make_utf8($Str) {
     if ($Str != '') {
@@ -59,10 +86,7 @@ function display_array($Array, $Escape = []) {
     return $Array;
 }
 
-header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
-header('Pragma:');
 header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
 header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');
-
-$Feed->UseSSL = (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
-require(__DIR__ . '/sections/feeds/index.php');
+header('Content-type: application/json');
+require_once(__DIR__.'/../sections/api/index.php');

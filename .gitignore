@@ -7,21 +7,21 @@ __MACOSX/
 logs/
 !logs/README.txt
 
-static/local/
+public/static/local/
 
-static/similar/
-!static/similar/.gitkeep
+public/static/similar/
+!public/static/similar/.gitkeep
 
 preview.html
 
-static/stylespreview/
-!static/stylespreview/.gitkeep
+public/static/stylespreview/
+!public/static/stylespreview/.gitkeep
 
 sections/tools/development/node_modules/
 /vendor/
 node_modules/
 
-static/userscripts/gazelle-json-export.js.txt
+public/static/userscripts/gazelle-json-export.js.txt
 
 .bash_history
 .cache/

@@ -363,7 +363,7 @@ class ARTISTS_SIMILAR extends ARTIST{
             }
             reset($this->xValues);
         }
-        $Img->make_png(SERVER_ROOT.'/static/similar/'.$this->ID.'.png');
+        $Img->make_png(SERVER_ROOT.'/public/static/similar/'.$this->ID.'.png');
     }
 
     function dump() {
