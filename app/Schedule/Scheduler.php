@@ -2,7 +2,7 @@
 
 namespace Gazelle\Schedule;
 
-use \Gazelle\Util\Irc;
+use \Gazelle\Util\{Irc, Time};
 
 class Scheduler {
     protected $db;
@@ -279,6 +279,18 @@ class Scheduler {
     }
 
     public function getTaskRuntimeStats(int $days = 7) {
+    }
+
+    public function getTaskSnapshot(float $start, float $end) {
+        $this->db->prepared_query('
+            SELECT pt.periodic_task_id, pt.name, pth.launch_time, pth.status, pth.num_errors, pth.num_items, pth.duration_ms
+            FROM periodic_task pt
+            INNER JOIN periodic_task_history pth USING (periodic_task_id)
+            WHERE pth.launch_time <= ? AND pth.launch_time + INTERVAL pth.duration_ms / 1000 SECOND >= ?
+            ', Time::sqlTime($end), Time::sqlTime($start)
+        );
+
+        return $this->db->to_array('periodic_task_id', MYSQLI_ASSOC);
     }
 
     public function run() {
