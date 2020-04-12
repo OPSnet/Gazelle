@@ -19,8 +19,8 @@ while ! mysql -h mysql -ugazelle -ppassword -e "show databases;" > /dev/null 2>&
     fi;
 done
 
-if [ ! -f /srv/www/classes/config.php ]; then
-    cp /var/www/.docker/web/config.php /var/www/classes/config.php
+if [ ! -f /var/www/classes/config.php ]; then
+    bash /var/www/.docker/web/generate-config.sh
 fi
 
 echo "Run migrate..."

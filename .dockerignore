@@ -4,3 +4,5 @@ Vagrantfile
 .vagrant/
 html/
 .docker/data
+.docker/mysql
+.docker/sphinxsearch
