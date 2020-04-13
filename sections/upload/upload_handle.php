@@ -32,14 +32,14 @@ $Properties = [];
 $Type = $Categories[(int)$_POST['type']];
 $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
-$Properties['Title'] = $_POST['title'];
+$Properties['Title'] = trim($_POST['title']);
 $Properties['Remastered'] = isset($_POST['remaster']) ? 1 : 0;
 if ($Properties['Remastered'] || isset($_POST['unknown'])) {
     $Properties['UnknownRelease'] = isset($_POST['unknown']) ? 1 : 0;
-    $Properties['RemasterYear'] = trim($_POST['remaster_year']);
-    $Properties['RemasterTitle'] = $_POST['remaster_title'];
-    $Properties['RemasterRecordLabel'] = $_POST['remaster_record_label'];
-    $Properties['RemasterCatalogueNumber'] = $_POST['remaster_catalogue_number'];
+    $Properties['RemasterYear'] = trim($_POST['remaster_year'] ?? '');
+    $Properties['RemasterTitle'] = trim($_POST['remaster_title'] ?? '');
+    $Properties['RemasterRecordLabel'] = trim($_POST['remaster_record_label'] ?? '');
+    $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
 }
 if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
     $Properties['UnknownRelease'] = 1;
@@ -49,24 +49,26 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
     $Properties['RemasterCatalogueNumber'] = '';
 }
 $Properties['Year'] = trim($_POST['year']);
-$Properties['RecordLabel'] = $_POST['record_label'];
-$Properties['CatalogueNumber'] = $_POST['catalogue_number'];
+$Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
+$Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
 $Properties['ReleaseType'] = $_POST['releasetype'];
-$Properties['Scene'] = isset($_POST['scene']) ? 1 : 0;
-$Properties['Format'] = $_POST['format'];
-$Properties['Media'] = $_POST['media'];
-$Properties['Bitrate'] = $_POST['bitrate'];
-$Properties['Encoding'] = $_POST['bitrate'];
+$Properties['Scene'] = isset($_POST['scene']) ? '1' : '0';
+$Properties['Format'] = trim($_POST['format']);
+$Properties['Media'] = trim($_POST['media'] ?? '');
+$Properties['Encoding'] = $Properties['Bitrate'] = trim($_POST['bitrate'] ?? '');
+if ($Properties['Encoding'] == 'Other') {
+    $_POST['other_bitrate'] = trim($_POST['other_bitrate'] ?? '');
+}
 $Properties['MultiDisc'] = $_POST['multi_disc'] ?? null;
-$Properties['TagList'] = array_unique(array_map(trim, explode(',', $_POST['tags']))); // Musicbranes loves to send duplicates
-$Properties['Image'] = trim($_POST['image']);
-$Properties['GroupDescription'] = trim($_POST['album_desc']);
+$Properties['TagList'] = array_unique(array_map('trim', explode(',', $_POST['tags']))); // Musicbranes loves to send duplicates
+$Properties['Image'] = trim($_POST['image'] ?? '');
+$Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
 $Properties['VanityHouse'] = (int)($_POST['vanity_house'] ?? null && check_perms('torrents_edit_vanityhouse'));
-$Properties['TorrentDescription'] = $_POST['release_desc'];
+$Properties['TorrentDescription'] = trim($_POST['release_desc'] ?? '');
 if ($_POST['album_desc']) {
-    $Properties['GroupDescription'] = trim($_POST['album_desc']);
+    $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? '');
 } elseif ($_POST['desc']) {
-    $Properties['GroupDescription'] = trim($_POST['desc']);
+    $Properties['GroupDescription'] = trim($_POST['desc'] ?? '');
 }
 $Properties['GroupID'] = $_POST['groupid'] ?? null;
 if (empty($_POST['artists'])) {
@@ -148,13 +150,12 @@ switch ($Type) {
 
             $Validate->SetFields('other_bitrate',
                 '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
-            $enc = trim($_POST['other_bitrate']);
+            $enc = $_POST['other_bitrate'];
             if (isset($_POST['vbr'])) {
                 $enc.= ' (VBR)';
             }
 
-            $Properties['Encoding'] = $enc;
-            $Properties['Bitrate'] = $enc;
+            $Properties['Encoding'] = $Properties['Bitrate'] = $enc;
         } else {
             $Validate->SetFields('bitrate',
                 '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
@@ -187,13 +188,12 @@ switch ($Type) {
         if ($Properties['Encoding'] == 'Other') {
             $Validate->SetFields('other_bitrate',
                 '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
-            $enc = trim($_POST['other_bitrate']);
+            $enc = $_POST['other_bitrate'];
             if (isset($_POST['vbr'])) {
                 $enc.= ' (VBR)';
             }
 
-            $Properties['Encoding'] = $enc;
-            $Properties['Bitrate'] = $enc;
+            $Properties['Encoding'] = $Properties['Bitrate'] = $enc;
         } else {
             $Validate->SetFields('bitrate',
                 '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
@@ -264,22 +264,22 @@ if ($Type == 'Music') {
                 } else {
                     $j = $i - 1;
                     $ExtraTorrents[$ExtraTorrentName]['Name'] = $ExtraTorrentName;
-                    $ExtraFormat = $_POST['extra_format'][$j];
+                    $ExtraFormat = trim($_POST['extra_format'][$j]);
                     if (empty($ExtraFormat)) {
                         $Err = 'Missing format for extra torrent.';
                         break;
                     } else {
-                        $ExtraTorrents[$ExtraTorrentName]['Format'] = trim($ExtraFormat);
+                        $ExtraTorrents[$ExtraTorrentName]['Format'] = $ExtraFormat;
                     }
-                    $ExtraBitrate = $_POST['extra_bitrate'][$j];
+                    $ExtraBitrate = trim($_POST['extra_bitrate'][$j]);
                     if (empty($ExtraBitrate)) {
                         $Err = 'Missing bitrate for extra torrent.';
                         break;
                     } else {
-                        $ExtraTorrents[$ExtraTorrentName]['Encoding'] = trim($ExtraBitrate);
+                        $ExtraTorrents[$ExtraTorrentName]['Encoding'] = $ExtraBitrate;
                     }
-                    $ExtraReleaseDescription = $_POST['extra_release_desc'][$j];
-                    $ExtraTorrents[$ExtraTorrentName]['TorrentDescription'] = trim($ExtraReleaseDescription);
+                    $ExtraReleaseDescription = trim($_POST['extra_release_desc'][$j]);
+                    $ExtraTorrents[$ExtraTorrentName]['TorrentDescription'] = $ExtraReleaseDescription;
                     $DupeNames[] = $ExtraFile['name'];
                 }
             }
@@ -301,13 +301,14 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
         6 => []
     ];
     for ($i = 0, $il = count($Artists); $i < $il; $i++) {
-        if (trim($Artists[$i]) != '') {
+        $Artists[$i] = trim($Artists[$i]);
+        if ($Artists[$i] != '') {
             if (!in_array($Artists[$i], $ArtistNames)) {
                 $ArtistForm[$Importance[$i]][] = ['name' => Artists::normalise_artist_name($Artists[$i])];
                 if ($Importance[$i] == 1) {
                     $MainArtistCount++;
                 }
-                $ArtistNames[] = trim($Artists[$i]);
+                $ArtistNames[] = $Artists[$i];
             }
         }
     }
@@ -526,8 +527,9 @@ if ($Type == 'Music') {
         );
         if ($DB->has_results()) {
             // Don't escape tg.Name. It's written directly to the log table
-            list($GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $Properties['TagList']) = $DB->next_record(MYSQLI_NUM, [4]);
-            $Properties['TagList'] = str_replace([' ', '.', '_'], [', ', '.', '.'], $Properties['TagList']);
+            list($GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $TagList)
+                = $DB->next_record(MYSQLI_NUM, [4]);
+            $Properties['TagList'] = explode(',', str_replace([' ', '.', '_'], [', ', '.', '.'], $TagList));
             if (!$Properties['Image'] && $WikiImage) {
                 $Properties['Image'] = $WikiImage;
             }
@@ -843,21 +845,21 @@ $Announce = '';
 if ($Type == 'Music') {
     $Announce .= Artists::display_artists($ArtistForm, false);
 }
-$Announce .= trim($Properties['Title']).' ';
+$Announce .= $Properties['Title'] . ' ';
 $Details = "";
 if ($Type == 'Music') {
-    $Announce .= '['.trim($Properties['Year']).']';
+    $Announce .= '['.$Properties['Year'].']';
     if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
         $Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
     }
-    $Details .= trim($Properties['Format']).' / '.trim($Properties['Bitrate']);
+    $Details .= $Properties['Format'].' / '.$Properties['Bitrate'];
     if ($HasLog == 1) {
         $Details .= ' / Log'.($LogInDB ? " ({$LogScore}%)" : "");
     }
     if ($HasCue == 1) {
         $Details .= ' / Cue';
     }
-    $Details .= ' / '.trim($Properties['Media']);
+    $Details .= ' / '.$Properties['Media'];
     if ($Properties['Scene'] == '1') {
         $Details .= ' / Scene';
     }
@@ -870,7 +872,7 @@ if ($Details !== "") {
 }
 
 $AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003"
-    . " - \00312".trim($Properties['TagList'])."\003"
+    . " - \00312" . implode(',', $Properties['TagList']) . "\003"
     . " - \00304".site_url()."torrents.php?id=$GroupID\003 / \00304".site_url()."torrents.php?action=download&id=$TorrentID\003";
 
 // ENT_QUOTES is needed to decode single quotes/apostrophes
@@ -951,9 +953,9 @@ if ($Properties['Image'] != '') {
             }
             array_unshift($RecentUploads, [
                 'ID' => $GroupID,
-                'Name' => trim($Properties['Title']),
+                'Name' => $Properties['Title'],
                 'Artist' => Artists::display_artists($ArtistForm, false, true),
-                'WikiImage' => trim($Properties['Image'])]);
+                'WikiImage' => $Properties['Image']]);
             $Cache->cache_value('recent_uploads_'.$LoggedUser['ID'], $RecentUploads, 0);
         } while (0);
     }
@@ -1029,8 +1031,14 @@ if (!$IsNewGroup) {
 }
 
 // For RSS
-$Item = $Feed->item($Title, Text::strip_bbcode($Properties['GroupDescription']), 'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id='.$TorrentID, $LoggedUser['Username'], 'torrents.php?id='.$GroupID, trim($Properties['TagList']));
-
+$Item = $Feed->item(
+    $Title,
+    Text::strip_bbcode($Properties['GroupDescription']),
+    'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id=' . $TorrentID,
+    $LoggedUser['Username'],
+    'torrents.php?id=' . $GroupID,
+    implode(',', $Properties['TagList'])
+);
 
 //Notifications
 $SQL = "
@@ -1075,8 +1083,8 @@ if (!empty($ArtistsUnescaped)) {
 $TagSQL = [];
 $NotTagSQL = [];
 foreach ($Properties['TagList'] as $Tag) {
-    $TagSQL[] = " Tags LIKE '%|".db_string(trim($Tag))."|%' ";
-    $NotTagSQL[] = " NotTags LIKE '%|".db_string(trim($Tag))."|%' ";
+    $TagSQL[] = " Tags LIKE '%|".db_string($Tag)."|%' ";
+    $NotTagSQL[] = " NotTags LIKE '%|".db_string($Tag)."|%' ";
 }
 if (count($TagSQL)) {
     $SQL .= ' AND (' . implode(' OR ', $TagSQL) . ')';
@@ -1084,10 +1092,10 @@ if (count($TagSQL)) {
 if (count($NotTagSQL)) {
     $SQL .= " AND !(" . implode(' OR ', $NotTagSQL) . ')';
 }
-$SQL .= " AND (Categories LIKE '%|".db_string(trim($Type))."|%' OR Categories = '') ";
+$SQL .= " AND (Categories LIKE '%|".db_string($Type)."|%' OR Categories = '') ";
 
 if ($Properties['ReleaseType']) {
-    $SQL .= " AND (ReleaseTypes LIKE '%|".db_string(trim($ReleaseTypes[$Properties['ReleaseType']]))."|%' OR ReleaseTypes = '') ";
+    $SQL .= " AND (ReleaseTypes LIKE '%|".db_string($ReleaseTypes[$Properties['ReleaseType']])."|%' OR ReleaseTypes = '') ";
 } else {
     $SQL .= " AND (ReleaseTypes = '') ";
 }
@@ -1100,19 +1108,19 @@ if ($Properties['ReleaseType']) {
 
 
 if ($Properties['Format']) {
-    $SQL .= " AND (Formats LIKE '%|".db_string(trim($Properties['Format']))."|%' OR Formats = '') ";
+    $SQL .= " AND (Formats LIKE '%|".db_string($Properties['Format'])."|%' OR Formats = '') ";
 } else {
     $SQL .= " AND (Formats = '') ";
 }
 
 if ($_POST['bitrate']) {
-    $SQL .= " AND (Encodings LIKE '%|".db_string(trim($_POST['bitrate']))."|%' OR Encodings = '') ";
+    $SQL .= " AND (Encodings LIKE '%|".db_string($_POST['bitrate'])."|%' OR Encodings = '') ";
 } else {
     $SQL .= " AND (Encodings = '') ";
 }
 
 if ($Properties['Media']) {
-    $SQL .= " AND (Media LIKE '%|".db_string(trim($Properties['Media']))."|%' OR Media = '') ";
+    $SQL .= " AND (Media LIKE '%|".db_string($Properties['Media'])."|%' OR Media = '') ";
 } else {
     $SQL .= " AND (Media = '') ";
 }
@@ -1132,11 +1140,11 @@ $SQL .= '))';
 
 
 if ($Properties['Year'] && $Properties['RemasterYear']) {
-    $SQL .= " AND (('".db_string(trim($Properties['Year']))."' BETWEEN FromYear AND ToYear)
-            OR ('".db_string(trim($Properties['RemasterYear']))."' BETWEEN FromYear AND ToYear)
+    $SQL .= " AND (('".db_string($Properties['Year'])."' BETWEEN FromYear AND ToYear)
+            OR ('".db_string($Properties['RemasterYear'])."' BETWEEN FromYear AND ToYear)
             OR (FromYear = 0 AND ToYear = 0)) ";
 } elseif ($Properties['Year'] || $Properties['RemasterYear']) {
-    $SQL .= " AND (('".db_string(trim(Max($Properties['Year'],$Properties['RemasterYear'])))."' BETWEEN FromYear AND ToYear)
+    $SQL .= " AND (('".db_string(max($Properties['Year'],$Properties['RemasterYear']))."' BETWEEN FromYear AND ToYear)
             OR (FromYear = 0 AND ToYear = 0)) ";
 } else {
     $SQL .= " AND (FromYear = 0 AND ToYear = 0) ";
