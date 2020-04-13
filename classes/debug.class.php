@@ -78,6 +78,7 @@ class DEBUG {
             [
                 'url'      => $_SERVER['REQUEST_URI'] ?? 'cli',
                 'message'  => $Report,
+                'time'     => time(),
                 'errors'   => $this->get_errors(true),
                 'queries'  => $this->get_queries(),
                 'flags'    => $this->get_flags(),
