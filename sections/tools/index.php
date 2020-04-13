@@ -499,6 +499,10 @@ switch ($_REQUEST['action']) {
         include(SERVER_ROOT.'/sections/tools/misc/analysis.php');
         break;
 
+    case 'analysis_list':
+        include(__DIR__.'/misc/analysis_list.php');
+        break;
+
     case 'process_info':
         include(SERVER_ROOT.'/sections/tools/development/process_info.php');
         break;
