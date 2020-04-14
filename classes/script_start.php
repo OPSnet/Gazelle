@@ -58,7 +58,10 @@ $Debug->handle_errors();
 $Debug->set_flag('Debug constructed');
 
 $DB = new DB_MYSQL;
+$Debug->set_flag('DB constructed');
+
 $Cache = new CACHE($MemcachedServers);
+$Debug->set_flag('Memcached constructed');
 
 G::$Cache = $Cache;
 G::$DB = $DB;
@@ -66,10 +69,12 @@ G::$Twig = new Environment(
     new FilesystemLoader(__DIR__ . '/../templates'),
     ['cache' => __DIR__ . '/../cache/twig']
 );
+$Debug->set_flag('Twig constructed');
 
 //Begin browser identification
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+    $Debug->set_flag('session started');
 }
 
 if (!isset($_SESSION['WhichBrowser'])) {
