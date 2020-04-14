@@ -198,11 +198,12 @@ class Users {
                     i.RestrictedForums,
                     i.PermittedForums,
                     i.NavItems,
-                    m.FLTokens,
+                    uf.tokens AS FLTokens,
                     m.PermissionID,
                     CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
                 FROM users_main AS m
                 INNER JOIN users_info AS i ON (i.UserID = m.ID)
+                INNER JOIN user_flt AS uf ON (uf.user_id = m.ID)
                 LEFT JOIN user_has_attr AS uha ON (uha.UserID = m.ID)
                 LEFT JOIN user_attr as ua ON (ua.ID = uha.UserAttrID AND ua.Name = ?)
                 WHERE m.ID = ?

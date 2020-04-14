@@ -14,14 +14,13 @@ if (isset($_REQUEST['addtokens'])) {
     $sql = "
         UPDATE users_main um
         INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
-            um.FLTokens = um.FLTokens + ?,
             uf.tokens = uf.tokens + ?
         WHERE um.Enabled = '1'";
     if (!isset($_REQUEST['leechdisabled'])) {
         $sql .= "
             AND um.can_leech = 1";
     }
-    $DB->prepared_query($sql, $Tokens, $Tokens);
+    $DB->prepared_query($sql, $Tokens);
 
     $DB->prepared_query("
         SELECT concat('user_info_heavy_', ID) as cacheKey FROM users_main
@@ -45,19 +44,23 @@ if (isset($_REQUEST['addtokens'])) {
     }
 
     if (isset($_REQUEST['onlydrop'])) {
-        $where = "WHERE FLTokens > ?";
+        $where = "WHERE uf.tokens > ?";
     } elseif (!isset($_REQUEST['leechdisabled'])) {
-        $where = "WHERE (Enabled = '1' AND can_leech = 1) OR FLTokens > ?";
+        $where = "WHERE (um.Enabled = '1' AND um.can_leech = 1) OR uf.tokens > ?";
     } else {
-        $where = "WHERE Enabled = '1' OR FLTokens > ?";
+        $where = "WHERE um.Enabled = '1' OR uf.tokens > ?";
     }
 
     $DB->prepared_query("SELECT concat('user_info_heavy_', ID) as cacheKey FROM users_main $where", $Tokens);
     $ck = $DB->collect('cacheKey');
     $Cache->deleteMulti($ck);
 
-    $DB->prepared_query("UPDATE users_main SET FLTokens = ? $where",
-        $Tokens, $Tokens);
+    $DB->prepared_query("
+        UPDATE users_main um
+        INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
+            uf.tokens = ?
+       $where
+       ", $Tokens);
 
     $message = '<div class="box pad">'
         . '<strong>Freeleech tokens reduced to ' . number_format($Tokens)

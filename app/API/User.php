@@ -135,7 +135,6 @@ class User extends AbstractAPI {
 
         if ($this->clear_tokens) {
             $UpdateSet[] = "um.Invites = '0'";
-            $UpdateSet[] = "um.FLTokens = '0'";
             $UpdateSet[] = "uf.tokens = 0";
             $Comment = 'Tokens and invites reset, enabled via API';
         }
