@@ -19,7 +19,7 @@ gc_enable();
 $PCount = chop(shell_exec("/usr/bin/pgrep -cf schedule.php"));
 if ($PCount > 3) {
     // 3 because the cron job starts two processes and pgrep finds itself
-    die("schedule.php is already running. Exiting ($PCount)\n");
+    die();
 }
 
 if (PHP_SAPI === 'cli') {

@@ -29,7 +29,7 @@ class ExpireFlTokens extends \Gazelle\Schedule\Task
                     AND uf.Time < ? - INTERVAL ? DAY
             ", $now, $expiry);
             while (list($userID, $infoHash) = $this->db->next_record(MYSQLI_NUM, false)) {
-                Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($infoHash), 'userid' => $userID]);
+                \Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($infoHash), 'userid' => $userID]);
                 $this->processed++;
             }
             $this->db->prepared_query("

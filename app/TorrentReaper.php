@@ -43,7 +43,7 @@ class TorrentReaper
             WHERE $criteria
             LIMIT 8000
         ");
-        $torrents = $this->db->to_array('ID', MYSQLI_NUM, false);
+        $torrents = $this->db->to_array('ID', MYSQLI_ASSOC, false);
 
         $logEntries = $deleteNotes = [];
 

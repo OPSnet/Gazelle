@@ -329,8 +329,8 @@ class Scheduler {
         $taskRunner->begin();
         try {
             $taskRunner->run();
-        } catch (\Exception $e) {
-            $taskRunner->log('Caught exception: ' . $e->getMessage(), 'error');
+        } catch (\Throwable $e) {
+            $taskRunner->log('Caught exception: ' . str_replace(SERVER_ROOT, '', $e->getMessage()), 'error');
         } finally {
             $taskRunner->end($task['is_sane']);
         }
@@ -340,8 +340,9 @@ class Scheduler {
                 UPDATE periodic_task
                 SET run_now = FALSE
                 WHERE periodic_task_id = ?
-                ', $task['periodic_task_id']
+                ', $id
             );
+            $this->clearCache();
         }
     }
 

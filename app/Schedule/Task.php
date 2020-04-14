@@ -52,7 +52,6 @@ abstract class Task {
 
         echo("DONE! (".number_format(microtime(true) - $this->startTime, 3).")\n");
 
-
         foreach ($this->events as $event) {
             echo(sprintf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event));
             $this->db->prepared_query('
@@ -70,7 +69,7 @@ abstract class Task {
             ', $this->taskId);
             $this->cache->delete_value(Scheduler::CACHE_TASKS);
 
-            Irc::sendChannel('Task '.$this->name.' is no longer sane '.site_url().'tools.php?action=periodic&amp;mode=detail&amp;id='.$this->taskId, LAB_CHAN);
+            Irc::sendChannel('Task '.$this->name.' is no longer sane '.site_url().'tools.php?action=periodic&mode=detail&id='.$this->taskId, LAB_CHAN);
             // todo: send notifications to appropriate users
         } else if ($errorCount == 0 && !$sane) {
             $this->db->prepared_query('
