@@ -26,7 +26,7 @@ sed -i -e "39s/''/'${MYSQL_USER}'/" ${CONF_FILE}
 sed -i -e "40s/''/'${MYSQL_PASSWORD}'/" ${CONF_FILE}
 sed -i -e "41s/''/'${MYSQL_USER}'/" ${CONF_FILE}
 sed -i -e "42s/''/'${MYSQL_PASSWORD}'/" ${CONF_FILE}
-sed -i -e "50s/(.+)/    ['host' => 'memcached', 'port' => 11211]/" ${CONF_FILE}
+sed -i -e "50s/.*/    ['host' => 'memcached', 'port' => 11211]/" ${CONF_FILE}
 
 sed -i -e "54s/localhost/sphinxsearch/" ${CONF_FILE}
 sed -i -e "s/127.0.0.1/sphinxsearch/" ${CONF_FILE}
