@@ -10,11 +10,13 @@ class RemoveDeadSessions extends \Gazelle\Schedule\Task
             SELECT UserID, SessionID
             FROM users_sessions
             WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = '1')
-               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = '0')");
+               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = '0')
+        ");
         $this->db->prepared_query("
             DELETE FROM users_sessions
             WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = '1')
-               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = '0')");
+               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = '0')
+        ");
 
         $this->db->set_query_id($sessionQuery);
         while (list($userID, $sessionID) = $this->db->next_record()) {

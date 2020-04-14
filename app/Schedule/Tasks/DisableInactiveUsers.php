@@ -23,7 +23,7 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
 
         while (list($username, $email) = $this->db->next_record()) {
             $body = "Hi $username,\n\nIt has been almost 4 months since you used your account at ".site_url().". This is an automated email to inform you that your account will be disabled in 10 days if you do not sign in.";
-            Misc::send_email($email, 'Your '.SITE_NAME.' account is about to be disabled', $body, 'noreply');
+            \Misc::send_email($email, 'Your '.SITE_NAME.' account is about to be disabled', $body, 'noreply');
         }
 
         $this->db->prepared_query("
@@ -42,8 +42,8 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
 
         if ($this->db->has_results()) {
             $userIDs = $this->db->collect('ID');
-            Tools::disable_users($userIDs, 'Disabled for inactivity.', 3);
-            Users::flush_enabled_users_count();
+            \Tools::disable_users($userIDs, 'Disabled for inactivity.', 3);
+            \Users::flush_enabled_users_count();
             foreach ($userIDs as $userID) {
                 $this->processed++;
                 $this->debug("Disabling $userID", $userID);

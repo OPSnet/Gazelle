@@ -24,11 +24,8 @@ class UserStatsYearly extends \Gazelle\Schedule\Task
                         (LogScore = 100 AND Media = 'CD')))
                 GROUP BY UserID
             ) p ON (p.UserID = um.ID)
-            GROUP BY um.ID;");
+            GROUP BY um.ID
+        ");
         $this->processed = $this->db->affected_rows();
-
-        $this->db->prepared_query("
-            DELETE FROM users_stats_yearly
-            WHERE Time < NOW() - INTERVAL 53 WEEK");
     }
 }

@@ -8,41 +8,43 @@ class UpdateDailyTop10 extends \Gazelle\Schedule\Task
     {
         $this->db->prepared_query("
                 INSERT INTO top10_history (Date, Type)
-                VALUES (now(), 'Daily')");
+                VALUES (now(), 'Daily')
+        ");
         $historyID = $this->db->inserted_id();
 
         $top10 = $this->cache->get_value('top10tor_day_10');
         if ($top10 === false) {
             $this->db->prepared_query("
-                    SELECT
-                        t.ID,
-                        g.ID,
-                        g.Name,
-                        g.CategoryID,
-                        g.TagList,
-                        t.Format,
-                        t.Encoding,
-                        t.Media,
-                        t.Scene,
-                        t.HasLog,
-                        t.HasCue,
-                        t.HasLogDB,
-                        t.LogScore,
-                        t.LogChecksum,
-                        t.RemasterYear,
-                        g.Year,
-                        t.RemasterTitle,
-                        tls.Snatched,
-                        tls.Seeders,
-                        tls.Leechers,
-                        ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
-                    FROM torrents AS t
-                    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-                    INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
-                    WHERE tls.Seeders > 0
-                        AND t.Time > (now() - INTERVAL 1 DAY)
-                    ORDER BY (tls.Seeders + tls.Leechers) DESC
-                    LIMIT 10;");
+                SELECT
+                    t.ID,
+                    g.ID,
+                    g.Name,
+                    g.CategoryID,
+                    g.TagList,
+                    t.Format,
+                    t.Encoding,
+                    t.Media,
+                    t.Scene,
+                    t.HasLog,
+                    t.HasCue,
+                    t.HasLogDB,
+                    t.LogScore,
+                    t.LogChecksum,
+                    t.RemasterYear,
+                    g.Year,
+                    t.RemasterTitle,
+                    tls.Snatched,
+                    tls.Seeders,
+                    tls.Leechers,
+                    ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
+                FROM torrents AS t
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
+                WHERE tls.Seeders > 0
+                    AND t.Time > (now() - INTERVAL 1 DAY)
+                ORDER BY (tls.Seeders + tls.Leechers) DESC
+                LIMIT 10;
+            ");
 
             $top10 = $this->db->to_array();
         }
@@ -60,6 +62,8 @@ class UpdateDailyTop10 extends \Gazelle\Schedule\Task
             if (!empty($artists)) {
                 $displayName = \Artists::display_artists($artists, false, true);
             }
+
+            // todo: doesn't this shit exist in classes somewhere already?
 
             $displayName .= $groupName;
 
@@ -115,7 +119,8 @@ class UpdateDailyTop10 extends \Gazelle\Schedule\Task
                     (HistoryID, Rank, TorrentID, TitleString, TagString)
                 VALUES
                     (?,         ?,    ?,         ?,           ?)
-            ", $historyID, $i, $torrentID, $titleString, $tagString);
+                ", $historyID, $i, $torrentID, $titleString, $tagString
+            );
             $i++;
         }
     }

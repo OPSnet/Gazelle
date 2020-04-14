@@ -8,8 +8,6 @@ class Freeleech extends \Gazelle\Schedule\Task
     {
         //We use this to control 6 hour freeleeches.
         // They're actually 7 hours, but don't tell anyone.
-        $TimeMinus = time_minus(3600 * 7);
-
         $qId = $this->db->prepared_query("
             SELECT DISTINCT GroupID
             FROM torrents
