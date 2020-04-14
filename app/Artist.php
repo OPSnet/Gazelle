@@ -14,6 +14,7 @@ class Artist {
     protected $artistRole; // what different roles does an artist have
     protected $nrGroups;   // number of distinct groups
     protected $groupRole;  // what role does this artist have in a group
+    protected $groupList;  // the release groups ordered by year and name
     protected $sections;   // their groups, gathered into sections
 
     protected $name;
@@ -27,8 +28,7 @@ class Artist {
     protected $nrSeeders;
     protected $nrTorrents;
 
-    const CACHE_PREFIX = 'artistv6_';
-    const CACHE_ALIAS = 'artist_alias_%d_%s';
+    const CACHE_PREFIX = 'artist_';
 
     public function __construct (\DB_MYSQL $db, \CACHE $cache, $id, $revision = false) {
         $this->db = $db;
@@ -141,6 +141,7 @@ class Artist {
             ', $this->id
         );
         $this->groupRole = [];
+        $this->groupList = [];
         $this->artistRole = [
             ARTIST_MAIN => 0,
             ARTIST_GUEST => 0,
@@ -155,6 +156,7 @@ class Artist {
             ++$nr;
             ++$this->artistRole[$row['artistRole']];
             $this->groupRole[$row['GroupID']] = $row['artistRole'];
+            $this->groupList[] = $row['GroupID']; // to retain year ordering
         }
         return $nr;
     }
@@ -173,20 +175,22 @@ class Artist {
 
     public function groupIds() {
         /* this is needed to call \Torrents::get_groups() */
-        return array_keys($this->groupRole);
+        return $this->groupList;
     }
 
-    public function loadGroups($groupList) {
+    public function loadGroups($torrentGroupList) {
         $this->sections   = [];
         $this->nrGroups   = 0;
         $this->nrLeechers = 0;
         $this->nrSnatches = 0;
         $this->nrSeeders  = 0;
         $this->nrTorrents = 0;
-        foreach ($groupList as $group) {
+        foreach ($this->groupList as $groupId) {
+            if (!isset($torrentGroupList[$groupId])) {
+                continue;
+            }
             ++$this->nrGroups;
-            $groups[$group['ID']] = true;
-            switch ($this->groupRole[$group['ID']]) {
+            switch ($this->groupRole[$groupId]) {
                 case ARTIST_GUEST:
                     $section = 1024;
                     break;
@@ -200,21 +204,21 @@ class Artist {
                     $section = 1021;
                     break;
                 default:
-                    $section = $group['ReleaseType'];
+                    $section = $torrentGroupList[$groupId]['ReleaseType'];
                     break;
             }
             if (!isset($this->sections[$section])) {
                 $this->sections[$section] = [];
             }
-            $this->sections[$section][] = $group;
-            foreach ($group['Torrents'] as $t) {
+            $this->sections[$section][] = $torrentGroupList[$groupId];
+            foreach ($torrentGroupList[$groupId]['Torrents'] as $t) {
                 $this->nrLeechers += $t['Leechers'];
                 $this->nrSnatches += $t['Snatched'];
                 $this->nrSeeders  += $t['Seeders'];
                 ++$this->nrTorrents;
             }
         }
-        /* TODO: See if ever $nrGroups < count($this->groupRoles) */
+        /* TODO: See if ever $nrGroups < count($this->groupList) */
         return $this->nrGroups;
     }
 

@@ -21,19 +21,26 @@ View::show_header('Cache key management');
 
 //Make sure the form was sent
 if (isset($_GET['cache'])) {
-    if ($_GET['cache'] === 'users') {
-        $max = $DB->scalar("SELECT max(ID) as count FROM users_main");
+    if ($_GET['cache'] === 'artists') {
+        $max = $DB->scalar("SELECT max(ArtistID) as count FROM artists_group");
         for ($i = 1; $i <= $max; $i++) {
-            $Cache->deleteMulti(['user_stats_' . $i, 'user_info_' . $i, 'user_info_heavy_' . $i]);
+            $Cache->deleteMulti(['artist_' . $i, 'artist_groups_' . $i]);
         }
-        echo "<div class='save_message'>All user caches cleared.</div>";
+        echo "<div class='save_message'>All artist caches flushed.</div>";
     }
     elseif ($_GET['cache'] === 'torrent_groups') {
         $max = $DB->scalar("SELECT max(ID) as count FROM torrents_group");
         for ($i = 1; $i <= $max; $i++) {
             $Cache->deleteMulti(['torrent_group_' . $i, 'groups_artists_' . $i]);
         }
-        echo "<div class='save_message'>All torrent caches cleared.</div>";
+        echo "<div class='save_message'>All torrent caches flushed.</div>";
+    }
+    elseif ($_GET['cache'] === 'users') {
+        $max = $DB->scalar("SELECT max(ID) as count FROM users_main");
+        for ($i = 1; $i <= $max; $i++) {
+            $Cache->deleteMulti(['user_stats_' . $i, 'user_info_' . $i, 'user_info_heavy_' . $i]);
+        }
+        echo "<div class='save_message'>All user caches flushed.</div>";
     }
 }
 
@@ -47,12 +54,12 @@ if (isset($Keys) && $_GET['type'] == 'clear') {
             $Cache->delete_value($Key);
         }
     }
-    echo '<div class="save_message">Key(s) ' . implode(', ', array_map('display_str', $Keys)) . ' cleared!</div>';
+    echo '<div class="save_message">Key(s) ' . implode(', ', array_map('display_str', $Keys)) . ' flushed.</div>';
 }
 $MultiKeyTooltip = 'Enter cache keys delimited by whitespace.';
 ?>
     <div class="header">
-        <h2>Clear or view cache keys</h2>
+        <h2>View or flush cache keys</h2>
     </div>
     <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center">
         <tr>
@@ -62,7 +69,7 @@ $MultiKeyTooltip = 'Enter cache keys delimited by whitespace.';
                     <input type="hidden" name="action" value="clear_cache" />
                     <select name="type">
                         <option value="view">View</option>
-                        <option value="clear">Clear</option>
+                        <option value="clear">Flush</option>
                     </select>
                     <input type="text" name="key" id="key" class="inputtext" value="<?=(isset($_GET['key']) && ($_GET['submit'] ?? '') != 'Multi' ? display_str($_GET['key']) : '')?>" />
                     <br /><input type="submit" name="submit" value="Single" class="submit" />
@@ -76,7 +83,7 @@ $MultiKeyTooltip = 'Enter cache keys delimited by whitespace.';
                     <input type="hidden" name="action" value="clear_cache" />
                     <select name="type" style="vertical-align: top;">
                         <option value="view">View</option>
-                        <option value="clear">Clear</option>
+                        <option value="clear">Flush</option>
                     </select>
                     <textarea type="text" name="key" id="key" class="inputtext"><?=(isset($_GET['key']) && ($_GET['submit'] ?? '') == 'Multi' ? display_str($_GET['key']) : '')?></textarea>
                     <br /><input type="submit" name="submit" value="Multi" class="submit" />
@@ -84,11 +91,14 @@ $MultiKeyTooltip = 'Enter cache keys delimited by whitespace.';
             </td>
         </tr>
         <tr>
-            <td rowspan="2" style="vertical-align: top;">Clear Common Caches:</td>
-            <td><a href="tools.php?action=clear_cache&cache=users">Users</a> (clears out user_stats_*, user_info_*, and user_info_heavy_*)</td>
+            <td rowspan="3" style="vertical-align: top;">Flush application caches:</td>
+            <td><a href="tools.php?action=clear_cache&amp;cache=artists">Artists</a> (flushes artist_* and artist_groups_*)</td>
         </tr>
         <tr>
-            <td><a href="tools.php?action=clear_cache&cache=torrent_groups">Torrent Groups</a> (clears out torrent_group_* and groups_artists_*)</td>
+            <td><a href="tools.php?action=clear_cache&amp;cache=torrent_groups">Torrent Groups</a> (flushes torrent_group_* and groups_artists_*)</td>
+        </tr>
+        <tr>
+            <td><a href="tools.php?action=clear_cache&amp;cache=users">Users</a> (flushes user_stats_*, user_info_*, and user_info_heavy_*)</td>
         </tr>
     </table>
 
