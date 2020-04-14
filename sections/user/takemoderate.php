@@ -137,7 +137,7 @@ $DB->prepared_query("
         DisableIRC,
         DisableRequests,
         m.RequiredRatio,
-        m.FLTokens, /* TODO: normally no-one will moderate tokens during the migration process */
+        uf.tokens AS FLTokens,
         i.RatioWatchEnds,
         la.Type,
         SHA1(i.AdminComment) AS CommentHash,
@@ -146,6 +146,7 @@ $DB->prepared_query("
     FROM users_main AS m
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = m.ID)
     INNER JOIN users_info AS i ON (i.UserID = m.ID)
+    INNER JOIN user_flt AS uf ON (uf.user_id = m.ID)
     LEFT JOIN user_bonus ub ON (ub.user_id = m.ID)
     LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
     LEFT JOIN users_levels AS l ON (l.UserID = m.ID)

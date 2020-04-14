@@ -87,7 +87,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.DisablePM,
             i.DisableIRC,
             i.DisableRequests,
-            um.FLTokens, /* TODO: read from user_flt in next phase */
+            uf.tokens AS FLTokens,
             um.2FA_Key,
             SHA1(i.AdminComment),
             i.InfoTitle,
@@ -98,6 +98,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
         INNER JOIN users_info AS i ON (i.UserID = um.ID)
+        INNER JOIN user_flt AS uf ON (uf.user_id = um.ID)
         LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
         LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
@@ -146,7 +147,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
             i.JoinDate,
             i.Info,
             i.Avatar,
-            um.FLTokens,
+            uf.tokens AS FLTokens,
             i.Donor,
             i.Warned,
             COUNT(posts.id) AS ForumPosts,
@@ -159,6 +160,7 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
         INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
         INNER JOIN users_info AS i ON (i.UserID = um.ID)
+        INNER JOIN user_flt AS uf ON (uf.user_id = um.ID)
         LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
         LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)

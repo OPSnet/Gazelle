@@ -163,12 +163,10 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
         }
         $TokensToUse = ceil($Size / BYTES_PER_FREELEECH_TOKEN);
         $DB->prepared_query('
-            UPDATE users_main um
-            INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
-                um.FLTokens = um.FLTokens - ?,
-                uf.tokens = uf.tokens - ?
-            WHERE um.FLTokens >= ? AND um.ID = ?
-            ', $TokensToUse, $TokensToUse, $TokensToUse, $UserID
+            UPDATE user_flt SET
+                tokens = tokens - ?
+            WHERE tokens >= ? AND user_id = ?
+            ', $TokensToUse, $TokensToUse, $UserID
         );
         if ($DB->affected_rows() == 0) {
             error('You do not have any freeleech tokens left. Please use the regular DL link.');
@@ -179,12 +177,10 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
             error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
             // recredit the tokens we just subtracted
             $DB->prepared_query('
-                UPDATE users_main um
-                INNER JOIN user_flt uf ON (uf.user_id = um.ID) SET
-                    um.FLTokens = um.FLTokens + ?,
-                    uf.tokens = uf.tokens + ?
-                WHERE um.ID = ?
-                ', $TokensToUse, $TokensToUse, $UserID
+                UPDATE user_flt SET
+                    tokens = tokens + ?
+                WHERE user_id = ?
+                ', $TokensToUse, $UserID
             );
         }
 
