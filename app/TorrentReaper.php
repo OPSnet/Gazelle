@@ -43,14 +43,14 @@ class TorrentReaper
             WHERE $criteria
             LIMIT 8000
         ");
-        $torrents = $this->db->to_array('ID', MYSQLI_NUM, false);
+        $torrents = $this->db->to_array(0, MYSQLI_NUM, false);
 
         $logEntries = $deleteNotes = [];
 
         $i = 0;
         foreach ($torrents as $torrent) {
             list($id, $groupID, $name, $format, $encoding, $userID, $media, $infoHash) = $torrent;
-            $artistName = \Artists::display_artists(Artists::get_artist($groupID), false, false, false);
+            $artistName = \Artists::display_artists(\Artists::get_artist($groupID), false, false, false);
             if ($artistName) {
                 $name = "$artistName - $name";
             }
@@ -74,7 +74,7 @@ class TorrentReaper
 
         foreach ($deleteNotes as $userID => $messageInfo) {
             $singular = (($messageInfo['Count'] == 1) ? true : false);
-            Misc::send_pm($userID, 0, $messageInfo['Count'].' of your torrents '.($singular ? 'has' : 'have').' been deleted for inactivity', ($singular ? 'One' : 'Some').' of your uploads '.($singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($singular ? 'it' : 'them').".\n\nThe following torrent".($singular ? ' was' : 's were').' deleted:'.$messageInfo['Msg']);
+            \Misc::send_pm($userID, 0, $messageInfo['Count'].' of your torrents '.($singular ? 'has' : 'have').' been deleted for inactivity', ($singular ? 'One' : 'Some').' of your uploads '.($singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($singular ? 'it' : 'them').".\n\nThe following torrent".($singular ? ' was' : 's were').' deleted:'.$messageInfo['Msg']);
         }
         unset($deleteNotes);
 

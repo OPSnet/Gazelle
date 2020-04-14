@@ -14,6 +14,7 @@ class UpdateGeoip extends \Gazelle\Schedule\Task
             INNER JOIN users_main AS u ON INET_ATON(u.IP) BETWEEN g.StartIP AND g.EndIP
             WHERE u.Enabled = '1'
             GROUP BY g.Code
-            ORDER BY Users DESC");
+            ORDER BY Users DESC
+        ");
     }
 }

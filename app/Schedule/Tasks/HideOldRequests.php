@@ -10,7 +10,8 @@ class HideOldRequests extends \Gazelle\Schedule\Task
             UPDATE requests
             SET Visible = 0
             WHERE TimeFilled < (now() - INTERVAL 7 DAY)
-                AND TimeFilled != '0000-00-00 00:00:00'");
+                AND TimeFilled != '0000-00-00 00:00:00'"
+        );
         $this->processed = $this->db->affected_rows();
     }
 }

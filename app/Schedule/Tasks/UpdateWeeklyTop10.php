@@ -8,7 +8,8 @@ class UpdateWeeklyTop10 extends \Gazelle\Schedule\Task
     {
         $this->db->query("
             INSERT INTO top10_history (Date, Type)
-            VALUES (now(), 'Weekly')");
+            VALUES (now(), 'Weekly')
+        ");
         $historyID = $this->db->inserted_id();
 
         $top10 = $this->cache->get_value('top10tor_week_10');
@@ -42,7 +43,8 @@ class UpdateWeeklyTop10 extends \Gazelle\Schedule\Task
                 WHERE tls.Seeders > 0
                     AND t.Time > (now() - INTERVAL 1 WEEK)
                 ORDER BY (tls.Seeders + tls.Leechers) DESC
-                LIMIT 10;");
+                LIMIT 10
+            ");
 
             $top10 = $this->db->to_array();
         }
@@ -66,6 +68,8 @@ class UpdateWeeklyTop10 extends \Gazelle\Schedule\Task
             if ($groupCategoryID == 1 && $groupYear > 0) {
                 $displayName .= " [$groupYear]";
             }
+
+            // todo: this is duplicated with daily top 10.
 
             // append extra info to torrent title
             $extraInfo = '';
@@ -111,11 +115,12 @@ class UpdateWeeklyTop10 extends \Gazelle\Schedule\Task
             $tagString = str_replace('|', ' ', $torrentTags);
 
             $this->db->prepared_query('
-                        INSERT INTO top10_history_torrents
-                            (HistoryID, Rank, TorrentID, TitleString, TagString)
-                        VALUES
-                            (?,         ?,    ?,         ?,           ?)
-            ', $historyID, $i, $torrentID, $titleString, $tagString);
+                INSERT INTO top10_history_torrents
+                    (HistoryID, Rank, TorrentID, TitleString, TagString)
+                VALUES
+                    (?,         ?,    ?,         ?,           ?)
+                ', $historyID, $i, $torrentID, $titleString, $tagString
+            );
             $i++;
         } //foreach ($top10 as $torrent)
     }

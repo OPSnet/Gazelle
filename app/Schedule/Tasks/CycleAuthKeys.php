@@ -22,13 +22,13 @@ class CycleAuthKeys extends \Gazelle\Schedule\Task
         ", \Users::make_secret(), \Users::make_secret());
 
         $this->db->prepared_query("
-            SELECT max(ID)
+            SELECT concat('user_info_heavy_', ID)
             FROM users_main
         ");
-        list($maxId) = $this->db->next_record();
+        $keys = $this->db->collect(0, false);
 
-        for ($i = 1; $i <= $maxId; $i++) {
-            $this->cache->delete_value("user_info_heavy_$i");
+        foreach ($keys as $key) {
+            $this->cache->delete_value($key);
         }
     }
 }

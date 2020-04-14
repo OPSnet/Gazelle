@@ -6,10 +6,10 @@ class FrontPageStats extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $this->db->prepared_query("
+        $snatchStats = $this->db->scalar("
             SELECT count(*)
-            FROM xbt_snatched");
-        list($snatchStats) = $this->db->next_record();
+            FROM xbt_snatched"
+        );
         $this->cache->cache_value('stats_snatches', $snatchStats, 0);
 
         $this->db->prepared_query("

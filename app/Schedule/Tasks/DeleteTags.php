@@ -9,7 +9,9 @@ class DeleteTags extends \Gazelle\Schedule\Task
         $this->db->prepared_query("
             DELETE FROM torrents_tags
             WHERE NegativeVotes > 1
-                AND NegativeVotes > PositiveVotes");
+                AND NegativeVotes > PositiveVotes
+            "
+        );
         $this->processed = $this->db->affected_rows();
     }
 }

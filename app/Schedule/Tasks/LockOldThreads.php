@@ -31,11 +31,11 @@ class LockOldThreads extends \Gazelle\Schedule\Task
             ", ...$ids);
 
             foreach ($ids as $id) {
-                $cache->begin_transaction("thread_$id".'_info');
-                $cache->update_row(false, ['IsLocked' => '1']);
-                $cache->commit_transaction(3600 * 24 * 30);
-                $cache->expire_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
-                $cache->expire_value("thread_$id".'_info', 3600 * 24 * 30);
+                $this->cache->begin_transaction("thread_$id".'_info');
+                $this->cache->update_row(false, ['IsLocked' => '1']);
+                $this->cache->commit_transaction(3600 * 24 * 30);
+                $this->cache->expire_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
+                $this->cache->expire_value("thread_$id".'_info', 3600 * 24 * 30);
                 \Forums::add_topic_note($id, 'Locked automatically by schedule', 0);
 
                 $this->processed++;
@@ -43,7 +43,7 @@ class LockOldThreads extends \Gazelle\Schedule\Task
 
             $forumIDs = array_flip(array_flip($forumIDs));
             foreach ($forumIDs as $forumID) {
-                $cache->delete_value("forums_$forumID");
+                $this->cache->delete_value("forums_$forumID");
             }
         }
     }

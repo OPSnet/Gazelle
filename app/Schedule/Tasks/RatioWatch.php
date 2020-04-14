@@ -21,7 +21,9 @@ class RatioWatch extends \Gazelle\Schedule\Task
                 AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
                 AND i.RatioWatchEnds != '0000-00-00 00:00:00'
                 AND um.can_leech = '0'
-                AND um.Enabled = '1'");
+                AND um.Enabled = '1'
+        ");
+
         $offRatioWatch = $this->db->collect('ID');
         if (count($offRatioWatch) > 0) {
             $placeholders = implode(',', array_fill(0, count($offRatioWatch), '?'));
@@ -61,7 +63,9 @@ class RatioWatch extends \Gazelle\Schedule\Task
             WHERE uls.Downloaded > 0
                 AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
                 AND i.RatioWatchEnds != '0000-00-00 00:00:00'
-                AND um.Enabled = '1'");
+                AND um.Enabled = '1'
+        ");
+
         $offRatioWatch = $this->db->collect('ID');
         if (count($offRatioWatch) > 0) {
             $placeholders = implode(',', array_fill(0, count($offRatioWatch), '?'));
@@ -100,9 +104,10 @@ class RatioWatch extends \Gazelle\Schedule\Task
                 AND uls.Uploaded / uls.Downloaded < um.RequiredRatio
                 AND i.RatioWatchEnds = '0000-00-00 00:00:00'
                 AND um.Enabled = '1'
-                AND um.can_leech = '1'");
-        $onRatioWatch = $this->db->collect('ID');
+                AND um.can_leech = '1'
+        ");
 
+        $onRatioWatch = $this->db->collect('ID');
         if (count($onRatioWatch) > 0) {
             $placeholders = implode(',', array_fill(0, count($onRatioWatch), '?'));
             $this->db->prepared_query("

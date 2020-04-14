@@ -14,11 +14,13 @@ class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task
             LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
             WHERE ula.user_id IS NULL
                 AND ui.JoinDate < now() - INTERVAL 7 DAY
-                AND um.Enabled != '2'");
+                AND um.Enabled != '2'
+            "
+        );
         $userIDs = $this->db->collect('UserID');
 
         // disable the users
-        $this->db->query("
+        $this->db->prepared_query("
             UPDATE users_info AS ui
             INNER JOIN users_main AS um ON (um.ID = ui.UserID)
             LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
@@ -28,14 +30,16 @@ class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task
                 ui.AdminComment = CONCAT(now(), ' - Disabled for inactivity (never logged in)\n\n', ui.AdminComment)
             WHERE ula.user_id IS NULL
                 AND ui.JoinDate < now() - INTERVAL 7 DAY
-                AND um.Enabled != '2'");
+                AND um.Enabled != '2'
+            "
+        );
         if ($this->db->has_results()) {
             \Users::flush_enabled_users_count();
         }
 
         // clear the appropriate cache keys
         foreach ($userIDs as $userID) {
-            $cache->delete_value("user_info_$userID");
+            $this->cache->delete_value("user_info_$userID");
             $this->processed++;
             $this->debug("Disabled $userID", $userID);
         }
