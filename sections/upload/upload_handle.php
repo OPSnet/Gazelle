@@ -33,7 +33,8 @@ $Type = $Categories[(int)$_POST['type']];
 $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
 $Properties['Title'] = trim($_POST['title']);
-$Properties['Remastered'] = isset($_POST['remaster']) ? 1 : 0;
+// Remastered is an Enum in the DB
+$Properties['Remastered'] = isset($_POST['remaster']) ? '1' : '0';
 if ($Properties['Remastered'] || isset($_POST['unknown'])) {
     $Properties['UnknownRelease'] = isset($_POST['unknown']) ? 1 : 0;
     $Properties['RemasterYear'] = trim($_POST['remaster_year'] ?? '');
