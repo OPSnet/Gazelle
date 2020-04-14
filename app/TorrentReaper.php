@@ -50,7 +50,7 @@ class TorrentReaper
         $i = 0;
         foreach ($torrents as $torrent) {
             list($id, $groupID, $name, $format, $encoding, $userID, $media, $infoHash) = $torrent;
-            $artistName = \Artists::display_artists(Artists::get_artist($groupID), false, false, false);
+            $artistName = \Artists::display_artists(\Artists::get_artist($groupID), false, false, false);
             if ($artistName) {
                 $name = "$artistName - $name";
             }
