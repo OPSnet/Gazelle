@@ -20,9 +20,13 @@ usort($items, function ($a, $b) { return $a['time'] > $b['time'] ? -1 : ($a['tim
 </div>
 <table width="100%">
     <tr class="colhead">
-        <td>ID</td>
-        <td>Time</td>
-        <td>Link</td>
+        <td>Case</td>
+        <td>Errors</td>
+        <td>Queries</td>
+        <td>Cache</td>
+        <td>Elapsed</td>
+        <td>Date</td>
+        <td>Message</td>
     </tr>
     <?php
     $row = 'b';
@@ -30,12 +34,17 @@ usort($items, function ($a, $b) { return $a['time'] > $b['time'] ? -1 : ($a['tim
         $row = $row === 'a' ? 'b' : 'a';
         ?>
         <tr class="row<?=$row?>">
-            <td><?=$item['key']?></td>
-            <td><?=date('Y-m-d H:i:s', $item['time'] ?? 0)?></td>
-            <td><a href='<?=site_url()?>tools.php?action=analysis&case=<?=$item['key']?>'>View</a></td>
+            <td><a href="tools.php?action=analysis&amp;case=<?= $item['key'] ?>"><?= $item['key'] ?></a></td>
+            <td><?= count($item['errors']) ?></td>
+            <td><?= count($item['queries']) ?></td>
+            <td><?= count($item['cache']) ?></td>
+            <td><?= display_str($item['perf']['Page process time'] ?? '?') ?></td>
+            <td><?= date('Y-m-d H:i:s', $item['time'] ?? 0) ?></td>
+            <td><pre><?= display_str($item['message']) ?></pre></td>
         </tr>
         <?php
     }
     ?>
 </table>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

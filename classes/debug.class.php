@@ -1,4 +1,6 @@
 <?php
+
+use Gazelle\Util\Time;
 // Debug info for developers
 ini_set('max_execution_time',600);
 define('MAX_TIME', 20000); //Maximum execution time in ms
@@ -46,10 +48,6 @@ class DEBUG {
         if (isset($_REQUEST['profile'])) {
             $Reason[] = 'Requested by ' . G::$LoggedUser['Username'];
         }
-
-        $this->Perf['Memory usage'] = (($Ram>>10) / 1024).' MB';
-        $this->Perf['Page process time'] = number_format($Micro / 1000, 3).' s';
-        $this->Perf['CPU time'] = number_format($this->get_cpu_time() / 1000000, 3).' s';
 
         if (isset($Reason[0])) {
             $this->log_var($CacheStatus, 'Cache server status');
@@ -221,12 +219,12 @@ class DEBUG {
             $Perf = [
                 'Memory usage' => Format::get_size(memory_get_usage(true)),
                 'Page process time' => number_format($PageTime, 3).' s',
-                'Script start' => $ScriptStartTime,
-                'Script end' => microtime(true)
             ];
             if ($CPUTime) {
                 $Perf['CPU time'] = number_format($CPUTime / 1000000, 3).' s';
             }
+            $Perf['Script start'] = Time::sqlTime($ScriptStartTime);
+            $Perf['Script end'] = Time::sqlTime(microtime(true));
             return $Perf;
         }
         return $this->Perf;
@@ -626,17 +624,16 @@ class DEBUG {
             <td>Task</td>
             <td>Start</td>
             <td>Duration</td>
-            <td>Processed</td>
+            <td>Processed / Errors</td>
         </tr>
 <?php
-        foreach ($Tasks as $Task) {
-            list($Id, $Name, $LaunchTime, $Status, $NumErrors, $NumItems, $Duration) = $Task;
+        foreach ($Tasks as $Id => $Task) {
 ?>
         <tr valign="top">
-            <td class="debug_data debug_task_data"><a href="tools.php?action=periodic&amp;mode=detail&amp;id=<?=$Id?>"><?=$Name?></a></td>
-            <td class="rowa debug_info debug_task_start"><?=$LaunchTime?></td>
-            <td class="rowa debug_info debug_task_time" style="width: 130px;" align="left"><?=number_format($Duration, 5)?> ms</td>
-            <td class="rowa debug_info debug_task_processed"><?=$NumItems?>/<?=$NumErrors?></td>
+            <td class="debug_data debug_task_data"><a href="tools.php?action=periodic&amp;mode=detail&amp;id=<?=$Id?>"><?=$Task['name']?></a></td>
+            <td class="rowa debug_info debug_task_start"><?=$Task['launch_time']?></td>
+            <td class="rowa debug_info debug_task_time" style="width: 130px;" align="left"><?=number_format($Task['duration_ms'], 0)?> ms</td>
+            <td class="rowa debug_info debug_task_processed"><?=$Task['num_items']?> / <?=$Task['num_errors']?></td>
         </tr>
 <?php   } ?>
     </table>
