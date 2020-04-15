@@ -107,7 +107,6 @@ SET FOREIGN_KEY_CHECKS = 1;
                     $wiki_body .= "{$track->position}. {$track->title} ({$track->duration})\n";
                 }
                 $insert_data['torrents_group'][] = [
-                    'ArtistID' => 0,
                     'CategoryID' => 1,
                     'Name' => $album->title,
                     'Year' => $album->year,

@@ -16,7 +16,7 @@ if (!is_number($_GET['id']) || !$_GET['id']) {
 
 $TorrentID = $_GET['id'];
 
-$DB->query("
+$DB->prepared_query('
     SELECT
         t.Media,
         t.Format,
@@ -33,7 +33,7 @@ $DB->query("
         tg.CategoryID,
         tg.Name AS Title,
         tg.Year,
-        tg.ArtistID,
+        ag.ArtistID,
         tg.VanityHouse,
         ag.Name AS ArtistName,
         t.GroupID,
@@ -49,16 +49,19 @@ $DB->query("
         lma.TorrentID AS LossymasterApproved,
         lwa.TorrentID AS LossywebApproved
     FROM torrents AS t
-        LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
-        LEFT JOIN artists_group AS ag ON ag.ArtistID = tg.ArtistID
-        LEFT JOIN torrents_bad_tags AS bt ON bt.TorrentID = t.ID
-        LEFT JOIN torrents_bad_folders AS bf ON bf.TorrentID = t.ID
-        LEFT JOIN torrents_bad_files AS bfi ON bfi.TorrentID = t.ID
-        LEFT JOIN torrents_missing_lineage AS ml ON ml.TorrentID = t.ID
-        LEFT JOIN torrents_cassette_approved AS ca ON ca.TorrentID = t.ID
-        LEFT JOIN torrents_lossymaster_approved AS lma ON lma.TorrentID = t.ID
-        LEFT JOIN torrents_lossyweb_approved AS lwa ON lwa.TorrentID = t.id
-    WHERE t.ID = '$TorrentID'");
+    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+    LEFT JOIN artists_group AS ag ON (ag.ArtistID = ta.ArtistID)
+    LEFT JOIN torrents_bad_tags AS bt ON (bt.TorrentID = t.ID)
+    LEFT JOIN torrents_bad_folders AS bf ON (bf.TorrentID = t.ID)
+    LEFT JOIN torrents_bad_files AS bfi ON (bfi.TorrentID = t.ID)
+    LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+    LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+    LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+    LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.id)
+    WHERE t.ID = ?
+    ', $TorrentID
+);
 
 list($Properties) = $DB->to_array(false, MYSQLI_BOTH);
 if (!$Properties) {
@@ -241,4 +244,4 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
 <?php
 } // if check_perms('torrents_edit')
 
-View::show_footer(); ?>
+View::show_footer();

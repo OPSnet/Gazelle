@@ -103,16 +103,18 @@ if (isset($_GET['tag']) || isset($_GET['replace'])) {
         if ($_GET['list']) {
             $AffectedTorrents = [];
             // 3) get a list of affected torrents
-            $DB->query("
+            $DB->prepared_query("
                 SELECT
                     tg.ID,
                     ag.ArtistID,
                     ag.Name,
                     tg.Name
                 FROM torrents_group AS tg
-                    LEFT JOIN artists_group AS ag ON ag.ArtistID = tg.ArtistID
-                    JOIN torrents_tags AS t ON t.GroupID = tg.ID
-                WHERE t.TagID = $TagID;");
+                INNER JOIN torrents_tags AS t ON (t.GroupID = tg.ID)
+                LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+                LEFT JOIN artists_group AS ag ON (ag.ArtistID = ta.ArtistID)
+                WHERE t.TagID = ?
+                ", $TagID);
             while (list($TorrentID, $ArtistID, $ArtistName, $TorrentName) = $DB->next_record()) {
                 $Row = ($ArtistName ? "<a href=\"artist.php?id=$ArtistID\">$ArtistName</a> - " : '');
                 $Row.= "<a href=\"torrents.php?id=$TorrentID\">".display_str($TorrentName).'</a>';
@@ -283,4 +285,3 @@ if (isset($_GET['tag']) || isset($_GET['replace'])) {
 echo '</div>';
 
 View::show_footer();
-?>

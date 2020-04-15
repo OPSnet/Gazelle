@@ -27,7 +27,7 @@ class Artist {
             VALUES (?, ?)
             ', $artistId, $name
         );
-        $aliasId = $DB->inserted_id();
+        $aliasId = $this->db->inserted_id();
 
         $this->cache->increment('stats_artist_count');
 
