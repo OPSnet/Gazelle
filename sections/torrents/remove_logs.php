@@ -23,4 +23,4 @@ $DB->prepared_query('
 
 $Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID"]);
 
-header('Location: ' . empty($_SERVER['HTTP_REFERER']) ? "torrents.php?torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER']);
+header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? "torrents.php?torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER']));

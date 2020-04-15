@@ -4,28 +4,24 @@ if (!$TorrentID || !is_number($TorrentID)) {
     error(404);
 }
 
-
-$DB->query("
+list($UserID, $Time, $Snatches) = $DB->row('
     SELECT
         t.UserID,
         t.Time,
         COUNT(x.uid)
     FROM torrents AS t
-        LEFT JOIN xbt_snatched AS x ON x.fid = t.ID
-    WHERE t.ID = $TorrentID
-    GROUP BY t.UserID");
-
-if (!$DB->has_results()) {
+    LEFT JOIN xbt_snatched AS x ON x.fid = t.ID
+    WHERE t.ID = ?
+    GROUP BY t.UserID
+    ', $TorrentID
+);
+if (!$UserID) {
     error('Torrent already deleted.');
 }
 
 if ($Cache->get_value('torrent_'.$TorrentID.'_lock')) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
-
-
-list($UserID, $Time, $Snatches) = $DB->next_record();
-
 
 if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_delete')) {
     error(403);
@@ -42,7 +38,6 @@ if (time_ago($Time) > 3600 * 24 * 7 && !check_perms('torrents_delete')) { // Sho
 if ($Snatches > 4 && !check_perms('torrents_delete')) { // Should this be torrents_delete or torrents_delete_fast?
     error('You can no longer delete this torrent as it has been snatched by 5 or more users. If you believe there is a problem with this torrent, please report it instead.');
 }
-
 
 View::show_header('Delete torrent', 'reportsv2');
 ?>
@@ -81,52 +76,53 @@ if (check_perms('admin_reports')) {
 ?>
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
 <?php
-    include(SERVER_ROOT.'/classes/reports.class.php');
-
-    require(SERVER_ROOT.'/sections/reportsv2/array.php');
+    require(__DIR__ . '/../reportsv2/array.php');
     $ReportID = 0;
-    $DB->query("
-            SELECT
-                tg.Name,
-                tg.ID,
-                CASE COUNT(ta.GroupID)
-                    WHEN 1 THEN aa.ArtistID
-                    WHEN 0 THEN '0'
-                    ELSE '0'
-                END AS ArtistID,
-                CASE COUNT(ta.GroupID)
-                    WHEN 1 THEN aa.Name
-                    WHEN 0 THEN ''
-                    ELSE 'Various Artists'
-                END AS ArtistName,
-                tg.Year,
-                tg.CategoryID,
-                t.Time,
-                t.Remastered,
-                t.RemasterTitle,
-                t.RemasterYear,
-                t.Media,
-                t.Format,
-                t.Encoding,
-                t.Size,
-                t.HasLog,
-                t.HasLogDB,
-                t.LogScore,
-                t.LogChecksum,
-                t.UserID AS UploaderID,
-                uploader.Username
-            FROM torrents AS t
-                LEFT JOIN torrents_group AS tg ON tg.ID = t.GroupID
-                LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID AND ta.Importance = '1'
-                LEFT JOIN artists_alias AS aa ON aa.AliasID = ta.AliasID
-                LEFT JOIN users_main AS uploader ON uploader.ID = t.UserID
-            WHERE t.ID = $TorrentID");
-
-    if (!$DB->has_results()) {
+    list($GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID,
+        $Time, $Remastered, $RemasterTitle, $RemasterYear, $Media, $Format,
+        $Encoding, $Size, $HasLog, $HasLogDB, $LogScore, $LogChecksum,
+        $UploaderID, $UploaderName)
+        = $DB->row("
+        SELECT
+            tg.Name,
+            tg.ID,
+            CASE COUNT(ta.GroupID)
+                WHEN 1 THEN aa.ArtistID
+                WHEN 0 THEN '0'
+                ELSE '0'
+            END AS ArtistID,
+            CASE COUNT(ta.GroupID)
+                WHEN 1 THEN aa.Name
+                WHEN 0 THEN ''
+                ELSE 'Various Artists'
+            END AS ArtistName,
+            tg.Year,
+            tg.CategoryID,
+            t.Time,
+            t.Remastered,
+            t.RemasterTitle,
+            t.RemasterYear,
+            t.Media,
+            t.Format,
+            t.Encoding,
+            t.Size,
+            t.HasLog,
+            t.HasLogDB,
+            t.LogScore,
+            t.LogChecksum,
+            t.UserID AS UploaderID,
+            uploader.Username
+        FROM torrents AS t
+        LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+        LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
+        LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
+        LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)
+        WHERE t.ID = ?
+        ", $TorrentID
+    );
+    if (!$GroupName) {
         die();
     }
-    list($GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID, $Time, $Remastered, $RemasterTitle,
-        $RemasterYear, $Media, $Format, $Encoding, $Size, $HasLog, $HasLogDB, $LogScore, $LogChecksum, $UploaderID, $UploaderName) = $DB->next_record();
 
     $Type = 'dupe'; //hardcoded default
 
@@ -310,4 +306,4 @@ for ($i = 0; $i < 9; $i++) { ?>
 </div>
 <?php
 }
-View::show_footer(); ?>
+View::show_footer();

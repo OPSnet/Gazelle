@@ -7,10 +7,12 @@ if (!check_perms('users_mod')) {
 if (isset($_POST['GroupID'])) {
     authorize();
 
-    //Vanity House forum ID
-    $ForumID = 18;
-
-    $GroupID = trim($_POST['GroupID']);
+    // match an ID or the last id in a URL (e.g. torrent group)
+    if (preg_match('/(\d+)\s*$/', $_POST['GroupID'], $match)) {
+        $GroupID = $match[1];
+    } else {
+        error('You did not enter a valid GroupID');
+    }
 
     if (!is_number($GroupID)) {
         error('You did not enter a valid GroupID');
@@ -29,23 +31,26 @@ if (isset($_POST['GroupID'])) {
                 tg.WikiImage,
                 ag.Name AS Artist
             FROM torrents_group AS tg
-                LEFT JOIN artists_group AS ag ON tg.ArtistID = ag.ArtistID
+            LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+            LEFT JOIN artists_group AS ag ON (ag.ArtistID = ta.ArtistID)
             WHERE tg.id = ?', $GroupID);
 
         $Album = $DB->next_record();
 
         //Make sure album exists
-        if (is_number($Album['ID'])) {
+        if ($Album['ID']) {
             //Remove old albums with type = 1, (so we remove previous VH alubm)
             $DB->prepared_query('DELETE FROM featured_albums WHERE Type = 1');
             $Cache->delete_value('vanity_house_album');
 
             //Freeleech torrents
             if (isset($_POST['FLTorrents'])) {
-                $DB->prepared_query('
+                $DB->prepared_query("
                     SELECT ID
                     FROM torrents
-                    WHERE GroupID = ?', $Album['ID']);
+                    WHERE Encoding = 'Lossless' AND GroupID = ?
+                    ", $Album['ID']
+                );
                 $TorrentIDs = $DB->collect('ID');
 
                 if (isset($_POST['NLOver']) && $FreeLeechType == '1') {
@@ -93,33 +98,24 @@ if (isset($_POST['GroupID'])) {
                     $Body .= '[img]' . $Album['WikiImage'] . '[/img]';
             }
 
-            //Create forum post
-            $ThreadID = Misc::create_thread($ForumID, $LoggedUser[ID], $Title, $Body);
-
-            //Add VH album
-            $type = 1;
+            //Add VH album and forum thread
             $DB->prepared_query('
                 INSERT INTO featured_albums
-                    (GroupID,ThreadID,Started,Type)
-                VALUES
-                    (?, ?, ?, ?)', db_string($GroupID), $ThreadID, sqltime(), 1);
+                       (GroupID, ThreadID, Started, Type)
+                VALUES (?,       ?,        now(),   1)
+                ', $GroupID, Misc::create_thread(VANITY_HOUSE_FORUM_ID, $LoggedUser[ID], $Title, $Body)
+            );
 
-
-            //Redirect to home page
             header("Location: /");
-        //What to do if we don't have a GroupID
         } else {
             //Uh oh, something went wrong
             error('Please supply a valid album ID');
         }
     }
-//Form wasn't sent -- Show form
-} else {
-
-    //Show our beautiful header
-    View::show_header('Vanity House');
-
+}
+View::show_header('Vanity House');
 ?>
+
     <div class="header">
         <h2>Vanity House</h2>
     </div>
@@ -129,8 +125,10 @@ if (isset($_POST['GroupID'])) {
         <div class="pad">
             <input type="hidden" name="action" value="vanityhouse" />
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-            <h3>Album ID</h3>
-            <input type="text" name="GroupID" id="groupid" class="inputtext" />    <br />
+            <h3>Torrent</h3>
+            (enter a torrent group ID or URL)<br />
+            <input type="text" name="GroupID" id="groupid" class="inputtext" /><br /><br />
+
             <h3>Body</h3>
             (Leave blank to auto generate)
             <textarea name="Body" cols="95" rows="15"></textarea><br /><br />
@@ -160,8 +158,4 @@ if (isset($_POST['GroupID'])) {
     </form>
     </div>
 <?php
-
-     View::show_footer();
-}
-
-?>
+View::show_footer();

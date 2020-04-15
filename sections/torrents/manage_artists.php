@@ -1,11 +1,12 @@
 <?php
-if (empty($_POST['importance']) || empty($_POST['artists']) || empty($_POST['groupid']) || !is_number($_POST['importance']) || !is_number($_POST['groupid'])) {
-    error(0);
-}
 if (!check_perms('torrents_edit')) {
     error(403);
 }
 authorize();
+
+if (empty($_POST['importance']) || empty($_POST['artists']) || empty($_POST['groupid']) || !is_number($_POST['importance']) || !is_number($_POST['groupid'])) {
+    error(0);
+}
 
 $GroupID = intval($_POST['groupid']);
 if ($GroupID === 0) {
@@ -27,11 +28,12 @@ foreach ($Artists as $i => $Artist) {
 
 if (count($CleanArtists) > 0) {
     $ArtistsString = implode(',', $ArtistIDs);
-    $DB->query("
-            SELECT Name
-            FROM torrents_group
-            WHERE ID = '{$GroupID}'");
-    list($GroupName) = $DB->next_record();
+    $GroupName = $DB->scalar('
+        SELECT Name
+        FROM torrents_group
+        WHERE ID = ?
+        ', $GroupID
+    );
     $DB->query("
             SELECT ArtistID, Name
             FROM artists_group
@@ -87,4 +89,3 @@ if (count($CleanArtists) > 0) {
     Torrents::update_hash($GroupID);
     header("Location: torrents.php?id=$GroupID");
 }
-?>

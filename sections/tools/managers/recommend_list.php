@@ -12,8 +12,9 @@ $DB->query("
         tg.ArtistID,
         ag.Name
     FROM torrents_recommended AS tr
-        JOIN torrents_group AS tg ON tg.ID=tr.GroupID
-        LEFT JOIN artists_group AS ag ON ag.ArtistID=tg.ArtistID
+    INNER JOIN torrents_group AS tg ON (tg.ID = tr.GroupID)
+    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+    LEFT JOIN artists_group AS ag ON (ag.ArtistID = ta.ArtistID)
     ORDER BY tr.Time DESC
     LIMIT 10
     ");
@@ -60,4 +61,6 @@ $DB->query("
         </ul>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+
+View::show_footer();

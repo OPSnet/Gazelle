@@ -103,6 +103,8 @@ define('HELP_FORUM_ID', 3); // ID of help forum
 define('HELP_RESOLVED_FORUM_ID', 44); // ID of forum to send resolved help threads when resolve button is pressed in HELP_FORUM_ID
 define('BUGS_FORUM_ID', 6); // ID of bug reports forum
 define('BUGS_RESOLVED_FORUM_ID', 14); // ID of forum to send resolved bug reports when resolve button is pressed in BUGS_FORUM_ID
+define('AOTM_FORUM_ID', 51); // ID of the Album of The Month forum
+define('VANITY_HOUSE_FORUM_ID', 18); // Vanity House forum
 
 if (!defined('FEATURE_EMAIL_REENABLE')) {
     define('FEATURE_EMAIL_REENABLE', true);

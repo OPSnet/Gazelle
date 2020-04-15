@@ -637,8 +637,8 @@ if ($IsNewGroup) {
     // Create torrent group
     $DB->prepared_query('
         INSERT INTO torrents_group
-               (CategoryID, Name, Year, RecordLabel, CatalogueNumber, WikiBody, WikiImage, ReleaseType, VanityHouse, Time, ArtistID)
-        VALUES (?,          ?,    ?,    ?,           ?,               ?,        ?,         ?,           ?,           now(), 0)
+               (CategoryID, Name, Year, RecordLabel, CatalogueNumber, WikiBody, WikiImage, ReleaseType, VanityHouse, Time)
+        VALUES (?,          ?,    ?,    ?,           ?,               ?,        ?,         ?,           ?,           now())
         ', $TypeID, $Properties['Title'], $Properties['Year'], $Properties['RecordLabel'], $Properties['CatalogueNumber'],
             $Properties['GroupDescription'], $Properties['Image'], $Properties['ReleaseType'], $Properties['VanityHouse']
     );
