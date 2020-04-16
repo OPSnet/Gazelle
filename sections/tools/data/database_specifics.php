@@ -19,7 +19,7 @@ if (!empty($_GET['table'])) {
 $SortOrderMap = [
     'datafree' => ['data_free', 'desc', 'free space'],
     'datasize' => ['data_length', 'desc', 'table size'],
-    'freeratio' => ['CASE WHEN data_length = 0 THEN data_free / data_length END', 'desc', 'table bloat'],
+    'freeratio' => ['CASE WHEN data_length = 0 THEN 0 ELSE data_free / data_length END', 'desc', 'table bloat'],
     'indexsize' => ['index_length', 'desc', 'index size'],
     'name' => ['table_name', 'desc', 'name'],
     'rows' => ['table_rows', 'desc', 'row counts'],
@@ -121,7 +121,7 @@ $header = new SortableTableHeader([
 <table>
     <tr class="colhead" style="text-align:right">
         <td style="text-align:left" class="nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
-        <td class="nobr"></td><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
         <td class="nobr"><?= $header->emit('rowsize', $SortOrderMap['rowsize'][1]) ?></td>
         <td class="nobr"><?= $header->emit('datasize', $SortOrderMap['datasize'][1]) ?></td>
         <td class="nobr"><?= $header->emit('indexsize', $SortOrderMap['indexsize'][1]) ?></td>
@@ -170,7 +170,7 @@ foreach ($Tables as $t) {
         <td class="number_column"><?= Format::get_size($TotalDataSize) ?></td>
         <td class="number_column"><?= Format::get_size($TotalIndexSize) ?></td>
         <td class="number_column"><?= Format::get_size($TotalFreeSize) ?></td>
-        <td class="number_column"><?= round($TotalDataSize == 0 ? 0 : ($TotalFreeSize / $tTotalDataSize) * 100, 2) ?></td>
+        <td class="number_column"><?= sprintf('%0.2f', $TotalDataSize == 0 ? 0 : ($TotalFreeSize / $TotalDataSize) * 100) ?></td>
         <td class="number_column"><?= Format::get_size($TotalDataSize + $TotalIndexSize) ?></td>
     </tr>
 </table>
