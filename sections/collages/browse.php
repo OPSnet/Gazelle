@@ -338,7 +338,7 @@ foreach ($Collages as $Collage) {
 ?>
     <tr class="row<?=$Row?><?= $BookmarkView ? " bookmark_$ID" : ''; ?>">
         <td class="td_collage_category">
-            <a href="collages.php?action=search&amp;cats[<? (int)$CategoryID ?>]=1"><?= $CollageCats[(int)$CategoryID] ?></a>
+            <a href="collages.php?action=search&amp;cats[<?= (int)$CategoryID ?>]=1"><?= $CollageCats[(int)$CategoryID] ?></a>
         </td>
         <td class="td_info">
             <a href="collages.php?id=<?=$ID?>"><?=$Name?></a>
