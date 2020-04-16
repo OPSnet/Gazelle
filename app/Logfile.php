@@ -23,7 +23,6 @@ class Logfile {
     public function details()         { return $this->details; }
     public function detailsAsString() { return implode("\r\n", $this->details); }
     public function filename()        { return $this->filename; }
-    public function name()            { return $this->name; }
     public function score()           { return $this->score; }
     public function text()            { return $this->text; }
 }
