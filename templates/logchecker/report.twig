@@ -1,0 +1,41 @@
+{% if not CHECKSUM %}
+    <blockquote>
+{%  if PASTED is not defined %}
+        <strong>Trumpable For:</strong>
+        <br /><br />
+        Bad/No Checksum(s)
+{%  else %}
+        Checksums of pasted log files cannot be verified, as the character encoding can change during copy-pasting.
+{%  endif %}
+    </blockquote>
+{% endif %}
+
+{% if SCORE == 100 %}
+{%    set COLOR = '#418B00' %}
+{% elseif SCORE  >  90 %}
+{%     set COLOR = '#74C42E' %}
+{% elseif SCORE  >  75 %}
+{%     set COLOR = '#FFAA00' %}
+{% elseif SCORE  >  50 %}
+{%     set COLOR = '#FF5E00' %}
+{% else %}
+{%     set COLOR = '#FF0000' %}
+{% endif %}
+    <blockquote>
+        <strong>Score:</strong> <span style="color:{{ COLOR }}">{{ SCORE }}</span> (out of 100)
+    </blockquote>
+{% for R in REPORT %}
+{% if R.details %}
+    <blockquote>
+        <h3>Log validation report:</h3>
+        <ul>
+{%  for detail in R.details %}
+            <li>{{ detail }}</li>
+{%  endfor %}
+        </ul>
+    </blockquote>
+{% endif %}
+    <blockquote>
+        <pre>{{ R.text|raw }}</pre>
+    </blockquote>
+{% endfor %}
