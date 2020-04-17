@@ -44,6 +44,21 @@ if [ ! -f /srv/gazelle.txt ]; then
     echo -e "\n"
 fi
 
+if [ ! -d /var/lib/gazelle/torrent ]; then
+    echo "Generate file storage directories..."
+    perl /var/www/scripts/generate-storage-dirs /var/lib/gazelle/torrent 2 100
+    perl /var/www/scripts/generate-storage-dirs /var/lib/gazelle/riplog 2 100
+    perl /var/www/scripts/generate-storage-dirs /var/lib/gazelle/riploghtml 2 100
+    chown -R gazelle /var/lib/gazelle
+fi
+
+if [ ! -f /etc/php/7.3/cli/conf.d/99-boris.ini ]; then
+    echo "Initialize Boris..."
+    grep '^disable_functions' /etc/php/7.3/cli/php.ini \
+        | sed -r 's/pcntl_(signal|fork|waitpid|signal_dispatch),//g' \
+        > /etc/php/7.3/cli/conf.d/99-boris.ini
+fi
+
 echo "Start services..."
 
 run_service cron
