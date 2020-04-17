@@ -354,6 +354,7 @@ if ($GroupID) {
  * 3. Create a row in the requests_artists table for each artist, based on the ID.
  */
 
+$ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
 foreach ($ArtistForm as $Importance => $Artists) {
     foreach ($Artists as $Num => $Artist) {
         //1. See if each artist given already exists and if it does, grab the ID.
@@ -377,18 +378,7 @@ foreach ($ArtistForm as $Importance => $Artists) {
         }
         if (!$ArtistID) {
             //2. For each artist that didn't exist, create an artist.
-            $DB->prepared_query('
-                INSERT INTO artists_group (Name)
-                VALUES (?)', $Artist['name']);
-            $ArtistID = $DB->inserted_id();
-
-            $Cache->increment('stats_artist_count');
-
-            $DB->prepared_query('
-                INSERT INTO artists_alias (ArtistID, Name)
-                VALUES (?, ?)', $ArtistID, $Artist['name']);
-            $AliasID = $DB->inserted_id();
-
+            list($ArtistID, $AliasID) = $ArtistManager->createArtist($Artist['name']);
             $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
         }
     }

@@ -31,14 +31,8 @@ switch ($Categories[$NewCategoryID-1]) {
             WHERE Name LIKE '$ArtistName'");
         if (!$DB->has_results()) {
             $Redirect = 0;
-            $DB->query("
-                INSERT INTO artists_group (Name)
-                VALUES ('$ArtistName')");
-            $ArtistID = $DB->inserted_id();
-            $DB->query("
-                INSERT INTO artists_alias (ArtistID, Name)
-                VALUES ('$ArtistID', '$ArtistName')");
-            $AliasID = $DB->inserted_id();
+            $ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
+            list($ArtistID, $AliasID) = $ArtistManager->createArtist($AliasName);
         } else {
             list($ArtistID, $AliasID, $Redirect, $ArtistName) = $DB->next_record();
             if ($Redirect) {
@@ -46,18 +40,20 @@ switch ($Categories[$NewCategoryID-1]) {
             }
         }
 
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO torrents_group
-                (ArtistID, CategoryID, Name, Year, ReleaseType, Time, WikiBody, WikiImage)
-            VALUES
-                ($ArtistID, '1', '$Title', '$Year', '$ReleaseType', '".sqltime()."', '', '')");
+                   (ArtistID, Name, Year, ReleaseType, Time, CategoryID, WikiBody, WikiImage)
+            VALUES (?,        ?,    ?,    ?,           now(), 1,         '',       '')
+            ", $ArtistID, $Title, $Year, $ReleaseType
+        );
         $GroupID = $DB->inserted_id();
 
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO torrents_artists
-                (GroupID, ArtistID, AliasID, Importance, UserID)
-            VALUES
-                ('$GroupID', '$ArtistID', '$AliasID', '1', '$LoggedUser[ID]')");
+                   (GroupID, ArtistID, AliasID, UserID, Importance)
+            VALUES (?,       ?,        ?,       ?,      1)
+            ", $GroupID, $ArtistID, $AliasID, $LoggedUser['ID']
+        );
         break;
     case 'Audiobooks':
     case 'Comedy':
@@ -120,4 +116,3 @@ $DB->query("
     WHERE GroupID = $OldGroupID");
 
 header("Location: torrents.php?id=$GroupID");
-?>
