@@ -921,30 +921,10 @@ if (G::$LoggedUser['DisablePoints'] == 0) {
 }
 
 //******************************************************************************//
-//--------------- Stupid Recent Uploads ----------------------------------------//
+//--------------- Recent Uploads (KISS) ----------------------------------------//
 
 if ($Properties['Image'] != '') {
-    $RecentUploads = $Cache->get_value('recent_uploads_'.$LoggedUser['ID']);
-    if (is_array($RecentUploads)) {
-        do {
-            foreach ($RecentUploads as $Item) {
-                if ($Item['ID'] == $GroupID) {
-                    break 2;
-                }
-            }
-
-            // Only reached if no matching GroupIDs in the cache already.
-            if (count($RecentUploads) === 5) {
-                array_pop($RecentUploads);
-            }
-            array_unshift($RecentUploads, [
-                'ID' => $GroupID,
-                'Name' => $Properties['Title'],
-                'Artist' => Artists::display_artists($ArtistForm, false, true),
-                'WikiImage' => $Properties['Image']]);
-            $Cache->cache_value('recent_uploads_'.$LoggedUser['ID'], $RecentUploads, 0);
-        } while (0);
-    }
+    $Cache->delete_value('user_recent_up_'.$LoggedUser['ID']);
 }
 
 //******************************************************************************//

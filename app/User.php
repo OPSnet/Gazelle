@@ -419,7 +419,7 @@ class User {
                 $recent[$id]['Name'] = \Artists::display_artists($artists[$info['ID']], false, true)
                     . $recent[$id]['Name'];
             }
-            $this->cache->cache_value('user_recent_ip_' . $this->id, $recent, 86400 * 3);
+            $this->cache->cache_value('user_recent_up_' . $this->id, $recent, 86400 * 3);
         }
         return $recent;
     }
