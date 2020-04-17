@@ -153,7 +153,7 @@ $Cache->deleteMulti($DB->collect('ck', false));
 
 //Fix Recent Uploads/Downloads for image change
 $DB->prepared_query("
-    SELECT DISTINCT concat('user_recent_upload_' , UserID) as ck
+    SELECT DISTINCT concat('user_recent_up_' , UserID) as ck
     FROM torrents AS t
     LEFT JOIN torrents_group AS tg ON (t.GroupID = tg.ID)
     WHERE tg.ID = ?

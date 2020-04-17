@@ -348,11 +348,11 @@ class Torrents {
         }
         $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $ID]]);
 
-        $RecentUploads = G::$Cache->get_value("recent_uploads_$UserID");
+        $RecentUploads = G::$Cache->get_value("user_recent_up_$UserID");
         if (is_array($RecentUploads)) {
             foreach ($RecentUploads as $Key => $Recent) {
                 if ($Recent['ID'] == $GroupID) {
-                    $deleted_keys[] = "recent_uploads_$UserID";
+                    $deleted_keys[] = "user_recent_up_$UserID";
                     break;
                 }
             }
