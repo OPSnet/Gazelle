@@ -62,17 +62,7 @@ You may want to install additional packages:
 * `apt update`
 * `apt install less procps vim`
 
-To use [Boris](https://github.com/borisrepl/boris), you must enable
-certain `pcntl_*` functions that are disabled by default. Run the
-following inside the web container:
-
-```
-    grep '^disable_functions' /etc/php/7.3/cli/php.ini \
-        | sed -r 's/pcntl_(signal|fork|waitpid|signal_dispatch),//g' \
-        > /etc/php/7.3/cli/conf.d/99-boris.ini
-```
-
-You can then run Boris directly:
+You can run Boris directly:
 
 `docker exec -it $WEBCONT /var/www/boris`
 
