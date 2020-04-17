@@ -2,25 +2,18 @@
 authorize();
 
 $UserID = $LoggedUser['ID'];
-$GroupID = db_string($_POST['groupid']);
+$GroupID = $_POST['groupid'];
 $Importances = $_POST['importance'];
 $AliasNames = $_POST['aliasname'];
 
-if (!is_number($GroupID) || !$GroupID) {
-    error(0);
-}
-
-$DB->query("
-    SELECT Name
-    FROM torrents_group
-    WHERE ID = $GroupID");
-if (!$DB->has_results()) {
+$GroupName = $DB->scalar('SELECT Name FROM torrents_group WHERE ID = ?', $GroupID);
+if (!$GroupName) {
     error(404);
 }
-list($GroupName) = $DB->next_record(MYSQLI_NUM, false);
 
 $Changed = false;
 
+$ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
 for ($i = 0; $i < count($AliasNames); $i++) {
     $AliasName = Artists::normalise_artist_name($AliasNames[$i]);
     $Importance = $Importances[$i];
@@ -43,41 +36,26 @@ for ($i = 0; $i < count($AliasNames); $i++) {
             }
         }
         if (!$AliasID) {
-            $AliasName = db_string($AliasName);
-            $DB->query("
-                INSERT INTO artists_group (Name)
-                VALUES ('$AliasName')");
-            $ArtistID = $DB->inserted_id();
-            $DB->query("
-                INSERT INTO artists_alias (ArtistID, Name)
-                VALUES ('$ArtistID', '$AliasName')");
-            $AliasID = $DB->inserted_id();
+            list($ArtistID, $AliasID) = $ArtistManager->createArtist($AliasName);
         }
+        $ArtistName = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?', $ArtistID);
 
-        $DB->query("
-            SELECT Name
-            FROM artists_group
-            WHERE ArtistID = $ArtistID");
-        list($ArtistName) = $DB->next_record(MYSQLI_NUM, false);
-
-
-        $DB->query("
+        $DB->prepared_query('
             INSERT IGNORE INTO torrents_artists
-                (GroupID, ArtistID, AliasID, Importance, UserID)
-            VALUES
-                ('$GroupID', '$ArtistID', '$AliasID', '$Importance', '$UserID')");
-
+                   (GroupID, ArtistID, AliasID, Importance, UserID)
+            VALUES (?,       ?,        ?,       ?,          ?)
+            ', $GroupID, $ArtistID, $AliasID, $Importance, $UserID
+        );
         if ($DB->affected_rows()) {
             $Changed = true;
-            Misc::write_log("Artist $ArtistID ($ArtistName) was added to the group $GroupID ($GroupName) as ".$ArtistTypes[$Importance].' by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].')');
+            Misc::write_log("Artist $ArtistID ($ArtistName) was added to the group $GroupID ($GroupName) as ".$ArtistTypes[$Importance].' by user '.$UserID.' ('.$LoggedUser['Username'].')');
             Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "added artist $ArtistName as ".$ArtistTypes[$Importance], 0);
         }
     }
 }
 
 if ($Changed) {
-    $Cache->delete_value("torrents_details_$GroupID");
-    $Cache->delete_value("groups_artists_$GroupID"); // Delete group artist cache
+    $Cache->deleteMulti(["torrents_details_$GroupID", "groups_artists_$GroupID"]);
     Torrents::update_hash($GroupID);
 }
 

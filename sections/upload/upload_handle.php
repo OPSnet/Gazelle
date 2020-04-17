@@ -543,7 +543,7 @@ if ($Type == 'Music') {
             $Properties['Artist'] = Artists::display_artists(Artists::get_artist($GroupID), false, false);
         }
     }
-    if (!$GroupID) {
+    if (!isset($GroupID)) {
         foreach ($ArtistForm as $Importance => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 $DB->prepared_query('
@@ -610,45 +610,30 @@ if ($Type == 'Music') {
 $LogName .= $Properties['Title'];
 
 //For notifications--take note now whether it's a new group
-$IsNewGroup = !$GroupID;
+$IsNewGroup = !isset($GroupID);
 
 //----- Start inserts
-if (!$GroupID && $Type == 'Music') {
-    //array to store which artists we have added already, to prevent adding an artist twice
-    $ArtistsAdded = [];
-    foreach ($ArtistForm as $Importance => $Artists) {
-        foreach ($Artists as $Num => $Artist) {
-            if (!$Artist['id']) {
-                if (isset($ArtistsAdded[strtolower($Artist['name'])])) {
-                    $ArtistForm[$Importance][$Num] = $ArtistsAdded[strtolower($Artist['name'])];
-                } else {
-                    // Create artist
-                    $DB->prepared_query('
-                        INSERT INTO artists_group (Name)
-                        VALUES (?)
-                        ', $Artist['name']
-                    );
-                    $ArtistID = $DB->inserted_id();
-
-                    $Cache->increment('stats_artist_count');
-
-                    $DB->prepared_query('
-                        INSERT INTO artists_alias (ArtistID, Name)
-                        VALUES (?, ?)
-                        ', $ArtistID, $Artist['name']
-                    );
-                    $AliasID = $DB->inserted_id();
-
-                    $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
-                    $ArtistsAdded[strtolower($Artist['name'])] = $ArtistForm[$Importance][$Num];
+if ($IsNewGroup) {
+    if ($Type == 'Music') {
+        //array to store which artists we have added already, to prevent adding an artist twice
+        $ArtistsAdded = [];
+        $ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
+        foreach ($ArtistForm as $Importance => $Artists) {
+            foreach ($Artists as $Num => $Artist) {
+                if (!$Artist['id']) {
+                    if (isset($ArtistsAdded[strtolower($Artist['name'])])) {
+                        $ArtistForm[$Importance][$Num] = $ArtistsAdded[strtolower($Artist['name'])];
+                    } else {
+                        list($ArtistID, $AliasID) = $ArtistManager->createArtist($Artist['name']);
+                        $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
+                        $ArtistsAdded[strtolower($Artist['name'])] = $ArtistForm[$Importance][$Num];
+                    }
                 }
             }
         }
+        unset($ArtistsAdded);
     }
-    unset($ArtistsAdded);
-}
 
-if (!$GroupID) {
     // Create torrent group
     $DB->prepared_query('
         INSERT INTO torrents_group
