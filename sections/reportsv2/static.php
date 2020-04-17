@@ -530,7 +530,7 @@ if (count($Reports) === 0) {
 <?php           if ($HasLog || $ExtraHasLog) { ?>
                 <tr>
                     <td class="label">Logfiles:</td>
-                    <td>
+                    <td colspan="3">
                         <table><tr><td>Reported</td><td>Relevant</td></tr><tr>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
 <?php               $log = new \Gazelle\Torrent\Log($DB, $Cache, $TorrentID);
