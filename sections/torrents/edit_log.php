@@ -7,11 +7,10 @@ if (!check_perms('users_mod')) {
 $TorrentID = intval($_GET['torrentid']);
 $LogID = intval($_GET['logid']);
 
-$DB->query("SELECT GroupID FROM torrents WHERE ID='{$TorrentID}'");
-if (!$DB->has_results()) {
+$GroupID = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
+if (!$GroupID) {
     error(404);
 }
-list($GroupID) = $DB->next_record(MYSQLI_NUM);
 $Group = Torrents::array_group(Torrents::get_groups([$GroupID])[$GroupID]);
 $TorrentTags = new Tags($Group['TagList']);
 
@@ -37,7 +36,12 @@ if ($ExtraInfo) {
     $DisplayName .= " - $ExtraInfo";
 }
 
-$DB->query("SELECT Log, FileName, Details, Score, Checksum, Adjusted, AdjustedScore, AdjustedChecksum, AdjustedBy, AdjustmentReason, AdjustmentDetails FROM torrents_logs WHERE TorrentID='{$TorrentID}' AND LogID='{$LogID}'");
+$DB->prepared_query('
+    SELECT FileName, Details, Score, Checksum, Adjusted, AdjustedScore, AdjustedChecksum, AdjustedBy, AdjustmentReason, AdjustmentDetails
+    FROM torrents_logs
+    WHERE TorrentID = ? AND LogID = ?
+    ', $TorrentID, $LogID
+);
 if (!$DB->has_results()) {
     error(404);
 }
