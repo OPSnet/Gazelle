@@ -19,31 +19,6 @@ class Torrent extends \Gazelle\File {
         return file_get_contents($path);
     }
 
-    /* PHASE 2: After //l storage is validated, this method can be
-     * removed and the parent method will be all that is required.
-     */
-    public function put ($source, $id) {
-        $this->db->prepared_query('SELECT 1 FROM torrents_files WHERE TorrentID = ?', $id);
-        if (!$this->db->has_results()) {
-            $this->db->prepared_query('
-                INSERT INTO torrents_files (File, TorrentID) VALUES (?, ?)
-                ', $source, $id
-            );
-        }
-        return parent::put($source, $id);
-    }
-
-    /* PHASE 2: After //l storage is validated, this method can be
-     * removed and the parent method will be all that is required.
-     */
-    public function remove ($id, $path) {
-        $this->db->prepared_query('
-            DELETE FROM torrents_files WHERE TorrentID = ?
-            ', $id
-        );
-        return parent::remove($id);
-    }
-
     public function path ($id) {
         $key = strrev(sprintf('%04d', $id));
         $k1 = substr($key, 0, 2);
