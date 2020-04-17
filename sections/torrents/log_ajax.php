@@ -5,8 +5,15 @@ if (!isset($TorrentID) || empty($TorrentID)) {
     error(403);
 }
 $LogScore = isset($_GET['logscore']) ? intval($_GET['logscore']) : 0;
-$DB->query("SELECT LogID, Log, Details, Score, `Checksum`, Adjusted, AdjustedBy, AdjustedScore, AdjustedChecksum, AdjustmentReason, AdjustmentDetails FROM torrents_logs WHERE TorrentID = '$TorrentID'");
-if($DB->record_count() > 0) {
+$DB->prepared_query('
+    SELECT LogID, Details, Score, `Checksum`, Adjusted, AdjustedBy, AdjustedScore, AdjustedChecksum, AdjustmentReason, AdjustmentDetails, Log
+    FROM torrents_logs
+    WHERE TorrentID = ?
+    ', $TorrentID
+);
+if(!$DB->record_count()) {
+    echo '';
+} else {
     ob_start();
     echo '<table><tr class=\'colhead_dark\' style=\'font-weight: bold;\'><td>This torrent has '.$DB->record_count().' '.($DB->record_count() > 1 ? 'logs' : 'log').' with a total score of '.$LogScore.' (out of 100):</td></tr>';
 
@@ -71,6 +78,4 @@ HTML;
     }
     echo '</table>';
     echo ob_get_clean();
-} else {
-    echo '';
 }
