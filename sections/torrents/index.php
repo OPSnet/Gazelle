@@ -21,184 +21,184 @@ if (!empty($_REQUEST['action'])) {
     switch ($_REQUEST['action']) {
         case 'editlog':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/edit_log.php');
+            require(__DIR__ . '/edit_log.php');
             break;
 
         case 'deletelog':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/delete_log.php');
+            require(__DIR__ . '/delete_log.php');
             break;
 
         case 'take_editlog':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/take_edit_log.php');
+            require(__DIR__ . '/take_edit_log.php');
             break;
 
         case 'rescore_log':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/rescore_log.php');
+            require(__DIR__ . '/rescore_log.php');
             break;
 
         case 'viewlog':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/log_ajax.php');
+            require(__DIR__ . '/log_ajax.php');
             break;
 
         case 'removelogs':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/remove_logs.php');
+            require(__DIR__ . '/remove_logs.php');
             break;
 
         case 'edit':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/edit.php');
+            require(__DIR__ . '/edit.php');
             break;
 
         case 'editgroup':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/editgroup.php');
+            require(__DIR__ . '/editgroup.php');
             break;
 
         case 'editgroupid':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/editgroupid.php');
+            require(__DIR__ . '/editgroupid.php');
             break;
 
         case 'changecategory':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/takechangecategory.php');
+            require(__DIR__ . '/takechangecategory.php');
             break;
         case 'grouplog':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/grouplog.php');
+            require(__DIR__ . '/grouplog.php');
             break;
         case 'takeedit':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/takeedit.php');
+            require(__DIR__ . '/takeedit.php');
             break;
 
         case 'newgroup':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/takenewgroup.php');
+            require(__DIR__ . '/takenewgroup.php');
             break;
 
         case 'peerlist':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/peerlist.php');
+            require(__DIR__ . '/peerlist.php');
             break;
 
         case 'snatchlist':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/snatchlist.php');
+            require(__DIR__ . '/snatchlist.php');
             break;
 
         case 'downloadlist':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/downloadlist.php');
+            require(__DIR__ . '/downloadlist.php');
             break;
 
         case 'redownload':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/redownload.php');
+            require(__DIR__ . '/redownload.php');
             break;
 
         case 'revert':
         case 'takegroupedit':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/takegroupedit.php');
+            require(__DIR__ . '/takegroupedit.php');
             break;
 
         case 'nonwikiedit':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/nonwikiedit.php');
+            require(__DIR__ . '/nonwikiedit.php');
             break;
 
         case 'rename':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/rename.php');
+            require(__DIR__ . '/rename.php');
             break;
 
         case 'merge':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/merge.php');
+            require(__DIR__ . '/merge.php');
             break;
 
         case 'add_alias':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/add_alias.php');
+            require(__DIR__ . '/add_alias.php');
             break;
 
         case 'delete_alias':
             enforce_login();
             authorize();
-            include(SERVER_ROOT.'/sections/torrents/delete_alias.php');
+            require(__DIR__ . '/delete_alias.php');
             break;
 
         case 'history':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/history.php');
+            require(__DIR__ . '/history.php');
             break;
 
         case 'delete':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/delete.php');
+            require(__DIR__ . '/delete.php');
             break;
 
         case 'takedelete':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/takedelete.php');
+            require(__DIR__ . '/takedelete.php');
             break;
 
         case 'masspm':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/masspm.php');
+            require(__DIR__ . '/masspm.php');
             break;
 
         case 'reseed':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/reseed.php');
+            require(__DIR__ . '/reseed.php');
             break;
 
         case 'takemasspm':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/takemasspm.php');
+            require(__DIR__ . '/takemasspm.php');
             break;
 
         case 'vote_tag':
             enforce_login();
             authorize();
-            include(SERVER_ROOT.'/sections/torrents/vote_tag.php');
+            require(__DIR__ . '/vote_tag.php');
             break;
 
         case 'add_tag':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/add_tag.php');
+            require(__DIR__ . '/add_tag.php');
             break;
 
         case 'delete_tag':
             enforce_login();
             authorize();
-            include(SERVER_ROOT.'/sections/torrents/delete_tag.php');
+            require(__DIR__ . '/delete_tag.php');
             break;
 
         case 'notify':
             enforce_login();
-            include(SERVER_ROOT.'/sections/torrents/notify.php');
+            require(__DIR__ . '/notify.php');
             break;
 
         case 'manage_artists':
             enforce_login();
-            require(SERVER_ROOT.'/sections/torrents/manage_artists.php');
+            require(__DIR__ . '/manage_artists.php');
             break;
 
         case 'editrequest':
             enforce_login();
-            require(SERVER_ROOT . '/sections/torrents/editrequest.php');
+            require(__DIR__ . '/editrequest.php');
             break;
 
         case 'takeeditrequest':
             enforce_login();
-            require(SERVER_ROOT . '/sections/torrents/takeeditrequest.php');
+            require(__DIR__ . '/takeeditrequest.php');
             break;
 
         case 'notify_clear':
@@ -211,16 +211,16 @@ if (!empty($_REQUEST['action'])) {
         case 'notify_catchup_filter':
             authorize();
             enforce_login();
-            require(SERVER_ROOT.'/sections/torrents/notify_actions.php');
+            require(__DIR__ . '/notify_actions.php');
             break;
 
         case 'download':
-            require(SERVER_ROOT.'/sections/torrents/download.php');
+            require(__DIR__ . '/download.php');
             break;
 
         case 'collector':
             enforce_login();
-            require(SERVER_ROOT.'/sections/torrents/collector.php');
+            require(__DIR__ . '/collector.php');
             break;
 
         case 'regen_filelist':
@@ -253,19 +253,19 @@ if (!empty($_REQUEST['action'])) {
             }
             break;
         case 'add_cover_art':
-            include(SERVER_ROOT.'/sections/torrents/add_cover_art.php');
+            require(__DIR__ . '/add_cover_art.php');
             break;
         case 'remove_cover_art':
-            include(SERVER_ROOT.'/sections/torrents/remove_cover_art.php');
+            require(__DIR__ . '/remove_cover_art.php');
             break;
         case 'autocomplete_tags':
-            include(SERVER_ROOT.'/sections/torrents/autocomplete_tags.php');
+            require(__DIR__ . '/autocomplete_tags.php');
             break;
         default:
             enforce_login();
 
             if (!empty($_GET['id'])) {
-                include(SERVER_ROOT.'/sections/torrents/details.php');
+                require(__DIR__ . '/details.php');
             } elseif (isset($_GET['torrentid']) && is_number($_GET['torrentid'])) {
                 $DB->query('
                     SELECT GroupID
@@ -276,7 +276,7 @@ if (!empty($_REQUEST['action'])) {
                     header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid']);
                 }
             } else {
-                include(SERVER_ROOT.'/sections/torrents/browse.php');
+                require(__DIR__ . '/browse.php');
             }
             break;
     }
@@ -284,7 +284,7 @@ if (!empty($_REQUEST['action'])) {
     enforce_login();
 
     if (!empty($_GET['id'])) {
-        include(SERVER_ROOT.'/sections/torrents/details.php');
+        require(__DIR__ . '/details.php');
     } elseif (isset($_GET['torrentid']) && intval($_GET['torrentid'])) {
         $torrent_id = (int)$_GET['torrentid'];
         $DB->prepared_query('
@@ -303,7 +303,7 @@ if (!empty($_REQUEST['action'])) {
             header("Location: log.php?search=Torrent+$_GET[torrentid]");
         }
     } elseif (!empty($_GET['type'])) {
-        include(SERVER_ROOT.'/sections/torrents/user.php');
+        require(__DIR__ . '/user.php');
     } elseif (!empty($_GET['groupname']) && !empty($_GET['forward'])) {
         $DB->prepared_query('
             SELECT ID
@@ -313,9 +313,9 @@ if (!empty($_REQUEST['action'])) {
         if ($GroupID) {
             header("Location: torrents.php?id=$GroupID");
         } else {
-            include(SERVER_ROOT.'/sections/torrents/browse.php');
+            require(__DIR__ . '/browse.php');
         }
     } else {
-        include(SERVER_ROOT.'/sections/torrents/browse.php');
+        require(__DIR__ . '/browse.php');
     }
 }
