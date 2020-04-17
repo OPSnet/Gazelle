@@ -55,7 +55,7 @@ class RipLog extends \Gazelle\File {
             . '/' . $torrent_id . '_' . $log_id . '.log';
     }
 
-    public function path_legacy ($id) {
+    public function pathLegacy ($id) {
         return self::STORAGE_LEGACY . '/' . $id[0] . '_' . $id[1] . '.log';
     }
 
@@ -64,9 +64,6 @@ class RipLog extends \Gazelle\File {
             $path = $this->path_legacy($id);
             if (file_exists($path)) {
                 parent::put(file_get_contents($path), [$id[0], $id[1]]);
-                if (!BETA) {
-                    unlink($path);
-                }
             }
         }
         return file_get_contents($this->path($id));
