@@ -28,7 +28,6 @@ if (check_perms('admin_manage_applicants')) { ?>
             <p>If you are looking for help with a general question, we appreciate it if you would only message through the staff inbox, where we can all help you.</p>
             <p>You can do that by <strong><a href="#" onclick="$('#compose').gtoggle(); return false;">sending a message to the Staff Inbox</a></strong>.</p>
             <p>If you'd like to join our staff, please feel free to <strong><a href="apply.php">apply</a></strong>!</p>
-            <p>If you are looking to ask staff a question which isn't fit for a Staff PM or support area, <a href='questions.php'>you can use our questions feature</a>.</p>
         </div>
     </div>
     <div class="box pad" style="padding: 0px 10px 10px 10px;">
