@@ -2,7 +2,7 @@
 
 namespace Gazelle\Schedule;
 
-use \Gazelle\Util\{Irc, Time};
+use \Gazelle\Util\Irc;
 
 class Scheduler {
     protected $db;
@@ -287,7 +287,7 @@ class Scheduler {
             FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pth.launch_time <= ? AND pth.launch_time + INTERVAL pth.duration_ms / 1000 SECOND >= ?
-            ', Time::sqlTime($end), Time::sqlTime($start)
+            ', $end, $start
         );
 
         return $this->db->to_array('periodic_task_id', MYSQLI_ASSOC);
