@@ -3,27 +3,27 @@
 enforce_login();
 
 if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
-    $File = $_FILES['log'];
+    $file = $_FILES['log'];
     $isPaste = false;
 } elseif (!empty($_POST["pastelog"])) {
-    $TmpFile = tempnam('/tmp', 'log_');
-    file_put_contents($TmpFile, $_POST["pastelog"]);
-    $File = ['tmp_name' => $TmpFile, 'name' => $TmpFile];
+    $fileTmp = tempnam('/tmp', 'log_');
+    file_put_contents($fileTmp, $_POST["pastelog"]);
+    $file = ['tmp_name' => $fileTmp, 'name' => $fileTmp];
     $isPaste = true;
 } else {
     error('No log file uploaded or file is empty.');
 }
-$logfile = new \Gazelle\Logfile($File['tmp_name'], $File['name']);
+$logfile = new \Gazelle\Logfile($file['tmp_name'], $file['name']);
 
-if (isset($TmpFile)) {
-    unlink($TmpFile);
+if (isset($fileTmp)) {
+    unlink($fileTmp);
 }
 
 View::show_header('Logchecker');
 ?>
 
 <div class="linkbox">
-    <a href="logchecker.php" class="brackets">Test Another Log File</a>
+    <a href="logchecker.php" class="brackets">Test Another Log file</a>
     <a href="logchecker.php?action=upload" class="brackets">Upload Missing Logs</a>
 </div>
 <div class="thin">
