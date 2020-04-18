@@ -52,7 +52,7 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 ?>
 <div class="header">
     <h2><?=$Title?></h2>
-    <h3>Points: <?=number_format($User['BonusPoints'])?></h3>
+    <h3>Points: <?=number_format((int)$User['BonusPoints'])?></h3>
 </div>
 <div class="linkbox">
     <a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>
