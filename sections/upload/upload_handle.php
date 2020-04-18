@@ -715,7 +715,7 @@ if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $Tag) {
         $Tag = Misc::sanitize_tag($Tag);
         if (!empty($Tag)) {
-        $Tag = Misc::get_alias_tag($Tag);
+            $Tag = Misc::get_alias_tag($Tag);
             $DB->prepared_query('
                 INSERT INTO tags
                        (Name, UserID)
@@ -1087,12 +1087,12 @@ foreach ($Properties['TagList'] as $Tag) {
     $TagSQL[] = " Tags LIKE '%|".db_string($Tag)."|%' ";
     $NotTagSQL[] = " NotTags LIKE '%|".db_string($Tag)."|%' ";
 }
-if (count($TagSQL)) {
-    $SQL .= ' AND (' . implode(' OR ', $TagSQL) . ')';
-}
-if (count($NotTagSQL)) {
-    $SQL .= " AND !(" . implode(' OR ', $NotTagSQL) . ')';
-}
+
+$TagSQL[] = "Tags = ''";
+
+$SQL .= ' AND (' . implode(' OR ', $TagSQL) . ')';
+$SQL .= " AND !(" . implode(' OR ', $NotTagSQL) . ')';
+
 $SQL .= " AND (Categories LIKE '%|".db_string($Type)."|%' OR Categories = '') ";
 
 if ($Properties['ReleaseType']) {
