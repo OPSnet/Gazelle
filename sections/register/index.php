@@ -118,6 +118,13 @@ if (!empty($_REQUEST['confirm'])) {
             );
 
             $DB->prepared_query('
+                INSERT INTO user_flt
+                       (user_id)
+                VALUES (?)
+                ', $UserID
+            );
+
+            $DB->prepared_query('
                 INSERT INTO users_leech_stats
                        (UserID, Uploaded)
                 VALUES (?,      ?)

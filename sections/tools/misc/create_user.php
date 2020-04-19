@@ -72,6 +72,13 @@ if (isset($_POST['Username'])) {
                 (?,      ?)",
             $userId, STARTING_UPLOAD); 
 
+        $DB->prepared_query('
+            INSERT INTO user_flt
+                   (user_id)
+            VALUES (?)
+            ', $userId
+        );
+
         //Redirect to users profile
         header ("Location: user.php?id=$userId");
 
