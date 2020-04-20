@@ -74,7 +74,6 @@ Category('Administration', [
     Item('Permissions manager',      'tools.php?action=permissions',     All(['admin_manage_permissions'])),
     Item('Staff page group manager', 'tools.php?action=staff_groups',    All(['admin_manage_permissions'])),
     Item('Torrent client whitelist', 'tools.php?action=whitelist',       All(['admin_whitelist'])),
-    Item('Payment dates',            'tools.php?action=payment_list',    All(['admin_manage_payments'])),
     Item('Database encryption key',  'tools.php?action=dbkey',           All(['admin_site_debug'])),
     Item('Auto-Enable requests',     'tools.php?action=enable_requests', All(['users_mod']) && FEATURE_EMAIL_REENABLE),
     Item('Login watch',              'tools.php?action=login_watch',     All(['admin_login_watch'])),
@@ -169,6 +168,7 @@ Category('Finances', [
     Item('Bitcoin (unprocessed)', 'tools.php?action=bitcoin_unproc',  All(['admin_donor_log'])),
     Item('Donation log',          'tools.php?action=donation_log',    All(['admin_donor_log'])),
     Item('Donor rewards',         'tools.php?action=donor_rewards',   All(['users_mod'])),
+    Item('Payment dates',         'tools.php?action=payment_list',    All(['admin_manage_payments'])),
 ]);
 
 Category('Developer Sandboxes', [
