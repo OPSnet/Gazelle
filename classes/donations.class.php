@@ -1,33 +1,6 @@
 <?php
 
-define('BTC_API_URL', 'https://api.bitcoinaverage.com/ticker/global/EUR/');
-define('USD_API_URL', 'http://www.google.com/ig/calculator?hl=en&q=1USD=?EUR');
-
 class Donations {
-    private static $ForumDescriptions = [
-        "I want only two houses, rather than seven... I feel like letting go of things",
-        "A billion here, a billion there, sooner or later it adds up to real money.",
-        "I've cut back, because I'm buying a house in the West Village.",
-        "Some girls are just born with glitter in their veins.",
-        "I get half a million just to show up at parties. My life is, like, really, really fun.",
-        "Some people change when they think they're a star or something",
-        "I'd rather not talk about money. It’s kind of gross.",
-        "I have not been to my house in Bermuda for two or three years, and the same goes for my house in Portofino. How long do I have to keep leading this life of sacrifice?",
-        "When I see someone who is making anywhere from $300,000 to $750,000 a year, that's middle class.",
-        "Money doesn't make you happy. I now have $50 million but I was just as happy when I had $48 million.",
-        "I'd rather smoke crack than eat cheese from a tin.",
-        "I am who I am. I can’t pretend to be somebody who makes $25,000 a year.",
-        "A girl never knows when she might need a couple of diamonds at ten 'o' clock in the morning.",
-        "I wouldn't run for president. I wouldn't want to move to a smaller house.",
-        "I have the stardom glow.",
-        "What's Walmart? Do they like, sell wall stuff?",
-        "Whenever I watch TV and see those poor starving kids all over the world, I can't help but cry. I mean I'd love to be skinny like that, but not with all those flies and death and stuff.",
-        "Too much money ain't enough money.",
-        "What's a soup kitchen?",
-        "I work very hard and I’m worth every cent!",
-        "To all my Barbies out there who date Benjamin Franklin, George Washington, Abraham Lincoln, you'll be better off in life. Get that money."
-    ];
-
     private static $IsSchedule = false;
 
     public static function regular_donate($UserID, $DonationAmount, $Source, $Reason, $Currency = "EUR") {
@@ -60,8 +33,22 @@ class Donations {
                 WHERE UserID = ?
                 ', '1', $UserID
             );
+
             // Give them an invite the first time they donate
             $FirstInvite = G::$DB->affected_rows();
+
+            // Assign them to the Donor secondary class
+            $DonorClass = G::$DB->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor');
+            if ($DonorClass) {
+                if (!G::$DB->scalar('SELECT 1 FROM users_levels WHERE UserID = ? AND PermissionID = ?', $UserID, $DonorClass)) {
+                    G::$DB->prepared_query('
+                        INSERT INTO users_levels
+                               (UserID, PermissionID)
+                        VALUES (?,      ?)
+                        ', $UserID, $DonorClass
+                    );
+                }
+            }
 
             // A staff member is directly manipulating donor points
             if (isset($Args['Manipulation']) && $Args['Manipulation'] === "Direct") {
@@ -81,25 +68,30 @@ class Donations {
                         $AdjustedRank, $Args['TotalRank']
                 );
             } else {
-                // Donations from the store get donor points directly, no need to calculate them
-                if (isset($Args['Source']) && $Args['Source'] == "Store Parser") {
-                    $ConvertedPrice = self::currency_exchange($Args['Amount'] * $Args['Price'], $Args['Currency']);
-                } else {
-                    $ConvertedPrice = self::currency_exchange($Args['Price'], $Args['Currency']);
-                    $DonorPoints = self::calculate_rank($ConvertedPrice);
+                $BTC = new \Gazelle\Manager\BTC(G::$DB, G::$Cache);
+                $forexRate = $BTC->latestRate('EUR');
+                switch ($Args['Currency'] == 'BTC') {
+                    case 'BTC':
+                        $btcAmount = $Args['Price'];
+                        $ConvertedPrice = $Args['Price'] * $forexRate;
+                        break;
+                    case 'EUR':
+                        $btcAmount = $Args['Price'] / $forexRate;
+                        $ConvertedPrice = $Args['Price'];
+                        break;
+                    default:
+                        $btcAmount = $BTC->fiat2btc($Args['Price'], $Args['Currency']);
+                        $ConvertedPrice = $btcAmount * $forexRate;
+                        break;
                 }
-                $IncreaseRank = $DonorPoints;
 
                 // Rank is the same thing as DonorPoints
-                $CurrentRank = self::get_rank($UserID);
                 // A user's donor rank can never exceed MAX_EXTRA_RANK
-                // If the amount they donated causes it to overflow, chnage it to MAX_EXTRA_RANK
                 // The total rank isn't affected by this, so their original donor point value is added to it
-                if (($CurrentRank + $DonorPoints) >= MAX_EXTRA_RANK) {
-                    $AdjustedRank = MAX_EXTRA_RANK;
-                } else {
-                    $AdjustedRank = $CurrentRank + $DonorPoints;
-                }
+                $IncreaseRank = $DonorPoints = self::calculate_rank($ConvertedPrice);
+                $CurrentRank = self::get_rank($UserID);
+                $AdjustedRank = min(MAX_EXTRA_RANK, $CurrentRank + $DonorPoints);
+
                 G::$DB->prepared_query('
                     INSERT INTO users_donor_ranks
                            (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
@@ -124,13 +116,12 @@ class Donations {
             self::calculate_special_rank($UserID);
 
             // Hand out invites
-            G::$DB->prepared_query('
+            $InvitesReceivedRank = G::$DB->scalar('
                 SELECT InvitesReceivedRank
                 FROM users_donor_ranks
                 WHERE UserID = ?
                 ', $UserID
             );
-            list($InvitesReceivedRank) = G::$DB->next_record();
             $AdjustedRank = $Rank >= MAX_RANK ? (MAX_RANK - 1) : $Rank;
             $InviteRank = $AdjustedRank - $InvitesReceivedRank;
             if ($InviteRank > 0) {
@@ -160,17 +151,14 @@ class Donations {
             // Lastly, add this donation to our history
             G::$DB->prepared_query('
                 INSERT INTO donations
-                       (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, Time)
-                VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         now())
+                       (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, btc, Time)
+                VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?, now())
                 ', $UserID, $ConvertedPrice, $Args['Source'], $Args['Reason'], $Args['Currency'],
-                    self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $DonorPoints, $TotalRank
+                    self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $DonorPoints, $TotalRank, $btcAmount
             );
 
             // Clear their user cache keys because the users_info values has been modified
-            G::$Cache->delete_value("user_info_$UserID");
-            G::$Cache->delete_value("user_info_heavy_$UserID");
-            G::$Cache->delete_value("donor_info_$UserID");
-
+            G::$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID"]);
         }
         G::$DB->set_query_id($QueryID);
     }
@@ -192,15 +180,35 @@ class Donations {
                 $SpecialRank = 0;
             }
             if ($SpecialRank < 1 && $TotalRank >= 10) {
-                Misc::send_pm($UserID, 0, "You've Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.", self::get_special_rank_one_pm());
+                Misc::send_pm( $UserID, 0,
+                    "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
+                    G::$Twig->render('donation/special-rank-1.twig', [
+                       'forum_url'   => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                       'site_name'   => SITE_NAME,
+                       'staffpm_url' => site_url() . 'staffpm.php',
+                    ])
+                );
                 $SpecialRank = 1;
             }
             if ($SpecialRank < 2 && $TotalRank >= 20) {
-                Misc::send_pm($UserID, 0, "You've Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.", self::get_special_rank_two_pm());
+                Misc::send_pm($UserID, 0,
+                    "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
+                    G::$Twig->render('donation/special-rank-2.twig', [
+                       'forum_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                       'site_name' => SITE_NAME,
+                    ])
+                );
                 $SpecialRank = 2;
             }
             if ($SpecialRank < 3 && $TotalRank >= 50) {
-                Misc::send_pm($UserID, 0, "You've Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.", self::get_special_rank_three_pm());
+                Misc::send_pm($UserID, 0,
+                    "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
+                    G::$Twig->render('donation/special-rank-3.twig', [
+                       'forum_url'      => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                       'forum_gold_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
+                       'site_name'      => SITE_NAME,
+                    ])
+                );
                 $SpecialRank = 3;
             }
             // Make them special
@@ -217,10 +225,8 @@ class Donations {
 
     public static function schedule() {
         self::$IsSchedule = true;
-
         DonationsBitcoin::find_new_donations();
         self::expire_ranks();
-        self::get_new_conversion_rates();
     }
 
     public static function expire_ranks() {
@@ -251,7 +257,7 @@ class Donations {
     }
 
     private static function calculate_rank($Amount) {
-        return floor($Amount / 5);
+        return floor($Amount / DONOR_RANK_PRICE);
     }
 
     public static function update_rank($UserID, $Rank, $TotalRank, $Reason) {
@@ -418,8 +424,6 @@ class Donations {
         return $Results;
     }
 
-
-
     public static function get_enabled_rewards($UserID) {
         $Rewards = [];
         $Rank = self::get_rank($UserID);
@@ -505,8 +509,6 @@ class Donations {
             $Update[] = "$ProfileInfoSQL = '$ProfileInfo'";
         }
     }
-
-
 
     public static function update_rewards($UserID) {
         $Rank = self::get_rank($UserID);
@@ -678,109 +680,6 @@ class Donations {
         return self::get_rank($UserID) > 0;
     }
 
-    public static function currency_exchange($Amount, $Currency) {
-        if (!self::is_valid_currency($Currency)) {
-            error("$Currency is not valid currency");
-        }
-        switch ($Currency) {
-            case 'USD':
-                $Amount = self::usd_to_euro($Amount);
-                break;
-            case 'BTC':
-                $Amount = self::btc_to_euro($Amount);
-                break;
-            default:
-                break;
-        }
-        return round($Amount, 2);
-    }
-
-    public static function is_valid_currency($Currency) {
-        return $Currency == 'EUR' || $Currency == 'BTC' || $Currency == 'USD';
-    }
-
-    public static function btc_to_euro($Amount) {
-        $Rate = G::$Cache->get_value('btc_rate');
-        if (empty($Rate)) {
-            $Rate = self::get_stored_conversion_rate('BTC');
-            G::$Cache->cache_value('btc_rate', $Rate, 86400);
-        }
-        return $Rate * $Amount;
-    }
-
-    public static function usd_to_euro($Amount) {
-        $Rate = G::$Cache->get_value('usd_rate');
-        if (empty($Rate)) {
-            $Rate = self::get_stored_conversion_rate('USD');
-            G::$Cache->cache_value('usd_rate', $Rate, 86400);
-        }
-        return $Rate * $Amount;
-    }
-
-    public static function get_stored_conversion_rate($Currency) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query('
-            SELECT Rate
-            FROM currency_conversion_rates
-            WHERE Currency = ?
-            ', $Currency
-        );
-        list($Rate) = G::$DB->next_record(MYSQLI_NUM, false);
-        G::$DB->set_query_id($QueryID);
-        return $Rate;
-    }
-
-    private static function set_stored_conversion_rate($Currency, $Rate) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query('
-            REPLACE INTO currency_conversion_rates
-                   (Currency, Rate, Time)
-            VALUES (?,        ?,    now())
-            ', $Currency, $Rate
-        );
-        if ($Currency == 'USD') {
-            $KeyName = 'usd_rate';
-        } elseif ($Currency == 'BTC') {
-            $KeyName = 'btc_rate';
-        }
-        G::$Cache->cache_value($KeyName, $Rate, 86400);
-        G::$DB->set_query_id($QueryID);
-    }
-
-    private static function get_new_conversion_rates() {
-        if ($BTC = file_get_contents(BTC_API_URL)) {
-            $BTC = json_decode($BTC, true);
-            if (isset($BTC['24h_avg'])) {
-                if ($Rate = round($BTC['24h_avg'], 4)) { // We don't need good precision
-                    self::set_stored_conversion_rate('BTC', $Rate);
-                }
-            }
-        }
-        if ($USD = file_get_contents(USD_API_URL)) {
-            // Valid JSON isn't returned so we make it valid.
-            $Replace = [
-                'lhs' => '"lhs"',
-                'rhs' => '"rhs"',
-                'error' => '"error"',
-                'icc' => '"icc"'
-            ];
-
-            $USD = str_replace(array_keys($Replace), array_values($Replace), $USD);
-            $USD = json_decode($USD, true);
-            if (isset($USD['rhs'])) {
-                // The response is in format "# Euroes", extracts the numbers.
-                $Rate = preg_split("/[\s,]+/", $USD['rhs']);
-                if ($Rate = round($Rate[0], 4)) { // We don't need good precision
-                    self::set_stored_conversion_rate('USD', $Rate);
-                }
-            }
-        }
-    }
-
-    public static function get_forum_description() {
-        return self::$ForumDescriptions[rand(0, count(self::$ForumDescriptions) - 1)];
-    }
-
     private static function get_pm_body($Source, $Currency, $DonationAmount, $ReceivedRank, $CurrentRank) {
         if ($Currency != 'BTC') {
             $DonationAmount = number_format($DonationAmount, 2);
@@ -790,45 +689,13 @@ class Donations {
         } elseif ($CurrentRank == 5) {
             $CurrentRank = 4;
         }
-        return "Thank you for your generosity and support. It's users like you who make all of this possible. What follows is a brief description of your transaction:
-[*][b]You Contributed:[/b] $DonationAmount $Currency
-[*][b]You Received:[/b] $ReceivedRank Donor Point".($ReceivedRank == 1 ? '' : 's')."
-[*][b]Your Donor Rank:[/b] Donor Rank # $CurrentRank
-Once again, thank you for your continued support of the site.
-
-Sincerely,
-
-".SITE_NAME.' Staff
-
-[align=center][If you have any questions or concerns, please [url='.site_url().'staffpm.php]send a Staff PM[/url].]';
-    }
-
-    private static function get_special_rank_one_pm() {
-        return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #1[/url]! You\'ve been awarded [b]one user pick[/b]! This user pick will be featured on the '.SITE_NAME.' front page during an upcoming event. After you submit your pick, there is no guarantee as to how long it will take before your pick is featured. Picks will be featured on a first-submitted, first-served basis. Please abide by the following guidelines when making your selection:
-
-[*]Pick something that hasn\'t been chosen. You can tell if a pick has been used previously by looking at the collages it\'s in.
-[*]Complete the enclosed form carefully and completely.
-[*]Send a [url='.site_url().'staffpm.php]Staff PM[/url] to request further information about the formatting of your pick, and the time at which it will be posted.
-
-Sincerely,
-'.SITE_NAME.' Staff';
-       }
-
-       private static function get_special_rank_two_pm() {
-               return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #2[/url]! You\'ve been awarded [b]double avatar functionality[/b]! To set a second avatar, please enter a URL leading to a valid image in the new field which has been unlocked in your [b]Personal Settings[/b]. Any avatar you choose must abide by normal avatar rules. When running your cursor over your avatar, it will flip to the alternate choice you\'ve established. Other users will also be able to view both of your avatars using this method.
-
-At this time, we\'d like to thank you for your continued support of the site. The fact that you\'ve reached this milestone is testament to your belief in '.SITE_NAME.' as a project. It\'s dedicated users like you that keep us alive. Have fun with the new toy.
-
-Sincerely,
-'.SITE_NAME.' Staff';
-       }
-
-       private static function get_special_rank_three_pm() {
-               return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #3[/url]! You\'ve been awarded [b]Diamond Rank[/b]! Diamond Rank grants you the benefits associated with every Donor Rank up to and including Gold ([url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789]Donor Rank #5[/url]). But unlike Donor Rank #5 - because Diamond Rank is a Special Rank - it will never expire.
-
-At this time, we\'d like to thank you for your continued support of the site. The fact that you\'ve reached this milestone is testament to your belief in '.SITE_NAME.' as a project. It\'s dedicated users like you that keep us alive. Consider yourself one of our top supporters!
-
-Sincerely,
-'.SITE_NAME.' Staff';
+        return G::$Twig->render('donation/donation-pm.twig', [
+            'amount' => $DonationAmount,
+            'cc'     => $Currency,
+            'points' => $ReceivedRank,
+            's'      => $ReceivedRank == 1 ? '' : 's',
+            'rank'   => $CurrentRank,
+            'staffpm_url' => site_url() . 'staffpm.php',
+        ]);
     }
 }
