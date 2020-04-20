@@ -4,8 +4,8 @@ if (!check_perms('admin_manage_payments')) {
 }
 
 $DB->prepared_query("
-        SELECT ID, Text, Expiry, Active
-        FROM payment_reminders");
+    SELECT ID, Text, Expiry, AnnualRent, Active
+    FROM payment_reminders");
 
 $Reminders = $DB->has_results() ? $DB->to_array('ID', MYSQLI_ASSOC) : [];
 
@@ -18,13 +18,16 @@ View::show_header('Payment Dates');
     <tr class="colhead">
         <td>Payment</td>
         <td>Expiry</td>
+        <td>Annual Rent</td>
         <td>Active</td>
         <td>Submit</td>
     </tr>
 <?php
 $Row = 'b';
+$TotalRent = 0;
 foreach ($Reminders as $r) {
-    list($ID, $Text, $Expiry, $Active) = array_values($r);
+    list($ID, $Text, $Expiry, $Rent, $Active) = array_values($r);
+    $TotalRent += $Rent;
     $Row = $Row === 'a' ? 'b' : 'a';
 ?>
     <tr class="row<?=$Row?>">
@@ -37,6 +40,9 @@ foreach ($Reminders as $r) {
             </td>
             <td>
                 <input type="text" name="expiry" value="<?=date('Y-m-d', strtotime($Expiry))?>" placeholder="YYYY-MM-DD" />
+            </td>
+            <td>
+                <input type="number" name="rent" value="<?= $Rent ?>" />
             </td>
             <td>
                 <input type="checkbox" name="active"<?=($Active == '1') ? ' checked="checked"' : ''?> />
@@ -62,6 +68,9 @@ foreach ($Reminders as $r) {
                 <input type="text" size="10" name="expiry" value="" placeholder="YYYY-MM-DD" />
             </td>
             <td>
+                <input type="number" title="Round to nearest dorra, no cents" name="rent" value="0" />
+            </td>
+            <td>
                 <input type="checkbox" name="active" checked="checked" />
             </td>
             <td>
@@ -70,6 +79,12 @@ foreach ($Reminders as $r) {
         </form>
     </tr>
 </table>
+<div class="box pad">
+    Annual rent: $<?= sprintf('%0.0f', $Rent) ?><br />
+    Quarterly rent: $<?= sprintf('%0.2f', $Rent / 3) ?>
+    Monthly rent: $<?= sprintf('%0.2f', $Rent / 12) ?>
+</div>
+
 <?php
-    View::show_footer();
-?>
+
+View::show_footer();
