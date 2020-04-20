@@ -39,7 +39,7 @@ class NotifyNonseedingUploaders extends \Gazelle\Schedule\Task
                 $torrentAlerts[$userID] = ['Count' => 0, 'Msg' => ''];
             }
 
-            $artistName = \Artists::display_artists(Artists::get_artist($groupID), false, false, false);
+            $artistName = \Artists::display_artists(\Artists::get_artist($groupID), false, false, false);
             if ($artistName) {
                 $name = "$artistName - $name";
             }
