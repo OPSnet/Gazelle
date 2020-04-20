@@ -60,8 +60,22 @@ class Donations {
                 WHERE UserID = ?
                 ', '1', $UserID
             );
+
             // Give them an invite the first time they donate
             $FirstInvite = G::$DB->affected_rows();
+
+            // Assign them to the Donor secondary class
+            $DonorClass = G::$DB->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor');
+            if ($DonorClass) {
+                if (!G::$DB->scalar('SELECT 1 FROM users_levels WHERE UserID = ? AND PermissionID = ?', $UserID, $DonorClass)) {
+                    G::$DB->prepared_query('
+                        INSERT INTO users_levels
+                               (UserID, PermissionID)
+                        VALUES (?,      ?)
+                        ', $UserID, $DonorClass
+                    );
+                }
+            }
 
             // A staff member is directly manipulating donor points
             if (isset($Args['Manipulation']) && $Args['Manipulation'] === "Direct") {
