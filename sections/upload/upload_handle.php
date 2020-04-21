@@ -1,5 +1,6 @@
 <?php
 
+use Gazelle\{Logfile, LogfileSummary};
 use OrpheusNET\Logchecker\Logchecker;
 
 //******************************************************************************//
@@ -502,6 +503,27 @@ if (!empty($Err)) { // Show the upload form, with the data the user entered
 }
 
 //******************************************************************************//
+//------------------------- Run the Logchecker ---------------------------------//
+$LogScore = 100;
+$LogChecksum = 1;
+$LogInDB = '0';
+$LogfileSummary = new LogfileSummary();
+if ($HasLog) {
+    ini_set('upload_max_filesize', 1000000);
+    foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
+        if (!$_FILES['logfiles']['size'][$Pos]) {
+            continue;
+        }
+
+        $LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
+        $FileName = $_FILES['logfiles']['name'][$Pos];
+
+        $LogfileSummary->add(new Logfile($LogPath, $FileName));
+        $LogInDB = '1';
+    }
+}
+
+//******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
 // Trickery
@@ -723,34 +745,6 @@ if (!$Properties['GroupID']) {
     }
 }
 
-//******************************************************************************//
-//--------------- Add the log scores to the DB ---------------------------------//
-$LogScore = 100;
-$LogChecksum = 1;
-$LogInDB = '0';
-$LogScores = [];
-$Logchecker = new Logchecker();
-if ($HasLog) {
-    ini_set('upload_max_filesize', 1000000);
-    foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-        if (!$_FILES['logfiles']['size'][$Pos]) {
-            continue;
-        }
-
-        $LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
-        $FileName = $_FILES['logfiles']['name'][$Pos];
-
-        $Logchecker->new_file($LogPath);
-        list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
-
-        $LogScore = min($Score, $LogScore);
-        $LogChecksum = min(intval($Checksum), $LogChecksum);
-        $Details = implode("\r\n", $Details);
-        $LogScores[$Pos] = [$Score, $Details, $Checksum, $Text, $FileName];
-        $LogInDB = '1';
-    }
-}
-
 // Torrent
 $DB->prepared_query("
     INSERT INTO torrents
@@ -767,8 +761,8 @@ $DB->prepared_query("
          ?, ?, now(), '0', '0')
     ", $GroupID, $LoggedUser['ID'], $Properties['Media'], $Properties['Format'], $Properties['Encoding'],
        $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
-       $Properties['Scene'], $HasLog, $HasCue, $LogInDB, $LogScore,
-       $LogChecksum ? '1' : '0', $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
+       $Properties['Scene'], $HasLog, $HasCue, $LogInDB, $LogfileSummary->overallScore(),
+       $LogfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
        $TotalSize, $Properties['TorrentDescription']
 );
 
@@ -791,17 +785,17 @@ $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 //******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//
 
-foreach ($LogScores as $Pos => $Log) {
-    list($Score, $Details, $Checksum, $Text, $FileName) = $Log;
+foreach($LogfileSummary->all() as $Logfile) {
     $DB->prepared_query('
         INSERT INTO torrents_logs
-               (TorrentID, Log, Details, Score, `Checksum`, FileName)
-        VALUES (?,         ?,   ?,       ?,     ?,          ?)
-        ', $TorrentID, $Text, $Details, $Score, $Checksum ? '1' : '0', $FileName
+               (TorrentID, Log, Details, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion)
+        VALUES (?,         ?,   ?,       ?,     ?,          ?,        ?,      ?,             ?,          ?,             ?)',
+        $TorrentID, $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(), $Logfile->filename(),
+        $Logfile->ripper(), $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
     );
     $LogID = $DB->inserted_id();
     if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
-        die("Could not copy logfile to the server.");
+        $Debug->analysis('Could not upload logfile for ' . $TorrentID);
     }
 }
 

@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Logfile;
+use Gazelle\LogfileSummary;
 use OrpheusNET\Logchecker\Logchecker;
 
 enforce_login();
@@ -16,21 +18,23 @@ $Action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_a
 $LogScore = 100;
 $LogChecksum = 1;
 
-$Extra = check_perms('users_mod') ? '' : " AND t.UserID = '{$LoggedUser['ID']}'";
-$DB->query("
-    SELECT t.ID, t.GroupID
-    FROM torrents t
-    WHERE t.ID = {$TorrentID} AND t.HasLog='1'" . $Extra);
+$Extra = '';
+$Params = [$TorrentID, '1'];
+if (!check_perms('users_mod')) {
+    $Extra = ' AND t.UserID = ?';
+    $Params[] = G::$LoggedUser['ID'];
+}
+$DB->prepared_query("SELECT t.ID, t.GroupID FROM torrents t WHERE t.ID = ? AND t.HasLog=?" . $Extra, ...$Params);
 
 $DetailsArray = [];
-$Logchecker = new Logchecker();
+$LogfileSummary = new LogfileSummary();
 if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
     list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);
-    $DB->query("SELECT LogID FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
+    $DB->prepared_query("SELECT LogID FROM torrents_logs WHERE TorrentID=?", $TorrentID);
     while(list($LogID) = $DB->next_record(MYSQLI_NUM)) {
-        @unlink(SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log");
+        @unlink(SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log");
     }
-    $DB->query("DELETE FROM torrents_logs WHERE TorrentID='{$TorrentID}'");
+    $DB->prepared_query("DELETE FROM torrents_logs WHERE TorrentID=?", $TorrentID);
     ini_set('upload_max_filesize', 1000000);
     foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
         if (!$_FILES['logfiles']['size'][$Pos]) {
@@ -38,21 +42,26 @@ if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
         }
         $FileName = $_FILES['logfiles']['name'][$Pos];
         $LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
-        $Logchecker->new_file($LogPath);
-        list($Score, $Details, $Checksum, $LogText) = $Logchecker->parse();
-        $Details = trim(implode("\r\n", $Details));
-        $DetailsArray[] = $Details;
-        $LogScore = min($LogScore, $Score);
-        $LogChecksum = min(intval($Checksum), $LogChecksum);
-        $Logs[] = [$Details, $LogText];
-        $DB->query("INSERT INTO torrents_logs (TorrentID, Log, Details, Score, `Checksum`, `FileName`) VALUES ($TorrentID, '".db_string($LogText)."', '".db_string($Details)."', $Score, '".enum_boolean($Checksum)."', '".db_string($FileName)."')");
+        $Logfile = new Logfile($LogPath, $FileName);
+        $LogfileSummary->add($Logfile);
+        $Logs[] = [$Logfile->details(), $Logfile->text()];
+        $DB->prepared_query(
+            "INSERT INTO torrents_logs
+                    (TorrentID, `Log`, Details, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion)
+            VALUES ( ?,         ?,     ?,       ?,     ?,          ?,          ?,      ?,             ?,          ?,             ?)",
+            $TorrentID, $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(), $FileName, $Logfile->ripper(),
+            $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
+        );
         $LogID = $DB->inserted_id();
         if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
             die("Could not copy logfile to the server.");
         }
     }
 
-    $DB->query("UPDATE torrents SET HasLogDB='1', LogScore={$LogScore}, LogChecksum='".enum_boolean($LogChecksum)."' WHERE ID='{$TorrentID}'");
+    $DB->prepared_query(
+        "UPDATE torrents SET HasLogDB=?, LogScore=?, LogChecksum=? WHERE ID=?",
+        '1', $LogfileSummary->overallScore(), $LogfileSummary->checksumStatus(), $TorrentID
+    );
     $Cache->delete_value("torrent_group_{$GroupID}");
     $Cache->delete_value("torrents_details_{$GroupID}");
 } else {
@@ -123,4 +132,3 @@ HTML;
 }
 
 View::show_footer();
-

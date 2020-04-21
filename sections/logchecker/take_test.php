@@ -14,7 +14,6 @@ if (isset($_FILES['log']) && is_uploaded_file($_FILES['log']['tmp_name'])) {
     error('No log file uploaded or file is empty.');
 }
 $logfile = new \Gazelle\Logfile($file['tmp_name'], $file['name']);
-
 if (isset($fileTmp)) {
     unlink($fileTmp);
 }
@@ -29,10 +28,8 @@ View::show_header('Logchecker');
 <div class="thin">
     <h2 class="center">Logchecker Test Results</h2>
 <?= G::$Twig->render('logchecker/report.twig', [
-    'PASTED'   => $isPaste,
-    'CHECKSUM' => $logfile->checksum(),
-    'SCORE'    => $logfile->score(),
-    'REPORT'   => [['details' => $logfile->details(), 'text' => $logfile->text()]],
+    'pasted'   => $isPaste,
+    'logfile'  => $logfile,
 ]) ?>
 </div>
 

@@ -3,6 +3,7 @@
 namespace Gazelle;
 
 class LogfileSummary {
+    /** @var Logfile[] */
     protected $list;
     protected $allChecksum;
     protected $lowestScore;

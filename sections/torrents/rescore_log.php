@@ -1,6 +1,7 @@
 <?php
 
 use OrpheusNET\Logchecker\Logchecker;
+use Gazelle\Logfile;
 
 if (!check_perms('users_mod')) {
     error(403);
@@ -20,15 +21,17 @@ if (!$DB->has_results()) {
     error(404);
 }
 
-$Log = new Logchecker();
-$LogPath = SERVER_ROOT."/logs/{$TorrentID}_{$LogID}.log";
-$Log->new_file($LogPath);
-list($Score, $Details, $Checksum, $LogText) = $Log->parse();
-$Details = trim(implode("\r\n", $Details));
+$LogPath = SERVER_ROOT_LIVE."/logs/{$TorrentID}_{$LogID}.log";
+$Logfile = new Logfile($LogPath);
 
 $DB->prepared_query(
-    'UPDATE torrents_logs SET Log = ?, Details = ?, Score = ?, `Checksum` = ?, Adjusted = ? WHERE LogID = ? AND TorrentID = ?',
-    $LogText, $Details, $Score, $Checksum, 0, $LogID, $TorrentID
+    'UPDATE torrents_logs SET
+        `Log` = ?, Details = ?, Score = ?, `Checksum` = ?,
+        Adjusted = ?, Ripper = ?, RipperVersion = ?, `Language` = ?, ChecksumState = ?, LogcheckerVersion = ?
+    WHERE LogID = ? AND TorrentID = ?',
+    $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(),
+    0, $Logfile->ripper(), $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion(),
+    $LogID, $TorrentID
 );
 
 Torrents::set_logscore($TorrentID, $GroupID);
