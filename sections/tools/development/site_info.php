@@ -39,7 +39,7 @@ foreach ($ComposerLock['packages'] as $Package) {
     }
 }
 
-$ComposerPackages = json_decode(composer_exec('composer info --format=json'), true);
+$ComposerPackages = json_decode(composer_exec('composer info -d ../ --format=json'), true);
 foreach ($ComposerPackages['installed'] as $Package) {
     if (isset($Packages[$Package['name']])) {
         $Packages[$Package['name']]['Installed'] = $Package['version'];
@@ -48,8 +48,8 @@ foreach ($ComposerPackages['installed'] as $Package) {
 
 $Debug->set_flag('Start Phinx');
 
-$PhinxVersion = shell_exec('vendor/bin/phinx --version');
-$PhinxMigrations = array_filter(json_decode(shell_exec('vendor/bin/phinx status --format=json | tail -n 1'), true)['migrations'], function($value) { return count($value) > 0; });
+$PhinxVersion = shell_exec('../vendor/bin/phinx --version');
+$PhinxMigrations = array_filter(json_decode(shell_exec('../vendor/bin/phinx status -c ../phinx.php --format=json | tail -n 1'), true)['migrations'], function($value) { return count($value) > 0; });
 $PHPTimeStamp = date('Y-m-d H:i:s');
 $DB->query('SELECT NOW() as now;');
 $DBTimeStamp = $DB->fetch_record()['now'];
