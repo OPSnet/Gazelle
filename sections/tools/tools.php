@@ -190,7 +190,6 @@ Category('Development', [
     Item('Scheduler (legacy)',    'schedule.php?auth='.$LoggedUser['AuthKey'], All(['admin_schedule'])),
     Item('Tracker info',          'tools.php?action=ocelot_info',              All(['users_mod'])),
     Item('Update GeoIP',          'tools.php?action=update_geoip',             All(['admin_update_geoip'])),
-    Item('Update drive offsets',  'tools.php?action=update_offsets',           All(['users_mod'])),
 ]);
 
 ?>
