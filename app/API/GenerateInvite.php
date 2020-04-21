@@ -9,12 +9,14 @@ class GenerateInvite extends AbstractAPI {
         }
 
         if (isset($_GET['interviewer_id'])) {
-            $where = "ID='".intval($_GET['interviewer_id'])."'";
+            $where = "ID";
+            $param = intval($_GET['interviewer_id']);
         }
         else {
-            $where = "Username='".db_string($_GET['interviewer_name'])."'";
+            $where = "Username";
+            $param = $_GET['interview_name'];
         }
-        $this->db->query("SELECT ID, Username FROM users_main WHERE {$where}");
+        $this->db->prepared_query("SELECT ID, Username FROM users_main WHERE {$where}=?", $param);
         if ($this->db->record_count() === 0) {
             json_error("Could not find interviewer");
         }
@@ -22,27 +24,30 @@ class GenerateInvite extends AbstractAPI {
         $interviewer_id = $user['ID'];
         $interviewer_name = $user['Username'];
 
-        $email = (!empty($_GET['email'])) ? db_string($_GET['email']) : "";
+        $email = $_GET['email'] ?? '';
         $expires = time_plus(60 * 60 * 24 * 3); // 3 days
-        $key = db_string(make_secret());
+        $key = make_secret();
         $reason = "Passed Interview";
 
         if (!empty($_GET['email'])) {
-            $this->db->query("SELECT ID, Username FROM users_main WHERE Email='{$email}'");
+            $this->db->prepared_query("SELECT ID, Username FROM users_main WHERE Email=?", $email);
             if ($this->db->record_count() > 0) {
                 json_error("Email address already in use");
             }
 
-            $this->db->query("SELECT * FROM invites WHERE Email='{$email}'");
+            $this->db->prepared_query("SELECT * FROM invites WHERE Email=?", $email);
             if ($this->db->record_count() > 0) {
                 $key = $this->db->next_record();
                 json_error("Invite code already generated for this email address");
             }
         }
 
-        $this->db->query("
-INSERT INTO invites (InviterID, InviteKey, Email, Expires, Reason)
-VALUES ('{$interviewer_id}', '{$key}', '{$email}', '{$expires}', '{$reason}')");
+        $this->db->prepared_query(
+            "INSERT INTO invites
+                    (InviterID, InviteKey, Email, Expires, Reason)
+            VALUES  (?,         ?,         ?,     ?,       ?)",
+            $interviewer_id, $key, $email, $expires, $reason
+        );
         $site_url = "http";
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "") {
             $site_url .= "s";
