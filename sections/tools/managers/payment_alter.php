@@ -14,7 +14,8 @@ if ($_POST['submit'] == 'Delete') {
         WHERE ID = ?", $_POST['id']);
 } else {
     $Val->SetFields('text', '1', 'string', 'The payment text must be set, and has a max length of 100 characters', ['maxlength' => 100]);
-    $Val->SetFields('rent', '1', 'number', 'Rent must be zero or positive, no decimal point)', ['min' => 0, 'allowperiod' => false]);
+    $Val->SetFields('rent', '1', 'number', 'Rent must be zero or positive)', ['min' => 0, 'allowperiod' => true]);
+    $Val->SetFields('cc', '1', 'regex', 'The currency code must follow the ISO-4217 standard', ['regex' => '/^(BTC|EUR|USD)$/']);
     $Val->SetFields('expiry', '1', 'regex', 'The expiry must be a date in the form of YYYY-MM-DD', ['regex' => '/^\d{4}-\d{2}-\d{2}$/']);
     $Err = $Val->ValidateForm($_POST);
 
@@ -26,20 +27,16 @@ if ($_POST['submit'] == 'Delete') {
     if ($_POST['submit'] == 'Create') {
         $DB->prepared_query("
             INSERT INTO payment_reminders
-                   (Text, Expiry, AnnualRent, Active)
-            VALUES (?,    ?,      ?,          ?)
+                   (Text, Expiry, AnnualRent, cc, Active)
+            VALUES (?,    ?,      ?,          ?,  ?)
             ",
-            $_POST['text'], $_POST['expiry'], $_POST['rent'], $_POST['active'] == 'on' ? 1 : 0);
+            $_POST['text'], $_POST['expiry'], $_POST['rent'], $_POST['cc'], $_POST['active'] == 'on' ? 1 : 0);
     } else {
-        if (!is_number($_POST['id']) || $_POST['id'] == '') {
-            error(0);
-        }
-
         $DB->prepared_query("
             UPDATE payment_reminders SET
-                Text = ?, Expiry = ?, AnnualRent = ?, Active = ?
+                Text = ?, Expiry = ?, AnnualRent = ?, cc = ?, Active = ?
             WHERE ID = ?
-            ", $_POST['text'], $_POST['expiry'], $_POST['rent'], $_POST['active'] == 'on' ? 1 : 0,
+            ", $_POST['text'], $_POST['expiry'], $_POST['rent'], $_POST['cc'], $_POST['active'] == 'on' ? 1 : 0,
             $_POST['id']);
     }
 }
