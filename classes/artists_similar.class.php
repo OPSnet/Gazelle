@@ -26,8 +26,6 @@ class ARTISTS_SIMILAR extends ARTIST{
     var $LargestDecimal = 0;
     var $LowestDecimal = 1;
 
-
-
     function dump_data() {
         return serialize([time(), $this->Name, $this->x, $this->y, serialize($this->Artists), serialize($this->Similar)]);
     }

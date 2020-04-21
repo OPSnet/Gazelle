@@ -27,7 +27,10 @@ $DB = new DB_MYSQL;
 $Debug = new DEBUG;
 $Twig = new Environment(
     new FilesystemLoader(__DIR__.'/../templates'),
-    ['cache' => __DIR__.'/../cache/twig']
+    [
+        'debug' => DEBUG_MODE,
+        'cache' => __DIR__.'/../cache/twig'
+    ]
 );
 $Debug->handle_errors();
 
