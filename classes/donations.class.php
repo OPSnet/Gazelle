@@ -1,8 +1,5 @@
 <?php
 
-define('BTC_API_URL', 'https://api.bitcoinaverage.com/ticker/global/EUR/');
-define('USD_API_URL', 'http://www.google.com/ig/calculator?hl=en&q=1USD=?EUR');
-
 class Donations {
     private static $ForumDescriptions = [
         "I want only two houses, rather than seven... I feel like letting go of things",
@@ -95,25 +92,30 @@ class Donations {
                         $AdjustedRank, $Args['TotalRank']
                 );
             } else {
-                // Donations from the store get donor points directly, no need to calculate them
-                if (isset($Args['Source']) && $Args['Source'] == "Store Parser") {
-                    $ConvertedPrice = self::currency_exchange($Args['Amount'] * $Args['Price'], $Args['Currency']);
-                } else {
-                    $ConvertedPrice = self::currency_exchange($Args['Price'], $Args['Currency']);
-                    $DonorPoints = self::calculate_rank($ConvertedPrice);
+                $BTC = new \Gazelle\Manager\BTC(G::$DB, G::$Cache);
+                $forexRate = $BTC->latestRate('EUR');
+                switch ($Args['Currency'] == 'BTC') {
+                    case 'BTC':
+                        $btcAmount = $Args['Price'];
+                        $ConvertedPrice = $Args['Price'] * $forexRate;
+                        break;
+                    case 'EUR':
+                        $btcAmount = $Args['Price'] / $forexRate;
+                        $ConvertedPrice = $Args['Price'];
+                        break;
+                    default:
+                        $btcAmount = $BTC->fiat2btc($Args['Price'], $Args['Currency']);
+                        $ConvertedPrice = $btcAmount * $forexRate;
+                        break;
                 }
-                $IncreaseRank = $DonorPoints;
 
                 // Rank is the same thing as DonorPoints
-                $CurrentRank = self::get_rank($UserID);
                 // A user's donor rank can never exceed MAX_EXTRA_RANK
-                // If the amount they donated causes it to overflow, chnage it to MAX_EXTRA_RANK
                 // The total rank isn't affected by this, so their original donor point value is added to it
-                if (($CurrentRank + $DonorPoints) >= MAX_EXTRA_RANK) {
-                    $AdjustedRank = MAX_EXTRA_RANK;
-                } else {
-                    $AdjustedRank = $CurrentRank + $DonorPoints;
-                }
+                $IncreaseRank = $DonorPoints = self::calculate_rank($ConvertedPrice);
+                $CurrentRank = self::get_rank($UserID);
+                $AdjustedRank = min(MAX_EXTRA_RANK, $CurrentRank + $DonorPoints);
+
                 G::$DB->prepared_query('
                     INSERT INTO users_donor_ranks
                            (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
@@ -138,13 +140,12 @@ class Donations {
             self::calculate_special_rank($UserID);
 
             // Hand out invites
-            G::$DB->prepared_query('
+            $InvitesReceivedRank = G::$DB->scalar('
                 SELECT InvitesReceivedRank
                 FROM users_donor_ranks
                 WHERE UserID = ?
                 ', $UserID
             );
-            list($InvitesReceivedRank) = G::$DB->next_record();
             $AdjustedRank = $Rank >= MAX_RANK ? (MAX_RANK - 1) : $Rank;
             $InviteRank = $AdjustedRank - $InvitesReceivedRank;
             if ($InviteRank > 0) {
@@ -174,17 +175,14 @@ class Donations {
             // Lastly, add this donation to our history
             G::$DB->prepared_query('
                 INSERT INTO donations
-                       (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, Time)
-                VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         now())
+                       (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, btc, Time)
+                VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?, now())
                 ', $UserID, $ConvertedPrice, $Args['Source'], $Args['Reason'], $Args['Currency'],
-                    self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $DonorPoints, $TotalRank
+                    self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $DonorPoints, $TotalRank, $btcAmount
             );
 
             // Clear their user cache keys because the users_info values has been modified
-            G::$Cache->delete_value("user_info_$UserID");
-            G::$Cache->delete_value("user_info_heavy_$UserID");
-            G::$Cache->delete_value("donor_info_$UserID");
-
+            G::$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID"]);
         }
         G::$DB->set_query_id($QueryID);
     }
@@ -231,10 +229,8 @@ class Donations {
 
     public static function schedule() {
         self::$IsSchedule = true;
-
         DonationsBitcoin::find_new_donations();
         self::expire_ranks();
-        self::get_new_conversion_rates();
     }
 
     public static function expire_ranks() {
@@ -265,7 +261,7 @@ class Donations {
     }
 
     private static function calculate_rank($Amount) {
-        return floor($Amount / 5);
+        return floor($Amount / DONOR_RANK_PRICE);
     }
 
     public static function update_rank($UserID, $Rank, $TotalRank, $Reason) {
@@ -432,8 +428,6 @@ class Donations {
         return $Results;
     }
 
-
-
     public static function get_enabled_rewards($UserID) {
         $Rewards = [];
         $Rank = self::get_rank($UserID);
@@ -519,8 +513,6 @@ class Donations {
             $Update[] = "$ProfileInfoSQL = '$ProfileInfo'";
         }
     }
-
-
 
     public static function update_rewards($UserID) {
         $Rank = self::get_rank($UserID);
@@ -690,105 +682,6 @@ class Donations {
 
     public static function is_donor($UserID) {
         return self::get_rank($UserID) > 0;
-    }
-
-    public static function currency_exchange($Amount, $Currency) {
-        if (!self::is_valid_currency($Currency)) {
-            error("$Currency is not valid currency");
-        }
-        switch ($Currency) {
-            case 'USD':
-                $Amount = self::usd_to_euro($Amount);
-                break;
-            case 'BTC':
-                $Amount = self::btc_to_euro($Amount);
-                break;
-            default:
-                break;
-        }
-        return round($Amount, 2);
-    }
-
-    public static function is_valid_currency($Currency) {
-        return $Currency == 'EUR' || $Currency == 'BTC' || $Currency == 'USD';
-    }
-
-    public static function btc_to_euro($Amount) {
-        $Rate = G::$Cache->get_value('btc_rate');
-        if (empty($Rate)) {
-            $Rate = self::get_stored_conversion_rate('BTC');
-            G::$Cache->cache_value('btc_rate', $Rate, 86400);
-        }
-        return $Rate * $Amount;
-    }
-
-    public static function usd_to_euro($Amount) {
-        $Rate = G::$Cache->get_value('usd_rate');
-        if (empty($Rate)) {
-            $Rate = self::get_stored_conversion_rate('USD');
-            G::$Cache->cache_value('usd_rate', $Rate, 86400);
-        }
-        return $Rate * $Amount;
-    }
-
-    public static function get_stored_conversion_rate($Currency) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query('
-            SELECT Rate
-            FROM currency_conversion_rates
-            WHERE Currency = ?
-            ', $Currency
-        );
-        list($Rate) = G::$DB->next_record(MYSQLI_NUM, false);
-        G::$DB->set_query_id($QueryID);
-        return $Rate;
-    }
-
-    private static function set_stored_conversion_rate($Currency, $Rate) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query('
-            REPLACE INTO currency_conversion_rates
-                   (Currency, Rate, Time)
-            VALUES (?,        ?,    now())
-            ', $Currency, $Rate
-        );
-        if ($Currency == 'USD') {
-            $KeyName = 'usd_rate';
-        } elseif ($Currency == 'BTC') {
-            $KeyName = 'btc_rate';
-        }
-        G::$Cache->cache_value($KeyName, $Rate, 86400);
-        G::$DB->set_query_id($QueryID);
-    }
-
-    private static function get_new_conversion_rates() {
-        if ($BTC = file_get_contents(BTC_API_URL)) {
-            $BTC = json_decode($BTC, true);
-            if (isset($BTC['24h_avg'])) {
-                if ($Rate = round($BTC['24h_avg'], 4)) { // We don't need good precision
-                    self::set_stored_conversion_rate('BTC', $Rate);
-                }
-            }
-        }
-        if ($USD = file_get_contents(USD_API_URL)) {
-            // Valid JSON isn't returned so we make it valid.
-            $Replace = [
-                'lhs' => '"lhs"',
-                'rhs' => '"rhs"',
-                'error' => '"error"',
-                'icc' => '"icc"'
-            ];
-
-            $USD = str_replace(array_keys($Replace), array_values($Replace), $USD);
-            $USD = json_decode($USD, true);
-            if (isset($USD['rhs'])) {
-                // The response is in format "# Euroes", extracts the numbers.
-                $Rate = preg_split("/[\s,]+/", $USD['rhs']);
-                if ($Rate = round($Rate[0], 4)) { // We don't need good precision
-                    self::set_stored_conversion_rate('USD', $Rate);
-                }
-            }
-        }
     }
 
     public static function get_forum_description() {
