@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "85c9db2416d01abe38cd7c1d95378e16",
+    "content-hash": "ffdf12641b440897069e430ff04a0d69",
     "packages": [
         {
             "name": "cakephp/cache",
@@ -421,29 +421,43 @@
         },
         {
             "name": "orpheusnet/logchecker",
-            "version": "0.8.6",
+            "version": "0.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OPSnet/Logchecker.git",
-                "reference": "fe836b646f75c5f77ad5a17be52c6860f723e5b5"
+                "reference": "b30b3ddafc7b8ee85740b3f87229d23aed5a2af3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/fe836b646f75c5f77ad5a17be52c6860f723e5b5",
-                "reference": "fe836b646f75c5f77ad5a17be52c6860f723e5b5",
+                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/b30b3ddafc7b8ee85740b3f87229d23aed5a2af3",
+                "reference": "b30b3ddafc7b8ee85740b3f87229d23aed5a2af3",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": ">=7",
-                "symfony/console": "^3.4",
-                "symfony/debug": "^3.4",
-                "symfony/yaml": "^3.4"
+                "php": ">=7.2",
+                "symfony/console": "^3.4 | ^4.0 | ^5.0",
+                "symfony/process": "^3.4 | ^4.0 | ^5.0",
+                "symfony/yaml": "^3.4 | ^4.0 | ^5.0"
+            },
+            "require-dev": {
+                "brainmaestro/composer-git-hooks": "^2.8",
+                "phpstan/phpstan": "^0.12",
+                "phpunit/phpunit": "^8.5",
+                "squizlabs/php_codesniffer": "^3.5"
             },
             "bin": [
                 "bin/logchecker"
             ],
             "type": "library",
+            "extra": {
+                "hooks": {
+                    "pre-commit": [
+                        "composer run lint:fix",
+                        "composer run static-analysis"
+                    ]
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "OrpheusNET\\Logchecker\\": "src/"
@@ -460,7 +474,7 @@
                 }
             ],
             "description": "Logchecker for validating logs generated from supported ripping programs (like EAC and XLD)",
-            "time": "2019-07-24T05:59:47+00:00"
+            "time": "2020-04-17T18:04:05+00:00"
         },
         {
             "name": "psr/cache",
@@ -1038,6 +1052,55 @@
                 "shim"
             ],
             "time": "2019-08-06T08:03:45+00:00"
+        },
+        {
+            "name": "symfony/process",
+            "version": "v5.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "c5ca4a0fc16a0c888067d43fbcfe1f8a53d8e70e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/c5ca4a0fc16a0c888067d43fbcfe1f8a53d8e70e",
+                "reference": "c5ca4a0fc16a0c888067d43fbcfe1f8a53d8e70e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Process\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Process Component",
+            "homepage": "https://symfony.com",
+            "time": "2020-03-27T16:56:45+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -2697,5 +2760,6 @@
     "platform": {
         "php": ">=7.1"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

@@ -1,5 +1,6 @@
 <?php
 
+use Gazelle\Logfile;
 use OrpheusNET\Logchecker\Logchecker;
 
 //******************************************************************************//
@@ -266,24 +267,22 @@ foreach ($DBTorVals as $Key => $Value) {
 $AddedLogs = false;
 if (count($_FILES['logfiles']['name']) > 0) {
     ini_set('upload_max_filesize', 1000000);
-    $Logchecker = new Logchecker();
+
     foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
         if (!$_FILES['logfiles']['size'][$Pos]) {
             continue;
         }
 
-        $LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
-        $FileName = $_FILES['logfiles']['name'][$Pos];
+        $Logfile = new Logfile($_FILES['logfiles']['tmp_name'][$Pos], $_FILES['logfiles']['name'][$Pos]);
 
-        $Logchecker->new_file($LogPath);
-        list($Score, $Details, $Checksum, $Text) = $Logchecker->parse();
-        $Details = implode("\r\n", $Details);
-
-        $DB->prepared_query("INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`) VALUES (?, ?, ?, ?, ?, ?)",
-            $TorrentID, $Text, $Details, $Score, $Checksum, $FileName
+        $DB->prepared_query("
+        INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            $TorrentID, $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(), $Logfile->filename(), $Logfile->ripper(),
+            $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
         );
         $LogID = $DB->inserted_id();
-        if (move_uploaded_file($LogPath, SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+        if (move_uploaded_file($Logfile->filepath(), SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
             die("Could not copy logfile to the server.");
         }
         $AddedLogs = true;
@@ -308,15 +307,15 @@ if ($AddedLogs) {
 }
 $SQL .= "
     SET
-        Media = $T[Media],
-        Format = $T[Format],
-        Encoding = $T[Encoding],
-        RemasterYear = $T[RemasterYear],
-        Remastered = $T[Remastered],
-        RemasterTitle = $T[RemasterTitle],
-        RemasterRecordLabel = $T[RemasterRecordLabel],
-        RemasterCatalogueNumber = $T[RemasterCatalogueNumber],
-        Scene = $T[Scene],";
+        Media = {$T['Media']},
+        Format = {$T['Format']},
+        Encoding = {$T['Encoding']},
+        RemasterYear = {$T['RemasterYear']},
+        Remastered = {$T['Remastered']},
+        RemasterTitle = {$T['RemasterTitle']},
+        RemasterRecordLabel = {$T['RemasterRecordLabel']},
+        RemasterCatalogueNumber = {$T['RemasterCatalogueNumber']},
+        Scene = {$T['Scene']},";
 if ($AddedLogs) {
     $SQL .= "
         LogScore = CASE WHEN tl.Score IS NULL THEN 100 ELSE tl.Score END,
@@ -325,15 +324,15 @@ if ($AddedLogs) {
 }
 
 if (check_perms('torrents_freeleech')) {
-    $SQL .= "FreeTorrent = $T[FreeLeech],";
-    $SQL .= "FreeLeechType = $T[FreeLeechType],";
+    $SQL .= "FreeTorrent = {$T['FreeLeech']},";
+    $SQL .= "FreeLeechType = {$T['FreeLeechType']},";
 }
 
 if (check_perms('users_mod')) {
     if ($T['Format'] == "'FLAC'" && $T['Media'] == "'CD'") {
         $SQL .= "
-            HasLog = $T[HasLog],
-            HasCue = $T[HasCue],";
+            HasLog = {$T['HasLog']},
+            HasCue = {$T['HasCue']},";
     } else {
         $SQL .= "
             HasLog = '0',
@@ -426,7 +425,7 @@ if (check_perms('users_mod')) {
 }
 
 $SQL .= "
-        Description = $T[TorrentDescription]
+        Description = {$T['TorrentDescription']}
     WHERE ID = $TorrentID";
 $DB->query($SQL);
 

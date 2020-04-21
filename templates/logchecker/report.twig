@@ -1,41 +1,41 @@
-{% if not CHECKSUM %}
+{% if not logfile.checksum() %}
     <blockquote>
-{%  if PASTED is not defined %}
+    {% if pasted is not defined or pasted == false %}
         <strong>Trumpable For:</strong>
         <br /><br />
-        Bad/No Checksum(s)
-{%  else %}
-        Checksums of pasted log files cannot be verified, as the character encoding can change during copy-pasting.
-{%  endif %}
+        {% if logfile.checksumState() == 'checksum_missing' %}
+                No Checksum(s)
+        {% elseif logfile.checksumState() == 'checksum_invalid' %}
+                Invalid Checksum(s)
+        {% endif %}
+    {% else %}
+            Checksums of pasted log files cannot be verified, as the character encoding can change during copy-pasting.
+    {% endif %}
     </blockquote>
 {% endif %}
 
-{% if SCORE == 100 %}
-{%    set COLOR = '#418B00' %}
-{% elseif SCORE  >  90 %}
-{%     set COLOR = '#74C42E' %}
-{% elseif SCORE  >  75 %}
-{%     set COLOR = '#FFAA00' %}
-{% elseif SCORE  >  50 %}
-{%     set COLOR = '#FF5E00' %}
+{% if logfile.score() == 100 %}
+{%    set color = '#418B00' %}
+{% elseif logfile.score()  >  90 %}
+{%     set color = '#74C42E' %}
+{% elseif logfile.score()  >  75 %}
+{%     set color = '#FFAA00' %}
+{% elseif logfile.score()  >  50 %}
+{%     set color = '#FF5E00' %}
 {% else %}
-{%     set COLOR = '#FF0000' %}
+{%     set color = '#FF0000' %}
 {% endif %}
     <blockquote>
-        <strong>Score:</strong> <span style="color:{{ COLOR }}">{{ SCORE }}</span> (out of 100)
+        <strong>Score:</strong> <span style="color:{{ color }}">{{ logfile.score() }}</span> (out of 100)
     </blockquote>
-{% for R in REPORT %}
-{% if R.details %}
     <blockquote>
         <h3>Log validation report:</h3>
         <ul>
-{%  for detail in R.details %}
+{% for detail in logfile.details() %}
             <li>{{ detail }}</li>
-{%  endfor %}
+{% endfor %}
         </ul>
     </blockquote>
-{% endif %}
     <blockquote>
-        <pre>{{ R.text|raw }}</pre>
+        <pre>{{ logfile.text()|raw }}</pre>
     </blockquote>
-{% endfor %}

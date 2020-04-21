@@ -80,7 +80,7 @@ if ($DB->has_results()) {
         }
         echo "\t\t\t\t<tr><td style=\"width: 5%;\"><input type=\"radio\" name=\"torrentid\" value=\"{$ID}\"></td><td>{$DisplayName}</td></tr>";
     }
-    $AcceptValues = Logchecker::get_accept_values();
+    $AcceptValues = Logchecker::getAcceptValues();
     echo <<<HTML
                 <tr class="colhead">
                     <td colspan="2">Upload Logs for This Torrent</td>
