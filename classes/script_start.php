@@ -67,7 +67,10 @@ G::$Cache = $Cache;
 G::$DB = $DB;
 G::$Twig = new Environment(
     new FilesystemLoader(__DIR__ . '/../templates'),
-    ['cache' => __DIR__ . '/../cache/twig']
+    [
+        'debug' => DEBUG_MODE,
+        'cache' => __DIR__ . '/../cache/twig'
+    ]
 );
 $Debug->set_flag('Twig constructed');
 

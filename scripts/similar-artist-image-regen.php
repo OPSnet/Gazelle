@@ -6,15 +6,9 @@ define('ERROR_EXCEPTION', true);
 
 require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../classes/classloader.php');
-
-use Gazelle\Util\Crypto;
-use Twig\Loader\FilesystemLoader;
-use Twig\Environment;
-
 require_once(__DIR__.'/../classes/time.class.php'); //Require the time class
 require_once(__DIR__.'/../classes/paranoia.class.php'); //Require the paranoia check_paranoia function
 require_once(__DIR__.'/../classes/util.php');
-require_once(__DIR__.'/../classes/image.class.php');
 
 $Debug = new DEBUG;
 $Debug->handle_errors();
@@ -24,16 +18,12 @@ $Cache = new CACHE($MemcachedServers);
 
 G::$Cache = $Cache;
 G::$DB = $DB;
-G::$Twig = new Environment(
-    new FilesystemLoader(__DIR__.'/../templates'),
-    ['cache' => __DIR__.'/../cache/twig']
-);
 
 define('WIDTH', 585);
 define('HEIGHT', 400);
 
 global $Img;
-$Img = new IMAGE;
+$Img = new IMAGE();
 
 $DB->query('
 	select ArtistID, Name from artists_group
