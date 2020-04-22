@@ -772,7 +772,7 @@ if ((check_perms('users_view_invites')) && $Invited > 0) {
 <?php
 }
 
-if (check_perms('users_mod')) {
+if (check_perms('users_give_donor')) {
     DonationsView::render_donation_history(Donations::get_donation_history($UserID));
 }
 

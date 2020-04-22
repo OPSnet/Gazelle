@@ -22,7 +22,7 @@ echo <<<HTML
     <div class="box pad donation_info">
         If you wish to donate, please contact <a href='https://orpheus.network/user.php?action=search&search=Spine'>Spine</a>, and they will handle your donation manually.
         <br /><br />
-        The minimum amount required for donating is 10 USD, and must be paid in Bitcoin.
+        The minimum amount required for donating is 10 Euros, and must be paid in Bitcoin.
     </div>
 
     <span class="donation_info_title">What you will receive for donating</span>

@@ -34,7 +34,7 @@ class Permissions {
                 WHERE ID = '$PermissionID'");
             $Permission = G::$DB->next_record(MYSQLI_ASSOC, ['Permissions']);
             G::$DB->set_query_id($QueryID);
-            $Permission['Permissions'] = unserialize($Permission['Permissions']);
+            $Permission['Permissions'] = unserialize($Permission['Permissions']) ?: [];
             G::$Cache->cache_value("perm_$PermissionID", $Permission, 2592000);
         }
         return $Permission;

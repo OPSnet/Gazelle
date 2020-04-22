@@ -175,9 +175,9 @@ if (!check_perms('users_mod', $Cur['Class'])) {
 }
 
 if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
-    Donations::regular_donate($UserID, $_POST['donation_value'], "Add Points", $_POST['donation_reason'], $_POST['donation_currency']);
+    Donations::moderator_donate($UserID, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason']);
 } elseif (!empty($_POST['donor_values_submit'])) {
-    Donations::update_rank($UserID, $_POST['donor_rank'], $_POST['total_donor_rank'], $_POST['reason']);
+    Donations::moderator_adjust($UserID, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason']);
 }
 
 // If we're deleting the user, we can ignore all the other crap
@@ -408,12 +408,6 @@ if ($Title != db_string($Cur['Title']) && check_perms('users_edit_titles')) {
     }
 }
 
-if ($Donor != $Cur['Donor'] && check_perms('users_give_donor')) {
-    $UpdateSet[] = "Donor = '$Donor'";
-    $EditSummary[] = 'donor status changed';
-    $LightUpdates['Donor'] = $Donor;
-}
-
 // Secondary classes
 if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
     $OldClasses = $Cur['SecondaryClasses'] ? explode(',', $Cur['SecondaryClasses']) : [];
@@ -456,6 +450,12 @@ if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
         //$LightUpdates['ExtraClasses'] = array_fill_keys($SecondaryClasses, 1);
         $DeleteKeys = true;
     }
+}
+
+if ($Donor != $Cur['Donor'] && check_perms('users_give_donor')) {
+    $UpdateSet[] = "Donor = '$Donor'";
+    $EditSummary[] = 'donor status changed';
+    $LightUpdates['Donor'] = $Donor;
 }
 
 if ($Visible != $Cur['Visible'] && check_perms('users_make_invisible')) {

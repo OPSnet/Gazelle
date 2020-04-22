@@ -6,9 +6,10 @@ class DonationsView {
         <table class="layout" id="donation_box">
             <tr class="colhead">
                 <td colspan="2">
-                    Donor System (add points)
+                    Donations
                 </td>
             </tr>
+            <tr><td></td><td><b>Manual Donation</td></tr>
             <tr>
                 <td class="label">Value:</td>
                 <td>
@@ -16,7 +17,7 @@ class DonationsView {
                     <select name="donation_currency">
                         <option value="EUR">EUR</option>
                         <option value="USD">USD</option>
-                        <option value="XBT">XBT</option>
+                        <option value="XBT" selected="selected">XBT</option>
                     </select>
                 </td>
             </tr>
@@ -25,31 +26,47 @@ class DonationsView {
                 <td><input type="text" class="wide_input_text" name="donation_reason" /></td>
             </tr>
             <tr>
-                <td align="right" colspan="2">
-                    <input type="submit" name="donor_points_submit" value="Add donor points" />
-                </td>
-            </tr>
-        </table>
-
-        <table class="layout" id="donor_points_box">
-            <tr class="colhead">
-                <td colspan="3" class="tooltip" title='Use this tool only when manually correcting values. If crediting donations normally, use the "Donor System (add points)" tool'>
-                    Donor System (modify values)
+                <td>&nbsp;</td>
+                <td>
+                    <input type="submit" name="donor_points_submit" value="Add donation" />
                 </td>
             </tr>
             <tr>
-                <td class="label tooltip" title="Active points determine a user's Donor Rank and do expire.">Active points:</td>
-                <td><input type="text" name="donor_rank" onkeypress="return isNumberKey(event);" value="<?=Donations::get_rank($UserID)?>" /></td>
+                <td>&nbsp;</td>
+                <td><b>Donation point adjustement</td>
             </tr>
             <tr>
-                <td class="label tooltip" title="Total points represent a user's overall total and never expire. Total points determines a user's Special Rank and Donor Leaderboard placement.">Total points:</td>
-                <td><input type="text" name="total_donor_rank" onkeypress="return isNumberKey(event);" value="<?=Donations::get_total_rank($UserID)?>" /></td>
+                <td colspan="2">Use this section only when manually adjusting
+                values. If crediting donations normally, use the Manual Donation
+                section. Active points represent the donation amount that has
+                not yet expired. Total points represent the combined amount of
+                all donations and never expire. These are used to determine the
+                Special Rank and Leaderboard placement of a member.</td>
+            </tr>
+            <tr>
+                <td class="label">Special Rank:</td>
+                <td><b><?= Donations::get_special_rank($UserID) ?></b></td>
+            </tr>
+            <tr>
+                <td class="label">Adjust active points:</td>
+                <td>
+                <input type="text" width="4" name="donor_rank_delta" value="0" />
+                (add or subtract) currently: <b><?= Donations::get_rank($UserID) ?></b>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Adjust total points:</td>
+                <td>
+                <input type="text" width="4" name="total_donor_rank_delta" value="0" />
+                (add or subtract) currently: <b><?= Donations::get_total_rank($UserID) ?></b>
+                </td>
             </tr>
             <tr>
                 <td class="label">Reason:</td>
                 <td><input type="text" class="wide_input_text" name="reason" /></td>
             </tr>
             <tr>
+                <td>&nbsp;</td>
                 <td align="right" colspan="2">
                     <input type="submit" name="donor_values_submit" value="Change point values" />
                 </td>
@@ -86,7 +103,11 @@ class DonationsView {
                     </li>
 <?php            } else { ?>
                     <li>
+<?php               if ($OwnProfile) { ?>
+                        You haven't donated.
+<?php               } else { ?>
                         This user hasn't donated.
+<?php               } ?>
                     </li>
 <?php            } ?>
                 </ul>
