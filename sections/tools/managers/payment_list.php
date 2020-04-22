@@ -8,7 +8,7 @@ $DB->prepared_query("
     FROM payment_reminders");
 
 $Reminders = $DB->has_results() ? $DB->to_array('ID', MYSQLI_ASSOC) : [];
-$BTC = new \Gazelle\Manager\BTC($DB, $Cache);
+$XBT = new \Gazelle\Manager\XBT($DB, $Cache);
 
 View::show_header('Payment Dates');
 ?>
@@ -21,7 +21,7 @@ View::show_header('Payment Dates');
         <td>Expiry</td>
         <td>Annual Rent</td>
         <td>Currency Code</td>
-        <td>Equivalent BTC</td>
+        <td>Equivalent XBT</td>
         <td>Active</td>
         <td>Submit</td>
     </tr>
@@ -31,12 +31,12 @@ $totalRent = 0;
 
 foreach ($Reminders as $r) {
     list($ID, $Text, $Expiry, $Rent, $CC, $Active) = array_values($r);
-    if ($CC == 'BTC') {
+    if ($CC == 'XBT') {
         $fiatRate = 1.0;
         $Rent = sprintf('%0.6f', $Rent);
         $btcRent = sprintf('%0.6f', $Rent);
     } else {
-        $fiatRate = $BTC->fetchRate($CC);
+        $fiatRate = $XBT->fetchRate($CC);
         if (!$fiatRate) {
             error(0, "$ID code $CC");
         }
@@ -64,7 +64,7 @@ foreach ($Reminders as $r) {
             </td>
             <td>
                 <select name="cc">
-                    <option value="BTC"<?= $CC == 'BTC' ? ' selected="selected"' : '' ?>>BTC</option>
+                    <option value="XBT"<?= $CC == 'XBT' ? ' selected="selected"' : '' ?>>XBT</option>
                     <option value="EUR"<?= $CC == 'EUR' ? ' selected="selected"' : '' ?>>EUR</option>
                     <option value="USD"<?= $CC == 'USD' ? ' selected="selected"' : '' ?>>USD</option>
                 </select>
@@ -100,7 +100,7 @@ foreach ($Reminders as $r) {
                 <select name="cc">
                     <option value="EUR" selected="selected">EUR</option>
                     <option value="USD">USD</option>
-                    <option value="BTC">BTC</option>
+                    <option value="XBT">XBT</option>
                 </select>
             </td>
             <td>&nbsp;</td>

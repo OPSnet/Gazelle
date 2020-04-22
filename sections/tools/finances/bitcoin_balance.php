@@ -5,7 +5,7 @@ if (!check_perms('admin_donor_log')) {
 $Title = "Bitcoin Donation Balance";
 View::show_header($Title);
 
-$Balance = DonationsBitcoin::get_balance() . ' BTC';
+$Balance = DonationsBitcoin::get_balance() . ' XBT';
 ?>
 <div class="header">
     <h2><?=$Title?></h2>
@@ -43,7 +43,7 @@ if (empty($_GET['list'])) {
     <tr>
         <td><?=Users::format_username($UserID, true, false, false, false)?></td>
         <td><tt><?=$BitcoinAddress?></tt></td>
-        <td><?=$BitcoinAddresses[$BitcoinAddress]?> BTC</td>
+        <td><?=$BitcoinAddresses[$BitcoinAddress]?> XBT</td>
     </tr>
 <?php
     }

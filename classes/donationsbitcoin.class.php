@@ -12,11 +12,11 @@ class DonationsBitcoin {
         if (empty($Donations)) {
             return [];
         }
-        $BTCUsers = [];
+        $XBTUsers = [];
         foreach ($Donations as $Account) {
-            $BTCUsers[$Account->address] = $Account->amount;
+            $XBTUsers[$Account->address] = $Account->amount;
         }
-        return $BTCUsers;
+        return $XBTUsers;
     }
 
     /**
@@ -159,7 +159,7 @@ class DonationsBitcoin {
             }
             $Debug->log_var($NewDonations, '$NewDonations');
             foreach (self::get_userids(array_keys($NewDonations)) as $Address => $UserID) {
-                Donations::regular_donate($UserID, $NewDonations[$Address], 'Bitcoin Parser', '', 'BTC');
+                Donations::regular_donate($UserID, $NewDonations[$Address], 'Bitcoin Parser', '', 'XBT');
                 self::store_donation($Address, $NewDonations[$Address]);
             }
             G::$Cache->cache_value('btc_total_received', $NewAmount, 0);

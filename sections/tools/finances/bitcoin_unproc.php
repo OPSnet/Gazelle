@@ -50,7 +50,7 @@ foreach ($AllDonations as $Address => $Amount) {
 <?php
 if (!empty($NewDonations)) {
     foreach (DonationsBitcoin::get_userids(array_keys($NewDonations)) as $Address => $UserID) {
-        $DonationEUR = 0; // FIXME Donations::currency_exchange($NewDonations[$Address], 'BTC');
+        $DonationEUR = 0; // FIXME Donations::currency_exchange($NewDonations[$Address], 'XBT');
 ?>
         <tr>
             <td><?=$Address?></td>

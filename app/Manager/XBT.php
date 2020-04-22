@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class BTC {
+class XBT {
     /** @var \DB_MYSQL */
     protected $db;
 
@@ -11,7 +11,9 @@ class BTC {
 
     const CACHE_KEY = 'btc_rate_%s';
 
-    /* Coinbase quotes have a 1% fee, but we lose more in tumbling, so whatever */
+    /* Coinbase quotes have a 1% fee, but we lose more in tumbling, so whatever.
+     * Coinbase never realised that BTC collides with Bhutan, XBT is the ISO-4217 code.
+     */
     const FX_QUOTE_URL = 'https://api.coinbase.com/v2/prices/BTC-%s/buy';
 
     public function __construct (\DB_MYSQL $db, \CACHE $cache) {
@@ -19,7 +21,7 @@ class BTC {
         $this->cache = $cache;
     }
 
-    /* Fetch the current BTC rate for a given currency code (ISO 4217)
+    /* Fetch the current XBT rate for a given currency code (ISO 4217)
      *
      * @param string $CC Currency Code
      * @return float current rate, or null if API endpoint cannot be reached or is in error.
@@ -94,11 +96,11 @@ class BTC {
         return $rate;
     }
 
-    /* Convert the fiat currency amount to BTC at current rates
+    /* Convert the fiat currency amount to XBT at current rates
      *
      * @param float $amount Amount of fiat currency
      * @param string $CC Currency Code
-     * @return float Current amount in BTC, or null on failure
+     * @return float Current amount in XBT, or null on failure
      */
     public function fiat2btc(float $amount, string $CC) {
         $rate = $this->latestRate($CC);
