@@ -15,7 +15,7 @@ if ($_POST['submit'] == 'Delete') {
 } else {
     $Val->SetFields('text', '1', 'string', 'The payment text must be set, and has a max length of 100 characters', ['maxlength' => 100]);
     $Val->SetFields('rent', '1', 'number', 'Rent must be zero or positive)', ['min' => 0, 'allowperiod' => true]);
-    $Val->SetFields('cc', '1', 'regex', 'The currency code must follow the ISO-4217 standard', ['regex' => '/^(BTC|EUR|USD)$/']);
+    $Val->SetFields('cc', '1', 'regex', 'The currency code must follow the ISO-4217 standard', ['regex' => '/^(XBT|EUR|USD)$/']);
     $Val->SetFields('expiry', '1', 'regex', 'The expiry must be a date in the form of YYYY-MM-DD', ['regex' => '/^\d{4}-\d{2}-\d{2}$/']);
     $Err = $Val->ValidateForm($_POST);
 
