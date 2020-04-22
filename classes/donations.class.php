@@ -3,13 +3,33 @@
 class Donations {
     private static $IsSchedule = false;
 
+    public static function moderator_adjust($UserID, $Rank, $TotalRank, $Reason) {
+        self::donate($UserID, [
+            "Source" => "Modify Values",
+            "Rank" => (int)$Rank,
+            "TotalRank" => (int)$TotalRank,
+            "SendPM" => false,
+            "Reason" => $Reason,
+        ]);
+    }
+
+    public static function moderator_donate($UserID, $amount, $Currency, $Reason) {
+        self::donate($UserID, [
+            "Source" => 'Add Points',
+            "Amount" => $amount,
+            "Currency" => $Currency,
+            "SendPM" => true,
+            "Reason" => $Reason,
+        ]);
+    }
+
     public static function regular_donate($UserID, $DonationAmount, $Source, $Reason, $Currency = "EUR") {
         self::donate($UserID, [
-            "Reason" => $Reason,
             "Source" => $Source,
-            "Price" => $DonationAmount,
+            "Amount" => $DonationAmount,
             "Currency" => $Currency,
-            "SendPM" => true
+            "SendPM" => true,
+            "Reason" => $Reason,
         ]);
     }
 
@@ -17,210 +37,205 @@ class Donations {
         $UserID = (int)$UserID;
         $QueryID = G::$DB->get_query_id();
 
+        G::$Cache->InternalCache = false;
+
+        // Legacy donor, should remove at some point
         G::$DB->prepared_query('
-            SELECT 1
-            FROM users_main
-            WHERE ID = ?
-            ', $UserID
+            UPDATE users_info
+            SET Donor = ?
+            WHERE UserID = ?
+            ', '1', $UserID
         );
-        if (G::$DB->has_results()) {
-            G::$Cache->InternalCache = false;
 
-            // Legacy donor, should remove at some point
-            G::$DB->prepared_query('
-                UPDATE users_info
-                SET Donor = ?
-                WHERE UserID = ?
-                ', '1', $UserID
-            );
-
-            // Give them an invite the first time they donate
-            $FirstInvite = G::$DB->affected_rows();
-
-            // Assign them to the Donor secondary class
-            $DonorClass = G::$DB->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor');
-            if ($DonorClass) {
-                if (!G::$DB->scalar('SELECT 1 FROM users_levels WHERE UserID = ? AND PermissionID = ?', $UserID, $DonorClass)) {
-                    G::$DB->prepared_query('
-                        INSERT INTO users_levels
-                               (UserID, PermissionID)
-                        VALUES (?,      ?)
-                        ', $UserID, $DonorClass
-                    );
-                }
+        if (!isset($Args['Amount'])) {
+            $xbtAmount = 0.0;
+            $fiatAmount = 0.0;
+        } else {
+            $XBT = new \Gazelle\Manager\XBT(G::$DB, G::$Cache);
+            $forexRate = $XBT->latestRate('EUR');
+            switch ($Args['Currency'] == 'XBT') {
+                case 'XBT':
+                    $xbtAmount = $Args['Amount'];
+                    $fiatAmount = $Args['Amount'] * $forexRate;
+                    break;
+                case 'EUR':
+                    $xbtAmount = $Args['Amount'] / $forexRate;
+                    $fiatAmount = $Args['Amount'];
+                    break;
+                default:
+                    $xbtAmount = $XBT->fiat2xbt($Args['Amount'], $Args['Currency']);
+                    $fiatAmount = $xbtAmount * $forexRate;
+                    break;
             }
-
-            // A staff member is directly manipulating donor points
-            if (isset($Args['Manipulation']) && $Args['Manipulation'] === "Direct") {
-                $DonorPoints = $Args['Rank'];
-                $AdjustedRank = $Args['Rank'] >= MAX_EXTRA_RANK ? MAX_EXTRA_RANK : $Args['Rank'];
-                $ConvertedPrice = 0;
-                G::$DB->prepared_query('
-                    INSERT INTO users_donor_ranks
-                           (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
-                    VALUES (?,      ?,    ?,         now(),        now())
-                    ON DUPLICATE KEY UPDATE
-                        Rank = ?,
-                        TotalRank = ?,
-                        DonationTime = now(),
-                        RankExpirationTime = now()
-                    ', $UserID, $AdjustedRank, $Args['TotalRank'],
-                        $AdjustedRank, $Args['TotalRank']
-                );
-            } else {
-                $BTC = new \Gazelle\Manager\BTC(G::$DB, G::$Cache);
-                $forexRate = $BTC->latestRate('EUR');
-                switch ($Args['Currency'] == 'BTC') {
-                    case 'BTC':
-                        $btcAmount = $Args['Price'];
-                        $ConvertedPrice = $Args['Price'] * $forexRate;
-                        break;
-                    case 'EUR':
-                        $btcAmount = $Args['Price'] / $forexRate;
-                        $ConvertedPrice = $Args['Price'];
-                        break;
-                    default:
-                        $btcAmount = $BTC->fiat2btc($Args['Price'], $Args['Currency']);
-                        $ConvertedPrice = $btcAmount * $forexRate;
-                        break;
-                }
-
-                // Rank is the same thing as DonorPoints
-                // A user's donor rank can never exceed MAX_EXTRA_RANK
-                // The total rank isn't affected by this, so their original donor point value is added to it
-                $IncreaseRank = $DonorPoints = self::calculate_rank($ConvertedPrice);
-                $CurrentRank = self::get_rank($UserID);
-                $AdjustedRank = min(MAX_EXTRA_RANK, $CurrentRank + $DonorPoints);
-
-                G::$DB->prepared_query('
-                    INSERT INTO users_donor_ranks
-                           (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
-                    VALUES (?,      ?,    ?,         now(),        now())
-                    ON DUPLICATE KEY UPDATE
-                        Rank = ?,
-                        TotalRank = TotalRank + ?,
-                        DonationTime = now(),
-                        RankExpirationTime = now()
-                    ', $UserID, $AdjustedRank, $DonorPoints,
-                        $AdjustedRank, $DonorPoints
-                );
-            }
-            // Donor cache key is outdated
-            G::$Cache->delete_value("donor_info_$UserID");
-
-            // Get their rank
-            $Rank = self::get_rank($UserID);
-            $TotalRank = self::get_total_rank($UserID);
-
-            // Now that their rank and total rank has been set, we can calculate their special rank
-            self::calculate_special_rank($UserID);
-
-            // Hand out invites
-            $InvitesReceivedRank = G::$DB->scalar('
-                SELECT InvitesReceivedRank
-                FROM users_donor_ranks
-                WHERE UserID = ?
-                ', $UserID
-            );
-            $AdjustedRank = $Rank >= MAX_RANK ? (MAX_RANK - 1) : $Rank;
-            $InviteRank = $AdjustedRank - $InvitesReceivedRank;
-            if ($InviteRank > 0) {
-                G::$DB->prepared_query('
-                    UPDATE users_main
-                    SET Invites = Invites + ?
-                    WHERE ID = ?
-                    ', $FirstInvite + $InviteRank, $UserID
-                );
-                G::$DB->prepared_query('
-                    UPDATE users_donor_ranks
-                    SET InvitesReceivedRank = ?
-                    WHERE UserID = ?
-                    ', $AdjustedRank, $UserID);
-            }
-
-            // Send them a thank you PM
-            if ($Args['SendPM']) {
-                Misc::send_pm(
-                    $UserID,
-                    0,
-                    'Your contribution has been received and credited. Thank you!',
-                    self::get_pm_body($Args['Source'], $Args['Currency'], $Args['Price'], $IncreaseRank, $Rank)
-                );
-            }
-
-            // Lastly, add this donation to our history
-            G::$DB->prepared_query('
-                INSERT INTO donations
-                       (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, btc, Time)
-                VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?, now())
-                ', $UserID, $ConvertedPrice, $Args['Source'], $Args['Reason'], $Args['Currency'],
-                    self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $DonorPoints, $TotalRank, $btcAmount
-            );
-
-            // Clear their user cache keys because the users_info values has been modified
-            G::$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID"]);
         }
-        G::$DB->set_query_id($QueryID);
-    }
 
-    private static function calculate_special_rank($UserID) {
-        $UserID = (int)$UserID;
-        $QueryID = G::$DB->get_query_id();
-        // Are they are special?
+        // A rank is acquired for a configured DONOR_RANK_PRICE.
+        // Multiple ranks can be acquired at once, but the current rank cannot exceed MAX_EXTRA_RANK
+        // The entire number of multiple ranks purchased at donation time are credited to Total ranks.
+        // Total ranks acquired (all time) unlock Special ranks.
+        $rankDelta = $Args['Rank'] ?? floor($fiatAmount / DONOR_RANK_PRICE);
+        $totalDelta = $Args['TotalRank'] ?? $rankDelta;
+
         G::$DB->prepared_query('
-            SELECT TotalRank, SpecialRank
+            INSERT INTO users_donor_ranks
+                   (UserID, Rank, TotalRank, DonationTime, RankExpirationTime)
+            VALUES (?,      ?,    ?,         now(),        now())
+            ON DUPLICATE KEY UPDATE
+                Rank = coalesce(Rank, 0) + ?,
+                TotalRank = coalesce(TotalRank, 0) + ?,
+                DonationTime = now(),
+                RankExpirationTime = now()
+            ', $UserID,
+                $rankDelta, $totalDelta,
+                $rankDelta, $totalDelta
+        );
+
+        // Fetch their current donor rank after update
+        list($Rank, $TotalRank, $SpecialRank, $previousInvites) = G::$DB->row('
+            SELECT Rank, TotalRank, SpecialRank, InvitesReceivedRank
             FROM users_donor_ranks
             WHERE UserID = ?
             ', $UserID
         );
-        if (G::$DB->has_results()) {
-            // Adjust their special rank depending on the total rank.
-            list($TotalRank, $SpecialRank) = G::$DB->next_record();
-            if ($TotalRank < 10) {
-                $SpecialRank = 0;
-            }
-            if ($SpecialRank < 1 && $TotalRank >= 10) {
-                Misc::send_pm( $UserID, 0,
-                    "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
-                    G::$Twig->render('donation/special-rank-1.twig', [
-                       'forum_url'   => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                       'site_name'   => SITE_NAME,
-                       'staffpm_url' => site_url() . 'staffpm.php',
-                    ])
-                );
-                $SpecialRank = 1;
-            }
-            if ($SpecialRank < 2 && $TotalRank >= 20) {
-                Misc::send_pm($UserID, 0,
-                    "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
-                    G::$Twig->render('donation/special-rank-2.twig', [
-                       'forum_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                       'site_name' => SITE_NAME,
-                    ])
-                );
-                $SpecialRank = 2;
-            }
-            if ($SpecialRank < 3 && $TotalRank >= 50) {
-                Misc::send_pm($UserID, 0,
-                    "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
-                    G::$Twig->render('donation/special-rank-3.twig', [
-                       'forum_url'      => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                       'forum_gold_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
-                       'site_name'      => SITE_NAME,
-                    ])
-                );
-                $SpecialRank = 3;
-            }
-            // Make them special
-            G::$DB->prepared_query('
-                UPDATE users_donor_ranks
-                SET SpecialRank = ?
-                WHERE UserID = ?
-                ', $SpecialRank, $UserID
-            );
-            G::$Cache->delete_value("donor_info_$UserID");
+
+        // They have been undonored
+        if ($xbtAmount == 0.0 && $Rank == 0 && $TotalRank == 0) {
+            self::remove_donor_status($UserID);
+            G::$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID"]);
+            return;
         }
+
+        // Assign them to the Donor secondary class if it hasn't already been done
+        $inviteForNewDonor = $xbtAmount > 0 ? self::add_donor_status($UserID) : 0;
+
+        // Now that their rank and total rank has been set, we can calculate their special rank and invites
+        $column = [];
+        $args = [];
+        $newSpecial = self::calculate_special_rank($UserID, $TotalRank);
+        if ($newSpecial != $SpecialRank) {
+            $column[] = 'SpecialRank = ?';
+            $args[] = $newSpecial;
+        }
+
+        // One invite given per two ranks gained, up to a certain limit
+        $newInvites = min(MAX_RANK, floor($Rank / 2)) - $previousInvites;
+        if ($newInvites) {
+            $column[] = 'InvitesReceivedRank = coalesce(InvitesReceivedRank, 0) + ?';
+            $args[] = $newInvites;
+        }
+        if ($column) {
+            $sql = 'UPDATE users_donor_ranks SET '
+                . implode(', ', $column)
+                . ' WHERE UserID = ?';
+            $args[] = $UserID;
+            G::$DB->prepared_query($sql, ...$args);
+        }
+
+        if ($inviteForNewDonor || $newInvites) {
+            G::$DB->prepared_query('
+                UPDATE users_main
+                SET Invites = Invites + ?
+                WHERE ID = ?
+                ', $inviteForNewDonor + $newInvites, $UserID
+            );
+        }
+
+        // Send them a thank you PM
+        if ($Args['SendPM']) {
+            Misc::send_pm(
+                $UserID,
+                0,
+                'Your contribution has been received and credited. Thank you!',
+                self::get_pm_body($Args['Source'], $Args['Currency'], $Args['Amount'], $IncreaseRank, $Rank)
+            );
+        }
+
+        // Add this donation to our history, with the reason for giving invites
+        $reason = trim($Args['Reason'] . " invites new=$inviteForNewDonor prev=$previousInvites given=$newInvites");
+        G::$DB->prepared_query('
+            INSERT INTO donations
+                   (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, xbt, Time)
+            VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?,   now())
+            ', $UserID, $fiatAmount, $Args['Source'], $reason, $Args['Currency'] ?? 'XZZ',
+                self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $rankDelta, $totalDelta, $xbtAmount
+        );
+
+        // Clear their user cache keys because the users_info values has been modified
+        G::$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID"]);
         G::$DB->set_query_id($QueryID);
+    }
+
+    private static function calculate_special_rank($UserID, $TotalRank) {
+        if ($TotalRank < 10) {
+            $SpecialRank = 0;
+        }
+
+        if ($SpecialRank < 1 && $TotalRank >= 10) {
+            Misc::send_pm( $UserID, 0,
+                "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
+                G::$Twig->render('donation/special-rank-1.twig', [
+                   'forum_url'   => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'site_name'   => SITE_NAME,
+                   'staffpm_url' => site_url() . 'staffpm.php',
+                ])
+            );
+            $SpecialRank = 1;
+        }
+
+        if ($SpecialRank < 2 && $TotalRank >= 20) {
+            Misc::send_pm($UserID, 0,
+                "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
+                G::$Twig->render('donation/special-rank-2.twig', [
+                   'forum_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'site_name' => SITE_NAME,
+                ])
+            );
+            $SpecialRank = 2;
+        }
+
+        if ($SpecialRank < 3 && $TotalRank >= 50) {
+            Misc::send_pm($UserID, 0,
+                "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
+                G::$Twig->render('donation/special-rank-3.twig', [
+                   'forum_url'      => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'forum_gold_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
+                   'site_name'      => SITE_NAME,
+                ])
+            );
+            $SpecialRank = 3;
+        }
+        return $SpecialRank;
+    }
+
+    protected static function add_donor_status($UserID) {
+        if (($class = G::$DB->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor')) !== null) {
+            G::$DB->prepared_query('
+                INSERT IGNORE INTO users_levels
+                       (UserID, PermissionID)
+                VALUES (?,      ?)
+                ', $UserID, $class
+            );
+            return G::$DB->affected_rows();
+        }
+        return 0;
+    }
+
+    protected static function remove_donor_status($UserID) {
+        $class = G::$DB->scalar('SELECT ID FROM permissions WHERE Name = ?', 'Donor');
+        if ($class) {
+            G::$DB->prepared_query('
+                DELETE FROM users_levels
+                WHERE UserID = ?
+                    AND PermissionID = ?
+                ', $UserID, $class
+            );
+        }
+        G::$DB->prepared_query('
+            UPDATE users_donor_ranks
+            SET SpecialRank = 0
+            WHERE UserID = ?
+            ', $UserID
+        );
     }
 
     public static function schedule() {
@@ -242,37 +257,19 @@ class Donations {
         if (G::$DB->record_count() > 0) {
             $UserIDs = [];
             while (list($UserID, $Rank) = G::$DB->next_record()) {
-                G::$Cache->delete_value("donor_info_$UserID");
-                G::$Cache->delete_value("donor_title_$UserID");
-                G::$Cache->delete_value("donor_profile_rewards_$UserID");
+                G::$Cache->deleteMulti(["donor_info_$UserID", "donor_title_$UserID", "donor_profile_rewards_$UserID"]);
                 $UserIDs[] = $UserID;
             }
-            $In = implode(',', $UserIDs);
-            G::$DB->query("
-                UPDATE users_donor_ranks
-                SET Rank = Rank - IF(Rank = " . MAX_RANK . ", 2, 1), RankExpirationTime = NOW()
-                WHERE UserID IN ($In)");
+            $placeholders = implode(',', array_fill(0, count($UserIDs), '?'));
+            G::$DB->prepared_query("
+                UPDATE users_donor_ranks SET
+                    Rank = Rank - 1,
+                    RankExpirationTime = now()
+                WHERE UserID IN ($placeholders)
+                ", MAX_RANK, ...$UserIDs
+            );
         }
         G::$DB->set_query_id($QueryID);
-    }
-
-    private static function calculate_rank($Amount) {
-        return floor($Amount / DONOR_RANK_PRICE);
-    }
-
-    public static function update_rank($UserID, $Rank, $TotalRank, $Reason) {
-        $Rank = (int)$Rank;
-        $TotalRank = (int)$TotalRank;
-
-        self::donate($UserID, [
-            "Reason" => $Reason,
-            "Source" => "Modify Values",
-            "Currency" => "EUR",
-            "SendPM" => false,
-            "Manipulation" => "Direct",
-            "Rank" => $Rank,
-            "TotalRank" => $TotalRank
-        ]);
     }
 
     public static function hide_stats($UserID) {
@@ -338,7 +335,7 @@ class Donations {
                 WHERE UserID = ?
                 ', $UserID
             );
-                // 2 hours less than 32 days to account for schedule run times
+            // 2 hours less than 32 days to account for schedule run times
             if (G::$DB->has_results()) {
                 list($Rank, $SpecialRank, $TotalRank, $DonationTime, $ExpireTime) = G::$DB->next_record(MYSQLI_NUM, false);
                 if ($DonationTime === null) {
@@ -376,7 +373,7 @@ class Donations {
                 'ExpireTime' => $ExpireTime,
                 'Rewards' => $Rewards
             ];
-            G::$Cache->cache_value("donor_info_$UserID", $DonorInfo, 0);
+            G::$Cache->cache_value("donor_info_$UserID", $DonorInfo, 86400);
         }
         return $DonorInfo;
     }
@@ -621,7 +618,7 @@ class Donations {
 
     public static function get_donation_history($UserID) {
         $UserID = (int)$UserID;
-        if (empty($UserID)) {
+        if ($UserID < 1) {
             error(404);
         }
         $QueryID = G::$DB->get_query_id();
@@ -681,7 +678,7 @@ class Donations {
     }
 
     private static function get_pm_body($Source, $Currency, $DonationAmount, $ReceivedRank, $CurrentRank) {
-        if ($Currency != 'BTC') {
+        if ($Currency != 'XBT') {
             $DonationAmount = number_format($DonationAmount, 2);
         }
         if ($CurrentRank >= MAX_RANK) {

@@ -9,7 +9,7 @@ class XBT {
     /** @var \CACHE */
     protected $cache;
 
-    const CACHE_KEY = 'btc_rate_%s';
+    const CACHE_KEY = 'xbt_rate_%s';
 
     /* Coinbase quotes have a 1% fee, but we lose more in tumbling, so whatever.
      * Coinbase never realised that BTC collides with Bhutan, XBT is the ISO-4217 code.
@@ -59,7 +59,7 @@ class XBT {
      */
     public function saveRate(string $CC, float $rate) {
         $this->db->prepared_query('
-            INSERT INTO btc_forex
+            INSERT INTO xbt_forex
                    (cc, rate)
             VALUES (?,  ?)
             ', $CC, $rate
@@ -77,7 +77,7 @@ class XBT {
         if (($rate = $this->cache->get_value($key)) === false) {
             $rate = $this->db->scalar('
                 SELECT rate
-                FROM btc_forex
+                FROM xbt_forex
                 WHERE forex_date > now() - INTERVAL 6 HOUR
                     AND cc = ? GROUP BY cc
                 ORDER BY forex_date DESC
@@ -102,7 +102,7 @@ class XBT {
      * @param string $CC Currency Code
      * @return float Current amount in XBT, or null on failure
      */
-    public function fiat2btc(float $amount, string $CC) {
+    public function fiat2xbt(float $amount, string $CC) {
         $rate = $this->latestRate($CC);
         return is_null($rate) ? null : $amount / $rate;
     }

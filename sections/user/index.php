@@ -221,13 +221,16 @@ switch ($_REQUEST['action']) {
             error(403);
         }
         $UserID = $_REQUEST['id'];
-        $Cache->delete_value('user_info_'.$UserID);
-        $Cache->delete_value('user_info_heavy_'.$UserID);
-        $Cache->delete_value('subscriptions_user_new_'.$UserID);
-        $Cache->delete_value('staff_pm_new_'.$UserID);
-        $Cache->delete_value('inbox_new_'.$UserID);
-        $Cache->delete_value('notifications_new_'.$UserID);
-        $Cache->delete_value('collage_subs_user_new_'.$UserID);
+        $Cache->deleteMulti([
+            'collage_subs_user_new_'  . $UserID,
+            'donor_info_'             . $UserID,
+            'inbox_new_'              . $UserID,
+            'notifications_new_'      . $UserID,
+            'staff_pm_new_'           . $UserID,
+            'subscriptions_user_new_' . $UserID,
+            'user_info_'              . $UserID,
+            'user_info_heavy_'        . $UserID,
+        ]);
         include(__DIR__ . '/user.php');
         break;
 
@@ -261,10 +264,6 @@ switch ($_REQUEST['action']) {
         if (isset($_GET['username']) && isset($_GET['uid'])) {
             echo LastFM::clear_cache($_GET['username'],$_GET['uid']);
         }
-        break;
-    case 'take_donate':
-        break;
-    case 'take_update_rank':
         break;
     default:
         if (isset($_REQUEST['id'])) {
