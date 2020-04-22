@@ -180,15 +180,35 @@ class Donations {
                 $SpecialRank = 0;
             }
             if ($SpecialRank < 1 && $TotalRank >= 10) {
-                Misc::send_pm($UserID, 0, "You've Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.", self::get_special_rank_one_pm());
+                Misc::send_pm( $UserID, 0,
+                    "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
+                    G::$Twig->render('donation/special-rank-1.twig', [
+                       'forum_url'   => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                       'site_name'   => SITE_NAME,
+                       'staffpm_url' => site_url() . 'staffpm.php',
+                    ])
+                );
                 $SpecialRank = 1;
             }
             if ($SpecialRank < 2 && $TotalRank >= 20) {
-                Misc::send_pm($UserID, 0, "You've Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.", self::get_special_rank_two_pm());
+                Misc::send_pm($UserID, 0,
+                    "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
+                    G::$Twig->render('donation/special-rank-2.twig', [
+                       'forum_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                       'site_name' => SITE_NAME,
+                    ])
+                );
                 $SpecialRank = 2;
             }
             if ($SpecialRank < 3 && $TotalRank >= 50) {
-                Misc::send_pm($UserID, 0, "You've Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.", self::get_special_rank_three_pm());
+                Misc::send_pm($UserID, 0,
+                    "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
+                    G::$Twig->render('donation/special-rank-3.twig', [
+                       'forum_url'      => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                       'forum_gold_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
+                       'site_name'      => SITE_NAME,
+                    ])
+                );
                 $SpecialRank = 3;
             }
             // Make them special
@@ -669,45 +689,13 @@ class Donations {
         } elseif ($CurrentRank == 5) {
             $CurrentRank = 4;
         }
-        return "Thank you for your generosity and support. It's users like you who make all of this possible. What follows is a brief description of your transaction:
-[*][b]You Contributed:[/b] $DonationAmount $Currency
-[*][b]You Received:[/b] $ReceivedRank Donor Point".($ReceivedRank == 1 ? '' : 's')."
-[*][b]Your Donor Rank:[/b] Donor Rank # $CurrentRank
-Once again, thank you for your continued support of the site.
-
-Sincerely,
-
-".SITE_NAME.' Staff
-
-[align=center][If you have any questions or concerns, please [url='.site_url().'staffpm.php]send a Staff PM[/url].]';
-    }
-
-    private static function get_special_rank_one_pm() {
-        return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #1[/url]! You\'ve been awarded [b]one user pick[/b]! This user pick will be featured on the '.SITE_NAME.' front page during an upcoming event. After you submit your pick, there is no guarantee as to how long it will take before your pick is featured. Picks will be featured on a first-submitted, first-served basis. Please abide by the following guidelines when making your selection:
-
-[*]Pick something that hasn\'t been chosen. You can tell if a pick has been used previously by looking at the collages it\'s in.
-[*]Complete the enclosed form carefully and completely.
-[*]Send a [url='.site_url().'staffpm.php]Staff PM[/url] to request further information about the formatting of your pick, and the time at which it will be posted.
-
-Sincerely,
-'.SITE_NAME.' Staff';
-       }
-
-       private static function get_special_rank_two_pm() {
-               return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #2[/url]! You\'ve been awarded [b]double avatar functionality[/b]! To set a second avatar, please enter a URL leading to a valid image in the new field which has been unlocked in your [b]Personal Settings[/b]. Any avatar you choose must abide by normal avatar rules. When running your cursor over your avatar, it will flip to the alternate choice you\'ve established. Other users will also be able to view both of your avatars using this method.
-
-At this time, we\'d like to thank you for your continued support of the site. The fact that you\'ve reached this milestone is testament to your belief in '.SITE_NAME.' as a project. It\'s dedicated users like you that keep us alive. Have fun with the new toy.
-
-Sincerely,
-'.SITE_NAME.' Staff';
-       }
-
-       private static function get_special_rank_three_pm() {
-               return 'Congratulations on reaching [url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790]Special Rank #3[/url]! You\'ve been awarded [b]Diamond Rank[/b]! Diamond Rank grants you the benefits associated with every Donor Rank up to and including Gold ([url='.site_url().'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789]Donor Rank #5[/url]). But unlike Donor Rank #5 - because Diamond Rank is a Special Rank - it will never expire.
-
-At this time, we\'d like to thank you for your continued support of the site. The fact that you\'ve reached this milestone is testament to your belief in '.SITE_NAME.' as a project. It\'s dedicated users like you that keep us alive. Consider yourself one of our top supporters!
-
-Sincerely,
-'.SITE_NAME.' Staff';
+        return G::$Twig->render('donation/donation-pm.twig', [
+            'amount' => $DonationAmount,
+            'cc'     => $Currency,
+            'points' => $ReceivedRank,
+            's'      => $ReceivedRank == 1 ? '' : 's',
+            'rank'   => $CurrentRank,
+            'staffpm_url' => site_url() . 'staffpm.php',
+        ]);
     }
 }
