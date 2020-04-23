@@ -273,10 +273,7 @@ if (count($_FILES['logfiles']['name']) > 0) {
             continue;
         }
 
-        $LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
-        $FileName = $_FILES['logfiles']['name'][$Pos];
-
-        $Logfile = new Logfile($LogPath, $FileName);
+        $Logfile = new Logfile($_FILES['logfiles']['tmp_name'][$Pos], $_FILES['logfiles']['name'][$Pos]);
 
         $DB->prepared_query("
         INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion)
@@ -285,7 +282,7 @@ if (count($_FILES['logfiles']['name']) > 0) {
             $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
         );
         $LogID = $DB->inserted_id();
-        if (move_uploaded_file($LogPath, SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+        if (move_uploaded_file($Logfile->filepath(), SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
             die("Could not copy logfile to the server.");
         }
         $AddedLogs = true;

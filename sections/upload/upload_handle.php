@@ -794,8 +794,8 @@ foreach($LogfileSummary->all() as $Logfile) {
         $Logfile->ripper(), $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
     );
     $LogID = $DB->inserted_id();
-    if (move_uploaded_file($_FILES['logfiles']['tmp_name'][$Pos], SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
-        $Debug->analysis('Could not upload logfile for ' . $TorrentID);
+    if (move_uploaded_file($Logfile->filepath(), SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
+        $Debug->analysis('Could not upload logfile for new torrent id: ' . $TorrentID);
     }
 }
 
