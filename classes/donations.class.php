@@ -165,6 +165,15 @@ class Donations {
         G::$DB->set_query_id($QueryID);
     }
 
+    public static function donations_total_month($month) {
+        return G::$DB->scalar("
+            SELECT sum(xbt)
+            FROM donations
+            WHERE time >= CAST(DATE_FORMAT(NOW() ,'%Y-%m-01') as DATE) - INTERVAL ? MONTH
+            ", $month - 1
+        );
+    }
+
     private static function calculate_special_rank($UserID, $TotalRank) {
         if ($TotalRank < 10) {
             $SpecialRank = 0;
