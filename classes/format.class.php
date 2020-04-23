@@ -273,10 +273,15 @@ class Format {
                     $Pages .= "<a href=\"$Location?page=$i$QueryString$Anchor\">";
                 }
                 $Pages .= '<strong>';
+                $PageStartPosition = (($i - 1) * $ItemsPerPage) + 1;
                 if ($i * $ItemsPerPage > $TotalRecords) {
-                    $Pages .= ((($i - 1) * $ItemsPerPage) + 1)."-$TotalRecords";
+                    if ($PageStartPosition == $TotalRecords) {
+                        $Pages .= $TotalRecords;
+                    } else {
+                        $Pages .= "$PageStartPosition-$TotalRecords";
+                    }
                 } else {
-                    $Pages .= ((($i - 1) * $ItemsPerPage) + 1).'-'.($i * $ItemsPerPage);
+                    $Pages .= "$PageStartPosition-" . ($i * $ItemsPerPage);
                 }
 
                 $Pages .= '</strong>';
