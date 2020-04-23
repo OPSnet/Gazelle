@@ -1,4 +1,5 @@
 <?php
+
 if (!check_perms('admin_manage_payments')) {
     error(403);
 }
@@ -120,14 +121,28 @@ foreach ($Reminders as $r) {
 </div>
     <table>
         <tr class="colhead">
-            <td>Annual</td>
-            <td>Quarterly</td>
+            <td>&nbsp;</td>
             <td>Monthly</td>
+            <td>Quarterly</td>
+            <td>Annual</td>
         </tr>
         <tr>
-            <td><?= sprintf('%0.4f', $totalRent) ?></td>
-            <td><?= sprintf('%0.4f', $totalRent / 3) ?></td>
+            <td>Budget</td>
             <td><?= sprintf('%0.4f', $totalRent / 12) ?></td>
+            <td><?= sprintf('%0.4f', $totalRent /  4) ?></td>
+            <td><?= sprintf('%0.4f', $totalRent) ?></td>
+        </tr>
+        <tr>
+            <td>Actual</td>
+            <td><?= sprintf('%0.4f', Donations::donations_total_month( 1)) ?></td>
+            <td><?= sprintf('%0.4f', Donations::donations_total_month( 3)) ?></td>
+            <td><?= sprintf('%0.4f', Donations::donations_total_month(12)) ?></td>
+        </tr>
+        <tr>
+            <td>Target</td>
+            <td><?= sprintf('%0.1f%%', Donations::donations_total_month( 1) / ($totalRent/12) * 100) ?></td>
+            <td><?= sprintf('%0.1f%%', Donations::donations_total_month( 4) / ($totalRent/ 4) * 100) ?></td>
+            <td><?= sprintf('%0.1f%%', Donations::donations_total_month(12) / ($totalRent   ) * 100) ?></td>
         </tr>
     </table>
 </div>
