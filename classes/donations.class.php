@@ -157,7 +157,7 @@ class Donations {
                    (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, xbt, Time)
             VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?,   now())
             ', $UserID, $fiatAmount, $Args['Source'], $reason, $Args['Currency'] ?? 'XZZ',
-                self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $rankDelta, $totalDelta, $xbtAmount
+                self::$IsSchedule ? 0 : G::$LoggedUser['ID'], $rankDelta, $TotalRank, $xbtAmount
         );
 
         // Clear their user cache keys because the users_info values has been modified
