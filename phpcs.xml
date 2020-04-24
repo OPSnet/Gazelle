@@ -2,28 +2,28 @@
 <ruleset name="Gazelle Standard" namespace="Gazelle\Standard">
     <description>The standard for writing code in gazelle</description>
     <arg name="colors"/>
+    <arg name="extensions" value="php"/>
     <arg value="s"/>
-    <arg name="extensions" value="php" />
 
     <file>.</file>
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*/static/*</exclude-pattern>
 
-    <!--
-    <rule ref="PSR2">
-        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
-    </rule>
-    -->
-    <rule ref="Generic.PHP.DisallowShortOpenTag">
-        <exclude name="Generic.PHP.DisallowShortOpenTag.EchoFound"/>
-    </rule>
-    <rule ref="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
-    <rule ref="Generic.WhiteSpace.DisallowTabIndent.NonIndentTabsUsed" />
-    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
+    <autoload>classes/classloader.php</autoload>
+
+    <rule ref="PSR12"/>
+
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
     <rule ref="Generic.PHP.ForbiddenFunctions">
         <properties>
-            <property name="forbiddenFunctions" type="array" value="db_string=>null,db_array=>null,each=>null" />
+            <property name="forbiddenFunctions" type="array" extend="true">
+                <element key="db_string" value="null"/>
+                <element key="db_array" value="null"/>
+                <element key="each" value="null"/>
+                <element key="eval" value="null"/>
+                <element key="extract" value="null"/>
+            </property>
         </properties>
     </rule>
 </ruleset>
