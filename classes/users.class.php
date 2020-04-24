@@ -77,14 +77,14 @@ class Users {
         if (empty($UserInfo) || empty($UserInfo['ID']) || !isset($UserInfo['Paranoia']) || empty($UserInfo['Class'])) {
             $OldQueryID = G::$DB->get_query_id();
 
-            G::$DB->query("
+            G::$DB->prepared_query("
                 SELECT
                     m.ID,
                     m.Username,
                     m.PermissionID,
                     m.Paranoia,
                     i.Artist,
-                    i.Donor,
+                    (donor.UserID IS NOT NULL) AS Donor,
                     i.Warned,
                     i.Avatar,
                     m.Enabled,
@@ -94,11 +94,16 @@ class Users {
                     la.Type AS LockedAccount,
                     GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS Levels
                 FROM users_main AS m
-                    INNER JOIN users_info AS i ON i.UserID = m.ID
-                    LEFT JOIN locked_accounts AS la ON la.UserID = m.ID
-                    LEFT JOIN users_levels AS ul ON ul.UserID = m.ID
-                WHERE m.ID = '$UserID'
-                GROUP BY m.ID");
+                INNER JOIN users_info AS i ON (i.UserID = m.ID)
+                LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
+                LEFT JOIN users_levels AS ul ON (ul.UserID = m.ID)
+                LEFT JOIN users_levels AS donor ON (donor.UserID = m.ID
+                    AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+                )
+                WHERE m.ID = ?
+                GROUP BY m.ID
+                ", $UserID
+            );
 
             if (!G::$DB->has_results()) { // Deleted user, maybe?
                 $UserInfo = [
