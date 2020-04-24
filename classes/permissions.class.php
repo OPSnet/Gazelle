@@ -69,6 +69,8 @@ class Permissions {
 
         $Permissions = self::get_permissions($UserInfo['PermissionID']);
 
+        // TODO: WTF is this nonsense to calculate MaxCollages? - Spine
+
         // Manage 'special' inherited permissions
         $BonusPerms = [];
         $BonusCollages = 0;
@@ -83,13 +85,6 @@ class Permissions {
             $CustomPermissions = [];
         }
 
-        // This is legacy donor cruft
-        if ($UserInfo['Donor']) {
-            $DonorPerms = self::get_permissions(DONOR);
-            unset($DonorPerms['Permissions']['MaxCollages']);
-        } else {
-            $DonorPerms = ['Permissions' => []];
-        }
         $MaxCollages = $BonusCollages;
         if (is_numeric($Permissions['Permissions']['MaxCollages'])) {
             $MaxCollages += $Permissions['Permissions']['MaxCollages'];
@@ -101,10 +96,10 @@ class Permissions {
         $Permissions['Permissions']['MaxCollages'] = $MaxCollages;
         // Combine the permissions
         return array_merge(
-                $Permissions['Permissions'],
-                $BonusPerms,
-                $CustomPermissions,
-                $DonorPerms['Permissions']);
+            $Permissions['Permissions'],
+            $BonusPerms,
+            $CustomPermissions
+        );
     }
 
     public static function is_mod($UserID) {

@@ -12,7 +12,7 @@ if ($UserID == $LoggedUser['ID']) {
 }
 
 // Always view as a normal user.
-$DB->prepared_query('
+$DB->prepared_query("
     SELECT
         um.Username,
         um.Email,
@@ -31,7 +31,7 @@ $DB->prepared_query('
         i.JoinDate,
         i.Info,
         i.Avatar,
-        i.Donor,
+        (donor.UserID IS NOT NULL) AS Donor,
         i.Warned,
         COUNT(posts.id) AS ForumPosts,
         i.Inviter,
@@ -41,12 +41,16 @@ $DB->prepared_query('
     LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS i ON (i.UserID = um.ID)
+    LEFT JOIN users_levels AS donor ON (donor.UserID = um.ID
+        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+    )
     LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
     LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
     LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
     WHERE um.ID = ?
+        AND ulp.Name = ?
     GROUP BY AuthorID
-    ', $UserID);
+    ", $UserID);
 
 if (!$DB->has_results()) { // If user doesn't exist
     json_die("failure", "no such user");

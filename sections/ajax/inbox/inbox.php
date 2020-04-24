@@ -33,21 +33,24 @@ $sql = "
         um2.Username AS ForwardedName,
         cu2.UserID,
         um.Username,
-        ui.Donor,
+        (donor.UserID IS NOT NULL) AS Donor,
         ui.Warned,
         um.Enabled,
         ui.Avatar,";
 $sql .= $Section === 'sentbox' ? ' cu.SentDate ' : ' cu.ReceivedDate ';
 $sql .= "AS Date
     FROM pm_conversations AS c
-        LEFT JOIN pm_conversations_users AS cu ON cu.ConvID = c.ID AND cu.UserID = '$UserID'
-        LEFT JOIN pm_conversations_users AS cu2 ON cu2.ConvID = c.ID AND cu2.UserID != '$UserID' AND cu2.ForwardedTo = 0
-        LEFT JOIN users_main AS um ON um.ID = cu2.UserID
-        LEFT JOIN users_info AS ui ON ui.UserID = um.ID
-        LEFT JOIN users_main AS um2 ON um2.ID = cu.ForwardedTo";
+    LEFT JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = '$UserID')
+    LEFT JOIN pm_conversations_users AS cu2 ON (cu2.ConvID = c.ID AND cu2.UserID != '$UserID' AND cu2.ForwardedTo = 0)
+    LEFT JOIN users_main AS um ON (um.ID = cu2.UserID)
+    LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
+    LEFT JOIN users_levels AS donor ON (donor.UserID = um.ID
+        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+    )
+    LEFT JOIN users_main AS um2 ON (um2.ID = cu.ForwardedTo)";
 
 if (!empty($_GET['search']) && $_GET['searchtype'] === 'message') {
-    $sql .=    ' JOIN pm_messages AS m ON c.ID = m.ConvID';
+    $sql .=    ' INNER JOIN pm_messages AS m ON (c.ID = m.ConvID)';
 }
 $sql .= " WHERE ";
 if (!empty($_GET['search'])) {

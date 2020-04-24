@@ -1,9 +1,6 @@
 <?php
 /**************************************************************************/
 /*-- Invite tree class -----------------------------------------------------
-
-
-
 ***************************************************************************/
 
 class INVITE_TREE {
@@ -25,10 +22,12 @@ class INVITE_TREE {
 ?>
         <div class="invitetree pad">
 <?php
-        G::$DB->query("
+        G::$DB->prepared_query('
             SELECT TreePosition, TreeID, TreeLevel
             FROM invite_tree
-            WHERE UserID = $UserID");
+            WHERE UserID = ?
+            ', $UserID
+        );
         if (!G::$DB->has_results()) {
             return;
         }
@@ -52,7 +51,7 @@ class INVITE_TREE {
                 it.UserID,
                 um.Enabled,
                 um.PermissionID,
-                ui.Donor,
+                (donor.UserID IS NOT NULL) AS Donor,
                 uls.Uploaded,
                 uls.Downloaded,
                 um.Paranoia,
@@ -61,7 +60,9 @@ class INVITE_TREE {
             FROM invite_tree AS it
             INNER JOIN users_main AS um ON (um.ID = it.UserID)
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = it.UserID)
-            INNER JOIN users_info AS ui ON (ui.UserID = it.UserID)
+            LEFT JOIN users_levels AS donor ON (donor.UserID = it.UserID
+                AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+            )
             WHERE TreeID = $TreeID
                 AND TreePosition > $TreePosition".
                 ($MaxPosition ? " AND TreePosition < $MaxPosition" : '')."

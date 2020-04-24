@@ -39,14 +39,6 @@ class Donations {
 
         G::$Cache->InternalCache = false;
 
-        // Legacy donor, should remove at some point
-        G::$DB->prepared_query('
-            UPDATE users_info
-            SET Donor = ?
-            WHERE UserID = ?
-            ', '1', $UserID
-        );
-
         if (!isset($Args['Amount'])) {
             $xbtAmount = 0.0;
             $fiatAmount = 0.0;
