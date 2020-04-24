@@ -93,6 +93,7 @@ $PermissionsArray = [
     'admin_manage_user_fls' => 'Can manage user FL tokens.',
     'admin_manage_applicants' => 'Can manage job roles and user applications.',
     'admin_manage_referrals' => 'Can manage referrals.',
+    'admin_view_payments' => 'Can view payments.',
     'admin_manage_payments' => 'Can manage payments.',
     'admin_manage_navigation' => 'Can manage navigation links.',
     'admin_view_referrals' => 'Can view referred users.',
@@ -272,6 +273,7 @@ function permissions_form() {
                     display_perm('admin_manage_user_fls', 'Can manage user FL tokens');
                     display_perm('admin_manage_applicants', 'Can manage job roles and user applications');
                     display_perm('admin_manage_referrals', 'Can manage referrals');
+                    display_perm('admin_view_payments', 'Can view payments');
                     display_perm('admin_manage_payments', 'Can manage payments');
                     display_perm('admin_manage_navigation', 'Can manage navigation links');
                     display_perm('admin_periodic_task_manage', 'Can manage periodic tasks');

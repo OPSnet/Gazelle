@@ -226,7 +226,14 @@ if (check_perms('site_send_unlimited_invites')) {
                         <a href="user.php?action=invite" class='tooltip' title="Invite<?=$Invites?>">Invite<?=$Invites?></a>
                     </li>
                     <li id="nav_donate" class="brackets<?=Format::add_class($PageID, ['donate'], 'active', false)?>">
-                        <a href="donate.php" class='tooltip' title="Donate">Donate</a>
+<?php
+$Payment = new \Gazelle\Manager\Payment(G::$DB, G::$Cache);
+$monthlyRental = $Payment->monthlyRental();
+$percent = $monthlyRental == 0.0
+    ? 100
+    : min(100, (int)((Donations::donations_total_month(1) / $monthlyRental) * 100));
+?>
+                        <a href="donate.php" class='tooltip' title="Donate">Donate (<?= $percent ?>%)</a>
                     </li>
 
                 </ul>
@@ -521,18 +528,8 @@ if (check_perms('users_mod') && FEATURE_EMAIL_REENABLE) {
 }
 
 if (check_perms('admin_manage_payments')) {
-    $DuePayments = G::$Cache->get_value('due_payments');
-    if ($DuePayments === false) {
-        G::$DB->prepared_query("
-            SELECT Text, Expiry
-            FROM payment_reminders
-            WHERE Active = 1 AND Expiry < ?
-            ORDER BY Expiry",
-            date('Y-m-d', strtotime('+6 days')));
-        $DuePayments = G::$DB->to_array(false, MYSQLI_ASSOC);
-        G::$Cache->cache_value('due_payments', $DuePayments, 60 * 60);
-    }
-
+    $Payment = new \Gazelle\Manager\Payment(G::$DB, G::$Cache);
+    $DuePayments = $Payment->due();
     if (count($DuePayments) > 0) {
         $AlertText = '<a href="tools.php?action=payment_list">Payments due</a>';
         foreach ($DuePayments as $p) {

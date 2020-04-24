@@ -1,15 +1,8 @@
 <?php
 
-if (!check_perms('admin_manage_payments')) {
+if (!check_perms('admin_manage_payments') && !check_perms('admin_view_payments')) {
     error(403);
 }
-
-$DB->prepared_query("
-    SELECT ID, Text, Expiry, AnnualRent, cc, Active
-    FROM payment_reminders");
-
-$Reminders = $DB->has_results() ? $DB->to_array('ID', MYSQLI_ASSOC) : [];
-$XBT = new \Gazelle\Manager\XBT($DB, $Cache);
 
 View::show_header('Payment Dates');
 ?>
@@ -24,55 +17,55 @@ View::show_header('Payment Dates');
         <td>Currency Code</td>
         <td>Equivalent XBT</td>
         <td>Active</td>
+<?php if (check_perms('admin_manage_payments')) { ?>
         <td>Submit</td>
+<?php } ?>
     </tr>
 <?php
 $Row = 'b';
 $totalRent = 0;
 
-foreach ($Reminders as $r) {
-    list($ID, $Text, $Expiry, $Rent, $CC, $Active) = array_values($r);
-    if ($CC == 'XBT') {
-        $fiatRate = 1.0;
-        $Rent = sprintf('%0.6f', $Rent);
-        $btcRent = sprintf('%0.6f', $Rent);
-    } else {
-        $fiatRate = $XBT->fetchRate($CC);
-        if (!$fiatRate) {
-            error(0, "$ID code $CC");
-        }
-        $Rent = sprintf('%0.2f', $Rent);
-        $btcRent = sprintf('%0.6f', $Rent / $fiatRate);
-    }
-    if ($Active) {
-        $totalRent += $btcRent;
+$Payment = new \Gazelle\Manager\Payment($DB, $Cache);
+$paymentList = $Payment->list();
+
+foreach ($paymentList as $r) {
+    if ($r['Active']) {
+        $totalRent += $r['btcRent'];
     }
     $Row = $Row === 'a' ? 'b' : 'a';
 ?>
-    <tr class="row<?=$Row?>">
+    <tr class="row<?= $Row ?>">
+<?php if (!check_perms('admin_manage_payments')) { ?>
+            <td><?= $r['Text'] ?></td>
+            <td><?= date('Y-m-d', strtotime($r['Expiry'])) ?></td>
+            <td><?= $r['Rent'] ?></td>
+            <td><?= $r['cc'] ?></td>
+            <td title="Based on a rate of <?= sprintf('%0.4f', $r['fiatRate'] )?>"><?= $r['btcRent'] ?></td>
+            <td><?= $r['Active'] == '1' ? 'Active' : 'Inactive' ?></td>
+<?php } else { ?>
         <form class="manage_form" name="accounts" action="" method="post">
-            <input type="hidden" name="id" value="<?=$ID?>" />
             <input type="hidden" name="action" value="payment_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+            <input type="hidden" name="id" value="<?= $r['ID'] ?>" />
             <td>
-                <input type="text" name="text" value="<?=$Text?>" />
+                <input type="text" name="text" value="<?= $r['Text'] ?>" />
             </td>
             <td>
-                <input type="text" name="expiry" value="<?=date('Y-m-d', strtotime($Expiry))?>" placeholder="YYYY-MM-DD" />
+                <input type="text" name="expiry" value="<?=date('Y-m-d', strtotime($r['Expiry']))?>" placeholder="YYYY-MM-DD" />
             </td>
             <td>
-                <input type="text" name="rent" value="<?= $Rent ?>" />
+                <input type="text" name="rent" value="<?= $r['Rent'] ?>" />
             </td>
             <td>
                 <select name="cc">
-                    <option value="XBT"<?= $CC == 'XBT' ? ' selected="selected"' : '' ?>>XBT</option>
-                    <option value="EUR"<?= $CC == 'EUR' ? ' selected="selected"' : '' ?>>EUR</option>
-                    <option value="USD"<?= $CC == 'USD' ? ' selected="selected"' : '' ?>>USD</option>
+                    <option value="XBT"<?= $r['cc'] == 'XBT' ? ' selected="selected"' : '' ?>>XBT</option>
+                    <option value="EUR"<?= $r['cc'] == 'EUR' ? ' selected="selected"' : '' ?>>EUR</option>
+                    <option value="USD"<?= $r['cc'] == 'USD' ? ' selected="selected"' : '' ?>>USD</option>
                 </select>
             </td>
-            <td title="Based on a rate of <?= sprintf('%0.4f', $fiatRate)?>"><?= $btcRent ?></td>
+            <td title="Based on a rate of <?= sprintf('%0.4f', $r['fiatRate'] )?>"><?= $r['btcRent'] ?></td>
             <td>
-                <input type="checkbox" name="active"<?=($Active == '1') ? ' checked="checked"' : ''?> />
+                <input type="checkbox" name="active"<?=($r['Active'] == '1') ? ' checked="checked"' : ''?> />
             </td>
             <td>
                 <input type="submit" name="submit" value="Edit" />
@@ -80,9 +73,14 @@ foreach ($Reminders as $r) {
             </td>
         </form>
     </tr>
-<?php } ?>
+<?php
+    } /* admin_manage_payments */
+} /* foreach */
+
+if (check_perms('admin_manage_payments')) {
+?>
     <tr class="colhead">
-        <td colspan="4">Create Payment</td>
+        <td colspan="7">Create Payment</td>
     </tr>
     <tr class="rowa">
         <form class="manage_form" name="accounts" action="" method="post">
@@ -113,6 +111,7 @@ foreach ($Reminders as $r) {
             </td>
         </form>
     </tr>
+<?php } /* admin_manage_payments */ ?>
 </table>
 
 <div class="box pad">
@@ -141,12 +140,11 @@ foreach ($Reminders as $r) {
         <tr>
             <td>Target</td>
             <td><?= sprintf('%0.1f%%', Donations::donations_total_month( 1) / ($totalRent/12) * 100) ?></td>
-            <td><?= sprintf('%0.1f%%', Donations::donations_total_month( 4) / ($totalRent/ 4) * 100) ?></td>
+            <td><?= sprintf('%0.1f%%', Donations::donations_total_month( 3) / ($totalRent/ 4) * 100) ?></td>
             <td><?= sprintf('%0.1f%%', Donations::donations_total_month(12) / ($totalRent   ) * 100) ?></td>
         </tr>
     </table>
 </div>
-
 <?php
 
 View::show_footer();
