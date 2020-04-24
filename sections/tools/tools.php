@@ -168,7 +168,7 @@ Category('Finances', [
     Item('Bitcoin (unprocessed)', 'tools.php?action=bitcoin_unproc',  All(['admin_donor_log'])),
     Item('Donation log',          'tools.php?action=donation_log',    All(['admin_donor_log'])),
     Item('Donor rewards',         'tools.php?action=donor_rewards',   All(['users_mod'])),
-    Item('Payment dates',         'tools.php?action=payment_list',    All(['admin_manage_payments'])),
+    Item('Payment dates',         'tools.php?action=payment_list',    Any(['admin_view_payments', 'admin_manage_payments'])),
 ]);
 
 Category('Developer Sandboxes', [
@@ -183,7 +183,7 @@ Category('Development', [
     Item('Database info',         'tools.php?action=database_specifics',       All(['site_database_specifics'])),
     Item('PHP processes',         'tools.php?action=process_info',             All(['site_debug'])),
     Item('Service stats',         'tools.php?action=service_stats',            All(['site_debug'])),
-    Item('Error Analysis',       'tools.php?action=analysis_list',            All(['site_analysis'])),
+    Item('Error Analysis',        'tools.php?action=analysis_list',            All(['site_analysis'])),
     Item('Site info',             'tools.php?action=site_info',                All(['admin_site_debug'])),
     Item('Site options',          'tools.php?action=site_options',             All(['users_mod'])),
     Item('Scheduler',             'tools.php?action=periodic&amp;mode=view',   All(['admin_periodic_task_view'])),

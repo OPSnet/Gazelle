@@ -2,16 +2,13 @@
 if (!check_perms('admin_manage_payments')) {
     error(403);
 }
+$Payment = new \Gazelle\Manager\Payment($DB, $Cache);
 
 if ($_POST['submit'] == 'Delete') {
     if (!is_number($_POST['id']) || $_POST['id'] == '') {
         error(0);
     }
-
-    $DB->prepared_query("
-        DELETE
-        FROM payment_reminders
-        WHERE ID = ?", $_POST['id']);
+    $Payment->remove($_POST['id']);
 } else {
     $Val->SetFields('text', '1', 'string', 'The payment text must be set, and has a max length of 100 characters', ['maxlength' => 100]);
     $Val->SetFields('rent', '1', 'number', 'Rent must be zero or positive)', ['min' => 0, 'allowperiod' => true]);
@@ -23,23 +20,20 @@ if ($_POST['submit'] == 'Delete') {
         require(__DIR__ . '/payment_list.php');
         die();
     }
-
+    $values = [
+        'text'   => trim($_POST['text']),
+        'expiry' => $_POST['expiry'],
+        'rent'   => $_POST['rent'],
+        'cc'     => $_POST['cc'],
+        'active' => $_POST['active'] == 'on' ? 1 : 0,
+    ];
     if ($_POST['submit'] == 'Create') {
-        $DB->prepared_query("
-            INSERT INTO payment_reminders
-                   (Text, Expiry, AnnualRent, cc, Active)
-            VALUES (?,    ?,      ?,          ?,  ?)
-            ",
-            $_POST['text'], $_POST['expiry'], $_POST['rent'], $_POST['cc'], $_POST['active'] == 'on' ? 1 : 0);
+        $Payment->create($values);
     } else {
-        $DB->prepared_query("
-            UPDATE payment_reminders SET
-                Text = ?, Expiry = ?, AnnualRent = ?, cc = ?, Active = ?
-            WHERE ID = ?
-            ", $_POST['text'], $_POST['expiry'], $_POST['rent'], $_POST['cc'], $_POST['active'] == 'on' ? 1 : 0,
-            $_POST['id']);
+        $Payment->modify($_POST['id'], $values);
     }
 }
 
 $Cache->delete_value('due_payments');
+
 header('Location: tools.php?action=payment_list');
