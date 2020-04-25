@@ -10,6 +10,10 @@ if ($Cache->get_value("torrent_{$TorrentID}_lock")) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 list($UserID, $GroupID, $Size, $InfoHash, $Name, $Year, $ArtistName, $Time, $Media, $Format, $Encoding,
     $HasLog, $HasCue, $HasLogDB, $LogScore, $Remastered, $RemasterTitle, $RemasterYear, $Snatches) = $DB->row('
     SELECT

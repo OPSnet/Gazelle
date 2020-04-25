@@ -4,6 +4,10 @@ if (!$TorrentID || !is_number($TorrentID)) {
     error(404);
 }
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 list($UserID, $Time, $Snatches) = $DB->row('
     SELECT
         t.UserID,
