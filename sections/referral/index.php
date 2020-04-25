@@ -3,6 +3,9 @@ if (isset($LoggedUser["ID"])) {
     header("Location: index.php");
     exit;
 }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 
 <div id="logo">

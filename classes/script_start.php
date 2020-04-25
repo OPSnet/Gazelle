@@ -74,66 +74,6 @@ G::$Twig = new Environment(
 );
 $Debug->set_flag('Twig constructed');
 
-//Begin browser identification
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-    $Debug->set_flag('session started');
-}
-
-if (!isset($_SESSION['WhichBrowser'])) {
-    $Debug->set_flag('start parsing user agent');
-    if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
-        $OS = explode(" ", $Matches[2]);
-        $_SESSION['WhichBrowser'] = [
-            'Browser' => 'Lidarr',
-            'BrowserVersion' => substr($Matches[1], 0, strrpos($Matches[1], '.')),
-            'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
-            'OperatingSystemVersion' => $OS[1] ?? null
-        ];
-    }
-    elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
-        $_SESSION['WhichBrowser'] = [
-            'Browser' => 'VarroaMusica',
-            'BrowserVersion' => str_replace('dev', '', $Matches[1]),
-            'OperatingSystem' => null,
-            'OperatingSystemVersion' => null
-        ];
-    }
-    elseif (in_array($_SERVER['HTTP_USER_AGENT'], ['Headphones/None', 'whatapi [isaaczafuta]'])) {
-        $_SESSION['WhichBrowser'] = [
-            'Browser' => $_SERVER['HTTP_USER_AGENT'],
-            'BrowserVersion' => null,
-            'OperatingSystem' => null,
-            'OperatingSystemVersion' => null
-        ];
-    }
-    else {
-        $Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
-        $Browser = $Result->browser;
-        if (empty($Browser->getName()) && !empty($Browser->using)) {
-            $Browser = $Browser->using;
-        }
-        $_SESSION['WhichBrowser'] = [
-            'Browser' => $Browser->getName(),
-            'BrowserVersion' => explode('.', $Browser->getVersion())[0],
-            'OperatingSystem' => $Result->os->getName(),
-            'OperatingSystemVersion' => $Result->os->getVersion()
-        ];
-    }
-    foreach (['Browser', 'BrowserVersion', 'OperatingSystem', 'OperatingSystemVersion'] as $Key) {
-        if ($_SESSION['WhichBrowser'][$Key] === "") {
-            $_SESSION['WhichBrowser'][$Key] = null;
-        }
-    }
-
-    $Debug->set_flag('end parsing user agent');
-}
-
-$Browser = $_SESSION['WhichBrowser']['Browser'];
-$BrowserVersion = $_SESSION['WhichBrowser']['BrowserVersion'];
-$OperatingSystem = $_SESSION['WhichBrowser']['OperatingSystem'];
-$OperatingSystemVersion = $_SESSION['WhichBrowser']['OperatingSystemVersion'];
-
 $Debug->set_flag('start user handling');
 
 // Get classes
@@ -230,12 +170,13 @@ if (isset($LoginCookie)) {
 
     // Update LastUpdate every 10 minutes
     if (strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
+        $userAgent = parse_user_agent($Debug);
         $Session->update([
             'ip-address'      => $_SERVER['REMOTE_ADDR'],
-            'browser'         => $Browser,
-            'browser-version' => $BrowserVersion,
-            'os'              => $OperatingSystem,
-            'os-version'      => $OperatingSystemVersion,
+            'browser'         => $userAgent['Browser'],
+            'browser-version' => $userAgent['BrowserVersion'],
+            'os'              => $userAgent['OperatingSystem'],
+            'os-version'      => $userAgent['OperatingSystemVersion'],
             'session-id'      => $SessionID
         ]);
     }
@@ -243,6 +184,57 @@ if (isset($LoginCookie)) {
 
 $Debug->set_flag('end user handling');
 $Debug->set_flag('start function definitions');
+
+function parse_user_agent($Debug) {
+    $Debug->set_flag('start parsing user agent');
+    if (preg_match("/^Lidarr\/([0-9\.]+) \((.+)\)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+        $OS = explode(" ", $Matches[2]);
+        $browserUserAgent = [
+            'Browser' => 'Lidarr',
+            'BrowserVersion' => substr($Matches[1], 0, strrpos($Matches[1], '.')),
+            'OperatingSystem' => $OS[0] === 'macos' ? 'macOS' : ucfirst($OS[0]),
+            'OperatingSystemVersion' => $OS[1] ?? null
+        ];
+    }
+    elseif (preg_match("/^VarroaMusica\/([0-9]+(?:dev)?)$/", $_SERVER['HTTP_USER_AGENT'], $Matches) === 1) {
+        $browserUserAgent = [
+            'Browser' => 'VarroaMusica',
+            'BrowserVersion' => str_replace('dev', '', $Matches[1]),
+            'OperatingSystem' => null,
+            'OperatingSystemVersion' => null
+        ];
+    }
+    elseif (in_array($_SERVER['HTTP_USER_AGENT'], ['Headphones/None', 'whatapi [isaaczafuta]'])) {
+        $browserUserAgent = [
+            'Browser' => $_SERVER['HTTP_USER_AGENT'],
+            'BrowserVersion' => null,
+            'OperatingSystem' => null,
+            'OperatingSystemVersion' => null
+        ];
+    }
+    else {
+        $Result = new WhichBrowser\Parser($_SERVER['HTTP_USER_AGENT']);
+        $Browser = $Result->browser;
+        if (empty($Browser->getName()) && !empty($Browser->using)) {
+            $Browser = $Browser->using;
+        }
+        $browserUserAgent = [
+            'Browser' => $Browser->getName(),
+            'BrowserVersion' => explode('.', $Browser->getVersion())[0],
+            'OperatingSystem' => $Result->os->getName(),
+            'OperatingSystemVersion' => $Result->os->getVersion()
+        ];
+    }
+    foreach (['Browser', 'BrowserVersion', 'OperatingSystem', 'OperatingSystemVersion'] as $Key) {
+        if ($browserUserAgent[$Key] === "") {
+            $browserUserAgent[$Key] = null;
+        }
+    }
+
+    $Debug->set_flag('end parsing user agent');
+
+    return $browserUserAgent;
+}
 
 /**
  * Log out the current session
