@@ -20,7 +20,7 @@ if (count($Images) != count($Summaries)) {
 }
 
 $Changed = false;
-for ($i = 0; $i < count($Images); $i++) {
+for ($i = 0, $end = count($Images); $i < $end; $i++) {
     $Image = $Images[$i];
     $Summary = $Summaries[$i];
 

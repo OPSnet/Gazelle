@@ -136,7 +136,7 @@ if (check_perms('site_submit_requests')) { ?>
 <?php
     if (count($CoverArt) > 0) {
         if (empty($LoggedUser['ShowExtraCovers'])) {
-            for ($Index = 0; $Index <= count($CoverArt); $Index++) { ?>
+            for ($Index = 0, $End = count($CoverArt); $Index <= $End; $Index++) { ?>
                 <span id="cover_controls_<?=($Index)?>"<?=($Index > 0 ? ' style="display: none;"' : '')?>>
 <?php           if ($Index == count($CoverArt)) { ?>
                         <a class="brackets prev_cover" data-gazelle-prev-cover="<?=($Index - 1)?>" href="#">Prev</a>

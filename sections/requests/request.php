@@ -304,7 +304,7 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
     $OCLC = str_replace(' ', '', $Request['OCLC']);
     if ($OCLC !== '') {
         $OCLCs = explode(',', $OCLC);
-        for ($i = 0; $i < count($OCLCs); $i++) {
+        for ($i = 0, $end = count($OCLCs); $i < $end; $i++) {
             if (!empty($Worldcat)) {
                 $Worldcat .= ', <a href="https://www.worldcat.org/oclc/'.$OCLCs[$i].'">'.$OCLCs[$i].'</a>';
             } else {

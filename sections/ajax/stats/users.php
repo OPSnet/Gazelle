@@ -105,7 +105,7 @@ if (!$Flow = $Cache->get_value('stats_users_flow')) {
         list($Label, $Amount) = $Month;
         $OutFlow[] = $Amount;
     }
-    for ($i = 0; $i < count($Labels); $i++) {
+    for ($i = 0, $end = count($Labels); $i < $end; $i++) {
         $Flow[$Labels[$i]] = [
             'new' => isset($InFlow[$i]) ? $InFlow[$i] : 0,
             'disabled' => isset($OutFlow[$i]) ? $OutFlow[$i] : 0
