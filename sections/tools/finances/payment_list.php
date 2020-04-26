@@ -134,7 +134,7 @@ if (check_perms('admin_manage_payments')) {
         <tr>
             <td>Actual</td>
             <td><?= sprintf('%0.4f', Donations::donations_total_month( 1)) ?></td>
-            <td><?= sprintf('%0.4f', Donations::donations_total_month( 4)) ?></td>
+            <td><?= sprintf('%0.4f', Donations::donations_total_month( 3)) ?></td>
             <td><?= sprintf('%0.4f', Donations::donations_total_month(12)) ?></td>
         </tr>
         <tr>
