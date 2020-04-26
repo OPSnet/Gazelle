@@ -106,7 +106,7 @@ class Donations {
         }
 
         // Assign them to the Donor secondary class if it hasn't already been done
-        $inviteForNewDonor = $xbtAmount > 0 ? self::add_donor_status($UserID) : 0;
+        $inviteForNewDonor = $xbtAmount > 0 ? DONOR_FIRST_INVITE_COUNT * self::add_donor_status($UserID) : 0;
 
         // Now that their rank and total rank has been set, we can calculate their special rank and invites
         $column = [];
