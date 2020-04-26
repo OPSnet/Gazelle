@@ -92,9 +92,9 @@ echo "\t\t$Pages\n";
         <form class="search_form" name="<?=($Section === 'sentbox' ? 'sentbox' : 'inbox')?>" action="inbox.php" method="get" id="searchbox">
             <div>
                 <input type="hidden" name="action" value="<?=$Section?>" />
-                <input type="radio" name="searchtype" value="user"<?=(empty($_GET['searchtype']) || $_GET['searchtype'] === 'user' ? ' checked="checked"' : '')?> /> User
-                <input type="radio" name="searchtype" value="subject"<?=(!empty($_GET['searchtype']) && $_GET['searchtype'] === 'subject' ? ' checked="checked"' : '')?> /> Subject
-                <input type="radio" name="searchtype" value="message"<?=(!empty($_GET['searchtype']) && $_GET['searchtype'] === 'message' ? ' checked="checked"' : '')?> /> Message
+                <input type="radio" id="search-user" name="searchtype" value="user"<?=(empty($_GET['searchtype']) || $_GET['searchtype'] === 'user' ? ' checked="checked"' : '')?> /><label for="search-user">&nbsp;User</label>
+                <input type="radio" id="search-subject" name="searchtype" value="subject"<?=(!empty($_GET['searchtype']) && $_GET['searchtype'] === 'subject' ? ' checked="checked"' : '')?> /><label for="search-subject">&nbsp;Subject</label>
+                <input type="radio" id="search-message" name="searchtype" value="message"<?=(!empty($_GET['searchtype']) && $_GET['searchtype'] === 'message' ? ' checked="checked"' : '')?> /><label for="search-message">&nbsp;Message</label>
                 <span style="float: right;">
 <?php            // provide a temporary toggle for sorting PMs
         $ToggleTitle = 'Temporary toggle switch for sorting PMs. To permanently change the sorting behavior, edit the setting in your profile.';
