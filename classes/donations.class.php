@@ -162,7 +162,7 @@ class Donations {
 
         // Clear their user cache keys because the users_info values has been modified
         G::$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID", "donor_info_$UserID",
-            'donations_month_1', 'donations_month_3', 'donations_month_12']);
+            'donations_month_3', 'donations_month_12']);
         G::$DB->set_query_id($QueryID);
     }
 
@@ -174,7 +174,7 @@ class Donations {
                 WHERE time >= CAST(DATE_FORMAT(NOW() ,'%Y-%m-01') as DATE) - INTERVAL ? MONTH
                 ", $month - 1
             );
-            G::$Cache->cache_value("donations_month_$month", $donations, 86400);
+            G::$Cache->cache_value("donations_month_$month", $donations, 3600 * 36);
         }
         return $donations;
     }
