@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 run_service()
 {
@@ -27,10 +27,9 @@ if [ ! -f /var/www/classes/config.php ]; then
     bash /var/www/.docker/web/generate-config.sh
 fi
 
-echo "Run migrate..."
-
-if ! LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; then
-    echo "PHINX FAILED TO MIGRATE"
+echo "Run migrations..."
+if ! FKEY_MY_DATABASE=1 LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; then
+    echo "PHINX FAILED TO RUN MIGRATIONS"
     exit 1
 fi
 
@@ -57,7 +56,7 @@ fi
 if [ ! -f /etc/php/7.3/cli/conf.d/99-boris.ini ]; then
     echo "Initialize Boris..."
     grep '^disable_functions' /etc/php/7.3/cli/php.ini \
-        | sed -r 's/pcntl_(signal|fork|waitpid|signal_dispatch),//g' \
+        | sed -r 's/pcntl_(fork|signal|signal_dispatch|waitpid),//g' \
         > /etc/php/7.3/cli/conf.d/99-boris.ini
 fi
 
