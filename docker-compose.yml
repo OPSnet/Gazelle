@@ -12,10 +12,9 @@ services:
       - mysql
     volumes:
       - .:/var/www
-      - /var/www/vendor
-      - /var/www/node_modules
       - .docker/web/nginx.conf:/etc/nginx/sites-available/gazelle.conf
     environment:
+      - ENV
       # These should match what you set for your mysql container below
       - MYSQL_USER=gazelle
       - MYSQL_PASSWORD=password
@@ -42,3 +41,7 @@ services:
     volumes:
       - ./.docker/data/sphinxsearch:/var/lib/sphinxsearch/data/
       - ./.docker/sphinxsearch/sphinx.conf:/var/lib/sphinxsearch/conf/sphinx.conf
+    environment:
+      # These should match what you set for your mysql container above
+      - MYSQL_USER=gazelle
+      - MYSQL_PASSWORD=password

@@ -82,10 +82,10 @@ And then:
 In the same vein, you can use `mysqldump` to perform a backup.
 
 #### Production Mode (not fully baked yet)
-In order to have Docker build the container using the production mode commands
-for both Composer and NPM, run this before powering it up:
+In order to have Docker run the container using the production mode commands
+for both Composer and NPM, run this when powering it up:
 
-`docker-compose build --build-arg BuildMode=prod`
+`ENV=prod docker-compose up`
 
 ### Vagrant (Legacy)
 This repository comes pre-setup to be run through
