@@ -2,20 +2,24 @@
 
 run_service()
 {
-    service $1 start
-    if [ $? -ne 0 ]; then
-        exit 1
-    fi
+    service "$1" start || exit 1
 }
+
+# We'll need these anyway so why not kill some time while waiting on MySQL to be ready
+if [ -n "$ENV" ] && [ "$ENV" == "prod" ]; then
+    su -c 'composer --version && composer install --no-dev --optimize-autoloader --no-suggest; yarn --prod' gazelle
+else
+    su -c 'composer --version && composer install; yarn' gazelle
+fi
 
 # Wait for MySQL...
 counter=1
-while ! mysql -h mysql -ugazelle -ppassword -e "show databases;" > /dev/null 2>&1; do
+while ! mysql -h mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "show databases;" > /dev/null 2>&1; do
     sleep 1
     counter=$((counter + 1))
     if [ $((counter % 20)) -eq 0 ]; then
-        mysql -h mysql -ugazelle -ppassword -e "show databases;"
-        >&2 echo "Still waiting for MySQL (Count: ${counter})."
+        mysql -h mysql -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "show databases;"
+        >&2 echo "Still waiting for MySQL (Count: $counter)."
     fi;
 done
 
@@ -24,9 +28,8 @@ if [ ! -f /var/www/classes/config.php ]; then
 fi
 
 echo "Run migrate..."
-LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate
 
-if [ $? -ne 0 ]; then
+if ! LOCK_MY_DATABASE=1 /var/www/vendor/bin/phinx migrate; then
     echo "PHINX FAILED TO MIGRATE"
     exit 1
 fi
@@ -35,8 +38,7 @@ echo -e "\n"
 
 if [ ! -f /srv/gazelle.txt ]; then
     echo "Run seed:run..."
-    /var/www/vendor/bin/phinx seed:run -s InitialUserSeeder
-    if [ $? -ne 0 ]; then
+    if ! /var/www/vendor/bin/phinx seed:run -s InitialUserSeeder; then
         echo "PHINX FAILED TO SEED"
         exit 1
     fi

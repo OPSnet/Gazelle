@@ -1,7 +1,5 @@
 FROM debian:buster-slim
 
-ARG BuildMode=dev
-
 WORKDIR /var/www
 
 # Misc software layer
@@ -101,21 +99,8 @@ RUN chown -R gazelle:gazelle /var/www \
     && ln -s /etc/nginx/sites-available/gazelle.conf /etc/nginx/sites-enabled/gazelle.conf \
     && rm -f /etc/nginx/sites-enabled/default
 
-USER gazelle
-
-# Build/run deps install layer
-RUN if [ "$BuildMode" = "prod" ]; then \
-        composer --version && composer install --no-dev --optimize-autoloader --no-suggest; \
-        yarn --prod; \
-    else \
-        composer --version && composer install; \
-        yarn; \
-    fi
-
-USER root
-
 EXPOSE 80/tcp
 EXPOSE 3306/tcp
 EXPOSE 34000/tcp
 
-CMD ["/bin/bash", "/var/www/.docker/web/entrypoint.sh"]
+ENTRYPOINT [ "/bin/bash", "/var/www/.docker/web/entrypoint.sh" ]
