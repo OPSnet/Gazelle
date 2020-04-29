@@ -90,7 +90,7 @@ if (!empty($_GET['setdefault'])) {
 if (isset($_GET['searchsubmit'])) {
     $GroupResults = !empty($_GET['group_results']);
 } else {
-    $GroupResults = !$LoggedUser['DisableGrouping2'];
+    $GroupResults = !$LoggedUser['TorrentGrouping'];
 }
 
 $Page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
