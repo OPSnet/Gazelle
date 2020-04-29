@@ -16,7 +16,7 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
                 AND NOT EXISTS (
                     SELECT 1
                     FROM users_levels ul
-                    INNER JOIN permissions ulp ON (p.ID = ul.PermissionsID)
+                    INNER JOIN permissions ulp ON (ulp.ID = ul.PermissionID)
                     WHERE ul.UserID = um.ID
                         AND p.NAME in (?, ?)
                 )
