@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Inbox;
+
 authorize();
 
 $UserID = $LoggedUser['ID'];
@@ -42,10 +45,9 @@ if (!$DB->has_results()) {
         WHERE ConvID = '$ConvID'
             AND UserID = '$UserID'");
     $Cache->delete_value("inbox_new_$ReceiverID");
-    header('Location: ' . Inbox::get_inbox_link());
+    header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
 } else {
     error("$StaffIDs[$ReceiverID] already has this conversation in their inbox.");
     header("Location: inbox.php?action=viewconv&id=$ConvID");
 }
 //View::show_footer();
-?>

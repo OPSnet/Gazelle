@@ -1,140 +1,87 @@
 <?php
 
-
+use Gazelle\Inbox;
 
 $UserID = $LoggedUser['ID'];
 
-
-if (empty($_GET['action'])) {
-    $Section = 'inbox';
-    $_GET['action'] = 'inbox';
-} else {
-    $Section = $_GET['action']; // either 'inbox' or 'sentbox'
-}
-if (!in_array($Section, ['inbox', 'sentbox'])) {
+try {
+    $Inbox = new Inbox(
+        $DB,
+        $LoggedUser['ID'],
+        $LoggedUser['ListUnreadPMsFirst'] ?? false
+    );
+} catch (Throwable $e) {
     error(404);
 }
-
-list($Page, $Limit) = Format::page_limit(MESSAGES_PER_PAGE);
 
 View::show_header('Inbox');
 ?>
 <div class="thin">
-    <h2><?=($Section === 'sentbox' ? 'Sentbox' : 'Inbox')?></h2>
+    <h2><?= $Inbox->title() ?></h2>
     <div class="linkbox">
-<?php
-if ($Section === 'inbox') { ?>
-        <a href="<?=Inbox::get_inbox_link('sentbox'); ?>" class="brackets">Sentbox</a>
-<?php } elseif ($Section === 'sentbox') { ?>
-        <a href="<?=Inbox::get_inbox_link(); ?>" class="brackets">Inbox</a>
-<?php }
-
-?>
-        <br /><br />
-<?php
-
-$Sort = empty($_GET['sort']) || $_GET['sort'] !== 'unread' ? 'Date DESC' : "cu.Unread = '1' DESC, DATE DESC";
-
-$sql = "
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        c.ID,
-        c.Subject,
-        cu.Unread,
-        cu.Sticky,
-        cu.ForwardedTo,
-        cu2.UserID,";
-$sql .= $Section === 'sentbox' ? ' cu.SentDate ' : ' cu.ReceivedDate ';
-$sql .= "AS Date
-    FROM pm_conversations AS c
-        LEFT JOIN pm_conversations_users AS cu ON cu.ConvID = c.ID AND cu.UserID = '$UserID'
-        LEFT JOIN pm_conversations_users AS cu2 ON cu2.ConvID = c.ID AND cu2.UserID != '$UserID' AND cu2.ForwardedTo = 0
-        LEFT JOIN users_main AS um ON um.ID = cu2.UserID";
-
-if (!empty($_GET['search']) && $_GET['searchtype'] === 'message') {
-    $sql .=    ' JOIN pm_messages AS m ON c.ID = m.ConvID';
-}
-$sql .= ' WHERE ';
-if (!empty($_GET['search'])) {
-    $Search = db_string($_GET['search']);
-    if ($_GET['searchtype'] === 'user') {
-        $sql .= "um.Username LIKE '$Search' AND ";
-    } elseif ($_GET['searchtype'] === 'subject') {
-        $Words = explode(' ', $Search);
-        $sql .= "c.Subject LIKE '%".implode("%' AND c.Subject LIKE '%", $Words)."%' AND ";
-    } elseif ($_GET['searchtype'] === 'message') {
-        $Words = explode(' ', $Search);
-        $sql .= "m.Body LIKE '%".implode("%' AND m.Body LIKE '%", $Words)."%' AND ";
+<?php foreach (array_keys(Inbox::SECTIONS) as $Section) {
+    if ($Inbox->section() != $Section) { ?>
+        <a href="<?= $Inbox->getLink($Section) ?>" class="brackets">
+            <?= $Inbox->title($Section) ?>
+        </a><?php
     }
-}
-$sql .= $Section === 'sentbox' ? ' cu.InSentbox' : ' cu.InInbox';
-$sql .= " = '1'";
+} ?>
+<br /><br />
+<?php
+list($NumResults, $Count, $Messages) = $Inbox->result();
 
-$sql .= "
-    GROUP BY c.ID
-    ORDER BY cu.Sticky, $Sort
-    LIMIT $Limit";
-$Results = $DB->query($sql);
-$DB->query('SELECT FOUND_ROWS()');
-list($NumResults) = $DB->next_record();
-$DB->set_query_id($Results);
-$Count = $DB->record_count();
-
-$Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
-echo "\t\t$Pages\n";
+$Pages = Format::get_pages(Format::page_limit(MESSAGES_PER_PAGE)[0], $NumResults, MESSAGES_PER_PAGE, 9);
+echo $Pages;
 ?>
     </div>
 
     <div class="box pad">
 <?php if ($Count == 0 && empty($_GET['search'])) { ?>
-    <h2>Your <?=($Section === 'sentbox' ? 'sentbox' : 'inbox')?> is empty.</h2>
+    <h2>Your <?= $Inbox->section() ?> is empty.</h2>
 <?php } else { ?>
-        <form class="search_form" name="<?=($Section === 'sentbox' ? 'sentbox' : 'inbox')?>" action="inbox.php" method="get" id="searchbox">
+        <form class="search_form" name="<?= $Inbox->section() ?>" action="inbox.php" method="get" id="searchbox">
             <div>
-                <input type="hidden" name="action" value="<?=$Section?>" />
-                <input type="radio" id="search-user" name="searchtype" value="user"<?=(empty($_GET['searchtype']) || $_GET['searchtype'] === 'user' ? ' checked="checked"' : '')?> /><label for="search-user">&nbsp;User</label>
-                <input type="radio" id="search-subject" name="searchtype" value="subject"<?=(!empty($_GET['searchtype']) && $_GET['searchtype'] === 'subject' ? ' checked="checked"' : '')?> /><label for="search-subject">&nbsp;Subject</label>
-                <input type="radio" id="search-message" name="searchtype" value="message"<?=(!empty($_GET['searchtype']) && $_GET['searchtype'] === 'message' ? ' checked="checked"' : '')?> /><label for="search-message">&nbsp;Message</label>
-                <span style="float: right;">
-<?php            // provide a temporary toggle for sorting PMs
-        $ToggleTitle = 'Temporary toggle switch for sorting PMs. To permanently change the sorting behavior, edit the setting in your profile.';
-        $BaseURL = "inbox.php?action={$_GET['action']}";
-
-        if (isset($_GET['sort']) && $_GET['sort'] === 'unread') { ?>
-                    <a href="<?=$BaseURL?>" class="brackets tooltip" title="<?=$ToggleTitle?>">List latest first</a>
-<?php        } else { ?>
-                    <a href="<?=$BaseURL?>&sort=unread" class="brackets tooltip" title="<?=$ToggleTitle?>">List unread first</a>
-<?php        } ?>
-                </span>
-                <br />
-                <input type="search" name="search" placeholder="<?=(!empty($_GET['search']) ? display_str($_GET['search']) : 'Search '.($Section === 'sentbox' ? 'sentbox' : 'inbox'))?>" style="width: 98%;" />
+                <input type="hidden" name="section" value="<?= $Inbox->section() ?>" />
+                <label><input type="radio" name="searchtype" value="user"<?= (empty($_GET['searchtype']) || $_GET['searchtype'] === 'user') ? ' checked="checked"' : '' ?> /> User</label>
+                <label><input type="radio" name="searchtype" value="subject"<?= Format::selected('searchtype', 'subject', 'checked') ?> /> Subject</label>
+                <label><input type="radio" name="searchtype" value="message"<?= Format::selected('searchtype', 'message', 'checked') ?> /> Message</label>
+                <input type="search" name="search" placeholder="<?=(!empty($_GET['search']) ? display_str($_GET['search']) : 'Search ' . $Inbox->section())?>" style="width: 98%;" />
             </div>
-        </form>
+        </form><br />
         <form class="manage_form" name="messages" action="inbox.php" method="post" id="messageform">
             <input type="hidden" name="action" value="masschange" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="section" value="<?= $Inbox->section() ?>" />
+            <input type="hidden" name="sort" value="<?= (string) (int) $Inbox->getSort() ?>" />
+            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
             <input type="submit" name="read" value="Mark as read" />&nbsp;
             <input type="submit" name="unread" value="Mark as unread" />&nbsp;
             <input type="submit" name="delete" value="Delete message(s)" />
+            <span style="float: right;">
+<?php            // provide a temporary toggle for sorting PMs
+        $ToggleTitle = 'Temporary toggle switch for sorting PMs. To permanently change the sorting behavior, edit the setting in your profile.';
+        $SortURL = $Inbox->getLink($Inbox->section(), Inbox::HTML, Inbox::ALT_SORT);
+        $LinkText = (strpos($SortURL, 'unread') !== false) ? 'unread' : 'latest';
+?>
+                <a href="<?= $SortURL ?>" class="brackets tooltip" title="<?= $ToggleTitle ?>">List <?= $LinkText ?> first</a>
+            </span>
 
             <table class="message_table checkboxes">
                 <tr class="colhead">
                     <td width="10"><input type="checkbox" onclick="toggleChecks('messageform', this);" /></td>
                     <td width="50%">Subject</td>
-                    <td><?=($Section === 'sentbox' ? 'Receiver' : 'Sender')?></td>
+                    <td><?= ($Inbox->section() === 'sentbox') ? 'Receiver' : 'Sender' ?></td>
                     <td>Date</td>
 <?php        if (check_perms('users_mod')) { ?>
                     <td>Forwarded to</td>
 <?php        } ?>
                 </tr>
-<?php
-    if ($Count == 0) { ?>
+<?php if ($Count == 0) { ?>
                 <tr class="a">
                     <td colspan="5">No results.</td>
                 </tr>
-<?php    } else {
+<?php } else {
         $Row = 'a';
-        while (list($ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $SenderID, $Date) = $DB->next_record()) {
+        foreach ($Messages as list($ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $SenderID, $Date)) {
             if ($Unread === '1') {
                 $RowClass = 'unreadpm';
             } else {
@@ -142,34 +89,32 @@ echo "\t\t$Pages\n";
                 $RowClass = "row$Row";
             }
 ?>
-                <tr class="<?=$RowClass?>">
-                    <td class="center"><input type="checkbox" name="messages[]=" value="<?=$ConvID?>" /></td>
+                <tr class="<?= $RowClass ?>">
+                    <td class="center"><input type="checkbox" name="messages[]=" value="<?= $ConvID ?>" /></td>
                     <td>
 <?php
-            echo "\t\t\t\t\t\t"; // for proper indentation of HTML
             if ($Unread) {
                 echo '<strong>';
             }
             if ($Sticky) {
                 echo 'Sticky: ';
             }
-            echo "\n";
+            $Section = ($Inbox->section() != 'inbox') ? '&amp;section=' . $Inbox->section() : '';
+            $Sort = ($Inbox->getSort() == Inbox::UNREAD_FIRST) ? '&amp;sort=unread' : '';
 ?>
-                        <a href="inbox.php?action=viewconv&amp;id=<?=$ConvID?>"><?=$Subject?></a>
+                        <a href="inbox.php?action=viewconv&amp;id=<?= $ConvID . $Section . $Sort ?>"><?= $Subject ?></a>
 <?php
-            echo "\t\t\t\t\t\t"; // for proper indentation of HTML
             if ($Unread) {
-                echo "</strong>\n";
+                echo "</strong>";
             } ?>
                     </td>
-                    <td><?=Users::format_username($SenderID, true, true, true, true)?></td>
-                    <td><?=time_diff($Date)?></td>
+                    <td><?= Users::format_username($SenderID, true, true, true, true) ?></td>
+                    <td><?= time_diff($Date) ?></td>
 <?php            if (check_perms('users_mod')) { ?>
-                    <td><?=(($ForwardedID && $ForwardedID != $LoggedUser['ID']) ? Users::format_username($ForwardedID, false, false, false) : '')?></td>
+                    <td><?= (($ForwardedID && $ForwardedID != $LoggedUser['ID']) ? Users::format_username($ForwardedID, false, false, false) : '') ?></td>
 <?php            } ?>
                 </tr>
 <?php
-        $DB->set_query_id($Results);
         }
     } ?>
             </table>
@@ -180,9 +125,8 @@ echo "\t\t$Pages\n";
 <?php } ?>
     </div>
     <div class="linkbox">
-<?php echo "\t\t$Pages\n"; ?>
+<?= $Pages ?>
     </div>
 </div>
 <?php
 View::show_footer();
-?>

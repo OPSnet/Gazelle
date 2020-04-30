@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Inbox;
+
 authorize();
 
 if (empty($_POST['toid'])) {
@@ -54,6 +57,4 @@ if (!empty($Err)) {
 
 $ConvID = Misc::send_pm($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
 
-
-header('Location: ' . Inbox::get_inbox_link());
-?>
+header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));

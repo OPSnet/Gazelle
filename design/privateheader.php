@@ -289,6 +289,12 @@ $percent = $monthlyRental == 0.0
                 $Tests = [$Tests];
             }
 
+            if ($Key == 'inbox') {
+                $Target = Gazelle\Inbox::getLinkQuick(null,
+                    isset(G::$LoggedUser['ListUnreadPMsFirst']) && G::$LoggedUser['ListUnreadPMsFirst']
+                );
+            }
+
             $ClassNames = NULL;
             if ($Key == 'notifications' && !check_perms('site_torrents_notify')) {
                 continue;

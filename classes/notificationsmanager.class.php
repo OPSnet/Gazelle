@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Inbox;
+
 class NotificationsManager {
     // Option types
     const OPT_DISABLED = 0;
@@ -358,7 +360,7 @@ class NotificationsManager {
 
         if ($NewMessages > 0) {
             $Title = 'You have ' . ($NewMessages == 1 ? 'a' : $NewMessages) . ' new message' . ($NewMessages > 1 ? 's' : '');
-            $this->create_notification(self::INBOX, 0, $Title, Inbox::get_inbox_link(), self::INFO);
+            $this->create_notification(self::INBOX, 0, $Title, Inbox::getLinkQuick('inbox', G::$LoggedUser['ListUnreadPMsFirst'] ?? false), self::INFO);
         }
     }
 

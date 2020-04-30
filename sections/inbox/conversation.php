@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Inbox;
+
 $ConvID = $_GET['id'];
 if (!$ConvID || !is_number($ConvID)) {
     error(404);
@@ -74,11 +77,18 @@ $DB->query("
     FROM pm_messages
     WHERE ConvID = '$ConvID'
     ORDER BY ID");
+
+$Section = (isset($_GET['section']) && in_array($_GET['section'], array_keys(Inbox::SECTIONS)))
+    ? $_GET['section']
+    : key(Inbox::SECTIONS);
+$Sort = (isset($_GET['sort']) && $_GET['sort'] == 'unread') ? Inbox::UNREAD_FIRST : Inbox::NEWEST_FIRST;
 ?>
 <div class="thin">
     <h2><?=$Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : '')?></h2>
     <div class="linkbox">
-        <a href="<?=Inbox::get_inbox_link(); ?>" class="brackets">Back to inbox</a>
+        <a href="<?= Inbox::getLinkQuick($Section, $Sort); ?>" class="brackets">
+            Back to <?= $Section ?>
+        </a>
     </div>
 <?php
 

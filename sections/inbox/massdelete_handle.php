@@ -1,7 +1,11 @@
 <?php
 
+use Gazelle\Inbox;
+
 enforce_login();
 $UserID = $LoggedUser['ID'];
+$Section = $_POST['section'];
+$UnreadFirst = (bool) $_POST['sort'];
 
 if (!isset($_POST['messages']) || !is_array($_POST['messages'])) {
     $Message = 'to delete';
@@ -11,8 +15,8 @@ if (!isset($_POST['messages']) || !is_array($_POST['messages'])) {
     elseif (isset($_POST['read'])) {
         $Message = 'to mark as read';
     }
-    error("You forgot to select messages {$Message}.");
-    header('Location: ' . Inbox::get_inbox_link());
+    error("You forgot to select messages $Message.");
+    header('Location: ' . Inbox::getLinkQuick($Section, $UnreadFirst, Inbox::RAW));
     die();
 }
 
@@ -57,4 +61,4 @@ if (isset($_POST['delete'])) {
 }
 $Cache->delete_value('inbox_new_'.$UserID);
 
-header('Location: ' . Inbox::get_inbox_link());
+header('Location: ' . Inbox::getLinkQuick($Section, $UnreadFirst, Inbox::RAW));
