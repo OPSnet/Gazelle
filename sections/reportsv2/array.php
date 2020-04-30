@@ -651,23 +651,6 @@ Your torrent has now been properly scored by the staff.'
                     'delete' => '0'
                 ]
             ],
-            'upload_contest' => [
-                'priority' => '162',
-                'reason' => '-1',
-                'title' => 'Upload Contest Approval Request',
-                'report_messages' => [
-                    'Please include a photograph of the CD next to a piece of paper with your username written on it.',
-                    '<strong class="important_text">Anything included in the proof images field will only be viewable by staff.</strong>'
-                ],
-                'report_fields' => [
-                    'proofimages' => '2'
-                ],
-                'resolve_options' => [
-                    'upload' => '0',
-                    'warn' => '0',
-                    'delete' => '0'
-                ]
-            ]
         ],
 
         '2' => [ //Applications Rules Broken

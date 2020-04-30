@@ -223,11 +223,6 @@ if ($DB->affected_rows() > 0 || !$Report) {
         list($GroupID) = $DB->next_record();
         $Cache->delete_value("torrents_details_$GroupID");
     }
-    elseif ($_POST['resolve_type'] === 'upload_contest') {
-        $DB->query("
-            INSERT INTO upload_contest
-            VALUES ($TorrentID, $UploaderID)");
-    }
 
     //Log and delete
     if (isset($Escaped['delete']) && check_perms('users_mod')) {
