@@ -1,10 +1,12 @@
 <?php
 
+use Gazelle\Inbox;
+
 if (empty($Return)) {
     $ToID = $_GET['to'];
     if ($ToID == $LoggedUser['ID']) {
         error('You cannot start a conversation with yourself!');
-        header('Location: ' . Inbox::get_inbox_link());
+        header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
     }
 }
 

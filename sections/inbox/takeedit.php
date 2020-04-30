@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Inbox;
+
 authorize();
 
 $UserID = $LoggedUser['ID'];
@@ -42,5 +45,5 @@ if (isset($_POST['delete'])) {
         $Cache->increment('inbox_new_'.$UserID);
     }
 }
-header('Location: ' . Inbox::get_inbox_link());
+header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
 ?>

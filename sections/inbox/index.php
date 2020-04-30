@@ -41,5 +41,5 @@ switch ($_REQUEST['action']) {
         require('forward.php');
         break;
     default:
-        require(SERVER_ROOT.'/sections/inbox/inbox.php');
+        require('inbox.php');
 }
