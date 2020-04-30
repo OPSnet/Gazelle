@@ -4,12 +4,7 @@ if (empty($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 $UserID = $_GET['id'];
 
-
-if ($UserID == $LoggedUser['ID']) {
-    $OwnProfile = true;
-} else {
-    $OwnProfile = false;
-}
+$OwnProfile = $UserID == $LoggedUser['ID'];
 
 // Always view as a normal user.
 $DB->prepared_query("
@@ -48,7 +43,6 @@ $DB->prepared_query("
     LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
     LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
     WHERE um.ID = ?
-        AND ulp.Name = ?
     GROUP BY AuthorID
     ", $UserID);
 
