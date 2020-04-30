@@ -273,9 +273,9 @@ class Forums {
         $QueryID = G::$DB->get_query_id();
         G::$DB->prepared_query("
             INSERT INTO forums_topic_notes
-                (TopicID, AuthorID, Body)
+                (TopicID, AuthorID, Body, AddedTime)
             VALUES
-                (?,       ?,        ?)",
+                (?,       ?,        ?,    now())",
             $TopicID, $UserID, $Note);
         G::$DB->set_query_id($QueryID);
         return (bool)G::$DB->affected_rows();
