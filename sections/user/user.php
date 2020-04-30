@@ -600,19 +600,11 @@ if (Applicant::user_is_applicant($UserID) && (check_perms('admin_manage_applican
                 <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 <?php
 }
-
-if (!isset($SupportFor)) {
-    $SupportFor = $User->supportFor();
-}
-if ($Override = check_perms('users_mod') || $OwnProfile || !empty($SupportFor)) {
-?>
-                <li<?=(($Override === 2 || $SupportFor) ? ' class="paranoia_override"' : '')?>>Clients: <?=
-                    implode('; ', $User->clients()) ?></li>
-<?php
-}
-
 if ($OwnProfile || check_perms('users_mod')) {
 ?>
+                <li<?= check_perms('users_mod') ? ' class="paranoia_override"' : '' ?>>Torrent clients: <?=
+                    implode('; ', $User->clients()) ?></li>
+
     <li>Password age: <?= $User->passwordAge() ?></li>
 <?php }
 if ($OwnProfile || check_perms('users_override_paranoia', $Class)) { ?>

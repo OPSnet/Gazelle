@@ -216,7 +216,7 @@ class User {
             WHERE uid = ?
             ', $this->id
         );
-        return $this->db->collect(0);
+        return $this->db->collect(0) ?: ['None'];
     }
 
     protected function getSingleValue($cacheKey, $query) {
