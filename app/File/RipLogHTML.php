@@ -5,7 +5,7 @@ namespace Gazelle\File;
 class RipLogHTML extends \Gazelle\File {
     const STORAGE = STORAGE_PATH_RIPLOGHTML;
 
-    public function get ($id) {
+    public function get($id) {
         $path = $this->path($id);
         if (!file_exists($path)) {
             $torrentId = $id[0];
@@ -26,14 +26,14 @@ class RipLogHTML extends \Gazelle\File {
         return file_get_contents($path);
     }
 
-    public function put ($source, $id) {
+    public function put($source, $id) {
         $out = fopen($this->path($id), 'wb');
         fwrite($out, $source);
         fclose($out);
         return true;
     }
 
-    public function remove ($id) {
+    public function remove($id) {
         $torrentId = $id[0];
         $logId = $id[1];
         if (is_null($logId)) {
@@ -59,7 +59,7 @@ class RipLogHTML extends \Gazelle\File {
         return true;
     }
 
-    public function path ($id) {
+    public function path($id) {
         $torrentId = $id[0];
         $logId = $id[1];
         $key = strrev(sprintf('%04d', $torrentId));

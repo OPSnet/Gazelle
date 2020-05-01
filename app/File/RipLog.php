@@ -6,7 +6,7 @@ class RipLog extends \Gazelle\File {
     const STORAGE = STORAGE_PATH_RIPLOG;
     const STORAGE_LEGACY = SERVER_ROOT_LIVE . '/logs';
 
-    public function put ($source, $id) {
+    public function put($source, $id) {
         // PHASE 2: The following can be removed after validation
         $this->db->prepared_query('SELECT 1 FROM torrents_logs WHERE TorrentID = ? AND LogID = ?', $id[0], $id[1]);
         if (!$this->db->has_results()) {
@@ -19,7 +19,7 @@ class RipLog extends \Gazelle\File {
         return false !== move_uploaded_file($source, $this->path($id));
     }
 
-    public function remove ($id) {
+    public function remove($id) {
         $torrent_id = $id[0];
         $log_id = $id[1];
         if (is_null($log_id)) {
@@ -47,7 +47,7 @@ class RipLog extends \Gazelle\File {
         return $this->db->affected_rows(); // PHASE 2 return true
     }
 
-    public function path ($id) {
+    public function path($id) {
         $torrent_id = $id[0];
         $log_id = $id[1];
         $key = strrev(sprintf('%04d', $torrent_id));
@@ -55,11 +55,11 @@ class RipLog extends \Gazelle\File {
             . '/' . $torrent_id . '_' . $log_id . '.log';
     }
 
-    public function pathLegacy ($id) {
+    public function pathLegacy($id) {
         return self::STORAGE_LEGACY . '/' . $id[0] . '_' . $id[1] . '.log';
     }
 
-    public function get ($id) {
+    public function get($id) {
         if (!$this->exists($id)) {
             $path = $this->path_legacy($id);
             if (file_exists($path)) {

@@ -5,7 +5,7 @@ namespace Gazelle\File;
 class Torrent extends \Gazelle\File {
     const STORAGE = STORAGE_PATH_TORRENT;
 
-    public function get ($id) {
+    public function get($id) {
         $path = $this->path($id);
         if (!file_exists($path)) {
             $this->db->prepared_query('SELECT File FROM torrents_files WHERE TorrentID = ?', $id);
@@ -19,7 +19,11 @@ class Torrent extends \Gazelle\File {
         return file_get_contents($path);
     }
 
-    public function path ($id) {
+    public function put($source, $id) {
+        return file_put_contents($this->path($id), $source);
+    }
+
+    public function path($id) {
         $key = strrev(sprintf('%04d', $id));
         $k1 = substr($key, 0, 2);
         $k2 = substr($key, 2, 2);

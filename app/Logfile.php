@@ -38,7 +38,6 @@ class Logfile {
     public function detailsAsString() { return implode("\r\n", $this->details); }
     public function filepath()        { return $this->filepath; }
     public function filename()        { return $this->filename; }
-    public function name()            { return $this->name; }
     public function score()           { return $this->score; }
     public function text()            { return $this->text; }
     public function ripper()          { return $this->ripper; }
