@@ -1,23 +1,20 @@
 <?php
 
-use Gazelle\Logfile;
-use OrpheusNET\Logchecker\Logchecker;
-
 //******************************************************************************//
 //--------------- Take edit ----------------------------------------------------//
-// This pages handles the backend of the 'edit torrent' function. It checks        //
-// the data, and if it all validates, it edits the values in the database        //
-// that correspond to the torrent in question.                                    //
+// This pages handles the backend of the 'edit torrent' function. It checks     //
+// the data, and if it all validates, it edits the values in the database       //
+// that correspond to the torrent in question.                                  //
 //******************************************************************************//
+
+use OrpheusNET\Logchecker\Logchecker;
 
 enforce_login();
 authorize();
 
-$Validate = new Validate;
-
 //******************************************************************************//
 //--------------- Set $Properties array ----------------------------------------//
-// This is used if the form doesn't validate, and when the time comes to enter    //
+// This is used if the form doesn't validate, and when the time comes to enter  //
 // it into the database.                                                        //
 //******************************************************************************//
 
@@ -52,17 +49,16 @@ $Properties['LossymasterApproved'] = (isset($_POST['lossymaster_approved']))? 1 
 $Properties['LossywebApproved'] = (isset($_POST['lossyweb_approved'])) ? 1 : 0;
 $Properties['Format'] = $_POST['format'];
 $Properties['Media'] = $_POST['media'];
-$Properties['Bitrate'] = $_POST['bitrate'];
-$Properties['Encoding'] = $_POST['bitrate'];
+$Properties['Bitrate'] = $Properties['Encoding'] = $_POST['bitrate'];
 $Properties['TorrentDescription'] = $_POST['release_desc'];
-$Properties['Name'] = $_POST['title'];
-if ($_POST['album_desc']) {
+$Properties['Name'] = $_POST['title'] ?? '';
+if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = $_POST['album_desc'];
 }
 if (check_perms('torrents_freeleech')) {
     $Free = $_POST['freeleechtype'];
     if (!in_array($Free, ['0', '1', '2'])) {
-        error(404);
+        error(0);
     }
     $Properties['FreeLeech'] = $Free;
 
@@ -71,7 +67,7 @@ if (check_perms('torrents_freeleech')) {
     } else {
         $FreeType = $_POST['freeleechreason'];
         if (!in_array($FreeType, ['0', '1', '2', '3'])) {
-            error(404);
+            error(0);
         }
     }
     $Properties['FreeLeechType'] = $FreeType;
@@ -80,15 +76,15 @@ if (check_perms('torrents_freeleech')) {
 //******************************************************************************//
 //--------------- Validate data in edit form -----------------------------------//
 
-$DB->prepared_query("
+list($UserID, $Remastered, $RemasterYear, $CurFreeLeech) = $DB->row('
     SELECT UserID, Remastered, RemasterYear, FreeTorrent
     FROM torrents
-    WHERE ID = ?", $TorrentID
+    WHERE ID = ?
+    ', $TorrentID
 );
-if (!$DB->has_results()) {
+if (!$UserID) {
     error(404);
 }
-list($UserID, $Remastered, $RemasterYear, $CurFreeLeech) = $DB->fetch_record(MYSQLI_BOTH, false);
 
 if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_edit')) {
     error(403);
@@ -106,6 +102,7 @@ if ($Properties['UnknownRelease'] && !($Remastered == '1' && !$RemasterYear) && 
     }
 }
 
+$Validate = new Validate;
 $Validate->SetFields('type', '1', 'number', 'Not a valid type.', ['maxlength' => count($Categories), 'minlength' => 1]);
 switch ($Type) {
     case 'Music':
@@ -133,11 +130,9 @@ switch ($Type) {
 
         $Validate->SetFields('remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 2 and 80 characters.', ['maxlength' => 80, 'minlength' => 2]);
 
-
         $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]);
 
         $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
-
 
         // Handle 'other' bitrates
         if ($Properties['Encoding'] == 'Other') {
@@ -168,7 +163,6 @@ switch ($Type) {
         $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]);
 
         $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
-
 
         // Handle 'other' bitrates
         if ($Properties['Encoding'] == 'Other') {
@@ -234,7 +228,6 @@ foreach ($Properties as $Key => $Value) {
     }
 }
 
-
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
@@ -249,10 +242,7 @@ $DBTorVals = $DBTorVals[0];
 $LogDetails = '';
 foreach ($DBTorVals as $Key => $Value) {
     $Value = "'$Value'";
-    if ($Value != $T[$Key]) {
-        if (!isset($T[$Key])) {
-            continue;
-        }
+    if (isset($T[$Key]) && $Value != $T[$Key]) {
         if ((empty($Value) && empty($T[$Key])) || ($Value == "'0'" && $T[$Key] == "''")) {
             continue;
         }
@@ -264,35 +254,49 @@ foreach ($DBTorVals as $Key => $Value) {
     }
 }
 
-$AddedLogs = false;
+// Some browsers will report an empty file when you submit, prune those out
+$_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], function($Name) { return !empty($Name); });
+
+$logfileSummary = new \Gazelle\LogfileSummary;
+$logfiles = [];
 if (count($_FILES['logfiles']['name']) > 0) {
     ini_set('upload_max_filesize', 1000000);
-
+    $ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+    $htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
     foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
         if (!$_FILES['logfiles']['size'][$Pos]) {
             continue;
         }
+        $logfile = new \Gazelle\Logfile(
+            $_FILES['logfiles']['tmp_name'][$Pos],
+            $_FILES['logfiles']['name'][$Pos]
+        );
+        $logfiles[] = $logfile;
+        $logfileSummary->add($logfile);
 
-        $Logfile = new Logfile($_FILES['logfiles']['tmp_name'][$Pos], $_FILES['logfiles']['name'][$Pos]);
-
-        $DB->prepared_query("
-        INSERT INTO torrents_logs (`TorrentID`, `Log`, `Details`, `Score`, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            $TorrentID, $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(), $Logfile->filename(), $Logfile->ripper(),
-            $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
+        $DB->prepared_query('
+            INSERT INTO torrents_logs
+                   (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Log, Details)
+            VALUES (?,         ?,      ?,         ?,        ?,      ?,              ?,         ?,             ?,                 ?,   ?)
+            ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
+                $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
+                Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
         );
         $LogID = $DB->inserted_id();
-        if (move_uploaded_file($Logfile->filepath(), SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
-            die("Could not copy logfile to the server.");
+        if (!move_uploaded_file($logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID]))) {
+            $Debug->analysis('Logfile copy failure',
+                sprintf('failed copy from [%s] to [%s]', $logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID])),
+                3600 * 24);
         }
-        $AddedLogs = true;
+        copy($ripFiler->pathLegacy([$TorrentID, $LogID]), $ripFiler->path([$TorrentID, $LogID]));
+        $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
     }
 }
 
 // Update info for the torrent
 $SQL = "UPDATE torrents AS t";
 
-if ($AddedLogs) {
+if ($logfiles) {
     $SQL .= "
     LEFT JOIN (
       SELECT
@@ -316,7 +320,7 @@ $SQL .= "
         RemasterRecordLabel = {$T['RemasterRecordLabel']},
         RemasterCatalogueNumber = {$T['RemasterCatalogueNumber']},
         Scene = {$T['Scene']},";
-if ($AddedLogs) {
+if ($logfiles) {
     $SQL .= "
         LogScore = CASE WHEN tl.Score IS NULL THEN 100 ELSE tl.Score END,
         LogChecksum = CASE WHEN tl.Checksum IS NULL THEN '1' ELSE tl.Checksum END,

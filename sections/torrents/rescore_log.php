@@ -1,7 +1,6 @@
 <?php
 
 use OrpheusNET\Logchecker\Logchecker;
-use Gazelle\Logfile;
 
 if (!check_perms('users_mod')) {
     error(403);
@@ -10,8 +9,7 @@ if (!check_perms('users_mod')) {
 $TorrentID = intval($_GET['torrentid']);
 $LogID = intval($_GET['logid']);
 
-$DB->prepared_query('SELECT GroupID FROM torrents WHERE ID= ?', $TorrentID);
-list($GroupID) = $DB->fetch_record();
+$DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
 if (!$GroupID) {
     error(404);
 }
@@ -21,19 +19,33 @@ if (!$DB->has_results()) {
     error(404);
 }
 
-$LogPath = SERVER_ROOT_LIVE."/logs/{$TorrentID}_{$LogID}.log";
-$Logfile = new Logfile($LogPath);
+$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
 
-$DB->prepared_query(
-    'UPDATE torrents_logs SET
-        `Log` = ?, Details = ?, Score = ?, `Checksum` = ?,
-        Adjusted = ?, Ripper = ?, RipperVersion = ?, `Language` = ?, ChecksumState = ?, LogcheckerVersion = ?
-    WHERE LogID = ? AND TorrentID = ?',
-    $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(),
-    0, $Logfile->ripper(), $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion(),
-    $LogID, $TorrentID
+$logpath = $ripFiler->pathLegacy([$TorrentID, $LogID]);
+$logfile = new \Gazelle\Logfile($logpath, basename($logpath));
+copy($ripFiler->pathLegacy([$TorrentID, $LogID]), $ripFiler->path([$TorrentID, $LogID]));
+
+$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
+
+$DB->prepared_query("
+    UPDATE torrents_logs SET
+        Score = ?,
+        `Checksum` = ?,
+        ChecksumState = ?,
+        Ripper = ?,
+        RipperVersion = ?,
+        `Language` = ?,
+        LogcheckerVersion = ?,
+        Details = ?,
+        Log = ?,
+        Adjusted = '0'
+    WHERE LogID = ? AND TorrentID = ?
+    ", $Logfile->score(), $Logfile->checksumStatus(), $Logfile->checksumState(), $Logfile->ripper(), $Logfile->ripperVersion(),
+        $Logfile->language(), Logchecker::getLogcheckerVersion(),
+        $Logfile->detailsAsString(), $Logfile->text(),
+        $LogID, $TorrentID
 );
-
 Torrents::set_logscore($TorrentID, $GroupID);
 
 header("Location: torrents.php?torrentid={$TorrentID}");
