@@ -1,6 +1,5 @@
 <?php
 
-use Gazelle\{Logfile, LogfileSummary};
 use OrpheusNET\Logchecker\Logchecker;
 
 //******************************************************************************//
@@ -13,8 +12,8 @@ use OrpheusNET\Logchecker\Logchecker;
 ini_set('max_file_uploads', 100);
 define('MAX_FILENAME_LENGTH', 255);
 
-include(__DIR__ . '/../torrents/functions.php');
-include(__DIR__ . '/../../classes/file_checker.class.php');
+require(__DIR__ . '/../torrents/functions.php');
+require(__DIR__ . '/../../classes/file_checker.class.php');
 
 enforce_login();
 authorize();
@@ -29,6 +28,7 @@ define('QUERY_EXCEPTION', true); // Shut up debugging
 // This is used if the form doesn't validate, and when the time comes to enter  //
 // it into the database.                                                        //
 
+$Err = null;
 $Properties = [];
 $Type = $Categories[(int)$_POST['type']];
 $TypeID = $_POST['type'] + 1;
@@ -323,7 +323,7 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 
 if ($Err) { // Show the upload form, with the data the user entered
     $UploadForm = $Type;
-    include(__DIR__ .'/upload.php');
+    require(__DIR__ . '/upload.php');
     die();
 }
 
@@ -331,40 +331,43 @@ if (!empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
     $DB->prepared_query('
         SELECT ta.ArtistID, aa.Name, ta.Importance
         FROM torrents_artists AS ta
-            JOIN artists_alias AS aa ON ta.AliasID = aa.AliasID
+        INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
         WHERE ta.GroupID = ?
         ORDER BY ta.Importance ASC, aa.Name ASC
         ', $Properties['GroupID']
     );
-    while (list($ArtistID, $ArtistName, $ArtistImportance) = $DB->next_record(MYSQLI_BOTH, false)) {
+    while (list($ArtistID, $ArtistName, $ArtistImportance) = $DB->next_record(MYSQLI_NUM, false)) {
         $ArtistForm[$ArtistImportance][] = ['id' => $ArtistID, 'name' => display_str($ArtistName)];
         $ArtistsUnescaped[$ArtistImportance][] = ['name' => $ArtistName];
     }
     $LogName .= Artists::display_artists($ArtistsUnescaped, false, true, false);
 }
 
-// Strip out Amazon's padding
-$AmazonReg = '/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i';
-$Matches = [];
-if (preg_match($AmazonReg, $Properties['Image'], $Matches)) {
-    $Properties['Image'] = $Matches[1].'.jpg';
+if ($Properties['Image']) {
+    // Strip out Amazon's padding
+    $AmazonReg = '/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i';
+    $Matches = [];
+    if (preg_match($AmazonReg, $Properties['Image'], $Matches)) {
+        $Properties['Image'] = $Matches[1].'.jpg';
+    }
+    if (!preg_match('/^'.IMAGE_REGEX.'$/i', $Properties['Image'])) {
+        $Properties['Image'] = '';
+    } else {
+        ImageTools::blacklisted($Properties['Image']);
+    }
 }
-ImageTools::blacklisted($Properties['Image']);
 
 //******************************************************************************//
 //--------------- Generate torrent file ----------------------------------------//
 
+$torrentFiler = new \Gazelle\File\Torrent($DB, $Cache);
 $Tor = new BencodeTorrent($TorrentName, true);
 $PublicTorrent = $Tor->make_private(); // The torrent is now private.
 $UnsourcedTorrent = $Tor->set_source(); // The source is now OPS
 $InfoHash = pack('H*', $Tor->info_hash());
 
-$DB->prepared_query('
-    SELECT ID
-    FROM torrents
-    WHERE info_hash = ?', $InfoHash);
-if ($DB->has_results()) {
-    list($ID) = $DB->next_record();
+$ID = $DB->scalar('SELECT ID FROM torrents WHERE info_hash = ?', $InfoHash);
+if ($ID) {
     $DB->prepared_query('
         SELECT TorrentID
         FROM torrents_files
@@ -378,6 +381,7 @@ if ($DB->has_results()) {
             VALUES (?, ?)
             ', $ID, $Tor->encode()
         );
+        $torrentFiler->put($Tor->encode(), $ID);
         $Err = '<a href="torrents.php?torrentid='.$ID.'">Thank you for fixing this torrent</a>';
     }
 }
@@ -409,16 +413,36 @@ foreach ($FileList as $File) {
     check_file($Type, $Name);
     // Make sure the filename is not too long
     if (mb_strlen($Name, 'UTF-8') + mb_strlen($DirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
-        $TooLongPaths[] = "$DirName/$Name";
+        $TooLongPaths[] = "<li>$DirName/$Name</li>";
     }
     // Add file info to array
     $TmpFileList[] = Torrents::filelist_format_file($File);
 }
 if (count($TooLongPaths) > 0) {
-    $Names = implode(' <br />', $TooLongPaths);
-    $Err = "The torrent contained one or more files with too long a name:<br /> $Names";
+    $Err = 'The torrent contained one or more files with too long a name: <ul>'
+        . implode('', $TooLongPaths)
+        . '</ul><br />';
 }
 $Debug->set_flag('upload: torrent decoded');
+
+$logfileSummary = new \Gazelle\LogfileSummary;
+if ($HasLog == '1') {
+    ini_set('upload_max_filesize', 1000000);
+    // Some browsers will report an empty file when you submit, prune those out
+    $_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], function($Name) { return !empty($Name); });
+    foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
+        if (!$_FILES['logfiles']['size'][$Pos]) {
+            continue;
+        }
+
+        $logfile = new \Gazelle\Logfile(
+            $_FILES['logfiles']['tmp_name'][$Pos],
+            $_FILES['logfiles']['name'][$Pos]
+        );
+        $logfileSummary->add($logfile);
+    }
+}
+$LogInDB = count($logfileSummary->all()) ? '1' : '0';
 
 if ($Type == 'Music') {
     $ExtraTorrentsInsert = [];
@@ -468,14 +492,8 @@ if ($Type == 'Music') {
         $ThisInsert['TotalSize'] = $ExtraTotalSize;
 
         $Debug->set_flag('upload: torrent decoded');
-        $DB->prepared_query('
-            SELECT ID
-            FROM torrents
-            WHERE info_hash = ?
-            ', $ThisInsert['InfoHash']
-        );
-        if ($DB->has_results()) {
-            list($ExtraID) = $DB->next_record();
+        $ExtraID = $DB->scalar('SELECT ID FROM torrents WHERE info_hash = ?', $ThisInsert['InfoHash']);
+        if ($ExtraID) {
             $DB->prepared_query('
                 SELECT TorrentID
                 FROM torrents_files
@@ -489,6 +507,7 @@ if ($Type == 'Music') {
                     VALUES (?, ?)
                     ', $ExtraID, $ThisInsert['TorEnc']
                 );
+                $torrentFiler->put($ThisInsert['TorEnc'], $ExtraID);
                 $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">Thank you for fixing this torrent.</a>";
             }
         }
@@ -496,41 +515,17 @@ if ($Type == 'Music') {
     unset($ThisInsert);
 }
 
-if (!empty($Err)) { // Show the upload form, with the data the user entered
+if ($Err) {
     $UploadForm = $Type;
-    include(__DIR__ . '/upload.php');
+    // TODO: Repopulate the form correctly
+    require(__DIR__ . '/upload.php');
     die();
-}
-
-//******************************************************************************//
-//------------------------- Run the Logchecker ---------------------------------//
-$LogScore = 100;
-$LogChecksum = 1;
-$LogInDB = '0';
-$LogfileSummary = new LogfileSummary();
-if ($HasLog) {
-    ini_set('upload_max_filesize', 1000000);
-    foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-        if (!$_FILES['logfiles']['size'][$Pos]) {
-            continue;
-        }
-
-        $LogPath = $_FILES['logfiles']['tmp_name'][$Pos];
-        $FileName = $_FILES['logfiles']['name'][$Pos];
-
-        $LogfileSummary->add(new Logfile($LogPath, $FileName));
-        $LogInDB = '1';
-    }
 }
 
 //******************************************************************************//
 //--------------- Start database stuff -----------------------------------------//
 
-// Trickery
-if (!preg_match('/^'.IMAGE_REGEX.'$/i', $Properties['Image'])) {
-    $Properties['Image'] = '';
-}
-
+$NoRevision = false;
 if ($Type == 'Music') {
     // Does it belong in a group?
     if ($Properties['GroupID']) {
@@ -688,18 +683,17 @@ if ($IsNewGroup) {
     );
     $Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID", "detail_files_$GroupID"]);
     if ($Type == 'Music') {
-        $DB->prepared_query('
+        $Properties['ReleaseType'] = $DB->scalar('
             SELECT ReleaseType
             FROM torrents_group
             WHERE ID = ?
             ', $GroupID
         );
-        list($Properties['ReleaseType']) = $DB->next_record();
     }
 }
 
 // Description
-if (!$NoRevision) {
+if ($NoRevision) {
     $DB->prepared_query('
         INSERT INTO wiki_torrents
                (PageID, Body, UserID, Image, Summary, Time)
@@ -761,8 +755,8 @@ $DB->prepared_query("
          ?, ?, now(), '0', '0')
     ", $GroupID, $LoggedUser['ID'], $Properties['Media'], $Properties['Format'], $Properties['Encoding'],
        $Properties['Remastered'], $Properties['RemasterYear'], $Properties['RemasterTitle'], $Properties['RemasterRecordLabel'], $Properties['RemasterCatalogueNumber'],
-       $Properties['Scene'], $HasLog, $HasCue, $LogInDB, $LogfileSummary->overallScore(),
-       $LogfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
+       $Properties['Scene'], $HasLog, $HasCue, $LogInDB, $logfileSummary->overallScore(),
+       $logfileSummary->checksumStatus(), $InfoHash, count($FileList), implode("\n", $TmpFileList), $DirName,
        $TotalSize, $Properties['TorrentDescription']
 );
 
@@ -785,18 +779,27 @@ $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 //******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//
 
-foreach($LogfileSummary->all() as $Logfile) {
+$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+foreach($logfileSummary->all() as $logfile) {
     $DB->prepared_query('
         INSERT INTO torrents_logs
-               (TorrentID, Log, Details, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion)
-        VALUES (?,         ?,   ?,       ?,     ?,          ?,        ?,      ?,             ?,          ?,             ?)',
-        $TorrentID, $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(), $Logfile->filename(),
-        $Logfile->ripper(), $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
+               (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Log, Details)
+        VALUES (?,         ?,      ?,         ?,        ?,      ?,             ?,          ?,             ?,                 ?,   ?)
+        ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(),
+            $logfile->ripper(), $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
+            Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
     );
     $LogID = $DB->inserted_id();
-    if (move_uploaded_file($Logfile->filepath(), SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log") === false) {
-        $Debug->analysis('Could not upload logfile for new torrent id: ' . $TorrentID);
+    if (!move_uploaded_file($logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID]))) {
+        $Debug->analysis(
+            sprintf('failed copy from [%s] to [%s]',
+                $logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID])),
+            3600 * 24
+        );
     }
+    copy($ripFiler->pathLegacy([$TorrentID, $LogID]), $ripFiler->path([$TorrentID, $LogID]));
+    $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 }
 
 //******************************************************************************//
@@ -808,6 +811,7 @@ $DB->prepared_query('
     VALUES (?,         ?)
     ', $TorrentID, $Tor->encode()
 );
+$torrentFiler->put($Tor->encode(), $TorrentID);
 Misc::write_log("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MB) was uploaded by ' . $LoggedUser['Username']);
 Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MB)', 0);
 
@@ -872,7 +876,7 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
             info_hash, FileCount, FileList, FilePath, Size, Description,
             Time, LogScore, HasLog, HasCue, FreeTorrent, FreeLeechType)
         VALUES
-             (?, ?, ?, ?, ?,
+            (?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?,
             now(), 0, '0', '0', '0', '0')
@@ -902,8 +906,10 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
         VALUES (?,         ?)
         ', $ExtraTorrentID, $ExtraTorrent['TorEnc']
     );
-    Misc::write_log("Torrent $ExtraTorrentID ($LogName) (" . number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2) . ' MB) was uploaded by ' . $LoggedUser['Username']);
-    Torrents::write_group_log($GroupID, $ExtraTorrentID, $LoggedUser['ID'], 'uploaded (' . number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2) . ' MB)', 0);
+    $torrentFiler->put($ExtraTorrent['TorEnc'], $ExtraTorrentID);
+    $sizeMB = number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2);
+    Misc::write_log("Torrent $ExtraTorrentID ($LogName) ($sizeMB  MB) was uploaded by " . $LoggedUser['Username']);
+    Torrents::write_group_log($GroupID, $ExtraTorrentID, $LoggedUser['ID'], "uploaded ($sizeMB MB)", 0);
     Torrents::update_hash($GroupID);
 }
 
