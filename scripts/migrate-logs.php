@@ -4,6 +4,8 @@ require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../classes/classloader.php');
 require_once(__DIR__.'/../classes/util.php');
 
+ini_set('MAX_EXECUTION_TIME', -1);
+
 $Debug = new DEBUG;
 $Debug->handle_errors();
 
