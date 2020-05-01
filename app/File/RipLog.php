@@ -15,7 +15,7 @@ class RipLog extends \Gazelle\File {
                 ', $id[0], $id[1], $source
             );
         }
-        copy($source, $this->path_legacy($id)); // PHASE 2: remove
+        copy($source, $this->pathLegacy($id)); // PHASE 2: remove
         return false !== move_uploaded_file($source, $this->path($id));
     }
 
@@ -35,7 +35,7 @@ class RipLog extends \Gazelle\File {
         if ($this->exists($id)) {
             unlink($path);
         }
-        $path = $this->path_legacy($id);
+        $path = $this->pathLegacy($id);
         if (file_exists($path)) {
             unlink($path);
         }
@@ -61,7 +61,7 @@ class RipLog extends \Gazelle\File {
 
     public function get($id) {
         if (!$this->exists($id)) {
-            $path = $this->path_legacy($id);
+            $path = $this->pathLegacy($id);
             if (file_exists($path)) {
                 parent::put(file_get_contents($path), [$id[0], $id[1]]);
             }
