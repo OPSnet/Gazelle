@@ -42,6 +42,10 @@ $preload = [
     'db'         => $DB,
     'bonus'      => new \Gazelle\Bonus($DB, $Cache),
     'stylesheet' => new \Gazelle\Stylesheet($DB, $Cache),
+    'twig'       => new Twig\Environment(
+        new Twig\Loader\FilesystemLoader('templates'),
+        ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
+    ),
 ];
 printf("** preloaded objects:\n** %s\n", implode(', ', array_keys($preload)));
 $b->setLocal($preload);
