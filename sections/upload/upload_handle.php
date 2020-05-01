@@ -820,7 +820,8 @@ $Debug->set_flag('upload: sphinx updated');
 
 // Running total for amount of BP to give
 $Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
-$BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Bitrate'], $LogInDB, $LogScore, $LogChecksum);
+$BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Bitrate'], $LogInDB,
+    $logfileSummary->overallScore(), $logfileSummary->overallScore());
 
 //******************************************************************************//
 //---------------IRC announce and feeds ---------------------------------------//
@@ -838,7 +839,7 @@ if ($Type == 'Music') {
     }
     $Details .= $Properties['Format'].' / '.$Properties['Bitrate'];
     if ($HasLog == 1) {
-        $Details .= ' / Log'.($LogInDB ? " ({$LogScore}%)" : "");
+        $Details .= ' / Log'.($LogInDB ? " ({$logfileSummary->overallScore()}%)" : "");
     }
     if ($HasCue == 1) {
         $Details .= ' / Cue';
