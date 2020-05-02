@@ -67,14 +67,14 @@ $DownloadsQ = $DB->query("
     GROUP BY TorrentID");
 
 $Collector = new TorrentsDL($DownloadsQ, "$Username's ".ucfirst($_GET['type']));
+$filer = new \Gazelle\File\Torrent($DB, $Cache);
 
 while (list($Downloads, $GroupIDs) = $Collector->get_downloads('TorrentID')) {
     $Artists = Artists::get_artists($GroupIDs);
     $TorrentIDs = array_keys($GroupIDs);
-    $TorrentFilesQ = $DB->query('
-        SELECT TorrentID, File
-        FROM torrents_files
-        WHERE TorrentID IN ('.implode(',', $TorrentIDs).')', false);
+    $TorrentFilesQ = $DB->prepared_query(sprintf('
+        SELECT ID FROM torrents WHERE ID IN (%s)
+        ', implode(', ', array_fill(0, count($TorrentIDs), '?'))), ...$TorrentIDs);
     if (is_int($TorrentFilesQ)) {
         // Query failed. Let's not create a broken zip archive
         foreach ($TorrentIDs as $TorrentID) {
@@ -84,10 +84,10 @@ while (list($Downloads, $GroupIDs) = $Collector->get_downloads('TorrentID')) {
         }
         continue;
     }
-    while (list($TorrentID, $TorrentFile) = $DB->next_record(MYSQLI_NUM, false)) {
+    while (list($TorrentID) = $DB->next_record(MYSQLI_NUM, false)) {
         $Download =& $Downloads[$TorrentID];
         $Download['Artist'] = Artists::display_artists($Artists[$Download['GroupID']], false, true, false);
-        $Collector->add_file($TorrentFile, $Download, $Download['Month']);
+        $Collector->add_file($filer->get($TorrentID), $Download, $Download['Month']);
         unset($Download);
     }
 }

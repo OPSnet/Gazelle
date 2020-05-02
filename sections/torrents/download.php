@@ -208,13 +208,9 @@ $DB->prepared_query("
     VALUES (?, ?, now())
     ", $UserID, $TorrentID);
 
-$DB->prepared_query("
-    SELECT File
-    FROM torrents_files
-    WHERE TorrentID = ?", $TorrentID);
-
 Torrents::set_snatch_update_time($UserID, Torrents::SNATCHED_UPDATE_AFTERDL);
-list($Contents) = $DB->next_record(MYSQLI_NUM, false);
+$filer = new \Gazelle\File\Torrent($DB, $Cache);
+$Contents = $filer->get($TorrentID);
 $Cache->delete_value('user_rlim_' . $UserID);
 
 $FileName = TorrentsDL::construct_file_name($Info['PlainArtists'], $Name, $Year, $Media, $Format, $Encoding, $TorrentID, $DownloadAlt);

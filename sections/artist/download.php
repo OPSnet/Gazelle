@@ -45,7 +45,6 @@ FROM torrents AS t
 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
 INNER JOIN torrents_group AS tg ON tg.ID = t.GroupID AND tg.CategoryID = '1'
 INNER JOIN artists_group AS a ON a.ArtistID = tg.ArtistID AND a.ArtistID = '59721'
-LEFT JOIN torrents_files AS f ON t.ID = f.TorrentID
 ORDER BY t.GroupID ASC, Rank DESC, tls.Seeders ASC
 */
 
@@ -152,12 +151,12 @@ ORDER BY t.GroupID ASC, Rank DESC, $Preference";
 
 $DownloadsQ = $DB->query($SQL);
 $Collector = new TorrentsDL($DownloadsQ, $ArtistName);
+$filer = new \Gazelle\File\Torrent($DB, $Cache);
 while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
     $Artists = Artists::get_artists($GroupIDs);
-    $TorrentFilesQ = $DB->query("
-        SELECT TorrentID, File
-        FROM torrents_files
-        WHERE TorrentID IN (".implode(',', array_keys($GroupIDs)).')', false);
+    $TorrentFilesQ = $DB->prepared_query(sprintf('
+        SELECT ID FROM torrents WHERE ID IN (%s)
+        ', implode(', ', array_fill(0, count($GroupIDs), '?'))), ...$GroupIDs);
     if (is_int($TorrentFilesQ)) {
         // Query failed. Let's not create a broken zip archive
         foreach ($GroupIDs as $GroupID) {
@@ -167,7 +166,7 @@ while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
         }
         continue;
     }
-    while (list($TorrentID, $TorrentFile) = $DB->next_record(MYSQLI_NUM, false)) {
+    while (list($TorrentID) = $DB->next_record(MYSQLI_NUM, false)) {
         $GroupID = $GroupIDs[$TorrentID];
         $Download =& $Downloads[$GroupID];
         $Download['Artist'] = Artists::display_artists($Artists[$Download['GroupID']], false, true, false);
@@ -210,7 +209,7 @@ while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
                 $ReleaseTypeName = 'Other';
                 break;
         }
-        $Collector->add_file($TorrentFile, $Download, $ReleaseTypeName);
+        $Collector->add_file($filer->get($TorrentID), $Download, $ReleaseTypeName);
         unset($Download);
     }
 }
