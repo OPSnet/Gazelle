@@ -24,7 +24,7 @@ $htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
 
 while (true) {
     $DB->prepared_query('
-        SELECT LogID, TorrentID, Log, Details
+        SELECT LogID, TorrentID, Log
         FROM torrents_logs
         WHERE LogID > ?
         ORDER BY LogID
@@ -37,7 +37,7 @@ while (true) {
 
     $list = $DB->to_array();
     foreach ($list as $torrent) {
-        list($logId, $torrentId, $log, $dtails) = $torrent;
+        list($logId, $torrentId, $log) = $torrent;
         $last = $logId;
         ++$processed;
         if (!file_exists($logFiler->path([$torrentId, $logId]))) {
