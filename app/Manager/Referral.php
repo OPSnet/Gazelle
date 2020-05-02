@@ -2,6 +2,9 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Util\Crypto;
+use Gazelle\Util\Proxy;
+
 class Referral {
     private $db;
     private $cache;
@@ -11,6 +14,7 @@ class Referral {
     public $readOnly;
 
     const CACHE_ACCOUNTS = 'referral_accounts';
+    const CACHE_BOUNCER = 'bouncer_status';
     // Do not change the ordering in this array after launch.
     const ACCOUNT_TYPES = ['Gazelle (API)', 'Gazelle Games', 'Tentacles', 'Luminance', 'Gazelle (HTML)', 'PTP'];
     // Accounts which use the user ID instead of username.
@@ -20,7 +24,7 @@ class Referral {
         $this->db = $db;
         $this->cache = $cache;
         $this->accounts = $this->cache->get_value(self::CACHE_ACCOUNTS);
-        $this->proxy = new \Gazelle\Util\Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
+        $this->proxy = new Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
 
         if ($this->accounts === false) {
             $this->db->query("SELECT ID, Site, Active, Type FROM referral_accounts");
@@ -35,13 +39,26 @@ class Referral {
         $this->readOnly = !apcu_exists('DB_KEY');
 
         if (!$this->readOnly) {
-            $this->db->prepared_query("SELECT URL FROM referral_accounts LIMIT 1");
-            if ($this->db->has_results()) {
-                list($url) = array_values($this->db->next_record());
-                $url = \Gazelle\Util\Crypto::dbDecrypt($url);
-                $this->readOnly = $url == null;
+            $url = $this->db->scalar("SELECT URL FROM referral_accounts LIMIT 1");
+            if ($url) {
+                $this->readOnly = Crypto::dbDecrypt($url) == null;
             }
         }
+    }
+
+    public function checkBouncer() {
+        if (!count($this->accounts)) {
+            return true;
+        }
+
+        $status = $this->cache->get_value(self::CACHE_BOUNCER);
+        if ($status === false) {
+            $req = $this->proxy->fetch(site_url(), [], [], false);
+            $status = $req == null ? 'dead' : 'alive';
+            $this->cache->cache_value(self::CACHE_BOUNCER, $status, 60 * 15);
+        }
+
+        return $status == 'alive';
     }
 
     public function generateToken() {
@@ -69,21 +86,23 @@ class Referral {
         $this->db->prepared_query("
             SELECT ID, Site, URL, User, Password, Active, Type, Cookie
             FROM referral_accounts
-            WHERE ID = ?", $id);
+            WHERE ID = ?
+            ", $id
+        );
 
+        $account = null;
         if ($this->db->has_results()) {
             $account = $this->db->next_record();
             foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
                 if (array_key_exists($key, $account)) {
-                    $account[$key] = \Gazelle\Util\Crypto::dbDecrypt($account[$key]);
+                    $account[$key] = Crypto::dbDecrypt($account[$key]);
                 }
             }
             $account["Cookie"] = json_decode($account["Cookie"], true);
             $account["UserIsId"] = in_array($account["Type"], self::ID_TYPES);
-            return $account;
-        } else {
-            return null;
         }
+
+        return $account;
     }
 
     public function getFullAccounts() {
@@ -96,7 +115,7 @@ class Referral {
             foreach ($accounts as &$account) {
                 foreach (['URL', 'User', 'Password', 'Cookie'] as $key) {
                     if (array_key_exists($key, $account)) {
-                        $account[$key] = \Gazelle\Util\Crypto::dbDecrypt($account[$key]);
+                        $account[$key] = Crypto::dbDecrypt($account[$key]);
                     }
                 }
                 $account["Cookie"] = json_decode($account["Cookie"], true);
@@ -104,70 +123,83 @@ class Referral {
             }
             return $accounts;
         }
+
         return [];
     }
 
     public function createAccount($site, $url, $user, $password, $active, $type, $cookie) {
-        if (!$this->readOnly) {
-            if (strlen($cookie) < 2) {
-                $cookie = '[]';
-            }
-            json_decode($cookie);
-            if (json_last_error() != JSON_ERROR_NONE) {
-                $cookie = '[]';
-            }
-            $this->db->prepared_query("
-                INSERT INTO referral_accounts
-                    (Site, URL, User, Password, Active, Type, Cookie)
-                VALUES
-                    (?, ?, ?, ?, ?, ?, ?)", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
-                \Gazelle\Util\Crypto::dbEncrypt($user),    \Gazelle\Util\Crypto::dbEncrypt($password),
-                $active, $type, \Gazelle\Util\Crypto::dbEncrypt($cookie));
-
-            $this->cache->delete_value(self::CACHE_ACCOUNTS);
+        if ($this->readOnly) {
+            return;
         }
+
+        if (strlen($cookie) < 2) {
+            $cookie = '[]';
+        }
+
+        json_decode($cookie);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            $cookie = '[]';
+        }
+
+        $this->db->prepared_query("
+            INSERT INTO referral_accounts
+                (Site, URL, User, Password, Active, Type, Cookie)
+            VALUES
+                (?,    ?,   ?,    ?,        ?,      ?,    ?)
+            ", $site, Crypto::dbEncrypt($url), Crypto::dbEncrypt($user),
+            Crypto::dbEncrypt($password), $active, $type, Crypto::dbEncrypt($cookie)
+        );
+
+        $this->cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
     private function updateCookie($id, $cookie) {
-        if (!$this->readOnly) {
-            $this->db->prepared_query("
-            UPDATE referral_accounts SET
-                Cookie = ?
-            WHERE ID = ?", \Gazelle\Util\Crypto::dbEncrypt(json_encode($cookie)), $id);
+        if ($this->readOnly) {
+            return;
         }
+
+        $this->db->prepared_query("
+            UPDATE referral_accounts
+            SET Cookie = ?
+            WHERE ID = ?
+            ", Crypto::dbEncrypt(json_encode($cookie)), $id
+        );
     }
 
     public function updateAccount($id, $site, $url, $user, $password, $active, $type, $cookie) {
-        if (!$this->readOnly) {
-            $account = $this->getFullAccount($id);
-            if (strlen($cookie) < 2) {
-                $cookie = '[]';
-            }
-            json_decode($cookie);
-            if (json_last_error() != JSON_ERROR_NONE) {
-                $cookie = '[]';
-            }
-            if ($cookie == '[]') {
-                $cookie = json_encode($account["Cookie"]);
-            }
-            if (strlen($password) == 0) {
-                $password = $account["Password"];
-            }
-            $this->db->prepared_query("
-                UPDATE referral_accounts SET
-                    Site = ?,
-                    URL = ?,
-                    User = ?,
-                    Password = ?,
-                    Active = ?,
-                    Type = ?,
-                    Cookie = ?
-                WHERE ID = ?", $site, \Gazelle\Util\Crypto::dbEncrypt($url),
-                \Gazelle\Util\Crypto::dbEncrypt($user),    \Gazelle\Util\Crypto::dbEncrypt($password),
-                $active, $type, \Gazelle\Util\Crypto::dbEncrypt($cookie), $id);
-
-            $this->cache->delete_value(self::CACHE_ACCOUNTS);
+        if ($this->readOnly) {
+            return;
         }
+
+        $account = $this->getFullAccount($id);
+        if (strlen($cookie) < 2) {
+            $cookie = '[]';
+        }
+        json_decode($cookie);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            $cookie = '[]';
+        }
+        if ($cookie == '[]') {
+            $cookie = json_encode($account["Cookie"]);
+        }
+        if (strlen($password) == 0) {
+            $password = $account["Password"];
+        }
+        $this->db->prepared_query("
+            UPDATE referral_accounts SET
+                Site = ?,
+                URL = ?,
+                User = ?,
+                Password = ?,
+                Active = ?,
+                Type = ?,
+                Cookie = ?
+            WHERE ID = ?
+            ", $site, Crypto::dbEncrypt($url), Crypto::dbEncrypt($user),
+            Crypto::dbEncrypt($password), $active, $type, Crypto::dbEncrypt($cookie), $id
+        );
+
+        $this->cache->delete_value(self::CACHE_ACCOUNTS);
     }
 
     public function deleteAccount($id) {
@@ -185,54 +217,56 @@ class Referral {
             $endDate = \Gazelle\Util\Time::sqlTime();
         }
 
-        $Filter = ['ru.Created BETWEEN ? AND ?'];
-        $Params = [$startDate, $endDate];
+        $filter = ['ru.Created BETWEEN ? AND ?'];
+        $params = [$startDate, $endDate];
 
         if ($view === 'pending') {
-            $Filter[] = 'ru.Active = 0';
+            $filter[] = 'ru.Active = 0';
         } else if ($view === 'processed') {
-            $Filter[] = 'ru.Active = 1';
+            $filter[] = 'ru.Active = 1';
         }
 
         if ($site != NULL) {
-            $Filter[] = 'ru.Site LIKE ?';
-            $Params[] = $site;
+            $filter[] = 'ru.Site LIKE ?';
+            $params[] = $site;
         }
 
         if ($username != NULL) {
-            $Filter[] = '(ru.Username LIKE ? OR um.Username LIKE ?)';
-            $Params[] = $username;
-            $Params[] = $username;
+            $filter[] = '(ru.Username LIKE ? OR um.Username LIKE ?)';
+            $params[] = $username;
+            $params[] = $username;
         }
 
         if ($invite != NULL) {
-            $Filter[] = 'ru.InviteKey LIKE ?';
-            $Params[] = $invite;
+            $filter[] = 'ru.InviteKey LIKE ?';
+            $params[] = $invite;
         }
 
-        $Filter = implode(' AND ', $Filter);
+        $filter = implode(' AND ', $filter);
 
-        $qId = $this->db->prepared_query("
+        $this->db->prepared_query("
             SELECT SQL_CALC_FOUND_ROWS ru.ID, ru.UserID, ru.Site, ru.Username, ru.Created, ru.Joined, ru.IP, ru.Active, ru.InviteKey
             FROM referral_users ru
             LEFT JOIN users_main um ON um.ID = ru.UserID
-            WHERE $Filter
+            WHERE $filter
             ORDER BY ru.Created DESC
-            LIMIT $limit", ...$Params);
-        $this->db->prepared_query("SELECT FOUND_ROWS()");
-        list($Results) = $this->db->next_record();
-        $this->db->set_query_id($qId);
+            LIMIT $limit
+            ", ...$params
+        );
 
-        $Users = $Results > 0 ? $this->db->to_array('ID', MYSQLI_ASSOC) : [];
+        $results = $this->db->scalar("SELECT found_rows()");
 
-        return ["Results" => $Results, "Users" => $Users];
+        $users = $results > 0 ? $this->db->to_array('ID', MYSQLI_ASSOC) : [];
+
+        return ["Results" => $results, "Users" => $users];
     }
 
     public function deleteUserReferral($id) {
         $this->db->prepared_query("
             DELETE FROM referral_users
-            WHERE ID = ?",
-            $id);
+            WHERE ID = ?
+            ", $id
+        );
     }
 
     public function validateCookie($acc) {
@@ -565,48 +599,50 @@ class Referral {
     }
 
     public function generateInvite($acc, $username, $email, $twig) {
-        $this->db->prepared_query("
+        $existing = $this->db->scalar("
             SELECT Username
             FROM referral_users
-            WHERE Username = ? AND Site = ?",
-            $username, $acc["Site"]);
-        if ($this->db->has_results()) {
+            WHERE Username = ? AND Site = ?
+            ", $username, $acc["Site"]
+        );
+
+        if ($existing) {
             return [false, "Account already used for referral, join " . BOT_DISABLED_CHAN . " on " . BOT_SERVER . " for help."];
         }
 
-        $InviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
-        $InviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
-        $InviteKey = \Users::make_secret();
+        $inviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
+        $inviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
+        $inviteKey = \Users::make_secret();
 
-        // save invite to DB
         $this->db->prepared_query("
             INSERT INTO invites
-                (InviterID, InviteKey, Email, Expires, Reason)
+                (InviteKey, Email, Expires, Reason)
             VALUES
-                (?, ?, ?, ?, ?)",
-            0, $InviteKey, $email, $InviteExpires, $InviteReason);
+                (?,         ?,     ?,       ?)
+            ", $inviteKey, $email, $inviteExpires, $inviteReason
+        );
 
-        // save to referral history
         $this->db->prepared_query("
             INSERT INTO referral_users
                 (Username, Site, IP, InviteKey)
             VALUES
-                (?, ?, ?, ?)",
-            $username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $InviteKey);
+                (?,        ?,    ?,  ?)
+            ", $username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $inviteKey
+        );
 
         if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) {
             $message = $twig->render('emails/referral.twig', [
                 'Email' => $email,
-                'InviteKey' => $InviteKey,
+                'InviteKey' => $inviteKey,
                 'DISABLED_CHAN' => BOT_DISABLED_CHAN,
                 'IRC_SERVER' => BOT_SERVER,
                 'SITE_NAME' => SITE_NAME,
                 'SITE_URL' => SITE_URL
             ]);
-            // send email
+
             \Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $message, 'noreply', 'text/plain');
         }
 
-        return [true, $InviteKey];
+        return [true, $inviteKey];
     }
 }
