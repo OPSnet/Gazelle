@@ -17,7 +17,7 @@ class DonationsView {
                     <select name="donation_currency">
                         <option value="EUR">EUR</option>
                         <option value="USD">USD</option>
-                        <option value="XBT">XBT</option>
+                        <option value="XBT" selected="selected">XBT</option>
                     </select>
                 </td>
             </tr>
