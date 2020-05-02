@@ -1,45 +1,51 @@
 <?php
-if (!check_perms('site_debug') || !check_perms('admin_manage_referrals')) {
+if (!check_perms('admin_manage_referrals')) {
     error(403);
 }
 
-$ReferralManager = new Gazelle\Manager\Referral($DB, $Cache);
-$ReferralAccounts = $ReferralManager->getFullAccounts();
+$referralManager = new Gazelle\Manager\Referral($DB, $Cache);
+$referralAccounts = $referralManager->getFullAccounts();
 
-$Cookie = [];
-$Params = [];
+$cookie = [];
+$params = [];
+$hasResult = false;
 
 if (isset($_POST['url'])) {
     authorize();
-    $Url = $_POST['url'];
-    $Proxy = new \Gazelle\Util\Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
-    $HasResult = true;
+    $url = $_POST['url'];
+    $proxy = new \Gazelle\Util\Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
+    $hasResult = true;
+    $failedLogin = false;
 
     if (isset($_POST['account'])) {
-        $Account = $ReferralManager->getFullAccount($_POST['account']);
-        $ReferralManager->loginAccount($Account);
-        $Cookie = $Account['Cookie'];
+        $account = $referralManager->getFullAccount($_POST['account']);
+        $failedLogin = !$referralManager->loginAccount($account);
+        $cookie = $account['Cookie'];
     } else {
-        $Cookie = $_POST['cookie'];
-        if (strlen($Cookie) < 2) {
-            $Cookie = [];
+        $cookie = $_POST['cookie'];
+        if (strlen($cookie) < 2) {
+            $cookie = [];
         }
-        $Cookie = json_decode($Cookie);
+        $cookie = json_decode($cookie);
         if (json_last_error() != JSON_ERROR_NONE) {
-            $Cookie = [];
+            $cookie = [];
         }
     }
 
-    $Params = $_POST['params'];
-    $Params = json_decode($Params);
+    $params = $_POST['params'];
+    $params = json_decode($params);
     if (json_last_error() != JSON_ERROR_NONE) {
-        $Params = [];
+        $params = [];
     }
 
-    $Post = isset($_POST['post']);
+    $post = isset($_POST['post']);
 
-    $Request = ['Url' => $Url, 'Params' => $Params, 'Cookie' => $Cookie, 'Post' => $Post];
-    $Response = $Proxy->fetch($Url, $Params, $Cookie, $Post);
+    $request = ['Url' => $url, 'Params' => $params, 'Cookie' => $cookie, 'Post' => $post];
+    if ($failedLogin) {
+        $response = ['status' => 500, 'cookies' => [], 'response' => 'Login failed.'];
+    } else {
+        $response = $proxy->fetch($url, $params, $cookie, $post);
+    }
 }
 
 View::show_header("Referral Sandbox");
@@ -51,12 +57,12 @@ div#preview {display: none;}
 <div class="header">
     <h2>Referral Sandbox</h2>
 </div>
-<?php if ($HasResult) { ?>
+<?php if ($hasResult) { ?>
 <div class="thin box pad">
     <div class="thin">
         <h3>Request</h3>
         <div class="box pad">
-<?php var_dump($Request); ?>
+<?php var_dump($request); ?>
         </div>
     </div>
     <div class="thin">
@@ -64,10 +70,15 @@ div#preview {display: none;}
         <div class="box pad">
             <a onclick="toggle_display('preview')" href="javascript:void(0)">Toggle Preview</a><br />
             <div id="preview">
-                <iframe style="width: 100%; height: 600px;" srcdoc="<?=str_replace('"', '&quot;', str_replace('&', '&amp;', $Response['response']))?>"></iframe>
+                <iframe style="width: 100%; height: 600px;" srcdoc="<?=str_replace('"', '&quot;', str_replace('&', '&amp;', $response['response']))?>"></iframe>
             </div><br />
             <div>
-<?php var_dump($Response) ?>
+<?php
+if (strpos($response['response'], '<html')) {
+    $response['response'] = 'HTML body';
+}
+var_dump($response)
+?>
             </div>
         </div>
     </div>
@@ -85,7 +96,7 @@ div#preview {display: none;}
                         <label for="url">URL</label>
                     </td>
                     <td>
-                        <input style="width: 98%;" type="text" name="url" value="<?=$Url?>" />
+                        <input style="width: 98%;" type="text" name="url" value="<?=$url?>" />
                     </td>
                 </tr>
                 <tr>
@@ -93,7 +104,7 @@ div#preview {display: none;}
                         <label for="cookie">Cookies</label>
                     </td>
                     <td>
-                        <textarea style="width: 98%;" name="cookie" cols="90" rows="8"><?=json_encode($Cookie)?></textarea>
+                        <textarea style="width: 98%;" name="cookie" cols="90" rows="8"><?=json_encode($cookie)?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -101,7 +112,7 @@ div#preview {display: none;}
                         <label for="params">Parameters</label>
                     </td>
                     <td>
-                        <textarea style="width: 98%;" name="params" cols="90" rows="8"><?=json_encode($Params)?></textarea>
+                        <textarea style="width: 98%;" name="params" cols="90" rows="8"><?=json_encode($params)?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -109,7 +120,7 @@ div#preview {display: none;}
                         <label for="post">POST</label>
                     </td>
                     <td>
-                        <input type="checkbox" name="post"<?=$Post ? ' checked="checked"' : ""?> />
+                        <input type="checkbox" name="post"<?=$post ? ' checked="checked"' : ""?> />
                     </td>
                 </tr>
             </tbody>
@@ -118,11 +129,11 @@ div#preview {display: none;}
     </form>
 </div>
 <div class="thin box pad">
-<?php if ($ReferralManager->readOnly) { ?>
+<?php if ($referralManager->readOnly) { ?>
     <p>
         <strong class="important_text">DB key not loaded - accounts disabled</strong>
     </p>
-<?php } else if (empty($ReferralAccounts)) { ?>
+<?php } else if (empty($referralAccounts)) { ?>
     <h3>Auto</h3>
     <p>No referral accounts found.</p>
 <?php } else { ?>
@@ -137,7 +148,7 @@ div#preview {display: none;}
                         <label for="url">URL</label>
                     </td>
                     <td>
-                        <input style="width: 98%;" type="text" name="url" value="<?=$Url?>" />
+                        <input style="width: 98%;" type="text" name="url" value="<?=$url?>" />
                     </td>
                 </tr>
                 <tr>
@@ -146,11 +157,11 @@ div#preview {display: none;}
                     </td>
                     <td>
 <?php
-    foreach ($ReferralAccounts as $Account) {
-        $ID = $Account["ID"];
+    foreach ($referralAccounts as $account) {
+        $id = $account["ID"];
 ?>
-                        <label for="<?=$ID?>"><?=$Account["Site"]?></label>
-                        <input id="<?=$ID?>" type="radio" name="account" value="<?=$ID?>" />
+                        <label for="<?=$id?>"><?=$account["Site"]?></label>
+                        <input id="<?=$id?>" type="radio" name="account" value="<?=$id?>" />
 <?php } ?>
                     </td>
                 </tr>
@@ -159,7 +170,7 @@ div#preview {display: none;}
                         <label for="params">Parameters</label>
                     </td>
                     <td>
-                        <textarea style="width: 98%;" name="params" cols="90" rows="8"><?=json_encode($Params)?></textarea>
+                        <textarea style="width: 98%;" name="params" cols="90" rows="8"><?=json_encode($params)?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -167,7 +178,7 @@ div#preview {display: none;}
                         <label for="post">POST</label>
                     </td>
                     <td>
-                        <input type="checkbox" name="post"<?=$Post ? ' checked="checked"' : ""?> />
+                        <input type="checkbox" name="post"<?=$post ? ' checked="checked"' : ""?> />
                     </td>
                 </tr>
             </tbody>

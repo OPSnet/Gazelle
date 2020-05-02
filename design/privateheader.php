@@ -554,6 +554,13 @@ if (check_perms('admin_site_debug')) {
     }
 }
 
+if (check_perms('admin_manage_referrals')) {
+    $Referrals = new \Gazelle\Manager\Referral(G::$DB, G::$Cache);
+    if (!$Referrals->checkBouncer()) {
+        $Alerts[] = '<a href="tools.php?action=referral_sandbox"><span style="color: red">Referral bouncer not responding</span></a>';
+    }
+}
+
 if (check_perms('admin_periodic_task_view')) {
     $scheduler = new \Gazelle\Schedule\Scheduler(G::$DB, G::$Cache);
     if ($insane = $scheduler->getInsaneTasks()) {
