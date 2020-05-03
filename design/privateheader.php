@@ -4,7 +4,7 @@ define('FOOTER_FILE', __DIR__ . '/privatefooter.php');
 
 $UseTooltipster = !isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Tooltipster'];
 
-$authsArgs = '&amp;user=' . G::$LoggedUser['ID']
+$authArgs = '&amp;user=' . G::$LoggedUser['ID']
     . '&amp;auth=' . G::$LoggedUser['RSS_Auth']
     . '&amp;passkey=' . G::$LoggedUser['torrent_pass']
     . '&amp;authkey=' . G::$LoggedUser['AuthKey'];
