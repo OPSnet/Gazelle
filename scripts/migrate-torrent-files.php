@@ -33,7 +33,7 @@ while (true) {
     }
 
     $last = $offset;
-    $list = $DB->to_array();
+    $list = $DB->to_array(false, MYSQLI_NUM, false);
     foreach ($list as $torrent) {
         list($id, $file) = $torrent;
         $last = $id;
