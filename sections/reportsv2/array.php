@@ -515,8 +515,9 @@ Your torrent was reported because it consisted of a discography.'
                     'upload' => '0',
                     'warn' => '0',
                     'delete' => '1',
-                    'pm' => '[rule]2.1.16[/rule]. All music torrents must represent a complete release, and may not be missing tracks (or discs in the case of a multi-disc release). They also may not contain any additional tracks or files that are not part of the release. 
-Your torrent was reported because it contained additional tracks or files that are not part of the release.'
+                    'pm' => '[rule]2.1.6.2[/rule]. Extraneous material was found in this torrent.
+[rule]2.1.6.2[/rule]. The torrent should contain only a single copy of each file that belongs in the release, and no other files that belong to separate releases.
+Your torrent was reported because it contained extra files that do not belong in the release.
                 ]
             ],
             'user_discog' => [
