@@ -444,6 +444,7 @@ if ($sections = $Artist->sections()) {
         $SnatchedGroupClass = ($Group['Flags']['IsSnatched'] ? ' snatched_group' : '');
         $prevEdition = torrentEdition('', '-', '', '', '');
         $EditionID = 0;
+        $UnknownCounter = 0;
 
         foreach ($Torrents as $TorrentID => $Torrent) {
             $torrentEdition = torrentEdition(
@@ -451,10 +452,10 @@ if ($sections = $Artist->sections()) {
                 $Torrent['RemasterCatalogueNumber'], $Torrent['Media']
             );
             if ($Torrent['Remastered'] && !$Torrent['RemasterYear']) {
-                $FirstUnknown = !isset($FirstUnknown);
+                $UnknownCounter++;
             }
 
-            if ($prevEdition != $torrentEdition) {
+            if ($prevEdition != $torrentEdition || $UnknownCounter === 1) {
                 $EditionID++;
 ?>
         <tr class="releases_<?= $section ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $groupsHidden ?>">
