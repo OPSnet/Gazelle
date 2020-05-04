@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Manager\Notification;
+
 authorize();
 
 if (!empty($_REQUEST['userid'])) {
@@ -327,7 +330,7 @@ G::$Cache->delete_value("lastfm_username_$UserID");
 
 Users::toggleAcceptFL($UserID, $Options['AcceptFL']);
 Donations::update_rewards($UserID);
-NotificationsManager::save_settings($UserID);
+Notification::save_settings($UserID);
 
 // Information on how the user likes to download torrents is stored in cache
 if ($DownloadAlt != $UH['DownloadAlt'] || $Options['HttpsTracker'] != $UH['HttpsTracker']) {

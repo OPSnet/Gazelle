@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Manager\Notification;
+
 /*********************************************************************\
 //--------------Mod thread-------------------------------------------//
 
@@ -404,7 +407,7 @@ if (isset($_POST['delete'])) {
             break;
     }
     if (isset($Notification)) {
-        NotificationsManager::notify_user($ThreadAuthorID, NotificationsManager::FORUMALERTS, $Notification, "forums.php?action=viewthread&threadid=$TopicID");
+        Notification::notify_user($ThreadAuthorID, Notification::FORUMALERTS, $Notification, "forums.php?action=viewthread&threadid=$TopicID");
     }
     if (count($TopicNotes) > 0) {
         Forums::add_topic_note($TopicID, implode("\n", $TopicNotes));

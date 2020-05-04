@@ -1,8 +1,10 @@
 <?php
 
-use Gazelle\Inbox;
+namespace Gazelle\Manager;
 
-class NotificationsManager {
+use \Gazelle\Inbox;
+
+class Notification {
     // Option types
     const OPT_DISABLED = 0;
     const OPT_POPUP = 1;
@@ -135,25 +137,25 @@ class NotificationsManager {
         $Type = db_string($Type);
         if (!empty($UserIDs)) {
             $UserIDs = implode(',', $UserIDs);
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query("
                 SELECT UserID
                 FROM users_notifications_settings
                 WHERE $Type != 0
                     AND UserID IN ($UserIDs)");
             $UserIDs = array();
-            while (list($ID) = G::$DB->next_record()) {
+            while (list($ID) = \G::$DB->next_record()) {
                 $UserIDs[] = $ID;
             }
-            G::$DB->set_query_id($QueryID);
+            \G::$DB->set_query_id($QueryID);
             foreach ($UserIDs as $UserID) {
-                $OneReads = G::$Cache->get_value("notifications_one_reads_$UserID");
+                $OneReads = \G::$Cache->get_value("notifications_one_reads_$UserID");
                 if (!$OneReads) {
                     $OneReads = array();
                 }
                 array_unshift($OneReads, $this->create_notification($OneReads, "oneread_" . uniqid(), null, $Message, $URL, $Importance));
                 $OneReads = array_filter($OneReads);
-                G::$Cache->cache_value("notifications_one_reads_$UserID", $OneReads, 0);
+                \G::$Cache->cache_value("notifications_one_reads_$UserID", $OneReads, 0);
             }
         }
         **/
@@ -166,44 +168,44 @@ class NotificationsManager {
             $UserID = (int)$UserID;
             $UserWhere = " AND UserID = '$UserID'";
         }
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             SELECT UserID
             FROM users_notifications_settings
             WHERE $Type != 0
                 $UserWhere");
         $IDs = [];
-        while (list($ID) = G::$DB->next_record()) {
+        while (list($ID) = \G::$DB->next_record()) {
             $IDs[] = $ID;
         }
-        G::$DB->set_query_id($QueryID);
+        \G::$DB->set_query_id($QueryID);
         return $IDs;
     }
 
     public function load_one_reads() {
-        $OneReads = G::$Cache->get_value('notifications_one_reads_' . G::$LoggedUser['ID']);
+        $OneReads = \G::$Cache->get_value('notifications_one_reads_' . \G::$LoggedUser['ID']);
         if (is_array($OneReads)) {
             $this->Notifications = $this->Notifications + $OneReads;
         }
     }
 
     public static function clear_one_read($ID) {
-        $OneReads = G::$Cache->get_value('notifications_one_reads_' . G::$LoggedUser['ID']);
+        $OneReads = \G::$Cache->get_value('notifications_one_reads_' . \G::$LoggedUser['ID']);
         if ($OneReads) {
             unset($OneReads[$ID]);
             if (count($OneReads) > 0) {
-                G::$Cache->cache_value('notifications_one_reads_' . G::$LoggedUser['ID'], $OneReads, 0);
+                \G::$Cache->cache_value('notifications_one_reads_' . \G::$LoggedUser['ID'], $OneReads, 0);
             } else {
-                G::$Cache->delete_value('notifications_one_reads_' . G::$LoggedUser['ID']);
+                \G::$Cache->delete_value('notifications_one_reads_' . \G::$LoggedUser['ID']);
             }
         }
 
     }
 
     public function load_global_notification() {
-        $GlobalNotification = G::$Cache->get_value('global_notification');
+        $GlobalNotification = \G::$Cache->get_value('global_notification');
         if ($GlobalNotification) {
-            $Read = G::$Cache->get_value('user_read_global_' . G::$LoggedUser['ID']);
+            $Read = \G::$Cache->get_value('user_read_global_' . \G::$LoggedUser['ID']);
             if (!$Read) {
                 $this->create_notification(self::GLOBALNOTICE, 0,  $GlobalNotification['Message'], $GlobalNotification['URL'], $GlobalNotification['Importance']);
             }
@@ -211,50 +213,50 @@ class NotificationsManager {
     }
 
     public static function get_global_notification() {
-        return G::$Cache->get_value('global_notification');
+        return \G::$Cache->get_value('global_notification');
     }
 
     public static function set_global_notification($Message, $URL, $Importance, $Expiration) {
         if (empty($Message) || empty($Expiration)) {
             error('Error setting notification');
         }
-        G::$Cache->cache_value('global_notification', ["Message" => $Message, "URL" => $URL, "Importance" => $Importance, "Expiration" => $Expiration], $Expiration);
+        \G::$Cache->cache_value('global_notification', ["Message" => $Message, "URL" => $URL, "Importance" => $Importance, "Expiration" => $Expiration], $Expiration);
     }
 
     public static function delete_global_notification() {
-        G::$Cache->delete_value('global_notification');
+        \G::$Cache->delete_value('global_notification');
     }
 
     public static function clear_global_notification() {
-        $GlobalNotification = G::$Cache->get_value('global_notification');
+        $GlobalNotification = \G::$Cache->get_value('global_notification');
         if ($GlobalNotification) {
             // This is some trickery
             // since we can't know which users have the read cache key set
             // we set the expiration time of their cache key to that of the length of the notification
             // this gaurantees that their cache key will expire after the notification expires
-            G::$Cache->cache_value('user_read_global_' . G::$LoggedUser['ID'], true, $GlobalNotification['Expiration']);
+            \G::$Cache->cache_value('user_read_global_' . \G::$LoggedUser['ID'], true, $GlobalNotification['Expiration']);
         }
     }
 
     public function load_news() {
-        $MyNews = G::$LoggedUser['LastReadNews'];
-        $CurrentNews = G::$Cache->get_value('news_latest_id');
-        $Title = G::$Cache->get_value('news_latest_title');
+        $MyNews = \G::$LoggedUser['LastReadNews'];
+        $CurrentNews = \G::$Cache->get_value('news_latest_id');
+        $Title = \G::$Cache->get_value('news_latest_title');
         if ($CurrentNews === false || $Title === false) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query('
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query('
                 SELECT ID, Title
                 FROM news
                 ORDER BY Time DESC
                 LIMIT 1');
-            if (G::$DB->has_results()) {
-                list($CurrentNews, $Title) = G::$DB->next_record();
+            if (\G::$DB->has_results()) {
+                list($CurrentNews, $Title) = \G::$DB->next_record();
             } else {
                 $CurrentNews = -1;
             }
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('news_latest_id', $CurrentNews, 0);
-            G::$Cache->cache_value('news_latest_title', $Title, 0);
+            \G::$DB->set_query_id($QueryID);
+            \G::$Cache->cache_value('news_latest_id', $CurrentNews, 0);
+            \G::$Cache->cache_value('news_latest_title', $Title, 0);
         }
         if ($MyNews < $CurrentNews) {
             $this->create_notification(self::NEWS, $CurrentNews, "Announcement: $Title", "index.php#news$CurrentNews", self::IMPORTANT);
@@ -262,25 +264,25 @@ class NotificationsManager {
     }
 
     public function load_blog() {
-        $MyBlog = G::$LoggedUser['LastReadBlog'];
-        $CurrentBlog = G::$Cache->get_value('blog_latest_id');
-        $Title = G::$Cache->get_value('blog_latest_title');
+        $MyBlog = \G::$LoggedUser['LastReadBlog'];
+        $CurrentBlog = \G::$Cache->get_value('blog_latest_id');
+        $Title = \G::$Cache->get_value('blog_latest_title');
         if ($CurrentBlog === false) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query('
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query('
                 SELECT ID, Title
                 FROM blog
                 WHERE Important = 1
                 ORDER BY Time DESC
                 LIMIT 1');
-            if (G::$DB->has_results()) {
-                list($CurrentBlog, $Title) = G::$DB->next_record();
+            if (\G::$DB->has_results()) {
+                list($CurrentBlog, $Title) = \G::$DB->next_record();
             } else {
                 $CurrentBlog = -1;
             }
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('blog_latest_id', $CurrentBlog, 0);
-            G::$Cache->cache_value('blog_latest_title', $Title, 0);
+            \G::$DB->set_query_id($QueryID);
+            \G::$Cache->cache_value('blog_latest_id', $CurrentBlog, 0);
+            \G::$Cache->cache_value('blog_latest_title', $Title, 0);
         }
         if ($MyBlog < $CurrentBlog) {
             $this->create_notification(self::BLOG, $CurrentBlog, "Blog: $Title", "blog.php#blog$CurrentBlog", self::IMPORTANT);
@@ -290,32 +292,32 @@ class NotificationsManager {
     public function load_staff_blog() {
         if (check_perms('users_mod')) {
             global $SBlogReadTime, $LatestSBlogTime;
-            if (!$SBlogReadTime && ($SBlogReadTime = G::$Cache->get_value('staff_blog_read_' . G::$LoggedUser['ID'])) === false) {
-                $QueryID = G::$DB->get_query_id();
-                G::$DB->query("
+            if (!$SBlogReadTime && ($SBlogReadTime = \G::$Cache->get_value('staff_blog_read_' . \G::$LoggedUser['ID'])) === false) {
+                $QueryID = \G::$DB->get_query_id();
+                \G::$DB->query("
                     SELECT Time
                     FROM staff_blog_visits
-                    WHERE UserID = " . G::$LoggedUser['ID']);
-                if (list($SBlogReadTime) = G::$DB->next_record()) {
+                    WHERE UserID = " . \G::$LoggedUser['ID']);
+                if (list($SBlogReadTime) = \G::$DB->next_record()) {
                     $SBlogReadTime = strtotime($SBlogReadTime);
                 } else {
                     $SBlogReadTime = 0;
                 }
-                G::$DB->set_query_id($QueryID);
-                G::$Cache->cache_value('staff_blog_read_' . G::$LoggedUser['ID'], $SBlogReadTime, 1209600);
+                \G::$DB->set_query_id($QueryID);
+                \G::$Cache->cache_value('staff_blog_read_' . \G::$LoggedUser['ID'], $SBlogReadTime, 1209600);
             }
-            if (!$LatestSBlogTime && ($LatestSBlogTime = G::$Cache->get_value('staff_blog_latest_time')) === false) {
-                $QueryID = G::$DB->get_query_id();
-                G::$DB->query('
+            if (!$LatestSBlogTime && ($LatestSBlogTime = \G::$Cache->get_value('staff_blog_latest_time')) === false) {
+                $QueryID = \G::$DB->get_query_id();
+                \G::$DB->query('
                     SELECT MAX(Time)
                     FROM staff_blog');
-                if (list($LatestSBlogTime) = G::$DB->next_record()) {
+                if (list($LatestSBlogTime) = \G::$DB->next_record()) {
                     $LatestSBlogTime = strtotime($LatestSBlogTime);
                 } else {
                     $LatestSBlogTime = 0;
                 }
-                G::$DB->set_query_id($QueryID);
-                G::$Cache->cache_value('staff_blog_latest_time', $LatestSBlogTime, 1209600);
+                \G::$DB->set_query_id($QueryID);
+                \G::$Cache->cache_value('staff_blog_latest_time', $LatestSBlogTime, 1209600);
             }
             if ($SBlogReadTime < $LatestSBlogTime) {
                 $this->create_notification(self::STAFFBLOG, 0, 'New Staff Blog Post!', 'staffblog.php', self::IMPORTANT);
@@ -324,17 +326,17 @@ class NotificationsManager {
     }
 
     public function load_staff_pms() {
-        $NewStaffPMs = G::$Cache->get_value('staff_pm_new_' . G::$LoggedUser['ID']);
+        $NewStaffPMs = \G::$Cache->get_value('staff_pm_new_' . \G::$LoggedUser['ID']);
         if ($NewStaffPMs === false) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query("
                 SELECT COUNT(ID)
                 FROM staff_pm_conversations
-                WHERE UserID = '" . G::$LoggedUser['ID'] . "'
+                WHERE UserID = '" . \G::$LoggedUser['ID'] . "'
                     AND Unread = '1'");
-            list($NewStaffPMs) = G::$DB->next_record();
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('staff_pm_new_' . G::$LoggedUser['ID'], $NewStaffPMs, 0);
+            list($NewStaffPMs) = \G::$DB->next_record();
+            \G::$DB->set_query_id($QueryID);
+            \G::$Cache->cache_value('staff_pm_new_' . \G::$LoggedUser['ID'], $NewStaffPMs, 0);
         }
 
         if ($NewStaffPMs > 0) {
@@ -344,23 +346,23 @@ class NotificationsManager {
     }
 
     public function load_inbox() {
-        $NewMessages = G::$Cache->get_value('inbox_new_' . G::$LoggedUser['ID']);
+        $NewMessages = \G::$Cache->get_value('inbox_new_' . \G::$LoggedUser['ID']);
         if ($NewMessages === false) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query("
                 SELECT COUNT(UnRead)
                 FROM pm_conversations_users
-                WHERE UserID = '" . G::$LoggedUser['ID'] . "'
+                WHERE UserID = '" . \G::$LoggedUser['ID'] . "'
                     AND UnRead = '1'
                     AND InInbox = '1'");
-            list($NewMessages) = G::$DB->next_record();
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('inbox_new_' . G::$LoggedUser['ID'], $NewMessages, 0);
+            list($NewMessages) = \G::$DB->next_record();
+            \G::$DB->set_query_id($QueryID);
+            \G::$Cache->cache_value('inbox_new_' . \G::$LoggedUser['ID'], $NewMessages, 0);
         }
 
         if ($NewMessages > 0) {
             $Title = 'You have ' . ($NewMessages == 1 ? 'a' : $NewMessages) . ' new message' . ($NewMessages > 1 ? 's' : '');
-            $this->create_notification(self::INBOX, 0, $Title, Inbox::getLinkQuick('inbox', G::$LoggedUser['ListUnreadPMsFirst'] ?? false), self::INFO);
+            $this->create_notification(self::INBOX, 0, $Title, Inbox::getLinkQuick('inbox', \G::$LoggedUser['ListUnreadPMsFirst'] ?? false), self::INFO);
         }
     }
 
@@ -369,17 +371,17 @@ class NotificationsManager {
             $NewNotifications = 0;
         }
         else {
-            $NewNotifications = G::$Cache->get_value('notifications_new_' . G::$LoggedUser['ID']);
+            $NewNotifications = \G::$Cache->get_value('notifications_new_' . \G::$LoggedUser['ID']);
             if ($NewNotifications === false) {
-                $QueryID = G::$DB->get_query_id();
-                G::$DB->query("
+                $QueryID = \G::$DB->get_query_id();
+                \G::$DB->query("
                     SELECT COUNT(UserID)
                     FROM users_notify_torrents
-                    WHERE UserID = ' " . G::$LoggedUser['ID'] . "'
+                    WHERE UserID = ' " . \G::$LoggedUser['ID'] . "'
                         AND UnRead = '1'");
-                list($NewNotifications) = G::$DB->next_record();
-                G::$DB->set_query_id($QueryID);
-                G::$Cache->cache_value('notifications_new_' . G::$LoggedUser['ID'], $NewNotifications, 0);
+                list($NewNotifications) = \G::$DB->next_record();
+                \G::$DB->set_query_id($QueryID);
+                \G::$Cache->cache_value('notifications_new_' . \G::$LoggedUser['ID'], $NewNotifications, 0);
             }
         }
         if ($NewNotifications > 0) {
@@ -390,20 +392,20 @@ class NotificationsManager {
 
     public function load_collage_subscriptions() {
         if (check_perms('site_collages_subscribe')) {
-            $NewCollages = G::$Cache->get_value('collage_subs_user_new_' . G::$LoggedUser['ID']);
+            $NewCollages = \G::$Cache->get_value('collage_subs_user_new_' . \G::$LoggedUser['ID']);
             if ($NewCollages === false) {
-                    $QueryID = G::$DB->get_query_id();
-                    G::$DB->query("
+                    $QueryID = \G::$DB->get_query_id();
+                    \G::$DB->query("
                         SELECT COUNT(DISTINCT s.CollageID)
                         FROM users_collage_subs AS s
                             JOIN collages AS c ON s.CollageID = c.ID
                             JOIN collages_torrents AS ct ON ct.CollageID = c.ID
-                        WHERE s.UserID = " . G::$LoggedUser['ID'] . "
+                        WHERE s.UserID = " . \G::$LoggedUser['ID'] . "
                             AND ct.AddedOn > s.LastVisit
                             AND c.Deleted = '0'");
-                    list($NewCollages) = G::$DB->next_record();
-                    G::$DB->set_query_id($QueryID);
-                    G::$Cache->cache_value('collage_subs_user_new_' . G::$LoggedUser['ID'], $NewCollages, 0);
+                    list($NewCollages) = \G::$DB->next_record();
+                    \G::$DB->set_query_id($QueryID);
+                    \G::$Cache->cache_value('collage_subs_user_new_' . \G::$LoggedUser['ID'], $NewCollages, 0);
             }
             if ($NewCollages > 0) {
                 $Title = 'You have ' . ($NewCollages == 1 ? 'a' : $NewCollages) . ' new collage update' . ($NewCollages > 1 ? 's' : '');
@@ -413,8 +415,8 @@ class NotificationsManager {
     }
 
     public function load_quote_notifications() {
-        if (isset(G::$LoggedUser['NotifyOnQuote']) && G::$LoggedUser['NotifyOnQuote']) {
-            $QuoteNotificationsCount = Subscriptions::has_new_quote_notifications();
+        if (isset(\G::$LoggedUser['NotifyOnQuote']) && \G::$LoggedUser['NotifyOnQuote']) {
+            $QuoteNotificationsCount = \Subscriptions::has_new_quote_notifications();
             if ($QuoteNotificationsCount > 0) {
                 $Title = 'New quote' . ($QuoteNotificationsCount > 1 ? 's' : '');
                 $this->create_notification(self::QUOTES, 0, $Title, 'userhistory.php?action=quote_notifications', self::INFO);
@@ -423,7 +425,7 @@ class NotificationsManager {
     }
 
     public function load_subscriptions() {
-        $SubscriptionsCount = Subscriptions::has_new_subscriptions();
+        $SubscriptionsCount = \Subscriptions::has_new_subscriptions();
         if ($SubscriptionsCount > 0) {
             $Title = 'New subscription' . ($SubscriptionsCount > 1 ? 's' : '');
             $this->create_notification(self::SUBSCRIPTIONS, 0, $Title, 'userhistory.php?action=subscriptions', self::INFO);
@@ -431,10 +433,10 @@ class NotificationsManager {
     }
 
     public static function clear_news($News = null) {
-        $QueryID = G::$DB->get_query_id();
+        $QueryID = \G::$DB->get_query_id();
         if (!$News) {
-            if (!$News = G::$Cache->get_value('news')) {
-                G::$DB->query('
+            if (!$News = \G::$Cache->get_value('news')) {
+                \G::$DB->query('
                     SELECT
                         ID,
                         Title,
@@ -443,29 +445,29 @@ class NotificationsManager {
                     FROM news
                     ORDER BY Time DESC
                     LIMIT 1');
-                $News = G::$DB->to_array(false, MYSQLI_NUM, false);
-                G::$Cache->cache_value('news_latest_id', $News[0][0], 0);
+                $News = \G::$DB->to_array(false, MYSQLI_NUM, false);
+                \G::$Cache->cache_value('news_latest_id', $News[0][0], 0);
             }
         }
 
-        if (G::$LoggedUser['LastReadNews'] != $News[0][0]) {
-            G::$Cache->begin_transaction('user_info_heavy_' . G::$LoggedUser['ID']);
-            G::$Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
-            G::$Cache->commit_transaction(0);
-            G::$DB->query("
+        if (\G::$LoggedUser['LastReadNews'] != $News[0][0]) {
+            \G::$Cache->begin_transaction('user_info_heavy_' . \G::$LoggedUser['ID']);
+            \G::$Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
+            \G::$Cache->commit_transaction(0);
+            \G::$DB->query("
                 UPDATE users_info
                 SET LastReadNews = '".$News[0][0]."'
-                WHERE UserID = " . G::$LoggedUser['ID']);
-            G::$LoggedUser['LastReadNews'] = $News[0][0];
+                WHERE UserID = " . \G::$LoggedUser['ID']);
+            \G::$LoggedUser['LastReadNews'] = $News[0][0];
         }
-        G::$DB->set_query_id($QueryID);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public static function clear_blog($Blog = null) {
-        $QueryID = G::$DB->get_query_id();
+        $QueryID = \G::$DB->get_query_id();
         if (!$Blog) {
-            if (!$Blog = G::$Cache->get_value('blog')) {
-                G::$DB->query("
+            if (!$Blog = \G::$Cache->get_value('blog')) {
+                \G::$DB->query("
                     SELECT
                         b.ID,
                         um.Username,
@@ -478,168 +480,168 @@ class NotificationsManager {
                         LEFT JOIN users_main AS um ON b.UserID = um.ID
                     ORDER BY Time DESC
                     LIMIT 1");
-                $Blog = G::$DB->to_array();
+                $Blog = \G::$DB->to_array();
             }
         }
-        if (G::$LoggedUser['LastReadBlog'] < $Blog[0][0]) {
-            G::$Cache->begin_transaction('user_info_heavy_' . G::$LoggedUser['ID']);
-            G::$Cache->update_row(false, ['LastReadBlog' => $Blog[0][0]]);
-            G::$Cache->commit_transaction(0);
-            G::$DB->query("
+        if (\G::$LoggedUser['LastReadBlog'] < $Blog[0][0]) {
+            \G::$Cache->begin_transaction('user_info_heavy_' . \G::$LoggedUser['ID']);
+            \G::$Cache->update_row(false, ['LastReadBlog' => $Blog[0][0]]);
+            \G::$Cache->commit_transaction(0);
+            \G::$DB->query("
                 UPDATE users_info
                 SET LastReadBlog = '". $Blog[0][0]."'
-                WHERE UserID = " . G::$LoggedUser['ID']);
-            G::$LoggedUser['LastReadBlog'] = $Blog[0][0];
+                WHERE UserID = " . \G::$LoggedUser['ID']);
+            \G::$LoggedUser['LastReadBlog'] = $Blog[0][0];
         }
-        G::$DB->set_query_id($QueryID);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public static function clear_staff_pms() {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             SELECT ID
             FROM staff_pm_conversations
             WHERE Unread = true
-                AND UserID = " . G::$LoggedUser['ID']);
+                AND UserID = " . \G::$LoggedUser['ID']);
         $IDs = [];
-        while (list($ID) = G::$DB->next_record()) {
+        while (list($ID) = \G::$DB->next_record()) {
             $IDs[] = $ID;
         }
         $IDs = implode(',', $IDs);
         if (!empty($IDs)) {
-            G::$DB->query("
+            \G::$DB->query("
                 UPDATE staff_pm_conversations
                 SET Unread = false
                 WHERE ID IN ($IDs)");
         }
-        G::$Cache->delete_value('staff_pm_new_' . G::$LoggedUser['ID']);
-        G::$DB->set_query_id($QueryID);
+        \G::$Cache->delete_value('staff_pm_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public static function clear_inbox() {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             SELECT ConvID
             FROM pm_conversations_users
             WHERE Unread = '1'
-                AND UserID = " . G::$LoggedUser['ID']);
+                AND UserID = " . \G::$LoggedUser['ID']);
         $IDs = [];
-        while (list($ID) = G::$DB->next_record()) {
+        while (list($ID) = \G::$DB->next_record()) {
             $IDs[] = $ID;
         }
         $IDs = implode(',', $IDs);
         if (!empty($IDs)) {
-            G::$DB->query("
+            \G::$DB->query("
                 UPDATE pm_conversations_users
                 SET Unread = '0'
                 WHERE ConvID IN ($IDs)
-                    AND UserID = " . G::$LoggedUser['ID']);
+                    AND UserID = " . \G::$LoggedUser['ID']);
         }
-        G::$Cache->delete_value('inbox_new_' . G::$LoggedUser['ID']);
-        G::$DB->set_query_id($QueryID);
+        \G::$Cache->delete_value('inbox_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public static function clear_torrents() {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             SELECT TorrentID
             FROM users_notify_torrents
-            WHERE UserID = ' " . G::$LoggedUser['ID'] . "'
+            WHERE UserID = ' " . \G::$LoggedUser['ID'] . "'
                 AND UnRead = '1'");
         $IDs = [];
-        while (list($ID) = G::$DB->next_record()) {
+        while (list($ID) = \G::$DB->next_record()) {
             $IDs[] = $ID;
         }
         $IDs = implode(',', $IDs);
         if (!empty($IDs)) {
-            G::$DB->query("
+            \G::$DB->query("
                 UPDATE users_notify_torrents
                 SET Unread = '0'
                 WHERE TorrentID IN ($IDs)
-                    AND UserID = " . G::$LoggedUser['ID']);
+                    AND UserID = " . \G::$LoggedUser['ID']);
         }
-        G::$Cache->delete_value('notifications_new_' . G::$LoggedUser['ID']);
-        G::$DB->set_query_id($QueryID);
+        \G::$Cache->delete_value('notifications_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public static function clear_collages() {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             UPDATE users_collage_subs
             SET LastVisit = NOW()
-            WHERE UserID = " . G::$LoggedUser['ID']);
-        G::$Cache->delete_value('collage_subs_user_new_' . G::$LoggedUser['ID']);
-        G::$DB->set_query_id($QueryID);
+            WHERE UserID = " . \G::$LoggedUser['ID']);
+        \G::$Cache->delete_value('collage_subs_user_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public static function clear_quotes() {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             UPDATE users_notify_quoted
             SET UnRead = '0'
-            WHERE UserID = " . G::$LoggedUser['ID']);
-        G::$Cache->delete_value('notify_quoted_' . G::$LoggedUser['ID']);
-        G::$DB->set_query_id($QueryID);
+            WHERE UserID = " . \G::$LoggedUser['ID']);
+        \G::$Cache->delete_value('notify_quoted_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public static function clear_subscriptions() {
-        $QueryID = G::$DB->get_query_id();
-        if (($UserSubscriptions = G::$Cache->get_value('subscriptions_user_' . G::$LoggedUser['ID'])) === false) {
-            G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        if (($UserSubscriptions = \G::$Cache->get_value('subscriptions_user_' . \G::$LoggedUser['ID'])) === false) {
+            \G::$DB->query("
                 SELECT TopicID
                 FROM users_subscriptions
-                WHERE UserID = " . G::$LoggedUser['ID']);
-            if ($UserSubscriptions = G::$DB->collect(0)) {
-                G::$Cache->cache_value('subscriptions_user_' . G::$LoggedUser['ID'], $UserSubscriptions, 0);
+                WHERE UserID = " . \G::$LoggedUser['ID']);
+            if ($UserSubscriptions = \G::$DB->collect(0)) {
+                \G::$Cache->cache_value('subscriptions_user_' . \G::$LoggedUser['ID'], $UserSubscriptions, 0);
             }
         }
         if (!empty($UserSubscriptions)) {
-            G::$DB->query("
+            \G::$DB->query("
                 INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
-                    SELECT '" . G::$LoggedUser['ID'] . "', ID, LastPostID
+                    SELECT '" . \G::$LoggedUser['ID'] . "', ID, LastPostID
                     FROM forums_topics
                     WHERE ID IN (".implode(',', $UserSubscriptions).')
                 ON DUPLICATE KEY UPDATE
                     PostID = LastPostID');
         }
-        G::$Cache->delete_value('subscriptions_user_new_' . G::$LoggedUser['ID']);
-        G::$DB->set_query_id($QueryID);
+        \G::$Cache->delete_value('subscriptions_user_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
 /*
     // TODO: Figure out what these functions are supposed to do and fix them
     public static function send_notification($UserID, $ID, $Type, $Message, $URL, $Importance = 'alert', $AutoExpire = false) {
-        $Notifications = G::$Cache->get_value("user_cache_notifications_$UserID");
+        $Notifications = \G::$Cache->get_value("user_cache_notifications_$UserID");
         if (empty($Notifications)) {
             $Notifications = array();
         }
         array_unshift($Notifications, $this->create_notification($Type, $ID, $Message, $URL, $Importance, $AutoExpire));
-        G::$Cache->cache_value("user_cache_notifications_$UserID", $Notifications, 0);
+        \G::$Cache->cache_value("user_cache_notifications_$UserID", $Notifications, 0);
     }
 
     public static function clear_notification($UserID, $Index) {
-        $Notifications = G::$Cache->get_value("user_cache_notifications_$UserID");
+        $Notifications = \G::$Cache->get_value("user_cache_notifications_$UserID");
         if (count($Notifications)) {
             unset($Notifications[$Index]);
             $Notifications = array_values($Notifications);
-            G::$Cache->cache_value("user_cache_notifications_$UserID", $Notifications, 0);
+            \G::$Cache->cache_value("user_cache_notifications_$UserID", $Notifications, 0);
         }
     }
 */
 
     public static function get_settings($UserID) {
-        $Results = G::$Cache->get_value("users_notifications_settings_$UserID");
+        $Results = \G::$Cache->get_value("users_notifications_settings_$UserID");
         if (!$Results) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query("
                 SELECT *
                 FROM users_notifications_settings AS n
                 LEFT JOIN users_push_notifications AS p
                 ON p.UserID = n.UserID
                 WHERE n.UserID = '$UserID'");
-            $Results = G::$DB->next_record(MYSQLI_ASSOC, false);
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value("users_notifications_settings_$UserID", $Results, 0);
+            $Results = \G::$DB->next_record(MYSQLI_ASSOC, false);
+            \G::$DB->set_query_id($QueryID);
+            \G::$Cache->cache_value("users_notifications_settings_$UserID", $Results, 0);
         }
         return $Results;
     }
@@ -666,8 +668,8 @@ class NotificationsManager {
         }
         $Update = implode(',', $Update);
 
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             UPDATE users_notifications_settings
             SET $Update
             WHERE UserID = '$UserID'");
@@ -680,7 +682,7 @@ class NotificationsManager {
         $PushOptions = db_string(serialize($PushOptionsArray));
 
         if ($PushService != 0) {
-            G::$DB->query("
+            \G::$DB->query("
                     INSERT INTO users_push_notifications
                         (UserID, PushService, PushOptions)
                     VALUES
@@ -689,11 +691,11 @@ class NotificationsManager {
                         PushService = '$PushService',
                         PushOptions = '$PushOptions'");
         } else {
-            G::$DB->query("UPDATE users_push_notifications SET PushService = 0 WHERE UserID = '$UserID'");
+            \G::$DB->query("UPDATE users_push_notifications SET PushService = 0 WHERE UserID = '$UserID'");
         }
 
-        G::$DB->set_query_id($QueryID);
-        G::$Cache->delete_value("users_notifications_settings_$UserID");
+        \G::$DB->set_query_id($QueryID);
+        \G::$Cache->delete_value("users_notifications_settings_$UserID");
     }
 
     public function is_traditional($Type) {
@@ -723,7 +725,7 @@ class NotificationsManager {
         }
         foreach($UserIDs as $UserID) {
             $UserID = (int) $UserID;
-            $QueryID = G::$DB->get_query_id();
+            $QueryID = \G::$DB->get_query_id();
             $SQL = "
                 SELECT
                     p.PushService, p.PushOptions
@@ -734,10 +736,10 @@ class NotificationsManager {
             if ($Type != self::GLOBALNOTICE) {
                 $SQL .= " AND n.$Type IN (" . self::OPT_PUSH . "," . self::OPT_POPUP_PUSH . "," . self::OPT_TRADITIONAL_PUSH . ")";
             }
-            G::$DB->query($SQL);
+            \G::$DB->query($SQL);
 
-            if (G::$DB->has_results()) {
-                list($PushService, $PushOptions) = G::$DB->next_record(MYSQLI_NUM, false);
+            if (\G::$DB->has_results()) {
+                list($PushService, $PushOptions) = \G::$DB->next_record(MYSQLI_NUM, false);
                 $PushOptions = unserialize($PushOptions);
                 switch ($PushService) {
                     // Case 1 is missing because NMA is dead.
@@ -768,7 +770,7 @@ class NotificationsManager {
                         }
 
                         $JSON = json_encode($Options);
-                        G::$DB->query("
+                        \G::$DB->query("
                             INSERT INTO push_notifications_usage
                                 (PushService, TimesUsed)
                             VALUES
@@ -781,7 +783,7 @@ class NotificationsManager {
                         fclose($PushServerSocket);
                     }
             }
-            G::$DB->set_query_id($QueryID);
+            \G::$DB->set_query_id($QueryID);
         }
     }
 
@@ -790,14 +792,14 @@ class NotificationsManager {
      *
      */
     public static function get_push_enabled_users() {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
             SELECT UserID
             FROM users_push_notifications
             WHERE PushService != 0
-                AND UserID != '" . G::$LoggedUser['ID']. "'");
-        $PushUsers = G::$DB->collect("UserID");
-        G::$DB->set_query_id($QueryID);
+                AND UserID != '" . \G::$LoggedUser['ID']. "'");
+        $PushUsers = \G::$DB->collect("UserID");
+        \G::$DB->set_query_id($QueryID);
         return $PushUsers;
     }
 }

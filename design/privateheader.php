@@ -1,5 +1,7 @@
 <?php
 
+use \Gazelle\Manager\Notification;
+
 define('FOOTER_FILE', __DIR__ . '/privatefooter.php');
 
 $UseTooltipster = !isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Tooltipster'];
@@ -131,13 +133,13 @@ foreach ($Scripts as $Script) {
 global $ClassLevels;
 // Get notifications early to change menu items if needed
 global $NotificationSpans;
-$NotificationsManager = new NotificationsManager(G::$LoggedUser['ID']);
+$NotificationsManager = new Notification(G::$LoggedUser['ID']);
 $Notifications = $NotificationsManager->get_notifications();
 $UseNoty = $NotificationsManager->use_noty();
 $NewSubscriptions = false;
 $NotificationSpans = [];
 foreach ($Notifications as $Type => $Notification) {
-    if ($Type === NotificationsManager::SUBSCRIPTIONS) {
+    if ($Type === Notification::SUBSCRIPTIONS) {
         $NewSubscriptions = true;
     }
     if ($UseNoty) {
@@ -147,7 +149,7 @@ foreach ($Notifications as $Type => $Notification) {
 if ($UseNoty && !empty($NotificationSpans)) {
     NotificationsManagerView::load_js();
 }
-if ($NotificationsManager->is_skipped(NotificationsManager::SUBSCRIPTIONS)) {
+if ($NotificationsManager->is_skipped(Notification::SUBSCRIPTIONS)) {
     $NewSubscriptions = Subscriptions::has_new_subscriptions();
 }
 
@@ -344,11 +346,11 @@ if ($Staff && $Staff->blogAlert()) {
 }
 
 // Inbox
-if ($NotificationsManager->is_traditional(NotificationsManager::INBOX)) {
+if ($NotificationsManager->is_traditional(Notification::INBOX)) {
     $NotificationsManager->load_inbox();
     $NewMessages = $NotificationsManager->get_notifications();
-    if (isset($NewMessages[NotificationsManager::INBOX])) {
-        $Alerts[] = NotificationsManagerView::format_traditional($NewMessages[NotificationsManager::INBOX]);
+    if (isset($NewMessages[Notification::INBOX])) {
+        $Alerts[] = NotificationsManagerView::format_traditional($NewMessages[Notification::INBOX]);
     }
     $NotificationsManager->clear_notifications_array();
 }
@@ -360,11 +362,11 @@ if (G::$LoggedUser['RatioWatch']) {
 }
 
 // Torrents
-if ($NotificationsManager->is_traditional(NotificationsManager::TORRENTS)) {
+if ($NotificationsManager->is_traditional(Notification::TORRENTS)) {
     $NotificationsManager->load_torrent_notifications();
     $NewTorrents = $NotificationsManager->get_notifications();
-    if (isset($NewTorrents[NotificationsManager::TORRENTS])) {
-        $Alerts[] = NotificationsManagerView::format_traditional($NewTorrents[NotificationsManager::TORRENTS]);
+    if (isset($NewTorrents[Notification::TORRENTS])) {
+        $Alerts[] = NotificationsManagerView::format_traditional($NewTorrents[Notification::TORRENTS]);
     }
     $NotificationsManager->clear_notifications_array();
 }

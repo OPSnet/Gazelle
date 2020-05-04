@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Manager\Notification;
+
 class Subscriptions {
     /**
      * Parse a post/comment body for quotes and notify all quoted users that have quote notifications enabled.
@@ -79,7 +82,7 @@ class Subscriptions {
             } else {
                 $URL = site_url() . "comments.php?action=jump&postid=$PostID";
             }
-            NotificationsManager::send_push($UserID, 'New Quote!', 'Quoted by ' . G::$LoggedUser['Username'] . " $URL", $URL, NotificationsManager::QUOTES);
+            Notification::send_push($UserID, 'New Quote!', 'Quoted by ' . G::$LoggedUser['Username'] . " $URL", $URL, Notification::QUOTES);
         }
         G::$DB->set_query_id($QueryID);
     }

@@ -1,5 +1,7 @@
 <?php
 
+use \Gazelle\Manager\Notification;
+
 $UserID = $_REQUEST['userid'];
 if (!is_number($UserID)) {
     error(404);
@@ -510,7 +512,7 @@ echo $Val->GenerateJS('userform');
                     <label for="unseededalerts">Enable unseeded torrent alerts</label>
                 </td>
             </tr>
-            <?php NotificationsManagerView::render_settings(NotificationsManager::get_settings($UserID)); ?>
+            <?php NotificationsManagerView::render_settings(Notification::get_settings($UserID)); ?>
         </table>
         <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="personal_settings">
             <tr class="colhead_dark">
