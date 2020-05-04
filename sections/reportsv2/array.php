@@ -206,7 +206,7 @@ Your torrent was reported because it was trumped by another torrent with improve
                 'title' => 'Track(s) Missing',
                 'report_messages' => [
                     'Please list the track number and title of the missing track.',
-                    'If possible, please provide a link to Amazon.com or another source showing the proper track listing.'
+                    'If possible, please provide a link to a reputable release catalogue showing the proper track listing.'
                 ],
                 'report_fields' => [
                     'track' => '2',
@@ -226,7 +226,7 @@ Your torrent was reported because it was missing tracks.'
                 'reason' => '6',
                 'title' => 'Disc(s) Missing',
                 'report_messages' => [
-                    'If possible, please provide a link to Amazon.com or another source showing the proper track listing.'
+                    'If possible, please provide a link to a reputable release catalogue showing the proper track listing, specifying which discs are missing.'
                 ],
                 'report_fields' => [
                     'track' => '0',
@@ -264,8 +264,8 @@ Your torrent was reported because it was missing discs.'
                 'reason' => '-1',
                 'title' => 'Bonus Tracks Only',
                 'report_messages' => [
-                    'If possible, please provide a link to Amazon.com or another source showing the proper track listing.',
-                    'Per <a href="rules.php?p=upload#r2.4.5">rule 2.4.5</a>, exclusive WEB-sourced bonus tracks are allowed to be uploaded separately.'
+                    'If possible, please provide a link to a reputable release catalogue showing the proper track listing.',
+                    'Per [rule]2.4.5[/rule], exclusive WEB-sourced bonus tracks are allowed to be uploaded separately.'
                 ],
                 'report_fields' => [
                     'track' => '0',
@@ -322,7 +322,7 @@ Your torrent was reported because it contained one or more audio files that did 
                 'reason' => '11',
                 'title' => 'Mutt Rip',
                 'report_messages' => [
-                    "Please list at least two (2) tracks which have different bitrates and/or encoders."
+                    "Please list at least two (2) tracks which have different bitrates and/or encoders, specifying what is different between the tracks."
                 ],
                 'report_fields' => [
                     'track' => '0'
@@ -340,7 +340,7 @@ Your torrent was reported because it contained one or more audio files that were
                 'reason' => '18',
                 'title' => 'Unsplit Album Rip',
                 'report_messages' => [
-                    "If possible, please provide a link to Amazon.com or another source showing the proper track listing.",
+                    "If possible, please provide a link to a reputable release catalogue showing the proper track listing.",
                     "This option is for uploads of CDs ripped as a single track when it should be split as on the CD.",
                     "This option is not to be confused with uploads of a single track, taken from a CD with multiple tracks (Tracks Missing)."
                 ],
@@ -499,6 +499,24 @@ The only allowable media formats are CD, DVD, Vinyl, Soundboard, SACD, DAT, Cass
                     'delete' => '1',
                     'pm' => '[rule]2.1.20[/rule]. User made discographies may not be uploaded. Multi-album torrents are not allowed on the site under any circumstances. That means no discographies, Pitchfork compilations, etc. If releases (e.g., CD singles) were never released as a bundled set, do not upload them together. Live Soundboard material should be uploaded as one torrent per night, per show, or per venue. Including more than one show in a torrent results in a multi-album torrent.
 Your torrent was reported because it consisted of a discography.'
+                ]
+            ],
+            'extra_files' => [
+                'priority' => '291',
+                'reason' => '19',
+                'title' => 'Extraneous files',
+                'report_messages' => [
+                    "Please include as much information as possible to verify the report, identifying the tracks or files that are not part of the release."
+                ],
+                'report_fields' => [
+                    'link' => '0'
+                ],
+                'resolve_options' => [
+                    'upload' => '0',
+                    'warn' => '0',
+                    'delete' => '1',
+                    'pm' => '[rule]2.1.16[/rule]. All music torrents must represent a complete release, and may not be missing tracks (or discs in the case of a multi-disc release). They also may not contain any additional tracks or files that are not part of the release. 
+Your torrent was reported because it contained additional tracks or files that are not part of the release.'
                 ]
             ],
             'user_discog' => [
