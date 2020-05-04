@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Manager\Notification;
+
 authorize();
 
 if (empty($_POST['title']) || empty($_POST['body'])) {
@@ -43,6 +46,6 @@ if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
         VALUES (?, ?)", G::$LoggedUser['ID'], $ThreadID);
     $Cache->delete_value('subscriptions_user_'.G::$LoggedUser['ID']);
 }
-NotificationsManager::send_push(NotificationsManager::get_push_enabled_users(), $_POST['title'], $_POST['body'], site_url() . 'index.php', NotificationsManager::BLOG);
+Notification::send_push(Notification::get_push_enabled_users(), $_POST['title'], $_POST['body'], site_url() . 'index.php', Notification::BLOG);
 
 header('Location: blog.php');

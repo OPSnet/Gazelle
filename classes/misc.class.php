@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Manager\Notification;
+
 class Misc {
     /**
      * Send an email.
@@ -128,7 +131,7 @@ class Misc {
             list($UnRead) = G::$DB->next_record();
             G::$Cache->cache_value("inbox_new_$ID", $UnRead);
 
-            NotificationsManager::send_push($ID, "Message from $SenderName, Subject: $UnescapedSubject", $UnescapedBody, site_url() . 'inbox.php', NotificationsManager::INBOX);
+            Notification::send_push($ID, "Message from $SenderName, Subject: $UnescapedSubject", $UnescapedBody, site_url() . 'inbox.php', Notification::INBOX);
         }
 
         G::$DB->set_query_id($QueryID);

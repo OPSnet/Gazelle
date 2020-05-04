@@ -1,12 +1,14 @@
 <?php
 
+use \Gazelle\Manager\Notification;
+
 if (!check_perms("users_mod")) {
     error(404);
 }
 
 View::show_header("Global Notification");
 
-$GlobalNotification = NotificationsManager::get_global_notification();
+$GlobalNotification = Notification::get_global_notification();
 
 $Expiration = $GlobalNotification['Expiration'] ? $GlobalNotification['Expiration'] / 60 : "";
 ?>
@@ -34,7 +36,7 @@ $Expiration = $GlobalNotification['Expiration'] ? $GlobalNotification['Expiratio
                 <td class="label">Importance</td>
                 <td>
                     <select name="importance" id="importance">
-<?php   foreach (NotificationsManager::$Importances as $Key => $Value) { ?>
+<?php   foreach (Notification::$Importances as $Key => $Value) { ?>
                         <option value="<?=$Value?>"<?=$Value == $GlobalNotification['Importance'] ? ' selected="selected"' : ''?>><?=ucfirst($Key)?></option>
 <?php   } ?>
                     </select>

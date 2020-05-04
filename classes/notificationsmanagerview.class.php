@@ -1,5 +1,7 @@
 <?php
 
+use \Gazelle\Manager\Notification;
+
 class NotificationsManagerView {
     private static $Settings;
 
@@ -9,10 +11,9 @@ class NotificationsManagerView {
             'noty/layouts/bottomRight.js',
             'noty/themes/default.js',
             'user_notifications.js'];
-        foreach ($JSIncludes as $JSInclude) {
-            $Path = STATIC_SERVER."functions/$JSInclude";
+        foreach ($JSIncludes as $inc) {
 ?>
-    <script src="<?=$Path?>?v=<?=filemtime(SERVER_ROOT."/$Path")?>" type="text/javascript"></script>
+    <script src="<?= STATIC_SERVER . "functions/$inc" ?>?v=<?= filemtime(SERVER_ROOT . "/public/static/functions/$inc")?>" type="text/javascript"></script>
 <?php
         }
     }
@@ -29,9 +30,9 @@ class NotificationsManagerView {
             <td>
                 <select name="pushservice" id="pushservice">
                     <option value="0"<?php if (empty($PushService)) { ?> selected="selected"<?php } ?>>Disable push notifications</option>
-<!--                        No option 1, Notify My Android died. -->
+<!--                No option 1, Notify My Android died. -->
                     <option value="2"<?php if ($PushService == 2) { ?> selected="selected"<?php } ?>>Prowl</option>
-<!--                        No option 3, notifo died. -->
+<!--                No option 3, notifo died. -->
                     <option value="4"<?php if ($PushService == 4) { ?> selected="selected"<?php } ?>>Super Toasty</option>
                     <option value="5"<?php if ($PushService == 5) { ?> selected="selected"<?php } ?>>Pushover</option>
                     <option value="6"<?php if ($PushService == 6) { ?> selected="selected"<?php } ?>>PushBullet</option>
@@ -61,7 +62,7 @@ class NotificationsManagerView {
                 <strong>News announcements</strong>
             </td>
             <td>
-<?php           self::render_checkbox(NotificationsManager::NEWS); ?>
+<?php           self::render_checkbox(Notification::NEWS); ?>
             </td>
         </tr>
         <tr>
@@ -69,7 +70,7 @@ class NotificationsManagerView {
                 <strong>Blog announcements</strong>
             </td>
             <td>
-<?php           self::render_checkbox(NotificationsManager::BLOG); ?>
+<?php           self::render_checkbox(Notification::BLOG); ?>
             </td>
         </tr>
         <tr>
@@ -77,7 +78,7 @@ class NotificationsManagerView {
                 <strong>Inbox messages</strong>
             </td>
             <td>
-<?php           self::render_checkbox(NotificationsManager::INBOX, true); ?>
+<?php           self::render_checkbox(Notification::INBOX, true); ?>
             </td>
         </tr>
         <tr>
@@ -85,7 +86,7 @@ class NotificationsManagerView {
                 <strong>Staff messages</strong>
             </td>
             <td>
-<?php           self::render_checkbox(NotificationsManager::STAFFPM, false, false); ?>
+<?php           self::render_checkbox(Notification::STAFFPM, false, false); ?>
             </td>
         </tr>
         <tr>
@@ -93,7 +94,7 @@ class NotificationsManagerView {
                 <strong>Thread subscriptions</strong>
             </td>
             <td>
-<?php           self::render_checkbox(NotificationsManager::SUBSCRIPTIONS, false, false); ?>
+<?php           self::render_checkbox(Notification::SUBSCRIPTIONS, false, false); ?>
             </td>
         </tr>
         <tr>
@@ -101,7 +102,7 @@ class NotificationsManagerView {
                 <strong>Quote notifications</strong>
             </td>
             <td>
-<?php           self::render_checkbox(NotificationsManager::QUOTES); ?>
+<?php           self::render_checkbox(Notification::QUOTES); ?>
             </td>
         </tr>
 <?php   if (check_perms('site_torrents_notify')) { ?>
@@ -110,7 +111,7 @@ class NotificationsManagerView {
                     <strong>Torrent notifications</strong>
                 </td>
                 <td>
-<?php               self::render_checkbox(NotificationsManager::TORRENTS, true, false); ?>
+<?php               self::render_checkbox(Notification::TORRENTS, true, false); ?>
                 </td>
             </tr>
 <?php   } ?>
@@ -120,7 +121,7 @@ class NotificationsManagerView {
                 <strong>Collage subscriptions</strong>
             </td>
             <td>
-<?php           self::render_checkbox(NotificationsManager::COLLAGES. false, false); ?>
+<?php           self::render_checkbox(Notification::COLLAGES. false, false); ?>
             </td>
         </tr>
 <?php
@@ -128,9 +129,9 @@ class NotificationsManagerView {
 
     private static function render_checkbox($Name, $Traditional = false, $Push = true) {
         $Checked = self::$Settings[$Name];
-        $PopupChecked = $Checked == NotificationsManager::OPT_POPUP || $Checked == NotificationsManager::OPT_POPUP_PUSH || !isset($Checked) ? ' checked="checked"' : '';
-        $TraditionalChecked = $Checked == NotificationsManager::OPT_TRADITIONAL || $Checked == NotificationsManager::OPT_TRADITIONAL_PUSH ? ' checked="checked"' : '';
-        $PushChecked = $Checked == NotificationsManager::OPT_TRADITIONAL_PUSH || $Checked == NotificationsManager::OPT_POPUP_PUSH || $Checked == NotificationsManager::OPT_PUSH ? ' checked="checked"' : '';
+        $PopupChecked = $Checked == Notification::OPT_POPUP || $Checked == Notification::OPT_POPUP_PUSH || !isset($Checked) ? ' checked="checked"' : '';
+        $TraditionalChecked = $Checked == Notification::OPT_TRADITIONAL || $Checked == Notification::OPT_TRADITIONAL_PUSH ? ' checked="checked"' : '';
+        $PushChecked = $Checked == Notification::OPT_TRADITIONAL_PUSH || $Checked == Notification::OPT_POPUP_PUSH || $Checked == Notification::OPT_PUSH ? ' checked="checked"' : '';
 
 ?>
         <label>
@@ -154,5 +155,4 @@ class NotificationsManagerView {
     public static function format_traditional($Contents) {
         return "<a href=\"$Contents[url]\">$Contents[message]</a>";
     }
-
 }
