@@ -412,6 +412,9 @@ class Forums {
                 : G::$DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
             G::$Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
         }
+        if (!self::check_forumperm($id)) {
+            $name = 'restricted';
+        }
         return $name
             ? sprintf('<a href="forums.php?action=viewforum&forumid=%d">%s</a>', $id, $name)
             : '[forum]' . $val . '[/forum]';
@@ -423,10 +426,13 @@ class Forums {
         }
 
         $cacheKey = 'bbcode-thread.' . $thread;
-        list($id, $name, $isLocked) = G::$Cache->get_value($cacheKey);
-        if (is_null($id)) {
-            list($id, $name, $isLocked) = G::$DB->row('SELECT ID, Title, IsLocked FROM forums_topics WHERE ID = ?', $thread);
+        list($id, $name, $isLocked, $forumId) = G::$Cache->get_value($cacheKey);
+        if (is_null($forumId)) {
+            list($id, $name, $isLocked, $forumId) = G::$DB->row('SELECT ID, Title, IsLocked, ForumID FROM forums_topics WHERE ID = ?', $thread);
             G::$Cache->cache_value($cacheKey, [$id, $name, $isLocked], 86400 + rand(1, 3600));
+        }
+        if (!self::check_forumperm($forumId)) {
+            $name = 'restricted';
         }
 
         if ($post) {
