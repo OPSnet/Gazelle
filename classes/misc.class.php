@@ -121,6 +121,7 @@ class Misc {
             FROM users_main
             WHERE ID = '$FromID'");
         list($SenderName) = G::$DB->next_record();
+        $notification = new Notification(G::$DB, G::$Cache);
         foreach ($ToID as $ID) {
             G::$DB->query("
                 SELECT COUNT(ConvID)
@@ -131,7 +132,7 @@ class Misc {
             list($UnRead) = G::$DB->next_record();
             G::$Cache->cache_value("inbox_new_$ID", $UnRead);
 
-            Notification::send_push($ID, "Message from $SenderName, Subject: $UnescapedSubject", $UnescapedBody, site_url() . 'inbox.php', Notification::INBOX);
+            $notification->push($ID, "Message from $SenderName, Subject: $UnescapedSubject", $UnescapedBody, site_url() . 'inbox.php', Notification::INBOX);
         }
 
         G::$DB->set_query_id($QueryID);

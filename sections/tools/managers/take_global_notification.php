@@ -5,11 +5,12 @@ use \Gazelle\Manager\Notification;
 if (!check_perms("users_mod")) {
     error(404);
 }
+$notification = new Notification($DB, $Cache);
 if ($_POST['set']) {
     $Expiration = $_POST['length'] * 60;
-    Notification::set_global_notification($_POST['message'], $_POST['url'], $_POST['importance'], $Expiration);
+    $notification->setGlobal($_POST['message'], $_POST['url'], $_POST['importance'], $Expiration);
 } elseif ($_POST['delete']) {
-    Notification::delete_global_notification();
+    $notification->deleteGlobal();
 }
 
 header("Location: tools.php?action=global_notification");

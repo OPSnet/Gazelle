@@ -8,6 +8,7 @@ if (!check_perms('users_mod') && $_GET['userid'] != $LoggedUser['ID']) {
 }
 
 $UserID = db_string($_GET['userid']);
-Notification::send_push($UserID, 'Push!', 'You\'ve been pushed by ' . $LoggedUser['Username']);
+$notification = new Notification($DB, $Cache);
+$notification->push($UserID, 'Push!', 'You\'ve been pushed by ' . $LoggedUser['Username']);
 
 header('Location: user.php?action=edit&userid=' . $UserID . "");

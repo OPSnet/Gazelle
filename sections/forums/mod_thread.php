@@ -407,7 +407,8 @@ if (isset($_POST['delete'])) {
             break;
     }
     if (isset($Notification)) {
-        Notification::notify_user($ThreadAuthorID, Notification::FORUMALERTS, $Notification, "forums.php?action=viewthread&threadid=$TopicID");
+        $notification = new Notification($DB, $Cache);
+        $notification->notifyUser($ThreadAuthorID, Notification::FORUMALERTS, $Notification, "forums.php?action=viewthread&threadid=$TopicID");
     }
     if (count($TopicNotes) > 0) {
         Forums::add_topic_note($TopicID, implode("\n", $TopicNotes));
