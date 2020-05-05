@@ -218,7 +218,8 @@ switch ($_REQUEST['action']) {
         $Cache->delete_value('news_latest_title');
         $Cache->delete_value('news');
 
-        Notification::send_push(Notification::get_push_enabled_users(), $_POST['title'], $_POST['body'], site_url() . 'index.php', Notification::NEWS);
+        $notification = new Notification($DB, $Cache, G::$LoggedUser['ID']);
+        $notification->push($notification->pushableUsers(), $_POST['title'], $_POST['body'], site_url() . 'index.php', Notification::NEWS);
 
         header('Location: index.php');
         break;

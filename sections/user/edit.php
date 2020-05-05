@@ -512,7 +512,10 @@ echo $Val->GenerateJS('userform');
                     <label for="unseededalerts">Enable unseeded torrent alerts</label>
                 </td>
             </tr>
-            <?php NotificationsManagerView::render_settings(Notification::get_settings($UserID)); ?>
+<?php
+            $notification = new Notification($DB, $Cache, $UserID);
+            NotificationsManagerView::render_settings($notification->settings());
+?>
         </table>
         <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="personal_settings">
             <tr class="colhead_dark">

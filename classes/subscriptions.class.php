@@ -62,6 +62,7 @@ class Subscriptions {
         );
 
         $Results = G::$DB->to_array();
+        $notification = new Notification(G::$DB, G::$Cache);
         foreach ($Results as $Result) {
             $UserID = $Result['ID'];
             $QuoterID = G::$LoggedUser['ID'];
@@ -82,7 +83,7 @@ class Subscriptions {
             } else {
                 $URL = site_url() . "comments.php?action=jump&postid=$PostID";
             }
-            Notification::send_push($UserID, 'New Quote!', 'Quoted by ' . G::$LoggedUser['Username'] . " $URL", $URL, Notification::QUOTES);
+            $notification->push($UserID, 'New Quote!', 'Quoted by ' . G::$LoggedUser['Username'] . " $URL", $URL, Notification::QUOTES);
         }
         G::$DB->set_query_id($QueryID);
     }
@@ -211,13 +212,14 @@ class Subscriptions {
     }
 
     /**
-     * Returns whether or not the current user has new subscriptions. This handles both forum and comment subscriptions.
+     * Returns whether or not a user has new subscriptions. This handles both forum and comment subscriptions.
+     * @param int $UserID The ID of the user
      * @return int Number of unread subscribed threads/comments
      */
-    public static function has_new_subscriptions() {
+    public static function has_new_subscriptions($UserID) {
         $QueryID = G::$DB->get_query_id();
 
-        $NewSubscriptions = G::$Cache->get_value('subscriptions_user_new_' . G::$LoggedUser['ID']);
+        $NewSubscriptions = G::$Cache->get_value('subscriptions_user_new_' . $UserID);
         if ($NewSubscriptions === false) {
             // forum subscriptions
             // TODO: refactor this shit and all the other places user_forums_sql is called.
@@ -229,7 +231,7 @@ class Subscriptions {
                 INNER JOIN forums AS f ON (f.ID = t.ForumID)
                 WHERE " . Forums::user_forums_sql() . "
                     AND IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", t.LastPostID, IF(l.PostID IS NULL, 0, l.PostID)) < t.LastPostID
-                    AND s.UserID = " . G::$LoggedUser['ID']);
+                    AND s.UserID = " . $UserID);
             list($NewForumSubscriptions) = G::$DB->next_record();
 
             // comment subscriptions
@@ -242,12 +244,12 @@ class Subscriptions {
                 WHERE s.UserID = ?
                     AND (s.Page != 'collages' OR co.Deleted = '0')
                     AND IF(lr.PostID IS NULL, 0, lr.PostID) < c.ID
-                ", G::$LoggedUser['ID']
+                ", $UserID
             );
             list($NewCommentSubscriptions) = G::$DB->next_record();
 
             $NewSubscriptions = $NewForumSubscriptions + $NewCommentSubscriptions;
-            G::$Cache->cache_value('subscriptions_user_new_' . G::$LoggedUser['ID'], $NewSubscriptions, 0);
+            G::$Cache->cache_value('subscriptions_user_new_' . $UserID, $NewSubscriptions, 0);
         }
         G::$DB->set_query_id($QueryID);
         return (int)$NewSubscriptions;
@@ -460,5 +462,24 @@ class Subscriptions {
             G::$Cache->delete_value("notify_quoted_$Subscriber");
         }
         G::$DB->set_query_id($QueryID);
+    }
+
+    /**
+     * Clear the forum subscription notifications of a user.
+     * @param int $UserID
+     */
+    public static function clearSubscriptions($UserID) {
+        $QueryID = G::$DB->get_query_id();
+        G::$DB->prepared_query("
+            INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
+                SELECT us.UserID, ft.ID, ft.LastPostID
+                FROM forums_topics ft
+                INNER JOIN users_subscriptions us ON (us.TopicID = ft.ID)
+                WHERE us.UserID = ?
+            ON DUPLICATE KEY UPDATE PostID = LastPostID
+            ", $UserID
+        );
+        G::$DB->set_query_id($QueryID);
+        G::$Cache->delete_value('subscriptions_user_new_' . $UserID);
     }
 }

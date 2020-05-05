@@ -1,41 +1,42 @@
 <?php
 
 use \Gazelle\Manager\Notification;
+$notification = new Notification($DB, $Cache, $UserID);
 
 $Type = $_POST['type'];
 
 switch($Type) {
-    case Notification::INBOX:
-        Notification::clear_inbox();
-        break;
-    case Notification::NEWS:
-        Notification::clear_news();
-        break;
     case Notification::BLOG:
-        Notification::clear_blog();
-        break;
-    case Notification::STAFFPM:
-        Notification::clear_staff_pms();
-        break;
-    case Notification::TORRENTS:
-        Notification::clear_torrents();
-        break;
-    case Notification::QUOTES:
-        Notification::clear_quotes();
-        break;
-    case Notification::SUBSCRIPTIONS:
-        Notification::clear_subscriptions();
+        G::$LoggedUser['LastReadBlog'] = $notification->clearBlog();
         break;
     case Notification::COLLAGES:
-        Notification::clear_collages();
+        $notification->clearCollages();
         break;
     case Notification::GLOBALNOTICE:
-        Notification::clear_global_notification();
+        $notification->clearGlobal();
+        break;
+    case Notification::INBOX:
+        $notification->clearInbox();
+        break;
+    case Notification::NEWS:
+        G::$LoggedUser['LastReadNews'] = $notification->clearNews();
+        break;
+    case Notification::QUOTES:
+        $notification->clearQuotes();
+        break;
+    case Notification::STAFFPM:
+        $notification->clearStaffPMs();
+        break;
+    case Notification::SUBSCRIPTIONS:
+        $notification->clearSubscriptions($UserID);
+        break;
+    case Notification::TORRENTS:
+        $notification->clearTorrents();
         break;
     default:
         break;
 }
 
 if (strpos($Type, "oneread_") === 0) {
-    Notification::clear_one_read($Type);
+    $notification->clearOneRead($Type);
 }

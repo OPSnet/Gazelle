@@ -91,7 +91,7 @@ if ($CurrentBlog === false) {
 }
 
 // Subscriptions
-$NewSubscriptions = Subscriptions::has_new_subscriptions();
+$NewSubscriptions = Subscriptions::has_new_subscriptions($LoggedUser['ID']);
 
 json_print("success", [
     'username' => $LoggedUser['Username'],

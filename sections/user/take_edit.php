@@ -330,7 +330,10 @@ G::$Cache->delete_value("lastfm_username_$UserID");
 
 Users::toggleAcceptFL($UserID, $Options['AcceptFL']);
 Donations::update_rewards($UserID);
-Notification::save_settings($UserID);
+$notification = new Notification($DB, $Cache, $UserID);
+// A little cheat technique, gets all keys in the $_POST array starting with 'notifications_'
+$settings = array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST))));
+$notification->save($settings, ["PushKey" => $_POST['pushkey']], (int)$_POST['pushservice'], $_POST['pushdevice']);
 
 // Information on how the user likes to download torrents is stored in cache
 if ($DownloadAlt != $UH['DownloadAlt'] || $Options['HttpsTracker'] != $UH['HttpsTracker']) {

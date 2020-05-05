@@ -133,9 +133,9 @@ foreach ($Scripts as $Script) {
 global $ClassLevels;
 // Get notifications early to change menu items if needed
 global $NotificationSpans;
-$NotificationsManager = new Notification(G::$LoggedUser['ID']);
-$Notifications = $NotificationsManager->get_notifications();
-$UseNoty = $NotificationsManager->use_noty();
+$notification = new Notification(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+$Notifications = $notification->notifications();
+$UseNoty = $notification->useNoty();
 $NewSubscriptions = false;
 $NotificationSpans = [];
 foreach ($Notifications as $Type => $Notification) {
@@ -149,8 +149,8 @@ foreach ($Notifications as $Type => $Notification) {
 if ($UseNoty && !empty($NotificationSpans)) {
     NotificationsManagerView::load_js();
 }
-if ($NotificationsManager->is_skipped(Notification::SUBSCRIPTIONS)) {
-    $NewSubscriptions = Subscriptions::has_new_subscriptions();
+if ($notification->isSkipped(Notification::SUBSCRIPTIONS)) {
+    $NewSubscriptions = Subscriptions::has_new_subscriptions(G::$LoggedUser['ID']);
 }
 
 $NavItems = Users::get_user_nav_items(G::$LoggedUser['ID']);
@@ -346,13 +346,13 @@ if ($Staff && $Staff->blogAlert()) {
 }
 
 // Inbox
-if ($NotificationsManager->is_traditional(Notification::INBOX)) {
-    $NotificationsManager->load_inbox();
-    $NewMessages = $NotificationsManager->get_notifications();
+if ($notification->isTraditional(Notification::INBOX)) {
+    $notification->loadInbox();
+    $NewMessages = $notification->notifications();
     if (isset($NewMessages[Notification::INBOX])) {
         $Alerts[] = NotificationsManagerView::format_traditional($NewMessages[Notification::INBOX]);
     }
-    $NotificationsManager->clear_notifications_array();
+    $notification->clear();
 }
 
 if (G::$LoggedUser['RatioWatch']) {
@@ -362,13 +362,13 @@ if (G::$LoggedUser['RatioWatch']) {
 }
 
 // Torrents
-if ($NotificationsManager->is_traditional(Notification::TORRENTS)) {
-    $NotificationsManager->load_torrent_notifications();
-    $NewTorrents = $NotificationsManager->get_notifications();
+if ($notification->isTraditional(Notification::TORRENTS)) {
+    $notification->loadTorrents();
+    $NewTorrents = $notification->notifications();
     if (isset($NewTorrents[Notification::TORRENTS])) {
         $Alerts[] = NotificationsManagerView::format_traditional($NewTorrents[Notification::TORRENTS]);
     }
-    $NotificationsManager->clear_notifications_array();
+    $notification->clear();
 }
 if (check_perms('users_mod')) {
     $ModBar[] = '<a href="tools.php">Toolbox</a>';
