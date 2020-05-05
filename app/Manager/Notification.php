@@ -108,6 +108,18 @@ class Notification {
         }
     }
 
+    public function is_traditional($Type) {
+        return $this->Settings[$Type] == self::OPT_TRADITIONAL || $this->Settings[$Type] == self::OPT_TRADITIONAL_PUSH;
+    }
+
+    public function is_skipped($Type) {
+        return isset($this->Skipped[$Type]);
+    }
+
+    public function use_noty() {
+        return in_array(self::OPT_POPUP, $this->Settings) || in_array(self::OPT_POPUP_PUSH, $this->Settings);
+    }
+
     public function get_notifications() {
         return $this->Notifications;
     }
@@ -238,6 +250,142 @@ class Notification {
         }
     }
 
+    public function load_blog() {
+        $MyBlog = \G::$LoggedUser['LastReadBlog'];
+        $CurrentBlog = \G::$Cache->get_value('blog_latest_id');
+        $Title = \G::$Cache->get_value('blog_latest_title');
+        if ($CurrentBlog === false) {
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query('
+                SELECT ID, Title
+                FROM blog
+                WHERE Important = 1
+                ORDER BY Time DESC
+                LIMIT 1');
+            if (\G::$DB->has_results()) {
+                list($CurrentBlog, $Title) = \G::$DB->next_record();
+            } else {
+                $CurrentBlog = -1;
+            }
+            \G::$DB->set_query_id($QueryID);
+            \G::$Cache->cache_value('blog_latest_id', $CurrentBlog, 0);
+            \G::$Cache->cache_value('blog_latest_title', $Title, 0);
+        }
+        if ($MyBlog < $CurrentBlog) {
+            $this->create_notification(self::BLOG, $CurrentBlog, "Blog: $Title", "blog.php#blog$CurrentBlog", self::IMPORTANT);
+        }
+    }
+
+    public static function clear_blog($Blog = null) {
+        $QueryID = \G::$DB->get_query_id();
+        if (!$Blog) {
+            if (!$Blog = \G::$Cache->get_value('blog')) {
+                \G::$DB->query("
+                    SELECT
+                        b.ID,
+                        um.Username,
+                        b.UserID,
+                        b.Title,
+                        b.Body,
+                        b.Time,
+                        b.ThreadID
+                    FROM blog AS b
+                        LEFT JOIN users_main AS um ON b.UserID = um.ID
+                    ORDER BY Time DESC
+                    LIMIT 1");
+                $Blog = \G::$DB->to_array();
+            }
+        }
+        if (\G::$LoggedUser['LastReadBlog'] < $Blog[0][0]) {
+            \G::$Cache->begin_transaction('user_info_heavy_' . \G::$LoggedUser['ID']);
+            \G::$Cache->update_row(false, ['LastReadBlog' => $Blog[0][0]]);
+            \G::$Cache->commit_transaction(0);
+            \G::$DB->query("
+                UPDATE users_info
+                SET LastReadBlog = '". $Blog[0][0]."'
+                WHERE UserID = " . \G::$LoggedUser['ID']);
+            \G::$LoggedUser['LastReadBlog'] = $Blog[0][0];
+        }
+        \G::$DB->set_query_id($QueryID);
+    }
+
+    public function load_collage_subscriptions() {
+        if (check_perms('site_collages_subscribe')) {
+            $NewCollages = \G::$Cache->get_value('collage_subs_user_new_' . \G::$LoggedUser['ID']);
+            if ($NewCollages === false) {
+                    $QueryID = \G::$DB->get_query_id();
+                    \G::$DB->query("
+                        SELECT COUNT(DISTINCT s.CollageID)
+                        FROM users_collage_subs AS s
+                            JOIN collages AS c ON s.CollageID = c.ID
+                            JOIN collages_torrents AS ct ON ct.CollageID = c.ID
+                        WHERE s.UserID = " . \G::$LoggedUser['ID'] . "
+                            AND ct.AddedOn > s.LastVisit
+                            AND c.Deleted = '0'");
+                    list($NewCollages) = \G::$DB->next_record();
+                    \G::$DB->set_query_id($QueryID);
+                    \G::$Cache->cache_value('collage_subs_user_new_' . \G::$LoggedUser['ID'], $NewCollages, 0);
+            }
+            if ($NewCollages > 0) {
+                $Title = 'You have ' . ($NewCollages == 1 ? 'a' : $NewCollages) . ' new collage update' . ($NewCollages > 1 ? 's' : '');
+                $this->create_notification(self::COLLAGES, 0, $Title, 'userhistory.php?action=subscribed_collages', self::INFO);
+            }
+        }
+    }
+
+    public static function clear_collages() {
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
+            UPDATE users_collage_subs
+            SET LastVisit = NOW()
+            WHERE UserID = " . \G::$LoggedUser['ID']);
+        \G::$Cache->delete_value('collage_subs_user_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
+    }
+
+    public function load_inbox() {
+        $NewMessages = \G::$Cache->get_value('inbox_new_' . \G::$LoggedUser['ID']);
+        if ($NewMessages === false) {
+            $QueryID = \G::$DB->get_query_id();
+            \G::$DB->query("
+                SELECT COUNT(UnRead)
+                FROM pm_conversations_users
+                WHERE UserID = '" . \G::$LoggedUser['ID'] . "'
+                    AND UnRead = '1'
+                    AND InInbox = '1'");
+            list($NewMessages) = \G::$DB->next_record();
+            \G::$DB->set_query_id($QueryID);
+            \G::$Cache->cache_value('inbox_new_' . \G::$LoggedUser['ID'], $NewMessages, 0);
+        }
+        if ($NewMessages > 0) {
+            $Title = 'You have ' . ($NewMessages == 1 ? 'a' : $NewMessages) . ' new message' . ($NewMessages > 1 ? 's' : '');
+            $this->create_notification(self::INBOX, 0, $Title, Inbox::getLinkQuick('inbox', \G::$LoggedUser['ListUnreadPMsFirst'] ?? false), self::INFO);
+        }
+    }
+
+    public static function clear_inbox() {
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
+            SELECT ConvID
+            FROM pm_conversations_users
+            WHERE Unread = '1'
+                AND UserID = " . \G::$LoggedUser['ID']);
+        $IDs = [];
+        while (list($ID) = \G::$DB->next_record()) {
+            $IDs[] = $ID;
+        }
+        $IDs = implode(',', $IDs);
+        if (!empty($IDs)) {
+            \G::$DB->query("
+                UPDATE pm_conversations_users
+                SET Unread = '0'
+                WHERE ConvID IN ($IDs)
+                    AND UserID = " . \G::$LoggedUser['ID']);
+        }
+        \G::$Cache->delete_value('inbox_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
+    }
+
     public function load_news() {
         $MyNews = \G::$LoggedUser['LastReadNews'];
         $CurrentNews = \G::$Cache->get_value('news_latest_id');
@@ -263,30 +411,54 @@ class Notification {
         }
     }
 
-    public function load_blog() {
-        $MyBlog = \G::$LoggedUser['LastReadBlog'];
-        $CurrentBlog = \G::$Cache->get_value('blog_latest_id');
-        $Title = \G::$Cache->get_value('blog_latest_title');
-        if ($CurrentBlog === false) {
-            $QueryID = \G::$DB->get_query_id();
-            \G::$DB->query('
-                SELECT ID, Title
-                FROM blog
-                WHERE Important = 1
-                ORDER BY Time DESC
-                LIMIT 1');
-            if (\G::$DB->has_results()) {
-                list($CurrentBlog, $Title) = \G::$DB->next_record();
-            } else {
-                $CurrentBlog = -1;
+    public static function clear_news($News = null) {
+        $QueryID = \G::$DB->get_query_id();
+        if (!$News) {
+            if (!$News = \G::$Cache->get_value('news')) {
+                \G::$DB->query('
+                    SELECT
+                        ID,
+                        Title,
+                        Body,
+                        Time
+                    FROM news
+                    ORDER BY Time DESC
+                    LIMIT 1');
+                $News = \G::$DB->to_array(false, MYSQLI_NUM, false);
+                \G::$Cache->cache_value('news_latest_id', $News[0][0], 0);
             }
-            \G::$DB->set_query_id($QueryID);
-            \G::$Cache->cache_value('blog_latest_id', $CurrentBlog, 0);
-            \G::$Cache->cache_value('blog_latest_title', $Title, 0);
         }
-        if ($MyBlog < $CurrentBlog) {
-            $this->create_notification(self::BLOG, $CurrentBlog, "Blog: $Title", "blog.php#blog$CurrentBlog", self::IMPORTANT);
+        if (\G::$LoggedUser['LastReadNews'] != $News[0][0]) {
+            \G::$Cache->begin_transaction('user_info_heavy_' . \G::$LoggedUser['ID']);
+            \G::$Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
+            \G::$Cache->commit_transaction(0);
+            \G::$DB->query("
+                UPDATE users_info
+                SET LastReadNews = '".$News[0][0]."'
+                WHERE UserID = " . \G::$LoggedUser['ID']);
+            \G::$LoggedUser['LastReadNews'] = $News[0][0];
         }
+        \G::$DB->set_query_id($QueryID);
+    }
+
+    public function load_quote_notifications() {
+        if (isset(\G::$LoggedUser['NotifyOnQuote']) && \G::$LoggedUser['NotifyOnQuote']) {
+            $QuoteNotificationsCount = \Subscriptions::has_new_quote_notifications();
+            if ($QuoteNotificationsCount > 0) {
+                $Title = 'New quote' . ($QuoteNotificationsCount > 1 ? 's' : '');
+                $this->create_notification(self::QUOTES, 0, $Title, 'userhistory.php?action=quote_notifications', self::INFO);
+            }
+        }
+    }
+
+    public static function clear_quotes() {
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
+            UPDATE users_notify_quoted
+            SET UnRead = '0'
+            WHERE UserID = " . \G::$LoggedUser['ID']);
+        \G::$Cache->delete_value('notify_quoted_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public function load_staff_blog() {
@@ -338,32 +510,64 @@ class Notification {
             \G::$DB->set_query_id($QueryID);
             \G::$Cache->cache_value('staff_pm_new_' . \G::$LoggedUser['ID'], $NewStaffPMs, 0);
         }
-
         if ($NewStaffPMs > 0) {
             $Title = 'You have ' . ($NewStaffPMs == 1 ? 'a' : $NewStaffPMs) . ' new Staff PM' . ($NewStaffPMs > 1 ? 's' : '');
             $this->create_notification(self::STAFFPM, 0, $Title, 'staffpm.php', self::INFO);
         }
     }
 
-    public function load_inbox() {
-        $NewMessages = \G::$Cache->get_value('inbox_new_' . \G::$LoggedUser['ID']);
-        if ($NewMessages === false) {
-            $QueryID = \G::$DB->get_query_id();
+    public static function clear_staff_pms() {
+        $QueryID = \G::$DB->get_query_id();
+        \G::$DB->query("
+            SELECT ID
+            FROM staff_pm_conversations
+            WHERE Unread = true
+                AND UserID = " . \G::$LoggedUser['ID']);
+        $IDs = [];
+        while (list($ID) = \G::$DB->next_record()) {
+            $IDs[] = $ID;
+        }
+        $IDs = implode(',', $IDs);
+        if (!empty($IDs)) {
             \G::$DB->query("
-                SELECT COUNT(UnRead)
-                FROM pm_conversations_users
-                WHERE UserID = '" . \G::$LoggedUser['ID'] . "'
-                    AND UnRead = '1'
-                    AND InInbox = '1'");
-            list($NewMessages) = \G::$DB->next_record();
-            \G::$DB->set_query_id($QueryID);
-            \G::$Cache->cache_value('inbox_new_' . \G::$LoggedUser['ID'], $NewMessages, 0);
+                UPDATE staff_pm_conversations
+                SET Unread = false
+                WHERE ID IN ($IDs)");
         }
+        \G::$Cache->delete_value('staff_pm_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
+    }
 
-        if ($NewMessages > 0) {
-            $Title = 'You have ' . ($NewMessages == 1 ? 'a' : $NewMessages) . ' new message' . ($NewMessages > 1 ? 's' : '');
-            $this->create_notification(self::INBOX, 0, $Title, Inbox::getLinkQuick('inbox', \G::$LoggedUser['ListUnreadPMsFirst'] ?? false), self::INFO);
+    public function load_subscriptions() {
+        $SubscriptionsCount = \Subscriptions::has_new_subscriptions();
+        if ($SubscriptionsCount > 0) {
+            $Title = 'New subscription' . ($SubscriptionsCount > 1 ? 's' : '');
+            $this->create_notification(self::SUBSCRIPTIONS, 0, $Title, 'userhistory.php?action=subscriptions', self::INFO);
         }
+    }
+
+    public static function clear_subscriptions() {
+        $QueryID = \G::$DB->get_query_id();
+        if (($UserSubscriptions = \G::$Cache->get_value('subscriptions_user_' . \G::$LoggedUser['ID'])) === false) {
+            \G::$DB->query("
+                SELECT TopicID
+                FROM users_subscriptions
+                WHERE UserID = " . \G::$LoggedUser['ID']);
+            if ($UserSubscriptions = \G::$DB->collect(0)) {
+                \G::$Cache->cache_value('subscriptions_user_' . \G::$LoggedUser['ID'], $UserSubscriptions, 0);
+            }
+        }
+        if (!empty($UserSubscriptions)) {
+            \G::$DB->query("
+                INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
+                    SELECT '" . \G::$LoggedUser['ID'] . "', ID, LastPostID
+                    FROM forums_topics
+                    WHERE ID IN (".implode(',', $UserSubscriptions).')
+                ON DUPLICATE KEY UPDATE
+                    PostID = LastPostID');
+        }
+        \G::$Cache->delete_value('subscriptions_user_new_' . \G::$LoggedUser['ID']);
+        \G::$DB->set_query_id($QueryID);
     }
 
     public function load_torrent_notifications() {
@@ -390,157 +594,6 @@ class Notification {
         }
     }
 
-    public function load_collage_subscriptions() {
-        if (check_perms('site_collages_subscribe')) {
-            $NewCollages = \G::$Cache->get_value('collage_subs_user_new_' . \G::$LoggedUser['ID']);
-            if ($NewCollages === false) {
-                    $QueryID = \G::$DB->get_query_id();
-                    \G::$DB->query("
-                        SELECT COUNT(DISTINCT s.CollageID)
-                        FROM users_collage_subs AS s
-                            JOIN collages AS c ON s.CollageID = c.ID
-                            JOIN collages_torrents AS ct ON ct.CollageID = c.ID
-                        WHERE s.UserID = " . \G::$LoggedUser['ID'] . "
-                            AND ct.AddedOn > s.LastVisit
-                            AND c.Deleted = '0'");
-                    list($NewCollages) = \G::$DB->next_record();
-                    \G::$DB->set_query_id($QueryID);
-                    \G::$Cache->cache_value('collage_subs_user_new_' . \G::$LoggedUser['ID'], $NewCollages, 0);
-            }
-            if ($NewCollages > 0) {
-                $Title = 'You have ' . ($NewCollages == 1 ? 'a' : $NewCollages) . ' new collage update' . ($NewCollages > 1 ? 's' : '');
-                $this->create_notification(self::COLLAGES, 0, $Title, 'userhistory.php?action=subscribed_collages', self::INFO);
-            }
-        }
-    }
-
-    public function load_quote_notifications() {
-        if (isset(\G::$LoggedUser['NotifyOnQuote']) && \G::$LoggedUser['NotifyOnQuote']) {
-            $QuoteNotificationsCount = \Subscriptions::has_new_quote_notifications();
-            if ($QuoteNotificationsCount > 0) {
-                $Title = 'New quote' . ($QuoteNotificationsCount > 1 ? 's' : '');
-                $this->create_notification(self::QUOTES, 0, $Title, 'userhistory.php?action=quote_notifications', self::INFO);
-            }
-        }
-    }
-
-    public function load_subscriptions() {
-        $SubscriptionsCount = \Subscriptions::has_new_subscriptions();
-        if ($SubscriptionsCount > 0) {
-            $Title = 'New subscription' . ($SubscriptionsCount > 1 ? 's' : '');
-            $this->create_notification(self::SUBSCRIPTIONS, 0, $Title, 'userhistory.php?action=subscriptions', self::INFO);
-        }
-    }
-
-    public static function clear_news($News = null) {
-        $QueryID = \G::$DB->get_query_id();
-        if (!$News) {
-            if (!$News = \G::$Cache->get_value('news')) {
-                \G::$DB->query('
-                    SELECT
-                        ID,
-                        Title,
-                        Body,
-                        Time
-                    FROM news
-                    ORDER BY Time DESC
-                    LIMIT 1');
-                $News = \G::$DB->to_array(false, MYSQLI_NUM, false);
-                \G::$Cache->cache_value('news_latest_id', $News[0][0], 0);
-            }
-        }
-
-        if (\G::$LoggedUser['LastReadNews'] != $News[0][0]) {
-            \G::$Cache->begin_transaction('user_info_heavy_' . \G::$LoggedUser['ID']);
-            \G::$Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
-            \G::$Cache->commit_transaction(0);
-            \G::$DB->query("
-                UPDATE users_info
-                SET LastReadNews = '".$News[0][0]."'
-                WHERE UserID = " . \G::$LoggedUser['ID']);
-            \G::$LoggedUser['LastReadNews'] = $News[0][0];
-        }
-        \G::$DB->set_query_id($QueryID);
-    }
-
-    public static function clear_blog($Blog = null) {
-        $QueryID = \G::$DB->get_query_id();
-        if (!$Blog) {
-            if (!$Blog = \G::$Cache->get_value('blog')) {
-                \G::$DB->query("
-                    SELECT
-                        b.ID,
-                        um.Username,
-                        b.UserID,
-                        b.Title,
-                        b.Body,
-                        b.Time,
-                        b.ThreadID
-                    FROM blog AS b
-                        LEFT JOIN users_main AS um ON b.UserID = um.ID
-                    ORDER BY Time DESC
-                    LIMIT 1");
-                $Blog = \G::$DB->to_array();
-            }
-        }
-        if (\G::$LoggedUser['LastReadBlog'] < $Blog[0][0]) {
-            \G::$Cache->begin_transaction('user_info_heavy_' . \G::$LoggedUser['ID']);
-            \G::$Cache->update_row(false, ['LastReadBlog' => $Blog[0][0]]);
-            \G::$Cache->commit_transaction(0);
-            \G::$DB->query("
-                UPDATE users_info
-                SET LastReadBlog = '". $Blog[0][0]."'
-                WHERE UserID = " . \G::$LoggedUser['ID']);
-            \G::$LoggedUser['LastReadBlog'] = $Blog[0][0];
-        }
-        \G::$DB->set_query_id($QueryID);
-    }
-
-    public static function clear_staff_pms() {
-        $QueryID = \G::$DB->get_query_id();
-        \G::$DB->query("
-            SELECT ID
-            FROM staff_pm_conversations
-            WHERE Unread = true
-                AND UserID = " . \G::$LoggedUser['ID']);
-        $IDs = [];
-        while (list($ID) = \G::$DB->next_record()) {
-            $IDs[] = $ID;
-        }
-        $IDs = implode(',', $IDs);
-        if (!empty($IDs)) {
-            \G::$DB->query("
-                UPDATE staff_pm_conversations
-                SET Unread = false
-                WHERE ID IN ($IDs)");
-        }
-        \G::$Cache->delete_value('staff_pm_new_' . \G::$LoggedUser['ID']);
-        \G::$DB->set_query_id($QueryID);
-    }
-
-    public static function clear_inbox() {
-        $QueryID = \G::$DB->get_query_id();
-        \G::$DB->query("
-            SELECT ConvID
-            FROM pm_conversations_users
-            WHERE Unread = '1'
-                AND UserID = " . \G::$LoggedUser['ID']);
-        $IDs = [];
-        while (list($ID) = \G::$DB->next_record()) {
-            $IDs[] = $ID;
-        }
-        $IDs = implode(',', $IDs);
-        if (!empty($IDs)) {
-            \G::$DB->query("
-                UPDATE pm_conversations_users
-                SET Unread = '0'
-                WHERE ConvID IN ($IDs)
-                    AND UserID = " . \G::$LoggedUser['ID']);
-        }
-        \G::$Cache->delete_value('inbox_new_' . \G::$LoggedUser['ID']);
-        \G::$DB->set_query_id($QueryID);
-    }
-
     public static function clear_torrents() {
         $QueryID = \G::$DB->get_query_id();
         \G::$DB->query("
@@ -561,50 +614,6 @@ class Notification {
                     AND UserID = " . \G::$LoggedUser['ID']);
         }
         \G::$Cache->delete_value('notifications_new_' . \G::$LoggedUser['ID']);
-        \G::$DB->set_query_id($QueryID);
-    }
-
-    public static function clear_collages() {
-        $QueryID = \G::$DB->get_query_id();
-        \G::$DB->query("
-            UPDATE users_collage_subs
-            SET LastVisit = NOW()
-            WHERE UserID = " . \G::$LoggedUser['ID']);
-        \G::$Cache->delete_value('collage_subs_user_new_' . \G::$LoggedUser['ID']);
-        \G::$DB->set_query_id($QueryID);
-    }
-
-    public static function clear_quotes() {
-        $QueryID = \G::$DB->get_query_id();
-        \G::$DB->query("
-            UPDATE users_notify_quoted
-            SET UnRead = '0'
-            WHERE UserID = " . \G::$LoggedUser['ID']);
-        \G::$Cache->delete_value('notify_quoted_' . \G::$LoggedUser['ID']);
-        \G::$DB->set_query_id($QueryID);
-    }
-
-    public static function clear_subscriptions() {
-        $QueryID = \G::$DB->get_query_id();
-        if (($UserSubscriptions = \G::$Cache->get_value('subscriptions_user_' . \G::$LoggedUser['ID'])) === false) {
-            \G::$DB->query("
-                SELECT TopicID
-                FROM users_subscriptions
-                WHERE UserID = " . \G::$LoggedUser['ID']);
-            if ($UserSubscriptions = \G::$DB->collect(0)) {
-                \G::$Cache->cache_value('subscriptions_user_' . \G::$LoggedUser['ID'], $UserSubscriptions, 0);
-            }
-        }
-        if (!empty($UserSubscriptions)) {
-            \G::$DB->query("
-                INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
-                    SELECT '" . \G::$LoggedUser['ID'] . "', ID, LastPostID
-                    FROM forums_topics
-                    WHERE ID IN (".implode(',', $UserSubscriptions).')
-                ON DUPLICATE KEY UPDATE
-                    PostID = LastPostID');
-        }
-        \G::$Cache->delete_value('subscriptions_user_new_' . \G::$LoggedUser['ID']);
         \G::$DB->set_query_id($QueryID);
     }
 
@@ -696,18 +705,6 @@ class Notification {
 
         \G::$DB->set_query_id($QueryID);
         \G::$Cache->delete_value("users_notifications_settings_$UserID");
-    }
-
-    public function is_traditional($Type) {
-        return $this->Settings[$Type] == self::OPT_TRADITIONAL || $this->Settings[$Type] == self::OPT_TRADITIONAL_PUSH;
-    }
-
-    public function is_skipped($Type) {
-        return isset($this->Skipped[$Type]);
-    }
-
-    public function use_noty() {
-        return in_array(self::OPT_POPUP, $this->Settings) || in_array(self::OPT_POPUP_PUSH, $this->Settings);
     }
 
     /**
