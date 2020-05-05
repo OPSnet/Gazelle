@@ -503,7 +503,7 @@ Your torrent was reported because it consisted of a discography.'
             ],
             'extra_files' => [
                 'priority' => '95',
-                'reason' => '19',
+                'reason' => '23',
                 'title' => 'Extraneous files',
                 'report_messages' => [
                     "Please include as much information as possible to verify the report, identifying the tracks or files that are not part of the release."
