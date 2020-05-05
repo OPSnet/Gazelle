@@ -206,7 +206,7 @@ Your torrent was reported because it was trumped by another torrent with improve
                 'title' => 'Track(s) Missing',
                 'report_messages' => [
                     'Please list the track number and title of the missing track.',
-                    'If possible, please provide a link to a reputable release catalogue showing the proper track listing.'
+                    'Please provide a link to a reputable release catalogue such as Discogs that shows the correct track listing.'
                 ],
                 'report_fields' => [
                     'track' => '2',
@@ -226,7 +226,7 @@ Your torrent was reported because it was missing tracks.'
                 'reason' => '6',
                 'title' => 'Disc(s) Missing',
                 'report_messages' => [
-                    'If possible, please provide a link to a reputable release catalogue showing the proper track listing, specifying which discs are missing.'
+                    'Please provide a link to a reputable release catalogue such as Discogs, showing the correct track listing and specify which discs are missing.'
                 ],
                 'report_fields' => [
                     'track' => '0',
@@ -264,7 +264,7 @@ Your torrent was reported because it was missing discs.'
                 'reason' => '-1',
                 'title' => 'Bonus Tracks Only',
                 'report_messages' => [
-                    'If possible, please provide a link to a reputable release catalogue showing the proper track listing.',
+                    'Please provide a link to a reputable release catalogue such as Discogs, that shows the correct track listing.',
                     'Per [rule]2.4.5[/rule], exclusive WEB-sourced bonus tracks are allowed to be uploaded separately.'
                 ],
                 'report_fields' => [
@@ -322,7 +322,7 @@ Your torrent was reported because it contained one or more audio files that did 
                 'reason' => '11',
                 'title' => 'Mutt Rip',
                 'report_messages' => [
-                    "Please list at least two (2) tracks which have different bitrates and/or encoders, specifying what is different between the tracks."
+                    "Please list at least two (2) tracks which have different bitrates and/or encoders, specifying the differences the tracks."
                 ],
                 'report_fields' => [
                     'track' => '0'
@@ -340,7 +340,7 @@ Your torrent was reported because it contained one or more audio files that were
                 'reason' => '18',
                 'title' => 'Unsplit Album Rip',
                 'report_messages' => [
-                    "If possible, please provide a link to a reputable release catalogue showing the proper track listing.",
+                    "Please provide a link to a reputable release catalogue such as Discogs, that shows the correct track listing.",
                     "This option is for uploads of CDs ripped as a single track when it should be split as on the CD.",
                     "This option is not to be confused with uploads of a single track, taken from a CD with multiple tracks (Tracks Missing)."
                 ],
@@ -504,7 +504,7 @@ Your torrent was reported because it consisted of a discography.'
             'extra_files' => [
                 'priority' => '95',
                 'reason' => '23',
-                'title' => 'Extraneous files',
+                'title' => 'Extraneous Files',
                 'report_messages' => [
                     "Please include as much information as possible to verify the report, identifying the tracks or files that are not part of the release."
                 ],
@@ -517,7 +517,7 @@ Your torrent was reported because it consisted of a discography.'
                     'delete' => '1',
                     'pm' => '[rule]2.1.6.2[/rule]. Extraneous material was found in this torrent.
 [rule]2.1.6.2[/rule]. The torrent should contain only a single copy of each file that belongs in the release, and no other files that belong to separate releases.
-Your torrent was reported because it contained extra files that do not belong in the release.
+Your torrent was reported because it contained extra files that do not belong in the release.'
                 ]
             ],
             'user_discog' => [
@@ -571,7 +571,7 @@ Your torrent is now eligible for trumping by a better-sounding rip with complete
                     'warn' => '4',
                     'delete' => '1',
                     'pm' => '[rule]2.2.10.9[/rule]. No log editing is permitted.
-[rule]2.2.10.9.1[/rule]. Forging log data is a serious misrepresentation of quality, and will result in a warning and the loss of your uploading privileges when the edited log is found. We recommend that you do not open the rip log file for any reason. However, if you must open the rip log, do not edit anything in the file for any reason. If you discover that one of your software settings is incorrect in the ripping software preferences, you must rip the CD again with the proper settings. Do not consolidate logs under any circumstances. If you must re-rip specific tracks or an entire disc and the rip results happen to have the new log appended to the original, leave them as is. Do not remove any part of either log, and never copy/paste parts of a new log over an old log.
+[rule]2.2.10.9.1[/rule]. Forging log data is a serious misrepresentation of quality, and will result in a warning and the loss of your uploading privileges when the edited log is found. We recommend that you do not open the rip log file for any reason. However, if you must open the rip log, do not edit anything in the file for any reason. If you discover that one of your software settings is incorrect in the ripping software preferences, you must rip the CD again with the correct settings. Do not consolidate logs under any circumstances. If you must re-rip specific tracks or an entire disc and the rip results happen to have the new log appended to the original, leave them as is. Do not remove any part of either log, and never copy/paste parts of a new log over an old log.
 Your torrent was reported because it contained an edited log (either edited by you or someone else). For questions about your uploading privileges, you must PM the staff member who handled this log case.'
                 ]
             ],
