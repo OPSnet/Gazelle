@@ -8,7 +8,7 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         $this->db->prepared_query("
             SELECT um.Username, um.Email, um.ID
             FROM users_main AS um
-            INNER JOIN user_last_access AS ula ON (ula.user_id = um.UserID)
+            INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
             INNER JOIN permissions p ON (p.ID = um.PermissionID)
             WHERE um.Enabled != '2'
                 AND ula.last_access BETWEEN date(now() - INTERVAL ? DAY) AND date(now() - INTERVAL ? DAY)
