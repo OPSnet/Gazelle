@@ -429,7 +429,7 @@ class Forums {
         list($id, $name, $isLocked, $forumId) = G::$Cache->get_value($cacheKey);
         if (is_null($forumId)) {
             list($id, $name, $isLocked, $forumId) = G::$DB->row('SELECT ID, Title, IsLocked, ForumID FROM forums_topics WHERE ID = ?', $thread);
-            G::$Cache->cache_value($cacheKey, [$id, $name, $isLocked], 86400 + rand(1, 3600));
+            G::$Cache->cache_value($cacheKey, [$id, $name, $isLocked, $forumId], 86400 + rand(1, 3600));
         }
         if (!self::check_forumperm($forumId)) {
             $name = 'restricted';
