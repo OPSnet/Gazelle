@@ -6,10 +6,9 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
 {
     protected function query($minDays, $maxDays) {
         $this->db->prepared_query("
-            SELECT um.Username, um.Email
-            FROM users_info AS ui
-            INNER JOIN users_main AS um ON (um.ID = ui.UserID)
-            INNER JOIN user_last_access AS ula ON (ula.user_id = ui.UserID)
+            SELECT um.Username, um.Email, um.ID
+            FROM users_main AS um
+            INNER JOIN user_last_access AS ula ON (ula.user_id = um.UserID)
             INNER JOIN permissions p ON (p.ID = um.PermissionID)
             WHERE um.Enabled != '2'
                 AND ula.last_access BETWEEN date(now() - INTERVAL ? DAY) AND date(now() - INTERVAL ? DAY)
@@ -18,9 +17,9 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
                     FROM users_levels ul
                     INNER JOIN permissions ulp ON (ulp.ID = ul.PermissionID)
                     WHERE ul.UserID = um.ID
-                        AND p.NAME in (?, ?)
+                        AND ulp.Name in (?, ?)
                 )
-                AND um.PermissionID IN (?, ?)
+                AND p.Name IN (?, ?)
             GROUP BY um.ID
             ", $maxDays, $minDays,
             'Donor', 'Torrent Celebrity',
