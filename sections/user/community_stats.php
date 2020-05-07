@@ -225,9 +225,9 @@ list($NumCollages, $NumCollageContribs, $UniqueGroups, $PerfectFLACs, $ForumTopi
                 </li>
 <?php
     }
-    if ($UserID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist', $Class)) {
+    if ($Override = check_paranoia_here('downloaded')) {
 ?>
-                <li id="comm_downloaded">Downloaded:
+                <li id="comm_downloaded"<?=($Override === 2 ? ' class="paranoia_override"' : '')?>>Downloaded:
                     <span class="user_commstats" id="user_commstats_downloaded"><a href="#" class="brackets" onclick="commStats(<?=$UserID?>); return false;">Show stats</a></span>
                     <span id="user_commstats_udownloaded"></span>
                     <a href="torrents.php?type=downloaded&amp;userid=<?=$UserID?>" class="brackets">View</a>
