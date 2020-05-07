@@ -11,15 +11,16 @@ if (!is_number($_GET['topicid'])) {
 }
 
 $TopicID = (int)$_GET['topicid'];
-
-$DB->query("
+$ForumID = $DB->scalar("
     SELECT f.ID
     FROM forums_topics AS t
-        JOIN forums AS f ON f.ID = t.ForumID
-    WHERE t.ID = $TopicID");
-list($ForumID) = $DB->next_record();
+    INNER JOIN forums AS f ON (f.ID = t.ForumID)
+    WHERE t.ID = ?
+    ", $TopicID
+);
 if (!Forums::check_forumperm($ForumID)) {
-    die();
+    error(403);
 }
 
-Subscriptions::subscribe($_GET['topicid']);
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription->subscribe($TopicID);

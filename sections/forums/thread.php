@@ -142,17 +142,12 @@ if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
     }
 }
 
-//Handle subscriptions
-$UserSubscriptions = Subscriptions::get_subscriptions();
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$isSubscribed = $subscription->isSubscribed($ThreadID);
 
-if (empty($UserSubscriptions)) {
-    $UserSubscriptions = [];
-}
-
-if (in_array($ThreadID, $UserSubscriptions)) {
+if ($isSubscribed) {
     $Cache->delete_value('subscriptions_user_new_'.$LoggedUser['ID']);
 }
-
 
 $QuoteNotificationsCount = $Cache->get_value('notify_quoted_' . $LoggedUser['ID']);
 if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
@@ -179,7 +174,7 @@ View::show_header($ThreadInfo['Title'] . ' &lt; '.$Forums[$ForumID]['Name'].' &l
     <div class="linkbox">
         <div class="center">
             <a href="reports.php?action=report&amp;type=thread&amp;id=<?=$ThreadID?>" class="brackets">Report thread</a>
-            <a href="#" onclick="Subscribe(<?=$ThreadID?>);return false;" id="subscribelink<?=$ThreadID?>" class="brackets"><?=(in_array($ThreadID, $UserSubscriptions) ? 'Unsubscribe' : 'Subscribe')?></a>
+            <a href="#" onclick="Subscribe(<?=$ThreadID?>);return false;" id="subscribelink<?=$ThreadID?>" class="brackets"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe' ?></a>
             <a href="#" onclick="$('#searchthread').gtoggle(); this.innerHTML = (this.innerHTML == 'Search this thread' ? 'Hide search' : 'Search this thread'); return false;" class="brackets">Search this thread</a>
         </div>
         <div id="searchthread" class="hidden center">
@@ -737,4 +732,5 @@ if (check_perms('site_moderate_forums')) {
 } // If user is moderator
 ?>
 </div>
-<?php View::show_footer();
+<?php
+View::show_footer();

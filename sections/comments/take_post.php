@@ -15,11 +15,11 @@ if (!$PageID) {
     error(404);
 }
 
-if (isset($_POST['subscribe']) && Subscriptions::has_subscribed_comments($Page, $PageID) === false) {
-    Subscriptions::subscribe_comments($Page, $PageID);
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+if (isset($_POST['subscribe']) && !$subscription->isSubscribedComments($Page, $PageID)) {
+    $subscription->subscribeComments($Page, $PageID);
 }
 
 $PostID = Comments::post($Page, $PageID, $_POST['body']);
 
 header("Location: " . Comments::get_url($Page, $PageID, $PostID));
-die();

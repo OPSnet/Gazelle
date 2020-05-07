@@ -150,7 +150,8 @@ if ($UseNoty && !empty($NotificationSpans)) {
     NotificationsManagerView::load_js();
 }
 if ($notification->isSkipped(Notification::SUBSCRIPTIONS)) {
-    $NewSubscriptions = Subscriptions::has_new_subscriptions(G::$LoggedUser['ID']);
+    $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+    $NewSubscriptions = $subscription->unread();
 }
 
 $NavItems = Users::get_user_nav_items(G::$LoggedUser['ID']);

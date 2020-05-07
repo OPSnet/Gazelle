@@ -1,6 +1,9 @@
 <?php
 authorize();
-$UserSubscriptions = Subscriptions::get_subscriptions();
+
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$UserSubscriptions = $subscription->subscriptions();
+
 if (!empty($UserSubscriptions)) {
     $DB->query("
         INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
@@ -31,4 +34,3 @@ $DB->query("
         PostID = LastPostID");
 $Cache->delete_value('subscriptions_user_new_'.$LoggedUser['ID']);
 header('Location: userhistory.php?action=subscriptions');
-?>

@@ -67,6 +67,7 @@ class Notification {
 
     protected $UserID;
     protected $userInfo;
+    protected $subscription;
     protected $Notifications;
     protected $Settings;
     protected $Skipped;
@@ -85,6 +86,7 @@ class Notification {
         $this->Settings = $this->settings();
         $this->Skipped = $Skip;
         $this->userInfo = \Users::user_heavy_info($this->UserID);
+        $this->subscription = new Subscription($this->db, $this->cache, $this->UserID);
         if ($AutoSkip) {
             foreach ($this->Settings as $Key => $Value) {
                 // Skip disabled and traditional settings
@@ -426,7 +428,7 @@ class Notification {
 
     public function loadQuotes() {
         if (isset($this->userInfo['NotifyOnQuote']) && $this->userInfo['NotifyOnQuote']) {
-            $QuoteNotificationsCount = \Subscriptions::has_new_quote_notifications();
+            $QuoteNotificationsCount = $this->subscription->unreadQuotes();
             if ($QuoteNotificationsCount > 0) {
                 $Title = 'New quote' . ($QuoteNotificationsCount > 1 ? 's' : '');
                 $this->create(self::QUOTES, 0, $Title, 'userhistory.php?action=quote_notifications', self::INFO);
@@ -514,7 +516,7 @@ class Notification {
     }
 
     public function loadSubscriptions() {
-        $SubscriptionsCount = \Subscriptions::has_new_subscriptions($this->UserID);
+        $SubscriptionsCount = $this->subscription->unread();
         if ($SubscriptionsCount > 0) {
             $Title = 'New subscription' . ($SubscriptionsCount > 1 ? 's' : '');
             $this->create(self::SUBSCRIPTIONS, 0, $Title, 'userhistory.php?action=subscriptions', self::INFO);
@@ -522,7 +524,7 @@ class Notification {
     }
 
     public function clearSubscriptions() {
-        \Subscriptions::clearSubscriptions($this->UserID);
+        $this->subscription->clear();
     }
 
     public function loadTorrents() {

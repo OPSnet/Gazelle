@@ -117,7 +117,8 @@ $DB->query("
     WHERE ID = '$TopicID'");
 
 if (isset($_POST['subscribe'])) {
-    Subscriptions::subscribe($TopicID);
+    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+    $subscription->subscribe($TopicID);
 }
 
 if (!$NoPoll) { // god, I hate double negatives...
@@ -200,6 +201,4 @@ $Cache->begin_transaction("thread_$TopicID".'_info');
 $Cache->update_row(false, ['Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $sqltime]);
 $Cache->commit_transaction(0);
 
-
 header("Location: forums.php?action=viewthread&threadid=$TopicID");
-die();

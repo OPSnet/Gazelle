@@ -99,7 +99,10 @@ if (Bookmarks::has_bookmarked('artist', $ArtistID)) { ?>
 <?php } else { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
 <?php } ?>
-            <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?= $ArtistID ?>);return false;"><?=Subscriptions::has_subscribed_comments('artist', $ArtistID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
+            <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?= $ArtistID ?>);return false;">
+<?php
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+echo $subscription->isSubscribedComments('artist', $ArtistID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
 <?php
 
 if (check_perms('site_edit_wiki')) { ?>

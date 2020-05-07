@@ -145,10 +145,10 @@ $Cache->commit_transaction();
 
 $Cache->delete_value("forums_$ForumID");
 
-Subscriptions::flush_subscriptions('forums', $TopicID);
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache);
+$subscription->flush('forums', $TopicID);
+$subscription->flushQuotes('forums', $TopicID);
 
-// quote notifications
-Subscriptions::flush_quote_notifications('forums', $TopicID);
 $DB->query("
     DELETE FROM users_notify_quoted
     WHERE Page = 'forums'
