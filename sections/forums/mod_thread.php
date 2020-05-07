@@ -168,10 +168,10 @@ if (isset($_POST['delete'])) {
     $Cache->delete_value("thread_{$TopicID}_info");
 
     // subscriptions
-    Subscriptions::move_subscriptions('forums', $TopicID, null);
+    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache);
+    $subscription->flushQuotes('forums', $TopicID);
+    $subscription->move('forums', $TopicID, null);
 
-    // quote notifications
-    Subscriptions::flush_quote_notifications('forums', $TopicID);
     $DB->query("
         DELETE FROM users_notify_quoted
         WHERE Page = 'forums'

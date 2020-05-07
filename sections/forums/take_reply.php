@@ -62,8 +62,9 @@ if (!Forums::check_forumperm($ForumID, 'Write') || $LoggedUser['DisablePosting']
     error(403);
 }
 
-if (isset($_POST['subscribe']) && Subscriptions::has_subscribed($TopicID) === false) {
-    Subscriptions::subscribe($TopicID);
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+if (isset($_POST['subscribe']) && !$subscription->isSubscribed($TopicID)) {
+    $subscription->subscribe($TopicID);
 }
 
 //Now lets handle the special case of merging posts, we can skip bumping the thread and all that fun
@@ -265,8 +266,8 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
     $ThreadInfo['Posts']++;
 }
 
-Subscriptions::flush_subscriptions('forums', $TopicID);
-Subscriptions::quote_notify($Body, $PostID, 'forums', $TopicID);
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription->flush('forums', $TopicID);
+$subscription->quoteNotify($Body, $PostID, 'forums', $TopicID);
 
 header("Location: forums.php?action=viewthread&threadid=$TopicID&page=".ceil($ThreadInfo['Posts'] / $PerPage));
-die();

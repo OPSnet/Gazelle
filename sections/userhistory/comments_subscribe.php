@@ -6,4 +6,5 @@ if (!in_array($_GET['page'], ['artist', 'collages', 'requests', 'torrents']) || 
     error(0);
 }
 
-Subscriptions::subscribe_comments($_GET['page'], $_GET['pageid']);
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription->subscribeComments($_GET['page'], $_GET['pageid']);

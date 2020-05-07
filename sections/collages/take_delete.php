@@ -45,8 +45,10 @@ if ($CategoryID == 0) {
         UPDATE collages
         SET Deleted = '1'
         WHERE ID = '$CollageID'");
-    Subscriptions::flush_subscriptions('collages', $CollageID);
-    Subscriptions::flush_quote_notifications('collages', $CollageID);
+
+    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache);
+    $subscription->flush('collages', $CollageID);
+    $subscription->flushQuotes('collages', $CollageID);
 }
 
 Misc::write_log("Collage $CollageID ($Name) was deleted by ".$LoggedUser['Username'].": $Reason");

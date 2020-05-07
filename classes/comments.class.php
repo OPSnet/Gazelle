@@ -36,8 +36,9 @@ class Comments {
         G::$Cache->delete_value($Page.'_comments_'.$PageID.'_catalogue_'.$CatalogueID);
         G::$Cache->delete_value($Page.'_comments_'.$PageID);
 
-        Subscriptions::flush_subscriptions($Page, $PageID);
-        Subscriptions::quote_notify($Body, $PostID, $Page, $PageID);
+        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+        $subscription->flush($Page, $PageID);
+        $subscription->quoteNotify($Body, $PostID, $Page, $PageID);
 
         G::$DB->set_query_id($QueryID);
 
@@ -163,8 +164,9 @@ class Comments {
             WHERE Page = '$Page'
                 AND PostID = $PostID");
 
-        Subscriptions::flush_subscriptions($Page, $PageID);
-        Subscriptions::flush_quote_notifications($Page, $PageID);
+        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache);
+        $subscription->flush($Page, $PageID);
+        $subscription->flushQuotes($Page, $PageID);
 
         //We need to clear all subsequential catalogues as they've all been bumped with the absence of this post
         $ThisCatalogue = floor((TORRENT_COMMENTS_PER_PAGE * $CommPage - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
@@ -370,7 +372,8 @@ class Comments {
                 AND PageID = $PageID");
 
         // comment subscriptions
-        Subscriptions::move_subscriptions($Page, $PageID, $TargetPageID);
+        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache);
+        $subscription->move($Page, $PageID, $TargetPageID);
 
         // cache (we need to clear all comment catalogues)
         G::$DB->query("
@@ -418,14 +421,14 @@ class Comments {
                 AND PageID = $PageID");
 
         // Delete quote notifications
-        Subscriptions::flush_quote_notifications($Page, $PageID);
+        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache);
+        $subscription->move($Page, $PageID, null);
+        $subscription->flushQuotes($Page, $PageID);
+
         G::$DB->query("
             DELETE FROM users_notify_quoted
             WHERE Page = '$Page'
                 AND PageID = $PageID");
-
-        // Deal with subscriptions
-        Subscriptions::move_subscriptions($Page, $PageID, null);
 
         // Clear cache
         $LastCatalogue = floor((TORRENT_COMMENTS_PER_PAGE * $CommPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);

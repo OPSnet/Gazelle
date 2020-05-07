@@ -122,7 +122,8 @@
                         </div>
                         <div class="preview_submit">
 <?php
-    if (isset($SubscribeBox) && !isset($ForumID) && Subscriptions::has_subscribed_comments($Document, $InputID) === false) {
+    $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+    if (isset($SubscribeBox) && !isset($ForumID) && !$subscription->isSubscribedComments($Document, $InputID)) {
 ?>
                             <input id="subscribebox" type="checkbox" name="subscribe"<?=!empty($HeavyInfo['AutoSubscribe']) ? ' checked="checked"' : ''?> tabindex="2" />
                             <label for="subscribebox">Subscribe</label>
@@ -131,7 +132,7 @@
     // Forum thread logic
     // This might use some more abstraction
     if (isset($ForumID)) {
-        if (!Subscriptions::has_subscribed($InputID)) {
+        if (!$subscription->isSubscribed($InputID)) {
 ?>
                             <input id="subscribebox" type="checkbox" name="subscribe"<?=!empty($HeavyInfo['AutoSubscribe']) ? ' checked="checked"' : ''?> tabindex="2" />
                             <label for="subscribebox">Subscribe</label>

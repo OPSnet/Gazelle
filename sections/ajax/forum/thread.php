@@ -134,11 +134,8 @@ if ($_GET['updatelastread'] !== '0') {
 }
 
 //Handle subscriptions
-$UserSubscriptions = Subscriptions::get_subscriptions();
-
-if (empty($UserSubscriptions)) {
-    $UserSubscriptions = [];
-}
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$UserSubscriptions = $subscription->subscriptions();
 
 if (in_array($ThreadID, $UserSubscriptions)) {
     $Cache->delete_value('subscriptions_user_new_'.$LoggedUser['ID']);

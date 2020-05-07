@@ -64,6 +64,7 @@ $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 list($NumComments, $Page, $Thread, $LastRead) = Comments::load('requests', $RequestID);
 
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
 View::show_header("View request: $FullName", 'comments,requests,bbcode,subscriptions');
 ?>
 <div class="thin">
@@ -81,7 +82,8 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
 <?php    } else { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Bookmark('request', <?=$RequestID?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
 <?php    } ?>
-            <a href="#" id="subscribelink_requests<?=$RequestID?>" class="brackets" onclick="SubscribeComments('requests',<?=$RequestID?>);return false;"><?=Subscriptions::has_subscribed_comments('requests', $RequestID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
+            <a href="#" id="subscribelink_requests<?=$RequestID?>" class="brackets" onclick="SubscribeComments('requests',<?=$RequestID?>);return false;"><?=
+                $subscription->isSubscribedComments('requests', $RequestID) ? 'Unsubscribe' : 'Subscribe'?></a>
             <a href="reports.php?action=report&amp;type=request&amp;id=<?=$RequestID?>" class="brackets">Report request</a>
 <?php    if (!$IsFilled) { ?>
             <a href="upload.php?requestid=<?=$RequestID?><?=($Request['GroupID'] ? "&amp;groupid=$Request[GroupID]" : '')?>" class="brackets">Upload request</a>

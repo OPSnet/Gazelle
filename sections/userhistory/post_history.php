@@ -167,7 +167,8 @@ if ($ShowGrouped) {
             <br /><br />
 <?php
 if ($ViewingOwn) {
-    $UserSubscriptions = Subscriptions::get_subscriptions();
+    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $UserID);
+    $UserSubscriptions = $subscription->subscriptions();
 
     if (!$ShowUnread) {
         if ($ShowGrouped) { ?>
@@ -289,4 +290,5 @@ if ($ViewingOwn) {
     </div>
 <?php } ?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

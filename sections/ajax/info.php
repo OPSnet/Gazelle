@@ -90,8 +90,7 @@ if ($CurrentBlog === false) {
     $Cache->cache_value('blog_latest_id', $CurrentBlog, 0);
 }
 
-// Subscriptions
-$NewSubscriptions = Subscriptions::has_new_subscriptions($LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
 
 json_print("success", [
     'username' => $LoggedUser['Username'],
@@ -103,7 +102,7 @@ json_print("success", [
         'notifications' => (int)$NewNotifications,
         'newAnnouncement' => $MyNews < $CurrentNews,
         'newBlog' => $MyBlog < $CurrentBlog,
-        'newSubscriptions' => $NewSubscriptions == 1
+        'newSubscriptions' => $subscription->unread() > 0,
     ],
     'userstats' => [
         'uploaded' => (int)$LoggedUser['BytesUploaded'],
@@ -113,5 +112,3 @@ json_print("success", [
         'class' => $ClassLevels[$LoggedUser['Class']]['Name']
     ]
 ]);
-
-?>

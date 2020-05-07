@@ -85,6 +85,8 @@ if (!$CoverArt) {
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 list($NumComments, $Page, $Thread, $LastRead) = Comments::load('torrents', $GroupID);
 
+$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+
 // Start output
 View::show_header($Title, 'browse,comments,torrent,bbcode,recommend,cover_art,subscriptions');
 ?>
@@ -112,7 +114,8 @@ if (Bookmarks::has_bookmarked('torrent', $GroupID)) {
             <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="add_bookmark brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
 <?php
 } ?>
-            <a href="#" id="subscribelink_torrents<?=$GroupID?>" class="brackets" onclick="SubscribeComments('torrents', <?=$GroupID?>); return false;"><?=Subscriptions::has_subscribed_comments('torrents', $GroupID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
+            <a href="#" id="subscribelink_torrents<?=$GroupID?>" class="brackets" onclick="SubscribeComments('torrents', <?=$GroupID?>); return false;"><?=
+                $subscription->isSubscribedComments('torrents', $GroupID) ? 'Unsubscribe' : 'Subscribe'?></a>
 <!-- <a href="#" id="recommend" class="brackets">Recommend</a> -->
 <?php
 if ($Categories[$GroupCategoryID-1] == 'Music') { ?>
