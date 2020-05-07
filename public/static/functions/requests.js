@@ -213,13 +213,11 @@ function Toggle(id, disable) {
 
 function ToggleLogCue() {
     var formats = document.getElementsByName('formats[]');
-    var flac = false;
+    var media   = document.getElementsByName('media[]');
+    var flac    = formats[1].checked;
+    var cd      = media[0].checked;
 
-    if (formats[1].checked) {
-        flac = true;
-    }
-
-    if (flac) {
+    if (flac && cd) {
         $('#logcue_tr').gshow();
     } else {
         $('#logcue_tr').ghide();
