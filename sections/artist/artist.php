@@ -215,7 +215,9 @@ foreach ($ZIPOptions as $Option) {
             <div class="head"><strong>Tags</strong></div>
             <ul class="stats nobullet">
 <?php
+$artistReleaseType = [];
 foreach ($Artist->sections() as $section => $Groups) {
+    $artistReleaseType[$section]++;
     foreach ($Groups as $Group) {
         // Skip compilations and soundtracks.
         if ($Group['ReleaseType'] != 7 && $Group['ReleaseType'] != 3) {
@@ -296,9 +298,14 @@ if ($sections = $Artist->sections()) {
     if (isset($LoggedUser['SortHide'])) {
         $reorderedSections = [];
         foreach (array_keys($LoggedUser['SortHide']) as $reltype) {
-            if (array_key_exists($reltype, $sections)) {
+            if (isset($artistReleaseType[$reltype])) {
                 $reorderedSections[$reltype] = $sections[$reltype];
+                unset($artistReleaseType[$reltype]);
             }
+        }
+        /* Any left-over release types */
+        foreach (array_keys($artistReleaseType) as $reltype) {
+            $reorderedSections[$reltype] = $sections[$reltype];
         }
         $sections = $reorderedSections;
     }
