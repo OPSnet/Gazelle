@@ -15,10 +15,10 @@ if (empty($_REQUEST['action'])) {
 
 switch ($_REQUEST['action']) {
     case 'notify':
-        include(__DIR__ . '/notify_edit.php');
+        require(__DIR__ . '/notify_edit.php');
         break;
     case 'notify_handle':
-        include(__DIR__ . '/notify_handle.php');
+        require(__DIR__ . '/notify_handle.php');
         break;
     case 'notify_delete':
         authorize();
@@ -39,23 +39,23 @@ switch ($_REQUEST['action']) {
         break;
     case 'search':// User search
         if (check_perms('admin_advanced_user_search') && check_perms('users_view_ips') && check_perms('users_view_email')) {
-            include(__DIR__ . '/advancedsearch.php');
+            require(__DIR__ . '/advancedsearch.php');
         }
         else {
-            include(__DIR__ . '/search.php');
+            require(__DIR__ . '/search.php');
         }
         break;
     case 'edit':
         if (isset($_REQUEST['userid'])) {
-            include(__DIR__ . '/edit.php');
+            require(__DIR__ . '/edit.php');
         }
         else {
             header("Location: user.php?action=edit&userid={$LoggedUser['ID']}");
         }
         break;
     case '2fa':
-        include(__DIR__ . '/../../classes/google_authenticator.class.php');
-        include(__DIR__ . '/../../classes/qr.class.php');
+        require(__DIR__ . '/../../classes/google_authenticator.class.php');
+        require(__DIR__ . '/../../classes/qr.class.php');
 
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -97,7 +97,7 @@ switch ($_REQUEST['action']) {
                     $_SESSION['private_key'] = (new PHPGangsta_GoogleAuthenticator())->createSecret();
                 }
 
-                include(__DIR__ . '/2fa/step1.php');
+                require(__DIR__ . '/2fa/step1.php');
                 break;
 
             case 'enable2':
@@ -112,7 +112,7 @@ switch ($_REQUEST['action']) {
                 }
 
                 if (empty($_POST['2fa'])) {
-                    include(__DIR__ . '/2fa/step2.php');
+                    require(__DIR__ . '/2fa/step2.php');
                 } else {
                     $works = (new PHPGangsta_GoogleAuthenticator())->verifyCode($_SESSION['private_key'], $_POST['2fa'], 2);
 
@@ -143,7 +143,7 @@ switch ($_REQUEST['action']) {
                     error(404);
                 }
 
-                include(__DIR__ . '/2fa/complete.php');
+                require(__DIR__ . '/2fa/complete.php');
                 unset($_SESSION['private_key']);
                 break;
 
@@ -154,7 +154,7 @@ switch ($_REQUEST['action']) {
                 }
 
                 if (empty($_POST['password']) && !check_perms('users_mod')) {
-                    include(__DIR__ . '/2fa/password_confirm.php');
+                    require(__DIR__ . '/2fa/password_confirm.php');
                 } else {
                     if (check_perms('users_edit_password') || Users::check_password($_POST['password'], $PassHash)) {
                         $DB->prepared_query("
@@ -184,37 +184,37 @@ switch ($_REQUEST['action']) {
         }
         break;
     case 'take_edit':
-        include(__DIR__ . '/take_edit.php');
+        require(__DIR__ . '/take_edit.php');
         break;
     case 'invitetree':
-        include(__DIR__ . '/invitetree.php');
+        require(__DIR__ . '/invitetree.php');
         break;
     case 'invite':
-        include(__DIR__ . '/invite.php');
+        require(__DIR__ . '/invite.php');
         break;
     case 'take_invite':
-        include(__DIR__ . '/take_invite.php');
+        require(__DIR__ . '/take_invite.php');
         break;
     case 'delete_invite':
-        include(__DIR__ . '/delete_invite.php');
+        require(__DIR__ . '/delete_invite.php');
         break;
     case 'stats':
-        include(__DIR__ . '/user_stats.php');
+        require(__DIR__ . '/user_stats.php');
         break;
     case 'sessions':
-        include(__DIR__ . '/sessions.php');
+        require(__DIR__ . '/sessions.php');
         break;
     case 'connchecker':
-        include(__DIR__ . '/connchecker.php');
+        require(__DIR__ . '/connchecker.php');
         break;
     case 'permissions':
-        include(__DIR__ . '/permissions.php');
+        require(__DIR__ . '/permissions.php');
         break;
     case 'similar':
-        include(__DIR__ . '/similar.php');
+        require(__DIR__ . '/similar.php');
         break;
     case 'moderate':
-        include(__DIR__ . '/takemoderate.php');
+        require(__DIR__ . '/takemoderate.php');
         break;
     case 'clearcache':
         if (!check_perms('admin_clear_cache') || !check_perms('users_override_paranoia')) {
@@ -231,7 +231,7 @@ switch ($_REQUEST['action']) {
             'user_info_'              . $UserID,
             'user_info_heavy_'        . $UserID,
         ]);
-        include(__DIR__ . '/user.php');
+        require(__DIR__ . '/user.php');
         break;
 
     // Provide public methods for Last.fm data gets.
@@ -267,7 +267,7 @@ switch ($_REQUEST['action']) {
         break;
     default:
         if (isset($_REQUEST['id'])) {
-            include(__DIR__ . '/user.php');
+            require(__DIR__ . '/user.php');
         } else {
             header("Location: user.php?id={$LoggedUser['ID']}");
         }
