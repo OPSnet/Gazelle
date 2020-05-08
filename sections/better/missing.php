@@ -62,7 +62,7 @@ switch ($type) {
         $mode = 'torrents';
         switch ($filter) {
             case 'snatched':
-                $joins[] = 'INNER JOIN xbt_snatched as x ON x.fid = t.TorrentID AND x.uid = ?';
+                $joins[] = 'INNER JOIN xbt_snatched as x ON x.fid = t.ID AND x.uid = ?';
                 $joinparams[] = $userId;
                 break;
             case 'uploaded':
