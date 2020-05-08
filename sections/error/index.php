@@ -10,7 +10,7 @@ function notify ($Channel, $Message) {
                 : $_SERVER['REMOTE_ADDR']
           )
         . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
-        . " accessing https://" . SSL_SITE_URL . $_SERVER['REQUEST_URI']
+        . " accessing https://" . SSL_SITE_URL . $_SERVER['REQUEST_URI'] . '(' . $_SERVER['REQUEST_METHOD'] . ')'
         . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
     );
 }
