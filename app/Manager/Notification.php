@@ -551,7 +551,7 @@ class Notification {
 
     public function clearTorrents() {
         $QueryID = $this->db->get_query_id();
-        $this->db->query("
+        $this->db->prepared_query("
             UPDATE users_notify_torrents
             SET Unread = '0'
             WHERE UnRead = '1'
