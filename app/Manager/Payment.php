@@ -112,7 +112,7 @@ class Payment {
     }
 
     public function due() {
-        if (($due = $this->cache->cache_value('due_payments', $DuePayments, 60 * 60)) === false) {
+        if (($due = $this->cache->get_value('due_payments')) === false) {
             $this->db->prepared_query('
                 SELECT Text, Expiry
                 FROM payment_reminders
