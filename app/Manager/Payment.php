@@ -74,7 +74,21 @@ class Payment {
             } else {
                 $l['fiatRate'] = $XBT->fetchRate($l['cc']);
                 if (!$l['fiatRate']) {
-                    throw new \Exception(sprintf('XBT id=%d cc=%s', $l['ID'], $l['cc']));
+                    // fallback to last known rate if there is one
+                    $l['fiatRate'] = $this->db->scalar('
+                        SELECT rate
+                        FROM xbt_forex
+                        WHERE forex_date = (
+                                SELECT max(forex_date)
+                                FROM xbt_forex
+                                WHERE cc = ?
+                            )
+                            AND cc = ?
+                        ', $l['cc'], $l['cc']
+                    );
+                    if (!$l['fiatRate']) {
+                        throw new \Exception(sprintf('XBT id=%d cc=%s', $l['ID'], $l['cc']));
+                    }
                 }
                 $l['Rent'] = sprintf('%0.2f', $l['AnnualRent']);
                 $l['btcRent'] = sprintf('%0.6f', $l['AnnualRent'] / $l['fiatRate']);
