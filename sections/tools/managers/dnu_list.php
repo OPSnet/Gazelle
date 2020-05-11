@@ -4,7 +4,6 @@ if (!check_perms('admin_dnu')) {
 }
 $Title = 'Manage the "Do Not Upload" list';
 
-View::show_header($Title, 'jquery-ui,dnu_list');
 $DB->query("
     SELECT
         d.ID,
@@ -13,9 +12,11 @@ $DB->query("
         d.UserID,
         d.Time
     FROM do_not_upload AS d
-        LEFT JOIN users_main AS um ON um.ID = d.UserID
-    ORDER BY d.Sequence");
-    ?>
+    ORDER BY d.Sequence
+");
+
+View::show_header($Title, 'jquery-ui,dnu_list');
+?>
     <div class="header">
         <h2><?=($Title)?></h2>
         <center><p>Drag and drop table rows to reorder.</p></center>
@@ -46,8 +47,7 @@ $DB->query("
             <td>Submit</td>
         </tr>
         <tbody>
-<?php
-while (list($ID, $Name, $Comment, $UserID, $DNUTime) = $DB->next_record()) { ?>
+<?php while (list($ID, $Name, $Comment, $UserID, $DNUTime) = $DB->next_record()) { ?>
             <tr id="item_<?=$ID?>">
                 <form class="manage_form dnu" action="tools.php" method="post">
                     <td>
@@ -69,8 +69,9 @@ while (list($ID, $Name, $Comment, $UserID, $DNUTime) = $DB->next_record()) { ?>
                     </td>
                 </form>
             </tr>
-<?php
-} ?>
+<?php } ?>
         </tbody>
     </table>
-<?php View::show_footer(); ?>
+<?php
+
+View::show_footer();
