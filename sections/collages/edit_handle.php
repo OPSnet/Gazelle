@@ -35,9 +35,10 @@ if (isset($_POST['name'])) {
     }
 }
 
+$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
 $TagList = explode(',', $_POST['tags']);
 foreach ($TagList as $ID => $Tag) {
-    $TagList[$ID] = Misc::sanitize_tag($Tag);
+    $TagList[$ID] = $tagMan->sanitize($Tag);
 }
 $TagList = implode(' ', $TagList);
 

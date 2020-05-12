@@ -1,0 +1,63 @@
+<h4>Instructions for use</h4>
+
+<div class="box pad">
+<p>This editor manages tag names and their duplicates. At the most simplest, it
+allows errors to be corrected, such as "rokc" &rarr; "rock". If the error
+happens freqently (usually due to scripts that mangle sources such as Discogs or
+Musicbrainz), an alias can be added so that new uses of the tag are corrected
+automatically.</p>
+
+<p>If a tag is merged into a non-existent tag, the action becomes equivalent to
+a renaming. If the tag is important enough to appear in drop-down autocompletion
+lists, it can be marked as official.</p>
+
+<p>If a tag needs to be split into two or more distinct tags, use a
+comma-separated list in the Merge field. For instance,
+"electronicambientexperimental" would be merged to "electronic, ambient,
+experimental" and the torrents or requests with that tag would have the three
+new tags applied separately.</p>
+
+<p>Depending on the historical contents of tags, there may be some tags that are
+no longer able to be specified. For instance, as of May 2020, it is no longer
+possible to create double-dotted tags (e.g. space..rock). When cleaning out
+broken legacy tags, you may need to check "Do not sanitize".</p>
+
+</div>
+<br />
+
+<form action="tools.php" method="get" name="tagform" id="tagform" onsubmit="return formVal();">
+    <input type="hidden" name="action" value="tags" />
+    <table>
+        <tr>
+            <td style="vertical-align: top;">
+                Tag to change:
+            </td>
+            <td style="vertical-align: top;">
+                <input type="text" name="tag" id="tag" />
+                <br /><input type="checkbox" name="dirty" id="dirty" /> <label for="dirty">Do not sanitize (e.g. legacy double-dotted tags)</label>
+            </td>
+            <td style="vertical-align: top;">
+                Merge with tag:
+            </td>
+            <td>
+                <input type="text" name="replace" id="replace" />
+                <br />If this tag does not exist, the tag to change will be renamed to this.
+                <br />Use commas to separate multiple replacements.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" name="list" id="list" checked="checked" /> <label for="list">List affected items</label>
+            </td>
+            <td>
+                <input type="checkbox" name="alias" id="alias" /> <label for="alias">Create an permanent alias for this correction</label>
+            </td>
+            <td>
+                <input type="checkbox" name="official" id="official" /> <label for="official">Mark this tag as official</label>
+            </td>
+            <td>
+                <input type="submit" value="Merge" />
+            </td>
+        </tr>
+    </table>
+</form>

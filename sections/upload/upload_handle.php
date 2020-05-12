@@ -712,29 +712,13 @@ if ($NoRevision) {
 }
 
 // Tags
+$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
 if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $Tag) {
-        $Tag = Misc::sanitize_tag($Tag);
+        $Tag = $tagMan->resolve($tagMan->sanitize($Tag));
         if (!empty($Tag)) {
-            $Tag = Misc::get_alias_tag($Tag);
-            $DB->prepared_query('
-                INSERT INTO tags
-                       (Name, UserID)
-                VALUES (?,    ?)
-                ON DUPLICATE KEY UPDATE
-                    Uses = Uses + 1
-                ', $Tag, $LoggedUser['ID']
-            );
-            $TagID = $DB->inserted_id();
-
-            $DB->prepared_query('
-                INSERT INTO torrents_tags
-                       (TagID, GroupID, UserID, PositiveVotes)
-                VALUES (?,     ?,       ?,      10)
-                ON DUPLICATE KEY UPDATE
-                    PositiveVotes = PositiveVotes + 1
-                ', $TagID, $GroupID, $LoggedUser['ID']
-            );
+            $TagID = $tagMan->create($Tag, $LoggedUser['ID']);
+            $tagMan->createTorrentTag($TagID, $GroupID, $LoggedUser['ID'], 10);
         }
     }
 }

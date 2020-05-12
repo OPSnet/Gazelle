@@ -81,9 +81,10 @@ if ($Err) {
     die();
 }
 
+$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
 $TagList = explode(',', $_POST['tags']);
 foreach ($TagList as $ID => $Tag) {
-    $TagList[$ID] = Misc::sanitize_tag($Tag);
+    $TagList[$ID] = $tagMan->sanitize($Tag);
 }
 
 $DB->prepared_query('

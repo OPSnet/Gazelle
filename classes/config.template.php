@@ -415,3 +415,5 @@ define('ARTIST_REGEX', SITELINK_REGEX.'\/artist\.php\?(.*&)?id=(\d+)'); // id = 
 
 define('DONOR_RANK_PRICE', 10);
 define('DONOR_FIRST_INVITE_COUNT', 2);
+
+define('TAG_OFFICIAL_COLUMNS', 4);
