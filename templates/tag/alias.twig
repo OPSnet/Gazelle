@@ -1,0 +1,28 @@
+{% for name, a in alias %}
+    <tr>
+        <form class="manage_form" name="aliases" method="post" action="">
+            <input type="hidden" name="changealias" value="1" />
+            <input type="hidden" name="aliasid" value="{{ a.id }}>" />
+            <td>
+    {% if is_mod %}
+                <input type="text" name="aliastag" value="{{ a.alias }}" />
+    {% else %}
+                {{ a.alias }}
+    {% endif %}
+            </td>
+            <td>
+    {% if is_mod %}
+                <input type="text" name="badtag" value="{{ a.bad }}" />
+    {% else %}
+                {{ a.bad }}
+    {% endif %}
+            </td>
+    {% if is_mod %}
+            <td>
+                <input type="submit" name="save" value="Save alias" />
+                <input type="submit" name="delete" value="Delete alias" />
+            </td>
+    {% endif %}
+        </form>
+    </tr>
+{% endfor %}

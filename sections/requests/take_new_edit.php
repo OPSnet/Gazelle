@@ -404,28 +404,12 @@ if (!$NewRequest) {
         WHERE RequestID = ?', $RequestID);
 }
 
+$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
 $Tags = array_unique(explode(',', $Tags));
 foreach ($Tags as $Index => $Tag) {
-    $Tag = Misc::sanitize_tag($Tag);
-    $Tag = Misc::get_alias_tag($Tag);
-    $Tags[$Index] = $Tag; //For announce
-    $DB->prepared_query('
-        INSERT INTO tags
-            (Name, UserID)
-        VALUES
-            (?, ?)
-        ON DUPLICATE KEY UPDATE
-            Uses = Uses + 1',
-            $Tag, $LoggedUser['ID']);
-
-    $TagID = $DB->inserted_id();
-
-    $DB->prepared_query('
-        INSERT IGNORE INTO requests_tags
-            (TagID, RequestID)
-        VALUES
-            (?, ?)',
-        $TagID, $RequestID);
+    $TagID = $tagMan->create($Tag, $LoggedUser['ID']);
+    $tagMan->createRequestTag($TagID, $RequestID);
+    $Tags[$Index] = $tagMan->name($TagID); // For announce, may have been aliased
 }
 
 if ($NewRequest) {

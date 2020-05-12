@@ -144,9 +144,9 @@ Category('Torrents', [
 ]);
 
 Category('Tags', [
-    Item('Tag aliases',           'tools.php?action=tag_aliases',   All(['users_mod'])),
-    Item('Batch tag editor',      'tools.php?action=edit_tags',     All(['users_mod'])),
-    Item('Official tags manager', 'tools.php?action=official_tags', All(['users_mod'])),
+    Item('Batch tag editor',      'tools.php?action=tags',          All(['users_mod'])),
+    Item('Tag aliases',           'tools.php?action=tags_aliases',  Any(['users_mod', 'site_tag_aliases_read'])),
+    Item('Official tags manager', 'tools.php?action=tags_official', All(['users_mod'])),
 ]);
 
 ?>

@@ -378,30 +378,6 @@ class Misc {
         return($TagIDs);
     }
 
-
-    /**
-     * Gets the alias of the tag; if there is no alias, silently returns the original tag.
-     *
-     * @param string $BadTag the tag we want to alias
-     * @return string The aliased tag.
-     */
-    public static function get_alias_tag($BadTag) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
-            SELECT AliasTag
-            FROM tag_aliases
-            WHERE BadTag = '$BadTag'
-            LIMIT 1");
-        if (G::$DB->has_results()) {
-            list($AliasTag) = G::$DB->next_record();
-        } else {
-            $AliasTag = $BadTag;
-        }
-        G::$DB->set_query_id($QueryID);
-        return $AliasTag;
-    }
-
-
     /*
      * Write a message to the system log.
      *
@@ -414,22 +390,6 @@ class Misc {
             INSERT INTO log (Message, Time)
             VALUES ('" . db_string($Message) . "', '" . sqltime() . "')");
         G::$DB->set_query_id($QueryID);
-    }
-
-
-    /**
-     * Get a tag ready for database input and display.
-     *
-     * @param string $Str
-     * @return string sanitized version of $Str
-     */
-    public static function sanitize_tag($Str) {
-        $Str = strtolower($Str);
-        $Str = preg_replace('/[^a-z0-9.]/', '', $Str);
-        $Str = preg_replace('/(^[.,]*)|([.,]*$)/', '', $Str);
-        $Str = htmlspecialchars($Str);
-        $Str = db_string(trim($Str));
-        return $Str;
     }
 
     /**

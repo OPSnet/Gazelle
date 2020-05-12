@@ -26,10 +26,11 @@ if (!empty($_GET['type']) && in_array($_GET['type'], ['c.name', 'description']))
     $searchField = 'c.name';
 }
 
+$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
 if (!empty($_GET['tags'])) {
     $Tags = explode(',', db_string(trim($_GET['tags'])));
     foreach ($Tags as $ID => $Tag) {
-        $Tags[$ID] = Misc::sanitize_tag($Tag);
+        $Tags[$ID] = $tagMan->sanitize($Tag);
     }
 }
 

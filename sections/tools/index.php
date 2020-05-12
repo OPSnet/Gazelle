@@ -21,7 +21,7 @@ if (isset($argv[1])) {
 }
 
 if (!isset($_REQUEST['action'])) {
-    include(SERVER_ROOT.'/sections/tools/tools.php');
+    require(__DIR__ . '/tools.php');
     die();
 }
 
@@ -49,70 +49,70 @@ $Feed = new Feed;
 switch ($_REQUEST['action']) {
     //Services
     case 'get_host':
-        include(SERVER_ROOT.'/sections/tools/services/get_host.php');
+        require(__DIR__ . '/services/get_host.php');
         break;
     case 'get_cc':
-        include(SERVER_ROOT.'/sections/tools/services/get_cc.php');
+        require(__DIR__ . '/services/get_cc.php');
         break;
     //Managers
     case 'categories':
-        include(SERVER_ROOT . '/sections/tools/managers/categories_list.php');
+        require(SERVER_ROOT . '/sections/tools/managers/categories_list.php');
         break;
 
     case 'categories_alter':
-        include(SERVER_ROOT . '/sections/tools/managers/categories_alter.php');
+        require(SERVER_ROOT . '/sections/tools/managers/categories_alter.php');
         break;
 
     case 'forum':
-        include(SERVER_ROOT.'/sections/tools/managers/forum_list.php');
+        require(__DIR__ . '/managers/forum_list.php');
         break;
 
     case 'forum_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/forum_alter.php');
+        require(__DIR__ . '/managers/forum_alter.php');
         break;
 
     case 'irc':
-        include(SERVER_ROOT . '/sections/tools/managers/irc_list.php');
+        require(SERVER_ROOT . '/sections/tools/managers/irc_list.php');
         break;
 
     case 'irc_alter':
-        include(SERVER_ROOT . '/sections/tools/managers/irc_alter.php');
+        require(SERVER_ROOT . '/sections/tools/managers/irc_alter.php');
         break;
 
     case 'whitelist':
-        include(SERVER_ROOT.'/sections/tools/managers/whitelist_list.php');
+        require(__DIR__ . '/managers/whitelist_list.php');
         break;
 
     case 'whitelist_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/whitelist_alter.php');
+        require(__DIR__ . '/managers/whitelist_alter.php');
         break;
 
     case 'referral_accounts':
-        include(SERVER_ROOT.'/sections/tools/managers/referral_accounts.php');
+        require(__DIR__ . '/managers/referral_accounts.php');
         break;
 
     case 'referral_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/referral_alter.php');
+        require(__DIR__ . '/managers/referral_alter.php');
         break;
 
     case 'referral_users':
-        include(SERVER_ROOT.'/sections/tools/managers/referral_users.php');
+        require(__DIR__ . '/managers/referral_users.php');
         break;
 
     case 'payment_alter':
-        include(SERVER_ROOT.'/sections/tools/finances/payment_alter.php');
+        require(__DIR__ . '/finances/payment_alter.php');
         break;
 
     case 'payment_list':
-        include(SERVER_ROOT.'/sections/tools/finances/payment_list.php');
+        require(__DIR__ . '/finances/payment_list.php');
         break;
 
     case 'enable_requests':
-        include(SERVER_ROOT.'/sections/tools/managers/enable_requests.php');
+        require(__DIR__ . '/managers/enable_requests.php');
         break;
     case 'ajax_take_enable_request':
         if (FEATURE_EMAIL_REENABLE) {
-            include(SERVER_ROOT.'/sections/tools/managers/ajax_take_enable_request.php');
+            require(__DIR__ . '/managers/ajax_take_enable_request.php');
         } else {
             // Prevent post requests to the ajax page
             header("Location: tools.php");
@@ -121,48 +121,48 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'login_watch':
-        include(SERVER_ROOT.'/sections/tools/managers/login_watch.php');
+        require(__DIR__ . '/managers/login_watch.php');
         break;
 
     case 'recommend':
-        include(SERVER_ROOT.'/sections/tools/managers/recommend_list.php');
+        require(__DIR__ . '/managers/recommend_list.php');
         break;
 
     case 'recommend_add':
-        include(SERVER_ROOT.'/sections/tools/managers/recommend_add.php');
+        require(__DIR__ . '/managers/recommend_add.php');
         break;
 
     case 'recommend_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/recommend_alter.php');
+        require(__DIR__ . '/managers/recommend_alter.php');
         break;
 
     case 'recommend_restore':
-        include(SERVER_ROOT.'/sections/tools/managers/recommend_restore.php');
+        require(__DIR__ . '/managers/recommend_restore.php');
         break;
 
     case 'email_blacklist':
-        include(SERVER_ROOT.'/sections/tools/managers/email_blacklist.php');
+        require(__DIR__ . '/managers/email_blacklist.php');
         break;
 
     case 'email_blacklist_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/email_blacklist_alter.php');
+        require(__DIR__ . '/managers/email_blacklist_alter.php');
         break;
 
     case 'email_blacklist_search':
-        include(SERVER_ROOT.'/sections/tools/managers/email_blacklist_search.php');
+        require(__DIR__ . '/managers/email_blacklist_search.php');
         break;
 
     case 'dnu':
-        include(SERVER_ROOT.'/sections/tools/managers/dnu_list.php');
+        require(__DIR__ . '/managers/dnu_list.php');
         break;
 
     case 'dnu_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/dnu_alter.php');
+        require(__DIR__ . '/managers/dnu_alter.php');
         break;
 
     case 'editnews':
     case 'news':
-        include(SERVER_ROOT.'/sections/tools/managers/news.php');
+        require(__DIR__ . '/managers/news.php');
         break;
 
     case 'takeeditnews':
@@ -225,40 +225,40 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'bonus_points':
-        include(SERVER_ROOT.'/sections/tools/managers/bonus_points.php');
+        require(__DIR__ . '/managers/bonus_points.php');
         break;
     case 'tokens':
-        include(SERVER_ROOT.'/sections/tools/managers/tokens.php');
+        require(__DIR__ . '/managers/tokens.php');
         break;
     case 'multiple_freeleech':
-        include(SERVER_ROOT.'/sections/tools/managers/multiple_freeleech.php');
+        require(__DIR__ . '/managers/multiple_freeleech.php');
         break;
     case 'ocelot':
-        include(SERVER_ROOT.'/sections/tools/managers/ocelot.php');
+        require(__DIR__ . '/managers/ocelot.php');
         break;
     case 'ocelot_info':
-        include(SERVER_ROOT.'/sections/tools/data/ocelot_info.php');
+        require(__DIR__ . '/data/ocelot_info.php');
         break;
-    case 'official_tags':
-        include(SERVER_ROOT.'/sections/tools/managers/official_tags.php');
+    case 'tags':
+        require(__DIR__ . '/managers/tags.php');
         break;
-    case 'edit_tags':
-        include(SERVER_ROOT.'/sections/tools/misc/tags.php');
+    case 'tags_aliases':
+        require(__DIR__ . '/managers/tags_aliases.php');
         break;
-    case 'tag_aliases':
-        include(SERVER_ROOT.'/sections/tools/managers/tag_aliases.php');
+    case 'tags_official':
+        require(__DIR__ . '/managers/tags_official.php');
         break;
     case 'label_aliases':
-        include(SERVER_ROOT.'/sections/tools/managers/label_aliases.php');
+        require(__DIR__ . '/managers/label_aliases.php');
         break;
     case 'change_log':
-        include(SERVER_ROOT.'/sections/tools/managers/change_log.php');
+        require(__DIR__ . '/managers/change_log.php');
         break;
     case 'global_notification':
-        include(SERVER_ROOT.'/sections/tools/managers/global_notification.php');
+        require(__DIR__ . '/managers/global_notification.php');
         break;
     case 'take_global_notification':
-        include(SERVER_ROOT.'/sections/tools/managers/take_global_notification.php');
+        require(__DIR__ . '/managers/take_global_notification.php');
         break;
     case 'permissions':
         if (!check_perms('admin_manage_permissions')) {
@@ -355,7 +355,7 @@ switch ($_REQUEST['action']) {
                 }
             }
 
-            include(SERVER_ROOT.'/sections/tools/managers/permissions_alter.php');
+            require(__DIR__ . '/managers/permissions_alter.php');
 
         } else {
             if (!empty($_REQUEST['removeid'])) {
@@ -389,130 +389,130 @@ switch ($_REQUEST['action']) {
                 $Cache->delete_value('classes');
             }
 
-            include(SERVER_ROOT.'/sections/tools/managers/permissions_list.php');
+            require(__DIR__ . '/managers/permissions_list.php');
         }
         break;
     case 'staff_groups_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/staff_groups_alter.php');
+        require(__DIR__ . '/managers/staff_groups_alter.php');
         break;
     case 'staff_groups':
-        include(SERVER_ROOT.'/sections/tools/managers/staff_groups_list.php');
+        require(__DIR__ . '/managers/staff_groups_list.php');
         break;
     case 'ip_ban':
         //TODO: Clean up DB table ip_bans.
-        include(SERVER_ROOT.'/sections/tools/managers/bans.php');
+        require(__DIR__ . '/managers/bans.php');
         break;
     case 'quick_ban':
-        include(SERVER_ROOT.'/sections/tools/misc/quick_ban.php');
+        require(__DIR__ . '/misc/quick_ban.php');
         break;
     //Data
     case 'registration_log':
-        include(SERVER_ROOT.'/sections/tools/data/registration_log.php');
+        require(__DIR__ . '/data/registration_log.php');
         break;
 
     case 'prvlog':
-        include(SERVER_ROOT.'/sections/tools/finances/btc_log.php');
+        require(__DIR__ . '/finances/btc_log.php');
         break;
 
     case 'bitcoin_unproc':
-        include(SERVER_ROOT.'/sections/tools/finances/bitcoin_unproc.php');
+        require(__DIR__ . '/finances/bitcoin_unproc.php');
         break;
 
     case 'bitcoin_balance':
-        include(SERVER_ROOT.'/sections/tools/finances/bitcoin_balance.php');
+        require(__DIR__ . '/finances/bitcoin_balance.php');
         break;
 
     case 'donor_rewards':
-        include(SERVER_ROOT.'/sections/tools/finances/donor_rewards.php');
+        require(__DIR__ . '/finances/donor_rewards.php');
         break;
     case 'upscale_pool':
-        include(SERVER_ROOT.'/sections/tools/data/upscale_pool.php');
+        require(__DIR__ . '/data/upscale_pool.php');
         break;
 
     case 'invite_pool':
-        include(SERVER_ROOT.'/sections/tools/data/invite_pool.php');
+        require(__DIR__ . '/data/invite_pool.php');
         break;
 
     case 'torrent_stats':
-        include(SERVER_ROOT.'/sections/tools/data/torrent_stats.php');
+        require(__DIR__ . '/data/torrent_stats.php');
         break;
 
     case 'user_flow':
-        include(SERVER_ROOT.'/sections/tools/data/user_flow.php');
+        require(__DIR__ . '/data/user_flow.php');
         break;
 
     case 'economic_stats':
-        include(SERVER_ROOT.'/sections/tools/data/economic_stats.php');
+        require(__DIR__ . '/data/economic_stats.php');
         break;
 
     case 'service_stats':
-        include(SERVER_ROOT.'/sections/tools/development/service_stats.php');
+        require(__DIR__ . '/development/service_stats.php');
         break;
 
     case 'database_specifics':
-        include(SERVER_ROOT.'/sections/tools/data/database_specifics.php');
+        require(__DIR__ . '/data/database_specifics.php');
         break;
 
     case 'special_users':
-        include(SERVER_ROOT.'/sections/tools/data/special_users.php');
+        require(__DIR__ . '/data/special_users.php');
         break;
 
     case 'platform_usage':
-        include(SERVER_ROOT.'/sections/tools/data/platform_usage.php');
+        require(__DIR__ . '/data/platform_usage.php');
         break;
     //END Data
 
     //Misc
     case 'update_geoip':
-        include(SERVER_ROOT.'/sections/tools/development/update_geoip.php');
+        require(__DIR__ . '/development/update_geoip.php');
         break;
 
     case 'dupe_ips':
-        include(SERVER_ROOT.'/sections/tools/misc/dupe_ip.php');
+        require(__DIR__ . '/misc/dupe_ip.php');
         break;
 
     case 'clear_cache':
-        include(SERVER_ROOT.'/sections/tools/development/clear_cache.php');
+        require(__DIR__ . '/development/clear_cache.php');
         break;
 
     case 'create_user':
-        include(SERVER_ROOT.'/sections/tools/misc/create_user.php');
+        require(__DIR__ . '/misc/create_user.php');
         break;
 
     case 'manipulate_tree':
-        include(SERVER_ROOT.'/sections/tools/misc/manipulate_tree.php');
+        require(__DIR__ . '/misc/manipulate_tree.php');
         break;
 
     case 'site_info':
-        include(SERVER_ROOT.'/sections/tools/development/site_info.php');
+        require(__DIR__ . '/development/site_info.php');
         break;
 
     case 'site_options':
-        include(SERVER_ROOT.'/sections/tools/development/site_options.php');
+        require(__DIR__ . '/development/site_options.php');
         break;
 
     case 'recommendations':
-        include(SERVER_ROOT.'/sections/tools/misc/recommendations.php');
+        require(__DIR__ . '/misc/recommendations.php');
         break;
 
     case 'analysis':
-        include(SERVER_ROOT.'/sections/tools/misc/analysis.php');
+        require(__DIR__ . '/misc/analysis.php');
         break;
 
     case 'analysis_list':
-        include(__DIR__.'/misc/analysis_list.php');
+        require(__DIR__.'/misc/analysis_list.php');
         break;
 
     case 'process_info':
-        include(SERVER_ROOT.'/sections/tools/development/process_info.php');
+        require(__DIR__ . '/development/process_info.php');
         break;
 
     case 'rate_limit':
-        include(__DIR__.'/managers/rate_limit.php');
+        require(__DIR__.'/managers/rate_limit.php');
         break;
 
     case 'rerender_gallery':
-        include(SERVER_ROOT.'/sections/tools/development/rerender_gallery.php');
+        require(__DIR__ . '/development/rerender_gallery.php');
         break;
 
     case 'periodic':
@@ -520,85 +520,85 @@ switch ($_REQUEST['action']) {
         switch ($mode) {
             case 'run_now':
             case 'view':
-                include(SERVER_ROOT.'/sections/tools/development/periodic_view.php');
+                require(__DIR__ . '/development/periodic_view.php');
                 break;
             case 'detail':
-                include(SERVER_ROOT.'/sections/tools/development/periodic_detail.php');
+                require(__DIR__ . '/development/periodic_detail.php');
                 break;
             case 'stats':
-                include(SERVER_ROOT.'/sections/tools/development/periodic_stats.php');
+                require(__DIR__ . '/development/periodic_stats.php');
                 break;
             case 'edit':
-                include(SERVER_ROOT.'/sections/tools/development/periodic_edit.php');
+                require(__DIR__ . '/development/periodic_edit.php');
                 break;
             case 'alter':
-                include(SERVER_ROOT.'/sections/tools/development/periodic_alter.php');
+                require(__DIR__ . '/development/periodic_alter.php');
                 break;
         }
         break;
 
     case 'public_sandbox':
-        include(SERVER_ROOT.'/sections/tools/sandboxes/public_sandbox.php');
+        require(__DIR__ . '/sandboxes/public_sandbox.php');
         break;
 
     case 'mod_sandbox':
         if (check_perms('users_mod')) {
-            include(SERVER_ROOT.'/sections/tools/sandboxes/mod_sandbox.php');
+            require(__DIR__ . '/sandboxes/mod_sandbox.php');
         } else {
             error(403);
         }
         break;
     case 'bbcode_sandbox':
-        include(SERVER_ROOT.'/sections/tools/sandboxes/bbcode_sandbox.php');
+        require(__DIR__ . '/sandboxes/bbcode_sandbox.php');
         break;
     case 'artist_importance_sandbox':
-        include(SERVER_ROOT.'/sections/tools/sandboxes/artist_importance_sandbox.php');
+        require(__DIR__ . '/sandboxes/artist_importance_sandbox.php');
         break;
     case 'db_sandbox':
-        include(SERVER_ROOT.'/sections/tools/sandboxes/db_sandbox.php');
+        require(__DIR__ . '/sandboxes/db_sandbox.php');
         break;
     case 'referral_sandbox':
-        include(SERVER_ROOT.'/sections/tools/sandboxes/referral_sandbox.php');
+        require(__DIR__ . '/sandboxes/referral_sandbox.php');
         break;
     case 'calendar':
-        include(SERVER_ROOT.'/sections/tools/managers/calendar.php');
+        require(__DIR__ . '/managers/calendar.php');
         break;
     case 'get_calendar_event':
-        include(SERVER_ROOT.'/sections/tools/managers/ajax_get_calendar_event.php');
+        require(__DIR__ . '/managers/ajax_get_calendar_event.php');
         break;
     case 'take_calendar_event':
-        include(SERVER_ROOT.'/sections/tools/managers/ajax_take_calendar_event.php');
+        require(__DIR__ . '/managers/ajax_take_calendar_event.php');
         break;
     case 'stylesheets':
-        include(SERVER_ROOT.'/sections/tools/managers/stylesheets_list.php');
+        require(__DIR__ . '/managers/stylesheets_list.php');
         break;
     case 'mass_pm':
-        include(SERVER_ROOT.'/sections/tools/managers/mass_pm.php');
+        require(__DIR__ . '/managers/mass_pm.php');
         break;
     case 'take_mass_pm':
-        include(SERVER_ROOT.'/sections/tools/managers/take_mass_pm.php');
+        require(__DIR__ . '/managers/take_mass_pm.php');
         break;
     case 'monthalbum':
-        include(SERVER_ROOT.'/sections/tools/misc/album_of_month.php');
+        require(__DIR__ . '/misc/album_of_month.php');
         break;
     case 'vanityhouse':
-        include(SERVER_ROOT.'/sections/tools/misc/vanity_house.php');
+        require(__DIR__ . '/misc/vanity_house.php');
         break;
     case 'dbkey':
-        include(SERVER_ROOT.'/sections/tools/managers/db_key.php');
+        require(__DIR__ . '/managers/db_key.php');
         break;
     case 'navigation_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/navigation_alter.php');
+        require(__DIR__ . '/managers/navigation_alter.php');
         break;
     case 'navigation':
-        include(SERVER_ROOT.'/sections/tools/managers/navigation_list.php');
+        require(__DIR__ . '/managers/navigation_list.php');
         break;
     case 'forum_transitions':
-        include(SERVER_ROOT.'/sections/tools/managers/forum_transitions_list.php');
+        require(__DIR__ . '/managers/forum_transitions_list.php');
         break;
     case 'forum_transitions_alter':
-        include(SERVER_ROOT.'/sections/tools/managers/forum_transitions_alter.php');
+        require(__DIR__ . '/managers/forum_transitions_alter.php');
         break;
     default:
-        include(SERVER_ROOT.'/sections/tools/tools.php');
+        require(__DIR__ . '/tools.php');
 }
