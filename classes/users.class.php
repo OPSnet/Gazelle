@@ -993,7 +993,7 @@ class Users {
                             SELECT count(DISTINCT t.GroupID, t.RemasterYear, t.RemasterCatalogueNumber, t.RemasterRecordLabel, t.RemasterTitle, t.Media)
                             FROM torrents t
                             WHERE t.Format = 'FLAC'
-                                AND (t.LogScore = 100
+                                AND ((t.LogScore = 100 AND t.Media = 'CD')
                                     OR t.Media IN ('Cassette', 'DAT')
                                     OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless'))
                                 AND t.UserID = users_main.ID
