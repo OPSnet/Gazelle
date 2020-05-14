@@ -63,6 +63,9 @@ class Subscription {
         }
 
         // remove any dupes in the array (the fast way)
+        // TODO: replace the above with $Usernames[$M[2]] = 1
+        //       (once the $Usernames[] = preg_replace() construct is understood)
+        //       and the following statement can be removed
         $Usernames = array_flip(array_flip($Usernames));
 
         $Placeholders = implode(', ', array_fill(0, count($Usernames), '?'));
@@ -78,28 +81,22 @@ class Subscription {
 
         $Results = $this->db->to_array();
         $notification = new Notification($this->db, $this->cache);
+        $info = \Users::user_info($this->UserID);
         foreach ($Results as $Result) {
-            $UserID = $Result['ID'];
-            $QuoterID = $this->userId;
-            $Page = $Page;
-            $PageID = $PageID;
-            $PostID = $PostID;
-
             $this->db->prepared_query('
                 INSERT IGNORE INTO users_notify_quoted
                     (UserID, QuoterID, Page, PageID, PostID, Date)
                 VALUES
                     (?,      ?,        ?,    ?,      ?,      now())
-                ', $this->userId, $QuoterID, $Page, $PageID, $PostID
+                ', $Result['ID'], $this->userId, $Page, $PageID, $PostID
             );
-            $this->cache->delete_value("notify_quoted_" . $this->userId);
-            if ($Page == 'forums') {
-                $URL = site_url() . "forums.php?action=viewthread&postid=$PostID";
-            } else {
-                $URL = site_url() . "comments.php?action=jump&postid=$PostID";
-            }
-            $info = \Users::user_info($this->UserID);
-            $notification->push($this->userId, 'New Quote!', 'Quoted by ' . $info['Username'] . " $URL", $URL, Notification::QUOTES);
+            $this->cache->delete_value("notify_quoted_" . $Result['ID']);
+            $URL = site_url() . (
+                ($Page == 'forums')
+                    ? "forums.php?action=viewthread&postid=$PostID"
+                    : "comments.php?action=jump&postid=$PostID"
+            );
+            $notification->push($Result['ID'], 'New Quote!', 'Quoted by ' . $info['Username'] . " $URL", $URL, Notification::QUOTES);
         }
         $this->db->set_query_id($QueryID);
     }
@@ -461,9 +458,8 @@ class Subscription {
 
     /**
      * Clear the forum subscription notifications of a user.
-     * @param int $UserID
      */
-    public function clear($UserID) {
+    public function clear() {
         $QueryID = $this->db->get_query_id();
         $this->db->prepared_query("
             INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
@@ -472,9 +468,9 @@ class Subscription {
                 INNER JOIN users_subscriptions us ON (us.TopicID = ft.ID)
                 WHERE us.UserID = ?
             ON DUPLICATE KEY UPDATE PostID = LastPostID
-            ", $UserID
+            ", $this->userId
         );
         $this->db->set_query_id($QueryID);
-        $this->cache->delete_value('subscriptions_user_new_' . $UserID);
+        $this->cache->delete_value('subscriptions_user_new_' . $this->userId);
     }
 }
