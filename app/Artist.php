@@ -17,6 +17,13 @@ class Artist {
     protected $groupList;  // the release groups ordered by year and name
     protected $sections;   // their groups, gathered into sections
 
+    protected $discogsId;
+    protected $discogsName;
+    protected $discogsStem;
+    protected $discogsSequence;
+    protected $discogsIsPreferred;
+    protected $homonyms;
+
     protected $name;
     protected $image;
     protected $body;
@@ -29,6 +36,7 @@ class Artist {
     protected $nrTorrents;
 
     const CACHE_PREFIX = 'artist_';
+    const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
     public function __construct (\DB_MYSQL $db, \CACHE $cache, $id, $revision = false) {
         $this->db = $db;
@@ -38,11 +46,14 @@ class Artist {
 
         $cacheKey = $this->cacheKey();
         if (($info = $this->cache->get_value($cacheKey)) !== false) {
-            list($this->name, $this->image, $this->body, $this->vanity, $this->similar) = $info;
+            list($this->name, $this->image, $this->body, $this->vanity, $this->similar,
+                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
+            ) = $info;
         } else {
-            $sql = 'SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse
+            $sql = 'SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse, dg.artist_discogs_id, dg.name as discogs_name, dg.stem as discogs_stem, dg.sequence, dg.is_preferred
                 FROM artists_group AS ag
                 LEFT JOIN wiki_artists AS wa USING (RevisionID)
+                LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
                 WHERE ';
             if ($this->revision) {
                 $sql .= 'wa.RevisionID = ?';
@@ -56,8 +67,11 @@ class Artist {
             if (!$this->db->has_results()) {
                 throw new \Exception("no such artist");
             }
-            list($this->name, $this->image, $this->body, $this->vanity)
+            list($this->name, $this->image, $this->body, $this->vanity,
+                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred)
                 = $this->db->next_record(MYSQLI_NUM);
+
+            $this->homonyms = $this->homonymCount();
 
             $this->db->prepared_query('
                 SELECT
@@ -75,8 +89,12 @@ class Artist {
                 ', $this->id
             );
             $this->similar = $this->db->to_array();
-            $this->cache->cache_value($cacheKey,
-                [$this->name, $this->image, $this->body, $this->vanity, $this->similar], 3600);
+            $this->cache->cache_value($cacheKey, [
+                    $this->name, $this->image, $this->body, $this->vanity, $this->similar,
+                    $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
+                ],
+                3600
+            );
         }
     }
 
@@ -93,7 +111,7 @@ class Artist {
         $this->cache->delete_value($this->cacheKey());
     }
 
-    public function get_alias($name) {
+    public function getAlias($name) {
         $this->db->prepared_query('
             SELECT AliasID
             FROM artists_alias
@@ -103,6 +121,22 @@ class Artist {
             $this->id, $name);
         list($alias) = $this->db->next_record();
         return empty($alias) ? $this->id : $alias;
+    }
+
+    public function editableInformation() {
+        return $this->db->row("
+            SELECT
+                ag.Name,
+                wa.Image,
+                wa.Body,
+                ag.VanityHouse,
+                dg.artist_discogs_id
+            FROM artists_group       AS ag
+            LEFT JOIN wiki_artists   AS wa USING (RevisionID)
+            LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
+            WHERE ag.ArtistID = ?
+            ", $this->id
+        );
     }
 
     public function requests() {
@@ -264,5 +298,86 @@ class Artist {
 
     public function similarArtists() {
         return $this->similar;
+    }
+
+    public function setDiscogsRelation(int $discogsId, int $userId) {
+        if ($this->discogsId == $discogsId) {
+            // don't blindly set the Discogs ID to something else if it's already set, or doesn't change
+            return;
+        }
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => sprintf(self::DISCOGS_API_URL, $discogsId),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11',
+        ]);
+        if (defined('HTTP_PROXY')) {
+            curl_setopt_array($curl, [
+                CURLOPT_HTTPPROXYTUNNEL => true,
+                CURLOPT_PROXY => HTTP_PROXY,
+            ]);
+        }
+
+        $result = curl_exec($curl);
+        if ($result === false || curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
+            return null;
+        }
+
+        /* Discogs names are e.g. "Spectrum (4)"
+         * This is split into "Spectrum" and 4 to detect and handle homonyms.
+         * First come, first served. The first homonym is considered preferred,
+         * so the artist page will show "Spectrum". Subsequent artists will
+         * be shown as "Spectrum (2)", "Spectrum (1)", ...
+         * This can be adjusted via a control panel afterwards.
+         */
+        $payload = json_decode($result);
+        $this->discogsName = $payload->name;
+        if (preg_match('/^(.*) \((\d+)\)$/', $this->discogsName, $match) ) {
+            $this->discogsStem = $match[1];
+            $this->discogsSequence = $match[2];
+        }
+        else {
+            $this->discogsStem = $this->discogsName;
+            $this->discogsSequence = 1;
+        }
+
+        $this->db->prepared_query('
+            INSERT INTO artist_discogs
+                   (artist_discogs_id, artist_id, is_preferred, sequence, stem, name, user_id)
+            VALUES (?,                 ?,         ?,            ?,        ?,    ?,    ?)
+            ', $discogsId, $this->id, $this->homonymCount() == 0, $this->discogsSequence, $this->discogsStem, $this->discogsName, $userId
+        );
+        $this->flushCache();
+        return $this->db->affected_rows();
+    }
+
+    public function homonymCount() {
+        return $this->db->scalar('
+            SELECT count(*) FROM artist_discogs WHERE stem = ?
+            ', $this->discogsStem
+        );
+    }
+
+    public function removeDiscogsRelation() {
+        $this->db->prepared_query('
+            DELETE FROM artist_discogs WHERE artist_id = ?
+            ', $this->id
+        );
+        $this->flushCache();
+        return $this->db->affected_rows();
+    }
+
+    public function discogsId() {
+        return $this->discogsId;
+    }
+
+    public function discogsName() {
+        return $this->discogsName;
+    }
+
+    public function discogsIsPreferred() {
+        return $this->discogsIsPreferred;
     }
 }

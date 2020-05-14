@@ -15,6 +15,8 @@ class User {
     /** @var int */
     protected  $id;
 
+    const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
+
     public function __construct(\DB_MYSQL $db, \CACHE $cache, int $id) {
         $this->db = $db;
         $this->cache = $cache;

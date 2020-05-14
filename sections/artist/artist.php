@@ -217,6 +217,9 @@ foreach ($ZIPOptions as $Option) {
 <?php
 $artistReleaseType = [];
 foreach ($Artist->sections() as $section => $Groups) {
+    if (!isset($artistReleaseType[$section])) {
+        $artistReleaseType[$section] = 0;
+    }
     $artistReleaseType[$section]++;
     foreach ($Groups as $Group) {
         // Skip compilations and soundtracks.
@@ -238,6 +241,17 @@ Tags::reset();
                 <li>Number of seeders: <?=number_format($Artist->nrSeeders())?></li>
                 <li>Number of leechers: <?=number_format($Artist->nrLeechers())?></li>
                 <li>Number of snatches: <?=number_format($Artist->nrSnatches())?></li>
+            </ul>
+        </div>
+        <div class="box box_info box_metadata_artist">
+            <div class="head"><strong>Metadata</strong></div>
+            <ul class="stats nobullet">
+                <li>Discogs ID: <?= $Artist->discogsId() ?: '<i>not set</i>' ?></li>
+<?php if ($Artist->discogsId()) { ?>
+                <li>Name: <?= $Artist->discogsName() ?><?= $Artist->discogsIsPreferred()
+                    ? '<span title="This artist does not need to display a sequence number for disambiguation">' . " \xE2\x98\x85</span>" : '' ?></li>
+                <li><span title="Artists having the same name">Synonyms: <?= $Artist->homonymCount() - 1 ?></span></li>
+<?php } ?>
             </ul>
         </div>
         <div class="box box_artists">
