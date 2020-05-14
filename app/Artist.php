@@ -68,7 +68,7 @@ class Artist {
                 throw new \Exception("no such artist");
             }
             list($this->name, $this->image, $this->body, $this->vanity,
-                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred)
+                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms)
                 = $this->db->next_record(MYSQLI_NUM);
 
             $this->homonyms = $this->homonymCount();
