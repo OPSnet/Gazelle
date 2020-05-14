@@ -69,7 +69,7 @@ class Artist {
             }
             list($this->name, $this->image, $this->body, $this->vanity,
                 $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms)
-                = $this->db->next_record(MYSQLI_NUM);
+                = $this->db->next_record(MYSQLI_NUM, false);
 
             $this->homonyms = $this->homonymCount();
 
