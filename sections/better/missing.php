@@ -16,7 +16,7 @@ if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
     $userId = $LoggedUser['ID'];
 }
 
-if (empty($_GET['type']) || !in_array($_GET['type'], ['checksum', 'tags', 'folders', 'files', 'lineage', 'artwork', 'artistimg', 'artistdesc'])) {
+if (empty($_GET['type']) || !in_array($_GET['type'], ['checksum', 'tags', 'folders', 'files', 'lineage', 'artwork', 'artistimg', 'artistdesc', 'artistdiscogs'])) {
     $_GET['type'] = 'checksum';
 }
 $type = $_GET['type'];
@@ -118,6 +118,15 @@ switch ($type) {
         $where[] = "(wa.Body IS NULL OR wa.Body = '')";
         $order = 'ORDER BY a.Name';
         $joins[] = 'LEFT JOIN wiki_artists wa ON wa.RevisionID = a.RevisionID';
+        $mode = 'artists';
+        break;
+    case 'artistdiscogs':
+        $query = '
+            SELECT SQL_CALC_FOUND_ROWS a.ArtistID, a.Name
+            FROM artists_group a';
+        $where[] = "(dg.artist_id IS NULL)";
+        $order = 'ORDER BY a.Name';
+        $joins[] = 'LEFT JOIN artist_discogs dg ON dg.artist_id = a.ArtistID';
         $mode = 'artists';
         break;
 }
@@ -245,6 +254,7 @@ function selected($val) {
                         <option value="artwork"<?=selected($type == 'artwork')?>>Missing Artwork</option>
                         <option value="artistimg"<?=selected($type == 'artistimg')?>>Missing Artist Images</option>
                         <option value="artistdesc"<?=selected($type == 'artistdesc')?>>Missing Artist Descriptions</option>
+                        <option value="artistdiscogs"<?=selected($type == 'artistdiscogs')?>>Missing Artist Discogs ID</option>
                     </select>
                     <select name="filter">
                         <option value="all"<?=selected($filter == 'all')?>>All</option>
@@ -357,7 +367,6 @@ switch ($mode) {
         </table>
     </div>
 </div>
-
 <?php
+
 View::show_footer();
-?>

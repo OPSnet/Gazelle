@@ -14,55 +14,80 @@ if (!check_perms('site_edit_wiki')) {
 }
 
 // Variables for database input
-$UserID = $LoggedUser['ID'];
-$ArtistID = $_REQUEST['artistid'];
-if (check_perms('artist_edit_vanityhouse')) {
-    $VanityHouse = isset($_POST['vanity_house']) ? 1 : 0 ;
-}
+$userId   = $LoggedUser['ID'];
+$artistId = $_REQUEST['artistid'];
+$artist   = new \Gazelle\Artist($DB, $Cache, $artistId);
 
 if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     authorize();
-    $RevisionID = $_GET['revisionid'];
-    if (!is_number($RevisionID)) {
+    $revisionId = $_GET['revisionid'];
+    if (!is_number($revisionId)) {
         error(0);
     }
 } else { // with edit, the variables are passed with POST
-    $Body = db_string($_POST['body']);
-    $Summary = db_string($_POST['summary']);
-    $Image = db_string($_POST['image']);
-    ImageTools::blacklisted($Image);
+    $discogsId = (int)($_POST['discogs-id']);
+    $body      = trim($_POST['body']);
+    $summary   = trim($_POST['summary']);
+    $image     = trim($_POST['image']);
+    ImageTools::blacklisted($image);
     // Trickery
-    if (!preg_match("/^".IMAGE_REGEX."$/i", $Image)) {
-        $Image = '';
+    if (!preg_match("/^".IMAGE_REGEX."$/i", $image)) {
+        $image = '';
     }
 }
 
-// Insert revision
-if (!$RevisionID) { // edit
-    $DB->query("
-        INSERT INTO wiki_artists
-            (PageID, Body, Image, UserID, Summary, Time)
-        VALUES
-            ('$ArtistID', '$Body', '$Image', '$UserID', '$Summary', '".sqltime()."')");
-} else { // revert
-    $DB->query("
-        INSERT INTO wiki_artists (PageID, Body, Image, UserID, Summary, Time)
-        SELECT '$ArtistID', Body, Image, '$UserID', 'Reverted to revision $RevisionID', '".sqltime()."'
-        FROM wiki_artists
-        WHERE RevisionID = '$RevisionID'");
+if ($discogsId > 0) {
+    if ($discogsId != $artist->discogsId()) {
+        $artist->setDiscogsRelation($discogsId, $userId);
+        if ($summary) {
+            $summary .= ", Discogs relation set to $discogsId";
+        } else {
+            $summary = "Discogs relation set to $discogsId";
+        }
+    }
+} else {
+    $artist->removeDiscogsRelation();
+    $summary = implode(', ', [$summary, "Discogs relation cleared"]);
 }
 
-$RevisionID = $DB->inserted_id();
+// Insert revision
+if (!$revisionId) { // edit
+    $DB->prepared_query("
+        INSERT INTO wiki_artists
+               (PageID, Body, Image, UserID, Summary, Time)
+        VALUES (?,      ?,    ?,     ?,      ?,       now())
+        ", $artistId, $body, $image, $userId, $summary
+    );
+    $revisionId = $DB->inserted_id();
+} else { // revert
+    $DB->prepared_query("
+        INSERT INTO wiki_artists
+              (PageID, Body, Image, UserID, Summary, Time)
+        SELECT ?,      Body, Image, ?,      ?,       now()
+        FROM wiki_artists
+        WHERE revisionId = ?
+        ", $artistId, $userID, "Reverted to revision $revisionId",
+            $revisionId
+    );
+}
 
-// Update artists table (technically, we don't need the RevisionID column, but we can use it for a join which is nice and fast)
-$DB->query("
-    UPDATE artists_group
-    SET
-        ". (isset($VanityHouse) ? "VanityHouse = '$VanityHouse'," : '') ."
-        RevisionID = '$RevisionID'
-    WHERE ArtistID = '$ArtistID'");
+// Update artists table (technically, we don't need the revisionId column, but we can use it for a join which is nice and fast)
+$column = ['RevisionID = ?'];
+$args   = [$revisionId];
+if (check_perms('artist_edit_vanityhouse')) {
+    $column[] = 'VanityHouse = ?';
+    $args[] = isset($_POST['vanity_house']) ? 1 : 0;
+}
+
+$columns = implode(', ', $column);
+$args[] = $artistId;
+$DB->prepared_query($sql = "
+    UPDATE artists_group SET
+        $columns
+    WHERE ArtistID = ?
+    ", ...$args
+);
 
 // There we go, all done!
-$artist = new \Gazelle\Artist($DB, $Cache, $ArtistID);
 $artist->flushCache();
-header("Location: artist.php?id=$ArtistID");
+header("Location: artist.php?id=" . $artistId);

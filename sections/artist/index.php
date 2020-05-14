@@ -18,31 +18,25 @@ enforce_login();
 if (!empty($_POST['action'])) {
     switch ($_POST['action']) {
         case 'edit':
-            require(SERVER_ROOT . '/sections/artist/takeedit.php');
+            require(__DIR__ . '/takeedit.php');
             break;
         case 'download':
-            require(SERVER_ROOT . '/sections/artist/download.php');
+            require(__DIR__ . '/download.php');
             break;
         case 'rename':
-            require(SERVER_ROOT . '/sections/artist/rename.php');
+            require(__DIR__ . '/rename.php');
             break;
         case 'add_similar':
-            require(SERVER_ROOT . '/sections/artist/add_similar.php');
+            require(__DIR__ . '/add_similar.php');
             break;
         case 'add_alias':
-            require(SERVER_ROOT . '/sections/artist/add_alias.php');
+            require(__DIR__ . '/add_alias.php');
             break;
         case 'change_artistid':
-            require(SERVER_ROOT . '/sections/artist/change_artistid.php');
-            break;
-        case 'concert_thread':
-            include(SERVER_ROOT . '/sections/artist/concert_thread.php');
-            break;
-        case 'take_concert_thread':
-            include(SERVER_ROOT . '/sections/artist/take_concert_thread.php');
+            require(__DIR__ . '/change_artistid.php');
             break;
         case 'takeeditrequest':
-            include(SERVER_ROOT . '/sections/artist/takeeditrequest.php');
+            include(__DIR__ . '/takeeditrequest.php');
             break;
         default:
             error(0);
@@ -50,47 +44,47 @@ if (!empty($_POST['action'])) {
 } elseif (!empty($_GET['action'])) {
     switch ($_GET['action']) {
         case 'autocomplete':
-            require('sections/artist/autocomplete.php');
+            require(__DIR__ . '/autocomplete.php');
             break;
 
         case 'edit':
-            require(SERVER_ROOT . '/sections/artist/edit.php');
+            require(__DIR__ . '/edit.php');
             break;
         case 'delete':
-            require(SERVER_ROOT . '/sections/artist/delete.php');
+            require(__DIR__ . '/delete.php');
             break;
         case 'revert':
-            require(SERVER_ROOT . '/sections/artist/takeedit.php');
+            require(__DIR__ . '/takeedit.php');
             break;
         case 'history':
-            require(SERVER_ROOT . '/sections/artist/history.php');
+            require(__DIR__ . '/history.php');
             break;
         case 'vote_similar':
-            require(SERVER_ROOT . '/sections/artist/vote_similar.php');
+            require(__DIR__ . '/vote_similar.php');
             break;
         case 'delete_similar':
-            require(SERVER_ROOT . '/sections/artist/delete_similar.php');
+            require(__DIR__ . '/delete_similar.php');
             break;
         case 'similar':
-            require(SERVER_ROOT . '/sections/artist/similar.php');
+            require(__DIR__ . '/similar.php');
             break;
         case 'similar_bg':
-            require(SERVER_ROOT . '/sections/artist/similar_bg.php');
+            require(__DIR__ . '/similar_bg.php');
             break;
         case 'notify':
-            require(SERVER_ROOT . '/sections/artist/notify.php');
+            require(__DIR__ . '/notify.php');
             break;
         case 'notifyremove':
-            require(SERVER_ROOT . '/sections/artist/notifyremove.php');
+            require(__DIR__ . '/notifyremove.php');
             break;
         case 'delete_alias':
-            require(SERVER_ROOT . '/sections/artist/delete_alias.php');
+            require(__DIR__ . '/delete_alias.php');
             break;
         case 'change_artistid':
-            require(SERVER_ROOT . '/sections/artist/change_artistid.php');
+            require(__DIR__ . '/change_artistid.php');
             break;
         case 'editrequest':
-            require(SERVER_ROOT . '/sections/artist/editrequest.php');
+            require(__DIR__ . '/editrequest.php');
             break;
         default:
             error(0);
@@ -99,7 +93,7 @@ if (!empty($_POST['action'])) {
 } else {
     if (!empty($_GET['id'])) {
 
-        include (SERVER_ROOT . '/sections/artist/artist.php');
+        require(__DIR__ . '/artist.php');
 
     } elseif (!empty($_GET['artistname'])) {
 
@@ -133,4 +127,3 @@ if (!empty($_POST['action'])) {
         header('Location: torrents.php');
     }
 }
-?>
