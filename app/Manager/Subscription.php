@@ -125,7 +125,7 @@ class Subscription {
             );
             array_push($UserSubscriptions, $TopicID);
         }
-        $this->cache->replace_value("subscriptions_user_$UserID", $UserSubscriptions, 0);
+        $this->cache->replace_value("subscriptions_user_" . $this->userId, $UserSubscriptions, 0);
         $this->cache->delete_value("subscriptions_user_new_" . $this->userId);
         $this->db->set_query_id($QueryID);
     }
@@ -134,7 +134,6 @@ class Subscription {
      * (Un)subscribe from comments.
      * @param string $Page 'artist', 'collages', 'requests' or 'torrents'
      * @param int $PageID ArtistID, CollageID, RequestID or GroupID
-     * @param int $UserID
      */
     public function subscribeComments($Page, $PageID) {
         $QueryID = $this->db->get_query_id();
@@ -165,7 +164,7 @@ class Subscription {
     }
 
     /**
-     * Read $UserID's subscriptions. If the cache key isn't set, it gets filled.
+     * Read users's subscriptions. If the cache key isn't set, it gets filled.
      * @return array Array of TopicIDs
      */
     public function subscriptions() {
