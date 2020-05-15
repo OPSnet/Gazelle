@@ -411,9 +411,15 @@ class Bonus {
     public function userTotals($userId) {
         $this->db->prepared_query("
             SELECT
-                COUNT(xfu.uid) as TotalTorrents,
-                SUM(t.Size) as TotalSize,
-                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)), 0) AS TotalHourlyPoints
+                count(xfu.uid) as TotalTorrents,
+                sum(t.Size) as TotalSize,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime,                           tls.Seeders)), 0)                           AS HourlyPoints,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 1),                tls.Seeders)), 0) * (24 * 1)                AS DailyPoints,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 7),                tls.Seeders)), 0) * (24 * 7)                AS WeeklyPoints,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004/12), tls.Seeders)), 0) * (24 * 365.256363004/12) AS MonthlyPoints,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)), 0) * (24 * 365.256363004)    AS YearlyPoints,
+                coalesce(sum(bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders)), 0) * (24 * 365.256363004)
+                    / (coalesce(sum(t.Size), 1) / (1024*1024*1024)) AS PointsPerGB
             FROM (
                 SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
             ) AS xfu
@@ -424,8 +430,8 @@ class Bonus {
                 xfu.uid = ?
             ", $userId, $userId
         );
-        list($total, $size, $hourly) = $this->db->next_record();
-        return [intval($total), floatval($size), floatval($hourly)];
+        list($total, $size, $hourly, $daily, $weekly, $monthly, $yearly, $ppGB) = $this->db->next_record(MYSQLI_NUM);
+        return [(int)$total, (float)$size, (float)$hourly, (float)$daily, (float)$weekly, (float)$monthly, (float)$yearly, (float)$ppGB];
     }
 
     public function userDetails($userId, $orderBy, $orderWay, $limit, $offset) {
@@ -447,10 +453,13 @@ class Bonus {
                 t.RemasterTitle,
                 GREATEST(tls.Seeders, 1) AS Seeders,
                 xfh.seedtime AS Seedtime,
-                bonus_accrual(t.Size, xfh.seedtime,                      tls.Seeders) AS HourlyPoints,
-                bonus_accrual(t.Size, xfh.seedtime + 1,                  tls.Seeders) * 12 AS DailyPoints,
-                bonus_accrual(t.Size, xfh.seedtime + 365.256363004 / 12, tls.Seeders) * 365.256363004 / 12 AS MonthlyPoints,
-                bonus_accrual(t.Size, xfh.seedtime + 365.256363004,      tls.Seeders) * 365.256363004 AS YearlyPoints
+                bonus_accrual(t.Size, xfh.seedtime,                           tls.Seeders)                           AS HourlyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 1),                tls.Seeders) * (24 * 1)                AS DailyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 7),                tls.Seeders) * (24 * 7)                AS WeeklyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004/12), tls.Seeders) * (24 * 365.256363004/12) AS MonthlyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders) * (24 * 365.256363004)    AS YearlyPoints,
+                bonus_accrual(t.Size, xfh.seedtime + (24 * 365.256363004),    tls.Seeders) * (24 * 365.256363004)
+                    / (t.Size / (1024*1024*1024)) AS PointsPerGB
             FROM (
                 SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?
             ) AS xfu

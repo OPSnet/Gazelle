@@ -2,52 +2,51 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-$Page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
-$Page = max(1, $Page);
-$Limit = TORRENTS_PER_PAGE;
-$Offset = TORRENTS_PER_PAGE * ($Page-1);
+$page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
+$page = max(1, $page);
+$limit = TORRENTS_PER_PAGE;
+$offset = TORRENTS_PER_PAGE * ($page-1);
 
-$SortOrderMap = [
-    'size'         => ['t.Size', 'desc'],
-    'seeders'      => ['Seeders', 'desc'],
-    'seedtime'     => ['SeedTime', 'desc'],
-    'hourlypoints' => ['HourlyPoints', 'desc'],
+$sortOrderMap =  [
+    'size'          => ['t.Size',        'desc'],
+    'seeders'       => ['Seeders',       'desc'],
+    'seedtime'      => ['SeedTime',      'desc'],
+    'hourlypoints'  => ['HourlyPoints',  'desc'],
+    'dailypoints'   => ['DailyPoints',   'desc'],
+    'weeklypoints'  => ['WeeklyPoints',  'desc'],
+    'monthlypoints' => ['MonthlyPoints', 'desc'],
+    'yearlypoints'  => ['YearlyPoints',  'desc'],
+    'pointspergb'   => ['PointsPerGB',   'desc'],
 ];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'hourlypoints';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+$sortOrder = (!empty($_GET['order']) && isset($sortOrderMap[$_GET['order']])) ? $_GET['order'] : 'hourlypoints';
+$orderBy = $sortOrderMap[$sortOrder][0];
+$orderWay = (empty($_GET['sort']) || $_GET['sort'] == $sortOrderMap[$sortOrder][1])
+    ? $sortOrderMap[$sortOrder][1]
+    : SortableTableHeader::SORT_DIRS[$sortOrderMap[$sortOrder][1]];
 
 if (!empty($_GET['userid'])) {
     if (!check_perms('admin_bp_history')) {
         error(403);
     }
-    $UserID = intval($_GET['userid']);
+    $userId = intval($_GET['userid']);
     $User = array_merge(Users::user_stats($_GET['userid']), Users::user_info($_GET['userid']), Users::user_heavy_info($_GET['userid']));
     if (empty($User)) {
         error(404);
     }
 }
 else {
-    $UserID = $LoggedUser['ID'];
+    $userId = $LoggedUser['ID'];
     $User = $LoggedUser;
 }
 
-$Title = ($UserID === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
+$Title = ($userId === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
 View::show_header($Title);
 
 $Bonus = new \Gazelle\Bonus($DB, $Cache);
 
-list($TotalTorrents, $TotalSize, $TotalHourlyPoints) = $Bonus->userTotals($UserID);
-$TotalDailyPoints = $TotalHourlyPoints * 24;
-$TotalWeeklyPoints = $TotalDailyPoints * 7;
-// The mean number of days in a month in the Gregorian calendar,
-// and then multiple that by 12
-$TotalMonthlyPoints = $TotalDailyPoints * 30.436875;
-$TotalYearlyPoints = $TotalDailyPoints * 365.2425;
-
-$Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
+list($totalTorrents, $totalSize, $totalHourlyPoints, $totalDailyPoints, $totalWeeklyPoints, $totalMonthlyPoints, $totalYearlyPoints, $totalPointsPerGB)
+    = $Bonus->userTotals($userId);
+$pages = Format::get_pages($page, $totalTorrents, TORRENTS_PER_PAGE);
 
 ?>
 <div class="header">
@@ -57,80 +56,80 @@ $Pages = Format::get_pages($Page, $TotalTorrents, TORRENTS_PER_PAGE);
 <div class="linkbox">
     <a href="wiki.php?action=article&name=bonuspoints" class="brackets">About Bonus Points</a>
     <a href="bonus.php" class="brackets">Bonus Point Shop</a>
-    <a href="bonus.php?action=history<?= check_perms('admin_bp_history') && $UserID != G::$LoggedUser['ID'] ? "&amp;userid=$UserID" : '' ?>" class="brackets">History</a>
+    <a href="bonus.php?action=history<?= check_perms('admin_bp_history') && $userId != G::$LoggedUser['ID'] ? "&amp;userid=$userId" : '' ?>" class="brackets">History</a>
 </div>
 <table>
     <thead>
         <tr class="colhead">
-            <td>Total Torrents</td>
-            <td>Size</td>
-            <td>BP/hour</td>
-            <td>BP/day</td>
-            <td>BP/week</td>
-            <td>BP/month</td>
-            <td>BP/year</td>
+            <td style="text-align: center;">Total Torrents</td>
+            <td style="text-align: center;">Size</td>
+            <td style="text-align: center;">BP/hour</td>
+            <td style="text-align: center;">BP/day</td>
+            <td style="text-align: center;">BP/week</td>
+            <td style="text-align: center;">BP/month</td>
+            <td style="text-align: center;">BP/year</td>
+            <td style="text-align: center;" title="Bonus points per GB if seeded a year">BP/GB/year</td>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td><?=$TotalTorrents?></td>
-            <td><?=Format::get_size($TotalSize)?></td>
-            <td><?=number_format($TotalHourlyPoints, 2)?></td>
-            <td><?=number_format($TotalDailyPoints, 2)?></td>
-            <td><?=number_format($TotalWeeklyPoints, 2)?></td>
-            <td><?=number_format($TotalMonthlyPoints, 2)?></td>
-            <td><?=number_format($TotalYearlyPoints, 2)?></td>
+            <td style="text-align: center;"><?=$totalTorrents?></td>
+            <td style="text-align: center;"><?=Format::get_size($totalSize)?></td>
+            <td style="text-align: center;"><?=number_format($totalHourlyPoints, 2)?></td>
+            <td style="text-align: center;"><?=number_format($totalDailyPoints, 2)?></td>
+            <td style="text-align: center;"><?=number_format($totalWeeklyPoints, 2)?></td>
+            <td style="text-align: center;"><?=number_format($totalMonthlyPoints, 2)?></td>
+            <td style="text-align: center;"><?=number_format($totalYearlyPoints, 2)?></td>
+            <td style="text-align: center;"><?=number_format($totalPointsPerGB, 2)?></td>
         </tr>
     </tbody>
 </table>
 <br />
 
 <div class="linkbox">
-    <?=$Pages?>
+    <?=$pages?>
 </div>
 <?php
 $header = new SortableTableHeader([
-    'size'         => 'Size',
-    'seeders'      => 'Seeders',
-    'seedtime'     => 'Seedtime',
-    'hourlypoints' => 'BP/hour',
-], $SortOrder, $OrderWay);
+    'size'          => 'Size',
+    'seeders'       => 'Seeders',
+    'seedtime'      => 'Seedtime',
+    'hourlypoints'  => 'BP/hour',
+    'dailypoints'   => 'BP/day',
+    'weeklypoints'  => 'BP/week',
+    'monthlypoints' => 'BP/month',
+    'yearlypoints'  => 'BP/year',
+    'pointspergb'   => 'BP/GB/year',
+], $sortOrder, $orderWay);
 ?>
 <table>
     <thead>
     <tr class="colhead">
         <td>Torrent</td>
-        <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('seedtime', $SortOrderMap['seedtime'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('hourlypoints', $SortOrderMap['hourlypoints'][1]) ?></td>
-        <td>BP/day</td>
-        <td>BP/week</td>
-        <td>BP/month</td>
-        <td>BP/year</td>
+        <td class="nobr number_column"><?= $header->emit('size',          $sortOrderMap['size'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('seeders',       $sortOrderMap['seeders'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('seedtime',      $sortOrderMap['seedtime'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('hourlypoints',  $sortOrderMap['hourlypoints'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('dailypoints',   $sortOrderMap['dailypoints'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('weeklypoints',  $sortOrderMap['weeklypoints'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('monthlypoints', $sortOrderMap['monthlypoints'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('yearlypoints',  $sortOrderMap['yearlypoints'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('pointspergb',   $sortOrderMap['pointspergb'][1]) ?></td>
     </tr>
     </thead>
     <tbody>
 <?php
 
-if ($TotalTorrents > 0) {
-    list($GroupIDs, $Torrents) = $Bonus->userDetails($UserID, $OrderBy, $OrderWay, $Limit, $Offset);
-    $Groups = Torrents::get_groups($GroupIDs, true, true, false);
-    foreach ($Torrents as $Torrent) {
-        // list($TorrentID, $GroupID, $Size, $Format, $Encoding, $HasLog, $HasLogDB, $HasCue, $LogScore, $LogChecksum, $Media, $Scene, $Seeders, $Seedtime, $HourlyPoints)
-        $Size = intval($Torrent['Size']);
-        $Seeders = intval($Torrent['Seeders']);
-        $HourlyPoints = floatval($Torrent['HourlyPoints']);
-        $DailyPoints = $HourlyPoints * 24;
-        $WeeklyPoints = $DailyPoints * 7;
-        $MonthlyPoints = $DailyPoints * 30.436875;
-        $YearlyPoints = $DailyPoints * 365.2425;
-
-        $GroupYear = $Groups[$Torrent['GroupID']]['Year'];
-        $Torrents = isset($Groups[$Torrent['GroupID']]['Torrents']) ? $Groups[$Torrent['GroupID']]['Torrents'] : [];
-        $Artists = $Groups[$Torrent['GroupID']]['Artists'];
-        $ExtendedArtists = $Groups[$Torrent['GroupID']]['ExtendedArtists'];
-        $VanityHouse = $Groups[$Torrent['GroupID']]['VanityHouse'];
+if ($totalTorrents) {
+    list($groupIDs, $torrentStats) = $Bonus->userDetails($userId, $orderBy, $orderWay, $limit, $offset);
+    $groups = Torrents::get_groups($groupIDs, true, true, false);
+    foreach ($torrentStats as $stats) {
+        $groupId = $stats['GroupID'];
+        $groupYear = $groups[$groupId]['Year'];
+        $torrents = isset($groups[$groupId]['Torrents']) ? $groups[$groupId]['Torrents'] : [];
+        $Artists = $groups[$groupId]['Artists'];
+        $ExtendedArtists = $groups[$groupId]['ExtendedArtists'];
+        $VanityHouse = $groups[$groupId]['VanityHouse'];
 
         if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
             unset($ExtendedArtists[2]);
@@ -141,29 +140,22 @@ if ($TotalTorrents > 0) {
         } else {
             $DisplayName = '';
         }
-        $DisplayName .= '<a href="torrents.php?id=' . $Torrent['GroupID'] . '&amp;torrentid=' . $Torrent['ID'] . '" class="tooltip" title="View torrent" dir="ltr">' . $Groups[$Torrent['GroupID']]['Name'] . '</a>';
-        if ($GroupYear > 0) {
-            $DisplayName .= " [$GroupYear]";
-        }
-        if ($VanityHouse) {
-            $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
-        }
-
-        $ExtraInfo = Torrents::torrent_info($Torrent);
-        if ($ExtraInfo) {
-            $DisplayName .= " - $ExtraInfo";
+        $DisplayName .= '<a href="torrents.php?id=' . $groupId . '&amp;torrentid=' . $torrent['ID'] . '" class="tooltip" title="View torrent" dir="ltr">' . $groups[$groupId]['Name'] . '</a>';
+        if ($groupYear > 0) {
+            $DisplayName .= " [$groupYear]";
         }
 ?>
     <tr>
         <td><?= $DisplayName ?></td>
-        <td><?= Format::get_size($Torrent['Size']) ?></td>
-        <td><?= number_format($Seeders) ?></td>
-        <td><?= convert_hours($Torrent['Seedtime'], 2) ?></td>
-        <td><?= number_format($HourlyPoints, 3) ?></td>
-        <td><?= number_format($DailyPoints, 3) ?></td>
-        <td><?= number_format($WeeklyPoints, 3) ?></td>
-        <td><?= number_format($MonthlyPoints, 2) ?></td>
-        <td><?= number_format($YearlyPoints, 2) ?></td>
+        <td class="nobr number_column"><?= Format::get_size($stats['Size']) ?></td>
+        <td class="number_column"><?= number_format($stats['Seeders']) ?></td>
+        <td class="number_column"><?= convert_hours($stats['Seedtime'], 2) ?></td>
+        <td class="number_column"><?= number_format($stats['HourlyPoints'], 3) ?></td>
+        <td class="number_column"><?= number_format($stats['DailyPoints'], 3) ?></td>
+        <td class="number_column"><?= number_format($stats['WeeklyPoints'], 3) ?></td>
+        <td class="number_column"><?= number_format($stats['MonthlyPoints'], 2) ?></td>
+        <td class="number_column"><?= number_format($stats['YearlyPoints'], 2) ?></td>
+        <td class="number_column"><?= number_format($stats['PointsPerGB'], 2) ?></td>
     </tr>
 <?php
     }
@@ -180,7 +172,7 @@ else {
     </tbody>
 </table>
 <div class="linkbox">
-    <?=$Pages?>
+    <?=$pages?>
 </div>
 <?php
 View::show_footer();
