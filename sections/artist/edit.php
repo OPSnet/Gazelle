@@ -147,32 +147,31 @@ View::show_header('Edit artist');
         <div class="pad">
         <ul class="nobullet">
 <?php
-$nonRedirAliases = [];
-$DB->query("
-    SELECT AliasID, Name, UserID, Redirect
-    FROM artists_alias
-    WHERE ArtistID = '$artistId'");
-while (list($aliasId, $aliasName, $User, $Redirect) = $DB->next_record(MYSQLI_NUM, true)) {
-    if ($aliasName == $name) {
-        $defaultId = $aliasId;
+$nonRedirAliases = $artist->redirects();
+$alias = [];
+foreach($nonRedirAliases as $r) {
+    if ($r['aliasName'] == $name) {
+        $defaultId = $r['aliasId'];
     }
 ?>
             <li>
-                <span class="tooltip" title="Alias ID"><?=$aliasId?></span>. <span class="tooltip" title="Alias name"><?=$aliasName?></span>
-<?php   if ($User) { ?>
-                <a href="user.php?id=<?=$User?>" title="Alias creator" class="brackets tooltip">User</a>
-<?php   }
-    if ($Redirect) { ?>
-                (writes redirect to <span class="tooltip" title="Target alias ID"><?=$Redirect?></span>)
-<?php   } else {
-        $nonRedirAliases[$aliasId] = $aliasName;
+                <span class="tooltip" title="Alias ID"><?= $r['aliasId'] ?></span>. <span class="tooltip" title="Alias name"><?= $r['aliasName'] ?></span>
+<?php if ($r['redirectId']) { ?>
+                (writes redirect to <span class="tooltip" title="Target alias ID"><?= $r['redirectId'] ?></span>)
+<?php
+    } else {
+        $alias[$r['aliasId']] = $r['aliasName'];
     }
 ?>
-                <a href="artist.php?action=delete_alias&amp;aliasid=<?=$aliasId?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Delete this alias" class="brackets tooltip">X</a>
+<?php if ($r['userId']) { ?>
+                &nbsp;<a href="user.php?id=<?= $r['userId'] ?>" class="brackets tooltip">Added by <?= Users::user_info($r['userId'])['Username'] ?></a>
+<?php } ?>
+                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid=<?=$aliasId?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Delete this alias" class="brackets tooltip">X</a>
+<?php if (!$r['redirectId']) { ?>
+                &nbsp;<?= "\xE2\x98\x85" ?>
+<?php } ?>
             </li>
-<?php
-}
-?>
+<?php } ?>
         </ul>
         </div>
         </td>
@@ -199,11 +198,9 @@ while (list($aliasId, $aliasName, $User, $Redirect) = $DB->next_record(MYSQLI_NU
                 <span class="label"><strong>Writes redirect to:</strong></span>
                 <select name="redirect">
                     <option value="0">Non-redirecting alias</option>
-<?php
-foreach($nonRedirAliases as $aliasId => $aliasName) { ?>
-                    <option value="<?=$aliasId?>"<?=$aliasId == $defaultId ? " selected" : ""?>><?=$aliasName?></option>
-<?php
-} ?>
+<?php foreach ($alias as $aliasId => $aliasName) { ?>
+                    <option value="<?= $aliasId ?>"<?= $aliasId == $defaultId ? ' selected="selected"' : "" ?>><?= $aliasName ?></option>
+<?php } ?>
                 </select><br />
             </div>
         </div>

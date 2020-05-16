@@ -139,6 +139,16 @@ class Artist {
         );
     }
 
+    public function redirects() {
+        $this->db->prepared_query("
+            SELECT AliasID as aliasId, Name as aliasName, UserID as userId,  Redirect as redirectId
+            FROM artists_alias
+            WHERE ArtistID = ?
+            ", $this->id
+        );
+        return $this->db->to_array('aliasId', MYSQLI_ASSOC);
+    }
+
     public function requests() {
         if (($requests = $this->cache->get_value("artists_requests_" . $this->id)) === false) {
             $this->db->prepared_query('
