@@ -12,7 +12,7 @@ class Users {
         if (!$Classes || !$ClassLevels) {
             $QueryID = G::$DB->get_query_id();
             G::$DB->query('
-                SELECT ID, Name, Level, Secondary
+                SELECT ID, Name, Level, Secondary, badge
                 FROM permissions
                 ORDER BY Level');
             $Classes = G::$DB->to_array('ID');
@@ -535,21 +535,6 @@ class Users {
     public static function format_username($UserID, $Badges = false, $IsWarned = true, $IsEnabled = true, $Class = false, $Title = false, $IsDonorForum = false) {
         global $Classes;
 
-        // This array is a hack that should be made less retarded, but whatevs
-        //                           PermID => ShortForm
-        $SecondaryClasses = [
-            '23' => 'FLS', // First Line Support
-            '30' => 'IN', // Interviewer
-            '31' => 'TC', // Torrent Celebrity
-            '32' => 'D', // Designer
-            '33' => 'ST', // Security Team
-            '37' => 'AR', // Archive Team
-            '36' => 'AT', // Alpha Team
-            '48' => 'BT', // Beta TEam
-            '38' => 'CT', // Charlie Team
-            '39' => 'DT', // Delta Team
-         ];
-
         if ($UserID == 0) {
             return 'System';
         }
@@ -629,8 +614,10 @@ class Users {
 
         if ($Badges) {
             $ClassesDisplay = [];
-            foreach (array_intersect_key($SecondaryClasses, $UserInfo['ExtraClasses']) as $PermID => $PermShort) {
-                $ClassesDisplay[] = '<span class="tooltip secondary_class" title="'.$Classes[$PermID]['Name'].'">'.$PermShort.'</span>';
+            foreach (array_keys($UserInfo['ExtraClasses']) as $PermID) {
+                if ($Classes[$PermID]['badge'] !== '') {
+                    $ClassesDisplay[] = '<span class="tooltip secondary_class" title="'.$Classes[$PermID]['Name'].'">'.$Classes[$PermID]['badge'].'</span>';
+                }
             }
             if (!empty($ClassesDisplay)) {
                 $Str .= '&nbsp;'.implode('&nbsp;', $ClassesDisplay);
