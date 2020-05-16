@@ -18,16 +18,23 @@ function confirmDelete(id) {
         </div>
     </div>
 <?php
+if (isset($err)) {
+?>
+    <div class="box thin">
+        <p class="important_text"><?=$err?></p>
+    </div>
+<?php
+}
 $DB->query("
     SELECT
         p.ID,
         p.Name,
         p.Level,
         p.Secondary,
-        COUNT(u.ID) + COUNT(DISTINCT l.UserID)
+        count(u.ID) + count(DISTINCT l.UserID)
     FROM permissions AS p
-        LEFT JOIN users_main AS u ON u.PermissionID = p.ID
-        LEFT JOIN users_levels AS l ON l.PermissionID = p.ID
+    LEFT JOIN users_main AS u ON (u.PermissionID = p.ID)
+    LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID)
     GROUP BY p.ID
     ORDER BY p.Secondary ASC, p.Level ASC");
 if ($DB->has_results()) {
@@ -40,17 +47,23 @@ if ($DB->has_results()) {
             <td class="center">Actions</td>
         </tr>
 <?php
-    while (list($ID, $Name, $Level, $Secondary, $UserCount) = $DB->next_record()) {
-        $part = $Secondary ? 'secclass' : 'class';
-        $link = "user.php?action=search&{$part}={$ID}";
+    while (list($id, $name, $level, $secondary, $userCount) = $DB->next_record()) {
+        $part = $secondary ? 'secclass' : 'class';
+        $link = "user.php?action=search&{$part}={$id}";
 ?>
         <tr>
-            <td><?=display_str($Name); ?></td>
-            <td><?=($Secondary ? 'Secondary' : $Level) ?></td>
-            <td><a href="<?=$link; ?>"><?=number_format($UserCount); ?></a></td>
+            <td><a href="<?=$link?>"><?=display_str($name)?></a></td>
+            <td><?=($secondary ? 'Secondary' : $level)?></td>
+            <td><a href="<?=$link?>"><?=number_format($userCount)?></a></td>
             <td class="center">
-                <a href="tools.php?action=permissions&amp;id=<?=$ID ?>" class="brackets">Edit</a>
-                <a href="#" onclick="return confirmDelete(<?=$ID?>);" class="brackets">Remove</a>
+                <a href="tools.php?action=permissions&amp;id=<?=$id?>" class="brackets">Edit</a>
+<?php
+        if (!$userCount) {
+?>
+                <a href="#" onclick="return confirmDelete(<?=$id?>);" class="brackets">Remove</a>
+<?php
+        }
+?>
             </td>
         </tr>
 <?php
@@ -64,4 +77,3 @@ if ($DB->has_results()) {
 </div>
 <?php
 View::show_footer();
-?>

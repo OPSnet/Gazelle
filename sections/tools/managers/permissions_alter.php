@@ -1,79 +1,159 @@
 <?php
-function display_perm($Key, $Title) {
-    global $Values;
-    $Perm = "<input type=\"checkbox\" name=\"perm_$Key\" id=\"$Key\" value=\"1\"";
-    if (!empty($Values[$Key])) {
-        $Perm .= ' checked="checked"';
-    }
-    $Perm .= " /> <label for=\"$Key\">$Title</label><br />";
-    echo "$Perm\n";
+if (!check_perms('admin_manage_permissions')) {
+    error(403);
 }
 
-$DB->prepared_query("
-    SELECT ID, Name
-    FROM staff_groups
-    ORDER BY Sort");
-$Groups = $DB->to_array(false, MYSQLI_ASSOC);
+$id = $_REQUEST['id'] ?? null;
+if ($id) {
+    $Val->SetFields('name', true, 'string', 'You did not enter a valid name for this permission set.');
+    $Val->SetFields('level', true, 'number', 'You did not enter a valid level for this permission set.');
+    $_POST['maxcollages'] = (empty($_POST['maxcollages'])) ? 0 : $_POST['maxcollages'];
+    $Val->SetFields('maxcollages', true, 'number', 'You did not enter a valid number of personal collages.');
 
-View::show_header('Manage Permissions', 'validate');
+    if (is_numeric($id)) {
+        $DB->prepared_query('
+            SELECT
+                p.ID,
+                p.Name,
+                p.Level,
+                p.Secondary,
+                p.PermittedForums,
+                p.Values,
+                p.DisplayStaff,
+                p.StaffGroup,
+                p.badge,
+                count(u.ID) + count(DISTINCT l.UserID)
+            FROM permissions AS p
+            LEFT JOIN users_main AS u ON (u.PermissionID = p.ID)
+            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID)
+            WHERE p.ID = ?
+            GROUP BY p.ID
+            ', $id
+        );
+        list($id, $name, $level, $secondary, $forums, $values, $displayStaff, $staffGroup, $badge, $userCount) = $DB->next_record(MYSQLI_NUM, [5]);
 
-echo $Val->GenerateJS('permissionsform');
-?>
-<form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
-    <input type="hidden" name="action" value="permissions" />
-    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-    <input type="hidden" name="id" value="<?=display_str($_REQUEST['id']); ?>" />
-    <div class="linkbox">
-        <a href="tools.php?action=permissions" class="brackets">Back to permission list</a>
-        <a href="tools.php" class="brackets">Back to tools</a>
-    </div>
-    <table class="permission_head layout">
-        <tr>
-            <td class="label">Permission name</td>
-            <td><input type="text" name="name" id="name" value="<?=!empty($Name) ? display_str($Name) : ''?>" /></td>
-        </tr>
-        <tr>
-            <td class="label">Class level</td>
-            <td><input type="text" name="level" id="level" value="<?=!empty($Level) ? display_str($Level) : ''?>" /></td>
-        </tr>
-        <tr>
-            <td class="label">Secondary class</td>
-            <td><input type="checkbox" name="secondary" value="1"<?=!empty($Secondary) ? ' checked="checked"' : ''?> /></td>
-        </tr>
-        <tr>
-            <td class="label">Show on staff page</td>
-            <td><input type="checkbox" name="displaystaff" value="1"<?=!empty($DisplayStaff) ? ' checked="checked"' : ''?> /></td>
-        </tr>
-        <tr>
-            <td class="label">Staff page group</td>
-            <td>
-                <select name="staffgroup" id="staffgroup">
-<?php
-foreach ($Groups as $Group) { ?>
-                    <option value="<?=$Group['ID']?>"<?=$Group['ID'] == $StaffGroup ? ' selected="selected"' : ''?>><?=$Group['Name']?></option>
-<?php
-} ?>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td class="label">Maximum number of personal collages</td>
-            <td><input type="text" name="maxcollages" size="5" value="<?=$Values['MaxCollages']?>" /></td>
-        </tr>
-        <tr>
-            <td class="label">Additional forums</td>
-            <td><input type="text" size="30" name="forums" value="<?=display_str($Forums)?>" /></td>
-        </tr>
-<?php if (is_numeric($_REQUEST['id'])) { ?>
-        <tr>
-            <td class="label">Current users in this class</td>
-            <td><?=number_format($UserCount)?></td>
-        </tr>
-<?php } ?>
-    </table>
-<?php
-include(SERVER_ROOT."/classes/permissions_form.php");
-permissions_form();
-?>
-</form>
-<?php View::show_footer(); ?>
+        if (!check_perms('admin_manage_permissions', $level)) {
+            error(403);
+        }
+
+        $values = unserialize($values);
+    }
+
+    if (!empty($_POST['submit'])) {
+        $err = $Val->ValidateForm($_POST);
+
+        if (!is_numeric($id)) {
+            if ($DB->scalar('SELECT ID FROM permissions WHERE Level = ?', $_REQUEST['level'])) {
+                $err = 'There is already a permission class with that level.';
+            }
+        } else if (empty($_REQUEST['secondary']) == $secondary) {
+            if (!$secondary && $DB->scalar('SELECT count(*) FROM users_main WHERE PermissionID = ?', $id) ||
+                 $secondary && $DB->scalar('SELECT count(*) FROM users_levels WHERE PermissionID = ?', $id)) {
+                $err = "You can't toggle secondary when there are users";
+            }
+        }
+
+
+        $values = [];
+        foreach ($_REQUEST as $key => $perms) {
+            if (substr($key, 0, 5) == 'perm_') {
+                $values[substr($key, 5)] = (int)$perms;
+            }
+        }
+
+        $name = $_REQUEST['name'];
+        $level = $_REQUEST['level'];
+        $secondary = empty($_REQUEST['secondary']) ? 0 : 1;
+        $forums = $_REQUEST['forums'];
+        $displayStaff = empty($_REQUEST['displaystaff']) ? '0' : '1';
+        $staffGroup = $_REQUEST['staffgroup'] ?? null;
+        $badge = $_REQUEST['badge'] ?? '';
+
+        if (!$secondary) {
+            $badge = '';
+        }
+
+        $values['MaxCollages'] = $_REQUEST['maxcollages'];
+
+        if (!$err) {
+            if (!is_numeric($id)) {
+                $DB->prepared_query('
+                    INSERT INTO permissions
+                        (Level, Name, Secondary, PermittedForums, `Values`, DisplayStaff, StaffGroup, badge)
+                    VALUES
+                        (?,     ?,    ?,         ?,                ?,       ?,            ?,          ?)
+                    ', $level, $name, $secondary, $forums, serialize($values), $displayStaff, $staffGroup, $badge
+                );
+            } else {
+                $DB->prepared_query('
+                    UPDATE permissions
+                    SET Level = ?,
+                        Name = ?,
+                        Secondary = ?,
+                        PermittedForums = ?,
+                        `Values` = ?,
+                        DisplayStaff = ?,
+                        StaffGroup = ?,
+                        badge = ?
+                    WHERE ID = ?
+                    ', $level, $name, $secondary, $forums, serialize($values), $displayStaff, $staffGroup, $badge, $id
+                );
+                $Cache->delete_value('perm_'.$id);
+                if ($secondary) {
+                    $DB->prepared_query("
+                        SELECT DISTINCT concat('user_info_heavy_', UserID)
+                        FROM users_levels
+                        WHERE PermissionID = ?
+                        ", $id
+                    );
+                } else {
+                    $DB->prepared_query("
+                        SELECT DISTINCT concat('user_info_heavy_', UserID)
+                        FROM users_main
+                        WHERE PermissionID = ?
+                        ", $id
+                    );
+                }
+                $Cache->deleteMulti($DB->collect(0, false));
+            }
+            $Cache->delete_value('classes');
+            $Cache->delete_value('staff');
+        } else {
+            error($err);
+        }
+    }
+
+    include(__DIR__.'/permissions_edit.php');
+} else {
+    $id = $_REQUEST['removeid'] ?? null;
+    if ($id) {
+        if ($DB->scalar('SELECT count(*) FROM users_main WHERE PermissionID = ?', $id)) {
+            $err = 'You cannot delete a class with users.';
+        } else {
+            if ($DB->scalar('SELECT Secondary FROM permissions WHERE ID = ?', $id)) {
+                $DB->prepared_query("
+                    SELECT DISTINCT concat('user_info_heavy_', UserID)
+                    FROM users_levels
+                    WHERE PermissionID = ?
+                    ", $id
+                );
+                $Cache->deleteMulti($DB->collect(0, false));
+                $DB->prepared_query('
+                    DELETE FROM users_levels
+                    WHERE PermissionId = ?
+                    ', $id
+                );
+            }
+
+            $DB->prepared_query('
+                DELETE FROM permissions
+                WHERE ID = ?
+                ', $id
+            );
+
+            $Cache->delete_value('classes');
+        }
+    }
+
+    include(__DIR__.'/permissions_list.php');
+}
