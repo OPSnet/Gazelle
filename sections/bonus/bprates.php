@@ -7,16 +7,16 @@ $page = max(1, $page);
 $limit = TORRENTS_PER_PAGE;
 $offset = TORRENTS_PER_PAGE * ($page-1);
 
-$sortOrderMap = [
-    'size'          => ['t.Size',       'desc'],
-    'seeders'       => ['Seeders',      'desc'],
-    'seedtime'      => ['SeedTime',     'desc'],
-    'hourlypoints'  => ['HourlyPoints', 'desc'],
-    'dailypoints'   => ['DailyPoints',  'desc'],
-    'weeklypoints'  => ['WeeklyPoints', 'desc'],
-    'monthlypoints' => ['MontlyPoints', 'desc'],
-    'yearlypoints'  => ['YearlyPoints', 'desc'],
-    'pointspergb'   => ['PointsPerGB',  'desc'],
+$sortOrderMap =  [
+    'size'          => ['t.Size',        'desc'],
+    'seeders'       => ['Seeders',       'desc'],
+    'seedtime'      => ['SeedTime',      'desc'],
+    'hourlypoints'  => ['HourlyPoints',  'desc'],
+    'dailypoints'   => ['DailyPoints',   'desc'],
+    'weeklypoints'  => ['WeeklyPoints',  'desc'],
+    'monthlypoints' => ['MonthlyPoints', 'desc'],
+    'yearlypoints'  => ['YearlyPoints',  'desc'],
+    'pointspergb'   => ['PointsPerGB',   'desc'],
 ];
 $sortOrder = (!empty($_GET['order']) && isset($sortOrderMap[$_GET['order']])) ? $_GET['order'] : 'hourlypoints';
 $orderBy = $sortOrderMap[$sortOrder][0];
