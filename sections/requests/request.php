@@ -58,7 +58,7 @@ if (empty($Request['ReleaseType'])) {
 //Votes time
 $RequestVotes = Requests::get_votes_array($RequestID);
 $VoteCount = count($RequestVotes['Voters']);
-$UserCanEdit = (!$IsFilled && $LoggedUser['ID'] === $Request['UserID'] && $VoteCount < 2);
+$UserCanEdit = (!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2);
 $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)

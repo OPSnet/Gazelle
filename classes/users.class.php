@@ -98,7 +98,7 @@ class Users {
                 LEFT JOIN locked_accounts AS la ON (la.UserID = m.ID)
                 LEFT JOIN users_levels AS ul ON (ul.UserID = m.ID)
                 LEFT JOIN users_levels AS donor ON (donor.UserID = m.ID
-                    AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+                    AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
                 )
                 WHERE m.ID = ?
                 GROUP BY m.ID
@@ -608,7 +608,7 @@ class Users {
 
         $Str .= ($IsWarned && $UserInfo['Warned'] != '0000-00-00 00:00:00') ? '<a href="wiki.php?action=article&amp;name=warnings"'
                     . '><img src="'.STATIC_SERVER.'common/symbols/warned.png" alt="Warned" title="Warned'
-                    . (G::$LoggedUser['ID'] === $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
+                    . (G::$LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
                     . '" class="tooltip" /></a>' : '';
         $Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
 
@@ -924,75 +924,6 @@ class Users {
      */
     public static function flush_enabled_users_count() {
         G::$Cache->delete_value('stats_user_count');
-    }
-
-    public static function get_promotion_criteria() {
-        $criteria = [];
-        $criteria[] = ['From' => USER,   'To' => MEMBER,         'MinUpload' => 10 * 1024 * 1024 * 1024,  'MinRatio' => 0.7,  'MinUploads' => 0,   'Weeks' => 1];
-        $criteria[] = ['From' => MEMBER, 'To' => POWER,          'MinUpload' => 25 * 1024 * 1024 * 1024,  'MinRatio' => 1.05, 'MinUploads' => 5,   'Weeks' => 2];
-        $criteria[] = ['From' => POWER,  'To' => ELITE,          'MinUpload' => 100 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 50,  'Weeks' => 4];
-        $criteria[] = ['From' => ELITE,  'To' => TORRENT_MASTER, 'MinUpload' => 500 * 1024 * 1024 * 1024, 'MinRatio' => 1.05, 'MinUploads' => 500, 'Weeks' => 8];
-        $criteria[] = [
-            'From' => TORRENT_MASTER,
-            'To' => POWER_TM,
-            'MinUpload' => 500 * 1024 * 1024 * 1024,
-            'MinRatio' => 1.05,
-            'MinUploads' => 500,
-            'Weeks' => 8,
-            'Extra' => '
-                        (
-                            SELECT count(DISTINCT GroupID)
-                            FROM torrents
-                            WHERE UserID = users_main.ID
-                        ) >= 500'];
-        $criteria[] = [
-            'From' => POWER_TM,
-            'To' => ELITE_TM,
-            'MinUpload' => 500 * 1024 * 1024 * 1024,
-            'MinRatio' => 1.05,
-            'MinUploads' => 500,
-            'Weeks' => 8,
-            'Extra' => "
-                        (
-                            SELECT count(ID)
-                            FROM torrents
-                            WHERE ((LogScore = 100 AND Format = 'FLAC')
-                                OR (Media = 'Vinyl' AND Format = 'FLAC')
-                                OR (Media = 'WEB' AND Format = 'FLAC')
-                                OR (Media = 'DVD' AND Format = 'FLAC')
-                                OR (Media = 'Soundboard' AND Format = 'FLAC')
-                                OR (Media = 'Cassette' AND Format = 'FLAC')
-                                OR (Media = 'SACD' AND Format = 'FLAC')
-                                OR (Media = 'Blu-ray' AND Format = 'FLAC')
-                                OR (Media = 'DAT' AND Format = 'FLAC')
-                                )
-                                AND UserID = users_main.ID
-                        ) >= 500"];
-        $criteria[] = [
-            'From' => ELITE_TM,
-            'To' => ULTIMATE_TM,
-            'MinUpload' => 2 * 1024 * 1024 * 1024 * 1024,
-            'MinRatio' => 1.05,
-            'MinUploads' => 2000,
-            'Weeks' => 12,
-            'Extra' => sprintf("
-                        ((
-                            SELECT count(DISTINCT t.GroupID, t.RemasterYear, t.RemasterCatalogueNumber, t.RemasterRecordLabel, t.RemasterTitle, t.Media)
-                            FROM torrents t
-                            WHERE t.Format = 'FLAC'
-                                AND ((t.LogScore = 100 AND t.Media = 'CD')
-                                    OR t.Media IN ('Cassette', 'DAT')
-                                    OR (t.Media IN ('Vinyl', 'DVD', 'Soundboard', 'SACD', 'BD') AND t.Encoding = '24bit Lossless'))
-                                AND t.UserID = users_main.ID
-                        ) >= 2000 AND
-                        (
-                            SELECT uls.Uploaded + IFNULL(b.Bounty, 0) - IFNULL(ubl.final, 0)
-                            FROM users_leech_stats uls
-                            LEFT JOIN %s.users_buffer_log ubl ON (ubl.opsid = uls.UserID)
-                            WHERE uls.UserID = users_main.ID
-                        ) >= 2 * 1024 * 1024 * 1024 * 1024)", RECOVERY_DB)];
-
-        return $criteria;
     }
 
     /**

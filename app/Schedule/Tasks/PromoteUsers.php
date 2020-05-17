@@ -6,7 +6,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $criteria = \Users::get_promotion_criteria();
+        $criteria = \Gazelle\User::promotionCriteria();
         foreach ($criteria as $l) { // $l = Level
             $fromClass = \Users::make_class_string($l['From']);
             $toClass = \Users::make_class_string($l['To']);
@@ -19,13 +19,13 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                         INNER JOIN users_info ui ON (users_main.ID = ui.UserID)
                         LEFT JOIN
                         (
-                            SELECT UserID, SUM(Bounty) AS Bounty
+                            SELECT UserID, sum(Bounty) AS Bounty
                             FROM requests_votes
                             GROUP BY UserID
-                        ) b ON b.UserID = users_main.ID
+                        ) b ON (b.UserID = users_main.ID)
                         WHERE users_main.PermissionID = ?
                         AND ui.Warned = '0000-00-00 00:00:00'
-                        AND uls.Uploaded + IFNULL(b.Bounty, 0) >= ?
+                        AND uls.Uploaded + coalesce(b.Bounty, 0) >= ?
                         AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
                         AND ui.JoinDate < now() - INTERVAL ? WEEK
                         AND (
@@ -34,11 +34,24 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                             WHERE UserID = users_main.ID
                         ) >= ?
                         AND users_main.Enabled = '1'";
+
+            $params = [$l['From'], $l['MinUpload'], $l['MinRatio'], $l['Weeks'], $l['MinUploads']];
+
             if (!empty($l['Extra'])) {
-                $query .= ' AND '.$l['Extra'];
+                $subQueries = array_map(function ($v) use (&$params) {
+                    $params[] = $v['Count'];
+                    return sprintf('(
+                                %s
+                            ) >= ?', $v['Query']);
+                }, $l['Extra']);
+
+                $query .= sprintf('
+                        AND (
+                            %s
+                        )', implode(' AND ', $subQueries));
             }
 
-            $this->db->prepared_query($query, $l['From'], $l['MinUpload'], $l['MinRatio'], $l['Weeks'], $l['MinUploads']);
+            $this->db->prepared_query($query, ...$params);
 
             $userIds = $this->db->collect('ID');
 
