@@ -32,7 +32,7 @@ if ($NewRequest) {
     $VoteCount = count($VoteArray['Voters']);
     $IsFilled = !empty($Request['TorrentID']);
     $CategoryName = $CategoriesV2[$Request['CategoryID'] - 1];
-    $CanEdit = ((!$IsFilled && $LoggedUser['ID'] === $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
+    $CanEdit = ((!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCount < 2) || check_perms('site_moderate_requests'));
 
     if (!$CanEdit) {
         error(403);

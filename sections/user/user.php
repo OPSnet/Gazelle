@@ -229,6 +229,7 @@ function check_paranoia_here($Setting) {
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
 $User = new \Gazelle\User($DB, $Cache, $UserID);
 $User->forceCacheFlush($UserID == $LoggedUser['ID']);
+list($ClassRatio, $Buffer) = $User->buffer();
 
 ?>
 <div class="thin">
@@ -378,7 +379,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
     }
     if (($Override = (check_paranoia_here('uploaded') && check_paranoia_here('downloaded')))) {
 ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded - $Downloaded, 5)?>">Buffer: <?=Format::get_size($Uploaded - $Downloaded)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Buffer, 5)?>">Buffer: <?=Format::get_size($Buffer)?></li>
 <?php
     }
     if (($Override = check_paranoia_here('ratio'))) {
@@ -389,6 +390,11 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
     if (($Override = check_paranoia_here('requiredratio')) && isset($RequiredRatio)) {
 ?>
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Required Ratio: <span class="tooltip" title="<?=number_format((double)$RequiredRatio, 5)?>"><?=number_format((double)$RequiredRatio, 2)?></span></li>
+<?php
+    }
+    if ($Override = check_paranoia_here('requiredratio')) {
+?>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Required Class Ratio: <span class="tooltip" title="<?=number_format((double)$ClassRatio, 5)?>"><?=number_format((double)$ClassRatio, 2)?></span></li>
 <?php
     }
     if (($Override = check_paranoia_here('bonuspoints')) && isset($BonusPoints)) {
@@ -419,6 +425,55 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
             </ul>
         </div>
 <?php
+    if ($OwnProfile || check_perms('users_mod', $Class)) {
+        $nextClass = $User->nextClass();
+        if ($nextClass) {
+?>
+        <div class="box box_info box_userinfo_nextclass">
+            <div class="head colhead_dark"><a href="wiki.php?action=article&amp;name=userclasses">Next Class</a></div>
+            <ul class="stats nobullet">
+                <li>Class: <?=$nextClass['Class']?></li>
+<?php
+            foreach ($nextClass['Requirements'] as $key => $req) {
+                $current = $req[0];
+                $goal = $req[1];
+                $type = $req[2];
+                if ($goal === 0) {
+                    continue;
+                }
+
+                switch ($type) {
+                case 'time':
+                    $percent = (time() - strtotime($current)) / $goal;
+                    $current = Gazelle\Util\Time::timeDiff($current, 2, true, false, false, true);
+                    $goal = $goal / 7 / 24 / 60 / 60;
+                    $goal = "$goal week" . ($goal > 1 ? 's' : '');
+                    break;
+                case 'float':
+                    $current = $current == '∞' ? $current : round($current, 2);
+                case 'int':
+                    $percent = $current == '∞' ? 1 : $current / $goal;
+                    break;
+                case 'bytes':
+                    $percent = $current / $goal;
+                    $current = Format::get_size($current);
+                    $goal = Format::get_size($goal);
+                    break;
+                }
+
+                $percent = sprintf('<span class="tooltip %s" title="%s">%s</span>',
+                    Format::get_ratio_color($percent),
+                    round($percent * 100, 2) . '%',
+                    round($percent * 100, 0) . '%'
+                );
+ ?>
+                <li><?=$key?>: <?=$current?> / <?=$goal?> (<?=$percent?>)</li>
+<?php } ?>
+            </ul>
+        </div>
+<?php
+        }
+      }
 // Last.fm statistics and comparability
 $LastFMUsername = LastFM::get_lastfm_username($UserID);
 if ($LastFMUsername)  {

@@ -32,7 +32,7 @@ class Time {
         }
     }
 
-    public static function timeDiff($timestamp, $levels = 2, $span = true, $lowercase = false, $starttime = false) {
+    public static function timeDiff($timestamp, $levels = 2, $span = true, $lowercase = false, $starttime = false, $hideAgo = false) {
         $starttime = ($starttime === false) ? time() : strtotime($starttime);
 
         if (!Type::isInteger($timestamp)) { // Assume that $timestamp is SQL timestamp
@@ -49,7 +49,7 @@ class Time {
         // If the time is negative, then it expires in the future.
         if ($time < 0) {
             $time = -$time;
-            $HideAgo = true;
+            $hideAgo = true;
         }
 
         $years = floor($time / 31556926); // seconds in one year
@@ -144,7 +144,7 @@ class Time {
 
         if ($return == '') {
             $return = 'Just now';
-        } elseif (!isset($HideAgo)) {
+        } elseif (!$hideAgo) {
             $return .= ' ago';
         }
 

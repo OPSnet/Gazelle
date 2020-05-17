@@ -19,17 +19,17 @@ class Format {
         'default'  => 'tl_notice',
         'snatched' => 'tl_snatched',
 
-        'freeleech'            => 'tl_free',
-        'neutral leech'        => 'tl_free tl_neutral',
-        'personal freeleech'=> 'tl_free tl_personal',
+        'freeleech'          => 'tl_free',
+        'neutral leech'      => 'tl_free tl_neutral',
+        'personal freeleech' => 'tl_free tl_personal',
 
-        'reported'        => 'tl_reported',
-        'bad tags'        => 'tl_reported tl_bad_tags',
-        'bad folders'    => 'tl_reported tl_bad_folders',
-        'bad file names'=> 'tl_reported tl_bad_file_names',
-        'missing lineage'=> 'tl_reported tl_missing_lineage',
-        'cassette approved'        => 'tl_approved tl_cassete',
-        'lossy master approved'    => 'tl_approved tl_lossy_master',
+        'reported'              => 'tl_reported',
+        'bad tags'              => 'tl_reported tl_bad_tags',
+        'bad folders'           => 'tl_reported tl_bad_folders',
+        'bad file names'        => 'tl_reported tl_bad_file_names',
+        'missing lineage'       => 'tl_reported tl_missing_lineage',
+        'cassette approved'     => 'tl_approved tl_cassete',
+        'lossy master approved' => 'tl_approved tl_lossy_master',
         'lossy web approved'    => 'tl_approved tl_lossy_web'
     ];
 

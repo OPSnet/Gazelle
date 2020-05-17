@@ -6,13 +6,9 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        // TODO: refactor this into the config.
-        $this->demote(USER, 0.65, 0, [
-            MEMBER, POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM, ULTIMATE_TM
-        ]);
-        $this->demote(MEMBER, 0.95, 25 * 1024 * 1024 * 1024, [
-            POWER, ELITE, TORRENT_MASTER, POWER_TM, ELITE_TM, ULTIMATE_TM
-        ]);
+        foreach (\Gazelle\User::demotionCriteria() as $criteria) {
+            $this->demote($criteria['To'], $criteria['Ratio'], $criteria['Upload'], $criteria['From']);
+        }
     }
 
     private function demote(int $newClass, float $ratio, int $upload, array $demoteClasses) {
