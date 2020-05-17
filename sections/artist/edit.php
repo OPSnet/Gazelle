@@ -84,63 +84,14 @@ View::show_header('Edit artist');
 
 <?php if (check_perms('torrents_edit')) { ?>
 
-<form class="rename_form" name="artist" action="artist.php" method="post">
-<input type="hidden" name="action" value="rename" />
-<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
-<input type="hidden" name="artistid" value="<?= $artistId ?>" />
-    <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_rename">
-    <tr class="colhead_dark">
-        <td colspan="2"><strong>Rename this artist</strong></td>
-    </tr>
-    <tr>
-        <td class="label" style="width: 120px; vertical-align: top;">New name</td>
-        <td>
-            <input type="text" name="name" size="92" value="<?=$name?>" /><br /><br />
-        </td>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td><input type="submit" value="Rename Artist" /></td>
-    </tr>
-    </table>
-</form>
-
-<form class="merge_form" name="artist" action="artist.php" method="post">
-<input type="hidden" name="action" value="change_artistid" />
-<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
-<input type="hidden" name="artistid" value="<?= $artistId ?>" />
-<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
-    <tr class="colhead_dark">
-        <td colspan="2"><strong>Alias Management</strong></td>
-    </tr>
-    <tr>
-        <td class="label" style="width: 120px; vertical-align: top;">Change to non-redirecting alias</td>
-        <td>
-            <p>Merges this artist ("<?=$name?>") into the artist specified below (without redirection),
-            so that ("<?=$name?>") and its aliases will appear as a non-redirecting alias of the artist entered in the text box below.</p>
-            <p>A non-redirecting alias is used so a release is show with the correct artist name (e.g.
-            <i>Sun Ra All Stars</i> versus <i>Sun Ra and His Astro-Solar-Infinity Arkestra</i>) and all
-            releases are shown on the artist page <i>Sun Ra</i>.</p>
-            <br />
-            <div style="text-align: center;">
-                <label for="newartistid">Artist ID:</label>&nbsp;<input type="text" id="newartistid" name="newartistid" size="40" value="" /><br />
-                <strong>OR</strong><br />
-                <label for="newartistid">Artist name:</label>&nbsp;<input type="text" id="newartistname" name="newartistname" size="40" value="" />
-            </div><br /><br />
-        </td>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-        <td><input type="submit" value="Make non-redirecting alias" /></td>
-    </tr>
-</table>
-</form>
-
 <form class="merge_form" name="artist" action="artist.php" method="post">
 <input type="hidden" name="action" value="change_artistid" />
 <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
 <input type="hidden" name="artistid" value="<?= $artistId ?>" />
     <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
+    <tr class="colhead_dark">
+        <td colspan="2"><strong>Alias Management</strong></td>
+    </tr>
     <tr>
         <td class="label" style="width: 120px; vertical-align: top;">Existing aliases</td>
         <td>
@@ -166,7 +117,7 @@ foreach($nonRedirAliases as $r) {
 <?php if ($r['userId']) { ?>
                 &nbsp;<a href="user.php?id=<?= $r['userId'] ?>" class="brackets tooltip">Added by <?= Users::user_info($r['userId'])['Username'] ?></a>
 <?php } ?>
-                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid=<?=$aliasId?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Delete this alias" class="brackets tooltip">X</a>
+                &nbsp;<a href="artist.php?action=delete_alias&amp;aliasid=<?=$r['aliasId']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Delete this alias" class="brackets tooltip">X</a>
 <?php if (!$r['redirectId']) { ?>
                 &nbsp;<?= "\xE2\x98\x85" ?>
 <?php } ?>
@@ -197,10 +148,10 @@ foreach($nonRedirAliases as $r) {
             <div class="field_div">
                 <span class="label"><strong>Writes redirect to:</strong></span>
                 <select name="redirect">
-                    <option value="0">Non-redirecting alias</option>
 <?php foreach ($alias as $aliasId => $aliasName) { ?>
                     <option value="<?= $aliasId ?>"<?= $aliasId == $defaultId ? ' selected="selected"' : "" ?>><?= $aliasName ?></option>
 <?php } ?>
+                    <option value="0">Non-redirecting alias</option>
                 </select><br />
             </div>
         </div>
@@ -211,6 +162,55 @@ foreach($nonRedirAliases as $r) {
         <td><input type="submit" value="Add alias" /></td>
     </tr>
 </table>
+</form>
+
+<form class="merge_form" name="artist" action="artist.php" method="post">
+<input type="hidden" name="action" value="change_artistid" />
+<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+<input type="hidden" name="artistid" value="<?= $artistId ?>" />
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_redirect">
+    <tr>
+        <td class="label" style="width: 120px; vertical-align: top;">Change to non-redirecting alias</td>
+        <td>
+            <p>Merges this artist ("<?=$name?>") into the artist specified below (without redirection),
+            so that ("<?=$name?>") and its aliases will appear as a non-redirecting alias of the artist entered in the text box below.</p>
+            <p>A non-redirecting alias is used so a release is show with the correct artist name (e.g.
+            <i>Sun Ra All Stars</i> versus <i>Sun Ra and His Astro-Solar-Infinity Arkestra</i>) and all
+            releases are shown on the artist page <i>Sun Ra</i>.</p>
+            <br />
+            <div style="text-align: center;">
+                <label for="newartistid">Artist ID:</label>&nbsp;<input type="text" id="newartistid" name="newartistid" size="40" value="" /><br />
+                <strong>OR</strong><br />
+                <label for="newartistid">Artist name:</label>&nbsp;<input type="text" id="newartistname" name="newartistname" size="40" value="" />
+            </div><br /><br />
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><input type="submit" value="Make non-redirecting alias" /></td>
+    </tr>
+</table>
+</form>
+
+<form class="rename_form" name="artist" action="artist.php" method="post">
+<input type="hidden" name="action" value="rename" />
+<input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+<input type="hidden" name="artistid" value="<?= $artistId ?>" />
+    <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border artist_edit" id="artist_edit_rename">
+    <tr class="colhead_dark">
+        <td colspan="2"><strong>Rename this artist</strong></td>
+    </tr>
+    <tr>
+        <td class="label" style="width: 120px; vertical-align: top;">New name</td>
+        <td>
+            <input type="text" name="name" size="92" value="<?=$name?>" /><br /><br />
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><input type="submit" value="Rename Artist" /></td>
+    </tr>
+    </table>
 </form>
 
 <?php } /* check_perms('torrents_edit') */ ?>
