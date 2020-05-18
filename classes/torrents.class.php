@@ -839,7 +839,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         }
 
         $QueryID = G::$DB->get_query_id();
-        $FL_condition = $AllFL && $FreeLeechType != '0' ? '' : "AND Encoding = 'Lossless'";
+        $FL_condition = $AllFL || $FreeLeechType == '0' ? '' : "AND Encoding IN ('24bit Lossless', 'Lossless')";
         $placeholders = implode(',', array_fill(0, count($TorrentIDs), '?'));
         G::$DB->prepared_query("
             UPDATE torrents
