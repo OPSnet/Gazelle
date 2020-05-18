@@ -1,11 +1,20 @@
 <?php
+
 enforce_login();
-if (!defined('LOG_ENTRIES_PER_PAGE')) {
-    define('LOG_ENTRIES_PER_PAGE', 100);
-}
+
+$siteLog = new \Gazelle\Manager\SiteLog($DB, $Cache, $Debug);
+
 View::show_header("Site log");
 
-include(SERVER_ROOT.'/sections/log/sphinx.php');
+if (!empty($_GET['page']) && is_number($_GET['page'])) {
+    $page = min(SPHINX_MAX_MATCHES / LOG_ENTRIES_PER_PAGE, (int)$_GET['page']);
+    $offset = ($page - 1) * LOG_ENTRIES_PER_PAGE;
+} else {
+    $page = 1;
+    $offset = 0;
+}
+
+$siteLog->load($page, $offset, $_GET['search'] ?? '');
 ?>
 <div class="thin">
     <div class="header">
@@ -27,190 +36,50 @@ include(SERVER_ROOT.'/sections/log/sphinx.php');
     </div>
 
 <?php
-    if ($TotalMatches > LOG_ENTRIES_PER_PAGE) { ?>
+if ($siteLog->totalMatches() > LOG_ENTRIES_PER_PAGE) {
+    $pages = Format::get_pages($page, $siteLog->totalMatches(), LOG_ENTRIES_PER_PAGE, 9);
+?>
     <div class="linkbox">
-<?php
-    $Pages = Format::get_pages($Page, $TotalMatches, LOG_ENTRIES_PER_PAGE, 9);
-    echo $Pages;?>
+        <?= $pages ?>
     </div>
-<?php
-    } ?>
+<?php } ?>
     <table cellpadding="6" cellspacing="1" border="0" class="log_table border" id="log_table" width="100%">
         <tr class="colhead">
             <td style="width: 180px;"><strong>Time</strong></td>
-            <td><strong>Message</strong></td>
+            <td><strong>Message<? ($_GET['search'] ?? null) ? (' "' . $_GET['search'] . '"') : '' ?></strong></td>
         </tr>
+<?php if ($siteLog->error()) { ?>
+    <tr class="nobr"><td colspan="2">Search request failed (<?= $siteLog->errorMessage() ?>).</td></tr>
 <?php
-    if ($QueryStatus) { ?>
-    <tr class="nobr"><td colspan="2">Search request failed (<?=$QueryError?>).</td></tr>
-<?php
-    } elseif (!$DB->has_results()) { ?>
-    <tr class="nobr"><td colspan="2">Nothing found!</td></tr>
-<?php
-    }
-$Row = 'a';
-$Usernames = [];
-while (list($ID, $Message, $LogTime) = $DB->next_record()) {
-    $MessageParts = explode(' ', $Message);
-    $Message = '';
-    $Color = $Colon = false;
-    for ($i = 0, $PartCount = sizeof($MessageParts); $i < $PartCount; $i++) {
-        if ((strpos($MessageParts[$i], 'https://'.SSL_SITE_URL) === 0
-                && $Offset = strlen('https://'.SSL_SITE_URL.'/'))
-            || (strpos($MessageParts[$i], 'http://'.NONSSL_SITE_URL) === 0
-                && $Offset = strlen('http://'.NONSSL_SITE_URL.'/'))
-            ) {
-                $MessageParts[$i] = '<a href="'.substr($MessageParts[$i], $Offset).'">'.substr($MessageParts[$i], $Offset).'</a>';
-        }
-        switch ($MessageParts[$i]) {
-            case 'Torrent':
-            case 'torrent':
-                $TorrentID = $MessageParts[$i + 1];
-                if (is_numeric($TorrentID)) {
-                    $Message = $Message.' '.$MessageParts[$i]." <a href=\"torrents.php?torrentid=$TorrentID\">$TorrentID</a>";
-                    $i++;
-                } else {
-                    $Message = $Message.' '.$MessageParts[$i];
-                }
-                break;
-            case 'Request':
-                $RequestID = $MessageParts[$i + 1];
-                if (is_numeric($RequestID)) {
-                    $Message = $Message.' '.$MessageParts[$i]." <a href=\"requests.php?action=view&amp;id=$RequestID\">$RequestID</a>";
-                    $i++;
-                } else {
-                    $Message = $Message.' '.$MessageParts[$i];
-                }
-                break;
-            case 'Artist':
-            case 'artist':
-                $ArtistID = $MessageParts[$i + 1];
-                if (is_numeric($ArtistID)) {
-                    $Message = $Message.' '.$MessageParts[$i]." <a href=\"artist.php?id=$ArtistID\">$ArtistID</a>";
-                    $i++;
-                } else {
-                    $Message = $Message.' '.$MessageParts[$i];
-                }
-                break;
-            case 'group':
-            case 'Group':
-                $GroupID = $MessageParts[$i + 1];
-                if (is_numeric($GroupID)) {
-                    $Message = $Message.' '.$MessageParts[$i]." <a href=\"torrents.php?id=$GroupID\">$GroupID</a>";
-                } else {
-                    $Message = $Message.' '.$MessageParts[$i];
-                }
-                $i++;
-                break;
-            case 'by':
-                $UserID = 0;
-                $User = '';
-                $URL = '';
-                if ($MessageParts[$i + 1] == 'user') {
-                    $i++;
-                    if (is_numeric($MessageParts[$i + 1])) {
-                        $UserID = $MessageParts[++$i];
-                    }
-                    $URL = "user $UserID (<a href=\"user.php?id=$UserID\">".substr($MessageParts[++$i], 1, -1).'</a>)';
-                } elseif (in_array($MessageParts[$i - 1], ['deleted', 'uploaded', 'edited', 'created', 'recovered'])) {
-                    $User = $MessageParts[++$i];
-                    if (substr($User, -1) == ':') {
-                        $User = substr($User, 0, -1);
-                        $Colon = true;
-                    }
-                    if (!isset($Usernames[$User])) {
-                        $DB->query("
-                            SELECT ID
-                            FROM users_main
-                            WHERE Username = _utf8 '" . db_string($User) . "'
-                            COLLATE utf8_bin");
-                        list($UserID) = $DB->next_record();
-                        $Usernames[$User] = $UserID ? $UserID : '';
-                    } else {
-                        $UserID = $Usernames[$User];
-                    }
-                    $DB->set_query_id($Log);
-                    $URL = $Usernames[$User] ? "<a href=\"user.php?id=$UserID\">$User</a>".($Colon ? ':' : '') : $User;
-                }
-                $Message = "$Message by $URL";
-                break;
-            case 'uploaded':
-                if ($Color === false) {
-                    $Color = 'green';
-                }
-                $Message = $Message.' '.$MessageParts[$i];
-                break;
-            case 'deleted':
-                if ($Color === false || $Color === 'green') {
-                    $Color = 'red';
-                }
-                $Message = $Message.' '.$MessageParts[$i];
-                break;
-            case 'edited':
-                if ($Color === false) {
-                    $Color = 'blue';
-                }
-                $Message = $Message.' '.$MessageParts[$i];
-                break;
-            case 'un-filled':
-                if ($Color === false) {
-                    $Color = '';
-                }
-                $Message = $Message.' '.$MessageParts[$i];
-                break;
-            case 'marked':
-                if ($i == 1) {
-                    $User = $MessageParts[$i - 1];
-                    if (!isset($Usernames[$User])) {
-                        $DB->query("
-                            SELECT ID
-                            FROM users_main
-                            WHERE Username = _utf8 '" . db_string($User) . "'
-                            COLLATE utf8_bin");
-                        list($UserID) = $DB->next_record();
-                        $Usernames[$User] = $UserID ? $UserID : '';
-                        $DB->set_query_id($Log);
-                    } else {
-                        $UserID = $Usernames[$User];
-                    }
-                    $URL = $Usernames[$User] ? "<a href=\"user.php?id=$UserID\">$User</a>" : $User;
-                    $Message = $URL." ".$MessageParts[$i];
-                } else {
-                    $Message = $Message.' '.$MessageParts[$i];
-                }
-                break;
-            case 'Collage':
-                $CollageID = $MessageParts[$i + 1];
-                if (is_numeric($CollageID)) {
-                    $Message = $Message.' '.$MessageParts[$i]." <a href=\"collages.php?id=$CollageID\">$CollageID</a>";
-                    $i++;
-                } else {
-                    $Message = $Message.' '.$MessageParts[$i];
-                }
-                break;
-            default:
-                $Message = $Message.' '.$MessageParts[$i];
-        }
-    }
-    $Row = $Row === 'a' ? 'b' : 'a';
+}
+$row = 'a';
+$count = 0;
+foreach ($siteLog->next() as $event) {
+    list($logId, $message, $logTime) = $event;
+    ++$count;
+    list ($color, $message) = $siteLog->colorize($message);
+    $row = $row === 'a' ? 'b' : 'a';
 ?>
-        <tr class="row<?=$Row?>" id="log_<?=$ID?>">
+        <tr class="row<?= $row ?>" id="log_<?= $logId ?>">
             <td class="nobr">
-                <?=time_diff($LogTime)?>
+                <?= time_diff($logTime) ?>
             </td>
             <td>
-                <span<?php if ($Color) { ?> style="color: <?=$Color?>;"<?php } ?>><?=$Message?></span>
+                <span<?= $color ? (' style="color:' . $color .';"') : '' ?>><?= $message ?></span>
             </td>
         </tr>
 <?php
 }
-?>
+if (!$siteLog->error() && !$count) { ?>
+    <tr class="nobr"><td colspan="2">Nothing found!</td></tr>
+<?php } ?>
     </table>
-    <?php    if ($TotalMatches > LOG_ENTRIES_PER_PAGE) { ?>
+<?php if ($siteLog->totalMatches() > LOG_ENTRIES_PER_PAGE) { ?>
     <div class="linkbox">
-        <?=$Pages;?>
+        <?= $pages ?>
     </div>
-    <?php    } ?>
+<?php  } ?>
 </div>
 <?php
-View::show_footer(); ?>
+
+View::show_footer();
