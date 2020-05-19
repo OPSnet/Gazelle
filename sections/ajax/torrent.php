@@ -26,7 +26,7 @@ if ($TorrentID <= 0) {
     json_die("failure", "bad id parameter");
 }
 
-$TorrentCache = get_torrent_info($TorrentID, true, 0, true, true);
+$TorrentCache = get_torrent_info($TorrentID, 0, true, true);
 
 if (!$TorrentCache) {
     json_die("failure", "bad id parameter");

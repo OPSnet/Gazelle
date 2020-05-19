@@ -1,5 +1,5 @@
 <?php
-function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
+function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
     global $Cache, $DB;
     if (!$RevisionID) {
         $TorrentCache = $Cache->get_value("torrents_details_$GroupID");
@@ -169,28 +169,22 @@ function get_group_info($GroupID, $Return = true, $RevisionID = 0, $PersonalProp
         }
     }
 
-    if ($Return) {
-        return [$TorrentDetails, $TorrentList];
-    }
+    return [$TorrentDetails, $TorrentList];
 }
 
-function get_torrent_info($TorrentID, $Return = true, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
+function get_torrent_info($TorrentID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
     $GroupID = (int)torrentid_to_groupid($TorrentID);
-    $GroupInfo = get_group_info($GroupID, $Return, $RevisionID, $PersonalProperties, $ApiCall);
+    $GroupInfo = get_group_info($GroupID, $RevisionID, $PersonalProperties, $ApiCall);
     if ($GroupInfo) {
         foreach ($GroupInfo[1] as &$Torrent) {
             //Remove unneeded entries
             if ($Torrent['ID'] != $TorrentID) {
                 unset($GroupInfo[1][$Torrent['ID']]);
             }
-            if ($Return) {
-                return $GroupInfo;
-            }
+            return $GroupInfo;
         }
     } else {
-        if ($Return) {
-            return null;
-        }
+        return null;
     }
 }
 

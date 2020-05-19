@@ -143,7 +143,7 @@ $Pages = Format::get_pages($Page, $NumResults, IPS_PER_PAGE, 9);
 $Results = $DB->to_array();
 foreach ($Results as $Index => $Result) {
     list($value, $torrentId, $Time) = $Result;
-    list($torrentInfo) = get_torrent_info($torrentId, true, 0, true, true);
+    list($torrentInfo) = get_torrent_info($torrentId, 0, true, true);
     $urlStem = $_SERVER['SCRIPT_NAME'] . '?action=tracker_ips&amp;userid=';
 ?>
     <tr class="rowa">

@@ -959,7 +959,7 @@ $UsedFormatBitrates = [];
 
 if (!$IsNewGroup) {
     // maybe there are torrents in the same release as the new torrent. Let's find out (for notifications)
-    $GroupInfo = get_group_info($GroupID, true, 0, false);
+    $GroupInfo = get_group_info($GroupID, 0, false);
 
     $ThisMedia = display_str($Properties['Media']);
     $ThisRemastered = display_str($Properties['Remastered']);

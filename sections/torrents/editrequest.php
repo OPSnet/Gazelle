@@ -6,7 +6,7 @@ if (empty($_GET['groupid']) || !is_numeric($_GET['groupid'])) {
 $GroupID = intval($_GET['groupid']);
 
 include(SERVER_ROOT.'/sections/torrents/functions.php');
-$TorrentCache = get_group_info($GroupID, true);
+$TorrentCache = get_group_info($GroupID);
 
 $TorrentDetails = $TorrentCache[0];
 $TorrentList = $TorrentCache[1];

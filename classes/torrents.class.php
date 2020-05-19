@@ -1254,7 +1254,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
         if (!$groupId) {
             return ($attr ? "[pl=$attr]" : '[pl]') . $id . '[/pl]';
         }
-        list ($info, $list) = get_torrent_info($id, true, 0, false);
+        list ($info, $list) = get_torrent_info($id, 0, false);
         $tagNames = implode(', ',
             array_map(function ($x) { return '#' . htmlentities($x); },
                 explode('|', $info['tagNames'])));
