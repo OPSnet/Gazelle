@@ -26,11 +26,11 @@ View::show_header('Periodic Task Statistics');
             <td>Errors</td>
         </tr>
         <tr>
-            <td><?=$stats['totals']['runs']?></td>
-            <td><?=$stats['totals']['duration']?></td>
-            <td><?=$stats['totals']['processed']?></td>
-            <td><?=$stats['totals']['events']?></td>
-            <td><?=$stats['totals']['errors']?></td>
+            <td><?=number_format($stats['totals']['runs'])?></td>
+            <td><?=number_format($stats['totals']['duration'])?> ms</td>
+            <td><?=number_format($stats['totals']['processed'])?></td>
+            <td><?=number_format($stats['totals']['events'])?></td>
+            <td><?=number_format($stats['totals']['errors'])?></td>
         </tr>
     </table>
     <br />
