@@ -12,7 +12,7 @@ $BotID = SYSTEM_USER_ID;
 $GroupID = intval($_POST['groupid']);
 
 include(SERVER_ROOT.'/sections/torrents/functions.php');
-$TorrentCache = get_group_info($GroupID, true, $RevisionID);
+$TorrentCache = get_group_info($GroupID, $RevisionID);
 
 $TorrentDetails = $TorrentCache[0];
 $TorrentList = $TorrentCache[1];

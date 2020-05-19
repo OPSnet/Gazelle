@@ -6,7 +6,7 @@ if ($GroupID === 0) {
     error('bad id parameter', true);
 }
 
-$TorrentDetails = get_group_info($GroupID, true, 0, false);
+$TorrentDetails = get_group_info($GroupID, 0, false);
 $TorrentDetails = $TorrentDetails[0];
 $Image = $TorrentDetails['WikiImage'];
 if (!$Image) { // handle no artwork

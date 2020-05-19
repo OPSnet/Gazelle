@@ -25,7 +25,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
         die();
     }
     $Artists = Artists::get_artist($GroupID);
-    $TorrentCache = get_group_info($GroupID, true);
+    $TorrentCache = get_group_info($GroupID);
     $GroupDetails = $TorrentCache[0];
     $TorrentList = $TorrentCache[1];
     // Resolve the torrentlist to the one specific torrent being reported

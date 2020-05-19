@@ -27,7 +27,7 @@ if ($GroupID <= 0) {
     json_die("failure", "bad id parameter");
 }
 
-$TorrentCache = get_group_info($GroupID, true, 0, true, true);
+$TorrentCache = get_group_info($GroupID, 0, true, true);
 
 if (!$TorrentCache) {
     json_die("failure", "bad id parameter");
