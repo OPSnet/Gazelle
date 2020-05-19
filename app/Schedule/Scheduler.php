@@ -191,8 +191,9 @@ class Scheduler {
                 'name' => $name,
                 'data' => array_map(
                     function ($v) use ($id, $key, $time) {
-                        if ($time)
+                        if ($time) {
                             return sprintf('[%d, %d]', strtotime($v[$key]) * 1000, $v[$id]);
+                        }
 
                         return sprintf("['%s', %d]", $v[$key], $v[$id]);
                     },
@@ -219,13 +220,13 @@ class Scheduler {
         $hourly = $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
 
         $this->db->prepared_query("
-            SELECT cast(pth.launch_time AS DATE) AS date,
+            SELECT date(pth.launch_time) AS date,
                    sum(pth.duration_ms) AS duration,
                    sum(pth.num_items) AS processed
                    FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pt.is_enabled IS TRUE
-              AND pth.launch_time >= now() - INTERVAL ? DAY
+              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             GROUP BY 1
             ORDER BY 1
             ", $days
@@ -239,7 +240,7 @@ class Scheduler {
             FROM periodic_task pt
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             WHERE pt.is_enabled IS TRUE
-              AND pth.launch_time >= now() - INTERVAL ? DAY
+              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             GROUP BY 1
             ORDER BY 1
             ", $days
@@ -264,7 +265,7 @@ class Scheduler {
             INNER JOIN periodic_task_history pth USING (periodic_task_id)
             LEFT JOIN periodic_task_history_event pthe USING (periodic_task_history_id)
             WHERE pt.is_enabled IS TRUE
-              AND pth.launch_time >= now() - INTERVAL ? DAY
+              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
             ", $days
         );
         $totals = $this->db->next_record(MYSQLI_ASSOC);
@@ -278,7 +279,21 @@ class Scheduler {
         ];
     }
 
-    public function getTaskRuntimeStats(int $days = 7) {
+    public function getTaskRuntimeStats(int $taskId, int $days = 28) {
+        $this->db->prepared_query("
+            SELECT date(pth.launch_time) AS date,
+                   sum(pth.duration_ms) AS duration,
+                   sum(pth.num_items) AS processed
+                   FROM periodic_task pt
+            INNER JOIN periodic_task_history pth USING (periodic_task_id)
+            WHERE pt.periodic_task_id = ?
+              AND pth.launch_time BETWEEN curdate() - INTERVAL ? DAY AND curdate()
+            GROUP BY 1
+            ORDER BY 1
+            ", $taskId, $days
+        );
+
+        return $this->constructAxes($this->db->to_array(false, MYSQLI_ASSOC), 'date', ['duration', 'processed'], true);
     }
 
     public function getTaskSnapshot(float $start, float $end) {

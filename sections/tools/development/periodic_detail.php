@@ -3,16 +3,18 @@ if (!check_perms('admin_periodic_task_view')) {
     error(403);
 }
 
-if (!isset($_GET['id']) || !is_number($_GET['id'])) {
+$id = (int)$_GET['id'] ?? 0;
+if (!$id) {
     error(0);
 }
-$id = intval($_GET['id']);
 
 define('TASKS_PER_PAGE', 100);
 list($page, $limit) = Format::page_limit(TASKS_PER_PAGE);
 
 $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
 $task = $scheduler->getTaskHistory($id, $limit);
+$stats = $scheduler->getTaskRuntimeStats($id);
+$Debug->log_var($stats);
 $canEdit = check_perms('admin_periodic_task_manage');
 
 View::show_header('Periodic Task Details');
@@ -23,6 +25,9 @@ View::show_header('Periodic Task Details');
 <?php include(__DIR__ . '/periodic_links.php');
 if ($task->count > 0) { ?>
 <br />
+<div class="box pad">
+    <div id="daily-totals" style="width: 100%; height: 350px;"></div>
+</div>
 <div class="linkbox">
     <?=Format::get_pages($page, $task->count, TASKS_PER_PAGE, 11)?>
 </div>
@@ -77,6 +82,39 @@ if ($task->count > 0) { ?>
     </tr>
 <?php } ?>
 </table>
+
+<script src="<?=STATIC_SERVER?>functions/highcharts.js"></script>
+<script src="<?=STATIC_SERVER?>functions/highcharts_custom.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initialiseChart('daily-totals', 'Daily', [
+        {
+            name: 'Duration',
+            yAxis: 0,
+            data: [<?=implode(',', $stats[0]['data'])?>]
+        },
+        {
+            name: 'Processed',
+            yAxis: 1,
+            data: [<?=implode(',', $stats[1]['data'])?>]
+        }
+    ], {
+        yAxis: [
+            {
+                title: {
+                    text: 'Duration'
+                }
+            }, {
+                title: {
+                    text: 'Items'
+                },
+                opposite: true
+            }
+        ]
+    });
+});
+</script>
 <?php
 } else {
 ?>
