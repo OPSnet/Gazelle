@@ -450,9 +450,15 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
                     $goal = "$goal week" . ($goal > 1 ? 's' : '');
                     break;
                 case 'float':
-                    $current = $current == '∞' ? $current : round($current, 2);
+                    if ($current === '∞') {
+                        $percent = 1;
+                    } else {
+                        $percent = $current / $goal;
+                        $current = round($current, 2);
+                    }
+                    break;
                 case 'int':
-                    $percent = $current == '∞' ? 1 : $current / $goal;
+                    $percent = $current === '∞' ? 1 : $current / $goal;
                     break;
                 case 'bytes':
                     $percent = $current / $goal;
@@ -464,7 +470,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
                 $percent = sprintf('<span class="tooltip %s" title="%s">%s</span>',
                     Format::get_ratio_color($percent),
                     round($percent * 100, 2) . '%',
-                    round($percent * 100, 0) . '%'
+                    round(min(1.0, $percent) * 100, 0) . '%'
                 );
  ?>
                 <li><?=$key?>: <?=$current?> / <?=$goal?> (<?=$percent?>)</li>
