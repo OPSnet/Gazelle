@@ -495,4 +495,33 @@ class Tag {
         );
         return $this->db->has_results();
     }
+
+    /**
+     * Get some autocomplete tags encoded in JSON
+     *
+     * @param string $word the stem of the tags to search for
+     * @return array of array of JSON key=>value names
+     *      [['value' => 'tag1'], ['value' => 'tag2'], ...]]
+     */
+    public function autocompleteAsJson(string $word) {
+        $maxKeySize = 4;
+        $keySize = min($maxKeySize, max(1, strlen($word)));
+        $letters = strtolower(substr($word, 0, $keySize));
+        $key = "autocomplete_tags_{$keySize}_$letters";
+
+        if (($suggestions = $this->cache->get($key)) == false) {
+            $this->db->prepared_query("
+                SELECT Name
+                FROM tags
+                WHERE (Uses > 700 OR TagType = 'genre')
+                    AND Name REGEXP concat('^', ?)
+                ORDER BY TagType = 'genre' DESC, Uses DESC
+                LIMIT ?
+                ", $word, 10
+            );
+            $suggestions = $this->db->to_array(false, MYSQLI_NUM, false);
+            $this->cache->cache_value($key, $suggestions, 1800 + 7200 * ($maxKeySize - $keySize)); // Can't cache things for too long in case names are edited
+        }
+        return array_map(function ($v) { return ['value' => $v[0]]; }, $suggestions);
+    }
 }
