@@ -352,12 +352,13 @@ class Artist {
             $this->discogsStem = $this->discogsName;
             $this->discogsSequence = 1;
         }
+        $this->discogsId = $discogsId;
 
         $this->db->prepared_query('
             INSERT INTO artist_discogs
                    (artist_discogs_id, artist_id, is_preferred, sequence, stem, name, user_id)
             VALUES (?,                 ?,         ?,            ?,        ?,    ?,    ?)
-            ', $discogsId, $this->id, $this->homonymCount() == 0, $this->discogsSequence, $this->discogsStem, $this->discogsName, $userId
+            ', $this->discogsId, $this->id, $this->homonymCount() == 0, $this->discogsSequence, $this->discogsStem, $this->discogsName, $userId
         );
         $this->flushCache();
         return $this->db->affected_rows();
