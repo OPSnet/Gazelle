@@ -62,10 +62,11 @@ foreach ($tables as $tag => $table) {
         foreach ($results as &$result) {
             $result['username'] = Users::format_username($result['id'], false, false, false);
             $result['num_uploads'] = number_format($result['num_uploads']);
+            $result['request_fills'] = number_format($result['request_fills']);
             $result['ratio'] = Format::get_ratio_html($result['uploaded'], $result['downloaded']);
             $result['join_date'] = time_diff($result['join_date']);
             $result['rank'] = ++$rank;
-            foreach (['uploaded', 'up_speed', 'downloaded', 'down_speed', 'request_votes', 'request_fills'] as $key) {
+            foreach (['uploaded', 'up_speed', 'downloaded', 'down_speed', 'request_votes'] as $key) {
                 $result[$key] = Format::get_size($result[$key]);
             }
         }

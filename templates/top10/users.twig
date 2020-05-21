@@ -1,17 +1,17 @@
 <h3>Top {{ limit }}  {{ title }}
     <small class="top10_quantity_links">
         {% if limit == 100 %}
-            - <a href="top10.php?type=users&amp;details=<?=$tag?>" class="brackets">Top 10</a>
+            - <a href="top10.php?type=users&amp;details={{ tag }}" class="brackets">Top 10</a>
             - <span class="brackets">Top 100</span>
-            - <a href="top10.php?type=users&amp;limit=250&amp;details=<?=$tag?>" class="brackets">Top 250</a>
+            - <a href="top10.php?type=users&amp;limit=250&amp;details={{ tag }}" class="brackets">Top 250</a>
         {% elseif limit == 250 %}
-            - <a href="top10.php?type=users&amp;details=<?=$tag?>" class="brackets">Top 10</a>
-            - <a href="top10.php?type=users&amp;limit=100&amp;details=<?=$tag?>" class="brackets">Top 100</a>
+            - <a href="top10.php?type=users&amp;details={{ tag }}" class="brackets">Top 10</a>
+            - <a href="top10.php?type=users&amp;limit=100&amp;details={{ tag }}" class="brackets">Top 100</a>
             - <span class="brackets">Top 250</span>
         {% else %}
             - <span class="brackets">Top 10</span>
-            - <a href="top10.php?type=users&amp;limit=100&amp;details=<?=$tag?>" class="brackets">Top 100</a>
-            - <a href="top10.php?type=users&amp;limit=250&amp;details=<?=$tag?>" class="brackets">Top 250</a>
+            - <a href="top10.php?type=users&amp;limit=100&amp;details={{ tag }}" class="brackets">Top 100</a>
+            - <a href="top10.php?type=users&amp;limit=250&amp;details={{ tag }}" class="brackets">Top 250</a>
         {% endif %}
     </small>
 </h3>

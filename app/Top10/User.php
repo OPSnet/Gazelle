@@ -49,7 +49,7 @@ class User
                     uls.Uploaded AS uploaded,
                     uls.Downloaded AS downloaded,
                     coalesce(bs.Bounty, 0) AS request_votes,
-                    coalesce(bf.Bounty, 0) AS request_fills,
+                    coalesce(bf.Fills, 0) AS request_fills,
                     abs(uls.Uploaded - ?) / (unix_timestamp() - unix_timestamp(ui.JoinDate)) AS up_speed,
                     uls.Downloaded / (unix_timestamp() - unix_timestamp(ui.JoinDate)) AS down_speed,
                     count(t.ID) AS num_uploads
@@ -65,10 +65,9 @@ class User
                 ) AS bs ON (bs.UserID = um.ID)
                 LEFT JOIN
                 (
-                    SELECT r.FillerID, sum(rv.Bounty) AS Bounty
-                    FROM requests_votes rv
-                    INNER JOIN requests r ON (r.ID = rv.RequestID)
-                    GROUP BY r.FillerID
+                    SELECT FillerID, count(*) AS Fills
+                    FROM requests
+                    GROUP BY FillerID
                 ) AS bf ON (bf.FillerID = um.ID)
                 WHERE um.Enabled = '1'
                     AND uls.Uploaded > ?
