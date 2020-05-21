@@ -1,10 +1,6 @@
 <?php
 define('LIMIT', 100);
 
-//$Limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
-//$Limit = in_array($Limit, array(100, 250, 500)) ? $Limit : 100;
-
-
 $Category = isset($_GET['category']) ? $_GET['category'] : 'weekly';
 $Category = in_array($Category, ['all_time', 'weekly', 'hyped']) ? $Category : 'weekly';
 
@@ -27,16 +23,16 @@ View::show_header("Last.fm", "jquery.imagesloaded,jquery.wookmark,top10", "tiles
 <div class="thin">
     <div class="header">
         <h2>Last.fm</h2>
-<?php   Top10View::render_linkbox("lastfm"); ?>
+<?php   \Gazelle\Top10::renderLinkbox("lastfm"); ?>
     </div>
-<?php    Top10View::render_artist_links($Category, $View); ?>
-<?php    Top10View::render_artist_controls($Category, $View); ?>
+<?php    \Gazelle\Top10::renderArtistLinks($Category, $View); ?>
+<?php    \Gazelle\Top10::renderArtistControls($Category, $View); ?>
 <?php   if ($View == 'tiles') { ?>
         <div class="tiles_container">
             <ul class="tiles">
 <?php
             foreach ($Artists as $Artist) {
-                    Top10View::render_artist_tile($Artist, $Category);
+                    \Gazelle\Top10::renderArtistTile($Artist, $Category);
             }
 ?>
             </ul>
@@ -46,7 +42,7 @@ View::show_header("Last.fm", "jquery.imagesloaded,jquery.wookmark,top10", "tiles
             <ul class="top_artist_list">
 <?php
             foreach ($Artists as $Artist) {
-                    Top10View::render_artist_list($Artist, $Category);
+                    \Gazelle\Top10::renderArtistList($Artist, $Category);
             }
 ?>
             </ul>

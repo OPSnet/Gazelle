@@ -92,7 +92,7 @@ View::show_header("Top $Limit Voted Groups",'browse,voting');
 <div class="thin">
     <div class="header">
         <h2>Top <?=$Limit?> Voted Groups</h2>
-        <?php Top10View::render_linkbox("votes"); ?>
+        <?php \Gazelle\Top10::renderLinkbox("votes"); ?>
     </div>
 <?php
 

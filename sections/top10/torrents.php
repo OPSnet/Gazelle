@@ -16,7 +16,7 @@ View::show_header("Top $limit Torrents");
 <div class="thin">
     <div class="header">
         <h2>Top <?=$limit?> Torrents</h2>
-        <?php Top10View::render_linkbox("torrents"); ?>
+        <?php \Gazelle\Top10::renderLinkbox("torrents"); ?>
     </div>
 <?php
 
