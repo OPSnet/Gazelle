@@ -865,8 +865,7 @@ class Users {
      */
     public static function removeCustomTitle($ID) {
         G::$DB->prepared_query("UPDATE users_main SET Title='' WHERE ID = ? ", $ID);
-        G::$Cache->delete_value("user_info_{$ID}");
-        G::$Cache->delete_value("user_stats_{$ID}");
+        G::$Cache->deleteMulti(["user_info_{$ID}", "user_stats_{$ID}"]);
     }
 
     /**
@@ -880,8 +879,7 @@ class Users {
         G::$DB->prepared_query("UPDATE users_main SET Title = ? WHERE ID = ?",
             $Title, $ID);
         if (G::$DB->affected_rows() == 1) {
-            G::$Cache->delete_value("user_info_{$ID}");
-            G::$Cache->delete_value("user_stats_{$ID}");
+            G::$Cache->deleteMulti(["user_info_{$ID}", "user_stats_{$ID}"]);
             return true;
         }
         return false;
