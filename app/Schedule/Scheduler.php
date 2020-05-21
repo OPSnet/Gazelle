@@ -134,20 +134,34 @@ class Scheduler {
         return $tasks;
     }
 
-    public function getTaskHistory(int $id, string $limit) {
-        global $Debug;
-        $queryId = $this->db->prepared_query("
-            SELECT SQL_CALC_FOUND_ROWS periodic_task_history_id, launch_time, status, num_errors,
-                   num_items, duration_ms
+    public function getTaskHistory(int $id, int $limit, int $offset, string $sort, string $direction) {
+        $sortMap = [
+            'id'         => 'periodic_task_history_id',
+            'launchtime' => 'launch_time',
+            'status'     => 'status',
+            'errors'     => 'num_errors',
+            'items'      => 'num_items',
+            'duration'   => 'duration_ms'
+        ];
+
+        if (!isset($sortMap[$sort])) {
+            return null;
+        }
+        $sort = $sortMap[$sort];
+
+        $rowCount = $this->db->scalar('
+            SELECT count(*)
             FROM periodic_task_history
             WHERE periodic_task_id = ?
-            ORDER BY launch_time DESC
-            LIMIT $limit
-        ", $id);
-        $this->db->prepared_query('SELECT found_rows()');
-        list($rowCount) = $this->db->next_record();
-        $this->db->set_query_id($queryId);
+            ', $id);
 
+        $this->db->prepared_query("
+            SELECT periodic_task_history_id, launch_time, status, num_errors, num_items, duration_ms
+            FROM periodic_task_history
+            WHERE periodic_task_id = ?
+            ORDER BY $sort $direction
+            LIMIT ? OFFSET ?
+        ", $id, $limit, $offset);
         $items = $this->db->to_array('periodic_task_history_id', MYSQLI_ASSOC);
 
         $placeholders = implode(',', array_fill(0, count($items), '?'));

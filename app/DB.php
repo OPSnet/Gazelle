@@ -76,4 +76,17 @@ class DB
         $this->db->prepared_query($sql, ...$argList);
         return [true, "rows deleted: " . $this->db->affected_rows()];
     }
+
+    /**
+     * Calculate page and SQL limit
+     * @param int $pageSize records per page
+     * @param int $page current page or a falsey value to fetch from $_REQUEST
+     */
+    public static function pageLimit(int $pageSize, int $page = 0) {
+        if (!$page) {
+            $page = max(1, (int)($_REQUEST['page'] ?? 0));
+        }
+
+        return [$page, $pageSize, $pageSize * ($page - 1)];
+    }
 }

@@ -8,13 +8,19 @@ if (!$id) {
     error(0);
 }
 
-define('TASKS_PER_PAGE', 100);
-list($page, $limit) = Format::page_limit(TASKS_PER_PAGE);
-
 $scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
-$task = $scheduler->getTaskHistory($id, $limit);
+if (!$scheduler->getTask($id)) {
+    error(404);
+}
+
+define('TASKS_PER_PAGE', 100);
+list($page, $limit, $offset) = \Gazelle\DB::pageLimit(TASKS_PER_PAGE);
+
+$sort = in_array($_GET['order'] ?? '', ['id', 'launchtime', 'status', 'errors', 'items', 'duration']) ? $_GET['order'] : 'launchtime';
+$orderWay = in_array($_GET['sort'] ?? '', ['asc', 'desc']) ? $_GET['sort'] : 'desc';
+
+$task = $scheduler->getTaskHistory($id, $limit, $offset, $sort, $orderWay);
 $stats = $scheduler->getTaskRuntimeStats($id);
-$Debug->log_var($stats);
 $canEdit = check_perms('admin_periodic_task_manage');
 
 View::show_header('Periodic Task Details');
@@ -23,7 +29,15 @@ View::show_header('Periodic Task Details');
 <h2>Periodic Task Details - <?=$task->name?></h2>
 </div>
 <?php include(__DIR__ . '/periodic_links.php');
-if ($task->count > 0) { ?>
+if ($task->count > 0) {
+    $header = new \Gazelle\Util\SortableTableHeader([
+        'launchtime' => 'Launch Time',
+        'duration'   => 'Duration',
+        'status'     => 'Status',
+        'items'      => 'Processed',
+        'errors'     => 'Errors'
+    ], $sort, $orderWay);
+?>
 <br />
 <div class="box pad">
     <div id="daily-totals" style="width: 100%; height: 350px;"></div>
@@ -33,11 +47,11 @@ if ($task->count > 0) { ?>
 </div>
 <table width="100%" id="tasks">
     <tr class="colhead">
-        <td>Launch Time <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
-        <td>Duration</td>
-        <td width="10%">Status</td>
-        <td width="10%">Processed</td>
-        <td width="10%">Errors</td>
+        <td><?=$header->emit('launchtime', 'desc')?> <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
+        <td><?=$header->emit('duration', 'desc')?></td>
+        <td width="10%"><?=$header->emit('status', 'desc')?></td>
+        <td width="10%"><?=$header->emit('items', 'desc')?></td>
+        <td width="10%"><?=$header->emit('errors', 'desc')?></td>
     </tr>
 <?php
     foreach ($task->items as $item) {
