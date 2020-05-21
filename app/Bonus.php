@@ -203,6 +203,9 @@ class Bonus {
     public function purchaseTitle($userId, $label, $title, $effectiveClass) {
         $item  = $this->items[$label];
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
+        if (mb_strlen($title) > 1024) {
+            throw new \Exception('Bonus:title:too-long');
+        }
         $price = $this->getEffectivePrice($label, $effectiveClass);
 
         /* if the price is 0, nothing changes so avoid hitting the db */

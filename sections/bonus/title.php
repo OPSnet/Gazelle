@@ -34,7 +34,14 @@ if (isset($_POST['confirm'])) {
         header('Location: bonus.php?complete=' . urlencode($Label));
     }
     catch (\Exception $e) {
-        error('You cannot afford this item.');
+        switch ($e->getMessage()) {
+        case 'Bonus:title:too-long':
+            error('This title is too long, you must reduce the length.');
+            break;
+        default:
+            error('You cannot afford this item.');
+            break;
+        }
     }
 }
 
