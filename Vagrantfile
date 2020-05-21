@@ -9,7 +9,8 @@ Vagrant.configure("2") do |config|
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "debian/contrib-stretch64"
 
-  config.vm.synced_folder ".", "/var/www/"
+  config.vm.synced_folder ".", "/var/www/",
+    owner: "www-data"
   # only sync if it exists
   if File.directory?(File.expand_path("ocelot"))
       config.vm.synced_folder "ocelot/", "/var/ocelot"

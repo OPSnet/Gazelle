@@ -1,0 +1,57 @@
+<h3>Top {{ limit }}  {{ title }}
+    <small class="top10_quantity_links">
+        {% if limit == 100 %}
+            - <a href="top10.php?type=users&amp;details={{ tag }}" class="brackets">Top 10</a>
+            - <span class="brackets">Top 100</span>
+            - <a href="top10.php?type=users&amp;limit=250&amp;details={{ tag }}" class="brackets">Top 250</a>
+        {% elseif limit == 250 %}
+            - <a href="top10.php?type=users&amp;details={{ tag }}" class="brackets">Top 10</a>
+            - <a href="top10.php?type=users&amp;limit=100&amp;details={{ tag }}" class="brackets">Top 100</a>
+            - <span class="brackets">Top 250</span>
+        {% else %}
+            - <span class="brackets">Top 10</span>
+            - <a href="top10.php?type=users&amp;limit=100&amp;details={{ tag }}" class="brackets">Top 100</a>
+            - <a href="top10.php?type=users&amp;limit=250&amp;details={{ tag }}" class="brackets">Top 250</a>
+        {% endif %}
+    </small>
+</h3>
+<table class="border">
+    <tr class="colhead">
+        <td class="center">Rank</td>
+        <td>User</td>
+        <td style="text-align: right;">Uploaded</td>
+        <td style="text-align: right;">UL speed</td>
+        <td style="text-align: right;">Downloaded</td>
+        <td style="text-align: right;">DL speed</td>
+        <td style="text-align: right;">Request votes</td>
+        <td style="text-align: right;">Request fills</td>
+        <td style="text-align: right;">Uploads</td>
+        <td style="text-align: right;">Ratio</td>
+        <td style="text-align: right;">Joined</td>
+    </tr>
+{% if not results %}
+    <tr class="rowb">
+        <td colspan="11" class="center">
+            Found no users matching the criteria
+        </td>
+    </tr>
+</table><br />
+{% else %}
+    {% for row in results %}
+    <tr class="row{{ row.rank % 2 ? 'a' : 'b' }}">
+        <td class="center">{{ row.rank }}</td>
+        <td>{{ row.username|raw }}</td>
+        <td class="number_column">{{ row.uploaded }}</td>
+        <td class="number_column tooltip" title="Upload speed is reported in base 2 in bytes per second, not bits per second.">{{ row.up_speed }}/s</td>
+        <td class="number_column">{{ row.downloaded }}</td>
+        <td class="number_column tooltip" title="Download speed is reported in base 2 in bytes per second, not bits per second.">{{ row.down_speed }}/s</td>
+        <td class="number_column">{{ row.request_votes }}</td>
+        <td class="number_column">{{ row.request_fills }}</td>
+        <td class="number_column">{{ row.num_uploads }}</td>
+        <td class="number_column">{{ row.ratio|raw }}</td>
+        <td class="number_column">{{ row.join_date|raw }}</td>
+    </tr>
+    {% endfor %}
+</table><br />
+{% endif %}
+

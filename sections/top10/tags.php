@@ -15,7 +15,7 @@ View::show_header('Top 10 Tags');
 <div class="thin">
     <div class="header">
         <h2>Top 10 Tags</h2>
-        <?php Top10View::render_linkbox("tags"); ?>
+        <?php \Gazelle\Top10::renderLinkbox("tags"); ?>
     </div>
 
 <?php
