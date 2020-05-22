@@ -21,7 +21,7 @@ if ((time() - strtotime($Contest['DateEnd'])) / 86400 > 15) {
     <div class="head colhead_dark"><strong>Contest Leaderboard</strong></div>
     <table>
 <?php
-        for ($i = 0, $end = min(3, count($Leaderboard)); $i < $end; $i++) {
+        for ($i = 0; $i < min(3, count($Leaderboard)); $i++) {
             $Row = $Leaderboard[$i];
             $User = Users::user_info($Row[0]);
 ?>

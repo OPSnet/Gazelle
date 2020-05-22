@@ -393,7 +393,7 @@ if ($CollageCovers != 0) { ?>
             <div class="head" id="coverhead"><strong>Cover Art</strong></div>
             <ul class="collage_images" id="collage_page0">
 <?php
-    for ($Idx = 0, $end = min($NumGroups, $CollageCovers); $Idx < $end; $Idx++) {
+    for ($Idx = 0; $Idx < min($NumGroups, $CollageCovers); $Idx++) {
         echo Collages::collage_cover_row($TorrentList[$GroupIDs[$Idx]]);
     }
 ?>

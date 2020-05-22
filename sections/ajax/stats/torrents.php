@@ -44,7 +44,7 @@ if (!$ByMonth = $Cache->get_value('stats_torrents_upload')) {
         $NetFlow[$Label] = $Amount;
     }
     $ByMonth = [];
-    for ($i = 0, $end = count($Labels); $i < $end; $i++) {
+    for ($i = 0; $i < count($Labels); $i++) {
         $Label = $Labels[$i];
         $ByMonth[$Label] = [
             'uploads' => isset($InFlow[$Label]) ? $InFlow[$Label] : 0,

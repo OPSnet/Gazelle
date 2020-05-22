@@ -35,7 +35,7 @@ function make_captcha_img() {
 
     $ForeColor = imagecolorallocatealpha($Img, 255, 255, 255, 65);
 
-    for ($i = 0, $end = strlen($CaptchaString); $i < $end; $i++) {
+    for ($i = 0; $i < strlen($CaptchaString); $i++) {
         $CharX = (($ImageWidth / $Length) * ($i + 1)) - (($ImageWidth / $Length) * 0.75);
         imagettftext($Img,$FontDisplay[$i]['size'], $FontDisplay[$i]['angle'], $CharX,
                         $FontDisplay[$i]['top'], $ForeColor,
