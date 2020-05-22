@@ -1030,26 +1030,24 @@ if (check_perms('users_mod', $Class)) { ?>
             </div>
         </div>
 
-        <table class="layout" id="user_info_box">
-            <tr class="colhead">
-                <td colspan="2">
-                    User Information
-                </td>
-            </tr>
-<?php    if (check_perms('users_edit_usernames', $Class)) { ?>
-            <tr>
-                <td class="label">Username:</td>
-                <td><input type="text" size="20" name="Username" value="<?=display_str($Username)?>" /></td>
-            </tr>
+<table class="layout" id="user_info_box">
+    <tr class="colhead">
+        <td colspan="2">
+            User Information
+        </td>
+    </tr>
+
 <?php
+    if (check_perms('users_edit_usernames', $Class)) {
+        echo G::$Twig->render('user/edit-username.twig', [
+            'username' => $Username,
+        ]);
     }
+
     if (check_perms('users_edit_titles')) {
-?>
-            <tr>
-                <td class="label">Custom title:</td>
-                <td><input type="text" class="wide_input_text" name="Title" value="<?=display_str($CustomTitle)?>" /></td>
-            </tr>
-<?php
+        echo G::$Twig->render('user/edit-title.twig', [
+            'title' => $CustomTitle,
+        ]);
     }
 
     if (check_perms('users_promote_below', $Class) || check_perms('users_promote_to', $Class - 1)) {
@@ -1084,380 +1082,126 @@ if (check_perms('users_mod', $Class)) { ?>
     }
 
     if (check_perms('users_give_donor')) {
-?>
-            <tr>
-                <td class="label">Donor:</td>
-                <td><input type="checkbox" name="Donor"<?php if ($Donor == 1) { ?> checked="checked"<?php } ?> /></td>
-            </tr>
-<?php
+        echo G::$Twig->render('user/edit-donor.twig', [
+            'is_donor' => $Donor == 1,
+        ]);
     }
-    if (check_perms('users_promote_below') || check_perms('users_promote_to')) { ?>
-        <tr>
-            <td class="label">Secondary classes:</td>
-            <td>
-<?php
-        $DB->prepared_query('
-            SELECT p.ID, p.Name, l.UserID
-            FROM permissions AS p
-            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
-            WHERE p.Secondary = 1
-            ORDER BY p.Name
-            ', $UserID
-        );
-        $i = 0;
-        while (list($PermID, $PermName, $IsSet) = $DB->next_record()) {
-            $i++;
-?>
-                <input type="checkbox" id="perm_<?=$PermID?>" name="secondary_classes[]" value="<?=$PermID?>"<?php if ($IsSet) { ?> checked="checked"<?php } ?> />&nbsp;<label for="perm_<?=$PermID?>" style="margin-right: 10px;"><?=$PermName?></label>
-<?php            if ($i % 3 == 0) {
-                echo "\t\t\t\t<br />\n";
-            }
-        } ?>
-            </td>
-        </tr>
-<?php }
 
-    if (check_perms('users_make_invisible')) { ?>
-            <tr>
-                <td class="label">Visible in peer lists:</td>
-                <td><input type="checkbox" name="Visible"<?php if ($Visible == 1) { ?> checked="checked"<?php } ?> /></td>
-            </tr>
-<?php }
+    if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
+        echo G::$Twig->render('user/edit-permission.twig', [
+            'permission' => $User->permissionList(),
+        ]);
+    }
 
-    if (check_perms('admin_rate_limit_manage')) { ?>
-            <tr id="comm_unlimited_download">
-                <td class="label tooltip" title="If checked, user is allowed to download unlimited torrent files.">Unlimited Torrent Downloads</td>
-                <td><input type="checkbox" name="unlimitedDownload" id="unlimitedDownload"<?= $UnlimitedDownload ? ' checked="checked"' : ''?> /></td>
-            </tr>
-<?php }
+    if (check_perms('users_make_invisible')) {
+        echo G::$Twig->render('user/edit-peer-visibility.twig', [
+            'is_visible' => $Visible == 1,
+        ]);
+    }
+
+    if (check_perms('admin_rate_limit_manage')) {
+        echo G::$Twig->render('user/edit-rate-limit.twig', [
+            'unlimited' => $UnlimitedDownload,
+        ]);
+    }
 
     if (check_perms('users_edit_ratio', $Class) || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])) {
-?>
-            <tr>
-                <td class="label tooltip" title="Upload amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Uploaded:</td>
-                <td>
-                    <input type="hidden" name="OldUploaded" value="<?=$Uploaded?>" />
-                    <input type="text" size="20" name="Uploaded" value="<?=$Uploaded?>" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label tooltip" title="Download amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Downloaded:</td>
-                <td>
-                    <input type="hidden" name="OldDownloaded" value="<?=$Downloaded?>" />
-                    <input type="text" size="20" name="Downloaded" value="<?=$Downloaded?>" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label tooltip" title="Bonus Points.">Bonus Points:</td>
-                <td>
-                    <input type="hidden" name="OldBonusPoints" value="<?=$BonusPoints?>" />
-                    <input type="text" size="20" name="BonusPoints" value="<?=$BonusPoints?>" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label tooltip" title="Enter a username.">Merge stats <strong>from:</strong></td>
-                <td>
-                    <input type="text" size="40" name="MergeStatsFrom" />
-                </td>
-            </tr>
-<?php
+        echo G::$Twig->render('user/edit-buffer.twig', [
+            'up'    => $Uploaded,
+            'down'  => $Downloaded,
+            'bonus' => $BonusPoints,
+        ]);
     }
 
     if (check_perms('users_edit_invites')) {
-?>
-            <tr>
-                <td class="label tooltip" title="Number of invites">Invites:</td>
-                <td><input type="text" size="5" name="Invites" value="<?=$Invites?>" /></td>
-            </tr>
-<?php
+        echo G::$Twig->render('user/edit-invite.twig', [
+            'amount' => $Invites,
+        ]);
     }
 
     if (check_perms('admin_manage_user_fls')) {
-?>
-            <tr>
-                <td class="label tooltip" title="Number of FL tokens">FL Tokens:</td>
-                <td><input type="text" size="5" name="FLTokens" value="<?=$FLTokens?>" /></td>
-            </tr>
-<?php
+        echo G::$Twig->render('user/edit-fltoken.twig', [
+            'amount' => $FLTokens,
+        ]);
     }
 
     if (check_perms('admin_manage_fls') || (check_perms('users_mod') && $OwnProfile)) {
-?>
-            <tr>
-                <td class="label tooltip" title="This is the message shown in the right-hand column on /staff.php">FLS/Staff remark:</td>
-                <td><input type="text" class="wide_input_text" name="SupportFor" value="<?=display_str($SupportFor)?>" /></td>
-            </tr>
-<?php
+        echo G::$Twig->render('user/edit-remark.twig', [
+            'remark' => $SupportFor,
+        ]);
     }
 
     if (check_perms('users_edit_reset_keys')) {
-?>
-            <tr>
-                <td class="label">Reset:</td>
-                <td>
-                    <input type="checkbox" name="ResetRatioWatch" id="ResetRatioWatch" /> <label for="ResetRatioWatch">Ratio watch</label> |
-                    <input type="checkbox" name="ResetPasskey" id="ResetPasskey" /> <label for="ResetPasskey">Passkey</label> |
-                    <input type="checkbox" name="ResetAuthkey" id="ResetAuthkey" /> <label for="ResetAuthkey">Authkey</label> |
-                    <input type="checkbox" name="ResetIPHistory" id="ResetIPHistory" /> <label for="ResetIPHistory">IP history</label> |
-                    <input type="checkbox" name="ResetEmailHistory" id="ResetEmailHistory" /> <label for="ResetEmailHistory">Email history</label>
-                    <br />
-                    <input type="checkbox" name="ResetSnatchList" id="ResetSnatchList" /> <label for="ResetSnatchList">Snatch list</label> |
-                    <input type="checkbox" name="ResetDownloadList" id="ResetDownloadList" /> <label for="ResetDownloadList">Download list</label>
-                </td>
-            </tr>
-<?php
+        echo G::$Twig->render('user/edit-reset.twig');
     }
 
     if (check_perms('users_edit_password')) {
+        echo G::$Twig->render('user/edit-password.twig', [
+            'key_2fa' => $FA_Key,
+            'user_id' => $UserID,
+        ]);
+    }
 ?>
-            <tr>
-                <td class="label">New password:</td>
-                <td>
-                    <input type="text" size="30" id="change_password" name="ChangePassword" />
-                    <button type="button" id="random_password">Generate</button>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="label">Two-factor Authentication:</td>
-                <td>
-<?php      if ($FA_Key) { ?>
-                    <a href="user.php?action=2fa&page=user&do=disable&userid=<?= $UserID ?>">Click here to disable</a>
-<?php      } else { ?>
-                    Currently Disabled
-<?php      } ?>
-                </td>
-            </tr>
-
-<?php    } ?>
-        </table>
-
-<?php    if (check_perms('users_warn')) { ?>
-        <table class="layout" id="warn_user_box">
-            <tr class="colhead">
-                <td colspan="2">
-                    Warnings
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Warned:</td>
-                <td>
-                    <input type="checkbox" name="Warned"<?php if ($Warned != '0000-00-00 00:00:00') { ?> checked="checked"<?php } ?> />
-                </td>
-            </tr>
-<?php        if ($Warned == '0000-00-00 00:00:00') { /* user is not warned */ ?>
-            <tr>
-                <td class="label">Expiration:</td>
-                <td>
-                    <select name="WarnLength">
-                        <option value="">---</option>
-                        <option value="1">1 week</option>
-                        <option value="2">2 weeks</option>
-                        <option value="4">4 weeks</option>
-                        <option value="8">8 weeks</option>
-                    </select>
-                </td>
-            </tr>
-<?php        } else { /* user is warned */ ?>
-            <tr>
-                <td class="label">Extension:</td>
-                <td>
-                    <select name="ExtendWarning" onchange="ToggleWarningAdjust(this);">
-                        <option>---</option>
-                        <option value="1">1 week</option>
-                        <option value="2">2 weeks</option>
-                        <option value="4">4 weeks</option>
-                        <option value="8">8 weeks</option>
-                    </select>
-                </td>
-            </tr>
-            <tr id="ReduceWarningTR">
-                <td class="label">Reduction:</td>
-                <td>
-                    <select name="ReduceWarning">
-                        <option>---</option>
-                        <option value="1">1 week</option>
-                        <option value="2">2 weeks</option>
-                        <option value="4">4 weeks</option>
-                        <option value="8">8 weeks</option>
-                    </select>
-                </td>
-            </tr>
-<?php        } ?>
-            <tr>
-                <td class="label tooltip" title="This message *will* be sent to the user in the warning PM!">Warning reason:</td>
-                <td>
-                    <input type="text" class="wide_input_text" name="WarnReason" />
-                </td>
-            </tr>
-<?php    } ?>
-        </table>
-<?php  if (check_perms('users_disable_any')) { ?>
-        <table class="layout">
-            <tr class="colhead">
-                <td colspan="2">
-                    Lock Account
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Lock Account:</td>
-                <td>
-                    <input type="checkbox" name="LockAccount" id="LockAccount" <?php if($LockedAccount) { ?> checked="checked" <?php } ?>/>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Reason:</td>
-                <td>
-                    <select name="LockReason">
-                        <option value="---">---</option>
-                        <option value="<?=STAFF_LOCKED?>" <?php if ($LockedAccount == STAFF_LOCKED) { ?> selected <?php } ?>>Staff Lock</option>
-                    </select>
-                </td>
-            </tr>
-        </table>
-<?php  }  ?>
-        <table class="layout" id="user_privs_box">
-            <tr class="colhead">
-                <td colspan="2">
-                    User Privileges
-                </td>
-            </tr>
-<?php    if (check_perms('users_disable_posts') || check_perms('users_disable_any')) {
-        $Emails = $User->emailHistory();
-?>
-            <tr>
-                <td class="label">Disable:</td>
-                <td>
-                    <input type="checkbox" name="DisablePosting" id="DisablePosting"<?php if ($DisablePosting == 1) { ?> checked="checked"<?php } ?> /> <label for="DisablePosting">Posting</label>
-<?php        if (check_perms('users_disable_any')) { ?> |
-                    <input type="checkbox" name="DisableAvatar" id="DisableAvatar"<?php if ($DisableAvatar == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableAvatar">Avatar</label> |
-                    <input type="checkbox" name="DisableForums" id="DisableForums"<?php if ($DisableForums == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableForums">Forums</label> |
-                    <input type="checkbox" name="DisableIRC" id="DisableIRC"<?php if ($DisableIRC == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableIRC">IRC</label> |
-                    <input type="checkbox" name="DisablePM" id="DisablePM"<?php if ($DisablePM == 1) { ?> checked="checked"<?php } ?> /> <label for="DisablePM">PM</label> |
-                    <br /><br />
-
-                    <input type="checkbox" name="DisableLeech" id="DisableLeech"<?php if ($DisableLeech == 0) { ?> checked="checked"<?php } ?> /> <label for="DisableLeech">Leech</label> |
-                    <input type="checkbox" name="DisableRequests" id="DisableRequests"<?php if ($DisableRequests == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableRequests">Requests</label> |
-                    <input type="checkbox" name="DisableUpload" id="DisableUpload"<?php if ($DisableUpload == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableUpload">Torrent upload</label> |
-                    <input type="checkbox" name="DisablePoints" id="DisablePoints"<?php if ($DisablePoints == 1) { ?> checked="checked"<?php } ?> /> <label for="DisablePoints">Bonus Points</label>
-                    <br /><br />
-
-                    <input type="checkbox" name="DisableTagging" id="DisableTagging"<?php if ($DisableTagging == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableTagging" class="tooltip" title="This only disables a user's ability to delete tags.">Tagging</label> |
-                    <input type="checkbox" name="DisableWiki" id="DisableWiki"<?php if ($DisableWiki == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableWiki">Wiki</label>
-                    <br /><br />
-
-                    <input type="checkbox" name="DisableInvites" id="DisableInvites"<?php if ($DisableInvites == 1) { ?> checked="checked"<?php } ?> /> <label for="DisableInvites">Invites</label>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Hacked:</td>
-                <td>
-                    <input type="checkbox" name="SendHackedMail" id="SendHackedMail" /> <label for="SendHackedMail">Send hacked account email</label> to
-                    <select name="HackedEmail">
-<?php
-            foreach ($Emails as $Email) {
-                list($Address, $IP) = $Email;
-?>
-                        <option value="<?=display_str($Address)?>"><?=display_str($Address)?> - <?=display_str($IP)?></option>
-<?php            } ?>
-                    </select>
-                </td>
-            </tr>
+</table>
 
 <?php
-        }
+    if (check_perms('users_disable_posts') || check_perms('users_disable_any')) {
+        echo G::$Twig->render('user/edit-privileges.twig', [
+            'email'          => $User->emailHistory(),
+            'is_unconfirmed' => $Enabled == '0',
+            'is_enabled'     => $Enabled == '1',
+            'is_disabled'    => $Enabled == '2',
+            'forum' => [
+                'restricted' => $RestrictedForums,
+                'permitted'  => $PermittedForums,
+            ],
+            'permission' => [
+                'disable_any' => check_perms('users_disable_any'),
+                'delete_user' => check_perms('users_delete_users'),
+            ],
+            'disable' => [
+                'avatar'  => $DisableAvatar,
+                'bonus'   => $DisablePoints,
+                'forum'   => $DisableForums,
+                'invite'  => $DisableInvites,
+                'irc'     => $DisableIRC,
+                'leech'   => $DisableLeech == 0,
+                'pm'      => $DisablePM,
+                'request' => $DisableRequests,
+                'tag'     => $DisableTagging,
+                'upload'  => $DisableUpload,
+                'wiki'    => $DisableWiki,
+            ],
+        ]);
+    }
+
+    DonationsView::render_mod_donations($UserID);
+
+
+    if (check_perms('users_warn')) {
+        echo G::$Twig->render('user/edit-warn.twig', [
+            'is_warned' => $Warned != '0000-00-00 00:00:00',
+            'until'     => $Warned != '0000-00-00 00:00:00' ? date('Y-m-d H:i', strtotime($Warned)) : 'n/a',
+        ]);
     }
 
     if (check_perms('users_disable_any')) {
-?>
-            <tr>
-                <td class="label">Account:</td>
-                <td>
-                    <select name="UserStatus">
-                        <option value="0"<?php if ($Enabled == '0') { ?> selected="selected"<?php } ?>>Unconfirmed</option>
-                        <option value="1"<?php if ($Enabled == '1') { ?> selected="selected"<?php } ?>>Enabled</option>
-                        <option value="2"<?php if ($Enabled == '2') { ?> selected="selected"<?php } ?>>Disabled</option>
-<?php        if (check_perms('users_delete_users')) { ?>
-                        <optgroup label="-- WARNING --">
-                            <option value="delete">Delete account</option>
-                        </optgroup>
-<?php        } ?>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">User reason:</td>
-                <td>
-                    <input type="text" class="wide_input_text" name="UserReason" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Restricted forums:</td>
-                <td>
-                    <input type="text" class="wide_input_text" name="RestrictedForums" value="<?=display_str($RestrictedForums)?>" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Extra forums:</td>
-                <td>
-                    <input type="text" class="wide_input_text" name="PermittedForums" value="<?=display_str($PermittedForums)?>" />
-                </td>
-            </tr>
-
-<?php    } ?>
-        </table>
-<?php    if (check_perms('users_logout')) { ?>
-        <table class="layout" id="session_box">
-            <tr class="colhead">
-                <td colspan="2">
-                    Session
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Reset session:</td>
-                <td><input type="checkbox" name="ResetSession" id="ResetSession" /></td>
-            </tr>
-            <tr>
-                <td class="label">Log out:</td>
-                <td><input type="checkbox" name="LogOut" id="LogOut" /></td>
-            </tr>
-        </table>
-<?php
+        echo G::$Twig->render('user/edit-lock.twig', [
+            'is_locked'  => $LockedAccount,
+            'staff_lock' => STAFF_LOCKED,
+        ]);
     }
-    if (check_perms('users_mod')) {
-        DonationsView::render_mod_donations($UserID);
-    }
-?>
-        <table class="layout" id="submit_box">
-            <tr class="colhead">
-                <td colspan="2">
-                    Submit
-                </td>
-            </tr>
-            <tr>
-                <td class="label tooltip" title="This message will be entered into staff notes only.">Reason:</td>
-                <td>
-                    <textarea rows="1" cols="35" class="wide_input_text" name="Reason" id="Reason" onkeyup="resize('Reason');"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Paste user stats:</td>
-                <td>
-                    <button type="button" id="paster">Paste</button>
-                </td>
-            </tr>
 
-            <tr>
-                <td align="right" colspan="2">
-                    <input type="submit" value="Save changes" />
-                </td>
-            </tr>
-        </table>
+    if (check_perms('users_logout')) {
+        echo G::$Twig->render('user/edit-session.twig');
+    }
+
+    echo G::$Twig->render('user/edit-submit.twig');
+?>
         </form>
-<?php
-}
-?>
+<?php } /* check_perms('users_mod') */ ?>
     </div>
 </div>
 <?php
+
 View::show_footer();

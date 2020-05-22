@@ -73,6 +73,21 @@ class User {
         return $this->db->affected_rows();
     }
 
+    public function permissionList() {
+        $this->db->prepared_query('
+            SELECT
+                p.ID                   AS permId,
+                p.Name                 AS permName,
+                (l.UserID IS NOT NULL) AS isSet
+            FROM permissions AS p
+            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
+            WHERE p.Secondary = 1
+            ORDER BY p.Name
+            ', $this->id
+        );
+        return $this->db->to_array('permName', MYSQLI_ASSOC, false);
+    }
+
     public function notifyFilters() {
         if ($this->forceCacheFlush || ($filters = $this->cache->get_value('notify_filters_' . $this->id)) === false) {
             $this->db->prepared_query('

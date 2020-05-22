@@ -1,0 +1,58 @@
+<table class="layout" id="warn_user_box">
+    <tr class="colhead">
+        <td colspan="2">
+            Warnings
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Warned:</td>
+        <td>
+            <input type="checkbox" name="Warned"{{ is_warned|checked }} />{{ is_warned ? ' until ' ~ until : '' }}
+        </td>
+    </tr>
+{% if not is_warned %}
+    <tr>
+        <td class="label">Expiration:</td>
+        <td>
+            <select name="WarnLength">
+                <option value="">---</option>
+                <option value="1">1 week</option>
+                <option value="2">2 weeks</option>
+                <option value="4">4 weeks</option>
+                <option value="8">8 weeks</option>
+            </select>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td class="label">Extension:</td>
+        <td>
+            <select name="ExtendWarning" onchange="ToggleWarningAdjust(this);">
+                <option>---</option>
+                <option value="1">1 week</option>
+                <option value="2">2 weeks</option>
+                <option value="4">4 weeks</option>
+                <option value="8">8 weeks</option>
+            </select>
+        </td>
+    </tr>
+    <tr id="ReduceWarningTR">
+        <td class="label">Reduction:</td>
+        <td>
+            <select name="ReduceWarning">
+                <option>---</option>
+                <option value="1">1 week</option>
+                <option value="2">2 weeks</option>
+                <option value="4">4 weeks</option>
+                <option value="8">8 weeks</option>
+            </select>
+        </td>
+    </tr>
+{% endif %}
+    <tr>
+        <td class="label tooltip" title="This message *will* be sent to the user in the warning PM!">Warning reason:</td>
+        <td>
+            <input type="text" class="wide_input_text" name="WarnReason" />
+        </td>
+    </tr>
+</table>

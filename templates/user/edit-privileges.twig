@@ -1,0 +1,73 @@
+<table class="layout" id="user_privs_box">
+    <tr class="colhead">
+        <td colspan="2">
+            User Privileges
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Disable:</td>
+        <td>
+            <input type="checkbox" name="DisablePosting" id="DisablePosting"{{ disable.posting|checked }} /> <label for="DisablePosting">Posting</label> |
+{% if permission.disable_any %}
+            <input type="checkbox" name="DisableAvatar" id="DisableAvatar"{{ disable.avatar|checked }} /> <label for="DisableAvatar">Avatar</label> |
+            <input type="checkbox" name="DisableForums" id="DisableForums"{{ disable.forum|checked }} /> <label for="DisableForums">Forums</label> |
+            <input type="checkbox" name="DisableIRC" id="DisableIRC"{{ disable.irc|checked }} /> <label for="DisableIRC">IRC</label> |
+            <input type="checkbox" name="DisablePM" id="DisablePM"{{ disable.pm|checked }} /> <label for="DisablePM">PM</label> |
+            <br /><br />
+            <input type="checkbox" name="DisableLeech" id="DisableLeech"{{ disable.leech|checked }} /> <label for="DisableLeech">Leech</label> |
+            <input type="checkbox" name="DisableRequests" id="DisableRequests"{{ disable.request|checked }} /> <label for="DisableRequests">Requests</label> |
+            <input type="checkbox" name="DisableUpload" id="DisableUpload"{{ disable.upload|checked }} /> <label for="DisableUpload">Torrent upload</label> |
+            <input type="checkbox" name="DisablePoints" id="DisablePoints"{{ disable.bonus|checked }} /> <label for="DisablePoints">Bonus Points</label>
+            <br /><br />
+            <input type="checkbox" name="DisableTagging" id="DisableTagging"{{ disable.tag|checked }} /> <label for="DisableTagging" class="tooltip" title="This only disables a user's ability to delete tags.">Tagging</label> |
+            <input type="checkbox" name="DisableWiki" id="DisableWiki"{{ disable.wiki|checked }} /> <label for="DisableWiki">Wiki</label>
+            <br /><br />
+            <input type="checkbox" name="DisableInvites" id="DisableInvites"{{ disable.invite|checked }} /> <label for="DisableInvites">Invites</label>
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Hacked:</td>
+        <td>
+            <input type="checkbox" name="SendHackedMail" id="SendHackedMail" /> <label for="SendHackedMail">Send hacked account email</label> to
+            <select name="HackedEmail">
+{% for e in email %}
+                <option value="{{ e.0 }}">{{ e.0 }} - {{ e.1 }}</option>
+{% endfor %}
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Account:</td>
+        <td>
+            <select name="UserStatus">
+                <option value="0"{{ is_confirmed|selected }}>Unconfirmed</option>
+                <option value="1"{{ is_enabled|selected   }}>Enabled</option>
+                <option value="2"{{ is_disabled|selected  }}>Disabled</option>
+{% if permission.delete_user %}
+                <optgroup label="-- WARNING --">
+                    <option value="delete">Delete account</option>
+                </optgroup>
+{% endif %}
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td class="label">User reason:</td>
+        <td>
+            <input type="text" class="wide_input_text" name="UserReason" />
+        </td>
+    </tr>
+    <tr>
+        <td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Restricted forums:</td>
+        <td>
+            <input type="text" class="wide_input_text" name="RestrictedForums" value="{{ forum.restricted }}" />
+        </td>
+    </tr>
+    <tr>
+        <td class="label tooltip" title="Enter a comma-delimited list of forum IDs.">Extra forums:</td>
+        <td>
+            <input type="text" class="wide_input_text" name="PermittedForums" value="{{ forum.permitted }}" />
+{% endif %}
+        </td>
+    </tr>
+</table>

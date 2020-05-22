@@ -1,0 +1,10 @@
+<tr>
+    <td class="label">Secondary classes:</td>
+    <td>
+{% for p in permission %}
+        <input type="checkbox" id="perm_{{ p.permId }}" name="secondary_classes[]" value="{{ p.permId }}"{{ p.isSet|checked }}
+            />&nbsp;<label for="perm_{{ p.permId }}" style="margin-right: 10px;">{{ p.permName }}</label>
+{{ cycle(['', '', '<br />' ], loop.index0) | raw }}
+{% endfor %}
+    </td>
+</tr>
