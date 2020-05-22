@@ -86,7 +86,7 @@ $ArticleID = (int)$_GET['id'];
 
 $Article = Wiki::get_article($ArticleID);
 list($Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName) = array_shift($Article);
-if ($Edit > $LoggedUser['EffectiveClass']) {
+if ($Read > $LoggedUser['EffectiveClass']) {
     error(404);
 }
 
