@@ -1,0 +1,22 @@
+<table class="layout">
+    <tr class="colhead">
+        <td colspan="2">
+            Lock Account
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Lock Account:</td>
+        <td>
+            <input type="checkbox" name="LockAccount" id="LockAccount"{{ is_locked|checked }} />
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Reason:</td>
+        <td>
+            <select name="LockReason">
+                <option value="---">---</option>
+                <option value="{{ staff_lock }}" {{ is_locked|checked }}>Staff Lock</option>
+            </select>
+        </td>
+    </tr>
+</table>

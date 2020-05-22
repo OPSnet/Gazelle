@@ -72,6 +72,21 @@ G::$Twig = new Environment(
         'cache' => __DIR__ . '/../cache/twig'
     ]
 );
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'checked',
+    function ($isChecked) {
+        return $isChecked ? ' checked="checked"' : '';
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'selected',
+    function ($isSelected) {
+        return $isSelected ? ' selected="selected"' : '';
+    }
+));
+
 $Debug->set_flag('Twig constructed');
 
 $Debug->set_flag('start user handling');

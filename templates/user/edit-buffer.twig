@@ -1,0 +1,27 @@
+<tr>
+    <td class="label tooltip" title="Upload amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Uploaded:</td>
+    <td>
+        <input type="hidden" name="OldUploaded" value="{{ up }}" />
+        <input type="text" size="20" name="Uploaded" value="{{ up }}" />
+    </td>
+</tr>
+<tr>
+    <td class="label tooltip" title="Download amount in bytes. Also accepts e.g. +20GB or -35.6364MB on the end.">Downloaded:</td>
+    <td>
+        <input type="hidden" name="OldDownloaded" value="{{ down }}" />
+        <input type="text" size="20" name="Downloaded" value="{{ down }}" />
+    </td>
+</tr>
+<tr>
+    <td class="label tooltip" title="Bonus Points.">Bonus Points:</td>
+    <td>
+        <input type="hidden" name="OldBonusPoints" value="{{ bonus }}" />
+        <input type="text" size="20" name="BonusPoints" value="{{ bonus }}" />
+    </td>
+</tr>
+<tr>
+    <td class="label tooltip" title="Enter a username.">Merge stats <strong>from:</strong></td>
+    <td>
+        <input type="text" size="40" name="MergeStatsFrom" />
+    </td>
+</tr>
