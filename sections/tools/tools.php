@@ -82,8 +82,8 @@ Category('Administration', [
 
 Category('Announcements', [
     Item('News post',           'tools.php?action=news',                All(['admin_manage_news'])),
-    Item('Global notification', 'tools.php?action=global_notification', All(['users_mod'])),
-    Item('Mass PM',             'tools.php?action=mass_pm',             All(['users_mod'])),
+    Item('Global notification', 'tools.php?action=global_notification', All(['admin_global_notification'])),
+    Item('Mass PM',             'tools.php?action=mass_pm',             All(['admin_global_notification'])),
     Item('Change log',          'tools.php?action=change_log',          All(['users_mod'])),
     Item('Calendar',            'tools.php?action=calendar',            Calendar::can_view()),
     Item('Vanity House',        'tools.php?action=vanityhouse',         All(['users_mod'])),
