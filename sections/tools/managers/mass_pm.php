@@ -1,6 +1,6 @@
 <?php
-if (!check_perms("users_mod")) {
-    error(403);
+if (!check_perms("admin_global_notification")) {
+    error(404);
 }
 
 $Classes = Users::get_classes()[0];
@@ -43,5 +43,5 @@ View::show_header('Compose Mass PM', 'inbox,bbcode,jquery.validate,form_validate
     </form>
 </div>
 <?php
+
 View::show_footer();
-?>

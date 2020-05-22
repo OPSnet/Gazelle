@@ -2,7 +2,7 @@
 
 use \Gazelle\Manager\Notification;
 
-if (!check_perms("users_mod")) {
+if (!check_perms("admin_global_notification")) {
     error(404);
 }
 $notification = new Notification($DB, $Cache);

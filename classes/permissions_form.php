@@ -106,6 +106,7 @@ $PermissionsArray = [
     'admin_manage_ipbans' => 'Can manage IP bans.',
     'admin_dnu' => 'Can manage do not upload list.',
     'admin_clear_cache' => 'Can clear cached.',
+    'admin_global_notification' => 'Can send global notifications and direct messages.',
     'admin_whitelist' => 'Can manage the list of allowed clients.',
     'admin_manage_permissions' => 'Can edit permission classes/user permissions.',
     'admin_recovery' => 'Can manage account recovery.',
@@ -290,6 +291,7 @@ function permissions_form() {
                     display_perm('admin_manage_ipbans', 'Can manage IP bans');
                     display_perm('admin_dnu', 'Can manage do not upload list');
                     display_perm('admin_clear_cache', 'Can clear cached pages');
+                    display_perm('admin_global_notification', 'Can send global notifications and private messages.');
                     display_perm('admin_whitelist', 'Can manage the list of allowed clients.');
                     display_perm('admin_manage_permissions', 'Can edit permission classes/user permissions.');
                     display_perm('admin_recovery', 'Can manage account recovery.');

@@ -3,8 +3,8 @@ set_time_limit(0);
 
 authorize();
 
-if (!check_perms("users_mod")) {
-    error(403);
+if (!check_perms("admin_global_notification")) {
+    error(404);
 }
 
 if (!is_number($_POST['class_id']) || empty($_POST['subject']) || empty($_POST['body'])) {
