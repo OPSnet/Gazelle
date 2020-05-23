@@ -206,7 +206,7 @@ if (!isset($_GET['tags_type']) || $_GET['tags_type'] === '1') {
 }
 if (!empty($_GET['tags'])) {
     $SearchTags = ['include' => [], 'exclude' => []];
-    $Tags = explode(',', $_GET['tags']);
+    $Tags = explode(',', str_replace('.', '_', $_GET['tags']));
     foreach ($Tags as $Tag) {
         $Tag = trim($Tag);
         if ($Tag[0] === '!' && strlen($Tag) >= 2) {
