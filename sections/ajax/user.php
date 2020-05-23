@@ -37,7 +37,7 @@ $DB->prepared_query("
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS i ON (i.UserID = um.ID)
     LEFT JOIN users_levels AS donor ON (donor.UserID = um.ID
-        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
     )
     LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
     LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)

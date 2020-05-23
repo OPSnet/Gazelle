@@ -190,6 +190,11 @@ function json_die($Status, $Message="bad parameters") {
  * Print JSON status result with an optional message.
  */
 function json_print($Status, $Message) {
+    if (check_perms('site_debug')) {
+        global $Debug;
+        $Message['queries'] = $Debug->get_queries();
+        $Message['searches'] = $Debug->get_sphinxql_queries();
+    }
     if ($Status == 'success' && $Message) {
         print json_encode(['status' => $Status, 'response' => $Message]);
     } elseif ($Message) {

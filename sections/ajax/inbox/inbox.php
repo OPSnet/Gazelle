@@ -45,7 +45,7 @@ $sql .= "AS Date
     LEFT JOIN users_main AS um ON (um.ID = cu2.UserID)
     LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
     LEFT JOIN users_levels AS donor ON (donor.UserID = um.ID
-        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
     )
     LEFT JOIN users_main AS um2 ON (um2.ID = cu.ForwardedTo)";
 
