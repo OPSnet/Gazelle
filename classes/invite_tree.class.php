@@ -61,7 +61,7 @@ class INVITE_TREE {
             INNER JOIN users_main AS um ON (um.ID = it.UserID)
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = it.UserID)
             LEFT JOIN users_levels AS donor ON (donor.UserID = it.UserID
-                AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor')
+                AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
             )
             WHERE TreeID = $TreeID
                 AND TreePosition > $TreePosition".
