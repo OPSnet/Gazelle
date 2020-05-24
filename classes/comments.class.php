@@ -27,9 +27,12 @@ class Comments {
                 ) AS Pages");
         list($Pages) = G::$DB->next_record();
 
-        G::$DB->query("
-            INSERT INTO comments (Page, PageID, AuthorID, AddedTime, Body)
-            VALUES ('$Page', $PageID, " . G::$LoggedUser['ID'] . ", '" . sqltime() . "', '" . db_string($Body) . "')");
+        G::$DB->prepared_query("
+            INSERT INTO comments
+                   (Page, PageID, AuthorID, Body)
+            VALUES (?,    ?,      ?,        ?)
+            ", $Page, $PageID, G::$LoggedUser['ID'], $Body
+        );
         $PostID = G::$DB->inserted_id();
 
         $CatalogueID = floor((TORRENT_COMMENTS_PER_PAGE * $Pages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
