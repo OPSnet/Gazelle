@@ -18,13 +18,6 @@ function confirmDelete(id) {
         </div>
     </div>
 <?php
-if (isset($err)) {
-?>
-    <div class="box thin">
-        <p class="important_text"><?=$err?></p>
-    </div>
-<?php
-}
 $DB->query("
     SELECT
         p.ID,
