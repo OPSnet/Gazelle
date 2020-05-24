@@ -323,6 +323,14 @@ class Scheduler {
     }
 
     public function run() {
+        $pendingMigrations = array_filter(json_decode(shell_exec('../vendor/bin/phinx status -c ../phinx.php --format=json | tail -n 1'), true)['migrations'], function($value) { return count($value) > 0 && $value['migration_status'] === 'down'; });
+
+        if (count($pendingMigrations)) {
+            Irc::sendChannel('Pending migrations found, scheduler cannot continue', LAB_CHAN);
+            echo "Pending migrations found, aborting\n";
+            return;
+        }
+
         $this->db->prepared_query('
             SELECT pt.periodic_task_id
             FROM periodic_task pt
