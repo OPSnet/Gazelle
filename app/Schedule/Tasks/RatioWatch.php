@@ -6,9 +6,6 @@ class RatioWatch extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $offRatioWatch = [];
-        $onRatioWatch = [];
-
         // Take users off ratio watch and enable leeching
         $userQuery = $this->db->prepared_query("
             SELECT
@@ -19,8 +16,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             WHERE uls.Downloaded > 0
                 AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
-                AND i.RatioWatchEnds != '0000-00-00 00:00:00'
-                AND um.can_leech = '0'
+                AND i.RatioWatchEnds > now()
                 AND um.Enabled = '1'
         ");
 
@@ -29,72 +25,30 @@ class RatioWatch extends \Gazelle\Schedule\Task
             $placeholders = implode(',', array_fill(0, count($offRatioWatch), '?'));
             $this->db->prepared_query("
                 UPDATE users_info AS ui
-                INNER JOIN users_main AS um ON (um.ID = ui.UserID)
-                SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
+                INNER JOIN users_main AS um ON (um.ID = ui.UserID) SET
+                    ui.RatioWatchEnds     = NULL,
                     ui.RatioWatchDownload = '0',
-                    um.can_leech = '1',
-                    ui.AdminComment = CONCAT(now(), ' - Leeching re-enabled by adequate ratio.\n\n', ui.AdminComment)
+                    um.can_leech          = '1',
+                    ui.AdminComment       = CONCAT(now(), ' - Taken off ratio watch by adequate ratio.\n\n', ui.AdminComment)
                 WHERE ui.UserID IN ($placeholders)
             ", ...$offRatioWatch);
+
+            foreach ($offRatioWatch as $userID) {
+                $this->cache->delete_value("user_info_heavy_$userID");
+                \Misc::send_pm($userID, 0, 'You have been taken off Ratio Watch', "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n");
+
+                $this->processed++;
+                $this->debug("Taking $userID off ratio watch", $userID);
+            }
+
+            $this->db->set_query_id($userQuery);
+            $passkeys = $this->db->collect('torrent_pass');
+            foreach ($passkeys as $passkey) {
+                \Tracker::update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '1']);
+            }
         }
 
-        foreach ($offRatioWatch as $userID) {
-            $this->cache->begin_transaction("user_info_heavy_$userID");
-            $this->cache->update_row(false, ['RatioWatchEnds' => '0000-00-00 00:00:00', 'RatioWatchDownload' => '0', 'CanLeech' => 1]);
-            $this->cache->commit_transaction(0);
-            \Misc::send_pm($userID, 0, 'You have been taken off Ratio Watch', "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n");
-
-            $this->processed++;
-            $this->debug("Taking $userID off ratio watch", $userID);
-        }
-
-        $this->db->set_query_id($userQuery);
-        $passkeys = $this->db->collect('torrent_pass');
-        foreach ($passkeys as $passkey) {
-            \Tracker::update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '1']);
-        }
-
-        // Take users off ratio watch
-        $userQuery = $this->db->prepared_query("
-            SELECT um.ID, um.torrent_pass
-            FROM users_info AS i
-            INNER JOIN users_main AS um ON (um.ID = i.UserID)
-            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-            WHERE uls.Downloaded > 0
-                AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
-                AND i.RatioWatchEnds != '0000-00-00 00:00:00'
-                AND um.Enabled = '1'
-        ");
-
-        $offRatioWatch = $this->db->collect('ID');
-        if (count($offRatioWatch) > 0) {
-            $placeholders = implode(',', array_fill(0, count($offRatioWatch), '?'));
-            $this->db->prepared_query("
-                UPDATE users_info AS ui
-                INNER JOIN users_main AS um ON (um.ID = ui.UserID)
-                SET ui.RatioWatchEnds = '0000-00-00 00:00:00',
-                    ui.RatioWatchDownload = '0',
-                    um.can_leech = '1'
-                WHERE ui.UserID IN ($placeholders)
-            ", ...$offRatioWatch);
-        }
-
-        foreach ($offRatioWatch as $userID) {
-            $this->cache->begin_transaction("user_info_heavy_$userID");
-            $this->cache->update_row(false, ['RatioWatchEnds' => '0000-00-00 00:00:00', 'RatioWatchDownload' => '0', 'CanLeech' => 1]);
-            $this->cache->commit_transaction(0);
-            \Misc::send_pm($userID, 0, "You have been taken off Ratio Watch", "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n");
-
-            $this->processed++;
-            $this->debug("Taking $userID off ratio watch", $userID);
-        }
-        $this->db->set_query_id($userQuery);
-        $passkeys = $this->db->collect('torrent_pass');
-        foreach ($passkeys as $passkey) {
-            \Tracker::update_tracker('update_user', ['passkey' => $passkey, 'can_leech' => '1']);
-        }
-
-        // Put user on ratio watch if he doesn't meet the standards
+        // Put users on ratio watch if they don't meet the standards
         $this->db->prepared_query("
             SELECT um.ID
             FROM users_info AS i
@@ -102,7 +56,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             WHERE uls.Downloaded > 0
                 AND uls.Uploaded / uls.Downloaded < um.RequiredRatio
-                AND i.RatioWatchEnds = '0000-00-00 00:00:00'
+                AND i.RatioWatchEnds IS NULL
                 AND um.Enabled = '1'
                 AND um.can_leech = '1'
         ");
@@ -113,22 +67,20 @@ class RatioWatch extends \Gazelle\Schedule\Task
             $this->db->prepared_query("
                 UPDATE users_info AS i
                 INNER JOIN users_main AS um ON (um.ID = i.UserID)
-                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                SET i.RatioWatchEnds = '".time_plus(60 * 60 * 24 * 14)."',
-                    i.RatioWatchTimes = i.RatioWatchTimes + 1,
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID) SET
+                    i.RatioWatchEnds     = now() + INTERVAL 2 WEEK,
+                    i.RatioWatchTimes    = i.RatioWatchTimes + 1,
                     i.RatioWatchDownload = uls.Downloaded
                 WHERE um.ID IN ($placeholders)
             ", ...$onRatioWatch);
-        }
 
-        foreach ($onRatioWatch as $userID) {
-            $this->cache->begin_transaction("user_info_heavy_$userID");
-            $this->cache->update_row(false, ['RatioWatchEnds' => time_plus(60 * 60 * 24 * 14), 'RatioWatchDownload' => 0]);
-            $this->cache->commit_transaction(0);
-            \Misc::send_pm($userID, 0, 'You have been put on Ratio Watch', "This happens when your ratio falls below the requirements outlined in the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above.");
+            foreach ($onRatioWatch as $userID) {
+                $this->cache->delete_value("user_info_heavy_$userID");
+                \Misc::send_pm($userID, 0, 'You have been put on Ratio Watch', "This happens when your ratio falls below the requirements outlined in the rules located [url=".site_url()."rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above.");
 
-            $this->processed++;
-            $this->debug("Putting $userID on ratio watch", $userID);
+                $this->processed++;
+                $this->debug("Putting $userID on ratio watch", $userID);
+            }
         }
     }
 }

@@ -10,8 +10,7 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
             SELECT ID, torrent_pass
             FROM users_info AS i
             INNER JOIN users_main AS m ON (m.ID = i.UserID)
-            WHERE i.RatioWatchEnds != '0000-00-00 00:00:00'
-                AND i.RatioWatchEnds < now()
+            WHERE i.RatioWatchEnds < now()
                 AND m.Enabled = '1'
                 AND m.can_leech != '0'");
 

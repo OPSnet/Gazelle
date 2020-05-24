@@ -15,25 +15,20 @@ if (!is_number($UserID)) {
     error(404);
 }
 
-$DB->query("
-    SELECT
-        ui.JoinDate,
-        p.Level AS Class
-    FROM users_main AS um
-        JOIN users_info AS ui ON um.ID = ui.UserID
-        JOIN permissions AS p ON p.ID = um.PermissionID
-    WHERE um.ID = $UserID");
-list($Joined, $Class) = $DB->next_record();
+
+list($Username, $Joined, $Class) = $DB->row("
+    SELECT um.Username, ui.JoinDate, p.Level AS Class
+    FROM users_main        um
+    INNER JOIN users_info  ui ON (ui.UserID = um.ID)
+    INNER JOIN permissions p  ON (p.ID = um.PermissionID)
+    WHERE um.ID = ?
+    ", $UserID
+);
 
 if (!check_perms('users_view_email', $Class)) {
     error(403);
 }
 
-$DB->query("
-    SELECT Username
-    FROM users_main
-    WHERE ID = $UserID");
-list($Username) = $DB->next_record();
 View::show_header("Email history for $Username");
 
 // Get current email (and matches)
@@ -363,4 +358,6 @@ if (isset($Matches)) {
 ?>
     </table>
 </div>
-<?php View::show_footer(); ?>
+<?php
+
+View::show_footer();

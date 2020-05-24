@@ -353,7 +353,7 @@ json_print("success", [
         'paranoia' => $ParanoiaLevel,
         'paranoiaText' => $ParanoiaLevelText,
         'donor' => ($Donor == 1),
-        'warned' => ($Warned != '0000-00-00 00:00:00'),
+        'warned' => is_null($Warned),
         'enabled' => ($Enabled == '1' || $Enabled == '0' || !$Enabled),
         'passkey' => $torrent_pass
     ],

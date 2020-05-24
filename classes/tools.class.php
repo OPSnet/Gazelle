@@ -191,7 +191,7 @@ class Tools {
             SET m.Enabled = '2',
                 m.can_leech = '0',
                 i.AdminComment = CONCAT('".sqltime()." - ".($AdminComment ? $AdminComment : 'Disabled by system')."\n\n', i.AdminComment),
-                i.BanDate = '".sqltime()."',
+                i.BanDate = now(),
                 i.BanReason = '$BanReason',
                 i.RatioWatchDownload = ".($BanReason == 2 ? 'm.Downloaded' : "'0'")."
             WHERE m.ID IN(".implode(',', $UserIDs).') ');
@@ -319,6 +319,4 @@ class Tools {
 
         return (($IP>>$SubnetMaskBits) == ($SubnetIP>>$SubnetMaskBits));
     }
-
 }
-?>

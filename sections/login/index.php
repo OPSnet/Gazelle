@@ -69,7 +69,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                             users_info AS i
                         SET
                             i.ResetKey = '',
-                            i.ResetExpires = '0000-00-00 00:00:00',
+                            i.ResetExpires = NULL,
                             m.PassHash = ?
                         WHERE i.UserID = m.ID
                             AND m.ID = ?
@@ -97,7 +97,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 $DB->prepared_query("
                     UPDATE users_info SET
                         ResetKey = '',
-                        ResetExpires = '0000-00-00 00:00:00'
+                        ResetExpires = NULL
                     WHERE UserID = ?
                     ", $UserID
                 );

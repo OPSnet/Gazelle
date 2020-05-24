@@ -59,7 +59,6 @@ class InitialUserSeeder extends AbstractSeed {
                 'TorrentGrouping' => 0,
                 'ShowTags' => 1,
                 'AuthKey' => '7d3b4750ea71502d25051875a250b71a',
-                'JoinDate' => '2018-03-08 15:50:31',
                 'Inviter' => 0,
             ],
             [
@@ -68,7 +67,6 @@ class InitialUserSeeder extends AbstractSeed {
                 'TorrentGrouping' => 0,
                 'ShowTags' => 1,
                 'AuthKey' => 'a1189fa8554776c6de31b6b4e2d0faea',
-                'JoinDate' => '2018-03-09 05:04:07',
                 'Inviter' => 0,
             ]
         ])->saveData();

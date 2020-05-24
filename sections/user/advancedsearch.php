@@ -71,6 +71,10 @@ class SQLMatcher {
                 return "$field > ?";
             case 'below':
                 return "$field < ?";
+            case 'isnull':
+                return "$field IS NULL";
+            case 'isnotnull':
+                return "$field IS NOT NULL";
             case 'no':
             case 'not_equal':
                 return "$field != ?";
@@ -129,6 +133,7 @@ $SingleDateChoices = ['inarray'=>['on', 'before', 'after']];
 $NumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer']];
 $OffNumberChoices = ['inarray'=>['equal', 'above', 'below', 'between', 'buffer', 'off']];
 $YesNo = ['inarray'=>['any', 'yes', 'no']];
+$Nullable = ['inarray'=>['any', 'isnull', 'isnotnull']];
 
 $emailHistoryChecked = false;
 $ipHistoryChecked = false;
@@ -177,7 +182,7 @@ if (count($_GET)) {
     $Val->SetFields('snatched', '0', 'inarray', "Invalid snatched field", $OffNumberChoices);
     $Val->SetFields('stylesheet', '0', 'inarray', 'Invalid stylesheet', array_unique(array_keys($Stylesheets)));
     $Val->SetFields('uploaded', '0', 'inarray', 'Invalid uploaded field', $NumberChoices);
-    $Val->SetFields('warned', '0', 'inarray', 'Invalid warned field', $YesNo);
+    $Val->SetFields('warned', '0', 'inarray', 'Invalid warned field', $Nullable);
     $Val->SetFields('way', '0', 'inarray', 'Invalid way', $WayVals);
 
     $Err = $Val->ValidateForm($_GET);
@@ -417,7 +422,6 @@ if (count($_GET)) {
 
         if ($_GET['warned']) {
             $Where[] = $m->op('ui1.Warned', $_GET['warned']);
-            $Args[] = '0000-00-00 00:00:00';
         }
 
         if ($disabledIpChecked) {
@@ -815,8 +819,8 @@ View::show_header('User search');
                 <td>
                     <select name="warned">
                         <option value=""<?php    if ($_GET['warned'] === '')    { echo ' selected="selected"'; } ?>>Don't Care</option>
-                        <option value="yes"<?php if ($_GET['warned'] === 'yes') { echo ' selected="selected"'; } ?>>Yes</option>
-                        <option value="no"<?php  if ($_GET['warned'] === 'no')  { echo ' selected="selected"'; } ?>>No</option>
+                        <option value="isnotnull"<?php if ($_GET['warned'] === 'isnotnull') { echo ' selected="selected"'; } ?>>Yes</option>
+                        <option value="isnull"<?php  if ($_GET['warned'] === 'isnull')  { echo ' selected="selected"'; } ?>>No</option>
                     </select>
                 </td>
                 </tr>

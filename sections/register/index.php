@@ -145,8 +145,8 @@ if (!empty($_REQUEST['confirm'])) {
             }
             $DB->prepared_query('
                 INSERT INTO users_info
-                       (UserID, StyleID, AuthKey, Inviter, AdminComment, JoinDate)
-                VALUES (?,      ?,       ?,       ?,       ?,            now())
+                       (UserID, StyleID, AuthKey, Inviter, AdminComment)
+                VALUES (?,      ?,       ?,       ?,       ?)
                 ', $UserID, $StyleID, $AuthKey, $InviterID, $InviteReason
             );
             $DB->prepared_query('
