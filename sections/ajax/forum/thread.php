@@ -256,12 +256,11 @@ foreach ($Thread as $Key => $Post) {
             'paranoia' => $Paranoia,
             'artist' => $Artist === '1',
             'donor' => $Donor == 1,
-            'warned' => $Warned !== '0000-00-00 00:00:00',
+            'warned' => !is_null($Warned),
             'avatar' => $Avatar,
             'enabled' => $Enabled === '2' ? false : true,
             'userTitle' => $UserTitle
         ],
-
     ];
 }
 

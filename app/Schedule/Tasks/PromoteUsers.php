@@ -24,7 +24,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                             GROUP BY UserID
                         ) b ON (b.UserID = users_main.ID)
                         WHERE users_main.PermissionID = ?
-                        AND ui.Warned = '0000-00-00 00:00:00'
+                        AND ui.Warned IS NULL
                         AND uls.Uploaded + coalesce(b.Bounty, 0) >= ?
                         AND (uls.Downloaded = 0 OR uls.Uploaded / uls.Downloaded >= ?)
                         AND ui.JoinDate < now() - INTERVAL ? WEEK

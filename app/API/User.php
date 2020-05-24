@@ -145,11 +145,11 @@ class User extends AbstractAPI {
             'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIp]);
         if (($Cur['Downloaded'] == 0) || ($Cur['Uploaded'] / $Cur['Downloaded'] >=
             $Cur['RequiredRatio'])) {
-            $UpdateSet[] = "ui.RatioWatchEnds = '0000-00-00 00:00:00'";
+            $UpdateSet[] = "ui.RatioWatchEnds = NULL";
             $UpdateSet[] = "um.can_leech = '1'";
             $UpdateSet[] = "ui.RatioWatchDownload = '0'";
         } else {
-            if ($Cur['RatioWatchEnds'] != '0000-00-00 00:00:00') {
+            if (!is_null($Cur['RatioWatchEnds'])) {
                 $UpdateSet[] = "ui.RatioWatchEnds = NOW()";
                 $UpdateSet[] = "ui.RatioWatchDownload = um.Downloaded";
                 $Comment .= ' (Ratio: '.\Format::get_ratio_html($Cur['Uploaded'],

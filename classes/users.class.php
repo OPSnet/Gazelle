@@ -55,20 +55,20 @@ class Users {
      *
      * @param $UserID int   The UserID to get info for
      * @return array with the following keys:
-     *    int    ID
-     *    string    Username
-     *    int    PermissionID
-     *    array    Paranoia - $Paranoia array sent to paranoia.class
-     *    boolean    Artist
-     *    boolean    Donor
-     *    string    Warned - When their warning expires in international time format
-     *    string    Avatar - URL
-     *    boolean    Enabled
-     *    string    Title
-     *    string    CatchupTime - When they last caught up on forums
-     *    boolean    Visible - If false, they don't show up on peer lists
-     *    array ExtraClasses - Secondary classes.
-     *    int EffectiveClass - the highest level of their main and secondary classes
+     *    int     ID
+     *    string  Username
+     *    int     PermissionID
+     *    array   Paranoia - $Paranoia array sent to paranoia.class
+     *    boolean Artist
+     *    boolean Donor
+     *    string  Warned - When their warning expires in international time format
+     *    string  Avatar - URL
+     *    boolean Enabled
+     *    string  Title
+     *    string  CatchupTime - When they last caught up on forums
+     *    boolean Visible - If false, they don't show up on peer lists
+     *    array   ExtraClasses - Secondary classes.
+     *    int     EffectiveClass - the highest level of their main and secondary classes
      */
     public static function user_info($UserID) {
         global $Classes, $SSL;
@@ -113,7 +113,7 @@ class Users {
                         'Paranoia' => [],
                         'Artist' => false,
                         'Donor' => false,
-                        'Warned' => '0000-00-00 00:00:00',
+                        'Warned' => null,
                         'Avatar' => '',
                         'Enabled' => 0,
                         'Title' => '',
@@ -151,7 +151,7 @@ class Users {
             G::$DB->set_query_id($OldQueryID);
         }
         if (strtotime($UserInfo['Warned']) < time()) {
-            $UserInfo['Warned'] = '0000-00-00 00:00:00';
+            $UserInfo['Warned'] = null;
             G::$Cache->cache_value("user_info_$UserID", $UserInfo, 2592000);
         }
 
@@ -606,7 +606,7 @@ class Users {
             }
         }
 
-        $Str .= ($IsWarned && $UserInfo['Warned'] != '0000-00-00 00:00:00') ? '<a href="wiki.php?action=article&amp;name=warnings"'
+        $Str .= ($IsWarned && $UserInfo['Warned']) ? '<a href="wiki.php?action=article&amp;name=warnings"'
                     . '><img src="'.STATIC_SERVER.'common/symbols/warned.png" alt="Warned" title="Warned'
                     . (G::$LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
                     . '" class="tooltip" /></a>' : '';

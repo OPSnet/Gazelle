@@ -183,6 +183,9 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         = $DB->next_record(MYSQLI_NUM, [10, 12]);
     $UnlimitedDownload = null;
 }
+if ($Warned == '') {
+    $Warned = null; // Fuck Gazelle
+}
 
 $BonusPointsPerHour = $Bonus->userHourlyRate($UserID);
 
@@ -418,7 +421,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>">Tokens</a>: <?=number_format($FLTokens)?></li>
 <?php
     }
-    if (($OwnProfile || check_perms('users_mod')) && $Warned != '0000-00-00 00:00:00') {
+    if (($OwnProfile || check_perms('users_mod')) && !is_null($Warned)) {
 ?>
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Warning expires in: <?=time_diff((date('Y-m-d H:i', strtotime($Warned))))?></li>
 <?php    } ?>
@@ -680,11 +683,7 @@ DonationsView::render_donor_stats($UserID);
     </div>
     <div class="main_column">
 <?php
-if (isset($RatioWatchEnds)
-    && $RatioWatchEnds != '0000-00-00 00:00:00'
-    && (time() < strtotime($RatioWatchEnds))
-    && ($Downloaded * $RequiredRatio) > $Uploaded
-) {
+if (time() < strtotime($RatioWatchEnds) && ($Downloaded * $RequiredRatio) > $Uploaded) {
 ?>
         <div class="box">
             <div class="head">Ratio watch</div>
@@ -1177,11 +1176,10 @@ if (check_perms('users_mod', $Class)) { ?>
 
     DonationsView::render_mod_donations($UserID);
 
-
     if (check_perms('users_warn')) {
         echo G::$Twig->render('user/edit-warn.twig', [
-            'is_warned' => $Warned != '0000-00-00 00:00:00',
-            'until'     => $Warned != '0000-00-00 00:00:00' ? date('Y-m-d H:i', strtotime($Warned)) : 'n/a',
+            'is_warned' => !is_null($Warned),
+            'until'     => !is_null($Warned) ? date('Y-m-d H:i', strtotime($Warned)) : 'n/a',
         ]);
     }
 

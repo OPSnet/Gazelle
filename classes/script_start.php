@@ -162,8 +162,7 @@ if (isset($LoginCookie)) {
 
     // $LoggedUser['RatioWatch'] as a bool to disable things for users on Ratio Watch
     $LoggedUser['RatioWatch'] = (
-        $LoggedUser['RatioWatchEnds'] != '0000-00-00 00:00:00'
-        && time() < strtotime($LoggedUser['RatioWatchEnds'])
+        time() < strtotime($LoggedUser['RatioWatchEnds'])
         && ($LoggedUser['BytesDownloaded'] * $LoggedUser['RequiredRatio']) > $LoggedUser['BytesUploaded']
     );
 

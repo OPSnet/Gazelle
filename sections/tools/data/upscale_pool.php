@@ -24,7 +24,7 @@ $RS = $DB->query("
     FROM users_main AS um
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS i ON (i.UserID = um.ID)
-    WHERE i.RatioWatchEnds != '0000-00-00 00:00:00'
+    WHERE i.RatioWatchEnds > now()
         AND um.Enabled = '1'
     ORDER BY i.RatioWatchEnds ASC
     LIMIT $Limit");
@@ -33,7 +33,7 @@ list($Results) = $DB->next_record();
 $DB->query("
     SELECT COUNT(UserID)
     FROM users_info
-    WHERE BanDate != '0000-00-00 00:00:00'
+    WHERE BanDate IS NOT NULL
         AND BanReason = '2'");
 list($TotalDisabled) = $DB->next_record();
 $DB->set_query_id($RS);
@@ -96,4 +96,3 @@ if ($DB->has_results()) {
 }
 
 View::show_footer();
-?>

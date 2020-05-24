@@ -99,7 +99,7 @@ while (list($ConvID, $Subject, $Unread, $Sticky, $ForwardedID, $ForwardedName, $
         'username' => $Username,
         'avatar' => $Avatar,
         'donor' => $Donor == 1,
-        'warned' => $Warned == 1,
+        'warned' => !is_null($Warned),
         'enabled' => $Enabled == 2 ? false : true,
         'date' => $Date
     ];

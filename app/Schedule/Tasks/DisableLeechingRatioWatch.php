@@ -11,7 +11,7 @@ class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
             FROM users_info AS i
             INNER JOIN users_main AS m ON (m.ID = i.UserID)
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = i.UserID)
-            WHERE i.RatioWatchEnds != '0000-00-00 00:00:00'
+            WHERE i.RatioWatchEnds IS NOT NULL
                 AND i.RatioWatchDownload + 10 * 1024 * 1024 * 1024 < uls.Downloaded
                 AND m.Enabled = '1'
                 AND m.can_leech = '1'"

@@ -230,10 +230,14 @@ $Cache->delete_value("user_info_" . $UserID);
 $DB->set_query_id($QueryID);
 
 if ($_POST['ResetRatioWatch'] && check_perms('users_edit_reset_keys')) {
-    $DB->query("
-        UPDATE users_info
-        SET RatioWatchEnds = '0000-00-00 00:00:00', RatioWatchDownload = '0', RatioWatchTimes = '0'
-        WHERE UserID = '$UserID'");
+    $DB->prepared_query("
+        UPDATE users_info SET
+            RatioWatchEnds = NULL,
+            RatioWatchDownload = '0',
+            RatioWatchTimes = '0'
+        WHERE UserID = ?
+        ", $UserID
+    );
     $EditSummary[] = 'RatioWatch history reset';
 }
 
@@ -511,11 +515,11 @@ if ($Invites != $Cur['Invites'] && check_perms('users_edit_invites')) {
     $HeavyUpdates['Invites'] = $Invites;
 }
 
-if ($Warned == 1 && $Cur['Warned'] == '0000-00-00 00:00:00' && check_perms('users_warn')) {
+if ($Warned == 1 && is_null($Cur['Warned']) && check_perms('users_warn')) {
     $Weeks = 'week' . ($WarnLength === 1 ? '' : 's');
     Misc::send_pm($UserID, 0, 'You have received a warning', "You have been [url=".site_url()."wiki.php?action=article&amp;name=warnings]warned for $WarnLength {$Weeks}[/url] by [user]".$LoggedUser['Username']."[/user]. The reason given was:
 [quote]{$WarnReason}[/quote]");
-    $UpdateSet[] = "Warned = '".sqltime()."' + INTERVAL $WarnLength WEEK";
+    $UpdateSet[] = "Warned = now() + INTERVAL $WarnLength WEEK";
     $Msg = "warned for $WarnLength $Weeks";
     if ($WarnReason) {
         $Msg .= " for \"$WarnReason\"";
@@ -523,10 +527,10 @@ if ($Warned == 1 && $Cur['Warned'] == '0000-00-00 00:00:00' && check_perms('user
     $EditSummary[] = db_string($Msg);
     $LightUpdates['Warned'] = time_plus(3600 * 24 * 7 * $WarnLength);
 
-} elseif ($Warned == 0 && $Cur['Warned'] != '0000-00-00 00:00:00' && check_perms('users_warn')) {
-    $UpdateSet[] = "Warned = '0000-00-00 00:00:00'";
+} elseif ($Warned == 0 && !is_null($Cur['Warned']) && check_perms('users_warn')) {
+    $UpdateSet[] = "Warned = NULL'";
     $EditSummary[] = 'warning removed';
-    $LightUpdates['Warned'] = '0000-00-00 00:00:00';
+    $LightUpdates['Warned'] = 'null';
 
 } elseif ($Warned == 1 && $ExtendWarning != '---' && check_perms('users_warn')) {
     $Weeks = 'week' . ($ExtendWarning === 1 ? '' : 's');

@@ -57,10 +57,10 @@ if (isset($_POST['Username'])) {
         //Give them a row in users_info
         $DB->prepared_query("
             INSERT INTO users_info
-                (UserID, StyleID, AuthKey, JoinDate)
-            VALUES
-                (?,      ?,       ?,       now())",
-            $userId, $StyleID, $authKey);
+                   (UserID, StyleID, AuthKey)
+            VALUES (?,      ?,       ?)
+            ", $userId, $StyleID, $authKey
+        );
 
         // Give the notification settings
         $DB->prepared_query("INSERT INTO users_notifications_settings (UserID) VALUES (?)", $userId);
@@ -141,4 +141,4 @@ if (isset($_POST['Username'])) {
 <?php
 }
 
-View::show_footer(); ?>
+View::show_footer();

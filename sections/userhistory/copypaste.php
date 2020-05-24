@@ -15,13 +15,12 @@ if (!check_perms('users_view_ips', $UserInfo['Class'])) {
 echo "Username: ". $UserInfo['Username'] . "</br>";
 
 //Display Join Date
-$DB->prepared_query("
-    SELECT ui.JoinDate
-    FROM users_main AS um
-        JOIN users_info AS ui ON um.ID = ui.UserID
-    WHERE um.ID = ?", $UserID);
-list($Joined) = $DB->next_record();
-
+$Joined = $DB->scalar("
+    SELECT JoinDate
+    FROM users_info
+    WHERE UserID = ?
+    ", $UserID
+);
 echo "Joined: " . $Joined . "</br>";
 
 //Get Emails from the DB.
@@ -73,7 +72,7 @@ if ($DB->has_results()) {
     $Results = [];
 }
 //Display the results.
-echo "</br>Site IP's:</br>";
+echo "</br>Site IPs:</br>";
 foreach ($Results as $Index => $Result) {
     $IP = $Result['IP'];
     $StartTime = $Result['StartTime'];
@@ -101,4 +100,3 @@ foreach ($Results as $Index => $Result) {
     $Time = $Result['tstamp'];
     echo $IP . " | TorrentID: " . $TorrentID . " | Time: " . date('Y-m-d g:i:s', $Time) . "</br>";
 }
-?>

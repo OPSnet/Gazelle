@@ -23,9 +23,9 @@ foreach ($Thread as $Key => $Post) {
             'authorName' => $Username,
             'artist' => $Artist == 1,
             'donor' => $Donor == 1,
-            'warned' => ($Warned != '0000-00-00 00:00:00'),
+            'warned' => !is_null($Warned),
             'avatar' => $Avatar,
-            'enabled' => ($Enabled == 2 ? false : true),
+            'enabled' => ($Enabled == '1' ? true : false),
             'userTitle' => $UserTitle
         ]
     ];

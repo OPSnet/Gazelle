@@ -16,13 +16,14 @@ if (!is_number($UserID)) {
     error(404);
 }
 
-$DB->query("
-    SELECT ui.JoinDate, p.Level AS Class
-    FROM users_main AS um
-        JOIN users_info AS ui ON um.ID = ui.UserID
-        JOIN permissions AS p ON p.ID = um.PermissionID
-    WHERE um.ID = $UserID");
-list($Joined, $Class) = $DB->next_record();
+list($Username, $Joined, $Class) = $DB->row("
+    SELECT um.Username, ui.JoinDate, p.Level AS Class
+    FROM users_main        um
+    INNER JOIN users_info  ui ON (ui.UserID = um.ID)
+    INNER JOIN permissions p  ON (p.ID = um.PermissionID)
+    WHERE um.ID = ?
+    ", $UserID
+);
 
 if (!check_perms('users_view_email', $Class)) {
     error(403);
@@ -30,18 +31,13 @@ if (!check_perms('users_view_email', $Class)) {
 
 $UsersOnly = isset($_GET['usersonly']);
 
-$DB->query("
-    SELECT Username
-    FROM users_main
-    WHERE ID = $UserID");
-list($Username)= $DB->next_record();
 View::show_header("Email history for $Username");
 
 if ($UsersOnly) {
     $DB->query("
         SELECT
             u.Email,
-            '".sqltime()."' AS Time,
+            now() AS Time,
             u.IP,
             c.Code
         FROM users_main AS u
@@ -59,14 +55,13 @@ if ($UsersOnly) {
             LEFT JOIN users_history_emails AS h2 ON h2.email = h.email and h2.UserID != '$UserID'
             LEFT JOIN geoip_country AS c ON INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP
         WHERE h.UserID = '$UserID'
-            AND h2.UserID > 0"
-            /*AND Time != '0000-00-00 00:00:00'*/."
+            AND h2.UserID > 0
         ORDER BY Time DESC");
 } else {
     $DB->query("
         SELECT
             u.Email,
-            '".sqltime()."' AS Time,
+            now() AS Time,
             u.IP,
             c.Code
         FROM users_main AS u
@@ -80,8 +75,7 @@ if ($UsersOnly) {
             c.Code
         FROM users_history_emails AS h
             LEFT JOIN geoip_country AS c ON INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP
-        WHERE UserID = '$UserID' "
-            /*AND Time != '0000-00-00 00:00:00'*/."
+        WHERE UserID = '$UserID'
         ORDER BY Time DESC");
 }
 $History = $DB->to_array();
@@ -147,4 +141,6 @@ foreach ($History as $Key => $Values) {
     }
 } ?>
 </table>
-<?php View::show_footer(); ?>
+<?php
+
+View::show_footer();
