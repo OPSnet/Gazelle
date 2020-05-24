@@ -43,6 +43,7 @@ $preload = [
     'bonus'      => new \Gazelle\Bonus($DB, $Cache),
     'stylesheet' => new \Gazelle\Stylesheet($DB, $Cache),
     'tagMan'     => new \Gazelle\Manager\Tag($DB, $Cache),
+    'torMan'     => new \Gazelle\Manager\Torrent($DB, $Cache),
     'twig'       => new Twig\Environment(
         new Twig\Loader\FilesystemLoader('templates'),
         ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
