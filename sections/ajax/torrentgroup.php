@@ -12,11 +12,13 @@ if ($GroupID && $TorrentHash) {
     json_die("failure", "bad parameters");
 }
 
+$torMan = new \Gazelle\Manager\Torrent($DB, $Cache);
+
 if ($TorrentHash) {
-    if (!is_valid_torrenthash($TorrentHash)) {
+    if (!$torMan->isValidHash($TorrentHash)) {
         json_die("failure", "bad hash parameter");
     } else {
-        $GroupID = (int)torrenthash_to_groupid($TorrentHash);
+        $GroupID = $torMan->hashToGroupId($TorrentHash);
         if (!$GroupID) {
             json_die("failure", "bad hash parameter");
         }

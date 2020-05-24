@@ -11,11 +11,13 @@ if ($TorrentID && $TorrentHash) {
     json_die("failure", "bad parameters");
 }
 
+$torMan = new \Gazelle\Manager\Torrent($DB, $Cache);
+
 if ($TorrentHash) {
-    if (!is_valid_torrenthash($TorrentHash)) {
+    if (!$torMan->isValidHash($TorrentHash)) {
         json_die("failure", "bad hash parameter");
     } else {
-        $TorrentID = (int)torrenthash_to_torrentid($TorrentHash);
+        $TorrentID = $torMan->hashToTorrentId($TorrentHash);
         if (!$TorrentID) {
             json_die("failure", "bad hash parameter");
         }

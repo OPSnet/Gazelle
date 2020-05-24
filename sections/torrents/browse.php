@@ -2,8 +2,6 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-include(SERVER_ROOT . '/sections/torrents/functions.php');
-
 $SortOrderMap = [];
 foreach (TorrentSearch::$SortOrders as $key => $val) {
     $SortOrderMap[$key] = [$key, 'desc'];
@@ -21,14 +19,10 @@ if (!empty($SortOrderMap[$SortOrder][1])) {
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $InfoHash = (!empty($_GET['searchstr'])) ? $_GET['searchstr'] : $_GET['groupname'];
 
+    $torMan = new \Gazelle\Manager\Torrent($DB, $Cache);
     // Search by infohash
-    if ($InfoHash = is_valid_torrenthash($InfoHash)) {
-        $DB->prepared_query("
-            SELECT ID, GroupID
-            FROM torrents
-            WHERE info_hash = UNHEX(?)", $InfoHash);
-        if ($DB->has_results()) {
-            list($ID, $GroupID) = $DB->next_record();
+    if ($InfoHash = $torMan->isValidHash($InfoHash)) {
+        if (list($ID, $GroupID) = $torMan->hashToTorrentGroup($InfoHash)) {
             header("Location: torrents.php?id=$GroupID&torrentid=$ID");
             die();
         }
