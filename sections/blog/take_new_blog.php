@@ -32,9 +32,9 @@ else {
 $Important = isset($_POST['important']) ? '1' : '0';
 $DB->prepared_query("
     INSERT INTO blog
-        (UserID, Title, Body, Time, ThreadID, Important)
-    VALUES
-        (?, ?, ?, ?, ?, ?)", G::$LoggedUser['ID'], $_POST['title'], $_POST['body'], sqltime(), $ThreadID, $Important);
+           (UserID, Title, Body, ThreadID, Important)
+    VALUES (?,      ?,     ?,    ?,        ?)
+    ", G::$LoggedUser['ID'], $_POST['title'], $_POST['body'], $ThreadID, $Important);
 
 $Cache->delete_value('blog');
 if ($Important == '1') {
