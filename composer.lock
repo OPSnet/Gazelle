@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9abd968766ff3deda8ccdb1eac3239c2",
+    "content-hash": "379d84203ae0998b70b0cd028dbd9eb9",
     "packages": [
         {
             "name": "cakephp/cache",
@@ -421,16 +421,16 @@
         },
         {
             "name": "orpheusnet/logchecker",
-            "version": "0.9.2",
+            "version": "0.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OPSnet/Logchecker.git",
-                "reference": "e7539b976dffda363abf1b72a61d04ee9b4fcd14"
+                "reference": "a7bbb966a09825e730ae0c9bf5d7c0a54bed9c9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/e7539b976dffda363abf1b72a61d04ee9b4fcd14",
-                "reference": "e7539b976dffda363abf1b72a61d04ee9b4fcd14",
+                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/a7bbb966a09825e730ae0c9bf5d7c0a54bed9c9a",
+                "reference": "a7bbb966a09825e730ae0c9bf5d7c0a54bed9c9a",
                 "shasum": ""
             },
             "require": {
@@ -474,7 +474,7 @@
                 }
             ],
             "description": "Logchecker for validating logs generated from supported ripping programs (like EAC and XLD)",
-            "time": "2020-04-29T12:16:06+00:00"
+            "time": "2020-05-24T05:03:39+00:00"
         },
         {
             "name": "psr/cache",
