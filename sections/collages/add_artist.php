@@ -21,20 +21,21 @@ function add_artist($CollageID, $ArtistID) {
         WHERE CollageID = '$CollageID'
             AND ArtistID = '$ArtistID'");
     if (!$DB->has_results()) {
-        $DB->query("
+        $DB->prepared_query("
             INSERT IGNORE INTO collages_artists
-                (CollageID, ArtistID, UserID, Sort, AddedOn)
-            VALUES
-                ('$CollageID', '$ArtistID', '$LoggedUser[ID]', '$Sort', '" . sqltime() . "')");
+                   (CollageID, ArtistID, UserID, Sort)
+            VALUES (?,         ?,        ?,      ?)
+            ", $CollageID, $ArtistID, $LoggedUser['ID'], $Sort
+        );
+        $DB->prepared_query("
+            UPDATE collages SET
+                NumTorrents = NumTorrents + 1,
+                Updated = now()
+            WHERE ID = ?
+            ", $CollageID
+        );
 
-        $DB->query("
-            UPDATE collages
-            SET NumTorrents = NumTorrents + 1, Updated = '" . sqltime() . "'
-            WHERE ID = '$CollageID'");
-
-        $Cache->delete_value("collage_$CollageID");
-        $Cache->delete_value("artists_collages_$ArtistID");
-        $Cache->delete_value("artists_collages_personal_$ArtistID");
+        $Cache->deleteMulti(["collage_$CollageID", "artists_collages_$ArtistID", "artists_collages_personal_$ArtistID"]);
 
         $DB->query("
             SELECT UserID
