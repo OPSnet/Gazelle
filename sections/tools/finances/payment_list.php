@@ -128,7 +128,7 @@ if (check_perms('admin_manage_payments')) {
         <tr>
             <td>Budget</td>
             <td><?= sprintf('%0.4f', $totalRent / 12) ?></td>
-            <td><?= sprintf('%0.4f', $totalRent / 3) ?></td>
+            <td><?= sprintf('%0.4f', $totalRent /  4) ?></td>
             <td><?= sprintf('%0.4f', $totalRent) ?></td>
         </tr>
         <tr>
