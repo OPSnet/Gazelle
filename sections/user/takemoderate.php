@@ -716,13 +716,13 @@ if ($EnableUser != $Cur['Enabled'] && check_perms('users_disable_users')) {
         $VisibleTrIP = $Visible && $Cur['IP'] != '127.0.0.1' ? '1' : '0';
         Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIP]);
         if (($Cur['Downloaded'] == 0) || ($Cur['Uploaded'] / $Cur['Downloaded'] >= $Cur['RequiredRatio'])) {
-            $UpdateSet[] = "i.RatioWatchEnds = '0000-00-00 00:00:00'";
+            $UpdateSet[] = "i.RatioWatchEnds = NULL";
             $CanLeech = 1;
             $UpdateSet[] = "m.can_leech = '1'";
             $UpdateSet[] = "i.RatioWatchDownload = '0'";
         } else {
             $EnableStr .= ' (Ratio: '.Format::get_ratio_html($Cur['Uploaded'], $Cur['Downloaded'], false).', RR: '.number_format($Cur['RequiredRatio'],2).')';
-            if ($Cur['RatioWatchEnds'] != '0000-00-00 00:00:00') {
+            if ($Cur['RatioWatchEnds']) {
                 $UpdateSet[] = "i.RatioWatchEnds = NOW()";
                 $UpdateSet[] = "i.RatioWatchDownload = m.Downloaded";
                 $CanLeech = 0;

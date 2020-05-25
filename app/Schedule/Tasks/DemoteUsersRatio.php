@@ -20,9 +20,11 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             LEFT JOIN
             (
-                SELECT UserID, SUM(Bounty) AS Bounty
-                FROM requests_votes
-                GROUP BY UserID
+                SELECT rv.UserID, sum(Bounty) AS Bounty
+                FROM requests_votes rv
+                INNER JOIN requests r ON (r.ID = rv.RequestID)
+                WHERE r.UserID != r.FillerID
+                GROUP BY rv.UserID
             ) b ON (b.UserID = um.ID)
             WHERE um.PermissionID IN ($placeholders)
                 AND (
@@ -38,13 +40,15 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             LEFT JOIN
             (
-                SELECT UserID, SUM(Bounty) AS Bounty
-                FROM requests_votes
-                GROUP BY UserID
+                SELECT rv.UserID, sum(Bounty) AS Bounty
+                FROM requests_votes rv
+                INNER JOIN requests r ON (r.ID = rv.RequestID)
+                WHERE r.UserID != r.FillerID
+                GROUP BY rv.UserID
             ) b ON (b.UserID = um.ID)
             SET
                 um.PermissionID = ?,
-                ui.AdminComment = CONCAT(now(), ' - Class changed to ', ?, ' by System\n\n', ui.AdminComment)
+                ui.AdminComment = concat(now(), ' - Class changed to ', ?, ' by System\n\n', ui.AdminComment)
             WHERE um.PermissionID IN ($placeholders)
                 AND (
                     (uls.Downloaded > 0 AND uls.Uploaded / uls.Downloaded < ?)

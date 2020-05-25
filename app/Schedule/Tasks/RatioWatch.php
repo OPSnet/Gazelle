@@ -29,7 +29,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
                     ui.RatioWatchEnds     = NULL,
                     ui.RatioWatchDownload = '0',
                     um.can_leech          = '1',
-                    ui.AdminComment       = CONCAT(now(), ' - Taken off ratio watch by adequate ratio.\n\n', ui.AdminComment)
+                    ui.AdminComment       = concat(now(), ' - Taken off ratio watch by adequate ratio.\n\n', ui.AdminComment)
                 WHERE ui.UserID IN ($placeholders)
             ", ...$offRatioWatch);
 
