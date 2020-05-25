@@ -175,7 +175,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
 function get_torrent_info($TorrentID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
     global $Cache, $DB;
     $torMan = new \Gazelle\Manager\Torrent($DB, $Cache);
-    $GroupInfo = get_group_info($torMan->idToGroupId($TorrentId), $RevisionID, $PersonalProperties, $ApiCall);
+    $GroupInfo = get_group_info($torMan->idToGroupId($TorrentID), $RevisionID, $PersonalProperties, $ApiCall);
     if (!$GroupInfo) {
         return null;
     }
