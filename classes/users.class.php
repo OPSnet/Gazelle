@@ -215,6 +215,9 @@ class Users {
                 ', 'no-fl-gifts', $UserID
             );
             $HeavyInfo = G::$DB->next_record(MYSQLI_ASSOC, ['CustomPermissions', 'SiteOptions']);
+            if ($HeavyInfo['RatioWatchEnds'] == '') {
+                $HeavyInfo['RatioWatchEnds'] = null;
+            }
 
             $HeavyInfo['CustomPermissions'] = unserialize_array($HeavyInfo['CustomPermissions']);
 

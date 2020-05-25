@@ -527,7 +527,7 @@ if ($Warned == 1 && is_null($Cur['Warned']) && check_perms('users_warn')) {
     $LightUpdates['Warned'] = time_plus(3600 * 24 * 7 * $WarnLength);
 
 } elseif ($Warned == 0 && !is_null($Cur['Warned']) && check_perms('users_warn')) {
-    $UpdateSet[] = "Warned = NULL'";
+    $UpdateSet[] = "Warned = NULL";
     $EditSummary[] = 'warning removed';
     $LightUpdates['Warned'] = 'null';
 
