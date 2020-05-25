@@ -1,2 +1,2 @@
-*/15      *  *   *    *       /usr/bin/php /var/www/schedule.php OL9n0m2JxhBxYyMvXWJg >> /tmp/schedule.log
-10-59/15  *  *   *    *       /usr/bin/php /var/www/peerupdate.php OL9n0m2JxhBxYyMvXWJg >> /tmp/peerupdate.log
+*/15      *  *   *    *       /usr/bin/php /var/www/public/schedule.php OL9n0m2JxhBxYyMvXWJg >> /tmp/schedule.log
+10-59/15  *  *   *    *       /usr/bin/php /var/www/public/peerupdate.php OL9n0m2JxhBxYyMvXWJg >> /tmp/peerupdate.log
