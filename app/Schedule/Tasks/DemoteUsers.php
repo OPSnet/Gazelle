@@ -19,9 +19,11 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                     INNER JOIN users_info ui ON (users_main.ID = ui.UserID)
                     LEFT JOIN
                     (
-                        SELECT UserID, sum(Bounty) AS Bounty
-                        FROM requests_votes
-                        GROUP BY UserID
+                        SELECT rv.UserID, sum(Bounty) AS Bounty
+                        FROM requests_votes rv
+                        INNER JOIN requests r ON (r.ID = rv.RequestID)
+                        WHERE r.UserID != r.FillerID
+                        GROUP BY rv.UserID
                     ) b ON (b.UserID = users_main.ID)
                     WHERE users_main.PermissionID = ?
                     AND (uls.Uploaded + coalesce(b.Bounty, 0) < ?
