@@ -4,7 +4,7 @@ if (!check_perms('admin_dnu')) {
 }
 $Title = 'Manage the "Do Not Upload" list';
 
-$DB->query("
+$DB->prepared_query("
     SELECT
         d.ID,
         d.Name,
