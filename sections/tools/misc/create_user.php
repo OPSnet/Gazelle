@@ -73,6 +73,13 @@ if (isset($_POST['Username'])) {
             $userId, STARTING_UPLOAD); 
 
         $DB->prepared_query('
+            INSERT INTO user_bonus
+                   (user_id)
+            VALUES (?)
+            ', $UserID
+        );
+
+        $DB->prepared_query('
             INSERT INTO user_flt
                    (user_id)
             VALUES (?)

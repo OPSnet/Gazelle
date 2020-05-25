@@ -492,7 +492,6 @@ if ($Downloaded != $Cur['Downloaded'] && $Downloaded != $_POST['OldDownloaded'] 
 $newBonusPoints = false;
 if ($BonusPoints != floatval($Cur['BonusPoints']) && $BonusPoints != floatval($_POST['OldBonusPoints'])
     && (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID']))) {
-    $UpdateSet[] = "BonusPoints = '{$BonusPoints}'";
     $EditSummary[] = "bonus points changed from {$Cur['BonusPoints']} to {$BonusPoints}";
     $Cache->delete_value("user_stats_{$UserID}");
     $newBonusPoints = $BonusPoints;
