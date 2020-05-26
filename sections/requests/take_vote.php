@@ -76,7 +76,7 @@ $UserIDs = [];
 while (list($UserID) = $DB->next_record()) {
     $UserIDs[] = $UserID;
 }
-$notification = new Notification($DB, $Cache);
+$notification = new Notification;
 $notification->notifyUsers($UserIDs, Notification::REQUESTALERTS, Format::get_size($Amount)
     . " of bounty has been added to a request you've voted on!", "requests.php?action=view&id=" . $RequestID);
 

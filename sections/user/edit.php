@@ -7,7 +7,7 @@ if (!is_number($UserID)) {
     error(404);
 }
 
-$User = new \Gazelle\User($DB, $Cache, $UserID);
+$User = new \Gazelle\User($UserID);
 
 $DB->prepared_query('
     SELECT
@@ -154,7 +154,7 @@ echo $Val->GenerateJS('userform');
                 <td>
                     <select name="stylesheet" id="stylesheet">
 <?php
-    $StylesheetsManager = new \Gazelle\Stylesheet($DB, $Cache);
+    $StylesheetsManager = new \Gazelle\Stylesheet;
     $Stylesheets = $StylesheetsManager->list();
 
     foreach ($Stylesheets as $Style) { ?>
@@ -513,7 +513,7 @@ echo $Val->GenerateJS('userform');
                 </td>
             </tr>
 <?php
-            $notification = new Notification($DB, $Cache, $UserID);
+            $notification = new Notification($UserID);
             NotificationsManagerView::render_settings($notification->settings());
 ?>
         </table>

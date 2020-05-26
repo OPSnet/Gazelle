@@ -142,7 +142,7 @@ if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
     }
 }
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 $isSubscribed = $subscription->isSubscribed($ThreadID);
 
 if ($isSubscribed) {

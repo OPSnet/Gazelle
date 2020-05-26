@@ -25,7 +25,7 @@ View::show_header('Payment Dates');
 $Row = 'b';
 $totalRent = 0;
 
-$Payment = new \Gazelle\Manager\Payment($DB, $Cache);
+$Payment = new \Gazelle\Manager\Payment;
 $paymentList = $Payment->list();
 
 foreach ($paymentList as $r) {

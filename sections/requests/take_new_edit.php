@@ -354,7 +354,7 @@ if ($GroupID) {
  * 3. Create a row in the requests_artists table for each artist, based on the ID.
  */
 
-$ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
+$ArtistManager = new \Gazelle\Manager\Artist;
 foreach ($ArtistForm as $Importance => $Artists) {
     foreach ($Artists as $Num => $Artist) {
         //1. See if each artist given already exists and if it does, grab the ID.
@@ -404,7 +404,7 @@ if (!$NewRequest) {
         WHERE RequestID = ?', $RequestID);
 }
 
-$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
+$tagMan = new \Gazelle\Manager\Tag;
 $Tags = array_unique(explode(',', $Tags));
 foreach ($Tags as $Index => $Tag) {
     $TagID = $tagMan->create($Tag, $LoggedUser['ID']);

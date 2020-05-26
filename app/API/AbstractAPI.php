@@ -2,15 +2,12 @@
 
 namespace Gazelle\API;
 
-abstract class AbstractAPI {
-    protected $db;
-    protected $cache;
+abstract class AbstractAPI extends \Gazelle\Base {
     protected $twig;
     protected $config;
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache, \Twig\Environment $twig, array $config) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct(\Twig\Environment $twig, array $config) {
+        parent::__construct();
         $this->twig = $twig;
         $this->config = $config;
     }

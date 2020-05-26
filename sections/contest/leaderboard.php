@@ -60,7 +60,7 @@ if (check_perms('admin_manage_contest') && count($Prior)) {
     <div class="head">
 <?php
 if ($Contest['BonusPool'] > 0) {
-    $bp = new \Gazelle\BonusPool($DB, $Cache, $Contest['BonusPool']);
+    $bp = new \Gazelle\BonusPool($Contest['BonusPool']);
 ?>
         <h3>The Bonus Point pool currently stands at <?= number_format($bp->getTotalSent()) ?> points.</h3>
 <?php

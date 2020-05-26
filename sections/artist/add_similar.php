@@ -60,9 +60,9 @@ if (!empty($Artist2ID)) { // artist was found in the database
             VALUES ('$SimilarID', '$UserID', 'up')");
     }
 
-    $artist = new \Gazelle\Artist($DB, $Cache, $Artist1ID);
+    $artist = new \Gazelle\Artist($Artist1ID);
     $artist->flushCache();
-    $artist = new \Gazelle\Artist($DB, $Cache, $Artist2ID);
+    $artist = new \Gazelle\Artist($Artist2ID);
     $artist->flushCache();
     $Cache->delete_value("similar_positions_$Artist1ID"); // Delete artist's similar map cache
     $Cache->delete_value("similar_positions_$Artist2ID"); // Delete artist's similar map cache

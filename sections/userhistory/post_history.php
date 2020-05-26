@@ -167,7 +167,7 @@ if ($ShowGrouped) {
             <br /><br />
 <?php
 if ($ViewingOwn) {
-    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $UserID);
+    $subscription = new \Gazelle\Manager\Subscription($UserID);
     $UserSubscriptions = $subscription->subscriptions();
 
     if (!$ShowUnread) {

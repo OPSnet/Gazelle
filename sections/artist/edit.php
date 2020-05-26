@@ -15,7 +15,7 @@ if ($artistId < 1) {
     error(0);
 }
 
-$artist = new \Gazelle\Artist($DB, $Cache, $artistId);
+$artist = new \Gazelle\Artist($artistId);
 
 // Get the artist name and the body of the last revision
 list($name, $image, $body, $vanityHouse, $discogsId) = $artist->editableInformation();

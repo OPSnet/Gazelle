@@ -2,22 +2,15 @@
 
 namespace Gazelle;
 
-class Bonus {
-    private $items;
-    /** @var \DB_MYSQL */
-    private $db;
-    /** @var \CACHE */
-    private $cache;
-
+class Bonus extends Base {
     const CACHE_ITEM = 'bonus_item';
     const CACHE_OPEN_POOL = 'bonus_pool';
     const CACHE_SUMMARY = 'bonus_summary.';
     const CACHE_HISTORY = 'bonus_history.';
     const CACHE_POOL_HISTORY = 'bonus_pool_history.';
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct() {
+        parent::__construct();
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
         if ($this->items === false) {
             $this->db->query("
@@ -111,7 +104,7 @@ class Bonus {
         if (!$this->removePoints($fromID, $price)) {
             return false;
         }
-        $pool = new \Gazelle\BonusPool($this->db, $this->cache, $poolId);
+        $pool = new \Gazelle\BonusPool($poolId);
         $pool->contribute($userId, $value, $taxedValue);
 
         $this->cache->deleteMulti([

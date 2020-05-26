@@ -2,13 +2,7 @@
 
 namespace Gazelle\Top10;
 
-class User
-{
-    /** @var \DB_MYSQL */
-    private $db;
-
-    /** @var \CACHE */
-    private $cache;
+class User extends \Gazelle\Base {
 
     public const UPLOADERS = 'uploaders';
     public const DOWNLOADERS = 'downloaders';
@@ -29,11 +23,6 @@ class User
         self::UPLOAD_SPEED => 'up_speed',
         self::DOWNLOAD_SPEED => 'down_speed',
     ];
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
 
     public function fetch(string $type, int $limit) {
         if (!array_key_exists($type, $this->sortMap)) {

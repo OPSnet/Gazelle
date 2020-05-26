@@ -232,9 +232,9 @@ while (list($GroupID) = $DB->next_record()) {
     $Cache->delete_value("torrents_details_$GroupID");
 }
 
-$artist = new \Gazelle\Artist($DB, $Cache, $ArtistID);
+$artist = new \Gazelle\Artist($ArtistID);
 $artist->flushCache();
-$artist = new \Gazelle\Artist($DB, $Cache, $TargetArtistID);
+$artist = new \Gazelle\Artist($TargetArtistID);
 $artist->flushCache();
 $Cache->delete_value("artists_requests_$TargetArtistID");
 $Cache->delete_value("artists_requests_$ArtistID");

@@ -4,7 +4,7 @@ namespace Gazelle\Manager;
 
 use \Gazelle\Inbox;
 
-class Notification {
+class Notification extends \Gazelle\Base {
     // Option types
     const OPT_DISABLED = 0;
     const OPT_POPUP = 1;
@@ -59,12 +59,6 @@ class Notification {
         'CollageAlerts',
         'TorrentAlerts'];
 
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
-
     protected $UserID;
     protected $userInfo;
     protected $subscription;
@@ -72,9 +66,8 @@ class Notification {
     protected $Settings;
     protected $Skipped;
 
-    public function __construct($db, $cache, $UserID = null, $Skip = [], $Load = true, $AutoSkip = true) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct($UserID = null, $Skip = [], $Load = true, $AutoSkip = true) {
+        parent::__construct();
         if ($UserID) {
             $this->load($UserID, $Skip, $Load, $AutoSkip);
         }
@@ -86,7 +79,7 @@ class Notification {
         $this->Settings = $this->settings();
         $this->Skipped = $Skip;
         $this->userInfo = \Users::user_heavy_info($this->UserID);
-        $this->subscription = new Subscription($this->db, $this->cache, $this->UserID);
+        $this->subscription = new Subscription($this->UserID);
         if ($AutoSkip) {
             foreach ($this->Settings as $Key => $Value) {
                 // Skip disabled and traditional settings

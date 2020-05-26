@@ -1,5 +1,5 @@
 <?php
-$ContestMgr = new \Gazelle\Contest(G::$DB, G::$Cache);
+$ContestMgr = new \Gazelle\Contest;
 
 $Contest = $ContestMgr->get_current_contest();
 

@@ -3,7 +3,7 @@ if (!check_perms('admin_manage_referrals')) {
     error(403);
 }
 
-$referralManager = new Gazelle\Manager\Referral($DB, $Cache);
+$referralManager = new Gazelle\Manager\Referral;
 $referralAccounts = $referralManager->getFullAccounts();
 
 $cookie = [];

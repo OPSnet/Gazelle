@@ -30,7 +30,7 @@ $query = $DB->prepared_query(sprintf('
     WHERE t.ID IN (%s)', implode(', ', array_fill(0, count($ids), '?'))), ...$ids);
 
 $collector = new TorrentsDL($query, $title);
-$filer = new \Gazelle\File\Torrent($DB, $Cache);
+$filer = new \Gazelle\File\Torrent;
 while (list($downloads, $groupIds) = $collector->get_downloads('TorrentID')) {
     $artists = Artists::get_artists($groupIds);
     $torrentIds = array_keys($groupIds);

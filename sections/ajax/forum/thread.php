@@ -134,7 +134,7 @@ if ($_GET['updatelastread'] !== '0') {
 }
 
 //Handle subscriptions
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 $UserSubscriptions = $subscription->subscriptions();
 
 if (in_array($ThreadID, $UserSubscriptions)) {

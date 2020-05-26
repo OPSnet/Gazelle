@@ -151,7 +151,7 @@ ORDER BY t.GroupID ASC, Rank DESC, $Preference";
 
 $DownloadsQ = $DB->query($SQL);
 $Collector = new TorrentsDL($DownloadsQ, $ArtistName);
-$filer = new \Gazelle\File\Torrent($DB, $Cache);
+$filer = new \Gazelle\File\Torrent;
 while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
     $Artists = Artists::get_artists($GroupIDs);
     $TorrentFilesQ = $DB->prepared_query(sprintf('

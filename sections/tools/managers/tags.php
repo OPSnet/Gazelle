@@ -9,7 +9,7 @@ $tagSpecs = ['maxlength'=>'100', 'minlength'=>'2'];
 $Val->SetFields('tag',     true, 'string', 'Enter a single tag to change.', $tagSpecs);
 $Val->SetFields('replace', true, 'string', 'Enter a single replacement name.', $tagSpecs);
 
-$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
+$tagMan = new \Gazelle\Manager\Tag;
 
 View::show_header('Batch Tag Editor', 'validate');
 echo $Val->GenerateJS('tagform');

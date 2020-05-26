@@ -158,9 +158,9 @@ if (isset($_POST['confirm'])) {
         }
     }
 
-    $artist = new \Gazelle\Artist($DB, $Cache, $ArtistID);
+    $artist = new \Gazelle\Artist($ArtistID);
     $artist->flushCache();
-    $artist = new \Gazelle\Artist($DB, $Cache, $NewArtistID);
+    $artist = new \Gazelle\Artist($NewArtistID);
     $artist->flushCache();
     $Cache->delete_value("artist_groups_$ArtistID");
     $Cache->delete_value("artist_groups_$NewArtistID");

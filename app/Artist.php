@@ -2,13 +2,7 @@
 
 namespace Gazelle;
 
-class Artist {
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
-
+class Artist extends Base {
     protected $id;
     protected $revision;
     protected $artistRole; // what different roles does an artist have
@@ -38,9 +32,8 @@ class Artist {
     const CACHE_PREFIX = 'artist_';
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache, $id, $revision = false) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct (int $id, $revision = false) {
+        parent::__construct();
         $this->id = $id;
         $this->revision = $revision;
 

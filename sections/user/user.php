@@ -3,7 +3,7 @@ if (empty($_GET['id']) || !is_number($_GET['id']) || (!empty($_GET['preview']) &
     error(404);
 }
 $UserID = (int)$_GET['id'];
-$Bonus = new \Gazelle\Bonus($DB, $Cache);
+$Bonus = new \Gazelle\Bonus;
 
 if (!empty($_POST)) {
     authorize();
@@ -230,7 +230,7 @@ function check_paranoia_here($Setting) {
 }
 
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
-$User = new \Gazelle\User($DB, $Cache, $UserID);
+$User = new \Gazelle\User($UserID);
 $User->forceCacheFlush($UserID == $LoggedUser['ID']);
 list($ClassRatio, $Buffer) = $User->buffer();
 

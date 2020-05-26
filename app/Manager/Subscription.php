@@ -2,19 +2,11 @@
 
 namespace Gazelle\Manager;
 
-class Subscription {
-
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
-
+class Subscription extends \Gazelle\Base {
     protected $userId;
 
-    public function __construct($db, $cache, $userId = null) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct($userId = null) {
+        parent::__construct();
         $this->userId = $userId;
     }
 
@@ -80,7 +72,7 @@ class Subscription {
         );
 
         $Results = $this->db->to_array();
-        $notification = new Notification($this->db, $this->cache);
+        $notification = new Notification;
         $info = \Users::user_info($this->UserID);
         foreach ($Results as $Result) {
             $this->db->prepared_query('

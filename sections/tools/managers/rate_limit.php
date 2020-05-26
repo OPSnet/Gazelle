@@ -3,7 +3,7 @@ if (!(check_perms('admin_rate_limit_view') || check_perms('admin_rate_limit_mana
     error(403);
 }
 
-$PRL = new \Gazelle\PermissionRateLimit($DB, $Cache);
+$PRL = new \Gazelle\PermissionRateLimit;
 if ($_POST) {
     authorize();
     if (isset($_POST['task'])) {
@@ -84,7 +84,7 @@ foreach ($list as $rateLimitInfo) {
 }
 
 if (check_perms('admin_rate_limit_manage')) {
-    $perm = new \Gazelle\Permission($DB, $Cache);
+    $perm = new \Gazelle\Permission;
     $permList = $perm->list();
 ?>
     <tr class="colhead">

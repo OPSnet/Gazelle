@@ -39,7 +39,7 @@ class Comments {
         G::$Cache->delete_value($Page.'_comments_'.$PageID.'_catalogue_'.$CatalogueID);
         G::$Cache->delete_value($Page.'_comments_'.$PageID);
 
-        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+        $subscription = new \Gazelle\Manager\Subscription(G::$LoggedUser['ID']);
         $subscription->flush($Page, $PageID);
         $subscription->quoteNotify($Body, $PostID, $Page, $PageID);
 
@@ -167,7 +167,7 @@ class Comments {
             WHERE Page = '$Page'
                 AND PostID = $PostID");
 
-        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache);
+        $subscription = new \Gazelle\Manager\Subscription;
         $subscription->flush($Page, $PageID);
         $subscription->flushQuotes($Page, $PageID);
 
@@ -375,7 +375,7 @@ class Comments {
                 AND PageID = $PageID");
 
         // comment subscriptions
-        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache);
+        $subscription = new \Gazelle\Manager\Subscription;
         $subscription->move($Page, $PageID, $TargetPageID);
 
         // cache (we need to clear all comment catalogues)
@@ -424,7 +424,7 @@ class Comments {
                 AND PageID = $PageID");
 
         // Delete quote notifications
-        $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache);
+        $subscription = new \Gazelle\Manager\Subscription;
         $subscription->move($Page, $PageID, null);
         $subscription->flushQuotes($Page, $PageID);
 

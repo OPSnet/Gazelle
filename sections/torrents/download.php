@@ -51,7 +51,7 @@ if (!is_number($TorrentID)) {
     error(0);
 }
 
-$User = new \Gazelle\User($DB, $Cache, $UserID);
+$User = new \Gazelle\User($UserID);
 
 /* uTorrent Remote and various scripts redownload .torrent files periodically.
  * To prevent this retardation from blowing bandwidth etc., let's block it
@@ -108,7 +108,7 @@ $Artists = $Info['Artists'];
  * stop them. Exception: always allowed if they are using FL tokens.
  */
 if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploaderID != $UserID) {
-    $PRL = new \Gazelle\PermissionRateLimit($DB, $Cache);
+    $PRL = new \Gazelle\PermissionRateLimit;
     if (!$PRL->safeFactor($User)) {
         if (!$PRL->safeOvershoot($User)) {
             $DB->prepared_query('
@@ -209,7 +209,7 @@ $DB->prepared_query("
     ", $UserID, $TorrentID);
 
 Torrents::set_snatch_update_time($UserID, Torrents::SNATCHED_UPDATE_AFTERDL);
-$filer = new \Gazelle\File\Torrent($DB, $Cache);
+$filer = new \Gazelle\File\Torrent;
 $Contents = $filer->get($TorrentID);
 $Cache->delete_value('user_rlim_' . $UserID);
 

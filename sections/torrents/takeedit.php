@@ -261,8 +261,8 @@ $logfileSummary = new \Gazelle\LogfileSummary;
 $logfiles = [];
 if (count($_FILES['logfiles']['name']) > 0) {
     ini_set('upload_max_filesize', 1000000);
-    $ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
-    $htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+    $ripFiler = new \Gazelle\File\RipLog;
+    $htmlFiler = new \Gazelle\File\RipLogHTML;
     foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
         if (!$_FILES['logfiles']['size'][$Pos]) {
             continue;

@@ -8,7 +8,7 @@ if (!check_perms("admin_global_notification")) {
 
 View::show_header("Global Notification");
 
-$notification = new Notification($DB, $Cache);
+$notification = new Notification;
 $GlobalNotification = $notification->global();
 
 $Expiration = $GlobalNotification['Expiration'] ? $GlobalNotification['Expiration'] / 60 : "";

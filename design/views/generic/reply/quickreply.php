@@ -122,7 +122,7 @@
                         </div>
                         <div class="preview_submit">
 <?php
-    $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+    $subscription = new \Gazelle\Manager\Subscription(G::$LoggedUser['ID']);
     if (isset($SubscribeBox) && !isset($ForumID) && !$subscription->isSubscribedComments($Document, $InputID)) {
 ?>
                             <input id="subscribebox" type="checkbox" name="subscribe"<?=!empty($HeavyInfo['AutoSubscribe']) ? ' checked="checked"' : ''?> tabindex="2" />

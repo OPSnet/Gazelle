@@ -2,22 +2,16 @@
 
 namespace Gazelle;
 
-class Contest {
+class Contest extends Base {
 
     const CACHE_CONTEST_TYPE = 'contest_type';
     const CACHE_CONTEST = 'contest.%d';
     const CACHE_CURRENT = 'contest_current';
 
-    /** @var \DB_MYSQL */
-    private $db;
-    /** @var \CACHE */
-    private $cache;
-
     private $type;
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct () {
+        parent::__construct();
         $this->type = $this->cache->get_value(self::CACHE_CONTEST_TYPE);
         if ($this->type === false) {
             $this->db->query("SELECT ID, Name FROM contest_type ORDER BY ID");
@@ -378,7 +372,7 @@ class Contest {
 
     public function calculate_pool_payout ($id) {
         list($total_torrents, $total_users) = $this->get_upload_stats($id);
-        $bonuspool = new \Gazelle\BonusPool($this->db, $this->cache, $this->get_contest($id)['BonusPool']);
+        $bonuspool = new \Gazelle\BonusPool($this->get_contest($id)['BonusPool']);
         return [
             'torrent' => $total_torrents,
             'user'    => $total_users,
@@ -480,7 +474,7 @@ class Contest {
         );
         $participants = $this->db->to_array('ID', MYSQLI_ASSOC);
         $contest = $this->get_contest($id);
-        $bonus = new \Gazelle\Bonus($this->db, $this->cache);
+        $bonus = new \Gazelle\Bonus;
 
         $report = fopen(TMPDIR . "/payout-contest-$id.txt", 'a');
         foreach ($participants as $p) {

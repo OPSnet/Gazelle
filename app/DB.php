@@ -2,18 +2,7 @@
 
 namespace Gazelle;
 
-class DB
-{
-    /** @var \DB_MYSQL */
-    private $db;
-
-    /** @var \CACHE */
-    private $cache;
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
+class DB extends Base {
 
     /**
      * Soft delete a row from a table <t> by inserting it into deleted_<t> and then delete from <t>

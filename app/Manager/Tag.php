@@ -2,19 +2,8 @@
 
 namespace Gazelle\Manager;
 
-class Tag {
-    private $items;
-    /** @var \DB_MYSQL */
-    private $db;
-    /** @var \CACHE */
-    private $cache;
-
+class Tag extends \Gazelle\Base {
     protected $foo;
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
 
     /**
      * Get a tag ready for database input and display.

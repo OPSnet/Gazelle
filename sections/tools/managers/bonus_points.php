@@ -11,7 +11,7 @@ if (isset($_REQUEST['add_points'])) {
         error('Please enter a positive number of points.');
     }
 
-    $Bonus = new \Gazelle\Bonus($DB, $Cache);
+    $Bonus = new \Gazelle\Bonus;
     $enabledCount = $Bonus->addGlobalPoints($Points);
     $Message = '<strong>' . number_format($Points) . ' bonus points added to ' . number_format($enabledCount) . ' enabled users.</strong><br /><br />';
 }

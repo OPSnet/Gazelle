@@ -60,7 +60,7 @@ $Debug->set_flag('Debug constructed');
 $DB = new DB_MYSQL;
 $Debug->set_flag('DB constructed');
 
-$Cache = new CACHE($MemcachedServers);
+$Cache = new CACHE;
 $Debug->set_flag('Memcached constructed');
 
 G::$Cache = $Cache;
@@ -115,8 +115,8 @@ if (isset($LoginCookie)) {
         logout($LoggedUser['ID'], $SessionID);
     }
 
-    $User = new \Gazelle\User($DB, $Cache, $LoggedUser['ID']);
-    $Session = new \Gazelle\Session($DB, $Cache, $LoggedUser['ID']);
+    $User = new \Gazelle\User($LoggedUser['ID']);
+    $Session = new \Gazelle\Session($LoggedUser['ID']);
 
     $UserSessions = $Session->sessions();
     if (!array_key_exists($SessionID, $UserSessions)) {
@@ -152,7 +152,7 @@ if (isset($LoginCookie)) {
     }
 
     // Stylesheet
-    $Stylesheets = new \Gazelle\Stylesheet($DB, $Cache);
+    $Stylesheets = new \Gazelle\Stylesheet;
     $LoggedUser['StyleName'] = $Stylesheets->getName($LoggedUser['StyleID']);
 
     // We've never had to disable the wiki privs of anyone.
@@ -259,7 +259,7 @@ function logout($userId, $sessionId = false) {
     setcookie('keeplogged', '', $epoch, '/', '', false);
     setcookie('session', '',    $epoch, '/', '', false);
     if ($sessionId) {
-        $session = new \Gazelle\Session(G::$DB, G::$Cache, $userId);
+        $session = new \Gazelle\Session($userId);
         $session->drop($sessionId);
     }
 
@@ -275,7 +275,7 @@ function logout($userId, $sessionId = false) {
  * Logout all sessions
  */
 function logout_all_sessions($userId) {
-    $session = new \Gazelle\Session(G::$DB, G::$Cache, $userId);
+    $session = new \Gazelle\Session($userId);
     $session->dropAll();
     logout($userId);
 }

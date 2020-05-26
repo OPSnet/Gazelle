@@ -6,7 +6,7 @@ class CalculateContestLeaderboard extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $contestMgr = new \Gazelle\Contest($this->db, $this->cache);
+        $contestMgr = new \Gazelle\Contest;
 
         $contestMgr->calculate_leaderboard();
         $contestMgr->calculate_request_pairs();

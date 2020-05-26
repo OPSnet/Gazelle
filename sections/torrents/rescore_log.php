@@ -19,13 +19,13 @@ if (!$DB->has_results()) {
     error(404);
 }
 
-$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+$ripFiler = new \Gazelle\File\RipLog;
 
 $logpath = $ripFiler->pathLegacy([$TorrentID, $LogID]);
 $logfile = new \Gazelle\Logfile($logpath, basename($logpath));
 copy($ripFiler->pathLegacy([$TorrentID, $LogID]), $ripFiler->path([$TorrentID, $LogID]));
 
-$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$htmlFiler = new \Gazelle\File\RipLogHTML;
 $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 
 $DB->prepared_query("

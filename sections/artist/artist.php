@@ -18,7 +18,7 @@ if (empty($_GET['revisionid'])) {
 //----------------- Build list and get stats
 
 try {
-    $Artist = new \Gazelle\Artist($DB, $Cache, $ArtistID, $RevisionID);
+    $Artist = new \Gazelle\Artist($ArtistID, $RevisionID);
 }
 catch (\Exception $e) {
     error(404);
@@ -67,7 +67,7 @@ function torrentEdition($title, $year, $recordLabel, $catlogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catlogueNumber, $media]);
 }
 
-$User = new \Gazelle\User($DB, $Cache, $LoggedUser['ID']);
+$User = new \Gazelle\User($LoggedUser['ID']);
 
 View::show_header($Artist->name(), 'browse,requests,bbcode,comments,voting,recommend,subscriptions');
 ?>
@@ -101,7 +101,7 @@ if (Bookmarks::has_bookmarked('artist', $ArtistID)) { ?>
 <?php } ?>
             <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?= $ArtistID ?>);return false;">
 <?php
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 echo $subscription->isSubscribedComments('artist', $ArtistID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
 <?php
 

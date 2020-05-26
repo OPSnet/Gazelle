@@ -5,7 +5,7 @@ use \Gazelle\Manager\Notification;
 if (!check_perms("admin_global_notification")) {
     error(404);
 }
-$notification = new Notification($DB, $Cache);
+$notification = new Notification;
 if ($_POST['set']) {
     $Expiration = $_POST['length'] * 60;
     $notification->setGlobal($_POST['message'], $_POST['url'], $_POST['importance'], $Expiration);

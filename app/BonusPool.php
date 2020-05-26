@@ -2,18 +2,13 @@
 
 namespace Gazelle;
 
-class BonusPool {
+class BonusPool extends Base {
     private $items;
-    /** @var \DB_MYSQL */
-    private $db;
-    /** @var \CACHE */
-    private $cache;
 
     const CACHE_SENT = 'bonuspool-sent.%d';
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache, $id) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct (int $id) {
+        parent::__construct();
         $this->id = $id;
     }
 

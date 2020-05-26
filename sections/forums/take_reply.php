@@ -62,7 +62,7 @@ if (!Forums::check_forumperm($ForumID, 'Write') || $LoggedUser['DisablePosting']
     error(403);
 }
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($TopicID)) {
     $subscription->subscribe($TopicID);
 }
@@ -266,7 +266,6 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
     $ThreadInfo['Posts']++;
 }
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
 $subscription->flush('forums', $TopicID);
 $subscription->quoteNotify($Body, $PostID, 'forums', $TopicID);
 

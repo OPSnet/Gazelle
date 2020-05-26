@@ -46,7 +46,7 @@ if ($CategoryID == 0) {
         SET Deleted = '1'
         WHERE ID = '$CollageID'");
 
-    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache);
+    $subscription = new \Gazelle\Manager\Subscription;
     $subscription->flush('collages', $CollageID);
     $subscription->flushQuotes('collages', $CollageID);
 }

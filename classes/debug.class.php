@@ -604,7 +604,7 @@ class DEBUG {
             return;
         }
 
-        $Scheduler = new \Gazelle\Schedule\Scheduler(G::$DB, G::$Cache);
+        $Scheduler = new \Gazelle\Schedule\Scheduler;
         $Header = 'Tasks';
         $Tasks = $Scheduler->getTaskSnapshot($Perf['Script start'], $Perf['Script end']);
 

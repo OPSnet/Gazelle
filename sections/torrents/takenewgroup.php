@@ -55,7 +55,7 @@ if (empty($_POST['confirm'])) {
     );
     if (!$DB->has_results()) {
         $Redirect = 0;
-        $ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
+        $ArtistManager = new \Gazelle\Manager\Artist;
         list($ArtistID, $AliasID) = $ArtistManager->createArtist($ArtistName);
     } else {
         list($ArtistID, $AliasID, $Redirect, $ArtistName) = $DB->next_record();

@@ -121,7 +121,7 @@ class Misc {
             FROM users_main
             WHERE ID = '$FromID'");
         list($SenderName) = G::$DB->next_record();
-        $notification = new Notification(G::$DB, G::$Cache);
+        $notification = new Notification;
         foreach ($ToID as $ID) {
             G::$DB->query("
                 SELECT COUNT(ConvID)

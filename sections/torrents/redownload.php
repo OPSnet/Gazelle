@@ -67,7 +67,7 @@ $DownloadsQ = $DB->query("
     GROUP BY TorrentID");
 
 $Collector = new TorrentsDL($DownloadsQ, "$Username's ".ucfirst($_GET['type']));
-$filer = new \Gazelle\File\Torrent($DB, $Cache);
+$filer = new \Gazelle\File\Torrent;
 
 while (list($Downloads, $GroupIDs) = $Collector->get_downloads('TorrentID')) {
     $Artists = Artists::get_artists($GroupIDs);

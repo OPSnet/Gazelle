@@ -43,7 +43,7 @@ class Donations {
             $xbtAmount = 0.0;
             $fiatAmount = 0.0;
         } else {
-            $XBT = new \Gazelle\Manager\XBT(G::$DB, G::$Cache);
+            $XBT = new \Gazelle\Manager\XBT;
             $forexRate = $XBT->latestRate('EUR');
             switch ($Args['Currency'] == 'XBT') {
                 case 'XBT':

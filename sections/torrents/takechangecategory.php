@@ -33,7 +33,7 @@ switch ($Categories[$NewCategoryID-1]) {
         );
         if (!$DB->has_results()) {
             $Redirect = 0;
-            $ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
+            $ArtistManager = new \Gazelle\Manager\Artist;
             list($ArtistID, $AliasID) = $ArtistManager->createArtist($AliasName);
         } else {
             list($ArtistID, $AliasID, $Redirect, $ArtistName) = $DB->next_record();

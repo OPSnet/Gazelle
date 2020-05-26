@@ -168,7 +168,7 @@ if (isset($_POST['delete'])) {
     $Cache->delete_value("thread_{$TopicID}_info");
 
     // subscriptions
-    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache);
+    $subscription = new \Gazelle\Manager\Subscription;
     $subscription->flushQuotes('forums', $TopicID);
     $subscription->move('forums', $TopicID, null);
 
@@ -407,7 +407,7 @@ if (isset($_POST['delete'])) {
             break;
     }
     if (isset($Notification)) {
-        $notification = new Notification($DB, $Cache);
+        $notification = new Notification;
         $notification->notifyUser($ThreadAuthorID, Notification::FORUMALERTS, $Notification, "forums.php?action=viewthread&threadid=$TopicID");
     }
     if (count($TopicNotes) > 0) {

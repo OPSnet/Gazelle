@@ -1,7 +1,7 @@
 <?php
 authorize();
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 $UserSubscriptions = $subscription->subscriptions();
 
 if (!empty($UserSubscriptions)) {

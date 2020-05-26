@@ -1,5 +1,5 @@
 <?php
-$torrent = new \Gazelle\Top10\Torrent(G::$DB, G::$Cache, $Formats, $LoggedUser);
+$torrent = new \Gazelle\Top10\Torrent($Formats, $LoggedUser);
 
 if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
     $details = 'all';

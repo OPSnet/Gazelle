@@ -3,7 +3,7 @@ if (!check_perms('admin_periodic_task_manage')) {
     error(403);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
+$scheduler = new \Gazelle\Schedule\Scheduler;
 $tasks = $scheduler->getTasks();
 $canEdit = true;
 

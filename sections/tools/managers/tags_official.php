@@ -3,7 +3,7 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
+$tagMan = new \Gazelle\Manager\Tag;
 
 $unofficialName = [];
 $new = 0;

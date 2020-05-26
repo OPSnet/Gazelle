@@ -2,16 +2,7 @@
 
 namespace Gazelle;
 
-class PermissionRateLimit {
-    /** @var \DB_MYSQL */
-    private $db;
-    /** @var \CACHE */
-    private $cache;
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
+class PermissionRateLimit extends Base {
 
     public function list() {
          $this->db->prepared_query('

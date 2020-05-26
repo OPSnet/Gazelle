@@ -2,18 +2,12 @@
 
 namespace Gazelle\Torrent;
 
-class Log {
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
+class Log extends \Gazelle\Base {
 
     protected $id; // id of the torrent
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache, $id) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct ($id) {
+        parent::__construct();
         $this->id = $id;
     }
 

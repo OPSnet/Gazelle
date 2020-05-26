@@ -2,12 +2,7 @@
 
 namespace Gazelle;
 
-class Report {
-    /** @var \DB_MYSQL */
-    protected  $db;
-
-    /** @var \CACHE */
-    protected  $cache;
+class Report extends Base {
 
     public static function openCount(\DB_MYSQL $db, \CACHE $cache) {
         if (($count = $cache->get_value('num_torrent_reportsv2')) === false) {

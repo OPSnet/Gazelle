@@ -1,8 +1,8 @@
 <?php
 
-function getClassObject($name, $db, $cache, $twig, $config) {
+function getClassObject($name, $twig, $config) {
     $name = "Gazelle\\API\\".str_replace("_", "", ucwords($name, "_"));
-    return new $name($db, $cache, $twig, $config);
+    return new $name($twig, $config);
 }
 
 $available = [
@@ -23,7 +23,7 @@ if (in_array($_GET['action'], $available)) {
         'ReleaseTypes' => $ReleaseTypes,
         'Debug' => $Debug
     ];
-    $class = getClassObject($_GET['action'], $DB, $Cache, $Twig, $config);
+    $class = getClassObject($_GET['action'], $Twig, $config);
 } else {
     json_error('invalid action');
 }

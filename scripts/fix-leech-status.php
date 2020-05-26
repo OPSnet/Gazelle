@@ -12,7 +12,7 @@ $Debug->handle_errors();
 ini_set('max_execution_time', -1);
 
 $DB = new DB_MYSQL;
-$Cache = new CACHE($MemcachedServers);
+$Cache = new CACHE;
 
 $DB->prepared_query('
     SELECT um.ID, um.torrent_pass

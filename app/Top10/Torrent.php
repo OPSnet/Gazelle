@@ -2,21 +2,15 @@
 
 namespace Gazelle\Top10;
 
-class Torrent {
-    /** @var \DB_MYSQL */
-    private $db;
-
-    /** @var \CACHE */
-    private $cache;
+class Torrent extends \Gazelle\Base {
 
     /** @var Array */
     private $formats;
 
     private $currentUser;
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache, Array $formats, $currentUser) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct (array $formats, $currentUser) {
+        parent::__construct();
         $this->formats = $formats;
         $this->currentUser = $currentUser;
     }
