@@ -3,9 +3,7 @@ enforce_login();
 
 define('ANNOUNCEMENT_FORUM_ID', 12);
 
-if (!check_perms('admin_manage_blog')) {
-    error(403);
-} else {
+if (check_perms('admin_manage_blog')) {
     switch ($_REQUEST['action'] ?? 'editblog') {
         case 'deadthread':
             require(__DIR__ . '/dead_thread.php');
@@ -21,7 +19,8 @@ if (!check_perms('admin_manage_blog')) {
             break;
         case 'editblog':
         default:
-            require(__DIR__ . '/blog_page.php');
             break;
     }
 }
+
+require(__DIR__ . '/blog_page.php');
