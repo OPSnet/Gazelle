@@ -2,20 +2,10 @@
 
 namespace Gazelle;
 
-class Permission {
-    /** @var \DB_MYSQL */
-    protected $db;
-    /** @var \CACHE */
-    protected $cache;
-
+class Permission extends Base {
     protected $list;
 
     const CACHE_KEY = 'permissions';
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
 
     public function list() {
         if (($this->list = $this->cache->get_value(self::CACHE_KEY)) === false) {

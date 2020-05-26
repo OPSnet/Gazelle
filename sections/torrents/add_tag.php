@@ -17,7 +17,7 @@ if (isset($_POST['undo'])) {
     $Cache->delete_value("deleted_tags_$GroupID".'_'.$UserID);
 }
 
-$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
+$tagMan = new \Gazelle\Manager\Tag;
 
 $Tags = array_unique(explode(',', $_POST['tagname']));
 foreach ($Tags as $TagName) {

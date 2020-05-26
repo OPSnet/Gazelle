@@ -2,19 +2,13 @@
 
 namespace Gazelle;
 
-class Staff {
-    /** @var \DB_MYSQL */
-    protected  $db;
-
-    /** @var \CACHE */
-    protected  $cache;
+class Staff extends Base {
 
     /** @var int */
     protected  $id;
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache, int $id) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct(int $id) {
+        parent::__construct();
         $this->id = $id;
     }
 

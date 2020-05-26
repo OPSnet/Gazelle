@@ -17,7 +17,7 @@ $offset    = 0;
 $processed = 0;
 $new       = 0;
 
-$filer = new \Gazelle\File\Torrent($DB, new CACHE($MemcachedServers));
+$filer = new \Gazelle\File\Torrent;
 
 while (true) {
     $DB->prepared_query('

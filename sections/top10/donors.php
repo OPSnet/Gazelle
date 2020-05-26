@@ -14,7 +14,7 @@ $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 $isMod = check_perms("users_mod");
 
-$donor = new \Gazelle\Top10\Donor(G::$DB);
+$donor = new \Gazelle\Top10\Donor;
 $results = $donor->getTopDonors($limit);
 ?>
 <h3>Top <?="$limit";?> Donors

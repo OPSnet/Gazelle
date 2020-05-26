@@ -5,9 +5,7 @@ namespace Gazelle\Manager;
 use Gazelle\Util\Crypto;
 use Gazelle\Util\Proxy;
 
-class Referral {
-    private $db;
-    private $cache;
+class Referral extends \Gazelle\Base {
     private $accounts;
     private $proxy;
 
@@ -20,9 +18,8 @@ class Referral {
     // Accounts which use the user ID instead of username.
     const ID_TYPES = [3, 4, 5];
 
-    public function __construct($db, $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct() {
+        parent::__construct();
         $this->accounts = $this->cache->get_value(self::CACHE_ACCOUNTS);
         $this->proxy = new Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
 

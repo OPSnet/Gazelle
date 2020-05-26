@@ -5,7 +5,7 @@ if (G::$LoggedUser['DisablePoints']) {
     error('Your points have been disabled.');
 }
 
-$Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
+$Bonus = new \Gazelle\Bonus;
 
 const DEFAULT_PAGE = '/sections/bonus/store.php';
 

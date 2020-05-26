@@ -2,19 +2,12 @@
 
 namespace Gazelle;
 
-class Stylesheet {
-    /** @var \DB_MYSQL */
-    private $db;
-
-    /** @var \CACHE */
-    private $cache;
+class Stylesheet extends Base {
 
     private $stylesheets;
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-
+    public function __construct() {
+        parent::__construct();
         if (($this->stylesheets = $this->cache->get_value('stylesheets')) === false) {
             $this->db->query("
                 SELECT

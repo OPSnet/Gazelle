@@ -2,17 +2,7 @@
 
 namespace Gazelle;
 
-abstract class File {
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
+abstract class File extends Base {
 
     public function put($source, $id) {
         return copy($source, $this->path($id));

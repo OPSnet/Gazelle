@@ -2,20 +2,10 @@
 
 namespace Gazelle\Manager;
 
-class Payment {
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
+class Payment extends \Gazelle\Base {
 
     const LIST_KEY = 'payment_list';
     const RENT_KEY = 'payment_monthly_rental';
-
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
 
     public function create(array $val) {
         $this->db->prepared_query('

@@ -23,7 +23,7 @@ $DB->query("
     FROM collages
     WHERE ID = '$CollageID'");
 list($Name) = $DB->next_record();
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 // Start printing
 View::show_header("Comments for collage $Name", 'comments,bbcode,subscriptions');
 ?>

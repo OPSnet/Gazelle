@@ -90,7 +90,7 @@ if ($CurrentBlog === false) {
     $Cache->cache_value('blog_latest_id', $CurrentBlog, 0);
 }
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 
 json_print("success", [
     'username' => $LoggedUser['Username'],

@@ -85,7 +85,7 @@ if (!$CoverArt) {
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 list($NumComments, $Page, $Thread, $LastRead) = Comments::load('torrents', $GroupID);
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 
 // Start output
 View::show_header($Title, 'browse,comments,torrent,bbcode,recommend,cover_art,subscriptions');
@@ -257,7 +257,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
 <?php
                     if (check_perms('torrents_edit')) {
     ?>                (<span class="tooltip" title="Artist alias ID"><?php
-            $a = new \Gazelle\Artist(G::$DB, G::$Cache, $Artist['id']);
+            $a = new \Gazelle\Artist($Artist['id']);
             echo $a->getAlias($Artist['name'])
                         ?></span>)&nbsp;<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?=$GroupID?>&amp;artistid=<?=$Artist['id']?>&amp;importance=<?=$s['offset']?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?= $s['role'] ?>">X</a></span>
     <?php           } ?>

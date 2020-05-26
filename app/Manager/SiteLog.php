@@ -2,16 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class SiteLog {
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
-
-    /** @var \DEBUG */
-    protected $debug;
-
+class SiteLog extends \Gazelle\Base {
     protected $logQuery;
     protected $totalMatches;
     protected $queryStatus;
@@ -19,9 +10,8 @@ class SiteLog {
     protected $qid;
     protected $usernames;
 
-    public function __construct (\DB_MYSQL $db, \CACHE $cache, \DEBUG $debug) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct (\DEBUG $debug) {
+        parent::__construct();
         $this->debug = $debug;
         $this->usernames = [];
     }

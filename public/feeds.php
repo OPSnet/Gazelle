@@ -15,7 +15,7 @@ require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../classes/classloader.php');
 require_once(__DIR__.'/../classes/util.php');
 
-$Cache = new CACHE($MemcachedServers);
+$Cache = new CACHE;
 $Feed = new Feed;
 
 function make_utf8($Str) {

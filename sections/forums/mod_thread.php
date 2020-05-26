@@ -168,7 +168,7 @@ if (isset($_POST['delete'])) {
     $Cache->delete_value("thread_{$TopicID}_info");
 
     // subscriptions
-    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache);
+    $subscription = new \Gazelle\Manager\Subscription;
     $subscription->flushQuotes('forums', $TopicID);
     $subscription->move('forums', $TopicID, null);
 

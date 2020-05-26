@@ -1,5 +1,5 @@
 <?php
-$top10 = new \Gazelle\Top10\User($DB, $Cache);
+$top10 = new \Gazelle\Top10\User;
 
 $tables = [
     'ul' => [

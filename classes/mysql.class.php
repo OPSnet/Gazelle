@@ -196,6 +196,9 @@ class DB_MYSQL {
             if (DEBUG_MODE || check_perms('site_debug')) {
                 print_r($this->Queries);
             }
+            echo "<pre>";
+            debug_print_backtrace();
+            echo "</pre>";
             die();
         } else {
             error('-1');

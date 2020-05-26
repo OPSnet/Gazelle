@@ -31,7 +31,7 @@ if (!check_perms('site_view_flow')) {
 }
 
 View::show_header('Economy');
-$Eco = new \Gazelle\Stats\Economic($DB, $Cache);
+$Eco = new \Gazelle\Stats\Economic;
 $totalEnabled = $Eco->get('totalEnabled');
 $totalPeerUsers = $Eco->get('totalPeerUsers');
 

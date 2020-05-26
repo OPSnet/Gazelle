@@ -16,24 +16,24 @@ require_once(__DIR__.'/../classes/classloader.php');
 require_once(__DIR__.'/../classes/util.php');
 
 $DB    = new DB_MYSQL;
-$Cache = new CACHE($MemcachedServers);
+$Cache = new CACHE;
 
 $allConfig = [
     '-html' => [
         'CHECK' => 'SELECT 1 FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
-        'FILER' => new \Gazelle\File\RipLogHTML($DB, $Cache),
+        'FILER' => new \Gazelle\File\RipLogHTML,
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOGHTML . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.html$~',
     ],
     '-log' => [
         'CHECK' => 'SELECT 1 FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
-        'FILER' => new \Gazelle\File\RipLog($DB, $Cache),
+        'FILER' => new \Gazelle\File\RipLog,
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOG . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.log$~',
     ],
     '-torrent' => [
         'CHECK' => 'SELECT 1 FROM torrents WHERE ID = ?',
-        'FILER' => new \Gazelle\File\Torrent($DB, $Cache),
+        'FILER' => new \Gazelle\File\Torrent,
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_TORRENT . ' -type f',
         'MATCH' => '~/(\d+)\.torrent$~',
     ],

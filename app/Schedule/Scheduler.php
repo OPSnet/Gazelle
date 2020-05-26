@@ -4,16 +4,9 @@ namespace Gazelle\Schedule;
 
 use \Gazelle\Util\Irc;
 
-class Scheduler {
-    protected $db;
-    protected $cache;
+class Scheduler extends \Gazelle\Base {
 
     const CACHE_TASKS = 'scheduled_tasks';
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
 
     public function getTask(int $id) {
         $tasks = $this->getTasks();

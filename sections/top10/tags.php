@@ -24,7 +24,7 @@ View::show_header('Top 10 Tags');
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
 $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
-$tag = new \Gazelle\Top10\Tag(G::$DB, G::$Cache);
+$tag = new \Gazelle\Top10\Tag;
 
 if ($details == 'all' || $details == 'top_used') {
     $topUsedTags = $tag->getTopUsedTags($limit);

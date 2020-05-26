@@ -2,17 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Artist {
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
-
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
+class Artist extends \Gazelle\Base {
 
     public function createArtist($name) {
         $this->db->prepared_query('

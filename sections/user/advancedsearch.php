@@ -155,7 +155,7 @@ if (count($_GET)) {
             $ClassIDs[] = $ClassID;
         }
     }
-    $StylesheetsManager = new \Gazelle\Stylesheet($DB, $Cache);
+    $StylesheetsManager = new \Gazelle\Stylesheet;
     $Stylesheets = $StylesheetsManager->list();
 
     $Val->SetFields('avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]);

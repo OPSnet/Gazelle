@@ -2,17 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Torrent {
-    /** @var \DB_MYSQL */
-    protected  $db;
-
-    /** @var \CACHE */
-    protected  $cache;
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
+class Torrent extends \Gazelle\Base {
 
     /**
      * Is this a valid torrenthash?

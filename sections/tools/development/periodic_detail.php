@@ -8,7 +8,7 @@ if (!$id) {
     error(0);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
+$scheduler = new \Gazelle\Schedule\Scheduler;
 if (!$scheduler->getTask($id)) {
     error(404);
 }

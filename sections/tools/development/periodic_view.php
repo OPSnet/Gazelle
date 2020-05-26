@@ -7,7 +7,7 @@ if (!check_perms('admin_periodic_task_view')) {
     error(403);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
+$scheduler = new \Gazelle\Schedule\Scheduler;
 
 if ($_REQUEST['mode'] === 'run_now' && isset($_REQUEST['id'])) {
     authorize();

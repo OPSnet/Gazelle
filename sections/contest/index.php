@@ -1,7 +1,7 @@
 <?php
 enforce_login();
 
-$ContestMgr = new \Gazelle\Contest(G::$DB, G::$Cache);
+$ContestMgr = new \Gazelle\Contest;
 
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {

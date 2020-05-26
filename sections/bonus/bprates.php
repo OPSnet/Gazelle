@@ -42,7 +42,7 @@ else {
 $Title = ($userId === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
 View::show_header($Title);
 
-$Bonus = new \Gazelle\Bonus($DB, $Cache);
+$Bonus = new \Gazelle\Bonus;
 
 list($totalTorrents, $totalSize, $totalHourlyPoints, $totalDailyPoints, $totalWeeklyPoints, $totalMonthlyPoints, $totalYearlyPoints, $totalPointsPerGB)
     = $Bonus->userTotals($userId);

@@ -15,7 +15,7 @@ if (!$PageID) {
     error(404);
 }
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribedComments($Page, $PageID)) {
     $subscription->subscribeComments($Page, $PageID);
 }

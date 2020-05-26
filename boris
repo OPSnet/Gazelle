@@ -29,9 +29,9 @@ require_once(__DIR__ . '/classes/time.class.php');
 require_once(__DIR__ . '/classes/util.php');
 require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 
-$Cache = new \CACHE($MemcachedServers);
-$DB = new \DB_MYSQL;
-$Debug = new \DEBUG;
+$Cache = new CACHE;
+$DB = new DB_MYSQL;
+$Debug = new DEBUG;
 $Debug->handle_errors();
 
 G::init($DB, $Cache);
@@ -40,15 +40,16 @@ $b = new \Boris\Boris(SITE_NAME . '> ');
 $preload = [
     'cache'      => $Cache,
     'db'         => $DB,
-    'bonus'      => new \Gazelle\Bonus($DB, $Cache),
-    'stylesheet' => new \Gazelle\Stylesheet($DB, $Cache),
-    'tagMan'     => new \Gazelle\Manager\Tag($DB, $Cache),
-    'torMan'     => new \Gazelle\Manager\Torrent($DB, $Cache),
+    'bonus'      => new \Gazelle\Bonus,
+    'stylesheet' => new \Gazelle\Stylesheet,
+    'tagMan'     => new \Gazelle\Manager\Tag,
+    'torMan'     => new \Gazelle\Manager\Torrent,
     'twig'       => new Twig\Environment(
         new Twig\Loader\FilesystemLoader('templates'),
         ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
     ),
 ];
+
 printf("** preloaded objects:\n** %s\n", implode(', ', array_keys($preload)));
 $b->setLocal($preload);
 $b->start();

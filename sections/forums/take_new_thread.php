@@ -117,7 +117,7 @@ $DB->query("
     WHERE ID = '$TopicID'");
 
 if (isset($_POST['subscribe'])) {
-    $subscription = new \Gazelle\Manager\Subscription($DB, $Cache, $LoggedUser['ID']);
+    $subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
     $subscription->subscribe($TopicID);
 }
 

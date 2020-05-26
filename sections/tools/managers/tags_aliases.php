@@ -3,7 +3,7 @@ if (!(check_perms('users_mod') || check_perms('site_tag_aliases_read'))) {
     error(403);
 }
 
-$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
+$tagMan = new \Gazelle\Manager\Tag;
 $action = null;
 if (check_perms('users_mod')) {
     if (isset($_POST['newalias'])) {

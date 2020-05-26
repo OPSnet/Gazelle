@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-class Inbox {
+class Inbox extends Base {
     const ALT_SORT = 2;
     const CUR_SORT = 1;
     const DEFAULT_SORT = 0;
@@ -26,9 +26,6 @@ class Inbox {
     // These two need to match values of $LoggedUser['ListUnreadPMsFirst']
     const UNREAD_FIRST = true;
     const NEWEST_FIRST = false;
-
-    /** @var \DB_MYSQL */
-    private $db;
 
     /** @var int */
     private $userId;
@@ -54,13 +51,11 @@ class Inbox {
     /**
      * Inbox constructor
      *
-     * @param \DB_MYSQL $db                 the DB object to query
      * @param int       $userId             usually $LoggedUser['ID']
      * @param bool      $unreadFirstDefault the user's inbox sort setting
      * @param array     $params             associative config array, usually $_GET
      */
-    public function __construct(\DB_MYSQL $db, $userId, $unreadFirstDefault = self::NEWEST_FIRST, array $params = []) {
-        $this->db = $db;
+    public function __construct($userId, $unreadFirstDefault = self::NEWEST_FIRST, array $params = []) {
         $this->userId = $userId;
         $this->unreadFirstDefault = (bool) $unreadFirstDefault;
         if (empty($params)) {

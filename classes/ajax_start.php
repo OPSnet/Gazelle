@@ -5,7 +5,7 @@ require_once(__DIR__.'/config.php');
 require_once(__DIR__.'/classloader.php');
 
 $Debug = new DEBUG;
-$Cache = new CACHE($MemcachedServers);
+$Cache = new CACHE;
 
 $SSL = $_SERVER['SERVER_PORT'] === '443';
 

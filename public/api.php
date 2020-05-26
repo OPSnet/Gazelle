@@ -22,7 +22,7 @@ require_once(__DIR__.'/../classes/time.class.php');
 require_once(__DIR__.'/../classes/paranoia.class.php');
 require_once(__DIR__.'/../classes/util.php');
 
-$Cache = new CACHE($MemcachedServers);
+$Cache = new CACHE;
 $DB = new DB_MYSQL;
 $Debug = new DEBUG;
 $Twig = new Environment(

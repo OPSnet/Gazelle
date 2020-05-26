@@ -2,19 +2,11 @@
 
 namespace Gazelle\Manager;
 
-class Subscription {
-
-    /** @var \DB_MYSQL */
-    protected $db;
-
-    /** @var \CACHE */
-    protected $cache;
-
+class Subscription extends \Gazelle\Base {
     protected $userId;
 
-    public function __construct($db, $cache, $userId = null) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct($userId = null) {
+        parent::__construct();
         $this->userId = $userId;
     }
 

@@ -4,7 +4,7 @@ if (!isset($_GET['userid']) || !is_number($_GET['userid'])) {
 }
 
 $UserID = $_GET['userid'];
-$User = new \Gazelle\User($DB, $Cache, $UserID);
+$User = new \Gazelle\User($UserID);
 $UInfo = Users::user_info($UserID);
 
 function check_paranoia_here($info, $setting) {

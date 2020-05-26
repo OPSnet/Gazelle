@@ -3,7 +3,7 @@ if (!check_perms('admin_periodic_task_view')) {
     error(403);
 }
 
-$scheduler = new \Gazelle\Schedule\Scheduler($DB, $Cache);
+$scheduler = new \Gazelle\Schedule\Scheduler;
 $stats = $scheduler->getRuntimeStats();
 $Debug->log_var($stats, 'nice');
 

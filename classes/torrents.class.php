@@ -285,11 +285,11 @@ class Torrents {
         list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record(MYSQLI_BOTH, [2, 'info_hash']);
 
         if ($ID > MAX_PREV_TORRENT_ID) {
-            $Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
+            $Bonus = new \Gazelle\Bonus;
             $Bonus->removePointsForUpload($UserID, [$Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum]);
         }
 
-        $manager = new \Gazelle\DB(G::$DB, G::$Cache);
+        $manager = new \Gazelle\DB;
         list($ok, $message) = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
         if (!$ok) {
             return $message;

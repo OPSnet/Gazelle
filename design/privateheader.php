@@ -12,7 +12,7 @@ $authArgs = '&amp;user=' . G::$LoggedUser['ID']
     . '&amp;authkey=' . G::$LoggedUser['AuthKey'];
 
 $Staff = check_perms('users_mod')
-    ? new \Gazelle\Staff(G::$DB, G::$Cache, G::$LoggedUser['ID'])
+    ? new \Gazelle\Staff(G::$LoggedUser['ID'])
     : null;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -133,7 +133,7 @@ foreach ($Scripts as $Script) {
 global $ClassLevels;
 // Get notifications early to change menu items if needed
 global $NotificationSpans;
-$notification = new Notification(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+$notification = new Notification(G::$LoggedUser['ID']);
 $Notifications = $notification->notifications();
 $UseNoty = $notification->useNoty();
 $NewSubscriptions = false;
@@ -150,7 +150,7 @@ if ($UseNoty && !empty($NotificationSpans)) {
     NotificationsManagerView::load_js();
 }
 if ($notification->isSkipped(Notification::SUBSCRIPTIONS)) {
-    $subscription = new \Gazelle\Manager\Subscription(G::$DB, G::$Cache, G::$LoggedUser['ID']);
+    $subscription = new \Gazelle\Manager\Subscription(G::$LoggedUser['ID']);
     $NewSubscriptions = $subscription->unread();
 }
 
@@ -205,7 +205,7 @@ if (check_perms('site_send_unlimited_invites')) {
                     </li>
                     <li id="nav_donate" class="brackets<?=Format::add_class($PageID, ['donate'], 'active', false)?>">
 <?php
-$Payment = new \Gazelle\Manager\Payment(G::$DB, G::$Cache);
+$Payment = new \Gazelle\Manager\Payment;
 $monthlyRental = $Payment->monthlyRental();
 $percent = $monthlyRental == 0.0
     ? 100
@@ -454,7 +454,7 @@ if (check_perms('users_mod') && FEATURE_EMAIL_REENABLE) {
 }
 
 if (check_perms('admin_manage_payments')) {
-    $Payment = new \Gazelle\Manager\Payment(G::$DB, G::$Cache);
+    $Payment = new \Gazelle\Manager\Payment;
     $DuePayments = $Payment->due();
     if (count($DuePayments) > 0) {
         $AlertText = '<a href="tools.php?action=payment_list">Payments due</a>';
@@ -475,14 +475,14 @@ if (check_perms('admin_site_debug')) {
 }
 
 if (check_perms('admin_manage_referrals')) {
-    $Referrals = new \Gazelle\Manager\Referral(G::$DB, G::$Cache);
+    $Referrals = new \Gazelle\Manager\Referral;
     if (!$Referrals->checkBouncer()) {
         $Alerts[] = '<a href="tools.php?action=referral_sandbox"><span style="color: red">Referral bouncer not responding</span></a>';
     }
 }
 
 if (check_perms('admin_periodic_task_view')) {
-    $scheduler = new \Gazelle\Schedule\Scheduler(G::$DB, G::$Cache);
+    $scheduler = new \Gazelle\Schedule\Scheduler;
     if ($insane = $scheduler->getInsaneTasks()) {
         $Alerts[] = sprintf('<a href="tools.php?action=periodic&amp;mode=view">There are %d insane tasks</a>', $insane);
     }

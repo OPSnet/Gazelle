@@ -2,7 +2,7 @@
 if (!check_perms('admin_manage_payments')) {
     error(403);
 }
-$Payment = new \Gazelle\Manager\Payment($DB, $Cache);
+$Payment = new \Gazelle\Manager\Payment;
 
 if ($_POST['submit'] == 'Delete') {
     if (!is_number($_POST['id']) || $_POST['id'] == '') {

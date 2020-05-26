@@ -13,7 +13,7 @@ if (!$GroupName) {
 
 $Changed = false;
 
-$ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
+$ArtistManager = new \Gazelle\Manager\Artist;
 for ($i = 0; $i < count($AliasNames); $i++) {
     $AliasName = Artists::normalise_artist_name($AliasNames[$i]);
     $Importance = $Importances[$i];

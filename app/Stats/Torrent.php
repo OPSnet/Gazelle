@@ -2,20 +2,14 @@
 
 namespace Gazelle\Stats;
 
-class Torrent {
-    /** @var \this->db_MYSQL */
-    protected $db;
-    /** @var \CACHE */
-    protected $cache;
+class Torrent extends \Gazelle\Base {
 
     protected $stats;
 
     const CACHE_KEY = 'stats_torrent';
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-
+    public function __construct() {
+        parent::__construct();
         if (($this->stats = $this->cache->get_value(self::CACHE_KEY)) === false) {
             $this->init();
         }

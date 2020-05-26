@@ -4,9 +4,7 @@ namespace Gazelle\Schedule;
 
 use \Gazelle\Util\Irc;
 
-abstract class Task {
-    protected $db;
-    protected $cache;
+abstract class Task extends \Gazelle\Base {
     protected $taskId;
     protected $name;
     protected $isDebug;
@@ -16,9 +14,8 @@ abstract class Task {
     protected $events;
     protected $processed;
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache, int $taskId, string $name, bool $isDebug) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct(int $taskId, string $name, bool $isDebug) {
+        parent::__construct();
         $this->taskId = $taskId;
         $this->name = $name;
         $this->isDebug = $isDebug;

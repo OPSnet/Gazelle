@@ -360,7 +360,7 @@ if ($Properties['Image']) {
 //******************************************************************************//
 //--------------- Generate torrent file ----------------------------------------//
 
-$torrentFiler = new \Gazelle\File\Torrent($DB, $Cache);
+$torrentFiler = new \Gazelle\File\Torrent;
 $Tor = new BencodeTorrent($TorrentName, true);
 $PublicTorrent = $Tor->make_private(); // The torrent is now private.
 $UnsourcedTorrent = $Tor->set_source(); // The source is now OPS
@@ -634,7 +634,7 @@ if ($IsNewGroup) {
     if ($Type == 'Music') {
         //array to store which artists we have added already, to prevent adding an artist twice
         $ArtistsAdded = [];
-        $ArtistManager = new \Gazelle\Manager\Artist($DB, $Cache);
+        $ArtistManager = new \Gazelle\Manager\Artist;
         foreach ($ArtistForm as $Importance => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 if (!$Artist['id']) {
@@ -712,7 +712,7 @@ if ($NoRevision) {
 }
 
 // Tags
-$tagMan = new \Gazelle\Manager\Tag($DB, $Cache);
+$tagMan = new \Gazelle\Manager\Tag;
 if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $Tag) {
         $Tag = $tagMan->resolve($tagMan->sanitize($Tag));
@@ -763,8 +763,8 @@ $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 //******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//
 
-$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
-$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$ripFiler = new \Gazelle\File\RipLog;
+$htmlFiler = new \Gazelle\File\RipLogHTML;
 foreach($logfileSummary->all() as $logfile) {
     $DB->prepared_query('
         INSERT INTO torrents_logs
@@ -803,7 +803,7 @@ Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
 
 // Running total for amount of BP to give
-$Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
+$Bonus = new \Gazelle\Bonus;
 $BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Bitrate'], $LogInDB,
     $logfileSummary->overallScore(), $logfileSummary->checksumStatus());
 

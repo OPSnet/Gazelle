@@ -10,7 +10,7 @@ $Debug->handle_errors();
 ini_set('max_execution_time', -1);
 
 $DB = new DB_MYSQL;
-$Cache = new CACHE($MemcachedServers);
+$Cache = new CACHE;
 
 define('CHUNK', 100);
 
@@ -19,8 +19,8 @@ $processed = 0;
 $newLog    = 0;
 $newHtml   = 0;
 
-$logFiler = new \Gazelle\File\RipLog($DB, $Cache);
-$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$logFiler = new \Gazelle\File\RipLog;
+$htmlFiler = new \Gazelle\File\RipLogHTML;
 
 while (true) {
     $DB->prepared_query('

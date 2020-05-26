@@ -2,7 +2,7 @@
 
 enforce_login();
 
-$siteLog = new \Gazelle\Manager\SiteLog($DB, $Cache, $Debug);
+$siteLog = new \Gazelle\Manager\SiteLog($Debug);
 
 View::show_header("Site log");
 

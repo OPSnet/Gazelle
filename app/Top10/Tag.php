@@ -2,17 +2,7 @@
 
 namespace Gazelle\Top10;
 
-class Tag {
-    /** @var \DB_MYSQL */
-    private $db;
-
-    /** @var \CACHE */
-    private $cache;
-
-    public function __construct (\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
+class Tag extends \Gazelle\Base {
 
     public function getTopUsedTags($limit) {
         if (!$topUsedTags = $this->cache->get_value('topusedtag_' . $limit)) {

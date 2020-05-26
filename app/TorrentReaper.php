@@ -2,15 +2,7 @@
 
 namespace Gazelle;
 
-class TorrentReaper
-{
-    protected $db;
-    protected $cache;
-
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
-    }
+class TorrentReaper extends Base {
 
     public function deleteDeadTorrents(bool $unseeded, bool $neverSeeded) {
         if (!$unseeded && !$neverSeeded) {

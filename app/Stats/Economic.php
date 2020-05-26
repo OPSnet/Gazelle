@@ -2,11 +2,7 @@
 
 namespace Gazelle\Stats;
 
-class Economic {
-    /** @var \DB_MYSQL */
-    protected $db;
-    /** @var \CACHE */
-    protected $cache;
+class Economic extends \Gazelle\Base {
 
     protected $stats;
 
@@ -22,9 +18,8 @@ class Economic {
         }
     }
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct() {
+        parent::__construct();
 
         if (($this->stats = $this->cache->get_value(self::CACHE_KEY)) === false) {
             list(

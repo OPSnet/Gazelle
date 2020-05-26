@@ -37,7 +37,7 @@ if (!empty($_GET['revisionid'])) { // if they're viewing an old revision
     $RevisionID = false;
 }
 
-$Artist = new \Gazelle\Artist($DB, $Cache, $ArtistID, $Revision);
+$Artist = new \Gazelle\Artist($ArtistID, $Revision);
 $cacheKey = $Artist->cacheKey();
 $Data = $Cache->get_value($cacheKey);
 if ($Data) {

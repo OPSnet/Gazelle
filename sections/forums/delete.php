@@ -145,7 +145,7 @@ $Cache->commit_transaction();
 
 $Cache->delete_value("forums_$ForumID");
 
-$subscription = new \Gazelle\Manager\Subscription($DB, $Cache);
+$subscription = new \Gazelle\Manager\Subscription;
 $subscription->flush('forums', $TopicID);
 $subscription->flushQuotes('forums', $TopicID);
 

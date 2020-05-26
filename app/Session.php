@@ -2,18 +2,12 @@
 
 namespace Gazelle;
 
-class Session {
-    /** @var \DB_MYSQL */
-    private $db;
-
-    /** @var \CACHE */
-    private $cache;
+class Session extends Base {
 
     private $id;
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache, $id) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct($id) {
+        parent::__construct();
         $this->id = $id;
     }
 

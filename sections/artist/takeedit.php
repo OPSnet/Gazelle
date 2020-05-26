@@ -16,7 +16,7 @@ if (!check_perms('site_edit_wiki')) {
 // Variables for database input
 $userId   = $LoggedUser['ID'];
 $artistId = $_REQUEST['artistid'];
-$artist   = new \Gazelle\Artist($DB, $Cache, $artistId);
+$artist   = new \Gazelle\Artist($artistId);
 
 if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     authorize();

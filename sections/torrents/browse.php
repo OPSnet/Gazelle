@@ -19,7 +19,7 @@ if (!empty($SortOrderMap[$SortOrder][1])) {
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $InfoHash = (!empty($_GET['searchstr'])) ? $_GET['searchstr'] : $_GET['groupname'];
 
-    $torMan = new \Gazelle\Manager\Torrent($DB, $Cache);
+    $torMan = new \Gazelle\Manager\Torrent;
     // Search by infohash
     if ($InfoHash = $torMan->isValidHash($InfoHash)) {
         if (list($ID, $GroupID) = $torMan->hashToTorrentGroup($InfoHash)) {

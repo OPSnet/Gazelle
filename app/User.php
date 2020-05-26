@@ -2,12 +2,7 @@
 
 namespace Gazelle;
 
-class User {
-    /** @var \DB_MYSQL */
-    protected  $db;
-
-    /** @var \CACHE */
-    protected  $cache;
+class User extends Base {
 
     /** @var int */
     protected  $forceCacheFlush;
@@ -17,9 +12,8 @@ class User {
 
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
-    public function __construct(\DB_MYSQL $db, \CACHE $cache, int $id) {
-        $this->db = $db;
-        $this->cache = $cache;
+    public function __construct(int $id) {
+        parent::__construct();
         $this->id = $id;
         $this->forceCacheFlush = false;
     }

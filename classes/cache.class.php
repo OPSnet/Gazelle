@@ -71,9 +71,10 @@ class CACHE extends Memcached {
      * @param $Servers
      * @param string $PersistantID
      */
-    function __construct($Servers, $PersistantID = 'apl') {
+    function __construct($PersistantID = 'ops') {
         parent::__construct($PersistantID);
-        $this->Servers = $Servers;
+        global $MemcachedServers;
+        $this->Servers = $MemcachedServers;
         $ServerList = [];
         foreach ($this->getServerList() as $Server) {
             $ServerList["{$Server['host']}:{$Server['port']}"] = true;

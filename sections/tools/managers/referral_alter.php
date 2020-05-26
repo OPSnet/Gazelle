@@ -6,7 +6,7 @@ if (!check_perms('admin_manage_referrals')) {
 }
 
 $P = db_array($_POST);
-$ReferralManager = new \Gazelle\Manager\Referral($DB, $Cache);
+$ReferralManager = new \Gazelle\Manager\Referral;
 
 if ($_POST['submit'] == 'Delete') {
     if (!is_number($_POST['id']) || $_POST['id'] == '') {
