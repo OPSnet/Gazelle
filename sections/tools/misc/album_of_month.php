@@ -34,9 +34,17 @@ if (isset($_POST['GroupID'])) {
         $Album = $DB->next_record();
 
         //Make sure album exists
-        if ($Album['ID']) {
+        if (!$Album['ID']) {
+            error('Please supply a valid album ID');
+        } else {
             //Remove old albums with type = 0 (so we remove the previous AotM)
-            $DB->prepared_query('DELETE FROM featured_albums WHERE Type = 0');
+            $DB->prepared_query('
+                UPDATE featured_albums SET
+                    Ended = now()
+                WHERE
+                    Ended IS NULL
+                    AND Type = 0
+            ');
             $Cache->delete_value('album_of_the_month');
 
             //Freeleech torrents
@@ -67,11 +75,11 @@ if (isset($_POST['GroupID'])) {
                     }
                 }
 
-                if (sizeof($TorrentIDs) > 0) {
+                if (count($TorrentIDs) > 0) {
                     Torrents::freeleech_torrents($TorrentIDs, $FreeLeechType, $FreeLeechReason);
                 }
 
-                if (isset($LargeTorrents) && sizeof($LargeTorrents) > 0) {
+                if (isset($LargeTorrents) && count($LargeTorrents) > 0) {
                     Torrents::freeleech_torrents($LargeTorrents, '2', $FreeLeechReason);
                 }
             }
@@ -95,14 +103,11 @@ if (isset($_POST['GroupID'])) {
             //Add album of the month and create forum
             $DB->prepared_query('
                 INSERT INTO featured_albums
-                       (GroupID, ThreadID, Started, Type)
-                VALUES (?,       ?,        now(),   0)
+                       (GroupID, ThreadID, Type)
+                VALUES (?,       ?,        0)
                 ', $GroupID, Misc::create_thread(AOTM_FORUM_ID, $LoggedUser['ID'], $Title, $Body)
             );
             header("Location: /");
-        } else {
-            //Uh oh, something went wrong
-            error('Please supply a valid album ID');
         }
     }
 }

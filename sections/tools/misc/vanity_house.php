@@ -38,9 +38,17 @@ if (isset($_POST['GroupID'])) {
         $Album = $DB->next_record();
 
         //Make sure album exists
-        if ($Album['ID']) {
+        if (!$Album['ID']) {
+            error('Please supply a valid album ID');
+        } else {
             //Remove old albums with type = 1, (so we remove previous VH alubm)
-            $DB->prepared_query('DELETE FROM featured_albums WHERE Type = 1');
+            $DB->prepared_query('
+                UPDATE featured_albums SET
+                    Ended = now()
+                WHERE
+                    Ended IS NULL
+                    AND Type = 1
+            ');
             $Cache->delete_value('vanity_house_album');
 
             //Freeleech torrents
@@ -73,11 +81,11 @@ if (isset($_POST['GroupID'])) {
                     }
                 }
 
-                if (sizeof($TorrentIDs) > 0) {
+                if (count($TorrentIDs) > 0) {
                     Torrents::freeleech_torrents($TorrentIDs, $FreeLeechType, $FreeLeechReason);
                 }
 
-                if (isset($LargeTorrents) && sizeof($LargeTorrents) > 0) {
+                if (isset($LargeTorrents) && count($LargeTorrents) > 0) {
                     Torrents::freeleech_torrents($LargeTorrents, '2', $FreeLeechReason);
                 }
             }
@@ -101,15 +109,12 @@ if (isset($_POST['GroupID'])) {
             //Add VH album and forum thread
             $DB->prepared_query('
                 INSERT INTO featured_albums
-                       (GroupID, ThreadID, Started, Type)
-                VALUES (?,       ?,        now(),   1)
+                       (GroupID, ThreadID, Type)
+                VALUES (?,       ?,        1)
                 ', $GroupID, Misc::create_thread(VANITY_HOUSE_FORUM_ID, $LoggedUser[ID], $Title, $Body)
             );
 
             header("Location: /");
-        } else {
-            //Uh oh, something went wrong
-            error('Please supply a valid album ID');
         }
     }
 }
