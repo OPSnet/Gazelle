@@ -381,6 +381,6 @@ class Scheduler extends \Gazelle\Base {
         if (!class_exists($class)) {
             return null;
         }
-        return new $class($this->db, $this->cache, $id, $name, $isDebug);
+        return new $class($id, $name, $isDebug);
     }
 }
