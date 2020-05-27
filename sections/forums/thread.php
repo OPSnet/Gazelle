@@ -239,6 +239,9 @@ if ($ThreadInfo['NoPoll'] == 0) {
             FROM forums_polls
             WHERE TopicID = '$ThreadID'");
         list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
+        if ($Featured == '') {
+            $Featured = null;
+        }
         $Answers = unserialize($Answers);
         $DB->query("
             SELECT Vote, COUNT(UserID)
@@ -287,7 +290,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
 
 ?>
     <div class="box thin clear">
-        <div class="head colhead_dark"><strong>Poll<?php if ($Closed) { echo ' [Closed]'; } ?><?php if ($Featured && $Featured !== '0000-00-00 00:00:00') { echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
+        <div class="head colhead_dark"><strong>Poll<?php if ($Closed) { echo ' [Closed]'; } ?><?php if ($Featured) { echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
         <div class="pad<?php if (/*$LastRead !== null || */$ThreadInfo['IsLocked']) { echo ' hidden'; } ?>" id="threadpoll">
             <p><strong><?=display_str($Question)?></strong></p>
 <?php    if ($UserResponse !== null || $Closed || $ThreadInfo['IsLocked'] || !Forums::check_forumperm($ForumID)) { ?>
@@ -414,7 +417,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
             </div>
 <?php    }
     if (check_perms('forums_polls_moderate') && !$RevealVoters) {
-        if (!$Featured || $Featured == '0000-00-00 00:00:00') {
+        if (!$Featured) {
 ?>
             <form class="manage_form" name="poll" action="forums.php" method="post">
                 <input type="hidden" name="action" value="poll_mod" />

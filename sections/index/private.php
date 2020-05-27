@@ -285,6 +285,7 @@ if (($TopicID = $Cache->get_value('polls_featured')) === false) {
     $DB->prepared_query('
         SELECT TopicID
         FROM forums_polls
+        WHERE Featured IS NOT NULL
         ORDER BY Featured DESC
         LIMIT 1
     ');
@@ -300,6 +301,9 @@ if ($TopicID) {
             ', $TopicID
         );
         list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
+        if ($Featured == '') {
+            $Featured = null;
+        }
         $Answers = unserialize($Answers);
         $DB->prepared_query("
             SELECT Vote, count(*)

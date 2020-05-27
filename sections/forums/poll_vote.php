@@ -40,6 +40,9 @@ if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("
         FROM forums_polls
         WHERE TopicID = '$TopicID'");
     list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
+    if ($Featured == '') {
+        $Featured = null;
+    }
     $Answers = unserialize($Answers);
     $DB->query("
         SELECT Vote, COUNT(UserID)
