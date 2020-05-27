@@ -56,7 +56,7 @@ class Payment extends \Gazelle\Base {
         }
 
         // update with latest forex rates
-        $XBT = new XBT($this->db, $this->cache);
+        $XBT = new XBT;
         foreach ($list as &$l) {
             if ($l['cc'] == 'XBT') {
                 $l['fiatRate'] = 1.0;
