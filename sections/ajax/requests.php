@@ -369,9 +369,9 @@ if ($NumResults == 0) {
             'recordLabel' => $Request['RecordLabel'],
             'catalogueNumber' => $Request['CatalogueNumber'],
             'releaseType' => $ReleaseTypes[$Request['ReleaseType']],
-            'bitrateList' => $Request['BitrateList'],
-            'formatList' => $Request['FormatList'],
-            'mediaList' => $Request['MediaList'],
+            'bitrateList' => preg_split('/\|/', $Request['BitrateList'], null, PREG_SPLIT_NO_EMPTY),
+            'formatList' => preg_split('/\|/', $Request['FormatList'], null, PREG_SPLIT_NO_EMPTY),
+            'mediaList' => preg_split('/\|/', $Request['MediaList'], null, PREG_SPLIT_NO_EMPTY),
             'logCue' => $Request['LogCue'],
             'isFilled' => ($Request['TorrentID'] > 0),
             'fillerId' => (int)$Request['FillerID'],
@@ -387,4 +387,3 @@ if ($NumResults == 0) {
         'results' => $JsonResults
     ]);
 }
-?>
