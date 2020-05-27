@@ -56,6 +56,7 @@ class Inbox extends Base {
      * @param array     $params             associative config array, usually $_GET
      */
     public function __construct($userId, $unreadFirstDefault = self::NEWEST_FIRST, array $params = []) {
+        parent::__construct();
         $this->userId = $userId;
         $this->unreadFirstDefault = (bool) $unreadFirstDefault;
         if (empty($params)) {

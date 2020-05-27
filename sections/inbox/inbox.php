@@ -6,7 +6,6 @@ $UserID = $LoggedUser['ID'];
 
 try {
     $Inbox = new Inbox(
-        $DB,
         $LoggedUser['ID'],
         $LoggedUser['ListUnreadPMsFirst'] ?? false
     );
