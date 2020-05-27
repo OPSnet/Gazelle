@@ -1,7 +1,7 @@
 <?php
 
 use \Gazelle\Manager\Notification;
-$notification = new Notification($DB, $Cache, $UserID);
+$notification = new Notification($UserID);
 
 $Type = $_POST['type'];
 
