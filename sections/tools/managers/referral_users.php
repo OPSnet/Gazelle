@@ -3,7 +3,7 @@ if (!check_perms('admin_view_referrals')) {
     error(403);
 }
 
-$ReferralManager = new Gazelle\Manager\Referral($DB, $Cache);
+$ReferralManager = new Gazelle\Manager\Referral;
 
 if (isset($_POST['id'])) {
     authorize();

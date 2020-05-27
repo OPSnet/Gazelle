@@ -513,7 +513,7 @@ echo $Val->GenerateJS('userform');
                 </td>
             </tr>
 <?php
-            $notification = new Notification($DB, $Cache, $UserID);
+            $notification = new Notification($UserID);
             NotificationsManagerView::render_settings($notification->settings());
 ?>
         </table>

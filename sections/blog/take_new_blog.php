@@ -46,7 +46,7 @@ if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
         VALUES (?, ?)", G::$LoggedUser['ID'], $ThreadID);
     $Cache->delete_value('subscriptions_user_'.G::$LoggedUser['ID']);
 }
-$notification = new Notification($DB, $Cache, G::$LoggedUser['ID']);
+$notification = new Notification(G::$LoggedUser['ID']);
 $notification->push($notification->pushableUsers(), $_POST['title'], $_POST['body'], site_url() . 'index.php', Notification::BLOG);
 
 header('Location: blog.php');

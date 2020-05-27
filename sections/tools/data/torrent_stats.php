@@ -2,7 +2,7 @@
 if (!check_perms('site_view_flow')) {
     error(403);
 }
-$stats = new Gazelle\Stats\Torrent($DB, $Cache);
+$stats = new Gazelle\Stats\Torrent;
 View::show_header('Torrents');
 ?>
 <div class="thin">
