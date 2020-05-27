@@ -805,7 +805,7 @@ $Debug->set_flag('upload: sphinx updated');
 // Running total for amount of BP to give
 $Bonus = new \Gazelle\Bonus(G::$DB, G::$Cache);
 $BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Bitrate'], $LogInDB,
-    $logfileSummary->overallScore(), $logfileSummary->overallScore());
+    $logfileSummary->overallScore(), $logfileSummary->checksumStatus());
 
 //******************************************************************************//
 //---------------IRC announce and feeds ---------------------------------------//
