@@ -195,8 +195,8 @@ class Misc {
                 LastPostID = ?,
                 LastPostAuthorID = ?,
                 LastPostTopicID = ?,
-                LastPostTime = ?
-            WHERE ID = ?', $PostID, $AuthorID, $TopicID, sqltime(), $ForumID);
+                LastPostTime = now()
+            WHERE ID = ?', $PostID, $AuthorID, $TopicID, $ForumID);
 
         G::$DB->prepared_query('
             UPDATE forums_topics
