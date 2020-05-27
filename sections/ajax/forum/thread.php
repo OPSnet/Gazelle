@@ -149,6 +149,9 @@ if ($ThreadInfo['NoPoll'] == 0) {
             FROM forums_polls
             WHERE TopicID = '$ThreadID'");
         list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
+        if ($Featured == '') {
+            $Featured = null;
+        }
         $Answers = unserialize($Answers);
         $DB->query("
             SELECT Vote, COUNT(UserID)

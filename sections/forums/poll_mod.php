@@ -16,6 +16,9 @@ if (!list($Question,$Answers,$Votes,$Featured,$Closed) = $Cache->get_value('poll
         FROM forums_polls
         WHERE TopicID='".$TopicID."'");
     list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
+    if ($Featured == '') {
+        $Featured = null;
+    }
     $Answers = unserialize($Answers);
     $DB->query("
         SELECT Vote, COUNT(UserID)
@@ -39,13 +42,15 @@ if (!list($Question,$Answers,$Votes,$Featured,$Closed) = $Cache->get_value('poll
 }
 
 if (isset($_POST['feature'])) {
-    if (!$Featured || $Featured == '0000-00-00 00:00:00') {
+    if (!$Featured) {
         $Featured = sqltime();
         $Cache->cache_value('polls_featured',$TopicID,0);
-        $DB->query('
+        $DB->prepared_query("
             UPDATE forums_polls
-            SET Featured=\''.sqltime().'\'
-            WHERE TopicID=\''.$TopicID.'\'');
+            SET Featured = ?
+            WHERE TopicID = ?
+            ", $Featured, $TopicID
+        );
     }
 }
 
@@ -61,4 +66,3 @@ $Cache->cache_value('polls_'.$TopicID, [$Question,$Answers,$Votes,$Featured,$Clo
 
 $Location = (empty($_SERVER['HTTP_REFERER'])) ? "forums.php?action=viewthread&threadid={$TopicID}" : $_SERVER['HTTP_REFERER'];
 header("Location: {$Location}");
-die();
