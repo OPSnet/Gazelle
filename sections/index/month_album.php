@@ -10,7 +10,7 @@ if ($FeaturedAlbum === false) {
             fa.Title
         FROM featured_albums AS fa
         INNER JOIN torrents_group AS tg ON (tg.ID = fa.GroupID)
-        WHERE Ended = 0 AND type = 0
+        WHERE Ended IS NULL AND type = 0
     ');
     $FeaturedAlbum = $DB->next_record();
     $Cache->cache_value('album_of_the_month', $FeaturedAlbum, 86400 * 3);
