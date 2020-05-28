@@ -503,7 +503,6 @@ if ($FLTokens != $Cur['FLTokens']
         || (check_perms('admin_manage_user_fls'))
         || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])
     )) {
-        $UpdateSet[] = "FLTokens = $FLTokens";
         $EditSummary[] = "Freeleech Tokens changed from $Cur[FLTokens] to $FLTokens";
         $HeavyUpdates['FLTokens'] = $FLTokens;
 }
@@ -707,7 +706,6 @@ if ($DisableRequests != $Cur['DisableRequests'] && check_perms('users_disable_an
     }
 }
 
-
 if ($EnableUser != $Cur['Enabled'] && check_perms('users_disable_users')) {
     $EnableStr = 'account '.translateUserStatus($Cur['Enabled']).'->'.translateUserStatus($EnableUser);
     if ($EnableUser == '2') {
@@ -865,7 +863,6 @@ if ($EditSummary) {
         $Summary .= "\nReason: $Reason";
     }
 
-
     $Summary .= "\n\n$AdminComment";
 } elseif (empty($UpdateSet) && empty($EditSummary) && $Cur['AdminComment'] == $_POST['AdminComment']) {
     $Summary = sqltime() . ' - Comment added by ' . $LoggedUser['Username'] . ': ' . "$Reason\n\n";
@@ -877,9 +874,6 @@ if (!empty($Summary)) {
 } else {
     $UpdateSet[] = "AdminComment = '$AdminComment'";
 }
-
-// Update cache
-
 
 // Build query
 
@@ -897,6 +891,15 @@ $DB->query($SQL);
 if ($newBonusPoints !== false) {
     $Bonus = new \Gazelle\Bonus;
     $Bonus->setPoints($UserID, $newBonusPoints);
+}
+
+if ($FLTokens != $Cur['FLTokens']) {
+    $DB->prepared_query('
+        UPDATE user_flt SET
+            tokens = ?
+        WHERE user_id = ?
+        ', $FLTokens, $UserID
+    );
 }
 
 if (!empty($LeechUpdateSet)) {
