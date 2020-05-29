@@ -9,7 +9,6 @@ if (!check_perms('admin_reports')) {
     error(403);
 }
 
-
 $DB->query("
     SELECT
         r.ID,
@@ -81,13 +80,14 @@ $DB->query("
 
         if (!$GroupID) {
             //Torrent already deleted
-            $DB->query("
-                UPDATE reportsv2
-                SET
+            $DB->prepared_query("
+                UPDATE reportsv2 SET
                     Status = 'Resolved',
-                    LastChangeTime = '".sqltime()."',
+                    LastChangeTime = now,
                     ModComment = 'Report already dealt with (torrent deleted)'
-                WHERE ID = $ReportID");
+                WHERE ID = ?
+                ", $ReportID
+            );
             $Cache->decrement('num_torrent_reportsv2');
 ?>
     <div id="report<?=$ReportID?>" class="report box pad center" data-reportid="<?=$ReportID?>">
