@@ -16,22 +16,23 @@ if (!check_perms('admin_reports')) {
 
 authorize();
 
-if (!is_number($_POST['torrentid'])) {
+if ((int)$_POST['torrentid'] < 1) {
     echo 'No Torrent ID';
     die();
 } else {
-    $TorrentID = $_POST['torrentid'];
+    $TorrentID = (int)$_POST['torrentid'];
 }
 
-$DB->query("
+$CategoryID = $DB->scalar("
     SELECT tg.CategoryID
     FROM torrents_group AS tg
-        JOIN torrents AS t ON t.GroupID = tg.ID
-    WHERE t.ID = $TorrentID");
-if (!$DB->has_results()) {
-    $Err = 'No torrent with that ID exists!';
-} else {
-    list($CategoryID) = $DB->next_record();
+    INNER JOIN torrents AS t ON (t.GroupID = tg.ID)
+    WHERE t.ID = ?
+    ", $TorrentID
+);
+if (!$CategoryID) {
+    echo 'No torrent with that ID exists!';
+    die();
 }
 
 if (!isset($_POST['type'])) {
@@ -49,40 +50,45 @@ if (!isset($_POST['type'])) {
     die();
 }
 
+$ExtraID = (int)$_POST['otherid'];
 
-$ExtraID = db_string($_POST['otherid']);
-
-if (!empty($_POST['extra'])) {
-    $Extra = db_string($_POST['extra']);
-} else {
+if (empty($_POST['extra'])) {
     $Extra = '';
+} else {
+    $Extra = trim($_POST['extra']);
 }
 
-if (!empty($Err)) {
-    echo $Err;
-    die();
-}
-
-$DB->query("
+if ($DB->scalar("
     SELECT ID
     FROM reportsv2
-    WHERE TorrentID = $TorrentID
-        AND ReporterID = ".db_string($LoggedUser['ID'])."
-        AND ReportedTime > '".time_minus(3)."'");
-if ($DB->has_results()) {
+    WHERE
+        ReportedTime > now() - INTERVAL 5 SECOND
+        AND TorrentID = ?
+        AND ReporterID = ?
+        ", $TorrentID, $LoggedUser['ID']
+    )
+) {
     die();
 }
 
-$DB->query("
+$DB->prepared_query("
     INSERT INTO reportsv2
-        (ReporterID, TorrentID, Type, UserComment, Status, ReportedTime, ExtraID)
-    VALUES
-        (".db_string($LoggedUser['ID']).", $TorrentID, '$Type', '$Extra', 'New', '".sqltime()."', '$ExtraID')");
-
+           (ReporterID, TorrentID, Type, UserComment, ExtraID)
+    VALUES (?,          ?,         ?,    ?,           ?)
+    ", $LoggedUser['ID'], $TorrentID, $Type, $Extra, $ExtraID
+);
 $ReportID = $DB->inserted_id();
+
+if ($UserID != $LoggedUser['ID']) {
+    Misc::send_pm($UserID, 0, "One of your torrents has been reported",
+        G::$Twig->render('reportsv2/new.twig', [
+            'id'    => $TorrentID,
+            'title' => $ReportType['title'],
+        ])
+    );
+}
 
 $Cache->delete_value("reports_torrent_$TorrentID");
 $Cache->increment('num_torrent_reportsv2');
 
 echo $ReportID;
-?>
