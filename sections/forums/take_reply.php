@@ -125,10 +125,12 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
 //Now we're dealing with a normal post
 } else {
     //Insert the post into the posts database
-    $DB->query("
-        INSERT INTO forums_posts (TopicID, AuthorID, AddedTime, Body)
-        VALUES ('$TopicID', '".$LoggedUser['ID']."', '$SQLTime', '".db_string($Body)."')");
-
+    $DB->prepared_query("
+        INSERT INTO forums_posts
+               (TopicID, AuthorID, AddedTime, Body)
+        VALUES (?,       ?,        ?,         ?)
+        ", $TopicID, $LoggedUser['ID'], $SQLTime, trim($Body)
+    );
     $PostID = $DB->inserted_id();
 
     //This updates the root index

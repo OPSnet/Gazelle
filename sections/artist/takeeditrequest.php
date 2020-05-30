@@ -47,10 +47,10 @@ $TopicID = $DB->inserted_id();
 
 $DB->prepared_query("
     INSERT INTO forums_posts
-        (TopicID, AuthorID, AddedTime, Body)
-    VALUES
-        (?, ?, ?, ?)", $TopicID, $BotID, $sqltime, $Body);
-
+           (TopicID, AuthorID, AddedTime, Body)
+    VALUES (?,       ?,        ?,         ?)
+    ", $TopicID, $BotID, $sqltime, $Body
+);
 $PostID = $DB->inserted_id();
 
 $DB->prepared_query("
