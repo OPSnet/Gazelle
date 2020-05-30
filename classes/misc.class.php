@@ -385,11 +385,11 @@ class Misc {
      * @param string $Message the message to write.
      */
     public static function write_log($Message) {
-        global $Time;
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
-            INSERT INTO log (Message, Time)
-            VALUES ('" . db_string($Message) . "', '" . sqltime() . "')");
+        G::$DB->prepared_query("
+            INSERT INTO log (Message) VALUES (?)
+            ", trim($Message)
+        );
         G::$DB->set_query_id($QueryID);
     }
 
