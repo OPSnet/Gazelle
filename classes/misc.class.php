@@ -173,10 +173,10 @@ class Misc {
 
         G::$DB->prepared_query('
             INSERT INTO forums_topics
-                (Title, AuthorID, ForumID, LastPostID, LastPostTime, LastPostAuthorID, CreatedTime)
-            VALUES
-                (?, ?, ?, ?, ?, ?, ?)',
-                $Title, $AuthorID, $ForumID, -1, sqltime(), $AuthorID, sqltime());
+                   (Title, ForumID, AuthorID, LastPostAuthorID, LastPostID)
+            VALUES (?,     ?,       ?,        ?,                -1)
+            ', $Title, $ForumID, $AuthorID, $AuthorID
+        );
         $TopicID = G::$DB->inserted_id();
         $Posts = 1;
 
@@ -205,8 +205,8 @@ class Misc {
                 NumPosts = NumPosts + 1,
                 LastPostID = ?,
                 LastPostAuthorID = ?,
-                LastPostTime = ?
-            WHERE ID = ?', $PostID, $AuthorID, sqltime(), $TopicID);
+                LastPostTime = now()
+            WHERE ID = ?', $PostID, $AuthorID, $TopicID);
 
         // Bump this topic to head of the cache
         list($Forum,,, $Stickies) = G::$Cache->get_value("forums_$ForumID");

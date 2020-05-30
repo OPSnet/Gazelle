@@ -60,14 +60,15 @@ if ($LastID < $PostID) { // Last post in a topic was removed
             LEFT JOIN users_main AS u ON u.ID = p.AuthorID
         WHERE p.ID = '$LastID'");
     list($LastAuthorID, $LastAuthorName, $LastTime) = $DB->next_record();
-    $DB->query("
-        UPDATE forums_topics
-        SET
-            LastPostID = '$LastID',
-            LastPostAuthorID = '$LastAuthorID',
-            LastPostTime = '$LastTime'
-        WHERE ID = '$TopicID'");
-    $DB->query("
+    $DB->prepared_query("
+        UPDATE forums_topics SET
+            LastPostID = ?,
+            LastPostAuthorID = ?,
+            LastPostTime = ?
+        WHERE ID = ?
+        ", $LastID, $LastAuthorID, $LastTime, $TopicID
+    );
+    $DB->prepared_query("
         SELECT
             t.ID,
             t.Title,
@@ -76,11 +77,13 @@ if ($LastID < $PostID) { // Last post in a topic was removed
             t.LastPostAuthorID,
             u.Username
         FROM forums_topics AS t
-            LEFT JOIN users_main AS u ON u.ID = t.LastPostAuthorID
-        WHERE ForumID = '$ForumID'
-            AND t.ID != '$TopicID'
+        LEFT JOIN users_main AS u ON (u.ID = t.LastPostAuthorID)
+        WHERE ForumID = ?
+            AND t.ID != ?
         ORDER BY LastPostID DESC
-        LIMIT 1");
+        LIMIT 1
+        ", $ForumID, $TopicID
+    );
     list($LastTopicID, $LastTopicTitle, $LastTopicPostID, $LastTopicPostTime, $LastTopicAuthorID, $LastTopicAuthorName) = $DB->next_record(MYSQLI_BOTH, false);
 
     if ($LastID < $LastTopicPostID) { // Topic is no longer the most recent in its forum

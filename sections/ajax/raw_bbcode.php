@@ -6,11 +6,13 @@ if (empty($PostID)) {
     json_die("error", "empty postid");
 }
 
-$DB->query("
+$DB->prepared_query("
     SELECT t.ForumID, p.Body
     FROM forums_posts AS p
-        JOIN forums_topics AS t ON p.TopicID = t.ID
-    WHERE p.ID = '$PostID'");
+    INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
+    WHERE p.ID = ?
+    ", $PostID
+);
 
 if (!$DB->has_results()) {
     json_die("error", "no results");
@@ -22,5 +24,3 @@ if (!Forums::check_forumperm($ForumID)) {
 }
 
 json_die("success", ["body" => nl2br($Body)]);
-
-?>

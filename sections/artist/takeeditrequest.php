@@ -40,9 +40,10 @@ POST;
 
 $DB->prepared_query("
     INSERT INTO forums_topics
-        (Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
-    Values
-        (?, ?, ?, ?, ?, ?)", $Title, $BotID, $EditForumID, $sqltime, $BotID, $sqltime);
+           (Title, ForumID, AuthorID, LastPostAuthorID)
+    Values (?,     ?,       ?,        ?)
+    ", $Title, $EditForumID, $BotID, $BotID
+);
 $TopicID = $DB->inserted_id();
 
 $DB->prepared_query("
@@ -70,8 +71,10 @@ $DB->prepared_query("
         NumPosts         = NumPosts + 1,
         LastPostID       = ?,
         LastPostAuthorID = ?,
-        LastPostTime     = ?
-    WHERE ID = ?", $PostID, $BotID, $sqltime, $TopicID);
+        LastPostTime     = now()
+    WHERE ID = ?
+    ", $PostID, $BotID, $TopicID
+);
 
 // if cache exists modify it, if not, then it will be correct when selected next, and we can skip this block
 if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
