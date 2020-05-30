@@ -607,16 +607,14 @@ class Referral extends \Gazelle\Base {
             return [false, "Account already used for referral, join " . BOT_DISABLED_CHAN . " on " . BOT_SERVER . " for help."];
         }
 
-        $inviteExpires = time_plus(60 * 60 * 24 * 3); // 3 days
         $inviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
         $inviteKey = \Users::make_secret();
 
         $this->db->prepared_query("
             INSERT INTO invites
-                (InviteKey, Email, Expires, Reason)
-            VALUES
-                (?,         ?,     ?,       ?)
-            ", $inviteKey, $email, $inviteExpires, $inviteReason
+                   (InviteKey, Email, Reason, Expires)
+            VALUES (?,         ?,     ?,      now() + INTERVAL 3 DAY)
+            ", $inviteKey, $email, $inviteReason
         );
 
         $this->db->prepared_query("
