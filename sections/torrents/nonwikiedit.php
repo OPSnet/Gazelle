@@ -19,7 +19,6 @@ if (!check_perms('torrents_edit')) {
     }
 }
 
-
 if (isset($_POST['freeleechtype']) && check_perms('torrents_freeleech')) {
     if (in_array($_POST['freeleechtype'], ['0', '1', '2'])) {
         $Free = $_POST['freeleechtype'];
@@ -42,32 +41,27 @@ $RecordLabel = db_string($_POST['record_label']);
 $CatalogueNumber = db_string($_POST['catalogue_number']);
 
 // Get some info for the group log
-$DB->query("
-    SELECT Year
-    FROM torrents_group
-    WHERE ID = $GroupID");
-list($OldYear) = $DB->next_record();
+$OldYear = $DB->scalar("SELECT Year FROM torrents_group WHERE ID = ?", $GroupID);
 
-
-
-$DB->query("
-    UPDATE torrents_group
-    SET
-        Year = '$Year',
-        RecordLabel = '".$RecordLabel."',
-        CatalogueNumber = '".$CatalogueNumber."'
-    WHERE ID = $GroupID");
+$DB->prepared_query("
+    UPDATE torrents_group SET
+        Year = ?,
+        RecordLabel = ?,
+        CatalogueNumber = ?
+    WHERE ID = ?
+    ", $Year, $RecordLabel, $CatalogueNumber, $GroupID
+);
 
 if ($OldYear != $Year) {
-    $DB->query("
-        INSERT INTO group_log (GroupID, UserID, Time, Info)
-        VALUES ('$GroupID', ".$LoggedUser['ID'].", '".sqltime()."', '".db_string("Year changed from $OldYear to $Year")."')");
+    Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Year changed from $OldYear to $Year", 0);
 }
 
-$DB->query("
+$DB->prepared_query("
     SELECT ID
     FROM torrents
-    WHERE GroupID = '$GroupID'");
+    WHERE GroupID = ?
+    ", $GroupID
+);
 while (list($TorrentID) = $DB->next_record()) {
     $Cache->delete_value("torrent_download_$TorrentID");
 }
@@ -75,4 +69,3 @@ Torrents::update_hash($GroupID);
 $Cache->delete_value("torrents_details_$GroupID");
 
 header("Location: torrents.php?id=$GroupID");
-?>

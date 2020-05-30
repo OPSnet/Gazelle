@@ -10,16 +10,11 @@ if (!is_number($TagID) || !is_number($GroupID)) {
     error(404);
 }
 
-$DB->query("
-    SELECT Name
-    FROM tags
-    WHERE ID = '$TagID'");
-if (list($TagName) = $DB->next_record()) {
-    $DB->query("
-        INSERT INTO group_log
-            (GroupID, UserID, Time, Info)
-        VALUES
-            ('$GroupID',".$LoggedUser['ID'].",'".sqltime()."','".db_string('Tag "'.$TagName.'" removed from group')."')");
+$TagName = $DB->scalar("
+    SELECT Name FROM tags WHERE ID = ?", $TagID
+);
+if ($TagName) {
+    Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Tag \"$TagName\" removed from group", 0);
 }
 
 $DB->query("

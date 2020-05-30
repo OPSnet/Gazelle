@@ -7,27 +7,24 @@ if (!check_perms('site_edit_wiki')) {
 $ID = $_GET['id'];
 $GroupID = $_GET['groupid'];
 
-
 if (!is_number($ID) || !is_number($ID) || !is_number($GroupID) || !is_number($GroupID)) {
     error(404);
 }
 
-$DB->query("
+list($Image, $Summary) = $DB->row("
     SELECT Image, Summary
     FROM cover_art
-    WHERE ID = '$ID'");
-list($Image, $Summary) = $DB->next_record();
+    WHERE ID = ?
+    ", $ID
+);
 
-$DB->query("
+$DB->prepared_query("
     DELETE FROM cover_art
-    WHERE ID = '$ID'");
+    WHERE ID = ?
+    ", $ID
+);
 
-$DB->query("
-    INSERT INTO group_log
-        (GroupID, UserID, Time, Info)
-    VALUES
-        ('$GroupID', ".$LoggedUser['ID'].", '".sqltime()."', '".db_string("Additional cover \"$Summary - $Image\" removed from group")."')");
+Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Additional cover \"$Summary - $Image\" removed from group", 0);
 
-$Cache->delete_value("torrents_cover_art_$GroupID");
-$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
-header("Location: {$Location}");
+$Cache->deleteMulti(["torrents_cover_art_$GroupID", "torrents_details_$GroupID"]);
+header("Location: " . empty($_SERVER['HTTP_REFERER']) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER']);

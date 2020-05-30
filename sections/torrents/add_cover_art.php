@@ -28,17 +28,15 @@ for ($i = 0; $i < count($Images); $i++) {
         continue;
     }
 
-    // sanitize inputs
-    $Image = db_string($Image);
-    $Summary = db_string($Summary);
-    $DB->query("
+    $DB->prepared_query("
         INSERT IGNORE INTO cover_art
-            (GroupID, Image, Summary, UserID, Time)
-        VALUES
-            ('$GroupID', '$Image', '$Summary', '$UserID', '$Time')");
-
+               (GroupID, Image, Summary, UserID, Time)
+        VALUES (?,       ?,     ?,       ?,      ?)
+        ", $GroupID, trim($Image), trim($Summary), $UserID, $Time
+    );
     if ($DB->affected_rows()) {
         $Changed = true;
+        Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Additional cover \"$Summary - $Image\" added to group", 0);
     }
 }
 
@@ -46,5 +44,4 @@ if ($Changed) {
     $Cache->delete_value("torrents_cover_art_$GroupID");
 }
 
-$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
-header("Location: {$Location}");
+header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$GroupID}");

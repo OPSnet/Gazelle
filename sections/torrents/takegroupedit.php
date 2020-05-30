@@ -133,11 +133,7 @@ $DB->query("
     WHERE ID='$GroupID'");
 // Log VH changes
 if ($OldVH != $VanityHouse && check_perms('torrents_edit_vanityhouse')) {
-    $DB->query("
-        INSERT INTO group_log
-            (GroupID, UserID, Time, Info)
-        VALUES
-            ('$GroupID',".$LoggedUser['ID'].",'".sqltime()."','".db_string('Vanity House status changed to '.($VanityHouse ? 'true' : 'false'))."')");
+    Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], 'Vanity House status changed to '.($VanityHouse ? 'true' : 'false'), 0);
 }
 
 // There we go, all done!
