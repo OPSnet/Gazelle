@@ -16,5 +16,6 @@ if (!$GroupID) {
 
 Torrents::clear_log($TorrentID, $LogID);
 Torrents::set_logscore($TorrentID, $GroupID);
+Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], "Riplog ID $LogID removed from torrent $TorrentID", 0);
 
 header("Location: torrents.php?torrentid={$TorrentID}");

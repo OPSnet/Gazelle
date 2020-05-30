@@ -166,11 +166,12 @@ if (empty($_POST['confirm'])) {
     Torrents::delete_group($GroupID);
 
     Torrents::write_group_log($NewGroupID, 0, $LoggedUser['ID'], "Merged Group $GroupID ($Name) to $NewGroupID ($NewName)", 0);
-    $DB->query("
+    $DB->prepared_query("
         UPDATE group_log
-        SET GroupID = $NewGroupID
-        WHERE GroupID = $GroupID");
-
+        SET GroupID = ?
+        WHERE GroupID = ?
+        ", $NewGroupID, $GroupID
+    );
     $GroupID = $NewGroupID;
 
     $DB->query("

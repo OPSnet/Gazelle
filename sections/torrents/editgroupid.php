@@ -108,11 +108,12 @@ if (empty($_POST['confirm'])) {
 
     Misc::write_log("Torrent $TorrentID was edited by " . $LoggedUser['Username']); // TODO: this is probably broken
     Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "merged group $OldGroupID", 0);
-    $DB->query("
+    $DB->prepared_query("
         UPDATE group_log
-        SET GroupID = $GroupID
-        WHERE GroupID = $OldGroupID");
-
+        SET GroupID = ?
+        WHERE GroupID = ?
+        ", $GroupID, $OldGroupID
+    );
     $Cache->delete_value("torrents_details_$GroupID");
     $Cache->delete_value("torrent_download_$TorrentID");
 

@@ -33,11 +33,7 @@ foreach ($Tags as $TagName) {
         $tagMan->createTorrentTag($TagID, $GroupID, $UserID, 3);
         $tagMan->createTorrentTagVote($TagID, $GroupID, $UserID, 'up');
 
-        $DB->query("
-            INSERT INTO group_log
-                (GroupID, UserID, Time, Info)
-            VALUES
-                ('$GroupID', ".$UserID.", '".sqltime()."', '".db_string("Tag \"$TagName\" added to group")."')");
+        Torrents::write_group_log($GroupID, 0, $UserID, "Tag \"$TagName\" added to group", 0);
     }
 }
 

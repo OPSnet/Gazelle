@@ -255,15 +255,14 @@ class Torrents {
      * @param boolean $Hidden Currently does fuck all. TODO: Fix that.
      */
     public static function write_group_log($GroupID, $TorrentID, $UserID, $Message, $Hidden) {
-        global $Time;
         $QueryID = G::$DB->get_query_id();
         G::$DB->prepared_query("
             INSERT INTO group_log
-                (GroupID, TorrentID, UserID, Info, Hidden, Time)
-            VALUES
-                (?,       ?,         ?,      ?,    ?,      now())",
-            $GroupID, $TorrentID, $UserID, $Message, $Hidden);
-            G::$DB->set_query_id($QueryID);
+                   (GroupID, TorrentID, UserID, Info, Hidden)
+            VALUES (?,       ?,         ?,      ?,    ?)
+            ", $GroupID, $TorrentID, $UserID, $Message, $Hidden
+        );
+        G::$DB->set_query_id($QueryID);
     }
 
     /**
