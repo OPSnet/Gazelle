@@ -88,12 +88,12 @@ $DB->query("
         ('".db_string($Title)."', '".$LoggedUser['ID']."', '$ForumID', '".$sqltime."', '".$LoggedUser['ID']."', '".$sqltime."')");
 $TopicID = $DB->inserted_id();
 
-$DB->query("
+$DB->prepared_query("
     INSERT INTO forums_posts
-        (TopicID, AuthorID, AddedTime, Body)
-    VALUES
-        ('$TopicID', '".$LoggedUser['ID']."', '".$sqltime."', '".db_string($Body)."')");
-
+           (TopicID, AuthorID, AddedTime, Body)
+    VALUES (?,       ?,        ?,         ?)
+    ", $TopicID, $LoggedUser['ID'], $sqltime, trim($Body)
+);
 $PostID = $DB->inserted_id();
 
 $DB->query("

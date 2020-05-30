@@ -182,9 +182,10 @@ class Misc {
 
         G::$DB->prepared_query('
             INSERT INTO forums_posts
-                (TopicID, AuthorID, AddedTime, Body)
-            VALUES
-                (?, ?, ?, ?)', $TopicID, $AuthorID, sqltime(), $PostBody);
+                   (TopicID, AuthorID, Body)
+            VALUES (?,       ?,        ?)
+            ', $TopicID, $AuthorID, $PostBody
+        );
         $PostID = G::$DB->inserted_id();
 
         G::$DB->prepared_query('
@@ -477,4 +478,3 @@ class Misc {
         return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $URL);
     }
 }
-?>
