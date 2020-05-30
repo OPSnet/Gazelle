@@ -87,7 +87,7 @@ Thank you,
 $SiteName Staff
 EOT;
 
-    $DB->query("
+    $DB->prepared_query("
         INSERT INTO invites
             (InviterID, InviteKey, Email, Expires, Reason)
         VALUES

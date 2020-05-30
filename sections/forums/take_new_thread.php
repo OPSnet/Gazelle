@@ -81,11 +81,12 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
 
 $sqltime = sqltime();
 
-$DB->query("
+$DB->prepared_query("
     INSERT INTO forums_topics
-        (Title, AuthorID, ForumID, LastPostTime, LastPostAuthorID, CreatedTime)
-    Values
-        ('".db_string($Title)."', '".$LoggedUser['ID']."', '$ForumID', '".$sqltime."', '".$LoggedUser['ID']."', '".$sqltime."')");
+           (Title, ForumID, AuthorID, LastPostAuthorID)
+    Values (?,     ?,      ?,         ?)
+    ", $Title, $ForumID, $LoggedUser['ID'], $LoggedUser['ID']
+);
 $TopicID = $DB->inserted_id();
 
 $DB->prepared_query("

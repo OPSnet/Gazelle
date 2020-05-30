@@ -35,7 +35,4 @@ if (!Forums::check_forumperm($ForumID)) {
 }
 
 // This gets sent to the browser, which echoes it wherever
-
 echo trim($Body);
-
-?>
