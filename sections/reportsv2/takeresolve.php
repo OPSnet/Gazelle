@@ -158,11 +158,12 @@ if ($DB->affected_rows() > 0 || !$Report) {
     }
 
     if ($_POST['resolve_type'] === 'tags_lots') {
-        $DB->query("
+        $DB->prepared_query("
             INSERT IGNORE INTO torrents_bad_tags
-                (TorrentID, UserID, TimeAdded)
-            VALUES
-                ($TorrentID, ".$LoggedUser['ID']." , '".sqltime()."')");
+                   (TorrentID, UserID)
+            VALUES (?,         ?)
+            ", $TorrentID, $LoggedUser['ID']
+        );
         $DB->query("
             SELECT GroupID
             FROM torrents
@@ -172,11 +173,12 @@ if ($DB->affected_rows() > 0 || !$Report) {
         $SendPM = true;
     }
     elseif ($_POST['resolve_type'] === 'folders_bad') {
-        $DB->query("
+        $DB->prepared_query("
             INSERT IGNORE INTO torrents_bad_folders
-                (TorrentID, UserID, TimeAdded)
-            VALUES
-                ($TorrentID, ".$LoggedUser['ID'].", '".sqltime()."')");
+                   (TorrentID, UserID)
+            VALUES (?,         ?)
+            ", $TorrentID, $LoggedUser['ID']
+        );
         $DB->query("
             SELECT GroupID
             FROM torrents
@@ -186,11 +188,12 @@ if ($DB->affected_rows() > 0 || !$Report) {
         $SendPM = true;
     }
     elseif ($_POST['resolve_type'] === 'filename') {
-        $DB->query("
+        $DB->prepared_query("
             INSERT IGNORE INTO torrents_bad_files
-                (TorrentID, UserID, TimeAdded)
-            VALUES
-                ($TorrentID, ".$LoggedUser['ID'].", '".sqltime()."')");
+                   (TorrentID, UserID)
+            VALUES (?,         ?)
+            ", $TorrentID, $LoggedUser['ID']
+        );
         $DB->query("
             SELECT GroupID
             FROM torrents
@@ -200,11 +203,12 @@ if ($DB->affected_rows() > 0 || !$Report) {
         $SendPM = true;
     }
     elseif ($_POST['resolve_type'] === 'lineage') {
-        $DB->query("
+        $DB->prepared_query("
             INSERT IGNORE INTO torrents_missing_lineage
-                (TorrentID, UserID, TimeAdded)
-            VALUES
-                ($TorrentID, ".$LoggedUser['ID'].", '".sqltime()."')");
+                   (TorrentID, UserID)
+            VALUES (?,         ?)
+            ", $TorrentID, $LoggedUser['ID']
+        );
         $DB->query("
             SELECT GroupID
             FROM torrents
@@ -213,9 +217,12 @@ if ($DB->affected_rows() > 0 || !$Report) {
         $Cache->delete_value("torrents_details_$GroupID");
     }
     elseif ($_POST['resolve_type'] === 'lossyapproval') {
-        $DB->query("
-            INSERT INTO torrents_lossymaster_approved
-            VALUES ($TorrentID, ".$LoggedUser['ID'].", '".sqltime()."')");
+        $DB->prepared_query("
+            INSERT IGNORE INTO torrents_lossymaster_approved
+                   (TorrentID, UserID)
+            VALUES (?,         ?)
+            ", $TorrentID, $LoggedUser['ID']
+        );
         $DB->query("
             SELECT GroupID
             FROM torrents
