@@ -92,7 +92,7 @@ EOT;
     $DB->prepared_query("
         INSERT INTO invites
                (InviterID, InviteKey, Email, Reason, Expires)
-        VALUES (?,         ?,         ?      ?,      now() + INTERVAL 3 DAY)
+        VALUES (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)
         ", $LoggedUser['ID'], $InviteKey, $CurEmail, $InviteReason
     );
 
