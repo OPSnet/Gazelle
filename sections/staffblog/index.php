@@ -5,13 +5,13 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-$DB->query("
+$DB->prepared_query("
     INSERT INTO staff_blog_visits
-        (UserID, Time)
-    VALUES
-        (".$LoggedUser['ID'].", NOW())
-    ON DUPLICATE KEY UPDATE
-        Time = NOW()");
+           (UserID)
+    VALUES (?)
+    ON DUPLICATE KEY UPDATE Time = NOW()
+    ", $LoggedUser['ID']
+);
 $Cache->delete_value('staff_blog_read_'.$LoggedUser['ID']);
 
 define('ANNOUNCEMENT_FORUM_ID', 5);
@@ -64,11 +64,12 @@ if (check_perms('admin_manage_blog')) {
                 $Title = db_string($_POST['title']);
                 $Body = db_string($_POST['body']);
 
-                $DB->query("
+                $DB->prepared_query("
                     INSERT INTO staff_blog
-                        (UserID, Title, Body, Time)
-                    VALUES
-                        ('$LoggedUser[ID]', '".db_string($_POST['title'])."', '".db_string($_POST['body'])."', NOW())");
+                           (UserID, Title, Body)
+                    VALUES (?,      ?,     ?)
+                    ", $LoggedUser['ID'], trim($_POST['title']), trim($_POST['body'])
+                );
                 $Cache->delete_value('staff_blog');
                 $Cache->delete_value('staff_blog_latest_time');
 
