@@ -158,8 +158,8 @@ if (!empty($_REQUEST['confirm'])) {
             );
             $DB->prepared_query('
                 INSERT INTO users_history_ips
-                       (UserID, IP, StartTime)
-                VALUES (?,      ?,  now())
+                       (UserID, IP)
+                VALUES (?,      ?)
                 ', $UserID, $_SERVER['REMOTE_ADDR']
             );
             $DB->prepared_query('

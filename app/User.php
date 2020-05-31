@@ -36,8 +36,8 @@ class User extends Base {
         );
         $this->db->prepared_query('
             INSERT IGNORE INTO users_history_ips
-                   (UserID, IP, StartTime)
-            VALUES (?,      ?,  now())
+                   (UserID, IP)
+            VALUES (?,      ?)
             ', $this->id, $newIP
         );
         $this->db->prepared_query('
