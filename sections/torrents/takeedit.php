@@ -347,7 +347,7 @@ if (check_perms('users_mod')) {
     list($btID) = $DB->fetch_record();
 
     if (!$btID && $Properties['BadTags']) {
-        $DB->prepared_query('INSERT INTO torrents_bad_tags (TorrentID, UserID, TimeAdded) VALUES (?, ?, now())',
+        $DB->prepared_query('INSERT IGNORE INTO torrents_bad_tags (TorrentID, UserID) VALUES (?, ?)',
             $TorrentID, $LoggedUser['ID']
         );
     }
@@ -359,7 +359,7 @@ if (check_perms('users_mod')) {
     list($bfID) = $DB->fetch_record();
 
     if (!$bfID && $Properties['BadFolders']) {
-        $DB->prepared_query('INSERT INTO torrents_bad_folders (TorrentID, UserID, TimeAdded) VALUES (?, ?, now())',
+        $DB->prepared_query('INSERT IGNORE INTO torrents_bad_folders (TorrentID, UserID) VALUES (?, ?)',
             $TorrentID, $LoggedUser['ID']
         );
     }
@@ -371,7 +371,7 @@ if (check_perms('users_mod')) {
     list($bfiID) = $DB->fetch_record();
 
     if (!$bfiID && $Properties['BadFiles']) {
-        $DB->prepared_query('INSERT INTO torrents_bad_files (TorrentID, UserID, TimeAdded) VALUES (?, ?, now())',
+        $DB->prepared_query('INSERT IGNORE INTO torrents_bad_files (TorrentID, UserID) VALUES (?, ?)',
             $TorrentID, $LoggedUser['ID']
         );
     }
@@ -383,7 +383,7 @@ if (check_perms('users_mod')) {
     list($mlID) = $DB->fetch_record();
 
     if (!$mlID && $Properties['Lineage']) {
-        $DB->prepared_query('INSERT INTO torrents_missing_lineage (TorrentID, UserID, TimeAdded) VALUES (?, ?, now())',
+        $DB->prepared_query('INSERT IGNORE INTO torrents_missing_lineage (TorrentID, UserID) VALUES (?, ?)',
             $TorrentID, $LoggedUser['ID']
         );
     }
@@ -395,7 +395,7 @@ if (check_perms('users_mod')) {
     list($caID) = $DB->fetch_record();
 
     if (!$caID && $Properties['CassetteApproved']) {
-        $DB->prepared_query('INSERT INTO torrents_cassette_approved (TorrentID, UserID, TimeAdded) VALUES (?, ?, now())',
+        $DB->prepared_query('INSERT IGNORE INTO torrents_cassette_approved (TorrentID, UserID) VALUES (?, ?)',
             $TorrentID, $LoggedUser['ID']
         );
     }
@@ -407,7 +407,7 @@ if (check_perms('users_mod')) {
     list($lmaID) = $DB->fetch_record();
 
     if (!$lmaID && $Properties['LossymasterApproved']) {
-        $DB->prepared_query('INSERT INTO torrents_lossymaster_approved (TorrentID, UserID, TimeAdded) VALUES (?, ?, now())',
+        $DB->prepared_query('INSERT IGNORE INTO torrents_lossymaster_approved (TorrentID, UserID) VALUES (?, ?)',
             $TorrentID, $LoggedUser['ID']
         );
     }
@@ -419,7 +419,7 @@ if (check_perms('users_mod')) {
     list($lwID) = $DB->fetch_record();
 
     if (!$lwID && $Properties['LossywebApproved']) {
-        $DB->prepared_query('INSERT INTO torrents_lossyweb_approved (TorrentID, UserID, TimeAdded) VALUES (?, ?, now())',
+        $DB->prepared_query('INSERT IGNORE INTO torrents_lossyweb_approved (TorrentID, UserID) VALUES (?, ?)',
             $TorrentID, $LoggedUser['ID']
         );
     }
