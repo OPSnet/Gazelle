@@ -16,7 +16,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             WHERE uls.Downloaded > 0
                 AND uls.Uploaded / uls.Downloaded >= um.RequiredRatio
-                AND i.RatioWatchEnds > now()
+                AND i.RatioWatchEnds IS NOT NULL
                 AND um.Enabled = '1'
         ");
 
