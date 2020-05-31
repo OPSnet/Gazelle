@@ -43,7 +43,7 @@ $CatalogueNumber = db_string($_POST['catalogue_number']);
 // Get some info for the group log
 $OldYear = $DB->scalar("SELECT Year FROM torrents_group WHERE ID = ?", $GroupID);
 
-$DB->update_query("
+$DB->prepared_query("
     UPDATE torrents_group SET
         Year = ?,
         RecordLabel = ?,

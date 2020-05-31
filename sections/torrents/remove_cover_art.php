@@ -27,4 +27,4 @@ $DB->prepared_query("
 Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Additional cover \"$Summary - $Image\" removed from group", 0);
 
 $Cache->deleteMulti(["torrents_cover_art_$GroupID", "torrents_details_$GroupID"]);
-header("Location: " . empty($_SERVER['HTTP_REFERER']) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: " . empty($_SERVER['HTTP_REFERER']) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER']);
