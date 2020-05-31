@@ -81,7 +81,7 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
 
 $sqltime = sqltime();
 
-$DB->query("
+$DB->prepared_query("
     INSERT INTO forums_topics
            (Title, ForumID, AuthorID, LastPostAuthorID)
     Values (?,     ?,      ?,         ?)
