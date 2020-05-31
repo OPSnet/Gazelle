@@ -89,7 +89,7 @@ Thank you,
 $SiteName Staff
 EOT;
 
-    $DB->query("
+    $DB->prepared_query("
         INSERT INTO invites
                (InviterID, InviteKey, Email, Reason, Expires)
         VALUES (?,         ?,         ?      ?,      now() + INTERVAL 3 DAY)
