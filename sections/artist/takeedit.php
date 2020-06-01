@@ -54,16 +54,16 @@ if ($discogsId > 0) {
 if (!$revisionId) { // edit
     $DB->prepared_query("
         INSERT INTO wiki_artists
-               (PageID, Body, Image, UserID, Summary, Time)
-        VALUES (?,      ?,    ?,     ?,      ?,       now())
+               (PageID, Body, Image, UserID, Summary)
+        VALUES (?,      ?,    ?,     ?,      ?)
         ", $artistId, $body, $image, $userId, $summary
     );
     $revisionId = $DB->inserted_id();
 } else { // revert
     $DB->prepared_query("
         INSERT INTO wiki_artists
-              (PageID, Body, Image, UserID, Summary, Time)
-        SELECT ?,      Body, Image, ?,      ?,       now()
+              (PageID, Body, Image, UserID, Summary)
+        SELECT ?,      Body, Image, ?,      ?
         FROM wiki_artists
         WHERE revisionId = ?
         ", $artistId, $userID, "Reverted to revision $revisionId",
