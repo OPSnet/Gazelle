@@ -15,32 +15,38 @@ foreach ($Forums as $Forum) {
 }
 
 //Now if we have IDs' we run the query
-if (!empty($TopicIDs)) {
-    $DB->query("
+if (empty($TopicIDs)) {
+    $LastRead = [];
+} else {
+    $args = $TopicIDS;
+    $placeholders = implode(',', array_fill(0, count($args), '?'));
+    $args[] = $LoggedUser['ID'];
+    $DB->prepared_query("
         SELECT
             l.TopicID,
             l.PostID,
             CEIL(
                 (
-                    SELECT COUNT(p.ID)
+                    SELECT count(*)
                     FROM forums_posts AS p
                     WHERE p.TopicID = l.TopicID
                         AND p.ID <= l.PostID
                 ) / $PerPage
             ) AS Page
         FROM forums_last_read_topics AS l
-        WHERE l.TopicID IN(".implode(',', $TopicIDs).")
-            AND l.UserID = '$LoggedUser[ID]'");
+        WHERE l.TopicID IN ($placeholders)
+            AND l.UserID = ?
+        ", $args
+    );
     $LastRead = $DB->to_array('TopicID', MYSQLI_ASSOC);
-} else {
-    $LastRead = [];
 }
 
-$DB->query("
+$RestrictedForums = $DB->scalar("
     SELECT RestrictedForums
     FROM users_info
-    WHERE UserID = ".$LoggedUser['ID']);
-list($RestrictedForums) = $DB->next_record();
+    WHERE UserID = ?
+    ", $LoggedUser['ID']
+);
 $RestrictedForums = explode(',', $RestrictedForums);
 $PermittedForums = array_keys($LoggedUser['PermittedForums']);
 

@@ -1,11 +1,11 @@
 <?php
 if (($Results = $Cache->get_value('better_single_groupids')) === false) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT
             t.ID AS TorrentID,
             t.GroupID AS GroupID
         FROM xbt_files_users AS x
-            JOIN torrents AS t ON t.ID=x.fid
+            JOIN torrents AS t ON (t.ID = x.fid)
         WHERE t.Format='FLAC'
         GROUP BY x.fid
         HAVING COUNT(x.uid) = 1

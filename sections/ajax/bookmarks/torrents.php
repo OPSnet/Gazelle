@@ -16,11 +16,12 @@ if (!empty($_GET['userid'])) {
     if (!is_number($UserID)) {
         error(404);
     }
-    $DB->query("
+    $Username = $DB->scalar("
         SELECT Username
         FROM users_main
-        WHERE ID = '$UserID'");
-    list($Username) = $DB->next_record();
+        WHERE ID = ?
+        ", $UserID
+    );
 } else {
     $UserID = $LoggedUser['ID'];
 }
@@ -76,12 +77,9 @@ foreach($GroupIDs as $GroupID) {
     ];
 }
 
-print
-    json_encode(
-        [
-            'status' => 'success',
-            'response' => [
-                'bookmarks' => $JsonBookmarks
-            ]
-        ]
-    );
+print json_encode([
+    'status' => 'success',
+    'response' => [
+        'bookmarks' => $JsonBookmarks
+    ]
+]);

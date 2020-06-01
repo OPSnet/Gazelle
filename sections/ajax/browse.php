@@ -216,7 +216,9 @@ foreach ($Results as $Key => $GroupID) {
         ];
     }
 }
+
 json_print('success', [
     'currentPage' => intval($Page),
     'pages' => ceil($NumResults / TORRENTS_PER_PAGE),
-    'results' => $JsonGroups]);
+    'results' => $JsonGroups
+]);

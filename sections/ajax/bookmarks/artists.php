@@ -1,45 +1,35 @@
 <?php
 
-if (!empty($_GET['userid'])) {
+if (empty($_GET['userid'])) {
+    $UserID = $LoggedUser['ID'];
+} else {
     if (!check_perms('users_override_paranoia')) {
-        print
-            json_encode(
-                [
-                    'status' => 'failure'
-                ]
-            );
+        print json_encode(['status' => 'failure']);
         die();
     }
     $UserID = $_GET['userid'];
     $Sneaky = ($UserID != $LoggedUser['ID']);
     if (!is_number($UserID)) {
-        print
-            json_encode(
-                [
-                    'status' => 'failure'
-                ]
-            );
+        print json_encode(['status' => 'failure']);
         die();
     }
-    $DB->query("
+    $Username = $DB->scalar("
         SELECT Username
         FROM users_main
-        WHERE ID = '$UserID'");
-    list($Username) = $DB->next_record();
-} else {
-    $UserID = $LoggedUser['ID'];
+        WHERE ID = ?
+        ", $UserID
+    );
 }
 
 $Sneaky = ($UserID != $LoggedUser['ID']);
 
-//$ArtistList = Bookmarks::all_bookmarks('artist', $UserID);
-
-$DB->query("
+$DB->prepared_query("
     SELECT ag.ArtistID, ag.Name
     FROM bookmarks_artists AS ba
-        INNER JOIN artists_group AS ag ON ba.ArtistID = ag.ArtistID
-    WHERE ba.UserID = $UserID");
-
+    INNER JOIN artists_group AS ag USING (ArtistID)
+    WHERE ba.UserID = ?
+    ", $UserID
+);
 $ArtistList = $DB->to_array();
 
 $JsonArtists = [];
@@ -51,14 +41,9 @@ foreach ($ArtistList as $Artist) {
     ];
 }
 
-print
-    json_encode(
-        [
-            'status' => 'success',
-            'response' => [
-                'artists' => $JsonArtists
-            ]
-        ]
-    );
-
-?>
+print json_encode([
+    'status' => 'success',
+    'response' => [
+        'artists' => $JsonArtists
+    ]
+]);
