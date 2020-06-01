@@ -260,6 +260,9 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
                 ', $_SERVER['REMOTE_ADDR']
             );
             list($AttemptID, $Attempts, $Bans, $BannedUntil) = $DB->next_record();
+            if ($BannedUntil == '') {
+                $BannedUntil = null;
+            }
 
             // Function to log a user's login attempt
             function log_attempt($UserID) {
@@ -316,19 +319,19 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
                         $DB->prepared_query('
                             UPDATE login_attempts SET
                                 LastAttempt = now(),
-                                BannedUntil = ?,
+                                BannedUntil = NULL,
                                 Attempts = ?
                             WHERE ID = ?
-                            ', '0000-00-00 00:00:00', $Attempts, $AttemptID
+                            ', $Attempts, $AttemptID
                         );
                     }
                 } else { // User has not attempted to log in recently
                     $Attempts = 1;
                     $DB->prepared_query('
                         INSERT INTO login_attempts
-                               (UserID, IP, Attempts, LastAttempt)
-                        VALUES (?,      ?,  ?,        now())
-                        ', $UserID, $IPStr, 1
+                               (UserID, IP)
+                        VALUES (?,      ?)
+                        ', $UserID, $IPStr
                     );
                 }
             } // end log_attempt function
@@ -489,10 +492,10 @@ else {
                 $DB->prepared_query('
                     UPDATE login_attempts SET
                         LastAttempt = now(),
-                        BannedUntil = ?,
+                        BannedUntil = NULL,
                         Attempts = ?
                     WHERE ID = ?
-                    ', '0000-00-00 00:00:00', $Attempts, $AttemptID
+                    ', $Attempts, $AttemptID
                 );
             }
         } else { // User has not attempted to log in recently
@@ -502,8 +505,8 @@ else {
             }
             $DB->prepared_query('
                 INSERT INTO login_attempts
-                       (UserID, IP, Attempts, LastAttempt)
-                VALUES (?,      ?,  1,        now())
+                       (UserID, IP)
+                VALUES (?,      ?)
                 ', $UserID, $IPStr
             );
         }
