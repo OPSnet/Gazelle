@@ -8,10 +8,10 @@ if (strtotime($BannedUntil) < time()) {
     <form class="auth_form" name="login" id="loginform" method="post" action="login.php?act=2fa">
         <?php
 
-        if (!empty($BannedUntil) && $BannedUntil != '0000-00-00 00:00:00') {
+        if ($BannedUntil) {
             $DB->prepared_query("
                 UPDATE login_attempts
-                SET BannedUntil = '0000-00-00 00:00:00', Attempts = '0'
+                SET BannedUntil = NULL, Attempts = 0
                 WHERE ID = ?
                 ", $AttemptID
             );
