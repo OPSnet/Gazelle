@@ -44,8 +44,8 @@ switch ($Categories[$NewCategoryID-1]) {
 
         $DB->prepared_query("
             INSERT INTO torrents_group
-                   (Name, Year, ReleaseType, Time, CategoryID, WikiBody, WikiImage)
-            VALUES (?,    ?,    ?,           now(), 1,         '',       '')
+                   (Name, Year, ReleaseType, CategoryID, WikiBody, WikiImage)
+            VALUES (?,    ?,    ?,           1,         '',       '')
             ", $Title, $Year, $ReleaseType
         );
         $GroupID = $DB->inserted_id();
@@ -63,10 +63,10 @@ switch ($Categories[$NewCategoryID-1]) {
         if (empty($Year) || !is_number($Year)) {
             error(0);
         }
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO torrents_group
-                   (Name, Year, CategoryID, WikiBody, WikiImage, Time)
-            VALUES (?,    ?,    ?,          '',       '',        now())
+                   (Name, Year, CategoryID, WikiBody, WikiImage)
+            VALUES (?,    ?,    ?,          '',       ''))
             ", $Title, $Year, $NewCategoryID
         );
         $GroupID = $DB->inserted_id();
@@ -75,10 +75,10 @@ switch ($Categories[$NewCategoryID-1]) {
     case 'Comics':
     case 'E-Books':
     case 'E-Learning Videos':
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO torrents_group
-                   (Name, CategoryID, WikiBody, WikiImage, Time)
-            VALUES (?,    ?,          '',       '',        now())
+                   (Name, CategoryID, WikiBody, WikiImage)
+            VALUES (?,    ?,          '',       '')
             ", $Title, $NewCategoryID
         );
         $GroupID = $DB->inserted_id();

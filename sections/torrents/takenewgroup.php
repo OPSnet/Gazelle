@@ -66,8 +66,8 @@ if (empty($_POST['confirm'])) {
 
     $DB->prepared_query("
         INSERT INTO torrents_group /* [$Title] [$Year] */
-               (Name, Year, Time, CategoryID, WikiBody, WikiImage)
-        VALUES (?,    ?,    now(), 1,         '',       '')
+               (Name, Year, CategoryID, WikiBody, WikiImage)
+        VALUES (?,    ?,    1,         '',       '')
         ", $Title, $Year
     );
     $GroupID = $DB->inserted_id();
