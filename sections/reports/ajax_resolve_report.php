@@ -23,7 +23,7 @@ if (!check_perms('admin_reports')) {
 $DB->prepared_query("
     UPDATE reports SET
         Status = 'Resolved',
-        ResolvedTime = now()
+        ResolvedTime = now(),
         ResolverID = ?
     WHERE ID = ?
     ", $LoggedUser['ID'], $ReportID
