@@ -16,11 +16,12 @@ if (!isset($_GET['threadid']) || !is_number($_GET['threadid'])) {
     if (isset($_GET['topicid']) && is_number($_GET['topicid'])) {
         $ThreadID = $_GET['topicid'];
     } elseif (isset($_GET['postid']) && is_number($_GET['postid'])) {
-        $DB->query("
+        $ThreadID = $DB->scalar("
             SELECT TopicID
             FROM forums_posts
-            WHERE ID = $_GET[postid]");
-        list($ThreadID) = $DB->next_record();
+            WHERE ID = ?
+            ", $_GET['postid']
+        );
         if ($ThreadID) {
             //Redirect postid to threadid when necessary.
             header("Location: ajax.php?action=forum&type=viewthread&threadid=$ThreadID&postid=$_GET[postid]");
@@ -45,8 +46,6 @@ if (isset($_GET['pp'])) {
     $PerPage = POSTS_PER_PAGE;
 }
 
-
-
 //---------- Get some data to start processing
 
 // Thread information, constant across all pages
@@ -67,12 +66,13 @@ if ($ThreadInfo['Posts'] > $PerPage) {
     if (isset($_GET['post']) && is_number($_GET['post'])) {
         $PostNum = $_GET['post'];
     } elseif (isset($_GET['postid']) && is_number($_GET['postid'])) {
-        $DB->query("
-            SELECT COUNT(ID)
+        $PostNum = $DB->scalar("
+            SELECT count(*)
             FROM forums_posts
             WHERE TopicID = $ThreadID
-                AND ID <= $_GET[postid]");
-        list($PostNum) = $DB->next_record();
+                AND ID <= ?
+            ", $_GET['postid']
+        );
     } else {
         $PostNum = 1;
     }
@@ -87,7 +87,7 @@ list($CatalogueID,$CatalogueLimit) = Format::catalogue_limit($Page, $PerPage, TH
 
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
 if (!$Catalogue = $Cache->get_value("thread_$ThreadID"."_catalogue_$CatalogueID")) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT
             p.ID,
             p.AuthorID,
@@ -96,9 +96,11 @@ if (!$Catalogue = $Cache->get_value("thread_$ThreadID"."_catalogue_$CatalogueID"
             p.EditedUserID,
             p.EditedTime
         FROM forums_posts AS p
-        WHERE p.TopicID = '$ThreadID'
-            AND p.ID != '".$ThreadInfo['StickyPostID']."'
-        LIMIT $CatalogueLimit");
+        WHERE p.TopicID = ?
+            AND p.ID != ?
+        LIMIT ?
+        ", $ThreadID, $ThreadInfo['StickyPostID'], $CatalogueLimit
+    );
     $Catalogue = $DB->to_array(false, MYSQLI_ASSOC);
     if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
         $Cache->cache_value("thread_$ThreadID"."_catalogue_$CatalogueID", $Catalogue, 0);
@@ -115,20 +117,21 @@ if ($_GET['updatelastread'] !== '0') {
     }
     //Handle last read
     if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
-        $DB->query("
+        $LastRead = $DB->scalar("
             SELECT PostID
             FROM forums_last_read_topics
-            WHERE UserID = '$LoggedUser[ID]'
-                AND TopicID = '$ThreadID'");
-        list($LastRead) = $DB->next_record();
+            WHERE UserID = ?
+                AND TopicID = ?
+            ", $LoggedUser['ID'], $ThreadID
+        );
         if ($LastRead < $LastPost) {
-            $DB->query("
+            $DB->prepared_query("
                 INSERT INTO forums_last_read_topics
-                    (UserID, TopicID, PostID)
-                VALUES
-                    ('$LoggedUser[ID]', '$ThreadID', '".db_string($LastPost)."')
-                ON DUPLICATE KEY UPDATE
-                    PostID = '$LastPost'");
+                       (UserID, TopicID, PostID)
+                VALUES (?,      ?,       ?)
+                ON DUPLICATE KEY UPDATE PostID = ?
+                ", $LoggedUser['ID'], $ThreadID, $LastPost, $LastPost
+            );
         }
     }
 }
@@ -144,20 +147,24 @@ if (in_array($ThreadID, $UserSubscriptions)) {
 $JsonPoll = [];
 if ($ThreadInfo['NoPoll'] == 0) {
     if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("polls_$ThreadID")) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT Question, Answers, Featured, Closed
             FROM forums_polls
-            WHERE TopicID = '$ThreadID'");
+            WHERE TopicID = ?
+            ", $ThreadID
+        );
         list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
         if ($Featured == '') {
             $Featured = null;
         }
         $Answers = unserialize($Answers);
-        $DB->query("
-            SELECT Vote, COUNT(UserID)
+        $DB->prepared_query("
+            SELECT Vote, count(*)
             FROM forums_polls_votes
-            WHERE TopicID = '$ThreadID'
-            GROUP BY Vote");
+            WHERE TopicID = ?
+            GROUP BY Vote
+            ", $ThreadID
+        );
         $VoteArray = $DB->to_array(false, MYSQLI_NUM);
 
         $Votes = [];
@@ -184,12 +191,13 @@ if ($ThreadInfo['NoPoll'] == 0) {
 
     $RevealVoters = in_array($ForumID, $ForumsRevealVoters);
     //Polls lose the you voted arrow thingy
-    $DB->query("
+    $UserResponse = $DB->scalar("
         SELECT Vote
         FROM forums_polls_votes
-        WHERE UserID = '".$LoggedUser['ID']."'
-            AND TopicID = '$ThreadID'");
-    list($UserResponse) = $DB->next_record();
+        WHERE UserID = ?
+            AND TopicID = ?
+        ", $LoggedUser['ID'], $ThreadID
+    );
     if (!empty($UserResponse) && $UserResponse != 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     } else {
@@ -214,9 +222,9 @@ if ($ThreadInfo['NoPoll'] == 0) {
             $Percent = 0;
         }
         $JsonPollAnswers[] = [
-            'answer' => $Answer,
-            'ratio' => $Ratio,
-            'percent' => $Percent
+            'answer'  => $Answer,
+            'ratio'   => $Ratio,
+            'percent' => $Percent,
         ];
     }
 
@@ -229,7 +237,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
     $JsonPoll['answers'] = $JsonPollAnswers;
 }
 
-//Sqeeze in stickypost
+// Squeeze in stickypost
 if ($ThreadInfo['StickyPostID']) {
     if ($ThreadInfo['StickyPostID'] != $Thread[0]['ID']) {
         array_unshift($Thread, $ThreadInfo['StickyPost']);
@@ -246,43 +254,40 @@ foreach ($Thread as $Key => $Post) {
 
     $UserInfo = Users::user_info($EditedUserID);
     $JsonPosts[] = [
-        'postId' => (int)$PostID,
-        'addedTime' => $AddedTime,
-        'bbBody' => $Body,
-        'body' => Text::full_format($Body),
-        'editedUserId' => (int)$EditedUserID,
-        'editedTime' => $EditedTime,
+        'postId'         => (int)$PostID,
+        'addedTime'      => $AddedTime,
+        'bbBody'         => $Body,
+        'body'           => Text::full_format($Body),
+        'editedUserId'   => (int)$EditedUserID,
+        'editedTime'     => $EditedTime,
         'editedUsername' => $UserInfo['Username'],
         'author' => [
-            'authorId' => (int)$AuthorID,
+            'authorId'   => (int)$AuthorID,
             'authorName' => $Username,
-            'paranoia' => $Paranoia,
-            'artist' => $Artist === '1',
-            'donor' => $Donor == 1,
-            'warned' => !is_null($Warned),
-            'avatar' => $Avatar,
-            'enabled' => $Enabled === '2' ? false : true,
-            'userTitle' => $UserTitle
+            'paranoia'   => $Paranoia,
+            'artist'     => $Artist === '1',
+            'donor'      => $Donor == 1,
+            'warned'     => !is_null($Warned),
+            'avatar'     => $Avatar,
+            'enabled'    => $Enabled === '2' ? false : true,
+            'userTitle'  => $UserTitle,
         ],
     ];
 }
 
-print
-    json_encode(
-        [
-            'status' => 'success',
-            'response' => [
-                'forumId' => (int)$ForumID,
-                'forumName' => $Forums[$ForumID]['Name'],
-                'threadId' => (int)$ThreadID,
-                'threadTitle' => display_str($ThreadInfo['Title']),
-                'subscribed' => in_array($ThreadID, $UserSubscriptions),
-                'locked' => $ThreadInfo['IsLocked'] == 1,
-                'sticky' => $ThreadInfo['IsSticky'] == 1,
-                'currentPage' => (int)$Page,
-                'pages' => ceil($ThreadInfo['Posts'] / $PerPage),
-                'poll' => empty($JsonPoll) ? null : $JsonPoll,
-                'posts' => $JsonPosts
-            ]
-        ]
-    );
+print json_encode([
+    'status' => 'success',
+    'response' => [
+        'forumId'     => (int)$ForumID,
+        'forumName'   => $Forums[$ForumID]['Name'],
+        'threadId'    => (int)$ThreadID,
+        'threadTitle' => display_str($ThreadInfo['Title']),
+        'subscribed'  => in_array($ThreadID, $UserSubscriptions),
+        'locked'      => $ThreadInfo['IsLocked'] == 1,
+        'sticky'      => $ThreadInfo['IsSticky'] == 1,
+        'currentPage' => (int)$Page,
+        'pages'       => ceil($ThreadInfo['Posts'] / $PerPage),
+        'poll'        => empty($JsonPoll) ? null : $JsonPoll,
+        'posts'       => $JsonPosts,
+    ]
+]);

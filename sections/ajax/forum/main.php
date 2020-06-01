@@ -1,10 +1,6 @@
 <?php
 
-if (isset($LoggedUser['PostsPerPage'])) {
-    $PerPage = $LoggedUser['PostsPerPage'];
-} else {
-    $PerPage = POSTS_PER_PAGE;
-}
+$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 
 //We have to iterate here because if one is empty it breaks the query
 $TopicIDs = [];
@@ -14,33 +10,39 @@ foreach ($Forums as $Forum) {
     }
 }
 
-//Now if we have IDs' we run the query
-if (!empty($TopicIDs)) {
-    $DB->query("
+//Now if we have IDs we run the query
+if (empty($TopicIDs)) {
+    $LastRead = [];
+} else {
+    $args = $TopicIDs;
+    $placeholders = implode(',', array_fill(0, count($args), '?'));
+    $args[] = $LoggedUser['ID'];
+    $DB->prepared_query("
         SELECT
             l.TopicID,
             l.PostID,
             CEIL(
                 (
-                    SELECT COUNT(p.ID)
+                    SELECT count(*)
                     FROM forums_posts AS p
                     WHERE p.TopicID = l.TopicID
                         AND p.ID <= l.PostID
                 ) / $PerPage
             ) AS Page
         FROM forums_last_read_topics AS l
-        WHERE l.TopicID IN(".implode(',', $TopicIDs).")
-            AND l.UserID = '$LoggedUser[ID]'");
+        WHERE l.TopicID IN ($placeholders)
+            AND l.UserID = ?
+        ", ...$args
+    );
     $LastRead = $DB->to_array('TopicID', MYSQLI_ASSOC);
-} else {
-    $LastRead = [];
 }
 
-$DB->query("
+$RestrictedForums = $DB->scalar("
     SELECT RestrictedForums
     FROM users_info
-    WHERE UserID = ".$LoggedUser['ID']);
-list($RestrictedForums) = $DB->next_record();
+    WHERE UserID = ?
+    ", $LoggedUser['ID']
+);
 $RestrictedForums = explode(',', $RestrictedForums);
 $PermittedForums = array_keys($LoggedUser['PermittedForums']);
 
@@ -60,12 +62,12 @@ foreach ($Forums as $Forum) {
     if ($CategoryID != $LastCategoryID) {
         if (!empty($JsonForums) && !empty($JsonCategory)) {
             $JsonCategory['forums'] = $JsonForums;
-            $JsonCategories[] = $JsonCategory;
+            $JsonCategories[]       = $JsonCategory;
         }
         $LastCategoryID = $CategoryID;
         $JsonCategory = [
-            'categoryID' => (int)$CategoryID,
-            'categoryName' => $ForumCats[$CategoryID]
+            'categoryID'   => (int)$CategoryID,
+            'categoryName' => $ForumCats[$CategoryID],
         ];
         $JsonForums = [];
     }
@@ -82,34 +84,32 @@ foreach ($Forums as $Forum) {
     $UserInfo = Users::user_info($LastAuthorID);
 
     $JsonForums[] = [
-        'forumId' => (int)$ForumID,
-        'forumName' => $ForumName,
-        'forumDescription' => $ForumDescription,
-        'numTopics' => (float)$NumTopics,
-        'numPosts' => (float)$NumPosts,
-        'lastPostId' => (float)$LastPostID,
-        'lastAuthorId' => (float)$LastAuthorID,
+        'forumId'            => (int)$ForumID,
+        'forumName'          => $ForumName,
+        'forumDescription'   => $ForumDescription,
+        'numTopics'          => (float)$NumTopics,
+        'numPosts'           => (float)$NumPosts,
+        'lastPostId'         => (float)$LastPostID,
+        'lastAuthorId'       => (float)$LastAuthorID,
         'lastPostAuthorName' => $UserInfo['Username'],
-        'lastTopicId' => (float)$LastTopicID,
-        'lastTime' => $LastTime,
-        'specificRules' => $SpecificRules,
-        'lastTopic' => display_str($LastTopic),
-        'read' => $Read == 1,
-        'locked' => $Locked == 1,
-        'sticky' => $Sticky == 1
+        'lastTopicId'        => (float)$LastTopicID,
+        'lastTime'           => $LastTime,
+        'specificRules'      => $SpecificRules,
+        'lastTopic'          => display_str($LastTopic),
+        'read'               => $Read == 1,
+        'locked'             => $Locked == 1,
+        'sticky'             => $Sticky == 1,
     ];
 }
 // ...And an extra one to catch the last category.
 if (!empty($JsonForums) && !empty($JsonCategory)) {
     $JsonCategory['forums'] = $JsonForums;
-    $JsonCategories[] = $JsonCategory;
+    $JsonCategories[]       = $JsonCategory;
 }
 
-print json_encode(
-    [
-        'status' => 'success',
-        'response' => [
-            'categories' => $JsonCategories
-        ]
+print json_encode([
+    'status' => 'success',
+    'response' => [
+        'categories' => $JsonCategories
     ]
-);
+]);
