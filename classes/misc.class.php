@@ -64,17 +64,19 @@ class Misc {
                 INSERT INTO pm_conversations (Subject)
                 VALUES ('$Subject')");
             $ConvID = G::$DB->inserted_id();
-            G::$DB->query("
+            G::$DB->prepared_query("
                 INSERT INTO pm_conversations_users
-                    (UserID, ConvID, InInbox, InSentbox, SentDate, ReceivedDate, UnRead)
-                VALUES
-                    ('$ToID', '$ConvID', '1','0','".sqltime()."', '".sqltime()."', '1')");
+                       (UserID, ConvID, InInbox, InSentbox, UnRead)
+                VALUES (?,      ?,      '1',     '0',       '1')
+                ", $ToID, $ConvID
+            );
             if ($FromID != 0) {
-                G::$DB->query("
+                G::$DB->prepared_query("
                     INSERT INTO pm_conversations_users
-                        (UserID, ConvID, InInbox, InSentbox, SentDate, ReceivedDate, UnRead)
-                    VALUES
-                        ('$FromID', '$ConvID', '0','1','".sqltime()."', '".sqltime()."', '0')");
+                           (UserID, ConvID, InInbox, InSentbox, UnRead)
+                    VALUES (?,      ?,      '0',     '1',       '0')
+                    ", $FromID, $ConvID
+                );
             }
             $ToID = [$ToID];
         } else {
