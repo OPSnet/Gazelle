@@ -11,16 +11,17 @@ if (!isset($_GET['count']) || !isset($_GET['offset']) || $Count <= 0 || $Offset 
 
 Text::$TOC = true;
 
-global $DB;
-$DB->query("
-        SELECT
-            ID,
-            Title,
-            Body,
-            Time
-        FROM news
-        ORDER BY Time DESC
-        LIMIT $Offset, $Count");
+$DB->prepared_query("
+    SELECT
+        ID,
+        Title,
+        Body,
+        Time
+    FROM news
+    ORDER BY Time DESC
+    LIMIT ?, ?
+    ", $Offset, $Count
+);
 $News = $DB->to_array(false, MYSQLI_NUM, false);
 
 $NewsResponse = [];

@@ -1,6 +1,6 @@
 <?php
 if (!$News = $Cache->get_value('news')) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT
             ID,
             Title,
@@ -28,7 +28,7 @@ if ($LoggedUser['LastReadNews'] != $News[0][0]) {
 }
 
 if (($Blog = $Cache->get_value('blog')) === false) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT
             b.ID,
             um.Username,
@@ -38,7 +38,7 @@ if (($Blog = $Cache->get_value('blog')) === false) {
             b.Time,
             b.ThreadID
         FROM blog AS b
-            LEFT JOIN users_main AS um ON b.UserID = um.ID
+        LEFT JOIN users_main AS um ON (b.UserID = um.ID)
         ORDER BY Time DESC
         LIMIT 20");
     $Blog = $DB->to_array();
