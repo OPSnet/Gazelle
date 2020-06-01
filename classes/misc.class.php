@@ -100,11 +100,12 @@ class Misc {
         }
 
         // Now that we have a $ConvID for sure, send the message.
-        G::$DB->query("
+        G::$DB->prepared_query("
             INSERT INTO pm_messages
-                (SenderID, ConvID, SentDate, Body)
-            VALUES
-                ('$FromID', '$ConvID', '".sqltime()."', '$Body')");
+                   (SenderID, ConvID, Body)
+            VALUES (?,        ?,      ?)
+            ", $FromID, $ConvID, $Body
+        );
 
         // Update the cached new message count.
         foreach ($ToID as $ID) {
