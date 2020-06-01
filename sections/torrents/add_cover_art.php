@@ -44,4 +44,4 @@ if ($Changed) {
     $Cache->delete_value("torrents_cover_art_$GroupID");
 }
 
-header("Location: " . empty($_SERVER['HTTP_REFERER']) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+header("Location: " . empty($_SERVER['HTTP_REFERER']) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER']);
