@@ -13,11 +13,13 @@ switch ($_GET['action']) {
         }
         if (is_number($_POST['newsid'])) {
             authorize();
-
-            $DB->query("
-                UPDATE news
-                SET Title = '".db_string($_POST['title'])."', Body = '".db_string($_POST['body'])."'
-                WHERE ID = '".db_string($_POST['newsid'])."'");
+            $DB->prepared_query("
+                UPDATE news SET
+                    Title = ?
+                    Body = ?
+                WHERE ID = ?
+                ", trim($_POST['title']), trim($_POST['body']), (int)$_POST['newsid']
+            );
             $Cache->delete_value('news');
             $Cache->delete_value('feed_news');
         }
@@ -26,11 +28,12 @@ switch ($_GET['action']) {
     case 'editnews':
         if (is_number($_GET['id'])) {
             $NewsID = $_GET['id'];
-            $DB->query("
+            list($Title, $Body) = $DB->row("
                 SELECT Title, Body
                 FROM news
-                WHERE ID = $NewsID");
-            list($Title, $Body) = $DB->next_record();
+                WHERE ID = ?
+                ", $NewsID
+            );
         }
 }
 ?>
@@ -61,7 +64,7 @@ switch ($_GET['action']) {
 <?php if ($_GET['action'] != 'editnews') { ?>
     <h2>News archive</h2>
 <?php
-$DB->query('
+$DB->prepared_query('
     SELECT
         ID,
         Title,
@@ -69,7 +72,9 @@ $DB->query('
         Time
     FROM news
     ORDER BY Time DESC
-    LIMIT ' . $NewsCount);// LIMIT 20
+    LIMIT ?
+    ', $NewsCount // LIMIT 20
+);
 $Count = 0;
 while (list($NewsID, $Title, $Body, $NewsTime) = $DB->next_record()) {
 ?>
@@ -93,4 +98,6 @@ while (list($NewsID, $Title, $Body, $NewsTime) = $DB->next_record()) {
     </div>
 <?php } ?>
 </div>
-<?php View::show_footer();?>
+<?php
+
+View::show_footer();

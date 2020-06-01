@@ -211,8 +211,8 @@ switch ($_REQUEST['action']) {
         }
 
         $DB->prepared_query("
-            INSERT INTO news (UserID, Title, Body, Time)
-            VALUES (?, ?, ?, now())
+            INSERT INTO news (UserID, Title, Body)
+            VALUES (?, ?, ?)
         ", $LoggedUser['ID'], $_POST['title'], $_POST['body']);
         $Cache->delete_value('news_latest_id');
         $Cache->delete_value('news_latest_title');

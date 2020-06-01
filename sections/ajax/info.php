@@ -13,7 +13,7 @@ if ($LoggedUser['BytesUploaded'] == 0 && $LoggedUser['BytesDownloaded'] == 0) {
 $MyNews = $LoggedUser['LastReadNews'];
 $CurrentNews = $Cache->get_value('news_latest_id');
 if ($CurrentNews === false) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT ID
         FROM news
         ORDER BY Time DESC
@@ -59,7 +59,7 @@ if (check_perms('site_torrents_notify')) {
 $MyNews = $LoggedUser['LastReadNews'];
 $CurrentNews = $Cache->get_value('news_latest_id');
 if ($CurrentNews === false) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT ID
         FROM news
         ORDER BY Time DESC
@@ -76,7 +76,7 @@ if ($CurrentNews === false) {
 $MyBlog = $LoggedUser['LastReadBlog'];
 $CurrentBlog = $Cache->get_value('blog_latest_id');
 if ($CurrentBlog === false) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT ID
         FROM blog
         WHERE Important = 1
