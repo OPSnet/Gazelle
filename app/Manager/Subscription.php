@@ -77,9 +77,9 @@ class Subscription extends \Gazelle\Base {
         foreach ($Results as $Result) {
             $this->db->prepared_query('
                 INSERT IGNORE INTO users_notify_quoted
-                    (UserID, QuoterID, Page, PageID, PostID, Date)
+                    (UserID, QuoterID, Page, PageID, PostID)
                 VALUES
-                    (?,      ?,        ?,    ?,      ?,      now())
+                    (?,      ?,        ?,    ?,      ?)
                 ', $Result['ID'], $this->userId, $Page, $PageID, $PostID
             );
             $this->cache->delete_value("notify_quoted_" . $Result['ID']);
