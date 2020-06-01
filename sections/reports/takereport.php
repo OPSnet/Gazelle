@@ -63,11 +63,12 @@ switch ($Short) {
         break;
 }
 
-$DB->query('
+$DB->prepared_query('
     INSERT INTO reports
-        (UserID, ThingID, Type, ReportedTime, Reason)
-    VALUES
-        ('.db_string($LoggedUser['ID']).", $ID, '$Short', '".sqltime()."', '".db_string($Reason)."')");
+           (UserID, ThingID, Type, Reason)
+    VALUES (?,      ?,       ?,    ?)
+    ', $LoggedUser['ID'], $ID, $Short, $Reason
+);
 $ReportID = $DB->inserted_id();
 
 $Channels = [];
@@ -80,7 +81,6 @@ if (in_array($Short, ['comment', 'post', 'thread'])) {
     $Channels[] = '#forumreports';
 }
 
-
 foreach ($Channels as $Channel) {
     send_irc("PRIVMSG $Channel :$ReportID - ".$LoggedUser['Username']." just reported a $Short: ".site_url()."$Link : ".strtr($Reason, "\n", ' '));
 }
@@ -88,4 +88,3 @@ foreach ($Channels as $Channel) {
 $Cache->delete_value('num_other_reports');
 
 header("Location: $Link");
-?>

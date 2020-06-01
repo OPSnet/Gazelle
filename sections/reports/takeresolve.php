@@ -20,12 +20,14 @@ if (!check_perms('admin_reports')) {
     }
 }
 
-$DB->query("
-    UPDATE reports
-    SET Status = 'Resolved',
-        ResolvedTime = '".sqltime()."',
-        ResolverID = '".$LoggedUser['ID']."'
-    WHERE ID = '".db_string($ReportID)."'");
+$DB->prepared_query("
+    UPDATE reports SET
+        Status = 'Resolved',
+        ResolvedTime = now(),
+        ResolverID = ?
+    WHERE ID = ?
+    ", $LoggedUser['ID'], $ReportID
+);
 
 $Channels = [];
 
@@ -52,4 +54,3 @@ foreach ($Channels as $Channel) {
 $Cache->delete_value('num_other_reports');
 
 header('Location: reports.php');
-?>
