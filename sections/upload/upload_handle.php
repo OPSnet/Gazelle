@@ -696,8 +696,8 @@ if ($IsNewGroup) {
 if ($NoRevision) {
     $DB->prepared_query('
         INSERT INTO wiki_torrents
-               (PageID, Body, UserID, Image, Summary, Time)
-        VALUES (?,      ?,    ?,      ?,     ?,       now())
+               (PageID, Body, UserID, Image, Summary)
+        VALUES (?,      ?,    ?,      ?,     ?)
         ', $GroupID, $Properties['GroupDescription'], $LoggedUser['ID'], $Properties['Image'], 'Uploaded new torrent'
     );
     $RevisionID = $DB->inserted_id();

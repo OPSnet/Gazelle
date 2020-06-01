@@ -87,12 +87,12 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
 
 // Insert revision
 if (empty($RevisionID)) { // edit
-    $DB->query("
+    $DB->prepared_query("
         INSERT INTO wiki_torrents
-            (PageID, Body, Image, UserID, Summary, Time)
-        VALUES
-            ('$GroupID', '".db_string($Body)."', '".db_string($Image)."', '$UserID', '$Summary', '".sqltime()."')");
-
+               (PageID, Body, Image, UserID, Summary)
+        VALUES (?,      ?,    ?,     ?,      ?)
+        ", $GroupID, $Body, $Image, $UserID, $Summary
+    );
     $DB->query("
         UPDATE torrents_group
         SET ReleaseType = '$ReleaseType'
@@ -108,13 +108,15 @@ else { // revert
     if ($PossibleGroupID != $GroupID) {
         error(404);
     }
-
-    $DB->query("
+    $DB->prepared_query("
         INSERT INTO wiki_torrents
-            (PageID, Body, Image, UserID, Summary, Time)
-        SELECT '$GroupID', Body, Image, '$UserID', 'Reverted to revision $RevisionID', '".sqltime()."'
-        FROM wiki_artists
-        WHERE RevisionID = '$RevisionID'");
+               (PageID, Body, Image, UserID, Summary)
+        SELECT  ?,      Body, Image, ?,      ?
+        FROM wiki_torrents
+        WHERE RevisionID = ?
+        ", $GroupID, $UserID, "Reverted to revision $RevisionID",
+            $RevisionID
+    );
 }
 
 $RevisionID = $DB->inserted_id();
