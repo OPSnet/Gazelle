@@ -7,8 +7,7 @@ class UpdateWeeklyTop10 extends \Gazelle\Schedule\Task
     public function run()
     {
         $this->db->query("
-            INSERT INTO top10_history (Date, Type)
-            VALUES (now(), 'Weekly')
+            INSERT INTO top10_history (Type) VALUES ('Weekly')
         ");
         $historyID = $this->db->inserted_id();
 
