@@ -7,8 +7,7 @@ class UpdateDailyTop10 extends \Gazelle\Schedule\Task
     public function run()
     {
         $this->db->prepared_query("
-                INSERT INTO top10_history (Date, Type)
-                VALUES (now(), 'Daily')
+                INSERT INTO top10_history (Type) VALUES ('Daily')
         ");
         $historyID = $this->db->inserted_id();
 
