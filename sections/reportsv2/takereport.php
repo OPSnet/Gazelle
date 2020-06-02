@@ -85,10 +85,9 @@ if (empty($_POST['track'])) {
     }
 }
 
-if (empty($_POST['extra'])) {
+$userComment = trim($_POST['extra']);
+if (empty($userComment)) {
     $Err = 'As useful as blank reports are, could you be a tiny bit more helpful? (Leave a comment)';
-} else {
-    $Extra = trim($_POST['extra']);
 }
 
 list($GroupID, $UserID) = $DB->row("
@@ -121,7 +120,7 @@ $DB->prepared_query("
     INSERT INTO reportsv2
            (ReporterID, TorrentID, Type, UserComment, Track, Image, ExtraID, Link)
     VALUES (?,          ?,         ?,    ?,           ?,     ?,     ?,       ?)
-    ", $LoggedUser['ID'], $TorrentID, $Type, $Extra, $Tracks, $Images, $ExtraIDs, $Links
+    ", $LoggedUser['ID'], $TorrentID, $Type, $userComment, $Tracks, $Images, $ExtraIDs, $Links
 );
 
 $Cache->delete_value("reports_torrent_$TorrentID");
@@ -130,8 +129,9 @@ $Cache->increment('num_torrent_reportsv2');
 if ($UserID != $LoggedUser['ID']) {
     Misc::send_pm($UserID, 0, "One of your torrents has been reported",
         G::$Twig->render('reportsv2/new.twig', [
-            'id'    => $TorrentID,
-            'title' => $ReportType['title'],
+            'id'     => $TorrentID,
+            'title'  => $ReportType['title'],
+            'reason' => $userComment,
         ])
     );
 }
