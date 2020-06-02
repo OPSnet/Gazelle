@@ -617,7 +617,9 @@ The Uploading Rules require that all uploads contain audio tracks with accurate 
                 'reason' => '13',
                 'title' => 'Skips / Encode Errors',
                 'report_messages' => [
-                    '<strong class="important_text">Please be as thorough as possible and include as much detail as you can. Refer to specific tracks and time positions to justify your report.</strong>'
+                    'Please be as thorough as possible and include as much detail as you can. Refer to specific tracks, error type, and time positions to justify your report. ',
+                    'If you have not already done so, you need to perform a force recheck on the torrent to ensure that the files are not corrupted on your end. ',
+                    '<strong class="important_text">We will not be able to handle reports without specific information on the errors or without a force recheck performed.</strong>'
                 ],
                 'report_fields' => [
                     'track' => '2'
