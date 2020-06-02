@@ -45,12 +45,7 @@ class Misc {
      * @param int $ConvID The conversation the message goes in. Leave blank to start a new conversation.
      * @return
      */
-    public static function send_pm($ToID, $FromID, $Subject, $Body, $ConvID = '') {
-        global $Time;
-        $UnescapedSubject = $Subject;
-        $UnescapedBody = $Body;
-        $Subject = db_string($Subject);
-        $Body = db_string($Body);
+    public static function send_pm($ToID, $FromID, $Subject, $Body, $ConvID = null) {
         if ($ToID == 0 || $ToID == $FromID) {
             // Don't allow users to send messages to the system or themselves
             return;
@@ -58,11 +53,12 @@ class Misc {
 
         $QueryID = G::$DB->get_query_id();
 
-        if ($ConvID == '') {
+        if (!$ConvID) {
             // Create a new conversation.
-            G::$DB->query("
-                INSERT INTO pm_conversations (Subject)
-                VALUES ('$Subject')");
+            G::$DB->prepared_query("
+                INSERT INTO pm_conversations (Subject) VALUES (?)
+                ", $Subject
+            );
             $ConvID = G::$DB->inserted_id();
             G::$DB->prepared_query("
                 INSERT INTO pm_conversations_users
@@ -78,25 +74,27 @@ class Misc {
                     ", $FromID, $ConvID
                 );
             }
-            $ToID = [$ToID];
         } else {
-            // Update the pre-existing conversations.
-            G::$DB->query("
-                UPDATE pm_conversations_users
-                SET
+            // Update the pre-existing conversation.
+            // TODO: The only time $ConvID is set is when replying to an existing inbox thread
+            //       That functionality could be moved to a reply() method
+            G::$DB->prepared_query("
+                UPDATE pm_conversations_users SET
                     InInbox = '1',
                     UnRead = '1',
-                    ReceivedDate = '".sqltime()."'
-                WHERE UserID IN (".implode(',', $ToID).")
-                    AND ConvID = '$ConvID'");
-
-            G::$DB->query("
-                UPDATE pm_conversations_users
-                SET
+                    ReceivedDate = now()
+                WHERE UserID = ?
+                    AND ConvID = ?
+                ", $ToID, $ConvID
+            );
+            G::$DB->prepared_query("
+                UPDATE pm_conversations_users SET
                     InSentbox = '1',
-                    SentDate = '".sqltime()."'
-                WHERE UserID = '$FromID'
-                    AND ConvID = '$ConvID'");
+                    SentDate = now()
+                WHERE UserID = ?
+                    AND ConvID = ?
+                ", $FromID, $ConvID
+            );
         }
 
         // Now that we have a $ConvID for sure, send the message.
@@ -108,38 +106,29 @@ class Misc {
         );
 
         // Update the cached new message count.
-        foreach ($ToID as $ID) {
-            G::$DB->query("
-                SELECT COUNT(ConvID)
+        G::$Cache->cache_value("inbox_new_$ToID",
+            G::$DB->scalar("
+                SELECT count(*)
                 FROM pm_conversations_users
                 WHERE UnRead = '1'
-                    AND UserID = '$ID'
-                    AND InInbox = '1'");
-            list($UnRead) = G::$DB->next_record();
-            G::$Cache->cache_value("inbox_new_$ID", $UnRead);
-        }
+                    AND InInbox = '1'
+                    AND UserID = ?
+                ", $ToID
+            )
+        );
 
-        G::$DB->query("
+        $SenderName = G::$DB->scalar("
             SELECT Username
             FROM users_main
-            WHERE ID = '$FromID'");
-        list($SenderName) = G::$DB->next_record();
+            WHERE ID = ?
+            ", $FromID
+        );
         $notification = new Notification;
         foreach ($ToID as $ID) {
-            G::$DB->query("
-                SELECT COUNT(ConvID)
-                FROM pm_conversations_users
-                WHERE UnRead = '1'
-                    AND UserID = '$ID'
-                    AND InInbox = '1'");
-            list($UnRead) = G::$DB->next_record();
-            G::$Cache->cache_value("inbox_new_$ID", $UnRead);
-
-            $notification->push($ID, "Message from $SenderName, Subject: $UnescapedSubject", $UnescapedBody, site_url() . 'inbox.php', Notification::INBOX);
+            $notification->push($ID, "Message from $SenderName, Subject: $Subject", $Body, site_url() . 'inbox.php', Notification::INBOX);
         }
 
         G::$DB->set_query_id($QueryID);
-
         return $ConvID;
     }
 
