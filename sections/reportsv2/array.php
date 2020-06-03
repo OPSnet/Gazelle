@@ -618,7 +618,7 @@ The Uploading Rules require that all uploads contain audio tracks with accurate 
                 'title' => 'Skips / Encode Errors',
                 'report_messages' => [
                     'If you have not already done so, make sure that your client has marked the torrent as completed and seeding at 100%. You must also perform a force recheck on the torrent to ensure that the files are not corrupted on your end. ',
-                    'Please be as thorough as possible and include as much detail as you can. Identify which tracks have problems, and their nature (silence, glitch, scrambled). Add a time position (mm:ss) if the problem is some distance from the beginning of the track. If the tracks are lossless, supply the output of [code]flac -d <file.flac>[/code] if possible.',
+                    'Please be as thorough as possible and include as much detail as you can. Identify which tracks have problems, and their nature (silence, glitch, scrambled). Add a time position (mm:ss) if the problem is some distance from the beginning of the track. If the tracks are lossless, supply the output of <pre>flac -d <file.flac></pre> if possible.',
                     '<strong class="important_text">We will dismiss as incomplete a report that lacks specific information on the errors and you must state that 1) the download is complete, and 2) you have forced a recheck on the torrent.</strong>'
                 ],
                 'report_fields' => [
