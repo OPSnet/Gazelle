@@ -20,73 +20,73 @@ $OuterResults = [];
 
 if ($Details == 'all' || $Details == 'ut') {
     if (!$TopUsedTags = $Cache->get_value("topusedtag_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT
                 t.ID,
                 t.Name,
-                COUNT(tt.GroupID) AS Uses,
+                count(*) AS Uses,
                 SUM(tt.PositiveVotes - 1) AS PosVotes,
                 SUM(tt.NegativeVotes - 1) AS NegVotes
             FROM tags AS t
-                JOIN torrents_tags AS tt ON tt.TagID = t.ID
+            INNER JOIN torrents_tags AS tt ON (tt.TagID = t.ID)
             GROUP BY tt.TagID
             ORDER BY Uses DESC
-            LIMIT $Limit");
+            LIMIT ?
+            ", $Limit
+        );
         $TopUsedTags = $DB->to_array();
         $Cache->cache_value("topusedtag_$Limit", $TopUsedTags, 3600 * 12);
     }
-
     $OuterResults[] = generate_tag_json('Most Used Torrent Tags', 'ut', $TopUsedTags, $Limit);
 }
 
 if ($Details == 'all' || $Details == 'ur') {
     if (!$TopRequestTags = $Cache->get_value("toprequesttag_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT
                 t.ID,
                 t.Name,
-                COUNT(r.RequestID) AS Uses,
+                count(*) AS Uses,
                 '',''
             FROM tags AS t
-                JOIN requests_tags AS r ON r.TagID = t.ID
+            INNER JOIN requests_tags AS r ON (r.TagID = t.ID)
             GROUP BY r.TagID
             ORDER BY Uses DESC
-            LIMIT $Limit");
+            LIMIT ?
+            ", $Limit
+        );
         $TopRequestTags = $DB->to_array();
         $Cache->cache_value("toprequesttag_$Limit", $TopRequestTags, 3600 * 12);
     }
-
     $OuterResults[] = generate_tag_json('Most Used Request Tags', 'ur', $TopRequestTags, $Limit);
 }
 
 if ($Details == 'all' || $Details == 'v') {
     if (!$TopVotedTags = $Cache->get_value("topvotedtag_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT
                 t.ID,
                 t.Name,
-                COUNT(tt.GroupID) AS Uses,
+                count(*) AS Uses,
                 SUM(tt.PositiveVotes - 1) AS PosVotes,
                 SUM(tt.NegativeVotes - 1) AS NegVotes
             FROM tags AS t
-                JOIN torrents_tags AS tt ON tt.TagID = t.ID
+            INNER JOIN torrents_tags AS tt ON (tt.TagID = t.ID)
             GROUP BY tt.TagID
             ORDER BY PosVotes DESC
-            LIMIT $Limit");
+            LIMIT ?
+            ", $Limit
+        );
         $TopVotedTags = $DB->to_array();
         $Cache->cache_value("topvotedtag_$Limit", $TopVotedTags, 3600 * 12);
     }
-
     $OuterResults[] = generate_tag_json('Most Highly Voted Tags', 'v', $TopVotedTags, $Limit);
 }
 
-print
-    json_encode(
-        [
-            'status' => 'success',
-            'response' => $OuterResults
-        ]
-    );
+print json_encode( [
+    'status' => 'success',
+    'response' => $OuterResults
+]);
 
 function generate_tag_json($Caption, $Tag, $Details, $Limit) {
     $results = [];
@@ -104,5 +104,5 @@ function generate_tag_json($Caption, $Tag, $Details, $Limit) {
         'tag' => $Tag,
         'limit' => (int)$Limit,
         'results' => $results
-        ];
+    ];
 }

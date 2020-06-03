@@ -248,6 +248,26 @@ class User extends Base {
         ');
     }
 
+    public function leechingCounts() {
+        return $this->getSingleValue('user-leeching-count', '
+            SELECT count(*)
+            FROM xbt_files_users AS x
+            INNER JOIN torrents AS t ON (t.ID = x.fid)
+            WHERE x.remaining > 0
+                AND x.uid = ?
+        ');
+    }
+
+    public function seedingCounts() {
+        return $this->getSingleValue('user-seeding-count', '
+            SELECT count(*)
+            FROM xbt_files_users AS x
+            INNER JOIN torrents AS t ON (t.ID = x.fid)
+            WHERE x.remaining = 0
+                AND x.uid = ?
+        ');
+    }
+
     public function artistsAdded() {
         return $this->getSingleValue('user-artists-count', '
             SELECT count(*)
@@ -304,6 +324,14 @@ class User extends Base {
         ');
     }
 
+    public function invitedCount() {
+        return $this->getSingleValue('user-invites', '
+            SELECT count(*)
+            FROM users_info
+            WHERE Inviter = ?
+        ');
+    }
+
     public function pendingInviteCount() {
         return $this->getSingleValue('user-inv-pending', '
             SELECT count(*)
@@ -332,6 +360,38 @@ class User extends Base {
         ');
     }
 
+    public function artistCommentCount() {
+        return $this->getSingleValue('user-comment-artist', "
+            SELECT count(*)
+            FROM comments
+            WHERE Page = 'artists' AND AuthorID = ?
+        ");
+    }
+
+    public function collageCommentCount() {
+        return $this->getSingleValue('user-comment-collage', "
+            SELECT count(*)
+            FROM comments
+            WHERE Page = 'collages' AND AuthorID = ?
+        ");
+    }
+
+    public function requestCommentCount() {
+        return $this->getSingleValue('user-comment-request', "
+            SELECT count(*)
+            FROM comments
+            WHERE Page = 'requests' AND AuthorID = ?
+        ");
+    }
+
+    public function torrentCommentCount() {
+        return $this->getSingleValue('user-comment-torrent', "
+            SELECT count(*)
+            FROM comments
+            WHERE Page = 'torrents' AND AuthorID = ?
+        ");
+    }
+
     public function forumWarning() {
         return $this->getSingleValue('user-forumwarn', '
             SELECT Comment
@@ -340,12 +400,21 @@ class User extends Base {
         ');
     }
 
-    public function invitedCount() {
-        return $this->getSingleValue('user-invites', '
+    public function collagesCreated() {
+        return $this->getSingleValue('user-collage-create', "
             SELECT count(*)
-            FROM users_info
-            WHERE Inviter = ?
-        ');
+            FROM collages
+            WHERE Deleted = '0' AND UserID = ?
+        ");
+    }
+
+    public function collagesContributed() {
+        return $this->getSingleValue('user-collage-contrib', "
+            SELECT count(DISTINCT ct.CollageID)
+            FROM collages_torrents AS ct
+            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
+            WHERE c.Deleted = '0' AND ct.UserID = ?
+        ");
     }
 
     public function peerCounts() {

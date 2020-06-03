@@ -3,6 +3,7 @@ if (empty($_GET['id']) || !is_numeric($_GET['id'])) {
     json_die("failure", "bad id parameter");
 }
 $UserID = $_GET['id'];
+$user = new \Gazelle\User($UserID);
 
 $OwnProfile = $UserID == $LoggedUser['ID'];
 
@@ -69,92 +70,29 @@ function check_paranoia_here($Setting) {
     return check_paranoia($Setting, $Paranoia, $Class, $UserID);
 }
 
-$Friend = false;
-$DB->query("
-    SELECT FriendID
-    FROM friends
-    WHERE UserID = '$LoggedUser[ID]'
-        AND FriendID = '$UserID'");
-if ($DB->has_results()) {
-    $Friend = true;
-}
+$Friend = $user->isFriend($LoggedUser['ID']);
 
-if (check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty')) {
-    $DB->query("
-        SELECT COUNT(DISTINCT r.ID), SUM(rv.Bounty)
-        FROM requests AS r
-            LEFT JOIN requests_votes AS rv ON r.ID = rv.RequestID
-        WHERE r.FillerID = $UserID");
-    list($RequestsFilled, $TotalBounty) = $DB->next_record();
-    $DB->query("
-        SELECT COUNT(RequestID), SUM(Bounty)
-        FROM requests_votes
-        WHERE UserID = $UserID");
-    list($RequestsVoted, $TotalSpent) = $DB->next_record();
-
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM torrents
-        WHERE UserID = '$UserID'");
-    list($Uploads) = $DB->next_record();
-} else {
+if (!(check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty'))) {
     $RequestsFilled = null;
     $TotalBounty = null;
     $RequestsVoted = null;
     $TotalSpent = null;
-}
-if (check_paranoia_here('uploads+')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM torrents
-        WHERE UserID = '$UserID'");
-    list($Uploads) = $DB->next_record();
 } else {
-    $Uploads = null;
+    list($RequestsFilled, $TotalBounty) = $user->requestsBounty();
+    list($RequestsVoted, $TotalSpent) = $user->requestsVotes();
 }
 
-if (check_paranoia_here('artistsadded')) {
-    $DB->query("
-        SELECT COUNT(ArtistID)
-        FROM torrents_artists
-        WHERE UserID = $UserID");
-    list($ArtistsAdded) = $DB->next_record();
-} else {
-    $ArtistsAdded = null;
-}
+$Uploads      = check_paranoia_here('uploads+')     ? null : $user->uploadCount();
+$ArtistsAdded = check_paranoia_here('artistsadded') ? null : $user->artistsAdded();
 
 // Do the ranks.
-if (check_paranoia_here('uploaded')) {
-    $UploadedRank = UserRank::get_rank('uploaded', $Uploaded);
-} else {
-    $UploadedRank = null;
-}
-if (check_paranoia_here('downloaded')) {
-    $DownloadedRank = UserRank::get_rank('downloaded', $Downloaded);
-} else {
-    $DownloadedRank = null;
-}
-if (check_paranoia_here('uploads+')) {
-    $UploadsRank = UserRank::get_rank('uploads', $Uploads);
-} else {
-    $UploadsRank = null;
-}
-if (check_paranoia_here('requestsfilled_count')) {
-    $RequestRank = UserRank::get_rank('requests', $RequestsFilled);
-} else {
-    $RequestRank = null;
-}
-$PostRank = UserRank::get_rank('posts', $ForumPosts);
-if (check_paranoia_here('requestsvoted_bounty')) {
-    $BountyRank = UserRank::get_rank('bounty', $TotalSpent);
-} else {
-    $BountyRank = null;
-}
-if (check_paranoia_here('artistsadded')) {
-    $ArtistsRank = UserRank::get_rank('artists', $ArtistsAdded);
-} else {
-    $ArtistsRank = null;
-}
+$UploadedRank = check_paranoia_here('uploaded') ? UserRank::get_rank('uploaded', $Uploaded) : null;
+$DownloadRank = check_paranoia_here('downloaded') ? UserRank::get_rank('downloaded', $Downloaded) : null;
+$UploadsRank  = check_paranoia_here('uploads+') ? UserRank::get_rank('uploads', $Uploads) : null;
+$RequestRank  = check_paranoia_here('requestsfilled_count') ? UserRank::get_rank('requests', $RequestsFilled) : null;
+$PostRank     = UserRank::get_rank('posts', $ForumPosts);
+$BountyRank   = check_paranoia_here('requestsvoted_bounty') ? UserRank::get_rank('bounty', $TotalSpent) : null;
+$ArtistsRank  = check_paranoia_here('artistsadded') ? UserRank::get_rank('artists', $ArtistsAdded) : null;
 
 if ($Downloaded == 0) {
     $Ratio = 1;
@@ -164,129 +102,63 @@ if ($Downloaded == 0) {
     $Ratio = round($Uploaded / $Downloaded, 2);
 }
 if (check_paranoia_here(['uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'])) {
-    $OverallRank = floor(UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio));
+    $OverallRank = floor(UserRank::overall_score($UploadedRank, $DownloadRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio));
 } else {
     $OverallRank = null;
 }
 
 // Community section
 if (check_paranoia_here('snatched+')) {
-$DB->query("
-    SELECT COUNT(x.uid), COUNT(DISTINCT x.fid)
-    FROM xbt_snatched AS x
-        INNER JOIN torrents AS t ON t.ID = x.fid
-    WHERE x.uid = '$UserID'");
-list($Snatched, $UniqueSnatched) = $DB->next_record();
+    list($Snatched, $UniqueSnatched) = $user->snatchCounts();
 }
 
-if (check_paranoia_here('torrentcomments+')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM comments
-        WHERE Page = 'torrents'
-            AND AuthorID = '$UserID'");
-    list($NumComments) = $DB->next_record();
-}
-
-if (check_paranoia_here('torrentcomments+')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM comments
-        WHERE Page = 'artist'
-            AND AuthorID = '$UserID'");
-    list($NumArtistComments) = $DB->next_record();
-}
-
-if (check_paranoia_here('torrentcomments+')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM comments
-        WHERE Page = 'collages'
-            AND AuthorID = '$UserID'");
-    list($NumCollageComments) = $DB->next_record();
-}
-
-if (check_paranoia_here('torrentcomments+')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM comments
-        WHERE Page = 'requests'
-            AND AuthorID = '$UserID'");
-    list($NumRequestComments) = $DB->next_record();
-}
+$NumComments        = check_paranoia_here('torrentcomments++') ? null : $user->torrentCommentCount();
+$NumArtistsComments = check_paranoia_here('torrentcomments++') ? null : $user->artistCommentCount();
+$NumCollageComments = check_paranoia_here('torrentcomments++') ? null : $user->collageCommentCount();
+$NumRequestComments = check_paranoia_here('torrentcomments++') ? null : $user->requestCommentCount();
 
 if (check_paranoia_here('collages+')) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM collages
-        WHERE Deleted = '0'
-            AND UserID = '$UserID'");
-    list($NumCollages) = $DB->next_record();
+    $NumCollages = $user->collagesCreated();
 }
 
 if (check_paranoia_here('collagecontribs+')) {
-    $DB->query("
-        SELECT COUNT(DISTINCT ct.CollageID)
-        FROM collages_torrents AS ct
-            JOIN collages AS c ON ct.CollageID = c.ID
-        WHERE c.Deleted = '0'
-            AND ct.UserID = '$UserID'");
-    list($NumCollageContribs) = $DB->next_record();
+    $NumCollageContribs = $user->collagesContributed();
 }
 
 if (check_paranoia_here('uniquegroups+')) {
-    $DB->query("
-        SELECT COUNT(DISTINCT GroupID)
+    $UniqueGroups = $DB->scalar("
+        SELECT count(DISTINCT GroupID)
         FROM torrents
-        WHERE UserID = '$UserID'");
-    list($UniqueGroups) = $DB->next_record();
+        WHERE UserID = ?
+        ", $UserID
+    );
 }
 
 if (check_paranoia_here('perfectflacs+')) {
-    $DB->query("
-        SELECT COUNT(ID)
+    $PerfectFLACs = $DB->scalar("
+        SELECT count(*)
         FROM torrents
-        WHERE (
-            (LogScore = 100 AND Format = 'FLAC')
-            OR (Media = 'Vinyl' AND Format = 'FLAC')
-            OR (Media = 'WEB' AND Format = 'FLAC')
-            OR (Media = 'DVD' AND Format = 'FLAC')
-            OR (Media = 'Soundboard' AND Format = 'FLAC')
-            OR (Media = 'Cassette' AND Format = 'FLAC')
-            OR (Media = 'SACD' AND Format = 'FLAC')
-            OR (Media = 'BD' AND Format = 'FLAC')
-            OR (Media = 'DAT' AND Format = 'FLAC')
+        WHERE Format = 'FLAC'
+            AND (
+                (Media = 'CD' AND LogChecksum = '1' AND HasCue = '1' AND HasLogDB = '1' AND LogScore = 100)
+                OR
+                (Media in ('BD', 'Cassette', 'DAT', 'DVD', 'SACD', 'Soundboard', 'WEB', 'Vinyl'))
             )
-            AND UserID = '$UserID'");
-    list($PerfectFLACs) = $DB->next_record();
+            AND UserID = ?
+        ", $UserID
+    );
 }
 
 if (check_paranoia_here('seeding+')) {
-    $DB->query("
-        SELECT COUNT(x.uid)
-        FROM xbt_files_users AS x
-            INNER JOIN torrents AS t ON t.ID = x.fid
-        WHERE x.uid = '$UserID'
-            AND x.remaining = 0");
-    list($Seeding) = $DB->next_record();
+    $Seeding = $user->seedingCounts();
 }
 
 if (check_paranoia_here('leeching+')) {
-    $DB->query("
-        SELECT COUNT(x.uid)
-        FROM xbt_files_users AS x
-            INNER JOIN torrents AS t ON t.ID = x.fid
-        WHERE x.uid = '$UserID'
-            AND x.remaining > 0");
-    list($Leeching) = $DB->next_record();
+    $Leeching = $user->leechingCounts();
 }
 
 if (check_paranoia_here('invitedcount')) {
-    $DB->query("
-        SELECT COUNT(UserID)
-        FROM users_info
-        WHERE Inviter = '$UserID'");
-    list($Invited) = $DB->next_record();
+    $Invited = $user->invitedCount();
 }
 
 if (!$OwnProfile) {
@@ -297,11 +169,7 @@ if (!$OwnProfile) {
 if (!check_paranoia_here('lastseen')) {
     $LastAccess = null;
 }
-if (check_paranoia_here('ratio')) {
-    $Ratio = Format::get_ratio($Uploaded, $Downloaded, 5);
-} else {
-    $Ratio = null;
-}
+$Ratio = check_paranoia_here('ratio') ? Format::get_ratio($Uploaded, $Downloaded, 5) : null;
 if (!check_paranoia_here('uploaded')) {
     $Uploaded = null;
 }
@@ -340,7 +208,7 @@ json_print("success", [
     ],
     'ranks' => [
         'uploaded' => $UploadedRank,
-        'downloaded' => $DownloadedRank,
+        'downloaded' => $DownloadRank,
         'uploads' => $UploadsRank,
         'requests' => $RequestRank,
         'bounty' => $BountyRank,

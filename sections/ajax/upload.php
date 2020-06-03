@@ -1,24 +1,22 @@
 <?php
 // echo out the slice of the form needed for the selected upload type ($_GET['section']).
 
-
-// Include the necessary form class
-include(SERVER_ROOT.'/classes/torrent_form.class.php');
-$TorrentForm = new TORRENT_FORM();
-
 $GenreTags = $Cache->get_value('genre_tags');
 if (!$GenreTags) {
-    $DB->query('
+    $DB->prepared_query("
         SELECT Name
         FROM tags
-        WHERE TagType=\'genre\'
-        ORDER BY Name');
+        WHERE TagType = 'genre'
+        ORDER BY Name
+    ");
     $GenreTags = $DB->collect('Name');
     $Cache->cache_value('genre_tags', $GenreTags, 3600 * 24);
 }
 
 $UploadForm = $Categories[$_GET['categoryid']];
 
+// Include the necessary form class
+$TorrentForm = new TORRENT_FORM();
 switch ($UploadForm) {
     case 'Music':
         $TorrentForm->music_form($GenreTags);
@@ -38,5 +36,3 @@ switch ($UploadForm) {
     default:
         echo 'Invalid action!';
 }
-
-?>
