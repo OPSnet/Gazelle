@@ -5,12 +5,13 @@ if (($Results = $Cache->get_value('better_single_groupids')) === false) {
             t.ID AS TorrentID,
             t.GroupID AS GroupID
         FROM xbt_files_users AS x
-            JOIN torrents AS t ON (t.ID = x.fid)
-        WHERE t.Format='FLAC'
+        INNER JOIN torrents AS t ON (t.ID = x.fid)
+        WHERE t.Format = 'FLAC'
         GROUP BY x.fid
         HAVING COUNT(x.uid) = 1
         ORDER BY t.LogScore DESC, t.Time ASC
-        LIMIT 30");
+        LIMIT 30
+    ");
 
     $Results = $DB->to_pair('GroupID', 'TorrentID', false);
     $Cache->cache_value('better_single_groupids', $Results, 3600);
