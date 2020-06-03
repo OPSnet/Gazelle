@@ -28,29 +28,27 @@ if ($CurrentNews === false) {
 
 $NewMessages = $Cache->get_value('inbox_new_' . $LoggedUser['ID']);
 if ($NewMessages === false) {
-    $DB->query("
-        SELECT COUNT(UnRead)
+    $NewMessages = $DB->scalar("
+        SELECT count(*)
         FROM pm_conversations_users
-        WHERE UserID = '" . $LoggedUser['ID'] . "'
-            AND UnRead = '1'
-            AND InInbox = '1'");
-    list($NewMessages) = $DB->next_record();
+        WHERE UnRead = '1'
+            AND InInbox = '1'
+            AND UserID = ?
+        ", $LoggedUser['ID']
+    );
     $Cache->cache_value('inbox_new_' . $LoggedUser['ID'], $NewMessages, 0);
 }
 
 if (check_perms('site_torrents_notify')) {
     $NewNotifications = $Cache->get_value('notifications_new_' . $LoggedUser['ID']);
     if ($NewNotifications === false) {
-        $DB->query("
-            SELECT COUNT(UserID)
+        $NewNotifications = $DB->scalar("
+            SELECT count(*)
             FROM users_notify_torrents
-            WHERE UserID = '$LoggedUser[ID]'
-                AND UnRead = '1'");
-        list($NewNotifications) = $DB->next_record();
-        /* if ($NewNotifications && !check_perms('site_torrents_notify')) {
-                $DB->query("DELETE FROM users_notify_torrents WHERE UserID='$LoggedUser[ID]'");
-                $DB->query("DELETE FROM users_notify_filters WHERE UserID='$LoggedUser[ID]'");
-        } */
+            WHERE UnRead = '1'
+                AND UserID = ?
+            ", $LoggedUser['ID']
+        );
         $Cache->cache_value('notifications_new_' . $LoggedUser['ID'], $NewNotifications, 0);
     }
 }

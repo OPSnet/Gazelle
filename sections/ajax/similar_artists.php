@@ -1,42 +1,34 @@
 <?php
 
 if (empty($_GET['id']) || !is_number($_GET['id']) || empty($_GET['limit']) || !is_number($_GET['limit'])) {
-    print
-        json_encode(
-            [
-                'status' => 'failure'
-            ]
-        );
-    die();
+    print json_die(['status' => 'failure']);
 }
 
-$artist_id = $_GET["id"];
-$artist_limit = $_GET["limit"];
+$artistId = $_GET["id"];
+$limit = $_GET["limit"];
 
-$DB->query("
-        SELECT
-            s2.ArtistID,
-            ag.Name,
-            ass.Score
-        FROM artists_similar AS s1
-            JOIN artists_similar AS s2 ON s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID
-            JOIN artists_similar_scores AS ass ON ass.SimilarID = s1.SimilarID
-            JOIN artists_group AS ag ON ag.ArtistID = s2.ArtistID
-        WHERE s1.ArtistID = $artist_id
-        ORDER BY ass.Score DESC
-        LIMIT $artist_limit");
+$DB->prepared_query("
+    SELECT
+        s2.ArtistID,
+        ag.Name,
+        ass.Score
+    FROM artists_similar AS s1
+    INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
+    INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
+    INNER JOIN artists_group AS ag ON (ag.ArtistID = s2.ArtistID)
+    WHERE ass.Score >= 0
+        AND s1.ArtistID = ?
+    ORDER BY ass.Score DESC
+    LIMIT ?
+    ", $artistId, $limit
+);
 
-
-        while (list($ArtistID, $Name, $Score) = $DB->next_record(MYSQLI_NUM, false)) {
-            if ($Score < 0) {
-                continue;
-            }
-            $results[] = [
-                    'id' => (int)$ArtistID,
-                    'name' => $Name,
-                    'score' => (int)$Score];
-        }
+while (list($ArtistID, $Name, $Score) = $DB->next_record(MYSQLI_NUM, false)) {
+    $results[] = [
+        'id'    => (int)$ArtistID,
+        'name'  => $Name,
+        'score' => (int)$Score,
+    ];
+}
 
 print json_encode($results);
-exit();
-?>

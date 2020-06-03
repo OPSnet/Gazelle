@@ -89,4 +89,3 @@ while (list($ForumID, $ForumName, $TopicID, $ThreadTitle, $Body, $LastPostID, $L
 json_print('success', [
     'threads' => $JsonPosts
 ]);
-?>

@@ -6,56 +6,48 @@ $UserStats = \Gazelle\User::globalActivityStats($DB, $Cache);
 
 // Begin torrent stats
 if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM torrents");
-    list($TorrentCount) = $DB->next_record();
+    $TorrentCount = $DB->scalar("
+        SELECT count(*) FROM torrents
+    ");
     $Cache->cache_value('stats_torrent_count', $TorrentCount, 604800); // staggered 1 week cache
 }
 
 if (($AlbumCount = $Cache->get_value('stats_album_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM torrents_group
-        WHERE CategoryID = '1'");
-    list($AlbumCount) = $DB->next_record();
+    $AlbumCount = $DB->scalar("
+        SELECT count(*) FROM torrents_group WHERE CategoryID = 1
+    ");
     $Cache->cache_value('stats_album_count', $AlbumCount, 604830); // staggered 1 week cache
 }
 
 if (($ArtistCount = $Cache->get_value('stats_artist_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ArtistID)
-        FROM artists_group");
-    list($ArtistCount) = $DB->next_record();
+    $ArtistCount = $DB->scalar("
+        SELECT count(*) FROM artists_group
+    ");
     $Cache->cache_value('stats_artist_count', $ArtistCount, 604860); // staggered 1 week cache
 }
 
 if (($PerfectCount = $Cache->get_value('stats_perfect_count')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
+    $PerfectCount = $DB->scalar("
+        SELECT count(*)
         FROM torrents
-        WHERE ((LogScore = 100 AND Format = 'FLAC')
-            OR (Media = 'Vinyl' AND Format = 'FLAC')
-            OR (Media = 'WEB' AND Format = 'FLAC')
-            OR (Media = 'DVD' AND Format = 'FLAC')
-            OR (Media = 'Soundboard' AND Format = 'FLAC')
-                        OR (Media = 'BD' AND Format = 'FLAC')
-            )");
-    list($PerfectCount) = $DB->next_record();
+        WHERE Format = 'FLAC'
+            AND (
+                (Media = 'CD' AND LogChecksum = '1' AND HasCue = '1' AND HasLogDB = '1' AND LogScore = 100)
+                OR
+                (Media in ('BD', 'DVD', 'Soundboard', 'WEB', 'Vinyl'))
+            )
+    ");
     $Cache->cache_value('stats_perfect_count', $PerfectCount, 3600); // staggered 1 week cache
 }
 
 // Begin request stats
 if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM requests");
-    list($RequestCount) = $DB->next_record();
-    $DB->query("
-        SELECT COUNT(ID)
-        FROM requests
-        WHERE FillerID > 0");
-    list($FilledCount) = $DB->next_record();
+    $RequestCount = $DB->scalar("
+        SELECT count(*) FROM requests
+    ");
+    $FilledCount = $DB->scalar("
+        SELECT count(*) FROM requests WHERE FillerID > 0
+    ");
     $Cache->cache_value('stats_requests', [$RequestCount, $FilledCount], 11280);
 } else {
     list($RequestCount, $FilledCount) = $RequestStats;
@@ -65,11 +57,12 @@ if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
 if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
     //Cache lock!
     if ($Cache->get_query_lock('peer_stats')) {
-        $DB->query("
+        $DB->prepared_query("
             SELECT IF(remaining=0,'Seeding','Leeching') AS Type, COUNT(uid)
             FROM xbt_files_users
             WHERE active = 1
-            GROUP BY Type");
+            GROUP BY Type
+        ");
         $PeerCount = $DB->to_array(0, MYSQLI_NUM, false);
         $LeecherCount = isset($PeerCount['Leeching']) ? $PeerCount['Leeching'][1] : 0;
         $SeederCount = isset($PeerCount['Seeding']) ? $PeerCount['Seeding'][1] : 0;
