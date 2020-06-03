@@ -3,8 +3,8 @@
 /*
 Disabled until we fix Geographical Data
 if (!list($Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements) = $Cache->get_value('geodistribution')) {
-    include_once(SERVER_ROOT.'/classes/charts.class.php');
-    $DB->query('
+    require(__DIR__ . '/../../../classes/charts.class.php');
+    $DB->prepared_query('
         SELECT Code, Users
         FROM users_geodistribution');
     $Data = $DB->to_array();
