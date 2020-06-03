@@ -26,9 +26,12 @@ if ($_REQUEST['do'] == 'vote') {
     $Type = ($_REQUEST['vote'] == 'up') ? 'Up' : 'Down';
 
     // Update the two votes tables if needed
-    $DB->query("
-        INSERT IGNORE INTO users_votes (UserID, GroupID, Type)
-        VALUES ($UserID, $GroupID, '$Type')");
+    $DB->prepared_query("
+        INSERT IGNORE INTO users_votes
+               (UserID, GroupID, Type)
+        VALUES (?,      ?,       ?)
+        ", $UserID, $GroupID, $Type
+    );
     if ($DB->affected_rows() == 0) {
         echo 'noaction';
         die();
@@ -44,15 +47,18 @@ if ($_REQUEST['do'] == 'vote') {
     // If the group has no votes yet, we need an insert, otherwise an update
     // so we can cut corners and use the magic of INSERT...ON DUPLICATE KEY UPDATE...
     // to accomplish both in one query
-    $DB->query("
+    $up = $Type == 'Up' ? 1 : 0;
+    $DB->prepared_query("
         INSERT INTO torrents_votes
-            (GroupID, Total, Ups, Score)
-        VALUES
-            ($GroupID, 1, ".($Type == 'Up' ? 1 : 0).", 0)
+               (GroupID, Ups, Score, Total)
+        VALUES (?,       ?,   0,     1)
         ON DUPLICATE KEY UPDATE
             Total = Total + 1,
-            Score = IFNULL(binomial_ci(Ups".($Type == 'Up' ? '+1' : '').", Total), 0)".
-                ($Type == 'Up' ? ', Ups = Ups + 1' : ''));
+            Ups   = Ups + ?,
+            Score = IFNULL(binomial_ci(Ups + ?, Total), 0)
+        ", $GroupID, $up,
+            $up, $up
+    );
 
     $UserVotes[$GroupID] = ['GroupID' => $GroupID, 'Type' => $Type];
 
@@ -78,9 +84,10 @@ if ($_REQUEST['do'] == 'vote') {
                     }
                 } else {
                     $VotePairs[$Vote['GroupID']] = [
-                                'GroupID' => $Vote['GroupID'],
-                                'Total' => 1,
-                                'Ups' => ($Type == 'Up') ? 1 : 0];
+                        'GroupID' => $Vote['GroupID'],
+                        'Total' => 1,
+                        'Ups' => ($Type == 'Up') ? 1 : 0
+                    ];
                 }
             }
         }
@@ -108,15 +115,16 @@ if ($_REQUEST['do'] == 'vote') {
                 }
             } else {
                 $VotePairs[$GroupID] = [
-                            'GroupID' => $GroupID,
-                            'Total' => 1,
-                            'Ups' => ($Type == 'Up') ? 1 : 0];
+                    'GroupID' => $GroupID,
+                    'Total' => 1,
+                    'Ups' => ($Type == 'Up') ? 1 : 0
+                ];
             }
             $Cache->cache_value("vote_pairs_$VGID", $VotePairs, 21600);
         }
     }
-
     echo 'success';
+
 } elseif ($_REQUEST['do'] == 'unvote') {
     if (!isset($UserVotes[$GroupID])) {
         echo 'noaction';
@@ -124,10 +132,12 @@ if ($_REQUEST['do'] == 'vote') {
     }
     $Type = $UserVotes[$GroupID]['Type'];
 
-    $DB->query("
+    $DB->prepared_query("
         DELETE FROM users_votes
-        WHERE UserID = $UserID
-            AND GroupID = $GroupID");
+        WHERE UserID = ?
+            AND GroupID = ?
+        ", $UserID, $GroupID
+    );
 
     // Update personal cache key
     unset($UserVotes[$GroupID]);
@@ -140,13 +150,15 @@ if ($_REQUEST['do'] == 'vote') {
     }
     $Cache->cache_value("votes_$GroupID", $GroupVotes);
 
-    $DB->query('
-        UPDATE torrents_votes
-        SET
+    $up = $Type == 'Up' ? 1 : 0;
+    $DB->prepared_query("
+        UPDATE torrents_votes SET
             Total = GREATEST(0, Total - 1),
-            Score = IFNULL(binomial_ci(GREATEST(0, Ups'.($Type == 'Up' ? '-1' : '').'), GREATEST(0, Total)), 0)'.
-            ($Type == 'Up' ? ', Ups = GREATEST(0, Ups - 1)' : '')."
-        WHERE GroupID=$GroupID");
+            Score = IFNULL(binomial_ci(GREATEST(0, Ups - ?), GREATEST(0, Total)), 0),
+            Ups   = GREATEST(0, Ups - ?)
+        WHERE GroupID = ?
+        ", $up, $up, $GroupID
+    );
     // Update paired cache keys
     // First update this album's paired votes. If this keys is magically not set,
     // our life just got a bit easier. We're only tracking paired votes on upvotes.
@@ -211,4 +223,3 @@ if ($_REQUEST['do'] == 'vote') {
         echo 'success-down';
     }
 }
-?>

@@ -9,21 +9,25 @@ if (empty($Limit)) {
     $Limit = 15;
 }
 $Results = [];
-if (check_paranoia_here('snatched')) {
-    $DB->query("
+if (!check_paranoia_here('snatched')) {
+    $Results['snatches'] = "hidden";
+} else {
+    $DB->prepared_query("
         SELECT
             g.ID,
             g.Name,
             g.WikiImage
         FROM xbt_snatched AS s
-            INNER JOIN torrents AS t ON t.ID = s.fid
-            INNER JOIN torrents_group AS g ON t.GroupID = g.ID
-        WHERE s.uid = '$UserID'
-            AND g.CategoryID = '1'
+        INNER JOIN torrents AS t ON (t.ID = s.fid)
+        INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
+        WHERE g.CategoryID = '1'
             AND g.WikiImage != ''
+            AND s.uid = ?
         GROUP BY g.ID
         ORDER BY s.tstamp DESC
-        LIMIT $Limit");
+        LIMIT ?
+        ", $UserID, $Limit
+    );
     $RecentSnatches = $DB->to_array(false, MYSQLI_ASSOC);
     $Artists = Artists::get_artists($DB->collect('ID'));
     foreach ($RecentSnatches as $Key => $SnatchInfo) {
@@ -32,24 +36,26 @@ if (check_paranoia_here('snatched')) {
 
     }
     $Results['snatches'] = $RecentSnatches;
-} else {
-    $Results['snatches'] = "hidden";
 }
 
-if (check_paranoia_here('uploads')) {
-    $DB->query("
+if (!check_paranoia_here('uploads')) {
+    $Results['uploads'] = "hidden";
+} else {
+    $DB->prepared_query("
         SELECT
             g.ID,
             g.Name,
             g.WikiImage
         FROM torrents_group AS g
-            INNER JOIN torrents AS t ON t.GroupID = g.ID
-        WHERE t.UserID = '$UserID'
-            AND g.CategoryID = '1'
+        INNER JOIN torrents AS t ON (t.GroupID = g.ID)
+        WHERE g.CategoryID = '1'
             AND g.WikiImage != ''
+            AND t.UserID = ?
         GROUP BY g.ID
         ORDER BY t.Time DESC
-        LIMIT $Limit");
+        LIMIT ?
+        ", $UserID, $Limit
+    );
     $RecentUploads = $DB->to_array(false, MYSQLI_ASSOC);
     $Artists = Artists::get_artists($DB->collect('ID'));
     foreach ($RecentUploads as $Key => $UploadInfo) {
@@ -58,8 +64,6 @@ if (check_paranoia_here('uploads')) {
 
     }
     $Results['uploads'] = $RecentUploads;
-} else {
-    $Results['uploads'] = "hidden";
 }
 
 json_print("success", $Results);

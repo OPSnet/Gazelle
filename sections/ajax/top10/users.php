@@ -21,9 +21,9 @@ $BaseQuery = "
         ui.JoinDate,
         uls.Uploaded,
         uls.Downloaded,
-        ABS(uls.Uploaded-".STARTING_UPLOAD.") / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS UpSpeed,
-        um.Downloaded / (".time()." - UNIX_TIMESTAMP(ui.JoinDate)) AS DownSpeed,
-        COUNT(t.ID) AS NumUploads
+        GREATEST(uls.Uploaded - ?, 0) / (unix_timestamp(now()) - unix_timestamp(ui.JoinDate)) AS UpSpeed,
+        uls.Downloaded / (unix_timestamp(now()) - unix_timestamp(ui.JoinDate)) AS DownSpeed,
+        count(t.ID) AS NumUploads
     FROM users_main AS um
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
@@ -33,15 +33,17 @@ $BaseQuery = "
         AND uls.Downloaded > 5 * 1024 * 1024 * 1024
         AND (um.Paranoia IS NULL OR (um.Paranoia NOT LIKE '%\"uploaded\"%' AND um.Paranoia NOT LIKE '%\"downloaded\"%'))
     GROUP BY um.ID";
+$args = [STARTING_UPLOAD, $Limit];
 
 $OuterResults = [];
-
 if ($Details == 'all' || $Details == 'ul') {
     if (!$TopUserUploads = $Cache->get_value("topuser_ul_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             $BaseQuery
-            ORDER BY u.Uploaded DESC
-            LIMIT $Limit;");
+            ORDER BY uls.Uploaded DESC
+            LIMIT ?
+            ", ...$args
+        );
         $TopUserUploads = $DB->to_array();
         $Cache->cache_value("topuser_ul_$Limit", $TopUserUploads, 3600 * 12);
     }
@@ -50,10 +52,12 @@ if ($Details == 'all' || $Details == 'ul') {
 
 if ($Details == 'all' || $Details == 'dl') {
     if (!$TopUserDownloads = $Cache->get_value("topuser_dl_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             $BaseQuery
-            ORDER BY u.Downloaded DESC
-            LIMIT $Limit;");
+            ORDER BY uls.Downloaded DESC
+            LIMIT ?
+            ", ...$args
+        );
         $TopUserDownloads = $DB->to_array();
         $Cache->cache_value("topuser_dl_$Limit", $TopUserDownloads, 3600 * 12);
     }
@@ -62,10 +66,12 @@ if ($Details == 'all' || $Details == 'dl') {
 
 if ($Details == 'all' || $Details == 'numul') {
     if (!$TopUserNumUploads = $Cache->get_value("topuser_numul_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             $BaseQuery
             ORDER BY NumUploads DESC
-            LIMIT $Limit;");
+            LIMIT ?
+            ", ...$args
+        );
         $TopUserNumUploads = $DB->to_array();
         $Cache->cache_value("topuser_numul_$Limit", $TopUserNumUploads, 3600 * 12);
     }
@@ -74,10 +80,12 @@ if ($Details == 'all' || $Details == 'numul') {
 
 if ($Details == 'all' || $Details == 'uls') {
     if (!$TopUserUploadSpeed = $Cache->get_value("topuser_ulspeed_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             $BaseQuery
             ORDER BY UpSpeed DESC
-            LIMIT $Limit;");
+            LIMIT ?
+            ", ...$args
+        );
         $TopUserUploadSpeed = $DB->to_array();
         $Cache->cache_value("topuser_ulspeed_$Limit", $TopUserUploadSpeed, 3600 * 12);
     }
@@ -86,23 +94,22 @@ if ($Details == 'all' || $Details == 'uls') {
 
 if ($Details == 'all' || $Details == 'dls') {
     if (!$TopUserDownloadSpeed = $Cache->get_value("topuser_dlspeed_$Limit")) {
-        $DB->query("
+        $DB->prepared_query("
             $BaseQuery
             ORDER BY DownSpeed DESC
-            LIMIT $Limit;");
+            LIMIT ?
+            ", ...$args
+        );
         $TopUserDownloadSpeed = $DB->to_array();
         $Cache->cache_value("topuser_dlspeed_$Limit", $TopUserDownloadSpeed, 3600 * 12);
     }
     $OuterResults[] = generate_user_json('Fastest Downloaders', 'dls', $TopUserDownloadSpeed, $Limit);
 }
 
-print
-    json_encode(
-        [
-            'status' => 'success',
-            'response' => $OuterResults
-        ]
-    );
+print json_encode([
+    'status' => 'success',
+    'response' => $OuterResults
+]);
 
 function generate_user_json($Caption, $Tag, $Details, $Limit) {
     $results = [];
@@ -123,6 +130,5 @@ function generate_user_json($Caption, $Tag, $Details, $Limit) {
         'tag' => $Tag,
         'limit' => (int)$Limit,
         'results' => $results
-        ];
+    ];
 }
-?>
