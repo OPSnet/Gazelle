@@ -34,7 +34,7 @@ switch ($_GET['action']) {
     // things that (may be) used on the site
     case 'upload_section':
         // Gets one of the upload forms
-        require(SERVER_ROOT . '/sections/ajax/upload.php');
+        require('upload.php');
         break;
     case 'preview':
         require('preview.php');
@@ -43,7 +43,7 @@ switch ($_GET['action']) {
         require('torrent_info.php');
         break;
     case 'stats':
-        require(SERVER_ROOT . '/sections/ajax/stats.php');
+        require('stats.php');
         break;
 
     case 'checkprivate':
@@ -57,112 +57,112 @@ switch ($_GET['action']) {
         require('torrentgroup.php');
         break;
     case 'torrentgroupalbumart':        // so the album art script can function without breaking the ratelimit
-        require(SERVER_ROOT . '/sections/ajax/torrentgroupalbumart.php');
+        require('torrentgroupalbumart.php');
         break;
     case 'tcomments':
-        require(SERVER_ROOT . '/sections/ajax/tcomments.php');
+        require('tcomments.php');
         break;
     case 'user':
-        require(SERVER_ROOT . '/sections/ajax/user.php');
+        require('user.php');
         break;
     case 'forum':
-        require(SERVER_ROOT . '/sections/ajax/forum/index.php');
+        require('forum/index.php');
         break;
     case 'top10':
-        require(SERVER_ROOT . '/sections/ajax/top10/index.php');
+        require('top10/index.php');
         break;
     case 'browse':
-        require(SERVER_ROOT . '/sections/ajax/browse.php');
+        require('browse.php');
         break;
     case 'usersearch':
-        require(SERVER_ROOT . '/sections/ajax/usersearch.php');
+        require('usersearch.php');
         break;
     case 'requests':
-        require(SERVER_ROOT . '/sections/ajax/requests.php');
+        require('requests.php');
         break;
     case 'artist':
-        require(SERVER_ROOT . '/sections/ajax/artist.php');
+        require('artist.php');
         break;
     case 'inbox':
-        require(SERVER_ROOT . '/sections/ajax/inbox/index.php');
+        require('inbox/index.php');
         break;
     case 'subscriptions':
-        require(SERVER_ROOT . '/sections/ajax/subscriptions.php');
+        require('subscriptions.php');
         break;
     case 'index':
-        require(SERVER_ROOT . '/sections/ajax/info.php');
+        require('info.php');
         break;
     case 'bookmarks':
-        require(SERVER_ROOT . '/sections/ajax/bookmarks/index.php');
+        require('bookmarks/index.php');
         break;
     case 'announcements':
-        require(SERVER_ROOT . '/sections/ajax/announcements.php');
+        require('announcements.php');
         break;
     case 'notifications':
-        require(SERVER_ROOT . '/sections/ajax/notifications.php');
+        require('notifications.php');
         break;
     case 'request':
-        require(SERVER_ROOT . '/sections/ajax/request.php');
+        require('request.php');
         break;
     case 'loadavg':
-        require(SERVER_ROOT . '/sections/ajax/loadavg.php');
+        require('loadavg.php');
         break;
     case 'better':
-        require(SERVER_ROOT . '/sections/ajax/better/index.php');
+        require('better/index.php');
         break;
     case 'password_validate':
-        require(SERVER_ROOT . '/sections/ajax/password_validate.php');
+        require('password_validate.php');
         break;
     case 'similar_artists':
-        require(SERVER_ROOT . '/sections/ajax/similar_artists.php');
+        require('similar_artists.php');
         break;
     case 'userhistory':
-        require(SERVER_ROOT . '/sections/ajax/userhistory/index.php');
+        require('userhistory/index.php');
         break;
     case 'votefavorite':
-        require(SERVER_ROOT . '/sections/ajax/takevote.php');
+        require('takevote.php');
         break;
     case 'wiki':
-        require(SERVER_ROOT . '/sections/ajax/wiki.php');
+        require('wiki.php');
         break;
     case 'send_recommendation':
-        require(SERVER_ROOT . '/sections/ajax/send_recommendation.php');
+        require('send_recommendation.php');
         break;
     case 'get_friends':
-        require(SERVER_ROOT . '/sections/ajax/get_friends.php');
+        require('get_friends.php');
         break;
     case 'news_ajax':
-        require(SERVER_ROOT . '/sections/ajax/news_ajax.php');
+        require('news_ajax.php');
         break;
     case 'community_stats':
-        require(SERVER_ROOT . '/sections/ajax/community_stats.php');
+        require('community_stats.php');
         break;
     case 'user_recents':
-        require(SERVER_ROOT . '/sections/ajax/user_recents.php');
+        require('user_recents.php');
         break;
     case 'collage':
-        require(SERVER_ROOT . '/sections/ajax/collage.php');
+        require('collage.php');
         break;
     case 'raw_bbcode':
-        require(SERVER_ROOT . '/sections/ajax/raw_bbcode.php');
+        require('raw_bbcode.php');
         break;
     case 'get_user_notifications':
-        require(SERVER_ROOT . '/sections/ajax/get_user_notifications.php');
+        require('get_user_notifications.php');
         break;
     case 'clear_user_notification':
-        require(SERVER_ROOT . '/sections/ajax/clear_user_notification.php');
+        require('clear_user_notification.php');
         break;
     case 'pushbullet_devices':
-        require(SERVER_ROOT . '/sections/ajax/pushbullet_devices.php');
+        require('pushbullet_devices.php');
         break;
     case 'loggy':
-        require(SERVER_ROOT . '/sections/ajax/loggy.php');
+        require('loggy.php');
         break;
     case 'user_stats':
-        require(SERVER_ROOT . '/sections/ajax/stats/users.php');
+        require('stats/users.php');
         break;
     case 'torrent_stats':
-        require(SERVER_ROOT . '/sections/ajax/stats/torrents.php');
+        require('stats/torrents.php');
         break;
     default:
         // If they're screwing around with the query string

@@ -76,13 +76,13 @@ $DB->prepared_query("
 $JsonMessages = [];
 while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) {
     $JsonMessage = [
-        'messageId' => (int)$MessageID,
-        'senderId' => (int)$SenderID,
+        'messageId'  => (int)$MessageID,
+        'senderId'   => (int)$SenderID,
         'senderName' => $Users[(int)$SenderID]['Username'],
-        'sentDate' => $SentDate,
-        'avatar' => $Users[(int)$SenderID]['Avatar'],
-        'bbBody' => $Body,
-        'body' => Text::full_format($Body)
+        'sentDate'   => $SentDate,
+        'avatar'     => $Users[(int)$SenderID]['Avatar'],
+        'bbBody'     => $Body,
+        'body'       => Text::full_format($Body),
     ];
     $JsonMessages[] = $JsonMessage;
 }
@@ -90,9 +90,9 @@ while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) {
 print json_encode([
     'status' => 'success',
     'response' => [
-        'convId' => (int)$ConvID,
-        'subject' => $Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : ''),
-        'sticky' => $Sticky == 1,
-        'messages' => $JsonMessages
+        'convId'   => (int)$ConvID,
+        'subject'  => $Subject.($ForwardedID > 0 ? " (Forwarded to $ForwardedName)" : ''),
+        'sticky'   => $Sticky == 1,
+        'messages' => $JsonMessages,
     ]
 ]);

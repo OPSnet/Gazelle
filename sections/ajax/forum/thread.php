@@ -46,8 +46,6 @@ if (isset($_GET['pp'])) {
     $PerPage = POSTS_PER_PAGE;
 }
 
-
-
 //---------- Get some data to start processing
 
 // Thread information, constant across all pages
@@ -224,9 +222,9 @@ if ($ThreadInfo['NoPoll'] == 0) {
             $Percent = 0;
         }
         $JsonPollAnswers[] = [
-            'answer' => $Answer,
-            'ratio' => $Ratio,
-            'percent' => $Percent
+            'answer'  => $Answer,
+            'ratio'   => $Ratio,
+            'percent' => $Percent,
         ];
     }
 
@@ -239,7 +237,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
     $JsonPoll['answers'] = $JsonPollAnswers;
 }
 
-//Sqeeze in stickypost
+// Squeeze in stickypost
 if ($ThreadInfo['StickyPostID']) {
     if ($ThreadInfo['StickyPostID'] != $Thread[0]['ID']) {
         array_unshift($Thread, $ThreadInfo['StickyPost']);
@@ -256,43 +254,40 @@ foreach ($Thread as $Key => $Post) {
 
     $UserInfo = Users::user_info($EditedUserID);
     $JsonPosts[] = [
-        'postId' => (int)$PostID,
-        'addedTime' => $AddedTime,
-        'bbBody' => $Body,
-        'body' => Text::full_format($Body),
-        'editedUserId' => (int)$EditedUserID,
-        'editedTime' => $EditedTime,
+        'postId'         => (int)$PostID,
+        'addedTime'      => $AddedTime,
+        'bbBody'         => $Body,
+        'body'           => Text::full_format($Body),
+        'editedUserId'   => (int)$EditedUserID,
+        'editedTime'     => $EditedTime,
         'editedUsername' => $UserInfo['Username'],
         'author' => [
-            'authorId' => (int)$AuthorID,
+            'authorId'   => (int)$AuthorID,
             'authorName' => $Username,
-            'paranoia' => $Paranoia,
-            'artist' => $Artist === '1',
-            'donor' => $Donor == 1,
-            'warned' => !is_null($Warned),
-            'avatar' => $Avatar,
-            'enabled' => $Enabled === '2' ? false : true,
-            'userTitle' => $UserTitle
+            'paranoia'   => $Paranoia,
+            'artist'     => $Artist === '1',
+            'donor'      => $Donor == 1,
+            'warned'     => !is_null($Warned),
+            'avatar'     => $Avatar,
+            'enabled'    => $Enabled === '2' ? false : true,
+            'userTitle'  => $UserTitle,
         ],
     ];
 }
 
-print
-    json_encode(
-        [
-            'status' => 'success',
-            'response' => [
-                'forumId' => (int)$ForumID,
-                'forumName' => $Forums[$ForumID]['Name'],
-                'threadId' => (int)$ThreadID,
-                'threadTitle' => display_str($ThreadInfo['Title']),
-                'subscribed' => in_array($ThreadID, $UserSubscriptions),
-                'locked' => $ThreadInfo['IsLocked'] == 1,
-                'sticky' => $ThreadInfo['IsSticky'] == 1,
-                'currentPage' => (int)$Page,
-                'pages' => ceil($ThreadInfo['Posts'] / $PerPage),
-                'poll' => empty($JsonPoll) ? null : $JsonPoll,
-                'posts' => $JsonPosts
-            ]
-        ]
-    );
+print json_encode([
+    'status' => 'success',
+    'response' => [
+        'forumId'     => (int)$ForumID,
+        'forumName'   => $Forums[$ForumID]['Name'],
+        'threadId'    => (int)$ThreadID,
+        'threadTitle' => display_str($ThreadInfo['Title']),
+        'subscribed'  => in_array($ThreadID, $UserSubscriptions),
+        'locked'      => $ThreadInfo['IsLocked'] == 1,
+        'sticky'      => $ThreadInfo['IsSticky'] == 1,
+        'currentPage' => (int)$Page,
+        'pages'       => ceil($ThreadInfo['Posts'] / $PerPage),
+        'poll'        => empty($JsonPoll) ? null : $JsonPoll,
+        'posts'       => $JsonPosts,
+    ]
+]);
