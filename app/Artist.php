@@ -58,7 +58,7 @@ class Artist extends Base {
 
             $this->db->prepared_query($sql, $queryId);
             if (!$this->db->has_results()) {
-                throw new \Exception("no such artist");
+                throw new \Exception("Artist:not-found");
             }
             list($this->name, $this->image, $this->body, $this->vanity,
                 $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms)
@@ -91,6 +91,56 @@ class Artist extends Base {
         }
     }
 
+    public function rename(int $userId, int $aliasId, string $name) {
+        $this->db->prepared_query("
+            INSERT INTO artists_alias
+                   (ArtistID, Name, UserID, Redirect)
+            VALUES (?,        ?,    ?,      0)
+            ", $this->id, $name, $userId
+        );
+        $targetId = $this->db->inserted_id();
+        $this->db->prepared_query("
+            UPDATE artists_alias SET Redirect = ? WHERE AliasID = ?
+            ", $targetId, $aliasId
+        );
+        $this->db->prepared_query("
+            UPDATE artists_group SET Name = ?  WHERE ArtistID = ?
+            ", $name, $this->id
+        );
+
+        // process artists in torrents
+        $this->db->prepared_query("
+            SELECT GroupID FROM torrents_artists WHERE AliasID = ?
+            ", $aliasId
+        );
+        $Groups = $this->db->collect('GroupID');
+        $this->db->prepared_query("
+            UPDATE IGNORE torrents_artists SET AliasID = ?  WHERE AliasID = ?
+            ", $targetId, $aliasId
+        );
+        foreach ($Groups as $GroupID) {
+            $this->cache->delete_value("groups_artists_$GroupID"); // Delete group artist cache
+            \Torrents::update_hash($GroupID);
+        }
+
+        // process artists in requests
+        $this->db->prepared_query("
+            SELECT RequestID
+            FROM requests_artists
+            WHERE AliasID = ?
+            ", $aliasId
+        );
+        $Requests = $this->db->collect('RequestID');
+        $this->db->prepared_query("
+            UPDATE IGNORE requests_artists SET AliasID = ? WHERE AliasID = ?
+            ", $targetId, $aliasId
+        );
+        foreach ($Requests as $RequestID) {
+            $this->cache->delete_value("request_artists_$RequestID"); // Delete request artist cache
+            \Requests::update_sphinx_requests($RequestID);
+        }
+    }
+
     public function cacheKey() {
         // TODO: change to protected when sections/ajax/artist.php is refactored
         if ($this->revision) {
@@ -102,6 +152,57 @@ class Artist extends Base {
 
     public function flushCache() {
         $this->cache->delete_value($this->cacheKey());
+    }
+
+    public function resolveAlias(string $name) {
+        $this->db->_prepared_query("
+            SELECT AliasID, ArtistID, Name, Redirect
+            FROM artists_alias
+            WHERE Name = ?
+            ", $name
+        );
+        while (list($CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect) = $this->db->next_record(MYSQLI_NUM, false)) {
+            if (!strcasecmp($CloneAliasName, $AliasName)) {
+                return [$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect];
+            }
+        }
+        return null;
+    }
+
+    public function resolveRedirect(int $redirectId) {
+        list($foundId, $foundRedirectId) = $this->db->row("
+            SELECT ArtistID, Redirect
+            FROM artists_alias
+            WHERE AliasID = ?
+            ", $redirectId
+        );
+        if (!$foundId) {
+            throw new \Exception("Artist:not-found");
+        }
+        elseif ($this->id != $foundId) {
+            throw new \Exception("Artist:not-redirected");
+        }
+        return $foundRedirectId > 0 ? $foundRedirectId : $redirectId;
+    }
+
+    public function addAlias(int $userId, string $name, int $redirect) {
+        $this->db->prepared_query("
+            INSERT INTO artists_alias
+                   (ArtistID, Name, Redirect, UserID)
+            VALUES (?,        ?,    ?,        ?)
+            ", $this->id, $name, $redirect, $userId
+        );
+        return $this->db->inserted_id();
+    }
+
+    public function removeAlias(int $aliasId) {
+        $this->db->prepared_query("
+            UPDATE artists_alias SET
+                ArtistID = ?,
+                Redirect = 0
+            WHERE AliasID = ?
+            ", $this->id, $aliasId
+        );
     }
 
     public function getAlias($name) {
@@ -383,5 +484,20 @@ class Artist extends Base {
 
     public function discogsIsPreferred() {
         return $this->discogsIsPreferred;
+    }
+
+    /* STATIC METHODS - for when you do not yet have an ID, e.g. during creation */
+
+    /**
+     * Collapse whitespace and directional markers, because people copypaste carelessly.
+     * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation
+     *
+     * @param string $ArtistName
+     */
+    public static function sanitize(string $name) {
+        // \u200e is &lrm;
+        $name = preg_replace('/^(?:\xE2\x80\x8E|\s)+/', '', $name);
+        $name = preg_replace('/(?:\xE2\x80\x8E|\s)+$/', '', $name);
+        return preg_replace('/ +/', ' ', $name);
     }
 }
