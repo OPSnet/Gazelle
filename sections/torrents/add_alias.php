@@ -15,7 +15,7 @@ $Changed = false;
 
 $ArtistManager = new \Gazelle\Manager\Artist;
 for ($i = 0; $i < count($AliasNames); $i++) {
-    $AliasName = Artists::normalise_artist_name($AliasNames[$i]);
+    $AliasName = \Gazelle\Artist::sanitize($AliasNames[$i]);
     $Importance = $Importances[$i];
 
     if (!in_array($Importance, ['1', '2', '3', '4', '5', '6', '7'])) {

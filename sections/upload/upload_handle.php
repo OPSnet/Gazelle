@@ -306,7 +306,7 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
         $Artists[$i] = trim($Artists[$i]);
         if ($Artists[$i] != '') {
             if (!in_array($Artists[$i], $ArtistNames)) {
-                $ArtistForm[$Importance[$i]][] = ['name' => Artists::normalise_artist_name($Artists[$i])];
+                $ArtistForm[$Importance[$i]][] = ['name' => \Gazelle\Artist::sanitize$Artists[$i])];
                 if ($Importance[$i] == 1) {
                     $MainArtistCount++;
                 }
