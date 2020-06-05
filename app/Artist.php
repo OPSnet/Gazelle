@@ -137,7 +137,7 @@ class Artist extends Base {
         );
         foreach ($Requests as $RequestID) {
             $this->cache->delete_value("request_artists_$RequestID"); // Delete request artist cache
-            Requests::update_sphinx_requests($RequestID);
+            \Requests::update_sphinx_requests($RequestID);
         }
     }
 
