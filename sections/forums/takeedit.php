@@ -46,9 +46,6 @@ if (!Forums::check_forumperm($ForumID, 'Write') || ($IsLocked && !check_perms('s
 if ($UserID != $AuthorID && !check_perms('site_moderate_forums')) {
     error(403,true);
 }
-if (!$DB->has_results()) {
-    error(404,true);
-}
 
 // Send a PM to the user to notify them of the edit
 if ($UserID != $AuthorID && $DoPM) {
