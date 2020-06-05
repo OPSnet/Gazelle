@@ -152,7 +152,6 @@ if (check_perms('site_collages_delete') || $CreatorID == $LoggedUser['ID']) { ?>
 } ?>
         </div>
     </div>
-<?php /* Misc::display_recommend($CollageID, "collage"); */ ?>
     <div class="sidebar">
         <div class="box box_category">
             <div class="head"><strong>Category</strong></div>

@@ -299,38 +299,6 @@ class Misc {
     }
 
 
-    /**
-     * Given an array of tags, return an array of their IDs.
-     *
-     * @param array $TagNames
-     * @return array IDs
-     */
-    public static function get_tags($TagNames) {
-        $TagIDs = [];
-        foreach ($TagNames as $Index => $TagName) {
-            $Tag = G::$Cache->get_value("tag_id_$TagName");
-            if (is_array($Tag)) {
-                unset($TagNames[$Index]);
-                $TagIDs[$Tag['ID']] = $Tag['Name'];
-            }
-        }
-        if (count($TagNames) > 0) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
-                SELECT ID, Name
-                FROM tags
-                WHERE Name IN ('".implode("', '", $TagNames)."')");
-            $SQLTagIDs = G::$DB->to_array;
-            G::$DB->set_query_id($QueryID);
-            foreach ($SQLTagIDs as $Tag) {
-                $TagIDs[$Tag['ID']] = $Tag['Name'];
-                G::$Cache->cache_value('tag_id_'.$Tag['Name'], $Tag, 0);
-            }
-        }
-
-        return($TagIDs);
-    }
-
     /*
      * Write a message to the system log.
      *
@@ -405,28 +373,5 @@ class Misc {
      */
     public static function is_new_torrent(&$Data) {
         return strpos(substr($Data, 0, 10), ':') !== false;
-    }
-
-    public static function display_recommend($ID, $Type, $Hide = true) {
-        if ($Hide) {
-            $Hide = ' style="display: none;"';
-        }
-        ?>
-        <div id="recommendation_div" data-id="<?=$ID?>" data-type="<?=$Type?>"<?=$Hide?> class="center">
-            <div style="display: inline-block;">
-                <strong>Recommend to:</strong>
-                <select id="friend" name="friend">
-                    <option value="0" selected="selected">Choose friend</option>
-                </select>
-                <input type="text" id="recommendation_note" placeholder="Add note..." />
-                <button id="send_recommendation" disabled="disabled">Send</button>
-            </div>
-            <div class="new" id="recommendation_status"><br /></div>
-        </div>
-<?php
-    }
-
-    public static function is_valid_url($URL) {
-        return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $URL);
     }
 }
