@@ -324,6 +324,16 @@ class User extends Base {
         ');
     }
 
+    public function addForumWarning(string $comment) {
+        $this->db->query("
+            INSERT INTO users_warnings_forums
+                   (UserID, Comment)
+            VALUES (?,      ?)
+            ON DUPLICATE KEY UPDATE Comment = concat(?, ', ', Comment)
+            ", $this->id, $comment, $comment
+        );
+    }
+
     public function invitedCount() {
         return $this->getSingleValue('user-invites', '
             SELECT count(*)

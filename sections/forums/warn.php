@@ -22,6 +22,7 @@ View::show_header('Warn User');
     </div>
     <div class="thin box pad">
         <form class="send_form" name="warning" action="" onsubmit="quickpostform.submit_button.disabled = true;" method="post">
+            <input type="hidden" name="forumid" value="<?=$ForumID?>" />
             <input type="hidden" name="postid" value="<?=$PostID?>" />
             <input type="hidden" name="userid" value="<?=$UserID?>" />
             <input type="hidden" name="key" value="<?=$Key?>" />
@@ -65,4 +66,6 @@ View::show_header('Warn User');
         </form>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+
+View::show_footer();

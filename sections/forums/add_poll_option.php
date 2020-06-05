@@ -17,6 +17,7 @@ if (!check_perms('site_moderate_forums')) {
         error(403);
     }
 }
+
 $DB->query("
     SELECT Answers
     FROM forums_polls
