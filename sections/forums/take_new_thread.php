@@ -14,12 +14,9 @@ authorize();
     the latter of which is an array
 */
 
-if (isset($LoggedUser['PostsPerPage'])) {
-    $PerPage = $LoggedUser['PostsPerPage'];
-} else {
-    $PerPage = POSTS_PER_PAGE;
+if ($LoggedUser['DisablePosting']) {
+    error('Your posting privileges have been removed.');
 }
-
 
 if (isset($_POST['thread']) && !is_number($_POST['thread'])) {
     error(0);
@@ -27,6 +24,13 @@ if (isset($_POST['thread']) && !is_number($_POST['thread'])) {
 
 if (isset($_POST['forum']) && !is_number($_POST['forum'])) {
     error(0);
+}
+$ForumID = $_POST['forum'];
+if (!isset($Forums[$ForumID])) {
+    error(404);
+}
+if (!Forums::check_forumperm($ForumID, 'Write') || !Forums::check_forumperm($ForumID, 'Create')) {
+    error(403);
 }
 
 // If you're not sending anything, go back
@@ -36,34 +40,18 @@ if (empty($_POST['body']) || empty($_POST['title'])) {
     die();
 }
 
-$Body = $_POST['body'];
-
-if ($LoggedUser['DisablePosting']) {
-    error('Your posting privileges have been removed.');
-}
-
 $Title = Format::cut_string(trim($_POST['title']), 150, 1, 0);
-
-
-$ForumID = $_POST['forum'];
-
-if (!isset($Forums[$ForumID])) {
-    error(404);
-}
-
-if (!Forums::check_forumperm($ForumID, 'Write') || !Forums::check_forumperm($ForumID, 'Create')) {
-    error(403);
-}
+$Body = trim($_POST['body']);
 
 if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forums_polls_create')) {
-    $NoPoll = 1;
+    $needPoll = false;
 } else {
-    $NoPoll = 0;
+    $needPoll = true;
     $Question = trim($_POST['question']);
     $Answers = [];
     $Votes = [];
 
-    //This can cause polls to have answer IDs of 1 3 4 if the second box is empty
+    // Step over empty answer fields to avoid gaps in the answer IDs
     foreach ($_POST['answers'] as $i => $Answer) {
         if ($Answer == '') {
             continue;
@@ -79,63 +67,24 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
     }
 }
 
-$sqltime = sqltime();
+$forum = new \Gazelle\Forum($ForumID);
+list($threadId, $postId) = $forum->addThread($LoggedUser['ID'], $Title, $Body);
 
-$DB->prepared_query("
-    INSERT INTO forums_topics
-           (Title, ForumID, AuthorID, LastPostAuthorID)
-    Values (?,     ?,      ?,         ?)
-    ", $Title, $ForumID, $LoggedUser['ID'], $LoggedUser['ID']
-);
-$TopicID = $DB->inserted_id();
-
-$DB->prepared_query("
-    INSERT INTO forums_posts
-           (TopicID, AuthorID, AddedTime, Body)
-    VALUES (?,       ?,        ?,         ?)
-    ", $TopicID, $LoggedUser['ID'], $sqltime, trim($Body)
-);
-$PostID = $DB->inserted_id();
-
-$DB->query("
-    UPDATE forums
-    SET
-        NumPosts         = NumPosts + 1,
-        NumTopics        = NumTopics + 1,
-        LastPostID       = '$PostID',
-        LastPostAuthorID = '".$LoggedUser['ID']."',
-        LastPostTopicID  = '$TopicID',
-        LastPostTime     = '".$sqltime."'
-    WHERE ID = '$ForumID'");
-
-$DB->query("
-    UPDATE forums_topics
-    SET
-        NumPosts         = NumPosts + 1,
-        LastPostID       = '$PostID',
-        LastPostAuthorID = '".$LoggedUser['ID']."',
-        LastPostTime     = '".$sqltime."'
-    WHERE ID = '$TopicID'");
-
-if (isset($_POST['subscribe'])) {
-    $subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
-    $subscription->subscribe($TopicID);
-}
-
-if (!$NoPoll) { // god, I hate double negatives...
-    $DB->query("
-        INSERT INTO forums_polls
-            (TopicID, Question, Answers)
-        VALUES
-            ('$TopicID', '".db_string($Question)."', '".db_string(serialize($Answers))."')");
-    $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, '0000-00-00 00:00:00', '0'], 0);
-
+if ($needPoll) {
+    $forum->addPoll($threadId, $Question, $Answers);
+    $Cache->cache_value("polls_$threadId", [$Question, $Answers, $Votes, null, 0], 0);
     if ($ForumID == STAFF_FORUM) {
-        send_irc('PRIVMSG '.MOD_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".site_url()."forums.php?action=viewthread&threadid=$TopicID");
+        send_irc('PRIVMSG '.MOD_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".site_url()."forums.php?action=viewthread&threadid=$threadId");
     }
 }
 
+if (isset($_POST['subscribe'])) {
+    $subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
+    $subscription->subscribe($threadId);
+}
+
 // if cache exists modify it, if not, then it will be correct when selected next, and we can skip this block
+$sqltime = sqltime(); // Not precise but it's just for the cache; no kittens will die
 if ($Forum = $Cache->get_value("forums_$ForumID")) {
     list($Forum,,,$Stickies) = $Forum;
 
@@ -151,17 +100,17 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
         $Part1 = [];
         $Part3 = $Forum;
     }
-    $Part2 = [$TopicID => [
-        'ID' => $TopicID,
-        'Title' => $Title,
-        'AuthorID' => $LoggedUser['ID'],
-        'IsLocked' => 0,
-        'IsSticky' => 0,
-        'NumPosts' => 1,
-        'LastPostID' => $PostID,
-        'LastPostTime' => $sqltime,
+    $Part2 = [$threadId => [
+        'ID'               => $threadId,
+        'Title'            => $Title,
+        'AuthorID'         => $LoggedUser['ID'],
+        'IsLocked'         => 0,
+        'IsSticky'         => 0,
+        'NumPosts'         => 1,
+        'LastPostID'       => $postId,
+        'LastPostTime'     => $sqltime,
         'LastPostAuthorID' => $LoggedUser['ID'],
-        'NoPoll' => $NoPoll
+        'NoPoll'           => $needPoll ? 0 : 1,
     ]]; // Bumped
     $Forum = $Part1 + $Part2 + $Part3;
 
@@ -170,15 +119,15 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
     // Update the forum root
     $Cache->begin_transaction('forums_list');
     $Cache->update_row($ForumID, [
-        'NumPosts' => '+1',
-        'NumTopics' => '+1',
-        'LastPostID' => $PostID,
+        'NumPosts'         => '+1',
+        'NumTopics'        => '+1',
+        'LastPostID'       => $postId,
         'LastPostAuthorID' => $LoggedUser['ID'],
-        'LastPostTopicID' => $TopicID,
-        'LastPostTime' => $sqltime,
-        'Title' => $Title,
-        'IsLocked' => 0,
-        'IsSticky' => 0
+        'LastPostTopicID'  => $threadId,
+        'LastPostTime'     => $sqltime,
+        'Title'            => $Title,
+        'IsLocked'         => 0,
+        'IsSticky'         => 0
         ]);
     $Cache->commit_transaction(0);
 } else {
@@ -186,20 +135,24 @@ if ($Forum = $Cache->get_value("forums_$ForumID")) {
     $Cache->delete_value('forums_list');
 }
 
-$Cache->begin_transaction("thread_$TopicID".'_catalogue_0');
+$Cache->begin_transaction("thread_$threadId".'_catalogue_0');
 $Post = [
-    'ID' => $PostID,
-    'AuthorID' => $LoggedUser['ID'],
-    'AddedTime' => $sqltime,
-    'Body' => $Body,
+    'ID'           => $postId,
+    'AuthorID'     => $LoggedUser['ID'],
+    'AddedTime'    => $sqltime,
+    'Body'         => $Body,
     'EditedUserID' => 0,
-    'EditedTime' => '0000-00-00 00:00:00'
-    ];
+    'EditedTime'   => null,
+];
 $Cache->insert('', $Post);
 $Cache->commit_transaction(0);
 
-$Cache->begin_transaction("thread_$TopicID".'_info');
-$Cache->update_row(false, ['Posts' => '+1', 'LastPostAuthorID' => $LoggedUser['ID'], 'LastPostTime' => $sqltime]);
+$Cache->begin_transaction("thread_$threadId".'_info');
+$Cache->update_row(false, [
+    'Posts'            => '+1',
+    'LastPostAuthorID' => $LoggedUser['ID'],
+    'LastPostTime'     => $sqltime
+]);
 $Cache->commit_transaction(0);
 
-header("Location: forums.php?action=viewthread&threadid=$TopicID");
+header("Location: forums.php?action=viewthread&threadid=$threadId");

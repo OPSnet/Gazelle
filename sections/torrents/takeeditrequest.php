@@ -49,43 +49,8 @@ $Body = <<<POST
 [quote=Comments]{$_POST['edit_details']}[/quote]
 POST;
 
-$DB->prepared_query("
-    INSERT INTO forums_topics
-           (Title, ForumID, AuthorID, LastPostAuthorID)
-    Values (?,     ?,       ?,        ?)
-    ", $Title, $EditForumID, $BotID, $BotID
-);
-$TopicID = $DB->inserted_id();
-
-$DB->prepared_query("
-    INSERT INTO forums_posts
-           (TopicID, AuthorID, AddedTime, Body)
-    VALUES (?,       ?,        ?,         ?)
-    ", $TopicID, $BotID, $sqltime, $Body
-);
-$PostID = $DB->inserted_id();
-
-$DB->prepared_query("
-    UPDATE forums
-    SET
-        NumPosts         = NumPosts + 1,
-        NumTopics        = NumTopics + 1,
-        LastPostID       = ?,
-        LastPostAuthorID = ?,
-        LastPostTopicID  = ?,
-        LastPostTime     = ?
-    WHERE ID = ?", $PostID, $BotID, $TopicID, $sqltime, $EditForumID);
-
-$DB->prepared_query("
-    UPDATE forums_topics
-    SET
-        NumPosts         = NumPosts + 1,
-        LastPostID       = ?,
-        LastPostAuthorID = ?,
-        LastPostTime     = ?
-    WHERE ID = ?
-    ", $PostID, $BotID, $sqltime, $TopicID
-);
+$forum = new \Gazelle\Forum($EditForumID);
+list ($TopicID, $postId) = $forum->addThread($BotID, $Title, $Body);
 
 // if cache exists modify it, if not, then it will be correct when selected next, and we can skip this block
 if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
@@ -110,7 +75,7 @@ if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
         'IsLocked' => 0,
         'IsSticky' => 0,
         'NumPosts' => 1,
-        'LastPostID' => $PostID,
+        'LastPostID' => $postId,
         'LastPostTime' => $sqltime,
         'LastPostAuthorID' => $BotID,
         'NoPoll' => 1
@@ -124,7 +89,7 @@ if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
     $Cache->update_row($EditForumID, [
         'NumPosts' => '+1',
         'NumTopics' => '+1',
-        'LastPostID' => $PostID,
+        'LastPostID' => $postId,
         'LastPostAuthorID' => $BotID,
         'LastPostTopicID' => $TopicID,
         'LastPostTime' => $sqltime,
@@ -141,12 +106,12 @@ else {
 
 $Cache->begin_transaction("thread_{$TopicID}_catalogue_0");
 $Post = [
-    'ID' => $PostID,
+    'ID' => $postId,
     'AuthorID' => $BotID,
     'AddedTime' => $sqltime,
     'Body' => $Body,
     'EditedUserID' => 0,
-    'EditedTime' => '0000-00-00 00:00:00'
+    'EditedTime' => null,
 ];
 $Cache->insert('', $Post);
 $Cache->commit_transaction(0);

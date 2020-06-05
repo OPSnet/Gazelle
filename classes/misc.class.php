@@ -149,56 +149,16 @@ class Misc {
 
         $QueryID = G::$DB->get_query_id();
 
-        G::$DB->prepared_query('
-            SELECT Username
-            FROM users_main
-            WHERE ID = ?', $AuthorID);
-        if (!G::$DB->has_results()) {
-            G::$DB->set_query_id($QueryID);
-            return -2;
-        }
-        list($AuthorName) = G::$DB->next_record();
+        $User = Users::user_info($AuthorID);
+        $AuthorName = $User['Username'];
 
         $ThreadInfo = [];
         $ThreadInfo['IsLocked'] = 0;
         $ThreadInfo['IsSticky'] = 0;
 
-        G::$DB->prepared_query('
-            INSERT INTO forums_topics
-                   (Title, ForumID, AuthorID, LastPostAuthorID, LastPostID)
-            VALUES (?,     ?,       ?,        ?,                -1)
-            ', $Title, $ForumID, $AuthorID, $AuthorID
-        );
-        $TopicID = G::$DB->inserted_id();
+        $forum = new \Gazelle\Forum($ForumID);
+        list($TopicID, $PostID) = $forum->addThread($AuthorId, $Title, $PostBody);
         $Posts = 1;
-
-        G::$DB->prepared_query('
-            INSERT INTO forums_posts
-                   (TopicID, AuthorID, Body)
-            VALUES (?,       ?,        ?)
-            ', $TopicID, $AuthorID, $PostBody
-        );
-        $PostID = G::$DB->inserted_id();
-
-        G::$DB->prepared_query('
-            UPDATE forums
-            SET
-                NumPosts  = NumPosts + 1,
-                NumTopics = NumTopics + 1,
-                LastPostID = ?,
-                LastPostAuthorID = ?,
-                LastPostTopicID = ?,
-                LastPostTime = now()
-            WHERE ID = ?', $PostID, $AuthorID, $TopicID, $ForumID);
-
-        G::$DB->prepared_query('
-            UPDATE forums_topics
-            SET
-                NumPosts = NumPosts + 1,
-                LastPostID = ?,
-                LastPostAuthorID = ?,
-                LastPostTime = now()
-            WHERE ID = ?', $PostID, $AuthorID, $TopicID);
 
         // Bump this topic to head of the cache
         list($Forum,,, $Stickies) = G::$Cache->get_value("forums_$ForumID");

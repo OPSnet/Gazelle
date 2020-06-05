@@ -38,43 +38,8 @@ $Body = <<<POST
 [quote=Comments]{$_POST['edit_details']}[/quote]
 POST;
 
-$DB->prepared_query("
-    INSERT INTO forums_topics
-           (Title, ForumID, AuthorID, LastPostAuthorID)
-    Values (?,     ?,       ?,        ?)
-    ", $Title, $EditForumID, $BotID, $BotID
-);
-$TopicID = $DB->inserted_id();
-
-$DB->prepared_query("
-    INSERT INTO forums_posts
-           (TopicID, AuthorID, AddedTime, Body)
-    VALUES (?,       ?,        ?,         ?)
-    ", $TopicID, $BotID, $sqltime, $Body
-);
-$PostID = $DB->inserted_id();
-
-$DB->prepared_query("
-    UPDATE forums
-    SET
-        NumPosts         = NumPosts + 1,
-        NumTopics        = NumTopics + 1,
-        LastPostID       = ?,
-        LastPostAuthorID = ?,
-        LastPostTopicID  = ?,
-        LastPostTime     = ?
-    WHERE ID = ?", $PostID, $BotID, $TopicID, $sqltime, $EditForumID);
-
-$DB->prepared_query("
-    UPDATE forums_topics
-    SET
-        NumPosts         = NumPosts + 1,
-        LastPostID       = ?,
-        LastPostAuthorID = ?,
-        LastPostTime     = now()
-    WHERE ID = ?
-    ", $PostID, $BotID, $TopicID
-);
+$forum = new \Gazelle\Forum($EditForumID);
+list ($threadId, $postId) = $forum->addThread($BotID, $Title, $Body);
 
 // if cache exists modify it, if not, then it will be correct when selected next, and we can skip this block
 if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
@@ -92,17 +57,17 @@ if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
         $Part1 = [];
         $Part3 = $Forum;
     }
-    $Part2 = [$TopicID => [
-        'ID' => $TopicID,
-        'Title' => $Title,
-        'AuthorID' => $BotID,
-        'IsLocked' => 0,
-        'IsSticky' => 0,
-        'NumPosts' => 1,
-        'LastPostID' => $PostID,
-        'LastPostTime' => $sqltime,
+    $Part2 = [$threadId => [
+        'ID'               => $threadId,
+        'Title'            => $Title,
+        'AuthorID'         => $BotID,
+        'IsLocked'         => 0,
+        'IsSticky'         => 0,
+        'NumPosts'         => 1,
+        'LastPostID'       => $postId,
+        'LastPostTime'     => $sqltime,
         'LastPostAuthorID' => $BotID,
-        'NoPoll' => 1
+        'NoPoll'           => 1
     ]]; // Bumped
     $Forum = $Part1 + $Part2 + $Part3;
 
@@ -111,15 +76,15 @@ if ($Forum = $Cache->get_value("forums_{$EditForumID}")) {
     // Update the forum root
     $Cache->begin_transaction('forums_list');
     $Cache->update_row($EditForumID, [
-        'NumPosts' => '+1',
-        'NumTopics' => '+1',
-        'LastPostID' => $PostID,
+        'NumPosts'         => '+1',
+        'NumTopics'        => '+1',
+        'LastPostID'       => $postId,
         'LastPostAuthorID' => $BotID,
-        'LastPostTopicID' => $TopicID,
-        'LastPostTime' => $sqltime,
-        'Title' => $Title,
-        'IsLocked' => 0,
-        'IsSticky' => 0
+        'LastPostTopicID'  => $threadId,
+        'LastPostTime'     => $sqltime,
+        'Title'            => $Title,
+        'IsLocked'         => 0,
+        'IsSticky'         => 0
     ]);
     $Cache->commit_transaction(0);
 }
@@ -128,24 +93,24 @@ else {
     $Cache->delete_value('forums_list');
 }
 
-$Cache->begin_transaction("thread_{$TopicID}_catalogue_0");
+$Cache->begin_transaction("thread_{$threadId}_catalogue_0");
 $Post = [
-    'ID' => $PostID,
-    'AuthorID' => $BotID,
-    'AddedTime' => $sqltime,
-    'Body' => $Body,
+    'ID'           => $postId,
+    'AuthorID'     => $BotID,
+    'AddedTime'    => $sqltime,
+    'Body'         => $Body,
     'EditedUserID' => 0,
-    'EditedTime' => '0000-00-00 00:00:00'
+    'EditedTime'   => null,
 ];
 $Cache->insert('', $Post);
 $Cache->commit_transaction(0);
 
-$Cache->begin_transaction("thread_{$TopicID}_info");
+$Cache->begin_transaction("thread_{$threadId}_info");
 $Cache->update_row(false, [
-    'Posts' => '+1',
+    'Posts'            => '+1',
     'LastPostAuthorID' => $BotID,
-    'LastPostTime' => $sqltime
+    'LastPostTime'     => $sqltime
 ]);
 $Cache->commit_transaction(0);
 
-header("Location: forums.php?action=viewthread&threadid={$TopicID}");
+header("Location: forums.php?action=viewthread&threadid={$threadId}");
