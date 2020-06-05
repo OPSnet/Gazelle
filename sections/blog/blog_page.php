@@ -109,7 +109,8 @@ if (!isset($_GET['action']) || $_GET['action'] !== 'editblog') {
                     <br /><br />
                     <em><a href="forums.php?action=viewthread&amp;threadid=<?=$ThreadID?>">Discuss this post here</a></em>
                     <?php        if (check_perms('admin_manage_blog')) { ?>
-                        <a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?=G::$LoggedUser['AuthKey']?>" class="brackets">Remove link</a>
+                        <span style="float: right"><a href="blog.php?action=deadthread&amp;id=<?=$BlogID?>&amp;auth=<?=G::$LoggedUser['AuthKey']?>"
+                            class="brackets">Remove link</a></span>
                         <?php
                     }
                 }
