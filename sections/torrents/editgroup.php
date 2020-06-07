@@ -13,13 +13,15 @@ the cache for the torrent group page.
 
 ************************************************************************/
 
-$GroupID = $_GET['groupid'];
-if (!is_number($GroupID) || !$GroupID) {
+$GroupID = (int)$_GET['groupid'];
+if ($GroupID < 1) {
     error(0);
 }
 
 // Get the torrent group name and the body of the last revision
-$DB->query("
+list($Name, $Image, $Body, $WikiImage, $WikiBody, $Year,
+    $RecordLabel, $CatalogueNumber, $ReleaseType, $CategoryID, $VanityHouse, $noCoverArt
+) = $DB->row("
     SELECT
         tg.Name,
         wt.Image,
@@ -31,16 +33,22 @@ $DB->query("
         tg.CatalogueNumber,
         tg.ReleaseType,
         tg.CategoryID,
-        tg.VanityHouse
+        tg.VanityHouse,
+        (tgha.TorrentGroupID IS NOT NULL) AS noCoverArt
     FROM torrents_group AS tg
-        LEFT JOIN wiki_torrents AS wt ON wt.RevisionID = tg.RevisionID
-    WHERE tg.ID = '$GroupID'");
-if (!$DB->has_results()) {
+    LEFT JOIN wiki_torrents AS wt USING (RevisionID)
+    LEFT JOIN torrent_group_has_attr AS tgha ON (tgha.TorrentGroupID = tg.ID
+        AND tgha.TorrentGroupAttrID = (SELECT tga.ID FROM torrent_group_attr tga WHERE tga.Name = 'no-cover-art')
+    )
+    WHERE tg.ID = ?
+    ", $GroupID
+);
+if (!$Name) {
     error(404);
 }
-list($Name, $Image, $Body, $WikiImage, $WikiBody, $Year, $RecordLabel, $CatalogueNumber, $ReleaseType, $CategoryID, $VanityHouse) = $DB->next_record();
 
 if (!$Body) {
+    // TODO: use coalesce(tg.WikiBody, wt.Body)
     $Body = $WikiBody;
     $Image = $WikiImage;
 }
@@ -61,6 +69,9 @@ View::show_header('Edit torrent group');
                 <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                 <h3>Image:</h3>
                 <input type="text" name="image" size="92" value="<?=$Image?>" /><br />
+                <br />Or if the release has no known official artwork (e.g. jam band live recording), check the following:<br />
+                <label><input type="checkbox" name="no_cover_art" value="1" <?=($noCoverArt ? 'checked="checked" ' : '')?>/> No release cover art</label><br /><br />
+
                 <h3>Torrent group description:</h3>
                 <textarea name="body" cols="91" rows="20"><?=$Body?></textarea><br />
 <?php
@@ -77,7 +88,7 @@ if ($CategoryID == 1) { ?>
 <?php
     if (check_perms('torrents_edit_vanityhouse')) { ?>
                 <h3>
-                    <label>Vanity House: <input type="checkbox" name="vanity_house" value="1" <?=($VanityHouse ? 'checked="checked" ' : '')?>/></label>
+                    <label><input type="checkbox" name="vanity_house" value="1" <?=($VanityHouse ? 'checked="checked" ' : '')?>/> Vanity House</label>
                 </h3>
 <?php
     }
@@ -92,10 +103,12 @@ if ($CategoryID == 1) { ?>
         </form>
     </div>
 <?php
-    $DB->query("
+    $DB->prepared_query("
         SELECT UserID
         FROM torrents
-        WHERE GroupID = $GroupID");
+        WHERE GroupID = ?
+        ", $GroupID
+    );
     //Users can edit the group info if they've uploaded a torrent to the group or have torrents_edit
     if (in_array($LoggedUser['ID'], $DB->collect('UserID')) || check_perms('torrents_edit')) { ?>
     <h3>Non-wiki torrent group editing</h3>
@@ -188,4 +201,5 @@ if (check_perms('torrents_edit')) {
 <?php
 } ?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();
