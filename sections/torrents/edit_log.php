@@ -47,7 +47,6 @@ if (!$DB->has_results()) {
 }
 
 $Log = $DB->next_record(MYSQLI_ASSOC, ['AdjustmentDetails']);
-
 $Checksum = ($Log['Checksum'] == '1') ? 'Good' : 'Missing/Invalid Checksum';
 $Details = "";
 if (!empty($Log['Details'])) {
@@ -84,7 +83,7 @@ View::show_header("Edit Log", 'edit_log');
             </tr>
             <tr>
                 <td>Log File</td>
-                <td colspan="2"><?=$Log['FileName']?> (<a href="logs/<?=$TorrentID?>_<?=$LogID?>.log" target="_blank">View Raw</a>)</td>
+                <td colspan="2"><?=$Log['FileName']?> (<a href="view.php?type=riplog&id=<?= $TorrentID ?>.<?= $LogID ?>" target="_blank">View Raw</a>)</td>
             </tr>
             <tr>
                 <td>Score</td>

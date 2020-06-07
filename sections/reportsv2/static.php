@@ -249,6 +249,7 @@ if (count($Reports) === 0) {
     </div>
 <?php
 } else {
+    $ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
     foreach ($Reports as $Report) {
 
         list($ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID,
@@ -553,7 +554,8 @@ if (count($Reports) === 0) {
                                 <li class="nobr"><?= $s ?></li>
 <?php                       } ?>
                                 <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
-                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= file_get_contents(sprintf("%s/logs/%d_%d.log", SERVER_ROOT_LIVE, $TorrentID, $logId)) ?></pre></li>
+                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?=
+                                        $ripFiler->get([$TorrentID, $logId]) ?></pre></li>
                                 <li><span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= $info['log'] ?></pre></li>
 <?php                   }
@@ -581,7 +583,8 @@ if (count($Reports) === 0) {
                                 <li class="nobr"><?= $s ?></li>
 <?php                       } ?>
                                 <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
-                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= file_get_contents(sprintf("%s/logs/%d_%d.log", SERVER_ROOT_LIVE, $ExtraID, $logId)) ?></pre></li>
+                                    </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?=
+                                        $ripFiler->get([$ExtraID, $logId]) ?></pre></li>
                                 <li><span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= $info['log'] ?></pre></li>
 <?php                   }

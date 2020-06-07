@@ -7,23 +7,17 @@ if (!check_perms('users_mod')) {
 $TorrentID = intval($_POST['torrentid']);
 $LogID = intval($_POST['logid']);
 
-$DB->prepared_query("SELECT GroupID FROM torrents WHERE ID = ?", $TorrentID);
-list($GroupID) = $DB->fetch_record();
+list($GroupID, $Checksum) = $DB->row("
+    SELECT t.GroupID, tl.Checksum
+    FROM torrents_logs tl
+    INNER JOIN torrents t ON (tl.TorrentID = t.ID)
+    WHERE tl.TorrentID = ? AND tl.LogID = ?
+    ", $TorrentID, $LogID
+);
 if (!$GroupID) {
     error(404);
 }
 
-$DB->prepared_query("
-    SELECT Log, FileName, Details, Score, Checksum, Adjusted, AdjustedScore, AdjustedChecksum, AdjustedBy, AdjustmentReason, AdjustmentDetails
-    FROM torrents_logs
-    WHERE TorrentID = ? AND LogID = ?",
-    $TorrentID, $LogID
-);
-if (!$DB->has_results()) {
-    error(404);
-}
-
-$Log = $DB->fetch_record(MYSQLI_ASSOC);
 $Adjusted = isset($_POST['adjusted']) ? '1' : '0';
 $AdjustedScore = 100;
 $AdjustedChecksum = isset($_POST['adjusted_checksum']) ? '1' : '0';
@@ -31,7 +25,7 @@ $AdjustedBy = G::$LoggedUser['ID'];
 $AdjustmentReason = $_POST['adjustment_reason'];
 $AdjustmentDetails = [];
 
-if ($AdjustedChecksum != $Log['Checksum']) {
+if ($AdjustedChecksum != $Checksum) {
     $AdjustmentDetails['checksum'] = 'Checksum manually '.($AdjustedChecksum == '1' ? 'validated' : 'invalidated');
 }
 
@@ -61,7 +55,6 @@ foreach ($Deductions as $Deduction) {
         $AdjustmentDetails[$Deduction[0]] = $Text;
         $AdjustedScore -= $Deduction[2];
     }
-
 }
 
 $TrackDeductions = [
