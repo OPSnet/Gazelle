@@ -11,6 +11,8 @@ $DB->prepared_query('
     WHERE TorrentID = ?
     ', $TorrentID
 );
+$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+
 if(!$DB->record_count()) {
     echo '';
 } else {
@@ -29,8 +31,8 @@ if(!$DB->record_count()) {
             echo "<a class='brackets' href='torrents.php?action=editlog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Edit Log</a>&nbsp;";
             echo "<a class='brackets' onclick=\"return confirm('Are you sure you want to deleted this log? There is NO undo!');\" href='torrents.php?action=deletelog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Delete Log</a>&nbsp;";
         }
-        if (file_exists(SERVER_ROOT . "/logs/{$TorrentID}_{$Log['LogID']}.log")) {
-            echo "<a class='brackets' href='logs/{$TorrentID}_{$Log['LogID']}.log' target='_blank'>View Raw Log</a>";
+        if ($ripFiler->exists([$TorrentID, $LogID])) {
+            echo "<a class='brackets' href='view.php?type=riplog&id={$TorrentID}.{$Log['LogID']}' target='_blank'>View Raw Log</a>";
         }
 
         if (($Log['Adjusted'] === '0' && $Log['Checksum'] === '0') || ($Log['Adjusted'] === '1' && $Log['AdjustedChecksum'] === '0')) {

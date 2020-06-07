@@ -1,10 +1,9 @@
 <?php
 
-use Gazelle\Logfile;
-use Gazelle\LogfileSummary;
 use OrpheusNET\Logchecker\Logchecker;
 
 enforce_login();
+ini_set('upload_max_filesize', 1000000);
 
 if (empty($_POST['torrentid'])) {
     error('No torrent is selected.');
@@ -13,120 +12,83 @@ $TorrentID = intval($_POST['torrentid']) ?? null;
 // Some browsers will report an empty file when you submit, prune those out
 $_FILES['logfiles']['name'] = array_filter($_FILES['logfiles']['name'], function($Name) { return !empty($Name); });
 $FileCount = count($_FILES['logfiles']['name']);
+if ($FileCount == 0) {
+    error("No logfiles uploaded.\n");
+}
 $Action = in_array($_POST['from_action'], ['upload', 'update']) ? $_POST['from_action'] : 'upload';
 
-$LogScore = 100;
-$LogChecksum = 1;
+$sql = "SELECT t.ID, t.GroupID
+    FROM torrents t
+    WHERE t.HasLog = '1' AND t.ID = ?
+";
+$args = [$TorrentID];
 
-$Extra = '';
-$Params = [$TorrentID, '1'];
 if (!check_perms('users_mod')) {
-    $Extra = ' AND t.UserID = ?';
-    $Params[] = G::$LoggedUser['ID'];
+    $sql .= " AND t.UserID = ?";
+    $args[] = $LoggedUser['ID'];
 }
-$DB->prepared_query("SELECT t.ID, t.GroupID FROM torrents t WHERE t.ID = ? AND t.HasLog=?" . $Extra, ...$Params);
+list($TorrentID, $GroupID) = $DB->row($sql, ...$args);
+if (!$TorrentID) {
+    error('Invalid torrent id.');
+}
 
-$DetailsArray = [];
-$LogfileSummary = new LogfileSummary();
-if ($TorrentID != 0 && $DB->has_results() && $FileCount > 0) {
-    list($TorrentID, $GroupID) = $DB->next_record(MYSQLI_BOTH);
-    $DB->prepared_query("SELECT LogID FROM torrents_logs WHERE TorrentID=?", $TorrentID);
-    while(list($LogID) = $DB->next_record(MYSQLI_NUM)) {
-        @unlink(SERVER_ROOT_LIVE . "/logs/{$TorrentID}_{$LogID}.log");
-    }
-    $DB->prepared_query("DELETE FROM torrents_logs WHERE TorrentID=?", $TorrentID);
-    ini_set('upload_max_filesize', 1000000);
-    foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
-        if (!$_FILES['logfiles']['size'][$Pos]) {
-            break;
-        }
-        $Logfile = new Logfile($_FILES['logfiles']['tmp_name'][$Pos], $_FILES['logfiles']['name'][$Pos]);
-        $LogfileSummary->add($Logfile);
-        $Logs[] = [$Logfile->details(), $Logfile->text()];
-        $DB->prepared_query(
-            "INSERT INTO torrents_logs
-                    (TorrentID, `Log`, Details, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion)
-            VALUES ( ?,         ?,     ?,       ?,     ?,          ?,          ?,      ?,             ?,          ?,             ?)",
-            $TorrentID, $Logfile->text(), $Logfile->detailsAsString(), $Logfile->score(), $Logfile->checksumStatus(), $Logfile->filename(), $Logfile->ripper(),
-            $Logfile->ripperVersion(), $Logfile->language(), $Logfile->checksumState(), Logchecker::getLogcheckerVersion()
-        );
-        $LogID = $DB->inserted_id();
-        if (move_uploaded_file($Logfile->filepath(), SERVER_ROOT . "/logs/{$TorrentID}_{$LogID}.log") === false) {
-            die("Could not copy logfile to the server.");
-        }
-    }
+$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+$ripFiler->remove([$TorrentID, null]);
 
-    $DB->prepared_query(
-        "UPDATE torrents SET HasLogDB=?, LogScore=?, LogChecksum=? WHERE ID=?",
-        '1', $LogfileSummary->overallScore(), $LogfileSummary->checksumStatus(), $TorrentID
+$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$htmlFiler->remove([$TorrentID, null]);
+
+$DB->prepared_query('
+    DELETE FROM torrents_logs WHERE TorrentID = ?
+    ', $TorrentID
+);
+
+$logfileSummary = new \Gazelle\LogfileSummary;
+foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
+    if (!$_FILES['logfiles']['size'][$Pos]) {
+        break;
+    }
+    $logfile = new \Gazelle\Logfile(
+        $_FILES['logfiles']['tmp_name'][$Pos],
+        $_FILES['logfiles']['name'][$Pos]
     );
-    $Cache->delete_value("torrent_group_{$GroupID}");
-    $Cache->delete_value("torrents_details_{$GroupID}");
-} else {
-    error('No log file uploaded or invalid torrent id was selected.');
+    $logfileSummary->add($logfile);
+
+    $DB->prepared_query('
+        INSERT INTO torrents_logs
+               (TorrentID, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, `Log`, Details)
+        VALUES (?,         ?,      ?,          ?,         ?,      ?,              ?,         ?,             ?,                  ?,    ?)
+        ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
+            $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
+            Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
+    );
+    $LogID = $DB->inserted_id();
+
+    $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
+    $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 }
+
+$DB->prepared_query("
+    UPDATE torrents SET
+        HasLogDB = '1',
+        LogScore = ?,
+        LogChecksum = ?
+    WHERE ID = ?
+    ", $logfileSummary->overallScore(), $logfileSummary->checksumStatus(),
+        $TorrentID
+);
+$Cache->deleteMulti(["torrent_group_{$GroupID}", "torrents_details_{$GroupID}"]);
 
 View::show_header();
-echo <<<HTML
+?>
 <div class="thin center">
-    <br><a href="logchecker.php?action={$Action}">Upload another log file</a>
+    <br /><a href="logchecker.php?action=<?= $Action ?>">Upload another log file</a>
 </div>
+<?php foreach ($logfileSummary->all() as $logfile) { ?>
 <div class="thin">
-HTML;
-
-if($LogScore == 100) {
-    $Color = '#418B00';
-}
-elseif($LogScore > 90) {
-    $Color = '#74C42E';
-}
-elseif($LogScore > 75) {
-    $Color = '#FFAA00';
-}
-elseif($LogScore > 50) {
-    $Color = '#FF5E00';
-}
-else {
-    $Color = '#FF0000';
-}
-
-echo "<blockquote><strong>Score:</strong> <span style=\"color:$Color\">$LogScore</span> (out of 100)</blockquote>";
-
-if ($LogChecksum === 0) {
-    echo <<<HTML
-    <blockquote>
-        <strong>Trumpable For:</strong>
-        <br /><br />
-        Bad/No Checksum(s)
-    </blockquote>
-HTML;
-}
-
-foreach ($Logs as $Log) {
-    list($Details, $Text) = $Log;
-    if (!empty($Details)) {
-        $Details = explode("\r\n", $Details);
-        print <<<HTML
-    <blockquote>
-    <h3>Log validation report:</h3>
-    <ul>
-HTML;
-        foreach ($Details as $Property) {
-            print "\t\t<li>{$Property}</li>";
-        }
-        print <<<HTML
-    </ul>
-    </blockquote>
-HTML;
-    }
-
-    echo <<<HTML
-    <blockquote>
-        <pre>{$Text}</pre>
-    </blockquote>
+    <?= G::$Twig->render('logchecker/report.twig', ['logfile' => $logfile]) ?>
 </div>
-HTML;
-
+<?php
 }
 
 View::show_footer();

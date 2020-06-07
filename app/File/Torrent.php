@@ -5,11 +5,13 @@ namespace Gazelle\File;
 class Torrent extends \Gazelle\File {
     const STORAGE = STORAGE_PATH_TORRENT;
 
-    public function put($source, $id) {
-        return file_put_contents($this->path($id), $source);
-    }
-
-    public function path($id) {
+    /**
+     * Path of a torrent file
+     *
+     * @param int id of torrent
+     * @return Fully qualified filename
+     */
+    public function path(/* array */ $id) {
         $key = strrev(sprintf('%04d', $id));
         $k1 = substr($key, 0, 2);
         $k2 = substr($key, 2, 2);

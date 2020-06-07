@@ -20,22 +20,28 @@ $Cache = new CACHE;
 
 $allConfig = [
     '-html' => [
-        'CHECK' => 'SELECT 1 FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
+        'CHECK' => 'SELECT Log FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
         'FILER' => new \Gazelle\File\RipLogHTML,
+        'MD5'   => 'SELECT Log AS digest FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOGHTML . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.html$~',
+        'NEWLN' => true,
     ],
     '-log' => [
         'CHECK' => 'SELECT 1 FROM torrents_logs WHERE TorrentID = ? AND LogID = ?',
         'FILER' => new \Gazelle\File\RipLog,
+        'MD5'   => null,
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_RIPLOG . ' -type f',
         'MATCH' => '~/(\d+)_(\d+)\.log$~',
+        'NEWLN' => false,
     ],
     '-torrent' => [
         'CHECK' => 'SELECT 1 FROM torrents WHERE ID = ?',
         'FILER' => new \Gazelle\File\Torrent,
+        'MD5'   => 'SELECT File AS digest FROM torrents_files WHERE TorrentID = ?',
         'PIPE'  => '/usr/bin/find ' . STORAGE_PATH_TORRENT . ' -type f',
         'MATCH' => '~/(\d+)\.torrent$~',
+        'NEWLN' => false,
     ],
 ];
 
@@ -58,6 +64,7 @@ $begin     = microtime(true);
 $processed = 0;
 $orphan    = 0;
 $alien     = 0;
+$mismatch  = 0;
 
 while (($file = fgets($find)) !== false) {
     $file = trim($file);
@@ -74,9 +81,19 @@ while (($file = fgets($find)) !== false) {
         echo "$file is orphan\n";
         continue;
     }
+
+    if (is_null($config['MD5'])) {
+        continue;
+    }
+    $db_digest = md5($DB->scalar($config['MD5'], ...array_slice($match, 1)) . ($config['NEWLN'] ? "\n" : ''));
+    $file_digest = md5(file_get_contents($file));
+    if ($db_digest != $file_digest) {
+        echo "$file contents $file_digest does not match db $db_digest\n";
+        ++$mismatch;
+    }
 }
 
 $delta = microtime(true) - $begin;
-printf("## Processed %d files in %0.1f seconds (%0.2f file/sec), %d orphans, %d aliens.\n",
-    $processed, $delta, $delta > 0 ? $processed / $delta : 0, $orphan, $alien
+printf("## Processed %d files in %0.1f seconds (%0.2f file/sec), %d orphan, %d alien, %d mismatch.\n",
+    $processed, $delta, $delta > 0 ? $processed / $delta : 0, $orphan, $alien, $mismatch
 );

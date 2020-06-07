@@ -283,12 +283,7 @@ if (count($_FILES['logfiles']['name']) > 0) {
                 Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
         );
         $LogID = $DB->inserted_id();
-        if (!move_uploaded_file($logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID]))) {
-            $Debug->analysis('Logfile copy failure',
-                sprintf('failed copy from [%s] to [%s]', $logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID])),
-                3600 * 24);
-        }
-        copy($ripFiler->pathLegacy([$TorrentID, $LogID]), $ripFiler->path([$TorrentID, $LogID]));
+        $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
         $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
     }
 }

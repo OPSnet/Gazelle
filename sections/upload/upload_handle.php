@@ -775,14 +775,7 @@ foreach($logfileSummary->all() as $logfile) {
             Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
     );
     $LogID = $DB->inserted_id();
-    if (!move_uploaded_file($logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID]))) {
-        $Debug->analysis(
-            sprintf('failed copy from [%s] to [%s]',
-                $logfile->filepath(), $ripFiler->pathLegacy([$TorrentID, $LogID])),
-            3600 * 24
-        );
-    }
-    copy($ripFiler->pathLegacy([$TorrentID, $LogID]), $ripFiler->path([$TorrentID, $LogID]));
+    $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
     $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 }
 

@@ -5,61 +5,40 @@ namespace Gazelle\File;
 class RipLogHTML extends \Gazelle\File {
     const STORAGE = STORAGE_PATH_RIPLOGHTML;
 
-    public function get($id) {
-        $path = $this->path($id);
-        if (!file_exists($path)) {
-            $torrentId = $id[0];
-            $logId = $id[1];
-            $save = $this->db->get_query_id();
-            $this->db->prepared_query('
-                SELECT Log FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
-                ', $torrentId, $logId
-            );
-            if (!$this->db->has_results()) {
-                return null;
-            }
-            list($file) = $this->db->next_record();
-            $this->put($file, $id);
-            $this->db->set_query_id($save);
-            // PHASE 2: DELETE FROM torrents_logs
-        }
-        return file_get_contents($path);
-    }
-
-    public function put($source, $id) {
-        $out = fopen($this->path($id), 'wb');
-        fwrite($out, $source);
-        fclose($out);
-        return true;
-    }
-
-    public function remove($id) {
+    /**
+     * Remove one or more HTML-ized rip logs of a torrent
+     *
+     * @param array $id The unique identifier [torrentId, logId] of the object
+     *                  If logId is null, all logs are taken into consideration
+     * @param boolean True (TODO: record individual unlink successes in the case of a wildcard
+     */
+    public function remove(/* array */ $id) {
         $torrentId = $id[0];
         $logId = $id[1];
         if (is_null($logId)) {
-            $htmlfiles = glob($this->path($torrentId, '*'));
+            $htmlfiles = glob($this->path([$torrentId, '*']));
             foreach ($htmlfiles as $path) {
                 if (preg_match('/(\d+)\.log/', $path, $match)) {
                     $logId = $match[1];
                     $this->remove([$torrentId, $logId]);
                 }
             }
+        } else {
+            $path = $this->path($id);
+            if (file_exists($path)) {
+                 @unlink($path);
+            }
         }
-        $path = $this->path($id);
-        if (file_exists($path)) {
-            unlink($path);
-        }
-        // PHASE 3: remove this
-        $this->db->prepared_query('
-            DELETE FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
-            ', $torrentId, $logId
-        );
-        // PHASE 2 end
-
         return true;
     }
 
-    public function path($id) {
+    /**
+     * Path of a HTML-ized rip log.
+     *
+     * @param array id rip log identifier [torrentId, logId]
+     * @return Fully qualified filename
+     */
+    public function path(/* array */ $id) {
         $torrentId = $id[0];
         $logId = $id[1];
         $key = strrev(sprintf('%04d', $torrentId));

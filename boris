@@ -38,13 +38,16 @@ G::init($DB, $Cache);
 
 $b = new \Boris\Boris(SITE_NAME . '> ');
 $preload = [
-    'cache'      => $Cache,
-    'db'         => $DB,
-    'bonus'      => new \Gazelle\Bonus,
-    'stylesheet' => new \Gazelle\Stylesheet,
-    'tagMan'     => new \Gazelle\Manager\Tag,
-    'torMan'     => new \Gazelle\Manager\Torrent,
-    'twig'       => new Twig\Environment(
+    'cache'       => $Cache,
+    'db'          => $DB,
+    'bonus'       => new \Gazelle\Bonus,
+    'fileHtml'    => new \Gazelle\File\RipLogHTML,
+    'fileLog'     => new \Gazelle\File\RipLog,
+    'fileTorrent' => new \Gazelle\File\Torrent,
+    'stylesheet'  => new \Gazelle\Stylesheet,
+    'tagMan'      => new \Gazelle\Manager\Tag,
+    'torMan'      => new \Gazelle\Manager\Torrent,
+    'twig'        => new Twig\Environment(
         new Twig\Loader\FilesystemLoader('templates'),
         ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
     ),

@@ -8,6 +8,13 @@ $TorrentID = intval($_GET['torrentid']);
 if (!$TorrentID) {
     error(404);
 }
+
+$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+$ripFiler->remove([$TorrentID, null]);
+
+$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$htmlFiler->remove([$TorrentID, null]);
+
 if (!$DB->scalar('SELECT 1 FROM torrents_logs WHERE TorrentID = ?', $TorrentID)) {
     error('Torrent has no logs.');
 }
