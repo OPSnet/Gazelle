@@ -15,7 +15,12 @@ if ($artistId < 1) {
     error(0);
 }
 
-$artist = new \Gazelle\Artist($artistId);
+try {
+    $artist = new \Gazelle\Artist($artistId);
+}
+catch (Exception $e) {
+    error("Cannot find an artist with the ID {$artistId}: See the <a href=\"log.php?search=Artist+$artistId\">site log</a>.");
+}
 
 // Get the artist name and the body of the last revision
 list($name, $image, $body, $vanityHouse, $discogsId) = $artist->editableInformation();
