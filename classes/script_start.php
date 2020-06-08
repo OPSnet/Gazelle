@@ -74,6 +74,13 @@ G::$Twig = new Environment(
 );
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
+    'number_format',
+    function ($text) {
+        return number_format($text);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
     'checked',
     function ($isChecked) {
         return $isChecked ? ' checked="checked"' : '';
@@ -84,6 +91,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
     'selected',
     function ($isSelected) {
         return $isSelected ? ' selected="selected"' : '';
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'ucfirst',
+    function ($text) {
+        return ucfirst($text);
     }
 ));
 

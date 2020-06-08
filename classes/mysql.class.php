@@ -403,6 +403,13 @@ class DB_MYSQL {
         }
     }
 
+    function next_row($type = MYSQLI_NUM) {
+        if ($this->LinkID) {
+            return mysqli_fetch_array($this->QueryID, $type);
+        }
+        return null;
+    }
+
     function next_record($Type = MYSQLI_BOTH, $Escape = true, $Reverse = false) {
         // $Escape can be true, false, or an array of keys to not escape
         // If $Reverse is true, then $Escape is an array of keys to escape

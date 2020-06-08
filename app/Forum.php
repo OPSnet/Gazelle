@@ -5,6 +5,8 @@ namespace Gazelle;
 class Forum extends Base {
     protected $forumId;
 
+    const CACHE_TOC = 'forum_toc';
+
     /**
      * Construct a Forum object
      *
@@ -118,6 +120,7 @@ class Forum extends Base {
             WHERE ID = ?
             ", $postId,  $userId, $threadId, $this->forumId
         );
+        $this->cache->delete_value(self::CACHE_TOC);
     }
 
     /**
@@ -253,5 +256,53 @@ class Forum extends Base {
             WHERE p.ID = ?
             ", $postId, POSTS_PER_PAGE, $postId
         );
+    }
+
+    /**
+     * The forum table of contents (the main /forums.php view)
+     *
+     * @return array
+     *  - string category name "Community"
+     *  containing an array of (one per forum):
+     *    - int forum id
+     *    - string forum name "The Lounge"
+     *    - string forum description "The Lounge"
+     *    - int number of threads (topics)
+     *    - int number of posts (sum of posts of all threads)
+     *    - int thread id of most recent post
+     *    - int min class read   \
+     *    - int min class write   -- ACLs
+     *    - int min class create /
+     *    - int number of posts in most recent thread
+     *    - string title of most recent thread
+     *    - int user id of author of most recent post
+     *    - int post id of most recent post
+     *    - timestamp date of most recent thread (creation or post)
+     *    - int last post is locked (0/1)
+     *    - int last post is sticky (0/1)
+     */
+    public function tableOfContents() {
+        if (!$toc = $this->cache->get_value(self::CACHE_TOC)) {
+            $this->db->prepared_query("
+                SELECT cat.Name AS categoryName,
+                    f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts, f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
+                    ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked
+                FROM forums f
+                INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
+                LEFT JOIN forums_topics ft ON (ft.ID = f.LastPostTopicID)
+                ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
+            ");
+            $toc = [];
+            while ($row = $this->db->next_row(MYSQLI_ASSOC)) {
+                $category = $row['categoryName'];
+                unset($row['categoryName']);
+                if (!isset($toc[$category])) {
+                    $toc[$category] = [];
+                }
+                $toc[$category][] = $row;
+            }
+            $this->cache->cache_value(self::CACHE_TOC, $toc, 86400 * 10);
+        }
+        return $toc;
     }
 }

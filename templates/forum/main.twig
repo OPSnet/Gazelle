@@ -1,0 +1,38 @@
+{% if seen == 1 %}
+<h3>{{ category }}</h3>
+<table class="forum_index m_table">
+    <tr class="colhead">
+        <td style="width: 2%;"></td>
+        <td class="m_th_left" style="width: 25%;">Forum</td>
+        <td>Last Post</td>
+        <td class="m_th_right" style="width: 7%;">Topics</td>
+        <td class="m_th_right" style="width: 7%;">Posts</td>
+    </tr>
+{% endif %}
+<tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <td class="td_read {{ is_read }} {{ tool_tip }}" title="{{ is_read | ucfirst }}"></td>
+    <td class="td_forum">
+        <h4 class="min_padding">
+            <a class="{{ tool_tip }}" href="forums.php?action=viewforum&amp;forumid={{ forum.ID }}" title="{{ forum.Description }}">{{ forum.Name }}</a>
+        </h4>
+    </td>
+{% if not forum.NumPosts %}
+    <td class="td_latest">
+        There are no topics here.{% if creator %} <a href="forums.php?action=new&amp;forumid={{ forum.ID }}}">Create one!</a>{% endif %}
+    </td>
+{% else %}
+    <td class="td_latest">
+        <span style="float: left;" class="last_topic">
+            <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostTopicID }}" class="tooltip" data-title-plain="{{ forum.Title }}" title="{{ forum.Title }}">{{ cut_title }}</a>
+        </span>
+{% if last_read %}
+        <span style="float: left;" class="{{ tool_tip }} last_read" title="Jump to last read">
+            <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostTopicID }}&amp;page={{ page }}#post{{ latest_id }}"></a>
+        </span>
+{% endif %}
+    <span style="float: right;" class="last_poster">by {{ user|raw }} {{ user_time|raw }}</span>
+    </td>
+{% endif %}
+    <td class="td_topic_count number_column m_td_right">{{ forum.NumTopics | number_format }}</td>
+    <td class="td_post_count number_column m_td_right">{{ forum.NumPosts | number_format }}</td>
+</tr>
