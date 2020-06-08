@@ -289,7 +289,7 @@ class Forum extends Base {
                 FROM forums f
                 INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
                 LEFT JOIN forums_topics ft ON (ft.ID = f.LastPostTopicID)
-                ORDER BY cat.Sort, f.Sort
+                ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
             ");
             $toc = [];
             while ($row = $this->db->next_row(MYSQLI_ASSOC)) {

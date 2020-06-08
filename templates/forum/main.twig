@@ -26,7 +26,7 @@
             <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostID }}" class="tooltip" data-title-plain="{{ forum.Title }}" title="{{ forum.Title }}">{{ cut_title }}</a>
         </span>
 {% if last_read %}
-        <span style="float: left;" class="{{ Tooltip }} last_read" title="Jump to last read">
+        <span style="float: left;" class="{{ tool_tip }} last_read" title="Jump to last read">
             <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostID }}&amp;page={{ page }} #post{{ post_id }}"></a>
         </span>
 {% endif %}
