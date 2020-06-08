@@ -50,7 +50,7 @@ $JsonCategories = [];
 $JsonCategory = [];
 $JsonForums = [];
 foreach ($Forums as $Forum) {
-    list($ForumID, $CategoryID, $ForumName, $ForumDescription, $MinRead, $MinWrite, $MinCreate, $NumTopics, $NumPosts, $LastPostID, $LastAuthorID, $LastTopicID, $LastTime, $SpecificRules, $LastTopic, $Locked, $Sticky) = array_values($Forum);
+    list($ForumID, $CategoryID, $ForumName, $ForumDescription, $MinRead, $MinWrite, $MinCreate, $NumTopics, $NumPosts, $LastPostID, $LastAuthorID, $LastTopicID, $LastTime, $LastTopic, $Locked, $Sticky) = array_values($Forum);
     if ($LoggedUser['CustomForums'][$ForumID] != 1
             && ($MinRead > $LoggedUser['Class']
             || array_search($ForumID, $RestrictedForums) !== false)
@@ -94,7 +94,6 @@ foreach ($Forums as $Forum) {
         'lastPostAuthorName' => $UserInfo['Username'],
         'lastTopicId'        => (float)$LastTopicID,
         'lastTime'           => $LastTime,
-        'specificRules'      => $SpecificRules,
         'lastTopic'          => display_str($LastTopic),
         'read'               => $Read == 1,
         'locked'             => $Locked == 1,

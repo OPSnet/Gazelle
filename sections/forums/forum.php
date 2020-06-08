@@ -128,25 +128,6 @@ View::show_header('Forums &gt; '. $Forums[$ForumID]['Name'], '', $IsDonorForum ?
             </div>
         </div>
     </div>
-<?php    if (check_perms('site_moderate_forums')) { ?>
-    <div class="linkbox">
-        <a href="forums.php?action=edit_rules&amp;forumid=<?=$ForumID?>" class="brackets">Change specific rules</a>
-    </div>
-<?php    } ?>
-<?php    if (!empty($Forums[$ForumID]['SpecificRules'])) { ?>
-    <div class="linkbox">
-            <strong>Forum Specific Rules</strong>
-<?php        foreach ($Forums[$ForumID]['SpecificRules'] as $ThreadIDs) {
-            $Thread = Forums::get_thread_info($ThreadIDs);
-            if ($Thread === null) {
-                error(404);
-            }
-?>
-        <br />
-        <a href="forums.php?action=viewthread&amp;threadid=<?=$ThreadIDs?>" class="brackets"><?=display_str($Thread['Title'])?></a>
-<?php        } ?>
-    </div>
-<?php    } ?>
     <div class="linkbox pager">
 <?php
 $Pages = Format::get_pages($Page, $Forums[$ForumID]['NumTopics'], TOPICS_PER_PAGE, 9);
@@ -274,4 +255,5 @@ if (count($Forum) === 0) {
     </div>
     <div class="linkbox"><a href="forums.php?action=catchup&amp;forumid=<?=$ForumID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a></div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

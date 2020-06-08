@@ -154,7 +154,7 @@ class Forums {
     public static function get_forums() {
         if (!$Forums = G::$Cache->get_value('forums_list')) {
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query("
                 SELECT
                     f.ID,
                     f.CategoryID,
@@ -169,32 +169,16 @@ class Forums {
                     f.LastPostAuthorID,
                     f.LastPostTopicID,
                     f.LastPostTime,
-                    0 AS SpecificRules,
                     t.Title,
                     t.IsLocked AS Locked,
                     t.IsSticky AS Sticky
                 FROM forums AS f
-                    JOIN forums_categories AS fc ON fc.ID = f.CategoryID
-                    LEFT JOIN forums_topics AS t ON t.ID = f.LastPostTopicID
+                INNER JOIN forums_categories AS fc ON (fc.ID = f.CategoryID)
+                LEFT JOIN forums_topics AS t ON (t.ID = f.LastPostTopicID)
                 GROUP BY f.ID
-                ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort, f.Name");
+                ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort, f.Name
+            ");
             $Forums = G::$DB->to_array('ID', MYSQLI_ASSOC, false);
-
-            G::$DB->query("
-                SELECT ForumID, ThreadID
-                FROM forums_specific_rules");
-            $SpecificRules = [];
-            while (list($ForumID, $ThreadID) = G::$DB->next_record(MYSQLI_NUM, false)) {
-                $SpecificRules[$ForumID][] = $ThreadID;
-            }
-            G::$DB->set_query_id($QueryID);
-            foreach ($Forums as $ForumID => &$Forum) {
-                if (isset($SpecificRules[$ForumID])) {
-                    $Forum['SpecificRules'] = $SpecificRules[$ForumID];
-                } else {
-                    $Forum['SpecificRules'] = [];
-                }
-            }
             G::$Cache->cache_value('forums_list', $Forums, 0);
         }
         return $Forums;

@@ -26,7 +26,6 @@ G::$Router->addGet('catchup',            __DIR__ . '/catchup.php');
 G::$Router->addGet('change_vote',        __DIR__ . '/change_vote.php');
 G::$Router->addGet('delete',             __DIR__ . '/delete.php');
 G::$Router->addGet('delete_poll_option', __DIR__ . '/delete_poll_option.php');
-G::$Router->addGet('edit_rules',         __DIR__ . '/edit_rules.php');
 G::$Router->addGet('get_post',           __DIR__ . '/get_post.php');
 G::$Router->addGet('new',                __DIR__ . '/newthread.php');
 G::$Router->addGet('search',             __DIR__ . '/search.php');
