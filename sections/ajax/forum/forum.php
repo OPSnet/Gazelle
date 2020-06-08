@@ -81,26 +81,15 @@ if ($LoggedUser['CustomForums'][$ForumID] != 1 && $Forums[$ForumID]['MinClassRea
 }
 
 $ForumName = display_str($Forums[$ForumID]['Name']);
-$JsonSpecificRules = [];
-foreach ($Forums[$ForumID]['SpecificRules'] as $ThreadIDs) {
-    $Thread = Forums::get_thread_info($ThreadIDs);
-    $JsonSpecificRules[] = [
-        'threadId' => (int)$ThreadIDs,
-        'thread' => display_str($Thread['Title'])
-    ];
-}
 
 $Pages = Format::get_pages($Page, $Forums[$ForumID]['NumTopics'], TOPICS_PER_PAGE, 9);
 
-if (count($Forum) === 0) {
-    print
-        json_encode(
-            [
-                'status' => 'success',
-                'forumName' => $ForumName,
-                'threads' => []
-            ]
-        );
+if (!count($Forum)) {
+    print json_encode([
+        'status' => 'success',
+        'forumName' => $ForumName,
+        'threads' => []
+    ]);
 } else {
     // forums_last_read_topics is a record of the last post a user read in a topic, and what page that was on
     $args = array_keys($Forum);
@@ -170,17 +159,13 @@ if (count($Forum) === 0) {
         ];
     }
 
-    print
-        json_encode(
-            [
-                'status' => 'success',
-                'response' => [
-                    'forumName' => $ForumName,
-                    'specificRules' => $JsonSpecificRules,
-                    'currentPage' => (int)$Page,
-                    'pages' => ceil($Forums[$ForumID]['NumTopics'] / TOPICS_PER_PAGE),
-                    'threads' => $JsonTopics
-                ]
-            ]
-        );
+    print json_encode([
+        'status' => 'success',
+        'response' => [
+            'forumName' => $ForumName,
+            'currentPage' => (int)$Page,
+            'pages' => ceil($Forums[$ForumID]['NumTopics'] / TOPICS_PER_PAGE),
+            'threads' => $JsonTopics
+        ]
+    ]);
 }
