@@ -25,7 +25,7 @@ foreach ($toc as $category => $forumList) {
             'category'  => $category,
             'cut_title' => Format::cut_string($forum['Title'], 50, 1),
             'forum'     => $forum,
-            'is_read'   => Forums::is_unread($forum['IsLocked'], $forum['IsSticky'], $forum['LastPostID'], $LastRead, $forum['LastPostID'], $forum['LastPostTime'])
+            'is_read'   => Forums::is_unread($forum['IsLocked'], $forum['IsSticky'], $forum['LastPostID'], $LastRead, $forum['LastPostTopicID'], $forum['LastPostTime'])
                 ? 'unread' : 'read',
             'last_read' => $lastPostId,
             'page'      => $lastPostId ? $LastRead[$forum['LastPostID']]['Page'] : 0,
