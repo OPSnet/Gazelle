@@ -269,6 +269,7 @@ class Forum extends Base {
      *    - string forum description "The Lounge"
      *    - int number of threads (topics)
      *    - int number of posts (sum of posts of all threads)
+     *    - int thread id of most recent post
      *    - int min class read   \
      *    - int min class write   -- ACLs
      *    - int min class create /
@@ -284,7 +285,7 @@ class Forum extends Base {
         if (!$toc = $this->cache->get_value(self::CACHE_TOC)) {
             $this->db->prepared_query("
                 SELECT cat.Name AS categoryName,
-                    f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
+                    f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts, f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
                     ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked
                 FROM forums f
                 INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)

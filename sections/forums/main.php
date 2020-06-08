@@ -19,7 +19,7 @@ foreach ($toc as $category => $forumList) {
         if ($forum['ID'] == DONOR_FORUM) {
             $forum['Description'] = donorForumDescription();
         }
-        $lastPostId = $LastRead[$forum['LastPostID']] ?? 0;
+        $lastPostId = $LastRead[$forum['LastPostTopicID']] ?? 0;
         echo G::$Twig->render('forum/main.twig', [
             'creator'   => $forum['MinClassCreate'] <= $LoggedUser['Class'],
             'category'  => $category,
