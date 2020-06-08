@@ -17,7 +17,7 @@ foreach ($toc as $category => $forumList) {
             continue;
         }
         if ($forum['ID'] == DONOR_FORUM) {
-            $forum['Description'] = donorForumTitle();
+            $forum['Description'] = donorForumDescription();
         }
         $lastPostId = $LastRead[$forum['LastPostID']] ?? 0;
         echo G::$Twig->render('forum/main.twig', [
