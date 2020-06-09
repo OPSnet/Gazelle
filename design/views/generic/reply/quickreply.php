@@ -150,7 +150,7 @@
                             <label for="mergebox">Merge</label>
 <?php
         }
-        if (!G::$LoggedUser['DisableAutoSave']) {
+        if (isset(G::$LoggedUser['DisableAutoSave']) && !G::$LoggedUser['DisableAutoSave']) {
 ?>
                             <script type="application/javascript">
                                 var storedTempTextarea = new StoreText('quickpost', 'quickpostform', <?=$InputID?>);
