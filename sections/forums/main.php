@@ -28,8 +28,8 @@ foreach ($toc as $category => $forumList) {
             'is_read'   => Forums::is_unread($forum['IsLocked'], $forum['IsSticky'], $forum['LastPostID'], $LastRead, $forum['LastPostTopicID'], $forum['LastPostTime'])
                 ? 'unread' : 'read',
             'last_read' => $lastPostId,
-            'page'      => $lastPostId ? $LastRead[$forum['LastPostID']]['Page'] : 0,
-            'post_id'   => $lastPostId ? $LastRead[$forum['LastPostID']]['PostID'] : 0,
+            'page'      => $lastPostId ? $LastRead[$forum['LastPostTopicID']]['Page'] : 0,
+            'latest_id' => $lastPostId ? $LastRead[$forum['LastPostTopicID']]['PostID'] : 0,
             'seen'      => ++$seen, // $seen == 1 implies <table> needs to be emitted
             'tool_tip'  => $forum['ID'] == DONOR_FORUM ? 'tooltip_gold' : 'tooltip',
             'user'      => Users::format_username($forum['LastPostAuthorID'], false, false, false),

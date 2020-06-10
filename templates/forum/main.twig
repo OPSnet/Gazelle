@@ -27,7 +27,7 @@
         </span>
 {% if last_read %}
         <span style="float: left;" class="{{ tool_tip }} last_read" title="Jump to last read">
-            <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostID }}&amp;page={{ page }} #post{{ post_id }}"></a>
+            <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostTopicID }}&amp;page={{ page }}#post{{ latest_id }}"></a>
         </span>
 {% endif %}
     <span style="float: right;" class="last_poster">by {{ user|raw }} {{ user_time|raw }}</span>
