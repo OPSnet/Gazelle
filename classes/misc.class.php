@@ -142,106 +142,11 @@ class Misc {
      * @return -1 on error, -2 on user not existing, thread id on success.
      */
     public static function create_thread($ForumID, $AuthorID, $Title, $PostBody) {
-        global $Time;
         if (!$ForumID || !$AuthorID || !is_number($AuthorID) || !$Title || !$PostBody) {
             return -1;
         }
-
-        $QueryID = G::$DB->get_query_id();
-
-        $User = Users::user_info($AuthorID);
-        $AuthorName = $User['Username'];
-
-        $ThreadInfo = [];
-        $ThreadInfo['IsLocked'] = 0;
-        $ThreadInfo['IsSticky'] = 0;
-
         $forum = new \Gazelle\Forum($ForumID);
-        list($TopicID, $PostID) = $forum->addThread($AuthorId, $Title, $PostBody);
-        $Posts = 1;
-
-        // Bump this topic to head of the cache
-        list($Forum,,, $Stickies) = G::$Cache->get_value("forums_$ForumID");
-        if (!empty($Forum)) {
-            if (count($Forum) == TOPICS_PER_PAGE && $Stickies < TOPICS_PER_PAGE) {
-                array_pop($Forum);
-            }
-            G::$DB->prepared_query('
-                SELECT IsLocked, IsSticky, NumPosts
-                FROM forums_topics
-                WHERE ID = ?', $TopicID);
-            list($IsLocked, $IsSticky, $NumPosts) = G::$DB->next_record();
-            $Part1 = array_slice($Forum, 0, $Stickies, true); //Stickys
-            $Part2 = [
-                $TopicID => [
-                    'ID' => $TopicID,
-                    'Title' => $Title,
-                    'AuthorID' => $AuthorID,
-                    'IsLocked' => $IsLocked,
-                    'IsSticky' => $IsSticky,
-                    'NumPosts' => $NumPosts,
-                    'LastPostID' => $PostID,
-                    'LastPostTime' => sqltime(),
-                    'LastPostAuthorID' => $AuthorID,
-                    ]
-                ]; //Bumped thread
-            $Part3 = array_slice($Forum, $Stickies, TOPICS_PER_PAGE, true); //Rest of page
-            if ($Stickies > 0) {
-                $Part1 = array_slice($Forum, 0, $Stickies, true); //Stickies
-                $Part3 = array_slice($Forum, $Stickies, TOPICS_PER_PAGE - $Stickies - 1, true); //Rest of page
-            } else {
-                $Part1 = [];
-                $Part3 = $Forum;
-            }
-            if (is_null($Part1)) {
-                $Part1 = [];
-            }
-            if (is_null($Part3)) {
-                $Part3 = [];
-            }
-            $Forum = $Part1 + $Part2 + $Part3;
-            G::$Cache->cache_value("forums_$ForumID", [$Forum, '', 0, $Stickies], 0);
-        }
-
-        //Update the forum root
-        G::$Cache->begin_transaction('forums_list');
-        $UpdateArray = [
-            'NumPosts' => '+1',
-            'NumTopics' => '+1',
-            'LastPostID' => $PostID,
-            'LastPostAuthorID' => $AuthorID,
-            'LastPostTopicID' => $TopicID,
-            'LastPostTime' => sqltime(),
-            'Title' => $Title,
-            'IsLocked' => $ThreadInfo['IsLocked'],
-            'IsSticky' => $ThreadInfo['IsSticky']
-            ];
-
-        $UpdateArray['NumTopics'] = '+1';
-
-        G::$Cache->update_row($ForumID, $UpdateArray);
-        G::$Cache->commit_transaction(0);
-
-        $CatalogueID = floor((POSTS_PER_PAGE * ceil($Posts / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
-        G::$Cache->begin_transaction('thread_'.$TopicID.'_catalogue_'.$CatalogueID);
-        $Post = [
-            'ID' => $PostID,
-            'AuthorID' => G::$LoggedUser['ID'],
-            'AddedTime' => sqltime(),
-            'Body' => $PostBody,
-            'EditedUserID' => 0,
-            'EditedTime' => '0000-00-00 00:00:00',
-            'Username' => ''
-            ];
-        G::$Cache->insert('', $Post);
-        G::$Cache->commit_transaction(0);
-
-        G::$Cache->begin_transaction('thread_'.$TopicID.'_info');
-        G::$Cache->update_row(false, ['Posts' => '+1', 'LastPostAuthorID' => $AuthorID]);
-        G::$Cache->commit_transaction(0);
-
-        G::$DB->set_query_id($QueryID);
-
+        list($TopicID, $PostID) = $forum->addThread((int)$AuthorId, $Title, $PostBody);
         return $TopicID;
     }
 

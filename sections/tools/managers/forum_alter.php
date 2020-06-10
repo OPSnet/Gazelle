@@ -68,9 +68,6 @@ if ($_POST['submit'] == 'Delete') { //Delete
                 ('$P[sort]', '$P[categoryid]', '$P[name]', '$P[description]', '$P[minclassread]', '$P[minclasswrite]', '$P[minclasscreate]', '$P[autolock]', '$P[autolockweeks]')");
     }
 }
-
 $Cache->delete_value('forums_list'); // Clear cache
 
-// Go back
-header('Location: tools.php?action=forum')
-?>
+header('Location: tools.php?action=forum');

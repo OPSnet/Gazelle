@@ -5,7 +5,8 @@ namespace Gazelle;
 class Forum extends Base {
     protected $forumId;
 
-    const CACHE_TOC = 'forum_toc';
+    const CACHE_TOC_MAIN  = 'forum_toc_main';
+    const CACHE_TOC_FORUM = 'forum_toc_%d';
 
     /**
      * Construct a Forum object
@@ -17,6 +18,24 @@ class Forum extends Base {
     public function __construct(int $id = 0) {
         parent::__construct();
         $this->forumId = $id;
+    }
+
+    /**
+     * Does the forum exist? (Did someone try to look at forumid = 982451653?)
+     *
+     * @param int $id The forum ID.
+     * @return bool True if it exists
+     */
+    public function exists() {
+        return 1 == $this->db->scalar("SELECT 1 FROM forums WHERE ID = ?", $this->forumId);
+    }
+
+    /* for the transition from sections/ to app/ - delete when done */
+    public function flushCache() {
+        $this->cache->deleteMulti([
+            self::CACHE_TOC_MAIN,
+            sprintf(self::CACHE_TOC_FORUM, $this->forumId)
+        ]);
     }
 
     /**
@@ -46,14 +65,24 @@ class Forum extends Base {
             ", $this->forumId, $title, $userId, $userId
         );
         $threadId = $this->db->inserted_id();
-
+        $body = trim($body);
         $this->db->prepared_query("
             INSERT INTO forums_posts
                    (TopicID, AuthorID, Body)
             VALUES (?,       ?,        ?)
-            ", $threadId, $userId, trim($body)
+            ", $threadId, $userId, $body
         );
         $postId = $this->db->inserted_id();
+        $this->cache->cache_value("thread_{$threadId}_catalogue_0", [
+            $postId => [
+                'ID'           => $postId,
+                'AuthorID'     => $userId,
+                'AddedTime'    => sqltime(),
+                'Body'         => $body,
+                'EditedUserID' => 0,
+                'EditedTime'   => null,
+            ]
+        ]);
 
         $this->updateTopic($userId, $threadId, $postId);
         $this->db->set_query_id($qid);
@@ -69,6 +98,7 @@ class Forum extends Base {
      * @return int $postId The ID of the post
      */
     public function addPost(int $userId, int $threadId, string $body) {
+        $qid = $this->db->get_query_id();
         $this->db->prepared_query("
             INSERT INTO forums_posts
                    (TopicID, AuthorID, Body)
@@ -77,6 +107,7 @@ class Forum extends Base {
         );
         $postId = $this->db->inserted_id();
         $this->updateTopic($userId, $threadId, $postId);
+        $this->db->set_query_id($qid);
         return $postId;
     }
 
@@ -96,6 +127,12 @@ class Forum extends Base {
                 LastPostTime     = now()
             WHERE ID = ?
             ", $postId, $userId, $threadId
+        );
+        $numPosts = $this->db->scalar("
+            SELECT NumPosts
+            FROM forums_topics
+            WHERE ID = ?
+            ", $threadId
         );
         $this->updateRoot($userId, $threadId, $postId);
     }
@@ -120,7 +157,13 @@ class Forum extends Base {
             WHERE ID = ?
             ", $postId,  $userId, $threadId, $this->forumId
         );
-        $this->cache->delete_value(self::CACHE_TOC);
+        $this->cache->deleteMulti([
+            "forums_list",
+            "forums_{$threadId}",
+            "thread_{$threadId}_info",
+            self::CACHE_TOC_MAIN,
+            sprintf(self::CACHE_TOC_FORUM, $this->forumId)
+        ]);
     }
 
     /**
@@ -264,25 +307,24 @@ class Forum extends Base {
      * @return array
      *  - string category name "Community"
      *  containing an array of (one per forum):
-     *    - int forum id
-     *    - string forum name "The Lounge"
-     *    - string forum description "The Lounge"
-     *    - int number of threads (topics)
-     *    - int number of posts (sum of posts of all threads)
-     *    - int thread id of most recent post
-     *    - int min class read   \
-     *    - int min class write   -- ACLs
-     *    - int min class create /
-     *    - int number of posts in most recent thread
-     *    - string title of most recent thread
-     *    - int user id of author of most recent post
-     *    - int post id of most recent post
-     *    - timestamp date of most recent thread (creation or post)
-     *    - int last post is locked (0/1)
-     *    - int last post is sticky (0/1)
+     *    - int 'ID' Forum id
+     *    - string 'Name' Forum name "The Lounge"
+     *    - string 'Description' Forum description "The Lounge"
+     *    - int 'NumTopics' Number of threads (topics)
+     *    - int 'NumPosts' Number of posts (sum of posts of all threads)
+     *    - int 'LastPostTopicID' Thread id of most recent post
+     *    - int 'MinClassRead' Min class read     \
+     *    - int 'MinClassWrite' Min class write   -+-- ACLs
+     *    - int 'MinClassCreate' Min class create /
+     *    - string 'Title' Title of most recent thread
+     *    - int 'LastPostAuthorID' User id of author of most recent post
+     *    - int 'LastPostID' Post id of most recent post
+     *    - timestamp 'LastPostTime' Date of most recent thread (creation or post)
+     *    - int 'IsSticky' Last post is locked (0/1)
+     *    - int 'IsLocked' Last post is sticky (0/1)
      */
-    public function tableOfContents() {
-        if (!$toc = $this->cache->get_value(self::CACHE_TOC)) {
+    public function tableOfContentsMain() {
+        if (!$toc = $this->cache->get_value(self::CACHE_TOC_MAIN)) {
             $this->db->prepared_query("
                 SELECT cat.Name AS categoryName,
                     f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts, f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
@@ -301,8 +343,87 @@ class Forum extends Base {
                 }
                 $toc[$category][] = $row;
             }
-            $this->cache->cache_value(self::CACHE_TOC, $toc, 86400 * 10);
+            $this->cache->cache_value(self::CACHE_TOC_MAIN, $toc, 86400 * 10);
         }
         return $toc;
+    }
+
+    /**
+     * The number of topics in this forum
+     *
+     * return int Number of topics
+     */
+    public function topicCount() {
+        $toc = $this->tableOfContentsForum();
+        return current($toc)['threadCount'];
+    }
+
+    /**
+     * The table of contents of a forum. Only the first page is cached,
+     * the subsequent pages are regenerated on each pageview.
+     *
+     * @return array
+     *    - int 'ID' Forum id
+     *    - string 'Title' Thread name "We will snatch your unsnatched FLACs"
+     *    - int 'AuthorID' User id of author
+     *    - int 'AuthorID' Thread locked? '0'/'1'
+     *    - int 'IsSticky' Thread sticky? '0'/'1'
+     *    - int 'NumPosts' Number of posts in thread
+     *    - int 'LastPostID' Post id of most recent post
+     *    - timestamp 'LastPostTime' Date of most recent post
+     *    - int 'LastPostAuthorID' User id of author of most recent post
+     *    - int 'stickyCount' Number of sticky posts
+     *    - int 'threadCount' Total number of threads in forum
+     */
+    public function tableOfContentsForum(int $page = 1) {
+        $key = sprintf(self::CACHE_TOC_FORUM, $this->forumId);
+        if ($page > 1 || ($page == 1 && !$forumToc = $this->cache->get_value($key))) {
+            $this->db->prepared_query("
+                SELECT ID, Title, AuthorID, IsLocked, IsSticky,
+                    NumPosts, LastPostID, LastPostTime, LastPostAuthorID,
+                    (SELECT count(*) from forums_topics WHERE IsSticky = '1' AND ForumID = ?) AS stickyCount,
+                    (SELECT count(*) from forums_topics WHERE ForumID = ?) AS threadCount
+                FROM forums_topics
+                WHERE ForumID = ?
+                ORDER BY Ranking DESC, IsSticky DESC, LastPostTime DESC
+                LIMIT ?, ?
+                ", $this->forumId, $this->forumId, $this->forumId, ($page - 1) * TOPICS_PER_PAGE, TOPICS_PER_PAGE
+            );
+            $forumToc = $this->db->to_array('ID', MYSQLI_ASSOC, false);
+            if ($page == 1) {
+                $this->cache->cache_value($key, $forumToc, 86400 * 10);
+            }
+        }
+        return $forumToc;
+    }
+
+    /**
+     * return a list of which page the user has read up to
+     * @param int $userId The user id reading the forum
+     * @param int $perPage The number of topics per page
+     * @return array
+     *  - int 'TopicID' The thread id
+     *  - int 'PostID'  The post id
+     *  - int 'Page'    The page number
+     */
+    public function userLastRead(int $userId, int $perPage) {
+        $this->db->prepared_query("
+            SELECT
+                l.TopicID,
+                l.PostID,
+                CEIL((
+                        SELECT count(*)
+                        FROM forums_posts AS p
+                        WHERE p.TopicID = l.TopicID
+                            AND p.ID <= l.PostID
+                    ) / ?
+                ) AS Page
+            FROM forums_last_read_topics AS l
+            INNER JOIN forums_topics ft ON (ft.ID = l.TopicID)
+            WHERE ft.ForumID = ?
+                AND l.UserID = ?
+            ", $perPage, $this->forumId, $userId
+        );
+        return $this->db->to_array('TopicID');
     }
 }

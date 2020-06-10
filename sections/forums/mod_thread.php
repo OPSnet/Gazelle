@@ -98,6 +98,9 @@ if (isset($_POST['transition'])) {
     }
 }
 
+$forum = new \Gazelle\Forum($ForumID);
+$forum->flushCache();
+
 // If we're deleting a thread
 if (isset($_POST['delete'])) {
     if (!check_perms('site_admin_forums')) {
@@ -147,24 +150,8 @@ if (isset($_POST['delete'])) {
             LastPostTime = '$NewLastAddedTime'
         WHERE ID = '$ForumID'");
     $Cache->delete_value("forums_$ForumID");
-
     $Cache->delete_value("thread_$TopicID");
-
-    $Cache->begin_transaction('forums_list');
-    $UpdateArray = [
-        'NumPosts' => $NumPosts,
-        'NumTopics' => '-1',
-        'LastPostID' => $NewLastPostID,
-        'LastPostAuthorID' => $NewLastAuthorID,
-        'LastPostTopicID' => $NewLastTopic,
-        'LastPostTime' => $NewLastAddedTime,
-        'Title' => $NewLastTitle,
-        'IsLocked' => $NewLocked,
-        'IsSticky' => $NewSticky
-        ];
-
-    $Cache->update_row($ForumID, $UpdateArray);
-    $Cache->commit_transaction(0);
+    $Cache->delete_value('forums_list');
     $Cache->delete_value("thread_{$TopicID}_info");
 
     // subscriptions
@@ -183,17 +170,6 @@ if (isset($_POST['delete'])) {
         $Action = 'editing';
     }
 
-    $Cache->begin_transaction("thread_{$TopicID}_info");
-    $UpdateArray = [
-        'IsSticky' => $Sticky,
-        'Ranking' => $Ranking,
-        'IsLocked' => $Locked,
-        'Title' => Format::cut_string($RawTitle, 150, 1, 0),
-        'ForumID' => $ForumID
-        ];
-    $Cache->update_row(false, $UpdateArray);
-    $Cache->commit_transaction(0);
-
     $DB->query("
         UPDATE forums_topics
         SET
@@ -204,10 +180,8 @@ if (isset($_POST['delete'])) {
             ForumID = '$ForumID'
         WHERE ID = '$TopicID'");
 
-    // always clear cache when editing a thread.
-    // if a thread title, etc. is changed, this cache key must be cleared so the thread listing
-    // properly shows the new thread title.
     $Cache->delete_value("forums_$ForumID");
+    $Cache->delete_value("thread_{$TopicID}_info");
 
     if ($ForumID != $OldForumID) { // If we're moving a thread, change the forum stats
         $Cache->delete_value("forums_$OldForumID");
@@ -217,16 +191,8 @@ if (isset($_POST['delete'])) {
             FROM forums
             WHERE ID = '$ForumID'");
         list($MinClassRead, $MinClassWrite, $ForumName) = $DB->next_record(MYSQLI_NUM, false);
-        $Cache->begin_transaction("thread_{$TopicID}_info");
-        $UpdateArray = [
-            'ForumName' => $ForumName,
-            'MinClassRead' => $MinClassRead,
-            'MinClassWrite' => $MinClassWrite
-            ];
-        $Cache->update_row(false, $UpdateArray);
-        $Cache->commit_transaction(3600 * 24 * 5);
 
-        $Cache->begin_transaction('forums_list');
+        $Cache->delete_value('forums_list');
 
         // Forum we're moving from
         $DB->query("
@@ -266,24 +232,7 @@ if (isset($_POST['delete'])) {
             WHERE ID = '$OldForumID'");
 
 
-        $UpdateArray = [
-            'NumPosts' => $NumPosts,
-            'NumTopics' => '-1',
-            'LastPostID' => $NewLastPostID,
-            'LastPostAuthorID' => $NewLastAuthorID,
-            'LastPostTopicID' => $NewLastTopic,
-            'LastPostTime' => $NewLastAddedTime,
-            'Title' => $NewLastTitle,
-            'IsLocked' => $NewLocked,
-            'IsSticky' => $NewSticky,
-            'Ranking' => $NewRanking
-            ];
-
-
-        $Cache->update_row($OldForumID, $UpdateArray);
-
         // Forum we're moving to
-
         $DB->query("
             SELECT
                 t.ID,
@@ -317,20 +266,6 @@ if (isset($_POST['delete'])) {
                 LastPostTime = '$NewLastAddedTime'
             WHERE ID = '$ForumID'");
 
-
-        $UpdateArray = [
-            'NumPosts' => ($NumPosts + $Posts),
-            'NumTopics' => '+1',
-            'LastPostID' => $NewLastPostID,
-            'LastPostAuthorID' => $NewLastAuthorID,
-            'LastPostTopicID' => $NewLastTopic,
-            'LastPostTime' => $NewLastAddedTime,
-            'Title' => $NewLastTitle
-            ];
-
-        $Cache->update_row($ForumID, $UpdateArray);
-
-        $Cache->commit_transaction(0);
     } else { // Editing
         $DB->query("
             SELECT LastPostTopicID
@@ -338,15 +273,7 @@ if (isset($_POST['delete'])) {
             WHERE ID = '$ForumID'");
         list($LastTopicID) = $DB->next_record();
         if ($LastTopicID == $TopicID) {
-            $UpdateArray = [
-                'Title' => $RawTitle,
-                'IsLocked' => $Locked,
-                'IsSticky' => $Sticky,
-                'Ranking' => $Ranking
-            ];
-            $Cache->begin_transaction('forums_list');
-            $Cache->update_row($ForumID, $UpdateArray);
-            $Cache->commit_transaction(0);
+            $Cache->delete_value('forums_list');
         }
     }
     if ($Locked) {
