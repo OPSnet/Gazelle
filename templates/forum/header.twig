@@ -1,0 +1,45 @@
+    <h2><a href="forums.php">Forums</a> &gt; {{ name }}</h2>
+    <div class="linkbox">
+{% if create %}
+        <a href="forums.php?action=new&amp;forumid={{ id }}" class="brackets">New thread</a>
+{% endif %}
+        <a href="#" onclick="$('#searchforum').gtoggle(); this.innerHTML = (this.innerHTML == 'Search this forum' ? 'Hide search' : 'Search this forum'); return false;" class="brackets">Search this forum</a>
+        <div id="searchforum" class="hidden center">
+            <div style="display: inline-block;">
+                <h3>Search this forum:</h3>
+                <form class="search_form" name="forum" action="forums.php" method="get">
+                    <table cellpadding="6" cellspacing="1" border="0" class="layout border">
+                        <tr>
+                            <td>
+                                <input type="hidden" name="action" value="search" />
+                                <input type="hidden" name="forums[]" value="{{ id }}" />
+                                <strong>Search for:</strong>
+                            </td>
+                            <td>
+                                <input type="search" id="searchbox" name="search" size="70" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Search in:</strong></td>
+                            <td>
+                                <input type="radio" name="type" id="type_title" value="title" checked="checked" />
+                                <label for="type_title">Titles</label>
+                                <input type="radio" name="type" id="type_body" value="body" />
+                                <label for="type_body">Post bodies</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Posted by:</strong></td>
+                            <td><input type="search" id="username" name="user" placeholder="Username" size="70" /></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: center;">
+                                <input type="submit" name="submit" value="Search" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <br />
+            </div>
+        </div>
+    </div>

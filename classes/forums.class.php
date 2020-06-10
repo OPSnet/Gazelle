@@ -266,20 +266,6 @@ class Forums {
     }
 
     /**
-     * Determine if a thread is unread
-     * @param bool $Locked
-     * @param bool $Sticky
-     * @param int $LastPostID
-     * @param array $LastRead An array as returned by self::get_last_read
-     * @param int $LastTopicID TopicID of the thread where the most recent post was made
-     * @param string $LastTime Datetime of the last post
-     * @return bool
-     */
-    public static function is_unread($Locked, $Sticky, $LastPostID, $LastRead, $LastTopicID, $LastTime) {
-        return (!$Locked || $Sticky) && $LastPostID != 0 && ((empty($LastRead[$LastTopicID]) || $LastRead[$LastTopicID]['PostID'] < $LastPostID) && strtotime($LastTime) > G::$LoggedUser['CatchupTime']);
-    }
-
-    /**
      * Create the part of WHERE in the sql queries used to filter forums for a
      * specific user (MinClassRead, restricted and permitted forums).
      * @return string

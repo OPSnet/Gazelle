@@ -1,9 +1,7 @@
 <?php
 
 $forum = new \Gazelle\Forum();
-$toc = $forum->tableOfContents();
-$LastRead = Forums::get_last_read($Forums);
-
+$toc = $forum->tableOfContentsMain();
 View::show_header('Forums');
 ?>
 <div class="thin">
@@ -12,28 +10,36 @@ View::show_header('Forums');
 <?php
 foreach ($toc as $category => $forumList) {
     $seen = 0;
-    foreach ($forumList as $forum) {
-        if (!Forums::check_forumperm($forum['ID'])) {
+    foreach ($forumList as $f) {
+        if (!Forums::check_forumperm($f['ID'])) {
             continue;
         }
-        if ($forum['ID'] == DONOR_FORUM) {
-            $forum['Description'] = donorForumDescription();
+        if ($f['ID'] == DONOR_FORUM) {
+            $f['Description'] = donorForumDescription();
         }
-        $lastPostId = $LastRead[$forum['LastPostTopicID']] ?? 0;
+        $forum->setForum($f['ID']);
+        $userLastRead = $forum->userLastRead($LoggedUser['ID'], $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE);
+        $userRead = isset($userLastRead[$f['LastPostTopicID']]);
+        $latestPostRead = $userRead ? $userLastRead[$f['LastPostTopicID']]['PostID'] : 0;
+        $isRead = (!$f['IsLocked'] || $f['IsSticky'])
+            && ($latestPostRead > $f['LastPostID']
+            && strtotime($f['LastPostTime']) > G::$LoggedUser['CatchupTime']
+        ) ? 'read' : 'unread';
+
         echo G::$Twig->render('forum/main.twig', [
-            'creator'   => $forum['MinClassCreate'] <= $LoggedUser['Class'],
-            'category'  => $category,
-            'cut_title' => Format::cut_string($forum['Title'], 50, 1),
-            'forum'     => $forum,
-            'is_read'   => Forums::is_unread($forum['IsLocked'], $forum['IsSticky'], $forum['LastPostID'], $LastRead, $forum['LastPostTopicID'], $forum['LastPostTime'])
-                ? 'unread' : 'read',
-            'last_read' => $lastPostId,
-            'page'      => $lastPostId ? $LastRead[$forum['LastPostTopicID']]['Page'] : 0,
-            'latest_id' => $lastPostId ? $LastRead[$forum['LastPostTopicID']]['PostID'] : 0,
-            'seen'      => ++$seen, // $seen == 1 implies <table> needs to be emitted
-            'tool_tip'  => $forum['ID'] == DONOR_FORUM ? 'tooltip_gold' : 'tooltip',
-            'user'      => Users::format_username($forum['LastPostAuthorID'], false, false, false),
-            'user_time' => time_diff($forum['LastPostTime'], 1),
+            'creator'        => $f['MinClassCreate'] <= $LoggedUser['Class'],
+            'category'       => $category,
+            'cut_title'      => Format::cut_string($f['Title'], 50, 1),
+            'forum'          => $f,
+            'id'             => $f['LastPostTopicID'],
+            'is_read'        => $isRead,
+            'last_post_diff' => time_diff($f['LastPostTime'], 1),
+            'last_post_user' => Users::format_username($f['LastPostAuthorID'], false, false, false),
+            'last_read_page' => $userRead ? $userLastRead[$f['LastPostTopicID']]['Page'] : null,
+            'last_read_post' => $userRead ? $userLastRead[$f['LastPostTopicID']]['PostID'] : null,
+            'seen'           => ++$seen, // $seen == 1 implies <table> needs to be emitted
+            'title'          => $f['Title'],
+            'tooltip'        => $f['ID'] == DONOR_FORUM ? 'tooltip_gold' : 'tooltip',
         ]);
     }
     /* close the <table> opened in first call to render() above */

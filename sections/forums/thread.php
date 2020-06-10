@@ -37,12 +37,6 @@ if (!isset($_GET['threadid']) || !is_number($_GET['threadid'])) {
     $ThreadID = $_GET['threadid'];
 }
 
-if (isset($LoggedUser['PostsPerPage'])) {
-    $PerPage = $LoggedUser['PostsPerPage'];
-} else {
-    $PerPage = POSTS_PER_PAGE;
-}
-
 //---------- Get some data to start processing
 
 // Thread information, constant across all pages
@@ -52,8 +46,6 @@ if ($ThreadInfo === null) {
 }
 $ForumID = $ThreadInfo['ForumID'];
 
-$IsDonorForum = $ForumID == DONOR_FORUM ? true : false;
-
 // Make sure they're allowed to look at the page
 if (!Forums::check_forumperm($ForumID)) {
     error(403);
@@ -61,6 +53,8 @@ if (!Forums::check_forumperm($ForumID)) {
 //Escape strings for later display
 $ThreadTitle = display_str($ThreadInfo['Title']);
 $ForumName = display_str($Forums[$ForumID]['Name']);
+$IsDonorForum = $ForumID == DONOR_FORUM ? true : false;
+$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
 if ($ThreadInfo['Posts'] > $PerPage) {
@@ -87,7 +81,7 @@ list($Page, $Limit) = Format::page_limit($PerPage, min($ThreadInfo['Posts'],$Pos
 if (($Page - 1) * $PerPage > $ThreadInfo['Posts']) {
     $Page = ceil($ThreadInfo['Posts'] / $PerPage);
 }
-list($CatalogueID,$CatalogueLimit) = Format::catalogue_limit($Page, $PerPage, THREAD_CATALOGUE);
+list($CatalogueID, $CatalogueLimit) = Format::catalogue_limit($Page, $PerPage, THREAD_CATALOGUE);
 
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
 if (!$Catalogue = $Cache->get_value("thread_{$ThreadID}_catalogue_$CatalogueID")) {
@@ -110,7 +104,7 @@ if (!$Catalogue = $Cache->get_value("thread_{$ThreadID}_catalogue_$CatalogueID")
         $Cache->cache_value("thread_{$ThreadID}_catalogue_$CatalogueID", $Catalogue, 0);
     }
 }
-$Thread = Format::catalogue_select($Catalogue, $Page, $PerPage, THREAD_CATALOGUE);
+$Thread = array_slice($Catalogue, (($PerPage * $Page - $PerPage) % THREAD_CATALOGUE), $PerPage, true);
 $LastPost = end($Thread);
 $LastPost = $LastPost['ID'];
 $FirstPost = reset($Thread);
@@ -440,7 +434,7 @@ if ($ThreadInfo['NoPoll'] == 0) {
 <?php
 } //End Polls
 
-//Sqeeze in stickypost
+// Squeeze in stickypost
 if ($ThreadInfo['StickyPostID']) {
     if ($ThreadInfo['StickyPostID'] != $Thread[0]['ID']) {
         array_unshift($Thread, $ThreadInfo['StickyPost']);
@@ -453,7 +447,6 @@ if ($ThreadInfo['StickyPostID']) {
 foreach ($Thread as $Key => $Post) {
     list($PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername) = array_values($Post);
     list($AuthorID, $Username, $PermissionID, $Paranoia, $Artist, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
-
 ?>
 <table class="forum_post wrap_overflow box vertical_margin<?php
     if (((!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky'])

@@ -10,10 +10,10 @@
     </tr>
 {% endif %}
 <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
-    <td class="td_read {{ is_read }} {{ tool_tip }}" title="{{ is_read | ucfirst }}"></td>
+    <td class="td_read {{ is_read }} {{ tooltip }}" title="{{ is_read | ucfirst }}"></td>
     <td class="td_forum">
         <h4 class="min_padding">
-            <a class="{{ tool_tip }}" href="forums.php?action=viewforum&amp;forumid={{ forum.ID }}" title="{{ forum.Description }}">{{ forum.Name }}</a>
+            <a class="{{ tooltip }}" href="forums.php?action=viewforum&amp;forumid={{ forum.ID }}" title="{{ forum.Description }}">{{ forum.Name }}</a>
         </h4>
     </td>
 {% if not forum.NumPosts %}
@@ -23,14 +23,15 @@
 {% else %}
     <td class="td_latest">
         <span style="float: left;" class="last_topic">
-            <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostTopicID }}" class="tooltip" data-title-plain="{{ forum.Title }}" title="{{ forum.Title }}">{{ cut_title }}</a>
+            <a href="forums.php?action=viewthread&amp;threadid={{ id }}" class="tooltip" data-title-plain="{{ title }}"{%
+                if title != cut_title %} title="{{ title }}"{% endif %}>{{ cut_title }}</a>
         </span>
-{% if last_read %}
-        <span style="float: left;" class="{{ tool_tip }} last_read" title="Jump to last read">
-            <a href="forums.php?action=viewthread&amp;threadid={{ forum.LastPostTopicID }}&amp;page={{ page }}#post{{ latest_id }}"></a>
+{% if is_read %}
+        <span style="float: left;" class="{{ tooltip }} last_read" title="Jump to last read">
+            <a href="forums.php?action=viewthread&amp;threadid={{ id }}&amp;page={{ last_read_page }}#post{{ last_read_post }}"></a>
         </span>
 {% endif %}
-    <span style="float: right;" class="last_poster">by {{ user|raw }} {{ user_time|raw }}</span>
+        <span style="float: right;" class="last_poster">by {{ last_post_user|raw }} {{ last_post_diff|raw }}</span>
     </td>
 {% endif %}
     <td class="td_topic_count number_column m_td_right">{{ forum.NumTopics | number_format }}</td>

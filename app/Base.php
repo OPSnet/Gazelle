@@ -11,6 +11,6 @@ class Base {
 
     public function __construct() {
         $this->db = new \DB_MYSQL;
-        $this->cache = new \CACHE;
+        $this->cache = \G::$Cache;
     }
 }
