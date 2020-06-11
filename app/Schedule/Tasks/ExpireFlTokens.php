@@ -6,14 +6,17 @@ class ExpireFlTokens extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $now = sqltime();
+        $slop   = 1.04; // 4% overshoot on download before forced expiry
+        $now    = sqltime();
         $expiry = FREELEECH_TOKEN_EXPIRY_DAYS;
+
         $this->db->prepared_query("
-            SELECT DISTINCT UserID
-            FROM users_freeleeches
-            WHERE Expired = FALSE
-                AND Time < ? - INTERVAL ? DAY
-        ", $now, $expiry);
+            SELECT DISTINCT uf.UserID
+            FROM users_freeleeches AS uf
+            INNER JOIN torrents AS t ON (t.ID = uf.TorrentID)
+            WHERE (uf.Expired = FALSE OR (t.Size > 0 AND uf.Downloaded / t.Size > ?))
+                AND uf.Time < ? - INTERVAL ? DAY
+        ", $slop, $now, $expiry);
 
         if ($this->db->has_results()) {
             while (list($userID) = $this->db->next_record()) {
@@ -24,10 +27,10 @@ class ExpireFlTokens extends \Gazelle\Schedule\Task
             $this->db->prepared_query("
                 SELECT uf.UserID, t.info_hash
                 FROM users_freeleeches AS uf
-                INNER JOIN torrents AS t ON (uf.TorrentID = t.ID)
-                WHERE uf.Expired = FALSE
+                INNER JOIN torrents AS t ON (t.ID = uf.TorrentID)
+                WHERE (uf.Expired = FALSE OR (t.Size > 0 AND uf.Downloaded / t.Size > ?))
                     AND uf.Time < ? - INTERVAL ? DAY
-            ", $now, $expiry);
+            ", $slop, $now, $expiry);
             while (list($userID, $infoHash) = $this->db->next_record(MYSQLI_NUM, false)) {
                 \Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($infoHash), 'userid' => $userID]);
                 $this->processed++;
@@ -35,9 +38,9 @@ class ExpireFlTokens extends \Gazelle\Schedule\Task
             $this->db->prepared_query("
                 UPDATE users_freeleeches
                 SET Expired = TRUE
-                WHERE Time < ? - INTERVAL ? DAY
-                    AND Expired = FALSE
-            ", $now, $expiry);
+                WHERE (Expired = FALSE OR (t.Size > 0 AND uf.Downloaded / t.Size > ?))
+                    AND Time < ? - INTERVAL ? DAY
+            ", $slop, $now, $expiry);
         }
     }
 }
