@@ -293,43 +293,8 @@ if (($TopicID = $Cache->get_value('polls_featured')) === false) {
     $Cache->cache_value('polls_featured', $TopicID, 3600 * 6);
 }
 if ($TopicID) {
-    if (($Poll = $Cache->get_value("polls_$TopicID")) === false) {
-        $DB->prepared_query('
-            SELECT Question, Answers, Featured, Closed
-            FROM forums_polls
-            WHERE TopicID = ?
-            ', $TopicID
-        );
-        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
-        if ($Featured == '') {
-            $Featured = null;
-        }
-        $Answers = unserialize($Answers);
-        $DB->prepared_query("
-            SELECT Vote, count(*)
-            FROM forums_polls_votes
-            WHERE Vote != '0'
-                AND TopicID = ?
-            GROUP BY Vote
-            ", $TopicID
-        );
-        $VoteArray = $DB->to_array(false, MYSQLI_NUM);
-
-        $Votes = [];
-        foreach ($VoteArray as $VoteSet) {
-            list($Key,$Value) = $VoteSet;
-            $Votes[$Key] = $Value;
-        }
-
-        for ($i = 1, $il = count($Answers); $i <= $il; ++$i) {
-            if (!isset($Votes[$i])) {
-                $Votes[$i] = 0;
-            }
-        }
-        $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, $Featured, $Closed], 86400 + rand(0, 3600));
-    } else {
-        list($Question, $Answers, $Votes, $Featured, $Closed) = $Poll;
-    }
+    $forum = new \Gazelle\Forum;
+    list($Question, $Answers, $Votes, $Featured, $Closed) = $forum->pollData($TopicID);
 
     if (!empty($Votes)) {
         $TotalVotes = array_sum($Votes);
@@ -339,15 +304,14 @@ if ($TopicID) {
         $MaxVotes = 0;
     }
 
-    $DB->prepared_query('
+    $UserResponse = $DB->scalar("
         SELECT Vote
         FROM forums_polls_votes
         WHERE UserID = ?
             AND TopicID = ?
-        ', $LoggedUser['ID'], $TopicID
+        ", $LoggedUser['ID'], $TopicID
     );
-    list($UserResponse) = $DB->next_record();
-    if (!empty($UserResponse) && $UserResponse != 0) {
+    if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     }
 ?>

@@ -1,72 +1,14 @@
 <?php
 
-if (!isset($_POST['topicid']) || !is_number($_POST['topicid'])) {
+$threadId = (int)$_POST['topicid'];
+if ($threadId < 1) {
     error(0, true);
 }
-$TopicID = $_POST['topicid'];
 
-if (!$ThreadInfo = $Cache->get_value("thread_$TopicID".'_info')) {
-    $DB->query("
-        SELECT
-            t.Title,
-            t.ForumID,
-            t.IsLocked,
-            t.IsSticky,
-            COUNT(fp.id) AS Posts,
-            t.LastPostAuthorID,
-            ISNULL(p.TopicID) AS NoPoll
-        FROM forums_topics AS t
-            JOIN forums_posts AS fp ON fp.TopicID = t.ID
-            LEFT JOIN forums_polls AS p ON p.TopicID = t.ID
-        WHERE t.ID = '$TopicID'
-        GROUP BY fp.TopicID");
-    if (!$DB->has_results()) {
-        die();
-    }
-    $ThreadInfo = $DB->next_record(MYSQLI_ASSOC);
-    if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
-        $Cache->cache_value("thread_$TopicID".'_info', $ThreadInfo, 0);
-    }
-}
-$ForumID = $ThreadInfo['ForumID'];
+$forum = new \Gazelle\Forum();
+$ForumID = $forum->setForumFromThread($threadId);
 
-if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("polls_$TopicID")) {
-    $DB->query("
-        SELECT
-            Question,
-            Answers,
-            Featured,
-            Closed
-        FROM forums_polls
-        WHERE TopicID = '$TopicID'");
-    list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
-    if ($Featured == '') {
-        $Featured = null;
-    }
-    $Answers = unserialize($Answers);
-    $DB->query("
-        SELECT Vote, COUNT(UserID)
-        FROM forums_polls_votes
-        WHERE TopicID = '$TopicID'
-            AND Vote != '0'
-        GROUP BY Vote");
-    $VoteArray = $DB->to_array(false, MYSQLI_NUM);
-
-    $Votes = [];
-    foreach ($VoteArray as $VoteSet) {
-        list($Key,$Value) = $VoteSet;
-        $Votes[$Key] = $Value;
-    }
-
-    for ($i = 1, $il = count($Answers); $i <= $il; ++$i) {
-        if (!isset($Votes[$i])) {
-            $Votes[$i] = 0;
-        }
-    }
-    $Cache->cache_value("polls_$TopicID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
-}
-
-
+list($Question, $Answers, $Votes, $Featured, $Closed) = $forum->pollData($threadId);
 if ($Closed) {
     error(403,true);
 }
@@ -86,7 +28,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     <input type="hidden" name="action" value="poll" />
     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
     <input type="hidden" name="large" value="<?=display_str($_POST['large'])?>" />
-    <input type="hidden" name="topicid" value="<?=$TopicID?>" />
+    <input type="hidden" name="topicid" value="<?=$threadId?>" />
 <?php
     for ($i = 1, $il = count($Answers); $i <= $il; $i++) { ?>
     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
@@ -105,15 +47,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     }
 
     //Add our vote
-    $DB->query("
-        INSERT IGNORE INTO forums_polls_votes
-            (TopicID, UserID, Vote)
-        VALUES
-            ($TopicID, " . $LoggedUser['ID'] . ", $Vote)");
-    if ($DB->affected_rows() == 1 && $Vote != 0) {
-        $Cache->begin_transaction("polls_$TopicID");
-        $Cache->update_row(2, [$Vote => '+1']);
-        $Cache->commit_transaction(0);
+    if ($forum->addPollVote($LoggedUser['ID'], $threadId, $Vote)) {
         $Votes[$Vote]++;
         $TotalVotes++;
         $MaxVotes++;
@@ -122,7 +56,6 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     if ($Vote != 0) {
         $Answers[$Vote] = '=> '.$Answers[$Vote];
     }
-
 ?>
         <ul class="poll nobullet">
 <?php
@@ -151,14 +84,14 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
                     fpv.Vote
                 FROM users_main AS um
                     JOIN forums_polls_votes AS fpv ON um.ID = fpv.UserID
-                WHERE TopicID = $TopicID
+                WHERE TopicID = $threadId
                 GROUP BY fpv.Vote");
 
             $StaffVotes = $DB->to_array();
             foreach ($StaffVotes as $StaffVote) {
                 list($StaffString, $StaffVoted) = $StaffVote;
 ?>
-                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$TopicID?>&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;vote=<?=(int)$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
+                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;vote=<?=(int)$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
 <?php
             }
         }
