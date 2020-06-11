@@ -74,12 +74,14 @@ class Forum extends Base {
         );
         $postId = $this->db->inserted_id();
         $this->cache->cache_value("thread_{$threadId}_catalogue_0", [
-            'ID'           => $postId,
-            'AuthorID'     => $userId,
-            'AddedTime'    => sqltime(),
-            'Body'         => $body,
-            'EditedUserID' => 0,
-            'EditedTime'   => null,
+            $postId => [
+                'ID'           => $postId,
+                'AuthorID'     => $userId,
+                'AddedTime'    => sqltime(),
+                'Body'         => $body,
+                'EditedUserID' => 0,
+                'EditedTime'   => null,
+            ]
         ]);
 
         $this->updateTopic($userId, $threadId, $postId);

@@ -445,9 +445,6 @@ if ($ThreadInfo['StickyPostID']) {
 }
 
 foreach ($Thread as $Key => $Post) {
-    if (!is_array($Post)) {
-        continue;
-    }
     list($PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername) = array_values($Post);
     list($AuthorID, $Username, $PermissionID, $Paranoia, $Artist, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
 ?>
