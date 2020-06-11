@@ -1,40 +1,23 @@
 <?php
 authorize();
 
-$ThreadID = $_POST['threadid'];
-$NewOption = $_POST['new_option'];
-
-if (!is_number($ThreadID)) {
+$threadId = (int)$_POST['threadid'];
+if ($threadId < 1) {
     error(404);
 }
+
 if (!check_perms('site_moderate_forums')) {
-    $DB->query("
-        SELECT ForumID
+    $forumId = $DB->scalar("
+        SELECT forumId
         FROM forums_topics
-        WHERE ID = $ThreadID");
-    list($ForumID) = $DB->next_record();
-    if (!in_array($ForumID, $ForumsRevealVoters)) {
+        WHERE ID = ?
+        ", $threadId
+    );
+    if (!in_array($forumId, $ForumsRevealVoters)) {
         error(403);
     }
 }
+$forum = new \Gazelle\Forum($forumId);
+$forum->addPollAnswer($threadId, trim($_POST['new_option']));
 
-$DB->query("
-    SELECT Answers
-    FROM forums_polls
-    WHERE TopicID = $ThreadID");
-if (!$DB->has_results()) {
-    error(404);
-}
-
-list($Answers) = $DB->next_record(MYSQLI_NUM, false);
-$Answers = unserialize($Answers);
-$Answers[] = $NewOption;
-$Answers = serialize($Answers);
-
-$DB->query("
-    UPDATE forums_polls
-    SET Answers = '".db_string($Answers)."'
-    WHERE TopicID = $ThreadID");
-$Cache->delete_value("polls_$ThreadID");
-
-header("Location: forums.php?action=viewthread&threadid=$ThreadID");
+header("Location: forums.php?action=viewthread&threadid=$threadId");

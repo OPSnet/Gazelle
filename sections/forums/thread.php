@@ -227,36 +227,8 @@ if (count($transitions) > 0) {
 <?php
 }
 if ($ThreadInfo['NoPoll'] == 0) {
-    if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $Cache->get_value("polls_$ThreadID")) {
-        $DB->query("
-            SELECT Question, Answers, Featured, Closed
-            FROM forums_polls
-            WHERE TopicID = '$ThreadID'");
-        list($Question, $Answers, $Featured, $Closed) = $DB->next_record(MYSQLI_NUM, [1]);
-        if ($Featured == '') {
-            $Featured = null;
-        }
-        $Answers = unserialize($Answers);
-        $DB->query("
-            SELECT Vote, COUNT(UserID)
-            FROM forums_polls_votes
-            WHERE TopicID = '$ThreadID'
-            GROUP BY Vote");
-        $VoteArray = $DB->to_array(false, MYSQLI_NUM);
-
-        $Votes = [];
-        foreach ($VoteArray as $VoteSet) {
-            list($Key,$Value) = $VoteSet;
-            $Votes[$Key] = $Value;
-        }
-
-        foreach (array_keys($Answers) as $i) {
-            if (!isset($Votes[$i])) {
-                $Votes[$i] = 0;
-            }
-        }
-        $Cache->cache_value("polls_$ThreadID", [$Question, $Answers, $Votes, $Featured, $Closed], 0);
-    }
+    $forum = new \Gazelle\Forum($ForumID);
+    list($Question, $Answers, $Votes, $Featured, $Closed) = $forum->pollData($ThreadID);
 
     if (!empty($Votes)) {
         $TotalVotes = array_sum($Votes);
@@ -268,13 +240,14 @@ if ($ThreadInfo['NoPoll'] == 0) {
 
     $RevealVoters = in_array($ForumID, $ForumsRevealVoters);
     //Polls lose the you voted arrow thingy
-    $DB->query("
+    $UserResponse = $DB->scalar("
         SELECT Vote
         FROM forums_polls_votes
-        WHERE UserID = '".$LoggedUser['ID']."'
-            AND TopicID = '$ThreadID'");
-    list($UserResponse) = $DB->next_record();
-    if (!empty($UserResponse) && $UserResponse != 0) {
+        WHERE UserID = ?
+            AND TopicID = ?
+        ", $LoggedUser['ID'], $ThreadID
+    );
+    if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     } else {
         if (!empty($UserResponse) && $RevealVoters) {
@@ -306,10 +279,10 @@ if ($ThreadInfo['NoPoll'] == 0) {
                         <span class="center_poll" style="width: <?=number_format($Ratio * 100, 2)?>%;"></span>
                         <span class="right_poll"></span>
                     </li>
-<?php            }
-            if ($Votes[0] > 0) {
+<?php       }
+            if ($Votes[0] ?? 0 > 0) {
 ?>
-                <li><?=($UserResponse == '0' ? '&raquo; ' : '')?>(Blank) (<?=number_format((float)($Votes[0] / $TotalVotes * 100), 2)?>%)</li>
+                <li><?=($UserResponse == '0' ? '&raquo; ' : '')?>(Blank) (<?=number_format((float)($Votes[0] ?? 0 / $TotalVotes * 100), 2)?>%)</li>
                 <li class="graph">
                     <span class="left_poll"></span>
                     <span class="center_poll" style="width: <?=number_format((float)($Votes[0] / $MaxVotes * 100), 2)?>%;"></span>

@@ -48,6 +48,25 @@ class Forum extends Base {
     }
 
     /**
+     * Set the forum ID from a thread ID.
+     *
+     * @param int $id The thread ID.
+     * @return int The forum ID.
+     */
+    public function setForumFromThread(int $threadId) {
+        if (!($forumId = $this->cache->get_value("thread_forum_" . $threadId))) {
+            $forumId = $this->db->scalar("
+                SELECT ForumID
+                FROM forums_topics
+                WHERE ID = ?
+                ", $threadId
+            );
+            $this->cache->cache_value("thread_forum_" . $threadId, $forumId, 0);
+        }
+        return $this->forumId = $forumId;
+    }
+
+    /**
      * Add a thread to the forum
      *
      * @param int $userID The author
@@ -167,6 +186,7 @@ class Forum extends Base {
 
     /**
      * Add a poll to a thread.
+     * TODO: add a closing date
      *
      * @param int $threadId The thread
      * @param string $question The poll question
@@ -179,6 +199,174 @@ class Forum extends Base {
             VALUES (?,       ?,        ?)
             ", $threadId, $question, serialize($answer)
         );
+    }
+
+    /**
+     * The answers for a poll
+     *
+     * @param int $threadId The thread
+     * @return array The answers
+     */
+    protected function fetchPollAnswers(int $threadId) {
+        return unserialize(
+            $this->db->scalar("
+                SELECT Answers
+                FROM forums_polls
+                WHERE TopicID = ?
+                ", $threadId
+            )
+        );
+    }
+
+    /**
+     * Save the answers for a poll
+     *
+     * @param int $threadId The thread
+     * @param array $answers The answers
+     */
+    protected function savePollAnswers(int $threadId, array $answers) {
+        $this->db->prepared_query("
+            UPDATE forums_polls SET
+                Answers = ?
+            WHERE TopicID = ?
+            ", serialize($answers), $threadId
+        );
+        $this->cache->delete_value("polls_$threadId");
+    }
+
+    /**
+     * Add a new answer to a poll.
+     *
+     * @param int $threadId The thread
+     * @param string $answer The new answer
+     */
+    public function addPollAnswer(int $threadId, string $answer) {
+        $answers = $this->fetchPollAnswers($threadId);
+        $answers[] = $answer;
+        $this->savePollAnswers($threadId, $answers);
+    }
+
+    /**
+     * Remove an answer from a poll.
+     *
+     * @param int $threadId The thread
+     * @param int $item The answer to remove (1-based)
+     */
+    public function removedPollAnswer(int $threadId, int $item) {
+        $answers = $this->fetchPollAnswers($threadId);
+        if ($answers) {
+            unset($Answers[$item]);
+            $this->savePollAnswers($threadId, $answers);
+            $this->prepared_query("
+                DELETE FROM forums_polls_votes
+                WHERE Vote = ?
+                    AND TopicID = ?
+                ", $item, $threadId
+            );
+            $this->cache->delete_value("polls_$ThreadID");
+        }
+    }
+
+    /**
+     * Get the data for a poll (TODO: spin off into a Poll object)
+     *
+     * @param int $threadId The thread
+     * @return array
+     * - string: question
+     * - array: answers
+     * - votes: recorded votes
+     * - featured: Featured on front page?
+     * - closed: Not more voting possible
+     */
+    public function pollData(int $threadId) {
+        if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $this->cache->get_value('polls_'.$threadId)) {
+            list($Question, $Answers, $Featured, $Closed) = $this->db->row("
+                SELECT Question, Answers, Featured, Closed
+                FROM forums_polls
+                WHERE TopicID = ?
+                ", $threadId
+            );
+            if ($Featured == '') {
+                $Featured = null;
+            }
+            $Answers = unserialize($Answers);
+            $this->db->prepared_query("
+                SELECT Vote, count(*)
+                FROM forums_polls_votes
+                WHERE Vote != '0'
+                    AND TopicID = ?
+                GROUP BY Vote
+                ", $threadId
+            );
+            $VoteArray = $this->db->to_array(false, MYSQLI_NUM);
+            $Votes = [];
+            foreach ($VoteArray as $VoteSet) {
+                list($Key,$Value) = $VoteSet;
+                $Votes[$Key] = $Value;
+            }
+            for ($i = 1, $end = count($Answers); $i <= $end; ++$i) {
+                if (!isset($Votes[$i])) {
+                    $Votes[$i] = 0;
+                }
+            }
+            $this->cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $Closed], 0);
+        }
+        return [$Question, $Answers, $Votes, $Featured, $Closed];
+    }
+
+    /**
+     * Vote on a poll
+     *
+     * @param int $userId Who is voting?
+     * @param int $threadId Where are they voting?
+     * @param int $vote What are they voting for?
+     * @return int 1 if this is the first time they have voted, otherwise 0
+     */
+    public function addPollVote(int $userId, int $threadId, int $vote) {
+        $this->db->prepared_query("
+            INSERT IGNORE INTO forums_polls_votes
+                   (TopicID, UserID, Vote)
+            VALUES (?,       ?,      ?)
+            ", $threadId, $userId, $vote
+        );
+        $change = $this->db->affected_rows();
+        if ($change) {
+            $this->cache->delete_value("polls_$threadId");
+        }
+        return $change;
+    }
+
+    /**
+     * Edit a poll
+     * TODO: feature and unfeature a poll.
+     *
+     * @param int $threadId In which thread?
+     * @param int $toFeature non-zero to feature on front page
+     * @param int $toClose toggle open/closed for voting
+     (*/
+    public function moderatePoll(int $threadId, int $toFeature, int $toClose) {
+        list($Question, $Answers, $Votes, $Featured, $Closed) = $this->pollData($threadId);
+        if ($toFeature && !$Featured) {
+            $Featured = sqltime();
+            $this->db->prepared_query("
+                UPDATE forums_polls SET
+                    Featured = ?
+                WHERE TopicID = ?
+                ", $Featured, $threadId
+            );
+            $this->cache->cache_value('polls_featured', $threadId ,0);
+        }
+
+        if ($toClose) {
+            $this->db->prepared_query("
+                UPDATE forums_polls SET
+                    Closed = ?
+                WHERE TopicID = ?
+                ", !$Closed, $threadId
+            );
+        }
+        $this->cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $toClose], 0);
+        $this->cache->delete_value('polls_'.$threadId);
     }
 
     /**
