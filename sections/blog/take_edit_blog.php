@@ -18,7 +18,8 @@ if ($ThreadID > 0) {
     }
 }
 elseif ($ThreadID === '') {
-    $ThreadID = Misc::create_thread(ANNOUNCEMENT_FORUM_ID, G::$LoggedUser['ID'], $_POST['title'], $_POST['body']);
+    $forum = new \Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
+    $ThreadID = $forum->addThread(G::$LoggedUser['ID'], $_POST['title'], $_POST['body']);
     if ($ThreadID < 1) {
         error(0);
     }

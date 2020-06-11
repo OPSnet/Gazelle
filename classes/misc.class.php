@@ -133,24 +133,6 @@ class Misc {
     }
 
     /**
-     * Create thread function.
-     *
-     * @param int $ForumID
-     * @param int $AuthorID ID of the user creating the post.
-     * @param string $Title
-     * @param string $PostBody
-     * @return -1 on error, -2 on user not existing, thread id on success.
-     */
-    public static function create_thread($ForumID, $AuthorID, $Title, $PostBody) {
-        if (!$ForumID || !$AuthorID || !is_number($AuthorID) || !$Title || !$PostBody) {
-            return -1;
-        }
-        $forum = new \Gazelle\Forum($ForumID);
-        list($TopicID, $PostID) = $forum->addThread((int)$AuthorId, $Title, $PostBody);
-        return $TopicID;
-    }
-
-    /**
      * Variant of in_array with trailing wildcard support
      *
      * @param string $Needle, array $Haystack
@@ -202,7 +184,6 @@ class Misc {
             }
         }
     }
-
 
     /*
      * Write a message to the system log.

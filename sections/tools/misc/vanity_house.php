@@ -107,11 +107,12 @@ if (isset($_POST['GroupID'])) {
             }
 
             //Add VH album and forum thread
+            $forum = new \Gazelle\Forum(VANITY_HOUSE_FORUM_ID);
             $DB->prepared_query('
                 INSERT INTO featured_albums
                        (GroupID, ThreadID, Type)
                 VALUES (?,       ?,        1)
-                ', $GroupID, Misc::create_thread(VANITY_HOUSE_FORUM_ID, $LoggedUser[ID], $Title, $Body)
+                ', $GroupID, $forum->addThread(G::$LoggedUser['ID'], $Title, $Body)
             );
 
             header("Location: /");
