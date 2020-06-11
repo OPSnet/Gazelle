@@ -2,54 +2,37 @@
 
 authorize();
 
-if (empty($_POST['groupid']) || !is_numeric($_POST['groupid'])) {
-    error(403);
+$groupId = (int)$_POST['groupid'];
+if ($groupId < 1) {
+    error(404);
 }
 
-$EditForumID = EDITING_FORUM_ID;
-$BotID = SYSTEM_USER_ID;
+require(__DIR__ . '/functions.php');
+$torrentCache = get_group_info($groupId, $RevisionID);
 
-$GroupID = intval($_POST['groupid']);
+list(, , $groupId, $groupName, $year, , , , , , $VH) = array_values($torrentCache[0]);
 
-include(SERVER_ROOT.'/sections/torrents/functions.php');
-$TorrentCache = get_group_info($GroupID, $RevisionID);
-
-$TorrentDetails = $TorrentCache[0];
-$TorrentList = $TorrentCache[1];
-
-// Group details
-list($WikiBody, $WikiImage, $GroupID, $GroupName, $GroupYear,
-    $GroupRecordLabel, $GroupCatalogueNumber, $ReleaseType, $GroupCategoryID,
-    $GroupTime, $GroupVanityHouse, $TorrentTags, $TorrentTagIDs, $TorrentTagUserIDs,
-    $TagPositiveVotes, $TagNegativeVotes, $GroupFlags) = array_values($TorrentDetails);
-
-$Title = $GroupName;
-$Artists = Artists::get_artist($GroupID);
-
-if ($Artists) {
-    $GroupName = Artists::display_artists($Artists, false, true, false) . $GroupName;
+$artists = Artists::get_artist($groupId);
+if ($artists) {
+    $groupName = Artists::display_artists($artists, false, true, false) . $groupName;
+}
+if ($year > 0) {
+    $groupName .= " [$year]";
+}
+if ($VH) {
+    $groupName .= ' [Vanity House]';
 }
 
-if ($GroupYear > 0) {
-    $GroupName .= ' ['.$GroupYear.']';
-}
+$forum = new \Gazelle\Forum(EDITING_FORUM_ID);
+$threadId = $forum->addThread(
+    SYSTEM_USER_ID,
+    "Editing request – Torrent Group: $groupName",
+    G::$Twig->render('forum/request-edit.twig', [
+        'user_name' => G::$LoggedUser['Username'],
+        'url'       => site_url() . 'torrents.php?id=' . $groupId,
+        'name'      => $name,
+        'details'   => trim($_POST['edit_details']),
+    ])
+);
 
-if ($GroupVanityHouse) {
-    $GroupName .= ' [Vanity House]';
-}
-
-$sqltime = sqltime();
-$UserLink = site_url().'user.php?id='.G::$LoggedUser['ID'];
-$Username = G::$LoggedUser['Username'];
-$TorrentLink = site_url().'torrents.php?id='.$GroupID;
-$Title = 'Torrent Group: ' . $GroupName;
-$Body = <<<POST
-[url={$UserLink}]{$Username}[/url] has submitted an editing request for: [url={$TorrentLink}]{$GroupName}[/url]
-
-[quote=Comments]{$_POST['edit_details']}[/quote]
-POST;
-
-$forum = new \Gazelle\Forum($EditForumID);
-list ($TopicID, $postId) = $forum->addThread($BotID, $Title, $Body);
-
-header("Location: forums.php?action=viewthread&threadid={$TopicID}");
+header("Location: forums.php?action=viewthread&threadid={$threadId}");

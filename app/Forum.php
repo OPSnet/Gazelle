@@ -53,7 +53,7 @@ class Forum extends Base {
      * @param int $userID The author
      * @param string $title The title of the thread
      * @param string $body The body of the first post in thread
-     * @return array [$threadId, $postId] The IDs of the thread and post
+     * @return array $threadId The ID of the thread
      */
     public function addThread(int $userId, string $title, string $body) {
         // LastPostID is updated in updateTopic()
@@ -83,10 +83,9 @@ class Forum extends Base {
                 'EditedTime'   => null,
             ]
         ]);
-
         $this->updateTopic($userId, $threadId, $postId);
         $this->db->set_query_id($qid);
-        return [$threadId, $postId];
+        return $threadId;
     }
 
     /**

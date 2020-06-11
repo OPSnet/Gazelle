@@ -13,14 +13,14 @@ if (!$artistId) {
 }
 
 $forum = new \Gazelle\Forum(EDITING_FORUM_ID);
-list ($threadId, $postId) = $forum->addThread(
+$threadId = $forum->addThread(
     SYSTEM_USER_ID,
     "Editing request — Artist: $name",
-    G::$Twig->render('forum/request-edit-artist.twig', [
-        'user_name'   => G::$LoggedUser['Username'],
-        'artist_url'  => site_url() . '/artist.php?id=' . $artistId,
-        'artist_name' => $name,
-        'details'     => trim($_POST['edit_details']),
+    G::$Twig->render('forum/request-edit.twig', [
+        'user_name' => G::$LoggedUser['Username'],
+        'url'       => site_url() . '/artist.php?id=' . $artistId,
+        'name'      => $name,
+        'details'   => trim($_POST['edit_details']),
     ])
 );
 
