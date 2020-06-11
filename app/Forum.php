@@ -108,6 +108,111 @@ class Forum extends Base {
     }
 
     /**
+     * Lock a thread. Closes its poll as a side-effect.
+     *
+     * @param int $threadId The thread to lock
+     */
+    public function lockThread(int $threadId) {
+        $this->db->prepared_query("
+            UPDATE forums_polls
+            SET Closed = 0
+            WHERE TopicID = ?
+            ", $threadId
+        );
+        $max = $this->db->scalar("
+            SELECT floor(NumPosts / ?) FROM forums_topics WHERE ID = ?
+            ", THREAD_CATALOGUE, $threadId
+        );
+        for ($i = 0; $i <= $max; $i++) {
+            $this->cache->expire_value("thread_{$TopicID}_catalogue_$i", 86400);
+        }
+        $this->cache->expire_value("thread_{$TopicID}_info", 86400);
+        $this->cache->delete_value("polls_$TopicID");
+    }
+
+    /**
+     * Edit the metadata of a thread
+     *
+     * @param int $threadId The thread to edit
+     * @param int $forumId Where is it being moved to?
+     * @param int $sticky Is the thread stuck at the top of the first page?
+     * @param int $rank Where in the list of sticky threads does it appear? (Larger numbers are higher)
+     * @param int $locked Is the thread locked?
+     * @param string $title The new title of the thread
+     */
+    public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title) {
+        $this->db->prepared_query("
+            UPDATE forums_topics SET
+                ForumID  = ?,
+                IsSticky = ?,
+                Ranking  = ?,
+                IsLocked = ?,
+                Title    = ?
+            WHERE ID = ?
+            ", $forumId, $sticky ? '1' : '0', $rank, $locked ? '1' : '0', trim($title),
+            $threadId
+        );
+        $this->cache->deleteMulti([
+            'forums_list', "forums_" . $forumId, "forums_" . $this->forumId, "thread_{$threadId}", "thread_{$threadId}_info",
+            self::CACHE_TOC_MAIN,
+            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
+        ]);
+        if ($forumId != $this->forumId) {
+            $this->moveThread($threadId, $forumId);
+        }
+        if ($locked) {
+            $this->lockThread($threadId);
+        }
+    }
+
+    /**
+     * Move a thread to another forum
+     *
+     * @param int $threadId The thread to edit
+     * @param int $forumId Where is it being moved to?
+     */
+    public function moveThread(int $threadId, int $forumId) {
+        $nrPosts = $this->db->scalar("
+            SELECT NumPosts FROM forums_topics WHERE ID = ?", $threadId
+        );
+
+        $this->adjustForumStats($this->forumId, -1, -$nrPosts);
+        $this->adjustForumStats($forumId,        1,  $nrPosts);
+    }
+
+    /**
+     * Remove a thread from the forum
+     * Forum counters are updated, subscriptions tidied, user last-read markers are removed.
+     *
+     * @param int $threadId The thread to remove
+     */
+    public function removeThread(int $threadId) {
+        $nrPosts = $this->db->scalar("
+            SELECT NumPosts FROM forums_topics WHERE ID = ?", $threadId
+        );
+        $this->db->prepared_query("
+            DELETE ft, fp, unq
+            FROM forums_topics AS ft
+            LEFT JOIN forums_posts AS fp ON (fp.TopicID = ft.ID)
+            LEFT JOIN users_notify_quoted as unq ON (unq.PageID = ft.ID AND unq.Page = 'forums')
+            WHERE TopicID = ?
+            ", $threadId
+        );
+        $this->adjustForumStats($this->forumId, -1, -$nrPosts);
+
+        $this->cache->deleteMulti([
+            'forums_list', "forums_" . $this->forumId, "thread_{$threadId}", "thread_{$threadId}_info",
+            self::CACHE_TOC_MAIN,
+            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
+        ]);
+
+        // subscriptions
+        $subscription = new \Gazelle\Manager\Subscription;
+        $subscription->flushQuotes('forums', $threadId);
+        $subscription->move('forums', $threadId, null);
+    }
+
+    /**
      * Add a post to a thread in the forum
      *
      * @param int $userID The author
@@ -127,6 +232,43 @@ class Forum extends Base {
         $this->updateTopic($userId, $threadId, $postId);
         $this->db->set_query_id($qid);
         return $postId;
+    }
+
+    /**
+     * Sticky (or unsticky) a post in a thread
+     *
+     * @param int $userID The stickier
+     * @param int $threadId The ID of the thread
+     * @param int $postId The ID of the post
+     * @param bool $set Sticky if true, otherwise unsticky
+     */
+    public function stickyPost(int $userId, int $threadId, int $postId, bool $set) {
+        // need to reset the post catalogues
+        list($bottom, $top) = $this->db->row("
+            SELECT
+                floor((ceil(count(*)               / ?) * ? - ?) / ?) AS bottom,
+                floor((ceil(sum(if(ID <= ?, 1, 0)) / ?) * ? - ?) / ?) AS top
+            FROM forums_posts
+            WHERE TopicID = ?
+            GROUP BY TopicID
+            ",        POSTS_PER_PAGE, POSTS_PER_PAGE, POSTS_PER_PAGE, THREAD_CATALOGUE,
+             $postId, POSTS_PER_PAGE, POSTS_PER_PAGE, POSTS_PER_PAGE, THREAD_CATALOGUE,
+            $threadId
+        );
+        if ($begin === '') { // Gazelle null-to-string coercion sucks
+            return;
+        }
+        $this->addThreadNote($threadId, $userId, "Post $postId " . ($set ? "stickied" : "unstickied"));
+        $this->db->prepared_query("
+            UPDATE forums_topics SET
+                StickyPostID = ?
+            WHERE ID = ?
+            ", $set ? $postId : 0, $threadId
+        );
+        $this->cache->delete_value("thread_{$threadId}_info");
+        for ($i = $bottom; $i <= $top; ++$i) {
+            $this->cache->delete_value("thread_{$threadId}_catalogue_{$i}");
+        }
     }
 
     /* Update the topic following the creation of a thread.
@@ -156,6 +298,22 @@ class Forum extends Base {
     }
 
     /**
+     * Add a note to a thread
+     *
+     * @param int $threadId The thread
+     * @param int $userId   The moderator
+     * @param string $notes  The multi-line text
+     */
+    public function addThreadNote(int $threadId, int $userId, string $notes) {
+        $this->db->prepared_query("
+            INSERT INTO forums_topic_notes
+                   (TopicID, AuthorID, Body)
+            VALUES (?,       ?,        ?)
+            ", $threadId, $userId, $notes
+        );
+    }
+
+    /**
      * Update the forum catalog following a change to a thread.
      * (Most recent thread and poster).
      *
@@ -182,6 +340,38 @@ class Forum extends Base {
             self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_TOC_FORUM, $this->forumId)
         ]);
+    }
+
+    /**
+     * Adjust the number of topics and posts of a forum.
+     * used when deleting a thread or moving a thread between forums.
+     * Recalculates the last post details in case the move changes things.
+     *
+     * @param int $forumId The thread
+     * @param int $topicDelta +/- the number of topic changes
+     * @param int $postDetla +/- the number of post changes
+     */
+    protected function adjustForumStats(int $forumId, int $topicDelta, int $postDelta) {
+        list($lastThreadId, $lastPostId, $lastAuthorId, $lastAddedTime)
+                = $this->db->row("
+            SELECT t.ID, t.LastPostID, p.AuthorID, p.AddedTime
+            FROM forums_topics AS t
+            LEFT JOIN forums_posts AS p ON (p.ID = t.LastPostID)
+            WHERE t.ForumID = ?
+            ", $forumId
+        );
+        $this->db->prepared_query("
+            UPDATE forums SET
+                NumTopics        = NumTopics + 1,
+                NumPosts         = NumPosts + ?,
+                LastPostTopicID  = ?,
+                LastPostID       = ?,
+                LastPostAuthorID = ?,
+                LastPostTime     = ?
+            WHERE ID = ?
+            ", $topicDelta, $postDelta, $lastThreadId, $lastPostId, $lastAuthorId, $lastAddedTime,
+            $forumId
+        );
     }
 
     /**
@@ -459,6 +649,32 @@ class Forum extends Base {
     }
 
     /**
+     * Get extended information about a thread
+     * TODO: merge with threadInfo()
+     *
+     * @param int $threadId The thread
+     * @return array [$author, $isLocked, $isSticky, $numPosts, $noPoll?]
+     */
+    public function threadInfoExtended(int $threadId) {
+        return $this->db->row("
+            SELECT
+                t.ForumID,
+                f.Name,
+                f.MinClassWrite,
+                t.NumPosts AS Posts,
+                t.AuthorID,
+                t.Title,
+                t.IsLocked,
+                t.IsSticky,
+                t.Ranking
+            FROM forums_topics AS t
+            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            WHERE t.ID = ?
+            ", $threadId
+        );
+    }
+
+    /**
      * Get information about a post. The forumId can be recovered from a postId.
      *
      * @param int $postId The post
@@ -612,5 +828,18 @@ class Forum extends Base {
             ", $perPage, $this->forumId, $userId
         );
         return $this->db->to_array('TopicID');
+    }
+
+    /**
+     * Clear the "last read" markers of users in a thread.
+     *
+     * @param int $id The thread ID.
+     */
+    public function clearUserLastRead(int $threadId) {
+        $this->db->prepared_query("
+            DELETE FROM forums_last_read_topics
+            WHERE TopicID = ?
+            ", $threadId
+        );
     }
 }
