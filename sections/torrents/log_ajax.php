@@ -11,7 +11,7 @@ $DB->prepared_query('
     WHERE TorrentID = ?
     ', $TorrentID
 );
-$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+$ripFiler = new \Gazelle\File\RipLog;
 
 if(!$DB->record_count()) {
     echo '';
@@ -31,7 +31,7 @@ if(!$DB->record_count()) {
             echo "<a class='brackets' href='torrents.php?action=editlog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Edit Log</a>&nbsp;";
             echo "<a class='brackets' onclick=\"return confirm('Are you sure you want to deleted this log? There is NO undo!');\" href='torrents.php?action=deletelog&torrentid={$TorrentID}&logid={$Log['LogID']}'>Delete Log</a>&nbsp;";
         }
-        if ($ripFiler->exists([$TorrentID, $LogID])) {
+        if ($ripFiler->exists([$TorrentID, $Log['LogID']])) {
             echo "<a class='brackets' href='view.php?type=riplog&id={$TorrentID}.{$Log['LogID']}' target='_blank'>View Raw Log</a>";
         }
 
