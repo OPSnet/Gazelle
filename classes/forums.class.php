@@ -244,28 +244,6 @@ class Forums {
     }
 
     /**
-     * Add a note to a topic.
-     * @param int $TopicID
-     * @param string $Note
-     * @param int|null $UserID
-     * @return boolean
-     */
-    public static function add_topic_note($TopicID, $Note, $UserID = null) {
-        if ($UserID === null) {
-            $UserID = G::$LoggedUser['ID'];
-        }
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query("
-            INSERT INTO forums_topic_notes
-                (TopicID, AuthorID, Body, AddedTime)
-            VALUES
-                (?,       ?,        ?,    now())",
-            $TopicID, $UserID, $Note);
-        G::$DB->set_query_id($QueryID);
-        return (bool)G::$DB->affected_rows();
-    }
-
-    /**
      * Create the part of WHERE in the sql queries used to filter forums for a
      * specific user (MinClassRead, restricted and permitted forums).
      * @return string

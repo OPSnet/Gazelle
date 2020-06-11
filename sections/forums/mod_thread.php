@@ -1,7 +1,5 @@
 <?php
 
-use \Gazelle\Manager\Notification;
-
 /*********************************************************************\
 //--------------Mod thread-------------------------------------------//
 
@@ -14,331 +12,114 @@ the front page.
 
 \*********************************************************************/
 
-// Quick SQL injection check
-if (!is_number($_POST['threadid'])) {
-    error(404);
-}
-if ($_POST['title'] == '') {
-    error(0);
-}
-// End injection check
-// Make sure they are moderators or are auto transitioning
+authorize();
+
 if (!check_perms('site_moderate_forums') && empty($_POST['transition'])) {
     error(403);
 }
-authorize();
+$threadId = (int)$_POST['threadid'];
+if ($threadId < 1) {
+    error(404);
+}
+$newForumId = (int)$_POST['forumid'];
+if ($newForumId < 1 && !isset($_POST['transition'])) {
+    error(404);
+}
+$newTitle = trim($_POST['title']);
+if ($newTitle == '') {
+    error("Title cannot be empty");
+}
 
 // Variables for database input
+$page      = (int)$_POST['page'];
+$locked    = isset($_POST['locked']) ? 1 : 0;
+$newSticky = isset($_POST['sticky']) ? 1 : 0;
+$newRank   = (int)$_POST['ranking'] ?? 0;
 
-$TopicID = (int)$_POST['threadid'];
-$Sticky = isset($_POST['sticky']) ? 1 : 0;
-$Locked = isset($_POST['locked']) ? 1 : 0;
-$Ranking = (int)$_POST['ranking'];
-if (!$Sticky && $Ranking > 0) {
-    $Ranking = 0;
-} elseif (0 > $Ranking) {
+if (!$newSticky && $newRank > 0) {
+    $newRank = 0;
+} elseif ($newRank < 0) {
     error('Ranking cannot be a negative value');
 }
-$Title = db_string($_POST['title']);
-$RawTitle = $_POST['title'];
-$ForumID = (int)$_POST['forumid'];
-$Page = (int)$_POST['page'];
-$Action = '';
 
-if ($Locked == 1 && check_perms('site_moderate_forums')) {
-    $DB->query("
-        DELETE FROM forums_last_read_topics
-        WHERE TopicID = '$TopicID'");
-}
+$forum = new \Gazelle\Forum();
+list($oldForumId, $oldName, $minClassWrite, $posts, $threadAuthorId, $oldTitle, $oldLocked, $oldSticky, $oldRank)
+    = $forum->threadInfoExtended($threadId);
+$forum->setForum($oldForumId);
 
-$DB->query("
-    SELECT
-        t.ForumID,
-        f.Name,
-        f.MinClassWrite,
-        COUNT(p.ID) AS Posts,
-        t.AuthorID,
-        t.Title,
-        t.IsLocked,
-        t.IsSticky,
-        t.Ranking
-    FROM forums_topics AS t
-        LEFT JOIN forums_posts AS p ON p.TopicID = t.ID
-        LEFT JOIN forums AS f ON f.ID = t.ForumID
-    WHERE t.ID = '$TopicID'
-    GROUP BY p.TopicID");
-list($OldForumID, $OldForumName, $MinClassWrite, $Posts, $ThreadAuthorID, $OldTitle, $OldLocked, $OldSticky, $OldRanking) = $DB->next_record(MYSQLI_BOTH, false);
-
-if ($MinClassWrite > $LoggedUser['Class']) {
+if ($minClassWrite > $LoggedUser['Class']) {
     error(403);
 }
-
-if (isset($_POST['transition'])) {
-    if (is_number($_POST['transition'])) {
-        // Permissions are handled inside forums.class.php
-        $transitions = Forums::get_transitions();
-        $Debug->log_var($transitions);
-        if (isset($transitions[$_POST['transition']])) {
-            $transition = $transitions[$_POST['transition']];
-            if ($transition['source'] != $OldForumID) {
-                error(403);
-            }
-            $ForumID = $transition['destination'];
-            $Sticky = $OldSticky;
-            $Locked = $OldLocked;
-            $Ranking = $OldRanking;
-            $Title = db_string($OldTitle);
-            $RawTitle = $OldTitle;
-            $Action = 'transitioning';
-        } else {
-            error(0);
-        }
-    } else {
-        error(0);
-    }
-}
-
-$forum = new \Gazelle\Forum($ForumID);
-$forum->flushCache();
 
 // If we're deleting a thread
 if (isset($_POST['delete'])) {
     if (!check_perms('site_admin_forums')) {
         error(403);
     }
+    $forum->removeThread($threadId);
+    header("Location: forums.php?action=viewforum&forumid=$newForumId");
 
-    $DB->query("
-        DELETE FROM forums_posts
-        WHERE TopicID = '$TopicID'");
-    $DB->query("
-        DELETE FROM forums_topics
-        WHERE ID = '$TopicID'");
+} else { // We are editing it
 
-    $DB->query("
-        SELECT
-            t.ID,
-            t.LastPostID,
-            t.Title,
-            p.AuthorID,
-            um.Username,
-            p.AddedTime,
-            (
-                SELECT COUNT(pp.ID)
-                FROM forums_posts AS pp
-                    JOIN forums_topics AS tt ON pp.TopicID = tt.ID
-                WHERE tt.ForumID = '$ForumID'
-            ),
-            t.IsLocked,
-            t.IsSticky
-        FROM forums_topics AS t
-            JOIN forums_posts AS p ON p.ID = t.LastPostID
-            LEFT JOIN users_main AS um ON um.ID = p.AuthorID
-        WHERE t.ForumID = '$ForumID'
-        GROUP BY t.ID
-        ORDER BY t.LastPostID DESC
-        LIMIT 1");
-    list($NewLastTopic, $NewLastPostID, $NewLastTitle, $NewLastAuthorID, $NewLastAuthorName, $NewLastAddedTime, $NumPosts, $NewLocked, $NewSticky) = $DB->next_record(MYSQLI_NUM, false);
-
-    $DB->query("
-        UPDATE forums
-        SET
-            NumTopics = NumTopics - 1,
-            NumPosts = NumPosts - '$Posts',
-            LastPostTopicID = '$NewLastTopic',
-            LastPostID = '$NewLastPostID',
-            LastPostAuthorID = '$NewLastAuthorID',
-            LastPostTime = '$NewLastAddedTime'
-        WHERE ID = '$ForumID'");
-    $Cache->delete_value("forums_$ForumID");
-    $Cache->delete_value("thread_$TopicID");
-    $Cache->delete_value('forums_list');
-    $Cache->delete_value("thread_{$TopicID}_info");
-
-    // subscriptions
-    $subscription = new \Gazelle\Manager\Subscription;
-    $subscription->flushQuotes('forums', $TopicID);
-    $subscription->move('forums', $TopicID, null);
-
-    $DB->query("
-        DELETE FROM users_notify_quoted
-        WHERE Page = 'forums'
-            AND PageID = '$TopicID'");
-
-    header("Location: forums.php?action=viewforum&forumid=$ForumID");
-} else { // If we're just editing it
-    if ($Action == '') {
-        $Action = 'editing';
-    }
-
-    $DB->query("
-        UPDATE forums_topics
-        SET
-            IsSticky = '$Sticky',
-            Ranking = '$Ranking',
-            IsLocked = '$Locked',
-            Title = '$Title',
-            ForumID = '$ForumID'
-        WHERE ID = '$TopicID'");
-
-    $Cache->delete_value("forums_$ForumID");
-    $Cache->delete_value("thread_{$TopicID}_info");
-
-    if ($ForumID != $OldForumID) { // If we're moving a thread, change the forum stats
-        $Cache->delete_value("forums_$OldForumID");
-
-        $DB->query("
-            SELECT MinClassRead, MinClassWrite, Name
-            FROM forums
-            WHERE ID = '$ForumID'");
-        list($MinClassRead, $MinClassWrite, $ForumName) = $DB->next_record(MYSQLI_NUM, false);
-
-        $Cache->delete_value('forums_list');
-
-        // Forum we're moving from
-        $DB->query("
-            SELECT
-                t.ID,
-                t.LastPostID,
-                t.Title,
-                p.AuthorID,
-                um.Username,
-                p.AddedTime,
-                (
-                    SELECT COUNT(pp.ID)
-                    FROM forums_posts AS pp
-                        JOIN forums_topics AS tt ON pp.TopicID = tt.ID
-                    WHERE tt.ForumID = '$OldForumID'
-                ),
-                t.IsLocked,
-                t.IsSticky,
-                t.Ranking
-            FROM forums_topics AS t
-                JOIN forums_posts AS p ON p.ID = t.LastPostID
-                LEFT JOIN users_main AS um ON um.ID = p.AuthorID
-            WHERE t.ForumID = '$OldForumID'
-            ORDER BY t.LastPostID DESC
-            LIMIT 1");
-        list($NewLastTopic, $NewLastPostID, $NewLastTitle, $NewLastAuthorID, $NewLastAuthorName, $NewLastAddedTime, $NumPosts, $NewLocked, $NewSticky, $NewRanking) = $DB->next_record(MYSQLI_NUM, false);
-
-        $DB->query("
-            UPDATE forums
-            SET
-                NumTopics = NumTopics - 1,
-                NumPosts = NumPosts - '$Posts',
-                LastPostTopicID = '$NewLastTopic',
-                LastPostID = '$NewLastPostID',
-                LastPostAuthorID = '$NewLastAuthorID',
-                LastPostTime = '$NewLastAddedTime'
-            WHERE ID = '$OldForumID'");
-
-
-        // Forum we're moving to
-        $DB->query("
-            SELECT
-                t.ID,
-                t.LastPostID,
-                t.Title,
-                p.AuthorID,
-                um.Username,
-                p.AddedTime,
-                (
-                    SELECT COUNT(pp.ID)
-                    FROM forums_posts AS pp
-                        JOIN forums_topics AS tt ON pp.TopicID = tt.ID
-                    WHERE tt.ForumID = '$ForumID'
-                )
-                FROM forums_topics AS t
-                    JOIN forums_posts AS p ON p.ID = t.LastPostID
-                    LEFT JOIN users_main AS um ON um.ID = p.AuthorID
-                WHERE t.ForumID = '$ForumID'
-                ORDER BY t.LastPostID DESC
-                LIMIT 1");
-        list($NewLastTopic, $NewLastPostID, $NewLastTitle, $NewLastAuthorID, $NewLastAuthorName, $NewLastAddedTime, $NumPosts) = $DB->next_record(MYSQLI_NUM, false);
-
-        $DB->query("
-            UPDATE forums
-            SET
-                NumTopics = NumTopics + 1,
-                NumPosts = NumPosts + '$Posts',
-                LastPostTopicID = '$NewLastTopic',
-                LastPostID = '$NewLastPostID',
-                LastPostAuthorID = '$NewLastAuthorID',
-                LastPostTime = '$NewLastAddedTime'
-            WHERE ID = '$ForumID'");
-
-    } else { // Editing
-        $DB->query("
-            SELECT LastPostTopicID
-            FROM forums
-            WHERE ID = '$ForumID'");
-        list($LastTopicID) = $DB->next_record();
-        if ($LastTopicID == $TopicID) {
-            $Cache->delete_value('forums_list');
+    if (isset($_POST['transition'])) {
+        $transId = (int)$_POST['transition'];
+        if ($transId < 1) {
+            error(0);
+        } else {
+            // Permissions are handled inside forums.class.php
+            $transitions = Forums::get_transitions();
+            $Debug->log_var($transitions);
+            if (!isset($transitions[$transId])) {
+                error(0);
+            } else {
+                $transition = $transitions[$transId];
+                if ($transition['source'] != $oldForumId) {
+                    error(403);
+                }
+                $newForumId = $transition['destination'];
+                $newSticky  = $oldSticky;
+                $locked     = $oldLocked;
+                $newRank    = $oldRank;
+                $newTitle   = $oldTitle;
+                $action     = 'transitioning';
+            }
         }
     }
-    if ($Locked) {
-        $CatalogueID = floor($NumPosts / THREAD_CATALOGUE);
-        for ($i = 0; $i <= $CatalogueID; $i++) {
-            $Cache->expire_value("thread_{$TopicID}_catalogue_$i", 3600 * 24 * 7); // 7 days
-        }
-        $Cache->expire_value("thread_{$TopicID}_info", 3600 * 24 * 7); // 7 days
 
-        $DB->query("
-            UPDATE forums_polls
-            SET Closed = '0'
-            WHERE TopicID = '$TopicID'");
-        $Cache->delete_value("polls_$TopicID");
+    if ($locked && check_perms('site_moderate_forums')) {
+        $forum->clearUserLastRead($threadId);
     }
+
+    $forum->editThread($threadId, $newForumId, $newSticky, $newRank, $locked, $newTitle);
 
     // topic notes and notifications
-    $TopicNotes = [];
-    switch ($Action) {
-        case 'editing':
-            if ($OldTitle != $RawTitle) {
-                // title edited
-                $TopicNotes[] = "Title edited from \"$OldTitle\" to \"$RawTitle\"";
-            }
-            if ($OldLocked != $Locked) {
-                if (!$OldLocked) {
-                    $TopicNotes[] = 'Locked';
-                } else {
-                    $TopicNotes[] = 'Unlocked';
-                }
-            }
-            if ($OldSticky != $Sticky) {
-                if (!$OldSticky) {
-                    $TopicNotes[] = 'Stickied';
-                } else {
-                    $TopicNotes[] = 'Unstickied';
-                }
-            }
-            if ($OldRanking != $Ranking) {
-                $TopicNotes[] = "Ranking changed from \"$OldRanking\" to \"$Ranking\"";
-            }
-            if ($ForumID != $OldForumID) {
-                $TopicNotes[] = "Moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url]";
-            }
-            break;
-        case 'trashing':
-            $TopicNotes[] = "Trashed (moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url])";
-            $Notification = "Your thread \"$NewLastTitle\" has been trashed";
-            break;
-        case 'resolving':
-            $TopicNotes[] = "Resolved (moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url])";
-            $Notification = "Your thread \"$NewLastTitle\" has been resolved";
-            break;
+    $notes = [];
+    $oldUrl = "[url=" . site_url() . "forums.php?action=viewforum&forumid=$oldForumId]{$oldName}[/url]";
+    $newUrl = "[url=" . site_url() . "forums.php?action=viewforum&forumid=$newForumId]{$newName}[/url]";
+    switch ($action ?? null) {
         case 'transitioning':
-            $TopicNotes[] = "Moved from [url=" . site_url() . "forums.php?action=viewforum&forumid=$OldForumID]{$OldForumName}[/url] to [url=" . site_url() . "forums.php?action=viewforum&forumid=$ForumID]{$ForumName}[/url] (" . $transition['label'] . " transition)";
+            $notes[] = "Moved from $oldUrl to $newUrl (" . $transition['label'] . " transition)";
             break;
         default:
+            if ($oldTitle != $newTitle) {
+                $notes[] = "Title edited from \"$oldTitle\" to \"$newTitle\"";
+            }
+            if ($oldLocked != $locked) {
+                $notes[] = $oldLocked ? 'Unlocked' : 'Locked';
+            }
+            if ($oldSticky != $newSticky) {
+                $notes[] = $oldSticky ? 'Unstickied' : 'Stickied';
+            }
+            if ($oldRank != $newRank) {
+                $notes[] = "Ranking changed from $oldRank to $newRank";
+            }
+            if ($newForumId != $oldForumId) {
+                $notes[] = "Moved from $oldUrl to $newUrl";
+            }
             break;
     }
-    if (isset($Notification)) {
-        $notification = new Notification;
-        $notification->notifyUser($ThreadAuthorID, Notification::FORUMALERTS, $Notification, "forums.php?action=viewthread&threadid=$TopicID");
+    if ($notes) {
+        $forum->addThreadNote($threadId, $LoggedUser['ID'], implode("\n", $notes));
     }
-    if (count($TopicNotes) > 0) {
-        Forums::add_topic_note($TopicID, implode("\n", $TopicNotes));
-    }
-    header("Location: forums.php?action=viewthread&threadid=$TopicID&page=$Page");
+    header("Location: forums.php?action=viewthread&threadid=$threadId&page=$page");
 }

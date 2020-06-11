@@ -5,12 +5,16 @@ if (!check_perms('site_moderate_forums')) {
     error(403);
 }
 
-if (!isset($_POST['topicid'], $_POST['body']) || !is_number($_POST['topicid']) || $_POST['body'] == '') {
+$threadId = (int)$_POST['topicid'];
+if ($threadId < 1) {
     error(404);
 }
+$body = trim($_POST['topicid'] ?? null);
+if (!strlen($body)) {
+    error("Thread note cannot be empty");
+}
 
-$TopicID = (int)$_POST['topicid'];
+$forum = new \Gazelle\Forum;
+$forum->addThreadNote($threadId, $LoggedUser['ID'], $body);
 
-Forums::add_topic_note($TopicID, $_POST['body']);
-
-header("Location: forums.php?action=viewthread&threadid=$TopicID#thread_notes");
+header("Location: forums.php?action=viewthread&threadid=$threadId#thread_notes");

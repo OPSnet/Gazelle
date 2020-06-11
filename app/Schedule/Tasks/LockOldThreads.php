@@ -30,13 +30,14 @@ class LockOldThreads extends \Gazelle\Schedule\Task
                 WHERE TopicID IN ($placeholders)
             ", ...$ids);
 
+            $forum = new \Gazelle\Forum;
             foreach ($ids as $id) {
                 $this->cache->begin_transaction("thread_$id".'_info');
                 $this->cache->update_row(false, ['IsLocked' => '1']);
                 $this->cache->commit_transaction(3600 * 24 * 30);
                 $this->cache->expire_value("thread_$id".'_catalogue_0', 3600 * 24 * 30);
                 $this->cache->expire_value("thread_$id".'_info', 3600 * 24 * 30);
-                \Forums::add_topic_note($id, 'Locked automatically by schedule', 0);
+                $forum->addThreadNote($id, 0, 'Locked automatically by schedule');
 
                 $this->processed++;
             }
