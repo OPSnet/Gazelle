@@ -173,13 +173,10 @@ class Forum extends Base {
      * @param int $threadId The thread to remove
      */
     public function removeThread(int $threadId) {
-        $forumId = $this->db->scalar("
-            SELECT ForumID FROM forums_topics WHERE ID = ?", $threadId
-        );
         $this->cache->deleteMulti([
-            'forums_list', "forums_" . $forumId, "thread_{$threadId}", "thread_{$threadId}_info",
+            'forums_list', "forums_" . $this->forumId, "thread_{$threadId}", "thread_{$threadId}_info",
             self::CACHE_TOC_MAIN,
-            sprintf(self::CACHE_TOC_FORUM, $forumId),
+            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
         $this->db->prepared_query("
             DELETE ft, fp, unq
@@ -189,7 +186,7 @@ class Forum extends Base {
             WHERE TopicID = ?
             ", $threadId
         );
-        $this->adjustForumStats($forumId);
+        $this->adjustForumStats($this->forumId);
 
         // subscriptions
         $subscription = new \Gazelle\Manager\Subscription;
@@ -215,7 +212,7 @@ class Forum extends Base {
          */
         $this->db->prepared_query("
             UPDATE forums f
-            INNER JOIN (
+            LEFT JOIN (
                 /* these are the values to update the row in the forums table */
                 SELECT count(DISTINCT fp.ID) as NumPosts,
                     count(DISTINCT ft.ID) as NumTopics,
@@ -235,8 +232,8 @@ class Forum extends Base {
                 WHERE ft.ForumID = ?
             ) POST ON (POST.ForumID = f.ID)
             SET
-                f.NumTopics        = POST.NumTopics,
-                f.NumPosts         = POST.NumPosts,
+                f.NumTopics        = coalesce(POST.NumTopics, 0),
+                f.NumPosts         = coalesce(POST.NumPosts, 0),
                 f.LastPostTopicID  = POST.TopicID,
                 f.LastPostID       = POST.ID,
                 f.LastPostAuthorID = POST.AuthorID,
@@ -244,6 +241,7 @@ class Forum extends Base {
             WHERE f.ID = ?
             ", $forumId, $forumId, $forumId
         );
+        return $this->db->affected_rows();
     }
 
     /**
