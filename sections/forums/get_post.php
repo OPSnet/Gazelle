@@ -1,5 +1,5 @@
 <?php
-//TODO: make this use the cache version of the thread, save the db query
+
 /*********************************************************************\
 //--------------Get Post--------------------------------------------//
 
@@ -12,27 +12,25 @@ $_GET['post'], which is the ID of the post.
 \*********************************************************************/
 
 // Quick SQL injection check
-if (!$_GET['post'] || !is_number($_GET['post'])) {
+$postId = (int)$_GET['post'];
+if ($postId < 1) {
     error(0);
 }
 
-// Variables for database input
-$PostID = $_GET['post'];
-
-// Mainly
-$DB->query("
+list($body, $forumId) = $DB->row("
     SELECT
         p.Body,
         t.ForumID
     FROM forums_posts AS p
-        JOIN forums_topics AS t ON p.TopicID = t.ID
-    WHERE p.ID = '$PostID'");
-list($Body, $ForumID) = $DB->next_record(MYSQLI_NUM);
+    INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
+    WHERE p.ID = ?
+    ", $postId
+);
 
 // Is the user allowed to view the post?
-if (!Forums::check_forumperm($ForumID)) {
+if (!Forums::check_forumperm($forumId)) {
     error(0);
 }
 
 // This gets sent to the browser, which echoes it wherever
-echo trim($Body);
+echo trim($body);

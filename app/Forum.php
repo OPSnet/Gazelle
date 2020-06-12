@@ -589,7 +589,6 @@ class Forum extends Base {
 
         // Store edit history
         $this->saveEdit($userId, $postId, $oldBody);
-
         return $postId;
     }
 
@@ -602,6 +601,12 @@ class Forum extends Base {
      */
     public function editPost(int $userId, int $postId, string $body) {
         $this->db->prepared_query("
+            INSERT INTO comments_edits
+                   (EditUser, PostID, Body, Page, EditTime)
+            VALUES (?,        ?,      (SELECT Body from forums_posts WHERE ID = ?), 'forums', now())
+            ", $userId, $postId, $postId
+        );
+        $this->db->prepared_query("
             UPDATE forums_posts SET
                 EditedUserID = ?,
                 Body = ?,
@@ -609,23 +614,7 @@ class Forum extends Base {
             WHERE ID = ?
             ", $userId, trim($body), $postId
         );
-    }
-
-    /**
-     * Record the history following a post edit
-     *
-     * @param int $userID The editor making the change
-     * @param int $postId The post
-     * @param string $body The previous contents
-     */
-    public function saveEdit(int $userId, int $postId, string $body) {
-        $this->db->prepared_query("
-            INSERT INTO comments_edits
-                   (PostID, EditUser, Body, EditTime, Page)
-            VALUES (?,      ?,        ?,    now(),   'forums')
-            ", $postId, $userId, trim($body)
-        );
-        $this->cache->delete_value("forums_edits_$PostID");
+        $this->cache->delete_value("forums_edits_$postId");
     }
 
     /**
@@ -801,8 +790,28 @@ class Forum extends Base {
         return $forumToc;
     }
 
+
     /**
-     * return a list of which page the user has read up to
+     * Mark the user as having read everything in the forum.
+     *
+     * @param int $userId The ID of the user catching up
+     */
+    public function userCatchup(int $userId) {
+        $this->db->prepared_query("
+            INSERT INTO forums_last_read_topics
+                   (UserID, TopicID, PostID)
+            SELECT ?,       ID,      LastPostID
+            FROM forums_topics
+            WHERE (LastPostTime > now() - INTERVAL 30 DAY OR IsSticky = '1')
+                AND ForumID = ?
+            ON DUPLICATE KEY UPDATE PostID = LastPostID
+            ", $userId, $this->forumId
+        );
+    }
+
+    /**
+     * Return a list of which page the user has read up to
+     *
      * @param int $userId The user id reading the forum
      * @param int $perPage The number of topics per page
      * @return array
