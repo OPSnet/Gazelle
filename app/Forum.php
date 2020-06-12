@@ -141,6 +141,11 @@ class Forum extends Base {
      * @param string $title The new title of the thread
      */
     public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title) {
+        $this->cache->deleteMulti([
+            'forums_list', "forums_" . $forumId, "forums_" . $this->forumId, "thread_{$threadId}", "thread_{$threadId}_info",
+            self::CACHE_TOC_MAIN,
+            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
+        ]);
         $this->db->prepared_query("
             UPDATE forums_topics SET
                 ForumID  = ?,
@@ -152,32 +157,13 @@ class Forum extends Base {
             ", $forumId, $sticky ? '1' : '0', $rank, $locked ? '1' : '0', trim($title),
             $threadId
         );
-        $this->cache->deleteMulti([
-            'forums_list', "forums_" . $forumId, "forums_" . $this->forumId, "thread_{$threadId}", "thread_{$threadId}_info",
-            self::CACHE_TOC_MAIN,
-            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
-        ]);
         if ($forumId != $this->forumId) {
-            $this->moveThread($threadId, $forumId);
+            $this->adjustForumStats($this->forumId);
+            $this->adjustForumStats($forumId);
         }
         if ($locked) {
             $this->lockThread($threadId);
         }
-    }
-
-    /**
-     * Move a thread to another forum
-     *
-     * @param int $threadId The thread to edit
-     * @param int $forumId Where is it being moved to?
-     */
-    public function moveThread(int $threadId, int $forumId) {
-        $nrPosts = $this->db->scalar("
-            SELECT NumPosts FROM forums_topics WHERE ID = ?", $threadId
-        );
-
-        $this->adjustForumStats($this->forumId, -1, -$nrPosts);
-        $this->adjustForumStats($forumId,        1,  $nrPosts);
     }
 
     /**
@@ -187,9 +173,14 @@ class Forum extends Base {
      * @param int $threadId The thread to remove
      */
     public function removeThread(int $threadId) {
-        $nrPosts = $this->db->scalar("
-            SELECT NumPosts FROM forums_topics WHERE ID = ?", $threadId
+        $forumId = $this->db->scalar("
+            SELECT ForumID FROM forums_topics WHERE ID = ?", $threadId
         );
+        $this->cache->deleteMulti([
+            'forums_list', "forums_" . $forumId, "thread_{$threadId}", "thread_{$threadId}_info",
+            self::CACHE_TOC_MAIN,
+            sprintf(self::CACHE_TOC_FORUM, $forumId),
+        ]);
         $this->db->prepared_query("
             DELETE ft, fp, unq
             FROM forums_topics AS ft
@@ -198,18 +189,61 @@ class Forum extends Base {
             WHERE TopicID = ?
             ", $threadId
         );
-        $this->adjustForumStats($this->forumId, -1, -$nrPosts);
-
-        $this->cache->deleteMulti([
-            'forums_list', "forums_" . $this->forumId, "thread_{$threadId}", "thread_{$threadId}_info",
-            self::CACHE_TOC_MAIN,
-            sprintf(self::CACHE_TOC_FORUM, $this->forumId),
-        ]);
+        $this->adjustForumStats($forumId);
 
         // subscriptions
         $subscription = new \Gazelle\Manager\Subscription;
         $subscription->flushQuotes('forums', $threadId);
         $subscription->move('forums', $threadId, null);
+    }
+
+    /**
+     * Adjust the number of topics and posts of a forum.
+     * used when deleting a thread or moving a thread between forums.
+     * Recalculates the last post details in case the move changes things.
+     * NB: This uses a forumID passed in explicitly, because
+     * moving threads requires two calls and it just makes things
+     * a bit clearer.
+     *
+     * @param int $forumId The ID of the forum
+     */
+    protected function adjustForumStats(int $forumId) {
+        /* Recalculate the correct values from first principles.
+         * This does not happen very often, and only a moderator
+         * pays the cost. At least this way the number correct
+         * themselves if ever they drift out of synch -- Spine
+         */
+        $this->db->prepared_query("
+            UPDATE forums f
+            INNER JOIN (
+                /* these are the values to update the row in the forums table */
+                SELECT count(DISTINCT fp.ID) as NumPosts,
+                    count(DISTINCT ft.ID) as NumTopics,
+                    LAST.ID, LAST.TopicID, LAST.AuthorID, LAST.AddedTime,
+                    ft.ForumID
+                FROM forums_posts fp
+                LEFT JOIN forums_topics ft on (ft.id = fp.topicid)
+                LEFT JOIN (
+                    /* find the most recent post of any thread in the forum */
+                    SELECT p.ID, p.TopicID, p.AuthorID, p.AddedTime, t.ForumID
+                    FROM forums_posts p
+                    INNER JOIN forums_topics t ON (t.ID = p.TopicID)
+                    WHERE t.ForumID = ?
+                    ORDER BY p.AddedTime DESC
+                    LIMIT 1
+                ) AS LAST USING (ForumID)
+                WHERE ft.ForumID = ?
+            ) POST ON (POST.ForumID = f.ID)
+            SET
+                f.NumTopics        = POST.NumTopics,
+                f.NumPosts         = POST.NumPosts,
+                f.LastPostTopicID  = POST.TopicID,
+                f.LastPostID       = POST.ID,
+                f.LastPostAuthorID = POST.AuthorID,
+                f.LastPostTime     = POST.AddedTime
+            WHERE f.ID = ?
+            ", $forumId, $forumId, $forumId
+        );
     }
 
     /**
@@ -340,38 +374,6 @@ class Forum extends Base {
             self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_TOC_FORUM, $this->forumId)
         ]);
-    }
-
-    /**
-     * Adjust the number of topics and posts of a forum.
-     * used when deleting a thread or moving a thread between forums.
-     * Recalculates the last post details in case the move changes things.
-     *
-     * @param int $forumId The thread
-     * @param int $topicDelta +/- the number of topic changes
-     * @param int $postDetla +/- the number of post changes
-     */
-    protected function adjustForumStats(int $forumId, int $topicDelta, int $postDelta) {
-        list($lastThreadId, $lastPostId, $lastAuthorId, $lastAddedTime)
-                = $this->db->row("
-            SELECT t.ID, t.LastPostID, p.AuthorID, p.AddedTime
-            FROM forums_topics AS t
-            LEFT JOIN forums_posts AS p ON (p.ID = t.LastPostID)
-            WHERE t.ForumID = ?
-            ", $forumId
-        );
-        $this->db->prepared_query("
-            UPDATE forums SET
-                NumTopics        = NumTopics + 1,
-                NumPosts         = NumPosts + ?,
-                LastPostTopicID  = ?,
-                LastPostID       = ?,
-                LastPostAuthorID = ?,
-                LastPostTime     = ?
-            WHERE ID = ?
-            ", $topicDelta, $postDelta, $lastThreadId, $lastPostId, $lastAuthorId, $lastAddedTime,
-            $forumId
-        );
     }
 
     /**
