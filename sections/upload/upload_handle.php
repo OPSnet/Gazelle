@@ -368,19 +368,10 @@ $InfoHash = pack('H*', $Tor->info_hash());
 
 $ID = $DB->scalar('SELECT ID FROM torrents WHERE info_hash = ?', $InfoHash);
 if ($ID) {
-    $DB->prepared_query('
-        SELECT TorrentID
-        FROM torrents_files
-        WHERE TorrentID = ?', $ID);
-    if ($DB->has_results()) {
+    if ($torrentFiler->exists($ID)) {
         $Err = '<a href="torrents.php?torrentid='.$ID.'">The exact same torrent file already exists on the site!</a>';
     } else {
         // A lost torrent
-        $DB->prepared_query('
-            INSERT INTO torrents_files (TorrentID, File)
-            VALUES (?, ?)
-            ', $ID, $Tor->encode()
-        );
         $torrentFiler->put($Tor->encode(), $ID);
         $Err = '<a href="torrents.php?torrentid='.$ID.'">Thank you for fixing this torrent</a>';
     }
@@ -494,19 +485,9 @@ if ($Type == 'Music') {
         $Debug->set_flag('upload: torrent decoded');
         $ExtraID = $DB->scalar('SELECT ID FROM torrents WHERE info_hash = ?', $ThisInsert['InfoHash']);
         if ($ExtraID) {
-            $DB->prepared_query('
-                SELECT TorrentID
-                FROM torrents_files
-                WHERE TorrentID = ?', $ExtraID);
-            if ($DB->has_results()) {
+            if ($torrentFiler->exists($ExtraID)) {
                 $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">The exact same torrent file already exists on the site!</a>";
             } else {
-                //One of the lost torrents.
-                $DB->prepared_query('
-                    INSERT INTO torrents_files (TorrentID, File)
-                    VALUES (?, ?)
-                    ', $ExtraID, $ThisInsert['TorEnc']
-                );
                 $torrentFiler->put($ThisInsert['TorEnc'], $ExtraID);
                 $Err = "<a href=\"torrents.php?torrentid=$ExtraID\">Thank you for fixing this torrent.</a>";
             }
@@ -787,12 +768,6 @@ foreach($logfileSummary->all() as $logfile) {
 //******************************************************************************//
 //--------------- Write torrent file -------------------------------------------//
 
-$DB->prepared_query('
-    INSERT INTO torrents_files
-           (TorrentID, File)
-    VALUES (?,         ?)
-    ', $TorrentID, $Tor->encode()
-);
 $torrentFiler->put($Tor->encode(), $TorrentID);
 Misc::write_log("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MB) was uploaded by ' . $LoggedUser['Username']);
 Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MB)', 0);
@@ -883,12 +858,6 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
     //******************************************************************************//
     //--------------- Write torrent file -------------------------------------------//
 
-    $DB->prepared_query('
-        INSERT INTO torrents_files
-               (TorrentID, File)
-        VALUES (?,         ?)
-        ', $ExtraTorrentID, $ExtraTorrent['TorEnc']
-    );
     $torrentFiler->put($ExtraTorrent['TorEnc'], $ExtraTorrentID);
     $sizeMB = number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2);
     Misc::write_log("Torrent $ExtraTorrentID ($LogName) ($sizeMB  MB) was uploaded by " . $LoggedUser['Username']);

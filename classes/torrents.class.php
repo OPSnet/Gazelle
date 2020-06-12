@@ -639,16 +639,15 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
      */
     public static function regenerate_filelist($TorrentID) {
         $QueryID = G::$DB->get_query_id();
-
-        G::$DB->prepared_query("
-            SELECT tg.ID,
-                tf.File
-            FROM torrents_files AS tf
-            INNER JOIN torrents AS t ON (t.ID = tf.TorrentID)
-            INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-            WHERE tf.TorrentID = ?", $TorrentID);
-        if (G::$DB->has_results()) {
-            list($GroupID, $Contents) = G::$DB->next_record(MYSQLI_NUM, false);
+        $GroupID = G::$DB->scalar("
+            SELECT t.GroupID
+            FROM torrents AS t
+            WHERE t.TorrentID = ?
+            ", $TorrentID
+        );
+        if ($GroupID) {
+            $filer = new \Gazelle\File\Torrent;
+            $Contents = $filer->get($TorrentID);
             if (Misc::is_new_torrent($Contents)) {
                 $Tor = new BencodeTorrent($Contents);
                 $FilePath = (isset($Tor->Dec['info']['files']) ? make_utf8($Tor->get_name()) : '');
