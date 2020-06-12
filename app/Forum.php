@@ -145,6 +145,7 @@ class Forum extends Base {
             'forums_list', "forums_" . $forumId, "forums_" . $this->forumId, "thread_{$threadId}", "thread_{$threadId}_info",
             self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
+            sprintf(self::CACHE_TOC_FORUM, $forumId),
         ]);
         $this->db->prepared_query("
             UPDATE forums_topics SET
