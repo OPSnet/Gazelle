@@ -3,30 +3,28 @@ if (!check_perms('site_admin_forums')) {
     error(403);
 }
 
-if (empty($_GET['postid']) || !is_number($_GET['postid'])) {
+$PostID = (int)$_GET['postid'];
+if ($PostID < 1) {
     die();
 }
-
-$PostID = $_GET['postid'];
-
-if (!isset($_GET['depth']) || !is_number($_GET['depth'])) {
+$Type = $_GET['type'] ?? '';
+if (!in_array($_GET['type'], ['forums', 'collages', 'requests', 'torrents', 'artist'])) {
     die();
 }
-
-$Depth = $_GET['depth'];
-
-if (empty($_GET['type']) || !in_array($_GET['type'], ['forums', 'collages', 'requests', 'torrents', 'artist'])) {
+if ($_GET['depth'] != (int)$_GET['depth']) {
     die();
 }
-$Type = $_GET['type'];
+$Depth = (int)$_GET['depth'];
 
-$Edits = $Cache->get_value($Type.'_edits_'.$PostID);
-if (!is_array($Edits)) {
-    $DB->query("
+if (!($Edits = $Cache->get_value($Type.'_edits_'.$PostID))) {
+    $DB->prepared_query("
         SELECT EditUser, EditTime, Body
         FROM comments_edits
-        WHERE Page = '$Type' AND PostID = $PostID
-        ORDER BY EditTime DESC");
+        WHERE Page = ?
+            AND PostID = ?
+        ORDER BY EditTime DESC
+        ", $Type, $PostID
+    );
     $Edits = $DB->to_array();
     $Cache->cache_value($Type.'_edits_'.$PostID, $Edits, 0);
 }
@@ -38,22 +36,24 @@ if ($Depth != 0) {
     //Not an edit, have to get from the original
     switch ($Type) {
         case 'forums':
-            //Get from normal forum stuffs
-            $DB->query("
+            $Body = $DB->scalar("
                 SELECT Body
                 FROM forums_posts
-                WHERE ID = $PostID");
-            list($Body) = $DB->next_record();
+                WHERE ID = ?
+                ", $PostID
+            );
             break;
         case 'collages':
         case 'requests':
         case 'artist':
         case 'torrents':
-            $DB->query("
+            $Body = $DB->scalar("
                 SELECT Body
                 FROM comments
-                WHERE Page = '$Type' AND ID = $PostID");
-            list($Body) = $DB->next_record();
+                WHERE Page = ?
+                    AND ID = ?
+                ", $Type, $PostID
+            );
             break;
     }
 }

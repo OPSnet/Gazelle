@@ -44,9 +44,7 @@ Misc::send_pm($UserID, $LoggedUser['ID'], $Subject, $PrivateMessage);
 $forum = new \Gazelle\Forum($ForumID);
 list($OldBody, $AuthorID, $TopicID, $ForumID, $IsLocked, $MinClassWrite, $Page) = $forum->postInfo($PostID);
 
-// Perform the update
 $forum->editPost($UserID, $PostID, $Body);
-$forum->saveEdit($UserID, $PostID, $OldBody);
 
 $CatalogueID = floor((POSTS_PER_PAGE * $Page - POSTS_PER_PAGE) / THREAD_CATALOGUE);
 $Cache->begin_transaction("thread_$TopicID" . "_catalogue_$CatalogueID");

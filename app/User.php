@@ -67,6 +67,16 @@ class User extends Base {
         return $this->db->affected_rows();
     }
 
+    public function updateCatchup() {
+        $this->db->prepared_query("
+            UPDATE users_info
+            SET CatchupTime = now()
+            WHERE UserID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value('user_info_' . $this->id);
+    }
+
     public function permissionList() {
         $this->db->prepared_query('
             SELECT
