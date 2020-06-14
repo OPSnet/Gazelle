@@ -34,22 +34,23 @@ $Key     = $_POST['key'];
 $DoPM    = isset($_POST['pm']) ? $_POST['pm'] : 0;
 
 $forum = new \Gazelle\Forum();
-list($OldBody, $AuthorID, $TopicID, $ForumID, $IsLocked, $MinClassWrite, $Page) = $forum->postInfo($PostID);
+$forumPost = $forum->postInfo($PostID);
+$TopicID = $forumPost['thread-id'];
 
 if (!Forums::check_forumperm($ForumID, 'Write')) {
     error('You lack the permission to edit this post.', true);
 }
-if ($IsLocked && !check_perms('site_moderate_forums')) {
+if ($forumPost['is-locked'] && !check_perms('site_moderate_forums')) {
     error('You cannot edit a locked post.', true);
 }
-if ($UserID != $AuthorID && !check_perms('site_moderate_forums')) {
+if ($UserID != $forumPost['user-id'] && !check_perms('site_moderate_forums')) {
     error(403, true);
 }
 
 // Send a PM to the user to notify them of the edit
-if ($UserID != $AuthorID && $DoPM) {
+if ($UserID != $forumPost['user-id'] && $DoPM) {
     Misc::send_pm(
-        $AuthorID, 0,
+        $forumPost['user-id'], 0,
         "Your post #$PostID has been edited",
         sprintf('One of your posts has been edited by %s: [url]%s[/url]',
             '[url='.site_url()."user.php?id=$UserID]".$LoggedUser['Username'].'[/url]',
@@ -61,7 +62,7 @@ if ($UserID != $AuthorID && $DoPM) {
 $forum->editPost($UserID, $PostID, $Body);
 
 $Cache->deleteMulti([
-    "thread_{$TopicID}_catalogue_" . (int)floor((POSTS_PER_PAGE * $Page - POSTS_PER_PAGE) / THREAD_CATALOGUE),
+    "thread_{$TopicID}_catalogue_" . (int)floor((POSTS_PER_PAGE * $forumPost['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE),
     "thread_{$TopicID}_info",
 ]);
 
