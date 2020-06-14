@@ -124,9 +124,9 @@ class Forum extends Base {
             ", THREAD_CATALOGUE, $threadId
         );
         for ($i = 0; $i <= $max; $i++) {
-            $this->cache->expire_value("thread_{$TopicID}_catalogue_$i", 86400);
+            $this->cache->delete_value("thread_{$TopicID}_catalogue_$i");
         }
-        $this->cache->expire_value("thread_{$TopicID}_info", 86400);
+        $this->cache->delete_value("thread_{$TopicID}_info");
         $this->cache->delete_value("polls_$TopicID");
     }
 
@@ -320,12 +320,6 @@ class Forum extends Base {
                 LastPostTime     = now()
             WHERE ID = ?
             ", $postId, $userId, $threadId
-        );
-        $numPosts = $this->db->scalar("
-            SELECT NumPosts
-            FROM forums_topics
-            WHERE ID = ?
-            ", $threadId
         );
         $this->updateRoot($userId, $threadId, $postId);
     }
@@ -588,7 +582,12 @@ class Forum extends Base {
         );
 
         // Store edit history
-        $this->saveEdit($userId, $postId, $oldBody);
+        $this->db->prepared_query("
+            INSERT INTO comments_edits
+                   (EditUser, PostID, Body, Page, EditTime)
+            VALUES (?,        ?,      ?,   'forums', now())
+            ", $userId, $postId, $oldBody
+        );
         return $postId;
     }
 
@@ -615,6 +614,114 @@ class Forum extends Base {
             ", $userId, trim($body), $postId
         );
         $this->cache->delete_value("forums_edits_$postId");
+    }
+
+    /**
+     * Fetch information about a post. Note: The ForumID can be recovered from a PostID.
+     *
+     * @param int $postId The post
+     * @return array
+     *   'min-class-write'  int Minimum permission required to write in forum where the post appears.
+     *   'forum-id'         int forum ID
+     *   'thread-id'        int thread ID
+     *   'thread-locked'    int IS the thread locked? '0'/'1'
+     *   'thread-pages'     int Number of pages in the thread
+     *   'page'             int Page where the post falls
+     *   'user-id'          int The user ID of the author
+     *   'is-sticky'        int Is the post the sticky post of the thread?
+     *   'body'             string The post contents
+     *
+     * NB: kebab-case chosen for grepability
+     */
+    public function postInfo(int $postId) {
+        $this->db->prepared_query('
+            SELECT
+                f.MinClassWrite         AS "min-class-write",
+                t.ForumID               AS "forum-id",
+                t.id                    AS "thread-id",
+                t.islocked              AS "thread-locked",
+                ceil(t.numposts / ?)    AS "thread-pages" ,
+                (SELECT ceil(sum(if(fp.ID <= p.ID, 1, 0)) / ?) FROM forums_posts fp WHERE fp.TopicID = t.ID)
+                                        AS "page",
+                p.AuthorID              AS "user-id",
+                (p.ID = t.StickyPostID) AS "is-sticky",
+                p.Body                  AS "body"
+            FROM forums_topics      t
+            INNER JOIN forums       f ON (t.forumid = f.id)
+            INNER JOIN forums_posts p ON (p.topicid = t.id)
+            WHERE p.ID = ?
+            ', POSTS_PER_PAGE, POSTS_PER_PAGE, $postId
+        );
+        return $this->db->next_record(MYSQLI_ASSOC, false);
+    }
+
+    /**
+     * Remove a post from a thread
+     *
+     * @param int $postID the ID of the post to remove
+     * @return bool Success
+     */
+    public function removePost(int $postId) {
+        $forumPost = $this->postInfo($postId);
+        if (!$forumPost) {
+            return false;
+        }
+        $this->db->prepared_query("
+            DELETE fp, unq
+            FROM forums_posts fp
+            LEFT JOIN users_notify_quoted unq ON (unq.PostID = fp.ID and unq.Page = 'forums')
+            WHERE fp.ID = ?
+            ", $postId
+        );
+        if ($this->db->affected_rows() == 0) {
+            return false;
+        }
+        $forumId  = $forumPost['forum-id'];
+        $threadId = $forumPost['thread-id'];
+
+        $this->db->prepared_query("
+            UPDATE forums_topics t
+            INNER JOIN
+            (
+                SELECT
+                    count(p.ID) AS NumPosts,
+                    IF(t.StickyPostID = ?, 0, t.StickyPostID) AS StickyPostID,
+                    t.ID
+                FROM forums_topics t
+                LEFT JOIN forums_posts p ON (p.TopicID = t.ID) where t.id = ?
+            ) UPD ON (UPD.ID = t.ID)
+            LEFT JOIN (
+                SELECT ID, AuthorID, AddedTime, TopicID
+                FROM forums_posts
+                WHERE TopicID = ?
+                ORDER BY ID desc
+                LIMIT 1
+            ) LAST ON (LAST.TopicID = UPD.ID)
+            SET
+                t.NumPosts         = UPD.NumPosts,
+                t.StickyPostID     = UPD.StickyPostID,
+                t.LastPostID       = LAST.ID,
+                t.LastPostAuthorID = LAST.AuthorID,
+                t.LastPostTime     = LAST.AddedTime
+            WHERE t.ID = ?
+            ", $postId, $threadId, $threadId, $threadId
+        );
+
+        $this->adjustForumStats($forumId);
+
+        $subscription = new \Gazelle\Manager\Subscription;
+        $subscription->flush('forums', $threadId);
+        $subscription->flushQuotes('forums', $threadId);
+
+        // We need to clear all subsequential catalogues as they've all been bumped with the absence of this post
+        $begin = (int)floor((POSTS_PER_PAGE * (int)$forumPost['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE);
+        $end = (int)floor((POSTS_PER_PAGE * (int)$forumPost['thread-pages'] - POSTS_PER_PAGE) / THREAD_CATALOGUE);
+        for ($i = $begin; $i <= $end; $i++) {
+            $this->cache->delete_value("thread_{$threadId}_catalogue_{$i}");
+        }
+        $this->cache->deleteMulti(["thread_{$threadId}_info", 'forums_list', "forums_$forumId"]);
+        $this->flushCache();
+        return true;
     }
 
     /**
@@ -661,36 +768,6 @@ class Forum extends Base {
             INNER JOIN forums AS f ON (f.ID = t.ForumID)
             WHERE t.ID = ?
             ", $threadId
-        );
-    }
-
-    /**
-     * Get information about a post. The forumId can be recovered from a postId.
-     *
-     * @param int $postId The post
-     * @return array [$body $author, $threadId, $forumId, $isLocked, $minClassWrite, $pageNumber, $noPoll?]
-     */
-    public function postInfo(int $postId) {
-        return $this->db->row("
-            SELECT
-                p.Body,
-                p.AuthorID,
-                p.TopicID,
-                t.ForumID,
-                t.IsLocked,
-                f.MinClassWrite,
-                ceil(
-                    (
-                        SELECT count(*)
-                        FROM forums_posts AS p2
-                        WHERE p2.TopicID = p.TopicID AND p2.ID <= ?
-                    ) / ?
-                ) AS Page
-            FROM forums_posts        AS p
-            INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
-            INNER JOIN forums        AS f ON (t.ForumID = f.ID)
-            WHERE p.ID = ?
-            ", $postId, POSTS_PER_PAGE, $postId
         );
     }
 

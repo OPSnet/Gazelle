@@ -44,6 +44,7 @@ $preload = [
     'fileHtml'    => new \Gazelle\File\RipLogHTML,
     'fileLog'     => new \Gazelle\File\RipLog,
     'fileTorrent' => new \Gazelle\File\Torrent,
+    'forum'       => new \Gazelle\Forum,
     'stylesheet'  => new \Gazelle\Stylesheet,
     'tagMan'      => new \Gazelle\Manager\Tag,
     'torMan'      => new \Gazelle\Manager\Torrent,
