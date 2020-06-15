@@ -95,9 +95,9 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
-    'ucfirst',
+    'ucfirstall',
     function ($text) {
-        return ucfirst($text);
+        return implode(' ', array_map(function ($w) {return ucfirst($w);}, explode(' ', $text)));
     }
 ));
 
