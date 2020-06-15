@@ -10,15 +10,15 @@
     </tr>
 {% endif %}
 <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
-    <td class="td_read {{ is_read }} {{ tooltip }}" title="{{ is_read | ucfirst }}"></td>
+    <td class="td_read {{ icon_class }} {{ tooltip }}" title="{{ icon_class|replace({'_': ' '})|ucfirstall }}"></td>
     <td class="td_forum">
         <h4 class="min_padding">
-            <a class="{{ tooltip }}" href="forums.php?action=viewforum&amp;forumid={{ forum.ID }}" title="{{ forum.Description }}">{{ forum.Name }}</a>
+            <a class="{{ tooltip }}" href="forums.php?action=viewforum&amp;forumid={{ forum_id }}" title="{{ description }}">{{ name }}</a>
         </h4>
     </td>
-{% if not forum.NumPosts %}
+{% if not threads %}
     <td class="td_latest">
-        There are no topics here.{% if creator %} <a href="forums.php?action=new&amp;forumid={{ forum.ID }}}">Create one!</a>{% endif %}
+        There are no topics here.{% if creator %} <a href="forums.php?action=new&amp;forumid={{ forum_id }}}">Create one!</a>{% endif %}
     </td>
 {% else %}
     <td class="td_latest">
@@ -34,6 +34,6 @@
         <span style="float: right;" class="last_poster">by {{ last_post_user|raw }} {{ last_post_diff|raw }}</span>
     </td>
 {% endif %}
-    <td class="td_topic_count number_column m_td_right">{{ forum.NumTopics | number_format }}</td>
-    <td class="td_post_count number_column m_td_right">{{ forum.NumPosts | number_format }}</td>
+    <td class="td_topic_count number_column m_td_right">{{ forum.NumTopics|number_format }}</td>
+    <td class="td_post_count number_column m_td_right">{{ forum.NumPosts|number_format }}</td>
 </tr>

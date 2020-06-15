@@ -19,25 +19,39 @@ foreach ($toc as $category => $forumList) {
         }
         $forum->setForum($f['ID']);
         $userLastRead = $forum->userLastRead($LoggedUser['ID'], $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE);
-        $userRead = isset($userLastRead[$f['LastPostTopicID']]);
-        $latestPostRead = $userRead ? $userLastRead[$f['LastPostTopicID']]['PostID'] : 0;
-        $isRead = (!$f['IsLocked'] || $f['IsSticky'])
-            && ($latestPostRead > $f['LastPostID']
-            && strtotime($f['LastPostTime']) > G::$LoggedUser['CatchupTime']
-        ) ? 'read' : 'unread';
+        if (isset($userLastRead[$f['LastPostTopicID']])) {
+            $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
+            $lastReadPost = $userLastRead[$f['LastPostTopicID']]['PostID'];
+            $catchup = $userLastRead[$f['LastPostTopicID']]['PostID'] >= $f['LastPostID']
+                && strtotime($f['LastPostTime']) > $LoggedUser['CatchupTime'];
+            $isRead = true;
+        } else {
+            $lastReadPage = null;
+            $lastReadPost = null;
+            $catchup = false;
+            $isRead = false;
+        }
+
+        $iconClass = ((!$f['IsLocked'] || $f['IsSticky']) && $catchup ? 'read' : 'unread')
+            . ($f['IsLocked'] ? '_locked' : '')
+            . ($f['IsSticky'] ? '_sticky' : '');
 
         echo G::$Twig->render('forum/main.twig', [
             'creator'        => $f['MinClassCreate'] <= $LoggedUser['Class'],
             'category'       => $category,
             'cut_title'      => Format::cut_string($f['Title'], 50, 1),
-            'forum'          => $f,
+            'description'    => $f['Description'],
+            'forum_id'       => $f['ID'],
+            'icon_class'     => $iconClass,
             'id'             => $f['LastPostTopicID'],
-            'is_read'        => $userRead,
+            'is_read'        => $isRead,
             'last_post_diff' => time_diff($f['LastPostTime'], 1),
             'last_post_user' => Users::format_username($f['LastPostAuthorID'], false, false, false),
-            'last_read_page' => $userRead ? $userLastRead[$f['LastPostTopicID']]['Page'] : null,
-            'last_read_post' => $userRead ? $userLastRead[$f['LastPostTopicID']]['PostID'] : null,
+            'last_read_page' => $lastReadPage,
+            'last_read_post' => $lastReadPost,
+            'name'           => $f['Name'],
             'seen'           => ++$seen, // $seen == 1 implies <table> needs to be emitted
+            'threads'        => $f['NumPosts'] > 0,
             'title'          => $f['Title'],
             'tooltip'        => $f['ID'] == DONOR_FORUM ? 'tooltip_gold' : 'tooltip',
         ]);

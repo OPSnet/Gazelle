@@ -1,5 +1,5 @@
 <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
-    <td class="td_read {{ read }} {{ tooltip }}" title="{{ icon_text }}"></td>
+    <td class="td_read {{ icon_class }} {{ tooltip }}" title="{{ icon_class|replace({'_': ' '})|ucfirstall }}"></td>
     <td class="td_latest">
         <span style="float: left;" class="last_topic">
             <strong>
@@ -15,6 +15,6 @@
 {% endif %}
         <span style="float: right;" class="last_poster">by {{ last_post_user|raw }} {{ last_post_diff|raw }}</span>
     </td>
-    <td class="td_replies number_column m_td_right">{{ replies }}</td>
+    <td class="td_replies number_column m_td_right">{{ replies|number_format }}</td>
     <td class="td_author">{{ author|raw }}</td>
 </tr>

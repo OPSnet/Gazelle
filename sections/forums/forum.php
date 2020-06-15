@@ -34,21 +34,21 @@ $perPage      = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 $userLastRead = $forum->userLastRead($LoggedUser['ID'], $perPage);
 
 foreach ($forumToc as &$thread) {
-
-    $userRead = isset($userLastRead[$thread['LastPostID']]);
-    $latestPostRead = $userRead ? $userLastRead[$thread['LastPostID']]['PostID'] : 0;
-    $isRead = (!$thread['IsLocked'] || $thread['IsSticky'])
-        && ($latestPostRead > $thread['LastPostID']
-        && strtotime($thread['LastPostTime']) > G::$LoggedUser['CatchupTime']
-    ) ? 'read' : 'unread';
-
-    $thread['read'] = $isRead;
-    if ($thread['IsLocked']) {
-        $thread['read'] .= '_locked';
+    if (isset($userLastRead[$thread['ID']])) {
+        $thread['last_read_page'] = (int)$userLastRead[$thread['ID']]['Page'];
+        $thread['last_read_post'] = $userLastRead[$thread['ID']]['PostID'];
+        $catchup = $userLastRead[$thread['ID']]['PostID'] >= $thread['LastPostID']
+            && strtotime($thread['LastPostTime']) > $LoggedUser['CatchupTime'];
+        $thread['is_read'] = true;
+    } else {
+        $thread['last_read_page'] = null;
+        $thread['last_read_post'] = null;
+        $catchup = false;
+        $thread['is_read'] = false;
     }
-    if ($thread['IsSticky']) {
-        $thread['read'] .= '_sticky';
-    }
+    $thread['icon_class'] = ((!$thread['IsLocked'] || $thread['IsSticky']) && $catchup ? 'read' : 'unread')
+        . ($thread['IsLocked'] ? '_locked' : '')
+        . ($thread['IsSticky'] ? '_sticky' : '');
 
     $links = [];
     $threadPages = ceil($thread['NumPosts'] / $perPage);
@@ -102,21 +102,18 @@ echo G::$Twig->render('forum/header.twig', [
 <?php
 } else {
     foreach ($forumToc as $thread) {
-        // echo '<tr><td colspan="4"><pre>'; var_dump($thread); echo "</pre></td></tr>";
-        $userRead = isset($userLastRead[$thread['ID']]);
         echo G::$Twig->render('forum/toc.twig', [
             'author'         => Users::format_username($thread['AuthorID'], false, false, false, false, false, $isDonorForum),
             'cut_title'      => $thread['cut_title'],
-            'icon_text'      => ucwords(str_replace('_', ' ', $thread['read'])),
+            'icon_class'     => $thread['icon_class'],
             'id'             => $thread['ID'],
-            'is_read'        => isset($userLastRead[$thread['ID']]),
+            'is_read'        => $thread['is_read'],
             'last_post_diff' => time_diff($thread['LastPostTime'], 1),
             'last_post_user' => Users::format_username($thread['LastPostAuthorID'], false, false, false, false, false, $isDonorForum),
-            'last_read_page' => $userRead ? $userLastRead[$thread['ID']]['Page'] : null,
-            'last_read_post' => $userRead ? $userLastRead[$thread['ID']]['PostID'] : null,
+            'last_read_page' => $thread['last_read_page'],
+            'last_read_post' => $thread['last_read_post'],
             'page_links'     => $thread['page_links'],
-            'read'           => $thread['read'],
-            'replies'        => number_format($thread['NumPosts'] - 1),
+            'replies'        => $thread['NumPosts'] - 1,
             'title'          => $thread['Title'],
             'tooltip'        => $forumId == DONOR_FORUM ? "tooltip_gold" : "tooltip",
         ]);
