@@ -12,35 +12,36 @@ if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$_POST['toid']])) {
     error(403);
 }
 
-if (isset($_POST['convid']) && is_number($_POST['convid'])) {
-    $ConvID = $_POST['convid'];
+if (($ConvID = (int)$_POST['convid']) > 0) {
+    // A reply to an ongoing conversation
     $Subject = '';
-    $ToID = explode(',', $_POST['toid']);
-    foreach ($ToID as $TID) {
-        if (!is_number($TID)) {
-            $Err = 'A recipient does not exist.';
-        }
-    }
-    $DB->query("
+    if (!$DB->scalar("
         SELECT UserID
         FROM pm_conversations_users
-        WHERE UserID = '$LoggedUser[ID]'
-            AND ConvID = '$ConvID'");
-    if (!$DB->has_results()) {
+        WHERE UserID = ?
+            AND ConvID = ?
+            ", $LoggedUser['ID'], $ConvID
+    )) {
         error(403);
     }
 } else {
-    $ConvID = '';
-    if (!is_number($_POST['toid'])) {
-        $Err = 'This recipient does not exist.';
-    } else {
-        $ToID = $_POST['toid'];
-    }
+    // A new conversation
+    $ConvID = null;
     $Subject = trim($_POST['subject']);
     if (empty($Subject)) {
         $Err = 'You cannot send a message without a subject.';
     }
 }
+$ToID = $DB->scalar("
+    SELECT ID
+    FROM users_main
+    WHERE ID = ?
+    ", (int)$_POST['toid']
+);
+if (!$ToID) {
+    $Err = 'Recipient does not exist.';
+}
+
 $Body = trim($_POST['body']);
 if ($Body === '' || $Body === false) {
     $Err = 'You cannot send a message without a body.';
@@ -48,13 +49,9 @@ if ($Body === '' || $Body === false) {
 
 if (!empty($Err)) {
     error($Err);
-    //header('Location: inbox.php?action=compose&to='.$_POST['toid']);
-    $ToID = $_POST['toid'];
     $Return = true;
-    include(SERVER_ROOT.'/sections/inbox/compose.php');
-    die();
+    require(__DIR__ . '/compose.php');
+} else {
+    Misc::send_pm($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
+    header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
 }
-
-$ConvID = Misc::send_pm($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
-
-header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));

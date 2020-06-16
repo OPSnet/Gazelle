@@ -38,7 +38,7 @@ if (isset($_GET['cache'])) {
     elseif ($_GET['cache'] === 'users') {
         $max = $DB->scalar("SELECT max(ID) as count FROM users_main");
         for ($i = 1; $i <= $max; $i++) {
-            $Cache->deleteMulti(['user_stats_' . $i, 'user_info_' . $i, 'user_info_heavy_' . $i, 'donor_info_' . $i]);
+            $Cache->deleteMulti(['inbox_new_' . $i, 'user_stats_' . $i, 'user_info_' . $i, 'user_info_heavy_' . $i, 'donor_info_' . $i]);
         }
         echo "<div class='save_message'>All user caches flushed.</div>";
     }
@@ -98,7 +98,7 @@ $MultiKeyTooltip = 'Enter cache keys delimited by whitespace.';
             <td><a href="tools.php?action=clear_cache&amp;cache=torrent_groups">Torrent Groups</a> (flushes torrent_group_* and groups_artists_*)</td>
         </tr>
         <tr>
-            <td><a href="tools.php?action=clear_cache&amp;cache=users">Users</a> (flushes user_stats_*, user_info_*, and user_info_heavy_*)</td>
+            <td><a href="tools.php?action=clear_cache&amp;cache=users">Users</a> (flushes donor_info_*, inbox_new_*, user_info_*, and user_info_heavy_*, user_stats_*)</td>
         </tr>
     </table>
 
