@@ -334,15 +334,14 @@ class Notification extends \Gazelle\Base {
     public function loadInbox() {
         $NewMessages = $this->cache->get_value('inbox_new_' . $this->UserID);
         if ($NewMessages === false) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->query("
-                SELECT COUNT(UnRead)
+            $NewMessages = $this->db->scalar("
+                SELECT count(*)
                 FROM pm_conversations_users
-                WHERE UserID = '" . $this->UserID . "'
-                    AND UnRead = '1'
-                    AND InInbox = '1'");
-            list($NewMessages) = $this->db->next_record();
-            $this->db->set_query_id($QueryID);
+                WHERE UnRead    = '1'
+                    AND InInbox = '1'
+                    AND UserID  = ?
+                ", $this->UserID
+            );
             $this->cache->cache_value('inbox_new_' . $this->UserID, $NewMessages, 0);
         }
         if ($NewMessages > 0) {
