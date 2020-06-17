@@ -10,9 +10,9 @@ if ($ArtistID < 1) {
     error(0);
 }
 $Redirect = (int)$_POST['redirect'];
-$AliasName = \Gazelle\Artist::sanitize($_POST['name']);
-if ($AliasName == '') {
-    error('Blank artist name.');
+$aliasName = \Gazelle\Artist::sanitize($_POST['name']);
+if (is_null($aliasName) || empty($aliasName)) {
+    error('You must supply an alias for this artist.');
 }
 
 /*
@@ -32,7 +32,7 @@ $DB->prepared_query("
 );
 if ($DB->has_results()) {
     while (list($CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect) = $DB->next_record(MYSQLI_NUM, false)) {
-        if (!strcasecmp($CloneAliasName, $AliasName)) {
+        if (!strcasecmp($CloneAliasName, $aliasName)) {
             break;
         }
     }
@@ -51,6 +51,7 @@ if ($DB->has_results()) {
         }
     }
 }
+
 if (!$CloneAliasID) {
     if ($Redirect) {
         try {
@@ -69,7 +70,7 @@ if (!$CloneAliasID) {
         }
 
     }
-    $aliasId = $artist->addAlias($LoggedUser['ID'], $AliasName, $Redirect);
+    $aliasId = $artist->addAlias($LoggedUser['ID'], $aliasName, $Redirect);
 
     Misc::write_log(sprintf("The alias %d (%s) was added to the artist %d (%s) by user %d (%s)",
         $aliasId, $aliasName, $ArtistID, $artist->name(), $LoggedUser['ID'], $LoggedUser['Username']
