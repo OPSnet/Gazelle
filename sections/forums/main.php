@@ -50,6 +50,8 @@ foreach ($toc as $category => $forumList) {
             'last_read_page' => $lastReadPage,
             'last_read_post' => $lastReadPost,
             'name'           => $f['Name'],
+            'num_posts'      => $f['NumPosts'],
+            'num_topics'     => $f['NumTopics'],
             'seen'           => ++$seen, // $seen == 1 implies <table> needs to be emitted
             'threads'        => $f['NumPosts'] > 0,
             'title'          => $f['Title'],
