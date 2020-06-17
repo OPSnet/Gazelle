@@ -17,6 +17,7 @@ if (!check_perms('site_edit_wiki')) {
 $userId   = $LoggedUser['ID'];
 $artistId = $_REQUEST['artistid'];
 $artist   = new \Gazelle\Artist($artistId);
+$summary  = [];
 
 if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     authorize();
@@ -27,7 +28,7 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
 } else { // with edit, the variables are passed with POST
     $discogsId = (int)($_POST['discogs-id']);
     $body      = trim($_POST['body']);
-    $summary   = trim($_POST['summary']);
+    $summary[] = trim($_POST['summary']);
     $image     = trim($_POST['image']);
     ImageTools::blacklisted($image);
     // Trickery
@@ -39,15 +40,11 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
 if ($discogsId > 0) {
     if ($discogsId != $artist->discogsId()) {
         $artist->setDiscogsRelation($discogsId, $userId);
-        if ($summary) {
-            $summary .= ", Discogs relation set to $discogsId";
-        } else {
-            $summary = "Discogs relation set to $discogsId";
-        }
+        $summary[] = "Discogs relation set to $discogsId";
     }
 } else {
     $artist->removeDiscogsRelation();
-    $summary = implode(', ', [$summary, "Discogs relation cleared"]);
+    $summary[] = "Discogs relation cleared"]);
 }
 
 // Insert revision
@@ -56,7 +53,7 @@ if (!$revisionId) { // edit
         INSERT INTO wiki_artists
                (PageID, Body, Image, UserID, Summary)
         VALUES (?,      ?,    ?,     ?,      ?)
-        ", $artistId, $body, $image, $userId, $summary
+        ", $artistId, $body, $image, $userId, implode(', ', $summary)
     );
     $revisionId = $DB->inserted_id();
 } else { // revert
