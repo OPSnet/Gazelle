@@ -122,6 +122,24 @@ Your torrent was reported because it contained material from the DNU list or fro
         ],
 
         '1' => [ //Music Resolves
+            'checksum_trump' =>  [
+                'priority' => '10',
+                'reason' => '24',
+                'title' => 'Checksum Trump',
+                'report_messages' => [
+                    'Please make certain that your checksum trump is valid (rules 2.2.10 and below). Only CD media rips are subject to checksum trumps.',
+                    'Please make sure you are reporting the torrent <strong class="important_text">which has been trumped</strong> and should be deleted, not the torrent that you think should remain on site.'
+                ],
+                'report_fields' => [
+                    'sitelink' => '1'
+                ],
+                'resolve_options' => [
+                    'upload' => '0',
+                    'warn' => '0',
+                    'delete' => '1',
+                    'pm' => '[rule]2.2.10.3[/rule]. A FLAC upload with an EAC, XLD, or whipper rip log with a valid checksum that scores 100% on the log checker replaces one with a lower score or bad or missing checksum. No log scoring less than 100% can trump an already existing one that scores under 100%. Your torrent was reported because it was trumped by another torrent that was ripped with a log file that scored 100%.'
+                ]
+            ],
             'tag_trump' =>  [
                 'priority' => '50',
                 'reason' => '4',
