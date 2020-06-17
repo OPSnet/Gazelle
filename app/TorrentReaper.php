@@ -58,7 +58,7 @@ class TorrentReaper extends Base {
                 $deleteNotes[$userID] = ['Count' => 0, 'Msg' => ''];
             }
 
-            $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=torrents.php?id=%s]%s[/url]", $groupID, $name);
+            $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=%storrents.php?id=%s]%s[/url]", site_url(), $groupID, $name);
             $deleteNotes[$userID]['Count']++;
 
             ++$i;
