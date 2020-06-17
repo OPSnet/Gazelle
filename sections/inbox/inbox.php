@@ -54,6 +54,7 @@ echo $Pages;
             <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
             <input type="submit" name="read" value="Mark as read" />&nbsp;
             <input type="submit" name="unread" value="Mark as unread" />&nbsp;
+            <input type="submit" name="sticky" value="Toggle sticky" title="Unsticky message are stickied, sticky messages are unstickied" />&nbsp;
             <input type="submit" name="delete" value="Delete message(s)" />
             <span style="float: right;">
 <?php            // provide a temporary toggle for sorting PMs
@@ -119,6 +120,7 @@ echo $Pages;
             </table>
             <input type="submit" name="read" value="Mark as read" />&nbsp;
             <input type="submit" name="unread" value="Mark as unread" />&nbsp;
+            <input type="submit" name="sticky" value="Toggle sticky" title="Unsticky message are stickied, sticky messages are unstickied" />&nbsp;
             <input type="submit" name="delete" value="Delete message(s)" />
         </form>
 <?php } ?>
