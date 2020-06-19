@@ -1,0 +1,25 @@
+<div class="header">
+    <h2 class="general">Client Whitelist</h2>
+</div>
+<div class="box pad">
+    <p>Client rules are how we maintain the integrity of our swarms. This allows us to filter out
+    disruptive and dishonest clients that may hurt the performance of either the tracker or individual peers.</p>
+    <table cellpadding="5" cellspacing="1" border="0" class="border" width="100%">
+    <tr class="colhead">
+        <td><strong>Allowed Client</strong></td>
+        <td style="width: 75px"><strong>Peer ID</strong></td>
+    </tr>
+{% for c in list %}
+{% if 'HIDDEN' not in c.vstring %}
+    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <td>{{ c.vstring }}</td>
+        <td>{{ c.peer_id }}</td>
+    </tr>
+{% endif %}
+{% endfor %}
+    </table>
+    <p>If you think an important client (or major version) should be listed, you can
+    <a href="{{ site_url }}//forums.php?action=viewthread&threadid={{ forum_thread }}">make a
+    suggestion</a> for Staff to take it into consideration. This does not guarantee that it
+    will be whitelisted, nor should you begin to use it until it has been approved.
+</div>
