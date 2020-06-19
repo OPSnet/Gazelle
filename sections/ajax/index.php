@@ -125,9 +125,6 @@ switch ($_GET['action']) {
     case 'wiki':
         require('wiki.php');
         break;
-    case 'send_recommendation':
-        require('send_recommendation.php');
-        break;
     case 'get_friends':
         require('get_friends.php');
         break;
