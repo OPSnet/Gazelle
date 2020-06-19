@@ -1,0 +1,55 @@
+<div class="thin">
+    <div class="header">
+        <h2>Edit request bounty</h2>
+        <h3><a href="requests.php?action=view&id={{ id }}">{{ title }}</a></h3>
+    </div>
+
+    <div class="box pad">
+        <p>This panel can be used to refund or remove bounty on a request. If the
+        bounty is refunded, the buffer is returned to the user who added to the
+        question (if buffer tax is enabled, the portion deducted from tax is not
+        refunded). If the bounty is removed, nothing is credited back to the user.
+        The latter should be used for cheaters.</p>
+
+        <p>If a request has been filled, the bounty will be removed from the stats
+        of the filler. In this case, they will receive a PM explaining the
+        situation. PMs are not sent to the people whose bounties are removed or
+        refunded. In all cases, a note is made on the user profiles of those
+        affected.</p>
+
+        <p>To avoid accidents when removing bounty, you must select both the
+        radio button in the Remove column <b>and</b> also check the box.</p>
+
+        <form action="" method="post" id="request_form">
+            <div>
+                <input type="hidden" name="id" value="{{ id }}" />
+                <input type="hidden" name="auth" value="{{ auth }}" />
+                <input type="hidden" name="action" value="takebounty" />
+            </div>
+
+            <table class="layout">
+                <tr>
+                    <td class="label" style="text-align: left; width: 40%;">User</td>
+                    <td class="label" style="text-align: left; width: 40%;">Bounty</td>
+                    <td class="label" style="width: 60px;">Keep</td>
+                    <td class="label" style="width: 60px;">Refund</td>
+                    <td class="label" style="width: 60px;"><strong class="important_text">Remove</strong></td>
+                </tr>
+{% for b in bounty %}
+                <tr>
+                    <td>{{ b.user_name|raw }}</td>
+                    <td title="{{ b.Bounty|number_format }}">{{ b.bounty_size }}</td>
+                    <td><input type="radio" title="No change" name="action-{{ b.UserID }}" value="keep" checked="checked" /></td>
+                    <td><input type="radio" title="Refund" name="action-{{ b.UserID }}" value="refund" /></td>
+                    <td><input type="radio" title="Remove (Danger!)" name="action-{{ b.UserID }}" value="remove" />&nbsp;<input type="checkbox" name="check-{{ b.UserID }}" /></td>
+                </tr>
+{% endfor %}
+                <tr>
+                    <td colspan="5">
+                        <input type="submit" id="button" value="Edit bounty" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
