@@ -28,6 +28,7 @@ $PermissionsArray = [
     'site_can_invite_always' => 'Can invite past user limit.',
     'site_send_unlimited_invites' => 'Unlimited invites.',
     'site_moderate_requests' => 'Request moderation access.',
+    'site_admin_requests' => 'Edit request bounties.',
     'site_delete_artist' => 'Can delete artists (must be able to delete torrents+requests).',
     'site_moderate_forums' => 'Forum moderation access.',
     'site_admin_forums' => 'Forum administrator access.',
@@ -161,6 +162,7 @@ function permissions_form() {
                     display_perm('site_can_invite_always', 'Can invite users even when invites are closed.');
                     display_perm('site_send_unlimited_invites', 'Can send unlimited invites.');
                     display_perm('site_moderate_requests', 'Can moderate any request.');
+                    display_perm('site_admin_requests','Can edit request bounties.');
                     display_perm('site_delete_artist', 'Can delete artists (must be able to delete torrents+requests).');
                     display_perm('forums_polls_create','Can create polls in the forums.');
                     display_perm('forums_polls_moderate','Can feature and close polls.');

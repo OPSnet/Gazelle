@@ -73,10 +73,16 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
         <div class="linkbox">
 <?php    if ($CanEdit) { ?>
             <a href="requests.php?action=edit&amp;id=<?=$RequestID?>" class="brackets">Edit</a>
-<?php    }
-    if ($UserCanEdit || check_perms('users_mod')) { ?>
+<?php
+    }
+    if (check_perms('site_admin_requests')) { ?>
+            <a href="requests.php?action=edit-bounty&amp;id=<?=$RequestID?>" class="brackets">Edit bounty</a>
+<?php
+    }
+    if ($UserCanEdit || check_perms('site_moderate_requests')) { ?>
             <a href="requests.php?action=delete&amp;id=<?=$RequestID?>" class="brackets">Delete</a>
-<?php    }
+<?php
+    }
     if (Bookmarks::has_bookmarked('request', $RequestID)) { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Unbookmark('request', <?=$RequestID?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php    } else { ?>

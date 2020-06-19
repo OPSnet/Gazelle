@@ -661,4 +661,5 @@ $header = new SortableTableHeader([
     </div>
 <?php } ?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();
