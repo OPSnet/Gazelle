@@ -5,7 +5,6 @@ $DB->prepared_query("
         f.FriendID,
         u.Username
     FROM friends AS f
-    RIGHT JOIN users_enable_recommendations AS r ON (r.ID = f.FriendID AND r.Enable = 1)
     RIGHT JOIN users_main AS u ON (u.ID = f.FriendID)
     WHERE f.UserID = ?
     ORDER BY u.Username ASC

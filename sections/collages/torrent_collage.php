@@ -103,7 +103,7 @@ if (!check_perms('site_collages_delete')
 // Silly hack for people who are on the old setting
 $CollageCovers = isset($LoggedUser['CollageCovers']) ? $LoggedUser['CollageCovers'] : 25 * (abs($LoggedUser['HideCollage'] - 1));
 
-View::show_header($Name, 'browse,collage,bbcode,voting,recommend');
+View::show_header($Name, 'browse,collage,bbcode,voting');
 ?>
 <div class="thin">
     <div class="header">
@@ -137,7 +137,6 @@ if (Bookmarks::has_bookmarked('collage', $CollageID)) {
             <a href="#" id="bookmarklink_collage_<?=$CollageID?>" class="brackets" onclick="Bookmark('collage', <?=$CollageID?>, 'Remove bookmark'); return false;">Bookmark</a>
 <?php
 } ?>
-<!-- <a href="#" id="recommend" class="brackets">Recommend</a> -->
 <?php
 if (check_perms('site_collages_manage') && !$Locked) {
 ?>

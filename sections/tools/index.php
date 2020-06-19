@@ -124,22 +124,6 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/managers/login_watch.php');
         break;
 
-    case 'recommend':
-        require(__DIR__ . '/managers/recommend_list.php');
-        break;
-
-    case 'recommend_add':
-        require(__DIR__ . '/managers/recommend_add.php');
-        break;
-
-    case 'recommend_alter':
-        require(__DIR__ . '/managers/recommend_alter.php');
-        break;
-
-    case 'recommend_restore':
-        require(__DIR__ . '/managers/recommend_restore.php');
-        break;
-
     case 'email_blacklist':
         require(__DIR__ . '/managers/email_blacklist.php');
         break;
@@ -361,10 +345,6 @@ switch ($_REQUEST['action']) {
 
     case 'site_options':
         require(__DIR__ . '/development/site_options.php');
-        break;
-
-    case 'recommendations':
-        require(__DIR__ . '/misc/recommendations.php');
         break;
 
     case 'analysis':

@@ -35,8 +35,6 @@ $PermissionsArray = [
     'site_view_flow' => 'Can view stats and data pools.',
     'site_view_full_log' => 'Can view old log entries.',
     'site_view_torrent_snatchlist' => 'Can view torrent snatch lists.',
-    'site_recommend_own' => 'Can recommend own torrents.',
-    'site_manage_recommendations' => 'Recommendations management access.',
     'site_delete_tag' => 'Can delete tags.',
     'site_disable_ip_history' => 'Disable IP history.',
     'zip_downloader' => 'Download multiple torrents at once.',
@@ -171,8 +169,6 @@ function permissions_form() {
                     display_perm('site_view_flow', 'Can view site stats and data pools.');
                     display_perm('site_view_full_log', 'Can view the full site log.');
                     display_perm('site_view_torrent_snatchlist', 'Can view torrent snatch lists.');
-                    display_perm('site_recommend_own', 'Can add own torrents to recommendations list.');
-                    display_perm('site_manage_recommendations', 'Can edit recommendations list.');
                     display_perm('site_delete_tag', 'Can delete tags.');
                     display_perm('site_disable_ip_history', 'Disable IP history.');
                     display_perm('zip_downloader', 'Download multiple torrents at once.');

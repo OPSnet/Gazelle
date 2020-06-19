@@ -137,7 +137,6 @@ Category('Managers', [
 
 Category('Torrents', [
     Item('Rate limiting',        'tools.php?action=rate_limit',    Any(['admin_rate_limit_view', 'admin_rate_limit_manage'])),
-    Item('Recommended torrents', 'tools.php?action=recommend',     Any(['site_recommend_own', 'site_manage_recommendations'])),
     Item('Collage recovery',     'collages.php?action=recover',    All(['site_collages_recover'])),
     Item('"Do Not Upload" list', 'tools.php?action=dnu',           All(['admin_dnu'])),
     Item('Label aliases',        'tools.php?action=label_aliases', All(['users_mod'])),
