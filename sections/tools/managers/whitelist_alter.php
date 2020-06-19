@@ -5,59 +5,39 @@ if (!check_perms('admin_whitelist')) {
     error(403);
 }
 
+$whitelist = new \Gazelle\Manager\ClientWhitelist;
+
 if ($_POST['submit'] == 'Delete') {
-    if (!is_number($_POST['id']) || $_POST['id'] == '') {
-        error('1');
+    $clientId = (int)$_POST['id'];
+    if ($clientId < 1) {
+        error(0);
     }
-
-    $DB->query('
-        SELECT peer_id
-        FROM xbt_client_whitelist
-        WHERE id = '.$_POST['id']);
-    list($PeerID) = $DB->next_record();
-    $DB->query('
-        DELETE FROM xbt_client_whitelist
-        WHERE id = '.$_POST['id']);
-    Tracker::update_tracker('remove_whitelist', ['peer_id' => $PeerID]);
-} else { //Edit & Create, Shared Validation
-
+    $peer = $whitelist->peerId($clientId);
+    $whitelist->remove($clientId);
+    Tracker::update_tracker('remove_whitelist', ['peer_id' => $peer]);
+} else {
+    // Edit or Create
     if (empty($_POST['client']) || empty($_POST['peer_id'])) {
-        print_r($_POST);
-        die();
+        error(0);
     }
+    $peer    = trim($_POST['peer_id']);
+    $vstring = trim($_POST['client']);
 
-    $Client = db_string($_POST['client']);
-    $PeerID = db_string($_POST['peer_id']);
-
-    if ($_POST['submit'] == 'Edit') { //Edit
-        if (empty($_POST['id']) || !is_number($_POST['id'])) {
-            error('3');
-        } else {
-            $DB->query('
-                SELECT peer_id
-                FROM xbt_client_whitelist
-                WHERE id = '.$_POST['id']);
-            list($OldPeerID) = $DB->next_record();
-            $DB->query("
-                UPDATE xbt_client_whitelist
-                SET
-                    vstring = '$Client',
-                    peer_id = '$PeerID'
-                WHERE ID = ".$_POST['id']);
-            Tracker::update_tracker('edit_whitelist', ['old_peer_id' => $OldPeerID, 'new_peer_id' => $PeerID]);
+    if ($_POST['submit'] == 'Edit') {
+        $clientId = (int)$_POST['id'];
+        if ($clientId < 1) {
+            error(0);
         }
-    } else { //Create
-        $DB->query("
-            INSERT INTO xbt_client_whitelist
-                (vstring, peer_id)
-            VALUES
-                ('$Client', '$PeerID')");
-        Tracker::update_tracker('add_whitelist', ['peer_id' => $PeerID]);
+        $oldPeer = $whitelist->modify($clientId, $peer, $vstring);
+        Tracker::update_tracker('edit_whitelist', [
+            'old_peer_id' => $oldPeer,
+            'new_peer_id' => $peer,
+        ]);
+    } else {
+        Tracker::update_tracker('add_whitelist', [
+            'peer_id' => $whitelist->create($peer, $vstring)
+        ]);
     }
 }
 
-$Cache->delete_value('whitelisted_clients');
-
-// Go back
-header('Location: tools.php?action=whitelist')
-?>
+header('Location: tools.php?action=whitelist');

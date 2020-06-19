@@ -1,0 +1,53 @@
+<div class="header">
+    <h2>Client Whitelist</h2>
+</div>
+<div class="box2 pad thin">
+<form class="add_form" name="clients" action="" method="post">
+    <input type="hidden" name="action" value="whitelist_alter" />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    <table>
+        <tr class="colhead">
+            <td colspan="4">Add client</td>
+        </tr>
+        <tr class="rowa">
+            <td>
+                <input type="text" size="60" name="client" placeholder="Client name" />
+            </td>
+            <td>
+                <input type="text" size="10" name="peer_id" placeholder="Peer ID" />
+            </td>
+            <td>
+                <input type="submit" value="Create" />
+            </td>
+        </tr>
+    </table>
+</form>
+<table width="100%">
+    <tr class="colhead">
+        <td>Client</td>
+        <td>Peer ID</td>
+        <td>Submit</td>
+    </tr>
+</table>
+{% for c in list %}
+<form class="manage_form" name="clients" action="" method="post">
+    <input type="hidden" name="action" value="whitelist_alter" />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    <table>
+        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <td>
+                <input type="hidden" name="id" value="{{ c.client_id }}" />
+                <input type="text" size="60" name="client" value="{{ c.vstring }}" />
+            </td>
+            <td>
+                <input type="text" size="10" name="peer_id" value="{{ c.peer_id }}" />
+            </td>
+            <td>
+                <input type="submit" name="submit" value="Edit" />
+                <input type="submit" name="submit" value="Delete" />
+            </td>
+        </tr>
+    </table>
+</form>
+{% endfor %}
+</div>
