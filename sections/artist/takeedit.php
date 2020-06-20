@@ -44,7 +44,7 @@ if ($discogsId > 0) {
     }
 } else {
     $artist->removeDiscogsRelation();
-    $summary[] = "Discogs relation cleared"]);
+    $summary[] = "Discogs relation cleared";
 }
 
 // Insert revision
