@@ -16,7 +16,7 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
 
         $userIDs = $this->db->collect('ID');
         if (count($userIDs) > 0) {
-            $placeholders = implode(',', array_fill(0, count($userIDs), '?'));
+            $placeholders = placeholders($userIDs);
             $this->db->prepared_query("
                 UPDATE users_info AS i
                 INNER JOIN users_main AS m ON (m.ID = i.UserID)

@@ -266,12 +266,11 @@ class Donations {
                 G::$Cache->deleteMulti(["donor_info_$UserID", "donor_title_$UserID", "donor_profile_rewards_$UserID"]);
                 $UserIDs[] = $UserID;
             }
-            $placeholders = implode(',', array_fill(0, count($UserIDs), '?'));
             G::$DB->prepared_query("
                 UPDATE users_donor_ranks SET
                     Rank = Rank - 1,
                     RankExpirationTime = now()
-                WHERE UserID IN ($placeholders)
+                WHERE UserID IN (" . placeholders($UserIDs) . ")
                 ", MAX_RANK, ...$UserIDs
             );
         }

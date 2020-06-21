@@ -73,11 +73,11 @@ class TorrentReaper extends Base {
         if (count($logEntries) > 0) {
             $chunks = array_chunk($logEntries, 100);
             foreach ($chunks as $messages) {
-                $placeholders = implode(',', array_fill(0, count($messages), '(?, now())'));
                 $this->db->prepared_query("
                     INSERT INTO log (Message, Time)
-                    VALUES $placeholders
-                ", ...$messages);
+                    VALUES " . placeholders($messages, '(?, now())')
+                    , ...$messages
+                );
             }
         }
 
@@ -88,11 +88,11 @@ class TorrentReaper extends Base {
         $similarIDs = $this->db->collect('SimilarID');
 
         if ($similarIDs) {
-            $placeholders = implode(', ', array_fill(0, count($similarIDs), '(?)'));
             $this->db->prepared_query("
                 DELETE FROM artists_similar
-                WHERE SimilarID IN ($placeholders)
+                WHERE SimilarID IN (" . placeholders($similarIDs, '(?)') . ")
             ", ...$similarIDs);
+            $placeholders = placeholders($similarIDs);
             $this->db->prepared_query("
                 DELETE FROM artists_similar_scores
                 WHERE SimilarID IN ($placeholders)

@@ -124,9 +124,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
             );
             $collageIDs = $DB->collect('CollageID');
             if ($collageIDs) {
-                $SQL .= "\nAND c.ID IN ("
-                    . implode(', ', array_fill(0, count($collageIDs), '?'))
-                    . ')';
+                $SQL .= "\nAND c.ID IN (" . placeholders($collageIDs) . ')';
                 $Args = array_merge($Args, $collageIDs);
             }
         } else {
@@ -140,9 +138,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'mine') {
     }
 
     if (!empty($Categories)) {
-        $SQL .= "\nAND CategoryID IN ("
-            . implode(', ', array_fill(0, count($Categories), '?'))
-            . ')';
+        $SQL .= "\nAND CategoryID IN (" . placeholders($Categories) . ')';
         $Args = array_merge($Args, $Categories);
     }
 }

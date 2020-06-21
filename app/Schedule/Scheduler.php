@@ -157,11 +157,10 @@ class Scheduler extends \Gazelle\Base {
         ", $id, $limit, $offset);
         $items = $this->db->to_array('periodic_task_history_id', MYSQLI_ASSOC);
 
-        $placeholders = implode(',', array_fill(0, count($items), '?'));
         $this->db->prepared_query("
             SELECT periodic_task_history_id, event_time, severity, event, reference
             FROM periodic_task_history_event
-            WHERE periodic_task_history_id IN ($placeholders)
+            WHERE periodic_task_history_id IN (" . placeholders($items) . ")
             ORDER BY event_time, periodic_task_history_event_id
         ", ...array_keys($items));
         $events = $this->db->to_array(false, MYSQLI_ASSOC);

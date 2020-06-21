@@ -60,13 +60,11 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                 $this->info(sprintf('Demoting %d users from %s to %s', count($userIds), $fromClass, $toClass));
                 $this->processed += count($userIds);
 
-                $params = array_merge([$l['From']], $userIds);
-                $placeholders = implode(', ', array_fill(0, count($userIds), '?'));
                 $this->db->prepared_query("
                     UPDATE users_main
                     SET PermissionID = ?
-                    WHERE ID IN ($placeholders)
-                    ", ...$params
+                    WHERE ID IN (" . placeholders($userIds) . ")
+                    ", $l['From'], ...$userIds
                 );
 
                 foreach ($userIds as $userId) {

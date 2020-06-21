@@ -205,7 +205,7 @@ if ($DB->has_results()) {
             SELECT DISTINCT concat('user_recent_snatch_', uid) as ck
             FROM xbt_snatched
             WHERE fid IN (%s)
-            ", implode(', ', array_fill(0, count($IDs), '?'))
+            ", placeholders($IDs)
         ), ...$IDs
     );
     $Cache->deleteMulti($DB->collect('ck', false));

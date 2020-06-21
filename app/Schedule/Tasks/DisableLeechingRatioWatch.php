@@ -28,14 +28,13 @@ class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
                 $this->debug("Disabling leech for $userID", $userID);
             }
 
-            $placeholders = implode(',', array_fill(0, count($users), '?'));
-
             $this->db->prepared_query("
-                    UPDATE users_info AS i
-                        JOIN users_main AS m ON m.ID = i.UserID
-                    SET m.can_leech = '0',
-                        i.AdminComment = CONCAT(now(), ' - Leeching privileges disabled by ratio watch system for downloading more than 10 GBs on ratio watch. - required ratio: ', m.RequiredRatio, '\n\n', i.AdminComment)
-                    WHERE m.ID IN ($placeholders)
+                UPDATE users_info AS i
+                INNER JOIN users_main AS m ON (m.ID = i.UserID)
+                SET
+                    m.can_leech = '0',
+                    i.AdminComment = CONCAT(now(), ' - Leeching privileges disabled by ratio watch system for downloading more than 10 GBs on ratio watch. - required ratio: ', m.RequiredRatio, '\n\n', i.AdminComment)
+                WHERE m.ID IN (" . placeholders($users) . ")
             ", ...array_values($users));
         }
     }

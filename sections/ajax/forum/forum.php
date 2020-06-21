@@ -93,8 +93,6 @@ if (!count($Forum)) {
 } else {
     // forums_last_read_topics is a record of the last post a user read in a topic, and what page that was on
     $args = array_keys($Forum);
-    $placeholders = implode(',', array_fill(0, count($args), '?'));
-    $args[] = $LoggedUser['ID'];
     $DB->prepared_query("
         SELECT
             l.TopicID,
@@ -108,9 +106,9 @@ if (!count($Forum)) {
                 ) / $PerPage
             ) AS Page
         FROM forums_last_read_topics AS l
-        WHERE l.TopicID IN ($placeholders)
-            AND l.UserID = ?
-        ", ...$args
+        WHERE l.UserID = ?
+            AND l.TopicID IN (" . placeholders($args) . ")
+        ", $LoggedUser['ID'], ...$args
     );
 
     // Turns the result set into a multi-dimensional array, with
