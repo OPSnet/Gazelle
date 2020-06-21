@@ -760,6 +760,11 @@ $Debug->set_flag('upload: ocelot updated');
 // (expire the key after 10 minutes to prevent locking it for too long in case there's a fatal error below)
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 
+if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
+    $torMan = new \Gazelle\Manager\Torrent;
+    $torMan->flushLatestUploads(5);
+}
+    
 //******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//
 
