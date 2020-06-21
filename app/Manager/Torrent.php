@@ -140,6 +140,6 @@ class Torrent extends \Gazelle\Base {
      * @param int $limit
      */
     public function flushLatestUploads(int $limit) {
-        $this->cache->cache_value(self::CACHE_KEY_LATEST_UPLOADS . $limit);
+        $this->cache->delete_value(self::CACHE_KEY_LATEST_UPLOADS . $limit);
     }
 }
