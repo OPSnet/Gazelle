@@ -18,7 +18,7 @@ class LockOldThreads extends \Gazelle\Schedule\Task
         $forumIDs = $this->db->collect('ForumID');
 
         if (count($ids) > 0) {
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $placeholders = placeholders($ids);
             $this->db->prepared_query("
                 UPDATE forums_topics
                 SET IsLocked = '1'

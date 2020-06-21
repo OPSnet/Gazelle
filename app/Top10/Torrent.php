@@ -124,14 +124,12 @@ class Torrent extends \Gazelle\Base {
             $artistPrepare = function($artist) { return trim($artist); };
             $artists = array_map($artistPrepare, $artists);
 
-            $filler = array_fill(0,  count($artists), "?");
-            $where = "(".implode(", ", $filler).")";
             $sql = "
             LEFT JOIN (
                 SELECT COUNT(*) AS ArtistCount, ta.GroupID
                 FROM torrents_artists AS ta
                 INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
-                WHERE ta.Importance != '2' AND aa.Name IN {$where}
+                WHERE ta.Importance != '2' AND aa.Name IN (" . placeholders($artists) . ")
                 GROUP BY ta.GroupID
             ) AS ta ON (g.ID = ta.GroupID)";
             return [$sql, $artists];
@@ -167,7 +165,7 @@ class Torrent extends \Gazelle\Base {
             $tags = array_map($replace, $tags);
             $tags = array_filter($tags);
 
-            # This is to make the prepared query work.
+            // This is to make the prepared query work.
             $likePrepare = function($tag) { return "%{$tag}%"; };
             $tags = array_map($likePrepare, $tags);
 

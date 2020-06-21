@@ -67,7 +67,7 @@ $BaseSQL = sprintf("SELECT
                     GROUP BY spm.UserID
                     ORDER BY Num DESC
                     LIMIT 50", $EXTRA, $IN,
-                    implode(', ', array_fill(0, count($SupportStaff), '?')));
+                    placeholders($SupportStaff));
 
 $DB->prepared_query($BaseSQL, \Gazelle\Util\Time::timeOffset(-3600 * 24), \Gazelle\Util\Time::timeOffset(-3600 * 24), $LoggedUser['Class'], ...$SupportStaff);
 $Results = $DB->to_array();

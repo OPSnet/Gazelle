@@ -14,9 +14,6 @@ foreach ($Forums as $Forum) {
 if (empty($TopicIDs)) {
     $LastRead = [];
 } else {
-    $args = $TopicIDs;
-    $placeholders = implode(',', array_fill(0, count($args), '?'));
-    $args[] = $LoggedUser['ID'];
     $DB->prepared_query("
         SELECT
             l.TopicID,
@@ -30,9 +27,9 @@ if (empty($TopicIDs)) {
                 ) / $PerPage
             ) AS Page
         FROM forums_last_read_topics AS l
-        WHERE l.TopicID IN ($placeholders)
-            AND l.UserID = ?
-        ", ...$args
+        WHERE l.UserID = ?
+            AND l.TopicID IN (" . placeholders($TopicIDs) . ")
+        ", $LoggedUser['ID'], ...$TopicIDs
     );
     $LastRead = $DB->to_array('TopicID', MYSQLI_ASSOC);
 }

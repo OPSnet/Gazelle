@@ -22,7 +22,6 @@ class RatioWatch extends \Gazelle\Schedule\Task
 
         $offRatioWatch = $this->db->collect('ID');
         if (count($offRatioWatch) > 0) {
-            $placeholders = implode(',', array_fill(0, count($offRatioWatch), '?'));
             $this->db->prepared_query("
                 UPDATE users_info AS ui
                 INNER JOIN users_main AS um ON (um.ID = ui.UserID) SET
@@ -30,7 +29,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
                     ui.RatioWatchDownload = '0',
                     um.can_leech          = '1',
                     ui.AdminComment       = concat(now(), ' - Taken off ratio watch by adequate ratio.\n\n', ui.AdminComment)
-                WHERE ui.UserID IN ($placeholders)
+                WHERE ui.UserID IN (" . placeholders($offRatioWatch) . ")
             ", ...$offRatioWatch);
 
             foreach ($offRatioWatch as $userID) {
@@ -63,7 +62,6 @@ class RatioWatch extends \Gazelle\Schedule\Task
 
         $onRatioWatch = $this->db->collect('ID');
         if (count($onRatioWatch) > 0) {
-            $placeholders = implode(',', array_fill(0, count($onRatioWatch), '?'));
             $this->db->prepared_query("
                 UPDATE users_info AS i
                 INNER JOIN users_main AS um ON (um.ID = i.UserID)
@@ -71,7 +69,7 @@ class RatioWatch extends \Gazelle\Schedule\Task
                     i.RatioWatchEnds     = now() + INTERVAL 2 WEEK,
                     i.RatioWatchTimes    = i.RatioWatchTimes + 1,
                     i.RatioWatchDownload = uls.Downloaded
-                WHERE um.ID IN ($placeholders)
+                WHERE um.ID IN (" . placeholders($onRatioWatch) . ")
             ", ...$onRatioWatch);
 
             foreach ($onRatioWatch as $userID) {

@@ -74,7 +74,7 @@ while (list($Downloads, $GroupIDs) = $Collector->get_downloads('TorrentID')) {
     $TorrentIDs = array_keys($GroupIDs);
     $TorrentFilesQ = $DB->prepared_query(sprintf('
         SELECT ID FROM torrents WHERE ID IN (%s)
-        ', implode(', ', array_fill(0, count($TorrentIDs), '?'))), ...$TorrentIDs);
+        ', placeholders($TorrentIDs)), ...$TorrentIDs);
     if (is_int($TorrentFilesQ)) {
         // Query failed. Let's not create a broken zip archive
         foreach ($TorrentIDs as $TorrentID) {

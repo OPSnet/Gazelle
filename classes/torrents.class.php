@@ -79,7 +79,7 @@ class Torrents {
         */
 
         if (count($NotFound) > 0) {
-            $placeholders = implode(',', array_fill(0, count($NotFound), '?'));
+            $placeholders = placeholders($NotFound);
             $ids = array_keys($NotFound);
             $NotFound = [];
             $QueryID = G::$DB->get_query_id();
@@ -386,7 +386,6 @@ class Torrents {
         $PMedUsers = [$UploaderID];
 
         // Seeders
-        $Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
         $DB->prepared_query("
 SELECT DISTINCT(xfu.uid)
 FROM
@@ -394,7 +393,8 @@ FROM
     JOIN users_info AS ui ON xfu.uid = ui.UserID
 WHERE xfu.fid = ?
     AND ui.NotifyOnDeleteSeeding='1'
-    AND xfu.uid NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
+    AND xfu.uid NOT IN (" . placeholders($PMedUsers) . ")
+", $TorrentID, ...$PMedUsers);
         $UserIDs = $DB->collect('uid');
         foreach ($UserIDs as $UserID) {
             Misc::send_pm($UserID, 0, $Subject, $MessageStart."you're seeding".$MessageEnd);
@@ -402,11 +402,11 @@ WHERE xfu.fid = ?
         $PMedUsers = array_merge($PMedUsers, $UserIDs);
 
         // Snatchers
-        $Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
         $DB->prepared_query("
 SELECT DISTINCT(xs.uid)
 FROM xbt_snatched AS xs JOIN users_info AS ui ON xs.uid = ui.UserID
-WHERE xs.fid=? AND ui.NotifyOnDeleteSnatched='1' AND xs.uid NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
+WHERE xs.fid=? AND ui.NotifyOnDeleteSnatched='1' AND xs.uid NOT IN (" . placeholders($PMedUsers) . ")
+", $TorrentID, ...$PMedUsers);
         $UserIDs = $DB->collect('uid');
         foreach ($UserIDs as $UserID) {
             Misc::send_pm($UserID, 0, $Subject, $MessageStart."you've snatched".$MessageEnd);
@@ -414,11 +414,11 @@ WHERE xs.fid=? AND ui.NotifyOnDeleteSnatched='1' AND xs.uid NOT IN ({$Extra})", 
         $PMedUsers = array_merge($PMedUsers, $UserIDs);
 
         // Downloaders
-        $Extra = implode(',', array_fill(0, count($PMedUsers), '?'));
         $DB->prepared_query("
 SELECT DISTINCT(ud.UserID)
 FROM users_downloads AS ud JOIN users_info AS ui ON ud.UserID = ui.UserID
-WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({$Extra})", $TorrentID, ...$PMedUsers);
+WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN (" . placeholders($PMedUsers) . ")
+", $TorrentID, ...$PMedUsers);
         $UserIDs = $DB->collect('UserID');
         foreach ($UserIDs as $UserID) {
             Misc::send_pm($UserID, 0, $Subject, $MessageStart."you've downloaded".$MessageEnd);
@@ -453,11 +453,11 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             WHERE GroupID = ?", $GroupID);
         if (G::$DB->has_results()) {
             $CollageIDs = G::$DB->collect('CollageID');
-            $params = implode(', ', array_fill(0, count($CollageIDs), '?'));
+            $placeholders = placeholders($CollageIDs);
             G::$DB->prepared_query("
                 UPDATE collages
                 SET NumTorrents = NumTorrents - 1
-                WHERE ID IN ($params)",
+                WHERE ID IN ($placeholders)",
                 ...$CollageIDs);
             G::$DB->prepared_query("
                 DELETE FROM collages_torrents
@@ -839,7 +839,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
 
         $QueryID = G::$DB->get_query_id();
         $FL_condition = $AllFL || $FreeLeechType == '0' ? '' : "AND Encoding IN ('24bit Lossless', 'Lossless')";
-        $placeholders = implode(',', array_fill(0, count($TorrentIDs), '?'));
+        $placeholders = placeholders($TorrentIDs);
         G::$DB->prepared_query("
             UPDATE torrents
             SET FreeTorrent = ?, FreeLeechType = ?
@@ -887,12 +887,10 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ({
             $GroupIDs = [$GroupIDs];
         }
 
-        $paramString = implode(', ', array_fill(0, count($GroupIDs), '?'));
-
         G::$DB->prepared_query("
             SELECT ID
             FROM torrents
-            WHERE GroupID IN ($paramString)",
+            WHERE GroupID IN (" . placeholders($GroupIDs) . ")",
             ...$GroupIDs);
         if (G::$DB->has_results()) {
             $TorrentIDs = G::$DB->collect('ID');

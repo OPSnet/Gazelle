@@ -117,7 +117,8 @@ Short SQL queries may be on a single line.
 All SQL keywords shall be uppercase. `count()`, `sum()`, `now()` are not
 keywords, they are functions.
 
-All queries that have external inputs shall use placeholders.
+All queries that have external inputs shall use placeholders. Queries
+with arbitrary numbers of external inputs should use placeholders().
 
 Aliases shall be used to refer to any columns whenever multiple tables are
 joined in an SQL query. They shall be using the `tbl_name AS alias_name`
@@ -139,7 +140,10 @@ When the column names match `USING` is preferred `a INNER JOIN b USING (kek)`.
 The SQL keyword `AND` must be indented once from the `WHERE` (and similar)
 statements.
 
-`UPDATE` that update multiple columns have one column per line.
+`UPDATE` that update multiple columns have one column per line. The `SET`
+clause is kept on the same line as the `UPDATE` statement, except in the
+case of a multi-table update against a derived table, where it sits on a
+line by itself.
 
 The "not equal to" operator `!=` must be used instead of the alternative
 operator `<>`.

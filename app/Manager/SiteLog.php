@@ -67,11 +67,10 @@ class SiteLog extends \Gazelle\Base {
             } else  {
                 $this->totalMatches = min(SPHINX_MAX_MATCHES, $result->get_meta('total_found'));
                 $logIds = $result->collect('id') ?: [0];
-                $placeholders = implode(',', array_fill(0, count($logIds), '?'));
                 $this->logQuery = $this->db->prepared_query("
                     SELECT ID, Message, Time
                     FROM log
-                    WHERE ID IN ($placeholders)
+                    WHERE ID IN (" . placeholders($logIds) . ")
                     ORDER BY ID DESC
                     ", ...$logIds
                 );

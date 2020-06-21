@@ -131,11 +131,10 @@ class Tag extends \Gazelle\Base {
      */
 
     public function unofficialize(array $id) {
-        $placeholders = implode(',', array_fill(0, count($id), '?'));
         $this->db->prepared_query("
             UPDATE tags SET
                 TagType = 'other'
-            WHERE ID IN ($placeholders)
+            WHERE ID IN (" . placeholders($id) . ")
             ", ...$id
         );
         return $this->db->affected_rows();

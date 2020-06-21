@@ -251,3 +251,18 @@ function unserialize_array($array) {
 function isset_array_checked($array, $value) {
     return (isset($array[$value])) ? "checked" : "";
 }
+
+/**
+ * Helper function to return an string of N elements from an array.
+ *
+ * (e.g. [2, 4, 6] into a list of query placeholders (e.g. '?,?,?')
+ * By default '?' is used, but a custom placeholder may be specified,
+ * such as '(?)' or '(?, now(), 100)', for use in a bulk insert.
+ *
+ * @param array $list The list of elements
+ * @param string $placeholder ('?' by default).
+ * @return string The resulting placeholder string.
+ */
+function placeholders(array $list, $placeholder = '?') {
+    return implode(',', array_fill(0, count($list), $placeholder));
+}

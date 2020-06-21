@@ -29,7 +29,7 @@ foreach ($Messages AS $ConvID) {
         error(0);
     }
 }
-$placeholders = implode(',', array_fill(0, count($Messages), '?'));
+$placeholders = placeholders($Messages);
 $args = array_merge($Messages, [$UserID]);
 $MessageCount = $DB->scalar("
     SELECT count(*)

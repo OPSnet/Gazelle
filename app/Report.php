@@ -55,7 +55,7 @@ class Report extends Base {
             $args[] = self::username2id($db, $filter['handler']);
         }
         if (array_key_exists('report-type', $filter)) {
-            $cond[] = 'r.Type in (' . implode(', ', array_fill(0, count($filter['report-type']), '?')) . ')';
+            $cond[] = 'r.Type in (' . placeholders($filter['report-type']) . ')';
             $args = array_merge($args, $filter['report-type']);
         }
         if (array_key_exists('dt-from', $filter)) {

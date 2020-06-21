@@ -60,14 +60,13 @@ class Subscription extends \Gazelle\Base {
         //       and the following statement can be removed
         $Usernames = array_flip(array_flip($Usernames));
 
-        $Placeholders = implode(', ', array_fill(0, count($Usernames), '?'));
         $this->db->prepared_query("
             SELECT m.ID
             FROM users_main AS m
             LEFT JOIN users_info AS i ON (i.UserID = m.ID)
             WHERE i.NotifyOnQuote = '1'
                 AND i.UserID != ?
-                AND m.Username IN ($Placeholders)
+                AND m.Username IN (" . placeholders($Usernames) . ")
             ", $this->userId, ...$Usernames
         );
 

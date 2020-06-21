@@ -426,7 +426,7 @@ if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
         $DB->prepared_query("
             DELETE FROM users_levels
             WHERE UserID = '$UserID'
-                AND PermissionID IN (".implode(', ', array_fill(0, count($DroppedClasses), '?')).")",
+                AND PermissionID IN (" . placeholders($DroppedClasses) . ")",
             ...$DroppedClasses);
         if (count($SecondaryClasses) > 0) {
             $LightUpdates['ExtraClasses'] = array_fill_keys($SecondaryClasses, 1);

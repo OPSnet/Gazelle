@@ -27,7 +27,7 @@ $query = $DB->prepared_query(sprintf('
         t.Size
     FROM torrents t
     INNER JOIN torrents_group tg ON t.GroupID = tg.ID
-    WHERE t.ID IN (%s)', implode(', ', array_fill(0, count($ids), '?'))), ...$ids);
+    WHERE t.ID IN (%s)', placeholders($ids)), ...$ids);
 
 $collector = new TorrentsDL($query, $title);
 $filer = new \Gazelle\File\Torrent;
@@ -36,7 +36,8 @@ while (list($downloads, $groupIds) = $collector->get_downloads('TorrentID')) {
     $torrentIds = array_keys($groupIds);
     $fileQuery = $DB->prepared_query(sprintf('
         SELECT ID FROM torrents WHERE ID IN (%s)',
-        implode(', ', array_fill(0, count($torrentIds), '?'))), ...$torrentIds);
+        placeholders($torrentIds)), ...$torrentIds);
+
     if (is_int($fileQuery)) {
         foreach ($torrentIds as $id) {
             $download =& $downloads[$id];

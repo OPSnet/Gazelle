@@ -39,11 +39,10 @@ if (isset($_POST['torrents'])) {
             $Err = 'Invalid freeleech type or freeleech reason';
         } else {
             // Get the torrent IDs
-            $placeholders = implode(',', array_fill(0, count($GroupIDs), '?'));
             $DB->prepared_query("
                 SELECT ID
                 FROM torrents
-                WHERE GroupID IN ($placeholders)
+                WHERE GroupID IN (" . placeholders($GroupIDs) . ")
                 ", ...$GroupIDs
             );
             $TorrentIDs = $DB->collect('ID');
@@ -59,13 +58,12 @@ if (isset($_POST['torrents'])) {
                     if (empty($Size) || !in_array($Units, ['k', 'm', 'g'])) {
                         $Err = 'Invalid size or units';
                     } else {
-                        $placeholders = implode(',', array_fill(0, count($TorrentIDs), '?'));
                         $DB->prepared_query("
                              SELECT ID
                              FROM torrents
                              WHERE Size > ?
-                                  AND ID IN ($placeholders)
-                            ", Format::get_bytes($Size . $Units), ...$TorrentIDs
+                                  AND ID IN (" . placeholders($TorrentIDs) . ")",
+                              Format::get_bytes($Size . $Units), ...$TorrentIDs
                         );
                         $LargeTorrents = $DB->collect('ID');
                         $TorrentIDs = array_diff($TorrentIDs, $LargeTorrents);
