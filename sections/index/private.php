@@ -362,6 +362,29 @@ if ($TopicID) {
 ?>
     </div>
     <div class="main_column">
+        <div id="last_uploads" class="box news_post">
+            <div class="head">
+                <strong>Latest Uploads</strong>
+            </div>
+            <div class="head">
+            <ul class="collage_images" id="collage_page0">
+<?php
+$torMan = new \Gazelle\Manager\Torrent;
+$latest = $torMan->latestUploads(5);
+foreach ($latest as $upload) {
+    $title = sprintf("%s<br />(%s)<br />uploaded by %s %s",
+        display_str($upload['name']), display_str($upload['tags']), display_str($upload['username']), time_diff($upload['uploadDate'], 2, false));
+    $alt = str_replace($title, '<br />', ' ');
+?>
+                <li class="image_group_<?= $upload['groupId'] ?>">
+                <a href="torrents.php?id=<?= $upload['groupId'] ?>&torrentid=<?= $upload['torrentId'] ?>#torrent<?= $upload['torrentId'] ?>">
+                <img class="tooltip_interactive" src="<?= ImageTools::process($upload['imageUrl'] , true) ?>" alt="<?= $alt ?>" title="<?= $title ?>"
+                    data-title-plain="<?= $alt ?>" width="118" /></a>
+                </li>
+<?php } ?>
+            </ul>
+            </div>
+        </div>
 <?php
 
 $Count = 0;
