@@ -73,7 +73,7 @@ if ($DB->scalar("
 
 $DB->prepared_query("
     INSERT INTO reportsv2
-           (ReporterID, TorrentID, Type, UserComment, ExtraID
+           (ReporterID, TorrentID, Type, UserComment, ExtraID)
     VALUES (?,          ?,         ?,    ?,           ?)
     ", $LoggedUser['ID'], $TorrentID, $Type, $Extra, $ExtraID
 );
