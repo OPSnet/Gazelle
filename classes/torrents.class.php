@@ -527,6 +527,9 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         Comments::delete_page('torrents', $GroupID);
 
         G::$DB->prepared_query("
+            DELETE FROM torrent_group_has_attr
+            WHERE TorrentGroupID = ?", $GroupID);
+        G::$DB->prepared_query("
             DELETE FROM torrents_group
             WHERE ID = ?", $GroupID);
         G::$DB->prepared_query("
