@@ -150,6 +150,8 @@ abstract class IRC_BOT {
                 $this->send_raw('GLINE *@'.$IP.' 90d :DNSBL Proxy');
             }
         }
+        // -- If ever this comes back to life:
+        // -- Removed in favor of \Gazelle\Manager\IPv4::isBanned()
         if (Tools::site_ban_ip($IP)) {
             $this->send_to($Channel, 'Site IP Ban Detected: '.$IP);
             if ($Gline) {

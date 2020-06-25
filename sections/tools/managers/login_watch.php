@@ -91,4 +91,5 @@ if (check_perms('admin_manage_ipbans')) { ?>
 ?>
     </table>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

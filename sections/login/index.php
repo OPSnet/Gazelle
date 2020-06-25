@@ -21,7 +21,8 @@ if (BLOCK_OPERA_MINI && isset($_SERVER['HTTP_X_OPERAMINI_PHONE'])) {
 }
 
 // Check if IP is banned
-if (Tools::site_ban_ip($_SERVER['REMOTE_ADDR'])) {
+$IPv4Man = new \Gazelle\Manager\IPv4;
+if ($IPv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
     error('Your IP address has been banned.');
 }
 
@@ -267,9 +268,6 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
             // Function to log a user's login attempt
             function log_attempt($UserID) {
                 global $DB, $Cache, $AttemptID, $Attempts, $Bans, $BannedUntil;
-                $IPStr = $_SERVER['REMOTE_ADDR'];
-                $IPA = substr($IPStr, 0, strcspn($IPStr, '.'));
-                $IP = Tools::ip_to_unsigned($IPStr);
                 if ($AttemptID) { // User has attempted to log in recently
                     $Attempts++;
                     if ($Attempts > 5) { // Only 6 allowed login attempts, ban user's IP
@@ -285,34 +283,8 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
                         );
 
                         if ($Bans > 9) { // Automated bruteforce prevention
-                            $DB->prepared_query('
-                                SELECT Reason
-                                FROM ip_bans
-                                WHERE ? BETWEEN FromIP AND ToIP
-                                ', $IP
-                            );
-                            if ($DB->has_results()) {
-                                //Ban exists already, only add new entry if not for same reason
-                                list($Reason) = $DB->next_record(MYSQLI_BOTH, false);
-                                if ($Reason != 'Automated ban per >60 failed login attempts') {
-                                    $DB->prepared_query("
-                                        UPDATE ip_bans SET
-                                            Reason = CONCAT('Automated ban per >60 failed login attempts AND ', Reason)
-                                        WHERE FromIP = ?
-                                            AND ToIP = ?
-                                        ", $IP, $IP
-                                    );
-                                }
-                            } else {
-                                //No ban
-                                $DB->prepared_query("
-                                    INSERT IGNORE INTO ip_bans
-                                           (FromIP, ToIP, Reason)
-                                    VALUES (?,      ?,    'Automated ban per >60 failed login attempts'
-                                    ", $IP, $IP
-                                );
-                                $Cache->delete_value("ip_bans_$IPA");
-                            }
+                            $IPv4Man = new \Gazelle\Manager\IPv4;
+                            $IPv4Man->createBan($IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
                         }
                     } else {
                         // User has attempted fewer than 6 logins
@@ -441,8 +413,6 @@ else {
     function log_attempt($UserID) {
         global $DB, $Cache, $AttemptID, $Attempts, $Bans, $BannedUntil;
         $IPStr = $_SERVER['REMOTE_ADDR'];
-        $IPA = substr($IPStr, 0, strcspn($IPStr, '.'));
-        $IP = Tools::ip_to_unsigned($IPStr);
         if ($AttemptID) { // User has attempted to log in recently
             $Attempts++;
             if ($Attempts > 5) { // Only 6 allowed login attempts, ban user's IP
@@ -458,34 +428,8 @@ else {
                 );
 
                 if ($Bans > 9) { // Automated bruteforce prevention
-                    $DB->prepared_query('
-                        SELECT Reason
-                        FROM ip_bans
-                        WHERE ? BETWEEN FromIP AND ToIP
-                        ', $IP
-                    );
-                    if ($DB->has_results()) {
-                        //Ban exists already, only add new entry if not for same reason
-                        list($Reason) = $DB->next_record(MYSQLI_BOTH, false);
-                        if ($Reason != 'Automated ban per >60 failed login attempts') {
-                            $DB->prepared_query("
-                                UPDATE ip_bans
-                                SET Reason = CONCAT('Automated ban per >60 failed login attempts AND ', Reason)
-                                WHERE FromIP = ?
-                                    AND ToIP = ?
-                                ", $IP, $IP
-                            );
-                        }
-                    } else {
-                        //No ban
-                        $DB->prepared_query("
-                            INSERT IGNORE INTO ip_bans
-                                   (FromIP, ToIP, Reason)
-                            VALUES (?,      ?,    'Automated ban per >60 failed login attempts'
-                            ", $IP, $IP
-                        );
-                        $Cache->delete_value("ip_bans_$IPA");
-                    }
+                    $IPv4Man = new \Gazelle\Manager\IPv4;
+                    $IPv4Man->createBan($IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
                 }
             } else {
                 // User has attempted fewer than 6 logins

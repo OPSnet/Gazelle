@@ -190,7 +190,8 @@ if (isset($LoginCookie)) {
 
     // IP changed
     if ($LoggedUser['IP'] != $_SERVER['REMOTE_ADDR'] && !check_perms('site_disable_ip_history')) {
-        if (Tools::site_ban_ip($_SERVER['REMOTE_ADDR'])) {
+        $IPv4Man = new \Gazelle\Manager\IPv4;
+        if ($IPv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
         $User->updateIP($LoggedUser['IP'], $_SERVER['REMOTE_ADDR']);
