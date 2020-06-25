@@ -39,7 +39,7 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
         if (!is_number($_POST['id']) || $_POST['id'] == '') {
             error(0);
         }
-        $DB->query("
+        $DB->prepared_query("
             UPDATE do_not_upload SET
                 Name = ?,
                 Comment = ?,
@@ -48,7 +48,7 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
             ", trim($_POST['name']), trim($_POST['comment']), $LoggedUser['ID'], $_POST['id']
         );
     } else { //Create
-        $DB->query("
+        $DB->prepared_query("
             INSERT INTO do_not_upload
                    (Name, Comment, UserID, Sequence)
             VALUES (?,    ?,       ?,      9999)
