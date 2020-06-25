@@ -2,17 +2,15 @@
 if (!check_perms('admin_manage_ipbans')) {
     error(403);
 }
+$IPv4Man = new \Gazelle\Manager\IPv4;
 
 if (isset($_POST['submit'])) {
     authorize();
-
-    $IPA = substr($_POST['start'], 0, strcspn($_POST['start'], '.'));
     if ($_POST['submit'] == 'Delete') { //Delete
         if (!is_number($_POST['id']) || $_POST['id'] == '') {
             error(0);
         }
-        $DB->query('DELETE FROM ip_bans WHERE ID='.$_POST['id']);
-        $Cache->delete_value('ip_bans_'.$IPA);
+        $IPv4Man->removeBan((int)$_POST['id']);
     } else { //Edit & Create, Shared Validation
         $Val->SetFields('start', '1','regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
         $Val->SetFields('end', '1','regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
@@ -21,70 +19,33 @@ if (isset($_POST['submit'])) {
         if ($Err) {
             error($Err);
         }
-
-        $Notes = db_string($_POST['notes']);
-        $Start = Tools::ip_to_unsigned($_POST['start']); //Sanitized by Validation regex
-        $End = Tools::ip_to_unsigned($_POST['end']); //See above
-
-        if ($_POST['submit'] == 'Edit') { //Edit
-            if (empty($_POST['id']) || !is_number($_POST['id'])) {
-                error(404);
-            }
-            $DB->query("
-                UPDATE ip_bans
-                SET
-                    FromIP=$Start,
-                    ToIP='$End',
-                    Reason='$Notes'
-                WHERE ID='".$_POST['id']."'");
-        } else { //Create
-            $DB->query("
-                INSERT INTO ip_bans
-                    (FromIP, ToIP, Reason)
-                VALUES
-                    ('$Start','$End', '$Notes')");
-        }
-        $Cache->delete_value('ip_bans_'.$IPA);
+        $IPv4Man->createBan($_POST['start'], $_POST['end'], trim($_POST['notes']));
     }
 }
 
 define('BANS_PER_PAGE', '20');
-list($Page, $Limit) = Format::page_limit(BANS_PER_PAGE);
 
-$sql = "
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        ID,
-        FromIP,
-        ToIP,
-        Reason
-    FROM ip_bans ";
-
+$cond = [];
+$args = [];
 if (!empty($_REQUEST['notes'])) {
-    $sql .= "WHERE Reason LIKE '%".db_string($_REQUEST['notes'])."%' ";
+    $cond[] = "Reason LIKE concat('%', ?, '%')";
+    $args[] = $_REQUEST['notes'];
 }
-
 if (!empty($_REQUEST['ip']) && preg_match('/'.IP_REGEX.'/', $_REQUEST['ip'])) {
-    if (!empty($_REQUEST['notes'])) {
-        $sql .= "AND '".Tools::ip_to_unsigned($_REQUEST['ip'])."' BETWEEN FromIP AND ToIP ";
-    } else {
-        $sql .= "WHERE '".Tools::ip_to_unsigned($_REQUEST['ip'])."' BETWEEN FromIP AND ToIP ";
-    }
+    $cond[] = "? BETWEEN FromIP AND ToIP";
+    $args[] = $IPv4Man->ip2ulong($_REQUEST['ip']);
 }
+$from = "FROM ip_bans" . (count($cond) ? (' WHERE ' . implode(' AND ', $cond)) : '');
 
-$sql .= "ORDER BY FromIP ASC";
-$sql .= " LIMIT ".$Limit;
-$Bans = $DB->query($sql);
-
-$DB->query('SELECT FOUND_ROWS()');
-list($Results) = $DB->next_record();
-
+$Results = $DB->scalar("SELECT count(*) $from", ...$args);
+list($Page, $Limit) = Format::page_limit(BANS_PER_PAGE);
 $PageLinks = Format::get_pages($Page, $Results, BANS_PER_PAGE, 11);
 
-View::show_header('IP Address Bans');
-$DB->set_query_id($Bans);
-?>
+$from .= " ORDER BY FromIP ASC LIMIT " . $Limit;
+$Bans = $DB->prepared_query("SELECT ID, FromIP, ToIP, Reason $from", ...$args);
 
+View::show_header('IP Address Bans');
+?>
 <div class="header">
     <h2>IP Address Bans</h2>
 </div>
@@ -171,4 +132,5 @@ while (list($ID, $Start, $End, $Reason) = $DB->next_record()) {
 <div class="linkbox">
 <?=$PageLinks?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

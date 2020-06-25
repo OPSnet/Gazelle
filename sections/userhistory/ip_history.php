@@ -241,7 +241,8 @@ foreach ($Results as $Index => $Result) {
                 <?=$IP?> (<?=Tools::get_country_code_by_ajax($IP)?>)<?php
     if ($CanManageIPBans) {
         if (!isset($IPBanChecks[$IP])) {
-            if (Tools::site_ban_ip($IP)) {
+            $IPv4Man = new \Gazelle\Manager\IPv4;
+            if ($IPv4Man->isBanned($IP)) {
                 $IPBanChecks[$IP] = true;
 ?>
                 <strong>[Banned]</strong>

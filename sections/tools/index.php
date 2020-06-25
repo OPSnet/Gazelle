@@ -255,11 +255,10 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/managers/staff_groups_list.php');
         break;
     case 'ip_ban':
-        //TODO: Clean up DB table ip_bans.
         require(__DIR__ . '/managers/bans.php');
         break;
     case 'quick_ban':
-        require(__DIR__ . '/misc/quick_ban.php');
+        require(__DIR__ . '/managers/quick_ban.php');
         break;
     //Data
     case 'registration_log':
