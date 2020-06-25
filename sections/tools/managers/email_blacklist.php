@@ -5,36 +5,34 @@ if (!check_perms('users_view_email')) {
 }
 list ($Page, $Limit) = Format::page_limit(EMAILS_PER_PAGE);
 
-View::show_header('Manage email blacklist');
-$Where = "";
+$cond = [];
+$args = [];
 if (!empty($_POST['email'])) {
-    $Email = db_string($_POST['email']);
-    $Where .= " WHERE Email LIKE '%$Email%'";
+    $cond[] = "Email LIKE concat('%', ?, '%')";
+    $args[] = trim($_POST['email']);
 }
 if (!empty($_POST['comment'])) {
-    $Comment = db_string($_POST['comment']);
-    if (!empty($Where)) {
-        $Where .= " AND";
-    } else {
-        $Where .= " WHERE";
-    }
-    $Where .= " Comment LIKE '%$Comment%'";
+    $cond[] = "Comment LIKE concat('%', ?, '%')";
+    $args[] = trim($_POST['comment']);
 }
-$DB->query("
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        ID,
-        UserID,
-        Time,
-        Email,
-        Comment
-    FROM email_blacklist
-    $Where
+$Where = count($cond) ? ('WHERE ' . implode(' AND ', $cond)) : "";
+
+$NumResults = $DB->scalar("
+    SELECT count(*)
+    FROM email_blacklist $Where
+    ", ...$args
+);
+
+$DB->prepared_query("
+    SELECT ID, UserID, Time, Email, Comment
+    FROM email_blacklist $Where
     ORDER BY Time DESC
-    LIMIT $Limit");
+    LIMIT $Limit
+    ", ...$args
+);
 $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
-$DB->query('SELECT FOUND_ROWS()');
-list ($NumResults) = $DB->next_record();
+
+View::show_header('Manage email blacklist');
 ?>
 <div class="header">
     <h2>Email Blacklist</h2>
@@ -42,7 +40,7 @@ list ($NumResults) = $DB->next_record();
 <br />
 <form action="tools.php" method="post">
     <input type="hidden" name="action" value="email_blacklist" />
-    <input type="email" name="email" size="30" placeholder="Email" />
+    <input type="text" name="email" size="30" placeholder="Email" />
     <input type="search" name="comment" size="60" placeholder="Comment" />
     <input type="submit" value="Search" />
 </form>
@@ -72,16 +70,14 @@ list ($NumResults) = $DB->next_record();
             <td><input type="submit" value="Create" /></td>
         </form>
     </tr>
-<?php
-    foreach ($Results as $Result) {
-?>
+<?php foreach ($Results as $Result) { ?>
     <tr>
         <form class="manage_form" name="email_blacklist" action="tools.php" method="post">
             <td>
                 <input type="hidden" name="action" value="email_blacklist_alter" />
                 <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                 <input type="hidden" name="id" value="<?=$Result['ID']?>" />
-                <input type="email" name="email" value="<?=display_str($Result['Email'])?>" size="30" />
+                <input type="text" name="email" value="<?=display_str($Result['Email'])?>" size="30" />
             </td>
             <td><input type="text" name="comment" value="<?=display_str($Result['Comment'])?>" size="60" /></td>
             <td><?=Users::format_username($Result ['UserID'], false, false, false)?><br /><?=time_diff($Result ['Time'], 1)?></td>
@@ -91,11 +87,11 @@ list ($NumResults) = $DB->next_record();
             </td>
         </form>
     </tr>
-<?php
-    } ?>
+<?php } ?>
 </table>
 <div class="linkbox pager">
     <br />
-    <?=$Pages?>
+    <?= $Pages ?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();
