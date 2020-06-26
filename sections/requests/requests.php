@@ -571,7 +571,6 @@ $header = new SortableTableHeader([
 <?php
         } else {
 
-    $TimeCompare = 1267643718; // Requests v2 was implemented 2010-03-03 20:15:18
     $Requests = Requests::get_requests(array_keys($SphRequests));
     foreach ($Requests as $RequestID => $Request) {
         $SphRequest = $SphRequests[$RequestID];
@@ -627,7 +626,7 @@ $header = new SortableTableHeader([
             </td>
             <td class="m_hidden nobr">
 <?php        if ($IsFilled) { ?>
-                <a href="torrents.php?<?=(strtotime($Request['TimeFilled']) < $TimeCompare ? 'id=' : 'torrentid=') . $Request['TorrentID']?>"><strong><?=time_diff($Request['TimeFilled'], 1)?></strong></a>
+                <a href="torrents.php?torrentid=<?= $Request['TorrentID'] ?>"><strong><?=time_diff($Request['TimeFilled'], 1)?></strong></a>
 <?php        } else { ?>
                 <strong>No</strong>
 <?php        } ?>
