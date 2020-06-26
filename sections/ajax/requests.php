@@ -328,7 +328,6 @@ if ($NumResults == 0) {
     ]);
 } else {
     $JsonResults = [];
-    $TimeCompare = 1267643718; // Requests v2 was implemented 2010-03-03 20:15:18
     $Requests = Requests::get_requests(array_keys($SphRequests));
     foreach ($SphRequests as $RequestID => $SphRequest) {
         $Request = $Requests[$RequestID];
