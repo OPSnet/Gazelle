@@ -1,0 +1,50 @@
+<ul>
+
+<li>Tags should be comma-separated, and you should use a period (".") to
+separate words inside a tag&#8202;&mdash;&#8202;e.g. "<strong
+class="important_text_alt">hip.hop</strong>".</li>
+
+<li>There is a list of official tags <?=($OnUpload ? 'to the left of the text
+box' : 'on <a href="upload.php">the torrent upload page</a>')?>. Please use
+these tags instead of "unofficial" tags (e.g. use the official "<strong
+class="important_text_alt">drum.and.bass</strong>" tag, instead of an unofficial
+"<strong class="important_text">dnb</strong>" tag). <strong>Please note that the
+"<strong class="important_text_alt">2000s</strong>" tag refers to music produced
+between 2000 and 2009.</strong></li>
+
+<li>Avoid abbreviations if at all possible. So instead of tagging an album as
+"<strong class="important_text">alt</strong>", tag it as "<strong
+class="important_text_alt">alternative</strong>". Make sure that you use correct
+spelling.</li>
+
+<li>Avoid using multiple synonymous tags. Using both "<strong
+class="important_text">prog.rock</strong>" and "<strong
+class="important_text_alt">progressive.rock</strong>" is redundant and
+annoying&#8202;&mdash;&#8202;just use the official "<strong
+class="important_text_alt">progressive.rock</strong>" tag.</li>
+
+<li>Do not add "useless" tags, such as "<strong
+class="important_text">seen.live</strong>", "<strong
+class="important_text">awesome</strong>", "<strong
+class="important_text">rap</strong>" (is encompassed by "<strong
+class="important_text_alt">hip.hop</strong>"), etc. If an album is live, you can
+tag it as "<strong class="important_text_alt">live</strong>".</li>
+
+<li>Only tag information on the album itself&#8202;&mdash;&#8202;<strong>not the
+individual release</strong>. Tags such as "<strong
+class="important_text">v0</strong>", "<strong
+class="important_text">eac</strong>", "<strong
+class="important_text">vinyl</strong>", "<strong
+class="important_text">from.what</strong>", etc. are strictly forbidden.
+Remember that these tags will be used for other versions of the same album.</li>
+
+<li><strong>You should be able to build up a list of tags using only the
+official tags
+{%- if on_upload -%}
+to the left of the text box
+{%- else -%}
+on <a href="upload.php">the torrent upload page</a>'
+{%- endif -%}. If you are in any doubt about whether or not a tag is acceptable,
+do not add it.</strong></li>
+
+</ul>

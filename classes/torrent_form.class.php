@@ -602,8 +602,7 @@ function show() {
                     </select>
 <?php            } ?>
                     <input type="text" id="tags" name="tags" size="40" value="<?=display_str($Torrent['TagList']) ?>"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
-                    <br />
-<?php Rules::display_site_tag_rules(true); ?>
+                    <br /><?= G::$Twig->render('rules/tag.twig', [on_upload => true]) ?>
                 </td>
             </tr>
             <tr>
