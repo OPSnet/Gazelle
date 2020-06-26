@@ -2,17 +2,19 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-if (isset($_GET['userid']) && check_perms('users_view_invites')) {
-    if (!is_number($_GET['userid'])) {
-        error(403);
-    }
-
-    $UserID=$_GET['userid'];
-    $Sneaky = true;
-} else {
+if (!isset($_GET['userid'])) {
     $UserCount = Users::get_enabled_users_count();
     $UserID = $LoggedUser['ID'];
     $Sneaky = false;
+} else {
+    if (!check_perms('users_view_invites')) {
+        error(403);
+    }    
+    $UserID = (int)$_GET['userid'];
+    if ($UserID < 1) {
+        error(404);
+    }
+    $Sneaky = true;
 }
 
 list($UserID, $Username, $PermissionID) = array_values(Users::user_info($UserID));
@@ -193,10 +195,10 @@ $header = new SortableTableHeader([
                 <td class="m_th_right nobr"><?= $header->emit('ratio', $SortOrderMap['ratio'][1]) ?></td>
             </tr>
 <?php
-    $Row = 'a';
-    foreach ($Invited as $User) {
-        list($ID, $Email, $Uploaded, $Downloaded, $JoinDate, $LastAccess) = $User;
-        $Row = $Row === 'a' ? 'b' : 'a';
+$Row = 'a';
+foreach ($Invited as $User) {
+    list($ID, $Email, $Uploaded, $Downloaded, $JoinDate, $LastAccess) = $User;
+    $Row = $Row === 'a' ? 'b' : 'a';
 ?>
             <tr class="row<?=$Row?>">
                 <td class="td_username"><?=Users::format_username($ID, true, true, true, true)?></td>
@@ -207,8 +209,7 @@ $header = new SortableTableHeader([
                 <td class="td_dl m_td_right"><?=Format::get_size($Downloaded)?></td>
                 <td class="td_ratio m_td_right"><?=Format::get_ratio_html($Uploaded, $Downloaded)?></td>
             </tr>
-<?php
-    } ?>
+<?php } ?>
         </table>
     </div>
 </div>
