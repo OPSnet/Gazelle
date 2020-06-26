@@ -7,10 +7,11 @@ $IPv4Man = new \Gazelle\Manager\IPv4;
 if (isset($_POST['submit'])) {
     authorize();
     if ($_POST['submit'] == 'Delete') { //Delete
-        if (!is_number($_POST['id']) || $_POST['id'] == '') {
+        $id = (int)$_POST['id'];
+        if ($id < 1) {
             error(0);
         }
-        $IPv4Man->removeBan((int)$_POST['id']);
+        $IPv4Man->removeBan($id);
     } else { //Edit & Create, Shared Validation
         $Val->SetFields('start', '1','regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
         $Val->SetFields('end', '1','regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
@@ -19,7 +20,7 @@ if (isset($_POST['submit'])) {
         if ($Err) {
             error($Err);
         }
-        $IPv4Man->createBan($_POST['start'], $_POST['end'], trim($_POST['notes']));
+        $IPv4Man->createBan($LoggedUser['ID'], $_POST['start'], $_POST['end'], trim($_POST['notes']));
     }
 }
 
@@ -42,7 +43,7 @@ list($Page, $Limit) = Format::page_limit(BANS_PER_PAGE);
 $PageLinks = Format::get_pages($Page, $Results, BANS_PER_PAGE, 11);
 
 $from .= " ORDER BY FromIP ASC LIMIT " . $Limit;
-$Bans = $DB->prepared_query("SELECT ID, FromIP, ToIP, Reason $from", ...$args);
+$Bans = $DB->prepared_query("SELECT ID, FromIP, ToIP, Reason, user_id, created $from", ...$args);
 
 View::show_header('IP Address Bans');
 ?>
@@ -82,6 +83,8 @@ View::show_header('IP Address Bans');
             <span class="tooltip" title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range.">Range</span>
         </td>
         <td>Notes</td>
+        <td>Added by</td>
+        <td>Date</td>
         <td>Submit</td>
     </tr>
     <tr class="rowa">
@@ -95,6 +98,7 @@ View::show_header('IP Address Bans');
             <td>
                 <input type="text" size="72" name="notes" />
             </td>
+            <td colspan="2">&nbsp;</td>
             <td>
                 <input type="submit" name="submit" value="Create" />
             </td>
@@ -102,7 +106,7 @@ View::show_header('IP Address Bans');
     </tr>
 <?php
 $Row = 'a';
-while (list($ID, $Start, $End, $Reason) = $DB->next_record()) {
+while (list($ID, $Start, $End, $Reason, $userId, $created) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
     $Start = long2ip($Start);
     $End = long2ip($End);
@@ -119,6 +123,8 @@ while (list($ID, $Start, $End, $Reason) = $DB->next_record()) {
             <td>
                 <input type="text" size="72" name="notes" value="<?=$Reason?>" />
             </td>
+            <td><?= Users::format_username($userId) ?></td>
+            <td><?= time_diff($created) ?></td>
             <td>
                 <input type="submit" name="submit" value="Edit" />
                 <input type="submit" name="submit" value="Delete" />

@@ -52,11 +52,12 @@ class IPv4 extends \Gazelle\Base {
      * Create an ip address ban over a range of addresses. Will append
      * the given reason to an existing ban.
      *
+     * @param int $userId The person doing the band (0 for system)
      * @param string $from The first address (dotted quad a.b.c.d)
      * @param string $to The last adddress in the range (may equal $from)
      * @param string $reason Why ban?
      */
-    public function createBan(string $ipv4From, string $ipv4To, string $reason) {
+    public function createBan(int $userId,  $ipv4From, string $ipv4To, string $reason) {
         $from = $this->ip2ulong($ipv4From);
         $to   = $this->ip2ulong($ipv4To);
         $current = $this->db->scalar('
@@ -69,18 +70,20 @@ class IPv4 extends \Gazelle\Base {
             if ($current != $reason) {
                 $this->db->prepared_query("
                     UPDATE ip_bans SET
-                        Reason = concat(?, ' AND ', Reason)
+                        Reason = concat(?, ' AND ', Reason),
+                        user_id = ?,
+                        created = now()
                     WHERE FromIP = ?
                         AND ToIP = ?
-                    ", $reason, $from, $to
+                    ", $reason, $userId, $from, $to
                 );
             }
         } else { // Not yet banned
             $this->db->prepared_query("
                 INSERT INTO ip_bans
-                       (Reason, FromIP, ToIP)
-                VALUES (?,      ?,      ?)
-                ", $reason, $from, $to
+                       (Reason, FromIP, ToIP, user_id)
+                VALUES (?,      ?,      ?,    ?)
+                ", $reason, $from, $to, $userId
             );
             $this->cache->delete_value(
                 self::CACHE_KEY . substr($ipaddr, 0, strcspn($ipaddr, '.')),

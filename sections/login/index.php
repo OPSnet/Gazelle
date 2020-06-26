@@ -284,7 +284,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
 
                         if ($Bans > 9) { // Automated bruteforce prevention
                             $IPv4Man = new \Gazelle\Manager\IPv4;
-                            $IPv4Man->createBan($IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
+                            $IPv4Man->createBan($UserID, $IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
                         }
                     } else {
                         // User has attempted fewer than 6 logins
@@ -429,7 +429,7 @@ else {
 
                 if ($Bans > 9) { // Automated bruteforce prevention
                     $IPv4Man = new \Gazelle\Manager\IPv4;
-                    $IPv4Man->createBan($IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
+                    $IPv4Man->createBan($UserID, $IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
                 }
             } else {
                 // User has attempted fewer than 6 logins
