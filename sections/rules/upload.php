@@ -9,24 +9,26 @@ $TOC = Text::parse_toc(0, true);
 View::show_header('Uploading Rules', 'rules');
 ?>
 <div class="thin">
-    <?php include('jump.php'); ?>
+    <?= G::$Twig->render('rules/toc.twig') ?>
     <div class="header">
         <h2>Uploading Rules</h2>
     </div>
-<!-- Uploading Rules Index Links -->
     <br />
     <form class="search_form" name="rules" onsubmit="return false" action="">
         <input type="text" id="search_string" value="Filter (empty to reset)" />
-        <span id="Index">Example: The search term <strong>FLAC</strong> returns all rules containing <strong>FLAC</strong>. The search term <strong>FLAC+trump</strong> returns all rules containing both <strong>FLAC</strong> and <strong>trump</strong>.</span>
+        <span id="Index">Example: The search term <strong>FLAC</strong> returns
+        all rules containing <strong>FLAC</strong>. The search term
+        <strong>FLAC+trump</strong> returns all rules containing both
+        <strong>FLAC</strong> and <strong>trump</strong>.</span>
     </form>
     <br />
     <div class="before_rules">
         <div class="box pad" style="padding: 10px 10px 10px 20px;">
-            <?=$TOC?>
+            <?= $TOC ?>
         </div>
     </div>
     <div id="actual_rules">
-        <?=$Body?>
+        <?= $Body ?>
     </div>
 </div>
 <?php

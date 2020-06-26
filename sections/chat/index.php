@@ -2,12 +2,12 @@
 enforce_login();
 View::show_header('IRC');
 
-$DB->query("
+$IRCKey = $DB->scalar("
     SELECT IRCKey
     FROM users_main
-    WHERE ID = $LoggedUser[ID]");
-list($IRCKey) = $DB->next_record();
-
+    WHERE ID = ?
+    ", $LoggedUser['ID']
+);
 if (empty($IRCKey)) {
 ?>
 <div class="thin">
@@ -29,7 +29,7 @@ if (empty($IRCKey)) {
         <h3 id="irc">IRC Rules - Please read these carefully!</h3>
     </div>
     <div class="box pad" style="padding: 10px 10px 10px 20px;">
-<?php   Rules::display_irc_chat_rules() ?>
+        <?= G::$Twig->render('rules/irc.twig'); ?>
         <form class="confirm_form center" name="chat" method="post" action="chat.php">
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <input type="submit" name="accept" value="I agree to these rules" />
@@ -77,4 +77,3 @@ if (empty($IRCKey)) {
 }
 
 View::show_footer();
-?>

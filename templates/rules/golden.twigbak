@@ -1,0 +1,305 @@
+<ul class="rules golden_rules">
+
+<li id="gr1.1"><a name="gr1.1" class="rule_link">1.1</a>
+    <div class="rule_wrap">
+        <div class="rule_short">One account per person, per lifetime.</div>
+        <div class="rule_long">Users are allowed one account per lifetime. If
+        your account is disabled, contact staff in #disabled on
+        <a href="chat.php">IRC</a>. Never make another account, you will be
+        disabled without question.</div>
+    </div>
+</li>
+
+<li id="gr1.2"><a name="gr1.2" class="rule_link">1.2</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not trade, sell, give away, or offer
+        accounts.</div>
+        <div class="rule_long">If you no longer wish to use your account, send a
+        <a href="staffpm.php">Staff PM</a> and request that your account be
+        disabled.</div>
+    </div>
+</li>
+
+<li id="gr1.3"><a name="gr1.3" class="rule_link">1.3</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not share accounts.</div>
+        <div class="rule_long">Accounts are for personal use only. Granting
+        access to your account in any way (e.g., shared login details, external
+        programs) is prohibited. <a
+        href="wiki.php?action=article&name=invite">Invite</a> friends or direct
+        them to the interview channel (#recruitment).</div>
+    </div>
+</li>
+
+<li id="gr1.4"><a name="gr1.4" class="rule_link">1.4</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not let your account become inactive.</div>
+        <div class="rule_long">You agree to log into the site regularly in order
+        to keep your account in good standing. Failure to do so will result in
+        your account being disabled. See <a
+        href="wiki.php?action=article&name=accountinactivity">Account
+        Inactivity</a> for more information.</div>
+    </div>
+</li>
+
+<li id="gr2.1"><a name="gr2.1" class="rule_link">2.1</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not invite bad users.</div>
+        <div class="rule_long">You are responsible for your invitees. You will
+        not be punished if your invitees fail to maintain required share ratios,
+        but invitees who break golden rules will place your invite privileges
+        and account at risk.</div>
+    </div>
+</li>
+
+<li id="gr2.2"><a name="gr2.2" class="rule_link">2.2</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not trade, sell, publicly give away, or
+        publicly offer invites.</div>
+        <div class="rule_long">Only invite people you know and trust. Do not
+        offer invites via other trackers, forums, social media, or other public
+        locations. Responding to public invite requests is prohibited.
+        Exception: Staff-designated recruiters may offer invites in approved
+        locations.</div>
+    </div>
+</li>
+
+<li id="gr2.3"><a name="gr2.3" class="rule_link">2.3</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not request invites or accounts.</div>
+        <div class="rule_long">Requesting invites to&mdash;or accounts
+        on&mdash;{{ site_name }} or other trackers is prohibited. Invites may be
+        <i>offered</i>, but not requested, in the Invites forum (restricted to
+        the <a href="wiki.php?action=article&name=classes">Elite class</a> and
+        above). You may request invites by messaging users only when they have
+        offered them in the Invites Forum. Unsolicited invite requests, even by
+        private message, are prohibited.</div>
+    </div>
+</li>
+
+<li id="gr3.1"><a name="gr3.1" class="rule_link">3.1</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not engage in ratio manipulation.</div>
+        <div class="rule_long">Transferring buffer&mdash;or increasing your
+        buffer&mdash;through unintended uses of the BitTorrent protocol or site
+        features (e.g., <a href="rules.php?p=requests">request abuse</a>)
+        constitutes ratio manipulation. When in doubt, send a
+        <a href="staffpm.php">Staff PM</a> asking for more information.</div>
+    </div>
+</li>
+
+<li id="gr3.2"><a name="gr3.2" class="rule_link">3.2</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not report incorrect data to the tracker
+        (i.e., cheating).</div>
+        <div class="rule_long">Reporting incorrect data to the tracker
+        constitutes cheating, whether it is accomplished through the use of a
+        modified "cheat client" or through manipulation of an approved
+        client.</div>
+    </div>
+</li>
+
+<li id="gr3.3"><a name="gr3.3" class="rule_link">3.3</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not use unapproved clients.</div>
+        <div class="rule_long">Your client must be listed on the <a
+        href="rules.php?p=clients">Client Whitelist</a>. You must not use
+        clients that have been modified in any way. Developers interested in
+        testing unstable clients must receive staff approval prior to
+        testing.</div>
+    </div>
+</li>
+
+<li id="gr3.4"><a name="gr3.4" class="rule_link">3.4</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not modify {{ site_name }} .torrent files.</div>
+        <div class="rule_long">Embedding non-{{ site_name }} announce URLs in
+        {{ site_name }} .torrents is prohibited. Doing so causes false data to be
+        reported and will be interpreted as cheating. This applies to standalone
+        .torrent files and .torrent files that have been loaded into a
+        client.</div>
+    </div>
+</li>
+
+<li id="gr3.5"><a name="gr3.5" class="rule_link">3.5</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not share .torrent files or your
+        passkey.</div>
+        <div class="rule_long">Embedded in each {{ site_name }} .torrent file is an
+        announce URL containing your personal passkey. Passkeys enable users to
+        report stats to the tracker.</div>
+    </div>
+</li>
+
+<li id="gr4.1"><a name="gr4.1" class="rule_link">4.1</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not blackmail, threaten, or expose fellow
+        users or staff.</div>
+        <div class="rule_long">Exposing or threatening to expose private
+        information about users for any reason is prohibited. Private
+        information includes, but is not limited to, personally identifying
+        information (e.g., names, records, biographical details, photos).
+        Information that has not been openly volunteered by a user should not be
+        discussed or shared without permission. This includes private
+        information collected via investigations into openly volunteered
+        information (e.g., Google search results).</div>
+    </div>
+</li>
+
+<li id="gr4.2"><a name="gr4.2" class="rule_link">4.2</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not scam or defraud.</div>
+        <div class="rule_long">Scams (e.g., phishing) of any kind are
+        prohibited.</div>
+    </div>
+</li>
+
+<li id="gr4.3"><a name="gr4.3" class="rule_link">4.3</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not disrespect staff decisions.</div>
+        <div class="rule_long">Disagreements must be discussed privately with
+        the deciding moderator. If the moderator has retired or is unavailable,
+        you may send a {{ staff_pm | raw }}. Do not contact
+        multiple moderators hoping to find one amenable to your cause; however,
+        you may contact a site administrator if you require a second opinion.
+        Options for contacting staff include private message, Staff PM, and
+        #help on <a href="chat.php">IRC</a>.</div>
+    </div>
+</li>
+
+<li id="gr4.4"><a name="gr4.4" class="rule_link">4.4</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not impersonate staff.</div>
+        <div class="rule_long">Impersonating staff or official service accounts
+        (e.g., Hermes) on-site, off-site, or on IRC is prohibited. Deceptively
+        misrepresenting staff decisions is also prohibited.</div>
+    </div>
+</li>
+
+<li id="gr4.5"><a name="gr4.5" class="rule_link">4.5</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not backseat moderate.</div>
+        <div class="rule_long">"Backseat moderation" occurs when users police
+        other users. Confronting, provoking, or chastising users suspected of
+        violating rules&mdash;or users suspected of submitting reports&mdash;is
+        prohibited. Submit a report if you see a rule violation.</div>
+    </div>
+</li>
+
+<li id="gr4.6"><a name="gr4.6" class="rule_link">4.6</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not request special events.</div>
+        <div class="rule_long">Special events (e.g., freeleech, neutral leech,
+        picks) are launched at the discretion of the staff. They do not adhere
+        to a fixed schedule, and may not be requested by users.</div>
+    </div>
+</li>
+
+<li id="gr4.7"><a name="gr4.7" class="rule_link">4.7</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not harvest user-identifying
+        information.</div>
+        <div class="rule_long">It is prohibited to use {{ site_name }}'s services to
+        harvest user-identifying information of any kind (e.g., IP addresses,
+        personal links) through the use of scripts, exploits, or other
+        techniques.</div>
+    </div>
+</li>
+
+<li id="gr4.8"><a name="gr4.8" class="rule_link">4.8</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not use {{ site_name }}'s services (including the
+        tracker, website, and IRC network) for commercial gain.</div>
+        <div class="rule_long">Commercializing services provided by or code
+        maintained by {{ site_name }} (e.g., Gazelle, Ocelot) is prohibited.
+        Commercializing content provided by {{ site_name }} users via the
+        aforementioned services (e.g., user torrent data) is prohibited.
+        Referral schemes, financial solicitations, and money offers are also
+        prohibited.</div>
+    </div>
+</li>
+
+<li id="gr5.1"><a name="gr5.1" class="rule_link">5.1</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not browse {{ site_name }} using any free proxy
+        or VPN service.</div>
+        <div class="rule_long">You may browse the site through a VPN/proxy only
+        if you have paid for this service. This includes (for example)
+        self-hosted VPNs or proxies, services like NordVPN and VPNs or proxies
+        that come with a seedbox. When in doubt, please send a
+        <a href="staffpm.php">Staff PM</a>. The use of Tor for browsing the site is
+        not allowed.</div>
+    </div>
+</li>
+
+<li id="gr5.2"><a name="gr5.2" class="rule_link">5.2</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not abuse automated site access.</div>
+        <div class="rule_long">All automated site access must be done through
+        the <a
+        href="https://github.com/OPSnet/Gazelle/wiki/JSON-API-Documentation">API</a>.
+        API use is limited to 5 requests within any 10-second window. Scripts
+        and other automated processes must not scrape the site's HTML pages.
+        When in doubt, seek advice from staff.</div>
+    </div>
+</li>
+
+<li id="gr5.3"><a name="gr5.3" class="rule_link">5.3</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not autosnatch freeleech torrents.</div>
+        <div class="rule_long">The automatic snatching of freeleech torrents
+        using any method involving little or no user-input (e.g., API-based
+        scripts, log or site scraping, etc.) is prohibited. See {{ site_name }}'s <a
+        href="wiki.php?action=article&id=66">Freeleech Autosnatching Policy</a>
+        article for more information.</div>
+    </div>
+</li>
+
+<li id="gr6.1"><a name="gr6.1" class="rule_link">6.1</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not seek or exploit live bugs for any
+        reason.</div>
+        <div class="rule_long">Seeking or exploiting bugs in the live site (as
+        opposed to a local development environment) is prohibited. If you
+        discover a critical bug or security vulnerability, immediately report it
+        in accordance with {{ site_name }}'s <a
+        href="wiki.php?action=article&name=disclosurepolicy">Responsible
+        Disclosure Policy</a>. Non-critical bugs can be reported in the <a
+        href="forums.php?action=viewforum&forumid=6">Bugs Forum</a>.</div>
+    </div>
+</li>
+
+<li id="gr6.2"><a name="gr6.2" class="rule_link">6.2</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Do not publish exploits.</div>
+        <div class="rule_long">The publication, organization, dissemination,
+        sharing, technical discussion, or technical facilitation of exploits is
+        prohibited at staff discretion. Exploits are defined as unanticipated or
+        unaccepted uses of internal, external, non-profit, or for-profit
+        services. Exploits are subject to reclassification at any time.</div>
+    </div>
+</li>
+
+<li id="gr7.0"><a name="gr7.0" class="rule_link">7.0</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Be respectful to all staff members.</div>
+        <div class="rule_long">Staff on {{ site_name }} are volunteers who dedicate
+        their time in order to keep the site running, while receiving no
+        compensation. Being disrespectful to them is prohibited, and might
+        result in a warning or a ban.</div>
+    </div>
+</li>
+
+<li id="gr7.1"><a name="gr7.1" class="rule_link">7.1</a>
+    <div class="rule_wrap">
+        <div class="rule_short">Staff have the final word on rule
+        interpretations.</div>
+        <div class="rule_long">All rules on {{ site_name }} may be subject to
+        different interpretations. Since the staff wrote these rules, their
+        interpretation is final. If you need clarification on a rule, or if you
+        think a rule should be restated, please send a
+        <a href="staffpm.php">Staff PM</a>.</div>
+    </div>
+</li>
+
+</ul>

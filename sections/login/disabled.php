@@ -46,7 +46,7 @@ function toggle_visibility(id) {
 </script>
 
 <div id="golden_rules" class="rule_summary" style="width: 35%; font-weight: bold; display: none; text-align: left;">
-<?php Rules::display_golden_rules(); ?>
+<?= G::$Twig->render('rules/golden.twig', [ 'site_name' => SITE_NAME ]) ?>
 <br /><br />
 </div>
 
@@ -103,4 +103,3 @@ Please use your <?=SITE_NAME?> username.
 }
 
 View::show_footer();
-?>
