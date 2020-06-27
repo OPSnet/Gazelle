@@ -24,11 +24,18 @@ else {
     if (is_null($ID)) {
         error('Nobody with that name found at ' . SITE_NAME . '. Are you certain the spelling is right?');
     }
-    elseif ($ID == G::$LoggedUser['ID']) {
-        error('You cannot give yourself tokens. (Nice try :)');
+    elseif ($ID == $LoggedUser['ID']) {
+        error('You cannot gift yourself tokens, they are cheaper to buy directly.');
     }
-    if (!$Bonus->purchaseTokenOther(G::$LoggedUser['ID'], $ID, $Label)) {
-        error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
+    try {
+        $Bonus->purchaseTokenOther($LoggedUser['ID'], $ID, $Label);
+    }
+    catch (Exception $e) {
+        if ($e->getMessage() == 'Bonus:otherToken:no-gift-funds') {
+            error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
+        } else {
+            error(0);
+        }
     }
 }
 
