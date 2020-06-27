@@ -27,8 +27,15 @@ else {
     elseif ($ID == G::$LoggedUser['ID']) {
         error('You cannot give yourself tokens. (Nice try :)');
     }
-    if (!$Bonus->purchaseTokenOther(G::$LoggedUser['ID'], $ID, $Label)) {
-        error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
+    try {
+        $Bonus->purchaseTokenOther(G::$LoggedUser['ID'], $ID, $Label);
+    }
+    catch (Exception $e) {
+        if ($e->getMessage() == 'Bonus:otherToken:no-gift-funds') {
+            error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
+        } else {
+            error(0);
+        }
     }
 }
 
