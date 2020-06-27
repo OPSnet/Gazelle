@@ -315,7 +315,8 @@ class Scheduler extends \Gazelle\Base {
     }
 
     public function run() {
-        $pendingMigrations = array_filter(json_decode(shell_exec('../vendor/bin/phinx status -c ../phinx.php --format=json | tail -n 1'), true)['migrations'], function($value) { return count($value) > 0 && $value['migration_status'] === 'down'; });
+        $phinxPath = realpath(__DIR__ . '/../../vendor/bin/phinx');
+        $pendingMigrations = array_filter(json_decode(shell_exec($phinxPath . ' status -c ../phinx.php --format=json | tail -n 1'), true)['migrations'], function($value) { return count($value) > 0 && $value['migration_status'] === 'down'; });
 
         if (count($pendingMigrations)) {
             Irc::sendChannel('Pending migrations found, scheduler cannot continue', LAB_CHAN);
