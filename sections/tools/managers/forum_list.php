@@ -65,17 +65,15 @@ $DB->query('
     <script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>
     <h2>Forum control panel</h2>
 </div>
-<table width="100%">
+<table>
     <tr class="colhead">
         <td>Category</td>
         <td>Sort</td>
         <td>Name</td>
         <td>Description</td>
-        <td>Min class read</td>
-        <td>Min class write</td>
-        <td>Min class create</td>
+        <td>Min class<br />read/write/create</td>
         <td>Auto-lock</td>
-        <td>Auto-lock weeks</td>
+        <td>Auto-lock<br />weeks</td>
         <td>Submit</td>
     </tr>
 <?php
@@ -108,17 +106,13 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
                 <input type="text" size="20" name="description" value="<?=$Description?>" />
             </td>
             <td>
-                <select name="minclassread">
+                r: <select name="minclassread">
                     <?=class_list($MinClassRead)?>
-                </select>
-            </td>
-            <td>
-                <select name="minclasswrite">
+                </select><br />
+                w: <select name="minclasswrite">
                     <?=class_list($MinClassWrite)?>
-                </select>
-            </td>
-            <td>
-                <select name="minclasscreate">
+                </select><br />
+                c: <select name="minclasscreate">
                     <?=class_list($MinClassCreate)?>
                 </select>
             </td>
@@ -126,7 +120,7 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
                 <input type="checkbox" name="autolock"<?=($AutoLock == '1') ? ' checked="checked"' : ''?> />
             </td>
             <td>
-                <input type="text" name="autolockweeks" value="<?=$AutoLockWeeks?>" />
+                <input type="text" size="4" name="autolockweeks" value="<?=$AutoLockWeeks?>" />
             </td>
             <td>
                 <input type="submit" name="submit" value="Edit" />
@@ -163,17 +157,13 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
                 <input type="text" size="20" name="description" />
             </td>
             <td>
-                <select name="minclassread">
+                r: <select name="minclassread">
                     <?=class_list()?>
-                </select>
-            </td>
-            <td>
-                <select name="minclasswrite">
+                </select><br />
+                w: <select name="minclasswrite">
                     <?=class_list()?>
-                </select>
-            </td>
-            <td>
-                <select name="minclasscreate">
+                </select><br />
+                c: <select name="minclasscreate">
                     <?=class_list()?>
                 </select>
             </td>
@@ -181,7 +171,7 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
                 <input type="checkbox" name="autolock" checked="checked" />
             </td>
             <td>
-                <input type="text" name="autolockweeks" value="4" />
+                <input type="text" size="4" name="autolockweeks" value="4" />
             </td>
             <td>
                 <input type="submit" value="Create" />
@@ -190,4 +180,5 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
         </form>
     </tr>
 </table>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();
