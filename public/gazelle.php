@@ -77,7 +77,6 @@ switch ($Document) {
     case 'requests':
     case 'rules':
     case 'signup':
-    case 'sitehistory':
     case 'staff':
     case 'staffblog':
     case 'staffpm':
