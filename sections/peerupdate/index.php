@@ -16,7 +16,7 @@ ob_end_flush();
 gc_enable();
 
 $Cache->InternalCache = false; // We don't want PHP to cache all results internally
-$DB->query('
+$DB->prepared_query('
     CREATE TEMPORARY TABLE tmp_torrents_peerlists (
         TorrentID int NOT NULL PRIMARY KEY,
         GroupID   int,
@@ -25,14 +25,14 @@ $DB->query('
         Snatches  int
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 ');
-$DB->query('
+$DB->prepared_query('
     INSERT INTO tmp_torrents_peerlists
     SELECT t.ID, t.GroupID, tls.Seeders, tls.Leechers, tls.Snatched
     FROM torrents t
     INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
 ');
 
-$DB->query('
+$DB->prepared_query('
     CREATE TEMPORARY TABLE tpc_temp (
         TorrentID int,
         GroupID   int,
@@ -42,7 +42,7 @@ $DB->query('
         PRIMARY KEY (GroupID, TorrentID)
     )
 ');
-$DB->query('
+$DB->prepared_query('
     INSERT INTO tpc_temp
     SELECT t2.*
     FROM torrents_peerlists AS t1
@@ -109,8 +109,8 @@ while ($TorrentID) {
 }
 printf("Updated %d keys, skipped %d keys in %.6fs (%d kB memory)\n", $UpdatedKeys, $UncachedGroups, microtime(true) - $ScriptStartTime, memory_get_usage(true) >> 10);
 
-$DB->query("DELETE FROM torrents_peerlists");
-$DB->query("
+$DB->prepared_query("DELETE FROM torrents_peerlists");
+$DB->prepared_query("
     INSERT INTO torrents_peerlists
     SELECT *
     FROM tmp_torrents_peerlists
