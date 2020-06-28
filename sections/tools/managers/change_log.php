@@ -17,8 +17,6 @@ if ($CanEdit && isset($_POST['perform'])) {
             INSERT INTO changelog (Message, Author, Time)
             VALUES ('$Message', '$Author', '$Date')");
         $ID = $DB->inserted_id();
-    //    SiteHistory::add_event(sqltime(), "Change log $ID", "tools.php?action=change_log", 1, 3, "", $Message, $LoggedUser['ID']);
-
     }
     if ($_POST['perform'] === 'remove' && !empty($_POST['change_id'])) {
         $ID = (int)$_POST['change_id'];
@@ -109,4 +107,5 @@ View::show_header('Gazelle Change Log', 'datetime_picker', 'datetime_picker');
 <?php
     } ?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();
