@@ -7,38 +7,36 @@ $CanEdit = check_perms('users_mod');
 if ($CanEdit && isset($_POST['perform'])) {
     authorize();
     if ($_POST['perform'] === 'add' && !empty($_POST['message'])) {
-        $Message = db_string($_POST['message']);
-        $Author = db_string($_POST['author']);
-        $Date = db_string($_POST['date']);
-        if (!is_valid_date($Date)) {
-            $Date = sqltime();
-        }
-        $DB->query("
-            INSERT INTO changelog (Message, Author, Time)
-            VALUES ('$Message', '$Author', '$Date')");
+        $DB->prepared_query("
+            INSERT INTO changelog
+                   (Message, Author)
+            VALUES (?,       ?)
+            ", trim($_POST['message']), trim($_POST['author'])
+        );
         $ID = $DB->inserted_id();
     }
     if ($_POST['perform'] === 'remove' && !empty($_POST['change_id'])) {
-        $ID = (int)$_POST['change_id'];
-        $DB->query("
-            DELETE FROM changelog
-            WHERE ID = '$ID'");
+        $DB->prepared_query("
+            DELETE FROM changelog WHERE ID = ?
+            ", (int)$_POST['change_id']
+        );
     }
 }
 
-$DB->query("
+$NumResults = $DB->scalar("
+    SELECT count(*) FROM changelog
+");
+$DB->prepared_query("
     SELECT
-        SQL_CALC_FOUND_ROWS
         ID,
         Message,
         Author,
         Date(Time) as Time2
     FROM changelog
     ORDER BY Time DESC
-    LIMIT $Limit");
+    LIMIT $Limit
+");
 $ChangeLog = $DB->to_array();
-$DB->query('SELECT FOUND_ROWS()');
-list($NumResults) = $DB->next_record();
 
 View::show_header('Gazelle Change Log', 'datetime_picker', 'datetime_picker');
 ?>
@@ -65,11 +63,13 @@ View::show_header('Gazelle Change Log', 'datetime_picker', 'datetime_picker');
                     <br />
                     <textarea name="message" rows="2"></textarea>
                 </div>
+                <!--
                 <div class="field_div" id="cl_date">
                     <span class="label">Date:</span>
                     <br />
                     <input type="text" class="date_picker" name="date" />
                 </div>
+                -->
                 <div class="field_div" id="cl_author">
                     <span class="label">Author:</span>
                     <br />
