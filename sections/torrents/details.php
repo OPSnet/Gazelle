@@ -106,8 +106,8 @@ if ($RevisionID && check_perms('site_edit_wiki')) { ?>
             <a href="torrents.php?action=revert&amp;groupid=<?=$GroupID ?>&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Revert to this revision</a>
 <?php
 }
-if (Bookmarks::has_bookmarked('torrent', $GroupID)) {
-?>
+$bookmark = new \Gazelle\Bookmark;
+if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
             <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="remove_bookmark brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
 <?php
 } else { ?>

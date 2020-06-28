@@ -220,7 +220,8 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
             $format, $encoding, $media, $scene, $hasLog, $hasCue, $hasLogDB, $logScore, $logChecksum, $year, $groupYear,
             $remasterTitle, $snatched, $seeders, $leechers, $data, $releaseType, $size) = $detail;
 
-        $isBookmarked = Bookmarks::has_bookmarked('torrent', $groupID);
+        $bookmark = new \Gazelle\Bookmark;
+        $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $groupID);
         $isSnatched = Torrents::has_snatched($torrentID);
 
         // generate torrent's title

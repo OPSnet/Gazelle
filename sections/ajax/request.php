@@ -89,11 +89,12 @@ $JsonTags = [];
 foreach ($Request['Tags'] as $Tag) {
     $JsonTags[] = $Tag;
 }
+$bookmark = new \Gazelle\Bookmark;
 json_print('success', [
     'requestId' => (int)$RequestID,
     'requestorId' => (int)$Request['UserID'],
     'requestorName' => $Requestor['Username'],
-    'isBookmarked' => Bookmarks::has_bookmarked('request', $RequestID),
+    'isBookmarked' => $bookmark->isRequestBookmarked($LoggedUser['ID'], $RequestID),
     'requestTax' => $RequestTax,
     'timeAdded' => $Request['TimeAdded'],
     'canEdit' => $CanEdit,

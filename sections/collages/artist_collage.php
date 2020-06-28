@@ -112,7 +112,8 @@ View::show_header($Name, 'browse,collage,bbcode,voting,recommend');
             <span class="brackets">Locked</span>
 <?php
     }
-    if (Bookmarks::has_bookmarked('collage', $CollageID)) {
+    $bookmark = new \Gazelle\Bookmark;
+    if ($bookmark->isCollageBookmarked($LoggedUser['ID'], $CollageID)) {
 ?>
             <a href="#" id="bookmarklink_collage_<?=$CollageID?>" class="brackets" onclick="Unbookmark('collage', <?=$CollageID?>, 'Bookmark'); return false;">Remove bookmark</a>
 <?php
@@ -311,4 +312,3 @@ if ($CollageCovers != 0) {
 </div>
 <?php
 View::show_footer();
-?>

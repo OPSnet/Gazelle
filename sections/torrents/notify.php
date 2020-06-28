@@ -243,6 +243,7 @@ $headerIcons = new SortableTableHeader([
     </tr>
 <?php
         unset($FilterResults['FilterLabel']);
+        $bookmark = new \Gazelle\Bookmark;
         foreach ($FilterResults as $Result) {
             $TorrentID = $Result['TorrentID'];
             $GroupID = $Result['GroupID'];
@@ -315,10 +316,11 @@ $headerIcons = new SortableTableHeader([
                 <strong><?=$DisplayName?></strong>
                 <div class="torrent_info">
                     <?=$ExtraInfo?>
-                    <?php if ($Result['UnRead']) {
-                        echo '<strong class="new">New!</strong>';
-                    } ?>
-<?php               if (Bookmarks::has_bookmarked('torrent', $GroupID)) { ?>
+<?php   if ($Result['UnRead']) { ?>
+                    <strong class="new">New!</strong>
+<?php
+        }
+        if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
                     <span class="remove_bookmark float_right">
                         <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                     </span>

@@ -20,8 +20,6 @@ if (!empty($_GET['userid'])) {
 
 $Sneaky = $UserID !== $LoggedUser['ID'];
 
-//$ArtistList = Bookmarks::all_bookmarks('artist', $UserID);
-
 $DB->query("
     SELECT ag.ArtistID, ag.Name
     FROM bookmarks_artists AS ba
@@ -106,4 +104,3 @@ foreach ($ArtistList as $Artist) {
 <?php
 View::show_footer();
 $Cache->cache_value('bookmarks_'.$UserID, serialize([[$Username, $TorrentList, $CollageDataList]]), 3600);
-?>
