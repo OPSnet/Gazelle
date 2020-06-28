@@ -12,16 +12,22 @@ if (!empty($_POST)) {
             error(403);
         }
     }
-    if ($_POST['action'] !== 'fltoken') {
-        error(403);
-    }
-    if ($_POST['flsubmit'] !== 'Send') {
+    if ($_POST['action'] !== 'fltoken' || $_POST['flsubmit'] !== 'Send') {
         error(403);
     }
     if (!preg_match('/^fl-(other-[1-4])$/', $_POST['fltype'], $match)) {
         error(403);
     }
-    $FL_OTHER_tokens = $Bonus->purchaseTokenOther($LoggedUser['ID'], $UserID, $match[1], $LoggedUser);
+    try {
+        $FL_OTHER_tokens = $Bonus->purchaseTokenOther($LoggedUser['ID'], $UserID, $match[1]);
+    }
+    catch (Exception $e) {
+        if ($e->getMessage() == 'Bonus:otherToken:no-gift-funds') {
+            error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
+        } else {
+            error(0);
+        }
+    }
 }
 $Preview = isset($_GET['preview']) ? $_GET['preview'] : 0;
 if ($UserID == $LoggedUser['ID']) {
@@ -36,7 +42,7 @@ if ($UserID == $LoggedUser['ID']) {
     $OwnProfile = false;
     //Don't allow any kind of previewing on others' profiles
     $Preview = 0;
-    $FL_Items = $Bonus->getListOther(G::$LoggedUser['BonusPoints']);
+    $FL_Items = $Bonus->getListOther($LoggedUser['BonusPoints']);
 }
 $EnabledRewards = Donations::get_enabled_rewards($UserID);
 $ProfileRewards = Donations::get_profile_rewards($UserID);

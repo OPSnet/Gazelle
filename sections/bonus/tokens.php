@@ -24,11 +24,11 @@ else {
     if (is_null($ID)) {
         error('Nobody with that name found at ' . SITE_NAME . '. Are you certain the spelling is right?');
     }
-    elseif ($ID == G::$LoggedUser['ID']) {
-        error('You cannot give yourself tokens. (Nice try :)');
+    elseif ($ID == $LoggedUser['ID']) {
+        error('You cannot gift yourself tokens, they are cheaper to buy directly.');
     }
     try {
-        $Bonus->purchaseTokenOther(G::$LoggedUser['ID'], $ID, $Label);
+        $Bonus->purchaseTokenOther($LoggedUser['ID'], $ID, $Label);
     }
     catch (Exception $e) {
         if ($e->getMessage() == 'Bonus:otherToken:no-gift-funds') {
