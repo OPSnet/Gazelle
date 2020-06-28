@@ -129,7 +129,8 @@ if (check_perms('site_collages_delete') || (check_perms('site_edit_wiki') && !$L
             <span class="brackets">Locked</span>
 <?php
 }
-if (Bookmarks::has_bookmarked('collage', $CollageID)) {
+$bookmark = new \Gazelle\Bookmark;
+if ($bookmark->isCollageBookmarked($LoggedUser['ID'], $CollageID)) {
 ?>
             <a href="#" id="bookmarklink_collage_<?=$CollageID?>" class="brackets" onclick="Unbookmark('collage', <?=$CollageID?>, 'Bookmark'); return false;">Remove bookmark</a>
 <?php
@@ -502,7 +503,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
             </td>
             <td colspan="5">
                 <strong><?= $DisplayName ?></strong>
-                <?php if (Bookmarks::has_bookmarked('torrent', $GroupID)) { ?>
+                <?php if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
                     <span class="remove_bookmark float_right">
                         <a style="float: right;" href="#" id="bookmarklink_torrent_<?= $GroupID ?>"
                            class="remove_bookmark brackets"

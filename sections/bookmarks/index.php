@@ -1,25 +1,19 @@
 <?php
 enforce_login();
 
-
-// Number of users per page
 define('BOOKMARKS_PER_PAGE', '20');
 
-if (empty($_REQUEST['action'])) {
-    $_REQUEST['action'] = 'view';
-}
-switch ($_REQUEST['action']) {
+switch ($_REQUEST['action'] ?? 'view') {
     case 'add':
-        require(SERVER_ROOT.'/sections/bookmarks/add.php');
+        require('add.php');
         break;
 
-
     case 'remove':
-        require(SERVER_ROOT.'/sections/bookmarks/remove.php');
+        require('remove.php');
         break;
 
     case 'mass_edit':
-        require(SERVER_ROOT.'/sections/bookmarks/mass_edit.php');
+        require('mass_edit.php');
         break;
 
     case 'remove_snatched':
@@ -41,7 +35,6 @@ switch ($_REQUEST['action']) {
             WHERE b.UserID = '$LoggedUser[ID]'");
         $Cache->delete_value("bookmarks_group_ids_" . $LoggedUser['ID']);
         header('Location: bookmarks.php');
-        die();
         break;
 
     case 'edit':
@@ -50,7 +43,7 @@ switch ($_REQUEST['action']) {
         }
         switch ($_REQUEST['type']) {
             case 'torrents':
-                require(SERVER_ROOT.'/sections/bookmarks/edit_torrents.php');
+                require('edit_torrents.php');
                 break;
             default:
                 error(404);
@@ -58,23 +51,20 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'view':
-        if (empty($_REQUEST['type'])) {
-            $_REQUEST['type'] = 'torrents';
-        }
-        switch ($_REQUEST['type']) {
+        switch ($_REQUEST['type'] ?? 'torrents') {
             case 'torrents':
-                require(SERVER_ROOT.'/sections/bookmarks/torrents.php');
+                require('torrents.php');
                 break;
             case 'artists':
-                require(SERVER_ROOT.'/sections/bookmarks/artists.php');
+                require('artists.php');
                 break;
             case 'collages':
                 $_GET['bookmarks'] = '1';
-                require(SERVER_ROOT.'/sections/collages/browse.php');
+                require(__DIR__ . '/../collages/browse.php');
                 break;
             case 'requests':
                 $_GET['type'] = 'bookmarks';
-                require(SERVER_ROOT.'/sections/requests/requests.php');
+                require(__DIR__ . '/../requests/requests.php');
                 break;
             default:
                 error(404);

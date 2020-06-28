@@ -459,7 +459,7 @@ die();
 // List of pages
 $Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 
-$Bookmarks = Bookmarks::all_bookmarks('torrent');
+$bookmark = new \Gazelle\Bookmark;
 
 $header = new SortableTableHeader([
     'year' => 'Year',
@@ -568,7 +568,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
 <?php    } ?>
             <div class="group_info clear">
                 <?=$DisplayName?>
-<?php    if (in_array($GroupID, $Bookmarks)) { ?>
+<?php    if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
                 <span class="remove_bookmark float_right">
                     <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                 </span>

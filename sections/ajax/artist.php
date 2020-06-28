@@ -154,6 +154,7 @@ reset($TorrentList);
 $JsonTorrents = [];
 $Tags = [];
 $NumTorrents = $NumSeeders = $NumLeechers = $NumSnatches = 0;
+$bookmark = new \Gazelle\Bookmark;
 foreach ($GroupIDs as $GroupID) {
     if (!isset($TorrentList[$GroupID])) {
         continue;
@@ -236,11 +237,10 @@ foreach ($GroupIDs as $GroupID) {
         'releaseType' => (int)$Group['ReleaseType'],
         'wikiImage' => $Group['WikiImage'],
         'groupVanityHouse' => $GroupVanityHouse == 1,
-        'hasBookmarked' => Bookmarks::has_bookmarked('torrent', $GroupID),
+        'hasBookmarked' => $bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID),
         'artists' => $Artists,
         'extendedArtists' => $ExtendedArtists,
         'torrent' => $InnerTorrents,
-
     ];
 }
 
@@ -293,7 +293,7 @@ json_print("success", [
     'id' => (int)$ArtistID,
     'name' => $Name,
     'notificationsEnabled' => $notificationsEnabled,
-    'hasBookmarked' => Bookmarks::has_bookmarked('artist', $ArtistID),
+    'hasBookmarked' => $bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID),
     'image' => $Image,
     'body' => Text::full_format($Body),
     'vanityHouse' => $VanityHouseArtist == 1,

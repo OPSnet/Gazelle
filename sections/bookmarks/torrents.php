@@ -8,26 +8,25 @@ function compare($X, $Y) {
     return($Y['count'] - $X['count']);
 }
 
-if (!empty($_GET['userid'])) {
+if (empty($_GET['userid'])) {
+    $UserID = $LoggedUser['ID'];
+    $Title  = 'Your bookmarked torrent groups';
+} else {
     if (!check_perms('users_override_paranoia')) {
         error(403);
     }
-    $UserID = $_GET['userid'];
-    if (!is_number($UserID)) {
+    list($UserID, $Title) = $DB->row("
+        SELECT ID, concat(Username, '''s bookmarked torrent groups')
+        FROM users_main
+        WHERE ID = ?
+        ", (int)$_GET['userid']
+    );
+    if (!$UserID) {
         error(404);
     }
-    $DB->query("
-        SELECT Username
-        FROM users_main
-        WHERE ID = '$UserID'");
-    list($Username) = $DB->next_record();
-} else {
-    $UserID = $LoggedUser['ID'];
 }
 
 $Sneaky = $UserID !== $LoggedUser['ID'];
-$Title = $Sneaky ? "$Username's bookmarked torrent groups" : 'Your bookmarked torrent groups';
-
 $NumGroups = 0;
 $ArtistCount = [];
 

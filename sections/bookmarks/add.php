@@ -1,122 +1,12 @@
 <?php
 authorize();
 
-if (!Bookmarks::can_bookmark($_GET['type'])) {
-    error(404);
+$bookmark = new \Gazelle\Bookmark;
+try {
+    // calls get_group_info from torrents/functions.php
+    require(__DIR__ . '/../torrents/functions.php'); // TODO: refactor this shit
+    $bookmark->create($LoggedUser['ID'], $_GET['type'], (int)$_GET['id']);
 }
-$Feed = new Feed;
-
-$Type = $_GET['type'];
-
-list($Table, $Col) = Bookmarks::bookmark_schema($Type);
-
-if (!is_number($_GET['id'])) {
+catch (Exception $e) {
     error(0);
-}
-$PageID = $_GET['id'];
-
-$DB->prepared_query("
-    SELECT UserID
-    FROM $Table
-    WHERE UserID = ?
-        AND $Col = ?
-    ", $LoggedUser['ID'], $PageID
-);
-if (!$DB->has_results()) {
-    if ($Type === 'torrent') {
-        $DB->prepared_query('
-            SELECT max(Sort)
-            FROM bookmarks_torrents
-            WHERE UserID = ?
-            ', $LoggedUser['ID']
-        );
-        list($Sort) = $DB->next_record();
-        if (!$Sort) {
-            $Sort = 0;
-        }
-        $Sort += 1;
-        $DB->prepared_query("
-            INSERT IGNORE INTO $Table (UserID, $Col, Sort, Time)
-            VALUES (?, ?, ?, now())
-            ", $LoggedUser['ID'], $PageID, $Sort
-        );
-    } else {
-        $DB->prepared_query("
-            INSERT IGNORE INTO $Table (UserID, $Col, Time)
-            VALUES (?, ?, now())
-            ", $LoggedUser['ID'], $PageID
-        );
-    }
-    $Cache->delete_value('bookmarks_'.$Type.'_'.$LoggedUser['ID']);
-    if ($Type == 'torrent') {
-        $Cache->delete_value('bookmarks_group_ids_'.$LoggedUser['ID']);
-
-        $DB->prepared_query('
-            SELECT Name, Year, WikiBody, TagList
-            FROM torrents_group
-            WHERE ID = ?
-            ', $PageID
-        );
-        list($GroupTitle, $Year, $Body, $TagList) = $DB->next_record();
-        $TagList = str_replace('_', '.', $TagList);
-
-        $DB->prepared_query('
-            SELECT ID, Format, Encoding, HasLog, HasCue, HasLogDB, LogScore, LogChecksum, Media, Scene, FreeTorrent, UserID
-            FROM torrents
-            WHERE GroupID = ?
-            ', $PageID
-        );
-        // RSS feed stuff
-        while ($Torrent = $DB->next_record()) {
-            // TODO: pretty sure this already exists in a class somewhere
-            $Title = $GroupTitle;
-            list($TorrentID, $Format, $Bitrate, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $Media, $Scene, $Freeleech, $UploaderID) = $Torrent;
-            $Title .= " [$Year] - ";
-            $Title .= "$Format / $Bitrate";
-            if ($HasLog == "'1'") {
-                $Title .= ' / Log';
-            }
-            if ($HasLogDB) {
-                $Title .= " / $LogScore%";
-            }
-            if ($HasCue == "'1'") {
-                $Title .= ' / Cue';
-            }
-            $Title .= ' / '.trim($Media);
-            if ($Scene == '1') {
-                $Title .= ' / Scene';
-            }
-            if ($Freeleech == '1') {
-                $Title .= ' / Freeleech!';
-            }
-            if ($Freeleech == '2') {
-                $Title .= ' / Neutral leech!';
-            }
-
-            $UploaderInfo = Users::user_info($UploaderID);
-            $Item = $Feed->item($Title,
-                                Text::strip_bbcode($Body),
-                                'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id='.$TorrentID,
-                                $UploaderInfo['Username'],
-                                "torrents.php?id=$PageID",
-                                trim($TagList));
-            $Feed->populate('torrents_bookmarks_t_'.$LoggedUser['torrent_pass'], $Item);
-        }
-    } elseif ($Type == 'request') {
-        $DB->prepared_query("
-            SELECT UserID
-            FROM $Table
-            WHERE $Col = ?
-            ", $PageID
-        );
-        if ($DB->record_count() < 100) {
-            // Sphinx doesn't like huge MVA updates. Update sphinx_requests_delta
-            // and live with the <= 1 minute delay if we have more than 100 bookmarkers
-            $Bookmarkers = implode(',', $DB->collect('UserID'));
-            $SphQL = new SphinxqlQuery();
-            $SphQL->raw_query("UPDATE requests, requests_delta SET bookmarker = ($Bookmarkers) WHERE id = $PageID");
-        } else {
-            Requests::update_sphinx_requests($PageID);
-        }
-    }
 }

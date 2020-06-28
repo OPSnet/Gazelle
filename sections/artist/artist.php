@@ -94,7 +94,8 @@ if (check_perms('site_torrents_notify')) {
     }
 }
 
-if (Bookmarks::has_bookmarked('artist', $ArtistID)) { ?>
+$bookmark = new \Gazelle\Bookmark;
+if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Unbookmark('artist', <?= $ArtistID ?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php } else { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
@@ -436,8 +437,7 @@ if ($sections = $Artist->sections()) {
         } ?>
                         <div class="group_info clear">
                             <strong><?=$DisplayName?></strong>
-<?php
-        if (Bookmarks::has_bookmarked('torrent', $GroupID)) { ?>
+<?php if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
                             <span class="remove_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>

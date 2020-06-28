@@ -127,7 +127,7 @@ if (check_perms('site_advanced_top10')) { ?>
 <?php
 }
 
-$Bookmarks = Bookmarks::all_bookmarks('torrent');
+$bookmark = new \Gazelle\Bookmark;
 ?>
     <h3>Top <?=$Limit?>
 <?php
@@ -172,7 +172,7 @@ foreach ($TopVotes as $GroupID => $Group) {
     $Score = $Group['Score'];
     $DownVotes = $TotalVotes - $UpVotes;
 
-    $IsBookmarked = in_array($GroupID, $Bookmarks);
+    $IsBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID);
     $UserVote = isset($UserVotes[$GroupID]) ? $UserVotes[$GroupID]['Type'] : '';
 
     $DisplayName = "$Group[Rank] - ";
