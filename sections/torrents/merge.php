@@ -91,22 +91,29 @@ if (empty($_POST['confirm'])) {
     );
     $DB->prepared_query("
         INSERT INTO torrents_votes (GroupID, Ups, Total, Score)
-            SELECT ?, UpVotes, TotalVotes, VoteScore
+            SELECT ?, UpVotes, TotalVotes, 0
             FROM (
                 SELECT
-                    IFNULL(SUM(IF(Type = 'Up', 1, 0)), 0) As UpVotes,
-                    COUNT(1) AS TotalVotes,
-                    binomial_ci(IFNULL(SUM(IF(Type = 'Up', 1, 0)), 0), COUNT(1)) AS VoteScore
+                    ifnull(sum(if(Type = 'Up', 1, 0)), 0) As UpVotes,
+                    count(*) AS TotalVotes
                 FROM users_votes
                 WHERE GroupID = ?
                 GROUP BY GroupID
             ) AS a
         ON DUPLICATE KEY UPDATE
             Ups = a.UpVotes,
-            Total = a.TotalVotes,
-            Score = a.VoteScore
-        ", $NewGroupID, $NewGroupID
+            Total = a.TotalVotes
+        ", $NewGroupID, $OldGroupID
     );
+    if ($DB->affected_rows()) {
+        // recompute score
+        $DB->prepared_query("
+            UPDATE torrents_votes SET
+                Score = IFNULL(binomial_ci(Ups, Total), 0)
+            WHERE GroupID = ?
+            ", $NewGroupID
+        );
+    }
     // 3. Clear the votes_pairs keys!
     $DB->prepared_query("
         SELECT v2.GroupID
