@@ -20,6 +20,7 @@ define('REFERRAL_KEY', hash('sha512', '')); //Random key. Used for encrypting tr
 define('REFERRAL_SEND_EMAIL', false); // Whether to send invite emails for referrals.
 define('REFERRAL_SITES', ['ABC', 'DEF']);
 define('RECOVERY', false);
+define('RECOVERY_BUFFER', false); // is buffer from previous site restituted
 define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow source flag from previous site.
 define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation.
