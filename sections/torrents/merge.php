@@ -3,40 +3,37 @@ if (!check_perms('torrents_edit')) {
     error(403);
 }
 
-$GroupID = $_POST['groupid'];
-$OldGroupID = $GroupID;
-$NewGroupID = db_string($_POST['targetgroupid']);
-
-if (!$GroupID || !is_number($GroupID)) {
+$OldGroupID = (int)$_POST['groupid'];
+$NewGroupID = (int)$_POST['targetgroupid'];
+if ($OldGroupID < 1 || $NewGroupID < 1) {
     error(404);
 }
-if (!$NewGroupID || !is_number($NewGroupID)) {
-    error(404);
-}
-if ($NewGroupID == $GroupID) {
+if ($NewGroupID == $OldGroupID) {
     error('Old group ID is the same as new group ID!');
 }
-$DB->query("
+list($CategoryID, $NewName) = $DB->row("
     SELECT CategoryID, Name
     FROM torrents_group
-    WHERE ID = '$NewGroupID'");
-if (!$DB->has_results()) {
+    WHERE ID = ?
+    ", $NewGroupID
+);
+if (!$CategoryID) {
     error('Target group does not exist.');
 }
-list($CategoryID, $NewName) = $DB->next_record();
 if ($Categories[$CategoryID - 1] != 'Music') {
     error('Only music groups can be merged.');
 }
 
-$DB->query("
+$Name = $DB->scalar("
     SELECT Name
     FROM torrents_group
-    WHERE ID = $GroupID");
-list($Name) = $DB->next_record();
+    WHERE ID = ?
+    ", $OldGroupID
+);
 
 // Everything is legit, let's just confim they're not retarded
 if (empty($_POST['confirm'])) {
-    $Artists = Artists::get_artists([$GroupID, $NewGroupID]);
+    $Artists = Artists::get_artists([$OldGroupID, $NewGroupID]);
 
     View::show_header();
 ?>
@@ -49,11 +46,11 @@ if (empty($_POST['confirm'])) {
             <input type="hidden" name="action" value="merge" />
             <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
             <input type="hidden" name="confirm" value="true" />
-            <input type="hidden" name="groupid" value="<?=$GroupID?>" />
+            <input type="hidden" name="groupid" value="<?=$OldGroupID?>" />
             <input type="hidden" name="targetgroupid" value="<?=$NewGroupID?>" />
             <h3>You are attempting to merge the group:</h3>
             <ul>
-                <li><?= Artists::display_artists($Artists[$GroupID], true, false)?> - <a href="torrents.php?id=<?=$GroupID?>"><?=$Name?></a></li>
+                <li><?= Artists::display_artists($Artists[$OldGroupID], true, false)?> - <a href="torrents.php?id=<?=$OldGroupID?>"><?=$Name?></a></li>
             </ul>
             <h3>Into the group:</h3>
             <ul>
@@ -70,121 +67,144 @@ if (empty($_POST['confirm'])) {
 
     // Votes ninjutsu. This is so annoyingly complicated.
     // 1. Get a list of everybody who voted on the old group and clear their cache keys
-    $DB->query("
+    $DB->prepared_query("
         SELECT UserID
         FROM users_votes
-        WHERE GroupID = '$GroupID'");
+        WHERE GroupID = ?
+        ", $OldGroupID
+    );
     while (list($UserID) = $DB->next_record()) {
         $Cache->delete_value("voted_albums_$UserID");
     }
     // 2. Update the existing votes where possible, clear out the duplicates left by key
     // conflicts, and update the torrents_votes table
-    $DB->query("
-        UPDATE IGNORE users_votes
-        SET GroupID = '$NewGroupID'
-        WHERE GroupID = '$GroupID'");
-    $DB->query("
+    $DB->prepared_query("
+        UPDATE IGNORE users_votes SET
+            GroupID = ?
+        WHERE GroupID = ?
+        ", $NewGroupID, $OldGroupID
+    );
+    $DB->prepared_query("
         DELETE FROM users_votes
-        WHERE GroupID = '$GroupID'");
-    $DB->query("
+        WHERE GroupID = ?
+        ", $OldGroupID
+    );
+    $DB->prepared_query("
         INSERT INTO torrents_votes (GroupID, Ups, Total, Score)
-            SELECT $NewGroupID, UpVotes, TotalVotes, VoteScore
+            SELECT ?, UpVotes, TotalVotes, VoteScore
             FROM (
                 SELECT
                     IFNULL(SUM(IF(Type = 'Up', 1, 0)), 0) As UpVotes,
                     COUNT(1) AS TotalVotes,
                     binomial_ci(IFNULL(SUM(IF(Type = 'Up', 1, 0)), 0), COUNT(1)) AS VoteScore
                 FROM users_votes
-                WHERE GroupID = $NewGroupID
+                WHERE GroupID = ?
                 GROUP BY GroupID
             ) AS a
         ON DUPLICATE KEY UPDATE
             Ups = a.UpVotes,
             Total = a.TotalVotes,
-            Score = a.VoteScore;");
+            Score = a.VoteScore
+        ", $NewGroupID, $NewGroupID
+    );
     // 3. Clear the votes_pairs keys!
-    $DB->query("
+    $DB->prepared_query("
         SELECT v2.GroupID
         FROM users_votes AS v1
-            INNER JOIN users_votes AS v2 USING (UserID)
+        INNER JOIN users_votes AS v2 USING (UserID)
         WHERE (v1.Type = 'Up' OR v2.Type = 'Up')
-            AND (v1.GroupID IN($GroupID, $NewGroupID))
-            AND (v2.GroupID NOT IN($GroupID, $NewGroupID));");
+            AND (v1.GroupID     IN (?, ?))
+            AND (v2.GroupID NOT IN (?, ?))
+        ", $OldGroupID, $NewGroupID, $OldGroupID, $NewGroupID
+    );
     while (list($CacheGroupID) = $DB->next_record()) {
         $Cache->delete_value("vote_pairs_$CacheGroupID");
     }
     // 4. Clear the new groups vote keys
     $Cache->delete_value("votes_$NewGroupID");
 
-    $DB->query("
-        UPDATE torrents
-        SET GroupID = '$NewGroupID'
-        WHERE GroupID = '$GroupID'");
-    $DB->query("
-        UPDATE wiki_torrents
-        SET PageID = '$NewGroupID'
-        WHERE PageID = '$GroupID'");
+    $DB->prepared_query("
+        UPDATE torrents SET
+            GroupID = ?
+        WHERE GroupID = ?
+        ", $NewGroupID, $OldGroupID
+    );
+    $DB->prepared_query("
+        UPDATE wiki_torrents SET
+            PageID = ?
+        WHERE PageID = ?
+        ", $NewGroupID, $OldGroupID
+    );
 
-    //Comments
+    // Comments
     Comments::merge('torrents', $OldGroupID, $NewGroupID);
 
-    //Collages
-    $DB->query("
+    // Collages
+    $DB->prepared_query("
         SELECT CollageID
         FROM collages_torrents
-        WHERE GroupID = '$OldGroupID'"); // Select all collages that contain edited group
+        WHERE GroupID = ?
+        ", $OldGroupID
+    );
     while (list($CollageID) = $DB->next_record()) {
-        $DB->query("
-            UPDATE IGNORE collages_torrents
-            SET GroupID = '$NewGroupID'
-            WHERE GroupID = '$OldGroupID'
-                AND CollageID = '$CollageID'"); // Change collage group ID to new ID
-        $DB->query("
+        $DB->prepared_query("
+            UPDATE IGNORE collages_torrents SET
+                GroupID = ?
+            WHERE GroupID = ?
+                AND CollageID = ?
+            ", $NewGroupID, $OldGroupID, $CollageID
+        );
+        $DB->prepared_query("
             DELETE FROM collages_torrents
-            WHERE GroupID = '$OldGroupID'
-                AND CollageID = '$CollageID'");
+            WHERE GroupID = ?
+                AND CollageID = ?
+                ", $OldGroupID, $CollageID
+        );
         $Cache->delete_value("collage_$CollageID");
     }
     $Cache->delete_value("torrent_collages_$NewGroupID");
     $Cache->delete_value("torrent_collages_personal_$NewGroupID");
 
     // Requests
-    $DB->query("
+    $DB->prepared_query("
         SELECT ID
         FROM requests
-        WHERE GroupID = '$OldGroupID'");
+        WHERE GroupID = ?
+        ", $OldGroupID
+    );
     $Requests = $DB->collect('ID');
-    $DB->query("
-        UPDATE requests
-        SET GroupID = '$NewGroupID'
-        WHERE GroupID = '$OldGroupID'");
     foreach ($Requests as $RequestID) {
         $Cache->delete_value("request_$RequestID");
     }
+    $DB->query("
+        UPDATE requests SET
+            GroupID = ?
+        WHERE GroupID = ?
+        ", $NewGroupID, $OldGroupID
+    );
     $Cache->delete_value('requests_group_'.$NewGroupID);
 
-    Torrents::delete_group($GroupID);
+    Torrents::delete_group($OldGroupID);
 
-    Torrents::write_group_log($NewGroupID, 0, $LoggedUser['ID'], "Merged Group $GroupID ($Name) to $NewGroupID ($NewName)", 0);
+    Torrents::write_group_log($NewGroupID, 0, $LoggedUser['ID'], "Merged Group $OldGroupID ($Name) to $NewGroupID ($NewName)", 0);
     $DB->prepared_query("
-        UPDATE group_log
-        SET GroupID = ?
+        UPDATE group_log SET
+            GroupID = ?
         WHERE GroupID = ?
-        ", $NewGroupID, $GroupID
+        ", $NewGroupID, $OldGroupID
     );
-    $GroupID = $NewGroupID;
-
-    $DB->query("
+    $DB->prepared_query("
         SELECT ID
         FROM torrents
-        WHERE GroupID = '$OldGroupID'");
+        WHERE GroupID = ?
+        ", $OldGroupID
+    );
     while (list($TorrentID) = $DB->next_record()) {
         $Cache->delete_value("torrent_download_$TorrentID");
     }
-    $Cache->delete_value("torrents_details_$GroupID");
-    $Cache->delete_value("groups_artists_$GroupID");
-    Torrents::update_hash($GroupID);
+    $Cache->delete_value("torrents_details_$NewGroupID");
+    $Cache->delete_value("groups_artists_$NewGroupID");
+    Torrents::update_hash($NewGroupID);
 
-    header("Location: torrents.php?id=" . $GroupID);
+    header("Location: torrents.php?id=" . $NewGroupID);
 }
-?>
