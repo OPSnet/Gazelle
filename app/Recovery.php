@@ -545,7 +545,7 @@ END_EMAIL;
             if ($reclaimed == -1) {
                 $reclaimMsg = "There were no torrents available to recover from the backup.";
             } else {
-                $reclaimMsg = "Number of torrents still alive from the backup: $reclaimed.";
+                $reclaimMsg = "Number of torrents found in the backup: $reclaimed. You will now receive bonus points for these torrents if you begin to seed them again.";
             }
 
             $uploaded_fmt   = \Format::get_size($uploaded);
@@ -561,10 +561,9 @@ END_EMAIL;
 
             /* no buffer for you if < 1MB */
             if ($final >= 1.0) {
-
                 $to = \Users::user_info($ops_user_id);
-
-                $Body = <<<END_MSG
+                if (RECOVERY_BUFFER) {
+                    $Body = <<<END_MSG
 Dear {$to['Username']},
 
 Your activity on the previous site has been rewarded.
@@ -577,11 +576,10 @@ Your details are as follows:
 [*] ... magic ...
 [*] Buffer: $final_fmt
 END_MSG;
-
-                if (strlen($irc_change)) {
-                    $Body .= "$irc_change\n";
-                }
-                $Body .= <<<END_MSG
+                    if (strlen($irc_change)) {
+                        $Body .= "$irc_change\n";
+                    }
+                    $Body .= <<<END_MSG
 
 This amount has been added to your existing Uploaded stats.  Don't sit on this buffer,
 go out and use it. You never know what tomorrow will bring.
@@ -589,7 +587,15 @@ go out and use it. You never know what tomorrow will bring.
 <3
 --OPS Staff
 END_MSG;
+                } else {
+                $Body = <<<END_MSG
+Dear {$to['Username']},
 
+$reclaimMsg
+
+--OPS Staff
+END_MSG;
+                }
                 \Misc::send_pm($ops_user_id, 0, "Your buffer stats have been updated", $Body);
             }
 
@@ -598,7 +604,8 @@ END_MSG;
                 INSERT INTO users_buffer_log
                        (opsid, aplid, uploaded, downloaded, bounty, nr_torrents, userclass, final)
                 VALUES (?,     ?,     ?,        ?,          ?,      ?,           ?,         ?)
-                ", $ops_user_id, $apl_user_id, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass, $final
+                ", $ops_user_id, $apl_user_id, $uploaded, $downloaded, $bounty, $nr_torrents, $irc_userclass,
+                    RECOVERY_BUFFER ? $final : 0
             );
 
             /* staff note */
@@ -610,13 +617,14 @@ END_MSG;
             );
 
             /* buffer */
-            $db->prepared_query("
-                UPDATE users_leech_stats
-                SET Uploaded = Uploaded + ?
-                WHERE UserID = ?
-                ", $final, $ops_user_id
-            );
-
+            if (RECOVERY_BUFFER) {
+                $db->prepared_query("
+                    UPDATE users_leech_stats
+                    SET Uploaded = Uploaded + ?
+                    WHERE UserID = ?
+                    ", $final, $ops_user_id
+                );
+            }
             $cache->delete_value('user_stats_' . $ops_user_id);
         }
     }
