@@ -176,7 +176,7 @@ if (empty($_POST['confirm'])) {
     foreach ($Requests as $RequestID) {
         $Cache->delete_value("request_$RequestID");
     }
-    $DB->query("
+    $DB->prepared_query("
         UPDATE requests SET
             GroupID = ?
         WHERE GroupID = ?
