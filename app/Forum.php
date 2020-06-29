@@ -13,11 +13,65 @@ class Forum extends Base {
      *
      * @param int $id The forum ID. In some circumstances it may not be possible
      * to determine in advance, for instance sections/forums/takeedit.php
-     * @seealso postInfo()
+     * @see postInfo()
      */
     public function __construct(int $id = 0) {
         parent::__construct();
         $this->forumId = $id;
+    }
+
+    /**
+     * Create a forum
+     * @param array hash of values (keyed on lowercase column names)
+     */
+    public function create(array $args) {
+        $this->db->prepared_query("
+            INSERT INTO forums
+                   (Sort, CategoryID, Name, Description, MinClassRead, MinClassWrite, MinClassCreate, AutoLock, AutoLockWeeks)
+            VALUES (?,    ?,          ?,    ?,           ?,            ?,             ?,              ?,        ?)
+            ", (int)$args['sort'], (int)$args['categoryid'], trim($args['name']), trim($args['description']),
+               (int)$args['minclassread'], (int)$args['minclasswrite'], (int)$args['minclasscreate'],
+               isset($args['autolock']) ? '1' : '0', (int)$args['autolockweeks']
+        );
+        $this->flushCache();
+    }
+
+    /**
+     * Modify a forum
+     * @param array hash of values (keyed on lowercase column names)
+     */
+    public function modify(array $args) {
+        $autolock = isset($_POST['autolock']) ? '1' : '0';
+        $this->db->prepared_query("
+            UPDATE forums SET
+                Sort           = ?,
+                CategoryID     = ?,
+                Name           = ?,
+                Description    = ?,
+                MinClassRead   = ?,
+                MinClassWrite  = ?,
+                MinClassCreate = ?,
+                AutoLock       = ?,
+                AutoLockWeeks  = ?
+            WHERE ID = ?
+            ", (int)$args['sort'], (int)$args['categoryid'], trim($args['name']), trim($args['description']),
+               (int)$args['minclassread'], (int)$args['minclasswrite'], (int)$args['minclasscreate'],
+               isset($args['autolock']) ? '1' : '0', (int)$args['autolockweeks'],
+               $this->forumId
+        );
+        $this->flushCache();
+    }
+
+    /**
+     * Remove a forum (There is no undo!)
+     */
+    public function remove() {
+        $this->db->prepared_query("
+            DELETE FROM forums
+            WHERE ID = ?
+            ", $this->forumId
+        );
+        $this->flushCache();
     }
 
     /**
@@ -33,9 +87,41 @@ class Forum extends Base {
     /* for the transition from sections/ to app/ - delete when done */
     public function flushCache() {
         $this->cache->deleteMulti([
+            'forums_list',
             self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_TOC_FORUM, $this->forumId)
         ]);
+    }
+
+    /**
+     * Get list of forum names
+     */
+    public function nameList() {
+        $this->db->prepared_query("
+            SELECT ID, Name
+            FROM forums
+            ORDER BY Sort
+        ");
+        return $this->db->to_array();
+    }
+
+    /**
+     * Get list of forums keyed by category
+     */
+    public function categoryList() {
+        if (($categories = $this->cache->get_value('forums_categories')) === false) {
+            $this->db->prepared_query("
+                SELECT ID, Name
+                FROM forums_categories
+                ORDER BY Sort, Name
+            ");
+            $categories = [];
+            while (list($id, $name) = $this->db->next_record(MYSQLI_NUM, false)) {
+                $categories[$id] = $name;
+            }
+            $this->cache->cache_value('forums_categories', $categories, 0);
+        }
+        return $categories;
     }
 
     /**
@@ -45,6 +131,18 @@ class Forum extends Base {
      */
     public function setForum(int $forumId) {
         $this->forumId = $forumId;
+    }
+
+    /**
+     * Get the minimum class that can read the forum
+     *
+     * @return int permissions class level
+     */
+    public function minClassRead() {
+        return $this->db->scalar("
+            SELECT MinClassRead FROM forums WHERE ID = ?
+            ", $this->forumId
+        );
     }
 
     /**
@@ -786,6 +884,9 @@ class Forum extends Base {
      *    - int 'MinClassRead' Min class read     \
      *    - int 'MinClassWrite' Min class write   -+-- ACLs
      *    - int 'MinClassCreate' Min class create /
+     *    - int 'Sort' Positional rank
+     *    - bool 'AutoLock' if true, forum will lock after AutoLockWeeks of inactivity
+     *    - int 'AutoLockWeeks' number of weeks for inactivity timer
      *    - string 'Title' Title of most recent thread
      *    - int 'LastPostAuthorID' User id of author of most recent post
      *    - int 'LastPostID' Post id of most recent post
@@ -796,8 +897,10 @@ class Forum extends Base {
     public function tableOfContentsMain() {
         if (!$toc = $this->cache->get_value(self::CACHE_TOC_MAIN)) {
             $this->db->prepared_query("
-                SELECT cat.Name AS categoryName,
-                    f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts, f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
+                SELECT cat.Name AS categoryName, cat.ID AS categoryId,
+                    f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts,
+                    f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
+                    f.Sort, f.AutoLock, f.AutoLockWeeks,
                     ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked
                 FROM forums f
                 INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
@@ -810,6 +913,7 @@ class Forum extends Base {
                 unset($row['categoryName']);
                 if (!isset($toc[$category])) {
                     $toc[$category] = [];
+                    $toc['AutoLock'] = ($toc['AutoLock'] == '1');
                 }
                 $toc[$category][] = $row;
             }

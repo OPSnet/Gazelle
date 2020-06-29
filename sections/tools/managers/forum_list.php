@@ -22,44 +22,16 @@ function class_list($Selected = 0) {
 if (!check_perms('admin_manage_forums')) {
     error(403);
 }
+$forum = new \Gazelle\Forum;
 
-View::show_header('Forum Management');
-$DB->query('
-    SELECT ID, Name
-    FROM forums
-    ORDER BY Sort');
-$ForumArray = $DB->to_array(); // used for generating the 'parent' drop down list
+$ForumArray = $forum->nameList(); // used for generating the 'parent' drop down list
 
 // Replace the old hard-coded forum categories
-unset($ForumCats);
-$ForumCats = $Cache->get_value('forums_categories');
-if ($ForumCats === false) {
-    $DB->query('
-        SELECT ID, Name
-        FROM forums_categories
-        ORDER BY Sort, Name');
-    $ForumCats = [];
-    while (list($ID, $Name) = $DB->next_record()) {
-        $ForumCats[$ID] = $Name;
-    }
-    $Cache->cache_value('forums_categories', $ForumCats, 0); //Inf cache.
-}
+$ForumCats = $forum->categoryList();
 
-$DB->query('
-    SELECT
-        f.ID,
-        CategoryID,
-        f.Sort,
-        f.Name,
-        Description,
-        MinClassRead,
-        MinClassWrite,
-        MinClassCreate,
-        AutoLock,
-        AutoLockWeeks
-    FROM forums AS f
-    LEFT JOIN forums_categories AS fc ON fc.ID = f.CategoryID
-    ORDER BY fc.Sort, fc.Name, f.CategoryID, f.Sort, f.Name');
+$toc = $forum->tableOfContentsMain();
+
+View::show_header('Forum Management');
 ?>
 <div class="header">
     <script type="text/javacript">document.getElementByID('content').style.overflow = 'visible';</script>
@@ -71,65 +43,66 @@ $DB->query('
         <td>Sort</td>
         <td>Name</td>
         <td>Description</td>
-        <td>Min class<br />read/write/create</td>
+        <td colspan="2">Min class<br />Read/Write/Create</td>
         <td>Auto-lock</td>
         <td>Auto-lock<br />weeks</td>
         <td>Submit</td>
     </tr>
 <?php
 $Row = 'b';
-while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinClassWrite, $MinClassCreate, $AutoLock, $AutoLockWeeks) = $DB->next_record()) {
-    $Row = $Row === 'a' ? 'b' : 'a';
+$auth = $LoggedUser['AuthKey'];
+foreach ($toc as $category => $forumList) {
+    foreach ($forumList as $f) {
+        $Row = $Row === 'a' ? 'b' : 'a';
 ?>
     <tr class="row<?=$Row?>">
         <form class="manage_form" name="forums" action="" method="post">
-            <input type="hidden" name="id" value="<?=$ID?>" />
+            <input type="hidden" name="id" value="<?= $f['ID'] ?>" />
             <input type="hidden" name="action" value="forum_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $auth ?>" />
             <td>
                 <select name="categoryid">
-<?php    reset($ForumCats);
-    foreach ($ForumCats as $CurCat => $CatName) {
-?>
-                    <option value="<?=$CurCat?>"<?php if ($CurCat == $CategoryID) { echo ' selected="selected"'; } ?>><?=$CatName?></option>
 <?php
-    } ?>
+        foreach ($ForumCats as $CurCat => $CatName) {
+?>
+                    <option value="<?= $CurCat ?>"<?= ($CurCat == $f['categoryId']) ? ' selected="selected"' : '' ?>><?= $CatName ?></option>
+<?php   } ?>
+            </td>
+            <td>
+                <input type="text" size="3" name="sort" value="<?= $f['Sort'] ?>" />
+            </td>
+            <td>
+                <input type="text" size="10" name="name" value="<?= $f['Name'] ?>" />
+            </td>
+            <td>
+                <input type="text" size="20" name="description" value="<?= $f['Description'] ?>" />
+            </td>
+            <td>R<br />W<br />C</td>
+            <td>
+                <select name="minclassread">
+                    <?=class_list($f['MinClassRead'])?>
+                </select><br />
+                <select name="minclasswrite">
+                    <?=class_list($f['MinClassWrite'])?>
+                </select><br />
+                <select name="minclasscreate">
+                    <?=class_list($f['MinClassCreate'])?>
                 </select>
             </td>
             <td>
-                <input type="text" size="3" name="sort" value="<?=$Sort?>" />
+                <input type="checkbox" name="autolock"<?= $f['AutoLock'] ? ' checked="checked"' : '' ?> />
             </td>
             <td>
-                <input type="text" size="10" name="name" value="<?=$Name?>" />
-            </td>
-            <td>
-                <input type="text" size="20" name="description" value="<?=$Description?>" />
-            </td>
-            <td>
-                r: <select name="minclassread">
-                    <?=class_list($MinClassRead)?>
-                </select><br />
-                w: <select name="minclasswrite">
-                    <?=class_list($MinClassWrite)?>
-                </select><br />
-                c: <select name="minclasscreate">
-                    <?=class_list($MinClassCreate)?>
-                </select>
-            </td>
-            <td>
-                <input type="checkbox" name="autolock"<?=($AutoLock == '1') ? ' checked="checked"' : ''?> />
-            </td>
-            <td>
-                <input type="text" size="4" name="autolockweeks" value="<?=$AutoLockWeeks?>" />
+                <input type="text" size="4" name="autolockweeks" value="<?= $f['AutoLockWeeks'] ?>" />
             </td>
             <td>
                 <input type="submit" name="submit" value="Edit" />
                 <input type="submit" name="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this forum? This is an irreversible action!')"/>
             </td>
-
         </form>
     </tr>
 <?php
+    }
 }
 ?>
     <tr class="colhead">
@@ -138,13 +111,12 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
     <tr class="rowa">
         <form class="create_form" name="forum" action="" method="post">
             <input type="hidden" name="action" value="forum_alter" />
-            <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+            <input type="hidden" name="auth" value="<?= $auth ?>" />
             <td>
                 <select name="categoryid">
 <?php foreach ($ForumCats as $CurCat => $CatName) { ?>
-                    <option value="<?=$CurCat?>"<?php if ($CurCat == $CategoryID) { echo ' selected="selected"'; } ?>><?=$CatName?></option>
-<?php
-    } ?>
+                    <option value="<?= $CurCat ?>"><?=$CatName?></option>
+<?php } ?>
                 </select>
             </td>
             <td>
@@ -156,25 +128,26 @@ while (list($ID, $CategoryID, $Sort, $Name, $Description, $MinClassRead, $MinCla
             <td>
                 <input type="text" size="20" name="description" />
             </td>
+            <td>R<br />W<br />C</td>
             <td>
-                r: <select name="minclassread">
+                <select name="minclassread">
                     <?=class_list()?>
                 </select><br />
-                w: <select name="minclasswrite">
+                <select name="minclasswrite">
                     <?=class_list()?>
                 </select><br />
-                c: <select name="minclasscreate">
+                <select name="minclasscreate">
                     <?=class_list()?>
                 </select>
             </td>
             <td>
-                <input type="checkbox" name="autolock" checked="checked" />
+                <input type="checkbox" name="autolock" />
             </td>
             <td>
-                <input type="text" size="4" name="autolockweeks" value="4" />
+                <input type="text" size="4" name="autolockweeks" value="52" />
             </td>
             <td>
-                <input type="submit" value="Create" />
+                <input type="submit" name="submit" value="Create" />
             </td>
 
         </form>
