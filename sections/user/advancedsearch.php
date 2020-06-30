@@ -110,17 +110,18 @@ function option($field, $value, $label) {
 }
 
 $OrderTable = [
-    'Username' => 'um1.Username',
-    'Joined' => 'ui1.JoinDate',
-    'Email' => 'um1.Email',
-    'IP' => 'um1.IP',
-    'Last Seen' => 'ula.last_access',
-    'Downloads' => 'Downloads',
-    'Snatches' => 'Snatches',
-    'Uploaded' => 'uls1.Uploaded',
+    'Bounty'     => 'Bounty',
     'Downloaded' => 'uls1.Downloaded',
-    'Ratio' => '(um1.Uploaded / um1.Downloaded)',
-    'Invites' => 'um1.Invites'
+    'Downloads'  => 'Downloads',
+    'Email'      => 'um1.Email',
+    'Invites'    => 'um1.Invites',
+    'Joined'     => 'ui1.JoinDate',
+    'Last Seen'  => 'ula.last_access',
+    'Ratio'      => '(um1.Uploaded / um1.Downloaded)',
+    'Seeding'    => 'Seeding',
+    'Snatches'   => 'Snatches',
+    'Uploaded'   => 'uls1.Uploaded',
+    'Username'   => 'um1.Username',
 ];
 $WayTable = ['Ascending'=>'ASC', 'Descending'=>'DESC'];
 
@@ -159,8 +160,9 @@ if (count($_GET)) {
     $Stylesheets = $StylesheetsManager->list();
 
     $Val->SetFields('avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]);
+    $Val->SetFields('bounty', '0', 'inarray', "Invalid bounty field", $OffNumberChoices);
     $Val->SetFields('cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]);
-    $Val->SetFields('class', '0', 'inarray', 'Invalid class', ['inarray' => $ClassIDs]);
+    // $Val->SetFields('class', '0', 'inarray', 'Invalid class', ['inarray' => $ClassIDs]);
     $Val->SetFields('comment', '0', 'string', 'Comment is too long.', ['maxlength' => 512]);
     $Val->SetFields('disabled_invites', '0', 'inarray', 'Invalid disabled_invites field', $YesNo);
     $Val->SetFields('disabled_uploads', '0', 'inarray', 'Invalid disabled_uploads field', $YesNo);
@@ -179,6 +181,7 @@ if (count($_GET)) {
     $Val->SetFields('passkey', '0', 'string', 'Invalid passkey', ['maxlength' => 32]);
     $Val->SetFields('ratio', '0', 'inarray', 'Invalid ratio field', $NumberChoices);
     $Val->SetFields('secclass', '0', 'inarray', 'Invalid class', ['inarray' => $SecClassIDs]);
+    $Val->SetFields('seeding', '0', 'inarray', "Invalid seeding field", $OffNumberChoices);
     $Val->SetFields('snatched', '0', 'inarray', "Invalid snatched field", $OffNumberChoices);
     $Val->SetFields('stylesheet', '0', 'inarray', 'Invalid stylesheet', array_unique(array_keys($Stylesheets)));
     $Val->SetFields('uploaded', '0', 'inarray', 'Invalid uploaded field', $NumberChoices);
@@ -199,12 +202,18 @@ if (count($_GET)) {
         $Distinct = false;
         $Order = '';
 
-        $snatchesValue = $_GET['snatched'] == 'off'
-            ? "'X'"
-            : '(SELECT count(*) FROM xbt_snatched AS xs WHERE xs.uid = um1.ID)';
         $inviteesValue = $_GET['invitees'] == 'off'
             ? "'X'"
             : '(SELECT count(*) FROM users_info AS ui2 WHERE ui2.Inviter = um1.ID)';
+        $seedingValue = $_GET['seeding'] == 'off'
+            ? "'X'"
+            : '(SELECT count(DISTINCT fid)
+                FROM xbt_files_users xfu
+                WHERE xfu.active = 1 AND xfu.remaining = 0 AND xfu.mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
+                    AND xfu.uid = um1.ID)';
+        $snatchesValue = $_GET['snatched'] == 'off'
+            ? "'X'"
+            : '(SELECT count(DISTINCT fid) FROM xbt_snatched AS xs WHERE xs.uid = um1.ID)';
 
         $SQL = "
             SQL_CALC_FOUND_ROWS
@@ -212,13 +221,14 @@ if (count($_GET)) {
             um1.Username,
             uls1.Uploaded,
             uls1.Downloaded,
-            (select count(*) from users_downloads ud WHERE ud.UserID = um1.ID) as Downloads,
+            (SELECT count(DISTINCT TorrentID) FROM users_downloads ud WHERE ud.UserID = um1.ID) as Downloads,
+            coalesce((SELECT sum(Bounty) FROM requests_votes rv WHERE rv.UserID = um1.ID), 0) as Bounty,
+            $seedingValue AS Seeding,
             $snatchesValue AS Snatches,
             $inviteesValue AS Invitees,
             um1.PermissionID,
             um1.Email,
             um1.Enabled,
-            um1.IP,
             um1.Invites,
             ui1.DisableInvites,
             ui1.Warned,
@@ -226,9 +236,9 @@ if (count($_GET)) {
             ui1.JoinDate,
             ula.last_access
         FROM users_main AS um1
-        LEFT JOIN user_last_access AS ula ON (ula.user_id = um1.ID)
         INNER JOIN users_leech_stats AS uls1 ON (uls1.UserID = um1.ID)
         INNER JOIN users_info AS ui1 ON (ui1.UserID = um1.ID)
+        LEFT JOIN user_last_access AS ula ON (ula.user_id = um1.ID)
         ";
 
         if (!empty($_GET['username'])) {
@@ -358,10 +368,22 @@ if (count($_GET)) {
             $Args = array_merge($Args, [$Decimals, $_GET['ratio1']], ($op === 'between' ? [$_GET['ratio2']] : []));
         }
 
+        if ($_GET['bounty'] !== 'off' && strlen($_GET['bounty1'])) {
+            $op = $_GET['bounty'];
+            $Having[] = $m->op('Bounty', $op);
+            $HavingArgs = array_merge($HavingArgs, [$_GET['bounty1'] * 1024 ** 3], ($op === 'between' ? [$_GET['bounty2'] * 1024 ** 3] : []));
+        }
+
         if ($_GET['downloads'] !== 'off' && strlen($_GET['downloads1'])) {
             $op = $_GET['downloads'];
             $Having[] = $m->op('Downloads', $op);
             $HavingArgs = array_merge($HavingArgs, [$_GET['downloads1']], ($op === 'between' ? [$_GET['downloads2']] : []));
+        }
+
+        if ($_GET['seeding'] !== 'off' && strlen($_GET['seeding1'])) {
+            $op = $_GET['seeding'];
+            $Having[] = $m->op('Seeding', $op);
+            $HavingArgs = array_merge($HavingArgs, [$_GET['seeding1']], ($op === 'between' ? [$_GET['seeding2']] : []));
         }
 
         if ($_GET['snatched'] !== 'off' && strlen($_GET['snatched1'])) {
@@ -389,7 +411,7 @@ if (count($_GET)) {
 
         if (strlen($_GET['downloaded1'])) {
             $op = $_GET['downloaded'];
-            $Where[] = $m->op('uls1.Uploaded', $op);
+            $Where[] = $m->op('uls1.Downloaded', $op);
             $Args[] = $_GET['downloaded1'] * 1024 ** 3;
             if ($op === 'on') {
                 $Args[] = $_GET['downloaded1'] * 1024 ** 3;
@@ -404,9 +426,9 @@ if (count($_GET)) {
             $Args[] = $_GET['enabled'];
         }
 
-        if ($_GET['class'] != '') {
-            $Where[] = 'um1.PermissionID = ?';
-            $Args[] = $_GET['class'];
+        if (isset($_GET['class']) && is_array($_GET['class'])) {
+            $Where[] = 'um1.PermissionID IN (' . placeholders($_GET['class']) . ')';
+            $Args = array_merge($Args, $_GET['class']);
         }
 
         if ($_GET['secclass'] != '') {
@@ -522,19 +544,16 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
-<?php
-    if (check_perms('users_mod')) { ?>
+<?php if (check_perms('users_mod')) { ?>
                 <td class="label nobr">Staff notes:</td>
                 <td>
                     <input type="text" name="comment" size="20" value="<?=display_str($_GET['comment'])?>" />
                 </td>
-<?php
-    } else { ?>
+<?php } else { ?>
                 <td class="label nobr"></td>
                 <td>
                 </td>
-<?php
-    } ?>
+<?php } ?>
                 </tr>
 
                 <tr>
@@ -640,6 +659,21 @@ View::show_header('User search');
                 </tr>
 
                 <tr>
+                <td class="label nobr">Seeding:</td>
+                <td width="30%">
+                    <select name="seeding">
+                        <option value="equal"<?php   if (isset($_GET['seeding']) && $_GET['seeding'] === 'equal')   { echo ' selected="selected"'; } ?>>Equal</option>
+                        <option value="above"<?php   if (isset($_GET['seeding']) && $_GET['seeding'] === 'above')   { echo ' selected="selected"'; } ?>>Above</option>
+                        <option value="below"<?php   if (isset($_GET['seeding']) && $_GET['seeding'] === 'below')   { echo ' selected="selected"'; } ?>>Below</option>
+                        <option value="between"<?php if (isset($_GET['seeding']) && $_GET['seeding'] === 'between') { echo ' selected="selected"'; } ?>>Between</option>
+                        <option value="off"<?php     if (!isset($_GET['seeding']) || $_GET['seeding'] === 'off')     { echo ' selected="selected"'; } ?>>Off</option>
+                    </select>
+                    <input type="text" name="seeding1" size="6" value="<?=display_str($_GET['seeding1'])?>" />
+                    <input type="text" name="seeding2" size="6" value="<?=display_str($_GET['seeding2'])?>" />
+                </td>
+                </tr>
+
+                <tr>
                 <td class="label tooltip nobr" title="Units are GiB">Data Uploaded:</td>
                 <td width="30%">
                     <select name="uploaded">
@@ -665,6 +699,20 @@ View::show_header('User search');
                     </select>
                     <input type="text" name="downloaded1" size="6" value="<?=display_str($_GET['downloaded1'])?>" />
                     <input type="text" name="downloaded2" size="6" value="<?=display_str($_GET['downloaded2'])?>" />
+                </td>
+                </tr>
+
+                <tr>
+                <td class="label tooltip nobr" title="Units are GiB">Request Bounty:</td>
+                <td width="30%">
+                    <select name="bounty">
+                        <?= option('bounty', 'equal', 'Equal') ?>
+                        <?= option('bounty', 'above', 'Above') ?>
+                        <?= option('bounty', 'below', 'Below') ?>
+                        <?= option('bounty', 'between', 'Between') ?>
+                    </select>
+                    <input type="text" name="bounty1" size="6" value="<?=display_str($_GET['bounty1'])?>" />
+                    <input type="text" name="bounty2" size="6" value="<?=display_str($_GET['bounty2'])?>" />
                 </td>
                 </tr>
 
@@ -723,26 +771,6 @@ View::show_header('User search');
                 </td>
                 </tr>
 
-                <tr>
-                <td class="label nobr">Search type:</td>
-                <td>
-                    <ul class="options_list nobullet">
-                        <li>
-                            <input type="radio" name="matchtype" id="strict_match_type" value="strict"<?php if ($_GET['matchtype'] == 'strict' || !$_GET['matchtype']) { echo ' checked="checked"'; } ?> />
-                            <label class="tooltip" title="A &quot;strict&quot; search uses no wildcards in search fields, and it is analogous to &#96;grep -E &quot;&circ;SEARCHTERM&#36;&quot;&#96;" for="strict_match_type">Strict</label>
-                        </li>
-                        <li>
-                            <input type="radio" name="matchtype" id="fuzzy_match_type" value="fuzzy"<?php if ($_GET['matchtype'] == 'fuzzy' || !$_GET['matchtype']) { echo ' checked="checked"'; } ?> />
-                            <label class="tooltip" title="A &quot;fuzzy&quot; search automatically prepends and appends wildcards to search strings, except for IP address searches, unless the search string begins or ends with a &quot;&#124;&quot; (pipe). It is analogous to a vanilla grep search (except for the pipe stuff)." for="fuzzy_match_type">Fuzzy</label>
-                        </li>
-                        <li>
-                            <input type="radio" name="matchtype" id="regexp_match_type" value="regexp"<?php if ($_GET['matchtype'] == 'regexp') { echo ' checked="checked"'; } ?> />
-                            <label class="tooltip" title="A &quot;regexp&quot; search uses MySQL's regular expression syntax." for="regexp_match_type">Regexp</label>
-                        </li>
-                    </ul>
-                </td>
-                </tr>
-
             </table></td>
             <!-- col3 -->
             <td style="vertical-align:top;"><table class="layout">
@@ -750,17 +778,15 @@ View::show_header('User search');
                 <tr>
                 <td class="label nobr">Primary class:</td>
                 <td>
-                    <select name="class">
-                        <option value=""<?php if ($_GET['class'] === '') { echo ' selected="selected"'; } ?>>Don't Care</option>
-    <?php
-    foreach ($ClassLevels as $Class) {
-        if ($Class['Secondary']) {
-            continue;
-        }
-    ?>
-                        <option value="<?=$Class['ID'] ?>"<?php if ($_GET['class'] === $Class['ID']) { echo ' selected="selected"'; } ?>><?=Format::cut_string($Class['Name'], 10, 1, 1).' ('.$Class['Level'].')'?></option>
-    <?php
-    } ?>
+                    <select name="class[]" size="3" multiple="multiple">
+<?php foreach ($ClassLevels as $Class) {
+    if ($Class['Secondary']) {
+        continue;
+    }
+?>
+                        <option value="<?=$Class['ID'] ?>"<?= in_array($Class['ID'], $_GET['class']) ? ' selected="selected"' : ''
+                            ?>><?=Format::cut_string($Class['Name'], 10, 1, 1).' ('.$Class['Level'].')'?></option>
+<?php } ?>
                     </select>
                 </td>
                 </tr>
@@ -770,23 +796,22 @@ View::show_header('User search');
                 <td>
                     <select name="secclass">
                         <option value=""<?php if ($_GET['secclass'] === '') { echo ' selected="selected"'; } ?>>Don't Care</option>
-    <?php
-        $Secondaries = [];
-        // Neither level nor ID is particularly useful when searching secondary classes, so let's do some
-        // kung-fu to sort them alphabetically.
-        $fnc = function($Class1, $Class2) { return strcmp($Class1['Name'], $Class2['Name']); };
-        foreach ($ClassLevels as $Class) {
-            if (!$Class['Secondary']) {
-                continue;
-            }
-            $Secondaries[] = $Class;
-        }
-        usort($Secondaries, $fnc);
-        foreach ($Secondaries as $Class) {
-    ?>
+<?php
+$Secondaries = [];
+// Neither level nor ID is particularly useful when searching secondary classes, so let's do some
+// kung-fu to sort them alphabetically.
+$fnc = function($Class1, $Class2) { return strcmp($Class1['Name'], $Class2['Name']); };
+foreach ($ClassLevels as $Class) {
+    if (!$Class['Secondary']) {
+        continue;
+    }
+    $Secondaries[] = $Class;
+}
+usort($Secondaries, $fnc);
+foreach ($Secondaries as $Class) {
+?>
                         <option value="<?=$Class['ID'] ?>"<?php if ($_GET['secclass'] === $Class['ID']) { echo ' selected="selected"'; } ?>><?=Format::cut_string($Class['Name'], 20, 1, 1)?></option>
-    <?php
-        } ?>
+<?php } ?>
                     </select>
                 </td>
                 </tr>
@@ -863,9 +888,9 @@ View::show_header('User search');
                 <td>
                     <select name="stylesheet" id="stylesheet">
                         <option value="">Don't Care</option>
-<?php               foreach ($Stylesheets as $Style) { ?>
+<?php foreach ($Stylesheets as $Style) { ?>
                         <option value="<?=$Style['ID']?>"<?php Format::selected('stylesheet',$Style['ID']); ?>><?=$Style['ProperName']?></option>
-<?php               } ?>
+<?php } ?>
                     </select>
                 </td>
                 </tr>
@@ -881,21 +906,40 @@ View::show_header('User search');
                 </td>
                 </tr>
 
+                <tr>
+                <td class="label nobr">Search type:</td>
+                <td>
+                    <ul class="options_list nobullet">
+                        <li>
+                            <input type="radio" name="matchtype" id="strict_match_type" value="strict"<?php if ($_GET['matchtype'] == 'strict' || !$_GET['matchtype']) { echo ' checked="checked"'; } ?> />
+                            <label class="tooltip" title="A &quot;strict&quot; search uses no wildcards in search fields, and it is analogous to &#96;grep -E &quot;&circ;SEARCHTERM&#36;&quot;&#96;" for="strict_match_type">Strict</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="matchtype" id="fuzzy_match_type" value="fuzzy"<?php if ($_GET['matchtype'] == 'fuzzy' || !$_GET['matchtype']) { echo ' checked="checked"'; } ?> />
+                            <label class="tooltip" title="A &quot;fuzzy&quot; search automatically prepends and appends wildcards to search strings, except for IP address searches, unless the search string begins or ends with a &quot;&#124;&quot; (pipe). It is analogous to a vanilla grep search (except for the pipe stuff)." for="fuzzy_match_type">Fuzzy</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="matchtype" id="regexp_match_type" value="regexp"<?php if ($_GET['matchtype'] == 'regexp') { echo ' checked="checked"'; } ?> />
+                            <label class="tooltip" title="A &quot;regexp&quot; search uses MySQL's regular expression syntax." for="regexp_match_type">Regexp</label>
+                        </li>
+                    </ul>
+                </td>
+                </tr>
+
             </table></td>
         </tr>
         </table>
         <!-- end -->
 
         Results ordered <select name="order">
-<?php
-            foreach (array_shift($OrderVals) as $Cur) { ?>
+<?php foreach (array_shift($OrderVals) as $Cur) { ?>
             <option value="<?=$Cur?>"<?php if (isset($_GET['order']) && $_GET['order'] == $Cur || (!isset($_GET['order']) && $Cur == 'Joined')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?php                   } ?>
+<?php } ?>
         </select>
         <select name="way">
-<?php                   foreach (array_shift($WayVals) as $Cur) { ?>
+<?php foreach (array_shift($WayVals) as $Cur) { ?>
             <option value="<?=$Cur?>"<?php if (isset($_GET['way']) && $_GET['way'] == $Cur || (!isset($_GET['way']) && $Cur == 'Descending')) { echo ' selected="selected"'; } ?>><?=$Cur?></option>
-<?php                   } ?>
+<?php } ?>
         </select>
         <input type="submit" value=" Search " />
     </form>
@@ -917,41 +961,41 @@ echo $Pages;
     <table width="100%">
         <tr class="colhead">
             <td>Username</td>
-            <td>Ratio</td>
-            <td>IP address</td>
             <td>Email</td>
             <td>Joined</td>
             <td>Last seen</td>
             <td>Upload</td>
             <td>Download</td>
+            <td>Ratio</td>
+            <td>Bounty</td>
             <td>Downloads</td>
             <td>Snatched</td>
+            <td>Seeding</td>
             <td>Invites</td>
-<?php        if (isset($_GET['invitees']) && $_GET['invitees'] != 'off') { ?>
+<?php if (isset($_GET['invitees']) && $_GET['invitees'] != 'off') { ?>
             <td>Invitees</td>
-<?php       } ?>
+<?php } ?>
         </tr>
 <?php
-while (list($UserID, $Username, $Uploaded, $Downloaded, $Downloads, $Snatched, $Invitees, $Class, $Email, $Enabled, $IP, $Invites, $DisableInvites, $Warned, $Donor, $JoinDate, $LastAccess) = $DB->next_record()) { ?>
+while (list($UserID, $Username, $Uploaded, $Downloaded, $Downloads, $Bounty, $Seeding, $Snatched, $Invitees, $Class, $Email, $Enabled, $Invites, $DisableInvites, $Warned, $Donor, $JoinDate, $LastAccess) = $DB->next_record()) { ?>
         <tr>
-            <td><?=Users::format_username($UserID, true, true, true, true)?></td>
-            <td><?=Format::get_ratio_html($Uploaded, $Downloaded)?></td>
-            <td><?=display_str($IP)?> (<?=Tools::get_country_code_by_ajax($IP)?>)</td>
+            <td><?=Users::format_username($UserID, true, true)?></td>
             <td><?=display_str($Email)?></td>
             <td><?=time_diff($JoinDate)?></td>
             <td><?=time_diff($LastAccess)?></td>
             <td><?=Format::get_size($Uploaded)?></td>
             <td><?=Format::get_size($Downloaded)?></td>
+            <td><?=Format::get_ratio_html($Uploaded, $Downloaded)?></td>
+            <td><?=Format::get_size($Bounty)?></td>
             <td><?=number_format((int)$Downloads)?></td>
             <td><?=(is_numeric($Snatched) ? number_format($Snatched) : display_str($Snatched))?></td>
+            <td><?=(is_numeric($Seeding) ? number_format($Seeding) : display_str($Seeding))?></td>
             <td><?php if ($DisableInvites) { echo 'X'; } else { echo number_format($Invites); } ?></td>
-<?php        if (isset($_GET['invitees']) && $_GET['invitees'] != 'off') { ?>
+<?php if (isset($_GET['invitees']) && $_GET['invitees'] != 'off') { ?>
             <td><?=number_format($Invitees)?></td>
-<?php        } ?>
+<?php } ?>
         </tr>
-<?php
-}
-?>
+<?php } ?>
     </table>
 </div>
 <div class="linkbox">

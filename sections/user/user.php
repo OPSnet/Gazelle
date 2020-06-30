@@ -237,7 +237,7 @@ function check_paranoia_here($Setting) {
 
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
 $User = new \Gazelle\User($UserID);
-$User->forceCacheFlush($UserID == $LoggedUser['ID']);
+$User->forceCacheFlush($OwnProfile);
 list($ClassRatio, $Buffer) = $User->buffer();
 
 ?>
@@ -380,6 +380,21 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
 ?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded, 5)?>">Uploaded: <?=Format::get_size($Uploaded)?></li>
 <?php
+        if ($OwnProfile || check_perms('users_mod')) {
+            $recovered = $DB->scalar("
+                SELECT final FROM users_buffer_log WHERE opsid = ?
+                ", $UserID
+            );
+            if ($recovered) {
+?>
+                <li class="tooltip" title="<?= "Recovered from previous site: " . Format::get_size($recovered, 5)?>">Recovered: <?=Format::get_size($recovered)?></li>
+<?php
+            } elseif (check_perms('users_mod')) {
+?>
+                <li class="tooltip paranoia_override">Recovered: no record</li>
+<?php
+            }
+        }
     }
     if (($Override = check_paranoia_here('downloaded'))) {
 ?>
@@ -1110,7 +1125,7 @@ if (check_perms('users_mod', $Class)) { ?>
         ]);
     }
 
-    if (check_perms('users_edit_ratio', $Class) || (check_perms('users_edit_own_ratio') && $UserID == $LoggedUser['ID'])) {
+    if (check_perms('users_edit_ratio', $Class) || (check_perms('users_edit_own_ratio') && $OwnProfile)) {
         echo G::$Twig->render('user/edit-buffer.twig', [
             'up'    => $Uploaded,
             'down'  => $Downloaded,
