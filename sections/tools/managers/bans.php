@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\SortableTableHeader;
+
 if (!check_perms('admin_manage_ipbans')) {
     error(403);
 }
@@ -26,24 +29,44 @@ if (isset($_POST['submit'])) {
 
 define('BANS_PER_PAGE', '20');
 
+$SortOrderMap = [
+    'fromip'     => ['i.FromIP',    'desc'],
+    'toip'       => ['i.ToIP',      'desc'],
+    'reason'     => ['i.Reason',     'asc'],
+    'username'   => ['um.Username',  'asc'],
+    'created'    => ['i.created',   'desc'],
+];
+$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
+$OrderBy = $SortOrderMap[$SortOrder][0];
+$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+$header = new SortableTableHeader([
+    'fromip'     => 'From',
+    'toip'       => 'To',
+    'reason'     => 'Reason',
+    'username'   => 'Added By',
+    'created'    => 'Date',
+], $SortOrder, $OrderWay);
+
 $cond = [];
 $args = [];
 if (!empty($_REQUEST['notes'])) {
-    $cond[] = "Reason LIKE concat('%', ?, '%')";
+    $cond[] = "i.Reason LIKE concat('%', ?, '%')";
     $args[] = $_REQUEST['notes'];
 }
 if (!empty($_REQUEST['ip']) && preg_match('/'.IP_REGEX.'/', $_REQUEST['ip'])) {
-    $cond[] = "? BETWEEN FromIP AND ToIP";
+    $cond[] = "? BETWEEN i.FromIP AND i.ToIP";
     $args[] = $IPv4Man->ip2ulong($_REQUEST['ip']);
 }
-$from = "FROM ip_bans" . (count($cond) ? (' WHERE ' . implode(' AND ', $cond)) : '');
+$from = "FROM ip_bans i LEFT JOIN users_main um ON (um.ID = i.user_id)" . (count($cond) ? (' WHERE ' . implode(' AND ', $cond)) : '');
 
 $Results = $DB->scalar("SELECT count(*) $from", ...$args);
 list($Page, $Limit) = Format::page_limit(BANS_PER_PAGE);
 $PageLinks = Format::get_pages($Page, $Results, BANS_PER_PAGE, 11);
 
-$from .= " ORDER BY FromIP ASC LIMIT " . $Limit;
-$Bans = $DB->prepared_query("SELECT ID, FromIP, ToIP, Reason, user_id, created $from", ...$args);
+$from .= " ORDER BY $OrderBy $OrderWay LIMIT " . $Limit;
+$Bans = $DB->prepared_query("SELECT i.ID, i.FromIP, i.ToIP, i.Reason, i.user_id, i.created, um.Username $from", ...$args);
 
 View::show_header('IP Address Bans');
 ?>
@@ -77,15 +100,16 @@ View::show_header('IP Address Bans');
 <div class="linkbox">
 <?=$PageLinks?>
 </div>
+<?php
+
+?>
 <table width="100%">
     <tr class="colhead">
-        <td colspan="2">
-            <span class="tooltip" title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range.">Range</span>
-        </td>
-        <td>Notes</td>
-        <td>Added by</td>
-        <td>Date</td>
-        <td>Submit</td>
+        <td title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range."><?= $header->emit('fromip', $SortOrderMap['fromip'][1]) ?></td>
+        <td><?= $header->emit('toip', $SortOrderMap['toip'][1]) ?></td>
+        <td><?= $header->emit('reason', $SortOrderMap['reason'][1]) ?></td>
+        <td><?= $header->emit('username', $SortOrderMap['username'][1]) ?></td>
+        <td><?= $header->emit('created', $SortOrderMap['created'][1]) ?></td>
     </tr>
     <tr class="rowa">
         <form class="create_form" name="ban" action="" method="post">
@@ -105,6 +129,7 @@ View::show_header('IP Address Bans');
         </form>
     </tr>
 <?php
+
 $Row = 'a';
 while (list($ID, $Start, $End, $Reason, $userId, $created) = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
@@ -131,12 +156,10 @@ while (list($ID, $Start, $End, $Reason, $userId, $created) = $DB->next_record())
             </td>
         </form>
     </tr>
-<?php
-}
-?>
+<?php } ?>
 </table>
 <div class="linkbox">
-<?=$PageLinks?>
+<?= $PageLinks ?>
 </div>
 <?php
 View::show_footer();
