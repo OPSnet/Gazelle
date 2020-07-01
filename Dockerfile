@@ -104,7 +104,7 @@ RUN chown -R gazelle:gazelle /var/www \
 USER gazelle
 
 # Build/run deps install layer
-RUN if [ "$BuildMode" = "prod" ]; then \
+RUN set -e; if [ "$BuildMode" = "prod" ]; then \
         composer --version && composer install --no-dev --optimize-autoloader --no-suggest; \
         yarn --prod; \
     else \
