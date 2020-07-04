@@ -18,12 +18,190 @@ class User extends Base {
         $this->forceCacheFlush = false;
     }
 
+    public function info() {
+        $this->db->prepared_query("
+            SELECT
+                um.Username,
+                um.IP,
+                um.Email,
+                um.PermissionID,
+                um.Title,
+                um.Enabled,
+                um.Invites,
+                um.can_leech,
+                um.Visible,
+                um.torrent_pass,
+                um.RequiredRatio,
+                ui.RatioWatchEnds,
+                ui.AdminComment,
+                ui.Artist,
+                ui.Warned,
+                ui.SupportFor,
+                ui.RestrictedForums,
+                ui.PermittedForums,
+                ui.DisableAvatar,
+                ui.DisableInvites,
+                ui.DisablePoints,
+                ui.DisablePosting,
+                ui.DisableForums,
+                ui.DisableTagging,
+                ui.DisableUpload,
+                ui.DisableWiki,
+                ui.DisablePM,
+                ui.DisableIRC,
+                ui.DisableRequests,
+                sha1(ui.AdminComment) AS CommentHash,
+                uls.Uploaded,
+                uls.Downloaded,
+                p.Level AS Class,
+                group_concat(l.PermissionID SEPARATOR ',') AS SecondaryClasses,
+                uf.tokens AS FLTokens,
+                coalesce(ub.points, 0) AS BonusPoints,
+                la.Type,
+                CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS unlimitedDownload
+            FROM users_main              AS um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            INNER JOIN users_info        AS ui ON (ui.UserID = um.ID)
+            INNER JOIN user_flt          AS uf ON (uf.user_id = um.ID)
+            LEFT JOIN permissions        AS p ON (p.ID = um.PermissionID)
+            LEFT JOIN user_bonus         AS ub ON (ub.user_id = um.ID)
+            LEFT JOIN users_levels       AS l ON (l.UserID = um.ID)
+            LEFT JOIN locked_accounts    AS la ON (la.UserID = um.ID)
+            LEFT JOIN user_has_attr      AS uhaud ON (uhaud.UserID = um.ID
+                AND uhaud.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+            WHERE um.ID = ?
+            GROUP BY um.ID
+            ", 'unlimited-download', $this->id
+        );
+        return $this->db->has_results() ? $this->db->next_record(MYSQLI_ASSOC, false) : null;
+    }
+
     public function id() {
         return $this->id;
     }
 
+    public function username() {
+        return $this->db->scalar("
+            SELECT Username
+            FROM users_main
+            WHERE ID = ?
+            ", $this->id
+        );
+    }
+
+    public function idFromUsername(string $username) {
+        return $this->db->scalar("
+            SELECT ID
+            FROM users_main
+            WHERE ID = ?
+            ", $username
+        );
+    }
+
+    public function url() {
+        return site_url() . "user.php?id=" . $this->id;
+    }
+
     public function forceCacheFlush($flush = true) {
         return $this->forceCacheFlush = $flush;
+    }
+
+    public function flushCache() {
+        $this->cache->deleteMulti([
+            "enabled_" . $this->id,
+            "user_info_" . $this->id,
+            "user_info_heavy_" . $this->id,
+            "user_stats_" . $this->id,
+        ]);
+    }
+
+    public function logout() {
+        $this->db->prepared_query("
+            SELECT SessionID
+            FROM users_sessions
+            WHERE UserID = ?
+            ", $this->id
+        );
+        $keyStem = 'session_' . $this->id . '_';
+        while (list($id) = $this->db->next_record(MYSQLI_NUM)) {
+            $this->cache->delete_value($keyStem . $id);
+        }
+        $this->cache->delete_value("users_sessions_" . $this->id);
+        $this->db->prepared_query("
+            DELETE FROM users_sessions
+            WHERE UserID = ?
+            ", $this->id
+        );
+        return $this->db->affected_rows();
+    }
+
+    public function remove() {
+        $this->db->prepared_query("
+            DELETE um, ui, uls
+            FROM users_main um
+            INNER JOIN user_info ui ON (ui.UserID = um.ID)
+            INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
+            WHERE um.ID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value("user_info_$UserID");
+    }
+
+    public function mergeLeechStats(string $username, string $staffname) {
+        list($mergeId, $up, $down) = $this->db->row("
+            SELECT um.ID, uls.Uploaded, uls.Downloaded
+            FROM users_main um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            WHERE um.Username = ?
+            ", $username
+        );
+        if (!$mergeId) {
+            return null;
+        }
+        $this->db->prepared_query("
+            UPDATE users_leech_stats uls
+            INNER JOIN users_info ui USING (UserID)
+            SET
+                uls.Uploaded = 0,
+                uls.Downloaded = 0,
+                ui.AdminComment = concat(now(), ' - ', ?, ui.AdminComment)
+            WHERE uls.UserID = ?
+            ", sprintf("leech stats (up: %s, down: %s, ratio: %s) transferred to %s (%s) by %s\n\n",
+                    \Format::get_size($up), \Format::get_size($down), \Format::get_ratio($up, $down),
+                    $this->url(), $this->username(), $staffname
+            ),
+            $mergeId
+        );
+        return ['up' => $up, 'down' => $down, 'userId' => $mergeId];
+    }
+
+    public function lock(int $lockType) {
+        $this->db->prepared_query("
+            INSERT INTO locked_accounts
+                   (UserID, Type)
+            VALUES (?,      ?)
+            ON DUPLICATE KEY UPDATE Type = ?
+            ", $this->id, $lockType, $lockType
+        );
+        return $this->db->affected_rows() == 1;
+    }
+
+    public function unlock() {
+        $this->db->prepared_query("
+            DELETE FROM locked_accounts WHERE UserID = ?
+            ", $this->id
+        );
+        return $this->db->affected_rows() == 1;
+    }
+
+    public function updateTokens(int $n) {
+        $this->db->prepared_query('
+            UPDATE user_flt SET
+                tokens = ?
+            WHERE user_id = ?
+            ', $n, $this->id
+        );
+        return $this->db->affected_rows() == 1;
     }
 
     public function updateIP($oldIP, $newIP) {
@@ -46,25 +224,164 @@ class User extends Base {
             WHERE ID = ?
             ', $newIP, \Tools::geoip($newIP), $this->id
         );
-        $this->cache->begin_transaction('user_info_heavy_' . $this->id);
-        $this->cache->update_row(false, ['IP' => $newIP]);
-        $this->cache->commit_transaction(0);
+        $this->cache->delete_value('user_info_heavy_' . $this->id);
     }
 
     public function updatePassword($pw, $ipAddr) {
-        $this->db->prepared_query('
-            INSERT INTO users_history_passwords
-                   (UserID, ChangerIP, ChangeTime)
-            VALUES (?,      ?,         now())
-            ', $this->id, $ipaddr
-        );
         $this->db->prepared_query('
             UPDATE users_main SET
                 PassHash = ?
             WHERE ID = ?
             ', \Users::make_password_hash($pw), $this->id
         );
+        if ($this->db->affected_rows() == 1) {
+            $this->db->prepared_query('
+                INSERT INTO users_history_passwords
+                       (UserID, ChangerIP, ChangeTime)
+                VALUES (?,      ?,         now())
+                ', $this->id, $ipaddr
+            );
+        }
+        return $this->db->affected_rows() == 1;
+    }
+
+    public function resetRatioWatch() {
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                RatioWatchEnds = NULL,
+                RatioWatchDownload = 0,
+                RatioWatchTimes = 0
+            WHERE UserID = ?
+            ", $this->id
+        );
+        return $this->db->affected_rows() == 1;
+    }
+
+    public function resetIpHistory() {
+        $n = 0;
+        $this->db->prepared_query("
+            DELETE FROM users_history_ips WHERE UserID = ?
+            ", $this->id
+        );
+        $n += $this->db->affected_rows();
+        $this->db->prepared_query("
+            UPDATE users_main SET IP = '127.0.0.1' WHERE ID = ?
+            ", $this->id
+        );
+        $n += $this->db->affected_rows();
+        $this->db->prepared_query("
+            UPDATE xbt_snatched SET IP = '' WHERE uid = ?
+            ", $this->id
+        );
+        $n += $this->db->affected_rows();
+        $this->db->prepared_query("
+            UPDATE users_history_passwords SET ChangerIP = '' WHERE UserID = ?
+            ", $this->id
+        );
+        $n += $this->db->affected_rows();
+        $this->db->prepared_query("
+            UPDATE users_history_passkeys SET ChangerIP = '' WHERE UserID = ?
+            ", $this->id
+        );
+        $n += $this->db->affected_rows();
+        $this->db->prepared_query("
+            UPDATE users_sessions SET IP = '127.0.0.1' WHERE UserID = ?
+            ", $this->id
+        );
+        $n += $this->db->affected_rows();
+        return $n;
+    }
+
+    public function resetEmailHistory(string $email, string $ipAddr) {
+        $this->db->prepared_query("
+            DELETE FROM users_history_emails
+            WHERE UserID = ?
+            ", $this->id
+        );
+        $this->db->prepared_query("
+            INSERT INTO users_history_emails
+                   (UserID, Email, IP)
+            VALUES (?,      ?,     ?)
+            ", $this->id, $email, $ip
+        );
+        $this->db->prepared_query("
+            UPDATE users_main
+            SET Email = ?
+            WHERE ID = ?
+            ", $email, $this->id
+        );
+        return $this->db->affected_rows() == 1;
+    }
+
+    public function resetSnatched() {
+        $this->db->prepared_query("
+            DELETE FROM xbt_snatched
+            WHERE uid = ?
+            ", $this->id
+        );
+        $this->cache->delete_value("user_recent_snatch_$UserID");
         return $this->db->affected_rows();
+    }
+
+    public function resetDownloadList() {
+        $this->db->prepared_query('
+            DELETE FROM users_downloads
+            WHERE UserID = ?
+            ', $this->id
+        );
+        return $this->db->affected_rows();
+    }
+
+    public function resetPasskeyHistory(string $oldPasskey, string $newPasskey, string $ipAddr) {
+        $this->db->prepared_query("
+            INSERT INTO users_history_passkeys
+                   (UserID, OldPassKey, NewPassKey, ChangerIP)
+            VALUES (?,      ?,          ?,          ?)
+            ", $this->id, $oldPasskey, $newPasskey, $ipAddr
+        );
+    }
+
+    public function supportCount(int $newClassId, int $levelClassId) {
+        return (int)$this->db->scalar("
+            SELECT count(DISTINCT DisplayStaff)
+            FROM permissions
+            WHERE ID IN (?, ?)
+            ", $newClassId, $levelClassId
+        );
+    }
+
+    /**
+     * toggle Unlimited Download setting
+     */
+    public function toggleUnlimitedDownload(bool $flag) {
+        $this->db->prepared_query('
+            SELECT ua.ID
+            FROM user_has_attr uha
+            INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID)
+            WHERE uha.UserID = ?
+                AND ua.Name = ?
+            ', $this->id, 'unlimited-download'
+        );
+        $found = $this->db->has_results();
+        // die("flag=$flag, found=$found");
+        $toggled = false;
+        if (!$flag && $found) {
+            list($attrId) = $this->db->next_record();
+            $this->db->prepared_query('
+                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
+                ', $this->id, $attrId
+            );
+            $toggled = $this->db->affected_rows() == 1;
+        }
+        elseif ($flag && !$found) {
+            $this->db->prepared_query('
+                INSERT INTO user_has_attr (UserID, UserAttrID)
+                    SELECT ?, ID FROM user_attr WHERE Name = ?
+                ', $this->id, 'unlimited-download'
+            );
+            $toggled = $this->db->affected_rows() == 1;
+        }
+        return $toggled;
     }
 
     public function updateCatchup() {
@@ -75,6 +392,7 @@ class User extends Base {
             ", $this->id
         );
         $this->cache->delete_value('user_info_' . $this->id);
+        return $this->db->affected_rows() == 1;
     }
 
     public function permissionList() {
@@ -90,6 +408,25 @@ class User extends Base {
             ', $this->id
         );
         return $this->db->to_array('permName', MYSQLI_ASSOC, false);
+    }
+
+    public function addClasses(array $classes) {
+        $this->db->prepared_query("
+            INSERT IGNORE INTO users_levels (UserID, PermissionID)
+            VALUES " . implode(', ', array_fill(0, count($classes), '(' . $this->id . ', ?)')),
+            ...$classes
+        );
+        return $this->db->affected_rows();
+    }
+
+    public function removeClasses(array $classes) {
+        $this->db->prepared_query("
+            DELETE FROM users_levels
+            WHERE UserID = ?
+                AND PermissionID IN (" . placeholders($classes) . ")",
+            $this->id, ...$classes
+        );
+        return $this->db->affected_rows();
     }
 
     public function notifyFilters() {
@@ -138,14 +475,22 @@ class User extends Base {
     public function isEnabled()     { return $this->enabledState() == 1; }
     public function isDisabled()    { return $this->enabledState() == 2; }
 
+    public function endWarningDate(int $weeks) {
+        return $this->db->scalar("
+            SELECT coalesce(Warned, now()) + INTERVAL ? WEEK
+            FROM users_info
+            WHERE UserID = ?
+            ", $weeks, $this->id
+        );
+    }
+
     public function LastFMUsername() {
-        $name = $this->db->scalar('
+        return $this->db->scalar('
             SELECT username
             FROM lastfm_users
             WHERE ID = ?
             ', $this->id
         );
-        return $name;
     }
 
     public function personalCollages() {
@@ -250,6 +595,14 @@ class User extends Base {
         return $value;
     }
 
+    public function joinDate() {
+        return $this->getSingleValue('user-joined', '
+            SELECT JoinDate
+            FROM users_info
+            WHERE UserID = ?
+        ');
+    }
+
     public function uploadCount() {
         return $this->getSingleValue('user-upload-count', '
             SELECT count(*)
@@ -335,7 +688,7 @@ class User extends Base {
     }
 
     public function addForumWarning(string $comment) {
-        $this->db->query("
+        $this->db->prepared_query("
             INSERT INTO users_warnings_forums
                    (UserID, Comment)
             VALUES (?,      ?)
@@ -615,19 +968,12 @@ class User extends Base {
         return $stats;
     }
 
-    public function joinDate() {
-        return $this->getSingleValue('user-joined', '
-            SELECT JoinDate
-            FROM users_info
-            WHERE UserID = ?
-        ');
-    }
-
     public function buffer() {
         $user = \Users::user_info($this->id);
-        $criteria = end(array_filter(self::demotionCriteria(), function ($v) use ($user) {
+        $demotion = array_filter(self::demotionCriteria(), function ($v) use ($user) {
             return in_array($user['PermissionID'], $v['From']);
-        }));
+        });
+        $criteria = end($demotion);
 
         $stats = \Users::user_stats($this->id);
         list($votes, $bounty) = $this->requestsVotes();
@@ -675,7 +1021,6 @@ class User extends Base {
                 $progress['Requirements'][$req] = [$count, $info['Count'], $info['Type']];
             }
         }
-
         return $progress;
     }
 
@@ -814,7 +1159,6 @@ class User extends Base {
                'Type' => 'bytes'
             ];
         }
-
         return $criteria;
     }
 }

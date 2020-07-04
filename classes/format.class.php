@@ -311,6 +311,7 @@ class Format {
      *
      * @param int $Size
      * @param int $Levels Number of decimal places. Defaults to 2, unless the size >= 1TB, in which case it defaults to 4.
+     *                    or 0 in the case of bytes.
      * @return string formatted number.
      */
     public static function get_size($Size, $Levels = 2) {
@@ -320,6 +321,9 @@ class Format {
         }
         if (func_num_args() == 1 && $Steps >= 4) {
             $Levels++;
+        }
+        if ($Steps == 0) {
+            $Levels = 0;
         }
         return number_format($Size, $Levels) . $Units[$Steps];
     }

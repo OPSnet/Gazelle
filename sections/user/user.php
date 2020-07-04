@@ -48,56 +48,18 @@ $EnabledRewards = Donations::get_enabled_rewards($UserID);
 $ProfileRewards = Donations::get_profile_rewards($UserID);
 $FA_Key = null;
 
-if (check_perms('users_mod')) { // Person viewing is a staff member
+if (check_perms('users_mod')) {
+    // Person viewing is staff
     $DB->prepared_query('
         SELECT
-            um.Username,
-            um.Email,
-            ula.last_access,
-            um.IP,
-            p.Level AS Class,
-            uls.Uploaded,
-            uls.Downloaded,
-            coalesce(ub.points, 0) as BonusPoints,
-            um.RequiredRatio,
-            um.Title,
-            um.torrent_pass,
-            um.Enabled,
-            um.Paranoia,
-            um.Invites,
-            um.can_leech,
-            um.Visible,
-            i.JoinDate,
-            i.Info,
-            i.Avatar,
-            i.AdminComment,
-            i.Donor,
-            i.Artist,
-            i.Warned,
-            i.SupportFor,
-            i.RestrictedForums,
-            i.PermittedForums,
-            i.Inviter,
-            inviter.Username,
-            COUNT(posts.id) AS ForumPosts,
-            i.RatioWatchEnds,
-            i.RatioWatchDownload,
-            i.DisableAvatar,
-            i.DisableInvites,
-            i.DisablePosting,
-            i.DisablePoints,
-            i.DisableForums,
-            i.DisableTagging,
-            i.DisableUpload,
-            i.DisableWiki,
-            i.DisablePM,
-            i.DisableIRC,
-            i.DisableRequests,
-            uf.tokens AS FLTokens,
-            um.2FA_Key,
-            SHA1(i.AdminComment),
-            i.InfoTitle,
-            la.Type AS LockedAccount,
+            um.Username, um.Email, ula.last_access, um.IP, p.Level AS Class, uls.Uploaded, uls.Downloaded,
+            coalesce(ub.points, 0) as BonusPoints, um.RequiredRatio, um.Title, um.torrent_pass, um.Enabled, um.Paranoia,
+            um.Invites, um.can_leech, um.Visible, i.JoinDate, i.Info, i.Avatar, i.AdminComment, i.Donor,
+            i.Artist, i.Warned, i.SupportFor, i.RestrictedForums, i.PermittedForums, i.Inviter,
+            inviter.Username, COUNT(posts.id) AS ForumPosts, i.RatioWatchEnds, i.RatioWatchDownload, i.DisableAvatar,
+            i.DisableInvites, i.DisablePosting, i.DisablePoints, i.DisableForums, i.DisableTagging,
+            i.DisableUpload, i.DisableWiki, i.DisablePM, i.DisableIRC, i.DisableRequests, uf.tokens AS FLTokens,
+            um.2FA_Key, SHA1(i.AdminComment), i.InfoTitle, la.Type AS LockedAccount,
             CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
             CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
         FROM users_main AS um
@@ -110,19 +72,12 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
         LEFT JOIN locked_accounts AS la ON (la.UserID = um.ID)
-        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-        LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
-        LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = um.ID)
-        LEFT JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
+        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID AND uhafl.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
+        LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = um.ID AND uhaud.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
         WHERE um.ID = ?
         GROUP BY AuthorID
         ', 'no-fl-gifts', 'unlimited-download', $UserID
     );
-
-    if (!$DB->has_results()) { // If user doesn't exist
-        header("Location: log.php?search=User+$UserID");
-    }
-
     list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
     $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia,
     $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor,
@@ -130,37 +85,17 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
     $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar,
     $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging,
     $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens,
-    $FA_Key, $CommentHash, $InfoTitle, $LockedAccount, $AcceptFL, $UnlimitedDownload)
+    $FA_Key, $CommentHash, $InfoTitle, $LockedAccount,
+    $AcceptFL, $UnlimitedDownload)
         = $DB->next_record(MYSQLI_NUM, [9, 12]);
-} else { // Person viewing is a normal user
+} else {
+    // Person viewing is a normal user
     $DB->prepared_query('
         SELECT
-            um.Username,
-            um.Email,
-            ula.last_access,
-            um.IP,
-            p.Level AS Class,
-            uls.Uploaded,
-            uls.Downloaded,
-            coalesce(ub.points, 0) as BonusPoints,
-            um.RequiredRatio,
-            um.Enabled,
-            um.Paranoia,
-            um.Invites,
-            um.Title,
-            um.torrent_pass,
-            um.can_leech,
-            i.JoinDate,
-            i.Info,
-            i.Avatar,
-            uf.tokens AS FLTokens,
-            i.Donor,
-            i.Warned,
-            COUNT(posts.id) AS ForumPosts,
-            i.Inviter,
-            i.DisableInvites,
-            inviter.username,
-            i.InfoTitle,
+            um.Username, um.Email, ula.last_access, um.IP, p.Level AS Class, uls.Uploaded, uls.Downloaded,
+            coalesce(ub.points, 0) as BonusPoints, um.RequiredRatio, um.Enabled, um.Paranoia, um.Invites, um.Title,
+            um.torrent_pass, um.can_leech, i.JoinDate, i.Info, i.Avatar, uf.tokens AS FLTokens, i.Donor, i.Warned,
+            COUNT(posts.id) AS ForumPosts, i.Inviter, i.DisableInvites, inviter.username, i.InfoTitle,
             CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL
         FROM users_main AS um
         LEFT JOIN user_last_access AS ula ON (ula.user_id = um.ID)
@@ -171,23 +106,21 @@ if (check_perms('users_mod')) { // Person viewing is a staff member
         LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
         LEFT JOIN users_main AS inviter ON (i.Inviter = inviter.ID)
         LEFT JOIN forums_posts AS posts ON (posts.AuthorID = um.ID)
-        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-        LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
+        LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID AND uhafl.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
         WHERE um.ID = ?
         GROUP BY AuthorID
         ', 'no-fl-gifts', $UserID
     );
-
-    if (!$DB->has_results()) { // If user doesn't exist
-        header("Location: log.php?search=User+$UserID");
-    }
-
     list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
     $BonusPoints, $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle,
     $torrent_pass, $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
-    $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle, $AcceptFL)
+    $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle,
+    $AcceptFL)
         = $DB->next_record(MYSQLI_NUM, [10, 12]);
     $UnlimitedDownload = null;
+}
+if (!$Username) { // If user doesn't exist
+    header("Location: log.php?search=User+$UserID");
 }
 if ($Warned == '') {
     $Warned = null; // Fuck Gazelle
@@ -1014,7 +947,7 @@ if (check_perms('users_mod', $Class) || $IsFLS) {
 }
 
 // Displays a table of forum warnings viewable only to Forum Moderators
-if ($LoggedUser['Class'] == 650 && check_perms('users_warn', $Class)) {
+if ($LoggedUser['Class'] == 800 && check_perms('users_warn', $Class)) {
     $ForumWarnings = $User->forumWarning();
     if ($ForumWarnings) {
 ?>
@@ -1027,7 +960,8 @@ if ($LoggedUser['Class'] == 650 && check_perms('users_warn', $Class)) {
 <?php
     }
 }
-if (check_perms('users_mod', $Class)) { ?>
+
+if (check_perms('users_mod') || $Classes[$LoggedUser['PermissionID']]['Name'] == 'Forum Moderator') { ?>
         <form class="manage_form" name="user" id="form" action="user.php" method="post">
         <input type="hidden" name="action" value="moderate" />
         <input type="hidden" name="userid" value="<?=$UserID?>" />
@@ -1099,12 +1033,6 @@ if (check_perms('users_mod', $Class)) { ?>
                 </td>
             </tr>
 <?php
-    }
-
-    if (check_perms('users_give_donor')) {
-        echo G::$Twig->render('user/edit-donor.twig', [
-            'is_donor' => $Donor == 1,
-        ]);
     }
 
     if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
@@ -1187,6 +1115,7 @@ if (check_perms('users_mod', $Class)) { ?>
                 'irc'     => $DisableIRC,
                 'leech'   => $DisableLeech == 0,
                 'pm'      => $DisablePM,
+                'posting' => $DisablePosting,
                 'request' => $DisableRequests,
                 'tag'     => $DisableTagging,
                 'upload'  => $DisableUpload,
@@ -1195,7 +1124,9 @@ if (check_perms('users_mod', $Class)) { ?>
         ]);
     }
 
-    DonationsView::render_mod_donations($UserID);
+    if (check_perms('users_give_donor')) {
+        DonationsView::render_mod_donations($UserID);
+    }
 
     if (check_perms('users_warn')) {
         echo G::$Twig->render('user/edit-warn.twig', [
@@ -1208,11 +1139,8 @@ if (check_perms('users_mod', $Class)) { ?>
         echo G::$Twig->render('user/edit-lock.twig', [
             'is_locked'  => $LockedAccount,
             'staff_lock' => STAFF_LOCKED,
+            'can_logout' => check_perms('users_logout'),
         ]);
-    }
-
-    if (check_perms('users_logout')) {
-        echo G::$Twig->render('user/edit-session.twig');
     }
 
     echo G::$Twig->render('user/edit-submit.twig');

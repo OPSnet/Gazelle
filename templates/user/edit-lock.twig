@@ -7,16 +7,22 @@
     <tr>
         <td class="label">Lock Account:</td>
         <td>
-            <input type="checkbox" name="LockAccount" id="LockAccount"{{ is_locked|checked }} />
+            <input type="checkbox" name="LockAccount" id="LockAccount"{{ is_locked|checked }} /> You must give the reason below when locking.
         </td>
     </tr>
     <tr>
-        <td class="label">Reason:</td>
+        <td class="label">Lock Reason:</td>
         <td>
-            <select name="LockReason">
+            <select name="LockType">
                 <option value="---">---</option>
                 <option value="{{ staff_lock }}" {{ is_locked|checked }}>Staff Lock</option>
             </select>
         </td>
     </tr>
+{% if can_logout %}
+    <tr>
+        <td class="label">Log out:</td>
+        <td><input type="checkbox" name="Logout" id="LogOut" /></td>
+    </tr>
+{% endif %}
 </table>
