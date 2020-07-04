@@ -958,33 +958,4 @@ class Users {
         }
     }
 
-    /**
-     * toggle Unlimited Download setting
-     */
-    public static function toggleUnlimitedDownload($id, $flag) {
-        G::$DB->prepared_query('
-            SELECT ua.ID
-            FROM user_has_attr uha
-            INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID)
-            WHERE uha.UserID = ?
-                AND ua.Name = ?
-            ', $id, 'unlimited-download'
-        );
-        $found = G::$DB->has_results();
-        if (!$flag && $found) {
-            list($attr_id) = G::$DB->next_record();
-            G::$DB->prepared_query('
-                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
-                ', $id, $attr_id
-            );
-        }
-        elseif ($flag && !$found) {
-            G::$DB->prepared_query('
-                INSERT INTO user_has_attr (UserID, UserAttrID)
-                    SELECT ?, ID FROM user_attr WHERE Name = ?
-                ', $id, 'unlimited-download'
-            );
-        }
-    }
-
 }
