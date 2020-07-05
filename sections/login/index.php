@@ -189,7 +189,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
         list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
         $Recovery = (!empty($Recovery)) ? unserialize($Recovery) : [];
         if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) !== false) {
-            $SessionID = Users::make_secret();
+            $SessionID = randomString();
             $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
             if ($_SESSION['temp_stay_logged']) {
                 $KeepLogged = '1';
@@ -331,7 +331,7 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
             header('Location: login.php?invalid2fa');
         } else {
-            $SessionID = Users::make_secret();
+            $SessionID = randomString();
             $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
 
             if ($_SESSION['temp_stay_logged']) {
@@ -493,7 +493,7 @@ else {
                     }
 
                     if ($Enabled == 1) {
-                        $SessionID = Users::make_secret();
+                        $SessionID = randomString();
                         $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
 
                         if ($TFAKey) {

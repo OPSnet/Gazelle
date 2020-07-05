@@ -18,7 +18,7 @@ class Misc {
         $Headers .= 'Content-type: text/plain; charset=iso-8859-1'."\r\n";
         $Headers .= 'From: '.SITE_NAME.' <'.$From.'@'.MAIL_HOST.'>'."\r\n";
         $Headers .= 'Reply-To: '.$From.'@'.MAIL_HOST."\r\n";
-        $Headers .= 'Message-Id: <'.Users::make_secret().'@'.MAIL_HOST.">\r\n";
+        $Headers .= 'Message-Id: <'.randomString().'@'.MAIL_HOST.">\r\n";
         $Headers .= 'X-Priority: 3'."\r\n";
         mail($To, $Subject, $Body, $Headers, "-f $From@".MAIL_HOST);
     }

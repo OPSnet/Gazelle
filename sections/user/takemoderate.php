@@ -512,7 +512,7 @@ if ($EnableUser != $Cur['Enabled'] && check_perms('users_disable_users')) {
 }
 
 if ($ResetPasskey == 1 && check_perms('users_edit_reset_keys')) {
-    $Passkey = Users::make_secret();
+    $Passkey = randomString();
     $user->resetPasskeyHistory($Cur['torrent_pass'], $Passkey, '0.0.0.0');
     $Cache->delete_value('user_'.$Cur['torrent_pass']);
     $TrackerUserUpdates['passkey'] = $Passkey; // MUST come after the case for updating can_leech
@@ -524,7 +524,7 @@ if ($ResetPasskey == 1 && check_perms('users_edit_reset_keys')) {
 
 if ($ResetAuthkey == 1 && check_perms('users_edit_reset_keys')) {
     $set[] = "Authkey = ?";
-    $args[] = Users::make_secret();
+    $args[] = randomString();
     $EditSummary[] = 'authkey reset';
 }
 

@@ -11,11 +11,12 @@ $UserCount = Users::get_enabled_users_count();
 $UserID = $LoggedUser['ID'];
 
 //This is where we handle things passed to us
-$DB->query("
+$CanLeech = $DB->scalar("
     SELECT can_leech
     FROM users_main
-    WHERE ID = $UserID");
-list($CanLeech) = $DB->next_record();
+    WHERE ID = ?
+    ", $UserID
+);
 
 if ($LoggedUser['RatioWatch']
     || !$CanLeech
@@ -35,7 +36,7 @@ $Email = $_POST['email'];
 $Username = $LoggedUser['Username'];
 $SiteName = SITE_NAME;
 $SiteURL = site_url();
-$InviteReason = check_perms('users_invite_notes') ? db_string($_POST['reason']) : '';
+$InviteReason = check_perms('users_invite_notes') ? $_POST['reason'] : '';
 
 //MultiInvite
 if (strpos($Email, '|') !== false && check_perms('site_send_unlimited_invites')) {
@@ -67,7 +68,7 @@ foreach ($Emails as $CurEmail) {
         header('Location: user.php?action=invite');
         die();
     }
-    $InviteKey = db_string(Users::make_secret());
+    $InviteKey = randomString();
 
 $DisabledChan = BOT_DISABLED_CHAN;
 $IRCServer = BOT_SERVER;

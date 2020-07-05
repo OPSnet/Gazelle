@@ -252,7 +252,7 @@ class Recovery {
             return false;
         }
 
-        $key = db_string(\Users::make_secret());
+        $key = randomString();
         $db->prepared_query("
              INSERT INTO invites (InviterID, InviteKey, Email,  Reason, Expires)
              VALUES              (?,         ?,         ?,      ?,      now() + interval 1 week)

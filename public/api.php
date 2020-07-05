@@ -41,12 +41,6 @@ function json_error($Code) {
     die();
 }
 
-function make_secret($Length = 32) {
-    $NumBytes = (int) round($Length / 2);
-    $Secret = bin2hex(openssl_random_pseudo_bytes($NumBytes));
-    return substr($Secret, 0, $Length);
-}
-
 function display_array($Array, $Escape = []) {
     foreach ($Array as $Key => $Val) {
         if ((!is_array($Escape) && $Escape == true) || !in_array($Key, $Escape)) {

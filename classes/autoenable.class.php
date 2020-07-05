@@ -134,7 +134,7 @@ class AutoEnable {
 
                 if ($Status == self::APPROVED) {
                     // Generate token
-                    $Token = Users::make_secret();
+                    $Token = randomString();
                     G::$DB->prepared_query("
                         UPDATE users_enable_requests
                         SET Token = ?

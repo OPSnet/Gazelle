@@ -59,7 +59,7 @@ class Referral extends \Gazelle\Base {
     }
 
     public function generateToken() {
-        return 'OPS|' . \Users::make_secret(64) . '|OPS';
+        return 'OPS|' . randomString(64) . '|OPS';
     }
 
     public function getTypes() {
@@ -501,14 +501,13 @@ class Referral extends \Gazelle\Base {
             return [false, "Account already used for referral, join " . BOT_DISABLED_CHAN . " on " . BOT_SERVER . " for help."];
         }
 
-        $inviteReason = 'This user was referred from their account on ' . $acc["Site"] . '.';
-        $inviteKey = \Users::make_secret();
-
+        $inviteKey = randomString();
         $this->db->prepared_query("
             INSERT INTO invites
                    (InviteKey, Email, Reason, Expires)
             VALUES (?,         ?,     ?,      now() + INTERVAL 3 DAY)
-            ", $inviteKey, $email, $inviteReason
+            ", $inviteKey, $email,
+                'This user was referred from their account on ' . $acc["Site"] . '.'
         );
 
         $this->db->prepared_query("

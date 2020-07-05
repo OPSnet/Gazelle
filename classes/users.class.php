@@ -478,18 +478,6 @@ class Users {
     }
 
     /**
-     * Generate a random string
-     *
-     * @param  int    $Length
-     * @return string random alphanumeric string
-     */
-    public static function make_secret($Length = 32) {
-        $NumBytes = (int) round($Length / 2);
-        $Secret = bin2hex(openssl_random_pseudo_bytes($NumBytes));
-        return substr($Secret, 0, $Length);
-    }
-
-    /**
      * Verify a password against a password hash
      *
      * @param string $Password password
@@ -842,7 +830,7 @@ class Users {
      */
     public static function resetPassword($UserID, $Username, $Email)
     {
-        $ResetKey = Users::make_secret();
+        $ResetKey = randomString();
         G::$DB->prepared_query("
             UPDATE users_info
             SET

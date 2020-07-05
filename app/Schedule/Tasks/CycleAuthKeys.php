@@ -19,7 +19,7 @@ class CycleAuthKeys extends \Gazelle\Schedule\Task
                             )
                         )
                     );
-        ", \Users::make_secret(), \Users::make_secret());
+        ", randomString(), randomString());
 
         $this->db->prepared_query("
             SELECT concat('user_info_heavy_', ID)
