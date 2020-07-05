@@ -1,0 +1,96 @@
+<style type="text/css">
+div#phpinfo {color: #222; font-family: sans-serif; display: none;}
+div#phpinfo pre {margin: 0; font-family: monospace;}
+div#phpinfo a:link {color: #009; text-decoration: none; background-color: #fff;}
+div#phpinfo a:hover {text-decoration: underline;}
+div#phpinfo table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px #ccc;}
+div#phpinfo .center {text-align: center;}
+div#phpinfo .center table {margin: 1em auto; text-align: left;}
+div#phpinfo .center th {text-align: center !important;}
+div#phpinfo td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px;}
+div#phpinfo h1 {font-size: 150%;}
+div#phpinfo h2 {font-size: 125%;}
+div#phpinfo .p {text-align: left;}
+div#phpinfo .e {background-color: #ccf; width: 300px; font-weight: bold;}
+div#phpinfo .h {background-color: #99c; font-weight: bold;}
+div#phpinfo .v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}
+div#phpinfo .v i {color: #999;}
+div#phpinfo img {float: right; border: 0;}
+div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
+</style>
+<div class="thin">
+    <h3>OS</h3>
+    <div class="box pad">
+        <span style="width: 70px; display: inline-block">Uptime:</span> {{ uptime.uptime|raw }} <br />
+        <span style="width: 70px; display: inline-block">Idle time:</span> {{ uptime.idletime|raw }} <br /><br />
+
+        <span style="width: 100px; display: inline-block">User:</span> {{ uid }} <br />
+        <span style="width: 100px; display: inline-block">Group:</span> {{ euid }} <br />
+        <span style="width: 100px; display: inline-block">Effective User:</span> {{ euid }} <br />
+        <span style="width: 100px; display: inline-block">Effective Group:</span> {{ euid }} <br />
+        <br /><tt>openssl_random_pseudo_bytes()</tt>:&nbsp;
+{%- if openssl_strong -%}
+            <span style="color:lime;">Strong</span>
+{%- else -%}
+            <span style="color:orangered;"><b>Weak/broken</span>
+{%- endif -%}
+    </div>
+    <h3>Timestamps</h3>
+    <div class="box pad">
+        <span style="width: 50px; display: inline-block">PHP:</span> {{ timestamp_php }}<br />
+        <span style="width: 50px; display: inline-block">DB:</span> {{ timestamp_db }}
+    </div>
+
+    <h3>PHP</h3>
+    <div class="box pad">
+        PHP Version: {{ php_version }} <br />
+        <a onclick="toggle_display('phpinfo')" href='javascript:void(0)'>Toggle PHP Info</a><br />
+        <div id="phpinfo">{{ phpinfo|raw }}</div>
+    </div>
+
+    <h3>Git</h3>
+    <div class="box pad">
+        <span style="width: 150px; display: inline-block;">Branch:</span> {{ git_branch }}<br />
+        <span style="width: 150px; display: inline-block;">Local Hash:</span> {{ git_hash }}<br />
+        <span style="width: 150px; display: inline-block;">Remote Hash:</span> {{ git_hash_remote }}
+    </div>
+
+    <h3>Composer</h3>
+    <div class="box pad">
+        Composer Version: {{ composer_version }}<br />
+        <table>
+            <tr class="colhead">
+                <td>Package</td>
+                <td>Requirement</td>
+                <td>Installed</td>
+            </tr>
+        <?php
+{% for p in package %}
+            <tr>
+                <td>{{ p.name }}</td>
+                <td>{{ p.require }}</td>
+                <td>{{ p.installed }}</td>
+            </tr>
+{% endfor %}
+        </table>
+    </div>
+
+    <h3>Phinx</h3>
+    <div class="box pad">
+        {{ phinx.version }}<br />
+        <table>
+            <tr class='colhead'>
+                <td>Status</td>
+                <td>Migration ID</td>
+                <td>Migration Name</td>
+            </tr>
+{% for m in phinx.migration %}
+            <tr>
+                <td>{{ m.migration_status }}</td>
+                <td>{{ m.migration_id }}</td>
+                <td>{{ m.migration_name }}</td>
+            </tr>
+{% endfor %}
+        </table>
+    </div>
+</div>
