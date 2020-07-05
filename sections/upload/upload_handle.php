@@ -396,7 +396,7 @@ $HasLog = '0';
 $HasCue = '0';
 $TmpFileList = [];
 $TooLongPaths = [];
-$DirName = (isset($Tor->Dec['info']['files']) ? Format::make_utf8($Tor->get_name()) : '');
+$DirName = (isset($Tor->Dec['info']['files']) ? make_utf8($Tor->get_name()) : '');
 $IgnoredLogFileNames = ['audiochecker.log', 'sox.log'];
 check_name($DirName); // check the folder name against the blacklist
 foreach ($FileList as $File) {
@@ -466,7 +466,7 @@ if ($Type == 'Music') {
 
         // File list and size
         list($ExtraTotalSize, $ExtraFileList) = $ExtraTor->file_list();
-        $ExtraDirName = isset($ExtraTor->Dec['info']['files']) ? Format::make_utf8($ExtraTor->get_name()) : '';
+        $ExtraDirName = isset($ExtraTor->Dec['info']['files']) ? make_utf8($ExtraTor->get_name()) : '';
 
         $ExtraTmpFileList = [];
         foreach ($ExtraFileList as $ExtraFile) {

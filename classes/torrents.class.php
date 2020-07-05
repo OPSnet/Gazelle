@@ -651,10 +651,10 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
             list($GroupID, $Contents) = G::$DB->next_record(MYSQLI_NUM, false);
             if (Misc::is_new_torrent($Contents)) {
                 $Tor = new BencodeTorrent($Contents);
-                $FilePath = (isset($Tor->Dec['info']['files']) ? Format::make_utf8($Tor->get_name()) : '');
+                $FilePath = (isset($Tor->Dec['info']['files']) ? make_utf8($Tor->get_name()) : '');
             } else {
                 $Tor = new TORRENT(unserialize(base64_decode($Contents)), true);
-                $FilePath = (isset($Tor->Val['info']->Val['files']) ? Format::make_utf8($Tor->get_name()) : '');
+                $FilePath = (isset($Tor->Val['info']->Val['files']) ? make_utf8($Tor->get_name()) : '');
             }
             list($TotalSize, $FileList) = $Tor->file_list();
             foreach ($FileList as $File) {
@@ -690,7 +690,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
      */
     public static function filelist_format_file($File) {
         list($Size, $Name) = $File;
-        $Name = Format::make_utf8(strtr($Name, "\n\r\t", '     '));
+        $Name = make_utf8(strtr($Name, "\n\r\t", '     '));
         $ExtPos = strrpos($Name, '.');
         // Should not be $ExtPos !== false. Extensionless files that start with a . should not get extensions
         $Ext = ($ExtPos ? trim(substr($Name, $ExtPos + 1)) : '');

@@ -76,7 +76,7 @@ function display_str($Str) {
         return '';
     }
     if ($Str != '' && !is_number($Str)) {
-        $Str = Format::make_utf8($Str);
+        $Str = make_utf8($Str);
         $Str = mb_convert_encoding($Str, 'HTML-ENTITIES', 'UTF-8');
         $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,6};)/m", '&amp;', $Str);
 
@@ -265,4 +265,49 @@ function isset_array_checked($array, $value) {
  */
 function placeholders(array $list, $placeholder = '?') {
     return implode(',', array_fill(0, count($list), $placeholder));
+}
+
+/**
+ * Magical function.
+ *
+ * @param string $Str function to detect encoding on.
+ * @return true if the string is in UTF-8.
+ */
+public static function is_utf8($Str) {
+    return preg_match('%^(?:
+        [\x09\x0A\x0D\x20-\x7E]              // ASCII
+        | [\xC2-\xDF][\x80-\xBF]             // non-overlong 2-byte
+        | \xE0[\xA0-\xBF][\x80-\xBF]         // excluding overlongs
+        | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  // straight 3-byte
+        | \xED[\x80-\x9F][\x80-\xBF]         // excluding surrogates
+        | \xF0[\x90-\xBF][\x80-\xBF]{2}      // planes 1-3
+        | [\xF1-\xF3][\x80-\xBF]{3}          // planes 4-15
+        | \xF4[\x80-\x8F][\x80-\xBF]{2}      // plane 16
+        )*$%xs', $Str
+    );
+}
+
+/**
+ * Detect the encoding of a string and transform it to UTF-8.
+ *
+ * @param string $Str
+ * @return UTF-8 encoded version of $Str
+ */
+function make_utf8($Str) {
+    if ($Str != '') {
+        if (is_utf8($Str)) {
+            $Encoding = 'UTF-8';
+        }
+        if (empty($Encoding)) {
+            $Encoding = mb_detect_encoding($Str, 'UTF-8, ISO-8859-1');
+        }
+        if (empty($Encoding)) {
+            $Encoding = 'ISO-8859-1';
+        }
+        if ($Encoding == 'UTF-8') {
+            return $Str;
+        } else {
+            return @mb_convert_encoding($Str, 'UTF-8', $Encoding);
+        }
+    }
 }
