@@ -66,28 +66,51 @@ function Category($Title, array $Entries) {
 View::show_header('Staff Tools');
 ?>
 <div class="permissions">
-    <div class="permission_container">
-    <!-- begin left column -->
+    <div class="toolbox_container">
+    <!-- begin column 1 -->
 <?php
 
 Category('Administration', [
-    Item('Permissions manager',      'tools.php?action=permissions',     All(['admin_manage_permissions'])),
-    Item('Staff page group manager', 'tools.php?action=staff_groups',    All(['admin_manage_permissions'])),
-    Item('Torrent client whitelist', 'tools.php?action=whitelist',       All(['admin_whitelist'])),
-    Item('Database encryption key',  'tools.php?action=dbkey',           All(['admin_site_debug'])),
     Item('Auto-Enable requests',     'tools.php?action=enable_requests', All(['users_mod']) && FEATURE_EMAIL_REENABLE),
+    Item('Database encryption key',  'tools.php?action=dbkey',           All(['admin_site_debug'])),
     Item('Login watch',              'tools.php?action=login_watch',     All(['admin_login_watch'])),
+    Item('Permissions manager',      'tools.php?action=permissions',     All(['admin_manage_permissions'])),
     Item('Reports V1',               'reports.php',                      Any(['admin_reports', 'site_moderate_forums'])),
+    Item('Staff page group manager', 'tools.php?action=staff_groups',    All(['admin_manage_permissions'])),
 ]);
 
 Category('Announcements', [
-    Item('News post',           'tools.php?action=news',                All(['admin_manage_news'])),
+    Item('Album of the Month',  'tools.php?action=monthalbum',          All(['users_mod'])),
+    Item('Calendar',            'tools.php?action=calendar',            Calendar::can_view()),
+    Item('Change log',          'tools.php?action=change_log',          All(['users_mod'])),
     Item('Global notification', 'tools.php?action=global_notification', All(['admin_global_notification'])),
     Item('Mass PM',             'tools.php?action=mass_pm',             All(['admin_global_notification'])),
-    Item('Change log',          'tools.php?action=change_log',          All(['users_mod'])),
-    Item('Calendar',            'tools.php?action=calendar',            Calendar::can_view()),
+    Item('News post',           'tools.php?action=news',                All(['admin_manage_news'])),
     Item('Vanity House',        'tools.php?action=vanityhouse',         All(['users_mod'])),
-    Item('Album of the Month',  'tools.php?action=monthalbum',          All(['users_mod'])),
+]);
+
+Category('Rewards', [
+    Item('Manage bonus points',         'tools.php?action=bonus_points',       All(['users_mod'])),
+    Item('Manage freeleech tokens',     'tools.php?action=tokens',             All(['users_mod'])),
+    Item('Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', All(['users_mod'])),
+]);
+
+?>
+    </div>
+    <div class="toolbox_container">
+    <!-- begin column 2 -->
+<?php
+
+Category('User management', [
+    Item('Create user',         'tools.php?action=create_user',       All(['admin_create_users'])),
+    Item('Invite pool',         'tools.php?action=invite_pool',       All(['users_view_invites'])),
+    Item('Invite tree manager', 'tools.php?action=manipulate_tree',   All(['users_mod'])),
+    Item('Special users',       'tools.php?action=special_users',     All(['admin_manage_permissions'])),
+    Item('Recovery',            'recovery.php?action=admin',          All(['admin_recovery'])),
+    Item('Referral accounts',   'tools.php?action=referral_accounts', All(['admin_manage_referrals'])),
+    Item('Referred users',      'tools.php?action=referral_users',    All(['admin_view_referrals'])),
+    Item('Registration log',    'tools.php?action=registration_log',  All(['users_view_ips', 'users_view_email'])),
+    Item('User flow',           'tools.php?action=user_flow',         All(['site_view_flow'])),
 ]);
 
 Category('Community', [
@@ -95,8 +118,8 @@ Category('Community', [
     Item('Contest manager',          'contest.php?action=admin',           All(['admin_manage_contest'])),
     Item('Forum manager',            'tools.php?action=forum',             All(['admin_manage_forums'])),
     Item('Forum transition manager', 'tools.php?action=forum_transitions', All(['admin_manage_forums'])),
-    Item('Navigation link manager',  'tools.php?action=navigation',        All(['admin_manage_navigation'])),
     Item('IRC manager',              'tools.php?action=irc',               All(['admin_manage_forums'])),
+    Item('Navigation link manager',  'tools.php?action=navigation',        All(['admin_manage_navigation'])),
 ]);
 
 Category('Stylesheets', [
@@ -105,41 +128,17 @@ Category('Stylesheets', [
 ]);
 
 ?>
-    <!-- end left column -->
     </div>
-    <div class="permission_container">
-    <!-- begin middle column -->
+    <div class="toolbox_container">
+    <!-- begin column 3 -->
 <?php
 
-Category('User management', [
-    Item('Create user',        'tools.php?action=create_user',       All(['admin_create_users'])),
-    Item('Special users',      'tools.php?action=special_users',     All(['admin_manage_permissions'])),
-    Item('Referral accounts',  'tools.php?action=referral_accounts', All(['admin_manage_referrals'])),
-    Item('Referred users',     'tools.php?action=referral_users',    All(['admin_view_referrals'])),
-    Item('User recovery',      'recovery.php?action=admin',          All(['admin_recovery'])),
-    Item('User flow',          'tools.php?action=user_flow',         All(['site_view_flow'])),
-    Item('Registration log',   'tools.php?action=registration_log',  All(['users_view_ips', 'users_view_email'])),
-    Item('Invite pool',        'tools.php?action=invite_pool',       All(['users_view_invites'])),
-    Item('Manage invite tree', 'tools.php?action=manipulate_tree',   All(['users_mod'])),
-]);
-
-Category('Rewards', [
-    Item('Manage bonus points',         'tools.php?action=bonus_points',       All(['users_mod'])),
-    Item('Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', All(['users_mod'])),
-    Item('Manage freeleech tokens',     'tools.php?action=tokens',             All(['users_mod'])),
-]);
-
-Category('Managers', [
-    Item('IP address bans',        'tools.php?action=ip_ban',          All(['admin_manage_ipbans'])),
-    Item('Duplicate IP addresses', 'tools.php?action=dupe_ips',        All(['users_view_ips'])),
-    Item('Email blacklist',        'tools.php?action=email_blacklist', All(['users_view_email'])),
-]);
-
 Category('Torrents', [
-    Item('Rate limiting',        'tools.php?action=rate_limit',    Any(['admin_rate_limit_view', 'admin_rate_limit_manage'])),
-    Item('Collage recovery',     'collages.php?action=recover',    All(['site_collages_recover'])),
+    Item('Client whitelist',     'tools.php?action=whitelist',     All(['admin_whitelist'])),
     Item('"Do Not Upload" list', 'tools.php?action=dnu',           All(['admin_dnu'])),
+    Item('Collage recovery',     'collages.php?action=recover',    All(['site_collages_recover'])),
     Item('Label aliases',        'tools.php?action=label_aliases', All(['users_mod'])),
+    Item('Rate limiting',        'tools.php?action=rate_limit',    Any(['admin_rate_limit_view', 'admin_rate_limit_manage'])),
 ]);
 
 Category('Tags', [
@@ -148,18 +147,11 @@ Category('Tags', [
     Item('Official tags manager', 'tools.php?action=tags_official', All(['users_mod'])),
 ]);
 
-?>
-    <!-- end middle column -->
-    </div>
-    <div class="permission_container">
-    <!-- begin right column -->
-<?php
-
-Category('Site Information', [
-    Item('Economic stats',       'tools.php?action=economic_stats', All(['site_view_flow'])),
-    Item('Torrent stats',        'tools.php?action=torrent_stats',  All(['site_view_flow'])),
-    Item('Ratio watch',          'tools.php?action=upscale_pool',   All(['site_view_flow'])),
-    Item('OS and browser usage', 'tools.php?action=platform_usage', All(['site_debug'])),
+Category('External data', [
+    Item('Email blacklist',        'tools.php?action=email_blacklist', All(['users_view_email'])),
+    Item('IP address bans',        'tools.php?action=ip_ban',          All(['admin_manage_ipbans'])),
+    Item('Duplicate IP addresses', 'tools.php?action=dupe_ips',        All(['users_view_ips'])),
+    Item('Update GeoIP',           'tools.php?action=update_geoip',    All(['admin_update_geoip'])),
 ]);
 
 Category('Finances', [
@@ -170,6 +162,22 @@ Category('Finances', [
     Item('Payment dates',         'tools.php?action=payment_list',    Any(['admin_view_payments', 'admin_manage_payments'])),
 ]);
 
+?>
+    </div>
+    <div class="toolbox_container">
+    <!-- begin column 4 -->
+<?php
+
+Category('Site Information', [
+    Item('Economic stats',       'tools.php?action=economic_stats', All(['site_view_flow'])),
+    Item('Torrent stats',        'tools.php?action=torrent_stats',  All(['site_view_flow'])),
+    Item('Ratio watch',          'tools.php?action=upscale_pool',   All(['site_view_flow'])),
+    Item('OS and browser usage', 'tools.php?action=platform_usage', All(['site_debug'])),
+    Item('Site info',            'tools.php?action=site_info',      All(['admin_site_debug'])),
+    Item('Site options',         'tools.php?action=site_options',   All(['users_mod'])),
+    Item('Tracker info',         'tools.php?action=ocelot_info',    All(['users_mod'])),
+]);
+
 Category('Developer Sandboxes', [
     Item('Artist Importance', 'tools.php?action=artist_importance_sandbox', All(['users_mod'])),
     Item('BBCode sandbox',    'tools.php?action=bbcode_sandbox',            All(['users_mod'])),
@@ -178,21 +186,16 @@ Category('Developer Sandboxes', [
 ]);
 
 Category('Development', [
+    Item('Cache/DB stats',        'tools.php?action=service_stats',            All(['site_debug'])),
     Item('Cache key management',  'tools.php?action=clear_cache',              All(['users_mod'])),
-    Item('Database info',         'tools.php?action=database_specifics',       All(['site_database_specifics'])),
-    Item('PHP processes',         'tools.php?action=process_info',             All(['site_debug'])),
-    Item('Service stats',         'tools.php?action=service_stats',            All(['site_debug'])),
+    Item('Database schema info',  'tools.php?action=database_specifics',       All(['site_database_specifics'])),
     Item('Error Analysis',        'tools.php?action=analysis_list',            All(['site_analysis'])),
-    Item('Site info',             'tools.php?action=site_info',                All(['admin_site_debug'])),
-    Item('Site options',          'tools.php?action=site_options',             All(['users_mod'])),
+    Item('PHP processes',         'tools.php?action=process_info',             All(['site_debug'])),
     Item('Scheduler',             'tools.php?action=periodic&amp;mode=view',   All(['admin_periodic_task_view'])),
     Item('Scheduler (legacy)',    'schedule.php?auth='.$LoggedUser['AuthKey'], All(['admin_schedule'])),
-    Item('Tracker info',          'tools.php?action=ocelot_info',              All(['users_mod'])),
-    Item('Update GeoIP',          'tools.php?action=update_geoip',             All(['admin_update_geoip'])),
 ]);
 
 ?>
-    <!-- end right column -->
     </div>
 </div>
 <?php

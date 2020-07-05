@@ -1727,6 +1727,12 @@ ul.collage_images li:nth-child(5n) img {
     text-align: right
 }
 
+.toolbox_container {
+    float: left;
+    padding: 5px;
+    width: 200px;
+}
+
 #upload #content>div.box.pad[style="margin: 0px auto; width: 700px;"] {
     width: 876px!important;
     margin-bottom: 12px!important

@@ -1281,6 +1281,16 @@ tr.torrent .bookmark > a:after {
     margin-left: 0;
 }
 
+.toolbox_container {
+    float: left;
+    margin-left: 20px;
+    width: 193px;
+}
+.permission_container input {
+    margin:0px 3px 5px 0px;
+    vertical-align:top;
+}
+
 /* TORRENTS */
 .main_column .torrent_table .pad {
     padding: 15px !important;
