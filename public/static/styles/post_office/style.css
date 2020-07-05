@@ -971,6 +971,12 @@ tr.unreadpm {
   clear: both;
   text-align: right; }
 
+.toolbox_container {
+    float: left;
+    padding: 5px;
+    width: 200px;
+}
+
 /* Layout (Invite tree) */
 ul .invitetree {
   margin: 0px 0px 0px 25px; }

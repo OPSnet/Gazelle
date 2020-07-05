@@ -762,6 +762,12 @@ strong.quoteheader {
     margin-left: 0;
 }
 
+.toolbox_container {
+    float: left;
+    margin-left: 20px;
+    width: 193px;
+}
+
 /* TORRENTS */
 
 #torrents input[value="Edit torrent"] {
