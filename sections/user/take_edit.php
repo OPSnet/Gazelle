@@ -413,7 +413,7 @@ if ($ResetPassword) {
 if (isset($_POST['resetpasskey'])) {
     $UserInfo = Users::user_heavy_info($UserID);
     $OldPassKey = $UserInfo['torrent_pass'];
-    $NewPassKey = Users::make_secret();
+    $NewPassKey = randomString();
     $ChangerIP = $LoggedUser['IP'];
     $SQL .= ',m.torrent_pass = ?';
     $Params[] = $NewPassKey;

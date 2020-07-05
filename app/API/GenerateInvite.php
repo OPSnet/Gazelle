@@ -25,9 +25,6 @@ class GenerateInvite extends AbstractAPI {
         $interviewer_name = $user['Username'];
 
         $email = $_GET['email'] ?? '';
-        $key = make_secret();
-        $reason = "Passed Interview";
-
         if (!empty($_GET['email'])) {
             if ($this->db->scalar("SELECT 1 FROM users_main WHERE Email = ?", $email)) {
                 json_error("Email address already in use");
@@ -38,11 +35,12 @@ class GenerateInvite extends AbstractAPI {
             }
         }
 
+        $key = randomString();
         $this->db->prepared_query(
             "INSERT INTO invites
                     (InviterID, InviteKey, Email, Reason, Expires)
             VALUES  (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)",
-            $interviewer_id, $key, $email, $reason
+            $interviewer_id, $key, $email, "Passed Interview"
         );
         $site_url = "http";
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "") {

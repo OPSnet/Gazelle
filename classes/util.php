@@ -311,3 +311,24 @@ function make_utf8($Str) {
         }
     }
 }
+
+/*
+ * Generate a random string drawn from alphanumeric characters
+ * but omitting lowercase l, uppercase I and O (to avoid confusion).
+ *
+ * @param  int    $length
+ * @return string random alphanumeric string
+ */
+function randomString($len = 32) {
+    $alphabet = str_split('abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789');
+    $max = count($alphabet);
+    $mask = (int)pow(2, ceil(log($size, 2))) - 1;
+    $out = '';
+    while (strlen($out) < $len) {
+        $n = ord(openssl_random_pseudo_bytes(1)) & $mask;
+        if ($n < $max) {
+            $out .= $alphabet[$n];
+        }
+    }
+    return $out;
+}

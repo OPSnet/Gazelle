@@ -26,8 +26,8 @@ if (isset($_POST['Username'])) {
     } else if (!empty($username) && !empty($email) && !empty($password) && $username != '0' && $username != '1') {
 
         //Create hashes...
-        $secret = Users::make_secret();
-        $torrentPass = Users::make_secret();
+        $secret = randomString();
+        $torrentPass = randomString();
 
         //Create the account
         $DB->prepared_query("
@@ -52,7 +52,7 @@ if (isset($_POST['Username'])) {
         list($StyleID) = $DB->next_record();
 
         //Auth key
-        $authKey = Users::make_secret();
+        $authKey = randomString();
 
         //Give them a row in users_info
         $DB->prepared_query("
