@@ -6,7 +6,7 @@
  * Formatting and sorting methods for tags and tag lists
  *
  * Example:
- * <pre>&lt;?php
+ * <pre><?php
  * $Tags = new Tags('pop rock hip.hop');
  * $Tags->Format(); // returns a tag link list
  *

@@ -99,7 +99,7 @@ View::show_header('Quote Notifications');
 foreach ($Results as $Result) {
     switch ($Result['Page']) {
         case 'forums':
-            $Links = 'Forums: <a href="forums.php?action=viewforum&amp;forumid=' . $Result['ForumID'] . '">' . display_str($Result['ForumName']) . '</a> &gt; ' .
+            $Links = 'Forums: <a href="forums.php?action=viewforum&amp;forumid=' . $Result['ForumID'] . '">' . display_str($Result['ForumName']) . '</a> &rsaquo; ' .
                     '<a href="forums.php?action=viewthread&amp;threadid=' . $Result['PageID'] . '" class="tooltip" title="' . display_str($Result['ForumTitle']) . '">' . Format::cut_string($Result['ForumTitle'], 75) . '</a>';
             $JumpLink = 'forums.php?action=viewthread&amp;threadid=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
             break;
@@ -152,7 +152,7 @@ foreach ($Results as $Result) {
             <td colspan="2">
                 <span style="float: left;">
                     <?=$Links?>
-                    &gt; Quoted by <?=Users::format_username($Result['QuoterID'], false, false, false, false) . ' ' . time_diff($Result['Date']) ?>
+                    &rsaquo; Quoted by <?=Users::format_username($Result['QuoterID'], false, false, false, false) . ' ' . time_diff($Result['Date']) ?>
                     <?=($Result['UnRead'] ? ' <span class="new">(New!)</span>' : '')?>
                 </span>
                 <span style="float: left;" class="tooltip last_read" title="Jump to quote">

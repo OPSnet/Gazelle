@@ -73,7 +73,7 @@ foreach ($forumToc as &$thread) {
     unset($thread); // because looping by reference
 }
 
-View::show_header('Forums &gt; ' . $Forums[$forumId]['Name'], '', $isDonorForum ? 'donor' : '');
+View::show_header('Forums &rsaquo; ' . $Forums[$forumId]['Name'], '', $isDonorForum ? 'donor' : '');
 ?>
 <div class="thin">
 <?php

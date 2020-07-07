@@ -75,7 +75,7 @@ function disabled($Disabled) {
 $SiteOptions = unserialize_array($SiteOptions);
 $SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
 
-View::show_header("$Username &gt; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
+View::show_header("$Username &rsaquo; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
 
 $EnabledReward = Donations::get_enabled_rewards($UserID);
 $Rewards = Donations::get_rewards($UserID);
@@ -95,7 +95,7 @@ echo $Val->GenerateJS('userform');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=Users::format_username($UserID, false, false, false)?> &gt; Settings</h2>
+        <h2><?=Users::format_username($UserID, false, false, false)?> &rsaquo; Settings</h2>
     </div>
     <form class="edit_form" name="user" id="userform" action="" method="post" autocomplete="off">
     <div class="sidebar settings_sidebar">

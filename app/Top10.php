@@ -88,7 +88,7 @@ class Top10
     private static function renderList($url, $name, $image) {
         if (!empty($image)) {
             $image = \ImageTools::process($image);
-            $title = "title=\"&lt;img class=&quot;large_tile&quot; src=&quot;$image&quot; alt=&quot;&quot; /&gt;\"";
+            $title = "title=\"&lt;img class=&quot;large_tile&quot; src=&quot;$image&quot; alt=&quot;&quot; /&rsaquo;\"";
             $name = display_str($name);
 ?>
             <li>

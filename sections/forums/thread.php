@@ -157,12 +157,12 @@ if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
 }
 
 // Start printing
-View::show_header($ThreadInfo['Title'] . ' &lt; '.$Forums[$ForumID]['Name'].' &lt; Forums','comments,subscriptions,bbcode', $IsDonorForum ? 'donor' : '');
+View::show_header($ThreadInfo['Title'] . ' &lsaquo; '.$Forums[$ForumID]['Name'].' &lsaquo; Forums','comments,subscriptions,bbcode', $IsDonorForum ? 'donor' : '');
 ?>
 <div class="thin">
     <h2>
-        <a href="forums.php">Forums</a> &gt;
-        <a href="forums.php?action=viewforum&amp;forumid=<?=$ThreadInfo['ForumID']?>"><?=$ForumName?></a> &gt;
+        <a href="forums.php">Forums</a> &rsaquo;
+        <a href="forums.php?action=viewforum&amp;forumid=<?=$ThreadInfo['ForumID']?>"><?=$ForumName?></a> &rsaquo;
         <?=$ThreadTitle?>
     </h2>
     <div class="linkbox">
@@ -521,8 +521,8 @@ foreach ($Thread as $Key => $Post) {
 </table>
 <?php } ?>
 <div class="breadcrumbs">
-    <a href="forums.php">Forums</a> &gt;
-    <a href="forums.php?action=viewforum&amp;forumid=<?=$ThreadInfo['ForumID']?>"><?=$ForumName?></a> &gt;
+    <a href="forums.php">Forums</a> &rsaquo;
+    <a href="forums.php?action=viewforum&amp;forumid=<?=$ThreadInfo['ForumID']?>"><?=$ForumName?></a> &rsaquo;
     <?=$ThreadTitle?>
 </div>
 <div class="linkbox">
