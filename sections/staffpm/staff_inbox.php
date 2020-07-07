@@ -6,8 +6,7 @@ $View = display_str(empty($_GET['view']) ? '' : $_GET['view']);
 $UserLevel = $LoggedUser['EffectiveClass'];
 
 
-$LevelCap = 1000;
-
+$LevelCap = Permissions::get_level_cap();
 
 // Setup for current view mode
 $SortStr = 'IF(AssignedToUser = '.$LoggedUser['ID'].', 0, 1) ASC, ';
@@ -43,7 +42,7 @@ switch ($View) {
 
 $WhereCondition = "
     WHERE (LEAST($LevelCap, spc.Level) <= $UserLevel OR spc.AssignedToUser = '".$LoggedUser['ID']."')
-      AND spc.Status IN ('$Status')";
+        AND spc.Status IN ('$Status')";
 
 if ($ViewString == 'Your Unanswered') {
     if ($UserLevel >= $Classes[MOD]['Level']) {
@@ -53,6 +52,67 @@ if ($ViewString == 'Your Unanswered') {
     }
 }
 
+$Row = 'a';
+
+// Start page
+?>
+<div class="thin">
+    <div class="header">
+        <h2><?=$ViewString?> Staff PMs</h2>
+        <div class="linkbox">
+<?php
+$Sections = [
+    'unanswered' => "All unanswered",
+    'open' => "Unresolved",
+    'resolved' => 'Resolved',
+];
+if ($IsStaff) {
+    $Sections = ['' => 'Your unanswered'] + $Sections;
+}
+
+foreach ($Sections as $Section => $Text) {
+    if ($Section == 'unanswered') {
+        $AllUnansweredStaffPMCount = $DB->scalar("
+            SELECT count(*)
+            FROM staff_pm_conversations
+            WHERE (least(?, Level) <= ? OR AssignedToUser = ?)
+                AND Status IN ('Unanswered')
+        ", $LevelCap, $UserLevel, $LoggedUser['ID']);
+        $Text .= " ($AllUnansweredStaffPMCount)";
+    }
+    if ($Section == 'open') {
+        $UnresolvedStaffPMCount = $DB->scalar("
+            SELECT count(*)
+            FROM staff_pm_conversations
+            WHERE (least(?, Level) <= ? OR AssignedToUser = ?)
+                AND Status IN ('Open', 'Unanswered')
+        ", $LevelCap, $UserLevel, $LoggedUser['ID']);
+        $Text .= " ($UnresolvedStaffPMCount)";
+    }
+
+    if ($Section == $View) {
+        $Text = "<strong>$Text</strong>";
+    }
+
+    $Section = ($Section) ? "?view=$Section" : '';
+
+    // Make sure the trailing space in this output remains.
+    ?><a href="staffpm.php<?= $Section ?>" class="brackets"><?= $Text ?></a>&nbsp;<?php
+}
+
+if (check_perms('admin_staffpm_stats')) { ?>
+            <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
+            <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
+<?php
+}
+    if ($IsFLS && !$IsStaff) { ?>
+            <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
+<?php    } ?>
+        </div>
+    </div>
+    <br />
+    <br />
+<?php
 list($Page, $Limit) = Format::page_limit(MESSAGES_PER_PAGE);
 // Get messages
 $StaffPMs = $DB->query("
@@ -80,40 +140,8 @@ $DB->query('SELECT FOUND_ROWS()');
 list($NumResults) = $DB->next_record();
 $DB->set_query_id($StaffPMs);
 
-$CurURL = Format::get_url();
-if (empty($CurURL)) {
-    $CurURL = 'staffpm.php?';
-} else {
-    $CurURL = "staffpm.php?$CurURL&";
-}
 $Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
-
-$Row = 'a';
-
-// Start page
 ?>
-<div class="thin">
-    <div class="header">
-        <h2><?=$ViewString?> Staff PMs</h2>
-        <div class="linkbox">
-<?php     if ($IsStaff) { ?>
-            <a href="staffpm.php" class="brackets">View your unanswered</a>
-<?php     } ?>
-            <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
-            <a href="staffpm.php?view=open" class="brackets">View unresolved</a>
-            <a href="staffpm.php?view=resolved" class="brackets">View resolved</a>
-<?php    if (check_perms('admin_staffpm_stats')) { ?>
-            <a href="staffpm.php?action=scoreboard&amp;view=user" class="brackets">View user scoreboard</a>
-            <a href="staffpm.php?action=scoreboard&amp;view=staff" class="brackets">View staff scoreboard</a>
-<?php    }
-
-    if ($IsFLS && !$IsStaff) { ?>
-            <span class="tooltip" title="This is the inbox where replies to Staff PMs you have sent are."><a href="staffpm.php?action=userinbox" class="brackets">Personal Staff Inbox</a></span>
-<?php    } ?>
-        </div>
-    </div>
-    <br />
-    <br />
     <div class="linkbox">
         <?=$Pages?>
     </div>
