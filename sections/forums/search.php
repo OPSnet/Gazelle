@@ -76,7 +76,7 @@ if (!empty($_GET['threadid']) && is_number($_GET['threadid'])) {
             AND " . Forums::user_forums_sql();
     $DB->query($SQL);
     if (list($Title) = $DB->next_record()) {
-        $Title = " &gt; <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
+        $Title = " &rsaquo; <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
     } else {
         error(404);
     }
@@ -85,11 +85,11 @@ if (!empty($_GET['threadid']) && is_number($_GET['threadid'])) {
 }
 
 // Let's hope we got some results - start printing out the content.
-View::show_header('Forums &gt; Search', 'bbcode,forum_search,datetime_picker', 'datetime_picker');
+View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker', 'datetime_picker');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><a href="forums.php">Forums</a> &gt; Search<?=$Title?></h2>
+        <h2><a href="forums.php">Forums</a> &rsaquo; Search<?=$Title?></h2>
     </div>
     <form class="search_form" name="forums" action="" method="get">
         <input type="hidden" name="action" value="search" />

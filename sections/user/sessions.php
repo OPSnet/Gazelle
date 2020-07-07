@@ -47,10 +47,10 @@ if (!is_array($UserSessions)) {
 }
 
 list($UserID, $Username) = array_values(Users::user_info($UserID));
-View::show_header($Username.' &gt; Sessions');
+View::show_header($Username.' &rsaquo; Sessions');
 ?>
 <div class="thin">
-<h2><?=Users::format_username($UserID, $Username)?> &gt; Sessions</h2>
+<h2><?=Users::format_username($UserID, $Username)?> &rsaquo; Sessions</h2>
     <div class="box pad">
         <p>Note: Clearing cookies can result in ghost sessions which are automatically removed after 30 days.</p>
     </div>

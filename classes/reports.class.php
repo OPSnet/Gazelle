@@ -10,7 +10,7 @@ class Reports {
      */
     public static function format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear) {
         if ($Remastered) {
-            $RemasterDisplayString = ' &lt;';
+            $RemasterDisplayString = ' &lsaquo;';
             if ($RemasterTitle != '' && $RemasterYear != '') {
                 $RemasterDisplayString .= "$RemasterTitle - $RemasterYear";
             } elseif ($RemasterTitle != '' && $RemasterYear == '') {
@@ -18,7 +18,7 @@ class Reports {
             } elseif ($RemasterTitle == '' && $RemasterYear != '') {
                 $RemasterDisplayString .= $RemasterYear;
             }
-            $RemasterDisplayString .= '&gt;';
+            $RemasterDisplayString .= '&rsaquo;';
         } else {
             $RemasterDisplayString = '';
         }

@@ -67,7 +67,7 @@ View::show_header('Invites');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=Users::format_username($UserID, false, false, false)?> &gt; Invites</h2>
+        <h2><?=Users::format_username($UserID, false, false, false)?> &rsaquo; Invites</h2>
         <div class="linkbox">
             <a href="user.php?action=invitetree<?php if ($Sneaky) { echo '&amp;userid='.$UserID; } ?>" class="brackets">Invite tree</a>
         </div>

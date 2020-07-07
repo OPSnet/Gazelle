@@ -148,7 +148,7 @@ if ($Artist->image()) { ?>
                         <input type="hidden" name="artistname" value="<?= $Artist->name() ?>" />
                         <input type="hidden" name="action" value="advanced" />
                         <input type="text" autocomplete="off" id="filelist" name="filelist" size="20" />
-                        <input type="submit" value="&gt;" />
+                        <input type="submit" value="&rsaquo;" />
                     </form>
                 </li>
             </ul>

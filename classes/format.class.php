@@ -263,8 +263,8 @@ class Format {
             $Pages = '';
 
             if ($StartPage > 1) {
-                $Pages .= "<a href=\"$Location?page=1$QueryString$Anchor\"><strong>&lt;&lt; First</strong></a> ";
-                $Pages .= "<a href=\"$Location?page=".($StartPage - 1).$QueryString.$Anchor.'" class="pager_prev"><strong>&lt; Prev</strong></a> | ';
+                $Pages .= "<a href=\"$Location?page=1$QueryString$Anchor\"><strong>&laquo; First</strong></a> ";
+                $Pages .= "<a href=\"$Location?page=".($StartPage - 1).$QueryString.$Anchor.'" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
             }
             //End change
 
@@ -294,8 +294,8 @@ class Format {
             }
 
             if ($StartPage && $StartPage < $TotalPages) {
-                $Pages .= " | <a href=\"$Location?page=".($StartPage + 1).$QueryString.$Anchor.'" class="pager_next"><strong>Next &gt;</strong></a> ';
-                $Pages .= "<a href=\"$Location?page=$TotalPages$QueryString$Anchor\"><strong> Last &gt;&gt;</strong></a>";
+                $Pages .= " | <a href=\"$Location?page=".($StartPage + 1).$QueryString.$Anchor.'" class="pager_next"><strong>Next &rsaquo;</strong></a> ';
+                $Pages .= "<a href=\"$Location?page=$TotalPages$QueryString$Anchor\"><strong> Last &raquo;</strong></a>";
             }
         }
         if ($TotalPages > 1) {

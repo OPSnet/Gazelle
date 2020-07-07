@@ -30,7 +30,7 @@ View::show_header("Comments for collage $Name", 'comments,bbcode,subscriptions')
 <div class="thin">
     <div class="header">
         <h2>
-            <a href="collages.php">Collages</a> &gt;
+            <a href="collages.php">Collages</a> &rsaquo;
             <a href="collages.php?id=<?=$CollageID?>"><?=$Name?></a>
         </h2>
         <div class="linkbox">
