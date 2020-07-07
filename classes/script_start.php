@@ -101,6 +101,24 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
     }
 ));
 
+G::$Twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $config, $key) {
+    return new \Twig\Markup(
+        ($default
+            ? sprintf(
+                '<input id="%s" type="checkbox" disabled="disabled"%s />&nbsp;',
+                "default_$key", (isset($default[$key]) && $default[$key] ? ' checked="checked"' : '')
+            )
+            : ''
+        )
+        . sprintf(
+            '<input type="checkbox" name="%s" id="%s" value="1"%s />&nbsp;<label for="%s">%s</label><br />',
+            "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key,
+            \Permissions::list()[$key] ?? "!unknown($key)!"
+        ),
+        'UTF-8'
+    );
+}));
+
 $Debug->set_flag('Twig constructed');
 
 $Debug->set_flag('start user handling');

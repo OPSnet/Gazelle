@@ -1,38 +1,34 @@
 <?php
 //TODO: Redo HTML
-if (!isset($_REQUEST['userid']) || !is_number($_REQUEST['userid'])) {
+$UserID = (int)$_REQUEST['userid'];
+if ($UserID < 1) {
     error(404);
 }
 
 // Get the user class of the user being edited to ensure that the logged in user has permission
-$DB->query("SELECT p.Level
-            FROM permissions p
-            JOIN users_main AS um ON um.PermissionID = p.ID
-            WHERE um.ID = '" . $_REQUEST['userid'] . "'");
-list($UserClass) = $DB->next_record();
+list($UserClass, $Customs) = $DB->row("
+    SELECT p.Level, um.CustomPermissions
+    FROM permissions p
+    INNER JOIN users_main AS um ON (um.PermissionID = p.ID)
+    WHERE um.ID = ?
+    ", $UserID
+);
 
 if (!check_perms('admin_manage_permissions', $UserClass)) {
     error(403);
 }
 
-include(SERVER_ROOT."/classes/permissions_form.php");
-
 list($UserID, $Username, $PermissionID) = array_values(Users::user_info($_REQUEST['userid']));
-
-$DB->query("
-    SELECT CustomPermissions
-    FROM users_main
-    WHERE ID = '$UserID'");
-
-list($Customs) = $DB->next_record(MYSQLI_NUM, false);
-
 
 $Defaults = Permissions::get_permissions_for_user($UserID, []);
 
 $Delta = [];
-if (isset($_POST['action'])) {
+if (!isset($_POST['action'])) {
+    $Delta = unserialize($Customs);
+} else {
     authorize();
 
+    $PermissionsArray = Permissions::list();
     foreach ($PermissionsArray as $Perm => $Explaination) {
         $Setting = isset($_POST["perm_$Perm"]) ? 1 : 0;
         $Default = isset($Defaults[$Perm]) ? 1 : 0;
@@ -45,35 +41,19 @@ if (isset($_POST['action'])) {
     }
     $Delta['MaxCollages'] = $_POST['maxcollages'];
 
-    $Cache->begin_transaction("user_info_heavy_$UserID");
-    $Cache->update_row(false, ['CustomPermissions' => $Delta]);
-    $Cache->commit_transaction(0);
-    $DB->query("
-        UPDATE users_main
-        SET CustomPermissions = '".db_string(serialize($Delta))."'
-        WHERE ID = '$UserID'");
-} elseif (!empty($Customs)) {
-    $Delta = unserialize($Customs);
+    $Cache->delete_value("user_info_heavy_$UserID");
+    $DB->prepared_query("
+        UPDATE users_main SET
+            CustomPermissions = ?
+        WHERE ID = ?
+        ", serialize($Delta), $UserID
+    );
 }
 
 $Permissions = array_merge($Defaults, $Delta);
 $MaxCollages = $Customs['MaxCollages'] + $Delta['MaxCollages'];
 
-function display_perm($Key, $Title) {
-    global $Defaults, $Permissions;
-    $Perm = "<input id=\"default_$Key\" type=\"checkbox\" disabled=\"disabled\"";
-    if (isset($Defaults[$Key]) && $Defaults[$Key]) {
-        $Perm .= ' checked="checked"';
-    }
-    $Perm .= " /><input type=\"checkbox\" name=\"perm_$Key\" id=\"$Key\" value=\"1\"";
-    if (isset($Permissions[$Key]) && $Permissions[$Key]) {
-        $Perm .= ' checked="checked"';
-    }
-    $Perm .= " /> <label for=\"$Key\">$Title</label><br />";
-    echo "$Perm\n";
-}
-
-View::show_header("$Username &gt; Permissions");
+View::show_header("$Username &rarr; Permissions");
 ?>
 <script type="text/javascript">//<![CDATA[
 function reset() {
@@ -87,9 +67,10 @@ function reset() {
 //]]>
 </script>
 <div class="header">
-    <h2><?=Users::format_username($UserID, false, false, false)?> &gt; Permissions</h2>
+    <h2><?=Users::format_username($UserID, false, false, false)?> &raquo; Permissions</h2>
     <div class="linkbox">
         <a href="#" onclick="reset(); return false;" class="brackets">Defaults</a>
+        <a href="tools.php?action=permissions&id=<?= $PermissionID ?>" class="brackets">Primary permissions</a>
     </div>
 </div>
 <div class="box pad">
@@ -106,8 +87,7 @@ function reset() {
     <input type="hidden" name="action" value="permissions" />
     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
     <input type="hidden" name="id" value="<?=$_REQUEST['userid']?>" />
-<?php
-permissions_form();
-?>
+<?= G::$Twig->render('admin/privilege-list.twig', [ 'default' => $Defaults, 'user' => $Permissions ]); ?>
 </form>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

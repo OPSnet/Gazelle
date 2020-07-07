@@ -71,12 +71,13 @@ View::show_header('Staff Tools');
 <?php
 
 Category('Administration', [
-    Item('Auto-Enable requests',     'tools.php?action=enable_requests', All(['users_mod']) && FEATURE_EMAIL_REENABLE),
-    Item('Database encryption key',  'tools.php?action=dbkey',           All(['admin_site_debug'])),
-    Item('Login watch',              'tools.php?action=login_watch',     All(['admin_login_watch'])),
-    Item('Permissions manager',      'tools.php?action=permissions',     All(['admin_manage_permissions'])),
-    Item('Reports V1',               'reports.php',                      Any(['admin_reports', 'site_moderate_forums'])),
-    Item('Staff page group manager', 'tools.php?action=staff_groups',    All(['admin_manage_permissions'])),
+    Item('Auto-Enable requests',     'tools.php?action=enable_requests',  All(['users_mod']) && FEATURE_EMAIL_REENABLE),
+    Item('Database encryption key',  'tools.php?action=dbkey',            All(['admin_site_debug'])),
+    Item('Login watch',              'tools.php?action=login_watch',      All(['admin_login_watch'])),
+    Item('Permissions manager',      'tools.php?action=permissions',      All(['admin_manage_permissions'])),
+    Item('Privilege matrix',         'tools.php?action=privilege_matrix', All(['admin_manage_permissions'])),
+    Item('Reports V1',               'reports.php',                       Any(['admin_reports', 'site_moderate_forums'])),
+    Item('Staff page group manager', 'tools.php?action=staff_groups',     All(['admin_manage_permissions'])),
 ]);
 
 Category('Announcements', [

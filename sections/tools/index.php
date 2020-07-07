@@ -56,11 +56,11 @@ switch ($_REQUEST['action']) {
         break;
     //Managers
     case 'categories':
-        require(SERVER_ROOT . '/sections/tools/managers/categories_list.php');
+        require(__DIR__ . '/managers/categories_list.php');
         break;
 
     case 'categories_alter':
-        require(SERVER_ROOT . '/sections/tools/managers/categories_alter.php');
+        require(__DIR__ . '/managers/categories_alter.php');
         break;
 
     case 'forum':
@@ -72,11 +72,31 @@ switch ($_REQUEST['action']) {
         break;
 
     case 'irc':
-        require(SERVER_ROOT . '/sections/tools/managers/irc_list.php');
+        require(__DIR__ . '/managers/irc_list.php');
+        break;
+
+    case 'dbkey':
+        require(__DIR__ . '/managers/db_key.php');
+        break;
+
+    case 'navigation_alter':
+        require(__DIR__ . '/managers/navigation_alter.php');
+        break;
+
+    case 'navigation':
+        require(__DIR__ . '/managers/navigation_list.php');
+        break;
+
+    case 'forum_transitions':
+        require(__DIR__ . '/managers/forum_transitions_list.php');
+        break;
+
+    case 'forum_transitions_alter':
+        require(__DIR__ . '/managers/forum_transitions_alter.php');
         break;
 
     case 'irc_alter':
-        require(SERVER_ROOT . '/sections/tools/managers/irc_alter.php');
+        require(__DIR__ . '/managers/irc_alter.php');
         break;
 
     case 'whitelist':
@@ -220,9 +240,6 @@ switch ($_REQUEST['action']) {
     case 'ocelot':
         require(__DIR__ . '/managers/ocelot.php');
         break;
-    case 'ocelot_info':
-        require(__DIR__ . '/data/ocelot_info.php');
-        break;
     case 'tags':
         require(__DIR__ . '/managers/tags.php');
         break;
@@ -246,7 +263,10 @@ switch ($_REQUEST['action']) {
         break;
     case 'permissions':
         // this is retarded and doesn't always alter things but it's better than being in __FILE__
-        require(__DIR__.'/managers/permissions_alter.php');
+        require(__DIR__ . '/managers/permissions_alter.php');
+        break;
+    case 'privilege_matrix':
+        require(__DIR__ . '/managers/privilege_matrix.php');
         break;
     case 'staff_groups_alter':
         require(__DIR__ . '/managers/staff_groups_alter.php');
@@ -260,9 +280,27 @@ switch ($_REQUEST['action']) {
     case 'quick_ban':
         require(__DIR__ . '/managers/quick_ban.php');
         break;
-    //Data
-    case 'registration_log':
-        require(__DIR__ . '/data/registration_log.php');
+    case 'calendar':
+        require(__DIR__ . '/managers/calendar.php');
+        break;
+    case 'get_calendar_event':
+        require(__DIR__ . '/managers/ajax_get_calendar_event.php');
+        break;
+    case 'take_calendar_event':
+        require(__DIR__ . '/managers/ajax_take_calendar_event.php');
+        break;
+    case 'stylesheets':
+        require(__DIR__ . '/managers/stylesheets_list.php');
+        break;
+    case 'mass_pm':
+        require(__DIR__ . '/managers/mass_pm.php');
+        break;
+    case 'take_mass_pm':
+        require(__DIR__ . '/managers/take_mass_pm.php');
+        break;
+
+    case 'rate_limit':
+        require(__DIR__ . '/managers/rate_limit.php');
         break;
 
     case 'prvlog':
@@ -280,6 +318,16 @@ switch ($_REQUEST['action']) {
     case 'donor_rewards':
         require(__DIR__ . '/finances/donor_rewards.php');
         break;
+
+    //Data
+    case 'ocelot_info':
+        require(__DIR__ . '/data/ocelot_info.php');
+        break;
+
+    case 'registration_log':
+        require(__DIR__ . '/data/registration_log.php');
+        break;
+
     case 'upscale_pool':
         require(__DIR__ . '/data/upscale_pool.php');
         break;
@@ -300,10 +348,6 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/data/economic_stats.php');
         break;
 
-    case 'service_stats':
-        require(__DIR__ . '/development/service_stats.php');
-        break;
-
     case 'database_specifics':
         require(__DIR__ . '/data/database_specifics.php');
         break;
@@ -318,24 +362,16 @@ switch ($_REQUEST['action']) {
     //END Data
 
     //Misc
+    case 'service_stats':
+        require(__DIR__ . '/development/service_stats.php');
+        break;
+
     case 'update_geoip':
         require(__DIR__ . '/development/update_geoip.php');
         break;
 
-    case 'dupe_ips':
-        require(__DIR__ . '/misc/dupe_ip.php');
-        break;
-
     case 'clear_cache':
         require(__DIR__ . '/development/clear_cache.php');
-        break;
-
-    case 'create_user':
-        require(__DIR__ . '/misc/create_user.php');
-        break;
-
-    case 'manipulate_tree':
-        require(__DIR__ . '/misc/manipulate_tree.php');
         break;
 
     case 'site_info':
@@ -346,20 +382,8 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/development/site_options.php');
         break;
 
-    case 'analysis':
-        require(__DIR__ . '/misc/analysis.php');
-        break;
-
-    case 'analysis_list':
-        require(__DIR__.'/misc/analysis_list.php');
-        break;
-
     case 'process_info':
         require(__DIR__ . '/development/process_info.php');
-        break;
-
-    case 'rate_limit':
-        require(__DIR__.'/managers/rate_limit.php');
         break;
 
     case 'rerender_gallery':
@@ -388,6 +412,34 @@ switch ($_REQUEST['action']) {
         }
         break;
 
+    case 'analysis':
+        require(__DIR__ . '/misc/analysis.php');
+        break;
+
+    case 'dupe_ips':
+        require(__DIR__ . '/misc/dupe_ip.php');
+        break;
+
+    case 'create_user':
+        require(__DIR__ . '/misc/create_user.php');
+        break;
+
+    case 'manipulate_tree':
+        require(__DIR__ . '/misc/manipulate_tree.php');
+        break;
+
+    case 'analysis_list':
+        require(__DIR__  . '/misc/analysis_list.php');
+        break;
+
+    case 'monthalbum':
+        require(__DIR__ . '/misc/album_of_month.php');
+        break;
+
+    case 'vanityhouse':
+        require(__DIR__ . '/misc/vanity_house.php');
+        break;
+
     case 'public_sandbox':
         require(__DIR__ . '/sandboxes/public_sandbox.php');
         break;
@@ -411,45 +463,7 @@ switch ($_REQUEST['action']) {
     case 'referral_sandbox':
         require(__DIR__ . '/sandboxes/referral_sandbox.php');
         break;
-    case 'calendar':
-        require(__DIR__ . '/managers/calendar.php');
-        break;
-    case 'get_calendar_event':
-        require(__DIR__ . '/managers/ajax_get_calendar_event.php');
-        break;
-    case 'take_calendar_event':
-        require(__DIR__ . '/managers/ajax_take_calendar_event.php');
-        break;
-    case 'stylesheets':
-        require(__DIR__ . '/managers/stylesheets_list.php');
-        break;
-    case 'mass_pm':
-        require(__DIR__ . '/managers/mass_pm.php');
-        break;
-    case 'take_mass_pm':
-        require(__DIR__ . '/managers/take_mass_pm.php');
-        break;
-    case 'monthalbum':
-        require(__DIR__ . '/misc/album_of_month.php');
-        break;
-    case 'vanityhouse':
-        require(__DIR__ . '/misc/vanity_house.php');
-        break;
-    case 'dbkey':
-        require(__DIR__ . '/managers/db_key.php');
-        break;
-    case 'navigation_alter':
-        require(__DIR__ . '/managers/navigation_alter.php');
-        break;
-    case 'navigation':
-        require(__DIR__ . '/managers/navigation_list.php');
-        break;
-    case 'forum_transitions':
-        require(__DIR__ . '/managers/forum_transitions_list.php');
-        break;
-    case 'forum_transitions_alter':
-        require(__DIR__ . '/managers/forum_transitions_alter.php');
-        break;
+
     default:
         require(__DIR__ . '/tools.php');
 }

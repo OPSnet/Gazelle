@@ -1,13 +1,4 @@
 <?php
-function display_perm($key, $title) {
-    global $values;
-    $perm = "<input type=\"checkbox\" name=\"perm_$key\" id=\"$key\" value=\"1\"";
-    if (!empty($values[$key])) {
-        $perm .= ' checked="checked"';
-    }
-    $perm .= " /> <label for=\"$key\">$title</label><br />";
-    echo "$perm\n";
-}
 
 $DB->prepared_query("
     SELECT ID, Name
@@ -25,6 +16,7 @@ echo $Val->GenerateJS('permissionsform');
     <input type="hidden" name="id" value="<?=display_str($_REQUEST['id']); ?>" />
     <div class="linkbox">
         <a href="tools.php?action=permissions" class="brackets">Back to permission list</a>
+        <a href="tools.php?action=privilege_matrix" class="brackets">Privilege Matrix</a>
         <a href="tools.php" class="brackets">Back to tools</a>
     </div>
     <table class="permission_head layout">
@@ -48,11 +40,9 @@ echo $Val->GenerateJS('permissionsform');
             <td class="label">Staff page group</td>
             <td>
                 <select name="staffgroup" id="staffgroup">
-<?php
-foreach ($groups as $group) { ?>
+<?php foreach ($groups as $group) { ?>
                     <option value="<?=$group['ID']?>"<?=$group['ID'] == $staffGroup ? ' selected="selected"' : ''?>><?=$group['Name']?></option>
-<?php
-} ?>
+<?php } ?>
                 </select>
             </td>
         </tr>
@@ -64,9 +54,7 @@ foreach ($groups as $group) { ?>
             <td class="label">Additional forums</td>
             <td><input type="text" size="30" name="forums" value="<?=display_str($forums)?>" /></td>
         </tr>
-<?php
-    if ($secondary) {
-?>
+<?php if ($secondary) { ?>
         <tr>
             <td class="label">Badge</td>
             <td><input type="text" size="30" name="badge" value="<?=$badge?>" /></td>
@@ -77,16 +65,11 @@ foreach ($groups as $group) { ?>
 ?>
         <tr>
             <td class="label">Current users in this class</td>
-            <td><?=number_format($userCount)?></td>
+            <td><?= number_format($userCount) ?>&nbsp;<a href="/user.php?action=search&class[]=<?= $id ?>" class="brackets">View</a></td>
         </tr>
-<?php
-    }
-?>
+<?php } ?>
     </table>
-<?php
-include(__DIR__.'../../../../classes/permissions_form.php');
-permissions_form();
-?>
+<?= G::$Twig->render('admin/privilege-list.twig', [ 'default' => null, 'user' => $values ]); ?>
 </form>
 <?php
 View::show_footer();
