@@ -273,7 +273,7 @@ function placeholders(array $list, $placeholder = '?') {
  * @param string $Str function to detect encoding on.
  * @return true if the string is in UTF-8.
  */
-public static function is_utf8($Str) {
+function is_utf8($Str) {
     return preg_match('%^(?:
         [\x09\x0A\x0D\x20-\x7E]              // ASCII
         | [\xC2-\xDF][\x80-\xBF]             // non-overlong 2-byte
