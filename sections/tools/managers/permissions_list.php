@@ -14,11 +14,12 @@ function confirmDelete(id) {
     <div class="header">
         <div class="linkbox">
             <a href="tools.php?action=permissions&amp;id=new" class="brackets">Create a new permission set</a>
+            <a href="tools.php?action=privilege_matrix" class="brackets">Privilege Matrix</a>
             <a href="tools.php" class="brackets">Back to tools</a>
         </div>
     </div>
 <?php
-$DB->query("
+$DB->prepared_query("
     SELECT
         p.ID,
         p.Name,
@@ -29,9 +30,11 @@ $DB->query("
     LEFT JOIN users_main AS u ON (u.PermissionID = p.ID)
     LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID)
     GROUP BY p.ID
-    ORDER BY p.Secondary ASC, p.Level ASC");
-if ($DB->has_results()) {
-?>
+    ORDER BY p.Secondary ASC, p.Level ASC
+");
+if (!$DB->has_results()) { ?>
+    <h2 align="center">There are no permission classes.</h2>
+<?php } else { ?>
     <table width="100%">
         <tr class="colhead">
             <td>Name</td>
@@ -41,7 +44,7 @@ if ($DB->has_results()) {
         </tr>
 <?php
     while (list($id, $name, $level, $secondary, $userCount) = $DB->next_record()) {
-        $part = $secondary ? 'secclass' : 'class';
+        $part = $secondary ? 'secclass' : 'class[]';
         $link = "user.php?action=search&{$part}={$id}";
 ?>
         <tr>
@@ -59,14 +62,9 @@ if ($DB->has_results()) {
 ?>
             </td>
         </tr>
-<?php
-    } ?>
+<?php } ?>
     </table>
-<?php
-} else { ?>
-    <h2 align="center">There are no permission classes.</h2>
-<?php
-} ?>
+<?php } ?>
 </div>
 <?php
 View::show_footer();

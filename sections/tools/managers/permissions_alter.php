@@ -113,7 +113,7 @@ if ($id) {
                     ", $id
                 );
             }
-            $Cache->deleteMulti(array_merge(['perm_'.$i], $DB->collect(0, false)));
+            $Cache->deleteMulti(array_merge(['perm_'.$id], $DB->collect(0, false)));
         }
         $Cache->deleteMulti(['classes', 'staff']);
     }

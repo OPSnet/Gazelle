@@ -1,0 +1,50 @@
+<style>
+.rot90-container {
+  position: relative;
+  display: inline-block;
+  height: 120px;
+  min-width: 20px;
+}
+.rot90 {
+  white-space: nowrap;
+  text-align: left;
+  overflow: hidden;
+  height: 20px;
+  line-height: 20px;
+  width: 120px;
+  position: absolute;
+  bottom: -10px;
+  transform: rotate(-90deg);
+  transform-origin: top left;
+}
+</style>
+<table width="100%">
+    <tr class="colhead">
+        <td rowspan="2" style="vertical-align: bottom">Primary Class {{ star|raw }} <br /><br />Privilege</td>
+{% for c in class_list %}
+        <td style="padding: 0;"><div class="rot90-container"><div class="rot90">
+            <a href="tools.php?action=permissions&id={{ c.id }}">{{ c.name }}</a>
+        </div></div></td>
+{% endfor %}
+    </tr>
+    <tr class="colhead">
+{% for c in class_list %}
+        <td style="padding: 0; text-align: center; font-weight: normal;">{{ c.primary ? star|raw : '' }}</td>
+{% endfor %}
+    </tr>
+{% for p in privilege %}
+    <tr>
+        <td{{ p.orphan ? ' title="This is an orphaned privilege" style="color: orangered; font-weight: bold;"' : '' }} title="{{ p.description }}">{{ p.name }}</td>
+{% for c in class_list %}
+        <td style="text-align: center;" title="{{ c.name }} {{ c.id in p.can ? 'can' : 'cannot' }} {{ p.description }}">
+            <a href="tools.php?action=permissions&id={{ c.id }}">{{ c.id in p.can ? tick : '&middot;' }}</a></td>
+{% endfor %}
+    </tr>
+{% endfor %}
+</table>
+<br />
+
+<div class="box pad">Any privileges marked <span style="color: orangered">in
+red</span> are orphaned privileges that were found in the database
+(in the <tt>permissions.Values</tt> column) but no longer connected to anything
+in the code. They should be cleaned out by hand.</div>
