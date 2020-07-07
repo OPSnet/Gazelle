@@ -1,5 +1,7 @@
 <?php
 class Permissions {
+    const LEVEL_CAP = 1000; // TODO: refactor as SELECT max(Level) FROM permissions
+
     /**
      * Check to see if a user has the permission to perform an action
      * This is called by check_perms in util.php, for convenience.
@@ -16,6 +18,16 @@ class Permissions {
             && (G::$LoggedUser['Class'] >= $MinClass
                 || G::$LoggedUser['EffectiveClass'] >= $MinClass
                 || $Override);
+    }
+
+    /**
+     * Some permission checks use this hard level cap to enable/disable
+     * functionality.
+     *
+     * @return int
+     */
+    public static function get_level_cap() {
+        return self::LEVEL_CAP;
     }
 
     /**
@@ -112,6 +124,6 @@ class Permissions {
     }
 
     public static function has_override($Level) {
-        return $Level >= 1000;
+        return $Level >= self::get_level_cap();
     }
 }
