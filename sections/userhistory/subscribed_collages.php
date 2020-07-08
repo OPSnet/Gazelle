@@ -6,22 +6,22 @@ if (!check_perms('site_collages_subscribe')) {
     error(403);
 }
 
-View::show_header('Subscribed collages','browse,collage');
-
 $ShowAll = !empty($_GET['showall']);
 
-if (!$ShowAll) {
+if ($ShowAll) {
     $sql = "
         SELECT
             c.ID,
             c.Name,
             c.NumTorrents,
+            CASE WHEN ca.CollageID IS NULL THEN 'torrent' ELSE 'artist' END as collageType,
             s.LastVisit
         FROM collages AS c
-            JOIN users_collage_subs AS s ON s.CollageID = c.ID
-            JOIN collages_torrents AS ct ON ct.CollageID = c.ID
-        WHERE s.UserID = $LoggedUser[ID] AND c.Deleted = '0'
-            AND ct.AddedOn > s.LastVisit
+        INNER JOIN users_collage_subs AS s ON (s.CollageID = c.ID)
+        LEFT JOIN collages_artists AS ca ON (ca.CollageID = c.ID)
+        LEFT JOIN collages_torrents AS ct ON (ct.CollageID = c.ID)
+        WHERE c.Deleted = '0'
+            AND s.UserID = ?
         GROUP BY c.ID";
 } else {
     $sql = "
@@ -29,42 +29,40 @@ if (!$ShowAll) {
             c.ID,
             c.Name,
             c.NumTorrents,
+            CASE WHEN ca.CollageID IS NULL THEN 'torrent' ELSE 'artist' END as collageType,
             s.LastVisit
         FROM collages AS c
-            JOIN users_collage_subs AS s ON s.CollageID = c.ID
-            LEFT JOIN collages_torrents AS ct ON ct.CollageID = c.ID
-        WHERE s.UserID = $LoggedUser[ID] AND c.Deleted = '0'
+        LEFT JOIN users_collage_subs AS s ON (s.CollageID = c.ID)
+        LEFT JOIN collages_artists AS ca ON (ca.CollageID = c.ID)
+        LEFT JOIN collages_torrents AS ct ON (ct.CollageID = c.ID)
+        WHERE c.Deleted = '0'
+            AND coalesce(ca.AddedOn, ct.AddedOn) > s.LastVisit
+            AND s.UserID = ?
         GROUP BY c.ID";
 }
 
-$DB->query($sql);
+$DB->prepared_query($sql, $LoggedUser['ID']);
 $NumResults = $DB->record_count();
 $CollageSubs = $DB->to_array();
+View::show_header('Subscribed collages','browse,collage');
+
 ?>
 <div class="thin">
     <div class="header">
         <h2>Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
 
         <div class="linkbox">
-<?php
-if ($ShowAll) {
-?>
+<?php if ($ShowAll) { ?>
             <br /><br />
             <a href="userhistory.php?action=subscribed_collages&amp;showall=0" class="brackets">Only display collages with new additions</a>&nbsp;&nbsp;&nbsp;
-<?php
-} else {
-?>
+<?php } else { ?>
             <br /><br />
             <a href="userhistory.php?action=subscribed_collages&amp;showall=1" class="brackets">Show all subscribed collages</a>&nbsp;&nbsp;&nbsp;
-<?php
-}
-?>
+<?php } ?>
             <a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
         </div>
     </div>
-<?php
-if (!$NumResults) {
-?>
+<?php if (!$NumResults) { ?>
     <div class="center">
         No subscribed collages<?=($ShowAll ? '' : ' with new additions')?>
     </div>
@@ -74,20 +72,34 @@ if (!$NumResults) {
     $ActionTitle = 'Hide';
     $ActionURL = 'hide';
     $ShowGroups = 0;
+    $artistCollage = [];
 
     foreach ($CollageSubs as $Collage) {
-        unset($TorrentTable);
+        $TorrentTable = '';
 
-        list($CollageID, $CollageName, $CollageSize, $LastVisit) = $Collage;
-        $RS = $DB->query("
-            SELECT GroupID
-            FROM collages_torrents
-            WHERE CollageID = $CollageID
-                AND AddedOn > '" . db_string($LastVisit) . "'
-            ORDER BY AddedOn");
-        $NewTorrentCount = $DB->record_count();
+        list($CollageID, $CollageName, $CollageSize, $type, $LastVisit) = $Collage;
+        if ($type == 'artist') {
+            $sql = "SELECT ArtistID AS ID
+                FROM collages_artists
+                WHERE CollageID = ?
+                    AND AddedOn > ?
+                ORDER BY AddedOn";
+        } else {
+            $sql = "SELECT GroupID AS ID
+                FROM collages_torrents
+                WHERE CollageID = ?
+                    AND AddedOn > ?
+                ORDER BY AddedOn";
+        }
+        $DB->prepared_query($sql, $CollageID, $LastVisit);
+        $NewCount = $DB->record_count();
 
-        $GroupIDs = $DB->collect('GroupID', false);
+        if ($type == 'artist') {
+            $artistCollage[] = [$CollageID, $CollageName, $NewCount, $DB->collect('ID', false)];
+            continue;
+        }
+
+        $GroupIDs = $DB->collect('ID', false);
         if (count($GroupIDs) > 0) {
             $TorrentList = Torrents::get_groups($GroupIDs);
         } else {
@@ -212,7 +224,7 @@ if (!$NumResults) {
         <td class="number_column"><?=number_format($Torrent['Leechers'])?></td>
     </tr>
 <?php
-                }
+                } /* foreach ($Torrents) */
             } else {
                 // Viewing a type that does not require grouping
                 $TorrentID = key($Torrents);
@@ -260,40 +272,65 @@ if (!$NumResults) {
 <?php
             }
             $TorrentTable .= ob_get_clean();
-        } ?>
-    <!-- I hate that proton is making me do it like this -->
-    <!--<div class="head colhead_dark" style="margin-top: 8px;">-->
-    <table style="margin-top: 8px;" class="subscribed_collages_table">
-        <tr class="colhead_dark">
-            <td>
-                <span style="float: left;">
-                    <strong><a href="collage.php?id=<?=$CollageID?>"><?=$CollageName?></a></strong> (<?=$NewTorrentCount?> new torrent<?=($NewTorrentCount == 1 ? '' : 's')?>)
-                </span>&nbsp;
-                <span style="float: right;">
-                    <a href="#" onclick="$('#discog_table_<?=$CollageID?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;collageid=<?=$CollageID?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?=$CollageID?>); return false;" id="subscribelink<?=$CollageID?>" class="brackets">Unsubscribe</a>
-                </span>
-            </td>
-        </tr>
-    </table>
-    <!--</div>-->
-    <table class="torrent_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?=$CollageID?>">
-        <tr class="colhead">
-            <td width="1%"><!-- expand/collapse --></td>
-            <td class="m_th_left" width="70%"><strong>Torrents</strong></td>
-            <td>Size</td>
-            <td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
-            <td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
-            <td class="sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
-        </tr>
+        }
+    /* I hate that proton is making me do it like this */
+?>
+<table style="margin-top: 8px;" class="subscribed_collages_table">
+    <tr class="colhead_dark">
+        <td>
+            <span style="float: left;">
+                <strong><a href="collage.php?id=<?=$CollageID?>"><?=$CollageName?></a></strong> (<?=$NewCount?> new torrent<?= plural($NewCount) ?>)
+            </span>&nbsp;
+            <span style="float: right;">
+                <a href="#" onclick="$('#discog_table_<?=$CollageID?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;collageid=<?=$CollageID?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?=$CollageID?>); return false;" id="subscribelink<?=$CollageID?>" class="brackets">Unsubscribe</a>
+            </span>
+        </td>
+    </tr>
+</table>
+<!--</div>-->
+<table class="torrent_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?=$CollageID?>">
+    <tr class="colhead">
+        <td width="1%"><!-- expand/collapse --></td>
+        <td class="m_th_left" width="70%"><strong>Torrents</strong></td>
+        <td>Size</td>
+        <td class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
+        <td class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
+        <td class="sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName'] ?>/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
+    </tr>
 <?=$TorrentTable?>
-    </table>
+</table>
 <?php
-    } // foreach ()
+    } // foreach ($CollageSubs)
+    if ($artistCollage) {
+?>
+        <h2>Subscribed artist collages<?=($ShowAll ? '' : ' with new additions')?></h2>
+<?php   foreach ($artistCollage as $c) {
+            list($id, $name, $new, $artistIds) = $c;
+?>
+            <div class="box pad">
+                <span style="float: left;"><strong><a href="collage.php?id=<?= $id ?>"><?= $name ?></a></strong> (<?= $new ?> new artist<?= plural($new) ?>)</span>
+                <span style="float: right;">
+                    <a href="#" onclick="$('#discog_table_<?= $id ?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets"><?=($ShowAll ? 'Show' : 'Hide')?></a>&nbsp;&nbsp;&nbsp;<a href="userhistory.php?action=catchup_collages&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;collageid=<?= $id ?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;<a href="#" onclick="CollageSubscribe(<?= $id ?>); return false;" id="subscribelink<?= $id ?>" class="brackets">Unsubscribe</a>
+                </span>
+            </div>
+            <table class="artist_table<?=$ShowAll ? ' hidden' : ''?> m_table" id="discog_table_<?= $id ?>">
+<?php
+            foreach ($artistIds as $artistId) {
+                $artist = new Gazelle\Artist($artistId);
+?>
+                <tr>
+                <td>
+                    <?= $artist->url() ?>
+                </td>
+                </tr>
+<?php       } ?>
+            </table>
+<?php
+        }
+    }
 } // else -- if (empty($NumResults))
 ?>
 </div>
 <?php
 
 View::show_footer();
-
-?>

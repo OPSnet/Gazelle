@@ -610,7 +610,7 @@ class Donation extends \Gazelle\Base {
             'amount' => $amount,
             'cc'     => $Currency,
             'points' => $ReceivedRank,
-            's'      => $ReceivedRank == 1 ? '' : 's',
+            's'      => plural($ReceivedRank),
             'rank'   => $CurrentRank,
             'staffpm_url' => site_url() . 'staffpm.php',
         ]);

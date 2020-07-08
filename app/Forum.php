@@ -540,7 +540,7 @@ class Forum extends Base {
         if ($answers) {
             unset($Answers[$item]);
             $this->savePollAnswers($threadId, $answers);
-            $this->prepared_query("
+            $this->db->prepared_query("
                 DELETE FROM forums_polls_votes
                 WHERE Vote = ?
                     AND TopicID = ?

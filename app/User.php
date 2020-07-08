@@ -89,7 +89,7 @@ class User extends Base {
         );
     }
 
-    public function idFromUsername(string $username) {
+    public function idFromUsername(string $username): int {
         return $this->db->scalar("
             SELECT ID
             FROM users_main
@@ -123,7 +123,7 @@ class User extends Base {
             ", $this->id
         );
         $keyStem = 'session_' . $this->id . '_';
-        while (list($id) = $this->db->next_record(MYSQLI_NUM)) {
+        while ([$id] = $this->db->next_record(MYSQLI_NUM)) {
             $this->cache->delete_value($keyStem . $id);
         }
         $this->cache->delete_value("users_sessions_" . $this->id);
@@ -148,7 +148,7 @@ class User extends Base {
     }
 
     public function mergeLeechStats(string $username, string $staffname) {
-        list($mergeId, $up, $down) = $this->db->row("
+        [$mergeId, $up, $down] = $this->db->row("
             SELECT um.ID, uls.Uploaded, uls.Downloaded
             FROM users_main um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
@@ -245,6 +245,26 @@ class User extends Base {
         return $this->db->affected_rows() == 1;
     }
 
+    public function updateLastReadBlog(int $blogId) {
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                LastReadBlog = ?
+            WHERE UserID = ?
+            ", $blogId, $this->id
+        );
+        $this->cache->delete_value('user_info_heavy_' . $this->id);
+    }
+
+    public function updateLastReadNews(int $newsId) {
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                LastReadNews = ?
+            WHERE UserID = ?
+            ", $newsId, $this->id
+        );
+        $this->cache->delete_value('user_info_heavy_' . $this->id);
+    }
+
     public function resetRatioWatch() {
         $this->db->prepared_query("
             UPDATE users_info SET
@@ -255,6 +275,41 @@ class User extends Base {
             ", $this->id
         );
         return $this->db->affected_rows() == 1;
+    }
+
+    public function clearQuotes() {
+        $this->db->prepared_query("
+            UPDATE users_notify_quoted SET
+                UnRead = '0'
+            WHERE UserID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value('notify_quoted_' . $this->id);
+    }
+
+    public function unreadTorrentNotifications(): int {
+        if (($new = $this->cache->get_value('notifications_new_' . $this->id)) === false) {
+            $new = $this->db->scalar("
+                SELECT count(*)
+                FROM users_notify_torrents
+                WHERE UnRead = '1'
+                    AND UserID = ?
+                ", $this->id
+            );
+            $this->cache->cache_value('notifications_new_' . $this->id, $new, 0);
+        }
+        return $new;
+    }
+
+    public function clearTorrentNotifications() {
+        $this->db->prepared_query("
+            UPDATE users_notify_torrents
+            SET Unread = '0'
+            WHERE UnRead = '1'
+                AND UserID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value('notifications_new_' . $this->id);
     }
 
     public function resetIpHistory() {
@@ -341,8 +396,45 @@ class User extends Base {
         );
     }
 
-    public function supportCount(int $newClassId, int $levelClassId) {
-        return (int)$this->db->scalar("
+    public function inboxUnreadCount(): int {
+        if (($unread = $this->cache->get_value('inbox_new_' . $this->id)) === false) {
+            $unread = $this->db->scalar("
+                SELECT count(*)
+                FROM pm_conversations_users
+                WHERE UnRead    = '1'
+                    AND InInbox = '1'
+                    AND UserID  = ?
+                ", $this->id
+            );
+            $this->cache->cache_value('inbox_new_' . $this->id, $unread, 0);
+        }
+        return $unread;
+    }
+
+    public function markAllReadInbox() {
+        $this->db->prepared_query("
+            UPDATE pm_conversations_users SET
+                Unread = '0'
+            WHERE Unread = '1'
+                AND UserID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value('inbox_new_' . $this->id);
+    }
+
+    public function markAllReadStaffPM() {
+        $this->db->prepared_query("
+            UPDATE staff_pm_conversations SET
+                Unread = false
+            WHERE Unread = true
+                AND UserID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value('staff_pm_new_' . $this->id);
+    }
+
+    public function supportCount(int $newClassId, int $levelClassId): int {
+        return $this->db->scalar("
             SELECT count(DISTINCT DisplayStaff)
             FROM permissions
             WHERE ID IN (?, ?)
@@ -366,7 +458,7 @@ class User extends Base {
         // die("flag=$flag, found=$found");
         $toggled = false;
         if (!$flag && $found) {
-            list($attrId) = $this->db->next_record();
+            [$attrId] = $this->db->next_record();
             $this->db->prepared_query('
                 DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
                 ', $this->id, $attrId
@@ -459,16 +551,16 @@ class User extends Base {
         return stripos($list['Artists'], $name) !== false;
     }
 
-    protected function enabledState() {
+    protected function enabledState(): int {
         if ($this->forceCacheFlush || ($enabled = $this->cache->get_value('enabled_' . $this->id)) === false) {
             $this->db->prepared_query("
                 SELECT Enabled FROM users_main WHERE ID = ?
                 ", $this->id()
             );
-            list($enabled) = $this->db->next_record(MYSQLI_NUM);
+            [$enabled] = $this->db->next_record(MYSQLI_NUM);
             $this->cache->cache_value('enabled_' . $this->id, (int)$enabled, 86400 * 3);
         }
-        return (int)$enabled;
+        return $enabled;
     }
 
     public function isUnconfirmed() { return $this->enabledState() == 0; }
@@ -506,6 +598,37 @@ class User extends Base {
         return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
+    public function collageUnreadCount(): int {
+        if (($new = $this->cache->get_value('collage_subs_user_new_' . $this->id)) === false) {
+            $new = $this->db->scalar("
+                 SELECT count(*) FROM (
+                    SELECT s.LastVisit
+                    FROM users_collage_subs s
+                    INNER JOIN collages c ON (c.ID = s.CollageID)
+                    LEFT JOIN collages_torrents ct ON (ct.CollageID = s.CollageID)
+                    LEFT JOIN collages_artists ca ON (ca.CollageID = s.CollageID)
+                    WHERE c.Deleted = '0'
+                        AND s.UserID = ?
+                    GROUP BY s.CollageID
+                    HAVING max(coalesce(ct.AddedOn, ca.AddedOn)) > s.LastVisit
+                ) unread
+                ", $this->id
+            );
+            $this->cache->cache_value('collage_subs_user_new_' . $this->id, $new, 0);
+        }
+        return $new;
+    }
+
+    public function clearCollages() {
+        $this->db->prepared_query("
+            UPDATE users_collage_subs SET
+                LastVisit = now()
+            WHERE UserID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value('collage_subs_user_new_' . $this->id);
+    }
+
     public function emailHistory() {
         $this->db->prepared_query('
             SELECT DISTINCT Email, IP
@@ -537,7 +660,7 @@ class User extends Base {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            list($filled, $bounty) = $this->db->next_record(MYSQLI_NUM);
+            [$filled, $bounty] = $this->db->next_record(MYSQLI_NUM);
         } else {
             $filled = $bounty = 0;
         }
@@ -552,7 +675,7 @@ class User extends Base {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            list($voted, $bounty) = $this->db->next_record(MYSQLI_NUM);
+            [$voted, $bounty] = $this->db->next_record(MYSQLI_NUM);
         } else {
             $voted = $bounty = 0;
         }
@@ -568,7 +691,7 @@ class User extends Base {
             ', $this->id
         );
         if ($this->db->has_results()) {
-            list($created, $bounty) = $this->db->next_record(MYSQLI_NUM);
+            [$created, $bounty] = $this->db->next_record(MYSQLI_NUM);
         } else {
             $created = $bounty = 0;
         }
@@ -589,7 +712,7 @@ class User extends Base {
         $cacheKey .= '.' . $this->id;
         if ($this->forceCacheFlush || ($value = $this->cache->get_value($cacheKey)) === false) {
             $this->db->prepared_query($query, $this->id);
-            list($value) = $this->db->next_record(MYSQLI_NUM);
+            [$value] = $this->db->next_record(MYSQLI_NUM);
             $this->cache->cache_value($cacheKey, $value, 3600);
         }
         return $value;
@@ -603,7 +726,7 @@ class User extends Base {
         ');
     }
 
-    public function uploadCount() {
+    public function uploadCount(): int {
         return $this->getSingleValue('user-upload-count', '
             SELECT count(*)
             FROM torrents
@@ -611,7 +734,7 @@ class User extends Base {
         ');
     }
 
-    public function leechingCounts() {
+    public function leechingCounts(): int {
         return $this->getSingleValue('user-leeching-count', '
             SELECT count(*)
             FROM xbt_files_users AS x
@@ -621,7 +744,7 @@ class User extends Base {
         ');
     }
 
-    public function seedingCounts() {
+    public function seedingCounts(): int {
         return $this->getSingleValue('user-seeding-count', '
             SELECT count(*)
             FROM xbt_files_users AS x
@@ -631,7 +754,7 @@ class User extends Base {
         ');
     }
 
-    public function artistsAdded() {
+    public function artistsAdded(): int {
         return $this->getSingleValue('user-artists-count', '
             SELECT count(*)
             FROM torrents_artists
@@ -647,7 +770,7 @@ class User extends Base {
         ');
     }
 
-    public function passwordCount() {
+    public function passwordCount(): int {
         return $this->getSingleValue('user-pw-count', '
             SELECT count(*)
             FROM users_history_passwords
@@ -655,7 +778,7 @@ class User extends Base {
         ');
     }
 
-    public function passkeyCount() {
+    public function passkeyCount(): int {
         return $this->getSingleValue('user-passkey-count', '
             SELECT count(*)
             FROM users_history_passkeys
@@ -663,7 +786,7 @@ class User extends Base {
         ');
     }
 
-    public function siteIPCount() {
+    public function siteIPCount(): int {
         return $this->getSingleValue('user-siteip-count', '
             SELECT count(DISTINCT IP)
             FROM users_history_ips
@@ -671,7 +794,7 @@ class User extends Base {
         ');
     }
 
-    public function trackerIPCount() {
+    public function trackerIPCount(): int {
         return $this->getSingleValue('user-trackip-count', "
             SELECT count(DISTINCT IP)
             FROM xbt_snatched
@@ -679,7 +802,7 @@ class User extends Base {
         ");
     }
 
-    public function emailCount() {
+    public function emailCount(): int {
         return $this->getSingleValue('user-email-count', '
             SELECT count(*)
             FROM users_history_emails
@@ -697,7 +820,7 @@ class User extends Base {
         );
     }
 
-    public function invitedCount() {
+    public function invitedCount(): int {
         return $this->getSingleValue('user-invites', '
             SELECT count(*)
             FROM users_info
@@ -705,7 +828,7 @@ class User extends Base {
         ');
     }
 
-    public function pendingInviteCount() {
+    public function pendingInviteCount(): int {
         return $this->getSingleValue('user-inv-pending', '
             SELECT count(*)
             FROM invites
@@ -733,7 +856,7 @@ class User extends Base {
         ');
     }
 
-    public function artistCommentCount() {
+    public function artistCommentCount(): int {
         return $this->getSingleValue('user-comment-artist', "
             SELECT count(*)
             FROM comments
@@ -741,7 +864,7 @@ class User extends Base {
         ");
     }
 
-    public function collageCommentCount() {
+    public function collageCommentCount(): int {
         return $this->getSingleValue('user-comment-collage', "
             SELECT count(*)
             FROM comments
@@ -749,7 +872,7 @@ class User extends Base {
         ");
     }
 
-    public function requestCommentCount() {
+    public function requestCommentCount(): int {
         return $this->getSingleValue('user-comment-request', "
             SELECT count(*)
             FROM comments
@@ -757,7 +880,7 @@ class User extends Base {
         ");
     }
 
-    public function torrentCommentCount() {
+    public function torrentCommentCount(): int {
         return $this->getSingleValue('user-comment-torrent', "
             SELECT count(*)
             FROM comments
@@ -773,7 +896,7 @@ class User extends Base {
         ');
     }
 
-    public function collagesCreated() {
+    public function collagesCreated(): int {
         return $this->getSingleValue('user-collage-create', "
             SELECT count(*)
             FROM collages
@@ -781,7 +904,7 @@ class User extends Base {
         ");
     }
 
-    public function collagesContributed() {
+    public function collagesContributed(): int {
         return $this->getSingleValue('user-collage-contrib', "
             SELECT count(DISTINCT ct.CollageID)
             FROM collages_torrents AS ct
@@ -802,8 +925,8 @@ class User extends Base {
         );
         $result = $this->db->to_array(0, MYSQLI_NUM, false);
         return [
-            'seeding' => (isset($result['seed']) ? $result['seed'][1] : 0),
-            'leeching' => (isset($result['leech']) ? $result['leech'][1] : 0)
+            'seeding' => (isset($result['seed']) ? (int)$result['seed'][1] : 0),
+            'leeching' => (isset($result['leech']) ? (int)$result['leech'][1] : 0)
         ];
     }
 
@@ -815,8 +938,8 @@ class User extends Base {
             WHERE x.uid = ?
             ', $this->id
         );
-        list($total, $unique) = $this->db->next_record(MYSQLI_NUM, false);
-        return [$total, $unique];
+        [$total, $unique] = $this->db->next_record(MYSQLI_NUM, false);
+        return [(int)$total, (int)$unique];
     }
 
     public function recentSnatches(int $limit = 5) {
@@ -911,12 +1034,12 @@ class User extends Base {
             WHERE ud.UserID = ?
             ', $this->id
         );
-        list($total, $unique) = $this->db->next_record(MYSQLI_NUM, false);
-        return [$total, $unique];
+        [$total, $unique] = $this->db->next_record(MYSQLI_NUM, false);
+        return [(int)$total, (int)$unique];
     }
 
     public function torrentDownloadCount($torrentId) {
-        $this->db->prepared_query('
+        return (int)$this->db->scalar('
             SELECT count(*)
             FROM users_downloads ud
             INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
@@ -924,12 +1047,10 @@ class User extends Base {
                 AND ud.TorrentID = ?
             ', $this->id, $torrentId
         );
-        list($total) = $this->db->next_record(MYSQLI_NUM, false);
-        return $total;
     }
 
     public function torrentRecentDownloadCount() {
-        $this->db->prepared_query('
+        return (int)$this->db->scalar('
             SELECT count(*)
             FROM users_downloads ud
             INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
@@ -937,8 +1058,6 @@ class User extends Base {
                 AND ud.UserID = ?
             ', $this->id
         );
-        list($total) = $this->db->next_record(MYSQLI_NUM, false);
-        return $total;
     }
 
     public function downloadSnatchFactor() {
@@ -968,7 +1087,7 @@ class User extends Base {
                 ", $this->id, $this->id, $this->id
             );
             $stats = ['download' => 0, 'snatch' => 0];
-            while (list($key, $count) = $this->db->next_record(MYSQLI_ASSOC)) {
+            while ([$key, $count] = $this->db->next_record(MYSQLI_ASSOC)) {
                 $stats[$key] = $count;
             }
             $stats = $this->cache->cache_value('user_rlim_' . $this->id, $stats, 3600);
@@ -1002,7 +1121,7 @@ class User extends Base {
         $criteria = end($demotion);
 
         $stats = \Users::user_stats($this->id);
-        list($votes, $bounty) = $this->requestsVotes();
+        [$votes, $bounty] = $this->requestsVotes();
         $effectiveUpload = $stats['BytesUploaded'] + $bounty;
         if ($criteria) {
             $ratio = $criteria['Ratio'];
@@ -1023,7 +1142,7 @@ class User extends Base {
         $stats = \Users::user_stats($this->id);
         $downloaded = (int)$stats['BytesDownloaded'];
         $uploaded = (int)$stats['BytesUploaded'];
-        list($votes, $bounty) = $this->requestsVotes();
+        [$votes, $bounty] = $this->requestsVotes();
         $progress = [
             'Class' => \Users::make_class_string($criteria['To']),
             'Requirements' => [

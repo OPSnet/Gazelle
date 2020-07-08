@@ -710,7 +710,7 @@ if (count($Collages) > 0) {
 ?>
         <table class="collage_table" id="collages">
             <tr class="colhead">
-                <td width="85%"><a href="#">&uarr;</a>&nbsp;This album is in <?=number_format(count($Collages))?> collage<?=((count($Collages) > 1) ? 's' : '')?><?=$SeeAll?></td>
+                <td width="85%"><a href="#">&uarr;</a>&nbsp;This album is in <?=number_format(count($Collages))?> collage<?= plural(count($Collages)) ?><?=$SeeAll?></td>
                 <td># torrents</td>
             </tr>
 <?php
@@ -764,7 +764,7 @@ if (count($PersonalCollages) > 0) {
 ?>
         <table class="collage_table" id="personal_collages">
             <tr class="colhead">
-                <td width="85%"><a href="#">&uarr;</a>&nbsp;This album is in <?=number_format(count($PersonalCollages))?> personal collage<?=((count($PersonalCollages) > 1) ? 's' : '')?><?=$SeeAll?></td>
+                <td width="85%"><a href="#">&uarr;</a>&nbsp;This album is in <?=number_format(count($PersonalCollages))?> personal collage<?= plural(count($PersonalCollages)) ?><?=$SeeAll?></td>
                 <td># torrents</td>
             </tr>
 <?php

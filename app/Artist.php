@@ -404,6 +404,12 @@ class Artist extends Base {
         return $this->similar;
     }
 
+    public function url() {
+        return sprintf('<a href="artist.php?id=%d">%s</a>',
+            $this->id, $this->name
+        );
+    }
+
     public function setDiscogsRelation(int $discogsId, int $userId) {
         if ($this->discogsId == $discogsId) {
             // don't blindly set the Discogs ID to something else if it's already set, or doesn't change

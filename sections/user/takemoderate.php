@@ -228,14 +228,14 @@ if ($editRatio) {
         $leechArgs[] = $Uploaded;
         $EditSummary[] = "uploaded changed from " . Format::get_size($Cur['Uploaded'])
             . ' to ' . Format::get_size($Uploaded)
-            . " (delta " . Format::get_size($Cur['Uploaded'] - $Uploaded) . ")";
+            . " (delta " . Format::get_size($Uploaded = $Cur['Uploaded']) . ")";
     }
     if ($Downloaded != $Cur['Downloaded'] && $Downloaded != $_POST['OldDownloaded']) {
         $leechSet[] = 'Downloaded = ?';
         $leechArgs[] = $Downloaded;
         $EditSummary[] = "downloaded changed from " . Format::get_size($Cur['Downloaded'])
             . ' to ' . Format::get_size($Downloaded)
-            . " (delta " . Format::get_size($Cur['Downloaded'] - $Downloaded) . ")";
+            . " (delta " . Format::get_size($Downloaded - $Cur['Downloaded']) . ")";
     }
 }
 
@@ -308,7 +308,7 @@ if (check_perms('users_warn')) {
     ) {
         if (is_null($Cur['Warned'])) {
             $weeksChange = $WarnLength;
-            $duration = 'week' . ($WarnLength === 1 ? '' : 's');
+            $duration = 'week' . plural($WarnLength);
             $message = [
                 'summary' => "warned for $WarnLength $duration",
                 'subject' => 'You have received a warning',
@@ -318,7 +318,7 @@ if (check_perms('users_warn')) {
         } else {
             $weeksChange = ($ExtendWarning != '---') ? $ExtendWarning : -$ReduceWarning;
             $nrWeeks = abs($weeksChange);
-            $duration = 'week' . ($nrWeeks === 1 ? '' : 's');
+            $duration = 'week' . plural($nrWeeks);
             $action = $weeksChange > 0 ? 'extended' : 'reduced';
             $message = [
                 'summary' => "warning $action $nrWeeks $duration",

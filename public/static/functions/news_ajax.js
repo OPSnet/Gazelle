@@ -15,17 +15,18 @@ function news_ajax(event, count, offset, privileged, authkey) {
         offset: offset
     })
     .done(function(data) {
-        var response = $.parseJSON(data.response);
-        if (typeof data == 'undefined' || data == null || data.status != "success" || typeof response == 'undefined' || response == null) {
+        var r = data.response;
+        if (!('items' in r)) {
             console.log("ERR ajax_news(" + (new Error).lineNumber + "): Unknown data or failure returned.");
             // Return to original paremeters, no news were added.
             $(event.target).attr('onclick', 'news_ajax(event, ' + count + ', ' + offset + ', ' + privileged + ', ' + authkey + '); return false;');
         } else {
-            if (response.length == 0) {
+            var i = r['items'];
+            if (i.length == 0) {
                 $(event.target).parent().remove();
             } else {
                 var targetClass = $('#more_news').prev().attr('class');
-                $.each(response, function() {
+                $.each(i, function() {
                     // Create a new element, insert the news.
                     $('#more_news').before($('<div/>', {
                         id: 'news' + this[0],

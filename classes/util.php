@@ -54,6 +54,27 @@ function assert_numbers(&$Base, $Keys, $Error = 0) {
 }
 
 /**
+ * Awful anglo-centric hack for handling plurals ;-)
+ *
+ * @param $n the number
+ * @return '' if 1, otherwise 's'
+ */
+function plural(int $n) {
+    return $n == 1 ? '' : 's';
+}
+
+/**
+ * Awful anglo-centric hack for handling articles
+ *
+ * @param $n the number
+ * @param $article string to use if you don't want the default 'a'
+ * @return 'a' (or $article) if $n == 1, otherwise $n
+ */
+function article(int $n, $article = 'a') {
+    return $n == 1 ? $article : $n;
+}
+
+/**
  * Return true, false or null, depending on the input value's "truthiness" or "non-truthiness"
  *
  * @param $Value the input value to check for truthiness

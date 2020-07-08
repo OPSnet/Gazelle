@@ -262,9 +262,8 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
             <ul class="stats nobullet">
 <?php
         if ($FL_OTHER_tokens > 0) {
-            $s = $FL_OTHER_tokens > 1 ? 's' : '';
 ?>
-            <li>You gave <?= $FL_OTHER_tokens ?> token<?= $s ?> to <?= $Username ?>. Your generosity is most appreciated!</li>
+            <li>You gave <?= $FL_OTHER_tokens ?> token<?= plural($FL_OTHER_tokens) ?> to <?= $Username ?>. Your generosity is most appreciated!</li>
 <?php
         } else {
 ?>
@@ -405,7 +404,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
                     $percent = (time() - strtotime($current)) / $goal;
                     $current = Gazelle\Util\Time::timeDiff($current, 2, true, false, false, true);
                     $goal = $goal / 7 / 24 / 60 / 60;
-                    $goal = "$goal week" . ($goal > 1 ? 's' : '');
+                    $goal = "$goal week" . plural($goal);
                     break;
                 case 'float':
                     if ($current === '∞') {

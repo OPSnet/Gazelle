@@ -1,38 +1,12 @@
 <?php
 Text::$TOC = true;
 
-$NewsCount = 5;
-if (!$News = $Cache->get_value('news')) {
-    $DB->prepared_query('
-        SELECT
-            ID,
-            Title,
-            Body,
-            Time
-        FROM news
-        ORDER BY Time DESC
-        LIMIT ?
-        ', $NewsCount
-    );
-    $News = $DB->to_array(false, MYSQLI_NUM, false);
-    $Cache->cache_value('news', $News, 3600);
-    if (count($News) > 0) {
-        $Cache->cache_value('news_latest_id', $News[0][0], 0);
-        $Cache->cache_value('news_latest_title', $News[0][1], 0);
-    }
-}
-
-if (count($News) > 0 && $LoggedUser['LastReadNews'] != $News[0][0]) {
-    $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
-    $Cache->update_row(false, ['LastReadNews' => $News[0][0]]);
-    $Cache->commit_transaction(0);
-    $DB->prepared_query('
-        UPDATE users_info
-        SET LastReadNews = ?
-        WHERE UserID = ?
-        ', $News[0][0], $LoggedUser['ID']
-    );
-    $LoggedUser['LastReadNews'] = $News[0][0];
+$user = new Gazelle\User($LoggedUser['ID']);
+$newsMan = new Gazelle\Manager\News;
+$latestNewsId = $newsMan->latestId();
+if ($LoggedUser['LastReadNews'] < $latestNewsId) {
+    $user->updateLastReadNews($latestNewsId);
+    $LoggedUser['LastReadNews'] = $latestNewsId;
 }
 
 View::show_header('News', 'bbcode,news_ajax');
@@ -40,8 +14,8 @@ View::show_header('News', 'bbcode,news_ajax');
 <div class="thin">
     <div class="sidebar">
 <?php
-include('month_album.php');
-include('vanity_album.php');
+require('month_album.php');
+require('vanity_album.php');
 
 if (check_perms('users_mod')) {
 ?>
@@ -80,7 +54,7 @@ if (($SBlogReadTime = $Cache->get_value('staff_blog_read_'.$LoggedUser['ID'])) =
     $Cache->cache_value('staff_blog_read_'.$LoggedUser['ID'], $SBlogReadTime, 86400);
 }
 ?>
-            <ul class="stats nobullet">
+            <ol class="stats nobullet">
 <?php
 $End = min(count($Blog), 5);
 for ($i = 0; $i < $End; $i++) {
@@ -88,55 +62,32 @@ for ($i = 0; $i < $End; $i++) {
     $BlogTime = strtotime($BlogTime);
 ?>
                 <li>
-                    <?=$SBlogReadTime < $BlogTime ? '<strong>' : ''?><?=($i + 1)?>.
+                    <?=$SBlogReadTime < $BlogTime ? '<strong>' : ''?>
                     <a href="staffblog.php#blog<?=$BlogID?>"><?=$Title?></a>
                     <?=$SBlogReadTime < $BlogTime ? '</strong>' : ''?>
                 </li>
 <?php
 }
 ?>
-            </ul>
+            </ol>
         </div>
 <?php    } ?>
         <div class="box">
             <div class="head colhead_dark"><strong><a href="blog.php">Latest blog posts</a></strong></div>
 <?php
-if (($Blog = $Cache->get_value('blog')) === false) {
-    $DB->prepared_query('
-        SELECT
-            b.ID,
-            um.Username,
-            b.UserID,
-            b.Title,
-            b.Body,
-            b.Time,
-            b.ThreadID
-        FROM blog AS b
-        LEFT JOIN users_main AS um ON (b.UserID = um.ID)
-        ORDER BY Time DESC
-        LIMIT 20
-    ');
-    $Blog = $DB->to_array();
-    $Cache->cache_value('blog', $Blog, 1209600);
-}
 ?>
-            <ul class="stats nobullet">
+            <ol class="stats">
 <?php
-if (count($Blog) < 5) {
-    $Limit = count($Blog);
-} else {
-    $Limit = 5;
-}
-for ($i = 0; $i < $Limit; $i++) {
-    list($BlogID, $Author, $AuthorID, $Title, $Body, $BlogTime, $ThreadID) = $Blog[$i];
+$blogMan = new Gazelle\Manager\Blog;
+$headlines = $blogMan->headlines();
+foreach ($headlines as $article) {
+    [$BlogID, , , $Title] = $article;
 ?>
                 <li>
-                    <?=($i + 1)?>. <a href="blog.php#blog<?=$BlogID?>"><?=$Title?></a>
+                    <a href="blog.php#blog<?=$BlogID?>"><?=$Title?></a>
                 </li>
-<?php
-}
-?>
-            </ul>
+<?php } ?>
+            </ol>
         </div>
 
 <?php include('contest_leaderboard.php'); ?>
@@ -386,13 +337,13 @@ foreach ($latest as $upload) {
             </div>
         </div>
 <?php
-
-$Count = 0;
-foreach ($News as $NewsItem) {
-    list($NewsID, $Title, $Body, $NewsTime) = $NewsItem;
-    if (strtotime($NewsTime) > time()) {
-        continue;
+$headlines = $newsMan->headlines();
+$show = 5;
+foreach ($headlines as $article) {
+    if (--$show < 0) {
+        break;
     }
+    list($NewsID, $Title, $Body, $NewsTime) = $article;
 ?>
         <div id="news<?=$NewsID?>" class="box news_post">
             <div class="head">
@@ -406,14 +357,11 @@ foreach ($News as $NewsItem) {
             <div id="newsbody<?=$NewsID?>" class="pad"><?=Text::full_format($Body)?></div>
         </div>
 <?php
-    if (++$Count > ($NewsCount - 1)) {
-        break;
-    }
 }
 ?>
         <div id="more_news" class="box">
             <div class="head">
-                <em><span><a href="#" onclick="news_ajax(event, 3, <?=$NewsCount?>, <?=check_perms('admin_manage_news') ? 1 : 0; ?>, false); return false;">Click to load more news</a>.</span> To browse old news posts, <a href="forums.php?action=viewforum&amp;forumid=12">click here</a>.</em>
+                <em><span><a href="#" onclick="news_ajax(event, 3, 5, <?=check_perms('admin_manage_news') ? 1 : 0; ?>, false); return false;">Click to load more news</a>.</span> To browse old news posts, <a href="forums.php?action=viewforum&amp;forumid=12">click here</a>.</em>
             </div>
         </div>
     </div>

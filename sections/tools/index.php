@@ -1,7 +1,5 @@
 <?php
 
-use \Gazelle\Manager\Notification;
-
 /*****************************************************************
     Tools switch center
 
@@ -136,7 +134,6 @@ switch ($_REQUEST['action']) {
         } else {
             // Prevent post requests to the ajax page
             header("Location: tools.php");
-            die();
         }
         break;
 
@@ -164,68 +161,12 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/managers/dnu_alter.php');
         break;
 
-    case 'editnews':
     case 'news':
-        require(__DIR__ . '/managers/news.php');
-        break;
-
-    case 'takeeditnews':
-        if (!check_perms('admin_manage_news')) {
-            error(403);
-        }
-        if (is_number($_POST['newsid'])) {
-            $DB->prepared_query("
-                UPDATE news
-                SET Title = ?,
-                    Body = ?
-                WHERE ID = ?
-            ", $_POST['title'], $_POST['body'], $_POST['newsid']);
-            $Cache->delete_value('news');
-            $Cache->delete_value('feed_news');
-        }
-        header('Location: index.php');
-        break;
-
     case 'deletenews':
-        if (!check_perms('admin_manage_news')) {
-            error(403);
-        }
-        if (is_number($_GET['id'])) {
-            authorize();
-            $DB->prepared_query("
-                DELETE FROM news
-                WHERE ID = ?
-            ", $_GET['id']);
-            $Cache->delete_value('news');
-            $Cache->delete_value('feed_news');
-
-            // Deleting latest news
-            $LatestNews = $Cache->get_value('news_latest_id');
-            if ($LatestNews !== false && $LatestNews == $_GET['id']) {
-                $Cache->delete_value('news_latest_id');
-                $Cache->delete_value('news_latest_title');
-            }
-        }
-        header('Location: index.php');
-        break;
-
+    case 'editnews':
+    case 'takeeditnews':
     case 'takenewnews':
-        if (!check_perms('admin_manage_news')) {
-            error(403);
-        }
-
-        $DB->prepared_query("
-            INSERT INTO news (UserID, Title, Body)
-            VALUES (?, ?, ?)
-        ", $LoggedUser['ID'], $_POST['title'], $_POST['body']);
-        $Cache->delete_value('news_latest_id');
-        $Cache->delete_value('news_latest_title');
-        $Cache->delete_value('news');
-
-        $notification = new Notification(G::$LoggedUser['ID']);
-        $notification->push($notification->pushableUsers(), $_POST['title'], $_POST['body'], site_url() . 'index.php', Notification::NEWS);
-
-        header('Location: index.php');
+        require(__DIR__ . '/managers/news.php');
         break;
 
     case 'bonus_points':
