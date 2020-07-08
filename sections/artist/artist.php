@@ -536,7 +536,7 @@ if (count($Collages) > 0) {
 ?>
     <table class="collage_table" id="collages">
         <tr class="colhead">
-            <td width="85%"><a href="#">&uarr;</a>&nbsp;This artist is in <?=number_format(count($Collages))?> collage<?=((count($Collages) > 1) ? 's' : '')?><?=$SeeAll?></td>
+            <td width="85%"><a href="#">&uarr;</a>&nbsp;This artist is in <?=number_format(count($Collages))?> collage<?= plural(count($Collages)) ?><?=$SeeAll?></td>
             <td># artists</td>
         </tr>
 <?php

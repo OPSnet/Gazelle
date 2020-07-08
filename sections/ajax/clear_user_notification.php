@@ -1,37 +1,37 @@
 <?php
 
-use \Gazelle\Manager\Notification;
-$notification = new Notification($UserID);
+$notification = new Gazelle\Manager\Notification($UserID);
+$user = new Gazelle\User($UserID);
 
 $Type = $_POST['type'];
 
 switch($Type) {
     case Notification::BLOG:
-        G::$LoggedUser['LastReadBlog'] = $notification->clearBlog();
+        $LoggedUser['LastReadBlog'] = $notification->clearBlog();
         break;
     case Notification::COLLAGES:
-        $notification->clearCollages();
+        $user->clearCollages();
         break;
     case Notification::GLOBALNOTICE:
         $notification->clearGlobal();
         break;
     case Notification::INBOX:
-        $notification->clearInbox();
+        $user->markAllReadInbox();
         break;
     case Notification::NEWS:
-        G::$LoggedUser['LastReadNews'] = $notification->clearNews();
+        $LoggedUser['LastReadNews'] = $notification->clearNews();
         break;
     case Notification::QUOTES:
-        $notification->clearQuotes();
+        $user->clearQuotes();
         break;
     case Notification::STAFFPM:
-        $notification->clearStaffPMs();
+        $user->markAllReadStaffPM();
         break;
     case Notification::SUBSCRIPTIONS:
         $notification->clearSubscriptions($UserID);
         break;
     case Notification::TORRENTS:
-        $notification->clearTorrents();
+        $user->clearTorrentNotifications();
         break;
     default:
         break;

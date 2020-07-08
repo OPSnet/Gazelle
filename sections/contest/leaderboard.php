@@ -191,7 +191,7 @@ END_STR
                 }
                 if ($row[0] == $LoggedUser['ID']) {
 ?>
-                <p>With your <?=$score?> upload<?= $score == 1 ? '' : 's' ?>, you are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
+                <p>With your <?=$score?> upload<?= plural($score) ?>, you are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
 <?php
                     $user_seen = 1;
                     break;

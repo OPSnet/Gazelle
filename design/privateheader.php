@@ -427,7 +427,7 @@ if (check_perms('admin_manage_applicants')) {
         $ModBar[] = sprintf(
             '<a href="apply.php?action=view">%d new Applicant%s</a>',
                 $NumNewApplicants,
-                ($NumNewApplicants == 1 ? '' : 's')
+                plural($NumNewApplicants)
         );
     }
 

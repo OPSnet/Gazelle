@@ -289,20 +289,13 @@ class Bonus extends Base {
     }
 
     public function sendPmToOther($fromID, $toID, $amount) {
-        if ($amount > 1) {
-            $is_are = 'are';
-            $s = 's';
-        }
-        else {
-            $is_are = 'is';
-            $s = '';
-        }
-        \Misc::send_pm($toID, 0, "Here {$is_are} {$amount} freeleech token{$s}!",
+        \Misc::send_pm($toID, 0,
+            "Here " . ($amount == 1 ? 'is' : 'are') . ' ' . article($amount) . " freeleech token" . plural($amount) . "!",
             \G::$Twig->render('bonus/token-other.twig', [
                 'TO'       => \Users::user_info($toID)['Username'],
                 'FROM'     => \Users::user_info($fromID)['Username'],
                 'AMOUNT'   => $amount,
-                'PLURAL'   => $s,
+                'PLURAL'   => plural($amount),
                 'SITE_URL' => SITE_URL,
                 'WIKI_ID'  => 57,
             ])

@@ -235,7 +235,7 @@ $LastGroupID = -1;
                 <li>Artists: <?=number_format(count($TopArtists))?></li>
 <?php } ?>
                 <li>Subscribers: <?=number_format((int)$Subscribers)?></li>
-                <li>Built by <?=number_format(count($UserAdditions))?> user<?=(count($UserAdditions) > 1 ? 's' : '')?></li>
+                <li>Built by <?=number_format(count($UserAdditions))?> user<?= plural(count($UserAdditions)) ?></li>
                 <li>Last updated: <?=time_diff($Updated)?></li>
             </ul>
         </div>

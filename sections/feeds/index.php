@@ -72,7 +72,7 @@ $Feed->open_feed();
 switch ($_GET['feed']) {
     case 'feed_news':
         $Feed->channel('News', 'RSS feed for site news.');
-        if (!$News = $Cache->get_value('news')) {
+        if (!$News = $Cache->get_value('feed_news')) {
             $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
@@ -81,26 +81,20 @@ switch ($_GET['feed']) {
                     Body,
                     Time
                 FROM news
+                WHERE Time < now()
                 ORDER BY Time DESC
-                LIMIT 10");
+                LIMIT 5");
             $News = $DB->to_array(false, MYSQLI_NUM, false);
-            $Cache->cache_value('news', $News, 1209600);
+            $Cache->cache_value('feed_news', $News, 1209600);
         }
-        $Count = 0;
         foreach ($News as $NewsItem) {
             list($NewsID, $Title, $Body, $NewsTime) = $NewsItem;
-            if (strtotime($NewsTime) >= time()) {
-                continue;
-            }
             echo $Feed->item($Title, Text::strip_bbcode($Body), "index.php#news$NewsID", SITE_NAME.' Staff', '', '', $NewsTime);
-            if (++$Count > 4) {
-                break;
-            }
         }
         break;
     case 'feed_blog':
         $Feed->channel('Blog', 'RSS feed for site blog.');
-        if (!$Blog = $Cache->get_value('blog')) {
+        if (!$Blog = $Cache->get_value('feed_blog')) {
             $DB = new DB_MYSQL; //Load the database wrapper
             $DB->query("
                 SELECT
@@ -116,7 +110,7 @@ switch ($_GET['feed']) {
                 ORDER BY Time DESC
                 LIMIT 20");
             $Blog = $DB->to_array();
-            $Cache->cache_value('blog', $Blog, 1209600);
+            $Cache->cache_value('feed_blog', $Blog, 1209600);
         }
         foreach ($Blog as $BlogItem) {
             list($BlogID, $Author, $AuthorID, $Title, $Body, $BlogTime, $ThreadID) = $BlogItem;
