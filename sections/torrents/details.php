@@ -88,7 +88,7 @@ list($NumComments, $Page, $Thread, $LastRead) = Comments::load('torrents', $Grou
 $subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 
 // Start output
-View::show_header($Title, 'browse,comments,torrent,bbcode,recommend,cover_art,subscriptions');
+View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscriptions');
 ?>
 <div class="thin">
     <div class="header">
@@ -116,7 +116,6 @@ if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
 } ?>
             <a href="#" id="subscribelink_torrents<?=$GroupID?>" class="brackets" onclick="SubscribeComments('torrents', <?=$GroupID?>); return false;"><?=
                 $subscription->isSubscribedComments('torrents', $GroupID) ? 'Unsubscribe' : 'Subscribe'?></a>
-<!-- <a href="#" id="recommend" class="brackets">Recommend</a> -->
 <?php
 if ($Categories[$GroupCategoryID-1] == 'Music') { ?>
             <a href="upload.php?groupid=<?=$GroupID?>" class="brackets">Add format</a>
