@@ -22,7 +22,7 @@ class CalendarView {
         }
 ?>
         <h1 class="center">
-            <a href="tools.php?action=calendar&amp;month=<?=$PreviousMonth?>&amp;year=<?=$PreviousYear?>">&lsaqu;</a>
+            <a href="tools.php?action=calendar&amp;month=<?=$PreviousMonth?>&amp;year=<?=$PreviousYear?>">&lsaquo;</a>
             <?=date("F", mktime(0, 0, 0, $Month, 10)) . " $Year"?>
             <a href="tools.php?action=calendar&amp;month=<?=$NextMonth?>&amp;year=<?=$NextYear?>">&rsaquo;</a>
         </h1>
