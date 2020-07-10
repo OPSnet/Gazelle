@@ -3,6 +3,7 @@
 if (!check_perms('admin_manage_payments') && !check_perms('admin_view_payments')) {
     error(403);
 }
+$donorMan = new Gazelle\Manager\Donation;
 
 View::show_header('Payment Dates');
 ?>
@@ -133,15 +134,15 @@ if (check_perms('admin_manage_payments')) {
         </tr>
         <tr>
             <td>Actual</td>
-            <td><?= sprintf('%0.4f', Donations::donations_total_month( 1)) ?></td>
-            <td><?= sprintf('%0.4f', Donations::donations_total_month( 3)) ?></td>
-            <td><?= sprintf('%0.4f', Donations::donations_total_month(12)) ?></td>
+            <td><?= sprintf('%0.4f', $donorMan->totalMonth( 1)) ?></td>
+            <td><?= sprintf('%0.4f', $donorMan->totalMonth( 3)) ?></td>
+            <td><?= sprintf('%0.4f', $donorMan->totalMonth(12)) ?></td>
         </tr>
         <tr>
             <td>Target</td>
-            <td><?= sprintf('%0.1f%%', Donations::donations_total_month( 1) / ($totalRent/12) * 100) ?></td>
-            <td><?= sprintf('%0.1f%%', Donations::donations_total_month( 3) / ($totalRent/ 4) * 100) ?></td>
-            <td><?= sprintf('%0.1f%%', Donations::donations_total_month(12) / ($totalRent   ) * 100) ?></td>
+            <td><?= sprintf('%0.1f%%', $donorMan->totalMonth( 1) / ($totalRent/12) * 100) ?></td>
+            <td><?= sprintf('%0.1f%%', $donorMan->totalMonth( 3) / ($totalRent/ 4) * 100) ?></td>
+            <td><?= sprintf('%0.1f%%', $donorMan->totalMonth(12) / ($totalRent   ) * 100) ?></td>
         </tr>
     </table>
 </div>

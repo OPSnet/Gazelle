@@ -205,11 +205,12 @@ if (check_perms('site_send_unlimited_invites')) {
                     </li>
                     <li id="nav_donate" class="brackets<?=Format::add_class($PageID, ['donate'], 'active', false)?>">
 <?php
-$Payment = new \Gazelle\Manager\Payment;
+$Payment = new Gazelle\Manager\Payment;
+$donorMan = new Gazelle\Manager\Donation;
 $monthlyRental = $Payment->monthlyRental();
 $percent = $monthlyRental == 0.0
     ? 100
-    : min(100, (int)((Donations::donations_total_month(1) / $monthlyRental) * 100));
+    : min(100, (int)(($donorMan->totalMonth(1) / $monthlyRental) * 100));
 ?>
                         <a href="donate.php" class='tooltip' title="Donate">Donate (<?= $percent ?>%)</a>
                     </li>

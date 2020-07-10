@@ -3,54 +3,13 @@ if (!check_perms('admin_donor_log')) {
     error(403);
 }
 $Title = "Bitcoin Donation Balance";
+$Balance = 0;
 View::show_header($Title);
 
-$Balance = DonationsBitcoin::get_balance() . ' XBT';
 ?>
 <div class="header">
-    <h2><?=$Title?></h2>
+    <h2><?= $Title ?></h2>
+    <h2>TODO</h2>
 </div>
-<div class="thin">
-    <div class="header">
-        <h3><?=$Balance?></h3>
-    </div>
 <?php
-if (empty($_GET['list'])) {
-?>
-    <a href="?action=<?=$_REQUEST['action']?>&amp;list=1" class="brackets">Show donor list</a>
-<?php
-} else {
-    $BitcoinAddresses = DonationsBitcoin::get_received();
-    $DB->query("
-        SELECT i.UserID, i.BitcoinAddress
-        FROM users_info AS i
-            JOIN users_main AS m ON m.ID = i.UserID
-        WHERE BitcoinAddress != ''
-        ORDER BY m.Username ASC");
-?>
-    <table>
-    <tr class="colhead">
-        <th>Username</th>
-        <th>Receiving Bitcoin Address</th>
-        <th>Amount</th>
-    </tr>
-<?php
-    while (list($UserID, $BitcoinAddress) = $DB->next_record(MYSQLI_NUM, false)) {
-        if (!isset($BitcoinAddresses[$BitcoinAddress])) {
-            continue;
-        }
-?>
-    <tr>
-        <td><?=Users::format_username($UserID, true, false, false, false)?></td>
-        <td><tt><?=$BitcoinAddress?></tt></td>
-        <td><?=$BitcoinAddresses[$BitcoinAddress]?> XBT</td>
-    </tr>
-<?php
-    }
-?>
-    </table>
-<?php
-}
-?>
-</div>
-<?php View::show_footer(); ?>
+View::show_footer();

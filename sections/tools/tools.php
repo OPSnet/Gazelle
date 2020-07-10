@@ -157,7 +157,6 @@ Category('External data', [
 
 Category('Finances', [
     Item('Bitcoin (balance)',     'tools.php?action=bitcoin_balance', All(['admin_donor_log'])),
-    Item('Bitcoin (unprocessed)', 'tools.php?action=bitcoin_unproc',  All(['admin_donor_log'])),
     Item('Donation log',          'tools.php?action=donation_log',    All(['admin_donor_log'])),
     Item('Donor rewards',         'tools.php?action=donor_rewards',   All(['users_mod'])),
     Item('Payment dates',         'tools.php?action=payment_list',    Any(['admin_view_payments', 'admin_manage_payments'])),

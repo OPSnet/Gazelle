@@ -1,105 +1,41 @@
 <?php
 
 class DonationsView {
-    public static function render_mod_donations($UserID) {
-?>
-        <table class="layout" id="donation_box">
-            <tr class="colhead">
-                <td colspan="2">
-                    Donations
-                </td>
-            </tr>
-            <tr><td></td><td><b>Manual Donation</td></tr>
-            <tr>
-                <td class="label">Value:</td>
-                <td>
-                    <input type="text" name="donation_value" onkeypress="return isNumberKey(event);" />
-                    <select name="donation_currency">
-                        <option value="EUR">EUR</option>
-                        <option value="USD">USD</option>
-                        <option value="XBT" selected="selected">XBT</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Reason:</td>
-                <td><input type="text" class="wide_input_text" name="donation_reason" /></td>
-            </tr>
-            <tr>
-                <td>&nbsp;</td>
-                <td>
-                    <input type="submit" name="donor_points_submit" value="Add donation" />
-                </td>
-            </tr>
-            <tr>
-                <td>&nbsp;</td>
-                <td><b>Donation point adjustement</td>
-            </tr>
-            <tr>
-                <td colspan="2">Use this section only when manually adjusting
-                values. If crediting donations normally, use the Manual Donation
-                section. Active points represent the donation amount that has
-                not yet expired. Total points represent the combined amount of
-                all donations and never expire. These are used to determine the
-                Special Rank and Leaderboard placement of a member.</td>
-            </tr>
-            <tr>
-                <td class="label">Special Rank:</td>
-                <td><b><?= Donations::get_special_rank($UserID) ?></b></td>
-            </tr>
-            <tr>
-                <td class="label">Adjust active points:</td>
-                <td>
-                <input type="text" width="4" name="donor_rank_delta" value="0" />
-                (add or subtract) currently: <b><?= Donations::get_rank($UserID) ?></b>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Adjust total points:</td>
-                <td>
-                <input type="text" width="4" name="total_donor_rank_delta" value="0" />
-                (add or subtract) currently: <b><?= Donations::get_total_rank($UserID) ?></b>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Reason:</td>
-                <td><input type="text" class="wide_input_text" name="reason" /></td>
-            </tr>
-            <tr>
-                <td>&nbsp;</td>
-                <td align="right" colspan="2">
-                    <input type="submit" name="donor_values_submit" value="Change point values" />
-                </td>
-            </tr>
-        </table>
-<?php
+    public static function render_mod_donations(int $UserID) {
+        $donorMan = new Gazelle\Manager\Donation;
+        echo G::$Twig->render('donation/admin-panel.twig', [
+            'rank' => $donorMan->rank($UserID),
+            'special_rank' => $donorMan->specialRank($UserID),
+            'total_rank' => $donorMan->totalRank($UserID),
+        ]);
     }
 
     public static function render_donor_stats($UserID) {
         $OwnProfile = G::$LoggedUser['ID'] == $UserID;
-        if (check_perms("users_mod") || $OwnProfile || Donations::is_visible($UserID)) {
+        $donorMan = new Gazelle\Manager\Donation;
+        if (check_perms("users_mod") || $OwnProfile || $donorMan->isVisible($UserID)) {
 ?>
             <div class="box box_info box_userinfo_donor_stats">
                 <div class="head colhead_dark">Donor Statistics</div>
                 <ul class="stats nobullet">
 <?php
-            if (Donations::is_donor($UserID)) {
+            if ($donorMan->isDonor($UserID)) {
                 if (check_perms('users_mod') || $OwnProfile) { ?>
                     <li>
-                        Total donor points: <?=Donations::get_total_rank($UserID)?>
+                        Total donor points: <?= $donorMan->totalRank($UserID) ?>
                     </li>
 <?php           } ?>
                     <li>
-                        Current donor rank: <?=self::render_rank(Donations::get_rank($UserID), Donations::get_special_rank($UserID), true)?>
+                        Current donor rank: <?=self::render_rank($donorMan->rank($UserID), $donorMan->specialRank($UserID), true)?>
                     </li>
                     <li>
-                        Leaderboard position: <?=Donations::get_leaderboard_position($UserID)?>
+                        Leaderboard position: <?=$donorMan->leaderboardRank($UserID)?>
                     </li>
                     <li>
-                        Last donated: <?=time_diff(Donations::get_donation_time($UserID))?>
+                        Last donated: <?=time_diff($donorMan->lastDonation($UserID))?>
                     </li>
                     <li>
-                        Rank expires: <?=(Donations::get_rank_expiration($UserID))?>
+                        Rank expires: <?=($donorMan->rankExpiry($UserID))?>
                     </li>
 <?php            } else { ?>
                     <li>

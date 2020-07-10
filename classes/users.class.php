@@ -548,8 +548,9 @@ class Users {
         }
         $ShowDonorIcon = (!in_array('hide_donor_heart', $Paranoia) || $OverrideParanoia);
 
+        $donorMan = new \Gazelle\Manager\Donation;
         if ($IsDonorForum) {
-            list($Prefix, $Suffix, $HasComma) = Donations::get_titles($UserID);
+            list($Prefix, $Suffix, $HasComma) = $donorMan->titles($UserID);
             $Username = "$Prefix $Username" . ($HasComma ? ', ' : ' ') . "$Suffix ";
         }
 
@@ -559,7 +560,7 @@ class Users {
             $Str .= "<a href=\"user.php?id=$UserID\">$Username</a>";
         }
         if ($Badges) {
-            $DonorRank = Donations::get_rank($UserID);
+            $DonorRank = $donorMan->rank($UserID);
             if ($DonorRank == 0 && $UserInfo['Donor'] == 1) {
                 $DonorRank = 1;
             }
@@ -568,9 +569,9 @@ class Users {
                 $IconImage = 'donor.png';
                 $IconText = 'Donor';
                 $DonorHeart = $DonorRank;
-                $SpecialRank = Donations::get_special_rank($UserID);
-                $EnabledRewards = Donations::get_enabled_rewards($UserID);
-                $DonorRewards = Donations::get_rewards($UserID);
+                $SpecialRank = $donorMan->specialRank($UserID);
+                $EnabledRewards = $donorMan->enabledRewards($UserID);
+                $DonorRewards = $donorMan->rewards($UserID);
                 if ($EnabledRewards['HasDonorIconMouseOverText'] && !empty($DonorRewards['IconMouseOverText'])) {
                     $IconText = display_str($DonorRewards['IconMouseOverText']);
                 }
@@ -695,10 +696,11 @@ class Users {
         $AvatarMouseOverText = '';
         $FirstAvatar = '';
         $SecondAvatar = '';
-        $EnabledRewards = Donations::get_enabled_rewards($UserID);
 
+        $donorMan = new \Gazelle\Manager\Donation;
+        $EnabledRewards = $donorMan->enabledRewards($UserID);
         if ($EnabledRewards['HasAvatarMouseOverText']) {
-            $Rewards = Donations::get_rewards($UserID);
+            $Rewards = $donorMan->rewards($UserID);
             $AvatarMouseOverText = $Rewards['AvatarMouseOverText'];
         }
         if (!empty($AvatarMouseOverText)) {
@@ -709,6 +711,7 @@ class Users {
         if ($EnabledRewards['HasSecondAvatar'] && !empty($Rewards['SecondAvatar'])) {
             $SecondAvatar = ImageTools::process($Rewards['SecondAvatar'], false, 'avatar2', $UserID);
         }
+
         $Attrs = "width=\"$Size\" $AvatarMouseOverText";
         // purpose of the switch is to set $FirstAvatar (URL)
         // case 1 is avatars disabled

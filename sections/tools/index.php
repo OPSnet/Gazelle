@@ -303,12 +303,8 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/managers/rate_limit.php');
         break;
 
-    case 'prvlog':
+    case 'donation_log':
         require(__DIR__ . '/finances/btc_log.php');
-        break;
-
-    case 'bitcoin_unproc':
-        require(__DIR__ . '/finances/bitcoin_unproc.php');
         break;
 
     case 'bitcoin_balance':
