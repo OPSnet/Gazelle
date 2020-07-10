@@ -10,7 +10,7 @@ class Base {
     protected $cache;
 
     public function __construct() {
-        $this->db = new \DB_MYSQL;
         $this->cache = \G::$Cache;
+        $this->db = \G::$DB;
     }
 }

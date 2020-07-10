@@ -1,0 +1,20 @@
+<table width"=100%" class="torrent_table">
+    {% for id, row in results %}
+        <tr class="torrent torrent_row{{ row.snatched ? ' snatched_torrent' : '' }}">
+            <td>
+                <span class="torrent_links_block">
+                    <a href="torrents.php?action=download&amp;id={{ id }}&amp;authkey={{ auth_key }}&amp;torrent_pass={{ torrent_pass }}" class="brackets tooltip" title="Download">DL</a>
+                    {% if row.token %}
+                        | <a href="torrents.php?action=download&amp;id={{ id }}&amp;authkey={{ auth_key }}&amp;torrent_pass={{ torrent_pass }}&amp;usetoken=1" class="brackets tooltip" title="Use a FL Token" onclick="return confirm('{{ row.fl_message }}');">FL</a>
+                    {% endif %}
+                </span>
+                {{ row.name | raw }}
+                {% if perms.admin_reports %}
+                    <a href="better.php?method=missing&amp;type={{ type }}&amp;remove={{ id }}&amp;filter={{ filter }}&amp;search={{ search }}" class="brackets">X</a>
+                {% endif %}
+                <div class="tags">{{ row.tags | raw }}</div>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+

@@ -1,0 +1,73 @@
+<br />
+<div class="thin">
+    <h2>Missing</h2>
+    {% include 'better/links.twig' only %}
+    <form class="search_form" name="missing" action="" method="get">
+        <input type="hidden" name="method" value="missing" />
+        <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
+            <tr>
+                <td class="label"><strong>Filter</strong></td>
+                <td>
+                    <select name="type">
+                        <option value="checksum"{{ types.checksum | selected }}>Missing Checksums</option>
+                        <option value="tags"{{ types.tags | selected }}>Bad Tags</option>
+                        <option value="folders"{{ types.folders | selected }}>Bad Folders</option>
+                        <option value="files"{{ types.files | selected }}>Bad Files</option>
+                        <option value="lineage"{{ types.lineage | selected }}>Missing Lineage</option>
+                        <option value="artwork"{{ types.artwork | selected }}>Missing Artwork</option>
+                        <option value="artistimg"{{ types.artistimg | selected }}>Missing Artist Images</option>
+                        <option value="artistdesc"{{ types.artistdesc | selected }}>Missing Artist Descriptions</option>
+                        <option value="artistdiscogs"{{ types.artistdiscogs | selected }}>Missing Artist Discogs ID</option>
+                    </select>
+                    <select name="filter">
+                        <option value="all"{{ filters.all | selected }}>All</option>
+                        <option value="snatched"{{ filters.snatched | selected }}>Snatched</option>
+                        <option value="uploaded"{{ filters.uploaded | selected }}>Uploaded</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Search</strong></td>
+                <td>
+                    <input type="search" name="search" size="60" value="{{ search }}" />
+                </td>
+            </tr>
+            <tr><td>&nbsp;</td><td><input type="submit" value="Search" /></td></tr>
+        </table>
+    </form>
+    <div class="linkbox">
+        {{ pages | raw }}
+    </div>
+    <div class="box pad">
+        <div class="torrent">
+            <h3>There are {{ result_count }} {{ mode }} remaining
+                {% if mode == 'torrents' and result_count > 1 and perms.zip_downloader %}
+                    {% include 'better/zip.twig' with {torrent_ids: torrent_ids} only %}
+                {% endif %}
+            </h3>
+        </div>
+        {% if mode is same as('torrents') %}
+            {% include 'better/torrents.twig' with {results: results, auth_key: auth_key, torrent_pass: torrent_pass, tokens: tokens} only %}
+        {% elseif mode is same as('groups') %}
+            <table width"=100%" class="torrent_table">
+                {% for id, group in results %}
+                    <tr>
+                        <td><a href="torrents.php?groupid={{ id }}&amp;action=editgroup">[Edit]</a>&nbsp;&nbsp;{{ group.artist|raw }} - <a href="torrents.php?id={{ id }}" target="_blank">{{ group.name|raw }}</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <table width"=100%" class="torrent_table">
+                {% for id, name in results %}
+                    <tr>
+                        <td><a href="artist.php?artistid={{ id }}&amp;action=edit">[Edit]</a>&nbsp;&nbsp;<a href="artist.php?id={{ id }}">{{ name|raw }}</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+    <div class="linkbox">
+        {{ pages | raw }}
+    </div>
+</div>
+
