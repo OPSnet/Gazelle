@@ -77,10 +77,11 @@ $SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
 
 View::show_header("$Username &rsaquo; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
 
-$EnabledReward = Donations::get_enabled_rewards($UserID);
-$Rewards = Donations::get_rewards($UserID);
-$ProfileRewards = Donations::get_profile_rewards($UserID);
-$DonorTitles = Donations::get_titles($UserID);
+$donorMan = new Gazelle\Manager\Donation;
+$EnabledReward  = $donorMan->enabledRewards($UserID);
+$Rewards        = $donorMan->rewards($UserID);
+$ProfileRewards = $donorMan->profileRewards($UserID);
+$DonorTitles    = $donorMan->titles($UserID);
 
 $NavItems = Users::get_nav_items();
 $UserNavItems = array_filter(array_map('trim', explode(',', $UserNavItems)));
@@ -693,7 +694,7 @@ echo $Val->GenerateJS('userform');
             <tr id="para_donations_tr">
                 <td class="label"><strong>Donations</strong></td>
                 <td>
-                    <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"<?= Donations::is_visible($UserID) ? ' checked="checked"' : ''?> />
+                    <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"<?= $donorMan->isVisible($UserID) ? ' checked="checked"' : ''?> />
                     <label for="p_donor_stats">Show donor stats</label>
                     <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"<?=checked(!in_array('hide_donor_heart', $Paranoia))?> />
                     <label for="p_donor_heart">Show donor heart</label>

@@ -1,0 +1,69 @@
+<table class="layout" id="donation_box">
+    <tr class="colhead">
+        <td colspan="2">
+            Donations
+        </td>
+    </tr>
+    <tr><td></td><td><b>Manual Donation</td></tr>
+    <tr>
+        <td class="label">Value:</td>
+        <td>
+            <input type="text" name="donation_value" onkeypress="return isNumberKey(event);" />
+            <select name="donation_currency">
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="XBT" selected="selected">XBT</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Reason:</td>
+        <td><input type="text" class="wide_input_text" name="donation_reason" /></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <input type="submit" name="donor_points_submit" value="Add donation" />
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td><b>Donation point adjustement</td>
+    </tr>
+    <tr>
+        <td colspan="2">Use this section only when manually adjusting
+        values. If crediting donations normally, use the Manual Donation
+        section. Active points represent the donation amount that has
+        not yet expired. Total points represent the combined amount of
+        all donations and never expire. These are used to determine the
+        Special Rank and Leaderboard placement of a member.</td>
+    </tr>
+    <tr>
+        <td class="label">Special Rank:</td>
+        <td><b> {{ special_rank }} </b></td>
+    </tr>
+    <tr>
+        <td class="label">Adjust active points:</td>
+        <td>
+        <input type="text" width="4" name="donor_rank_delta" value="0" />
+        (add or subtract) currently: <b>{{ rank }}</b>
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Adjust total points:</td>
+        <td>
+        <input type="text" width="4" name="total_donor_rank_delta" value="0" />
+        (add or subtract) currently: <b>{{ total_rank }}</b>
+        </td>
+    </tr>
+    <tr>
+        <td class="label">Reason:</td>
+        <td><input type="text" class="wide_input_text" name="reason" /></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td align="right" colspan="2">
+            <input type="submit" name="donor_values_submit" value="Change point values" />
+        </td>
+    </tr>
+</table>

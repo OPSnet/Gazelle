@@ -3,7 +3,8 @@ if (empty($_GET['id']) || !is_number($_GET['id']) || (!empty($_GET['preview']) &
     error(404);
 }
 $UserID = (int)$_GET['id'];
-$Bonus = new \Gazelle\Bonus;
+$Bonus = new Gazelle\Bonus;
+$donorMan = new Gazelle\Manager\Donation;
 
 if (!empty($_POST)) {
     authorize();
@@ -44,8 +45,8 @@ if ($UserID == $LoggedUser['ID']) {
     $Preview = 0;
     $FL_Items = $Bonus->getListOther($LoggedUser['BonusPoints']);
 }
-$EnabledRewards = Donations::get_enabled_rewards($UserID);
-$ProfileRewards = Donations::get_profile_rewards($UserID);
+$EnabledRewards = $donorMan->enabledRewards($UserID);
+$ProfileRewards = $donorMan->profileRewards($UserID);
 $FA_Key = null;
 
 if (check_perms('users_mod')) {
@@ -779,7 +780,7 @@ if ((check_perms('users_view_invites')) && $Invited > 0) {
 }
 
 if (check_perms('users_give_donor')) {
-    DonationsView::render_donation_history(Donations::get_donation_history($UserID));
+    DonationsView::render_donation_history($donorMan->history($UserID));
 }
 
 // Requests

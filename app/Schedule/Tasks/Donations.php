@@ -6,7 +6,7 @@ class Donations extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        // yikes
-        \Donations::schedule();
+        $donorMan = new \Gazelle\Manager\Donation;
+        $this->processed = $donorMan->expireRanks();
     }
 }

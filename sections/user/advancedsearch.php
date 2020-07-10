@@ -784,7 +784,7 @@ View::show_header('User search');
         continue;
     }
 ?>
-                        <option value="<?=$Class['ID'] ?>"<?= in_array($Class['ID'], $_GET['class']) ? ' selected="selected"' : ''
+                        <option value="<?=$Class['ID'] ?>"<?= in_array($Class['ID'], $_GET['class'] ?? []) ? ' selected="selected"' : ''
                             ?>><?=Format::cut_string($Class['Name'], 10, 1, 1).' ('.$Class['Level'].')'?></option>
 <?php } ?>
                     </select>
