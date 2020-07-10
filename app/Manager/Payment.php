@@ -12,7 +12,7 @@ class Payment extends \Gazelle\Base {
             INSERT INTO payment_reminders
                    (Text, Expiry, AnnualRent, cc, Active)
             VALUES (?,    ?,      ?,          ?,  ?)
-            ', $val['text'], $val['expiry'], $val['rent'], $val['cc'], $val['active']
+            ', $val['text'], $val['expiry'], $val['rent'], $val['cc'], isset($val['active'])
         );
         $this->flush();
         return $this->db->inserted_id();
@@ -23,7 +23,7 @@ class Payment extends \Gazelle\Base {
             UPDATE payment_reminders SET
                 Text = ?, Expiry = ?, AnnualRent = ?, cc = ?, Active = ?
             WHERE ID = ?
-            ", $val['text'], $val['expiry'], $val['rent'], $val['cc'], $val['active'] == 'on' ? 1 : 0,
+            ", $val['text'], $val['expiry'], $val['rent'], $val['cc'], isset($val['active']),
             $id
         );
         $this->flush();
@@ -50,6 +50,7 @@ class Payment extends \Gazelle\Base {
             $this->db->prepared_query("
                 SELECT ID, Text, Expiry, AnnualRent, cc, Active
                 FROM payment_reminders
+                ORDER BY Expiry
             ");
             $list = $this->db->to_array('ID', MYSQLI_ASSOC);
             $this->cache->cache_value(self::LIST_KEY, $list, 86400 * 30);
