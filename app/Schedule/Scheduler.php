@@ -157,24 +157,26 @@ class Scheduler extends \Gazelle\Base {
         ", $id, $limit, $offset);
         $items = $this->db->to_array('periodic_task_history_id', MYSQLI_ASSOC);
 
-        $this->db->prepared_query("
-            SELECT periodic_task_history_id, event_time, severity, event, reference
-            FROM periodic_task_history_event
-            WHERE periodic_task_history_id IN (" . placeholders($items) . ")
-            ORDER BY event_time, periodic_task_history_event_id
-        ", ...array_keys($items));
-        $events = $this->db->to_array(false, MYSQLI_ASSOC);
-
         $historyEvents = [];
-        foreach ($events as $event) {
-            list($historyId, $eventTime, $severity, $message, $reference) = array_values($event);
-            $historyEvents[$historyId][] = new Event($severity, $message, $reference, $eventTime);
+        if (count($items)) {
+            $this->db->prepared_query("
+                SELECT periodic_task_history_id, event_time, severity, event, reference
+                FROM periodic_task_history_event
+                WHERE periodic_task_history_id IN (" . placeholders($items) . ")
+                ORDER BY event_time, periodic_task_history_event_id
+            ", ...array_keys($items));
+            $events = $this->db->to_array(false, MYSQLI_ASSOC);
+
+            foreach ($events as $event) {
+                list($historyId, $eventTime, $severity, $message, $reference) = array_values($event);
+                $historyEvents[$historyId][] = new Event($severity, $message, $reference, $eventTime);
+            }
         }
 
         $task = new TaskHistory($this->getTask($id)['name'], $rowCount);
         foreach ($items as $item) {
             list($historyId, $launchTime, $status, $numErrors, $numItems, $duration) = array_values($item);
-            $taskEvents = array_key_exists($historyId, $historyEvents) ? $historyEvents[$historyId] : [];
+            $taskEvents = $historyEvents[$historyId] ?? [];
             $task->items[] = new HistoryItem($launchTime, $status, $numErrors, $numItems, $duration, $taskEvents);
         }
 
