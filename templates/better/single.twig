@@ -1,0 +1,16 @@
+<br />
+<div class="thin">
+    <h2>Single Seeded</h2>
+    {% include 'better/links.twig' only %}
+    <div class="box pad">
+        <div class="torrent">
+            <h3>Here are {{ result_count }} random torrents
+                {% if result_count > 0 and perms.zip_downloader %}
+                    {% include 'better/zip.twig' with {torrent_ids: torrent_ids} only %}
+                {% endif %}
+            </h3>
+        </div>
+        {% include 'better/torrents.twig' with {results: results, auth_key: auth_key, torrent_pass: torrent_pass, tokens: tokens} only %}
+    </div>
+</div>
+
