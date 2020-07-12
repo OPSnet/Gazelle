@@ -159,7 +159,7 @@ class Donation extends \Gazelle\Base {
             INSERT INTO donations
                    (UserID, Amount, Source, Reason, Currency, AddedBy, Rank, TotalRank, xbt)
             VALUES (?,      ?,      ?,      ?,      ?,        ?,       ?,    ?,         ?)
-            ', $UserID, $fiatAmount, $Args['Source'], $reason, $Args['Currency'] ?? 'XZZ',
+            ', $UserID, round($fiatAmount, 2), $Args['Source'], $reason, $Args['Currency'] ?? 'XZZ',
                 $Args['Who'], $rankDelta, $TotalRank, $xbtAmount
         );
 
