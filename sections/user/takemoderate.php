@@ -586,14 +586,16 @@ if (count($EditSummary)) {
     $args[] = $AdminComment;
 }
 
-$args[] = $UserID;
-$DB->prepared_query("
-    UPDATE users_main AS m
-    INNER JOIN users_info AS i ON (m.ID = i.UserID)
-    SET " .  implode(', ', $set) . "
-    WHERE m.ID = ?
-    ", ...$args
-);
+if ($set) {
+    $args[] = $UserID;
+    $DB->prepared_query("
+        UPDATE users_main AS m
+        INNER JOIN users_info AS i ON (m.ID = i.UserID)
+        SET " .  implode(', ', $set) . "
+        WHERE m.ID = ?
+        ", ...$args
+    );
+}
 
 if ($leechSet) {
     $leechArgs[] = $UserID;
