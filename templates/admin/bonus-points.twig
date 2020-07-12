@@ -1,0 +1,23 @@
+<div class="header">
+    <h2>Add bonus points to enabled users</h2>
+</div>
+<div class="box pad" style="margin-left: auto; margin-right: auto; max-width: 80%;">
+    {{ message|raw }}
+    <form class="add_form" name="bonus-points" action="" method="post">
+        <input type="date" name="since_date" value="{{ since }}" />
+        <label for="since_date">Cut-off date for consideration</label><br /><br />
+
+        <input type="number" id="active_points" name="active_points" min="0" size="6" style="text-align: right;" />&nbsp;
+        <label for="active_points"> Add points to all enabled users who have been active on or after the cut-off date.</label><br /><br />
+
+        <input type="number" id="upload_points" name="upload_points" min="0" size="6" style="text-align: right;" />&nbsp;
+        <label for="upload_points"> Add points for people who have made an upload on or after the cut-off date.</label><br /><br />
+
+        <input type="number" id="seed_points" name="seed_points" min="0" size="6" style="text-align: right;" />&nbsp;
+        <label for="seed_points"> Add points for people who have been seeding now.</label><br /><br />
+
+        <input type="hidden" name="action" value="bonus_points" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="submit" name="add_points" value="Add bonus points" />
+    </form>
+</div>

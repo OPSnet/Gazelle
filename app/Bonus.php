@@ -329,23 +329,22 @@ class Bonus extends Base {
         $this->flushUserCache($userId);
     }
 
-    public function addGlobalPoints($points) {
-        $this->db->prepared_query("
-            INSERT INTO user_bonus
-            SELECT um.ID, ?
-            FROM users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
-            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
-            WHERE ui.DisablePoints = '0'
-                AND um.Enabled = '1'
-                AND uhafl.UserID IS NULL
-            ON DUPLICATE KEY UPDATE points = points + ?
-            ", $points, $points
-        );
+    public function addMultiPoints(int $points, array $ids = []): int {
+        if ($ids) {
+            $this->db->prepared_query("
+                UPDATE user_bonus SET
+                    points = points + ?
+                WHERE user_id in (" . placeholders($ids) . ")
+                ", $points, ...$ids
+            );
+            $this->cache->deleteMulti(array_map(function ($k) { return "user_stats_$k"; }, $ids));
+        }
+        return count($ids);
+    }
 
+    public function addGlobalPoints(int $points): int {
         $this->db->prepared_query("
-            SELECT concat('user_stats_', um.ID) as ck
+            SELECT um.ID
             FROM users_main um
             INNER JOIN users_info ui ON (ui.UserID = um.ID)
             LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
@@ -354,12 +353,57 @@ class Bonus extends Base {
                 AND um.Enabled = '1'
                 AND uhafl.UserID IS NULL
         ");
-        if ($this->db->has_results()) {
-            $keys = $this->db->collect('ck', false);
-            $this->cache->deleteMulti($keys);
-            return count($keys);
-        }
-        return 0;
+        return $this->addMultiPoints($points, $this->db->collect('ID', false));
+    }
+
+    public function addActivePoints(int $points, string $since): int {
+        $this->db->prepared_query("
+            SELECT um.ID
+            FROM users_main um
+            INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            INNER JOIN user_last_access ula ON (ula.user_id = um.ID)
+            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
+            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
+            WHERE ui.DisablePoints = '0'
+                AND um.Enabled = '1'
+                AND uhafl.UserID IS NULL
+                AND ula.last_access >= ?
+            ", $since
+        );
+        return $this->addMultiPoints($points, $this->db->collect('ID', false));
+    }
+
+    public function addUploadPoints(int $points, string $since): int {
+        $this->db->prepared_query($sql = "
+            SELECT DISTINCT um.ID
+            FROM users_main um
+            INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            INNER JOIN torrents t ON (t.UserID = um.ID)
+            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
+            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
+            WHERE ui.DisablePoints = '0'
+                AND um.Enabled = '1'
+                AND uhafl.UserID IS NULL
+                AND t.Time >= ?
+            ", $since
+        );
+        return $this->addMultiPoints($points, $this->db->collect('ID', false));
+    }
+
+    public function addSeedPoints(int $points): int {
+        $this->db->prepared_query("
+            SELECT DISTINCT um.ID
+            FROM users_main um
+            INNER JOIN users_info ui ON (ui.UserID = um.ID)
+            INNER JOIN xbt_files_users xfu ON (xfu.uid = um.ID)
+            LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID)
+            LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = 'no-fl-gifts')
+            WHERE ui.DisablePoints = '0'
+                AND um.Enabled = '1'
+                AND uhafl.UserID IS NULL
+                AND xfu.active = 1 and xfu.remaining = 0 and xfu.connectable = 1 and timespent > 0
+        ");
+        return $this->addMultiPoints($points, $this->db->collect('ID', false));
     }
 
     public function removePointsForUpload($userId, array $torrentDetails) {
