@@ -2,35 +2,40 @@
 if (!check_perms('users_mod')) {
     error(403);
 }
-$Message = "";
+$message = "";
 if (isset($_REQUEST['add_points'])) {
     authorize();
-    $Points = floatval($_REQUEST['num_points']);
+    $active = (int)($_POST['active_points'] ?? 0);
+    $upload = (int)($_POST['upload_points'] ?? 0);
+    $seed   = (int)($_POST['seed_points'] ?? 0);
+    $since  = trim($_POST['since_date'] ?? date("Y-m-d", strtotime("-120 day", time())));
 
-    if ($Points <= 0) {
+    if ($active < 0 || $upload < 0 ||  $seed < 0) {
         error('Please enter a positive number of points.');
     }
 
-    $Bonus = new \Gazelle\Bonus;
-    $enabledCount = $Bonus->addGlobalPoints($Points);
-    $Message = '<strong>' . number_format($Points) . ' bonus points added to ' . number_format($enabledCount) . ' enabled users.</strong><br /><br />';
+    $bonus = new \Gazelle\Bonus;
+    $activeCount = $bonus->addActivePoints($active, $since);
+    $uploadCount = $bonus->addUploadPoints($upload, $since);
+    $seedCount   = $bonus->addSeedPoints($seed);
+    if ($activeCount) {
+        $message .= '<strong>' . number_format($active) . ' bonus points added to ' . number_format($activeCount) . ' active users.</strong><br />';
+    }
+    if ($uploadCount) {
+        $message .= '<strong>' . number_format($upload) . ' bonus points added to ' . number_format($uploadCount) . ' active uploaders.</strong><br />';
+    }
+    if ($seedCount) {
+        $message .= '<strong>' . number_format($seed) . ' bonus points added to ' . number_format($seedCount) . ' active seeders.</strong><br />';
+    }
+    if ($message) {
+        $message .= '<br />';
+    }
 }
 
 View::show_header('Add tokens sitewide');
-
-?>
-<div class="header">
-    <h2>Add bonus points to all enabled users</h2>
-</div>
-<div class="box pad" style="margin-left: auto; margin-right: auto; text-align: center; max-width: 40%;">
-    <?=$Message?>
-    <form class="add_form" name="fltokens" action="" method="post">
-        <input type="hidden" name="action" value="bonus_points" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-        Points to add: <input type="text" name="num_points" size="10" style="text-align: right;" /><br /><br />
-        <input type="submit" name="add_points" value="Add points" />
-    </form>
-</div>
-<br />
-<?php
+echo G::$Twig->render('admin/bonus-points.twig', [
+    'auth'    => $LoggedUser['AuthKey'],
+    'message' => $message,
+    'since'   =>  date("Y-m-d", strtotime("-120 day", time())),
+]);
 View::show_footer();
