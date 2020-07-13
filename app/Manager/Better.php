@@ -125,6 +125,7 @@ class Better extends \Gazelle\Base
                 $mode = 'artists';
                 break;
             case 'artistdiscogs':
+                $joins[] = "LEFT JOIN artist_discogs dg ON (dg.artist_id = a.ArtistID)";
                 $where[] = "(dg.artist_id IS NULL)";
                 $mode = 'artists';
                 break;
