@@ -60,7 +60,7 @@
             <table width"=100%" class="torrent_table">
                 {% for id, name in results %}
                     <tr>
-                        <td><a href="artist.php?id={{ id }}">{{ name }}</a></td>
+                        <td><a href="artist.php?artistid={{ id }}&amp;action=edit">[Edit]</a>&nbsp;&nbsp;<a href="artist.php?id={{ id }}">{{ name|raw }}</a></td>
                     </tr>
                 {% endfor %}
             </table>
