@@ -21,18 +21,18 @@ sed -i -e "14s|/path|/var/www|g" ${CONF_FILE}
 sed -i -e "16s|''|'http://localhost:34000'|" ${CONF_FILE}
 sed -i -e "17s|''|'https://localhost:3400'|" ${CONF_FILE}
 
-sed -i -e "38s/localhost/mysql/" ${CONF_FILE}
-sed -i -e "39s/''/'${MYSQL_USER}'/" ${CONF_FILE}
-sed -i -e "40s/''/'${MYSQL_PASSWORD}'/" ${CONF_FILE}
-sed -i -e "41s/''/'${MYSQL_USER}'/" ${CONF_FILE}
-sed -i -e "42s/''/'${MYSQL_PASSWORD}'/" ${CONF_FILE}
-sed -i -e "50s/.*/    ['host' => 'memcached', 'port' => 11211]/" ${CONF_FILE}
+sed -i -e "39s/localhost/mysql/" ${CONF_FILE}
+sed -i -e "40s/''/'${MYSQL_USER}'/" ${CONF_FILE}
+sed -i -e "41s/''/'${MYSQL_PASSWORD}'/" ${CONF_FILE}
+sed -i -e "42s/''/'${MYSQL_USER}'/" ${CONF_FILE}
+sed -i -e "43s/''/'${MYSQL_PASSWORD}'/" ${CONF_FILE}
+sed -i -e "51s/.*/    ['host' => 'memcached', 'port' => 11211]/" ${CONF_FILE}
 
-sed -i -e "54s/localhost/sphinxsearch/" ${CONF_FILE}
+sed -i -e "55s/localhost/sphinxsearch/" ${CONF_FILE}
 sed -i -e "s/127.0.0.1/sphinxsearch/" ${CONF_FILE}
 
-sed -i -e "63s/false/true/" ${CONF_FILE}
+sed -i -e "64s/false/true/" ${CONF_FILE}
 
-sed -i -e "83s/false/true/" ${CONF_FILE}
+sed -i -e "84s/false/true/" ${CONF_FILE}
 
 echo ""
