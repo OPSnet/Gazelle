@@ -191,7 +191,7 @@ if (!$OwnProfile) {
 <?php
 }
 
-if (check_perms('users_edit_profiles', $Class) || $LoggedUser['ID'] == $UserID) {
+if (check_perms('users_edit_profiles', $Class) || $OwnProfile) {
 ?>
         <a href="user.php?action=edit&amp;userid=<?=$UserID?>" class="brackets">Settings</a>
 <?php
@@ -222,7 +222,7 @@ if (check_perms('users_mod')) {
         <a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
 <?php
 }
-if (check_perms('users_mod') || ($LoggedUser['ID'] == $UserID && check_perms('site_user_stats'))) {
+if (check_perms('users_mod') || ($OwnProfile && check_perms('site_user_stats'))) {
 ?>
         <a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?php
@@ -456,17 +456,8 @@ if (check_paranoia_here('requestsvoted_count') || check_paranoia_here('requestsv
     $RequestsVoted = $TotalSpent = $RequestsCreated = $RequestsCreatedSpent = 0;
 }
 
-if (check_paranoia_here('uploads+')) {
-    $Uploads = $User->uploadCount();
-} else {
-    $Uploads = 0;
-}
-
-if (check_paranoia_here('artistsadded')) {
-    $ArtistsAdded = $User->artistsAdded();
-} else {
-    $ArtistsAdded = 0;
-}
+$Uploads = check_paranoia_here('uploads+') ? $User->uploadCount() : 0;
+$ArtistsAdded = check_paranoia_here('artistsadded') ? $User->artistsAdded() : 0;
 
 //Do the ranks
 $UploadedRank = UserRank::get_rank('uploaded', $Uploaded);
@@ -485,7 +476,6 @@ if ($Downloaded == 0) {
     $Ratio = round($Uploaded / $Downloaded, 2);
 }
 $OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio);
-
 ?>
         <div class="box box_info box_userinfo_percentile">
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
@@ -632,6 +622,12 @@ if ($OwnProfile || check_perms('users_override_paranoia', $Class)) { ?>
             </ul>
         </div>
 <?php
+if (check_paranoia_here('snatched')) {
+    echo G::$Twig->render('user/tag-snatch.twig', [
+        'id' => $UserID,
+        'list' => $User->tagSnatchCounts(),
+    ]);
+}
 include(__DIR__.'/community_stats.php');
 DonationsView::render_donor_stats($UserID);
 ?>
@@ -1016,7 +1012,7 @@ if (check_perms('users_mod') || $Classes[$LoggedUser['PermissionID']]['Name'] ==
             if ($CurClass['Secondary']) {
                 continue;
             }
-            elseif ($LoggedUser['ID'] != $UserID && !check_perms('users_promote_to', $Class-1) && $CurClass['Level'] == $LoggedUser['EffectiveClass']) {
+            elseif (!$OwnProfile && !check_perms('users_promote_to', $Class-1) && $CurClass['Level'] == $LoggedUser['EffectiveClass']) {
                 break;
             }
             elseif ($CurClass['Level'] > $LoggedUser['EffectiveClass']) {
