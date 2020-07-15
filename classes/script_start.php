@@ -88,6 +88,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
+    'image',
+    function ($i) {
+        return ImageTools::process($i, true);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
     'selected',
     function ($isSelected) {
         return $isSelected ? ' selected="selected"' : '';

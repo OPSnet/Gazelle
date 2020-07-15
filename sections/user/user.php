@@ -624,11 +624,11 @@ if ($OwnProfile || check_perms('users_override_paranoia', $Class)) { ?>
 <?php
 if (check_paranoia_here('snatched')) {
     echo G::$Twig->render('user/tag-snatch.twig', [
-        'id' => $UserID,
+        'id'   => $UserID,
         'list' => $User->tagSnatchCounts(),
     ]);
 }
-include(__DIR__.'/community_stats.php');
+require(__DIR__.'/community_stats.php');
 DonationsView::render_donor_stats($UserID);
 ?>
     </div>
@@ -662,47 +662,21 @@ if (!$Info) {
 DonationsView::render_profile_rewards($EnabledRewards, $ProfileRewards);
 
 if (check_paranoia_here('snatched')) {
-    $RecentSnatches = $User->recentSnatches();
-    if (count($RecentSnatches)) {
-?>
-    <table class="layout recent" id="recent_snatches" cellpadding="0" cellspacing="0" border="0">
-        <tr class="colhead">
-            <td colspan="5">Recent Snatches</td>
-        </tr>
-        <tr>
-<?php        foreach ($RecentSnatches as $recent) { ?>
-            <td>
-                <a href="torrents.php?id=<?= $recent['ID'] ?>">
-                    <img class="tooltip" title="<?= $recent['Name'] ?>" alt="<?= $recent['Name'] ?>" src="<?= ImageTools::process($recent['WikiImage'], true) ?>" width="107" />
-                </a>
-            </td>
-<?php        } ?>
-        </tr>
-    </table>
-<?php
-    }
+    echo G::$Twig->render('user/recent.twig', [
+        'id'     => $UserID,
+        'recent' => $User->recentSnatches(),
+        'title'  => 'Snatches',
+        'type'   => 'snatched',
+    ]);
 }
 
 if (check_paranoia_here('uploads')) {
-    $RecentUploads = $User->recentUploads();
-    if (count($RecentUploads)) {
-?>
-    <table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
-        <tr class="colhead">
-            <td colspan="5">Recent Uploads</td>
-        </tr>
-        <tr>
-<?php        foreach ($RecentUploads as $recent) { ?>
-            <td>
-                <a href="torrents.php?id=<?= $recent['ID'] ?>">
-                    <img class="tooltip" title="<?= $recent['Name'] ?>" alt="<?= $recent['Name'] ?>" src="<?= ImageTools::process($recent['WikiImage'], true) ?>" width="107" />
-                </a>
-            </td>
-<?php        } ?>
-        </tr>
-    </table>
-<?php
-    }
+    echo G::$Twig->render('user/recent.twig', [
+        'id'     => $UserID,
+        'recent' => $User->recentUploads(),
+        'title'  => 'Uploads',
+        'type'   => 'uploaded',
+    ]);
 }
 
 $Collages = $User->personalCollages();
@@ -756,12 +730,12 @@ foreach ($Collages as $CollageInfo) {
 
 // Linked accounts
 if (check_perms('users_mod')) {
-    include(__DIR__ . '/linkedfunctions.php');
+    require(__DIR__ . '/linkedfunctions.php');
     user_dupes_table($UserID);
 }
 
 if ((check_perms('users_view_invites')) && $Invited > 0) {
-    include(__DIR__  . '/../../classes/invite_tree.class.php');
+    require(__DIR__  . '/../../classes/invite_tree.class.php');
     $Tree = new INVITE_TREE($UserID, ['visible' => false]);
 ?>
         <div class="box" id="invitetree_box">
@@ -927,8 +901,7 @@ if (check_perms('users_mod', $Class) || $IsFLS) {
             } else {
                 $Resolver = '(unresolved)';
             }
-
-            ?>
+?>
                 <tr>
                     <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
                     <td><?=time_diff($Date, 2, true)?></td>
