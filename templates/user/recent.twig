@@ -1,0 +1,16 @@
+{% if recent %}
+<table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
+<tr class="colhead">
+    <td colspan="5"><a href="torrents.php?type={{ type }}&amp;userid={{ id }}">Recent {{ title }}</a></td>
+</tr>
+<tr>
+{% for r in recent %}
+    <td>
+        <a href="torrents.php?id={{ r.ID }}">
+        <img class="tooltip" title="{{ r.Name }}" alt="{{ r.Name }}" src="{{ r.WikiImage|image }}" width="107" />
+        </a>
+    </td>
+{% endfor %}
+    </tr>
+</table>
+{% endif %}

@@ -1,0 +1,9 @@
+<div class="box box_info box_userinfo_activity">
+    <div class="head colhead_dark">Snatched tags</div>
+    <ul class="stats nobullet">
+{% for tag in list %}
+        <li><a href="torrents.php?type=snatched&amp;userid={{ id }}&amp;tags={{ tag.name }}&amp;order=time&amp;sort=desc">{{ tag.name }}</a>
+            ({{ tag.n }})</li>
+{% endfor %}
+    </ul>
+</div>

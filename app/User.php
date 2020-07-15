@@ -849,6 +849,32 @@ class User extends Base {
         return $recent;
     }
 
+    public function tagSnatchCounts(int $limit = 8) {
+        if (($list = $this->cache->get_value('user_tag_snatch_' . $this->id)) === false) {
+            $this->db->prepared_query("
+                SELECT tg.Name AS name,
+                    tg.ID AS id,
+                    count(*) AS n
+                FROM torrents_tags tt
+                INNER JOIN tags tg ON (tg.ID = tt.TagID)
+                INNER JOIN (
+                    SELECT DISTINCT t.GroupID
+                    FROM xbt_snatched xs
+                    INNER JOIN torrents t ON (t.id = xs.fid)
+                    WHERE tstamp > unix_timestamp(now() - INTERVAL 6 MONTH)
+                        AND xs.uid = ?
+                ) SN USING (GroupID)
+                GROUP BY tg.ID
+                ORDER BY 3 DESC, 1
+                LIMIT ?
+                ", $this->id, $limit
+            );
+            $list = $this->db->to_array(false, MYSQLI_ASSOC, false);
+            $this->cache->cache_value('user_tag_snatch_' . $this->id, $list, 86400 * 90);
+        }
+        return $list;
+    }
+
     public function recentUploads(int $limit = 5) {
         if (($recent = $this->cache->get_value('user_recent_up_' . $this->id)) === false) {
             $this->db->prepared_query("

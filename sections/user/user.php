@@ -191,7 +191,7 @@ if (!$OwnProfile) {
 <?php
 }
 
-if (check_perms('users_edit_profiles', $Class) || $LoggedUser['ID'] == $UserID) {
+if (check_perms('users_edit_profiles', $Class) || $OwnProfile) {
 ?>
         <a href="user.php?action=edit&amp;userid=<?=$UserID?>" class="brackets">Settings</a>
 <?php
@@ -222,7 +222,7 @@ if (check_perms('users_mod')) {
         <a href="userhistory.php?action=token_history&amp;userid=<?=$UserID?>" class="brackets">FL tokens</a>
 <?php
 }
-if (check_perms('users_mod') || ($LoggedUser['ID'] == $UserID && check_perms('site_user_stats'))) {
+if (check_perms('users_mod') || ($OwnProfile && check_perms('site_user_stats'))) {
 ?>
         <a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?php
@@ -456,17 +456,8 @@ if (check_paranoia_here('requestsvoted_count') || check_paranoia_here('requestsv
     $RequestsVoted = $TotalSpent = $RequestsCreated = $RequestsCreatedSpent = 0;
 }
 
-if (check_paranoia_here('uploads+')) {
-    $Uploads = $User->uploadCount();
-} else {
-    $Uploads = 0;
-}
-
-if (check_paranoia_here('artistsadded')) {
-    $ArtistsAdded = $User->artistsAdded();
-} else {
-    $ArtistsAdded = 0;
-}
+$Uploads = check_paranoia_here('uploads+') ? $User->uploadCount() : 0;
+$ArtistsAdded = check_paranoia_here('artistsadded') ? $User->artistsAdded() : 0;
 
 //Do the ranks
 $UploadedRank = UserRank::get_rank('uploaded', $Uploaded);
@@ -485,7 +476,6 @@ if ($Downloaded == 0) {
     $Ratio = round($Uploaded / $Downloaded, 2);
 }
 $OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio);
-
 ?>
         <div class="box box_info box_userinfo_percentile">
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
@@ -632,7 +622,13 @@ if ($OwnProfile || check_perms('users_override_paranoia', $Class)) { ?>
             </ul>
         </div>
 <?php
-include(__DIR__.'/community_stats.php');
+if (check_paranoia_here('snatched')) {
+    echo G::$Twig->render('user/tag-snatch.twig', [
+        'id'   => $UserID,
+        'list' => $User->tagSnatchCounts(),
+    ]);
+}
+require(__DIR__.'/community_stats.php');
 DonationsView::render_donor_stats($UserID);
 ?>
     </div>
@@ -666,47 +662,21 @@ if (!$Info) {
 DonationsView::render_profile_rewards($EnabledRewards, $ProfileRewards);
 
 if (check_paranoia_here('snatched')) {
-    $RecentSnatches = $User->recentSnatches();
-    if (count($RecentSnatches)) {
-?>
-    <table class="layout recent" id="recent_snatches" cellpadding="0" cellspacing="0" border="0">
-        <tr class="colhead">
-            <td colspan="5">Recent Snatches</td>
-        </tr>
-        <tr>
-<?php        foreach ($RecentSnatches as $recent) { ?>
-            <td>
-                <a href="torrents.php?id=<?= $recent['ID'] ?>">
-                    <img class="tooltip" title="<?= $recent['Name'] ?>" alt="<?= $recent['Name'] ?>" src="<?= ImageTools::process($recent['WikiImage'], true) ?>" width="107" />
-                </a>
-            </td>
-<?php        } ?>
-        </tr>
-    </table>
-<?php
-    }
+    echo G::$Twig->render('user/recent.twig', [
+        'id'     => $UserID,
+        'recent' => $User->recentSnatches(),
+        'title'  => 'Snatches',
+        'type'   => 'snatched',
+    ]);
 }
 
 if (check_paranoia_here('uploads')) {
-    $RecentUploads = $User->recentUploads();
-    if (count($RecentUploads)) {
-?>
-    <table class="layout recent" id="recent_uploads" cellpadding="0" cellspacing="0" border="0">
-        <tr class="colhead">
-            <td colspan="5">Recent Uploads</td>
-        </tr>
-        <tr>
-<?php        foreach ($RecentUploads as $recent) { ?>
-            <td>
-                <a href="torrents.php?id=<?= $recent['ID'] ?>">
-                    <img class="tooltip" title="<?= $recent['Name'] ?>" alt="<?= $recent['Name'] ?>" src="<?= ImageTools::process($recent['WikiImage'], true) ?>" width="107" />
-                </a>
-            </td>
-<?php        } ?>
-        </tr>
-    </table>
-<?php
-    }
+    echo G::$Twig->render('user/recent.twig', [
+        'id'     => $UserID,
+        'recent' => $User->recentUploads(),
+        'title'  => 'Uploads',
+        'type'   => 'uploaded',
+    ]);
 }
 
 $Collages = $User->personalCollages();
@@ -760,12 +730,12 @@ foreach ($Collages as $CollageInfo) {
 
 // Linked accounts
 if (check_perms('users_mod')) {
-    include(__DIR__ . '/linkedfunctions.php');
+    require(__DIR__ . '/linkedfunctions.php');
     user_dupes_table($UserID);
 }
 
 if ((check_perms('users_view_invites')) && $Invited > 0) {
-    include(__DIR__  . '/../../classes/invite_tree.class.php');
+    require(__DIR__  . '/../../classes/invite_tree.class.php');
     $Tree = new INVITE_TREE($UserID, ['visible' => false]);
 ?>
         <div class="box" id="invitetree_box">
@@ -931,8 +901,7 @@ if (check_perms('users_mod', $Class) || $IsFLS) {
             } else {
                 $Resolver = '(unresolved)';
             }
-
-            ?>
+?>
                 <tr>
                     <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
                     <td><?=time_diff($Date, 2, true)?></td>
@@ -1016,7 +985,7 @@ if (check_perms('users_mod') || $Classes[$LoggedUser['PermissionID']]['Name'] ==
             if ($CurClass['Secondary']) {
                 continue;
             }
-            elseif ($LoggedUser['ID'] != $UserID && !check_perms('users_promote_to', $Class-1) && $CurClass['Level'] == $LoggedUser['EffectiveClass']) {
+            elseif (!$OwnProfile && !check_perms('users_promote_to', $Class-1) && $CurClass['Level'] == $LoggedUser['EffectiveClass']) {
                 break;
             }
             elseif ($CurClass['Level'] > $LoggedUser['EffectiveClass']) {
