@@ -26,6 +26,7 @@ class Text {
         'forum'      => 0,
         'headline'   => 1,
         'hide'       => 1,
+        'hr'         => 0,
         'i'          => 0,
         'img'        => 1,
         'important'  => 0,
@@ -472,6 +473,9 @@ class Text {
             if ($TagName == 'img' && !empty($Tag[3][0])) { //[img=...]
                 $Block = ''; // Nothing inside this tag
                 // Don't need to touch $i
+            } elseif ($TagName == 'hr') {
+                $Block = ''; // Nothing inside this tag either
+                // Don't need to touch $i
             } elseif ($TagName == 'inlineurl') { // We did a big replace early on to turn http:// into [inlineurl]http://
 
                 // Let's say the block can stop at a newline or a space
@@ -782,6 +786,9 @@ class Text {
                     break;
                 case 's':
                     $Str .= '<span style="text-decoration: line-through;">'.self::to_html($Block['Val'], $Rules).'</span>';
+                    break;
+                case 'hr':
+                    $Str .= '<hr />';
                     break;
                 case 'important':
                     $Str .= '<strong class="important_text">'.self::to_html($Block['Val'], $Rules).'</strong>';
