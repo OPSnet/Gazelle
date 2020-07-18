@@ -483,8 +483,8 @@ class Donation extends \Gazelle\Base {
             }
             $this->updateTitle($UserID, $_POST['donor_title_prefix'], $_POST['donor_title_suffix'], $_POST['donor_title_comma']);
         }
-        $ranks = count($insert);
-        for ($i = 1; $i <= $ranks; $i++) {
+
+        for ($i = 1; $i < min(MAX_RANK, $Rank); $i++) {
             if (isset($_POST["profile_title_" . $i]) && isset($_POST["profile_info_" . $i])) {
                 $insert[] = "ProfileInfoTitle" . $i;
                 $insert[] = "ProfileInfo" . $i;
@@ -501,7 +501,7 @@ class Donation extends \Gazelle\Base {
                 }
             }
         }
-        if ($ranks) {
+        if (count($insert) > 0) {
             $this->db->prepared_query("
                 INSERT INTO donor_rewards
                        (UserID, " . implode(', ', $insert) . ")
