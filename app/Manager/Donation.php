@@ -488,8 +488,8 @@ class Donation extends \Gazelle\Base {
             if (isset($_POST["profile_title_" . $i]) && isset($_POST["profile_info_" . $i])) {
                 $insert[] = "ProfileInfoTitle" . $i;
                 $insert[] = "ProfileInfo" . $i;
-                $args[] = trim($_POST["profile_info_" . $i]);
                 $args[] = trim($_POST["profile_title_" . $i]);
+                $args[] = trim($_POST["profile_info_" . $i]);
             }
         }
         if ($SpecialRank >= 2) {
