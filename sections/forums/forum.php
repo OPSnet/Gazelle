@@ -38,7 +38,7 @@ foreach ($forumToc as &$thread) {
         $thread['last_read_page'] = (int)$userLastRead[$thread['ID']]['Page'];
         $thread['last_read_post'] = $userLastRead[$thread['ID']]['PostID'];
         $catchup = $userLastRead[$thread['ID']]['PostID'] >= $thread['LastPostID']
-            && strtotime($thread['LastPostTime']) > $LoggedUser['CatchupTime'];
+            || $LoggedUser['CatchupTime'] >= strtotime($thread['LastPostTime']);
         $thread['is_read'] = true;
     } else {
         $thread['last_read_page'] = null;
