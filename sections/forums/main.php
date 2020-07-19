@@ -28,7 +28,7 @@ foreach ($toc as $category => $forumList) {
         } else {
             $lastReadPage = null;
             $lastReadPost = null;
-            $catchup = false;
+            $catchup = $LoggedUser['CatchupTime'] >= strtotime($f['LastPostTime']);
             $isRead = false;
         }
 

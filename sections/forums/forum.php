@@ -43,7 +43,7 @@ foreach ($forumToc as &$thread) {
     } else {
         $thread['last_read_page'] = null;
         $thread['last_read_post'] = null;
-        $catchup = false;
+        $catchup = $LoggedUser['CatchupTime'] >= strtotime($thread['LastPostTime']);
         $thread['is_read'] = false;
     }
     $thread['icon_class'] = ((!$thread['IsLocked'] || $thread['IsSticky']) && $catchup ? 'read' : 'unread')
