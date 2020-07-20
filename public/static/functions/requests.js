@@ -206,7 +206,7 @@ function Toggle(id, disable) {
         }
     }
 
-    if (id == "formats") {
+    if (id === "formats" || id === "media") {
         ToggleLogCue();
     }
 }

@@ -332,7 +332,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
             } ?>
                         <input type="checkbox" name="media[]" value="<?=$Key?>" id="media_<?=$Key?>"
                             <?=(!empty($MediaArray) && in_array($Key, $MediaArray) ? ' checked="checked" ' : '')?>
-                        onchange="if (!this.checked) { $('#toggle_media').raw().checked = false; }" /><label for="media_<?=$Key?>"> <?=$Val?></label>
+                        onchange="ToggleLogCue(); if (!this.checked) { $('#toggle_media').raw().checked = false; }" /><label for="media_<?=$Key?>"> <?=$Val?></label>
 <?php        } ?>
                     </td>
                 </tr>
