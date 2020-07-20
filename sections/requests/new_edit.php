@@ -394,6 +394,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                         <input type="hidden" id="amount" name="amount" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
                         <input type="hidden" id="current_uploaded" value="<?=$LoggedUser['BytesUploaded']?>" />
                         <input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
+                        <input type='hidden' id='request_tax' value="<?=$RequestTax?>" />
                         <?= $RequestTax > 0
                             ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span></strong><br />'
                             : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span>'
