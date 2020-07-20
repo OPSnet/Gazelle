@@ -391,7 +391,12 @@ else {
         error(404);
     }
     else {
-        require($file);
+        try {
+            require($file);
+        }
+        catch (\DB_MYSQL_Exception $e) {
+            error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
+        }
     }
 }
 
@@ -406,6 +411,9 @@ if (G::$Router->hasRoutes()) {
     }
     catch (\Gazelle\Exception\InvalidAccessException $exception) {
         error(403);
+    }
+    catch (\DB_MYSQL_Exception $e) {
+        error("That was not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
     }
 }
 
