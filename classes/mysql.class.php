@@ -116,7 +116,7 @@ set_query_id($ResultSet)
 *///---------------------------------------------------------------------------------
 
 if (!extension_loaded('mysqli')) {
-    die('Mysqli Extension not loaded.');
+    throw new Exception('Mysqli Extension not loaded.');
 }
 
 function enum_boolean($bool) {
@@ -147,6 +147,8 @@ function db_array($Array, $DontEscape = [], $Quote = false) {
     }
     return $Array;
 }
+
+class DB_MYSQL_Exception extends Exception {}
 
 //TODO: revisit access levels once Drone is replaced by ZeRobot
 class DB_MYSQL {
@@ -185,24 +187,15 @@ class DB_MYSQL {
         global $Debug, $argv;
         $DBError = 'MySQL: '.strval($Msg).' SQL error: '.strval($this->Errno).' ('.strval($this->Error).')';
         if ($this->Errno == 1194) {
-            send_irc('PRIVMSG '.ADMIN_CHAN.' :'.$this->Error);
+            send_irc('PRIVMSG ' . ADMIN_CHAN . ' :' . $DBError);
         }
-        /*if ($this->Errno == 1194) {
-            preg_match("Table '(\S+)' is marked as crashed and should be repaired", $this->Error, $Matches);
-        } */
         $Debug->analysis('!dev DB Error', $DBError, 3600 * 24);
         if (DEBUG_MODE || check_perms('site_debug') || isset($argv[1])) {
-            echo '<pre>'.display_str($DBError).'</pre>';
             if (DEBUG_MODE || check_perms('site_debug')) {
                 print_r($this->Queries);
             }
-            echo "<pre>";
-            debug_print_backtrace();
-            echo "</pre>";
-            die();
-        } else {
-            error('-1');
         }
+        throw new DB_MYSQL_Exception($DBError);
     }
 
     function connect() {
@@ -281,8 +274,10 @@ class DB_MYSQL {
         $this->setup_query();
         $this->PreparedQuery = $Query;
         $this->Statement = $this->LinkID->prepare($Query);
+        $this->Errno = $this->LinkID->errno;
+        $this->Error = $this->LinkID->error;
         if ($this->Statement === false) {
-            $this->halt("Invalid Query: [$Query] " . mysqli_error($this->LinkID));
+            $this->halt(sprintf("Invalid Query: (%d) %s [$Query]", $this->Errno, $this->Error));
         }
         return $this->Statement;
     }

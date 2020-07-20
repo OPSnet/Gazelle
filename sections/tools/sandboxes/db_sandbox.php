@@ -31,17 +31,20 @@ View::show_header($Title);
 <?php
 
 if (!empty($_POST['query'])) {
-    G::$DB->prepared_query($_POST['query']);
-    $Record = G::$DB->fetch_record();
-    $Headers = [];
-    $Row = [];
-    foreach ($Record as $Key => $Value) {
-        if (!is_int($Key)) {
-            $Headers[] = $Key;
-            $Row[] = $Value;
-        }
+    try {
+        $success = true;
+        $DB->prepared_query($_POST['query']);
     }
-
+    catch (DB_MYSQL_Exception $e) {
+        $success = false;
+?>
+    <div class="thin box pad">
+        <h3 style="display:inline">Query error</h3>
+        <div>Mysql error: <?= display_str($e->getMessage()) ?></div>
+    </div>
+<?php
+    }
+    if ($success) {
 ?>
 <div class="thin" style="overflow-x: scroll">
     <div>
@@ -49,10 +52,21 @@ if (!empty($_POST['query'])) {
     </div>
     <table>
 <?php
+
+$Record = $DB->fetch_record();
+$Headers = [];
+$Row = [];
+foreach ($Record as $Key => $Value) {
+    if (!is_int($Key)) {
+        $Headers[] = $Key;
+        $Row[] = $Value;
+    }
+}
+
 print_row($Headers, 'colhead');
 print_row($Row, 'rowb');
 $Cnt = 0;
-while ($Record = G::$DB->fetch_record()) {
+while ($Record = $DB->fetch_record()) {
     $Row = [];
     foreach ($Record as $Key => $Value) {
         if (!is_int($Key)) {
@@ -66,5 +80,6 @@ while ($Record = G::$DB->fetch_record()) {
 </div>
 
 <?php
+    }
 }
 View::show_footer();
