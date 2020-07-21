@@ -321,7 +321,7 @@ class Notification extends \Gazelle\Base {
         }
         if (($latestTime = $this->cache->get_value('staff_blog_latest_time')) === false) {
             $latestTime = $this->db->scalar("
-                SELECT unix_timestamp(max((Time)) FROM staff_blog
+                SELECT unix_timestamp(max(Time)) FROM staff_blog
             ");
             if (!$latestTime) {
                 $latestTime = 0;
