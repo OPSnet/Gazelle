@@ -215,7 +215,7 @@ function audio_file_map($fileList) {
             continue;
         }
         $ext = substr($info['ext'], 1); // skip over period
-        if (in_array($ext, ['flac', 'mp3', 'ac3'])) {
+        if (in_array($ext, ['ac3', 'flac', 'm4a', 'mp3'])) {
             if (!isset($map[$ext])) {
                 $map[$ext] = 0;
             }
