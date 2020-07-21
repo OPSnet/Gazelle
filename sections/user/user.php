@@ -305,7 +305,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
             <div class="head colhead_dark">Statistics</div>
             <ul class="stats nobullet">
                 <li>Joined: <?=$JoinedDate?></li>
-<?php    if (($Override = check_paranoia_here('lastseen'))) { ?>
+<?php if (($Override = check_paranoia_here('lastseen'))) { ?>
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Last seen: <?= time_diff($LastAccess) ?></li>
 <?php
     }
@@ -313,21 +313,6 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
 ?>
                 <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded, 5)?>">Uploaded: <?=Format::get_size($Uploaded)?></li>
 <?php
-        if ($OwnProfile || check_perms('users_mod')) {
-            $recovered = $DB->scalar("
-                SELECT final FROM users_buffer_log WHERE opsid = ?
-                ", $UserID
-            );
-            if ($recovered) {
-?>
-                <li class="tooltip" title="<?= "Recovered from previous site: " . Format::get_size($recovered, 5)?>">Recovered: <?=Format::get_size($recovered)?></li>
-<?php
-            } elseif (check_perms('users_mod')) {
-?>
-                <li class="tooltip paranoia_override">Recovered: no record</li>
-<?php
-            }
-        }
     }
     if (($Override = check_paranoia_here('downloaded'))) {
 ?>
@@ -343,6 +328,21 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
 ?>
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Ratio: <?=Format::get_ratio_html($Uploaded, $Downloaded)?></li>
 <?php
+    }
+    if ($OwnProfile || check_perms('users_mod')) {
+        $recovered = $DB->scalar("
+            SELECT final FROM users_buffer_log WHERE opsid = ?
+            ", $UserID
+        );
+        if ($recovered) {
+?>
+            <li class="tooltip" title="<?= "Recovered from previous site: " . Format::get_size($recovered, 5)?>">Recovered: <?=Format::get_size($recovered)?></li>
+<?php
+        } elseif (check_perms('users_mod')) {
+?>
+            <li class="tooltip paranoia_override">Recovered: no record</li>
+<?php
+        }
     }
     if (($Override = check_paranoia_here('requiredratio')) && isset($RequiredRatio)) {
 ?>
@@ -366,7 +366,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
         } else {
             $text = 'Points Per Hour';
         }
-                ?></li>
+        ?></li>
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><?= $text ?>: <?=number_format($BonusPointsPerHour)?></li>
 <?php
     }
