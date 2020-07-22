@@ -428,7 +428,7 @@ class Notification extends \Gazelle\Base {
                 ON DUPLICATE KEY UPDATE
                     PushService = ?,
                     PushOptions = ?
-                ", $this->UserID, $service, $options,
+                ", $this->userId, $service, $options,
                     $service, $options
             );
         }
@@ -522,7 +522,7 @@ class Notification extends \Gazelle\Base {
             FROM users_push_notifications
             WHERE PushService != 0
                 AND UserID != ?
-            ", $this->UserID
+            ", $this->userId
         );
         return $this->db->collect("UserID");
     }
