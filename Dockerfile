@@ -36,6 +36,8 @@ RUN pip3 install chardet eac-logchecker xld-logchecker
 
 # PHP layer
 RUN apt-get install -y --no-install-recommends \
+        php \
+        php-bcmath \
         php7.3-cli \
         php7.3-curl \
         php7.3-fpm \
