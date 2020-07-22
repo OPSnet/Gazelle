@@ -43,7 +43,7 @@ class Bookmark extends Base {
      */
     public function allBookmarks(string $type, $userId) {
         $key = "bookmarks_{$type}_{$userId}";
-        if (($Bookmarks = $this->cache->get_value($key)) === false) {
+        if (($all = $this->cache->get_value($key)) === false) {
             list ($table, $column) = $this->schema($type);
             $q = $this->db->get_query_id();
             $this->db->prepared_query("
