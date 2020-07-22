@@ -343,7 +343,7 @@ function make_utf8($Str) {
 function randomString($len = 32) {
     $alphabet = str_split('abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789');
     $max = count($alphabet);
-    $mask = (int)pow(2, ceil(log($size, 2))) - 1;
+    $mask = (int)pow(2, ceil(log($len, 2))) - 1;
     $out = '';
     while (strlen($out) < $len) {
         $n = ord(openssl_random_pseudo_bytes(1)) & $mask;
