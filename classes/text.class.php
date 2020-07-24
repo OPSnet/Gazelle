@@ -868,7 +868,7 @@ class Text {
                 case 'align':
                     $ValidAttribs = ['left', 'center', 'right'];
                     if (!in_array($Block['Attr'], $ValidAttribs)) {
-                        $Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val']).'[/align]';
+                        $Str .= '[align='.$Block['Attr'].']'.self::to_html($Block['Val'], $Rules).'[/align]';
                     } else {
                         $Str .= '<div style="text-align: '.$Block['Attr'].';">'.self::to_html($Block['Val'], $Rules).'</div>';
                     }
