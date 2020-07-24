@@ -31,7 +31,7 @@
         {% if r.artistId %}
     <li><a href="artist.php?id={{ r.artistId }}">{{ r.artistName }}</a> -
         {% endif %}
-    <a href="requests.php?action=view&id={{ r.requestId }}">{{ r.requestName }}</a></li>
+    <a href="requests.php?action=view&amp;id={{ r.requestId }}">{{ r.requestName }}</a></li>
     {% endfor %}
     </ul></td>
 {% endif %}
