@@ -23,7 +23,7 @@
         <td rowspan="2" style="vertical-align: bottom">Primary Class {{ star|raw }} <br /><br />Privilege</td>
 {% for c in class_list %}
         <td style="padding: 0;"><div class="rot90-container"><div class="rot90">
-            <a href="tools.php?action=permissions&id={{ c.id }}">{{ c.name }}</a>
+            <a href="tools.php?action=permissions&amp;id={{ c.id }}">{{ c.name }}</a>
         </div></div></td>
 {% endfor %}
     </tr>
@@ -37,7 +37,7 @@
         <td{{ p.orphan ? ' title="This is an orphaned privilege" style="color: orangered; font-weight: bold;"' : '' }} title="{{ p.description }}">{{ p.name }}</td>
 {% for c in class_list %}
         <td style="text-align: center;" title="{{ c.name }} {{ c.id in p.can ? 'can' : 'cannot' }} {{ p.description }}">
-            <a href="tools.php?action=permissions&id={{ c.id }}">{{ c.id in p.can ? tick : '&middot;' }}</a></td>
+            <a href="tools.php?action=permissions&amp;id={{ c.id }}">{{ c.id in p.can ? tick : '&middot;' }}</a></td>
 {% endfor %}
     </tr>
 {% endfor %}
