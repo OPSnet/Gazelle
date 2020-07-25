@@ -89,11 +89,11 @@ class User extends Base {
         );
     }
 
-    public function idFromUsername(string $username): int {
+    public function idFromUsername(string $username) {
         return $this->db->scalar("
             SELECT ID
             FROM users_main
-            WHERE ID = ?
+            WHERE Username = ?
             ", $username
         );
     }

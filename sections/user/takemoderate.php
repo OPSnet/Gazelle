@@ -1,7 +1,4 @@
 <?php
-/*************************************************************************\
-//--------------Take moderation -----------------------------------------//
-\*************************************************************************/
 
 // Are they being tricky blighters?
 $UserID = (int)$_POST['userid'];
@@ -260,37 +257,33 @@ if ($Classes[$Class]['Level'] != $Cur['Class']
         $Cache->delete_value('staff_ids');
     }
     $Cache->delete_value("donor_info_$UserID");
+}
 
-    if ($Username !== $Cur['Username'] && check_perms('users_edit_usernames', $Cur['Class'] - 1)) {
-        if (strtolower($Username) !== strtolower($Cur['Username'])) {
-            if ($this->idFromUsername($Username)) {
-                error("Username already in use by <a href=\"user.php?id=$inUse\">$Username</a>");
-                header("Location: user.php?id=$UserID");
-            } else {
-                $set[] = 'Username = ?';
-                $args[] = $Username;
-                $EditSummary[] = "username changed from ".$Cur['Username']." to $Username";
-            }
-        } elseif (in_array($Username, ['0', '1'])) {
-            error('You cannot set a username of "0" or "1".');
-            header("Location: user.php?id=$UserID");
-        } else {
-            $set[] = 'Username = ?';
-            $args[] = $Username;
-            $EditSummary[] = "username changed from ".$Cur['Username']." to $Username";
-        }
+if ($Username !== $Cur['Username'] && check_perms('users_edit_usernames', $Cur['Class'] - 1)) {
+    if (in_array($Username, ['0', '1'])) {
+        error('You cannot set a username of "0" or "1".');
+        header("Location: user.php?id=$UserID");
+        exit;
+    } elseif (($inUse = $user->idFromUsername($Username)) > 0) {
+        error("Username already in use by <a href=\"user.php?id=$inUse\">$Username</a>");
+        header("Location: user.php?id=$inUse");
+        exit;
+    } else {
+        $set[] = 'Username = ?';
+        $args[] = $Username;
+        $EditSummary[] = "username changed from ".$Cur['Username']." to $Username";
     }
+}
 
-    if ($Title != $Cur['Title'] && check_perms('users_edit_titles')) {
-        // Using the unescaped value for the test to avoid confusion
-        if (mb_strlen($_POST['Title']) > 1024) {
-            error("Custom titles have a maximum length of 1,024 characters.");
-            header("Location: user.php?id=$UserID");
-        } else {
-            $set[] = 'Title = ?';
-            $args[] = $Title;
-            $EditSummary[] = "title changed to [code]{$Title}[/code]";
-        }
+if ($Title != $Cur['Title'] && check_perms('users_edit_titles')) {
+    // Using the unescaped value for the test to avoid confusion
+    if (mb_strlen($_POST['Title']) > 1024) {
+        error("Custom titles have a maximum length of 1,024 characters.");
+        header("Location: user.php?id=$UserID");
+    } else {
+        $set[] = 'Title = ?';
+        $args[] = $Title;
+        $EditSummary[] = "title changed to [code]{$Title}[/code]";
     }
 }
 
@@ -564,7 +557,7 @@ if ($MergeStatsFrom && check_perms('users_edit_ratio')) {
 
 if ($ChangePassword && check_perms('users_edit_password')) {
     $set[] = "PassHash = ?";
-    $args[] = Users::make_password_hash($Pass);
+    $args[] = Users::make_password_hash($ChangePassword);
     $user->logout();
     $EditSummary[] = 'password reset';
 }
