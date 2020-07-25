@@ -2,8 +2,8 @@
 /**
  * New transcode module:
  * $_GET['filter'] determines which torrents should be shown and can be empty/all (default), uploaded, snatched or seeding
- * $_GET['target'] further filters which transcodes one would like to do and can be empty/any (default), v0, v2, 320 or all
- *  Here, 'any' means that at least one of the formats V0, V2 and 320 is missing and 'all' means that all of them are missing.
+ * $_GET['target'] further filters which transcodes one would like to do and can be empty/any (default), v0, 320 or all
+ *  Here, 'any' means that at least one of the formats V0 and/or 320 is missing and 'all' means that all of them are missing.
  *  'v0', etc. mean that this specific format is missing (but others might be present).
  *
  * Furthermore, there's $_GET['userid'] which allows to see the page as a different user would see it (specifically relevant for uploaded/snatched/seeding).
@@ -22,10 +22,10 @@ if (!empty($_GET['userid']) && is_number($_GET['userid'])) {
 if (empty($_GET['filter']) || !in_array($_GET['filter'], ['uploaded', 'seeding', 'snatched'])) {
     $_GET['filter'] = 'all';
 }
-if (empty($_GET['target']) || !in_array($_GET['target'], ['v0', 'v2', '320', 'all'])) {
+if (empty($_GET['target']) || !in_array($_GET['target'], ['v0', '320', 'all'])) {
     $_GET['target'] = 'any';
 }
-$encodings = ['v0' => 'V0 (VBR)', 'v2' => 'V2 (VBR)', '320' => '320'];
+$encodings = ['v0' => 'V0 (VBR)', '320' => '320'];
 
 function transcode_init_sphql() {
     // Initializes a basic SphinxqlQuery object
@@ -36,15 +36,15 @@ function transcode_init_sphql() {
         ->where_match('FLAC', 'format')
         ->order_by('RAND()')
         ->limit(0, TORRENTS_PER_PAGE, TORRENTS_PER_PAGE);
-    if (in_array($_GET['target'], ['v0', 'v2', '320'])) {
-        // V0/V2/320 is missing
+    if (in_array($_GET['target'], ['v0', '320'])) {
+        // V0/320 is missing
         $sqlQL->where_match('!'.$_GET['target'], 'encoding', false);
     } elseif ($_GET['target'] === 'all') {
         // all transcodes are missing
-        $sqlQL->where_match('!(v0 | v2 | 320)', 'encoding', false);
+        $sqlQL->where_match('!(v0 | 320)', 'encoding', false);
     } else {
         // any transcode is missing
-        $sqlQL->where_match('!(v0 v2 320)', 'encoding', false);
+        $sqlQL->where_match('!(v0 320)', 'encoding', false);
     }
     if (!empty($_GET['search'])) {
         $sqlQL->where_match($_GET['search'], '(groupname,artistname,year,taglist)');
@@ -197,7 +197,6 @@ $counter = [
     'total' => 0, //how many FLAC torrents can be transcoded?
     'miss_total' => 0, //how many transcodes are missing?
     'miss_V0 (VBR)' => 0, //how many V0 transcodes are missing?
-    'miss_V2 (VBR)' => 0, //how many V2 transcodes are missing?
     'miss_320' => 0, //how many 320 transcodes are missing?
     'ids' => []
 ];
@@ -257,7 +256,6 @@ function selected($val) {
                     <select name="target">
                         <option value="any"<?=selected($_GET['target'] == 'any')?>>Any transcode missing</option>
                         <option value="v0"<?=selected($_GET['target'] == 'v0')?>>V0 missing</option>
-                        <option value="v2"<?=selected($_GET['target'] == 'v2')?>>V2 missing</option>
                         <option value="320"<?=selected($_GET['target'] == '320')?>>320 missing</option>
                         <option value="all"<?=selected($_GET['target'] == 'all')?>>All transcodes missing</option>
                     </select>
@@ -279,7 +277,7 @@ function selected($val) {
 
             Number of perfect FLACs you can transcode: <?=number_format($counter['total'])?><br />
             Number of missing transcodes: <?=number_format($counter['miss_total'])?><br />
-            Number of missing V2 / V0 / 320 transcodes: <?=number_format($counter['miss_V2 (VBR)'])?> / <?=number_format($counter['miss_V0 (VBR)'])?> / <?=number_format($counter['miss_320'])?>
+            Number of missing V0 / 320 transcodes: <?=number_format($counter['miss_V0 (VBR)'])?> / <?=number_format($counter['miss_320'])?>
 <?php
 if (check_perms('zip_downloader') && count($counter['ids']) > 1) {
     $idList = implode(',', $counter['ids']);
@@ -295,7 +293,6 @@ if (check_perms('zip_downloader') && count($counter['ids']) > 1) {
     <table width="100%" class="torrent_table">
         <tr class="colhead">
             <td>Torrent</td>
-            <td>V2</td>
             <td>V0</td>
             <td>320</td>
         </tr>
@@ -343,7 +340,6 @@ if ($resultCount == 0) { ?>
                 <div class="torrent_info"><?=$edition['EditionName']?></div>
                 <div class="tags"><?=$torrentTags->format('better.php?action=transcode&tags=')?></div>
             </td>
-            <td><?=(isset($edition['MP3s']['V2 (VBR)']) ? '<strong class="important_text_alt">YES</strong>' : '<strong class="important_text">NO</strong>')?></td>
             <td><?=(isset($edition['MP3s']['V0 (VBR)']) ? '<strong class="important_text_alt">YES</strong>' : '<strong class="important_text">NO</strong>')?></td>
             <td><?=(isset($edition['MP3s']['320']) ? '<strong class="important_text_alt">YES</strong>' : '<strong class="important_text">NO</strong>')?></td>
         </tr>
