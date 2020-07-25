@@ -1,12 +1,12 @@
 <?php
 enforce_login();
-$TorrentID = (int) $_GET['torrentid'];
-if (!isset($TorrentID) || empty($TorrentID)) {
+$TorrentID = (int)$_GET['torrentid'];
+if ($TorrentID < 1) {
     error(403);
 }
 $LogScore = isset($_GET['logscore']) ? intval($_GET['logscore']) : 0;
 $DB->prepared_query('
-    SELECT LogID, Details, Score, `Checksum`, Adjusted, AdjustedBy, AdjustedScore, AdjustedChecksum, AdjustmentReason, AdjustmentDetails, Log
+    SELECT LogID, Score, `Checksum`, Adjusted, AdjustedBy, AdjustedScore, AdjustedChecksum, AdjustmentReason, AdjustmentDetails, Details
     FROM torrents_logs
     WHERE TorrentID = ?
     ', $TorrentID

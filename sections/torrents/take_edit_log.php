@@ -7,7 +7,7 @@ if (!check_perms('users_mod')) {
 $TorrentID = intval($_POST['torrentid']);
 $LogID = intval($_POST['logid']);
 
-list($GroupID, $Checksum) = $DB->row("
+[$GroupID, $Checksum] = $DB->row("
     SELECT t.GroupID, tl.Checksum
     FROM torrents_logs tl
     INNER JOIN torrents t ON (tl.TorrentID = t.ID)

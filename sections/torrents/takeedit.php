@@ -276,11 +276,11 @@ if (count($_FILES['logfiles']['name']) > 0) {
 
         $DB->prepared_query('
             INSERT INTO torrents_logs
-                   (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Log, Details)
-            VALUES (?,         ?,      ?,         ?,        ?,      ?,              ?,         ?,             ?,                 ?,   ?)
+                   (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
+            VALUES (?,         ?,      ?,         ?,        ?,      ?,              ?,         ?,             ?,                 ?)
             ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
                 $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
-                Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
+                Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
         );
         $LogID = $DB->inserted_id();
         $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);
@@ -294,14 +294,14 @@ $SQL = "UPDATE torrents AS t";
 if ($logfiles) {
     $SQL .= "
     LEFT JOIN (
-      SELECT
-          TorrentID,
-          MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-          MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+        SELECT
+            TorrentID,
+            min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+            min(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
         FROM torrents_logs
-        WHERE TorrentID = {$TorrentID}
+        TorrentID = {$TorrentID}
         GROUP BY TorrentID
-       ) AS tl ON t.ID = tl.TorrentID
+    ) AS tl ON (t.ID = tl.TorrentID)
 ";
 }
 $SQL .= "

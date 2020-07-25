@@ -32,10 +32,10 @@ if (!$TorrentID) {
     error('Invalid torrent id.');
 }
 
-$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+$ripFiler = new Gazelle\File\RipLog;
 $ripFiler->remove([$TorrentID, null]);
 
-$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$htmlFiler = new Gazelle\File\RipLogHTML;
 $htmlFiler->remove([$TorrentID, null]);
 
 $DB->prepared_query('
@@ -43,12 +43,12 @@ $DB->prepared_query('
     ', $TorrentID
 );
 
-$logfileSummary = new \Gazelle\LogfileSummary;
+$logfileSummary = new Gazelle\LogfileSummary;
 foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
     if (!$_FILES['logfiles']['size'][$Pos]) {
         break;
     }
-    $logfile = new \Gazelle\Logfile(
+    $logfile = new Gazelle\Logfile(
         $_FILES['logfiles']['tmp_name'][$Pos],
         $_FILES['logfiles']['name'][$Pos]
     );
@@ -56,11 +56,11 @@ foreach ($_FILES['logfiles']['name'] as $Pos => $File) {
 
     $DB->prepared_query('
         INSERT INTO torrents_logs
-               (TorrentID, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, `Log`, Details)
-        VALUES (?,         ?,      ?,          ?,         ?,      ?,              ?,         ?,             ?,                  ?,    ?)
+               (TorrentID, Score, `Checksum`, `FileName`, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
+        VALUES (?,         ?,      ?,          ?,         ?,      ?,              ?,         ?,             ?,                 ?)
         ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(), $logfile->ripper(),
             $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
-            Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
+            Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
     );
     $LogID = $DB->inserted_id();
 

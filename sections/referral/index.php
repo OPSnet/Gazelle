@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <?php
 // redirect if referrals are currently closed, or no partner sites
-$ReferralManager = new Gazelle\Manager\Referral($DB, $Cache);
+$ReferralManager = new Gazelle\Manager\Referral;
 $Accounts = $ReferralManager->getActiveAccounts();
 
 if (!defined('OPEN_EXTERNAL_REFERRALS') || !OPEN_EXTERNAL_REFERRALS || !count($Accounts) || $ReferralManager->readOnly) {

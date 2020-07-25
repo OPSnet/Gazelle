@@ -141,7 +141,6 @@ class Torrents {
                         LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
                         LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
                         LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
-                        LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
                     WHERE t.GroupID IN ($placeholders)
                     ORDER BY t.GroupID, t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
                             t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID",
@@ -1196,22 +1195,25 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
      */
     public static function clear_log($TorrentID, $LogID) {
         G::$DB->prepared_query("
-            DELETE FROM torrents_logs WHERE TorrentID=? AND LogID=?
+            DELETE FROM torrents_logs WHERE TorrentID = ? AND LogID = ?
             ", $TorrentID, $LogID
         );
         return G::$DB->affected_rows();
     }
 
     public static function set_logscore($TorrentID, $GroupID) {
-        G::$DB->prepared_query("
-            SELECT COUNT(*) FROM torrents_logs WHERE TorrentID=?
+        $count = G::$DB->scalar("
+            SELECT COUNT(*) FROM torrents_logs WHERE TorrentID = ?
             ", $TorrentID
         );
 
-        list($count) = G::$DB->fetch_record();
         if (!$count) {
             G::$DB->prepared_query("
-                UPDATE torrents SET HasLogDB = 0, LogScore = 100, LogChecksum = 1 WHERE ID=?
+                UPDATE torrents SET
+                    HasLogDB = '0',
+                    LogChecksum = '1',
+                    LogScore = 0
+                WHERE ID = ?
                 ", $TorrentID
             );
         }
@@ -1220,22 +1222,21 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
                 UPDATE torrents AS t
                 LEFT JOIN (
                     SELECT
-                      TorrentID,
-                      MIN(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
-                      MIN(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
+                        TorrentID,
+                        min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
+                        min(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
                     FROM torrents_logs
                     WHERE TorrentID = ?
                     GROUP BY TorrentID
                 ) AS tl ON t.ID = tl.TorrentID
                 SET
-                    t.LogScore      = tl.Score,
+                    t.LogScore    = tl.Score,
                     t.LogChecksum = tl.Checksum
                 WHERE t.ID = ?
         ", $TorrentID, $TorrentID);
         }
 
-        G::$Cache->delete_value("torrent_group_{$GroupID}");
-        G::$Cache->delete_value("torrents_details_{$GroupID}");
+        G::$Cache->deleteMulti(["torrent_group_{$GroupID}", "torrents_details_{$GroupID}"]);
     }
 
     public static function bbcodeUrl($val, $attr) {
