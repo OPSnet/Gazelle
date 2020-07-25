@@ -564,7 +564,7 @@ if ($MergeStatsFrom && check_perms('users_edit_ratio')) {
 
 if ($ChangePassword && check_perms('users_edit_password')) {
     $set[] = "PassHash = ?";
-    $args[] = Users::make_password_hash($Pass);
+    $args[] = Users::make_password_hash($ChangePassword);
     $user->logout();
     $EditSummary[] = 'password reset';
 }
