@@ -9,11 +9,11 @@ if (empty($_GET['ids']) || empty($_GET['title'])) {
 
 $ids = explode(',', $_GET['ids']);
 foreach ($ids as $id) {
-    if (!is_number($id)) {
+    if ((int)$id < 1) {
         error(0);
     }
 }
-$title = $_GET['title'];
+$title = trim($_GET['title']);
 
 $query = $DB->prepared_query(sprintf('
     SELECT
@@ -26,12 +26,12 @@ $query = $DB->prepared_query(sprintf('
         tg.Name,
         t.Size
     FROM torrents t
-    INNER JOIN torrents_group tg ON t.GroupID = tg.ID
+    INNER JOIN torrents_group tg ON (t.GroupID = tg.ID)
     WHERE t.ID IN (%s)', placeholders($ids)), ...$ids);
 
 $collector = new TorrentsDL($query, $title);
-$filer = new \Gazelle\File\Torrent;
-while (list($downloads, $groupIds) = $collector->get_downloads('TorrentID')) {
+$filer = new Gazelle\File\Torrent;
+while ([$downloads, $groupIds] = $collector->get_downloads('TorrentID')) {
     $artists = Artists::get_artists($groupIds);
     $torrentIds = array_keys($groupIds);
     $fileQuery = $DB->prepared_query(sprintf('
@@ -47,10 +47,10 @@ while (list($downloads, $groupIds) = $collector->get_downloads('TorrentID')) {
         continue;
     }
 
-    while (list($id) = $DB->next_record(MYSQLI_NUM, false)) {
+    while ([$id] = $DB->next_record(MYSQLI_NUM, false)) {
         $download =& $downloads[$id];
         $download['Artist'] = Artists::display_artists($artists[$download['GroupID']], false, true, false);
-        $Collector->add_file($filer->get($id), $download);
+        $collector->add_file($filer->get($id), $download);
         unset($download);
     }
 }
