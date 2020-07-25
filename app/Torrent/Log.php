@@ -25,7 +25,6 @@ class Log extends \Gazelle\Base {
     public function logDetails() {
         $this->db->prepared_query("
             SELECT LogID,
-                coalesce(Details, '') as Details,
                 Adjusted,
                 AdjustedBy,
                 AdjustmentReason,
@@ -34,7 +33,7 @@ class Log extends \Gazelle\Base {
                 AdjustedScore,
                 `Checksum`,
                 AdjustedChecksum,
-                Log
+                coalesce(Details, '') as Details
             FROM torrents_logs
             WHERE TorrentID = ?
             ", $this->id

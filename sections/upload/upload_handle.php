@@ -754,11 +754,11 @@ $htmlFiler = new \Gazelle\File\RipLogHTML;
 foreach($logfileSummary->all() as $logfile) {
     $DB->prepared_query('
         INSERT INTO torrents_logs
-               (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Log, Details)
-        VALUES (?,         ?,      ?,         ?,        ?,      ?,             ?,          ?,             ?,                 ?,   ?)
+               (TorrentID, Score, `Checksum`, FileName, Ripper, RipperVersion, `Language`, ChecksumState, LogcheckerVersion, Details)
+        VALUES (?,         ?,      ?,         ?,        ?,      ?,             ?,          ?,             ?,                 ?)
         ', $TorrentID, $logfile->score(), $logfile->checksumStatus(), $logfile->filename(),
             $logfile->ripper(), $logfile->ripperVersion(), $logfile->language(), $logfile->checksumState(),
-            Logchecker::getLogcheckerVersion(), $logfile->text(), $logfile->detailsAsString()
+            Logchecker::getLogcheckerVersion(), $logfile->detailsAsString()
     );
     $LogID = $DB->inserted_id();
     $ripFiler->put($logfile->filepath(), [$TorrentID, $LogID]);

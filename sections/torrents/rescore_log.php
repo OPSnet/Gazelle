@@ -6,8 +6,8 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-$TorrentID = intval($_GET['torrentid']);
-$LogID = intval($_GET['logid']);
+$TorrentID = (int)$_GET['torrentid'];
+$LogID     = (int)$_GET['logid'];
 
 $GroupID = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
 if (!$GroupID) {

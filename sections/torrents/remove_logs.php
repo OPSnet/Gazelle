@@ -9,10 +9,10 @@ if (!$TorrentID) {
     error(404);
 }
 
-$ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+$ripFiler = new Gazelle\File\RipLog;
 $ripFiler->remove([$TorrentID, null]);
 
-$htmlFiler = new \Gazelle\File\RipLogHTML($DB, $Cache);
+$htmlFiler = new Gazelle\File\RipLogHTML;
 $htmlFiler->remove([$TorrentID, null]);
 
 if (!$DB->scalar('SELECT 1 FROM torrents_logs WHERE TorrentID = ?', $TorrentID)) {
@@ -26,4 +26,4 @@ $GroupID = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
 Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], "All logs removed from torrent", 0);
 
 $Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID"]);
-header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? "torrents.php?torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER']));
+header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? "torrents.php?torrentid={$TorrentID}"));

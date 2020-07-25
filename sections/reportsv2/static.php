@@ -249,7 +249,7 @@ if (count($Reports) === 0) {
     </div>
 <?php
 } else {
-    $ripFiler = new \Gazelle\File\RipLog($DB, $Cache);
+    $ripFiler = new Gazelle\File\RipLog;
     foreach ($Reports as $Report) {
 
         list($ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID,
@@ -534,7 +534,7 @@ if (count($Reports) === 0) {
                     <td colspan="3">
                         <table><tr><td>Reported</td><td>Relevant</td></tr><tr>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
-<?php               $log = new \Gazelle\Torrent\Log($TorrentID);
+<?php               $log = new Gazelle\Torrent\Log($TorrentID);
                     $details = $log->logDetails(); ?>
                                 <ul class="nobullet logdetails">
 <?php               if (!count($details)) { ?>
@@ -563,7 +563,7 @@ if (count($Reports) === 0) {
                                 </ul>
                             </td>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
-<?php               $log = new \Gazelle\Torrent\Log($ExtraID);
+<?php               $log = new Gazelle\Torrent\Log($ExtraID);
                     $details = $log->logDetails(); ?>
                                 <ul class="nobullet logdetails">
 <?php               if (!count($details)) { ?>
