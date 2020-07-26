@@ -40,6 +40,7 @@ class Log extends \Gazelle\Base {
         );
         $logs = $this->db->to_array('LogID', MYSQLI_ASSOC, false);
         $details = [];
+        $htmlFiler = new Gazelle\File\RipLogHTML;
         foreach ($logs as $log) {
             $details[$log['LogID']] = [
                 'adjustment' => $log['Adjusted'] === '0'
@@ -50,7 +51,7 @@ class Log extends \Gazelle\Base {
                         'adjusted' => $log['AdjustedScore'],
                         'reason'   => empty($log['AdjustmentReason']) ? 'none supplied' : $log['AdjustmentReason'],
                     ],
-                'log'    => $log['Log'],
+                'log'    => $htmlFiler->get([$this->id, $log['LogID']]),
                 'status' => array_merge(explode("\n", $log['Details']), unserialize($log['AdjustmentDetails']) ?: []),
             ];
             if (($log['Adjusted'] === '0' && $log['Checksum'] === '0') || ($log['Adjusted'] === '1' && $log['AdjustedChecksum'] === '0')) {

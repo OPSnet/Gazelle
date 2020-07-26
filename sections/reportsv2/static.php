@@ -17,7 +17,7 @@ include(__DIR__ . '/../../classes/reports.class.php');
 include(__DIR__ . '/../torrents/functions.php');
 
 define('REPORTS_PER_PAGE', '10');
-list($Page, $Limit) = Format::page_limit(REPORTS_PER_PAGE);
+[$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
 
 
 if (isset($_GET['view'])) {
@@ -54,13 +54,12 @@ if (!$ID) {
             break;
     }
 } else {
+    $Username = $DB->scalar("
+        SELECT Username FROM users_main WHERE ID = ?
+        ", $ID
+    );
     switch ($View) {
         case 'staff':
-            $DB->query("
-                SELECT Username
-                FROM users_main
-                WHERE ID = $ID");
-            list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "$Username's in-progress reports";
             } else {
@@ -71,11 +70,6 @@ if (!$ID) {
                     AND r.ResolverID = $ID";
             break;
         case 'resolver':
-            $DB->query("
-                SELECT Username
-                FROM users_main
-                WHERE ID = $ID");
-            list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "$Username's resolved reports";
             } else {
@@ -101,11 +95,6 @@ if (!$ID) {
             $Where = "WHERE r.ID = $ID";
             break;
         case 'reporter':
-            $DB->query("
-                SELECT Username
-                FROM users_main
-                WHERE ID = $ID");
-            list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "All torrents reported by $Username";
             } else {
@@ -115,11 +104,6 @@ if (!$ID) {
             $Order = 'ORDER BY r.ReportedTime DESC';
             break;
         case 'uploader':
-            $DB->query("
-                SELECT Username
-                FROM users_main
-                WHERE ID = $ID");
-            list($Username) = $DB->next_record();
             if ($Username) {
                 $Title = "All reports for torrents uploaded by $Username";
             } else {
@@ -211,7 +195,7 @@ $DB->query("
 $Reports = $DB->to_array();
 
 $DB->query('SELECT FOUND_ROWS()');
-list($Results) = $DB->next_record();
+[$Results] = $DB->next_record();
 $PageLinks = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
 
 View::show_header('Reports V2', 'reportsv2,bbcode,torrent');
@@ -252,12 +236,12 @@ if (count($Reports) === 0) {
     $ripFiler = new Gazelle\File\RipLog;
     foreach ($Reports as $Report) {
 
-        list($ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID,
+        [$ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID,
             $ResolverName, $Status, $ReportedTime, $LastChangeTime, $ModComment, $Tracks, $Images,
             $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year,
             $CategoryID, $Time, $Description, $FileList, $Remastered, $RemasterTitle, $RemasterYear,
             $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum,
-            $LastAction, $UploaderID, $UploaderName)
+            $LastAction, $UploaderID, $UploaderName]
                 = Misc::display_array($Report, ['ModComment']);
 
         if (!$GroupID && $Status != 'Resolved') {
@@ -266,7 +250,7 @@ if (count($Reports) === 0) {
                 UPDATE reportsv2
                 SET
                     Status = 'Resolved',
-                    LastChangeTime = '".sqltime()."',
+                    LastChangeTime = now()
                     ModComment = 'Report already dealt with (torrent deleted)'
                 WHERE ID = $ReportID");
             $Cache->decrement('num_torrent_reportsv2');
@@ -398,7 +382,7 @@ if (count($Reports) === 0) {
                             AND req.TorrentID = $TorrentID");
                     $Requests = ($DB->has_results());
                     if ($Requests > 0) {
-                        while (list($RequestID, $FillerID, $FillerName, $FilledTime) = $DB->next_record()) {
+                        while ([$RequestID, $FillerID, $FillerName, $FilledTime] = $DB->next_record()) {
 ?>
                         <div style="text-align: right;">
                             <strong class="important_text"><a href="user.php?id=<?=$FillerID?>"><?=$FillerName?></a> used this torrent to fill <a href="requests.php?action=view&amp;id=<?=$RequestID?>">this request</a> <?=time_diff($FilledTime)?></strong>
@@ -489,11 +473,11 @@ if (count($Reports) === 0) {
                         ", $ExtraID
                     );
 
-                    list($ExtraGroupName, $ExtraGroupID, $ExtraArtistID, $ExtraArtistName,
+                    [$ExtraGroupName, $ExtraGroupID, $ExtraArtistID, $ExtraArtistName,
                         $ExtraYear, $ExtraTime, $ExtraDescription, $ExtraFileList, $ExtraRemastered,
                         $ExtraRemasterTitle, $ExtraRemasterYear, $ExtraMedia, $ExtraFormat,
                         $ExtraEncoding, $ExtraSize, $ExtraHasCue, $ExtraHasLog, $ExtraLogScore,
-                        $ExtraLastAction, $ExtraUploaderID, $ExtraUploaderName)
+                        $ExtraLastAction, $ExtraUploaderID, $ExtraUploaderName]
                             = Misc::display_array($DB->next_record());
 
                     if ($ExtraGroupName) {
