@@ -40,7 +40,7 @@ class Log extends \Gazelle\Base {
         );
         $logs = $this->db->to_array('LogID', MYSQLI_ASSOC, false);
         $details = [];
-        $htmlFiler = new Gazelle\File\RipLogHTML;
+        $htmlFiler = new \Gazelle\File\RipLogHTML;
         foreach ($logs as $log) {
             $details[$log['LogID']] = [
                 'adjustment' => $log['Adjusted'] === '0'
