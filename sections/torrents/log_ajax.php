@@ -11,7 +11,8 @@ $DB->prepared_query('
     WHERE TorrentID = ?
     ', $TorrentID
 );
-$ripFiler = new \Gazelle\File\RipLog;
+$ripFiler = new Gazelle\File\RipLog;
+$htmlFiler = new Gazelle\File\RipLogHTML;
 
 if(!$DB->record_count()) {
     echo '';
@@ -36,13 +37,13 @@ if(!$DB->record_count()) {
         }
 
         if (($Log['Adjusted'] === '0' && $Log['Checksum'] === '0') || ($Log['Adjusted'] === '1' && $Log['AdjustedChecksum'] === '0')) {
-            echo <<<HTML
+?>
     <blockquote>
         <strong>Trumpable For:</strong>
         <br /><br />
         Bad/No Checksum(s)
     </blockquote>
-HTML;
+<?php
         }
 
         if ($Log['Adjusted'] === '1') {
@@ -53,11 +54,9 @@ HTML;
             $AdjustmentDetails = unserialize($Log['AdjustmentDetails']);
             unset($AdjustmentDetails['tracks']);
             if (!empty($AdjustmentDetails)) {
-                echo '<br /><strong>Adjustment Details:</strong><ul>';
-                foreach ($AdjustmentDetails as $Entry) {
-                    echo '<li>'.$Entry.'</li>';
-                }
-                echo '</ul>';
+                echo '<br /><strong>Adjustment Details:</strong><ul>'
+                    . implode('', array_map(function ($d) {return "<li>$d</li>";}, $AdjustmentDetails))
+                    . '</ul>';
             }
             echo '</blockquote>';
         }
@@ -67,16 +66,15 @@ HTML;
             $Log['Details'][] = 'Bad/No Checksum(s)';
         }
         if (!empty($Log['Details'])) {
-            $Extra = ($Log['Adjusted'] === '1') ? 'Original ' : '';
-            echo '<blockquote><strong>'.$Extra.'Log validation report:</strong><ul>';
-            foreach($Log['Details'] as $Entry) {
-                echo '<li>'.$Entry.'</li>';
-            }
-            echo '</ul></blockquote>';
+            echo '<blockquote><strong>'
+                . ($Log['Adjusted'] === '1' ? 'Original ' : '') . 'Log validation report:</strong><ul>'
+                . implode('', array_map(function ($d) {return "<li>$d</li>";}, $Log['Details']))
+                . '</ul></blockquote>';
         }
 
-        echo "<blockquote><pre style='white-space:pre-wrap;'>".html_entity_decode($Log['Log'])."</pre></blockquote>";
-        echo '</td></tr>';
+        echo "<blockquote><pre style='white-space:pre-wrap;'>"
+            . $htmlFiler->get([$TorrentID, $Log['LogID']])
+            . '</pre></blockquote></td></tr>';
     }
     echo '</table>';
     echo ob_get_clean();
