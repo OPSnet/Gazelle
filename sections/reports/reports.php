@@ -1,47 +1,54 @@
 <?php
-/************************************************************************
- ************************************************************************/
+
 if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
-    error(404);
+    error(403);
 }
 
 // Number of reports per page
 define('REPORTS_PER_PAGE', '10');
 
-list($Page, $Limit) = Format::page_limit(REPORTS_PER_PAGE);
+[$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
 
-include(SERVER_ROOT . '/sections/reports/array.php');
+require_once('array.php');
 
-// Header
-View::show_header('Reports', 'bbcode,reports');
-
-if ($_GET['id'] && is_number($_GET['id'])) {
+$cond = [];
+$args = [];
+if (isset($_GET['id'])) {
     $View = 'Single report';
-    $Where = 'r.ID = ' . $_GET['id'];
+    $cond[] = 'r.ID = ?';
+    $args[] = (int)$_GET['id'];
 } elseif (empty($_GET['view'])) {
     $View = 'New';
-    $Where = "Status = 'New'";
+    $cond[] = 'r.Status = ?';
+    $args[] = 'New';
 } else {
     $View = $_GET['view'];
     switch ($_GET['view']) {
         case 'old':
-            $Where = "Status = 'Resolved'";
+            $cond[] = 'r.Status = ?';
+            $args[] = 'Resolved';
             break;
         default:
-            error(404);
+            error(403);
             break;
     }
 }
 
-if (!check_perms('admin_reports')) {
-    if (check_perms('site_moderate_forums')) {
-        $Where .= " AND Type IN('comment', 'post', 'thread')";
-    }
+if (!check_perms('admin_reports') && check_perms('site_moderate_forums')) {
+    $cond[] = "r.Type IN ('comment', 'post', 'thread')";
 }
 
-$Reports = $DB->query("
+$Where = $cond ? ('WHERE ' . implode(' AND ', $cond))
+    : '';
+
+$Results = $DB->scalar("
+    SELECT count(*) FROM reports r $Where
+    ", ...$args
+);
+$Pages = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
+
+$DB->prepared_query("
     SELECT
-        SQL_CALC_FOUND_ROWS
         r.ID,
         r.UserID,
         um.Username,
@@ -54,19 +61,15 @@ $Reports = $DB->query("
         r.Notes,
         r.ResolverID
     FROM reports AS r
-        JOIN users_main AS um ON r.UserID = um.ID
-    WHERE $Where
+    INNER JOIN users_main AS um ON r.UserID = um.ID
+    $Where
     ORDER BY ReportedTime DESC
-    LIMIT $Limit");
+    LIMIT $Limit
+    ", ...$args
+);
+$Reports = $DB->get_query_id();
 
-// Number of results (for pagination)
-$DB->query('SELECT FOUND_ROWS()');
-list($Results) = $DB->next_record();
-
-// Done with the number of results. Move $DB back to the result set for the reports
-$DB->set_query_id($Reports);
-
-// Start printing stuff
+View::show_header('Reports', 'bbcode,reports');
 ?>
 <div class="thin">
     <div class="header">
@@ -78,14 +81,11 @@ $DB->set_query_id($Reports);
         </div>
     </div>
     <div class="linkbox">
-<?php
-// pagination
-        $Pages = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
-        echo $Pages;
-        ?>
+<?= $Pages ?>
     </div>
 <?php
-    while (list($ReportID, $SnitchID, $SnitchName, $ThingID, $Short, $ReportedTime, $Reason, $Status, $ClaimerID, $Notes, $ResolverID) = $DB->next_record()) {
+    $DB->set_query_id($Reports);
+    while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason, $Status, $ClaimerID, $Notes, $ResolverID] = $DB->next_record(MYSQLI_NUM, false)) {
         $Type = $Types[$Short];
         $Reference = "reports.php?id=$ReportID#report$ReportID";
 ?>
@@ -94,8 +94,8 @@ $DB->set_query_id($Reports);
                 <tr>
                     <td><strong><a href="<?=$Reference?>">Report #<?=$ReportID?></a></strong></td>
                     <td>
-                        <strong><?=$Type['title']?></strong> was reported by <a href="user.php?id=<?=$SnitchID?>"><?=$SnitchName?></a> <?=time_diff($ReportedTime)?>
-                        <a href="reports.php?action=compose&amp;to=<?=$SnitchID?>&amp;reportid=<?=$ReportID?>&amp;type=<?=$Short?>&amp;thingid=<?=$ThingID?>" class="brackets">Contact</a>
+                        <strong><?=$Type['title']?></strong> was reported by <a href="user.php?id=<?=$UserID?>"><?=$UserName?></a> <?=time_diff($ReportedTime)?>
+                        <a href="reports.php?action=compose&amp;to=<?=$UserID?>&amp;reportid=<?=$ReportID?>&amp;type=<?=$Short?>&amp;thingid=<?=$ThingID?>" class="brackets">Contact</a>
                     </td>
                 </tr>
                 <tr>
@@ -103,85 +103,102 @@ $DB->set_query_id($Reports);
                         <strong>
 <?php                       switch ($Short) {
                                 case 'user':
-                                    $DB->query("
-                                        SELECT Username
-                                        FROM users_main
-                                        WHERE ID = $ThingID");
-                                    if (!$DB->has_results()) {
+                                    $Username = $DB->scalar("
+                                        SELECT Username FROM users_main WHERE ID = ?
+                                        ", $ThingID
+                                    );
+                                    if (!$Username) {
                                         echo 'No user with the reported ID found';
                                     } else {
-                                        list($Username) = $DB->next_record();
                                         echo "<a href=\"user.php?id=$ThingID\">" . display_str($Username) . '</a>';
                                     }
                                     break;
                                 case 'request':
                                 case 'request_update':
-                                    $DB->query("
-                                        SELECT Title
-                                        FROM requests
-                                        WHERE ID = $ThingID");
-                                    if (!$DB->has_results()) {
+                                    $Name = $DB->scalar("
+                                        SELECT Title FROM requests WHERE ID = ?
+                                        ", $ThingID
+                                    );
+                                    if (!$Name) {
                                         echo 'No request with the reported ID found';
                                     } else {
-                                        list($Name) = $DB->next_record();
                                         echo "<a href=\"requests.php?action=view&amp;id=$ThingID\">" . display_str($Name) . '</a>';
                                     }
                                     break;
                                 case 'collage':
-                                    $DB->query("
-                                        SELECT Name
-                                        FROM collages
-                                        WHERE ID = $ThingID");
-                                    if (!$DB->has_results()) {
+                                    $Name = $DB->scalar("
+                                        SELECT Name FROM collages WHERE ID = ?
+                                        ", $ThingID
+                                    );
+                                    if (!$Name) {
                                         echo 'No collage with the reported ID found';
                                     } else {
-                                        list($Name) = $DB->next_record();
                                         echo "<a href=\"collages.php?id=$ThingID\">" . display_str($Name) . '</a>';
                                     }
                                     break;
                                 case 'thread':
-                                    $DB->query("
-                                        SELECT Title
-                                        FROM forums_topics
-                                        WHERE ID = $ThingID");
-                                    if (!$DB->has_results()) {
+                                    [$forumId, $forumName, $thread, $userId, $username] = $DB->row("
+                                        SELECT
+                                            f.id,
+                                            f.Name,
+                                            ft.Title,
+                                            um.ID,
+                                            um.Username
+                                        FROM forums f
+                                        INNER JOIN forums_topics ft ON (ft.ForumID = f.ID)
+                                        INNER JOIN users_main um on (um.ID = ft.AuthorID)
+                                        WHERE ft.ID = ?
+                                        ", $ThingID
+                                    );
+                                    if (!$thread) {
                                         echo 'No forum thread with the reported ID found';
-                                    } else {
-                                        list($Title) = $DB->next_record();
-                                        echo "<a href=\"forums.php?action=viewthread&amp;threadid=$ThingID\">" . display_str($Title) . '</a>';
+                                    } else { ?>
+<a href="forums.php?action=viewforum&forumid=<?= $forumId ?>"><?= $forumName
+    ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?= $ThingID ?>"><?=
+    display_str($thread) ?></a> created by <a href="user.php?id=<?= $userId ?>"><?= $username ?></a>
+<?php
                                     }
                                     break;
                                 case 'post':
-                                    if (isset($LoggedUser['PostsPerPage'])) {
-                                        $PerPage = $LoggedUser['PostsPerPage'];
-                                    } else {
-                                        $PerPage = POSTS_PER_PAGE;
-                                    }
-                                    $DB->query("
+                                    $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+                                    [$forumId, $forumName, $threadId, $threadName, $userId, $username, $PostID, $Body, $PostNum] = $DB->row("
                                         SELECT
+                                            f.ID,
+                                            f.Name,
+                                            ft.ID,
+                                            ft.Title,
+                                            um.ID,
+                                            um.Username,
                                             p.ID,
                                             p.Body,
-                                            p.TopicID,
                                             (
-                                                SELECT COUNT(p2.ID)
+                                                SELECT count(*)
                                                 FROM forums_posts AS p2
-                                                WHERE p2.TopicID = p.TopicID
-                                                    AND p2.ID <= p.ID
+                                                WHERE p2.TopicID = p.TopicID AND p2.ID <= p.ID
                                             ) AS PostNum
                                         FROM forums_posts AS p
-                                        WHERE p.ID = $ThingID");
-                                    if (!$DB->has_results()) {
+                                        INNER JOIN forums_topics ft ON (ft.ID = p.TopicID)
+                                        INNER JOIN forums f on (f.ID = ft.ForumID)
+                                        INNER JOIN users_main um on (um.ID = p.AuthorID)
+                                        WHERE p.ID = ?
+                                        ", $ThingID
+                                    );
+                                    if (!$PostID) {
                                         echo 'No forum post with the reported ID found';
-                                    } else {
-                                        list($PostID, $Body, $TopicID, $PostNum) = $DB->next_record();
-                                        echo "<a href=\"forums.php?action=viewthread&amp;threadid=$TopicID&amp;post=$PostNum#post$PostID\">FORUM POST ID #$PostID</a>";
+                                    } else { ?>
+<a href="forums.php?action=viewforum&forumid=<?= $forumId ?>"><?= $forumName
+    ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?= $threadId ?>"><?=
+    display_str($threadName) ?></a> &rsaquo; <a href="forums.php?action=viewthread&amp;threadid=<?=
+    $threadId ?>&amp;post=<?= $PostNum ?>#post<?= $PostID ?>">Post #<?= $PostID ?></a> by
+    <a href="user.php?id=<?= $userId ?>"><?= $username ?></a>
+<?php
                                     }
                                     break;
                                 case 'comment':
-                                    $DB->query("
-                                        SELECT 1
-                                        FROM comments
-                                        WHERE ID = $ThingID");
+                                    $DB->prepared_query("
+                                        SELECT 1 FROM comments WHERE ID = ?
+                                        ", $ThingID
+                                    );
                                     if (!$DB->has_results()) {
                                         echo 'No comment with the reported ID found';
                                     } else {
@@ -242,9 +259,7 @@ $DB->set_query_id($Reports);
     }
     ?>
     <div class="linkbox">
-<?php
-    echo $Pages;
-?>
+<?= $Pages; ?>
     </div>
 </div>
 <?php
