@@ -23,14 +23,14 @@ if (!check_perms('torrents_edit')) {
 
 $ArtistID = (int)$_POST['artistid'];
 try {
-    $artist = new \Gazelle\Artist($ArtistID);
+    $artist = new Gazelle\Artist($ArtistID);
 }
 catch (\Exception $e) {
     error(404);
 }
 
 $oldName = $artist->name();
-$newName = \Gazelle\Artist::sanitize($_POST['name']);
+$newName = Gazelle\Artist::sanitize($_POST['name']);
 
 if (empty($newName)) {
     error('No new name given.');
@@ -84,7 +84,7 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
             UPDATE artists_group SET
                 Name = ?
             WHERE ArtistID = ?
-            ", $NewName, $ArtistID);
+            ", $newName, $ArtistID);
     }
     $DB->prepared_query("
         SELECT GroupID
@@ -190,22 +190,16 @@ if (!$TargetAliasID || $TargetAliasID == $oldAliasId) {
     }
 }
 
-// Clear torrent caches
 $DB->prepared_query("
     SELECT GroupID
     FROM torrents_artists
     WHERE ArtistID = ?
     ", $ArtistID
 );
-while (list($GroupID) = $DB->next_record()) {
-    $Cache->delete_value("torrents_details_$GroupID");
-}
+$Cache->deleteMulti(array_merge($DB->collect('GroupID'), ["artists_requests_$TargetArtistID", "artists_requests_$ArtistID"]));
 
 $artist->flushCache();
-
-$artist = new \Gazelle\Artist($TargetArtistID);
+$artist = new Gazelle\Artist($TargetArtistID);
 $artist->flushCache();
-$Cache->delete_value("artists_requests_$TargetArtistID");
-$Cache->delete_value("artists_requests_$ArtistID");
 
 header("Location: artist.php?id=$TargetArtistID");
