@@ -1,15 +1,21 @@
 <?php
+if (!check_perms('site_archive_ajax')) {
+    json_die('failure', 'insufficient permissions to view page');
+}
 
-$Where = ["t.HasLog='1'", "t.HasLogDB='0'"];
+$where = ["t.HasLog='1'", "t.HasLogDB='0'"];
 
 if ($_GET['type'] === 'active') {
-    $Where[] = "tls.last_action > '".(new \DateTime())->sub(new \DateInterval('P14D'))->format('Y-m-d')."'";
+    $where[] = 'tls.last_action > now() - INTERVAL 14 DAY';
+}
+else if ($_GET['type'] === 'unseeded') {
+    $where = ['tls.Seeders = 0'];
 }
 else {
-    $Where[] = 'tls.Seeders > 0';
+    $where[] = 'tls.Seeders > 0';
 }
 
-$Where = implode(' AND ', $Where);
-$DB->prepared_query("SELECT t.ID FROM torrents t INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID) WHERE {$Where}");
+$where = implode(' AND ', $where);
+$DB->prepared_query("SELECT t.ID FROM torrents t INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID) WHERE {$where}");
 
 json_print('success', ['IDs' => $DB->collect('ID', false)]);
