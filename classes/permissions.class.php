@@ -41,6 +41,7 @@ class Permissions {
             'site_search_many' => 'Can go past low limit of search results',
             'site_user_stats' => 'Can view own user stat graphs',
             'site_unlimit_ajax' => 'Can bypass ajax api limits',
+            'site_archive_ajax' => 'Can view archive related ajax endpoints',
             'users_edit_usernames' => 'Can edit usernames',
             'users_edit_ratio' => 'Can edit anyone\'s upload/download amounts',
             'users_edit_own_ratio' => 'Can edit own upload/download amounts',
