@@ -190,11 +190,6 @@ class DB_MYSQL {
             send_irc('PRIVMSG ' . ADMIN_CHAN . ' :' . $DBError);
         }
         $Debug->analysis('!dev DB Error', $DBError, 3600 * 24);
-        if (DEBUG_MODE || check_perms('site_debug') || isset($argv[1])) {
-            if (DEBUG_MODE || check_perms('site_debug')) {
-                print_r($this->Queries);
-            }
-        }
         throw new DB_MYSQL_Exception($DBError);
     }
 
@@ -277,7 +272,8 @@ class DB_MYSQL {
         $this->Errno = $this->LinkID->errno;
         $this->Error = $this->LinkID->error;
         if ($this->Statement === false) {
-            $this->halt(sprintf("Invalid Query: (%d) %s [$Query]", $this->Errno, $this->Error));
+            $this->Queries[] = ["$Query /* ERROR: {$this->Error} */", 0, null];
+            $this->halt(sprintf("Invalid Query: %s(%d) [%s]", $this->Error, $this->Errno, $Query));
         }
         return $this->Statement;
     }
