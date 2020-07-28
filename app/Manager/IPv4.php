@@ -86,7 +86,7 @@ class IPv4 extends \Gazelle\Base {
                 ", $reason, $from, $to, $userId
             );
             $this->cache->delete_value(
-                self::CACHE_KEY . substr($ipaddr, 0, strcspn($ipaddr, '.')),
+                self::CACHE_KEY . substr($ipaddr, 0, strcspn($ipaddr, '.'))
             );
         }
     }
