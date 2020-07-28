@@ -8,7 +8,7 @@ if (!isset($_GET['id'])) {
 
 G::$DB->prepared_query('UPDATE blog SET ThreadID = NULL WHERE ID = ? ', (int)$_GET['id']);
 if (G::$DB->affected_rows() > 0) {
-    $Cache->deleteMulti[('blog', 'feed_blog']);
+    $Cache->deleteMulti(['blog', 'feed_blog']);
 }
 
 header('Location: blog.php');
