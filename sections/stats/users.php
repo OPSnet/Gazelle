@@ -1,4 +1,5 @@
 <?php
+
 $statsUser = new Gazelle\Stats\User;
 $flow      = $statsUser->flow();
 $classDist = $statsUser->classDistribution();

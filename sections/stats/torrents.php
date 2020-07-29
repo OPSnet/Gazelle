@@ -1,4 +1,5 @@
 <?php
+
 $statsTor = new Gazelle\Stats\Torrent;
 [$flow, $torrentCat] = $statsTor->yearlyFlow();
 
