@@ -1,94 +1,87 @@
 <?php
-if (!list($Labels, $InFlow, $OutFlow, $NetFlow, $Max) = $Cache->get_value('torrents_timeline')) {
-    $DB->query("
-        SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
-        FROM log
-        WHERE Message LIKE 'Torrent % was uploaded by %'
-        GROUP BY Month
-        ORDER BY Time DESC
-        LIMIT 1, 12");
-    $TimelineIn = array_reverse($DB->to_array());
-    $DB->query("
-        SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
-        FROM log
-        WHERE Message LIKE 'Torrent % was deleted %'
-        GROUP BY Month
-        ORDER BY Time DESC
-        LIMIT 1, 12");
-    $TimelineOut = array_reverse($DB->to_array());
-    $DB->query("
-        SELECT DATE_FORMAT(Time,'%b \'%y') AS Month, COUNT(ID)
-        FROM torrents
-        GROUP BY Month
-        ORDER BY Time DESC
-        LIMIT 1, 12");
-    $TimelineNet = array_reverse($DB->to_array());
-
-    foreach ($TimelineIn as $Month) {
-        list($Label, $Amount) = $Month;
-        if ($Amount > $Max) {
-            $Max = $Amount;
-        }
-    }
-    foreach ($TimelineOut as $Month) {
-        list($Label, $Amount) = $Month;
-        if ($Amount > $Max) {
-            $Max = $Amount;
-        }
-    }
-    foreach ($TimelineNet as $Month) {
-        list($Label, $Amount) = $Month;
-        if ($Amount > $Max) {
-            $Max = $Amount;
-        }
-    }
-    foreach ($TimelineIn as $Month) {
-        list($Label, $Amount) = $Month;
-        $Labels[] = $Label;
-        $InFlow[] = number_format(($Amount / $Max) * 100, 4);
-    }
-    foreach ($TimelineOut as $Month) {
-        list($Label, $Amount) = $Month;
-        $OutFlow[] = number_format(($Amount / $Max) * 100, 4);
-    }
-    foreach ($TimelineNet as $Month) {
-        list($Label, $Amount) = $Month;
-        $NetFlow[] = number_format(($Amount / $Max) * 100, 4);
-    }
-    $Cache->cache_value('torrents_timeline', [$Labels, $InFlow, $OutFlow, $NetFlow, $Max], mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
-}
-
-include_once(SERVER_ROOT.'/classes/charts.class.php');
-$DB->query("
-    SELECT tg.CategoryID, COUNT(t.ID) AS Torrents
-    FROM torrents AS t
-        JOIN torrents_group AS tg ON tg.ID = t.GroupID
-    GROUP BY tg.CategoryID
-    ORDER BY Torrents DESC");
-$Groups = $DB->to_array();
-$Pie = new PIE_CHART(750, 400, ['Other' => 1, 'Percentage' => 1]);
-foreach ($Groups as $Group) {
-    list($CategoryID, $Torrents) = $Group;
-    $CategoryName = $Categories[$CategoryID - 1];
-    $Pie->add($CategoryName, $Torrents);
-}
-$Pie->transparent();
-$Pie->color('FF33CC');
-$Pie->generate();
-$Categories = $Pie->url();
+$statsTor = new Gazelle\Stats\Torrent;
+[$flow, $torrentCat] = $statsTor->yearlyFlow();
 
 View::show_header('Detailed torrent statistics');
 ?>
+<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+Highcharts.chart('torrent-flow', {
+    chart: {
+        type: 'column',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'Torrent Flow',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    xAxis: {
+        categories: [<?= implode(',', array_map(function ($x) { return "'$x'"; }, array_keys($flow))) ?>],
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}'
+    },
+    legend: { itemStyle: {color: 'silver'}, itemHoverStyle: {color: 'gainsboro' }},
+    plotOptions: { column: { stacking: 'normal' } },
+    series: [
+        { type: 'column', name: 'Created', color: 'darkgreen', data: [<?= implode(',', array_map(function ($x) use ($flow) { return  (int)$flow[$x]['t_add'] ?? 0; }, array_keys($flow))) ?>] },
+        { type: 'column', name: 'Removed', color: 'darkred', data: [<?= implode(',', array_map(function ($x) use ($flow) { return -(int)$flow[$x]['t_del'] ?? 0; }, array_keys($flow))) ?>] },
+        { type: 'spline', name: 'Net',
+            marker: { lineWidth: 2, color: 'teal', fillColor: 'steelblue'},
+            data: [<?= implode(',', array_map(function ($x) use ($flow) { return $flow[$x]['t_net'] ?? 0; }, array_keys($flow))) ?>] },
+    ]
+});
+
+Highcharts.chart('torrent-pie', {
+    chart: {
+        type: 'pie',
+        plotBackgroundColor: '#051401',
+        backgroundColor: '#000000',
+    },
+    title: {
+        text: 'Torrent breakdown',
+        style: { color: '#c0c0c0', },
+    },
+    credits: { enabled: false },
+    tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: 'white',
+            }
+        }
+    },
+    series: [{
+        name: 'Upload types',
+        data: [
+<?php foreach ($torrentCat as $label => $value) { ?>
+            { name: '<?= $Categories[$value[0] - 1] ?>', y: <?= $value[1] ?> },
+<?php } ?>
+        ]
+    }],
+})});
+</script>
+
 <div class="linkbox">
     <a href="stats.php?action=users" class="brackets">User Stats</a>
 </div>
 <h1 id="Torrent_Upload"><a href="#Torrent_Upload">Uploads by month</a></h1>
 <div class="box pad center">
-    <img src="https://chart.googleapis.com/chart?cht=lc&amp;chs=880x160&amp;chco=000D99,99000D,00990D&amp;chg=0,-1,1,1&amp;chxt=y,x&amp;chxs=0,h&amp;chxl=1:|<?=implode('|', $Labels)?>&amp;chxr=0,0,<?=$Max?>&amp;chd=t:<?=implode(',', $InFlow)?>|<?=implode(',', $OutFlow)?>|<?=implode(',', $NetFlow)?>&amp;chls=2,4,0&amp;chdl=Uploads|Deletions|Remaining&amp;chf=bg,s,FFFFFF00" alt="User Flow Chart" />
-</div>
+    <figure class="highcharts-figure"><div id="torrent-flow"></div></figure>
+    <br />
 <h1 id="Torrent_Category"><a href="#Torrent_Category">Torrents by category</a></h1>
 <div class="box pad center">
-    <img src="<?=$Categories?>" alt="" />
+    <figure class="highcharts-figure"><div id="torrent-pie"></div></figure>
+    <br />
 </div>
 <?php
 View::show_footer();
