@@ -1,8 +1,4 @@
-<?php
-
-View::show_header('Inbox');
-
-?>
+<?php View::show_header('Site stats'); ?>
 
 <div class="thin">
     <h3 id="general">Pursuit of Perfection</h3>

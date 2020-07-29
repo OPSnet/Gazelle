@@ -93,5 +93,46 @@ class Torrent extends \Gazelle\Base {
 
         $this->cache->cache_value(self::CACHE_KEY, $this->stats = $stats, 7200);
     }
-}
 
+    /* Get the yearly torrent flows (added, removed and net per month)
+     * @return array
+     *      - array keyed by month with [net, add, del]
+     *      - array keyed by month with [category-id]
+     */
+    public function yearlyFlow(): array {
+        if (!([$flow, $torrentCat] = $this->cache->get_value('torrentflow'))) {
+            $this->db->prepared_query("
+                SELECT date_format(t.Time,'%Y-%m') AS Month,
+                    count(*) as t_net
+                FROM torrents t
+                GROUP BY Month
+                ORDER BY Time DESC
+                LIMIT 12
+            ");
+            $net = $this->db->to_array('Month', MYSQLI_ASSOC, false);
+
+            $this->db->prepared_query("
+                SELECT date_format(Time,'%Y-%m') as Month,
+                    sum(Message LIKE 'Torrent % was uploaded by %') AS t_add,
+                    sum(Message LIKE 'Torrent % was deleted %')     AS t_del
+                FROM log
+                GROUP BY Month order by Time DESC
+                LIMIT 12
+            ");
+            $flow = array_merge_recursive($net, $this->db->to_array('Month', MYSQLI_ASSOC, false));
+            asort($flow);
+            $flow = array_slice($flow, -12);
+
+            $this->db->prepared_query("
+                SELECT tg.CategoryID, count(*)
+                FROM torrents AS t
+                INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+                GROUP BY tg.CategoryID
+                ORDER BY 2 DESC
+            ");
+            $torrentCat = $this->db->to_array();
+            $this->cache->cache_value('torrentflow', [$flow, $torrentCat], mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
+        }
+        return [$flow, $torrentCat];
+    }
+}
