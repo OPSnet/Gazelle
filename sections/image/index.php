@@ -1,147 +1,149 @@
 <?php
 
 if (!check_perms('site_proxy_images')) {
-    img_error('forbidden');
+    header('Content-type: image/png');
+    Gazelle\Image::render('403 forbidden');
+    exit;
 }
 
-$URL = isset($_GET['i']) ? htmlspecialchars_decode($_GET['i']) : null;
+$url = isset($_GET['i']) ? urldecode($_GET['i']) : null;
+$key = 'imagev4_' . md5($url);
 
-if (!extension_loaded('openssl') && strtoupper($URL[4]) == 'S') {
-    img_error('badprotocol');
-}
-
-if (!preg_match('/^'.IMAGE_REGEX.'/is', $URL, $Matches)) {
-    img_error('invalid');
-}
-
-if (isset($_GET['c'])) {
-    list($Data, $FileType) = $Cache->get_value('image_cache_'.md5($URL));
-    $Cached = true;
-}
-if (!isset($Data) || !$Data) {
-    $Cached = false;
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $URL);
-    curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11');
-    $Data = curl_exec($ch);
-    $rescode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if (!$Data || empty($Data)) {
-        img_error('timeout');
-    }
-    $FileType = image_type($Data);
-    if ($FileType && function_exists("imagecreatefrom$FileType")) {
-        $Image = imagecreatefromstring($Data);
-        if (invisible($Image)) {
-            img_error('invisible');
-        }
-        if (verysmall($Image)) {
-            img_error('small');
-        }
+// use a while loop to allow early exit
+while (($imageData = $Cache->get_value($key)) === false) {
+    if (!preg_match('/^'.IMAGE_REGEX.'/is', $url)) {
+        $imageData = null;
+        $error = 'bad parameters';
+        break;
     }
 
-    if (isset($_GET['c']) && strlen($Data) < 262144) {
-        $Cache->cache_value('image_cache_'.md5($URL), [$Data, $FileType], 3600 * 24 * 7);
+    $curl = curl_init();
+    curl_setopt_array($curl, [
+        CURLOPT_URL            => $url,
+        CURLOPT_HEADER         => false,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.1 Safari/537.11',
+    ]);
+    if (defined('HTTP_PROXY')) {
+        curl_setopt_array($curl, [
+            CURLOPT_HTTPPROXYTUNNEL => true,
+            CURLOPT_PROXY           => HTTP_PROXY,
+        ]);
+    }
+
+    $imageData = curl_exec($curl);
+    $rescode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+    if ($rescode != 200) {
+        $error = "HTTP $rescode";
+        break;
+    }
+
+    $len = strlen($imageData);
+    if (isset($_GET['c']) && $len > 0 && $len <= 262144) {
+        $Cache->cache_value($key, $imageData, 86400 * 3);
+    }
+    break; // all good
+}
+
+if (!isset($error)) {
+    $image = new Gazelle\Image($imageData);
+    if ($image->error()) {
+        $error = 'corrupt';
+    }
+    elseif ($image->invisible()) {
+        $error = 'invisible';
+    }
+    elseif ($image->verysmall()) {
+        $error = 'too small';
     }
 }
 
-// Reset avatar, add mod note
-function reset_image($UserID, $Type, $AdminComment, $PrivMessage) {
-    if ($Type === 'avatar') {
-        $CacheKey = "user_info_$UserID";
-        $DBTable = 'users_info';
-        $DBColumn = 'Avatar';
-        $PMSubject = 'Your avatar has been automatically reset';
-    } elseif ($Type === 'avatar2') {
-        $CacheKey = "donor_info_$UserID";
-        $DBTable = 'donor_rewards';
-        $DBColumn = 'SecondAvatar';
-        $PMSubject = 'Your second avatar has been automatically reset';
-    } elseif ($Type === 'donoricon') {
-        $CacheKey = "donor_info_$UserID";
-        $DBTable = 'donor_rewards';
-        $DBColumn = 'CustomIcon';
-        $PMSubject = 'Your donor icon has been automatically reset';
-    }
-
-    $UserInfo = G::$Cache->get_value($CacheKey, true);
-    if ($UserInfo !== false) {
-        if ($UserInfo[$DBColumn] === '') {
-            // This image has already been reset
-            return;
-        }
-        $UserInfo[$DBColumn] = '';
-        G::$Cache->cache_value($CacheKey, $UserInfo, 2592000); // cache for 30 days
-    }
-
-    // reset the avatar or donor icon URL
-    G::$DB->query("
-        UPDATE $DBTable
-        SET $DBColumn = ''
-        WHERE UserID = '$UserID'");
-
-    // write comment to staff notes
-    G::$DB->query("
-        UPDATE users_info
-        SET AdminComment = CONCAT('".sqltime().' - '.db_string($AdminComment)."\n\n', AdminComment)
-        WHERE UserID = '$UserID'");
-
-    // clear cache keys
-    G::$Cache->delete_value($CacheKey);
-
-    Misc::send_pm($UserID, 0, $PMSubject, $PrivMessage);
+if (isset($error)) {
+    $Cache->delete_value($key);
+    header('Content-type: image/png');
+    Gazelle\Image::render($error);
+    exit;
 }
 
-// Enforce avatar rules
 if (isset($_GET['type']) && isset($_GET['userid'])) {
-    $ValidTypes = ['avatar', 'avatar2', 'donoricon'];
-    if (!is_number($_GET['userid']) || !in_array($_GET['type'], $ValidTypes)) {
-        die();
-    }
-    $UserID = $_GET['userid'];
-    $Type = $_GET['type'];
-
-    if ($Type === 'avatar' || $Type === 'avatar2') {
-        $MaxFileSize = 256 * 1024; // 256 kB
-        $MaxImageHeight = 400; // pixels
-        $TypeName = $Type === 'avatar' ? 'avatar' : 'second avatar';
-    } elseif ($Type === 'donoricon') {
-        $MaxFileSize = 64 * 1024; // 64 kB
-        $MaxImageHeight = 100; // pixels
-        $TypeName = 'donor icon';
+    $userId = (int)$_GET['userid'];
+    if ($userId < 1) {
+        $Cache->delete_value($key);
+        header('Content-type: image/png');
+        Gazelle\Image::render('no such user');
+        exit;
     }
 
-    $Height = image_height($FileType, $Data);
-    if (strlen($Data) > $MaxFileSize || $Height > $MaxImageHeight) {
-        // Sometimes the cached image we have isn't the actual image
-        if ($Cached) {
-            $Data2 = @file_get_contents($URL, 0, stream_context_create(['http' => ['timeout' => 15]]));
-        } else {
-            $Data2 = $Data;
+    $usage  = $_GET['type'];
+    switch($usage) {
+        case 'avatar':
+            $maxHeight = 400; // pixels
+            $maxSizeKb = 256;
+            break;
+        case 'avatar2':
+            $maxHeight = 400;
+            $maxSizeKb = 256;
+            break;
+        case 'donoricon':
+            $maxHeight = 100;
+            $maxSizeKb = 64;
+            break;
+        default:
+            $Cache->delete_value($key);
+            header('Content-type: image/png');
+            Gazelle\Image::render('bad image type');
+            exit;
+    }
+
+    $sizeKb = strlen($imageData) / 1024;
+    if ($sizeKb > $maxSizeKb || $image->height() > $maxHeight) {
+        switch($usage) {
+            case 'avatar':
+                $imageType = 'avatar';
+                $subject   = 'Your avatar has been automatically reset';
+                $DB->prepared_query("
+                    UPDATE users_info SET Avatar = '' WHERE UserID = ?  ", $userId
+                );
+                $Cache->delete_value("user_info_$userId");
+                break;
+            case 'avatar2':
+                $imageType = 'second avatar';
+                $subject   = 'Your second avatar has been automatically reset';
+                $DB->prepared_query("
+                    UPDATE donor_rewards SET SecondAvatar = '' WHERE UserID = ?  ", $userId
+                );
+                $Cache->delete_value("donor_info_$userId");
+                break;
+            case 'donoricon':
+                $imageType = 'donor icon';
+                $subject   = 'Your donor icon has been automatically reset';
+                $DB->prepared_query("
+                    UPDATE donor_rewards SET CustomIcon = '' WHERE UserID = ?  ", $userId
+                );
+                $Cache->delete_value("donor_info_$userId");
+                break;
         }
 
-        if (strlen($Data2) > $MaxFileSize || image_height($FileType, $Data2) > $MaxImageHeight) {
-            require_once(SERVER_ROOT.'/classes/mysql.class.php');
-            require_once(SERVER_ROOT.'/classes/time.class.php');
-            $DBURL = db_string($URL);
-            $AdminComment = ucfirst($TypeName)." reset automatically (Size: ".number_format((strlen($Data)) / 1024)." kB, Height: ".$Height."px). Used to be $DBURL";
-            $PrivMessage = SITE_NAME." has the following requirements for {$TypeName}s:\n\n".
-                "[b]".ucfirst($TypeName)."s must not exceed ".($MaxFileSize / 1024)." kB or be vertically longer than {$MaxImageHeight}px.[/b]\n\n".
-                "Your $TypeName at $DBURL has been found to exceed these rules. As such, it has been automatically reset. You are welcome to reinstate your $TypeName once it has been resized down to an acceptable size.";
-            reset_image($UserID, $Type, $AdminComment, $PrivMessage);
-        }
+        $sizeKb = number_format($sizeKb);
+        $DB->prepared_query("
+            UPDATE users_info SET
+                AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
+            WHERE UserID = ?
+            ", ucfirst($imageType) . " $url reset automatically (Size: {$sizeKb}kB, Height: {$image->height()}px).\n\n",
+                $userId
+        );
+        Misc::send_pm($userId, 0, $subject, G::$Twig->render('user/reset-avatar.twig', [
+            'height'    => $maxHeight,
+            'site_name' => SITE_NAME,
+            'size_kb'   => $sizeKb,
+            'type'      => $imageType,
+            'url'       => $url,
+        ]));
     }
 }
 
-if (!isset($FileType)) {
-    img_error('timeout');
-}
-
-header("Content-type: image/$FileType");
-echo $Data;
+header("Content-type: image/" . $image->type());
+$image->display();
