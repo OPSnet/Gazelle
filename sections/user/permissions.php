@@ -6,7 +6,7 @@ if ($UserID < 1) {
 }
 
 // Get the user class of the user being edited to ensure that the logged in user has permission
-list($UserClass, $Customs) = $DB->row("
+[$UserClass, $Customs] = $DB->row("
     SELECT p.Level, um.CustomPermissions
     FROM permissions p
     INNER JOIN users_main AS um ON (um.PermissionID = p.ID)
@@ -24,7 +24,7 @@ $Defaults = Permissions::get_permissions_for_user($UserID, []);
 
 $Delta = [];
 if (!isset($_POST['action'])) {
-    $Delta = unserialize($Customs);
+    $Delta = $Customs == null ? [] : unserialize($Customs);
 } else {
     authorize();
 
@@ -51,7 +51,7 @@ if (!isset($_POST['action'])) {
 }
 
 $Permissions = array_merge($Defaults, $Delta);
-$MaxCollages = $Customs['MaxCollages'] + $Delta['MaxCollages'];
+$MaxCollages = $Customs['MaxCollages'] + ($Delta['MaxCollages'] ?? 0);
 
 View::show_header("$Username &rarr; Permissions");
 ?>
