@@ -5,7 +5,7 @@ if (!check_perms('admin_donor_log')) {
 }
 
 define('DONATIONS_PER_PAGE', 50);
-list($Page, $Limit) = Format::page_limit(DONATIONS_PER_PAGE);
+[$Page, $Limit] = Format::page_limit(DONATIONS_PER_PAGE);
 
 $dateSearch = !empty($_GET['after_date']) && !empty($_GET['before_date']);
 
@@ -61,6 +61,8 @@ $DB->prepared_query("
 ");
 $Timeline = array_reverse($DB->to_array(false, MYSQLI_ASSOC, false));
 
+$payment = new \Gazelle\Manager\Payment;
+
 View::show_header('Donation log');
 ?>
 <script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
@@ -84,6 +86,12 @@ Highcharts.chart('donation-timeline', {
     },
     yAxis: {
         title: {text: 'bitcoin'},
+        plotLines: [{
+            color: '#800000',
+            width: 2,
+            value: <?= $payment->monthlyRental() ?>,
+            zIndex: 5,
+        }],
     },
     xAxis: {
         categories: [<?= implode(',', array_map(function ($x) { return "'" . $x['Month'] . "'"; }, $Timeline)) ?>],
