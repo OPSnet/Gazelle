@@ -68,7 +68,7 @@ if(!$DB->record_count()) {
         if (!empty($Log['Details'])) {
             echo '<blockquote><strong>'
                 . ($Log['Adjusted'] === '1' ? 'Original ' : '') . 'Log validation report:</strong><ul>'
-                . array_map(function ($d) {return "<li>$d</li>";}, $Log['Details'])
+                . implode('', array_map(function ($d) {return "<li>$d</li>";}, $Log['Details']))
                 . '</ul></blockquote>';
         }
 
