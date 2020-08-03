@@ -299,7 +299,7 @@ if ($logfiles) {
             min(CASE WHEN Adjusted = '1' THEN AdjustedScore ELSE Score END) AS Score,
             min(CASE WHEN Adjusted = '1' THEN AdjustedChecksum ELSE Checksum END) AS Checksum
         FROM torrents_logs
-        TorrentID = {$TorrentID}
+        WHERE TorrentID = {$TorrentID}
         GROUP BY TorrentID
     ) AS tl ON (t.ID = tl.TorrentID)
 ";
