@@ -354,6 +354,12 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Required Class Ratio: <span class="tooltip" title="<?=number_format((double)$ClassRatio, 5)?>"><?=number_format((double)$ClassRatio, 2)?></span></li>
 <?php
     }
+    if ($Override = check_paranoia_here('seeding+')) {
+        $seedingSize = $User->seedingSize();
+?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($seedingSize, 5)?>">Seeding Size: <?=Format::get_size($seedingSize)?></li>
+<?php
+    }
     if (($Override = check_paranoia_here('bonuspoints')) && isset($BonusPoints)) {
 ?>
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Bonus Points: <?=number_format($BonusPoints)?><?php

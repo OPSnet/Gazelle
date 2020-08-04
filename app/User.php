@@ -709,7 +709,7 @@ class User extends Base {
     }
 
     protected function getSingleValue($cacheKey, $query) {
-        $cacheKey .= '.' . $this->id;
+        $cacheKey .= '_' . $this->id;
         if ($this->forceCacheFlush || ($value = $this->cache->get_value($cacheKey)) === false) {
             $this->db->prepared_query($query, $this->id);
             [$value] = $this->db->next_record(MYSQLI_NUM);
@@ -1167,6 +1167,22 @@ class User extends Base {
             }
         }
         return $progress;
+    }
+
+    public function seedingSize(): int {
+        return $this->getSingleValue('seeding_size', '
+            SELECT coalesce(sum(t.Size), 0)
+            FROM
+            (
+                SELECT DISTINCT fid
+                FROM xbt_files_users
+                WHERE active = 1
+                  AND remaining = 0
+                  AND mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
+                  AND uid = ?
+            ) AS xfu
+            INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+        ');
     }
 
     public static function demotionCriteria() {
