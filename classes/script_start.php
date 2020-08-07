@@ -74,9 +74,9 @@ G::$Twig = new Environment(
 );
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
-    'number_format',
-    function ($text) {
-        return number_format($text);
+    'article',
+    function ($word) {
+        return preg_match('/^[aeiou]/i', $word) ? 'an' : 'a';
     }
 ));
 
@@ -95,9 +95,30 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
+    'plural',
+    function ($number) {
+        return plural($number);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
     'selected',
     function ($isSelected) {
         return $isSelected ? ' selected="selected"' : '';
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'time_diff',
+    function ($time) {
+        return time_diff($time);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'user_url',
+    function ($userId) {
+        return Users::format_username($userId, false, false, false);
     }
 ));
 
