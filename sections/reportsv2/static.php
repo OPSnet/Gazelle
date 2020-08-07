@@ -250,7 +250,7 @@ if (count($Reports) === 0) {
                 UPDATE reportsv2
                 SET
                     Status = 'Resolved',
-                    LastChangeTime = now()
+                    LastChangeTime = now(),
                     ModComment = 'Report already dealt with (torrent deleted)'
                 WHERE ID = $ReportID");
             $Cache->decrement('num_torrent_reportsv2');
