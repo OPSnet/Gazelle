@@ -395,7 +395,16 @@ else {
             require($file);
         }
         catch (\DB_MYSQL_Exception $e) {
-            error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
+            if (DEBUG_MODE || check_perms('site_debug')) {
+?>
+<h3>Database error</h3>
+<code><?= $e->getMessage() ?></code>
+<pre><?= str_replace(SERVER_ROOT .'/', '', $e->getTraceAsString()) ?></pre>
+<?php
+            }
+            else {
+                error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
+            }
         }
     }
 }
