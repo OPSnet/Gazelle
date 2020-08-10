@@ -115,7 +115,7 @@ View::show_header('Reports', 'bbcode,reports');
                                     break;
                                 case 'request':
                                 case 'request_update':
-                                    $name = $DB->scalar("
+                                    $Name = $DB->scalar("
                                         SELECT Title FROM requests WHERE ID = ?
                                         ", $ThingID
                                     );
