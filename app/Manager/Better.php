@@ -24,8 +24,7 @@ class Better extends \Gazelle\Base
         );
 
         $torrent = new \Gazelle\Torrent();
-        $groupId = $torrent->idToGroup($id);
-        $this->cache->delete_value('torrents_details_'.$groupId);
+        $this->cache->delete_value('torrents_details_' . $torrent->idToGroup($id));
     }
 
     public function missing(string $type, string $filter, string $search, int $limit, int $offset, int $userId) {
@@ -36,6 +35,20 @@ class Better extends \Gazelle\Base
         $order = '';
         $params = [];
         $joinParams = [];
+
+        $artistUserSnatchJoin = "INNER JOIN (
+                SELECT DISTINCT ta.ArtistID
+                FROM torrents_artists ta
+                INNER JOIN torrents t ON (t.GroupID = ta.GroupID)
+                INNER JOIN xbt_snatched x ON (x.fid = t.ID AND x.uid = ?)
+            ) s ON (s.ArtistID = a.ArtistID)";
+        $artistUserUploadJoin = "INNER JOIN (
+                SELECT DISTINCT ta.ArtistID
+                FROM torrents t
+                INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
+                INNER JOIN torrents_artists ta ON (ta.GroupID = tg.ID)
+                WHERE t.UserID = ?
+            ) s ON (s.ArtistID = a.ArtistID)";
 
         switch ($type) {
             case 'checksum':
@@ -94,39 +107,64 @@ class Better extends \Gazelle\Base
                 $order = 'ORDER BY tg.Name';
                 switch ($filter) {
                     case 'snatched':
-                        $joins[] = '
-                            INNER JOIN
-                            (
-                                SELECT DISTINCT t.GroupID
-                                FROM torrents t
-                                INNER JOIN xbt_snatched x ON (x.fid = t.ID AND x.uid = ?)
-                            ) s ON (s.GroupID = tg.ID)';
-                        $joinParams[] = $userId;
+                        $where[] = "EXISTS (
+                            SELECT 1 FROM xbt_snatched xs
+                            INNER JOIN torrents t ON (t.ID = xs.fid AND xs.uid = ?)
+                            WHERE t.GroupID = tg.ID)";
+                        $params[] = $userId;
                         break;
                     case 'uploaded':
-                        $joins[] = '
-                            INNER JOIN
-                            (
-                                SELECT DISTINCT GroupID
-                                FROM torrents
-                                WHERE UserID = ?
-                            ) u ON (u.GroupID = tg.ID)';
-                        $joinParams[] = $userId;
+                        $where[] = "EXISTS (
+                            SELECT 1 FROM torrents t
+                            WHERE t.GroupID = tg.ID
+                                AND t.UserID = ?)";
+                        $params[] = $userId;
                         break;
                 }
                 $mode = 'groups';
                 break;
             case 'artistimg':
                 $where[] = "(wa.Image IS NULL OR wa.Image = '')";
+                switch ($filter) {
+                    case 'uploaded':
+                        $joins[] = $artistUserUploadJoin;
+                        $joinParams[] = $userId;
+                        break;
+                    case 'snatched':
+                        $joins[] = $artistUserSnatchJoin;
+                        $joinParams[] = $userId;
+                        break;
+                }
+
                 $mode = 'artists';
                 break;
             case 'artistdesc':
                 $where[] = "(wa.Body IS NULL OR wa.Body = '')";
+                switch ($filter) {
+                    case 'uploaded':
+                        $joins[] = $artistUserUploadJoin;
+                        $joinParams[] = $userId;
+                        break;
+                    case 'snatched':
+                        $joins[] = $artistUserSnatchJoin;
+                        $joinParams[] = $userId;
+                        break;
+                }
                 $mode = 'artists';
                 break;
             case 'artistdiscogs':
                 $joins[] = "LEFT JOIN artist_discogs dg ON (dg.artist_id = a.ArtistID)";
                 $where[] = "(dg.artist_id IS NULL)";
+                switch ($filter) {
+                    case 'uploaded':
+                        $joins[] = $artistUserUploadJoin;
+                        $joinParams[] = $userId;
+                        break;
+                    case 'snatched':
+                        $joins[] = $artistUserSnatchJoin;
+                        $joinParams[] = $userId;
+                        break;
+                }
                 $mode = 'artists';
                 break;
         }
@@ -168,13 +206,7 @@ class Better extends \Gazelle\Base
             }
         }
 
-        if (count($where) > 0) {
-            $where = 'WHERE '.implode(' AND ', $where);
-        } else {
-            $where = '';
-        }
-
-
+        $where = count($where) ? 'WHERE '.implode(' AND ', $where) : '';
         $joins = implode("\n", $joins);
         $params = array_merge($joinParams, $params);
 
