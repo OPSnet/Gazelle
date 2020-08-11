@@ -53,8 +53,8 @@ abstract class Task extends \Gazelle\Base {
             echo(sprintf("%s [%s] (%d) %s\n", $event->timestamp, $event->severity, $event->reference, $event->event));
             $this->db->prepared_query('
                 INSERT INTO periodic_task_history_event
-                       (periodic_task_history_id, severity, event_time, event, reference)
-                VALUES (?,                        ?,        ?,          ?,     ?)
+                       (periodic_task_history_id, severity, event_time, event,             reference)
+                VALUES (?,                        ?,        ?,          substr(?, 1, 255), ?)
             ', $this->historyId, $event->severity, $event->timestamp, $event->event, $event->reference);
         }
 

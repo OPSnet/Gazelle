@@ -95,8 +95,7 @@ foreach ($TorrentGroups as $GroupID => $Editions) {
         $ArtistNames = '';
     }
 
-    $TagList = [];
-    $TagList = explode(' ', str_replace('_', '.', $GroupInfo['TagList']));
+    $TagList = explode(' ', $GroupInfo['TagList']);
     $TorrentTags = [];
     foreach ($TagList as $Tag) {
         $TorrentTags[] = "<a href=\"torrents.php?taglist=$Tag\">$Tag</a>";

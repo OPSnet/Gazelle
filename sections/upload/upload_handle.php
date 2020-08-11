@@ -510,19 +510,22 @@ $NoRevision = false;
 if ($Type == 'Music') {
     // Does it belong in a group?
     if ($Properties['GroupID']) {
-        $DB->prepared_query('
+        $DB->prepared_query("
             SELECT
-                ID,
-                WikiImage,
-                WikiBody,
-                RevisionID,
-                Name,
-                Year,
-                ReleaseType,
-                TagList
-            FROM torrents_group
-            WHERE id = ?
-            ', $Properties['GroupID']
+                tg.ID,
+                tg.WikiImage,
+                tg.WikiBody,
+                tg.RevisionID,
+                tg.Name,
+                tg.Year,
+                tg.ReleaseType,
+                group_concat(t.Name SEPARATOR ' ') AS TagList
+            FROM torrents_group tg
+            INNER JOIN torrents_tags tt ON (tt.GroupID = tg.ID)
+            INNER JOIN tags t ON (t.ID = tt.TagID)
+            GROUP BY tg.ID, tg.WikiImage, tg.WikiBody, tg.RevisionID, tg.Name, tg.Year, tg.ReleaseType
+            WHERE tg.Id = ?
+            ", $Properties['GroupID']
         );
         if ($DB->has_results()) {
             // Don't escape tg.Name. It's written directly to the log table

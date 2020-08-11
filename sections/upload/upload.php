@@ -13,7 +13,7 @@ ini_set('max_file_uploads', '100');
 View::show_header('Upload', 'upload,validate_upload,valid_tags,musicbrainz,multiformat_uploader,bbcode');
 
 if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
-    $DB->query('
+    $DB->prepared_query("
         SELECT
             tg.ID as GroupID,
             tg.CategoryID,
@@ -24,25 +24,21 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
             tg.WikiImage AS Image,
             tg.WikiBody AS GroupDescription,
             tg.ReleaseType,
-            tg.VanityHouse
+            tg.VanityHouse,
+            group_concat(t.Name SEPARATOR ', ') AS TagList
         FROM torrents_group AS tg
-            LEFT JOIN torrents AS t ON t.GroupID = tg.ID
-        WHERE tg.ID = '.$_GET['groupid'].'
-        GROUP BY tg.ID');
+        INNER JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
+        INNER JOIN tags t ON (t.ID = tt.TagID)
+        WHERE tg.ID = ?
+        GROUP BY tg.ID, tg.CategoryID, tg.Name, tg.Year, tg.RecordLabel, tg.CatalogueNumber,
+            tg.WikiImage, tg.WikiBody, tg.ReleaseType, tg.VanityHouse
+        ", $_GET['groupid']
+    );
     if ($DB->has_results()) {
-        list($Properties) = $DB->to_array(false, MYSQLI_BOTH);
+        $Properties = $DB->next_record();
         $UploadForm = $Categories[$Properties['CategoryID'] - 1];
         $Properties['CategoryName'] = $Categories[$Properties['CategoryID'] - 1];
         $Properties['Artists'] = Artists::get_artist($_GET['groupid']);
-
-        $DB->query("
-            SELECT
-                GROUP_CONCAT(tags.Name SEPARATOR ', ') AS TagList
-            FROM torrents_tags AS tt
-                JOIN tags ON tags.ID = tt.TagID
-            WHERE tt.GroupID = '$_GET[groupid]'");
-
-        list($Properties['TagList']) = $DB->next_record();
     } else {
         unset($_GET['groupid']);
     }
@@ -50,20 +46,22 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
         $Properties['RequestID'] = $_GET['requestid'];
     }
 } elseif (empty($Properties) && !empty($_GET['requestid']) && is_number($_GET['requestid'])) {
-    $DB->query('
+    $DB->prepared_query('
         SELECT
             ID AS RequestID,
             CategoryID,
-            Title AS Title,
+            Title,
             Year,
             RecordLabel,
             CatalogueNumber,
             ReleaseType,
             Image
         FROM requests
-        WHERE ID = '.$_GET['requestid']);
+        WHERE ID = ?
+        ', $_GET['requestid']
+    );
 
-    list($Properties) = $DB->to_array(false, MYSQLI_BOTH);
+    $Properties = $DB->next_record();
     $UploadForm = $Categories[$Properties['CategoryID'] - 1];
     $Properties['CategoryName'] = $Categories[$Properties['CategoryID'] - 1];
     $Properties['Artists'] = Requests::get_artists($_GET['requestid']);

@@ -60,7 +60,7 @@ foreach ($Results as $Key => $GroupID) {
         $Torrents = [$TorrentID => $GroupInfo['Torrents'][$TorrentID]];
     }
 
-    $TagList = explode(' ', str_replace('_', '.', $GroupInfo['TagList']));
+    $TagList = explode(' ', $GroupInfo['TagList']);
     $JsonArtists = [];
     if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
         unset($ExtendedArtists[2]);

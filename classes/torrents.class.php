@@ -85,10 +85,16 @@ class Torrents {
             $QueryID = G::$DB->get_query_id();
             G::$DB->prepared_query("
                 SELECT
-                    ID, Name, Year, RecordLabel, CatalogueNumber, TagList, ReleaseType, VanityHouse, WikiImage, CategoryID
-                FROM torrents_group
-                WHERE ID IN ($placeholders)",
-                ...$ids);
+                    tg.ID, tg.Name, tg.Year, tg.RecordLabel, tg.CatalogueNumber, tg.ReleaseType, 
+                    tg.VanityHouse, tg.WikiImage, tg.CategoryID,
+                    group_concat(t.Name SEPARATOR ' ') AS TagList
+                FROM torrents_group tg
+                LEFT JOIN torrents_tags tt ON (tt.GroupID = tg.ID)
+                LEFT JOIN tags t ON (t.ID = tt.TagID)
+                WHERE tg.ID IN ($placeholders)
+                GROUP BY tg.ID
+                ", ...$ids
+            );
 
             while ($Group = G::$DB->next_record(MYSQLI_ASSOC, true)) {
                 $NotFound[$Group['ID']] = $Group;
@@ -143,8 +149,10 @@ class Torrents {
                         LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
                     WHERE t.GroupID IN ($placeholders)
                     ORDER BY t.GroupID, t.Remastered, (t.RemasterYear != 0) DESC, t.RemasterYear, t.RemasterTitle,
-                            t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID",
-                    ...$ids);
+                            t.RemasterRecordLabel, t.RemasterCatalogueNumber, t.Media, t.Format, t.Encoding, t.ID
+                    ", ...$ids
+                )
+;
                 while ($Torrent = G::$DB->next_record(MYSQLI_ASSOC, true)) {
                     $NotFound[$Torrent['GroupID']]['Torrents'][$Torrent['ID']] = $Torrent;
                 }
@@ -558,6 +566,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
     public static function update_hash($GroupID) {
         $QueryID = G::$DB->get_query_id();
 
+        // todo: remove this legacy code once TagList replacement is confirmed working
         G::$DB->prepared_query("
             UPDATE torrents_group
             SET TagList = (
@@ -598,22 +607,27 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
 
         G::$DB->prepared_query("
             REPLACE INTO sphinx_delta
-                (ID, GroupID, GroupName, TagList, Year, CategoryID, Time, ReleaseType, RecordLabel,
+                (ID, GroupID, GroupName, Year, CategoryID, Time, ReleaseType, RecordLabel,
                 CatalogueNumber, VanityHouse, Size, Snatched, Seeders, Leechers, LogScore, Scene, HasLog,
                 HasCue, FreeTorrent, Media, Format, Encoding, Description, RemasterYear, RemasterTitle,
-                RemasterRecordLabel, RemasterCatalogueNumber, FileList, VoteScore, ArtistName)
+                RemasterRecordLabel, RemasterCatalogueNumber, FileList, TagList, VoteScore, ArtistName)
             SELECT
-                t.ID, g.ID, g.Name, g.TagList, g.Year, g.CategoryID, UNIX_TIMESTAMP(t.Time), g.ReleaseType,
+                t.ID, g.ID, g.Name, g.Year, g.CategoryID, unix_timestamp(t.Time), g.ReleaseType,
                 g.RecordLabel, g.CatalogueNumber, g.VanityHouse, t.Size, tls.Snatched, tls.Seeders,
-                tls.Leechers, t.LogScore, CAST(t.Scene AS CHAR), CAST(t.HasLog AS CHAR), CAST(t.HasCue AS CHAR),
-                CAST(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
+                tls.Leechers, t.LogScore, cast(t.Scene AS CHAR), cast(t.HasLog AS CHAR), cast(t.HasCue AS CHAR),
+                cast(t.FreeTorrent AS CHAR), t.Media, t.Format, t.Encoding, t.Description,
                 t.RemasterYear, t.RemasterTitle, t.RemasterRecordLabel, t.RemasterCatalogueNumber,
-                REPLACE(REPLACE(t.FileList, '_', ' '), '/', ' ') AS FileList, ?, ?
-            FROM torrents AS t
+                replace(replace(t.FileList, '_', ' '), '/', ' ') AS FileList,
+                replace(group_concat(t2.Name SEPARATOR ' '), '.', '_'), ?, ?
+            FROM torrents t
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
-            WHERE g.ID = ?",
-            $VoteScore, $ArtistName, $GroupID);
+            INNER JOIN torrents_group g ON (g.ID = t.GroupID)
+            INNER JOIN torrents_tags tt ON (tt.GroupID = g.ID)
+            INNER JOIN tags t2 ON (t2.ID = tt.TagID)
+            WHERE g.ID = ?
+            GROUP BY g.ID
+            ", $VoteScore, $ArtistName, $GroupID
+        );
 
         G::$Cache->delete_value("torrents_details_$GroupID");
         G::$Cache->delete_value("torrent_group_$GroupID");

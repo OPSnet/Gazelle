@@ -15,52 +15,67 @@ class Torrent extends \Gazelle\Base {
         $this->currentUser = $currentUser;
     }
 
-    function getTopTorrents($getParameters, $details = 'all', $limit = 10) {
-        $cacheKey = 'top10_' . $details . '_' . md5(implode($getParameters,'')) . '_' . $limit;
+    public function getTopTorrents($getParameters, $details = 'all', $limit = 10) {
+        $cacheKey = 'top10_v2_' . $details . '_' . md5(implode($getParameters,'')) . '_' . $limit;
         $topTorrents = $this->cache->get_value($cacheKey);
 
-        if ($topTorrents !== false) return $topTorrents;
-        if (!$this->cache->get_query_lock($cacheKey)) return false;
+        if ($topTorrents !== false) { 
+            return $topTorrents;
+        }
+        if (!$this->cache->get_query_lock($cacheKey)) {
+            return false;
+        }
 
         $where = [];
         $anyTags = isset($getParameters['anyall']) && $getParameters['anyall'] == 'any';
-        if (isset($getParameters['tags'])) $where[] = $this->tagWhere($getParameters['tags'], $anyTags);
-        if (isset($getParameters['format'])) $where[] = $this->formatWhere($getParameters['format']);
+        if (isset($getParameters['format'])) {
+            $where[] = $this->formatWhere($getParameters['format']);
+        }
+        if (isset($getParameters['tags'])) {
+            $where[] = $this->tagWhere($getParameters['tags'], $anyTags);
+        }
+
         $where[] = $this->freeleechWhere($getParameters);
         $where[] = $this->detailsWhere($details);
 
         $where[] = ["parameters" => null, "where" => "tls.Seeders > 0"];
 
         $whereFilter = function($value) {
-            if (!isset($value["where"])) {
-                return null;
-            };
-            return $value["where"];
+            return $value["where"] ?? null;
         };
 
         $parameterFilter = function($value) {
-            if (!isset($value["parameters"])) {
-                return null;
-            };
-            return $value["parameters"];
+            return $value["parameters"] ?? null;
         };
 
         $filteredWhere = array_filter(array_map($whereFilter, $where));
         $parameters = $this->flatten(array_filter(array_map($parameterFilter, $where)));
 
-        $query = $this->baseQuery;
+        $innerQuery = '';
+        $joinParameters = [];
 
         if (!empty($getParameters['excluded_artists'])) {
-            list($clause, $artists) = $this->excludedArtistClause($getParameters['excluded_artists']);
-            $query .= $clause;
-            $parameters = array_merge($artists, $parameters);
+            [$clause, $artists] = $this->excludedArtistClause($getParameters['excluded_artists']);
+            $innerQuery .= $clause;
+            $joinParameters[] = $artists;
             $filteredWhere[] = "ta.ArtistCount IS NULL";
         }
 
-        $query .= " WHERE " . implode(" AND ", $filteredWhere);
-        $query = $query . (isset($getParameters['groups']) && $getParameters['groups'] == 'show' ? ' GROUP BY g.ID ' : '');
-        $query = $query . ' ORDER BY ' . $this->orderBy($details) . ' DESC';
-        $query = $query . " LIMIT $limit";
+        if (count($joinParameters)) {
+            $joinParameters = $this->flatten($joinParameters);
+            $parameters = array_merge($joinParameters, $parameters);
+        }
+
+        $innerQuery .= " WHERE " . implode(" AND ", $filteredWhere);
+        $innerQuery = $innerQuery . (isset($getParameters['groups']) && $getParameters['groups'] == 'show' ? ' GROUP BY g.ID ' : '');
+        $orderBy = 'ORDER BY ' . $this->orderBy($details) . ' DESC';
+
+        $query = sprintf($this->baseQuery,
+            $innerQuery,
+            ($getParameters['groups'] ?? 'hide') == 'show' ? 'g.ID' : 't.ID, g.ID',
+            $this->orderBy($details) . ' DESC',
+            $limit
+        );
 
         $this->db->prepared_query($query, ...$parameters);
         $topTorrents = $this->db->to_array();
@@ -70,7 +85,7 @@ class Torrent extends \Gazelle\Base {
         return $topTorrents;
     }
 
-    function showFreeleechTorrents($freeleechParameters) {
+    public function showFreeleechTorrents($freeleechParameters) {
         if (isset($freeleechParameters)) {
             return $freeleechParameters == 'hide' ? 1 : 0;
         } else if (isset($this->currentUser['DisableFreeTorrentTop10'])) {
@@ -160,19 +175,25 @@ class Torrent extends \Gazelle\Base {
 
     private function tagWhere($getParameters, $any = false) {
         if (!empty($getParameters)) {
-            $tags = explode(',', str_replace('.', '_', trim($getParameters)));
-            $replace = function($tag) { return preg_replace('/[^a-z0-9_]/', '', $tag); };
+            $tags = explode(',', trim($getParameters));
+            $replace = function($tag) { return preg_replace('/[^a-z0-9.]/', '', $tag); };
             $tags = array_map($replace, $tags);
             $tags = array_filter($tags);
 
             // This is to make the prepared query work.
-            $likePrepare = function($tag) { return "%{$tag}%"; };
-            $tags = array_map($likePrepare, $tags);
 
-            $whereKeyword = $any ? 'OR' : 'AND';
-            $filler = array_fill(0,  count($tags), "g.TagList LIKE ? ");
-            $where = '(' . implode(" $whereKeyword ", $filler) . ')';
-            return ["parameters" => $tags, "where" => $where];
+            $where = implode(array_fill(0,  count($tags), "t.Name = ?"), ' OR ');
+            $clause = "
+        g.ID IN (
+            SELECT tt.GroupID
+            FROM torrents_tags tt
+            INNER JOIN tags t ON (t.ID = tt.TagID)
+            WHERE $where
+            GROUP BY tt.GroupID
+            HAVING count(*) >= ?
+        )";
+            $tags[] = $any ? 1 : count($tags);
+            return ['parameters' => $tags, 'where' => $clause];
         }
 
         return [];
@@ -184,33 +205,81 @@ class Torrent extends \Gazelle\Base {
         return $return;
     }
 
-    private $baseQuery = '
+    public function storeTop10($type, $key, $days) {
+        $this->db->prepared_query("
+            INSERT INTO top10_history (Type) VALUES (?)
+            ", $type
+        );
+        $historyID = $this->db->inserted_id();
+
+        $top10 = $this->cache->get_value('top10tor_v2_' . $key . '_10');
+        if ($top10 === false) {
+            $query = sprintf($this->baseQuery,
+                'WHERE tls.Seeders > 0 AND t.Time > (now() - INTERVAL ? DAY)',
+                '(tls.Seeders + tls.Leechers) DESC',
+                't.ID, g.ID',
+                '10'
+            );
+            $this->db->prepared_query($query, $days);
+
+            $top10 = $this->db->to_array(MYSQLI_NUM);
+        }
+
+        $groupIds = array_column($top10, 1);
+        // exclude artists because it's retarded
+        $groups = \Torrents::get_groups($groupIds, true, false);
+        $artists = \Artists::get_artists($groupIds);
+        global $Debug;
+        foreach ($top10 as $i => $torrent) {
+            [$torrentID, $groupID, $data] = $torrent;
+            $group = $groups[$groupID];
+
+            $displayName = '';
+
+            if (!empty($artists[$groupID])) {
+                $displayName = \Artists::display_artists($artists[$groupID], false, true);
+            }
+
+            $displayName .= $group['Name'];
+
+            if ($group['CategoryID'] == 1 && $group['Year'] > 0) {
+                $displayName .= " [${group['Year']}]";
+            }
+
+            $torrentDetails = $group['Torrents'][$torrentID];
+            // some flags are less flaggy than other flags
+            unset($torrentDetails['IsSnatched']);
+            unset($torrentDetails['FreeTorrent']);
+            unset($torrentDetails['PersonalFL']);
+            //                                                    media, edition, flags
+            $extraInfo = \Torrents::torrent_info($torrentDetails, true,  true,    false);
+            if ($extraInfo != '') {
+                $extraInfo = "- [$extraInfo]";
+            }
+
+            $titleString = "$displayName $extraInfo";
+
+            $Debug->log_var($group, 'group');
+            $this->db->prepared_query('
+                INSERT INTO top10_history_torrents
+                    (HistoryID, Rank, TorrentID, TitleString, TagString)
+                VALUES
+                    (?,         ?,    ?,         ?,           ?)
+                ', $historyID, $i, $torrentID, $titleString, $group['TagList']
+            );
+        }
+    }
+
+    private $baseQuery = "
         SELECT
             t.ID,
             g.ID,
-            g.Name,
-            g.CategoryID,
-            g.wikiImage,
-            g.TagList,
-            t.Format,
-            t.Encoding,
-            t.Media,
-            t.Scene,
-            t.HasLog,
-            t.HasCue,
-            t.HasLogDB,
-            t.LogScore,
-            t.LogChecksum,
-            t.RemasterYear,
-            g.Year,
-            t.RemasterTitle,
-            tls.Snatched,
-            tls.Seeders,
-            tls.Leechers,
-            ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data,
-            g.ReleaseType,
-            t.Size
+            ((t.Size * tls.Snatched) + (t.Size * 0.5 * tls.Leechers)) AS Data
         FROM torrents AS t
         INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)';
+        INNER JOIN torrents_group AS g ON (g.ID = t.GroupID)
+        %s
+        GROUP BY %s
+        ORDER BY %s
+        LIMIT %s";
 }

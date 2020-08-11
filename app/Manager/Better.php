@@ -147,20 +147,18 @@ class Better extends \Gazelle\Base
                             tg.Name LIKE ?
                         OR  t.Description LIKE ?
                         OR  coalesce(wt.Body, tg.WikiBody) LIKE ?
-                        OR  tg.TagList LIKE ?
                     )';
                     $searchString = "%$search%";
-                    $params = array_merge($params, array_fill(0, 4, $searchString));
+                    $params = array_merge($params, array_fill(0, 3, $searchString));
                     $joins[] = 'LEFT JOIN wiki_torrents wt ON (wt.RevisionID = tg.RevisionID)';
                     break;
                 case 'groups':
                     $where[] = '(
                             tg.Name LIKE ?
                         OR  coalesce(wt.Body, tg.WikiBody) LIKE ?
-                        OR  tg.TagList LIKE ?
                     )';
                     $searchString = "%$search%";
-                    $params = array_merge($params, array_fill(0, 3, $searchString));
+                    $params = array_merge($params, array_fill(0, 2, $searchString));
                     break;
                 case 'artists':
                     $where[] = 'a.Name LIKE ?';

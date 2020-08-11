@@ -67,7 +67,7 @@ if (!empty($_GET['date'])) {
                 g.ID,
                 g.Name,
                 g.CategoryID,
-                g.TagList,
+                group_concat(t.Name SEPARATOR '') AS TagList,
                 t.Format,
                 t.Encoding,
                 t.Media,
@@ -80,10 +80,12 @@ if (!empty($_GET['date'])) {
                 t.RemasterYear,
                 g.Year,
                 t.RemasterTitle
-            FROM top10_history AS th
-                LEFT JOIN top10_history_torrents AS tht ON tht.HistoryID = th.ID
-                LEFT JOIN torrents AS t ON t.ID = tht.TorrentID
-                LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
+            FROM top10_history th
+            LEFT JOIN top10_history_torrents tht ON (tht.HistoryID = th.ID)
+            LEFT JOIN torrents t ON (t.ID = tht.TorrentID)
+            LEFT JOIN torrents_group g ON (g.ID = t.GroupID)
+            LEFT JOIN torrents_tags tt ON (tt.GroupID = g.ID)
+            LEFT JOIN tags t ON (t.ID = tt.TagID)
             $Where
             ORDER BY tht.Rank ASC");
 
