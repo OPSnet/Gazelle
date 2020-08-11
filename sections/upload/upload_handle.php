@@ -523,8 +523,8 @@ if ($Type == 'Music') {
             FROM torrents_group tg
             INNER JOIN torrents_tags tt ON (tt.GroupID = tg.ID)
             INNER JOIN tags t ON (t.ID = tt.TagID)
+            WHERE tg.ID = ?
             GROUP BY tg.ID, tg.WikiImage, tg.WikiBody, tg.RevisionID, tg.Name, tg.Year, tg.ReleaseType
-            WHERE tg.Id = ?
             ", $Properties['GroupID']
         );
         if ($DB->has_results()) {
