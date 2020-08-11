@@ -185,7 +185,7 @@ foreach ($GroupIDs as $GroupID) {
     // $GroupVanityHouse = $Group['VanityHouse'];
     $GroupVanityHouse = $Importances[$GroupID]['VanityHouse'];
 
-    $TagList = explode(' ',str_replace('_', '.', $Group['TagList']));
+    $TagList = explode(' ', $Group['TagList']);
 
     // $Tags array is for the sidebar on the right
     foreach ($TagList as $Tag) {

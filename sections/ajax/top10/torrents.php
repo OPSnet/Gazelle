@@ -67,16 +67,6 @@ function generate_torrent_json($caption, $tag, $details, $limit) {
         $artist = Artists::display_artists(Artists::get_artist($groupID), false, true);
         $truncatedArtist = substr($artist, 0, strlen($artist) - 3);
 
-        $tagList = [];
-
-        if ($tagsList != '') {
-            $tagsList = explode(' ', $tagsList);
-            foreach ($tagsList as $tagKey => $tagName) {
-                $tagName = str_replace('_', '.', $tagName);
-                $tagList[] = $tagName;
-            }
-        }
-
         // Append to the existing array.
         $results[] = [
             'torrentId' => (int)$torrentID,
@@ -96,7 +86,7 @@ function generate_torrent_json($caption, $tag, $details, $limit) {
             'media' => $media,
             'scene' => $scene == 1,
             'year' => (int)$year,
-            'tags' => $tagsList,
+            'tags' => explode(' ', $tagsList),
             'snatched' => (int)$snatched,
             'seeders' => (int)$seeders,
             'leechers' => (int)$leechers,
