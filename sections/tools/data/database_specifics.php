@@ -21,21 +21,56 @@ $SortOrderMap = [
     'datasize' => ['data_length', 'desc', 'table size'],
     'freeratio' => ['CASE WHEN data_length = 0 THEN 0 ELSE data_free / data_length END', 'desc', 'table bloat'],
     'indexsize' => ['index_length', 'desc', 'index size'],
-    'name' => ['table_name', 'desc', 'name'],
+    'name' => ['table_name', 'asc', 'name'],
     'rows' => ['table_rows', 'desc', 'row counts'],
     'rowsize' => ['avg_row_length', 'desc', 'mean row length'],
-    'totalsize' => ['data_length + index_length', 'desc', 'total table size'],
+    'totalsize' => ['total_length', 'desc', 'total table size'],
 ];
+$header = new SortableTableHeader([
+    'datafree' => 'Free Size',
+    'datasize' => 'Data Size',
+    'freeratio' => 'Bloat %',
+    'indexsize' => 'Index Size',
+    'name' => 'Name',
+    'rows' => 'Rows',
+    'rowsize' => 'Row Size',
+    'totalsize' => 'Total Size',
+], $SortOrder, $orderWay);
+
 $SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'totalsize';
 $orderBy = $SortOrderMap[$SortOrder][0];
 $orderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
     ? $SortOrderMap[$SortOrder][1]
     : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 
+$mode = $_GET['mode'] ?? 'show';
+switch($mode) {
+    case 'show':
+        $groupColumn = 'table_name';
+        $where = '';
+        break;
+    case 'merge':
+        $groupColumn = "replace(table_name, 'deleted_', '')";
+        $where = '';
+        break;
+    case 'exclude':
+        $groupColumn = 'table_name';
+        $where = " AND table_name NOT LIKE 'deleted%'";
+        break;
+}
+
 $DB->prepared_query("
-    SELECT table_name, engine, table_rows, avg_row_length, data_length, index_length, data_free
+    SELECT $groupColumn AS table_name,
+        engine,
+        sum(table_rows) AS table_rows,
+        avg(avg_row_length) AS avg_row_length,
+        sum(data_length) AS data_length,
+        sum(index_length) AS index_length,
+        sum(index_length + data_length) AS total_length,
+        sum(data_free) AS data_free
     FROM information_schema.tables
-    WHERE table_schema = ?
+    WHERE table_schema = ?$where
+    GROUP BY $groupColumn
     ORDER by $orderBy $orderWay
     ", SQLDB
 );
@@ -48,7 +83,7 @@ foreach ($Tables as $name => $info) {
             $data[$name] = round($info['data_length'] == 0 ? 0 : $info['data_free'] / $info['data_length'], 2);
             break;
         case 'totalsize':
-            $data[$name] = $info['data_length'] + $info['index_length'];
+            $data[$name] = $info['total_length'];
             break;
         default:
             $data[$name] = $info[$SortOrderMap[$SortOrder][0]];
@@ -57,7 +92,11 @@ foreach ($Tables as $name => $info) {
 
 View::show_header('Database Specifics');
 ?>
-
+<div class="linkbox">
+    <a href="tools.php?action=database_specifics&amp;mode=show" title="Tables of deleted data are shown separately" class="brackets">Show deleted data</a>
+    <a href="tools.php?action=database_specifics&amp;mode=merge" title="Stats of tables of deleted data are merged with their source table" class="brackets">Merge deleted data</a>
+    <a href="tools.php?action=database_specifics&amp;mode=exclude" title="Tables of deleted data are excluded" class="brackets">Exclude deleted data</a>
+</div>
 <script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
 <script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
 <script>
@@ -106,18 +145,7 @@ Highcharts.chart('statistics', {
 </figure>
 </div>
 <br />
-<?php
-$header = new SortableTableHeader([
-    'datafree' => 'Free Size',
-    'datasize' => 'Data Size',
-    'freeratio' => 'Bloat %',
-    'indexsize' => 'Index Size',
-    'name' => 'Name',
-    'rows' => 'Rows',
-    'rowsize' => 'Row Size',
-    'totalsize' => 'Total Size',
-], $SortOrder, $orderWay);
-?>
+
 <table>
     <tr class="colhead" style="text-align:right">
         <td style="text-align:left" class="nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
