@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-class Base {
+abstract class Base {
     /** @var \DB_MYSQL */
     protected $db;
 
