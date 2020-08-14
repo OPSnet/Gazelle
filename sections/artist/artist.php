@@ -737,20 +737,16 @@ if (defined('LASTFM_API_KEY')) {
     include(__DIR__ . '/concerts.php');
 }
 
-// --- Comments ---
-list($NumComments, $Page, $Thread, $LastRead) = Comments::load('artist', $ArtistID);
-
+[$NumComments, $Page, $Thread, $LastRead] = Comments::load('artist', $ArtistID);
 $Pages = Format::get_pages($Page, $NumComments, TORRENT_COMMENTS_PER_PAGE, 9, '#comments');
-
 ?>
     <div id="artistcomments">
         <div class="linkbox"><a name="comments"></a>
             <?=($Pages)?>
         </div>
 <?php
-
-//---------- Begin printing
-CommentsView::render_comments($Thread, $LastRead, "artist.php?id=$ArtistID");
+$comments = new Gazelle\CommentViewer\Artist(G::$Twig, $LoggedUser['ID'], $ArtistID);
+$comments->renderThread($Thread, $LastRead ?: 0);
 ?>
         <div class="linkbox">
             <?=($Pages)?>

@@ -46,8 +46,9 @@ if ($Pages) {
     </div>
 <?php
 
-//---------- Begin printing
-CommentsView::render_comments($Thread, $LastRead, "collages.php?action=comments&amp;collageid=$CollageID");
+$comments = new Gazelle\CommentViewer\Collage(G::$Twig, $LoggedUser['ID'], $CollageID);
+$comments->renderThread($Thread, $LastRead ?: 0);
+
 if (!$ThreadInfo['IsLocked'] || check_perms('site_moderate_forums')) {
     if ($ThreadInfo['MinClassWrite'] <= $LoggedUser['Class'] && !$LoggedUser['DisablePosting']) {
         View::parse('generic/reply/quickreply.php', [
@@ -65,4 +66,5 @@ if (!$ThreadInfo['IsLocked'] || check_perms('site_moderate_forums')) {
         <?=$Pages?>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

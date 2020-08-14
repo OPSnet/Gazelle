@@ -1,46 +1,29 @@
 <?php
 enforce_login();
 
-// fix old links
-if ($_REQUEST['action'] == 'artists') {
-    $_REQUEST['action'] = 'artist';
-} elseif ($_REQUEST['action'] == 'my_torrents') {
-    $_REQUEST['action'] = 'torrents';
-    $_REQUEST['type'] = 'uploaded';
-}
-
-$Action = '';
-if (!empty($_REQUEST['action'])) {
-    $Action = $_REQUEST['action'];
-}
-
-switch ($Action) {
-    case 'take_post':
-        require SERVER_ROOT . '/sections/comments/take_post.php';
+switch ($_REQUEST['action'] ?? null) {
+    case 'take_delete':
+        require_once('take_delete.php');
         break;
     case 'take_edit':
-        require SERVER_ROOT . '/sections/comments/take_edit.php';
+        require_once('take_edit.php');
         break;
-    case 'take_delete':
-        require SERVER_ROOT . '/sections/comments/take_delete.php';
-        break;
-    case 'warn':
-        require SERVER_ROOT . '/sections/comments/warn.php';
+    case 'take_post':
+        require_once('take_post.php');
         break;
     case 'take_warn':
-        require SERVER_ROOT . '/sections/comments/take_warn.php';
+        require_once('take_warn.php');
         break;
     case 'get':
-        require SERVER_ROOT . '/sections/comments/get.php';
+        require_once('get.php');
         break;
     case 'jump':
-        require SERVER_ROOT . '/sections/comments/jump.php';
+        require_once('jump.php');
         break;
-    case 'artist':
-    case 'collages':
-    case 'requests':
-    case 'torrents':
+    case 'warn':
+        require_once('warn.php');
+        break;
     default:
-        require SERVER_ROOT . '/sections/comments/comments.php';
+        require_once('comments.php');
         break;
 }

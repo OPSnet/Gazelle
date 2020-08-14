@@ -806,7 +806,8 @@ $Pages = Format::get_pages($Page, $NumComments, TORRENT_COMMENTS_PER_PAGE, 9, '#
             <?=$Pages?>
         </div>
 <?php
-CommentsView::render_comments($Thread, $LastRead, "torrents.php?id=$GroupID");
+$comments = new Gazelle\CommentViewer\Torrent(G::$Twig, $LoggedUser['ID'], $GroupID);
+$comments->renderThread($Thread, $LastRead ?: 0);
 ?>
         <div class="linkbox">
             <?=$Pages?>
