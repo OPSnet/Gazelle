@@ -1,0 +1,52 @@
+<table class="layout" cellpadding="2" cellspacing="2" border="0" align="center">
+    <tr valign="top">
+        <td align="right">Username</td>
+        <td align="left">
+            <input type="text" name="username" id="username" class="inputtext" placeholder="Username" value="{{ username }}" />
+            <p>Use common sense when choosing your username. Offensive usernames may result in an instant ban.
+            <br /><strong>Do not choose a username that can be associated with your real name.</strong> If you do so, we will not change it for you.</p>
+        </td>
+    </tr>
+    <tr valign="top">
+        <td align="right">Email address</td>
+        <td align="left">
+            <input type="email" name="email" id="email" class="inputtext" placeholder="Email" value="{{ email }}" />
+        </td>
+    </tr>
+    <tr valign="top">
+        <td align="right">Password</td>
+        <td align="left">
+            <input type="password" name="password" id="new_pass_1" class="inputtext" placeholder="Password" /> <strong id="pass_strength"></strong>
+        </td>
+    </tr>
+    <tr valign="top">
+        <td align="right">Verify&nbsp;password</td>
+        <td align="left">
+            <input type="password" name="confirm_password" id="new_pass_2" class="inputtext" placeholder="Verify password" /> <strong id="pass_match"></strong>
+            <p>A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or a symbol, or is at least 20 characters.</p>
+        </td>
+    </tr>
+    <tr valign="top">
+        <td></td>
+        <td align="left">
+            <input type="checkbox" name="readrules" id="readrules" value="1"{{ readrules|checked }} />
+            <label for="readrules">I will read and abide by the rules.</label>
+        </td>
+    </tr>
+    <tr valign="top">
+        <td></td>
+        <td align="left">
+            <input type="checkbox" name="readwiki" id="readwiki" value="1"{{ readwiki|checked }} />
+            <label for="readwiki">I will read the wiki.</label>
+        </td>
+    </tr>
+    <tr valign="top">
+        <td></td>
+        <td align="left">
+            <input type="checkbox" name="agereq" id="agereq" value="1"{{ agereq|checked }} />
+            <label for="agereq">I am 13 years of age or older.</label>
+        </td>
+    </tr>
+        <td colspan="2" align="center"><br /><input type="submit" name="submit" value="Create my account" class="submit" /></td>
+    </tr>
+</table>

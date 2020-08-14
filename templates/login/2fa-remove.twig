@@ -1,0 +1,35 @@
+<form method="post">
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border">
+    <thead>
+    <tr class="colhead_dark">
+        <td>&nbsp;</td>
+        <td>
+            <strong>Please enter your password to confirm the removal of Two-Factor Authentification (2FA) from your account.</strong>
+        </td>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr>
+        <td class="label">
+            <label for="password"><strong>Password</strong></label>
+        </td>
+
+        <td>
+            <input type="password" size="50" name="password" id="password"/>
+{% if bad %}
+                <p class="warning">Invalid password.</p>
+{% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <input type="submit" value="Remove 2FA">
+        </td>
+    </tr>
+    </tbody>
+</table>
+</form>
+

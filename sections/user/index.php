@@ -122,7 +122,7 @@ switch ($_REQUEST['action']) {
                     } else {
                         $recovery = [];
                         for ($i = 0; $i < 6; $i++) {
-                            $recovery[] = strtoupper(bin2hex(openssl_random_pseudo_bytes(16)));
+                            $recovery[] = randomString(16);
                         }
 
                         $DB->prepared_query('

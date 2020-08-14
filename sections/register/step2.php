@@ -7,4 +7,3 @@ View::show_header('Registration Complete');
 </div>
 <?php
 View::show_footer();
-?>

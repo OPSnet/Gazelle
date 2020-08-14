@@ -1,0 +1,37 @@
+<div class="box pad">
+Please note that if you lose your 2FA key and all of your backup keys, the
+{{ site_name }} staff cannot help you retrieve your account. Ensure you
+keep your backup keys in a safe place.
+</div>
+
+<form method="post">
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border">
+    <thead>
+        <tr class="colhead_dark">
+            <td>&nbsp;</td>
+            <td>
+                <strong>Please enter your two-factor authentication key given to you by your App.</strong>
+            </td>
+        </tr>
+    </thead>
+    
+    <tbody>
+        <tr>
+            <td class="label tooltip_interactive"
+                title="If all went to plan last step, your authentication app should've given you a code. Please enter that here."
+                data-title-plain="If all went to plan last step, your authentication app should've given you a code. Please enter that here.">
+                <label for="2fa"><strong>Authentication Key</strong></label>
+            </td>
+            
+            <td>
+                <input type="text" size="50" name="2fa" id="2fa"/>
+            </td>
+        </tr>
+    
+        <tr>
+            <td>&nbsp;</td>
+            <td><input type="submit" value="Authenticate!"></td>
+        </tr>
+    </tbody>
+</table>
+</form>
