@@ -307,7 +307,9 @@ class Comments {
         //This is a hybrid to reduce the catalogue down to the page elements: We use the page limit % catalogue
         $Thread = array_slice($Catalogue, ((TORRENT_COMMENTS_PER_PAGE * $CommPage - TORRENT_COMMENTS_PER_PAGE) % THREAD_CATALOGUE), TORRENT_COMMENTS_PER_PAGE, true);
 
-        if ($HandleSubscriptions && count($Thread) > 0) {
+        if (!($HandleSubscriptions && count($Thread) > 0)) {
+            $LastRead = false;
+        } else {
             // quote notifications
             $LastPost = end($Thread);
             $LastPost = $LastPost['ID'];
@@ -326,29 +328,28 @@ class Comments {
             }
 
             // last read
-            G::$DB->query("
+            $LastRead = G::$DB->scalar("
                 SELECT PostID
                 FROM users_comments_last_read
-                WHERE UserID = " . G::$LoggedUser['ID'] . "
-                    AND Page = '$Page'
-                    AND PageID = $PageID");
-            list($LastRead) = G::$DB->next_record();
+                WHERE UserID = ?
+                    AND Page = ?
+                    AND PageID = ?
+                ", G::$LoggedUser['ID'], $Page, $PageID
+            );
             if ($LastRead < $LastPost) {
-                G::$DB->query("
+                G::$DB->prepared_query("
                     INSERT INTO users_comments_last_read
-                        (UserID, Page, PageID, PostID)
-                    VALUES
-                        (" . G::$LoggedUser['ID'] . ", '$Page', $PageID, $LastPost)
+                           (UserID, Page, PageID, PostID)
+                    VALUES (?,      ?,    ?,      ?)
                     ON DUPLICATE KEY UPDATE
-                        PostID = $LastPost");
+                        PostID = ?
+                    ", G::$LoggedUser['ID'], $Page, $PageID, $LastPost, $LastPost
+                );
                 G::$Cache->delete_value('subscriptions_user_new_' . G::$LoggedUser['ID']);
             }
-        } else {
-            $LastRead = false;
         }
 
         G::$DB->set_query_id($QueryID);
-
         return [$NumComments, $CommPage, $Thread, $LastRead];
     }
 

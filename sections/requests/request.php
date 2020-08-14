@@ -449,7 +449,8 @@ echo $Pages;
 <?php
 
 //---------- Begin printing
-CommentsView::render_comments($Thread, $LastRead, "requests.php?action=view&amp;id=$RequestID");
+$comments = new Gazelle\CommentViewer\Request(G::$Twig, $LoggedUser['ID'], $RequestID);
+$comments->renderThread($Thread, $LastRead ?: 0);
 
 if ($Pages) { ?>
         <div class="linkbox pager"><?=$Pages?></div>

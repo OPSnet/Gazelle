@@ -1,0 +1,55 @@
+<table class="forum_post box vertical_margin{{ show_avatar ? '' : ' noavatar' }}{{ unread ? ' forum_unread' : ''}}" id="post{{ id }}">
+    <colgroup>
+{% if show_avatar %}
+        <col class="col_avatar" />
+{% endif %}
+        <col class="col_post_body" />
+    </colgroup>
+    <tr class="colhead_dark">
+        <td colspan="{{ show_avatar ? 2 : 1 }}">
+            <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ id }}</a>
+                {{ header|raw }}
+                - <a href="#quickpost" onclick="Quote('{{ id }}','{{ username }}', true);" class="brackets">Quote</a>
+{%    if show_edit %}
+                - <a href="#post{{ id }}" onclick="Edit_Form('{{ id }}','{{ key }}');" class="brackets">Edit</a>
+{%    endif %}
+            </div>
+            <div id="bar{{ id }}" style="float: right;">
+                <a href="reports.php?action=report&amp;type=comment&amp;id={{ id }}" class="brackets">Report</a>
+{% if is_admin %}
+{%    if show_delete %}
+                - <a href="#post{{ id }}" onclick="Delete('{{ id }}');" class="brackets">Delete</a>
+{%    endif %}
+{%    if show_warn %}
+                <form class="manage_form hidden" name="user" id="warn{{ id }}" action="comments.php" method="post">
+                    <input type="hidden" name="action" value="warn" />
+                    <input type="hidden" name="postid" value="{{ id }}" />
+                </form>
+                - <a href="#" onclick="$('#warn{{ id }}').raw().submit(); return false;" class="brackets">Warn</a>
+{%     endif %}
+                &nbsp;
+                <a href="#">&uarr;</a>
+{% endif %}
+            </div>
+        </td>
+    </tr>
+    <tr>
+{% if show_avatar %}
+        <td class="avatar" valign="top">{{ avatar|raw }}</td>
+{% endif %}
+        <td class="body" valign="top">
+            <div id="content{{ id }}">
+                {{ body|raw }}
+{% if edited %}
+                <br />
+                <br />
+                <span class="last_edited">
+{%    if is_admin %}
+                <a href="#content{{ id }}" onclick="LoadEdit('{{ page }}', {{ id }}, 1); return false;">&laquo;</a>
+{%    endif %}
+                Last edited by {{ editor|raw }} {{ edit_time|raw }}</span>
+{% endif %}
+            </div>
+        </td>
+    </tr>
+</table>

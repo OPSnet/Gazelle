@@ -102,6 +102,15 @@ class User extends Base {
         return site_url() . "user.php?id=" . $this->id;
     }
 
+    public function avatarMode(): int {
+        return \Users::user_heavy_info($this->id)['DisableAvatars'];
+    }
+
+    public function primaryClass(): int {
+        $info = \Users::user_info($this->id);
+        return $info['Class'];
+    }
+
     public function forceCacheFlush($flush = true) {
         return $this->forceCacheFlush = $flush;
     }
