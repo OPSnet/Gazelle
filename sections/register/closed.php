@@ -6,4 +6,3 @@ View::show_header('Registration Closed');
 </div>
 <?php
 View::show_footer();
-?>

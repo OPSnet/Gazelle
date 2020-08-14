@@ -17,4 +17,3 @@ View::show_header('Register');
 </div>
 <?php
 View::show_footer();
-?>

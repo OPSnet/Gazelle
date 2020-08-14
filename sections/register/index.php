@@ -276,16 +276,19 @@ if (!empty($_REQUEST['confirm'])) {
         }
     } elseif ($_GET['invite']) {
         // If they haven't submitted the form, check to see if their invite is good
-        $DB->query("
-            SELECT InviteKey
-            FROM invites
-            WHERE InviteKey = '".db_string($_GET['invite'])."'");
-        if (!$DB->has_results()) {
-            error('Invite not found!');
+        if (!$DB->scalar("
+            SELECT InviteKey FROM invites WHERE InviteKey = ?
+            ", $_GET['invite']
+        )) {
+            View::show_header('No invitation found');
+            echo G::$Twig->render('login/no-invite.twig', [
+                'static' => STATIC_SERVER,
+                'key'    => $_GET['invite']]);
+            exit;
         }
     }
 
-    include('step1.php');
+    require('step1.php');
 
 } elseif (!OPEN_REGISTRATION) {
     if (isset($_GET['welcome'])) {

@@ -4,7 +4,7 @@ echo $Validate->GenerateJS('recoverform');
 ?>
 
 <div id="logo">
-<a href="/"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
+<a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
 </div>
 
 <div id="main">

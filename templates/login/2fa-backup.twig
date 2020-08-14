@@ -1,0 +1,18 @@
+<div class="box pad">
+Please note that if you lose your 2FA key and all your backup keys, the
+{{ site_name }} staff cannot help you retrieve your account. Ensure you
+keep your backup keys in a safe place.
+</div>
+
+<div class="box pad">
+
+<p>Two-factor authentication has now been enabled on your account. Please
+note down the following recovery keys, they are the only way you will be
+able to recover your account if you lose your hardware device.</p>
+
+<ul class="pad">
+{% for k in keys %}
+    <li><tt>{{ k }}</tt></li>
+{% endfor %}
+</ul>
+</div>
