@@ -58,6 +58,7 @@ class User extends Base {
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
                 la.Type,
+                ui.collages AS Collages,
                 CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS unlimitedDownload
             FROM users_main              AS um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
@@ -464,7 +465,6 @@ class User extends Base {
             ', $this->id, 'unlimited-download'
         );
         $found = $this->db->has_results();
-        // die("flag=$flag, found=$found");
         $toggled = false;
         if (!$flag && $found) {
             [$attrId] = $this->db->next_record();
@@ -599,12 +599,32 @@ class User extends Base {
             SELECT ID, Name
             FROM collages
             WHERE UserID = ?
-                AND CategoryID = '0'
+                AND CategoryID = 0
                 AND Deleted = '0'
             ORDER BY Featured DESC, Name ASC
             ", $this->id
         );
         return $this->db->to_array(false, MYSQLI_NUM, false);
+    }
+
+    public function canCreatePersonalCollage(): bool {
+        [$allowed, $created] = $this->db->row("
+            SELECT i.collages, coalesce(c.num, 0)
+            FROM users_info i
+            LEFT JOIN
+            (
+                SELECT UserID, count(*) AS num
+                FROM collages
+                WHERE CategoryID = 0
+                  AND Deleted = '0'
+            ) c USING (UserID)
+            WHERE i.UserID = ?
+            ", $this->id
+        );
+        $donorMan = new Manager\Donation();
+        $allowed += $donorMan->personalCollages($this->id);
+
+        return $allowed > $created;
     }
 
     public function collageUnreadCount(): int {

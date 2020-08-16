@@ -47,10 +47,6 @@ echo $Val->GenerateJS('permissionsform');
             </td>
         </tr>
         <tr>
-            <td class="label">Maximum number of personal collages</td>
-            <td><input type="text" name="maxcollages" size="5" value="<?=$values['MaxCollages']?>" /></td>
-        </tr>
-        <tr>
             <td class="label">Additional forums</td>
             <td><input type="text" size="30" name="forums" value="<?=display_str($forums)?>" /></td>
         </tr>

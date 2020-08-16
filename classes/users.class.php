@@ -203,6 +203,7 @@ class Users {
                     i.RestrictedForums,
                     i.PermittedForums,
                     i.NavItems,
+                    i.collages AS Collages,
                     uf.tokens AS FLTokens,
                     m.PermissionID,
                     CASE WHEN uha.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL

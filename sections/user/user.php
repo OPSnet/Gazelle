@@ -60,7 +60,7 @@ if (check_perms('users_mod')) {
             inviter.Username, COUNT(posts.id) AS ForumPosts, i.RatioWatchEnds, i.RatioWatchDownload, i.DisableAvatar,
             i.DisableInvites, i.DisablePosting, i.DisablePoints, i.DisableForums, i.DisableTagging,
             i.DisableUpload, i.DisableWiki, i.DisablePM, i.DisableIRC, i.DisableRequests, uf.tokens AS FLTokens,
-            um.2FA_Key, SHA1(i.AdminComment), i.InfoTitle, la.Type AS LockedAccount,
+            um.2FA_Key, SHA1(i.AdminComment), i.InfoTitle, la.Type AS LockedAccount, i.collages,
             CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
             CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
         FROM users_main AS um
@@ -86,7 +86,7 @@ if (check_perms('users_mod')) {
     $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar,
     $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging,
     $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens,
-    $FA_Key, $CommentHash, $InfoTitle, $LockedAccount,
+    $FA_Key, $CommentHash, $InfoTitle, $LockedAccount, $MaxCollages,
     $AcceptFL, $UnlimitedDownload)
         = $DB->next_record(MYSQLI_NUM, [9, 12]);
 } else {
@@ -1030,9 +1030,11 @@ if (check_perms('users_mod') || $Classes[$LoggedUser['PermissionID']]['Name'] ==
 
     if (check_perms('users_edit_ratio', $Class) || (check_perms('users_edit_own_ratio') && $OwnProfile)) {
         echo G::$Twig->render('user/edit-buffer.twig', [
-            'up'    => $Uploaded,
-            'down'  => $Downloaded,
-            'bonus' => $BonusPoints,
+            'up'             => $Uploaded,
+            'down'           => $Downloaded,
+            'bonus'          => $BonusPoints,
+            'collages'       => $MaxCollages,
+            'donor_collages' => $donorMan->personalCollages($UserID),
         ]);
     }
 

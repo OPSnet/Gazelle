@@ -69,9 +69,6 @@ class Privilege extends \Gazelle\Base {
         foreach ($this->classList as $c) {
             $perm = \Permissions::get_permissions($c['id'])['Permissions'];
             foreach (array_keys($perm) as $p) {
-                if (in_array($p, ['MaxCollages'])) { // barf
-                    continue;
-                }
                 if (!isset($this->privilege[$p])) {
                     // orphan permissions in the db that no longer do anything
                     $this->privilege[$p] = [

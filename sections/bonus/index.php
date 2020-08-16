@@ -17,7 +17,7 @@ if (isset($_GET['action'])) {
                 $Label = $_REQUEST['label'];
                 $Item = $Bonus->getItem($Label);
                 if ($Item) {
-                    $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['EffectiveClass']);
+                    $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['ID']);
                     if ($Price > G::$LoggedUser['BonusPoints']) {
                         error('You cannot afford this item.');
                     }
@@ -34,6 +34,8 @@ if (isset($_GET['action'])) {
                         case 'title-off':
                             require_once(SERVER_ROOT . '/sections/bonus/title.php');
                             break;
+                        case 'collage-1':
+                            require_once(SERVER_ROOT . '/sections/bonus/collage.php');
                         default:
                             require_once(SERVER_ROOT . DEFAULT_PAGE);
                             break;

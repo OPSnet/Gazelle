@@ -7,8 +7,6 @@ $id = $_REQUEST['id'] ?? null;
 if ($id) {
     $Val->SetFields('name', true, 'string', 'You did not enter a valid name for this permission set.');
     $Val->SetFields('level', true, 'number', 'You did not enter a valid level for this permission set.');
-    $_POST['maxcollages'] = (empty($_POST['maxcollages'])) ? 0 : $_POST['maxcollages'];
-    $Val->SetFields('maxcollages', true, 'number', 'You did not enter a valid number of personal collages.');
 
     if (is_numeric($id)) {
         $DB->prepared_query('
@@ -74,8 +72,6 @@ if ($id) {
         if (!$secondary) {
             $badge = '';
         }
-
-        $values['MaxCollages'] = $_REQUEST['maxcollages'];
 
         if (!is_numeric($id)) {
             $DB->prepared_query('

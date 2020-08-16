@@ -26,17 +26,16 @@ HTML;
 if (isset($_GET['action']) && $_GET['action'] == 'donate') {
     authorize();
     $value = $_POST['donate'];
-    if (G::$LoggedUser['ID'] != $_POST['userid']) {
+    if ($LoggedUser['ID'] != $_POST['userid']) {
 ?>
 <div class="alertbar blend">User error, no bonus points donated.</div>
 <?php
-    }
-    elseif (G::$LoggedUser['BonusPoints'] < $value) {
+    } elseif ($LoggedUser['BonusPoints'] < $value) {
 ?>
-<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int) G::$LoggedUser['BonusPoints']) ?> points.</div>
+<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int) $LoggedUser['BonusPoints']) ?> points.</div>
 <?php
     }
-    elseif ($Bonus->donate($_POST['poolid'], $value, G::$LoggedUser['ID'], G::$LoggedUser['EffectiveClass'])) {
+    elseif ($Bonus->donate($_POST['poolid'], $value, $LoggedUser['ID'], $LoggedUser['EffectiveClass'])) {
 ?>
 <div class="alertbar blend">Success! Your donation to the Bonus Point pool has been recorded.</div>
 <?php
@@ -65,11 +64,11 @@ if (count($pool) > 0) {
                 <thead>
                 <tbody>
                     <tr>
-                        <td><?=number_format((int) G::$LoggedUser['BonusPoints']) ?></td>
+                        <td><?=number_format((int) $LoggedUser['BonusPoints']) ?></td>
                         <td><input type="text" width="10" name="donate" />
                             <input type="hidden" name="poolid" value="<?= $pool['Id'] ?>"/>
-                            <input type="hidden" name="userid" value="<?= G::$LoggedUser['ID'] ?>"/>
-                            <input type="hidden" name="auth" value="<?= G::$LoggedUser['AuthKey'] ?>"/>
+                            <input type="hidden" name="userid" value="<?= $LoggedUser['ID'] ?>"/>
+                            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>"/>
                         </td>
                     </tr>
                     <tr>
@@ -103,12 +102,12 @@ $Cnt = 0;
 $Items = $Bonus->getList();
 
 foreach ($Items as $Label => $Item) {
-    if ($Item['MinClass'] >  G::$LoggedUser['EffectiveClass']) {
+    if ($Item['MinClass'] >  $LoggedUser['EffectiveClass']) {
         continue;
     }
     $Cnt++;
     $RowClass = ($Cnt % 2 === 0) ? 'rowb' : 'rowa';
-    $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['EffectiveClass']);
+    $Price = $Bonus->getEffectivePrice($Label, $LoggedUser['ID']);
     $FormattedPrice = number_format($Price);
     print <<<HTML
             <tr class="$RowClass">
@@ -118,7 +117,7 @@ foreach ($Items as $Label => $Item) {
                 <td>
 HTML;
 
-    if (G::$LoggedUser['BonusPoints'] >= $Price) {
+    if ($LoggedUser['BonusPoints'] >= $Price) {
         $NextFunction = preg_match('/^other-\d$/',          $Label) ? 'ConfirmOther' : 'null';
         $OnClick      = preg_match('/^title-bbcode-[yn]$/', $Label) ? "NoOp" : "ConfirmPurchase";
         print <<<HTML

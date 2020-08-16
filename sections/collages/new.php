@@ -7,15 +7,8 @@ if (!check_perms('site_collages_renamepersonal')) {
 
 $NoName = !check_perms('site_collages_renamepersonal') && $Category === '0';
 
-$collageCount = $DB->scalar("
-    SELECT count(*)
-    FROM collages
-    WHERE CategoryID = 0
-        AND Deleted = '0'
-        AND UserID = ?
-    ", $LoggedUser['ID']
-);
-$personalAllowed = check_perms('site_collages_personal') && $collageCount < $LoggedUser['Permissions']['MaxCollages'];
+$user = new \Gazelle\User($LoggedUser['ID']);
+$personalAllowed = $user->canCreatePersonalCollage();
 ?>
 <div class="thin">
 <?php

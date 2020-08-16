@@ -20,6 +20,16 @@
     </td>
 </tr>
 <tr>
+    <td class="label tooltip" title="Personal Collages.">Personal Collages:</td>
+    <td>
+        <input type="hidden" name="OldCollages" value="{{ collages }}" />
+        <input type="text" size="20" name="Collages" value="{{ collages }}" />
+{% if donor_collages > 0 %}
+            <p>Donor perks provide an extra {{ donor_collages }} collages <em>in addition</em> to this amount.</p>
+{% endif %}
+    </td>
+</tr>
+<tr>
     <td class="label tooltip" title="Enter a username.">Transfer buffer from user:</td>
     <td>
         <input type="text" size="16" name="MergeStatsFrom" /> Upload and download from the specified user will be drained into this user.
