@@ -7,7 +7,7 @@ if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST[
     die();
 }
 
-$ID = G::$LoggedUser['ID'];
+$ID = $LoggedUser['ID'];
 $Label = $_REQUEST['label'];
 if ($Label === 'title-off') {
     authorize();
@@ -30,7 +30,7 @@ if (isset($_POST['confirm'])) {
         error(403);
     }
     try {
-        $Bonus->purchaseTitle($ID, $Label, $_POST['title'], G::$LoggedUser['EffectiveClass']);
+        $Bonus->purchaseTitle($ID, $Label, $_POST['title']);
         header('Location: bonus.php?complete=' . urlencode($Label));
     }
     catch (\Exception $e) {
@@ -58,7 +58,7 @@ View::show_header('Bonus Points - Title', 'bonus');
         <tr>
             <td>
                 <form action="bonus.php?action=purchase&label=<?= $Label ?>" method="post">
-                    <input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
+                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                     <input type="hidden" name="confirm" value="true" />
                     <input type="text" style="width: 98%" id="title" name="title" placeholder="Custom Title"/> <br />
                     <input type="submit" onclick="ConfirmPurchase(event, '<?=$Item['Title']?>')" value="Submit" />&nbsp;<input type="button" onclick="PreviewTitle(<?=$BBCode?>);" value="Preview" /><br /><br />

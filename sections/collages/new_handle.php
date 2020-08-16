@@ -35,14 +35,9 @@ $Val->SetFields('description', '1', 'string', 'The description must be between 1
 $Err = $Val->ValidateForm($_POST);
 
 if (!$Err && $P['category'] === '0') {
-    $DB->query("
-        SELECT count(*)
-        FROM collages
-        WHERE UserID = '$LoggedUser[ID]'
-            AND CategoryID = '0'
-            AND Deleted = '0'");
-    list($CollageCount) = $DB->next_record();
-    if (($CollageCount >= $LoggedUser['Permissions']['MaxCollages']) || !check_perms('site_collages_personal')) {
+    $user = new \Gazelle\User($LoggedUser['ID']);
+    $personalAllowed = $user->canCreatePersonalCollage();
+    if (!$personalAllowed) {
         $Err = 'You may not create a personal collage.';
     } elseif (check_perms('site_collages_renamepersonal') && !stristr($P['name'], $LoggedUser['Username'])) {
         $Err = 'Your personal collage\'s title must include your username.';

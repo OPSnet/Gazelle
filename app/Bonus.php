@@ -14,9 +14,9 @@ class Bonus extends Base {
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
         if ($this->items === false) {
             $this->db->query("
-                SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title
+                SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title, sequence
                 FROM bonus_item
-                ORDER BY FIELD(label, 'token-1', 'token-4', 'token-2', 'token-3', 'other-1', 'other-4', 'other-2', 'other-3', 'title-bb-n', 'title-bb-y', 'title-off', 'invite')
+                ORDER BY sequence
             ");
             $this->items = $this->db->has_results() ? $this->db->to_array('Label') : [];
             $this->cache->cache_value(self::CACHE_ITEM, $this->items, 86400 * 30);
@@ -56,9 +56,15 @@ class Bonus extends Base {
         return BONUS_AWARD_OTHER;
     }
 
-    public function getEffectivePrice($label, $effectiveClass) {
+    public function getEffectivePrice($label, $userId) {
         $item  = $this->items[$label];
-        return $effectiveClass >= $item['FreeClass'] ? 0 : $item['Price'];
+        $info = \Users::user_heavy_info($userId);
+        if (preg_match('/^collage-\d$/', $label)) {
+            return $item['Price'] * pow(2, $info['Collages']);
+        }
+
+        $info = \Users::user_info($userId);
+        return $info['EffectiveClass'] >= $item['FreeClass'] ? 0 : $item['Price'];
     }
 
     public function getListOther($balance) {
@@ -84,7 +90,7 @@ class Bonus extends Base {
             $pool = $this->db->next_record();
             $this->cache->cache_value($key, $pool, 3600);
         }
-        return $pool;
+        return $pool ?? [];
     }
 
     public function donate($poolId, $value, $userId, $effectiveClass) {
@@ -193,13 +199,13 @@ class Bonus extends Base {
         return true;
     }
 
-    public function purchaseTitle($userId, $label, $title, $effectiveClass) {
+    public function purchaseTitle($userId, $label, $title) {
         $item  = $this->items[$label];
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
         if (mb_strlen($title) > 1024) {
             throw new \Exception('Bonus:title:too-long');
         }
-        $price = $this->getEffectivePrice($label, $effectiveClass);
+        $price = $this->getEffectivePrice($label, $userId);
 
         /* if the price is 0, nothing changes so avoid hitting the db */
         if ($price > 0) {

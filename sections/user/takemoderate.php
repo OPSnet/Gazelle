@@ -55,6 +55,7 @@ if (isset($_POST['BonusPoints'])) {
         $BonusPoints = round(floatval($_POST['BonusPoints']), 5);
     }
 }
+$Collages = (int)$_POST['Collages'] ?? 0;
 $FLTokens = isset($_POST['FLTokens']) ? trim($_POST['FLTokens']) : 0;
 if (!is_number($FLTokens)) {
     error(0);
@@ -135,6 +136,10 @@ if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
 
 // User was not deleted. Perform other stuff.
 
+// Begin building users_main/users_info update
+$set = [];
+$args = [];
+
 $EditSummary = [];
 $TrackerUserUpdates = ['passkey' => $Cur['torrent_pass']];
 
@@ -196,6 +201,13 @@ if ($BonusPoints != floatval($Cur['BonusPoints']) && $BonusPoints != floatval($_
     $EditSummary[] = "bonus points changed from {$Cur['BonusPoints']} to {$BonusPoints}";
 }
 
+if ($Collages != $Cur['Collages'] && $Collages != (int)$_POST['OldCollages']
+    && (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $ownProfile))) {
+    $set[] = 'collages = ?';
+    $args[] = $Collages;
+    $EditSummary[] = "personal collages changed from {$Cur['Collages']} to {$Collages}";
+}
+
 $removedClasses = [];
 $addedClasses   = [];
 if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
@@ -235,10 +247,6 @@ if ($editRatio) {
             . " (delta " . Format::get_size($Downloaded - $Cur['Downloaded']) . ")";
     }
 }
-
-// Begin building users_main/users_info update
-$set = [];
-$args = [];
 
 if ($Classes[$Class]['Level'] != $Cur['Class']
     && (

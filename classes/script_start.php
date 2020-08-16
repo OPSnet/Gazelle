@@ -203,8 +203,6 @@ if (isset($LoginCookie)) {
     // No conditions will force a logout from this point, can hit the DB more.
     // Complete the $LoggedUser array
     $LoggedUser['Permissions'] = Permissions::get_permissions_for_user($LoggedUser['ID'], $LoggedUser['CustomPermissions']);
-    $donorMan = new Gazelle\Manager\Donation;
-    $LoggedUser['Permissions']['MaxCollages'] += $donorMan->personalCollages($LoggedUser['ID']);
     $LoggedUser['RSS_Auth'] = md5($LoggedUser['ID'] . RSS_HASH . $LoggedUser['torrent_pass']);
 
     // Notifications

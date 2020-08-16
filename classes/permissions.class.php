@@ -206,15 +206,10 @@ class Permissions {
 
         $Permissions = self::get_permissions($UserInfo['PermissionID']);
 
-        // TODO: WTF is this nonsense to calculate MaxCollages? - Spine
-
         // Manage 'special' inherited permissions
         $BonusPerms = [];
-        $BonusCollages = 0;
         foreach ($UserInfo['ExtraClasses'] as $PermID => $Value) {
             $ClassPerms = self::get_permissions($PermID);
-            $BonusCollages += $ClassPerms['Permissions']['MaxCollages'];
-            unset($ClassPerms['Permissions']['MaxCollages']);
             $BonusPerms = array_merge($BonusPerms, $ClassPerms['Permissions']);
         }
 
@@ -222,15 +217,6 @@ class Permissions {
             $CustomPermissions = [];
         }
 
-        $MaxCollages = $BonusCollages;
-        if (is_numeric($Permissions['Permissions']['MaxCollages'])) {
-            $MaxCollages += $Permissions['Permissions']['MaxCollages'];
-        }
-        if (isset($CustomPermissions['MaxCollages'])) {
-            $MaxCollages += $CustomPermissions['MaxCollages'];
-            unset($CustomPermissions['MaxCollages']);
-        }
-        $Permissions['Permissions']['MaxCollages'] = $MaxCollages;
         // Combine the permissions
         return array_merge(
             $Permissions['Permissions'],

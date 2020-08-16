@@ -17,7 +17,7 @@ if (isset($_GET['action'])) {
                 $Label = $_REQUEST['label'];
                 $Item = $Bonus->getItem($Label);
                 if ($Item) {
-                    $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['EffectiveClass']);
+                    $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['ID']);
                     if ($Price > G::$LoggedUser['BonusPoints']) {
                         error('You cannot afford this item.');
                     }

@@ -36,10 +36,6 @@ if (!isset($_POST['action'])) {
             $Delta[$Perm] = $Setting;
         }
     }
-    if (!is_number($_POST['maxcollages']) && !empty($_POST['maxcollages'])) {
-        error("Please enter a valid number of extra personal collages");
-    }
-    $Delta['MaxCollages'] = $_POST['maxcollages'];
 
     $Cache->delete_value("user_info_heavy_$UserID");
     $DB->prepared_query("
@@ -51,7 +47,6 @@ if (!isset($_POST['action'])) {
 }
 
 $Permissions = array_merge($Defaults, $Delta);
-$MaxCollages = $Customs['MaxCollages'] + ($Delta['MaxCollages'] ?? 0);
 
 View::show_header("$Username &rarr; Permissions");
 ?>
@@ -78,12 +73,6 @@ function reset() {
 </div>
 <br />
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="">
-    <table class="layout permission_head">
-        <tr>
-            <td class="label">Extra personal collages</td>
-            <td><input type="text" name="maxcollages" size="5" value="<?=($MaxCollages ? $MaxCollages : '0') ?>" /></td>
-        </tr>
-    </table>
     <input type="hidden" name="action" value="permissions" />
     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
     <input type="hidden" name="id" value="<?=$_REQUEST['userid']?>" />
