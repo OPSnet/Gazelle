@@ -222,6 +222,30 @@ class Bonus extends Base {
         return true;
     }
 
+    public function purchaseCollage($userId, $label) {
+        $item  = $this->items[$label];
+        $price = $this->getEffectivePrice($label, $userId);
+
+        if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
+            throw new \Exception('Bonus:invite:minclass');
+        }
+        $this->db->prepared_query('
+            UPDATE user_bonus ub
+            INNER JOIN users_info ui ON (ui.UserID = ub.user_id) SET
+                ub.points = ub.points - ?,
+                ui.collages = ui.collages + 1
+            WHERE ub.points >= ?
+                AND ub.user_id = ?
+            ', $price, $price, $userId
+        );
+        if ($this->db->affected_rows() != 2) {
+            throw new \Exception('Bonus:collage:nofunds');
+        }
+        $this->addPurchaseHistory($item['ID'], $userId, $price);
+        $this->flushUserCache($userId);
+        return true;
+    }
+
     public function purchaseToken($userId, $label) {
         if (!array_key_exists($label, $this->items)) {
             throw new \Exception('Bonus:selfToken:badlabel');

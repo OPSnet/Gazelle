@@ -34,6 +34,8 @@ if (isset($_GET['action'])) {
                         case 'title-off':
                             require_once(SERVER_ROOT . '/sections/bonus/title.php');
                             break;
+                        case 'collage-1':
+                            require_once(SERVER_ROOT . '/sections/bonus/collage.php');
                         default:
                             require_once(SERVER_ROOT . DEFAULT_PAGE);
                             break;
