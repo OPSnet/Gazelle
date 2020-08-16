@@ -10,9 +10,10 @@ if (!check_perms('site_database_specifics')) {
 if (!empty($_GET['table'])) {
     if (preg_match('/([\w-]+)/', $_GET['table'], $match)) {
         $DB->prepared_query('SHOW CREATE TABLE ' . $match[1]);
-        list(,$definition) = $DB->next_record(MYSQLI_NUM, false);
+        [,$definition] = $DB->next_record(MYSQLI_NUM, false);
         header('Content-type: text/plain');
-        die($definition);
+        echo $definition;
+        exit;
     }
 }
 
@@ -26,6 +27,13 @@ $SortOrderMap = [
     'rowsize' => ['avg_row_length', 'desc', 'mean row length'],
     'totalsize' => ['total_length', 'desc', 'total table size'],
 ];
+
+$SortOrder = $_GET['order'] ?? 'totalsize';
+$orderBy   = $SortOrderMap[$SortOrder][0];
+$orderWay  = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
+    ? $SortOrderMap[$SortOrder][1]
+    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+
 $header = new SortableTableHeader([
     'datafree' => 'Free Size',
     'datasize' => 'Data Size',
@@ -37,30 +45,24 @@ $header = new SortableTableHeader([
     'totalsize' => 'Total Size',
 ], $SortOrder, $orderWay);
 
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'totalsize';
-$orderBy = $SortOrderMap[$SortOrder][0];
-$orderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
-
 $mode = $_GET['mode'] ?? 'show';
 switch($mode) {
     case 'show':
-        $groupColumn = 'table_name';
+        $tableColumn = 'table_name';
         $where = '';
         break;
     case 'merge':
-        $groupColumn = "replace(table_name, 'deleted_', '')";
+        $tableColumn = "replace(table_name, 'deleted_', '')";
         $where = '';
         break;
     case 'exclude':
-        $groupColumn = 'table_name';
-        $where = " AND table_name NOT LIKE 'deleted%'";
+        $tableColumn = 'table_name';
+        $where = "AND table_name NOT LIKE 'deleted%'";
         break;
 }
 
 $DB->prepared_query("
-    SELECT $groupColumn AS table_name,
+    SELECT $tableColumn AS table_name,
         engine,
         sum(table_rows) AS table_rows,
         avg(avg_row_length) AS avg_row_length,
@@ -69,8 +71,8 @@ $DB->prepared_query("
         sum(index_length + data_length) AS total_length,
         sum(data_free) AS data_free
     FROM information_schema.tables
-    WHERE table_schema = ?$where
-    GROUP BY $groupColumn
+    WHERE table_schema = ? $where
+    GROUP BY $tableColumn, engine
     ORDER by $orderBy $orderWay
     ", SQLDB
 );
@@ -149,13 +151,13 @@ Highcharts.chart('statistics', {
 <table>
     <tr class="colhead" style="text-align:right">
         <td style="text-align:left" class="nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('rowsize', $SortOrderMap['rowsize'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('datasize', $SortOrderMap['datasize'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('indexsize', $SortOrderMap['indexsize'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('datafree', $SortOrderMap['datafree'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('freeratio', $SortOrderMap['freeratio'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('totalsize', $SortOrderMap['totalsize'][1]) ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('rowsize', $SortOrderMap['rowsize'][1]) ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('datasize', $SortOrderMap['datasize'][1]) ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('indexsize', $SortOrderMap['indexsize'][1]) ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('datafree', $SortOrderMap['datafree'][1]) ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('freeratio', $SortOrderMap['freeratio'][1]) ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('totalsize', $SortOrderMap['totalsize'][1]) ?></td>
     </tr>
 <?php
 $TotalRows = 0;
@@ -192,14 +194,14 @@ foreach ($Tables as $t) {
 }
 ?>
     <tr>
+        <td><b>Grand totals</b></td>
+        <td class="number_column"><b><?= number_format($TotalRows) ?></b></td>
         <td></td>
-        <td class="number_column"><?= number_format($TotalRows) ?></td>
-        <td></td>
-        <td class="number_column"><?= Format::get_size($TotalDataSize) ?></td>
-        <td class="number_column"><?= Format::get_size($TotalIndexSize) ?></td>
-        <td class="number_column"><?= Format::get_size($TotalFreeSize) ?></td>
-        <td class="number_column"><?= sprintf('%0.2f', $TotalDataSize == 0 ? 0 : ($TotalFreeSize / $TotalDataSize) * 100) ?></td>
-        <td class="number_column"><?= Format::get_size($TotalDataSize + $TotalIndexSize) ?></td>
+        <td class="number_column"><b><?= Format::get_size($TotalDataSize) ?></b></td>
+        <td class="number_column"><b><?= Format::get_size($TotalIndexSize) ?></b></td>
+        <td class="number_column"><b><?= Format::get_size($TotalFreeSize) ?></b></td>
+        <td class="number_column"><b><?= sprintf('%0.2f', $TotalDataSize == 0 ? 0 : ($TotalFreeSize / $TotalDataSize) * 100) ?></b></td>
+        <td class="number_column"><b><?= Format::get_size($TotalDataSize + $TotalIndexSize) ?></b></td>
     </tr>
 </table>
 <?php
