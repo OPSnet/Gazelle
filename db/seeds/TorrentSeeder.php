@@ -7,7 +7,6 @@ class TorrentSeeder extends AbstractSeed {
      * To reset and rerun this seed:
 SET FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE torrents_files;
 TRUNCATE torrents_tags;
 TRUNCATE torrents_group;
 TRUNCATE torrents_artists;
@@ -56,7 +55,6 @@ SET FOREIGN_KEY_CHECKS = 1;
             'tags' => [],
             'torrents_tags' => [],
             'torrents' => [],
-            'torrents_files' => []
         ];
 
         $artists = [];
@@ -202,10 +200,6 @@ SET FOREIGN_KEY_CHECKS = 1;
                 'FreeLeechType' => 0
             ];
 
-            $insert_data['torrents_files'][] = [
-                'TorrentID' => count($insert_data['torrents']) + 1,
-                'File' => b'd8:announce65:https://localhost:34000/4f9587fbcb06fe09165e4f84d35d0403/announce7:comment53:https://localhost:8080//torrents.php?id=1&torrentid=113:creation datei1489617624e8:encoding5:UTF-84:infod5:filesld6:lengthi45573573e4:pathl19:01 - Nightmare.flaceed6:lengthi31675140e4:pathl31:02 - Welcome to the Family.flaceed6:lengthi36911187e4:pathl21:03 - Danger Line.flaceed6:lengthi47893264e4:pathl22:04 - Buried Alive.flaceed6:lengthi40839480e4:pathl29:05 - Natural Born Killer.flaceed6:lengthi40787176e4:pathl21:06 - So Far Away.flaceed6:lengthi34999093e4:pathl22:07 - God Hates Us.flaceed6:lengthi52152693e4:pathl16:08 - Victim.flaceed6:lengthi34464081e4:pathl32:09 - Tonight the World Dies.flaceed6:lengthi34485391e4:pathl17:10 - Fiction.flaceed6:lengthi81953099e4:pathl17:11 - Save Me.flaceed6:lengthi1100e4:pathl33:Avenged Sevenfold - Nightmare.cueeed6:lengthi12890e4:pathl33:Avenged Sevenfold - Nightmare.logeed6:lengthi66260e4:pathl10:folder.jpgeee4:name73:Avenged Sevenfold \xe2\x80\x8e- Nightmare (2010) [CD - FLAC - Lossless] {524026-2}12:piece lengthi262144e6:pieces19:fake torrent pieces7:privatei1e6:source3:APLee'
-            ];
             $i++;
         }
 

@@ -306,7 +306,7 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
         $Artists[$i] = trim($Artists[$i]);
         if ($Artists[$i] != '') {
             if (!in_array($Artists[$i], $ArtistNames)) {
-                $ArtistForm[$Importance[$i]][] = ['name' => \Gazelle\Artist::sanitize($Artists[$i])];
+                $ArtistForm[$Importance[$i]][] = ['name' => Gazelle\Artist::sanitize($Artists[$i])];
                 if ($Importance[$i] == 1) {
                     $MainArtistCount++;
                 }
@@ -360,7 +360,7 @@ if ($Properties['Image']) {
 //******************************************************************************//
 //--------------- Generate torrent file ----------------------------------------//
 
-$torrentFiler = new \Gazelle\File\Torrent;
+$torrentFiler = new Gazelle\File\Torrent;
 $Tor = new BencodeTorrent($TorrentName, true);
 $PublicTorrent = $Tor->make_private(); // The torrent is now private.
 $UnsourcedTorrent = $Tor->set_source(); // The source is now OPS
@@ -416,7 +416,7 @@ if (count($TooLongPaths) > 0) {
 }
 $Debug->set_flag('upload: torrent decoded');
 
-$logfileSummary = new \Gazelle\LogfileSummary;
+$logfileSummary = new Gazelle\LogfileSummary;
 if ($HasLog == '1') {
     ini_set('upload_max_filesize', 1000000);
     // Some browsers will report an empty file when you submit, prune those out
@@ -426,7 +426,7 @@ if ($HasLog == '1') {
             continue;
         }
 
-        $logfile = new \Gazelle\Logfile(
+        $logfile = new Gazelle\Logfile(
             $_FILES['logfiles']['tmp_name'][$Pos],
             $_FILES['logfiles']['name'][$Pos]
         );
@@ -618,7 +618,7 @@ if ($IsNewGroup) {
     if ($Type == 'Music') {
         //array to store which artists we have added already, to prevent adding an artist twice
         $ArtistsAdded = [];
-        $ArtistManager = new \Gazelle\Manager\Artist;
+        $ArtistManager = new Gazelle\Manager\Artist;
         foreach ($ArtistForm as $Importance => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 if (!$Artist['id']) {
@@ -696,7 +696,7 @@ if ($NoRevision) {
 }
 
 // Tags
-$tagMan = new \Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag;
 if (!$Properties['GroupID']) {
     foreach ($Properties['TagList'] as $Tag) {
         $Tag = $tagMan->resolve($tagMan->sanitize($Tag));
@@ -745,15 +745,15 @@ $Debug->set_flag('upload: ocelot updated');
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
 
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
-    $torMan = new \Gazelle\Manager\Torrent;
+    $torMan = new Gazelle\Manager\Torrent;
     $torMan->flushLatestUploads(5);
 }
     
 //******************************************************************************//
 //--------------- Write Log DB       -------------------------------------------//
 
-$ripFiler = new \Gazelle\File\RipLog;
-$htmlFiler = new \Gazelle\File\RipLogHTML;
+$ripFiler = new Gazelle\File\RipLog;
+$htmlFiler = new Gazelle\File\RipLogHTML;
 foreach($logfileSummary->all() as $logfile) {
     $DB->prepared_query('
         INSERT INTO torrents_logs
@@ -779,7 +779,7 @@ Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
 
 // Running total for amount of BP to give
-$Bonus = new \Gazelle\Bonus;
+$Bonus = new Gazelle\Bonus;
 $BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Bitrate'], $LogInDB,
     $logfileSummary->overallScore(), $logfileSummary->checksumStatus());
 

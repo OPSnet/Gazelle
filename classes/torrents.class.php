@@ -291,11 +291,11 @@ class Torrents {
         list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record(MYSQLI_BOTH, [2, 'info_hash']);
 
         if ($ID > MAX_PREV_TORRENT_ID) {
-            $Bonus = new \Gazelle\Bonus;
+            $Bonus = new Gazelle\Bonus;
             $Bonus->removePointsForUpload($UserID, [$Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum]);
         }
 
-        $manager = new \Gazelle\DB;
+        $manager = new Gazelle\DB;
         list($ok, $message) = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
         if (!$ok) {
             return $message;
@@ -659,7 +659,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
             ", $TorrentID
         );
         if ($GroupID) {
-            $filer = new \Gazelle\File\Torrent;
+            $filer = new Gazelle\File\Torrent;
             $Contents = $filer->get($TorrentID);
             if (Misc::is_new_torrent($Contents)) {
                 $Tor = new BencodeTorrent($Contents);
@@ -743,7 +743,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
     /**
      * Format the information about a torrent.
      * @param array $Data an array a subset of the following keys:
-     *    Format, Encoding, HasLog, LogScore HasCue, Media, Scene, RemasterYear
+     *    Format, Encoding, HasLog, LogScore, HasCue, Media, Scene, RemasterYear
      *    RemasterTitle, FreeTorrent, PersonalFL
      * @param boolean $ShowMedia if false, Media key will be omitted
      * @param boolean $ShowEdition if false, RemasterYear/RemasterTitle will be omitted
