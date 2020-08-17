@@ -371,7 +371,7 @@ $Params = [
 
 if ($ResetPassword) {
     $SQL .= ',m.PassHash = ?';
-    $Params[] = Users::make_password_hash($_POST['new_pass_1']);
+    $Params[] = Gazelle\UserCreator::hashPassword($_POST['new_pass_1']);
     $DB->prepared_query('
         INSERT INTO users_history_passwords
             (UserID, ChangerIP, ChangeTime)

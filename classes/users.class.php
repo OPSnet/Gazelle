@@ -503,17 +503,6 @@ class Users {
     }
 
     /**
-     * Create salted crypt hash for a given string with
-     * settings specified in CRYPT_HASH_PREFIX
-     *
-     * @param string  $Str string to hash
-     * @return string hashed password
-     */
-    public static function make_password_hash($Str) {
-        return password_hash(hash('sha256', $Str), PASSWORD_DEFAULT);
-    }
-
-    /**
      * Returns a username string for display
      *
      * @param int|string $UserID

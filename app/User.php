@@ -239,7 +239,7 @@ class User extends Base {
             UPDATE users_main SET
                 PassHash = ?
             WHERE ID = ?
-            ', \Users::make_password_hash($pw), $this->id
+            ', UserCreator::hashPassword($pw), $this->id
         );
         if ($this->db->affected_rows() == 1) {
             $this->db->prepared_query('

@@ -74,7 +74,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                             m.PassHash = ?
                         WHERE i.UserID = m.ID
                             AND m.ID = ?
-                        ", Users::make_password_hash($_REQUEST['password']), $UserID
+                        ", Gazelle\UserCreator::hashPassword($_REQUEST['password']), $UserID
                     );
                     $DB->prepared_query('
                         INSERT INTO users_history_passwords
@@ -488,7 +488,7 @@ else {
                             UPDATE users_main SET
                                 passhash = ?
                             WHERE ID = ?
-                            ', Users::make_password_hash($_POST['password']), $UserID
+                            ', Gazelle\UserCreator::hashPassword($_POST['password']), $UserID
                         );
                     }
 
