@@ -19,13 +19,11 @@ if (!$DB->scalar('SELECT 1 FROM torrents_logs WHERE LogID = ? AND TorrentID = ?'
     error(404);
 }
 
-$ripFiler = new \Gazelle\File\RipLog;
+$ripFiler = new Gazelle\File\RipLog;
+$logpath = $ripFiler->path([$TorrentID, $LogID]);
+$logfile = new Gazelle\Logfile($logpath, basename($logpath));
 
-$logpath = $ripFiler->pathLegacy([$TorrentID, $LogID]);
-$logfile = new \Gazelle\Logfile($logpath, basename($logpath));
-
-copy($ripFiler->pathLegacy([$TorrentID, $LogID]), $ripFiler->path([$TorrentID, $LogID]));
-$htmlFiler = new \Gazelle\File\RipLogHTML;
+$htmlFiler = new Gazelle\File\RipLogHTML;
 $htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
 
 $DB->prepared_query("
@@ -38,12 +36,11 @@ $DB->prepared_query("
         `Language` = ?,
         LogcheckerVersion = ?,
         Details = ?,
-        Log = ?,
         Adjusted = '0'
     WHERE LogID = ? AND TorrentID = ?
     ", $logfile->score(), $logfile->checksumStatus(), $logfile->checksumState(), $logfile->ripper(), $logfile->ripperVersion(),
         $logfile->language(), Logchecker::getLogcheckerVersion(),
-        $logfile->detailsAsString(), $logfile->text(),
+        $logfile->detailsAsString()
         $LogID, $TorrentID
 );
 Torrents::set_logscore($TorrentID, $GroupID);

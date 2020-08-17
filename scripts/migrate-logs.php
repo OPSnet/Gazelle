@@ -1,5 +1,12 @@
 <?php
 
+/* The torrents_logs.Log column no longer exists as of this commit.
+ * This script is left for historical purposes and for people who
+ * want to migrate an existing Gazelle installation.
+ * Similarly, the Gazelle\File\RipLog::pathLegacy() method no
+ * longer exists.
+ */
+
 require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../classes/classloader.php');
 require_once(__DIR__.'/../classes/util.php');
@@ -21,8 +28,8 @@ $errLog    = 0;
 $newHtml   = 0;
 $errHtml   = 0;
 
-$logFiler = new \Gazelle\File\RipLog;
-$htmlFiler = new \Gazelle\File\RipLogHTML;
+$logFiler = new Gazelle\File\RipLog;
+$htmlFiler = new Gazelle\File\RipLogHTML;
 
 while (true) {
     $DB->prepared_query('

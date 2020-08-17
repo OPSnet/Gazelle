@@ -17,7 +17,6 @@ class RipLog extends \Gazelle\File {
      * @return boolean Success of the operation
      */
     public function put(string $source, /* array */ $id) {
-        copy($source, $this->pathLegacy($id)); // PHASE 2: remove
         return false !== move_uploaded_file($source, $this->path($id));
     }
 
@@ -44,10 +43,6 @@ class RipLog extends \Gazelle\File {
             if ($this->exists($id)) {
                 @unlink($path);
             }
-            $path = $this->pathLegacy($id);
-            if (file_exists($path)) {
-                @unlink($path);
-            }
         }
         return true;
     }
@@ -56,7 +51,7 @@ class RipLog extends \Gazelle\File {
      * Path of a rip log.
      *
      * @param array id rip log identifier [torrentId, logId]
-     * @return Fully qualified filename
+     * @return string Fully qualified filename
      */
     public function path(/* array */ $id) {
         $torrent_id = $id[0];
@@ -64,15 +59,5 @@ class RipLog extends \Gazelle\File {
         $key = strrev(sprintf('%04d', $torrent_id));
         return sprintf('%s/%02d/%02d', self::STORAGE, substr($key, 0, 2), substr($key, 2, 2))
             . '/' . $torrent_id . '_' . $log_id . '.log';
-    }
-
-    /**
-     * Legacy path of a rip log.
-     *
-     * @param array id rip log identifier [torrentId, logId]
-     * @return Fully qualified filename
-     */
-    public function pathLegacy(array $id) {
-        return self::STORAGE_LEGACY . '/' . $id[0] . '_' . $id[1] . '.log';
     }
 }
