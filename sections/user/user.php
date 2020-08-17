@@ -170,7 +170,7 @@ function check_paranoia_here($Setting) {
 }
 
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
-$User = new \Gazelle\User($UserID);
+$User = new Gazelle\User($UserID);
 $User->forceCacheFlush($OwnProfile);
 list($ClassRatio, $Buffer) = $User->buffer();
 
@@ -464,53 +464,74 @@ if (check_paranoia_here('requestsvoted_count') || check_paranoia_here('requestsv
 $Uploads = check_paranoia_here('uploads+') ? $User->uploadCount() : 0;
 $ArtistsAdded = check_paranoia_here('artistsadded') ? $User->artistsAdded() : 0;
 
-//Do the ranks
-$UploadedRank = UserRank::get_rank('uploaded', $Uploaded);
-$DownloadedRank = UserRank::get_rank('downloaded', $Downloaded);
-$UploadsRank = UserRank::get_rank('uploads', $Uploads);
-$RequestRank = UserRank::get_rank('requests', $RequestsFilled);
-$PostRank = UserRank::get_rank('posts', $ForumPosts);
-$BountyRank = UserRank::get_rank('bounty', $TotalSpent);
-$ArtistsRank = UserRank::get_rank('artists', $ArtistsAdded);
+$collageAdditions = check_paranoia_here('collagecontribs+') ? $User->collageAdditions() : 0;
+$releaseVotes     = $User->releaseVotes();
+$bonusPointsSpent = $User->bonusPointsSpent();
+$torrentComments  = check_paranoia_here('torrentcomments++') ? $User->torrentCommentCount() : 0;
 
-if ($Downloaded == 0) {
-    $Ratio = 1;
-} elseif ($Uploaded == 0) {
-    $Ratio = 0.5;
-} else {
-    $Ratio = round($Uploaded / $Downloaded, 2);
+$rank = new Gazelle\UserRank(
+    new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
+    [
+        'uploaded'   => $Uploaded,
+        'downloaded' => $Downloaded,
+        'uploads'    => $Uploads,
+        'requests'   => $RequestsFilled,
+        'posts'      => $ForumPosts,
+        'bounty'     => $TotalSpent,
+        'artists'    => $ArtistsAdded,
+        'collage'    => $collageAdditions,
+        'votes'      => $releaseVotes,
+        'bonus'      => $bonusPointsSpent,
+        'comment-t'  => $torrentComments,
+    ]
+);
+function display_rank(Gazelle\UserRank $r, string $dimension) {
+    return $r->rank($dimension) === false ? 'Server busy' : $r->rank($dimension);
 }
-$OverallRank = UserRank::overall_score($UploadedRank, $DownloadedRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio);
 ?>
         <div class="box box_info box_userinfo_percentile">
             <div class="head colhead_dark">Percentile Rankings (hover for values)</div>
             <ul class="stats nobullet">
 <?php    if (($Override = check_paranoia_here('uploaded'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded)?>">Data uploaded: <?=$UploadedRank === false ? 'Server busy' : number_format($UploadedRank)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Uploaded)?> uploaded">Data uploaded: <?= display_rank($rank, 'uploaded') ?></li>
 <?php
     }
     if (($Override = check_paranoia_here('downloaded'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Downloaded)?>">Data downloaded: <?=$DownloadedRank === false ? 'Server busy' : number_format($DownloadedRank)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($Downloaded)?> downloaded">Data downloaded: <?= display_rank($rank, 'downloaded') ?></li>
 <?php
     }
     if (($Override = check_paranoia_here('uploads+'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?>">Torrents uploaded: <?=$UploadsRank === false ? 'Server busy' : number_format($UploadsRank)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($Uploads)?> uploads">Torrents uploaded: <?= display_rank($rank, 'uploads') ?></li>
 <?php
     }
     if (($Override = check_paranoia_here('requestsfilled_count'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($RequestsFilled)?>">Requests filled: <?=$RequestRank === false ? 'Server busy' : number_format($RequestRank)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($RequestsFilled)?> filled">Requests filled: <?= display_rank($rank, 'requests') ?></li>
 <?php
     }
     if (($Override = check_paranoia_here('requestsvoted_bounty'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($TotalSpent)?>">Bounty spent: <?=$BountyRank === false ? 'Server busy' : number_format($BountyRank)?></li>
-<?php    } ?>
-                <li class="tooltip" title="<?=number_format($ForumPosts)?>">Posts made: <?=$PostRank === false ? 'Server busy' : number_format($PostRank)?></li>
-<?php    if (($Override = check_paranoia_here('artistsadded'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?>">Artists added: <?=$ArtistsRank === false ? 'Server busy' : number_format($ArtistsRank)?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=Format::get_size($TotalSpent)?> spent">Request votes: <?= display_rank($rank, 'bounty') ?></li>
+<?php } ?>
+                <li class="tooltip" title="<?=number_format($ForumPosts)?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
+<?php
+    if (($Override = check_paranoia_here('torrentcomments++'))) { ?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= number_format($torrentComments) ?> posted">Torrent commments: <?= display_rank($rank, 'comment-t') ?></li>
 <?php
     }
-    if (check_paranoia_here(['uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'])) { ?>
-                <li><strong>Overall rank: <?=$OverallRank === false ? 'Server busy' : number_format($OverallRank)?></strong></li>
+    if (($Override = check_paranoia_here('collagecontribs+'))) { ?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($collageAdditions)?> contributions">Collage contributions: <?= display_rank($rank, 'collage') ?></li>
+<?php }
+    if (($Override = check_paranoia_here('artistsadded'))) { ?>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?=number_format($ArtistsAdded)?> added">Artists added: <?= display_rank($rank, 'artists') ?></li>
+<?php } ?>
+                <li class="tooltip" title="<?=number_format($releaseVotes)?> votes">Release votes cast: <?= display_rank($rank, 'votes') ?></li>
+<?php
+    if ($OwnProfile || check_perms('admin_bp_history')) { ?>
+                <li class="tooltip<?= !$OwnProfile && check_perms('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($bonusPointsSpent)?> spent">Bonus points spent: <?= display_rank($rank, 'bonus') ?></li>
+<?php
+    }
+    if (check_paranoia_here(['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) { ?>
+                <li<?= $Class >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= $rank->score() === false ? 'Server busy'
+                    : $Class >= 900 ? '&nbsp;&infin;' : number_format($rank->score() * $User->rankFactor()) ?></strong></li>
 <?php    } ?>
             </ul>
         </div>

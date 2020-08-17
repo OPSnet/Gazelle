@@ -595,7 +595,7 @@ class User extends Base {
         );
     }
 
-    public function personalCollages() {
+    public function personalCollages(): array {
         $this->db->prepared_query("
             SELECT ID, Name
             FROM collages
@@ -659,7 +659,7 @@ class User extends Base {
         $this->cache->delete_value('collage_subs_user_new_' . $this->id);
     }
 
-    public function emailHistory() {
+    public function emailHistory(): array {
         $this->db->prepared_query('
             SELECT DISTINCT Email, IP
             FROM users_history_emails
@@ -728,7 +728,7 @@ class User extends Base {
         return [$created, $bounty];
     }
 
-    public function clients() {
+    public function clients(): array {
         $this->db->prepared_query('
             SELECT DISTINCT useragent
             FROM xbt_files_users
@@ -840,7 +840,7 @@ class User extends Base {
         ');
     }
 
-    public function addForumWarning(string $comment) {
+    public function addForumWarning(string $comment): int {
         $this->db->prepared_query("
             INSERT INTO users_warnings_forums
                    (UserID, Comment)
@@ -848,6 +848,7 @@ class User extends Base {
             ON DUPLICATE KEY UPDATE Comment = concat(?, ', ', Comment)
             ", $this->id, $comment, $comment
         );
+        return $this->db->affected_rows();
     }
 
     public function invitedCount(): int {
@@ -926,6 +927,22 @@ class User extends Base {
         ');
     }
 
+    public function releaseVotes(): int {
+        return $this->getSingleValue('user-release-votes', '
+            SELECT count(*)
+            FROM users_votes
+            WHERE UserID = ?
+        ');
+    }
+
+    public function bonusPointsSpent(): int {
+        return (int)$this->getSingleValue('user-bp-spent', '
+            SELECT sum(Price)
+            FROM bonus_history
+            WHERE UserID = ?
+        ');
+    }
+
     public function collagesCreated(): int {
         return $this->getSingleValue('user-collage-create', "
             SELECT count(*)
@@ -934,8 +951,17 @@ class User extends Base {
         ");
     }
 
-    public function collagesContributed(): int {
-        return $this->getSingleValue('user-collage-contrib', "
+    public function artistCollageContributed(): int {
+        return $this->getSingleValue('user-collage-a-contrib', "
+            SELECT count(DISTINCT ct.CollageID)
+            FROM collages_artists AS ct
+            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
+            WHERE c.Deleted = '0' AND ct.UserID = ?
+        ");
+    }
+
+    public function torrentCollageContributed(): int {
+        return $this->getSingleValue('user-collage-t-contrib', "
             SELECT count(DISTINCT ct.CollageID)
             FROM collages_torrents AS ct
             INNER JOIN collages AS c ON (ct.CollageID = c.ID)
@@ -943,7 +969,33 @@ class User extends Base {
         ");
     }
 
-    public function peerCounts() {
+    public function collagesContributed(): int {
+        return $this->artistCollageContributed() + $this->torrentCollageContributed();
+    }
+
+    public function artistCollageAdditions(): int {
+        return $this->getSingleValue('user-collage-a-add', "
+            SELECT count(*)
+            FROM collages_artists AS ct
+            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
+            WHERE c.Deleted = '0' AND ct.UserID = ?
+        ");
+    }
+
+    public function torrentCollageAdditions(): int {
+        return $this->getSingleValue('user-collage-t-add', "
+            SELECT count(*)
+            FROM collages_torrents AS ct
+            INNER JOIN collages AS c ON (ct.CollageID = c.ID)
+            WHERE c.Deleted = '0' AND ct.UserID = ?
+        ");
+    }
+
+    public function collageAdditions(): int {
+        return $this->artistCollageAdditions() + $this->torrentCollageAdditions();
+    }
+
+    public function peerCounts(): array {
         $this->db->prepared_query("
             SELECT IF(remaining = 0, 'seed', 'leech') AS Type, count(*)
             FROM xbt_files_users AS x
@@ -960,7 +1012,7 @@ class User extends Base {
         ];
     }
 
-    public function snatchCounts() {
+    public function snatchCounts(): array {
         $this->db->prepared_query('
             SELECT count(*), count(DISTINCT x.fid)
             FROM xbt_snatched AS x
@@ -1141,6 +1193,23 @@ class User extends Base {
             $cache->cache_value('stats_users', $stats, 7200);
         }
         return $stats;
+    }
+
+    /**
+     * Scale down user rank if certain steps have not been taken
+     * @return float Scaling factor between 0.0 and 1.0
+     */
+    public function rankFactor(): float {
+        $factor = 1.0;
+        $info = \Users::user_info($this->id);
+        if (!strlen($info['Avatar'])) {
+            $factor *= 0.75;
+        }
+        $heavy = \Users::user_heavy_info($this->id);
+        if (!strlen($heavy['Info'])) {
+            $factor *= 0.75;
+        }
+        return $factor;
     }
 
     public function buffer() {
