@@ -419,3 +419,17 @@ define('DONOR_RANK_PRICE', 10);
 define('DONOR_FIRST_INVITE_COUNT', 2);
 
 define('TAG_OFFICIAL_COLUMNS', 4);
+
+define('RANKING_WEIGHT', [
+    'uploaded'   => [ 8, 'DataUpload'],
+    'downloaded' => [20, 'DataDownload'],
+    'uploads'    => [25, 'Uploads'],
+    'requests'   => [10, 'RequestsFilled'],
+    'posts'      => [ 3, 'ForumPosts'],
+    'bounty'     => [ 4, 'BountySpent'],
+    'artists'    => [ 1, 'ArtistsAdded'],
+    'collage'    => [ 5, 'CollageContribution'],
+    'votes'      => [ 5, 'ReleaseVotes'],
+    'bonus'      => [ 6, 'BonusPoints'],
+    'comment-t'  => [18, 'CommentTorrent'],
+]);

@@ -180,6 +180,7 @@ class Users {
                     m.CustomPermissions,
                     m.can_leech AS CanLeech,
                     m.IRCKey,
+                    i.Info,
                     i.AuthKey,
                     i.RatioWatchEnds,
                     i.RatioWatchDownload,

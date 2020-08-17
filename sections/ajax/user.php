@@ -3,7 +3,7 @@ if (empty($_GET['id']) || !is_numeric($_GET['id'])) {
     json_die("failure", "bad id parameter");
 }
 $UserID = $_GET['id'];
-$user = new \Gazelle\User($UserID);
+$user = new Gazelle\User($UserID);
 
 $OwnProfile = $UserID == $LoggedUser['ID'];
 
@@ -51,7 +51,12 @@ if (!$DB->has_results()) { // If user doesn't exist
     json_die("failure", "no such user");
 }
 
-list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded, $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass, $DisableLeech, $JoinDate, $Info, $Avatar, $Donor, $Warned, $ForumPosts, $InviterID, $DisableInvites, $InviterName, $RatioWatchEnds, $RatioWatchDownload) = $DB->next_record(MYSQLI_NUM, [9, 11]);
+[$Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
+$RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle, $torrent_pass,
+$DisableLeech, $JoinDate, $Info, $Avatar, $Donor, $Warned, $ForumPosts,
+$InviterID, $DisableInvites, $InviterName, $RatioWatchEnds,
+$RatioWatchDownload]
+    = $DB->next_record(MYSQLI_NUM, [9, 11]);
 
 $Paranoia = unserialize($Paranoia);
 if (!is_array($Paranoia)) {
@@ -70,42 +75,46 @@ function check_paranoia_here($Setting) {
     return check_paranoia($Setting, $Paranoia, $Class, $UserID);
 }
 
-$Friend = $user->isFriend($LoggedUser['ID']);
-
 if (!(check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty'))) {
     $RequestsFilled = null;
-    $TotalBounty = null;
-    $RequestsVoted = null;
-    $TotalSpent = null;
+    $TotalBounty    = null;
+    $RequestsVoted  = null;
+    $TotalSpent     = null;
 } else {
     list($RequestsFilled, $TotalBounty) = $user->requestsBounty();
-    list($RequestsVoted, $TotalSpent) = $user->requestsVotes();
+    list($RequestsVoted,  $TotalSpent)  = $user->requestsVotes();
 }
 
-$Uploads      = check_paranoia_here('uploads+')     ? null : $user->uploadCount();
-$ArtistsAdded = check_paranoia_here('artistsadded') ? null : $user->artistsAdded();
+$Uploads          = check_paranoia_here('uploads+')     ? null : $user->uploadCount();
+$ArtistsAdded     = check_paranoia_here('artistsadded') ? null : $user->artistsAdded();
+$releaseVotes     = $user->releaseVotes();
+$bonusPointsSpent = $user->bonusPointsSpent();
+$torrentComments  = check_paranoia_here('torrentcomments++') ? $user->torrentCommentCount() : 0;
 
-// Do the ranks.
-$UploadedRank = check_paranoia_here('uploaded') ? UserRank::get_rank('uploaded', $Uploaded) : null;
-$DownloadRank = check_paranoia_here('downloaded') ? UserRank::get_rank('downloaded', $Downloaded) : null;
-$UploadsRank  = check_paranoia_here('uploads+') ? UserRank::get_rank('uploads', $Uploads) : null;
-$RequestRank  = check_paranoia_here('requestsfilled_count') ? UserRank::get_rank('requests', $RequestsFilled) : null;
-$PostRank     = UserRank::get_rank('posts', $ForumPosts);
-$BountyRank   = check_paranoia_here('requestsvoted_bounty') ? UserRank::get_rank('bounty', $TotalSpent) : null;
-$ArtistsRank  = check_paranoia_here('artistsadded') ? UserRank::get_rank('artists', $ArtistsAdded) : null;
+if (check_paranoia_here('collages+')) {
+    $NumCollages = $user->collagesCreated();
+}
 
-if ($Downloaded == 0) {
-    $Ratio = 1;
-} elseif ($Uploaded == 0) {
-    $Ratio = 0.5;
-} else {
-    $Ratio = round($Uploaded / $Downloaded, 2);
+if (check_paranoia_here('collagecontribs+')) {
+    $NumCollageContribs = $user->collagesContributed();
 }
-if (check_paranoia_here(['uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded'])) {
-    $OverallRank = floor(UserRank::overall_score($UploadedRank, $DownloadRank, $UploadsRank, $RequestRank, $PostRank, $BountyRank, $ArtistsRank, $Ratio));
-} else {
-    $OverallRank = null;
-}
+
+$rank = new Gazelle\UserRank(
+    new Gazelle\UserRank\Configuration(RANKING_WEIGHT),
+    [
+        'uploaded'   => $Uploaded ?? 0,
+        'downloaded' => $Downloaded ?? 0,
+        'uploads'    => $Uploads ?? 0,
+        'requests'   => $RequestsFilled ?? 0,
+        'posts'      => $ForumPosts,
+        'bounty'     => $TotalSpent ?? 0,
+        'artists'    => $ArtistsAdded ?? 0,
+        'collage'    => $NumCollageContribs ?? 0,
+        'votes'      => $releaseVotes,
+        'bonus'      => $bonusPointsSpent,
+        'comment-t'  => $torrentComments,
+    ]
+);
 
 // Community section
 if (check_paranoia_here('snatched+')) {
@@ -116,14 +125,6 @@ $NumComments        = check_paranoia_here('torrentcomments++') ? null : $user->t
 $NumArtistsComments = check_paranoia_here('torrentcomments++') ? null : $user->artistCommentCount();
 $NumCollageComments = check_paranoia_here('torrentcomments++') ? null : $user->collageCommentCount();
 $NumRequestComments = check_paranoia_here('torrentcomments++') ? null : $user->requestCommentCount();
-
-if (check_paranoia_here('collages+')) {
-    $NumCollages = $user->collagesCreated();
-}
-
-if (check_paranoia_here('collagecontribs+')) {
-    $NumCollageContribs = $user->collagesContributed();
-}
 
 if (check_paranoia_here('uniquegroups+')) {
     $UniqueGroups = $DB->scalar("
@@ -194,27 +195,31 @@ if ($ParanoiaLevel == 0) {
 header('Content-Type: text/plain; charset=utf-8');
 
 json_print("success", [
-    'username' => $Username,
-    'avatar' => $Avatar,
-    'isFriend' => $Friend,
+    'username'    => $Username,
+    'avatar'      => $Avatar,
+    'isFriend'    => $user->isFriend($LoggedUser['ID']),
     'profileText' => Text::full_format($Info),
     'stats' => [
-        'joinedDate' => $JoinDate,
-        'lastAccess' => $LastAccess ?? '',
-        'uploaded' => (($Uploaded == null) ? null : (int)$Uploaded),
-        'downloaded' => (($Downloaded == null) ? null : (int)$Downloaded),
-        'ratio' => $Ratio,
+        'joinedDate'    => $JoinDate,
+        'lastAccess'    => $LastAccess ?? '',
+        'uploaded'      => (($Uploaded == null) ? null : (int)$Uploaded),
+        'downloaded'    => (($Downloaded == null) ? null : (int)$Downloaded),
+        'ratio'         => $Ratio,
         'requiredRatio' => (($RequiredRatio == null) ? null : (float)$RequiredRatio)
     ],
     'ranks' => [
-        'uploaded' => $UploadedRank,
-        'downloaded' => $DownloadRank,
-        'uploads' => $UploadsRank,
-        'requests' => $RequestRank,
-        'bounty' => $BountyRank,
-        'posts' => $PostRank,
-        'artists' => $ArtistsRank,
-        'overall' => (($OverallRank == null) ? 0 : $OverallRank)
+        'uploaded'   => check_paranoia_here('uploaded') ? $rank->rank('uploaded') : null,
+        'downloaded' => check_paranoia_here('downloaded') ? $rank->rank('downloaded') : null,
+        'uploads'    => check_paranoia_here('uploads+') ? $rank->rank('uploads') : null,
+        'requests'   => check_paranoia_here('requestsfilled_count') ? $rank->rank('requests') : null,
+        'bounty'     => check_paranoia_here('requestsvoted_bounty') ? $rank->rank('bounty') : null,
+        'posts'      => $rank->rank('posts'),
+        'artists'    => check_paranoia_here('artistsadded') ? $rank->rank('artists') : null,
+        'collage'    => check_paranoia_here('collagecontribs+') ? $rank->rank('collage') : null,
+        'votes'      => $rank->rank('votes'),
+        'bonus'      => $rank->rank('bonus'),
+        'overall'    => check_paranoia_here(['uploaded', 'downloaded', 'uploads+', 'requestsfilled_count', 'requestsvoted_bounty', 'artistsadded', 'collagecontribs+'])
+            ? $rank->score() * $user->rankFactor() : null,
     ],
     'personal' => [
         'class' => $ClassLevels[$Class]['Name'],
@@ -226,24 +231,25 @@ json_print("success", [
         'passkey' => $torrent_pass
     ],
     'community' => [
-        'posts' => (int)$ForumPosts,
+        'posts'           => (int)$ForumPosts,
         'torrentComments' => (($NumComments == null) ? null : (int)$NumComments),
-        'artistComments' => (($NumArtistComments == null) ? null : (int)$NumArtistComments),
+        'artistComments'  => (($NumArtistComments == null) ? null : (int)$NumArtistComments),
         'collageComments' => (($NumCollageComments == null) ? null : (int)$NumCollageComments),
         'requestComments' => (($NumRequestComments == null) ? null : (int)$NumRequestComments),
         'collagesStarted' => (($NumCollages == null) ? null : (int)$NumCollages),
         'collagesContrib' => (($NumCollageContribs == null) ? null : (int)$NumCollageContribs),
-        'requestsFilled' => (($RequestsFilled == null) ? null : (int)$RequestsFilled),
-        'bountyEarned' => (($TotalBounty == null) ? null : (int)$TotalBounty),
-        'requestsVoted' => (($RequestsVoted == null) ? null : (int)$RequestsVoted),
-        'bountySpent' => (($TotalSpent == null) ? null : (int)$TotalSpent),
-        'perfectFlacs' => (($PerfectFLACs == null) ? null : (int)$PerfectFLACs),
-        'uploaded' => (($Uploads == null) ? null : (int)$Uploads),
-        'groups' => (($UniqueGroups == null) ? null : (int)$UniqueGroups),
-        'seeding' => (($Seeding == null) ? null : (int)$Seeding),
-        'leeching' => (($Leeching == null) ? null : (int)$Leeching),
-        'snatched' => (($Snatched == null) ? null : (int)$Snatched),
-        'invited' => (($Invited == null) ? null : (int)$Invited),
-        'artistsAdded' => (($ArtistsAdded == null) ? null : (int)$ArtistsAdded)
+        'requestsFilled'  => (($RequestsFilled == null) ? null : (int)$RequestsFilled),
+        'bountyEarned'    => (($TotalBounty == null) ? null : (int)$TotalBounty),
+        'requestsVoted'   => (($RequestsVoted == null) ? null : (int)$RequestsVoted),
+        'bountySpent'     => (($TotalSpent == null) ? null : (int)$TotalSpent),
+        'releaseVotes'    => (($releaseVotes == null) ? null : (int)$releaseVotes),
+        'perfectFlacs'    => (($PerfectFLACs == null) ? null : (int)$PerfectFLACs),
+        'uploaded'        => (($Uploads == null) ? null : (int)$Uploads),
+        'groups'          => (($UniqueGroups == null) ? null : (int)$UniqueGroups),
+        'seeding'         => (($Seeding == null) ? null : (int)$Seeding),
+        'leeching'        => (($Leeching == null) ? null : (int)$Leeching),
+        'snatched'        => (($Snatched == null) ? null : (int)$Snatched),
+        'invited'         => (($Invited == null) ? null : (int)$Invited),
+        'artistsAdded'    => (($ArtistsAdded == null) ? null : (int)$ArtistsAdded)
     ]
 ]);
