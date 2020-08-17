@@ -260,7 +260,7 @@ if ($Classes[$class]['Level'] != $cur['Class']
     $args[] = $class;
     $editSummary[] = 'class changed to '.Users::make_class_string($class);
 
-    if ($user->supportCount($class, $Classes[$cur['Class']]['ID']) === 2) {
+    if ($user->supportCount($class, $cur['PermissionID']) === 2) {
         if ($Classes[$class]['Level'] < $cur['Class']) {
             $supportFor = '';
         }
@@ -568,7 +568,7 @@ if ($mergeStatsFrom && check_perms('users_edit_ratio')) {
 
 if ($changePassword && check_perms('users_edit_password')) {
     $set[] = "PassHash = ?";
-    $args[] = Users::make_password_hash($changePassword);
+    $args[] = Gazelle\UserCreator::hashPassword($ChangePassword);
     $user->logout();
     $editSummary[] = 'password reset';
 }

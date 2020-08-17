@@ -41,6 +41,7 @@ class InviteTree extends Base {
             WHERE TreeID = ?
                 AND TreePosition > ?
                 AND TreeLevel <= ?
+            ORDER BY TreePosition LIMIT 1
             ", $treeId, $inviterPosition, $level
         );
         if (!$nextPosition) {
