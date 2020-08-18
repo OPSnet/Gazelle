@@ -422,7 +422,8 @@ if (check_perms('admin_reports')) {
 }
 
 if (check_perms('admin_manage_applicants')) {
-    $NumNewApplicants = Applicant::new_applicant_count();
+    $appMan = new Gazelle\Manager\Applicant;
+    $NumNewApplicants = $appMan->newApplicantCount();
     if ($NumNewApplicants > 0) {
         $ModBar[] = sprintf(
             '<a href="apply.php?action=view">%d new Applicant%s</a>',
@@ -431,7 +432,7 @@ if (check_perms('admin_manage_applicants')) {
         );
     }
 
-    $NumNewReplies = Applicant::new_reply_count();
+    $NumNewReplies = $appMan->newReplyCount();
     if ($NumNewReplies > 0) {
         $ModBar[] = sprintf(
             '<a href="apply.php?action=view">%d new Applicant %s</a>',

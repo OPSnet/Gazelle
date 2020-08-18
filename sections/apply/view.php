@@ -3,27 +3,29 @@ View::show_header('View Applications', 'apply');
 $IS_STAFF = check_perms('admin_manage_applicants'); /* important for viewing the full story and full applicant list */
 if (isset($_POST['id']) && is_number($_POST['id'])) {
     authorize();
-    $ID = intval($_POST['id']);
-    $App = Applicant::factory($ID);
-    if (!$IS_STAFF && $App->user_id() != $LoggedUser['ID']) {
+    $ID = (int)$_POST['id'];
+    $App = new Gazelle\Applicant($ID);
+    if (!$IS_STAFF && $App->userId() != $LoggedUser['ID']) {
         error(403);
     }
-    $note_delete = array_filter($_POST, function ($x) { return preg_match('/^note-delete-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
-    if (is_array($note_delete) && count($note_delete) == 1) {
-            $App->delete_note(
-                trim(array_keys($note_delete)[0], 'note-delete-')
+    $remove = array_filter($_POST, function ($x) { return preg_match('/^note-delete-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+    if (is_array($remove) && count($remove) == 1) {
+            $App->removeNote(
+                trim(array_keys($remove)[0], 'note-delete-')
             );
     }
     elseif (isset($_POST['resolve'])) {
         if ($_POST['resolve'] === 'Resolve') {
             $App->resolve(true);
+            header('Location: /apply.php?action=view');
+            exit;
         }
         elseif ($_POST['resolve'] === 'Reopen') {
             $App->resolve(false);
         }
     }
     elseif (isset($_POST['note_reply'])) {
-        $App->save_note(
+        $App->saveNote(
             $LoggedUser['ID'],
             $_POST['note_reply'],
             $IS_STAFF && $_POST['visibility'] == 'staff' ? 'staff' : 'public'
@@ -31,9 +33,9 @@ if (isset($_POST['id']) && is_number($_POST['id'])) {
     }
 }
 elseif (isset($_GET['id']) && is_number($_GET['id'])) {
-    $ID = intval($_GET['id']);
-    $App = Applicant::factory($ID);
-    if (!$IS_STAFF && $App->user_id() != $LoggedUser['ID']) {
+    $ID = (int)$_GET['id'];
+    $App = new Gazelle\Applicant($ID);
+    if (!$IS_STAFF && $App->userId() != $LoggedUser['ID']) {
         error(403);
     }
 }
@@ -58,28 +60,25 @@ if ($IS_STAFF) {
     if (!$Resolved) {
 ?>
     <a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
-<?php
-    } ?>
+<?php } ?>
     <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
-<?php
-}
-?>
+<?php } ?>
 </div>
 
 <?php
 if (isset($ID)) { ?>
 <div class="box">
-    <div class="head"<?= $App->is_resolved() ? ' style="font-style: italic;"' : '' ?>><?= $App->role_title() ?>
+    <div class="head"<?= $App->isResolved() ? ' style="font-style: italic;"' : '' ?>><?= $App->roleTitle() ?>
 <?php
     if ($IS_STAFF) { ?>
         <div style="float: right;">
             <form name="role_resolve" method="POST" action="/apply.php?action=view&amp;id=<?= $ID ?>">
-                <input type="submit" name="resolve" value="<?= $App->is_resolved() ? 'Reopen' : 'Resolve' ?>" />
+                <input type="submit" name="resolve" value="<?= $App->isResolved() ? 'Reopen' : 'Resolve' ?>" />
                 <input type="hidden" name="id" value="<?= $ID ?>"/>
                 <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>"/>
             </form>
         </div>
-        <br />Application received from <?= Users::format_username($App->user_id(), true, true, true, true, true, false) ?> received <?= time_diff($App->created(), 2) ?>.
+        <br />Application received from <?= Users::format_username($App->userId(), true, true, true, true, true, false) ?> received <?= time_diff($App->created(), 2) ?>.
 <?php
     } ?>
     </div>
@@ -87,13 +86,13 @@ if (isset($ID)) { ?>
     <div class="pad">
         <p><?= Text::full_format($App->body()) ?></p>
 <?php
-    if (!$App->is_resolved()) { ?>
+    if (!$App->isResolved()) { ?>
         <form id="thread_note_reply" name="thread_note_replay" method="POST" action="/apply.php?action=view&amp;id=<?= $ID ?>">
 <?php
     } ?>
         <table class="forum_post wrap_overflow box vertical_margin">
 <?php
-    foreach ($App->get_story() as $note) {
+    foreach ($App->story() as $note) {
         if (!$IS_STAFF && $note['visibility'] == 'staff') {
             continue;
         }
@@ -109,7 +108,7 @@ if (isset($ID)) { ?>
                     <div style="margin: 5px 4px 20px 4px">
                         <?= Text::full_format($note['body']) ?>
                     </div>
-<?php   if ($IS_STAFF && !$App->is_resolved()) { ?>
+<?php   if ($IS_STAFF && !$App->isResolved()) { ?>
                     <div style="float: right; padding-top: 10px 0; margin-bottom: 6px;">
                         <input type="submit" name="note-delete-<?= $note['id'] ?>" value="delete" style="height: 20px; padding: 0 3px;"/>
                     </div>
@@ -118,7 +117,7 @@ if (isset($ID)) { ?>
             </tr>
 <?php
     } /* foreach */
-    if (!$App->is_resolved()) {
+    if (!$App->isResolved()) {
         if ($IS_STAFF) {
 ?>
             <tr>
@@ -151,7 +150,7 @@ if (isset($ID)) { ?>
                 </td>
             </tr>
 <?php
-    } /* !$App->is_resolved() */ ?>
+    } /* !$App->isResolved() */ ?>
         </table>
         </form>
     </div>
@@ -160,21 +159,21 @@ if (isset($ID)) { ?>
 } else { /* no id parameter given -- show list of applicant entries - all if staff, otherwise their own (if any) */
     $Page            = isset($_GET['page']) && is_number($_GET['page']) ? intval($_GET['page']) : 1;
     $UserID          = $IS_STAFF ? 0 : $LoggedUser['ID'];
-    $ApplicationList = Applicant::get_list($Page, $Resolved, $UserID);
+    $ApplicationList = $appMan->list($Page, $Resolved, $UserID);
 ?>
     <h3><?=$Resolved ? 'Resolved' : 'Current' ?> Applications</h3>
 <?php
     if (count($ApplicationList)) { ?>
     <table>
         <tr>
-            <td class="label">Role</td>
+            <th>Role</th>
 <?php   if ($IS_STAFF) { ?>
-            <td class="label">Applicant</td>
+            <th>Applicant</th>
 <?php   } ?>
-            <td class="label">Date Created</td>
-            <td class="label">Comments</td>
-            <td class="label">Last comment from</td>
-            <td class="label">Last comment added</td>
+            <th>Date Created</th>
+            <th>Comments</th>
+            <th>Last comment from</th>
+            <th>Last comment added</th>
         </tr>
 <?php  foreach ($ApplicationList as $appl) { ?>
         <tr>
