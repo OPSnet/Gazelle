@@ -630,7 +630,8 @@ if (check_perms('users_view_invites')) {
                     <?= '(' . $User->pendingInviteCount() . ' in use)' ?></li>
 <?php
 }
-if (Applicant::user_is_applicant($UserID) && (check_perms('admin_manage_applicants') || $OwnProfile)) {
+$appMan = new Gazelle\Manager\Applicant;
+if ($appMan->userIsApplicant($UserID) && (check_perms('admin_manage_applicants') || $OwnProfile)) {
 ?>
                 <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 <?php

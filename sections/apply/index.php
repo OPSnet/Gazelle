@@ -6,28 +6,26 @@ $Title = '';
 $Body  = '';
 $Error = '';
 
-$action = isset($_GET['action']) ? $_GET['action'] : '';
-switch ($action) {
+switch ($_GET['action'] ?? '') {
     case 'admin':
         if (check_perms('admin_manage_applicants')) {
-            include(SERVER_ROOT.'/sections/apply/admin.php');
-        }
-        else {
-            include(SERVER_ROOT.'/sections/apply/apply.php');
+            require_once('admin.php');
+        } else {
+            require_once('apply.php');
         }
         break;
 
     case 'view':
-        if (check_perms('admin_manage_applicants') || (!check_perms('admin_manage_applicants') && Applicant::user_is_applicant($LoggedUser['ID']))) {
-            include(SERVER_ROOT.'/sections/apply/view.php');
-        }
-        else {
-            include(SERVER_ROOT.'/sections/apply/apply.php');
+        $appMan = new Gazelle\Manager\Applicant;
+        if (check_perms('admin_manage_applicants') || (!check_perms('admin_manage_applicants') && $appMan->userIsApplicant($LoggedUser['ID']))) {
+            require_once('view.php');
+        } else {
+            require_once('apply.php');
         }
         break;
 
     case 'save':
     default:
-        include(SERVER_ROOT.'/sections/apply/apply.php');
+        require_once('apply.php');
         break;
 }

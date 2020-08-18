@@ -10,15 +10,15 @@ if (isset($_POST['auth'])) {
     $edit = array_filter($_POST, function ($x) { return preg_match('/^edit-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
     if (is_array($edit) && count($edit) == 1) {
         $EDIT_ID = trim(array_keys($edit)[0], 'edit-');
-        $AppRole = ApplicantRole::factory($EDIT_ID);
+        $AppRole = new Gazelle\ApplicantRole($EDIT_ID);
     }
     elseif (isset($_POST['edit']) && is_numeric($_POST['edit'])) {
         $EDIT_ID = intval($_POST['edit']);
-        $AppRole = ApplicantRole::factory($EDIT_ID);
+        $AppRole = new Gazelle\ApplicantRole($EDIT_ID);
         if (isset($_POST['user_id']) && is_numeric($_POST['user_id'])) {
-            $user_id = intval($_POST['user_id']);
-            if ($user_id == $LoggedUser['ID']) {
-                $AppRole->update(
+            $userId = (int)$_POST['user_id'];
+            if ($userId == $LoggedUser['ID']) {
+                $AppRole->modify(
                     $_POST['title'],
                     $_POST['description'],
                     (isset($_POST['status']) && is_numeric($_POST['status']) && $_POST['status'] == 1)
@@ -29,7 +29,8 @@ if (isset($_POST['auth'])) {
         }
     }
     else {
-        $AppRole = new ApplicantRole(
+        $appRoleMan = new Gazelle\Manager\ApplicantRole;
+        $AppRole = $appRoleMan->create(
             $_POST['title'],
             $_POST['description'],
             (isset($_POST['status']) && is_numeric($_POST['status']) && $_POST['status'] == 1),
@@ -55,17 +56,17 @@ if (isset($_POST['auth'])) {
 <div class="box">
     <div class="head">Current Roles</div>
     <div class="pad">
-<?php
-    if ($Saved) { ?>
+<?php if ($Saved) { ?>
         <p>The role <?= $AppRole->title() ?> was <?= $Saved ?>.</p>
 <?php
-    } ?>
-
-<?php
-    if (!$EDIT_ID) {
-    $Roles = ApplicantRole::get_list(true);
-    if (count($Roles)) {
+}
+if (!$EDIT_ID) {
+    $appRoleMan = new Gazelle\Manager\ApplicantRole;
+    $Roles = $appRoleMan->list(true);
+    if (!$Roles) {
 ?>
+        <p>There are no current roles. Create one using the form below.</p>
+<?php } else { ?>
         <table>
 <?php   foreach ($Roles as $title => $info) { ?>
             <tr>
@@ -89,9 +90,6 @@ if (isset($_POST['auth'])) {
 <?php   } /* foreach */ ?>
         </table>
 <?php
-    } else { ?>
-        <p>There are no current roles. Create one using the form below.</p>
-<?php
     }
 } /* !$EDIT_ID */ ?>
     </div>
@@ -102,9 +100,9 @@ if (isset($_POST['auth'])) {
     <div class="pad">
 
 <?php
-if (isset($App)) {
-    $checked_published = $AppRole->is_published() ? ' checked' : '';
-    $checked_archived  = $AppRole->is_published() ? '' : ' checked';
+if (isset($AppRole)) {
+    $checked_published = $AppRole->isPublished() ? ' checked' : '';
+    $checked_archived  = $AppRole->isPublished() ? '' : ' checked';
 }
 else {
     $checked_published = '';

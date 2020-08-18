@@ -1,4 +1,5 @@
 <?php
+$appMan = new Gazelle\Manager\Applicant;
 if (isset($_POST['auth'])) {
     authorize();
     $Role = array_key_exists('role', $_POST) ? trim($_POST['role']) : '';
@@ -6,7 +7,7 @@ if (isset($_POST['auth'])) {
 
     if (strlen($Role)) {
         if (strlen($Body) > 80) {
-            $Applicant = new Applicant($LoggedUser['ID'], $Role, $Body);
+            $Applicant = $appMan->createApplicant($LoggedUser['ID'], $Role, $Body);
             header('Location: /apply.php?action=view&id=' . $Applicant->id());
             exit;
         }
@@ -29,14 +30,14 @@ View::show_header('Apply', 'apply');
     <div class="header">
         <h3>Apply for a role at <?=SITE_NAME?></h3>
 <?php
-    if (check_perms('admin_manage_applicants') || Applicant::user_is_applicant($LoggedUser['ID'])) { ?>
+    if (check_perms('admin_manage_applicants') || $appMan->userIsApplicant($LoggedUser['ID'])) { ?>
         <div class="linkbox">
     <?php if (check_perms('admin_manage_applicants')) { ?>
             <a href="/apply.php?action=view" class="brackets">Current applications</a>
             <a href="/apply.php?action=view&status=resolved" class="brackets">Resolved applications</a>
             <a href="/apply.php?action=admin" class="brackets">Manage roles</a>
     <?php }
-    if (Applicant::user_is_applicant($LoggedUser['ID'])) { ?>
+    if ($appMan->userIsApplicant($LoggedUser['ID'])) { ?>
             <a href="/apply.php?action=view" class="brackets">View your application</a>
     <?php } ?>
         </div>
@@ -45,8 +46,9 @@ View::show_header('Apply', 'apply');
     </div>
 
 <?php
-$Roles = ApplicantRole::get_list();
-if (count($Roles)) { ?>
+$appRoleMan = new Gazelle\Manager\ApplicantRole;
+$Roles = $appRoleMan->list();
+if ($Roles) { ?>
     <div class="box">
         <div class="head">Open Roles</div>
         <div class="pad">
