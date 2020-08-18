@@ -1,27 +1,30 @@
 <?php
 
-$Val = new Validate;
-
 if (!empty($_REQUEST['confirm'])) {
     // Confirm registration
-    $DB->query("
+    $UserID = $DB->scalar("
         SELECT ID
         FROM users_main
-        WHERE torrent_pass = '".db_string($_REQUEST['confirm'])."'
-            AND Enabled = '0'");
-    list($UserID) = $DB->next_record();
+        WHERE Enabled = '0'
+            AND torrent_pass = ?
+        ", $_REQUEST['confirm']
+    );
 
     if ($UserID) {
-        $DB->query("
-            UPDATE users_main
-            SET Enabled = '1'
-            WHERE ID = '$UserID'");
+        $DB->prepared_query("
+            UPDATE users_main SET
+                Enabled = '1'
+            WHERE ID = ?
+            ", $UserID
+        );
         $Cache->delete_value("user_info_{$UserID}");
         $Cache->increment('stats_user_count');
-        include('step2.php');
+        require('step2.php');
     }
 
 } elseif (OPEN_REGISTRATION || !empty($_REQUEST['invite'])) {
+
+    $Val = new Validate;
     $Val->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
     $Val->SetFields('email', true, 'email', 'You did not enter a valid email address.');
     $Val->SetFields('password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
@@ -29,61 +32,57 @@ if (!empty($_REQUEST['confirm'])) {
     $Val->SetFields('readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.');
     $Val->SetFields('readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.');
     $Val->SetFields('agereq', true, 'checkbox', 'You did not select the box that says you are 13 years of age or older.');
-    //$Val->SetFields('captcha', true, 'string', 'You did not enter a captcha code.', array('minlength' => 6, 'maxlength' => 6));
 
     if (!empty($_POST['submit'])) {
         // User has submitted registration form
+
         $Err = $Val->ValidateForm($_REQUEST);
-        /*
-        if (!$Err && strtolower($_SESSION['captcha']) != strtolower($_REQUEST['captcha'])) {
-            $Err = 'You did not enter the correct captcha code.';
-        }
-        */
+
         if (!$Err) {
+            $username = trim($_REQUEST['username']);
+            $email    = trim($_REQUEST['email']);
+
             // Don't allow a username of "0" or "1" due to PHP's type juggling
-            if (trim($_POST['username']) == '0' || trim($_POST['username']) == '1') {
+            if (in_array($username, ['0', '1'])) {
                 $Err = 'You cannot have a username of "0" or "1".';
             }
 
-            $DB->query("
-                SELECT COUNT(ID)
-                FROM users_main
-                WHERE Username LIKE '".db_string(trim($_POST['username']))."'");
-            list($UserCount) = $DB->next_record();
-
-            if ($UserCount) {
+            $found = $DB->scalar("
+                SELECT 1 FROM users_main WHERE Username = ?
+                ", $username
+            );
+            if ($found) {
                 $Err = 'There is already someone registered with that username.';
                 $_REQUEST['username'] = '';
             }
 
-            if ($_REQUEST['invite']) {
-                $DB->query("
-                    SELECT InviterID, Email, Reason
-                    FROM invites
-                    WHERE InviteKey = '".db_string($_REQUEST['invite'])."'");
-                if (!$DB->has_results()) {
-                    $Err = 'Invite does not exist.';
-                    $InviterID = 0;
-                } else {
-                    list($InviterID, $InviteEmail, $InviteReason) = $DB->next_record(MYSQLI_NUM, false);
-                }
-            } else {
-                $InviterID = 0;
-                $InviteEmail = $_REQUEST['email'];
+            if (!$_REQUEST['invite']) {
+                $InviterID    = 0;
+                $InviteEmail  = $email;
                 $InviteReason = '';
+                $InviteReason = sqltime() . " - no invite code";
+            } else {
+                [$InviterID, $InviteEmail, $InviteReason] = $DB->row("
+                    SELECT InviterID, Email, concat(now(), ' - ', coalesce(Reason, 'standard invitation'))
+                    FROM invites
+                    WHERE InviteKey = ?
+                    ", trim($_REQUEST['invite'])
+                );
+                if (!$InviterID) {
+                    View::show_header('No invitation found');
+                    echo G::$Twig->render('login/no-invite.twig', [
+                        'static' => STATIC_SERVER,
+                        'key'    => $_GET['invite']]);
+                    exit;
+                }
             }
         }
 
         if (!$Err) {
-            $torrent_pass = randomString();
-
-            // Previously SELECT COUNT(ID) FROM users_main, which is a lot slower.
-            $DB->query("
-                SELECT ID
-                FROM users_main
-                LIMIT 1");
-            $UserCount = $DB->record_count();
-            if ($UserCount == 0) {
+            $found = $DB->scalar("
+                SELECT ID FROM users_main LIMIT 1
+            ");
+            if (!$found) {
                 $NewInstall = true;
                 $Class = SYSOP;
                 $Enabled = '1';
@@ -93,13 +92,14 @@ if (!empty($_REQUEST['confirm'])) {
                 $Enabled = '0';
             }
 
+            $torrent_pass = randomString();
             $DB->prepared_query('
                 INSERT INTO users_main
                        (Username, Email, PassHash, torrent_pass, IP, PermissionID, Enabled, Invites, ipcc)
                 VALUES (?,        ?,     ?,        ?,            ?,  ?,            ?,       ?,       ?)
                 ',
-                    trim($_POST['username']),
-                    trim($_POST['email']),
+                    $username,
+                    $email,
                     Users::make_password_hash($_POST['password']),
                     $torrent_pass,
                     $_SERVER['REMOTE_ADDR'],
@@ -140,21 +140,11 @@ if (!empty($_REQUEST['confirm'])) {
                     STARTING_UPLOAD
             );
 
-            $StyleID = $DB->scalar("
-                SELECT ID
-                FROM stylesheets
-                WHERE `Default` = '1'
-            ");
-            $AuthKey = randomString();
-
-            if ($InviteReason !== '') {
-                $InviteReason = sqltime()." - $InviteReason";
-            }
-            $DB->prepared_query('
+            $DB->prepared_query("
                 INSERT INTO users_info
-                       (UserID, StyleID, AuthKey, Inviter, AdminComment)
-                VALUES (?,      ?,       ?,       ?,       ?)
-                ', $UserID, $StyleID, $AuthKey, $InviterID, $InviteReason
+                       (UserID, Inviter, AdminComment, AuthKey, StyleID)
+                VALUES (?,      ?,       ?,            ?,       (SELECT ID FROM stylesheets WHERE `Default` = '1'))
+                ", $UserID, $InviterID, $InviteReason, randomString()
             );
             $DB->prepared_query('
                 INSERT INTO users_history_ips
@@ -172,104 +162,39 @@ if (!empty($_REQUEST['confirm'])) {
                 INSERT INTO users_history_emails
                        (UserID, Email, IP)
                 VALUES (?,      ?,     ?)
-                ', $UserID, trim($_REQUEST['email']), $_SERVER['REMOTE_ADDR']
+                ', $UserID, $email, $_SERVER['REMOTE_ADDR']
             );
 
-            if ($_REQUEST['email'] != $InviteEmail) {
+            if ($email != $InviteEmail) {
                 $DB->prepared_query('
                     INSERT INTO users_history_emails
                            (UserID, Email, IP, Time)
                     VALUES (?,      ?,     ?,  now())
-                    ', $UserID, trim($InviteEmail), $_SERVER['REMOTE_ADDR']
+                    ', $UserID, $InviteEmail, $_SERVER['REMOTE_ADDR']
                 );
             }
 
             $DB->prepared_query("
-                UPDATE referral_users
-                    SET UserID = ?,
-                        Joined = ?,
-                        Active = 1,
-                        InviteKey = ''
-                WHERE InviteKey = ?",
-                $UserID, sqltime(), $_REQUEST['invite']);
+                UPDATE referral_users SET
+                    Joined    = now(),
+                    Active    = 1,
+                    InviteKey = '',
+                    UserID    = ?
+                WHERE InviteKey = ?
+                ", $UserID, $_REQUEST['invite']
+            );
 
-            // Manage invite trees, delete invite
-
-            if ($InviterID !== 0) {
-                $DB->query("
-                    SELECT TreePosition, TreeID, TreeLevel
-                    FROM invite_tree
-                    WHERE UserID = '$InviterID'");
-                list($InviterTreePosition, $TreeID, $TreeLevel) = $DB->next_record();
-
-                // If the inviter doesn't have an invite tree
-                // Note: This should never happen unless you've transferred from another database, like What.CD did
-                if (!$DB->has_results()) {
-                    $DB->query("
-                        SELECT MAX(TreeID) + 1
-                        FROM invite_tree");
-                    list($TreeID) = $DB->next_record();
-
-                    $DB->query("
-                        INSERT INTO invite_tree
-                            (UserID, InviterID, TreePosition, TreeID, TreeLevel)
-                        VALUES ('$InviterID', '0', '1', '$TreeID', '1')");
-
-                    $TreePosition = 2;
-                    $TreeLevel = 2;
-                } else {
-                    $DB->query("
-                        SELECT TreePosition
-                        FROM invite_tree
-                        WHERE TreePosition > '$InviterTreePosition'
-                            AND TreeLevel <= '$TreeLevel'
-                            AND TreeID = '$TreeID'
-                        ORDER BY TreePosition
-                        LIMIT 1");
-                    list($TreePosition) = $DB->next_record();
-
-                    if ($TreePosition) {
-                        $DB->query("
-                            UPDATE invite_tree
-                            SET TreePosition = TreePosition + 1
-                            WHERE TreeID = '$TreeID'
-                                AND TreePosition >= '$TreePosition'");
-                    } else {
-                        $DB->query("
-                            SELECT TreePosition + 1
-                            FROM invite_tree
-                            WHERE TreeID = '$TreeID'
-                            ORDER BY TreePosition DESC
-                            LIMIT 1");
-                        list($TreePosition) = $DB->next_record();
-                    }
-                    $TreeLevel++;
-
-                    // Create invite tree record
-                    $DB->query("
-                        INSERT INTO invite_tree
-                            (UserID, InviterID, TreePosition, TreeID, TreeLevel)
-                        VALUES
-                            ('$UserID', '$InviterID', '$TreePosition', '$TreeID', '$TreeLevel')");
-                }
-            } else { // No inviter (open registration)
-                $DB->query("
-                    SELECT MAX(TreeID)
-                    FROM invite_tree");
-                list($TreeID) = $DB->next_record();
-                $TreeID++;
-                $InviterID = 0;
-                $TreePosition = 1;
-                $TreeLevel = 1;
+            if ($InviterID) {
+                $inviteTree = new Gazelle\InviteTree($InviterID);
+                $inviteTree->add($UserID);
             }
 
             $message = G::$Twig->render('emails/new_registration.twig', [
-                'Username' => $_REQUEST['username'],
+                'Username'   => $username,
                 'TorrentKey' => $torrent_pass,
-                'SITE_NAME' => SITE_NAME,
-                'SITE_URL' => SITE_URL
+                'SITE_NAME'  => SITE_NAME,
+                'SITE_URL'   => SITE_URL
             ]);
-
             Misc::send_email($_REQUEST['email'], 'New account confirmation at '.SITE_NAME, $message, 'noreply');
             Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $torrent_pass]);
             $Sent = 1;
@@ -292,8 +217,8 @@ if (!empty($_REQUEST['confirm'])) {
 
 } elseif (!OPEN_REGISTRATION) {
     if (isset($_GET['welcome'])) {
-        include('code.php');
+        require('code.php');
     } else {
-        include('closed.php');
+        require('closed.php');
     }
 }
