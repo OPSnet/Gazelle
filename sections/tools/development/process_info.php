@@ -1,12 +1,12 @@
 <?php
-if (!check_perms('site_debug')) {
+if (!check_perms('admin_site_debug')) {
     error(403);
 }
 View::show_header('PHP Processes');
-$PIDList = trim(`ps -C php-fpm -o pid --no-header`);
-$PIDs = explode("\n", $PIDList);
-$Debug->log_var($PIDList, 'PID list');
-$Debug->log_var($PIDs, 'PIDs');
+preg_match('/.*\/(.*)/', PHP_BINARY, $match, PREG_UNMATCHED_AS_NULL);
+$binary = $match[1] ?? 'php-fpm';
+$pidList = trim(`ps -C ${binary} -o pid --no-header`);
+$pids = explode("\n", $pidList);
 ?>
 <div class="thin">
     <table class="process_info">
@@ -16,19 +16,19 @@ $Debug->log_var($PIDs, 'PIDs');
         </colgroup>
         <tr class="colhead_dark">
             <td colspan="2">
-                <?=count($PIDs) . ' processes'?>
+                <?=count($pids) . ' processes'?>
             </td>
         </tr>
 <?php
-foreach ($PIDs as $PID) {
-    $PID = trim($PID);
-    if (!$ProcessInfo = $Cache->get_value("php_$PID")) {
+foreach ($pids as $pid) {
+    $pid = trim($pid);
+    if (!$ProcessInfo = $Cache->get_value("php_$pid")) {
         continue;
     }
 ?>
         <tr>
             <td>
-                <?=$PID?>
+                <?=$pid?>
             </td>
             <td>
                 <pre><?php print_r($ProcessInfo); ?></pre>

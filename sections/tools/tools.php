@@ -190,7 +190,7 @@ Category('Development', [
     Item('Cache key management',  'tools.php?action=clear_cache',              All(['users_mod'])),
     Item('Database schema info',  'tools.php?action=database_specifics',       All(['site_database_specifics'])),
     Item('Error Analysis',        'tools.php?action=analysis_list',            All(['site_analysis'])),
-    Item('PHP processes',         'tools.php?action=process_info',             All(['site_debug'])),
+    Item('PHP processes',         'tools.php?action=process_info',             All(['admin_site_debug'])),
     Item('Scheduler',             'tools.php?action=periodic&amp;mode=view',   All(['admin_periodic_task_view'])),
     Item('Scheduler (legacy)',    'schedule.php?auth='.$LoggedUser['AuthKey'], All(['admin_schedule'])),
 ]);
