@@ -1,0 +1,55 @@
+{% for dono in history %}
+{% if loop.first %}
+<div class="box box2" id="donation_history_box">
+    <div class="head">
+        Donation History <a href="#" onclick="$('#donation_history').gtoggle(); return false;" class="brackets">View</a>
+    </div>
+    <div class="hidden" id="donation_history">
+        <table cellpadding="6" cellspacing="1" border="0" class="border" width="100%">
+            <tbody>
+            <tr class="colhead_dark">
+                <td><strong>Source</strong></td>
+                <td>
+                    <strong>Date</strong>
+                </td>
+                <td>
+                    <strong>Amount (EUR)</strong>
+                </td>
+                <td>
+                    <strong>Added Points</strong>
+                </td>
+                <td>
+                    <strong>Total Points</strong>
+                </td>
+                <td style="width: 30%;">
+                    <strong>Reason</strong>
+                </td>
+            </tr>
+{% endif %}
+            <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+                <td>
+                    {{ dono.Source }} ({{ dono.AddedBy|user_url|raw }})
+                </td>
+                <td>
+                    {{ dono.Time }}
+                </td>
+                <td>
+                    {{ dono.Amount }}
+                </td>
+                <td>
+                    {{ dono.Rank }}
+                </td>
+                <td>
+                    {{ dono.TotalRank }}
+                </td>
+                <td>
+                    {{ dono.Reason }}
+                </td>
+            </tr>
+{% if loop.last %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endfor %}

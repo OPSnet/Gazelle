@@ -45,8 +45,6 @@ if ($UserID == $LoggedUser['ID']) {
     $Preview = 0;
     $FL_Items = $Bonus->getListOther($LoggedUser['BonusPoints']);
 }
-$EnabledRewards = $donorMan->enabledRewards($UserID);
-$ProfileRewards = $donorMan->profileRewards($UserID);
 $FA_Key = null;
 
 if (check_perms('users_mod')) {
@@ -655,8 +653,20 @@ if (check_paranoia_here('snatched')) {
         'list' => $User->tagSnatchCounts(),
     ]);
 }
-require(__DIR__.'/community_stats.php');
-DonationsView::render_donor_stats($UserID);
+require('community_stats.php');
+
+if (check_perms("users_mod") || $OwnProfile || $donorMan->isVisible($UserID)) {
+    echo G::$Twig->render('donation/stats.twig', [
+        'is_donor'    => $donorMan->isDonor($UserID),
+        'is_self'     => $OwnProfile,
+        'is_mod'      => check_perms('users_mod'),
+        'total_rank'  => $donorMan->totalRank($UserID),
+        'current'     => $donorMan->rankLabel($UserID, true),
+        'leaderboard' => $donorMan->leaderboardRank($UserID),
+        'last'        => $donorMan->lastDonation($UserID),
+        'expiry'      => $donorMan->rankExpiry($UserID),
+    ]);
+}
 ?>
     </div>
     <div class="main_column">
@@ -686,7 +696,21 @@ if (!$Info) {
             </div>
         </div>
 <?php
-DonationsView::render_profile_rewards($EnabledRewards, $ProfileRewards);
+$EnabledRewards = $donorMan->enabledRewards($UserID);
+$ProfileRewards = $donorMan->profileRewards($UserID);
+for ($i = 1; $i <= 4; $i++) {
+    if ($EnabledRewards['HasProfileInfo' . $i] && $ProfileRewards['ProfileInfo' . $i]) {
+?>
+    <div class="box">
+        <div class="head" style="height: 13px;">
+            <span style="float: left;"><?=!empty($ProfileRewards['ProfileInfoTitle' . $i]) ? display_str($ProfileRewards['ProfileInfoTitle' . $i]) : "Extra Profile " . ($i + 1)?></span>
+            <span style="float: right;"><a href="#" onclick="$('#profilediv_<?=$i?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
+        </div>
+        <div class="pad profileinfo" id="profilediv_<?= $i ?>"><?= Text::full_format($ProfileRewards['ProfileInfo' . $i]); ?></div>
+    </div>
+<?php
+    }
+}
 
 if (check_paranoia_here('snatched')) {
     echo G::$Twig->render('user/recent.twig', [
@@ -777,7 +801,9 @@ if ((check_perms('users_view_invites')) && $Invited > 0) {
 }
 
 if (check_perms('users_give_donor')) {
-    DonationsView::render_donation_history($donorMan->history($UserID));
+    echo G::$Twig->render('donation/history.twig', [
+        'history' => $donorMan->history($UserID),
+    ]);
 }
 
 // Requests
@@ -1124,7 +1150,11 @@ if (check_perms('users_mod') || $Classes[$LoggedUser['PermissionID']]['Name'] ==
     }
 
     if (check_perms('users_give_donor')) {
-        DonationsView::render_mod_donations($UserID);
+        echo G::$Twig->render('donation/admin-panel.twig', [
+            'rank' => $donorMan->rank($UserID),
+            'special_rank' => $donorMan->specialRank($UserID),
+            'total_rank' => $donorMan->totalRank($UserID),
+        ]);
     }
 
     if (check_perms('users_warn')) {
