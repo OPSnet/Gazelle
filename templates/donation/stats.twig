@@ -1,0 +1,20 @@
+<div class="box box_info box_userinfo_donor_stats">
+    <div class="head colhead_dark">Donor Statistics</div>
+    <ul class="stats nobullet">
+{% if not is_donor %}
+{%      if is_self %}
+        <li>You haven't donated.</li>
+{%      else %}
+        <li>This user hasn't donated.</li>
+{%      endif %}
+{% else %}
+{%      if is_mod or is_self %}
+        <li>Total donor points: {{ total_rank }}</li>
+{%      endif %}
+        <li>Current donor rank: {{ current }}</li>
+        <li>Leaderboard position: {{ leaderboard }}</li>
+        <li>Last donated: {{ last|time_diff|raw }}
+        <li>Rank expires: {{ expiry|raw }}
+{% endif %}
+    </ul>
+</div>

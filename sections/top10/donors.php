@@ -1,6 +1,5 @@
 <?php
 View::show_header('Top 10 Donors');
-
 ?>
 <div class="thin">
     <div class="header">
@@ -14,28 +13,34 @@ $limit = in_array($limit, [10, 100, 250]) ? $limit : 10;
 
 $isMod = check_perms("users_mod");
 
-$donor = new \Gazelle\Top10\Donor;
+$donorMan = new Gazelle\Manager\Donation;
+$donor = new Gazelle\Top10\Donor;
 $results = $donor->getTopDonors($limit);
 ?>
 <h3>Top <?="$limit";?> Donors
   <small class="top10_quantity_links">
-  <?php
-  switch ($limit) {
-    case 100: ?>
+<?php
+switch ($limit) {
+    case 100:
+?>
       - <a href="top10.php?type=donors" class="brackets">Top 10</a>
       - <span class="brackets">Top 100</span>
       - <a href="top10.php?type=donors&amp;limit=250" class="brackets">Top 250</a>
-    <?php    break;
-    case 250: ?>
+<?php
+        break;
+    case 250:
+?>
       - <a href="top10.php?type=donors" class="brackets">Top 10</a>
       - <a href="top10.php?type=donors&amp;limit=100" class="brackets">Top 100</a>
       - <span class="brackets">Top 250</span>
-    <?php    break;
-    default: ?>
+<?php
+        break;
+    default:
+?>
       - <span class="brackets">Top 10</span>
       - <a href="top10.php?type=donors&amp;limit=100" class="brackets">Top 100</a>
       - <a href="top10.php?type=donors&amp;limit=250" class="brackets">Top 250</a>
-  <?php } ?>
+<?php } ?>
   </small></h3>
 
   <table class="border">
@@ -46,7 +51,6 @@ $results = $donor->getTopDonors($limit);
       <td style="text-align: left;">Current Donor Rank</td>
       <td style="text-align: left;">Last Donated</td>
     </tr>
-
 
 <?php if (empty($results)) { ?>
   <tr class="rowb">
@@ -65,11 +69,12 @@ $results = $donor->getTopDonors($limit);
         <td class="center"><?=$index + 1?></td>
         <td><?=$donor['Hidden'] && !$isMod ? 'Hidden' : Users::format_username($donor['UserID'], false, false, false)?></td>
         <td style="text-align: left;"><?=check_perms('users_mod') || $index < 51 ? $donor['TotalRank'] : 'Hidden';?></td>
-        <td style="text-align: left;"><?=$donor['Hidden'] && !$isMod ? 'Hidden' : DonationsView::render_rank($donor['Rank'], $donor['SpecialRank'])?></td>
+        <td style="text-align: left;"><?=$donor['Hidden'] && !$isMod ? 'Hidden' : $donorMan->rankLabel($donor['UserID']) ?></td>
         <td style="text-align: left;"><?=$donor['Hidden'] && !$isMod ? 'Hidden' : time_diff($donor['DonationTime'])?></td>
     </tr>
-  <?php } ?>
+<?php } ?>
   </table>
   <br>
 </div>
-<?php View::show_footer();
+<?php
+View::show_footer();

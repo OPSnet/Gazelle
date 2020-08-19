@@ -583,6 +583,33 @@ class Donation extends \Gazelle\Base {
         return $Position ?? 0;
     }
 
+    public function rankLabel(int $userId, bool $showOverflow = false): string {
+        if ($this->specialRank($userId) == 3) {
+            return '∞ [Diamond]';
+        }
+        $rank = $this->rank($userId);
+        $label = $rank >= MAX_RANK ? MAX_RANK : $rank;
+        $overflow = $rank - $label;
+        if ($label == 5 || $label == 6) {
+            $label--;
+        }
+        if ($showOverflow && $overflow) {
+            $label .= " (+$overflow)";
+        }
+        if ($rank >= 6) {
+            $label .= ' [Gold]';
+        } elseif ($rank >= 4) {
+            $label .= ' [Silver]';
+        } elseif ($rank >= 3) {
+            $label .= ' [Bronze]';
+        } elseif ($rank >= 2) {
+            $label .= ' [Copper]';
+        } elseif ($rank >= 1) {
+            $label .= ' [Red]';
+        }
+        return $label;
+    }
+
     public function isDonor(int $userId) {
         return $this->rank($userId) > 0;
     }
