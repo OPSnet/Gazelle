@@ -50,7 +50,7 @@ class Bonus extends Base {
                 return BONUS_AWARD_FLAC;
             }
         }
-        elseif ($format == 'MP3' && in_array($encoding, ['V2 (VBR)', 'V0 (VBR)', '320'])) {
+        elseif ($format == 'MP3' && in_array($encoding, ['V0 (VBR)', '320'])) {
             return BONUS_AWARD_MP3;
         }
         return BONUS_AWARD_OTHER;
@@ -439,13 +439,13 @@ class Bonus extends Base {
         if ($force) {
         // allow points to go negative
             $this->db->prepared_query('
-                UPDATE user_bonus SET points = points - ?  WHERE user_id = ?
+                UPDATE user_bonus SET points = points - ? WHERE user_id = ?
                 ', $points, $userId
             );
         } else {
             // Fail if points would go negative
             $this->db->prepared_query('
-                UPDATE user_bonus SET points = points - ?  WHERE points >= ?  AND user_id = ?
+                UPDATE user_bonus SET points = points - ? WHERE points >= ?  AND user_id = ?
                 ', $points, $points, $userId
             );
             if ($this->db->affected_rows() != 1) {
@@ -456,23 +456,21 @@ class Bonus extends Base {
         return true;
     }
 
-    public function userHourlyRate($userId) {
-        $this->db->prepared_query('
+    public function userHourlyRate(int $userId): float {
+        return $this->db->scalar("
             SELECT coalesce(sum(bonus_accrual(t.Size, xfh.seedtime, tls.Seeders)), 0) as Rate
             FROM (SELECT DISTINCT uid,fid FROM xbt_files_users WHERE active=1 AND remaining=0 AND mtime > unix_timestamp(NOW() - INTERVAL 1 HOUR) AND uid = ?) AS xfu
             INNER JOIN xbt_files_history AS xfh USING (uid, fid)
             INNER JOIN torrents AS t ON (t.ID = xfu.fid)
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-            WHERE
-                xfu.uid = ?
-                ', $userId, $userId
+            WHERE xfu.uid = ?
+                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
+            ", $userId, $userId
         );
-        list($rate) = $this->db->next_record(MYSQLI_NUM);
-        return $rate;
     }
 
     public function userTotals($userId) {
-        $this->db->prepared_query("
+        [$total, $size, $hourly, $daily, $weekly, $monthly, $yearly, $ppGB] = $this->db->row("
             SELECT
                 count(xfu.uid) as TotalTorrents,
                 sum(t.Size) as TotalSize,
@@ -491,9 +489,9 @@ class Bonus extends Base {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             WHERE
                 xfu.uid = ?
+                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ", $userId, $userId
         );
-        list($total, $size, $hourly, $daily, $weekly, $monthly, $yearly, $ppGB) = $this->db->next_record(MYSQLI_NUM);
         return [(int)$total, (float)$size, (float)$hourly, (float)$daily, (float)$weekly, (float)$monthly, (float)$yearly, (float)$ppGB];
     }
 
@@ -531,6 +529,7 @@ class Bonus extends Base {
             INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
             WHERE
                 xfu.uid = ?
+                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
             ORDER BY $orderBy $orderWay
             LIMIT ?
             OFFSET ?
@@ -563,11 +562,13 @@ class Bonus extends Base {
             FROM xbt_files_users xfu
             INNER JOIN users_main AS um ON (um.ID = xfu.uid)
             INNER JOIN users_info AS ui ON (ui.UserID = xfu.uid)
+            INNER JOIN torrents   AS t  ON (t.ID = xfu.fid)
             WHERE xfu.active = 1
                 AND xfu.remaining = 0
                 AND xfu.mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
                 AND um.Enabled = '1'
                 AND ui.DisablePoints = '0'
+                AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
         ");
         if ($task) {
             $task->debug('xbt_unique constructed');
@@ -591,6 +592,7 @@ class Bonus extends Base {
                 INNER JOIN torrents AS t ON (t.ID = xfu.fid)
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
                 WHERE xfu.uid BETWEEN ? AND ?
+                    AND NOT (t.Format = 'MP3' AND t.Encoding = 'V2 (VBR)')
                 GROUP BY
                     xfu.uid
                 ON DUPLICATE KEY UPDATE points = points + VALUES(points)
@@ -616,13 +618,12 @@ class Bonus extends Base {
 
             /* see if there are some more users to process */
             $userId += $chunk;
-            $this->db->prepared_query('
+            $more = $this->db->scalar("
                 SELECT 1
                 FROM xbt_unique
                 WHERE uid >= ?
-                ', $userId
+                ", $userId
             );
-            $more = $this->db->has_results();
         }
         return $processed;
     }
