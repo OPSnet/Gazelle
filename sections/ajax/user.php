@@ -88,7 +88,8 @@ if (!(check_paranoia_here('requestsfilled_count') || check_paranoia_here('reques
 $Uploads          = check_paranoia_here('uploads+')     ? null : $user->uploadCount();
 $ArtistsAdded     = check_paranoia_here('artistsadded') ? null : $user->artistsAdded();
 $releaseVotes     = $user->releaseVotes();
-$bonusPointsSpent = $User->bonusPointsSpent();
+$bonusPointsSpent = $user->bonusPointsSpent();
+$torrentComments  = check_paranoia_here('torrentcomments++') ? $user->torrentCommentCount() : 0;
 
 if (check_paranoia_here('collages+')) {
     $NumCollages = $user->collagesCreated();
@@ -105,12 +106,13 @@ $rank = new Gazelle\UserRank(
         'downloaded' => $Downloaded ?? 0,
         'uploads'    => $Uploads ?? 0,
         'requests'   => $RequestsFilled ?? 0,
-        'bounty'     => $TotalSpent ?? 0,
         'posts'      => $ForumPosts,
-        'artists'    => $ArtistsAdded,
+        'bounty'     => $TotalSpent ?? 0,
+        'artists'    => $ArtistsAdded ?? 0,
         'collage'    => $NumCollageContribs ?? 0,
         'votes'      => $releaseVotes,
         'bonus'      => $bonusPointsSpent,
+        'comment-t'  => $torrentComments,
     ]
 );
 
