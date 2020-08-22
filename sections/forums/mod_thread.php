@@ -68,7 +68,6 @@ if (isset($_POST['delete'])) {
         } else {
             // Permissions are handled inside forums.class.php
             $transitions = Forums::get_transitions();
-            $Debug->log_var($transitions);
             if (!isset($transitions[$transId])) {
                 error(0);
             } else {
@@ -94,6 +93,7 @@ if (isset($_POST['delete'])) {
 
     // topic notes and notifications
     $notes = [];
+    $newName = $DB->scalar('SELECT Name FROM forums WHERE ID = ?', $newForumId);
     $oldUrl = "[url=" . site_url() . "forums.php?action=viewforum&forumid=$oldForumId]{$oldName}[/url]";
     $newUrl = "[url=" . site_url() . "forums.php?action=viewforum&forumid=$newForumId]{$newName}[/url]";
     switch ($action ?? null) {
