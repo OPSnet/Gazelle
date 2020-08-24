@@ -481,7 +481,7 @@ class Donation extends \Gazelle\Base {
                     $args[] = $value;
                 }
             }
-            $this->updateTitle($UserID, $_POST['donor_title_prefix'], $_POST['donor_title_suffix'], $_POST['donor_title_comma']);
+            $this->updateTitle($UserID, $_POST['donor_title_prefix'], $_POST['donor_title_suffix'], !empty($_POST['donor_title_comma']));
         }
 
         for ($i = 1; $i < min(MAX_RANK, $Rank); $i++) {
@@ -526,8 +526,8 @@ class Donation extends \Gazelle\Base {
             VALUES (?,      ?,      ?,      ?)
             ON DUPLICATE KEY UPDATE
                 Prefix = ?, Suffix = ?, UseComma = ?
-            ', $UserID, $Prefix, $Suffix, $UseComma !== null ? 1 : 0,
-                $Prefix, $Suffix, $UseComma !== null ? 1 : 0
+            ', $UserID, $Prefix, $Suffix, $UseComma ? 1 : 0,
+                $Prefix, $Suffix, $UseComma ? 1 : 0
         );
         $this->cache->delete_value("donor_title_$UserID");
         $this->db->set_query_id($QueryID);
