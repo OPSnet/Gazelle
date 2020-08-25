@@ -82,7 +82,7 @@ $blogMan = new Gazelle\Manager\Blog;
 $headlines = $blogMan->headlines();
 $n = 0;
 foreach ($headlines as $article) {
-    if ($n++ > 5) {
+    if (++$n > 5) {
         break;
     }
     [$BlogID, $Title] = $article;
