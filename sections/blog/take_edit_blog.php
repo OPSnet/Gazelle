@@ -1,6 +1,10 @@
 <?php
 authorize();
 
+if (!check_perms('admin_manage_blog')) {
+    error(403);
+}
+
 if (empty($_POST['blogid']) || empty($_POST['body']) || empty($_POST['title'])) {
     error('You must provide a blog id, title, and body when editing a blog entry.');
 }
@@ -8,16 +12,15 @@ if (empty($_POST['blogid']) || empty($_POST['body']) || empty($_POST['title'])) 
 $ThreadID = !isset($_POST['thread']) || $_POST['thread'] === '' ? '' : max(0, intval($_POST['thread']));
 
 if ($ThreadID > 0) {
-    $DB->prepared_query("
-        SELECT ForumID
-        FROM forums_topics
-        WHERE ID = ?", $ThreadID);
-    if (!$DB->has_results()) {
+    if (!$DB->scalar("
+        SELECT 1 FROM forums_topics WHERE ID = ?
+        ", $ThreadID
+    )) {
         error('No such thread exists!');
     }
 }
 elseif ($ThreadID === '') {
-    $forum = new \Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
+    $forum = new Gazelle\Forum(ANNOUNCEMENT_FORUM_ID);
     $ThreadID = $forum->addThread($LoggedUser['ID'], $_POST['title'], $_POST['body']);
     if ($ThreadID < 1) {
         error(0);
@@ -27,24 +30,19 @@ else {
     $ThreadID = null;
 }
 
-$BlogID = intval($_POST['blogid']);
-if ($BlogID > 0) {
-    $blog = new Gazelle\Manager\Blog;
-    $blog->modify([
+$BlogID = (int)$_POST['blogid'];
+if ($BlogID) {
+    $blogMan = new Gazelle\Manager\Blog;
+    $blogMan->modify([
         'id'        => $BlogID,
         'title'     => $_POST['title'],
         'body'      => $_POST['body'],
         'important' => isset($_POST['important']) ? 1 : 0,
         'threadId'  => $ThreadID,
     ]);
-
     if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-        $DB->prepared_query("
-            INSERT IGNORE INTO users_subscriptions
-            VALUES (?, ?)
-            ", $LoggedUser['ID'], $ThreadID
-        );
-        $Cache->delete_value('subscriptions_user_'.$LoggedUser['ID']);
+        $subMan = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+        $subMan->subscribe($ThreadID);
     }
 }
 

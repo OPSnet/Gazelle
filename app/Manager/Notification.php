@@ -249,11 +249,9 @@ class Notification extends \Gazelle\Base {
     }
 
     public function clearBlog() {
-        $blog = new \Gazelle\Manager\Blog;
-        [$blogId] = $blog->latest();
-        if ($this->userInfo['LastReadBlog'] < $blogId) {
-            $this->user->updateLastReadBlog($blogId);
-        }
+        $blogMan = new \Gazelle\Manager\Blog;
+        $blogMan->catchupUser($this->userId);
+        $this->cache->delete_value('user_info_heavy_' . $this->userId);
         return $blogId;
     }
 

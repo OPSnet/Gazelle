@@ -256,16 +256,6 @@ class User extends Base {
         return $this->db->affected_rows() == 1;
     }
 
-    public function updateLastReadBlog(int $blogId) {
-        $this->db->prepared_query("
-            UPDATE users_info SET
-                LastReadBlog = ?
-            WHERE UserID = ?
-            ", $blogId, $this->id
-        );
-        $this->cache->delete_value('user_info_heavy_' . $this->id);
-    }
-
     public function updateLastReadNews(int $newsId) {
         $this->db->prepared_query("
             UPDATE users_info SET

@@ -1,8 +1,12 @@
 <?php
 
-use \Gazelle\Manager\Notification;
+use Gazelle\Manager\Notification;
 
 authorize();
+
+if (!check_perms('admin_manage_blog')) {
+    error(403);
+}
 
 if (empty($_POST['title']) || empty($_POST['body'])) {
     error('You must have a title and body for the blog post.');
@@ -11,11 +15,7 @@ if (empty($_POST['title']) || empty($_POST['body'])) {
 $ThreadID = !isset($_POST['thread']) || $_POST['thread'] === '' ? '' : max(0, intval($_POST['thread']));
 
 if ($ThreadID > 0) {
-    $DB->prepared_query("
-        SELECT ForumID
-        FROM forums_topics
-        WHERE ID = ?", $ThreadID);
-    if (!$DB->has_results()) {
+    if (!$DB->scalar("SELECT ForumID FROM forums_topics WHERE ID = ?", $ThreadID)) {
         error('No such thread exists!');
     }
 }
@@ -30,22 +30,22 @@ else {
     $ThreadID = null;
 }
 
-$blog = new Gazelle\Manager\Blog;
-$blog->create([
-    'title'     => $_POST['title'],
-    'body'      => $_POST['body'],
+$blogMan = new Gazelle\Manager\Blog;
+$blog = $blogMan->create([
+    'title'     => trim($_POST['title']),
+    'body'      => trim($_POST['body']),
     'important' => isset($_POST['important']) ? 1 : 0,
     'threadId'  => $ThreadID,
     'userId'    => $LoggedUser['ID'],
 ]);
 
 if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
-    $DB->prepared_query("
-        INSERT IGNORE INTO users_subscriptions
-        VALUES (?, ?)", $LoggedUser['ID'], $ThreadID);
-    $Cache->delete_value('subscriptions_user_'.$LoggedUser['ID']);
+    $subMan = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+    $subMan->subscribe($ThreadID);
 }
 $notification = new Notification($LoggedUser['ID']);
-$notification->push($notification->pushableUsers(), $_POST['title'], $_POST['body'], site_url() . 'index.php', Notification::BLOG);
+$notification->push($notification->pushableUsers(), $blog->title(), $blog->body(), site_url() . 'index.php', Notification::BLOG);
+
+send_irc("PRIVMSG " . MOD_CHAN . " :!New blog article: " . $blog->title());
 
 header('Location: blog.php');

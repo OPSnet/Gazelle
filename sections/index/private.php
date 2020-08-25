@@ -80,8 +80,12 @@ for ($i = 0; $i < $End; $i++) {
 <?php
 $blogMan = new Gazelle\Manager\Blog;
 $headlines = $blogMan->headlines();
+$n = 0;
 foreach ($headlines as $article) {
-    [$BlogID, , , $Title] = $article;
+    if ($n++ > 5) {
+        break;
+    }
+    [$BlogID, $Title] = $article;
 ?>
                 <li>
                     <a href="blog.php#blog<?=$BlogID?>"><?=$Title?></a>

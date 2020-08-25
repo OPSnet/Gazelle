@@ -1,26 +1,23 @@
 <?php
-enforce_login();
 
+enforce_login();
 define('ANNOUNCEMENT_FORUM_ID', 12);
 
-if (check_perms('admin_manage_blog')) {
-    switch ($_REQUEST['action'] ?? 'editblog') {
-        case 'deadthread':
-            require(__DIR__ . '/dead_thread.php');
-            break;
-        case 'takeeditblog':
-            require(__DIR__ . '/take_edit_blog.php');
-            break;
-        case 'deleteblog':
-            require(__DIR__ . '/delete_blog.php');
-            break;
-        case 'takenewblog':
-            require(__DIR__ . '/take_new_blog.php');
-            break;
-        case 'editblog':
-        default:
-            break;
-    }
+switch ($_REQUEST['action'] ?? '') {
+    case 'deadthread':
+        require_once('dead_thread.php');
+        break;
+    case 'takeeditblog':
+        require_once('take_edit_blog.php');
+        break;
+    case 'deleteblog':
+        require_once('delete_blog.php');
+        break;
+    case 'takenewblog':
+        require_once('take_new_blog.php');
+        break;
+    case 'editblog':
+    default:
+        require_once('blog_page.php');
+        break;
 }
-
-require(__DIR__ . '/blog_page.php');

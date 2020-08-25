@@ -96,9 +96,8 @@ class Subscription extends \Gazelle\Base {
      * (Un)subscribe from a forum thread.
      * @param int $TopicID
      */
-    public function subscribe($TopicID) {
+    public function subscribe(int $TopicID) {
         $QueryID = $this->db->get_query_id();
-        $UserSubscriptions = $this->subscriptions();
         $Key = $this->isSubscribed($TopicID);
         if ($Key !== false) {
             $this->db->prepared_query('
@@ -107,17 +106,14 @@ class Subscription extends \Gazelle\Base {
                     AND TopicID = ?
                 ', $this->userId, $TopicID
             );
-            unset($UserSubscriptions[$Key]);
         } else {
             $this->db->prepared_query('
                 INSERT IGNORE INTO users_subscriptions (UserID, TopicID)
                 VALUES (?, ?)
                 ', $this->userId, $TopicID
             );
-            array_push($UserSubscriptions, $TopicID);
         }
-        $this->cache->replace_value("subscriptions_user_" . $this->userId, $UserSubscriptions, 0);
-        $this->cache->delete_value("subscriptions_user_new_" . $this->userId);
+        $this->cache->deleteMulti(["subscriptions_user_" . $this->userId, "subscriptions_user_new_" . $this->userId]);
         $this->db->set_query_id($QueryID);
     }
 
