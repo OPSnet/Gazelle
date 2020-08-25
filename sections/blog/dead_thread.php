@@ -2,13 +2,16 @@
 
 authorize();
 
-if (!isset($_GET['id'])) {
+if (!check_perms('admin_manage_blog')) {
+    error(403);
+}
+
+$blogId = (int)$_GET['id'];
+if (!$blogId) {
     error('Please provide an ID for a blog post to remove the thread link from.');
 }
 
-G::$DB->prepared_query('UPDATE blog SET ThreadID = NULL WHERE ID = ? ', (int)$_GET['id']);
-if (G::$DB->affected_rows() > 0) {
-    $Cache->deleteMulti(['blog', 'feed_blog']);
-}
+$blogMan = new Gazelle\Manager\Blog;
+$blogMan->removeThread($blogId);
 
 header('Location: blog.php');

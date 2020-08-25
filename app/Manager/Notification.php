@@ -249,11 +249,9 @@ class Notification extends \Gazelle\Base {
     }
 
     public function clearBlog() {
-        $blog = new \Gazelle\Manager\Blog;
-        [$blogId] = $blog->latest();
-        if ($this->userInfo['LastReadBlog'] < $blogId) {
-            $this->user->updateLastReadBlog($blogId);
-        }
+        $blogMan = new \Gazelle\Manager\Blog;
+        $blogMan->catchupUser($this->userId);
+        $this->cache->delete_value('user_info_heavy_' . $this->userId);
         return $blogId;
     }
 
@@ -262,11 +260,30 @@ class Notification extends \Gazelle\Base {
             return;
         }
         $new = $this->user->collageUnreadCount();
-
         if ($new > 0) {
             $this->create(self::COLLAGES, 'You have ' . article($new) . ' new collage update' . plural($new),
                 'userhistory.php?action=subscribed_collages', self::INFO);
         }
+    }
+
+    public function catchupCollage(int $collageId) {
+        $this->db->prepared_query("
+            UPDATE users_collage_subs SET
+                LastVisit = now()
+            WHERE UserID = ? AND CollageID = ?
+            ", $this->userId, $collageId
+        );
+        $this->cache->delete_value('collage_subs_user_new_' . $this->userId);
+    }
+
+    public function catchupAllCollages() {
+        $this->db->prepared_query("
+            UPDATE users_collage_subs SET
+                LastVisit = now()
+            WHERE UserID = ?
+            ", $this->userId
+        );
+        $this->cache->delete_value('collage_subs_user_new_' . $this->userId);
     }
 
     public function loadInbox() {

@@ -84,4 +84,5 @@ $DB->set_query_id($QueryID);
         </div>
     <?php } ?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

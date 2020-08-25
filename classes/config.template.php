@@ -155,13 +155,16 @@ define('THREAD_CATALOGUE', 500); // Limit to THREAD_CATALOGUE posts per cache ke
 define('BOT_NICK', '');
 define('BOT_SERVER', ''); // IRC server address. Used for onsite chat tool.
 define('BOT_PORT', 6667);
-define('BOT_CHAN', '#'.NONSSL_SITE_URL);
-define('BOT_ANNOUNCE_CHAN', '#');
-define('BOT_STAFF_CHAN', '#');
-define('BOT_DISABLED_CHAN', '#'); // Channel to refer disabled users to.
-define('BOT_HELP_CHAN', '#');
-define('BOT_DEBUG_CHAN', '#');
-define('BOT_REPORT_CHAN', '#');
+define('BOT_CHAN', '#mygazelle');
+define('ADMIN_CHAN', '#admin');
+define('LAB_CHAN', '#lab');
+define('STATUS_CHAN', '#status');
+define('BOT_ANNOUNCE_CHAN', '#announce');
+define('BOT_STAFF_CHAN', '#staff');
+define('BOT_DISABLED_CHAN', '#disabled'); // Channel to refer disabled users to.
+define('BOT_HELP_CHAN', '#help');
+define('BOT_DEBUG_CHAN', '#debug');
+define('BOT_REPORT_CHAN', '#reports');
 define('BOT_NICKSERV_PASS', '');
 define('BOT_INVITE_CHAN', BOT_CHAN.'-invites'); // Channel for non-members seeking an interview
 define('BOT_INTERVIEW_CHAN', BOT_CHAN.'-interview'); // Channel for the interviews
@@ -169,9 +172,6 @@ define('BOT_INTERVIEW_NUM', 5);
 define('BOT_INTERVIEW_STAFF', BOT_CHAN.'-interviewers'); // Channel for the interviewers
 define('SOCKET_LISTEN_PORT', 51010);
 define('SOCKET_LISTEN_ADDRESS', 'localhost');
-define('ADMIN_CHAN', '#');
-define('LAB_CHAN', '#');
-define('STATUS_CHAN', '#');
 
 // Miscellaneous values
 define('RANK_ONE_COST', 5);

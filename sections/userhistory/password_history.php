@@ -54,4 +54,5 @@ $DB->query("
     </tr>
 <?php } ?>
 </table>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

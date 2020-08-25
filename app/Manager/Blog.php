@@ -6,6 +6,10 @@ class Blog extends \Gazelle\Base {
 
     const CACHE_KEY = 'blogv2';
 
+    public function flushCache() {
+        $this->cache->deleteMulti(['feed_blog', self::CACHE_KEY]);
+    }
+
     /**
      * Create a blog article
      * @param array
@@ -16,15 +20,15 @@ class Blog extends \Gazelle\Base {
      *      - important  The level of importance
      * @return ID of new article
      */
-    public function create(array $info): int {
+    public function create(array $info): \Gazelle\Blog {
         $this->db->prepared_query("
             INSERT INTO blog
                    (UserID, Title, Body, ThreadID, Important)
             VALUES (?,      ?,     ?,    ?,        ?)
             ", $info['userId'], trim($info['title']), trim($info['body']), $info['threadId'], $info['important']
         );
-        $this->cache->deleteMulti(['feed_blog', self::CACHE_KEY]);
-        return $this->db->inserted_id();
+        $this->flushCache();
+        return new \Gazelle\Blog($this->db->inserted_id());
     }
 
     /**
@@ -48,19 +52,55 @@ class Blog extends \Gazelle\Base {
             WHERE ID = ?
             ", trim($info['title']), trim($info['body']), $info['threadId'], $info['important'], $info['id']
         );
-        $this->cache->deleteMulti(['feed_blog', self::CACHE_KEY]);
+        $this->flushCache();
         return $this->db->affected_rows();
     }
 
     /**
+     * Remove an existing blog article
+     * @param int ID of the blog article
+     * @return bool true if the supplied ID corresponded to a blog article
+     */
+    public function remove(int $blogId): bool {
+        $this->db->prepared_query("
+            DELETE FROM blog WHERE ID = ?
+            ", $blogId
+        );
+        $removed = $this->db->affected_rows() == 1;
+        if ($removed) {
+            $this->flushCache();
+        }
+        return $removed;
+    }
+
+    /**
+     * Remove an the link to the forum topic of the blog article
+     * @param int ID of the blog article
+     * @return bool true if there was a thread to remove
+     */
+    public function removeThread(int $blogId): bool {
+        $this->db->prepared_query("
+            UPDATE blog SET
+                ThreadID = NULL
+            WHERE ID = ?
+            ", $blogId
+        );
+        $removed = $this->db->affected_rows() == 1;
+        if ($removed) {
+            $this->flushCache();
+        }
+        return $removed;
+    }
+
+    /**
      * Get a number of most recent articles.
-     * (hard-coded to 5 max, otherwise cache invalidation becomes difficult)
+     * (hard-coded to 20 max, otherwise cache invalidation becomes difficult)
      *
      * @return array
      *      - id of article
+     *      - title of article
      *      - name of author
      *      - id of author
-     *      - title of article
      *      - body of article
      *      - article creation date
      *      - threadId of associated thread
@@ -68,15 +108,15 @@ class Blog extends \Gazelle\Base {
     public function headlines(): array {
         if (($headlines = $this->cache->get_value(self::CACHE_KEY)) === false) {
             $this->db->prepared_query("
-                SELECT b.ID, um.Username, b.UserID, b.Title, b.Body, b.Time, b.ThreadID
+                SELECT b.ID, b.Title, um.Username, b.UserID, b.Body, b.Time, b.ThreadID
                 FROM blog b
                 INNER JOIN users_main um ON (um.ID = b.UserID)
-                WHERE b.Time < now()
+                WHERE b.Time <= now()
                 ORDER BY b.Time DESC
-                LIMIT 5
+                LIMIT 20
             ");
             $headlines = $this->db->to_array(false, MYSQLI_NUM, false);
-            $this->cache->cache_value(self::CACHE_KEY, $headlines, 0);
+            $this->cache->cache_value(self::CACHE_KEY, $headlines, 86400);
         }
         return $headlines;
     }
@@ -106,5 +146,21 @@ class Blog extends \Gazelle\Base {
     public function latestId(): int {
         [$blogId] = $this->latest();
         return $blogId;
+    }
+
+    /**
+     * Indicate a user has read the given blog entry
+     * @param int $userId The user
+     * @param int $blogId The blog the user has read (should be the most recent)
+     * @return bool true if there was a change in status (you will need to flush their heavy cache)
+     */
+    public function catchupUser(int $userId): bool {
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                LastReadBlog = (SELECT max(ID) FROM blog)
+            WHERE UserID = ?
+            ", $userId
+        );
+        return $this->db->affected_rows() == 1;
     }
 }

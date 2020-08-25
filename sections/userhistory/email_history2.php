@@ -359,5 +359,4 @@ if (isset($Matches)) {
     </table>
 </div>
 <?php
-
 View::show_footer();

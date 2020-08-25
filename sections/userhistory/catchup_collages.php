@@ -1,13 +1,12 @@
 <?php
+
 authorize();
-if ($_REQUEST['collageid'] && is_number($_REQUEST['collageid'])) {
-    $Where = ' AND CollageID = '.$_REQUEST['collageid'];
+
+$notifMan = new \Gazelle\Manager\Notification($LoggedUser['ID']);
+if ($_REQUEST['collageid'] && (int)$_REQUEST['collageid']) {
+    $notifMan->catchupCollage($_REQUEST['collageid']);
 } else {
-    $Where = '';
+    $notifMan->catchupAllCollages();
 }
 
-$DB->query("UPDATE users_collage_subs SET LastVisit = NOW() WHERE UserID = ".$LoggedUser['ID'].$Where);
-$Cache->delete_value('collage_subs_user_new_'.$LoggedUser['ID']);
-
 header('Location: userhistory.php?action=subscribed_collages');
-?>

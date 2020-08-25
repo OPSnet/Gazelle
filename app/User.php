@@ -255,16 +255,6 @@ class User extends Base {
         return $this->db->affected_rows() == 1;
     }
 
-    public function updateLastReadBlog(int $blogId) {
-        $this->db->prepared_query("
-            UPDATE users_info SET
-                LastReadBlog = ?
-            WHERE UserID = ?
-            ", $blogId, $this->id
-        );
-        $this->cache->delete_value('user_info_heavy_' . $this->id);
-    }
-
     public function updateLastReadNews(int $newsId) {
         $this->db->prepared_query("
             UPDATE users_info SET
@@ -646,16 +636,6 @@ class User extends Base {
             $this->cache->cache_value('collage_subs_user_new_' . $this->id, $new, 0);
         }
         return $new;
-    }
-
-    public function clearCollages() {
-        $this->db->prepared_query("
-            UPDATE users_collage_subs SET
-                LastVisit = now()
-            WHERE UserID = ?
-            ", $this->id
-        );
-        $this->cache->delete_value('collage_subs_user_new_' . $this->id);
     }
 
     public function emailHistory(): array {

@@ -1,42 +1,41 @@
 <?php
 
-$notification = new Gazelle\Manager\Notification($UserID);
-$user = new Gazelle\User($UserID);
+$notifMan = new Gazelle\Manager\Notification($LoggedUser['ID']);
+$user = new Gazelle\User($LoggedUser['ID']);
 
 $Type = $_POST['type'];
 
 switch($Type) {
-    case Notification::BLOG:
-        $LoggedUser['LastReadBlog'] = $notification->clearBlog();
+    case 'Blog':
+        $LoggedUser['LastReadBlog'] = $notifMan->clearBlog();
         break;
-    case Notification::COLLAGES:
-        $user->clearCollages();
+    case 'Collages':
+        $notifMan->catchupAllCollages();
         break;
-    case Notification::GLOBALNOTICE:
-        $notification->clearGlobal();
+    case 'Global':
+        $notifMan->clearGlobal();
         break;
-    case Notification::INBOX:
+    case 'Inbox':
         $user->markAllReadInbox();
         break;
-    case Notification::NEWS:
-        $LoggedUser['LastReadNews'] = $notification->clearNews();
+    case 'News':
+        $LoggedUser['LastReadNews'] = $notifMan->clearNews();
         break;
-    case Notification::QUOTES:
+    case 'Quotes':
         $user->clearQuotes();
         break;
-    case Notification::STAFFPM:
+    case 'StaffPM':
         $user->markAllReadStaffPM();
         break;
-    case Notification::SUBSCRIPTIONS:
-        $notification->clearSubscriptions($UserID);
+    case 'Subscriptions':
+        $notifMan->clearSubscriptions($UserID);
         break;
-    case Notification::TORRENTS:
+    case 'Torrents':
         $user->clearTorrentNotifications();
         break;
     default:
+        if (strpos($Type, "oneread_") === 0) {
+            $notifMan->clearOneRead($Type);
+        }
         break;
-}
-
-if (strpos($Type, "oneread_") === 0) {
-    $notification->clearOneRead($Type);
 }
