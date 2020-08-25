@@ -8,7 +8,6 @@ date_default_timezone_set('UTC');
 define('SITE_NAME', 'Orpheus Dev'); //The name of your site
 define('NONSSL_SITE_URL', 'localhost:8080'); //The FQDN of your site
 define('SSL_SITE_URL', 'localhost:8080'); //The FQDN of your site, make this different if you are using a subdomain for ssl
-define('SITE_IP', ''); //The IP address by which your site can be publicly accessed
 define('SITE_HOST', 'localhost');
 //define('SITE_URL', 'http://localhost:8080');
 define('MAIL_HOST', 'mail.'.SITE_HOST); // The host to use for mail delivery (e.g. mail.orpheus.network)
@@ -28,7 +27,6 @@ define('SSL_STATIC_SERVER', 'static/');
 
 // Keys
 define('ENCKEY', 'JRFb5tW89xBSjaJP'); //Random key. The key for encryption
-define('SITE_SALT', 'xwNXjg2BL5C5gLPIUMlq'); //Random key. Default site wide salt for passwords, DO NOT LEAVE THIS BLANK/CHANGE AFTER LAUNCH!
 define('SCHEDULE_KEY', 'OL9n0m2JxhBxYyMvXWJg'); // Random key. This key must be the argument to schedule.php for the schedule to work.
 define('RSS_HASH', 'weFQmRVNrfcbhq0TNWZA'); //Random key. Used for generating unique RSS auth key.
 
@@ -93,8 +91,6 @@ define('DONOR_INVITES', 2);
 define('SYSTEM_USER_ID', 1);
 define('TRASH_FORUM_ID', 4);
 define('EDITING_FORUM_ID', 34);
-define('EDITING_TRASH_FORUM_ID', 48);
-
 
 if (!defined('FEATURE_EMAIL_REENABLE')) {
     define('FEATURE_EMAIL_REENABLE', true);
@@ -109,10 +105,7 @@ define('POWER',            '4');
 define('ELITE',            '5');
 define('VIP',            '26');
 define('TORRENT_MASTER','25');
-define('LEGEND',        '27');
-define('CELEB',            '31');
 define('MOD',            '11');
-define('CODER',            '24');
 define('LEAD_DEV',      '43');
 define('SYSOP',            '15');
 define('ARTIST',        '19');
@@ -123,7 +116,6 @@ define('ELITE_TM',        '28');
 define('FORUM_MOD',        '21');
 define('TORRENT_MOD',   '22');
 define('INTERVIEWER',   '30');
-define('DESIGNER',      '32');
 define('SECURITY',      '33');
 define('IRC',           '34');
 define('SHADOW',        '35');
@@ -152,17 +144,8 @@ define('BOT_NICK', '');
 define('BOT_SERVER', ''); // IRC server address. Used for onsite chat tool.
 define('BOT_PORT', 6667);
 define('BOT_CHAN', '#'.NONSSL_SITE_URL);
-define('BOT_ANNOUNCE_CHAN', '#');
-define('BOT_STAFF_CHAN', '#');
 define('BOT_DISABLED_CHAN', '#'); // Channel to refer disabled users to.
-define('BOT_HELP_CHAN', '#');
-define('BOT_DEBUG_CHAN', '#');
 define('BOT_REPORT_CHAN', '#');
-define('BOT_NICKSERV_PASS', '');
-define('BOT_INVITE_CHAN',BOT_CHAN.'-invites'); // Channel for non-members seeking an interview
-define('BOT_INTERVIEW_CHAN',BOT_CHAN.'-interview'); // Channel for the interviews
-define('BOT_INTERVIEW_NUM',5);
-define('BOT_INTERVIEW_STAFF',BOT_CHAN.'-interviewers'); // Channel for the interviewers
 define('SOCKET_LISTEN_PORT', 51010);
 define('SOCKET_LISTEN_ADDRESS', 'localhost');
 define('ADMIN_CHAN', '#');

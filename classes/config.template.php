@@ -6,7 +6,6 @@
 define('SITE_NAME', ''); //The name of your site
 define('NONSSL_SITE_URL', ''); //The FQDN of your site
 define('SSL_SITE_URL', ''); //The FQDN of your site, make this different if you are using a subdomain for ssl
-define('SITE_IP', ''); //The IP address by which your site can be publicly accessed
 define('SITE_HOST', ''); // The host for your site (e.g. localhost, orpheus.network)
 define('SITE_URL', 'https://'.SITE_HOST); // The base URL to access the site (e.g. http://localhost:8080, https://orpheus.network)
 define('MAIL_HOST', 'mail.'.SITE_HOST); // The host to use for mail delivery (e.g. mail.orpheus.network)
@@ -31,7 +30,6 @@ define('SSL_STATIC_SERVER', 'static/');
 
 // Keys
 define('ENCKEY', ''); //Random key. The key for encryption
-define('SITE_SALT', ''); //Random key. Default site wide salt for passwords, DO NOT LEAVE THIS BLANK/CHANGE AFTER LAUNCH!
 define('SCHEDULE_KEY', ''); // Random key. This key must be the argument to schedule.php for the schedule to work.
 define('RSS_HASH', ''); //Random key. Used for generating unique RSS auth key.
 
@@ -99,11 +97,8 @@ define('DONOR_INVITES', 2);
 define('SYSTEM_USER_ID', 17); // ID for user to create "system" threads under (e.g. Edit Requests)
 define('TRASH_FORUM_ID', 4); // ID of forum to send threads to when trash button is pressed
 define('EDITING_FORUM_ID', 34); // ID of forum to send editing requests to
-define('EDITING_TRASH_FORUM_ID', 48); // ID of forum to send editing threads to when trash button is pressed in EDITING_FORUM_ID
 define('HELP_FORUM_ID', 3); // ID of help forum
-define('HELP_RESOLVED_FORUM_ID', 44); // ID of forum to send resolved help threads when resolve button is pressed in HELP_FORUM_ID
 define('BUGS_FORUM_ID', 6); // ID of bug reports forum
-define('BUGS_RESOLVED_FORUM_ID', 14); // ID of forum to send resolved bug reports when resolve button is pressed in BUGS_FORUM_ID
 define('AOTM_FORUM_ID', 51); // ID of the Album of The Month forum
 define('VANITY_HOUSE_FORUM_ID', 18); // Vanity House forum
 define('CLIENT_WHITELIST_FORUM_ID', 680); // Client whitelist suggestion forum
@@ -121,11 +116,7 @@ define('POWER',         '4');
 define('ELITE',         '5');
 define('VIP',           '6');
 define('TORRENT_MASTER','7');
-define('LEGEND',        '8');
-define('CELEB',         '9');
 define('MOD',           '11');
-define('DESIGNER',      '13');
-define('CODER',         '14');
 define('SYSOP',         '15');
 define('ARTIST',        '19');
 define('DONOR',         '20');
@@ -159,17 +150,8 @@ define('BOT_CHAN', '#mygazelle');
 define('ADMIN_CHAN', '#admin');
 define('LAB_CHAN', '#lab');
 define('STATUS_CHAN', '#status');
-define('BOT_ANNOUNCE_CHAN', '#announce');
-define('BOT_STAFF_CHAN', '#staff');
 define('BOT_DISABLED_CHAN', '#disabled'); // Channel to refer disabled users to.
-define('BOT_HELP_CHAN', '#help');
-define('BOT_DEBUG_CHAN', '#debug');
 define('BOT_REPORT_CHAN', '#reports');
-define('BOT_NICKSERV_PASS', '');
-define('BOT_INVITE_CHAN', BOT_CHAN.'-invites'); // Channel for non-members seeking an interview
-define('BOT_INTERVIEW_CHAN', BOT_CHAN.'-interview'); // Channel for the interviews
-define('BOT_INTERVIEW_NUM', 5);
-define('BOT_INTERVIEW_STAFF', BOT_CHAN.'-interviewers'); // Channel for the interviewers
 define('SOCKET_LISTEN_PORT', 51010);
 define('SOCKET_LISTEN_ADDRESS', 'localhost');
 
@@ -380,10 +362,6 @@ $ExternalServicesConfig = [
         'cookie_expiry' => 0,
         'status' => TRUE
     ]];
-
-define('TOP10_ALL_TIME_THRESHOLD', 150);
-define('TOP10_YEAR_THRESHOLD', 80);
-define('TOP10_DATA_THRESHOLD', 50);
 
 define('SITE_LAUNCH_YEAR', 2018);
 
