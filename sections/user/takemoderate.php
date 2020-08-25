@@ -1,118 +1,119 @@
 <?php
 
 // Are they being tricky blighters?
-$UserID = (int)$_POST['userid'];
-if ($UserID < 1) {
+$userID = (int)$_POST['userid'];
+if ($userID < 1) {
     error(404);
 } elseif (!check_perms('users_mod')) {
     error(403);
 }
-$ownProfile = $UserID == $LoggedUser['ID'];
-$user = new Gazelle\User($UserID);
+$ownProfile = $userID == $LoggedUser['ID'];
+$user = new Gazelle\User($userID);
 
 authorize();
 // End checking for moronity
 
 // Variables for database input
-$Class = (int)$_POST['Class'];
-$Username = trim($_POST['Username']);
-$Title = $_POST['Title'];
-$AdminComment = trim($_POST['AdminComment']);
-$SecondaryClasses = isset($_POST['secondary_classes']) ? $_POST['secondary_classes'] : [];
-foreach ($SecondaryClasses as $i => $Val) {
+$class = (int)$_POST['Class'];
+$username = trim($_POST['Username']);
+$title = $_POST['Title'];
+$adminComment = trim($_POST['AdminComment']);
+$secondaryClasses = isset($_POST['secondary_classes']) ? $_POST['secondary_classes'] : [];
+foreach ($secondaryClasses as $i => $Val) {
     if (!is_number($Val)) {
-        unset($SecondaryClasses[$i]);
+        unset($secondaryClasses[$i]);
     }
 }
-$Visible = isset($_POST['Visible']) ? 1 : 0;
+$visible = isset($_POST['Visible']) ? 1 : 0;
 $unlimitedDownload = isset($_POST['unlimitedDownload']) ? 1 : 0;
-$Invites = (int)$_POST['Invites'];
-$SupportFor = trim($_POST['SupportFor']);
-$ChangePassword = $_POST['ChangePassword'];
-$Warned = isset($_POST['Warned']) ? 1 : 0;
-$Uploaded = $Downloaded = $BonusPoints = null;
+$invites = (int)$_POST['Invites'];
+$supportFor = trim($_POST['SupportFor']);
+$changePassword = $_POST['ChangePassword'];
+$warned = isset($_POST['Warned']) ? 1 : 0;
+$uploaded = $downloaded = $bonusPoints = null;
 if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
-    $Uploaded = ($_POST['Uploaded'] === '' ? 0 : $_POST['Uploaded']);
-    if ($Arithmetic = strpbrk($Uploaded, '+-')) {
-        $Uploaded += max(-$Uploaded, Format::get_bytes($Arithmetic));
+    $uploaded = ($_POST['Uploaded'] === '' ? 0 : $_POST['Uploaded']);
+    if ($arithmetic = strpbrk($uploaded, '+-')) {
+        $uploaded += max(-$uploaded, Format::get_bytes($arithmetic));
     }
-    $Downloaded = ($_POST['Downloaded'] === '' ? 0 : $_POST['Downloaded']);
-    if ($Arithmetic = strpbrk($Downloaded, '+-')) {
-        $Downloaded += max(-$Downloaded, Format::get_bytes($Arithmetic));
+    $downloaded = ($_POST['Downloaded'] === '' ? 0 : $_POST['Downloaded']);
+    if ($arithmetic = strpbrk($downloaded, '+-')) {
+        $downloaded += max(-$downloaded, Format::get_bytes($arithmetic));
     }
-    if (!is_number($Uploaded) || !is_number($Downloaded)) {
+    if (!is_number($uploaded) || !is_number($downloaded)) {
         error(0);
     }
 }
 if (isset($_POST['BonusPoints'])) {
     if (empty($_POST['BonusPoints'])) {
-        $BonusPoints = 0;
+        $bonusPoints = 0;
     }
     elseif ($_POST['BonusPoints'] != strval(floatval($_POST['BonusPoints']))) {
         error(0);
     }
     else {
-        $BonusPoints = round(floatval($_POST['BonusPoints']), 5);
+        $bonusPoints = round(floatval($_POST['BonusPoints']), 5);
     }
 }
 $Collages = (int)$_POST['Collages'] ?? 0;
-$FLTokens = isset($_POST['FLTokens']) ? trim($_POST['FLTokens']) : 0;
-if (!is_number($FLTokens)) {
+$flTokens = isset($_POST['FLTokens']) ? trim($_POST['FLTokens']) : 0;
+if (!is_number($flTokens)) {
     error(0);
 }
 
-$WarnLength = (int)$_POST['WarnLength'];
-$ExtendWarning = $_POST['ExtendWarning'] ?? '---';
-$ReduceWarning = $_POST['ReduceWarning'] ?? '---';
-$WarnReason = trim($_POST['WarnReason']);
-$UserReason = trim($_POST['UserReason']);
-$DisableAvatar = isset($_POST['DisableAvatar']) ? 1 : 0;
-$DisableInvites = isset($_POST['DisableInvites']) ? 1 : 0;
-$DisablePosting = isset($_POST['DisablePosting']) ? 1 : 0;
-$DisablePoints = isset($_POST['DisablePoints']) ? 1 : 0;
-$DisableForums = isset($_POST['DisableForums']) ? 1 : 0;
-$DisableTagging = isset($_POST['DisableTagging']) ? 1 : 0;
-$DisableUpload = isset($_POST['DisableUpload']) ? 1 : 0;
-$DisableWiki = isset($_POST['DisableWiki']) ? 1 : 0;
-$DisablePM = isset($_POST['DisablePM']) ? 1 : 0;
-$DisableIRC = isset($_POST['DisableIRC']) ? 1 : 0;
-$DisableRequests = isset($_POST['DisableRequests']) ? 1 : 0;
-$DisableLeech = isset($_POST['DisableLeech']) ? 0 : 1;
-$LockAccount = isset($_POST['LockAccount']) ? 1 : 0;
-$LockType = (int)$_POST['LockType'];
+$warnLength = (int)$_POST['WarnLength'];
+$extendWarning = $_POST['ExtendWarning'] ?? '---';
+$reduceWarning = $_POST['ReduceWarning'] ?? '---';
+$warnReason = trim($_POST['WarnReason']);
+$userReason = trim($_POST['UserReason']);
+$disableAvatar = isset($_POST['DisableAvatar']) ? 1 : 0;
+$disableInvites = isset($_POST['DisableInvites']) ? 1 : 0;
+$disablePosting = isset($_POST['DisablePosting']) ? 1 : 0;
+$disablePoints = isset($_POST['DisablePoints']) ? 1 : 0;
+$disableForums = isset($_POST['DisableForums']) ? 1 : 0;
+$disableTagging = isset($_POST['DisableTagging']) ? 1 : 0;
+$disableUpload = isset($_POST['DisableUpload']) ? 1 : 0;
+$disableWiki = isset($_POST['DisableWiki']) ? 1 : 0;
+$disablePM = isset($_POST['DisablePM']) ? 1 : 0;
+$disableIRC = isset($_POST['DisableIRC']) ? 1 : 0;
+$disableRequests = isset($_POST['DisableRequests']) ? 1 : 0;
+$disableLeech = isset($_POST['DisableLeech']) ? 0 : 1;
+$lockAccount = isset($_POST['LockAccount']) ? 1 : 0;
+$lockType = (int)$_POST['LockType'];
 
-$RestrictedForums = trim($_POST['RestrictedForums']);
-$PermittedForums = trim($_POST['PermittedForums']);
-$EnableUser = (int)$_POST['UserStatus'];
-$ResetRatioWatch = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
-$ResetIPHistory = $_POST['ResetIPHistory'] ?? 0;
-$ResetPasskey = isset($_POST['ResetPasskey']) ? 1 : 0;
-$ResetAuthkey = isset($_POST['ResetAuthkey']) ? 1 : 0;
-$LogoutSession = isset($_POST['Logout']) ? 1 : 0;
-$SendHackedMail = isset($_POST['SendHackedMail']) ? 1 : 0;
-if ($SendHackedMail && !empty(trim($_POST['HackedEmail']))) {
-    $HackedEmail = trim($_POST['HackedEmail']);
+$restrictedForums = trim($_POST['RestrictedForums']);
+$permittedForums = trim($_POST['PermittedForums']);
+$enableUser = (int)$_POST['UserStatus'];
+$resetRatioWatch = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
+$resetIPHistory = $_POST['ResetIPHistory'] ?? 0;
+$resetPasskey = isset($_POST['ResetPasskey']) ? 1 : 0;
+$resetAuthkey = isset($_POST['ResetAuthkey']) ? 1 : 0;
+$logoutSession = isset($_POST['Logout']) ? 1 : 0;
+$sendHackedMail = isset($_POST['SendHackedMail']) ? 1 : 0;
+if ($sendHackedMail && !empty(trim($_POST['HackedEmail']))) {
+    $hackedEmail = trim($_POST['HackedEmail']);
 } else {
-    $SendHackedMail = false;
+    $sendHackedMail = false;
 }
-$MergeStatsFrom = trim($_POST['MergeStatsFrom']);
-$Reason = trim($_POST['Reason']);
+$mergeStatsFrom = trim($_POST['MergeStatsFrom']);
+$reason = trim($_POST['Reason']);
 
 // Get the existing user information
-if (!$Cur = $user->info()) { // If user doesn't exist
-    header("Location: log.php?search=User+$UserID");
+if (!$cur = $user->info()) { // If user doesn't exist
+    header("Location: log.php?search=User+$userID");
+    exit;
 }
 
-if ($_POST['comment_hash'] != $Cur['CommentHash']) {
+if ($_POST['comment_hash'] != $cur['CommentHash']) {
     error("Somebody else has moderated this user since you loaded it. Please go back and refresh the page.");
 }
 
 // NOW that we know the class of the current user, we can see if one staff member is trying to hax0r us.
-if (!check_perms('users_mod', $Cur['Class'])) {
+if (!check_perms('users_mod', $cur['Class'])) {
     error(403);
 }
 
-if ($MergeStatsFrom && ($Downloaded != $Cur['Downloaded'] || $Uploaded != $Cur['Uploaded'])) {
+if ($mergeStatsFrom && ($downloaded != $cur['Downloaded'] || $uploaded != $cur['Uploaded'])) {
     // Too make make-work code to deal with this unlikely eventuality
     error("Do not transfer buffer and edit upload/download in the same operation.");
 }
@@ -120,85 +121,82 @@ if ($MergeStatsFrom && ($Downloaded != $Cur['Downloaded'] || $Uploaded != $Cur['
 $donorMan = new Gazelle\Manager\Donation;
 $donorMan->twig(G::$Twig);
 if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) && is_numeric($_POST['donation_value'])) {
-    $donorMan->moderatorDonate($UserID, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $LoggedUser['ID']);
+    $donorMan->moderatorDonate($userID, $_POST['donation_value'], $_POST['donation_currency'], $_POST['donation_reason'], $LoggedUser['ID']);
 } elseif (!empty($_POST['donor_values_submit'])) {
-    $donorMan->moderatorAdjust($UserID, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $LoggedUser['ID']);
+    $donorMan->moderatorAdjust($userID, $_POST['donor_rank_delta'], $_POST['total_donor_rank_delta'], $_POST['reason'], $LoggedUser['ID']);
 }
 
 // If we're deleting the user, we can ignore all the other crap
 
 if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
-    Misc::write_log("User account $UserID (".$Cur['Username'].") was deleted by ".$LoggedUser['Username']);
+    Misc::write_log("User account $userID (".$cur['Username'].") was deleted by ".$LoggedUser['Username']);
     $user->remove();
-    Tracker::update_tracker('remove_user', ['passkey' => $Cur['torrent_pass']]);
-    header("Location: log.php?search=User+$UserID");
+    Tracker::update_tracker('remove_user', ['passkey' => $cur['torrent_pass']]);
+    header("Location: log.php?search=User+$userID");
+    exit;
 }
 
 // User was not deleted. Perform other stuff.
 
-// Begin building users_main/users_info update
-$set = [];
-$args = [];
+$editSummary = [];
+$trackerUserUpdates = ['passkey' => $cur['torrent_pass']];
 
-$EditSummary = [];
-$TrackerUserUpdates = ['passkey' => $Cur['torrent_pass']];
-
-if (!$LockType || $LockAccount == 0) {
-    if ($Cur['Type']) {
+if (!$lockType || $lockAccount == 0) {
+    if ($cur['Type']) {
         $user->unlock();
-        $Cache->delete_value('user_' . $Cur['torrent_pass']);
-        $EditSummary[] = 'account unlocked';
+        $Cache->delete_value('user_' . $cur['torrent_pass']);
+        $editSummary[] = 'account unlocked';
     }
-} elseif ($LockType) {
-    if ($Cur['Type'] !== $LockType) {
-        if ($user->lock($LockType)) {
-            $Cache->delete_value('user_' . $Cur['torrent_pass']);
-            $EditSummary[] = empty($Cur['Type'])
-                ? "Account locked (type $LockType)"
-                : "Account lock type changed to $LockType";
+} elseif ($lockType) {
+    if ($cur['Type'] !== $lockType) {
+        if ($user->lock($lockType)) {
+            $Cache->delete_value('user_' . $cur['torrent_pass']);
+            $editSummary[] = empty($cur['Type'])
+                ? "Account locked (type $lockType)"
+                : "Account lock type changed to $lockType";
         }
     }
 }
 
 if ($_POST['ResetRatioWatch'] ?? 0 && check_perms('users_edit_reset_keys')) {
     $user->resetRatioWatch();
-    $EditSummary[] = 'RatioWatch history reset';
+    $editSummary[] = 'RatioWatch history reset';
 }
 
-if ($ResetIPHistory && check_perms('users_edit_reset_keys')) {
+if ($resetIPHistory && check_perms('users_edit_reset_keys')) {
     $user->resetIpHistory();
-    $EditSummary[] = 'IP history cleared';
+    $editSummary[] = 'IP history cleared';
 }
 
 if ($_POST['ResetEmailHistory'] ?? 0 && check_perms('users_edit_reset_keys')) {
-    $user->resetEmailHistory($Username . '@' . SITE_URL, $ResetIPHistory ? '127.0.0.1' : $Cur['IP']);
-    $EditSummary[] = 'email history cleared';
+    $user->resetEmailHistory($username . '@' . SITE_URL, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
+    $editSummary[] = 'email history cleared';
 }
 
 if ($_POST['ResetSnatchList'] ?? 0 && check_perms('users_edit_reset_keys')) {
     $user->resetSnatched();
-    $EditSummary[] = 'snatch list cleared';
+    $editSummary[] = 'snatch list cleared';
 }
 
 if ($_POST['ResetDownloadList'] ?? 0 && check_perms('users_edit_reset_keys')) {
     $user->resetDownloadList();
-    $EditSummary[] = 'download list cleared';
+    $editSummary[] = 'download list cleared';
 }
 
-if ($LogoutSession && check_perms('users_logout')) {
+if ($logoutSession && check_perms('users_logout')) {
     $sessions = $user->logout();
-    $EditSummary[] = "logged out of all sessions (n=$sessions)";
+    $editSummary[] = "logged out of all sessions (n=$sessions)";
 }
 
-if ($FLTokens != $Cur['FLTokens'] && ($editRatio || check_perms('admin_manage_user_fls'))) {
-    $EditSummary[] = "freeleech tokens changed from $Cur[FLTokens] to $FLTokens";
+if ($flTokens != $cur['FLTokens'] && ($editRatio || check_perms('admin_manage_user_fls'))) {
+    $editSummary[] = "freeleech tokens changed from $cur[FLTokens] to $flTokens";
 }
 
 $newBonusPoints = false;
-if ($BonusPoints != floatval($Cur['BonusPoints']) && $BonusPoints != floatval($_POST['OldBonusPoints'])
+if ($bonusPoints != floatval($cur['BonusPoints']) && $bonusPoints != floatval($_POST['OldBonusPoints'])
     && (check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $ownProfile))) {
-    $newBonusPoints = $BonusPoints;
-    $EditSummary[] = "bonus points changed from {$Cur['BonusPoints']} to {$BonusPoints}";
+    $newBonusPoints = $bonusPoints;
+    $editSummary[] = "bonus points changed from {$cur['BonusPoints']} to {$bonusPoints}";
 }
 
 if ($Collages != $Cur['Collages'] && $Collages != (int)$_POST['OldCollages']
@@ -211,20 +209,20 @@ if ($Collages != $Cur['Collages'] && $Collages != (int)$_POST['OldCollages']
 $removedClasses = [];
 $addedClasses   = [];
 if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
-    $OldClasses = $Cur['SecondaryClasses'] ? explode(',', $Cur['SecondaryClasses']) : [];
-    $removedClasses = array_diff($OldClasses, $SecondaryClasses);
-    $addedClasses   = array_diff($SecondaryClasses, $OldClasses);
+    $oldClasses = $cur['SecondaryClasses'] ? explode(',', $cur['SecondaryClasses']) : [];
+    $removedClasses = array_diff($oldClasses, $secondaryClasses);
+    $addedClasses   = array_diff($secondaryClasses, $oldClasses);
     if ($removedClasses) {
-        $EditSummary[] = 'secondary classes dropped: ' . classNames($removedClasses);
+        $editSummary[] = 'secondary classes dropped: ' . classNames($removedClasses);
     }
     if ($addedClasses) {
-        $EditSummary[] = "secondary classes added: " . classNames($addedClasses);
+        $editSummary[] = "secondary classes added: " . classNames($addedClasses);
     }
 }
 
-if ($unlimitedDownload != $Cur['unlimitedDownload'] && check_perms('admin_rate_limit_manage')) {
+if ($unlimitedDownload != $cur['unlimitedDownload'] && check_perms('admin_rate_limit_manage')) {
     if ($user->toggleUnlimitedDownload($unlimitedDownload)) {
-        $EditSummary[] = "unlimited download " . strtolower(enabledStatus($unlimitedDownload));
+        $editSummary[] = "unlimited download " . strtolower(enabledStatus($unlimitedDownload));
     }
 }
 
@@ -232,92 +230,97 @@ $leechSet = [];
 $leechArgs = [];
 $editRatio = check_perms('users_edit_ratio') || (check_perms('users_edit_own_ratio') && $ownProfile);
 if ($editRatio) {
-    if ($Uploaded != $Cur['Uploaded'] && $Uploaded != $_POST['OldUploaded']) {
+    if ($uploaded != $cur['Uploaded'] && $uploaded != $_POST['OldUploaded']) {
         $leechSet[] = 'Uploaded = ?';
-        $leechArgs[] = $Uploaded;
-        $EditSummary[] = "uploaded changed from " . Format::get_size($Cur['Uploaded'])
-            . ' to ' . Format::get_size($Uploaded)
-            . " (delta " . Format::get_size($Uploaded = $Cur['Uploaded']) . ")";
+        $leechArgs[] = $uploaded;
+        $editSummary[] = "uploaded changed from " . Format::get_size($cur['Uploaded'])
+            . ' to ' . Format::get_size($uploaded)
+            . " (delta " . Format::get_size($uploaded - $cur['Uploaded']) . ")";
     }
-    if ($Downloaded != $Cur['Downloaded'] && $Downloaded != $_POST['OldDownloaded']) {
+    if ($downloaded != $cur['Downloaded'] && $downloaded != $_POST['OldDownloaded']) {
         $leechSet[] = 'Downloaded = ?';
-        $leechArgs[] = $Downloaded;
-        $EditSummary[] = "downloaded changed from " . Format::get_size($Cur['Downloaded'])
-            . ' to ' . Format::get_size($Downloaded)
-            . " (delta " . Format::get_size($Downloaded - $Cur['Downloaded']) . ")";
+        $leechArgs[] = $downloaded;
+        $editSummary[] = "downloaded changed from " . Format::get_size($cur['Downloaded'])
+            . ' to ' . Format::get_size($downloaded)
+            . " (delta " . Format::get_size($downloaded - $cur['Downloaded']) . ")";
     }
 }
 
-if ($Classes[$Class]['Level'] != $Cur['Class']
+// Begin building users_main/users_info update
+$set = [];
+$args = [];
+
+if ($Classes[$class]['Level'] != $cur['Class']
     && (
-        ($Classes[$Class]['Level'] < $LoggedUser['Class'] && check_perms('users_promote_below', $Cur['Class']))
-        || ($Classes[$Class]['Level'] <= $LoggedUser['Class'] && check_perms('users_promote_to', $Cur['Class'] - 1))
+        ($Classes[$class]['Level'] < $LoggedUser['Class'] && check_perms('users_promote_below', $cur['Class']))
+        || ($Classes[$class]['Level'] <= $LoggedUser['Class'] && check_perms('users_promote_to', $cur['Class'] - 1))
         )
     ) {
     $set[] = 'PermissionID = ?';
-    $args[] = $Class;
-    $EditSummary[] = 'class changed to '.Users::make_class_string($Class);
+    $args[] = $class;
+    $editSummary[] = 'class changed to '.Users::make_class_string($class);
 
-    if ($user->supportCount($Class, $ClassLevels[$Cur['Class']]['ID']) === 2) {
-        if ($Classes[$Class]['Level'] < $Cur['Class']) {
-            $SupportFor = '';
+    if ($user->supportCount($class, $Classes[$cur['Class']]['ID']) === 2) {
+        if ($Classes[$class]['Level'] < $cur['Class']) {
+            $supportFor = '';
         }
         $Cache->delete_value('staff_ids');
     }
-    $Cache->delete_value("donor_info_$UserID");
+    $Cache->delete_value("donor_info_$userID");
 }
 
-if ($Username !== $Cur['Username'] && check_perms('users_edit_usernames', $Cur['Class'] - 1)) {
-    if (in_array($Username, ['0', '1'])) {
+if ($username !== $cur['Username'] && check_perms('users_edit_usernames', $cur['Class'] - 1)) {
+    if (in_array($username, ['0', '1'])) {
         error('You cannot set a username of "0" or "1".');
-        header("Location: user.php?id=$UserID");
+        header("Location: user.php?id=$userID");
         exit;
-    } elseif (($inUse = $user->idFromUsername($Username)) > 0) {
-        error("Username already in use by <a href=\"user.php?id=$inUse\">$Username</a>");
+    } elseif (strtolower($username) != strtolower($cur['Username']) && ($inUse = $user->idFromUsername($username)) > 0) {
+        error("Username already in use by <a href=\"user.php?id=$inUse\">$username</a>");
         header("Location: user.php?id=$inUse");
         exit;
     } else {
         $set[] = 'Username = ?';
-        $args[] = $Username;
-        $EditSummary[] = "username changed from ".$Cur['Username']." to $Username";
+        $args[] = $username;
+        $editSummary[] = "username changed from ".$cur['Username']." to $username";
     }
 }
 
-if ($Title != $Cur['Title'] && check_perms('users_edit_titles')) {
+if ($title != $cur['Title'] && check_perms('users_edit_titles')) {
     // Using the unescaped value for the test to avoid confusion
     if (mb_strlen($_POST['Title']) > 1024) {
         error("Custom titles have a maximum length of 1,024 characters.");
-        header("Location: user.php?id=$UserID");
+        header("Location: user.php?id=$userID");
+        exit;
     } else {
         $set[] = 'Title = ?';
-        $args[] = $Title;
-        $EditSummary[] = "title changed to [code]{$Title}[/code]";
+        $args[] = $title;
+        $editSummary[] = "title changed to [code]{$title}[/code]";
     }
 }
 
 if (check_perms('users_warn')) {
-    if ($Warned == 0) {
-        if (!is_null($Cur['Warned'])) {
+    if ($warned == 0) {
+        if (!is_null($cur['Warned'])) {
             $set[] = "Warned = ?";
             $args[] = null;
-            $EditSummary[] = 'warning removed';
+            $editSummary[] = 'warning removed';
         }
     } elseif (
-        (is_null($Cur['Warned']) && $WarnLength != '---')
+        (is_null($cur['Warned']) && $warnLength != '---')
         ||
-        ($Cur['Warned'] && ($ExtendWarning != '---' || $ReduceWarning != '---'))
+        ($cur['Warned'] && ($extendWarning != '---' || $reduceWarning != '---'))
     ) {
-        if (is_null($Cur['Warned'])) {
-            $weeksChange = $WarnLength;
-            $duration = 'week' . plural($WarnLength);
+        if (is_null($cur['Warned'])) {
+            $weeksChange = $warnLength;
+            $duration = 'week' . plural($warnLength);
             $message = [
-                'summary' => "warned for $WarnLength $duration",
+                'summary' => "warned for $warnLength $duration",
                 'subject' => 'You have received a warning',
                 'body'    => "You have been [url=" . site_url()
-                    . "wiki.php?action=article&amp;name=warnings]warned[/url] for $WarnLength $duration",
+                    . "wiki.php?action=article&amp;name=warnings]warned[/url] for $warnLength $duration",
             ];
         } else {
-            $weeksChange = ($ExtendWarning != '---') ? $ExtendWarning : -$ReduceWarning;
+            $weeksChange = ($extendWarning != '---') ? $extendWarning : -$reduceWarning;
             $nrWeeks = abs($weeksChange);
             $duration = 'week' . plural($nrWeeks);
             $action = $weeksChange > 0 ? 'extended' : 'reduced';
@@ -331,165 +334,165 @@ if (check_perms('users_warn')) {
         $args[] = $weeksChange;
         $expiry = $user->endWarningDate($weeksChange);
         $message['body'] .= ", by [user]" . $LoggedUser['Username'] . "[/user]."
-            . " The reason given was:\n[quote]{$WarnReason}[/quote]. The warning will expire on $expiry."
+            . " The reason given was:\n[quote]{$warnReason}[/quote]. The warning will expire on $expiry."
             . "\n\nThis is an automated message. You may reply for more information if necessary.";
-        Misc::send_pm($UserID, $LoggedUser['ID'], $message['subject'], $message['body']);
-        $EditSummary[] = $message['summary'] . ", expiry: $expiry"
-            . ($WarnReason ? ", reason: \"$WarnReason\"" : '');
+        Misc::send_pm($userID, $LoggedUser['ID'], $message['subject'], $message['body']);
+        $editSummary[] = $message['summary'] . ", expiry: $expiry"
+            . ($warnReason ? ", reason: \"$warnReason\"" : '');
     }
 }
 
-if ($RestrictedForums != $Cur['RestrictedForums'] && check_perms('users_mod')) {
+if ($restrictedForums != $cur['RestrictedForums'] && check_perms('users_mod')) {
     $set[] = "RestrictedForums = ?";
-    $args[] = $RestrictedForums;
-    $EditSummary[] = "prohibited forum(s): $RestrictedForums";
+    $args[] = $restrictedForums;
+    $editSummary[] = "prohibited forum(s): $restrictedForums";
 }
 
-if ($PermittedForums != $Cur['PermittedForums'] && check_perms('users_mod')) {
-    $ForumSet = explode(',', $PermittedForums);
-    $ForumList = [];
-    foreach ($ForumSet as $ForumID) {
-        $f = trim($ForumID);
-        if ($Forums[$f]['MinClassCreate'] <= $LoggedUser['EffectiveClass']) {
-            $ForumList[] = $f;
+if ($permittedForums != $cur['PermittedForums'] && check_perms('users_mod')) {
+    $forumSet = explode(',', $permittedForums);
+    $forumList = [];
+    foreach ($forumSet as $forumID) {
+        $f = trim($forumID);
+        if ($forums[$f]['MinClassCreate'] <= $LoggedUser['EffectiveClass']) {
+            $forumList[] = $f;
         }
     }
     $set[] = "PermittedForums = ?";
-    $args[] = implode(',', $ForumList);
-    $EditSummary[] = "permitted forum(s): $PermittedForums";
+    $args[] = implode(',', $forumList);
+    $editSummary[] = "permitted forum(s): $permittedForums";
 }
 
-if ($Visible != $Cur['Visible'] && check_perms('users_make_invisible')) {
+if ($visible != $cur['Visible'] && check_perms('users_make_invisible')) {
     $set[] = 'Visible = ?';
-    $args[] = $Visible ? '1' : '0';
-    $TrackerUserUpdates['visible'] = $Visible;
-    $EditSummary[] = 'visibility ' . ($Visible ? 'on' : 'off');
+    $args[] = $visible ? '1' : '0';
+    $trackerUserUpdates['visible'] = $visible;
+    $editSummary[] = 'visibility ' . ($visible ? 'on' : 'off');
 }
 
-if ($Invites != $Cur['Invites'] && check_perms('users_edit_invites')) {
+if ($invites != $cur['Invites'] && check_perms('users_edit_invites')) {
     $set[] = 'Invites = ?';
-    $args[] = $Invites;
-    $EditSummary[] = "number of invites changed from $Cur[Invites] to $Invites";
+    $args[] = $invites;
+    $editSummary[] = "number of invites changed from $cur[Invites] to $invites";
 }
 
-if ($SupportFor != $Cur['SupportFor'] && (check_perms('admin_manage_fls') || (check_perms('users_mod') && $ownProfile))) {
+if ($supportFor != $cur['SupportFor'] && (check_perms('admin_manage_fls') || (check_perms('users_mod') && $ownProfile))) {
     $set[] = "SupportFor = ?";
-    $args[] = $SupportFor;
-    $EditSummary[] = "First-Line Support status changed to \"$SupportFor\"";
+    $args[] = $supportFor;
+    $editSummary[] = "First-Line Support status changed to \"$supportFor\"";
 }
 
 $privChange = [];
-if ($DisableAvatar != $Cur['DisableAvatar'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your avatar privileges have been ' . ($DisableAvatar ? 'removed' : 'restored');
+if ($disableAvatar != $cur['DisableAvatar'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your avatar privileges have been ' . ($disableAvatar ? 'removed' : 'restored');
     $set[] = "DisableAvatar = ?";
-    $args[] = $DisableAvatar ? '1' : '0';
-    $EditSummary[] = 'avatar privileges ' . disabled($DisableAvatar);
+    $args[] = $disableAvatar ? '1' : '0';
+    $editSummary[] = 'avatar privileges ' . disabled($disableAvatar);
 }
 
-if ($DisableLeech != $Cur['can_leech'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your leeching privileges have been ' . ($DisableLeech ? 'removed' : 'restored');
+if ($disableLeech != $cur['can_leech'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your leeching privileges have been ' . ($disableLeech ? 'removed' : 'restored');
     $set[] = "can_leech = ?";
-    $args[] = $DisableLeech ? '1' : '0';
-    $TrackerUserUpdates['can_leech'] = $DisableLeech;
-    $EditSummary[] = "leeching status changed (".enabledStatus($Cur['can_leech'])." &rarr; ".enabledStatus($DisableLeech).")";
+    $args[] = $disableLeech ? '1' : '0';
+    $trackerUserUpdates['can_leech'] = $disableLeech;
+    $editSummary[] = "leeching status changed (".enabledStatus($cur['can_leech'])." &rarr; ".enabledStatus($disableLeech).")";
 }
 
-if ($DisableInvites != $Cur['DisableInvites'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your invite privileges have been ' . ($DisableInvites ? 'removed' : 'restored');
+if ($disableInvites != $cur['DisableInvites'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your invite privileges have been ' . ($disableInvites ? 'removed' : 'restored');
     $set[] = "DisableInvites = ?";
-    $args[] = $DisableInvites ? '1' : '0';
-    $EditSummary[] = 'invites privileges ' . disabled($DisableInvites);
+    $args[] = $disableInvites ? '1' : '0';
+    $editSummary[] = 'invites privileges ' . disabled($disableInvites);
 }
 
-if ($DisablePosting != $Cur['DisablePosting'] && check_perms('users_disable_posts')) {
-    $privChange[] = 'Your forum posting privileges have been ' . ($DisablePosting ? 'removed' : 'restored');
+if ($disablePosting != $cur['DisablePosting'] && check_perms('users_disable_posts')) {
+    $privChange[] = 'Your forum posting privileges have been ' . ($disablePosting ? 'removed' : 'restored');
     $set[] = "DisablePosting = ?";
-    $args[] = $DisablePosting ? '1' : '0';
-    $EditSummary[] = 'posting privileges ' . disabled($DisablePosting);
+    $args[] = $disablePosting ? '1' : '0';
+    $editSummary[] = 'posting privileges ' . disabled($disablePosting);
 }
 
-if ($DisablePoints != $Cur['DisablePoints'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your bonus points acquisition has been ' . ($DisablePoints ? 'revoked' : 'restored');
+if ($disablePoints != $cur['DisablePoints'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your bonus points acquisition has been ' . ($disablePoints ? 'revoked' : 'restored');
     $set[] = "DisablePoints = ?";
-    $args[] = $DisablePoints ? '1' : '0';
-    $EditSummary[] = 'points privileges ' . disabled($DisablePoints);
+    $args[] = $disablePoints ? '1' : '0';
+    $editSummary[] = 'points privileges ' . disabled($disablePoints);
 }
 
-if ($DisableForums != $Cur['DisableForums'] && check_perms('users_disable_posts')) {
-    $privChange[] = 'Your forum access has been ' . ($DisableForums ? 'revoked' : 'restored');
+if ($disableForums != $cur['DisableForums'] && check_perms('users_disable_posts')) {
+    $privChange[] = 'Your forum access has been ' . ($disableForums ? 'revoked' : 'restored');
     $set[] = "DisableForums = ?";
-    $args[] = $DisableForums ? '1' : '0';
-    $EditSummary[] = 'forums privileges ' . disabled($DisableForums);
+    $args[] = $disableForums ? '1' : '0';
+    $editSummary[] = 'forums privileges ' . disabled($disableForums);
 }
 
-if ($DisableTagging != $Cur['DisableTagging'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your tagging privileges have been ' . ($DisableTagging ? 'removed' : 'restored');
+if ($disableTagging != $cur['DisableTagging'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your tagging privileges have been ' . ($disableTagging ? 'removed' : 'restored');
     $set[] = "DisableTagging = ?";
-    $args[] = $DisableTagging ? '1' : '0';
-    $EditSummary[] = 'tagging privileges ' . disabled($DisableTagging);
+    $args[] = $disableTagging ? '1' : '0';
+    $editSummary[] = 'tagging privileges ' . disabled($disableTagging);
 }
 
-if ($DisableUpload != $Cur['DisableUpload'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your upload privileges have been ' . ($DisableUpload ? 'removed' : 'restored');
+if ($disableUpload != $cur['DisableUpload'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your upload privileges have been ' . ($disableUpload ? 'removed' : 'restored');
     $set[] = "DisableUpload = ?";
-    $args[] = $DisableUpload ? '1' : '0';
-    $EditSummary[] = 'upload privileges ' . disabled($DisableUpload);
+    $args[] = $disableUpload ? '1' : '0';
+    $editSummary[] = 'upload privileges ' . disabled($disableUpload);
 }
 
-if ($DisableWiki != $Cur['DisableWiki'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your site editing privileges have been ' . ($DisableWiki ? 'removed' : 'restored');
+if ($disableWiki != $cur['DisableWiki'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your site editing privileges have been ' . ($disableWiki ? 'removed' : 'restored');
     $set[] = "DisableWiki = ?";
-    $args[] = $DisableWiki ? '1' : '0';
-    $EditSummary[] = 'wiki privileges ' . disabled($DisableWiki);
+    $args[] = $disableWiki ? '1' : '0';
+    $editSummary[] = 'wiki privileges ' . disabled($disableWiki);
 }
 
-if ($DisablePM != $Cur['DisablePM'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your private messate (PM) privileges have been ' . ($DisablePM ? 'removed' : 'restored');
+if ($disablePM != $cur['DisablePM'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your private messate (PM) privileges have been ' . ($disablePM ? 'removed' : 'restored');
     $set[] = "DisablePM = ?";
-    $args[] = $DisablePM ? '1' : '0';
-    $EditSummary[] = 'PM privileges ' . disabled($DisablePM);
+    $args[] = $disablePM ? '1' : '0';
+    $editSummary[] = 'PM privileges ' . disabled($disablePM);
 }
 
-if ($DisableIRC != $Cur['DisableIRC']) {
-    $privChange[] = 'Your IRC privileges have been ' . ($DisableIRC ? 'removed' : 'restored');
+if ($disableIRC != $cur['DisableIRC']) {
+    $privChange[] = 'Your IRC privileges have been ' . ($disableIRC ? 'removed' : 'restored');
     $set[] = "DisableIRC = ?";
-    $args[] = $DisableIRC ? '1' : '0';
-    $EditSummary[] = 'IRC privileges ' . disabled($DisableIRC);
+    $args[] = $disableIRC ? '1' : '0';
+    $editSummary[] = 'IRC privileges ' . disabled($disableIRC);
 }
 
-if ($DisableRequests != $Cur['DisableRequests'] && check_perms('users_disable_any')) {
-    $privChange[] = 'Your request privileges have been ' . ($DisableRequests ? 'removed' : 'restored');
+if ($disableRequests != $cur['DisableRequests'] && check_perms('users_disable_any')) {
+    $privChange[] = 'Your request privileges have been ' . ($disableRequests ? 'removed' : 'restored');
     $set[] = "DisableRequests = ?";
-    $args[] = $DisableRequests ? '1' : '0';
-    $EditSummary[] = 'request privileges ' . disabled($DisableRequests);
+    $args[] = $disableRequests ? '1' : '0';
+    $editSummary[] = 'request privileges ' . disabled($disableRequests);
 }
 
-if ($privChange && $UserReason) {
+if ($privChange && $userReason) {
     sort($privChange);
     Misc::send_pm(
-        $UserID, 0,
+        $userID, 0,
         count($privChange) == 1 ? $privChange[0] : 'Multiple privileges have changed on your account',
         G::$Twig->render('user/pm-privilege.twig', [
             'privs'  => $privChange,
-            'reason' => $UserReason,
+            'reason' => $userReason,
             'chan'   => BOT_DISABLED_CHAN,
             'url'    => site_url() . 'wiki.php?action=article&amp;id=5',
         ])
     );
-    $EditSummary[] = 'PM sent';
+    $editSummary[] = 'PM sent';
 }
 
-if ($EnableUser != $Cur['Enabled'] && check_perms('users_disable_users')) {
-    $EnableStr = 'account ' . translateUserStatus($Cur['Enabled']) . ' &rarr; ' . translateUserStatus($EnableUser);
-    if ($EnableUser == '2') {
-        Tools::disable_users($UserID, '', 1);
-        $TrackerUserUpdates = [];
-    } elseif ($EnableUser == '1') {
+if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
+    $enableStr = 'account ' . translateUserStatus($cur['Enabled']) . ' &rarr; ' . translateUserStatus($enableUser);
+    if ($enableUser == '2') {
+        Tools::disable_users($userID, '', 1);
+        $trackerUserUpdates = [];
+    } elseif ($enableUser == '1') {
         $Cache->increment('stats_user_count');
-        $VisibleTrIP = $Visible && $Cur['IP'] != '127.0.0.1' ? '1' : '0';
-        Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $Cur['torrent_pass'], 'visible' => $VisibleTrIP]);
-        if (($Cur['Downloaded'] == 0) || ($Cur['Uploaded'] / $Cur['Downloaded'] >= $Cur['RequiredRatio'])) {
-            $CanLeech = 1;
+        $visibleTrIP = $visible && $cur['IP'] != '127.0.0.1' ? '1' : '0';
+        Tracker::update_tracker('add_user', ['id' => $userID, 'passkey' => $cur['torrent_pass'], 'visible' => $visibleTrIP]);
+        if (($cur['Downloaded'] == 0) || ($cur['Uploaded'] / $cur['Downloaded'] >= $cur['RequiredRatio'])) {
+            $canLeech = 1;
             $set[] = "i.RatioWatchEnds = ?";
             $args[] = null;
             $set[] = "m.can_leech = ?";
@@ -497,42 +500,42 @@ if ($EnableUser != $Cur['Enabled'] && check_perms('users_disable_users')) {
             $set[] = "i.RatioWatchDownload = ?";
             $args[] = '0';
         } else {
-            $EnableStr .= ' (Ratio: '.Format::get_ratio_html($Cur['Uploaded'], $Cur['Downloaded'], false).', RR: '.number_format($Cur['RequiredRatio'],2).')';
-            if ($Cur['RatioWatchEnds']) {
+            $enableStr .= ' (Ratio: '.Format::get_ratio_html($cur['Uploaded'], $cur['Downloaded'], false).', RR: '.number_format($cur['RequiredRatio'],2).')';
+            if ($cur['RatioWatchEnds']) {
                 $set[] = "i.RatioWatchEnds = now()";
                 $set[] = "i.RatioWatchDownload = m.Downloaded";
-                $CanLeech = 0;
+                $canLeech = 0;
             }
-            $TrackerUserUpdates['can_leech'] = 0;
+            $trackerUserUpdates['can_leech'] = 0;
         }
         $set[] = "i.BanReason = ?";
         $args[] = '0';
         $set[] = "Enabled = ?";
         $args[] = '1';
     }
-    $Cache->replace_value("enabled_$UserID", $EnableUser, 0);
-    $EditSummary[] = $EnableStr;
+    $Cache->replace_value("enabled_$userID", $enableUser, 0);
+    $editSummary[] = $enableStr;
 }
 
-if ($ResetPasskey == 1 && check_perms('users_edit_reset_keys')) {
-    $Passkey = randomString();
-    $user->resetPasskeyHistory($Cur['torrent_pass'], $Passkey, '0.0.0.0');
-    $Cache->delete_value('user_'.$Cur['torrent_pass']);
-    $TrackerUserUpdates['passkey'] = $Passkey; // MUST come after the case for updating can_leech
-    Tracker::update_tracker('change_passkey', ['oldpasskey' => $Cur['torrent_pass'], 'newpasskey' => $Passkey]);
+if ($resetPasskey == 1 && check_perms('users_edit_reset_keys')) {
+    $passkey = randomString();
+    $user->resetPasskeyHistory($cur['torrent_pass'], $passkey, '0.0.0.0');
+    $Cache->delete_value('user_'.$cur['torrent_pass']);
+    $trackerUserUpdates['passkey'] = $passkey; // MUST come after the case for updating can_leech
+    Tracker::update_tracker('change_passkey', ['oldpasskey' => $cur['torrent_pass'], 'newpasskey' => $passkey]);
     $set[] = "torrent_pass = ?";
-    $args[] = $Passkey;
-    $EditSummary[] = 'passkey reset';
+    $args[] = $passkey;
+    $editSummary[] = 'passkey reset';
 }
 
-if ($ResetAuthkey == 1 && check_perms('users_edit_reset_keys')) {
+if ($resetAuthkey == 1 && check_perms('users_edit_reset_keys')) {
     $set[] = "Authkey = ?";
     $args[] = randomString();
-    $EditSummary[] = 'authkey reset';
+    $editSummary[] = 'authkey reset';
 }
 
-if ($SendHackedMail && check_perms('users_disable_any')) {
-    Misc::send_email($HackedEmail, 'Your '.SITE_NAME.' account', G::$Twig->render('emails/hacked.twig', [
+if ($sendHackedMail && check_perms('users_disable_any')) {
+    Misc::send_email($hackedEmail, 'Your '.SITE_NAME.' account', G::$Twig->render('emails/hacked.twig', [
             'site_name' => SITE_NAME,
             'server'    => BOT_SERVER,
             'port'      => BOT_PORT,
@@ -541,12 +544,12 @@ if ($SendHackedMail && check_perms('users_disable_any')) {
         ]),
         'noreply'
     );
-    Tools::disable_users($UserID, '', 1);
-    $EditSummary[] = "hacked account email sent to $HackedEmail";
+    Tools::disable_users($userID, '', 1);
+    $editSummary[] = "hacked account email sent to $hackedEmail";
 }
 
-if ($MergeStatsFrom && check_perms('users_edit_ratio')) {
-    $stats = $user->mergeLeechStats($MergeStatsFrom, $LoggedUser['Username']);
+if ($mergeStatsFrom && check_perms('users_edit_ratio')) {
+    $stats = $user->mergeLeechStats($mergeStatsFrom, $LoggedUser['Username']);
     if ($stats) {
         $merge = new Gazelle\User($stats['userId']);
         $merge->flushCache();
@@ -554,41 +557,42 @@ if ($MergeStatsFrom && check_perms('users_edit_ratio')) {
         $leechArgs[] = $stats['up'];
         $leechSet[] = "Downloaded = Downloaded + ?";
         $leechArgs[] = $stats['down'];
-        $EditSummary[] = sprintf('leech stats (up: %s, down: %s, ratio: %s) merged from %s (%s) prior(up: %s, down: %s, ratio: %s)',
+        $editSummary[] = sprintf('leech stats (up: %s, down: %s, ratio: %s) merged from %s (%s) prior(up: %s, down: %s, ratio: %s)',
             Format::get_size($stats['up']), Format::get_size($stats['down']), Format::get_ratio($stats['up'], $stats['down']),
-            $merge->url(), $MergeStatsFrom,
-            Format::get_size($Cur['Uploaded']), Format::get_size($Cur['Downloaded']),
-            Format::get_ratio($Cur['Uploaded'], $Cur['Downloaded'])
+            $merge->url(), $mergeStatsFrom,
+            Format::get_size($cur['Uploaded']), Format::get_size($cur['Downloaded']),
+            Format::get_ratio($cur['Uploaded'], $cur['Downloaded'])
         );
     }
 }
 
-if ($ChangePassword && check_perms('users_edit_password')) {
+if ($changePassword && check_perms('users_edit_password')) {
     $set[] = "PassHash = ?";
-    $args[] = Users::make_password_hash($ChangePassword);
+    $args[] = Users::make_password_hash($changePassword);
     $user->logout();
-    $EditSummary[] = 'password reset';
+    $editSummary[] = 'password reset';
 }
 
-if (!(count($set) || count($leechSet) || count($EditSummary))) {
-    if (!$Reason) {
-        header("Location: user.php?id=$UserID");
+if (!(count($set) || count($leechSet) || count($editSummary))) {
+    if (!$reason) {
+        header("Location: user.php?id=$userID");
+        exit;
     } else {
-        $EditSummary[] = 'notes added';
+        $editSummary[] = 'notes added';
     }
 }
 
-if (count($EditSummary)) {
-    $summary = implode(', ', $EditSummary) . ' by ' . $LoggedUser['Username'];
+if (count($editSummary)) {
+    $summary = implode(', ', $editSummary) . ' by ' . $LoggedUser['Username'];
     $set[] = "AdminComment = ?";
-    $args[] = sqltime() . ' - ' . ucfirst($summary) . ($Reason ? "\nReason: $Reason" : '') . "\n\n$AdminComment";
-} elseif ($AdminComment != $Cur['AdminComment']) {
+    $args[] = sqltime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment";
+} elseif ($adminComment != $cur['AdminComment']) {
     $set[] = "AdminComment = ?";
-    $args[] = $AdminComment;
+    $args[] = $adminComment;
 }
 
 if ($set) {
-    $args[] = $UserID;
+    $args[] = $userID;
     $DB->prepared_query("
         UPDATE users_main AS m
         INNER JOIN users_info AS i ON (m.ID = i.UserID)
@@ -599,7 +603,7 @@ if ($set) {
 }
 
 if ($leechSet) {
-    $leechArgs[] = $UserID;
+    $leechArgs[] = $userID;
     $DB->prepared_query("
         UPDATE users_leech_stats
         SET " . implode(', ', $leechSet) . "
@@ -616,24 +620,24 @@ if ($addedClasses) {
 }
 
 if ($newBonusPoints !== false) {
-    $Bonus = new \Gazelle\Bonus;
-    $Bonus->setPoints($UserID, $newBonusPoints);
+    $bonus = new \Gazelle\Bonus;
+    $bonus->setPoints($userID, $newBonusPoints);
 }
 
-if ($FLTokens != $Cur['FLTokens']) {
-    $user->updateTokens($FLTokens);
+if ($flTokens != $cur['FLTokens']) {
+    $user->updateTokens($flTokens);
 }
 
-if (count($TrackerUserUpdates) > 1) {
-    Tracker::update_tracker('update_user', $TrackerUserUpdates);
+if (count($trackerUserUpdates) > 1) {
+    Tracker::update_tracker('update_user', $trackerUserUpdates);
 }
 
 $user->flushCache();
 
-header("location: user.php?id=$UserID");
+header("location: user.php?id=$userID");
 
-function translateUserStatus($Status) {
-    switch ($Status) {
+function translateUserStatus($status) {
+    switch ($status) {
         case 0:
             return 'Unconfirmed';
         case 1:
@@ -641,18 +645,18 @@ function translateUserStatus($Status) {
         case 2:
             return 'Disabled';
         default:
-            return $Status;
+            return $status;
     }
 }
 
-function enabledStatus($Status) {
-    switch ($Status) {
+function enabledStatus($status) {
+    switch ($status) {
         case 0:
             return 'Disabled';
         case 1:
             return 'Enabled';
         default:
-            return $Status;
+            return $status;
     }
 }
 
