@@ -2,6 +2,16 @@
 
 use Gazelle\Util\SortableTableHeader;
 
+if (!isset($_GET['userid'])) {
+    header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
+    exit;
+}
+
+$userID = $_GET['userid'];
+if (!is_number($userID)) {
+    error(0);
+}
+
 $sortOrderMap = [
     'time'     => ['Time', 'desc'],
     'name'     => ['Name', 'asc'],
@@ -16,18 +26,17 @@ $orderWay = (empty($_GET['sort']) || $_GET['sort'] == $sortOrderMap[$sortOrder][
     ? $sortOrderMap[$sortOrder][1]
     : SortableTableHeader::SORT_DIRS[$sortOrderMap[$sortOrder][1]];
 
-$userVotes = Votes::get_user_votes($LoggedUser['ID']);
+$header = new SortableTableHeader([
+    'name' => 'Torrent',
+    'time' => 'Time',
+    'size' => 'Size',
+], $sortOrder, $orderWay);
 
-if (!isset($_GET['userid'])) {
-    header("Location: torrents.php?type={$_GET['type']}&userid={$LoggedUser['ID']}");
-    exit;
-}
-
-$userID = $_GET['userid'];
-if (!is_number($userID)) {
-    error(0);
-}
-$tagMan = new \Gazelle\Manager\Tag;
+$headerIcons = new SortableTableHeader([
+    'snatched' => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
+    'seeders'  => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
+    'leechers' => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
+], $sortOrder, $orderWay, ['asc' => '', 'desc' => '']);
 
 if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
     $page = $_GET['page'];
@@ -39,6 +48,7 @@ if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
 
 $cond = [];
 $args = [];
+
 if (!empty($_GET['format'])) {
     if (in_array($_GET['format'], $Formats)) {
         $cond[] = 't.Format = ?';
@@ -111,6 +121,7 @@ if (!isset($_GET['tags_type'])) {
 }
 
 if (!empty($_GET['tags'])) {
+    $tagMan = new \Gazelle\Manager\Tag;
     $tags = explode(',', $_GET['tags']);
     $includeTags = [];
     $excludeTags = [];
@@ -157,55 +168,62 @@ switch ($_GET['type']) {
         if (!check_paranoia('snatched', $user['Paranoia'], $userClass, $userID)) {
             error(403);
         }
+        $join = "INNER JOIN xbt_snatched AS xs ON (xs.fid =  t.ID)";
         $time = 'xs.tstamp';
         $userField = 'xs.uid';
-        $from = "
-            xbt_snatched AS xs
-                INNER JOIN torrents AS t ON t.ID = xs.fid
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
+        break;
+    case 'snatched-unseeded':
+        if (!check_paranoia('snatched', $user['Paranoia'], $userClass, $userID)) {
+            error(403);
+        }
+        $join = "INNER JOIN xbt_snatched AS xs ON (xs.fid = t.ID)
+            LEFT JOIN xbt_files_users AS xfu USING (uid, fid)";
+        $cond[] = 'xfu.fid IS NULL';
+        $time = 'xs.tstamp';
+        $userField = 'xs.uid';
         break;
     case 'seeding':
         if (!check_paranoia('seeding', $user['Paranoia'], $userClass, $userID)) {
             error(403);
         }
+        $join = "INNER JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID)";
+        $cond[] = 'xfu.active = 1 AND xfu.Remaining = 0';
         $time = '(xfu.mtime - xfu.timespent)';
         $userField = 'xfu.uid';
-        $cond[] = 'xfu.active = 1 AND xfu.Remaining = 0';
-        $from = "
-            xbt_files_users AS xfu
-                INNER JOIN torrents AS t ON t.ID = xfu.fid
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'leeching':
         if (!check_paranoia('leeching', $user['Paranoia'], $userClass, $userID)) {
             error(403);
         }
+        $join = "INNER JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID)";
+        $cond[] = 'xfu.active = 1 AND xfu.Remaining > 0';
         $time = '(xfu.mtime - xfu.timespent)';
         $userField = 'xfu.uid';
-        $cond[] = 'xfu.active = 1 AND xfu.Remaining > 0';
-        $from = "
-            xbt_files_users AS xfu
-                INNER JOIN torrents AS t ON t.ID = xfu.fid
-                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     case 'uploaded':
         if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !check_paranoia('uploads', $user['Paranoia'], $userClass, $userID)) {
             error(403);
         }
+        $join = "";
         $time = 'unix_timestamp(t.Time)';
         $userField = 't.UserID';
-        $from = "torrents AS t
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
+        break;
+    case 'uploaded-unseeded':
+        if ((empty($_GET['filter']) || $_GET['filter'] !== 'perfectflac') && !check_paranoia('uploads', $user['Paranoia'], $userClass, $userID)) {
+            error(403);
+        }
+        $join = "LEFT JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)";
+        $cond[] = 'xfu.fid IS NULL';
+        $time = 'unix_timestamp(t.Time)';
+        $userField = 't.UserID';
         break;
     case 'downloaded':
         if (!($userID == $LoggedUser['ID'] || check_perms('site_view_torrent_snatchlist'))) {
             error(403);
         }
+        $join = "INNER JOIN users_downloads AS ud ON (ud.TorrentID = t.ID)";
         $time = 'unix_timestamp(ud.Time)';
         $userField = 'ud.UserID';
-        $from = "users_downloads AS ud
-            INNER JOIN torrents AS t ON (t.ID = ud.TorrentID)
-            INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)";
         break;
     default:
         error(404);
@@ -232,113 +250,92 @@ if (!empty($_GET['filter'])) {
     }
 }
 
-$cond[] = "$userField = ?";
-$args[] = $userID;
-$whereCondition = implode("\nAND ", $cond);
+$having = [];
+$havingArgs = [];
+$havingColumns = '';
+$havingCondition = '';
 
+if (trim($_GET['search']) !== '') {
+    $join .= "\nINNER JOIN torrents_artists AS ta ON (ta.GroupID = t.GroupID)
+        INNER JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)";
+    $words = array_unique(array_filter(explode(' ', $_GET['search']), 'mb_strlen'));
+    if ($words) {
+        $havingColumns = ", aa.Name as aName, tg.Name as gName, tg.Year";
+        $having[] = '('
+            . implode(' OR ', array_fill(0, count($words),
+                "CONCAT_WS(GROUP_CONCAT(aName), ' ', gName, ' ', tg.Year) LIKE concat('%', ?, '%')"
+            ))
+            . ')';
+        $havingArgs = $words;
+    }
+}
+if ($having) {
+    $havingCondition = "HAVING " . implode(' AND ', $having);
+}
+
+$cond[] = "$userField = ?";
+$args = array_merge($args, [$userID], $havingArgs);
+
+$whereCondition = implode("\nAND ", $cond);
 if (empty($groupBy)) {
     $groupBy = 't.ID';
 }
 
-if ((empty($_GET['search']) || trim($_GET['search']) === '') && $sortOrder != 'name') {
-    $DB->prepared_query("
-        SELECT
-            SQL_CALC_FOUND_ROWS
-            t.GroupID,
-            t.ID AS TorrentID,
-            $time AS Time,
-            tg.CategoryID
-        FROM $from
+$torrentCount = $DB->scalar("
+    SELECT count(*) FROM (
+        SELECT t.ID $havingColumns
+        FROM torrents AS t
         INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+        INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+        $join
         WHERE $whereCondition
         GROUP BY $groupBy
-        ORDER BY $orderBy $orderWay
-        LIMIT $limit
-        ", ...$args
-    );
-} else {
-    $DB->prepared_query("
-        CREATE TEMPORARY TABLE temp_sections_torrents_user (
-            GroupID int(10) unsigned not null,
-            TorrentID int(10) unsigned not null,
-            Time int(12) unsigned not null,
-            CategoryID int(3) unsigned,
-            Seeders int(6) unsigned,
-            Leechers int(6) unsigned,
-            Snatched int(10) unsigned,
-            Name mediumtext,
-            Size bigint(12) unsigned,
-        PRIMARY KEY (TorrentID)) CHARSET=utf8
-    ");
-    $DB->prepared_query("
-        INSERT IGNORE INTO temp_sections_torrents_user
-            SELECT
-                t.GroupID,
-                t.ID AS TorrentID,
-                $time AS Time,
-                tg.CategoryID,
-                tls.Seeders,
-                tls.Leechers,
-                tls.Snatched,
-                CONCAT_WS(' ', GROUP_CONCAT(aa.Name SEPARATOR ' '), ' ', tg.Name, ' ', tg.Year, ' ') AS Name,
-                t.Size
-            FROM $from
-            INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-            LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
-            LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
-            WHERE $whereCondition
-            GROUP BY TorrentID, Time
-        ", ...$args
-    );
+        $havingCondition
+    ) SEARCH
+    ", ...$args
+);
 
-    if (!empty($_GET['search']) && trim($_GET['search']) !== '') {
-        $words = array_unique(explode(' ', db_string($_GET['search'])));
-    }
-
-    if (($dotpos = strpos($orderBy, '.')) !== false) {
-        $orderBy = substr($orderBy, $dotpos + 1);
-    }
-
-    $sql = "
-        SELECT
-            SQL_CALC_FOUND_ROWS
-            GroupID,
-            TorrentID,
-            Time,
-            CategoryID
-        FROM temp_sections_torrents_user";
-    if (!empty($words)) {
-        $sql .= "
-        WHERE Name LIKE '%".implode("%' AND Name LIKE '%", $words)."%'";
-    }
-    $sql .= "
-        ORDER BY $orderBy $orderWay
-        LIMIT $limit";
-    $DB->prepared_query($sql);
-}
+$DB->prepared_query("
+    SELECT
+        t.GroupID,
+        t.ID AS TorrentID,
+        $time AS Time,
+        tg.CategoryID $havingColumns
+    FROM torrents AS t
+    INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+    INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+    $join
+    WHERE $whereCondition
+    GROUP BY $groupBy
+    $havingCondition
+    ORDER BY $orderBy $orderWay
+    LIMIT $limit
+    ", ...$args
+);
 
 $groupIDs = $DB->collect('GroupID');
 $torrentsInfo = $DB->to_array('TorrentID', MYSQLI_ASSOC);
-$torrentCount = $DB->scalar('SELECT FOUND_ROWS()');
 
 $results = Torrents::get_groups($groupIDs);
 $action = display_str($_GET['type']);
 $user = Users::user_info($userID);
+$pages = Format::get_pages($page, $torrentCount, TORRENTS_PER_PAGE);
+$urlStem = "torrents.php?userid={$userID}&amp;type=";
 
 View::show_header($user['Username']."'s $action torrents",'voting');
-
-$pages = Format::get_pages($page, $torrentCount, TORRENTS_PER_PAGE);
 ?>
 <div class="thin">
     <div class="linkbox">
-    <a class="brackets" href="torrents.php?type=uploaded&amp;userid=<?= $userID ?>">uploaded</a>
-    <a class="brackets" href="torrents.php?type=downloaded&amp;userid=<?= $userID ?>">downloaded</a>
-    <a class="brackets" href="torrents.php?type=snatched&amp;userid=<?= $userID ?>">snatched</a>
-    <a class="brackets" href="torrents.php?type=seeding&amp;userid=<?= $userID ?>">seeding</a>
-    <a class="brackets" href="torrents.php?type=leeching&amp;userid=<?= $userID ?>">leeching</a>
+    <a class="brackets" href="<?= $urlStem ?>uploaded" title="Torrents you have uploaded">uploaded</a>
+    <a class="brackets" href="<?= $urlStem ?>uploaded-unseeded" title="Torrents you have uploaded but are not currently seeding">uploaded (unseeded)</a>
+    <a class="brackets" href="<?= $urlStem ?>downloaded" title="Torrents you have downloaded but never snatched completely">downloaded</a>
+    <a class="brackets" href="<?= $urlStem ?>snatched" title="Torrents you have snatched">snatched</a>
+    <a class="brackets" href="<?= $urlStem ?>snatched-unseeded" title="Torrents you have snatched but are not not currently seeding">snatched (unseeded)</a>
+    <a class="brackets" href="<?= $urlStem ?>seeding" title="Your seeding torrents that are earning bonus points">seeding</a>
+    <a class="brackets" href="<?= $urlStem ?>leeching" title="Torrents you have downloaded and partially snatched">leeching</a>
     </div>
     <div class="header">
-        <h2><a href="user.php?id=<?=$userID?>"><?=$user['Username']?></a><?="'s $action torrents"?></h2>
+        <h2><a href="user.php?id=<?=$userID?>"><?=$user['Username']?></a>'s <?= str_replace('-', ' and ', $action) ?> torrents</h2>
     </div>
     <div>
         <form class="search_form" name="torrents" action="" method="get">
@@ -356,28 +353,28 @@ $pages = Format::get_pages($page, $torrentCount, TORRENTS_PER_PAGE);
                     <td class="nobr" colspan="3">
                         <select id="bitrate" name="bitrate" class="ft_bitrate">
                             <option value="">Bitrate</option>
-<?php    foreach ($Bitrates as $bitrateName) { ?>
+<?php foreach ($Bitrates as $bitrateName) { ?>
                             <option value="<?=display_str($bitrateName); ?>"<?php Format::selected('bitrate', $bitrateName); ?>><?=display_str($bitrateName); ?></option>
-<?php    } ?>                </select>
+<?php } ?>                </select>
 
                         <select name="format" class="ft_format">
                             <option value="">Format</option>
-<?php    foreach ($Formats as $formatName) { ?>
+<?php foreach ($Formats as $formatName) { ?>
                             <option value="<?=display_str($formatName); ?>"<?php Format::selected('format', $formatName); ?>><?=display_str($formatName); ?></option>
-<?php    } ?>
+<?php } ?>
                             <option value="perfectflac"<?php Format::selected('filter', 'perfectflac'); ?>>Perfect FLACs</option>
                         </select>
                         <select name="media" class="ft_media">
                             <option value="">Media</option>
-<?php    foreach ($Media as $mediaName) { ?>
+<?php foreach ($Media as $mediaName) { ?>
                             <option value="<?=display_str($mediaName); ?>"<?php Format::selected('media',$mediaName); ?>><?=display_str($mediaName); ?></option>
-<?php    } ?>
+<?php } ?>
                         </select>
                         <select name="releasetype" class="ft_releasetype">
                             <option value="">Release type</option>
-<?php    foreach ($ReleaseTypes as $id=>$type) { ?>
+<?php foreach ($ReleaseTypes as $id=>$type) { ?>
                             <option value="<?=display_str($id); ?>"<?php Format::selected('releasetype',$id); ?>><?=display_str($type); ?></option>
-<?php    } ?>
+<?php } ?>
                         </select>
                     </td>
                 </tr>
@@ -465,25 +462,12 @@ foreach ($Categories as $catKey => $catName) {
             </div>
         </form>
     </div>
-<?php    if (count($groupIDs) === 0) { ?>
+<?php if (!$torrentCount) { ?>
     <div class="center">
         Nothing found!
     </div>
-<?php    } else {
-
-    $header = new SortableTableHeader([
-        'name' => 'Torrent',
-        'time' => 'Time',
-        'size' => 'Size',
-    ], $sortOrder, $orderWay);
-
-    $headerIcons = new SortableTableHeader([
-        'snatched' => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
-        'seeders'  => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
-        'leechers' => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
-    ], $sortOrder, $orderWay, ['asc' => '', 'desc' => '']);
-
-    ?>
+<?php } else { ?>
+    <h4><?= number_format($torrentCount) ?> torrent<?= plural($torrentCount) ?> found.</h4>
     <div class="linkbox"><?=$pages?></div>
     <table class="torrent_table cats m_table" width="100%">
         <tr class="colhead">
@@ -497,6 +481,8 @@ foreach ($Categories as $catKey => $catName) {
         </tr>
 <?php
     $pageSize = 0;
+    $userVotes = Votes::get_user_votes($LoggedUser['ID']);
+
     foreach ($torrentsInfo as $torrentID => $info) {
         [$groupID, , $time] = array_values($info);
 
@@ -547,7 +533,7 @@ foreach ($Categories as $catKey => $catName) {
                         | <a href="reportsv2.php?action=report&amp;id=<?=$torrentID?>" class="tooltip" title="Report">RP</a> ]
                     </span>
                     <?= $displayName ?>
-<?php                    Votes::vote_link($groupID, isset($userVotes[$groupID]) ? $userVotes[$groupID]['Type'] : ''); ?>
+<?php    Votes::vote_link($groupID, isset($userVotes[$groupID]) ? $userVotes[$groupID]['Type'] : ''); ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userID.'&amp;tags=')?></div>
                 </div>
             </td>
@@ -558,10 +544,10 @@ foreach ($Categories as $catKey => $catName) {
             <td class="td_leechers m_td_right number_column"><?=number_format($torrent['Leechers'])?></td>
         </tr>
 <?php
-    }?>
+    } /* foreach */ ?>
     </table>
 <?php
-} ?>
+} /* if ($torrentCount) */ ?>
     <div class="linkbox"><?= $pages ?></div>
 </div>
 <?php
