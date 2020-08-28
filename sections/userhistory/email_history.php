@@ -1,22 +1,13 @@
 <?php
-/************************************************************************
-||------------|| User email history page ||---------------------------||
 
-This page lists previous email addresses a user has used on the site. It
-gets called if $_GET['action'] == 'email'.
+/* Display all email addresses a user has used on the site. */
 
-It also requires $_GET['userid'] in order to get the data for the correct
-user.
-
-************************************************************************/
-
-
-$UserID = $_GET['userid'];
-if (!is_number($UserID)) {
+$UserID = (int)$_GET['userid'];
+if (!$UserID) {
     error(404);
 }
 
-list($Username, $Joined, $Class) = $DB->row("
+[$Username, $Joined, $Class] = $DB->row("
     SELECT um.Username, ui.JoinDate, p.Level AS Class
     FROM users_main        um
     INNER JOIN users_info  ui ON (ui.UserID = um.ID)
@@ -41,8 +32,8 @@ if ($UsersOnly) {
             u.IP,
             c.Code
         FROM users_main AS u
-            LEFT JOIN users_main AS u2 ON u2.Email = u.Email AND u2.ID != '$UserID'
-            LEFT JOIN geoip_country AS c ON INET_ATON(u.IP) BETWEEN c.StartIP AND c.EndIP
+        LEFT JOIN users_main AS u2 ON (u2.Email = u.Email AND u2.ID != '$UserID')
+        LEFT JOIN geoip_country AS c ON (INET_ATON(u.IP) BETWEEN c.StartIP AND c.EndIP)
         WHERE u.ID = '$UserID'
             AND u2.ID > 0
         UNION
@@ -52,8 +43,8 @@ if ($UsersOnly) {
             h.IP,
             c.Code
         FROM users_history_emails AS h
-            LEFT JOIN users_history_emails AS h2 ON h2.email = h.email and h2.UserID != '$UserID'
-            LEFT JOIN geoip_country AS c ON INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP
+        LEFT JOIN users_history_emails AS h2 ON (h2.email = h.email and h2.UserID != '$UserID')
+        LEFT JOIN geoip_country AS c ON (INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP)
         WHERE h.UserID = '$UserID'
             AND h2.UserID > 0
         ORDER BY Time DESC");
@@ -65,7 +56,7 @@ if ($UsersOnly) {
             u.IP,
             c.Code
         FROM users_main AS u
-            LEFT JOIN geoip_country AS c ON INET_ATON(u.IP) BETWEEN c.StartIP AND c.EndIP
+        LEFT JOIN geoip_country AS c ON (INET_ATON(u.IP) BETWEEN c.StartIP AND c.EndIP)
         WHERE u.ID = '$UserID'
         UNION
         SELECT
@@ -74,7 +65,7 @@ if ($UsersOnly) {
             h.IP,
             c.Code
         FROM users_history_emails AS h
-            LEFT JOIN geoip_country AS c ON INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP
+        LEFT JOIN geoip_country AS c ON (INET_ATON(h.IP) BETWEEN c.StartIP AND c.EndIP)
         WHERE UserID = '$UserID'
         ORDER BY Time DESC");
 }
@@ -142,5 +133,4 @@ foreach ($History as $Key => $Values) {
 } ?>
 </table>
 <?php
-
 View::show_footer();

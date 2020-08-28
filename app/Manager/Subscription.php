@@ -459,4 +459,57 @@ class Subscription extends \Gazelle\Base {
         $this->db->set_query_id($QueryID);
         $this->cache->delete_value('subscriptions_user_new_' . $this->userId);
     }
+
+    public function catchupSubscriptions() {
+        $this->db->prepared_query("
+            INSERT INTO forums_last_read_topics (UserID, TopicID, PostID)
+                SELECT us.UserID, ft.ID, ft.LastPostID
+                FROM users_subscriptions us
+                INNER JOIN forums_topics ft ON (ft.ID = us.TopicID)
+                WHERE us.UserID = ?
+            ON DUPLICATE KEY UPDATE PostID = LastPostID
+            ", $this->userId
+        );
+        $this->db->prepared_query("
+            INSERT INTO users_comments_last_read (UserID, Page, PageID, PostID)
+                SELECT s.UserID, s.Page, s.PageID, IFNULL(c.ID, 0) AS LastPostID
+                FROM users_subscriptions_comments AS s
+                LEFT JOIN comments AS c ON (c.Page = s.Page AND c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
+                WHERE s.UserID = ?
+            ON DUPLICATE KEY UPDATE PostID = LastPostID
+            ", $this->userId
+        );
+        $this->cache->delete_value('subscriptions_user_new_' . $this->userId);
+    }
+
+    public function toggleCollageSubscription(int $collageId) {
+        if ($this->db->scalar("
+            SELECT 1
+            FROM users_collage_subs
+            WHERE UserID = ?
+                AND CollageID = ?
+            ", $this->userId, $collageId
+        )) {
+            $this->db->prepared_query("
+                DELETE FROM users_collage_subs
+                WHERE UserID = ?
+                    AND CollageID = ?
+                ", $this->userId, $collageId
+            );
+            \Collages::decrease_subscriptions($collageId);
+        } else {
+            $this->db->prepared_query("
+                INSERT IGNORE INTO users_collage_subs
+                       (UserID, CollageID)
+                VALUES (?,      ?)
+                ", $this->userId, $collageId
+            );
+            \Collages::increase_subscriptions($collageId);
+        }
+        $this->cache->deleteMulti([
+            'collage_subs_user_' . $this->userId,
+            'collage_subs_user_new_' . $this->userId,
+            'collage_' . $collageId
+        ]);
+    }
 }

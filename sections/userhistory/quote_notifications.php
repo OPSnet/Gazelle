@@ -166,4 +166,5 @@ foreach ($Results as $Result) {
     </table>
 <?php } ?>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

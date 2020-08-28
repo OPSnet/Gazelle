@@ -332,5 +332,4 @@ View::show_header('Subscribed collages','browse,collage');
 ?>
 </div>
 <?php
-
 View::show_footer();

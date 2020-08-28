@@ -639,16 +639,6 @@ class User extends Base {
         return $new;
     }
 
-    public function clearCollages() {
-        $this->db->prepared_query("
-            UPDATE users_collage_subs SET
-                LastVisit = now()
-            WHERE UserID = ?
-            ", $this->id
-        );
-        $this->cache->delete_value('collage_subs_user_new_' . $this->id);
-    }
-
     public function emailHistory(): array {
         $this->db->prepared_query('
             SELECT DISTINCT Email, IP
