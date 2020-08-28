@@ -14,11 +14,11 @@ if (!is_number($userID)) {
 
 $sortOrderMap = [
     'time'     => ['Time', 'desc'],
-    'name'     => ['Name', 'asc'],
-    'seeders'  => ['tls.Seeders', 'desc'],
-    'leechers' => ['tls.Leechers', 'desc'],
-    'snatched' => ['tls.Snatched', 'desc'],
-    'size'     => ['Size', 'desc'],
+    'name'     => ['t.Name', 'asc'],
+    'snatched' => ['tls.Snatched', 'desc', 't.Size desc'],
+    'seeders'  => ['tls.Seeders', 'desc', 't.Size desc'],
+    'leechers' => ['tls.Leechers', 'desc', 't.Size desc'],
+    'size'     => ['t.Size', 'desc'],
 ];
 $sortOrder = (!empty($_GET['order']) && isset($sortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
 $orderBy = $sortOrderMap[$sortOrder][0];
@@ -32,11 +32,17 @@ $header = new SortableTableHeader([
     'size' => 'Size',
 ], $sortOrder, $orderWay);
 
+$iconUri = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
 $headerIcons = new SortableTableHeader([
-    'snatched' => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
-    'seeders'  => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
-    'leechers' => '<img src="<?= STATIC_SERVER ?>styles/' . $LoggedUser['StyleName'] . '/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
+    'snatched' => '<img src="' . $iconUri . '/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
+    'seeders'  => '<img src="' . $iconUri . '/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
+    'leechers' => '<img src="' . $iconUri . '/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
 ], $sortOrder, $orderWay, ['asc' => '', 'desc' => '']);
+
+$orderBy .= " $orderWay";
+if (count($sortOrderMap[$sortOrder]) == 3) {
+    $orderBy .= ', ' . $sortOrderMap[$sortOrder][2];
+}
 
 if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
     $page = $_GET['page'];
@@ -48,7 +54,6 @@ if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
 
 $cond = [];
 $args = [];
-
 if (!empty($_GET['format'])) {
     if (in_array($_GET['format'], $Formats)) {
         $cond[] = 't.Format = ?';
@@ -254,16 +259,15 @@ $having = [];
 $havingArgs = [];
 $havingColumns = '';
 $havingCondition = '';
-
 if (trim($_GET['search']) !== '') {
-    $join .= "\nINNER JOIN torrents_artists AS ta ON (ta.GroupID = t.GroupID)
+    $join .= "INNER JOIN torrents_artists AS ta ON (ta.GroupID = t.GroupID)
         INNER JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)";
     $words = array_unique(array_filter(explode(' ', $_GET['search']), 'mb_strlen'));
     if ($words) {
         $havingColumns = ", aa.Name as aName, tg.Name as gName, tg.Year";
         $having[] = '('
             . implode(' OR ', array_fill(0, count($words),
-                "CONCAT_WS(GROUP_CONCAT(aName), ' ', gName, ' ', tg.Year) LIKE concat('%', ?, '%')"
+                "concat_ws(' ', group_concat(aName), gName, tg.Year) LIKE concat('%', ?, '%')"
             ))
             . ')';
         $havingArgs = $words;
@@ -308,7 +312,7 @@ $DB->prepared_query("
     WHERE $whereCondition
     GROUP BY $groupBy
     $havingCondition
-    ORDER BY $orderBy $orderWay
+    ORDER BY $orderBy
     LIMIT $limit
     ", ...$args
 );
