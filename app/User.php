@@ -321,7 +321,7 @@ class User extends Base {
             FROM users_history_ips
             WHERE UserID = ?
             GROUP BY IP
-            ORDER BY IP, StartTime DESC, EndTime DESC
+            ORDER BY inet_aton(IP), StartTime DESC, EndTime DESC
             ", $this->id
         );
         return $this->db->to_array(false, MYSQLI_NUM, false);
@@ -334,7 +334,7 @@ class User extends Base {
                 from_unixtime(max(tstamp)) as last_seen
             FROM xbt_snatched
             WHERE uid = ?
-            GROUP BY ip
+            GROUP BY inet_aton(IP)
             ORDER BY tstamp DESC
             ", $this->id
         );
