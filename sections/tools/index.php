@@ -281,6 +281,10 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/data/user_flow.php');
         break;
 
+    case 'user_info':
+        require(__DIR__ . '/data/user_info.php');
+        break;
+
     case 'economic_stats':
         require(__DIR__ . '/data/economic_stats.php');
         break;
