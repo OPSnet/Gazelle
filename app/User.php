@@ -313,6 +313,34 @@ class User extends Base {
         $this->cache->delete_value('notifications_new_' . $this->id);
     }
 
+    public function siteIPv4Summary() {
+        $this->db->prepared_query("
+            SELECT IP,
+                min(StartTime) AS min_start,
+                max(coalesce(EndTime, now())) AS max_end
+            FROM users_history_ips
+            WHERE UserID = ?
+            GROUP BY IP
+            ORDER BY IP, StartTime DESC, EndTime DESC
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_NUM, false);
+    }
+
+    public function trackerIPv4Summary() {
+        $this->db->prepared_query("
+            SELECT IP,
+                from_unixtime(min(tstamp)) as first_seen,
+                from_unixtime(max(tstamp)) as last_seen
+            FROM xbt_snatched
+            WHERE uid = ?
+            GROUP BY ip
+            ORDER BY tstamp DESC
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_NUM, false);
+    }
+
     public function resetIpHistory() {
         $n = 0;
         $this->db->prepared_query("
@@ -639,24 +667,39 @@ class User extends Base {
         return $new;
     }
 
+    /**
+     * Email history
+     *
+     * @return array [email address, ip, date]
+     */
     public function emailHistory(): array {
-        $this->db->prepared_query('
-            SELECT DISTINCT Email, IP
-            FROM users_history_emails
+        $this->db->prepared_query("
+            SELECT
+                u.Email,
+                u.IP,
+                now() AS Time
+            FROM users_main AS u
+            WHERE u.ID = ?
+            UNION
+            SELECT
+                h.Email,
+                h.IP,
+                h.Time
+            FROM users_history_emails AS h
             WHERE UserID = ?
-            ORDER BY Time ASC
-            ', $this->id
+            ORDER BY Time DESC
+            ", $this->id, $this->id
         );
-        return $this->db->to_array();
+        return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
     public function isFriend($id) {
-        $this->db->prepared_query('
+        $this->db->prepared_query("
             SELECT 1
             FROM friends
             WHERE UserID = ?
                 AND FriendID = ?
-            ', $id, $this->id
+            ", $id, $this->id
         );
         return $this->db->has_results();
     }
@@ -733,6 +776,14 @@ class User extends Base {
             SELECT JoinDate
             FROM users_info
             WHERE UserID = ?
+        ');
+    }
+
+    public function lastAccess() {
+        return $this->getSingleValue('user-last-access', '
+            SELECT ula.last_access
+            FROM user_last_access ula
+            WHERE user_id = ?
         ');
     }
 

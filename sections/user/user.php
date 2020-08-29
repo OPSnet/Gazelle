@@ -207,7 +207,7 @@ if (check_perms('admin_manage_permissions', $Class)) {
 if (check_perms('users_view_ips', $Class)) {
 ?>
         <a href="user.php?action=sessions&amp;userid=<?=$UserID?>" class="brackets">Sessions</a>
-        <a href="userhistory.php?action=copypaste&amp;userid=<?=$UserID?>" class="brackets">Generate Copy-Paste</a>
+        <a href="tools.php?action=user_info&amp;userid=<?=$UserID?>" class="brackets">Email/IP summary</a>
 <?php
 }
 if (check_perms('admin_reports')) {
