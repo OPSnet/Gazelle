@@ -44,5 +44,7 @@ View::show_header("Email history for <?= Users::user_info($userId)['Username'] ?
     </table>
 
 <?= G::$Twig->render('user/email-dup.twig', [ 'other' => $other ]) ?>
-
+<br />
 </div>
+<?php
+View::show_footer();
