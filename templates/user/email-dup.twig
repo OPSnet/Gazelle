@@ -1,0 +1,34 @@
+{% for r in other %}
+{% if loop.first %}
+<br />
+<div class="header">
+<h3>Duplicate email addresses used</h3>
+</div>
+<table>
+    <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Registered since</th>
+        <th>Registered from</th>
+        <th>Enabled</th>
+        <th>Donor</th>
+        <th>Warned until</th>
+    </tr>
+{% endif %}
+    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <td><a href="userhistory.php?action=email&userid={{ r.user_id }}">{{ r.username }}</a></td>
+        <td>{{ r.email }}</td>
+        <td>{{ r.created }}</td>
+        <td>{{ r.ipv4 }}
+            <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ r.ipv4 }}" class="brackets tooltip" title="Shared with other users?">S</a>
+            <a href="https://whatismyipaddress.com/ip/{{ r.ipv4 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
+        </td>
+        <td>{{ r.is_enabled ? 'yes' : 'no' }}</td>
+        <td>{{ r.is_donor ? 'yes' : 'no' }}</td>
+        <td>{{ r.is_warned }}</td>
+    </tr>
+{% if loop.last %}
+</table>
+<br />
+{% endif %}
+{% endfor %}

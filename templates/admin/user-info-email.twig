@@ -1,0 +1,16 @@
+<tr><th colspan="3">Email History</th></tr>
+<tr>
+    <th>Address</th>
+    <th>Registered since</th>
+    <th>Registered from</th>
+</tr>
+{% for i in info %}
+<tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+    <td>{{ i.0 }}</td>
+    <td>{{ i.1 }}</td>
+    <td>{{ i.2 }}
+        <a href="user.php?action=search&amp;ip_history=on&amp;ip={{ i.0 }}" class="brackets tooltip" title="Shared with other users?">S</a>
+        <a href="https://whatismyipaddress.com/ip/{{ i.0 }}" class="brackets tooltip" title="Search WIMIA.com">WI</a>
+    </td>
+</tr>
+{% endfor %}

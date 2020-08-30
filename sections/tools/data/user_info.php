@@ -19,21 +19,17 @@ View::show_header('User information');
 <tr><th>Last seen</th><td colspan="2"><?= $user->lastAccess() ?></td></tr>
 <tr><th>Joined</th><td colspan="2"><?= $user->joinDate() ?></td></tr>
 <?php
-echo G::$Twig->render('admin/user-info.twig', [
-    'title'  => 'Email History',
-    'header' => ['Address', 'Registered from', 'Registered at'],
+echo G::$Twig->render('admin/user-info-email.twig', [
     'info'   => $user->emailHistory(),
 ]);
 
-echo G::$Twig->render('admin/user-info.twig', [
+echo G::$Twig->render('admin/user-info-ipv4.twig', [
     'title'  => 'Site IPv4 Information',
-    'header' => ['Address', 'First seen', 'Last seen'],
     'info'   => $user->siteIPv4Summary(),
 ]);
 
-echo G::$Twig->render('admin/user-info.twig', [
+echo G::$Twig->render('admin/user-info-ipv4.twig', [
     'title'  => 'Tracker IPv4 Information',
-    'header' => ['Address', 'First seen', 'Last seen'],
     'info'   => $user->trackerIPv4Summary(),
 ]);
 ?>

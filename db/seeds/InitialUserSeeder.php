@@ -75,13 +75,13 @@ class InitialUserSeeder extends AbstractSeed {
             [
                 'UserID' => 1,
                 'Email' => 'admin@example.com',
-                'Time' => null,
+                'Time' => now(),
                 'IP' => '127.0.0.1'
             ],
             [
                 'UserID' => 2,
                 'Email' => 'user@example.com',
-                'Time' => null,
+                'Time' => now(),
                 'IP' => '127.0.0.1'
             ]
         ])->saveData();

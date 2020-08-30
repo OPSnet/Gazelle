@@ -168,8 +168,8 @@ if (!empty($_REQUEST['confirm'])) {
             if ($email != $InviteEmail) {
                 $DB->prepared_query('
                     INSERT INTO users_history_emails
-                           (UserID, Email, IP, Time)
-                    VALUES (?,      ?,     ?,  now())
+                           (UserID, Email, IP)
+                    VALUES (?,      ?,     ?)
                     ', $UserID, $InviteEmail, $_SERVER['REMOTE_ADDR']
                 );
             }

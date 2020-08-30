@@ -540,7 +540,7 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
 <?php        if (check_perms('users_view_email', $Class)) { ?>
-                <li>Emails: <?=number_format($User->emailCount())?> <a href="userhistory.php?action=email2&amp;userid=<?=$UserID?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">Legacy view</a></li>
+                <li>Emails: <?=number_format($User->emailCount())?> <a href="userhistory.php?action=email&amp;userid=<?=$UserID?>" class="brackets">View</a></li>
 <?php
         }
         if (check_perms('users_view_ips', $Class)) {

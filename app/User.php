@@ -675,20 +675,13 @@ class User extends Base {
     public function emailHistory(): array {
         $this->db->prepared_query("
             SELECT
-                u.Email,
-                u.IP,
-                now() AS Time
-            FROM users_main AS u
-            WHERE u.ID = ?
-            UNION
-            SELECT
                 h.Email,
-                h.IP,
-                h.Time
+                h.Time,
+                h.IP
             FROM users_history_emails AS h
-            WHERE UserID = ?
-            ORDER BY Time DESC
-            ", $this->id, $this->id
+            WHERE h.UserID = ?
+            ORDER BY h.Time DESC
+            ", $this->id
         );
         return $this->db->to_array(false, MYSQLI_NUM, false);
     }

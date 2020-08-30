@@ -26,9 +26,6 @@ if ($_GET['action']) {
         case 'email':
             require_once('email_history.php');
             break;
-        case 'email2':
-            require_once('email_history2.php');
-            break;
         case 'passkeys':
             require_once('passkey_history.php');
             break;
