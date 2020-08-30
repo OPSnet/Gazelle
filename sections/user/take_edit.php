@@ -131,66 +131,48 @@ if (isset($_POST['p_donor_stats'])) {
 // End building $Paranoia
 
 // Email change
-$DB->prepared_query('
+$CurEmail = $DB->scalar("
     SELECT Email
     FROM users_main
     WHERE ID = ?
-    ', $UserID
+    ", $UserID
 );
 
-list($CurEmail) = $DB->next_record();
 if ($CurEmail != $_POST['email']) {
     if (!check_perms('users_edit_profiles')) { // Non-admins have to authenticate to change email
-        $DB->prepared_query('
+        $PassHash = $DB->scalar("
             SELECT PassHash
             FROM users_main
             WHERE ID = ?
-            ', $UserID
+            ", $UserID
         );
-
-        list($PassHash) = $DB->next_record();
         if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
             $Err = 'You did not enter the correct password.';
         }
     }
     if (!$Err) {
         $NewEmail = $_POST['email'];
-
-        //This piece of code will update the time of their last email change to the current time *not* the current change.
-        $ChangerIP = $LoggedUser['IP'];
-        $DB->prepared_query("
-            UPDATE users_history_emails
-            SET Time = now()
-            WHERE UserID = ? 
-                AND Time = '0000-00-00 00:00:00'
-            ", $UserID
-        );
-
         $DB->prepared_query("
             INSERT INTO users_history_emails
-                (UserID, Email, IP, Time)
-            VALUES
-                (?,      ?,     ?, '0000-00-00 00:00:00')
+                   (UserID, Email, IP)
+            VALUES (?,      ?,     ?)
             ", $UserID, $NewEmail, $_SERVER['REMOTE_ADDR']
         );
     } else {
         error($Err);
         header("Location: user.php?action=edit&userid=$UserID");
-        die();
+        exit;
     }
 }
 //End email change
 
 if (!$Err && !empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
-    $DB->prepared_query('
+    $PassHash = $DB->scalar("
         SELECT PassHash
         FROM users_main
         WHERE ID = ? 
-        ', $UserID
+        ", $UserID
     );
-
-    list($PassHash) = $DB->next_record();
-
     if (Users::check_password($_POST['cur_pass'], $PassHash)) {
         if ($_POST['cur_pass'] == $_POST['new_pass_1']) {
             $Err = 'Your new password cannot be the same as your old password.';
@@ -212,7 +194,7 @@ if ($LoggedUser['DisableAvatar'] && $_POST['avatar'] != $U['Avatar']) {
 if ($Err) {
     error($Err);
     header("Location: user.php?action=edit&userid=$UserID");
-    die();
+    exit;
 }
 
 if (!empty($LoggedUser['DefaultSearch'])) {
