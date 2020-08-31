@@ -9,17 +9,17 @@
         <td colspan="{{ show_avatar ? 2 : 1 }}">
             <div style="float: left;"><a class="post_id" href="{{ url }}">#{{ id }}</a>
                 {{ header|raw }}
-{% if is_admin %}
                 - <a href="#quickpost" onclick="Quote('{{ id }}','{{ username }}', true);" class="brackets">Quote</a>
 {%    if show_edit %}
                 - <a href="#post{{ id }}" onclick="Edit_Form('{{ id }}','{{ key }}');" class="brackets">Edit</a>
 {%    endif %}
-{%    if show_delete %}
-                - <a href="#post{{ id }}" onclick="Delete('{{ id }}');" class="brackets">Delete</a>
-{%    endif %}
             </div>
             <div id="bar{{ id }}" style="float: right;">
                 <a href="reports.php?action=report&amp;type=comment&amp;id={{ id }}" class="brackets">Report</a>
+{% if is_admin %}
+{%    if show_delete %}
+                - <a href="#post{{ id }}" onclick="Delete('{{ id }}');" class="brackets">Delete</a>
+{%    endif %}
 {%    if show_warn %}
                 <form class="manage_form hidden" name="user" id="warn{{ id }}" action="comments.php" method="post">
                     <input type="hidden" name="action" value="warn" />
