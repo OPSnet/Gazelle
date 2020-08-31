@@ -9,7 +9,7 @@ class Stylesheet extends Base {
     public function __construct() {
         parent::__construct();
         if (($this->stylesheets = $this->cache->get_value('stylesheets')) === false) {
-            $this->db->query("
+            $this->db->prepared_query("
                 SELECT
                     ID,
                     lower(replace(Name, ' ', '_')) AS Name,

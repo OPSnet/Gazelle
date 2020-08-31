@@ -24,7 +24,7 @@ class Referral extends \Gazelle\Base {
         $this->proxy = new Proxy(REFERRAL_KEY, REFERRAL_BOUNCER);
 
         if ($this->accounts === false) {
-            $this->db->query("SELECT ID, Site, Active, Type FROM referral_accounts");
+            $this->db->prepared_query("SELECT ID, Site, Active, Type FROM referral_accounts");
             $this->accounts = $this->db->has_results() ? $this->db->to_array('ID') : [];
             foreach ($this->accounts as &$acc) {
                 $acc["UserIsId"] = in_array($acc["Type"], self::ID_TYPES);

@@ -164,7 +164,7 @@ class Notification extends \Gazelle\Base {
         if (!empty($userIds)) {
             $userIds = implode(',', $userIds);
             $QueryID = $this->db->get_query_id();
-            $this->db->query("
+            $this->db->prepared_query("
                 SELECT UserID
                 FROM users_notifications_settings
                 WHERE $type != 0
@@ -479,7 +479,7 @@ class Notification extends \Gazelle\Base {
             if ($Type != self::GLOBALNOTICE) {
                 $SQL .= " AND n.$Type IN (" . self::OPT_PUSH . "," . self::OPT_POPUP_PUSH . "," . self::OPT_TRADITIONAL_PUSH . ")";
             }
-            $this->db->query($SQL);
+            $this->db->prepared_query($SQL);
 
             if ($this->db->has_results()) {
                 [$PushService, $PushOptions] = $this->db->next_record(MYSQLI_NUM, false);

@@ -14,7 +14,7 @@ class Contest extends Base {
         parent::__construct();
         $this->type = $this->cache->get_value(self::CACHE_CONTEST_TYPE);
         if ($this->type === false) {
-            $this->db->query("SELECT ID, Name FROM contest_type ORDER BY ID");
+            $this->db->prepared_query("SELECT ID, Name FROM contest_type ORDER BY ID");
             $this->type = $this->db->to_array('ID');
             $this->cache->cache_value(self::CACHE_CONTEST_TYPE, $this->type, 86400 * 7);
         }
@@ -25,7 +25,7 @@ class Contest extends Base {
     }
 
     public function get_list () {
-        $this->db->query("
+        $this->db->prepared_query("
             SELECT c.ID, c.Name, c.DateBegin, c.DateEnd, t.ID AS ContestType, (cbp.BonusPoolID IS NOT NULL) AS BonusPool, cbp.Status AS BonusStatus
             FROM contest c
             INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
@@ -86,7 +86,7 @@ class Contest extends Base {
     public function get_prior_contests () {
         $Prior = $this->cache->get_value('contest_prior');
         if ($Prior === false) {
-            $this->db->query("
+            $this->db->prepared_query("
                 SELECT c.ID
                 FROM contest c
                 WHERE c.DateBegin < NOW()
@@ -203,7 +203,7 @@ class Contest extends Base {
     }
 
     public function calculate_leaderboard () {
-        $this->db->query("
+        $this->db->prepared_query("
             SELECT c.ID
             FROM contest c
             INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
@@ -222,7 +222,7 @@ class Contest extends Base {
             list($subquery, $args) = $this->leaderboard_query($Contest);
             array_unshift($args, $id);
             if ($subquery) {
-                $this->db->query("BEGIN");
+                $this->db->prepared_query("BEGIN");
                 $this->db->prepared_query('DELETE FROM contest_leaderboard WHERE ContestID = ?', $id);
                 $this->db->prepared_query("
                     INSERT INTO contest_leaderboard
@@ -246,7 +246,7 @@ class Contest extends Base {
                         TG.Name,
                         T.Time
                 ", ...$args);
-                $this->db->query("COMMIT");
+                $this->db->prepared_query("COMMIT");
                 $this->cache->delete_value('contest_leaderboard_' . $id);
                 switch ($Contest['ContestType']) {
                     case 'upload_flac':
@@ -319,7 +319,7 @@ class Contest extends Base {
         $Key = "contest_leaderboard_{$Contest['ID']}";
         $Leaderboard = $this->cache->get_value($Key);
         if (!$UseCache || $Leaderboard === false) {
-            $this->db->query("
+            $this->db->prepared_query("
             SELECT
                 l.UserID,
                 l.FlacCount,
@@ -344,7 +344,7 @@ class Contest extends Base {
             $Pairs = [];
         }
         else {
-            $this->db->query("
+            $this->db->prepared_query("
                 SELECT r.FillerID, r.UserID, count(*) AS nr
                 FROM requests r
                 WHERE r.TimeFilled BETWEEN '{$Contest['DateBegin']}' AND '{$Contest['DateEnd']}'
