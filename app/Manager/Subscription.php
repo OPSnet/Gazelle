@@ -197,26 +197,25 @@ class Subscription extends \Gazelle\Base {
      * @return int Number of unread subscribed threads/comments
      */
     public function unread() {
-        $QueryID = $this->db->get_query_id();
-
         $NewSubscriptions = $this->cache->get_value('subscriptions_user_new_' . $this->userId);
         if ($NewSubscriptions === false) {
             // forum subscriptions
             // TODO: refactor this shit and all the other places user_forums_sql is called.
-            $this->db->query("
-                SELECT COUNT(1)
+            $NewForumSubscriptions = $this->db->scalar("
+                SELECT count(*)
                 FROM users_subscriptions AS s
                 LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
                 INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
                 INNER JOIN forums AS f ON (f.ID = t.ForumID)
                 WHERE " . \Forums::user_forums_sql() . "
                     AND IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", t.LastPostID, IF(l.PostID IS NULL, 0, l.PostID)) < t.LastPostID
-                    AND s.UserID = " . $this->userId);
-            list($NewForumSubscriptions) = $this->db->next_record();
+                    AND s.UserID = ?
+                ", $this->userId
+            );
 
             // comment subscriptions
-            $this->db->prepared_query("
-                SELECT COUNT(1)
+            $NewCommentSubscriptions = $this->db->scalar("
+                SELECT count(*)
                 FROM users_subscriptions_comments AS s
                 LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = s.UserID AND lr.Page = s.Page AND lr.PageID = s.PageID)
                 LEFT JOIN comments AS c ON (c.ID = (SELECT MAX(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
@@ -226,13 +225,11 @@ class Subscription extends \Gazelle\Base {
                     AND IF(lr.PostID IS NULL, 0, lr.PostID) < c.ID
                 ", $this->userId
             );
-            list($NewCommentSubscriptions) = $this->db->next_record();
 
             $NewSubscriptions = $NewForumSubscriptions + $NewCommentSubscriptions;
             $this->cache->cache_value('subscriptions_user_new_' . $this->userId, $NewSubscriptions, 0);
         }
-        $this->db->set_query_id($QueryID);
-        return (int)$NewSubscriptions;
+        return $NewSubscriptions;
     }
 
     /**
@@ -242,19 +239,18 @@ class Subscription extends \Gazelle\Base {
     public function unreadQuotes() {
         $QuoteNotificationsCount = $this->cache->get_value('notify_quoted_' . $this->userId);
         if ($QuoteNotificationsCount === false) {
-            $QueryID = $this->db->get_query_id();
-            $this->db->query("
-                SELECT COUNT(1)
+            $QuoteNotificationsCount = $this->db->scalar("
+                SELECT count(*)
                 FROM users_notify_quoted AS q
                 LEFT JOIN forums_topics AS t ON (t.ID = q.PageID)
                 LEFT JOIN forums AS f ON (f.ID = t.ForumID)
                 LEFT JOIN collages AS c ON (q.Page = 'collages' AND c.ID = q.PageID)
-                WHERE q.UserID = " . $this->userId . "
-                    AND q.UnRead
+                WHERE q.UnRead
                     AND (q.Page != 'forums' OR " . \Forums::user_forums_sql() . ")
-                    AND (q.Page != 'collages' OR c.Deleted = '0')");
-            list($QuoteNotificationsCount) = $this->db->next_record();
-            $this->db->set_query_id($QueryID);
+                    AND (q.Page != 'collages' OR c.Deleted = '0')
+                    AND q.UserID = ?
+                ", $this->userId
+            );
             $this->cache->cache_value('notify_quoted_' . $this->userId, $QuoteNotificationsCount, 0);
         }
         return (int)$QuoteNotificationsCount;

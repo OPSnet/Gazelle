@@ -4,7 +4,7 @@ namespace Gazelle\Schedule\Tasks;
 
 class DisableInactiveUsers extends \Gazelle\Schedule\Task
 {
-    protected function query($minDays, $maxDays) {
+    protected function userQuery($minDays, $maxDays) {
         $this->db->prepared_query("
             SELECT um.Username, um.Email, um.ID
             FROM users_main AS um
@@ -29,13 +29,13 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
 
     public function run() {
         // Send email
-        $this->query(110, 111);
+        $this->userQuery(110, 111);
         while (list($username, $email) = $this->db->next_record()) {
             $body = "Hi $username,\n\nIt has been almost 4 months since you used your account at ".site_url().". This is an automated email to inform you that your account will be disabled in 10 days if you do not sign in.";
             \Misc::send_email($email, 'Your '.SITE_NAME.' account is about to be disabled', $body, 'noreply');
         }
 
-        $this->query(120, 180);
+        $this->userQuery(120, 180);
         if ($this->db->has_results()) {
             $userIDs = $this->db->collect('ID');
             \Tools::disable_users($userIDs, 'Disabled for inactivity.', 3);

@@ -26,11 +26,11 @@ abstract class AbstractUserRank extends \Gazelle\Base {
      * slow.
      */
     public function build(): array {
-        $this->db->query("
+        $this->db->prepared_query("
             DROP TEMPORARY TABLE IF EXISTS temp_stats
         ");
 
-        $this->db->query("
+        $this->db->prepared_query("
             CREATE TEMPORARY TABLE temp_stats (
                 id int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 val bigint(20) unsigned NOT NULL

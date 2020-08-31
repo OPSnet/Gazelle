@@ -13,7 +13,7 @@ class Bonus extends Base {
         parent::__construct();
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
         if ($this->items === false) {
-            $this->db->query("
+            $this->db->prepared_query("
                 SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title, sequence
                 FROM bonus_item
                 ORDER BY sequence
