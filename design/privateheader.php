@@ -1,6 +1,6 @@
 <?php
 
-use \Gazelle\Manager\Notification;
+use Gazelle\Manager\Notification;
 
 define('FOOTER_FILE', __DIR__ . '/privatefooter.php');
 
@@ -12,7 +12,7 @@ $authArgs = '&amp;user=' . G::$LoggedUser['ID']
     . '&amp;authkey=' . G::$LoggedUser['AuthKey'];
 
 $Staff = check_perms('users_mod')
-    ? new \Gazelle\Staff(G::$LoggedUser['ID'])
+    ? new Gazelle\Staff(G::$LoggedUser['ID'])
     : null;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -133,9 +133,9 @@ foreach ($Scripts as $Script) {
 global $ClassLevels;
 // Get notifications early to change menu items if needed
 global $NotificationSpans;
-$notification = new Notification(G::$LoggedUser['ID']);
-$Notifications = $notification->notifications();
-$UseNoty = $notification->useNoty();
+$notifMan = new Notification(G::$LoggedUser['ID']);
+$Notifications = $notifMan->notifications();
+$UseNoty = $notifMan->useNoty();
 $NewSubscriptions = false;
 $NotificationSpans = [];
 foreach ($Notifications as $Type => $Notification) {
@@ -149,9 +149,8 @@ foreach ($Notifications as $Type => $Notification) {
 if ($UseNoty && !empty($NotificationSpans)) {
     NotificationsManagerView::load_js();
 }
-if ($notification->isSkipped(Notification::SUBSCRIPTIONS)) {
-    $subscription = new \Gazelle\Manager\Subscription(G::$LoggedUser['ID']);
-    $NewSubscriptions = $subscription->unread();
+if ($notifMan->isSkipped(Notification::SUBSCRIPTIONS)) {
+    $NewSubscriptions = (new Gazelle\Manager\Subscription(G::$LoggedUser['ID']))->unread();
 }
 
 $NavItems = Users::get_user_nav_items(G::$LoggedUser['ID']);
@@ -205,9 +204,9 @@ if (check_perms('site_send_unlimited_invites')) {
                     </li>
                     <li id="nav_donate" class="brackets<?=Format::add_class($PageID, ['donate'], 'active', false)?>">
 <?php
-$Payment = new Gazelle\Manager\Payment;
 $donorMan = new Gazelle\Manager\Donation;
-$monthlyRental = $Payment->monthlyRental();
+$payMan = new Gazelle\Manager\Payment;
+$monthlyRental = $payMan->monthlyRental();
 $percent = $monthlyRental == 0.0
     ? 100
     : min(100, (int)(($donorMan->totalMonth(1) / $monthlyRental) * 100));
@@ -348,13 +347,13 @@ if ($Staff && $Staff->blogAlert()) {
 }
 
 // Inbox
-if ($notification->isTraditional(Notification::INBOX)) {
-    $notification->loadInbox();
-    $NewMessages = $notification->notifications();
+if ($notifMan->isTraditional(Notification::INBOX)) {
+    $notifMan->loadInbox();
+    $NewMessages = $notifMan->notifications();
     if (isset($NewMessages[Notification::INBOX])) {
         $Alerts[] = NotificationsManagerView::format_traditional($NewMessages[Notification::INBOX]);
     }
-    $notification->clear();
+    $notifMan->clear();
 }
 
 if (G::$LoggedUser['RatioWatch']) {
@@ -364,13 +363,13 @@ if (G::$LoggedUser['RatioWatch']) {
 }
 
 // Torrents
-if ($notification->isTraditional(Notification::TORRENTS)) {
-    $notification->loadTorrents();
-    $NewTorrents = $notification->notifications();
+if ($notifMan->isTraditional(Notification::TORRENTS)) {
+    $notifMan->loadTorrents();
+    $NewTorrents = $notifMan->notifications();
     if (isset($NewTorrents[Notification::TORRENTS])) {
         $Alerts[] = NotificationsManagerView::format_traditional($NewTorrents[Notification::TORRENTS]);
     }
-    $notification->clear();
+    $notifMan->clear();
 }
 if (check_perms('users_mod')) {
     $ModBar[] = '<a href="tools.php">Toolbox</a>';
@@ -406,18 +405,20 @@ if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] == FORUM_MOD) {
         $ModBar[] = '<a href="staffpm.php">'.$NumStaffPMs.' Staff PMs</a>';
     }
 }
-if (check_perms('admin_reports')) {
-    $open = \Gazelle\Report::openCount(G::$DB, G::$Cache);
-    $ModBar[] = '<a href="reportsv2.php">' . $open . (($open == 1) ? ' Report' : ' Reports') . '</a>';
 
-    $other = \Gazelle\Report::otherCount(G::$DB, G::$Cache);
+if (check_perms('admin_reports')) {
+    $repoMan = new Gazelle\Report;
+    $open = $repoMan->openCount();
+    $ModBar[] = "<a href=\"reportsv2.php\">$open Report" . plural($open) . '</a>';
+
+    $other = $repoMan->otherCount();
     if ($other > 0) {
-        $ModBar[] = '<a href="reports.php">' . $other . (($other == 1) ? ' Other report' : ' Other reports') . '</a>';
+        $ModBar[] = "<a href=\"reports.php\">$other Other report" . plural($other) . '</a>';
     }
 } elseif (check_perms('site_moderate_forums')) {
-    $open = \Gazelle\Report::forumCount(G::$DB, G::$Cache);
+    $open = (new Gazelle\Report)->forumCount();
     if ($open > 0) {
-        $ModBar[] = '<a href="reports.php">' . $open . (($open == 1) ? ' Forum report' : ' Forum reports') . '</a>';
+        $ModBar[] = "<a href=\"reports.php\">$open Forum report" . plural($open) . '</a>';
     }
 }
 
@@ -431,7 +432,6 @@ if (check_perms('admin_manage_applicants')) {
                 plural($NumNewApplicants)
         );
     }
-
     $NumNewReplies = $appMan->newReplyCount();
     if ($NumNewReplies > 0) {
         $ModBar[] = sprintf(
@@ -445,23 +445,20 @@ if (check_perms('admin_manage_applicants')) {
 if (check_perms('users_mod') && FEATURE_EMAIL_REENABLE) {
     $NumEnableRequests = G::$Cache->get_value(AutoEnable::CACHE_KEY_NAME);
     if ($NumEnableRequests === false) {
-        G::$DB->query("SELECT COUNT(1) FROM users_enable_requests WHERE Outcome IS NULL");
-        list($NumEnableRequests) = G::$DB->next_record();
+        $NumEnableRequests = G::$DB->scalar("SELECT count(*) FROM users_enable_requests WHERE Outcome IS NULL");
         G::$Cache->cache_value(AutoEnable::CACHE_KEY_NAME, $NumEnableRequests);
     }
-
     if ($NumEnableRequests > 0) {
         $ModBar[] = '<a href="tools.php?action=enable_requests">' . $NumEnableRequests . " Enable requests</a>";
     }
 }
 
 if (check_perms('admin_manage_payments')) {
-    $Payment = new \Gazelle\Manager\Payment;
-    $DuePayments = $Payment->due();
-    if (count($DuePayments) > 0) {
+    $due = $payMan->due();
+    if ($due) {
         $AlertText = '<a href="tools.php?action=payment_list">Payments due</a>';
-        foreach ($DuePayments as $p) {
-            list($Text, $Expiry) = array_values($p);
+        foreach ($due as $p) {
+            [$Text, $Expiry] = array_values($p);
             $Color = strtotime($Expiry) < (strtotime('+3 days')) ? 'red' : 'orange';
             $AlertText .= sprintf(' | <span style="color: %s">%s: %s</span>', $Color, $Text, date('Y-m-d', strtotime($Expiry)));
         }
@@ -477,23 +474,20 @@ if (check_perms('admin_site_debug')) {
 }
 
 if (check_perms('admin_manage_referrals')) {
-    $Referrals = new \Gazelle\Manager\Referral;
-    if (!$Referrals->checkBouncer()) {
+    if (!(new Gazelle\Manager\Referral)->checkBouncer()) {
         $Alerts[] = '<a href="tools.php?action=referral_sandbox"><span style="color: red">Referral bouncer not responding</span></a>';
     }
 }
 
 if (check_perms('admin_periodic_task_view')) {
-    $scheduler = new \Gazelle\Schedule\Scheduler;
-    if ($insane = $scheduler->getInsaneTasks()) {
+    if ($insane = (new Gazelle\Schedule\Scheduler)->getInsaneTasks()) {
         $Alerts[] = sprintf('<a href="tools.php?action=periodic&amp;mode=view">There are %d insane tasks</a>', $insane);
     }
 }
 
 if (!empty($Alerts) || !empty($ModBar)) { ?>
             <div id="alerts">
-<?php
-    foreach ($Alerts as $Alert) { ?>
+<?php foreach ($Alerts as $Alert) { ?>
                 <div class="alertbar"><?=$Alert?></div>
 <?php
     }
@@ -501,29 +495,22 @@ if (!empty($Alerts) || !empty($ModBar)) { ?>
                 <div class="alertbar blend">
                     <?=implode(' | ', $ModBar); echo "\n"?>
                 </div>
-<?php
-    } ?>
+<?php } ?>
             </div>
 <?php
 }
 //Done handling alertbars
 
-if (isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType']) { // Advanced search
-    $UseAdvancedSearch = true;
-} else {
-    $UseAdvancedSearch = false;
-}
+$UseAdvancedSearch = isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType'];
 ?>
             <div id="searchbars">
                 <ul>
                     <li id="searchbar_torrents">
                         <span class="hidden">Torrents: </span>
                         <form class="search_form" name="torrents" action="torrents.php" method="get">
-<?php
-    if ($UseAdvancedSearch) { ?>
+<?php if ($UseAdvancedSearch) { ?>
                             <input type="hidden" name="action" value="advanced" />
-<?php
-    } ?>
+<?php } ?>
                             <input id="torrentssearch" accesskey="t" spellcheck="false"
                                     onfocus="if (this.value == 'Torrents') { this.value = ''; }"
                                     onblur="if (this.value == '') { this.value = 'Torrents'; }"

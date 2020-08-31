@@ -51,7 +51,7 @@ if (isset($_GET['dt-until']) && preg_match('/(\d\d\d\d-\d\d-\d\d)/', $_GET['dt-u
 if (isset($filter)) {
     $filter['page'] = (isset($_GET['page']) && preg_match('/(\d+)/', $_GET['page'], $match))
         ? $match[1] : 1;
-    list ($Results, $Total) = \Gazelle\Report::search(G::$DB, $filter);
+    [$Results, $Total] = (new Gazelle\Report)->search($filter);
 }
 
 if (!isset($dt_from)) {

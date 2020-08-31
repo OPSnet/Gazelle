@@ -3,56 +3,55 @@
 namespace Gazelle;
 
 class Report extends Base {
-
-    public static function openCount(\DB_MYSQL $db, \CACHE $cache) {
-        if (($count = $cache->get_value('num_torrent_reportsv2')) === false) {
-            $count = $db->scalar("
+    public function openCount(): int {
+        if (($count = $this->cache->get_value('num_torrent_reportsv2')) === false) {
+            $count = $this->db->scalar("
                 SELECT count(*)
                 FROM reportsv2
                 WHERE Status = 'New'
             ");
-            $cache->cache_value('num_torrent_reportsv2', $count, 3600 * 6);
+            $this->cache->cache_value('num_torrent_reportsv2', $count, 3600 * 6);
         }
         return $count;
     }
 
-    public static function otherCount(\DB_MYSQL $db, \CACHE $cache) {
-        if (($count = $cache->get_value('num_other_reports')) === false) {
-            $count = $db->scalar("
+    public function otherCount(): int {
+        if (($count = $this->cache->get_value('num_other_reports')) === false) {
+            $count = $this->db->scalar("
                 SELECT count(*)
                 FROM reports
                 WHERE Status = 'New'
             ");
-            $cache->cache_value('num_other_reports', $count, 3600 * 6);
+            $this->cache->cache_value('num_other_reports', $count, 3600 * 6);
         }
         return $count;
     }
 
-    public static function forumCount(\DB_MYSQL $db, \CACHE $cache) {
-        if (($count = $cache->get_value('num_forum_reports')) === false) {
-            $count = $db->scalar("
+    public function forumCount(): int {
+        if (($count = $this->cache->get_value('num_forum_reports')) === false) {
+            $count = $this->db->scalar("
                 SELECT count(*)
                 FROM reports
                 WHERE Status = 'New'
                     AND Type IN ('artist_comment', 'collages_comment', 'post', 'requests_comment', 'thread', 'torrents_comment')
             ");
-            $cache->cache_value('num_forum_reports', $count, 3600 * 6);
+            $this->cache->cache_value('num_forum_reports', $count, 3600 * 6);
         }
         return $count;
     }
 
-    public static function search(\DB_MYSQL $db, array $filter) {
+    public function search(array $filter): array {
         $cond = [];
         $args = [];
         $delcond = [];
         $delargs = [];
         if (array_key_exists('reporter', $filter) && $filter['reporter']) {
             $cond[] = 'r.ReporterID = ?';
-            $args[] = self::username2id($db, $filter['reporter']);
+            $args[] = $this->username2id($filter['reporter']);
         }
         if (array_key_exists('handler', $filter) && $filter['handler']) {
             $cond[] = 'r.ResolverID = ?';
-            $args[] = self::username2id($db, $filter['handler']);
+            $args[] = $this->username2id($filter['handler']);
         }
         if (array_key_exists('report-type', $filter)) {
             $cond[] = 'r.Type in (' . placeholders($filter['report-type']) . ')';
@@ -72,9 +71,9 @@ class Report extends Base {
         }
         if (array_key_exists('uploader', $filter) && $filter['uploader']) {
             $cond[] = 't.UserID = ?';
-            $args[] = self::username2id($db, $filter['uploader']);
+            $args[] = $this->username2id($db, $filter['uploader']);
             $delcond[] = 'dt.UserID = ?';
-            $delargs[] = self::username2id($db, $filter['uploader']);
+            $delargs[] = $this->username2id($db, $filter['uploader']);
         }
         if (array_key_exists('group', $filter)) {
             $cond[] = 't.GroupID = ?';
@@ -125,16 +124,12 @@ class Report extends Base {
                 TORRENTS_PER_PAGE * (max($filter['page'], 1) - 1), // OFFSET
             ]
         );
-        $db->prepared_query($sql, ...$args);
-        $result = $db->to_array();
-        $db->query('SELECT FOUND_ROWS()');
-        list($count) = $db->next_record();
-        return [$result, $count];
+        $this->db->prepared_query($sql, ...$args);
+        $result = $this->db->to_array();
+        return [$result, $this->db->scalar('SELECT FOUND_ROWS()')];
     }
 
-    private static function username2id (\DB_MYSQL $db, $name) {
-        $db->prepared_query('SELECT ID FROM users_main WHERE Username = ?', $name);
-        $user = $db->next_record();
-        return $user['ID'];
+    protected function username2id (string $name): ?int {
+        return $this->db->scalar('SELECT ID FROM users_main WHERE Username = ?', $name);
     }
 }
