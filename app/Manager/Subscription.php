@@ -472,11 +472,12 @@ class Subscription extends \Gazelle\Base {
         );
         $this->db->prepared_query("
             INSERT INTO users_comments_last_read (UserID, Page, PageID, PostID)
-                SELECT s.UserID, s.Page, s.PageID, IFNULL(c.ID, 0) AS LastPostID
+                SELECT s.UserID, s.Page, s.PageID, IFNULL(c.ID, 0)
                 FROM users_subscriptions_comments AS s
-                LEFT JOIN comments AS c ON (c.Page = s.Page AND c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
+                LEFT JOIN comments AS c ON (c.Page = s.Page AND c.ID =
+                    (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
                 WHERE s.UserID = ?
-            ON DUPLICATE KEY UPDATE PostID = LastPostID
+            ON DUPLICATE KEY UPDATE PostID = IFNULL(c.ID, 0)
             ", $this->userId
         );
         $this->cache->delete_value('subscriptions_user_new_' . $this->userId);
