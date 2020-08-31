@@ -100,13 +100,12 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
 <?php } else { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
 <?php } ?>
-            <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?= $ArtistID ?>);return false;">
-<?php
-$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
-echo $subscription->isSubscribedComments('artist', $ArtistID) !== false ? 'Unsubscribe' : 'Subscribe'?></a>
-<?php
+            <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?=
+                $ArtistID ?>);return false;"><?=
+                (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('artist', $ArtistID) !== false
+                    ? 'Unsubscribe' : 'Subscribe'?></a>
 
-if (check_perms('site_edit_wiki')) { ?>
+<?php if (check_perms('site_edit_wiki')) { ?>
             <a href="artist.php?action=edit&amp;artistid=<?= $ArtistID ?>" class="brackets">Edit</a>
 <?php } ?>
             <a href="artist.php?action=history&amp;artistid=<?= $ArtistID ?>" class="brackets">View history</a>
