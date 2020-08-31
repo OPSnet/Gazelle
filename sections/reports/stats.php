@@ -20,11 +20,11 @@ View::show_header('Other reports stats');
 if (check_perms('admin_reports')) {
 $DB->prepared_query("
     SELECT um.Username,
-        COUNT(r.ID) AS Reports
+        count(*) AS Reports
     FROM reports AS r
     INNER JOIN users_main AS um ON (um.ID = r.ResolverID)
-    WHERE r.ReportedTime > NOW() - INTERVAL 24 HOUR
-    GROUP BY r.ResolverID
+    WHERE r.ResolvedTime > now() - INTERVAL 24 HOUR
+    GROUP BY um.Username
     ORDER BY Reports DESC
 ");
 $Results = $DB->to_array();
@@ -54,11 +54,11 @@ $Results = $DB->to_array();
 <?php
 $DB->prepared_query("
     SELECT um.Username,
-        COUNT(r.ID) AS Reports
+        count(*) AS Reports
     FROM reports AS r
     INNER JOIN users_main AS um ON (um.ID = r.ResolverID)
-    WHERE r.ReportedTime > NOW() - INTERVAL 1 WEEK
-    GROUP BY r.ResolverID
+    WHERE r.ResolvedTime > now() - INTERVAL 1 WEEK
+    GROUP BY um.Username
     ORDER BY Reports DESC
 ");
 $Results = $DB->to_array();
@@ -88,11 +88,11 @@ $Results = $DB->to_array();
 <?php
 $DB->prepared_query("
     SELECT um.Username,
-        COUNT(r.ID) AS Reports
+        count(*) AS Reports
     FROM reports AS r
     INNER JOIN users_main AS um ON (um.ID = r.ResolverID)
-    WHERE r.ReportedTime > NOW() - INTERVAL 1 MONTH
-    GROUP BY r.ResolverID
+    WHERE r.ResolvedTime > now() - INTERVAL 1 MONTH
+    GROUP BY um.Username
     ORDER BY Reports DESC
 ");
 $Results = $DB->to_array();
@@ -122,10 +122,10 @@ $Results = $DB->to_array();
 <?php
 $DB->prepared_query("
     SELECT um.Username,
-        COUNT(r.ID) AS Reports
+        count(*) AS Reports
     FROM reports AS r
     INNER JOIN users_main AS um ON (um.ID = r.ResolverID)
-    GROUP BY r.ResolverID
+    GROUP BY um.Username
     ORDER BY Reports DESC
 ");
 $Results = $DB->to_array();
@@ -164,7 +164,7 @@ $Results = $DB->to_array();
         SELECT u.Username,
             COUNT(f.LastPostAuthorID) as Trashed
         FROM forums_topics AS f
-            LEFT JOIN users_main AS u ON u.ID = f.LastPostAuthorID
+        LEFT JOIN users_main AS u ON (u.ID = f.LastPostAuthorID)
         WHERE f.ForumID IN ($TrashForumIDs)
         GROUP BY f.LastPostAuthorID
         ORDER BY Trashed DESC
