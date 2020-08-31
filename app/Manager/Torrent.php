@@ -4,7 +4,346 @@ namespace Gazelle\Manager;
 
 class Torrent extends \Gazelle\Base {
 
+    protected $userId;
+    protected $showSnatched;
+    protected $snatchBucket;
+    protected $updateTime;
+    protected $tokenCache;
+
     const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_';
+    const FILELIST_DELIM = 0xF7; // Hex for &divide; Must be the same as phrase_boundary in sphinx.conf!
+    const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
+    const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
+
+    /**
+     * Set context to a specific user. Used to determine whether or not to display
+     * Personal Freeleech and Snatched indicators in torrent and group info.
+     *
+     * @param int $userID The ID of the User
+     * @return $this to allow method chaining
+     */
+    public function setViewer(int $userId) {
+        $this->userId = $userId;
+        return $this;
+    }
+
+    /**
+     * In the context of a user, determine whether snatched indicators should be
+     * added to torrent and group info.
+     *
+     * @param int $userID The ID of the User
+     * @return $this to allow method chaining
+     */
+    public function setShowSnatched(int $showSnatched) {
+        $this->showSnatched = $showSnatched;
+        return $this;
+    }
+
+    /**
+     * Has the viewing user snatched this torrent? (And do they want
+     * to know about it?)
+     *
+     * @param int $torrentId
+     * @return bool
+     */
+    public function isSnatched(int $torrentId): bool {
+        if (!$this->userId && !$this->showSnatched) {
+            return false;
+        }
+
+        $buckets = 64;
+        $bucketMask = $buckets - 1;
+        $bucketId = $torrentId & $bucketMask;
+
+        $snatchKey = "users_snatched_" . $this->$userID . "_time";
+        if (!$this->snatchBucket) {
+            $this->snatchBucket = array_fill(0, $buckets, false);
+            $this->updateTime = $this->cache->get_value($snatchKey);
+            if ($this->updateTime === false) {
+                $this->updateTime = [
+                    'last' => 0,
+                    'next' => 0
+                ];
+            }
+        } elseif (isset($this->snatchBucket[$bucketId][$torrentId])) {
+            return true;
+        }
+
+        // Torrent was not found in the previously inspected snatch lists
+        $bucket =& $this->snatchBucket[$bucketId];
+        if ($bucket === false) {
+            $now = time();
+            // This bucket hasn't been checked before
+            $bucket = $this->cache->get_value($snatchKey, true);
+            if ($bucket === false || $now > $this->updateTime['next']) {
+                $bucketKeyStem = 'users_snatched_' . $this->userId . '_';
+                $updated = [];
+                $qid = $this->db->get_query_id();
+                if ($bucket === false || $this->updateTime['last'] == 0) {
+                    for ($i = 0; $i < $buckets; $i++) {
+                        $this->snatchBucket[$i] = [];
+                    }
+                    // Not found in cache. Since we don't have a suitable index, it's faster to update everything
+                    $this->db->prepared_query("
+                        SELECT fid
+                        FROM xbt_snatched
+                        WHERE uid = ?
+                        ", $UserID
+                    );
+                    while ([$id] = $this->db->next_record(MYSQLI_NUM, false)) {
+                        $this->snatchBucket[$id & $bucketMask][(int)$id] = true;
+                    }
+                    $updated = array_fill(0, $buckets, true);
+                } elseif (isset($bucket[$torrentId])) {
+                    // Old cache, but torrent is snatched, so no need to update
+                    return true;
+                } else {
+                    // Old cache, check if torrent has been snatched recently
+                    $this->db->prepared_query("
+                        SELECT fid
+                        FROM xbt_snatched
+                        WHERE uid = ? AND tstamp >= ?
+                        ", $this->userId, $this->updateTime['last']
+                    );
+                    while ([$id] = $this->db->next_record(MYSQLI_NUM, false)) {
+                        $bucketId = $id & $bucketMask;
+                        if ($this->snatchBucket[$bucketId] === false) {
+                            $this->snatchBucket[$bucketId] = $this->cache->get_value("$bucketKeyStem$bucketId", true);
+                            if ($this->snatchBucket[$bucketId] === false) {
+                                $this->snatchBucket[$bucketId] = [];
+                            }
+                        }
+                        $this->snatchBucket[$bucketId][(int)$id] = true;
+                        $updated[$bucketId] = true;
+                    }
+                }
+                $this->db->set_query_id($qid);
+                for ($i = 0; $i < $buckets; $i++) {
+                    if (isset($updated[$i])) {
+                        $this->cache->cache_value("$bucketKeyStem$i", $this->snatchBucket[$i], 7200);
+                    }
+                }
+                $this->updateTime['last'] = $now;
+                $this->updateTime['next'] = $now + self::SNATCHED_UPDATE_INTERVAL;
+                $this->cache->cache_value($snatchKey, $this->updateTime, 7200);
+            }
+        }
+        return isset($bucket[$torrentId]);
+    }
+
+    /**
+     * Check if the viwer has an active freeleech token
+     * setViewer() must be called beforehand
+     *
+     * @param int $torrentId
+     * @return true if an active token exists for the viewer
+     */
+    public function hasToken(int $torrentId): bool {
+        if (!$this->userId) {
+            return false;
+        }
+        if (!$this->tokenCache) {
+            $key = "users_tokens_" . $this->userId;
+            $this->tokenCache = $this->cache->get_value($key);
+            if ($this->tokenCache === false) {
+                $qid = $this->db->get_query_id();
+                $this->db->prepared_query("
+                    SELECT TorrentID
+                    FROM users_freeleeches
+                    WHERE Expired = 0 AND UserID = ?
+                    ",
+                    $this->userId
+                );
+                $this->tokenCache = array_fill_keys($this->db->collect('TorrentID', false), true);
+                $this->db->set_query_id($qid);
+                $this->cache->cache_value($key, $this->tokenCache, 3600);
+            }
+        }
+        return isset($this->tokenCache[$torrentId]);
+    }
+
+    public function groupInfo(int $groupId, int $revisionId = 0): ?array {
+        if (!$revisionId) {
+            $cached = $this->cache->get_value("torrents_details_$groupId");
+        }
+        if (!$revisionId && is_array($cached)) {
+            [$group, $torrentList] = $cached;
+        } else {
+            // Fetch the group details
+
+            $SQL = 'SELECT '
+                . ($revisionId ? 'w.Body, w.Image,' : 'g.WikiBody, g.WikiImage,')
+                . " g.ID,
+                    g.Name,
+                    g.Year,
+                    g.RecordLabel,
+                    g.CatalogueNumber,
+                    g.ReleaseType,
+                    g.CategoryID,
+                    g.Time,
+                    g.VanityHouse,
+                    GROUP_CONCAT(DISTINCT tags.Name SEPARATOR '|') as tagNames,
+                    GROUP_CONCAT(DISTINCT tags.ID SEPARATOR '|'),
+                    GROUP_CONCAT(tt.UserID SEPARATOR '|'),
+                    GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|'),
+                    GROUP_CONCAT(tt.NegativeVotes SEPARATOR '|')
+                FROM torrents_group AS g
+                LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
+                LEFT JOIN tags ON (tags.ID = tt.TagID)";
+
+            $args = [];
+            if ($revisionId) {
+                $SQL .= '
+                    LEFT JOIN wiki_torrents AS w ON (w.PageID = ? AND w.RevisionID = ?)';
+                $args[] = $groupId;
+                $args[] = $revisionId;
+            }
+
+            $SQL .= "
+                WHERE g.ID = ?
+                GROUP BY g.ID";
+            $args[] = $groupId;
+
+            $this->db->prepared_query($SQL, ...$args);
+            $group = $this->db->next_record(MYSQLI_ASSOC);
+
+            // Fetch the individual torrents
+            $columns = "
+                    t.ID,
+                    t.Media,
+                    t.Format,
+                    t.Encoding,
+                    t.Remastered,
+                    t.RemasterYear,
+                    t.RemasterTitle,
+                    t.RemasterRecordLabel,
+                    t.RemasterCatalogueNumber,
+                    t.Scene,
+                    t.HasLog,
+                    t.HasCue,
+                    t.HasLogDB,
+                    t.LogScore,
+                    t.LogChecksum,
+                    t.FileCount,
+                    t.Size,
+                    tls.Seeders,
+                    tls.Leechers,
+                    tls.Snatched,
+                    t.FreeTorrent,
+                    t.Time,
+                    t.Description,
+                    t.FileList,
+                    t.FilePath,
+                    t.UserID,
+                    tls.last_action,
+                    HEX(t.info_hash) AS InfoHash,
+                    tbt.TorrentID AS BadTags,
+                    tbf.TorrentID AS BadFolders,
+                    tfi.TorrentID AS BadFiles,
+                    ml.TorrentID AS MissingLineage,
+                    ca.TorrentID AS CassetteApproved,
+                    lma.TorrentID AS LossymasterApproved,
+                    lwa.TorrentID AS LossywebApproved,
+                    t.LastReseedRequest,
+                    t.ID AS HasFile,
+                    COUNT(tl.LogID) AS LogCount
+            ";
+
+            $this->db->prepared_query("
+                SELECT $columns
+                    ,0 as is_deleted
+                FROM torrents AS t
+                INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
+                LEFT JOIN torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
+                LEFT JOIN torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
+                LEFT JOIN torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+                LEFT JOIN torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+                LEFT JOIN torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+                LEFT JOIN torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
+                LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
+                WHERE t.GroupID = ?
+                GROUP BY t.ID
+                UNION DISTINCT
+                SELECT $columns
+                    ,1 as is_deleted
+                FROM deleted_torrents AS t
+                INNER JOIN deleted_torrents_leech_stats tls ON (tls.TorrentID = t.ID)
+                LEFT JOIN deleted_torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
+                LEFT JOIN deleted_torrents_bad_folders AS tbf ON (tbf.TorrentID = t.ID)
+                LEFT JOIN deleted_torrents_bad_files AS tfi ON (tfi.TorrentID = t.ID)
+                LEFT JOIN deleted_torrents_missing_lineage AS ml ON (ml.TorrentID = t.ID)
+                LEFT JOIN deleted_torrents_cassette_approved AS ca ON (ca.TorrentID = t.ID)
+                LEFT JOIN deleted_torrents_lossymaster_approved AS lma ON (lma.TorrentID = t.ID)
+                LEFT JOIN deleted_torrents_lossyweb_approved AS lwa ON (lwa.TorrentID = t.ID)
+                LEFT JOIN torrents_logs AS tl ON (tl.TorrentID = t.ID)
+                WHERE t.GroupID = ?
+                GROUP BY t.ID
+                ORDER BY Remastered ASC,
+                    (RemasterYear != 0) DESC,
+                    RemasterYear ASC,
+                    RemasterTitle ASC,
+                    RemasterRecordLabel ASC,
+                    RemasterCatalogueNumber ASC,
+                    Media ASC,
+                    Format,
+                    Encoding,
+                    ID", $groupId, $groupId);
+
+            $torrentList = $this->db->to_array('ID', MYSQLI_ASSOC);
+            if (empty($group) || empty($torrentList)) {
+                return null;
+            }
+
+            if (!$revisionId) {
+                $this->cache->cache_value("torrents_details_$groupId", [$group, $torrentList],
+                    in_array(0, $this->db->collect('Seeders')) ? 600 : 3600
+                );
+            }
+        }
+
+        // Fetch all user specific torrent and group properties
+        $group['Flags'] = ['IsSnatched' => false];
+        foreach ($torrentList as &$t) {
+            $t['PersonalFL'] = empty($t['FreeTorrent']) && $this->hasToken($t['ID']);
+            if ($t['IsSnatched'] = $this->isSnatched($t['ID'])) {
+                $group['IsSnatched'] = true;
+            }
+        }
+
+        // make the values sane (null, boolean as appropriate)
+        // TODO: once all get_*_info calls have been ported over, do this prior to caching
+        foreach (['CatalogueNumber', 'RecordLabel'] as $nullable) {
+            $group[$nullable] = $group[$nullable] == '' ? null : $group[$nullable];
+        }
+
+        foreach ($torrentList as &$torrent) {
+            foreach (['last_action', 'LastReseedRequest', 'RemasterCatalogueNumber', 'RemasterRecordLabel', 'RemasterTitle', 'RemasterYear']
+                as $nullable
+            ) {
+                $torrent[$nullable] = $torrent[$nullable] == '' ? null : $torrent[$nullable];
+            }
+            foreach (['FreeTorrent', 'HasCue', 'HasLog', 'HasLogDB', 'LogChecksum', 'Remastered', 'Scene']
+                as $zerotruth
+            ) {
+                $torrent[$zerotruth] = !($torrent[$zerotruth] == '0');
+            }
+            foreach (['BadFiles', 'BadFolders', 'BadTags', 'CassetteApproved', 'LossymasterApproved', 'LossywebApproved', 'MissingLineage']
+                as $emptytruth
+            ) {
+                $torrent[$emptytruth] = !($torrent[$emptytruth] == '');
+            }
+        }
+
+        return [$group, $torrentList];
+    }
+
+    public function torrentInfo(int $torrentId, $revisionId = 0) {
+        if (!($info = $this->groupInfo($this->idToGroupId($torrentId), $revisionId))) {
+            return null;
+        }
+        return [$info[0], $info[1][$torrentId]];
+    }
 
     /**
      * Is this a valid torrenthash?
