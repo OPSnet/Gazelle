@@ -7,7 +7,7 @@ class Bookmark extends Base {
     /**
      * Get the bookmark schema.
      * Recommended usage:
-     * list($table, $column) = $bookmark->schema('torrent');
+     * [$table, $column] = $bookmark->schema('torrent');
      *
      * @param string $type the type to get the schema for
      * @return [table, column]
@@ -66,7 +66,7 @@ class Bookmark extends Base {
      * @return array Group IDs, Bookmark Data, Torrent List
      */
     public function torrentBookmarks(int $userId) {
-        list($groupIds, $bookmarkData) = $this->cache->get_value("bookmarks_group_ids_$userId");
+        [$groupIds, $bookmarkData] = $this->cache->get_value("bookmarks_group_ids_$userId");
         if (!$groupIds) {
             $q = $this->db->get_query_id();
             $this->db->prepared_query("
@@ -143,7 +143,7 @@ class Bookmark extends Base {
      * @param int $id The ID of the object
      */
     public function create(int $userId, string $type, int $id) {
-        list($table, $column) = $this->schema($type);
+        [$table, $column] = $this->schema($type);
         if ($id < 1) {
             throw new Exception('bookmark:create:bad-id');
         }
@@ -166,17 +166,19 @@ class Bookmark extends Base {
                 $this->cache->deleteMulti(["bookmarks_{$type}_{$userId}", "bookmarks_group_ids_{$userId}"]);
                 // RSS feed stuff
                 $Feed = new \Feed;
-                list($details, $list) = \get_group_info($id);
-                foreach ($list as $Torrent) {
-                    $Feed->populate('torrents_bookmarks_t_' . \Users::user_info($userId)['torrent_pass'],
+
+                [$group, $list] = (new Manager\Torrent)->groupInfo($id);
+                $labelMan = new Manager\TorrentLabel;
+                foreach ($list as $torrent) {
+                    $Feed->populate('torrents_bookmarks_t_' . \Users::user_heavy_info($userId)['torrent_pass'],
                         $Feed->item(
-                            $details['Name'] . \Torrents::torrent_info($Torrent),
-                            \Text::strip_bbcode($details['WikiBody']),
+                            $group['Name'] . ' ' . $labelMan->load($torrent)->label(),
+                            \Text::strip_bbcode($group['WikiBody']),
                             'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id='
-                                . $Torrent['ID'],
-                            \Users::user_info($Torrent['UserID'])['Username'],
+                                . $torrent['ID'],
+                            \Users::user_info($torrent['UserID'])['Username'],
                             "torrents.php?id=$id",
-                            $details['GROUP_CONCAT(DISTINCT tags.ID SEPARATOR \'|\')']
+                            $group['tagIds']
                         )
                     );
                 }
@@ -207,7 +209,7 @@ class Bookmark extends Base {
      * @param int $id The ID of the object
      */
     public function remove(int $userId, string $type, int $id) {
-        list($table, $column) = $this->schema($type);
+        [$table, $column] = $this->schema($type);
         if ($id < 1) {
             throw new Exception('bookmark:remove:bad-id');
         }
