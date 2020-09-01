@@ -254,13 +254,13 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
         error(404);
     }
 } else {
-    $TorrentID = $_GET['id'];
+    $TorrentID = (int)$_GET['id'];
     [$CategoryID, $GroupID] = $DB->row("
         SELECT tg.CategoryID, t.GroupID
         FROM torrents_group AS tg
         LEFT JOIN torrents AS t ON (t.GroupID = tg.ID)
         WHERE t.ID = ?
-        ", (int)$_GET['id']
+        ", $TorrentID
     );
     if (empty($CategoryID) || empty($GroupID)) {
         // Deleted torrent
@@ -269,7 +269,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     }
     $Artists = Artists::get_artist($GroupID);
     [$GroupDetails, $TorrentList] = (new Gazelle\Manager\Torrent)->groupInfo($GroupID);
-    $TorrentList = [$TorrentList[$Torrent[$TorrentID]]];
+    $TorrentList = [$TorrentList[$TorrentID]];
     // Group details
     [$WikiBody,, $GroupID, $GroupName, $GroupYear,,, $ReleaseType, $GroupCategoryID,,
         $GroupVanityHouse,,,,,, $GroupFlags] = array_values($GroupDetails);
