@@ -14,7 +14,7 @@ if (!is_number($userID)) {
 
 $sortOrderMap = [
     'time'     => ['Time', 'desc'],
-    'name'     => ['t.Name', 'asc'],
+    'name'     => ['tg.Name', 'asc'],
     'snatched' => ['tls.Snatched', 'desc', 't.Size desc'],
     'seeders'  => ['tls.Seeders', 'desc', 't.Size desc'],
     'leechers' => ['tls.Leechers', 'desc', 't.Size desc'],
