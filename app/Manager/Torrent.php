@@ -186,10 +186,10 @@ class Torrent extends \Gazelle\Base {
                     g.Time,
                     g.VanityHouse,
                     GROUP_CONCAT(DISTINCT tags.Name SEPARATOR '|') as tagNames,
-                    GROUP_CONCAT(DISTINCT tags.ID SEPARATOR '|'),
-                    GROUP_CONCAT(tt.UserID SEPARATOR '|'),
-                    GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|'),
-                    GROUP_CONCAT(tt.NegativeVotes SEPARATOR '|')
+                    GROUP_CONCAT(DISTINCT tags.ID SEPARATOR '|') as tagIds,
+                    GROUP_CONCAT(tt.UserID SEPARATOR '|') as tagVoteUserIds,
+                    GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|') as tagUpvotes,
+                    GROUP_CONCAT(tt.NegativeVotes SEPARATOR '|') as tagDownvotes
                 FROM torrents_group AS g
                 LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
                 LEFT JOIN tags ON (tags.ID = tt.TagID)";
@@ -253,8 +253,7 @@ class Torrent extends \Gazelle\Base {
             ";
 
             $this->db->prepared_query("
-                SELECT $columns
-                    ,0 as is_deleted
+                SELECT $columns, 0 as is_deleted
                 FROM torrents AS t
                 INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
                 LEFT JOIN torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
@@ -268,8 +267,7 @@ class Torrent extends \Gazelle\Base {
                 WHERE t.GroupID = ?
                 GROUP BY t.ID
                 UNION DISTINCT
-                SELECT $columns
-                    ,1 as is_deleted
+                SELECT $columns, 1 as is_deleted
                 FROM deleted_torrents AS t
                 INNER JOIN deleted_torrents_leech_stats tls ON (tls.TorrentID = t.ID)
                 LEFT JOIN deleted_torrents_bad_tags AS tbt ON (tbt.TorrentID = t.ID)
@@ -313,6 +311,7 @@ class Torrent extends \Gazelle\Base {
                 $group['IsSnatched'] = true;
             }
         }
+        unset($t);
 
         // make the values sane (null, boolean as appropriate)
         // TODO: once all get_*_info calls have been ported over, do this prior to caching
@@ -323,6 +322,22 @@ class Torrent extends \Gazelle\Base {
             global $CategoryIcons;
             $group['WikiImage'] = STATIC_SERVER.'common/noartwork/'
                 . $CategoryIcons[$group['CategoryID'] - 1];
+        }
+
+        // Reorganize tag info to be useful
+        $tagIds = explode('|', $group['tagIds']);
+        $tagNames = explode('|', $group['tagNames']);
+        $tagVoteUserIds = explode('|', $group['tagVoteUserIds']);
+        $tagUpvotes = explode('|', $group['tagUpvotes']);
+        $tagDownvotes = explode('|', $group['tagDownvotes']);
+        $group['tags'] = [];
+        for ($n = 0; $n < count($tagIds); ++$n) {
+            $group['tags'][$tagIds[$n]] = [
+                'name' => $tagNames[$n],
+                'userId' => $tagVoteUserIds[$n],
+                'upvotes' => $tagUpvotes[$n],
+                'downvotes' => $tagDownvotes[$n],
+            ];
         }
 
         foreach ($torrentList as &$torrent) {
