@@ -163,6 +163,9 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function groupInfo(int $groupId, int $revisionId = 0): ?array {
+        if (!$groupId) {
+            return null;
+        }
         if (!$revisionId) {
             $cached = $this->cache->get_value("torrents_details_$groupId");
         }
@@ -315,6 +318,11 @@ class Torrent extends \Gazelle\Base {
         // TODO: once all get_*_info calls have been ported over, do this prior to caching
         foreach (['CatalogueNumber', 'RecordLabel'] as $nullable) {
             $group[$nullable] = $group[$nullable] == '' ? null : $group[$nullable];
+        }
+        if (!$group['WikiImage']) {
+            global $CategoryIcons;
+            $group['WikiImage'] = STATIC_SERVER.'common/noartwork/'
+                . $CategoryIcons[$group['CategoryID'] - 1];
         }
 
         foreach ($torrentList as &$torrent) {

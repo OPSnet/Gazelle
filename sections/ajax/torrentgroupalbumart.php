@@ -1,18 +1,10 @@
 <?php
-require(SERVER_ROOT.'/sections/torrents/functions.php');
 
-$GroupID = (int)$_GET['id'];
-if ($GroupID === 0) {
-    error('bad id parameter', true);
+[$info] = (new Gazelle\Manager\Torrent)->setShowSnatched(false)->groupInfo((int)$_GET['id']);
+if (!$info) {
+    json_die('bad id parameter');
 }
 
-$TorrentDetails = get_group_info($GroupID, 0, false);
-$TorrentDetails = $TorrentDetails[0];
-$Image = $TorrentDetails['WikiImage'];
-if (!$Image) { // handle no artwork
-    $Image = STATIC_SERVER.'common/noartwork/'.$CategoryIcons[$TorrentDetails['CategoryID'] - 1];
-}
-
-json_die("success", [
-    'wikiImage' => $Image
+json_print("success", [
+    'wikiImage' => $info['WikiImage']
 ]);
