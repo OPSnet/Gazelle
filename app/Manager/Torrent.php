@@ -323,6 +323,7 @@ class Torrent extends \Gazelle\Base {
             $group['WikiImage'] = STATIC_SERVER.'common/noartwork/'
                 . $CategoryIcons[$group['CategoryID'] - 1];
         }
+        $group['VanityHouse'] = ($group['VanityHouse'] == 1);
 
         // Reorganize tag info to be useful
         $tagIds = explode('|', $group['tagIds']);
@@ -362,7 +363,11 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function torrentInfo(int $torrentId, $revisionId = 0) {
-        if (!($info = $this->groupInfo($this->idToGroupId($torrentId), $revisionId))) {
+        $groupId = $this->idToGroupId($torrentId);
+        if (!$groupId) {
+            return null;
+        }
+        if (!($info = $this->groupInfo($groupId, $revisionId))) {
             return null;
         }
         return [$info[0], $info[1][$torrentId]];
