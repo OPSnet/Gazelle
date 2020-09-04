@@ -235,6 +235,7 @@ $Results = $DB->scalar("
     FROM $table
     $Join
     $cond
+    GROUP BY C.ID
     ", ...array_merge($joinArgs, $condArgs)
 );
 
@@ -256,6 +257,7 @@ $Comments = $DB->prepared_query("
     FROM $table
     $Join
     $cond
+    GROUP BY C.ID
     ORDER BY C.ID DESC
     LIMIT ?
     ", ...array_merge($joinArgs, $condArgs, [$Limit])
