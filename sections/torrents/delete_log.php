@@ -1,21 +1,21 @@
 <?php
 
-$TorrentID = intval($_GET['torrentid']);
-$LogID = intval($_GET['logid']);
+$torrentId = (int)$_GET['torrentid'];
+$logId = (int)$_GET['logid'];
 
-if ($TorrentID === 0 || $LogID === 0) {
+if (!$torrentId || !$logId) {
     error(404);
 }
 
-$GroupID = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
-if (!$GroupID) {
+$groupId = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $torrentId);
+if (!$groupId) {
     error(404);
 }
 
-@unlink(SERVER_ROOT."logs/{$TorrentID}_{$LogID}.log");
+(new Gazelle\File\RipLog)->remove([$torrentId, $logId]);
+(new Gazelle\Log)->torrent($groupId, $torrentId, $LoggedUser['ID'], "Riplog ID $logId removed from torrent $torrentId");
 
-Torrents::clear_log($TorrentID, $LogID);
-Torrents::set_logscore($TorrentID, $GroupID);
-Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], "Riplog ID $LogID removed from torrent $TorrentID", 0);
+Torrents::clear_log($torrentId, $logId);
+Torrents::set_logscore($torrentId, $groupId);
 
-header("Location: torrents.php?torrentid={$TorrentID}");
+header("Location: torrents.php?torrentid={$torrentId}");

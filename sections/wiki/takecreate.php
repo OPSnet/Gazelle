@@ -61,6 +61,6 @@ if ($TitleAlias != '' && $Dupe === false) {
     Wiki::flush_aliases();
 }
 
-Misc::write_log("Wiki article $ArticleID (".$_POST['title'].") was created by ".$LoggedUser['Username']);
+(new Gazelle\Log)->general("Wiki article $ArticleID (".$_POST['title'].") was created by ".$LoggedUser['Username']);
 
 header("Location: wiki.php?action=article&id=$ArticleID");

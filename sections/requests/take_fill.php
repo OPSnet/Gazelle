@@ -164,7 +164,7 @@ foreach ($UserIDs as $User) {
 }
 
 $RequestVotes = Requests::get_votes_array($RequestID);
-Misc::write_log("Request $RequestID ($FullName) was filled by user $FillerID ($FillerUsername) with the torrent $TorrentID for a ".Format::get_size($RequestVotes['TotalBounty']).' bounty.');
+(new Gazelle\Log)->general("Request $RequestID ($FullName) was filled by user $FillerID ($FillerUsername) with the torrent $TorrentID for a ".Format::get_size($RequestVotes['TotalBounty']).' bounty.');
 
 // Give bounty
 $DB->prepared_query('

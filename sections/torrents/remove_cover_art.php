@@ -1,30 +1,31 @@
 <?php
+
+/* TODO: This is an ajax call: move to sections/ajax */
+
 authorize();
 if (!check_perms('site_edit_wiki')) {
     error(403);
 }
 
-$ID = $_GET['id'];
-$GroupID = $_GET['groupid'];
+$coverId = (int)$_GET['id'];
+$groupId = (int)$_GET['groupid'];
 
-if (!is_number($ID) || !is_number($ID) || !is_number($GroupID) || !is_number($GroupID)) {
+if (!$coverId || !$groupId) {
     error(404);
 }
 
-list($Image, $Summary) = $DB->row("
+[$image, $summary] = $DB->row("
     SELECT Image, Summary
     FROM cover_art
     WHERE ID = ?
-    ", $ID
+    ", $coverId
 );
-
 $DB->prepared_query("
     DELETE FROM cover_art
     WHERE ID = ?
-    ", $ID
+    ", $coverId
 );
 
-Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Additional cover \"$Summary - $Image\" removed from group", 0);
+(new Gazelle\Log)->group($groupId, $LoggedUser['ID'], "Additional cover \"$summary - $image\" removed from group");
 
-$Cache->deleteMulti(["torrents_cover_art_$GroupID", "torrents_details_$GroupID"]);
-header("Location: " . empty($_SERVER['HTTP_REFERER']) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER']);
+$Cache->deleteMulti(["torrents_cover_art_$groupId", "torrents_details_$groupId"]);

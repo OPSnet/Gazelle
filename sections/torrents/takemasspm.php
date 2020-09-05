@@ -7,24 +7,19 @@
 //******************************************************************************//
 
 authorize();
-
 enforce_login();
-
-$Validate = new Validate;
 
 $TorrentID = (int)$_POST['torrentid'];
 $GroupID = (int)$_POST['groupid'];
 $Subject = $_POST['subject'];
 $Message = $_POST['message'];
 
-//******************************************************************************//
-//--------------- Validate data in edit form -----------------------------------//
-
 // FIXME: Still need a better perm name
 if (!check_perms('site_moderate_requests')) {
     error(403);
 }
 
+$Validate = new Validate;
 $Validate->SetFields('torrentid', '1', 'number', 'Invalid torrent ID.', ['minlength' => 1]);
 $Validate->SetFields('groupid', '1', 'number', 'Invalid group ID.', [ 'minlength' => 1]);
 $Validate->SetFields('subject', '0', 'string', 'Invalid subject.', ['maxlength' => 1000, 'minlength' => 1]);
@@ -33,13 +28,7 @@ $Err = $Validate->ValidateForm($_POST); // Validate the form
 
 if ($Err) {
     error($Err);
-    $Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=masspm&amp;id={$GroupID}&amp;torrentid={$TorrentID}" : $_SERVER['HTTP_REFERER'];
-    header("Location: {$Location}");
-    die();
 }
-
-//******************************************************************************//
-//--------------- Send PMs to users --------------------------------------------//
 
 $DB->prepared_query('
     SELECT uid
@@ -52,6 +41,7 @@ $Snatchers = $DB->to_array();
 foreach ($Snatchers as $UserID) {
     Misc::send_pm($UserID[0], 0, $Subject, $Message);
 }
+$n = count($Snatchers);
+(new Gazelle\Log)->general($LoggedUser['Username']." sent a mass PM to $n snatcher" . plural($n) . " of torrent $TorrentID in group $GroupID");
 
-Misc::write_log($LoggedUser['Username']." sent mass notice to snatchers of torrent $TorrentID in group $GroupID");
 header("Location: torrents.php?id=$GroupID");

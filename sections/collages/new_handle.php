@@ -90,5 +90,5 @@ $DB->prepared_query('
 );
 $CollageID = $DB->inserted_id();
 $Cache->delete_value("collage_$CollageID");
-Misc::write_log("Collage $CollageID (".$_POST['name'].') was created by '.$LoggedUser['Username']);
+(new Gazelle\Log)->general("Collage $CollageID (".$_POST['name'].') was created by '.$LoggedUser['Username']);
 header("Location: collages.php?id=$CollageID");

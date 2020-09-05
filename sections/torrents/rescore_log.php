@@ -6,25 +6,23 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-$TorrentID = (int)$_GET['torrentid'];
-$LogID     = (int)$_GET['logid'];
-
-$GroupID = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $TorrentID);
-if (!$GroupID) {
+$torrentId = (int)$_GET['torrentid'];
+$logId     = (int)$_GET['logid'];
+if (!$torrentId || !$logId) {
     error(404);
 }
-
+$groupId = $DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $torrentId);
+if (!$groupId) {
+    error(404);
+}
 if (!$DB->scalar('SELECT 1 FROM torrents_logs WHERE LogID = ? AND TorrentID = ?',
-        $LogID, $TorrentID)) {
+        $logId, $torrentId)) {
     error(404);
 }
 
-$ripFiler = new Gazelle\File\RipLog;
-$logpath = $ripFiler->path([$TorrentID, $LogID]);
+$logpath = (new Gazelle\File\RipLog)->path([$torrentId, $logId]);
 $logfile = new Gazelle\Logfile($logpath, basename($logpath));
-
-$htmlFiler = new Gazelle\File\RipLogHTML;
-$htmlFiler->put($logfile->text(), [$TorrentID, $LogID]);
+(new Gazelle\File\RipLogHTML)->put($logfile->text(), [$torrentId, $logId]);
 
 $DB->prepared_query("
     UPDATE torrents_logs SET
@@ -40,9 +38,9 @@ $DB->prepared_query("
     WHERE LogID = ? AND TorrentID = ?
     ", $logfile->score(), $logfile->checksumStatus(), $logfile->checksumState(), $logfile->ripper(), $logfile->ripperVersion(),
         $logfile->language(), Logchecker::getLogcheckerVersion(),
-        $logfile->detailsAsString()
-        $LogID, $TorrentID
+        $logfile->detailsAsString(),
+        $logId, $torrentId
 );
-Torrents::set_logscore($TorrentID, $GroupID);
+Torrents::set_logscore($torrentId, $groupId);
 
-header("Location: torrents.php?torrentid={$TorrentID}");
+header("Location: torrents.php?torrentid={$torrentId}");

@@ -292,7 +292,7 @@ class Artists {
         } else {
             $Username = 'System';
         }
-        Misc::write_log("Artist $ArtistID ($Name) was deleted by $Username");
+        (new Gazelle\Log)->general("Artist $ArtistID ($Name) was deleted by $Username");
         G::$DB->set_query_id($QueryID);
     }
 }

@@ -129,7 +129,7 @@ if (!empty($_POST['donor_points_submit']) && !empty($_POST['donation_value']) &&
 // If we're deleting the user, we can ignore all the other crap
 
 if ($_POST['UserStatus'] === 'delete' && check_perms('users_delete_users')) {
-    Misc::write_log("User account $userID (".$cur['Username'].") was deleted by ".$LoggedUser['Username']);
+    (new Gazelle\Log)->general("User account $userID (".$cur['Username'].") was deleted by ".$LoggedUser['Username']);
     $user->remove();
     Tracker::update_tracker('remove_user', ['passkey' => $cur['torrent_pass']]);
     header("Location: log.php?search=User+$userID");

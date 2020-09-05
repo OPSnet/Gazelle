@@ -2,23 +2,22 @@
 
 authorize();
 
-//Set by system
-if (!$_POST['groupid'] || !is_number($_POST['groupid'])) {
+$groupId = (int)$_POST['groupid'];
+if (!$groupId) {
     error(404);
 }
-$GroupID = $_POST['groupid'];
 
 //Usual perm checks
 if (!check_perms('torrents_edit')) {
-    $DB->query("
-        SELECT UserID
-        FROM torrents
-        WHERE GroupID = $GroupID");
-    if (!in_array($LoggedUser['ID'], $DB->collect('UserID'))) {
+    if (!$DB->scalar("
+        SELECT ID FROM torrents WHERE GroupID = ?  AND User = ?
+        ", $groupId, $LoggedUser['ID']
+    )) {
         error(403);
     }
 }
 
+$log = [];
 if (isset($_POST['freeleechtype']) && check_perms('torrents_freeleech')) {
     if (in_array($_POST['freeleechtype'], ['0', '1', '2'])) {
         $Free = $_POST['freeleechtype'];
@@ -31,41 +30,50 @@ if (isset($_POST['freeleechtype']) && check_perms('torrents_freeleech')) {
     } else {
         error(404);
     }
-
-    Torrents::freeleech_groups($GroupID, $Free, $FreeType);
+    $log[] = "freeleech type=$Free reason=$FreeType";
+    Torrents::freeleech_groups($groupId, $Free, $FreeType);
 }
 
-//Escape fields
-$Year = db_string((int)$_POST['year']);
-$RecordLabel = db_string($_POST['record_label']);
-$CatalogueNumber = db_string($_POST['catalogue_number']);
+$year = (int)trim($_POST['year']);
+$recordLabel = trim($_POST['record_label']);
+$catNumber = trim($_POST['catalogue_number']);
 
 // Get some info for the group log
-$OldYear = $DB->scalar("SELECT Year FROM torrents_group WHERE ID = ?", $GroupID);
+[$oldYear, $oldRecLabel, $oldCatNumber] = $DB->row("
+    SELECT Year, RecordLabel, CatalogueNumber FROM torrents_group WHERE ID = ?
+", $groupId);
 
-$DB->prepared_query("
-    UPDATE torrents_group SET
-        Year = ?,
-        RecordLabel = ?,
-        CatalogueNumber = ?
-    WHERE ID = ?
-    ", $Year, $RecordLabel, $CatalogueNumber, $GroupID
-);
-
-if ($OldYear != $Year) {
-    Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Year changed from $OldYear to $Year", 0);
+if ($oldYear != $year) {
+    $log[] = "year $oldYear => $year";
+}
+if ($oldRecLabel != $recordLabel) {
+    $log[] = "record label \"$oldRecLabel\" => \"$recordLabel\"";
+}
+if ($oldCatNumber != $catNumber) {
+    $log[] = "cat number \"$oldCatNumber\" => \"$catNumber\"";
 }
 
-$DB->prepared_query("
-    SELECT ID
-    FROM torrents
-    WHERE GroupID = ?
-    ", $GroupID
-);
-while (list($TorrentID) = $DB->next_record()) {
-    $Cache->delete_value("torrent_download_$TorrentID");
-}
-Torrents::update_hash($GroupID);
-$Cache->delete_value("torrents_details_$GroupID");
+if ($log) {
+    $DB->prepared_query("
+        UPDATE torrents_group SET
+            Year = ?,
+            RecordLabel = ?,
+            CatalogueNumber = ?
+        WHERE ID = ?
+        ", $year, $recordLabel, $catNumber, $groupId
+    );
+    (new Gazelle\Log)->group($groupId, $LoggedUser['ID'], ucfirst(implode(", ", $log)));
 
-header("Location: torrents.php?id=$GroupID");
+    $DB->prepared_query("
+        SELECT concat('torrent_download_', ID) as cachekey
+        FROM torrents
+        WHERE GroupID = ?
+        ", $groupId
+    );
+    $Cache->deleteMulti($DB->collect('cacheKey'));
+    $Cache->delete_value("torrents_details_$groupId");
+
+    Torrents::update_hash($groupId);
+}
+
+header("Location: torrents.php?id=$groupId");

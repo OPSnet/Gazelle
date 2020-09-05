@@ -29,7 +29,7 @@ for ($i = 0; $i < count($AliasNames); $i++) {
             WHERE Name = ?
             ', $AliasName
         );
-        while (list($AliasID, $ArtistID, $Redirect, $FoundAliasName) = $DB->next_record(MYSQLI_NUM, false)) {
+        while ([$AliasID, $ArtistID, $Redirect, $FoundAliasName] = $DB->next_record(MYSQLI_NUM, false)) {
             if (!strcasecmp($AliasName, $FoundAliasName)) {
                 if ($Redirect) {
                     $AliasID = $Redirect;
@@ -38,7 +38,7 @@ for ($i = 0; $i < count($AliasNames); $i++) {
             }
         }
         if (!$AliasID) {
-            list($ArtistID, $AliasID) = $ArtistManager->createArtist($AliasName);
+            [$ArtistID, $AliasID] = $ArtistManager->createArtist($AliasName);
         }
         $ArtistName = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?', $ArtistID);
 
@@ -50,12 +50,11 @@ for ($i = 0; $i < count($AliasNames); $i++) {
         );
 
         if ($DB->affected_rows()) {
+            (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "added artist $ArtistName as ".$ArtistTypes[$Importance])
+                ->general("Artist $ArtistID ($ArtistName) was added to the group $GroupID ($GroupName) as "
+                    . $ArtistTypes[$Importance].' by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].')'
+                );
             $Changed = true;
-            $ArtistName = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?', $ArtistID);
-
-            Misc::write_log("Artist $ArtistID ($ArtistName) was added to the group $GroupID ($GroupName) as "
-                . $ArtistTypes[$Importance].' by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].')');
-            Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "added artist $ArtistName as ".$ArtistTypes[$Importance], 0);
         }
     }
 }
@@ -65,4 +64,4 @@ if ($Changed) {
     Torrents::update_hash($GroupID);
 }
 
-header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? "torrents.php?id=$GroupID" : $_SERVER['HTTP_REFERER']));
+header('Location: ' . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id=$GroupID");
