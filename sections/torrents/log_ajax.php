@@ -1,7 +1,7 @@
 <?php
 enforce_login();
 $TorrentID = (int)$_GET['torrentid'];
-if ($TorrentID < 1) {
+if (!$TorrentID) {
     error(403);
 }
 $LogScore = isset($_GET['logscore']) ? intval($_GET['logscore']) : 0;
@@ -14,10 +14,14 @@ $DB->prepared_query('
 $ripFiler = new Gazelle\File\RipLog;
 $htmlFiler = new Gazelle\File\RipLogHTML;
 
+ob_start();
 if(!$DB->record_count()) {
-    echo '';
+    echo 'No logs found!';
+    if (check_perms('torrents_delete')) {?>
+&nbsp;<a class="brackets" href="torrents.php?action=removelogs&amp;torrentid=<?= $TorrentID ?>">Repair DB</a>
+<?php
+    }
 } else {
-    ob_start();
     echo '<table><tr class=\'colhead_dark\' style=\'font-weight: bold;\'><td>This torrent has '.$DB->record_count().' '.($DB->record_count() > 1 ? 'logs' : 'log').' with a total score of '.$LogScore.' (out of 100):</td></tr>';
 
     if (check_perms('torrents_delete')) {
@@ -77,5 +81,5 @@ if(!$DB->record_count()) {
             . '</pre></blockquote></td></tr>';
     }
     echo '</table>';
-    echo ob_get_clean();
 }
+echo ob_get_clean();

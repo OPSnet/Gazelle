@@ -1,8 +1,8 @@
 <?php
 authorize();
 
-$TorrentID = $_POST['torrentid'];
-if (!$TorrentID || !is_number($TorrentID)) {
+$TorrentID = (int)$_POST['torrentid'];
+if (!$TorrentID) {
     error(404);
 }
 
@@ -44,19 +44,19 @@ list($UserID, $GroupID, $Size, $InfoHash, $Name, $Year, $ArtistName, $Time, $Med
     WHERE t.ID = ?
     ', $TorrentID
 );
+if (($LoggedUser['ID'] != $UserID || time_ago($Time) > 3600 * 24 * 7 || $Snatches > 4) && !check_perms('torrents_delete')) {
+    error(403);
+}
+$sizeMB = number_format($Size / (1024 * 1024), 2) . ' MB';
 $RemasterDisplayString = Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear);
 if (empty($ArtistName)) {
-    $RawName = $Name.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+    $RawName = $Name.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '') . " $sizeMB";
 }
 elseif ($ArtistName == 'Various Artists') {
-    $RawName = "Various Artists - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
+    $RawName = "Various Artists - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '') . " ($sizeMB)";
 }
 else {
-    $RawName = "$ArtistName - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MB)';
-}
-
-if ((intval($LoggedUser['ID']) != $UserID || time_ago($Time) > 3600 * 24 * 7 || $Snatches > 4) && !check_perms('torrents_delete')) {
-    error(403);
+    $RawName = "$ArtistName - $Name".($Year ? " ($Year)" : '')." [$Format/$Encoding/$Media]{$RemasterDisplayString}" . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '') . " ($sizeMB)";
 }
 
 if ($ArtistName) {
@@ -72,18 +72,19 @@ if (isset($_SESSION['logged_user']['multi_delete'])) {
     $_SESSION['logged_user']['multi_delete'] = 1;
 }
 
-$InfoHash = unpack('H*', $InfoHash);
 $Err = Torrents::delete_torrent($TorrentID, $GroupID);
 if ($Err) {
     error($Err);
 }
-$Log = "Torrent $TorrentID ($Name) (".number_format($Size / (1024 * 1024), 2).' MB) ('.strtoupper($InfoHash[1]).') was deleted by '.$LoggedUser['Username']
-    . ': ' .$_POST['reason'].' '.$_POST['extra'];
-Torrents::send_pm($TorrentID, $UserID, $RawName, $Log, 0, G::$LoggedUser['ID'] != $UserID);
-Misc::write_log($Log);
-Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'deleted torrent ('.number_format($Size / (1024 * 1024), 2).' MB, '
-    . strtoupper($InfoHash[1]).') for reason: '.$_POST['reason'].' '.$_POST['extra'], 0);
 
+$InfoHash = unpack('H*', $InfoHash);
+$sizeMB_hash = "$sizeMB " . strtoupper($InfoHash[1]);
+$reason = trim($_POST['reason'] . ' ' . $_POST['extra']);
+$Log = "Torrent $TorrentID ($Name) ($sizeMB_hash was deleted by {$LoggedUser['Username']}: $reason";
+Torrents::send_pm($TorrentID, $UserID, $RawName, $Log, 0, G::$LoggedUser['ID'] != $UserID);
+(new Gazelle\Log)
+    ->torrent($GroupID, $TorrentID, $LoggedUser['ID'], "deleted torrent ($sizeMB_hash) for reason: $reason")
+    ->general($Log);
 View::show_header('Torrent deleted');
 ?>
 <div class="thin">

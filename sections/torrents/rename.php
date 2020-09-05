@@ -33,7 +33,7 @@ $DB->prepared_query("
 $Cache->delete_value("torrents_details_$GroupID");
 
 Torrents::update_hash($GroupID);
-Misc::write_log("Torrent Group $GroupID ($OldName) was renamed to \"$NewName\" from \"$OldName\" by ".$LoggedUser['Username']);
-Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "renamed to \"$NewName\" from \"$OldName\"", 0);
+(new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "renamed to \"$NewName\" from \"$OldName\"")
+    ->general("Torrent Group $GroupID ($OldName) was renamed to \"$NewName\" from \"$OldName\" by ".$LoggedUser['Username']);
 
 header("Location: torrents.php?id=$GroupID");

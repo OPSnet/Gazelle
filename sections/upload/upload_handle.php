@@ -772,8 +772,8 @@ foreach($logfileSummary->all() as $logfile) {
 //--------------- Write torrent file -------------------------------------------//
 
 $torrentFiler->put($Tor->encode(), $TorrentID);
-Misc::write_log("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MB) was uploaded by ' . $LoggedUser['Username']);
-Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MB)', 0);
+(new Gazelle\Log)->torrent($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MB)')
+    ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MB) was uploaded by ' . $LoggedUser['Username']);
 
 Torrents::update_hash($GroupID);
 $Debug->set_flag('upload: sphinx updated');
@@ -863,8 +863,8 @@ foreach ($ExtraTorrentsInsert as $ExtraTorrent) {
 
     $torrentFiler->put($ExtraTorrent['TorEnc'], $ExtraTorrentID);
     $sizeMB = number_format($ExtraTorrent['TotalSize'] / (1024 * 1024), 2);
-    Misc::write_log("Torrent $ExtraTorrentID ($LogName) ($sizeMB  MB) was uploaded by " . $LoggedUser['Username']);
-    Torrents::write_group_log($GroupID, $ExtraTorrentID, $LoggedUser['ID'], "uploaded ($sizeMB MB)", 0);
+    (new Gazelle\Log)->torrent($GroupID, $ExtraTorrentID, $LoggedUser['ID'], "uploaded ($sizeMB MB)")
+        ->general("Torrent $ExtraTorrentID ($LogName) ($sizeMB  MB) was uploaded by " . $LoggedUser['Username']);
     Torrents::update_hash($GroupID);
 }
 

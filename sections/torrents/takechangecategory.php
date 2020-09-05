@@ -8,12 +8,12 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-$OldGroupID = $_POST['oldgroupid'];
-$TorrentID = $_POST['torrentid'];
-$Title = db_string(trim($_POST['title']));
-$OldCategoryID = $_POST['oldcategoryid'];
-$NewCategoryID = $_POST['newcategoryid'];
-if (!is_number($OldGroupID) || !is_number($TorrentID) || !$OldGroupID || !$TorrentID || empty($Title)) {
+$OldGroupID = (int)$_POST['oldgroupid'];
+$TorrentID = (int)$_POST['torrentid'];
+$Title = trim($_POST['title']);
+$OldCategoryID = (int)$_POST['oldcategoryid'];
+$NewCategoryID = (int)$_POST['newcategoryid'];
+if (!$OldGroupID || !$NewCategoryID || !$TorrentID || empty($Title)) {
     error(0);
 }
 
@@ -107,18 +107,18 @@ if ($DB->scalar('SELECT ID FROM torrents WHERE GroupID = ?', $OldGroupID)) {
     $Cache->delete_value("torrent_comments_{$GroupID}_catalogue_0");
 }
 
-Torrents::update_hash($GroupID);
-
-$Cache->delete_value("torrent_download_$TorrentID");
-
-Misc::write_log("Torrent $TorrentID was edited by $LoggedUser[Username]");
-Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "merged from group $OldGroupID", 0);
-
 $DB->prepared_query('
     UPDATE group_log SET
         GroupID = ?
     WHERE GroupID = ?
     ', $GroupID, $OldGroupID
 );
+
+Torrents::update_hash($GroupID);
+
+$Cache->delete_value("torrent_download_$TorrentID");
+
+(new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "category changed from $OldCategoryID to $NewCategoryID, merged from group $OldGroupID")
+    ->general("Torrent $TorrentID was changed to category $NewCategoryID by $LoggedUser[Username]");
 
 header("Location: torrents.php?id=$GroupID");

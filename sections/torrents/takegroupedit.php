@@ -145,7 +145,7 @@ $noCoverArt = (isset($_POST['no_cover_art']) ? 1 : 0);
 
 $logInfo = [];
 if ($_POST['summary']) {
-    $logInfo[] = trim($_POST['summary']);
+    $logInfo[] = "summary: " . trim($_POST['summary']);
 }
 if ($noCoverArt != $oldNoCoverArt) {
     if ($noCoverArt) {
@@ -170,7 +170,7 @@ if ($OldVH != $VanityHouse) {
     $logInfo[] = 'Vanity House status changed to '. ($VanityHouse ? 'true' : 'false');
 }
 if ($logInfo) {
-    Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], implode(', ', $logInfo), 0);
+    (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], implode(', ', $logInfo));
 }
 
 // There we go, all done!

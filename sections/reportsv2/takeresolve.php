@@ -233,28 +233,28 @@ if ($DB->affected_rows() > 0 || !$Report) {
 
     //Log and delete
     if (isset($Escaped['delete']) && check_perms('users_mod')) {
-        $DB->query("
+        $UpUsername = $DB->scalar("
             SELECT Username
             FROM users_main
-            WHERE ID = $UploaderID");
-        list($UpUsername) = $DB->next_record();
-        $Log = "Torrent $TorrentID ($RawName) uploaded by $UpUsername was deleted by ".$LoggedUser['Username'];
-        $Log .= ($Escaped['resolve_type'] == 'custom' ? '' : ' for the reason: '.$ResolveType['title'].".");
+            WHERE ID = ?
+            ", $UploaderID
+        );
+        $Log = "Torrent $TorrentID ($RawName) uploaded by $UpUsername was deleted by ".$LoggedUser['Username']
+            . ($Escaped['resolve_type'] == 'custom' ? '' : ' for the reason: '.$ResolveType['title'].".");
         if (isset($Escaped['log_message']) && $Escaped['log_message'] != '') {
             $Log .= ' ( '.$Escaped['log_message'].' )';
         }
-        $DB->query("
+        [$GroupID, $InfoHash] = $DB->row("
             SELECT GroupID, hex(info_hash)
             FROM torrents
-            WHERE ID = $TorrentID");
-        list($GroupID, $InfoHash) = $DB->next_record();
+            WHERE ID = ?
+            ", $TorrentID
+        );
         Torrents::delete_torrent($TorrentID, 0, $ResolveType['reason']);
 
-        //$InfoHash = unpack("H*", $InfoHash);
-        $Log .= ' ('.strtoupper($InfoHash).')';
-        Misc::write_log($Log);
-        $Log = 'deleted torrent for the reason: '.$ResolveType['title'].'. ( '.$Escaped['log_message'].' )';
-        Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], $Log, 0);
+        (new Gazelle\Log)->general($Log . ' ('.strtoupper($InfoHash).')')
+            ->torrent($GroupID, $TorrentID, $LoggedUser['ID'],
+                'deleted torrent for the reason: '.$ResolveType['title'].'. ( '.$Escaped['log_message'].' )');
         $TrumpID = 0;
         if ($Escaped['resolve_type'] === 'trump') {
             if (preg_match('/torrentid=([0-9]+)/', $Escaped['log_message'], $Matches) === 1) {

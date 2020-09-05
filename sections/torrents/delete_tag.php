@@ -3,48 +3,48 @@ if (!empty($LoggedUser['DisableTagging']) || !check_perms('site_delete_tag')) {
     error(403);
 }
 
-$TagID = $_GET['tagid'];
-$GroupID = $_GET['groupid'];
+$tagId = (int)$_GET['tagid'];
+$groupId = (int)$_GET['groupid'];
 
-if (!is_number($TagID) || !is_number($GroupID)) {
+if (!$tagId || !$groupId) {
     error(404);
 }
 
-$TagName = $DB->scalar("
-    SELECT Name FROM tags WHERE ID = ?", $TagID
+$name = $DB->scalar("
+    SELECT Name FROM tags WHERE ID = ?", $tagId
 );
-if ($TagName) {
-    Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "Tag \"$TagName\" removed from group", 0);
+if ($name) {
+    $DB->prepared_query("
+        DELETE FROM torrents_tags_votes WHERE GroupID = ? AND TagID = ?
+        ", $groupId, $tagId
+    );
+    $DB->prepared_query("
+        DELETE FROM torrents_tags WHERE GroupID = ? AND TagID = ?
+        ", $groupId, $tagId
+    );
+    $uses = $DB->scalar("
+        SELECT count(*) FROM torrents_tags WHERE TagID = ?
+        ", $tagId
+    ) + $DB->scalar("
+        SELECT count(*)
+        FROM requests_tags rt
+        INNER JOIN requests r ON (r.ID = rt.RequestID)
+        WHERE r.FillerID = 0 /* TODO: change to DEFAULT NULL */
+            AND rt.TagID = ?
+        ", $tagId
+    );
+    if (!$uses) {
+        (new Gazelle\Log)->general("Unused tag \"$name\" removed by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
+        $DB->prepared_query("
+            DELETE FROM tags WHERE ID = ?
+            ", $tagId
+        );
+    }
+
+    Torrents::update_hash($groupId);
+    (new Gazelle\Log)->group($groupId, $LoggedUser['ID'], "Tag \"$name\" removed from group $groupId");
+
+    // Cache the deleted tag for 5 minutes
+    $Cache->cache_value('deleted_tags_'.$groupId.'_'.$LoggedUser['ID'], $name, 300);
 }
-
-$DB->query("
-    DELETE FROM torrents_tags_votes
-    WHERE GroupID = '$GroupID'
-        AND TagID = '$TagID'");
-$DB->query("
-    DELETE FROM torrents_tags
-    WHERE GroupID = '$GroupID'
-        AND TagID = '$TagID'");
-
-Torrents::update_hash($GroupID);
-
-$DB->query("
-    SELECT COUNT(GroupID)
-    FROM torrents_tags
-    WHERE TagID = $TagID");
-list($Count) = $DB->next_record();
-if ($Count < 1) {
-    $DB->query("
-        SELECT Name
-        FROM tags
-        WHERE ID = $TagID");
-    list($TagName) = $DB->next_record();
-
-    $DB->query("
-        DELETE FROM tags
-        WHERE ID = $TagID");
-}
-// Cache the deleted tag for 5 minutes
-$Cache->cache_value('deleted_tags_'.$GroupID.'_'.$LoggedUser['ID'], $TagName, 300);
-$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
-header("Location: {$Location}");
+header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$groupId}");

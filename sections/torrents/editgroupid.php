@@ -9,40 +9,39 @@ if (!check_perms('torrents_edit')) {
     error(403);
 }
 
-$OldGroupID = $_POST['oldgroupid'];
-$GroupID = $_POST['groupid'];
-$TorrentID = $_POST['torrentid'];
+$OldGroupID = (int)$_POST['oldgroupid'];
+$GroupID = (int)$_POST['groupid'];
+$TorrentID = (int)$_POST['torrentid'];
 
-
-if (!is_number($OldGroupID) || !is_number($GroupID) || !is_number($TorrentID) || !$OldGroupID || !$GroupID || !$TorrentID) {
-    error(0);
+if (!$OldGroupID || !$GroupID || !$TorrentID) {
+    error(404);
 }
 
 if ($OldGroupID == $GroupID) {
-    $Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=edit&id={$GroupID}" : $_SERVER['HTTP_REFERER'];
-    header("Location: {$Location}");
-    die();
+    header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?action=edit&id={$OldGroupID}");
+    exit;
 }
 
 //Everything is legit, let's just confim they're not retarded
 if (empty($_POST['confirm'])) {
-    $DB->query("
+    $Name = $DB->scalar("
         SELECT Name
         FROM torrents_group
-        WHERE ID = $OldGroupID");
-    if (!$DB->has_results()) {
+        WHERE ID = ?
+        ", $GroupID
+    );
+    if (is_null($Name)) {
         //Trying to move to an empty group? I think not!
         set_message('The destination torrent group does not exist!');
-        $Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?action=edit&id={$OldGroupID}" : $_SERVER['HTTP_REFERER'];
-        header("Location: {$Location}");
-        die();
+        header("Location: " . $_SERVER['HTTP_REFERER'] ?? "torrents.php?action=edit&id={$OldGroupID}");
+        exit();
     }
-    list($Name) = $DB->next_record();
-    $DB->query("
+    [$CategoryID, $NewName] = $DB->row("
         SELECT CategoryID, Name
         FROM torrents_group
-        WHERE ID = $GroupID");
-    list($CategoryID, $NewName) = $DB->next_record();
+        WHERE ID = ?
+        ", $GroupID
+    );
     if ($Categories[$CategoryID - 1] != 'Music') {
         error('Destination torrent group must be in the "Music" category.');
     }
@@ -80,24 +79,29 @@ if (empty($_POST['confirm'])) {
 } else {
     authorize();
 
-    $DB->query("
-        UPDATE torrents
-        SET    GroupID = '$GroupID'
-        WHERE ID = $TorrentID");
+    $DB->prepared_query("
+        UPDATE torrents SET
+            GroupID = ?
+        WHERE ID = ?
+        ", $GroupID, $TorrentID
+    );
 
     // Delete old torrent group if it's empty now
-    $DB->query("
-        SELECT COUNT(ID)
+    $Count = $DB->scalar("
+        SELECT count(*)
         FROM torrents
-        WHERE GroupID = '$OldGroupID'");
-    list($TorrentsInGroup) = $DB->next_record();
-    if ($TorrentsInGroup == 0) {
+        WHERE GroupID = ?
+        ", $OldGroupID
+    );
+    if (!$Count) {
         // TODO: votes etc!
-        $DB->query("
-            UPDATE comments
-            SET PageID = '$GroupID'
+        $DB->prepared_query("
+            UPDATE comments SET
+                PageID = ?
             WHERE Page = 'torrents'
-                AND PageID = '$OldGroupID'");
+                AND PageID = ?
+            ", $GroupID, $OldGroupID
+        );
         $Cache->delete_value("torrent_comments_{$GroupID}_catalogue_0");
         $Cache->delete_value("torrent_comments_$GroupID");
         Torrents::delete_group($OldGroupID);
@@ -106,8 +110,8 @@ if (empty($_POST['confirm'])) {
     }
     Torrents::update_hash($GroupID);
 
-    Misc::write_log("Torrent $TorrentID was edited by " . $LoggedUser['Username']); // TODO: this is probably broken
-    Torrents::write_group_log($GroupID, 0, $LoggedUser['ID'], "merged group $OldGroupID", 0);
+    (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "merged group $OldGroupID")
+        ->general("Torrent $TorrentID was edited by " . $LoggedUser['Username']);
     $DB->prepared_query("
         UPDATE group_log
         SET GroupID = ?

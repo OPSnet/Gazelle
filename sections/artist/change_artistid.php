@@ -166,15 +166,18 @@ if (isset($_POST['confirm'])) {
     $Cache->delete_value("artist_groups_$NewArtistID");
 
     // Delete the old artist
-    $DB->query("
+    $DB->prepared_query("
         DELETE FROM artists_group
-        WHERE ArtistID = $ArtistID");
-
-    Misc::write_log("The artist $ArtistID ($ArtistName) was made into a non-redirecting alias of artist $NewArtistID ($NewArtistName) by user ".$LoggedUser['ID']." (".$LoggedUser['Username'].')');
+        WHERE ArtistID = ?
+        ", $ArtistID
+    );
+    (new Gazelle\Log)->general("The artist $ArtistID ($ArtistName) was made into a non-redirecting alias of artist $NewArtistID ($NewArtistName) by user ".$LoggedUser['ID']." (".$LoggedUser['Username'].')');
 
     header("Location: artist.php?action=edit&artistid=$NewArtistID");
-} else {
-    View::show_header('Merging Artists');
+    exit;
+}
+
+View::show_header('Merging Artists');
 ?>
     <div class="header">
         <h2>Confirm merge</h2>
@@ -192,5 +195,4 @@ if (isset($_POST['confirm'])) {
         </div>
     </form>
 <?php
-    View::show_footer();
-}
+View::show_footer();

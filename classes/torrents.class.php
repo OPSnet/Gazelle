@@ -251,27 +251,6 @@ class Torrents {
         }
     }
 
-
-    /*
-     * Write to the group log.
-     *
-     * @param int $GroupID
-     * @param int $TorrentID
-     * @param int $UserID
-     * @param string $Message
-     * @param boolean $Hidden Currently does fuck all. TODO: Fix that.
-     */
-    public static function write_group_log($GroupID, $TorrentID, $UserID, $Message, $Hidden) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query("
-            INSERT INTO group_log
-                   (GroupID, TorrentID, UserID, Info, Hidden)
-            VALUES (?,       ?,         ?,      ?,    ?)
-            ", $GroupID, $TorrentID, $UserID, $Message, $Hidden
-        );
-        G::$DB->set_query_id($QueryID);
-    }
-
     /**
      * Delete a torrent.
      *
@@ -441,7 +420,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
     public static function delete_group($GroupID) {
         $QueryID = G::$DB->get_query_id();
 
-        Misc::write_log("Group $GroupID automatically deleted (No torrents have this group).");
+        (new Gazelle\Log)->general("Group $GroupID automatically deleted (No torrents have this group).");
 
         G::$DB->prepared_query("
             SELECT CategoryID
@@ -874,12 +853,13 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         $GroupIDs = G::$DB->collect('GroupID');
         G::$DB->set_query_id($QueryID);
 
+        $groupLog = new Gazelle\Log;
         foreach ($Torrents as $Torrent) {
-            list($TorrentID, $GroupID, $InfoHash) = $Torrent;
+            [$TorrentID, $GroupID, $InfoHash] = $Torrent;
             Tracker::update_tracker('update_torrent', ['info_hash' => rawurlencode($InfoHash), 'freetorrent' => $FreeNeutral]);
             G::$Cache->delete_value("torrent_download_$TorrentID");
-            Misc::write_log(G::$LoggedUser['Username']." marked torrent $TorrentID freeleech type $FreeLeechType!");
-            Torrents::write_group_log($GroupID, $TorrentID, G::$LoggedUser['ID'], "marked as freeleech type $FreeLeechType!", 0);
+            $groupLog->torrent($GroupID, $TorrentID, G::$LoggedUser['ID'], "marked as freeleech type $FreeLeechType!")
+                ->general(G::$LoggedUser['Username']." marked torrent $TorrentID freeleech type $FreeLeechType!");
         }
 
         foreach ($GroupIDs as $GroupID) {

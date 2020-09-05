@@ -40,7 +40,7 @@ if ($DB->has_results()) {
         if ($ArtistID == $CloneArtistID && $Redirect == 0) {
             if ($CloneRedirect) {
                 $artist->removeAlias($CloneAliasID);
-                Misc::write_log(sprintf("Redirection for the alias %d (%s) for the artist %d was removed by user %d (%s)",
+                (new Gazelle\Log)->general(sprintf("Redirection for the alias %d (%s) for the artist %d was removed by user %d (%s)",
                     $CloneAliasID, $aliasName, $ArtistID, $LoggedUser['ID'], $LoggedUser['Username']
                 ));
             } else {
@@ -72,7 +72,7 @@ if (!$CloneAliasID) {
     }
     $aliasId = $artist->addAlias($LoggedUser['ID'], $aliasName, $Redirect);
 
-    Misc::write_log(sprintf("The alias %d (%s) was added to the artist %d (%s) by user %d (%s)",
+    (new Gazelle\Log)->general(sprintf("The alias %d (%s) was added to the artist %d (%s) by user %d (%s)",
         $aliasId, $aliasName, $ArtistID, $artist->name(), $LoggedUser['ID'], $LoggedUser['Username']
     ));
 }

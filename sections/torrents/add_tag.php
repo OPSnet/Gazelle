@@ -6,7 +6,7 @@ if (!empty($LoggedUser['DisableTagging'])) {
 
 $UserID = $LoggedUser['ID'];
 $GroupID = $_POST['groupid'];
-$Location = (empty($_SERVER['HTTP_REFERER'])) ? "torrents.php?id={$GroupID}" : $_SERVER['HTTP_REFERER'];
+$Location = $_SERVER['HTTP_REFERER'] ?? "torrents.php?id={$GroupID}";
 
 if (!is_number($GroupID) || !$GroupID) {
     error(0);
@@ -27,15 +27,15 @@ foreach ($Tags as $TagName) {
         $TagID = $tagMan->create($TagName, $UserID);
         if ($tagMan->torrentTagHasVote($TagID, $GroupID, $UserID)) {
             // User has already voted on this tag
-            header("Location: {$Location}");
-            die();
+            header("Location: $Location");
+            exit;
         }
         $tagMan->createTorrentTag($TagID, $GroupID, $UserID, 3);
         $tagMan->createTorrentTagVote($TagID, $GroupID, $UserID, 'up');
 
-        Torrents::write_group_log($GroupID, 0, $UserID, "Tag \"$TagName\" added to group", 0);
+        (new Gazelle\Log)->group($GroupID, $UserID, "Tag \"$TagName\" added to group");
     }
 }
 
 Torrents::update_hash($GroupID); // Delete torrent group cache
-header("Location: {$Location}");
+header("Location: $Location");

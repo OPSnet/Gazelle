@@ -185,20 +185,6 @@ class Misc {
         }
     }
 
-    /*
-     * Write a message to the system log.
-     *
-     * @param string $Message the message to write.
-     */
-    public static function write_log($Message) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query("
-            INSERT INTO log (Message) VALUES (?)
-            ", trim($Message)
-        );
-        G::$DB->set_query_id($QueryID);
-    }
-
     /**
      * HTML escape an entire array for output.
      * @param array $Array, what we want to escape

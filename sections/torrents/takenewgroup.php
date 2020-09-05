@@ -10,13 +10,13 @@ if (!check_perms('torrents_edit')) {
     error(403);
 }
 
-$OldGroupID = $_POST['oldgroupid'];
-$TorrentID = $_POST['torrentid'];
+$OldGroupID = (int)$_POST['oldgroupid'];
+$TorrentID = (int)$_POST['torrentid'];
 $ArtistName = trim($_POST['artist']);
 $Title = trim($_POST['title']);
-$Year = trim($_POST['year']);
+$Year = (int)$_POST['year'];
 
-if (!is_number($OldGroupID) || !is_number($TorrentID) || !is_number($Year) || !$OldGroupID || !$TorrentID || !$Year || empty($Title) || empty($ArtistName)) {
+if (!$OldGroupID || !$TorrentID || !$Year || empty($Title) || empty($ArtistName)) {
     error(0);
 }
 
@@ -97,7 +97,7 @@ if (empty($_POST['confirm'])) {
 
     $Cache->delete_value("torrent_download_$TorrentID");
 
-    Misc::write_log("Torrent $TorrentID was edited by " . $LoggedUser['Username']);
+    (new Gazelle\Log)->general("Torrent $TorrentID was split out from group $OldGroupID to $GroupId by " . $LoggedUser['Username']);
 
     header("Location: torrents.php?id=$GroupID");
 }

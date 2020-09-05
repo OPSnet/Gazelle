@@ -432,18 +432,17 @@ if (check_perms('torrents_freeleech') && $Properties['FreeLeech'] != $CurFreeLee
     Torrents::freeleech_torrents($TorrentID, $Properties['FreeLeech'], $Properties['FreeLeechType']);
 }
 
-$DB->prepared_query('
+[$GroupID, $Name, $Time] = $DB->row("
     SELECT g.ID, g.Name, t.Time
     FROM torrents_group g
     INNER JOIN torrents t ON (t.GroupID = g.ID)
-    WHERE t.ID = ?', $TorrentID
+    WHERE t.ID = ?
+    ", $TorrentID
 );
-list($GroupID, $Name, $Time) = $DB->fetch_record();
 
-Misc::write_log("Torrent $TorrentID ($Name) in group $GroupID was edited by ".$LoggedUser['Username']." ($LogDetails)"); // TODO: this is probably broken
-Torrents::write_group_log($GroupID, $TorrentID, $LoggedUser['ID'], $LogDetails, 0);
-$Cache->delete_value("torrents_details_$GroupID");
-$Cache->delete_value("torrent_download_$TorrentID");
+(new Gazelle\Log)->torrent($GroupID, $TorrentID, $LoggedUser['ID'], $LogDetails)
+    ->general("Torrent $TorrentID ($Name) in group $GroupID was edited by ".$LoggedUser['Username']." ($LogDetails)");
+$Cache->deleteMulti(["torrents_details_$GroupID", "torrent_download_$TorrentID"]);
 
 Torrents::update_hash($GroupID);
 // All done!
