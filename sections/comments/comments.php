@@ -263,7 +263,7 @@ $Comments = $DB->prepared_query("
     ", ...array_merge($joinArgs, $condArgs, [$Limit])
 );
 $Count = $DB->record_count();
-$Pages = Format::get_pages($Page, $Results, $PerPage, 11);
+$Pages = Format::get_pages($Page, $Count, $PerPage, 11);
 
 if ($Action == 'requests') {
     $RequestIDs = array_flip(array_flip($DB->collect('PageID')));
@@ -280,11 +280,11 @@ if ($Action == 'requests') {
 
 $Links = implode(' ', $ActionLinks)
     . ($TypeLinks
-        ? '<br />' . implode(' ', array_map(
-            function ($x) { 
+        ? (' ' . implode(' ', array_map(
+            function ($x) {
                 return sprintf('<a href="%s" class="brackets">%s</a>', $x[0], $x[1]);
             }, $TypeLinks
-        ))
+        )))
         : ''
     );
 
