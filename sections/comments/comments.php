@@ -328,6 +328,7 @@ View::show_header(sprintf($Title, 'bbcode,comments'));
                 break;
         }
         $author = Users::user_info($AuthorID);
+        $ownProfile = $AuthorID == $LoggedUser['ID'];
         echo G::$Twig->render('comment/comment.twig', [
             'avatar'      => Users::show_avatar($author['Avatar'], $AuthorID, $author['Username'], $LoggedUser['DisableAvatars']),
             'body'        => Text::full_format($Body),
