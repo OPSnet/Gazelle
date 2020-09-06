@@ -144,13 +144,13 @@ if ($CategoryID == 1) { ?>
                 <tr>
                     <td class="label">Torrent <strong>group</strong> leech status</td>
                     <td>
-<?php       $Leech = ['Normal', 'Freeleech', 'Neutral Leech'];
+<?php   $Leech = ['Normal', 'Freeleech', 'Neutral Leech'];
         foreach ($Leech as $Key => $Type) { ?>
                         <label><input type="radio" name="freeleechtype" value="<?=$Key?>"<?=($Key == $Torrent['FreeTorrent'] ? ' checked="checked"' : '')?> /> <?=$Type?></label>
 <?php   } ?>
                          because
                         <select name="freeleechreason">
-<?php        $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
+<?php   $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
         foreach ($FL as $Key => $FLType) { ?>
                             <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$FLType?></option>
 <?php
@@ -175,7 +175,7 @@ if (check_perms('torrents_edit')) {
                 <input type="hidden" name="action" value="rename" />
                 <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                 <input type="hidden" name="groupid" value="<?=$GroupID?>" />
-                <input type="text" name="name" size="92" value="<?=$Name?>" />
+                <input type="text" name="name" size="92" value="<?= display_str($Name) ?>" />
                 <div style="text-align: center;">
                     <input type="submit" value="Rename" />
                 </div>
