@@ -147,11 +147,7 @@ class User extends Base {
 
     public function remove() {
         $this->db->prepared_query("
-            DELETE um, ui, uls
-            FROM users_main um
-            INNER JOIN user_info ui ON (ui.UserID = um.ID)
-            INNER JOIN users_leech_stats uls ON (uls.UserID = um.ID)
-            WHERE um.ID = ?
+            DELETE FROM users_main WHERE ID = ?
             ", $this->id
         );
         $this->cache->delete_value("user_info_$UserID");
