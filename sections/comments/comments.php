@@ -30,7 +30,7 @@ if (!isset($_GET['id'])) {
     $Username = $LoggedUser['Username'];
 } else {
     $UserID = (int)$_GET['id'];
-    if ($UserID < 1) {
+    if (!$UserID) {
         error(404);
     }
     $UserInfo = Users::user_info($UserID);
@@ -103,15 +103,11 @@ switch ($Action) {
             case 'contributed':
                 $Header = 'Comments left on collages %s contributed to';
                 $Title  = 'Comments left on collages ' . $have . ' contributed to';
-                $Join[] = "LEFT JOIN collages_torrents ct ON (ct.CollageID = cl.ID AND ct.UserID = ?)";
-                $Join[] = "LEFT JOIN collages_artists  ca ON (ca.CollageID = cl.ID AND ca.UserID = ?)";
-                $joinArgs[] = $UserID;
-                $joinArgs[] = $UserID;
-                $condition[] = 'IF(cl.CategoryID = '
-                    . array_search('Artists', $CollageCats)
-                    . ', ca.ArtistID, ct.GroupID) IS NOT NULL';
-                $condition[] = "C.AuthorID != ?";
-                $condArgs[] = $UserID;
+                $condition[] = "C.AuthorID != ? AND cl.ID IN (
+                    SELECT DISTINCT CollageID FROM collages_torrents ct WHERE ct.UserID = ?
+                    UNION ALL
+                    SELECT DISTINCT CollageID FROM collages_artists ca WHERE ca.UserID = ?)";
+                $condArgs = array_merge($condArgs, [$UserID, $UserID, $UserID]);
                 $TypeLinks = [
                     [$BaseLink, "Display comments left on collages $have made"],
                     ["$BaseLink&amp;type=created", "Display comments left on " . createdBy($ownProfile, $Username, 'collages')],
@@ -230,18 +226,18 @@ $joinArgs[] = $Action;
 $Join = implode("\n", $Join);
 $cond = $condition ? 'WHERE ' . implode(" AND ", $condition) : '';
 
-$Results = $DB->scalar("
+$Count = $DB->scalar("
     SELECT count(*)
     FROM $table
     $Join
     $cond
-    GROUP BY C.ID
     ", ...array_merge($joinArgs, $condArgs)
 );
 
 // Posts per page limit stuff
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 [$Page, $Limit] = Format::page_limit($PerPage);
+$Pages = Format::get_pages($Page, $Count, $PerPage, 11);
 
 $Comments = $DB->prepared_query("
     SELECT
@@ -259,11 +255,9 @@ $Comments = $DB->prepared_query("
     $cond
     GROUP BY C.ID
     ORDER BY C.ID DESC
-    LIMIT ?
-    ", ...array_merge($joinArgs, $condArgs, [$Limit])
+    LIMIT $Limit
+    ", ...array_merge($joinArgs, $condArgs)
 );
-$Count = $DB->record_count();
-$Pages = Format::get_pages($Page, $Count, $PerPage, 11);
 
 if ($Action == 'requests') {
     $RequestIDs = array_flip(array_flip($DB->collect('PageID')));
@@ -280,7 +274,7 @@ if ($Action == 'requests') {
 
 $Links = implode(' ', $ActionLinks)
     . ($TypeLinks
-        ? (' ' . implode(' ', array_map(
+        ? (' <br />' . implode(' ', array_map(
             function ($x) {
                 return sprintf('<a href="%s" class="brackets">%s</a>', $x[0], $x[1]);
             }, $TypeLinks
