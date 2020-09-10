@@ -206,7 +206,6 @@ class UserCreator extends Base {
         $this->ipaddr       = null;
         $this->passHash     = null;
         $this->permissionId = null;
-        $this->announceKey  = null;
         $this->userName     = null;
     }
 

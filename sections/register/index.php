@@ -50,8 +50,6 @@ if (!empty($_REQUEST['confirm'])) {
                 $creator->setInviteKey($_REQUEST['invite']);
             }
 
-            // hack but whatever.
-            $announceKey = $creator->announceKey();
             try {
                 $user = $creator->create();
             }
@@ -89,7 +87,7 @@ if (!empty($_REQUEST['confirm'])) {
                     'New account confirmation at '.SITE_NAME,
                     G::$Twig->render('emails/new_registration.twig', [
                         'Username'   => $username,
-                        'TorrentKey' => $announceKey(),
+                        'TorrentKey' => $creator->announceKey(),
                         'SITE_NAME'  => SITE_NAME,
                         'SITE_URL'   => SITE_URL
                     ]),
