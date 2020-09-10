@@ -50,7 +50,7 @@ abstract class CommentViewer {
         $author = \Users::user_info($AuthorID);
         $ownProfile = $AuthorID == $this->user->id();
         echo $this->twig->render('comment/comment.twig', [
-            'avatar'      => \Users::show_avatar($author['Avatar'], $AuthorID, $author['Username'], $this->user->showAvatar()),
+            'avatar'      => \Users::show_avatar($author['Avatar'], $AuthorID, $author['Username'], $this->user->avatarMode()),
             'body'        => \Text::full_format($Body),
             'edited'      => $EditedUserID,
             'editor'      => \Users::format_username($EditedUserID, false, false, false),
@@ -59,7 +59,7 @@ abstract class CommentViewer {
             'is_admin'    => check_perms('site_admin_forums'),
             'header'      => '<strong>' . \Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header,
             'page'        => $this->page,
-            'show_avatar' => $this->user->showAvatar(),
+            'show_avatar' => $this->user->avatarMode() != 1,
             'show_delete' => check_perms('site_moderate_forums'),
             'show_edit'   => $ownProfile || check_perms('site_moderate_forums'),
             'show_warn'   => check_perms('users_warn') && !$ownProfile && $this->user->primaryClass() >= $author['Class'],

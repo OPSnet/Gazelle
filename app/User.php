@@ -103,9 +103,8 @@ class User extends Base {
         return site_url() . "user.php?id=" . $this->id;
     }
 
-    public function showAvatar(): bool {
-        $info = \Users::user_heavy_info($this->id);
-        return $info['DisableAvatars'] == 0;
+    public function avatarMode(): int {
+        return \Users::user_heavy_info($this->id)['DisableAvatars'];
     }
 
     public function primaryClass(): int {
