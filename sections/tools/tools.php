@@ -125,7 +125,6 @@ Category('Community', [
 
 Category('Stylesheets', [
     Item('Stylesheet usage',          'tools.php?action=stylesheets',      All(['admin_manage_stylesheets'])),
-    Item('Render stylesheet gallery', 'tools.php?action=rerender_gallery', Any(['site_debug', 'users_mod'])),
 ]);
 
 ?>

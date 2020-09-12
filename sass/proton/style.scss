@@ -1207,6 +1207,11 @@ tr.torrent .bookmark > a:after {
     margin: 0 0 2px 0;
 }
 
+#recommended ul {
+    margin: 0 0 0 0;
+    padding: 10px;
+}
+
 .sidebar form {
     padding: 0 !important;
     margin: 0 !important;
@@ -1279,16 +1284,6 @@ tr.torrent .bookmark > a:after {
 
 .permission_container:first-child {
     margin-left: 0;
-}
-
-.toolbox_container {
-    float: left;
-    margin-left: 20px;
-    width: 193px;
-}
-.permission_container input {
-    margin:0px 3px 5px 0px;
-    vertical-align:top;
 }
 
 /* TORRENTS */

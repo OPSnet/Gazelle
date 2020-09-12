@@ -35,12 +35,6 @@ if (substr($_REQUEST['action'], 0, 12) == 'update_geoip' && !isset($argv[1])) {
     }
 }
 
-if (substr($_REQUEST['action'],0,16) == 'rerender_gallery' && !isset($argv[1])) {
-    if (!check_perms('site_debug')) {
-        error(403);
-    }
-}
-
 $Val = new Validate;
 $Feed = new Feed;
 
@@ -325,10 +319,6 @@ switch ($_REQUEST['action']) {
 
     case 'process_info':
         require(__DIR__ . '/development/process_info.php');
-        break;
-
-    case 'rerender_gallery':
-        require(__DIR__ . '/development/rerender_gallery.php');
         break;
 
     case 'periodic':

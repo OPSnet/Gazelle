@@ -8,8 +8,8 @@ Originally forked from Postmodern, which was based on 'Zeal', a modification of 
 /* Colors */
 /* Layout (Torrents page) */
 * {
-  padding: 0em;
-  margin: 0em; }
+  padding: 0;
+  margin: 0; }
 
 html {
   width: 100%; }
@@ -970,12 +970,6 @@ tr.unreadpm {
 .submit_container {
   clear: both;
   text-align: right; }
-
-.toolbox_container {
-    float: left;
-    padding: 5px;
-    width: 200px;
-}
 
 /* Layout (Invite tree) */
 ul .invitetree {

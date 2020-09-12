@@ -8,6 +8,13 @@ logs/
 !logs/README.txt
 
 public/static/local/
+mix-manifest.json
+
+public/static/styles/**/*.css
+!public/static/styles/opendyslexic/style.css
+!public/static/styles/tooltipster/custom.css
+!public/static/styles/tooltipster/reset.css
+*.map
 
 public/static/similar/
 !public/static/similar/.gitkeep
