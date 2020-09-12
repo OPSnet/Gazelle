@@ -39,7 +39,7 @@ foreach ($toc as $category => $forumList) {
         echo G::$Twig->render('forum/main.twig', [
             'creator'        => $f['MinClassCreate'] <= $LoggedUser['Class'],
             'category'       => $category,
-            'cut_title'      => Format::cut_string($f['Title'], 50, 1),
+            'cut_title'      => shortenString($f['Title'] ?? '', 50, true),
             'description'    => $f['Description'],
             'forum_id'       => $f['ID'],
             'icon_class'     => $iconClass,

@@ -330,9 +330,9 @@ while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $Threa
             </td>
             <td>
 <?php    if (empty($ThreadID)) { ?>
-                <a href="forums.php?action=viewthread&amp;threadid=<?=$ID?>"><?=Format::cut_string($Title, 80); ?></a>
+                <a href="forums.php?action=viewthread&amp;threadid=<?=$ID?>"><?= shortenString($Title, 80) ?></a>
 <?php    } else { ?>
-                <?=Format::cut_string($Title, 80); ?>
+                <?=shortenString($Title, 80); ?>
 <?php
     }
     if ($Type == 'body') { ?>

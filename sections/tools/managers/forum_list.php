@@ -13,7 +13,7 @@ function class_list($Selected = 0) {
         if ($Selected == $Level) {
             $Return .= ' selected="selected"';
         }
-        $Return .= '>'.Format::cut_string($Name, 20, 1)."</option>\n";
+        $Return .= '>'.shortenString($Name, 20, true)."</option>\n";
     }
     reset($Classes);
     return $Return;

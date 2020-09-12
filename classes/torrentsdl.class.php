@@ -208,7 +208,7 @@ class TorrentsDL {
             $TorrentName = $TorrentArtist . $TorrentName;
         }
 
-        $TorrentName = Format::cut_string($TorrentName . $TorrentInfo, $MaxLength, true, false);
+        $TorrentName = shortenString($TorrentName . $TorrentInfo, $MaxLength, true, false);
         if ($TorrentID !== false) {
             $TorrentName .= "-$TorrentID";
         }

@@ -33,41 +33,6 @@ class Format {
         'lossy web approved'    => 'tl_approved tl_lossy_web'
     ];
 
-    /**
-     * Shorten a string
-     *
-     * @param string $Str string to cut
-     * @param int    $Length cut at length
-     * @param bool   $Hard force cut at length instead of at closest word
-     * @param bool   $ShowDots Show dots at the end
-     * @return string formatted string
-     */
-    public static function cut_string($Str, $Length, $Hard = false, $ShowDots = true) {
-        if (mb_strlen($Str, 'UTF-8') > $Length) {
-            if ($Hard == 0) {
-                // Not hard, cut at closest word
-                $CutDesc = mb_substr($Str, 0, $Length, 'UTF-8');
-                $DescArr = explode(' ', $CutDesc);
-                if (count($DescArr) > 1) {
-                    array_pop($DescArr);
-                    $CutDesc = implode(' ', $DescArr);
-                }
-                if ($ShowDots) {
-                    //TODO: should we replace the three dots with an ellipsis character?
-                    $CutDesc .= '...';
-                }
-            } else {
-                $CutDesc = mb_substr($Str, 0, $Length, 'UTF-8');
-                if ($ShowDots) {
-                    $CutDesc .= '...';
-                }
-            }
-            return $CutDesc;
-        } else {
-            return $Str;
-        }
-    }
-
 
     /**
      * Gets the CSS class corresponding to a ratio

@@ -353,3 +353,32 @@ function randomString($len = 32) {
     }
     return $out;
 }
+
+/**
+ * Shorten a string
+ *
+ * @param string $text string to cut
+ * @param int    $maxLength cut at length
+ * @param bool   $force force cut at length instead of at closest word
+ * @param bool   $ellipsis Show dots at the end
+ * @return string formatted string
+ */
+function shortenString(string $text, int $maxLength, bool $force = false, bool $ellipsis = true): string {
+    if (mb_strlen($text, 'UTF-8') <= $maxLength) {
+        return $text;
+    }
+    if ($force) {
+        $short = mb_substr($text, 0, $maxLength, 'UTF-8');
+    } else {
+        $short = mb_substr($text, 0, $maxLength, 'UTF-8');
+        $words = explode(' ', $short);
+        if (count($words) > 1) {
+            array_pop($words);
+            $short = implode(' ', $words);
+        }
+    }
+    if ($ellipsis) {
+        $short .= "\xE2\x80\xA6"; // U+2026 HORIZONTAL ELLIPSIS
+    }
+    return $short;
+}

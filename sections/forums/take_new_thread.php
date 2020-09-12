@@ -40,7 +40,7 @@ if (empty($_POST['body']) || empty($_POST['title'])) {
     die();
 }
 
-$Title = Format::cut_string(trim($_POST['title']), 150, 1, 0);
+$Title = shortenString(trim($_POST['title']), 150, true, false);
 $Body = trim($_POST['body']);
 
 if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forums_polls_create')) {
