@@ -118,8 +118,8 @@ class UserCreator extends Base {
         }
         $this->db->prepared_query("
             INSERT INTO users_info
-                   (" . implode(',', $infoFields) . ")
-            VALUES (" . placeholders($infoFields) . ")
+                   (" . implode(',', $infoFields) . ", StyleID)
+            VALUES (" . placeholders($infoFields) . ", (SELECT s.ID FROM stylesheets s WHERE s.Default = '1' LIMIT 1))
             ", ...$infoArgs
         );
 
