@@ -3,19 +3,40 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
+    "dev": "yarn build",
+    "prod": "cross-env NODE_ENV=production yarn build",
+    "build": "yarn build:scss && yarn build:previews",
+    "build:scss": "webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "build:previews": "node scripts/render_styles_preview.js",
+    "start": "yarn build:scss -- --watch",
+    "lint:css": "stylelint \"sass/**/*.scss\" || exit 0",
+    "lint:css-checkstyle": "stylelint \"sass/**/*.scss\" --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js || exit 0",
     "lint:php:internal": "find . -path './vendor' -prune -o -path ./node_modules -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v \"No syntax errors detected\" )",
     "lint:php:phpcs": "vendor/bin/phpcs -p",
-    "lint:php": "npm run lint:php:internal && npm run lint:php:phpcs",
+    "lint:php": "yarn lint:php:internal && yarn lint:php:phpcs",
     "lint:php:fix": "./.bin/phpcbf",
-    "pre-commit": "npm run lint:php:fix"
+    "pre-commit": "yarn lint:php:fix"
   },
   "license": "Unlicense",
   "devDependencies": {
+    "browser-sync": "^2.26.10",
+    "browser-sync-webpack-plugin": "^2.2.2",
     "husky": "^4.2.5",
-    "lint-staged": "^9.5.0"
+    "lint-staged": "^9.5.0",
+    "stylelint": "^13.3.2",
+    "stylelint-checkstyle-formatter": "^0.1.2",
+    "stylelint-config-recommended": "^3.0.0",
+    "stylelint-config-standard": "^20.0.0",
+    "stylelint-scss": "^3.16.1"
   },
   "dependencies": {
-    "puppeteer": "^2.1.1"
+    "cross-env": "^7.0.2",
+    "laravel-mix": "^5.0.4",
+    "puppeteer": "^2.1.1",
+    "sass": "^1.26.10",
+    "sass-loader": "^9.0.2",
+    "sharp": "^0.25.4",
+    "webpack": "^4"
   },
   "husky": {
     "hooks": {
@@ -28,5 +49,13 @@
       "bash .bin/phpcbf",
       "vendor/bin/phpcs"
     ]
-  }
+  },
+  "browserslist": [
+    "ie 11",
+    "safari >= 10",
+    "ios >= 10",
+    "android >= 6",
+    "Firefox ESR",
+    "last 2 years and > 0.1%"
+  ]
 }

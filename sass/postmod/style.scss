@@ -5,7 +5,6 @@ This design incorporates some code from the 'Customize Zeal' Greasemonkey script
 
 /* Layout (Torrents page) */
 
-
 /* Global */
 @font-face { font-family: Akzidenz; src: url('images/Akzidenz.otf'); }
 @font-face { font-family: Officina; src: url('images/Officina.otf'); }
@@ -13,8 +12,8 @@ This design incorporates some code from the 'Customize Zeal' Greasemonkey script
 @font-face { font-family: Avant; src: url('images/Avant.otf'); }
 
 * {
-    padding: 0em;
-    margin: 0em;
+    padding: 0;
+    margin: 0;
 }
 
 html {

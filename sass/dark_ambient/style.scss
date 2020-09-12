@@ -762,12 +762,6 @@ strong.quoteheader {
     margin-left: 0;
 }
 
-.toolbox_container {
-    float: left;
-    margin-left: 20px;
-    width: 193px;
-}
-
 /* TORRENTS */
 
 #torrents input[value="Edit torrent"] {
@@ -1159,6 +1153,11 @@ strong.quoteheader {
     color: #8c8c8c;
 }
 
+.toolbox_container {
+    float: left;
+    margin-left: 20px;
+    width: 193px;
+}
 
 /* TORRENTS */
 
@@ -1553,7 +1552,7 @@ h3 {
 .seeders img,
 .leechers img {
     width: 16px;
-    height 16px;
+    height: 16px;
     background-size: 100%
 }
 

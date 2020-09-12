@@ -1281,14 +1281,15 @@ tr.torrent .bookmark > a:after {
     margin-left: 0;
 }
 
+.permission_container input {
+    margin: 0 3px 5px 0;
+    vertical-align: top;
+}
+
 .toolbox_container {
     float: left;
     margin-left: 20px;
     width: 193px;
-}
-.permission_container input {
-    margin:0px 3px 5px 0px;
-    vertical-align:top;
 }
 
 /* TORRENTS */

@@ -119,9 +119,10 @@ filter: url(https://what.cd/static/styles/80char/desaturate.svg#greyscale);
 
 }
 
-noty_message {
-    backround: #000000; !important
-}
+// As you can see, the code below isn't even valid so it clearly wasn't needed.
+// noty_message {
+//     backround: #000000; !important
+// }
 
 .noty_text {
     col: #000000;
@@ -426,8 +427,8 @@ white-space: normal !important;
 }
 
 #userinfo_minor a {
-    color: black; !important
-    }
+    color: black !important
+}
 
 #userinfo_stats #stats_seeding {
     margin-left: -7px;
@@ -1075,7 +1076,7 @@ tr.unreadpm {
 .toolbox_container {
     float: left;
     width: 200px;
-    padding:5px;
+    padding: 5px;
 }
 
 /* Layout (Invite tree) */
