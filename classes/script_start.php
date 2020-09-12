@@ -95,6 +95,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
+    'octet_size',
+    function ($size) {
+        return Format::get_size($size);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
     'plural',
     function ($number) {
         return plural($number);
@@ -143,6 +150,13 @@ G::$Twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $c
             "perm_$key", $key, (empty($config[$key]) ? '' : ' checked="checked"'), $key,
             \Permissions::list()[$key] ?? "!unknown($key)!"
         ),
+        'UTF-8'
+    );
+}));
+
+G::$Twig->addFunction(new \Twig\TwigFunction('ratio', function ($up, $down) {
+    return new \Twig\Markup(
+        Format::get_ratio_html($up, $down),
         'UTF-8'
     );
 }));

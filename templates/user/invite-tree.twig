@@ -1,0 +1,38 @@
+<p style="font-weight: bold;">
+    This tree has {{ stats.total|number_format }} entries, {{ stats.branch|number_format }} branches, and a depth of {{ depth }}.
+    It has
+{%- if classes|length > 1 -%}
+{%-  for c in classes -%}
+        {{ loop.last ? ' and' : (loop.first ? '' : ',') }}
+        {{ c|raw }}
+{%-   endfor -%}
+{%- else -%}
+    {{ classes.0 }}
+{%- endif -%}.
+{{ stats.disabled }}{{ stats.disabled == 1 ? ' user is ' : ' users are ' }}
+disabled ({{ pc_disabled|number_format }}%)
+and {{ stats.donor }}{{ stats.donor == 1 ? ' user has ' : ' users have ' }}
+donated ({{ pc_donor|number_format }}%).
+</p>
+
+<p style="font-weight: bold;">
+    The amount uploaded by direct invitees is {{ stats.upload_top|octet_size }};
+    the amount downloaded by direct invitees is {{ stats.download_top|octet_size }} and the
+    aggregate ratio is {{ ratio(stats.upload_top, stats.download_top) }}.
+</p>
+
+{% if depth > 1 %}
+<p style="font-weight: bold;">
+    The total amount uploaded by the entire tree is {{ stats.upload_total|octet_size }};
+    the total amount downloaded is {{ stats.download_total|octet_size }} and the
+    aggregate ratio is {{ ratio(stats.upload_total, stats.download_total) }}.
+</p>
+{% endif %}
+
+{% if stats.paranoid %}
+<p style="font-weight: bold;">
+{{ stats.paranoid }} user{{ stats.paranoid == 1 ? '' : 's' }} ({{ pc_paranoid|number_format }}%)
+{{ stats.paranoid == 1 ? 'is' : 'are' }} too paranoid to have their stats shown here,
+and {{ stats.paranoid == 1 ? 'was' : 'were' }} not factored into the upload and download totals.
+</p>
+{% endif %}

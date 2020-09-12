@@ -1,32 +1,34 @@
 <?php
 
 if (!isset($_GET['userid'])) {
-    $UserCount = Users::get_enabled_users_count();
-    $UserID = $LoggedUser['ID'];
-    $Sneaky = false;
+    $userId = $LoggedUser['ID'];
 } else {
     if (!check_perms('users_view_invites')) {
         error(403);
     }    
-    $UserID = (int)$_GET['userid'];
-    if ($UserID < 1) {
-        error(404);
-    }
-    $Sneaky = true;
+    $userId = (int)$_GET['userid'];
 }
 
-list($UserID, $Username) = array_values(Users::user_info($UserID));
+// Cannot use Users::user_info() because an inexistent ID will return 'Unknown'
+[$userId, $Username] = $DB->row("
+    SELECT ID, Username
+    FROM users_main
+    WHERE ID = ?
+    ", $userId
+);
+if (!$userId) {
+    error(404);
+}
 
-$Tree = new INVITE_TREE($UserID);
-
+$tree = new Gazelle\InviteTree($userId);
 View::show_header($Username.' &rsaquo; Invites &rsaquo; Tree');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=Users::format_username($UserID, false, false, false)?> &rsaquo; <a href="user.php?action=invite&amp;userid=<?=$UserID?>">Invites</a> &rsaquo; Tree</h2>
+        <h2><?=Users::format_username($userId, false, false, false)?> &rsaquo; <a href="user.php?action=invite&amp;userid=<?=$userId?>">Invites</a> &rsaquo; Tree</h2>
     </div>
     <div class="box pad">
-<?php $Tree->make_tree(); ?>
+        <?= $tree->render(G::$Twig) ?>
     </div>
 </div>
 <?php

@@ -781,23 +781,24 @@ foreach ($Collages as $CollageInfo) {
 
 // Linked accounts
 if (check_perms('users_mod')) {
-    require(__DIR__ . '/linkedfunctions.php');
+    require_once('linkedfunctions.php');
     user_dupes_table($UserID);
 }
 
-if ((check_perms('users_view_invites')) && $Invited > 0) {
-    require(__DIR__  . '/../../classes/invite_tree.class.php');
-    $Tree = new INVITE_TREE($UserID, ['visible' => false]);
+if (check_perms('users_view_invites')) {
+    $tree = new Gazelle\InviteTree($UserID);
+    if ($tree->hasInvitees()) {
 ?>
         <div class="box" id="invitetree_box">
             <div class="head">
                 Invite Tree <a href="#" onclick="$('#invitetree').gtoggle(); return false;" class="brackets">View</a>
             </div>
             <div id="invitetree" class="hidden">
-<?php                $Tree->make_tree(); ?>
+                <?= $tree->render(G::$Twig) ?>
             </div>
         </div>
 <?php
+    }
 }
 
 if (check_perms('users_give_donor')) {
