@@ -189,7 +189,7 @@ if (!$NumResults) {
                 $Links = 'Forums: <a href="forums.php?action=viewforum&amp;forumid=' . $Result['ForumID'] . '">' . display_str($Result['ForumName']) . '</a> &rsaquo; ' .
                     '<a href="forums.php?action=viewthread&amp;threadid=' . $Result['PageID'] .
                         '" class="tooltip" title="' . display_str($Result['Name']) . '">' .
-                        display_str(Format::cut_string($Result['Name'], 75)) .
+                        display_str(shortenString($Result['Name'], 75)) .
                     '</a>';
                 $JumpLink = 'forums.php?action=viewthread&amp;threadid=' . $Result['PageID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 break;

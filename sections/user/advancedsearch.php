@@ -785,7 +785,7 @@ View::show_header('User search');
     }
 ?>
                         <option value="<?=$Class['ID'] ?>"<?= in_array($Class['ID'], $_GET['class'] ?? []) ? ' selected="selected"' : ''
-                            ?>><?=Format::cut_string($Class['Name'], 10, 1, 1).' ('.$Class['Level'].')'?></option>
+                            ?>><?=shortenString($Class['Name'], 12, true).' ('.$Class['Level'].')'?></option>
 <?php } ?>
                     </select>
                 </td>
@@ -810,7 +810,7 @@ foreach ($ClassLevels as $Class) {
 usort($Secondaries, $fnc);
 foreach ($Secondaries as $Class) {
 ?>
-                        <option value="<?=$Class['ID'] ?>"<?php if ($_GET['secclass'] === $Class['ID']) { echo ' selected="selected"'; } ?>><?=Format::cut_string($Class['Name'], 20, 1, 1)?></option>
+                        <option value="<?=$Class['ID'] ?>"<?php if ($_GET['secclass'] === $Class['ID']) { echo ' selected="selected"'; } ?>><?=shortenString($Class['Name'], 20, true)?></option>
 <?php } ?>
                     </select>
                 </td>

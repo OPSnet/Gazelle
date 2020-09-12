@@ -67,7 +67,7 @@ foreach ($forumToc as &$thread) {
         }
     }
     $thread = array_merge($thread, [
-        'cut_title'  => Format::cut_string($thread['Title'], 75 - (2 * count($links))),
+        'cut_title'  => shortenString($thread['Title'], 75 - (2 * count($links))),
         'page_links' => $links ? (' (' . implode(' ', $links) . ')') : '',
     ]);
     unset($thread); // because looping by reference

@@ -50,7 +50,7 @@ class CalendarView {
             $Category = Calendar::$Categories[$Event['Category']];
             $Tooltip = $Event['Title'] . " - " . Calendar::$Categories[$Event['Category']] . " - " . Calendar::$Importances[$Event['Importance']];
 ?>
-            <p><a href="#" class="event_day tooltip" title="<?=$Tooltip?>" data-gazelle-id="<?=$Event['ID']?>" style="color: <?=$Color?>;"><?=Format::cut_string($Event['Title'], 8, true)?></a></p>
+            <p><a href="#" class="event_day tooltip" title="<?=$Tooltip?>" data-gazelle-id="<?=$Event['ID']?>" style="color: <?=$Color?>;"><?=shortenString($Event['Title'], 8, true)?></a></p>
 <?php
         }
     }
