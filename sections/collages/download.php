@@ -131,7 +131,7 @@ INNER JOIN collages_torrents AS c ON (t.GroupID = c.GroupID AND c.CollageID = '$
 INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID AND tg.CategoryID = '1')
 ORDER BY t.GroupID ASC, Rank DESC, $Preference";
 
-$DownloadsQ = $DB->query($SQL);
+$DownloadsQ = $DB->prepared_query($SQL);
 $Collector = new TorrentsDL($DownloadsQ, $CollageName);
 $filer = new \Gazelle\File\Torrent;
 while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {

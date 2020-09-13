@@ -38,6 +38,9 @@ class Comments {
         $CatalogueID = floor((TORRENT_COMMENTS_PER_PAGE * $Pages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         G::$Cache->delete_value($Page.'_comments_'.$PageID.'_catalogue_'.$CatalogueID);
         G::$Cache->delete_value($Page.'_comments_'.$PageID);
+        if ($Page == 'collages') {
+            G::$Cache->delete_value($Page.'_comments_recent_'.$PageID);
+        }
 
         $subscription = new \Gazelle\Manager\Subscription(G::$LoggedUser['ID']);
         $subscription->flush($Page, $PageID);
@@ -351,6 +354,47 @@ class Comments {
 
         G::$DB->set_query_id($QueryID);
         return [$NumComments, $CommPage, $Thread, $LastRead];
+    }
+
+    /**
+     * Load recent collage comments. Used for displaying recent comments on collage pages.
+     * @param int $CollageID ID of the collage
+     * @return array ($Comments)
+     *     $Comments
+     *         ID: Comment ID
+     *         Body: Comment body
+     *         AuthorID: Author of comment
+     *         Username: Their username
+     *         AddedTime: Date of comment creation
+     */
+    public static function collageSummary($CollageID, $count = 5) {
+        $key = "collages_comments_recent_$CollageID";
+        if (($list = G::$Cache->get_value($key)) === false) {
+            $qid = G::$DB->get_query_id();
+            G::$DB->prepared_query('
+                SELECT
+                    c.ID AS id,
+                    c.Body as body,
+                    c.AuthorID as author_id,
+                    c.AddedTime as added
+                FROM comments AS c
+                LEFT JOIN users_main AS um ON (um.ID = c.AuthorID)
+                WHERE c.Page = ?  AND c.PageID = ?
+                ORDER BY c.ID DESC
+                LIMIT ?
+                ', 'collages', $CollageID, $count
+            );
+            $list = G::$DB->to_array(false, MYSQLI_ASSOC);
+            foreach ($list as &$c) {
+                $c['body'] = Text::full_format($c['body']);
+            }
+            unset($c);
+            G::$DB->set_query_id($quid);
+            if (count($list)) {
+                G::$Cache->cache_value($key, $list, 7200);
+            }
+        }
+        return $list;
     }
 
     /**

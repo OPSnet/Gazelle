@@ -214,6 +214,7 @@ $CollageCats = [
     8 => 'Awards',
     9 => 'Series',
 ];
+define('COLLAGE_ARTISTS_ID', 7);
 
 $ReleaseTypes = [
     1  => 'Album',

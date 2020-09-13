@@ -1,5 +1,5 @@
 <?php
-define('ARTIST_COLLAGE', 'Artists');
+
 if (empty($_GET['id']) || !is_number($_GET['id'])) {
     json_die("failure", "bad parameters");
 }
@@ -8,9 +8,9 @@ $CollageID = $_GET['id'];
 $CacheKey = "collage_$CollageID";
 $CollageData = $Cache->get_value($CacheKey);
 if ($CollageData) {
-    list($Name, $Description, $CommentList, $Deleted, $CollageCategoryID, $CreatorID, $Locked, $MaxGroups, $MaxGroupsPerUser, $Updated, $Subscribers) = $CollageData;
+    [$Name, $Description, $CommentList, $Deleted, $CollageCategoryID, $CreatorID, $Locked, $MaxGroups, $MaxGroupsPerUser, $Updated, $Subscribers] = $CollageData;
 } else {
-    list($Name, $Description, $CreatorID, $Deleted, $CollageCategoryID, $Locked, $MaxGroups, $MaxGroupsPerUser, $Updated, $Subscribers)
+    [$Name, $Description, $CreatorID, $Deleted, $CollageCategoryID, $Locked, $MaxGroups, $MaxGroupsPerUser, $Updated, $Subscribers]
     = $DB->row("
         SELECT
             Name,
@@ -60,7 +60,7 @@ $JSON = [
     'torrentGroupIDList'  => $TorrentGroups
 ];
 
-if ($CollageCategoryID != array_search(ARTIST_COLLAGE, $CollageCats)) {
+if ($CollageCategoryID != COLLAGE_ARTISTS_ID) {
     // torrent collage
     $TorrentGroups = [];
     $DB->prepared_query("
@@ -140,7 +140,7 @@ if ($CollageCategoryID != array_search(ARTIST_COLLAGE, $CollageCats)) {
         ", $CollageID
     );
     $Artists = [];
-    while (list($ArtistID, $ArtistName, $ArtistImage) = $DB->next_record()) {
+    while ([$ArtistID, $ArtistName, $ArtistImage] = $DB->next_record()) {
         $Artists[] = [
             'id'    => (int)$ArtistID,
             'name'  => $ArtistName,

@@ -4,13 +4,13 @@ use Gazelle\Util\SortableTableHeader;
 
 define('COLLAGES_PER_PAGE', 25);
 
-list($Page, $Limit) = Format::page_limit(COLLAGES_PER_PAGE);
+[$Page, $Limit] = Format::page_limit(COLLAGES_PER_PAGE);
 
 $SortOrderMap = [
     'time'        => ['ID', 'desc'],
     'name'        => ['c.Name', 'asc'],
     'subscribers' => ['c.Subscribers', 'desc'],
-    'torrents'    => ['NumTorrents', 'desc'],
+    'torrents'    => ['c.NumTorrents', 'desc'],
     'updated'     => ['c.Updated', 'desc'],
 ];
 $SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
@@ -19,13 +19,6 @@ $OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][
     ? $SortOrderMap[$SortOrder][1]
     : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 
-// Are we searching in bodies, or just names?
-if (!empty($_GET['type']) && in_array($_GET['type'], ['c.name', 'description'])) {
-    $searchField = $_GET['type'];
-} else {
-    $searchField = 'c.name';
-}
-
 $tagMan = new \Gazelle\Manager\Tag;
 if (!empty($_GET['tags'])) {
     $Tags = explode(',', db_string(trim($_GET['tags'])));
@@ -33,30 +26,97 @@ if (!empty($_GET['tags'])) {
         $Tags[$ID] = $tagMan->sanitize($Tag);
     }
 }
-
-if (empty($_GET['cats'])) {
-    $Categories = array_keys($CollageCats);
-} else {
-    $Categories = $_GET['cats'];
-    foreach ($Categories as $Cat => $Accept) {
-        if (empty($CollageCats[$Cat]) || !$Accept) {
-            unset($Categories[$Cat]);
-        }
-    }
-    $Categories = array_keys($Categories);
-}
+$tagSearchAll = ($_GET['tags_type'] ?? 1) ? 1 : 0;
 
 $BookmarkView = !empty($_GET['bookmarks']);
+$Where = ["c.Deleted = '0'"];
+$Args = [];
+
 if ($BookmarkView) {
-    $Categories[] = 0;
-    $BookmarkJoin = 'INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)';
+    $Categories = array_keys($CollageCats);
+    $Join = 'INNER JOIN bookmarks_collages AS bc ON (c.ID = bc.CollageID)';
+    $Where[] = "bc.UserID = ?";
+    $Args[] = $LoggedUser['ID'];
 } else {
-    $BookmarkJoin = '';
+    $Join = '';
+    if (empty($_GET['cats'])) {
+        $Categories = array_keys($CollageCats);
+    } else {
+        $Categories = $_GET['cats'];
+        foreach ($Categories as $Cat => $Accept) {
+            if (empty($CollageCats[$Cat]) || !$Accept) {
+                unset($Categories[$Cat]);
+            }
+        }
+        $Categories = array_keys($Categories);
+    }
 }
 
-$Args = [];
-$SQL = "SELECT
-    SQL_CALC_FOUND_ROWS
+$searchField = (!empty($_GET['type']) && in_array($_GET['type'], ['c.name', 'description']))
+    ? $_GET['type'] : 'c.name';
+
+if (isset($_GET['action']) && $_GET['action'] === 'mine') {
+    $Where[] = 'c.CategoryID = 0 AND c.UserID = ?';
+    $Args[] = $LoggedUser['ID'];
+} else {
+    if (!empty($_GET['search'])) {
+        $words = explode(' ', trim($_GET['search']));
+        $Where = array_merge($Where, array_fill(0, count($words), "$searchField LIKE concat('%', ?, '%')"));
+        $Args = array_merge($Args, $words);
+    }
+
+    if (!empty($Tags)) {
+        $Where[] = '('
+            . implode(
+                $tagSearchAll ? ' AND ' : ' OR ',
+                array_fill(0, count($Tags), "c.TagList LIKE concat('%', ?, '%')")
+            )
+            . ')';
+        $Args = array_merge($Args, $Tags);
+    }
+
+    if (!empty($_GET['userid'])) {
+        $UserID = (int)$_GET['userid'];
+        if ($UserID < 1) {
+            error(404);
+        }
+        $User = Users::user_info($UserID);
+        $Perms = Permissions::get_permissions($User['PermissionID']);
+        $UserClass = $Perms['Class'];
+
+        $UserLink = '<a href="user.php?id='.$UserID.'">'.$User['Username'].'</a>';
+        if (empty($_GET['contrib'])) {
+            if (!check_paranoia('collages', $User['Paranoia'], $UserClass, $UserID)) {
+                error(403);
+            }
+            $Where[] = "c.UserID = ?";
+            $Args[] = $UserID;
+        } else {
+            if (!check_paranoia('collagecontribs', $User['Paranoia'], $UserClass, $UserID)) {
+                error(403);
+            }
+            $Where[] = "c.ID IN (SELECT DISTINCT CollageID FROM collages_torrents WHERE UserID = ?)";
+            $Args[] = $UserID;
+        }
+    }
+
+    // Don't filter on categories if all are selected
+    sort($Categories);
+    if (!empty($Categories) && implode(' ', $Categories) != implode(' ', array_keys($CollageCats))) {
+        $Where[] = "CategoryID IN (" . placeholders($Categories) . ')';
+        $Args = array_merge($Args, $Categories);
+    }
+}
+
+$From = "collages AS c $Join
+WHERE " . implode("\n    AND ", $Where);
+
+$NumResults = $DB->scalar("
+    SELECT count(*) FROM $From
+    ", ...$Args
+);
+$DB->prepared_query("
+    SELECT
     c.ID,
     c.Name,
     c.NumTorrents,
@@ -65,91 +125,13 @@ $SQL = "SELECT
     c.UserID,
     c.Subscribers,
     c.Updated
-FROM collages AS c
-$BookmarkJoin
-WHERE Deleted = '0'";
-
-if ($BookmarkView) {
-    $SQL .= "\nAND bc.UserID = ?";
-    $Args[] = $LoggedUser['ID'];
-}
-
-if (isset($_GET['action']) && $_GET['action'] === 'mine') {
-    $SQL .= "\nAND c.UserID = ? AND c.CategoryID = 0";
-    $Args[] = $LoggedUser['ID'];
-} else {
-    if (!empty($_GET['search'])) {
-        $words = explode(' ', trim($_GET['search']));
-        $SQL .= "\nAND " . implode(' AND ', array_fill(0, count($words), "$searchField LIKE concat('%', ?, '%')"));
-        $Args = array_merge($Args, $words);
-    }
-
-    if (isset($_GET['tags_type']) && $_GET['tags_type'] === '0') { // Any
-        $_GET['tags_type'] = '0';
-        $ANY = true;
-    } else { // All
-        $_GET['tags_type'] = '1';
-        $ANY = false;
-    }
-
-    if (!empty($Tags)) {
-        $SQL .= "\nAND ("
-            . implode(
-                $ANY ? ' OR ' : ' AND ',
-                array_fill(0, count($Tags), "TagList LIKE concat('%', ?, '%')")
-            )
-            . ')';
-        $Args = array_merge($Args, $Tags);
-    }
-
-    if (!empty($_GET['userid'])) {
-        $UserID = $_GET['userid'];
-        if (!is_number($UserID)) {
-            error(404);
-        }
-        $User = Users::user_info($UserID);
-        $Perms = Permissions::get_permissions($User['PermissionID']);
-        $UserClass = $Perms['Class'];
-
-        $UserLink = '<a href="user.php?id='.$UserID.'">'.$User['Username'].'</a>';
-        if (!empty($_GET['contrib'])) {
-            if (!check_paranoia('collagecontribs', $User['Paranoia'], $UserClass, $UserID)) {
-                error(403);
-            }
-            $DB->prepared_query('
-                SELECT DISTINCT CollageID
-                FROM collages_torrents
-                WHERE UserID = ?
-                ', $UserID
-            );
-            $collageIDs = $DB->collect('CollageID');
-            if ($collageIDs) {
-                $SQL .= "\nAND c.ID IN (" . placeholders($collageIDs) . ')';
-                $Args = array_merge($Args, $collageIDs);
-            }
-        } else {
-            if (!check_paranoia('collages', $User['Paranoia'], $UserClass, $UserID)) {
-                error(403);
-            }
-            $SQL .= "\nAND UserID = ?";
-            $Args[] = $_GET['userid'];
-        }
-        $Categories[] = 0;
-    }
-
-    if (!empty($Categories)) {
-        $SQL .= "\nAND CategoryID IN (" . placeholders($Categories) . ')';
-        $Args = array_merge($Args, $Categories);
-    }
-}
-
-$SQL .= "\nORDER BY $OrderBy $OrderWay LIMIT $Limit";
-$DB->prepared_query($SQL, ...$Args);
+    FROM $From
+    ORDER BY $OrderBy $OrderWay LIMIT $Limit
+    ", ...$Args
+);
 $Collages = $DB->to_array();
-$DB->query('SELECT FOUND_ROWS()');
-list($NumResults) = $DB->next_record();
 
-View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collages', 'collage');
+View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages', 'collage');
 ?>
 <div class="thin">
     <div class="header">
@@ -182,11 +164,12 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
                     </td>
                 </tr>
                 <tr id="tagfilter">
-                    <td class="label">Tags (comma-separated):</td>
+                    <td class="label">Tags (comma-separated):(<?= $tagSearchAll ?>)</td>
                     <td>
                         <input type="text" id="tags" name="tags" size="70" value="<?=(!empty($_GET['tags']) ? display_str($_GET['tags']) : '')?>"<?php Users::has_autocomplete_enabled('other'); ?> /><br />
-                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked'); ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
-                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked'); ?> /><label for="tags_type1"> All</label>
+                        <input type="radio" name="tags_type" id="tags_type0" value="0"<?= !$tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
+
+                        <input type="radio" name="tags_type" id="tags_type1" value="1"<?= $tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type1"> All</label>
                     </td>
                 </tr>
                 <tr id="categories">
@@ -217,7 +200,7 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
                             <option value="time"<?php Format::selected('order', 'time'); ?>>Time</option>
                             <option value="name"<?php Format::selected('order', 'name'); ?>>Name</option>
                             <option value="subscribers"<?php Format::selected('order', 'subscribers'); ?>>Subscribers</option>
-                            <option value="torrents"<?php Format::selected('order', 'torrents'); ?>>Torrents</option>
+                            <option value="torrents"<?php Format::selected('order', 'torrents'); ?>>Entries</option>
                             <option value="updated"<?php Format::selected('order', 'updated'); ?>>Updated</option>
                         </select>
                         <select name="sort" class="ft_order_way">
@@ -255,7 +238,7 @@ View::show_header(($BookmarkView) ? 'Your bookmarked collages' : 'Browse collage
             );
             $CollageCount = $DB->record_count();
             if ($CollageCount === 1) {
-                list($CollageID) = $DB->next_record();
+                [$CollageID] = $DB->next_record();
 ?>
         <a href="collages.php?id=<?= $CollageID ?>" class="brackets">Personal collage</a>
 <?php       } elseif ($CollageCount > 1) { ?>
@@ -310,7 +293,7 @@ $header = new SortableTableHeader([
     'time'        => 'Created',
     'name'        => 'Collage',
     'subscribers' => 'Subscribers',
-    'torrents'    => 'Torrents',
+    'torrents'    => 'Entries',
     'updated'     => 'Updated',
 ], $SortOrder, $OrderWay);
 
@@ -327,7 +310,7 @@ $header = new SortableTableHeader([
 <?php
 $Row = 'a'; // For the pretty colours
 foreach ($Collages as $Collage) {
-    list($ID, $Name, $NumTorrents, $TagList, $CategoryID, $UserID, $Subscribers, $Updated) = $Collage;
+    [$ID, $Name, $NumTorrents, $TagList, $CategoryID, $UserID, $Subscribers, $Updated] = $Collage;
     $Row = $Row === 'a' ? 'b' : 'a';
     $TorrentTags = new Tags($TagList);
 
