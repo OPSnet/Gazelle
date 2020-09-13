@@ -32,8 +32,8 @@ class Collage extends Base {
     protected $artists;
     protected $contributors;
 
-    const CACHE_KEY    = 'collage-%d';
-    const DISPLAY_KEY  = 'collage-display-%d';
+    const CACHE_KEY    = 'collagev2_%d';
+    const DISPLAY_KEY  = 'collagev2_display_%d';
     const SUBS_KEY     = 'collage_subs_user_%d';
     const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
@@ -70,6 +70,7 @@ class Collage extends Base {
                 $info = [true, ''];
             }
             $this->cache->cache_value($key, $info, 7200);
+            $this->cache->delete_value(sprintf('collage_', $this->id));
         }
         [
             $this->deleted, $taglist,
@@ -112,6 +113,7 @@ class Collage extends Base {
                 ", $count, $this->id
             );
             $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+            $this->cache->delete_value(sprintf('collage_', $this->id));
         }
 
         foreach ($artists as $artist) {
@@ -167,6 +169,7 @@ class Collage extends Base {
                 ", $count, $this->id
             );
             $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
+            $this->cache->delete_value(sprintf('collage_', $this->id));
         }
 
         // in case of a tie in tag usage counts, order by first past the post
@@ -299,6 +302,7 @@ class Collage extends Base {
         }
         $keys[] = sprintf(self::CACHE_KEY, $this->id);
         $this->cache->deleteMulti($keys);
+        $this->cache->delete_value(sprintf('collage_', $this->id));
         return $this;
     }
 

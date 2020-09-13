@@ -164,7 +164,7 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
                     </td>
                 </tr>
                 <tr id="tagfilter">
-                    <td class="label">Tags (comma-separated):(<?= $tagSearchAll ?>)</td>
+                    <td class="label">Tags (comma-separated):</td>
                     <td>
                         <input type="text" id="tags" name="tags" size="70" value="<?=(!empty($_GET['tags']) ? display_str($_GET['tags']) : '')?>"<?php Users::has_autocomplete_enabled('other'); ?> /><br />
                         <input type="radio" name="tags_type" id="tags_type0" value="0"<?= !$tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
