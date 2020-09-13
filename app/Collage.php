@@ -116,7 +116,12 @@ class Collage extends Base {
 
         foreach ($artists as $artist) {
             if (!isset($this->artists[$artist['ArtistID']])) {
-                $this->artists[$artist['ArtistID']] = ['name' => $artist['Name'], 'count' => 0, 'image' => $artist['Image']];
+                $this->artists[$artist['ArtistID']] = [
+                    'count' => 0,
+                    'id'    => $artist['ArtistID'],
+                    'image' => $artist['Image'],
+                    'name'  => $artist['Name'],
+                ];
             }
             $this->artists[$artist['ArtistID']]['count']++;
 
@@ -186,16 +191,20 @@ class Collage extends Base {
             $this->groupIds[] = $groupId;
             $group = $this->torrents[$groupId];
             $extendedArtists = $group['ExtendedArtists'];
-            $Artists =
+            $artists =
                 (empty($extendedArtists[1]) && empty($extendedArtists[4]) && empty($extendedArtists[5]) && empty($extendedArtists[6]))
                 ? $group['Artists']
                 : array_merge((array)$extendedArtists[1], (array)$extendedArtists[4], (array)$extendedArtists[5], (array)$extendedArtists[6]);
 
-            foreach ($Artists as $Artist) {
-                if (!isset($this->artists[$Artist['id']])) {
-                    $this->artists[$Artist['id']] = ['name' => $Artist['name'], 'count' => 0];
+            foreach ($artists as $artist) {
+                if (!isset($this->artists[$artist['id']])) {
+                    $this->artists[$artist['id']] = [
+                        'count' => 0,
+                        'id'    => (int)$artist['id'],
+                        'name'  => $artist['name'],
+                    ];
                 }
-                $this->artists[$Artist['id']]['count']++;
+                $this->artists[$artist['id']]['count']++;
             }
 
             $contribUserId = $groupContribIds[$groupId]['UserID'];

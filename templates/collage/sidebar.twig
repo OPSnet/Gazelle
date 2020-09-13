@@ -44,8 +44,8 @@ collage by {{ user_id|user_url|raw }}
     <div class="head"><strong>Top Artists</strong></div>
     <div class="pad">
         <ol style="padding-left: 5px;">
-{% for artist_id, artist in top_artists %}
-            <li><a href="artist.php?id={{ artist_id }} ">{{ artist.name }}</a> ({{ artist.count|number_format }})</li>
+{% for artist in top_artists %}
+            <li><a href="artist.php?id={{ artist.id }} ">{{ artist.name }}</a> ({{ artist.count|number_format }})</li>
 {% endfor %}
         </ol>
     </div>
