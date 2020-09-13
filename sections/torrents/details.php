@@ -14,16 +14,16 @@ if (!empty($_GET['revisionid']) && is_number($_GET['revisionid'])) {
     $RevisionID = 0;
 }
 
-include(SERVER_ROOT.'/sections/torrents/functions.php');
+require('functions.php');
 $TorrentCache = get_group_info($GroupID, $RevisionID);
 $TorrentDetails = $TorrentCache[0];
 $TorrentList = $TorrentCache[1];
 
 // Group details
-list($WikiBody, $WikiImage, $GroupID, $GroupName, $GroupYear,
+[$WikiBody, $WikiImage, $GroupID, $GroupName, $GroupYear,
     $GroupRecordLabel, $GroupCatalogueNumber, $ReleaseType, $GroupCategoryID,
     $GroupTime, $GroupVanityHouse, $TorrentTags, $TorrentTagIDs, $TorrentTagUserIDs,
-    $TagPositiveVotes, $TagNegativeVotes, $GroupFlags) = array_values($TorrentDetails);
+    $TagPositiveVotes, $TagNegativeVotes, $GroupFlags] = array_values($TorrentDetails);
 
 $DisplayName = "<span dir=\"ltr\">$GroupName</span>";
 $AltName = $GroupName; // Goes in the alt text of the image
@@ -83,7 +83,7 @@ if (!$CoverArt) {
 }
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-list($NumComments, $Page, $Thread, $LastRead) = Comments::load('torrents', $GroupID);
+[$NumComments, $Page, $Thread, $LastRead] = Comments::load('torrents', $GroupID);
 
 $subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 
@@ -176,7 +176,7 @@ $Index++;
 ?>
 </div>
 <?php       foreach ($CoverArt as $Cover) {
-                list($ImageID, $Image, $Summary, $AddedBy) = $Cover;
+                [$ImageID, $Image, $Summary, $AddedBy] = $Cover;
                 ?>
                     <div id="cover_div_<?=$Index?>" class="pad"<?=(empty($LoggedUser['ShowExtraCovers']) ? ' style="display: none;"' : '')?>>
                 <p align="center">
@@ -412,13 +412,13 @@ foreach ($TorrentList as $t) {
 $LastMedia = null;
 $UnknownCounter = 0;
 foreach ($TorrentList as $Torrent) {
-    list($TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
+    [$TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
         $RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
         $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $FileCount, $Size, $Seeders, $Leechers,
         $Snatched, $FreeTorrent, $TorrentTime, $Description, $FileList,
         $FilePath, $UserID, $LastActive, $InfoHash, $BadTags, $BadFolders, $BadFiles,
         $MissingLineage, $CassetteApproved, $LossymasterApproved, $LossywebApproved,
-        $LastReseedRequest, $HasFile, $LogCount, $is_deleted, $PersonalFL, $IsSnatched) = array_values($Torrent);
+        $LastReseedRequest, $HasFile, $LogCount, $is_deleted, $PersonalFL, $IsSnatched] = array_values($Torrent);
 
     if ($is_deleted && count($TorrentList) > 1) {
         continue;
@@ -715,7 +715,7 @@ if (count($Collages) > 0) {
             </tr>
 <?php
     foreach ($Indices as $i) {
-        list($CollageName, $CollageTorrents, $CollageID) = $Collages[$i];
+        [$CollageName, $CollageTorrents, $CollageID] = $Collages[$i];
         unset($Collages[$i]);
 ?>
             <tr>
@@ -725,7 +725,7 @@ if (count($Collages) > 0) {
 <?php
     }
     foreach ($Collages as $Collage) {
-        list($CollageName, $CollageTorrents, $CollageID) = $Collage;
+        [$CollageName, $CollageTorrents, $CollageID] = $Collage;
 ?>
             <tr class="collage_rows hidden">
                 <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
@@ -769,7 +769,7 @@ if (count($PersonalCollages) > 0) {
             </tr>
 <?php
     foreach ($Indices as $i) {
-        list($CollageName, $CollageTorrents, $CollageID) = $PersonalCollages[$i];
+        [$CollageName, $CollageTorrents, $CollageID] = $PersonalCollages[$i];
         unset($PersonalCollages[$i]);
 ?>
             <tr>
@@ -779,7 +779,7 @@ if (count($PersonalCollages) > 0) {
 <?php
     }
     foreach ($PersonalCollages as $Collage) {
-        list($CollageName, $CollageTorrents, $CollageID) = $Collage;
+        [$CollageName, $CollageTorrents, $CollageID] = $Collage;
 ?>
             <tr class="personal_rows hidden">
                 <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>

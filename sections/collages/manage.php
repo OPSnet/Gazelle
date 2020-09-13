@@ -1,22 +1,23 @@
 <?php
-$CollageID = $_GET['collageid'];
-if (!is_number($CollageID)) {
-    error(0);
-}
-
-$DB->query("
-    SELECT Name, UserID, CategoryID
-    FROM collages
-    WHERE ID = '$CollageID'");
-list($Name, $UserID, $CategoryID) = $DB->next_record();
-if ($CategoryID == 0 && $UserID != $LoggedUser['ID'] && !check_perms('site_collages_delete')) {
-    error(403);
-}
-if ($CategoryID == array_search(ARTIST_COLLAGE, $CollageCats)) {
+$CollageID = (int)$_GET['collageid'];
+if ($CollageID < 1) {
     error(404);
 }
 
-$DB->query("
+[$Name, $UserID, $CategoryID] = $DB->row("
+    SELECT Name, UserID, CategoryID
+    FROM collages
+    WHERE ID = ?
+    ", $CollageID
+);
+if ($CategoryID == 0 && $UserID != $LoggedUser['ID'] && !check_perms('site_collages_delete')) {
+    error(403);
+}
+if ($CategoryID == COLLAGE_ARTISTS_ID) {
+    error(404);
+}
+
+$DB->prepared_query("
     SELECT
         ct.GroupID,
         um.ID,
@@ -24,22 +25,18 @@ $DB->query("
         ct.Sort,
         tg.CatalogueNumber
     FROM collages_torrents AS ct
-        JOIN torrents_group AS tg ON tg.ID = ct.GroupID
-        LEFT JOIN users_main AS um ON um.ID = ct.UserID
-    WHERE ct.CollageID = '$CollageID'
-    ORDER BY ct.Sort");
-
+    INNER JOIN torrents_group AS tg ON (tg.ID = ct.GroupID)
+    LEFT JOIN users_main AS um ON (um.ID = ct.UserID)
+    WHERE ct.CollageID = ?
+    ORDER BY ct.Sort
+    ", $CollageID
+);
 $GroupIDs = $DB->collect('GroupID');
 
 $CollageDataList = $DB->to_array('GroupID', MYSQLI_ASSOC);
-if (count($GroupIDs) > 0) {
-    $TorrentList = Torrents::get_groups($GroupIDs);
-} else {
-    $TorrentList = [];
-}
+$TorrentList = count($GroupIDs) ? Torrents::get_groups($GroupIDs) : [];
 
 View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
-
 ?>
 <div class="thin">
     <div class="header">
@@ -88,7 +85,7 @@ View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
         $GroupYear = $Group['Year'];
         $Artists = $Group['Artists'];
         $ExtendedArtists = $Group['ExtendedArtists'];
-        list(, $UserID, $Username, $Sort, $CatNum) = array_values($CollageDataList[$GroupID]);
+        [, $UserID, $Username, $Sort, $CatNum] = array_values($CollageDataList[$GroupID]);
 
         $Number++;
 

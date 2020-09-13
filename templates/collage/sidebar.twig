@@ -1,0 +1,131 @@
+<div class="box box_category">
+    <div class="head"><strong>Category</strong></div>
+    <div class="pad">
+    <a href="collages.php?action=search&amp;cats[{{ category_id }}]=1">{{ category_name }}</a>
+{% if is_personal %}
+collage by {{ user_id|user_url|raw }}
+{% endif %}
+    </div>
+</div>
+<div class="box box_description">
+    <div class="head"><strong>Description</strong></div>
+    <div class="pad">{{ description|raw }}</div>
+</div>
+<div class="box box_info box_statistics_collage_{{ object }}s">
+    <div class="head"><strong>Statistics</strong></div>
+    <ul class="stats nobullet">
+        <li>{{ object|capitalize }}s: {{ entries|number_format }}</li>
+{% if artists %}
+        <li>Artists: {{ artists|number_format }}</li>
+{% endif %}
+        <li>Subscribers: {{ subscribers|number_format }}</li>
+        <li>Built by {{ contributors_n|number_format }} user{{ contributors_n|plural }}</li>
+        <li>Last updated: {{ updated|time_diff|raw }}</li>
+    </ul>
+</div>
+{% if top_tags is defined %}
+<div class="box box_tags">
+    <div class="head"><strong>Top Tags</strong></div>
+    <div class="pad">
+{%   if top_tags is empty %}
+        <i>None yet</i>
+{%   else %}
+        <ol style="padding-left: 5px;">
+{% for t in top_tags %}
+            <li><a href="collages.php?action=search&amp;tags={{ t.tag }}">{{ t.tag }}</a> ({{ t.count }})</li>
+{% endfor %}
+        </ol>
+{%     endif %}
+    </div>
+</div>
+{% endif %}
+{% if artists %}
+<div class="box box_artists">
+    <div class="head"><strong>Top Artists</strong></div>
+    <div class="pad">
+        <ol style="padding-left: 5px;">
+{% for artist in top_artists %}
+            <li><a href="artist.php?id={{ artist.id }} ">{{ artist.name }}</a> ({{ artist.count|number_format }})</li>
+{% endfor %}
+        </ol>
+    </div>
+</div>
+{% endif %}
+{% if not is_personal %}
+<div class="box box_contributors">
+    <div class="head"><strong>Top Contributors</strong></div>
+    <div class="pad">
+        <ol style="padding-left: 5px;">
+{% for user_id, additions in contributors %}
+            <li>{{ user_id|user_url|raw}} ({{ additions|number_format }})</li>
+{% endfor %}
+        </ol>
+    </div>
+</div>
+{% endif %}
+{% if can_add %}
+<div class="box box_add{{ object }}">
+    <div class="head"><strong>Add {{ object_name }}</strong><span class="float_right"><a href="#" onclick="$('.add_{{ object }}_container').toggle_class('hidden'); this.innerHTML = (this.innerHTML == 'Batch add' ? 'Individual add' : 'Batch add'); return false;" class="brackets">Batch add</a></span></div>
+    <div class="pad add_{{ object }}_container">
+        <form class="add_form" name="{{ object }}" action="collages.php" method="post">
+            <input type="hidden" name="action" value="add_{{ object }}" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="collageid" value="{{ id }}" />
+            <div class="field_div">
+                <input type="text" size="20" name="url" />
+            </div>
+            <div class="submit_div">
+                <input type="submit" value="Add" />
+            </div>
+            <span style="font-style: italic;">Enter the URL of {{ object|article }} {{ object }} on the site.</span>
+        </form>
+    </div>
+    <div class="pad hidden add_{{ object }}_container">
+        <form class="add_form" name="{{ object }}s" action="collages.php" method="post">
+            <input type="hidden" name="action" value="add_{{ object }}_batch" />
+            <input type="hidden" name="auth" value="{{ auth }}" />
+            <input type="hidden" name="collageid" value="{{ id }}" />
+            <div class="field_div">
+                <textarea name="urls" rows="5" cols="25" style="white-space: pre; word-wrap: normal; overflow: auto;"></textarea>
+            </div>
+            <div class="submit_div">
+                <input type="submit" value="Add" />
+            </div>
+            <span style="font-style: italic;">Enter the URLs of {{ object}}s on the site, one per line.</span>
+        </form>
+    </div>
+</div>
+{% endif %}
+<h3>Comments</h3>
+{% for comment in comments %}
+<div class="box comment">
+    <div class="head">
+        {{ comment.author_id|user_url|raw }} {{ comment.added|time_diff|raw }}
+        <br />
+        <a href="reports.php?action=report&amp;type=collages_comment&amp;id={{ comment.id }}" class="brackets">Report</a>
+    </div>
+    <div class="pad">{{ comment.body|raw }}</div>
+</div>
+{% endfor %}
+<div class="box pad">
+    <a href="collages.php?action=comments&amp;collageid={{ id }}" class="brackets">View all comments</a>
+</div>
+{% if can_post %}
+<div class="box box_addcomment">
+    <div class="head"><strong>Add comment</strong></div>
+    <form class="send_form" name="comment" id="quickpostform" onsubmit="quickpostform.submit_button.disabled = true;" action="comments.php" method="post">
+        <input type="hidden" name="action" value="take_post" />
+        <input type="hidden" name="page" value="collages" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="pageid" value="{{ id }}" />
+        <div class="pad">
+            <div class="field_div">
+                <textarea name="body" cols="24" rows="5"></textarea>
+            </div>
+            <div class="submit_div">
+                <input type="submit" id="submit_button" value="Add comment" />
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}

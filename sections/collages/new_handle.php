@@ -35,9 +35,8 @@ $Val->SetFields('description', '1', 'string', 'The description must be between 1
 $Err = $Val->ValidateForm($_POST);
 
 if (!$Err && $P['category'] === '0') {
-    $user = new \Gazelle\User($LoggedUser['ID']);
-    $personalAllowed = $user->canCreatePersonalCollage();
-    if (!$personalAllowed) {
+    $user = new Gazelle\User($LoggedUser['ID']);
+    if (!$user->canCreatePersonalCollage()) {
         $Err = 'You may not create a personal collage.';
     } elseif (check_perms('site_collages_renamepersonal') && !stristr($P['name'], $LoggedUser['Username'])) {
         $Err = 'Your personal collage\'s title must include your username.';
@@ -45,14 +44,13 @@ if (!$Err && $P['category'] === '0') {
 }
 
 if (!$Err) {
-    $DB->prepared_query('
+    [$ID, $Deleted] = $DB->row("
         SELECT ID, Deleted
         FROM collages
         WHERE Name = ?
-        ', $name
+        ", $name
     );
-    if ($DB->has_results()) {
-        list($ID, $Deleted) = $DB->next_record();
+    if ($ID) {
         if ($Deleted) {
             $Err = 'That collection already exists but needs to be recovered; please <a href="staffpm.php">contact</a> the staff team!';
         } else {
@@ -72,11 +70,11 @@ if ($Err) {
     $Category = $_POST['category'];
     $Tags = $_POST['tags'];
     $Description = $_POST['description'];
-    include(__DIR__ . '/new.php');
-    die();
+    require('new.php');
+    exit;
 }
 
-$tagMan = new \Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag;
 $TagList = explode(',', $_POST['tags']);
 foreach ($TagList as $ID => $Tag) {
     $TagList[$ID] = $tagMan->sanitize($Tag);

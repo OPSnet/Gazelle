@@ -1,0 +1,74 @@
+From: Spine
+To: Developers
+Date: 2020-08-04
+Subject: Orpheus Development Papers #2 - Denormalized Totals
+Version: 1
+
+Certain tables in Gazelle precompute and store totals in parent tables to
+avoid having to compute `count(*)` each time the total is required. This is
+achieved by starting from zero and updating with +1 or -1 depending on
+whether a row is inserted or deleted from a child table.
+
+In production this usually works perfectly well, but during development it
+is possible for the two values to drift out of synch due to errors in new
+code. To correct the totals, you can perform the `count(*)` operation on
+the child table and update the parent table when the results differ.
+
+collages_artists
+================
+
+SELECT c.ID, c.NumTorrents, count(ca.CollageID) as n
+FROM collages_artists ca
+INNER JOIN collages c ON (c.ID = ca.CollageID)
+GROUP BY c.ID
+HAVING c.NumTorrents != count(ca.CollageID);
++-----+-------------+---+
+| ID  | NumTorrents | n |
++-----+-------------+---+
+| 101 |           3 | 4 |
+| 104 |           5 | 3 |
++-----+-------------+---+
+
+UPDATE collages c INNER JOIN (
+    SELECT c.ID, c.NumTorrents, count(ca.CollageID) as n
+    FROM collages_artists ca
+    INNER JOIN collages c ON (c.ID = ca.CollageID)
+    GROUP BY c.ID
+    HAVING c.NumTorrents != count(ca.CollageID)
+) FIX USING (ID)
+SET c.NumTorrents = FIX.n;
+
+collages_torrents
+=================
+SELECT c.ID, c.NumTorrents, count(ct.CollageID) as n
+FROM collages_torrents ct
+INNER JOIN collages c ON (c.ID = ct.CollageID)
+GROUP BY c.ID
+HAVING c.NumTorrents != count(ct.CollageID);
+
+UPDATE collages c INNER JOIN (
+    SELECT c.ID, c.NumTorrents, count(ct.CollageID) as n
+    FROM collages_torrents ct
+    INNER JOIN collages c ON (c.ID = ct.CollageID)
+    GROUP BY c.ID
+    HAVING c.NumTorrents != count(ct.CollageID)
+) FIX USING (ID)
+SET c.NumTorrents = FIX.n;
+
+forums_topics
+=============
+
+SELECT ft.ID, ft.NumPosts, count(fp.ID)
+FROM forums_posts fp
+INNER JOIN forums_topics ft ON (ft.ID = fp.TopicID)
+GROUP BY ft.ID
+HAVING ft.NumPosts != count(fp.ID);
+
+Performing the update is left as an exercise to the reader.
+
+To find other tables that may benefit from this housekeeping, use:
+
+    SELECT table_name, column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'gazelle'
+        AND column_name LIKE 'Num%';

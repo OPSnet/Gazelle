@@ -1,22 +1,23 @@
 <?php
-$CollageID = $_GET['collageid'];
-if (!is_number($CollageID)) {
-    error(0);
-}
-
-$DB->query("
-    SELECT Name, UserID, CategoryID
-    FROM collages
-    WHERE ID = '$CollageID'");
-list($Name, $UserID, $CategoryID) = $DB->next_record();
-if ($CategoryID === '0' && $UserID !== $LoggedUser['ID'] && !check_perms('site_collages_delete')) {
-    error(403);
-}
-if ($CategoryID != array_search(ARTIST_COLLAGE, $CollageCats)) {
+$CollageID = (int)$_GET['collageid'];
+if ($CollageID < 1) {
     error(404);
 }
 
-$DB->query("
+[$Name, $UserID, $CategoryID] = $DB->row("
+    SELECT Name, UserID, CategoryID
+    FROM collages
+    WHERE ID = ?
+    ", $CollageID
+);
+if ($CategoryID === '0' && $UserID !== $LoggedUser['ID'] && !check_perms('site_collages_delete')) {
+    error(403);
+}
+if ($CategoryID != COLLAGE_ARTISTS_ID) {
+    error(404);
+}
+
+$DB->prepared_query("
     SELECT
         ca.ArtistID,
         ag.Name,
@@ -24,16 +25,15 @@ $DB->query("
         um.Username,
         ca.Sort
     FROM collages_artists AS ca
-        JOIN artists_group AS ag ON ag.ArtistID = ca.ArtistID
-        LEFT JOIN users_main AS um ON um.ID = ca.UserID
-    WHERE ca.CollageID = '$CollageID'
-    ORDER BY ca.Sort");
-
+    INNER JOIN artists_group AS ag ON (ag.ArtistID = ca.ArtistID)
+    LEFT JOIN users_main AS um ON (um.ID = ca.UserID)
+    WHERE ca.CollageID = ?
+    ORDER BY ca.Sort
+    ", $CollageID
+);
 $Artists = $DB->to_array('ArtistID', MYSQLI_ASSOC);
 
-
-View::show_header("Manage collage $Name", 'jquery-ui,jquery.tablesorter,sort');
-
+View::show_header("Manage artist collage $Name", 'jquery-ui,jquery.tablesorter,sort');
 ?>
 
 <div class="thin">
@@ -110,4 +110,5 @@ View::show_header("Manage collage $Name", 'jquery-ui,jquery.tablesorter,sort');
         </div>
     </form>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

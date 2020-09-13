@@ -1,17 +1,12 @@
 <?php
 
-$CollageID = $_GET['collageid'];
-if (!is_number($CollageID) || !$CollageID) {
+$CollageID = (int)$_GET['collageid'];
+if ($CollageID < 1) {
     error(404);
 }
+$Collage = new Gazelle\Collage($_GET['collageid']);
 
-$DB->query("
-    SELECT Name, CategoryID, UserID
-    FROM collages
-    WHERE ID = '$CollageID'");
-list($Name, $CategoryID, $UserID) = $DB->next_record();
-
-if (!check_perms('site_collages_delete') && $UserID != $LoggedUser['ID']) {
+if (!check_perms('site_collages_delete') && !$Collage->isOwner($LoggedUser['ID']) && !$Collage->isDeleted()) {
     error(403);
 }
 
@@ -27,15 +22,11 @@ View::show_header('Delete collage');
                 <input type="hidden" name="action" value="take_delete" />
                 <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                 <input type="hidden" name="collageid" value="<?=$CollageID?>" />
-<?php
-if ($CategoryID == 0) {
-?>
+<?php if ($CategoryID == 0) { ?>
                 <div class="alertbar" style="margin-bottom: 1em;">
                     <strong>Warning: This is a personal collage. If you delete this collage, it <em>cannot</em> be recovered!</strong>
                 </div>
-<?php
-}
-?>
+<?php } ?>
                 <div class="field_div">
                     <strong>Reason: </strong>
                     <input type="text" name="reason" size="40" />
@@ -49,4 +40,3 @@ if ($CategoryID == 0) {
 </div>
 <?php
 View::show_footer();
-?>

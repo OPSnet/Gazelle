@@ -7,20 +7,25 @@ if ($_POST['collage_id'] && is_number($_POST['collage_id'])) {
     authorize();
     $CollageID = $_POST['collage_id'];
 
-    $DB->query("
+    $DB->prepared_query("
         SELECT Name
         FROM collages
-        WHERE ID = $CollageID");
+        WHERE ID = ?
+        ", $CollageID
+    );
     if (!$DB->has_results()) {
         error('Collage is completely deleted');
     } else {
-        $DB->query("
-            UPDATE collages
-            SET Deleted = '0'
-            WHERE ID = $CollageID");
+        $DB->prepared_query("
+            UPDATE collages SET
+                Deleted = '0'
+            WHERE ID = ?
+            ", $CollageID
+        );
         $Cache->delete_value("collage_$CollageID");
-        Misc::write_log("Collage $CollageID was recovered by ".$LoggedUser['Username']);
+        (new Gazelle\Log)->general("Collage $CollageID was recovered by ".$LoggedUser['Username']);
         header("Location: collages.php?id=$CollageID");
+        exit;
     }
 }
 View::show_header('Collage recovery!');
