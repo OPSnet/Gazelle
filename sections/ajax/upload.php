@@ -1,18 +1,8 @@
 <?php
 // echo out the slice of the form needed for the selected upload type ($_GET['section']).
 
-$GenreTags = $Cache->get_value('genre_tags');
-if (!$GenreTags) {
-    $DB->prepared_query("
-        SELECT Name
-        FROM tags
-        WHERE TagType = 'genre'
-        ORDER BY Name
-    ");
-    $GenreTags = $DB->collect('Name');
-    $Cache->cache_value('genre_tags', $GenreTags, 3600 * 24);
-}
-
+$tagMan = new Gazelle\Manager\Tag;
+$GenreTags = $tagMan->genreList();
 $UploadForm = $Categories[$_GET['categoryid']];
 
 // Include the necessary form class

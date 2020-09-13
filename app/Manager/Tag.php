@@ -173,6 +173,26 @@ class Tag extends \Gazelle\Base {
     }
 
     /**
+     * Get the names of all genre tags
+     *
+     * @return array List of names
+     */
+    public function genreList(): array {
+        $list = $this->cache->get_value('genre_tags');
+        if (!$list) {
+            $this->db->prepared_query("
+                SELECT Name
+                FROM tags
+                WHERE TagType = 'genre'
+                ORDER BY Name
+            ");
+            $list = $this->db->collect('Name');
+            $this->cache->cache_value('genre_tags', $list, 3600 * 24);
+        }
+        return $list;
+    }
+
+    /**
      * Rename a tag
      *
      * @param int $tagId

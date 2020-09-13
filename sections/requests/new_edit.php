@@ -132,6 +132,9 @@ if ($NewRequest && !empty($_GET['artistid']) && intval($_GET['artistid'])) {
     }
 }
 
+$tagMan = new Gazelle\Manager\Tag;
+$GenreTags = $tagMan->genreList();
+
 View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'requests,form_validate');
 ?>
 <div class="thin">
@@ -252,20 +255,6 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                 <tr>
                     <td class="label">Tags</td>
                     <td>
-<?php
-    $GenreTags = $Cache->get_value('genre_tags');
-    if (!$GenreTags) {
-        $DB->prepared_query('
-            SELECT Name
-            FROM tags
-            WHERE TagType = ?
-            ORDER BY Name',
-            'genre'
-        );
-        $GenreTags = $DB->collect('Name');
-        $Cache->cache_value('genre_tags', $GenreTags, 3600 * 6);
-    }
-?>
                         <select id="genre_tags" name="genre_tags" onchange="add_tag(); return false;">
                             <option>---</option>
 <?php    foreach (Misc::display_array($GenreTags) as $Genre) { ?>
