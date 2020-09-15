@@ -6,7 +6,7 @@ function log_attempt(int $UserID, string $capture) {
     global $AttemptID, $Attempts, $Bans, $BannedUntil, $watch;
     $IPStr = $_SERVER['REMOTE_ADDR'];
     if (!$AttemptID) {
-        $AttemptID = $watch->create($userId, $capture, $IPstr);
+        $AttemptID = $watch->create($IPStr, $capture, $UserID);
     } elseif ($Attempt < 6) {
         $watch->setWatch($AttemptID)->increment($UserID, $capture);
     } else {
@@ -368,7 +368,9 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 ', $UserID
             );
 
-            $watch->setWatch($AttemptID)->clearAttempts();
+            if ($AttemptID) {
+                $watch->setWatch($AttemptID)->clearAttempts();
+            }
             if (empty($_COOKIE['redirect'])) {
                 header('Location: index.php');
             } else {
