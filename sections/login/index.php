@@ -504,7 +504,9 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                             ON DUPLICATE KEY UPDATE last_access = now()
                             ', $UserID
                         );
-                        $watch->setWatch($AttemptID)->clearAttempts();
+                        if ($AttemptID) {
+                            $watch->setWatch($AttemptID)->clearAttempts();
+                        }
                         if (empty($_COOKIE['redirect'])) {
                             header('Location: index.php');
                         } else {
