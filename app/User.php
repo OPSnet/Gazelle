@@ -104,7 +104,7 @@ class User extends Base {
     }
 
     public function avatarMode(): int {
-        return \Users::user_heavy_info($this->id)['DisableAvatars'];
+        return \Users::user_heavy_info($this->id)['DisableAvatars'] ?? 0;
     }
 
     public function primaryClass(): int {
