@@ -73,7 +73,6 @@ View::show_header('Staff Tools');
 Category('Administration', [
     Item('Auto-Enable requests',     'tools.php?action=enable_requests',  All(['users_mod']) && FEATURE_EMAIL_REENABLE),
     Item('Database encryption key',  'tools.php?action=dbkey',            All(['admin_site_debug'])),
-    Item('Login watch',              'tools.php?action=login_watch',      All(['admin_login_watch'])),
     Item('Permissions manager',      'tools.php?action=permissions',      All(['admin_manage_permissions'])),
     Item('Privilege matrix',         'tools.php?action=privilege_matrix', All(['admin_manage_permissions'])),
     Item('Reports V1',               'reports.php',                       Any(['admin_reports', 'site_moderate_forums'])),
@@ -96,6 +95,10 @@ Category('Rewards', [
     Item('Freeleech torrents/collages', 'tools.php?action=multiple_freeleech', All(['users_mod'])),
 ]);
 
+Category('Stylesheets', [
+    Item('Stylesheet usage',          'tools.php?action=stylesheets',      All(['admin_manage_stylesheets'])),
+]);
+
 ?>
     </div>
     <div class="toolbox_container">
@@ -104,6 +107,7 @@ Category('Rewards', [
 
 Category('User management', [
     Item('Create user',         'tools.php?action=create_user',       All(['admin_create_users'])),
+    Item('Login watch',         'tools.php?action=login_watch',       All(['admin_login_watch'])),
     Item('Invite pool',         'tools.php?action=invite_pool',       All(['users_view_invites'])),
     Item('Invite tree manager', 'tools.php?action=manipulate_tree',   All(['users_mod'])),
     Item('Special users',       'tools.php?action=special_users',     All(['admin_manage_permissions'])),
@@ -121,10 +125,6 @@ Category('Community', [
     Item('Forum transition manager', 'tools.php?action=forum_transitions', All(['admin_manage_forums'])),
     Item('IRC manager',              'tools.php?action=irc',               All(['admin_manage_forums'])),
     Item('Navigation link manager',  'tools.php?action=navigation',        All(['admin_manage_navigation'])),
-]);
-
-Category('Stylesheets', [
-    Item('Stylesheet usage',          'tools.php?action=stylesheets',      All(['admin_manage_stylesheets'])),
 ]);
 
 ?>

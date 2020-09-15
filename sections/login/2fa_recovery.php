@@ -7,22 +7,14 @@
 <?php } else { ?>
     <form class="auth_form" name="login" id="loginform" method="post" action="login.php?act=2fa_recovery">
 <?php
-        if ($BannedUntil) {
-            $DB->prepared_query("
-                UPDATE login_attempts
-                SET BannedUntil = NULL, Attempts = 0
-                WHERE ID = ?
-                ", $AttemptID
-            );
-            $Attempts = 0;
-        }
-        if (isset($Err)) {
+    if (!is_null($BannedUntil) && strtotime($BannedUntil) <= time()) {
+        $watch = new Gazelle\LoginWatch;
+        $watch->setWatch($AttemptID)->clearPriorBan();
+        $Attempts = 0;
+    }
+    if (isset($Err)) {
 ?>
             <span class="warning"><?= $Err ?><br/><br/></span>
-<?php } ?>
-<?php if ($Attempts > 0) { ?>
-            You have <span class="info"><?= (6 - $Attempts) ?></span> attempts remaining.<br/><br/>
-            <strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br/><br/>
 <?php } ?>
 <div id="logo">
 <a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
@@ -47,6 +39,7 @@
     </form>
     <br /><br />
 <?php } ?>
+</div>
 <script type="text/javascript">
     cookie.set('cookie_test', 1, 1);
     if (cookie.get('cookie_test') != null) {

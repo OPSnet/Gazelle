@@ -73,6 +73,9 @@ View::show_header('IP Address Bans');
 <div class="header">
     <h2>IP Address Bans</h2>
 </div>
+<div class="linkbox">
+    <a href="tools.php?action=login_watch">Login Watch</a>
+</div>
 <div>
     <form class="search_form" name="bans" action="" method="get">
         <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">

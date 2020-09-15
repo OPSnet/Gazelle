@@ -1,95 +1,68 @@
 <?php
-if (!check_perms('admin_login_watch')) {
+if (!(check_perms('admin_login_watch') || check_perms('admin_manage_ipbans'))) {
     error(403);
 }
-
-if (isset($_POST['submit']) && isset($_POST['id']) && $_POST['submit'] == 'Unban' && is_number($_POST['id'])) {
-    authorize();
-    $DB->prepared_query("
-        DELETE FROM login_attempts
-        WHERE ID = ?
-        ", (int)$_POST['id']
-    );
-}
-
 View::show_header('Login Watch');
 
-$DB->prepared_query('
-    SELECT
-        ID,
-        IP,
-        UserID,
-        LastAttempt,
-        Attempts,
-        BannedUntil,
-        Bans
-    FROM login_attempts
-    WHERE (BannedUntil > now() OR LastAttempt > now() - INTERVAL 6 HOUR)
-    ORDER BY BannedUntil ASC');
+if ($_POST) {
+    authorize();
+    if (check_perms('admin_manage_ipbans')) {
+        $ban = [];
+        $clear = [];
+        $admin = array_filter($_POST, function ($x) { return preg_match('/^admin-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+        foreach ($admin as $admin_id => $op) {
+            $id = (int)explode('-', $admin_id)[1];
+            if ($op == 'ban') {
+                $ban[] = $id;
+            } elseif ($op == 'clear') {
+                $clear[] = $id;
+            }
+        }
+    } elseif (check_perms('admin_login_watch')) {
+        $clear = [];
+        $admin = array_filter($_POST, function ($x) { return preg_match('/^clear-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
+        foreach ($admin as $admin_id => $op) {
+            $id = (int)explode('-', $admin_id)[1];
+            $clear[] = $id;
+        }
+    }
+}
+
+$watch = new Gazelle\LoginWatch;
+if ($ban) {
+    $nrBan = $watch->setBan(
+        $LoggedUser['ID'],
+        $_REQUEST['reason'] ?? "Banned by {$LoggedUser['Username']} from login watch.",
+        $ban
+    );
+}
+if ($clear) {
+    $nrClear = $watch->setClear($clear);
+}
+
+$list = $watch->activeList();
+$resolve = isset($_REQUEST['resolve']);
+foreach ($list as &$attempt) {
+    $attempt['dns'] = $resolve ? gethostbyaddr($attempt['ipaddr']) : $attempt['ipaddr'];
+}
+unset($attempt);
+
 ?>
 <div class="thin">
     <div class="header">
         <h2>Login Watch Management</h2>
     </div>
-    <table width="100%">
-        <tr class="colhead">
-            <td>IP</td>
-            <td>User</td>
-            <td>Bans</td>
-            <td>Remaining</td>
-            <td>Submit</td>
-<?php
-if (check_perms('admin_manage_ipbans')) { ?>
-            <td>Submit</td>
-<?php
-} ?>
-        </tr>
-<?php
-$Row = 'b';
-while (list($ID, $IP, $UserID, $LastAttempt, $Attempts, $BannedUntil, $Bans) = $DB->next_record()) {
-    $Row = $Row === 'a' ? 'b' : 'a';
-?>
-        <tr class="row<?=$Row?>">
-            <td>
-                <?=$IP?>
-            </td>
-            <td>
-                <?php if ($UserID != 0) { echo Users::format_username($UserID, true, true, true, true); } ?>
-            </td>
-            <td>
-                <?=$Bans?>
-            </td>
-            <td>
-                <?=time_diff($BannedUntil)?>
-            </td>
-            <td>
-                <form class="manage_form" name="bans" action="" method="post">
-                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-                    <input type="hidden" name="id" value="<?=$ID?>" />
-                    <input type="hidden" name="action" value="login_watch" />
-                    <input type="submit" name="submit" value="Unban" />
-                </form>
-            </td>
-<?php
-if (check_perms('admin_manage_ipbans')) { ?>
-            <td>
-                <form class="manage_form" name="bans" action="" method="post">
-                    <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-                    <input type="hidden" name="id" value="<?=$ID?>" />
-                    <input type="hidden" name="action" value="ip_ban" />
-                    <input type="hidden" name="start" value="<?=$IP?>" />
-                    <input type="hidden" name="end" value="<?=$IP?>" />
-                    <input type="hidden" name="notes" value="Banned per <?=$Bans?> bans on login watch." />
-                    <input type="submit" name="submit" value="IP Ban" />
-                </form>
-            </td>
-<?php
-} ?>
-        </tr>
-<?php
-}
-?>
-    </table>
+    <div class="linkbox">
+        <a href="tools.php?action=ip_ban">IP Address Bans</a>
+    </div>
+    <?= G::$Twig->render('admin/login-watch.twig', [
+        'auth'     => $LoggedUser['AuthKey'],
+        'list'     => $list,
+        'can_ban'  => check_perms('admin_manage_ipbans'),
+        'nr_ban'   => $nrBan ?? null,
+        'nr_clear' => $nrClear ?? null,
+        'resolve'  => $resolve,
+    ]) ?>
 </div>
 <?php
 View::show_footer();
