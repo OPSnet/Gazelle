@@ -1,0 +1,103 @@
+{% if nr_ban or nr_clear %}
+<div class="pad box">
+    {% if nr_ban %}
+    IP addresses banned: {{ nr_ban }}
+    {% endif %}
+    {% if nr_clear %}
+    IP addresses cleared: {{ nr_clear }}
+    {% endif %}
+</div>
+{% endif %}
+
+{% if list is empty %}
+<div class="pad box">
+    There are no current login watches.
+</div>
+{% else %}
+{% for b in list %}
+    {% if loop.first %}
+<form class="manage_form" name="bans" action="" method="post">
+<input type="hidden" name="auth" value="{{ auth }}" />
+<input type="hidden" name="action" value="login_watch" />
+<table width="100%">
+    <tr class="colhead">
+        <td>{{ header.ipaddr|raw }}</td>
+        <td>DNS</td>
+        <td>{{ header.user|raw }}</td>
+        <td>{{ header.attempts|raw }}</td>
+        <td>{{ header.bans|raw }}</td>
+        <td>{{ header.last_attempt|raw }}</td>
+        <td>{{ header.banned_until|raw }}</td>
+        <td>Clear</td>
+        {% if can_ban %}
+        <td>Ban</td>
+        <td>Do nothing</td>
+        {% endif %}
+
+    </tr>
+    {% endif %}
+    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <td>
+            {{ b.ipaddr|raw }}
+            <a href="https://whatismyipaddress.com/ip/{{ b.ipaddr }}" class="brackets tooltip" title="whatismyipaddress.com" target="_blank">WI</a>
+        </td>
+        <td>
+            {{ b.dns }}
+        </td>
+        <td>
+    {% if b.user_id %}
+            {{ b.user_id|user_url|raw }}
+    {% else %}
+            <i title="no user with this name">{{ b.capture }}</i>
+    {% endif %}
+        </td>
+        <td>
+            {{ b.attempts }}
+        </td>
+        <td>
+            {{ b.bans }}
+        </td>
+        <td>
+            {{ b.last_attempt|time_diff|raw }}
+        </td>
+        <td>
+            {{ b.banned_until|time_diff|raw }}
+        </td>
+    {% if can_ban %}
+        <td style="text-align: center">
+            <input type="radio" name="admin-{{ b.id }}" value="clear" />
+        </td>
+        <td style="text-align: center">
+            <input type="radio" name="admin-{{ b.id }}" value="ban" />
+        </td>
+        <td style="text-align: center">
+            <input type="radio" id="noop-{{ b.id }}" name="admin-{{ b.id }}" value="noop" checked="checked" />
+        </td>
+    {% else %}
+        <td>
+            <input type="checkbox" name="clear-{{ b.id }}" />
+        </td>
+    {% endif %}
+    {% if loop.last %}
+        {% if can_ban %}
+    <tr>
+        <td><br />Ban Reason</td>
+        <td colspan="9">
+            <br />
+            <input type="text" name="reason" size="40" />
+            <br />When banning, this reason will be recorded for each checked IP address.
+        </td>
+    </tr>
+        {% endif %}
+    <tr>
+        <td colspan="10">
+            <input type="checkbox" id="resolve" name="resolve"{{ resolve ? ' checked="checked"' : ''}}
+            />&nbsp;<label for="resolve">Resolve IP addresses (may be slow)</label><br />
+            <input type="submit" name="submit" value="Update" />
+        </td>
+    </tr>
+</table>
+</form>
+    {% endif %}
+{% endfor %}
+{% endif %}

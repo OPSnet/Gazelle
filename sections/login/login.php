@@ -7,31 +7,29 @@
 </div>
 
 <div class="main">
-<?php if (strtotime($BannedUntil) < time()) { ?>
+<?php if (strtotime($BannedUntil) > time()) { ?>
+    <div style="text-align: center; margin-top: 50px;" class="warning">You are banned from logging in<br />for another <?=time_diff($BannedUntil)?>.</div>
+<?php } else { ?>
 <div class="auth">
 <form class="auth_form" name="login" id="loginform" method="post" action="login.php">
 <?php
-if ($BannedUntil) {
-    $DB->prepared_query("
-        UPDATE login_attempts
-        SET BannedUntil = NULL, Attempts = 0
-        WHERE ID = ?
-        ", $AttemptID
-    );
-    $Attempts = 0;
-}
-if (isset($Err)) {
+    if (!is_null($BannedUntil) && strtotime($BannedUntil) <= time()) {
+        $watch = new Gazelle\LoginWatch;
+        $watch->setWatch($AttemptID)->clearPriorBan();
+        $Attempts = 0;
+    }
+    if (isset($Err)) {
 ?>
-<span class="warning"><?=$Err?><br /><br /></span>
+<span class="warning"><?= $Err ?><br /><br /></span>
 <?php
-}
-if ($Attempts > 0) { ?>
+    }
+    if ($Attempts > 0) { ?>
 You have <span class="info"><?=(6 - $Attempts)?></span> attempts remaining.<br /><br />
-<strong>WARNING:</strong> You will be banned for 6 hours after your login attempts run out!<br /><br />
+<strong>WARNING:</strong> You will be banned for 6 hours<br />after your login attempts run out!<br /><br />
 <?php
-}
-if (isset($_GET['invalid2fa'])) { ?>
-<span class="warning">You have entered an invalid two-factor authentication key. Please login again.</span>
+    }
+    if (isset($_GET['invalid2fa'])) { ?>
+<div class="warning" style="margin: 10px 0;">You have entered an invalid two-factor authentication key.<br />Please login again.</div>
 <?php } ?>
     <div>
     <label for="username">Username</label>
@@ -50,22 +48,14 @@ if (isset($_GET['invalid2fa'])) { ?>
     </div>
     <a href="login.php?act=recover" class="tooltip" title="Recover your password">Password recovery</a>
 </form>
-<?php
-} else {
-?>
-<span class="warning">You are banned from logging in for another <?=time_diff($BannedUntil)?>.</span>
-<?php
-}
-
-?>
-</div>
+<?php } ?>
 </div>
 <script type="text/javascript">
 cookie.set('cookie_test', 1, 1);
 if (cookie.get('cookie_test') != null) {
-cookie.del('cookie_test');
+    cookie.del('cookie_test');
 } else {
-$('#no-cookies').gshow();
+    $('#no-cookies').gshow();
 }
 window.onload = function() {document.getElementById("username").focus();};
 </script>

@@ -827,3 +827,36 @@ input[type="search"] {
     margin-top: 10px;
     font-weight: 600
 }
+
+.xdebug-error {
+    font-size: 12px;
+    width: 95%;
+    margin: 0 auto 10px auto;
+    border-color: #606060;
+    background: #dddddd;
+}
+
+.xdebug-error th, .xdebug-error td {
+    padding: 4px;
+    color: #202020;
+}
+
+.xdebug-error th {
+    background: #d0d0d0;
+    color: #202020;
+}
+
+.xdebug-error span {
+    display: none;
+}
+
+.xdebug-error_description th {
+    font-size: 1.2em;
+    padding: 20px 4px 20px 100px;
+    background: #cccccc;
+}
+
+.xdebug-error_callStack th {
+    background: #606060;
+    color: #e0e0e0;
+}

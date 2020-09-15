@@ -2,12 +2,35 @@
 
 use Gazelle\Util\Crypto;
 
+function log_attempt(int $UserID, string $capture) {
+    global $AttemptID, $Attempts, $Bans, $BannedUntil, $watch;
+    $IPStr = $_SERVER['REMOTE_ADDR'];
+    if (!$AttemptID) {
+        $AttemptID = $watch->create($IPStr, $capture, $UserID);
+    } elseif ($Attempt < 6) {
+        $watch->setWatch($AttemptID)->increment($UserID, $capture);
+    } else {
+        $watch->setWatch($AttemptID)->ban($Attempts, $capture, $UserID);
+        if ($Bans > 9) {
+            $IPv4Man = new Gazelle\Manager\IPv4;
+            $IPv4Man->createBan($UserID, $IPStr, $IPStr, 'Automated ban, too many failed login attempts');
+        }
+        Misc::send_pm($UserID, 0, "Too many login attempts on your account",
+            G::$Twig->render('login/too-many-failures.twig', [
+            'ipaddr' => $IPStr,
+            'username' => $capture,
+        ]));
+    }
+    $Attempts = $watch->nrAttempts();
+    $BannedUntil = $watch->bannedUntil();
+}
+
 /*-- TODO ---------------------------//
 Add the JavaScript validation into the display page using the class
 //-----------------------------------*/
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+if (BLOCK_OPERA_MINI && isset($_SERVER['HTTP_X_OPERAMINI_PHONE'])) {
+    error('Opera Mini is banned. Please use another browser.');
 }
 
 // Allow users to reset their password while logged in
@@ -16,29 +39,28 @@ if(!empty($LoggedUser['ID']) && $_REQUEST['act'] != 'recover') {
     die();
 }
 
-if (BLOCK_OPERA_MINI && isset($_SERVER['HTTP_X_OPERAMINI_PHONE'])) {
-    error('Opera Mini is banned. Please use another browser.');
-}
-
 // Check if IP is banned
 $IPv4Man = new \Gazelle\Manager\IPv4;
 if ($IPv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
     error('Your IP address has been banned.');
 }
 
-$Validate = new Validate;
-
 if (array_key_exists('action', $_GET) && $_GET['action'] == 'disabled') {
     require('disabled.php');
     die();
 }
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$watch = new Gazelle\LoginWatch;
+
 if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
     // Recover password
     if (!empty($_REQUEST['key'])) {
         // User has entered a new password, use step 2
-
-        $DB->prepared_query("
+        [$UserID, $Email, $Country, $Expires] = $DB->row("
             SELECT
                 m.ID,
                 m.Email,
@@ -51,11 +73,27 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 AND i.ResetKey = ?
                 ", $_REQUEST['key']
         );
-        list($UserID, $Email, $Country, $Expires) = $DB->next_record();
-        if ($UserID && strtotime($Expires) > time()) {
-
-        // If the user has requested a password change, and his key has not expired
-            $Validate->SetFields('password', '1', 'regex', 'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
+        if (!$UserID || strtotime($Expires) < time()) {
+            // Either the key has expired, or they didn't request a password change at all
+            if ($UserID) {
+                // If the key has expired, clear all the reset information
+                $DB->prepared_query("
+                    UPDATE users_info SET
+                        ResetKey = '',
+                        ResetExpires = NULL
+                    WHERE UserID = ?
+                    ", $UserID
+                );
+                $_SESSION['reseterr'] = 'The link you were given has expired.'; // Error message to display on form
+            }
+            // Show the first form (enter email address)
+            header('Location: login.php?act=recover');
+        } else {
+            // The user requested a password change and the key has not expired
+            $Validate = new Validate;
+            $Validate->SetFields('password', '1', 'regex',
+                'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer',
+                ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
             $Validate->SetFields('verifypassword', '1', 'compare', 'Your passwords did not match.', ['comparefield' => 'password']);
 
             if (!empty($_REQUEST['password'])) {
@@ -88,39 +126,21 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             }
 
             // Either a form asking for them to enter the password
-            // Or a success message if $Reset is 1
+            // Or a success message if $Reset is true
             require('recover_step2.php');
-
-        } else {
-            // Either his key has expired, or he hasn't requested a pass change at all
-            if (strtotime($Expires) < time() && $UserID) {
-                // If his key has expired, clear all the reset information
-                $DB->prepared_query("
-                    UPDATE users_info SET
-                        ResetKey = '',
-                        ResetExpires = NULL
-                    WHERE UserID = ?
-                    ", $UserID
-                );
-                $_SESSION['reseterr'] = 'The link you were given has expired.'; // Error message to display on form
-            }
-            // Show him the first form (enter email address)
-            header('Location: login.php?act=recover');
         }
-
-    } // End step 2
-
-    // User has not clicked the link in his email, use step 1
-    else {
+        // End step 2
+    } else {
+        // User has not clicked the link in his email, use step 1
+        $Validate = new Validate;
         $Validate->SetFields('email', '1', 'email', 'You entered an invalid email address.');
-
         if (!empty($_REQUEST['email'])) {
             // User has entered email and submitted form
             $Err = $Validate->ValidateForm($_REQUEST);
 
             if (!$Err) {
-                // Form validates correctly
-                $DB->prepared_query("
+                // Email exists in the database?
+                [$UserID, $Username, $Email] = $DB->row("
                     SELECT
                         ID,
                         Username,
@@ -130,10 +150,8 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                         AND Email = ?
                     ", $_REQUEST['email']
                 );
-                list($UserID, $Username, $Email) = $DB->next_record();
 
                 if ($UserID) {
-                    // Email exists in the database
                     // Set ResetKey, send out email, and set $Sent to 1 to show success page
                     Users::resetPassword($UserID, $Username, $Email);
 
@@ -145,15 +163,13 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                     $Cache->delete_value("user_stats_$UserID");
                     $Cache->delete_value("enabled_$UserID");
 
-                    $DB->prepared_query('
-                        SELECT SessionID
+                    $DB->prepared_query("
+                        SELECT concat('session_', SessionID) as cacheKey
                         FROM users_sessions
                         WHERE UserID = ?
-                        ', $UserID
+                        ", $UserID
                     );
-                    while (list($SessionID) = $DB->next_record()) {
-                        $Cache->delete_value("session_$UserID"."_$SessionID");
-                    }
+                    $Cache->deleteMulti($DB->collect('cacheKey'));
                     $DB->prepared_query('
                         UPDATE users_sessions SET
                             Active = 0
@@ -175,29 +191,49 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
         // Either a form for the user's email address, or a success message
         require('recover_step1.php');
     } // End if (step 1)
+    // End password recovery
 
-} // End password recovery
-elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
+} elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
     if (!isset($_SESSION['temp_user_data'])) {
         header('Location: login.php');
         exit;
-    }
-    elseif (empty($_POST['2fa_recovery_key'])) {
+    } elseif (empty($_POST['2fa_recovery_key'])) {
+        [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
         require('2fa_recovery.php');
-    }
-    else {
-        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+    } else {
+        [$UserID, $capture] = $_SESSION['temp_user_data'];
+        [$PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery] = $DB->row("
+            SELECT
+                PermissionID,
+                CustomPermissions,
+                PassHash,
+                Enabled,
+                2FA_Key,
+                Recovery
+            FROM users_main
+            WHERE ID = ?
+            ", $UserID
+        );
         $Recovery = (!empty($Recovery)) ? unserialize($Recovery) : [];
-        if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) !== false) {
-            $SessionID = randomString();
-            $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
+        if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) === false) {
+            [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
+            log_attempt($UserID, $capture);
+            unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+            $Err = 'Your backup recovery key was incorrect.';
+            setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
+            require('sections/login/login.php');
+            exit;
+        } else {
             if ($_SESSION['temp_stay_logged']) {
                 $KeepLogged = '1';
-                setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
+                $expiry = time() + 60 * 60 * 24 * 365;
             } else {
                 $KeepLogged = '0';
-                setcookie('session', $Cookie, 0, '/', '', $SSL, true);
+                $expiry = 0;
             }
+            $SessionID = randomString();
+            $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
+            setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
 
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
 
@@ -243,105 +279,58 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
                 ', $UserID
             );
 
-            if (!empty($_COOKIE['redirect'])) {
-                $URL = $_COOKIE['redirect'];
-                setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
-                header("Location: $URL");
-                die();
-            } else {
+            $watch->setWatch($AttemptID)->clearAttempts();
+            if (empty($_COOKIE['redirect'])) {
                 header('Location: index.php');
-                die();
+            } else {
+                setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
+                header("Location: " . $_COOKIE['redirect']);
             }
-        }
-        else {
-            $DB->prepared_query('
-                SELECT ID, Attempts, Bans, BannedUntil
-                FROM login_attempts
-                WHERE IP = ?
-                ', $_SERVER['REMOTE_ADDR']
-            );
-            list($AttemptID, $Attempts, $Bans, $BannedUntil) = $DB->next_record();
-            if ($BannedUntil == '') {
-                $BannedUntil = null;
-            }
-
-            // Function to log a user's login attempt
-            function log_attempt($UserID) {
-                global $DB, $Cache, $AttemptID, $Attempts, $Bans, $BannedUntil;
-                if ($AttemptID) { // User has attempted to log in recently
-                    $Attempts++;
-                    if ($Attempts > 5) { // Only 6 allowed login attempts, ban user's IP
-                        $BannedUntil = time_plus(60 * 60 * 6);
-                        $DB->prepared_query('
-                            UPDATE login_attempts SET
-                                Bans = Bans + 1,
-                                LastAttempt = now(),
-                                Attempts = ?,
-                                BannedUntil = ?
-                            WHERE ID = ?
-                            ', $Attempts, $BannedUntil, $AttemptID
-                        );
-
-                        if ($Bans > 9) { // Automated bruteforce prevention
-                            $IPv4Man = new \Gazelle\Manager\IPv4;
-                            $IPv4Man->createBan($UserID, $IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
-                        }
-                    } else {
-                        // User has attempted fewer than 6 logins
-                        $DB->prepared_query('
-                            UPDATE login_attempts SET
-                                LastAttempt = now(),
-                                BannedUntil = NULL,
-                                Attempts = ?
-                            WHERE ID = ?
-                            ', $Attempts, $AttemptID
-                        );
-                    }
-                } else { // User has not attempted to log in recently
-                    $Attempts = 1;
-                    $DB->prepared_query('
-                        INSERT INTO login_attempts
-                               (UserID, IP)
-                        VALUES (?,      ?)
-                        ', $UserID, $IPStr
-                    );
-                }
-            } // end log_attempt function
-            log_attempt($UserID);
-            unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
-            header('Location: login.php');
+            exit;
         }
     }
-}
-elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
+} elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
     if (!isset($_SESSION['temp_user_data'])) {
         header('Location: login.php');
         exit;
     }
-
     if (empty($_POST['2fa'])) {
         require('2fa.php');
     } else {
-        include(SERVER_ROOT . '/classes/google_authenticator.class.php');
+        require(__DIR__ . '/../../classes/google_authenticator.class.php');
 
-        list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery) = $_SESSION['temp_user_data'];
+        [$UserID, $capture] = $_SESSION['temp_user_data'];
+        [$PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery] = $DB->row("
+            SELECT
+                PermissionID,
+                CustomPermissions,
+                PassHash,
+                Enabled,
+                2FA_Key,
+                Recovery
+            FROM users_main
+            WHERE ID = ?
+            ", $UserID
+        );
 
         if (!(new PHPGangsta_GoogleAuthenticator())->verifyCode($TFAKey, $_POST['2fa'], 2)) {
             // invalid 2fa key, log the user completely out
+            [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
+            log_attempt($UserID, $capture);
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
             header('Location: login.php?invalid2fa');
         } else {
-            $SessionID = randomString();
-            $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
 
             if ($_SESSION['temp_stay_logged']) {
                 $KeepLogged = '1';
-                setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
+                $expiry = time() + 60 * 60 * 24 * 365;
             } else {
                 $KeepLogged = '0';
-                setcookie('session', $Cookie, 0, '/', '', $SSL, true);
+                $expiry = 0;
             }
-
+            $SessionID = randomString();
+            $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
+            setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
 
             //TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
@@ -379,138 +368,108 @@ elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
                 ', $UserID
             );
 
-            if (!empty($_COOKIE['redirect'])) {
-                $URL = $_COOKIE['redirect'];
-                setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
-                header("Location: $URL");
-                die();
-            } else {
+            $watch->setWatch($AttemptID)->clearAttempts();
+            if (empty($_COOKIE['redirect'])) {
                 header('Location: index.php');
-                die();
+            } else {
+                setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
+                header("Location: " . $_COOKIE['redirect']);
             }
+            exit;
         }
     }
-}
-// Normal login
-else {
+} else {
     if (isset($_SESSION['temp_user_data'])) {
         header('Location: login.php?act=2fa');
         exit;
     }
 
-    $Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
-    $Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', ['minlength' => '6', 'maxlength' => -1]);
-
-    $DB->prepared_query('
-        SELECT ID, Attempts, Bans, BannedUntil
-        FROM login_attempts
-        WHERE IP = ?
-        ', $_SERVER['REMOTE_ADDR']
-    );
-    list($AttemptID, $Attempts, $Bans, $BannedUntil) = $DB->next_record();
-
-    // Function to log a user's login attempt
-    function log_attempt($UserID) {
-        global $DB, $Cache, $AttemptID, $Attempts, $Bans, $BannedUntil;
-        $IPStr = $_SERVER['REMOTE_ADDR'];
-        if ($AttemptID) { // User has attempted to log in recently
-            $Attempts++;
-            if ($Attempts > 5) { // Only 6 allowed login attempts, ban user's IP
-                $BannedUntil = time_plus(60 * 60 * 6);
-                $DB->prepared_query('
-                    UPDATE login_attempts SET
-                        Bans = Bans + 1,
-                        LastAttempt = now(),
-                        Attempts = ?,
-                        BannedUntil = now() + INTERVAL 6 HOUR
-                    WHERE ID = ?
-                    ', $Attempts, $BannedUntil, $AttemptID
-                );
-
-                if ($Bans > 9) { // Automated bruteforce prevention
-                    $IPv4Man = new \Gazelle\Manager\IPv4;
-                    $IPv4Man->createBan($UserID, $IPStr, $IPStr, 'Automated ban per >60 failed login attempts');
-                }
-            } else {
-                // User has attempted fewer than 6 logins
-                $DB->prepared_query('
-                    UPDATE login_attempts SET
-                        LastAttempt = now(),
-                        BannedUntil = NULL,
-                        Attempts = ?
-                    WHERE ID = ?
-                    ', $Attempts, $AttemptID
-                );
-            }
-        } else { // User has not attempted to log in recently
-            $Attempts = 1;
-            if (!$UserID) {
-                $UserID = 0;
-            }
-            $DB->prepared_query('
-                INSERT INTO login_attempts
-                       (UserID, IP)
-                VALUES (?,      ?)
-                ', $UserID, $IPStr
-            );
+    // Normal login
+    [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
+    if (!isset($_POST['username']) && !isset($_POST['password'])) {
+        if ($Attempts > 5 && !$BannedUntil) {
+            $watch->setWatch($AttemptID)->ban($Attempts, '-intial page load-');
+            $BannedUntil = $watch->bannedUntil();
         }
-    } // end log_attempt function
-
-    // If user has submitted form
-    if (isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['password']) && !empty($_POST['password'])) {
+    } else {
+        // If user has submitted form
         if (strtotime($BannedUntil) > time()) {
             header("Location: login.php");
-            die();
+            exit;
         }
+        $Validate = new Validate;
+        $Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
+        $Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', ['minlength' => '6', 'maxlength' => -1]);
         $Err = $Validate->ValidateForm($_POST);
 
-        if (!$Err) {
-            // Passes preliminary validation (username and password "look right")
-            $DB->prepared_query("
+        $username = trim($_POST['username']);
+        if ($Err) {
+            log_attempt(0, $username);
+            setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
+        } else {
+            // username and password "look right", see if they are valid
+            $password = $_POST['password'];
+            [$UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey] = $DB->row("
                 SELECT
                     ID,
                     PermissionID,
                     CustomPermissions,
                     PassHash,
                     Enabled,
-                    2FA_Key,
-                    Recovery
+                    2FA_Key
                 FROM users_main
-                WHERE Username != '' and Username = ?
-                ", $_POST['username']
+                WHERE Username = ?
+                ", $username
             );
-            $UserData = $DB->next_record(MYSQLI_NUM, [2, 6]);
-            list($UserID, $PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey) = $UserData;
-            if (strtotime($BannedUntil) < time()) {
-                if ($UserID && Users::check_password($_POST['password'], $PassHash)) {
-                    if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($_POST['password'], $PassHash)) {
+            if (strtotime($BannedUntil) >= time()) {
+                log_attempt($UserID, $username);
+                setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
+            } elseif ($Attempts > 5 && !$BannedUntil) {
+                $watch->ban($Attempts, $username);
+                $BannedUntil = $watch->bannedUntil();
+            } else {
+                if (!($UserID && Users::check_password($password, $PassHash))) {
+                    log_attempt($UserID ?? 0, $username);
+                    $Err = 'Your username or password was incorrect.';
+                    setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
+                } else {
+                    if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($password, $PassHash)) {
                         $DB->prepared_query('
                             UPDATE users_main SET
                                 passhash = ?
                             WHERE ID = ?
-                            ', Gazelle\UserCreator::hashPassword($_POST['password']), $UserID
+                            ', Gazelle\UserCreator::hashPassword($password), $UserID
                         );
                     }
 
-                    if ($Enabled == 1) {
+                    if ($Enabled == '0') {
+                        log_attempt($UserID, $username);
+                        $Err = 'Your account has not been confirmed.<br />Please check your email.';
+                        setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
+                    } elseif ($Enabled == '2') {
+                        log_attempt($UserID, $username);
+                        // Save the username in a cookie for the disabled page
+                        setcookie('username', db_string($username), time() + 60 * 60, '/', '', false);
+                        header('Location: login.php?action=disabled');
+                    } elseif ($Enabled == '1') {
                         $SessionID = randomString();
                         $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
-
                         if ($TFAKey) {
                             // user has TFA enabled! :)
                             $_SESSION['temp_stay_logged'] = (isset($_POST['keeplogged']) && $_POST['keeplogged']);
-                            $_SESSION['temp_user_data'] = $UserData;
+                            $_SESSION['temp_user_data'] = [$UserID, $username];
                             header('Location: login.php?act=2fa');
                             exit;
                         }
 
                         if (isset($_POST['keeplogged']) && $_POST['keeplogged']) {
                             $KeepLogged = '1';
-                            setcookie('session', $Cookie, time() + 60 * 60 * 24 * 365, '/', '', $SSL, true);
+                            $expiry = time() + 60 * 60 * 24 * 365;
                         } else {
                             $KeepLogged = '0';
-                            setcookie('session', $Cookie, 0, '/', '', $SSL, true);
+                            $expiry = 0;
                         }
+                        setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
 
                         //TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
                         // Because we <3 our staff
@@ -545,42 +504,17 @@ else {
                             ON DUPLICATE KEY UPDATE last_access = now()
                             ', $UserID
                         );
-                        if (!empty($_COOKIE['redirect'])) {
-                            $URL = $_COOKIE['redirect'];
-                            setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
-                            header("Location: $URL");
-                            die();
-                        } else {
+                        $watch->setWatch($AttemptID)->clearAttempts();
+                        if (empty($_COOKIE['redirect'])) {
                             header('Location: index.php');
-                            die();
+                        } else {
+                            setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
+                            header("Location: " . $_COOKIE['redirect']);
                         }
-                    } else {
-                        log_attempt($UserID);
-                        if ($Enabled == 2) {
-
-                            // Save the username in a cookie for the disabled page
-                            setcookie('username', db_string($_POST['username']), time() + 60 * 60, '/', '', false);
-                            header('Location: login.php?action=disabled');
-                        } elseif ($Enabled == 0) {
-                            $Err = 'Your account has not been confirmed.<br />Please check your email.';
-                        }
-                        setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
+                        exit;
                     }
-                } else {
-                    log_attempt($UserID);
-
-                    $Err = 'Your username or password was incorrect.';
-                    setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
                 }
-
-            } else {
-                log_attempt($UserID);
-                setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
             }
-
-        } else {
-            log_attempt('0');
-            setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
         }
     }
     require('sections/login/login.php');
