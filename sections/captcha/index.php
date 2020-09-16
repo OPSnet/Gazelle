@@ -53,5 +53,4 @@ function make_captcha_img() {
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 $_SESSION['captcha'] = make_captcha_img();
