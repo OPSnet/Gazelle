@@ -425,7 +425,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 log_attempt($UserID, $username);
                 setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
             } elseif ($Attempts > 5 && !$BannedUntil) {
-                $watch->ban($Attempts, $username, $UserID ?? 0);
+                $watch->ban($Attempts, $username);
                 $BannedUntil = $watch->bannedUntil();
             } else {
                 if (!($UserID && Users::check_password($password, $PassHash))) {
