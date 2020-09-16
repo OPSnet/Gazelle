@@ -10,7 +10,7 @@ function log_attempt(int $UserID, string $capture) {
     } elseif ($Attempt < 6) {
         $watch->setWatch($AttemptID)->increment($UserID, $capture);
     } else {
-        $watch->setWatch($AttemptID)->ban($capture);
+        $watch->setWatch($AttemptID)->ban($Attempts, $capture, $UserID);
         if ($Bans > 9) {
             $IPv4Man = new Gazelle\Manager\IPv4;
             $IPv4Man->createBan($UserID, $IPStr, $IPStr, 'Automated ban, too many failed login attempts');
@@ -427,7 +427,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 log_attempt($UserID, $username);
                 setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
             } elseif ($Attempts > 5 && !$BannedUntil) {
-                $watch->ban();
+                $watch->ban($Attempts, $username, $UserID ?? 0);
                 $BannedUntil = $watch->bannedUntil();
             } else {
                 if (!($UserID && Users::check_password($password, $PassHash))) {
