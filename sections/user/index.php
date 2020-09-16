@@ -57,33 +57,27 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/../../classes/google_authenticator.class.php');
         require(__DIR__ . '/../../classes/qr.class.php');
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         if (empty($_GET['do'])) {
             // we didn't get a required "do", we'll just let the 404 handler deal with the request.
             error(404);
         }
 
-        $UserID = $_REQUEST['userid'];
-
-        if (!is_number($UserID)) {
+        $UserID = (int)$_REQUEST['userid'];
+        if (!$UserID) {
             error(404);
         }
-
-        $DB->prepared_query('
+        [$PassHash, $TFAKey, $Level] = $DB->row("
             SELECT m.PassHash, m.2FA_Key, p.Level
             FROM users_main AS m
             LEFT JOIN permissions AS p ON (p.ID = PermissionID)
             WHERE m.ID = ?
-            ', $UserID
+            ", $UserID
         );
-
-        list($PassHash, $TFAKey, $Level) = $DB->next_record(MYSQLI_NUM);
-
         if ($UserID != $LoggedUser['ID'] && !check_perms('users_mod')) {
             error(403);
+        }
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(['read_and_close' => true]);
         }
 
         switch($_GET['do']) {
@@ -92,9 +86,12 @@ switch ($_REQUEST['action']) {
                     // 2fa is already enabled...
                     error(404);
                 }
-
                 if (empty($_SESSION['private_key'])) {
+                    if (session_status() === PHP_SESSION_NONE) {
+                        session_start();
+                    }
                     $_SESSION['private_key'] = (new PHPGangsta_GoogleAuthenticator())->createSecret();
+                    session_write_close();
                 }
 
                 require(__DIR__ . '/2fa/step1.php');
@@ -144,7 +141,11 @@ switch ($_REQUEST['action']) {
                 }
 
                 require(__DIR__ . '/2fa/complete.php');
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
                 unset($_SESSION['private_key']);
+                session_write_close();
                 break;
 
             case 'disable':

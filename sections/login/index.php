@@ -50,10 +50,6 @@ if (array_key_exists('action', $_GET) && $_GET['action'] == 'disabled') {
     die();
 }
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 $watch = new Gazelle\LoginWatch;
 
 if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
@@ -84,10 +80,15 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                     WHERE UserID = ?
                     ", $UserID
                 );
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
                 $_SESSION['reseterr'] = 'The link you were given has expired.'; // Error message to display on form
+                session_write_close();
             }
             // Show the first form (enter email address)
             header('Location: login.php?act=recover');
+            exit;
         } else {
             // The user requested a password change and the key has not expired
             $Validate = new Validate;
@@ -179,21 +180,28 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 }
                 $Err = "Email sent with further instructions.";
             }
-
-        } elseif (!empty($_SESSION['reseterr'])) {
-            // User has not entered email address, and there is an error set in session data
-            // This is typically because their key has expired.
-            // Stick the error into $Err so recover_step1.php can take care of it
-            $Err = $_SESSION['reseterr'];
-            unset($_SESSION['reseterr']);
+        } else {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            if (!empty($_SESSION['reseterr'])) {
+                // User has not entered email address, and there is an error set in session data
+                // This is typically because their key has expired.
+                // Stick the error into $Err so recover_step1.php can take care of it
+                $Err = $_SESSION['reseterr'];
+                unset($_SESSION['reseterr']);
+            }
+            session_write_close();
         }
-
         // Either a form for the user's email address, or a success message
         require('recover_step1.php');
     } // End if (step 1)
     // End password recovery
 
 } elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start(['read_and_close' => true]);
+    }
     if (!isset($_SESSION['temp_user_data'])) {
         header('Location: login.php');
         exit;
@@ -218,7 +226,11 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
         if (($Key = array_search($_POST['2fa_recovery_key'], $Recovery)) === false) {
             [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
             log_attempt($UserID, $capture);
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+            session_write_close();
             $Err = 'Your backup recovery key was incorrect.';
             setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
             require('sections/login/login.php');
@@ -234,8 +246,11 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             $SessionID = randomString();
             $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
             setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
-
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+            session_write_close();
 
             //TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
             // Because we <3 our staff
@@ -290,6 +305,9 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
         }
     }
 } elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa') {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start(['read_and_close' => true]);
+    }
     if (!isset($_SESSION['temp_user_data'])) {
         header('Location: login.php');
         exit;
@@ -317,10 +335,13 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             // invalid 2fa key, log the user completely out
             [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
             log_attempt($UserID, $capture);
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+            session_write_close();
             header('Location: login.php?invalid2fa');
         } else {
-
             if ($_SESSION['temp_stay_logged']) {
                 $KeepLogged = '1';
                 $expiry = time() + 60 * 60 * 24 * 365;
@@ -331,7 +352,11 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             $SessionID = randomString();
             $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
             setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
+            session_write_close();
 
             //TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
             // Because we <3 our staff
@@ -375,10 +400,13 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
                 header("Location: " . $_COOKIE['redirect']);
             }
-            exit;
         }
+        exit;
     }
 } else {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start(['read_and_close' => true]);
+    }
     if (isset($_SESSION['temp_user_data'])) {
         header('Location: login.php?act=2fa');
         exit;
@@ -456,8 +484,12 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                         $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
                         if ($TFAKey) {
                             // user has TFA enabled! :)
+                            if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                            }
                             $_SESSION['temp_stay_logged'] = (isset($_POST['keeplogged']) && $_POST['keeplogged']);
                             $_SESSION['temp_user_data'] = [$UserID, $username];
+                            session_write_close();
                             header('Location: login.php?act=2fa');
                             exit;
                         }

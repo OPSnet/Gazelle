@@ -4,7 +4,7 @@ if (isset($LoggedUser["ID"])) {
     exit;
 }
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    session_start(['read_and_close' => true]);
 }
 ?>
 
@@ -66,7 +66,11 @@ View::show_header('External Tracker Referrals');
 <?php
 } else if ($_POST['action'] == 'account') {
     $Token = $ReferralManager->generateToken();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     $_SESSION['referral_token'] = $Token;
+    session_write_close();
     $Account = $ReferralManager->getAccount($_POST['service']);
 ?>
     <br/>
@@ -143,4 +147,3 @@ View::show_header('External Tracker Referrals');
     }
 }
 View::show_footer();
-?>
