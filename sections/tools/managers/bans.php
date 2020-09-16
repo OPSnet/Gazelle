@@ -27,13 +27,13 @@ if (isset($_POST['submit'])) {
     }
 }
 
-define('BANS_PER_PAGE', '20');
+define('BANS_PER_PAGE', '50');
 
 $SortOrderMap = [
-    'fromip'     => ['i.FromIP',    'desc'],
-    'toip'       => ['i.ToIP',      'desc'],
-    'reason'     => ['i.Reason',     'asc'],
-    'username'   => ['um.Username',  'asc'],
+    'fromip'     => ['i.FromIP',    'asc'],
+    'toip'       => ['i.ToIP',      'asc'],
+    'reason'     => ['i.Reason',    'asc'],
+    'username'   => ['um.Username', 'asc'],
     'created'    => ['i.created',   'desc'],
 ];
 $SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
@@ -66,7 +66,8 @@ list($Page, $Limit) = Format::page_limit(BANS_PER_PAGE);
 $PageLinks = Format::get_pages($Page, $Results, BANS_PER_PAGE, 11);
 
 $from .= " ORDER BY $OrderBy $OrderWay LIMIT " . $Limit;
-$Bans = $DB->prepared_query("SELECT i.ID, i.FromIP, i.ToIP, i.Reason, i.user_id, i.created, um.Username $from", ...$args);
+$DB->prepared_query("SELECT i.ID, i.FromIP, i.ToIP, i.Reason, i.user_id, i.created, um.Username $from", ...$args);
+$banQ = $DB->get_query_id();
 
 View::show_header('IP Address Bans');
 ?>
@@ -133,8 +134,9 @@ View::show_header('IP Address Bans');
     </tr>
 <?php
 
-$Row = 'a';
-while (list($ID, $Start, $End, $Reason, $userId, $created) = $DB->next_record()) {
+$DB->set_query_id($banQ);
+$Row = 'b';
+while ([$ID, $Start, $End, $Reason, $userId, $created, $username] = $DB->next_record()) {
     $Row = $Row === 'a' ? 'b' : 'a';
     $Start = long2ip($Start);
     $End = long2ip($End);
@@ -159,7 +161,10 @@ while (list($ID, $Start, $End, $Reason, $userId, $created) = $DB->next_record())
             </td>
         </form>
     </tr>
-<?php } ?>
+<?php
+    $DB->set_query_id($banQ);
+}
+?>
 </table>
 <div class="linkbox">
 <?= $PageLinks ?>
