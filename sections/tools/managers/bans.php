@@ -62,7 +62,7 @@ if (!empty($_REQUEST['ip']) && preg_match('/'.IP_REGEX.'/', $_REQUEST['ip'])) {
 $from = "FROM ip_bans i LEFT JOIN users_main um ON (um.ID = i.user_id)" . (count($cond) ? (' WHERE ' . implode(' AND ', $cond)) : '');
 
 $Results = $DB->scalar("SELECT count(*) $from", ...$args);
-list($Page, $Limit) = Format::page_limit(BANS_PER_PAGE);
+[$Page, $Limit] = Format::page_limit(BANS_PER_PAGE);
 $PageLinks = Format::get_pages($Page, $Results, BANS_PER_PAGE, 11);
 
 $from .= " ORDER BY $OrderBy $OrderWay LIMIT " . $Limit;
