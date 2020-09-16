@@ -368,9 +368,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 ', $UserID
             );
 
-            if ($AttemptID) {
-                $watch->setWatch($AttemptID)->clearAttempts();
-            }
+            $watch->setWatch($AttemptID)->clearAttempts();
             if (empty($_COOKIE['redirect'])) {
                 header('Location: index.php');
             } else {
@@ -506,9 +504,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                             ON DUPLICATE KEY UPDATE last_access = now()
                             ', $UserID
                         );
-                        if ($AttemptID) {
-                            $watch->setWatch($AttemptID)->clearAttempts();
-                        }
+                        $watch->setWatch($AttemptID)->clearAttempts();
                         if (empty($_COOKIE['redirect'])) {
                             header('Location: index.php');
                         } else {

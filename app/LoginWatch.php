@@ -7,9 +7,13 @@ class LoginWatch extends Base {
 
     /**
      * Set the context of a watched IP address (to save passing it in to each method call).
+     * On a virgin login with no previous errors there may not even be a watch yet
+     * @param int ID of the watch
      */
-    public function setWatch(int $watchId) {
-        $this->watchId = $watchId;
+    public function setWatch($watchId) {
+        if (!is_null($watchId)) {
+            $this->watchId = $watchId;
+        }
         return $this;
     }
 
@@ -140,20 +144,24 @@ class LoginWatch extends Base {
      * Get the list of login failures
      * @return array list [ID, ipaddr, userid, LastAttempt (datetime), Attempts, BannedUntil (datetime), Bans]
      */
-    public function activeList(): array {
+    public function activeList(string $orderBy, string $orderWay): array {
         $this->db->prepared_query("
             SELECT
-                ID          AS id,
-                IP          AS ipaddr,
-                UserID      AS user_id,
-                LastAttempt AS last_attempt,
-                Attempts    AS attempts,
-                BannedUntil AS banned_until,
-                Bans        AS bans,
-                capture
-            FROM login_attempts
-            WHERE (BannedUntil > now() OR LastAttempt > now() - INTERVAL 6 HOUR)
-            ORDER BY BannedUntil ASC
+                w.ID          AS id,
+                w.IP          AS ipaddr,
+                w.UserID      AS user_id,
+                w.LastAttempt AS last_attempt,
+                w.Attempts    AS attempts,
+                w.BannedUntil AS banned_until,
+                w.Bans        AS bans,
+                w.capture,
+                um.Username   AS username,
+                (ip.FromIP IS NOT NULL) AS banned
+            FROM login_attempts w
+            LEFT JOIN users_main um ON (um.ID = w.UserID)
+            LEFT JOIN ip_bans ip ON (ip.FromIP = inet_aton(w.IP))
+            WHERE (w.BannedUntil > now() OR w.LastAttempt > now() - INTERVAL 6 HOUR)
+            ORDER BY $orderBy $orderWay
         ");
         return $this->db->to_array('id', MYSQLI_ASSOC, false);
     }
@@ -164,6 +172,9 @@ class LoginWatch extends Base {
      * @return number of addresses banned
      */
     public function setBan(int $userId, string $reason, array $list): int {
+        if (!$list) {
+            return 0;
+        }
         $reason = trim($reason);
         $n = 0;
         foreach ($list as $id) {
@@ -188,6 +199,9 @@ class LoginWatch extends Base {
      * @return number of rows removed
      */
     public function setClear(array $list): int {
+        if (!$list) {
+            return 0;
+        }
         $this->db->prepared_query("
             DELETE FROM login_attempts
             WHERE ID in (" . placeholders($list) . ")

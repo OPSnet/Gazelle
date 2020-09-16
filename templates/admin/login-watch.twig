@@ -21,23 +21,24 @@
 <input type="hidden" name="action" value="login_watch" />
 <table width="100%">
     <tr class="colhead">
-        <td>IP</td>
+        <td>{{ header.ipaddr|raw }}</td>
         <td>DNS</td>
-        <td>User</td>
-        <td>Attempts</td>
-        <td>Bans</td>
-        <td>Last Attempt</td>
-        <td>Login Forbidden</td>
+        <td>{{ header.user|raw }}</td>
+        <td>{{ header.attempts|raw }}</td>
+        <td>{{ header.bans|raw }}</td>
+        <td>{{ header.last_attempt|raw }}</td>
+        <td>{{ header.banned_until|raw }}</td>
         <td>Clear</td>
         {% if can_ban %}
         <td>Ban</td>
         <td>Do nothing</td>
         {% endif %}
+
     </tr>
     {% endif %}
     <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
         <td>
-            {{ b.ipaddr }}
+            {{ b.ipaddr|raw }}
             <a href="https://whatismyipaddress.com/ip/{{ b.ipaddr }}" class="brackets tooltip" title="whatismyipaddress.com" target="_blank">WI</a>
         </td>
         <td>
