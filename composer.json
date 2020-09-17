@@ -19,11 +19,17 @@
       "Gazelle\\": "app/"
     }
   },
+  "config": {
+    "sort-packages": true
+  },
   "require": {
+    "php": ">=7.3",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-mysqli": "*",
     "d11wtq/boris": "^1.0",
     "orpheusnet/bencode-torrent": "^0.11.0",
     "orpheusnet/logchecker": "^0.9.4",
-    "php": ">=7.3",
     "robmorgan/phinx": "^0.11.0",
     "twig/twig": "^2.12",
     "whichbrowser/parser": "^2.0",
