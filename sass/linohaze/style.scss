@@ -1095,10 +1095,6 @@ p.min_padding {
     font-size: 13px
 }
 
-.main_column #recommended .head a[href="#"] {
-    float: right
-}
-
 .tags {
     padding: 0 0 0 20px;
     font-style: italic
@@ -1725,6 +1721,12 @@ ul.collage_images li:nth-child(5n) img {
 .submit_container {
     clear: both;
     text-align: right
+}
+
+.toolbox_container {
+    float: left;
+    padding: 5px;
+    width: 200px;
 }
 
 #upload #content>div.box.pad[style="margin: 0px auto; width: 700px;"] {

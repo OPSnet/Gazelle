@@ -2,12 +2,13 @@ FROM debian:buster-slim
 
 WORKDIR /var/www
 
-# Misc software layer
-RUN useradd -ms /bin/bash gazelle \
-    && apt-get update \
+# Software package layer
+# Nodesource setup comes after yarnpkg because it runs `apt-get update`
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
+        composer \
         cron \
         curl \
         git \
@@ -22,22 +23,6 @@ RUN useradd -ms /bin/bash gazelle \
         mariadb-client \
         netcat-openbsd \
         nginx \
-        python3 \
-        python3-pip \
-        python3-setuptools \
-        python3-wheel \
-        software-properties-common \
-        unzip \
-        wget \
-        zlib1g-dev
-
-# Python tools layer
-RUN pip3 install chardet eac-logchecker xld-logchecker
-
-# PHP layer
-RUN apt-get install -y --no-install-recommends \
-        php \
-        php-bcmath \
         php7.3-cli \
         php7.3-curl \
         php7.3-fpm \
@@ -47,18 +32,26 @@ RUN apt-get install -y --no-install-recommends \
         php7.3-xml \
         php7.3-zip \
         php-apcu \
+        php-bcmath \
         php-memcached \
         php-xdebug \
-        composer
-
-# NodeJS layer
-# Nodesource setup comes after yarnpkg because it runs `apt-get update`
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+        python3 \
+        python3-pip \
+        python3-setuptools \
+        python3-wheel \
+        software-properties-common \
+        unzip \
+        wget \
+        zlib1g-dev \
+    && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && curl -sL https://deb.nodesource.com/setup_12.x | bash - \
     && apt-get install -y --no-install-recommends \
         nodejs \
         yarn
+
+# Python tools layer
+RUN pip3 install chardet eac-logchecker xld-logchecker
 
 # Puppeteer layer
 # This installs the necessary packages to run the bundled version of chromium for puppeteer
@@ -115,7 +108,8 @@ RUN apt-get install -y --no-install-recommends \
 COPY . /var/www
 
 # Permissions and configuration layer
-RUN chown -R gazelle:gazelle /var/www \
+RUN useradd -ms /bin/bash gazelle \
+    && chown -R gazelle:gazelle /var/www \
     && cp /var/www/.docker/web/php.ini /etc/php/7.3/cli/php.ini \
     && cp /var/www/.docker/web/php.ini /etc/php/7.3/fpm/php.ini \
     && cp /var/www/.docker/web/xdebug.ini /etc/php/7.3/mods-available/xdebug.ini \

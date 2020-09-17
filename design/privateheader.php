@@ -62,10 +62,10 @@ if (isset(G::$LoggedUser['Notify'])) {
 }
 ?>
     <link rel="stylesheet" type="text/css"
-            href="<?=STATIC_SERVER?>styles/global.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/global.css')?>" />
+            href="<?=STATIC_SERVER?>styles/global.css?v=<?=filemtime(SERVER_ROOT.'/sass/global.scss')?>" />
 <?php
 if ($UseTooltipster) { ?>
-    <link rel="stylesheet" href="<?=STATIC_SERVER?>styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/tooltipster/style.css')?>" type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?=STATIC_SERVER?>styles/tooltipster/style.css?v=<?=filemtime(SERVER_ROOT.'/sass/tooltipster/style.scss')?>" type="text/css" media="screen" />
 <?php
 } ?>
     <meta name="viewport" content="width=device-width" />
@@ -73,7 +73,7 @@ if ($UseTooltipster) { ?>
 if (empty(G::$LoggedUser['StyleURL'])) {
 ?>
     <link rel="stylesheet" type="text/css" title="<?=G::$LoggedUser['StyleName']?>" media="screen"
-            href="<?=STATIC_SERVER?>styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/public/static/styles/'.G::$LoggedUser['StyleName'].'/style.css')?>" />
+            href="<?=STATIC_SERVER?>styles/<?=G::$LoggedUser['StyleName']?>/style.css?v=<?=filemtime(SERVER_ROOT.'/sass/'.G::$LoggedUser['StyleName'].'/style.scss')?>" />
 <?php
 } else {
         $StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);

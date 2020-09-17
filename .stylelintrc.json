@@ -21,9 +21,5 @@
         "shorthand-property-no-redundant-values": null,
         "unit-whitelist": ["deg", "em", "ex", "ms", "rem", "%", "s", "px", "vw", "vh", "rad", "dppx", "dpi", "dpcm", "in", "pt"],
         "scss/at-rule-no-unknown": true
-    },
-    "ignoreFiles": [
-        "public/static/node_modules/**/*.scss",
-        "public/static/stylesv2/**/*.css"
-    ]
+    }
 }

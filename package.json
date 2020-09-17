@@ -3,19 +3,19 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "prod": "npm run build:scss && npm run build:previews",
-    "render_previews": "node scripts/render_styles_preview.js",
-    "build:scss": "cross-env NODE_ENV=production webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "dev": "yarn build",
+    "prod": "cross-env NODE_ENV=production yarn build",
+    "build": "yarn build:scss && yarn build:previews",
+    "build:scss": "webpack --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "build:previews": "node scripts/render_styles_preview.js",
-    "start": "npm run dev -- --watch",
-    "lint:css": "stylelint \"public/static/styles/**/*.scss\" || exit 0",
-    "lint:css-checkstyle": "stylelint \"public/static/styles/**/*.scss\" --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js || exit 0",
+    "start": "yarn build:scss -- --watch",
+    "lint:css": "stylelint \"sass/**/*.scss\" || exit 0",
+    "lint:css-checkstyle": "stylelint \"sass/**/*.scss\" --custom-formatter ./node_modules/stylelint-checkstyle-formatter/index.js || exit 0",
     "lint:php:internal": "find . -path './vendor' -prune -o -path ./node_modules -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v \"No syntax errors detected\" )",
     "lint:php:phpcs": "vendor/bin/phpcs -p",
-    "lint:php": "npm run lint:php:internal && npm run lint:php:phpcs",
+    "lint:php": "yarn lint:php:internal && yarn lint:php:phpcs",
     "lint:php:fix": "./.bin/phpcbf",
-    "pre-commit": "npm run lint:php:fix"
+    "pre-commit": "yarn lint:php:fix"
   },
   "license": "Unlicense",
   "devDependencies": {

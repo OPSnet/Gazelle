@@ -1079,11 +1079,6 @@ strong.quoteheader {
     margin: 0 0 2px 0;
 }
 
-#recommended ul {
-    margin: 0 0 0 0;
-    padding: 10px;
-}
-
 .sidebar form {
     padding: 0 !important;
     margin: 0 !important;
@@ -1158,6 +1153,11 @@ strong.quoteheader {
     color: #8c8c8c;
 }
 
+.toolbox_container {
+    float: left;
+    margin-left: 20px;
+    width: 193px;
+}
 
 /* TORRENTS */
 
