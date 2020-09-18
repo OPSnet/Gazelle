@@ -23,7 +23,7 @@ if ($_POST['collage_id'] && is_number($_POST['collage_id'])) {
             ", $CollageID
         );
         $Cache->delete_value("collage_$CollageID");
-        Misc::write_log("Collage $CollageID was recovered by ".$LoggedUser['Username']);
+        (new Gazelle\Log)->general("Collage $CollageID was recovered by ".$LoggedUser['Username']);
         header("Location: collages.php?id=$CollageID");
         exit;
     }

@@ -58,7 +58,7 @@ if ($CategoryID == 0) {
     $subscription->flushQuotes('collages', $CollageID);
 }
 
-Misc::write_log("Collage $CollageID ($Name) was deleted by ".$LoggedUser['Username'].": $Reason");
+(new Gazelle\Log)->general("Collage $CollageID ($Name) was deleted by ".$LoggedUser['Username'].": $Reason");
 
 $Cache->delete_value("collage_$CollageID");
 header('Location: collages.php');
