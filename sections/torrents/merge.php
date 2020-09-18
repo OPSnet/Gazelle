@@ -5,7 +5,7 @@ if (!check_perms('torrents_edit')) {
 
 $oldGroupId = (int)$_POST['groupid'];
 $newGroupId = (int)$_POST['targetgroupid'];
-if (!$oldGroupId || !$newGroupId1) {
+if (!$oldGroupId || !$newGroupId) {
     error(404);
 }
 if ($newGroupId == $oldGroupId) {
