@@ -86,14 +86,25 @@ if (!empty($_REQUEST['confirm'])) {
                     $creator->email(),
                     'New account confirmation at '.SITE_NAME,
                     G::$Twig->render('emails/new_registration.twig', [
-                        'Username'   => $username,
-                        'TorrentKey' => $creator->announceKey(),
-                        'SITE_NAME'  => SITE_NAME,
-                        'SITE_URL'   => SITE_URL
+                        'username'     => $username,
+                        'announce_key' => $user->announceKey(),
+                        'site_name'    => SITE_NAME,
+                        'site_url'     => SITE_URL
                     ]),
                     'noreply'
                 );
-                Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $torrent_pass]);
+                Misc::send_pm(
+                    $user->id(),
+                    0,
+                    "Welcome to " . SITE_NAME,
+                    G::$Twig->render('user/welcome.twig', [
+                        'username'     => $username,
+                        'announce_key' => $user->announceKey(),
+                        'site_name'    => SITE_NAME,
+                        'site_url'     => SITE_URL
+                    ])
+                );
+                Tracker::update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
                 $Sent = 1;
                 $NewInstall = $creator->newInstall();
             }

@@ -202,6 +202,7 @@ class UserCreator extends Base {
         $this->email        = [];
         $this->enabled      = false;
         $this->id           = null;
+        $this->announceKey  = null;
         $this->inviteKey    = null;
         $this->ipaddr       = null;
         $this->passHash     = null;
@@ -216,15 +217,6 @@ class UserCreator extends Base {
      */
     public function newInstall(): bool {
         return $this->newInstall;
-    }
-
-    /**
-     * The generated announce key (for use in the welcome email)
-     *
-     * @return string The announce key
-     */
-    public function announceKey(): string {
-        return $this->announceKey;
     }
 
     /**

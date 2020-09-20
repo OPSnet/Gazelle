@@ -77,11 +77,11 @@ class User extends Base {
         return $this->db->has_results() ? $this->db->next_record(MYSQLI_ASSOC, false) : null;
     }
 
-    public function id() {
+    public function id(): int {
         return $this->id;
     }
 
-    public function username() {
+    public function username(): string {
         return $this->db->scalar("
             SELECT Username
             FROM users_main
@@ -90,8 +90,17 @@ class User extends Base {
         );
     }
 
-    public function idFromUsername(string $username) {
+    public function announceKey(): string {
         return $this->db->scalar("
+            SELECT torrent_pass
+            FROM users_main
+            WHERE ID = ?
+            ", $this->id
+        );
+    }
+
+    public function idFromUsername(string $username): int {
+        return (int)$this->db->scalar("
             SELECT ID
             FROM users_main
             WHERE Username = ?
@@ -99,7 +108,7 @@ class User extends Base {
         );
     }
 
-    public function url() {
+    public function url(): string {
         return site_url() . "user.php?id=" . $this->id;
     }
 
