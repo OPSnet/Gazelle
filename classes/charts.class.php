@@ -18,7 +18,7 @@ class GOOGLE_CHARTS {
             return '__';
         }
         $CharKey = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.';
-        return $CharKey[(int)floor($Number / 64)].$CharKey[int()floor($Number % 64)];
+        return $CharKey[(int)floor($Number / 64)].$CharKey[(int)floor($Number % 64)];
     }
 
     public function color($Colors) {
