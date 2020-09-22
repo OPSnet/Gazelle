@@ -13,7 +13,9 @@ class Forum extends Base {
      *
      * @param int $id The forum ID. In some circumstances it may not be possible
      * to determine in advance, for instance sections/forums/takeedit.php
+     * or sections/forums/get_post.php
      * @see postInfo()
+     * @see postBody()
      */
     public function __construct(int $id = 0) {
         parent::__construct();
@@ -712,6 +714,26 @@ class Forum extends Base {
             ", $userId, trim($body), $postId
         );
         $this->cache->delete_value("forums_edits_$postId");
+    }
+
+    /**
+     * Get a post body and set the forum id.
+     * Use the forum id to check whether the viewer is allowed to see it.
+     *
+     * @param int $postId The post
+     * @return array [The post body, the forum id] or null if the post does not exist
+     */
+    public function postBody(int $postId) {
+        [$body, $this->forumId] = $this->db->row("
+            SELECT
+                p.Body,
+                t.ForumID
+            FROM forums_posts AS p
+            INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
+            WHERE p.ID = ?
+            ", $postId
+        );
+        return [$body, $this->forumId];
     }
 
     /**

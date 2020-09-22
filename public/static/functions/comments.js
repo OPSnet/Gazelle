@@ -91,15 +91,16 @@ function Quote(post, user, link) {
     function inPost(elt) {
         return $.contains($('#post' + postid)[0],elt);
     }
+
     // Str -> undefined
     function insertQuote(response) {
         if ($('#quickpost').raw().value !== '') {
             $('#quickpost').raw().value += "\n\n";
         }
-        $('#quickpost').raw().value = $('#quickpost').raw().value + "[quote=" + username + (link == true ? "|" + target : "") + "]" +
-            //response.replace(/(img|aud)(\]|=)/ig,'url$2').replace(/\[url\=(https?:\/\/[^\s\[\]<>"\'()]+?)\]\[url\](.+?)\[\/url\]\[\/url\]/gi, "[url]$1[/url]")
-            html_entity_decode(response)
-        + "[/quote]";
+        $('#quickpost').raw().value = $('#quickpost').raw().value
+            + "[quote=" + username + (link == true ? "|" + target : "") + "]"
+            + response
+            + "[/quote]";
         resize('quickpost');
     }
 }
