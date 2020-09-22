@@ -184,7 +184,7 @@ foreach ($topVotes as $groupID => $group) {
     $score = $group['Score'];
     $downVotes = $totalVotes - $upVotes;
 
-    $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID);
+    $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $groupID);
     $userVote = isset($userVotes[$groupID]) ? $userVotes[$groupID]['Type'] : '';
 
     $displayName = "$group[Rank] - ";
