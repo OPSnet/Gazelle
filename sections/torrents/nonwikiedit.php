@@ -10,7 +10,7 @@ if (!$groupId) {
 //Usual perm checks
 if (!check_perms('torrents_edit')) {
     if (!$DB->scalar("
-        SELECT ID FROM torrents WHERE GroupID = ?  AND User = ?
+        SELECT ID FROM torrents WHERE GroupID = ? AND UserID = ?
         ", $groupId, $LoggedUser['ID']
     )) {
         error(403);
