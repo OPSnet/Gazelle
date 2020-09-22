@@ -80,33 +80,34 @@ if (!empty($_REQUEST['confirm'])) {
                         break;
                 }
             }
-
-            if (!$Err) {
-                Misc::send_email(
-                    $creator->email(),
-                    'New account confirmation at '.SITE_NAME,
-                    G::$Twig->render('emails/new_registration.twig', [
-                        'username'     => $username,
-                        'announce_key' => $user->announceKey(),
-                        'site_name'    => SITE_NAME,
-                        'site_url'     => SITE_URL
-                    ]),
-                    'noreply'
-                );
-                Misc::send_pm(
-                    $user->id(),
-                    0,
-                    "Welcome to " . SITE_NAME,
-                    G::$Twig->render('user/welcome.twig', [
-                        'username'     => $username,
-                        'announce_key' => $user->announceKey(),
-                        'site_name'    => SITE_NAME,
-                        'site_url'     => SITE_URL
-                    ])
-                );
-                Tracker::update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
-                $Sent = 1;
-                $NewInstall = $creator->newInstall();
+            finally {
+                if (!$Err) {
+                    Misc::send_email(
+                        $user->email(),
+                        'New account confirmation at '.SITE_NAME,
+                        G::$Twig->render('emails/new_registration.twig', [
+                            'username'     => $username,
+                            'announce_key' => $user->announceKey(),
+                            'site_name'    => SITE_NAME,
+                            'site_url'     => SITE_URL
+                        ]),
+                        'noreply'
+                    );
+                    Misc::send_pm(
+                        $user->id(),
+                        0,
+                        "Welcome to " . SITE_NAME,
+                        G::$Twig->render('user/welcome.twig', [
+                            'username'     => $username,
+                            'announce_key' => $user->announceKey(),
+                            'site_name'    => SITE_NAME,
+                            'site_url'     => SITE_URL
+                        ])
+                    );
+                    Tracker::update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
+                    $Sent = 1;
+                    $NewInstall = $creator->newInstall();
+                }
             }
         }
     } elseif ($_GET['invite']) {

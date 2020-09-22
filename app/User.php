@@ -99,6 +99,15 @@ class User extends Base {
         );
     }
 
+    public function email(): string {
+        return $this->db->scalar("
+            SELECT Email
+            FROM users_main
+            WHERE ID = ?
+            ", $this->id
+        );
+    }
+
     public function idFromUsername(string $username): int {
         return (int)$this->db->scalar("
             SELECT ID
