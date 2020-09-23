@@ -50,10 +50,10 @@ abstract class Json extends Base {
      */
     public function failure(string $message) {
         print json_encode(
-            array_merge(
-                [
+            array_merge([
                     'status' => 'failure',
-                    'response' => $message,
+                    'response' => [],
+                    'error' => $message,
                     'info' => [
                         'source'  => $this->source,
                         'version' => $this->version,
@@ -71,17 +71,16 @@ abstract class Json extends Base {
             return;
         }
         print json_encode(
-            [
-                'status' => 'success',
-                'response' => array_merge(
-                    $payload,
-                    $this->debug(),
-                    [ 'info' => [
+            array_merge([
+                    'status' => 'success',
+                    'response' => $payload,
+                    'info' => [
                         'source'  => $this->source,
                         'version' => $this->version,
-                    ]]
-                ),
-            ],
+                    ],
+                ],
+                $this->debug()
+            ),
             $this->mode
         );
     }
