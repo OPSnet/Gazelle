@@ -84,7 +84,7 @@ function Quote(post, user, link) {
     if (getSelection().toString() && inPost(getSelection().anchorNode) && inPost(getSelection().focusNode)) {
         insertQuote(getSelection().toString());
     } else {
-        ajax.get(requrl, insertQuote);
+        ajax.get(requrl, insertQuoteDecoded);
     }
 
     // DOM element (non-jQuery) -> Bool
@@ -100,6 +100,18 @@ function Quote(post, user, link) {
         $('#quickpost').raw().value = $('#quickpost').raw().value
             + "[quote=" + username + (link == true ? "|" + target : "") + "]"
             + response
+            + "[/quote]";
+        resize('quickpost');
+    }
+
+    // Str -> undefined
+    function insertQuoteDecoded(response) {
+        if ($('#quickpost').raw().value !== '') {
+            $('#quickpost').raw().value += "\n\n";
+        }
+        $('#quickpost').raw().value = $('#quickpost').raw().value
+            + "[quote=" + username + (link == true ? "|" + target : "") + "]"
+            + html_entity_decode(response)
             + "[/quote]";
         resize('quickpost');
     }
