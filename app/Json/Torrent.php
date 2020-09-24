@@ -54,9 +54,11 @@ class Torrent extends \Gazelle\Json {
             return null;
         }
 
-        [$details, $torrent] = (new \Gazelle\Manager\Torrent)->setViewer($this->userId)
-                ->setShowSnatched($this->showSnatched ?? 0)
-                ->torrentInfo($this->id);
+        [$details, $torrent] = (new \Gazelle\Manager\Torrent)
+            ->setTorrentId($this->id)
+            ->setViewer($this->userId)
+            ->setShowSnatched($this->showSnatched ?? 0)
+            ->torrentInfo();
         if (!$details) {
             $this->failure("bad id parameter");
             return null;
