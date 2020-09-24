@@ -805,16 +805,16 @@
         },
         {
             "name": "orpheusnet/logchecker",
-            "version": "0.9.4",
+            "version": "0.9.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OPSnet/Logchecker.git",
-                "reference": "03133c5184da9488a9533562be0c78507b8951e9"
+                "reference": "97741692dfaa7f3907efa647c05ca1749c9998f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/03133c5184da9488a9533562be0c78507b8951e9",
-                "reference": "03133c5184da9488a9533562be0c78507b8951e9",
+                "url": "https://api.github.com/repos/OPSnet/Logchecker/zipball/97741692dfaa7f3907efa647c05ca1749c9998f2",
+                "reference": "97741692dfaa7f3907efa647c05ca1749c9998f2",
                 "shasum": ""
             },
             "require": {
@@ -858,7 +858,7 @@
                 }
             ],
             "description": "Logchecker for validating logs generated from supported ripping programs (like EAC and XLD)",
-            "time": "2020-05-24T05:23:10+00:00"
+            "time": "2020-09-24T07:31:37+00:00"
         },
         {
             "name": "psr/cache",
@@ -3851,5 +3851,6 @@
         "ext-json": "*",
         "ext-mysqli": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }
