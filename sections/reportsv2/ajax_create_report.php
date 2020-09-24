@@ -81,11 +81,11 @@ $ReportID = $DB->inserted_id();
 
 if ($UserID != $LoggedUser['ID']) {
     Misc::send_pm($UserID, 0, "One of your torrents has been reported",
-        Text::full_format(G::$Twig->render('reportsv2/new.twig', [
+        G::$Twig->render('reportsv2/new.twig', [
             'id'     => $TorrentID,
             'title'  => $ReportType['title'],
             'reason' => $Extra,
-        ]))
+        ])
     );
 }
 
