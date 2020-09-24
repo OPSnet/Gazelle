@@ -51,7 +51,7 @@ class RipLog extends \Gazelle\File {
      * Path of a rip log.
      *
      * @param array id rip log identifier [torrentId, logId]
-     * @return Fully qualified filename
+     * @return string Fully qualified filename
      */
     public function path(/* array */ $id) {
         $torrent_id = $id[0];
