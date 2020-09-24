@@ -4,6 +4,35 @@ namespace Gazelle\Manager;
 
 class Torrent extends \Gazelle\Base {
 
+    /*
+     **** To display a torrent name, edition and flags, at the minimum the code looks like:
+
+        $torMan = new Gazelle\Manager\Torrent;
+        $labelMan = new Gazelle\Manager\TorrentLabel;
+
+        // set up the labeler once
+        $labelMan->showMedia(true)->showEdition(true);
+
+        // load the group and torrent ids (normally both of these are always at hand)
+        $torMan->setGroupId(1234)->setTorrentId(1666);
+
+        // the artist name (A, A & B, Various Artists, Various Composers under Various Conductors etc
+        echo $torMan->artistHtml();
+
+        // load the torrent details into the labeler
+        $labelMan->load($torMan->torrentInfo()[1]);
+
+        // remaster info, year, etc
+        echo $labelMan->edition();
+
+        // flags (Reported, Freeleech, Lossy WEB Approved, etc
+        echo $labelMan->label();
+
+    **** This is a bit cumbersome and subject to change
+    */
+
+    protected $torrentId;
+    protected $groupId;
     protected $userId;
     protected $showSnatched;
     protected $snatchBucket;
@@ -16,15 +45,156 @@ class Torrent extends \Gazelle\Base {
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
     /**
+     * Set context to a specific group. Used to retrieve the
+     * information needed to build a complete url.
+     *
+     * @param int $groupId The ID of the group
+     */
+    public function setGroupId(int $groupId) {
+        $this->groupId = $groupId;
+        return $this;
+    }
+
+    /**
+     * Set context to a specific torrent. Used to retrieve the
+     * information needed to build a complete url.
+     *
+     * @param int $torrentId The ID of the torrent (not the group!)
+     * @return $this to allow method chaining
+     */
+    public function setTorrentId(int $torrentId) {
+        $this->torrentId = $torrentId;
+        return $this;
+    }
+
+    /**
      * Set context to a specific user. Used to determine whether or not to display
      * Personal Freeleech and Snatched indicators in torrent and group info.
      *
-     * @param int $userID The ID of the User
+     * @param int $userId The ID of the User
      * @return $this to allow method chaining
      */
     public function setViewer(int $userId) {
         $this->userId = $userId;
         return $this;
+    }
+
+    /**
+     * Generate an HTML anchor for an artist
+     */
+    protected function artistLink(array $info): string {
+        return '<a href="artist.php?id=' . $info['id'] . '" dir="ltr">' . display_str($info['name']) . '</a>';
+    }
+
+    /**
+     * Get the HTML artist name. (Individual artists will be clickable, or VA)
+     */
+    public function artistHtml(): string {
+        static $nameCache = [];
+        if (isset($nameCache[$this->torrentId])) {
+            return $nameCache[$this->torrentId];
+        }
+
+        if (!$this->torrentId && !$this->groupId) {
+            return $nameCache[$this->torrentId] = sprintf('(torrent id:%d)', $this->torrentId);
+        }
+        $key = 'seedbox_groups_artists_' . $this->groupId;
+        $roleList = $this->cache->get_value($key);
+        if ($roleList === false) {
+            $this->db->prepared_query("
+                SELECT ta.Importance,
+                    ta.ArtistID,
+                    aa.Name,
+                    ta.AliasID
+                FROM torrents_artists AS ta
+                INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
+                WHERE ta.GroupID = ?
+                ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
+                ", $this->groupId
+            );
+            $roleList = [];
+            while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
+                $roleList[$role][] = [
+                    'id'      => $artistId,
+                    'aliasid' => $aliasId,
+                    'name'    => $artistName,
+                ];
+            }
+            $this->cache->cache_value($key, $roleList, 3600);
+        }
+
+        $map = [
+            'main' => 1,
+            'guest' => 2,
+            'composer' => 3,
+            'conductor' => 4,
+            'dj' => 5,
+        ];
+        $artist = [];
+        $count  = [];
+        foreach ($map as $role => $id) {
+            $artist[$role] = isset($roleList[$id]) ? $roleList[$id] : [];
+            $count[$role] = count($artist[$role]);
+        }
+        $composerCount = $count['composer'];
+        $conductorCount = $count['conductor'];
+        $djCount = $count['dj'];
+        $mainCount = $count['main'];
+        if ($composerCount + $mainCount + $conductorCount + $djCount == 0) {
+            return $nameCache[$this->torrentId] = sprintf('(torrent id:%d)', $this->torrentId);
+        }
+
+        $chunk = [];
+        if ($djCount == 1) {
+            $chunk[] = $this->artistLink($artist['dj'][0]);
+        } elseif ($djCount == 2) {
+            $chunk[] = $this->artistLink($artist['dj'][0]) . ' &amp; ' . $this->artistLink($artist['dj'][1]);
+        } elseif ($djCount > 2) {
+            $chunk[] = 'Various DJs';
+        } else {
+            if ($composerCount > 0) {
+                if ($composerCount == 1) {
+                    $chunk[] = $this->artistLink($artist['composer'][0]);
+                } elseif ($composerCount == 2) {
+                    $chunk[] = $this->artistLink($artist['composer'][0]) . ' &amp; ' . $this->artistLink($artist['composer'][1]);
+                } elseif ($composerCount > 2 && $mainCount + $conductorCount == 0) {
+                    $chunk[] = 'Various Composers';
+                }
+                if ($mainCount > 0) {
+                    $chunk[] = 'performed by';
+                }
+            }
+
+            if ($composerCount > 0
+                && $mainCount > 1
+                && $conductorCount > 1
+            ) {
+                $chunk[] = 'Various Artists';
+            } else {
+                if ($mainCount == 1) {
+                    $chunk[] = $this->artistLink($artist['main'][0]);
+                } elseif ($count['main'] == 2) {
+                    $chunk[] = $this->artistLink($artist['main'][0]) . ' &amp; ' . $this->artistLink($artist['main'][1]);
+                } elseif ($count['main'] > 2) {
+                    $chunk[] = 'Various Artists';
+                }
+
+                if ($conductorCount > 0
+                    && $mainCount + $composerCount > 0
+                    && ($composerCount < 3 || $mainCount > 0)
+                ) {
+                    $chunk[] = 'under';
+                }
+                if ($conductorCount == 1) {
+                    $chunk[] = $this->artistLink($artist['conductor'][0]);
+                } elseif ($count['conductor'] == 2) {
+                    $chunk[] = $this->artistLink($artist['conductor'][0]) . ' &amp; ' . $this->artistLink($artist['conductor'][1]);
+                } elseif ($count['conductor'] > 2) {
+                    $chunk[] = 'Various Conductors';
+                }
+            }
+        }
+        return $nameCache[$this->torrentId] = implode(' ', $chunk);
     }
 
     /**
@@ -347,7 +517,7 @@ class Torrent extends \Gazelle\Base {
             ) {
                 $torrent[$nullable] = $torrent[$nullable] == '' ? null : $torrent[$nullable];
             }
-            foreach (['FreeTorrent', 'HasCue', 'HasLog', 'HasLogDB', 'LogChecksum', 'Remastered', 'Scene']
+            foreach (['HasCue', 'HasLog', 'HasLogDB', 'LogChecksum', 'Remastered', 'Scene']
                 as $zerotruth
             ) {
                 $torrent[$zerotruth] = !($torrent[$zerotruth] == '0');
@@ -358,19 +528,18 @@ class Torrent extends \Gazelle\Base {
                 $torrent[$emptytruth] = !($torrent[$emptytruth] == '');
             }
         }
-
         return [$group, $torrentList];
     }
 
-    public function torrentInfo(int $torrentId, $revisionId = 0) {
-        $groupId = $this->idToGroupId($torrentId);
+    public function torrentInfo($revisionId = 0) {
+        $groupId = $this->idToGroupId($this->torrentId);
         if (!$groupId) {
             return null;
         }
         if (!($info = $this->groupInfo($groupId, $revisionId))) {
             return null;
         }
-        return [$info[0], $info[1][$torrentId]];
+        return [$info[0], $info[1][$this->torrentId]];
     }
 
     /**

@@ -66,66 +66,82 @@ class TorrentLabel {
     }
 
     /**
+     * Generate the edition of the torrent
+     * @return string
+     */
+    public function edition(): string {
+        if (!$this->showEdition) {
+            return '';
+        }
+        $edition = [];
+        $year = $this->info['RemasterYear'] ?? $this->info['Year'] ?? null;
+        if ($year) {
+            $edition[] = $year;
+        }
+        $title = $this->info['RemasterTitle'] ?? null;
+        if ($title) {
+            $edition[] = $title;
+        }
+        $recordLabel = $this->info['RemasterRecordLabel'] ?? $this->info['RecordLabel'] ?? null;
+        if ($recordLabel) {
+            $edition[] = $recordLabel;
+        }
+        $recordCatalogue = $this->info['RemasterRecordCatalogue'] ?? $this->info['RecordCatalogue'] ?? null;
+        if ($recordCatalogue) {
+            $edition[] = $recordCatalogue;
+        }
+        return implode('/', $edition);
+    }
+
+    /**
      * Generate the HTML label of the torrent
      * @return string
      */
     public function label(): string {
         $label = [];
-        if ($this->info['Format']) {
+        if (isset($this->info['Format'])) {
             $label[] = $this->info['Format'];
         }
-        if ($this->info['Encoding']) {
+        if (isset($this->info['Encoding'])) {
             $label[] = $this->info['Encoding'];
         }
-        if ($this->info['Media'] === 'CD') {
-            if ($this->info['HasLog']) {
-                $label[] = 'Log' . ($this->info['HasLogDB'] ? " ({$this->info['LogScore']}%)" : '');
+        if (isset($this->info['Media']) && $this->info['Media'] === 'CD') {
+            if (isset($this->info['HasLog'])) {
+                $label[] = 'Log' . (($this->info['HasLogDB'] ?? false) ? " ({$this->info['LogScore']}%)" : '');
             }
-            if ($this->info['HasCue']) {
+            if (isset($this->info['HasCue']) && $this->info['HasCue']) {
                 $label[] = 'Cue';
             }
         }
-        if ($this->showMedia && $this->info['Media']) {
+        if ($this->showMedia && isset($this->info['Media'])) {
             $label[] = $this->info['Media'];
         }
-        if ($this->info['Scene']) {
+        if (isset($this->info['Scene']) && $this->info['Scene']) {
             $label[] = 'Scene';
         }
         if (!count($label) && $this->groupName) {
             $label[] = $this->groupName;
         }
-        if ($this->showEdition) {
-            $edition = [];
-            if ($this->info['RemasterYear']) {
-                $edition[] = $this->info['RemasterYear'];
-            }
-            if ($this->info['RemasterTitle']) {
-                $edition[] = $this->info['RemasterTitle'];
-            }
-            if ($edition) {
-                $label[] = implode(' ', $edition);
-            }
-        }
-        if ($this->info['IsSnatched']) {
+
+        if (isset($this->info['IsSnatched']) && $this->info['IsSnatched']) {
             $label[] = $this->element('tl_snatched', 'Snatched!');
         }
         if (isset($this->info['FreeTorrent'])) {
             if ($this->info['FreeTorrent'] == '1') {
                 $label[] = $this->element('tl_free', 'Freeleech!');
-            }
-            if ($this->info['FreeTorrent'] == '2') {
+            } elseif ($this->info['FreeTorrent'] == '2') {
                 $label[] = $this->element('tl_free tl_neutral', 'Neutral Leech!');
             }
         }
-        if ($this->info['PersonalFL']) {
+        if (isset($this->info['PersonalFL']) && $this->info['PersonalFL']) {
             $label[] = $this->personalFreeleech();
         $this->element('tl_free tl_personal', 'Personal Freeleech!');
         }
-        if ($this->info['Reported']) {
+        if (isset($this->info['Reported']) && $this->info['Reported']) {
             $label[] = $this->element('tl_reported', 'Reported');
         }
 
-        if ($ShowFlags) {
+        if ($this->showFlags) {
             if ($this->info['HasLog'] && $this->info['HasLogDB'] && $this->info['LogChecksum'] !== '1') {
                 $label[] = $this->element('tl_notice', 'Bad/Missing Checksum');
             }
