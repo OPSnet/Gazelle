@@ -39,30 +39,33 @@ class Artist extends Base {
 
         $cacheKey = $this->cacheKey();
         if (($info = $this->cache->get_value($cacheKey)) !== false) {
-            list($this->name, $this->image, $this->body, $this->vanity, $this->similar,
+            [$this->name, $this->image, $this->body, $this->vanity, $this->similar,
                 $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
-            ) = $info;
+            ] = $info;
         } else {
-            $sql = 'SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse, dg.artist_discogs_id, dg.name as discogs_name, dg.stem as discogs_stem, dg.sequence, dg.is_preferred
-                FROM artists_group AS ag
-                LEFT JOIN wiki_artists AS wa USING (RevisionID)
-                LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
-                WHERE ';
             if ($this->revision) {
-                $sql .= 'wa.RevisionID = ?';
-                $queryId = $this->revision;
+                $join = "LEFT JOIN wiki_artists AS wa ON (wa.PageID = ag.ArtistID)";
+                $cond = 'wa.RevisionID = ?';
+                $args = $this->revision;
             } else {
-                $sql .= 'ag.ArtistID = ?';
-                $queryId = $this->id;
+                $join = "LEFT JOIN wiki_artists AS wa USING (RevisionID)";
+                $cond .= 'ag.ArtistID = ?';
+                $args = $this->id;
             }
+            $sql = "SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse,
+                    dg.artist_discogs_id, dg.name as discogs_name, dg.stem as discogs_stem, dg.sequence, dg.is_preferred
+                FROM artists_group AS ag
+                $join
+                LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
+                WHERE $cond";
 
-            $this->db->prepared_query($sql, $queryId);
+            $this->db->prepared_query($sql, $args);
             if (!$this->db->has_results()) {
                 throw new \Exception("Artist:not-found");
             }
-            list($this->name, $this->image, $this->body, $this->vanity,
-                $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms)
-                = $this->db->next_record(MYSQLI_NUM, false);
+            [$this->name, $this->image, $this->body, $this->vanity, $this->discogsId, $this->discogsName,
+                $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred
+            ] = $this->db->next_record(MYSQLI_NUM, false);
 
             $this->homonyms = $this->homonymCount();
 
@@ -161,7 +164,7 @@ class Artist extends Base {
             WHERE Name = ?
             ", $name
         );
-        while (list($CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect) = $this->db->next_record(MYSQLI_NUM, false)) {
+        while ([$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect] = $this->db->next_record(MYSQLI_NUM, false)) {
             if (!strcasecmp($CloneAliasName, $AliasName)) {
                 return [$CloneAliasID, $CloneArtistID, $CloneAliasName, $CloneRedirect];
             }
@@ -170,7 +173,7 @@ class Artist extends Base {
     }
 
     public function resolveRedirect(int $redirectId) {
-        list($foundId, $foundRedirectId) = $this->db->row("
+        [$foundId, $foundRedirectId] = $this->db->row("
             SELECT ArtistID, Redirect
             FROM artists_alias
             WHERE AliasID = ?
@@ -206,15 +209,14 @@ class Artist extends Base {
     }
 
     public function getAlias($name) {
-        $this->db->prepared_query('
+        $alias = $this->db->scalar('
             SELECT AliasID
             FROM artists_alias
             WHERE ArtistID = ?
                 AND ArtistID != AliasID
                 AND Name = ?',
             $this->id, $name);
-        list($alias) = $this->db->next_record();
-        return empty($alias) ? $this->id : $alias;
+        return $alias ?: $this->id;
     }
 
     public function editableInformation() {
