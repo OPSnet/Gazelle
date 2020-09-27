@@ -610,6 +610,53 @@ class Torrent extends \Gazelle\Base {
     }
 
     /**
+     * How many unresolved torrent reports are there in this group?
+     * @param int Group ID
+     * @return int number of unresolved reports
+     */
+    public function unresolvedGroupReports(int $groupId): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM reportsv2 AS r
+            INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
+            WHERE r.Status != 'Resolved'
+                AND t.GroupID = ?
+            ", $groupId
+        );
+    }
+
+    /**
+     * How many unresolved torrent reports are there for this user?
+     * @param int User ID
+     * @return int number of unresolved reports
+     */
+    public function unresolvedUserReports(int $userId): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM reportsv2 AS r
+            INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
+            WHERE r.Status != 'Resolved'
+                AND t.UserID = ?
+            ", $userId
+        );
+    }
+
+    /**
+     * Get the requests filled by this torrent.
+     * (Should only be one, but hey, who knows what the original developer was looking to catch?)
+     * @param int torrent ID
+     * @return DB object to loop over [request id, filler user id, date filled]
+     */
+    public function requestFills(int $torrentId) {
+        return $this->db->prepared_query("
+            SELECT r.ID, r.FillerID, r.TimeFilled
+            FROM requests AS r
+            WHERE r.TorrentID = ?
+            ", $torrentId
+        );
+    }
+
+    /**
      * Return the N most recent lossless uploads
      * Note that if both a Lossless and 24bit Lossless are uploaded at the same time,
      * only one entry will be returned, to ensure that the result is comprised of N

@@ -103,6 +103,9 @@ define('AOTM_FORUM_ID', 51); // ID of the Album of The Month forum
 define('VANITY_HOUSE_FORUM_ID', 18); // Vanity House forum
 define('CLIENT_WHITELIST_FORUM_ID', 680); // Client whitelist suggestion forum
 
+define('USER_TORRENT_DELETE_MAX', 3);
+define('USER_TORRENT_DELETE_HOURS', 24);
+
 if (!defined('FEATURE_EMAIL_REENABLE')) {
     define('FEATURE_EMAIL_REENABLE', true);
 }

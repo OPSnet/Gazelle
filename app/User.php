@@ -1179,6 +1179,16 @@ class User extends Base {
         );
     }
 
+    public function torrentRecentRemoveCount(int $hours): int {
+        return (int)$this->db->scalar('
+            SELECT count(*)
+            FROM user_torrent_remove utr
+            WHERE utr.UserID = ?
+                AND utr.removed >= now() - INTERVAL ? HOUR
+            ', $this->id, $hours
+        );
+    }
+
     public function downloadSnatchFactor() {
         $this->db->prepared_query('
             SELECT 1
