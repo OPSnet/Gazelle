@@ -267,7 +267,7 @@ class Torrents {
             WHERE ID = ?
             ', $ID
         );
-        list($GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum) = G::$DB->next_record(MYSQLI_BOTH, [2, 'info_hash']);
+        [$GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum] = G::$DB->next_record(MYSQLI_INT, [2, 'info_hash']);
 
         if ($ID > MAX_PREV_TORRENT_ID) {
             $Bonus = new Gazelle\Bonus;
@@ -275,22 +275,21 @@ class Torrents {
         }
 
         $manager = new Gazelle\DB;
-        list($ok, $message) = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
+        [$ok, $message] = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $ID]], false);
         if (!$ok) {
             return $message;
         }
-        list($ok, $message) = $manager->softDelete(SQLDB, 'torrents',             [['ID', $ID]]);
+        [$ok, $message] = $manager->softDelete(SQLDB, 'torrents',             [['ID', $ID]]);
         if (!$ok) {
             return $message;
         }
         Tracker::update_tracker('delete_torrent', ['info_hash' => rawurlencode($InfoHash), 'id' => $ID, 'reason' => $OcelotReason]);
         G::$Cache->decrement('stats_torrent_count');
 
-        G::$DB->prepared_query('
-            SELECT COUNT(*)
-            FROM torrents
-            WHERE GroupID = ?', $GroupID);
-        list($Count) = G::$DB->next_record();
+        $Count = G::$DB->scalar("
+            SELECT count(*) FROM torrents WHERE GroupID = ?
+            ", $GroupID
+        );
         if ($Count > 0) {
             Torrents::update_hash($GroupID);
         }
@@ -304,14 +303,20 @@ class Torrents {
         $manager->softDelete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $ID]]);
         $manager->softDelete(SQLDB, 'torrents_missing_lineage',        [['TorrentID', $ID]]);
 
+        G::$DB->prepared_query("
+            INSERT INTO user_torrent_remove
+                   (user_id, torrent_id)
+            VALUES (?,       ?)
+            ", G::$LoggedUser['ID'] ?? 0, $ID
+        );
+
         // Tells Sphinx that the group is removed
         G::$DB->prepared_query('
             REPLACE INTO sphinx_delta (ID, Time)
             VALUES (?, now())', $ID);
 
         G::$DB->prepared_query("
-            UPDATE reportsv2
-            SET
+            UPDATE reportsv2 SET
                 Status = 'Resolved',
                 LastChangeTime = now(),
                 ModComment = 'Report already dealt with (torrent deleted)'
@@ -328,7 +333,7 @@ class Torrents {
             SELECT UserID
             FROM users_notify_torrents
             WHERE TorrentID = ?', $ID);
-        while (list($UserID) = G::$DB->next_record()) {
+        while ([$UserID] = G::$DB->next_record()) {
             $deleted_keys[] = "notifications_new_$UserID";
         }
         $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $ID]]);

@@ -225,7 +225,7 @@ class Torrent extends \Gazelle\Base {
         $bucketMask = $buckets - 1;
         $bucketId = $torrentId & $bucketMask;
 
-        $snatchKey = "users_snatched_" . $this->$userID . "_time";
+        $snatchKey = "users_snatched_" . $this->userId . "_time";
         if (!$this->snatchBucket) {
             $this->snatchBucket = array_fill(0, $buckets, false);
             $this->updateTime = $this->cache->get_value($snatchKey);
@@ -258,7 +258,7 @@ class Torrent extends \Gazelle\Base {
                         SELECT fid
                         FROM xbt_snatched
                         WHERE uid = ?
-                        ", $UserID
+                        ", $this->userId
                     );
                     while ([$id] = $this->db->next_record(MYSQLI_NUM, false)) {
                         $this->snatchBucket[$id & $bucketMask][(int)$id] = true;
@@ -605,6 +605,53 @@ class Torrent extends \Gazelle\Base {
             SELECT GroupID
             FROM torrents
             WHERE ID = ?
+            ", $torrentId
+        );
+    }
+
+    /**
+     * How many unresolved torrent reports are there in this group?
+     * @param int Group ID
+     * @return int number of unresolved reports
+     */
+    public function unresolvedGroupReports(int $groupId): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM reportsv2 AS r
+            INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
+            WHERE r.Status != 'Resolved'
+                AND t.GroupID = ?
+            ", $groupId
+        );
+    }
+
+    /**
+     * How many unresolved torrent reports are there for this user?
+     * @param int User ID
+     * @return int number of unresolved reports
+     */
+    public function unresolvedUserReports(int $userId): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM reportsv2 AS r
+            INNER JOIN torrents AS t ON (t.ID = r.TorrentID)
+            WHERE r.Status != 'Resolved'
+                AND t.UserID = ?
+            ", $userId
+        );
+    }
+
+    /**
+     * Get the requests filled by this torrent.
+     * (Should only be one, but hey, who knows what the original developer was looking to catch?)
+     * @param int torrent ID
+     * @return DB object to loop over [request id, filler user id, date filled]
+     */
+    public function requestFills(int $torrentId) {
+        return $this->db->prepared_query("
+            SELECT r.ID, r.FillerID, r.TimeFilled
+            FROM requests AS r
+            WHERE r.TorrentID = ?
             ", $torrentId
         );
     }
