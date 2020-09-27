@@ -9,7 +9,7 @@ run_service()
 if [ -n "$ENV" ] && [ "$ENV" == "prod" ]; then
     su -c 'composer --version && composer install --no-dev --optimize-autoloader --no-suggest; yarn --prod; yarn prod' gazelle
 else
-    su -c 'composer --version && composer install; yarn; yarn dev; yarn build:previews' gazelle
+    su -c 'composer --version && composer install; yarn; yarn dev' gazelle
 fi
 
 # Wait for MySQL...
