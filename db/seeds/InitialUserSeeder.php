@@ -1,9 +1,11 @@
 <?php
 
 use Phinx\Seed\AbstractSeed;
+use Phinx\Util\Literal;
 
 class InitialUserSeeder extends AbstractSeed {
     public function run() {
+        /** @var \PDOStatement $stmt */
         $stmt = $this->query("SELECT COUNT(*) AS count FROM users_main WHERE Username='admin'");
         if (((int) $stmt->fetch()['count']) > 0) {
             return;
@@ -75,13 +77,13 @@ class InitialUserSeeder extends AbstractSeed {
             [
                 'UserID' => 1,
                 'Email' => 'admin@example.com',
-                'Time' => now(),
+                'Time' => Literal::from('now()'),
                 'IP' => '127.0.0.1'
             ],
             [
                 'UserID' => 2,
                 'Email' => 'user@example.com',
-                'Time' => now(),
+                'Time' => Literal::from('now()'),
                 'IP' => '127.0.0.1'
             ]
         ])->saveData();
