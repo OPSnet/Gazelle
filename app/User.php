@@ -1183,7 +1183,7 @@ class User extends Base {
         return (int)$this->db->scalar('
             SELECT count(*)
             FROM user_torrent_remove utr
-            WHERE utr.UserID = ?
+            WHERE utr.user_id = ?
                 AND utr.removed >= now() - INTERVAL ? HOUR
             ', $this->id, $hours
         );
