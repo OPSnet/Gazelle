@@ -13,7 +13,6 @@ ini_set('max_file_uploads', 100);
 define('MAX_FILENAME_LENGTH', 255);
 
 require(__DIR__ . '/../torrents/functions.php');
-require(__DIR__ . '/../../classes/file_checker.class.php');
 
 enforce_login();
 authorize();
@@ -381,6 +380,8 @@ if (isset($Tor->Dec['encrypted_files'])) {
     $Err = 'This torrent contains an encrypted file list which is not supported here.';
 }
 
+$checker = new Gazelle\Util\FileChecker;
+
 // File list and size
 list($TotalSize, $FileList) = $Tor->file_list();
 $HasLog = '0';
@@ -389,7 +390,9 @@ $TmpFileList = [];
 $TooLongPaths = [];
 $DirName = (isset($Tor->Dec['info']['files']) ? make_utf8($Tor->get_name()) : '');
 $IgnoredLogFileNames = ['audiochecker.log', 'sox.log'];
-check_name($DirName); // check the folder name against the blacklist
+if (!$Err) {
+    $Err = $checker->checkName($DirName); // check the folder name against the blacklist
+}
 foreach ($FileList as $File) {
     list($Size, $Name) = $File;
     // add +log to encoding
@@ -401,7 +404,9 @@ foreach ($FileList as $File) {
         $HasCue = '1';
     }
     // Check file name and extension against blacklist/whitelist
-    check_file($Type, $Name);
+    if (!$Err) {
+        $Err = $checker->checkFile($Type, $Name);
+    }
     // Make sure the filename is not too long
     if (mb_strlen($Name, 'UTF-8') + mb_strlen($DirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
         $TooLongPaths[] = "<li>$DirName/$Name</li>";
@@ -463,7 +468,9 @@ if ($Type == 'Music') {
         foreach ($ExtraFileList as $ExtraFile) {
             list($ExtraSize, $ExtraName) = $ExtraFile;
 
-            check_file($Type, $ExtraName);
+            if (!$Err) {
+                $Err = $checker->checkFile($Type, $ExtraName);
+            }
 
             // Make sure the file name is not too long
             if (mb_strlen($ExtraName, 'UTF-8') + mb_strlen($ExtraDirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {

@@ -443,6 +443,24 @@ Your torrent has now been labeled using the appropriate format and bitrate.'
                     'pm' => ''
                 ]
             ],
+            'wrong_lyrics' => [
+                'priority' => '340',
+                'reason' => '22',
+                'title' => 'Wrong Lyrics file',
+                'report_messages' => [
+                    "Please provide the list of song titles included in the lyrics, and if possible, what release they belong to.",
+                    '"Low-quality" fan-sourced lyrics are not sufficient grounds for reporting.',
+                ],
+                'report_fields' => [
+                ],
+                'resolve_options' => [
+                    'upload' => '0',
+                    'warn' => '0',
+                    'delete' => '0',
+                    'pm' => ''
+                ]
+            ],
+
             'format' => [
                 'priority' => '100',
                 'reason' => '5',
