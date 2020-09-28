@@ -59,7 +59,7 @@ if(!$DB->record_count()) {
             unset($AdjustmentDetails['tracks']);
             if (!empty($AdjustmentDetails)) {
                 echo '<br /><strong>Adjustment Details:</strong><ul>'
-                    . array_map(function ($d) {return "<li>$d</li>";}, $AdjustmentDetails)
+                    . implode('', array_map(function ($d) {return "<li>$d</li>";}, $AdjustmentDetails))
                     . '</ul>';
             }
             echo '</blockquote>';
