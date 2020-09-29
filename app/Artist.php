@@ -58,13 +58,13 @@ class Artist extends Base {
                 $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
             ] = $info;
         } else {
-            if ($this->revision) {
+            if ($this->revisionId) {
                 $join = "LEFT JOIN wiki_artists AS wa ON (wa.PageID = ag.ArtistID)";
                 $cond = 'wa.RevisionID = ?';
-                $args = $this->revision;
+                $args = $this->revisionId;
             } else {
                 $join = "LEFT JOIN wiki_artists AS wa USING (RevisionID)";
-                $cond .= 'ag.ArtistID = ?';
+                $cond = 'ag.ArtistID = ?';
                 $args = $this->id;
             }
             $sql = "SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse,
