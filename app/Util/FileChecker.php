@@ -42,7 +42,7 @@ class FileChecker {
             return $this->forbiddenError($name);
         }
         $nameLC = strtolower($name);
-        foreach ($keywords as $value) {
+        foreach ($this->keywords as $value) {
             if (strpos($nameLC, $value) !== false) {
                 return $this->forbiddenError($name);
             }
