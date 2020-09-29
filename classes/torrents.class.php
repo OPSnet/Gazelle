@@ -307,7 +307,7 @@ class Torrents {
             INSERT INTO user_torrent_remove
                    (user_id, torrent_id)
             VALUES (?,       ?)
-            ", G::$LoggedUser['ID'], $ID
+            ", G::$LoggedUser['ID'] ?? 0, $ID
         );
 
         // Tells Sphinx that the group is removed
