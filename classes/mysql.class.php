@@ -334,10 +334,10 @@ class DB_MYSQL {
      * the two functions separately instead of this function.
      *
      * @param $Query
-     * @param array ...$Parameters
+     * @param mixed ...$Parameters
      * @return bool|mysqli_result
      */
-    function prepared_query($Query, ...$Parameters) {
+    public function prepared_query($Query, ...$Parameters) {
         $this->prepare($Query);
         return $this->execute(...$Parameters);
     }

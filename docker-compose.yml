@@ -5,7 +5,6 @@ services:
     build: .
     ports:
       - 8080:80
-      - 36000:3306
       - 34000:34000
     depends_on:
       - memcached
@@ -24,6 +23,8 @@ services:
 
   mysql:
     image: mariadb:10.3
+    ports:
+      - 36000:3306
     volumes:
       - ./.docker/mysql/mysqld_sql_mode.cnf:/etc/mysql/conf.d/mysqld_sql_mode.cnf
       - ./.docker/data/mysql:/var/lib/mysql

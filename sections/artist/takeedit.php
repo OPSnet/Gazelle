@@ -38,8 +38,7 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
 }
 
 if ($discogsId > 0) {
-    if ($discogsId != $artist->discogsId()) {
-        $artist->setDiscogsRelation($discogsId, $userId);
+    if ($discogsId != $artist->discogsId() && $artist->setDiscogsRelation($discogsId, $userId)) {
         $summary[] = "Discogs relation set to $discogsId";
     }
 } else {
