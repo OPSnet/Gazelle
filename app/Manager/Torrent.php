@@ -225,7 +225,7 @@ class Torrent extends \Gazelle\Base {
         $bucketMask = $buckets - 1;
         $bucketId = $torrentId & $bucketMask;
 
-        $snatchKey = "users_snatched_" . $this->$userID . "_time";
+        $snatchKey = "users_snatched_" . $this->userId . "_time";
         if (!$this->snatchBucket) {
             $this->snatchBucket = array_fill(0, $buckets, false);
             $this->updateTime = $this->cache->get_value($snatchKey);
@@ -258,7 +258,7 @@ class Torrent extends \Gazelle\Base {
                         SELECT fid
                         FROM xbt_snatched
                         WHERE uid = ?
-                        ", $UserID
+                        ", $this->userId
                     );
                     while ([$id] = $this->db->next_record(MYSQLI_NUM, false)) {
                         $this->snatchBucket[$id & $bucketMask][(int)$id] = true;
