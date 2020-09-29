@@ -40,6 +40,10 @@ Buster. A volume is mounted from the base of the git repository at
 `/var/www` in the container. Changes to the source code are
 immediately served without rebuilding or restarting.
 
+You may want to install additional packages:
+* `apt update`
+* `apt install less procps vim`
+
 If you want to poke around inside the web container, open a shell:
 
 `export WEBCONT=$(docker ps|awk '$2 ~ /web$/ {print $1}')`
@@ -58,14 +62,6 @@ Edit the resulting file and then apply it:
 
 `docker exec -it $WEBCONT vendor/bin/phinx migrate`
 
-You may want to install additional packages:
-* `apt update`
-* `apt install less procps vim`
-
-You can run Boris directly:
-
-`docker exec -it $WEBCONT /var/www/boris`
-
 To access the database, save the following in `~root/.my.cnf` of
 the database container:
 
@@ -77,9 +73,15 @@ the database container:
 ```
 
 And then:
+
 `docker exec -it $(docker ps|awk '$2 ~ /^mariadb/ {print $1}') mysql`
 
 In the same vein, you can use `mysqldump` to perform a backup.
+
+#### Boris
+You can run Boris directly:
+
+`docker exec -it $WEBCONT /var/www/boris`
 
 #### Production Mode (not fully baked yet)
 In order to have Docker run the container using the production mode commands
