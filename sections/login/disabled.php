@@ -13,7 +13,7 @@ if (isset($_POST['email']) && FEATURE_EMAIL_REENABLE) {
 }
 if ((empty($_POST['submit']) || empty($_POST['username'])) && !isset($Output)) {
 ?>
-<p class="warning">
+<p class="warning-login">
 Your account has been disabled.<br />
 This is either due to inactivity or rule violation(s).<br /><br /></p>
 <?php
