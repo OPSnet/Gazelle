@@ -8,7 +8,7 @@ function log_attempt(int $UserID, string $capture) {
     if (!$AttemptID) {
         $AttemptID = $watch->create($IPStr, $capture, $UserID);
     } elseif ($Attempt < 6) {
-        $watch->setWatch($AttemptID)->increment($UserID, $capture);
+        $watch->setWatch($AttemptID)->increment($UserID, $IPStr, $capture);
     } else {
         $watch->setWatch($AttemptID)->ban($Attempts, $capture, $UserID);
         if ($Bans > 9) {

@@ -1,36 +1,44 @@
 <?php View::show_header(); ?>
-<span id="no-cookies" class="hidden warning">You appear to have cookies disabled.<br /><br /></span>
-<noscript><span class="warning"><?=SITE_NAME?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br /><br /></noscript>
+<span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br /><br /></span>
+<noscript><span class="warning-login"><?=SITE_NAME?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br /><br /></noscript>
 
 <div id="logo">
 <a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
 </div>
 
 <div class="main">
-<?php if (strtotime($BannedUntil) > time()) { ?>
-    <div style="text-align: center; margin-top: 50px;" class="warning">You are banned from logging in<br />for another <?=time_diff($BannedUntil)?>.</div>
-<?php } else { ?>
 <div class="auth">
+<?php
+$banEpoch = strtotime($BannedUntil);
+$delta = $banEpoch - time();
+if ($delta > 0) {
+?>
+    <div class="warning-login"><?= isset($Err) ? "$Err<br />" : '' ?>You are blocked from logging in<br />for <?=
+        $delta <= 60
+            ? ('<span title="' . $delta . ' seconds">a few moments.</span>')
+            : ('another ' . time_diff($BannedUntil) . '.')
+?>
+    </div>
+<?php } else { ?>
 <form class="auth_form" name="login" id="loginform" method="post" action="login.php">
 <?php
-    if (!is_null($BannedUntil) && strtotime($BannedUntil) <= time()) {
-        $watch = new Gazelle\LoginWatch;
-        $watch->setWatch($AttemptID)->clearPriorBan();
-        $Attempts = 0;
-    }
-    if (isset($Err)) {
-?>
-<span class="warning"><?= $Err ?><br /><br /></span>
-<?php
-    }
-    if ($Attempts > 0) { ?>
-You have <span class="info"><?=(6 - $Attempts)?></span> attempts remaining.<br /><br />
-<strong>WARNING:</strong> You will be banned for 6 hours<br />after your login attempts run out!<br /><br />
+    if (isset($Err) || isset($_GET['invalid2fa']) || $Attempts > 0) { ?>
+<div class="warning-login">
+<?php if (isset($Err)) { ?>
+<?= $Err ?><br />
 <?php
     }
     if (isset($_GET['invalid2fa'])) { ?>
-<div class="warning" style="margin: 10px 0;">You have entered an invalid two-factor authentication key.<br />Please login again.</div>
+You have entered an invalid two-factor authentication key, please login again.<br />
+<?php
+    }
+    if ($Attempts > 0) {
+?>
+<strong>WARNING:</strong> Incorrect username/password details<br />will increase the time you are blocked from logging in.
 <?php } ?>
+</div>
+
+<?php } /* $Err, invalid2fa, $Attempts */ ?>
     <div>
     <label for="username">Username</label>
     <input type="text" name="username" id="username" class="inputtext" required="required" maxlength="20" pattern="[A-Za-z0-9_?\.]{1,20}" autofocus="autofocus" placeholder="Username" />
@@ -49,6 +57,7 @@ You have <span class="info"><?=(6 - $Attempts)?></span> attempts remaining.<br /
     <a href="login.php?act=recover" class="tooltip" title="Recover your password">Password recovery</a>
 </form>
 <?php } ?>
+</div>
 </div>
 <script type="text/javascript">
 cookie.set('cookie_test', 1, 1);

@@ -163,9 +163,16 @@ input[type="text"]:invalid, input[type="password"]:invalid {
     font-weight: bold;
 }
 
+.warning-login {
+    text-align: center;
+    margin: 50px 0;
+    font-weight: 550;
+    color: #ff9617;
+}
+
 .warning {
-    color: red;
-    font-weight: bold;
+    font-weight: 550;
+    color: #ff9617;
 }
 
 .center {

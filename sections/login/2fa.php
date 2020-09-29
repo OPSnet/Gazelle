@@ -1,29 +1,23 @@
 <?php View::show_header('Two-factor Authentication'); ?>
-<span id="no-cookies" class="hidden warning">You appear to have cookies disabled.<br/><br/></span>
-<noscript><span class="warning"><?= SITE_NAME ?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br/><br/>
+<span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br/><br/></span>
+<noscript><span class="warning-login"><?= SITE_NAME ?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br/><br/>
 </noscript>
-<?php if (strtotime($BannedUntil) >= time()) { ?>
-    <span class="warning">You are banned from logging in for another <?= time_diff($BannedUntil) ?>.</span>
+<?php
+$banEpoch = strtotime($BannedUntil);
+$now = time();
+if ($banEpoch > $now) {
+    $until = ($banEpoch - $now <= 60) ? 'a few moments' : ('another ' . time_diff($BannedUntil));
+?>
+    <span class="warning-login"><?= isset($Err) ? "$Err<br />" : '' ?>You are banned from logging in for <?= $until ?>.</span>
 <?php } else { ?>
     <form class="auth_form" name="login" id="loginform" method="post" action="login.php?act=2fa">
-        <?php
-        if ($BannedUntil) {
-            $DB->prepared_query("
-                UPDATE login_attempts
-                SET BannedUntil = NULL, Attempts = 0
-                WHERE ID = ?
-                ", $AttemptID
-            );
-            $Attempts = 0;
-        }
-        if (isset($Err)) {
-            ?>
-            <span class="warning"><?= $Err ?><br/><br/></span>
-        <?php } ?>
-        <?php if ($Attempts > 0) { ?>
-            You have <span class="info"><?= (6 - $Attempts) ?></span> attempts remaining.<br/><br/>
-            <strong>WARNING:</strong> You will be banned for 6 hours<br />after your login attempts run out!<br/><br/>
-        <?php } ?>
+<?php if (isset($Err)) { ?>
+            <span class="warning-login"><?= $Err ?><br/><br/></span>
+<?php
+}
+if ($Attempts > 0) { ?>
+<p><strong>WARNING:</strong> Incorrect username/password details will increase the time<br >you are blocked from logging in.</p>
+<?php } ?>
 <div id="logo">
 <a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
 </div>

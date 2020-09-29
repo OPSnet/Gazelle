@@ -49,20 +49,34 @@ class LoginWatch extends Base {
     }
 
     /**
-     * Record another failure attempt on this watch
+     * Record another failure attempt on this watch. If the user has not
+     * logged in recently from this IP address then subsequent logins
+     * will be blocked for increasingly longer times, otherwise 1 minute.
+     *
      * @param int $userId The ID of the user
+     * @param string $ipaddr The IP the user is coming from
      * @param string $capture The username captured on the form
      * @return int 1 if the watch was updated
      */
-    public function increment(int $UserID, string $capture): int {
+    public function increment(int $userId, string $ipaddr, string $capture): int {
+        $seen = $this->db->scalar("
+            SELECT 1
+            FROM users_history_ips
+            WHERE (EndTime IS NULL OR EndTime > now() - INTERVAL 1 WEEK)
+                AND UserID = ?
+                AND IP = ?
+            ", $userId, $ipaddr
+        );
+        $delay = $seen ? 60 : LOGIN_ATTEMPT_BACKOFF[min($this->nrAttempts(), count(LOGIN_ATTEMPT_BACKOFF)-1)];
         $this->db->prepared_query('
             UPDATE login_attempts SET
-                LastAttempt = now(),
                 Attempts = Attempts + 1,
+                LastAttempt = now(),
+                BannedUntil = now() + INTERVAL ? SECOND,
                 UserID = ?,
                 capture = ?
             WHERE ID = ?
-            ', $UserID, $capture, $this->watchId
+            ', $delay, $userId, $capture, $this->watchId
         );
         return $this->db->affected_rows();
     }

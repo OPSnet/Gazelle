@@ -1,20 +1,20 @@
 <?php View::show_header('Two-factor Authentication'); ?>
-<span id="no-cookies" class="hidden warning">You appear to have cookies disabled.<br/><br/></span>
-<noscript><span class="warning"><?= SITE_NAME ?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br/><br/>
+<span id="no-cookies" class="hidden warning-login">You appear to have cookies disabled.<br/><br/></span>
+<noscript><span class="warning-login"><?= SITE_NAME ?> requires JavaScript to function properly. Please enable JavaScript in your browser.</span><br/><br/>
 </noscript>
-<?php if (strtotime($BannedUntil) >= time()) { ?>
-    <span class="warning">You are banned from logging in for another <?= time_diff($BannedUntil) ?>.</span>
+<?php
+$banEpoch = strtotime($BannedUntil);
+$now = time();
+if ($banEpoch > $now) {
+    $until = ($banEpoch - $now <= 60) ? 'a few moments' : ('another ' . time_diff($BannedUntil));
+?>
+    <span class="warning-login"><?= isset($Err) ? "$Err<br />" : '' ?>You are banned from logging in for <?= $until ?>.</span>
 <?php } else { ?>
     <form class="auth_form" name="login" id="loginform" method="post" action="login.php?act=2fa_recovery">
 <?php
-    if (!is_null($BannedUntil) && strtotime($BannedUntil) <= time()) {
-        $watch = new Gazelle\LoginWatch;
-        $watch->setWatch($AttemptID)->clearPriorBan();
-        $Attempts = 0;
-    }
     if (isset($Err)) {
 ?>
-            <span class="warning"><?= $Err ?><br/><br/></span>
+            <span class="warning-login"><?= $Err ?><br/><br/></span>
 <?php } ?>
 <div id="logo">
 <a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>

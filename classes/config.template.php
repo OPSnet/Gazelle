@@ -24,6 +24,19 @@ define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore 
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow source flag from previous site.
 define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation.
 
+define('LOGIN_ATTEMPT_BACKOFF', [
+    0,
+    30,
+    90,
+    60 * 5, // 5 minutes
+    60 * 15,
+    3600 * 3, // 3 hours
+    3600 * 6,
+    86400,
+    86400 * 3,
+    86400 * 7,
+]);
+
 // Allows you to run static content off another server. Default is usually what you want.
 define('NONSSL_STATIC_SERVER', 'static/');
 define('SSL_STATIC_SERVER', 'static/');
