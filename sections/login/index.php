@@ -416,7 +416,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
     [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
     if (!isset($_POST['username']) && !isset($_POST['password'])) {
         if ($Attempts > 5 && !$BannedUntil) {
-            $watch->setWatch($AttemptID)->ban($Attempts, '-intial page load-');
+            $watch->setWatch($AttemptID)->ban($Attempts, '-initial page load-');
             $BannedUntil = $watch->bannedUntil();
         }
     } else {
@@ -450,7 +450,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 ", $username
             );
             if (strtotime($BannedUntil) >= time()) {
-                log_attempt($UserID, $username);
+                log_attempt($UserID ?? 0, $username);
                 setcookie('keeplogged', '', time() + 60 * 60 * 24 * 365, '/', '', false);
             } elseif ($Attempts > 5 && !$BannedUntil) {
                 $watch->ban($Attempts, $username);
