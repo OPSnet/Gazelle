@@ -55,6 +55,7 @@ SET FOREIGN_KEY_CHECKS = 1;
             'tags' => [],
             'torrents_tags' => [],
             'torrents' => [],
+            'torrents_leech_stats' => [],
         ];
 
         $artists = [];
@@ -200,6 +201,9 @@ SET FOREIGN_KEY_CHECKS = 1;
                 'FreeLeechType' => 0
             ];
 
+            $insert_data['torrents_leech_stats'][] = [
+                'TorrentID' => count($insert_data['torrents']) + 1,
+            ];
             $i++;
         }
 
