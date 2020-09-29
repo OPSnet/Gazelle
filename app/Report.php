@@ -71,9 +71,9 @@ class Report extends Base {
         }
         if (array_key_exists('uploader', $filter) && $filter['uploader']) {
             $cond[] = 't.UserID = ?';
-            $args[] = $this->username2id($db, $filter['uploader']);
+            $args[] = $this->username2id($filter['uploader']);
             $delcond[] = 'dt.UserID = ?';
-            $delargs[] = $this->username2id($db, $filter['uploader']);
+            $delargs[] = $this->username2id($filter['uploader']);
         }
         if (array_key_exists('group', $filter)) {
             $cond[] = 't.GroupID = ?';
