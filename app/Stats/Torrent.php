@@ -31,12 +31,13 @@ class Torrent extends \Gazelle\Base {
     public function media() { return $this->stats['media']; }
 
     protected function init() {
+        $userMan = new Gazelle\Manager\User;
         $stats = [
             'day'       => [],
             'week'      => [],
             'month'     => [],
             'quarter'   => [],
-            'total-users' => \Users::get_enabled_users_count(),
+            'total-users' => $userMan->getEnabledUsersCount(),
         ];
 
         list($stats['torrent-count'], $stats['total-size'], $stats['total-files']) = $this->db->row('

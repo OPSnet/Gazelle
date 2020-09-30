@@ -7,7 +7,8 @@ authorize();
  * Super sorry for doing that, but this is totally not reusable.
  */
 
-$UserCount = Users::get_enabled_users_count();
+$userMan = new Gazelle\Manager\User;
+$UserCount = $userMan->getEnabledUsersCount();
 $UserID = $LoggedUser['ID'];
 
 //This is where we handle things passed to us

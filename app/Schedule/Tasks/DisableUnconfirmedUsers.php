@@ -34,7 +34,8 @@ class DisableUnconfirmedUsers extends \Gazelle\Schedule\Task
             "
         );
         if ($this->db->has_results()) {
-            \Users::flush_enabled_users_count();
+            $userMan = new \Gazelle\Manager\User;
+            $userMan->flushEnabledUsersCount();
         }
 
         // clear the appropriate cache keys

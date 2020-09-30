@@ -104,12 +104,11 @@ foreach ($headlines as $article) {
 <?php
 }
 
-$UserCount = Users::get_enabled_users_count();
+$userMan = new Gazelle\Manager\User;
+$UserCount = $userMan->getEnabledUsersCount();
+$UserStats = $userMan->globalActivityStats();
 ?>
                 <li>Enabled users: <?=number_format($UserCount)?> <a href="stats.php?action=users" class="brackets">Details</a></li>
-<?php
-$UserStats = \Gazelle\User::globalActivityStats($DB, $Cache);
-?>
                 <li>Users active today: <?=number_format($UserStats['Day'])?> (<?=number_format($UserStats['Day'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this week: <?=number_format($UserStats['Week'])?> (<?=number_format($UserStats['Week'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this month: <?=number_format($UserStats['Month'])?> (<?=number_format($UserStats['Month'] / $UserCount * 100, 2)?>%)</li>

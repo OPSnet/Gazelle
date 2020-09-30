@@ -28,8 +28,13 @@ if (!empty($_GET['userid'])) {
     if (!check_perms('admin_bp_history')) {
         error(403);
     }
-    $userId = intval($_GET['userid']);
-    $User = array_merge(Users::user_stats($_GET['userid']), Users::user_info($_GET['userid']), Users::user_heavy_info($_GET['userid']));
+    $userId = (int)$_GET['userid'];
+    if (!$userId) {
+        error(404);
+    }
+    // TODO: subsume all info into the Gazelle\User class
+    $tmp = new Gazelle\User($userId);
+    $User = array_merge(Users::user_heavy_info($userId), Users::user_info($userId), $tmp->activityStats());
     if (empty($User)) {
         error(404);
     }
@@ -42,10 +47,10 @@ else {
 $Title = ($userId === $LoggedUser['ID']) ? 'Your Bonus Points Rate' : "{$User['Username']}'s Bonus Point Rate";
 View::show_header($Title);
 
-$Bonus = new \Gazelle\Bonus;
+$Bonus = new Gazelle\Bonus;
 
-list($totalTorrents, $totalSize, $totalHourlyPoints, $totalDailyPoints, $totalWeeklyPoints, $totalMonthlyPoints, $totalYearlyPoints, $totalPointsPerGB)
-    = $Bonus->userTotals($userId);
+[$totalTorrents, $totalSize, $totalHourlyPoints, $totalDailyPoints, $totalWeeklyPoints, $totalMonthlyPoints, $totalYearlyPoints, $totalPointsPerGB
+] = $Bonus->userTotals($userId);
 $pages = Format::get_pages($page, $totalTorrents, TORRENTS_PER_PAGE);
 
 ?>

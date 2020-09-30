@@ -22,7 +22,8 @@ class FrontPageStats extends \Gazelle\Schedule\Task
         $leecherCount = isset($peerCount['Leeching'][1]) ? $peerCount['Leeching'][1] : 0;
         $this->cache->cache_value('stats_peers', [$leecherCount, $seederCount], 0);
 
-        $stats = \Gazelle\User::globalActivityStats($this->db, $this->cache);
+        $userMan = new Gazelle\Manager\User;
+        $stats = $userMan->globalActivityStats();
         $this->processed = $stats['Day']; /* why not? */
     }
 }

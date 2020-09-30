@@ -189,8 +189,8 @@ if (isset($LoginCookie)) {
         logout($LoggedUser['ID'], $SessionID);
     }
 
-    $User = new \Gazelle\User($LoggedUser['ID']);
-    $Session = new \Gazelle\Session($LoggedUser['ID']);
+    $User = new Gazelle\User($LoggedUser['ID']);
+    $Session = new Gazelle\Session($LoggedUser['ID']);
 
     $UserSessions = $Session->sessions();
     if (!array_key_exists($SessionID, $UserSessions)) {
@@ -202,16 +202,14 @@ if (isset($LoginCookie)) {
     }
 
     // TODO: These globals need to die, and just use $LoggedUser
-    // TODO: And then instantiate $LoggedUser from \Gazelle\Session when needed
+    // TODO: And then instantiate $LoggedUser from Gazelle\Session when needed
     $LightInfo = Users::user_info($LoggedUser['ID']);
     if (empty($LightInfo['Username'])) { // Ghost
         logout($LoggedUser['ID'], $SessionID);
     }
 
-    $UserStats = Users::user_stats($LoggedUser['ID']);
     $HeavyInfo = Users::user_heavy_info($LoggedUser['ID']);
-
-    $LoggedUser = array_merge($HeavyInfo, $LightInfo, $UserStats);
+    $LoggedUser = array_merge($HeavyInfo, $LightInfo, $User->activityStats());
     G::$LoggedUser =& $LoggedUser;
 
     // No conditions will force a logout from this point, can hit the DB more.
@@ -225,7 +223,7 @@ if (isset($LoginCookie)) {
     }
 
     // Stylesheet
-    $Stylesheets = new \Gazelle\Stylesheet;
+    $Stylesheets = new Gazelle\Stylesheet;
     $LoggedUser['StyleName'] = $Stylesheets->getName($LoggedUser['StyleID']);
 
     // We've never had to disable the wiki privs of anyone.
@@ -249,7 +247,7 @@ if (isset($LoginCookie)) {
 
     // IP changed
     if ($LoggedUser['IP'] != $_SERVER['REMOTE_ADDR'] && !check_perms('site_disable_ip_history')) {
-        $IPv4Man = new \Gazelle\Manager\IPv4;
+        $IPv4Man = new Gazelle\Manager\IPv4;
         if ($IPv4Man->isBanned($_SERVER['REMOTE_ADDR'])) {
             error('Your IP address has been banned.');
         }
@@ -333,7 +331,7 @@ function logout($userId, $sessionId = false) {
     setcookie('keeplogged', '', $epoch, '/', '', false);
     setcookie('session', '',    $epoch, '/', '', false);
     if ($sessionId) {
-        $session = new \Gazelle\Session($userId);
+        $session = new Gazelle\Session($userId);
         $session->drop($sessionId);
     }
 
@@ -349,7 +347,7 @@ function logout($userId, $sessionId = false) {
  * Logout all sessions
  */
 function logout_all_sessions($userId) {
-    $session = new \Gazelle\Session($userId);
+    $session = new Gazelle\Session($userId);
     $session->dropAll();
     logout($userId);
 }
@@ -414,7 +412,7 @@ $Cache->cache_value('php_' . getmypid(),
     ], 600
 );
 
-G::$Router = new \Gazelle\Router($LoggedUser['AuthKey']);
+G::$Router = new Gazelle\Router($LoggedUser['AuthKey']);
 if (isset($LoggedUser['LockedAccount']) && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
     require(__DIR__ . '/../sections/locked/index.php');
 }
@@ -448,10 +446,10 @@ if (G::$Router->hasRoutes()) {
         /** @noinspection PhpIncludeInspection */
         require_once(G::$Router->getRoute($action));
     }
-    catch (\Gazelle\Exception\RouterException $exception) {
+    catch (Gazelle\Exception\RouterException $exception) {
         error(404);
     }
-    catch (\Gazelle\Exception\InvalidAccessException $exception) {
+    catch (Gazelle\Exception\InvalidAccessException $exception) {
         error(403);
     }
     catch (\DB_MYSQL_Exception $e) {

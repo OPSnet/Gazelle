@@ -77,6 +77,30 @@ class User extends Base {
         return $this->db->has_results() ? $this->db->next_record(MYSQLI_ASSOC, false) : null;
     }
 
+    public function activityStats(): array {
+        if (($stats = $this->cache->get_value('user_stats_' . $this->id)) === false) {
+            $this->db->prepared_query("
+                SELECT
+                    uls.Uploaded AS BytesUploaded,
+                    uls.Downloaded AS BytesDownloaded,
+                    coalesce(ub.points, 0) as BonusPoints,
+                    um.RequiredRatio
+                FROM users_main um
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
+                WHERE um.ID = ?
+                ", $this->id
+            );
+            $stats = $this->db->next_record(MYSQLI_ASSOC);
+            $stats['BytesUploaded'] = (int)$stats['BytesUploaded'];
+            $stats['BytesDownloaded'] = (int)$stats['BytesDownloaded'];
+            $stats['BonusPoints'] = (float)$stats['BonusPoints'];
+            $stats['RequiredRatio'] = (float)$stats['RequiredRatio'];
+            $this->cache->cache_value('user_stats_' . $this->id, $stats, 3600);
+        }
+        return $stats;
+    }
+
     public function id(): int {
         return $this->id;
     }
@@ -168,7 +192,7 @@ class User extends Base {
             DELETE FROM users_main WHERE ID = ?
             ", $this->id
         );
-        $this->cache->delete_value("user_info_$UserID");
+        $this->cache->delete_value("user_info_" . $this->id);
     }
 
     public function mergeLeechStats(string $username, string $staffname) {
@@ -416,7 +440,7 @@ class User extends Base {
             WHERE uid = ?
             ", $this->id
         );
-        $this->cache->delete_value("user_recent_snatch_$UserID");
+        $this->cache->delete_value("user_recent_snatch_" . $this->id);
         return $this->db->affected_rows();
     }
 
@@ -1224,24 +1248,6 @@ class User extends Base {
         return (1 + $stats['download']) / (1 + $stats['snatch']);
     }
 
-    public static function globalActivityStats($db, $cache) {
-        if (($stats = $cache->get_value('stats_users')) === false) {
-            $db->prepared_query("
-                SELECT
-                    sum(ula.last_access > now() - INTERVAL 1 DAY) AS Day,
-                    sum(ula.last_access > now() - INTERVAL 1 WEEK) AS Week,
-                    sum(ula.last_access > now() - INTERVAL 1 MONTH) AS Month
-                FROM users_main um
-                INNER JOIN user_last_access AS ula ON (ula.user_id = um.ID)
-                WHERE um.Enabled = '1'
-                    AND ula.last_access > now() - INTERVAL 1 MONTH
-            ");
-            $stats = $db->next_record(MYSQLI_ASSOC);
-            $cache->cache_value('stats_users', $stats, 7200);
-        }
-        return $stats;
-    }
-
     /**
      * Scale down user rank if certain steps have not been taken
      * @return float Scaling factor between 0.0 and 1.0
@@ -1266,7 +1272,7 @@ class User extends Base {
         });
         $criteria = end($demotion);
 
-        $stats = \Users::user_stats($this->id);
+        $stats = $this->activityStats();
         [$votes, $bounty] = $this->requestsVotes();
         $effectiveUpload = $stats['BytesUploaded'] + $bounty;
         if ($criteria) {
@@ -1285,15 +1291,14 @@ class User extends Base {
             return null;
         }
 
-        $stats = \Users::user_stats($this->id);
-        $downloaded = (int)$stats['BytesDownloaded'];
-        $uploaded = (int)$stats['BytesUploaded'];
+        $stats = $this->activityStats();
         [$votes, $bounty] = $this->requestsVotes();
         $progress = [
             'Class' => \Users::make_class_string($criteria['To']),
             'Requirements' => [
-                'Upload' => [$uploaded + $bounty, $criteria['MinUpload'], 'bytes'],
-                'Ratio' => [$downloaded == 0 ? '∞' : $uploaded / $downloaded, $criteria['MinRatio'], 'float'],
+                'Upload' => [$stats['BytesUploaded'] + $bounty, $criteria['MinUpload'], 'bytes'],
+                'Ratio' => [$stats['BytesDownloaded'] == 0 ? '∞'
+                    : $stats['BytesUploaded'] / $stats['BytesDownloaded'], $criteria['MinRatio'], 'float'],
                 'Time' => [
                     $this->joinDate(),
                     $criteria['Weeks'] * 7 * 24 * 60 * 60,

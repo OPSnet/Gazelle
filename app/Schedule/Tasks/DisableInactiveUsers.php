@@ -43,7 +43,8 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
                 $this->processed++;
                 $this->debug("Disabling $userID", $userID);
             }
-            \Users::flush_enabled_users_count();
+            $userMan = new \Gazelle\Manager\User;
+            $userMan->flushEnabledUsersCount();
         }
     }
 }

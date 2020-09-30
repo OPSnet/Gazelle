@@ -3,7 +3,8 @@
 use Gazelle\Util\SortableTableHeader;
 
 if (!isset($_GET['userid'])) {
-    $UserCount = Users::get_enabled_users_count();
+    $userMan = new Gazelle\Manager\User;
+    $UserCount = $userMan->getEnabledUsersCount();
     $UserID = $LoggedUser['ID'];
     $Sneaky = false;
 } else {
@@ -17,7 +18,7 @@ if (!isset($_GET['userid'])) {
     $Sneaky = true;
 }
 
-list($UserID, $Username, $PermissionID) = array_values(Users::user_info($UserID));
+[$UserID, $Username, $PermissionID] = array_values(Users::user_info($UserID));
 
 $DB->prepared_query('
     SELECT InviteKey, Email, Expires
@@ -63,7 +64,6 @@ $DB->prepared_query("
 $Invited = $DB->to_array();
 
 View::show_header('Invites');
-
 ?>
 <div class="thin">
     <div class="header">

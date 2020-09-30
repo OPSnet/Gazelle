@@ -430,7 +430,8 @@ class Contest extends Base {
     protected function do_payout ($id) {
         $total = $this->calculate_pool_payout($id);
         $bonus = $total['bonus'];
-        $enabled_user_bonus    = $bonus * 0.05 / \Users::get_enabled_users_count();
+        $userMan = new \Gazelle\Manager\User;
+        $enabled_user_bonus    = $bonus * 0.05 / $userMan->getEnabledUsersCount();
         $contest_participation = $bonus * 0.1 / $total['user'];
         $per_entry_bonus       = $bonus * 0.85 / $total['torrent'];
 
