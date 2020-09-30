@@ -5,42 +5,6 @@ $userMan = new Gazelle\Manager\User;
 $UserStats = $userMan->globalActivityStats();
 $UserCount = $userMan->getEnabledUsersCount();
 
-// Begin torrent stats
-if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {
-    $TorrentCount = $DB->scalar("
-        SELECT count(*) FROM torrents
-    ");
-    $Cache->cache_value('stats_torrent_count', $TorrentCount, 604800); // staggered 1 week cache
-}
-
-if (($AlbumCount = $Cache->get_value('stats_album_count')) === false) {
-    $AlbumCount = $DB->scalar("
-        SELECT count(*) FROM torrents_group WHERE CategoryID = 1
-    ");
-    $Cache->cache_value('stats_album_count', $AlbumCount, 604830); // staggered 1 week cache
-}
-
-if (($ArtistCount = $Cache->get_value('stats_artist_count')) === false) {
-    $ArtistCount = $DB->scalar("
-        SELECT count(*) FROM artists_group
-    ");
-    $Cache->cache_value('stats_artist_count', $ArtistCount, 604860); // staggered 1 week cache
-}
-
-if (($PerfectCount = $Cache->get_value('stats_perfect_count')) === false) {
-    $PerfectCount = $DB->scalar("
-        SELECT count(*)
-        FROM torrents
-        WHERE Format = 'FLAC'
-            AND (
-                (Media = 'CD' AND LogChecksum = '1' AND HasCue = '1' AND HasLogDB = '1' AND LogScore = 100)
-                OR
-                (Media in ('BD', 'DVD', 'Soundboard', 'WEB', 'Vinyl'))
-            )
-    ");
-    $Cache->cache_value('stats_perfect_count', $PerfectCount, 3600); // staggered 1 week cache
-}
-
 // Begin request stats
 if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
     $RequestCount = $DB->scalar("
@@ -76,6 +40,7 @@ if (($PeerStats = $Cache->get_value('stats_peers')) === false) {
     list($LeecherCount, $SeederCount) = $PeerStats;
 }
 
+$torrentStatsMan = new Gazelle\Stats\Torrent;
 json_print("success", [
     'maxUsers' => USER_LIMIT,
     'enabledUsers' => (int) $UserCount,
@@ -83,10 +48,10 @@ json_print("success", [
     'usersActiveThisWeek' => (int) $UserStats['Week'],
     'usersActiveThisMonth' => (int) $UserStats['Month'],
 
-    'torrentCount' => (int) $TorrentCount,
-    'releaseCount' => (int) $AlbumCount,
-    'artistCount' => (int) $ArtistCount,
-    'perfectFlacCount' => (int) $PerfectCount,
+    'torrentCount'     => $torrentStatsMan->torrentCount(),
+    'releaseCount'     => $torrentStatsMan->albumCount(),
+    'artistCount'      => $torrentStatsMan->artistCount(),
+    'perfectFlacCount' => $torrentStatsMan->perfectCount(),
 
     'requestCount' => (int) $RequestCount,
     'filledRequestCount' => (int) $FilledCount,

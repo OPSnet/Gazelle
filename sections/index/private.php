@@ -107,60 +107,16 @@ foreach ($headlines as $article) {
 $userMan = new Gazelle\Manager\User;
 $UserCount = $userMan->getEnabledUsersCount();
 $UserStats = $userMan->globalActivityStats();
+$torrentStatsMan = new Gazelle\Stats\Torrent;
 ?>
                 <li>Enabled users: <?=number_format($UserCount)?> <a href="stats.php?action=users" class="brackets">Details</a></li>
                 <li>Users active today: <?=number_format($UserStats['Day'])?> (<?=number_format($UserStats['Day'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this week: <?=number_format($UserStats['Week'])?> (<?=number_format($UserStats['Week'] / $UserCount * 100, 2)?>%)</li>
                 <li>Users active this month: <?=number_format($UserStats['Month'])?> (<?=number_format($UserStats['Month'] / $UserCount * 100, 2)?>%)</li>
-<?php
-
-if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {
-    $DB->prepared_query('
-        SELECT count(*)
-        FROM torrents
-    ');
-    list($TorrentCount) = $DB->next_record();
-    $Cache->cache_value('stats_torrent_count', $TorrentCount, 86400 + rand(0, 3600));
-}
-
-if (($AlbumCount = $Cache->get_value('stats_album_count')) === false) {
-    $DB->prepared_query("
-        SELECT count(*)
-        FROM torrents_group
-        WHERE CategoryID = '1'
-    ");
-    list($AlbumCount) = $DB->next_record();
-    $Cache->cache_value('stats_album_count', $AlbumCount, 86400 + rand(0, 3600));
-}
-
-if (($ArtistCount = $Cache->get_value('stats_artist_count')) === false) {
-    $DB->prepared_query('
-        SELECT count(*)
-        FROM artists_group
-    ');
-    list($ArtistCount) = $DB->next_record();
-    $Cache->cache_value('stats_artist_count', $ArtistCount, 86400 + rand(0, 3600));
-}
-
-if (($PerfectCount = $Cache->get_value('stats_perfect_count')) === false) {
-    $DB->prepared_query("
-        SELECT count(*)
-        FROM torrents
-        WHERE Format = 'FLAC'
-            AND (
-                (Media = 'CD' AND LogScore = 100)
-                OR
-                (Media IN ('Vinyl', 'WEB', 'DVD', 'Soundboard', 'BD', 'SACD', 'BD'))
-            )
-    ");
-    list($PerfectCount) = $DB->next_record();
-    $Cache->cache_value('stats_perfect_count', $PerfectCount, 86400 + rand(0, 3600)); // half a day plus fuzz
-}
-?>
-                <li>Torrents: <?=number_format($TorrentCount)?></li>
-                <li>Releases: <?=number_format($AlbumCount)?></li>
-                <li>Artists: <?=number_format($ArtistCount)?></li>
-                <li>"Perfect" FLACs: <?=number_format($PerfectCount)?></li>
+                <li>Torrents: <?=number_format($torrentStatsMan->torrentCount()) ?></li>
+                <li>Releases: <?=number_format($torrentStatsMan->albumCount()) ?></li>
+                <li>Artists: <?=number_format($torrentStatsMan->artistCount())?></li>
+                <li>"Perfect" FLACs: <?=number_format($torrentStatsMan->perfectCount())?></li>
 <?php
 //End Torrent Stats
 
