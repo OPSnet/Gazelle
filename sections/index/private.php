@@ -115,21 +115,8 @@ $torrentStatsMan = new Gazelle\Stats\Torrent;
                 <li>Releases: <?=number_format($torrentStatsMan->albumCount()) ?></li>
                 <li>Artists: <?=number_format($torrentStatsMan->artistCount())?></li>
                 <li>"Perfect" FLACs: <?=number_format($torrentStatsMan->perfectCount())?></li>
+                <li>Collages: <?= number_format((new Gazelle\Stats\Collage)->collageCount()) ?></li>
 <?php
-//End Torrent Stats
-
-if (($CollageCount = $Cache->get_value('stats_collages')) === false) {
-    $DB->prepared_query('
-        SELECT count(*)
-        FROM collages
-    ');
-    list($CollageCount) = $DB->next_record();
-    $Cache->cache_value('stats_collages', $CollageCount, 86400 + rand(0, 3600));
-}
-?>
-                <li>Collages: <?=number_format($CollageCount)?></li>
-<?php
-
 if (($RequestStats = $Cache->get_value('stats_requests')) === false) {
     $DB->prepared_query('
         SELECT count(*), sum(FillerID > 0)
