@@ -31,7 +31,7 @@ class Torrent extends \Gazelle\Base {
     public function media() { return $this->stats['media']; }
 
     protected function init() {
-        $userMan = new Gazelle\Manager\User;
+        $userMan = new \Gazelle\Manager\User;
         $stats = [
             'day'       => [],
             'week'      => [],
@@ -40,23 +40,23 @@ class Torrent extends \Gazelle\Base {
             'total-users' => $userMan->getEnabledUsersCount(),
         ];
 
-        list($stats['torrent-count'], $stats['total-size'], $stats['total-files']) = $this->db->row('
+        [$stats['torrent-count'], $stats['total-size'], $stats['total-files']] = $this->db->row('
             SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents
         ');
 
-        list($stats['day']['count'], $stats['day']['size'], $stats['day']['files']) = $this->db->row('
+        [$stats['day']['count'], $stats['day']['size'], $stats['day']['files']] = $this->db->row('
             SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 1 DAY
         ');
 
-        list($stats['week']['count'], $stats['week']['size'], $stats['week']['files']) = $this->db->row('
+        [$stats['week']['count'], $stats['week']['size'], $stats['week']['files']] = $this->db->row('
             SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 7 DAY
         ');
 
-        list($stats['month']['count'], $stats['month']['size'], $stats['month']['files']) = $this->db->row('
+        [$stats['month']['count'], $stats['month']['size'], $stats['month']['files']] = $this->db->row('
             SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 30 DAY
         ');
 
-        list($stats['quarter']['count'], $stats['quarter']['size'], $stats['quarter']['files']) = $this->db->row('
+        [$stats['quarter']['count'], $stats['quarter']['size'], $stats['quarter']['files']] = $this->db->row('
             SELECT count(*), coalesce(sum(Size), 0), coalesce(sum(FileCount), 0) FROM torrents WHERE Time > now() - INTERVAL 120 DAY
         ');
 
@@ -135,5 +135,54 @@ class Torrent extends \Gazelle\Base {
             $this->cache->cache_value('torrentflow', [$flow, $torrentCat], mktime(0, 0, 0, date('n') + 1, 2)); //Tested: fine for dec -> jan
         }
         return [$flow, $torrentCat];
+    }
+
+    /**
+     * Get the number of albums (category 1 == Music)
+     * @return int count
+     */
+    public function albumCount(): int {
+        if (($count = $this->cache->get_value('stats_album_count')) === false) {
+            $count = $this->db->scalar("
+                SELECT count(*) FROM torrents_group WHERE CategoryID = 1
+            ");
+            $this->cache->cache_value('stats_album_count', $count, 7200 + rand(0, 300));
+        }
+        return $count;
+    }
+
+    /**
+     * Get the number of artists
+     * @return int count
+     */
+    public function artistCount(): int {
+        if (($count = $this->cache->get_value('stats_artist_count')) === false) {
+            $count = $this->db->scalar("
+                SELECT count(*) FROM artists_group
+            ");
+            $this->cache->cache_value('stats_artist_count', $count, 7200 + rand(0, 300));
+        }
+        return $count;
+    }
+
+    /**
+     * Get the number of perfect flacs
+     * @return int count
+     */
+    public function perfectCount(): int {
+        if (($count = $this->cache->get_value('stats_perfect_count')) === false) {
+            $count = $this->db->scalar("
+                SELECT count(*)
+                FROM torrents
+                WHERE Format = 'FLAC'
+                    AND (
+                        (Media = 'CD' AND LogChecksum = '1' AND HasCue = '1' AND HasLogDB = '1' AND LogScore = 100)
+                        OR
+                        (Media in ('BD', 'DVD', 'Soundboard', 'WEB', 'Vinyl'))
+                    )
+            ");
+            $this->cache->cache_value('stats_perfect_count', $count, 7200 + rand(0, 300));
+        }
+        return $count;
     }
 }
