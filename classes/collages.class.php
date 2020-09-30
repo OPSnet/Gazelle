@@ -1,25 +1,5 @@
 <?php
 class Collages {
-    public static function increase_subscriptions($CollageID) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
-            UPDATE collages
-            SET Subscribers = Subscribers + 1
-            WHERE ID = '$CollageID'");
-        G::$DB->set_query_id($QueryID);
-    }
-
-    public static function decrease_subscriptions($CollageID) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query("
-            UPDATE collages SET
-                Subscribers = IF(Subscribers < 1, 0, Subscribers - 1)
-            WHERE ID = ?
-            ", $CollageID
-        );
-        G::$DB->set_query_id($QueryID);
-    }
-
     public static function create_personal_collage() {
         $CollageCount = G::$DB->scalar("
             SELECT
