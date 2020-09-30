@@ -1,8 +1,9 @@
 <?php
 // Begin user stats
-$UserCount = Users::get_enabled_users_count();
 
-$UserStats = \Gazelle\User::globalActivityStats($DB, $Cache);
+$userMan = new Gazelle\Manager\User;
+$UserStats = $userMan->globalActivityStats();
+$UserCount = $userMan->getEnabledUsersCount();
 
 // Begin torrent stats
 if (($TorrentCount = $Cache->get_value('stats_torrent_count')) === false) {

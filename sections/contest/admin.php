@@ -120,12 +120,14 @@ if ($Contest['BonusPool']) {
     $Contest = $ContestMgr->get_contest($Contest['ID']);
     $total = $ContestMgr->calculate_pool_payout($Contest['ID']);
     $bonus = $total['bonus'];
+    $userMan = new \Gazelle\Manager\User;
+    $userCount = $userMan->getEnabledUsersCount();
 ?>
     <div class="box pad">
         <table>
             <tr><th>Payout</th><th>Value</th></tr>
-            <tr><td>Enabled users</td><td><?= number_format(Users::get_enabled_users_count()) ?></td></tr>
-            <tr><td>Enabled user bonus</td><td><?= number_format($bonus * 0.05 / Users::get_enabled_users_count(), 2) ?></td></tr>
+            <tr><td>Enabled users</td><td><?= number_format($userCount) ?></td></tr>
+            <tr><td>Enabled user bonus</td><td><?= number_format($bonus * 0.05 / $userCount, 2) ?></td></tr>
             <tr><td>Contest participation</td><td><?= number_format($bonus * 0.1 / $total['user'], 2) ?></td></tr>
             <tr><td>Per entry added</td><td><?= number_format($bonus * 0.85 / $total['torrent'], 2) ?></td></tr>
             <tr><td>Status of payout</td><td><?= $Contest['BonusStatus'] ?></td></tr>
