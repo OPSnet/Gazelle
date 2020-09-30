@@ -149,6 +149,7 @@ function db_array($Array, $DontEscape = [], $Quote = false) {
 }
 
 class DB_MYSQL_Exception extends Exception {}
+class DB_MYSQL_DuplicateKeyException extends DB_MYSQL_Exception {}
 
 //TODO: revisit access levels once Drone is replaced by ZeRobot
 class DB_MYSQL {
@@ -184,6 +185,9 @@ class DB_MYSQL {
     }
 
     function halt($Msg) {
+        if ($this->Errno == 1062) {
+            throw new DB_MYSQL_DuplicateKeyException;
+        }
         global $Debug, $argv;
         $DBError = 'MySQL: '.strval($Msg).' SQL error: '.strval($this->Errno).' ('.strval($this->Error).')';
         if ($this->Errno == 1194) {
