@@ -33,7 +33,7 @@ class Image {
             case IMG_PNG:  return imagepng($this->image);
             case IMG_WBMP: return imagewbmp($this->image);
             case IMG_WEBP: return imagewebp($this->image);
-            case IMG_XPM:  return imagexbm($this->image);
+            case IMG_XPM:  return imagexbm($this->image, null);
         }
     }
 
