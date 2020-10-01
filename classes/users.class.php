@@ -116,9 +116,9 @@ class Users {
                 $UserInfo['ExtraClasses'] = [];
             }
             unset($UserInfo['Levels']);
-            $EffectiveClass = $UserInfo['Class'];
+            $EffectiveClass = (int)$UserInfo['Class'];
             foreach ($UserInfo['ExtraClasses'] as $Class => $Val) {
-                $EffectiveClass = max($EffectiveClass, $Classes[$Class]['Level']);
+                $EffectiveClass = max($EffectiveClass, (int)$Classes[$Class]['Level']);
             }
             $UserInfo['EffectiveClass'] = $EffectiveClass;
 

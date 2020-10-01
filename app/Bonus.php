@@ -5,16 +5,18 @@ namespace Gazelle;
 class Bonus extends Base {
     const CACHE_ITEM = 'bonus_item';
     const CACHE_OPEN_POOL = 'bonus_pool';
-    const CACHE_SUMMARY = 'bonus_summary.';
-    const CACHE_HISTORY = 'bonus_history.';
-    const CACHE_POOL_HISTORY = 'bonus_pool_history.';
+    const CACHE_SUMMARY = 'bonus_summary_';
+    const CACHE_HISTORY = 'bonus_history_';
+    const CACHE_POOL_HISTORY = 'bonus_pool_history_';
 
     public function __construct() {
         parent::__construct();
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
         if ($this->items === false) {
             $this->db->prepared_query("
-                SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title, sequence
+                SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title, sequence,
+                    IF (Label REGEXP '^other-', 'ConfirmOther', 'null') AS JS_next_function,
+                    IF (Label REGEXP '^title-bb-[yn]', 'NoOp', 'ConfirmPurchase') AS JS_on_click
                 FROM bonus_item
                 ORDER BY sequence
             ");
@@ -32,6 +34,15 @@ class Bonus extends Base {
 
     public function getList() {
         return $this->items;
+    }
+
+    public function getListForUser(int $userId) {
+        $items = [];
+        foreach ($this->items as $item) {
+            $item['Price'] = $this->getEffectivePrice($item['Label'], $userId);
+            $items[] = $item;
+        }
+        return $items;
     }
 
     public function getItem($label) {
@@ -84,16 +95,21 @@ class Bonus extends Base {
 
     public function getOpenPool() {
         $key = self::CACHE_OPEN_POOL;
-        $pool = $this->cache->get_value($key);
-        if ($pool === false) {
-            $this->db->prepared_query('SELECT Id, Name, Total FROM bonus_pool WHERE now() BETWEEN SinceDate AND UntilDate');
-            $pool = $this->db->next_record();
+        if (($pool = $this->cache->get_value($key)) === false) {
+            $this->db->prepared_query("
+                SELECT bonus_pool_id, name, total
+                FROM bonus_pool
+                WHERE now() BETWEEN since_date AND until_date
+                ORDER BY since_date
+                LIMIT 1
+            ");
+            $pool = $this->db->next_record(MYSQLI_ASSOC);
             $this->cache->cache_value($key, $pool, 3600);
         }
         return $pool ?? [];
     }
 
-    public function donate($poolId, $value, $userId, $effectiveClass) {
+    public function donate(int $poolId, int $value, int $userId, int $effectiveClass) {
         if ($effectiveClass < 250) {
             $taxedValue = $value * BONUS_POOL_TAX_STD;
         }
@@ -107,11 +123,10 @@ class Bonus extends Base {
             $taxedValue = $value * BONUS_POOL_TAX_STAFF;
         }
 
-        if (!$this->removePoints($fromID, $price)) {
+        if (!$this->removePoints($userId, $value)) {
             return false;
         }
-        $pool = new \Gazelle\BonusPool($poolId);
-        $pool->contribute($userId, $value, $taxedValue);
+        (new BonusPool($poolId))->contribute($userId, $value, $taxedValue);
 
         $this->cache->deleteMulti([
             self::CACHE_OPEN_POOL,
@@ -162,12 +177,12 @@ class Bonus extends Base {
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
-                SELECT sum(c.amountrecv) AS Total, p.UntilDate, p.Name
+                SELECT sum(c.amount_recv) AS total, p.until_date, p.name
                 FROM bonus_pool_contrib c
-                INNER JOIN bonus_pool p ON (p.ID = c.BonusPoolID)
-                WHERE c.UserID = ?
-                GROUP BY p.UntilDate, p.Name
-                ORDER BY p.UntilDate, p.Name
+                INNER JOIN bonus_pool p USING (bonus_pool_id)
+                WHERE c.user_id = ?
+                GROUP BY p.until_date, p.name
+                ORDER BY p.until_date, p.name
                 ', $userId
             );
             $history = $this->db->has_results() ? $this->db->to_array() : null;

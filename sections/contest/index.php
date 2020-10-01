@@ -1,19 +1,16 @@
 <?php
 enforce_login();
 
-$ContestMgr = new \Gazelle\Contest;
+$contestMan = new Gazelle\Manager\Contest;
 
-if (isset($_GET['action'])) {
-    switch ($_GET['action']) {
-        case 'leaderboard':
-            include(SERVER_ROOT . '/sections/contest/leaderboard.php');
-            break;
-        case 'admin':
-        case 'create':
-            include(SERVER_ROOT . '/sections/contest/admin.php');
-            break;
-    }
-}
-else {
-    include(SERVER_ROOT.'/sections/contest/intro.php');
+switch ($_GET['action'] ?? '') {
+    case 'leaderboard':
+        require('leaderboard.php');
+        break;
+    case 'admin':
+    case 'create':
+        require('admin.php');
+        break;
+    default:
+        require('intro.php');
 }

@@ -88,6 +88,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
+    'bb_format',
+    function ($text) {
+        return Text::full_format($text);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
     'image',
     function ($i) {
         return ImageTools::process($i, true);

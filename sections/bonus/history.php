@@ -43,12 +43,12 @@ $pool_total = 0;
 if (!is_null($PoolSummary)) {
     $has_spent++;
     foreach ($PoolSummary as $p) {
-        $when = (time() < strtotime($p['UntilDate']))
-            ? " ending in " . time_diff($p['UntilDate'])
-            : " ended " . time_diff($p['UntilDate']) . ' ago';
-        $pool_total += $p['Total'];
+        $when = (time() < strtotime($p['until_date']))
+            ? " ending in " . time_diff($p['until_date'])
+            : " ended " . time_diff($p['until_date']) . ' ago';
+        $pool_total += $p['total'];
 ?>
-    <h4><?= $WhoSpent ?> <?=number_format($p['Total']) ?> bonus points to donate to the <?= $p['Name'] . $when ?>.</h4>
+    <h4><?= $WhoSpent ?> <?=number_format($p['total']) ?> bonus points to donate to the <?= $p['name'] . $when ?>.</h4>
 <?php
     }
 }

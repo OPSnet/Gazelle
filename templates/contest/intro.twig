@@ -1,0 +1,16 @@
+{% if contest is empty %}
+<div class="thin">
+    <div class="box pad" style="padding: 10px 10px 10px 20px;">
+        <p>Looks like the contest hasn't begun yet!</p>
+    </div>
+    </div>
+{% else %}
+{% if contest.banner %}
+<div class="pad">
+    <img border="0" src="{{ contest.banner }}" alt="{{ contest.name }}" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
+</div>
+{% endif %}
+<div class="box pad">
+    {{ contest.wikiText|bb_format|raw }}
+</div>
+{% endif %}

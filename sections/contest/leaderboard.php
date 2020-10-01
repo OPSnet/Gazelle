@@ -1,27 +1,27 @@
 <?php
 enforce_login();
-if (isset($_POST['leaderboard']) && is_number($_POST['leaderboard'])) {
-    $Contest = $ContestMgr->get_contest(intval($_POST['leaderboard']));
+if (!empty($_POST['leaderboard'])) {
+    $contest = new Gazelle\Contest((int)$_POST['leaderboard']);
 }
-elseif (isset($_GET['id']) && is_number($_GET['id'])) {
-    $Contest = $ContestMgr->get_contest(intval($_GET['id']));
+elseif (!empty($_GET['id'])) {
+    $contest = new Gazelle\Contest((int)$_GET['id']);
 }
 else {
-    $Contest = $ContestMgr->get_current_contest();
+    $contest = $contestMan->currentContest();
 }
 
-if (!empty($Contest)) {
-    $Leaderboard = $ContestMgr->get_leaderboard($Contest['ID']);
-    View::show_header($Contest['Name'].' Leaderboard');
+if (!empty($contest)) {
+    $leaderboard = $contest->leaderboard();
+    View::show_header($contest->name() . ' Leaderboard');
 }
 else {
     View::show_header('Leaderboard');
 }
 
-if ($Contest['Banner']) {
+if ($contest->banner()) {
 ?>
 <div class="pad">
-    <img border="0" src="<?= $Contest['Banner'] ?>" alt="<?= $Contest['Name'] ?>" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
+    <img border="0" src="<?= $contest->banner() ?>" alt="<?= $contest->name() ?>" width="640" height="125" style="display: block; margin-left: auto; margin-right: auto;"/>
 </div>
 <?php
 } /* banner */
@@ -36,39 +36,29 @@ if ($Contest['Banner']) {
 <div class="box pad" style="padding: 10px 10px 10px 20px;">
 
 <?php
-$Prior = $ContestMgr->get_prior_contests();
-if (check_perms('admin_manage_contest') && count($Prior)) {
+$prior = $contestMan->priorContests();
+if (check_perms('admin_manage_contest') && count($prior)) {
 ?>
     <form class="edit_form" style="float: right;" action="contest.php?action=leaderboard" method="post">
         <select name="leaderboard">
-<?php
-    foreach ($Prior as $id) {
-        $prior_contest = $ContestMgr->get_contest($id[0]);
-        $selected = $prior_contest['ID'] == $Contest['ID'] ? ' selected' : '';
-?>
-            <option value="<?= $prior_contest['ID'] ?>"<?= $selected ?>><?= $prior_contest['Name'] ?></option>
-<?php
-    }
-?>
+<?php foreach ($prior as $p) { ?>
+            <option value="<?= $p->id() ?>"<?= $p->id() === $contest->id() ? ' selected' : '' ?>><?= $p->name() ?></option>
+<?php } ?>
         </select>
         <input type="submit" id="view" value="view" />
     </form>
-<?php
-} /* prior */
-?>
-
+<?php } ?>
     <div class="head">
 <?php
-if ($Contest['BonusPool'] > 0) {
-    $bp = new \Gazelle\BonusPool($Contest['BonusPool']);
+if ($contest->hasBonusPool()) {
 ?>
-        <h3>The Bonus Point pool currently stands at <?= number_format($bp->getTotalSent()) ?> points.</h3>
+        <h3>The Bonus Point pool currently stands at <?= number_format($contest->bonusPoolTotal()) ?> points.</h3>
 <?php
 } ?>
 
 <?php
-if (!count($Leaderboard)) {
-    if ($Contest['is_open']) {
+if (!count($leaderboard)) {
+    if ($contest->isOpen()) {
 ?>
     <p>The scheduler has not run yet, there are no results to display.<p>
 <?php
@@ -81,125 +71,102 @@ if (!count($Leaderboard)) {
 ?>
 <?php
 } else {
+    $isRequestFill = $contest instanceof \Gazelle\Contest\RequestFill;
 ?>
         <h3>A grand total of <?=
-            G::$Cache->get_value("contest_leaderboard_total_{$Contest['ID']}")
+            G::$Cache->get_value("contest_leaderboard_total_" . $contest->id())
             ?: "<span title=\"We will recalculate the numbers soon\">many, many, many</span>"
-        ?> <?= $Contest['ContestType'] == 'request_fill' ? 'requests have been filled' : 'torrents have been uploaded' ?>.</h3>
+        ?> <?= $isRequestFill ? 'requests have been filled' : 'torrents have been uploaded' ?>.</h3>
     </div>
     <table class="layout">
 
     <tr>
-    <td class="label" style="text-align:left">Rank</td>
-    <td class="label" style="text-align:left">Who</td>
-    <td class="label" style="text-align:left">Most recent <?= $Contest['ContestType'] == 'request_fill' ? 'fill' : 'upload'; ?></td>
-    <td class="label" style="text-align:left">Most recent time</td>
-    <td class="label" style="text-align:left"><?= $Contest['ContestType'] == 'request_fill' ? 'Requests Filled' : 'Perfect FLACs'; ?></td>
+    <th style="text-align:left">Rank</th>
+    <th style="text-align:left">Who</th>
+    <th style="text-align:left">Most recent <?= $isRequestFill ? 'fill' : 'upload'; ?></th>
+    <th style="text-align:left">Most recent time</th>
+    <th style="text-align:left"><?= $isRequestFill ? 'Requests Filled' : 'Perfect FLACs'; ?></th>
     </tr>
 <?php
+    $torMan = new Gazelle\Manager\Torrent;
+    $labelMan = new Gazelle\Manager\TorrentLabel;
+    $labelMan->showMedia(true)->showEdition(true)->showFlags(true);
+
     $rank = 0;
-    $prev_score = 0;
-    $nr_rows = 0;
-    $user_seen = 0;
-    foreach ($Leaderboard as $row) {
-        $score = $row[1];
-        if ($Contest['ContestType'] == 'request_fill' || $Contest['ContestType'] == 'upload_flac_strict_rank') {
+    $prevScore = 0;
+    $nrRows = 0;
+    $userSeen = 0;
+    foreach ($leaderboard as $row) {
+
+        $score = $row['entry_count'];
+        if ($isRequestFill) {
                 ++$rank;
         }
         else {
-            if ($prev_score != $score) {
+            if ($prevScore != $score) {
                 ++$rank;
             }
-            $prev_score = $score;
+            $prevScore = $score;
         }
-        if ($rank > $Contest['Display'] || $nr_rows > $Contest['Display']) {
+        if ($rank > $contest->display() || $nrRows > $contest->display()) {
             // cut off at limit, even if we haven't reached last winning place because of too many ties
             break;
         }
-        ++$nr_rows;
+        ++$nrRows;
 
-        if ($row[0] == $LoggedUser['ID']) {
-            $user_extra = " (that's you!)";
-            $user_seen = 1;
+        if ($row['user_id'] == $LoggedUser['ID']) {
+            $userExtra = "&nbsp;(that's&nbsp;you!)";
+            $userSeen = 1;
         }
         else {
-            $user_extra = '';
+            $userExtra = '';
         }
+        [$group, $torrent] = $torMan->setTorrentId($row['last_entry_id'])->torrentInfo();
 
-        $artist_markup = '';
-        $artist_id = explode(',', $row[4]);
-        $artist_name = explode(chr(1), $row[5]);
-        if (count($artist_id) > 2) {
-            $artist_markup = 'Various Artists - ';
-        }
-        elseif (count($artist_id) == 2) {
-            $artist_markup = sprintf(
-                '<a href="/artist.php?id=%d">%s</a> & <a href="/artist.php?id=%d">%s</a> - ',
-                $artist_id[0], $artist_name[0],
-                $artist_id[1], $artist_name[1]
-            );
-        }
-        //For non-music torrents, $artist_id[0] does exist but has no value.
-        else {
-            if ((string)$artist_id[0] == '') {
-                $artist_markup = '';
-            }
-            else {
-            $artist_markup = sprintf(
-                '<a href="/artist.php?id=%d">%s</a> - ',
-                $artist_id[0], $artist_name[0]
-            );
-            }
-        }
-
-        $userinfo = Users::user_info($row[0]);
         printf(<<<END_STR
     <tr>
         <td>%d</td>
-        <td><a href="/user.php?id=%d">%s</a>$user_extra</td>
-        <td>%s<a href="/torrents.php?torrentid=%d">%s</a></td>
+        <td><a href="/user.php?id=%d">%s</a>$userExtra</td>
+        <td>%s - <a href="torrents.php?id=%d&amp;torrentid=%d">%s</a> - %s</td>
         <td>%s</td>
         <td>%d</td>
     </tr>
 END_STR
         , $rank,
-            $row[0], $userinfo['Username'],
-            $artist_markup,
-            $row[2], $row[3], // torrent
-            time_diff($row[6], 1),
+            $row['user_id'], Users::user_info($row['user_id'])['Username'],
+            $torMan->artistHtml(), $group['ID'], $row['last_entry_id'], $group['Name'], $labelMan->load($torrent)->label(),
+            time_diff($row['last_upload'], 1),
             $score
         );
     }
 ?>
 </table>
 <?php
-    if ($Contest['is_open']) {
+    if ($contest->isOpen()) {
         // if the contest is still open, we will try to motivate them
-        if (!$user_seen) {
+        if (!$userSeen) {
             // the user isn't on the ladderboard, let's go through the list again and see if we can find them
             $rank = 0;
-            $prev_score = 0;
-            foreach ($Leaderboard as $row) {
+            $prevScore = 0;
+            foreach ($leaderboard as $row) {
                 $score = $row[1];
-                if ($Contest['ContestType'] == 'request_fill' || $Contest['ContestType'] == 'upload_flac_strict_rank') {
+                if ($isRequestFill) {
                     ++$rank;
                 }
-                else {
-                    if ($score != $prev_score) {
-                        ++$rank;
-                    }
+                elseif ($score != $prevScore) {
+                    ++$rank;
                 }
                 if ($row[0] == $LoggedUser['ID']) {
 ?>
-                <p>With your <?=$score?> upload<?= plural($score) ?>, you are currently ranked number <?=$rank?> on the leaderboard. Keep going and see if you can make it!</p>
+                <p>With your <?= $score ?> upload<?= plural($score) ?>, you are currently ranked number <?= $rank ?> on the leaderboard. Keep going and see if you can make it!</p>
 <?php
-                    $user_seen = 1;
+                    $userSeen = 1;
                     break;
                 }
             }
-            if (!$user_seen) {
+            if (!$userSeen) {
 ?>
-                <p>It doesn't look like you're on the leaderboard at all... <?= $Contest['ContestType'] == 'request_fill' ? 'fill some requests' : 'upload some FLACs' ?> for fame and glory!</p>
+                <p>It doesn't look like you're on the leaderboard at all... <?= $isRequestFill ? 'fill some requests' : 'upload some FLACs' ?> for fame and glory!</p>
 
 <?php
             }

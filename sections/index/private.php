@@ -93,9 +93,7 @@ foreach ($headlines as $article) {
 <?php } ?>
             </ol>
         </div>
-
-<?php include('contest_leaderboard.php'); ?>
-
+<?php require('contest_leaderboard.php'); ?>
         <div class="box">
             <div class="head colhead_dark"><strong>Stats</strong></div>
             <ul class="stats nobullet">

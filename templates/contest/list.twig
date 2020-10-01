@@ -1,0 +1,25 @@
+{% if list is not empty %}
+    {% for contest in list %}
+        {% if loop.first %}
+<div class="box pad">
+    <table>
+        <tr class="colhead">
+            <td>Name</td>
+            <td>Contest Type</td>
+            <td>Begins</td>
+            <td>Ends</td>
+        </tr>
+        {% endif %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td>{%- if current == contest.id -%}&nbsp;{{ pointer|raw }}{%- endif -%}
+                <a href="contest.php?action=admin&id={{ contest.id }}">{{ contest.name }}</a></td>
+            <td>{{ contest.contestType }}</td>
+            <td>{{ contest.dateBegin }}</td>
+            <td>{{ contest.dateEnd }}</td>
+        </tr>
+        {% if loop.last %}
+    </table>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}

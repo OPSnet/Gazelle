@@ -1,0 +1,17 @@
+{% set user_bonus = per_entry_bonus * nr_entries %}
+Dear {{ username }},
+
+{% if nr_entries == 0 %}
+During {{ name }} that ran from {{ date.begin }} to {{ date.end }}, you uploaded {{ nr_entries }} {{ entries }}. Each upload turned out to be worth {{ per_entry_bonus|number_format(2) }} bonus points, so your uploading activity earnt you a total of {{ user_bonus|number_format(2) }} points!
+
+On top of that, just because you participated, you have been awarded a further {{ contest_bonus|number_format(2) }} points. And since you are awesome and are on Orpheus anyway, the cherry on top is an additional {{ enabled_bonus|number_format(2) }} points.
+
+All in all, you have been granted {{ (enabled_bonus + contest_bonus + user_bonus)|number_format(2) }} bonus points. Enjoy!
+{% else %}
+During {{ name }} that ran from {{ date.begin }} to {{ date.end }}, you didn't upload anything. So sad, because you missed out on {{ contest_bonus|number_format(2) }} bonus pointsjust for participating even once, and an additional {{ per_entry_bonus|number_format(2) }} points for each successful upload.
+
+All is not lost, because thanks to the love and generosity of the Orpheus community, you have been granted {{ enabled_bonus|number_format(2) }} bonus points for having being here during the contest!
+{% endif %}
+
+<3
+Orpheus Staff
