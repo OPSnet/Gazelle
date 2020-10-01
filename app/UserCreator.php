@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-class UserCreatorException extends \Exception {}
+use Gazelle\Exception\UserCreatorException;
 
 class UserCreator extends Base {
     protected $newInstall;

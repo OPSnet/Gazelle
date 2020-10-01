@@ -27,7 +27,7 @@ class Bookmark extends Base {
                 return [ 'bookmarks_requests', 'RequestID' ];
                 break;
             default:
-                throw new Exception('bookmark:type:unknown');
+                throw new Exception\BookmarkUnknownTypeException($type);
                 break;
         }
     }
@@ -144,8 +144,8 @@ class Bookmark extends Base {
      */
     public function create(int $userId, string $type, int $id) {
         [$table, $column] = $this->schema($type);
-        if ($id < 1) {
-            throw new Exception('bookmark:create:bad-id');
+        if (!$id) {
+            throw new Exception\BookmarkIdentifierException($id);
         }
         if ($this->db->scalar("
             SELECT 1 FROM $table WHERE UserID = ? AND $column = ?
@@ -211,7 +211,7 @@ class Bookmark extends Base {
     public function remove(int $userId, string $type, int $id) {
         [$table, $column] = $this->schema($type);
         if ($id < 1) {
-            throw new Exception('bookmark:remove:bad-id');
+            throw new Exception\BookmarkIdentifierException($id);
         }
         $this->db->prepared_query("
             DELETE FROM $table WHERE UserID = ?  AND $column = ?

@@ -2,8 +2,6 @@
 
 namespace Gazelle;
 
-class BlogNotFoundException extends \Exception {}
-
 class Blog extends Base {
     protected $id;
     protected $title;
@@ -20,7 +18,7 @@ class Blog extends Base {
             ", $this->id
         );
         if (!$this->title) {
-            throw new BlogNotFoundException($id);
+            throw new Exception\ResourceNotFoundException($id);
         }
     }
 

@@ -7,8 +7,6 @@ namespace Gazelle;
  * A collection of notes is called a story.
  */
 
-class ThreadNotFoundException extends \Exception {}
-
 class Thread extends Base {
     protected $id;      // the ID of the row in the thread table
     protected $type;    // the type of thread
@@ -30,7 +28,7 @@ class Thread extends Base {
                 WHERE t.ID = ?
             ", $id);
             if (!$data) {
-                throw new ThreadNotFoundException;
+                throw new Exception\ResourceNotFoundException($id);
             }
             $data = $this->db->next_record();
             $this->cache->cache_value($key, $data, 86400);
