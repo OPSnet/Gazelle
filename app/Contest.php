@@ -3,589 +3,244 @@
 namespace Gazelle;
 
 class Contest extends Base {
+    const CACHE_CONTEST = 'contest_%d';
 
-    const CACHE_CONTEST_TYPE = 'contest_type';
-    const CACHE_CONTEST = 'contest.%d';
-    const CACHE_CURRENT = 'contest_current';
+    protected $id;
+    protected $info;
+    protected $type;
+    protected $bonusPool;
+    protected $totalEntries;
+    protected $totalUsers;
+    protected $bonusUser;
+    protected $bonusContest;
+    protected $bonusPerEntry;
 
-    private $type;
-
-    public function __construct () {
+    public function __construct(int $id) {
         parent::__construct();
-        $this->type = $this->cache->get_value(self::CACHE_CONTEST_TYPE);
-        if ($this->type === false) {
-            $this->db->prepared_query("SELECT ID, Name FROM contest_type ORDER BY ID");
-            $this->type = $this->db->to_array('ID');
-            $this->cache->cache_value(self::CACHE_CONTEST_TYPE, $this->type, 86400 * 7);
-        }
-    }
-
-    public function get_type () {
-        return $this->type;
-    }
-
-    public function get_list () {
-        $this->db->prepared_query("
-            SELECT c.ID, c.Name, c.DateBegin, c.DateEnd, t.ID AS ContestType, (cbp.BonusPoolID IS NOT NULL) AS BonusPool, cbp.Status AS BonusStatus
-            FROM contest c
-            INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
-            LEFT JOIN contest_has_bonus_pool cbp ON (cbp.ContestID = c.ID)
-            ORDER BY c.DateBegin DESC
-         ");
-         return $this->db->to_array();
-    }
-
-    public function get_contest ($Id) {
-        $key = sprintf(self::CACHE_CONTEST, $Id);
-        $Contest = $this->cache->get_value($key);
-        if ($Contest === false) {
-            $this->db->prepared_query('
-                SELECT c.ID, t.Name AS ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd,
-                    coalesce(cbp.BonusPoolID, 0) AS BonusPool,
-                    cbp.Status AS BonusStatus,
-                    CASE WHEN now() BETWEEN c.DateBegin AND c.DateEnd THEN 1 ELSE 0 END AS is_open,
-                    CASE WHEN cbp.BonusPoolID IS NOT NULL AND cbp.Status = ? AND now() > c.DateEnd THEN 1 ELSE 0 END AS payout_ready
+        $this->id = $id;
+        $key = sprintf(self::CACHE_CONTEST, $this->id);
+        if (($this->info = $this->cache->get_value($key)) === false) {
+            $this->db->prepared_query("
+                SELECT t.name AS contest_type, c.name, c.banner, c.description, c.display, c.max_tracked, c.date_begin, c.date_end,
+                    coalesce(cbp.bonus_pool_id, 0) AS bonus_pool,
+                    cbp.status AS bonus_status,
+                    cbp.bonus_user,
+                    cbp.bonus_contest,
+                    cbp.bonus_per_entry,
+                    IF (now() BETWEEN c.date_begin AND c.date_end, 1, 0) AS is_open,
+                    IF (cbp.bonus_pool_id IS NOT NULL AND cbp.status = ? AND now() > c.date_end, 1, 0) AS payout_ready
                 FROM contest c
-                INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
-                LEFT JOIN contest_has_bonus_pool cbp ON (cbp.ContestID = c.ID)
-                WHERE c.ID = ?
-                ', 'open', $Id
+                INNER JOIN contest_type t USING (contest_type_id)
+                LEFT JOIN contest_has_bonus_pool cbp USING (contest_id)
+                WHERE c.contest_id = ?
+                ", 'open', $this->id
             );
-            if ($this->db->has_results()) {
-                $Contest = $this->db->next_record(MYSQLI_ASSOC);
-                $this->cache->cache_value($key, $Contest, 86400 * 3);
-            }
+            $this->info = $this->db->next_record(MYSQLI_ASSOC);
+            $this->cache->cache_value($key, $this->info, 86400 * 3);
         }
-        return $Contest;
+        if (is_null($this->info)) {
+            throw new Exception\ResourceNotFoundException($id);
+        }
+        try {
+            // upload-flac-no-single => UploadFlacNoSingle
+            $className = '\\Gazelle\\Contest\\' . implode('', array_map('ucfirst', explode('-', $this->info['contest_type'])));
+            $this->type = new $className($this->id, $this->info['date_begin'], $this->info['date_end']);
+        }
+        catch (\Error $e) {
+            throw new Exception\ResourceNotFoundException($e->getMessage() . " [id=$id]");
+        }
+        if ($this->info['bonus_pool']) {
+            $this->bonusPool = $this->info['bonus_pool'] ? new \Gazelle\BonusPool($this->info['bonus_pool']) : null;
+            // calculate the ratios of how the bonus pool is carved up
+            // sum(bonUser + bonusContest + bonusPerEntry) == 1.0
+            $bonusClaimSum       = $this->info['bonus_user'] + $this->info['bonus_contest'] + $this->info['bonus_per_entry'];
+            $this->bonusUser     = $this->info['bonus_user'] / $bonusClaimSum;
+            $this->bonusContest  = $this->info['bonus_contest'] / $bonusClaimSum;
+            $this->bonusPerEntry = 1 - ($this->bonusUser + $this->bonusContest);
+        }
     }
 
-    public function get_current_contest () {
-        $Contest = $this->cache->get_value(self::CACHE_CURRENT);
-        if ($Contest === false) {
-            $this->db->prepared_query('
-                SELECT c.ID, t.Name AS ContestType, c.Name, c.Banner, c.WikiText, c.Display, c.MaxTracked, c.DateBegin, c.DateEnd,
-                    coalesce(cbp.BonusPoolID, 0) AS BonusPool,
-                    cbp.Status AS BonusStatus,
-                    CASE WHEN now() BETWEEN c.DateBegin AND c.DateEnd THEN 1 ELSE 0 END AS is_open,
-                    CASE WHEN cbp.BonusPoolID IS NOT NULL AND cbp.Status = ? AND now() > c.DateEnd THEN 1 ELSE 0 END AS payout_ready
-                FROM contest c
-                INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
-                LEFT JOIN contest_has_bonus_pool cbp ON (cbp.ContestID = c.ID)
-                WHERE c.DateEnd = (select max(DateEnd) from contest)
-            ', 'open');
-            if ($this->db->has_results()) {
-                $Contest = $this->db->next_record(MYSQLI_ASSOC);
-                // Cache this for three days
-                $this->cache->cache_value(sprintf(self::CACHE_CONTEST, $Contest['ID']), $Contest, 86400 * 3);
-                $this->cache->cache_value(self::CACHE_CURRENT, $Contest, 86400 * 3);
-            }
-        }
-        return $Contest;
-    }
-
-    public function get_prior_contests () {
-        $Prior = $this->cache->get_value('contest_prior');
-        if ($Prior === false) {
-            $this->db->prepared_query("
-                SELECT c.ID
-                FROM contest c
-                WHERE c.DateBegin < NOW()
-                /* AND ... we may want to think about excluding certain past contests */
-                ORDER BY c.DateBegin ASC
-            ");
-            if ($this->db->has_results()) {
-                $Prior = $this->db->to_array(false, MYSQLI_BOTH);
-                $this->cache->cache_value('contest_prior', $Prior, 86400 * 3);
-            }
-        }
-        return $Prior;
-    }
-
-    private function leaderboard_query ($Contest) {
-        /* only called from schedule, don't need to worry about caching this */
-        switch ($Contest['ContestType']) {
-            case 'upload_flac':
-                /* how many 100% flacs uploaded? */
-                $sql = "
-                    SELECT u.ID AS userid,
-                        count(*) AS nr,
-                        max(t.ID) AS last_torrent
-                    FROM users_main u
-                    INNER JOIN torrents t ON (t.Userid = u.ID)
-                    WHERE t.Format = 'FLAC'
-                        AND t.Time BETWEEN ? AND ?
-                        AND (
-                            t.Media IN ('Vinyl', 'WEB')
-                            OR (t.Media = 'CD'
-                                AND t.HasLog = '1'
-                                AND t.HasCue = '1'
-                                AND t.LogScore = 100
-                                AND t.LogChecksum = '1'
-                            )
-                        )
-                    GROUP By u.ID
-                ";
-                $args = [
-                    $Contest['DateBegin'],
-                    $Contest['DateEnd']
-                ];
-                break;
-
-            case 'upload_flac_no_single':
-                /* how many non-Single 100% flacs uploaded? */
-                $sql = "
-                    SELECT u.ID AS userid,
-                        count(*) AS nr,
-                        max(t.ID) AS last_torrent
-                    FROM users_main u
-                    INNER JOIN torrents t ON (t.Userid = u.ID)
-                    INNER JOIN torrents_group g ON (t.GroupID = g.ID)
-                    INNER JOIN release_type r ON (g.ReleaseType = r.ID)
-                    WHERE r.Name != 'Single'
-                        AND t.Format = 'FLAC'
-                        AND t.Time BETWEEN ? AND ?
-                        AND (
-                            t.Media IN ('Vinyl', 'WEB', 'SACD')
-                            OR (t.Media = 'CD'
-                                AND t.HasLog = '1'
-                                AND t.HasCue = '1'
-                                AND t.LogScore = 100
-                                AND t.LogChecksum = '1'
-                            )
-                        )
-                    GROUP By u.ID
-                ";
-                $args = [
-                    $Contest['DateBegin'],
-                    $Contest['DateEnd']
-                ];
-                break;
-
-            case 'request_fill':
-                /* how many requests filled */
-                $sql = "
-                    SELECT r.FillerID AS userid,
-                        count(*) AS nr,
-                        max(if(r.TimeFilled = LAST.TimeFilled AND r.TimeAdded < ?, TorrentID, NULL)) AS last_torrent
-                    FROM requests r
-                    INNER JOIN (
-                        SELECT r.FillerID,
-                            MAX(r.TimeFilled) AS TimeFilled
-                        FROM requests r
-                        INNER JOIN users_main u ON (r.FillerID = u.ID)
-                        INNER JOIN torrents t ON (r.TorrentID = t.ID)
-                        WHERE r.TimeFilled BETWEEN ? AND ?
-                            AND r.FIllerId != r.UserID
-                            AND r.TimeAdded < ?
-                        GROUP BY r.FillerID
-                    ) LAST USING (FillerID)
-                    WHERE r.TimeFilled BETWEEN ? AND ?
-                        AND r.FIllerId != r.UserID
-                        AND r.TimeAdded < ?
-                    GROUP BY r.FillerID
-                    ";
-                $args = [
-                    $Contest['DateBegin'],
-                    $Contest['DateBegin'],
-                    $Contest['DateEnd'],
-                    $Contest['DateBegin'],
-                    $Contest['DateBegin'],
-                    $Contest['DateEnd'],
-                    $Contest['DateBegin']
-                ];
-                break;
-            default:
-                $sql = null;
-                $args = [];
-                break;
-        }
-        return [$sql, $args];
-    }
-
-    public function calculate_leaderboard () {
+    public function save(array $params): int {
         $this->db->prepared_query("
-            SELECT c.ID
-            FROM contest c
-            INNER JOIN contest_type t ON (t.ID = c.ContestTypeID)
-            WHERE c.DateEnd > now() - INTERVAL 1 MONTH
-            ORDER BY c.DateEnd DESC
-        ");
-        $contest_id = [];
-        while ($this->db->has_results()) {
-            $c = $this->db->next_record();
-            if (isset($c['ID'])) {
-                $contest_id[] = $c['ID'];
-            }
+            UPDATE contest SET
+                name = ?, display = ?, max_tracked = ?, date_begin = ?, date_end = ?,
+                contest_type_id = ?, banner = ?, description = ?
+            WHERE ID = ?
+            ", trim($params['name']), $params['display'], $params['maxtrack'], $params['date_begin'], $params['date_end'],
+                $params['type'], trim($params['banner']), trim($params['description']),
+                $this->id
+        );
+        $success = $db->affected_rows();
+        if (isset($params['payment'])) {
+            $this->setPaymentReady();
         }
-        foreach ($contest_id as $id) {
-            $Contest = $this->get_contest($id);
-            list($subquery, $args) = $this->leaderboard_query($Contest);
-            array_unshift($args, $id);
-            if ($subquery) {
-                $this->db->prepared_query("BEGIN");
-                $this->db->prepared_query('DELETE FROM contest_leaderboard WHERE ContestID = ?', $id);
-                $this->db->prepared_query("
-                    INSERT INTO contest_leaderboard
-                    SELECT ?, LADDER.userid,
-                        LADDER.nr,
-                        T.ID,
-                        TG.Name,
-                        group_concat(TA.ArtistID),
-                        group_concat(AG.Name order by AG.Name separator 0x1),
-                        T.Time
-                    FROM torrents_group TG
-                    LEFT JOIN torrents_artists TA ON (TA.GroupID = TG.ID)
-                    LEFT JOIN artists_group AG ON (AG.ArtistID = TA.ArtistID)
-                    INNER JOIN torrents T ON (T.GroupID = TG.ID)
-                    INNER JOIN (
-                        $subquery
-                    ) LADDER on (LADDER.last_torrent = T.ID)
-                    GROUP BY
-                        LADDER.nr,
-                        T.ID,
-                        TG.Name,
-                        T.Time
-                ", ...$args);
-                $this->db->prepared_query("COMMIT");
-                $this->cache->delete_value('contest_leaderboard_' . $id);
-                switch ($Contest['ContestType']) {
-                    case 'upload_flac':
-                        $this->db->prepared_query("
-                            SELECT count(*) AS nr
-                            FROM torrents t
-                            WHERE t.Format = 'FLAC'
-                                AND t.Time BETWEEN ? AND ?
-                                AND (
-                                    t.Media IN ('Vinyl', 'WEB')
-                                    OR (t.Media = 'CD'
-                                        AND t.HasLog = '1'
-                                        AND t.HasCue = '1'
-                                        AND t.LogScore = 100
-                                        AND t.LogChecksum = '1'
-                                    )
-                                )
-                            ", $Contest['DateBegin'], $Contest['DateEnd']
-                        );
-                        break;
-                    case 'upload_flac_no_single':
-                        $this->db->prepared_query("
-                            SELECT count(*) AS nr
-                            FROM torrents t
-                            INNER JOIN torrents_group g ON (t.GroupID = g.ID)
-                            INNER JOIN release_type r ON (g.ReleaseType = r.ID)
-                            WHERE r.Name != 'Single'
-                                AND t.Format = 'FLAC'
-                                AND t.Time BETWEEN ? AND ?
-                                AND (
-                                    t.Media IN ('Vinyl', 'WEB', 'SACD')
-                                    OR (t.Media = 'CD'
-                                        AND t.HasLog = '1'
-                                        AND t.HasCue = '1'
-                                        AND t.LogScore = 100
-                                        AND t.LogChecksum = '1'
-                                    )
-                                )
-                            ", $Contest['DateBegin'], $Contest['DateEnd']
-                        );
-                        break;
-                    case 'request_fill':
-                        $this->db->prepared_query("
-                            SELECT
-                                count(*) AS nr
-                            FROM requests r
-                            INNER JOIN users_main u ON (r.FillerID = u.ID)
-                            WHERE r.TimeFilled BETWEEN ? AND ?
-                                AND r.FIllerId != r.UserID
-                                AND r.TimeAdded < ?
-                            ", $Contest['DateBegin'], $Contest['DateEnd'], $Contest['DateBegin']
-                        );
-                        break;
-                    default:
-                        $this->db->prepared_query("SELECT 0");
-                        break;
-                }
-                $this->cache->cache_value(
-                    "contest_leaderboard_total_{$Contest['ID']}",
-                    $this->db->has_results() ? $this->db->next_record()[0] : 0,
-                    3600 * 6
-                );
-                $this->get_leaderboard($id, false);
-            }
-        }
+        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
+        return $success;
     }
 
-    public function get_leaderboard ($Id, $UseCache = true) {
-        $Contest = $this->get_contest($Id);
-        $Key = "contest_leaderboard_{$Contest['ID']}";
-        $Leaderboard = $this->cache->get_value($Key);
-        if (!$UseCache || $Leaderboard === false) {
-            $this->db->prepared_query("
-            SELECT
-                l.UserID,
-                l.FlacCount,
-                l.LastTorrentID,
-                l.LastTorrentNAme,
-                l.ArtistList,
-                l.ArtistNames,
-                l.LastUpload
-            FROM contest_leaderboard l
-            WHERE l.ContestID = {$Contest['ID']}
-            ORDER BY l.FlacCount DESC, l.LastUpload ASC, l.UserID ASC
-            LIMIT {$Contest['MaxTracked']}");
-            $Leaderboard = $this->db->to_array(false, MYSQLI_BOTH);
-            $this->cache->cache_value($Key, $Leaderboard, 60 * 20);
+    public function id(): int {
+        return $this->id;
+    }
+
+    public function contestType(): string {
+        return $this->info['contest_type'];
+    }
+
+    public function banner(): string {
+        return $this->info['banner'];
+    }
+
+    public function dateBegin(): string {
+        return $this->info['date_begin'];
+    }
+
+    public function dateEnd(): string {
+        return $this->info['date_end'];
+    }
+
+    public function display(): int {
+        return $this->info['display'];
+    }
+
+    public function calculateLeaderboard(): int {
+        return $this->type->calculateLeaderboard();
+    }
+
+    public function leaderboard(): array {
+        // may be a trait, so no access to $this
+        return $this->type->leaderboard($this->maxTracked());
+    }
+
+    public function maxTracked(): int {
+        return $this->info['max_tracked'];
+    }
+
+    public function name(): string {
+        return $this->info['name'];
+    }
+
+    public function description(): string {
+        return $this->info['description'];
+    }
+
+    public function totalEntries(): int {
+        return $this->type->totalEntries();
+    }
+
+    public function totalUsers(): int {
+        return $this->type->totalUsers();
+    }
+
+    public function hasBonusPool(): bool {
+        return !is_null($this->bonusPool);
+    }
+
+    public function bonusPoolTotal(): float {
+        static $total;
+        if (is_null($total)) {
+            $total = $this->bonusPool ? $this->bonusPool->total() : 0.0;
         }
-        return $Leaderboard;
+        return $total;
     }
 
-    public function calculate_request_pairs () {
-        $Contest = $this->get_current_contest();
-        if ($Contest['ContestType'] != 'request_fill') {
-            $Pairs = [];
-        }
-        else {
-            $this->db->prepared_query("
-                SELECT r.FillerID, r.UserID, count(*) AS nr
-                FROM requests r
-                WHERE r.TimeFilled BETWEEN '{$Contest['DateBegin']}' AND '{$Contest['DateEnd']}'
-                GROUP BY
-                    r.FillerID, r.UserId
-                HAVING count(*) > 1
-                ORDER BY
-                    count(*) DESC, r.FillerID ASC
-                LIMIT 100
-            ");
-            $Pairs = $this->db->to_array(false, MYSQLI_BOTH);
-        }
-        $this->cache->cache_value('contest_pairs_' . $Contest['ID'], $Pairs, 60 * 20);
+    public function bonusStatus(): string {
+        return $this->info['bonus_status'];
     }
 
-    public function get_request_pairs ($UseCache = true) {
-        $Contest = $this->get_current_contest();
-        $Key = "contest_pairs_{$Contest['ID']}";
-        if (($Pairs = $this->cache->get_value($Key)) === false) {
-            $this->calculate_request_pairs();
-            $Pairs = $this->cache->get_value($Key);
-        }
-        return $Pairs;
+    public function bonusPerUserValue(): int {
+        return $this->info['bonus_user'];
     }
 
-    public function calculate_pool_payout ($id) {
-        list($total_torrents, $total_users) = $this->get_upload_stats($id);
-        $bonuspool = new \Gazelle\BonusPool($this->get_contest($id)['BonusPool']);
-        return [
-            'torrent' => $total_torrents,
-            'user'    => $total_users,
-            'bonus'   => $bonuspool->getTotalSent()
-        ];
+    public function bonusPerContestValue(): int {
+        return $this->info['bonus_contest'];
     }
 
-    public function get_upload_stats ($id) {
-        $this->db->prepared_query("
-            SELECT count(*) AS nr_torrents, count(DISTINCT um.ID) AS nr_users
-            FROM contest c,
-                users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            INNER JOIN torrents t ON (t.Userid = um.ID)
-            INNER JOIN torrents_group g ON (t.GroupID = g.ID)
-            INNER JOIN release_type r ON (g.ReleaseType = r.ID)
-            WHERE
-                c.ID = ?
-                AND um.Enabled = '1'
-                AND ui.JoinDate <= c.DateEnd
-                AND r.Name != 'Single'
-                AND t.Format = 'FLAC'
-                AND t.Time BETWEEN c.DateBegin AND c.DateEnd
-                AND (
-                    t.Media IN ('Vinyl', 'WEB', 'SACD')
-                    OR (t.Media = 'CD'
-                        AND t.HasLog = '1'
-                        AND t.HasCue = '1'
-                        AND t.LogScore = 100
-                        AND t.LogChecksum = '1'
-                    )
-                )
-        ", $id);
-        return $this->db->next_record();
+    public function bonusPerEntryValue(): int {
+        return $this->info['bonus_per_entry'];
     }
 
-    public function schedule_payout () {
+    public function bonusPerUser(): float {
+        return $this->bonusPoolTotal() * $this->bonusUser / \Users::get_enabled_users_count();
+    }
+
+    public function bonusPerContest(): float {
+        return $this->bonusPoolTotal() *  $this->bonusContest / $this->totalUsers();
+    }
+
+    public function bonusPerEntry(): float {
+        return $this->bonusPoolTotal() * $this->bonusPerEntry / $this->totalEntries();
+    }
+
+    public function isOpen(): bool {
+        return $this->info['is_open'] === 1;
+    }
+
+    public function paymentReady(): bool {
+        return $this->info['payout_ready'] === 1;
+    }
+
+    public function setPaymentReady() {
         $this->db->prepared_query('
-            SELECT c.ID
-            FROM contest c
-            INNER JOIN contest_has_bonus_pool cbp ON (cbp.ContestID = c.ID)
-            WHERE c.DateEnd < now()
-                AND cbp.Status = ?
-            ', 'ready'
+            UPDATE contest_has_bonus_pool SET
+                status = ?
+            WHERE contest_id = ?
+            ', 'ready', $this->id
         );
-        $Contests = $this->db->to_array(false, MYSQLI_NUM);
-        $total_participants = 0;
-        foreach ($Contests as $c) {
-            $total_participants += $this->do_payout($c[0]);
-            $this->set_payment_closed($c[0]);
-        }
-        return $total_participants;
+        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
+        return $this->db->affected_rows();
     }
 
-    protected function do_payout ($id) {
-        $total = $this->calculate_pool_payout($id);
-        $bonus = $total['bonus'];
-        $userMan = new \Gazelle\Manager\User;
-        $enabled_user_bonus    = $bonus * 0.05 / $userMan->getEnabledUsersCount();
-        $contest_participation = $bonus * 0.1 / $total['user'];
-        $per_entry_bonus       = $bonus * 0.85 / $total['torrent'];
-
-        $enabled_user_bonus_fmt    = number_format($enabled_user_bonus, 2);
-        $contest_participation_fmt = number_format($contest_participation, 2);
-        $per_entry_bonus_fmt       = number_format($per_entry_bonus, 2);
-
-        $this->db->prepared_query("
-            SELECT um.ID, um.Username, count(t.ID) AS nr_entries, ? AS enabled_bonus,
-                CASE WHEN count(t.ID) > 0 THEN ? ELSE 0 END AS participated_bonus,
-                count(t.ID) * ? AS entries_bonus
-            FROM contest c,
-                users_main um
-            INNER JOIN users_info ui ON (ui.UserID = um.ID)
-            LEFT JOIN torrents t ON (t.UserID = um.ID)
-            LEFT JOIN torrents_group g ON (t.GroupID = g.ID)
-            LEFT JOIN release_type r ON (g.ReleaseType = r.ID)
-            WHERE
-                c.ID = ?
-                AND um.Enabled = '1'
-                AND ui.JoinDate <= c.DateEnd
-                AND
-                    (t.ID IS NULL
-                    OR (
-                            r.Name != 'Single'
-                        AND t.Format = 'FLAC'
-                        AND t.Time BETWEEN c.DateBegin AND c.DateEnd
-                        AND (
-                            t.Media IN ('Vinyl', 'WEB', 'SACD')
-                            OR (t.Media = 'CD'
-                                AND t.HasLog = '1'
-                                AND t.HasCue = '1'
-                                AND t.LogScore = 100
-                                AND t.LogChecksum = '1'
-                            )
-                        )
-                    )
-                )
-            GROUP BY um.ID
-            ", $enabled_user_bonus, $contest_participation, $per_entry_bonus, $id
+    public function setPaymentClosed() {
+        $this->db->prepared_query('
+            UPDATE contest_has_bonus_pool SET
+                status = ?
+            WHERE contest_id = ?
+            ', 'paid', $this->id
         );
-        $participants = $this->db->to_array('ID', MYSQLI_ASSOC);
-        $contest = $this->get_contest($id);
-        $bonus = new \Gazelle\Bonus;
+        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $id));
+        return $this->db->affected_rows();
+    }
 
-        $report = fopen(TMPDIR . "/payout-contest-$id.txt", 'a');
+    public function doPayment(\Twig\Environment $twig) {
+        $enabledUserBonus = $this->bonusPerUser();
+        $contestBonus     = $this->bonusPerContest();
+        $perEntryBonus    = $this->bonusPerEntry();
+
+        $participants = $this->contestType->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
+        $bonus = new Bonus;
+        $report = fopen(TMPDIR . "/payout-contest-" . $this->id . ".txt", 'a');
         foreach ($participants as $p) {
-            if ($p['nr_entries'] == 0) {
-                $total_gain      = $enabled_user_bonus;
-                $total_gain_fmt  = number_format($enabled_user_bonus, 2);
-                $msg = <<<END_MSG
-Dear {$p['Username']},
-
-During {$contest['Name']} that ran from {$contest['DateBegin']} to {$contest['DateEnd']}, you didn't upload anything. So sad, because you missed out on {$contest_participation_fmt} bonus points just for participating even once, and an additional {$per_entry_bonus_fmt} points for each successful upload.
-
-All is not lost, because thanks to the love and generosity of the Orpheus community, you have been granted {$total_gain_fmt} bonus points just for being here, enjoy!
-
-<3
-Orpheus Staff
-END_MSG;
-            } else {
-                $entries         = $p['nr_entries'] == 1 ? 'entry' : 'entries';
-                $entry_bonus     = $per_entry_bonus * $p['nr_entries'];
-                $total_gain      = $enabled_user_bonus + $contest_participation + $entry_bonus;
-                $entry_bonus_fmt = number_format($entry_bonus, 2);
-                $total_gain_fmt  = number_format($total_gain, 2);
-                $msg = <<<END_MSG
-Dear {$p['Username']},
-
-During {$contest['Name']} that ran from {$contest['DateBegin']} to {$contest['DateEnd']}, you uploaded {$p['nr_entries']} {$entries}. Each upload turned out to be worth {$per_entry_bonus_fmt} bonus points, so your uploading activity earnt you a total of {$entry_bonus_fmt} points!
-
-On top of that, just because you participated, you have been awarded a further {$contest_participation_fmt} points. And since you are awesome and are on Orpheus anyway, the cherry on top is an additional {$enabled_user_bonus_fmt} points.
-
-All in all, you have been granted {$total_gain_fmt} bonus points. Enjoy!
-
-<3
-Orpheus Staff
-END_MSG;
-            }
-            $bonus->addPoints($p['ID'], $total_gain);
-            \Misc::send_pm($p['ID'], 0, "You have received {$total_gain_fmt} bonus points!", $msg);
-            $this->db->prepared_query("
-                UPDATE users_info
-                SET AdminComment = CONCAT(?, AdminComment)
-                WHERE UserID = ?
-                ", sqltime() . " - {$total_gain_fmt} BP added for {$p['nr_entries']} entries in {$contest['Name']}\n\n", $p['ID']
+            \Misc::send_pm(
+                $p['ID'],
+                0,
+                "You have received " . number_format($totalGain, 2) . " bonus points!",
+                Text::full_format($twig->render('contest/payout.twig', [
+                    'username'        => $p['Username'],
+                    'date'            => ['begin' => $this->info['date_begin'], 'end' => $this->info['date_end']],
+                    'enabled_bonus'   => $enabledUserBonus,
+                    'contest_bonus'   => $contestBonus,
+                    'per_entry_bonus' => $perEntryBonus,
+                    'name'            => $this->info['name'],
+                    'nr_entries'      => $p['nr_entries'],
+                    'entries'         => $p['nr_entries'] == 1 ? 'entry' : 'entries',
+                ]))
             );
-            fwrite($report, sqltime() . " {$p['Username']} ({$p['ID']}) n={$p['nr_entries']} t={$total_gain_fmt}\n");
+            $totalGain = $enabledUserBonus;
+            if ($p['nr_entries']) {
+                $totalGain += $contestBonus + ($perEntryBonus * $p['nr_entries']);
+            }
+            $bonus->addPoints($p['ID'], $totalGain);
+            $this->db->prepared_query("
+                UPDATE users_info SET
+                    AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
+                WHERE UserID = ?
+                ", number_format($totalGain, 2) . " BP added for {$p['nr_entries']} entries in {$contest['Name']}\n\n",
+                    $p['ID']
+            );
+            fwrite($report, sqltime() . " {$p['Username']} ({$p['ID']}) n={$p['nr_entries']} t={$totalGain}\n");
             fflush($report);
         }
         fclose($report);
         return count($participants);
-    }
-
-    public function set_payment_ready ($id) {
-        $this->db->prepared_query('
-            UPDATE contest_has_bonus_pool
-            SET Status = ?
-            WHERE ContestID = ?
-            ', 'ready', $id
-        );
-        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $id));
-        return $this->db->affected_rows();
-    }
-
-    public function set_payment_closed ($id) {
-        $this->db->prepared_query('
-            UPDATE contest_has_bonus_pool
-            SET Status = ?
-            WHERE ContestID = ?
-            ', 'paid', $id
-        );
-        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $id));
-        return $this->db->affected_rows();
-    }
-
-    public function save ($params) {
-        if (isset($params['cid'])) {
-            $contest_id = $params['cid'];
-            $this->db->prepared_query("
-                UPDATE contest SET
-                    Name = ?, Display = ?, MaxTracked = ?, DateBegin = ?, DateEnd = ?,
-                    ContestTypeID = ?, Banner = ?, WikiText = ?
-                WHERE ID = ?
-                ", $params['name'], $params['display'], $params['maxtrack'], $params['date_begin'], $params['date_end'],
-                    $params['type'], $params['banner'], $params['intro'],
-                    $contest_id
-            );
-            if (isset($params['payment'])) {
-                $this->set_payment_ready($contest_id);
-            }
-            $this->cache->delete_value(self::CACHE_CURRENT);
-            $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $contest_id));
-        }
-        elseif (isset($params['new'])) {
-            $this->db->prepared_query("
-                INSERT INTO contest (Name, Display, MaxTracked, DateBegin, DateEnd, ContestTypeID, Banner, WikiText)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ",
-                    $params['name'], $params['display'], $params['maxtrack'], $params['date_begin'], $params['date_end'],
-                    $params['type'], $params['banner'], $params['intro']
-            );
-            $contest_id = $this->db->inserted_id();
-
-            if (array_key_exists('pool', $params)) {
-                $this->db->prepared_query("INSERT INTO bonus_pool (Name, SinceDate, UntilDate) VALUES (?, ?, ?)",
-                    $params['name'], $params['date_begin'], $params['date_end']
-                );
-                $pool_id = $this->db->inserted_id();
-                $this->db->prepared_query("INSERT INTO contest_has_bonus_pool (ContestID, BonusPoolID) VALUES (?, ?)",
-                    $contest_id, $pool_id
-                );
-            }
-        }
-        return $contest_id;
     }
 }

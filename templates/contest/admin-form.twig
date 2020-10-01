@@ -1,0 +1,149 @@
+<form class="edit_form" name="contest" id="contestform" action="{{ action }}" method="post">
+{% if contest.hasBonidsPool %}
+<div class="box pad">
+    <table>
+        <tr><th>Payout</th><th>Value</th></tr>
+        <tr>
+            <td>Enabled users</td>
+            <td>{{ user_count|number_format }}</td>
+        </tr>
+        <tr>
+            <td>Enabled user bonus</td>
+            <td>{{ contest.bonusPerUser|number_format(2) }}</td>
+        </tr>
+        <tr>
+            <td>Contest participation</td>
+            <td>{{ contest.bonusPerContest|number_format(2) }}></td>
+        </tr>
+        <tr>
+            <td>Per entry added</td>
+            <td>{{ contest.bonusPerEntry|number_format(2) }}</td>
+        </tr>
+        <tr>
+            <td>Status of payout</td>
+            <td>{{ contest.bonusStatus }}</td>
+        </tr>
+    {% if contest.paymentRead %}
+        <tr>
+            <td>Payout is ready</td>
+            <td><input type="submit" name="payment" value="Initiate payment"/></td>
+        </tr>
+    {% endif %}
+    </table>
+</div>
+{% endif %}
+    <table>
+        <tr>
+            <td class="label">Contest name:</td>
+            <td>
+                <p>Edit the name of the contest</p>
+                <input type="text" size="80" name="name" value="{{ create ? '' : contest.name }}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">Contest type:</td>
+            <td>
+                <p>Edit the type of the contest</p>
+                <select name="type">
+{% for t in type %}
+                    <option value="{{ t.id }}"{{ t.name == c.contestType ? ' selected' : '' }}>{{ t.name }}</option>
+{% endfor %}
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">Bonus Point pool:</td>
+            <td>
+                <p>Members can contribute their Bonus Points to an award pool</p>
+                <input type="checkbox" name="pool" value="{{ create ? 0 : contest.hasPool }}"{{ contest.hasPool ? ' checked' : '' }}/>
+            </td>
+        </tr>
+
+{% if create or has_pool %}
+        <tr>
+            <td class="label">Bonus Point distribution:</td>
+            <td>
+                <p>The bonus pool is divided into three parts. Adjust the values according to specifiy the proportions. Their sum
+                does not need to add up to anything in particular: they will be scaled to the interval [0, 1] and the sum == 1.</p>
+
+                <input type="number" min="0" max="10000" id="pool-user" name="pool-user" value="{{ create ? 5 : contest.bonusPerUserValue }}"
+                />&nbsp;<label for="pool-user">This proportion of the pool will be shared between all enabled users. The number of users may vary
+                over time; the exact value will be known only at the end of the contest.<br />
+
+                <input type="number" min="0" max="10000" id="pool-contest" name="pool-contest" value="{{ create ? 15 : contest.bonusPerContestValue }}"
+                />&nbsp;<label for="pool-contest">This proportion of the pool will be shared between all users who
+                participate in the contest (i.e. at least one entry).<br />
+
+                <input type="number" min="0" max="10000" id="pool-entry" name="pool-entry" value="{{ create ? 80 : contest.bonusPerEntryValue }}"
+                />&nbsp;<label for="pool-entry">This proportion of the pool will be shared between every entry in the contest.
+            </td>
+        </tr>
+{% endif %}
+
+        <tr>
+            <td class="label">Begin date:</td>
+            <td>
+                <p>Uploaded torrents/completed requests are counted from this date (yyyy/mm/dd hh:mm:ss)</p>
+                <input type="text" size="20" name="date_begin" value="{{ create ? '' : contest.dateBegin }}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">End date:</td>
+            <td>
+                <p>Uploaded torrents/completed requests are counted up until this date (yyyy/mm/dd hh:mm:ss)</p>
+                <input type="text" size="20" name="date_end" value="{{ create ? '' : contest.dateEnd }}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">Displayed:</td>
+            <td>
+                <p>This many people will be displayed on the ladderboard</p>
+                <input type="text" size="20" name="display" value="{{ create ? 100 : contest.display }}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">Max tracked:</td>
+            <td>
+                <p>Even if a person is not on the displayed ladderboard, we can still tell them
+                    where they are (this corresponds to an SQL LIMIT value).</p>
+                <input type="text" size="20" name="maxtrack" value="{{ create ? 2500 : contest.maxTracked }}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">Banner:</td>
+            <td>
+                <p>This is the image displayed at the top of the page (optional).
+                   May be a local asset, or a URL.</p>
+                <input type="text" size="60" name="banner" value="{{ create ? '' : contest.banner }}"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">Introduction:</td>
+            <td>
+                <p>This is the introduction / guide of the contest.</p>
+                {{ intro.getBuffer|raw }}
+                <div style="text-align: center;">
+                    <input type="button" value="Preview" class="hidden button_preview_{{ intro.getID }}" tabindex="1" />
+                </div>
+            </td>
+        </tr>
+
+    </table>
+    <input type="hidden" name="userid" value="{{ user_id }}"/>
+    <input type="hidden" name="auth" value="{{ auth }}"/>
+{% if create %}
+    <input type="hidden" name="new" value="1"/>
+    <input type="submit" id="submit" value="Create contest"/>
+{% else %}
+    <input type="hidden" name="cid" value="{{ contest.id }}"/>
+    <input type="submit" id="submit" value="Save contest"/>
+{% endif %}
+</form>
+

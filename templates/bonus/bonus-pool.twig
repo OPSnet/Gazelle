@@ -1,0 +1,31 @@
+<div class="thin">
+    <div class="box pad">
+        <h3>The <b>{{ pool.name }}</b> pool is open for business!</h3>
+        <div>Donate points for greater good! The points you give here will be distributed out to everyone
+        who participates in the contest. You can give as many times as you want until the end.</div>
+        <br />
+        <h3>The grand total currently stands at {{ pool.total|number_format }} points</h3>
+        <form class="pool_form" name="pool" id="poolform" action="bonus.php?action=donate" method="post">
+            <table>
+                <thead>
+                    <tr><th>Current BP</th><th>Donated BP</th></tr>
+                <thead>
+                <tbody>
+                    <tr>
+                        <td>{{ points|number_format }}</td>
+                        <td><input type="text" width="10" name="donate" />
+                            <input type="hidden" name="poolid" value="{{ pool.bonus_pool_id }}"/>
+                            <input type="hidden" name="userid" value="{{ user_id }}"/>
+                            <input type="hidden" name="auth" value="{{ auth }}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><input type="submit" value="Donate" /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div><small>The fine print: obviously, you cannot donate more BP than you currently have. There are no refunds. Some handling fees apply.</small></div>
+        </form>
+    </div>
+</div>

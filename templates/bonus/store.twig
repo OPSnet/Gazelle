@@ -1,0 +1,35 @@
+{% for item in list %}
+{% if loop.first %}
+<div class="thin">
+    <table>
+        <thead>
+            <tr class="colhead">
+                <td>Description</td>
+                <td width="45px">Points</td>
+                <td width="70px">Checkout</td>
+            </tr>
+        </thead>
+        <tbody>
+{% endif %}
+{% if item.MinClass < class %}
+            <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+                <td>{{ item.Title }}</td>
+                <td style="text-align:right">{{ item.Price|number_format }}</td>
+                <td>
+    {% if points >= item.Price %}
+                    <a id="bonusconfirm" href="bonus.php?action=purchase&amp;label={{ item.Label
+                        }}&amp;auth={{ auth }}" onclick="{{ item.JS_on_click }}(event, '{{ item.Title }}', {{ item.JS_next_function }}, this);">Purchase</a>
+    {% else %}
+                    <span style="font-style: italic">Too Expensive</span>
+
+    {% endif %}
+{% endif %}
+                </td>
+    </tr>
+{% if loop.last %}
+        </tbody>
+    </table>
+    <br />
+</div>
+{% endif %}
+{% endfor %}
