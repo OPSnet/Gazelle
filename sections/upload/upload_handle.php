@@ -335,7 +335,7 @@ if (!empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
         ORDER BY ta.Importance ASC, aa.Name ASC
         ', $Properties['GroupID']
     );
-    while (list($ArtistID, $ArtistName, $ArtistImportance) = $DB->next_record(MYSQLI_NUM, false)) {
+    while ([$ArtistID, $ArtistName, $ArtistImportance] = $DB->next_record(MYSQLI_NUM, false)) {
         $ArtistForm[$ArtistImportance][] = ['id' => $ArtistID, 'name' => display_str($ArtistName)];
         $ArtistsUnescaped[$ArtistImportance][] = ['name' => $ArtistName];
     }
@@ -383,7 +383,7 @@ if (isset($Tor->Dec['encrypted_files'])) {
 $checker = new Gazelle\Util\FileChecker;
 
 // File list and size
-list($TotalSize, $FileList) = $Tor->file_list();
+[$TotalSize, $FileList] = $Tor->file_list();
 $HasLog = '0';
 $HasCue = '0';
 $TmpFileList = [];
@@ -394,7 +394,7 @@ if (!$Err) {
     $Err = $checker->checkName($DirName); // check the folder name against the blacklist
 }
 foreach ($FileList as $File) {
-    list($Size, $Name) = $File;
+    [$Size, $Name] = $File;
     // add +log to encoding
     if ($Properties['Media'] == 'CD' && $Properties['Encoding'] == "Lossless" && !in_array(strtolower($Name), $IgnoredLogFileNames) && preg_match('/\.log$/i', $Name)) {
         $HasLog = '1';
@@ -461,12 +461,12 @@ if ($Type == 'Music') {
         }
 
         // File list and size
-        list($ExtraTotalSize, $ExtraFileList) = $ExtraTor->file_list();
+        [$ExtraTotalSize, $ExtraFileList] = $ExtraTor->file_list();
         $ExtraDirName = isset($ExtraTor->Dec['info']['files']) ? make_utf8($ExtraTor->get_name()) : '';
 
         $ExtraTmpFileList = [];
         foreach ($ExtraFileList as $ExtraFile) {
-            list($ExtraSize, $ExtraName) = $ExtraFile;
+            [$ExtraSize, $ExtraName] = $ExtraFile;
 
             if (!$Err) {
                 $Err = $checker->checkFile($Type, $ExtraName);
@@ -536,9 +536,9 @@ if ($Type == 'Music') {
         );
         if ($DB->has_results()) {
             // Don't escape tg.Name. It's written directly to the log table
-            list($GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $TagList)
+            [$GroupID, $WikiImage, $WikiBody, $RevisionID, $Properties['Title'], $Properties['Year'], $Properties['ReleaseType'], $TagList]
                 = $DB->next_record(MYSQLI_NUM, [4]);
-            $Properties['TagList'] = explode(',', str_replace([' ', '.', '_'], [', ', '.', '.'], $TagList));
+            $Properties['TagList'] = explode(',', str_replace([' ', '.', '_'], '.', $TagList));
             if (!$Properties['Image'] && $WikiImage) {
                 $Properties['Image'] = $WikiImage;
             }
@@ -571,7 +571,7 @@ if ($Type == 'Music') {
                 );
 
                 if ($DB->has_results()) {
-                    list($GroupID, $WikiImage, $WikiBody, $RevisionID) = $DB->next_record();
+                    [$GroupID, $WikiImage, $WikiBody, $RevisionID] = $DB->next_record();
                     if (!$Properties['Image'] && $WikiImage) {
                         $Properties['Image'] = $WikiImage;
                     }
@@ -598,7 +598,7 @@ if ($Type == 'Music') {
                         ', $Artist['name']
                     );
                     if ($DB->has_results()) {
-                        while (list($ArtistID, $AliasID, $AliasName, $Redirect) = $DB->next_record(MYSQLI_NUM, false)) {
+                        while ([$ArtistID, $AliasID, $AliasName, $Redirect] = $DB->next_record(MYSQLI_NUM, false)) {
                             if (!strcasecmp($Artist['name'], $AliasName)) {
                                 if ($Redirect) {
                                     $AliasID = $Redirect;
@@ -632,7 +632,7 @@ if ($IsNewGroup) {
                     if (isset($ArtistsAdded[strtolower($Artist['name'])])) {
                         $ArtistForm[$Importance][$Num] = $ArtistsAdded[strtolower($Artist['name'])];
                     } else {
-                        list($ArtistID, $AliasID) = $ArtistManager->createArtist($Artist['name']);
+                        [$ArtistID, $AliasID] = $ArtistManager->createArtist($Artist['name']);
                         $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
                         $ArtistsAdded[strtolower($Artist['name'])] = $ArtistForm[$Importance][$Num];
                     }
@@ -1079,14 +1079,12 @@ if ($Properties['Year'] && $Properties['RemasterYear']) {
 }
 $SQL .= " AND UserID != '".$LoggedUser['ID']."' ";
 
-$DB->prepared_query('
+$Paranoia = unserialize($DB->scalar('
     SELECT Paranoia
     FROM users_main
     WHERE ID = ?
     ', $LoggedUser['ID']
-);
-list($Paranoia) = $DB->next_record();
-$Paranoia = unserialize($Paranoia);
+));
 if (!is_array($Paranoia)) {
     $Paranoia = [];
 }
@@ -1107,7 +1105,7 @@ if ($DB->has_results()) {
         VALUES ';
     $Rows = [];
     foreach ($UserArray as $User) {
-        list($FilterID, $UserID, $Passkey) = $User;
+        [$FilterID, $UserID, $Passkey] = $User;
         $Rows[] = "('$UserID', '$GroupID', '$TorrentID', '$FilterID')";
         $Feed->populate("torrents_notify_$Passkey", $Item);
         $Cache->delete_value("notifications_new_$UserID");
@@ -1117,7 +1115,7 @@ if ($DB->has_results()) {
     $Debug->set_flag('upload: notification inserts finished');
 
     foreach ($FilterArray as $Filter) {
-        list($FilterID, $UserID, $Passkey) = $Filter;
+        [$FilterID, $UserID, $Passkey] = $Filter;
         $Feed->populate("torrents_notify_{$FilterID}_$Passkey", $Item);
     }
 }
@@ -1130,7 +1128,7 @@ $DB->prepared_query('
     WHERE b.GroupID = ?
     ', $GroupID
 );
-while (list($UserID, $Passkey) = $DB->next_record()) {
+while ([$UserID, $Passkey] = $DB->next_record()) {
     $Feed->populate("torrents_bookmarks_t_$Passkey", $Item);
 }
 

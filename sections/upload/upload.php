@@ -1,16 +1,16 @@
 <?php
 //**********************************************************************//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Upload form ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// This page relies on the TORRENT_FORM class. All it does is call        //
-// the necessary functions.                                                //
+// This page relies on the TORRENT_FORM class. All it does is call      //
+// the necessary functions.                                             //
 //----------------------------------------------------------------------//
-// $Properties, $Err and $UploadForm are set in takeupload.php, and        //
-// are only used when the form doesn't validate and this page must be    //
+// $Properties, $Err and $UploadForm are set in upload_handle.php, and  //
+// are only used when the form doesn't validate and this page must be   //
 // called again.                                                        //
 //**********************************************************************//
 
 ini_set('max_file_uploads', '100');
-View::show_header('Upload', 'upload,validate_upload,valid_tags,musicbrainz,multiformat_uploader,bbcode');
+View::show_header('Upload', 'upload,validate_upload,valid_tags,musicbrainz,bbcode');
 
 if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
     $DB->prepared_query("
@@ -32,7 +32,7 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
         WHERE tg.ID = ?
         GROUP BY tg.ID, tg.CategoryID, tg.Name, tg.Year, tg.RecordLabel, tg.CatalogueNumber,
             tg.WikiImage, tg.WikiBody, tg.ReleaseType, tg.VanityHouse
-        ", $_GET['groupid']
+        ", (int)$_GET['groupid']
     );
     if ($DB->has_results()) {
         $Properties = $DB->next_record();
@@ -46,7 +46,7 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
         $Properties['RequestID'] = $_GET['requestid'];
     }
 } elseif (empty($Properties) && !empty($_GET['requestid']) && is_number($_GET['requestid'])) {
-    $DB->prepared_query('
+    $DB->prepared_query("
         SELECT
             ID AS RequestID,
             CategoryID,
@@ -58,9 +58,8 @@ if (empty($Properties) && !empty($_GET['groupid']) && is_number($_GET['groupid']
             Image
         FROM requests
         WHERE ID = ?
-        ', $_GET['requestid']
+        ", (int)$_GET['requestid']
     );
-
     $Properties = $DB->next_record();
     $UploadForm = $Categories[$Properties['CategoryID'] - 1];
     $Properties['CategoryName'] = $Categories[$Properties['CategoryID'] - 1];
@@ -72,41 +71,29 @@ if (!empty($ArtistForm)) {
     $Properties['Artists'] = $ArtistForm;
 }
 
-require(SERVER_ROOT.'/classes/torrent_form.class.php');
 if (empty($Properties)) {
     $Properties = null;
 }
 if (empty($Err)) {
     $Err = null;
 }
-$TorrentForm = new TORRENT_FORM($Properties, $Err);
 
-$GenreTags = $Cache->get_value('genre_tags');
-if (!$GenreTags) {
-    $DB->query("
-        SELECT Name
-        FROM tags
-        WHERE TagType = 'genre'
-        ORDER BY Name");
-    $GenreTags = $DB->collect('Name');
-    $Cache->cache_value('genre_tags', $GenreTags, 3600 * 6);
-}
-
-$DB->query('
+$DB->prepared_query("
     SELECT
         Name,
         Comment,
         Time
     FROM do_not_upload
-    ORDER BY Sequence');
+    ORDER BY Sequence"
+);
 $DNU = $DB->to_array();
-$DB->query('SELECT MAX(Time) FROM do_not_upload');
-list($Updated) = $DB->next_record();
-$DB->query("
-    SELECT IF(MAX(Time) IS NULL OR MAX(Time) < '$Updated', 1, 0)
+$Updated = $DB->scalar('SELECT MAX(Time) FROM do_not_upload');
+$NewDNU = $DB->scalar("
+    SELECT IF(MAX(Time) IS NULL OR MAX(Time) < ?, 1, 0)
     FROM torrents
-    WHERE UserID = ".$LoggedUser['ID']);
-list($NewDNU) = $DB->next_record();
+    WHERE UserID = ?
+    ", $Updated, $LoggedUser['ID']
+);
 $HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
 ?>
 <div class="<?=(check_perms('torrents_hide_dnu') ? 'box pad' : '')?>" style="margin: 0px auto; width: 700px;">
@@ -124,7 +111,7 @@ $HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
         </tr>
 <?php     $TimeDiff = strtotime('-1 month', strtotime('now'));
     foreach ($DNU as $BadUpload) {
-        list($Name, $Comment, $Updated) = $BadUpload;
+        [$Name, $Comment, $Updated] = $BadUpload;
 ?>
         <tr>
             <td>
@@ -140,6 +127,8 @@ $HideDNU = check_perms('torrents_hide_dnu') && !$NewDNU;
     </table>
 </div><?=($HideDNU ? '<br />' : '')?>
 <?php
+$GenreTags = (new Gazelle\Manager\Tag)->genreList();
+$TorrentForm = new TORRENT_FORM($Properties, $Err);
 $TorrentForm->head();
 switch ($UploadForm) {
     case 'Music':
@@ -161,10 +150,4 @@ switch ($UploadForm) {
         $TorrentForm->music_form($GenreTags);
 }
 $TorrentForm->foot();
-?>
-<script type="text/javascript">
-    Format(<?=(!empty($Err)) ? 'true' : 'false'?>);
-    Bitrate();
-</script>
-<?php
 View::show_footer();

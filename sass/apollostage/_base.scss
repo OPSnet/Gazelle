@@ -60,8 +60,7 @@ textarea {
 .comment:not(.head) img,
 .news_post:not(.head) img,
 .profileinfo:not(.head) img,
-.wiki_article img,
-form table td.label {
+.wiki_article img {
   vertical-align: middle;
 }
 
@@ -253,6 +252,7 @@ form {
 
 form table td.label {
   color: $footer-color;
+  padding-top: 9px;
   font-weight: 600;
   text-align: right;
   width: 180px;

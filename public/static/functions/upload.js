@@ -1,17 +1,91 @@
-var ArtistCount = 1;
+var AllowedMediaFormat = {
+    WEB:        ['FLAC', 'MP3', 'AAC'],
+    CD:         ['FLAC', 'MP3', 'AAC'],
+    SACD:       ['FLAC', 'MP3', 'AAC'],
+    DVD:        ['FLAC', 'MP3', 'AC3', 'DTS'],
+    BD:         ['FLAC', 'MP3', 'AC3', 'DTS'],
+    DAT:        ['FLAC', 'MP3', 'AAC'],
+    Vinyl:      ['FLAC', 'MP3', 'AAC'],
+    Soundboard: ['FLAC', 'MP3', 'AAC'],
+    Cassette:   ['FLAC', 'MP3', 'AAC'],
+};
+
+var AllowedBitrate = {
+    FLAC: {
+        list: ['24bit Lossless', 'Lossless'],
+        rank: [1, 0],
+    },
+    MP3: {
+        list: ['320', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '256', '192', 'Other'],
+        rank: [0, 1],
+    },
+    AAC: { list: ['256 (VBR)'], rank: [0] },
+    AC3: { list: ['Other'], rank: [0] },
+    DTS: { list: ['Other'], rank: [0] },
+};
+
+var MAX_EXTRA_FORMATS = 5;
+
+function MBhide() {
+    document.getElementById("musicbrainz_popup").style.display = "none";
+    document.getElementById("popup_background").style.display = "none";
+}
+function MBshow() {
+    document.getElementById("musicbrainz_popup").style.display = "block";
+    document.getElementById("popup_background").style.display = "block";
+}
+
+function musicFormInit() {
+    $('#torrent-json-file').change(function () {
+        ParseUploadJson();
+    });
+    $('#musicbrainz_button').click(function () {
+        MBshow();
+    });
+    $('#popup_close').click(function () {
+        MBhide();
+    });
+    $('#media').click(function () {
+        changeMedia();
+    });
+    $('#format').click(function () {
+        setAllowedFormat('#format', '#bitrate');
+    });
+    $('#bitrate').click(function () {
+        setAllowedBitrate('#format', '#bitrate');
+    });
+    $('#add_format').click(function () {
+        addFormatRow();
+    });
+    $('#remove_format').click(function () {
+        removeFormatRow();
+    });
+    $('#other_bitrate_span').click(function () {
+        AltBitrate();
+    });
+    $('#image').change(function () {
+        loadThumbnail();
+    });
+    $('#post').click(function() {
+        return checkFields();
+    });
+    ArtistCount      = 0;
+    ArtistJsonCount  = 0;
+    LogCount         = 0;
+    ExtraFormatCount = 0;
+}
 
 function Categories() {
     var dynamic_form = $('#dynamic_form');
     ajax.get('ajax.php?action=upload_section&categoryid=' + $('#categories').raw().value, function (response) {
         dynamic_form.raw().innerHTML = response;
-        initMultiButtons();
-        // Evaluate the code that generates previews.
         eval($('#dynamic_form script.preview_code').html());
         setTimeout(function() {
             dynamic_form.data('loaded', true);
+            if ($('#categories').val() == 0) { /* Music */
+                musicFormInit();
+            }
         }, 500);
-
-        ArtistCount = 1;
     });
 }
 
@@ -23,42 +97,68 @@ function Remaster() {
     }
 }
 
-function Format(skip_bitrate) {
-    var format = $('#format');
-    var bitrate = $('#bitrate');
-    if (format.raw().options[format.raw().selectedIndex].value === 'FLAC') {
-        if (!skip_bitrate) {
-            for (var i = 0; i < bitrate.raw().options.length; i++) {
-                if (bitrate.raw().options[i].value === 'Lossless') {
-                    bitrate.raw()[i].selected = true;
-                }
-            }
-        }
-        $('#upload_logs').gshow();
-        $('#other_bitrate_span').ghide();
-    } else {
-        if (!skip_bitrate) {
-            $('#bitrate').raw()[0].selected = true;
-        }
-        $('#upload_logs').ghide();
-    }
-
-    var format_warning = $('#format_warning');
-    if (format_warning.raw()) {
-        if (format.raw().options[format.raw().selectedIndex].value === 'AAC') {
-            format_warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
-        } else {
-            format_warning.raw().innerHTML = '';
-        }
-    }
+function changeMedia() {
+    CheckYear();
+    setAllowedFormat('#format', '#bitrate');
 }
 
-function Bitrate() {
-    var bitrate = $('#bitrate');
-    $('#other_bitrate').raw().value = '';
-    if (bitrate.raw().options[bitrate.raw().selectedIndex].value === 'Other') {
-        $('#other_bitrate_span').gshow();
+function setAllowedFormat(formatField, bitrateField) {
+    var media = $('#media').val();
+    var fmt = $(formatField).val();
+    var btr = $(bitrateField).val();
+    var warning = $('#format_warning');
+    $(formatField).empty().append(new Option('---', ''));
+    if (media === '---') {
+        $(bitrateField).empty().append(new Option('---', ''));
+        $('#upload_logs').ghide();
+        $('#other_bitrate_span').ghide();
+        warning.raw().innerHTML = '';
+        return;
+    }
+    $.each(AllowedMediaFormat[media], function(k) {
+        $(formatField).append(new Option(AllowedMediaFormat[media][k], AllowedMediaFormat[media][k]));
+    });
+    if (fmt === '---' || AllowedMediaFormat[media].indexOf(fmt) == -1) {
+        fmt = 'FLAC';
+    }
+    if (fmt === "---" || (['DVD', 'BD'].indexOf(media) == -1 && ['AC3', 'DTS'].indexOf(fmt) > -1)) {
+        fmt = 'FLAC';
+        $('#bitrate').val(AllowedBitrate['FLAC'].list[AllowedBitrate['FLAC'].rank[0]]);
+    }
+    $(formatField).val(fmt);
+    if(formatField === '#format' && fmt === 'FLAC' && media === 'CD') {
+        $('#upload_logs').gshow();
+    }
+    else {
+        $('#upload_logs').ghide();
+    }
+    if ($(formatField).val() === 'AAC') {
+        warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
     } else {
+        warning.raw().innerHTML = '';
+    }
+    setAllowedBitrate(formatField, bitrateField);
+}
+
+function setAllowedBitrate(formatField, bitrateField) {
+    var fmt = $(formatField).val();
+    var btr = $(bitrateField).val();
+    $(bitrateField).empty().append(new Option('---', ''));
+    if (media === '---' || fmt === '---') {
+        $('#other_bitrate_span').ghide();
+        return;
+    }
+    var allowed = AllowedBitrate[fmt];
+    $.each(allowed.list, function(k) {
+        if (!(media == 'CD' && allowed.list[k] == '24bit Lossless')) {
+            $(bitrateField).append(new Option(allowed.list[k], allowed.list[k]));
+        }
+    });
+    if (btr === '' || allowed.list.indexOf(btr) == -1) {
+        btr = allowed.list[allowed.rank[0]];
+    }
+    $(bitrateField).val(btr);
+    if($(bitrateField).val() !== 'Other') {
         $('#other_bitrate_span').ghide();
     }
 }
@@ -72,6 +172,145 @@ function AltBitrate() {
     }
 }
 
+function addFormatRow() {
+    if (ExtraFormatCount == MAX_EXTRA_FORMATS) {
+        return;
+    }
+    if (++ExtraFormatCount == MAX_EXTRA_FORMATS) {
+         $("#add_format").css('visibility', 'hidden');
+    }
+    $("#remove_format").show();
+
+    var master = $(document.createElement("tr"))
+        .attr({
+            id: 'extra_format_row_' + ExtraFormatCount
+        })
+        .insertBefore('#extra_format_placeholder');
+
+    $(document.createElement("td"))
+        .addClass('label')
+        .html("Extra format " + ExtraFormatCount + ":")
+        .appendTo(master);
+    var row = $(document.createElement("td"))
+        .appendTo(master);
+    $(document.createElement("input"))
+        .attr({
+            id: "extra_file_" + ExtraFormatCount,
+            type: 'file',
+            name: "extra_file_" + ExtraFormatCount,
+            size: 30,
+            accept: "application/x-bittorrent,.torrent",
+        })
+        .appendTo(row);
+    $(document.createElement("span"))
+        .html("&nbsp;&nbsp;&nbsp;&nbsp;Format: ")
+        .appendTo(row);
+
+    var formatSelect = $(document.createElement("select"))
+        .attr({
+            id: "format_" + ExtraFormatCount,
+            name: 'extra_format[]'
+        })
+        .click(function () {
+            Format('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount)
+        });
+    var used = getUsedPairs();
+    $.each(AllowedBitrate, function(k,v) {
+        if (!(k in used) || used[k].length < AllowedBitrate[k].list.length) {
+            formatSelect.append(new Option(k, k));
+        }
+    });
+    formatSelect.val('MP3').appendTo(row);
+
+    // bitrates
+    $(document.createElement("span")).html("&nbsp;&nbsp;&nbsp;&nbsp;Bitrate: ").appendTo(row);
+    var bitrateSelect = $(document.createElement("select"))
+        .attr({
+            id:"bitrate_" + ExtraFormatCount,
+            name:'extra_bitrate[]'
+        })
+        .append(new Option('---', ''));
+    $.each(AllowedBitrate.MP3.list, function(k, v) {
+        if (!(v == 'Other' || (used.MP3 && used.MP3.indexOf(v) !== -1))) {
+            bitrateSelect.append(new Option(v, v));
+        }
+    });
+    var nf;
+    if (!used.MP3 || used.MP3.indexOf('320') == -1) { nf = 0; }
+    else if (used.MP3.indexOf('V0 (VBR)') == -1) { nf = 1; }
+    else if (used.MP3.indexOf('V2 (VBR)') == -1) { nf = 2; }
+    if (nf !== undefined) {
+        bitrateSelect.val(AllowedBitrate.MP3.list[
+            AllowedBitrate.MP3.rank[nf]
+        ]);
+    }
+    bitrateSelect.click(function () {
+            setAllowedBitrate('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount)
+        })
+        .appendTo(row);
+
+    // release description
+    var desc_row = $(document.createElement("tr"))
+        .attr({ id: "desc_row"})
+        .css('cursor', 'pointer')
+        .appendTo(row);
+    $(document.createElement("a"))
+        .html("&nbsp;&nbsp;[Add Release Description]")
+        .css('marginLeft', '-5px')
+        .click(function () {
+            $("#extra_release_desc_" + ExtraFormatCount)
+                .toggle(300);
+        })
+        .appendTo(desc_row) ;
+    $(document.createElement("textarea"))
+        .attr({
+            id: "extra_release_desc_" + ExtraFormatCount,
+            name: "extra_release_desc[]",
+            cols: 60,
+            rows: 4,
+            style: 'display:none; margin-left: 5px; margin-top: 10px; margin-bottom: 10px;'
+        })
+        .appendTo(desc_row);
+    $("#post").val("Upload torrents");
+}
+
+function removeFormatRow() {
+    if (ExtraFormatCount == 0) {
+        return;
+    }
+    if (ExtraFormatCount-- > 0) {
+        $("#extra_format_placeholder").prev().remove();
+        if (ExtraFormatCount == 0) {
+            $("#remove_format").hide();
+        }
+        $("#add_format").css('visibility', 'visible');
+        $("#post").val("Upload torrents");
+    }
+}
+
+function getUsedPairs() {
+    // fetch the format/bitrate combinations already used in the form
+    var fmt = $('#format').val();
+    var btr = $('#bitrate').val();
+    var used = {};
+    if (fmt !== '' && btr !== '' && AllowedBitrate[fmt].list.indexOf(btr) != -1) {
+        used[fmt] = [btr];
+    }
+    for (e = 1; e < ExtraFormatCount; e++) {
+        fmt = $("#format_" + e).val();
+        btr = $("#bitrate_" + e).val();
+        if (fmt !== '' && btr !== '' && AllowedBitrate[fmt].list.indexOf(btr) != -1) {
+            if (fmt in used) {
+                used[fmt].push(btr);
+            }
+            else {
+                used[fmt] = [btr];
+            }
+        }
+    }
+    return used;
+}
+
 function add_tag() {
     if ($('#tags').raw().value == "") {
         $('#tags').raw().value = $('#genre_tags').raw().options[$('#genre_tags').raw().selectedIndex].value;
@@ -81,15 +320,14 @@ function add_tag() {
     }
 }
 
-var LogCount = 1;
-
 function AddLogField(acceptTypes) {
     if (LogCount >= 200) {
         return;
     }
+    LogCount++;
     var LogField = document.createElement("input");
     LogField.type = "file";
-    LogField.id = "file";
+    LogField.id = "logfile_" + LogCount;
     LogField.name = "logfiles[]";
     LogField.accept = acceptTypes;
     LogField.multiple = true;
@@ -97,21 +335,7 @@ function AddLogField(acceptTypes) {
     var x = $('#logfields').raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(LogField);
-    LogCount++;
 }
-
-function RemoveLogField() {
-    if (LogCount == 1) {
-        return;
-    }
-    var x = $('#logfields').raw();
-    for (i = 0; i < 2; i++) {
-        x.removeChild(x.lastChild);
-    }
-    LogCount--;
-}
-
-var ExtraLogCount = 1;
 
 function AddExtraLogField(id) {
     if (LogCount >= 200) {
@@ -120,7 +344,7 @@ function AddExtraLogField(id) {
     var LogField = document.createElement("input");
     LogField.type = "file";
     LogField.id = "file_" + id;
-    LogField.name = "logfiles_" + id + "[]";
+    LogField.name = "logfile_" + id + "[]";
     LogField.size = 50;
     var x = $('#logfields_' + id).raw();
     x.appendChild(document.createElement("br"));
@@ -139,96 +363,11 @@ function RemoveLogField() {
     LogCount--;
 }
 
-var FormatCount = 0;
-
-function AddFormat() {
-    if (FormatCount >= 10) {
-        return;
-    }
-    FormatCount++;
-    $('#extras').raw().value = FormatCount;
-
-    var NewRow = document.createElement("tr");
-    NewRow.id = "new_torrent_row"+FormatCount;
-    NewRow.setAttribute("style","border-top-width: 5px; border-left-width: 5px; border-right-width: 5px;");
-
-    var NewCell1 = document.createElement("td");
-    NewCell1.setAttribute("class","label");
-    NewCell1.innerHTML = "Extra Torrent File";
-
-    var NewCell2 = document.createElement("td");
-    var TorrentField = document.createElement("input");
-    TorrentField.type = "file";
-    TorrentField.id = "extra_torrent_file"+FormatCount;
-    TorrentField.name = "extra_torrent_files[]";
-    TorrentField.size = 50;
-    NewCell2.appendChild(TorrentField);
-
-    NewRow.appendChild(NewCell1);
-    NewRow.appendChild(NewCell2);
-
-    NewRow = document.createElement("tr");
-    NewRow.id = "new_format_row"+FormatCount;
-    NewRow.setAttribute("style","border-left-width: 5px; border-right-width: 5px;");
-    NewCell1 = document.createElement("td");
-    NewCell1.setAttribute("class","label");
-    NewCell1.innerHTML = "Extra Format / Bitrate";
-
-    NewCell2 = document.createElement("td");
-    tmp = '<select id="releasetype" name="extra_formats[]"><option value="">---</option>';
-    var formats=["Saab","Volvo","BMW"];
-    for (var i in formats) {
-        tmp += '<option value="'+formats[i]+'">'+formats[i]+"</option>\n";
-    }
-    tmp += "</select>";
-    var bitrates=["1","2","3"];
-    tmp += '<select id="releasetype" name="extra_bitrates[]"><option value="">---</option>';
-    for (var i in bitrates) {
-        tmp += '<option value="'+bitrates[i]+'">'+bitrates[i]+"</option>\n";
-    }
-    tmp += "</select>";
-
-    NewCell2.innerHTML = tmp;
-    NewRow.appendChild(NewCell1);
-    NewRow.appendChild(NewCell2);
-
-
-    NewRow = document.createElement("tr");
-    NewRow.id = "new_description_row"+FormatCount;
-    NewRow.setAttribute("style","border-bottom-width: 5px; border-left-width: 5px; border-right-width: 5px;");
-    NewCell1 = document.createElement("td");
-    NewCell1.setAttribute("class","label");
-    NewCell1.innerHTML = "Extra Release Description";
-
-    NewCell2 = document.createElement("td");
-    NewCell2.innerHTML = '<textarea name="extra_release_desc[]" id="release_desc" cols="60" rows="4"></textarea>';
-
-    NewRow.appendChild(NewCell1);
-    NewRow.appendChild(NewCell2);
-}
-
-function RemoveFormat() {
-    if (FormatCount == 0) {
-        return;
-    }
-    $('#extras').raw().value = FormatCount;
-
-    var x = $('#new_torrent_row'+FormatCount).raw();
-    x.parentNode.removeChild(x);
-
-    x = $('#new_format_row'+FormatCount).raw();
-    x.parentNode.removeChild(x);
-
-    x = $('#new_description_row'+FormatCount).raw();
-    x.parentNode.removeChild(x);
-
-    FormatCount--;
-}
-
 function AddArtistField() {
     if (ArtistCount >= 200) {
         return;
     }
+    ArtistCount++;
     var ArtistField = document.createElement("input");
     ArtistField.type = "text";
     ArtistField.id = "artist_" + ArtistCount;
@@ -236,22 +375,21 @@ function AddArtistField() {
     ArtistField.size = 45;
     ArtistField.onblur = CheckVA;
 
-    var ImportanceField = document.createElement("select");
-    ImportanceField.id = "importance_" + ArtistCount;
-    ImportanceField.name = "importance[]";
-    ImportanceField.options[0] = new Option("Main", "1");
-    ImportanceField.options[1] = new Option("Guest", "2");
-    ImportanceField.options[2] = new Option("Composer    ", "4");
-    ImportanceField.options[3] = new Option("Conductor", "5");
-    ImportanceField.options[4] = new Option("DJ / Compiler", "6");
-    ImportanceField.options[5] = new Option("Remixer", "3");
-    ImportanceField.options[6] = new Option("Producer", "7");
+    var RoleField = document.createElement("select");
+    RoleField.id = "importance_" + ArtistCount;
+    RoleField.name = "importance[]";
+    RoleField.options[0] = new Option("Main", "1");
+    RoleField.options[1] = new Option("Guest", "2");
+    RoleField.options[2] = new Option("Composer    ", "4");
+    RoleField.options[3] = new Option("Conductor", "5");
+    RoleField.options[4] = new Option("DJ / Compiler", "6");
+    RoleField.options[5] = new Option("Remixer", "3");
+    RoleField.options[6] = new Option("Producer", "7");
 
     var x = $('#artistfields').raw();
     x.appendChild(document.createElement("br"));
     x.appendChild(ArtistField);
-    x.appendChild(document.createTextNode('\n'));
-    x.appendChild(ImportanceField);
+    x.appendChild(RoleField);
 
     if ($("#artist_0").data("gazelle-autocomplete")) {
         $(ArtistField).live('focus', function() {
@@ -260,16 +398,14 @@ function AddArtistField() {
             });
         });
     }
-
-    ArtistCount++;
 }
 
 function RemoveArtistField() {
-    if (ArtistCount === 1) {
+    if (ArtistCount === 0) {
         return;
     }
     var x = $('#artistfields').raw();
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 3; i++) {
         x.removeChild(x.lastChild);
     }
     ArtistCount--;
@@ -293,12 +429,10 @@ function CheckVA () {
 
 function CheckYear() {
     var media = $('#media').raw().options[$('#media').raw().selectedIndex].text;
-    if (media == "---" || media == "Vinyl" || media == "Soundboard" || media == "Cassette") {
-        media = "old";
-    }
+    mediaOld = (media == "---" || media == "Vinyl" || media == "Soundboard" || media == "Cassette");
     var year = $('#year').val();
     var unknown = $('#unknown').prop('checked');
-    if (year < 1982 && year != '' && media != "old" && !unknown) {
+    if (year < 1982 && year != '' && !mediaOld && !unknown) {
         $('#yearwarning').gshow();
         $('#remaster').raw().checked = true;
         $('#remaster_true').gshow();
@@ -350,6 +484,14 @@ function GroupRemaster() {
     }
 }
 
+function loadThumbnail() {
+    var url = $('#image').val();
+    if (url === '') {
+        $('#thumbnail').attr('src', '').hide();
+    } else {
+        $('#thumbnail').attr('src', url).show();
+    }
+}
 
 /**
  * Accepts a mapping which is an object where each prop is the id of
@@ -359,32 +501,22 @@ function GroupRemaster() {
  * @param mapping
  * @param data
  */
-function FillInFields(mapping, data) {
+function jsonFill(source, mapping) {
     for (var prop in mapping) {
+        if (prop == 'releasetype') {
+            // Different sites have different IDs beyond the first few
+            continue;
+        }
         if (!mapping.hasOwnProperty(prop)) {
             continue;
         }
-        if (data[mapping[prop]] && data[mapping[prop]] !== '') {
-            $('#' + prop).val(data[mapping[prop]]).trigger('change');
+        if (source[mapping[prop]] && source[mapping[prop]] !== '') {
+            $('#' + prop).val(source[mapping[prop]]).trigger('change');
         }
     }
 }
 
-function AddArtist(array, importance, cnt) {
-    for (var i = 0; i < array.length; i++) {
-        var artist_id = (cnt > 0) ? 'artist_' + cnt : 'artist';
-        var importance_id = (cnt > 0) ? 'importance_' + cnt : 'importance';
-        if (array[i]['name']) {
-            $('#' + artist_id).val(array[i]['name']);
-            $('#' + importance_id).val(importance);
-            AddArtistField();
-            cnt++;
-        }
-    }
-    return cnt;
-}
-
-function ParseEncoding(encoding) {
+function fillEncodingField(encoding) {
     if ($("#bitrate option[value='" + encoding + "']").length > 0) {
         $('#bitrate').val(encoding);
     }
@@ -400,47 +532,49 @@ function ParseEncoding(encoding) {
     }
 }
 
-function ParseMusicJson(group, torrent) {
-    var cnt = 0;
-
-    // JSON property to HTML value for importance
-    var mapping = {
-        artists: 1,
-        with: 2,
-        composers: 4,
-        conductor: 5,
-        dj: 6,
-        remixedBy: 3,
-        producer: 7
-    };
-
-    if (group['musicInfo']) {
-        for (var prop in group['musicInfo']) {
-            if (!group['musicInfo'].hasOwnProperty(prop)) {
-                continue;
+function fillArtist(artistlist, role) {
+    for (var i = 0; i < artistlist.length; i++) {
+        if (artistlist[i]['name']) {
+            if (ArtistJsonCount++ > 0) {
+                AddArtistField();
             }
-            cnt = AddArtist(group['musicInfo'][prop], mapping[prop], cnt);
+            $('#artist_' + ArtistCount).val(artistlist[i]['name']);
+            $('#importance_' + ArtistCount).val(role);
         }
-        RemoveArtistField();
+    }
+}
+
+function fillMusicForm(group, torrent) {
+    if (group['musicInfo']) {
+        // JSON property to HTML value for artist role
+        var mapping = {
+            artists: 1,
+            with: 2,
+            composers: 4,
+            conductor: 5,
+            dj: 6,
+            remixedBy: 3,
+            producer: 7,
+        };
+        for (var prop in group['musicInfo']) {
+            if (group['musicInfo'].hasOwnProperty(prop)) {
+                fillArtist(group['musicInfo'][prop], mapping[prop]);
+            }
+        }
     }
 
-    // HTML ID to JSON key for group data
-    mapping = {
+    // fill out group info
+    jsonFill(group, {
         record_label: 'recordLabel',
-        releasetype: 'releaseType',
-        catalogue_number: 'catalogueNumber'
-    };
+        catalogue_number: 'catalogueNumber',
+        album_desc: 'wikiBody',
+    });
 
-    FillInFields(mapping, group);
-
-    // HTML ID to JSON key for torrent data
-    mapping = {
+    // fill out torrent info
+    jsonFill(torrent, {
         format: 'format',
-        media: 'media'
-    };
-    FillInFields(mapping, torrent);
-
-    ParseEncoding(torrent['encoding']);
+        media: 'media',
+    });
 
     if (torrent['scene']) {
         $('#scene').prop('checked', torrent['scene']);
@@ -448,45 +582,37 @@ function ParseMusicJson(group, torrent) {
 
     if (torrent['remastered'] === true) {
         $('#remaster').prop('checked', true).triggerHandler('click');
-        mapping = {
+        jsonFill(torrent, {
             remaster_year: 'remasterYear',
             remaster_title: 'remasterTitle',
             remaster_record_label: 'remasterRecordLabel',
-            remaster_catalogue_number: 'remasterCatalogueNumber'
-        };
-        FillInFields(mapping, torrent);
+            remaster_catalogue_number: 'remasterCatalogueNumber',
+        });
     }
 }
 
-function ParseForm(group, torrent) {
-    var mapping = {
+function fillForm(group, torrent) {
+    jsonFill(group, {
         title: 'name',
         year: 'year',
-        image: 'wikiImage'
-    };
-    FillInFields(mapping, group);
+        image: 'wikiImage',
+        wikiBody: 'wikiBody',
+    });
 
     if (!group['categoryName'] || group['categoryName'] === 'Music') {
-        ParseMusicJson(group, torrent);
+        fillMusicForm(group, torrent);
     }
     else if (group['categoryName'] === 'Comedy') {
-        mapping = {
-            format: 'format'
-        };
-        FillInFields(mapping, torrent);
-        ParseEncoding(torrent['encoding']);
+        jsonFill(torrent, {
+            format: 'format',
+        });
     }
 
-    // special columns
+    // other columns
+    fillEncodingField(torrent['encoding']);
     if (group['tags']) {
         $('#tags').val(group['tags'].join(','));
     }
-
-    if (group['wikiBody']) {
-        $('#album_desc').val(group['wikiBody']);
-        $('#desc').val(group['wikiBody']);
-    }
-
     if (torrent['description']) {
         // This does not get converted to HTML in the ajax endpoint
         $('#release_desc').val(torrent['description']);
@@ -513,7 +639,10 @@ function WaitForCategory(callback) {
 
 function insertParsedJson(data) {
     var group = data['response']['group'];
-    var torrent = data['response']['torrent'];
+    var torrent = data['response']['torrent'][0];
+    if(typeof(torrent) == 'undefined') {
+        torrent = data['response']['torrent'];
+    }
 
     var categories_mapping = {
         'Music': 0,
@@ -532,13 +661,12 @@ function insertParsedJson(data) {
     categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
     // delay for the form to change before filling it
     WaitForCategory(function() {
-        ParseForm(group, torrent);
+        fillForm(group, torrent);
     });
 }
 
 function ParseUploadJson() {
     var reader = new FileReader();
-
     reader.addEventListener('load', function() {
         try {
             var data = JSON.parse(reader.result.toString());
@@ -569,3 +697,82 @@ function ParseUploadJson() {
         reader.readAsText(file);
     }
 }
+
+function checkFields() {
+    var error = 0;
+    // When your DOM is historically fucked up...
+    var is_new = $("#torrent-new").val() == "1";
+    var is_music = (typeof($('#categories').val()) != "undefined" && $('#categories').val() == "0");
+    var is_edit = (typeof($('#edittype').val()) != "undefined" && $('#edittype').val() == "1");
+    $("#check").empty();
+    if (!is_edit && (is_new && !$('#file').val())) {
+        ++error;
+        $("#check").append('<li>No torrent file specified, no-one will be able to download from you.</li>');
+    }
+    if (!is_edit && (is_new && !$('#title').val())) {
+        ++error;
+        $("#check").append('<li>No title specified.</li>');
+    }
+    if ($('#tags').val() == '') {
+        ++error;
+        $("#check").append('<li>You must add at least one tag that describes this release.</li>');
+    }
+    if (is_music) {
+        if (is_new && !$('#artist_0').val()) {
+            ++error;
+            $("#check").append('<li>No artist specified. There must be at least Main artist.</li>');
+        }
+        if ($('#year').val() == '') {
+            ++error;
+            $("#check").append('<li>No year specified. When was this released?</li>');
+        }
+        if (!(is_new && $('#releasetype').val())) {
+            ++error;
+            $("#check").append('<li>Release type (Album, EP, ...) not specified.</li>');
+        }
+        if (is_new && $('#media').val() == '---') {
+            ++error;
+            $("#check").append('<li>Media type (CD, WEB, ...) not specified.</li>');
+        }
+        if (is_new && $('#format').val() == '---') {
+            ++error;
+            $("#check").append('<li>Format (FLAC, MP3, ...) not specified.</li>');
+        }
+        if ($('#bitrate').val() == '---') {
+            ++error;
+            $("#check").append('<li>Bitrate (Lossless, 320, V0 (VBR), ...) not specified.</li>');
+        }
+        if (LogCount > 1) {
+            missing = 0;
+            for (i = 1; i < 2; i++) {
+                if (!$('#logfile' + 1).val()) {
+                    ++missing;
+                }
+            }
+            if (missing) {
+                ++error;
+                $("#check").append('<li>You specified that there was a logfile for this rip but did not add it (Expected: '
+                    + LogCount + ', missing: ' + missing + ').</li>');
+            }
+        }
+        if ($('#album_desc').val() == '') {
+            ++error;
+            $("#check").append('<li>You need to add a description to this release (which also improves its chance of being snatched).</li>');
+        }
+    }
+    if (error) {
+        if (is_music) {
+            $("#check").append('<li>Using <b>YADG</b> solves many such problems automatically, check it out in the forums.</li>');
+        }
+        $("#check").append('<li><strong class="important_text">You must correct the above problems.</strong></li>');
+        $("#check").show();
+    } else {
+        $("#check").hide();
+    }
+
+    return error == 0;
+}
+
+$(document).ready(function () {
+    musicFormInit();
+});

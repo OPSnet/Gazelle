@@ -7,7 +7,8 @@ class Tag extends \Gazelle\Base {
 
     /**
      * Get a tag ready for database input and display.
-     * Trim whitespace, force to lower case, remove all that is not alphanumeric + dot,
+     * Trim whitespace, force to lower case, internal spaces and dashes become dots,
+     * remove all that is not alphanumeric + dot,
      * remove leading and trailing dots and remove doubled-up dots.
      *
      * @param string $tag
@@ -17,7 +18,7 @@ class Tag extends \Gazelle\Base {
         return preg_replace('/\.+/', '.',         // remove doubled-up dots
             trim(                                 // trim leading, trailing dots
                 preg_replace('/[^a-z0-9.]+/', '', // remove non alphanum, dot
-                    str_replace('-', '.',         // dash to dot
+                    str_replace([' ', '-'], '.',  // dash and internal space to dot
                         strtolower(               // lowercase
                             trim($tag)            // whitespace
                         )
