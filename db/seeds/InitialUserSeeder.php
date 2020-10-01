@@ -3,45 +3,50 @@
 use Phinx\Seed\AbstractSeed;
 use Phinx\Util\Literal;
 
+require_once(__DIR__ . '/../../classes/util.php'); // randomString()
+
 class InitialUserSeeder extends AbstractSeed {
     public function run() {
         /** @var \PDOStatement $stmt */
-        $stmt = $this->query("SELECT COUNT(*) AS count FROM users_main WHERE Username='admin'");
-        if (((int) $stmt->fetch()['count']) > 0) {
+        $stmt = $this->getAdapter()->getConnection()->prepare("
+            SELECT 1
+            FROM users_main
+            WHERE PermissionID = ?
+            LIMIT 1
+        ");
+        $stmt->execute([SYSOP]);
+        if ($stmt->fetch(PDO::FETCH_NUM)[0]) {
+            // There is a Sysop-level user, consider the database seeded
             return;
         }
-
-        $now = (new \DateTime("now"))->format("Y-m-d H:i:s");
         $this->table('users_main')->insert([
             [
                 'Username' => 'admin',
                 'Email' => 'admin@example.com',
                 'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
-                'Class' => 5,
+                'torrent_pass' => randomString(32),
+                'PermissionID' => SYSOP,
+                'Invites' => STARTING_INVITES,
                 'Enabled' => '1',
                 'Visible' => 1,
-                'Invites' => 0,
-                'PermissionID' => 15,
                 'can_leech' => 1,
-                'torrent_pass' => '86519d75682397913039534ea21a4e45',
             ],
             [
                 'Username' => 'user',
                 'Email' => 'user@example.com',
                 'PassHash' => password_hash(hash('sha256','password'), PASSWORD_DEFAULT),
-                'Class' => 5,
+                'torrent_pass' => randomString(32),
+                'PermissionID' => USER,
+                'Invites' => STARTING_INVITES,
                 'Enabled' => '1',
                 'Visible' => 1,
-                'Invites' => 0,
-                'PermissionID' => 2,
                 'can_leech' => 1,
-                'torrent_pass' => '86519d75682397913039534ea21a4e45',
             ],
         ])->saveData();
 
         $this->table('user_last_access')->insert([
-            [ 'user_id' => 1, 'last_access' => $now ],
-            [ 'user_id' => 2, 'last_access' => $now ],
+            [ 'user_id' => 1, 'last_access' => Literal::from('now()') ],
+            [ 'user_id' => 2, 'last_access' => Literal::from('now()') ],
         ])->saveData();
 
         $this->table('user_flt')->insert([
