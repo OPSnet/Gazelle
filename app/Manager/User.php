@@ -9,7 +9,7 @@ class User extends \Gazelle\Base {
      * @return array [Day, Week, Month]
      */
     public function globalActivityStats(): array {
-        if (($stats = $cache->get_value('stats_users')) === false) {
+        if (($stats = $this->cache->get_value('stats_users')) === false) {
             $this->db->prepared_query("
                 SELECT
                     sum(ula.last_access > now() - INTERVAL 1 DAY) AS Day,
@@ -32,7 +32,7 @@ class User extends \Gazelle\Base {
      * @return integer Number of enabled users (this is cached).
      */
     public function getEnabledUsersCount(): int {
-        if (($count = G::$Cache->get_value('stats_user_count')) == false) {
+        if (($count = $this->cache->get_value('stats_user_count')) == false) {
             $count = $this->db->scalar("SELECT count(*) FROM users_main WHERE Enabled = '1'");
             $this->cache->cache_value('stats_user_count', $count, 0);
         }
