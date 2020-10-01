@@ -415,7 +415,7 @@ class Collage extends Base {
      */
     public function torrentList(): array {
         if (is_null($this->userId)) {
-            throw new CollageException('user-not-set');
+            throw new Exception\CollageUserNotSetException;
         }
         return $this->torrents;
     }

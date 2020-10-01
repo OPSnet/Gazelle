@@ -29,7 +29,7 @@ if (isset($_POST['Username'])) {
             ->setAdminComment('Created by ' . $LoggedUser['Username'] . ' via admin toolbox')
             ->create();
     }
-    catch (Gazelle\UserCreatorException $e) {
+    catch (Gazelle\Exception\UserCreatorException $e) {
         switch ($e->getMessage()) {
             case 'username-invalid':
                 error('Specified username is forbidden');

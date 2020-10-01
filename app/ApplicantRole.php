@@ -2,8 +2,6 @@
 
 namespace Gazelle;
 
-class ApplicantRoleNotFoundException extends \Exception {};
-
 class ApplicantRole extends Base {
     protected $id;
     protected $title;
@@ -28,7 +26,7 @@ class ApplicantRole extends Base {
                 WHERE ID = ?
             ", $id);
             if (!$this->db->has_results()) {
-                throw new ApplicantRoleNotFoundException;
+                throw new Exception\ResourceNotFoundException($id);
             }
             $data = $this->db->next_record(MYSQLI_ASSOC);
             $this->cache->cache_value($key, $data, 86400);

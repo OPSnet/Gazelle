@@ -77,7 +77,7 @@ if (!empty($_REQUEST['confirm'])) {
                 Tracker::update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);
                 $Sent = 1;
             }
-            catch (Gazelle\UserCreatorException $e) {
+            catch (Gazelle\Exception\UserCreatorException $e) {
                 switch ($e->getMessage()) {
                     case 'email':
                         $Err = 'No email address given';

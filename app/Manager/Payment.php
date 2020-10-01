@@ -2,6 +2,8 @@
 
 namespace Gazelle\Manager;
 
+use \Gazelle\Exception\PaymentFetchForexException;
+
 class Payment extends \Gazelle\Base {
 
     const LIST_KEY = 'payment_list';
@@ -78,7 +80,7 @@ class Payment extends \Gazelle\Base {
                         ', $l['cc'], $l['cc']
                     );
                     if (!$l['fiatRate']) {
-                        throw new \Exception(sprintf('XBT id=%d cc=%s', $l['ID'], $l['cc']));
+                        throw new PaymentFetchForexException(sprintf('XBT id=%d cc=%s', $l['ID'], $l['cc']));
                     }
                 }
                 $l['Rent'] = sprintf('%0.2f', $l['AnnualRent']);
