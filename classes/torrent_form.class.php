@@ -5,7 +5,7 @@
  ********************************************************************************
  ** This class is used to create both the upload form, and the 'edit torrent'  **
  ** form. It is broken down into several functions - head(), foot(),           **
- ** music_form() [music], audiobook_form() [Audiobooks and comedy], and           **
+ ** music_form() [music], audiobook_form() [Audiobooks and comedy], and        **
  ** simple_form() [everything else].                                           **
  **                                                                            **
  ** When it is called from the edit page, the forms are shortened quite a bit. **
@@ -65,17 +65,18 @@ class TORRENT_FORM {
 <?php
     }
     if ($this->Error) {
-        echo "\t".'<p style="color: red; text-align: center;">'.$this->Error."</p>\n";
-    }
 ?>
+    <p style="color: red; text-align: center;"><?= $this->Error ?></p>
+<?php } ?>
     <form class="create_form" name="torrent" action="" enctype="multipart/form-data" method="post" id="upload_table" onsubmit="$('#post').raw().disabled = 'disabled';">
         <div>
+            <input type="hidden" id="torrent-new" name="torrent-new" value="<?= $this->NewTorrent ? 1 : 0 ?>" />
             <input type="hidden" name="submit" value="true" />
             <input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
 <?php        if (!$this->NewTorrent) { ?>
                 <input type="hidden" name="action" value="takeedit" />
                 <input type="hidden" name="torrentid" value="<?=display_str($this->TorrentID)?>" />
-                <input type="hidden" name="type" value="<?=display_str($this->Torrent['CategoryID'])?>" />
+                <input type="hidden" name="type" id="edittype" value="<?=display_str($this->Torrent['CategoryID'])?>" />
 <?php
             } else {
                 if ($this->Torrent && $this->Torrent['GroupID']) {
@@ -103,22 +104,17 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">JSON file:</td>
                 <td>
-                    <input type="file" onchange="ParseUploadJson()" id="torrent-json-file" accept="<?= implode(',', self::JSON_INPUT_ACCEPT); ?>" />
+                    <input type="file" id="torrent-json-file" accept="<?= implode(',', self::JSON_INPUT_ACCEPT); ?>" />
+                    <br />(If you are not cross-seeding from another site, you can safely leave this field empty).
                 </td>
             </tr>
             <tr>
                 <td class="label">Type:</td>
                 <td>
                     <select id="categories" name="type" onchange="Categories()"<?=$this->Disabled?>>
-<?php
-            foreach (Misc::display_array($this->Categories) as $Index => $Cat) {
-                echo "\t\t\t\t\t\t<option value=\"$Index\"";
-                if ($Cat == $this->Torrent['CategoryName']) {
-                    echo ' selected="selected"';
-                }
-                echo ">$Cat</option>\n";
-            }
-?>
+<?php       foreach (Misc::display_array($this->Categories) as $Index => $Cat) { ?>
+                        <option value="<?= $Index ?>"<?= $Cat == $this->Torrent['CategoryName'] ? ' selected="selected"' : '' ?>><?= $Cat ?></option>
+<?php       } ?>
                     </select>
                 </td>
             </tr>
@@ -128,48 +124,20 @@ class TORRENT_FORM {
 <?php
     } // function head
 
-
     function foot() {
         $Torrent = $this->Torrent;
 ?>
         </div>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
-<?php
-        if (!$this->NewTorrent) {
-            if (check_perms('torrents_freeleech')) {
-?>
-            <tr id="freetorrent">
-                <td class="label">Leech Type</td>
-                <td>
-                    <select name="freeleechtype">
-<?php
-                $FL = ["Normal", "Free", "Neutral"];
-                foreach ($FL as $Key => $Name) {
-?>
-                        <option value="<?=$Key?>"<?=($Key == $Torrent['FreeTorrent'] ? ' selected="selected"' : '')?>><?=$Name?></option>
-<?php           } ?>
-                    </select>
-                    because
-                    <select name="freeleechreason">
-<?php
-                $FL = ["N/A", "Staff Pick", "Perma-FL", "Vanity House"];
-                foreach ($FL as $Key => $Name) {
-?>
-                        <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$Name?></option>
-<?php           } ?>
-                    </select>
-                </td>
-            </tr>
-<?php
-            }
-        }
-?>
             <tr>
                 <td colspan="2" style="text-align: center;">
                     <p>Be sure that your torrent is approved by the <a href="rules.php?p=upload" target="_blank">rules</a>. Not doing this will result in a <strong class="important_text">warning</strong> or <strong class="important_text">worse</strong>.</p>
 <?php       if ($this->NewTorrent) { ?>
-                    <p>After uploading the torrent, you will have a one hour grace period during which no one other than you can fill requests with this torrent. Make use of this time wisely, and <a href="requests.php" target="_blank">search the list of requests</a>.</p>
+                    <p>After uploading the torrent, you will have a one hour grace period during which no one other than you can fill requests with this torrent.<br />Make use of this time wisely, and <a href="requests.php" target="_blank">search the list of requests</a>.</p>
 <?php       } ?>
+                    <div style="width: 60%; margin: 0 auto;">
+                    <ul id="check" class="nobullet" style="display: none; padding: 12px; text-align: left; border: 2px solid orangered;"></ul>
+                    </div>
                     <input id="post" type="submit"<?php if ($this->NewTorrent) { echo ' value="Upload torrent"'; } else { echo ' value="Edit torrent"';} ?> />
                 </td>
             </tr>
@@ -186,7 +154,7 @@ class TORRENT_FORM {
         $UnknownRelease = !$this->NewTorrent && $IsRemaster && !$Torrent['RemasterYear'];
 
         if ($Torrent['GroupID']) {
-            G::$DB->query('
+            G::$DB->prepared_query("
                 SELECT
                     ID,
                     RemasterYear,
@@ -194,14 +162,15 @@ class TORRENT_FORM {
                     RemasterRecordLabel,
                     RemasterCatalogueNumber
                 FROM torrents
-                WHERE GroupID = '.$Torrent['GroupID']."
-                    AND Remastered = '1'
+                WHERE Remastered = '1'
                     AND RemasterYear != 0
+                    AND GroupID = ?
                 ORDER BY RemasterYear DESC,
                     RemasterTitle DESC,
                     RemasterRecordLabel DESC,
-                    RemasterCatalogueNumber DESC");
-
+                    RemasterCatalogueNumber DESC
+                ", $Torrent['GroupID']
+            );
             if (G::$DB->has_results()) {
                 $GroupRemasters = G::$DB->to_array(false, MYSQLI_BOTH, false);
             }
@@ -218,19 +187,53 @@ class TORRENT_FORM {
         $LossywebApproved = $Torrent['LossywebApproved'];
         global $ReleaseTypes;
 ?>
+        <div id="musicbrainz_popup" style="display: none;">
+            <a href="#null" id="popup_close">x</a>
+            <h1 id="popup_title"></h1>
+            <h2 id="popup_back"></h2>
+            <div id="results1"></div>
+            <div id="results2"></div>
+        </div>
+        <div id="popup_background"></div>
+
         <table cellpadding="3" cellspacing="1" border="0" class="layout border<?php if ($this->NewTorrent) { echo ' slice'; } ?>" width="100%">
-<?php        if ($this->NewTorrent) { ?>
+<?php   if (!$this->NewTorrent) { ?>
+            <tr><td colspan="2"><h3>Edit <?= Artists::display_artists(Artists::get_artist($Torrent['GroupID'])) . display_str($Torrent['Title'] )?></h3></td></tr>
+<?php   } else { ?>
+            <tr id="releasetype_tr">
+                <td class="label">
+                    <span id="releasetype_label">Release type:</span>
+                </td>
+                <td>
+                    <select id="releasetype" name="releasetype"<?=$this->Disabled?>>
+                        <option>---</option>
+<?php       foreach ($ReleaseTypes as $Key => $Val) { ?>
+                        <option value="<?= $Key ?>"<?= $Key == $Torrent['ReleaseType'] ? ' selected="selected"' : '' ?>><?= $Val ?></option>
+<?php       } ?>
+                    </select>
+                    <br />Please take the time to fill this out correctly (especially when adding Compilations and Anthologies). Need help? Try reading <a href="wiki.php?action=article&amp;id=58" target="_blank">this wiki article</a> or searching <a href="https://musicbrainz.org/search" target="_blank">MusicBrainz</a>.
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Image (recommended):</td>
+                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image']) ?>"<?=$this->Disabled?> />
+                    <img id="thumbnail" src="#" height="100" width="100" float="right" style="margin-left: 10px; vertical-align: top; display: none;" />
+                <br />Cover art helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
+                </td>
+            </tr>
+
             <tr id="artist_tr">
             <td class="label">Artist(s):</td>
             <td id="artistfields">
-                <p id="vawarning" class="hidden">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</p>
+                <p id="vawarning" class="hidden"><strong class="important_text">Please use the multiple artists feature rather than adding "Various Artists" as an artist; read <a href="wiki.php?action=article&amp;id=64" target="_blank">this</a> for more information.</strong></p>
 <?php
             if (!empty($Torrent['Artists'])) {
                 $FirstArtist = true;
                 foreach ($Torrent['Artists'] as $Importance => $Artists) {
+                    $n = 0;
                     foreach ($Artists as $Artist) {
 ?>
-                    <input type="text" id="artist" name="artists[]" size="45" value="<?=display_str($Artist['name']) ?>" onblur="CheckVA();"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+                    <input type="text" id="artist_<?= $n++ ?>" name="artists[]" size="45" value="<?=display_str($Artist['name']) ?>" onblur="CheckVA();"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
                     <select id="importance" name="importance[]"<?=$this->Disabled?>>
                         <option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
                         <option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
@@ -256,8 +259,8 @@ class TORRENT_FORM {
                 }
             } else {
 ?>
-                    <input type="text" id="artist" name="artists[]" size="45" onblur="CheckVA();"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
-                    <select id="importance" name="importance[]"<?=$this->Disabled?>>
+                    <input type="text" id="artist_0" name="artists[]" size="45" onblur="CheckVA();"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+                    <select id="importance_0" name="importance[]"<?=$this->Disabled?>>
                         <option value="1">Main</option>
                         <option value="2">Guest</option>
                         <option value="4">Composer</option>
@@ -270,6 +273,7 @@ class TORRENT_FORM {
 <?php       } ?>
                 </td>
             </tr>
+
             <tr id="title_tr">
                 <td class="label">Album title:</td>
                 <td>
@@ -281,53 +285,16 @@ class TORRENT_FORM {
                 <td class="label tooltip" title="Click the &quot;Find Info&quot; button to automatically fill out parts of the upload form by selecting an entry in MusicBrainz">MusicBrainz:</td>
                 <td><input type="button" value="Find Info" id="musicbrainz_button" /></td>
             </tr>
-            <div id="musicbrainz_popup">
-                <a href="#null" id="popup_close">x</a>
-                <h1 id="popup_title"></h1>
-                <h2 id="popup_back"></h2>
-                <div id="results1"></div>
-                <div id="results2"></div>
-            </div>
-            <div id="popup_background"></div>
-
-<script type="text/javascript">
-//<![CDATA[
-hide();
-if (document.getElementById("categories").disabled == false) {
-    if (navigator.appName == 'Opera') {
-        var useragent = navigator.userAgent;
-        var match = useragent.split('Version/');
-        var version = parseFloat(match[1]);
-        if (version >= 12.00) {
-            show();
-        }
-    } else if (navigator.appName != 'Microsoft Internet Explorer') {
-        show();
-    }
-}
-
-function hide() {
-    document.getElementById("musicbrainz_tr").style.display = "none";
-    document.getElementById("musicbrainz_popup").style.display = "none";
-    document.getElementById("popup_background").style.display = "none";
-}
-
-function show() {
-    document.getElementById("musicbrainz_tr").style.display = "";
-    document.getElementById("musicbrainz_popup").style.display = "";
-    document.getElementById("popup_background").style.display = "";
-}
-//]]>
-</script>
-
             <tr id="year_tr">
                 <td class="label">
                     <span id="year_label_not_remaster"<?php if ($IsRemaster) { echo ' class="hidden"';} ?>>Year:</span>
-                    <span id="year_label_remaster"<?php if (!$IsRemaster) { echo ' class="hidden"';} ?>>Year of original release:</span>
+                    <span id="year_label_remaster"<?php if (!$IsRemaster) { echo ' class="hidden"';} ?>>Year of first release:</span>
                 </td>
                 <td>
                     <p id="yearwarning" class="hidden">You have entered a year for a release which predates the medium's availability. You will need to change the year and enter additional edition information. If this information cannot be provided, check the &quot;Unknown Release&quot; check box below.</p>
-                    <input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>"<?=$this->Disabled?> onblur="CheckYear();" /> This is the year of the original release.
+                    <input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>"<?=$this->Disabled?> onblur="CheckYear();" />
+                    <br />This is the year of the original release. You may be uploading a remaster or re-edition that was published more recently.
+                    <br />If so, there is a place to add that date below (check Edition information).
                 </td>
             </tr>
             <tr id="label_tr">
@@ -342,34 +309,13 @@ function show() {
                     Please double-check the record label and catalogue number when using MusicBrainz. See <a href="wiki.php?action=article&amp;id=18" target="_blank">this guide</a> for more details.
                 </td>
             </tr>
-            <tr id="releasetype_tr">
-                <td class="label">
-                    <span id="releasetype_label">Release type:</span>
-                </td>
-                <td>
-                    <select id="releasetype" name="releasetype"<?=$this->Disabled?>>
-                        <option>---</option>
-<?php
-            foreach ($ReleaseTypes as $Key => $Val) {
-                echo "\t\t\t\t\t\t<option value=\"$Key\"";
-                if ($Key == $Torrent['ReleaseType']) {
-                    echo ' selected="selected"';
-                }
-                echo ">$Val</option>\n";
-            }
-?>
-                    </select> Please take the time to fill this out properly. Need help? Try reading <a href="wiki.php?action=article&amp;id=58" target="_blank">this wiki article</a> or searching <a href="https://musicbrainz.org/search" target="_blank">MusicBrainz</a>.
-                </td>
-            </tr>
-<?php    } ?>
-<?php    if (!$this->NewTorrent) { ?>
-            <tr><td colspan="2"><h3>Edit <?= Artists::display_artists(Artists::get_artist($Torrent['GroupID'])) . display_str($Torrent['Title'] )?></h3></td></tr>
-<?php    } ?>
+
+<?php    } /* $this->NewTorrent */ ?>
             <tr>
                 <td class="label">Edition information:</td>
                 <td>
                     <input type="checkbox" id="remaster" name="remaster"<?php if ($IsRemaster) { echo ' checked="checked"'; } ?> onclick="Remaster();<?php if ($this->NewTorrent) { ?> CheckYear();<?php } ?>" />
-                    <label for="remaster">Check this box if this torrent is a different release to the original, for example a limited or country specific edition or a release that includes additional bonus tracks or is a bonus disc.</label>
+                    <label for="remaster">Check this if this torrent is a different edition to the original, for example a remaster, country specific edition, or a release that includes additional bonus tracks or bonus discs.</label>
                     <div id="remaster_true"<?php if (!$IsRemaster) { echo ' class="hidden"';} ?>>
 <?php    if (check_perms('edit_unknowns') || G::$LoggedUser['ID'] == $Torrent['UserID']) { ?>
                         <br />
@@ -408,20 +354,20 @@ function show() {
                                     <td class="label">Title:</td>
                                     <td>
                                         <input type="text" id="remaster_title" name="remaster_title" size="50" value="<?=display_str($Torrent['RemasterTitle']) ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
-                                        <p class="min_padding">Title of the release (e.g. <span style="font-style: italic;">"Deluxe Edition" or "Remastered"</span>).</p>
+                                        <p class="min_padding">Title of the edition (e.g. <span style="font-style: italic;">"Deluxe Edition" or "Remastered"</span>).</p>
                                     </td>
                                 </tr>
                                 <tr id="edition_record_label">
                                     <td class="label">Record label:</td>
                                     <td>
                                         <input type="text" id="remaster_record_label" name="remaster_record_label" size="50" value="<?=display_str($Torrent['RemasterRecordLabel']) ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
-                                        <p class="min_padding">This is for the record label of the <strong>release</strong>. It may differ from the original.</p>
+                                        <p class="min_padding">This is for the record label of the <strong>edition</strong>. It may differ from the original.</p>
                                     </td>
                                 </tr>
                                 <tr id="edition_catalogue_number">
                                     <td class="label">Catalogue number:</td>
                                     <td><input type="text" id="remaster_catalogue_number" name="remaster_catalogue_number" size="50" value="<?=display_str($Torrent['RemasterCatalogueNumber']) ?>"<?php if ($UnknownRelease) { echo ' disabled="disabled"';} ?> />
-                                        <p class="min_padding">This is for the catalogue number of the <strong>release</strong>.</p>
+                                        <p class="min_padding">This is for the catalogue number of the <strong>edition</strong>.</p>
                                     </td>
                                 </tr>
                             </tbody>
@@ -436,10 +382,39 @@ function show() {
                     <label for="scene">Select this only if this is a "scene release".<br />If you ripped it yourself, it is <strong>not</strong> a scene release. If you are not sure, <strong class="important_text">do not</strong> select it; you will be penalized. For information on the scene, visit <a href="https://en.wikipedia.org/wiki/Warez_scene" target="_blank">Wikipedia</a>.</label>
                 </td>
             </tr>
+<?php   if (check_perms('torrents_edit_vanityhouse') && $this->NewTorrent) { ?>
+            <tr>
+                <td class="label">Vanity House:</td>
+                <td>
+                    <label><input type="checkbox" id="vanity_house" name="vanity_house"<?php if ($Torrent['GroupID']) { echo ' disabled="disabled"'; } ?><?php if ($Torrent['VanityHouse']) { echo ' checked="checked"';} ?> />
+                    Check this only if you are submitting your own work or submitting on behalf of the artist, and this is intended to be a Vanity House release.
+                    </label>
+                </td>
+            </tr>
+<?php   } ?>
+
+            <tr>
+                <td class="label">Media:</td>
+                <td>
+                    <select name="media" id="media">
+                        <option>---</option>
+<?php
+        foreach ($this->Media as $Media) {
+            echo "\t\t\t\t\t\t<option value=\"$Media\"";
+            if (isset($Torrent['Media']) && $Media == $Torrent['Media']) {
+                echo ' selected="selected"';
+            }
+            echo ">$Media</option>\n";
+        }
+?>
+                    </select>
+                </td>
+            </tr>
+
             <tr>
                 <td class="label">Format:</td>
                 <td>
-                    <select id="format" name="format" onchange="Format()">
+                    <select id="format" name="format">
                         <option>---</option>
 <?php
         foreach (Misc::display_array($this->Formats) as $Format) {
@@ -476,7 +451,6 @@ function show() {
         $SimpleBitrate = explode(' ', $Torrent['Bitrate']);
         $SimpleBitrate = $SimpleBitrate[0];
 
-
         foreach (Misc::display_array($this->Bitrates) as $Bitrate) {
             echo "\t\t\t\t\t\t<option value=\"$Bitrate\"";
             if (($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')) {
@@ -499,46 +473,20 @@ function show() {
                 </td>
                 <td id="logfields">
                     Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-                    <input id="file" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField('<?=Logchecker::getAcceptValues()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+                    <input id="logfile_1" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField('<?=Logchecker::getAcceptValues()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
                 </td>
             </tr>
             <tr>
                 <td class="label">Multi-format uploader:</td>
-                <td><input type="button" value="+" id="add_format" /><input type="button" style="display: none;" value="-" id="remove_format" /></td>
+                <td><input type="button" value="+" id="add_format" />&nbsp;<input type="button" style="display: none;" value="-" id="remove_format" /></td>
             </tr>
             <tr id="placeholder_row_top"></tr>
-            <tr id="placeholder_row_bottom"></tr>
+            <tr id="extra_format_placeholder"></tr>
 <?php
         }
-        if (check_perms('torrents_edit_vanityhouse') && $this->NewTorrent) {
+
+        if (!$this->NewTorrent && check_perms('users_mod')) {
 ?>
-            <tr>
-                <td class="label">Vanity House:</td>
-                <td>
-                    <label><input type="checkbox" id="vanity_house" name="vanity_house"<?php if ($Torrent['GroupID']) { echo ' disabled="disabled"'; } ?><?php if ($Torrent['VanityHouse']) { echo ' checked="checked"';} ?> />
-                    Check this only if you are submitting your own work or submitting on behalf of the artist, and this is intended to be a Vanity House release. Checking this will also automatically add the group as a recommendation.
-                    </label>
-                </td>
-            </tr>
-<?php   } ?>
-            <tr>
-                <td class="label">Media:</td>
-                <td>
-                    <select name="media" onchange="CheckYear();" id="media">
-                        <option>---</option>
-<?php
-        foreach ($this->Media as $Media) {
-            echo "\t\t\t\t\t\t<option value=\"$Media\"";
-            if (isset($Torrent['Media']) && $Media == $Torrent['Media']) {
-                echo ' selected="selected"';
-            }
-            echo ">$Media</option>\n";
-        }
-?>
-                    </select>
-                </td>
-            </tr>
-<?php   if (!$this->NewTorrent && check_perms('users_mod')) { ?>
             <tr>
                 <td class="label">Log/cue:</td>
                 <td>
@@ -602,12 +550,8 @@ function show() {
                     </select>
 <?php            } ?>
                     <input type="text" id="tags" name="tags" size="40" value="<?=display_str($Torrent['TagList']) ?>"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
-                    <br /><?= G::$Twig->render('rules/tag.twig', [on_upload => true]) ?>
+                    <br /><?= G::$Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
-            </tr>
-            <tr>
-                <td class="label">Image (optional):</td>
-                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image']) ?>"<?=$this->Disabled?> /></td>
             </tr>
             <tr>
                 <td class="label">Album description:</td>
@@ -712,10 +656,6 @@ function show() {
                 </td>
             </tr>
             <tr>
-                <td class="label">Image (optional):</td>
-                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image']) ?>"<?=$this->Disabled?> /></td>
-            </tr>
-            <tr>
                 <td class="label">Description:</td>
                 <td>
 <?php new TEXTAREA_PREVIEW('album_desc', 'album_desc', display_str($Torrent['GroupDescription']), 60, 8); ?>
@@ -769,4 +709,3 @@ function show() {
         </table>
 <?php   }//function simple_form
 }//class
-?>

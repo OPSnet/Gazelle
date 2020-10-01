@@ -606,6 +606,11 @@ td.label {
     width: 180px;
 }
 
+#upload form table td.label {
+    vertical-align: top;
+    padding-top: 15px;
+}
+
 table.slice {
     margin-top: -1px;
 }

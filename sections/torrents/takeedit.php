@@ -56,7 +56,7 @@ if (isset($_POST['album_desc'])) {
     $Properties['GroupDescription'] = $_POST['album_desc'];
 }
 if (check_perms('torrents_freeleech')) {
-    $Free = $_POST['freeleechtype'];
+    $Free = $_POST['freeleechtype'] ?? '0';
     if (!in_array($Free, ['0', '1', '2'])) {
         error(0);
     }
@@ -65,7 +65,7 @@ if (check_perms('torrents_freeleech')) {
     if ($Free == '0') {
         $FreeType = '0';
     } else {
-        $FreeType = $_POST['freeleechreason'];
+        $FreeType = $_POST['freeleechreason'] ?? '0';
         if (!in_array($FreeType, ['0', '1', '2', '3'])) {
             error(0);
         }

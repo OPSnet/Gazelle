@@ -212,7 +212,7 @@ $CategoryV2Icons = ['music.png'];
 
 $Formats = ['MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS'];
 $Bitrates = ['192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other'];
-$Media = ['CD', 'DVD', 'Vinyl', 'Blu-ray', 'Soundboard', 'SACD', 'DAT', 'Cassette', 'WEB'];
+$Media = ['CD', 'DVD', 'Vinyl', 'BD', 'Soundboard', 'SACD', 'DAT', 'Cassette', 'WEB'];
 
 define('ICON_ALL',    "\xe2\x9c\x85");
 define('ICON_NONE',   "\xf0\x9f\x9a\xab");

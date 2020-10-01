@@ -8,13 +8,12 @@
 // most members.                                                        //
 //**********************************************************************//
 
-require(SERVER_ROOT.'/classes/torrent_form.class.php');
+require(__DIR__ . '/../../classes/torrent_form.class.php');
 
-if (!is_number($_GET['id']) || !$_GET['id']) {
+$TorrentID = (int)$_GET['id'];
+if ($TorrentID < 1) {
     error(0);
 }
-
-$TorrentID = $_GET['id'];
 
 $DB->prepared_query('
     SELECT
@@ -63,7 +62,7 @@ $DB->prepared_query('
     ', $TorrentID
 );
 
-list($Properties) = $DB->to_array(false, MYSQLI_BOTH);
+[$Properties] = $DB->to_array(false, MYSQLI_BOTH);
 if (!$Properties) {
     error(404);
 }

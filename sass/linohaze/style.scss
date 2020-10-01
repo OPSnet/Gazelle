@@ -1244,7 +1244,12 @@ td.colhead_dark,
 td.label {
     text-align: right;
     width: 180px;
-    vertical-align: middle
+    vertical-align: middle;
+}
+
+#upload form table td.label {
+    vertical-align: top;
+    padding-top: 15px;
 }
 
 table.slice {
