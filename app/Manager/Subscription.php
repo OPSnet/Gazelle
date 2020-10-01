@@ -478,35 +478,4 @@ class Subscription extends \Gazelle\Base {
         );
         $this->cache->delete_value('subscriptions_user_new_' . $this->userId);
     }
-
-    public function toggleCollageSubscription(int $collageId) {
-        if ($this->db->scalar("
-            SELECT 1
-            FROM users_collage_subs
-            WHERE UserID = ?
-                AND CollageID = ?
-            ", $this->userId, $collageId
-        )) {
-            $this->db->prepared_query("
-                DELETE FROM users_collage_subs
-                WHERE UserID = ?
-                    AND CollageID = ?
-                ", $this->userId, $collageId
-            );
-            \Collages::decrease_subscriptions($collageId);
-        } else {
-            $this->db->prepared_query("
-                INSERT IGNORE INTO users_collage_subs
-                       (UserID, CollageID)
-                VALUES (?,      ?)
-                ", $this->userId, $collageId
-            );
-            \Collages::increase_subscriptions($collageId);
-        }
-        $this->cache->deleteMulti([
-            'collage_subs_user_' . $this->userId,
-            'collage_subs_user_new_' . $this->userId,
-            'collage_' . $collageId
-        ]);
-    }
 }

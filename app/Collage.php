@@ -306,6 +306,46 @@ class Collage extends Base {
         return $this;
     }
 
+    public function toggleSubscription(int $userId) {
+        $this->db->set_query_id($qid);
+        if ($this->db->scalar("
+            SELECT 1
+            FROM users_collage_subs
+            WHERE UserID = ?
+                AND CollageID = ?
+            ", $userId, $this->id
+        )) {
+            $this->db->prepared_query("
+                DELETE FROM users_collage_subs
+                WHERE UserID = ?
+                    AND CollageID = ?
+                ", $userId, $this->id
+            );
+            $delta = -1;
+        } else {
+            $this->db->prepared_query("
+                INSERT IGNORE INTO users_collage_subs
+                       (UserID, CollageID)
+                VALUES (?,      ?)
+                ", $userId, $this->id
+            );
+            $delta = 1;
+        }
+        $this->db->prepared_query("
+            UPDATE collages SET
+                Subscribers = greatest(0, Subscribers + ?)
+            WHERE ID = ?
+            ", $delta, $this->id
+        );
+        $this->cache->deleteMulti([
+            'collage_subs_user_' . $userId,
+            'collage_subs_user_new_' . $userId,
+            'collage_' . $this->id
+        ]);
+        $qid = $this->db->get_query_id();
+        return $this;
+    }
+
     /**
      * Load the subscriptions of the user, and clear the new additions flag if
      * they have subscribed to this collage.
