@@ -194,6 +194,8 @@ class Format {
         $Location = "$Document.php";
         $StartPage = ceil($StartPage);
         $TotalPages = 0;
+        $Pages = '';
+
         if ($TotalRecords > 0) {
             $StartPage = min($StartPage, ceil($TotalRecords / $ItemsPerPage));
 
@@ -224,8 +226,6 @@ class Format {
             if ($QueryString != '') {
                 $QueryString = "&amp;$QueryString";
             }
-
-            $Pages = '';
 
             if ($StartPage > 1) {
                 $Pages .= "<a href=\"$Location?page=1$QueryString$Anchor\"><strong>&laquo; First</strong></a> ";

@@ -27,7 +27,7 @@ class IMAGE {
         }
         $t = $Thickness / 2 - 0.5;
         if ($x1 == $x2 || $y1 == $y2) {
-            return imagefilledrectangle($this->Image, round(min($x1, $x2) - $t), round(min($y1, $y2) - $t), round(max($x1, $x2) + $t), round(max($y1, $y2) + $t), $color);
+            return imagefilledrectangle($this->Image, round(min($x1, $x2) - $t), round(min($y1, $y2) - $t), round(max($x1, $x2) + $t), round(max($y1, $y2) + $t), $Color);
         }
         $k = ($y2 - $y1) / ($x2 - $x1); //y = kx + q
         $a = $t / sqrt(1 + pow($k, 2));

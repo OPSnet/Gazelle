@@ -285,7 +285,7 @@ class Tags {
         }
 
         // 'All' tags
-        if (!isset($TagType) || $TagType == 1) {
+        if ($TagType == 1) {
             $SearchWords = array_merge($Tags['include'], $Tags['exclude']);
             if (!empty($Tags)) {
                 $QueryParts[] = implode(' ', $SearchWords);

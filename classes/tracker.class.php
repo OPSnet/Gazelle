@@ -129,6 +129,8 @@ class Tracker {
         $Sleep = 0;
         $Success = false;
         $StartTime = microtime(true);
+        $Data = "";
+        $Response = "";
         while (!$Success && $Attempts++ < $MaxAttempts) {
             if ($Sleep) {
                 sleep($Sleep);

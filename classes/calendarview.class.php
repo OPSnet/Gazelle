@@ -115,6 +115,5 @@ class CalendarView {
 
         </table>
 <?php
-        echo $Calendar;
     }
 }

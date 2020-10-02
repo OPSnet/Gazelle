@@ -199,9 +199,9 @@ class AutoEnable {
 
         if (!G::$DB->has_results()) {
             error(404);
-        } else {
-            list($UserID) = G::$DB->next_record();
         }
+
+        list($UserID) = G::$DB->next_record();
 
         G::$DB->query("
             SELECT Username

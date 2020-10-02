@@ -249,16 +249,22 @@ class DEBUG {
     }
 
     public function get_classes() {
+        $Classes = [];
         foreach (get_declared_classes() as $Class) {
-            $Classes[$Class]['Vars'] = get_class_vars($Class);
-            $Classes[$Class]['Functions'] = get_class_methods($Class);
+            $Classes[$Class] = [
+                'Vars' => get_class_vars($Class),
+                'Functions' => get_class_methods($Class),
+            ];
         }
         return $Classes;
     }
 
     public function get_extensions() {
+        $Extensions = [];
         foreach (get_loaded_extensions() as $Extension) {
-            $Extensions[$Extension]['Functions'] = get_extension_funcs($Extension);
+            $Extensions[$Extension] = [
+                'Functions' => get_extension_funcs($Extension),
+            ];
         }
         return $Extensions;
     }

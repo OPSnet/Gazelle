@@ -20,6 +20,8 @@ spl_autoload_register(function ($ClassName) {
             case 'BENCODE_LIST':
                 $FileName = 'torrent.class';
                 break;
+            default:
+                return;
         }
         $FilePath = __DIR__ . "/$FileName.php";
     }

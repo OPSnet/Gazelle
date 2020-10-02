@@ -16,6 +16,7 @@ class TorrentsDL {
     private $Title;
     private $User;
     private $AnnounceURL;
+    private $SkippedFiles = [];
 
     /**
      * Create a Zip object and store the query results
@@ -134,8 +135,8 @@ class TorrentsDL {
         $NumSkipped = count($this->SkippedFiles);
         return "Collector Download Summary for $this->Title - " . SITE_NAME . "\r\n"
             . "\r\n"
-            . "User:        {$this->User[Username]}\r\n"
-            . "Passkey:    {$this->User[torrent_pass]}\r\n"
+            . "User:        {$this->User['Username']}\r\n"
+            . "Passkey:    {$this->User['torrent_pass']}\r\n"
             . "\r\n"
             . "Time:        $Time\r\n"
             . "Used:        $Used\r\n"

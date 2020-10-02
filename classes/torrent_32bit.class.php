@@ -72,7 +72,7 @@ coded up in around 4 minutes for STC when we discovered this problem, then
 discovered that floats aren't accurate enough to use. :(
 
 *******************************************************************************/
-class BENCODE2 {
+abstract class BENCODE2 {
     var $Val; // Decoded array
     var $Pos = 1; // Pointer that indicates our position in the string
     var $Str = ''; // Torrent string
@@ -85,6 +85,8 @@ class BENCODE2 {
             $this->Val = $Val;
         }
     }
+
+    abstract function dec();
 
     // Decode an element based on the type
     function decode($Type, $Key) {

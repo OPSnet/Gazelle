@@ -662,6 +662,7 @@ class Users {
         $AvatarMouseOverText = '';
         $FirstAvatar = '';
         $SecondAvatar = '';
+        $ShowAvatar = false;
 
         $donorMan = new \Gazelle\Manager\Donation;
         $EnabledRewards = $donorMan->enabledRewards($UserID);
@@ -697,6 +698,7 @@ class Users {
                     $FirstAvatar = $Avatar;
                     break;
                 }
+                $Robot = false;
                 switch (G::$LoggedUser['Identicons']) {
                     case 0:
                         $Type = 'identicon';

@@ -276,6 +276,7 @@ class Validate {
 
         reset($this->Fields);
         foreach ($this->Fields as $FieldKey => $Field) {
+            $ValItem = '';
             if ($Field['Type'] == 'string') {
                 $ValItem = '    if ($(\'#'.$FieldKey.'\').raw().value == ""';
                 if (!empty($Field['MaxLength'])) {
@@ -384,7 +385,6 @@ class Validate {
             } else {
                 $ReturnJS .= $ValItem;
             }
-            $ValItem = '';
         }
 
         $ReturnJS .= "}\r\n";
