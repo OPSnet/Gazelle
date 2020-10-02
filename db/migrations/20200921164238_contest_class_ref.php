@@ -45,6 +45,7 @@ class ContestClassRef extends AbstractMigration {
         ");
         $this->execute("
             ALTER TABLE contest DROP FOREIGN KEY IF EXISTS contest_type_fk;
+            ALTER TABLE contest_leaderboard DROP FOREIGN KEY IF EXISTS contest_fk;
             ALTER TABLE contest_leaderboard DROP FOREIGN KEY IF EXISTS contest_leaderboard_fk;
         ");
         $this->execute("
