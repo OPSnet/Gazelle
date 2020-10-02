@@ -433,7 +433,7 @@ class TORRENT_FORM {
             <tr id="bitrate_row">
                 <td class="label">Bitrate:</td>
                 <td>
-                    <select id="bitrate" name="bitrate" onchange="Bitrate()">
+                    <select id="bitrate" name="bitrate">
                         <option value="">---</option>
 <?php
         if ($Torrent['Bitrate'] && !in_array($Torrent['Bitrate'], $this->Bitrates)) {
