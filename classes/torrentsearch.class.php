@@ -188,6 +188,11 @@ class TorrentSearch {
     private $UsedTorrentFields = [];
 
     /**
+     * @var boolean whether results should be groups by group id
+     */
+    private $GroupResults;
+
+    /**
      * Initialize and configure a TorrentSearch object
      *
      * @param bool $GroupResults whether results should be grouped by group id

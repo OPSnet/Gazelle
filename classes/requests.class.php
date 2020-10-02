@@ -67,7 +67,7 @@ class Requests {
         // Try to fetch the requests from the cache first.
         foreach ($RequestIDs as $i => $RequestID) {
             if (!is_number($RequestID)) {
-                unset($RequestIDs[$i], $Found[$GroupID], $NotFound[$GroupID]);
+                unset($RequestIDs[$i], $Found[$RequestID], $NotFound[$RequestID]);
                 continue;
             }
             $Data = G::$Cache->get_value("request_$RequestID");
@@ -268,9 +268,9 @@ class Requests {
             $RequestVotes = [];
             $RequestVotes['TotalBounty'] = array_sum(G::$DB->collect('Bounty'));
 
+            $VotesArray = [];
             foreach ($Votes as $Vote) {
                 list($UserID, $Bounty, $Username) = $Vote;
-                $VoteArray = [];
                 $VotesArray[] = ['UserID' => $UserID, 'Username' => $Username, 'Bounty' => $Bounty];
             }
 

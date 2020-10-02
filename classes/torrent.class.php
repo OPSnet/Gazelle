@@ -63,7 +63,7 @@ the BENCODE_DICT class.
 
 
 *******************************************************************************/
-class BENCODE2 {
+abstract class BENCODE2 {
     var $Val; // Decoded array
     var $Pos = 1; // Pointer that indicates our position in the string
     var $Str = ''; // Torrent string
@@ -76,6 +76,8 @@ class BENCODE2 {
             $this->Val = $Val;
         }
     }
+
+    abstract function dec();
 
     // Decode an element based on the type. The type is really just an indicator.
     function decode($Type, $Key) {

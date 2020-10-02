@@ -21,17 +21,6 @@ class SphinxqlResult {
     }
 
     /**
-     * Redirect to the Mysqli result object if a nonexistent method is called
-     *
-     * @param string $Name method name
-     * @param array $Arguments arguments used in the function call
-     * @return whatever the parent function returns
-     */
-    public function __call($Name, $Arguments) {
-        return call_user_func_array([$this->Result, $Name], $Arguments);
-    }
-
-    /**
      * Did the query find anything?
      *
      * @return bool results were found
@@ -48,10 +37,10 @@ class SphinxqlResult {
      */
     public function collect($Key) {
         $Return = [];
-        while ($Row = $this->fetch_array()) {
+        while ($Row = $this->Result->fetch_array()) {
             $Return[] = $Row[$Key];
         }
-        $this->data_seek(0);
+        $this->Result->data_seek(0);
         return $Return;
     }
 
@@ -64,14 +53,14 @@ class SphinxqlResult {
      */
     public function to_array($Key, $ResultType = MYSQLI_ASSOC) {
         $Return = [];
-        while ($Row = $this->fetch_array($ResultType)) {
+        while ($Row = $this->Result->fetch_array($ResultType)) {
             if ($Key !== false) {
                 $Return[$Row[$Key]] = $Row;
             } else {
                 $Return[] = $Row;
             }
         }
-        $this->data_seek(0);
+        $this->Result->data_seek(0);
         return $Return;
     }
 
@@ -84,10 +73,10 @@ class SphinxqlResult {
      */
     public function to_pair($Key1, $Key2) {
         $Return = [];
-        while ($Row = $this->fetch_array()) {
+        while ($Row = $this->Result->fetch_array()) {
             $Return[$Row[$Key1]] = $Row[$Key2];
         }
-        $this->data_seek(0);
+        $this->Result->data_seek(0);
         return $Return;
     }
 

@@ -419,7 +419,7 @@ $Cache->cache_value('php_' . getmypid(),
     ], 600
 );
 
-G::$Router = new Gazelle\Router($LoggedUser['AuthKey']);
+G::$Router = new Gazelle\Router($LoggedUser['AuthKey'] ?? '');
 if (isset($LoggedUser['LockedAccount']) && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
     require(__DIR__ . '/../sections/locked/index.php');
 }

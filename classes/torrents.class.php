@@ -653,6 +653,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
                 $FilePath = (isset($Tor->Val['info']->Val['files']) ? make_utf8($Tor->get_name()) : '');
             }
             list($TotalSize, $FileList) = $Tor->file_list();
+            $TmpFileList = [];
             foreach ($FileList as $File) {
                 $TmpFileList[] = self::filelist_format_file($File);
             }
@@ -1081,6 +1082,8 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         $GroupInfo = self::get_groups([$GroupID], true, true, false)[$GroupID];
         $ExtendedArtists = $GroupInfo['ExtendedArtists'];
 
+        $DisplayName = '';
+
         if ($Mode & self::DISPLAYSTRING_ARTISTS) {
             if (!empty($ExtendedArtists[1])
                 || !empty($ExtendedArtists[4])
@@ -1239,10 +1242,10 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
     }
 
     public static function bbcodeUrl($val, $attr) {
-        $cacheKey = 'bbcode-collage.' . $id . '.' . $attr;
+        $cacheKey = 'bbcode-collage.' . $val . '.' . $attr;
         if (($url = G::$Cache->get_value($cacheKey)) === false) {
             $url = self::bbcodeUrlBuild($val, $attr);
-            G::$Cache->cache_value($key, $url, 86400 + rand(1, 3600));
+            G::$Cache->cache_value($cacheKey, $url, 86400 + rand(1, 3600));
         }
         return $url;
     }

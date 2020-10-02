@@ -410,6 +410,7 @@ class Text {
         $ArrayPos = 0;
         $StrLC = strtolower($Str);
         $ListId = 1;
+        $MaxAttribs = 0;
 
         while ($i < $Len) {
             $Block = '';
@@ -1038,7 +1039,7 @@ class Text {
                         $LocalURL = self::local_url($Block['Attr']);
                         if ($LocalURL) {
                             $Str .= self::resolve_url($Block['Attr'])
-                                ?? ('<a href="' . $LocalURL . '">' . ($title ? $title : substr($LocalURL, 1)) . '</a>');
+                                ?? ('<a href="' . $LocalURL . '">' . substr($LocalURL, 1) . '</a>');
                         } else {
                             $Str .= self::resolve_url($Block['Attr'])
                                 ?? sprintf('<a rel="noreferrer" target="_blank" href="%s">%s</a>', $Block['Attr'], $Block['Attr']);
@@ -1162,6 +1163,7 @@ class Text {
 
         $Elements = $Document->getElementsByTagName('div');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
+            /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             if (strpos($Element->getAttribute('style'), 'text-align') !== false) {
                 $NewElement = $Document->createElement('align');
@@ -1173,6 +1175,7 @@ class Text {
 
         $Elements = $Document->getElementsByTagName('span');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
+            /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             if (strpos($Element->getAttribute('class'), 'size') !== false) {
                 $NewElement = $Document->createElement('size');
@@ -1200,7 +1203,9 @@ class Text {
 
         $Elements = $Document->getElementsByTagName('ul');
         for ($i = 0; $i < $Elements->length; $i++) {
-            $InnerElements = $Elements->item($i)->getElementsByTagName('li');
+            /** @var \DOMElement $Element */
+            $Element = $Elements->item($i);
+            $InnerElements = $Element->getElementsByTagName('li');
             for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
                 $Element = $InnerElements->item($j);
                 $NewElement = $Document->createElement('bullet');
@@ -1211,7 +1216,9 @@ class Text {
 
         $Elements = $Document->getElementsByTagName('ol');
         for ($i = 0; $i < $Elements->length; $i++) {
-            $InnerElements = $Elements->item($i)->getElementsByTagName('li');
+            /** @var \DOMElement $Element */
+            $Element = $Elements->item($i);
+            $InnerElements = $Element->getElementsByTagName('li');
             for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
                 $Element = $InnerElements->item($j);
                 $NewElement = $Document->createElement('number');
@@ -1222,6 +1229,7 @@ class Text {
 
         $Elements = $Document->getElementsByTagName('strong');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
+            /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             if ($Element->hasAttribute('class') === 'important_text') {
                 $NewElement = $Document->createElement('important');
@@ -1232,6 +1240,7 @@ class Text {
 
         $Elements = $Document->getElementsByTagName('a');
         for ($i = $Elements->length - 1; $i >= 0; $i--) {
+            /** @var \DOMElement $Element */
             $Element = $Elements->item($i);
             if ($Element->hasAttribute('href')) {
                 $Element->removeAttribute('rel');
@@ -1243,6 +1252,7 @@ class Text {
                     && $Element->getAttribute('onclick') === 'BBCode.spoiler(this);') {
                     $Spoilers = $Document->getElementsByTagName('blockquote');
                     for ($j = $Spoilers->length - 1; $j >= 0; $j--) {
+                        /** @var \DOMElement $Spoiler */
                         $Spoiler = $Spoilers->item($j);
                         if ($Spoiler->hasAttribute('class') && $Spoiler->getAttribute('class') === 'hidden spoiler') {
                             $NewElement = $Document->createElement('spoiler');

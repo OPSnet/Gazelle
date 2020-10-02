@@ -93,12 +93,12 @@ class SphinxqlQuery {
      * Add attribute less-than filter. Calling multiple filter functions results in boolean AND between each condition.
      *
      * @param string $Attribute attribute which the filter will apply to
-     * @param array $Value upper limit for matches
+     * @param int|null $Value upper limit for matches
      * @param bool $Inclusive whether to use <= or <
      * @return current SphinxqlQuery object
      */
     public function where_lt($Attribute, $Value, $Inclusive = false) {
-        if (empty($Attribute) || !isset($Value) || !is_number($Value)) {
+        if (empty($Attribute) || $Value === null || !is_number($Value)) {
             $this->error("Attribute name is required and only numeric filters are supported.");
             return $this;
         }
@@ -110,12 +110,12 @@ class SphinxqlQuery {
      * Add attribute greater-than filter. Calling multiple filter functions results in boolean AND between each condition.
      *
      * @param string $Attribute attribute which the filter will apply to
-     * @param array $Value lower limit for matches
+     * @param int|null $Value lower limit for matches
      * @param bool $Inclusive whether to use >= or >
      * @return current SphinxqlQuery object
      */
     public function where_gt($Attribute, $Value, $Inclusive = false) {
-        if (empty($Attribute) || !isset($Value) || !is_number($Value)) {
+        if (empty($Attribute) || $Value === null || !is_number($Value)) {
             $this->error("Attribute name is required and only numeric filters are supported.");
             return $this;
         }

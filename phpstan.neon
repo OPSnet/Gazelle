@@ -4,8 +4,11 @@ parameters:
 		- classes/config.template.php
 		- classes/classloader.php
 	scanFiles:
+		- classes/proxies.class.php
 		- classes/time.class.php
 		- classes/util.php
+		- sections/artist/index.php
+		- sections/torrents/functions.php
 	paths:
 		- app
 		- classes
