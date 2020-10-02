@@ -43,6 +43,10 @@ if ($user->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_D
     ', $TorrentID
 );
 
+if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_delete')) {
+    error(403);
+}
+
 if (empty($ArtistName)) {
     $RawName = $Name;
 }
