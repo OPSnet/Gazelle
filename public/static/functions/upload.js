@@ -158,8 +158,10 @@ function setAllowedBitrate(formatField, bitrateField) {
         btr = allowed.list[allowed.rank[0]];
     }
     $(bitrateField).val(btr);
-    if($(bitrateField).val() !== 'Other') {
+    if (btr !== 'Other') {
         $('#other_bitrate_span').ghide();
+    } else {
+        $('#other_bitrate_span').gshow();
     }
 }
 
