@@ -85,7 +85,7 @@ class Torrents {
             $QueryID = G::$DB->get_query_id();
             G::$DB->prepared_query("
                 SELECT
-                    tg.ID, tg.Name, tg.Year, tg.RecordLabel, tg.CatalogueNumber, tg.ReleaseType, 
+                    tg.ID, tg.Name, tg.Year, tg.RecordLabel, tg.CatalogueNumber, tg.ReleaseType,
                     tg.VanityHouse, tg.WikiImage, tg.CategoryID,
                     group_concat(t.Name SEPARATOR ' ') AS TagList
                 FROM torrents_group tg
@@ -267,7 +267,7 @@ class Torrents {
             WHERE ID = ?
             ', $ID
         );
-        [$GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum] = G::$DB->next_record(MYSQLI_INT, [2, 'info_hash']);
+        [$GroupID, $UserID, $InfoHash, $Format, $Media, $Encoding, $HasLogDB, $LogScore, $LogChecksum] = G::$DB->next_record(MYSQLI_NUM, [2]);
 
         if ($ID > MAX_PREV_TORRENT_ID) {
             $Bonus = new Gazelle\Bonus;
