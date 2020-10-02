@@ -225,6 +225,11 @@ function json_print($Status, $Message) {
     }
 }
 
+function json_error($Code) {
+    echo json_encode(['status' => 400, 'error' => $Code, 'response' => []]);
+    die();
+}
+
 /**
  * Print the site's URL including the appropriate URI scheme, including the trailing slash
  *
@@ -381,4 +386,13 @@ function shortenString(string $text, int $maxLength, bool $force = false, bool $
         $short .= "\xE2\x80\xA6"; // U+2026 HORIZONTAL ELLIPSIS
     }
     return $short;
+}
+
+function display_array($Array, $Escape = []) {
+    foreach ($Array as $Key => $Val) {
+        if ((!is_array($Escape) && $Escape == true) || !in_array($Key, $Escape)) {
+            $Array[$Key] = display_str($Val);
+        }
+    }
+    return $Array;
 }

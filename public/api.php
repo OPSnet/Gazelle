@@ -36,20 +36,6 @@ $Debug->handle_errors();
 
 G::initialize();
 
-function json_error($Code) {
-    echo json_encode(['status' => 400, 'error' => $Code, 'response' => []]);
-    die();
-}
-
-function display_array($Array, $Escape = []) {
-    foreach ($Array as $Key => $Val) {
-        if ((!is_array($Escape) && $Escape == true) || !in_array($Key, $Escape)) {
-            $Array[$Key] = display_str($Val);
-        }
-    }
-    return $Array;
-}
-
 header('Expires: '.date('D, d M Y H:i:s', time() + (2 * 60 * 60)).' GMT');
 header('Last-Modified: '.date('D, d M Y H:i:s').' GMT');
 header('Content-type: application/json');

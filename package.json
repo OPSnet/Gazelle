@@ -47,6 +47,7 @@
     "*.php": [
       "php -l",
       ".bin/phpcbf",
+      "vendor/bin/phpstan analyse",
       "vendor/bin/phpcs"
     ]
   },

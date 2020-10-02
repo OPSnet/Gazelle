@@ -1,0 +1,16 @@
+parameters:
+	level: 1
+	bootstrapFiles:
+		- classes/config.template.php
+		- classes/classloader.php
+	scanFiles:
+		- classes/time.class.php
+		- classes/util.php
+	paths:
+		- app
+		- classes
+	excludes_analyse:
+		- classes/pushserver.class.php
+		- sections
+	parallel:
+		maximumNumberOfProcesses: 1
