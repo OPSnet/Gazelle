@@ -20,7 +20,7 @@ foreach ($headlines as $item) {
     ];
 }
 
-$latestNewsID = $newsMan->latestId();
+$latestNewsId = $newsMan->latestId();
 if ($LoggedUser['LastReadNews'] < $latestNewsId) {
     $user->updateLastReadNews($latestNewsId);
     $LoggedUser['LastReadNews'] = $latestNewsId;

@@ -41,8 +41,3 @@ if ($Type == "resolve") {
 }
 
 echo json_encode(["status" => "success"]);
-
-function json_error($Message) {
-    echo json_encode(["status" => $Message]);
-    die();
-}

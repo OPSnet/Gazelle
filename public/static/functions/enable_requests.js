@@ -58,7 +58,7 @@
                         $("#row_" + resolveIDs[i]).remove();
                     }
                 } else {
-                    alert(response['status']);
+                    alert(response['error']);
                 }
             });
         });
@@ -78,7 +78,7 @@
                         $("#row_" + id).remove();
                         alert("The request has been un-resolved. Please refresh your browser to see it.");
                     } else {
-                        alert(response['status']);
+                        alert(response['error']);
                     }
                 });
             }
