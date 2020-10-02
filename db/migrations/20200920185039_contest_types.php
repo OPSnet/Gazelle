@@ -13,4 +13,7 @@ class ContestTypes extends AbstractMigration {
                 ('upload_perfect_flac ')
         ");
     }
+
+    public function down() {
+    }
 }
