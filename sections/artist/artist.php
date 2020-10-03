@@ -68,12 +68,13 @@ function torrentEdition($title, $year, $recordLabel, $catlogueNumber, $media) {
 }
 
 $User = new \Gazelle\User($LoggedUser['ID']);
+$name = $Artist->name() ?? 'artist:' . $ArtistID;
 
-View::show_header($Artist->name(), 'browse,requests,bbcode,comments,voting,subscriptions');
+View::show_header($name, 'browse,requests,bbcode,comments,voting,subscriptions');
 ?>
 <div class="thin">
     <div class="header">
-        <h2><?=display_str($Artist->name())?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
+        <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
         <div class="linkbox">
             <a href="artist.php?action=editrequest&amp;artistid=<?=$ArtistID?>" class="brackets">Request an Edit</a>
 <?php
@@ -84,7 +85,7 @@ if (check_perms('site_submit_requests')) { ?>
 
 if (check_perms('site_torrents_notify')) {
     $urlStem = sprintf('artist.php?artistid=%d&amp;auth=%s', $ArtistID, $LoggedUser['AuthKey']);
-    if ($User->hasArtistNotification($Artist->name())) {
+    if ($User->hasArtistNotification($name)) {
 ?>
             <a href="<?= $urlStem ?>&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
 <?php
@@ -132,9 +133,9 @@ if (check_perms('site_delete_artist') && check_perms('torrents_delete')) { ?>
 
 if ($Artist->image()) { ?>
         <div class="box box_image">
-            <div class="head"><strong><?= $Artist->name() ?></strong></div>
+            <div class="head"><strong><?= $name ?></strong></div>
             <div style="text-align: center; padding: 10px 0px;">
-                <img style="max-width: 220px;" src="<?= ImageTools::process($Artist->image(), true) ?>" alt="<?= $Artist->name()?>" onclick="lightbox.init('<?= ImageTools::process($Artist->image()) ?>', 220);" />
+                <img style="max-width: 220px;" src="<?= ImageTools::process($Artist->image(), true) ?>" alt="<?= $name?>" onclick="lightbox.init('<?= ImageTools::process($Artist->image()) ?>', 220);" />
             </div>
         </div>
 <?php } ?>
@@ -144,7 +145,7 @@ if ($Artist->image()) { ?>
             <ul class="nobullet">
                 <li>
                     <form class="search_form" name="filelists" action="torrents.php">
-                        <input type="hidden" name="artistname" value="<?= $Artist->name() ?>" />
+                        <input type="hidden" name="artistname" value="<?= $name ?>" />
                         <input type="hidden" name="action" value="advanced" />
                         <input type="text" autocomplete="off" id="filelist" name="filelist" size="20" />
                         <input type="submit" value="&rsaquo;" />
@@ -231,7 +232,7 @@ foreach ($Artist->sections() as $section => $Groups) {
         }
     }
 }
-echo Tags::topAsHtml(50, 'torrents.php?taglist=', $Artist->name());
+echo Tags::topAsHtml(50, 'torrents.php?taglist=', $name);
 Tags::reset();
 ?>
             </ul>
@@ -452,7 +453,7 @@ if ($sections = $Artist->sections()) {
         $VoteType = isset($UserVotes[$GroupID]['Type']) ? $UserVotes[$GroupID]['Type'] : '';
         Votes::vote_link($GroupID, $VoteType);
 ?>
-                            <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $Artist->name())?></div>
+                            <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $name)?></div>
                         </div>
                     </td>
                 </tr>
@@ -489,7 +490,7 @@ if ($sections = $Artist->sections()) {
 <?php   if (Torrents::can_use_token($Torrent)) { ?>
                             | <a href="torrents.php?action=download&amp;id=<?=$TorrentID ?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>&amp;usetoken=1" class="tooltip" title="Use a FL Token" onclick="return confirm('<?=FL_confirmation_msg($Torrent['Seeders'], $Torrent['Size'])?>');">FL</a>
 <?php   } ?>
-                            | <a href="ajax.php?action=torrent&amp;id=<?=($TorrentID)?>" download="<?= $Artist->name() . " - " . $GroupName . ' ['. $GroupYear .']' ?> [<?=($TorrentID)?>] [orpheus.network].json" class="tooltip" title="Download JSON">JS</a>
+                            | <a href="ajax.php?action=torrent&amp;id=<?=($TorrentID)?>" download="<?= $name . " - " . $GroupName . ' ['. $GroupYear .']' ?> [<?=($TorrentID)?>] [orpheus.network].json" class="tooltip" title="Download JSON">JS</a>
                     ]
                 </span>
                 &nbsp;&nbsp;&raquo;&nbsp; <a href="torrents.php?id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>"><?= Torrents::torrent_info($Torrent) ?></a>
@@ -631,7 +632,7 @@ if ($Requests) {
 
 // Similar Artist Map
 if ($Artist->similarArtists()) {
-    $Similar = new ARTISTS_SIMILAR($ArtistID, $Artist->name());
+    $Similar = new ARTISTS_SIMILAR($ArtistID, $name);
     if ($SimilarData = $Cache->get_value("similar_positions_$ArtistID")) {
         $Similar->load_data($SimilarData);
         if (!(current($Similar->Artists)->NameLength)) {
