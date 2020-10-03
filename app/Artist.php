@@ -388,7 +388,7 @@ class Artist extends Base {
         return $this->sections ?? [];
     }
 
-    public function name(): string {
+    public function name(): ?string {
         return $this->name;
     }
 
