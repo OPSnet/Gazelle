@@ -77,13 +77,7 @@ View::show_header('Delete torrent', 'reportsv2');
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
 <?php
     require(__DIR__ . '/../reportsv2/array.php');
-    $TypeList = $Types['master'] + $Types[$CategoryID];
-    $Priorities = [];
-    foreach ($TypeList as $Key => $Value) {
-        $Priorities[$Key] = $Value['priority'];
-    }
-    array_multisort($Priorities, SORT_ASC, $TypeList);
-    $ReportID = 0;
+
     [$GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID,
         $Time, $Remastered, $RemasterTitle, $RemasterYear, $Media, $Format,
         $Encoding, $Size, $HasLog, $HasLogDB, $LogScore, $UploaderID] = $DB->row("
@@ -126,6 +120,16 @@ View::show_header('Delete torrent', 'reportsv2');
     }
     $UploaderName = Users::user_info($UploaderID)['Username'];
 
+    $TypeList = $Types['master'];
+    if (isset($Types[$CategoryID])) {
+        $TypeList = array_merge($TypeList, $Types[$CategoryID]);
+    }
+    $Priorities = [];
+    foreach ($TypeList as $Key => $Value) {
+        $Priorities[$Key] = $Value['priority'];
+    }
+    array_multisort($Priorities, SORT_ASC, $TypeList);
+    $ReportID = 0;
     $Type = 'dupe'; //hardcoded default
 
     if (array_key_exists($Type, $Types[$CategoryID])) {
