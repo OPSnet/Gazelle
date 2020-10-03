@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "cross-env": "^7.0.2",
-    "laravel-mix": "^5.0.4",
+    "laravel-mix": "^5.0.5",
     "puppeteer": "^2.1.1",
     "sass": "^1.26.10",
     "sass-loader": "^9.0.2",
