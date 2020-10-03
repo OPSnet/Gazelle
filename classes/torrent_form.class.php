@@ -129,6 +129,32 @@ class TORRENT_FORM {
 ?>
         </div>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
+<?php
+        if (!$this->NewTorrent) {
+            if (check_perms('torrents_freeleech')) {
+                $leech = ["Normal", "Free", "Neutral"];
+                $reason = ["N/A", "Staff Pick", "Perma-FL", "Vanity House"];
+?>
+            <tr id="freetorrent">
+                <td class="label">Leech Type</td>
+                <td>
+                    <select name="freeleechtype">
+<?php           foreach ($leech as $Key => $Name) { ?>
+                        <option value="<?= $Key ?>"<?=($Key == $Torrent['FreeTorrent'] ? ' selected="selected"' : '')?>><?= $Name ?></option>
+<?php           } ?>
+                    </select>
+                    because
+                    <select name="freeleechreason">
+<?php           foreach ($reason as $Key => $Name) { ?>
+                        <option value="<?= $Key ?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?= $Name ?></option>
+<?php           } ?>
+                    </select>
+                </td>
+            </tr>
+<?php
+            }
+        }
+?>
             <tr>
                 <td colspan="2" style="text-align: center;">
                     <p>Be sure that your torrent is approved by the <a href="rules.php?p=upload" target="_blank">rules</a>. Not doing this will result in a <strong class="important_text">warning</strong> or <strong class="important_text">worse</strong>.</p>
@@ -198,7 +224,10 @@ class TORRENT_FORM {
 
         <table cellpadding="3" cellspacing="1" border="0" class="layout border<?php if ($this->NewTorrent) { echo ' slice'; } ?>" width="100%">
 <?php   if (!$this->NewTorrent) { ?>
-            <tr><td colspan="2"><h3>Edit <?= Artists::display_artists(Artists::get_artist($Torrent['GroupID'])) . display_str($Torrent['Title'] )?></h3></td></tr>
+            <tr><td colspan="2"><h3>Edit <?=
+                Artists::display_artists(Artists::get_artist($Torrent['GroupID']))
+                . '<a href="/torrents.php?id=' . $Torrent['GroupID'] . '">' . display_str($Torrent['Title']) . "</a>"
+            ?></h3></td></tr>
 <?php   } else { ?>
             <tr id="releasetype_tr">
                 <td class="label">
