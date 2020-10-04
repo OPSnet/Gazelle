@@ -108,6 +108,8 @@ function setAllowedFormat(formatField, bitrateField) {
     var btr = $(bitrateField).val();
     var warning = $('#format_warning');
     $(formatField).empty().append(new Option('---', ''));
+    console.log(fmt);
+    console.log(media);
     if (media === '---') {
         $(bitrateField).empty().append(new Option('---', ''));
         $('#upload_logs').ghide();
@@ -614,6 +616,8 @@ function fillMusicForm(group, torrent, source) {
         format: 'format',
         media: 'media',
     });
+
+    setAllowedFormat('#format', '#bitrate');
 
     if (torrent['scene']) {
         $('#scene').prop('checked', torrent['scene']);
