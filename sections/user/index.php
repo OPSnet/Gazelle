@@ -55,7 +55,6 @@ switch ($_REQUEST['action']) {
         break;
     case '2fa':
         require(__DIR__ . '/../../classes/google_authenticator.class.php');
-        require(__DIR__ . '/../../classes/qr.class.php');
 
         if (empty($_GET['do'])) {
             // we didn't get a required "do", we'll just let the 404 handler deal with the request.

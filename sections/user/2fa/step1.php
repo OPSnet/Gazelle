@@ -1,4 +1,16 @@
 <?php
+
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\ErrorCorrectionLevel;
+
+$qrCode = new QrCode('otpauth://totp/' . SITE_NAME . '?secret=' . $_SESSION['private_key']);
+$qrCode->setSize(300);
+$qrCode->setMargin(10);
+$qrCode->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH());
+$qrCode->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0]);
+$qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
+
+
 View::show_header('Two-factor Authentication');
 ?>
 
@@ -16,18 +28,7 @@ View::show_header('Two-factor Authentication');
 <div class="box box2">
     <div class="center pad">
         <div>
-            <img src="data:image/png;base64,<?php
-                echo base64_encode(
-                    (new QrCode())->setText('otpauth://totp/' . SITE_NAME . '?secret=' . $_SESSION['private_key'])
-                        ->setSize(300)
-                        ->setPadding(10)
-                        ->setLabel($_SESSION['private_key'])
-                        ->setErrorCorrection('high')
-                        ->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0])
-                        ->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0])
-                        ->get('png')
-                );
-            ?>">
+            <img src="<?=$qrCode->writeDataUri();?>">
             <div class="twofa_text">Secret Text: <span><?=$_SESSION['private_key']?></span></div>
 
             <?php if(isset($_GET['invalid'])): ?>
