@@ -75,7 +75,7 @@ class TorrentsDL {
     /**
      * Add a file to the zip archive
      *
-     * @param string $TorrentData bencoded torrent without announce url (new format) or TORRENT object (old format)
+     * @param string $TorrentData bencoded torrent without announce url
      * @param array $Info file info stored as an array with at least the keys
      *  Artist, Name, Year, Media, Format, Encoding and TorrentID
      * @param string $FolderName folder name
@@ -222,22 +222,19 @@ class TorrentsDL {
     /**
      * Convert a stored torrent into a binary file that can be loaded in a torrent client
      *
-     * @param mixed $TorrentData bencoded torrent without announce URL (new format) or TORRENT object (old format)
+     * @param mixed $TorrentData bencoded torrent without announce URL
      * @param string $AnnounceURL
      * @param int $TorrentID
      * @return string bencoded string
      */
     public static function get_file($TorrentData, $AnnounceURL, $TorrentID) {
-        $Tor = new TORRENT($TorrentData);
-        $Tor->set_announce_url($AnnounceURL);
-        // We have to sort the dictionary because of the added comment field.
-        // "Keys must be strings and appear in sorted order"
-        // https://wiki.theory.org/BitTorrentSpecification
-        $Tor->Val['comment'] = site_url()."torrents.php?torrentid={$TorrentID}";
-        unset($Tor->Val['announce-list']);
-        unset($Tor->Val['url-list']);
-        unset($Tor->Val['libtorrent_resume']);
-        ksort($Tor->Val);
-        return $Tor->enc();
+        $Tor = new OrpheusNET\BencodeTorrent\BencodeTorrent();
+        $Tor->decodeString($TorrentData);
+        $Tor->cleanDataDictionary();
+        $Tor->setValue([
+            'announce' => $AnnounceURL,
+            'comment' => site_url() . "torrents.php?torrentid=$TorrentID",
+        ]);
+        return $Tor->getEncode();
     }
 }
