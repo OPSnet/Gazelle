@@ -7,6 +7,7 @@ class Contest extends Base {
 
     protected $id;
     protected $info;
+    /** @var \Gazelle\Contest\AbstractContest */
     protected $type;
     protected $bonusPool;
     protected $totalEntries;
@@ -70,7 +71,7 @@ class Contest extends Base {
                 $params['type'], trim($params['banner']), trim($params['description']),
                 $this->id
         );
-        $success = $db->affected_rows();
+        $success = $this->db->affected_rows();
         if (isset($params['payment'])) {
             $this->setPaymentReady();
         }
@@ -160,7 +161,7 @@ class Contest extends Base {
     }
 
     public function bonusPerUser(): float {
-        return $this->bonusPoolTotal() * $this->bonusUser / \Users::get_enabled_users_count();
+        return $this->bonusPoolTotal() * $this->bonusUser / (new Manager\User())->getEnabledUsersCount();
     }
 
     public function bonusPerContest(): float {
@@ -197,7 +198,7 @@ class Contest extends Base {
             WHERE contest_id = ?
             ', 'paid', $this->id
         );
-        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $id));
+        $this->cache->delete_value(sprintf(self::CACHE_CONTEST, $this->id));
         return $this->db->affected_rows();
     }
 
@@ -206,15 +207,19 @@ class Contest extends Base {
         $contestBonus     = $this->bonusPerContest();
         $perEntryBonus    = $this->bonusPerEntry();
 
-        $participants = $this->contestType->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
+        $participants = $this->type->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
         $bonus = new Bonus;
         $report = fopen(TMPDIR . "/payout-contest-" . $this->id . ".txt", 'a');
         foreach ($participants as $p) {
+            $totalGain = $enabledUserBonus;
+            if ($p['nr_entries']) {
+                $totalGain += $contestBonus + ($perEntryBonus * $p['nr_entries']);
+            }
             \Misc::send_pm(
                 $p['ID'],
                 0,
                 "You have received " . number_format($totalGain, 2) . " bonus points!",
-                Text::full_format($twig->render('contest/payout.twig', [
+                \Text::full_format($twig->render('contest/payout-uploader.twig', [
                     'username'        => $p['Username'],
                     'date'            => ['begin' => $this->info['date_begin'], 'end' => $this->info['date_end']],
                     'enabled_bonus'   => $enabledUserBonus,
@@ -225,16 +230,12 @@ class Contest extends Base {
                     'entries'         => $p['nr_entries'] == 1 ? 'entry' : 'entries',
                 ]))
             );
-            $totalGain = $enabledUserBonus;
-            if ($p['nr_entries']) {
-                $totalGain += $contestBonus + ($perEntryBonus * $p['nr_entries']);
-            }
             $bonus->addPoints($p['ID'], $totalGain);
             $this->db->prepared_query("
                 UPDATE users_info SET
                     AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
                 WHERE UserID = ?
-                ", number_format($totalGain, 2) . " BP added for {$p['nr_entries']} entries in {$contest['Name']}\n\n",
+                ", number_format($totalGain, 2) . " BP added for {$p['nr_entries']} entries in {$this->info['name']}\n\n",
                     $p['ID']
             );
             fwrite($report, sqltime() . " {$p['Username']} ({$p['ID']}) n={$p['nr_entries']} t={$totalGain}\n");

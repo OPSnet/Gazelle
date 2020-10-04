@@ -59,7 +59,7 @@ class GenerateInvite extends AbstractAPI {
                 'DISABLED_CHAN' => BOT_DISABLED_CHAN
             ]);
 
-            Misc::send_email($_GET['email'], 'New account confirmation at '.SITE_NAME, $body, 'noreply');
+            \Misc::send_email($_GET['email'], 'New account confirmation at '.SITE_NAME, $body, 'noreply');
         }
 
         return ["key" => $key, "invite_url" => $site_url];

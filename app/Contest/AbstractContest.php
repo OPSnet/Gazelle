@@ -83,7 +83,7 @@ abstract class AbstractContest extends \Gazelle\Base {
         $this->db->commit();
         $total = $this->totalEntries();
         $this->cache->delete_value("contest_leaderboard_" . $this->id);
-        $this->cache->cache_value("contest_leaderboard_total_" . $this->id, $count, 3600 * 6);
+        $this->cache->cache_value("contest_leaderboard_total_" . $this->id, $total, 3600 * 6);
         return $total;
     }
 }

@@ -31,8 +31,8 @@ class Subscription extends \Gazelle\Base {
         $Pattern = sprintf('/\[quote(?:=(%s)(?:\|.*)?)?]|\[\/quote]|@(%s)/i', USERNAME_REGEX_SHORT, USERNAME_REGEX_SHORT);
         preg_match_all($Pattern, $Body, $Matches, PREG_SET_ORDER);
 
+        $Usernames = [];
         if (count($Matches)) {
-            $Usernames = [];
             $Level = 0;
             foreach ($Matches as $M) {
                 if ($M[0] != '[/quote]') {
@@ -50,7 +50,7 @@ class Subscription extends \Gazelle\Base {
             }
         }
 
-        if (!count($Usernames)) {
+        if (empty($Usernames)) {
             return;
         }
 
@@ -72,7 +72,7 @@ class Subscription extends \Gazelle\Base {
 
         $Results = $this->db->to_array();
         $notification = new Notification;
-        $info = \Users::user_info($this->UserID);
+        $info = \Users::user_info($this->userId);
         foreach ($Results as $Result) {
             $this->db->prepared_query('
                 INSERT IGNORE INTO users_notify_quoted

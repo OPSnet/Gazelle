@@ -94,7 +94,7 @@ class RequestFill extends AbstractContest {
                 HAVING count(*) > 1
                 ORDER BY count(*) DESC, r.FillerID ASC
                 LIMIT 100
-                ", $this->info['date_begin'], $this->info['date_end']
+                ", $this->begin, $this->end
             );
             $pairs = $this->db->to_array(false, MYSQLI_ASSOC);
             $this->cache->cache_value('contest_pairs_' . $id, $pairs, 60 * 20);

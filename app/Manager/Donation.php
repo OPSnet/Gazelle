@@ -170,6 +170,7 @@ class Donation extends \Gazelle\Base {
     }
 
     protected function calculateSpecialRank(int $UserID, int $TotalRank) {
+        $SpecialRank = $this->specialRank($UserID);
         if ($TotalRank < 10) {
             $SpecialRank = 0;
         }

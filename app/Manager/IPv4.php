@@ -26,7 +26,8 @@ class IPv4 extends \Gazelle\Base {
      * @return bool True if banned
      */
     public function isBanned(string $IP) {
-        $key = self::CACHE_KEY . substr($IP, 0, strcspn($IP, '.'));
+        $A = substr($IP, 0, strcspn($IP, '.'));
+        $key = self::CACHE_KEY . $A;
         $IPBans = $this->cache->get_value($key);
         if (!is_array($IPBans)) {
             $this->db->prepared_query("
@@ -39,7 +40,7 @@ class IPv4 extends \Gazelle\Base {
             $this->cache->cache_value($key, $IPBans, 0);
         }
         $IPNum = $this->ip2ulong($IP);
-        foreach ($IPBans as $Index => $IPBan) {
+        foreach ($IPBans as $IPBan) {
             list ($FromIP, $ToIP) = $IPBan;
             if ($IPNum >= $FromIP && $IPNum <= $ToIP) {
                 return true;
@@ -86,7 +87,7 @@ class IPv4 extends \Gazelle\Base {
                 ", $reason, $from, $to, $userId
             );
             $this->cache->delete_value(
-                self::CACHE_KEY . substr($ipaddr, 0, strcspn($ipaddr, '.'))
+                self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
             );
         }
     }

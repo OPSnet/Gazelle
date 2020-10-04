@@ -14,12 +14,26 @@ define('SERVER_ROOT_LIVE', '/path'); //Only needed on the beta site when accessi
 define('BETA', false); //Only needed on the beta site when different code paths are necessary
 define('ANNOUNCE_HTTP_URL', '');
 define('ANNOUNCE_HTTPS_URL', '');
+
 define('REFERRAL_BOUNCER', ''); // URL to the bouncer including trailing /.
 define('REFERRAL_KEY', hash('sha512', '')); //Random key. Used for encrypting traffic to/from the boucner.
 define('REFERRAL_SEND_EMAIL', false); // Whether to send invite emails for referrals.
 define('REFERRAL_SITES', ['ABC', 'DEF']);
+
 define('RECOVERY', false);
 define('RECOVERY_BUFFER', false); // is buffer from previous site restituted
+define('RECOVERY_SALT', '');
+define('RECOVERY_PATH', '');
+define('RECOVERY_DB', '');
+define('RECOVERY_MAPPING_TABLE', 'users_' . RECOVERY_DB . '_mapping');
+define('RECOVERY_IRC_TABLE', 'users_' . RECOVERY_DB . '_irc');
+define('RECOVERY_AUTOVALIDATE', true);
+define('RECOVERY_AUTOVALIDATE_LIMIT', 20);
+define('RECOVERY_ADMIN_ID', 17); // hermes
+define('RECOVERY_ADMIN_NAME', 'RecoveryBot');
+define('RECOVERY_BUFFER_REASSIGN_LIMIT', 100);
+define('RECOVERY_PAIR_SALT', '');
+
 define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow source flag from previous site.
 define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation.
@@ -166,6 +180,7 @@ define('BOT_CHAN', '#mygazelle');
 define('ADMIN_CHAN', '#admin');
 define('LAB_CHAN', '#lab');
 define('STATUS_CHAN', '#status');
+define('MOD_CHAN', '#staff');
 define('BOT_DISABLED_CHAN', '#disabled'); // Channel to refer disabled users to.
 define('BOT_REPORT_CHAN', '#reports');
 define('SOCKET_LISTEN_PORT', 51010);

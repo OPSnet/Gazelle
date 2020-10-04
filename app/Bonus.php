@@ -9,6 +9,8 @@ class Bonus extends Base {
     const CACHE_HISTORY = 'bonus_history_';
     const CACHE_POOL_HISTORY = 'bonus_pool_history_';
 
+    protected $items;
+
     public function __construct() {
         parent::__construct();
         $this->items = $this->cache->get_value(self::CACHE_ITEM);

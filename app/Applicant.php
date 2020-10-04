@@ -6,6 +6,7 @@ class Applicant extends Base {
     protected $id;
     protected $roleId;
     protected $userId;
+    protected $body;
     protected $thread;
     protected $resolved;
     protected $created;
