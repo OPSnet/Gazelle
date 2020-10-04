@@ -179,7 +179,7 @@ function addFormatRow() {
         return;
     }
     if (++ExtraFormatCount == MAX_EXTRA_FORMATS) {
-         $("#add_format").css('visibility', 'hidden');
+        $("#add_format").css('visibility', 'hidden');
     }
     $("#remove_format").show();
 
@@ -214,7 +214,7 @@ function addFormatRow() {
             name: 'extra_format[]'
         })
         .click(function () {
-            Format('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount)
+            Format('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount);
         });
     var used = getUsedPairs();
     $.each(AllowedBitrate, function(k,v) {
@@ -247,9 +247,8 @@ function addFormatRow() {
         ]);
     }
     bitrateSelect.click(function () {
-            setAllowedBitrate('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount)
-        })
-        .appendTo(row);
+        setAllowedBitrate('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount);
+    }).appendTo(row);
 
     // release description
     var desc_row = $(document.createElement("tr"))
@@ -505,11 +504,8 @@ function loadThumbnail() {
  */
 function jsonFill(source, mapping) {
     for (var prop in mapping) {
-        if (prop == 'releasetype') {
-            // Different sites have different IDs beyond the first few
-            continue;
-        }
-        if (!mapping.hasOwnProperty(prop)) {
+        // skip releasetype, it is a special case
+        if (!mapping.hasOwnProperty(prop) || prop === 'releasetype') {
             continue;
         }
         if (source[mapping[prop]] && source[mapping[prop]] !== '') {
@@ -546,7 +542,7 @@ function fillArtist(artistlist, role) {
     }
 }
 
-function fillMusicForm(group, torrent) {
+function fillMusicForm(group, torrent, source) {
     if (group['musicInfo']) {
         // JSON property to HTML value for artist role
         var mapping = {
@@ -572,6 +568,47 @@ function fillMusicForm(group, torrent) {
         album_desc: 'wikiBody',
     });
 
+    // ideally, the torrent json contains a releaseName field that is human readable,
+    // and through which we can correspond it to our site's dropdown. Otherwise,
+    // we assume they are using the original WCD category IDs, which is augmented
+    // for specific well-known sources.
+    let releaseName = group['releaseName'];
+    if (!group['releaseName']) {
+        let releaseTypes = {
+            1: 'Album',
+            3: 'Soundtrack',
+            5: 'EP',
+            6: 'Anthology',
+            7: 'Compilation',
+            9: 'Single',
+            11: 'Live album',
+            13: 'Remix',
+            14: 'Bootleg',
+            15: 'Interview',
+            16: 'Mixtape',
+            21: 'Unknown',
+        };
+        if (source === 'red') {
+            Object.assign(releaseTypes, {
+                17: 'Demo',
+                18: 'Concert Recording',
+                19: 'DJ Mix',
+            });
+        }
+
+        releaseName = releaseTypes[group['releaseType']];
+    }
+
+    if (releaseName) {
+        $("#releasetype option")
+            .filter(function() { return $(this).text().toLowerCase() === releaseName.toLowerCase(); })
+            .prop('selected', true)
+            .trigger('change');
+    } else {
+        $("#releasetype").val($("#releasetype option:first").val());
+    }
+
+
     // fill out torrent info
     jsonFill(torrent, {
         format: 'format',
@@ -593,7 +630,7 @@ function fillMusicForm(group, torrent) {
     }
 }
 
-function fillForm(group, torrent) {
+function fillForm(group, torrent, source) {
     jsonFill(group, {
         title: 'name',
         year: 'year',
@@ -602,7 +639,7 @@ function fillForm(group, torrent) {
     });
 
     if (!group['categoryName'] || group['categoryName'] === 'Music') {
-        fillMusicForm(group, torrent);
+        fillMusicForm(group, torrent, source);
     }
     else if (group['categoryName'] === 'Comedy') {
         jsonFill(torrent, {
@@ -639,7 +676,7 @@ function WaitForCategory(callback) {
     }, 100);
 }
 
-function insertParsedJson(data) {
+function insertParsedJson(data, source) {
     var group = data['response']['group'];
     var torrent = data['response']['torrent'][0];
     if(typeof(torrent) == 'undefined') {
@@ -663,12 +700,13 @@ function insertParsedJson(data) {
     categories.val(categories_mapping[group['categoryName']]).triggerHandler('change');
     // delay for the form to change before filling it
     WaitForCategory(function() {
-        fillForm(group, torrent);
+        fillForm(group, torrent, source);
     });
 }
 
 function ParseUploadJson() {
     var reader = new FileReader();
+    let source;
     reader.addEventListener('load', function() {
         try {
             var data = JSON.parse(reader.result.toString());
@@ -676,7 +714,7 @@ function ParseUploadJson() {
                 {'data': data}
             ).done((response) => {
                 if (response && response.status === 'success') {
-                    insertParsedJson(response);
+                    insertParsedJson(response, source);
                 }
                 else {
                     alert("Failed to parse JSON.");
@@ -686,7 +724,7 @@ function ParseUploadJson() {
                 alert("Error with server response.");
                 const err = JSON.parse(xhr);
                 console.error(err.Message);
-            })
+            });
         }
         catch (e) {
             alert("Could not read file. Please try again.");
@@ -696,6 +734,9 @@ function ParseUploadJson() {
 
     var file = $('#torrent-json-file')[0].files[0];
     if (file) {
+        if (file.name.endsWith('[redacted.ch].json')) {
+            source = 'red';
+        }
         reader.readAsText(file);
     }
 }
