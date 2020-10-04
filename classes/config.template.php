@@ -34,8 +34,11 @@ define('RECOVERY_ADMIN_NAME', 'RecoveryBot');
 define('RECOVERY_BUFFER_REASSIGN_LIMIT', 100);
 define('RECOVERY_PAIR_SALT', '');
 
-define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
+define('SOURCE', ''); // source flag to use for torrent files. should be unique from other sites to enable easy cross seeding.
+define('GRANDFATHER_SOURCE', ''); // flag to use for grandfathering torrents. useful if expecting torrents from a defunct site.
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow source flag from previous site.
+define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore source flag.
+
 define('MAX_PREV_TORRENT_ID', 0); // Lowest torrent ID of previous site incarnation.
 
 define('LOGIN_ATTEMPT_BACKOFF', [

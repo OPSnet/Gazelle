@@ -643,19 +643,14 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
             ", $TorrentID
         );
         if ($GroupID) {
-            $filer = new Gazelle\File\Torrent;
-            $Contents = $filer->get($TorrentID);
-            if (Misc::is_new_torrent($Contents)) {
-                $Tor = new BencodeTorrent($Contents);
-                $FilePath = (isset($Tor->Dec['info']['files']) ? make_utf8($Tor->get_name()) : '');
-            } else {
-                $Tor = new TORRENT(unserialize(base64_decode($Contents)), true);
-                $FilePath = (isset($Tor->Val['info']->Val['files']) ? make_utf8($Tor->get_name()) : '');
-            }
-            list($TotalSize, $FileList) = $Tor->file_list();
+            $Tor = new OrpheusNET\BencodeTorrent\BencodeTorrent();
+            $Tor->decodeString((new Gazelle\File\Torrent())->get($TorrentID));
+            $TorData = $Tor->getData();
+            $FilePath = (isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : '');
+            ['total_size' => $TotalSize, 'files' => $FileList] = $Tor->getFileList();
             $TmpFileList = [];
             foreach ($FileList as $File) {
-                $TmpFileList[] = self::filelist_format_file($File);
+                $TmpFileList[] = self::filelist_format_file($File['path'], $File['size']);
             }
             $FileString = implode("\n", $TmpFileList);
             G::$DB->prepared_query("
@@ -682,12 +677,12 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
     /**
      * Create a string that contains file info in a format that's easy to use for Sphinx
      *
-     * @param array $File (File size, File name)
+     * @param  string  $Name file path
+     * @param  int  $Size file size
      * @return string with the format .EXT sSIZEs NAME DELIMITER
      */
-    public static function filelist_format_file($File) {
-        list($Size, $Name) = $File;
-        $Name = make_utf8(strtr($Name, "\n\r\t", '     '));
+    public static function filelist_format_file(string $Name, int $Size) {
+        $Name = make_utf8(strtr($Name, "\n\r\t", '   '));
         $ExtPos = strrpos($Name, '.');
         // Should not be $ExtPos !== false. Extensionless files that start with a . should not get extensions
         $Ext = ($ExtPos ? trim(substr($Name, $ExtPos + 1)) : '');

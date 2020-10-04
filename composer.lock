@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "81c6eb8926b94fdb26fbf2c51218202f",
+    "content-hash": "85fffb9cc51507a4a6579bc3848c0cf5",
     "packages": [
         {
             "name": "cakephp/cache",
@@ -764,24 +764,24 @@
         },
         {
             "name": "orpheusnet/bencode-torrent",
-            "version": "v0.11.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OPSnet/bencode-torrent.git",
-                "reference": "911e2899f4682006545395aa4eb8fa1f30b29a15"
+                "reference": "ca9617422a0d67693fbdec8d514893c5a10f3ecd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OPSnet/bencode-torrent/zipball/911e2899f4682006545395aa4eb8fa1f30b29a15",
-                "reference": "911e2899f4682006545395aa4eb8fa1f30b29a15",
+                "url": "https://api.github.com/repos/OPSnet/bencode-torrent/zipball/ca9617422a0d67693fbdec8d514893c5a10f3ecd",
+                "reference": "ca9617422a0d67693fbdec8d514893c5a10f3ecd",
                 "shasum": ""
             },
             "require": {
-                "php": "^7"
+                "php": "^7.2"
             },
             "require-dev": {
-                "ext-mbstring": "^7",
-                "phpunit/phpunit": "^6|^7",
+                "phpstan/phpstan": "^0.12.48",
+                "phpunit/phpunit": "^8",
                 "squizlabs/php_codesniffer": "3.*"
             },
             "type": "library",
@@ -801,7 +801,7 @@
                 }
             ],
             "description": "PHP Library for decoding and encoding BitTorrent BEncoded data, built for Gazelle",
-            "time": "2018-11-10T16:44:14+00:00"
+            "time": "2020-10-03T20:31:03+00:00"
         },
         {
             "name": "orpheusnet/logchecker",
@@ -2837,20 +2837,6 @@
                 "MIT"
             ],
             "description": "PHPStan - PHP Static Analysis Tool",
-            "funding": [
-                {
-                    "url": "https://github.com/ondrejmirtes",
-                    "type": "github"
-                },
-                {
-                    "url": "https://www.patreon.com/phpstan",
-                    "type": "patreon"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/phpstan/phpstan",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-10-01T13:20:16+00:00"
         },
         {

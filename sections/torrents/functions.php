@@ -1,4 +1,5 @@
 <?php
+
 function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $ApiCall = false) {
     global $Cache, $DB;
     if (!$RevisionID) {
@@ -225,3 +226,28 @@ function audio_file_map($fileList) {
     return $map;
 }
 
+function set_source(
+    \OrpheusNET\BencodeTorrent\BencodeTorrent $torrent,
+    string $siteSource,
+    string $grandfatherSource,
+    int $grandfatherSourceDate,
+    int $grandfatherNoSourceDate
+) {
+    $torrentSource = $torrent->getSource();
+    $creationDate = $torrent->getCreationDate();
+
+    if ($torrentSource === $siteSource) {
+        return false;
+    }
+
+    if (!is_null($creationDate)) {
+        if (is_null($torrentSource) && $creationDate <= $grandfatherNoSourceDate) {
+            return false;
+        }
+        elseif (!is_null($torrentSource) && $torrentSource === $grandfatherSource && $creationDate <= $grandfatherSourceDate) {
+            return false;
+        }
+    }
+
+    return $torrent->setSource($siteSource);
+}
