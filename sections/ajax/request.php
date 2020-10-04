@@ -115,7 +115,7 @@ json_print('success', [
         ? new stdClass : Requests::get_artist_by_type($RequestID),
     'catalogueNumber' => $Request['CatalogueNumber'],
     'releaseType' => (int)$Request['ReleaseType'],
-    'releaseName' => $ReleaseName,
+    'releaseTypeName' => $ReleaseName,
     'bitrateList' => preg_split('/\|/', $Request['BitrateList'], null, PREG_SPLIT_NO_EMPTY),
     'formatList' => preg_split('/\|/', $Request['FormatList'], null, PREG_SPLIT_NO_EMPTY),
     'mediaList' => preg_split('/\|/', $Request['MediaList'], null, PREG_SPLIT_NO_EMPTY),

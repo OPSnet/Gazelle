@@ -587,8 +587,8 @@ function fillMusicForm(group, torrent, source) {
     // and through which we can correspond it to our site's dropdown. Otherwise,
     // we assume they are using the original WCD category IDs, which is augmented
     // for specific well-known sources.
-    let releaseName = group['releaseName'];
-    if (!group['releaseName']) {
+    let releaseTypeName = group['releaseTypeName'] || group['releaseName']
+    if (!releaseTypeName) {
         let releaseTypes = {
             1: 'Album',
             3: 'Soundtrack',
@@ -611,12 +611,12 @@ function fillMusicForm(group, torrent, source) {
             });
         }
 
-        releaseName = releaseTypes[group['releaseType']];
+        releaseTypeName = releaseTypes[group['releaseType']];
     }
 
-    if (releaseName) {
+    if (releaseTypeName) {
         $("#releasetype option")
-            .filter(function() { return $(this).text().toLowerCase() === releaseName.toLowerCase(); })
+            .filter(function() { return $(this).text().toLowerCase() === releaseTypeName.toLowerCase(); })
             .prop('selected', true)
             .trigger('change');
     } else {

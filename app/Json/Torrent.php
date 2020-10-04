@@ -87,7 +87,7 @@ class Torrent extends \Gazelle\Json {
                 'recordLabel'     => $details['RecordLabel'] ?? '',
                 'catalogueNumber' => $details['CatalogueNumber'] ?? '',
                 'releaseType'     => $details['ReleaseType'] ?? '',
-                'releaseName'     => $ReleaseTypes[$details['ReleaseType'] ?? 21], // fallback to Unknown release
+                'releaseTypeName' => $ReleaseTypes[$details['ReleaseType'] ?? 21], // fallback to Unknown release
                 'categoryId'      => $details['CategoryID'],
                 'categoryName'    => $categoryName,
                 'time'            => $details['Time'],
