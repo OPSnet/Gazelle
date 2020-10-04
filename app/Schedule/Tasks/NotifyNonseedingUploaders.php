@@ -27,6 +27,8 @@ class NotifyNonseedingUploaders extends \Gazelle\Schedule\Task
 
         $torrentIDs = $this->db->to_array();
         $torrentAlerts = [];
+        $inactivityExceptionsMade = [];
+
         foreach ($torrentIDs as $torrentID) {
             list($id, $groupID, $name, $format, $encoding, $userID) = $torrentID;
 

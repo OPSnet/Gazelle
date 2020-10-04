@@ -134,8 +134,7 @@ class TorrentLabel {
             }
         }
         if (isset($this->info['PersonalFL']) && $this->info['PersonalFL']) {
-            $label[] = $this->personalFreeleech();
-        $this->element('tl_free tl_personal', 'Personal Freeleech!');
+            $label[] = $this->element('tl_free tl_personal', 'Personal Freeleech!');
         }
         if (isset($this->info['Reported']) && $this->info['Reported']) {
             $label[] = $this->element('tl_reported', 'Reported');

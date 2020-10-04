@@ -3,6 +3,7 @@
 namespace Gazelle\Manager;
 
 class SiteLog extends \Gazelle\Base {
+    protected $debug;
     protected $logQuery;
     protected $totalMatches;
     protected $queryStatus;
@@ -63,7 +64,7 @@ class SiteLog extends \Gazelle\Base {
             $this->debug->set_flag('Finished SphQL query');
             if ($this->queryStatus = $result->Errno) {
                 $this->queryError = $result->Error;
-                $this->logQuery = $this0->db->prepared_query('SET @nothing = 0');
+                $this->logQuery = $this->db->prepared_query('SET @nothing = 0');
             } else  {
                 $this->totalMatches = min(SPHINX_MAX_MATCHES, $result->get_meta('total_found'));
                 $logIds = $result->collect('id') ?: [0];

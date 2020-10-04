@@ -13,6 +13,9 @@ abstract class CommentViewer {
     /** @var string */
     protected $baseLink;
 
+    /** @var \Twig\Environment */
+    protected $twig;
+
     public function __construct(\Twig\Environment $twig, int $viewerId) {
         $this->twig = $twig;
         $this->user = new User($viewerId);

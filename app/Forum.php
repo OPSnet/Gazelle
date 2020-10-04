@@ -224,10 +224,10 @@ class Forum extends Base {
             ", THREAD_CATALOGUE, $threadId
         );
         for ($i = 0; $i <= $max; $i++) {
-            $this->cache->delete_value("thread_{$TopicID}_catalogue_$i");
+            $this->cache->delete_value("thread_{$threadId}_catalogue_$i");
         }
-        $this->cache->delete_value("thread_{$TopicID}_info");
-        $this->cache->delete_value("polls_$TopicID");
+        $this->cache->delete_value("thread_{$threadId}_info");
+        $this->cache->delete_value("polls_$threadId");
     }
 
     /**
@@ -388,7 +388,7 @@ class Forum extends Base {
              $postId, POSTS_PER_PAGE, POSTS_PER_PAGE, POSTS_PER_PAGE, THREAD_CATALOGUE,
             $threadId
         );
-        if ($begin === '') { // Gazelle null-to-string coercion sucks
+        if ($bottom === '') { // Gazelle null-to-string coercion sucks
             return;
         }
         $this->addThreadNote($threadId, $userId, "Post $postId " . ($set ? "stickied" : "unstickied"));
@@ -540,7 +540,7 @@ class Forum extends Base {
     public function removedPollAnswer(int $threadId, int $item) {
         $answers = $this->fetchPollAnswers($threadId);
         if ($answers) {
-            unset($Answers[$item]);
+            unset($answers[$item]);
             $this->savePollAnswers($threadId, $answers);
             $this->db->prepared_query("
                 DELETE FROM forums_polls_votes
@@ -548,7 +548,7 @@ class Forum extends Base {
                     AND TopicID = ?
                 ", $item, $threadId
             );
-            $this->cache->delete_value("polls_$ThreadID");
+            $this->cache->delete_value("polls_$threadId");
         }
     }
 
@@ -973,6 +973,7 @@ class Forum extends Base {
      */
     public function tableOfContentsForum(int $page = 1) {
         $key = sprintf(self::CACHE_TOC_FORUM, $this->forumId);
+        $forumToc = null;
         if ($page > 1 || ($page == 1 && !$forumToc = $this->cache->get_value($key))) {
             $this->db->prepared_query("
                 SELECT ID, Title, AuthorID, IsLocked, IsSticky,

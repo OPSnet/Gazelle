@@ -151,7 +151,6 @@ class Blog extends \Gazelle\Base {
     /**
      * Indicate a user has read the given blog entry
      * @param int $userId The user
-     * @param int $blogId The blog the user has read (should be the most recent)
      * @return bool true if there was a change in status (you will need to flush their heavy cache)
      */
     public function catchupUser(int $userId): bool {

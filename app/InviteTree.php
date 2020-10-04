@@ -151,6 +151,9 @@ class InviteTree extends Base {
             ", ...$args
         );
 
+        $markup = '';
+        $classSummary = [];
+
         while ([$inviteeId, $enabled, $permissionId, $donor, $uploaded, $downloaded, $paranoia, $position, $level]
             = $this->db->next_record(MYSQLI_NUM, false)
         ) {

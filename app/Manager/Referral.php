@@ -423,6 +423,7 @@ class Referral extends \Gazelle\Base {
 
         if ($json["status"] === 'success') {
             $match = false;
+            $userId = null;
             foreach ($json["response"]["results"] as $userResult) {
                 if ($userResult["username"] == $user) {
                     $match = true;

@@ -275,7 +275,7 @@ class User extends Base {
         $this->cache->delete_value('user_info_heavy_' . $this->id);
     }
 
-    public function updatePassword($pw, $ipAddr) {
+    public function updatePassword($pw, $ipaddr) {
         $this->db->prepared_query('
             UPDATE users_main SET
                 PassHash = ?
@@ -413,7 +413,7 @@ class User extends Base {
         return $n;
     }
 
-    public function resetEmailHistory(string $email, string $ipAddr) {
+    public function resetEmailHistory(string $email, string $ipaddr) {
         $this->db->prepared_query("
             DELETE FROM users_history_emails
             WHERE UserID = ?
@@ -423,7 +423,7 @@ class User extends Base {
             INSERT INTO users_history_emails
                    (UserID, Email, IP)
             VALUES (?,      ?,     ?)
-            ", $this->id, $email, $ip
+            ", $this->id, $email, $ipaddr
         );
         $this->db->prepared_query("
             UPDATE users_main
@@ -453,12 +453,12 @@ class User extends Base {
         return $this->db->affected_rows();
     }
 
-    public function resetPasskeyHistory(string $oldPasskey, string $newPasskey, string $ipAddr) {
+    public function resetPasskeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr) {
         $this->db->prepared_query("
             INSERT INTO users_history_passkeys
                    (UserID, OldPassKey, NewPassKey, ChangerIP)
             VALUES (?,      ?,          ?,          ?)
-            ", $this->id, $oldPasskey, $newPasskey, $ipAddr
+            ", $this->id, $oldPasskey, $newPasskey, $ipaddr
         );
     }
 

@@ -92,7 +92,7 @@ if ($create || $contest) {
         'create'     => $create,
         'type'       => $contestTypes,
         'intro'      => new TEXTAREA_PREVIEW('description', 'description', $create ? '' : display_str($contest->description()), 60, 8, false, false, true),
-        'user_count' => Users::get_enabled_users_count(),
+        'user_count' => (new \Gazelle\Manager\User())->getEnabledUsersCount(),
     ]);
 ?>
 </div>

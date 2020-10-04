@@ -336,6 +336,7 @@ class Torrent extends \Gazelle\Base {
         if (!$groupId) {
             return null;
         }
+        $cached = null;
         if (!$revisionId) {
             $cached = $this->cache->get_value("torrents_details_$groupId");
         }

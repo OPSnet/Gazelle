@@ -252,7 +252,7 @@ class Notification extends \Gazelle\Base {
         $blogMan = new \Gazelle\Manager\Blog;
         $blogMan->catchupUser($this->userId);
         $this->cache->delete_value('user_info_heavy_' . $this->userId);
-        return $blogId;
+        return $blogMan->latestId();
     }
 
     public function loadCollages() {
@@ -450,7 +450,7 @@ class Notification extends \Gazelle\Base {
             );
         }
         $this->db->set_query_id($QueryID);
-        $this->cache->delete_value("users_notifications_settings_$UserID");
+        $this->cache->delete_value("users_notifications_settings_{$this->userId}");
     }
 
     /**

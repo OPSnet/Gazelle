@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class BonusPool extends Base {
-    private $items;
+    protected $id;
 
     const CACHE_SENT = 'bonuspool_sent_%d';
 

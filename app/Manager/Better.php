@@ -23,8 +23,7 @@ class Better extends \Gazelle\Base
             ', $table), $id
         );
 
-        $torrent = new \Gazelle\Torrent();
-        $this->cache->delete_value('torrents_details_' . $torrent->idToGroup($id));
+        $this->cache->delete_value('torrents_details_' . (new \Gazelle\Manager\Torrent())->idToGroupId($id));
     }
 
     public function missing(string $type, string $filter, string $search, int $limit, int $offset, int $userId) {
@@ -35,6 +34,7 @@ class Better extends \Gazelle\Base
         $order = '';
         $params = [];
         $joinParams = [];
+        $mode = '';
 
         $artistUserSnatchJoin = "INNER JOIN (
                 SELECT DISTINCT ta.ArtistID
@@ -229,6 +229,7 @@ class Better extends \Gazelle\Base
 
         $this->db->prepared_query($query, ...$params);
 
+        $results = null;
         switch ($mode) {
             case 'torrents':
                 if ($resultCount > 0) {
@@ -245,8 +246,10 @@ class Better extends \Gazelle\Base
                 if ($resultCount > 0) {
                     $results = $this->db->to_array('ID', MYSQLI_ASSOC);
                     foreach (\Artists::get_artists(array_keys($results)) as $groupId => $data) {
-                        $results[$groupId]['Artists'] = [];
-                        $results[$groupId]['ExtendedArtists'] = [];
+                        $results[$groupId] = [
+                            'Artists' => [],
+                            'ExtendedArtists' => []
+                        ];
                         foreach ([1, 4, 6] as $importance) {
                             if (isset($data[$importance])) {
                                 $results[$groupId]['Artists'] = array_merge($results[$groupId]['Artists'], $data[$importance]);

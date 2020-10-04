@@ -78,7 +78,7 @@ class Bookmark extends Base {
             );
             $groupIds = $this->db->collect('GroupID');
             $bookmarkData = $this->db->to_array('GroupID', MYSQLI_ASSOC);
-            $this->cache->cache_value("bookmarks_group_ids_$UserID", [$groupIds, $bookmarkData], 3600);
+            $this->cache->cache_value("bookmarks_group_ids_$userId", [$groupIds, $bookmarkData], 3600);
         }
         return [$groupIds, $bookmarkData, \Torrents::get_groups($groupIds)];
     }

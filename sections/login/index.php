@@ -7,7 +7,7 @@ function log_attempt(int $UserID, string $capture) {
     $IPStr = $_SERVER['REMOTE_ADDR'];
     if (!$AttemptID) {
         $AttemptID = $watch->create($IPStr, $capture, $UserID);
-    } elseif ($Attempt < 6) {
+    } elseif ($Attempts < 6) {
         $watch->setWatch($AttemptID)->increment($UserID, $IPStr, $capture);
     } else {
         $watch->setWatch($AttemptID)->ban($Attempts, $capture, $UserID);
