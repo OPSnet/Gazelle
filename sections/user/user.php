@@ -512,7 +512,7 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
                 <li class="tooltip" title="<?=number_format($ForumPosts)?> posts">Forum posts made: <?= display_rank($rank, 'posts') ?></li>
 <?php
     if (($Override = check_paranoia_here('torrentcomments++'))) { ?>
-                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= number_format($torrentComments) ?> posted">Torrent commments: <?= display_rank($rank, 'comment-t') ?></li>
+                <li class="tooltip<?=($Override === 2 ? ' paranoia_override' : '')?>" title="<?= number_format($torrentComments) ?> posted">Torrent comments: <?= display_rank($rank, 'comment-t') ?></li>
 <?php
     }
     if (($Override = check_paranoia_here('collagecontribs+'))) { ?>
