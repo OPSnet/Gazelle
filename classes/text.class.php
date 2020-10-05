@@ -1276,11 +1276,12 @@ class Text {
             }
         }
 
-        $Str = str_replace(["<body>\n", "\n</body>", "<body>", "</body>"], "", $Document->saveHTML($Document->getElementsByTagName('body')->item(0)));
+        $Str = $Document->saveHTML($Document->getElementsByTagName('body')->item(0));
+        $Str = str_replace(["<body>\n", "\n</body>", "<body>", "</body>"], "", $Str);
         $Str = str_replace(["\r\n", "\n"], "", $Str);
         $Str = preg_replace("/\<strong\>([a-zA-Z0-9 ]+)\<\/strong\>\: \<spoiler\>/", "[spoiler=\\1]", $Str);
         $Str = str_replace("</spoiler>", "[/spoiler]", $Str);
-        $Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*)\<blockquote\>/","[quote=\\1]", $Str);
+        $Str = preg_replace("/\<strong class=\"quoteheader\"\>(.*)\<\/strong\>(.*)wrote\:(.*?)\<blockquote\>/","[quote=\\1]", $Str);
         $Str = preg_replace("/\<(\/*)blockquote\>/", "[\\1quote]", $Str);
         $Str = preg_replace("/\<(\/*)strong\>/", "[\\1b]", $Str);
         $Str = preg_replace("/\<(\/*)italic\>/", "[\\1i]", $Str);
@@ -1288,7 +1289,7 @@ class Text {
         $Str = preg_replace("/\<(\/*)important\>/", "[\\1important]", $Str);
         $Str = preg_replace("/\<(\/*)code\>/", "[\\1code]", $Str);
         $Str = preg_replace("/\<(\/*)pre\>/", "[\\1pre]", $Str);
-        $Str = preg_replace("/\<color color=\"(.*)\"\>/", "[color=\\1]", $Str);
+        $Str = preg_replace("/\<color color=\"(.*?)\"\>/", "[color=\\1]", $Str);
         $Str = str_replace("</color>", "[/color]", $Str);
         $Str = str_replace(['<number>', '<bullet>'], ['[#]', '[*]'], $Str);
         $Str = str_replace(['</number>', '</bullet>'], '<br />', $Str);
@@ -1303,9 +1304,9 @@ class Text {
         $Str = preg_replace('#/torrents.php\?taglist="?(?:[^"]*)#', 'https://'.SITE_URL.'\\0', $Str);
         $Str = preg_replace("/\<(\/*)artist\>/", "[\\1artist]", $Str);
         $Str = preg_replace("/\((\/*)user\>/", "[\\1user]", $Str);
-        $Str = preg_replace("/\<a href=\"([^\"]*)\">/", "[url=\\1]", $Str);
+        $Str = preg_replace("/\<a href=\"([^\"]*?)\">/", "[url=\\1]", $Str);
         $Str = preg_replace("/\<(\/*)a\>/", "[\\1url]", $Str);
-        $Str = preg_replace("/\<img(.*)src=\"(.*)\"(.*)\>/", '[img]\\2[/img]', $Str);
+        $Str = preg_replace("/\<img(.*?)src=\"(.*?)\"(.*?)\>/", '[img]\\2[/img]', $Str);
         $Str = str_replace('<p>', '', $Str);
         $Str = str_replace('</p>', '<br />', $Str);
         //return $Str;
