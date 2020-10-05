@@ -563,11 +563,24 @@ function fillMusicForm(group, torrent, source) {
         }
     }
 
+    // ideally we are getting the JSON file from an endpoint that does not make use reverse
+    // HTML back into BBCode. We use `wikiBBcode` here, RED uses `bbBody`.
+    let albumDescField;
+    if (group['wikiBBcode'] !== undefined) {
+        albumDescField = 'wikiBBcode';
+    }
+    else if (group['bbBody'] !== undefined) {
+        albumDescField = 'bbBody';
+    }
+    else {
+        albumDescField = 'wikiBody';
+    }
+
     // fill out group info
     jsonFill(group, {
         record_label: 'recordLabel',
         catalogue_number: 'catalogueNumber',
-        album_desc: 'wikiBody',
+        album_desc: albumDescField,
     });
 
     // ideally, the torrent json contains a releaseName field that is human readable,
