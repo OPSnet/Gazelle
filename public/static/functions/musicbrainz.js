@@ -29,7 +29,7 @@ $(document).ready(function() {
 
     $("#musicbrainz_button").click(function() {
         var $album = $("#title").val();
-        var $artist = $("#artist").val();
+        var $artist = $("#artist_0").val();
         if ($artist.length > 0 || $album.length > 0) {
             jQuery('#results1').empty();
             jQuery('#results2').empty();
@@ -213,7 +213,7 @@ function populateForm(xml) {
     });
 
     clear();
-    $("#artist").val($artist);
+    $("#artist_0").val($artist);
     $("#title").val($release_title);
     $("#year").val($year_original);
     $("#record_label").val($record_label);
@@ -335,7 +335,7 @@ function enableMusicBrainzButton() {
  */
 function clear() {
     closeEditionsForm();
-    $("#artist").val("");
+    $("#artist_0").val("");
     $("#title").val("");
     $("#year").val("");
     $("#record_label").val("");
