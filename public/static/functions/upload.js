@@ -71,8 +71,10 @@ function musicFormInit() {
     });
     ArtistCount      = 0;
     ArtistJsonCount  = 0;
-    LogCount         = 0;
     ExtraFormatCount = 0;
+
+    // the form starts with one logfile field
+    LogCount         = 1;
 }
 
 function Categories() {
@@ -356,7 +358,7 @@ function AddExtraLogField(id) {
 }
 
 function RemoveLogField() {
-    if (LogCount == 1) {
+    if (LogCount === 1) {
         return;
     }
     var x = $('#logfields').raw();
@@ -802,10 +804,10 @@ function checkFields() {
             ++error;
             $("#check").append('<li>Bitrate (Lossless, 320, V0 (VBR), ...) not specified.</li>');
         }
-        if (LogCount > 1) {
+        if (LogCount > 1 && !$('#upload_logs')[0].classList.contains('hidden')) {
             missing = 0;
-            for (i = 1; i < 2; i++) {
-                if (!$('#logfile' + 1).val()) {
+            for (i = 1; i <= LogCount; i++) {
+                if (!$('#logfile_' + i).val()) {
                     ++missing;
                 }
             }
