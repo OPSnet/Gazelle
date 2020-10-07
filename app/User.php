@@ -612,7 +612,8 @@ class User extends Base {
     }
 
     public function loadArtistNotifications(): array {
-        if (($info = $this->cache->get_value('notify_artists_' . $this->id)) === false) {
+        $info = $this->cache->get_value('notify_artists_' . $this->id);
+        if (empty($info)) {
             $this->db->prepared_query("
                 SELECT ID, Artists
                 FROM users_notify_filters
