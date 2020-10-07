@@ -2,7 +2,7 @@
 use Gazelle\Util\{Crypto, Irc};
 
 require_once(__DIR__.'/config.php');
-require_once(__DIR__.'/classloader.php');
+require_once(__DIR__.'/../vendor/autoload.php');
 
 $Debug = new DEBUG;
 $Cache = new CACHE;

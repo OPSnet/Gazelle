@@ -3,7 +3,7 @@
 /* If ever can_leech and RatioWatchEnds get out of synch, no task will catch it */
 
 require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../classes/classloader.php');
+require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/util.php');
 
 $Debug = new DEBUG;

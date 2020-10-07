@@ -7,7 +7,7 @@ define('TIME_EXCEPTION', true);
 define('ERROR_EXCEPTION', true);
 
 require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../classes/classloader.php');
+require_once(__DIR__.'/../vendor/autoload.php');
 
 use Gazelle\Util\Crypto;
 use Twig\Loader\FilesystemLoader;

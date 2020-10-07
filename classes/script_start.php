@@ -12,7 +12,7 @@
 /********************************************************/
 
 require_once(__DIR__ . '/config.php'); //The config contains all site wide configuration information
-require_once(__DIR__ . '/classloader.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Gazelle\Util\Crypto;
 use Twig\Loader\FilesystemLoader;
