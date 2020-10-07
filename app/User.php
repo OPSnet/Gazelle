@@ -690,6 +690,7 @@ class User extends Base {
                 WHERE ID = ?
                 ", $info['Artists'], $info['ID']
             );
+            $change = $this->db->affected_rows();
         }
         if ($change) {
             $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
