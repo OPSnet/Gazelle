@@ -5,7 +5,7 @@ define('TIME_EXCEPTION', true);
 define('ERROR_EXCEPTION', true);
 
 require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../classes/classloader.php');
+require_once(__DIR__.'/../vendor/autoload.php');
 require_once(__DIR__.'/../classes/time.class.php'); //Require the time class
 require_once(__DIR__.'/../classes/paranoia.class.php'); //Require the paranoia check_paranoia function
 require_once(__DIR__.'/../classes/util.php');

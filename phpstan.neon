@@ -2,7 +2,6 @@ parameters:
 	level: 1
 	bootstrapFiles:
 		- classes/config.template.php
-		- classes/classloader.php
 	scanFiles:
 		- classes/paranoia.class.php
 		- classes/proxies.class.php
