@@ -103,7 +103,7 @@ switch ($_REQUEST['action']) {
                 }
 
                 if (empty($_SESSION['private_key'])) {
-                    header('Location: user.php?action=2fa&do=enable&userid=' . G::$LoggedUser['ID']);
+                    header('Location: user.php?action=2fa&do=enable&userid=' . $UserID);
                     exit;
                 }
 
@@ -114,7 +114,7 @@ switch ($_REQUEST['action']) {
 
                     if (!$works) {
                         // user got their token wrong...
-                        header('Location: user.php?action=2fa&do=enable&invalid&userid=' . $LoggedUser['ID']);
+                        header('Location: user.php?action=2fa&do=enable&invalid&userid=' . $UserID);
                     } else {
                         $recovery = [];
                         for ($i = 0; $i < 6; $i++) {
@@ -128,7 +128,7 @@ switch ($_REQUEST['action']) {
                             WHERE ID = ?
                             ', $_SESSION['private_key'], serialize($recovery), $UserID
                         );
-                        header('Location: user.php?action=2fa&do=complete&userid=' . $LoggedUser['ID']);
+                        header('Location: user.php?action=2fa&do=complete&userid=' . $UserID);
                     }
                 }
                 break;
@@ -153,33 +153,26 @@ switch ($_REQUEST['action']) {
                     error(404);
                 }
 
-                if (empty($_POST['password']) && !check_perms('users_mod')) {
-                    require(__DIR__ . '/2fa/password_confirm.php');
-                } else {
-                    if (check_perms('users_edit_password') || Users::check_password($_POST['password'], $PassHash)) {
-                        $DB->prepared_query("
-                            UPDATE users_main SET
-                                2FA_Key = '',
-                                Recovery = ''
-                            WHERE ID = ?
-                            ", $UserID
-                        );
-
-                        if (isset($_GET['page']) && $_GET['page'] === 'user') {
-                            $action = '';
-                            $ID = $UserID;
-                        }
-                        else {
-                            $action = 'action=edit&';
-                            $ID = $LoggedUser['ID'];
-                        }
-                        header('Location: user.php?' . $action . 'userid=' . $ID);
+                if ($UserID === $LoggedUser['ID']) {
+                    if (empty($_POST['password'])) {
+                        require(__DIR__ . '/2fa/password_confirm.php');
+                        break;
                     }
-                    else {
-                        header('Location: user.php?action=2fa&do=disable&invalid&userid=' . $LoggedUser['ID']);
+                    if (!Users::check_password($_POST['password'], $PassHash)) {
+                        header('Location: user.php?action=2fa&do=disable&invalid&userid=' . $UserID);
                         exit;
                     }
+                } elseif (!check_perms('users_edit_password')) {
+                    error(403);
                 }
+
+                (new Gazelle\User($UserID))->remove2FA();
+
+                $action = '';
+                if (!isset($_GET['page']) || $_GET['page'] !== 'user') {
+                    $action = 'action=edit&';
+                }
+                header('Location: user.php?' . $action . 'userid=' . $UserID);
                 break;
         }
         break;

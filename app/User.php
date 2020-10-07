@@ -1473,4 +1473,15 @@ class User extends Base {
         }
         return $criteria;
     }
+
+    public function remove2FA(): int {
+        $this->db->prepared_query("
+            UPDATE users_main SET
+                2FA_Key = '',
+                Recovery = ''
+            WHERE ID = ?
+            ", $this->id
+        );
+        return $this->db->affected_rows();
+    }
 }
