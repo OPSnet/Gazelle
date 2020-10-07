@@ -32,7 +32,7 @@ foreach ($toc as $category => $forumList) {
             $isRead = false;
         }
 
-        $iconClass = ((!$f['IsLocked'] || $f['IsSticky']) && $catchup ? 'read' : 'unread')
+        $iconClass = (($f['IsLocked'] && !$f['IsSticky']) || $catchup ? 'read' : 'unread')
             . ($f['IsLocked'] ? '_locked' : '')
             . ($f['IsSticky'] ? '_sticky' : '');
 
