@@ -600,20 +600,103 @@ class User extends Base {
         return $filters;
     }
 
-    public function hasArtistNotification($name) {
-        if (($list = $this->cache->get_value('notify_artists_' . $this->id)) === false) {
-            $this->db->prepared_query('
+    public function removeNotificationFilter(int $notifId) {
+        $this->db->prepared_query('
+            DELETE FROM users_notify_filters
+            WHERE UserID = ? AND ID = ?
+            ', $this->id, $notifId
+        );
+        if ($this->db->affected_rows()) {
+            $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
+        }
+    }
+
+    public function loadArtistNotifications(): array {
+        $info = $this->cache->get_value('notify_artists_' . $this->id);
+        if (empty($info)) {
+            $this->db->prepared_query("
                 SELECT ID, Artists
                 FROM users_notify_filters
                 WHERE Label = ?
                     AND UserID = ?
+                ORDER BY ID
                 LIMIT 1
-                ', 'Artist notifications', $this->id
+                ", 'Artist notifications', $this->id
             );
-            $list = $this->db->next_record(MYSQLI_ASSOC, false);
-            $this->cache->cache_value('notify_artists_' . $this->id, $list, 0);
+            $info = $this->db->next_record(MYSQLI_ASSOC, false);
+            if (!$info) {
+                $info = ['ID' => 0, 'Artists' => ''];
+            }
+            $this->cache->cache_value('notify_artists_' . $this->id, $info, 0);
         }
-        return stripos($list['Artists'], $name) !== false;
+        return $info;
+    }
+
+    public function hasArtistNotification(string $name): bool {
+        $info = $this->loadArtistNotifications();
+        return stripos($info['Artists'], "|$name|") !== false;
+    }
+
+    public function addArtistNotification(\Gazelle\Artist $artist): int {
+        $info = $this->loadArtistNotifications();
+        $alias = implode('|', $artist->aliasList());
+        if (!$alias) {
+            return 0;
+        }
+
+        $change = 0;
+        if (!$info['ID']) {
+            $this->db->prepared_query("
+                INSERT INTO users_notify_filters
+                       (UserID, Label, Artists)
+                VALUES (?,      ?,     ?)
+                ", $this->id, 'Artist notifications', "|$alias|"
+            );
+            $change = $this->db->affected_rows();
+        } elseif (stripos($info['Artists'], "|$alias|") === false) {
+            $this->db->prepared_query("
+                UPDATE users_notify_filters SET
+                    Artists = ?
+                WHERE ID = ? AND Artists NOT LIKE concat('%', ?, '%')
+                ", $info['Artists'] . "$alias|", $info['ID'], "|$alias|"
+            );
+            $change = $this->db->affected_rows();
+        }
+        if ($change) {
+            $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
+        }
+        return $change;
+    }
+
+    public function removeArtistNotification(\Gazelle\Artist $artist): int {
+        $info = $this->loadArtistNotifications();
+        $aliasList = $artist->aliasList();
+        foreach ($aliasList as $alias) {
+            while (stripos($info['Artists'], "|$alias|") !== false) {
+                $info['Artists'] = str_ireplace("|$alias|", '|', $info['Artists']);
+            }
+        }
+        $change = 0;
+        if ($info['Artists'] === '|') {
+            $this->db->prepared_query("
+                DELETE FROM users_notify_filters
+                WHERE ID = ?
+                ", $info['ID']
+            );
+            $change = $this->db->affected_rows();
+        } else {
+            $this->db->prepared_query("
+                UPDATE users_notify_filters SET
+                    Artists = ?
+                WHERE ID = ?
+                ", $info['Artists'], $info['ID']
+            );
+            $change = $this->db->affected_rows();
+        }
+        if ($change) {
+            $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
+        }
+        return $change;
     }
 
     protected function enabledState(): int {

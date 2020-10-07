@@ -22,19 +22,11 @@ switch ($_REQUEST['action']) {
         break;
     case 'notify_delete':
         authorize();
-        if ($_GET['id'] && is_number($_GET['id'])) {
-            $DB->prepared_query('
-                DELETE FROM users_notify_filters
-                WHERE ID = ? AND UserID = ?
-                ', $_GET['id'], $LoggedUser['ID']
-            );
-
-            $ArtistNotifications = $Cache->get_value('notify_artists_'.$LoggedUser['ID']);
-            if (is_array($ArtistNotifications) && $ArtistNotifications['ID'] == $_GET['id']) {
-                $Cache->delete_value('notify_artists_'.$LoggedUser['ID']);
-            }
+        $notifId = (int)$_GET['id'];
+        if ($notifId) {
+            $user = new Gazelle\User($LoggedUser['ID']);
+            $user->removeNotificationFilter($notifId);
         }
-        $Cache->delete_value('notify_filters_'.$LoggedUser['ID']);
         header('Location: user.php?action=notify');
         break;
     case 'search':// User search
