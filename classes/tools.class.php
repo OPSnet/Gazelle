@@ -234,13 +234,14 @@ class Tools {
 
             $AdminComment = date('Y-m-d')." - Warning (Clash) extended to expire at $NewExpDate by " . G::$LoggedUser['Username'] . "\nReason: $Reason\n\n";
 
-            G::$DB->query('
-                UPDATE users_info
-                SET
-                    Warned = \''.db_string($NewExpDate).'\',
+            G::$DB->prepared_query("
+                UPDATE users_info SET
+                    Warned = ?
                     WarnedTimes = WarnedTimes + 1,
-                    AdminComment = CONCAT(\''.db_string($AdminComment).'\', AdminComment)
-                WHERE UserID = \''.db_string($UserID).'\'');
+                    AdminComment = CONCAT(?, AdminComment)
+                WHERE UserID = ?
+                ",  $NewExpDate, $AdminComment, $UserID
+            );
         } else {
             //Not changing, user was not already warned
             $WarnTime = time_plus($Duration);
@@ -251,13 +252,14 @@ class Tools {
 
             $AdminComment = date('Y-m-d')." - Warned until $WarnTime by " . G::$LoggedUser['Username'] . "\nReason: $Reason\n\n";
 
-            G::$DB->query('
-                UPDATE users_info
-                SET
-                    Warned = \''.db_string($WarnTime).'\',
+            G::$DB->prepared_query("
+                UPDATE users_info SET
+                    Warned = ?
                     WarnedTimes = WarnedTimes + 1,
-                    AdminComment = CONCAT(\''.db_string($AdminComment).'\', AdminComment)
-                WHERE UserID = \''.db_string($UserID).'\'');
+                    AdminComment = CONCAT(?, AdminComment)
+                WHERE UserID = ?
+                ",  $WarnTime, $AdminComment, $UserID
+            );
         }
         G::$DB->set_query_id($QueryID);
     }
@@ -269,10 +271,12 @@ class Tools {
      */
     public static function update_user_notes($UserID, $AdminComment) {
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query('
-            UPDATE users_info
-            SET AdminComment = CONCAT(\''.db_string($AdminComment).'\', AdminComment)
-            WHERE UserID = \''.db_string($UserID).'\'');
+        G::$DB->prepared_query("
+            UPDATE users_info SET
+                AdminComment = CONCAT(?, AdminComment)
+            WHERE UserID = ?
+            ", $AdminComment, $UserID
+        );
         G::$DB->set_query_id($QueryID);
     }
 
