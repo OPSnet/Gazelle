@@ -6,10 +6,11 @@ if ($_GET['id'] && $_GET['artistname']) {
     json_die("failure", "bad parameters");
 }
 
-$ArtistID = $_GET['id'];
-if ($ArtistID && !is_number($ArtistID)) {
+$ArtistID = (int)$_GET['id'];
+if (!$ArtistID) {
     json_die("failure");
 }
+$user = new Gazelle\User($LoggedUser['ID']);
 
 if (empty($ArtistID)) {
     if (!empty($_GET['artistname'])) {
@@ -267,32 +268,10 @@ foreach ($Requests as $RequestID => $Request) {
     ];
 }
 
-//notifications disabled by default
-$notificationsEnabled = false;
-if (check_perms('site_torrents_notify')) {
-    if (($Notify = $Cache->get_value('notify_artists_'.$LoggedUser['ID'])) === false) {
-        $DB->prepared_query('
-            SELECT ID, Artists
-            FROM users_notify_filters
-            WHERE UserID = ?
-                AND Label = ?
-            LIMIT 1
-            ', $LoggedUser[ID], 'Artist notifications'
-        );
-        $Notify = $DB->next_record(MYSQLI_ASSOC, false);
-        $Cache->cache_value('notify_artists_'.$LoggedUser['ID'], $Notify, 0);
-    }
-    if (stripos($Notify['Artists'], "|$Name|") === false) {
-        $notificationsEnabled = false;
-    } else {
-        $notificationsEnabled = true;
-    }
-}
-
 json_print("success", [
     'id' => (int)$ArtistID,
     'name' => $Name,
-    'notificationsEnabled' => $notificationsEnabled,
+    'notificationsEnabled' => $user->hasArtistNotification($Name),
     'hasBookmarked' => $bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID),
     'image' => $Image,
     'body' => Text::full_format($Body),

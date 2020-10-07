@@ -4,7 +4,6 @@ namespace Gazelle;
 
 use Requests;
 use Torrents;
-use OutOfBoundsException;
 use UnexpectedValueException;
 
 class Artist extends Base {
@@ -45,7 +44,7 @@ class Artist extends Base {
      * Artist constructor.
      * @param  int  $id
      * @param  int|null  $revisionId
-     * @throws OutOfBoundsException
+     * @throws Gazelle\Exception\ResourceNotFoundException
      */
     public function __construct (int $id, $revisionId = null) {
         parent::__construct();
@@ -76,7 +75,7 @@ class Artist extends Base {
 
             $this->db->prepared_query($sql, $args);
             if (!$this->db->has_results()) {
-                throw new OutOfBoundsException("Artist:not-found");
+                throw new Exception\ResourceNotFoundException($id);
             }
             [$this->name, $this->image, $this->body, $this->vanity, $this->discogsId, $this->discogsName,
                 $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred
@@ -171,7 +170,7 @@ class Artist extends Base {
     /**
      * @param  int  $redirectId
      * @return int
-     * @throws OutOfBoundsException
+     * @throws Gazelle\Exception\ResourceNotFoundException
      * @throws UnexpectedValueException
      */
     public function resolveRedirect(int $redirectId): int {
@@ -182,7 +181,7 @@ class Artist extends Base {
             ", $redirectId
         );
         if (!$foundId) {
-            throw new OutOfBoundsException("Artist:not-found");
+            throw new Exception\ResourceNotFoundException($id);
         }
         if ($this->id !== $foundId) {
             throw new UnexpectedValueException("Artist:not-redirected");
@@ -226,6 +225,16 @@ class Artist extends Base {
             ', $this->id, $name
         );
         return $alias ?: $this->id;
+    }
+
+    public function aliasList(): array {
+        $this->db->prepared_query("
+            SELECT Name
+            FROM artists_alias
+            WHERE Redirect = 0 AND ArtistID = ?
+            ", $this->id
+        );
+        return $this->db->collect('Name');
     }
 
     public function editableInformation(): array {
