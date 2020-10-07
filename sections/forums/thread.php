@@ -117,7 +117,6 @@ $transitions = Forums::get_thread_transitions($ForumID);
 //Handle last read
 
 if (!$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
-
     $DB->prepared_query("
         SELECT PostID
         FROM forums_last_read_topics
