@@ -13,7 +13,7 @@ $(document).ready(function() {
     });
 
     if (url.path == 'torrents' || url.path == 'upload' || url.path == 'artist' || (url.path == 'requests' && url.query['action'] == 'new') || url.path == 'collages') {
-        $("#artist" + SELECTOR).autocomplete({
+        $("#artist_0" + SELECTOR).autocomplete({
             deferRequestBy: 300,
             serviceUrl : ARTIST_AUTOCOMPLETE_URL
         });
