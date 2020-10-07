@@ -652,7 +652,7 @@ class User extends Base {
                 ", $this->id, 'Artist notifications', "|$alias|"
             );
             $change = $this->db->affected_rows();
-        } elseif (stripos($info['Artists'], "|$aliasList|") === false) {
+        } elseif (stripos($info['Artists'], "|$alias|") === false) {
             $this->db->prepared_query("
                 UPDATE users_notify_filters SET
                     Artists = ?
@@ -667,7 +667,7 @@ class User extends Base {
         return $change;
     }
 
-    public function removeArtistNotification(\Gazelle\Artists $artist): int {
+    public function removeArtistNotification(\Gazelle\Artist $artist): int {
         $info = $this->loadArtistNotifications();
         $aliasList = $artist->aliasList();
         foreach ($aliasList as $alias) {

@@ -10,6 +10,6 @@ try {
     error(404);
 }
 $user = new Gazelle\User($LoggedUser['ID']);
-$user->removeNotificationArtist($artist);
+$user->removeArtistNotification($artist);
 
 header("Location: " . $_SERVER['HTTP_REFERER'] ?? "artist.php?id=" . $artist->id());

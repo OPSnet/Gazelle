@@ -181,7 +181,7 @@ class Artist extends Base {
             ", $redirectId
         );
         if (!$foundId) {
-            throw new Exception\ResourceNotFoundException($id);
+            throw new Exception\ResourceNotFoundException($redirectId);
         }
         if ($this->id !== $foundId) {
             throw new UnexpectedValueException("Artist:not-redirected");
@@ -520,5 +520,9 @@ class Artist extends Base {
         $name = preg_replace('/^(?:\xE2\x80\x8E|\s)+/', '', $name);
         $name = preg_replace('/(?:\xE2\x80\x8E|\s)+$/', '', $name);
         return preg_replace('/ +/', ' ', $name);
+    }
+
+    public function id() {
+        return $this->id;
     }
 }
