@@ -1,12 +1,16 @@
 <?php
 authorize();
 
-$TorrentID = (int)$_POST['torrentid'];
-if (!$TorrentID) {
+$torrentId = (int)$_POST['torrentid'];
+if (!$torrentId) {
     error(404);
 }
 
-if ($Cache->get_value("torrent_{$TorrentID}_lock")) {
+if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_delete')) {
+    error(403);
+}
+
+if ($Cache->get_value("torrent_{$torrentId}_lock")) {
     error('Torrent cannot be deleted because the upload process is not completed yet. Please try again later.');
 }
 
@@ -16,76 +20,47 @@ if ($user->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_D
         . ' torrents. Please contact a staff member if you need to delete more.');
 }
 
-[$UserID, $GroupID, $Size, $InfoHash, $Name, $Year, $ArtistName, $Media, $Format, $Encoding,
-    $HasCue, $HasLogDB, $LogScore, $Remastered, $RemasterTitle, $RemasterYear] = $DB->row('
-    SELECT
-        t.UserID,
-        t.GroupID,
-        t.Size,
-        t.info_hash,
-        tg.Name,
-        tg.Year,
-        ag.Name,
-        t.Media,
-        t.Format,
-        t.Encoding,
-        t.HasCue,
-        t.HasLogDB,
-        t.LogScore,
-        t.Remastered,
-        t.RemasterTitle,
-        t.RemasterYear
-    FROM torrents AS t
-    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
-    LEFT JOIN artists_group AS ag ON (ag.ArtistID = ta.ArtistID)
-    WHERE t.ID = ?
-    ', $TorrentID
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setTorrentId($torrentId)
+    ->setViewer($LoggedUser['ID'])
+    ->setArtistDisplayText();
+
+[$group, $torrent] = $torMan->torrentInfo();
+
+$labelMan = new Gazelle\Manager\TorrentLabel;
+$labelMan->showMedia(true)
+    ->showEdition(true)
+    ->load($torrent);
+
+$name = $group['Name']
+    . " [" . $labelMan->release()
+    . '] (' . $labelMan->edition() . ')';
+$artistName = $torMan->setGroupID($group['ID'])->artistName();
+if ($artistName) {
+    $name = "$artistName - $name";
+}
+
+$reason = trim($_POST['reason']) . ' ' . trim($_POST['extra']);
+[$success, $message] = $torMan->remove($reason);
+if (!$success) {
+    error($message);
+}
+
+Torrents::send_pm(
+    $torrentId,
+    $torrent['UserID'],
+    $name,
+    "Torrent $torrentId $name ("
+        . number_format($torrent['Size'] / (1024 * 1024), 2) . ' MB '
+        . strtoupper($torrent['InfoHash'])
+        . ") was deleted by {$LoggedUser['Username']}: $reason",
+    0,
+    G::$LoggedUser['ID'] != $UserID
 );
-
-if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_delete')) {
-    error(403);
-}
-
-if (empty($ArtistName)) {
-    $RawName = $Name;
-}
-elseif ($ArtistName == 'Various Artists') {
-    $RawName = "Various Artists - $Name";
-}
-else {
-    $RawName = "$ArtistName - $Name";
-}
-
-if ($ArtistName) {
-    // more pretzel logic
-    $Name = "$ArtistName - $Name";
-}
-
-$RawName .= ($Year ? " ($Year)" : '')
-    . ($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '')
-    . Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear)
-    . ($HasCue ? ' (Cue)' : '')
-    . ($HasLogDB ? " (Log: {$LogScore}%)" : '')
-    . ' (' . Format::get_size($Size) . ')';
-
-$Err = Torrents::delete_torrent($TorrentID, $GroupID);
-if ($Err) {
-    error($Err);
-}
-
-$InfoHash = unpack('H*', $InfoHash);
-$sizeMB_hash = "$sizeMB " . strtoupper($InfoHash[1]);
-$reason = trim($_POST['reason'] . ' ' . $_POST['extra']);
-$Log = "Torrent $TorrentID ($Name) ($sizeMB_hash was deleted by {$LoggedUser['Username']}: $reason";
-Torrents::send_pm($TorrentID, $UserID, $RawName, $Log, 0, G::$LoggedUser['ID'] != $UserID);
-(new Gazelle\Log)
-    ->torrent($GroupID, $TorrentID, $LoggedUser['ID'], "deleted torrent ($sizeMB_hash) for reason: $reason")
-    ->general($Log);
 View::show_header('Torrent deleted');
 ?>
 <div class="thin">
-    <h3>Torrent was successfully deleted.</h3>
+    <h3>Torrent <?= $name ?> was successfully deleted.</h3>
 </div>
 <?php
 View::show_footer();

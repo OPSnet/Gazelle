@@ -245,16 +245,19 @@ if ($DB->affected_rows() > 0 || !$Report) {
             $Log .= ' ( '.$Escaped['log_message'].' )';
         }
         [$GroupID, $InfoHash] = $DB->row("
-            SELECT GroupID, hex(info_hash)
+            SELECT GroupID, info_hash
             FROM torrents
             WHERE ID = ?
             ", $TorrentID
         );
-        Torrents::delete_torrent($TorrentID, 0, $ResolveType['reason']);
+        (new Gazelle\Manager\Torrent)
+            ->setTorrentId($TorrentID)
+            ->setViewer($LoggedUser['ID'])
+            ->remove(
+                sprintf('%s (%s)', $ResolveType['title'], $Escaped['log_message'] ?? 'none'),
+                $ResolveType['reason']
+            );
 
-        (new Gazelle\Log)->general($Log . ' ('.strtoupper($InfoHash).')')
-            ->torrent($GroupID, $TorrentID, $LoggedUser['ID'],
-                'deleted torrent for the reason: '.$ResolveType['title'].'. ( '.$Escaped['log_message'].' )');
         $TrumpID = 0;
         if ($Escaped['resolve_type'] === 'trump') {
             if (preg_match('/torrentid=([0-9]+)/', $Escaped['log_message'], $Matches) === 1) {

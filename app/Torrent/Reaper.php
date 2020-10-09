@@ -20,45 +20,43 @@ class TorrentReaper extends Base {
         $criteria = implode(' OR ', $criteria);
 
         $this->db->prepared_query("
-            SELECT
-                t.ID,
-                t.GroupID,
-                tg.Name,
-                t.Format,
-                t.Encoding,
-                t.UserID,
-                t.Media,
-                HEX(t.info_hash) AS InfoHash
+            SELECT t.ID
             FROM torrents AS t
             INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
-            INNER JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
             WHERE $criteria
             LIMIT 8000
         ");
-        $torrents = $this->db->to_array(0, MYSQLI_NUM, false);
+        $torrents = $this->db->collect('ID');
 
         $logEntries = $deleteNotes = [];
+        $torMan = new Manager\Torrent;
+        $torMan->setArtistDisplayText()->setViewer(0);
+        $labelMan = new Manager\TorrentLabel;
+        $labelMan->showMedia(true)->showEdition(true);
 
         $i = 0;
-        foreach ($torrents as $torrent) {
-            list($id, $groupID, $name, $format, $encoding, $userID, $media, $infoHash) = $torrent;
-            $artistName = \Artists::display_artists(\Artists::get_artist($groupID), false, false, false);
+        foreach ($torrents as $id) {
+            [$group, $torrent] = $torMan->setTorrentId($id)->torrentInfo();
+            $name = $group['Name'] . " " . $labelMan->load($torrent)->edition();
+
+            $artistName = $torMan->artistName();
             if ($artistName) {
                 $name = "$artistName - $name";
             }
 
-            if ($format && $encoding) {
-                $name .= ' ['.(empty($media) ? '' : "$media / ") . "$format / $encoding]";
+            [$success, $message] = $torMan->remove('inactivity (unseeded)');
+            if (!$success) {
+                continue;
             }
+            $log = "Torrent $id ($name) (" . strtoupper($torrent['InfoHash']) . ") was deleted for inactivity (unseeded)";
+            $logEntries[] = $log;
 
-            \Torrents::delete_torrent($id, $groupID);
-            $logEntries[] = "Torrent $id ($name) (".strtoupper($infoHash).") was deleted for inactivity (unseeded)";
-
+            $userID = $torrent['UserID'];
             if (!array_key_exists($userID, $deleteNotes)) {
                 $deleteNotes[$userID] = ['Count' => 0, 'Msg' => ''];
             }
 
-            $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=%storrents.php?id=%s]%s[/url]", site_url(), $groupID, $name);
+            $deleteNotes[$userID]['Msg'] .= sprintf("\n[url=%storrents.php?id=%s]%s[/url]", site_url(), $group['ID'], $name);
             $deleteNotes[$userID]['Count']++;
 
             ++$i;
@@ -66,7 +64,12 @@ class TorrentReaper extends Base {
 
         foreach ($deleteNotes as $userID => $messageInfo) {
             $singular = (($messageInfo['Count'] == 1) ? true : false);
-            \Misc::send_pm($userID, 0, $messageInfo['Count'].' of your torrents '.($singular ? 'has' : 'have').' been deleted for inactivity', ($singular ? 'One' : 'Some').' of your uploads '.($singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($singular ? 'it' : 'them').".\n\nThe following torrent".($singular ? ' was' : 's were').' deleted:'.$messageInfo['Msg']);
+            \Misc::send_pm(
+                $userID,
+                0,
+                $messageInfo['Count'].' of your torrents '.($singular ? 'has' : 'have').' been deleted for inactivity',
+                ($singular ? 'One' : 'Some').' of your uploads '.($singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($singular ? 'it' : 'them').".\n\nThe following torrent".($singular ? ' was' : 's were').' deleted:'.$messageInfo['Msg']
+            );
         }
         unset($deleteNotes);
 

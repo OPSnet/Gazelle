@@ -5,6 +5,19 @@ namespace Gazelle;
 class DB extends Base {
 
     /**
+     * Skip foreign key checks
+     * @param $relax true if foreign key checks should be skipped
+     */
+    public function relaxConstraints(bool $relax) {
+        if ($relax) {
+            $this->db->prepared_query("SET foreign_key_checks = 0");
+        } else {
+            $this->db->prepared_query("SET foreign_key_checks = 1");
+        }
+        return $this;
+    }
+
+    /**
      * Soft delete a row from a table <t> by inserting it into deleted_<t> and then delete from <t>
      * @param string $schema the schema name
      * @param string $table the table name
