@@ -2,6 +2,9 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Exception\TorrentManagerIdNotSetException;
+use Gazelle\Exception\TorrentManagerUserNotSetException;
+
 class Torrent extends \Gazelle\Base {
 
     /*
@@ -38,11 +41,21 @@ class Torrent extends \Gazelle\Base {
     protected $snatchBucket;
     protected $updateTime;
     protected $tokenCache;
+    protected $artistDisplay;
+    protected $logger;
 
     const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_';
     const FILELIST_DELIM = 0xF7; // Hex for &divide; Must be the same as phrase_boundary in sphinx.conf!
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
+
+    const ARTIST_DISPLAY_TEXT = 1;
+    const ARTIST_DISPLAY_HTML = 2;
+
+    public function __construct() {
+        parent::__construct();
+        $this->artistDisplay = self::ARTIST_DISPLAY_HTML;
+    }
 
     /**
      * Set context to a specific group. Used to retrieve the
@@ -80,14 +93,29 @@ class Torrent extends \Gazelle\Base {
     }
 
     /**
-     * Generate an HTML anchor for an artist
+     * Set artist display to text
      */
-    protected function artistLink(array $info): string {
-        return '<a href="artist.php?id=' . $info['id'] . '" dir="ltr">' . display_str($info['name']) . '</a>';
+    public function setArtistDisplayText() {
+        $this->artistDisplay = self::ARTIST_DISPLAY_TEXT;
+        return $this;
+    }
+
+    public function artistName(): string {
+        return $this->artistHtml();
     }
 
     /**
-     * Get the HTML artist name. (Individual artists will be clickable, or VA)
+     * Generate an HTML anchor or the name for an artist
+     */
+    protected function artistLink(array $info): string {
+        return $this->artistDisplay === self::ARTIST_DISPLAY_HTML
+            ? '<a href="artist.php?id=' . $info['id'] . '" dir="ltr">' . display_str($info['name']) . '</a>'
+            : $info['name'];
+    }
+
+    /**
+     * Generate the artist name. (Individual artists will be clickable, or VA)
+     * TODO: refactor calls into artistName()
      */
     public function artistHtml(): string {
         static $nameCache = [];
@@ -96,7 +124,7 @@ class Torrent extends \Gazelle\Base {
         }
 
         if (!$this->torrentId && !$this->groupId) {
-            return $nameCache[$this->torrentId] = sprintf('(torrent id:%d)', $this->torrentId);
+            return $nameCache[$this->torrentId] = '';
         }
         $key = 'seedbox_groups_artists_' . $this->groupId;
         $roleList = $this->cache->get_value($key);
@@ -144,11 +172,12 @@ class Torrent extends \Gazelle\Base {
             return $nameCache[$this->torrentId] = sprintf('(torrent id:%d)', $this->torrentId);
         }
 
+        $and = $this->artistDisplay === self::ARTIST_DISPLAY_HTML ? '&amp;' : '&';
         $chunk = [];
         if ($djCount == 1) {
             $chunk[] = $this->artistLink($artist['dj'][0]);
         } elseif ($djCount == 2) {
-            $chunk[] = $this->artistLink($artist['dj'][0]) . ' &amp; ' . $this->artistLink($artist['dj'][1]);
+            $chunk[] = $this->artistLink($artist['dj'][0]) . " $and " . $this->artistLink($artist['dj'][1]);
         } elseif ($djCount > 2) {
             $chunk[] = 'Various DJs';
         } else {
@@ -156,7 +185,7 @@ class Torrent extends \Gazelle\Base {
                 if ($composerCount == 1) {
                     $chunk[] = $this->artistLink($artist['composer'][0]);
                 } elseif ($composerCount == 2) {
-                    $chunk[] = $this->artistLink($artist['composer'][0]) . ' &amp; ' . $this->artistLink($artist['composer'][1]);
+                    $chunk[] = $this->artistLink($artist['composer'][0]) . " $and " . $this->artistLink($artist['composer'][1]);
                 } elseif ($composerCount > 2 && $mainCount + $conductorCount == 0) {
                     $chunk[] = 'Various Composers';
                 }
@@ -174,7 +203,7 @@ class Torrent extends \Gazelle\Base {
                 if ($mainCount == 1) {
                     $chunk[] = $this->artistLink($artist['main'][0]);
                 } elseif ($count['main'] == 2) {
-                    $chunk[] = $this->artistLink($artist['main'][0]) . ' &amp; ' . $this->artistLink($artist['main'][1]);
+                    $chunk[] = $this->artistLink($artist['main'][0]) . " $and " . $this->artistLink($artist['main'][1]);
                 } elseif ($count['main'] > 2) {
                     $chunk[] = 'Various Artists';
                 }
@@ -188,7 +217,7 @@ class Torrent extends \Gazelle\Base {
                 if ($conductorCount == 1) {
                     $chunk[] = $this->artistLink($artist['conductor'][0]);
                 } elseif ($count['conductor'] == 2) {
-                    $chunk[] = $this->artistLink($artist['conductor'][0]) . ' &amp; ' . $this->artistLink($artist['conductor'][1]);
+                    $chunk[] = $this->artistLink($artist['conductor'][0]) . " $and " . $this->artistLink($artist['conductor'][1]);
                 } elseif ($count['conductor'] > 2) {
                     $chunk[] = 'Various Conductors';
                 }
@@ -217,7 +246,7 @@ class Torrent extends \Gazelle\Base {
      * @return bool
      */
     public function isSnatched(int $torrentId): bool {
-        if (!$this->userId && !$this->showSnatched) {
+        if (!$this->userId || !$this->showSnatched) {
             return false;
         }
 
@@ -725,5 +754,143 @@ class Torrent extends \Gazelle\Base {
      */
     public function flushLatestUploads(int $limit) {
         $this->cache->delete_value(self::CACHE_KEY_LATEST_UPLOADS . $limit);
+    }
+
+    /**
+     * Delete a torrent.
+     * setViewer() must have been called prior, to set the user removing (use 0 for system)
+     * setTorrentId() must have been called prior, to identify the torrent to be removed
+     *
+     * @param string $reason Why is this being deleted? (For the log)
+     * @param string $trackerReason The deletion reason for ocelot to report to users.
+     */
+    public function remove(string $reason, int $trackerReason = -1): array {
+        $qid = $this->db->get_query_id();
+        if (!$this->torrentId) {
+            throw new TorrentManagerIdNotSetException;
+        }
+        if ($this->userId === null) {
+            throw new TorrentManagerUserNotSetException;
+        }
+
+        [$group, $torrent] = $this->torrentInfo();
+        if ($this->torrentId > MAX_PREV_TORRENT_ID) {
+            (new \Gazelle\Bonus)->removePointsForUpload($torrent['UserID'],
+                [$torrent['Format'], $torrent['Media'], $torrent['Encoding'], $torrent['HasLogDB'], $torrent['LogScore'], $torrent['LogChecksum']]);
+        }
+
+        $manager = new \Gazelle\DB;
+        $manager->relaxConstraints(true);
+        [$ok, $message] = $manager->softDelete(SQLDB, 'torrents_leech_stats', [['TorrentID', $this->torrentId]], false);
+        if (!$ok) {
+            return [false, $message];
+        }
+        [$ok, $message] = $manager->softDelete(SQLDB, 'torrents', [['ID', $this->torrentId]]);
+        if (!$ok) {
+            return [false, $message];
+        }
+        $manager->relaxConstraints(false);
+        \Tracker::update_tracker('delete_torrent', [
+            'id' => $this->torrentId,
+            'info_hash' => rawurlencode(hex2bin($torrent['InfoHash'])),
+            'reason' => $trackerReason,
+        ]);
+        $this->cache->decrement('stats_torrent_count');
+
+        $Count = $this->db->scalar("
+            SELECT count(*) FROM torrents WHERE GroupID = ?
+            ", $group['ID']
+        );
+        if ($Count > 0) {
+            \Torrents::update_hash($group['ID']);
+        }
+
+        $manager->softDelete(SQLDB, 'torrents_files',                  [['TorrentID', $this->torrentId]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_files',              [['TorrentID', $this->torrentId]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_folders',            [['TorrentID', $this->torrentId]]);
+        $manager->softDelete(SQLDB, 'torrents_bad_tags',               [['TorrentID', $this->torrentId]]);
+        $manager->softDelete(SQLDB, 'torrents_cassette_approved',      [['TorrentID', $this->torrentId]]);
+        $manager->softDelete(SQLDB, 'torrents_lossymaster_approved',   [['TorrentID', $this->torrentId]]);
+        $manager->softDelete(SQLDB, 'torrents_lossyweb_approved',      [['TorrentID', $this->torrentId]]);
+        $manager->softDelete(SQLDB, 'torrents_missing_lineage',        [['TorrentID', $this->torrentId]]);
+
+        $this->db->prepared_query("
+            INSERT INTO user_torrent_remove
+                (user_id, torrent_id)
+            VALUES (?,       ?)
+            ", $this->userId, $this->torrentId
+        );
+
+        // Tells Sphinx that the group is removed
+        $this->db->prepared_query("
+            REPLACE INTO sphinx_delta
+                (ID, Time)
+            VALUES (?, now())
+            ", $this->torrentId
+        );
+
+        $this->db->prepared_query("
+            UPDATE reportsv2 SET
+                Status = 'Resolved',
+                LastChangeTime = now(),
+                ModComment = 'Report already dealt with (torrent deleted)'
+            WHERE Status != 'Resolved'
+                AND TorrentID = ?
+            ", $this->torrentId
+        );
+        $count = $this->db->affected_rows();
+        if ($count) {
+            $this->cache->decrement('num_torrent_reportsv2', $count);
+        }
+
+        // Torrent notifications
+        $this->db->prepared_query("
+            SELECT concat('notifications_new_', UserID) as ck
+            FROM users_notify_torrents
+            WHERE TorrentID = ?
+            ", $this->torrentId
+        );
+        $deleteKeys = $this->db->collect('ck', false);
+        $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $this->torrentId]]);
+
+        if ($this->userId !== 0) {
+            $RecentUploads = $this->cache->get_value("user_recent_up_" . $this->userId);
+            if (is_array($RecentUploads)) {
+                foreach ($RecentUploads as $Key => $Recent) {
+                    if ($Recent['ID'] == $group['ID']) {
+                        $deleteKeys[] = "user_recent_up_" . $this->userId;
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        $deleteKeys[] = "torrent_download_" . $this->torrentId;
+        $deleteKeys[] = "torrent_group_" . $group['ID'];
+        $deleteKeys[] = "torrents_details_" . $group['ID'];
+        $this->cache->deleteMulti($deleteKeys);
+
+        if (!$this->logger) {
+            $this->logger = new \Gazelle\Log;
+        }
+        $infohash = strtoupper($torrent['InfoHash']);
+        $sizeMB = number_format($torrent['Size'] / (1024 * 1024), 2) . ' MB';
+        $username = $this->userId ? \Users::user_info($this->userId)['Username'] : 'system';
+        $this->logger->general(
+            "Torrent "
+                . $this->torrentId
+                . " ({$group['Name']}) [" . (new TorrentLabel)->load($torrent)->release()
+                . "] ($sizeMB $infohash) was deleted by $username for reason: $reason"
+            )
+            ->torrent(
+                $group['ID'],
+                $this->torrentId,
+                $this->userId,
+                "deleted torrent ($sizeMB $infohash) for reason: $reason"
+            );
+
+        $this->db->set_query_id($qid);
+        return [true, "torrent " . $this->torrentId . " removed"];
     }
 }

@@ -6,7 +6,7 @@ class DeleteNeverSeededTorrents extends \Gazelle\Schedule\Task
 {
     public function run()
     {
-        $torrents = new \Gazelle\TorrentReaper;
+        $torrents = new \Gazelle\Torrent\Reaper;
 
         $deleted = $torrents->deleteDeadTorrents(false, true);
         foreach ($deleted as $id) {

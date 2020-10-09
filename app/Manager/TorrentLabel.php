@@ -66,6 +66,18 @@ class TorrentLabel {
     }
 
     /**
+     * Generate the release [Format/Encoding/Media] of the torrent
+     * @return string
+     */
+    public function release(): string {
+        $release = [$this->info['Format'], $this->info['Encoding']];
+        if ($this->info['Media']) {
+            $release[] = $this->info['Media'];
+        }
+        return implode('/', $release);
+    }
+
+    /**
      * Generate the edition of the torrent
      * @return string
      */
