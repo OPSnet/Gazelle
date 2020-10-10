@@ -1,8 +1,8 @@
 <?php
 
-namespace Gazelle;
+namespace Gazelle\Torrent;
 
-class TorrentReaper extends Base {
+class Reaper extends \Gazelle\Base {
 
     public function deleteDeadTorrents(bool $unseeded, bool $neverSeeded) {
         if (!$unseeded && !$neverSeeded) {
@@ -29,9 +29,9 @@ class TorrentReaper extends Base {
         $torrents = $this->db->collect('ID');
 
         $logEntries = $deleteNotes = [];
-        $torMan = new Manager\Torrent;
+        $torMan = new \Gazelle\Manager\Torrent;
         $torMan->setArtistDisplayText()->setViewer(0);
-        $labelMan = new Manager\TorrentLabel;
+        $labelMan = new \Gazelle\Manager\TorrentLabel;
         $labelMan->showMedia(true)->showEdition(true);
 
         $i = 0;
