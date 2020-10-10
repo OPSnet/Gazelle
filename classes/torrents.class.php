@@ -1134,7 +1134,9 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
     public static function bbcodeUrl($val, $attr) {
         $cacheKey = 'bbcode-collage.' . $val . '.' . $attr;
         if (($url = G::$Cache->get_value($cacheKey)) === false) {
+            $oldQueryId = G::$DB->get_query_id();
             $url = self::bbcodeUrlBuild($val, $attr);
+            G::$DB->set_query_id($oldQueryId);
             G::$Cache->cache_value($cacheKey, $url, 86400 + rand(1, 3600));
         }
         return $url;
