@@ -769,7 +769,7 @@ class Torrent extends \Gazelle\Base {
         if (!$this->torrentId) {
             throw new TorrentManagerIdNotSetException;
         }
-        if (!$this->userId) {
+        if ($this->userId === null) {
             throw new TorrentManagerUserNotSetException;
         }
 
@@ -816,7 +816,7 @@ class Torrent extends \Gazelle\Base {
 
         $this->db->prepared_query("
             INSERT INTO user_torrent_remove
-                   (user_id, torrent_id)
+                (user_id, torrent_id)
             VALUES (?,       ?)
             ", $this->userId, $this->torrentId
         );
@@ -824,7 +824,7 @@ class Torrent extends \Gazelle\Base {
         // Tells Sphinx that the group is removed
         $this->db->prepared_query("
             REPLACE INTO sphinx_delta
-                   (ID, Time)
+                (ID, Time)
             VALUES (?, now())
             ", $this->torrentId
         );
@@ -853,15 +853,18 @@ class Torrent extends \Gazelle\Base {
         $deleteKeys = $this->db->collect('ck', false);
         $manager->softDelete(SQLDB, 'users_notify_torrents', [['TorrentID', $this->torrentId]]);
 
-        $RecentUploads = $this->cache->get_value("user_recent_up_" . $this->userId);
-        if (is_array($RecentUploads)) {
-            foreach ($RecentUploads as $Key => $Recent) {
-                if ($Recent['ID'] == $group['ID']) {
-                    $deleteKeys[] = "user_recent_up_" . $this->userId;
-                    break;
+        if ($this->userId !== 0) {
+            $RecentUploads = $this->cache->get_value("user_recent_up_" . $this->userId);
+            if (is_array($RecentUploads)) {
+                foreach ($RecentUploads as $Key => $Recent) {
+                    if ($Recent['ID'] == $group['ID']) {
+                        $deleteKeys[] = "user_recent_up_" . $this->userId;
+                        break;
+                    }
                 }
             }
         }
+
 
         $deleteKeys[] = "torrent_download_" . $this->torrentId;
         $deleteKeys[] = "torrent_group_" . $group['ID'];
