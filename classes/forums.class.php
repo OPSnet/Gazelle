@@ -354,7 +354,7 @@ class Forums {
     }
 
     public static function bbcodeForumUrl($val) {
-        $cacheKey = 'bbcode-forum.' . $val;
+        $cacheKey = 'bbcode_forum_' . $val;
         list($id, $name) = G::$Cache->get_value($cacheKey);
         if (is_null($id)) {
             list($id, $name) = (int)$val > 0
@@ -375,7 +375,7 @@ class Forums {
             list($thread, $post) = explode(':', $thread);
         }
 
-        $cacheKey = 'bbcode-thread.' . $thread;
+        $cacheKey = 'bbcode_thread_' . $thread;
         list($id, $name, $isLocked, $forumId) = G::$Cache->get_value($cacheKey);
         if (is_null($forumId)) {
             list($id, $name, $isLocked, $forumId) = G::$DB->row('SELECT ID, Title, IsLocked, ForumID FROM forums_topics WHERE ID = ?', $thread);
