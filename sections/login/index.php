@@ -162,7 +162,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                     // Set ResetKey, send out email, and set $Sent to 1 to show success page
                     Users::resetPassword($UserID, $Username, $Email);
                     $session = new Gazelle\Session($UserID);
-                    $session->dropAllSessions();
+                    $session->dropAll();
                     $Sent = 1; // If $Sent is 1, recover_step1.php displays a success message
                 }
                 $Err = "Email sent with further instructions.";
