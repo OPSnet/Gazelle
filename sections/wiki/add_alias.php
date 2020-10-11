@@ -17,7 +17,7 @@ $NewAlias = Wiki::normalize_alias($_POST['alias']);
 $Dupe = Wiki::alias_to_id($_POST['alias']);
 
 if ($NewAlias != '' && $NewAlias!='addalias' && $Dupe === false) { //Not null, and not dupe
-    $DB->query("INSERT INTO wiki_aliases (Alias, UserID, ArticleID) VALUES ('$NewAlias', '$LoggedUser[ID]', '$ArticleID')");
+    $DB->query("INSERT INTO wiki_aliases (Alias, UserID, ArticleID) VALUES ('$NewAlias', '{$LoggedUser['ID']}', '$ArticleID')");
 } else {
     error('The alias you attempted to add was either null or already in the database.');
 }

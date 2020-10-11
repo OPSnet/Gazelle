@@ -54,7 +54,7 @@ if (empty($_GET['type'])) {
                 if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
                     error(403);
                 }
-                $Title = "Requests created by $UserInfo[Username]";
+                $Title = "Requests created by " . $UserInfo['Username'];
                 $SphQL->where('userid', $UserInfo['ID']);
             } else {
                 $Title = 'My requests';
@@ -66,7 +66,7 @@ if (empty($_GET['type'])) {
                 if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
                     error(403);
                 }
-                $Title = "Requests voted for by $UserInfo[Username]";
+                $Title = "Requests voted for by " . $UserInfo['Username'];
                 $SphQL->where('voter', $UserInfo['ID']);
             } else {
                 $Title = 'Requests I have voted on';
@@ -78,7 +78,7 @@ if (empty($_GET['type'])) {
                 if (!check_paranoia('requestsfilled_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
                     error(403);
                 }
-                $Title = "Requests filled by $UserInfo[Username]";
+                $Title = "Requests filled by " . $UserInfo['Username'];
                 $SphQL->where('fillerid', $UserInfo['ID']);
             } else {
                 $Title = 'Requests I have filled';
@@ -593,11 +593,11 @@ $header = new SortableTableHeader([
         if ($CategoryName === 'Music') {
             $ArtistForm = Requests::get_artists($RequestID);
             $ArtistLink = Artists::display_artists($ArtistForm, true, true);
-            $FullName = "$ArtistLink<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Request[Title]</span> [$Request[Year]]</a>";
+            $FullName = "$ArtistLink<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">{$Request['Title']}</span> [{$Request['Year']}]</a>";
         } elseif ($CategoryName === 'Audiobooks' || $CategoryName === 'Comedy') {
-            $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Request[Title]</span> [$Request[Year]]</a>";
+            $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">{$Request['Title']}</span> [{$Request['Year']}]</a>";
         } else {
-            $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\" dir=\"ltr\">$Request[Title]</a>";
+            $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\" dir=\"ltr\">{$Request['Title']}</a>";
         }
         $Tags = $Request['Tags'];
 ?>

@@ -24,7 +24,7 @@ if (!isset($_GET['threadid']) || !is_number($_GET['threadid'])) {
         );
         if ($ThreadID) {
             //Redirect postid to threadid when necessary.
-            header("Location: ajax.php?action=forum&type=viewthread&threadid=$ThreadID&postid=$_GET[postid]");
+            header("Location: ajax.php?action=forum&type=viewthread&threadid=$ThreadID&postid={$_GET['postid']}");
             die();
         } else {
             print json_encode(['status' => 'failure']);

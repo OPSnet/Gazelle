@@ -188,7 +188,7 @@ if ($logoutSession && check_perms('users_logout')) {
 }
 
 if ($flTokens != $cur['FLTokens'] && ($editRatio || check_perms('admin_manage_user_fls'))) {
-    $editSummary[] = "freeleech tokens changed from $cur[FLTokens] to $flTokens";
+    $editSummary[] = "freeleech tokens changed from {$cur['FLTokens']} to $flTokens";
 }
 
 $newBonusPoints = false;
@@ -371,7 +371,7 @@ if ($visible != $cur['Visible'] && check_perms('users_make_invisible')) {
 if ($invites != $cur['Invites'] && check_perms('users_edit_invites')) {
     $set[] = 'Invites = ?';
     $args[] = $invites;
-    $editSummary[] = "number of invites changed from $cur[Invites] to $invites";
+    $editSummary[] = "number of invites changed from {$cur['Invites']} to $invites";
 }
 
 if ($supportFor != $cur['SupportFor'] && (check_perms('admin_manage_fls') || (check_perms('users_mod') && $ownProfile))) {

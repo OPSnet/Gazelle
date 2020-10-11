@@ -272,7 +272,7 @@ $headerIcons = new SortableTableHeader([
             $GroupCategoryID = $GroupInfo['CategoryID'];
             if ($GroupCategoryID == 1) {
                 if ($GroupInfo['Year'] > 0) {
-                    $DisplayName .= " [$GroupInfo[Year]]";
+                    $DisplayName .= " [" . $GroupInfo['Year'] . "]";
                 }
                 if ($GroupInfo['ReleaseType'] > 0) {
                     $DisplayName .= ' ['.$ReleaseTypes[$GroupInfo['ReleaseType']].']';

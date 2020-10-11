@@ -30,7 +30,7 @@ if (!empty($_GET['ip']) && trim($_GET['ip']) != '') {
     $SearchIPQuery = "";
 }
 
-View::show_header("IP address history for $UserInfo[Username]");
+View::show_header("IP address history for " . $UserInfo['Username']);
 ?>
 <script type="text/javascript">//<![CDATA[
 function Ban(ip, elemID) {

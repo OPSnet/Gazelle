@@ -141,7 +141,7 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
         $TorrentList = $DB->to_array('ID', MYSQLI_ASSOC);
         if (empty($TorrentDetails) || empty($TorrentList)) {
             if ($ApiCall === false) {
-                header('Location: log.php?search='.(empty($_GET['torrentid']) ? "Group+$GroupID" : "Torrent+$_GET[torrentid]"));
+                header('Location: log.php?search='.(empty($_GET['torrentid']) ? "Group+$GroupID" : "Torrent+{$_GET['torrentid']}"));
                 die();
             }
             else {

@@ -96,7 +96,7 @@ class Tracker {
         if ($Type === self::STATS_MAIN) {
             $Get .= 'get=stats';
         } elseif ($Type === self::STATS_USER && !empty($Params['key'])) {
-            $Get .= "get=user&key=$Params[key]";
+            $Get .= "get=user&key={$Params['key']}";
         } else {
             return false;
         }

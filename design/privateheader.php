@@ -143,7 +143,7 @@ foreach ($Notifications as $Type => $Notification) {
         $NewSubscriptions = true;
     }
     if ($UseNoty) {
-        $NotificationSpans[] = "<span class=\"noty-notification\" style=\"display: none;\" data-noty-type=\"$Type\" data-noty-id=\"$Notification[id]\" data-noty-importance=\"$Notification[importance]\" data-noty-url=\"$Notification[url]\">$Notification[message]</span>";
+        $NotificationSpans[] = "<span class=\"noty-notification\" style=\"display: none;\" data-noty-type=\"$Type\" data-noty-id=\"{$Notification['id']}\" data-noty-importance=\"{$Notification['importance']}\" data-noty-url=\"{$Notification['url']}\">{$Notification['message']}</span>";
     }
 }
 if ($UseNoty && !empty($NotificationSpans)) {

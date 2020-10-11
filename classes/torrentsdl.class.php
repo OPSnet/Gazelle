@@ -98,7 +98,7 @@ class TorrentsDL {
      * @param array $Info file info stored as an array with at least the keys Artist, Name and Year
      */
     public function fail_file($Info) {
-        $this->FailedFiles[] = $Info['Artist'] . $Info['Name'] . " $Info[Year]";
+        $this->FailedFiles[] = $Info['Artist'] . $Info['Name'] . " " . $Info['Year'];
     }
 
     /**
@@ -107,7 +107,7 @@ class TorrentsDL {
      * @param array $Info file info stored as an array with at least the keys Artist, Name and Year
      */
     public function skip_file($Info) {
-        $this->SkippedFiles[] = $Info['Artist'] . $Info['Name'] . " $Info[Year]";
+        $this->SkippedFiles[] = $Info['Artist'] . $Info['Name'] . " " . $Info['Year'];
     }
 
     /**

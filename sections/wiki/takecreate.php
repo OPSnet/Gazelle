@@ -13,7 +13,7 @@ if (!$Err) {
     $DB->query("
         SELECT ID
         FROM wiki_articles
-        WHERE Title = '$P[title]'");
+        WHERE Title = '{$P['title']}'");
     if ($DB->has_results()) {
         list($ID) = $DB->next_record();
         $Err = 'An article with that name already exists <a href="wiki.php?action=article&amp;id='.$ID.'">here</a>.';
@@ -48,7 +48,7 @@ $DB->query("
     INSERT INTO wiki_articles
         (Revision, Title, Body, MinClassRead, MinClassEdit, Date, Author)
     VALUES
-        ('1', '$P[title]', '$P[body]', '$Read', '$Edit', '".sqltime()."', '$LoggedUser[ID]')");
+        ('1', '{$P['title']}', '{$P['body']}', '$Read', '$Edit', '".sqltime()."', '{$LoggedUser['ID']}')");
 
 $ArticleID = $DB->inserted_id();
 

@@ -59,7 +59,7 @@ function transcode_parse_groups($groups) {
             continue;
         }
         foreach ($group['Torrents'] as $torrentID => $torrent) {
-            $remIdent = "$torrent[Media] $torrent[RemasterYear] $torrent[RemasterTitle] $torrent[RemasterRecordLabel] $torrent[RemasterCatalogueNumber]";
+            $remIdent = "{$torrent['Media']} {$torrent['RemasterYear']} {$torrent['RemasterTitle']} {$torrent['RemasterRecordLabel']} {$torrent['RemasterCatalogueNumber']}";
             if (!isset($torrentGroups[$groupID])) {
                 $torrentGroups[$groupID] = [
                     'Year' => $group['Year'],

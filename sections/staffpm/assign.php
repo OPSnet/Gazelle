@@ -33,7 +33,7 @@ if ($ConvID = (int)$_GET['convid']) {
                 SET Status = 'Unanswered',
                     Level = ?
                 WHERE ID = ?", $Level, $ConvID);
-            $Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
+            $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
             header('Location: staffpm.php');
         } else {
             error(404);
@@ -50,9 +50,9 @@ if ($ConvID = (int)$_GET['convid']) {
         FROM staff_pm_conversations
         WHERE ID = ?", $ConvID);
     list($Level, $AssignedToUser) = $DB->next_record();
-    
+
     $LevelCap = 1000;
-    
+
 
     if ($LoggedUser['EffectiveClass'] >= min($Level, $LevelCap) || $AssignedToUser == $LoggedUser['ID']) {
         // Staff member is allowed to assign conversation, assign
@@ -66,7 +66,7 @@ if ($ConvID = (int)$_GET['convid']) {
                     Level = ?,
                     AssignedToUser = NULL
                 WHERE ID = ?", $NewLevel, $ConvID);
-            $Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
+            $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
         } else {
             $UserInfo = Users::user_info($NewLevel);
             $Level = $Classes[$UserInfo['PermissionID']]['Level'];
@@ -81,7 +81,7 @@ if ($ConvID = (int)$_GET['convid']) {
                     AssignedToUser = ?,
                     Level = ?
                 WHERE ID = ?", $NewLevel, $Level, $ConvID);
-            $Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
+            $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
         }
         echo '1';
 

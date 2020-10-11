@@ -274,7 +274,7 @@ class Comments {
                 FROM comments
                 WHERE Page = '$Page'
                     AND PageID = $PageID
-                    AND ID <= $_GET[postid]");
+                    AND ID <= {$_GET['postid']}");
             list($PostNum) = G::$DB->next_record();
             list($CommPage, $Limit) = Format::page_limit(TORRENT_COMMENTS_PER_PAGE, $PostNum);
         } else {

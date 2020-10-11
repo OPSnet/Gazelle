@@ -23,9 +23,9 @@ if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
         $where[] = sprintf('EXISTS (
             SELECT 1
             FROM torrents_tags tt
-            INNER JOIN tags t ON (t.ID = tt.TagID) 
+            INNER JOIN tags t ON (t.ID = tt.TagID)
             WHERE tt.GroupID = tg.ID
-                AND (%s) 
+                AND (%s)
             )', implode($operator, array_fill(0, count($tags), 't.Name = ?'))
         );
     }
@@ -187,7 +187,7 @@ foreach ($topVotes as $groupID => $group) {
     $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $groupID);
     $userVote = isset($userVotes[$groupID]) ? $userVotes[$groupID]['Type'] : '';
 
-    $displayName = "$group[Rank] - ";
+    $displayName = $group['Rank'] . " - ";
 
     if (!empty($extendedArtists[1]) || !empty($extendedArtists[4]) || !empty($extendedArtists[5])|| !empty($extendedArtists[6])) {
         unset($extendedArtists[2]);

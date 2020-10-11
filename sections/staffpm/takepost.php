@@ -7,7 +7,7 @@ if ($Message = db_string($_POST['message'])) {
             INSERT INTO staff_pm_conversations
                 (Subject, Status, Level, UserID, Date)
             VALUES
-                ('$Subject', 'Unanswered', $_POST[level], $LoggedUser[ID], '".sqltime()."')"
+                ('$Subject', 'Unanswered', {$_POST['level']}, {$LoggedUser['ID']}, '".sqltime()."')"
         );
 
         // New message
@@ -16,7 +16,7 @@ if ($Message = db_string($_POST['message'])) {
             INSERT INTO staff_pm_messages
                 (UserID, SentDate, Message, ConvID)
             VALUES
-                ($LoggedUser[ID], '".sqltime()."', '$Message', $ConvID)"
+                ({$LoggedUser['ID']}, '".sqltime()."', '$Message', $ConvID)"
         );
 
         header('Location: staffpm.php');
@@ -50,7 +50,7 @@ if ($Message = db_string($_POST['message'])) {
                         Unread = true,
                         Status = 'Open'
                     WHERE ID = $ConvID");
-                $Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
+                $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
             } else {
                 // User
                 $DB->query("
@@ -62,8 +62,8 @@ if ($Message = db_string($_POST['message'])) {
             }
 
             // Clear cache for user
-            $Cache->delete_value("staff_pm_new_$UserID");
-            $Cache->delete_value("staff_pm_new_$LoggedUser[ID]");
+            $Cache->delete_value("staff_pm_new_" . $UserID);
+            $Cache->delete_value("staff_pm_new_" . $LoggedUser['ID']);
 
             header("Location: staffpm.php?action=viewconv&id=$ConvID");
         } else {

@@ -42,7 +42,7 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
                 $ReporterID = $Report['ReporterID'];
                 $Reporter = Users::user_info($ReporterID);
                 $ReporterName = $Reporter['Username'];
-                $ReportLinks = "<a href=\"user.php?id=$ReporterID\">$ReporterName</a> <a href=\"reportsv2.php?view=report&amp;id=$Report[ID]\">reported it</a>";
+                $ReportLinks = "<a href=\"user.php?id=$ReporterID\">$ReporterName</a> <a href=\"reportsv2.php?view=report&amp;id={$Report['ID']}\">reported it</a>";
             } else {
                 $ReportLinks = 'Someone reported it';
             }

@@ -114,7 +114,7 @@ while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) { ?>
 $DB->query("
     SELECT UserID
     FROM pm_conversations_users
-    WHERE UserID != '$LoggedUser[ID]'
+    WHERE UserID != '{$LoggedUser['ID']}'
         AND ConvID = '$ConvID'
         AND (ForwardedTo = 0 OR ForwardedTo = UserID)");
 $ReceiverIDs = $DB->collect('UserID');

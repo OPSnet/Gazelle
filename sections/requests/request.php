@@ -33,11 +33,11 @@ $ArtistName = Artists::display_artists($ArtistForm, false, true);
 $ArtistLink = Artists::display_artists($ArtistForm, true, true);
 
 if ($IsFilled) {
-    $DisplayLink = "$ArtistLink<a href=\"torrents.php?torrentid=$Request[TorrentID]\" dir=\"ltr\">$Request[Title]</a> [$Request[Year]]";
+    $DisplayLink = "$ArtistLink<a href=\"torrents.php?torrentid={$Request['TorrentID']}\" dir=\"ltr\">{$Request['Title']}</a> [{$Request['Year']}]";
 } else {
-    $DisplayLink = $ArtistLink.'<span dir="ltr">'.$Request['Title']."</span> [$Request[Year]]";
+    $DisplayLink = $ArtistLink.'<span dir="ltr">'.$Request['Title']."</span> [{$Request['Year']}]";
 }
-$FullName = $ArtistName.$Request['Title']." [$Request[Year]]";
+$FullName = $ArtistName.$Request['Title']." [{$Request['Year']}]";
 
 if ($Request['BitrateList'] != '') {
     $BitrateString = implode(', ', explode('|', $Request['BitrateList']));
@@ -93,7 +93,7 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
                 $subscription->isSubscribedComments('requests', $RequestID) ? 'Unsubscribe' : 'Subscribe'?></a>
             <a href="reports.php?action=report&amp;type=request&amp;id=<?=$RequestID?>" class="brackets">Report request</a>
 <?php    if (!$IsFilled) { ?>
-            <a href="upload.php?requestid=<?=$RequestID?><?=($Request['GroupID'] ? "&amp;groupid=$Request[GroupID]" : '')?>" class="brackets">Upload request</a>
+            <a href="upload.php?requestid=<?=$RequestID?><?=($Request['GroupID'] ? "&amp;groupid={$Request['GroupID']}" : '')?>" class="brackets">Upload request</a>
 <?php    }
     if (!$IsFilled && ($Request['CategoryID'] === '0' || ($CategoryName === 'Music' && $Request['Year'] === '0'))) { ?>
             <a href="reports.php?action=report&amp;type=request_update&amp;id=<?=$RequestID?>" class="brackets">Request update</a>

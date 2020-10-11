@@ -74,7 +74,7 @@ foreach ($ArtistList as $Artist) {
             $DB->query("
                 SELECT ID, Artists
                 FROM users_notify_filters
-                WHERE UserID = '$LoggedUser[ID]'
+                WHERE UserID = '{$LoggedUser['ID']}'
                     AND Label = 'Artist notifications'
                 LIMIT 1");
             $Notify = $DB->next_record(MYSQLI_ASSOC);

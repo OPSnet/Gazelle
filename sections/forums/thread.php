@@ -22,10 +22,10 @@ if (!isset($_GET['threadid']) || !is_number($_GET['threadid'])) {
         $DB->query("
             SELECT TopicID
             FROM forums_posts
-            WHERE ID = $_GET[postid]");
+            WHERE ID = {$_GET['postid']}");
         list($ThreadID) = $DB->next_record();
         if ($ThreadID) {
-            header("Location: forums.php?action=viewthread&threadid=$ThreadID&postid=$_GET[postid]#post$_GET[postid]");
+            header("Location: forums.php?action=viewthread&threadid=$ThreadID&postid={$_GET['postid']}#post{$_GET['postid']}");
             die();
         } else {
             error(404);
@@ -65,9 +65,9 @@ if ($ThreadInfo['Posts'] > $PerPage) {
             SELECT COUNT(ID)
             FROM forums_posts
             WHERE TopicID = $ThreadID
-                AND ID <= $_GET[postid]";
+                AND ID <= {$_GET['postid']}";
         if ($ThreadInfo['StickyPostID'] < $_GET['postid']) {
-            $SQL .= " AND ID != $ThreadInfo[StickyPostID]";
+            $SQL .= " AND ID != {$ThreadInfo['StickyPostID']}";
         }
         $DB->query($SQL);
         list($PostNum) = $DB->next_record();
@@ -147,7 +147,7 @@ if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
     $DB->query("
         UPDATE users_notify_quoted
         SET UnRead = false
-        WHERE UserID = '$LoggedUser[ID]'
+        WHERE UserID = '{$LoggedUser['ID']}'
             AND Page = 'forums'
             AND PageID = '$ThreadID'
             AND PostID >= '$FirstPost'

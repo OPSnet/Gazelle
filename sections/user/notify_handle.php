@@ -131,7 +131,7 @@ if ($_POST['users'.$FormID]) {
         SELECT ID, Paranoia
         FROM users_main
         WHERE Username IN ('" . implode("', '", $EscapedUsernames) . "')
-            AND ID != $LoggedUser[ID]");
+            AND ID != {$LoggedUser['ID']}");
     while (list($UserID, $Paranoia) = $DB->next_record()) {
         $Paranoia = unserialize($Paranoia);
         if (!in_array('notifications', $Paranoia)) {
@@ -176,13 +176,13 @@ if ($_POST['id'.$FormID] && is_number($_POST['id'.$FormID])) {
             ToYear='$ToYear',
             Users ='$Users'
         WHERE ID='".$_POST['id'.$FormID]."'
-            AND UserID='$LoggedUser[ID]'");
+            AND UserID='{$LoggedUser['ID']}'");
 } else {
     $DB->query("
         INSERT INTO users_notify_filters
             (UserID, Label, Artists, ExcludeVA, NewGroupsOnly, Tags, NotTags, ReleaseTypes, Categories, Formats, Encodings, Media, FromYear, ToYear, Users)
         VALUES
-            ('$LoggedUser[ID]','".db_string($_POST['label'.$FormID])."','$ArtistList','$ExcludeVA','$NewGroupsOnly','$TagList', '$NotTagList', '$ReleaseTypeList','$CategoryList','$FormatList','$EncodingList','$MediaList', '$FromYear', '$ToYear', '$Users')");
+            ('{$LoggedUser['ID']}','".db_string($_POST['label'.$FormID])."','$ArtistList','$ExcludeVA','$NewGroupsOnly','$TagList', '$NotTagList', '$ReleaseTypeList','$CategoryList','$FormatList','$EncodingList','$MediaList', '$FromYear', '$ToYear', '$Users')");
 }
 
 $Cache->delete_value('notify_filters_'.$LoggedUser['ID']);

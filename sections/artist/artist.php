@@ -589,9 +589,9 @@ if ($Requests) {
             if ($CategoryName == 'Music') {
                 $ArtistForm = Requests::get_artists($RequestID);
                 $ArtistLink = Artists::display_artists($ArtistForm, true, true);
-                $FullName = $ArtistLink."<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Title</span> [$Request[Year]]</a>";
+                $FullName = $ArtistLink."<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Title</span> [{$Request['Year']}]</a>";
             } elseif ($CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
-                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Title</span> [$Request[Year]]</a>";
+                $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\"><span dir=\"ltr\">$Title</span> [{$Request['Year']}]</a>";
             } else {
                 $FullName = "<a href=\"requests.php?action=view&amp;id=$RequestID\" dir=\"ltr\">$Title</a>";
             }

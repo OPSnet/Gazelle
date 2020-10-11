@@ -300,7 +300,7 @@ if (!empty($_REQUEST['action'])) {
         if ($GroupID) {
             header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid'].'#torrent'.$_GET['torrentid']);
         } else {
-            header("Location: log.php?search=Torrent+$_GET[torrentid]");
+            header("Location: log.php?search=Torrent+" . $_GET['torrentid']);
         }
     } elseif (!empty($_GET['type'])) {
         require(__DIR__ . '/user.php');

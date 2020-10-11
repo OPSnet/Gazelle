@@ -9,7 +9,7 @@ if (isset($_GET['showall']) && $_GET['showall']) {
 }
 
 if (isset($_GET['catchup']) && $_GET['catchup']) {
-    $DB->query("UPDATE users_notify_quoted SET UnRead = '0' WHERE UserID = '$LoggedUser[ID]'");
+    $DB->query("UPDATE users_notify_quoted SET UnRead = '0' WHERE UserID = '{$LoggedUser['ID']}'");
     $Cache->delete_value('notify_quoted_' . $LoggedUser['ID']);
     header('Location: userhistory.php?action=quote_notifications');
     die();
@@ -43,7 +43,7 @@ $sql = "
         LEFT JOIN forums AS f ON f.ID = t.ForumID
         LEFT JOIN artists_group AS a ON a.ArtistID = q.PageID
         LEFT JOIN collages AS c ON c.ID = q.PageID
-    WHERE q.UserID = $LoggedUser[ID]
+    WHERE q.UserID = {$LoggedUser['ID']}
         AND (q.Page != 'forums' OR " . Forums::user_forums_sql() . ")
         AND (q.Page != 'collages' OR c.Deleted = '0')
         $UnreadSQL
