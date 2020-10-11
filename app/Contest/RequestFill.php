@@ -54,6 +54,7 @@ class RequestFill extends AbstractContest {
                 AND r.FillerId != r.UserID
                 AND r.TimeFilled BETWEEN c.date_begin AND c.date_end
                 AND r.TimeAdded < c.date_begin
+                AND c.contest_id = ?
             ", $this->id
         );
     }

@@ -8,6 +8,6 @@ class CalculateContestLeaderboard extends \Gazelle\Schedule\Task
     {
         $contestMan = new \Gazelle\Manager\Contest;
         $this->processed = $contestMan->calculateAllLeaderboards();
-        $this->processed += $contestMan->schedulePayout(G::$Twig);
+        $this->processed += $contestMan->schedulePayout(\G::$Twig);
     }
 }
