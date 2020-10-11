@@ -504,7 +504,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
             INNER JOIN torrents_tags tt ON (tt.GroupID = g.ID)
             INNER JOIN tags t2 ON (t2.ID = tt.TagID)
             WHERE g.ID = ?
-            GROUP BY g.ID
+            GROUP BY t.ID
             ", $VoteScore, $ArtistName, $GroupID
         );
 
