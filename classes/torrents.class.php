@@ -988,13 +988,13 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         }
 
         if ($Mode & self::DISPLAYSTRING_LINKED) {
-            $DisplayName .= "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">$GroupInfo[Name]</a>";
+            $DisplayName .= "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">{$GroupInfo['Name']}</a>";
         } else {
             $DisplayName .= $GroupInfo['Name'];
         }
 
         if (($Mode & self::DISPLAYSTRING_YEAR) && $GroupInfo['Year'] > 0) {
-            $DisplayName .= " [$GroupInfo[Year]]";
+            $DisplayName .= " [" . $GroupInfo['Year'] . "]";
         }
 
         if (($Mode & self::DISPLAYSTRING_VH) && $GroupInfo['VanityHouse']) {

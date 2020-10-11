@@ -59,7 +59,7 @@ if (empty($_GET['type'])) {
                 if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
                     json_die("failure");
                 }
-                $Title = "Requests created by $UserInfo[Username]";
+                $Title = "Requests created by " . $UserInfo['Username'];
                 $SphQL->where('userid', $UserInfo['ID']);
             } else {
                 $Title = 'My requests';
@@ -71,7 +71,7 @@ if (empty($_GET['type'])) {
                 if (!check_paranoia('requestsvoted_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
                     json_die("failure");
                 }
-                $Title = "Requests voted for by $UserInfo[Username]";
+                $Title = "Requests voted for by " . $UserInfo['Username'];
                 $SphQL->where('voter', $UserInfo['ID']);
             } else {
                 $Title = 'Requests I have voted on';
@@ -83,7 +83,7 @@ if (empty($_GET['type'])) {
                 if (!check_paranoia('requestsfilled_list', $UserInfo['Paranoia'], $Perms['Class'], $UserInfo['ID'])) {
                     json_die("failure");
                 }
-                $Title = "Requests filled by $UserInfo[Username]";
+                $Title = "Requests filled by " . $UserInfo['Username'];
                 $SphQL->where('fillerid', $UserInfo['ID']);
             } else {
                 $Title = 'Requests I have filled';

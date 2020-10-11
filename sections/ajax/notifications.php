@@ -42,7 +42,7 @@ if (count($GroupIDs)) {
         WHERE UserID = ?
         ', '0', $LoggedUser['ID']
     );
-    $Cache->delete_value("notifications_new_$LoggedUser[ID]");
+    $Cache->delete_value("notifications_new_" . $LoggedUser['ID']);
 }
 
 $DB->set_query_id($Results);

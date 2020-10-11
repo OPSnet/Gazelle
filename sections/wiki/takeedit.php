@@ -56,8 +56,8 @@ $SQL = "
     UPDATE wiki_articles
     SET
         Revision = '".db_string($OldRevision + 1)."',
-        Title = '$P[title]',
-        Body = '$P[body]',";
+        Title = '{$P['title']}',
+        Body = '{$P['body']}',";
 if ($Read && $Edit) {
     $SQL .= "
         MinClassRead = '$Read',
@@ -65,8 +65,8 @@ if ($Read && $Edit) {
 }
 $SQL .= "
         Date = '".sqltime()."',
-        Author = '$LoggedUser[ID]'
-    WHERE ID = '$P[id]'";
+        Author = '{$LoggedUser['ID']}'
+    WHERE ID = '{$P['id']}'";
 $DB->query($SQL);
 Wiki::flush_article($ArticleID);
 

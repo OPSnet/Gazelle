@@ -295,10 +295,10 @@ class Text {
                 $URL .= ltrim($URLInfo['path'], '/'); // Things break if the path starts with '//'
             }
             if (!empty($URLInfo['query'])) {
-                $URL .= "?$URLInfo[query]";
+                $URL .= "?{$URLInfo['query']}";
             }
             if (!empty($URLInfo['fragment'])) {
-                $URL .= "#$URLInfo[fragment]";
+                $URL .= "#{$URLInfo['fragment']}";
             }
             return $URL ? "/$URL" : false;
         } else {
@@ -860,7 +860,7 @@ class Text {
                     $Str .= '<code>'.$Block['Val'].'</code>';
                     break;
                 case 'list':
-                    $Str .= "<$Block[ListType] class=\"postlist\">";
+                    $Str .= "<{$Block['ListType']} class=\"postlist\">";
                     foreach ($Block['Val'] as $Line) {
                         $Str .= '<li'.($Rules ? ' id="r'.$Line['Id'].'"' : '').'>'.self::to_html($Line, $Rules).'</li>';
                     }

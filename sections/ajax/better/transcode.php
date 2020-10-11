@@ -44,7 +44,7 @@ foreach ($Groups as $GroupID => $Group) {
         continue;
     }
     foreach ($Group['Torrents'] as $Torrent) {
-        $TorRemIdent = "$Torrent[Media] $Torrent[RemasterYear] $Torrent[RemasterTitle] $Torrent[RemasterRecordLabel] $Torrent[RemasterCatalogueNumber]";
+        $TorRemIdent = "{$Torrent['Media']} {$Torrent['RemasterYear']} {$Torrent['RemasterTitle']} {$Torrent['RemasterRecordLabel']} {$Torrent['RemasterCatalogueNumber']}";
         if (!isset($TorrentGroups[$Group['ID']])) {
             $TorrentGroups[$Group['ID']] = [
                 $TorRemIdent => [

@@ -153,6 +153,6 @@ class NotificationsManagerView {
     }
 
     public static function format_traditional($Contents) {
-        return "<a href=\"$Contents[url]\">$Contents[message]</a>";
+        return "<a href=\"{$Contents['url']}\">{$Contents['message']}</a>";
     }
 }

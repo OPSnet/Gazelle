@@ -30,7 +30,7 @@ $DB->query("
         ToYear,
         Users
     FROM users_notify_filters
-    WHERE UserID=$LoggedUser[ID]");
+    WHERE UserID={$LoggedUser['ID']}");
 
 $NumFilters = $DB->record_count();
 

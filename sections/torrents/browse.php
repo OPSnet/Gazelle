@@ -406,7 +406,7 @@ if ($NumResults == 0) {
             INNER JOIN torrents_group AS g ON t.GroupID = g.ID
             INNER JOIN torrents_tags AS tt ON tt.GroupID = g.ID
             INNER JOIN tags ON tags.ID = tt.TagID
-        WHERE s.uid = '$LoggedUser[ID]'
+        WHERE s.uid = '{$LoggedUser['ID']}'
             AND tt.TagID != '13679'
             AND tt.TagID != '4820'
             AND tt.TagID != '2838'

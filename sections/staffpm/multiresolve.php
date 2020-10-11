@@ -28,8 +28,8 @@ if ($IDs = $_POST['id']) {
         $DB->query($Query);
     }
     // Clear cache for user
-    $Cache->delete_value("staff_pm_new_$LoggedUser[ID]");
-    $Cache->delete_value("num_staff_pms_$LoggedUser[ID]");
+    $Cache->delete_value("staff_pm_new_" . $LoggedUser['ID']);
+    $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
 
     // Done! Return to inbox
     header("Location: staffpm.php");

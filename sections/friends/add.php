@@ -18,6 +18,6 @@ $DB->query("
     INSERT IGNORE INTO friends
         (UserID, FriendID)
     VALUES
-        ('$LoggedUser[ID]', '$FriendID')");
+        ('{$LoggedUser['ID']}', '$FriendID')");
 
 header('Location: friends.php');

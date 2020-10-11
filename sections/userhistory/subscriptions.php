@@ -51,7 +51,7 @@ $DB->query("
         ui.Avatar AS LastReadAvatar,
         c_lr.EditedUserID AS LastReadEditedUserID
     FROM users_subscriptions_comments AS s
-        LEFT JOIN users_comments_last_read AS lr ON lr.UserID = $LoggedUser[ID] AND lr.Page = s.Page AND lr.PageID = s.PageID
+        LEFT JOIN users_comments_last_read AS lr ON lr.UserID = {$LoggedUser['ID']} AND lr.Page = s.Page AND lr.PageID = s.PageID
         LEFT JOIN artists_group AS a ON s.Page = 'artist' AND a.ArtistID = s.PageID
         LEFT JOIN collages AS co ON s.Page = 'collages' AND co.ID = s.PageID
         LEFT JOIN comments AS c ON c.ID = (
@@ -63,12 +63,12 @@ $DB->query("
         LEFT JOIN comments AS c_lr ON c_lr.ID = lr.PostID
         LEFT JOIN users_main AS um ON um.ID = c_lr.AuthorID
         LEFT JOIN users_info AS ui ON ui.UserID = um.ID
-    WHERE s.UserID = $LoggedUser[ID] AND s.Page IN ('artist', 'collages', 'requests', 'torrents') AND (s.Page != 'collages' OR co.Deleted = '0')" . ($ShowUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
+    WHERE s.UserID = {$LoggedUser['ID']} AND s.Page IN ('artist', 'collages', 'requests', 'torrents') AND (s.Page != 'collages' OR co.Deleted = '0')" . ($ShowUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
     GROUP BY s.PageID)
     UNION ALL
     (SELECT 'forums', s.TopicID, lr.PostID, f.ID, f.Name, t.Title, p.ID, p.AddedTime, p_lr.Body, p_lr.EditedTime, um.ID, um.Username, ui.Avatar, p_lr.EditedUserID
     FROM users_subscriptions AS s
-        LEFT JOIN forums_last_read_topics AS lr ON lr.UserID = $LoggedUser[ID] AND s.TopicID = lr.TopicID
+        LEFT JOIN forums_last_read_topics AS lr ON lr.UserID = {$LoggedUser['ID']} AND s.TopicID = lr.TopicID
         LEFT JOIN forums_topics AS t ON t.ID = s.TopicID
         LEFT JOIN forums AS f ON f.ID = t.ForumID
         LEFT JOIN forums_posts AS p ON p.ID = (
@@ -79,7 +79,7 @@ $DB->query("
         LEFT JOIN forums_posts AS p_lr ON p_lr.ID = lr.PostID
         LEFT JOIN users_main AS um ON um.ID = p_lr.AuthorID
         LEFT JOIN users_info AS ui ON ui.UserID = um.ID
-    WHERE s.UserID = $LoggedUser[ID]" .
+    WHERE s.UserID = {$LoggedUser['ID']}" .
         ($ShowUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') .
         ' AND ' . Forums::user_forums_sql() . "
     GROUP BY t.ID)

@@ -26,13 +26,13 @@ switch ($_REQUEST['action'] ?? 'view') {
             SELECT DISTINCT GroupID
             FROM torrents AS t
                 JOIN xbt_snatched AS s ON s.fid = t.ID
-            WHERE s.uid = '$LoggedUser[ID]'");
+            WHERE s.uid = '{$LoggedUser['ID']}'");
         $DB->query("
             DELETE b
             FROM bookmarks_torrents AS b
                 JOIN snatched_groups_temp AS s
             USING(GroupID)
-            WHERE b.UserID = '$LoggedUser[ID]'");
+            WHERE b.UserID = '{$LoggedUser['ID']}'");
         $Cache->delete_value("bookmarks_group_ids_" . $LoggedUser['ID']);
         header('Location: bookmarks.php');
         break;

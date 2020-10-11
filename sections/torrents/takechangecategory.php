@@ -119,6 +119,6 @@ Torrents::update_hash($GroupID);
 $Cache->delete_value("torrent_download_$TorrentID");
 
 (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "category changed from $OldCategoryID to $NewCategoryID, merged from group $OldGroupID")
-    ->general("Torrent $TorrentID was changed to category $NewCategoryID by $LoggedUser[Username]");
+    ->general("Torrent $TorrentID was changed to category $NewCategoryID by " . $LoggedUser['Username']);
 
 header("Location: torrents.php?id=$GroupID");
