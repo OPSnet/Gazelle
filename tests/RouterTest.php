@@ -5,18 +5,15 @@ namespace Gazelle;
 use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase {
-    public function setUp() {
+    public function setUp(): void {
         $_SERVER['REQUEST_METHOD'] = null;
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $_SERVER['REQUEST_METHOD'] = null;
         unset($_REQUEST['auth']);
     }
 
-    /**
-     * @throws \Gazelle\Exception\RouterException
-     */
     public function testBasic() {
         $router = new Router('auth');
         $this->assertFalse($router->hasRoutes());
@@ -31,9 +28,6 @@ class RouterTest extends TestCase {
         $this->assertTrue($router->hasRoutes());
     }
 
-    /**
-     * @throws Exception\RouterException
-     */
     public function testAddRoutes() {
         $router = new Router();
         $router->authorizePost(false);
@@ -44,9 +38,6 @@ class RouterTest extends TestCase {
         $this->assertEquals('path', $router->getRoute('action'));
     }
 
-    /**
-     * @throws Exception\RouterException
-     */
     public function testAuthorizeGet() {
         $router = new Router('auth23');
         $router->addGet('action', 'path', true);
@@ -68,46 +59,38 @@ class RouterTest extends TestCase {
         $this->assertTrue($router->hasRoutes());
     }
 
-    /**
-     * @expectedException \Gazelle\Exception\RouterException
-     * @expectedExceptionMessage Invalid action for 'GET' request method
-     */
     public function testInvalidRoute() {
         $router = new Router();
         $_SERVER['REQUEST_METHOD'] = 'GET';
+        $this->expectException(\Gazelle\Exception\RouterException::class);
+        $this->expectExceptionMessage("Invalid action for 'GET' request method");
         $router->getRoute('invalid');
     }
 
-    /**
-     * @expectedException \Gazelle\Exception\InvalidAccessException
-     * @expectedExceptionMessage You are not authorized to access this action
-     */
     public function testNoAuthGet() {
         $router = new Router();
         $router->authorizeGet();
         $router->addGet('action', 'path');
+        $this->expectException(\Gazelle\Exception\InvalidAccessException::class);
+        $this->expectExceptionMessage('You are not authorized to access this action');
         $router->getRoute('action');
     }
 
-    /**
-     * @expectedException \Gazelle\Exception\InvalidAccessException
-     * @expectedExceptionMessage You are not authorized to access this action
-     */
     public function testNoAuthPost() {
         $router = new Router();
         $router->addPost('action', 'test2');
         $_SERVER['REQUEST_METHOD'] = 'POST';
+        $this->expectException(\Gazelle\Exception\InvalidAccessException::class);
+        $this->expectExceptionMessage('You are not authorized to access this action');
         $router->getRoute('action');
     }
 
-    /**
-     * @expectedException \Gazelle\Exception\InvalidAccessException
-     * @expectedExceptionMessage You are not authorized to access this action
-     */
     public function testInvalidAuth() {
         $router = new Router('auth');
         $router->addPost('action', 'test_path');
         $_SERVER['REQUEST_METHOD'] = 'POST';
+        $this->expectException(\Gazelle\Exception\InvalidAccessException::class);
+        $this->expectExceptionMessage('You are not authorized to access this action');
         $router->getRoute('action');
     }
 }
