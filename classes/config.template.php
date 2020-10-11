@@ -175,7 +175,7 @@ define('LOG_ENTRIES_PER_PAGE', 50);
 define('THREAD_CATALOGUE', 500); // Limit to THREAD_CATALOGUE posts per cache key.
 
 // IRC settings
-// define('DISABLE_IRC', false);
+define('DISABLE_IRC', false);
 define('BOT_NICK', '');
 define('BOT_SERVER', ''); // IRC server address. Used for onsite chat tool.
 define('BOT_PORT', 6667);
