@@ -184,8 +184,7 @@ if ($_POST['ResetDownloadList'] ?? 0 && check_perms('users_edit_reset_keys')) {
 }
 
 if ($logoutSession && check_perms('users_logout')) {
-    $sessions = $user->logout();
-    $editSummary[] = "logged out of all sessions (n=$sessions)";
+    $editSummary[] = "logged out of all sessions (n=" . (new Gazelle\Session($UserID))->dropAll() . ")";
 }
 
 if ($flTokens != $cur['FLTokens'] && ($editRatio || check_perms('admin_manage_user_fls'))) {

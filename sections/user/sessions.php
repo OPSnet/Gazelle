@@ -1,52 +1,32 @@
 <?php
 
 //TODO: restrict to viewing below class, username in h2
-if (isset($_GET['userid']) && check_perms('users_view_ips') && check_perms('users_logout')) {
-    if (!is_number($_GET['userid'])) {
+if (isset($_GET['userid'])) {
+    if (!check_perms('users_view_ips') || !check_perms('users_logout')) {
+        error(403);
+    }
+    $UserID = (int)$_GET['userid'];
+    if (!$UserID) {
         error(404);
     }
-    $UserID = $_GET['userid'];
 } else {
     $UserID = G::$LoggedUser['ID'];
 }
 
+$sessionMan = new Gazelle\Session($UserID);
 if (isset($_POST['all'])) {
     authorize();
-
-    $DB->query("
-        DELETE FROM users_sessions
-        WHERE UserID = '$UserID'
-            AND SessionID != '$SessionID'");
-    $Cache->delete_value("users_sessions_$UserID");
+    $sessionMan->dropAll();
 }
 
 if (isset($_POST['session'])) {
     authorize();
-
-    $DB->query("
-        DELETE FROM users_sessions
-        WHERE UserID = '$UserID'
-            AND SessionID = '".db_string($_POST['session'])."'");
-    $Cache->delete_value("users_sessions_$UserID");
+    $sessionMan->drop($_POST['session']);
 }
 
-$UserSessions = $Cache->get_value('users_sessions_'.$UserID);
-if (!is_array($UserSessions)) {
-    $DB->query("
-        SELECT
-            SessionID,
-            Browser,
-            OperatingSystem,
-            IP,
-            LastUpdate
-        FROM users_sessions
-        WHERE UserID = '$UserID'
-        ORDER BY LastUpdate DESC");
-    $UserSessions = $DB->to_array('SessionID', MYSQLI_ASSOC);
-    $Cache->cache_value("users_sessions_$UserID", $UserSessions, 0);
-}
+$sessions = $sessionMan->sessions();
 
-list($UserID, $Username) = array_values(Users::user_info($UserID));
+[$UserID, $Username] = array_values(Users::user_info($UserID));
 View::show_header($Username.' &rsaquo; Sessions');
 ?>
 <div class="thin">
@@ -98,4 +78,3 @@ View::show_header($Username.' &rsaquo; Sessions');
 <?php
 
 View::show_footer();
-?>

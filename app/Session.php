@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use \Gazelle\Util\Crypto;
+
 class Session extends Base {
 
     private $id;
@@ -11,7 +13,7 @@ class Session extends Base {
         $this->id = $id;
     }
 
-    public function sessions() {
+    public function sessions(): array {
         if (($sessions = $this->cache->get_value('users_sessions_' . $this->id)) === false) {
             $this->db->prepared_query("
                 SELECT
@@ -29,57 +31,115 @@ class Session extends Base {
             $sessions = $this->db->to_array('SessionID', MYSQLI_ASSOC);
             $this->cache->cache_value('users_sessions_' . $this->id, $sessions, 43200);
         }
-        return $sessions;
+        return $sessions ?: [];
     }
 
-    public function update($args) {
+    public function create(array $info): array {
+        $sessionId = randomString();
         $this->db->prepared_query('
-            UPDATE user_last_access
-            SET last_access = now()
-            WHERE user_id = ?
+            INSERT INTO users_sessions
+                   (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
+            VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
+            ', $this->id, $sessionId, $info['keep-logged'], $info['browser'], $info['os'], $info['ipaddr'], $info['useragent']
+        );
+
+        $this->db->prepared_query('
+            INSERT INTO user_last_access
+                   (user_id, last_access)
+            VALUES (?, now())
+            ON DUPLICATE KEY UPDATE last_access = now()
             ', $this->id
         );
-        $sessionId = $args['session-id'];
-        $now = sqltime(); // keep db and cache synchronized
-        $this->db->prepared_query('
-            UPDATE users_sessions SET
-                IP = ?, Browser = ?, BrowserVersion = ?,
-                OperatingSystem = ?, OperatingSystemVersion = ?, LastUpdate = ?
-            WHERE UserID = ? AND SessionID = ?
-            ', $args['ip-address'], $args['browser'], $args['browser-version'],
-                $args['os'], $args['os-version'], $now,
-                /* where */ $this->id, $sessionId
-        );
-        $this->cache->begin_transaction('users_sessions_' . $this->id);
-        $this->cache->delete_row($sessionId);
-        $this->cache->insert_front($sessionId, [
-            'SessionID'              => $sessionId,
-            'IP'                     => $args['ip-address'],
-            'Browser'                => $args['browser'],
-            'BrowserVersion'         => $args['browser-version'],
-            'OperatingSystem'        => $args['os'],
-            'OperatingSystemVersion' => $args['os-version'],
-            'LastUpdate'             => sqltime()
-        ]);
-        $this->cache->commit_transaction(0);
+        $this->cache->delete_value("users_sessions_" . $this->id);
+        $sessions = $this->sessions();
+        return $sessions[$sessionId];
     }
 
-    public function drop($sessionId) {
+    public function cookie(string $sessionId): string {
+        return Crypto::encrypt(Crypto::encrypt($sessionId . '|~|' . $this->id, ENCKEY), ENCKEY);
+    }
+
+    public function update(array $info): array {
+        $this->db->prepared_query("
+            UPDATE user_last_access SET
+                last_access = now()
+            WHERE user_id = ?
+            ", $this->id
+        );
+        $this->db->prepared_query("
+            UPDATE users_sessions SET
+                LastUpdate = now(),
+                IP = ?,
+                Browser = ?,
+                BrowserVersion = ?,
+                OperatingSystem = ?,
+                OperatingSystemVersion = ?
+            WHERE UserID = ? AND SessionID = ?
+            ", $info['ip-address'], $info['browser'], $info['browser-version'], $info['os'], $info['os-version'],
+                /* where */ $this->id, $info['session-id']
+        );
+        $this->cache->delete_value('users_sessions_' . $this->id);
+        return $this->sessions();
+    }
+
+    public function drop(string $sessionId): int {
         $this->db->prepared_query('
             DELETE FROM users_sessions
             WHERE UserID = ?  AND SessionID = ?
             ', $this->id, $sessionId
         );
-        $this->cache->begin_transaction('users_sessions_' . $this->id);
-        $this->cache->delete_row($sessionId);
-        $this->cache->commit_transaction(0);
+        $this->cache->deleteMulti([
+            'session_' . $sessionId,
+            'users_sessions_' . $this->id,
+            'user_info_' . $this->id,
+            'user_info_heavy_' . $this->id,
+            'user_stats_' . $this->id,
+            'enabled_' . $this->id,
+        ]);
+        return $this->db->affected_rows();
     }
 
-    public function dropAll() {
+    public function purgeDead(): int {
+        $this->db->prepared_query("
+            SELECT concat('users_sessions_', UserID) as ck
+            FROM users_sessions
+            WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = 1)
+               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = 0)
+        ");
+        if (!$this->db->has_results()) {
+            return 0;
+        }
+        $cacheKeys = $this->db->collect('ck', false);
+        $this->db->prepared_query("
+            DELETE FROM users_sessions
+            WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = 1)
+               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = 0)
+        ");
+        $this->cache->deleteMulti($cacheKeys);
+        return count($cacheKeys);
+    }
+
+    public function dropAll(): int {
+        $this->db->prepared_query("
+            SELECT concat('session_', SessionID) AS ck
+            FROM users_sessions
+            WHERE UserID = ?
+            ", $this->id
+        );
+        $this->cache->deleteMulti(array_merge(
+            $this->db->collect('ck'),
+            [
+                'users_sessions_' . $this->id,
+                'user_info_' . $this->id,
+                'user_info_heavy_' . $this->id,
+                'user_stats_' . $this->id,
+                'enabled_' . $this->id,
+            ]
+        ));
         $this->db->prepared_query('
             DELETE FROM users_sessions WHERE UserID = ?
             ', $this->id
         );
-        $this->cache->delete_value('users_sessions_' . $this->id);
+        return $this->db->affected_rows();
     }
 }
