@@ -45,13 +45,13 @@ function musicFormInit() {
     $('#popup_close').click(function () {
         MBhide();
     });
-    $('#media').click(function () {
+    $('#media').change(function () {
         changeMedia();
     });
-    $('#format').click(function () {
+    $('#format').change(function () {
         setAllowedFormat('#format', '#bitrate');
     });
-    $('#bitrate').click(function () {
+    $('#bitrate').change(function () {
         setAllowedBitrate('#format', '#bitrate');
     });
     $('#add_format').click(function () {
@@ -110,8 +110,6 @@ function setAllowedFormat(formatField, bitrateField) {
     var btr = $(bitrateField).val();
     var warning = $('#format_warning');
     $(formatField).empty().append(new Option('---', ''));
-    console.log(fmt);
-    console.log(media);
     if (media === '---') {
         $(bitrateField).empty().append(new Option('---', ''));
         $('#upload_logs').ghide();
@@ -217,7 +215,7 @@ function addFormatRow() {
             id: "format_" + ExtraFormatCount,
             name: 'extra_format[]'
         })
-        .click(function () {
+        .change(function () {
             Format('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount);
         });
     var used = getUsedPairs();
@@ -250,7 +248,7 @@ function addFormatRow() {
             AllowedBitrate.MP3.rank[nf]
         ]);
     }
-    bitrateSelect.click(function () {
+    bitrateSelect.change(function () {
         setAllowedBitrate('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount);
     }).appendTo(row);
 
@@ -589,7 +587,7 @@ function fillMusicForm(group, torrent, source) {
     // and through which we can correspond it to our site's dropdown. Otherwise,
     // we assume they are using the original WCD category IDs, which is augmented
     // for specific well-known sources.
-    let releaseTypeName = group['releaseTypeName'] || group['releaseName']
+    let releaseTypeName = group['releaseTypeName'] || group['releaseName'];
     if (!releaseTypeName) {
         let releaseTypes = {
             1: 'Album',
