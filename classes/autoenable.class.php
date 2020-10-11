@@ -29,51 +29,38 @@ class AutoEnable {
             die();
         }
 
-        // Get the user's ID
-        G::$DB->query("
-                SELECT um.ID
-                FROM users_main AS um
-                JOIN users_info ui ON ui.UserID = um.ID
-                WHERE um.Username = '$Username'
-                  AND um.Enabled = '2'");
-
-        if (G::$DB->has_results()) {
-            // Make sure the user can make another request
-            list($UserID) = G::$DB->next_record();
-            G::$DB->query("
-            SELECT 1 FROM users_enable_requests
-            WHERE UserID = '$UserID'
-              AND (
-                    (
-                      Timestamp > NOW() - INTERVAL 1 WEEK
-                        AND HandledTimestamp IS NULL
-                    )
-                    OR
-                    (
-                      Timestamp > NOW() - INTERVAL 2 MONTH
-                        AND
-                          (Outcome = '".self::DENIED."'
-                             OR Outcome = '".self::DISCARDED."')
-                    )
-                  )");
-        }
+        // Make sure the user is allowed to make an enable request
+        [$UserID, $requestExists] = G::$DB->row("
+            SELECT um.ID,
+                (uer.UserID IS NOT NULL) as requestExists
+            FROM users_main AS um
+            LEFT JOIN users_enable_requests AS uer ON (uer.UserID = um.ID)
+            WHERE um.Enabled = '2'
+                AND um.Username = ?
+                AND (
+                    uer.UserID IS NULL
+                    OR (uer.Timestamp > now() - INTERVAL 1 WEEK AND uer.HandledTimestamp IS NULL)
+                    OR (uer.Timestamp > now() - INTERVAL 2 MONTH AND uer.Outcome IN (?, ?))
+                )
+        ", $Username, self::DENIED, self::DISCARDED
+        );
 
         $IP = $_SERVER['REMOTE_ADDR'];
-
-        if (G::$DB->has_results() || !isset($UserID)) {
-            // User already has/had a pending activation request or username is invalid
+        if (!$UserID) {
+            // say what?
+            $Output = '';
+        } elseif ($requestExists) {
+            // User already has/had a pending activation request
             $Output = sprintf(self::REJECTED_MESSAGE, BOT_DISABLED_CHAN, BOT_SERVER);
-            if (isset($UserID)) {
-                Tools::update_user_notes($UserID, sqltime() . " - Enable request rejected from $IP\n\n");
-            }
+            Tools::update_user_notes($UserID, sqltime() . " - Enable request rejected from $IP\n\n");
         } else {
             // New disable activation request
-            $UserAgent = db_string($_SERVER['HTTP_USER_AGENT']);
-
-            G::$DB->query("
+            G::$DB->prepared_query("
                 INSERT INTO users_enable_requests
-                (UserID, Email, IP, UserAgent, Timestamp)
-                VALUES ('$UserID', '$Email', '$IP', '$UserAgent', '".sqltime()."')");
+                       (UserID, Email, IP, UserAgent, Timestamp)
+                VALUES (?,      ?,     ?,  ?,         now())
+                ", $UserID, $Email, $IP, $_SERVER['HTTP_USER_AGENT']
+            );
 
             // Cache the number of requests for the modbar
             G::$Cache->increment_value(self::CACHE_KEY_NAME);
@@ -81,7 +68,6 @@ class AutoEnable {
             $Output = self::RECEIVED_MESSAGE;
             Tools::update_user_notes($UserID, sqltime() . " - Enable request " . G::$DB->inserted_id() . " received from $IP\n\n");
         }
-
         return $Output;
     }
 
@@ -244,15 +230,19 @@ class AutoEnable {
      * @return string The error output, or an empty string
      */
     public static function handle_token($Token) {
-        $Token = db_string($Token);
-        G::$DB->query("
+        [$UserID, $Timestamp] = G::$DB->row("
             SELECT UserID, HandledTimestamp
             FROM users_enable_requests
-            WHERE Token = '$Token'");
-
-        if (G::$DB->has_results()) {
-            list($UserID, $Timestamp) = G::$DB->next_record();
-            G::$DB->query("UPDATE users_enable_requests SET Token = NULL WHERE Token = '$Token'");
+            WHERE Token = ?
+            ", $Token
+        );
+        if (!$UserID) {
+            $Err = "Invalid token.";
+        } else {
+            G::$DB->query("
+                UPDATE users_enable_requests SET Token = NULL WHERE Token = ?
+                ", $Token
+            );
             if ($Timestamp < time_minus(3600 * 48)) {
                 // Old request
                 Tools::update_user_notes($UserID, sqltime() . " - Tried to use an expired enable token from ".$_SERVER['REMOTE_ADDR']."\n\n");
@@ -260,17 +250,15 @@ class AutoEnable {
             } else {
                 // Good request, decrement cache value and enable account
                 G::$Cache->decrement_value(AutoEnable::CACHE_KEY_NAME);
-                G::$DB->query("UPDATE users_main SET Enabled = '1', can_leech = '1' WHERE ID = '$UserID'");
-                G::$DB->query("UPDATE users_info SET BanReason = '0' WHERE UserID = '$UserID'");
-                G::$DB->query("SELECT torrent_pass FROM users_main WHERE ID='{$UserID}'");
-                list($TorrentPass) = G::$DB->next_record();
-                Tracker::update_tracker('add_user', ['id' => $UserID, 'passkey' => $TorrentPass]);
+                G::$DB->prepared_query("UPDATE users_main SET Enabled = '1', can_leech = '1' WHERE ID = ?", $UserID);
+                G::$DB->prepared_query("UPDATE users_info SET BanReason = '0' WHERE UserID = ?", $UserID);
+                Tracker::update_tracker('add_user', [
+                    'id' => $UserID,
+                    'passkey' => G::$DB->scalar("SELECT torrent_pass FROM users_main WHERE ID = ?", $UserID)
+                ]);
                 $Err = "Your account has been enabled. You may now log in.";
             }
-        } else {
-            $Err = "Invalid token.";
         }
-
         return $Err;
     }
 

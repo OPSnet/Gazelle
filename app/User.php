@@ -167,26 +167,6 @@ class User extends Base {
         ]);
     }
 
-    public function logout() {
-        $this->db->prepared_query("
-            SELECT SessionID
-            FROM users_sessions
-            WHERE UserID = ?
-            ", $this->id
-        );
-        $keyStem = 'session_' . $this->id . '_';
-        while ([$id] = $this->db->next_record(MYSQLI_NUM)) {
-            $this->cache->delete_value($keyStem . $id);
-        }
-        $this->cache->delete_value("users_sessions_" . $this->id);
-        $this->db->prepared_query("
-            DELETE FROM users_sessions
-            WHERE UserID = ?
-            ", $this->id
-        );
-        return $this->db->affected_rows();
-    }
-
     public function remove() {
         $this->db->prepared_query("
             DELETE FROM users_main WHERE ID = ?

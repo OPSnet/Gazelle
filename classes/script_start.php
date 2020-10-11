@@ -189,7 +189,7 @@ if (isset($_COOKIE['session'])) {
     $LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
 }
 if (isset($LoginCookie)) {
-    list($SessionID, $LoggedUser['ID']) = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
+    [$SessionID, $LoggedUser['ID']] = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
     $LoggedUser['ID'] = (int)$LoggedUser['ID'];
 
     if (!$LoggedUser['ID'] || !$SessionID) {

@@ -25,6 +25,12 @@ function log_attempt(int $UserID, string $capture) {
     $BannedUntil = $watch->bannedUntil();
 }
 
+function needResetIpaddr(int $permissionId, $custom = ''): bool {
+    $perms = Permissions::get_permissions($permissionId);
+    $custom = unserialize($customPerms);
+    return isset($perms['Permissions']['site_disable_ip_history']) || isset($custom['site_disable_ip_history']);
+}
+
 /*-- TODO ---------------------------//
 Add the JavaScript validation into the display page using the class
 //-----------------------------------*/
@@ -155,28 +161,9 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 if ($UserID) {
                     // Set ResetKey, send out email, and set $Sent to 1 to show success page
                     Users::resetPassword($UserID, $Username, $Email);
-
+                    $session = new Gazelle\Session($UserID);
+                    $session->dropAllSessions();
                     $Sent = 1; // If $Sent is 1, recover_step1.php displays a success message
-
-                    //Log out all of the users current sessions
-                    $Cache->delete_value("user_info_$UserID");
-                    $Cache->delete_value("user_info_heavy_$UserID");
-                    $Cache->delete_value("user_stats_$UserID");
-                    $Cache->delete_value("enabled_$UserID");
-
-                    $DB->prepared_query("
-                        SELECT concat('session_', SessionID) as cacheKey
-                        FROM users_sessions
-                        WHERE UserID = ?
-                        ", $UserID
-                    );
-                    $Cache->deleteMulti($DB->collect('cacheKey'));
-                    $DB->prepared_query('
-                        UPDATE users_sessions SET
-                            Active = 0
-                        WHERE Active = 1 AND UserID = ?
-                        ', $UserID
-                    );
                 }
                 $Err = "Email sent with further instructions.";
             }
@@ -243,41 +230,22 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 $KeepLogged = '0';
                 $expiry = 0;
             }
-            $SessionID = randomString();
-            $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
-            setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
+
+            $sessionMan = new Gazelle\Session($UserID);
+            $session = $sessionMan->create([
+                'keep-logged' => $KeepLogged,
+                'browser' => $Browser,
+                'os' => $OperatingSystem,
+                'ipaddr' => needResetIpaddr($PermissionID, $CustomPermissions) ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'],
+                'useragent' => $_SERVER['HTTP_USER_AGENT'],
+            ]);
+            setcookie('session', $sessionMan->cookie($session['SessionID']), $expiry, '/', '', $SSL, true);
+
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
             session_write_close();
-
-            //TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
-            // Because we <3 our staff
-            $Permissions = Permissions::get_permissions($PermissionID);
-            $CustomPermissions = unserialize($CustomPermissions);
-            if (isset($Permissions['Permissions']['site_disable_ip_history'])
-                || isset($CustomPermissions['site_disable_ip_history'])
-            ) {
-                $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-            }
-
-            $DB->prepared_query('
-                INSERT INTO users_sessions
-                       (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
-                VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
-                ', $UserID, $SessionID, $KeepLogged, $Browser, $OperatingSystem, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']
-            );
-
-            $Cache->begin_transaction("users_sessions_$UserID");
-            $Cache->insert_front($SessionID, [
-                'SessionID' => $SessionID,
-                'Browser' => $Browser,
-                'OperatingSystem' => $OperatingSystem,
-                'IP' => $_SERVER['REMOTE_ADDR'],
-                'LastUpdate' => sqltime()
-            ]);
-            $Cache->commit_transaction(0);
 
             unset($Recovery[$Key]);
             $DB->prepared_query('
@@ -285,13 +253,6 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                     Recovery = ?
                 WHERE ID = ?
                 ', serialize($Recovery), $UserID
-            );
-            $DB->prepared_query('
-                INSERT INTO user_last_access
-                       (user_id, last_access)
-                VALUES (?, now())
-                ON DUPLICATE KEY UPDATE last_access = now()
-                ', $UserID
             );
 
             $watch->setWatch($AttemptID)->clearAttempts();
@@ -349,49 +310,22 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 $KeepLogged = '0';
                 $expiry = 0;
             }
-            $SessionID = randomString();
-            $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
-            setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
+
+            $sessionMan = new Gazelle\Session($UserID);
+            $session = $sessionMan->create([
+                'keep-logged' => $KeepLogged,
+                'browser' => $Browser,
+                'os' => $OperatingSystem,
+                'ipaddr' => $_SERVER['REMOTE_ADDR'],
+                'useragent' => $_SERVER['HTTP_USER_AGENT'],
+            ]);
+            setcookie('session', $sessionMan->cookie($session['SessionID']), $expiry, '/', '', $SSL, true);
+
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
             unset($_SESSION['temp_stay_logged'], $_SESSION['temp_user_data']);
             session_write_close();
-
-            //TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
-            // Because we <3 our staff
-            $Permissions = Permissions::get_permissions($PermissionID);
-            $CustomPermissions = unserialize($CustomPermissions);
-            if (isset($Permissions['Permissions']['site_disable_ip_history'])
-                || isset($CustomPermissions['site_disable_ip_history'])
-            ) {
-                $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-            }
-
-            $DB->prepared_query('
-                INSERT INTO users_sessions
-                       (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
-                VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
-                ', $UserID, $SessionID, $KeepLogged, $Browser, $OperatingSystem, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']
-            );
-
-            $Cache->begin_transaction("users_sessions_$UserID");
-            $Cache->insert_front($SessionID, [
-                'SessionID' => $SessionID,
-                'Browser' => $Browser,
-                'OperatingSystem' => $OperatingSystem,
-                'IP' => $_SERVER['REMOTE_ADDR'],
-                'LastUpdate' => sqltime()
-            ]);
-            $Cache->commit_transaction(0);
-
-            $DB->prepared_query('
-                INSERT INTO user_last_access
-                       (user_id, last_access)
-                VALUES (?, now())
-                ON DUPLICATE KEY UPDATE last_access = now()
-                ', $UserID
-            );
 
             $watch->setWatch($AttemptID)->clearAttempts();
             if (empty($_COOKIE['redirect'])) {
@@ -477,11 +411,9 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                     } elseif ($Enabled == '2') {
                         log_attempt($UserID, $username);
                         // Save the username in a cookie for the disabled page
-                        setcookie('username', db_string($username), time() + 60 * 60, '/', '', false);
+                        setcookie('username', urlencode($username), time() + 60 * 60, '/', '', false);
                         header('Location: login.php?action=disabled');
                     } elseif ($Enabled == '1') {
-                        $SessionID = randomString();
-                        $Cookie = Crypto::encrypt(Crypto::encrypt($SessionID . '|~|' . $UserID, ENCKEY), ENCKEY);
                         if ($TFAKey) {
                             // user has TFA enabled! :)
                             if (session_status() === PHP_SESSION_NONE) {
@@ -491,57 +423,24 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                             $_SESSION['temp_user_data'] = [$UserID, $username];
                             session_write_close();
                             header('Location: login.php?act=2fa');
-                            exit;
-                        }
-
-                        if (isset($_POST['keeplogged']) && $_POST['keeplogged']) {
-                            $KeepLogged = '1';
-                            $expiry = time() + 60 * 60 * 24 * 365;
                         } else {
-                            $KeepLogged = '0';
-                            $expiry = 0;
-                        }
-                        setcookie('session', $Cookie, $expiry, '/', '', $SSL, true);
+                            $sessionMan = new Gazelle\Session($UserID);
+                            $session = $sessionMan->create([
+                                'keep-logged' => 0,
+                                'browser' => $Browser,
+                                'os' => $OperatingSystem,
+                                'ipaddr' => needResetIpaddr($PermissionID, $CustomPermissions) ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'],
+                                'useragent' => $_SERVER['HTTP_USER_AGENT'],
+                            ]);
+                            setcookie('session', $sessionMan->cookie($session['SessionID']), $expiry, '/', '', $SSL, true);
 
-                        //TODO: another tracker might enable this for donors, I think it's too stupid to bother adding that
-                        // Because we <3 our staff
-                        $Permissions = Permissions::get_permissions($PermissionID);
-                        $CustomPermissions = unserialize($CustomPermissions);
-                        if (isset($Permissions['Permissions']['site_disable_ip_history'])
-                            || isset($CustomPermissions['site_disable_ip_history'])
-                        ) {
-                            $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-                        }
-
-                        $DB->prepared_query('
-                            INSERT INTO users_sessions
-                                   (UserID, SessionID, KeepLogged, Browser, OperatingSystem, IP, FullUA, LastUpdate)
-                            VALUES (?,      ?,         ?,          ?,       ?,               ?,  ?,      now())
-                            ', $UserID, $SessionID, $KeepLogged, $Browser, $OperatingSystem, $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']
-                        );
-                        $Cache->begin_transaction("users_sessions_$UserID");
-                        $Cache->insert_front($SessionID, [
-                            'SessionID' => $SessionID,
-                            'Browser' => $Browser,
-                            'OperatingSystem' => $OperatingSystem,
-                            'IP' => $_SERVER['REMOTE_ADDR'],
-                            'LastUpdate' => sqltime()
-                        ]);
-                        $Cache->commit_transaction(0);
-
-                        $DB->prepared_query('
-                            INSERT INTO user_last_access
-                                   (user_id, last_access)
-                            VALUES (?, now())
-                            ON DUPLICATE KEY UPDATE last_access = now()
-                            ', $UserID
-                        );
-                        $watch->setWatch($AttemptID)->clearAttempts();
-                        if (empty($_COOKIE['redirect'])) {
-                            header('Location: index.php');
-                        } else {
-                            setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
-                            header("Location: " . $_COOKIE['redirect']);
+                            $watch->setWatch($AttemptID)->clearAttempts();
+                            if (empty($_COOKIE['redirect'])) {
+                                header('Location: index.php');
+                            } else {
+                                setcookie('redirect', '', time() - 60 * 60 * 24, '/', '', false);
+                                header("Location: " . $_COOKIE['redirect']);
+                            }
                         }
                         exit;
                     }
