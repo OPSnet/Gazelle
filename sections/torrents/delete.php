@@ -215,7 +215,8 @@ View::show_header('Delete torrent', 'reportsv2');
 <?php
         }
         $requests = $torMan->requestFills($TorrentID);
-        while ([$RequestID, $FillerID, $FilledTime] = $requests->next_record()) {
+        foreach ($requests as $request) {
+            [$RequestID, $FillerID, $FilledTime] = $request;
             $FillerName = Users::user_info($FillerID)['Username'];
 ?>
                         <div style="text-align: right;">
