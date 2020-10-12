@@ -24,10 +24,10 @@ $invite = $DB->prepared_query('
 ');
 $inv = [];
 while ([$invitee, $inviter] = $DB->next_record()) {
-	$save = $DB->get_query_id();
+    $save = $DB->get_query_id();
     if (!isset($inv[$inviter])) {
         $inv[$inviter] = new Gazelle\InviteTree($inviter);
     }
     $inv[$inviter]->add($invitee);
-	$DB->set_query_id($save);
+    $DB->set_query_id($save);
 }
