@@ -9,7 +9,7 @@ class PaymentCost extends AbstractMigration {
     }
 
     public function down() {
-        $this->execute("ALTER TABLE payment_reminders MODIFY Expiry datetime default '0000-00-00 00:00:00, DROP COLUMN AnnualRent");
+        $this->execute("ALTER TABLE payment_reminders MODIFY Expiry datetime default '0000-00-00 00:00:00', DROP COLUMN AnnualRent");
         $this->execute("UPDATE payment_reminders SET Expiry = '0000-00-00 00:00:00' WHERE Expiry is NULL");
     }
 }

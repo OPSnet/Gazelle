@@ -1,6 +1,7 @@
 <?php
 
 use Phinx\Migration\AbstractMigration;
+use Phinx\Db\Adapter\MysqlAdapter;
 
 /**
  * On a small site, or if the site is offline it is safe to run this
@@ -135,7 +136,7 @@ class DropSecret extends AbstractMigration
                 'null' => false,
                 'limit' => MysqlAdapter::INT_TINY,
             ])
-            ->change();
+            ->update();
 
         $this->table('torrents_group')
              ->changeColumn('TagList', 'string', [
@@ -144,6 +145,6 @@ class DropSecret extends AbstractMigration
                 'collation' => 'utf8_general_ci',
                 'encoding' => 'utf8',
              ])
-             ->change();
+             ->update();
     }
 }
