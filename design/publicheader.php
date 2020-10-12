@@ -14,6 +14,7 @@ define('FOOTER_FILE',SERVER_ROOT.'/design/publicfooter.php');
     <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
     <link href="<?=STATIC_SERVER ?>styles/public/style.css?v=<?=filemtime(SERVER_ROOT."/static/styles/public/style.css")?>" rel="stylesheet" type="text/css" />
     <script src="<?=STATIC_SERVER?>functions/jquery.js" type="text/javascript"></script>
+    <?=(DEBUG_MODE || check_perms('site_debug')) ? '<script src="' . STATIC_SERVER . 'functions/jquery-migrate.js" type="text/javascript"></script>' : ''?>
     <script src="<?=STATIC_SERVER?>functions/script_start.js?v=<?=filemtime(SERVER_ROOT.'/public/static/functions/script_start.js')?>" type="text/javascript"></script>
     <script src="<?=STATIC_SERVER?>functions/ajax.class.js?v=<?=filemtime(SERVER_ROOT.'/public/static/functions/ajax.class.js')?>" type="text/javascript"></script>
     <script src="<?=STATIC_SERVER?>functions/cookie.class.js?v=<?=filemtime(SERVER_ROOT.'/public/static/functions/cookie.class.js')?>" type="text/javascript"></script>
