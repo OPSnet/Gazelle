@@ -44,24 +44,41 @@ class InitialUserSeeder extends AbstractSeed {
             ],
         ])->saveData();
 
+        $stmt = $this->query("SELECT ID FROM users_main WHERE Username='admin'");
+        /** @var \PDOStatement $stmt */
+        $adminId = (int) $stmt->fetch()['ID'];
+        $userId = $adminId + 1;
+
         $this->table('user_last_access')->insert([
-            [ 'user_id' => 1, 'last_access' => Literal::from('now()') ],
-            [ 'user_id' => 2, 'last_access' => Literal::from('now()') ],
+            [
+                'user_id' => $adminId,
+                'last_access' => Literal::from('now()'),
+            ],
+            [
+                'user_id' => $userId,
+                'last_access' => Literal::from('now()'),
+            ],
         ])->saveData();
 
         $this->table('user_flt')->insert([
-            [ 'user_id' => 1 ],
-            [ 'user_id' => 2 ],
+            ['user_id' => $adminId],
+            ['user_id' => $userId],
         ])->saveData();
 
         $this->table('users_leech_stats')->insert([
-            [ 'UserID' => 1, 'Uploaded' => STARTING_UPLOAD ],
-            [ 'UserID' => 2, 'Uploaded' => STARTING_UPLOAD ]
+            [
+                'UserID' => $adminId,
+                'Uploaded' => STARTING_UPLOAD
+            ],
+            [
+                'UserID' => $adminId,
+                'Uploaded' => STARTING_UPLOAD
+            ]
         ])->saveData();
 
         $this->table('users_info')->insert([
             [
-                'UserID' => 1,
+                'UserID' => $adminId,
                 'StyleID' => 18,
                 'TorrentGrouping' => 0,
                 'ShowTags' => 1,
@@ -69,7 +86,7 @@ class InitialUserSeeder extends AbstractSeed {
                 'Inviter' => 0,
             ],
             [
-                'UserID' => 2,
+                'UserID' => $userId,
                 'StyleID' => 1,
                 'TorrentGrouping' => 0,
                 'ShowTags' => 1,
@@ -80,13 +97,13 @@ class InitialUserSeeder extends AbstractSeed {
 
         $this->table('users_history_emails')->insert([
             [
-                'UserID' => 1,
+                'UserID' => $adminId,
                 'Email' => 'admin@example.com',
                 'Time' => Literal::from('now()'),
                 'IP' => '127.0.0.1'
             ],
             [
-                'UserID' => 2,
+                'UserID' => $userId,
                 'Email' => 'user@example.com',
                 'Time' => Literal::from('now()'),
                 'IP' => '127.0.0.1'
@@ -94,8 +111,8 @@ class InitialUserSeeder extends AbstractSeed {
         ])->saveData();
 
         $this->table('users_notifications_settings')->insert([
-            ['UserID' => 1],
-            ['UserID' => 2]
+            ['UserID' => $adminId],
+            ['UserID' => $userId]
         ])->saveData();
     }
 }
