@@ -47,6 +47,6 @@ while(($row = fgets($in))) {
 }
 
 $DB->prepared_query('
-	INSERT INTO wiki_articles (Title, Body, MinClassRead, MinClassEdit, Date, Author)
-	VALUES (?, ?, 800, 800, now(), 2)
-	', $title, $body);
+    INSERT INTO wiki_articles (Title, Body, MinClassRead, MinClassEdit, Date, Author)
+    VALUES (?, ?, 800, 800, now(), 2)
+    ', $title, $body);
