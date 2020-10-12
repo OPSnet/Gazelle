@@ -1,6 +1,7 @@
 <?php
 
 use Phinx\Migration\AbstractMigration;
+use Phinx\Db\Adapter\MysqlAdapter;
 
 class DropReportsEmailBlacklist extends AbstractMigration {
 

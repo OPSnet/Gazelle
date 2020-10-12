@@ -3,6 +3,11 @@
 -- Host: 127.0.0.1    Database: gazelle
 -- ------------------------------------------------------
 -- Server version	10.3.23-MariaDB-1:10.3.23+maria~focal
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -143,7 +148,7 @@ CREATE TABLE `artists_alias` (
   PRIMARY KEY (`AliasID`),
   KEY `ArtistID` (`ArtistID`,`Name`),
   KEY `name_idx` (`Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -160,7 +165,7 @@ CREATE TABLE `artists_group` (
   `LastCommentID` int(10) NOT NULL DEFAULT 0,
   PRIMARY KEY (`ArtistID`),
   KEY `Name` (`Name`,`RevisionID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -292,7 +297,7 @@ CREATE TABLE `bonus_item` (
   `sequence` int(6) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Label` (`Label`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -442,7 +447,7 @@ CREATE TABLE `collage_attr` (
   `Description` varchar(500) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Name` (`Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -633,7 +638,7 @@ CREATE TABLE `contest_type` (
   `name` varchar(32) CHARACTER SET ascii NOT NULL,
   PRIMARY KEY (`contest_type_id`),
   UNIQUE KEY `Name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_swedish_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -682,16 +687,11 @@ CREATE TABLE `deleted_torrents` (
   `FileCount` int(6) NOT NULL,
   `FileList` mediumtext NOT NULL,
   `FilePath` varchar(255) NOT NULL,
-  `Size` bigint(20) NOT NULL,
-  `Leechers` int(6) NOT NULL,
-  `Seeders` int(6) NOT NULL,
-  `last_action` timestamp NULL DEFAULT NULL,
+  `Size` bigint(12) NOT NULL,
   `FreeTorrent` enum('0','1','2') NOT NULL,
   `FreeLeechType` enum('0','1','2','3','4','5','6','7') NOT NULL,
-  `Time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `Time` datetime DEFAULT NULL,
   `Description` text DEFAULT NULL,
-  `Snatched` int(10) unsigned NOT NULL,
-  `balance` bigint(20) NOT NULL,
   `LastReseedRequest` datetime DEFAULT NULL,
   `TranscodedFrom` int(10) NOT NULL,
   PRIMARY KEY (`ID`)
@@ -998,7 +998,7 @@ CREATE TABLE `forums` (
   `AutoLock` enum('0','1') DEFAULT '1',
   `AutoLockWeeks` int(3) unsigned NOT NULL DEFAULT 4,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1147,7 +1147,7 @@ CREATE TABLE `forums_transitions` (
   KEY `destination` (`destination`),
   CONSTRAINT `forums_transitions_ibfk_1` FOREIGN KEY (`source`) REFERENCES `forums` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `forums_transitions_ibfk_2` FOREIGN KEY (`destination`) REFERENCES `forums` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1196,7 +1196,7 @@ CREATE TABLE `group_log` (
   PRIMARY KEY (`ID`),
   KEY `GroupID` (`GroupID`),
   KEY `TorrentID` (`TorrentID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1325,7 +1325,7 @@ CREATE TABLE `log` (
   `Time` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`ID`),
   KEY `Time` (`Time`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1346,7 +1346,7 @@ CREATE TABLE `login_attempts` (
   PRIMARY KEY (`ID`),
   KEY `IP` (`IP`),
   KEY `attempts_idx` (`Attempts`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1365,7 +1365,7 @@ CREATE TABLE `nav_items` (
   `mandatory` tinyint(1) NOT NULL,
   `initial` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1421,7 +1421,7 @@ CREATE TABLE `periodic_task` (
   PRIMARY KEY (`periodic_task_id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `classname` (`classname`)
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1500,7 +1500,7 @@ CREATE TABLE `permissions` (
   KEY `StaffGroup` (`StaffGroup`),
   KEY `secondary_name_idx` (`Secondary`,`Name`),
   CONSTRAINT `permissions_ibfk_1` FOREIGN KEY (`StaffGroup`) REFERENCES `staff_groups` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1656,7 +1656,7 @@ CREATE TABLE `release_type` (
   `Name` varchar(50) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Name` (`Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2140,7 +2140,7 @@ CREATE TABLE `stylesheets` (
   `Default` enum('0','1') NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`),
   KEY `default_idx` (`Default`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2175,7 +2175,7 @@ CREATE TABLE `tags` (
   UNIQUE KEY `Name_2` (`Name`),
   KEY `TagType` (`TagType`),
   KEY `Uses` (`Uses`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2226,7 +2226,7 @@ CREATE TABLE `thread_type` (
   `Name` varchar(20) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Name` (`Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2285,7 +2285,7 @@ CREATE TABLE `torrent_group_attr` (
   `Description` varchar(500) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Name` (`Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2364,7 +2364,7 @@ CREATE TABLE `torrents` (
   KEY `Encoding` (`Encoding`),
   KEY `Time` (`Time`),
   KEY `FreeTorrent` (`FreeTorrent`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2471,7 +2471,7 @@ CREATE TABLE `torrents_group` (
   KEY `CategoryID` (`CategoryID`),
   KEY `Name` (`Name`(255)),
   KEY `Year` (`Year`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2521,7 +2521,7 @@ CREATE TABLE `torrents_logs` (
   `LogcheckerVersion` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`LogID`),
   KEY `TorrentID` (`TorrentID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2663,7 +2663,7 @@ CREATE TABLE `user_attr` (
   `Description` varchar(500) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Name` (`Name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2897,7 +2897,7 @@ CREATE TABLE `users_history_emails` (
   `users_history_emails_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`users_history_emails_id`),
   KEY `UserID` (`UserID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3087,7 +3087,7 @@ CREATE TABLE `users_main` (
   KEY `RequiredRatio` (`RequiredRatio`),
   KEY `cc_index` (`ipcc`),
   KEY `PermissionID` (`PermissionID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3403,7 +3403,7 @@ CREATE TABLE `wiki_articles` (
   `Date` datetime DEFAULT NULL,
   `Author` int(10) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3561,6 +3561,9 @@ CREATE TABLE `xbt_snatched` (
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed
+-- Dump completed on 2020-10-11 21:12:19

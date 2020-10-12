@@ -1,6 +1,7 @@
 <?php
 
 use Phinx\Migration\AbstractMigration;
+use Phinx\Db\Adapter\MysqlAdapter;
 
 class DropDeletedTorrentsFiles extends AbstractMigration {
     public function up() {
