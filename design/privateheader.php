@@ -119,6 +119,10 @@ if ($UseTooltipster) {
     $Scripts[] = 'tooltipster';
 }
 $Scripts[] = 'tooltipster_settings';
+if (DEBUG_MODE || check_perms('site_debug')) {
+    $Scripts[] = 'jquery-migrate';
+}
+
 foreach ($Scripts as $Script) {
     if (trim($Script) == '') {
         continue;
