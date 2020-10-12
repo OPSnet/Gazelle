@@ -41,12 +41,15 @@ SET FOREIGN_KEY_CHECKS = 1;
     }
 
     public function run() {
-        $stmt = $this->query("SELECT COUNT(*) AS count FROM users_main");
-        $user_count  = (int) $stmt->fetch()['count'];
+        $stmt = $this->query("SELECT MIN(ID) as min_id, MAX(ID) as max_id FROM users_main");
+        /** @var \PDOStatement $stmt */
+        $row = $stmt->fetch();
+        $lowerUserId  = $row['min_id'];
+        $upperUserId = $row['max_id'];
 
         $bencode = new OrpheusNET\BencodeTorrent\BencodeTorrent();
 
-        $insert_data = [
+        $insertData = [
             'artists_group' => [],
             'artists_alias' => [],
             'torrents_group' => [],
@@ -74,7 +77,7 @@ SET FOREIGN_KEY_CHECKS = 1;
             if (!property_exists($album, 'year') || (!empty($album->message) && $album->message === 'Release not found.') || $album->year == 0) {
                 continue;
             }
-            $user_id = rand(1, $user_count);
+            $user_id = rand($lowerUserId, $upperUserId);
             $this->output->writeln("Found torrent {$i}...");
 
             $artist = $album->artists[0];
@@ -83,29 +86,29 @@ SET FOREIGN_KEY_CHECKS = 1;
                     'id' => count($artists) + 1,
                     'obj' => $artist,
                 ];
-                $insert_data['artists_group'][] = ['Name' => $artist->name];
-                $insert_data['artists_alias'][] = ['ArtistID' => $artists[$artist->name]['id'], 'Name' => $artist->name];
+                $insertData['artists_group'][] = ['Name' => $artist->name];
+                $insertData['artists_alias'][] = ['ArtistID' => $artists[$artist->name]['id'], 'Name' => $artist->name];
             }
 
             foreach ($album->genres as $idx => $genre) {
                 $genre = str_replace([' ', '&'], ['.', ''], strtolower($genre));
                 $album->genres[$idx] = $genre;
                 if (!isset($tags[$genre])) {
-                    $insert_data['tags'][] = [
+                    $insertData['tags'][] = [
                         'Name' => $genre,
                         'TagType' => 'genre',
                         'Uses' => 1,
                         'UserID' => $user_id
                     ];
-                    $tags[$genre] = ['id' => (count($tags) + 1), 'genre' => $genre, 'idx' => count($insert_data)];
+                    $tags[$genre] = ['id' => (count($tags) + 1), 'genre' => $genre, 'idx' => count($insertData)];
                 }
             }
             if (!isset($groups[$album->title])) {
-                $wiki_body = !empty($album->notes) ? $album->notes . "\n\n" : '';
+                $wikiBody = !empty($album->notes) ? $album->notes . "\n\n" : '';
                 foreach ($album->tracklist as $track) {
-                    $wiki_body .= "{$track->position}. {$track->title} ({$track->duration})\n";
+                    $wikiBody .= "{$track->position}. {$track->title} ({$track->duration})\n";
                 }
-                $insert_data['torrents_group'][] = [
+                $insertData['torrents_group'][] = [
                     'CategoryID' => 1,
                     'Name' => $album->title,
                     'Year' => $album->year,
@@ -113,15 +116,15 @@ SET FOREIGN_KEY_CHECKS = 1;
                     'RecordLabel' => $album->labels[0]->name,
                     'Time' => '2018-03-22 02:24:19',
                     'RevisionID' => count($groups) + 1,
-                    'WikiBody' => $wiki_body,
+                    'WikiBody' => $wikiBody,
                     'WikiImage' => '',
                     'ReleaseType' => 1,
                     'VanityHouse' => 0
                 ];
 
-                $insert_data['wiki_torrents'][] = [
+                $insertData['wiki_torrents'][] = [
                     'PageID' => count($groups) + 1,
-                    'Body' => $wiki_body,
+                    'Body' => $wikiBody,
                     'UserID' => $user_id,
                     'Summary' => 'Uploaded new torrent',
                     'Time' => '2018-03-22 02:24:19',
@@ -129,14 +132,14 @@ SET FOREIGN_KEY_CHECKS = 1;
                 ];
 
                 foreach ($album->genres as $genre) {
-                    $insert_data['torrents_tags'][] = [
+                    $insertData['torrents_tags'][] = [
                         'TagID' => $tags[$genre]['id'],
                         'GroupID' => count($groups) + 1,
                         'PositiveVotes' => 10
                     ];
                 }
 
-                $insert_data['torrents_artists'][] = [
+                $insertData['torrents_artists'][] = [
                     'GroupID' => count($groups) + 1,
                     'ArtistID' => $artists[$album->artists[0]->name]['id'],
                     'AliasID' => $artists[$album->artists[0]->name]['id'],
@@ -148,17 +151,17 @@ SET FOREIGN_KEY_CHECKS = 1;
 
             $media = ($album->formats[0]->name === 'Vinyl') ? 'Vinyl' : 'CD';
 
-            $torrent_id = count($insert_data['torrents']) + 1;
+            $torrent_id = count($insertData['torrents']) + 1;
             $files = [];
-            $file_list = [];
+            $fileList = [];
             $delim = utf8_encode(chr(0xF7));
             foreach ($album->tracklist as $track) {
                 $length = rand(1, 45573573);
                 $name = "{$track->position}. {$track->title}.mp3";
                 $files[] = ['length' => $length, 'path' => [$name]];
-                $file_list[] = ".mp3 s{$length} {$name} {$delim}";
+                $fileList[] = ".mp3 s{$length} {$name} {$delim}";
             }
-            $file_list = implode('\n', $file_list);
+            $fileList = implode('\n', $fileList);
             /** @noinspection PhpUnhandledExceptionInspection */
             $bencode->setData([
                 'announce' => 'https://localhost:34000/hash_pass/announce',
@@ -173,7 +176,7 @@ SET FOREIGN_KEY_CHECKS = 1;
                 ]
 
             ]);
-            $insert_data['torrents'][] = [
+            $insertData['torrents'][] = [
                 'GroupID' => $groups[$album->title]['id'],
                 'UserID' => $user_id,
                 'Media' => $media,
@@ -192,7 +195,7 @@ SET FOREIGN_KEY_CHECKS = 1;
                 'LogChecksum' => 1,
                 'info_hash' => $bencode->getHexInfoHash(),
                 'FileCount' => count($album->tracklist),
-                'FileList' => $file_list,
+                'FileList' => $fileList,
                 'FilePath' => "{$album->artists[0]->name} - {$album->title} ({$album->year})",
                 'Size' => '253809759',
                 'Time' => '2018-03-22 02:24:19',
@@ -201,13 +204,13 @@ SET FOREIGN_KEY_CHECKS = 1;
                 'FreeLeechType' => 0
             ];
 
-            $insert_data['torrents_leech_stats'][] = [
-                'TorrentID' => count($insert_data['torrents']) + 1,
+            $insertData['torrents_leech_stats'][] = [
+                'TorrentID' => count($insertData['torrents']) + 1,
             ];
             $i++;
         }
 
-        foreach ($insert_data as $table => $data) {
+        foreach ($insertData as $table => $data) {
             $this->table($table)->insert($data)->saveData();
         }
 
