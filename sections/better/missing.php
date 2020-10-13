@@ -50,16 +50,15 @@ switch ($mode) {
         $results = array_column($results, 'Name', 'ArtistID');
         break;
     case 'groups':
-        $results = array_reduce($results, function ($acc, $item) {
+        $results = array_map(function ($item) {
             if (count($item['Artists']) > 1) {
                 $artist = 'Various Artists';
             } else {
                 $artist = sprintf('<a href="artist.php?id=%s" target="_blank">%s</a>', $item['Artists'][0]['id'], $item['Artists'][0]['name']);
             }
 
-            $acc[$item['ID']] = ['artist' => $artist, 'name' => $item['Name']];
-            return $acc;
-        }, []);
+            return ['artist' => $artist, 'name' => $item['Name']];
+        }, $results);
         break;
     case 'torrents':
         $results = $better->twigGroups($results);

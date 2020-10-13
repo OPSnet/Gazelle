@@ -248,7 +248,8 @@ class Better extends \Gazelle\Base
                     foreach (\Artists::get_artists(array_keys($results)) as $groupId => $data) {
                         $results[$groupId] = [
                             'Artists' => [],
-                            'ExtendedArtists' => []
+                            'ExtendedArtists' => [],
+                            'Name' => $results[$groupId]['Name'],
                         ];
                         foreach ([1, 4, 6] as $importance) {
                             if (isset($data[$importance])) {
