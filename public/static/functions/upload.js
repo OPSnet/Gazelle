@@ -19,7 +19,7 @@ var AllowedBitrate = {
         list: ['320', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '256', '192', 'Other'],
         rank: [0, 1],
     },
-    AAC: { list: ['256 (VBR)'], rank: [0] },
+    AAC: { list: ['256'], rank: [0] },
     AC3: { list: ['Other'], rank: [0] },
     DTS: { list: ['Other'], rank: [0] },
 };
@@ -135,7 +135,7 @@ function setAllowedFormat(formatField, bitrateField) {
         $('#upload_logs').ghide();
     }
     if ($(formatField).val() === 'AAC') {
-        warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.24">(2.1.24)</a>';
+        warning.raw().innerHTML = 'AAC torrents may only be uploaded if they represent editions unavailable on Orpheus in any other format sourced from the same medium and edition <a href="rules.php?p=upload#r2.1.21" target="_blank">(2.1.21)</a>';
     } else {
         warning.raw().innerHTML = '';
     }
