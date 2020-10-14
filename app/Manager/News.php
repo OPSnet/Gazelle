@@ -71,7 +71,7 @@ class News extends \Gazelle\Base {
      *      - article creation date
      */
     public function headlines(): array {
-        if (($headlines = $this->cache->get_value("news")) === false) {
+        if (($headlines = $this->cache->get_value(self::CACHE_KEY)) === false) {
             $this->db->prepared_query("
                 SELECT ID, Title, Body, Time
                 FROM news
@@ -109,12 +109,7 @@ class News extends \Gazelle\Base {
      */
     public function latest(): array {
         $headlines = $this->headlines();
-        [$newsId, $title] = $headlines[0];
-        if (!$newsId) {
-            $newsId = -1;
-            $title = '';
-        }
-        return [(int)$newsId, $title];
+        return $headlines[0] ?? [-1, null, null, null];
     }
 
     /**
