@@ -12,4 +12,4 @@ try {
 $user = new Gazelle\User($LoggedUser['ID']);
 $user->addArtistNotification($artist);
 
-header("Location: " . $_SERVER['HTTP_REFERER'] ?? "artist.php?id=" . $artist->id());
+header("Location: " . redirectUrl("artist.php?id=" . $artist->id()));

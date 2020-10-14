@@ -9,28 +9,31 @@ requests and torrents. It is called when $_GET['action'] == 'delete'.
 
 authorize();
 
-$ArtistID = $_GET['artistid'];
-if (!is_number($ArtistID) || empty($ArtistID)) {
-    error(0);
-}
-
 if (!check_perms('site_delete_artist') || !check_perms('torrents_delete')) {
     error(403);
 }
 
+$ArtistID = (int)$_GET['artistid'];
+if (!$ArtistID) {
+    error(404);
+}
+
 View::show_header('Artist deleted');
 
-$DB->query("
+$Name = $DB->scalar("
     SELECT Name
     FROM artists_group
-    WHERE ArtistID = $ArtistID");
-list($Name) = $DB->next_record();
+    WHERE ArtistID = ?
+    ", $ArtistID
+);
 
-$DB->query("
+$DB->prepared_query("
     SELECT tg.Name, tg.ID
     FROM torrents_group AS tg
-        LEFT JOIN torrents_artists AS ta ON ta.GroupID = tg.ID
-    WHERE ta.ArtistID = $ArtistID");
+    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID)
+    WHERE ta.ArtistID = ?
+    ", $ArtistID
+);
 $Count = $DB->record_count();
 if ($DB->has_results()) {
 ?>
@@ -39,26 +42,24 @@ if ($DB->has_results()) {
         Please remove the artist from these torrents manually before attempting to delete.<br />
         <div class="box pad">
             <ul>
-<?php
-    while (list($GroupName, $GroupID) = $DB->next_record(MYSQLI_NUM, true)) {
-?>
+<?php while ([$GroupName, $GroupID] = $DB->next_record(MYSQLI_NUM, true)) { ?>
                 <li>
                     <a href="torrents.php?id=<?=$GroupID?>" class="tooltip" title="View torrent group" dir="ltr"><?=$GroupName?></a>
                 </li>
-<?php
-    }
-?>
+<?php } ?>
             </ul>
         </div>
     </div>
 <?php
 }
 
-$DB->query("
+$DB->prepared_query("
     SELECT r.Title, r.ID
     FROM requests AS r
-        LEFT JOIN requests_artists AS ra ON ra.RequestID = r.ID
-    WHERE ra.ArtistID = $ArtistID");
+    LEFT JOIN requests_artists AS ra ON (ra.RequestID = r.ID)
+    WHERE ra.ArtistID = ?
+    ", $ArtistID
+);
 $Count += $DB->record_count();
 if ($DB->has_results()) {
 ?>
@@ -67,15 +68,11 @@ if ($DB->has_results()) {
         Please remove the artist from these requests manually before attempting to delete.<br />
         <div class="box pad">
             <ul>
-<?php
-    while (list($RequestName, $RequestID) = $DB->next_record(MYSQLI_NUM, true)) {
-?>
+<?php while ([$RequestName, $RequestID] = $DB->next_record(MYSQLI_NUM, true)) { ?>
                 <li>
                     <a href="requests.php?action=view&amp;id=<?=$RequestID?>" class="tooltip" title="View request" dir="ltr"><?=$RequestName?></a>
                 </li>
-<?php
-    }
-?>
+<?php } ?>
             </ul>
         </div>
     </div>
@@ -90,4 +87,4 @@ if ($Count == 0) {
     </div>
 <?php
 }
-View::show_footer();?>
+View::show_footer();

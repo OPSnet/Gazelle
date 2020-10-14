@@ -86,4 +86,4 @@ $DB->prepared_query($sql = "
 
 // There we go, all done!
 $artist->flushCache();
-header("Location: artist.php?id=" . $artistId);
+header("Location: artist.php?id={$artistId}");

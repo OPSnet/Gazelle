@@ -49,4 +49,4 @@ $DB->prepared_query("
 
 (new Gazelle\Log)->general("The alias $AliasID ($AliasName) was removed from the artist $ArtistID ($ArtistName) by user {$LoggedUser['ID']} ({$LoggedUser['Username']})");
 
-header("Location: " . $_SERVER['HTTP_REFERER'] ?? "artist.php?action=edit&artistid={$ArtistID}");
+header("Location: " . redirectUrl("artist.php?action=edit&artistid={$ArtistID}"));

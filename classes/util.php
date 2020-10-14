@@ -167,6 +167,15 @@ function send_irc($Raw) {
     Irc::sendRaw($Raw);
 }
 
+/**
+ * Determine the redirect header to use based on the client HTTP_REFERER or fallback
+ *
+ * @param string fallback URL if HTTP_REFERER is empty
+ * @return string redirect URL
+ */
+function redirectUrl(string $fallback): string {
+    return empty($_SERVER['HTTP_REFERER']) ? $fallback : $_SERVER['HTTP_REFERER'];
+}
 
 /**
  * Display a critical error and kills the page.
@@ -179,7 +188,7 @@ function send_irc($Raw) {
  */
 function error($Error, $NoHTML = false, $Log = false) {
     global $Debug;
-    require(SERVER_ROOT.'/sections/error/index.php');
+    require_once(__DIR__ . '/../sections/error/index.php');
     $Debug->profile();
     die();
 }
