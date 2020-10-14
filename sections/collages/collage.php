@@ -18,8 +18,7 @@ else {
     $CollageCovers = isset($LoggedUser['CollageCovers']) ? $LoggedUser['CollageCovers'] : 25 * abs(($LoggedUser['HideCollage'] ?? 0) - 1);
     $CollagePages = [];
     $bookmark = new Gazelle\Bookmark;
-
-    require_once($Collage->categoryId() == COLLAGE_ARTISTS_ID ? 'artist_collage.php' : 'torrent_collage.php');
+    require_once($Collage->isArtist() ? 'artist_collage.php' : 'torrent_collage.php');
 }
 
 View::show_footer();

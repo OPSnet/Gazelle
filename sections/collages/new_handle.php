@@ -1,55 +1,34 @@
 <?php
 authorize();
 
+if (!is_number($_POST['category'])) {
+    error(403);
+}
+$categoryId = (int)$_POST['category'];
+$collageMan = new Gazelle\Manager\Collage;
+
 $Val = new Validate;
-
-$P = [];
-$P = db_array($_POST);
-
-if ($P['category'] > 0 || check_perms('site_collages_renamepersonal')) {
+if ($categoryId > 0 || check_perms('site_collages_renamepersonal')) {
     $Val->SetFields('name', '1', 'string', 'The name must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
     $name = trim($_POST['name']);
 } else {
-    // Get a collage name and make sure it's unique
-    $name = $LoggedUser['Username'] . "'s personal collage";
-    $DB->prepared_query('
-        SELECT ID
-        FROM collages
-        WHERE Name = ?
-        ', $name
-    );
-    $i = 1;
-    $basename = $name;
-    while ($DB->has_results()) {
-        $name = "$basename no. " . ++$i;
-        $DB->prepared_query('
-            SELECT ID
-            FROM collages
-            WHERE Name = ?
-            ', $name
-        );
-    }
+    $name = $collageName->personalCollageName($LoggedUser['Username']);
 }
 $Val->SetFields('description', '1', 'string', 'The description must be between 10 and 65535 characters', ['maxlength' => 65535, 'minlength' => 10]);
 
 $Err = $Val->ValidateForm($_POST);
 
-if (!$Err && $P['category'] === '0') {
-    $user = new Gazelle\User($LoggedUser['ID']);
+$user = new Gazelle\User($LoggedUser['ID']);
+if (!$Err && $categoryId === '0') {
     if (!$user->canCreatePersonalCollage()) {
         $Err = 'You may not create a personal collage.';
-    } elseif (check_perms('site_collages_renamepersonal') && !stristr($P['name'], $LoggedUser['Username'])) {
-        $Err = 'Your personal collage\'s title must include your username.';
+    } elseif (check_perms('site_collages_renamepersonal') && !stristr($name, $LoggedUser['Username'])) {
+        $Err = 'The title of your personal collage must include your username.';
     }
 }
 
 if (!$Err) {
-    [$ID, $Deleted] = $DB->row("
-        SELECT ID, Deleted
-        FROM collages
-        WHERE Name = ?
-        ", $name
-    );
+    [$ID, $Deleted] = $collageMan->exists($name);
     if ($ID) {
         if ($Deleted) {
             $Err = 'That collection already exists but needs to be recovered; please <a href="staffpm.php">contact</a> the staff team!';
@@ -59,34 +38,26 @@ if (!$Err) {
     }
 }
 
-if (!$Err) {
-    if (empty($CollageCats[$P['category']])) {
-        $Err = 'Please select a category';
-    }
+if (!$Err && empty($CollageCats[$categoryId])) {
+    $Err = 'Please select a category';
 }
 
 if ($Err) {
     $Name = $name;
-    $Category = $_POST['category'];
+    $Category = $categoryId;
     $Tags = $_POST['tags'];
     $Description = $_POST['description'];
     require('new.php');
     exit;
 }
 
-$tagMan = new Gazelle\Manager\Tag;
-$TagList = explode(',', $_POST['tags']);
-foreach ($TagList as $ID => $Tag) {
-    $TagList[$ID] = $tagMan->sanitize($Tag);
-}
-
-$DB->prepared_query('
-    INSERT INTO collages
-           (Name, Description, UserID, TagList, CategoryID)
-    VALUES (?,    ?,           ?,      ?,       ?)
-    ', $name, trim($_POST['description']), $LoggedUser['ID'], implode(' ', $TagList), (int)$_POST['category']
+$collage = $collageMan->create(
+    $user,
+    $categoryId,
+    $name,
+    $_POST['description'],
+    (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags'])),
+    new Gazelle\Log
 );
-$CollageID = $DB->inserted_id();
-$Cache->delete_value("collage_$CollageID");
-(new Gazelle\Log)->general("Collage $CollageID (".$_POST['name'].') was created by '.$LoggedUser['Username']);
-header("Location: collages.php?id=$CollageID");
+
+header("Location: collages.php?id=" . $collage->id());

@@ -241,6 +241,36 @@ function site_url($SSL = true) {
 }
 
 /**
+ * Hydrate an array from a query string (everything that follow '?')
+ * This reimplements parse_str() and side-steps the issue of max_input_vars limits.
+ *
+ * Example:
+ * in: li[]=14&li[]=31&li[]=58&li[]=68&li[]=69&li[]=54&li[]=5, param=li[]
+ * parsed: ['li[]' => ['14', '31, '58', '68', '69', '5']]
+ * out: ['14', '31, '58', '68', '69', '5']
+ *
+ * @param string query string from url
+ * @param string url param to extract
+ * @return array hydrated equivalent
+ */
+function parseUrlArgs(string $urlArgs, string $param): array {
+    $list = [];
+    $pairs = explode('&', $urlArgs);
+    foreach ($pairs as $p) {
+        [$name, $value] = explode('=', $p, 2);
+        if (!isset($list[$name])) {
+            $list[$name] = $value;
+        } else {
+            if (!is_array($list[$name])) {
+                $list[$name] = [$list[$name]];
+            }
+            $list[$name][] = $value;
+        }
+    }
+    return array_key_exists($param, $list) ? $list[$param] : [];
+}
+
+/**
  * The text of the pop-up confirmation when burning an FL token.
  *
  * @param integer $seeders - number of seeders for the torrent

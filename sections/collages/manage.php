@@ -1,19 +1,14 @@
 <?php
 $CollageID = (int)$_GET['collageid'];
-if ($CollageID < 1) {
+if (!$CollageID) {
     error(404);
 }
+$collage = new Gazelle\Collage($CollageID);
 
-[$Name, $UserID, $CategoryID] = $DB->row("
-    SELECT Name, UserID, CategoryID
-    FROM collages
-    WHERE ID = ?
-    ", $CollageID
-);
-if ($CategoryID == 0 && $UserID != $LoggedUser['ID'] && !check_perms('site_collages_delete')) {
+if ($collage->isPersonal() && !$collage->isOwner($LoggedUser['ID']) && !check_perms('site_collages_delete')) {
     error(403);
 }
-if ($CategoryID == COLLAGE_ARTISTS_ID) {
+if ($collage->isArtist()) {
     error(404);
 }
 
@@ -36,11 +31,11 @@ $GroupIDs = $DB->collect('GroupID');
 $CollageDataList = $DB->to_array('GroupID', MYSQLI_ASSOC);
 $TorrentList = count($GroupIDs) ? Torrents::get_groups($GroupIDs) : [];
 
-View::show_header("Manage collage: $Name", 'jquery-ui,jquery.tablesorter,sort');
+View::show_header("Manage collage: " . $collage->name(), 'jquery-ui,jquery.tablesorter,sort');
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Manage collage <a href="collages.php?id=<?=$CollageID?>"><?=$Name?></a></h2>
+        <h2>Manage collage <a href="collages.php?id=<?=$CollageID?>"><?= $collage->name() ?></a></h2>
     </div>
     <table width="100%" class="layout">
         <tr class="colhead"><td id="sorting_head">Sorting</td></tr>

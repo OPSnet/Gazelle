@@ -2,7 +2,7 @@
 
 $Artists = $Collage->artistList();
 
-$NumGroups = count($Artists);
+$NumGroups = $Collage->numArtists();
 $NumGroupsByUser = 0;
 $UserAdditions = [];
 $Render = [];
@@ -19,7 +19,7 @@ foreach ($Artists as $id => $Artist) {
 }
 
 // Pad it out
-if ($NumGroups = $Collage->numEntries() > $CollageCovers) {
+if ($NumGroups > $CollageCovers) {
     for ($i = $NumGroups + 1; $i <= ceil($NumGroups / $CollageCovers) * $CollageCovers; $i++) {
         $Render[] = '<li></li>';
     }

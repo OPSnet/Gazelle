@@ -66,7 +66,6 @@ switch ($_REQUEST['action'] ?? '') {
         require('edit_handle.php');
         break;
     case 'delete':
-        authorize();
         require('delete.php');
         break;
     case 'take_delete':
