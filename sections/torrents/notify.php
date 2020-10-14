@@ -79,7 +79,7 @@ if ($OrderBy == 'tnt.Year') {
     );
     $DB->prepared_query("
         UPDATE temp_notify_torrents AS tnt
-        INNER JOIN (torrents_group AS tg ON tnt.GroupID = tg.ID)
+        INNER JOIN torrents_group AS tg ON (tnt.GroupID = tg.ID)
         SET tnt.Year = tg.Year
     ");
     $DB->prepared_query("
