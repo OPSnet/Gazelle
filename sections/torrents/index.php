@@ -234,14 +234,12 @@ if (!empty($_REQUEST['action'])) {
             break;
         case 'fix_group':
             if ((check_perms('users_mod') || check_perms('torrents_fix_ghosts')) && authorize() && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
-                $DB->query('
-                    SELECT COUNT(ID)
-                    FROM torrents
-                    WHERE GroupID = '.$_GET['groupid']);
-                list($Count) = $DB->next_record();
+                $Count = $DB->scalar("
+                    SELECT count(*) FROM torrents WHERE GroupID = ?
+                    ", $_GET['groupid']
+                );
                 if ($Count == 0) {
                     Torrents::delete_group($_GET['groupid']);
-                } else {
                 }
                 if (!empty($_GET['artistid']) && is_number($_GET['artistid'])) {
                     header('Location: artist.php?id='.$_GET['artistid']);
@@ -267,11 +265,10 @@ if (!empty($_REQUEST['action'])) {
             if (!empty($_GET['id'])) {
                 require(__DIR__ . '/details.php');
             } elseif (isset($_GET['torrentid']) && is_number($_GET['torrentid'])) {
-                $DB->query('
-                    SELECT GroupID
-                    FROM torrents
-                    WHERE ID = '.$_GET['torrentid']);
-                list($GroupID) = $DB->next_record();
+                $GroupID = $DB->scalar("
+                    SELECT GroupID FROM torrents WHERE ID = ?
+                    ", $_GET['torrentid']
+                );
                 if ($GroupID) {
                     header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid']);
                 }

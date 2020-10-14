@@ -33,36 +33,37 @@ if (!empty($_GET['setdefault'])) {
     $UnsetList = ['page', 'setdefault'];
     $UnsetRegexp = '/(&|^)('.implode('|', $UnsetList).')=.*?(&|$)/i';
 
-    $DB->query("
-        SELECT SiteOptions
-        FROM users_info
-        WHERE UserID = '".db_string($LoggedUser['ID'])."'");
-    list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
-    $SiteOptions = unserialize_array($SiteOptions);
+    $SiteOptions = unserialize_array($DB->scalar("
+        SELECT SiteOptions FROM users_info WHERE UserID = ?
+        ", $LoggedUser['ID']
+    ));
     $SiteOptions = array_merge(Users::default_site_options(), $SiteOptions);
 
     $SiteOptions['DefaultSearch'] = preg_replace($UnsetRegexp, '', $_SERVER['QUERY_STRING']);
-    $DB->query("
-        UPDATE users_info
-        SET SiteOptions = '".db_string(serialize($SiteOptions))."'
-        WHERE UserID = '".db_string($LoggedUser['ID'])."'");
+    $DB->prepared_query("
+        UPDATE users_info SET
+            SiteOptions = ?
+        WHERE UserID = ?
+        ", serialize($SiteOptions), $LoggedUser['ID']
+    );
     $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['DefaultSearch' => $SiteOptions['DefaultSearch']]);
     $Cache->commit_transaction(0);
 
 // Clearing default search options
 } elseif (!empty($_GET['cleardefault'])) {
-    $DB->query("
-        SELECT SiteOptions
-        FROM users_info
-        WHERE UserID = '".db_string($LoggedUser['ID'])."'");
-    list($SiteOptions) = $DB->next_record(MYSQLI_NUM, false);
-    $SiteOptions = unserialize_array($SiteOptions);
+    $SiteOptions = unserialize_array($DB->scalar("
+        SELECT SiteOptions FROM users_info WHERE UserID = ?
+        ", $LoggedUser['ID']
+    ));
     $SiteOptions['DefaultSearch'] = '';
-    $DB->query("
-        UPDATE users_info
-        SET SiteOptions = '".db_string(serialize($SiteOptions))."'
-        WHERE UserID = '".db_string($LoggedUser['ID'])."'");
+
+    $DB->prepared_query("
+        UPDATE users_info SET
+            SiteOptions = ?
+        WHERE UserID = ?
+        ", serialize($SiteOptions), $LoggedUser['ID']
+    );
     $Cache->begin_transaction('user_info_heavy_'.$LoggedUser['ID']);
     $Cache->update_row(false, ['DefaultSearch' => '']);
     $Cache->commit_transaction(0);
@@ -109,6 +110,16 @@ if ($AdvancedSearch) {
     $Action = 'action=basic';
     $HideBasic = '';
     $HideAdvanced = ' hidden';
+}
+
+if (Format::form('remastertitle', true) == ''
+    && Format::form('remasteryear', true) == ''
+    && Format::form('remasterrecordlabel', true) == ''
+    && Format::form('remastercataloguenumber', true) == ''
+) {
+    $Hidden = ' hidden';
+} else {
+    $Hidden = '';
 }
 
 View::show_header('Browse Torrents', 'browse');
@@ -164,17 +175,6 @@ View::show_header('Browse Torrents', 'browse');
             <tr id="edition_expand" class="ftr_advanced<?=$HideAdvanced?>">
                 <td colspan="4" class="center ft_edition_expand"><a href="#" class="brackets" onclick="ToggleEditionRows(); return false;">Click here to toggle searching for specific remaster information</a></td>
             </tr>
-<?php
-if (Format::form('remastertitle', true) == ''
-    && Format::form('remasteryear', true) == ''
-    && Format::form('remasterrecordlabel', true) == ''
-    && Format::form('remastercataloguenumber', true) == ''
-) {
-    $Hidden = ' hidden';
-} else {
-    $Hidden = '';
-}
-?>
             <tr id="edition_title" class="ftr_advanced<?=$HideAdvanced . $Hidden?>">
                 <td class="label">Edition title:</td>
                 <td class="ft_remastertitle">
@@ -396,26 +396,25 @@ if ($x % 7 != 0) { // Padding
 </form>
 <?php
 if ($NumResults == 0) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT
             tags.Name,
             ((COUNT(tags.Name) - 2) * (SUM(tt.PositiveVotes) - SUM(tt.NegativeVotes))) / (tags.Uses * 0.8) AS Score
         FROM xbt_snatched AS s
-            INNER JOIN torrents AS t ON t.ID = s.fid
-            INNER JOIN torrents_group AS g ON t.GroupID = g.ID
-            INNER JOIN torrents_tags AS tt ON tt.GroupID = g.ID
-            INNER JOIN tags ON tags.ID = tt.TagID
-        WHERE s.uid = '{$LoggedUser['ID']}'
-            AND tt.TagID != '13679'
-            AND tt.TagID != '4820'
-            AND tt.TagID != '2838'
-            AND g.CategoryID = '1'
-            AND tags.Uses > '10'
+        INNER JOIN torrents AS t ON (t.ID = s.fid)
+        INNER JOIN torrents_group AS g ON (t.GroupID = g.ID)
+        INNER JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
+        INNER JOIN tags ON (tags.ID = tt.TagID)
+        WHERE g.CategoryID = 1
+            AND tags.Uses > 10
+            AND s.uid = ?
         GROUP BY tt.TagID
         ORDER BY Score DESC
-        LIMIT 8");
+        LIMIT 8
+        ", $LoggedUser['ID']
+    );
     $TagText = [];
-    while (list($Tag) = $DB->next_record()) {
+    while ([$Tag] = $DB->next_record()) {
         $TagText[] = "<a href='torrents.php?taglist={$Tag}'>{$Tag}</a>";
     }
     $TagText = implode(", ", $TagText);

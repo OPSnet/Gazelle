@@ -1,23 +1,27 @@
 <?php
-//global $Cache, $DB;
-include(SERVER_ROOT.'/sections/torrents/ranking_funcs.php');
+
+require('ranking_funcs.php');
 
 $Top10 = $Cache->get_value('similar_albums_'.$GroupID);
 if ($Top10 === false || isset($Top10[$GroupID])) {
 
     $VotePairs = $Cache->get_value('vote_pairs_'.$GroupID, true);
     if ($VotePairs === false || isset($VotePairs[$GroupID])) {
-        $DB->query("
-            SELECT v.GroupID, SUM(IF(v.Type='Up',1,0)) AS Ups, COUNT(1) AS Total
-            FROM (    SELECT UserID
-                    FROM users_votes
-                    WHERE GroupID = '$GroupID'
-                        AND Type='Up'
-                ) AS a
-                JOIN users_votes AS v USING (UserID)
-            WHERE v.GroupID != '$GroupID'
+        $DB->prepared_query("
+            SELECT v.GroupID,
+                sum(if(v.Type='Up', 1, 0)) AS Ups,
+                count(*) AS Total
+            FROM (
+                SELECT UserID
+                FROM users_votes
+                WHERE Type='Up' AND GroupID = ?
+            ) AS a
+            INNER JOIN users_votes AS v USING (UserID)
+            WHERE v.GroupID != ?
             GROUP BY v.GroupID
-            HAVING Ups > 0");
+            HAVING Ups > 0
+            ", $GroupID, $GroupID
+        );
         $VotePairs = $DB->to_array('GroupID', MYSQLI_ASSOC, false);
         $Cache->cache_value('vote_pairs_'.$GroupID, $VotePairs, 21600);
     }
@@ -43,7 +47,6 @@ if (count($Top10) > 0) {
             </tr>
 <?php
     $Top10Groups = array_keys($Top10);
-
     $Groups = Torrents::get_groups($Top10Groups, true, true, false);
     $i = 0;
     foreach ($Top10Groups as $MatchGroupID) {
@@ -57,9 +60,6 @@ if (count($Top10) > 0) {
             <tr class="votes_rows hidden <?=($i & 1) ? 'rowb' : 'rowa'?>">
                 <td><span class="like_ranks"><?=$i?>.</span> <?=$Str?></td>
             </tr>
-<?php
-    } ?>
+<?php } /* foreach */ ?>
         </table>
-<?php
-}
-?>
+<?php } /* count($Top10) */ ?>
