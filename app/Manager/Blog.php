@@ -129,12 +129,7 @@ class Blog extends \Gazelle\Base {
      */
     public function latest(): array {
         $headlines = $this->headlines();
-        [$blogId, $title] = $headlines[0];
-        if (!$blogId) {
-            $blogId = -1;
-            $title = '';
-        }
-        return [$blogId, $title];
+        return $headlines[0] ?? [-1, null, null, null, null, null, null];
     }
 
     /**
