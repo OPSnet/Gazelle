@@ -2,11 +2,12 @@
 
 namespace Gazelle;
 
-class Collage extends Base {
-    protected $id;
+class Collage extends BaseObject {
     protected $items;
     protected $ownerId;
     protected $categoryId;
+    protected $entryTable;
+    protected $entryColumn;
     protected $deleted;
     protected $description;
     protected $featured;
@@ -20,7 +21,7 @@ class Collage extends Base {
     protected $tags; // these are added at creation
     protected $torrentTags; // these are derived from the torrents added to the collage
     protected $updated;
-    protected $userId;
+    protected $viewerId;
     protected $userSubscriptions;
 
     /* these are only loaded on a torrent collage display */
@@ -37,14 +38,14 @@ class Collage extends Base {
     const SUBS_KEY     = 'collage_subs_user_%d';
     const SUBS_NEW_KEY = 'collage_subs_user_new_%d';
 
+    public function tableName(): string { return 'collages'; }
+
     /**
      * Collage constructor.
      * @param int $id collage id
      */
     public function __construct(int $id) {
-        parent::__construct();
-
-        $this->id = $id;
+        parent::__construct($id);
         $this->artists = [];
         $this->contributors = [];
 
@@ -79,9 +80,13 @@ class Collage extends Base {
             $this->sortNewest
         ] = $info;
         $this->tags = explode(' ', $taglist);
-        if ($this->categoryId == COLLAGE_ARTISTS_ID) {
+        if ($this->isArtist()) {
+            $this->entryTable = 'collages_artists';
+            $this->entryColumn = 'ArtistID';
             $this->loadArtists();
         } else {
+            $this->entryTable = 'collages_torrents';
+            $this->entryColumn = 'GroupID';
             $this->loadTorrents();
         }
     }
@@ -221,16 +226,16 @@ class Collage extends Base {
         return $this;
     }
 
-    public function setViewer(int $userId) {
-        $this->userId = $userId;
+    public function setViewer(int $viewerId) {
+        $this->viewerId = $viewerId;
         $this->lockedForUser = false;
         if (!check_perms('site_collages_delete')) {
             if ($this->categoryId === '0') {
-                if (!check_perms('site_collages_personal') || !$this->isOwner($userId)) {
+                if (!check_perms('site_collages_personal') || !$this->isOwner($this->viewerId)) {
                     $this->lockedForUser = true;
                 }
             }
-            $groupsByUser = $this->contributors[$userId] ?? 0;
+            $groupsByUser = $this->contributors[$this->viewerId] ?? 0;
             if ($this->locked
                 || ($this->maxGroups > 0 && count($this->groupIds) >= $this->maxGroups)
                 || ($this->maxGroupsPerUser > 0 && $groupsByUser >= $this->maxGroupsPerUser)
@@ -244,9 +249,6 @@ class Collage extends Base {
     public function categoryId() { return $this->categoryId; }
     public function description() { return $this->description; }
     public function groupIds() { return $this->groupIds; }
-    public function isDeleted() { return $this->deleted == '1'; }
-    public function isFeatured () { return $this->featured; }
-    public function isLocked() { return $this->locked == '1' || (isset($this->lockedForUser) && $this->lockedForUser); }
     public function maxGroups() { return $this->maxGroups; }
     public function maxGroupsPerUser() { return $this->maxGroupsPerUser; }
     public function name() { return $this->name; }
@@ -260,10 +262,16 @@ class Collage extends Base {
     public function updated() { return $this->updated; }
     public function contributors() { return $this->contributors; }
 
-    public function isOwner(int $userId): bool { return $this->ownerId == $userId; }
+    public function isArtist(): bool { return $this->categoryId === COLLAGE_ARTISTS_ID; }
+    public function isDeleted(): bool { return $this->deleted == '1'; }
+    public function isFeatured () { return $this->featured; }
+    public function isLocked(): bool { return $this->locked == '1' || (isset($this->lockedForUser) && $this->lockedForUser); }
+    public function isOwner(int $userId): bool { return $this->ownerId === $userId; }
+    public function isPersonal(): bool { return $this->categoryId === 0; }
 
     /**
      * Increment count of number of entries in collage.
+     *
      * @param int $delta change in value (defaults to 1)
      * @return int number of entries
      */
@@ -292,13 +300,13 @@ class Collage extends Base {
      */
     public function flush(array $keys = []) {
         $this->db->prepared_query("
-            SELECT concat('collage_subs_user_new_', UserID) as k
+            SELECT concat('collage_subs_user_new_', UserID) as ck
             FROM users_collage_subs
             WHERE CollageID = ?
             ", $this->id
         );
         if ($this->db->has_results()) {
-            $keys = array_merge($keys, $this->db->collect('k'));
+            $keys = array_merge($keys, $this->db->collect('ck'));
         }
         $keys[] = sprintf(self::CACHE_KEY, $this->id);
         $this->cache->deleteMulti($keys);
@@ -454,7 +462,7 @@ class Collage extends Base {
      * @return an of torrent groups, and an array of user ids (who added the torrents)
      */
     public function torrentList(): array {
-        if (is_null($this->userId)) {
+        if (is_null($this->viewerId)) {
             throw new Exception\CollageUserNotSetException;
         }
         return $this->torrents;
@@ -518,5 +526,132 @@ class Collage extends Base {
         return $limit == -1
             ? $this->torrentTags
             : array_slice($this->torrentTags, 0, $limit, true);
+    }
+
+    /*** UPDATE METHODS ***/
+
+    public function setToggleLocked() {
+        return $this->setUpdate('Locked', $this->locked === '1' ? '0' : '1');
+    }
+
+    public function setFeatured() {
+        return $this->setUpdate('Featured', 1);
+    }
+
+    public function updateSequenceEntry(int $entryId, int $sequence): bool {
+        $table = $this->isArtist() ? 'collages_artists' : 'collages_torrents';
+        $column = $this->isArtist() ? 'ArtistID' : 'GroupID';
+        $this->db->prepared_query("
+            UPDATE $table SET
+                Sort = ?
+            WHERE CollageID = ?
+                AND $column = ?
+            ", $sequence, $this->id, $entryId
+        );
+        return $this->db->affected_rows() == 1;
+    }
+
+    public function updateSequence(string $series): int {
+        $series = parseUrlArgs($_POST['drag_drop_collage_sort_order'], 'li[]');
+        if (empty($series)) {
+            return 0;
+        }
+        $id = $this->id;
+        $args = array_merge(...array_map(function ($sort, $entryId) use ($id) {
+            return [(int)$entryId, ($sort + 1) * 10, $id];
+        }, array_keys($series), $series));
+        $this->db->prepared_query("
+            INSERT INTO " . $this->entryTable . " (" . $this->entryColumn . ", Sort, CollageID)
+            VALUES " . implode(', ', array_fill(0, count($series), '(?, ?, ?)')) . "
+            ON DUPLICATE KEY UPDATE Sort = VALUES(Sort)
+            ", ...$args
+        );
+        return $this->db->affected_rows();
+    }
+
+    public function removeEntry(int $entryId) {
+        $this->db->prepared_query("
+            DELETE FROM " . $this->entryTable . "
+            WHERE CollageID = ?
+                AND GroupID = ?
+            ", $this->id, $entryId
+        );
+        $rows = $this->db->affected_rows();
+        $this->numEntries -= $rows;
+        $this->db->prepared_query("
+            UPDATE collages SET
+                NumTorrents = greatest(0, NumTorrents - ?)
+            WHERE ID = ?
+            ", $rows, $this->id
+        );
+        if ($this->isArtist()) {
+            $this->cache->deleteMulti(["artist_$entryId", "artist_groups_$entryId"]);
+        } else {
+            $this->cache->deleteMulti(["torrents_details_$entryId", "torrent_collages_$entryId", "torrent_collages_personal_$entryId"]);
+        }
+        return $this;
+    }
+
+    public function remove(User $user, Manager\Subscription $subMan, Log $logger, string $reason): int {
+        $this->db->prepared_query("
+            SELECT GroupID
+            FROM collages_torrents
+            WHERE CollageID = ?
+            ", $this->id
+        );
+        while ([$GroupID] = $this->db->next_record()) {
+            $this->cache->deleteMulti(["torrents_details_$GroupID", "torrent_collages_$GroupID", "torrent_collages_personal_$GroupID"]);
+        }
+
+        if ($this->isPersonal()) {
+            \Comments::delete_page('collages', $this->id);
+            $this->db->prepared_query("
+                DELETE FROM collages_torrents
+                WHERE CollageID = ?
+                ", $this->id
+            );
+            $this->db->prepared_query("
+                DELETE FROM collages
+                WHERE ID = ?
+                ", $this->id
+            );
+            $rows = $this->db->affected_rows();
+        } else {
+            $this->db->prepared_query("
+                UPDATE collages SET
+                    Deleted = '1'
+                WHERE
+                    Deleted = '0'
+                    AND ID = ?
+                ", $this->id
+            );
+            $rows = $this->db->affected_rows();
+
+            $subMan->flush('collages', $this->id);
+            $subMan->flushQuotes('collages', $this->id);
+        }
+        $this->flush();
+        $logger->general(sprintf("Collage %d (%s) was deleted by %s: %s",
+            $this->id, $this->name, $user->name, $reason
+        ));
+        return $rows;
+    }
+
+    public function modify(): bool {
+        if (!$this->updateField) {
+            return false;
+        }
+        if (in_array('Featured', $this->updateField)) {
+            // unfeature the previously featured collage
+            $this->db->prepared_query("
+                UPDATE collages SET
+                    Featured = 0
+                WHERE CategoryID = 0
+                    AND Featured = 1
+                    AND UserID = ?
+                ", $this->ownerId
+            );
+        }
+        return parent::modify();
     }
 }

@@ -1,12 +1,12 @@
-<?
+<?php
 
-$CollageID = (int)$_GET['collageid'];
-if ($CollageID < 1) {
+$collageID = (int)$_GET['collageid'];
+if ($collageID < 1) {
     error(404);
 }
-$Collage = new Gazelle\Collage($CollageID);
+$collage = new Gazelle\Collage($collageID);
 
-if ($Collage->categoryId() == 0 && !$Collage->isOwner($LoggedUser['ID']) && !check_perms('site_collages_delete')) {
+if ($collage->categoryId() == 0 && !$collage->isOwner($LoggedUser['ID']) && !check_perms('site_collages_delete')) {
     error(403);
 }
 
@@ -22,22 +22,22 @@ if (!empty($Err)) {
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Edit collage <a href="collages.php?id=<?=$CollageID?>"><?=$Collage->name()?></a></h2>
+        <h2>Edit collage <a href="collages.php?id=<?=$collageID?>"><?=$collage->name()?></a></h2>
     </div>
     <form class="edit_form" name="collage" action="collages.php" method="post">
         <input type="hidden" name="action" value="edit_handle" />
         <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-        <input type="hidden" name="collageid" value="<?=$CollageID?>" />
+        <input type="hidden" name="collageid" value="<?=$collageID?>" />
         <table id="edit_collage" class="layout">
 <?php
-if (check_perms('site_collages_delete') || ($CategoryID == 0 && $UserID == $LoggedUser['ID'] && check_perms('site_collages_renamepersonal'))) { ?>
+if (check_perms('site_collages_delete') || ($collage->isPersonal() && $collage->isOwner($LoggedUser['ID']) && check_perms('site_collages_renamepersonal'))) { ?>
             <tr>
                 <td class="label">Name</td>
-                <td><input type="text" name="name" size="60" value="<?=$Collage->name()?>" /></td>
+                <td><input type="text" name="name" size="60" value="<?=$collage->name()?>" /></td>
             </tr>
 <?php
 }
-if ($Collage->categoryId() > 0 || check_perms('site_collages_delete')) { ?>
+if ($collage->categoryId() > 0 || check_perms('site_collages_delete')) { ?>
             <tr>
                 <td class="label"><strong>Category</strong></td>
                 <td>
@@ -49,7 +49,7 @@ if ($Collage->categoryId() > 0 || check_perms('site_collages_delete')) { ?>
             continue;
         }
 ?>
-        <option value="<?=$CatID?>"<?=$CatID == $Collage->categoryId() ? ' selected="selected"' : ''?>><?=$CatName?></option>
+        <option value="<?=$CatID?>"<?=$CatID == $collage->categoryId() ? ' selected="selected"' : ''?>><?=$CatName?></option>
 <?php    } ?>
                     </select>
                 </td>
@@ -59,17 +59,17 @@ if ($Collage->categoryId() > 0 || check_perms('site_collages_delete')) { ?>
             <tr>
                 <td class="label">Description</td>
                 <td>
-                    <textarea name="description" id="description" cols="60" rows="10"><?=$Collage->description()?></textarea>
+                    <textarea name="description" id="description" cols="60" rows="10"><?=$collage->description()?></textarea>
                 </td>
             </tr>
             <tr>
                 <td class="label">Tags</td>
-                <td><input type="text" name="tags" size="60" value="<?=implode(', ', $Collage->tags())?>" /></td>
+                <td><input type="text" name="tags" size="60" value="<?=implode(', ', $collage->tags())?>" /></td>
             </tr>
-<?php if ($Collage->categoryId() == 0) { /* CategoryID == 0 is for "personal" collages */ ?>
+<?php if ($collage->isPersonal()) { ?>
             <tr>
                 <td class="label"><span class="tooltip" title="A &quot;featured&quot; personal collage will be listed first on your profile, along with a preview of the included torrents.">Featured</span></td>
-                <td><input type="checkbox" name="featured"<?=($Collage->isFeatured() ? ' checked="checked"' : '')?> /></td>
+                <td><input type="checkbox" name="featured"<?=($collage->isFeatured() ? ' checked="checked"' : '')?> /></td>
             </tr>
 <?php
 }
@@ -77,15 +77,15 @@ if (check_perms('site_collages_delete')) {
 ?>
             <tr>
                 <td class="label">Locked</td>
-                <td><input type="checkbox" name="locked" <?=$Collage->isLocked() ? 'checked="checked" ' : ''?>/></td>
+                <td><input type="checkbox" name="locked" <?=$collage->isLocked() ? 'checked="checked" ' : ''?>/></td>
             </tr>
             <tr>
                 <td class="label">Max groups</td>
-                <td><input type="text" name="maxgroups" size="5" value="<?=$Collage->maxGroups()?>" /></td>
+                <td><input type="text" name="maxgroups" size="5" value="<?=$collage->maxGroups()?>" /></td>
             </tr>
             <tr>
                 <td class="label">Max groups per user</td>
-                <td><input type="text" name="maxgroupsperuser" size="5" value="<?=$Collage->maxGroupsPerUser()?>" /></td>
+                <td><input type="text" name="maxgroupsperuser" size="5" value="<?=$collage->maxGroupsPerUser()?>" /></td>
             </tr>
 
 <?php } ?>

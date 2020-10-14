@@ -14,7 +14,7 @@ $header = new \Gazelle\Util\SortableTableHeader('time', [
 
 $tagMan = new \Gazelle\Manager\Tag;
 if (!empty($_GET['tags'])) {
-    $Tags = explode(',', db_string(trim($_GET['tags'])));
+    $Tags = explode(',', trim($_GET['tags']));
     foreach ($Tags as $ID => $Tag) {
         $Tags[$ID] = $tagMan->sanitize($Tag);
     }
@@ -212,8 +212,13 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
             </table>
         </form>
     </div>
-<?php
-    } /* if (!$BookmarkView) */ ?>
+<?php } else { ?>
+        <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
+        <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
+        <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
+        <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
+        <br /><br />
+<?php } ?>
     <div class="linkbox">
 <?php
     if (!$BookmarkView) {
@@ -246,25 +251,22 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
         <a href="userhistory.php?action=subscribed_collages" class="brackets">Subscribed collages</a>
 <?php   } ?>
         <a href="bookmarks.php?type=collages" class="brackets">Bookmarked collages</a>
-<?php   if (check_perms('site_collages_recover')) { ?>
-        <a href="collages.php?action=recover" class="brackets">Recover collage</a>
-<?php   }
+        <a href="random.php?action=collage" class="brackets">Random collage</a>
+<?php
         if (check_perms('site_collages_create') || check_perms('site_collages_personal') || check_perms('site_collages_recover')) {
+           if (check_perms('site_collages_recover')) {
 ?>
+        <a href="collages.php?action=recover" class="brackets">Recover collage</a>
+<?php      } ?>
         <br />
-<?php   } ?>
+<?php   }
+    }
+    if (check_perms('site_collages_create') || check_perms('site_collages_personal')) {
+?>
         <a href="collages.php?userid=<?=$LoggedUser['ID']?>" class="brackets">Collages you started</a>
         <a href="collages.php?userid=<?=$LoggedUser['ID']?>&amp;contrib=1" class="brackets">Collages you contributed to</a>
-        <a href="random.php?action=collage" class="brackets">Random collage</a>
         <br /><br />
-<?php    } else { ?>
-        <a href="bookmarks.php?type=torrents" class="brackets">Torrents</a>
-        <a href="bookmarks.php?type=artists" class="brackets">Artists</a>
-        <a href="bookmarks.php?type=collages" class="brackets">Collages</a>
-        <a href="bookmarks.php?type=requests" class="brackets">Requests</a>
-        <br /><br />
-<?php
-    }
+<?php }
     $Pages = Format::get_pages($Page, $NumResults, COLLAGES_PER_PAGE, 9);
     echo $Pages;
 ?>

@@ -1,0 +1,24 @@
+<div class="thin center">
+    <div class="box" style="width: 600px; margin: 0px auto;">
+        <div class="head colhead">
+            Recover deleted collage
+        </div>
+        <div class="pad">
+            <form class="undelete_form" name="collage" action="collages.php" method="post">
+                <input type="hidden" name="action" value="recover" />
+                <input type="hidden" name="auth" value="{{ auth }}" />
+                <div class="field_div">
+                    <strong>Collage ID: </strong>
+                    <input type="text" name="id" size="8" />
+                </div>
+                <div class="field_div">
+                    <strong>Collage name: </strong>
+                    <input type="text" name="name" size="40" />
+                </div>
+                <div class="submit_div">
+                    <input value="Recover!" type="submit" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
