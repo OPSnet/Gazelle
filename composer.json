@@ -31,7 +31,7 @@
     "d11wtq/boris": "^1.0",
     "endroid/qr-code": "^3.9",
     "maennchen/zipstream-php": "^2.1",
-    "orpheusnet/bencode-torrent": "^1.1.0",
+    "orpheusnet/bencode-torrent": "^1.1.1",
     "orpheusnet/logchecker": "^0.9.4",
     "robmorgan/phinx": "^0.11.0",
     "twig/twig": "^2.12",
