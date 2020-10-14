@@ -12,40 +12,41 @@ if (!empty($_GET['page']) && is_number($_GET['page'])) {
     $Limit = 100;
 }
 
-$DB->query("
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        UserID,
+$NumResults = $DB->scalar("SELECT count(*) FROM users_downloads WHERE TorrentID = ?", $TorrentID);
+$DB->prepared_query("
+    SELECT UserID,
         Time
     FROM users_downloads
-    WHERE TorrentID = '$TorrentID'
+    WHERE TorrentID = ?
     ORDER BY Time DESC
-    LIMIT $Limit");
-$UserIDs = $DB->collect('UserID');
+    LIMIT $Limit
+    ", $TorrentID
+);
 $Results = $DB->to_array('UserID', MYSQLI_ASSOC);
-
-$DB->query('SELECT FOUND_ROWS()');
-list($NumResults) = $DB->next_record();
-
-if (count($UserIDs) > 0) {
-    $UserIDs = implode(',', $UserIDs);
-    $DB->query("
-        SELECT uid
-        FROM xbt_snatched
-        WHERE fid = '$TorrentID'
-            AND uid IN($UserIDs)");
+if (empty($Results)) {
+    $Snatched = [];
+    $Seeding = [];
+} else {
+    $DB->prepared_query("
+        SELECT xs.uid
+        FROM xbt_snatched xs
+        INNER JOIN users_downloads ud ON (ud.UserID = xs.uid)
+        WHERE xs.fid = ?
+        ", $TorrentID
+    );
     $Snatched = $DB->to_array('uid');
-
-    $DB->query("
-        SELECT uid
+    $DB->prepared_query("
+        SELECT xfu.uid
         FROM xbt_files_users
-        WHERE fid = '$TorrentID'
-            AND Remaining = 0
-            AND uid IN($UserIDs)");
+        INNER JOIN users_downloads ud ON (ud.UserID = xfu.uid)
+        WHERE xfu.Remaining = 0 AND xfu.fid = ?
+        WHERE xs.fid = ?
+        ", $TorrentID
+    );
     $Seeding = $DB->to_array('uid');
 }
 ?>
-<h4 class="tooltip" title="List of users that have clicked the &quot;DL&quot; button">List of Downloaders</h4>
+<h4 class="tooltip" title="List of users that have clicked the [DL] button">List of Downloaders</h4>
 <?php if ($NumResults > 100) { ?>
 <div class="linkbox"><?=js_pages('show_downloads', $_GET['torrentid'], $NumResults, $Page)?></div>
 <?php } ?>
@@ -53,31 +54,26 @@ if (count($UserIDs) > 0) {
     <tr class="colhead_dark" style="font-weight: bold;">
         <td>User</td>
         <td>Time</td>
-
         <td>User</td>
         <td>Time</td>
     </tr>
     <tr>
 <?php
 $i = 0;
-
-foreach ($Results as $ID=>$Data) {
-    list($SnatcherID, $Timestamp) = array_values($Data);
+foreach ($Results as $ID => $Data) {
+    [$SnatcherID, $Timestamp] = array_values($Data);
 
     $User = Users::format_username($SnatcherID, true, true, true, true);
-
     if (!array_key_exists($SnatcherID, $Snatched) && $SnatcherID != $UserID) {
-        $User = '<span style="font-style: italic;">'.$User.'</span>';
+        $User = '<span style="font-style: italic;">' . $User . '</span>';
         if (array_key_exists($SnatcherID, $Seeding)) {
-            $User = '<strong>'.$User.'</strong>';
+            $User = '<strong>' . $User . '</strong>';
         }
     }
     if ($i % 2 == 0 && $i > 0) { ?>
     </tr>
     <tr>
-<?php
-    }
-?>
+<?php } ?>
         <td><?=$User?></td>
         <td><?=time_diff($Timestamp)?></td>
 <?php

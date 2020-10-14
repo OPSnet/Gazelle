@@ -686,13 +686,15 @@ if (empty($LoggedUser['DisableRequests']) && count($Requests) > 0) {
 }
 $Collages = $Cache->get_value("torrent_collages_$GroupID");
 if (!is_array($Collages)) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT c.Name, c.NumTorrents, c.ID
         FROM collages AS c
-            JOIN collages_torrents AS ct ON ct.CollageID = c.ID
-        WHERE ct.GroupID = '$GroupID'
-            AND Deleted = '0'
-            AND CategoryID != '0'");
+        INNER JOIN collages_torrents AS ct ON (ct.CollageID = c.ID)
+        WHERE Deleted = '0'
+            AND CategoryID != '0'
+            AND ct.GroupID = ?
+        ", $GroupID
+    );
     $Collages = $DB->to_array();
     $Cache->cache_value("torrent_collages_$GroupID", $Collages, 3600 * 6);
 }
@@ -739,13 +741,15 @@ if (count($Collages) > 0) {
 
 $PersonalCollages = $Cache->get_value("torrent_collages_personal_$GroupID");
 if (!is_array($PersonalCollages)) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT c.Name, c.NumTorrents, c.ID
         FROM collages AS c
             JOIN collages_torrents AS ct ON ct.CollageID = c.ID
-        WHERE ct.GroupID = '$GroupID'
-            AND Deleted = '0'
-            AND CategoryID = '0'");
+        WHERE Deleted = '0'
+            AND CategoryID = '0'
+            AND ct.GroupID = ?
+        ", $GroupID
+    );
     $PersonalCollages = $DB->to_array(false, MYSQLI_NUM);
     $Cache->cache_value("torrent_collages_personal_$GroupID", $PersonalCollages, 3600 * 6);
 }

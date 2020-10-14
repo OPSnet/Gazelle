@@ -44,66 +44,73 @@ if (check_perms('users_mod') && !empty($_GET['userid']) && is_number($_GET['user
 // Sorting by release year requires joining torrents_group, which is slow. Using a temporary table
 // makes it speedy enough as long as there aren't too many records to create
 if ($OrderBy == 'tnt.Year') {
-    $DB->query("
-        SELECT COUNT(*)
+    $cond = ['unt.UserID = ?'];
+    $args = [$UserID];
+    if ($FilterID) {
+        $cond[] = 'FilterID = ?';
+        $args[] = $FilterID;
+    }
+    $clause = implode(' AND ', $cond);
+    $TorrentCount = $DB->scalar("
+        SELECT count(*)
         FROM users_notify_torrents AS unt
-        INNER JOIN torrents AS t ON (t.ID=unt.TorrentID)
+        INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
         INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        WHERE unt.UserID=$UserID".
-        ($FilterID
-            ? " AND FilterID=$FilterID"
-            : ''));
-    list($TorrentCount) = $DB->next_record();
+        WHERE $clause
+        ", ...$args
+    );
     if ($TorrentCount > NOTIFICATIONS_MAX_SLOWSORT) {
         error('Due to performance issues, torrent lists with more than '.number_format(NOTIFICATIONS_MAX_SLOWSORT).' items cannot be ordered by release year.');
     }
 
-    $DB->query("
+    $DB->prepared_query("
         CREATE TEMPORARY TABLE temp_notify_torrents
             (TorrentID int, GroupID int, UnRead tinyint, FilterID int, Year smallint, PRIMARY KEY(GroupID, TorrentID), KEY(Year))
         ENGINE=InnoDB");
-    $DB->query("
+    $DB->prepared_query("
         INSERT IGNORE INTO temp_notify_torrents (TorrentID, GroupID, UnRead, FilterID)
         SELECT t.ID, t.GroupID, unt.UnRead, unt.FilterID
         FROM users_notify_torrents AS unt
         INNER JOIN torrents AS t ON t.ID=unt.TorrentID
         INNER JOIN torrents_leech_stats tls ON (tls.TorrentID = t.ID)
-        WHERE unt.UserID=$UserID".
-        ($FilterID
-            ? " AND unt.FilterID=$FilterID"
-            : ''));
-    $DB->query("
+        WHERE $clause
+        ", ...$args
+    );
+    $DB->prepared_query("
         UPDATE temp_notify_torrents AS tnt
-            JOIN torrents_group AS tg ON tnt.GroupID = tg.ID
-        SET tnt.Year = tg.Year");
-
-    $DB->query("
+        INNER JOIN (torrents_group AS tg ON tnt.GroupID = tg.ID)
+        SET tnt.Year = tg.Year
+    ");
+    $DB->prepared_query("
         SELECT TorrentID, GroupID, UnRead, FilterID
         FROM temp_notify_torrents AS tnt
-        ORDER BY $OrderBy $OrderDir, GroupID $OrderDir
-        LIMIT $Limit");
-    $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
+        ORDER BY $OrderBy $OrderWay, GroupID $OrderWay
+        LIMIT $Limit
+    ");
 } else {
-    $DB->query("
+    $from = "
+        FROM users_notify_torrents AS unt
+        INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
+        INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = unt.TorrentID)
+        WHERE $clause
+    ";
+    $TorrentCount = $DB->scalar("
+        SELECT count(*) $from
+        ", ...$args
+    );
+    $DB->prepared_query("
         SELECT
-            SQL_CALC_FOUND_ROWS
             unt.TorrentID,
             unt.UnRead,
             unt.FilterID,
             t.GroupID
-        FROM users_notify_torrents AS unt
-        INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
-        INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = unt.TorrentID)
-        WHERE unt.UserID = $UserID".
-        ($FilterID
-            ? " AND unt.FilterID = $FilterID"
-            : '')."
-        ORDER BY $OrderBy $OrderDir
-        LIMIT $Limit");
-    $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
-    $DB->query('SELECT FOUND_ROWS()');
-    list($TorrentCount) = $DB->next_record();
+        $from
+        ORDER BY $OrderBy $OrderWay
+        LIMIT $Limit
+        ", ...$args
+    );
 }
+$Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 
 $GroupIDs = $FilterIDs = $UnReadIDs = [];
 foreach ($Results as $Torrent) {
@@ -121,10 +128,12 @@ if (!empty($GroupIDs)) {
     $TorrentGroups = Torrents::get_groups($GroupIDs);
 
     // Get the relevant filter labels
-    $DB->query('
+    $DB->prepared_query("
         SELECT ID, Label, Artists
         FROM users_notify_filters
-        WHERE ID IN ('.implode(',', $FilterIDs).')');
+        WHERE ID IN (" . placeholders($FilterIDs) . ")
+        ", ...$FilterIDs
+    );
     $Filters = $DB->to_array('ID', MYSQLI_ASSOC, ['Artists']);
     foreach ($Filters as &$Filter) {
         $Filter['Artists'] = explode('|', trim($Filter['Artists'], '|'));
@@ -137,11 +146,13 @@ if (!empty($GroupIDs)) {
 
     if (!empty($UnReadIDs)) {
         //Clear before header but after query so as to not have the alert bar on this page load
-        $DB->query("
-            UPDATE users_notify_torrents
-            SET UnRead = '0'
-            WHERE UserID = ".$LoggedUser['ID'].'
-                AND TorrentID IN ('.implode(',', $UnReadIDs).')');
+        $DB->prepared_query("
+            UPDATE users_notify_torrents SET
+                UnRead = '0'
+            WHERE UserID = ?
+                AND TorrentID IN (" . placeholders($UnReadIDs) . ")
+            ", $LoggedUser['ID'], ...$UnReadIDs
+        );
         $Cache->delete_value('notifications_new_'.$LoggedUser['ID']);
     }
 }

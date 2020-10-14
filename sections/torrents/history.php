@@ -1,17 +1,19 @@
 <?php
-if (!isset($_GET['groupid']) || !is_number($_GET['groupid'])) {
-    error(0);
-}
-$GroupID = (int)$_GET['groupid'];
 
-$DB->query("
-    SELECT Name
-    FROM torrents_group
-    WHERE ID = $GroupID");
-if (!$DB->has_results()) {
+$GroupID = (int)$_GET['groupid'];
+if (!$GroupID) {
     error(404);
 }
-list($Name) = $DB->next_record();
+
+$Name = $DB->scalar("
+    SELECT Name
+    FROM torrents_group
+    WHERE ID = ?
+    ", $GroupID
+);
+if (!$Name) {
+    error(404);
+}
 
 View::show_header("Revision history for $Name");
 ?>
