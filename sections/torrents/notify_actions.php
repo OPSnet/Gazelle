@@ -16,7 +16,7 @@ switch ($_GET['action']) {
         }
         $DB->prepared_query("
             DELETE FROM users_notify_torrents WHERE UserID = ? AND TorrentID = ?
-            ", $LoggedUser[ID], $_GET[torrentid]
+            ", $LoggedUser['ID'], $_GET['torrentid']
         );
         $Cache->delete_value('notifications_new_'.$LoggedUser['ID']);
         break;

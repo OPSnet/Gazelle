@@ -41,16 +41,17 @@ if (check_perms('users_mod') && !empty($_GET['userid']) && is_number($_GET['user
     $UserID = $LoggedUser['ID'];
 }
 
+$cond = ['unt.UserID = ?'];
+$args = [$UserID];
+if ($FilterID) {
+    $cond[] = 'FilterID = ?';
+    $args[] = $FilterID;
+}
+$clause = implode(' AND ', $cond);
+
 // Sorting by release year requires joining torrents_group, which is slow. Using a temporary table
 // makes it speedy enough as long as there aren't too many records to create
 if ($OrderBy == 'tnt.Year') {
-    $cond = ['unt.UserID = ?'];
-    $args = [$UserID];
-    if ($FilterID) {
-        $cond[] = 'FilterID = ?';
-        $args[] = $FilterID;
-    }
-    $clause = implode(' AND ', $cond);
     $TorrentCount = $DB->scalar("
         SELECT count(*)
         FROM users_notify_torrents AS unt
