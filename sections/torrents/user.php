@@ -12,37 +12,35 @@ if (!is_number($userID)) {
     error(0);
 }
 
-$sortOrderMap = [
-    'time'     => ['Time', 'desc'],
-    'name'     => ['tg.Name', 'asc'],
-    'snatched' => ['tls.Snatched', 'desc', 't.Size desc'],
-    'seeders'  => ['tls.Seeders', 'desc', 't.Size desc'],
-    'leechers' => ['tls.Leechers', 'desc', 't.Size desc'],
-    'size'     => ['t.Size', 'desc'],
-];
-$sortOrder = (!empty($_GET['order']) && isset($sortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
-$orderBy = $sortOrderMap[$sortOrder][0];
-$orderWay = (empty($_GET['sort']) || $_GET['sort'] == $sortOrderMap[$sortOrder][1])
-    ? $sortOrderMap[$sortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$sortOrderMap[$sortOrder][1]];
-
-$header = new SortableTableHeader([
-    'name' => 'Torrent',
-    'time' => 'Time',
-    'size' => 'Size',
-], $sortOrder, $orderWay);
-
 $iconUri = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
-$headerIcons = new SortableTableHeader([
-    'snatched' => '<img src="' . $iconUri . '/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
-    'seeders'  => '<img src="' . $iconUri . '/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
-    'leechers' => '<img src="' . $iconUri . '/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
-], $sortOrder, $orderWay, ['asc' => '', 'desc' => '']);
-
-$orderBy .= " $orderWay";
-if (count($sortOrderMap[$sortOrder]) == 3) {
-    $orderBy .= ', ' . $sortOrderMap[$sortOrder][2];
-}
+$imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
+$headerMap = [
+    'name'     => ['dbColumn' => 'tg.Name', 'defaultSort' => 'asc',  'text' => 'Torrent'],
+    'time'     => ['dbColumn' => 'Time',    'defaultSort' => 'desc', 'text' => 'Time'],
+    'size'     => ['dbColumn' => 't.Size',  'defaultSort' => 'desc', 'text' => 'Size'],
+    'snatched' => [
+        'dbColumn'      => 'tls.Snatched',
+        'defaultSort'   => 'desc',
+        'secondarySort' => 't.Size desc',
+        'text'          => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches'),
+    ],
+    'seeders'  => [
+        'dbColumn'      => 'tls.Seeders',
+        'defaultSort'   => 'desc',
+        'secondarySort' => 't.Size desc',
+        'text'          => sprintf($imgTag, 'seeders', 'Seeders', 'Seeders'),
+    ],
+    'leechers' => [
+        'dbColumn'      => 'tls.Leechers',
+        'defaultSort'   => 'desc',
+        'secondarySort' => 't.Size desc',
+        'text'          => sprintf($imgTag, 'leechers', 'Leechers', 'Leechers'),
+    ],
+];
+$header = new SortableTableHeader('time', $headerMap);
+$secondarySort = $header->current()['secondarySort'] ?? '';
+$orderBy = $header->getOrderBy() . ' ' . $header->getOrderDir() . ($secondarySort ? ", $secondarySort" : '');
+$headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
 if (!empty($_GET['page']) && is_number($_GET['page']) && $_GET['page'] > 0) {
     $page = $_GET['page'];
@@ -476,12 +474,12 @@ foreach ($Categories as $catKey => $catName) {
     <table class="torrent_table cats m_table" width="100%">
         <tr class="colhead">
             <td class="cats_col"></td>
-            <td class="m_th_left nobr"><?= $header->emit('name', $sortOrderMap['name'][1]) ?></td>
-            <td class="nobr"><?= $header->emit('time', $sortOrderMap['time'][1]) ?></td>
-            <td class="nobr"><?= $header->emit('size', $sortOrderMap['size'][1]) ?></td>
-            <td class="sign nobr snatches m_th_right"><?= $headerIcons->emit('snatched', $sortOrderMap['snatched'][1]) ?></td>
-            <td class="sign nobr seeders m_th_right"><?= $headerIcons->emit('seeders', $sortOrderMap['seeders'][1]) ?></td>
-            <td class="sign nobr leechers m_th_right"><?= $headerIcons->emit('leechers', $sortOrderMap['leechers'][1]) ?></td>
+            <td class="m_th_left nobr"><?= $header->emit('name') ?></td>
+            <td class="nobr"><?= $header->emit('time') ?></td>
+            <td class="nobr"><?= $header->emit('size') ?></td>
+            <td class="sign nobr snatches m_th_right"><?= $headerIcons->emit('snatched') ?></td>
+            <td class="sign nobr seeders m_th_right"><?= $headerIcons->emit('seeders') ?></td>
+            <td class="sign nobr leechers m_th_right"><?= $headerIcons->emit('leechers') ?></td>
         </tr>
 <?php
     $pageSize = 0;

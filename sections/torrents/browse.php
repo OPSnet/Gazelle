@@ -2,19 +2,18 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-$SortOrderMap = [];
-foreach (TorrentSearch::$SortOrders as $key => $val) {
-    $SortOrderMap[$key] = [$key, 'desc'];
-}
-
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = '';
-if (!empty($SortOrderMap[$SortOrder][1])) {
-    $OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-        ? $SortOrderMap[$SortOrder][1]
-        : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
-}
+$iconUri = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
+$imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
+$headerMap = [
+    'year'     => ['defaultSort' => 'desc', 'text' => 'Year'],
+    'time'     => ['defaultSort' => 'desc', 'text' => 'Time'],
+    'size'     => ['defaultSort' => 'desc', 'text' => 'Size'],
+    'snatched' => ['defaultSort' => 'desc', 'text' => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches')],
+    'seeders'  => ['defaultSort' => 'desc', 'text' => sprintf($imgTag, 'seeders', 'Seeders', 'Seeders')],
+    'leechers' => ['defaultSort' => 'desc', 'text' => sprintf($imgTag, 'leechers', 'Leechers', 'Leechers')],
+];
+$header = new SortableTableHeader('time', $headerMap);
+$headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $InfoHash = (!empty($_GET['searchstr'])) ? $_GET['searchstr'] : $_GET['groupname'];
@@ -88,7 +87,7 @@ if (isset($_GET['searchsubmit'])) {
 }
 
 $Page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
-$Search = new TorrentSearch($GroupResults, $OrderBy, $OrderWay, $Page, TORRENTS_PER_PAGE);
+$Search = new TorrentSearch($GroupResults, $header->getSortKey(), $header->getOrderDir(), $Page, TORRENTS_PER_PAGE);
 $Results = $Search->query($_GET);
 $Groups = $Search->get_groups();
 $RealNumResults = $NumResults = $Search->record_count();
@@ -451,18 +450,6 @@ die();
 $Pages = Format::get_pages($Page, $NumResults, TORRENTS_PER_PAGE);
 
 $bookmark = new \Gazelle\Bookmark;
-
-$header = new SortableTableHeader([
-    'year' => 'Year',
-    'time' => 'Time',
-    'size' => 'Size',
-], $SortOrder, $OrderWay);
-
-$headerIcons = new SortableTableHeader([
-    'snatched' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
-    'seeders'  => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
-    'leechers' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
-], $SortOrder, $OrderWay, ['asc' => '', 'desc' => '']);
 ?>
 
 <div class="linkbox"><?=$Pages?></div>
@@ -473,13 +460,13 @@ $headerIcons = new SortableTableHeader([
         <td class="small"></td>
 <?php    } ?>
         <td class="small cats_col"></td>
-        <td class="m_th_left m_th_left_collapsable nobr" width="100%">Name / <?= $header->emit('year', $SortOrderMap['year'][1]) ?></td>
+        <td class="m_th_left m_th_left_collapsable nobr" width="100%">Name / <?= $header->emit('year') ?></td>
         <td>Files</td>
-        <td class="nobr"><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
-        <td class="sign nobr snatches"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
-        <td class="sign nobr seeders"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
-        <td class="sign nobr leechers"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('time') ?></td>
+        <td class="nobr"><?= $header->emit('size') ?></td>
+        <td class="sign nobr snatches"><?= $headerIcons->emit('snatched') ?></td>
+        <td class="sign nobr seeders"><?= $headerIcons->emit('seeders') ?></td>
+        <td class="sign nobr leechers"><?= $headerIcons->emit('leechers') ?></td>
     </tr>
 <?php
 

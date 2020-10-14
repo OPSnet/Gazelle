@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 if (!isset($_GET['userid'])) {
     $userMan = new Gazelle\Manager\User;
     $UserCount = $userMan->getEnabledUsersCount();
@@ -29,21 +27,18 @@ $DB->prepared_query('
 );
 $Pending = $DB->to_array();
 
-$SortOrderMap = [
-    'username'   => ['um.Username', 'desc'],
-    'email'      => ['um.Email', 'desc'],
-    'joined'     => ['ui.JoinDate', 'desc'],
-    'lastseen'   => ['ula.last_access', 'desc'],
-    'uploaded'   => ['uls.Uploaded', 'desc'],
-    'downloaded' => ['uls.Downloaded', 'desc'],
-    'ratio'      => ['(uls.Uploaded / uls.Downloaded)', 'desc'],
-    'id'         => ['um.ID', 'desc'],
-];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'joined';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+$header = new \Gazelle\Util\SortableTableHeader('joined', [
+    'id'         => ['dbColumn' => 'um.ID',           'defaultSort' => 'desc'],
+    'username'   => ['dbColumn' => 'um.Username',     'defaultSort' => 'desc', 'text' => 'Username'],
+    'email'      => ['dbColumn' => 'um.Email',        'defaultSort' => 'desc', 'text' => 'Email'],
+    'joined'     => ['dbColumn' => 'ui.JoinDate',     'defaultSort' => 'desc', 'text' => 'Joined'],
+    'lastseen'   => ['dbColumn' => 'ula.last_access', 'defaultSort' => 'desc', 'text' => 'Last Seen'],
+    'uploaded'   => ['dbColumn' => 'uls.Uploaded',    'defaultSort' => 'desc', 'text' => 'Uploaded'],
+    'downloaded' => ['dbColumn' => 'uls.Downloaded',  'defaultSort' => 'desc', 'text' => 'Downloaded'],
+    'ratio'      => ['dbColumn' => '(uls.Uploaded / uls.Downloaded)', 'defaultSort' => 'desc', 'text' => 'Ratio'],
+]);
+$OrderBy = $header->getOrderBy();
+$OrderDir = $header->getOrderDir();
 
 $DB->prepared_query("
     SELECT
@@ -58,7 +53,7 @@ $DB->prepared_query("
     INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
     INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
     WHERE ui.Inviter = ?
-    ORDER BY $OrderBy $OrderWay
+    ORDER BY $OrderBy $OrderDir
     ", $UserID
 );
 $Invited = $DB->to_array();
@@ -170,29 +165,18 @@ if (!empty($Pending)) {
     } ?>
         </table>
     </div>
-<?php
-}
-$header = new SortableTableHeader([
-    'username'   => 'Username',
-    'email'      => 'Email',
-    'joined'     => 'Joined',
-    'lastseen'   => 'Last Seen',
-    'uploaded'   => 'Uploaded',
-    'downloaded' => 'Downloaded',
-    'ratio'      => 'Ratio',
-], $SortOrder, $OrderWay);
-?>
+<?php } ?>
     <h3>Invitee list</h3>
     <div class="box pad">
         <table class="invite_table m_table "width="100%">
             <tr class="colhead">
-                <td class="m_th_left nobr"><?= $header->emit('username', $SortOrderMap['username'][1]) ?></td>
-                <td class="nobr"><?= $header->emit('email', $SortOrderMap['email'][1]) ?></td>
-                <td class="nobr"><?= $header->emit('joined', $SortOrderMap['joined'][1]) ?></td>
-                <td class="nobr"><?= $header->emit('lastseen', $SortOrderMap['lastseen'][1]) ?></td>
-                <td class="m_th_right nobr"><?= $header->emit('uploaded', $SortOrderMap['uploaded'][1]) ?></td>
-                <td class="m_th_right nobr"><?= $header->emit('downloaded', $SortOrderMap['downloaded'][1]) ?></td>
-                <td class="m_th_right nobr"><?= $header->emit('ratio', $SortOrderMap['ratio'][1]) ?></td>
+                <td class="m_th_left nobr"><?= $header->emit('username') ?></td>
+                <td class="nobr"><?= $header->emit('email') ?></td>
+                <td class="nobr"><?= $header->emit('joined') ?></td>
+                <td class="nobr"><?= $header->emit('lastseen') ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('uploaded') ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('downloaded') ?></td>
+                <td class="m_th_right nobr"><?= $header->emit('ratio') ?></td>
             </tr>
 <?php
 $Row = 'a';

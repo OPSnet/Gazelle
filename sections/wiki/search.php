@@ -1,8 +1,5 @@
 <?php
 
-use Cake\Collection\Iterator\SortIterator;
-use Gazelle\Util\SortableTableHeader;
-
 if (empty($_GET['nojump'])) {
     $ArticleID = Wiki::alias_to_id($_GET['search']);
     if ($ArticleID) {
@@ -15,16 +12,13 @@ if (empty($_GET['nojump'])) {
 define('ARTICLES_PER_PAGE', 25);
 list($Page, $Limit) = Format::page_limit(ARTICLES_PER_PAGE);
 
-$SortOrderMap = [
-    'title'   => ['Title', 'asc'],
-    'created' => ['ID', 'desc'],
-    'edited'  => ['Date', 'desc'],
-];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+$header = new \Gazelle\Util\SortableTableHeader('created', [
+    'created' => ['dbColumn' => 'ID',    'defaultSort' => 'desc'],
+    'title'   => ['dbColumn' => 'Title', 'defaultSort' => 'asc',  'text' => 'Article'],
+    'edited'  => ['dbColumn' => 'Date',  'defaultSort' => 'desc', 'text' => 'Last updated on'],
+]);
+$OrderBy = $header->getOrderBy();
+$OrderDir = $header->getOrderDir();
 
 $TypeMap = [
     'title' => 'Title',
@@ -54,7 +48,7 @@ if ($Search != '') {
 }
 
 $SQL .= "
-    ORDER BY $OrderBy $OrderWay
+    ORDER BY $OrderBy $OrderDir
     LIMIT $Limit ";
 $RS = $DB->query($SQL);
 $DB->query("
@@ -118,16 +112,11 @@ $DB->set_query_id($RS);
     <div class="linkbox pager"><?=($Pages)?></div>
 <?php
     }
-
-$header = new SortableTableHeader([
-    'title'  => 'Article',
-    'edited' => 'Last updated on',
-], $SortOrder, $OrderWay);
 ?>
 <table width="100%">
     <tr class="colhead">
-        <td class="nobr"><?= $header->emit('title', $SortOrderMap['title'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('edited', $SortOrderMap['edited'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('title') ?></td>
+        <td class="nobr"><?= $header->emit('edited') ?></td>
         <td>Last edited by</td>
     </tr>
 <?php

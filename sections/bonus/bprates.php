@@ -1,28 +1,21 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
-$page = !empty($_GET['page']) ? intval($_GET['page']) : 1;
+$page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
 $page = max(1, $page);
 $limit = TORRENTS_PER_PAGE;
 $offset = TORRENTS_PER_PAGE * ($page-1);
 
-$sortOrderMap =  [
-    'size'          => ['t.Size',        'desc'],
-    'seeders'       => ['Seeders',       'desc'],
-    'seedtime'      => ['SeedTime',      'desc'],
-    'hourlypoints'  => ['HourlyPoints',  'desc'],
-    'dailypoints'   => ['DailyPoints',   'desc'],
-    'weeklypoints'  => ['WeeklyPoints',  'desc'],
-    'monthlypoints' => ['MonthlyPoints', 'desc'],
-    'yearlypoints'  => ['YearlyPoints',  'desc'],
-    'pointspergb'   => ['PointsPerGB',   'desc'],
-];
-$sortOrder = (!empty($_GET['order']) && isset($sortOrderMap[$_GET['order']])) ? $_GET['order'] : 'hourlypoints';
-$orderBy = $sortOrderMap[$sortOrder][0];
-$orderWay = (empty($_GET['sort']) || $_GET['sort'] == $sortOrderMap[$sortOrder][1])
-    ? $sortOrderMap[$sortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$sortOrderMap[$sortOrder][1]];
+$header = new \Gazelle\Util\SortableTableHeader('hourlypoints', [
+    'size'          => ['dbColumn' => 't.Size',        'defaultSort' => 'desc', 'text' => 'Size'],
+    'seeders'       => ['dbColumn' => 'Seeders',       'defaultSort' => 'desc', 'text' => 'Seeders'],
+    'seedtime'      => ['dbColumn' => 'SeedTime',      'defaultSort' => 'desc', 'text' => 'Seedtime'],
+    'hourlypoints'  => ['dbColumn' => 'HourlyPoints',  'defaultSort' => 'desc', 'text' => 'BP/hour'],
+    'dailypoints'   => ['dbColumn' => 'DailyPoints',   'defaultSort' => 'desc', 'text' => 'BP/day'],
+    'weeklypoints'  => ['dbColumn' => 'WeeklyPoints',  'defaultSort' => 'desc', 'text' => 'BP/week'],
+    'monthlypoints' => ['dbColumn' => 'MonthlyPoints', 'defaultSort' => 'desc', 'text' => 'BP/month'],
+    'yearlypoints'  => ['dbColumn' => 'YearlyPoints',  'defaultSort' => 'desc', 'text' => 'BP/year'],
+    'pointspergb'   => ['dbColumn' => 'PointsPerGB',   'defaultSort' => 'desc', 'text' => 'BP/GB/year'],
+]);
 
 if (!empty($_GET['userid'])) {
     if (!check_perms('admin_bp_history')) {
@@ -94,39 +87,27 @@ $pages = Format::get_pages($page, $totalTorrents, TORRENTS_PER_PAGE);
 <div class="linkbox">
     <?=$pages?>
 </div>
-<?php
-$header = new SortableTableHeader([
-    'size'          => 'Size',
-    'seeders'       => 'Seeders',
-    'seedtime'      => 'Seedtime',
-    'hourlypoints'  => 'BP/hour',
-    'dailypoints'   => 'BP/day',
-    'weeklypoints'  => 'BP/week',
-    'monthlypoints' => 'BP/month',
-    'yearlypoints'  => 'BP/year',
-    'pointspergb'   => 'BP/GB/year',
-], $sortOrder, $orderWay);
-?>
 <table>
     <thead>
     <tr class="colhead">
         <td>Torrent</td>
-        <td class="nobr number_column"><?= $header->emit('size',          $sortOrderMap['size'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('seeders',       $sortOrderMap['seeders'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('seedtime',      $sortOrderMap['seedtime'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('hourlypoints',  $sortOrderMap['hourlypoints'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('dailypoints',   $sortOrderMap['dailypoints'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('weeklypoints',  $sortOrderMap['weeklypoints'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('monthlypoints', $sortOrderMap['monthlypoints'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('yearlypoints',  $sortOrderMap['yearlypoints'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('pointspergb',   $sortOrderMap['pointspergb'][1]) ?></td>
+        <td class="nobr number_column"><?= $header->emit('size') ?></td>
+        <td class="nobr"><?= $header->emit('seeders') ?></td>
+        <td class="nobr"><?= $header->emit('seedtime') ?></td>
+        <td class="nobr"><?= $header->emit('hourlypoints') ?></td>
+        <td class="nobr"><?= $header->emit('dailypoints') ?></td>
+        <td class="nobr"><?= $header->emit('weeklypoints') ?></td>
+        <td class="nobr"><?= $header->emit('monthlypoints') ?></td>
+        <td class="nobr"><?= $header->emit('yearlypoints') ?></td>
+        <td class="nobr"><?= $header->emit('pointspergb') ?></td>
     </tr>
     </thead>
     <tbody>
 <?php
 
 if ($totalTorrents) {
-    list($groupIDs, $torrentStats) = $Bonus->userDetails($userId, $orderBy, $orderWay, $limit, $offset);
+    [$groupIDs, $torrentStats] = $Bonus->userDetails($userId, $header->getOrderBy(), $header->getOrderDir(),
+        $limit, $offset);
     $groups = Torrents::get_groups($groupIDs, true, true, false);
     foreach ($torrentStats as $stats) {
         $groupId = $stats['GroupID'];

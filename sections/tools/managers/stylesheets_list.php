@@ -1,22 +1,17 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 if (!check_perms('admin_manage_stylesheets')) {
     error(403);
 }
 
-$SortOrderMap = [
-    'id'      => ['s.ID', 'asc'],
-    'name'    => ['s.Name', 'asc'],
-    'enabled' => ['ui_count', 'desc'],
-    'total'   => ['ud_count', 'desc'],
-];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'id';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+$header = new \Gazelle\Util\SortableTableHeader('id', [
+    'id'      => ['dbColumn' => 's.ID',     'defaultSort' => 'asc'],
+    'name'    => ['dbColumn' => 's.Name',   'defaultSort' => 'asc',  'text' => 'Name'],
+    'enabled' => ['dbColumn' => 'ui_count', 'defaultSort' => 'desc', 'text' => 'Enabled Users'],
+    'total'   => ['dbColumn' => 'ud_count', 'defaultSort' => 'desc', 'text' => 'Total Users'],
+]);
+$OrderBy = $header->getOrderBy();
+$OrderDir = $header->getOrderDir();
 
 View::show_header('Manage Stylesheets');
 ?>
@@ -42,22 +37,16 @@ View::show_header('Manage Stylesheets');
     LEFT JOIN (
         SELECT StyleID, COUNT(*) AS Count FROM users_info AS ui JOIN users_main AS um ON ui.UserID = um.ID GROUP BY StyleID
     ) AS ud ON s.ID = ud.StyleID
-    ORDER BY $OrderBy $OrderWay");
+    ORDER BY $OrderBy $OrderDir");
 
-    if ($DB->has_results()) {
-        $header = new SortableTableHeader([
-            'name'    => 'Name',
-            'enabled' => 'Enabled Users',
-            'total'   => 'Total Users',
-        ], $SortOrder, $OrderWay);
-        ?>
+    if ($DB->has_results()) { ?>
         <table width="100%">
             <tr class="colhead">
-                <td><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
+                <td><?= $header->emit('name') ?></td>
                 <td>Description</td>
                 <td>Default</td>
-                <td><?= $header->emit('enabled', $SortOrderMap['enabled'][1]) ?></td>
-                <td><?= $header->emit('total', $SortOrderMap['total'][1]) ?></td>
+                <td><?= $header->emit('enabled') ?></td>
+                <td><?= $header->emit('total') ?></td>
             </tr>
             <?php
             while (list($ID, $Name, $Description, $Default, $EnabledCount, $TotalCount) = $DB->next_record(MYSQLI_NUM, [1, 2])) { ?>

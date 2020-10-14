@@ -1,23 +1,16 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 define('COLLAGES_PER_PAGE', 25);
 
 [$Page, $Limit] = Format::page_limit(COLLAGES_PER_PAGE);
 
-$SortOrderMap = [
-    'time'        => ['ID', 'desc'],
-    'name'        => ['c.Name', 'asc'],
-    'subscribers' => ['c.Subscribers', 'desc'],
-    'torrents'    => ['c.NumTorrents', 'desc'],
-    'updated'     => ['c.Updated', 'desc'],
-];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+$header = new \Gazelle\Util\SortableTableHeader('time', [
+    'time'        => ['dbColumn' => 'ID',            'defaultSort' => 'desc', 'text' => 'Created'],
+    'name'        => ['dbColumn' => 'c.Name',        'defaultSort' => 'asc',  'text' => 'Collage'],
+    'subscribers' => ['dbColumn' => 'c.Subscribers', 'defaultSort' => 'desc', 'text' => 'Subscribers'],
+    'torrents'    => ['dbColumn' => 'c.NumTorrents', 'defaultSort' => 'desc', 'text' => 'Entries'],
+    'updated'     => ['dbColumn' => 'c.Updated',     'defaultSort' => 'desc', 'text' => 'Updated'],
+]);
 
 $tagMan = new \Gazelle\Manager\Tag;
 if (!empty($_GET['tags'])) {
@@ -115,6 +108,8 @@ $NumResults = $DB->scalar("
     SELECT count(*) FROM $From
     ", ...$Args
 );
+$OrderBy = $header->getOrderBy();
+$OrderDir = $header->getOrderDir();
 $DB->prepared_query("
     SELECT
     c.ID,
@@ -126,7 +121,7 @@ $DB->prepared_query("
     c.Subscribers,
     c.Updated
     FROM $From
-    ORDER BY $OrderBy $OrderWay LIMIT $Limit
+    ORDER BY $OrderBy $OrderDir LIMIT $Limit
     ", ...$Args
 );
 $Collages = $DB->to_array();
@@ -288,23 +283,14 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
 <?php   View::show_footer();
         die();
     }
-
-$header = new SortableTableHeader([
-    'time'        => 'Created',
-    'name'        => 'Collage',
-    'subscribers' => 'Subscribers',
-    'torrents'    => 'Entries',
-    'updated'     => 'Updated',
-], $SortOrder, $OrderWay);
-
 ?>
 <table width="100%" class="collage_table m_table">
     <tr class="colhead">
         <td class="m_th_left">Category</td>
-        <td class="nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?> / <?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
-        <td class="m_th_right nobr"><?= $header->emit('torrents', $SortOrderMap['torrents'][1]) ?></td>
-        <td class="m_th_right nobr"><?= $header->emit('subscribers', $SortOrderMap['subscribers'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('updated', $SortOrderMap['updated'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('name') ?> / <?= $header->emit('time') ?></td>
+        <td class="m_th_right nobr"><?= $header->emit('torrents') ?></td>
+        <td class="m_th_right nobr"><?= $header->emit('subscribers') ?></td>
+        <td class="nobr"><?= $header->emit('updated') ?></td>
         <td>Author</td>
     </tr>
 <?php

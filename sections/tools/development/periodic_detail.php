@@ -3,7 +3,7 @@ if (!check_perms('admin_periodic_task_view')) {
     error(403);
 }
 
-$id = (int)$_GET['id'] ?? 0;
+$id = (int) ($_GET['id'] ?? 0);
 if (!$id) {
     error(0);
 }
@@ -16,10 +16,16 @@ if (!$scheduler->getTask($id)) {
 define('TASKS_PER_PAGE', 100);
 list($page, $limit, $offset) = \Gazelle\DB::pageLimit(TASKS_PER_PAGE);
 
-$sort = in_array($_GET['order'] ?? '', ['id', 'launchtime', 'status', 'errors', 'items', 'duration']) ? $_GET['order'] : 'launchtime';
-$orderWay = in_array($_GET['sort'] ?? '', ['asc', 'desc']) ? $_GET['sort'] : 'desc';
+$header = new \Gazelle\Util\SortableTableHeader('launchtime', [
+    'id'         => ['defaultSort' => 'desc'],
+    'launchtime' => ['defaultSort' => 'desc',  'text' => 'Launch Time'],
+    'duration'   => ['defaultSort' => 'desc',  'text' => 'Duration'],
+    'status'     => ['defaultSort' => 'desc',  'text' => 'Status'],
+    'items'      => ['defaultSort' => 'desc',  'text' => 'Processed'],
+    'errors'     => ['defaultSort' => 'desc',  'text' => 'Errors']
+]);
 
-$task = $scheduler->getTaskHistory($id, $limit, $offset, $sort, $orderWay);
+$task = $scheduler->getTaskHistory($id, $limit, $offset, $header->getSortKey(), $header->getOrderDir());
 $stats = $scheduler->getTaskRuntimeStats($id);
 $canEdit = check_perms('admin_periodic_task_manage');
 
@@ -29,15 +35,7 @@ View::show_header('Periodic Task Details');
 <h2>Periodic Task Details - <?=$task->name?></h2>
 </div>
 <?php include(__DIR__ . '/periodic_links.php');
-if ($task->count > 0) {
-    $header = new \Gazelle\Util\SortableTableHeader([
-        'launchtime' => 'Launch Time',
-        'duration'   => 'Duration',
-        'status'     => 'Status',
-        'items'      => 'Processed',
-        'errors'     => 'Errors'
-    ], $sort, $orderWay);
-?>
+if ($task->count > 0) { ?>
 <br />
 <div class="box pad">
     <div id="daily-totals" style="width: 100%; height: 350px;"></div>
@@ -47,11 +45,11 @@ if ($task->count > 0) {
 </div>
 <table width="100%" id="tasks">
     <tr class="colhead">
-        <td><?=$header->emit('launchtime', 'desc')?> <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
-        <td><?=$header->emit('duration', 'desc')?></td>
-        <td width="10%"><?=$header->emit('status', 'desc')?></td>
-        <td width="10%"><?=$header->emit('items', 'desc')?></td>
-        <td width="10%"><?=$header->emit('errors', 'desc')?></td>
+        <td><?=$header->emit('launchtime')?> <a href="#" onclick="$('#tasks .reltime').gtoggle(); $('#tasks .abstime').gtoggle(); return false;" class="brackets">Toggle</a></td>
+        <td><?=$header->emit('duration')?></td>
+        <td width="10%"><?=$header->emit('status')?></td>
+        <td width="10%"><?=$header->emit('items')?></td>
+        <td width="10%"><?=$header->emit('errors')?></td>
     </tr>
 <?php
     foreach ($task->items as $item) {

@@ -1,29 +1,20 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 $SphQL = new SphinxqlQuery();
 $SphQL->select('id, votes, bounty')->from('requests, requests_delta');
 
-$SortOrderMap = [
-    'votes'    => ['votes', 'desc'],
-    'bounty'   => ['bounty', 'desc'],
-    'lastvote' => ['lastvote', 'desc'],
-    'filled'   => ['timefilled', 'desc'],
-    'year'     => ['year', 'desc'],
-    'created'  => ['timeadded', 'desc'],
-    'random'   => ['RAND()', ''],
-];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = '';
-if (!empty($SortOrderMap[$SortOrder][1])) {
-    $OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-        ? $SortOrderMap[$SortOrder][1]
-        : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
-}
+$header = new \Gazelle\Util\SortableTableHeader('created', [
+    'year'     => ['dbColumn' => 'year',       'defaultSort' => 'desc', 'text' => 'Year'],
+    'votes'    => ['dbColumn' => 'votes',      'defaultSort' => 'desc', 'text' => 'Votes'],
+    'bounty'   => ['dbColumn' => 'bounty',     'defaultSort' => 'desc', 'text' => 'Bounty'],
+    'filled'   => ['dbColumn' => 'timefilled', 'defaultSort' => 'desc', 'text' => 'Filled'],
+    'created'  => ['dbColumn' => 'timeadded',  'defaultSort' => 'desc', 'text' => 'Created'],
+    'lastvote' => ['dbColumn' => 'lastvote',   'defaultSort' => 'desc', 'text' => 'Last Vote'],
+    'random'   => ['dbColumn' => 'RAND()',     'defaultSort' => ''],
+]);
+$OrderBy = $header->getOrderBy();
 
-$SphQL->order_by($OrderBy, $OrderWay);
+$SphQL->order_by($OrderBy, $header->getOrderDir());
 
 $Submitted = !empty($_GET['submit']);
 
@@ -514,31 +505,22 @@ View::show_header($Title, 'requests');
     </form>
 <?php        if (isset($PageLinks)) { ?>
     <div class="linkbox">
-        <?=    $PageLinks?>
+        <?= $PageLinks ?>
     </div>
-<?php        }
-$header = new SortableTableHeader([
-    'year'     => 'Year',
-    'votes'    => 'Votes',
-    'bounty'   => 'Bounty',
-    'filled'   => 'Filled',
-    'created'  => 'Created',
-    'lastvote' => 'Last Vote',
-], $SortOrder, $OrderWay);
-?>
+<?php        } ?>
     <table id="request_table" class="request_table border m_table" cellpadding="6" cellspacing="1" border="0" width="100%">
         <tr class="colhead_dark">
             <td style="width: 38%;" class="m_th_left nobr">
-                Request Name / <?= $header->emit('year', $SortOrderMap['year'][1]) ?>
+                Request Name / <?= $header->emit('year') ?>
             </td>
             <td class="m_th_right nobr">
-                <?= $header->emit('votes', $SortOrderMap['votes'][1]) ?>
+                <?= $header->emit('votes') ?>
             </td>
             <td class="m_th_right nobr">
-                <?= $header->emit('bounty', $SortOrderMap['bounty'][1]) ?>
+                <?= $header->emit('bounty') ?>
             </td>
             <td class="nobr">
-                <?= $header->emit('filled', $SortOrderMap['filled'][1]) ?>
+                <?= $header->emit('filled') ?>
             </td>
             <td class="nobr">
                 Filled by
@@ -547,10 +529,10 @@ $header = new SortableTableHeader([
                 Requested by
             </td>
             <td class="nobr">
-                <?= $header->emit('created', $SortOrderMap['created'][1]) ?>
+                <?= $header->emit('created') ?>
             </td>
             <td class="nobr">
-                <?= $header->emit('lastvote', $SortOrderMap['lastvote'][1]) ?>
+                <?= $header->emit('lastvote') ?>
             </td>
         </tr>
 <?php
