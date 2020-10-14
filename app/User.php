@@ -1517,7 +1517,7 @@ class User extends Base {
             ]
         ];
 
-        if (defined('RECOVERY_DB')) {
+        if (defined('RECOVERY_DB') && !empty(RECOVERY_DB)) {
             $criteria[ELITE_TM]['Extra'][SITE_NAME . ' Upload'] = [
                'Query' => sprintf("
                             SELECT uls.Uploaded + coalesce(b.Bounty, 0) - coalesce(ubl.final, 0)

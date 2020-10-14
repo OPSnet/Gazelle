@@ -327,7 +327,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Ratio: <?=Format::get_ratio_html($Uploaded, $Downloaded)?></li>
 <?php
     }
-    if ($OwnProfile || check_perms('users_mod')) {
+    if ((defined('RECOVERY_DB') && !empty(RECOVERY_DB)) && ($OwnProfile || check_perms('users_mod'))) {
         $recovered = $DB->scalar("
             SELECT final FROM users_buffer_log WHERE opsid = ?
             ", $UserID
