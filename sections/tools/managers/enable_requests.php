@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -17,18 +15,6 @@ View::show_header("Enable Requests", 'enable_requests');
 // Pagination
 $RequestsPerPage = 25;
 list($Page, $Limit) = Format::page_limit($RequestsPerPage);
-
-// How can things be ordered?
-$SortOrderMap = [
-    'submitted_timestamp' => ['uer.Timestamp', 'desc'],
-    'outcome'             => ['uer.Outcome', 'desc'],
-    'handled_timestamp'   => ['uer.HandledTimestamp', 'desc'],
-];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'submitted_timestamp';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
 
 $Where = [];
 $Joins = [];
@@ -91,6 +77,15 @@ if (!$ShowChecked || count($Where) == 0) {
     $Where[] = 'Outcome IS NULL';
 }
 
+// How can things be ordered?
+$header = new \Gazelle\Util\SortableTableHeader('submitted_timestamp', [
+    'submitted_timestamp' => ['dbColumn' => 'uer.Timestamp', 'defaultSort' => 'desc', 'text' => 'Age'],
+    'handled_timestamp'   => ['dbColumn' => 'uer.Outcome',   'defaultSort' => 'desc', 'text' => ($ShowChecked) ? ' / Checked Date' : ''],
+    'outcome'             => ['dbColumn' => 'uer.HandledTimestamp', 'defaultSort' => 'desc', 'text' => 'Outcome'],
+]);
+$OrderBy = $header->getOrderBy();
+$OrderDir = $header->getOrderDir();
+
 $QueryID = $DB->query("
     SELECT SQL_CALC_FOUND_ROWS
            uer.ID,
@@ -108,7 +103,7 @@ $QueryID = $DB->query("
     ".implode(' ', $Joins)."
     WHERE
     ".implode(' AND ', $Where)."
-    ORDER BY $OrderBy $OrderWay
+    ORDER BY $OrderBy $OrderDir
     LIMIT $Limit");
 
 $DB->query("SELECT FOUND_ROWS()");
@@ -234,12 +229,6 @@ if ($NumResults > 0) { ?>
 <?php
     $Pages = Format::get_pages($Page, $NumResults, $RequestsPerPage);
     echo $Pages;
-
-    $header = new SortableTableHeader([
-        'submitted_timestamp' => 'Age',
-        'handled_timestamp'   => ($ShowChecked) ? ' / Checked Date' : '',
-        'outcome'             => 'Outcome',
-    ], $SortOrder, $OrderWay);
 ?>
     </div>
     <table width="100%">
@@ -249,12 +238,12 @@ if ($NumResults > 0) { ?>
             <td class="nobr">Email Address</td>
             <td class="nobr">IP Address</td>
             <td class="nobr">User Agent</td>
-            <td class="nobr"><?= $header->emit('submitted_timestamp', $SortOrderMap['submitted_timestamp'][1]) ?></td>
+            <td class="nobr"><?= $header->emit('submitted_timestamp') ?></td>
             <td class="nobr">Ban Reason</td>
             <td class="nobr">Comment<?= $ShowChecked ? ' / Checked By' : ''?></td>
-            <td class="nobr">Submit<?= $header->emit('handled_timestamp', $SortOrderMap['handled_timestamp'][1]) ?></td>
+            <td class="nobr">Submit<?= $header->emit('handled_timestamp') ?></td>
 <?php   if ($ShowChecked) { ?>
-            <td><?= $header->emit('outcome', $SortOrderMap['outcome'][1]) ?></td>
+            <td><?= $header->emit('outcome') ?></td>
 <?php   } ?>
         </tr>
     <?php

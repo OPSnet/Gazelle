@@ -1,49 +1,30 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 if (!check_perms('site_database_specifics')) {
     error(403);
 }
 
 // View table definition
-if (!empty($_GET['table'])) {
-    if (preg_match('/([\w-]+)/', $_GET['table'], $match)) {
-        $DB->prepared_query('SHOW CREATE TABLE ' . $match[1]);
-        [,$definition] = $DB->next_record(MYSQLI_NUM, false);
-        header('Content-type: text/plain');
-        echo $definition;
-        exit;
-    }
+if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) {
+    $DB->prepared_query('SHOW CREATE TABLE ' . $match[1]);
+    [,$definition] = $DB->next_record(MYSQLI_NUM, false);
+    header('Content-type: text/plain');
+    echo $definition;
+    exit;
 }
 
-$SortOrderMap = [
-    'datafree' => ['data_free', 'desc', 'free space'],
-    'datasize' => ['data_length', 'desc', 'table size'],
-    'freeratio' => ['CASE WHEN data_length = 0 THEN 0 ELSE data_free / data_length END', 'desc', 'table bloat'],
-    'indexsize' => ['index_length', 'desc', 'index size'],
-    'name' => ['table_name', 'asc', 'name'],
-    'rows' => ['table_rows', 'desc', 'row counts'],
-    'rowsize' => ['avg_row_length', 'desc', 'mean row length'],
-    'totalsize' => ['total_length', 'desc', 'total table size'],
-];
-
-$SortOrder = $_GET['order'] ?? 'totalsize';
-$orderBy   = $SortOrderMap[$SortOrder][0];
-$orderWay  = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
-
-$header = new SortableTableHeader([
-    'datafree' => 'Free Size',
-    'datasize' => 'Data Size',
-    'freeratio' => 'Bloat %',
-    'indexsize' => 'Index Size',
-    'name' => 'Name',
-    'rows' => 'Rows',
-    'rowsize' => 'Row Size',
-    'totalsize' => 'Total Size',
-], $SortOrder, $orderWay);
+$header = new \Gazelle\Util\SortableTableHeader('totalsize', [
+    'datafree'  => ['dbColumn' => 'data_free',      'defaultSort' => 'desc', 'text' => 'Free Size',  'alt' => 'free space'],
+    'datasize'  => ['dbColumn' => 'data_length',    'defaultSort' => 'desc', 'text' => 'Data Size',  'alt' => 'table size'],
+    'freeratio' => ['dbColumn' => 'CASE WHEN data_length = 0 THEN 0 ELSE data_free / data_length END', 'defaultSort' => 'desc', 'text' => 'Bloat %', 'alt' => 'table bloat'],
+    'indexsize' => ['dbColumn' => 'index_length',   'defaultSort' => 'desc', 'text' => 'Index Size', 'alt' => 'index size'],
+    'name'      => ['dbColumn' => 'table_name',     'defaultSort' => 'asc',  'text' => 'Name',       'alt' => 'name'],
+    'rows'      => ['dbColumn' => 'table_rows',     'defaultSort' => 'desc', 'text' => 'Rows',       'alt' => 'row counts'],
+    'rowsize'   => ['dbColumn' => 'avg_row_length', 'defaultSort' => 'desc', 'text' => 'Row Size',   'alt' => 'mean row length'],
+    'totalsize' => ['dbColumn' => 'total_length',   'defaultSort' => 'desc', 'text' => 'Total Size', 'alt' => 'total table size'],
+]);
+$orderBy = $header->getOrderBy();
+$orderDir = $header->getOrderDir();
 
 $mode = $_GET['mode'] ?? 'show';
 switch($mode) {
@@ -73,22 +54,17 @@ $DB->prepared_query("
     FROM information_schema.tables
     WHERE table_schema = ? $where
     GROUP BY $tableColumn, engine
-    ORDER by $orderBy $orderWay
+    ORDER by $orderBy $orderDir
     ", SQLDB
 );
 $Tables = $DB->to_array('table_name', MYSQLI_ASSOC);
 
 $data = [];
 foreach ($Tables as $name => $info) {
-    switch ($SortOrder) {
-        case 'freeratio':
-            $data[$name] = round($info['data_length'] == 0 ? 0 : $info['data_free'] / $info['data_length'], 2);
-            break;
-        case 'totalsize':
-            $data[$name] = $info['total_length'];
-            break;
-        default:
-            $data[$name] = $info[$SortOrderMap[$SortOrder][0]];
+    if ($header->getSortKey() === 'freeratio') {
+        $data[$name] = round($info['data_length'] == 0 ? 0 : $info['data_free'] / $info['data_length'], 2);
+    } else {
+        $data[$name] = $info[$orderBy];
     }
 }
 
@@ -112,7 +88,7 @@ Highcharts.chart('statistics', {
         plotShadow: true,
     },
     title: {
-        text: '<?= SITE_NAME ?> database breakdown by <?= $SortOrderMap[$SortOrder][2] ?>',
+        text: '<?= SITE_NAME ?> database breakdown by <?= $header->current()['alt'] ?>',
         style: {
             color: '#c0c0c0',
         },
@@ -150,14 +126,14 @@ Highcharts.chart('statistics', {
 
 <table>
     <tr class="colhead" style="text-align:right">
-        <td style="text-align:left" class="nobr"><?= $header->emit('name', $SortOrderMap['name'][1]) ?></td>
-        <td style="text-align:right" class="nobr"><?= $header->emit('rows', $SortOrderMap['rows'][1]) ?></td>
-        <td style="text-align:right" class="nobr"><?= $header->emit('rowsize', $SortOrderMap['rowsize'][1]) ?></td>
-        <td style="text-align:right" class="nobr"><?= $header->emit('datasize', $SortOrderMap['datasize'][1]) ?></td>
-        <td style="text-align:right" class="nobr"><?= $header->emit('indexsize', $SortOrderMap['indexsize'][1]) ?></td>
-        <td style="text-align:right" class="nobr"><?= $header->emit('datafree', $SortOrderMap['datafree'][1]) ?></td>
-        <td style="text-align:right" class="nobr"><?= $header->emit('freeratio', $SortOrderMap['freeratio'][1]) ?></td>
-        <td style="text-align:right" class="nobr"><?= $header->emit('totalsize', $SortOrderMap['totalsize'][1]) ?></td>
+        <td style="text-align:left" class="nobr"><?= $header->emit('name') ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('rows') ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('rowsize') ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('datasize') ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('indexsize') ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('datafree') ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('freeratio') ?></td>
+        <td style="text-align:right" class="nobr"><?= $header->emit('totalsize') ?></td>
     </tr>
 <?php
 $TotalRows = 0;

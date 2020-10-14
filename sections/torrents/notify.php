@@ -9,19 +9,20 @@ if (!check_perms('site_torrents_notify')) {
 define('NOTIFICATIONS_PER_PAGE', 50);
 define('NOTIFICATIONS_MAX_SLOWSORT', 10000);
 
-$SortOrderMap = [
-    'time'     => ['unt.TorrentID', 'desc'],
-    'size'     => ['t.Size', 'desc'],
-    'snatched' => ['tls.Snatched', 'desc'],
-    'seeders'  => ['tls.Seeders', 'desc'],
-    'leechers' => ['tls.Leechers', 'desc'],
-    'year'     => ['tnt.Year', 'desc'],
+$iconUri = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
+$imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
+$headerMap = [
+    'year'     => ['dbColumn' => 'tnt.Year',      'defaultSort' => 'desc', 'text' => 'Year'],
+    'time'     => ['dbColumn' => 'unt.TorrentID', 'defaultSort' => 'desc', 'text' => 'Time'],
+    'size'     => ['dbColumn' => 't.Size',        'defaultSort' => 'desc', 'text' => 'Size'],
+    'snatched' => ['dbColumn' => 'tls.Snatched',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'snatched', 'Snatches', 'Snatches')],
+    'seeders'  => ['dbColumn' => 'tls.Seeders',   'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'seeders', 'Seeders', 'Seeders')],
+    'leechers' => ['dbColumn' => 'tls.Leechers',  'defaultSort' => 'desc', 'text' => sprintf($imgTag, 'leechers', 'Leechers', 'Leechers')],
 ];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'time';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
+$header = new SortableTableHeader('time', $headerMap);
+$OrderBy = $header->getOrderBy();
+$OrderDir = $header->getOrderDir();
+$headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
 if (!empty($_GET['filterid']) && is_number($_GET['filterid'])) {
     $FilterID = $_GET['filterid'];
@@ -79,7 +80,7 @@ if ($OrderBy == 'tnt.Year') {
     $DB->query("
         SELECT TorrentID, GroupID, UnRead, FilterID
         FROM temp_notify_torrents AS tnt
-        ORDER BY $OrderBy $OrderWay, GroupID $OrderWay
+        ORDER BY $OrderBy $OrderDir, GroupID $OrderDir
         LIMIT $Limit");
     $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 } else {
@@ -97,7 +98,7 @@ if ($OrderBy == 'tnt.Year') {
         ($FilterID
             ? " AND unt.FilterID = $FilterID"
             : '')."
-        ORDER BY $OrderBy $OrderWay
+        ORDER BY $OrderBy $OrderDir
         LIMIT $Limit");
     $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
     $DB->query('SELECT FOUND_ROWS()');
@@ -214,32 +215,20 @@ if (empty($Results)) {
     <a href="#" onclick="clearSelected(<?=$FilterID?>); return false;" class="brackets">Clear selected in filter</a>
     <a href="torrents.php?action=notify_clear_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Clear all old in filter</a>
     <a href="torrents.php?action=notify_catchup_filter&amp;filterid=<?=$FilterID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Mark all in filter as read</a>
-<?php   }
-$header = new SortableTableHeader([
-    'year' => 'Year',
-    'time' => 'Time',
-    'size' => 'Size',
-], $SortOrder, $OrderWay);
-
-$headerIcons = new SortableTableHeader([
-    'snatched' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/snatched.png" class="tooltip" alt="Snatches" title="Snatches" />',
-    'seeders'  => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/seeders.png" class="tooltip" alt="Seeders" title="Seeders" />',
-    'leechers' => '<img src="static/styles/' . $LoggedUser['StyleName'] . '/images/leechers.png" class="tooltip" alt="Leechers" title="Leechers" />',
-], $SortOrder, $OrderWay, ['asc' => '', 'desc' => '']);
-?>
+<?php   } ?>
 </div>
 <form class="manage_form" name="torrents" id="notificationform_<?=$FilterID?>" action="">
 <table class="torrent_table cats checkboxes border m_table">
     <tr class="colhead">
         <td style="text-align: center;"><input type="checkbox" name="toggle" onclick="toggleChecks('notificationform_<?=$FilterID?>', this, '.notify_box')" /></td>
         <td class="small cats_col"></td>
-        <td style="width: 100%;" class="nobr">Name<?=$TorrentCount <= NOTIFICATIONS_MAX_SLOWSORT ? ' / ' . $header->emit('year', $SortOrderMap['year'][1]) : ''?></td>
+        <td style="width: 100%;" class="nobr">Name<?=$TorrentCount <= NOTIFICATIONS_MAX_SLOWSORT ? ' / ' . $header->emit('year') : ''?></td>
         <td>Files</td>
-        <td class="nobr"><?= $header->emit('time', $SortOrderMap['time'][1]) ?></td>
-        <td class="nobr"><?= $header->emit('size', $SortOrderMap['size'][1]) ?></td>
-        <td class="sign nobr snatches"><?= $headerIcons->emit('snatched', $SortOrderMap['snatched'][1]) ?></td>
-        <td class="sign nobr seeders"><?= $headerIcons->emit('seeders', $SortOrderMap['seeders'][1]) ?></td>
-        <td class="sign nobr leechers"><?= $headerIcons->emit('leechers', $SortOrderMap['leechers'][1]) ?></td>
+        <td class="nobr"><?= $header->emit('time') ?></td>
+        <td class="nobr"><?= $header->emit('size') ?></td>
+        <td class="sign nobr snatches"><?= $headerIcons->emit('snatched') ?></td>
+        <td class="sign nobr seeders"><?= $headerIcons->emit('seeders') ?></td>
+        <td class="sign nobr leechers"><?= $headerIcons->emit('leechers') ?></td>
     </tr>
 <?php
         unset($FilterResults['FilterLabel']);

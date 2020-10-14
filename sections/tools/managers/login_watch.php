@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 if (!(check_perms('admin_login_watch') || check_perms('admin_manage_ipbans'))) {
     error(403);
 }
@@ -42,34 +40,21 @@ if (isset($clear)) {
     $nrClear = $watch->setClear($clear);
 }
 
-$sortOrderMap = [
-    'ipaddr'       => ['inet_aton(w.IP)', 'asc'],
-    'user'         => ['coalesce(um.username, w.capture)', 'asc'],
-    'last_attempt' => ['w.LastAttempt', 'desc'],
-    'banned_until' => ['w.BannedUntil', 'desc'],
-    'attempts'     => ['w.Attempts',    'desc'],
-    'bans'         => ['w.Bans',        'desc'],
-];
-$sortOrder = (!empty($_GET['order']) && isset($sortOrderMap[$_GET['order']])) ? $_GET['order'] : 'last_attempt';
-$orderBy = $sortOrderMap[$sortOrder][0];
-$orderWay = (empty($_GET['sort']) || $_GET['sort'] == $sortOrderMap[$sortOrder][1])
-    ? $sortOrderMap[$sortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$sortOrderMap[$sortOrder][1]];
-$headerInfo = new SortableTableHeader([
-    'ipaddr'       => 'IP',
-    'user'         => 'User',
-    'attempts'     => 'Attempts',
-    'bans'         => 'Bans',
-    'last_attempt' => 'Last Attempt',
-    'banned_until' => 'Login Forbidden',
-], $sortOrder, $orderWay);
+$headerInfo = new \Gazelle\Util\SortableTableHeader('last_attempt', [
+    'ipaddr'       => ['dbColumn' => 'inet_aton(w.IP)', 'defaultSort' => 'asc',  'text' => 'IP'],
+    'user'         => ['dbColumn' => 'coalesce(um.username, w.capture)', 'defaultSort' => 'asc', 'text' => 'User'],
+    'attempts'     => ['dbColumn' => 'w.Attempts',      'defaultSort' => 'desc', 'text' => 'Attempts'],
+    'bans'         => ['dbColumn' => 'w.Bans',          'defaultSort' => 'desc', 'text' => 'Bans'],
+    'last_attempt' => ['dbColumn' => 'w.LastAttempt',   'defaultSort' => 'desc', 'text' => 'Last Attempt'],
+    'banned_until' => ['dbColumn' => 'w.BannedUntil',   'defaultSort' => 'desc', 'text' => 'Login Forbidden'],
+]);
 
 $header = [];
-foreach (array_keys($sortOrderMap) as $column) {
-    $header[$column] = $headerInfo->emit($column, $sortOrderMap[$column][1]);
+foreach ($headerInfo->getAllSortKeys() as $column) {
+    $header[$column] = $headerInfo->emit($column);
 }
 
-$list = $watch->activeList($orderBy, $orderWay);
+$list = $watch->activeList($headerInfo->getOrderBy(), $headerInfo->getOrderDir());
 $resolve = isset($_REQUEST['resolve']);
 foreach ($list as &$attempt) {
     $attempt['dns'] = $resolve ? gethostbyaddr($attempt['ipaddr']) : $attempt['ipaddr'];

@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Util\SortableTableHeader;
-
 if (!check_perms('admin_manage_ipbans')) {
     error(403);
 }
@@ -29,25 +27,15 @@ if (isset($_POST['submit'])) {
 
 define('BANS_PER_PAGE', '50');
 
-$SortOrderMap = [
-    'fromip'     => ['i.FromIP',    'asc'],
-    'toip'       => ['i.ToIP',      'asc'],
-    'reason'     => ['i.Reason',    'asc'],
-    'username'   => ['um.Username', 'asc'],
-    'created'    => ['i.created',   'desc'],
-];
-$SortOrder = (!empty($_GET['order']) && isset($SortOrderMap[$_GET['order']])) ? $_GET['order'] : 'created';
-$OrderBy = $SortOrderMap[$SortOrder][0];
-$OrderWay = (empty($_GET['sort']) || $_GET['sort'] == $SortOrderMap[$SortOrder][1])
-    ? $SortOrderMap[$SortOrder][1]
-    : SortableTableHeader::SORT_DIRS[$SortOrderMap[$SortOrder][1]];
-$header = new SortableTableHeader([
-    'fromip'     => 'From',
-    'toip'       => 'To',
-    'reason'     => 'Reason',
-    'username'   => 'Added By',
-    'created'    => 'Date',
-], $SortOrder, $OrderWay);
+$header = new \Gazelle\Util\SortableTableHeader('created', [
+    'fromip'     => ['dbColumn' => 'i.FromIP',    'defaultSort' => 'asc',  'text' => 'From'],
+    'toip'       => ['dbColumn' => 'i.ToIP',      'defaultSort' => 'asc',  'text' => 'To'],
+    'reason'     => ['dbColumn' => 'i.Reason',    'defaultSort' => 'asc',  'text' => 'Reason'],
+    'username'   => ['dbColumn' => 'um.Username', 'defaultSort' => 'asc',  'text' => 'Added By'],
+    'created'    => ['dbColumn' => 'i.created',   'defaultSort' => 'desc', 'text' => 'Date'],
+]);
+$OrderBy = $header->getOrderBy();
+$OrderDir = $header->getOrderDir();
 
 $cond = [];
 $args = [];
@@ -65,7 +53,7 @@ $Results = $DB->scalar("SELECT count(*) $from", ...$args);
 [$Page, $Limit] = Format::page_limit(BANS_PER_PAGE);
 $PageLinks = Format::get_pages($Page, $Results, BANS_PER_PAGE, 11);
 
-$from .= " ORDER BY $OrderBy $OrderWay LIMIT " . $Limit;
+$from .= " ORDER BY $OrderBy $OrderDir LIMIT " . $Limit;
 $DB->prepared_query("SELECT i.ID, i.FromIP, i.ToIP, i.Reason, i.user_id, i.created, um.Username $from", ...$args);
 $banQ = $DB->get_query_id();
 
@@ -109,11 +97,13 @@ View::show_header('IP Address Bans');
 ?>
 <table width="100%">
     <tr class="colhead">
-        <td title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range."><?= $header->emit('fromip', $SortOrderMap['fromip'][1]) ?></td>
-        <td><?= $header->emit('toip', $SortOrderMap['toip'][1]) ?></td>
-        <td><?= $header->emit('reason', $SortOrderMap['reason'][1]) ?></td>
-        <td><?= $header->emit('username', $SortOrderMap['username'][1]) ?></td>
-        <td><?= $header->emit('created', $SortOrderMap['created'][1]) ?></td>
+        <td title="The IP addresses specified are &#42;inclusive&#42;. The left box is the beginning of the IP address range, and the right box is the end of the IP address range.">
+            <?= $header->emit('fromip') ?>
+        </td>
+        <td><?= $header->emit('toip') ?></td>
+        <td><?= $header->emit('reason') ?></td>
+        <td><?= $header->emit('username') ?></td>
+        <td><?= $header->emit('created') ?></td>
     </tr>
     <tr class="rowa">
         <form class="create_form" name="ban" action="" method="post">
