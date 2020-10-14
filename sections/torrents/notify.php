@@ -85,7 +85,7 @@ if ($OrderBy == 'tnt.Year') {
     $DB->prepared_query("
         SELECT TorrentID, GroupID, UnRead, FilterID
         FROM temp_notify_torrents AS tnt
-        ORDER BY $OrderBy $OrderWay, GroupID $OrderWay
+        ORDER BY $OrderBy $OrderDir, GroupID $OrderDir
         LIMIT $Limit
     ");
 } else {
@@ -106,7 +106,7 @@ if ($OrderBy == 'tnt.Year') {
             unt.FilterID,
             t.GroupID
         $from
-        ORDER BY $OrderBy $OrderWay
+        ORDER BY $OrderBy $OrderDir
         LIMIT $Limit
         ", ...$args
     );
