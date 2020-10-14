@@ -143,10 +143,6 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/managers/email_blacklist_alter.php');
         break;
 
-    case 'email_blacklist_search':
-        require(__DIR__ . '/managers/email_blacklist_search.php');
-        break;
-
     case 'dnu':
         require(__DIR__ . '/managers/dnu_list.php');
         break;

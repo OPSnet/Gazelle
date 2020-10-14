@@ -1,50 +1,50 @@
 <?php
-$Key = $_REQUEST['key'];
-$Type = $_REQUEST['type'];
 
-if (($Key != TRACKER_SECRET) || $_SERVER['REMOTE_ADDR'] != TRACKER_HOST) {
+if (
+       ($_SERVER['REMOTE_ADDR'] ?? '') !== TRACKER_HOST
+    || ($_REQUEST['key'] ?? '') !== TRACKER_SECRET
+    || ($_REQUEST['type'] ?? '') !== 'expiretoken'
+) {
     error(403);
 }
 
-switch ($Type) {
-    case 'expiretoken':
-        if (isset($_GET['tokens'])) {
-            $Tokens = explode(',', $_GET['tokens']);
-            if (empty($Tokens)) {
-                error(0);
-            }
-            $Cond = $UserIDs = [];
-            foreach ($Tokens as $Key => $Token) {
-                list($UserID, $TorrentID) = explode(':', $Token);
-                if (!is_number($UserID) || !is_number($TorrentID)) {
-                    continue;
-                }
-                $Cond[] = "(UserID = $UserID AND TorrentID = $TorrentID)";
-                $UserIDs[] = $UserID;
-            }
-            if (!empty($Cond)) {
-                $Query = "
-                    UPDATE users_freeleeches
-                    SET Expired = TRUE
-                    WHERE ".implode(" OR ", $Cond);
-                $DB->query($Query);
-                foreach ($UserIDs as $UserID) {
-                    $Cache->delete_value("users_tokens_$UserID");
-                }
-            }
-        } else {
-            $TorrentID = $_REQUEST['torrentid'];
-            $UserID = $_REQUEST['userid'];
-            if (!is_number($TorrentID) || !is_number($UserID)) {
-                error(403);
-            }
-            $DB->query("
-                UPDATE users_freeleeches
-                SET Expired = TRUE
-                WHERE UserID = $UserID
-                    AND TorrentID = $TorrentID");
-            $Cache->delete_value("users_tokens_$UserID");
+if (isset($_GET['tokens'])) {
+    $Tokens = explode(',', $_GET['tokens']);
+    if (empty($Tokens)) {
+        error(0);
+    }
+    $cond = [];
+    $args = [];
+    $ck = [];
+    foreach ($Tokens as $Token) {
+        [$UserID, $TorrentID] = array_map(function ($n) {return (int)$n;}, explode(':', $Token));
+        if (!$UserID || !$TorrentID) {
+            continue;
         }
-        break;
+        $cond[] = "(UserID = ? AND TorrentID = ?)";
+        $args = array_merge($args, [$UserID, $TorrentID]);
+        $ck[] = "users_tokens_$UserID";
+    }
+    if ($cond) {
+        $DB->prepared_query("
+            UPDATE users_freeleeches SET
+                Expired = TRUE
+            WHERE "
+            . implode(" OR ", $cond), ...$args
+        );
+        $Cache->deleteMulti($ck);
+    }
+} else {
+    $TorrentID = (int)$_REQUEST['torrentid'];
+    $UserID = (int)$_REQUEST['userid'];
+    if (!$TorrentID || !$UserID) {
+        error(403);
+    }
+    $DB->prepared_query("
+        UPDATE users_freeleeches SET
+            Expired = TRUE
+        WHERE UserID = ? AND TorrentID = ?
+        ", $UserID, $TorrentID
+    );
+    $Cache->delete_value("users_tokens_$UserID");
 }
-?>
