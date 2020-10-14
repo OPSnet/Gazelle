@@ -202,4 +202,4 @@ $artist->flushCache();
 $artist = new Gazelle\Artist($TargetArtistID);
 $artist->flushCache();
 
-header("Location: artist.php?id=$TargetArtistID");
+header("Location: artist.php?id={$TargetArtistID}");

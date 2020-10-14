@@ -512,13 +512,15 @@ if ($sections = $Artist->sections()) {
 
 $Collages = $Cache->get_value("artists_collages_$ArtistID");
 if (!is_array($Collages)) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT c.Name, c.NumTorrents, c.ID
         FROM collages AS c
-            JOIN collages_artists AS ca ON ca.CollageID = c.ID
-        WHERE ca.ArtistID = '$ArtistID'
+        INNER JOIN collages_artists AS ca ON (ca.CollageID = c.ID)
+        WHERE CategoryID = '7'
             AND Deleted = '0'
-            AND CategoryID = '7'");
+            AND ca.ArtistID = ?
+        ", $ArtistID
+    );
     $Collages = $DB->to_array();
     $Cache->cache_value("artists_collages_$ArtistID", $Collages, 3600 * 6);
 }

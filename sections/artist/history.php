@@ -1,17 +1,19 @@
 <?php
-if (!is_number($_GET['artistid'])) {
-    error(0);
-}
-$ArtistID = (int)$_GET['artistid'];
 
-$DB->query("
-    SELECT Name
-    FROM artists_group
-    WHERE ArtistID = $ArtistID");
-if (!$DB->has_results()) {
+$ArtistID = (int)$_GET['artistid'];
+if (!$ArtistID) {
     error(404);
 }
-list($Name) = $DB->next_record();
+
+$Name = $DB->scalar("
+    SELECT Name
+    FROM artists_group
+    WHERE ArtistID = ?
+    ", $ArtistID
+);
+if (!$Name) {
+    error(404);
+}
 
 View::show_header("Revision history for $Name");
 ?>

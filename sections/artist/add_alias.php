@@ -77,4 +77,4 @@ if (!$CloneAliasID) {
     ));
 }
 
-header("Location:" . ($_SERVER['HTTP_REFERER'] ?: "artist.php?action=edit&artistid={$ArtistID}"));
+header("Location:" . redirectUrl("artist.php?action=edit&artistid={$ArtistID}"));
