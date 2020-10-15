@@ -40,7 +40,7 @@ View::show_header('Tag Aliases');
 </div>
 <?php if (!is_null($action)) { ?>
 <div class="box pad center">
-    Result: <?= $action ?> <strong><? $result == 1 ? 'succeeded' : 'failed' ?></strong>.
+    Result: <?= $action ?> <strong><?= $result == 1 ? 'succeeded' : 'failed' ?></strong>.
 </div>
 <?php } ?>
 <table class="thin">
