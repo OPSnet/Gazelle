@@ -5,7 +5,7 @@ $(document).ready(function() {
     $('#donor_title_prefix_preview').text($('#donor_title_prefix').val().trim() + ' ');
     $('#donor_title_suffix_preview').text(' ' + $('#donor_title_suffix').val().trim());
 
-    if ($('#donor_title_comma').attr('checked')) {
+    if ($('#donor_title_comma').prop('checked')) {
         $('#donor_title_comma_preview').text('');
     } else {
         $('#donor_title_comma_preview').text(', ');

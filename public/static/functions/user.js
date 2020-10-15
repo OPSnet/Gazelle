@@ -149,7 +149,7 @@ function ToggleWarningAdjust(selector) {
 addDOMLoadEvent(ToggleIdenticons);
 function ToggleIdenticons() {
     var disableAvatars = $('#disableavatars');
-    if (disableAvatars.size()) {
+    if (disableAvatars.length) {
         var selected = disableAvatars[0].selectedIndex;
         if (selected == 2 || selected == 3) {
             $('#identicons').gshow();
