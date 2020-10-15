@@ -47,10 +47,10 @@ class Staff extends Base {
         ];
         $params = [$this->user['ID'], Permissions::get_level_cap(), $this->user['EffectiveClass']];
         [$classes] = Users::get_classes();
-        if (check_perms('users_mod')) {
+        if ($this->user['EffectiveClass'] >= $classes[MOD]['Level']) {
             $conditions[] = 'Level >= ?';
             $params[] = $classes[MOD]['Level'];
-        } elseif ($this->user['PermissionID'] === FORUM_MOD) {
+        } elseif ($this->user['EffectiveClass'] === $classes[FORUM_MOD]['Level']) {
             $conditions[] = 'Level >= ?';
             $params[] = $classes[FORUM_MOD]['Level'];
         }
