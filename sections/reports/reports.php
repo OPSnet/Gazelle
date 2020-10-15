@@ -95,7 +95,7 @@ View::show_header('Reports', 'bbcode,reports');
                     <td><strong><a href="<?=$Reference?>">Report #<?=$ReportID?></a></strong></td>
                     <td>
                         <strong><?=$Type['title']?></strong> was reported by <a href="user.php?id=<?=$UserID?>"><?=$UserName?></a> <?=time_diff($ReportedTime)?>
-                        <a href="reports.php?action=compose&amp;to=<?=$UserID?>&amp;reportid=<?=$ReportID?>&amp;type=<?=$Short?>&amp;thingid=<?=$ThingID?>" class="brackets">Contact</a>
+                        <a href="reports.php?action=compose&amp;toid=<?=$UserID?>&amp;reportid=<?=$ReportID?>&amp;type=<?=$Short?>&amp;thingid=<?=$ThingID?>" class="brackets">Contact</a>
                     </td>
                 </tr>
                 <tr>

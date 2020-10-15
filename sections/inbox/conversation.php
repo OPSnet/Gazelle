@@ -2,69 +2,69 @@
 
 use Gazelle\Inbox;
 
-$ConvID = $_GET['id'];
-if (!$ConvID || !is_number($ConvID)) {
+$ConvID = (int)$_GET['id'];
+if (!$ConvID) {
     error(404);
 }
 
-
 $UserID = $LoggedUser['ID'];
-$DB->query("
+[$InInbox, $InSentbox] = $DB->row("
     SELECT InInbox, InSentbox
     FROM pm_conversations_users
-    WHERE UserID = '$UserID'
-        AND ConvID = '$ConvID'");
-if (!$DB->has_results()) {
+    WHERE UserID = ?
+        AND ConvID = ?
+    ", $UserID, $ConvID
+);
+if (is_null($InInbox)) {
     error(403);
 }
-list($InInbox, $InSentbox) = $DB->next_record();
-
-
 
 if (!$InInbox && !$InSentbox) {
-
     error(404);
 }
 
 // Get information on the conversation
-$DB->query("
+[$Subject, $Sticky, $UnRead, $ForwardedID] = $DB->row("
     SELECT
         c.Subject,
         cu.Sticky,
         cu.UnRead,
         cu.ForwardedTo
     FROM pm_conversations AS c
-        JOIN pm_conversations_users AS cu ON c.ID = cu.ConvID
-    WHERE c.ID = '$ConvID'
-        AND UserID = '$UserID'");
-list($Subject, $Sticky, $UnRead, $ForwardedID) = $DB->next_record();
+    INNER JOIN pm_conversations_users AS cu ON (c.ID = cu.ConvID)
+    WHERE cu.UserID = ?
+        AND cu.ConvID = ?
+    ", $UserID, $ConvID
+);
 
-
-$DB->query("
+$DB->prepared_query("
     SELECT um.ID, Username
     FROM pm_messages AS pm
-        JOIN users_main AS um ON um.ID = pm.SenderID
-    WHERE pm.ConvID = '$ConvID'");
-
+    INNER JOIN users_main AS um ON (um.ID = pm.SenderID)
+    WHERE pm.ConvID = ?
+    ", $ConvID
+);
 $ConverstionParticipants = $DB->to_array();
 
+$Users = [
+    0 => ['UserStr' => 'System', 'Username' => 'System'],
+];
 foreach ($ConverstionParticipants as $Participant) {
     $PMUserID = (int)$Participant['ID'];
-    $Users[$PMUserID]['UserStr'] = Users::format_username($PMUserID, true, true, true, true);
-    $Users[$PMUserID]['Username'] = $Participant['Username'];
+    $Users[$PMUserID] = [
+        'UserStr' => Users::format_username($PMUserID, true, true, true, true),
+        'Username' => $Participant['Username'],
+    ];
 }
 
-$Users[0]['UserStr'] = 'System'; // in case it's a message from the system
-$Users[0]['Username'] = 'System';
-
-
 if ($UnRead == '1') {
-
-    $DB->query("
-        UPDATE pm_conversations_users
-        SET UnRead = '0'
-        WHERE ConvID = '$ConvID'
-            AND UserID = '$UserID'");
+    $DB->prepared_query("
+        UPDATE pm_conversations_users SET
+            UnRead = '0'
+        WHERE UserID = ?
+            AND ConvID = ?
+        ", $UserID, $ConvID
+    );
     // Clear the caches of the inbox and sentbox
     $Cache->decrement("inbox_new_$UserID");
 }
@@ -72,11 +72,13 @@ if ($UnRead == '1') {
 View::show_header("View conversation $Subject", 'comments,inbox,bbcode,jquery.validate,form_validate');
 
 // Get messages
-$DB->query("
+$DB->prepared_query("
     SELECT SentDate, SenderID, Body, ID
     FROM pm_messages
-    WHERE ConvID = '$ConvID'
-    ORDER BY ID");
+    WHERE ConvID = ?
+    ORDER BY ID
+    ",$ConvID
+);
 
 $Section = (isset($_GET['section']) && in_array($_GET['section'], array_keys(Inbox::SECTIONS)))
     ? $_GET['section']
@@ -92,7 +94,7 @@ $Sort = (isset($_GET['sort']) && $_GET['sort'] == 'unread') ? Inbox::UNREAD_FIRS
     </div>
 <?php
 
-while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) { ?>
+while ([$SentDate, $SenderID, $Body, $MessageID] = $DB->next_record()) { ?>
     <div class="box vertical_space">
         <div class="head" style="overflow: hidden;">
             <div style="float: left;">
@@ -111,14 +113,15 @@ while (list($SentDate, $SenderID, $Body, $MessageID) = $DB->next_record()) { ?>
     </div>
 <?php
 }
-$DB->query("
+$DB->prepared_query("
     SELECT UserID
     FROM pm_conversations_users
-    WHERE UserID != '{$LoggedUser['ID']}'
-        AND ConvID = '$ConvID'
-        AND (ForwardedTo = 0 OR ForwardedTo = UserID)");
+    WHERE ForwardedTo IN (0, UserID)
+        AND UserID != ?
+        AND ConvID = ?
+    ", $UserID, $ConvID
+);
 $ReceiverIDs = $DB->collect('UserID');
-
 
 if (!empty($ReceiverIDs) && (empty($LoggedUser['DisablePM']) || array_intersect($ReceiverIDs, array_keys($StaffIDs)))) {
 ?>
@@ -170,12 +173,11 @@ if (!empty($ReceiverIDs) && (empty($LoggedUser['DisablePM']) || array_intersect(
         </div>
     </form>
 <?php
-$DB->query("
-    SELECT SupportFor
-    FROM users_info
-    WHERE UserID = ".$LoggedUser['ID']);
-list($FLS) = $DB->next_record();
-if ((check_perms('users_mod') || $FLS != '') && (!$ForwardedID || $ForwardedID == $LoggedUser['ID'])) {
+$FLS = $DB->scalar("
+    SELECT SupportFor FROM users_info WHERE UserID = ?
+    ", $UserID
+);
+if ((check_perms('users_mod') || $FLS != '') && (!$ForwardedID || $ForwardedID == $UserID)) {
 ?>
     <h3>Forward conversation</h3>
     <form class="send_form" name="forward" action="inbox.php" method="post">
@@ -207,4 +209,3 @@ if ((check_perms('users_mod') || $FLS != '') && (!$ForwardedID || $ForwardedID =
 </div>
 <?php
 View::show_footer();
-?>

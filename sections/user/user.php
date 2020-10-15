@@ -181,7 +181,7 @@ list($ClassRatio, $Buffer) = $User->buffer();
 <?php
 if (!$OwnProfile) {
 ?>
-        <a href="inbox.php?action=compose&amp;to=<?=$UserID?>" class="brackets">Send message</a>
+        <a href="inbox.php?action=compose&amp;toid=<?=$UserID?>" class="brackets">Send message</a>
 <?php if (!$User->isFriend($LoggedUser['ID'])) { ?>
         <a href="friends.php?action=add&amp;friendid=<?=$UserID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Add to friends</a>
 <?php } ?>

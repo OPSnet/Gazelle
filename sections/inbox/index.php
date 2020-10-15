@@ -3,7 +3,7 @@ enforce_login();
 
 $StaffIDs = $Cache->get_value('staff_ids');
 if (!is_array($StaffIDs)) {
-    $DB->query("
+    $DB->prepared_query("
         SELECT m.ID, m.Username
         FROM users_main AS m
             JOIN permissions AS p ON p.ID=m.PermissionID

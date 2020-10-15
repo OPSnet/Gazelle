@@ -4,7 +4,7 @@ if (!check_perms('site_moderate_forums')) {
 }
 
 if (empty($Return)) {
-    $ToID = $_GET['to'];
+    $ToID = $_GET['toid'];
     if ($ToID == $LoggedUser['ID']) {
         error("You cannot start a conversation with yourself!");
         header('Location: inbox.php');
