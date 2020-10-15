@@ -33,21 +33,20 @@ class Collage extends \Gazelle\Base {
     }
 
     public function recoverById(int $id) {
-        return $this->recover(
-            $this->db->scalar("SELECT ID FROM collages WHERE ID = ?", $id)
-        );
+        $collageId = $this->db->scalar("SELECT ID FROM collages WHERE ID = ?", $id);
+        if ($collageId !== null) {
+            return $this->recover($collageId);
+        }
     }
 
     public function recoverByName(string $name) {
-        return $this->recover(
-            $this->db->scalar("SELECT ID FROM collages WHERE Name = ?", $name)
-        );
+        $collageId = $this->db->scalar("SELECT ID FROM collages WHERE Name = ?", $name);
+        if ($collageId !== null) {
+            return $this->recover($collageId);
+        }
     }
 
     protected function recover(int $id) {
-        if (!$id) {
-            return null;
-        }
         $this->db->prepared_query("
             UPDATE collages SET
                 Deleted = '0'
