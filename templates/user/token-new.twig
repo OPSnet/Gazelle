@@ -1,0 +1,26 @@
+{% if error %}
+<div class="box pad">
+    <div class="important">{{ error }}</div>
+</div>
+{% endif %}
+
+<div class="box pad">
+    <p>
+        Use this page to generate new API tokens. When the token is shown to you is the only time the token
+        will be visible, so be sure to copy it down. You, nor staff, will be able to view the value for
+        any previously generation token.
+        <br /><br />
+        <strong class="important_text">Treat your tokens like passwords and keep them secret.</strong>
+    </p>
+</div>
+
+<div class="box box2">
+    <form action="user.php?action=token&amp;do=generate&amp;user_id={{ id }}" method="POST">
+        <div class="pad">
+            Name: <input type='text' name='token_name' value='{{ token_name }}' required />
+        </div>
+        <div class="center pad">
+            <input type='submit' value='Generate' />
+        </div>
+    </form>
+</div>

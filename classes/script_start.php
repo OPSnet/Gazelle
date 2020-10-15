@@ -15,6 +15,7 @@ require_once(__DIR__ . '/config.php'); //The config contains all site wide confi
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Gazelle\Util\Crypto;
+use Gazelle\Util\Text;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
@@ -90,7 +91,7 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 G::$Twig->addFilter(new \Twig\TwigFilter(
     'bb_format',
     function ($text) {
-        return Text::full_format($text);
+        return \Text::full_format($text);
     }
 ));
 
@@ -174,7 +175,7 @@ $Debug->set_flag('start user handling');
 
 // Get classes
 // TODO: Remove these globals, replace by calls into Users
-list($Classes, $ClassLevels) = Users::get_classes();
+[$Classes, $ClassLevels] = Users::get_classes();
 
 //-- Load user information
 // User info is broken up into many sections
@@ -185,34 +186,93 @@ list($Classes, $ClassLevels) = Users::get_classes();
 // Enabled - if the user's enabled or not
 // Permissions
 
-if (isset($_COOKIE['session'])) {
-    $LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
-}
-if (isset($LoginCookie)) {
-    [$SessionID, $LoggedUser['ID']] = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
-    $LoggedUser['ID'] = (int)$LoggedUser['ID'];
+// Set the document we are loading
+$Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
 
-    if (!$LoggedUser['ID'] || !$SessionID) {
-        logout($LoggedUser['ID'], $SessionID);
+$LoggedUser = [];
+$SessionID = false;
+$FullToken = null;
+
+// Only allow using the Authorization header for ajax endpoint
+if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
+    if ((new \Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
+        header('Content-type: application/json');
+        json_die('error', 'your ip address has been banned');
     }
 
+    $AuthorizationHeader = explode(" ", (string) $_SERVER['HTTP_AUTHORIZATION']);
+    if (count($AuthorizationHeader) !== 2 || $AuthorizationHeader[0] !== 'token') {
+        header('Content-type: application/json');
+        json_die('error', 'invalid authorization type, must be "token"');
+    }
+    $FullToken = $AuthorizationHeader[1];
+    $Revoked = 1;
+
+    $UserId = (int) substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32);
+    if (!empty($UserId)) {
+        [$LoggedUser['ID'], $Revoked] = G::$DB->row('SELECT user_id, revoked FROM api_tokens WHERE user_id=? AND token=?', $UserId, $FullToken);
+    }
+
+    if (empty($LoggedUser['ID']) || $Revoked === 1) {
+        log_token_attempt(G::$DB);
+        header('Content-type: application/json');
+        json_die('error', 'invalid token');
+    }
+}
+
+$UserSessions = [];
+if (isset($_COOKIE['session'])) {
+    $LoginCookie = Crypto::decrypt($_COOKIE['session'], ENCKEY);
+    if ($LoginCookie !== false) {
+        [$SessionID, $LoggedUser['ID']] = explode('|~|', Crypto::decrypt($LoginCookie, ENCKEY));
+        $LoggedUser['ID'] = (int)$LoggedUser['ID'];
+
+        if (!$LoggedUser['ID'] || !$SessionID) {
+            logout($LoggedUser['ID'], $SessionID);
+        }
+
+        $Session = new Gazelle\Session($LoggedUser['ID']);
+        $UserSessions = $Session->sessions();
+        if (!array_key_exists($SessionID, $UserSessions)) {
+            logout($LoggedUser['ID'], $SessionID);
+        }
+    }
+}
+
+if (isset($LoggedUser['ID'])) {
     $User = new Gazelle\User($LoggedUser['ID']);
     $Session = new Gazelle\Session($LoggedUser['ID']);
 
-    $UserSessions = $Session->sessions();
-    if (!array_key_exists($SessionID, $UserSessions)) {
-        logout($LoggedUser['ID'], $SessionID);
+    if (!is_null($FullToken) && !$User->hasApiToken($FullToken)) {
+        log_token_attempt(G::$DB, $LoggedUser['ID']);
+        header('Content-type: application/json');
+        json_die('error', 'invalid token');
     }
 
     if ($User->isDisabled()) {
-        logout($LoggedUser['ID'], $SessionID);
+        if (is_null($FullToken)) {
+            logout($LoggedUser['ID'], $SessionID);
+        }
+        else {
+            log_token_attempt(G::$DB, $LoggedUser['ID']);
+            header('Content-type: application/json');
+            json_die('error', 'invalid token');
+        }
     }
 
     // TODO: These globals need to die, and just use $LoggedUser
     // TODO: And then instantiate $LoggedUser from Gazelle\Session when needed
     $LightInfo = Users::user_info($LoggedUser['ID']);
     if (empty($LightInfo['Username'])) { // Ghost
-        logout($LoggedUser['ID'], $SessionID);
+        if (!is_null($FullToken)) {
+            $User->flushCache();
+            log_token_attempt(G::$DB, $LoggedUser['ID']);
+            header('Content-type: application/json');
+            json_die('error', 'invalid token');
+        }
+        else {
+            logout($LoggedUser['ID'], $SessionID);
+        }
     }
 
     $HeavyInfo = Users::user_heavy_info($LoggedUser['ID']);
@@ -262,7 +322,7 @@ if (isset($LoginCookie)) {
     }
 
     // Update LastUpdate every 10 minutes
-    if (strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
+    if ($SessionID && strtotime($UserSessions[$SessionID]['LastUpdate']) + 600 < time()) {
         $userAgent = parse_user_agent($Debug);
         $Session->update([
             'ip-address'      => $_SERVER['REMOTE_ADDR'],
@@ -342,9 +402,8 @@ function logout($userId, $sessionId = false) {
         $session->drop($sessionId);
     }
 
-    G::$Cache->delete_value('user_info_' . $userId);
-    G::$Cache->delete_value('user_stats_' . $userId);
-    G::$Cache->delete_value('user_info_heavy_' . $userId);
+    $user = new Gazelle\User($userId);
+    $user->flushCache();
 
     header('Location: login.php');
     die();
@@ -364,8 +423,8 @@ function enforce_login() {
         header('Location: login.php');
         die();
     }
-    global $SessionID;
-    if (!$SessionID) {
+    global $SessionID, $FullToken, $Document;
+    if (!$SessionID && ($Document !== 'ajax' || empty($FullToken))) {
         setcookie('redirect', $_SERVER['REQUEST_URI'], time() + 60 * 30, '/', '', false);
         logout(G::$LoggedUser['ID']);
     }
@@ -400,12 +459,12 @@ function authorizeIfPost($Ajax = false) {
 
 $Debug->set_flag('ending function definitions');
 
-// load the appropriate /sections/*/index.php
-$Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
+// We cannot error earlier, as we need the user info for headers and stuff
 if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
     error(404);
 }
 
+// load the appropriate /sections/*/index.php
 $Cache->cache_value('php_' . getmypid(),
     [
         'start' => sqltime(),

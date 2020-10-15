@@ -14,6 +14,7 @@ enforce_login();
     e.g. array(5,10) = 5 requests every 10 seconds    */
 $AJAX_LIMIT = [5,10];
 $LimitedPages = ['tcomments','user','forum','top10','browse','usersearch','requests','artist','inbox','subscriptions','bookmarks','announcements','notifications','request','better','similar_artists','userhistory','votefavorite','wiki','torrentgroup','news_ajax','user_recents', 'collage', 'raw_bbcode'];
+$RequireTokenPages = [];
 
 $UserID = $LoggedUser['ID'];
 header('Content-Type: application/json; charset=utf-8');
@@ -24,10 +25,14 @@ if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && in_array($_GE
         $Cache->cache_value('ajax_requests_'.$UserID, '0', $AJAX_LIMIT[1]);
     }
     if ($UserRequests > $AJAX_LIMIT[0]) {
-        json_die("failure", "rate limit exceeded");
+        json_die("failure", "Rate limit exceeded");
     } else {
         $Cache->increment_value('ajax_requests_'.$UserID);
     }
+}
+
+if (is_null($Token) && in_array($_GET['action'], $RequireTokenPages)) {
+    json_die("error", "This page requires an api token");
 }
 
 switch ($_GET['action']) {

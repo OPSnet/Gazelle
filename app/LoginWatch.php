@@ -34,11 +34,11 @@ class LoginWatch extends Base {
     /**
      * Create a new login watch on an userid/username/ipaddress
      * @param string IPv4 address
-     * @param string $capture The username captured on the form
+     * @param string|null $capture The username captured on the form
      * @param int $userId
      * @return int ID of watch
      */
-    public function create(string $ipaddr, string $capture, int $userId = 0) {
+    public function create(string $ipaddr, ?string $capture, int $userId = 0) {
         $this->db->prepared_query("
             INSERT INTO login_attempts
                    (IP, capture, UserID)
@@ -58,7 +58,7 @@ class LoginWatch extends Base {
      * @param string $capture The username captured on the form
      * @return int 1 if the watch was updated
      */
-    public function increment(int $userId, string $ipaddr, string $capture): int {
+    public function increment(int $userId, string $ipaddr, ?string $capture): int {
         $seen = $this->db->scalar("
             SELECT 1
             FROM users_history_ips
@@ -88,7 +88,7 @@ class LoginWatch extends Base {
      * @param int $userId user ID of a valid user (or 0 if invalid username)
      * @return int 1 if the watch was banned
      */
-    public function ban(int $attempts, string $capture, int $userId = 0): int {
+    public function ban(int $attempts, ?string $capture, int $userId = 0): int {
         $this->db->prepared_query('
             UPDATE login_attempts SET
                 Bans = Bans + 1,
