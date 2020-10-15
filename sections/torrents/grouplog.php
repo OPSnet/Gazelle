@@ -30,7 +30,7 @@ $DB->prepared_query("
     ORDER BY Time DESC
     ", $GroupID
 );
-while ([$TorrentID, $UserID, $Info, $Time] = $db->next_record()) {
+while ([$TorrentID, $UserID, $Info, $Time] = $DB->next_record()) {
 ?>
         <tr class="rowa">
             <td><?=$Time?></td>
