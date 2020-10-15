@@ -1,10 +1,6 @@
 <?php
 
 enforce_login();
-$friendId = (int)$_REQUEST['friendid'];
-if (!$friendId) {
-    error(404);
-}
 
 switch ($_REQUEST['action'] ?? '') {
     case 'add':
