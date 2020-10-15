@@ -84,7 +84,7 @@ if (!empty($_GET['setdefault'])) {
 if (isset($_GET['searchsubmit'])) {
     $GroupResults = !empty($_GET['group_results']);
 } else {
-    $GroupResults = !$LoggedUser['TorrentGrouping'];
+    $GroupResults = !isset($LoggedUser['DisableGrouping2']) || $LoggedUser['DisableGrouping2'] == 0;
 }
 
 $Page = !empty($_GET['page']) ? (int) $_GET['page'] : 1;
@@ -524,7 +524,7 @@ foreach ($Results as $Key => $GroupID) {
         }
         $DisplayName .= ' ['.$ReleaseTypes[$ReleaseType].']';
 ?>
-    <tr class="group<?=$SnatchedGroupClass?>">
+    <tr class="group groupid_<?=$GroupID?>_header<?=$SnatchedGroupClass?>">
 <?php
 $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] == 1);
 ?>

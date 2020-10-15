@@ -218,7 +218,7 @@ foreach ($topVotes as $groupID => $group) {
         unset($torrent);
         $snatchedGroupClass = $groupSnatched ? ' snatched_group' : '';
 ?>
-                <tr class="group discog<?=$snatchedGroupClass?>" id="group_<?=$groupID?>">
+                <tr class="group groupid_<?=$groupID?>_header discog<?=$snatchedGroupClass?>" id="group_<?=$groupID?>">
                     <td class="center">
                         <div id="showimg_<?=$groupID?>" class="show_torrents">
                             <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?=$groupID?>, this, event);" title="Expand this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all groups on this page."></a>

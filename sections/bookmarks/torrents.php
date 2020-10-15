@@ -237,7 +237,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
         // Grouped torrents
         $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGrouping'] === 1);
         ?>
-        <tr class="group discog<?= $SnatchedGroupClass ?>" id="group_<?= $GroupID ?>">
+        <tr class="group groupid_<?=$GroupID?>_header discog<?= $SnatchedGroupClass ?>" id="group_<?= $GroupID ?>">
             <td class="td_collapse m_td_left center">
                 <div id="showimg_<?= $GroupID ?>" class="<?= ($ShowGroups ? 'hide' : 'show') ?>_torrents">
                     <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $GroupID ?>, this, event);"

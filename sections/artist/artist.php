@@ -353,15 +353,16 @@ if ($sections = $Artist->sections()) {
 <?php
     $stylePath = SSL_STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images/';
 
+    $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 0) == 1 ? 1 : 0;
+
     foreach ($sections as $section => $Groups) {
         $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
-        $sectionClosed = isset($LoggedUser['SortHide']) && array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 0
+        $sectionClosed = !isset($LoggedUser['SortHide']) || (array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 0)
             ? 0 : 1;
-        $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 1) == 1 ? 1 : 0;
-        $formatsClosed = ($LoggedUser['DisableGrouping2'] ?? 1) == 1 ? 0 : 1;
+
         $sectionHidden = $sectionClosed ? ' hidden' : '';
         $groupsHidden = ($sectionClosed || $groupsClosed) ? ' hidden' : '';
-        $formatsHidden = ($sectionClosed || $groupsClosed || $formatsClosed) ? ' hidden' : '';
+
 ?>
                 <tr class="colhead_dark" id="torrents_<?= $sectionLabel ?>">
                     <td class="small"><!-- expand/collapse --></td>
@@ -421,7 +422,7 @@ if ($sections = $Artist->sections()) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 ?>
-            <tr class="releases_<?=$section?> group discog<?= $sectionHidden . ($isSnatched ? ' snatched_group' : '') ?>">
+            <tr class="releases_<?=$section?> group groupid_<?=$GroupID?>_header discog<?= $sectionHidden . ($isSnatched ? ' snatched_group' : '') ?>">
                     <td class="td_collapse center m_td_left">
                         <div id="showimg_<?=$GroupID?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
                             <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $GroupID ?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>
@@ -476,14 +477,14 @@ if ($sections = $Artist->sections()) {
                 $EditionID++;
 ?>
         <tr class="releases_<?= $section ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $groupsHidden ?>">
-            <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group."><?= $formatsClosed ? '+' : '&minus;' ?></a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
+            <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
         </tr>
 <?php
             }
             $prevEdition = $torrentEdition;
             $SnatchedTorrentClass = ($Torrent['IsSnatched'] ? ' snatched_torrent' : '');
 ?>
-        <tr class="releases_<?=$section?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $formatsHidden ?>">
+        <tr class="releases_<?=$section?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
             <td class="td_info" colspan="2">
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=$Torrent['HasFile'] ? 'DL' : 'Missing'?></a>
