@@ -6,7 +6,18 @@ if (!$torrentId) {
     error(404);
 }
 
-if ($LoggedUser['ID'] != $UserID && !check_perms('torrents_delete')) {
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setTorrentId($torrentId)
+    ->setViewer($LoggedUser['ID'])
+    ->setArtistDisplayText();
+
+[$group, $torrent] = $torMan->torrentInfo();
+
+if (!$torrent) {
+    error(404);
+}
+
+if ($LoggedUser['ID'] != $torrent['UserID'] && !check_perms('torrents_delete')) {
     error(403);
 }
 
@@ -19,13 +30,6 @@ if ($user->torrentRecentRemoveCount(USER_TORRENT_DELETE_HOURS) >= USER_TORRENT_D
     error('You have recently deleted ' . USER_TORRENT_DELETE_MAX
         . ' torrents. Please contact a staff member if you need to delete more.');
 }
-
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setTorrentId($torrentId)
-    ->setViewer($LoggedUser['ID'])
-    ->setArtistDisplayText();
-
-[$group, $torrent] = $torMan->torrentInfo();
 
 $labelMan = new Gazelle\Manager\TorrentLabel;
 $labelMan->showMedia(true)
