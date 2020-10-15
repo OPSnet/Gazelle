@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    if ($('#donor_title_prefix_preview').size() === 0) {
+    if ($('#donor_title_prefix_preview').length === 0) {
         return;
     }
     $('#donor_title_prefix_preview').text($('#donor_title_prefix').val().trim() + ' ');
