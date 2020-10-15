@@ -46,7 +46,7 @@ if ($siteLog->totalMatches() > LOG_ENTRIES_PER_PAGE) {
     <table cellpadding="6" cellspacing="1" border="0" class="log_table border" id="log_table" width="100%">
         <tr class="colhead">
             <td style="width: 180px;"><strong>Time</strong></td>
-            <td><strong>Message<? ($_GET['search'] ?? null) ? (' "' . $_GET['search'] . '"') : '' ?></strong></td>
+            <td><strong>Message<?= ($_GET['search'] ?? null) ? (' "' . $_GET['search'] . '"') : '' ?></strong></td>
         </tr>
 <?php if ($siteLog->error()) { ?>
     <tr class="nobr"><td colspan="2">Search request failed (<?= $siteLog->errorMessage() ?>).</td></tr>
