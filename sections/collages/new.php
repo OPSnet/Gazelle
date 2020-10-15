@@ -1,6 +1,7 @@
 <?php
 View::show_header('Create a collage');
 
+$ChangeJS = '';
 if (!check_perms('site_collages_renamepersonal')) {
     $ChangeJS = " onchange=\"if ( this.options[this.selectedIndex].value == '0') { $('#namebox').ghide(); $('#personal').gshow(); } else { $('#namebox').gshow(); $('#personal').ghide(); }\"";
 }

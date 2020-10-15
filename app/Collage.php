@@ -291,7 +291,7 @@ class Collage extends BaseObject {
      * @param int $userId id of user
      * @return int number of entries
      */
-    public function countByUser(string $table, int $userId): int {
+    public function countByUser(int $userId): int {
         return $this->contributors[$userId] ?? 0;
     }
 

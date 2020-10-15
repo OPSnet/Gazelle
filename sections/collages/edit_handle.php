@@ -43,14 +43,14 @@ $collage->setUpdate('Description', trim($_POST['description']))
 
 if (isset($_POST['featured'])
     && (
-        ($collage->isPersonal() && $collage->isOwner($LoggedUser['ID'])
+        ($collage->isPersonal() && $collage->isOwner($LoggedUser['ID']))
         || check_perms('site_collages_delete')
     )
 ) {
     $collage->setFeatured();
 }
 
-if (($collage->isPersonal() && $collage->isOwnwer($LoggedUser['ID']) && check_perms('site_collages_renamepersonal'))
+if (($collage->isPersonal() && $collage->isOwner($LoggedUser['ID']) && check_perms('site_collages_renamepersonal'))
     || check_perms('site_collages_delete')
 ) {
     $collage->setUpdate('Name', trim($_POST['name']));
