@@ -18,10 +18,10 @@ function clearSelected(filterId) {
         }
     }
     ajax.get("?action=notify_clear_items&torrentids=" + checkedBoxes.join(',') + "&auth=" + authkey, function() {
-            for (var i = checkedBoxes.length - 1; i >= 0; i--) {
-                $('#torrent' + checkedBoxes[i]).remove();
-            }
-        });
+        for (var i = checkedBoxes.length - 1; i >= 0; i--) {
+            $('#torrent' + checkedBoxes[i]).remove();
+        }
+    });
 }
 
 $(document).ready(function () {
@@ -30,7 +30,7 @@ $(document).ready(function () {
         var nextBox, index = notifyBoxes.index($(this));
         if (index > 0 && e.which === 75) { // K
             nextBox = notifyBoxes.get(index-1);
-        } else if (index < notifyBoxes.size()-1 && e.which === 74) { // J
+        } else if (index < (notifyBoxes.length - 1) && e.which === 74) { // J
             nextBox = notifyBoxes.get(index+1);
         } else if (e.which === 88) {
             $(this).prop('checked', !$(this).prop('checked'));
