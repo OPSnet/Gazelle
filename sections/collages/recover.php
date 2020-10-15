@@ -7,7 +7,7 @@ if (isset($_POST['id']) || isset($_POST['name'])) {
     authorize();
     $collageMan = new Gazelle\Manager\Collage;
     $collage = null;
-    var_dump($_POST);
+
     if (isset($_POST['id'])) {
         $collage = $collageMan->recoverById((int)$_POST['id']);
     }
