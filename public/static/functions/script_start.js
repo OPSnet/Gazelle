@@ -236,7 +236,7 @@ function sleep(milliseconds) {
 
 $.fn.extend({
     results: function () {
-        return this.size();
+        return this.length;
     },
     gshow: function () {
         return this.remove_class('hidden');
@@ -254,7 +254,7 @@ $.fn.extend({
         return this;
     },
     listen: function (event, callback) {
-        for (var i = 0, il = this.size(); i < il; i++) {
+        for (var i = 0, il = this.length; i < il; i++) {
             var object = this[i];
             if (document.addEventListener) {
                 object.addEventListener(event, callback, false);
@@ -265,7 +265,7 @@ $.fn.extend({
         return this;
     },
     add_class: function (class_name, force) {
-        for (var i = 0, il = this.size(); i < il; i++) {
+        for (var i = 0, il = this.length; i < il; i++) {
             var object = this[i];
             if (object.className === '') {
                 object.className = class_name;
@@ -276,7 +276,7 @@ $.fn.extend({
         return this;
     },
     remove_class: function (class_name) {
-        for (var i = 0, il = this.size(); i < il; i++) {
+        for (var i = 0, il = this.length; i < il; i++) {
             var object = this[i];
             var classes = object.className.split(' ');
             var result = array_search(class_name, classes);
@@ -288,7 +288,7 @@ $.fn.extend({
         return this;
     },
     has_class: function(class_name) {
-        for (var i = 0, il = this.size(); i < il; i++) {
+        for (var i = 0, il = this.length; i < il; i++) {
             var object = this[i];
             var classes = object.className.split(' ');
             if (array_search(class_name, classes)) {
@@ -298,7 +298,7 @@ $.fn.extend({
         return false;
     },
     toggle_class: function(class_name) {
-        for (var i = 0, il = this.size(); i < il; i++) {
+        for (var i = 0, il = this.length; i < il; i++) {
             var object = this[i];
             var classes = object.className.split(' ');
             var result = array_search(class_name, classes);

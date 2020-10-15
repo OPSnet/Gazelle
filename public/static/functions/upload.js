@@ -183,25 +183,27 @@ function addFormatRow() {
     if (++ExtraFormatCount == MAX_EXTRA_FORMATS) {
         $("#add_format").css('visibility', 'hidden');
     }
+
+    let formatFieldNum = ExtraFormatCount;
     $("#remove_format").show();
 
     var master = $(document.createElement("tr"))
         .attr({
-            id: 'extra_format_row_' + ExtraFormatCount
+            id: 'extra_format_row_' + formatFieldNum
         })
         .insertBefore('#extra_format_placeholder');
 
     $(document.createElement("td"))
         .addClass('label')
-        .html("Extra format " + ExtraFormatCount + ":")
+        .html("Extra format " + formatFieldNum + ":")
         .appendTo(master);
     var row = $(document.createElement("td"))
         .appendTo(master);
     $(document.createElement("input"))
         .attr({
-            id: "extra_file_" + ExtraFormatCount,
+            id: "extra_file_" + formatFieldNum,
             type: 'file',
-            name: "extra_file_" + ExtraFormatCount,
+            name: "extra_file_" + formatFieldNum,
             size: 30,
             accept: "application/x-bittorrent,.torrent",
         })
@@ -212,11 +214,11 @@ function addFormatRow() {
 
     var formatSelect = $(document.createElement("select"))
         .attr({
-            id: "format_" + ExtraFormatCount,
+            id: "format_" + formatFieldNum,
             name: 'extra_format[]'
         })
         .change(function () {
-            Format('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount);
+            setAllowedBitrate('#format_' + formatFieldNum, '#bitrate_' + formatFieldNum);
         });
     var used = getUsedPairs();
     $.each(AllowedBitrate, function(k,v) {
@@ -230,7 +232,7 @@ function addFormatRow() {
     $(document.createElement("span")).html("&nbsp;&nbsp;&nbsp;&nbsp;Bitrate: ").appendTo(row);
     var bitrateSelect = $(document.createElement("select"))
         .attr({
-            id:"bitrate_" + ExtraFormatCount,
+            id:"bitrate_" + formatFieldNum,
             name:'extra_bitrate[]'
         })
         .append(new Option('---', ''));
@@ -249,7 +251,7 @@ function addFormatRow() {
         ]);
     }
     bitrateSelect.change(function () {
-        setAllowedBitrate('#format_' + ExtraFormatCount, '#bitrate_' + ExtraFormatCount);
+        setAllowedBitrate('#format_' + formatFieldNum, '#bitrate_' + formatFieldNum);
     }).appendTo(row);
 
     // release description
@@ -261,13 +263,13 @@ function addFormatRow() {
         .html("&nbsp;&nbsp;[Add Release Description]")
         .css('marginLeft', '-5px')
         .click(function () {
-            $("#extra_release_desc_" + ExtraFormatCount)
+            $("#extra_release_desc_" + formatFieldNum)
                 .toggle(300);
         })
         .appendTo(desc_row) ;
     $(document.createElement("textarea"))
         .attr({
-            id: "extra_release_desc_" + ExtraFormatCount,
+            id: "extra_release_desc_" + formatFieldNum,
             name: "extra_release_desc[]",
             cols: 60,
             rows: 4,
