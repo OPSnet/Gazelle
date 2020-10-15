@@ -234,8 +234,11 @@ function ToggleLogScore() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('amount_box').addEventListener('input', function() {
+    const amountBox = document.getElementById('amount_box');
+    if (amountBox) {
+        amountBox.addEventListener('input', function() {
+            Calculate();
+        });
         Calculate();
-    });
-    Calculate();
+    }
 });

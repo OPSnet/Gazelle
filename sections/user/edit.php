@@ -263,7 +263,7 @@ echo $Val->GenerateJS('userform');
             <tr id="tor_group_tr">
                 <td style="vertical-align: top;" class="label"><strong>Torrent grouping</strong></td>
                 <td>
-                    <p class="min_padding">Enabling torrent grouping will place multiple
+                    <p class="min_padding">Enabling torrent grouping on the search page will place multiple
                     formats of the same torrent group together beneath a common header.</p>
                     <div class="option_group">
                         <input type="checkbox" name="disablegrouping" id="disablegrouping"<?=$SiteOptions['DisableGrouping2'] == 0 ? ' checked="checked"' : ''?> />

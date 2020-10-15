@@ -108,6 +108,22 @@ function add_tag(tag) {
     }
 }
 
+/**
+ *
+ * @param {Event} event
+ */
+function openAll(event) {
+    // we check individual keyCodes for dealing with macOS X weirdness
+    // otherwise, can just check for ctrlKey or metaKey
+    // http://stackoverflow.com/a/3922353
+    return (
+        event.keyCode == 91 // WebKit (left apple)
+        || event.keyCode == 93 // WebKit (right apple)
+        || event.keyCode == 224 // Firefox
+        || event.keyCode == 17 // Opera
+    ) || (event.ctrlKey || event.metaKey);
+}
+
 function toggle_group(groupid, link, event) {
     var showRow = true;
     var clickedRow = link;
@@ -115,18 +131,19 @@ function toggle_group(groupid, link, event) {
         clickedRow = clickedRow.parentNode;
     }
     var group_rows = clickedRow.parentNode.children;
-    var showing = $(clickedRow).nextElementSibling().has_class('hidden');
-    var allGroups = (event.ctrlKey || event.metaKey); // detect ctrl or cmd
+    var showing = link.parentNode.classList.contains('show_torrents');
 
-    // for dealing with Mac OS X
-    // http://stackoverflow.com/a/3922353
-    var allGroupsMac = (
-                event.keyCode == 91 // WebKit (left apple)
-                || event.keyCode == 93 // WebKit (right apple)
-                || event.keyCode == 224 // Firefox
-                || event.keyCode == 17 // Opera
-                ) ? true : null;
+    const allGroups = openAll(event);
 
+    let releaseType = null;
+    if (allGroups) {
+        for (let className of clickedRow.classList) {
+            if (className.startsWith('releases_')) {
+                releaseType = className;
+                break;
+            }
+        }
+    }
 
     for (var i = 0; i < group_rows.length; i++) {
         var row = $(group_rows[i]);
@@ -139,46 +156,47 @@ function toggle_group(groupid, link, event) {
         if (row.has_class('torrent')) {
             continue; // Prevents non-grouped torrents from disappearing when collapsing all groups
         }
-        var relevantRow = row.has_class('group') ? $(group_rows[i + 1]) : row;
-        if (allGroups || allGroupsMac || relevantRow.has_class('groupid_' + groupid)) {
-            row = $(group_rows[i]); // idk why we need this :S
-            if (row.has_class('group')) {
-                var section;
-                if (location.pathname.search('/artist.php$') !== -1) {
-                    section = 'in this release type.';
-                } else {
-                    section = 'on this page.';
-                }
-                var tooltip = showing
-                    ? 'Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups '+section
-                    : 'Expand this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all groups '+section;
-                $('a.show_torrents_link', row).updateTooltip(tooltip);
-                $('a.show_torrents_link', row).raw().parentNode.className = (showing) ? 'hide_torrents' : 'show_torrents';
+
+        // we have groupid_#_header so as to not break the toggle_edition logic
+        if (!(
+            (allGroups && (releaseType === null || row[0].classList.contains(releaseType)))
+            || (row.has_class('groupid_' + groupid) || row.has_class('groupid_' + groupid + '_header'))
+        )) {
+            continue;
+        }
+
+        if (row.has_class('group')) {
+            var section;
+            if (location.pathname.search('/artist.php$') !== -1) {
+                section = 'in this release type.';
             } else {
-                if (showing) {
-                    // show the row depending on whether the edition it's in is collapsed or not
-                    if (row.has_class('edition')) {
-                        row.gshow();
-                        showRow = ($('a', row.raw()).raw().innerHTML != '+');
-                    } else {
-                        if (showRow) {
-                            row.gshow();
-                        } else {
-                            row.ghide();
-                        }
-                    }
+                section = 'on this page.';
+            }
+            var tooltip = showing
+                ? 'Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups '+section
+                : 'Expand this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to expand all groups '+section;
+            $('a.show_torrents_link', row).updateTooltip(tooltip);
+            $('a.show_torrents_link', row).raw().parentNode.className = (showing) ? 'hide_torrents' : 'show_torrents';
+        } else {
+            if (showing) {
+                // show the row depending on whether the edition it's in is collapsed or not
+                if (row.has_class('edition')) {
+                    row.gshow();
+                    showRow = ($('a', row.raw()).raw().innerHTML != '+');
                 } else {
-                    row.ghide();
+                    if (showRow) {
+                        row.gshow();
+                    } else {
+                        row.ghide();
+                    }
                 }
+            } else {
+                row.ghide();
             }
         }
     }
-    if (event.preventDefault) {
-        event.preventDefault();
-    } else {
-        // for IE < 9 support
-        event.returnValue = false;
-    }
+
+    event.preventDefault();
 }
 
 function toggle_edition(groupid, editionid, lnk, event) {
@@ -188,15 +206,8 @@ function toggle_edition(groupid, editionid, lnk, event) {
     }
     //var showing = has_class(nextElementSibling(clickedRow), 'hidden');
     var showing = $(clickedRow).nextElementSibling().has_class('hidden');
-    var allEditions = (event.ctrlKey || event.metaKey); // detect ctrl and cmd
-    // for dealing with Mac OS X
-    // http://stackoverflow.com/a/3922353
-    var allEditionsMac = (
-                event.keyCode == 91 // WebKit (left apple)
-                || event.keyCode == 93 // WebKit (right apple)
-                || event.keyCode == 224 // Firefox
-                || event.keyCode == 17 // Opera
-                ) ? true : null;
+
+    const allEditions = openAll(event);
 
     var group_rows = $('tr.groupid_' + groupid);
     for (var i = 0; i < group_rows.results(); i++) {
@@ -209,7 +220,7 @@ function toggle_edition(groupid, editionid, lnk, event) {
             $('a', row).updateTooltip(tooltip);
             continue;
         }
-        if (allEditions || allEditionsMac || row.has_class('edition_' + editionid)) {
+        if (allEditions || row.has_class('edition_' + editionid)) {
             if (showing && !row.has_class('torrentdetails')) {
                 row.gshow();
             } else {
@@ -217,12 +228,8 @@ function toggle_edition(groupid, editionid, lnk, event) {
             }
         }
     }
-    if (event.preventDefault) {
-        event.preventDefault();
-    } else {
-        // for IE < 9 support
-        event.returnValue = false;
-    }
+
+    event.preventDefault();
 }
 
 function toggleTorrentSearch(mode) {
