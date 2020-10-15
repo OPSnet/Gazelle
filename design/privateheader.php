@@ -11,8 +11,8 @@ $authArgs = '&amp;user=' . G::$LoggedUser['ID']
     . '&amp;passkey=' . G::$LoggedUser['torrent_pass']
     . '&amp;authkey=' . G::$LoggedUser['AuthKey'];
 
-$Staff = check_perms('users_mod')
-    ? new Gazelle\Staff(G::$LoggedUser['ID'])
+$Staff = (check_perms('users_mod') || G::$LoggedUser['PermissionID'] === FORUM_MOD)
+    ? new Gazelle\Staff(G::$LoggedUser)
     : null;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -232,68 +232,74 @@ $percent = $monthlyRental == 0.0
                         Ratio: <span class="stat"><?=Format::get_ratio_html(G::$LoggedUser['BytesUploaded'], G::$LoggedUser['BytesDownloaded'])?></span>
                     </li>
 <?php
-    if (!empty(G::$LoggedUser['RequiredRatio'])) { ?>
+if (!empty(G::$LoggedUser['RequiredRatio'])) { ?>
                     <li id="stats_required">
                         <a href="rules.php?p=ratio">Required</a>:
                         <span class="stat tooltip" title="<?=number_format(G::$LoggedUser['RequiredRatio'], 5)?>"><?=number_format(G::$LoggedUser['RequiredRatio'], 2)?></span>
                     </li>
 <?php
-    }
-    if (G::$LoggedUser['FLTokens'] > 0) { ?>
+}
+if (G::$LoggedUser['FLTokens'] > 0) { ?>
                     <li id="fl_tokens">
                         <a href="wiki.php?action=article&amp;id=57">Tokens</a>:
                         <span class="stat">
                             <a href="userhistory.php?action=token_history&amp;userid=<?=G::$LoggedUser['ID']?>"><?=G::$LoggedUser['FLTokens']?></a>
                         </span>
                     </li>
-<?php
-    } ?>
+<?php } ?>
                 </ul>
                 <ul id="userinfo_minor"<?=$NewSubscriptions ? ' class="highlite"' : ''?>>
 <?php
-        $parseNavItem = function($val) {
-            $val = trim($val);
-            return $val == 'false' ? false : $val;
-        };
+$parseNavItem = function($val) {
+    $val = trim($val);
+    return $val == 'false' ? false : $val;
+};
 
-        foreach ($NavItems as $n) {
-            list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($n);
-            if (strpos($Tests, ':')) {
-                $Parts = array_map('trim', explode(',', $Tests));
-                $Tests = [];
+$NewStaffPMs = ($Staff !== null && $Staff->pmCount() > 0);
 
-                foreach ($Parts as $Part) {
-                    $Tests[] = array_map($parseNavItem, explode(':', $Part));
-                }
-            } else if (strpos($Tests, ',')) {
-                $Tests = array_map($parseNavItem, explode(',', $Tests));
-            } else {
-                $Tests = [$Tests];
-            }
+foreach ($NavItems as $n) {
+    list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($n);
+    if (strpos($Tests, ':')) {
+        $Parts = array_map('trim', explode(',', $Tests));
+        $Tests = [];
 
-            if ($Key == 'inbox') {
-                $Target = Gazelle\Inbox::getLinkQuick(null,
-                    isset(G::$LoggedUser['ListUnreadPMsFirst']) && G::$LoggedUser['ListUnreadPMsFirst']
-                );
-            }
+        foreach ($Parts as $Part) {
+            $Tests[] = array_map($parseNavItem, explode(':', $Part));
+        }
+    } else if (strpos($Tests, ',')) {
+        $Tests = array_map($parseNavItem, explode(',', $Tests));
+    } else {
+        $Tests = [$Tests];
+    }
 
-            $ClassNames = NULL;
-            if ($Key == 'notifications' && !check_perms('site_torrents_notify')) {
-                continue;
-            } else if ($Key == 'subscriptions') {
-                $ClassNames = $NewSubscriptions ? 'new-subscriptions' : '';
-                $ClassNames = trim($ClassNames.Format::add_class($PageID, ['userhistory', 'subscriptions'], 'active', false));
-            }
+    if ($Key == 'inbox') {
+        $Target = Gazelle\Inbox::getLinkQuick(null, G::$LoggedUser['ListUnreadPMsFirst'] ?? false);
+    }
 
-            if ($ClassNames == NULL) {
-?>
+    if ($Key == 'notifications' && !check_perms('site_torrents_notify')) {
+        continue;
+    }
+
+    $ClassNames = null;
+    if ($Key == 'subscriptions') {
+        $ClassNames = $NewSubscriptions ? 'new-subscriptions' : '';
+        $ClassNames = trim($ClassNames . Format::add_class($PageID, ['userhistory', 'subscriptions'], 'active', false));
+    }
+
+    if ($Key == 'staffinbox') {
+        $ClassNames = $NewStaffPMs ? 'new-subscriptions' : '';
+        $ClassNames = trim($ClassNames . Format::add_class($PageID, $Tests, 'active', false));
+    }
+
+    if ($ClassNames === null) { ?>
                     <li id="nav_<?=$Key?>"<?=Format::add_class($PageID, $Tests, 'active', true, $TestUser ? 'userid' : false)?>>
-<?php       } else { ?>
+<?php }
+    else { ?>
                     <li id="nav_<?=$Key?>"<?=$ClassNames ? " class=\"$ClassNames\"" : ''?>>
-<?php       } ?>
+<?php } ?>
                         <a href="<?=$Target?>"><?=$Title?></a>
                     </li>
-<?php   } ?>
+<?php } ?>
                 </ul>
             </div>
             <div id="menu">
@@ -378,36 +384,9 @@ if ($notifMan->isTraditional(Notification::TORRENTS)) {
 if (check_perms('users_mod')) {
     $ModBar[] = '<a href="tools.php">Toolbox</a>';
 }
-if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] == FORUM_MOD) {
-    $NumStaffPMs = G::$Cache->get_value('num_staff_pms_'.G::$LoggedUser['ID']);
-    if ($NumStaffPMs === false) {
-        if (check_perms('users_mod')) {
 
-            $LevelCap = 1000;
-
-            G::$DB->query("
-                SELECT COUNT(ID)
-                FROM staff_pm_conversations
-                WHERE Status = 'Unanswered'
-                    AND (AssignedToUser = ".G::$LoggedUser['ID']."
-                        OR (LEAST('$LevelCap', Level) <= '".G::$LoggedUser['EffectiveClass']."'
-                            AND Level <= ".G::$LoggedUser['Class']."))");
-        }
-        if (G::$LoggedUser['PermissionID'] == FORUM_MOD) {
-            G::$DB->query("
-                SELECT COUNT(ID)
-                FROM staff_pm_conversations
-                WHERE Status='Unanswered'
-                    AND (AssignedToUser = ".G::$LoggedUser['ID']."
-                        OR Level = '". $Classes[FORUM_MOD]['Level'] . "')");
-        }
-        list($NumStaffPMs) = G::$DB->next_record();
-        G::$Cache->cache_value('num_staff_pms_'.G::$LoggedUser['ID'], $NumStaffPMs , 1000);
-    }
-
-    if ($NumStaffPMs > 0) {
-        $ModBar[] = '<a href="staffpm.php">'.$NumStaffPMs.' Staff PMs</a>';
-    }
+if ($NewStaffPMs) {
+    $ModBar[] = '<a href="staffpm.php">' . $Staff->pmCount() . ' Staff PMs</a>';
 }
 
 if (check_perms('admin_reports')) {
