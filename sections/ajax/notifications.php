@@ -13,12 +13,19 @@ if ((int)$_GET['filterid'] > 0) {
     $args[] = (int)$_GET['filterid'];
 }
 $where = implode(' AND ', $cond);
-$args[] = $Limit;
 
+$TorrentCount = $DB->scalar("
+    SELECT count(*)
+    FROM users_notify_torrents AS unt
+    INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
+    LEFT JOIN users_notify_filters AS unf ON (unf.ID = unt.FilterID)
+    WHERE $where
+    ", ...$args
+);
+
+$args[] = $Limit;
 $Results = $DB->prepared_query("
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        unt.TorrentID,
+    SELECT unt.TorrentID,
         unt.UnRead,
         unt.FilterID,
         unf.Label,
@@ -32,7 +39,6 @@ $Results = $DB->prepared_query("
     ", ...$args
 );
 $GroupIDs = array_unique($DB->collect('GroupID'));
-$TorrentCount = $DB->scalar('SELECT FOUND_ROWS()');
 
 if (count($GroupIDs)) {
     $TorrentGroups = Torrents::get_groups($GroupIDs);
