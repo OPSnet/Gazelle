@@ -201,6 +201,9 @@ switch ($_REQUEST['action']) {
     case 'moderate':
         require(__DIR__ . '/takemoderate.php');
         break;
+    case 'token':
+        require_once(__DIR__ . '/token.php');
+        break;
     case 'clearcache':
         if (!check_perms('admin_clear_cache') || !check_perms('users_override_paranoia')) {
             error(403);

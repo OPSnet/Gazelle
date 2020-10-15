@@ -912,6 +912,37 @@ list($ArtistsAdded) = $DB->next_record();
                     <a href="user.php?action=2fa&do=<?= $TwoFAKey ? 'disable' : 'enable' ?>&userid=<?= $UserID ?>">Click here to <?= $TwoFAKey ? 'disable' : 'enable' ?></a>
                 </td>
             </tr>
+
+            <tr id="acc_api_keys_tr">
+                <td class="label"><strong>API Keys</strong></td>
+                <td>
+                    API keys can be generated to access our <b><a href="https://github.com/OPSnet/Gazelle/wiki/JSON-API-Documentation" target='_blank'>API</a></b>.<br />
+                    Rememeber to revoke tokens you no longer use.<br />
+                    <strong class="important_text">Treat your tokens like passwords and keep them secret.</strong>
+                    <br /><br />
+                    <table class="layout border">
+                        <tr class='colhead'>
+                            <th>Name</th>
+                            <th>Created</th>
+                            <th>Revoke</th>
+                        </tr>
+<?php
+$DB->prepared_query('SELECT id, name, token, created FROM api_tokens WHERE user_id = ? ORDER BY created DESC', $UserID);
+$rowClass = 'b';
+foreach ($DB->to_array(false, MYSQLI_ASSOC, false) as $row) {
+    $rowClass = ($rowClass === 'b') ? 'a' : 'b';
+?>
+                        <tr class='row<?= $rowClass ?>'>
+                            <td><?= $row['name'] ?></td>
+                            <td><?= time_diff($row['created']) ?></td>
+                            <td style='text-align: center'><a href='user.php?action=token&amp;do=revoke&amp;user_id=<?=
+                                $LoggedUser['ID'] ?>&amp;token_id=<?= $row['id'] ?>'>Revoke</a>
+                        </tr>
+<?php } /* foreach */ ?>
+                    </table>
+                    <a href='user.php?action=token&amp;user_id=<?= $LoggedUser['ID'] ?>'>Click here to create a new token</a>
+                </td>
+            </tr>
         </table>
     </div>
     </form>

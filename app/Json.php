@@ -74,11 +74,8 @@ abstract class Json extends Base {
             array_merge([
                     'status' => 'success',
                     'response' => $payload,
-                    'info' => [
-                        'source'  => $this->source,
-                        'version' => $this->version,
-                    ],
                 ],
+                $this->info(),
                 $this->debug()
             ),
             $this->mode
@@ -93,6 +90,15 @@ abstract class Json extends Base {
         return [
             'queries'  => $Debug->get_queries(),
             'searches' => $Debug->get_sphinxql_queries(),
+        ];
+    }
+
+    protected function info() {
+        return [
+            'info' => [
+                'source' => $this->source,
+                'version' => $this->version,
+            ]
         ];
     }
 }

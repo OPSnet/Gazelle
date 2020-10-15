@@ -67,6 +67,7 @@ class IPv4 extends \Gazelle\Base {
             WHERE ? BETWEEN FromIP AND ToIP
             ', $from
         );
+
         if ($current) {
             if ($current != $reason) {
                 $this->db->prepared_query("
@@ -87,7 +88,7 @@ class IPv4 extends \Gazelle\Base {
                 ", $reason, $from, $to, $userId
             );
             $this->cache->delete_value(
-                self::CACHE_KEY . substr($from, 0, strcspn($from, '.'))
+                self::CACHE_KEY . substr($ipv4From, 0, strcspn($ipv4From, '.'))
             );
         }
     }

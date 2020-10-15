@@ -2,6 +2,7 @@
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 
+use Gazelle\Manager\IPv4;
 use Gazelle\Util\{Type, Time, Irc};
 
 /**
@@ -209,7 +210,6 @@ function check_perms($PermissionName, $MinClass = 0) {
 
 /**
  * Print JSON status result with an optional message and die.
- * DO NOT USE THIS FUNCTION!
  */
 function json_die($Status, $Message="bad parameters") {
     json_print($Status, $Message);
@@ -225,18 +225,32 @@ function json_print($Status, $Message) {
         $Message['queries'] = $Debug->get_queries();
         $Message['searches'] = $Debug->get_sphinxql_queries();
     }
+
     if ($Status == 'success' && $Message) {
-        print json_encode(['status' => $Status, 'response' => $Message]);
+        $response = ['status' => $Status, 'response' => $Message];
     } elseif ($Message) {
-        print json_encode(['status' => $Status, 'error' => $Message]);
+        $response = ['status' => $Status, 'error' => $Message];
     } else {
-        print json_encode(['status' => $Status, 'response' => []]);
+        $response = ['status' => $Status, 'response' => []];
     }
+    print(json_encode(add_json_info($response)));
 }
 
 function json_error($Code) {
-    echo json_encode(['status' => 400, 'error' => $Code, 'response' => []]);
+    echo json_encode(add_json_info(['status' => 400, 'error' => $Code, 'response' => []]));
     die();
+}
+
+function add_json_info($Json) {
+    if (!isset($Json['info'])) {
+        $Json = array_merge($Json, [
+            'info' => [
+                'source' => SITE_NAME,
+                'version' => 1,
+            ],
+        ]);
+    }
+    return $Json;
 }
 
 /**
@@ -377,11 +391,11 @@ function make_utf8($Str) {
     }
 }
 
-/*
+/**
  * Generate a random string drawn from alphanumeric characters
  * but omitting lowercase l, uppercase I and O (to avoid confusion).
  *
- * @param  int    $length
+ * @param  int    $len
  * @return string random alphanumeric string
  */
 function randomString($len = 32) {
@@ -396,6 +410,35 @@ function randomString($len = 32) {
         }
     }
     return $out;
+}
+
+// TODO: reconcile this with log_attempt in login/index.php
+function log_token_attempt(DB_MYSQL $db, int $userId = 0): void {
+    $watch = new Gazelle\LoginWatch;
+    $ipStr = $_SERVER['REMOTE_ADDR'];
+
+    [$attemptId, $attempts, $bans] = $db->row('
+        SELECT ID, Attempts, Bans
+        FROM login_attempts
+        WHERE IP = ?
+        ', $_SERVER['REMOTE_ADDR']
+    );
+
+    if (!$attemptId) {
+        $watch->create($ipStr, null, $userId);
+        return;
+    }
+
+    $attempts++;
+    $watch->setWatch($attemptId);
+    if ($attempts < 6) {
+        $watch->increment($userId, $ipStr, null);
+        return;
+    }
+    $watch->ban($attempts, null, $userId);
+    if ($bans > 9) {
+        (new IPv4())->createBan(0, $ipStr, $ipStr, 'Automated ban per failed token usage');
+    }
 }
 
 /**

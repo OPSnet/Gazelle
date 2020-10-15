@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Util\Crypto;
-
 function log_attempt(int $UserID, string $capture) {
     global $AttemptID, $Attempts, $Bans, $BannedUntil, $watch;
     $IPStr = $_SERVER['REMOTE_ADDR'];
@@ -27,7 +25,7 @@ function log_attempt(int $UserID, string $capture) {
 
 function needResetIpaddr(int $permissionId, $custom = ''): bool {
     $perms = Permissions::get_permissions($permissionId);
-    $custom = unserialize($customPerms);
+    $custom = unserialize($custom);
     return isset($perms['Permissions']['site_disable_ip_history']) || isset($custom['site_disable_ip_history']);
 }
 
@@ -398,7 +396,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                     if (password_needs_rehash($PassHash, PASSWORD_DEFAULT) || Users::check_password_old($password, $PassHash)) {
                         $DB->prepared_query('
                             UPDATE users_main SET
-                                passhash = ?
+                                PassHash = ?
                             WHERE ID = ?
                             ', Gazelle\UserCreator::hashPassword($password), $UserID
                         );

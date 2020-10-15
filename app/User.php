@@ -8,7 +8,7 @@ class User extends Base {
     protected  $forceCacheFlush;
 
     /** @var int */
-    protected  $id;
+    protected $id;
 
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
@@ -1535,6 +1535,52 @@ class User extends Base {
             ];
         }
         return $criteria;
+    }
+
+    public function createApiToken(string $name, string $key): string {
+        $suffix = sprintf('%014d', $this->id);
+
+        while (true) {
+            // prevent collisions with an existing token name
+            $token = Util\Text::base64UrlEncode(Util\Crypto::encrypt(random_bytes(32) . $suffix, $key));
+            if (!$this->hasApiToken($token)) {
+                break;
+            }
+        }
+
+        $this->db->prepared_query("
+            INSERT INTO api_tokens
+                   (user_id, name, token)
+            VALUES (?,       ?,    ?)
+            ", $this->id, $name, $token
+        );
+        return $token;
+    }
+
+    public function hasTokenByName(string $name) {
+        return $this->db->scalar(
+            "SELECT 1 FROM api_tokens WHERE user_id=? AND name=?",
+            $this->id,
+            $name
+        ) === 1;
+    }
+
+    public function hasApiToken(string $token): bool {
+        return $this->db->scalar("
+            SELECT 1 FROM api_tokens WHERE user_id = ? AND token = ?
+            ", $this->id, $token
+        ) === 1;
+    }
+
+    public function revokeApiTokenById(int $tokenId): int {
+        $this->db->prepared_query("
+            UPDATE api_tokens
+            SET revoked = 1
+            WHERE user_id = ?
+                AND id = ?
+            ", $this->id, $tokenId
+        );
+        return $this->db->affected_rows();
     }
 
     public function remove2FA(): int {
