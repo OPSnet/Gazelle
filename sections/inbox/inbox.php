@@ -27,7 +27,7 @@ View::show_header('Inbox');
 } ?>
 <br /><br />
 <?php
-list($NumResults, $Count, $Messages) = $Inbox->result();
+[$NumResults, $Count, $Messages] = $Inbox->result();
 
 $Pages = Format::get_pages(Format::page_limit(MESSAGES_PER_PAGE)[0], $NumResults, MESSAGES_PER_PAGE, 9);
 echo $Pages;

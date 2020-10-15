@@ -92,7 +92,7 @@ foreach ($Charts as $Chart) {
 <?php
 if (!$OwnProfile) {
 ?>
-        <a href="inbox.php?action=compose&amp;to=<?=$UserID?>" class="brackets">Send message</a>
+        <a href="inbox.php?action=compose&amp;toid=<?=$UserID?>" class="brackets">Send message</a>
         <a href="reports.php?action=report&amp;type=user&amp;id=<?=$UserID?>" class="brackets">Report user</a>
 <?php
 }
