@@ -103,6 +103,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
+    'ipaddr',
+    function ($ipaddr) {
+        return Tools::display_ip($ipaddr);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
     'octet_size',
     function ($size) {
         return Format::get_size($size);
@@ -134,6 +141,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
     'user_url',
     function ($userId) {
         return Users::format_username($userId, false, false, false);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'user_full',
+    function ($userId) {
+        return Users::format_username($userId, true, true, true, true);
     }
 ));
 
