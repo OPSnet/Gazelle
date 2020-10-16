@@ -479,6 +479,7 @@ class DB_MYSQL {
         if ($this->Statement) {
             return $this->Statement->affected_rows;
         }
+        return 0;
     }
 
     function info() {
