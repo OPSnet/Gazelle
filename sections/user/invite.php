@@ -65,6 +65,9 @@ View::show_header('Invites');
         <h2><?=Users::format_username($UserID, false, false, false)?> &rsaquo; Invites</h2>
         <div class="linkbox">
             <a href="user.php?action=invitetree<?php if ($Sneaky) { echo '&amp;userid='.$UserID; } ?>" class="brackets">Invite tree</a>
+<?php if (check_perms('users_view_invites')) { ?>
+            <a href="tools.php?action=invite_pool" class="brackets">Invite pool</a>
+<?php } ?>
         </div>
     </div>
 <?php if ($UserCount >= USER_LIMIT && !check_perms('site_can_invite_always')) { ?>

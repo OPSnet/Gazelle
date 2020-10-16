@@ -1,0 +1,71 @@
+<div class="header">
+    <h2>{{ title }}</h2>
+</div>
+
+<div class="box pad">
+    <p>{{ pending|number_format }} unused invites have been sent.</p>
+{% if removed is not empty %}
+    <p>The invite was {{ removed ? '' : ' not' }} removed.</p>
+{% endif %}
+</div>
+<br />
+
+<div>
+    <form class="search_form" name="invites" action="" method="get">
+        <table cellpadding="6" cellspacing="1" border="0" class="layout border" width="100%">
+            <tr>
+                <td class="label"><strong>Email address (regexps allowed):</strong></td>
+                <td>
+                    <input type="hidden" name="action" value="invite_pool" />
+                    <input type="text" name="search" size="60" value="{{ search }}" />
+                    &nbsp;
+                    <input type="submit" value="Search pool" />
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+{% for invite in list %}
+    {% if loop.first %}
+<div class="linkbox">
+    {{ linkbox }}
+</div>
+<table width="100%">
+    <tr class="colhead">
+        <td>Inviter</td>
+        <td>Email address</td>
+        <td>IP address</td>
+        <td>Invite link</td>
+        <td>Expires</td>
+    {% if can_edit_invites %}
+        <td>Controls</td>
+    {% endif %}
+    </tr>
+    {% endif %}
+
+    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <td>{{ invite.user_id|user_full|raw }}</td>
+        <td>{{ invite.email }}</td>
+        <td>{{ invite.ipaddr|ipaddr|raw }}</td>
+        <td><a href="register.php?invite={{ invite.key }}">{{ invite.key }}</a></td>
+        <td>{{ invite.expires|time_diff|raw }}</td>
+    {% if can_edit_invites %}
+        <td>
+            <form class="delete_form" name="invite" action="" method="post">
+                <input type="hidden" name="action" value="invite_pool" />
+                <input type="hidden" name="auth" value="{{ auth }}" />
+                <input type="hidden" name="invitekey" value="{{ invite.key }}" />
+                <input type="submit" value="Delete" />
+            </form>
+        </td>
+    {% endif %}
+    </tr>
+
+    {% if loop.last %}
+</table>
+<div class="linkbox">
+    {{ linkbox }}
+</div>
+    {% endif %}
+{% endfor %}
