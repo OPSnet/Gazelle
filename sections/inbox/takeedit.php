@@ -41,11 +41,14 @@ if (isset($_POST['delete'])) {
         $DB->prepared_query("
             UPDATE pm_conversations_users SET
                 Unread = '1'
-            WHERE UserID = ?
+            WHERE Unread = '0'
+                AND UserID = ?
                 AND ConvID = ?
             ", $UserID, $ConvID
         );
-        $Cache->increment('inbox_new_'.$UserID);
+        if (G::$DB->affected_rows() > 0) {
+            $Cache->increment('inbox_new_'.$UserID);
+        }
     }
 }
 header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));

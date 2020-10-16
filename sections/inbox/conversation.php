@@ -61,12 +61,16 @@ if ($UnRead == '1') {
     $DB->prepared_query("
         UPDATE pm_conversations_users SET
             UnRead = '0'
-        WHERE UserID = ?
+        WHERE UnRead = '1'
+            AND UserID = ?
             AND ConvID = ?
         ", $UserID, $ConvID
     );
     // Clear the caches of the inbox and sentbox
-    $Cache->decrement("inbox_new_$UserID");
+    if (G::$DB->affected_rows() > 0) {
+        $Cache->decrement("inbox_new_$UserID");
+    }
+
 }
 
 View::show_header("View conversation $Subject", 'comments,inbox,bbcode,jquery.validate,form_validate');
