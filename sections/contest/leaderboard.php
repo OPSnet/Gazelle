@@ -73,9 +73,8 @@ if (!count($leaderboard)) {
 } else {
     $isRequestFill = $contest instanceof \Gazelle\Contest\RequestFill;
 ?>
-        <h3>A grand total of <?=
-            G::$Cache->get_value("contest_leaderboard_total_" . $contest->id())
-            ?: "<span title=\"We will recalculate the numbers soon\">many, many, many</span>"
+        <h3>A grand total of <?= $contest->totalEntries()
+            ?: '<span title="We will recalculate the numbers soon">many, many, many</span>'
         ?> <?= $isRequestFill ? 'requests have been filled' : 'torrents have been uploaded' ?>.</h3>
     </div>
     <table class="layout">

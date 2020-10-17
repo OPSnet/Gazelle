@@ -47,7 +47,7 @@
                 <p>Edit the type of the contest</p>
                 <select name="type">
 {% for t in type %}
-                    <option value="{{ t.id }}"{{ t.name == c.contestType ? ' selected' : '' }}>{{ t.name }}</option>
+                    <option value="{{ t.id }}"{{ t.name == contest.contestType ? ' selected' : '' }}>{{ t.name }}</option>
 {% endfor %}
                 </select>
             </td>
