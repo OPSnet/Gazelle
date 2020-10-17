@@ -1,27 +1,25 @@
 <?php
 enforce_login();
 
-if (!isset($_REQUEST['action'])) {
-    $_REQUEST['action'] = '';
-}
-
 // Get user level
-$DB->query("
-    SELECT
-        i.SupportFor,
+$DB->prepared_query("
+    SELECT i.SupportFor,
         p.DisplayStaff
     FROM users_info AS i
-        JOIN users_main AS m ON m.ID = i.UserID
-        JOIN permissions AS p ON p.ID = m.PermissionID
-    WHERE i.UserID = ".$LoggedUser['ID']
+    INNER JOIN users_main AS m ON (m.ID = i.UserID)
+    INNER JOIN permissions AS p ON (p.ID = m.PermissionID)
+    WHERE i.UserID = ?
+    ", $LoggedUser['ID']
 );
-list($SupportFor, $DisplayStaff) = $DB->next_record();
+[$SupportFor, $DisplayStaff] = $DB->next_record();
+
 // Logged in user is staff
 $IsStaff = ($DisplayStaff == 1);
+
 // Logged in user is Staff or FLS
 $IsFLS = ($IsStaff || isset($LoggedUser['ExtraClasses'][FLS_TEAM]));
 
-switch ($_REQUEST['action']) {
+switch ($_REQUEST['action'] ?? '') {
     case 'viewconv':
         require('viewconv.php');
         break;
@@ -65,12 +63,6 @@ switch ($_REQUEST['action']) {
         require('user_inbox.php');
         break;
     default:
-        if ($IsStaff || $IsFLS) {
-            require('staff_inbox.php');
-        } else {
-            require('user_inbox.php');
-        }
+        require($IsStaff || $IsFLS ? 'staff_inbox.php' : 'user_inbox.php');
         break;
 }
-
-?>

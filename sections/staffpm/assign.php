@@ -6,15 +6,19 @@ if (!($IsFLS)) {
 
 if ($ConvID = (int)$_GET['convid']) {
     // FLS, check level of conversation
-    $DB->prepared_query("
+    $Level = $DB->scalar("
         SELECT Level
         FROM staff_pm_conversations
         WHERE ID = ?", $ConvID);
-    list($Level) = $DB->next_record();
 
-    if ($Level == 0) {
+    if ($Level > 0) {
+        // FLS trying to assign non-FLS conversation
+        error(403);
+    } else {
         // FLS conversation, assign to staff (moderator)
-        if (!empty($_GET['to'])) {
+        if (empty($_GET['to'])) {
+            error(404);
+        } else {
             $Level = 0;
             switch ($_GET['to']) {
                 case 'forum':
@@ -32,31 +36,30 @@ if ($ConvID = (int)$_GET['convid']) {
                 UPDATE staff_pm_conversations
                 SET Status = 'Unanswered',
                     Level = ?
-                WHERE ID = ?", $Level, $ConvID);
+                WHERE ID = ?
+                ", $Level, $ConvID
+            );
             $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
             header('Location: staffpm.php');
-        } else {
-            error(404);
         }
-    } else {
-        // FLS trying to assign non-FLS conversation
-        error(403);
     }
 
 } elseif ($ConvID = (int)$_POST['convid']) {
     // Staff (via AJAX), get current assign of conversation
-    $DB->prepared_query("
+    [$Level, $AssignedToUser] = $DB->row("
         SELECT Level, AssignedToUser
         FROM staff_pm_conversations
-        WHERE ID = ?", $ConvID);
-    list($Level, $AssignedToUser) = $DB->next_record();
+        WHERE ID = ?
+        ", $ConvID
+    );
 
     $LevelCap = 1000;
-
-
-    if ($LoggedUser['EffectiveClass'] >= min($Level, $LevelCap) || $AssignedToUser == $LoggedUser['ID']) {
+    if ($LoggedUser['EffectiveClass'] < min($Level, $LevelCap) || $AssignedToUser != $LoggedUser['ID']) {
+        // Staff member is not allowed to assign conversation
+        echo '-1';
+    } else {
         // Staff member is allowed to assign conversation, assign
-        list($LevelType, $NewLevel) = explode('_', $_POST['assign']);
+        [$LevelType, $NewLevel] = explode('_', $_POST['assign']);
 
         if ($LevelType == 'class') {
             // Assign to class
@@ -65,7 +68,9 @@ if ($ConvID = (int)$_GET['convid']) {
                 SET Status = 'Unanswered',
                     Level = ?,
                     AssignedToUser = NULL
-                WHERE ID = ?", $NewLevel, $ConvID);
+                WHERE ID = ?"
+                , $NewLevel, $ConvID
+            );
             $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
         } else {
             $UserInfo = Users::user_info($NewLevel);
@@ -80,18 +85,14 @@ if ($ConvID = (int)$_GET['convid']) {
                 SET Status = 'Unanswered',
                     AssignedToUser = ?,
                     Level = ?
-                WHERE ID = ?", $NewLevel, $Level, $ConvID);
+                WHERE ID = ?
+                ", $NewLevel, $Level, $ConvID
+            );
             $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
         }
         echo '1';
-
-    } else {
-        // Staff member is not allowed to assign conversation
-        echo '-1';
     }
-
 } else {
     // No ID
     header('Location: staffpm.php');
 }
-?>
