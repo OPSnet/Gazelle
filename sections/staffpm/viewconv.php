@@ -2,33 +2,32 @@
 
 if ($ConvID = (int)$_GET['id']) {
     // Get conversation info
-    $DB->query("
+    [$Subject, $UserID, $Level, $AssignedToUser, $Unread, $Status] = $DB->row("
         SELECT Subject, UserID, Level, AssignedToUser, Unread, Status
         FROM staff_pm_conversations
-        WHERE ID = $ConvID");
-    list($Subject, $UserID, $Level, $AssignedToUser, $Unread, $Status) = $DB->next_record();
-
+        WHERE ID = ?
+        ", $ConvID
+    );
     $LevelCap = Permissions::get_level_cap();
     $UserLevel = $LoggedUser['EffectiveClass'];
-
-
     $PMLevel = $Level;
     $Level = min($Level, $LevelCap);
 
     if (!(($UserID == $LoggedUser['ID'])
             || ($AssignedToUser == $LoggedUser['ID'])
             || (($Level > 0 && $Level <= $LoggedUser['EffectiveClass']) || ($Level == 0 && $IsFLS))
-        )) {
-    // User is trying to view someone else's conversation
+    )) {
+        // User is trying to view someone else's conversation
         error(403);
     }
     // User is trying to view their own unread conversation, set it to read
     if ($UserID == $LoggedUser['ID'] && $Unread) {
-        $DB->query("
+        $DB->prepared_query("
             UPDATE staff_pm_conversations
             SET Unread = false
-            WHERE ID = $ConvID");
-        // Clear cache for user
+            WHERE ID = ?
+            ", $ConvID
+        );
         $Cache->delete_value("staff_pm_new_" . $LoggedUser['ID']);
     }
 
@@ -92,20 +91,21 @@ if ($IsFLS && !$IsStaff) { ?>
 }
 if (!$IsStaff && !$IsFLS) { ?>
     <a href="staffpm.php" class="brackets">Back to inbox</a>
-<?php
-} ?>        </div>
+<?php } ?>
+        </div>
     </div>
     <br />
     <br />
     <div id="inbox">
 <?php
     // Get messages
-    $StaffPMs = $DB->query("
+    $StaffPMs = $DB->prepared_query("
         SELECT UserID, SentDate, Message, ID
         FROM staff_pm_messages
-        WHERE ConvID = $ConvID");
-
-    while (list($UserID, $SentDate, $Message, $MessageID) = $DB->next_record()) {
+        WHERE ConvID = ?
+        ", $ConvID
+    );
+    while ([$UserID, $SentDate, $Message, $MessageID] = $DB->next_record()) {
         // Set user string
         if ($UserID == $OwnerID) {
             // User, use prepared string
@@ -153,11 +153,12 @@ if (!$IsStaff && !$IsFLS) { ?>
                     <option id="first_common_response">Select a message</option>
 <?php
         // List common responses
-        $DB->query("
+        $DB->prepared_query("
             SELECT ID, Name
             FROM staff_pm_responses
-            ORDER BY Name ASC");
-        while (list($ID, $Name) = $DB->next_record()) {
+            ORDER BY Name ASC
+        ");
+        while ([$ID, $Name] = $DB->next_record()) {
 ?>
                     <option value="<?=$ID?>"><?=$Name?></option>
 <?php   } ?>
@@ -214,17 +215,17 @@ if (!$IsStaff && !$IsFLS) { ?>
 ?>
                         </optgroup>
                         <optgroup label="Staff">
-<?php        // Staff members
-        $DB->query("
+<?php // Staff members
+        $DB->prepared_query("
             SELECT
                 m.ID,
                 m.Username
             FROM permissions AS p
-                JOIN users_main AS m ON m.PermissionID = p.ID
+            INNER JOIN users_main AS m ON (m.PermissionID = p.ID)
             WHERE p.DisplayStaff = '1'
-            ORDER BY p.Level DESC, m.Username ASC"
-        );
-        while (list($ID, $Name) = $DB->next_record()) {
+            ORDER BY p.Level DESC, m.Username ASC
+        ");
+        while ([$ID, $Name] = $DB->next_record()) {
             // Create one <option> for each staff member
             $Selected = (($AssignedToUser == $ID) ? ' selected="selected"' : '');
 ?>
@@ -232,20 +233,19 @@ if (!$IsStaff && !$IsFLS) { ?>
 <?php   } ?>
                         </optgroup>
                         <optgroup label="First Line Support">
-<?php
-        // FLS users
-        $DB->query("
+<?php // FLS users
+        $DB->prepared_query("
             SELECT
                 m.ID,
                 m.Username
             FROM users_info AS i
-                JOIN users_main AS m ON m.ID = i.UserID
-                JOIN permissions AS p ON p.ID = m.PermissionID
+            INNER JOIN users_main AS m ON (m.ID = i.UserID)
+            INNER JOIN permissions AS p ON (p.ID = m.PermissionID)
             WHERE p.DisplayStaff != '1'
                 AND i.SupportFor != ''
             ORDER BY m.Username ASC
         ");
-        while (list($ID, $Name) = $DB->next_record()) {
+        while ([$ID, $Name] = $DB->next_record()) {
             // Create one <option> for each FLS user
             $Selected = (($AssignedToUser == $ID) ? ' selected="selected"' : '');
 ?>
@@ -264,10 +264,10 @@ if (!$IsStaff && !$IsFLS) { ?>
     if ($Status != 'Resolved') { ?>
                     <input type="button" value="Resolve" onclick="location.href='staffpm.php?action=resolve&amp;id=<?=$ConvID?>';" />
 <?php   if ($IsFLS) { /* Moved by request */ ?>
-                    <input type="button" value="Common answers" onclick="$('#common_answers').gtoggle();" />
+                    <input type="button" title="Create, edit and use canned replies" value="Common answers" onclick="$('#common_answers').gtoggle();" />
 <?php   } ?>
                     <input type="button" id="previewbtn" value="Preview" class="hidden button_preview_<?=$TextPrev->getID()?>" />
-                    <input type="submit" value="Send message" />
+                    <input type="submit" title="Reply to the sender" value="Send message" />
 <?php } else { ?>
                     <input type="button" value="Unresolve" onclick="location.href='staffpm.php?action=unresolve&amp;id=<?=$ConvID?>';" />
 <?php } ?>

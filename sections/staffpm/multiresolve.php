@@ -1,40 +1,34 @@
 <?php
-if ($IDs = $_POST['id']) {
-    $Queries = [];
-    foreach ($IDs as &$ID) {
-        $ID = (int)$ID;
-
-        // Check if conversation belongs to user
-        $DB->query("
-            SELECT UserID, AssignedToUser
-            FROM staff_pm_conversations
-            WHERE ID = $ID");
-        list($UserID, $AssignedToUser) = $DB->next_record();
-
-        if ($UserID == $LoggedUser['ID'] || $DisplayStaff == '1' || $UserID == $AssignedToUser) {
-            // Conversation belongs to user or user is staff, queue query
-            $Queries[] = "
-                UPDATE staff_pm_conversations
-                SET Status = 'Resolved', ResolverID = ".$LoggedUser['ID']."
-                WHERE ID = $ID";
-        } else {
-            // Trying to run disallowed query
-            error(403);
-        }
-    }
-
-    // Run queries
-    foreach ($Queries as $Query) {
-        $DB->query($Query);
-    }
-    // Clear cache for user
-    $Cache->delete_value("staff_pm_new_" . $LoggedUser['ID']);
-    $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
-
-    // Done! Return to inbox
-    header("Location: staffpm.php");
-} else {
+$IDs = $_POST['id'];
+if (!$IDs) {
     // No ID
     header("Location: staffpm.php");
+    exit;
 }
-?>
+
+foreach ($IDs as $ID) {
+    $ID = (int)$ID;
+    // Check if conversation belongs to user
+    [$UserID, $AssignedToUser] = $DB->row("
+        SELECT UserID, AssignedToUser
+        FROM staff_pm_conversations
+        WHERE ID = $ID");
+
+    if ($UserID == $LoggedUser['ID'] || $DisplayStaff == '1' || $UserID == $AssignedToUser) {
+        // Trying to run disallowed query, stop here
+        break;
+    } else {
+        // Conversation belongs to user or user is staff
+        $DB->prepared_query("
+            UPDATE staff_pm_conversations SET
+                Date = now(),
+                Status = 'Resolved',
+                ResolverID = ?
+            WHERE ID = ?
+            ", $LoggedUser['ID'], $ID
+        );
+    }
+}
+$Cache->deleteMulti(["staff_pm_new_" . $LoggedUser['ID'], "num_staff_pms_" . $LoggedUser['ID']]);
+
+header("Location: staffpm.php");

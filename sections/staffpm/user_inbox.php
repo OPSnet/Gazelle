@@ -3,9 +3,8 @@
 View::show_header('Staff PMs', 'staffpm');
 
 // Get messages
-$StaffPMs = $DB->query("
-    SELECT
-        ID,
+$StaffPMs = $DB->prepared_query("
+    SELECT ID,
         Subject,
         UserID,
         Status,
@@ -14,8 +13,9 @@ $StaffPMs = $DB->query("
         Date,
         Unread
     FROM staff_pm_conversations
-    WHERE UserID = ".$LoggedUser['ID']."
-    ORDER BY Status, Date DESC"
+    WHERE UserID = ?
+    ORDER BY Status, Date DESC
+    ", $LoggedUser['ID']
 );
 
 // Start page
@@ -55,7 +55,7 @@ if (!$DB->has_results()) {
     // List messages
     $Row = 'a';
     $ShowBox = 1;
-    while (list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread) = $DB->next_record()) {
+    while ([$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread] = $DB->next_record()) {
         if ($Unread === '1') {
             $RowClass = 'unreadpm';
         } else {

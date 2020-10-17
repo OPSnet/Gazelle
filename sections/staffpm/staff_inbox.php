@@ -4,8 +4,6 @@ View::show_header('Staff Inbox');
 
 $View = display_str(empty($_GET['view']) ? '' : $_GET['view']);
 $UserLevel = $LoggedUser['EffectiveClass'];
-
-
 $LevelCap = Permissions::get_level_cap();
 
 // Setup for current view mode
@@ -54,13 +52,6 @@ if ($ViewString == 'Your Unanswered') {
 
 $Row = 'a';
 
-// Start page
-?>
-<div class="thin">
-    <div class="header">
-        <h2><?=$ViewString?> Staff PMs</h2>
-        <div class="linkbox">
-<?php
 $Sections = [
     'unanswered' => "All unanswered",
     'open' => "Unresolved",
@@ -70,6 +61,13 @@ if ($IsStaff) {
     $Sections = ['' => 'Your unanswered'] + $Sections;
 }
 
+// Start page
+?>
+<div class="thin">
+    <div class="header">
+        <h2><?=$ViewString?> Staff PMs</h2>
+        <div class="linkbox">
+<?php
 foreach ($Sections as $Section => $Text) {
     if ($Section == 'unanswered') {
         $AllUnansweredStaffPMCount = $DB->scalar("
@@ -113,12 +111,17 @@ if (check_perms('admin_staffpm_stats')) { ?>
     <br />
     <br />
 <?php
-list($Page, $Limit) = Format::page_limit(MESSAGES_PER_PAGE);
+[$Page, $Limit] = Format::page_limit(MESSAGES_PER_PAGE);
+
+$NumResults = $DB->scalar("
+    SELECT count(*)
+    FROM staff_pm_conversations AS spc
+    LEFT JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
+    $WhereCondition
+");
 // Get messages
-$StaffPMs = $DB->query("
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        spc.ID,
+$StaffPMs = $DB->prepared_query("
+    SELECT spc.ID,
         spc.Subject,
         spc.UserID,
         spc.Status,
@@ -126,19 +129,15 @@ $StaffPMs = $DB->query("
         spc.AssignedToUser,
         spc.Date,
         spc.Unread,
-        COUNT(spm.ID) AS NumReplies,
+        count(spm.ID) AS NumReplies,
         spc.ResolverID
     FROM staff_pm_conversations AS spc
-    JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
+    LEFT JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
     $WhereCondition
     GROUP BY spc.ID
     ORDER BY $SortStr spc.Date DESC
     LIMIT $Limit
 ");
-
-$DB->query('SELECT FOUND_ROWS()');
-list($NumResults) = $DB->next_record();
-$DB->set_query_id($StaffPMs);
 
 $Pages = Format::get_pages($Page, $NumResults, MESSAGES_PER_PAGE, 9);
 ?>
@@ -153,7 +152,6 @@ if (!$DB->has_results()) {
 ?>
         <h2>No messages</h2>
 <?php
-
 } else {
     // Messages, draw table
     if ($ViewString != 'Resolved' && $IsStaff) {
@@ -184,10 +182,9 @@ if (!$DB->has_results()) {
 <?php
 
     // List messages
-    while (list($ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID) = $DB->next_record()) {
+    while ([$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread, $NumReplies, $ResolverID] = $DB->next_record()) {
         $Row = $Row === 'a' ? 'b' : 'a';
         $RowClass = "row$Row";
-
         $UserStr = Users::format_username($UserID, true, true, true, true);
 
         // Get assigned
@@ -198,11 +195,9 @@ if (!$DB->has_results()) {
             if ($Assigned != 'Sysop') {
                 $Assigned .= '+';
             }
-
         } else {
             // Assigned to user
             $Assigned = Users::format_username($AssignedToUser, true, true, true, true);
-
         }
 
         // Get resolver
@@ -220,7 +215,7 @@ if (!$DB->has_results()) {
                     <td><?=$UserStr?></td>
                     <td><?=time_diff($Date, 2, true)?></td>
                     <td><?=$Assigned?></td>
-                    <td><?=$NumReplies - 1?></td>
+                    <td><?= max(0, $NumReplies - 1) ?></td>
 <?php        if ($ViewString == 'Resolved') { ?>
                     <td><?=$ResolverStr?></td>
 <?php        } ?>
@@ -248,7 +243,4 @@ if (!$DB->has_results()) {
     </div>
 </div>
 <?php
-
 View::show_footer();
-
-?>
