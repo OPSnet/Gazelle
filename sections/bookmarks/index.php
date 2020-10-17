@@ -1,8 +1,6 @@
 <?php
 enforce_login();
 
-define('BOOKMARKS_PER_PAGE', '20');
-
 switch ($_REQUEST['action'] ?? 'view') {
     case 'add':
         require('add.php');
@@ -17,24 +15,7 @@ switch ($_REQUEST['action'] ?? 'view') {
         break;
 
     case 'remove_snatched':
-        authorize();
-        $DB->query("
-            CREATE TEMPORARY TABLE snatched_groups_temp
-                (GroupID int PRIMARY KEY)");
-        $DB->query("
-            INSERT INTO snatched_groups_temp
-            SELECT DISTINCT GroupID
-            FROM torrents AS t
-                JOIN xbt_snatched AS s ON s.fid = t.ID
-            WHERE s.uid = '{$LoggedUser['ID']}'");
-        $DB->query("
-            DELETE b
-            FROM bookmarks_torrents AS b
-                JOIN snatched_groups_temp AS s
-            USING(GroupID)
-            WHERE b.UserID = '{$LoggedUser['ID']}'");
-        $Cache->delete_value("bookmarks_group_ids_" . $LoggedUser['ID']);
-        header('Location: bookmarks.php');
+        require('remove_snatched.php');
         break;
 
     case 'edit':
