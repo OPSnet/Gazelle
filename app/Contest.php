@@ -66,7 +66,7 @@ class Contest extends Base {
             UPDATE contest SET
                 name = ?, display = ?, max_tracked = ?, date_begin = ?, date_end = ?,
                 contest_type_id = ?, banner = ?, description = ?
-            WHERE ID = ?
+            WHERE contest_id = ?
             ", trim($params['name']), $params['display'], $params['maxtrack'], $params['date_begin'], $params['date_end'],
                 $params['type'], trim($params['banner']), trim($params['description']),
                 $this->id
