@@ -142,7 +142,7 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
  * table and update their cache key.
  */
 if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
-    if (isset($LoggedUser)) {
+    if (!empty($LoggedUser)) {
         $FLTokens = $LoggedUser['FLTokens'];
         if ($LoggedUser['CanLeech'] != '1') {
             error('You cannot use tokens while leech disabled.');
