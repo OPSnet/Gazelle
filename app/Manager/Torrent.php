@@ -617,12 +617,17 @@ class Torrent extends \Gazelle\Base {
      * @return array The torrent id and group id if found, otherwise null
      */
     public function hashToTorrentGroup(string $hash) {
-        return $this->db->row("
-            SELECT ID, GroupID
-            FROM torrents
-            WHERE info_hash = UNHEX(?)
-            ", $hash
-        );
+        $key = "thash_to_group_$hash";
+        if (($info = $this->cache->get_value($key)) === false) {
+            $info =  $this->db->row("
+                SELECT ID, GroupID
+                FROM torrents
+                WHERE info_hash = UNHEX(?)
+                ", $hash
+            );
+            $this->cache->cache_value($key, $info, 86400 + rand(0, 3600));
+        }
+        return $info;
     }
 
     /**
@@ -631,12 +636,17 @@ class Torrent extends \Gazelle\Base {
      * @return int The group id if found, otherwise null
      */
     public function idToGroupId(int $torrentId) {
-        return $this->db->scalar("
-            SELECT GroupID
-            FROM torrents
-            WHERE ID = ?
-            ", $torrentId
-        );
+        $key = "tid_to_group_$torrentId";
+        if (($groupId = $this->cache->get_value($key)) === false) {
+            $groupId = $this->db->scalar("
+                SELECT GroupID
+                FROM torrents
+                WHERE ID = ?
+                ", $torrentId
+            );
+            $this->cache->cache_value($key, $groupId, 86400 + rand(0, 3600));
+        }
+        return $groupId;
     }
 
     /**

@@ -21,11 +21,11 @@ if ((time() - strtotime($contest->dateEnd())) / 86400 > 15) {
 <?php
         for ($i = 0, $end = min(3, count($leaderboard)); $i < $end; $i++) {
             $Row = $leaderboard[$i];
-            $User = Users::user_info($Row[0]);
+            $User = Users::user_info($Row['user_id']);
 ?>
         <tr>
             <td><a href="user.php?id=<?=$User['ID']?>"><?=$User['Username']?></a></td>
-            <td><?=$Row[1]?></td>
+            <td><?=$Row['entry_count']?></td>
         </tr>
 <?php } ?>
     </table>

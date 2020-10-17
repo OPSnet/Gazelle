@@ -30,7 +30,6 @@ abstract class AbstractContest extends \Gazelle\Base {
     protected $id;
     protected $begin;
     protected $end;
-    protected $stats; /* entries, users */
 
     public function __construct(int $id, string $begin, string $end) {
         parent::__construct();
@@ -42,20 +41,6 @@ abstract class AbstractContest extends \Gazelle\Base {
     abstract public function ranker(): array;
     abstract public function participationStats(): array;
     abstract public function userPayout(float $enabledUserBonus, float $contestBonus, float $perEntryBonus): array;
-
-    public function totalEntries(): int {
-        if (!$this->stats) {
-            $this->stats = $this->participationStats();
-        }
-        return $stats[0] ?? 0;
-    }
-
-    public function totalUsers(): int {
-        if (!$this->stats) {
-            $this->stats = $this->participationStats();
-        }
-        return $stats[1] ?? 0;
-    }
 
     public function calculateLeaderboard(): int {
         /* only called from schedule, don't need to worry about caching this */
@@ -80,10 +65,9 @@ abstract class AbstractContest extends \Gazelle\Base {
                 T.Time
             ", $this->id, ...$args
         );
+        $n = $this->db->affected_rows();
         $this->db->commit();
-        $total = $this->totalEntries();
-        $this->cache->delete_value("contest_leaderboard_" . $this->id);
-        $this->cache->cache_value("contest_leaderboard_total_" . $this->id, $total, 3600 * 6);
-        return $total;
+        $this->cache->deleteMulti(["contest_stats_" . $this->id, "contest_leaderboard_" . $this->id]);
+        return $n;
     }
 }

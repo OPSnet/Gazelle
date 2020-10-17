@@ -9,6 +9,7 @@ class Contest extends Base {
     protected $info;
     /** @var \Gazelle\Contest\AbstractContest */
     protected $type;
+    protected $stats; /* entries, users */
     protected $bonusPool;
     protected $totalEntries;
     protected $totalUsers;
@@ -124,12 +125,26 @@ class Contest extends Base {
         return $this->info['description'];
     }
 
+    protected function participationStats(): array {
+        if (($this->stats = $this->cache->get_value('contest_stats_' . $this->id)) === false) {
+            $this->stats = $this->type->participationStats() ?? [0, 0];
+            $this->cache->cache_value('contest_stats_' . $this->id, $this->stats, 900);
+        }
+        return $this->stats;
+    }
+
     public function totalEntries(): int {
-        return $this->type->totalEntries();
+        if (!$this->stats) {
+            $this->stats = $this->participationStats();
+        }
+        return $this->stats[0] ?? 0;
     }
 
     public function totalUsers(): int {
-        return $this->type->totalUsers();
+        if (!$this->stats) {
+            $this->stats = $this->participationStats();
+        }
+        return $this->stats[1] ?? 0;
     }
 
     public function hasBonusPool(): bool {
