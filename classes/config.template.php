@@ -163,6 +163,7 @@ define('ULTIMATE_TM',   '48');
 define('STAFF_LOCKED', 1);
 
 // Pagination
+define('BOOKMARKS_PER_PAGE', 20);
 define('FRIENDS_PER_PAGE', 20);
 define('INVITES_PER_PAGE', 50);
 define('LOG_ENTRIES_PER_PAGE', 50);

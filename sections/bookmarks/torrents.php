@@ -15,7 +15,7 @@ if (empty($_GET['userid'])) {
     if (!check_perms('users_override_paranoia')) {
         error(403);
     }
-    list($UserID, $Title) = $DB->row("
+    [$UserID, $Title] = $DB->row("
         SELECT ID, concat(Username, '''s bookmarked torrent groups')
         FROM users_main
         WHERE ID = ?
@@ -30,7 +30,7 @@ $Sneaky = $UserID !== $LoggedUser['ID'];
 $NumGroups = 0;
 $ArtistCount = [];
 
-list($GroupIDs, $CollageDataList, $TorrentList) = Users::get_bookmarks($UserID);
+[$GroupIDs, $CollageDataList, $TorrentList] = Users::get_bookmarks($UserID);
 foreach ($GroupIDs as $Idx => $GroupID) {
     if (!isset($TorrentList[$GroupID])) {
         unset($GroupIDs[$Idx]);
@@ -198,7 +198,7 @@ foreach ($GroupIDs as $Idx => $GroupID) {
     $Artists = $Group['Artists'];
     $ExtendedArtists = $Group['ExtendedArtists'];
 
-    list(, $Sort, $AddedTime) = array_values($CollageDataList[$GroupID]);
+    [, $Sort, $AddedTime] = array_values($CollageDataList[$GroupID]);
 
     if ($Artists) {
         foreach ($Artists as $Artist) {
