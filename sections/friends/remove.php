@@ -1,8 +1,11 @@
 <?php
-$DB->query("
+
+authorize();
+$DB->prepared_query("
     DELETE FROM friends
-    WHERE UserID='{$LoggedUser['ID']}'
-        AND FriendID='{$P['friendid']}'");
+    WHERE UserID = ?
+        AND FriendID = ?
+    ", $LoggedUser['ID'], (int)$_POST['friendid']
+);
 
 header('Location: friends.php');
-?>
