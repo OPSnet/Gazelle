@@ -6,16 +6,18 @@ if (!check_perms('admin_manage_contest')) {
 
 $create = isset($_GET['action']) && $_GET['action'] === 'create';
 $Saved = 0;
-if (!empty($_POST['new']) || !empty($_POST['cid'])) {
+if (!empty($_POST['cid'])) {
     authorize();
     $contest = new Gazelle\Contest((int)$_POST['cid']);
     $contest->save($_POST);
     $Saved = 1;
-}
-elseif (!empty($_GET['id'])) {
+} elseif (!empty($_POST['new'])) {
+    authorize();
+    $contestMan = new Gazelle\Manager\Contest;
+    $contest = $contestMan->create($_POST);
+} elseif (!empty($_GET['id'])) {
     $contest = new Gazelle\Contest((int)$_GET['id']);
-}
-elseif (!$create) {
+} elseif (!$create) {
     $contest = $contestMan->currentContest();
 }
 
@@ -88,6 +90,7 @@ if ($create || $contest) {
 
     echo G::$Twig->render('contest/admin-form.twig', [
         'action'     => $create ? 'contest.php?action=create' : 'contest.php?action=admin&amp;id=' . $contest->id(),
+        'auth'       => $LoggedUser['AuthKey'],
         'contest'    => $contest,
         'create'     => $create,
         'type'       => $contestTypes,

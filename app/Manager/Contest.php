@@ -10,7 +10,7 @@ class Contest extends \Gazelle\Base {
                    (name, display, max_tracked, date_begin, date_end, contest_type_id, banner, description)
             VALUES (?,    ?,       ?,           ?,          ?,        ?,               ?,      ?)
             ", $info['name'], $info['display'], $info['maxtrack'], $info['date_begin'], $info['date_end'],
-               $info['type'], $info['banner'], $info['intro']
+               $info['type'], $info['banner'], $info['description']
         );
         $contestId = $this->db->inserted_id();
         if (isset($info['pool'])) {
