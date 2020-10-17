@@ -10,6 +10,9 @@ class User extends Base {
     /** @var int */
     protected $id;
 
+    /** @var array contents of \Users::user_heavy_info */
+    protected $heavy;
+
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
     public function __construct(int $id) {
@@ -152,6 +155,30 @@ class User extends Base {
     public function primaryClass(): int {
         $info = \Users::user_info($this->id);
         return $info['Class'];
+    }
+
+    protected function initHeavy() {
+        $this->heavy = \Users::user_heavy_info($this->id);
+    }
+
+    public function forbiddenForums(): array {
+        if (!$this->heavy) {
+            $this->initHeavy();
+        }
+        return isset($this->heavy['CustomForums']) ? array_keys($this->heavy['CustomForums'], 0) : [];
+    }
+
+    public function permittedForums(): array {
+        if (!$this->heavy) {
+            $this->initHeavy();
+        }
+        $permitted = isset($this->heavy['CustomForums']) ? array_keys($this->heavy['CustomForums'], 1) : [];
+        // TODO: This logic needs to be moved from the Donations manager to the User
+        $donorMan = new Manager\Donation;
+        if ($donorMan->hasForumAccess($this->id) && !in_array(DONOR_FORUM, $permitted)) {
+            $permitted[] = DONOR_FORUM;
+        }
+        return $permitted;
     }
 
     public function forceCacheFlush($flush = true) {

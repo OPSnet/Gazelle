@@ -1,90 +1,65 @@
 <?php
-//TODO: Clean up this fucking mess
-/*
-Forums search result page
-*/
 
-list($Page, $Limit) = Format::page_limit(POSTS_PER_PAGE);
-
-if (isset($_GET['type']) && $_GET['type'] === 'body') {
-    $Type = 'body';
-} else {
-    $Type = 'title';
-}
-
-// What are we looking for? Let's make sure it isn't dangerous.
-if (isset($_GET['search'])) {
-    $Search = trim($_GET['search']);
-} else {
-    $Search = '';
-}
-
-$ThreadAfterDate = db_string($_GET['thread_created_after']);
-$ThreadBeforeDate = db_string($_GET['thread_created_before']);
-
-if ((!empty($ThreadAfterDate) && !is_valid_date($ThreadAfterDate)) || (!empty($ThreadBeforeDate) && !is_valid_date($ThreadBeforeDate))) {
-    error("Incorrect topic created date");
-}
-
-$PostAfterDate = db_string($_GET['post_created_after']);
-$PostBeforeDate = db_string($_GET['post_created_before']);
-
-if ((!empty($PostAfterDate) && !is_valid_date($PostAfterDate)) || (!empty($PostBeforeDate) && !is_valid_date($PostBeforeDate))) {
-    error("Incorrect post created date");
-}
-
-// Searching for posts by a specific user
-if (!empty($_GET['user'])) {
-    $User = trim($_GET['user']);
-    $DB->query("
-        SELECT ID
-        FROM users_main
-        WHERE Username = '".db_string($User)."'");
-    list($AuthorID) = $DB->next_record();
-    if ($AuthorID === null) {
-        $AuthorID = 0;
-        //this will cause the search to return 0 results.
-        //workaround in line 276 to display that the username was wrong.
-    }
-} else {
-    $User = '';
-}
-
-// Are we looking in individual forums?
-if (isset($_GET['forums']) && is_array($_GET['forums'])) {
-    $ForumArray = [];
-    foreach ($_GET['forums'] as $Forum) {
-        if (is_number($Forum)) {
-            $ForumArray[] = $Forum;
-        }
-    }
-    if (count($ForumArray) > 0) {
-        $SearchForums = implode(', ', $ForumArray);
-    }
-}
+$search = new Gazelle\ForumSearch(new Gazelle\User($LoggedUser['ID']));
+$search->setSearchType($_GET['type'] ?? 'title')
+    ->setSearchText(trim($_GET['search']) ?? '')
+    ->setAuthor($_GET['user'] ?? '');
 
 // Searching for posts in a specific thread
-if (!empty($_GET['threadid']) && is_number($_GET['threadid'])) {
-    $ThreadID = $_GET['threadid'];
-    $Type = 'body';
-    $SQL = "
-        SELECT
-            Title
-        FROM forums_topics AS t
-            JOIN forums AS f ON f.ID = t.ForumID
-        WHERE t.ID = $ThreadID
-            AND " . Forums::user_forums_sql();
-    $DB->query($SQL);
-    if (list($Title) = $DB->next_record()) {
-        $Title = " &rsaquo; <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
-    } else {
-        error(404);
-    }
+$ThreadID = (int)($_GET['threadid'] ?? 0);
+if (!$ThreadID) {
+    $Title = " &rsaquo; &ldquo;" . display_str($search->searchText()) . "&rdquo;";
 } else {
-    $ThreadID = '';
+    $Title = $search->threadTitle($ThreadID);
+    if (is_null($Title)) {
+        // naughty naughty
+        error(403);
+    }
+    $search->setSearchType('body');
+    $Title = " &rsaquo; <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
 }
 
-// Let's hope we got some results - start printing out the content.
+$threadCreatedBefore = $_GET['thread_created_before'] ?? '';
+if (!empty($threadCreatedBefore)) {
+    if (is_valid_date($threadCreatedBefore)) {
+        $search->setThreadCreatedBefore($threadCreatedBefore);
+    } else {
+        error("Incorrect topic created before date");
+    }
+}
+$threadCreatedAfter = $_GET['thread_created_after'] ?? '';
+if (!empty($threadCreatedAfter)) {
+    if (is_valid_date($threadCreatedAfter)) {
+        $search->setThreadCreatedAfter($threadCreatedAfter);
+    } else {
+        error("Incorrect topic created after date");
+    }
+}
+
+if ($search->isBodySearch()) {
+    $postCreatedBefore = $_GET['post_created_before'] ?? '';
+    if (!empty($postCreatedBefore)) {
+        if (is_valid_date($postCreatedBefore)) {
+            $search->setPostCreatedBefore($postCreatedBefore);
+        } else {
+            error("Incorrect post created before date");
+        }
+    }
+    $postCreatedAfter = $_GET['post_created_after'] ?? '';
+    if (!empty($postCreatedAfter)) {
+        if (is_valid_date($postCreatedAfter)) {
+            $search->setPostCreatedAfter($postCreatedAfter);
+        } else {
+            error("Incorrect post created after date");
+        }
+    }
+}
+
+// Has the user checked individual forums?
+if (isset($_GET['forums']) && is_array($_GET['forums'])) {
+    $search->setForumList($_GET['forums']);
+}
+
 View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker', 'datetime_picker');
 ?>
 <div class="thin">
@@ -97,51 +72,47 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
             <tr>
                 <td><strong>Search for:</strong></td>
                 <td>
-                    <input type="search" name="search" size="70" value="<?=display_str($Search)?>" />
+                    <input type="search" name="search" size="70" value="<?= display_str($search->searchText()) ?>" />
                 </td>
             </tr>
             <tr>
                 <td><strong>Posted by:</strong></td>
                 <td>
-                    <input type="search" name="user" placeholder="Username" size="70" value="<?=display_str($User)?>" />
+                    <input type="search" name="user" placeholder="Username" size="70" value="<?= display_str($search->authorName()) ?>" />
                 </td>
             </tr>
             <tr>
                 <td><strong>Topic created:</strong></td>
                 <td>
                     After:
-                    <input type="text" class="date_picker" name="thread_created_after" id="thread_created_after" value="<?=$ThreadAfterDate?>" />
+                    <input type="text" class="date_picker" name="thread_created_after" id="thread_created_after" value="<?= $threadCreatedAfter ?>" />
                     Before:
-                    <input type="text" class="date_picker" name="thread_created_before" id="thread_created_before" value="<?=$ThreadBeforeDate?>" />
+                    <input type="text" class="date_picker" name="thread_created_before" id="thread_created_before" value="<?= $threadCreatedBefore ?>" />
                 </td>
             </tr>
-<?php
-if (empty($ThreadID)) {
-?>
+<?php if (!$ThreadID) { ?>
             <tr>
                 <td><strong>Search in:</strong></td>
                 <td>
-                    <input type="radio" name="type" id="type_title" value="title"<?php if ($Type == 'title') { echo ' checked="checked"'; } ?> />
+                    <input type="radio" name="type" id="type_title" value="title"<?php if (!$search->isBodySearch()) { echo ' checked="checked"'; } ?> />
                     <label for="type_title">Titles</label>
-                    <input type="radio" name="type" id="type_body" value="body"<?php if ($Type == 'body') { echo ' checked="checked"'; } ?> />
+                    <input type="radio" name="type" id="type_body" value="body"<?php if ($search->isBodySearch()) { echo ' checked="checked"'; } ?> />
                     <label for="type_body">Post bodies</label>
                 </td>
             </tr>
-            <tr id="post_created_row" <?php if ($Type == 'title') { echo "class='hidden'"; } ?>>
+            <tr id="post_created_row" <?php if (!$search->isBodySearch()) { echo "class='hidden'"; } ?>>
                 <td><strong>Post created:</strong></td>
                 <td>
                     After:
-                    <input type="text" class="date_picker" name="post_created_after" id="post_created_after" value="<?=$PostAfterDate?>" />
+                    <input type="text" class="date_picker" name="post_created_after" id="post_created_after" value="<?= $postCreatedAfter ?? '' ?>" />
                     Before:
-                    <input type="text" class="date_picker" name="post_created_before" id="post_created_before" value="<?=$PostBeforeDate?>" />
+                    <input type="text" class="date_picker" name="post_created_before" id="post_created_before" value="<?= $postCreatedBefore ?? '' ?>" />
                 </td>
             </tr>
             <tr>
                 <td><strong>Forums:</strong></td>
                 <td>
         <table id="forum_search_cat_list" class="cat_list layout">
-
-
 <?php
     // List of forums
     $Open = false;
@@ -152,18 +123,15 @@ if (empty($ThreadID)) {
         if (!Forums::check_forumperm($Forum['ID'])) {
             continue;
         }
-
         $Columns++;
 
         if ($Forum['CategoryID'] != $LastCategoryID) {
             $LastCategoryID = $Forum['CategoryID'];
             if ($Open) {
-                if ($Columns % 5) { ?>
-                <td colspan="<?=(5 - ($Columns % 5))?>"></td>
-<?php
-                }
-
+                if ($Columns % 5) {
 ?>
+                <td colspan="<?=(5 - ($Columns % 5))?>"></td>
+<?php           } ?>
             </tr>
 <?php
             }
@@ -178,16 +146,18 @@ if (empty($ThreadID)) {
                 </td>
             </tr>
             <tr>
-<?php        } elseif ($Columns % 5 == 0) { ?>
+<?php   } elseif ($Columns % 5 == 0) { ?>
             </tr>
             <tr>
-<?php        } ?>
+<?php   } ?>
                 <td>
-                    <input type="checkbox" name="forums[]" value="<?=$Forum['ID']?>" data-category="forum_category_<?=$i?>" id="forum_<?=$Forum['ID']?>"<?php if (isset($_GET['forums']) && in_array($Forum['ID'], $_GET['forums'])) { echo ' checked="checked"';} ?> />
+                    <input type="checkbox" name="forums[]" value="<?=$Forum['ID']?>" data-category="forum_category_<?=$i?>" id="forum_<?=$Forum['ID']?>"<?= in_array($Forum['ID'], ($_GET['forums'] ?? [])) ? ' checked="checked"' : '' ?> />
                     <label for="forum_<?=$Forum['ID']?>"><?=htmlspecialchars($Forum['Name'])?></label>
                 </td>
-<?php     }
-    if ($Columns % 5) { ?>
+<?php
+    }
+    if ($Columns % 5) {
+?>
                 <td colspan="<?=(5 - ($Columns % 5))?>"></td>
 <?php    } ?>
             </tr>
@@ -204,109 +174,10 @@ if (empty($ThreadID)) {
                 </tr>
             </table>
         </form>
+
+<?php $results = $search->results(Format::page_limit(POSTS_PER_PAGE)); ?>
     <div class="linkbox">
-<?php
-
-// Break search string down into individual words
-$Words = explode(' ', db_string($Search));
-
-if ($Type == 'body') {
-
-    $SQL = "
-        SELECT
-            SQL_CALC_FOUND_ROWS
-            t.ID,
-            ".(!empty($ThreadID) ? "SUBSTRING_INDEX(p.Body, ' ', 40)" : 't.Title').",
-            t.ForumID,
-            f.Name,
-            p.AddedTime,
-            p.ID,
-            p.Body,
-            t.CreatedTime
-        FROM forums_posts AS p
-            JOIN forums_topics AS t ON t.ID = p.TopicID
-            JOIN forums AS f ON f.ID = t.ForumID
-        WHERE " . Forums::user_forums_sql() . ' AND ';
-
-    //In tests, this is significantly faster than LOCATE
-    $SQL .= "p.Body LIKE '%";
-    $SQL .= implode("%' AND p.Body LIKE '%", $Words);
-    $SQL .= "%' ";
-
-    //$SQL .= "LOCATE('";
-    //$SQL .= implode("', p.Body) AND LOCATE('", $Words);
-    //$SQL .= "', p.Body) ";
-
-    if (isset($SearchForums)) {
-        $SQL .= " AND f.ID IN ($SearchForums)";
-    }
-    if (isset($AuthorID)) {
-        $SQL .= " AND p.AuthorID = '$AuthorID' ";
-    }
-    if (!empty($ThreadID)) {
-        $SQL .= " AND t.ID = '$ThreadID' ";
-    }
-    if (!empty($ThreadAfterDate)) {
-        $SQL .= " AND t.CreatedTime >= '$ThreadAfterDate'";
-    }
-    if (!empty($ThreadBeforeDate)) {
-        $SQL .= " AND t.CreatedTime <= '$ThreadBeforeDate'";
-    }
-    if (!empty($PostAfterDate)) {
-        $SQL .= " AND p.AddedTime >= '$PostAfterDate'";
-    }
-    if (!empty($PostBeforeDate)) {
-        $SQL .= " AND p.AddedTime <= '$PostBeforeDate'";
-    }
-
-    $SQL .= "
-        ORDER BY p.AddedTime DESC
-        LIMIT $Limit";
-
-} else {
-    $SQL = "
-        SELECT
-            SQL_CALC_FOUND_ROWS
-            t.ID,
-            t.Title,
-            t.ForumID,
-            f.Name,
-            t.LastPostTime,
-            '',
-            '',
-            t.CreatedTime
-        FROM forums_topics AS t
-            JOIN forums AS f ON f.ID = t.ForumID
-        WHERE " . Forums::user_forums_sql() . ' AND ';
-    $SQL .= "t.Title LIKE '%";
-    $SQL .= implode("%' AND t.Title LIKE '%", $Words);
-    $SQL .= "%' ";
-    if (isset($SearchForums)) {
-        $SQL .= " AND f.ID IN ($SearchForums)";
-    }
-    if (isset($AuthorID)) {
-        $SQL .= " AND t.AuthorID = '$AuthorID' ";
-    }
-    if (!empty($ThreadAfterDate)) {
-        $SQL .= " AND t.CreatedTime >= '$ThreadAfterDate'";
-    }
-    if (!empty($ThreadBeforeDate)) {
-        $SQL .= " AND t.CreatedTime <= '$ThreadBeforeDate'";
-    }
-    $SQL .= "
-        ORDER BY t.LastPostTime DESC
-        LIMIT $Limit";
-}
-
-// Perform the query
-$Records = $DB->query($SQL);
-$DB->query('SELECT FOUND_ROWS()');
-list($Results) = $DB->next_record();
-$DB->set_query_id($Records);
-
-$Pages = Format::get_pages($Page, $Results, POSTS_PER_PAGE, 9);
-echo $Pages;
-?>
+        <?= $search->pageLinkbox() ?>
     </div>
     <table cellpadding="6" cellspacing="1" border="0" class="forum_list border" width="100%">
     <tr class="colhead">
@@ -315,12 +186,13 @@ echo $Pages;
         <td>Topic creation time</td>
         <td>Last post time</td>
     </tr>
-<?php if (!$DB->has_results()) { ?>
-        <tr><td colspan="4">Nothing found<?=((isset($AuthorID) && $AuthorID == 0) ? ' (unknown username)' : '')?>!</td></tr>
+<?php if (empty($results)) { ?>
+        <tr><td colspan="4">Nothing found<?= !empty($_GET['user']) ? ' (unknown username)' : '' ?>!</td></tr>
 <?php }
 
 $Row = 'a'; // For the pretty colours
-while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $ThreadCreatedTime) = $DB->next_record()) {
+foreach ($results as $r) {
+    [$ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $ThreadCreatedTime] = $r;
     $Row = $Row === 'a' ? 'b' : 'a';
     // Print results
 ?>
@@ -335,7 +207,7 @@ while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $Threa
                 <?=shortenString($Title, 80); ?>
 <?php
     }
-    if ($Type == 'body') { ?>
+    if ($search->isBodySearch()) { ?>
                 <a href="#" onclick="$('#post_<?=$PostID?>_text').gtoggle(); return false;">(Show)</a> <span style="float: right;" class="tooltip last_read" title="Jump to post"><a href="forums.php?action=viewthread&amp;threadid=<?=$ID?><?php if (!empty($PostID)) { echo "&amp;postid=$PostID#post$PostID"; } ?>"></a></span>
 <?php    } ?>
             </td>
@@ -346,7 +218,7 @@ while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $Threa
                 <?=time_diff($LastTime)?>
             </td>
         </tr>
-<?php    if ($Type == 'body') { ?>
+<?php    if ($search->isBodySearch()) { ?>
         <tr class="row<?=$Row?> hidden" id="post_<?=$PostID?>_text">
             <td colspan="4"><?=Text::full_format($Body)?></td>
         </tr>
@@ -356,7 +228,8 @@ while (list($ID, $Title, $ForumID, $ForumName, $LastTime, $PostID, $Body, $Threa
     </table>
 
     <div class="linkbox">
-        <?=$Pages?>
+        <?= $search->pageLinkbox() ?>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

@@ -181,7 +181,7 @@ class DEBUG {
             $Line = $Matches[5];
         }
 
-        //Lets not be repetative
+        //Lets not be repetitive
         if (($Tracer[$Steps]['function'] == 'include' || $Tracer[$Steps]['function'] == 'require' ) && isset($Tracer[$Steps]['args'][0]) && $Tracer[$Steps]['args'][0] == $File) {
             unset($Tracer[$Steps]['args']);
         }
@@ -200,8 +200,8 @@ class DEBUG {
         }
 
         //Shorten the path & we're done
-        $File = str_replace(SERVER_ROOT, '', $File);
-        $Error = str_replace(SERVER_ROOT, '', $Error);
+        $File = str_replace(SERVER_ROOT . '/', '', $File);
+        $Error = str_replace(SERVER_ROOT . '/', '', $Error);
 
         if (DEBUG_WARNINGS) {
             $this->Errors[] = [$Error, $File.':'.$Line, $Call, $Args];
