@@ -312,7 +312,7 @@ class Text {
         if (!$info || !isset($info['host']) || $info['host'] != SITE_HOST) {
             return null;
         }
-        parse_str($info['query'], $args);
+        parse_str($info['query'] ?? '', $args);
         $fragment = isset($info['fragment']) ? '#' . $info['fragment'] : '';
         switch ($info['path']) {
             case '/artist.php':
