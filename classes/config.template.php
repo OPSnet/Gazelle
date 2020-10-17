@@ -172,6 +172,7 @@ define('REQUESTS_PER_PAGE', 25);
 define('TOPICS_PER_PAGE', 50);
 define('TORRENTS_PER_PAGE', 50);
 define('TORRENT_COMMENTS_PER_PAGE', 10);
+define('WIKI_ARTICLES_PER_PAGE', 25);
 
 // Cache catalogues
 define('THREAD_CATALOGUE', 500); // Limit to THREAD_CATALOGUE posts per cache key.

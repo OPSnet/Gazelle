@@ -5,7 +5,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
 $ArticleID = (int)$_GET['id'];
 
 $Latest = Wiki::get_article($ArticleID);
-list($Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName) = array_shift($Latest);
+[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName] = array_shift($Latest);
 if ($Read > $LoggedUser['EffectiveClass']) {
     error(404);
 }
@@ -37,16 +37,17 @@ View::show_header("Revisions of ".$Title);
                 <td><input type="radio" name="new" value="<?=$Revision?>" checked="checked" /></td>
             </tr>
 <?php
-$DB->query("
-    SELECT
-        Revision,
+$DB->prepared_query("
+    SELECT Revision,
         Title,
         Author,
         Date
     FROM wiki_revisions
-    WHERE ID = '$ArticleID'
-    ORDER BY Revision DESC");
-while (list($Revision, $Title, $AuthorID, $Date) = $DB->next_record()) { ?>
+    WHERE ID = ?
+    ORDER BY Revision DESC
+    ", $ArticleID
+);
+while ([$Revision, $Title, $AuthorID, $Date] = $DB->next_record()) { ?>
             <tr>
                 <td><?=$Revision?></td>
                 <td><?=$Title?></td>
@@ -64,4 +65,5 @@ while (list($Revision, $Title, $AuthorID, $Date) = $DB->next_record()) { ?>
         </table>
     </form>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();
