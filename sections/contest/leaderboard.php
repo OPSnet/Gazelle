@@ -90,7 +90,7 @@ if (!count($leaderboard)) {
 <?php
     $torMan = new Gazelle\Manager\Torrent;
     $labelMan = new Gazelle\Manager\TorrentLabel;
-    $labelMan->showMedia(true)->showEdition(true)->showFlags(true);
+    $labelMan->showMedia(true)->showEdition(true)->showFlags(false);
 
     $rank = 0;
     $prevScore = 0;
