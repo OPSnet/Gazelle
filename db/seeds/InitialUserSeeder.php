@@ -15,10 +15,11 @@ class InitialUserSeeder extends AbstractSeed {
             LIMIT 1
         ");
         $stmt->execute([SYSOP]);
-        if ($stmt->fetch(PDO::FETCH_NUM)[0]) {
+        if ($stmt->fetch(\PDO::FETCH_NUM) !== false) {
             // There is a Sysop-level user, consider the database seeded
             return;
         }
+
         $this->table('users_main')->insert([
             [
                 'Username' => 'admin',
@@ -60,18 +61,13 @@ class InitialUserSeeder extends AbstractSeed {
             ],
         ])->saveData();
 
-        $this->table('user_flt')->insert([
-            ['user_id' => $adminId],
-            ['user_id' => $userId],
-        ])->saveData();
-
         $this->table('users_leech_stats')->insert([
             [
                 'UserID' => $adminId,
                 'Uploaded' => STARTING_UPLOAD
             ],
             [
-                'UserID' => $adminId,
+                'UserID' => $userId,
                 'Uploaded' => STARTING_UPLOAD
             ]
         ])->saveData();
@@ -114,5 +110,17 @@ class InitialUserSeeder extends AbstractSeed {
             ['UserID' => $adminId],
             ['UserID' => $userId]
         ])->saveData();
+
+        $tables = [
+            'user_flt',
+            'user_bonus',
+        ];
+
+        foreach ($tables as $table) {
+            $this->table($table)->insert([
+                ['user_id' => $adminId],
+                ['user_id' => $userId],
+            ])->saveData();
+        }
     }
 }
