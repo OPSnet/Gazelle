@@ -1,10 +1,10 @@
 <?php
 authorize();
 
-if (!isset($_POST['id']) || !is_number($_POST['id'])) {
-    error(0);
-}
 $ArticleID = (int)$_POST['id'];
+if (!$ArticleID) {
+    error(404);
+}
 
 $Val = new Validate;
 $Val->SetFields('title', '1', 'string', 'The title must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
@@ -13,29 +13,26 @@ if ($Err) {
     error($Err);
 }
 
-$P = [];
-$P = db_array($_POST);
-
 $Article = Wiki::get_article($ArticleID);
-list($OldRevision, $OldTitle, $OldBody, $CurRead, $CurEdit, $OldDate, $OldAuthor) = array_shift($Article);
+[$OldRevision, $OldTitle, $OldBody, $CurRead, $CurEdit, $OldDate, $OldAuthor] = array_shift($Article);
 if ($CurEdit > $LoggedUser['EffectiveClass']) {
     error(403);
 }
 
 if (check_perms('admin_manage_wiki')) {
-    $Read=$_POST['minclassread'];
-    $Edit=$_POST['minclassedit'];
-    if (!is_number($Read)) {
-        error(0); //int?
+    $Read = (int)$_POST['minclassread'];
+    $Edit = (int)$_POST['minclassedit'];
+    if (!$Read) {
+        error(404);
     }
-    if (!is_number($Edit)) {
-        error(0);
+    if (!$Edit) {
+        error(404);
     }
     if ($Edit > $LoggedUser['EffectiveClass']) {
-        error('You can\'t restrict articles above your own level.');
+        error('You cannot restrict articles above your own level.');
     }
     if ($Edit < $Read) {
-        $Edit = $Read; //Human error fix.
+        $Edit = $Read;
     }
 }
 
@@ -45,29 +42,42 @@ if ($MyRevision != $OldRevision) {
 }
 
 // Store previous revision
-$DB->query("
+$DB->prepared_query("
     INSERT INTO wiki_revisions
-        (ID, Revision, Title, Body, Date, Author)
-    VALUES
-        ('".db_string($ArticleID)."', '".db_string($OldRevision)."', '".db_string($OldTitle)."', '".db_string($OldBody)."', '".db_string($OldDate)."', '".db_string($OldAuthor)."')");
-
+           (ID, Revision, Title, Body, Author, Date)
+    VALUES (?,  ?,        ?,     ?,    ?,      ?)
+    ", $ArticleID, $OldRevision, $OldTitle, $OldBody, $OldAuthor, $OldDate
+);
 // Update wiki entry
-$SQL = "
-    UPDATE wiki_articles
-    SET
-        Revision = '".db_string($OldRevision + 1)."',
-        Title = '{$P['title']}',
-        Body = '{$P['body']}',";
-if ($Read && $Edit) {
-    $SQL .= "
-        MinClassRead = '$Read',
-        MinClassEdit = '$Edit',";
+$field = [
+    'Revision = ? + 1',
+    'Title = ?',
+    'Body = ?',
+    'Author = ?',
+];
+$value = [
+    $OldRevision,
+    trim($_POST['title']),
+    trim($_POST['body']),
+    $LoggedUser['ID'],
+];
+if ($Read) {
+    $field[] = 'MinClassRead = ?';
+    $value[] = $Read;
 }
-$SQL .= "
-        Date = '".sqltime()."',
-        Author = '{$LoggedUser['ID']}'
-    WHERE ID = '{$P['id']}'";
-$DB->query($SQL);
+if ($Edit) {
+    $field[] = 'MinClassEdit = ?';
+    $value[] = $Edit;
+}
+$value[] = $_POST['id'];
+
+$DB->prepared_query("
+    UPDATE wiki_articles SET
+        Date = now(),
+    " . implode(', ', $field) . "
+    WHERE ID = ?
+    ", ...$value
+);
 Wiki::flush_article($ArticleID);
 
 header("Location: wiki.php?action=article&id=$ArticleID");

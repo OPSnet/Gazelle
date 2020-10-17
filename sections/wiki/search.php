@@ -4,13 +4,10 @@ if (empty($_GET['nojump'])) {
     $ArticleID = Wiki::alias_to_id($_GET['search']);
     if ($ArticleID) {
         //Found the article!
-        header('Location: wiki.php?action=article&id='.$ArticleID);
+        header("Location: wiki.php?action=article&id={$ArticleID}");
         die();
     }
 }
-
-define('ARTICLES_PER_PAGE', 25);
-list($Page, $Limit) = Format::page_limit(ARTICLES_PER_PAGE);
 
 $header = new \Gazelle\Util\SortableTableHeader('created', [
     'created' => ['dbColumn' => 'ID',    'defaultSort' => 'desc'],
@@ -24,39 +21,22 @@ $TypeMap = [
     'title' => 'Title',
     'body'  => 'Body',
 ];
-$Type = (!empty($_GET['type']) && isset($TypeMap[$_GET['type']])) ? $TypeMap[$_GET['type']] : 'Title';
-
-// What are we looking for? Let's make sure it isn't dangerous.
-$Search = db_string(trim($_GET['search']));
+$Type = $TypeMap[$_GET['type'] ?? 'title'];
 
 // Break search string down into individual words
-$Words = explode(' ', $Search);
+$words = explode(' ', trim($_GET['search']));
+$cond = array_fill(0, count($words), "$Type LIKE concat('%', ?, '%')");
+$args = $words;
+$cond[] = 'MinClassRead <= ?';
+$args[] = $LoggedUser['EffectiveClass'];
+$where = 'WHERE ' . implode(' AND ', $cond);
 
-$SQL = "
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        ID,
-        Title,
-        Date,
-        Author
-    FROM wiki_articles
-    WHERE MinClassRead <= '".$LoggedUser['EffectiveClass']."'";
-if ($Search != '') {
-    $SQL .= " AND $Type LIKE '%";
-    $SQL .= implode("%' AND $Type LIKE '%", $Words);
-    $SQL .= "%' ";
-}
-
-$SQL .= "
-    ORDER BY $OrderBy $OrderDir
-    LIMIT $Limit ";
-$RS = $DB->query($SQL);
-$DB->query("
-    SELECT FOUND_ROWS()");
-list($NumResults) = $DB->next_record();
+$NumResults = $DB->scalar("
+    SELECT count(*) FROM wiki_articles $where
+    ", ...$args
+);
 
 View::show_header('Search articles');
-$DB->set_query_id($RS);
 ?>
 <div class="thin">
     <div class="header">
@@ -107,12 +87,12 @@ $DB->set_query_id($RS);
     </div>
     <br />
 <?php
-    $Pages = Format::get_pages($Page, $NumResults, ARTICLES_PER_PAGE);
-    if ($Pages) { ?>
-    <div class="linkbox pager"><?=($Pages)?></div>
-<?php
-    }
+    [$Page, $Limit] = Format::page_limit(WIKI_ARTICLES_PER_PAGE);
+    $Pages = Format::get_pages($Page, $NumResults, WIKI_ARTICLES_PER_PAGE);
+    if ($Pages) {
 ?>
+    <div class="linkbox pager"><?= $Pages ?></div>
+<?php } ?>
 <table width="100%">
     <tr class="colhead">
         <td class="nobr"><?= $header->emit('title') ?></td>
@@ -120,7 +100,19 @@ $DB->set_query_id($RS);
         <td>Last edited by</td>
     </tr>
 <?php
-    while (list($ID, $Title, $Date, $UserID) = $DB->next_record()) { ?>
+$DB->prepared_query("
+    SELECT ID,
+        Title,
+        Date,
+        Author
+    FROM wiki_articles
+    $where
+    ORDER BY $OrderBy $OrderDir
+    LIMIT $Limit
+    ", ...$args
+);
+while ([$ID, $Title, $Date, $UserID] = $DB->next_record()) {
+?>
     <tr>
         <td><a href="wiki.php?action=article&amp;id=<?=$ID?>"><?=$Title?></a></td>
         <td><?=$Date?></td>
@@ -130,4 +122,5 @@ $DB->set_query_id($RS);
 </table>
     <div class="linkbox"><?=$Pages?></div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

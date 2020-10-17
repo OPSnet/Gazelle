@@ -7,30 +7,29 @@ if (!empty($_GET['letter'])) {
     }
 }
 
-View::show_header($Title);
-
 $sql = "
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        ID,
+    SELECT ID,
         Title,
         Date,
         Author
     FROM wiki_articles
-    WHERE MinClassRead <= '".$LoggedUser['EffectiveClass']."'";
+    WHERE MinClassRead <= ?
+    ";
+$args = [$LoggedUser['EffectiveClass']];
 if (isset($Letter) && $Letter !== '1') {
-    $sql .= " AND LEFT(Title,1) = '".db_string($Letter)."'";
+    $sql .= " AND LEFT(Title,1) = ?";
+    $args[] = $Letter;
 } else {
     $Letter = 'All';
 }
 $sql .= " ORDER BY Title";
 
-$DB->query($sql);
+$DB->prepared_query($sql, ...$args);
 
+View::show_header($Title);
 ?>
 <div class="thin">
-<?php
-    if (isset($Letter)) { ?>
+<?php if (isset($Letter)) { ?>
     <div class="header">
         <h2><?=$Title?></h2>
     </div>
@@ -48,8 +47,7 @@ $DB->query($sql);
         </tr>
 <?php   } ?>
     </table>
-<?php
-    } ?>
+<?php } /* $Letter */ ?>
     <div class="box pad center">
         <p>Search the wiki for user created tutorials and information.</p>
         <form class="search_form" name="wiki" action="wiki.php" method="get">
@@ -91,4 +89,5 @@ $DB->query($sql);
         </span>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

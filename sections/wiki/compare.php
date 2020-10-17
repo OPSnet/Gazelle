@@ -58,15 +58,16 @@ function get_body($ID, $Rev) {
     if ($Rev == $Revision) {
         $Str = $Body;
     } else {
-        $DB->query("
+        $Str = $DB->scalar("
             SELECT Body
             FROM wiki_revisions
-            WHERE ID = '$ID'
-                AND Revision = '$Rev'");
-        if (!$DB->has_results()) {
+            WHERE ID = ?
+                AND Revision = ?
+            ", $ID, $Rev
+        );
+        if (is_null($Str)) {
             error(404);
         }
-        list($Str) = $DB->next_record();
     }
     return $Str;
 }
@@ -85,7 +86,7 @@ if (!isset($_GET['old'])
 $ArticleID = (int)$_GET['id'];
 
 $Article = Wiki::get_article($ArticleID);
-list($Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName) = array_shift($Article);
+[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName] = array_shift($Article);
 if ($Read > $LoggedUser['EffectiveClass']) {
     error(404);
 }
@@ -104,4 +105,3 @@ $Diff1 = get_body($ArticleID, $_GET['old']);
 </div>
 <?php
 View::show_footer();
-?>
