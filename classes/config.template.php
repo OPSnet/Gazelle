@@ -163,14 +163,15 @@ define('ULTIMATE_TM',   '48');
 define('STAFF_LOCKED', 1);
 
 // Pagination
+define('FRIENDS_PER_PAGE', 20);
 define('INVITES_PER_PAGE', 50);
-define('TORRENT_COMMENTS_PER_PAGE', 10);
+define('LOG_ENTRIES_PER_PAGE', 50);
+define('MESSAGES_PER_PAGE', 25);
 define('POSTS_PER_PAGE', 25);
+define('REQUESTS_PER_PAGE', 25);
 define('TOPICS_PER_PAGE', 50);
 define('TORRENTS_PER_PAGE', 50);
-define('REQUESTS_PER_PAGE', 25);
-define('MESSAGES_PER_PAGE', 25);
-define('LOG_ENTRIES_PER_PAGE', 50);
+define('TORRENT_COMMENTS_PER_PAGE', 10);
 
 // Cache catalogues
 define('THREAD_CATALOGUE', 500); // Limit to THREAD_CATALOGUE posts per cache key.

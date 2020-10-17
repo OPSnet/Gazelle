@@ -7,15 +7,13 @@ switch ($_REQUEST['action'] ?? '') {
         require_once('add.php');
         break;
     case 'Remove friend':
-        authorize();
         require_once('remove.php');
         break;
     case 'Update':
-        authorize();
         require_once('comment.php');
         break;
     case 'Contact':
-        header("Location: inbox.php?action=compose&toid={$friendId}");
+        header('Location: inbox.php?action=compose&to=' . (int)$_POST['friendid']);
         break;
     default:
         require_once('friends.php');
