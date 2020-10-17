@@ -47,14 +47,14 @@ abstract class AbstractContest extends \Gazelle\Base {
         if (!$this->stats) {
             $this->stats = $this->participationStats();
         }
-        return $stats[0] ?? 0;
+        return $this->stats[0] ?? 0;
     }
 
     public function totalUsers(): int {
         if (!$this->stats) {
             $this->stats = $this->participationStats();
         }
-        return $stats[1] ?? 0;
+        return $this->stats[1] ?? 0;
     }
 
     public function calculateLeaderboard(): int {
