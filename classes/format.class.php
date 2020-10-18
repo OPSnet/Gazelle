@@ -136,7 +136,7 @@ class Format {
      * @param int $DefaultResult Optional, which result's page we want if no page is specified
      * If this parameter is not specified, we will default to page 1
      *
-     * @return array(int, string) What page we are on, and what to use in the LIMIT section of a query
+     * @return array<int, string> What page we are on, and what to use in the LIMIT section of a query
      * e.g. "SELECT [...] LIMIT $Limit;"
      */
     public static function page_limit($PerPage, $DefaultResult = 1) {

@@ -19,6 +19,7 @@ class ForumSearch extends Base {
     protected $authorName = '';
     protected $authorId = '';
     protected $page = 0;
+    protected $threadId;
     protected $linkbox;
 
     public function __construct(User $user) {
@@ -36,7 +37,7 @@ class ForumSearch extends Base {
         return $this->authorName;
     }
 
-    public function threadId(): string {
+    public function threadId(): int {
         return $this->threadId;
     }
 
@@ -205,15 +206,12 @@ class ForumSearch extends Base {
             $args[] = $this->user->primaryClass();
         } else {
             if ($this->selectedForums) {
-                // any additional forum to which they have specific access and they have selected
-                $cond[] = 'f.ID IN (' . placeholders($this->selectedForums)
-                    . ') AND (f.MinClassRead <= ? OR f.ID IN (' . placeholders($this->permittedForums) . '))';
-                $args = array_merge($args, $this->selectedForums, [$this->user->primaryClass()], $this->permittedForums);
-            } else {
-                // any additional forum to which they have specific access
-                $cond[] = '(f.MinClassRead <= ? OR f.ID IN (' . placeholders($this->permittedForums) . '))';
-                $args = array_merge($args, [$this->user->primaryClass()], $this->permittedForums);
+                $cond[] = 'f.ID in (' . placeholders($this->selectedForums) . ')';
+                $args = array_merge($args, $this->selectedForums);
             }
+
+            $cond[] = '(f.MinClassRead <= ?' . ($this->permittedForums ? ' OR f.ID IN (' . placeholders($this->permittedForums) . ')' : '') . ')';
+            $args[] = array_merge([$this->user->primaryClass()], $this->permittedForums);
         }
         // but not if they have been banned from it
         if ($this->forbiddenForums) {
