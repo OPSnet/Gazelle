@@ -1,61 +1,58 @@
 <?php
-/**********************************************************************
- *>>>>>>>>>>>>>>>>>>>>>>>>>>> User search <<<<<<<<<<<<<<<<<<<<<<<<<<<<*
- **********************************************************************/
 
-if (empty($_GET['search'])) {
+use Gazelle\Util\Paginator;
+
+$search = trim($_GET['search'] ?? '');
+if (!strlen($search)) {
     json_die("failure", "no search terms");
-} else {
-    $_GET['username'] = $_GET['search'];
 }
 
-define('USERS_PER_PAGE', 30);
+$condition = check_perms('site_advanced_search')
+    ? "Username LIKE concat('%', ?, '%')"
+    : "Username = ?";
 
-if (isset($_GET['username'])) {
-    $_GET['username'] = trim($_GET['username']);
+$total = $DB->scalar("
+    SELECT count(*) FROM users_main WHERE $condition
+    ", $search
+);
 
-    list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
-    $DB->prepared_query("
-        SELECT
-            SQL_CALC_FOUND_ROWS
-            um.ID,
-            um.Username,
-            um.Enabled,
-            um.PermissionID,
-            (donor.UserID IS NOT NULL) AS Donor,
-            ui.Warned,
-            ui.Avatar
-        FROM users_main AS um
-        INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
-        LEFT JOIN users_levels AS donor ON (donor.UserID = um.ID
-            AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
-        )
-        WHERE Username LIKE concat('%', ?, '%')
-        ORDER BY Username
-        LIMIT ?
-        ", trim($_GET['username']), $Limit
-    );
-    $Results = $DB->to_array(MYSQLI_NUM);
-    $DB->query('SELECT FOUND_ROWS();');
-    list($NumResults) = $DB->next_record();
-}
+$paginator = new Paginator(AJAX_USERS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$DB->prepared_query("
+    SELECT um.ID,
+        um.Username,
+        um.Enabled,
+        um.PermissionID,
+        (donor.UserID IS NOT NULL) AS Donor,
+        ui.Warned,
+        ui.Avatar
+    FROM users_main AS um
+    INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+    LEFT JOIN users_levels AS donor ON (donor.UserID = um.ID
+        AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
+    )
+    WHERE $condition
+    ORDER BY Username
+    LIMIT ? OFFSET ?
+    ", $search, $paginator->limit(), $paginator->offset()
+);
+$results = $DB->to_array(0, MYSQLI_NUM);
 
-$JsonUsers = [];
-foreach ($Results as $Result) {
-    list($UserID, $Username, $Enabled, $PermissionID, $Donor, $Warned, $Avatar) = $Result;
-    $JsonUsers[] = [
-        'userId' => (int)$UserID,
-        'username' => $Username,
-        'donor' => $Donor == 1,
-        'warned' => !is_null($Warned),
-        'enabled' => ($Enabled == 2 ? false : true),
-        'class' => Users::make_class_string($PermissionID),
-        'avatar' => $Avatar
+$payload = [];
+foreach ($results as $result) {
+    [$userId, $username, $enabled, $permissionId, $donor, $warned, $avatar] = $result;
+    $payload[] = [
+        'userId'   => (int)$userId,
+        'username' => $username,
+        'donor'    => $donor == 1,
+        'warned'   => !is_null($warned),
+        'enabled'  => ($enabled == 2 ? false : true),
+        'class'    => Users::make_class_string($permissionId),
+        'avatar'   => $avatar,
     ];
 }
 
 json_print("success", [
-    'currentPage' => (int)$Page,
-    'pages' => ceil($NumResults / USERS_PER_PAGE),
-    'results' => $JsonUsers
+    'currentPage' => $paginator->page(),
+    'pages'       => (int)ceil($total / AJAX_USERS_PER_PAGE),
+    'results'     => $payload,
 ]);
