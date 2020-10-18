@@ -126,7 +126,16 @@ if (empty($_POST['confirm'])) {
     );
     $Cache->deleteMulti($DB->collect('cacheKey'));
 
-    // 4. Clear the new groups vote keys
+    // GroupIDs
+    $DB->prepared_query("SELECT ID FROM torrents WHERE GroupID = ?", $oldGroupId);
+    $cacheKeys = [];
+    while ([$TorrentID] = G::$DB->next_row()) {
+        $cacheKeys[] = 'torrent_download_' . $TorrentID;
+        $cacheKeys[] = 'tid_to_group_' . $TorrentID;
+    }
+    $Cache->deleteMulti($cacheKeys);
+    unset($cacheKeys);
+
     $DB->prepared_query("
         UPDATE torrents SET
             GroupID = ?
@@ -182,19 +191,17 @@ if (empty($_POST['confirm'])) {
         ", $newGroupId, $oldGroupId
     );
 
-    $DB->prepared_query("
-        SELECT concat('torrent_download_', ID) as cachekey
-        FROM torrents
-        WHERE GroupID = ?
-        ", $oldGroupId
-    );
-    $Cache->deleteMulti($DB->collect('cacheKey'));
     Torrents::delete_group($oldGroupId);
     Torrents::update_hash($newGroupId);
 
-    $Cache->deleteMulti(["groups_artists_$newGroupId", "requests_group_$newGroupId",
-        "torrent_collages_$newGroupId", "torrent_collages_personal_$newGroupId",
-        "torrents_details_$newGroupId", "torrents_details_$oldGroupId", "votes_$newGroupId"
+    $Cache->deleteMulti([
+        "groups_artists_$newGroupId",
+        "requests_group_$newGroupId",
+        "torrent_collages_$newGroupId",
+        "torrent_collages_personal_$newGroupId",
+        "torrents_details_$newGroupId",
+        "torrents_details_$oldGroupId",
+        "votes_$newGroupId"
     ]);
 
     $DB->prepared_query("
