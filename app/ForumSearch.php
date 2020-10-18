@@ -211,7 +211,7 @@ class ForumSearch extends Base {
             }
 
             $cond[] = '(f.MinClassRead <= ?' . ($this->permittedForums ? ' OR f.ID IN (' . placeholders($this->permittedForums) . ')' : '') . ')';
-            $args[] = array_merge($args, [$this->user->primaryClass()], $this->permittedForums);
+            $args = array_merge($args, [$this->user->primaryClass()], $this->permittedForums);
         }
         // but not if they have been banned from it
         if ($this->forbiddenForums) {
