@@ -7,8 +7,6 @@ authorize();
 
 if ($_POST['submit'] == 'Reorder') { // Reorder
     foreach ($_POST['item'] as $Position => $Item) {
-        $Position = db_string($Position);
-        $Item = db_string($Item);
         $DB->prepared_query("
             UPDATE do_not_upload SET
                 Sequence = ?
