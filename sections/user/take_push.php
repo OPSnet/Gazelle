@@ -1,14 +1,15 @@
 <?php
 
-use \Gazelle\Manager\Notification;
-
 authorize();
+$UserID = (int)$_GET['userid'];
+if (!$UserID) {
+    error(404);
+}
 if (!check_perms('users_mod') && $_GET['userid'] != $LoggedUser['ID']) {
     error(403);
 }
 
-$UserID = db_string($_GET['userid']);
-$notification = new Notification;
-$notification->push($UserID, 'Push!', 'You\'ve been pushed by ' . $LoggedUser['Username']);
+$notification = new Gazelle\Manager\Notification;
+$notification->push($UserID, 'Push!', 'You have been pushed by ' . $LoggedUser['Username']);
 
-header('Location: user.php?action=edit&userid=' . $UserID . "");
+header("Location: user.php?action=edit&userid={$UserID}");
