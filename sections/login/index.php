@@ -412,16 +412,23 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                         setcookie('username', urlencode($username), time() + 60 * 60, '/', '', false);
                         header('Location: login.php?action=disabled');
                     } elseif ($Enabled == '1') {
+                        $KeepLogged = (isset($_POST['keeplogged']) && $_POST['keeplogged']);
                         if ($TFAKey) {
                             // user has TFA enabled! :)
                             if (session_status() === PHP_SESSION_NONE) {
                                 session_start();
                             }
-                            $_SESSION['temp_stay_logged'] = (isset($_POST['keeplogged']) && $_POST['keeplogged']);
+                            $_SESSION['temp_stay_logged'] = $KeepLogged;
                             $_SESSION['temp_user_data'] = [$UserID, $username];
                             session_write_close();
                             header('Location: login.php?act=2fa');
                         } else {
+                            if ($KeepLogged) {
+                                $expiry = time() + 60 * 60 * 24 * 365;
+                            } else {
+                                $expiry = 0;
+                            }
+
                             $sessionMan = new Gazelle\Session($UserID);
                             $session = $sessionMan->create([
                                 'keep-logged' => 0,

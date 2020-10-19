@@ -410,7 +410,6 @@ function logout($userId, $sessionId = false) {
     $epoch = time() - 60 * 60 * 24 * 365;
     setcookie('session', '',    $epoch, '/', '', false);
     setcookie('keeplogged', '', $epoch, '/', '', false);
-    setcookie('session', '',    $epoch, '/', '', false);
     if ($sessionId) {
         $session = new Gazelle\Session($userId);
         $session->drop($sessionId);
