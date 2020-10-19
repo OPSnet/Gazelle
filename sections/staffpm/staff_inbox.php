@@ -118,7 +118,6 @@ $NumResults = $DB->scalar("
     FROM staff_pm_conversations AS spc
     LEFT JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
     $WhereCondition
-    GROUP BY spc.ID
 ");
 // Get messages
 $StaffPMs = $DB->prepared_query("
