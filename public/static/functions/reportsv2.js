@@ -106,7 +106,7 @@ function AddMore(view, id) {
     var num = parseInt($('#repop_amount').val()) || 10;
     var curCount = $('.report').size();
     if (curCount < 50) {
-        NewReport(Math.min(num, 50 - curCount), view, id)
+        NewReport(Math.min(num, 50 - curCount), view, id);
     }
 }
 
@@ -169,7 +169,7 @@ function Grab(reportid) {
         });
     } else {
         $('#all_reports input[name="reportid"]').each(function() {
-            var reportid = this.value
+            var reportid = this.value;
             $.get("reportsv2.php?action=ajax_grab_report&id=" + reportid, function(response) {
                 if (response == '1') {
                     $('#grab' + reportid).disable();
@@ -183,7 +183,7 @@ function Grab(reportid) {
 
 function MultiResolve() {
     $('input[name="multi"]:checked').each(function() {
-        TakeResolve(this.id.substr(5))
+        TakeResolve(this.id.substr(5));
     });
 }
 
@@ -208,15 +208,14 @@ function Switch(reportid, torrentid, otherid) {
         torrentid: otherid,
         type: $('#type' + reportid).val(),
         otherid: torrentid
-    }
+    };
 
     $.post('reportsv2.php?action=ajax_create_report', report, function(response) {
-            //Returns new report ID.
-            if (isNaN(response)) {
-                alert(response);
-            } else {
-                window.location = 'reportsv2.php?view=report&id=' + response;
-            }
+        //Returns new report ID.
+        if (isNaN(response)) {
+            alert(response);
+        } else {
+            window.location = 'reportsv2.php?view=report&id=' + response;
         }
-    );
+    });
 }
