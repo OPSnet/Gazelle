@@ -153,13 +153,13 @@ if ($ShowGrouped) {
         <h2>
 <?php
     if ($ShowGrouped) {
-        echo 'Grouped '.($ShowUnread ? 'unread ' : '')."post history for <a href=\"user.php?id=$UserID\">$Username</a>";
+        echo 'Grouped '.($ShowUnread ? 'unread ' : '')."post history for <a href=\"user.php?id=$UserID\">{$UserInfo['Username']}</a>";
     }
     elseif ($ShowUnread) {
-        echo "Unread post history for <a href=\"user.php?id=$UserID\">$Username</a>";
+        echo "Unread post history for <a href=\"user.php?id=$UserID\">{$UserInfo['Username']}</a>";
     }
     else {
-        echo "Post history for <a href=\"user.php?id=$UserID\">$Username</a>";
+        echo "Post history for <a href=\"user.php?id=$UserID\">{$UserInfo['Username']}</a>";
     }
 ?>
         </h2>
@@ -190,7 +190,7 @@ if ($ViewingOwn) {
 <?php
     } else {
 ?>
-            <a href="forums.php?action=search&amp;type=body&amp;user=<?=$Username?>" class="brackets">Search</a>
+            <a href="forums.php?action=search&amp;type=body&amp;user=<?=$UserInfo['Username']?>" class="brackets">Search</a>
 <?php
     }
 ?>
@@ -260,7 +260,7 @@ if ($ViewingOwn) {
         <tr>
 <?php       if (Users::has_avatars_enabled()) { ?>
             <td class="avatar" valign="top">
-                <?=Users::show_avatar($UserInfo['Avatar'], $UserID, $Username, $HeavyInfo['DisableAvatars'])?>
+                <?=Users::show_avatar($UserInfo['Avatar'], $UserID, $UserInfo['Username'], $HeavyInfo['DisableAvatars'])?>
             </td>
 <?php       } ?>
             <td class="body" valign="top">
