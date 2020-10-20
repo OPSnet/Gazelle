@@ -243,9 +243,8 @@ class DB_MYSQL {
      */
     function query($Query, $AutoHandle=1) {
         $this->setup_query();
-        $LinkID = &$this->LinkID;
 
-        $Closure = function() use ($LinkID, $Query) {
+        $Closure = function() use ($Query) {
             return mysqli_query($this->LinkID, $Query);
         };
 
