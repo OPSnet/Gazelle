@@ -13,7 +13,7 @@ class NotificationsManagerView {
             'user_notifications.js'];
         foreach ($JSIncludes as $inc) {
 ?>
-    <script src="<?= STATIC_SERVER . "functions/$inc" ?>?v=<?= filemtime(SERVER_ROOT . "/public/static/functions/$inc")?>" type="text/javascript"></script>
+    <script src="<?= STATIC_SERVER . "/functions/$inc" ?>?v=<?= filemtime(SERVER_ROOT . "/public/static/functions/$inc")?>" type="text/javascript"></script>
 <?php
         }
     }

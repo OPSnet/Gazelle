@@ -167,8 +167,8 @@ echo $Val->GenerateJS('userform');
 <?php   foreach ($Stylesheets as $Style) { ?>
                         <div class="preview_wrapper">
                             <div class="preview_image" name="<?=($Style['Name'])?>">
-                                <a href="<?=STATIC_SERVER.'stylespreview/full_'.$Style['Name'].'.png'?>" target="_blank">
-                                    <img src="<?=STATIC_SERVER.'stylespreview/thumb_'.$Style['Name'].'.png'?>" alt="<?=$Style['Name']?>" />
+                                <a href="<?=STATIC_SERVER.'/stylespreview/full_'.$Style['Name'].'.png'?>" target="_blank">
+                                    <img src="<?=STATIC_SERVER.'/stylespreview/thumb_'.$Style['Name'].'.png'?>" alt="<?=$Style['Name']?>" />
                                 </a>
                             </div>
                             <p class="preview_name">

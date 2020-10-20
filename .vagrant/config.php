@@ -22,8 +22,7 @@ define('GRANDFATHER_NO_SOURCE', strtotime('1970-01-01')); // End date to ignore 
 define('GRANDFATHER_OLD_SOURCE', strtotime('1970-01-01')); // End date to allow APL
 
 // Allows you to run static content off another server. Default is usually what you want.
-define('NONSSL_STATIC_SERVER', 'static/');
-define('SSL_STATIC_SERVER', 'static/');
+define('STATIC_SERVER', 'static/');
 
 // Keys
 define('ENCKEY', 'JRFb5tW89xBSjaJP'); //Random key. The key for encryption
@@ -63,15 +62,6 @@ define('TRACKER_REPORTKEY', '1737853d77069dc24824916a8d0e501e'); // Must be 32 c
 
 // This is special to the vagrant setup as we are not using the default 80 port and at the same time cannot use SSL
 define('SITE_URL', NONSSL_SITE_URL);
-define('STATIC_SERVER', NONSSL_STATIC_SERVER);
-
-/*if (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 80) {
-    define('SITE_URL', NONSSL_SITE_URL);
-    define('STATIC_SERVER', NONSSL_STATIC_SERVER);
-} else {
-    define('SITE_URL', SSL_SITE_URL);
-    define('STATIC_SERVER', SSL_STATIC_SERVER);
-}*/
 
 // Site settings
 define('CRYPT_HASH_PREFIX', '$2y$07$');

@@ -555,9 +555,9 @@ class Users {
                         $DonorHeart = 5;
                     }
                     if ($DonorHeart === 1) {
-                        $IconImage = STATIC_SERVER . 'common/symbols/donor.png';
+                        $IconImage = STATIC_SERVER . '/common/symbols/donor.png';
                     } else {
-                        $IconImage = STATIC_SERVER . "common/symbols/donor_{$DonorHeart}.png";
+                        $IconImage = STATIC_SERVER . "/common/symbols/donor_{$DonorHeart}.png";
                     }
                 }
                 $Str .= "<a target=\"_blank\" href=\"$IconLink\"><img class=\"donor_icon tooltip\" src=\"$IconImage\" alt=\"$IconText\" title=\"$IconText\" /></a>";
@@ -565,10 +565,10 @@ class Users {
         }
 
         $Str .= ($IsWarned && $UserInfo['Warned']) ? '<a href="wiki.php?action=article&amp;name=warnings"'
-                    . '><img src="'.STATIC_SERVER.'common/symbols/warned.png" alt="Warned" title="Warned'
+                    . '><img src="'.STATIC_SERVER.'/common/symbols/warned.png" alt="Warned" title="Warned'
                     . (G::$LoggedUser['ID'] == $UserID ? ' - Expires ' . date('Y-m-d H:i', strtotime($UserInfo['Warned'])) : '')
                     . '" class="tooltip" /></a>' : '';
-        $Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
+        $Str .= ($IsEnabled && $UserInfo['Enabled'] == 2) ? '<a href="rules.php"><img src="'.STATIC_SERVER.'/common/symbols/disabled.png" alt="Banned" title="Disabled" class="tooltip" /></a>' : '';
 
         if ($Badges) {
             $ClassesDisplay = [];
@@ -687,7 +687,7 @@ class Users {
                 if (!empty($Avatar)) {
                     $FirstAvatar = $Avatar;
                 } else {
-                    $FirstAvatar = STATIC_SERVER.'common/avatars/default.png';
+                    $FirstAvatar = STATIC_SERVER.'/common/avatars/default.png';
                 }
                 break;
             case 2:
@@ -735,7 +735,7 @@ class Users {
                 }
                 break;
             default:
-                $FirstAvatar = STATIC_SERVER.'common/avatars/default.png';
+                $FirstAvatar = STATIC_SERVER.'/common/avatars/default.png';
         }
         // in this case, $Attrs is actually just a URL
         if (!$ReturnHTML) {

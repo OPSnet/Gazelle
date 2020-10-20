@@ -95,8 +95,8 @@ if ($task->count > 0) { ?>
 <?php } ?>
 </table>
 
-<script src="<?=STATIC_SERVER?>functions/highcharts.js"></script>
-<script src="<?=STATIC_SERVER?>functions/highcharts_custom.js"></script>
+<script src="<?=STATIC_SERVER?>/functions/highcharts.js"></script>
+<script src="<?=STATIC_SERVER?>/functions/highcharts_custom.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

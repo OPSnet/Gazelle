@@ -2,6 +2,7 @@ var dateFormat = 'Y-m-d';
 var timeFormat = 'H:i';
 var timeStep = 15;
 $(document).ready(function() {
+    // TODO: FIX_STATIC_SERVER
     $.getScript("static/functions/jquery.datetimepicker.js", function() {
         $(".date_picker").datetimepicker({
             timepicker: false,

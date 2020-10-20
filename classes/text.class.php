@@ -848,7 +848,7 @@ class Text {
                     $Str .= '<a href="wiki.php?action=article&amp;name='.urlencode($Block['Val']).'">'.$Block['Val'].'</a>';
                     break;
                 case 'tex':
-                    $Str .= '<img style="vertical-align: middle;" src="'.STATIC_SERVER.'blank.gif" onload="if (this.src.substr(this.src.length - 9, this.src.length) == \'blank.gif\') { this.src = \'https://chart.googleapis.com/chart?cht=tx&amp;chf=bg,s,FFFFFF00&amp;chl='.urlencode(mb_convert_encoding($Block['Val'], 'UTF-8', 'HTML-ENTITIES')).'&amp;chco=\' + hexify(getComputedStyle(this.parentNode, null).color); }" alt="'.$Block['Val'].'" />';
+                    $Str .= '<img style="vertical-align: middle;" src="'.STATIC_SERVER.'/blank.gif" onload="if (this.src.substr(this.src.length - 9, this.src.length) == \'blank.gif\') { this.src = \'https://chart.googleapis.com/chart?cht=tx&amp;chf=bg,s,FFFFFF00&amp;chl='.urlencode(mb_convert_encoding($Block['Val'], 'UTF-8', 'HTML-ENTITIES')).'&amp;chco=\' + hexify(getComputedStyle(this.parentNode, null).color); }" alt="'.$Block['Val'].'" />';
                     break;
                 case 'plain':
                     $Str .= $Block['Val'];
@@ -1126,7 +1126,7 @@ class Text {
         }
         if (count(self::$ProcessedSmileys) == 0 && count(self::$Smileys) > 0) {
             foreach (self::$Smileys as $Key => $Val) {
-                self::$ProcessedSmileys[$Key] = '<img border="0" src="'.STATIC_SERVER.'common/smileys/'.$Val.'" alt="" />';
+                self::$ProcessedSmileys[$Key] = '<img border="0" src="'.STATIC_SERVER.'/common/smileys/'.$Val.'" alt="" />';
             }
             reset(self::$ProcessedSmileys);
         }

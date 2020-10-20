@@ -160,7 +160,7 @@ if (check_perms('zip_downloader')) {
         unset($CollagePages);
     }
 }
-$iconUri = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
+$iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 ?>
         <table class="torrent_table grouping cats m_table" id="discog_table">
             <tr class="colhead_dark">

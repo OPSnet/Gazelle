@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<link rel="stylesheet" href="/static/styles/apollostage/style.css" />
+<link rel="stylesheet" href="<?= STATIC_SERVER ?>/styles/apollostage/style.css" />
 
 <style type="text/css" media="screen">
 body{background-color:#212328;margin:0;font-size:0.9em;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}

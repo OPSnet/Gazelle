@@ -520,7 +520,7 @@ class Torrent extends \Gazelle\Base {
         }
         if (!$group['WikiImage']) {
             global $CategoryIcons;
-            $group['WikiImage'] = STATIC_SERVER.'common/noartwork/'
+            $group['WikiImage'] = STATIC_SERVER.'/common/noartwork/'
                 . $CategoryIcons[$group['CategoryID'] - 1];
         }
         $group['VanityHouse'] = ($group['VanityHouse'] == 1);

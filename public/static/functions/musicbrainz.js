@@ -419,6 +419,7 @@ function controlPopup() {
 
 function loadCSS() {
     var $link = document.createElement('link')
+    // TODO: FIX_STATIC_SERVER
     $link.href = 'static/styles/musicbrainz.css';
     $link.rel = 'stylesheet';
     $link.type = 'text/css';

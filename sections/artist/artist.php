@@ -351,7 +351,7 @@ if ($sections = $Artist->sections()) {
     </div>
     <table class="torrent_table grouped release_table m_table">
 <?php
-    $stylePath = SSL_STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images/';
+    $stylePath = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images/';
 
     $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 0) == 1 ? 1 : 0;
 
@@ -660,7 +660,7 @@ if ($Artist->similarArtists()) {
                 <strong id="flipper_title">Similar Artist Map</strong>
                 <a id="flip_to" class="brackets" href="#" onclick="flipView(); return false;">Switch to cloud</a>
             </div>
-            <div id="flip_view_1" style="display: block; width: <?=(WIDTH)?>px; height: <?=(HEIGHT)?>px; position: relative; background-image: url(<?= SSL_STATIC_SERVER ?>similar/<?=($ArtistID)?>.png?t=<?=(time())?>);">
+            <div id="flip_view_1" style="display: block; width: <?=(WIDTH)?>px; height: <?=(HEIGHT)?>px; position: relative; background-image: url(<?= STATIC_SERVER ?>/similar/<?=($ArtistID)?>.png?t=<?=(time())?>);">
 <?php
     $Similar->write_artists();
 ?>
@@ -687,9 +687,8 @@ function flipView() {
         document.getElementById('flip_to').innerHTML = 'Switch to map';
 
         if (!cloudLoaded) {
-            require("<?= SSL_STATIC_SERVER ?>functions/tagcanvas.js", function () {
-                require("<?= SSL_STATIC_SERVER ?>functions/artist_cloud.js", function () {
-                });
+            require("<?= STATIC_SERVER ?>/functions/tagcanvas.js", function () {
+                require("<?= STATIC_SERVER ?>/functions/artist_cloud.js", function () {});
             });
             cloudLoaded = true;
         }

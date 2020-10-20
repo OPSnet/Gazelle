@@ -301,7 +301,7 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     }
 }
 
-$urlStem = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
+$urlStem = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 
 if (empty($Types[$CategoryID])) {
     $TypeList = $Types['master'];

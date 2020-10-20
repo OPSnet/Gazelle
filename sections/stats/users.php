@@ -16,8 +16,8 @@ View::show_header('Detailed User Statistics');
     <a href="stats.php?action=torrents" class="brackets">Torrent Stats</a>
 </div>
 
-<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
-<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts_custom.js"></script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
 Highcharts.chart('user-flow', {

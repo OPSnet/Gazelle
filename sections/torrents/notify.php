@@ -9,7 +9,7 @@ if (!check_perms('site_torrents_notify')) {
 define('NOTIFICATIONS_PER_PAGE', 50);
 define('NOTIFICATIONS_MAX_SLOWSORT', 10000);
 
-$iconUri = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
+$iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 $imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['dbColumn' => 'tnt.Year',      'defaultSort' => 'desc', 'text' => 'Year'],

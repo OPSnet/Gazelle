@@ -80,8 +80,8 @@ list($Results) = $DB->next_record();
 View::show_header('User Flow');
 $DB->set_query_id($RS);
 ?>
-<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
-<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts_custom.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 Highcharts.chart('user-flow', {

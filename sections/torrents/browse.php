@@ -2,7 +2,7 @@
 
 use Gazelle\Util\SortableTableHeader;
 
-$iconUri = STATIC_SERVER . 'styles/' . $LoggedUser['StyleName'] . '/images';
+$iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 $imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
     'year'     => ['defaultSort' => 'desc', 'text' => 'Year'],
