@@ -46,8 +46,6 @@ switch ($_REQUEST['action']) {
         }
         break;
     case '2fa':
-        require(__DIR__ . '/../../classes/google_authenticator.class.php');
-
         if (empty($_GET['do'])) {
             // we didn't get a required "do", we'll just let the 404 handler deal with the request.
             error(404);
@@ -81,7 +79,7 @@ switch ($_REQUEST['action']) {
                     if (session_status() === PHP_SESSION_NONE) {
                         session_start();
                     }
-                    $_SESSION['private_key'] = (new PHPGangsta_GoogleAuthenticator())->createSecret();
+                    $_SESSION['private_key'] = (new \RobThree\Auth\TwoFactorAuth())->createSecret();
                     session_write_close();
                 }
 
@@ -102,7 +100,7 @@ switch ($_REQUEST['action']) {
                 if (empty($_POST['2fa'])) {
                     require(__DIR__ . '/2fa/step2.php');
                 } else {
-                    $works = (new PHPGangsta_GoogleAuthenticator())->verifyCode($_SESSION['private_key'], $_POST['2fa'], 2);
+                    $works = (new \RobThree\Auth\TwoFactorAuth())->verifyCode($_SESSION['private_key'], $_POST['2fa'], 2);
 
                     if (!$works) {
                         // user got their token wrong...

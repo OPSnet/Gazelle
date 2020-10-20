@@ -34,6 +34,7 @@
     "orpheusnet/bencode-torrent": "^1.1.1",
     "orpheusnet/logchecker": "^0.9.4",
     "robmorgan/phinx": "^0.11.0",
+    "robthree/twofactorauth": "^1.7",
     "twig/twig": "^2.12",
     "vinkla/hashids": "^8.1",
     "whichbrowser/parser": "^2.0"

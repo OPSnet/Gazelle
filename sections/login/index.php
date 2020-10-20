@@ -274,8 +274,6 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
     if (empty($_POST['2fa'])) {
         require('2fa.php');
     } else {
-        require(__DIR__ . '/../../classes/google_authenticator.class.php');
-
         [$UserID, $capture] = $_SESSION['temp_user_data'];
         [$PermissionID, $CustomPermissions, $PassHash, $Enabled, $TFAKey, $Recovery] = $DB->row("
             SELECT
@@ -290,7 +288,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             ", $UserID
         );
 
-        if (!(new PHPGangsta_GoogleAuthenticator())->verifyCode($TFAKey, $_POST['2fa'], 2)) {
+        if (!(new \RobThree\Auth\TwoFactorAuth())->verifyCode($TFAKey, $_POST['2fa'], 2)) {
             // invalid 2fa key, log the user completely out
             [$AttemptID, $Attempts, $Bans, $BannedUntil] = $watch->findByIp($_SERVER['REMOTE_ADDR']);
             log_attempt($UserID, $capture);
