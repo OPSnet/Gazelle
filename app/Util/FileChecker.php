@@ -61,7 +61,7 @@ class FileChecker {
     }
 
     public function checkExtensions(string $type, string $name): ?string {
-        $ext = pathinfo($name, PATHINFO_EXTENSION);
+        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
         if (in_array($type, ['Music', 'Audiobooks', 'Comedy', 'E-Books']) && !in_array($ext, $this->musicExtensions)) {
             return $this->invalidError($name);
         } elseif ($type == 'Comics' && !in_array($ext, $this->comicsExtensions)) {
