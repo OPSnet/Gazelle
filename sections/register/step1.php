@@ -2,8 +2,8 @@
 View::show_header('Register');
 echo $Val->GenerateJS('registerform');
 ?>
-<script src="<?=STATIC_SERVER?>functions/validate.js" type="text/javascript"></script>
-<script src="<?=STATIC_SERVER?>functions/password_validate.js" type="text/javascript"></script>
+<script src="<?=STATIC_SERVER?>/functions/validate.js" type="text/javascript"></script>
+<script src="<?=STATIC_SERVER?>/functions/password_validate.js" type="text/javascript"></script>
 
 <div id="logo">
 <a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>

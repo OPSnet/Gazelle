@@ -75,8 +75,8 @@ View::show_header('Database Specifics');
     <a href="tools.php?action=database_specifics&amp;mode=merge" title="Stats of tables of deleted data are merged with their source table" class="brackets">Merge deleted data</a>
     <a href="tools.php?action=database_specifics&amp;mode=exclude" title="Tables of deleted data are excluded" class="brackets">Exclude deleted data</a>
 </div>
-<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
-<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts_custom.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 Highcharts.chart('statistics', {

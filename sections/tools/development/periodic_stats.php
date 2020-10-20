@@ -42,8 +42,8 @@ View::show_header('Periodic Task Statistics');
     </div>
 </div>
 
-<script src="<?=STATIC_SERVER?>functions/highcharts.js"></script>
-<script src="<?=STATIC_SERVER?>functions/highcharts_custom.js"></script>
+<script src="<?=STATIC_SERVER?>/functions/highcharts.js"></script>
+<script src="<?=STATIC_SERVER?>/functions/highcharts_custom.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

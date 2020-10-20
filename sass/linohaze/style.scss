@@ -2452,6 +2452,7 @@ img[alt="Leechers"] {
     background-size: contain;
 }
 
+// TODO: FIX_STATIC_SERVER
 img[src="static/common/symbols/donor.png"] {
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAANCAYAAAEBGQTXAAAA9klEQVR42mJ8bGHBAAJMDBDwHyCAGJFFIkAMgACCifyHKvnG+P8/jA0BAAEE1wMCMsePg/W+g2r5DzNMCKogCqwF3QyAAIKZwQfEd4H4CFTcBoiVgWZ+YoEKaAGxCBAHIGnWAOJTMAUnQKYBsT6UfxGmCiCAUJyJDmABMBeIP0Kt+QjlM6AHAYrDYTq/oUl8RzaWG4j/QNkgmgtZEgRYoS5nhZuLHkLIACDA8HoFH4DFDgwsRYolGP6BRWw5ejiBgDoWC9ixiKlh02wCxP5A/BuHS/9A5Y2xaQaBTUDMBsQeQPwZKvYZymeFysMBCw5bdkKTHF4AAEhDQPRtaNWTAAAAAElFTkSuQmCC') no-repeat scroll 0 0 transparent;
     height: 13px!important;

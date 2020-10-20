@@ -180,9 +180,9 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         <td class="m_th_left m_th_left_collapsable">Name</td>
         <td style="text-align: right;">Size</td>
         <td style="text-align: right;">Data</td>
-        <td style="text-align: right;" class="sign snatches"><img src="static/styles/<?=$LoggedUser['StyleName']?>/images/snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
-        <td style="text-align: right;" class="sign seeders"><img src="static/styles/<?=$LoggedUser['StyleName']?>/images/seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
-        <td style="text-align: right;" class="sign leechers"><img src="static/styles/<?=$LoggedUser['StyleName']?>/images/leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
+        <td style="text-align: right;" class="sign snatches"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName']?>/images/snatched.png" alt="Snatches" title="Snatches" class="tooltip" /></td>
+        <td style="text-align: right;" class="sign seeders"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName']?>/images/seeders.png" alt="Seeders" title="Seeders" class="tooltip" /></td>
+        <td style="text-align: right;" class="sign leechers"><img src="<?= STATIC_SERVER ?>/styles/<?=$LoggedUser['StyleName']?>/images/leechers.png" alt="Leechers" title="Leechers" class="tooltip" /></td>
         <td style="text-align: right;">Peers</td>
     </tr>
 <?php

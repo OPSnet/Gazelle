@@ -7,7 +7,7 @@ View::show_header();
 ?>
 
 <div id="logo">
-<img src="static/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" />
+<img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" />
 </div>
 
 <div class="main">

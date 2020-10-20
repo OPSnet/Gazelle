@@ -56,7 +56,7 @@ if (empty($IRCKey)) {
         <div style="padding: 0px 10px 10px 20px;">
             <p>If you have an IRC client, refer to <a href="wiki.php?action=article&amp;name=IRC+-+How+to+join">this wiki article</a> for information on how to connect. (IRC applet users are automatically identified with Drone.)</p>
         </div>
-        <applet codebase="static/irc/" code="IRCApplet.class" archive="irc.jar,sbox.jar" width="800" height="600" align="center">
+        <applet codebase="<?= STATIC_SERVER ?>/irc/" code="IRCApplet.class" archive="irc.jar,sbox.jar" width="800" height="600" align="center">
             <param name="nick" value="<?=$nick?>" />
             <param name="alternatenick" value="WhatGuest????" />
             <param name="name" value="Java IRC User" />

@@ -223,7 +223,7 @@ class ImageTools {
             $Src = self::process($Url, true);
             $Lightbox = self::process($Url);
         } else {
-            $Src = STATIC_SERVER . 'common/noartwork/' . $CategoryIcons[$CategoryID - 1];
+            $Src = STATIC_SERVER . '/common/noartwork/' . $CategoryIcons[$CategoryID - 1];
             $Lightbox = $Src;
         }
 ?>

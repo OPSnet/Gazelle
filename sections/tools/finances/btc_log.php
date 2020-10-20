@@ -65,8 +65,8 @@ $payment = new \Gazelle\Manager\Payment;
 
 View::show_header('Donation log');
 ?>
-<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
-<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts_custom.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 Highcharts.chart('donation-timeline', {

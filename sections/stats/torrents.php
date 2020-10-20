@@ -5,8 +5,8 @@ $statsTor = new Gazelle\Stats\Torrent;
 
 View::show_header('Detailed torrent statistics');
 ?>
-<script src="<?= STATIC_SERVER ?>functions/highcharts.js"></script>
-<script src="<?= STATIC_SERVER ?>functions/highcharts_custom.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts.js"></script>
+<script src="<?= STATIC_SERVER ?>/functions/highcharts_custom.js"></script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
 Highcharts.chart('torrent-flow', {
