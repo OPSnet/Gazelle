@@ -71,7 +71,7 @@ class InitialUserSeeder extends AbstractSeed {
                 'Uploaded' => STARTING_UPLOAD
             ],
             [
-                'UserID' => $adminId,
+                'UserID' => $userId,
                 'Uploaded' => STARTING_UPLOAD
             ]
         ])->saveData();
