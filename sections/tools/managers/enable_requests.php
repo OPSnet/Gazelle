@@ -12,9 +12,8 @@ if (!FEATURE_EMAIL_REENABLE) {
 
 View::show_header("Enable Requests", 'enable_requests');
 
-// Pagination
 $RequestsPerPage = 25;
-list($Page, $Limit) = Format::page_limit($RequestsPerPage);
+[$Page, $Limit] = Format::page_limit($RequestsPerPage);
 
 $Where = [];
 $Joins = [];
@@ -22,51 +21,54 @@ $Joins = [];
 // Build query for different views
 if ($_GET['view'] == 'perfect') {
     $Where[] = "um.Email = uer.Email";
-    $Joins[] = "JOIN users_main um ON um.ID = uer.UserID";
+    $Joins[] = "INNER JOIN users_main um ON (um.ID = uer.UserID)";
     $Where[] = "uer.IP = (SELECT IP FROM users_history_ips uhi1 WHERE uhi1.StartTime = (SELECT MAX(StartTime) FROM users_history_ips uhi2 WHERE uhi2.UserID = uer.UserID ORDER BY StartTime DESC LIMIT 1))";
     $Where[] = "(SELECT 1 FROM users_history_ips uhi WHERE uhi.IP = uer.IP AND uhi.UserID != uer.UserID) IS NULL";
     $Where[] = "ui.BanReason = '3'";
 } else if ($_GET['view'] == 'minus_ip') {
     $Where[] = "um.Email = uer.Email";
-    $Joins[] = "JOIN users_main um ON um.ID = uer.UserID";
+    $Joins[] = "INNER JOIN users_main um ON (um.ID = uer.UserID)";
     $Where[] = "ui.BanReason = '3'";
 } else if ($_GET['view'] == 'invalid_email') {
-    $Joins[] = "JOIN users_main um ON um.ID = uer.UserID";
+    $Joins[] = "INNER JOIN users_main um ON (um.ID = uer.UserID)";
     $Where[] = "um.Email != uer.Email";
 } else if ($_GET['view'] == 'ip_overlap') {
-    $Joins[] = "JOIN users_history_ips uhi ON uhi.IP = uer.IP AND uhi.UserID != uer.UserID";
+    $Joins[] = "INNER JOIN users_history_ips uhi ON (uhi.IP = uer.IP AND uhi.UserID != uer.UserID)";
 } else if ($_GET['view'] == 'manual_disable') {
     $Where[] = "ui.BanReason != '3'";
 } else {
     $Joins[] = '';
 }
 // End views
+$args = [];
 
 // Build query further based on search
 if (isset($_GET['search'])) {
-    $Username = db_string($_GET['username']);
-    $IP = db_string($_GET['ip']);
-    $SubmittedBetween = db_string($_GET['submitted_between']);
-    $SubmittedTimestamp1 = db_string($_GET['submitted_timestamp1']);
-    $SubmittedTimestamp2 = db_string($_GET['submitted_timestamp2']);
-    $HandledUsername = db_string($_GET['handled_username']);
-    $HandledBetween = db_string($_GET['handled_between']);
-    $HandledTimestamp1 = db_string($_GET['handled_timestamp1']);
-    $HandledTimestamp2 = db_string($_GET['handled_timestamp2']);
-    $OutcomeSearch = (int) $_GET['outcome_search'];
+    $Username = trim($_GET['username']);
+    $IP = trim($_GET['ip']);
+    $SubmittedBetween = trim($_GET['submitted_between']);
+    $SubmittedTimestamp1 = trim($_GET['submitted_timestamp1']);
+    $SubmittedTimestamp2 = trim($_GET['submitted_timestamp2']);
+    $HandledUsername = trim($_GET['handled_username']);
+    $HandledBetween = trim($_GET['handled_between']);
+    $HandledTimestamp1 = trim($_GET['handled_timestamp1']);
+    $HandledTimestamp2 = trim($_GET['handled_timestamp2']);
+    $OutcomeSearch = (int)$_GET['outcome_search'];
     $Checked = (isset($_GET['show_checked']));
 
     if (!empty($Username)) {
-        $Joins[] = "JOIN users_main um1 ON um1.ID = uer.UserID";
+        $Joins[] = "INNER JOIN users_main um1 ON (um1.ID = uer.UserID)";
     }
 
     if (!empty($HandledUsername)) {
-        $Joins[] = "JOIN users_main um2 ON um2.ID = uer.CheckedBy";
+        $Joins[] = "INNER JOIN users_main um2 ON (um2.ID = uer.CheckedBy)";
     }
 
-    $Where = array_merge($Where, AutoEnable::build_search_query($Username,
-        $IP, $SubmittedBetween, $SubmittedTimestamp1, $SubmittedTimestamp2, $HandledUsername,
-        $HandledBetween, $HandledTimestamp1, $HandledTimestamp2, $OutcomeSearch, $Checked));
+    [$cond, $args] = AutoEnable::build_search_query(
+        $Username, $IP, $SubmittedBetween, $SubmittedTimestamp1, $SubmittedTimestamp2,
+        $HandledUsername, $HandledBetween, $HandledTimestamp1, $HandledTimestamp2, $OutcomeSearch, $Checked
+    );
+    $Where = array_merge($Where, $cond);
 }
 // End search queries
 
@@ -86,9 +88,19 @@ $header = new \Gazelle\Util\SortableTableHeader('submitted_timestamp', [
 $OrderBy = $header->getOrderBy();
 $OrderDir = $header->getOrderDir();
 
-$QueryID = $DB->query("
-    SELECT SQL_CALC_FOUND_ROWS
-           uer.ID,
+$joinList = implode(' ', $Joins);
+$whereList = implode(' AND ', $Where);
+
+$NumResults = $DB->scalar("
+    SELECT count(*)
+    FROM users_enable_requests AS uer
+    INNER JOIN users_info ui ON (ui.UserID = uer.UserID)
+    $joinList
+    WHERE $whereList
+    ", ...$args
+);
+$QueryID = $DB->prepared_query("
+    SELECT uer.ID,
            uer.UserID,
            uer.Email,
            uer.IP,
@@ -100,15 +112,12 @@ $QueryID = $DB->query("
            uer.Outcome
     FROM users_enable_requests AS uer
     JOIN users_info ui ON ui.UserID = uer.UserID
-    ".implode(' ', $Joins)."
-    WHERE
-    ".implode(' AND ', $Where)."
+    $joinList
+    WHERE $whereList
     ORDER BY $OrderBy $OrderDir
-    LIMIT $Limit");
-
-$DB->query("SELECT FOUND_ROWS()");
-list($NumResults) = $DB->next_record();
-$DB->set_query_id($QueryID);
+    LIMIT $Limit
+    ", ...$args
+);
 ?>
 
 <div class="header">
@@ -130,20 +139,23 @@ $DB->set_query_id($QueryID);
             <th>Username</th>
             <th>Checked</th>
         </tr>
-<?php  $DB->query("
-        SELECT COUNT(CheckedBy), CheckedBy
-        FROM users_enable_requests
-        WHERE CheckedBy IS NOT NULL
-        GROUP BY CheckedBy
-        ORDER BY COUNT(CheckedBy) DESC
-        LIMIT 50");
-        while (list($Checked, $UserID) = $DB->next_record()) { ?>
+<?php
+$DB->prepared_query("
+    SELECT count(*), CheckedBy
+    FROM users_enable_requests
+    WHERE CheckedBy IS NOT NULL
+    GROUP BY CheckedBy
+    ORDER BY 1 DESC
+");
+while ([$Checked, $UserID] = $DB->next_record()) { ?>
             <tr>
                 <td><?=Users::format_username($UserID)?></td>
                 <td><?=$Checked?></td>
             </tr>
-<?php   }
-    $DB->set_query_id($QueryID); ?>
+<?php
+}
+$DB->set_query_id($QueryID);
+?>
     </table>
     <form action="" method="GET" id="search_form" <?=!isset($_GET['search']) ? 'class="hidden"' : ''?>>
         <input type="hidden" name="action" value="enable_requests" />
@@ -223,13 +235,13 @@ $DB->set_query_id($QueryID);
         </table>
     </form>
 </div>
-<?php
-if ($NumResults > 0) { ?>
-    <div class="linkbox">
-<?php
+<?php if (!$NumResults) { ?>
+    <h2 align="center">No new pending auto enable requests<?=isset($_GET['view']) ? ' in this view' : ''?></h2>
+<?php } else { ?>
     $Pages = Format::get_pages($Page, $NumResults, $RequestsPerPage);
-    echo $Pages;
 ?>
+    <div class="linkbox">
+        <?= $Pages ?>
     </div>
     <table width="100%">
         <tr class="colhead">
@@ -248,7 +260,7 @@ if ($NumResults > 0) { ?>
         </tr>
     <?php
     $Row = 'a';
-    while (list($ID, $UserID, $Email, $IP, $UserAgent, $Timestamp, $BanReason, $CheckedBy, $HandledTimestamp, $Outcome) = $DB->next_record()) {
+    while ([$ID, $UserID, $Email, $IP, $UserAgent, $Timestamp, $BanReason, $CheckedBy, $HandledTimestamp, $Outcome] = $DB->next_record()) {
         $Row = $Row === 'a' ? 'b' : 'a';
 ?>
         <tr class="row<?=$Row?>" id="row_<?=$ID?>">
@@ -263,18 +275,18 @@ if ($NumResults > 0) { ?>
             <td><?=display_str($UserAgent)?></td>
             <td><?=time_diff($Timestamp)?></td>
             <td><?=($BanReason == 3) ? '<b>Inactivity</b>' : 'Other'?></td>
-<?php   if (!$HandledTimestamp) { ?>
+<?php   if ($HandledTimestamp) { ?>
+            <td><?=Users::format_username($CheckedBy);?></td>
+            <td><?=$HandledTimestamp?></td>
+<?php   } else { ?>
             <td><input class="inputtext" type="text" id="comment<?=$ID?>" placeholder="Comment" /></td>
             <td>
                 <input type="submit" id="outcome" value="Approve" data-id="<?=$ID?>" />
                 <input type="submit" id="outcome" value="Reject" data-id="<?=$ID?>" />
                 <input type="submit" id="outcome" value="Discard" data-id="<?=$ID?>" />
             </td>
-<?php   } else { ?>
-            <td><?=Users::format_username($CheckedBy);?></td>
-            <td><?=$HandledTimestamp?></td>
-<?php   }
-
+<?php
+        }
         if ($ShowChecked) { ?>
             <td><?=AutoEnable::get_outcome_string($Outcome)?>
 <?php       if ($Outcome == AutoEnable::DISCARDED) { ?>
@@ -288,19 +300,13 @@ if ($NumResults > 0) { ?>
     ?>
     </table>
     <div class="linkbox">
-<?php
-    $Pages = Format::get_pages($Page, $NumResults, $RequestsPerPage);
-    echo $Pages;
-?>
+        <?= $Pages ?>
     </div>
 <div style="padding-bottom: 11px;">
     <input type="submit" id="outcome" value="Approve Selected" />
     <input type="submit" id="outcome" value="Reject Selected" />
     <input type="submit" id="outcome" value="Discard Selected" />
 </div>
-<?php
-} else { ?>
-    <h2 align="center">No new pending auto enable requests<?=isset($_GET['view']) ? ' in this view' : ''?></h2>
 <?php
 }
 View::show_footer();
