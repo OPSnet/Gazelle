@@ -289,7 +289,7 @@ class ForumSearch extends Base {
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID) $forumPostJoin
             WHERE " . implode(' AND ', $cond) . "
             ORDER BY p.AddedTime DESC
-            LIMIT ?";
+            LIMIT $limit";
         } else {
             $sql = "SELECT t.ID,
                 t.Title,
@@ -303,9 +303,8 @@ class ForumSearch extends Base {
             INNER JOIN forums_topics AS t ON (t.ForumID = f.ID) $forumPostJoin
             WHERE " . implode(' AND ', $cond) . "
             ORDER BY t.LastPostTime DESC
-            LIMIT ?";
+            LIMIT $limit";
         }
-        $args[] = $limit;
         $this->db->prepared_query($sql, ...$args);
         return $this->db->to_array(false, MYSQLI_NUM, false);
     }
