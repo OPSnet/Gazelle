@@ -2,31 +2,41 @@
 if (!check_perms('users_view_ips') || !check_perms('users_view_email')) {
     error(403);
 }
-View::show_header('Registration log');
-define('USERS_PER_PAGE', 50);
-list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
 
-$AfterDate = $_POST['after_date'] ?? null;
-$BeforeDate = $_POST['before_date'] ?? null;
-$DateSearch = false;
-if (!empty($AfterDate) && !empty($BeforeDate)) {
-    list($Y, $M, $D) = explode('-', $AfterDate);
+$afterDate = $_POST['after_date'] ?? null;
+$beforeDate = $_POST['before_date'] ?? null;
+
+$cond = [];
+$args = [];
+if (is_null($afterDate) || is_null($beforeDate)) {
+    $cond[] = 'i.JoinDate > now() - INTERVAL 3 DAY';
+} else {
+    [$Y, $M, $D] = explode('-', $afterDate);
     if (!checkdate($M, $D, $Y)) {
         error('Incorrect "after" date format');
     }
-    list($Y, $M, $D) = explode('-', $BeforeDate);
+    $args[] = $afterDate;
+    [$Y, $M, $D] = explode('-', $beforeDate);
     if (!checkdate($M, $D, $Y)) {
         error('Incorrect "before" date format');
     }
-    $AfterDate = db_string($AfterDate);
-    $BeforeDate = db_string($BeforeDate);
-    $DateSearch = true;
+    $args[] = $beforeDate;
+    $cond[] = 'i.JoinDate BETWEEN ? AND ?';
 }
 
-$RS = "
-    SELECT
-        SQL_CALC_FOUND_ROWS
-        um.ID,
+$whereList = implode(' AND ', $cond);
+$Results = $DB->scalar("
+    SELECT count(*)
+    FROM users_info AS i
+    WHERE $whereList
+    ", ...$args
+);
+
+[$Page, $Limit] = Format::page_limit(USERS_PER_PAGE);
+$Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11);
+
+$DB->prepared_query("
+    SELECT um.ID,
         um.IP,
         um.ipcc,
         um.Email,
@@ -66,36 +76,27 @@ $RS = "
     LEFT JOIN users_main AS im ON (i.Inviter = im.ID)
     LEFT JOIN users_leech_stats AS ils ON (ils.UserID = im.ID)
     LEFT JOIN users_info AS ii ON (i.Inviter = ii.UserID)
-    WHERE";
-if ($DateSearch) {
-    $RS .= " i.JoinDate BETWEEN '$AfterDate' AND '$BeforeDate' ";
-} else {
-    $RS .= " i.JoinDate > '".time_minus(3600 * 24 * 3)."'";
-}
-$RS .= "
+    WHERE $whereList
     ORDER BY i.Joindate DESC
-    LIMIT $Limit";
-$QueryID = $DB->query($RS);
-$DB->query('SELECT FOUND_ROWS()');
-list($Results) = $DB->next_record();
-$DB->set_query_id($QueryID);
+    LIMIT $Limit
+    ", ...$args
+);
+
+View::show_header('Registration log');
 ?>
 
 <form action="" method="post" acclass="thin box pad">
     <input type="hidden" name="action" value="registration_log" />
     Joined after: <input type="date" name="after_date" />
     Joined before: <input type="date" name="before_date" />
-    <input type="submit" />
+    <input type="submit" value="Search" />
 </form>
 
-<?php
-if ($DB->has_results()) {
-?>
+<?php if (!$DB->has_results()) { ?>
+    <h2 align="center">There have been no new registrations in the past 72 hours.</h2>
+<?php } else { ?>
     <div class="linkbox">
-<?php
-    $Pages = Format::get_pages($Page, $Results, USERS_PER_PAGE, 11) ;
-    echo $Pages;
-?>
+        <?= $Pages; ?>
     </div>
 
     <table width="100%">
@@ -109,7 +110,7 @@ if ($DB->has_results()) {
             <td>Registered</td>
         </tr>
 <?php
-    while (list($UserID, $IP, $IPCC, $Email, $Username, $PermissionID, $Uploaded, $Downloaded, $Enabled, $Donor, $Warned, $Joined, $Uses, $InviterID, $InviterIP, $InviterIPCC, $InviterEmail, $InviterUsername, $InviterPermissionID, $InviterUploaded, $InviterDownloaded, $InviterEnabled, $InviterDonor, $InviterWarned, $InviterJoined, $InviterUses) = $DB->next_record()) {
+    while ([$UserID, $IP, $IPCC, $Email, $Username, $PermissionID, $Uploaded, $Downloaded, $Enabled, $Donor, $Warned, $Joined, $Uses, $InviterID, $InviterIP, $InviterIPCC, $InviterEmail, $InviterUsername, $InviterPermissionID, $InviterUploaded, $InviterDownloaded, $InviterEnabled, $InviterDonor, $InviterWarned, $InviterJoined, $InviterUses] = $DB->next_record()) {
     $Row = $IP === $InviterIP ? 'a' : 'b';
 ?>
         <tr class="row<?=$Row?>">
@@ -140,16 +141,11 @@ if ($DB->has_results()) {
                 <?=time_diff($InviterJoined)?>
             </td>
         </tr>
-<?php
-    } ?>
+<?php } ?>
     </table>
     <div class="linkbox">
-<?php echo $Pages; ?>
+        <?= $Pages ?>
     </div>
-<?php
-} else { ?>
-    <h2 align="center">There have been no new registrations in the past 72 hours.</h2>
 <?php
 }
 View::show_footer();
-?>

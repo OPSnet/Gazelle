@@ -160,6 +160,7 @@ define('REQUESTS_PER_PAGE', 25);
 define('TOPICS_PER_PAGE', 50);
 define('TORRENTS_PER_PAGE', 50);
 define('TORRENT_COMMENTS_PER_PAGE', 10);
+define('USERS_PER_PAGE', 50);
 define('WIKI_ARTICLES_PER_PAGE', 25);
 
 define('AJAX_USERS_PER_PAGE', 30);
