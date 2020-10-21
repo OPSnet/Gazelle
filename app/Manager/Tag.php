@@ -35,7 +35,7 @@ class Tag extends \Gazelle\Base {
      * @param string tidy list of space-separated tags
      */
     public function normalize(string $tagList): string {
-        $tags = explode(' ', $tagList);
+        $tags = preg_split('/[\s]+/', $tagList);
         $clean = [];
         foreach ($tags as $t) {
             $clean[$this->sanitize($t)] = 1;
