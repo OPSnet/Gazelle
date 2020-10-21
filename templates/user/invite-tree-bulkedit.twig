@@ -1,0 +1,30 @@
+<div class="thin">
+{% if message %}
+    <div class="center">
+        <p style="color: red; text-align: center;">{{ message }}</p>
+    </div>
+{% endif %}
+    <form class="manage_form" name="user" action="" method="post">
+        <input type="hidden" id="action" name="action" value="manipulate_tree" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <table class="layout">
+            <tr>
+                <td class="label"><strong>UserID</strong></td>
+                <td><input type="search" size="10" name="id" id="id" /></td>
+                <td class="label"><strong>Mandatory comment!</strong></td>
+                <td><input type="search" size="40" name="comment" id="comment" /></td>
+            </tr>
+            <tr>
+                <td class="label"><strong>Action: </strong></td>
+                <td colspan="2">
+                    <select name="perform">
+                        <option value="comment">Add a staff note to entire tree</option>
+                        <option value="disable">Disable entire tree</option>
+                        <option value="invites">Disable invites privileges</option>
+                    </select>
+                </td>
+                <td align="left"><input type="submit" value="Manipulate!" /></td>
+            </tr>
+        </table>
+    </form>
+</div>

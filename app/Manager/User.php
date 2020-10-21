@@ -46,4 +46,21 @@ class User extends \Gazelle\Base {
         $this->cache->delete_value('stats_user_count');
         return $this;
     }
+
+    /**
+     * Disable a user from being able to use invites
+     *
+     * @param int user id
+     * @return bool success (if invite status was changed)
+     */
+    public function disableInvites(int $userId): bool {
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                DisableInvites = '1'
+            WHERE DisableInvites = '0'
+                AND UserID = ?
+            ", $userId
+        );
+        return $this->db->affected_rows() === 1;
+    }
 }
