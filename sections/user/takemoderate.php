@@ -567,8 +567,8 @@ if ($mergeStatsFrom && check_perms('users_edit_ratio')) {
 
 if ($changePassword && check_perms('users_edit_password')) {
     $set[] = "PassHash = ?";
-    $args[] = Gazelle\UserCreator::hashPassword($ChangePassword);
-    $user->logout();
+    $args[] = Gazelle\UserCreator::hashPassword($changePassword);
+    (new \Gazelle\Session($userID))->dropAll();
     $editSummary[] = 'password reset';
 }
 
