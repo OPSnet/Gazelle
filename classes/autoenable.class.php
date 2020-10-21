@@ -85,26 +85,35 @@ class AutoEnable {
 
         $UserInfo = [];
         $IDs = (!is_array($IDs)) ? [$IDs] : $IDs;
-
-        if (count($IDs) == 0) {
+        if (empty($IDs)) {
             error(404);
         }
-
         foreach ($IDs as $ID) {
             if (!is_number($ID)) {
                 error(404);
             }
         }
 
-        G::$DB->query("SELECT Email, ID, UserID
-                FROM users_enable_requests
-                WHERE ID IN (".implode(',', $IDs).")
-                    AND Outcome IS NULL");
+        G::$DB->prepared_query("
+            SELECT Email, ID, UserID
+            FROM users_enable_requests
+            WHERE Outcome IS NULL
+                AND ID IN (" . placeholders($IDs) . ")
+            ", ...$IDs
+        );
         $Results = G::$DB->to_array(false, MYSQLI_NUM);
 
-        if ($Status != self::DISCARDED) {
+        if ($Status === self::DISCARDED) {
+            foreach ($Results as $Result) {
+                [, $ID, $UserID] = $Result;
+                $UserInfo[] = [$ID, $UserID];
+            }
+        } else {
             // Prepare email
-            $context = [];
+            $context = [
+                'SITE_NAME' => SITE_NAME,
+                'TOKEN'     => '',
+            ];
             if ($Status == self::APPROVED) {
                 $template = 'enable_request_accepted.twig';
                 $context['SITE_URL'] = SITE_URL;
@@ -112,56 +121,47 @@ class AutoEnable {
                 $template = 'enable_request_denied.twig';
             }
 
-            $context['SITE_NAME'] = SITE_NAME;
-
             foreach ($Results as $Result) {
-                list($Email, $ID, $UserID) = $Result;
+                [$Email, $ID, $UserID] = $Result;
                 $UserInfo[] = [$ID, $UserID];
 
                 if ($Status == self::APPROVED) {
                     // Generate token
-                    $Token = randomString();
+                    $context['TOKEN'] = randomString();
                     G::$DB->prepared_query("
-                        UPDATE users_enable_requests
-                        SET Token = ?
-                        WHERE ID = ?", $Token, $ID);
-                    $context['TOKEN'] = $Token;
+                        UPDATE users_enable_requests SET
+                            Token = ?
+                        WHERE ID = ?
+                        ", $context['TOKEN'], $ID
+                    );
                 }
 
                 // Send email
-                $Subject = "Your enable request for " . SITE_NAME . " has been ";
-                $Subject .= ($Status == self::APPROVED) ? 'approved' : 'denied';
-
+                $Subject = "Your enable request for " . SITE_NAME . " has been "
+                    . ($Status == self::APPROVED ? 'approved' : 'denied');
                 Misc::send_email($Email, $Subject, G::$Twig->render("emails/".$template, $context), 'noreply');
-            }
-        } else {
-            foreach ($Results as $Result) {
-                list(, $ID, $UserID) = $Result;
-                $UserInfo[] = [$ID, $UserID];
             }
         }
 
         // User notes stuff
-        G::$DB->query("
-            SELECT Username
-            FROM users_main
-            WHERE ID = '" . G::$LoggedUser['ID'] . "'");
-        list($StaffUser) = G::$DB->next_record();
-
         foreach ($UserInfo as $User) {
-            list($ID, $UserID) = $User;
-            $BaseComment = sqltime() . " - Enable request $ID " . strtolower(self::get_outcome_string($Status)) . ' by [user]'.$StaffUser.'[/user]';
-            $BaseComment .= (!empty($Comment)) ? "\nReason: $Comment\n\n" : "\n\n";
-            Tools::update_user_notes($UserID, $BaseComment);
+            [$ID, $UserID] = $User;
+            Tools::update_user_notes($UserID,
+                sqltime() . " - Enable request $ID " . strtolower(self::get_outcome_string($Status))
+                    . ' by [user]' . G::$LoggedUser['Username'] . '[/user]'
+                    . (!empty($Comment) ? "\nReason: $Comment\n\n" : "\n\n")
+            );
         }
 
         // Update database values and decrement cache
-        G::$DB->query("
-                UPDATE users_enable_requests
-                SET HandledTimestamp = '".sqltime()."',
-                    CheckedBy = '".G::$LoggedUser['ID']."',
-                    Outcome = '$Status'
-                WHERE ID IN (".implode(',', $IDs).")");
+        G::$DB->prepared_query("
+            UPDATE users_enable_requests SET
+                HandledTimestamp = now(),
+                CheckedBy = ?,
+                Outcome = ?
+            WHERE ID IN (" . placeholders(IDs) . ")
+            ", G::$LoggedUser['ID'], $Status, ...$IDs
+        );
         G::$Cache->decrement_value(self::CACHE_KEY_NAME, count($IDs));
     }
 
@@ -172,34 +172,30 @@ class AutoEnable {
      */
     public static function unresolve_request($ID) {
         $ID = (int) $ID;
-
-        if (empty($ID)) {
+        if (!$ID) {
             error(404);
         }
 
-        G::$DB->query("
+        $UserID = G::$DB->scalar("
             SELECT UserID
             FROM users_enable_requests
-            WHERE Outcome = '" . self::DISCARDED . "'
-              AND ID = '$ID'");
-
-        if (!G::$DB->has_results()) {
+            WHERE Outcome = ?
+                AND ID = ?
+            ", self::DISCARDED, $ID
+        );
+        if (!$UserID) {
             error(404);
         }
 
-        list($UserID) = G::$DB->next_record();
-
-        G::$DB->query("
-            SELECT Username
-            FROM users_main
-            WHERE ID = '" . G::$LoggedUser['ID'] . "'");
-        list($StaffUser) = G::$DB->next_record();
-
-        Tools::update_user_notes($UserID, sqltime() . " - Enable request $ID unresolved by [user]" . $StaffUser . '[/user]' . "\n\n");
-        G::$DB->query("
-            UPDATE users_enable_requests
-            SET Outcome = NULL, HandledTimestamp = NULL, CheckedBy = NULL
-            WHERE ID = '$ID'");
+        Tools::update_user_notes($UserID, sqltime() . " - Enable request $ID unresolved by [user]" . G::$LoggedUser['Username'] . '[/user]' . "\n\n");
+        G::$DB->prepared_query("
+            UPDATE users_enable_requests SET
+                Outcome = NULL,
+                HandledTimestamp = NULL,
+                CheckedBy = NULL
+            WHERE ID = ?
+            ", $ID
+        );
         G::$Cache->increment_value(self::CACHE_KEY_NAME);
     }
 
@@ -209,7 +205,7 @@ class AutoEnable {
      * @param int $Outcome The outcome integer
      * @return string The formatted output string
      */
-    public static function get_outcome_string($Outcome) {
+    public static function get_outcome_string($Outcome): string {
         if ($Outcome == self::APPROVED) {
             $String = "Approved";
         } else if ($Outcome == self::DENIED) {
@@ -219,7 +215,6 @@ class AutoEnable {
         } else {
             $String = "---";
         }
-
         return $String;
     }
 
@@ -275,30 +270,38 @@ class AutoEnable {
      * @return array The WHERE conditions for the query
      */
     public static function build_search_query($Username, $IP, $SubmittedBetween, $SubmittedTimestamp1, $SubmittedTimestamp2, $HandledUsername, $HandledBetween, $HandledTimestamp1, $HandledTimestamp2, $OutcomeSearch, $Checked) {
-        $Where = [];
+        $cond = [];
+        $args = [];
 
         if (!empty($Username)) {
-            $Where[] = "um1.Username = '$Username'";
+            $cond[] = "um1.Username = ?";
+            $args[] = $Username;
         }
 
         if (!empty($IP)) {
-            $Where[] = "uer.IP = '$IP'";
+            $cond[] = "uer.IP = ?";
+            $args[] = $IP;
         }
 
         if (!empty($SubmittedTimestamp1)) {
             switch($SubmittedBetween) {
                 case 'on':
-                    $Where[] = "DATE(uer.Timestamp) = DATE('$SubmittedTimestamp1')";
+                    $cond[] = "DATE(uer.Timestamp) = DATE(?)";
+                    $args[] = $SubmittedTimestamp1;
                     break;
                 case 'before':
-                    $Where[] = "DATE(uer.Timestamp) < DATE('$SubmittedTimestamp1')";
+                    $cond[] = "DATE(uer.Timestamp) < DATE(?)";
+                    $args[] = $SubmittedTimestamp1;
                     break;
                 case 'after':
-                    $Where[] = "DATE(uer.Timestamp) > DATE('$SubmittedTimestamp1')";
+                    $cond[] = "DATE(uer.Timestamp) > DATE(?)";
+                    $args[] = $SubmittedTimestamp1;
                     break;
                 case 'between':
                     if (!empty($SubmittedTimestamp2)) {
-                        $Where[] = "DATE(uer.Timestamp) BETWEEN DATE('$SubmittedTimestamp1') AND DATE('$SubmittedTimestamp2')";
+                        $cond[] = "DATE(uer.Timestamp) BETWEEN DATE(?) AND DATE(?)";
+                        $args[] = $SubmittedTimestamp1;
+                        $args[] = $SubmittedTimestamp2;
                     }
                     break;
                 default:
@@ -309,17 +312,22 @@ class AutoEnable {
         if (!empty($HandledTimestamp1)) {
             switch($HandledBetween) {
                 case 'on':
-                    $Where[] = "DATE(uer.HandledTimestamp) = DATE('$HandledTimestamp1')";
+                    $cond[] = "DATE(uer.HandledTimestamp) = DATE(?)";
+                    $args[] = $HandledTimestamp1;
                     break;
                 case 'before':
-                    $Where[] = "DATE(uer.HandledTimestamp) < DATE('$HandledTimestamp1')";
+                    $cond[] = "DATE(uer.HandledTimestamp) < DATE(?)";
+                    $args[] = $HandledTimestamp1;
                     break;
                 case 'after':
-                    $Where[] = "DATE(uer.HandledTimestamp) > DATE('$HandledTimestamp1')";
+                    $cond[] = "DATE(uer.HandledTimestamp) > DATE(?)";
+                    $args[] = $HandledTimestamp1;
                     break;
                 case 'between':
                     if (!empty($HandledTimestamp2)) {
-                        $Where[] = "DATE(uer.HandledTimestamp) BETWEEN DATE('$HandledTimestamp1') AND DATE('$HandledTimestamp2')";
+                        $cond[] = "DATE(uer.HandledTimestamp) BETWEEN DATE(?) AND DATE(?)";
+                        $args[] = $HandledTimestamp1;
+                        $args[] = $HandledTimestamp2;
                     }
                     break;
                 default:
@@ -328,18 +336,20 @@ class AutoEnable {
         }
 
         if (!empty($HandledUsername)) {
-            $Where[] = "um2.Username = '$HandledUsername'";
+            $cond[] = "um2.Username = ?";
+            $args[] = $HandledUsername;
         }
 
         if (!empty($OutcomeSearch)) {
-            $Where[] = "uer.Outcome = '$OutcomeSearch'";
+            $cond[] = "uer.Outcome = ?";
+            $args[] = $OutcomeSearch;
         }
 
         if ($Checked) {
             // This is to skip the if statement in enable_requests.php
-            $Where[] = "(uer.Outcome IS NULL OR uer.Outcome IS NOT NULL)";
+            $cond[] = "(uer.Outcome IS NULL OR uer.Outcome IS NOT NULL)";
         }
 
-        return $Where;
+        return [$cond, $args];
     }
 }

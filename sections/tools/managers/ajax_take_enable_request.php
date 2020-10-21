@@ -11,8 +11,8 @@ $Type = $_GET['type'];
 
 if ($Type == "resolve") {
     $IDs = $_GET['ids'];
-    $Comment = db_string($_GET['comment']);
-    $Status = db_string($_GET['status']);
+    $Comment = trim($_GET['comment']);
+    $Status = trim($_GET['status']);
 
     // Error check and set things up
     if ($Status == "Approve" || $Status == "Approve Selected") {
@@ -25,7 +25,7 @@ if ($Type == "resolve") {
         json_error("Invalid resolution option");
     }
 
-    if (is_array($IDs) && count($IDs) == 0) {
+    if (is_array($IDs) && empty($IDs)) {
         json_error("You must select at least one reuqest to use this option");
     } else if (!is_array($IDs) && !is_number($IDs)) {
         json_error("You must select at least 1 request");
