@@ -9,11 +9,37 @@ namespace Gazelle;
  */
 
 class InviteTree extends Base {
-    protected $id;
+    protected $userId;
+    protected $treeId;
+    protected $treeLevel;
+    protected $treePosition;
+    protected $maxPosition;
 
-    public function __construct(int $id) {
+    public function __construct(int $userId) {
         parent::__construct();
-        $this->id = $id;
+        $this->userId = $userId;
+        [$this->treeId, $this->treeLevel, $this->treePosition, $this->maxPosition] = $this->db->row("
+            SELECT
+                t1.TreeID,
+                t1.TreeLevel,
+                t1.TreePosition,
+                (
+                    SELECT t2.TreePosition
+                    FROM invite_tree AS t2
+                    WHERE t2.TreeID = t1.TreeID
+                        AND t2.TreeLevel = t1.TreeLevel
+                        AND t2.TreePosition > t1.TreePosition
+                    ORDER BY t2.TreePosition
+                    LIMIT 1
+                )
+            FROM invite_tree AS t1
+            WHERE t1.UserID = ?
+            ", $this->userId
+        );
+    }
+
+    public function treeId(): ?int {
+        return $this->treeId;
     }
 
     public function hasInvitees(): bool {
@@ -22,17 +48,32 @@ class InviteTree extends Base {
             FROM invite_tree
             WHERE InviterId = ?
             LIMIT 1
-            ", $this->id
+            ", $this->userId
         ) ? true : false;
     }
 
+    public function inviteeList(): array {
+        $this->db->prepared_query("
+            SELECT UserID
+            FROM invite_tree
+            WHERE TreeID = ?
+                AND TreeLevel > ?
+                AND TreePosition > ?
+                AND TreePosition < coalesce(?, 100000000)
+            ORDER BY TreePosition
+            ", $this->treeId, $this->treeLevel, $this->treePosition, $this->maxPosition
+        );
+        return $this->db->collect('UserID');
+    }
+
     public function add(int $userId) {
+        // TODO: use the new instance variables instead of doing a lookup here
         while (true) {
             [$treeId, $inviterPosition, $level] = $this->db->row("
                 SELECT TreeID, TreePosition, TreeLevel
                 FROM invite_tree
                 WHERE UserID = ?
-                ", $this->id
+                ", $this->userId
             );
             if ($treeId) {
                 break;
@@ -42,7 +83,7 @@ class InviteTree extends Base {
                 INSERT INTO invite_tree
                        (UserID, TreeID)
                 VALUES (?, (SELECT coalesce(max(it.TreeID), 0) + 1 FROM invite_tree AS it))
-                ", $this->id
+                ", $this->userId
             );
         }
         $nextPosition = $this->db->scalar("
@@ -78,7 +119,7 @@ class InviteTree extends Base {
             INSERT INTO invite_tree
                    (UserID, InviterID, TreeID, TreePosition, TreeLevel)
             VALUES (?,      ?,         ?,      ?,            ?)
-            ", $userId, $this->id, $treeId, $nextPosition, $level + 1
+            ", $userId, $this->userId, $treeId, $nextPosition, $level + 1
         );
     }
 
@@ -88,7 +129,7 @@ class InviteTree extends Base {
             SELECT TreeID, TreePosition, TreeLevel
             FROM invite_tree
             WHERE UserID = ?
-            ", $this->id
+            ", $this->userId
         );
         if (!$treeId) {
             return '';

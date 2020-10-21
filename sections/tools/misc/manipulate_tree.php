@@ -1,119 +1,72 @@
 <?php
 // Props to Leto of StC.
 if (!check_perms('users_view_invites') && !check_perms('users_disable_users') && !check_perms('users_edit_invites') && !check_perms('users_disable_any')) {
-    error(404);
+    error(403);
 }
-View::show_header('Manipulate Invite Tree');
+
+$doComment = false;
+$doDisable = false;
+$doInvites = false;
+$message = null;
 
 if ($_POST['id']) {
     authorize();
-
-    if (!is_number($_POST['id'])) {
-        error(403);
+    $action = $_POST['perform'] ?? '';
+    $doComment = $action === 'comment';
+    $doDisable = $action === 'disable';
+    $doInvites = $action === 'invites';
+    if (!($doComment || $doDisable || $doInvites)) {
+        error("No maniplation action specified");
     }
     if (!$_POST['comment']) {
         error('Please enter a comment to add to the users affected.');
     }
-    else {
-        $Comment = date('Y-m-d H:i:s') . " - ";
-        $Comment .= db_string($_POST['comment']);
-        $Comment .= "\n" . "Manipulate Tree used by " . $LoggedUser['Username'];
+    $userId = (int)$_POST['id'];
+    if (!$userId) {
+        error(404);
     }
-    $UserID = $_POST['id'];
-    $DB->query("
-            SELECT
-                t1.TreePosition,
-                t1.TreeID,
-                t1.TreeLevel,
-                (
-                    SELECT
-                        t2.TreePosition
-                    FROM invite_tree AS t2
-                    WHERE t2.TreeID = t1.TreeID
-                        AND t2.TreeLevel = t1.TreeLevel
-                        AND t2.TreePosition > t1.TreePosition
-                    ORDER BY t2.TreePosition
-                    LIMIT 1
-                ) AS MaxPosition
-            FROM invite_tree AS t1
-            WHERE t1.UserID = $UserID");
-    list ($TreePosition, $TreeID, $TreeLevel, $MaxPosition) = $DB->next_record();
-    if (!$MaxPosition) {
-        $MaxPosition = 1000000;
-    } // $MaxPermission is null if the user is the last one in that tree on that level
-    if (!$TreeID) {
-        return;
-    }
-    $DB->query("
-            SELECT
-                UserID
-            FROM invite_tree
-            WHERE TreeID = $TreeID
-                AND TreePosition > $TreePosition
-                AND TreePosition < $MaxPosition
-                AND TreeLevel > $TreeLevel
-            ORDER BY TreePosition");
-    $BanList = [];
+    $user = new Gazelle\User($userId);
+    $username = $user->username();
 
-    while (list ($Invitee) = $DB->next_record()) {
-        $BanList[] = $Invitee;
-    }
-
-    foreach ($BanList as $Key => $InviteeID) {
-        if ($_POST['perform'] === 'nothing') {
-            Tools::update_user_notes($InviteeID, $Comment . "\n\n");
-            $Msg = "Successfully commented on entire invite tree!";
-        } elseif ($_POST['perform'] === 'disable') {
-            Tools::disable_users($InviteeID, $Comment);
-            $Msg = "Successfully banned entire invite tree!";
-        } elseif ($_POST['perform'] === 'inviteprivs') { // DisableInvites =1
-            Tools::update_user_notes($InviteeID, $Comment . "\n\n");
-            $DB->query("
-                UPDATE users_info
-                SET DisableInvites = '1'
-                WHERE UserID = '$InviteeID'");
-            $Msg = "Successfully removed invite privileges from entire tree!";
-        }
-        else {
-            error(403);
+    $inviteTree = new Gazelle\InviteTree($userId);
+    if (!$inviteTree->treeId()) {
+        $message = "No invite tree exists for $username";
+    } else {
+        $userMan = new Gazelle\Manager\User;
+        $inviteeList = $inviteTree->inviteeList();
+        $inviteeCount = count($inviteeList);
+        if (!$inviteeCount) {
+            $message = "No invitees for $username";
+        } else {
+            if ($doComment) {
+                $message = "Commented on";
+                $comment = "comment";
+            } elseif ($doDisable) {
+                $message = "Banned";
+                $comment = "disable";
+            } elseif ($doInvites) {
+                $message = "Removed invite privileges from";
+                $comment = "invites removed";
+            }
+            $message .= " entire tree ({$inviteeCount} user" . plural($inviteeCount) . ')';
+            $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree $comment on $username by {$LoggedUser['Username']}";
+            foreach ($inviteeList as $inviteeId) {
+                if ($doComment) {
+                    Tools::update_user_notes($inviteeId, $comment . "\n\n");
+                } elseif ($doDisable) {
+                    Tools::disable_users($inviteeId, $comment);
+                } elseif ($doInvites) {
+                    Tools::update_user_notes($inviteeId, $comment . "\n\n");
+                    $userMan->disableInvites($inviteeId);
+                }
+            }
         }
     }
 }
-?>
 
-<div class="thin">
-<?php
-if ($Msg) { ?>
-    <div class="center">
-        <p style="color: red; text-align: center;"><?=$Msg?></p>
-    </div>
-<?php } ?>
-    <form class="manage_form" name="user" action="" method="post">
-        <input type="hidden" id="action" name="action" value="manipulate_tree" />
-        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-        <table class="layout">
-            <tr>
-                <td class="label"><strong>UserID</strong></td>
-                <td><input type="search" size="10" name="id" id="id" /></td>
-                <td class="label"><strong>Mandatory comment!</strong></td>
-                <td><input type="search" size="40" name="comment" id="comment" /></td>
-            </tr>
-            <tr>
-                <td class="label"><strong>Action: </strong></td>
-                <td colspan="2">
-                    <select name="perform">
-                        <option value="nothing"<?php
-                    if ($_POST['perform'] === 'nothing') { echo ' selected="selected"'; } ?>>Do nothing</option>
-                        <option value="disable"<?php
-                    if ($_POST['perform'] === 'disable') { echo ' selected="selected"'; } ?>>Disable entire tree</option>
-                        <option value="inviteprivs"<?php
-                    if ($_POST['perform'] === 'inviteprivs') { echo ' selected="selected"'; } ?>>Disable invites privileges</option>
-                    </select>
-                </td>
-                <td align="left"><input type="submit" value="Go" /></td>
-            </tr>
-        </table>
-    </form>
-</div>
-
-<?php View::show_footer(); ?>
+View::show_header('Manipulate Invite Tree');
+echo G::$Twig->render('user/invite-tree-bulkedit.twig', [
+    'auth'    => $LoggedUser['AuthKey'],
+    'message' => $message,
+]);
+View::show_footer();
