@@ -39,7 +39,7 @@ if (isset($_POST['name'])) {
 }
 
 $collage->setUpdate('Description', trim($_POST['description']))
-    ->setUpdate('TagList', (new Gazelle\Manager\Tag)->normalize($_POST['tags']));
+    ->setUpdate('TagList', (new Gazelle\Manager\Tag)->normalize(str_replace(',', ' ', $_POST['tags']));
 
 if (isset($_POST['featured'])
     && (

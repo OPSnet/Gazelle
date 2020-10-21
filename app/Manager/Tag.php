@@ -31,16 +31,16 @@ class Tag extends \Gazelle\Base {
     /**
      * Normalize a list of tags (sanitize them and remove duplicates)
      *
-     * @param string comma-separated list of tags
-     * @param string tidy list of comma-separated tags
+     * @param string space-separated list of tags
+     * @param string tidy list of space-separated tags
      */
     public function normalize(string $tagList): string {
-        $tags = explode(',', $tagList);
+        $tags = explode(' ', $tagList);
         $clean = [];
         foreach ($tags as $t) {
             $clean[$this->sanitize($t)] = 1;
         }
-        return implode(',', array_keys($clean));
+        return implode(' ', array_keys($clean));
     }
 
     /**
