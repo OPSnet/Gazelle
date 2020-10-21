@@ -40,7 +40,6 @@ if (empty($Results)) {
         FROM xbt_files_users
         INNER JOIN users_downloads ud ON (ud.UserID = xfu.uid)
         WHERE xfu.Remaining = 0 AND xfu.fid = ?
-        WHERE xs.fid = ?
         ", $TorrentID
     );
     $Seeding = $DB->to_array('uid');
