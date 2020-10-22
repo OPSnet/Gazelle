@@ -363,7 +363,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Bonus Points: <?=number_format($BonusPoints)?><?php
         if (check_perms('admin_bp_history')) {
              printf('&nbsp;<a href="bonus.php?action=history&amp;userid=%d" class="brackets">History</a>', $UserID);
-             $text = '<a href="bonus.php?action=bprates&userid=' . $UserID . '">Points Per Hour</a>';
+             $text = '<a href="bonus.php?action=bprates&amp;userid=' . $UserID . '">Points Per Hour</a>';
         } else if ($OwnProfile) {
              printf('&nbsp;<a href="bonus.php?action=history" class="brackets">History</a>', $UserID);
              $text = '<a href="bonus.php?action=bprates">Points Per Hour</a>';
