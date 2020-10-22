@@ -572,20 +572,19 @@ if ($changePassword && check_perms('users_edit_password')) {
     $editSummary[] = 'password reset';
 }
 
-if (!(count($set) || count($leechSet) || count($editSummary))) {
-    if (!$reason) {
-        header("Location: user.php?id=$userID");
-        exit;
-    } else {
-        $editSummary[] = 'notes added';
-    }
+if (!(count($set) || count($leechSet) || count($editSummary)) && $reason) {
+    $editSummary[] = 'notes added';
 }
 
+// Because of the infinitely fucked up encoding/decoding of Gazelle, $adminComment !== $cur['AdminComment']
+// almost always evaluates to true, even if the user did not purposely change the field. This then means
+// we do have a bug where if a mod changes something about a user AND changes the admin comment, we will lose
+// that change, but until we never decode stuff coming out of the DB, not much can be done.
 if (count($editSummary)) {
     $summary = implode(', ', $editSummary) . ' by ' . $LoggedUser['Username'];
     $set[] = "AdminComment = ?";
     $args[] = sqltime() . ' - ' . ucfirst($summary) . ($reason ? "\nReason: $reason" : '') . "\n\n$adminComment";
-} elseif ($adminComment != $cur['AdminComment']) {
+} elseif ($adminComment !== $cur['AdminComment']) {
     $set[] = "AdminComment = ?";
     $args[] = $adminComment;
 }
@@ -631,7 +630,9 @@ if (count($trackerUserUpdates) > 1) {
     Tracker::update_tracker('update_user', $trackerUserUpdates);
 }
 
-$user->flushCache();
+if (count($set) || count($leechSet)) {
+    $user->flushCache();
+}
 
 header("location: user.php?id=$userID");
 
