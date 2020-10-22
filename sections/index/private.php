@@ -272,7 +272,7 @@ foreach ($latest as $upload) {
     $alt = str_replace($title, '<br />', ' ');
 ?>
                 <li class="image_group_<?= $upload['groupId'] ?>">
-                <a href="torrents.php?id=<?= $upload['groupId'] ?>&torrentid=<?= $upload['torrentId'] ?>#torrent<?= $upload['torrentId'] ?>">
+                <a href="torrents.php?id=<?= $upload['groupId'] ?>&amp;torrentid=<?= $upload['torrentId'] ?>#torrent<?= $upload['torrentId'] ?>">
                 <img class="tooltip_interactive" src="<?= ImageTools::process($upload['imageUrl'] , true) ?>" alt="<?= $alt ?>" title="<?= $title ?>"
                     data-title-plain="<?= $alt ?>" width="118" /></a>
                 </li>
