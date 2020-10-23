@@ -23,6 +23,7 @@ if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Permiss
     error(403);
 }
 
+$Val = new Validate;
 $Val->SetFields('stylesheet', 1, "number", "You forgot to select a stylesheet.");
 $Val->SetFields('styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => '/^'.CSS_REGEX.'$/i']);
 $Val->SetFields('postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]);

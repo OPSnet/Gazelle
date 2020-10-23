@@ -92,6 +92,7 @@ if (!count($UserNavItems)) {
     }));
 }
 
+$Val = new Validate;
 echo $Val->GenerateJS('userform');
 ?>
 <div class="thin">

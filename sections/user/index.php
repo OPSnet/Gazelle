@@ -7,7 +7,6 @@ Make sure all constants are defined in config.php and not in random files
 *****************************************************************/
 
 enforce_login();
-$Val = new Validate;
 
 switch ($_REQUEST['action'] ?? '') {
     case 'notify':
