@@ -780,9 +780,16 @@ foreach ($Collages as $CollageInfo) {
 <?php
 
 // Linked accounts
-if (check_perms('users_mod')) {
-    require_once('linkedfunctions.php');
-    user_dupes_table($UserID);
+if (check_perms('users_edit_usernames')) {
+    [$linkGroupId, $comments, $list] = (new Gazelle\Manager\UserLink($User))->info();
+    echo G::$Twig->render('user/linked.twig', [
+        'auth'     => $LoggedUser['AuthKey'],
+        'comments' => $comments,
+        'group_id' => $linkGroupId,
+        'hash'     => sha1($comments),
+        'list'     => $list,
+        'user_id'  => $UserID,
+    ]);
 }
 
 if (check_perms('users_view_invites')) {

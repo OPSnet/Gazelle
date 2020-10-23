@@ -9,16 +9,12 @@ Make sure all constants are defined in config.php and not in random files
 enforce_login();
 $Val = new Validate;
 
-if (empty($_REQUEST['action'])) {
-    $_REQUEST['action'] = '';
-}
-
-switch ($_REQUEST['action']) {
+switch ($_REQUEST['action'] ?? '') {
     case 'notify':
-        require(__DIR__ . '/notify_edit.php');
+        require_once('notify_edit.php');
         break;
     case 'notify_handle':
-        require(__DIR__ . '/notify_handle.php');
+        require_once('notify_handle.php');
         break;
     case 'notify_delete':
         authorize();
@@ -31,15 +27,15 @@ switch ($_REQUEST['action']) {
         break;
     case 'search':// User search
         if (check_perms('admin_advanced_user_search') && check_perms('users_view_ips') && check_perms('users_view_email')) {
-            require(__DIR__ . '/advancedsearch.php');
+            require_once('advancedsearch.php');
         }
         else {
-            require(__DIR__ . '/search.php');
+            require_once('search.php');
         }
         break;
     case 'edit':
         if (isset($_REQUEST['userid'])) {
-            require(__DIR__ . '/edit.php');
+            require_once('edit.php');
         }
         else {
             header("Location: user.php?action=edit&userid={$LoggedUser['ID']}");
@@ -83,7 +79,7 @@ switch ($_REQUEST['action']) {
                     session_write_close();
                 }
 
-                require(__DIR__ . '/2fa/step1.php');
+                require_once('2fa/step1.php');
                 break;
 
             case 'enable2':
@@ -98,7 +94,7 @@ switch ($_REQUEST['action']) {
                 }
 
                 if (empty($_POST['2fa'])) {
-                    require(__DIR__ . '/2fa/step2.php');
+                    require_once('2fa/step2.php');
                 } else {
                     $works = (new \RobThree\Auth\TwoFactorAuth())->verifyCode($_SESSION['private_key'], $_POST['2fa'], 2);
 
@@ -129,7 +125,7 @@ switch ($_REQUEST['action']) {
                     error(404);
                 }
 
-                require(__DIR__ . '/2fa/complete.php');
+                require_once('2fa/complete.php');
                 if (session_status() === PHP_SESSION_NONE) {
                     session_start();
                 }
@@ -145,7 +141,7 @@ switch ($_REQUEST['action']) {
 
                 if ($UserID === $LoggedUser['ID']) {
                     if (empty($_POST['password'])) {
-                        require(__DIR__ . '/2fa/password_confirm.php');
+                        require_once('2fa/password_confirm.php');
                         break;
                     }
                     if (!Users::check_password($_POST['password'], $PassHash)) {
@@ -167,37 +163,40 @@ switch ($_REQUEST['action']) {
         }
         break;
     case 'take_edit':
-        require(__DIR__ . '/take_edit.php');
+        require_once('take_edit.php');
+        break;
+    case 'dupes':
+        require_once('manage_linked.php');
         break;
     case 'invitetree':
-        require(__DIR__ . '/invitetree.php');
+        require_once('invitetree.php');
         break;
     case 'invite':
-        require(__DIR__ . '/invite.php');
+        require_once('invite.php');
         break;
     case 'take_invite':
-        require(__DIR__ . '/take_invite.php');
+        require_once('take_invite.php');
         break;
     case 'delete_invite':
-        require(__DIR__ . '/delete_invite.php');
+        require_once('delete_invite.php');
         break;
     case 'stats':
-        require(__DIR__ . '/user_stats.php');
+        require_once('user_stats.php');
         break;
     case 'sessions':
-        require(__DIR__ . '/sessions.php');
+        require_once('sessions.php');
         break;
     case 'connchecker':
-        require(__DIR__ . '/connchecker.php');
+        require_once('connchecker.php');
         break;
     case 'permissions':
-        require(__DIR__ . '/permissions.php');
+        require_once('permissions.php');
         break;
     case 'similar':
-        require(__DIR__ . '/similar.php');
+        require_once('similar.php');
         break;
     case 'moderate':
-        require(__DIR__ . '/takemoderate.php');
+        require_once('takemoderate.php');
         break;
     case 'token':
         require_once(__DIR__ . '/token.php');
@@ -217,7 +216,7 @@ switch ($_REQUEST['action']) {
             'user_info_'              . $UserID,
             'user_info_heavy_'        . $UserID,
         ]);
-        require(__DIR__ . '/user.php');
+        require_once('user.php');
         break;
 
     // Provide public methods for Last.fm data gets.
@@ -253,7 +252,7 @@ switch ($_REQUEST['action']) {
         break;
     default:
         if (isset($_REQUEST['id'])) {
-            require(__DIR__ . '/user.php');
+            require_once('user.php');
         } else {
             header("Location: user.php?id={$LoggedUser['ID']}");
         }

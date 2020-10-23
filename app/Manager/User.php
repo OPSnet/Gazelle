@@ -4,6 +4,22 @@ namespace Gazelle\Manager;
 
 class User extends \Gazelle\Base {
     /**
+     * Get a User object based on their username
+     *
+     * @param string username
+     * @return \Gazelle\User object or null if not found
+     */
+    public function findByUsername(string $username): ?\Gazelle\User {
+        $userId = (int)$this->db->scalar("
+            SELECT ID
+            FROM users_main
+            WHERE Username = ?
+            ", $username
+        );
+        return is_null($userId) ? null : new \Gazelle\User($userId);
+    }
+
+    /**
      * Get the number of enabled users last day/week/month
      *
      * @return array [Day, Week, Month]

@@ -1,46 +1,43 @@
 <?php
-authorize();
-include(SERVER_ROOT.'/sections/user/linkedfunctions.php');
 
-if (!check_perms('users_mod')) {
+authorize();
+
+if (!check_perms('users_edit_usernames')) {
     error(403);
 }
+$userId = (int)$_REQUEST['userid'];
+if (!$userId) {
+    error(404);
+}
+$source = new Gazelle\User($userId);
+$userLink = new Gazelle\Manager\UserLink($source);
 
-$UserID = (int) $_REQUEST['userid'];
-
-switch ($_REQUEST['dupeaction']) {
+switch ($_REQUEST['dupeaction'] ?? '') {
     case 'remove':
-        unlink_user($_REQUEST['removeid']);
+        $userLink->remove(new Gazelle\User($_REQUEST['removeid']), $LoggedUser['Username']);
         break;
 
     case 'update':
+        $updateNote = isset($_REQUEST['update_note']);
+
         if ($_REQUEST['target']) {
-            $Target = $_REQUEST['target'];
-            $DB->query("
-                SELECT ID
-                FROM users_main
-                WHERE Username LIKE '".db_string($Target)."'");
-            if (list($TargetID) = $DB->next_record()) {
-                link_users($UserID, $TargetID, (isset($_REQUEST['ignore_comments'])) ? true : false);
-            } else {
-                error("User '$Target' not found.");
+            $username = trim($_REQUEST['target']);
+            $target = (new Gazelle\Manager\User)->findByUsername($username);
+            if (is_null($target)) {
+                error("User '" . display_str($username) . "' not found.");
+            } elseif ($source->id() === $target->id()) {
+                error("Cannot link a user to themselves");
             }
+            $userLink->link($target, $LoggedUser['Username'], $updateNote);
         }
 
-        $DB->query("
-            SELECT GroupID
-            FROM users_dupes
-            WHERE UserID = '$UserID'");
-        list($GroupID) = $DB->next_record();
-
-        if ($_REQUEST['dupecomments'] && $GroupID) {
-            dupe_comments($GroupID, $_REQUEST['dupecomments'], (isset($_REQUEST['ignore_comments'])) ? true : false);
+        if ($_REQUEST['dupecomments']) {
+            $userLink->addGroupComments($_REQUEST['dupecomments'], $LoggedUser['Username'], $updateNote);
         }
         break;
 
     default:
         error(403);
 }
-echo '\o/';
-header("Location: user.php?id=$UserID");
-?>
+
+header("Location: user.php?id={$userId}");
