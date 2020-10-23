@@ -14,6 +14,7 @@ if (isset($_GET['username'])) {
 
     $_GET['username'] = trim($_GET['username']);
     // form submitted
+    $Val = new Validate;
     $Val->SetFields('username', '1', 'username', 'Please enter a username.');
     $Err = $Val->ValidateForm($_GET);
 

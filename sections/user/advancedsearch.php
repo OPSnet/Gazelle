@@ -154,6 +154,7 @@ if (count($_GET)) {
     $StylesheetsManager = new \Gazelle\Stylesheet;
     $Stylesheets = $StylesheetsManager->list();
 
+    $Val = new Validate;
     $Val->SetFields('avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]);
     $Val->SetFields('bounty', '0', 'inarray', "Invalid bounty field", $OffNumberChoices);
     $Val->SetFields('cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]);
