@@ -138,6 +138,20 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
+    'ucfirst',
+    function ($text) {
+        return ucfirst($text);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'ucfirstall',
+    function ($text) {
+        return implode(' ', array_map(function ($w) {return ucfirst($w);}, explode(' ', $text)));
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
     'user_url',
     function ($userId) {
         return Users::format_username($userId, false, false, false);
@@ -148,13 +162,6 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
     'user_full',
     function ($userId) {
         return Users::format_username($userId, true, true, true, true);
-    }
-));
-
-G::$Twig->addFilter(new \Twig\TwigFilter(
-    'ucfirstall',
-    function ($text) {
-        return implode(' ', array_map(function ($w) {return ucfirst($w);}, explode(' ', $text)));
     }
 ));
 
