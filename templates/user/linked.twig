@@ -1,0 +1,55 @@
+<form class="manage_form" name="user" method="post" id="linkedform" action="">
+    <input type="hidden" name="action" value="dupes" />
+    <input type="hidden" name="dupeaction" value="update" />
+    <input type="hidden" name="userid" value="{{ user_id }}" />
+    <input type="hidden" id="auth" name="auth" value="{{ auth }}" />
+    <input type="hidden" id="form_comment_hash" name="form_comment_hash" value="{{ hash }}" />
+    <div class="box box2" id="l_a_box">
+        <div class="head">
+            Linked Accounts ({{ list|length }}) <a href="#" onclick="$('.linkedaccounts').gtoggle(); return false;" class="brackets">View</a>
+        </div>
+        <table width="100%" class="layout hidden linkedaccounts">
+{% for u in list %}
+    {% if loop.first %}
+            <tr>
+    {% endif %}
+                <td align="left">{{ u.user_id|user_full|raw }}
+                <a href="user.php?action=dupes&amp;dupeaction=remove&amp;auth={{ auth }}&amp;userid={{ user_id }}&amp;removeid={{ u.user_id }}" onclick="return confirm('Are you sure you wish to remove {{ u.username }} from this group?');" class="brackets tooltip" title="Remove linked account">X</a>
+                </td>
+    {% if not loop.last %}
+        {% if loop.index0 > 0 and loop.index % 4 == 0 %}
+            </tr>
+            <tr>
+        {% endif %}
+    {% else %}
+        {% set n = 3 - loop.index0 % 4 %}
+        {% if n > 0 %}
+            {% for t in 1 .. n %}
+                <td>&nbsp;</td>
+            {% endfor %}
+        {% endif %}
+            </tr>
+    {% endif %}
+{% endfor %}
+            <tr>
+                <td colspan="5" align="left" style="border-top: thin solid;"><strong>Comments:</strong></td>
+            </tr>
+            <tr>
+                <td colspan="5" align="left">
+                    <div id="dupecomments" class="{{ list|length ? '' : 'hidden' }}">{{ comments|bb_format|raw }}</div>
+                    <div id="editdupecomments" class="{{ list|length ? 'hidden' : '' }}">
+                        <textarea name="dupecomments" onkeyup="resize('dupecommentsbox');" id="dupecommentsbox" cols="65" rows="5" style="width: 98%;"> {{ comments }}</textarea>
+                    </div>
+                    <span style="float: right;"><a href="#" onclick="$('#dupecomments').gtoggle(); $('#editdupecomments').gtoggle(); resize('dupecommentsbox'); return false;" class="brackets">Edit linked account comments</a></span>
+                </td>
+            </tr>
+        </table>
+        <div class="pad hidden linkedaccounts">
+            <label for="target">Link this user with: </label>
+            <input type="text" name="target" id="target" /><br />
+            <label for="update_note">Update staff notes</label>
+            <input type="checkbox" name="update_note" id="update_note" checked="checked" /><br />
+            <input type="submit" value="Update" />
+        </div>
+    </div>
+</form>
