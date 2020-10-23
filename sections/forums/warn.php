@@ -23,6 +23,7 @@ View::show_header('Warn User');
     <div class="thin box pad">
         <form class="send_form" name="warning" action="" onsubmit="quickpostform.submit_button.disabled = true;" method="post">
             <input type="hidden" name="forumid" value="<?=$ForumID?>" />
+            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
             <input type="hidden" name="postid" value="<?=$PostID?>" />
             <input type="hidden" name="userid" value="<?=$UserID?>" />
             <input type="hidden" name="key" value="<?=$Key?>" />

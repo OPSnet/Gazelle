@@ -481,6 +481,7 @@ foreach ($Thread as $Key => $Post) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
                     <input type="hidden" name="action" value="warn" />
+                    <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
                     <input type="hidden" name="postid" value="<?=$PostID?>" />
                     <input type="hidden" name="userid" value="<?=$AuthorID?>" />
                     <input type="hidden" name="key" value="<?=$Key?>" />
