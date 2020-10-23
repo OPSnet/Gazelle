@@ -429,7 +429,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
 
                             $sessionMan = new Gazelle\Session($UserID);
                             $session = $sessionMan->create([
-                                'keep-logged' => 0,
+                                'keep-logged' => $KeepLogged ? '1' : '0',
                                 'browser' => $Browser,
                                 'os' => $OperatingSystem,
                                 'ipaddr' => needResetIpaddr($PermissionID, $CustomPermissions) ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'],
