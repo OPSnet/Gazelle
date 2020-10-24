@@ -103,8 +103,8 @@ class Session extends Base {
         $this->db->prepared_query("
             SELECT concat('users_sessions_', UserID) as ck
             FROM users_sessions
-            WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = 1)
-               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = 0)
+            WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = '1')
+               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = '0')
         ");
         if (!$this->db->has_results()) {
             return 0;
@@ -112,8 +112,8 @@ class Session extends Base {
         $cacheKeys = $this->db->collect('ck', false);
         $this->db->prepared_query("
             DELETE FROM users_sessions
-            WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = 1)
-               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = 0)
+            WHERE (LastUpdate < (now() - INTERVAL 30 DAY) AND KeepLogged = '1')
+               OR (LastUpdate < (now() - INTERVAL 60 MINUTE) AND KeepLogged = '0')
         ");
         $this->cache->deleteMulti($cacheKeys);
         return count($cacheKeys);
