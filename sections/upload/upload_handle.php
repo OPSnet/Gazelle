@@ -1083,7 +1083,6 @@ if ($Properties['Year'] && $Properties['RemasterYear']) {
 } else {
     $SQL .= " AND (FromYear = 0 AND ToYear = 0) ";
 }
-$SQL .= " AND UserID != '".$LoggedUser['ID']."' ";
 
 $Paranoia = unserialize($DB->scalar('
     SELECT Paranoia
@@ -1096,6 +1095,8 @@ if (!is_array($Paranoia)) {
 }
 if (!in_array('notifications', $Paranoia)) {
     $SQL .= " AND (Users LIKE '%|".$LoggedUser['ID']."|%' OR Users = '') ";
+} else {
+    $SQL .= " AND (Users ='')";
 }
 
 $SQL .= " AND UserID != '".$LoggedUser['ID']."' ";
