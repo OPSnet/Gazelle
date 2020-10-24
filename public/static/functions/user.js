@@ -16,7 +16,7 @@ function ChangeTo(to) {
             for (var i = 0; i < buttons.length; i++) {
                 buttons[i].setAttribute('onclick',"ChangeTo('text'); return false;");
             }
-        })
+        });
     }
 }
 
@@ -180,7 +180,7 @@ function togglePassKey(key) {
 function RandomIRCKey() {
     var irckeyChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     var randIRCKeyLen= 32;
-    var randIRCKey = Array(randIRCKeyLen).fill(irckeyChars).map(function(x) { return x[Math.floor(Math.random() * x.length)] }).join('');
+    var randIRCKey = Array(randIRCKeyLen).fill(irckeyChars).map(function(x) { return x[Math.floor(Math.random() * x.length)]; }).join('');
     irckey.value = randIRCKey;
 }
 
