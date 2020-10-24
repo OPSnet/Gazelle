@@ -628,11 +628,20 @@ function fillMusicForm(group, torrent, source) {
 
     // fill out torrent info
     jsonFill(torrent, {
-        format: 'format',
         media: 'media',
     });
 
     setAllowedFormat('#format', '#bitrate');
+
+    jsonFill(torrent, {
+        format: 'format',
+    });
+
+    setAllowedBitrate('#format', '#bitrate');
+
+    jsonFill(torrent, {
+        bitrate: 'bitrate',
+    });
 
     if (torrent['scene']) {
         $('#scene').prop('checked', torrent['scene']);
