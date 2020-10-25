@@ -217,7 +217,7 @@ class Contest extends Base {
         return $this->db->affected_rows();
     }
 
-    public function doPayment(\Twig\Environment $twig) {
+    public function doPayout(\Twig\Environment $twig) {
         $enabledUserBonus = $this->bonusPerUser();
         $contestBonus     = $this->bonusPerContest();
         $perEntryBonus    = $this->bonusPerEntry();
