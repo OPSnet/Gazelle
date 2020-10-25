@@ -1,0 +1,46 @@
+{% macro letter_box(show_search = true) %}
+    <div class="box pad center">
+        {% if show_search %}
+        <p>Search the wiki for user created tutorials and information.</p>
+        <form class="search_form" name="wiki" action="wiki.php" method="get">
+            <input type="hidden" name="action" value="search" />
+            <input type="hidden" name="nojump" value="1" />
+            <input type="search" name="search" size="80" />
+            <input value="Search" type="submit" class="hidden" />
+        </form>
+        <br />
+        <p>Additionally, you can manually browse through the articles by their first letter.</p>
+        {% endif %}
+        <span>
+            {% for letter in 'a'..'z' %}
+            <a href="wiki.php?action=browse&amp;letter={{ letter }}">{{ letter|upper }}</a>&nbsp;&nbsp;
+            {% endfor %}
+            <a href="wiki.php?action=browse&amp;letter=1">All</a>&nbsp;&nbsp;
+        </span>
+    </div>
+{% endmacro %}
+
+<div class="thin">
+    <div class="header">
+        <h2>{{ title }}</h2>
+    </div>
+
+    {{ _self.letter_box() }}
+
+    <table width="100%" style="margin-bottom: 10px;">
+        <tr class="colhead">
+            <td>Article</td>
+            <td>Last updated on</td>
+            <td>Last edited by</td>
+        </tr>
+        {% for article in articles %}
+        <tr>
+            <td><a href="wiki.php?action=article&amp;id={{ article.ID }}">{{ article.Title }}</a></td>
+            <td>{{ article.Date }}</td>
+            <td>{{ article.Author|user_url|raw }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    {{ _self.letter_box(false) }}
+</div>
