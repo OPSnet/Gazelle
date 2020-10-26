@@ -9,7 +9,12 @@ if (isset($_GET['showall']) && $_GET['showall']) {
 }
 
 if (isset($_GET['catchup']) && $_GET['catchup']) {
-    $DB->query("UPDATE users_notify_quoted SET UnRead = '0' WHERE UserID = '{$LoggedUser['ID']}'");
+    $DB->prepared_query("
+        UPDATE users_notify_quoted SET
+            UnRead = '0'
+        WHERE UserID = ?
+        ", $LoggedUser['ID']
+    );
     $Cache->delete_value('notify_quoted_' . $LoggedUser['ID']);
     header('Location: userhistory.php?action=quote_notifications');
     die();
@@ -39,17 +44,17 @@ $sql = "
         a.Name as ArtistName,
         c.Name as CollageName
     FROM users_notify_quoted AS q
-        LEFT JOIN forums_topics AS t ON t.ID = q.PageID
-        LEFT JOIN forums AS f ON f.ID = t.ForumID
-        LEFT JOIN artists_group AS a ON a.ArtistID = q.PageID
-        LEFT JOIN collages AS c ON c.ID = q.PageID
+    LEFT JOIN forums_topics AS t ON (t.ID = q.PageID)
+    LEFT JOIN forums AS f ON (f.ID = t.ForumID)
+    LEFT JOIN artists_group AS a ON (a.ArtistID = q.PageID)
+    LEFT JOIN collages AS c ON (c.ID = q.PageID)
     WHERE q.UserID = {$LoggedUser['ID']}
         AND (q.Page != 'forums' OR " . Forums::user_forums_sql() . ")
         AND (q.Page != 'collages' OR c.Deleted = '0')
         $UnreadSQL
     ORDER BY q.Date DESC
     LIMIT $Limit";
-$DB->query($sql);
+$DB->prepared_query($sql);
 $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
 $DB->query('SELECT FOUND_ROWS()');
 list($NumResults) = $DB->next_record();
@@ -66,13 +71,12 @@ foreach ($Results as $Result) {
 $TorrentGroups = Torrents::get_groups($TorrentGroups, true, true, false);
 $Requests = Requests::get_requests($Requests);
 
-//Start printing page
 View::show_header('Quote Notifications');
 ?>
 <div class="thin">
     <div class="header">
         <h2>
-            Quote notifications
+            <a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= Users::user_info($LoggedUser['ID'])['Username'] ?></a> &rsaquo; Quote notifications
             <?=$NumResults && !empty($UnreadSQL) ? " ($NumResults new)" : '' ?>
         </h2>
         <div class="linkbox pager">

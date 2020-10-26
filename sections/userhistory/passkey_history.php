@@ -10,39 +10,32 @@ user.
 
 ************************************************************************/
 
-$UserID = $_GET['userid'];
-if (!is_number($UserID)) {
-    error(404);
-}
-
-$DB->query("
-    SELECT
-        um.Username,
-        p.Level AS Class
-    FROM users_main AS um
-        LEFT JOIN permissions AS p ON p.ID = um.PermissionID
-    WHERE um.ID = $UserID");
-list($Username, $Class) = $DB->next_record();
-
 if (!check_perms('users_view_keys', $Class)) {
     error(403);
 }
 
-View::show_header("PassKey history for $Username");
+$UserID = (int)$_GET['userid'];
+if (!$UserID) {
+    error(404);
+}
+$Username = Users::user_info($UserID)['Username'];
 
-$DB->query("
+$DB->prepared_query("
     SELECT
         OldPassKey,
         NewPassKey,
         ChangeTime,
         ChangerIP
     FROM users_history_passkeys
-    WHERE UserID = $UserID
-    ORDER BY ChangeTime DESC");
+    WHERE UserID = ?
+    ORDER BY ChangeTime DESC
+    ", $UserID
+);
 
+View::show_header("Passkey history for $Username");
 ?>
 <div class="header">
-    <h2>Passkey history for <a href="/user.php?id=<?=$UserID?>"><?=$Username?></a></h2>
+    <h2><a href="/user.php?id=<?= $UserID ?>"><?= $Username ?></a> &rsaquo; Passkey History</h2>
 </div>
 <table width="100%">
     <tr class="colhead">
@@ -51,7 +44,7 @@ $DB->query("
         <td>Changed</td>
         <td>IP <a href="/userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">H</a></td>
     </tr>
-<?php while (list($OldPassKey, $NewPassKey, $ChangeTime, $ChangerIP) = $DB->next_record()) { ?>
+<?php while ([$OldPassKey, $NewPassKey, $ChangeTime, $ChangerIP] = $DB->next_record()) { ?>
     <tr class="rowa">
         <td><?=display_str($OldPassKey)?></td>
         <td><?=display_str($NewPassKey)?></td>

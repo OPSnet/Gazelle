@@ -10,8 +10,7 @@ $ShowAll = !empty($_GET['showall']);
 
 if ($ShowAll) {
     $sql = "
-        SELECT
-            c.ID,
+        SELECT c.ID,
             c.Name,
             c.NumTorrents,
             CASE WHEN ca.CollageID IS NULL THEN 'torrent' ELSE 'artist' END as collageType,
@@ -25,8 +24,7 @@ if ($ShowAll) {
         GROUP BY c.ID";
 } else {
     $sql = "
-        SELECT
-            c.ID,
+        SELECT c.ID,
             c.Name,
             c.NumTorrents,
             CASE WHEN ca.CollageID IS NULL THEN 'torrent' ELSE 'artist' END as collageType,
@@ -49,7 +47,8 @@ View::show_header('Subscribed collages','browse,collage');
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
+        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= Users::user_info($LoggedUser['ID'])['Username']
+            ?></a> &rsaquo; Subscribed collages<?=($ShowAll ? '' : ' with new additions')?></h2>
 
         <div class="linkbox">
 <?php if ($ShowAll) { ?>
@@ -77,7 +76,7 @@ View::show_header('Subscribed collages','browse,collage');
     foreach ($CollageSubs as $Collage) {
         $TorrentTable = '';
 
-        list($CollageID, $CollageName, $CollageSize, $type, $LastVisit) = $Collage;
+        [$CollageID, $CollageName, $CollageSize, $type, $LastVisit] = $Collage;
         if ($type == 'artist') {
             $sql = "SELECT ArtistID AS ID
                 FROM collages_artists
@@ -305,7 +304,7 @@ View::show_header('Subscribed collages','browse,collage');
 ?>
         <h2>Subscribed artist collages<?=($ShowAll ? '' : ' with new additions')?></h2>
 <?php   foreach ($artistCollage as $c) {
-            list($id, $name, $new, $artistIds) = $c;
+            [$id, $name, $new, $artistIds] = $c;
 ?>
             <div class="box pad">
                 <span style="float: left;"><strong><a href="collage.php?id=<?= $id ?>"><?= $name ?></a></strong> (<?= $new ?> new artist<?= plural($new) ?>)</span>

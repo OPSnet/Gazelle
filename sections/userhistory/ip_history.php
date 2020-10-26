@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\Time;
+
 /************************************************************************
 ||------------|| User IP history page ||---------------------------||
 
@@ -10,143 +13,67 @@ user.
 
 ************************************************************************/
 
-define('IPS_PER_PAGE', 25);
+if (!check_perms('users_view_ips')) {
+    error(403);
+}
 
 $UserID = $_GET['userid'];
 if (!is_number($UserID)) {
     error(404);
 }
-$UserInfo = Users::user_info($UserID);
-if (!check_perms('users_view_ips', $UserInfo['Class'])) {
-    error(403);
-}
 
 $UsersOnly = !empty($_GET['usersonly']);
+$cond = [];
+$args = [];
 
-if (!empty($_GET['ip']) && trim($_GET['ip']) != '') {
-    $SearchIP = db_string(str_replace("*", "%", trim($_GET['ip'])));
-    $SearchIPQuery = "AND IP LIKE '$SearchIP'";
+if (trim($_GET['ip'] ?? '') !== '') {
+    $cond[] = 'uhi.IP REGEXP ?';
+    $args[] = trim($_GET['ip']);
+}
+
+[$Page, $Limit] = Format::page_limit(IPS_PER_PAGE);
+if (!$UsersOnly) {
+    $from = "FROM users_history_ips uhi"
+        . ($cond ? (' WHERE ' . implode(' AND ', $cond)) : '')
+        . " GROUP BY uhi.IP";
 } else {
-    $SearchIPQuery = "";
+    $cond[] = 'uhi.UserID = ?';
+    $args[] = $UserID;
+    $from = "FROM users_history_ips uhi
+        INNER JOIN users_history_ips uhi_other ON (uhi_other.IP = uhi.IP AND uhi_other.UserID != uhi.UserID)
+        WHERE " . implode(' AND ', $cond) . "
+        GROUP BY uhi.IP";
 }
 
-View::show_header("IP address history for " . $UserInfo['Username']);
-?>
-<script type="text/javascript">//<![CDATA[
-function Ban(ip, elemID) {
-    var notes = prompt("Enter notes for this ban");
-    if (notes != null && notes.length > 0) {
-        var xmlhttp;
-        if (window.XMLHttpRequest) {
-            xmlhttp = new XMLHttpRequest();
-        } else {
-            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-        }
-        xmlhttp.onreadystatechange=function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                document.getElementById(elemID).innerHTML = "<strong>[Banned]</strong>";
-            }
-        }
-        xmlhttp.open("GET", "tools.php?action=quick_ban&perform=create&ip=" + ip + "&notes=" + notes, true);
-        xmlhttp.send();
-    }
+$totalCommon = $DB->scalar("
+    SELECT count(DISTINCT uhi.IP)
+    $from
+    ", ...$args
+);
+$DB->prepared_query("
+    SELECT uhi.IP,
+        min(uhi.StartTime) as StartTime,
+        max(uhi.EndTime) as EndTime
+    $from
+    ORDER BY StartTime DESC
+    LIMIT $Limit
+    ", ...$args
+);
+$Results = $DB->to_array(false, MYSQLI_ASSOC);
 
-}
-/*
-function UnBan(ip, id, elemID) {
-        var xmlhttp;
-        if (window.XMLHttpRequest) {
-            xmlhttp = new XMLHttpRequest();
-        } else {
-            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-        }
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                document.getElementById(elemID).innerHTML = "Ban";
-                document.getElementById(elemID).onclick = function() { Ban(ip, elemID); return false; };
-            }
-        }
-        xmlhttp.open("GET","tools.php?action=quick_ban&perform=delete&id=" + id + "&ip=" + ip, true);
-        xmlhttp.send();
-}
-*/
-//]]>
-</script>
-<?php
-list($Page, $Limit) = Format::page_limit(IPS_PER_PAGE);
-
-if ($UsersOnly) {
-    $DB->query("
-        SELECT DISTINCT IP
-        FROM users_history_ips
-        WHERE UserID = '$UserID'
-            $SearchIPQuery");
-
-    if ($DB->has_results()) {
-        $UserIPs = db_array($DB->collect('IP'), [], true);
-        $DB->query("
-            SELECT DISTINCT IP
-            FROM users_history_ips
-            WHERE UserID != '$UserID'
-                AND IP IN (" . implode(',', $UserIPs) . ")");
-        unset($UserIPs);
-
-        if ($DB->has_results()) {
-            $OtherIPs = db_array($DB->collect('IP'), [], true);
-            $QueryID = $DB->query("
-                SELECT
-                    SQL_CALC_FOUND_ROWS
-                    IP,
-                    StartTime,
-                    EndTime
-                FROM users_history_ips
-                WHERE UserID = '$UserID'
-                    AND IP IN (" . implode(',', $OtherIPs) . ")
-                ORDER BY StartTime DESC
-                LIMIT $Limit");
-            unset($OtherIPs);
-        }
-    }
-} else {
-    $QueryID = $DB->query("
-        SELECT
-            SQL_CALC_FOUND_ROWS
+if ($Results) {
+    $IPs = $DB->collect('IP');
+    $DB->prepared_query("
+        SELECT UserID,
             IP,
             StartTime,
             EndTime
         FROM users_history_ips
-        WHERE UserID = '$UserID'
-            $SearchIPQuery
+        WHERE UserID NOT IN (0, ?)
+            AND IP IN (" . placeholders($IPs) . ")
         ORDER BY StartTime DESC
-        LIMIT $Limit");
-}
-
-
-if (isset($QueryID)) {
-    $DB->query('SELECT FOUND_ROWS()');
-    list($NumResults) = $DB->next_record();
-    $DB->set_query_id($QueryID);
-    $Results = $DB->to_array(false, MYSQLI_ASSOC);
-    $IPMatches = $IPMatchesUser = $IPMatchesIgnored = [];
-} else {
-    $NumResults = 0;
-    $Results = [];
-}
-
-if (!empty($Results)) {
-    $IPs = db_array($DB->collect('IP'), [], true);
-    $DB->query("
-        SELECT
-            UserID,
-            IP,
-            StartTime,
-            EndTime
-        FROM users_history_ips
-        WHERE IP IN (" . implode(',', $IPs) . ")
-            AND UserID != '$UserID'
-            AND UserID != 0
-        ORDER BY StartTime DESC");
-    unset($IPs);
+        ", $UserID, ...$IPs
+    );
 
     while ($Match = $DB->next_record(MYSQLI_ASSOC)) {
         $OtherIP = $Match['IP'];
@@ -166,12 +93,13 @@ if (!empty($Results)) {
     }
 }
 
-$Pages = Format::get_pages($Page, $NumResults, IPS_PER_PAGE, 9);
-
+$Username = Users::user_info($UserID)['Username'];
+$Pages = Format::get_pages($Page, $totalCommon, IPS_PER_PAGE, 9);
+View::show_header($Username . " &rsaquo; IP address history", 'iphist');
 ?>
 <div class="thin">
     <div class="header">
-        <h2>IP address history for <a href="user.php?id=<?=$UserID?>"><?=$UserInfo['Username']?></a></h2>
+        <h2><a href="user.php?id=<?=$UserID?>"><?= $Username ?></a> &rsaquo; IP address history</h2>
         <div class="linkbox">
 <?php
 if ($UsersOnly) { ?>
@@ -204,7 +132,7 @@ if ($UsersOnly) { ?>
 } ?>
                 <input type="text" name="ip" value="<?=Format::form('ip')?>" />
                 <input type="submit" value="Search" />
-                Wildcard (*) search examples: 127.0.* or 1*2.0.*.1 or *.*.*.*
+                Regexps may be used
             </form>
         </td></tr>
     </table>
@@ -285,7 +213,7 @@ foreach ($Results as $Index => $Result) {
                 <span class="reltime"><?=time_diff($EndTime)?></span>
                 <span class="abstime hidden"><?=$EndTime?></span>
             </td>
-            <td><?php /*time_diff(strtotime($StartTime), strtotime($EndTime));*/ ?></td>
+            <td><?= Time::timeDiff($EndTime, 2, true, false, $StartTime, true) ?></td>
         </tr>
 <?php
     if (!empty($OtherUsers) && ($FirstOccurrence || count($OtherUsers) < 100)) {
@@ -305,7 +233,7 @@ foreach ($Results as $Index => $Result) {
                 <span class="reltime"><?=time_diff($OtherUser['EndTime'])?></span>
                 <span class="hidden abstime"><?=$OtherUser['EndTime']?></span>
             </td>
-            <td><?php /*time_diff(strtotime($OtherUser['StartTime']), strtotime($OtherUser['EndTime'])); */ ?></td>
+            <td><?= Time::timeDiff($OtherUser['StartTime'], 2, true, false, $OtherUser['EndTime'], true) ?></td>
         </tr>
 <?php
         }
