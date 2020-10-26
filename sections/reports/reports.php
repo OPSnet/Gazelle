@@ -4,12 +4,7 @@ if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
     error(403);
 }
 
-// Number of reports per page
-define('REPORTS_PER_PAGE', '10');
-
 [$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
-
-require_once('array.php');
 
 $cond = [];
 $args = [];
@@ -84,10 +79,12 @@ View::show_header('Reports', 'bbcode,reports');
 <?= $Pages ?>
     </div>
 <?php
-    $DB->set_query_id($Reports);
-    while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason, $Status, $ClaimerID, $Notes, $ResolverID] = $DB->next_record(MYSQLI_NUM, false)) {
-        $Type = $Types[$Short];
-        $Reference = "reports.php?id=$ReportID#report$ReportID";
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
+$DB->set_query_id($Reports);
+while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason, $Status, $ClaimerID, $Notes, $ResolverID] = $DB->next_record(MYSQLI_NUM, false)) {
+    $Type = $Types[$Short];
+    $Reference = "reports.php?id=$ReportID#report$ReportID";
 ?>
         <div id="report_<?=$ReportID?>" style="margin-bottom: 1em;" class="pending_report_v1">
             <table cellpadding="5" id="report_<?=$ReportID?>">

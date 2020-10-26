@@ -26,20 +26,22 @@ if (!is_number($_POST['categoryid']) || !is_number($TorrentID)) {
     $CategoryID = $_POST['categoryid'];
 }
 
+if (!isset($_POST['from_delete'])) {
+    $Report = true;
+} elseif (!is_number($_POST['from_delete'])) {
+    echo 'Hax occurred in from_delete';
+}
+
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
 if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
     $ReportType = $Types[$CategoryID][$_POST['type']];
 } elseif (array_key_exists($_POST['type'], $Types['master'])) {
     $ReportType = $Types['master'][$_POST['type']];
 } else {
     //There was a type but it wasn't an option!
-    echo 'Hax on section type';
+    echo 'Unknown section type';
     die();
-}
-
-if (!isset($_POST['from_delete'])) {
-    $Report = true;
-} elseif (!is_number($_POST['from_delete'])) {
-    echo 'Hax occurred in from_delete';
 }
 
 if ($Recipient == 'Uploader') {
@@ -59,7 +61,7 @@ if ($Recipient == 'Uploader') {
 $Subject = $_POST['raw_name'];
 
 if (!is_number($ToID)) {
-    $Err = "Haxx occurring, non-number present";
+    $Err = "Hax occurring, non-number present";
 }
 
 if ($ToID == $LoggedUser['ID']) {

@@ -156,6 +156,7 @@ define('INVITES_PER_PAGE', 50);
 define('LOG_ENTRIES_PER_PAGE', 50);
 define('MESSAGES_PER_PAGE', 25);
 define('POSTS_PER_PAGE', 25);
+define('REPORTS_PER_PAGE', '10');
 define('REQUESTS_PER_PAGE', 25);
 define('TOPICS_PER_PAGE', 50);
 define('TORRENTS_PER_PAGE', 50);

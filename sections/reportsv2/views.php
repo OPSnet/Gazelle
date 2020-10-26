@@ -11,36 +11,21 @@ if (!check_perms('admin_reports')) {
 
 View::show_header('Reports V2', 'reportsv2');
 
-
 //Grab owner's ID, just for examples
-$DB->query("
+[$ownerId, $owner] = $DB->row("
     SELECT ID, Username
     FROM users_main
-    ORDER BY ID ASC
-    LIMIT 1");
-list($OwnerID, $Owner) = $DB->next_record();
-$Owner = display_str($Owner);
-
+    WHERE ID = ?
+", $LoggedUser['ID']);
+$owner = display_str($owner);
+$reportMan = new Gazelle\Manager\ReportV2;
 ?>
 <div class="header">
     <h2>Reports V2 Information</h2>
-<?php include('header.php'); ?>
+<?php require_once('header.php'); ?>
 </div>
 <div class="thin float_clear">
     <div class="two_columns pad">
-<?php
-$DB->query("
-    SELECT
-        um.ID,
-        um.Username,
-        COUNT(r.ID) AS Reports
-    FROM reportsv2 AS r
-        JOIN users_main AS um ON um.ID = r.ResolverID
-    WHERE r.LastChangeTime > NOW() - INTERVAL 24 HOUR
-    GROUP BY r.ResolverID
-    ORDER BY Reports DESC");
-$Results = $DB->to_array();
-?>
         <h3>Reports resolved in the last 24 hours</h3>
         <table class="box border">
             <tr class="colhead">
@@ -48,35 +33,17 @@ $Results = $DB->to_array();
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
 <?php
-foreach ($Results as $Result) {
-    list($UserID, $Username, $Reports) = $Result;
-    if ($Username == $LoggedUser['Username']) {
-        $RowClass = ' class="rowa"';
-    } else {
-        $RowClass = '';
-    }
+$list = $reportMan->resolvedLastDay();
+foreach ($list as $summary) {
+    [$userId, $username, $count] = $summary;
 ?>
-            <tr<?=$RowClass?>>
-                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
-                <td class="number_column"><?=number_format($Reports)?></td>
+            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
+                <td class="number_column"><?=number_format($count)?></td>
             </tr>
-<?php
-}
-?>
+<?php } ?>
         </table>
-<?php
-$DB->query("
-    SELECT
-        um.ID,
-        um.Username,
-        COUNT(r.ID) AS Reports
-    FROM reportsv2 AS r
-        JOIN users_main AS um ON um.ID = r.ResolverID
-    WHERE r.LastChangeTime > NOW() - INTERVAL 1 WEEK
-    GROUP BY r.ResolverID
-    ORDER BY Reports DESC");
-$Results = $DB->to_array();
-?>
+
         <h3>Reports resolved in the last week</h3>
         <table class="box border">
             <tr class="colhead">
@@ -84,35 +51,17 @@ $Results = $DB->to_array();
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
 <?php
-foreach ($Results as $Result) {
-    list($UserID, $Username, $Reports) = $Result;
-    if ($Username == $LoggedUser['Username']) {
-        $RowClass = ' class="rowa"';
-    } else {
-        $RowClass = '';
-    }
+$list = $reportMan->resolvedLastWeek();
+foreach ($list as $summary) {
+    [$userId, $username, $count] = $summary;
 ?>
-            <tr<?=$RowClass?>>
-                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
-                <td class="number_column"><?=number_format($Reports)?></td>
+            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
+                <td class="number_column"><?=number_format($count)?></td>
             </tr>
-<?php
-}
-?>
+<?php } ?>
         </table>
-<?php
-$DB->query("
-    SELECT
-        um.ID,
-        um.Username,
-        COUNT(r.ID) AS Reports
-    FROM reportsv2 AS r
-        JOIN users_main AS um ON um.ID = r.ResolverID
-    WHERE r.LastChangeTime > NOW() - INTERVAL 1 MONTH
-    GROUP BY r.ResolverID
-    ORDER BY Reports DESC");
-$Results = $DB->to_array();
-?>
+
         <h3>Reports resolved in the last month</h3>
         <table class="box border">
             <tr class="colhead">
@@ -120,34 +69,17 @@ $Results = $DB->to_array();
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
 <?php
-foreach ($Results as $Result) {
-    list($UserID, $Username, $Reports) = $Result;
-    if ($Username == $LoggedUser['Username']) {
-        $RowClass = ' class="rowa"';
-    } else {
-        $RowClass = '';
-    }
+$list = $reportMan->resolvedLastMonth();
+foreach ($list as $summary) {
+    [$userId, $username, $count] = $summary;
 ?>
-            <tr<?=$RowClass?>>
-                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
-                <td class="number_column"><?=number_format($Reports)?></td>
+            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
+                <td class="number_column"><?=number_format($count)?></td>
             </tr>
-<?php
-}
-?>
+<?php } ?>
         </table>
-<?php
-$DB->query("
-    SELECT
-        um.ID,
-        um.Username,
-        COUNT(r.ID) AS Reports
-    FROM reportsv2 AS r
-        JOIN users_main AS um ON um.ID = r.ResolverID
-    GROUP BY r.ResolverID
-    ORDER BY Reports DESC");
-$Results = $DB->to_array();
-?>
+
         <h3>Total reports resolved</h3>
         <table class="box border">
             <tr class="colhead">
@@ -155,21 +87,15 @@ $Results = $DB->to_array();
                 <td class="colhead_dark number_column">Reports</td>
             </tr>
 <?php
-foreach ($Results as $Result) {
-    list($UserID, $Username, $Reports) = $Result;
-    if ($Username == $LoggedUser['Username']) {
-        $RowClass = ' class="rowa"';
-    } else {
-        $RowClass = '';
-    }
+$list = $reportMan->resolvedSummary();
+foreach ($list as $summary) {
+    [$userId, $username, $count] = $summary;
 ?>
-            <tr<?=$RowClass?>>
-                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$UserID?>"><?=$Username?></a></td>
-                <td class="number_column"><?=number_format($Reports)?></td>
+            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
+                <td><a href="reportsv2.php?view=resolver&amp;id=<?=$userId?>"><?=$username?></a></td>
+                <td class="number_column"><?=number_format($count)?></td>
             </tr>
-<?php
-}
-?>
+<?php } ?>
         </table>
         <h3>Different view modes by person</h3>
         <div class="box pad">
@@ -203,47 +129,35 @@ foreach ($Results as $Result) {
             <strong>By reporter ID:</strong>
             <ul>
                 <li>
-                    Reports created by <?=$Owner?>
+                    Reports created by <?=$owner?>
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=reporter&amp;id=<?=$OwnerID?>"><?=site_url()?>reportsv2.php?view=reporter&amp;id=<?=$OwnerID?></a>
+                    <a href="reportsv2.php?view=reporter&amp;id=<?=$ownerId?>"><?=site_url()?>reportsv2.php?view=reporter&amp;id=<?=$ownerId?></a>
                 </li>
             </ul>
             <strong>By uploader ID:</strong>
             <ul>
                 <li>
-                    Reports for torrents uploaded by <?=$Owner?>
+                    Reports for torrents uploaded by <?=$owner?>
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=uploader&amp;id=<?=$OwnerID?>"><?=site_url()?>reportsv2.php?view=uploader&amp;id=<?=$OwnerID?></a>
+                    <a href="reportsv2.php?view=uploader&amp;id=<?=$ownerId?>"><?=site_url()?>reportsv2.php?view=uploader&amp;id=<?=$ownerId?></a>
                 </li>
             </ul>
             <strong>By resolver ID:</strong>
             <ul>
                 <li>
-                    Reports for torrents resolved by <?=$Owner?>
+                    Reports for torrents resolved by <?=$owner?>
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=resolver&amp;id=<?=$OwnerID?>"><?=site_url()?>reportsv2.php?view=resolver&amp;id=<?=$OwnerID?></a>
+                    <a href="reportsv2.php?view=resolver&amp;id=<?=$ownerId?>"><?=site_url()?>reportsv2.php?view=resolver&amp;id=<?=$ownerId?></a>
                 </li>
             </ul>
             <strong>User the search feature for anything more specific.</strong>
         </div>
     </div>
     <div class="two_columns pad">
-<?php
-    $DB->query("
-        SELECT
-            r.ResolverID,
-            um.Username,
-            COUNT(r.ID) AS Count
-        FROM reportsv2 AS r
-            LEFT JOIN users_main AS um ON r.ResolverID = um.ID
-        WHERE r.Status = 'InProgress'
-        GROUP BY r.ResolverID");
 
-    $Staff = $DB->to_array();
-?>
         <h3>Currently assigned reports by staff member</h3>
         <table class="box border">
             <tr class="colhead">
@@ -251,33 +165,22 @@ foreach ($Results as $Result) {
                 <td class="colhead_dark number_column">Current Count</td>
             </tr>
 <?php
-    foreach ($Staff as $Array) {
-        if ($Array['Username'] == $LoggedUser['Username']) {
-            $RowClass = ' class="rowa"';
-        } else {
-            $RowClass = '';
-        }
+$list = $reportMan->inProgressSummary();
+    foreach ($list as $summary) {
 ?>
-            <tr<?=$RowClass?>>
+            <tr<?= $username == $LoggedUser['Username'] ? ' class="rowa"' : '' ?>>
                 <td>
-                    <a href="reportsv2.php?view=staff&amp;id=<?=$Array['ResolverID']?>"><?=display_str($Array['Username'])?>'s reports</a>
+                    <a href="reportsv2.php?view=staff&amp;id=<?=$summary['ResolverID']?>"><?=display_str($summary['Username'])?>'s reports</a>
                 </td>
-                <td class="number_column"><?=number_format($Array['Count'])?></td>
+                <td class="number_column"><?=number_format($summary['Count'])?></td>
             </tr>
-<?php
-    } ?>
+<?php } ?>
         </table>
         <h3>Different view modes by report type</h3>
 <?php
-    $DB->query("
-        SELECT
-            Type,
-            COUNT(ID) AS Count
-        FROM reportsv2
-        WHERE Status = 'New'
-        GROUP BY Type");
-    $Current = $DB->to_array();
-    if (!empty($Current)) {
+$list = $reportMan->newSummary();
+$Types = $reportMan->types();
+if (!empty($list)) {
 ?>
         <table class="box border">
             <tr class="colhead">
@@ -285,21 +188,21 @@ foreach ($Results as $Result) {
                 <td class="colhead_dark number_column">Current Count</td>
             </tr>
 <?php
-        foreach ($Current as $Array) {
+        foreach ($list as $summary) {
             //Ugliness
             foreach ($Types as $Category) {
-                if (!empty($Category[$Array['Type']])) {
-                    $Title = $Category[$Array['Type']]['title'];
+                if (!empty($Category[$summary['Type']])) {
+                    $title = $Category[$summary['Type']]['title'];
                     break;
                 }
             }
 ?>
-            <tr<?=$Title === 'Urgent' ? ' class="rowa" style="font-weight: bold;"' : ''?>>
+            <tr<?=$title === 'Urgent' ? ' class="rowa" style="font-weight: bold;"' : ''?>>
                 <td>
-                    <a href="reportsv2.php?view=type&amp;id=<?=display_str($Array['Type'])?>"><?=display_str($Title)?></a>
+                    <a href="reportsv2.php?view=type&amp;id=<?=display_str($summary['Type'])?>"><?=display_str($title)?></a>
                 </td>
                 <td class="number_column">
-                    <?=number_format($Array['Count'])?>
+                    <?=number_format($summary['Count'])?>
                 </td>
             </tr>
 <?php

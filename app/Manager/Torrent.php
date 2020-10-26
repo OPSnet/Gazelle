@@ -687,13 +687,14 @@ class Torrent extends \Gazelle\Base {
      * @param int torrent ID
      * @return DB object to loop over [request id, filler user id, date filled]
      */
-    public function requestFills(int $torrentId) {
-        return $this->db->prepared_query("
+    public function requestFills(int $torrentId): array {
+        $this->db->prepared_query("
             SELECT r.ID, r.FillerID, r.TimeFilled
             FROM requests AS r
             WHERE r.TorrentID = ?
             ", $torrentId
         );
+        return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
     /**

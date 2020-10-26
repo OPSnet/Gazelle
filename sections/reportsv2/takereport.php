@@ -19,6 +19,8 @@ if ((int)$_POST['torrentid'] < 1 || (int)$_POST['categoryid'] < 1) {
 $TorrentID = (int)$_POST['torrentid'];
 $CategoryID = (int)$_POST['categoryid'];
 
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
 if (!isset($_POST['type'])) {
     error(404);
 } elseif (array_key_exists($_POST['type'], $Types[$CategoryID])) {

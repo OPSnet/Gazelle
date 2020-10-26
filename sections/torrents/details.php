@@ -437,7 +437,8 @@ foreach ($TorrentList as $Torrent) {
     else {
         $Reported = true;
         $Torrent['Reported'] = $NumReports;
-        include(SERVER_ROOT.'/sections/reportsv2/array.php');
+        $reportMan = new Gazelle\Manager\ReportV2;
+        $Types = $reportMan->types();
         $ReportInfo = '
         <table class="reportinfo_table">
             <tr class="colhead_dark" style="font-weight: bold;">

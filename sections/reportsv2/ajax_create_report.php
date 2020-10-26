@@ -16,11 +16,15 @@ if (!check_perms('admin_reports')) {
 
 authorize();
 
-if ((int)$_POST['torrentid'] < 1) {
+$TorrentID = (int)$_POST['torrentid'];
+if (!$TorrentID) {
     echo 'No Torrent ID';
     die();
-} else {
-    $TorrentID = (int)$_POST['torrentid'];
+}
+
+if (!isset($_POST['type'])) {
+    echo 'Missing Type';
+    die();
 }
 
 $CategoryID = $DB->scalar("
@@ -35,10 +39,9 @@ if (!$CategoryID) {
     die();
 }
 
-if (!isset($_POST['type'])) {
-    echo 'Missing Type';
-    die();
-} elseif (array_key_exists($_POST['type'], $Types[$CategoryID])) {
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
+if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
     $Type = $_POST['type'];
     $ReportType = $Types[$CategoryID][$Type];
 } elseif (array_key_exists($_POST['type'], $Types['master'])) {

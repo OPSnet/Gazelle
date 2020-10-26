@@ -248,6 +248,9 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
 <?php
 }
 
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
+
 //If we're not coming from torrents.php, check we're being returned because of an error.
 if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     if (!isset($Err)) {
