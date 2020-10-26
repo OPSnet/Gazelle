@@ -10,44 +10,36 @@ user.
 
 ************************************************************************/
 
-$UserID = $_GET['userid'];
-if (!is_number($UserID)) {
-    error(404);
-}
-
-$DB->query("
-    SELECT
-        um.Username,
-        p.Level AS Class
-    FROM users_main AS um
-        LEFT JOIN permissions AS p ON p.ID = um.PermissionID
-    WHERE um.ID = $UserID");
-list($Username, $Class) = $DB->next_record();
-
-if (!check_perms('users_view_keys', $Class)) {
+if (!check_perms('users_view_keys')) {
     error(403);
 }
 
-View::show_header("Password reset history for $Username");
+$UserID = (int)$_GET['userid'];
+if (!$UserID) {
+    error(404);
+}
+$Username = Users::user_info($UserID)['Username'];
 
-$DB->query("
+$DB->prepared_query("
     SELECT
         ChangeTime,
         ChangerIP
     FROM users_history_passwords
     WHERE UserID = $UserID
-    ORDER BY ChangeTime DESC");
+    ORDER BY ChangeTime DESC
+");
 
+View::show_header("<?= $Username ?> &rsaquo; Password reset history");
 ?>
 <div class="header">
-    <h2>Password reset history for <a href="/user.php?id=<?=$UserID?>"><?=$Username?></a></h2>
+    <h2><a href="/user.php?id=<?= $UserID ?>"><?= $Username ?></a> &rsaquo; Password reset history</h2>
 </div>
 <table width="100%">
     <tr class="colhead">
         <td>Changed</td>
         <td>IP <a href="/userhistory.php?action=ips&amp;userid=<?=$UserID?>" class="brackets">H</a></td>
     </tr>
-<?php while (list($ChangeTime, $ChangerIP) = $DB->next_record()) { ?>
+<?php while ([$ChangeTime, $ChangerIP] = $DB->next_record()) { ?>
     <tr class="rowa">
         <td><?=time_diff($ChangeTime)?></td>
         <td><?=display_str($ChangerIP)?> <a href="/user.php?action=search&amp;ip_history=on&amp;ip=<?=display_str($ChangerIP)?>" class="brackets tooltip" title="Search">S</a><br /><?=Tools::get_host_by_ajax($ChangerIP)?></td>

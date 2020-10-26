@@ -33,7 +33,7 @@ $DB->prepared_query("
 );
 $other = $DB->to_array(false, MYSQLI_ASSOC, false);
 
-View::show_header("Email history for <?= Users::user_info($userId)['Username'] ?>");
+View::show_header(Users::user_info($userId)['Username'] . " &rasquo; Email History");
 ?>
 <div class="thin">
     <div class="header">

@@ -37,16 +37,20 @@ if (isset($_GET['expire'])) {
     if (!is_number($UserID) || !is_number($TorrentID)) {
         error(403);
     }
-    $DB->query("
+    $InfoHash = $DB->scalar("
         SELECT info_hash
         FROM torrents
-        WHERE ID = $TorrentID");
-    if (list($InfoHash) = $DB->next_record(MYSQLI_NUM, FALSE)) {
-        $DB->query("
-            UPDATE users_freeleeches
-            SET Expired = TRUE
-            WHERE UserID = $UserID
-                AND TorrentID = $TorrentID");
+        WHERE ID = ?
+        ", $TorrentID
+    );
+    if ($InfoHash) {
+        $DB->prepared_query("
+            UPDATE users_freeleeches SET
+                Expired = true
+            WHERE UserID = ?
+                AND TorrentID = ?
+            ", $UserID, $TorrentID
+        );
         $Cache->delete_value("users_tokens_$UserID");
         Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID]);
     }
@@ -55,7 +59,7 @@ if (isset($_GET['expire'])) {
 
 View::show_header('Freeleech token history');
 
-list($Page, $Limit) = Format::page_limit(25);
+[$Page, $Limit] = Format::page_limit(25);
 
 $DB->prepared_query("
     SELECT
@@ -71,8 +75,8 @@ $DB->prepared_query("
         t.Encoding,
         t.Size
     FROM users_freeleeches AS f
-        LEFT JOIN torrents AS t ON t.ID = f.TorrentID
-        LEFT JOIN torrents_group AS g ON g.ID = t.GroupID
+    LEFT JOIN torrents AS t ON (t.ID = f.TorrentID)
+    LEFT JOIN torrents_group AS g ON (g.ID = t.GroupID)
     WHERE f.UserID = ?
     ORDER BY f.Time DESC
     LIMIT $Limit", $UserID);
@@ -107,7 +111,7 @@ $Artists = Artists::get_artists($GroupIDs);
 $i = true;
 foreach ($Tokens as $Token) {
     $i = !$i;
-    list($TorrentID, $GroupID, $Time, $Expired, $Downloaded, $Uses, $Name, $Format, $Encoding, $Size) = $Token;
+    [$TorrentID, $GroupID, $Time, $Expired, $Downloaded, $Uses, $Name, $Format, $Encoding, $Size] = $Token;
     if ($Name != '') {
         $Name = "<a href=\"torrents.php?torrentid=$TorrentID\">$Name</a>";
         $ArtistName = Artists::display_artists($Artists[$GroupID]);

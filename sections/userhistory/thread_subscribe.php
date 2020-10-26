@@ -6,11 +6,11 @@ if (!empty($LoggedUser['DisableForums'])) {
     error(403);
 }
 
-if (!is_number($_GET['topicid'])) {
-    error(0);
+$TopicID = (int)$_GET['topicid'];
+if (!$TopicID) {
+    error(404);
 }
 
-$TopicID = (int)$_GET['topicid'];
 $ForumID = $DB->scalar("
     SELECT f.ID
     FROM forums_topics AS t

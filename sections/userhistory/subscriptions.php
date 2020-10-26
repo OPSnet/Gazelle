@@ -33,7 +33,7 @@ $ShowCollapsed = (!isset($_GET['collapse']) && !isset($HeavyInfo['SubscriptionsC
  * LastReadAvatar
  * LastReadEditedUserID
  */
-$DB->query("
+$DB->prepared_query("
     (SELECT
         SQL_CALC_FOUND_ROWS
         s.Page,
@@ -106,8 +106,8 @@ $Requests = Requests::get_requests($Requests);
 ?>
 <div class="thin">
     <div class="header">
-        <h2>Subscriptions<?=$ShowUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
-
+        <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= Users::user_info($LoggedUser['ID'])['Username']
+            ?></a> &rsaquo; Subscriptions<?=$ShowUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
         <div class="linkbox">
 <?php
 if (!$ShowUnread) {

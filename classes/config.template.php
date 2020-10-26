@@ -153,6 +153,7 @@ define('STAFF_LOCKED', 1);
 define('BOOKMARKS_PER_PAGE', 20);
 define('FRIENDS_PER_PAGE', 20);
 define('INVITES_PER_PAGE', 50);
+define('IPS_PER_PAGE', 50);
 define('LOG_ENTRIES_PER_PAGE', 50);
 define('MESSAGES_PER_PAGE', 25);
 define('POSTS_PER_PAGE', 25);

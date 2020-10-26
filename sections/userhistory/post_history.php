@@ -7,22 +7,16 @@ if (!empty($LoggedUser['DisableForums'])) {
     error(403);
 }
 
-$UserID = empty($_GET['userid']) ? $LoggedUser['ID'] : $_GET['userid'];
-if (!is_number($UserID)) {
-    error(0);
+$UserID = (int)($_GET['userid'] ?? 0) ?: $LoggedUser['ID'];
+if (!$UserID) {
+    error(404);
 }
 
-if (isset($LoggedUser['PostsPerPage'])) {
-    $PerPage = $LoggedUser['PostsPerPage'];
-} else {
-    $PerPage = POSTS_PER_PAGE;
-}
-
-list($Page, $Limit) = Format::page_limit($PerPage);
+$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+[$Page, $Limit] = Format::page_limit($PerPage);
 
 $UserInfo = Users::user_info($UserID);
-
-View::show_header('Post history for ' . $UserInfo['Username'], 'subscriptions,comments,bbcode');
+View::show_header($UserInfo['Username'] . ' &rsaquo; Post history', 'subscriptions,comments,bbcode');
 
 $ViewingOwn = ($UserID == $LoggedUser['ID']);
 $ShowUnread = ($ViewingOwn && (!isset($_GET['showunread']) || !!$_GET['showunread']));
@@ -33,13 +27,14 @@ if ($ShowGrouped) {
             SQL_CALC_FOUND_ROWS
             MAX(p.ID) AS ID
         FROM forums_posts AS p
-            LEFT JOIN forums_topics AS t ON t.ID = p.TopicID';
+        LEFT JOIN forums_topics AS t ON (t.ID = p.TopicID)
+        ';
     if ($ShowUnread) {
         $sql .= '
-            LEFT JOIN forums_last_read_topics AS l ON l.TopicID = t.ID AND l.UserID = '.$LoggedUser['ID'];
+        LEFT JOIN forums_last_read_topics AS l ON (l.TopicID = t.ID AND l.UserID = ' . $LoggedUser['ID'] . ')';
     }
     $sql .= "
-            LEFT JOIN forums AS f ON f.ID = t.ForumID
+        LEFT JOIN forums AS f ON (f.ID = t.ForumID)
         WHERE p.AuthorID = $UserID
             AND " . Forums::user_forums_sql();
     if ($ShowUnread) {
@@ -51,7 +46,7 @@ if ($ShowGrouped) {
         GROUP BY t.ID
         ORDER BY p.ID DESC
         LIMIT $Limit";
-    $PostIDs = $DB->query($sql);
+    $PostIDs = $DB->prepared_query($sql);
     $DB->query('SELECT FOUND_ROWS()');
     list($Results) = $DB->next_record();
 
@@ -73,16 +68,15 @@ if ($ShowGrouped) {
                 t.IsLocked,
                 t.IsSticky
             FROM forums_posts AS p
-                LEFT JOIN users_main AS um ON um.ID = p.AuthorID
-                LEFT JOIN users_info AS ui ON ui.UserID = p.AuthorID
-                LEFT JOIN users_main AS ed ON ed.ID = p.EditedUserID
-                JOIN forums_topics AS t ON t.ID = p.TopicID
-                JOIN forums AS f ON f.ID = t.ForumID
-                LEFT JOIN forums_last_read_topics AS l ON l.UserID = $UserID
-                        AND l.TopicID = t.ID
+            LEFT JOIN users_main AS um ON (um.ID = p.AuthorID)
+            LEFT JOIN users_info AS ui ON (ui.UserID = p.AuthorID)
+            LEFT JOIN users_main AS ed ON (ed.ID = p.EditedUserID)
+            INNER JOIN forums_topics AS t ON (t.ID = p.TopicID)
+            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            LEFT JOIN forums_last_read_topics AS l ON (l.UserID = $UserID AND l.TopicID = t.ID)
             WHERE p.ID IN (".implode(',', $PostIDs).')
             ORDER BY p.ID DESC';
-        $Posts = $DB->query($sql);
+        $Posts = $DB->prepared_query($sql);
     }
 } else {
     $sql = '
@@ -112,12 +106,12 @@ if ($ShowGrouped) {
             t.IsLocked,
             t.IsSticky
         FROM forums_posts AS p
-            LEFT JOIN users_main AS um ON um.ID = p.AuthorID
-            LEFT JOIN users_info AS ui ON ui.UserID = p.AuthorID
-            LEFT JOIN users_main AS ed ON ed.ID = p.EditedUserID
-            JOIN forums_topics AS t ON t.ID = p.TopicID
-            JOIN forums AS f ON f.ID = t.ForumID
-            LEFT JOIN forums_last_read_topics AS l ON l.UserID = $UserID AND l.TopicID = t.ID
+        LEFT JOIN users_main AS um ON (um.ID = p.AuthorID)
+        LEFT JOIN users_info AS ui ON (ui.UserID = p.AuthorID)
+        LEFT JOIN users_main AS ed ON (ed.ID = p.EditedUserID)
+        INNER JOIN forums_topics AS t ON (t.ID = p.TopicID)
+        INNER JOIN forums AS f ON (f.ID = t.ForumID)
+        LEFT JOIN forums_last_read_topics AS l ON (l.UserID = $UserID AND l.TopicID = t.ID)
         WHERE p.AuthorID = $UserID
             AND " . Forums::user_forums_sql();
 
@@ -139,7 +133,7 @@ if ($ShowGrouped) {
     }
 
     $sql .= " LIMIT $Limit";
-    $Posts = $DB->query($sql);
+    $Posts = $DB->prepared_query($sql);
 
     $DB->query('SELECT FOUND_ROWS()');
     list($Results) = $DB->next_record();
@@ -151,15 +145,16 @@ if ($ShowGrouped) {
 <div class="thin">
     <div class="header">
         <h2>
+        <a href="user.php?id=<?= $UserID ?>"><?= $UserInfo['Username'] ?></a> &rsaquo;
 <?php
     if ($ShowGrouped) {
-        echo 'Grouped '.($ShowUnread ? 'unread ' : '')."post history for <a href=\"user.php?id=$UserID\">{$UserInfo['Username']}</a>";
+        echo 'Grouped '.($ShowUnread ? 'unread ' : '')."post history";
     }
     elseif ($ShowUnread) {
-        echo "Unread post history for <a href=\"user.php?id=$UserID\">{$UserInfo['Username']}</a>";
+        echo "Unread post history";
     }
     else {
-        echo "Post history for <a href=\"user.php?id=$UserID\">{$UserInfo['Username']}</a>";
+        echo "Post history";
     }
 ?>
         </h2>
@@ -187,24 +182,16 @@ if ($ViewingOwn) {
         }
 ?>
             <a href="userhistory.php?action=subscriptions" class="brackets">Go to subscriptions</a>
-<?php
-    } else {
-?>
-            <a href="forums.php?action=search&amp;type=body&amp;user=<?=$UserInfo['Username']?>" class="brackets">Search</a>
-<?php
-    }
-?>
+<?php } else { ?>
+            <a href="forums.php?action=search&amp;type=body&amp;user=<?=$Username?>" class="brackets">Search</a>
+<?php } ?>
         </div>
     </div>
-<?php
-    if (empty($Results)) {
-?>
+<?php if (empty($Results)) { ?>
     <div class="center">
         No topics<?=$ShowUnread ? ' with unread posts' : '' ?>
     </div>
-<?php
-    } else {
-?>
+<?php } else { ?>
     <div class="linkbox">
 <?php
     $Pages = Format::get_pages($Page, $Results, $PerPage, 11);
@@ -213,7 +200,7 @@ if ($ViewingOwn) {
     </div>
 <?php
     $QueryID = $DB->get_query_id();
-    while (list($PostID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername, $TopicID, $ThreadTitle, $LastPostID, $LastRead, $Locked, $Sticky) = $DB->next_record()) {
+    while ([$PostID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername, $TopicID, $ThreadTitle, $LastPostID, $LastRead, $Locked, $Sticky] = $DB->next_record()) {
 ?>
     <table class="forum_post vertical_margin<?=!Users::has_avatars_enabled() ? ' noavatar' : '' ?>" id="post<?=$PostID ?>">
         <colgroup>
@@ -231,9 +218,7 @@ if ($ViewingOwn) {
         if ($ViewingOwn) {
             if ((!$Locked || $Sticky) && (!$LastRead || $LastRead < $LastPostID)) { ?>
                     <span class="new">(New!)</span>
-<?php
-            }
-?>
+<?php       } ?>
                 </span>
 <?php            if (!empty($LastRead)) { ?>
                 <span style="float: left;" class="tooltip last_read" title="Jump to last read">
@@ -243,8 +228,7 @@ if ($ViewingOwn) {
         } else {
 ?>
                 </span>
-<?php   }
-?>
+<?php   } ?>
                 <span id="bar<?=$PostID ?>" style="float: right;">
 <?php   if ($ViewingOwn && !in_array($TopicID, $UserSubscriptions)) { ?>
                     <a href="#" onclick="Subscribe(<?=$TopicID?>); $('.subscribelink<?=$TopicID?>').remove(); return false;" class="brackets subscribelink<?=$TopicID?>">Subscribe</a>
@@ -254,9 +238,7 @@ if ($ViewingOwn) {
                 </span>
             </td>
         </tr>
-<?php
-        if (!$ShowGrouped) {
-?>
+<?php   if (!$ShowGrouped) { ?>
         <tr>
 <?php       if (Users::has_avatars_enabled()) { ?>
             <td class="avatar" valign="top">

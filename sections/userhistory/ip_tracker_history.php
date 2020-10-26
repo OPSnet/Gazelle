@@ -8,34 +8,20 @@ user.
 
 ************************************************************************/
 
-require_once(__DIR__ . '/../torrents/functions.php');
-
-define('IPS_PER_PAGE', 50);
-
-if (!check_perms('users_mod')) {
+if (!check_perms('users_mod') || !check_perms('users_view_ips')) {
     error(403);
 }
 
-$userId = $_GET['userid'] ?? null;
-$ipAddr     = $_GET['ip'] ?? null;
+require_once(__DIR__ . '/../torrents/functions.php');
 
-if (!(is_number($userId) || preg_match('/^' . IP_REGEX . '$/', $ipAddr))) {
+$userId = (int)$_GET['userid'] ?? null;
+$ipAddr = $_GET['ip'] ?? null;
+
+if (!($userId || preg_match('/^' . IP_REGEX . '$/', $ipAddr))) {
     error(404);
 }
 
-$DB->prepared_query('
-    SELECT um.Username,
-        p.Level AS Class
-    FROM users_main AS um
-    LEFT JOIN permissions AS p ON (p.ID = um.PermissionID)
-    WHERE um.ID = ?
-    ', $userId
-);
-list($Username, $Class) = $DB->next_record();
-
-if (!check_perms('users_view_ips', $Class)) {
-    error(403);
-}
+$Username = Users::user_info($userId)['Username'];
 View::show_header('Tracker IP address history for ' . ($userId ? $Username : "IP address $ipAddr"));
 ?>
 <script type="text/javascript">
@@ -46,7 +32,7 @@ function ShowIPs(rowname) {
 <div class="thin">
     <div class="header">
 <?php if ($userId) { ?>
-        <h2>Tracker IP address history for <a href="user.php?id=<?= $userId ?>"><?= $Username ?></a></h2>
+        <h2><a href="user.php?id=<?= $userId ?>"><?= $Username ?></a> &rsaquo; Tracker IP address history</h2>
 <?php } else { ?>
         <h2>Tracker history for IP address <?= $ipAddr ?></h2>
 <?php } ?>
@@ -98,31 +84,24 @@ if ($summary) {
 <?php
 }
 
-list($Page, $Limit) = Format::page_limit(IPS_PER_PAGE);
-$TrackerIps = $userId
-    ? $DB->prepared_query('
-        SELECT IP, fid, tstamp
-        FROM xbt_snatched
-        WHERE uid = ?
-        ORDER BY tstamp DESC
-        LIMIT ?
-        ', $userId, $Limit
-    )
-    : $DB->prepared_query('
-        SELECT uid, fid, tstamp
-        FROM xbt_snatched
-        WHERE ip = ?
-        ORDER BY tstamp DESC
-        LIMIT ?
-        ', $ipAddr, $Limit
-    );
+[$Page, $Limit] = Format::page_limit(IPS_PER_PAGE);
+$column = $userId ? 'uid' : 'ip';
 
-$DB->query('SELECT FOUND_ROWS()');
-list($NumResults) = $DB->next_record();
-$DB->set_query_id($TrackerIps);
-
+$NumResults = $DB->scalar("
+    SELECT count(*) FROM xbt_snatched WHERE $column = ?
+    ", $userId ?: $ipAddr
+);
 $Pages = Format::get_pages($Page, $NumResults, IPS_PER_PAGE, 9);
 
+$DB->prepared_query("
+    SELECT IP, fid, tstamp
+    FROM xbt_snatched
+    WHERE $column = ?
+    ORDER BY tstamp DESC
+    LIMIT ?
+    ", $userId ?: $ipAddr, $Limit
+);
+$Results = $DB->to_array();
 ?>
     <div class="header">
         <h3>Detail</h3>
@@ -140,10 +119,9 @@ $Pages = Format::get_pages($Page, $NumResults, IPS_PER_PAGE, 9);
             <td>Time</td>
         </tr>
 <?php
-$Results = $DB->to_array();
 foreach ($Results as $Index => $Result) {
-    list($value, $torrentId, $Time) = $Result;
-    list($torrentInfo) = get_torrent_info($torrentId, 0, true, true);
+    [$value, $torrentId, $Time] = $Result;
+    [$torrentInfo] = get_torrent_info($torrentId, 0, true, true);
     $urlStem = $_SERVER['SCRIPT_NAME'] . '?action=tracker_ips&amp;userid=';
 ?>
     <tr class="rowa">
@@ -158,9 +136,7 @@ foreach ($Results as $Index => $Result) {
         <td><a href="torrents.php?torrentid=<?= $torrentId ?>"><?= $torrentInfo['Name'] ?></a></td>
         <td><?=date('Y-m-d g:i:s', $Time)?></td>
     </tr>
-<?php
-}
-?>
+<?php } ?>
 </table>
 <div class="linkbox">
     <?= $Pages ?>

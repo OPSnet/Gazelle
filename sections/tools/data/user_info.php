@@ -13,7 +13,7 @@ $user = new Gazelle\User($UserID);
 View::show_header('User information');
 ?>
 <div class="box pad center">
-<h2>Information on <?= $user->info()['Username'] ?></h2>
+<h2>Information on <a href="/user.php?id=<?= $UserID ?>"><?= $user->info()['Username'] ?></a></h2>
 <table>
 <tr><th>Now</th><td colspan="2"><?= Date('Y-m-d H:i:s') ?></td></tr>
 <tr><th>Last seen</th><td colspan="2"><?= $user->lastAccess() ?></td></tr>
