@@ -59,15 +59,12 @@ $FillerUsername = $LoggedUser['Username'];
 
 $Err = [];
 if (!empty($_POST['user']) && check_perms('site_moderate_requests')) {
-    $FillerUsername = trim($_POST['user']);
-    $DB->prepared_query('
-        SELECT ID
-        FROM users_main
-        WHERE Username = ?', $FillerUsername);
-    if (!$DB->has_results()) {
+    $filler = (new Gazelle\Manager\User)->findByUsername(trim($_POST['user']));
+    if (!$filler) {
         $Err[] = 'No such user to fill for!';
     } else {
-        list($FillerID) = $DB->next_record();
+        $FillerID       = $filler->id();
+        $FillerUsername = $filler->username();
     }
 }
 

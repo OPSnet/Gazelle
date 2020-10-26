@@ -16,7 +16,7 @@ class User extends \Gazelle\Base {
             WHERE Username = ?
             ", $username
         );
-        return is_null($userId) ? null : new \Gazelle\User($userId);
+        return $userId ? new \Gazelle\User($userId) : null;
     }
 
     /**
