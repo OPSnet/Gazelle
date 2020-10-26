@@ -279,18 +279,4 @@ class Tools {
         );
         G::$DB->set_query_id($QueryID);
     }
-
-    /**
-    * Check if an IP address is part of a given CIDR range.
-    * @param string $CheckIP the IP address to be looked up
-    * @param string $Subnet the CIDR subnet to be checked against
-    */
-    public static function check_cidr_range($CheckIP, $Subnet) {
-        $IP = ip2long($CheckIP);
-        $CIDR = split('/', $Subnet);
-        $SubnetIP = ip2long($CIDR[0]);
-        $SubnetMaskBits = 32 - $CIDR[1];
-
-        return (($IP>>$SubnetMaskBits) == ($SubnetIP>>$SubnetMaskBits));
-    }
 }
