@@ -130,8 +130,7 @@ if ($_POST['users'.$FormID]) {
     $DB->query("
         SELECT ID, Paranoia
         FROM users_main
-        WHERE Username IN ('" . implode("', '", $EscapedUsernames) . "')
-            AND ID != {$LoggedUser['ID']}");
+        WHERE Username IN ('" . implode("', '", $EscapedUsernames) . "')");
     while (list($UserID, $Paranoia) = $DB->next_record()) {
         $Paranoia = unserialize($Paranoia);
         if (!in_array('notifications', $Paranoia)) {
