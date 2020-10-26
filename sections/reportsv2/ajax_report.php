@@ -6,11 +6,10 @@
  */
 authorize();
 
-?>
-<ul>
-<?php
 $CategoryID = $_POST['categoryid'];
 
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
 if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
     $ReportType = $Types[$CategoryID][$_POST['type']];
 } elseif (array_key_exists($_POST['type'],$Types['master'])) {
@@ -20,18 +19,15 @@ if (array_key_exists($_POST['type'], $Types[$CategoryID])) {
     die();
 }
 
-foreach ($ReportType['report_messages'] as $Message) {
 ?>
+<ul>
+<?php foreach ($ReportType['report_messages'] as $Message) { ?>
     <li><?=$Message?></li>
-<?php
-}
-?>
+<?php } ?>
 </ul>
 <br />
 <table class="layout border" cellpadding="3" cellspacing="1" border="0" width="100%">
-<?php
-if (array_key_exists('image', $ReportType['report_fields'])) {
-?>
+<?php if (array_key_exists('image', $ReportType['report_fields'])) { ?>
     <tr>
         <td class="label">
             Image(s)<?=($ReportType['report_fields']['image'] == '1' ? ' <strong class="important_text">(Required)</strong>:' : '')?>
@@ -89,9 +85,7 @@ if (array_key_exists('proofimages', $ReportType['report_fields'])) {
             <input id="image" type="text" name="image" size="50" value="<?=(!empty($_POST['proofimages']) ? display_str($_POST['proofimages']) : '')?>" />
         </td>
     </tr>
-<?php
-}
-?>
+<?php } ?>
     <tr>
         <td class="label">
             Comments <strong class="important_text">(Required)</strong>:

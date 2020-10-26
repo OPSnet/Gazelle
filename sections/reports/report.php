@@ -1,10 +1,11 @@
 <?php
 
-include(SERVER_ROOT.'/sections/reports/array.php');
-
 if (empty($_GET['type']) || empty($_GET['id']) || !is_number($_GET['id'])) {
     error(404);
 }
+
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
 
 if (!array_key_exists($_GET['type'], $Types)) {
     error(403);

@@ -76,7 +76,8 @@ View::show_header('Delete torrent', 'reportsv2');
 <?php if (check_perms('admin_reports')) { ?>
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
 <?php
-    require(__DIR__ . '/../reportsv2/array.php');
+    $reportMan = new Gazelle\Manager\ReportV2;
+    $Types = $reportMan->types();
 
     [$GroupName, $GroupID, $ArtistID, $ArtistName, $Year, $CategoryID,
         $Time, $Remastered, $RemasterTitle, $RemasterYear, $Media, $Format,
@@ -215,8 +216,8 @@ View::show_header('Delete torrent', 'reportsv2');
 <?php
         }
         $requests = $torMan->requestFills($TorrentID);
-        foreach ($requests as $request) {
-            [$RequestID, $FillerID, $FilledTime] = $request;
+        foreach ($requests as $r) {
+            [$RequestID, $FillerID, $FilledTime] = $r;
             $FillerName = Users::user_info($FillerID)['Username'];
 ?>
                         <div style="text-align: right;">

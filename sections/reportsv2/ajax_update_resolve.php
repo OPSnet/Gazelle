@@ -4,33 +4,28 @@
 if (!check_perms('admin_reports')) {
     error(403);
 }
+authorize();
 
 if (empty($_GET['newresolve'])) {
-    echo "No new resolve";
-    die();
+    error("No new resolve");
 }
 
-$ReportID = (int) $_GET['reportid'];
-$CategoryID = (int) $_GET['categoryid'];
-$NewType = $_GET['newresolve'];
+$id = (int)$_GET['reportid'];
+if (!$id) {
+    error("No report ID");
+}
 
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
+$TypeList = $Types['master'];
+$CategoryID = (int)$_GET['categoryid'];
 if (!empty($Types[$CategoryID])) {
-    $TypeList = $Types['master'] + $Types[$CategoryID];
-    $Priorities = [];
-    foreach ($TypeList as $Key => $Value) {
-        $Priorities[$Key] = $Value['priority'];
-    }
-    array_multisort($Priorities, SORT_ASC, $TypeList);
-} else {
-    $TypeList = $Types['master'];
+    $TypeList = array_merge($TypeList, $Types[$CategoryID]);
 }
 
+$NewType = $_GET['newresolve'];
 if (!array_key_exists($NewType, $TypeList)) {
-    echo "No resolve from that category";
-    die();
+    error("No resolve from that category");
 }
 
-$DB->query("
-    UPDATE reportsv2
-    SET Type = '$NewType'
-    WHERE ID = $ReportID");
+(new Gazelle\ReportV2($id))->changeType($NewType);

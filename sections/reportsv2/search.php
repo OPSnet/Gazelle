@@ -5,16 +5,19 @@ if (!check_perms('admin_reports')) {
 
 View::show_header('Reports V2', 'reportsv2');
 
-$report_name_cache = [];
-foreach ($ReportCategories as $label => $key) {
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
+$categories = $reportMan->categories();
+$reportNameCache = [];
+foreach ($categories as $label => $key) {
     foreach (array_keys($Types[$label]) as $type) {
-        $report_name_cache[$type] = $Types[$label][$type]['title'] . " ($key)";
+        $reportNameCache[$type] = $Types[$label][$type]['title'] . " ($key)";
     }
 }
 
 if (isset($_GET['report-type'])) {
     foreach ($_GET['report-type'] as $t) {
-        if (array_key_exists($t, $report_name_cache)) {
+        if (array_key_exists($t, $reportNameCache)) {
             $filter['report-type'][] = $t;
         }
     }
@@ -121,7 +124,7 @@ if (isset($Results)) {
                 <td><?= $user_cache[$r['ReporterID']] ?></td>
                 <td><?= $user_cache[$r['ResolverID']] ?></td>
                 <td><?= $name ?></td>
-                <td><?= $report_name_cache[$r['Type']] ?></td>
+                <td><?= $reportNameCache[$r['Type']] ?></td>
                 <td><?= time_diff($r['ReportedTime']) ?></td>
             </tr>
 <?php
@@ -165,12 +168,11 @@ if (isset($Results)) {
                     <select multiple="multiple" size="8" name="report-type[]">
                         <option value="0">Don't Care</option>
 <?php
-foreach ($report_name_cache as $key => $label) {
+foreach ($reportNameCache as $key => $label) {
     $selected = array_key_exists('report-type', $_GET) && in_array($key, $_GET['report-type']) ? ' selected="selected"' : '';
 ?>
                         <option value="<?= $key ?>"<?= $selected ?>><?= $label ?></option>
-<?php
-} ?>
+<?php } ?>
                     </select>
                 </td>
             </tr>

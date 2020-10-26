@@ -13,41 +13,40 @@ if (!check_perms('admin_reports')) {
     error(403);
 }
 
-include(__DIR__ . '/../../classes/reports.class.php');
-include(__DIR__ . '/../torrents/functions.php');
+require_once(__DIR__ . '/../torrents/functions.php');
 
-define('REPORTS_PER_PAGE', '10');
-[$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
 
-
-if (isset($_GET['view'])) {
-    $View = $_GET['view'];
-} else {
-    error(404);
-}
-
+$View = $_GET['view'];
 if (isset($_GET['id'])) {
-    if (!is_number($_GET['id']) && $View !== 'type') {
-        error(404);
+    if ((int)$_GET['id'] > 0) {
+        $ID = (int)$_GET['id'];
     } else {
-        $ID = db_string($_GET['id']);
+        $reportType = $_GET['id'];
+        $ID = 0;
     }
-} else {
-    $ID = '';
 }
 
-$Order = 'ORDER BY r.ReportedTime ASC';
-
+$orderBy = 'ORDER BY r.ReportedTime ASC';
+$cond = [];
+$args = [];
 if (!$ID) {
     switch ($View) {
         case 'resolved':
             $Title = 'Resolved reports';
-            $Where = "WHERE r.Status = 'Resolved'";
-            $Order = 'ORDER BY r.LastChangeTime DESC';
+            $cond[] = "r.Status = 'Resolved'";
+            $orderBy = 'ORDER BY r.LastChangeTime DESC';
             break;
         case 'unauto':
             $Title = 'New reports, not auto assigned!';
-            $Where = "WHERE r.Status = 'New'";
+            $cond[] = "r.Status = 'New'";
+            break;
+        case 'type':
+            $reportName = $reportMan->typeName($reportType);
+            $Title = "All new reports of type $reportName";
+            $cond[] = "r.Status = 'New' AND r.Type = ?";
+            $args[] = $reportType;
             break;
         default:
             error(404);
@@ -60,65 +59,41 @@ if (!$ID) {
     );
     switch ($View) {
         case 'staff':
-            if ($Username) {
-                $Title = "$Username's in-progress reports";
-            } else {
-                $Title = "$ID's in-progress reports";
-            }
-            $Where = "
-                WHERE r.Status = 'InProgress'
-                    AND r.ResolverID = $ID";
+            $Title = ($Username ?: $ID) . "'s in-progress reports";
+            $cond[] = "r.Status = 'InProgress' AND r.ResolverID = ?";
+            $args[] = $ID;
             break;
         case 'resolver':
-            if ($Username) {
-                $Title = "$Username's resolved reports";
-            } else {
-                $Title = "$ID's resolved reports";
-            }
-            $Where = "
-                WHERE r.Status = 'Resolved'
-                    AND r.ResolverID = $ID";
-            $Order = 'ORDER BY r.LastChangeTime DESC';
+            $Title = ($Username ?: $ID) . "'s resolved reports";
+            $cond[] = "r.Status = 'Resolved' AND r.ResolverID = ?";
+            $args[] = $ID;
+            $orderBy = 'ORDER BY r.LastChangeTime DESC';
             break;
         case 'group':
             $Title = "Unresolved reports for the group $ID";
-            $Where = "
-                WHERE r.Status != 'Resolved'
-                    AND tg.ID = $ID";
+            $cond[] = "r.Status != 'Resolved' AND tg.ID = ?";
+            $args[] = $ID;
             break;
         case 'torrent':
             $Title = "All reports for the torrent $ID";
-            $Where = "WHERE r.TorrentID = $ID";
+            $cond[] = 'r.TorrentID = ?';
+            $args[] = $ID;
             break;
         case 'report':
             $Title = "Viewing resolution of report $ID";
-            $Where = "WHERE r.ID = $ID";
+            $cond[] = 'r.ID = ?';
+            $args[] = $ID;
             break;
         case 'reporter':
-            if ($Username) {
-                $Title = "All torrents reported by $Username";
-            } else {
-                $Title = "All torrents reported by user $ID";
-            }
-            $Where = "WHERE r.ReporterID = $ID";
-            $Order = 'ORDER BY r.ReportedTime DESC';
+            $Title = 'All torrents reported by ' . ($Username ?: "user $ID");
+            $cond[] = 'r.ReporterID = ?';
+            $args[] = $ID;
+            $orderBy = 'ORDER BY r.ReportedTime DESC';
             break;
         case 'uploader':
-            if ($Username) {
-                $Title = "All reports for torrents uploaded by $Username";
-            } else {
-                $Title = "All reports for torrents uploaded by user $ID";
-            }
-            $Where = "
-                WHERE r.Status != 'Resolved'
-                    AND t.UserID = $ID";
-            break;
-        case 'type':
-            $Title = 'All new reports for the chosen type';
-            $Where = "
-                WHERE r.Status = 'New'
-                    AND r.Type = '$ID'";
-            break;
+            $Title = 'All torrents uploaded by ' . ($Username ?: "user $ID");
+            $cond[] = "r.Status != 'Resolved' AND t.UserID = ?";
+            $args[] = $ID;
             break;
         default:
             error(404);
@@ -126,9 +101,25 @@ if (!$ID) {
     }
 }
 
-$DB->query("
+$tables = "
+    reportsv2 AS r
+    LEFT JOIN torrents AS t ON (t.ID = r.TorrentID)
+    LEFT JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
+    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
+    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
+    LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
+    LEFT JOIN users_main AS resolver ON (resolver.ID = r.ResolverID)
+    LEFT JOIN users_main AS reporter ON (reporter.ID = r.ReporterID)
+    LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)
+    WHERE "
+    . implode("\n    AND ", $cond);
+
+$Results = $DB->scalar("SELECT count(*) FROM $tables", ...$args);
+
+[$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
+
+$DB->prepared_query("
     SELECT
-        SQL_CALC_FOUND_ROWS
         r.ID,
         r.ReporterID,
         coalesce(reporter.Username, 'System'),
@@ -178,56 +169,39 @@ $DB->query("
         tls.last_action,
         t.UserID AS UploaderID,
         uploader.Username
-    FROM reportsv2 AS r
-    LEFT JOIN torrents AS t ON (t.ID = r.TorrentID)
-    LEFT JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
-    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
-    LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
-    LEFT JOIN users_main AS resolver ON (resolver.ID = r.ResolverID)
-    LEFT JOIN users_main AS reporter ON (reporter.ID = r.ReporterID)
-    LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)
-    $Where
+    FROM $tables
     GROUP BY r.ID
-    $Order
-    LIMIT $Limit");
-
+    $orderBy
+    LIMIT $Limit
+    ", ...$args
+);
 $Reports = $DB->to_array();
 
-$DB->query('SELECT FOUND_ROWS()');
-[$Results] = $DB->next_record();
 $PageLinks = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
 
 View::show_header('Reports V2', 'reportsv2,bbcode,torrent');
 ?>
 <div class="header">
     <h2><?=$Title?></h2>
-<?php
-include('header.php'); ?>
+<?php require_once('header.php'); ?>
 </div>
 <div class="buttonbox pad center">
-<?php
-if ($View !== 'resolved') { ?>
+<?php if ($View !== 'resolved') { ?>
     <span class="tooltip" title="Resolves *all* checked reports with their respective resolutions"><input type="button" onclick="MultiResolve();" value="Multi-resolve" /></span>
     <span class="tooltip" title="Assigns all of the reports on the page to you!"><input type="button" onclick="Grab();" value="Claim all" /></span>
 <?php
 }
 if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
     | <span class="tooltip" title="Unclaim all of the reports currently displayed"><input type="button" onclick="GiveBack();" value="Unclaim all" /></span>
-<?php
-} ?>
+<?php } ?>
 </div>
-<?php
-if ($PageLinks) { ?>
+<?php if ($PageLinks) { ?>
 <div class="linkbox">
     <?=$PageLinks?>
 </div>
-<?php
-} ?>
+<?php } ?>
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
-<?php
-if (count($Reports) === 0) {
-?>
+<?php if (count($Reports) === 0) { ?>
     <div class="box pad center">
         <strong>No new reports! \o/</strong>
     </div>
@@ -241,19 +215,14 @@ if (count($Reports) === 0) {
             $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year,
             $CategoryID, $Time, $Description, $FileList, $Remastered, $RemasterTitle, $RemasterYear,
             $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum,
-            $LastAction, $UploaderID, $UploaderName]
-                = Misc::display_array($Report, ['ModComment']);
+            $LastAction, $UploaderID, $UploaderName
+        ] = $Report;
+        $ModComment = display_str($ModComment);
+        $report = new Gazelle\ReportV2($ReportID);
 
         if (!$GroupID && $Status != 'Resolved') {
             //Torrent already deleted
-            $DB->query("
-                UPDATE reportsv2
-                SET
-                    Status = 'Resolved',
-                    LastChangeTime = now(),
-                    ModComment = 'Report already dealt with (torrent deleted)'
-                WHERE ID = $ReportID");
-            $Cache->decrement('num_torrent_reportsv2');
+            $report->resolve('Report already dealt with (torrent deleted)');
 ?>
     <div id="report<?=$ReportID?>" class="report box pad center">
         <a href="reportsv2.php?view=report&amp;id=<?=$ReportID?>">Report <?=$ReportID?></a> for torrent <?=$TorrentID?> (deleted) has been automatically resolved. <input type="button" value="Hide" onclick="ClearReport(<?=$ReportID?>);" />
@@ -263,15 +232,7 @@ if (count($Reports) === 0) {
             if (!$CategoryID) {
                 //Torrent was deleted
             } else {
-                if (array_key_exists($Type, $Types[$CategoryID])) {
-                    $ReportType = $Types[$CategoryID][$Type];
-                } elseif (array_key_exists($Type, $Types['master'])) {
-                    $ReportType = $Types['master'][$Type];
-                } else {
-                    //There was a type but it wasn't an option!
-                    $Type = 'other';
-                    $ReportType = $Types['master']['other'];
-                }
+                $ReportType = $reportMan->type($Type);
             }
             $RemasterDisplayString = Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear);
 
@@ -340,35 +301,29 @@ if (count($Reports) === 0) {
 <?php                   } ?>
 
 <?php           if ($Status != 'Resolved') {
-                    $DB->query("
-                        SELECT r.ID
-                        FROM reportsv2 AS r
-                            LEFT JOIN torrents AS t ON t.ID = r.TorrentID
-                        WHERE r.Status != 'Resolved'
-                            AND t.GroupID = $GroupID");
-                    $GroupOthers = ($DB->record_count() - 1);
-
-                    if ($GroupOthers > 0) { ?>
+                    $totalGroup = $reportMan->totalReportsGroup($GroupID);
+                    if ($totalGroup > 1) {
+                        --$totalGroup;
+ ?>
                         <div style="text-align: right;">
-                            <a href="reportsv2.php?view=group&amp;id=<?=$GroupID?>">There <?=(($GroupOthers > 1) ? "are $GroupOthers other reports" : "is 1 other report")?> for torrent(s) in this group</a>
+                            <a href="reportsv2.php?view=group&amp;id=<?=$GroupID?>">There <?=
+                                $totalGroup > 1 ? "are $totalGroup other reports" : "is 1 other report"
+                                ?> for torrent(s) in this group</a>
+                        </div>
+<?php
+                    }
+                    $totalUploaded = $reportMan->totalReportsUploader($UploaderID);
+                    if ($totalUploaded > 1) {
+                        --$totalUploaded;
+?>
+                        <div style="text-align: right;">
+                            <a href="reportsv2.php?view=uploader&amp;id=<?=$UploaderID?>">There <?=
+                                $totalUploaded > 1 ? "are $totalUploaded other reports" : "is 1 other report"
+                                ?> for torrent(s) uploaded by this user</a>
                         </div>
 <?php               }
 
-                    $DB->query("
-                        SELECT t.UserID
-                        FROM reportsv2 AS r
-                            JOIN torrents AS t ON t.ID = r.TorrentID
-                        WHERE r.Status != 'Resolved'
-                            AND t.UserID = $UploaderID");
-                    $UploaderOthers = ($DB->record_count() - 1);
-
-                    if ($UploaderOthers > 0) { ?>
-                        <div style="text-align: right;">
-                            <a href="reportsv2.php?view=uploader&amp;id=<?=$UploaderID?>">There <?=(($UploaderOthers > 1) ? "are $UploaderOthers other reports" : "is 1 other report")?> for torrent(s) uploaded by this user</a>
-                        </div>
-<?php               }
-
-                    $DB->query("
+                    $DB->prepared_query("
                         SELECT DISTINCT req.ID,
                             req.FillerID,
                             um.Username,
@@ -378,10 +333,10 @@ if (count($Reports) === 0) {
                             LEFT JOIN reportsv2 AS rep ON rep.TorrentID = t.ID
                             JOIN users_main AS um ON um.ID = req.FillerID
                         WHERE rep.Status != 'Resolved'
-                            AND req.TimeFilled > '2010-03-04 02:31:49'
-                            AND req.TorrentID = $TorrentID");
-                    $Requests = ($DB->has_results());
-                    if ($Requests > 0) {
+                            AND req.TorrentID = ?
+                        ", $TorrentID
+                    );
+                    if ($DB->has_results()) {
                         while ([$RequestID, $FillerID, $FillerName, $FilledTime] = $DB->next_record()) {
 ?>
                         <div style="text-align: right;">
@@ -764,8 +719,7 @@ if (count($Reports) === 0) {
 }
 ?>
 </div>
-<?php
-if ($PageLinks) { ?>
+<?php if ($PageLinks) { ?>
 <div class="linkbox pager"><?=$PageLinks?></div>
 <?php
 }

@@ -1,21 +1,9 @@
 <?php
 if (!check_perms('admin_reports')) {
-    die('403');
+    error(403);
 }
 
-if (!is_number($_GET['id'])) {
-    die();
+$id = (int)$_GET['id'];
+if ($id) {
+    (new Gazelle\ReportV2($id))->unclaim();
 }
-
-$DB->query("
-    SELECT Status
-    FROM reportsv2
-    WHERE ID = ".$_GET['id']);
-list($Status) = $DB->next_record();
-if (isset($Status)) {
-    $DB->query("
-        UPDATE reportsv2
-        SET Status = 'New', ResolverID = 0
-        WHERE ID = ".$_GET['id']);
-}
-?>

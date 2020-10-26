@@ -22,6 +22,8 @@ if (!isset($_GET['categoryid'])) {
     $CategoryID = $_GET['categoryid'];
 }
 
+$reportMan = new Gazelle\Manager\ReportV2;
+$Types = $reportMan->types();
 if (!isset($_GET['type'])) {
     error(404);
 } elseif (array_key_exists($_GET['type'], $Types[$CategoryID])) {
