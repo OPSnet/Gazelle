@@ -157,18 +157,18 @@ $Results = $DB->to_array();
     </div>
     <div class="two_columns pad">
 <?php
-
-    $TrashForumIDs = '12';
-
-    $DB->query("
+    $TrashForumIDs = [12];
+    $DB->prepared_query("
         SELECT u.Username,
-            COUNT(f.LastPostAuthorID) as Trashed
+            count(f.LastPostAuthorID) as Trashed
         FROM forums_topics AS f
         LEFT JOIN users_main AS u ON (u.ID = f.LastPostAuthorID)
-        WHERE f.ForumID IN ($TrashForumIDs)
+        WHERE f.ForumID IN (" . placeholders($TrashForumIDs) . ")
         GROUP BY f.LastPostAuthorID
         ORDER BY Trashed DESC
-        LIMIT 30");
+        LIMIT 30
+        ", ...$TrashForumIDs
+    );
     $Results = $DB->to_array();
 ?>
         <h3><strong>Threads trashed since the beginning of time</strong></h3>
@@ -181,7 +181,7 @@ $Results = $DB->to_array();
 <?php
     $i = 1;
     foreach ($Results as $Result) {
-        list($Username, $Trashed) = $Result;
+        [$Username, $Trashed] = $Result;
         if ($Username == $LoggedUser['Username']) {
             $RowClass = ' class="rowa"';
         } else {

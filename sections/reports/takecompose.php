@@ -10,7 +10,6 @@ if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$_POST['toid']])) {
     error(403);
 }
 
-
 if (isset($_POST['convid']) && is_number($_POST['convid'])) {
     $ConvID = $_POST['convid'];
     $Subject = '';
@@ -20,11 +19,13 @@ if (isset($_POST['convid']) && is_number($_POST['convid'])) {
             $Err = 'A recipient does not exist.';
         }
     }
-    $DB->query("
+    $DB->prepared_query("
         SELECT UserID
         FROM pm_conversations_users
-        WHERE UserID = '{$LoggedUser['ID']}'
-            AND ConvID = '$ConvID'");
+        WHERE UserID = ?
+            AND ConvID = ?
+        ", $LoggedUser['ID'], $ConvID
+    );
     if (!$DB->has_results()) {
         error(403);
     }
@@ -56,4 +57,3 @@ if (!empty($Err)) {
 $ConvID = Misc::send_pm($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
 
 header('Location: reports.php');
-?>

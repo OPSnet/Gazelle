@@ -1,28 +1,14 @@
 <?php
 
-if (!check_perms('site_moderate_forums') || empty($_POST['id'])) {
-    print
-        json_encode(
-            [
-                'status' => 'failure'
-            ]
-        );
-    die();
+$postId = (int)$_POST['id'];
+if (!($postId && check_perms('site_moderate_forums'))) {
+    json_error('no post id');
 }
 
-$ID = (int)$_POST['id'];
-
-$Notes = str_replace("<br />", "\n", $_POST['notes']);
-$Notes = db_string($Notes);
-
-$DB->query("
-    UPDATE reports
-    SET Notes = '$Notes'
-    WHERE ID = '$ID'");
-print
-    json_encode(
-        [
-            'status' => 'success'
-        ]
-    );
-die();
+$DB->prepared_query("
+    UPDATE reports SET
+        Notes = ?
+    WHERE ID = ?
+    ", str_replace("<br />", "\n", trim($_POST['notes'])), $postId
+);
+print json_encode(['status' => 'success']);
