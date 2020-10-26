@@ -23,18 +23,6 @@ class Misc {
         mail($To, $Subject, $Body, $Headers, "-f $From@".MAIL_HOST);
     }
 
-
-    /**
-     * Sanitize a string to be allowed as a filename.
-     *
-     * @param string $EscapeStr the string to escape
-     * @return the string with all banned characters removed.
-     */
-    public static function file_string($EscapeStr) {
-        return str_replace(['"', '*', '/', ':', '<', '>', '?', '\\', '|'], '', $EscapeStr);
-    }
-
-
     /**
      * Sends a PM from $FromId to $ToId.
      *
