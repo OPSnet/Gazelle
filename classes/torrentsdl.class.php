@@ -44,7 +44,7 @@ class TorrentsDL {
      * @param string $EscapeStr the string to escape
      * @return the string with all banned characters removed.
      */
-    public function safeString(string $EscapeStr): string {
+    public static function safeString(string $EscapeStr): string {
         return str_replace(['"', '*', '/', ':', '<', '>', '?', '\\', '|'], '', $EscapeStr);
     }
 
@@ -93,7 +93,7 @@ class TorrentsDL {
      * @param string $FolderName folder name
      */
     public function add_file(&$TorrentData, $Info, $FolderName = '') {
-        $FolderName = $this->safeString($FolderName);
+        $FolderName = static::safeString($FolderName);
         $MaxPathLength = $FolderName ? (self::MaxPathLength - strlen($FolderName) - 1) : self::MaxPathLength;
         $FileName = self::construct_file_name($Info['Artist'], $Info['Name'], $Info['Year'], $Info['Media'], $Info['Format'], $Info['Encoding'], $Info['TorrentID'], false, $MaxPathLength);
         $this->Size += $Info['Size'];
@@ -194,8 +194,8 @@ class TorrentsDL {
         if ($TorrentID !== false) {
             $MaxLength -= (strlen($TorrentID) + 1);
         }
-        $TorrentArtist = $this->safeString($Artist);
-        $TorrentName = $this->safeString($Album);
+        $TorrentArtist = static::safeString($Artist);
+        $TorrentName = static::safeString($Album);
         if ($Year > 0) {
             $TorrentName .= " - $Year";
         }
@@ -210,7 +210,7 @@ class TorrentsDL {
             $TorrentInfo[] = $Encoding;
         }
         if (!empty($TorrentInfo)) {
-            $TorrentInfo = ' (' . $this->safeString(implode(' - ', $TorrentInfo)) . ')';
+            $TorrentInfo = ' (' . static::safeString(implode(' - ', $TorrentInfo)) . ')';
         } else {
             $TorrentInfo = '';
         }
