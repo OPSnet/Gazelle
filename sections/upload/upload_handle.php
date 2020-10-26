@@ -1099,7 +1099,7 @@ if (!in_array('notifications', $Paranoia)) {
     $SQL .= " AND (Users ='')";
 }
 
-$SQL .= " AND UserID != '".$LoggedUser['ID']."' ";
+$SQL .= " AND (UserID != '".$LoggedUser['ID']."' OR Users LIKE '%|".$LoggedUser['ID']."|%') ";
 $DB->query($SQL);
 $Debug->set_flag('upload: notification query finished');
 
