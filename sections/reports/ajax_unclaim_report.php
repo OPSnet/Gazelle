@@ -1,20 +1,14 @@
 <?php
 
 if (!check_perms('site_moderate_forums') || empty($_POST['id']) || empty($_POST['remove'])) {
-    print
-        json_encode(
-            [
-                'status' => 'failure'
-            ]
-        );
-    die();
+    json_error('bad parameters');
 }
-$ID = (int)$_POST['id'];
-$DB->query("UPDATE reports SET ClaimerID = '0' WHERE ID = '$ID'");
-print
-    json_encode(
-        [
-            'status' => 'success',
-        ]
-    );
-die();
+
+$DB->prepared_query("
+    UPDATE reports SET ClaimerID = 0 WHERE ID = ?
+    ", (int)$_POST['id']
+);
+
+print json_encode([
+    'status' => 'success',
+]);

@@ -1,84 +1,83 @@
 <?php
 
-if (empty($_GET['type']) || empty($_GET['id']) || !is_number($_GET['id'])) {
+$ID = (int)$_GET['id'];
+if (empty($_GET['type']) || !$ID) {
     error(404);
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
-$Types = $reportMan->types();
-
+require_once('array.php');
 if (!array_key_exists($_GET['type'], $Types)) {
     error(403);
 }
 $Short = $_GET['type'];
 $Type = $Types[$Short];
 
-$ID = $_GET['id'];
-
 switch ($Short) {
     case 'user':
-        $DB->query("
-            SELECT Username
-            FROM users_main
-            WHERE ID = $ID");
-        if (!$DB->has_results()) {
+        $Username = $DB->scalar("
+            SELECT Username FROM users_main WHERE ID = ?
+            ", $ID
+        );
+        if (!$Username) {
             error(404);
         }
-        list($Username) = $DB->next_record();
         break;
 
     case 'request_update':
         $NoReason = true;
-        $DB->query("
+        [$Name, $Desc, $Filled, $CategoryID, $Year] = $DB->row("
             SELECT Title, Description, TorrentID, CategoryID, Year
             FROM requests
-            WHERE ID = $ID");
-        if (!$DB->has_results()) {
+            WHERE ID = ?
+            ", $ID
+        );
+        if (!$Name) {
             error(404);
         }
-        list($Name, $Desc, $Filled, $CategoryID, $Year) = $DB->next_record();
         if ($Filled || ($CategoryID != 0 && ($Categories[$CategoryID - 1] != 'Music' || $Year != 0))) {
             error(403);
         }
         break;
 
     case 'request':
-        $DB->query("
+        [$Name, $Desc, $Filled] = $DB->row("
             SELECT Title, Description, TorrentID
             FROM requests
-            WHERE ID = $ID");
-        if (!$DB->has_results()) {
+            WHERE ID = ?
+            ", $ID
+        );
+        if (!$Name) {
             error(404);
         }
-        list($Name, $Desc, $Filled) = $DB->next_record();
         break;
 
     case 'collage':
-        $DB->query("
+        [$Name, $Desc] = $DB->row("
             SELECT Name, Description
             FROM collages
-            WHERE ID = $ID");
-        if (!$DB->has_results()) {
+            WHERE ID = ?
+            ", $ID
+        );
+        if (!$Name) {
             error(404);
         }
-        list($Name, $Desc) = $DB->next_record();
         break;
 
     case 'thread':
-        $DB->query("
+        [$Title, $ForumID, $Username] = $DB->row("
             SELECT ft.Title, ft.ForumID, um.Username
             FROM forums_topics AS ft
-                JOIN users_main AS um ON um.ID = ft.AuthorID
-            WHERE ft.ID = $ID");
-        if (!$DB->has_results()) {
+            INNER JOIN users_main AS um ON (um.ID = ft.AuthorID)
+            WHERE ft.ID = ?
+            ", $ID
+        );
+        if (!$Title) {
             error(404);
         }
-        list($Title, $ForumID, $Username) = $DB->next_record();
-        $DB->query("
-            SELECT MinClassRead
-            FROM forums
-            WHERE ID = $ForumID");
-        list($MinClassRead) = $DB->next_record();
+        $MinClassRead = $DB->scalar("
+            SELECT MinClassRead FROM forums WHERE ID = ?
+            ", $ForumID
+        );
         if (!empty($LoggedUser['DisableForums'])
                 || ($MinClassRead > $LoggedUser['EffectiveClass'] && (!isset($LoggedUser['CustomForums'][$ForumID]) || $LoggedUser['CustomForums'][$ForumID] == 0))
                 || (isset($LoggedUser['CustomForums'][$ForumID]) && $LoggedUser['CustomForums'][$ForumID] == 0)) {
@@ -87,25 +86,23 @@ switch ($Short) {
         break;
 
     case 'post':
-        $DB->query("
+        [$Body, $TopicID, $Username] = $DB->row("
             SELECT fp.Body, fp.TopicID, um.Username
             FROM forums_posts AS fp
-                JOIN users_main AS um ON um.ID = fp.AuthorID
-            WHERE fp.ID = $ID");
-        if (!$DB->has_results()) {
+            INNER JOIN users_main AS um ON (um.ID = fp.AuthorID)
+            WHERE fp.ID = ?
+            ", $ID
+        );
+        if (!$Body) {
             error(404);
         }
-        list($Body, $TopicID, $Username) = $DB->next_record();
-        $DB->query("
-            SELECT ForumID
-            FROM forums_topics
-            WHERE ID = $TopicID");
-        list($ForumID) = $DB->next_record();
-        $DB->query("
-            SELECT MinClassRead
-            FROM forums
-            WHERE ID = $ForumID");
-        list($MinClassRead) = $DB->next_record();
+        [$ForumID, $MinClassRead] = $DB->row("
+            SELECT ft.ForumID, f.MinClassRead
+            FROM forums_topics ft
+            INNER JOIN forums f ON (f.ID = ft.ForumID)
+            WHERE ft.ID = ?
+            ", $TopicID
+        );
         if (!empty($LoggedUser['DisableForums'])
                 || ($MinClassRead > $LoggedUser['EffectiveClass'] && (!isset($LoggedUser['CustomForums'][$ForumID]) || $LoggedUser['CustomForums'][$ForumID] == 0))
                 || (isset($LoggedUser['CustomForums'][$ForumID]) && $LoggedUser['CustomForums'][$ForumID] == 0)) {
@@ -114,15 +111,16 @@ switch ($Short) {
         break;
 
     case 'comment':
-        $DB->query("
+        [$Body, $Username] = $DB->row("
             SELECT c.Body, um.Username
             FROM comments AS c
-                JOIN users_main AS um ON um.ID = c.AuthorID
-            WHERE c.ID = $ID");
-        if (!$DB->has_results()) {
+            INNER JOIN users_main AS um ON (um.ID = c.AuthorID)
+            WHERE c.ID = ?
+            ", $ID
+        );
+        if (!$Body) {
             error(404);
         }
-        list($Body, $Username) = $DB->next_record();
         break;
 }
 
@@ -136,11 +134,9 @@ View::show_header('Report a '.$Type['title'], 'bbcode,jquery.validate,form_valid
     <div class="box pad">
         <p>Following these guidelines will help the moderators deal with your report in a timely fashion. </p>
         <ul>
-<?php
-foreach ($Type['guidelines'] as $Guideline) { ?>
+<?php foreach ($Type['guidelines'] as $Guideline) { ?>
             <li><?=$Guideline?></li>
-<?php
-} ?>
+<?php } ?>
         </ul>
         <p>In short, please include as much detail as possible when reporting. Thank you. </p>
     </div>
@@ -299,9 +295,7 @@ if (empty($NoReason)) {
             <input type="submit" value="Submit report" />
         </form>
     </div>
-<?php
-} ?>
+<?php } ?>
 </div>
 <?php
 View::show_footer();
-?>

@@ -188,9 +188,9 @@ function MultiResolve() {
 }
 
 function UpdateResolve(reportid) {
-    var newresolve = $('#resolve_type' + reportid).val();
     var url = 'reportsv2.php?action=ajax_update_resolve&reportid=' + reportid
-        + "&newresolve=" + newresolve
+        + "&auth=" + $('input[name="auth"]').val()
+        + "&newresolve=" + $('#resolve_type' + reportid).val()
         + "&categoryid=" + $('#categoryid' + reportid).val();
     $.get(url, function(response) {
         $('#update_resolve' + reportid).disable();

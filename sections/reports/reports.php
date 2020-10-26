@@ -79,8 +79,7 @@ View::show_header('Reports', 'bbcode,reports');
 <?= $Pages ?>
     </div>
 <?php
-$reportMan = new Gazelle\Manager\ReportV2;
-$Types = $reportMan->types();
+require_once('array.php');
 $DB->set_query_id($Reports);
 while ([$ReportID, $UserID, $UserName, $ThingID, $Short, $ReportedTime, $Reason, $Status, $ClaimerID, $Notes, $ResolverID] = $DB->next_record(MYSQLI_NUM, false)) {
     $Type = $Types[$Short];

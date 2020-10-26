@@ -1,19 +1,18 @@
 <?php
 authorize();
 
-if (empty($_POST['id']) || !is_number($_POST['id']) || empty($_POST['type']) || ($_POST['type'] !== 'request_update' && empty($_POST['reason']))) {
+$ID = (int)$_POST['id'];
+if (!$ID || empty($_POST['type']) || ($_POST['type'] !== 'request_update' && empty($_POST['reason']))) {
     error(404);
 }
 
-$reportMan = new Gazelle\Manager\ReportV2;
-$Types = $reportMan->types();
-
+require_once('array.php');
 if (!array_key_exists($_POST['type'], $Types)) {
     error(403);
 }
 $Short = $_POST['type'];
 $Type = $Types[$Short];
-$ID = $_POST['id'];
+
 if ($Short === 'request_update') {
     $Year = trim($_POST['year']);
     if (empty($Year) || !is_number($Year)) {
@@ -44,19 +43,19 @@ switch ($Short) {
         $Link = "forums.php?action=viewthread&threadid=$ID";
         break;
     case 'post':
-        $DB->query("
-            SELECT
-                p.ID,
+        [$PostID, $TopicID, $PostNum] = $DB->row("
+            SELECT p.ID,
                 p.TopicID,
                 (
-                    SELECT COUNT(p2.ID)
+                    SELECT count(p2.ID)
                     FROM forums_posts AS p2
                     WHERE p2.TopicID = p.TopicID
                         AND p2.ID <= p.ID
                 ) AS PostNum
             FROM forums_posts AS p
-            WHERE p.ID = $ID");
-        list($PostID, $TopicID, $PostNum) = $DB->next_record();
+            WHERE p.ID = ?
+            ", $ID
+        );
         $Link = "forums.php?action=viewthread&threadid=$TopicID&post=$PostNum#post$PostID";
         break;
     case 'comment':
