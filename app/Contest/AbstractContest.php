@@ -104,11 +104,14 @@ abstract class AbstractContest extends \Gazelle\Base {
         );
         $n = $this->db->affected_rows();
         $this->db->commit();
-        $this->cache->cache_value(
-            sprintf('tmp_' . self::LEADERBOARD_CACHE_KEY, $this->id),
-            $this->cache->get_value(sprintf(self::LEADERBOARD_CACHE_KEY, $this->id)),
-            60 * 20
-        );
+        $leaderboard = $this->cache->get_value(sprintf(self::LEADERBOARD_CACHE_KEY, $this->id));
+        if ($leaderboard !== false) {
+            $this->cache->cache_value(
+                sprintf('tmp_' . self::LEADERBOARD_CACHE_KEY, $this->id),
+                $leaderboard,
+                60 * 60 * 7
+            );
+        }
         $this->cache->deleteMulti([sprintf(self::STATS_CACHE_KEY, $this->id), sprintf(self::LEADERBOARD_CACHE_KEY, $this->id)]);
         return $n;
     }
