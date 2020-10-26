@@ -273,10 +273,14 @@ if ($username !== $cur['Username'] && check_perms('users_edit_usernames', $cur['
         error('You cannot set a username of "0" or "1".');
         header("Location: user.php?id=$userID");
         exit;
-    } elseif (strtolower($username) != strtolower($cur['Username']) && ($inUse = $user->idFromUsername($username)) > 0) {
-        error("Username already in use by <a href=\"user.php?id=$inUse\">$username</a>");
-        header("Location: user.php?id=$inUse");
-        exit;
+    } elseif (strtolower($username) !== strtolower($cur['Username'])) {
+        $found = (new Gazelle\Manager\User)->findByUsername($username);
+        if ($found) {
+            $id = $found->id();
+            error("Username already in use by <a href=\"user.php?id=$id\">$username</a>");
+            header("Location: user.php?id=$id");
+            exit;
+        }
     } else {
         $set[] = 'Username = ?';
         $args[] = $username;

@@ -10,15 +10,10 @@ if (!empty($_GET['search'])) {
     } elseif (preg_match('/^'.EMAIL_REGEX.'$/i', $_GET['search'])) {
         $_GET['email'] = $_GET['search'];
     } elseif (preg_match(USERNAME_REGEX,$_GET['search'])) {
-        $DB->prepared_query('
-            SELECT ID
-            FROM users_main
-            WHERE Username = ?
-            ', $_GET['search']
-        );
-        if (list($ID) = $DB->next_record()) {
-            header("Location: user.php?id=$ID");
-            die();
+        $found = (new Gazelle\Manager\User)->findByUsername($_GET['search']);
+        if ($found) {
+            header("Location: user.php?id=" . $found->id());
+            exit;
         }
         $_GET['username'] = $_GET['search'];
     } else {

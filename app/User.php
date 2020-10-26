@@ -135,15 +135,6 @@ class User extends Base {
         );
     }
 
-    public function idFromUsername(string $username): int {
-        return (int)$this->db->scalar("
-            SELECT ID
-            FROM users_main
-            WHERE Username = ?
-            ", $username
-        );
-    }
-
     public function url(): string {
         return site_url() . "user.php?id=" . $this->id;
     }
