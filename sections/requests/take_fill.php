@@ -2,6 +2,20 @@
 //******************************************************************************//
 //--------------- Fill a request -----------------------------------------------//
 
+/**
+ * TODO: this can probably disappear when this page is investigated in greater detail.
+ *
+ * Search for $Needle in the string $Haystack which is a list of values separated by $Separator.
+ * @param string $Haystack
+ * @param string $Needle
+ * @param string $Separator
+ * @param boolean $Strict
+ * @return boolean
+ */
+function search_joined_string($Haystack, $Needle, $Separator = '|', $Strict = true) {
+    return (array_search($Needle, explode($Separator, $Haystack), $Strict) !== false);
+}
+
 $RequestID = $_REQUEST['requestid'];
 if (!intval($RequestID)) {
     error(0);
@@ -123,13 +137,13 @@ if ($BitrateList === 'Other') {
     if (in_array($Bitrate, ['24bit Lossless', 'Lossless', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', 'APS (VBR)', 'APX (VBR)', '256', '320'])) {
         $Err[] = "$Bitrate is not an allowed bitrate for this request.";
     }
-} elseif ($BitrateList && $BitrateList != 'Any' && !Misc::search_joined_string($BitrateList, $Bitrate)) {
+} elseif ($BitrateList && $BitrateList != 'Any' && !search_joined_string($BitrateList, $Bitrate)) {
     $Err[] = "$Bitrate is not an allowed bitrate for this request.";
 }
-if ($FormatList && $FormatList != 'Any' && !Misc::search_joined_string($FormatList, $Format)) {
+if ($FormatList && $FormatList != 'Any' && !search_joined_string($FormatList, $Format)) {
     $Err[] = "$Format is not an allowed format for this request.";
 }
-if ($MediaList && $MediaList != 'Any' && !Misc::search_joined_string($MediaList, $Media)) {
+if ($MediaList && $MediaList != 'Any' && !search_joined_string($MediaList, $Media)) {
     $Err[] = "$Media is not a permitted media for this request.";
 }
 
