@@ -87,16 +87,12 @@ if (!count($leaderboard)) {
     <th style="text-align:left"><?= $isRequestFill ? 'Requests Filled' : 'Perfect FLACs'; ?></th>
     </tr>
 <?php
-    $torMan = new Gazelle\Manager\Torrent;
-    $labelMan = new Gazelle\Manager\TorrentLabel;
-    $labelMan->showMedia(true)->showEdition(true)->showFlags(false);
 
     $rank = 0;
     $prevScore = 0;
     $nrRows = 0;
     $userSeen = 0;
     foreach ($leaderboard as $row) {
-
         $score = $row['entry_count'];
         if ($isRequestFill) {
                 ++$rank;
@@ -120,20 +116,19 @@ if (!count($leaderboard)) {
         else {
             $userExtra = '';
         }
-        [$group, $torrent] = $torMan->setTorrentId($row['last_entry_id'])->torrentInfo();
 
         printf(<<<END_STR
     <tr>
         <td>%d</td>
         <td><a href="/user.php?id=%d">%s</a>$userExtra</td>
-        <td>%s - <a href="torrents.php?id=%d&amp;torrentid=%d">%s</a> - %s</td>
+        <td>%s</td>
         <td>%s</td>
         <td>%d</td>
     </tr>
 END_STR
         , $rank,
-            $row['user_id'], Users::user_info($row['user_id'])['Username'],
-            $torMan->artistHtml(), $group['ID'], $row['last_entry_id'], $group['Name'], $labelMan->load($torrent)->label(),
+            $row['user_id'], $row['username'],
+            $row['last_entry_link'],
             time_diff($row['last_upload'], 1),
             $score
         );
