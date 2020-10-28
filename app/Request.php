@@ -42,7 +42,7 @@ class Request extends Base {
     /**
      * Get the total bounty that a user has added to a request
      * @param int $userId ID of user
-     * @return array keyed by user ID
+     * @return int keyed by user ID
      */
     public function userBounty(int $userId) {
         return $this->db->scalar("
