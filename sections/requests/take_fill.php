@@ -1,4 +1,12 @@
 <?php
+
+function print_or_return($JsonMsg, $Error = null) {
+    if (defined('NO_AJAX_ERROR')) {
+        return $JsonMsg;
+    } else {
+        json_or_error($JsonMsg, $Error);
+    }
+}
 //******************************************************************************//
 //--------------- Fill a request -----------------------------------------------//
 
@@ -27,18 +35,18 @@ authorize();
 if (!empty($_GET['torrentid']) && intval($_GET['torrentid'])) {
     $TorrentID = $_GET['torrentid'];
 } else {
-    if (empty($_POST['link'])) {
-        error('You forgot to supply a link to the filling torrent');
+    if (empty($_REQUEST['link'])) {
+        return print_or_return('You forgot to supply a link to the filling torrent');
     } else {
-        $Link = $_POST['link'];
+        $Link = $_REQUEST['link'];
         if (!preg_match('/'.TORRENT_REGEX.'/i', $Link, $Matches)) {
-            error('Your link does not appear to be valid (use the [PL] button to obtain the correct URL).');
+            return print_or_return('Your link does not appear to be valid (use the [PL] button to obtain the correct URL).');
         } else {
             $TorrentID = $Matches[4];
         }
     }
     if (!$TorrentID || !intval($TorrentID)) {
-        error(404);
+        return print_or_return('could not determine torrentid', 404);
     }
 }
 
@@ -64,7 +72,7 @@ $DB->prepared_query("
     WHERE t.ID = ?", $TorrentID);
 
 if (!$DB->has_results()) {
-    error(404);
+    return print_or_return('invalid torrentid', 404);
 }
 list($UploaderID, $UploadTime, $TorrentReleaseType, $Bitrate, $Format, $Media, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum, $TorrentCategoryID, $TorrentCatalogueNumber, $GracePeriod) = $DB->next_record();
 
@@ -72,8 +80,8 @@ $FillerID = intval($LoggedUser['ID']);
 $FillerUsername = $LoggedUser['Username'];
 
 $Err = [];
-if (!empty($_POST['user']) && check_perms('site_moderate_requests')) {
-    $filler = (new Gazelle\Manager\User)->findByUsername(trim($_POST['user']));
+if (!empty($_REQUEST['user']) && check_perms('site_moderate_requests')) {
+    $filler = (new Gazelle\Manager\User)->findByUsername(trim($_REQUEST['user']));
     if (!$filler) {
         $Err[] = 'No such user to fill for!';
     } else {
@@ -148,7 +156,7 @@ if ($MediaList && $MediaList != 'Any' && !search_joined_string($MediaList, $Medi
 }
 
 if (count($Err)) {
-    error(implode('<br />', $Err));
+    return print_or_return($Err, implode('<br />', $Err));
 }
 
 //We're all good! Fill!
@@ -202,4 +210,14 @@ Requests::update_sphinx_requests($RequestID);
 $SphQL = new SphinxqlQuery();
 $SphQL->raw_query("UPDATE requests, requests_delta SET torrentid = $TorrentID, fillerid = $FillerID WHERE id = $RequestID", false);
 
-header("Location: requests.php?action=view&id=$RequestID");
+if (!defined('AJAX')) {
+    return [
+        'requestId' => $RequestID,
+        'torrentId' => $TorrentID,
+        'fillerId' => $FillerID,
+        'fillerName' => $FillerUsername,
+        'bounty' => $RequestVotes['TotalBounty'],
+    ];
+} else {
+    header("Location: requests.php?action=view&id=$RequestID");
+}

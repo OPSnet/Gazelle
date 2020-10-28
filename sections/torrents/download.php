@@ -2,7 +2,7 @@
 
 use \Gazelle\Util\Irc;
 
-if (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass'])) {
+if (defined('AJAX') || (!isset($_REQUEST['authkey']) || !isset($_REQUEST['torrent_pass']))) {
     enforce_login();
     $TorrentPass = $LoggedUser['torrent_pass'];
     $DownloadAlt = $LoggedUser['DownloadAlt'];
@@ -48,7 +48,7 @@ $HttpsTracker = $HttpsTracker || isset($_REQUEST['ssl']);
 $TorrentID = $_REQUEST['id'];
 
 if (!is_number($TorrentID)) {
-    error(0);
+    json_or_error(0, 'missing torrentid');
 }
 
 $User = new \Gazelle\User($UserID);
@@ -60,8 +60,8 @@ $User = new \Gazelle\User($UserID);
 $ScriptUAs = ['BTWebClient*', 'Python-urllib*', 'python-requests*', 'uTorrent*'];
 if (Misc::in_array_partial($_SERVER['HTTP_USER_AGENT'], $ScriptUAs)) {
     if ($User->torrentDownloadCount($TorrentID) > 3) {
-        error('You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.', true);
-        die();
+        $Msg = 'You have already downloaded this torrent file four times. If you need to download it again, please do so from your browser.';
+        json_or_error($Msg, $Msg, true);
     }
 }
 
@@ -87,7 +87,8 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
         ', $TorrentID
     );
     if (!$DB->has_results()) {
-        error(404);
+        json_or_error('invalid torrentid', 404);
+
     }
     $Info = [$DB->next_record(MYSQLI_NUM, [4, 5, 6, 10])];
     $Artists = Artists::get_artist($Info[0][4]);
@@ -96,9 +97,9 @@ if (!is_array($Info) || !array_key_exists('PlainArtists', $Info) || empty($Info[
     $Cache->cache_value("torrent_download_$TorrentID", $Info, 0);
 }
 if (!is_array($Info[0])) {
-    error(404);
+    json_or_error('could not find torrent', 404);
 }
-list($Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash, $TorrentUploaderID)
+[$Media, $Format, $Encoding, $Year, $GroupID, $Name, $Image, $CategoryID, $Size, $FreeTorrent, $InfoHash, $TorrentUploaderID]
     = array_shift($Info); // used for generating the filename
 $Artists = $Info['Artists'];
 
@@ -132,7 +133,7 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
                 );
                 G::$Cache->cache_value('user_429_flood_' . $UserID, 1, 3600);
             }
-            error(429);
+            json_or_error('rate limiting hit on downloading', 429);
         }
     }
 }
@@ -145,13 +146,13 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     if (!empty($LoggedUser)) {
         $FLTokens = $LoggedUser['FLTokens'];
         if ($LoggedUser['CanLeech'] != '1') {
-            error('You cannot use tokens while leech disabled.');
+            json_or_error('You cannot use tokens while leech disabled.');
         }
     }
     else {
         $UInfo = Users::user_heavy_info($UserID);
         if ($UInfo['CanLeech'] != '1') {
-            error('You may not use tokens while leech disabled.');
+            json_or_error('You may not use tokens while leech disabled.');
         }
         $FLTokens = $UInfo['FLTokens'];
     }
@@ -159,7 +160,7 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
     // First make sure this isn't already FL, and if it is, do nothing
     if (!Torrents::has_token($TorrentID)) {
         if (!STACKABLE_FREELEECH_TOKENS && $Size >= BYTES_PER_FREELEECH_TOKEN) {
-            error('This torrent is too large. Please use the regular DL link.');
+            json_or_error('This torrent is too large. Please use the regular DL link.');
         }
         $TokensToUse = ceil($Size / BYTES_PER_FREELEECH_TOKEN);
         $DB->prepared_query('
@@ -169,12 +170,12 @@ if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
             ', $TokensToUse, $TokensToUse, $UserID
         );
         if ($DB->affected_rows() == 0) {
-            error('You do not have any freeleech tokens left. Please use the regular DL link.');
+            json_or_error('You do not have any freeleech tokens left. Please use the regular DL link.');
         }
 
         // Let the tracker know about this
         if (!Tracker::update_tracker('add_token', ['info_hash' => rawurlencode($InfoHash), 'userid' => $UserID])) {
-            error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
+            json_or_error('Sorry! An error occurred while trying to register your token. Most often, this is due to the tracker being down or under heavy load. Please try again later.');
             // recredit the tokens we just subtracted
             $DB->prepared_query('
                 UPDATE user_flt SET

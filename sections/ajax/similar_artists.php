@@ -1,7 +1,7 @@
 <?php
 
 if (empty($_GET['id']) || !is_number($_GET['id']) || empty($_GET['limit']) || !is_number($_GET['limit'])) {
-    print json_die(['status' => 'failure']);
+    print json_die('failure');
 }
 
 $artistId = $_GET["id"];
