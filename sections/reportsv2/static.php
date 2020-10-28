@@ -106,16 +106,14 @@ $tables = "
     LEFT JOIN torrents AS t ON (t.ID = r.TorrentID)
     LEFT JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
     LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
-    LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
     LEFT JOIN users_main AS resolver ON (resolver.ID = r.ResolverID)
     LEFT JOIN users_main AS reporter ON (reporter.ID = r.ReporterID)
-    LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)
-    WHERE "
-    . implode("\n    AND ", $cond);
+    LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)";
 
-$Results = $DB->scalar("SELECT count(*) FROM $tables", ...$args);
-
+$Results = $DB->scalar("
+    SELECT count(*) FROM $tables WHERE
+    " . implode("\n    AND ", $cond), ...$args
+);
 [$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
 
 $DB->prepared_query("
@@ -170,13 +168,15 @@ $DB->prepared_query("
         t.UserID AS UploaderID,
         uploader.Username
     FROM $tables
+    LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
+    LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
+    WHERE " . implode("\n    AND ", $cond) . "
     GROUP BY r.ID
     $orderBy
     LIMIT $Limit
     ", ...$args
 );
 $Reports = $DB->to_array();
-
 $PageLinks = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
 
 View::show_header('Reports V2', 'reportsv2,bbcode,torrent');

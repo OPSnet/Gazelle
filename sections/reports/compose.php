@@ -92,7 +92,7 @@ switch ($Type) {
                 p.Body,
                 p.TopicID,
                 (
-                    SELECT count(p2.ID)
+                    SELECT count(*)
                     FROM forums_posts AS p2
                     WHERE p2.TopicID = p.TopicID
                         AND p2.ID <= p.ID
@@ -101,7 +101,7 @@ switch ($Type) {
             WHERE p.ID = ?
             ", $ThingID
         );
-        if (!$PostId) {
+        if (!$PostID) {
             error('No forum post with the reported ID found');
         } else {
             $TypeLink = 'this [url='.site_url()."forums.php?action=viewthread&amp;threadid=$TopicID&amp;post=$PostNum#post$PostID]forum post[/url]";
@@ -117,7 +117,7 @@ switch ($Type) {
             error('No comment with the reported ID found');
         } else {
             $TypeLink = '[url='.site_url()."comments.php?action=jump&amp;postid=$ThingID]this comment[/url]";
-            $Subject = 'Comment Report: ID #'.display_str($ThingID) . "\n" . shortenString($Body, 200);
+            $Subject = 'Comment Report: ID #' . display_str($ThingID) . " " . shortenString($Body, 200);
         }
         break;
     default:
