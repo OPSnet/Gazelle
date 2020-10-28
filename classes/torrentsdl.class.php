@@ -35,6 +35,7 @@ class TorrentsDL {
         $options = new ZipStream\Option\Archive;
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false); // for macOS compatibility
+        $options->setFlushOutput(true); // flush on each file to save on memory
         $this->Zip = new ZipStream\ZipStream(self::safeString($Title) . '.zip', $options);
     }
 
@@ -99,7 +100,6 @@ class TorrentsDL {
         $this->Size += $Info['Size'];
         $this->NumAdded++;
         $this->Zip->addFile(($FolderName ? "$FolderName/" : "") . $FileName, self::get_file($TorrentData, $this->AnnounceURL, $Info['TorrentID']));
-        usleep(25000); // We don't want to send much faster than the client can receive
     }
 
     /**
