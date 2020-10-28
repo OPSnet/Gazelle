@@ -219,7 +219,7 @@ $RatioRequirements = [
     [5 * 1024 * 1024 * 1024,  0.15, date('Y-m-d H:i:s', time() - (60 * 60 * 24 * 14))]
 ];
 
-//Captcha fonts should be located in /classes/fonts
+//Captcha fonts are located in ./fonts
 $CaptchaFonts = [
     'ARIBLK.TTF',
     'IMPACT.TTF',
