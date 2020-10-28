@@ -75,7 +75,7 @@ class Image {
      * Build and emit an image containing a simple text message.
      */
     public static function render(string $text) {
-        $font = realpath(__DIR__ . '/../classes/fonts/VERDANAB.TTF');
+        $font = realpath(__DIR__ . '/../fonts/VERDANAB.TTF');
         $pointSize = 40.0;
         while (true) {
             [$left,, $right] = imageftbbox($pointSize, 0, $font, $text);

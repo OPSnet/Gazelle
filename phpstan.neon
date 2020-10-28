@@ -1,19 +1,23 @@
 parameters:
-	level: 1
-	bootstrapFiles:
-		- classes/config.template.php
-	scanFiles:
-		- classes/paranoia.class.php
-		- classes/proxies.class.php
-		- classes/time.class.php
-		- classes/util.php
-		- sections/artist/index.php
-		- sections/torrents/functions.php
-	paths:
-		- app
-		- classes
-	excludes_analyse:
-		- classes/pushserver.class.php
-		- sections
-	parallel:
-		maximumNumberOfProcesses: 1
+    level: 1
+    bootstrapFiles:
+        - classes/config.template.php
+    scanFiles:
+        - classes/paranoia.class.php
+        - classes/proxies.class.php
+        - classes/time.class.php
+        - classes/util.php
+        - sections/artist/index.php
+        - sections/torrents/functions.php
+    paths:
+        - app
+        - classes
+    excludes_analyse:
+        - classes/pushserver.class.php
+        - sections
+    parallel:
+        maximumNumberOfProcesses: 1
+    ignoreErrors:
+        -
+            message: '/(Constant IMG_BMP|Function imagebmp) not found\./'
+            path: app/Image.php

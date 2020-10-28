@@ -11,7 +11,7 @@ class IMAGE {
 
     function create($Width, $Height) {
         $this->Image = imagecreate($Width, $Height);
-        $this->Font = SERVER_ROOT.'/classes/fonts/VERDANA.TTF';
+        $this->Font = __DIR__ . '/../fonts/VERDANA.TTF';
         if (function_exists('imageantialias')) {
             imageantialias($this->Image, true);
         }

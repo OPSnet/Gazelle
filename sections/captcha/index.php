@@ -5,7 +5,7 @@ if (!function_exists('imagettftext')) {
 
 function get_font() {
     global $CaptchaFonts;
-    return __DIR__.'/../../classes/fonts/'.$CaptchaFonts[mt_rand(0, count($CaptchaFonts) - 1)];
+    return __DIR__ . '/../../fonts/' . $CaptchaFonts[mt_rand(0, count($CaptchaFonts) - 1)];
 }
 
 function make_captcha_img() {
