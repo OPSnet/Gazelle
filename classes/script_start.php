@@ -218,15 +218,26 @@ $FullToken = null;
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     if ((new \Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
         header('Content-type: application/json');
-        json_die('error', 'your ip address has been banned');
+        json_die('failure', 'your ip address has been banned');
     }
 
     $AuthorizationHeader = explode(" ", (string) $_SERVER['HTTP_AUTHORIZATION']);
-    if (count($AuthorizationHeader) !== 2 || $AuthorizationHeader[0] !== 'token') {
-        header('Content-type: application/json');
-        json_die('error', 'invalid authorization type, must be "token"');
+    // this first case is for compatibility with RED
+    if (count($AuthorizationHeader) === 1) {
+        $FullToken = $AuthorizationHeader[0];
     }
-    $FullToken = $AuthorizationHeader[1];
+    elseif (count($AuthorizationHeader) === 2) {
+        if ($AuthorizationHeader[0] !== 'token') {
+            header('Content-type: application/json');
+            json_die('failure', 'invalid authorization type, must be "token"');
+        }
+        $FullToken = $AuthorizationHeader[1];
+    }
+    else {
+        header('Content-type: application/json');
+        json_die('failure', 'invalid authorization type, must be "token"');
+    }
+
     $Revoked = 1;
 
     $UserId = (int) substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32);
@@ -237,7 +248,7 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     if (empty($LoggedUser['ID']) || $Revoked === 1) {
         log_token_attempt(G::$DB);
         header('Content-type: application/json');
-        json_die('error', 'invalid token');
+        json_die('failure', 'invalid token');
     }
 }
 
@@ -267,7 +278,7 @@ if (isset($LoggedUser['ID'])) {
     if (!is_null($FullToken) && !$User->hasApiToken($FullToken)) {
         log_token_attempt(G::$DB, $LoggedUser['ID']);
         header('Content-type: application/json');
-        json_die('error', 'invalid token');
+        json_die('failure', 'invalid token');
     }
 
     if ($User->isDisabled()) {
@@ -277,7 +288,7 @@ if (isset($LoggedUser['ID'])) {
         else {
             log_token_attempt(G::$DB, $LoggedUser['ID']);
             header('Content-type: application/json');
-            json_die('error', 'invalid token');
+            json_die('failure', 'invalid token');
         }
     }
 
@@ -289,7 +300,7 @@ if (isset($LoggedUser['ID'])) {
             $User->flushCache();
             log_token_attempt(G::$DB, $LoggedUser['ID']);
             header('Content-type: application/json');
-            json_die('error', 'invalid token');
+            json_die('failure', 'invalid token');
         }
         else {
             logout($LoggedUser['ID'], $SessionID);

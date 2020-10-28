@@ -16,7 +16,10 @@ define('MAX_FILENAME_LENGTH', 255);
 require(__DIR__ . '/../torrents/functions.php');
 
 enforce_login();
-authorize();
+
+if (!defined('AJAX')) {
+    authorize();
+}
 
 $Validate = new Validate;
 $Feed = new Feed;
@@ -35,9 +38,9 @@ $TypeID = $_POST['type'] + 1;
 $Properties['CategoryName'] = $Type;
 $Properties['Title'] = trim($_POST['title']);
 // Remastered is an Enum in the DB
-$Properties['Remastered'] = isset($_POST['remaster']) ? '1' : '0';
-if ($Properties['Remastered'] || isset($_POST['unknown'])) {
-    $Properties['UnknownRelease'] = isset($_POST['unknown']) ? 1 : 0;
+$Properties['Remastered'] = !empty($_POST['remaster']) ? '1' : '0';
+if ($Properties['Remastered'] || !empty($_POST['unknown'])) {
+    $Properties['UnknownRelease'] = !empty($_POST['unknown']) ? 1 : 0;
     $Properties['RemasterYear'] = trim($_POST['remaster_year'] ?? '');
     $Properties['RemasterTitle'] = trim($_POST['remaster_title'] ?? '');
     $Properties['RemasterRecordLabel'] = trim($_POST['remaster_record_label'] ?? '');
@@ -54,7 +57,7 @@ $Properties['Year'] = trim($_POST['year']);
 $Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
 $Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
 $Properties['ReleaseType'] = $_POST['releasetype'];
-$Properties['Scene'] = isset($_POST['scene']) ? '1' : '0';
+$Properties['Scene'] = !empty($_POST['scene']) ? '1' : '0';
 $Properties['Format'] = trim($_POST['format']);
 $Properties['Media'] = trim($_POST['media'] ?? '');
 $Properties['Encoding'] = $Properties['Bitrate'] = trim($_POST['bitrate'] ?? '');
@@ -153,7 +156,7 @@ switch ($Type) {
             $Validate->SetFields('other_bitrate',
                 '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
             $enc = $_POST['other_bitrate'];
-            if (isset($_POST['vbr'])) {
+            if (!empty($_POST['vbr'])) {
                 $enc.= ' (VBR)';
             }
 
@@ -191,7 +194,7 @@ switch ($Type) {
             $Validate->SetFields('other_bitrate',
                 '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
             $enc = $_POST['other_bitrate'];
-            if (isset($_POST['vbr'])) {
+            if (!empty($_POST['vbr'])) {
                 $enc.= ' (VBR)';
             }
 
@@ -252,9 +255,9 @@ if ($Type == 'Music') {
     $DupeNames = [];
     $DupeNames[] = $_FILES['file_input']['name'];
 
-    if (isset($_POST['extra_format']) && isset($_POST['extra_bitrate'])) {
+    if (!empty($_POST['extra_format']) && !empty($_POST['extra_bitrate'])) {
         for ($i = 1; $i <= 5; $i++) {
-            if (isset($_FILES["extra_file_$i"])) {
+            if (!empty($_FILES["extra_file_$i"])) {
                 $ExtraFile = $_FILES["extra_file_$i"];
                 $ExtraTorrentName = $ExtraFile['tmp_name'];
                 if (!is_uploaded_file($ExtraTorrentName) || !filesize($ExtraTorrentName)) {
@@ -322,9 +325,13 @@ if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
 }
 
 if ($Err) { // Show the upload form, with the data the user entered
-    $UploadForm = $Type;
-    require(__DIR__ . '/upload.php');
-    die();
+    if (defined('AJAX')) {
+        json_error($Err);
+    } else {
+        $UploadForm = $Type;
+        require(__DIR__ . '/upload.php');
+        die();
+    }
 }
 
 if (!empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
@@ -444,8 +451,9 @@ if ($HasLog == '1') {
 }
 $LogInDB = count($logfileSummary->all()) ? '1' : '0';
 
+$ExtraTorrentsInsert = [];
+// disable extra torrents when using ajax, just have them re-submit multiple times
 if ($Type == 'Music') {
-    $ExtraTorrentsInsert = [];
     foreach ($ExtraTorrents as $ExtraTorrent) {
         $Name = $ExtraTorrent['Name'];
         $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
@@ -510,10 +518,14 @@ if ($Type == 'Music') {
 }
 
 if ($Err) {
-    $UploadForm = $Type;
-    // TODO: Repopulate the form correctly
-    require(__DIR__ . '/upload.php');
-    die();
+    if (defined('AJAX')) {
+        json_error($Err);
+    } else {
+        $UploadForm = $Type;
+        // TODO: Repopulate the form correctly
+        require(__DIR__ . '/upload.php');
+        die();
+    }
 }
 
 //******************************************************************************//
@@ -902,32 +914,44 @@ if ($Properties['Image'] != '') {
  * to make it seem like the PHP process is working in the background.
  */
 
-if ($PublicTorrent || $UnsourcedTorrent) {
-    View::show_header('Warning');
-?>
-    <h1>Warning</h1>
-    <p><strong>Your torrent has been uploaded; however, you must download your torrent from <a href="torrents.php?id=<?=$GroupID?>">here</a> because:</strong></p>
-    <ul>
-<?php
-    if ($PublicTorrent) {
-?>
-        <li><strong>You didn't make your torrent using the "private" option</strong></li>
-<?php
+if (defined('AJAX')) {
+    $Response = [
+        'groupId' => $GroupID,
+        'torrentId' => $TorrentID,
+        'private' => !$PublicTorrent,
+        'source' => !$UnsourcedTorrent,
+    ];
+
+    if ($RequestID) {
+        define('NO_AJAX_ERROR', true);
+        $FillResponse = require_once(__DIR__ . '/../requests/take_fill.php');
+        if (!isset($FillResponse['requestid'])) {
+            $FillResponse = [
+                'status' => 400,
+                'error' => $FillResponse,
+            ];
+        }
+        $Response['fillRequest'] = $FillResponse;
     }
-    if ($UnsourcedTorrent) {
-?>
-        <li><strong>The "source" flag was not set to OPS. Please read the <a href="/wiki.php?action=article&id=<?= SOURCE_FLAG_WIKI_PAGE_ID ?>">wiki page about source flags</a> to find out why this is important. </strong></li>
-<?php
-    }
-?>
-    </ul>
-<?php
-    View::show_footer();
-} elseif ($RequestID) {
-    header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=".$LoggedUser['AuthKey']);
+    json_print('success', $Response);
 } else {
-    header("Location: torrents.php?id=$GroupID");
+    if ($PublicTorrent || $UnsourcedTorrent) {
+        View::show_header('Warning');
+        echo G::$Twig->render('upload/result_warnings.twig', [
+            'group_id' => $GroupID,
+            'public' => $PublicTorrent,
+            'unsourced' => $UnsourcedTorrent,
+            'source_flag_wiki_id' => SOURCE_FLAG_WIKI_PAGE_ID,
+        ]);
+        View::show_footer();
+    } elseif ($RequestID) {
+        header("Location: requests.php?action=takefill&requestid=$RequestID&torrentid=$TorrentID&auth=".$LoggedUser['AuthKey']);
+    } else {
+        header("Location: torrents.php?id=$GroupID");
+    }
 }
+
+
 if (function_exists('fastcgi_finish_request')) {
     fastcgi_finish_request();
 } else {

@@ -237,8 +237,16 @@ function json_print($Status, $Message) {
 }
 
 function json_error($Code) {
-    echo json_encode(add_json_info(['status' => 400, 'error' => $Code, 'response' => []]));
+    echo json_encode(add_json_info(['status' => 'failure', 'error' => $Code, 'response' => []]));
     die();
+}
+
+function json_or_error($JsonError, $Error = null, $NoHTML = false) {
+    if (defined('AJAX')) {
+        json_error($JsonError);
+    } else {
+        error($Error ?? $JsonError, $NoHTML);
+    }
 }
 
 function add_json_info($Json) {

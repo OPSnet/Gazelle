@@ -1,0 +1,10 @@
+<h1>Warning</h1>
+<p><strong>Your torrent has been uploaded; however, you must download your torrent from <a href="torrents.php?id={{ group_id }}">here</a> because:</strong></p>
+<ul>
+{% if public %}
+    <li><strong>You didn't make your torrent using the "private" option</strong></li>
+{% endif %}
+{% if unsourced %}
+    <li><strong>The "source" flag was not set to OPS. Please read the <a href="/wiki.php?action=article&id={{ source_flag_wiki_id }}">wiki page about source flags</a> to find out why this is important. </strong></li>
+{% endif %}
+</ul>

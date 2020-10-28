@@ -1,7 +1,7 @@
 <?php
 
 if (!empty($LoggedUser['DisableForums'])) {
-    print json_die(['status' => 'failure']);
+    print json_die('failure');
 }
 
 // Replace the old hard-coded forum categories
@@ -21,6 +21,6 @@ switch ($_GET['type'] ?? 'main') {
         require('thread.php');
         break;
     default:
-        print json_encode(['status' => 'failure']);
+        print json_encode('failure');
         break;
 }

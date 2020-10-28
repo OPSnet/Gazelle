@@ -21,7 +21,7 @@ $Groups = $Search->get_groups();
 $NumResults = $Search->record_count();
 
 if ($Results === false) {
-    json_die('error', 'Search returned an error. Make sure all parameters are valid and of the expected types.');
+    json_die('failure', 'Search returned an error. Make sure all parameters are valid and of the expected types.');
 }
 if ($NumResults == 0) {
     json_die('success', [

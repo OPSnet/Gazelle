@@ -10,13 +10,24 @@ The required page is determined by $_GET['action'].
 
 enforce_login();
 
+define('AJAX', true);
+
 /*    AJAX_LIMIT = array(x,y) = 'x' requests every 'y' seconds.
     e.g. array(5,10) = 5 requests every 10 seconds    */
 $AJAX_LIMIT = [5,10];
-$LimitedPages = ['tcomments','user','forum','top10','browse','usersearch','requests','artist','inbox','subscriptions','bookmarks','announcements','notifications','request','better','similar_artists','userhistory','votefavorite','wiki','torrentgroup','news_ajax','user_recents', 'collage', 'raw_bbcode'];
-$RequireTokenPages = [];
+$LimitedPages = [
+    'tcomments','user','forum','top10','browse','usersearch','requests','artist','inbox','subscriptions','bookmarks','announcements',
+    'notifications','request','better','similar_artists','userhistory','votefavorite','wiki','torrentgroup','news_ajax','user_recents',
+    'collage', 'raw_bbcode', 'requestfill', 'request_fill', 'addtag', 'add_tag',
+];
+$RequireTokenPages = ['upload', 'download'];
 
 $UserID = $LoggedUser['ID'];
+
+if (!empty($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 16) === 'application/json') {
+    $_POST = json_decode(file_get_contents('php://input'), true);
+}
+
 header('Content-Type: application/json; charset=utf-8');
 //    Enforce rate limiting everywhere except info.php
 if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && in_array($_GET['action'], $LimitedPages)) {
@@ -31,8 +42,8 @@ if (!check_perms('site_unlimit_ajax') && isset($_GET['action']) && in_array($_GE
     }
 }
 
-if (is_null($Token) && in_array($_GET['action'], $RequireTokenPages)) {
-    json_die("error", "This page requires an api token");
+if (!isset($FullToken) && in_array($_GET['action'], $RequireTokenPages)) {
+    json_die("failure", "This page requires an api token");
 }
 
 switch ($_GET['action']) {
@@ -165,6 +176,23 @@ switch ($_GET['action']) {
         break;
     case 'torrent_stats':
         require('stats/torrents.php');
+        break;
+
+    case 'upload':
+        require(__DIR__ . '/../upload/upload_handle.php');
+        break;
+    case 'download':
+        require(__DIR__ . '/../torrents/download.php');
+        break;
+
+    // RED uses the non '_' endpoint, maintaining compat with them here
+    case 'request_fill':
+    case 'requestfill':
+        json_print('success', require(__DIR__ . '/../requests/take_fill.php'));
+        break;
+    case 'add_tag':
+    case 'addtag':
+        require(__DIR__ . '/../torrents/add_tag.php');
         break;
     default:
         // If they're screwing around with the query string
