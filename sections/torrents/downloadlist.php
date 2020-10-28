@@ -37,7 +37,7 @@ if (empty($Results)) {
     $Snatched = $DB->to_array('uid');
     $DB->prepared_query("
         SELECT xfu.uid
-        FROM xbt_files_users
+        FROM xbt_files_users xfu
         INNER JOIN users_downloads ud ON (ud.UserID = xfu.uid)
         WHERE xfu.Remaining = 0 AND xfu.fid = ?
         ", $TorrentID
