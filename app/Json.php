@@ -54,12 +54,9 @@ abstract class Json extends Base {
                     'status' => 'failure',
                     'response' => [],
                     'error' => $message,
-                    'info' => [
-                        'source'  => $this->source,
-                        'version' => $this->version,
-                    ],
                 ],
-                $this->debug()
+                $this->info(),
+                $this->debug(),
             ),
             $this->mode
         );
@@ -88,8 +85,10 @@ abstract class Json extends Base {
         }
         global $Debug;
         return [
-            'queries'  => $Debug->get_queries(),
-            'searches' => $Debug->get_sphinxql_queries(),
+            'debug' => [
+                'queries'  => $Debug->get_queries(),
+                'searches' => $Debug->get_sphinxql_queries(),
+            ],
         ];
     }
 

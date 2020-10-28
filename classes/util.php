@@ -220,12 +220,6 @@ function json_die($Status, $Message="bad parameters") {
  * Print JSON status result with an optional message.
  */
 function json_print($Status, $Message) {
-    if (check_perms('site_debug')) {
-        global $Debug;
-        $Message['queries'] = $Debug->get_queries();
-        $Message['searches'] = $Debug->get_sphinxql_queries();
-    }
-
     if ($Status == 'success' && $Message) {
         $response = ['status' => $Status, 'response' => $Message];
     } elseif ($Message) {
@@ -233,6 +227,7 @@ function json_print($Status, $Message) {
     } else {
         $response = ['status' => $Status, 'response' => []];
     }
+
     print(json_encode(add_json_info($response)));
 }
 
@@ -255,6 +250,16 @@ function add_json_info($Json) {
             'info' => [
                 'source' => SITE_NAME,
                 'version' => 1,
+            ],
+        ]);
+    }
+    if (!isset($Json['debug']) && check_perms('site_debug')) {
+        /** @var DEBUG $Debug */
+        global $Debug;
+        $Json = array_merge($Json, [
+            'debug' => [
+                'queries' => $Debug->get_queries(),
+                'searches' => $Debug->get_sphinxql_queries()
             ],
         ]);
     }
