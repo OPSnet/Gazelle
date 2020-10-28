@@ -381,7 +381,7 @@ class Scheduler extends \Gazelle\Base {
         }
     }
 
-    private function createRunner(int $id, string $name, string $class, bool $isDebug) {
+    private function createRunner(int $id, string $name, string $class, bool $isDebug): Task {
         $class = 'Gazelle\\Schedule\\Tasks\\'.$class;
         if (!class_exists($class)) {
             return null;
