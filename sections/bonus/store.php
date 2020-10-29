@@ -32,7 +32,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
 <?php } elseif ($value <= 0) { ?>
 <div class="alertbar blend">Warning! You cannot donate negative or no points!</div>
 <?php } elseif ($LoggedUser['BonusPoints'] < $value) { ?>
-<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int) $LoggedUser['BonusPoints']) ?> points.</div>
+<div class="alertbar blend">Warning! You cannot donate <?= number_format($value) ?> if you only have <?= number_format((int)$LoggedUser['BonusPoints']) ?> points.</div>
 <?php } elseif ($Bonus->donate((int)$_POST['poolid'], $value, $LoggedUser['ID'], $LoggedUser['EffectiveClass'])) { ?>
 <div class="alertbar blend">Success! Your donation to the Bonus Point pool has been recorded.</div>
 <?php } else { ?>
@@ -45,7 +45,7 @@ $pool = $Bonus->getOpenPool();
 if ($pool) {
     echo G::$Twig->render('bonus/bonus-pool.twig', [
         'auth'    => $LoggedUser['AuthKey'],
-        'points'  => $LoggedUser['BonusPoints'],
+        'points'  => (int)$LoggedUser['BonusPoints'],
         'pool'    => $pool,
         'user_id' => $LoggedUser['ID'],
     ]);
@@ -55,7 +55,7 @@ echo G::$Twig->render('bonus/store.twig', [
     'auth'    => $LoggedUser['AuthKey'],
     'class'   => $LoggedUser['EffectiveClass'],
     'list'    => $Bonus->getListForUser($LoggedUser['ID']),
-    'points'  => $LoggedUser['BonusPoints'],
+    'points'  => (int)$LoggedUser['BonusPoints'],
     'user_id' => $LoggedUser['ID'],
 ]);
 
