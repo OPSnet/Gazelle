@@ -56,8 +56,7 @@ View::show_header('Edit artist');
         <td>
         <div class="pad">E.g. for Suzanne Vega, the Discogs artist page is https://www.discogs.com/artist/41182-Suzanne-Vega
         <br />Hence her Discogs ID is <b>41182</b>.
-        <br />When correcting a mistake, first clear the existing ID by blanking out
-        the current value and saving, then add the correct ID in a second edit.</div>
+        </div>
         <input type="text" name="discogs-id" size="9" value="<?= $discogsId ?>" /><br /><br />
         </td>
     </tr>

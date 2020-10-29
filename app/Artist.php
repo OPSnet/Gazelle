@@ -467,10 +467,19 @@ class Artist extends Base {
         }
         $this->discogsId = $discogsId;
 
+        // We only run this query when artist_discogs_id has changed, so the collision
+        // should only happen on the UNIQUE(artist_id) index
         $this->db->prepared_query('
             INSERT INTO artist_discogs
                    (artist_discogs_id, artist_id, is_preferred, sequence, stem, name, user_id)
             VALUES (?,                 ?,         ?,            ?,        ?,    ?,    ?)
+            ON DUPLICATE KEY UPDATE
+                artist_discogs_id = VALUES(artist_discogs_id),
+                is_preferred = VALUES(is_preferred),
+                sequence = VALUES(sequence),
+                stem = VALUES(stem),
+                name = VALUES(name),
+                user_id = VALUES(user_id)
             ', $this->discogsId, $this->id, $this->homonymCount() == 0,
             $this->discogsSequence, $this->discogsStem, $this->discogsName, $userId
         );
