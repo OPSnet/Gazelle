@@ -116,7 +116,7 @@ if (empty($_POST['confirm'])) {
 
     // 3. Clear the votes_pairs keys!
     $DB->prepared_query("
-        SELECT concat('request_', v2.GroupId) as cachekey
+        SELECT concat('vote_pairs_', v2.GroupId) as cachekey
         FROM users_votes AS v1
         INNER JOIN users_votes AS v2 USING (UserID)
         WHERE (v1.Type = 'Up' OR v2.Type = 'Up')
