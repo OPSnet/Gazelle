@@ -54,7 +54,7 @@ if ($ConvID = (int)$_GET['convid']) {
     );
 
     $LevelCap = 1000;
-    if ($LoggedUser['EffectiveClass'] < min($Level, $LevelCap) || $AssignedToUser != $LoggedUser['ID']) {
+    if ($LoggedUser['EffectiveClass'] < min($Level, $LevelCap) && $AssignedToUser != $LoggedUser['ID']) {
         // Staff member is not allowed to assign conversation
         echo '-1';
     } else {
