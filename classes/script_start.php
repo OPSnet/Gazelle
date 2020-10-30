@@ -165,6 +165,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
     }
 ));
 
+G::$Twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
+    return new \Twig\Markup(
+        ImageTools::process($icon, false, 'donoricon', $userId),
+        'UTF-8'
+    );
+}));
+
 G::$Twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $config, $key) {
     return new \Twig\Markup(
         ($default
