@@ -1,0 +1,48 @@
+<div class="header">
+    <h2>Ratio Watch</h2>
+</div>
+{% if users is empty %}
+<h2 align="center">There are no users currently on ratio watch ({{ total_disabled|number_format }} are already disabled).</h2>
+{% else %}
+<div class="box pad thin">
+    <p>There are currently {{ total|number_format }} enabled users on Ratio Watch and {{ total_disabled|number_format }} already disabled.</p>
+</div>
+<div class="linkbox">
+    {{ pages|raw }}
+</div>
+<table width="100%">
+    <tr class="colhead">
+        <td>User</td>
+        <td class="number_column">Uploaded</td>
+        <td class="number_column">Downloaded</td>
+        <td class="number_column">Ratio</td>
+        <td class="number_column">Required Ratio</td>
+        <td class="number_column tooltip" title="How much the user needs to upload to meet their required ratio">Deficit</td>
+        <td class="number_column tooltip" title="How much the user has downloaded on Ratio Watch">Gamble</td>
+        <td>Registration Date</td>
+        <td class="tooltip" title="If the time shown here ends in &quot;ago&quot;, it represents how long the user has been on ratio watch and/or below their required ratio. Otherwise, it represents the time until the two week Ratio Watch period expires.">Ratio Watch Ended/Ends</td>
+    </tr>
+    {% for u in users %}
+    <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+        <td>{{ u.user_id|user_full|raw }}</td>
+        <td class="number_column">{{ u.uploaded|octet_size }}</td>
+        <td class="number_column">{{ u.downloaded|octet_size }}</td>
+        <td class="number_column">{{ ratio(u.uploaded, u.downloaded)|raw }}</td>
+        <td class="number_column">{{ u.required_ration|number_format(2) }}</td>
+        <td class="number_column">
+            {%- if u.downloaded * u.required_ratio > u.uploaded -%}
+            {{ (u.downloaded * u.required_ratio - u.uploaded)|octet_size }}
+            {%- else -%}
+            &nbsp;
+            {%- endif -%}
+        </td>
+        <td class="number_column">{{ (u.downloaded - u.ratio_watch_downloaded)|octet_size }}</td>
+        <td>{{ u.join_date|time_diff|raw }}</td>
+        <td>{{ u.ratio_watch_ends|time_diff|raw }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<div class="linkbox">
+    {{ pages|raw }}
+</div>
+{% endif %}

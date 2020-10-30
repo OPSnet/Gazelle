@@ -255,8 +255,8 @@ switch ($_REQUEST['action']) {
         require(__DIR__ . '/data/registration_log.php');
         break;
 
-    case 'upscale_pool':
-        require(__DIR__ . '/data/upscale_pool.php');
+    case 'ratio_watch':
+        require(__DIR__ . '/data/ratio_watch.php');
         break;
 
     case 'invite_pool':

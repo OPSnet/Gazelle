@@ -170,7 +170,7 @@ Category('Finances', [
 Category('Site Information', [
     Item('Economic stats',       'tools.php?action=economic_stats', All(['site_view_flow'])),
     Item('Torrent stats',        'tools.php?action=torrent_stats',  All(['site_view_flow'])),
-    Item('Ratio watch',          'tools.php?action=upscale_pool',   All(['site_view_flow'])),
+    Item('Ratio watch',          'tools.php?action=ratio_watch',    All(['site_view_flow'])),
     Item('OS and browser usage', 'tools.php?action=platform_usage', All(['site_debug'])),
     Item('Site info',            'tools.php?action=site_info',      All(['admin_site_debug'])),
     Item('Site options',         'tools.php?action=site_options',   All(['users_mod'])),

@@ -79,4 +79,59 @@ class User extends \Gazelle\Base {
         );
         return $this->db->affected_rows() === 1;
     }
+
+    /**
+     * Get the table joins for looking at users on ratio watch
+     *
+     * @return string SQL table joins
+     */
+    protected function sqlRatioWatchJoins(): string {
+        return "FROM users_main AS um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+            WHERE ui.RatioWatchEnds > now()
+                AND um.Enabled = '1'";
+    }
+
+    /**
+     * How many people are on ratio watch?
+     *
+     * return int number of users
+     */
+    public function totalRatioWatchUsers(): int {
+        return $this->db->scalar("SELECT count(*) " . $this->sqlRatioWatchJoins());
+    }
+
+    /**
+     * Get details of people on ratio watch
+     *
+     * @return array user details
+     */
+    public function ratioWatchUsers(int $limit, int $offset): array {
+        $this->db->prepared_query("
+            SELECT um.ID              AS user_id,
+                uls.Uploaded          AS uploaded,
+                uls.Downloaded        AS downloaded,
+                ui.JoinDate           AS join_date,
+                ui.RatioWatchEnds     AS ratio_watch_ends,
+                ui.RatioWatchDownload AS ratio_watch_downloaded,
+                um.RequiredRatio      AS required_ratio
+            " . $this->sqlRatioWatchJoins() . "
+            ORDER BY ui.RatioWatchEnds ASC
+            LIMIT ? OFFSET ?
+            ", $limit, $offset
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    /**
+     * How many users are banned for inadequate ratio?
+     *
+     * @return int number of users
+     */
+    public function totalBannedForRatio(): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM users_info WHERE BanDate IS NOT NULL AND BanReason = '2'
+        ");
+    }
 }
