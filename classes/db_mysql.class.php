@@ -175,7 +175,7 @@ class DB_MYSQL {
     protected $Port = 0;
     protected $Socket = '';
 
-    function __construct($Database = SQLDB, $User = SQLLOGIN, $Pass = SQLPASS, $Server = SQLHOST, $Port = SQLPORT, $Socket = SQLSOCK) {
+    public function __construct($Database = SQLDB, $User = SQLLOGIN, $Pass = SQLPASS, $Server = SQLHOST, $Port = SQLPORT, $Socket = SQLSOCK) {
         $this->Database = $Database;
         $this->Server = $Server;
         $this->User = $User;
@@ -184,7 +184,7 @@ class DB_MYSQL {
         $this->Socket = $Socket;
     }
 
-    function halt($Msg) {
+    private function halt($Msg) {
         if ($this->Errno == 1062) {
             throw new DB_MYSQL_DuplicateKeyException;
         }
@@ -197,7 +197,7 @@ class DB_MYSQL {
         throw new DB_MYSQL_Exception($DBError);
     }
 
-    function connect() {
+    public function connect() {
         if (!$this->LinkID) {
             $this->LinkID = mysqli_connect($this->Server, $this->User, $this->Pass, $this->Database, $this->Port, $this->Socket); // defined in config.php
             if (!$this->LinkID) {
@@ -245,7 +245,7 @@ class DB_MYSQL {
      * @param int $AutoHandle
      * @return mysqli_result|bool
      */
-    function query($Query, $AutoHandle=1) {
+    public function query($Query, $AutoHandle=1) {
         $this->setup_query();
 
         $Closure = function() use ($Query) {
@@ -268,7 +268,7 @@ class DB_MYSQL {
      * @return mysqli_stmt|bool Returns a statement object
      *                          or FALSE if an error occurred.
      */
-    function prepare($Query) {
+    public function prepare($Query) {
         $this->setup_query();
         $this->PreparedQuery = $Query;
         $this->Statement = $this->LinkID->prepare($Query);
@@ -294,7 +294,7 @@ class DB_MYSQL {
      *                            or TRUE for other successful DML queries
      *                            or FALSE on failure.
      */
-    function execute(...$Parameters) {
+    public function execute(...$Parameters) {
         /** @var mysqli_stmt $Statement */
         $Statement = &$this->Statement;
 
@@ -386,25 +386,20 @@ class DB_MYSQL {
         }
     }
 
-    function query_unb($Query) {
-        $this->connect();
-        mysqli_real_query($this->LinkID, $Query);
-    }
-
-    function inserted_id() {
+    public function inserted_id() {
         if ($this->LinkID) {
             return mysqli_insert_id($this->LinkID);
         }
     }
 
-    function next_row($type = MYSQLI_NUM) {
+    public function next_row($type = MYSQLI_NUM) {
         if ($this->LinkID) {
             return mysqli_fetch_array($this->QueryID, $type);
         }
         return null;
     }
 
-    function next_record($Type = MYSQLI_BOTH, $Escape = true, $Reverse = false) {
+    public function next_record($Type = MYSQLI_BOTH, $Escape = true, $Reverse = false) {
         // $Escape can be true, false, or an array of keys to not escape
         // If $Reverse is true, then $Escape is an array of keys to escape
         if ($this->LinkID) {
@@ -433,7 +428,7 @@ class DB_MYSQL {
      *                          or can be an array of array keys for what columns to escape
      * @return array next result set if exists
      */
-    function fetch_record(...$Escape) {
+    public function fetch_record(...$Escape) {
         if (count($Escape) === 1 && $Escape[0] === true) {
             $Escape = true;
         }
@@ -443,7 +438,7 @@ class DB_MYSQL {
         return $this->next_record(MYSQLI_BOTH, $Escape, true);
     }
 
-    function close() {
+    public function close() {
         if ($this->LinkID) {
             if (!mysqli_close($this->LinkID)) {
                 $this->halt('Cannot close connection or connection did not open.');
@@ -456,7 +451,7 @@ class DB_MYSQL {
      * returns an integer with the number of rows found
      * returns a string if the number of rows found exceeds MAXINT
      */
-    function record_count() {
+    public function record_count() {
         if ($this->QueryID) {
             return mysqli_num_rows($this->QueryID);
         }
@@ -466,11 +461,11 @@ class DB_MYSQL {
      * returns true if the query exists and there were records found
      * returns false if the query does not exist or if there were 0 records returned
      */
-    function has_results() {
+    public function has_results() {
         return ($this->QueryID && $this->record_count() !== 0);
     }
 
-    function affected_rows() {
+    public function affected_rows() {
         if ($this->LinkID) {
             return $this->LinkID->affected_rows;
         }
@@ -481,12 +476,12 @@ class DB_MYSQL {
         return 0;
     }
 
-    function info() {
+    public function info() {
         return mysqli_get_host_info($this->LinkID);
     }
 
     // You should use db_string() instead.
-    function escape_str($Str) {
+    public function escape_str($Str) {
         $this->connect();
         if (is_array($Str)) {
             trigger_error('Attempted to escape array.');
@@ -498,7 +493,7 @@ class DB_MYSQL {
     // Creates an array from a result set
     // If $Key is set, use the $Key column in the result set as the array key
     // Otherwise, use an integer
-    function to_array($Key = false, $Type = MYSQLI_BOTH, $Escape = true) {
+    public function to_array($Key = false, $Type = MYSQLI_BOTH, $Escape = true) {
         $Return = [];
         while ($Row = mysqli_fetch_array($this->QueryID, $Type)) {
             if ($Escape !== false) {
@@ -515,7 +510,7 @@ class DB_MYSQL {
     }
 
     //  Loops through the result set, collecting the $ValField column into an array with $KeyField as keys
-    function to_pair($KeyField, $ValField, $Escape = true) {
+    public function to_pair($KeyField, $ValField, $Escape = true) {
         $Return = [];
         while ($Row = mysqli_fetch_array($this->QueryID)) {
             if ($Escape) {
@@ -532,7 +527,7 @@ class DB_MYSQL {
     }
 
     //  Loops through the result set, collecting the $Key column into an array
-    function collect($Key, $Escape = true) {
+    public function collect($Key, $Escape = true) {
         $Return = [];
         while ($Row = mysqli_fetch_array($this->QueryID)) {
             $Return[] = $Escape ? display_str($Row[$Key]) : $Row[$Key];
@@ -550,7 +545,7 @@ class DB_MYSQL {
      * @param mixed   $args  The values of the placeholders
      * @return array  resultset or null
      */
-    function row($sql, ...$args) {
+    public function row($sql, ...$args) {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
         $result = $this->next_record(MYSQLI_NUM, false);
@@ -568,7 +563,7 @@ class DB_MYSQL {
      * @param mixed   $args  The values of the placeholders
      * @return mixed  value or null
      */
-    function scalar($sql, ...$args) {
+    public function scalar($sql, ...$args) {
         $qid = $this->get_query_id();
         $this->prepared_query($sql, ...$args);
         $result = $this->has_results() ? $this->next_record(MYSQLI_NUM, false) : [null];
@@ -576,16 +571,16 @@ class DB_MYSQL {
         return $result[0];
     }
 
-    function set_query_id(&$ResultSet) {
+    public function set_query_id(&$ResultSet) {
         $this->QueryID = $ResultSet;
         $this->Row = 0;
     }
 
-    function get_query_id() {
+    public function get_query_id() {
         return $this->QueryID;
     }
 
-    function beginning() {
+    public function beginning() {
         mysqli_data_seek($this->QueryID, 0);
         $this->Row = 0;
     }
@@ -594,7 +589,7 @@ class DB_MYSQL {
      * This function determines whether the last query caused warning messages
      * and stores them in $this->Queries.
      */
-    function warnings() {
+    public function warnings() {
         $Warnings = [];
         if ($this->LinkID !== false && mysqli_warning_count($this->LinkID)) {
             $e = mysqli_get_warnings($this->LinkID);
@@ -609,15 +604,15 @@ class DB_MYSQL {
         $this->Queries[count($this->Queries) - 1][2] = $Warnings;
     }
 
-    function begin_transaction() {
+    public function begin_transaction() {
         mysqli_begin_transaction($this->LinkID);
     }
 
-    function commit() {
+    public function commit() {
         mysqli_commit($this->LinkID);
     }
 
-    function rollback() {
+    public function rollback() {
         mysqli_rollback($this->LinkID);
     }
 }
