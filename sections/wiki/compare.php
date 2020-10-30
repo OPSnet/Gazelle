@@ -84,9 +84,9 @@ if (!isset($_GET['old'])
 }
 
 $ArticleID = (int)$_GET['id'];
+$wikiMan = new Gazelle\Manager\Wiki;
 
-$Article = Wiki::get_article($ArticleID);
-[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName] = array_shift($Article);
+[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID] = $wikiMan->article($ArticleID);
 if ($Read > $LoggedUser['EffectiveClass']) {
     error(404);
 }

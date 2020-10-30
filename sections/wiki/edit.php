@@ -1,11 +1,12 @@
 <?php
-if (!isset($_GET['id']) || !is_number($_GET['id'])) {
+
+$ArticleID = (int)$_GET['id'];
+if (!$ArticleID) {
     error(404);
 }
-$ArticleID = (int)$_GET['id'];
 
-$Article = Wiki::get_article($ArticleID);
-list($Revision, $Title, $Body, $Read, $Edit, $Date, $Author) = array_shift($Article);
+$wikiMan = new Gazelle\Manager\Wiki;
+[$Revision, $Title, $Body, $Read, $Edit, $Date] = $wikiMan->article($ArticleID);
 if ($Edit > $LoggedUser['EffectiveClass']) {
     error('You do not have access to edit this article.');
 }
@@ -41,4 +42,5 @@ View::show_header('Edit '.$Title);
         </form>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

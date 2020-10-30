@@ -1,8 +1,10 @@
 <?php
+
+$wikiMan = new Gazelle\Manager\Wiki;
 if (!empty($_GET['id']) && is_number($_GET['id'])) { //Visiting article via ID
-    $ArticleID = $_GET['id'];
+    $ArticleID = (int)$_GET['id'];
 } elseif ($_GET['name'] != '') { //Retrieve article ID via alias.
-    $ArticleID = Wiki::alias_to_id($_GET['name']);
+    $ArticleID = $wikiMan->alias($_GET['name']);
 } else {
     json_die("failure");
 }
@@ -10,12 +12,10 @@ if (!empty($_GET['id']) && is_number($_GET['id'])) { //Visiting article via ID
 if (!$ArticleID) { //No article found
     json_die("failure", "article not found");
 }
-$Article = Wiki::get_article($ArticleID, false);
-
-if (!$Article) {
+[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName, $Aliases] = $wikiMan->article($ArticleID);
+if (is_null($Revision)) {
     json_die("failure", "article not found");
 }
-list($Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName, $Aliases, $UserIDs) = array_shift($Article);
 if ($Read > $LoggedUser['EffectiveClass']) {
     json_die("failure", "higher user class required to view article");
 }
