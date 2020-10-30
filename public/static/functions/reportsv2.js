@@ -57,7 +57,7 @@ function TakeResolve(reportid) {
         if (response) {
             ErrorBox(reportid, response);
         } else {
-            if ($('#from_delete' + reportid).size()) {
+            if ($('#from_delete' + reportid).length) {
                 window.location.search = '?id=' + $('#from_delete' + reportid).val();
             } else {
                 $('#report' + reportid).remove();
@@ -81,16 +81,16 @@ function NewReport(q, view, id) {
         if (response) {
             var div = $(response);
             var id = div.data("reportid");
-            if (!$('#report'+id).size()) {
+            if (!$('#report'+id).length) {
                 $('#all_reports').append(div);
                 $('#no_reports').remove();
-                if ($('#type', div).size()) {
+                if ($('#type', div).length) {
                     Load(id);
                 }
             }
         } else {
             // No new reports at this time
-            if (!$('.report').size() && !$('#no_reports') == 0) {
+            if (!$('.report').length && !$('#no_reports') == 0) {
                 $('#all_reports').append($('<div id="no_reports" class="box pad center"><strong>No new reports! \o/</strong></div>'));
             }
         }
@@ -104,7 +104,7 @@ function NewReport(q, view, id) {
 function AddMore(view, id) {
     // Function will add the amount of reports in the input box unless that will take it over 50
     var num = parseInt($('#repop_amount').val()) || 10;
-    var curCount = $('.report').size();
+    var curCount = $('.report').length;
     if (curCount < 50) {
         NewReport(Math.min(num, 50 - curCount), view, id);
     }

@@ -23,8 +23,8 @@ class ReportV2 extends Base {
                 LastChangeTime = now(),
                 Status = 'InProgress',
                 ResolverID = ?
-            WHERE ResolverID != ? AND ID = ?
-            ", $userId, $userId, $this->id
+            WHERE ID = ?
+            ", $userId, $this->id
         );
         return $this->db->affected_rows() === 1;
     }
