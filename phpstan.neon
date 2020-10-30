@@ -14,6 +14,7 @@ parameters:
         - classes
     excludes_analyse:
         - classes/pushserver.class.php
+        - design
         - sections
     parallel:
         maximumNumberOfProcesses: 1
