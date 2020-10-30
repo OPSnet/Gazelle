@@ -7,61 +7,60 @@ if (G::$LoggedUser['DisablePoints']) {
 
 $Bonus = new \Gazelle\Bonus;
 
-const DEFAULT_PAGE = '/sections/bonus/store.php';
+const DEFAULT_PAGE = 'store.php';
 
-if (isset($_GET['action'])) {
-    switch ($_GET['action']) {
-        case 'purchase':
-            /* handle validity and cost as early as possible */
-            if (isset($_REQUEST['label']) && preg_match('/^[a-z]{1,15}(-\w{1,15}){0,4}/', $_REQUEST['label'])) {
-                $Label = $_REQUEST['label'];
-                $Item = $Bonus->getItem($Label);
-                if ($Item) {
-                    $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['ID']);
-                    if ($Price > G::$LoggedUser['BonusPoints']) {
-                        error('You cannot afford this item.');
-                    }
-                    switch($Label)  {
-                        case 'token-1': case 'token-2': case 'token-3': case 'token-4':
-                        case 'other-1': case 'other-2': case 'other-3': case 'other-4':
-                            require_once(SERVER_ROOT . '/sections/bonus/tokens.php');
-                            break;
-                        case 'invite':
-                            require_once(SERVER_ROOT . '/sections/bonus/invite.php');
-                            break;
-                        case 'title-bb-y':
-                        case 'title-bb-n':
-                        case 'title-off':
-                            require_once(SERVER_ROOT . '/sections/bonus/title.php');
-                            break;
-                        case 'collage-1':
-                            require_once(SERVER_ROOT . '/sections/bonus/collage.php');
-                        default:
-                            require_once(SERVER_ROOT . DEFAULT_PAGE);
-                            break;
-                    }
+switch ($_GET['action'] ?? '') {
+    case 'purchase':
+        /* handle validity and cost as early as possible */
+        if (isset($_REQUEST['label']) && preg_match('/^[a-z]{1,15}(-\w{1,15}){0,4}/', $_REQUEST['label'])) {
+            $Label = $_REQUEST['label'];
+            $Item = $Bonus->getItem($Label);
+            if ($Item) {
+                $Price = $Bonus->getEffectivePrice($Label, G::$LoggedUser['ID']);
+                if ($Price > G::$LoggedUser['BonusPoints']) {
+                    error('You cannot afford this item.');
                 }
-                else {
-                    require_once(SERVER_ROOT . DEFAULT_PAGE);
-                    break;
+                switch($Label)  {
+                    case 'token-1': case 'token-2': case 'token-3': case 'token-4':
+                    case 'other-1': case 'other-2': case 'other-3': case 'other-4':
+                        require_once('tokens.php');
+                        break;
+                    case 'invite':
+                        require_once('invite.php');
+                        break;
+                    case 'title-bb-y':
+                    case 'title-bb-n':
+                    case 'title-off':
+                        require_once('title.php');
+                        break;
+                    case 'collage-1':
+                        require_once('collage.php');
+                    default:
+                        require_once(DEFAULT_PAGE);
+                        break;
                 }
             }
-            break;
-        case 'bprates':
-            require_once(SERVER_ROOT . '/sections/bonus/bprates.php');
-            break;
-        case 'title':
-            require_once(SERVER_ROOT . '/sections/bonus/title.php');
-            break;
-        case 'history':
-            require_once(SERVER_ROOT . '/sections/bonus/history.php');
-            break;
-        case 'donate':
-        default:
-            require_once(SERVER_ROOT . DEFAULT_PAGE);
-            break;
-    }
-}
-else {
-    require_once(SERVER_ROOT . DEFAULT_PAGE);
+            else {
+                require_once(DEFAULT_PAGE);
+                break;
+            }
+        }
+        break;
+    case 'bprates':
+        require_once('bprates.php');
+        break;
+    case 'title':
+        require_once('title.php');
+        break;
+    case 'history':
+        require_once('history.php');
+        break;
+    case 'cacheflush':
+        $Bonus->flushPriceCache();
+        header("Location: bonus.php");
+        exit;
+    case 'donate':
+    default:
+        require_once(DEFAULT_PAGE);
+        break;
 }
