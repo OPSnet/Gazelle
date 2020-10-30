@@ -13,18 +13,38 @@ class Bonus extends Base {
 
     public function __construct() {
         parent::__construct();
+    }
+
+    protected function items() {
         $this->items = $this->cache->get_value(self::CACHE_ITEM);
         if ($this->items === false) {
+            $discount = $this->discount();
             $this->db->prepared_query("
-                SELECT ID, Price, Amount, MinClass, FreeClass, Label, Title, sequence,
+                SELECT ID,
+                 Price * (greatest(0, least(100, 100 - ?))) / 100) as Price,
+                    Amount, MinClass, FreeClass, Label, Title, sequence,
                     IF (Label REGEXP '^other-', 'ConfirmOther', 'null') AS JS_next_function,
                     IF (Label REGEXP '^title-bb-[yn]', 'NoOp', 'ConfirmPurchase') AS JS_on_click
                 FROM bonus_item
                 ORDER BY sequence
-            ");
+                ", $discount
+            );
             $this->items = $this->db->has_results() ? $this->db->to_array('Label') : [];
             $this->cache->cache_value(self::CACHE_ITEM, $this->items, 86400 * 30);
         }
+        return $this->items;
+    }
+
+    /**
+     * Return the global discount rate for the shop
+     *
+     * @return int Discount rate (0: normal price, 100: everything is free :)
+     */
+    public function discount(): int {
+        return $this->db->scalar("
+            SELECT Value FROM site_options WHERE Name = ?
+            ", 'bonus-discount'
+        ) ?? 0;
     }
 
     public function flushUserCache($userId) {
@@ -34,21 +54,25 @@ class Bonus extends Base {
         ]);
     }
 
+    public function flushPriceCache() {
+        $this->items = [];
+        $this->cache->delete_value(self::CACHE_ITEM);
+    }
+
     public function getList() {
-        return $this->items;
+        return $this->items();
     }
 
     public function getListForUser(int $userId) {
-        $items = [];
-        foreach ($this->items as $item) {
+        return array_map(function ($item) {
             $item['Price'] = $this->getEffectivePrice($item['Label'], $userId);
-            $items[] = $item;
-        }
-        return $items;
+            return $item;
+        }, $this->items());
     }
 
     public function getItem($label) {
-        return array_key_exists($label, $this->items) ? $this->items[$label] : null;
+        $items = $this->items();
+        return array_key_exists($label, $items) ? $items[$label] : null;
     }
 
     public function getTorrentValue($format, $media, $encoding, $haslogdb = 0, $logscore = 0, $logchecksum = 0) {
@@ -70,7 +94,7 @@ class Bonus extends Base {
     }
 
     public function getEffectivePrice($label, $userId) {
-        $item  = $this->items[$label];
+        $item  = $this->items()[$label];
         $info = \Users::user_heavy_info($userId);
         if (preg_match('/^collage-\d$/', $label)) {
             return $item['Price'] * pow(2, $info['Collages']);
@@ -81,8 +105,9 @@ class Bonus extends Base {
     }
 
     public function getListOther($balance) {
+        $items = $this->items();
         $list_other = [];
-        foreach ($this->items as $label => $item) {
+        foreach ($items as $label => $item) {
             if (preg_match('/^other-\d$/', $label) && $balance >= $item['Price']) {
                 $list_other[] = [
                     'Label' => $item['Label'],
@@ -194,7 +219,7 @@ class Bonus extends Base {
     }
 
     public function purchaseInvite($userId) {
-        $item = $this->items['invite'];
+        $item = $this->items()['invite'];
         $price = $item['Price'];
         if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
             throw new \Exception('Bonus:invite:minclass');
@@ -217,7 +242,7 @@ class Bonus extends Base {
     }
 
     public function purchaseTitle($userId, $label, $title) {
-        $item  = $this->items[$label];
+        $item  = $this->items()[$label];
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
         if (mb_strlen($title) > 1024) {
             throw new \Exception('Bonus:title:too-long');
@@ -240,7 +265,7 @@ class Bonus extends Base {
     }
 
     public function purchaseCollage($userId, $label) {
-        $item  = $this->items[$label];
+        $item  = $this->items()[$label];
         $price = $this->getEffectivePrice($label, $userId);
 
         if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
@@ -264,10 +289,10 @@ class Bonus extends Base {
     }
 
     public function purchaseToken($userId, $label) {
-        if (!array_key_exists($label, $this->items)) {
+        $item = $this->items()[$label];
+        if (!$item) {
             throw new \Exception('Bonus:selfToken:badlabel');
         }
-        $item   = $this->items[$label];
         $amount = $item['Amount'];
         $price  = $item['Price'];
         $this->db->prepared_query('
@@ -291,10 +316,10 @@ class Bonus extends Base {
         if ($fromID === $toID) {
             throw new \Exception('Bonus:otherToken:self');
         }
-        if (!array_key_exists($label, $this->items)) {
+        $item = $this->items()[$label];
+        if (!$item) {
             throw new \Exception('Bonus:otherToken:badlabel');
         }
-        $item  = $this->items[$label];
         $amount = $item['Amount'];
         $price  = $item['Price'];
 

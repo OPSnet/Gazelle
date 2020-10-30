@@ -1,6 +1,9 @@
 {% for item in list %}
 {% if loop.first %}
 <div class="thin">
+    {% if discount %}
+    <h3 style="text-align: center; color: lime;">All prices currently {{ min(100, max(0, discount)) }}% off &mdash; Hurry, sale ends soon &mdash; While stocks last!</h3>
+    {% endif %}
     <table>
         <thead>
             <tr class="colhead">

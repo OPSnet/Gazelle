@@ -20,6 +20,9 @@ HTML;
     <a href="wiki.php?action=article&amp;name=bonuspoints" class="brackets">About Bonus Points</a>
     <a href="bonus.php?action=bprates" class="brackets">Bonus Point Rates</a>
     <a href="bonus.php?action=history" class="brackets">History</a>
+<?php if (check_perms('admin_bp_history')) { ?>
+    <a href="bonus.php?action=cacheflush" title="Trigger price recalculation after changing 'bonus-discount' site option" class="brackets">Cache flush</a>
+<?php } ?>
 </div>
 
 <?php
@@ -52,11 +55,12 @@ if ($pool) {
 }
 
 echo G::$Twig->render('bonus/store.twig', [
-    'auth'    => $LoggedUser['AuthKey'],
-    'class'   => $LoggedUser['EffectiveClass'],
-    'list'    => $Bonus->getListForUser($LoggedUser['ID']),
-    'points'  => (int)$LoggedUser['BonusPoints'],
-    'user_id' => $LoggedUser['ID'],
+    'auth'     => $LoggedUser['AuthKey'],
+    'class'    => $LoggedUser['EffectiveClass'],
+    'discount' => $Bonus->discount(),
+    'list'     => $Bonus->getListForUser($LoggedUser['ID']),
+    'points'   => (int)$LoggedUser['BonusPoints'],
+    'user_id'  => $LoggedUser['ID'],
 ]);
 
 View::show_footer();
