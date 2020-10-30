@@ -21,7 +21,7 @@ class Bonus extends Base {
             $discount = $this->discount();
             $this->db->prepared_query("
                 SELECT ID,
-                 Price * (greatest(0, least(100, 100 - ?))) / 100) as Price,
+                 Price * (greatest(0, least(100, 100 - ?)) / 100) as Price,
                     Amount, MinClass, FreeClass, Label, Title, sequence,
                     IF (Label REGEXP '^other-', 'ConfirmOther', 'null') AS JS_next_function,
                     IF (Label REGEXP '^title-bb-[yn]', 'NoOp', 'ConfirmPurchase') AS JS_on_click
@@ -64,7 +64,7 @@ class Bonus extends Base {
     }
 
     public function getListForUser(int $userId) {
-        return array_map(function ($item) {
+        return array_map(function ($item) use ($userId) {
             $item['Price'] = $this->getEffectivePrice($item['Label'], $userId);
             return $item;
         }, $this->items());
