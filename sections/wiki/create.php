@@ -34,4 +34,5 @@ View::show_header('Create an article');
         </form>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();

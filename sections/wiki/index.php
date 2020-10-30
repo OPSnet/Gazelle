@@ -1,10 +1,6 @@
 <?php
 enforce_login();
 
-
-define('INDEX_ARTICLE', '1');
-
-
 function class_list($Selected = 0) {
     global $Classes, $LoggedUser;
     $Return = '';
@@ -21,54 +17,52 @@ function class_list($Selected = 0) {
     return $Return;
 }
 
-if (!empty($_REQUEST['action'])) {
+if (empty($_REQUEST['action'])) {
+    $_GET['id'] = INDEX_WIKI_PAGE_ID;
+    require_once('article.php');
+} else {
     switch ($_REQUEST['action']) {
         case 'create':
             if ($_POST['action']) {
-                include('takecreate.php');
+                require_once('takecreate.php');
             } else {
-                include('create.php');
+                require_once('create.php');
             }
             break;
         case 'edit':
             if (!empty($_POST['action'])) {
-                include('takeedit.php');
+                require_once('takeedit.php');
             } else {
-                include('edit.php');
+                require_once('edit.php');
             }
             break;
         case 'delete':
             if ($_POST['action']) {
-                include('takedelete.php');
+                require_once('takedelete.php');
             } else {
-                include('delete.php');
+                require_once('delete.php');
             }
             break;
         case 'revisions':
-            include('revisions.php');
+            require_once('revisions.php');
             break;
         case 'compare':
-            include('compare.php');
+            require_once('compare.php');
             break;
         case 'add_alias':
-            include('add_alias.php');
+            require_once('add_alias.php');
             break;
         case 'delete_alias':
-            include('delete_alias.php');
+            require_once('delete_alias.php');
             break;
         case 'browse':
-            include('wiki_browse.php');
+            require_once('wiki_browse.php');
             break;
         case 'article':
-            include('article.php');
+            require_once('article.php');
             break;
         case 'search':
-            include('search.php');
+            require_once('search.php');
             break;
     }
-} else {
-    $_GET['id'] = INDEX_ARTICLE;
-    include('article.php');
-    //include('splash.php');
 }
-?>

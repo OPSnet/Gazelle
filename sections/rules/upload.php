@@ -1,11 +1,8 @@
 <?php
+
+[,,$Body] = (new Gazelle\Manager\Wiki)->article(RULES_WIKI_PAGE_ID);
 Text::$TOC = true;
-
-$Article = Wiki::get_article(RULES_WIKI)[0]['Body'];
-
-$Body = Text::full_format($Article, false, 3, true);
-$TOC = Text::parse_toc(0, true);
-
+$Body = Text::full_format($Body, false, 3, true);
 View::show_header('Uploading Rules', 'rules');
 ?>
 <div class="thin">
@@ -24,7 +21,7 @@ View::show_header('Uploading Rules', 'rules');
     <br />
     <div class="before_rules">
         <div class="box pad" style="padding: 10px 10px 10px 20px;">
-            <?= $TOC ?>
+            <?= Text::parse_toc(0, true) ?>
         </div>
     </div>
     <div id="actual_rules">

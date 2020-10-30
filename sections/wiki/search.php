@@ -1,11 +1,13 @@
 <?php
 
+$wikiMan = new Gazelle\Manager\Wiki;
+
 if (empty($_GET['nojump'])) {
-    $ArticleID = Wiki::alias_to_id($_GET['search']);
+    $ArticleID = $wikiMan->alias($_GET['search']);
     if ($ArticleID) {
         //Found the article!
         header("Location: wiki.php?action=article&id={$ArticleID}");
-        die();
+        exit;
     }
 }
 
@@ -36,13 +38,16 @@ $NumResults = $DB->scalar("
     ", ...$args
 );
 
+[$Page, $Limit] = Format::page_limit(WIKI_ARTICLES_PER_PAGE);
+$Pages = Format::get_pages($Page, $NumResults, WIKI_ARTICLES_PER_PAGE);
+
 View::show_header('Search articles');
 ?>
 <div class="thin">
     <div class="header">
         <h2>Search articles</h2>
         <div class="linkbox">
-            <a href="wiki.php?action=create&amp;alias=<?=display_str(Wiki::normalize_alias($_GET['search']))?>" class="brackets">Create an article</a>
+            <a href="wiki.php?action=create&amp;alias=<?=display_str($wikiMan->normalizeAlias($_GET['search']))?>" class="brackets">Create an article</a>
         </div>
     </div>
     <div>
@@ -86,11 +91,7 @@ View::show_header('Search articles');
         </form>
     </div>
     <br />
-<?php
-    [$Page, $Limit] = Format::page_limit(WIKI_ARTICLES_PER_PAGE);
-    $Pages = Format::get_pages($Page, $NumResults, WIKI_ARTICLES_PER_PAGE);
-    if ($Pages) {
-?>
+<?php if ($Pages) { ?>
     <div class="linkbox pager"><?= $Pages ?></div>
 <?php } ?>
 <table width="100%">
@@ -111,6 +112,7 @@ $DB->prepared_query("
     LIMIT $Limit
     ", ...$args
 );
+
 while ([$ID, $Title, $Date, $UserID] = $DB->next_record()) {
 ?>
     <tr>

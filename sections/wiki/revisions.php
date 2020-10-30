@@ -1,11 +1,12 @@
 <?php
-if (!isset($_GET['id']) || !is_number($_GET['id'])) {
+
+$ArticleID = (int)$_GET['id'];
+if (!$ArticleID) {
     error(404);
 }
-$ArticleID = (int)$_GET['id'];
 
-$Latest = Wiki::get_article($ArticleID);
-[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName] = array_shift($Latest);
+$wikiMan = new Gazelle\Manager\Wiki;
+[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID] = $wikiMan->article($ArticleID);
 if ($Read > $LoggedUser['EffectiveClass']) {
     error(404);
 }
@@ -37,17 +38,8 @@ View::show_header("Revisions of ".$Title);
                 <td><input type="radio" name="new" value="<?=$Revision?>" checked="checked" /></td>
             </tr>
 <?php
-$DB->prepared_query("
-    SELECT Revision,
-        Title,
-        Author,
-        Date
-    FROM wiki_revisions
-    WHERE ID = ?
-    ORDER BY Revision DESC
-    ", $ArticleID
-);
-while ([$Revision, $Title, $AuthorID, $Date] = $DB->next_record()) { ?>
+$link = $wikiMan->revisions($ArticleID);
+while ([$Revision, $Title, $AuthorID, $Date] = $link->next_record()) { ?>
             <tr>
                 <td><?=$Revision?></td>
                 <td><?=$Title?></td>

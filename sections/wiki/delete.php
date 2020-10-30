@@ -5,35 +5,25 @@ if (!check_perms('admin_manage_wiki')) {
     error(403);
 }
 
-$ID = (int)$_GET['id'];
-if (!$ID) {
+$articleId = (int)$_GET['id'];
+if (!$articleId) {
     error(404);
 }
 
-if ($ID == INDEX_ARTICLE) {
+if ($articleId == INDEX_WIKI_PAGE_ID) {
     error('You cannot delete the main wiki article.');
 }
 
-
-if ($DB->scalar("SELECT MinClassEdit FROM wiki_articles WHERE ID = ?", $ArticleID) > $LoggedUser['EffectiveClass']) {
+$wikiMan = new Gazelle\Manager\Wiki;
+if (!$wikiMan->editAllowed($articleId, $LoggedUser['EffectiveClass'])) {
     error(403);
 }
-
-$Title = $DB->scalar("
-    SELECT Title FROM wiki_articles WHERE ID = ?
-    ", $ID
-);
-if (!$title) {
+[, $title] = $wikiMan->article($articleId);
+if (is_null($title)) {
     error(404);
 }
 
-//Log
-(new Gazelle\Log)->general("Wiki article $ID ($Title) was deleted by ".$LoggedUser['Username']);
-//Delete
-$DB->prepared_query("DELETE FROM wiki_articles WHERE ID = ?", $ID);
-$DB->prepared_query("DELETE FROM wiki_aliases WHERE ArticleID = ?", $ID);
-$DB->prepared_query("DELETE FROM wiki_revisions WHERE ID = ?", $ID);
-Wiki::flush_aliases();
-Wiki::flush_article($ID);
+$wikiMan->remove($articleId);
+(new Gazelle\Log)->general("Wiki article $articleId \"$title\" was deleted by {$LoggedUser['Username']}");
 
 header("location: wiki.php");

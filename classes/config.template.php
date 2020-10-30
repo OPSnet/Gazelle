@@ -207,7 +207,10 @@ define('BONUS_POOL_TAX_ELITE', 0.8);
 define('BONUS_POOL_TAX_TM', 0.7);
 define('BONUS_POOL_TAX_STAFF', 0.5);
 
+define('INDEX_WIKI_PAGE_ID', 1);
+define('RULES_WIKI_PAGE_ID', 127);
 define('SOURCE_FLAG_WIKI_PAGE_ID', 113);
+
 
 define('TMPDIR', '/tmp');
 

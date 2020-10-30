@@ -1,13 +1,14 @@
 <?php
-Text::$TOC = true;
 
+$wikiMan = new Gazelle\Manager\Wiki;
+
+Text::$TOC = true;
 $ArticleID = false;
 if (!empty($_GET['id']) && is_number($_GET['id'])) { //Visiting article via ID
     $ArticleID = (int)$_GET['id'];
 } elseif ($_GET['name'] != '') { //Retrieve article ID via alias.
-    $ArticleID = Wiki::alias_to_id($_GET['name']);
+    $ArticleID = $wikiMan->alias($_GET['name']);
 } else { //No ID, No Name
-    //error(404);
     error('Unknown article ['.display_str($_GET['id']).']');
 }
 
@@ -22,7 +23,7 @@ if (!$ArticleID) { //No article found
         There is no article matching the name you requested.
         <ul>
             <li><a href="wiki.php?action=search&amp;search=<?=display_str($_GET['name'])?>">Search</a> for an article similar to this.</li>
-            <li><a href="wiki.php?action=create&amp;alias=<?=display_str(Wiki::normalize_alias($_GET['name']))?>">Create</a> an article in its place.</li>
+            <li><a href="wiki.php?action=create&amp;alias=<?=display_str($wikiMan->normalizeAlias($_GET['name']))?>">Create</a> an article in its place.</li>
         </ul>
     </div>
 </div>
@@ -31,8 +32,7 @@ if (!$ArticleID) { //No article found
     die();
 }
 
-$Article = Wiki::get_article($ArticleID);
-list($Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $AuthorName, $Aliases, $UserIDs) = array_shift($Article);
+[$Revision, $Title, $Body, $Read, $Edit, $Date, $AuthorID, $Aliases, $UserIDs] = $wikiMan->article($ArticleID);
 if ($Read > $LoggedUser['EffectiveClass']) {
     error('You must be a higher user class to view this wiki article');
 }
@@ -51,10 +51,9 @@ View::show_header($Title,'wiki,bbcode');
             <a href="wiki.php?action=edit&amp;id=<?=$ArticleID?>" class="brackets">Edit</a>
 <?php } ?>
             <a href="wiki.php?action=revisions&amp;id=<?=$ArticleID?>" class="brackets">History</a>
-<?php if (check_perms('admin_manage_wiki') && $_GET['id'] != INDEX_ARTICLE) { ?>
-            <a href="wiki.php?action=delete&amp;id=<?=$ArticleID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to delete?\nYes, DELETE, not as in \'Oh hey, if this is wrong we can get someone to magically undelete it for us later\' it will be GONE.\nGiven this new information, do you still want to DELETE this article and all its revisions and all its alias\' and act like it never existed?')">Delete</a>
+<?php if (check_perms('admin_manage_wiki') && $_GET['id'] != INDEX_WIKI_PAGE_ID) { ?>
+            <a href="wiki.php?action=delete&amp;id=<?=$ArticleID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets" onclick="return confirm('Are you sure you want to delete?\nYes, DELETE, not as in \'Oh hey, if this is wrong we can get someone to magically undelete it for us later\' it will be GONE.\nGiven this new information, do you still want to DELETE this article and all its revisions and all its aliases and act like it never existed?')">Delete</a>
 <?php } ?>
-            <!--<a href="reports.php?action=submit&amp;type=wiki&amp;article=<?=$ArticleID ?>" class="brackets">Report</a>-->
         </div>
     </div>
     <div class="sidebar">
@@ -136,4 +135,5 @@ if ($Aliases != $Title) {
     </div>
     </div>
 </div>
-<?php View::show_footer(); ?>
+<?php
+View::show_footer();
