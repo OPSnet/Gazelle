@@ -568,10 +568,13 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function torrentInfo($revisionId = 0) {
-        $this->groupId = $this->idToGroupId($this->torrentId);
         if (!$this->groupId) {
-            return null;
+            $this->groupId = $this->idToGroupId($this->torrentId);
+            if (!$this->groupId) {
+                return null;
+            }
         }
+
         if (!($info = $this->groupInfo($this->groupId, $revisionId))) {
             return null;
         }
