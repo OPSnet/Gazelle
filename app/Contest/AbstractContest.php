@@ -12,7 +12,8 @@ trait TorrentLeaderboard {
                     um.Username as username,
                     l.entry_count,
                     l.last_entry_id,
-                    t.Time as last_upload
+                    t.Time as last_upload,
+                    t.GroupID as group_id
                 FROM contest_leaderboard l
                 INNER JOIN torrents t ON (t.ID = l.last_entry_id)
                 INNER JOIN users_main um ON (um.ID = l.user_id)
@@ -42,7 +43,10 @@ trait TorrentLeaderboard {
                     }
                 }
                 if (empty($leaderboard[$i]['last_entry_link'])) {
-                    [$group, $torrent] = $torMan->setTorrentId($leaderboard[$i]['last_entry_id'])->torrentInfo();
+                    [$group, $torrent] = $torMan
+                        ->setTorrentId($leaderboard[$i]['last_entry_id'])
+                        ->setGroupId($leaderboard[$i]['group_id'])
+                        ->torrentInfo();
                     $leaderboard[$i]['last_entry_link'] = sprintf(
                         '%s - <a href="torrents.php?id=%d&amp;torrentid=%d">%s</a> - %s',
                         $torMan->artistHtml(),

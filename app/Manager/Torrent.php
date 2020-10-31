@@ -79,6 +79,9 @@ class Torrent extends \Gazelle\Base {
      * @return $this to allow method chaining
      */
     public function setTorrentId(int $torrentId) {
+        if ($this->torrentId !== $torrentId) {
+            $this->groupId = null;
+        }
         $this->torrentId = $torrentId;
         return $this;
     }
@@ -568,10 +571,13 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function torrentInfo($revisionId = 0) {
-        $this->groupId = $this->idToGroupId($this->torrentId);
         if (!$this->groupId) {
-            return null;
+            $this->groupId = $this->idToGroupId($this->torrentId);
+            if (!$this->groupId) {
+                return null;
+            }
         }
+
         if (!($info = $this->groupInfo($this->groupId, $revisionId))) {
             return null;
         }
