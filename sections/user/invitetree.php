@@ -5,7 +5,7 @@ if (!isset($_GET['userid'])) {
 } else {
     if (!check_perms('users_view_invites')) {
         error(403);
-    }    
+    }
     $userId = (int)$_GET['userid'];
 }
 

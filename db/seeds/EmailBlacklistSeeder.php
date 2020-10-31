@@ -1,4 +1,4 @@
-<?php 
+<?php
 use Phinx\Seed\AbstractSeed;
 
 class EmailBlacklistSeeder extends AbstractSeed {

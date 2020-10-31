@@ -22,7 +22,7 @@ class Tag extends \Gazelle\Base {
             $topUsedTags = $this->db->to_array();
             $this->cache->cache_value('topusedtag_' . $limit, $topUsedTags, 3600 * 12);
         }
-        
+
         return $topUsedTags;
     }
 

@@ -24,7 +24,7 @@ abstract class Task extends \Gazelle\Base {
     }
 
     public function begin() {
-        $this->startTime = microtime(true); 
+        $this->startTime = microtime(true);
         $this->db->prepared_query('
             INSERT INTO periodic_task_history
                    (periodic_task_id)

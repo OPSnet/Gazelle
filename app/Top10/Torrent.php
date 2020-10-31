@@ -19,7 +19,7 @@ class Torrent extends \Gazelle\Base {
         $cacheKey = 'top10_v2_' . $details . '_' . md5(implode($getParameters,'')) . '_' . $limit;
         $topTorrents = $this->cache->get_value($cacheKey);
 
-        if ($topTorrents !== false) { 
+        if ($topTorrents !== false) {
             return $topTorrents;
         }
         if (!$this->cache->get_query_lock($cacheKey)) {
