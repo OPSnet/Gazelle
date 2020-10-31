@@ -82,9 +82,9 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new \Twig\TwigFilter(
-    'checked',
-    function ($isChecked) {
-        return $isChecked ? ' checked="checked"' : '';
+    'b64',
+    function (string $binary) {
+        return base64_encode($binary);
     }
 ));
 
@@ -92,6 +92,13 @@ G::$Twig->addFilter(new \Twig\TwigFilter(
     'bb_format',
     function ($text) {
         return \Text::full_format($text);
+    }
+));
+
+G::$Twig->addFilter(new \Twig\TwigFilter(
+    'checked',
+    function ($isChecked) {
+        return $isChecked ? ' checked="checked"' : '';
     }
 ));
 
@@ -536,6 +543,7 @@ else {
 <code><?= $e->getMessage() ?></code>
 <pre><?= str_replace(SERVER_ROOT .'/', '', $e->getTraceAsString()) ?></pre>
 <?php
+                View::show_footer();
             }
             else {
                 error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");

@@ -1,0 +1,49 @@
+<div class="box pad">
+    <h3>Multiple seeding locations</h3>
+
+    <p>Select one seedbox and choose another to see which seeds appear in both locations,
+    or do not appear in the second location.</p>
+    <p>If you are seeding from only one location, this page will be of no use. You
+    should look at your <a href="https://orpheus.network/torrents.php?type=seeding&amp;userid={{
+        userid }}">seeding torrents</a>.</p>
+
+{% if host is empty %}
+    No seed locations are reporting. Are your clients seeding and connected?
+{% else %}
+    <form class="manage_form" name="seedbox" action="user.php?action=seedbox-view&amp;userid={{ userid }}" method="post">
+        <input type="hidden" name="action" value="seedbox-view" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="userid" value="{{ userid }}" />
+
+<div>View seeds on&nbsp;
+{%- for h in host -%}
+    {%- if loop.first -%}
+<select name="source">
+    {% endif %}
+    <option value="{{ h.id }}"{{ h.id == source or source == 0 and loop.index0 == 0 ? ' selected="selected"' : '' }}>{{ h.name }}</option>
+    {% if loop.last %}
+</select>
+    {%- endif %}
+{% endfor -%}
+
+&nbsp;that are&nbsp;<select name="view">
+    <option value="union" {{ mode == 'union' ? ' selected="selected"' : '' }}>also</option>
+    <option value="exclude" {{ mode == 'exclude' ? ' selected="selected"' : '' }}>not</option>
+ </select>&nbsp;seeding on
+
+{%- for h in host -%}
+    {%- if loop.first -%}
+&nbsp;<select name="target">
+    {% endif %}
+    <option{{ h.id == target or target == 0 and loop.index0 == 1 ? ' selected="selected"' : ''}} value="{{ h.id }}">{{ h.name }}</option>
+    {% if loop.last %}
+</select>
+    {% endif %}
+{% endfor %}
+
+</div>
+<br />
+<input type="submit" value="View seeds" />
+</form>
+{% endif %}
+</div>

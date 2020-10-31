@@ -32,10 +32,9 @@ if (isset($_POST['confirm'])) {
     try {
         $Bonus->purchaseTitle($ID, $Label, $_POST['title']);
         header('Location: bonus.php?complete=' . urlencode($Label));
-    }
-    catch (\Exception $e) {
+    } catch (\Gazelle\BonusException $e) {
         switch ($e->getMessage()) {
-        case 'Bonus:title:too-long':
+        case 'title:too-long':
             error('This title is too long, you must reduce the length.');
             break;
         default:

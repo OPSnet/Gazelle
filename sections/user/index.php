@@ -197,6 +197,12 @@ switch ($_REQUEST['action'] ?? '') {
     case 'moderate':
         require_once('takemoderate.php');
         break;
+    case 'seedbox':
+        require_once('seedbox_edit.php');
+        break;
+    case 'seedbox-view':
+        require_once('seedbox_view.php');
+        break;
     case 'token':
         require_once(__DIR__ . '/token.php');
         break;

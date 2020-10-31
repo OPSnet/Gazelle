@@ -4,6 +4,22 @@ namespace Gazelle\Manager;
 
 class User extends \Gazelle\Base {
     /**
+     * Get a User object based on their ID
+     *
+     * @param int userId
+     * @return \Gazelle\User object or null if not found
+     */
+    public function findById(int $userId): ?\Gazelle\User {
+        $userId = (int)$this->db->scalar("
+            SELECT ID
+            FROM users_main
+            WHERE ID = ?
+            ", $userId
+        );
+        return $userId ? new \Gazelle\User($userId) : null;
+    }
+
+    /**
      * Get a User object based on their username
      *
      * @param string username

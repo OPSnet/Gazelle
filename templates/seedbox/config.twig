@@ -1,0 +1,90 @@
+<div class="box pad">
+    <p>On this page you can create familiar names for the IP addresses of the
+    places you seed from (which is not necessarily a seedbox). E.g. "home",
+    "feral", "seedhost.eu", "basement-pc", "mercury". Using names can help when
+    seeding from several locations, because who remembers IP addresses?</p>
+    <p>Use the View page to see if seeds are active in two locations.
+    This helps in migrating from one location to another, and identifying where
+    seeds can be removed to free up space. Another use is migrating from one
+    computer to another, or even a different BitTorrent client on the same
+    computer. Compare to make sure you have moved everything over.</p>
+    <p>Note that the BitTorrent protocol is under-specified, and there is
+    no guaranteed way to distinguish two instances of the same client version
+    running behind a VPN or NAT. If you have, for instance, two Deluge clients
+    on two machines in your basement, they will be reported as one.</p>
+</div>
+
+<div class="box pad">
+{% if host is empty %}
+    No seed locations are reporting. Are your clients seeding and connected?
+{% else %}
+    <h3>Seeding locations</h3>
+    {% for h in host %}
+        {% if loop.first %}
+    <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ userid }}" method="post">
+        <input type="hidden" name="action" value="seedbox" />
+        <input type="hidden" name="mode" value="update" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="userid" value="{{ userid }}" />
+        <table>
+        <tr>
+            <th>Name</th>
+            <th>IP address</th>
+            <th>Useragent</th>
+            <th>Total seeding</th>
+        </tr>
+        {% endif %}
+        <tr>
+            <td>
+                <input type="text" name="name-{{ loop.index }}" size="40" maxlen="40" value="{{ h.name }}" />
+                <input type="hidden" name="id-{{ loop.index }}" value="{{ h.id }}" />
+                <input type="hidden" name="ip-{{ loop.index }}" value="{{ h.ipv4addr }}" />
+                <input type="hidden" name="ua-{{ loop.index }}" value="{{ h.useragent }}" />
+                <input type="hidden" name="sig-{{ loop.index }}" value="{{ h.sig }}" />
+            </td>
+            <td>
+                {{ h.ipv4addr }}
+            </td>
+            <td>
+                {{ h.useragent }}
+            </td>
+            <td>{{ h.total|number_format }}</td>
+        </tr>
+        {% if loop.last %}
+        </table>
+        <input type="submit" value="Update names" />
+    </form>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+</div>
+
+{% if free %}
+<div class="box pad">
+    <h3>Unused names</h3>
+    <p>You have defined these names but have not associated them with a seed location.
+    If you no longer require a name, click the checkbox and remove it. If you did not
+    expect to see a name here because it is in uese, check your client to make sure
+    it is not frozen or has crashed.</p>
+    {% for f in free %}
+        {% if loop.first %}
+    <form class="manage_form" name="seedbox" action="user.php?action=seedbox&amp;userid={{ userid }}" method="post">
+        <input type="hidden" name="action" value="seedbox" />
+        <input type="hidden" name="mode" value="remove" />
+        <input type="hidden" name="auth" value="{{ auth }}" />
+        <input type="hidden" name="userid" value="{{ userid }}" />
+    <ul>
+        {% endif %}
+        <li>
+            <input type="checkbox" id="seedbox-rm-{{ loop.index }}" name="rm-{{ loop.index }}" />
+            <input type="hidden" id="rmid-{{ loop.index }}" name="rmid-{{ loop.index }}" value="{{ f.id }}" />
+            <label for="seedbox-rm-{{ loop.index }}">{{ f.name }}</label>
+        </li>
+        {% if loop.last %}
+    </ul>
+    <input type="submit" value="Remove unused names" />
+    </form>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}

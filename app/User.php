@@ -24,6 +24,9 @@ class User extends BaseObject {
     /** @var array contents of \Users::user_info */
     protected $light;
 
+    /** @var array user attributes set for user */
+    protected $attr;
+
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
     public function tableName(): string {
@@ -101,6 +104,25 @@ class User extends BaseObject {
         );
         $this->info = $this->db->has_results() ? $this->db->next_record(MYSQLI_ASSOC, false) : null;
         return $this->info;
+    }
+
+    public function attr(): array {
+        if (is_null($this->attr)) {
+            $this->db->prepared_query("
+                SELECT ua.Name, ua.ID
+                FROM user_attr ua
+                INNER JOIN user_has_attr uha ON (uha.UserAttrID = ua.ID)
+                WHERE uha.UserID = ?
+                ", $this->id
+            );
+            $this->attr = $this->db->to_pair('Name', 'ID');
+        }
+        return $this->attr;
+    }
+
+    public function hasAttr(string $name): ?int {
+        $attr = $this->attr();
+        return isset($attr[$name]) ? $attr[$name] : null;
     }
 
     protected function light() {

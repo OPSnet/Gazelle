@@ -1,5 +1,8 @@
 <?php
 class View {
+
+    protected static $footerSeen = false;
+
     /**
      * @var string Path relative to where (P)HTML templates reside
      */
@@ -42,11 +45,15 @@ class View {
      *                 ['disclaimer'] = [boolean] (False) Displays the disclaimer in the footer
      */
     public static function show_footer($Options = []) {
+        if (self::$footerSeen) {
+            return;
+        }
+        self::$footerSeen = true;
         global $ScriptStartTime, $SessionID, $UserSessions, $Debug, $Time;
         if (!is_array(G::$LoggedUser) || (isset($Options['recover']) && $Options['recover'] === true)) {
-            require(SERVER_ROOT.'/design/publicfooter.php');
+            require(__DIR__ . '/../design/publicfooter.php');
         } else {
-            require(SERVER_ROOT.'/design/privatefooter.php');
+            require(__DIR__ . '/../design/privatefooter.php');
         }
     }
 

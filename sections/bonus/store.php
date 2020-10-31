@@ -44,23 +44,26 @@ if (isset($_GET['action']) && $_GET['action'] == 'donate') {
     }
 }
 
+$user = new Gazelle\User($LoggedUser['ID']);
+$points = (int)$LoggedUser['BonusPoints'];
+$auth = $LoggedUser['AuthKey'];
 $pool = $Bonus->getOpenPool();
 if ($pool) {
     echo G::$Twig->render('bonus/bonus-pool.twig', [
-        'auth'    => $LoggedUser['AuthKey'],
-        'points'  => (int)$LoggedUser['BonusPoints'],
+        'auth'    => $auth,
+        'points'  => $points,
         'pool'    => $pool,
-        'user_id' => $LoggedUser['ID'],
+        'user_id' => $user->id(),
     ]);
 }
 
 echo G::$Twig->render('bonus/store.twig', [
-    'auth'     => $LoggedUser['AuthKey'],
-    'class'    => $LoggedUser['EffectiveClass'],
+    'auth'     => $auth,
+    'class'    => $user->primaryClass(),
     'discount' => $Bonus->discount(),
-    'list'     => $Bonus->getListForUser($LoggedUser['ID']),
-    'points'   => (int)$LoggedUser['BonusPoints'],
-    'user_id'  => $LoggedUser['ID'],
+    'list'     => $Bonus->getListForUser($user),
+    'points'   => $points,
+    'user_id'  => $user->id(),
 ]);
 
 View::show_footer();

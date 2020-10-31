@@ -1,0 +1,12 @@
+<div class="box pad">
+{% for t in list %}
+    {% if loop.first %}
+    <h3>Seeds on {{ source }} that are {{ mode == 'union' ? 'also' : 'not' }} on {{ target }}</h3>
+    <ul>
+    {% endif %}
+        <li>{{ t.artist|raw }} - {{ t.name|raw }}</li>
+    {% if loop.last %}
+    </ul>
+    {% endif %}
+{% endfor %}
+</div>

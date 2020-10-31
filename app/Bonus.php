@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use \Gazelle\Exception\BonusException;
+
 class Bonus extends Base {
     const CACHE_ITEM = 'bonus_item';
     const CACHE_OPEN_POOL = 'bonus_pool';
@@ -63,11 +65,16 @@ class Bonus extends Base {
         return $this->items();
     }
 
-    public function getListForUser(int $userId) {
-        return array_map(function ($item) use ($userId) {
-            $item['Price'] = $this->getEffectivePrice($item['Label'], $userId);
-            return $item;
-        }, $this->items());
+    public function getListForUser(User $user) {
+        $items = [];
+        foreach ($this->items as $item) {
+            if ($item['Label'] === 'seedbox' && $user->hasAttr('feature-seedbox')) {
+                continue;
+            }
+            $item['Price'] = $this->getEffectivePrice($item['Label'], $user->id());
+            $items[] = $item;
+        }
+        return $items;
     }
 
     public function getItem($label) {
@@ -222,7 +229,7 @@ class Bonus extends Base {
         $item = $this->items()['invite'];
         $price = $item['Price'];
         if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
-            throw new \Exception('Bonus:invite:minclass');
+            throw new BonusException('invite:minclass');
         }
         $this->db->prepared_query('
             UPDATE user_bonus ub
@@ -234,7 +241,7 @@ class Bonus extends Base {
             ', $price, $price, $userId
         );
         if ($this->db->affected_rows() != 2) {
-            throw new \Exception('Bonus:invite:nofunds');
+            throw new BonusException('invite:nofunds');
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->flushUserCache($userId);
@@ -245,18 +252,18 @@ class Bonus extends Base {
         $item  = $this->items()[$label];
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
         if (mb_strlen($title) > 1024) {
-            throw new \Exception('Bonus:title:too-long');
+            throw new BonusException('title:too-long');
         }
         $price = $this->getEffectivePrice($label, $userId);
 
         /* if the price is 0, nothing changes so avoid hitting the db */
         if ($price > 0) {
             if (!$this->removePoints($userId, $price)) {
-                throw new \Exception('Bonus:title:nofunds');
+                throw new BonusException('title:nofunds');
             }
         }
         if (!\Users::setCustomTitle($userId, $title)) {
-            throw new \Exception('Bonus:title:set');
+            throw new BonusException('title:set');
             return false;
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
@@ -267,10 +274,6 @@ class Bonus extends Base {
     public function purchaseCollage($userId, $label) {
         $item  = $this->items()[$label];
         $price = $this->getEffectivePrice($label, $userId);
-
-        if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
-            throw new \Exception('Bonus:invite:minclass');
-        }
         $this->db->prepared_query('
             UPDATE user_bonus ub
             INNER JOIN users_info ui ON (ui.UserID = ub.user_id) SET
@@ -281,8 +284,41 @@ class Bonus extends Base {
             ', $price, $price, $userId
         );
         if ($this->db->affected_rows() != 2) {
-            throw new \Exception('Bonus:collage:nofunds');
+            throw new BonusException('collage:nofunds');
         }
+        $this->addPurchaseHistory($item['ID'], $userId, $price);
+        $this->flushUserCache($userId);
+        return true;
+    }
+
+    public function unlockSeedbox(int $userId) {
+        $item  = $this->items['seedbox'];
+        $price = $this->getEffectivePrice('seedbox', $userId);
+        $this->db->begin_transaction();
+        $this->db->prepared_query('
+            UPDATE user_bonus ub SET
+                ub.points = ub.points - ?
+            WHERE ub.points >= ?
+                AND ub.user_id = ?
+            ', $price, $price, $userId
+        );
+        if ($this->db->affected_rows() != 1) {
+            $this->db->rollback();
+            throw new BonusException('seedbox:nofunds');
+        }
+        try {
+            $this->db->prepared_query("
+                INSERT INTO user_has_attr
+                       (UserID, UserAttrID)
+                VALUES (?,      (SELECT ID FROM user_attr WHERE Name = ?))
+                ", $userId, 'feature-seedbox'
+            );
+        } catch (\DB_MYSQL_DuplicateKeyException $e) {
+            // no point in buying a second time
+            $this->db->rollback();
+            throw new BonusException('seedbox:already-purchased');
+        }
+        $this->db->commit();
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->flushUserCache($userId);
         return true;
@@ -291,7 +327,7 @@ class Bonus extends Base {
     public function purchaseToken($userId, $label) {
         $item = $this->items()[$label];
         if (!$item) {
-            throw new \Exception('Bonus:selfToken:badlabel');
+            throw new BonusException('selfToken:badlabel');
         }
         $amount = $item['Amount'];
         $price  = $item['Price'];
@@ -305,7 +341,7 @@ class Bonus extends Base {
             ', $price, $amount, $userId, $price
         );
         if ($this->db->affected_rows() != 2) {
-            throw new \Exception('Bonus:selfToken:funds');
+            throw new BonusException('selfToken:funds');
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->flushUserCache($userId);
@@ -314,11 +350,11 @@ class Bonus extends Base {
 
     public function purchaseTokenOther($fromID, $toID, $label) {
         if ($fromID === $toID) {
-            throw new \Exception('Bonus:otherToken:self');
+            throw new BonusException('otherToken:self');
         }
         $item = $this->items()[$label];
         if (!$item) {
-            throw new \Exception('Bonus:otherToken:badlabel');
+            throw new BonusException('otherToken:badlabel');
         }
         $amount = $item['Amount'];
         $price  = $item['Price'];
@@ -346,7 +382,7 @@ class Bonus extends Base {
             ", $price, $amount, $toID, $fromID, $price
         );
         if ($this->db->affected_rows() != 2) {
-            throw new \Exception('Bonus:otherToken:no-gift-funds');
+            throw new BonusException('otherToken:no-gift-funds');
         }
         $this->addPurchaseHistory($item['ID'], $fromID, $price, $toID);
         $this->cache->deleteMulti([
