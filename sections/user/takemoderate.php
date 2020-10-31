@@ -555,7 +555,7 @@ if ($mergeStatsFrom && check_perms('users_edit_ratio')) {
     $stats = $user->mergeLeechStats($mergeStatsFrom, $LoggedUser['Username']);
     if ($stats) {
         $merge = new Gazelle\User($stats['userId']);
-        $merge->flushCache();
+        $merge->flush();
         $leechSet[] = "Uploaded = Uploaded + ?";
         $leechArgs[] = $stats['up'];
         $leechSet[] = "Downloaded = Downloaded + ?";
@@ -635,7 +635,7 @@ if (count($trackerUserUpdates) > 1) {
 }
 
 if (count($set) || count($leechSet)) {
-    $user->flushCache();
+    $user->flush();
 }
 
 header("location: user.php?id=$userID");

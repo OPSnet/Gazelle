@@ -14,8 +14,8 @@ abstract class BaseObject extends Base {
         $this->id = $id;
     }
 
-    abstract function tableName(): string;
-    abstract function flush();
+    abstract public function tableName(): string;
+    abstract public function flush();
 
     public function id(): int {
         return $this->id;

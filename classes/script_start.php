@@ -441,7 +441,7 @@ function logout($userId, $sessionId = false) {
     }
 
     $user = new Gazelle\User($userId);
-    $user->flushCache();
+    $user->flush();
 
     header('Location: login.php');
     die();

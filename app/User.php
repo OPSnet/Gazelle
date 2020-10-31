@@ -2,26 +2,46 @@
 
 namespace Gazelle;
 
-class User extends Base {
+class User extends BaseObject {
 
     /** @var int */
-    protected  $forceCacheFlush;
+    protected $forceCacheFlush = false;
 
-    /** @var int */
-    protected $id;
+    /** @var array queue of forum warnings to persist */
+    protected $forumWarning = [];
+
+    /** @var array queue of staff notes to persist */
+    protected $staffNote = [];
+
+    /** @var array contents of info
+     * TODO: kill $heavy and $light
+     */
+    protected $info;
 
     /** @var array contents of \Users::user_heavy_info */
     protected $heavy;
 
+    /** @var array contents of \Users::user_info */
+    protected $light;
+
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
-    public function __construct(int $id) {
-        parent::__construct();
-        $this->id = $id;
-        $this->forceCacheFlush = false;
+    public function tableName(): string {
+        return 'users_main';
     }
 
-    public function info() {
+    public function __construct(int $id) {
+        parent::__construct($id);
+    }
+
+    public function url(): string {
+        return site_url() . "user.php?id=" . $this->id;
+    }
+
+    public function info(): ?array {
+        if ($this->info) {
+            return $this->info;
+        }
         $this->db->prepared_query("
             SELECT
                 um.Username,
@@ -35,9 +55,11 @@ class User extends Base {
                 um.Visible,
                 um.torrent_pass,
                 um.RequiredRatio,
+                um.IRCKey,
                 ui.RatioWatchEnds,
                 ui.AdminComment,
                 ui.Artist,
+                ui.JoinDate,
                 ui.Warned,
                 ui.SupportFor,
                 ui.RestrictedForums,
@@ -77,93 +99,64 @@ class User extends Base {
             GROUP BY um.ID
             ", 'unlimited-download', $this->id
         );
-        return $this->db->has_results() ? $this->db->next_record(MYSQLI_ASSOC, false) : null;
+        $this->info = $this->db->has_results() ? $this->db->next_record(MYSQLI_ASSOC, false) : null;
+        return $this->info;
     }
 
-    public function activityStats(): array {
-        if (($stats = $this->cache->get_value('user_stats_' . $this->id)) === false) {
-            $this->db->prepared_query("
-                SELECT
-                    uls.Uploaded AS BytesUploaded,
-                    uls.Downloaded AS BytesDownloaded,
-                    coalesce(ub.points, 0) as BonusPoints,
-                    um.RequiredRatio
-                FROM users_main um
-                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
-                WHERE um.ID = ?
-                ", $this->id
-            );
-            $stats = $this->db->next_record(MYSQLI_ASSOC);
-            $stats['BytesUploaded'] = (int)$stats['BytesUploaded'];
-            $stats['BytesDownloaded'] = (int)$stats['BytesDownloaded'];
-            $stats['BonusPoints'] = (float)$stats['BonusPoints'];
-            $stats['RequiredRatio'] = (float)$stats['RequiredRatio'];
-            $this->cache->cache_value('user_stats_' . $this->id, $stats, 3600);
+    protected function light() {
+        if (!$this->light) {
+            $this->light = \Users::user_info($this->id);
         }
-        return $stats;
+        return $this->light;
     }
 
-    public function id(): int {
-        return $this->id;
+    protected function heavy() {
+        if (!$this->heavy) {
+            $this->heavy = \Users::user_heavy_info($this->id);
+        }
+        return $this->heavy;
     }
 
     public function username(): string {
-        return $this->db->scalar("
-            SELECT Username
-            FROM users_main
-            WHERE ID = ?
-            ", $this->id
-        );
+        return $this->info()['Username'];
     }
 
     public function announceKey(): string {
-        return $this->db->scalar("
-            SELECT torrent_pass
-            FROM users_main
-            WHERE ID = ?
-            ", $this->id
-        );
+        return $this->info()['torrent_pass'];
     }
 
     public function email(): string {
-        return $this->db->scalar("
-            SELECT Email
-            FROM users_main
-            WHERE ID = ?
-            ", $this->id
-        );
+        return $this->info()['Email'];
     }
 
-    public function url(): string {
-        return site_url() . "user.php?id=" . $this->id;
+    public function IRCKey() {
+        return $this->info()['IRCKey'];
     }
 
-    public function avatarMode(): int {
-        return \Users::user_heavy_info($this->id)['DisableAvatars'] ?? 0;
+    public function joinDate() {
+        return $this->info()['JoinDate'];
+    }
+
+    public function supportFor() {
+        return $this->info()['SupportFor'];
+    }
+
+    public function avatarMode(): string {
+        return $this->info()['DisableAvatars'] ?? '0';
     }
 
     public function primaryClass(): int {
-        $info = \Users::user_info($this->id);
-        return $info['Class'];
-    }
-
-    protected function initHeavy() {
-        $this->heavy = \Users::user_heavy_info($this->id);
+        return $this->info()['PermissionID'];
     }
 
     public function forbiddenForums(): array {
-        if (!$this->heavy) {
-            $this->initHeavy();
-        }
-        return isset($this->heavy['CustomForums']) ? array_keys($this->heavy['CustomForums'], 0) : [];
+        $heavy = $this->heavy();
+        return isset($heavy['CustomForums']) ? array_keys($heavy['CustomForums'], 0) : [];
     }
 
     public function permittedForums(): array {
-        if (!$this->heavy) {
-            $this->initHeavy();
-        }
-        $permitted = isset($this->heavy['CustomForums']) ? array_keys($this->heavy['CustomForums'], 1) : [];
+        $heavy = $this->heavy();
+        $permitted = isset($heavy['CustomForums']) ? array_keys($heavy['CustomForums'], 1) : [];
         // TODO: This logic needs to be moved from the Donations manager to the User
         $donorMan = new Manager\Donation;
         if ($donorMan->hasForumAccess($this->id) && !in_array(DONOR_FORUM, $permitted)) {
@@ -176,7 +169,10 @@ class User extends Base {
         return $this->forceCacheFlush = $flush;
     }
 
-    public function flushCache() {
+    public function flush() {
+        $this->info = null;
+        $this->heavy = null;
+        $this->light = null;
         $this->cache->deleteMulti([
             "enabled_" . $this->id,
             "user_info_" . $this->id,
@@ -190,7 +186,60 @@ class User extends Base {
             DELETE FROM users_main WHERE ID = ?
             ", $this->id
         );
-        $this->cache->delete_value("user_info_" . $this->id);
+        $this->flush();
+    }
+
+    public function remove2FA() {
+        return $this->setUpdate('2FA_Key', '')
+            ->setUpdate('Recovery', '');
+    }
+
+    /**
+     * Record a forum warning for this user
+     *
+     * @param string reason for the warning.
+     */
+    public function addForumWarning(string $reason) {
+        $this->forumWarning[] = $reason;
+        return $this;
+    }
+
+    /**
+     * Record a staff not for this user
+     *
+     * @param string staff note
+     */
+    public function addStaffNote(string $note) {
+        $this->staffNote[] = $note;
+        return $this;
+    }
+
+    public function modify(): bool {
+        $changed = false;
+        if (!empty($this->forumWarning)) {
+            $warning = implode(', ', $this->forumWarning);
+            $this->db->prepared_query("
+                INSERT INTO users_warnings_forums
+                       (UserID, Comment)
+                VALUES (?,      concat(now(), ' - ', ?))
+                ON DUPLICATE KEY UPDATE
+                    Comment = concat(Comment, '\n', now(), ' - ', ?)
+                ", $this->id, $warning, $warning
+            );
+            $changed = $changed || $this->db->affected_rows() > 0; // 1 or 2 depending on whether the update is triggered
+            $this->forumWarning = [];
+        }
+        if (!empty($this->staffNote)) {
+            $this->db->prepared_query("
+                UPDATE users_info SET
+                AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
+                WHERE UserID = ?
+                ", implode(', ', $this->staffNote) . "\n\n", $this->id
+            );
+            $changed = $changed || $this->db->affected_rows() === 1;
+            $this->staffNote = [];
+        }
+        return parent::modify() || $changed;
     }
 
     public function mergeLeechStats(string $username, string $staffname) {
@@ -221,7 +270,7 @@ class User extends Base {
         return ['up' => $up, 'down' => $down, 'userId' => $mergeId];
     }
 
-    public function lock(int $lockType) {
+    public function lock(int $lockType): bool {
         $this->db->prepared_query("
             INSERT INTO locked_accounts
                    (UserID, Type)
@@ -229,25 +278,25 @@ class User extends Base {
             ON DUPLICATE KEY UPDATE Type = ?
             ", $this->id, $lockType, $lockType
         );
-        return $this->db->affected_rows() == 1;
+        return $this->db->affected_rows() === 1;
     }
 
-    public function unlock() {
+    public function unlock(): bool {
         $this->db->prepared_query("
             DELETE FROM locked_accounts WHERE UserID = ?
             ", $this->id
         );
-        return $this->db->affected_rows() == 1;
+        return $this->db->affected_rows() === 1;
     }
 
-    public function updateTokens(int $n) {
+    public function updateTokens(int $n): bool {
         $this->db->prepared_query('
             UPDATE user_flt SET
                 tokens = ?
             WHERE user_id = ?
             ', $n, $this->id
         );
-        return $this->db->affected_rows() == 1;
+        return $this->db->affected_rows() === 1;
     }
 
     public function updateIP($oldIP, $newIP) {
@@ -270,10 +319,11 @@ class User extends Base {
             WHERE ID = ?
             ', $newIP, \Tools::geoip($newIP), $this->id
         );
+        $this->heavy = null;
         $this->cache->delete_value('user_info_heavy_' . $this->id);
     }
 
-    public function updatePassword($pw, $ipaddr) {
+    public function updatePassword(string $pw, string $ipaddr): bool {
         $this->db->prepared_query('
             UPDATE users_main SET
                 PassHash = ?
@@ -288,20 +338,22 @@ class User extends Base {
                 ', $this->id, $ipaddr
             );
         }
-        return $this->db->affected_rows() == 1;
+        return $this->db->affected_rows() === 1;
     }
 
-    public function updateLastReadNews(int $newsId) {
+    public function updateLastReadNews(int $newsId): bool {
         $this->db->prepared_query("
             UPDATE users_info SET
                 LastReadNews = ?
             WHERE UserID = ?
             ", $newsId, $this->id
         );
+        $this->heavy = null;
         $this->cache->delete_value('user_info_heavy_' . $this->id);
+        return $this->db->affected_rows() === 1;
     }
 
-    public function resetRatioWatch() {
+    public function resetRatioWatch(): bool {
         $this->db->prepared_query("
             UPDATE users_info SET
                 RatioWatchEnds = NULL,
@@ -310,10 +362,10 @@ class User extends Base {
             WHERE UserID = ?
             ", $this->id
         );
-        return $this->db->affected_rows() == 1;
+        return $this->db->affected_rows() === 1;
     }
 
-    public function clearQuotes() {
+    public function clearQuotes(): bool {
         $this->db->prepared_query("
             UPDATE users_notify_quoted SET
                 UnRead = '0'
@@ -321,6 +373,7 @@ class User extends Base {
             ", $this->id
         );
         $this->cache->delete_value('notify_quoted_' . $this->id);
+        return $this->db->affected_rows() === 1;
     }
 
     public function unreadTorrentNotifications(): int {
@@ -337,7 +390,7 @@ class User extends Base {
         return $new;
     }
 
-    public function clearTorrentNotifications() {
+    public function clearTorrentNotifications(): bool {
         $this->db->prepared_query("
             UPDATE users_notify_torrents
             SET Unread = '0'
@@ -346,9 +399,10 @@ class User extends Base {
             ", $this->id
         );
         $this->cache->delete_value('notifications_new_' . $this->id);
+        return $this->db->affected_rows() === 1;
     }
 
-    public function siteIPv4Summary() {
+    public function siteIPv4Summary(): array {
         $this->db->prepared_query("
             SELECT IP,
                 min(StartTime) AS min_start,
@@ -362,7 +416,7 @@ class User extends Base {
         return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
-    public function trackerIPv4Summary() {
+    public function trackerIPv4Summary(): array {
         $this->db->prepared_query("
             SELECT IP,
                 from_unixtime(min(tstamp)) as first_seen,
@@ -376,7 +430,7 @@ class User extends Base {
         return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
-    public function resetIpHistory() {
+    public function resetIpHistory(): int {
         $n = 0;
         $this->db->prepared_query("
             DELETE FROM users_history_ips WHERE UserID = ?
@@ -411,7 +465,7 @@ class User extends Base {
         return $n;
     }
 
-    public function resetEmailHistory(string $email, string $ipaddr) {
+    public function resetEmailHistory(string $email, string $ipaddr): bool {
         $this->db->prepared_query("
             DELETE FROM users_history_emails
             WHERE UserID = ?
@@ -429,10 +483,10 @@ class User extends Base {
             WHERE ID = ?
             ", $email, $this->id
         );
-        return $this->db->affected_rows() == 1;
+        return $this->db->affected_rows() === 1;
     }
 
-    public function resetSnatched() {
+    public function resetSnatched(): int {
         $this->db->prepared_query("
             DELETE FROM xbt_snatched
             WHERE uid = ?
@@ -442,7 +496,7 @@ class User extends Base {
         return $this->db->affected_rows();
     }
 
-    public function resetDownloadList() {
+    public function resetDownloadList(): int {
         $this->db->prepared_query('
             DELETE FROM users_downloads
             WHERE UserID = ?
@@ -451,13 +505,14 @@ class User extends Base {
         return $this->db->affected_rows();
     }
 
-    public function resetPasskeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr) {
+    public function resetPasskeyHistory(string $oldPasskey, string $newPasskey, string $ipaddr): bool {
         $this->db->prepared_query("
             INSERT INTO users_history_passkeys
                    (UserID, OldPassKey, NewPassKey, ChangerIP)
             VALUES (?,      ?,          ?,          ?)
             ", $this->id, $oldPasskey, $newPasskey, $ipaddr
         );
+        return $this->db->affected_rows() === 1;
     }
 
     public function inboxUnreadCount(): int {
@@ -475,7 +530,7 @@ class User extends Base {
         return $unread;
     }
 
-    public function markAllReadInbox() {
+    public function markAllReadInbox(): int {
         $this->db->prepared_query("
             UPDATE pm_conversations_users SET
                 Unread = '0'
@@ -484,9 +539,10 @@ class User extends Base {
             ", $this->id
         );
         $this->cache->delete_value('inbox_new_' . $this->id);
+        return $this->db->affected_rows();
     }
 
-    public function markAllReadStaffPM() {
+    public function markAllReadStaffPM(): int {
         $this->db->prepared_query("
             UPDATE staff_pm_conversations SET
                 Unread = false
@@ -495,6 +551,7 @@ class User extends Base {
             ", $this->id
         );
         $this->cache->delete_value('staff_pm_new_' . $this->id);
+        return $this->db->affected_rows();
     }
 
     public function supportCount(int $newClassId, int $levelClassId): int {
@@ -509,7 +566,7 @@ class User extends Base {
     /**
      * toggle Unlimited Download setting
      */
-    public function toggleUnlimitedDownload(bool $flag) {
+    public function toggleUnlimitedDownload(bool $flag): bool {
         $this->db->prepared_query('
             SELECT ua.ID
             FROM user_has_attr uha
@@ -526,7 +583,7 @@ class User extends Base {
                 DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
                 ', $this->id, $attrId
             );
-            $toggled = $this->db->affected_rows() == 1;
+            $toggled = $this->db->affected_rows() === 1;
         }
         elseif ($flag && !$found) {
             $this->db->prepared_query('
@@ -534,23 +591,24 @@ class User extends Base {
                     SELECT ?, ID FROM user_attr WHERE Name = ?
                 ', $this->id, 'unlimited-download'
             );
-            $toggled = $this->db->affected_rows() == 1;
+            $toggled = $this->db->affected_rows() === 1;
         }
         return $toggled;
     }
 
-    public function updateCatchup() {
+    public function updateCatchup(): bool {
         $this->db->prepared_query("
             UPDATE users_info
             SET CatchupTime = now()
             WHERE UserID = ?
             ", $this->id
         );
+        $this->light = null;
         $this->cache->delete_value('user_info_' . $this->id);
-        return $this->db->affected_rows() == 1;
+        return $this->db->affected_rows() === 1;
     }
 
-    public function permissionList() {
+    public function permissionList(): array {
         $this->db->prepared_query('
             SELECT
                 p.ID                   AS permId,
@@ -565,7 +623,7 @@ class User extends Base {
         return $this->db->to_array('permName', MYSQLI_ASSOC, false);
     }
 
-    public function addClasses(array $classes) {
+    public function addClasses(array $classes): int {
         $this->db->prepared_query("
             INSERT IGNORE INTO users_levels (UserID, PermissionID)
             VALUES " . implode(', ', array_fill(0, count($classes), '(' . $this->id . ', ?)')),
@@ -574,7 +632,7 @@ class User extends Base {
         return $this->db->affected_rows();
     }
 
-    public function removeClasses(array $classes) {
+    public function removeClasses(array $classes): int {
         $this->db->prepared_query("
             DELETE FROM users_levels
             WHERE UserID = ?
@@ -584,7 +642,7 @@ class User extends Base {
         return $this->db->affected_rows();
     }
 
-    public function notifyFilters() {
+    public function notifyFilters(): array {
         if ($this->forceCacheFlush || ($filters = $this->cache->get_value('notify_filters_' . $this->id)) === false) {
             $this->db->prepared_query('
                 SELECT ID, Label
@@ -598,15 +656,17 @@ class User extends Base {
         return $filters;
     }
 
-    public function removeNotificationFilter(int $notifId) {
+    public function removeNotificationFilter(int $notifId): int {
         $this->db->prepared_query('
             DELETE FROM users_notify_filters
             WHERE UserID = ? AND ID = ?
             ', $this->id, $notifId
         );
-        if ($this->db->affected_rows()) {
+        $removed = $this->db->affected_rows();
+        if ($removed) {
             $this->cache->deleteMulti(['notify_filters_' . $this->id, 'notify_artists_' . $this->id]);
         }
+        return $removed;
     }
 
     public function loadArtistNotifications(): array {
@@ -882,14 +942,6 @@ class User extends Base {
         return $value;
     }
 
-    public function joinDate() {
-        return $this->getSingleValue('user-joined', '
-            SELECT JoinDate
-            FROM users_info
-            WHERE UserID = ?
-        ');
-    }
-
     public function lastAccess() {
         return $this->getSingleValue('user-last-access', '
             SELECT ula.last_access
@@ -934,14 +986,6 @@ class User extends Base {
         ');
     }
 
-    public function IRCKey() {
-        return $this->getSingleValue('user-irckey', '
-            SELECT IRCKey
-            FROM users_main
-            WHERE ID = ?
-        ');
-    }
-
     public function passwordCount(): int {
         return $this->getSingleValue('user-pw-count', '
             SELECT count(*)
@@ -982,17 +1026,6 @@ class User extends Base {
         ');
     }
 
-    public function addForumWarning(string $comment): int {
-        $this->db->prepared_query("
-            INSERT INTO users_warnings_forums
-                   (UserID, Comment)
-            VALUES (?,      ?)
-            ON DUPLICATE KEY UPDATE Comment = concat(?, ', ', Comment)
-            ", $this->id, $comment, $comment
-        );
-        return $this->db->affected_rows();
-    }
-
     public function invitedCount(): int {
         return $this->getSingleValue('user-invites', '
             SELECT count(*)
@@ -1019,14 +1052,6 @@ class User extends Base {
             ')
         );
         return substr($age, 0, strpos($age, " ago"));
-    }
-
-    public function supportFor() {
-        return $this->getSingleValue('user-support', '
-            SELECT SupportFor
-            FROM users_info
-            WHERE UserID = ?
-        ');
     }
 
     public function artistCommentCount(): int {
@@ -1335,21 +1360,43 @@ class User extends Base {
      */
     public function rankFactor(): float {
         $factor = 1.0;
-        $info = \Users::user_info($this->id);
-        if (!strlen($info['Avatar'])) {
+        if (!strlen($this->light()['Avatar'])) {
             $factor *= 0.75;
         }
-        $heavy = \Users::user_heavy_info($this->id);
-        if (!strlen($heavy['Info'])) {
+        if (!strlen($this->heavy()['Info'])) {
             $factor *= 0.75;
         }
         return $factor;
     }
 
+    public function activityStats(): array {
+        if (($stats = $this->cache->get_value('user_stats_' . $this->id)) === false) {
+            $this->db->prepared_query("
+                SELECT
+                    uls.Uploaded AS BytesUploaded,
+                    uls.Downloaded AS BytesDownloaded,
+                    coalesce(ub.points, 0) as BonusPoints,
+                    um.RequiredRatio
+                FROM users_main um
+                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+                LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
+                WHERE um.ID = ?
+                ", $this->id
+            );
+            $stats = $this->db->next_record(MYSQLI_ASSOC);
+            $stats['BytesUploaded'] = (int)$stats['BytesUploaded'];
+            $stats['BytesDownloaded'] = (int)$stats['BytesDownloaded'];
+            $stats['BonusPoints'] = (float)$stats['BonusPoints'];
+            $stats['RequiredRatio'] = (float)$stats['RequiredRatio'];
+            $this->cache->cache_value('user_stats_' . $this->id, $stats, 3600);
+        }
+        return $stats;
+    }
+
     public function buffer() {
-        $user = \Users::user_info($this->id);
-        $demotion = array_filter(self::demotionCriteria(), function ($v) use ($user) {
-            return in_array($user['PermissionID'], $v['From']);
+        $class = $this->primaryClass();
+        $demotion = array_filter(self::demotionCriteria(), function ($v) use ($class) {
+            return in_array($class, $v['From']);
         });
         $criteria = end($demotion);
 
@@ -1366,8 +1413,7 @@ class User extends Base {
     }
 
     public function nextClass() {
-        $user = \Users::user_info($this->id);
-        $criteria = self::promotionCriteria()[$user['PermissionID']] ?? null;
+        $criteria = self::promotionCriteria()[$this->info()['PermissionID']] ?? null;
         if (!$criteria) {
             return null;
         }
@@ -1576,10 +1622,9 @@ class User extends Base {
     }
 
     public function hasTokenByName(string $name) {
-        return $this->db->scalar(
-            "SELECT 1 FROM api_tokens WHERE user_id=? AND name=?",
-            $this->id,
-            $name
+        return $this->db->scalar("
+            SELECT 1 FROM api_tokens WHERE user_id = ? AND name = ?
+            ", $this->id, $name
         ) === 1;
     }
 
@@ -1592,22 +1637,10 @@ class User extends Base {
 
     public function revokeApiTokenById(int $tokenId): int {
         $this->db->prepared_query("
-            UPDATE api_tokens
-            SET revoked = 1
-            WHERE user_id = ?
-                AND id = ?
+            UPDATE api_tokens SET
+                revoked = 1
+            WHERE user_id = ? AND id = ?
             ", $this->id, $tokenId
-        );
-        return $this->db->affected_rows();
-    }
-
-    public function remove2FA(): int {
-        $this->db->prepared_query("
-            UPDATE users_main SET
-                2FA_Key = '',
-                Recovery = ''
-            WHERE ID = ?
-            ", $this->id
         );
         return $this->db->affected_rows();
     }
