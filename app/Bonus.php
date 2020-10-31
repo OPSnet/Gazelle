@@ -66,15 +66,16 @@ class Bonus extends Base {
     }
 
     public function getListForUser(User $user) {
-        $items = [];
-        foreach ($this->items as $item) {
+        $items = $this->items();
+        $allowed = [];
+        foreach ($items as $item) {
             if ($item['Label'] === 'seedbox' && $user->hasAttr('feature-seedbox')) {
                 continue;
             }
             $item['Price'] = $this->getEffectivePrice($item['Label'], $user->id());
-            $items[] = $item;
+            $allowed[] = $item;
         }
-        return $items;
+        return $allowed;
     }
 
     public function getItem($label) {
