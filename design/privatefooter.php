@@ -24,7 +24,7 @@
         $Y = SITE_LAUNCH_YEAR . "-$Y";
     }
 ?>
-    <p>Site and design &copy; <?= $Y ?> <?=SITE_NAME?></p>
+    <p>Site and design &copy; <?= $Y ?> <?=SITE_NAME?> | <a href='https://github.com/OPSnet/Gazelle'>Project Gazelle</a></p>
 <?php
     if (!empty($LastActive)) { ?>
     <p>

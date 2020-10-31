@@ -41,7 +41,7 @@ class Invite extends \Gazelle\Base {
             $where = "WHERE i.Email REGEXP ?";
             $args = [$this->search];
         }
-            
+
         $this->db->prepared_query("
             SELECT i.InviterID AS user_id,
                 um.IP AS ipaddr,
