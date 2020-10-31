@@ -151,7 +151,7 @@ switch ($_REQUEST['action'] ?? '') {
                     error(403);
                 }
 
-                (new Gazelle\User($UserID))->remove2FA();
+                (new Gazelle\User($UserID))->remove2FA()->modify();
 
                 $action = '';
                 if (!isset($_GET['page']) || $_GET['page'] !== 'user') {
