@@ -21,9 +21,8 @@ if (!empty($_POST)) {
     }
     try {
         $FL_OTHER_tokens = $Bonus->purchaseTokenOther($LoggedUser['ID'], $UserID, $match[1]);
-    }
-    catch (Exception $e) {
-        if ($e->getMessage() == 'Bonus:otherToken:no-gift-funds') {
+    } catch (\Gazelle\BonusException $e) {
+        if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
         } else {
             error(0);
@@ -181,7 +180,7 @@ list($ClassRatio, $Buffer) = $User->buffer();
 <?php
 if (!$OwnProfile) {
 ?>
-        <a href="inbox.php?action=compose&amp;toid=<?=$UserID?>" class="brackets">Send message</a>
+        <a href="inbox.php?action=compose&amp;toid=<?=$UserID?>" class="brackets" title="Send a private message">Send PM</a>
 <?php if (!$User->isFriend($LoggedUser['ID'])) { ?>
         <a href="friends.php?action=add&amp;friendid=<?=$UserID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Add to friends</a>
 <?php } ?>
@@ -191,23 +190,12 @@ if (!$OwnProfile) {
 
 if (check_perms('users_edit_profiles', $Class) || $OwnProfile) {
 ?>
-        <a href="user.php?action=edit&amp;userid=<?=$UserID?>" class="brackets">Settings</a>
+        <a href="user.php?action=edit&amp;userid=<?=$UserID?>" class="brackets">Edit</a>
 <?php
 }
 if (check_perms('users_view_invites', $Class)) {
 ?>
         <a href="user.php?action=invite&amp;userid=<?=$UserID?>" class="brackets">Invites</a>
-<?php
-}
-if (check_perms('admin_manage_permissions', $Class)) {
-?>
-        <a href="user.php?action=permissions&amp;userid=<?=$UserID?>" class="brackets">Permissions</a>
-<?php
-}
-if (check_perms('users_view_ips', $Class)) {
-?>
-        <a href="user.php?action=sessions&amp;userid=<?=$UserID?>" class="brackets">Sessions</a>
-        <a href="tools.php?action=user_info&amp;userid=<?=$UserID?>" class="brackets">Email/IP summary</a>
 <?php
 }
 if (check_perms('admin_reports')) {
@@ -225,14 +213,30 @@ if (check_perms('users_mod') || ($OwnProfile && check_perms('site_user_stats')))
         <a href="user.php?action=stats&amp;userid=<?=$UserID?>" class="brackets">Stats</a>
 <?php
 }
+if ($User->hasAttr('feature-seedbox') && (check_perms('users_view_ips', $Class) || $OwnProfile)) {
+?>
+        <a href="user.php?action=seedbox<?= $OwnProfile ? '' : "&amp;userid={$UserID}" ?>" class="brackets">Seedboxes</a>
+<?php
+}
+if (check_perms('users_view_ips', $Class)) {
+?>
+        <a href="user.php?action=sessions&amp;userid=<?=$UserID?>" class="brackets">Sessions</a>
+        <a href="tools.php?action=user_info&amp;userid=<?=$UserID?>" class="brackets">Email/IP info</a>
+<?php
+}
 if (check_perms('admin_clear_cache') && check_perms('users_override_paranoia')) {
 ?>
         <a href="user.php?action=clearcache&amp;id=<?=$UserID?>" class="brackets">Clear cache</a>
 <?php
 }
+if (check_perms('admin_manage_permissions', $Class)) {
+?>
+        <a href="user.php?action=permissions&amp;userid=<?=$UserID?>" class="brackets">Permissions</a>
+<?php
+}
 if (check_perms('users_mod')) {
 ?>
-        <a href="#staff_tools" class="brackets">Jump to staff tools</a>
+        <a href="#staff_tools" class="brackets">Staff tools</a>
 <?php
 }
 ?>

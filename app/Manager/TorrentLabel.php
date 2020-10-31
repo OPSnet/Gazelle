@@ -118,7 +118,7 @@ class TorrentLabel {
             $label[] = $this->info['Encoding'];
         }
         if (isset($this->info['Media']) && $this->info['Media'] === 'CD') {
-            if (isset($this->info['HasLog'])) {
+            if (isset($this->info['HasLog']) && $this->info['HasLog']) {
                 $label[] = 'Log' . (($this->info['HasLogDB'] ?? false) ? " ({$this->info['LogScore']}%)" : '');
             }
             if (isset($this->info['HasCue']) && $this->info['HasCue']) {

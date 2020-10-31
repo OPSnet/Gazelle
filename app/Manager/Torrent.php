@@ -19,6 +19,9 @@ class Torrent extends \Gazelle\Base {
         // load the group and torrent ids (normally both of these are always at hand)
         $torMan->setGroupId(1234)->setTorrentId(1666);
 
+        // if only the torrentId is set, it will discover the groupId
+        $torMan->setTorrentId(1666);
+
         // the artist name (A, A & B, Various Artists, Various Composers under Various Conductors etc
         echo $torMan->artistHtml();
 
@@ -123,10 +126,13 @@ class Torrent extends \Gazelle\Base {
             return $nameCache[$this->torrentId];
         }
 
+        if (!$this->groupId) {
+            $this->groupId = $this->idToGroupId($this->torrentId);
+        }
         if (!$this->torrentId && !$this->groupId) {
             return $nameCache[$this->torrentId] = '';
         }
-        $key = 'seedbox_groups_artists_' . $this->groupId;
+        $key = 'short_groups_artists_' . $this->groupId;
         $roleList = $this->cache->get_value($key);
         if ($roleList === false) {
             $this->db->prepared_query("
