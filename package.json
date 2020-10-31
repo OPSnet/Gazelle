@@ -22,7 +22,7 @@
     "browser-sync": "^2.26.13",
     "browser-sync-webpack-plugin": "^2.2.2",
     "husky": "^4.2.5",
-    "lint-staged": "^9.5.0",
+    "lint-staged": "^10.5.0",
     "stylelint": "^13.3.2",
     "stylelint-checkstyle-formatter": "^0.1.2",
     "stylelint-config-recommended": "^3.0.0",
@@ -40,7 +40,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged --verbose"
     }
   },
   "lint-staged": {
@@ -48,7 +48,7 @@
       "php -l",
       ".bin/phpcbf",
       "vendor/bin/phpstan analyse",
-      "vendor/bin/phpcs"
+      ".bin/phpcs"
     ]
   },
   "browserslist": [
