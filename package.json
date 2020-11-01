@@ -45,7 +45,6 @@
   },
   "lint-staged": {
     "*.php": [
-      "php -l",
       ".bin/phpcbf",
       "vendor/bin/phpstan analyse",
       ".bin/phpcs"

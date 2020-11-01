@@ -71,4 +71,6 @@
         </properties>
         <type>warning</type>
     </rule>
+
+    <rule ref="Generic.PHP.Syntax" />
 </ruleset>
