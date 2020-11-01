@@ -94,6 +94,7 @@ class Permissions {
             'admin_manage_navigation' => 'Can manage navigation links',
             'admin_view_referrals' => 'Can view referred users',
             'admin_bp_history' => 'Can view bonus points spent by other users',
+            'admin_fl_history' => 'Can view freeleech tokens spent by other users',
             'admin_reports' => 'Can access reports system',
             'admin_advanced_user_search' => 'Can access advanced user search',
             'admin_create_users' => 'Can create users through an administrative form',

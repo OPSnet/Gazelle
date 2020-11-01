@@ -49,7 +49,7 @@ class Paginator {
         $pageCount = 0;
         $this->linkbox = '';
 
-        $uri = str_replace('&', '&amp;', preg_replace('/([?&])page=\d+/', '$1', $_SERVER['REQUEST_URI']));
+        $uri = str_replace('&', '&amp;', preg_replace('/[?&]page=\d+/', '', $_SERVER['REQUEST_URI']));
         if (strpos($uri, '?') === false) {
             $uri .= '?';
         }
@@ -78,13 +78,13 @@ class Paginator {
             }
 
             if ($this->page > 1) {
-                $this->linkbox = "<a href=\"{$uri}page=1\"><strong>&laquo; First</strong></a> "
-                    . "<a href=\"{$uri}page=" . ($this->page - 1) . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
+                $this->linkbox = "<a href=\"{$uri}&amp;page=1\"><strong>&laquo; First</strong></a> "
+                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
             }
 
             for ($i = $firstPage; $i <= $lastPage; $i++) {
                 if ($i != $this->page) {
-                    $this->linkbox .= "<a href=\"{$uri}page=$i\">";
+                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i\">";
                 }
                 $this->linkbox .= '<strong>';
                 $firstEntry = (($i - 1) * $this->perPage) + 1;
@@ -109,9 +109,9 @@ class Paginator {
             }
 
             if ($this->page && $this->page < $pageCount) {
-                $this->linkbox .= " | <a href=\"${uri}page=" . ($this->page + 1)
+                $this->linkbox .= " | <a href=\"${uri}&amp;page=" . ($this->page + 1)
                     . '" class="pager_next"><strong>Next &rsaquo;</strong></a>'
-                    . " <a href=\"${uri}page=$pageCount\"><strong> Last &raquo;</strong></a>";
+                    . " <a href=\"${uri}&amp;page=$pageCount\"><strong> Last &raquo;</strong></a>";
             }
         }
         if (strlen($this->linkbox)) {

@@ -1,0 +1,37 @@
+<div class="header">
+    <h2><a href="{{ user.url }}">{{ user.username }}</a> &rsaquo; Freeleech token history</h2>
+</div>
+
+{{ paginator.linkbox|raw }}
+
+<table>
+    <tr class="colhead_dark">
+        <td>Torrent</td>
+        <td>Time</td>
+        <td>Expired</td>
+{% if own_profile or admin %}
+        <td>Downloaded</td>
+        <td>Size</td>
+        <td>Tokens used</td>
+{% endif %}
+    </tr>
+{% set torrent_list = user.tokenPage(paginator.limit, paginator.offset) %}
+{% for t in torrent_list %}
+    <tr class="{{ cycle(['b', 'a'], loop.index0) }}">
+        <td>{{ t.name|raw }}</td>
+        <td class="nowrap">{{ t.created|time_diff|raw }}</td>
+        <td>{{ t.expired ? 'Yes' : 'No' }}
+    {%- if admin and not t.expired %}
+            &nbsp;<a href="userhistory.php?action=token_history&amp;expire=1&amp;auth={{ auth }}&amp;userid={{ t.userid }}&amp;torrentid={{ t.torrent_id }}">(expire)</a>
+    {%- endif -%}
+        </td>
+    {% if own_profile or admin %}
+        <td class="nowrap">{{ t.downloaded|octet_size }}</td>
+        <td class="nowrap">{{ t.size|octet_size }}</td>
+        <td>{{ t.uses }}</td>
+     {% endif %}
+    </tr>
+{% endfor %}
+</table>
+
+{{ paginator.linkbox|raw }}
