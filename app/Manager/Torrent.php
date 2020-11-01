@@ -22,7 +22,7 @@ class Torrent extends \Gazelle\Base {
         // if only the torrentId is set, it will discover the groupId
         $torMan->setTorrentId(1666);
 
-        // the artist name (A, A & B, Various Artists, Various Composers under Various Conductors etc
+        // the artist name (A, A & B, Various Artists, Various Composers under Various Conductors etc)
         echo $torMan->artistHtml();
 
         // load the torrent details into the labeler
@@ -909,5 +909,25 @@ class Torrent extends \Gazelle\Base {
 
         $this->db->set_query_id($qid);
         return [true, "torrent " . $this->torrentId . " removed"];
+    }
+
+    public function expireToken(int $userId, int $torrentId): bool {
+        $hash = $this->db->scalar("
+            SELECT info_hash FROM torrents WHERE ID = ?
+            ", $torrentId
+        );
+        if (!$hash) {
+            return false;
+        }
+        $this->db->prepared_query("
+            UPDATE users_freeleeches SET
+                Expired = true
+            WHERE UserID = ?
+                AND TorrentID = ?
+            ", $userId, $torrentId
+        );
+        $this->cache->delete_value("users_tokens_{$userId}");
+        \Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($hash), 'userid' => $userId]);
+        return true;
     }
 }

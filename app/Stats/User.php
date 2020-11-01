@@ -145,4 +145,17 @@ class User extends \Gazelle\Base {
         }
         return [$Countries, $Rank, $CountryUsers, $CountryMax, $CountryMin, $LogIncrements];
     }
+
+    /**
+     * How many FL tokens has someone used?
+     *
+     * @param \Gazelle\User
+     * @return int Number of tokens used
+     */
+    public function flTokenTotal(\Gazelle\User $user): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM users_freeleeches WHERE UserID = ?
+            ", $user->id()
+        );
+    }
 }

@@ -16,7 +16,7 @@ class TorrentLabel {
         $this->showEdition = false;
         $this->showFlags = true;
         $this->groupName = null;
-        $this->separator = ' / ';
+        $this->separator = '/';
     }
 
     /**
@@ -153,7 +153,7 @@ class TorrentLabel {
         }
 
         if ($this->showFlags) {
-            if ($this->info['HasLog'] && $this->info['HasLogDB'] && $this->info['LogChecksum'] !== '1') {
+            if (isset($this->info['Media']) && $this->info['Media'] === 'CD' && $this->info['HasLog'] && $this->info['HasLogDB'] && !$this->info['LogChecksum']) {
                 $label[] = $this->element('tl_notice', 'Bad/Missing Checksum');
             }
             if ($this->info['BadTags']) {

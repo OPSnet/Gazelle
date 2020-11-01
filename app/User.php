@@ -27,6 +27,12 @@ class User extends BaseObject {
     /** @var array user attributes set for user */
     protected $attr;
 
+    /** @var \Gazelle\Manager\Torrent to look up torrents associated with a user (snatched, uploaded, ...) */
+    protected $torMan;
+
+    /** @var \Gazelle\Manager\TorrentLabel to look up torrents associated with a user (snatched, uploaded, ...) */
+    protected $labelMan;
+
     const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
 
     public function tableName(): string {
@@ -35,6 +41,16 @@ class User extends BaseObject {
 
     public function __construct(int $id) {
         parent::__construct($id);
+    }
+
+    public function setTorrentManager(Manager\Torrent $torMan) {
+        $this->torMan = $torMan;
+        return $this;
+    }
+
+    public function setTorrentLabelManager(Manager\TorrentLabel $labelMan) {
+        $this->labelMan = $labelMan;
+        return $this;
     }
 
     public function url(): string {
@@ -1378,6 +1394,52 @@ class User extends BaseObject {
             $stats = $this->cache->cache_value('user_rlim_' . $this->id, $stats, 3600);
         }
         return (1 + $stats['download']) / (1 + $stats['snatch']);
+    }
+
+    /**
+     * Get a page of FL token uses by user
+     *
+     * @param int How many? (To fill a page)
+     * @param int From where (which page)
+     * @return array [torrent_id, group_id, created, expired, downloaded, uses, group_name, format, encoding, size]
+     */
+    public function tokenPage(int $limit, int $offset): array {
+        $this->db->prepared_query("
+            SELECT t.GroupID AS group_id,
+                g.Name       AS group_name,
+                t.ID         AS torrent_id,
+                t.Size       AS size,
+                f.Time       AS created,
+                f.Expired    AS expired,
+                f.Downloaded AS downloaded,
+                f.Uses       AS uses
+            FROM users_freeleeches AS f
+            LEFT JOIN torrents AS t ON (t.ID = f.TorrentID)
+            LEFT JOIN torrents_group AS g ON (g.ID = t.GroupID)
+            WHERE f.UserID = ?
+            ORDER BY f.Time DESC
+            LIMIT ? OFFSET ?
+            ", $this->id, $limit, $offset
+        );
+        $list = [];
+        $torrents = $this->db->to_array(false, MYSQLI_ASSOC, false);
+        foreach ($torrents as $t) {
+            if (!$t['group_id']) {
+                $name = "(<i>Deleted torrent <a href=\"log.php?search=Torrent+{$t['torrent_id']}\">{$t['torrent_id']}</a></i>)";
+            } else {
+                $name = "<a href=\"torrents.php?id={$t['group_id']}&amp;torrentid={$t['torrent_id']}\">{$t['group_name']}</a>";
+                $artist = $this->torMan->setGroupId($t['group_id'])->setTorrentId($t['torrent_id'])->artistHtml();
+                if ($artist) {
+                    $name = "$artist - $name";
+                }
+                $this->labelMan->load($this->torMan->torrentInfo()[1]);
+                $name .= ' [' . $this->labelMan->label() . ']';
+            }
+            $t['expired'] = ($t['expired'] === 1);
+            $t['name'] = $name;
+            $list[] = $t;
+        }
+        return $list;
     }
 
     /**
