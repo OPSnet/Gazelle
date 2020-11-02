@@ -4,6 +4,7 @@ namespace Gazelle;
 
 class Contest extends Base {
     const CACHE_CONTEST = 'contest_%d';
+    const CONTEST_LEADERBOARD_CACHE_KEY = 'contest_leaderboard_%d_%d';
 
     protected $id;
     protected $info;
@@ -23,7 +24,7 @@ class Contest extends Base {
         $key = sprintf(self::CACHE_CONTEST, $this->id);
         if (($this->info = $this->cache->get_value($key)) === false) {
             $this->db->prepared_query("
-                SELECT t.name AS contest_type, c.name, c.banner, c.description, c.display, c.max_tracked, c.date_begin, c.date_end,
+                SELECT t.name AS contest_type, c.name, c.banner, c.description, c.display, c.date_begin, c.date_end,
                     coalesce(cbp.bonus_pool_id, 0) AS bonus_pool,
                     cbp.status AS bonus_status,
                     cbp.bonus_user,
@@ -65,10 +66,10 @@ class Contest extends Base {
     public function save(array $params): int {
         $this->db->prepared_query("
             UPDATE contest SET
-                name = ?, display = ?, max_tracked = ?, date_begin = ?, date_end = ?,
+                name = ?, display = ?, date_begin = ?, date_end = ?,
                 contest_type_id = ?, banner = ?, description = ?
             WHERE contest_id = ?
-            ", trim($params['name']), $params['display'], $params['maxtrack'], $params['date_begin'], $params['date_end'],
+            ", trim($params['name']), $params['display'], $params['date_begin'], $params['date_end'],
                 $params['type'], trim($params['banner']), trim($params['description']),
                 $this->id
         );
@@ -104,17 +105,8 @@ class Contest extends Base {
         return $this->info['display'];
     }
 
-    public function calculateLeaderboard(): int {
-        return $this->type->calculateLeaderboard();
-    }
-
-    public function leaderboard(): array {
-        // may be a trait, so no access to $this
-        return $this->type->leaderboard($this->maxTracked());
-    }
-
-    public function maxTracked(): int {
-        return $this->info['max_tracked'];
+    public function leaderboard(int $limit, int $offset): array {
+        return $this->type->leaderboard($limit, $offset);
     }
 
     public function name(): string {
@@ -189,6 +181,40 @@ class Contest extends Base {
 
     public function isOpen(): bool {
         return $this->info['is_open'] === 1;
+    }
+
+    public function calculateLeaderboard(): int {
+        /* only called from scheduler, don't need to worry how long this takes */
+        [$subquery, $args] = $this->type->ranker();
+        $this->db->begin_transaction();
+        $this->db->prepared_query('DELETE FROM contest_leaderboard WHERE contest_id = ?', $this->id);
+        $this->db->prepared_query("
+            INSERT INTO contest_leaderboard
+                (contest_id, user_id, entry_count, last_entry_id)
+            SELECT ?, LADDER.userid, LADDER.nr, T.ID
+            FROM torrents_group TG
+            LEFT JOIN torrents_artists TA ON (TA.GroupID = TG.ID)
+            LEFT JOIN artists_group AG ON (AG.ArtistID = TA.ArtistID)
+            INNER JOIN torrents T ON (T.GroupID = TG.ID)
+            INNER JOIN (
+                $subquery
+            ) LADDER on (LADDER.last_torrent = T.ID)
+            GROUP BY
+                LADDER.nr,
+                T.ID,
+                TG.Name,
+                T.Time
+            ", $this->id, ...$args
+        );
+        $n = $this->db->affected_rows();
+        $this->db->commit();
+        /* recache the pages */
+        $pages = range(0, (int)(ceil($n)/CONTEST_ENTRIES_PER_PAGE) - 1);
+        foreach ($pages as $p) {
+            $this->cache->delete_value(sprintf(self::CONTEST_LEADERBOARD_CACHE_KEY, $this->id, $p));
+            $this->type->leaderboard(CONTEST_ENTRIES_PER_PAGE, $p);
+        }
+        return $n;
     }
 
     public function paymentReady(): bool {

@@ -1,0 +1,10 @@
+{% if prior %}
+<form class="edit_form" style="float: right;" action="contest.php?action=leaderboard" method="post">
+    <select name="leaderboard">
+    {% for p in prior %}
+        <option value="{{ p.id }}"{% if p.id == current %} selected="selected"{% endif %}>{{ p.name }}</option>
+    {% endfor %}
+    </select>
+    <input type="submit" id="view" value="view" />
+</form>
+{% endif %}

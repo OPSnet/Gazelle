@@ -7,9 +7,9 @@ class Contest extends \Gazelle\Base {
     public function create (array $info) {
         $this->db->prepared_query("
             INSERT INTO contest
-                   (name, display, max_tracked, date_begin, date_end, contest_type_id, banner, description)
-            VALUES (?,    ?,       ?,           ?,          ?,        ?,               ?,      ?)
-            ", $info['name'], $info['display'], $info['maxtrack'], $info['date_begin'], $info['date_end'],
+                   (name, display, date_begin, date_end, contest_type_id, banner, description)
+            VALUES (?,    ?,       ?,          ?,        ?,               ?,      ?)
+            ", $info['name'], $info['display'], $info['date_begin'], $info['date_end'],
                $info['type'], $info['banner'], $info['description']
         );
         $contestId = $this->db->inserted_id();
