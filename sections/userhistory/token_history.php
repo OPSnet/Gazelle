@@ -3,11 +3,15 @@
 if (!isset($_GET['userid'])) {
     $userId = $LoggedUser['ID'];
 } else {
-    if (!check_perms('admin_fl_history')) {
+    $userId = (int)$_GET['userid'];
+    if (!$userId) {
+        error(0);
+    }
+    if ($userId !== G::$LoggedUser['ID'] && !check_perms('admin_fl_history')) {
         error(403);
     }
-    $userId = (int)$_GET['userid'];
 }
+
 $user = (new Gazelle\Manager\User)->findById($userId);
 if (!$user) {
     error(404);
