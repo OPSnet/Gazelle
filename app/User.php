@@ -164,7 +164,7 @@ class User extends BaseObject {
     }
 
     public function avatarMode(): string {
-        return $this->info()['DisableAvatars'] ?? '0';
+        return $this->heavy()['DisableAvatars'] ?? '0';
     }
 
     public function primaryClass(): int {
