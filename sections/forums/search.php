@@ -17,6 +17,7 @@ if (!$ThreadID) {
     }
     $search->setSearchType('body');
     $Title = " &rsaquo; <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
+    $search->setThreadId($ThreadID);
 }
 
 $threadCreatedBefore = $_GET['thread_created_before'] ?? '';

@@ -152,6 +152,11 @@ class ForumSearch extends Base {
         return $this->setThreadCond('t.CreatedTime >= ?', $date);
     }
 
+    public function setThreadId(int $threadId): void {
+        $this->threadId = $threadId;
+        $this->setThreadCond('t.ID = ?', $this->threadId);
+    }
+
     /**
      * Save a condition related to post searches
      *
