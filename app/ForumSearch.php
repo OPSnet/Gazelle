@@ -203,7 +203,7 @@ class ForumSearch extends Base {
         if (!($this->permittedForums || $this->selectedForums)) {
             // any forum they have access to due to their class
             $cond[] = 'f.MinClassRead <= ?';
-            $args[] = $this->user->primaryClass();
+            $args[] = $this->user->classLevel();
         } else {
             if ($this->selectedForums) {
                 $cond[] = 'f.ID in (' . placeholders($this->selectedForums) . ')';
@@ -211,7 +211,7 @@ class ForumSearch extends Base {
             }
 
             $cond[] = '(f.MinClassRead <= ?' . ($this->permittedForums ? ' OR f.ID IN (' . placeholders($this->permittedForums) . ')' : '') . ')';
-            $args = array_merge($args, [$this->user->primaryClass()], $this->permittedForums);
+            $args = array_merge($args, [$this->user->classLevel()], $this->permittedForums);
         }
         // but not if they have been banned from it
         if ($this->forbiddenForums) {

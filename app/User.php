@@ -171,6 +171,10 @@ class User extends BaseObject {
         return $this->info()['PermissionID'];
     }
 
+    public function classLevel(): int {
+        return $this->light()['Class'];
+    }
+
     public function forbiddenForums(): array {
         $heavy = $this->heavy();
         return isset($heavy['CustomForums']) ? array_keys($heavy['CustomForums'], 0) : [];
