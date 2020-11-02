@@ -6,7 +6,8 @@ namespace Gazelle\Contest;
 
 class RequestFill extends AbstractContest {
 
-    public function leaderboard(): array {
+    public function leaderboard(int $limit, int $offset): array {
+        // TODO
         return [];
     }
 
@@ -98,7 +99,7 @@ class RequestFill extends AbstractContest {
                 ", $this->begin, $this->end
             );
             $pairs = $this->db->to_array(false, MYSQLI_ASSOC);
-            $this->cache->cache_value('contest_pairs_' . $id, $pairs, 60 * 20);
+            $this->cache->cache_value('contest_pairs_' . $id, $pairs, 3600);
         }
         return $pairs;
     }

@@ -152,6 +152,7 @@ define('STAFF_LOCKED', 1);
 
 // Pagination
 define('BOOKMARKS_PER_PAGE', 20);
+define('CONTEST_ENTRIES_PER_PAGE', 50);
 define('FRIENDS_PER_PAGE', 20);
 define('INVITES_PER_PAGE', 50);
 define('IPS_PER_PAGE', 50);

@@ -1,0 +1,34 @@
+<div class="head">
+{% if contest.hasPool %}
+    <h3>The Bonus Point pool currently stands at {{ contest.bonusPoolTotal|number_format }} points.</h3>
+{% endif %}
+{% if not contest.isOpen %}
+    <p>That's not supposed to happen. Looks like the contest hasn't begun yet!<p>
+{% elseif contest.totalEntries == 0 %}
+    <p>The scheduler has not run yet, there are no results to display.<p>
+{% else %}
+    <h3>A grand total of {{ contest.totalEntries|number_format }} {{ action_header }}</h3>
+</div>
+{{ paginator.linkbox|raw }}
+{% set rank = (paginator.page - 1) * paginator.limit %}
+<table class="layout">
+    <tr>
+    <th style="text-align:left">Rank</th>
+    <th style="text-align:left">Who</th>
+    <th style="text-align:left">Most recent {{ action }}</th>
+    <th style="text-align:left">Most recent time</th>
+    <th style="text-align:left">{{ score_header }}</th>
+    </tr>
+    {% for entry in contest.leaderboard(paginator.limit, paginator.offset) %}
+        {% set rank = rank + 1 %}
+    <tr>
+        <td>{{ rank|number_format }}</td>
+        <td class="nowrap"><a href="/user.php?id={{ entry.user_id }}">{{ entry.username}}</a>{% if entry.user_id == viewer %} (that's you!){% endif %}</td>
+        <td>{{ entry.last_entry_link|raw }}</td>
+        <td class="nowrap">{{ entry.last_upload|time_diff|raw }} </td>
+        <td>{{ entry.entry_count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{{ paginator.linkbox|raw }}
+{% endif %}
