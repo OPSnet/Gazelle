@@ -4,7 +4,7 @@ $contest = (new Gazelle\Manager\Contest)->currentContest();
 if (is_null($contest)) {
     return;
 }
-$leaderboard = $contest->leaderboard(3, 0);
+$leaderboard = $contest->leaderboard(CONTEST_ENTRIES_PER_PAGE, 0);
 if (empty($leaderboard)) {
     return;
 }
