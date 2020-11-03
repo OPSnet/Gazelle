@@ -76,9 +76,11 @@ View::show_header($name, 'browse,requests,bbcode,comments,voting,subscriptions')
     <div class="header">
         <h2><?=display_str($name)?><?= $RevisionID ? " (Revision #$RevisionID)" : '' ?><?= $Artist->vanityHouse() ? ' [Vanity House]' : '' ?></h2>
         <div class="linkbox">
+<?php if (check_perms('site_edit_wiki')) { ?>
+            <a href="artist.php?action=edit&amp;artistid=<?= $ArtistID ?>" class="brackets">Edit</a>
+<?php } ?>
             <a href="artist.php?action=editrequest&amp;artistid=<?=$ArtistID?>" class="brackets">Request an Edit</a>
-<?php
-if (check_perms('site_submit_requests')) { ?>
+<?php if (check_perms('site_submit_requests')) { ?>
             <a href="requests.php?action=new&amp;artistid=<?=$ArtistID?>" class="brackets">Add request</a>
 <?php
 }
@@ -88,8 +90,7 @@ if (check_perms('site_torrents_notify')) {
     if ($User->hasArtistNotification($name)) {
 ?>
             <a href="<?= $urlStem ?>&amp;action=notifyremove" class="brackets">Do not notify of new uploads</a>
-<?php
-    } else { ?>
+<?php } else { ?>
             <a href="<?= $urlStem ?>&amp;action=notify" class="brackets">Notify of new uploads</a>
 <?php
     }
@@ -106,32 +107,23 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
                 (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('artist', $ArtistID) !== false
                     ? 'Unsubscribe' : 'Subscribe'?></a>
 
-<?php if (check_perms('site_edit_wiki')) { ?>
-            <a href="artist.php?action=edit&amp;artistid=<?= $ArtistID ?>" class="brackets">Edit</a>
-<?php } ?>
             <a href="artist.php?action=history&amp;artistid=<?= $ArtistID ?>" class="brackets">View history</a>
-<?php
-
-if ($RevisionID && check_perms('site_edit_wiki')) { ?>
+<?php if ($RevisionID && check_perms('site_edit_wiki')) { ?>
             <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Revert to this revision</a>
 <?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#info" class="brackets">Info</a>
-<?php
-
-if (defined('LASTFM_API_KEY')) { ?>
+<?php if (defined('LASTFM_API_KEY')) { ?>
             <a href="artist.php?id=<?=$ArtistID?>#concerts" class="brackets">Concerts</a>
 <?php } ?>
             <a href="artist.php?id=<?=$ArtistID?>#artistcomments" class="brackets">Comments</a>
-<?php
-if (check_perms('site_delete_artist') && check_perms('torrents_delete')) { ?>
+<?php if (check_perms('site_delete_artist') && check_perms('torrents_delete')) { ?>
             <a href="artist.php?action=delete&amp;artistid=<?=$ArtistID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Delete</a>
 <?php } ?>
         </div>
     </div>
-    <div class="sidebar">
-<?php
 
-if ($Artist->image()) { ?>
+    <div class="sidebar">
+<?php if ($Artist->image()) { ?>
         <div class="box box_image">
             <div class="head"><strong><?= $name ?></strong></div>
             <div style="text-align: center; padding: 10px 0px;">
