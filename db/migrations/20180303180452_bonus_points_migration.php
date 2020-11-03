@@ -1,7 +1,6 @@
 <?php
 
 use Phinx\Migration\AbstractMigration;
-use Phinx\DB\Adapter\MysqlAdapter;
 
 class BonusPointsMigration extends AbstractMigration {
 
