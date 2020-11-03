@@ -3,7 +3,7 @@
 namespace Gazelle\Manager;
 
 class Wiki extends \Gazelle\Base {
-    protected $aliasList;
+    protected $aliases;
     protected const CACHE_KEY = 'wiki_article_v3_%d';
 
     /**
@@ -321,6 +321,6 @@ class Wiki extends \Gazelle\Base {
             DELETE FROM wiki_aliases WHERE Alias = ?
             ", $this->normalizeAlias(trim($alias))
         );
-        return $this->flush($articleId);
+        return $this->flushArticle($articleId);
     }
 }

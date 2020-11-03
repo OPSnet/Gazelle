@@ -159,7 +159,7 @@ class AutoEnable {
                 HandledTimestamp = now(),
                 CheckedBy = ?,
                 Outcome = ?
-            WHERE ID IN (" . placeholders(IDs) . ")
+            WHERE ID IN (" . placeholders($IDs) . ")
             ", G::$LoggedUser['ID'], $Status, ...$IDs
         );
         G::$Cache->decrement_value(self::CACHE_KEY_NAME, count($IDs));

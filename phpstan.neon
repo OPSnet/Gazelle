@@ -12,12 +12,20 @@ parameters:
     paths:
         - app
         - classes
+        - db
     excludes_analyse:
         - classes/pushserver.class.php
         - design
         - sections
     parallel:
         maximumNumberOfProcesses: 1
+    
+    # The ignored error in theory should not occur on PHP 7.3 with php-gd, but
+    # we have had it happen nevertheless on some developer machines. Given its
+    # our only ignored error, we are fine having this error happen optionally
+    # for developers. If we add more ignored errors, we should readdress this
+    # setting, and if the error still occurs for people
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         -
             message: '/(Constant IMG_BMP|Function imagebmp) not found\./'
