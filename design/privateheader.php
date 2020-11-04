@@ -192,7 +192,7 @@ $NavItems = Users::get_user_nav_items(G::$LoggedUser['ID']);
                         <a href="upload.php" title="Upload">Upload</a>
                     </li>
                     <li id="nav_bonus" class="brackets<?=Format::add_class($PageID, ['user', 'bonus'], 'active', false)?>">
-                        <a href="bonus.php" class='tooltip' title="Bonus (<?=number_format((int) G::$LoggedUser['BonusPoints'])?>)">Bonus (<?=number_format((int) G::$LoggedUser['BonusPoints'])?>)</a>
+                        <a href="bonus.php" class='tooltip' title="BP/hour: <?=number_format(G::$LoggedUser['BonusPointsPerHour'], 2)?>">Bonus (<?=number_format((int) G::$LoggedUser['BonusPoints'])?>)</a>
                     </li>
 <?php
 if (check_perms('site_send_unlimited_invites')) {

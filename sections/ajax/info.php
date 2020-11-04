@@ -33,6 +33,8 @@ json_print("success", [
         'downloaded' => (int)$LoggedUser['BytesDownloaded'],
         'ratio' => (float)$Ratio,
         'requiredratio' => (float)$LoggedUser['RequiredRatio'],
+        'bonusPoints' => (int)$LoggedUser['BonusPoints'],
+        'bonusPointsPerHour' => number_format($LoggedUser['BonusPointsPerHour'], 2),
         'class' => $ClassLevels[$LoggedUser['Class']]['Name']
     ]
 ]);
