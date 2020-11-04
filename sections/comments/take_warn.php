@@ -15,7 +15,7 @@ if (!$AuthorID) {
 }
 $user = new Gazelle\User($AuthorID);
 
-if ($user->primaryClass() > $LoggedUser['Class']) {
+if ($user->classLevel() > $LoggedUser['Class']) {
     error(403);
 }
 
