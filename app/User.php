@@ -1475,6 +1475,7 @@ class User extends BaseObject {
             $stats['BytesUploaded'] = (int)$stats['BytesUploaded'];
             $stats['BytesDownloaded'] = (int)$stats['BytesDownloaded'];
             $stats['BonusPoints'] = (float)$stats['BonusPoints'];
+            $stats['BonusPointsPerHour'] = (new \Gazelle\Bonus)->userHourlyRate($this->id);
             $stats['RequiredRatio'] = (float)$stats['RequiredRatio'];
             $this->cache->cache_value('user_stats_' . $this->id, $stats, 3600);
         }

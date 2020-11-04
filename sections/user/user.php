@@ -375,7 +375,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
             $text = 'Points Per Hour';
         }
         ?></li>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><?= $text ?>: <?=number_format($BonusPointsPerHour)?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><?= $text ?>: <?=number_format($BonusPointsPerHour, 2)?></li>
 <?php
     }
     if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {
