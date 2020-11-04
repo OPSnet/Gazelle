@@ -227,7 +227,7 @@ $Join = implode("\n", $Join);
 $cond = $condition ? 'WHERE ' . implode(" AND ", $condition) : '';
 
 $Count = $DB->scalar("
-    SELECT count(*)
+    SELECT count(DISTINCT(C.ID))
     FROM $table
     $Join
     $cond
