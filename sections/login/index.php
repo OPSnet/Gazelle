@@ -312,7 +312,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
                 'keep-logged' => $KeepLogged,
                 'browser' => $Browser,
                 'os' => $OperatingSystem,
-                'ipaddr' => $_SERVER['REMOTE_ADDR'],
+                'ipaddr' => needResetIpaddr($PermissionID, $CustomPermissions) ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'],
                 'useragent' => $_SERVER['HTTP_USER_AGENT'],
             ]);
             setcookie('session', $sessionMan->cookie($session['SessionID']), $expiry, '/', '', $SSL, true);
