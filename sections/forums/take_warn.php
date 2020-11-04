@@ -17,7 +17,7 @@ $WarningLength = $_POST['length'];
 $forumId = (int)$_POST['forumid'];
 $postId = (int)$_POST['postid'];
 $Key = (int)$_POST['key'];
-$URL = site_url() . "forums.php?action=viewthread&amp;postid=$postId#post$postId";
+$URL = SITE_URL . "/forums.php?action=viewthread&amp;postid=$postId#post$postId";
 if ($WarningLength !== 'verbal') {
     $Time = (int)$WarningLength * (7 * 24 * 60 * 60);
     Tools::warn_user($userId, $Time, "$URL - $Reason");

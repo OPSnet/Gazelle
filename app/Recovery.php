@@ -277,7 +277,7 @@ lose your chances of ever signing up in the future.
 
 To confirm your invite, click on the following link:
 
-https://$SITE_URL/register.php?invite=$key
+$SITE_URL/register.php?invite=$key
 
 After you register, you will be able to use your account. Please take note
 that if you do not use this invite in the next 3 days, it will expire. We
@@ -285,7 +285,7 @@ urge you to read the RULES and the wiki immediately after you join.
 
 MOST IMPORTANT OF ALL:
 
-You should read the following article: https://$SITE_URL/wiki.php?action=article&id=114
+You should read the following article: $SITE_URL/wiki.php?action=article&id=114
 
 This will help you understand what you need to do to begin reseeding
 your old torrents (and avoid downloading them all over again by accident,

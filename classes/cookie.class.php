@@ -32,7 +32,7 @@ class COOKIE /*implements COOKIE_INTERFACE*/ {
 
     //Pass the 4th optional param as false to allow JS access to the cookie
     public function set($Key, $Value, $Seconds = 86400, $LimitAccess = SELF::LIMIT_ACCESS) {
-        setcookie(SELF::PREFIX.$Key, $Value, time() + $Seconds, '/', SITE_URL, $_SERVER['SERVER_PORT'] === '443', $LimitAccess, false);
+        setcookie(SELF::PREFIX.$Key, $Value, time() + $Seconds, '/', SITE_HOST, $_SERVER['SERVER_PORT'] === '443', $LimitAccess, false);
     }
 
     public function del($Key) {

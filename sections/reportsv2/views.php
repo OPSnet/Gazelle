@@ -105,7 +105,7 @@ foreach ($list as $summary) {
                     Reports of torrents with ID = 1
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=torrent&amp;id=1"><?=site_url()?>reportsv2.php?view=torrent&amp;id=1</a>
+                    <a href="reportsv2.php?view=torrent&amp;id=1"><?=SITE_URL?>/reportsv2.php?view=torrent&amp;id=1</a>
                 </li>
             </ul>
             <strong>By group ID of torrent reported:</strong>
@@ -114,7 +114,7 @@ foreach ($list as $summary) {
                     Reports of torrents within the group with ID = 1
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=group&amp;id=1"><?=site_url()?>reportsv2.php?view=group&amp;id=1</a>
+                    <a href="reportsv2.php?view=group&amp;id=1"><?=SITE_URL?>/reportsv2.php?view=group&amp;id=1</a>
                 </li>
             </ul>
             <strong>By report ID:</strong>
@@ -123,7 +123,7 @@ foreach ($list as $summary) {
                     The report with ID = 1
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=report&amp;id=1"><?=site_url()?>reportsv2.php?view=report&amp;id=1</a>
+                    <a href="reportsv2.php?view=report&amp;id=1"><?=SITE_URL?>/reportsv2.php?view=report&amp;id=1</a>
                 </li>
             </ul>
             <strong>By reporter ID:</strong>
@@ -132,7 +132,7 @@ foreach ($list as $summary) {
                     Reports created by <?=$owner?>
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=reporter&amp;id=<?=$ownerId?>"><?=site_url()?>reportsv2.php?view=reporter&amp;id=<?=$ownerId?></a>
+                    <a href="reportsv2.php?view=reporter&amp;id=<?=$ownerId?>"><?=SITE_URL?>/reportsv2.php?view=reporter&amp;id=<?=$ownerId?></a>
                 </li>
             </ul>
             <strong>By uploader ID:</strong>
@@ -141,7 +141,7 @@ foreach ($list as $summary) {
                     Reports for torrents uploaded by <?=$owner?>
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=uploader&amp;id=<?=$ownerId?>"><?=site_url()?>reportsv2.php?view=uploader&amp;id=<?=$ownerId?></a>
+                    <a href="reportsv2.php?view=uploader&amp;id=<?=$ownerId?>"><?=SITE_URL?>/reportsv2.php?view=uploader&amp;id=<?=$ownerId?></a>
                 </li>
             </ul>
             <strong>By resolver ID:</strong>
@@ -150,7 +150,7 @@ foreach ($list as $summary) {
                     Reports for torrents resolved by <?=$owner?>
                 </li>
                 <li>
-                    <a href="reportsv2.php?view=resolver&amp;id=<?=$ownerId?>"><?=site_url()?>reportsv2.php?view=resolver&amp;id=<?=$ownerId?></a>
+                    <a href="reportsv2.php?view=resolver&amp;id=<?=$ownerId?>"><?=SITE_URL?>/reportsv2.php?view=resolver&amp;id=<?=$ownerId?></a>
                 </li>
             </ul>
             <strong>User the search feature for anything more specific.</strong>

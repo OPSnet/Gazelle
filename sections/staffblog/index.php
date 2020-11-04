@@ -61,7 +61,7 @@ if (check_perms('admin_manage_blog')) {
                     ->setAuthorId($LoggedUser['ID'])
                     ->modify();
                 send_irc("PRIVMSG ".MOD_CHAN." :!mod New staff blog: " . $blogMan->title()
-                    . " - https://".SSL_SITE_URL."/staffblog.php#blog" . $blogMan->blogId()
+                    . " - " . SITE_URL."/staffblog.php#blog" . $blogMan->blogId()
                 );
                 header('Location: staffblog.php');
                 exit;

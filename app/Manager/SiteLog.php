@@ -85,12 +85,9 @@ class SiteLog extends \Gazelle\Base {
         $message = '';
         $color = $colon = false;
         for ($i = 0, $n = count($messageParts); $i < $n; $i++) {
-            if ((strpos($messageParts[$i], 'https://'.SSL_SITE_URL) === 0
-                    && $offset = strlen('https://'.SSL_SITE_URL.'/'))
-                || (strpos($messageParts[$i], 'http://'.NONSSL_SITE_URL) === 0
-                    && $offset = strlen('http://'.NONSSL_SITE_URL.'/'))
-                ) {
-                    $messageParts[$i] = '<a href="'.substr($messageParts[$i], $offset).'">'.substr($messageParts[$i], $offset).'</a>';
+            if (strpos($messageParts[$i], SITE_URL) === 0) {
+                $offset = strlen(SITE_URL) + 1; // trailing slash
+                $messageParts[$i] = '<a href="'.substr($messageParts[$i], $offset).'">'.substr($messageParts[$i], $offset).'</a>';
             }
             switch ($messageParts[$i]) {
                 case 'Torrent':

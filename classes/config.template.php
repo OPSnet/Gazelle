@@ -4,10 +4,10 @@
 
 // Main settings
 define('SITE_NAME', ''); //The name of your site
-define('NONSSL_SITE_URL', ''); //The FQDN of your site
-define('SSL_SITE_URL', ''); //The FQDN of your site, make this different if you are using a subdomain for ssl
 define('SITE_HOST', ''); // The host for your site (e.g. localhost, orpheus.network)
 define('SITE_URL', 'https://'.SITE_HOST); // The base URL to access the site (e.g. http://localhost:8080, https://orpheus.network)
+//define('ALT_SITE_HOST', ''); // Alternative hostname for site, such as for beta deploy (e.g. beta.localhost)
+//define('ALT_SITE_URL', 'https://' . ALT_SITE_HOST); // This should be uncommented out if you are providing a second way to access site code, e.g. beta site
 define('MAIL_HOST', 'mail.'.SITE_HOST); // The host to use for mail delivery (e.g. mail.orpheus.network)
 define('SERVER_ROOT', '/path'); //The root of the server, used for includes, purpose is to shorten the path string
 define('SERVER_ROOT_LIVE', '/path'); //Only needed on the beta site when accessing unmocked resources, otherwise == SERVER_ROOT
@@ -424,7 +424,7 @@ define('USERNAME_REGEX', '/^'.USERNAME_REGEX_SHORT.'$/iD');
 define('EMAIL_REGEX','[_a-z0-9-]+([.+][_a-z0-9-]+)*@'.DOMAIN_REGEX);
 define('IMAGE_REGEX', URL_REGEX.'\/\S+\.(jpg|jpeg|tif|tiff|png|gif|bmp)(\?\S*)?');
 define('CSS_REGEX', URL_REGEX.'\/\S+\.css(\?\S*)?');
-define('SITELINK_REGEX', RESOURCE_REGEX.'(ssl.)?'.preg_quote(NONSSL_SITE_URL, '/'));
+define('SITELINK_REGEX', '(?:' . preg_quote(SITE_URL, '/') . (defined('ALT_SITE_URL') ? '|' . preg_quote(ALT_SITE_URL, '/') : '') . ')');
 define('TORRENT_REGEX', SITELINK_REGEX.'\/torrents\.php\?(.*&)?torrentid=(\d+)'); // torrentid = group 4
 define('TORRENT_GROUP_REGEX', SITELINK_REGEX.'\/torrents\.php\?(.*&)?id=(\d+)'); // id = group 4
 define('ARTIST_REGEX', SITELINK_REGEX.'\/artist\.php\?(.*&)?id=(\d+)'); // id = group 4

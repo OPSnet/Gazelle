@@ -267,16 +267,6 @@ function add_json_info($Json) {
 }
 
 /**
- * Print the site's URL including the appropriate URI scheme, including the trailing slash
- *
- * @param bool $SSL - whether the URL should be crafted for HTTPS or regular HTTP
- * @return url for site
- */
-function site_url($SSL = true) {
-    return $SSL ? 'https://' . SSL_SITE_URL . '/' : 'http://' . NONSSL_SITE_URL . '/';
-}
-
-/**
  * Hydrate an array from a query string (everything that follow '?')
  * This reimplements parse_str() and side-steps the issue of max_input_vars limits.
  *

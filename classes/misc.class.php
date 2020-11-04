@@ -9,7 +9,7 @@ class Misc {
      * @param string $To the email address to send it to.
      * @param string $Subject
      * @param string $Body
-     * @param string $From The user part of the user@NONSSL_SITE_URL email address.
+     * @param string $From The user part of the user@MAIL_HOST email address.
      * @param string $ContentType text/plain or text/html
      */
 
@@ -113,7 +113,7 @@ class Misc {
         );
         $notification = new Notification;
         foreach ($ToID as $ID) {
-            $notification->push($ID, "Message from $SenderName, Subject: $Subject", $Body, site_url() . 'inbox.php', Notification::INBOX);
+            $notification->push($ID, "Message from $SenderName, Subject: $Subject", $Body, SITE_URL . '/inbox.php', Notification::INBOX);
         }
 
         G::$DB->set_query_id($QueryID);

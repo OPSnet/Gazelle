@@ -19,7 +19,7 @@ $UH = Users::user_heavy_info($UserID);
 
 $Permissions = Permissions::get_permissions($U['PermissionID']);
 if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Permissions['Class'])) {
-    send_irc('PRIVMSG '.ADMIN_CHAN.' :User '.$LoggedUser['Username'].' ('.site_url().'user.php?id='.$LoggedUser['ID'].') just tried to edit the profile of '.site_url().'user.php?id='.$_REQUEST['userid']);
+    send_irc('PRIVMSG '.ADMIN_CHAN.' :User '.$LoggedUser['Username'].' ('.SITE_URL.'/user.php?id='.$LoggedUser['ID'].') just tried to edit the profile of '.SITE_URL.'/user.php?id='.$_REQUEST['userid']);
     error(403);
 }
 
@@ -171,7 +171,7 @@ if (!$Err && !empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empt
     $PassHash = $DB->scalar("
         SELECT PassHash
         FROM users_main
-        WHERE ID = ? 
+        WHERE ID = ?
         ", $UserID
     );
     if (Users::check_password($_POST['cur_pass'], $PassHash)) {

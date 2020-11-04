@@ -94,8 +94,8 @@ if (isset($_POST['delete'])) {
     // topic notes and notifications
     $notes = [];
     $newName = $DB->scalar('SELECT Name FROM forums WHERE ID = ?', $newForumId);
-    $oldUrl = "[url=" . site_url() . "forums.php?action=viewforum&forumid=$oldForumId]{$oldName}[/url]";
-    $newUrl = "[url=" . site_url() . "forums.php?action=viewforum&forumid=$newForumId]{$newName}[/url]";
+    $oldUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=$oldForumId]{$oldName}[/url]";
+    $newUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=$newForumId]{$newName}[/url]";
     switch ($action ?? null) {
         case 'transitioning':
             $notes[] = "Moved from $oldUrl to $newUrl (" . $transition['label'] . " transition)";

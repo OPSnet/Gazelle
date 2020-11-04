@@ -13,7 +13,7 @@ switch ($_REQUEST['action']) {
     case 'takenewnews':
         $newsMan->create($LoggedUser['ID'], $_POST['title'], $_POST['body']);
         $notification = new Notification($LoggedUser['ID']);
-        $notification->push($notification->pushableUsers(), $_POST['title'], $_POST['body'], site_url() . 'index.php', Notification::NEWS);
+        $notification->push($notification->pushableUsers(), $_POST['title'], $_POST['body'], SITE_URL . '/index.php', Notification::NEWS);
         header('Location: index.php');
         exit;
         break;

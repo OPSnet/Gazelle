@@ -6,11 +6,11 @@ function notify ($Channel, $Message) {
     send_irc("PRIVMSG "
         . $Channel . " :" . $Message . " error by "
         . ($UserID
-                ? site_url() . "user.php?id=" . $UserID . " (" . $LoggedUser['Username'] . ")"
+                ? SITE_URL . "/user.php?id=" . $UserID . " (" . $LoggedUser['Username'] . ")"
                 : $_SERVER['REMOTE_ADDR']
           )
         . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
-        . " accessing https://" . SSL_SITE_URL . $_SERVER['REQUEST_URI'] . ' (' . $_SERVER['REQUEST_METHOD'] . ')'
+        . " accessing " . SITE_URL . $_SERVER['REQUEST_URI'] . ' (' . $_SERVER['REQUEST_METHOD'] . ')'
         . (!empty($_SERVER['HTTP_REFERER']) ? " from " . $_SERVER['HTTP_REFERER'] : '')
     );
 }

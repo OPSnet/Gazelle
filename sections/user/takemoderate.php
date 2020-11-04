@@ -169,7 +169,7 @@ if ($resetIPHistory && check_perms('users_edit_reset_keys')) {
 }
 
 if ($_POST['ResetEmailHistory'] ?? 0 && check_perms('users_edit_reset_keys')) {
-    $user->resetEmailHistory($username . '@' . SITE_URL, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
+    $user->resetEmailHistory($username . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $cur['IP']);
     $editSummary[] = 'email history cleared';
 }
 
@@ -319,8 +319,8 @@ if (check_perms('users_warn')) {
             $message = [
                 'summary' => "warned for $warnLength $duration",
                 'subject' => 'You have received a warning',
-                'body'    => "You have been [url=" . site_url()
-                    . "wiki.php?action=article&amp;name=warnings]warned[/url] for $warnLength $duration",
+                'body'    => "You have been [url=" . SITE_URL
+                    . "/wiki.php?action=article&amp;name=warnings]warned[/url] for $warnLength $duration",
             ];
         } else {
             $weeksChange = ($extendWarning != '---') ? $extendWarning : -$reduceWarning;
@@ -479,7 +479,7 @@ if ($privChange && $userReason) {
             'privs'  => $privChange,
             'reason' => $userReason,
             'chan'   => BOT_DISABLED_CHAN,
-            'url'    => site_url() . 'wiki.php?action=article&amp;id=5',
+            'url'    => SITE_URL . '/wiki.php?action=article&amp;id=5',
         ])
     );
     $editSummary[] = 'PM sent';

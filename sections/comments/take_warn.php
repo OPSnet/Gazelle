@@ -25,7 +25,8 @@ $Body = trim($_POST['body']);
 $Length = trim($_POST['length']);
 $PostID = (int)$_POST['postid'];
 
-$URL = site_url() . Comments::get_url_query($PostID);
+$URL = SITE_URL . '/' . Comments::get_url_query($PostID);
+
 if ($Length !== 'verbal') {
     $Time = (int)$Length * (7 * 24 * 60 * 60);
     $WarnTime = time_plus($Time);

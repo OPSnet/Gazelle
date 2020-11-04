@@ -65,7 +65,7 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
 
             $this->cache->delete_value("user_info_$userID");
             $this->cache->delete_value("user_info_heavy_$userID");
-            \Misc::send_pm($userID, 0, "You have been demoted to $classString", "You now only meet the requirements for the \"$classString\" user class.\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".site_url()."wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
+            \Misc::send_pm($userID, 0, "You have been demoted to $classString", "You now only meet the requirements for the \"$classString\" user class.\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
         }
 
         if ($demotions > 0) {

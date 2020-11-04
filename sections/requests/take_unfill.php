@@ -57,12 +57,12 @@ if ($RequestVotes['TotalBounty'] > $Uploaded) {
         WHERE UserID = ?', $RequestVotes['TotalBounty'], $FillerID);
 }
 
-Misc::send_pm($FillerID, 0, 'A request you filled has been unfilled', "The request \"[url=".site_url()."requests.php?action=view&amp;id=$RequestID]$FullName"."[/url]\" was unfilled by [url=".site_url().'user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason']."[/quote]\nIf you feel like this request was unjustly unfilled, please [url=".site_url()."reports.php?action=report&amp;type=request&amp;id=$RequestID]report the request[/url] and explain why this request should not have been unfilled.");
+Misc::send_pm($FillerID, 0, 'A request you filled has been unfilled', "The request \"[url=".SITE_URL."/requests.php?action=view&amp;id=$RequestID]$FullName"."[/url]\" was unfilled by [url=".SITE_URL.'/user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason']."[/quote]\nIf you feel like this request was unjustly unfilled, please [url=".SITE_URL."/reports.php?action=report&amp;type=request&amp;id=$RequestID]report the request[/url] and explain why this request should not have been unfilled.");
 
 $Cache->delete_value("user_stats_$FillerID");
 
 if ($UserID !== $LoggedUser['ID']) {
-    Misc::send_pm($UserID, 0, 'A request you created has been unfilled', "The request \"[url=".site_url()."requests.php?action=view&amp;id=$RequestID]$FullName"."[/url]\" was unfilled by [url=".site_url().'user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username']."[/url] for the reason: [quote]".$_POST['reason'].'[/quote]');
+    Misc::send_pm($UserID, 0, 'A request you created has been unfilled', "The request \"[url=".SITE_URL."/requests.php?action=view&amp;id=$RequestID]$FullName"."[/url]\" was unfilled by [url=".SITE_URL.'/user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username']."[/url] for the reason: [quote]".$_POST['reason'].'[/quote]');
 }
 
 (new Gazelle\Log)->general("Request $RequestID ($FullName), with a ".Format::get_size($RequestVotes['TotalBounty']).' bounty, was unfilled by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].') for the reason: '.$_POST['reason']);

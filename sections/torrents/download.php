@@ -125,8 +125,8 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
                     "user.php?id=" . $UserID
                     . " (" . Users::user_info($UserID)['Username'] . ")"
                     . " (" . Tools::geoip($_SERVER['REMOTE_ADDR']) . ")"
-                    . " accessing https://"
-                    . SSL_SITE_URL . $_SERVER['REQUEST_URI']
+                    . " accessing "
+                    . SITE_URL . $_SERVER['REQUEST_URI']
                     . (!empty($_SERVER['HTTP_REFERER'])? " from ".$_SERVER['HTTP_REFERER'] : '')
                     . ' hit download rate limit',
                     STATUS_CHAN

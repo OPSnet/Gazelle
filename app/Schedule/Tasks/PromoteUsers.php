@@ -84,7 +84,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                         ", $comment, $userId
                     );
 
-                    \Misc::send_pm($userId, 0, "You have been promoted to $toClass", "Congratulations on your promotion to $toClass!\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".site_url()."wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
+                    \Misc::send_pm($userId, 0, "You have been promoted to $toClass", "Congratulations on your promotion to $toClass!\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
                 }
             }
         }

@@ -843,7 +843,7 @@ if ($Details !== "") {
 
 $AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003"
     . " - \00312" . implode(',', $Properties['TagList']) . "\003"
-    . " - \00304".site_url()."torrents.php?id=$GroupID\003 / \00304".site_url()."torrents.php?action=download&id=$TorrentID\003";
+    . " - \00304".SITE_URL."/torrents.php?id=$GroupID\003 / \00304".SITE_URL."/torrents.php?action=download&id=$TorrentID\003";
 
 // ENT_QUOTES is needed to decode single quotes/apostrophes
 send_irc('PRIVMSG #ANNOUNCE :'.html_entity_decode($AnnounceSSL, ENT_QUOTES));

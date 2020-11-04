@@ -245,7 +245,7 @@ class TorrentsDL {
         $Tor->cleanDataDictionary();
         $Tor->setValue([
             'announce' => $AnnounceURL,
-            'comment' => site_url() . "torrents.php?torrentid=$TorrentID",
+            'comment' => SITE_URL . "/torrents.php?torrentid=$TorrentID",
         ]);
         return $Tor->getEncode();
     }

@@ -1,13 +1,9 @@
 s/'SITE_NAME', *'/&Gazelle Dev/
 s/'SITE_HOST', *'/&localhost/
 
-s/'NONSSL_SITE_URL', *'/&localhost:8080/
-s/'SSL_SITE_URL', *'/&localhost:8080/
-s/'SSL_HOST', *'/&localhost/
+s|'(SITE_URL)', *'https://'.SITE_HOST|'\1', 'http://'.SITE_HOST.':8080'|
 
-s/('SITE_URL', *'http)s/\1/
-
-s/'(SERVER_ROOT(_LIVE)?)', *'\/path/'\1', '\/var\/www/
+s|'(SERVER_ROOT(_LIVE)?)', *'/path|'\1', '/var/www|
 
 s|'ANNOUNCE_HTTP_URL', *'|&http://localhost:34000|
 s|'ANNOUNCE_HTTPS_URL', *'|&https://localhost:3400|

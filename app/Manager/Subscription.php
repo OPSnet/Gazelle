@@ -82,10 +82,10 @@ class Subscription extends \Gazelle\Base {
                 ', $Result['ID'], $this->userId, $Page, $PageID, $PostID
             );
             $this->cache->delete_value("notify_quoted_" . $Result['ID']);
-            $URL = site_url() . (
+            $URL = SITE_URL . (
                 ($Page == 'forums')
-                    ? "forums.php?action=viewthread&postid=$PostID"
-                    : "comments.php?action=jump&postid=$PostID"
+                    ? "/forums.php?action=viewthread&postid=$PostID"
+                    : "/comments.php?action=jump&postid=$PostID"
             );
             $notification->push($Result['ID'], 'New Quote!', 'Quoted by ' . $info['Username'] . " $URL", $URL, Notification::QUOTES);
         }
