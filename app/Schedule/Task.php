@@ -66,7 +66,7 @@ abstract class Task extends \Gazelle\Base {
             ', $this->taskId);
             $this->cache->delete_value(Scheduler::CACHE_TASKS);
 
-            Irc::sendChannel('Task '.$this->name.' is no longer sane '.site_url().'tools.php?action=periodic&mode=detail&id='.$this->taskId, LAB_CHAN);
+            Irc::sendChannel('Task '.$this->name.' is no longer sane '.SITE_URL.'/tools.php?action=periodic&mode=detail&id='.$this->taskId, LAB_CHAN);
             // todo: send notifications to appropriate users
         } else if ($errorCount == 0 && !$sane) {
             $this->db->prepared_query('

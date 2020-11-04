@@ -29,7 +29,7 @@ $threadId = $forum->addThread(
     "Editing request – Torrent Group: $groupName",
     G::$Twig->render('forum/request-edit.twig', [
         'user_name' => G::$LoggedUser['Username'],
-        'url'       => site_url() . 'torrents.php?id=' . $groupId,
+        'url'       => SITE_URL . '/torrents.php?id=' . $groupId,
         'name'      => $name,
         'details'   => trim($_POST['edit_details']),
     ])

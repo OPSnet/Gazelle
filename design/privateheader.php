@@ -79,7 +79,7 @@ if (empty(G::$LoggedUser['StyleURL'])) {
         $StyleURLInfo = parse_url(G::$LoggedUser['StyleURL']);
         if (substr(G::$LoggedUser['StyleURL'], -4) == '.css'
                 && $StyleURLInfo['query'].$StyleURLInfo['fragment'] == ''
-                && in_array($StyleURLInfo['host'], [NONSSL_SITE_URL, SSL_SITE_URL])
+                && $StyleURLInfo['host'] === SITE_HOST
                 && file_exists(SERVER_ROOT.$StyleURLInfo['path'])) {
             $StyleURL = G::$LoggedUser['StyleURL'].'?v='.filemtime(SERVER_ROOT.'/public/'.$StyleURLInfo['path']);
         } else {

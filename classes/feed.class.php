@@ -14,7 +14,7 @@ class Feed {
     }
 
     function channel($Title, $Description, $Section = '') {
-        $Site = 'https://' . SSL_SITE_URL . '/';
+        $Site = SITE_URL . '/';
         echo "\t\t<title>$Title :: ". SITE_NAME. "</title>\n";
         echo "\t\t<link>$Site$Section</link>\n";
         echo "\t\t<description>$Description</description>\n";
@@ -30,7 +30,7 @@ class Feed {
         } else {
             $Date = date('r', strtotime($Date));
         }
-        $Site = 'https://' . SSL_SITE_URL . '/';
+        $Site = SITE_URL . '/';
         $Item = "\t\t<item>\n";
         $Item .= "\t\t\t<title><![CDATA[$Title]]></title>\n";
         $Item .= "\t\t\t<description><![CDATA[$Description]]></description>\n";

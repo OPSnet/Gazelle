@@ -53,8 +53,8 @@ if ($UserID != $forumPost['user-id'] && $DoPM) {
         $forumPost['user-id'], 0,
         "Your post #$PostID has been edited",
         sprintf('One of your posts has been edited by %s: [url]%s[/url]',
-            '[url='.site_url()."user.php?id=$UserID]".$LoggedUser['Username'].'[/url]',
-            site_url()."forums.php?action=viewthread&postid=$PostID#post$PostID"
+            '[url='.SITE_URL."/user.php?id=$UserID]".$LoggedUser['Username'].'[/url]',
+            SITE_URL."/forums.php?action=viewthread&postid=$PostID#post$PostID"
         )
     );
 }

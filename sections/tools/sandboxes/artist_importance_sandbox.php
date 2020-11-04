@@ -36,8 +36,8 @@ $DB->prepared_query("
                 <td><?=$ArtistName?></td>
                 <td><?=$GroupName?></td>
                 <td><?=var_export($Importance, true)?></td>
-                <td><?= site_url() ?>/torrents.php?id=<?=$GroupID?></td>
-                <td><?= site_url() ?>/artist.php?id=<?=$ArtistID?></td>
+                <td><?= SITE_URL ?>/torrents.php?id=<?=$GroupID?></td>
+                <td><?= SITE_URL ?>/artist.php?id=<?=$ArtistID?></td>
             </tr>
 <?php
         }

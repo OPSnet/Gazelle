@@ -85,7 +85,7 @@ class User extends AbstractAPI {
                 $user['DisplayStats'][$key] = "Hidden";
             }
         }
-        $user['UserPage'] = site_url() . "user.php?id={$user['ID']}";
+        $user['UserPage'] = SITE_URL . "/user.php?id={$user['ID']}";
 
         return $user;
     }

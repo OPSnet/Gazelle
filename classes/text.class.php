@@ -287,9 +287,7 @@ class Text {
             return false;
         }
         $Host = $URLInfo['host'];
-        // If for some reason your site does not require subdomains or contains a directory in the SITE_URL, revert to the line below.
-        //if ($Host == NONSSL_SITE_URL || $Host == SSL_SITE_URL || $Host == 'www.'.NONSSL_SITE_URL) {
-        if (empty($URLInfo['port']) && preg_match('/(\S+\.)*'.NONSSL_SITE_URL.'/', $Host)) {
+        if (empty($URLInfo['port']) && ($Host === SITE_HOST || (defined('ALT_SITE_HOST') && $Host === ALT_SITE_HOST))) {
             $URL = '';
             if (!empty($URLInfo['path'])) {
                 $URL .= ltrim($URLInfo['path'], '/'); // Things break if the path starts with '//'
@@ -309,7 +307,11 @@ class Text {
     public static function resolve_url($url) {
         $rawurl = str_replace('&amp;', '&', $url); // unfuck aggressive escaping
         $info = parse_url($rawurl);
-        if (!$info || !isset($info['host']) || $info['host'] != SITE_HOST) {
+        if (
+            !$info
+            || empty($info['host'])
+            || ($info['host'] !== SITE_HOST && (!defined('ALT_SITE_HOST') || $info['host'] !== ALT_SITE_HOST))
+        ) {
             return null;
         }
         parse_str($info['query'] ?? '', $args);
@@ -820,7 +822,7 @@ class Text {
                     $Str .= \Torrents::bbcodeUrl($Block['Val'], $Block['Attr']);
                     break;
                 case 'torrent':
-                    $Pattern = '/('.NONSSL_SITE_URL.'\/torrents\.php.*[\?&]id=)?(\d+)($|&|\#).*/i';
+                    $Pattern = '/('.SITELINK_REGEX.'\/torrents\.php.*[\?&]id=)?(\d+)($|&|\#).*/i';
                     $Matches = [];
                     if (preg_match($Pattern, $Block['Val'], $Matches)) {
                         if (isset($Matches[2])) {
@@ -1001,7 +1003,7 @@ class Text {
                             if (substr($Block['Val'], 0, 1) != '/') {
                                 $Block['Val'] = '/' . $Block['Val'];
                             }
-                            $url = self::resolve_url('https://' . SITE_URL . $Block['Val']);
+                            $url = self::resolve_url(SITE_URL . $Block['Val']);
                             if ($url) {
                                 $Str .= $url;
                             } else {
@@ -1300,8 +1302,8 @@ class Text {
         $Str = str_replace("</size>", "[/size]", $Str);
         //$Str = preg_replace("/\<a href=\"rules.php\?(.*)#(.*)\"\>(.*)\<\/a\>/", "[rule]\\3[/rule]", $Str);
         //$Str = preg_replace("/\<a href=\"wiki.php\?action=article&name=(.*)\"\>(.*)\<\/a>/", "[[\\1]]", $Str);
-        $Str = preg_replace('#/torrents.php\?recordlabel="?(?:[^"]*)#', 'https://'.SITE_URL.'\\0', $Str);
-        $Str = preg_replace('#/torrents.php\?taglist="?(?:[^"]*)#', 'https://'.SITE_URL.'\\0', $Str);
+        $Str = preg_replace('#/torrents.php\?recordlabel="?(?:[^"]*)#', SITE_URL.'\\0', $Str);
+        $Str = preg_replace('#/torrents.php\?taglist="?(?:[^"]*)#', SITE_URL.'\\0', $Str);
         $Str = preg_replace("/\<(\/*)artist\>/", "[\\1artist]", $Str);
         $Str = preg_replace("/\((\/*)user\>/", "[\\1user]", $Str);
         $Str = preg_replace("/\<a href=\"([^\"]*?)\">/", "[url=\\1]", $Str);

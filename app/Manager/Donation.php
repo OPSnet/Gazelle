@@ -179,9 +179,9 @@ class Donation extends \Gazelle\Base {
             \Misc::send_pm( $UserID, 0,
                 "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
                 $this->twig->render('donation/special-rank-1.twig', [
-                   'forum_url'   => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'forum_url'   => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
                    'site_name'   => SITE_NAME,
-                   'staffpm_url' => site_url() . 'staffpm.php',
+                   'staffpm_url' => SITE_URL . '/staffpm.php',
                 ])
             );
             $SpecialRank = 1;
@@ -191,7 +191,7 @@ class Donation extends \Gazelle\Base {
             \Misc::send_pm($UserID, 0,
                 "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
                 $this->twig->render('donation/special-rank-2.twig', [
-                   'forum_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'forum_url' => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
                    'site_name' => SITE_NAME,
                 ])
             );
@@ -202,8 +202,8 @@ class Donation extends \Gazelle\Base {
             \Misc::send_pm($UserID, 0,
                 "You have Reached Special Donor Rank #3! You've Earned: Diamond Rank. Details Inside.",
                 $this->twig->render('donation/special-rank-3.twig', [
-                   'forum_url'      => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                   'forum_gold_url' => site_url() . 'forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
+                   'forum_url'      => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
+                   'forum_gold_url' => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
                    'site_name'      => SITE_NAME,
                 ])
             );
@@ -640,7 +640,7 @@ class Donation extends \Gazelle\Base {
             'points' => $ReceivedRank,
             's'      => plural($ReceivedRank),
             'rank'   => $CurrentRank,
-            'staffpm_url' => site_url() . 'staffpm.php',
+            'staffpm_url' => SITE_URL . '/staffpm.php',
         ]);
     }
 

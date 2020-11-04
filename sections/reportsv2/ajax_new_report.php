@@ -388,7 +388,7 @@ foreach ($TypeList as $Type => $Data) {
                         $Extras = explode(' ', $ExtraIDs);
                         $Value = '';
                         foreach ($Extras as $ExtraID) {
-                            $Value .= site_url()."torrents.php?torrentid=$ExtraID ";
+                            $Value .= SITE_URL."/torrents.php?torrentid=$ExtraID ";
                         }
                         echo ' value="'.trim($Value).'"';
                     } ?> />

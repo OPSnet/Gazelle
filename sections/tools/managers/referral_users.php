@@ -141,7 +141,7 @@ $Row = 'b';
 <?php   if (check_perms('users_view_invites')) { ?>
             <td>
 <?php       if (!$Active) { ?>
-                <a href="https://<?=SITE_URL?>/register.php?invite=<?=$Invite?>"><?=$Invite?></a>
+                <a href="<?=SITE_URL?>/register.php?invite=<?=$Invite?>"><?=$Invite?></a>
 <?php       } ?>
             </td>
 <?php   }

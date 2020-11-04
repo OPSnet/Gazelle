@@ -42,11 +42,8 @@ class GenerateInvite extends AbstractAPI {
             VALUES  (?,         ?,         ?,     ?,      now() + INTERVAL 3 DAY)",
             $interviewer_id, $key, $email, "Passed Interview"
         );
-        $site_url = "http";
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "") {
-            $site_url .= "s";
-        }
-        $site_url .= "://" . SITE_URL . "/register.php?invite={$key}";
+
+        $site_url = SITE_URL . "/register.php?invite={$key}";
 
         if (!empty($_GET['email'])) {
             $body = $this->twig->render('emails/invite.twig', [

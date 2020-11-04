@@ -152,7 +152,7 @@ END_MSG
                     , $user['Username']
                     , $staff['Username']
                     , $this->roleTitle()
-                    , site_url() . '/apply.php?action=view&id=' . $this->id()
+                    , SITE_URL . '/apply.php?action=view&id=' . $this->id()
                     , SITE_NAME
                 )
             );

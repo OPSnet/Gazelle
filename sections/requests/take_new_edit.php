@@ -428,7 +428,7 @@ if ($NewRequest) {
         $Bytes, $LoggedUser['ID']);
     $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
 
-    $Announce = "\"$Title\" - ".Artists::display_artists($ArtistForm, false, false).' '.site_url()."requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);
+    $Announce = "\"$Title\" - ".Artists::display_artists($ArtistForm, false, false).' '.SITE_URL."/requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);
     send_irc("PRIVMSG #requests :{$Announce}");
 } else {
     $Cache->delete_value("request_$RequestID");

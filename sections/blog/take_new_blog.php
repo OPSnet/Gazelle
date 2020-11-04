@@ -44,7 +44,7 @@ if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
     $subMan->subscribe($ThreadID);
 }
 $notification = new Notification($LoggedUser['ID']);
-$notification->push($notification->pushableUsers(), $blog->title(), $blog->body(), site_url() . 'index.php', Notification::BLOG);
+$notification->push($notification->pushableUsers(), $blog->title(), $blog->body(), SITE_URL . '/index.php', Notification::BLOG);
 
 send_irc("PRIVMSG " . MOD_CHAN . " :!New blog article: " . $blog->title());
 

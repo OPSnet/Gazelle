@@ -36,7 +36,7 @@ if ($LoggedUser['RatioWatch']
 $Email = $_POST['email'];
 $Username = $LoggedUser['Username'];
 $SiteName = SITE_NAME;
-$SiteURL = site_url();
+$SiteURL = SITE_URL;
 $InviteReason = check_perms('users_invite_notes') ? $_POST['reason'] : '';
 
 //MultiInvite
@@ -83,7 +83,7 @@ If you have previously had an account at $SiteName, do not use this invite. Inst
 
 To confirm your invite, click on the following link:
 
-{$SiteURL}register.php?invite=$InviteKey
+{$SiteURL}/register.php?invite=$InviteKey
 
 After you register, you will be able to use your account. Please take note that if you do not use this invite in the next 3 days, it will expire. We urge you to read the RULES and the wiki immediately after you join.
 

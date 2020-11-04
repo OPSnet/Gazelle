@@ -6,13 +6,11 @@ date_default_timezone_set('UTC');
 
 // Main settings
 define('SITE_NAME', 'Orpheus Dev'); //The name of your site
-define('NONSSL_SITE_URL', 'localhost:8080'); //The FQDN of your site
-define('SSL_SITE_URL', 'localhost:8080'); //The FQDN of your site, make this different if you are using a subdomain for ssl
 define('SITE_HOST', 'localhost');
-//define('SITE_URL', 'http://localhost:8080');
+define('SITE_URL', 'http://localhost:8080');
 define('MAIL_HOST', 'mail.'.SITE_HOST); // The host to use for mail delivery (e.g. mail.orpheus.network)
 define('SERVER_ROOT', '/var/www'); //The root of the server, used for includes, purpose is to shorten the path string
-define('ANNOUNCE_URL', 'http://'.NONSSL_SITE_URL.':34000'); //Announce URL
+define('ANNOUNCE_URL', 'http://'.SITE_HOST.':34000'); //Announce URL
 define('ANNOUNCE_HTTP_URL', 'http://localhost:34000');
 define('ANNOUNCE_HTTPS_URL', 'https://localhost:34000');
 define('REFERRAL_BOUNCER', 'http://127.0.0.1:8888'); // URL to referral bouncer.
@@ -58,10 +56,6 @@ define('TRACKER_HOST', 'localhost');
 define('TRACKER_PORT', 34000);
 define('TRACKER_SECRET', '1737853d77069dc24824916a8d0e501e'); // Must be 32 characters and match site_password in Ocelot's config.cpp
 define('TRACKER_REPORTKEY', '1737853d77069dc24824916a8d0e501e'); // Must be 32 characters and match report_password in Ocelot's config.cpp
-
-
-// This is special to the vagrant setup as we are not using the default 80 port and at the same time cannot use SSL
-define('SITE_URL', NONSSL_SITE_URL);
 
 // Site settings
 define('CRYPT_HASH_PREFIX', '$2y$07$');
@@ -133,7 +127,7 @@ define('DISABLE_IRC', true);
 define('BOT_NICK', '');
 define('BOT_SERVER', ''); // IRC server address. Used for onsite chat tool.
 define('BOT_PORT', 6667);
-define('BOT_CHAN', '#'.NONSSL_SITE_URL);
+define('BOT_CHAN', '#'.SITE_HOST);
 define('BOT_DISABLED_CHAN', '#'); // Channel to refer disabled users to.
 define('BOT_REPORT_CHAN', '#');
 define('SOCKET_LISTEN_PORT', 51010);

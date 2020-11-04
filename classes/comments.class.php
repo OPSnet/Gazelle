@@ -114,8 +114,8 @@ class Comments {
         if ($SendPM && G::$LoggedUser['ID'] != $AuthorID) {
             // Send a PM to the user to notify them of the edit
             $PMSubject = "Your comment #$PostID has been edited";
-            $PMurl = site_url()."comments.php?action=jump&postid=$PostID";
-            $ProfLink = '[url='.site_url().'user.php?id='.G::$LoggedUser['ID'].']'.G::$LoggedUser['Username'].'[/url]';
+            $PMurl = SITE_URL."/comments.php?action=jump&postid=$PostID";
+            $ProfLink = '[url='.SITE_URL.'/user.php?id='.G::$LoggedUser['ID'].']'.G::$LoggedUser['Username'].'[/url]';
             $PMBody = "One of your comments has been edited by $ProfLink: [url]{$PMurl}[/url]";
             Misc::send_pm($AuthorID, 0, $PMSubject, $PMBody);
         }

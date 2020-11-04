@@ -24,7 +24,7 @@ class Collages {
             exit;
         }
         $NameStr = G::$LoggedUser['Username'] . "'s personal collage" . ($CollageCount > 0 ? ' no. ' . ($CollageCount + 1) : '');
-        $Description = 'Personal collage for ' . G::$LoggedUser['Username'] . '. The first 5 albums will appear on his or her [url=' . site_url() . 'user.php?id= ' . G::$LoggedUser['ID'] . ']profile[/url].';
+        $Description = 'Personal collage for ' . G::$LoggedUser['Username'] . '. The first 5 albums will appear on his or her [url=' . SITE_URL . '/user.php?id= ' . G::$LoggedUser['ID'] . ']profile[/url].';
         G::$DB->prepared_query("
             INSERT INTO collages
                    (Name, Description, UserID, CategoryID)

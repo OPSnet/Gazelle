@@ -83,7 +83,7 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                         ", $comment, $userId
                     );
 
-                    \Misc::send_pm($userId, 0, "You have been demoted to $toClass", "You now only qualify for the \"$toClass\" user class.\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".site_url()."wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
+                    \Misc::send_pm($userId, 0, "You have been demoted to $toClass", "You now only qualify for the \"$toClass\" user class.\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
                 }
             }
         }

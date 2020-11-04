@@ -23,49 +23,49 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 switch ($Type) {
     case 'artists':
 ?>
-    <Url type="text/html" method="get" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/artist.php?artistname={searchTerms}"></Url>
-    <moz:SearchForm>http<?=($SSL?'s':'')?>://<?=SITE_URL?>/torrents.php?action=advanced</moz:SearchForm>
+    <Url type="text/html" method="get" template="<?=SITE_URL?>/artist.php?artistname={searchTerms}"></Url>
+    <moz:SearchForm><?=SITE_URL?>/torrents.php?action=advanced</moz:SearchForm>
 <?php
         break;
     case 'torrents':
 ?>
-    <Url type="text/html" method="get" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/torrents.php?action=basic&amp;searchstr={searchTerms}"></Url>
-    <moz:SearchForm>http<?=($SSL?'s':'')?>://<?=SITE_URL?>/torrents.php</moz:SearchForm>
+    <Url type="text/html" method="get" template="<?=SITE_URL?>/torrents.php?action=basic&amp;searchstr={searchTerms}"></Url>
+    <moz:SearchForm><?=SITE_URL?>/torrents.php</moz:SearchForm>
 <?php
         break;
     case 'requests':
 ?>
-    <Url type="text/html" method="get" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/requests.php?search={searchTerms}"></Url>
-    <moz:SearchForm>http<?=($SSL?'s':'')?>://<?=SITE_URL?>/requests.php</moz:SearchForm>
+    <Url type="text/html" method="get" template="<?=SITE_URL?>/requests.php?search={searchTerms}"></Url>
+    <moz:SearchForm><?=SITE_URL?>/requests.php</moz:SearchForm>
 <?php
         break;
     case 'forums':
 ?>
-    <Url type="text/html" method="get" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/forums.php?action=search&amp;search={searchTerms}"></Url>
-    <moz:SearchForm>http<?=($SSL?'s':'')?>://<?=SITE_URL?>/forums.php?action=search</moz:SearchForm>
+    <Url type="text/html" method="get" template="<?=SITE_URL?>/forums.php?action=search&amp;search={searchTerms}"></Url>
+    <moz:SearchForm><?=SITE_URL?>/forums.php?action=search</moz:SearchForm>
 <?php
         break;
     case 'users':
 ?>
-    <Url type="text/html" method="get" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/user.php?action=search&amp;search={searchTerms}"></Url>
-    <moz:SearchForm>http<?=($SSL?'s':'')?>://<?=SITE_URL?>/user.php?action=search</moz:SearchForm>
+    <Url type="text/html" method="get" template="<?=SITE_URL?>/user.php?action=search&amp;search={searchTerms}"></Url>
+    <moz:SearchForm><?=SITE_URL?>/user.php?action=search</moz:SearchForm>
 <?php
         break;
     case 'wiki':
 ?>
-    <Url type="text/html" method="get" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/wiki.php?action=search&amp;search={searchTerms}"></Url>
-    <moz:SearchForm>http<?=($SSL?'s':'')?>://<?=SITE_URL?>/wiki.php?action=search</moz:SearchForm>
+    <Url type="text/html" method="get" template="<?=SITE_URL?>/wiki.php?action=search&amp;search={searchTerms}"></Url>
+    <moz:SearchForm><?=SITE_URL?>/wiki.php?action=search</moz:SearchForm>
 <?php
         break;
     case 'log':
 ?>
-    <Url type="text/html" method="get" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/log.php?search={searchTerms}"></Url>
-    <moz:SearchForm>http<?=($SSL?'s':'')?>://<?=SITE_URL?>/log.php</moz:SearchForm>
+    <Url type="text/html" method="get" template="<?=SITE_URL?>/log.php?search={searchTerms}"></Url>
+    <moz:SearchForm><?=SITE_URL?>/log.php</moz:SearchForm>
 <?php
         break;
 }
 ?>
-    <Url type="application/opensearchdescription+xml" rel="self" template="http<?=($SSL?'s':'')?>://<?=SITE_URL?>/opensearch.php?type=<?=$Type?>" />
+    <Url type="application/opensearchdescription+xml" rel="self" template="<?=SITE_URL?>/opensearch.php?type=<?=$Type?>" />
     <Language>en-us</Language>
     <OutputEncoding>UTF-8</OutputEncoding>
     <InputEncoding>UTF-8</InputEncoding>

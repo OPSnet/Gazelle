@@ -74,7 +74,7 @@ if ($needPoll) {
     $forum->addPoll($threadId, $Question, $Answers);
     $Cache->cache_value("polls_$threadId", [$Question, $Answers, $Votes, null, 0], 0);
     if ($ForumID == STAFF_FORUM) {
-        send_irc('PRIVMSG '.MOD_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".site_url()."forums.php?action=viewthread&threadid=$threadId");
+        send_irc('PRIVMSG '.MOD_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
     }
 }
 

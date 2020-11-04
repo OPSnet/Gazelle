@@ -50,7 +50,7 @@ class Referral extends \Gazelle\Base {
 
         $status = $this->cache->get_value(self::CACHE_BOUNCER);
         if ($status === false) {
-            $req = $this->proxy->fetch(site_url(), [], [], false);
+            $req = $this->proxy->fetch(SITE_URL, [], [], false);
             $status = $req == null ? 'dead' : 'alive';
             $this->cache->cache_value(self::CACHE_BOUNCER, $status, 60 * 15);
         }

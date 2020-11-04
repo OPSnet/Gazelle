@@ -54,7 +54,7 @@ class User extends BaseObject {
     }
 
     public function url(): string {
-        return site_url() . "user.php?id=" . $this->id;
+        return SITE_URL . "/user.php?id=" . $this->id;
     }
 
     public function info(): ?array {

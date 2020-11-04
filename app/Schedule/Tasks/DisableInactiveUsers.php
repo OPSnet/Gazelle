@@ -31,7 +31,7 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         // Send email
         $this->userQuery(110, 111);
         while (list($username, $email) = $this->db->next_record()) {
-            $body = "Hi $username,\n\nIt has been almost 4 months since you used your account at ".site_url().". This is an automated email to inform you that your account will be disabled in 10 days if you do not sign in.";
+            $body = "Hi $username,\n\nIt has been almost 4 months since you used your account at ".SITE_URL."/. This is an automated email to inform you that your account will be disabled in 10 days if you do not sign in.";
             \Misc::send_email($email, 'Your '.SITE_NAME.' account is about to be disabled', $body, 'noreply');
         }
 
