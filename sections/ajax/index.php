@@ -177,6 +177,9 @@ switch ($_GET['action']) {
     case 'torrent_stats':
         require('stats/torrents.php');
         break;
+    case 'logchecker':
+        require('logchecker.php');
+        break;
 
     case 'upload':
         require(__DIR__ . '/../upload/upload_handle.php');
