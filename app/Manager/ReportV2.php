@@ -2,7 +2,7 @@
 
 namespace Gazelle\Manager;
 
-class Reportv2 extends \Gazelle\Base {
+class ReportV2 extends \Gazelle\Base {
 
     protected $categories = [
         'master' => 'General',

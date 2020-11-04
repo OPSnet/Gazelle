@@ -48,4 +48,4 @@ twig-flush:
 .PHONY: update
 update:
 	git pull
-	composer install --no-dev --optimize-autoloader --no-suggest --no-progress
+	composer install --no-dev --optimize-autoloader --no-progress
