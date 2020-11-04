@@ -65,7 +65,7 @@ abstract class CommentViewer {
             'show_avatar' => $this->user->avatarMode() != '1',
             'show_delete' => check_perms('site_moderate_forums'),
             'show_edit'   => $ownProfile || check_perms('site_moderate_forums'),
-            'show_warn'   => check_perms('users_warn') && !$ownProfile && $this->user->primaryClass() >= $author['Class'],
+            'show_warn'   => check_perms('users_warn') && !$ownProfile && $this->user->classLevel() >= $author['Class'],
             'unread'      => $Unread,
             'url'         => $this->baseLink($PostID),
             'username'    => $author['Username'],

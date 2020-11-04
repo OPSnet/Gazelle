@@ -1,5 +1,7 @@
 <?php
 
+/** @var \Gazelle\Bonus $Bonus */
+
 View::show_header('Bonus Points Shop', 'bonus');
 
 if (isset($_GET['complete'])) {
@@ -59,7 +61,7 @@ if ($pool) {
 
 echo G::$Twig->render('bonus/store.twig', [
     'auth'     => $auth,
-    'class'    => $user->primaryClass(),
+    'class'    => $user->classLevel(),
     'discount' => $Bonus->discount(),
     'list'     => $Bonus->getListForUser($user),
     'points'   => $points,
