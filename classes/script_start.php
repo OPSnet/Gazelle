@@ -311,7 +311,7 @@ if (isset($LoggedUser['ID'])) {
     $LightInfo = Users::user_info($LoggedUser['ID']);
     if (empty($LightInfo['Username'])) { // Ghost
         if (!is_null($FullToken)) {
-            $User->flushCache();
+            $User->flush();
             log_token_attempt(G::$DB, $LoggedUser['ID']);
             header('Content-type: application/json');
             json_die('failure', 'invalid token');
