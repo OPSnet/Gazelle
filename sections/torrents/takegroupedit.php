@@ -27,9 +27,12 @@ list ($OldVH, $oldNoCoverArt) = $DB->row("
     WHERE tg.ID = ?
     ", $GroupID
 );
+
 if ($OldVH === null) {
     error(404);
 }
+
+$VanityHouse = $OldVH;
 
 if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're reverting to a previous revision
     $RevisionID = $_GET['revisionid'];
@@ -67,8 +70,6 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
     $ReleaseType = (int)$_POST['releasetype'];
     if (check_perms('torrents_edit_vanityhouse')) {
         $VanityHouse = (isset($_POST['vanity_house']) ? 1 : 0);
-    } else {
-        $VanityHouse = $OldVH;
     }
 
     if (($GroupInfo = $Cache->get_value('torrents_details_'.$GroupID)) && !isset($GroupInfo[0][0])) {
