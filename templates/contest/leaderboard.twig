@@ -1,5 +1,5 @@
 <div class="head">
-{% if contest.hasPool %}
+{% if contest.hasBonusPool %}
     <h3>The Bonus Point pool currently stands at {{ contest.bonusPoolTotal|number_format }} points.</h3>
 {% endif %}
 {% if not contest.isOpen %}
