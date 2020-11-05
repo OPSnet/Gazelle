@@ -46,8 +46,9 @@ if (empty($_POST['sitelink'])) {
     $ExtraIDs = '';
 } else {
     if (preg_match_all('/'.TORRENT_REGEX.'/i', $_POST['sitelink'], $Matches)) {
-        $ExtraIDs = implode(' ', $Matches[4]);
-        if (in_array($TorrentID, $Matches[4])) {
+        $Match = end($Matches);
+        $ExtraIDs = implode(' ', $Match);
+        if (in_array($TorrentID, $Match)) {
             $Err = "The extra permalinks you gave included the link to the torrent you're reporting!";
         }
     } else {

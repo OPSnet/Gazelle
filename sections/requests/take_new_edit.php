@@ -170,7 +170,7 @@ if (!empty($FormatArray) && in_array(array_search('FLAC', $Formats), $FormatArra
 if (!empty($_POST['groupid'])) {
     $GroupID = trim($_POST['groupid']);
     if (preg_match('/^'.TORRENT_GROUP_REGEX.'/i', $GroupID, $Matches)) {
-        $GroupID = $Matches[4];
+        $GroupID = end($Matches);
     }
     if (intval($GroupID)) {
         $DB->prepared_query('

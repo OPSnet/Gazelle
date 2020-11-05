@@ -69,6 +69,7 @@ function torrentEdition($title, $year, $recordLabel, $catlogueNumber, $media) {
 
 $User = new \Gazelle\User($LoggedUser['ID']);
 $name = $Artist->name() ?? 'artist:' . $ArtistID;
+$Requests = [];
 
 View::show_header($name, 'browse,requests,bbcode,comments,voting,subscriptions');
 ?>

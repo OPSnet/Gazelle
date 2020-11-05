@@ -42,7 +42,7 @@ if (!empty($_GET['torrentid']) && intval($_GET['torrentid'])) {
         if (!preg_match('/'.TORRENT_REGEX.'/i', $Link, $Matches)) {
             return print_or_return('Your link does not appear to be valid (use the [PL] button to obtain the correct URL).');
         } else {
-            $TorrentID = $Matches[4];
+            $TorrentID = end($Matches);
         }
     }
     if (!$TorrentID || !intval($TorrentID)) {

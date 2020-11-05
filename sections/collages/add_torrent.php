@@ -47,7 +47,7 @@ if ($_REQUEST['action'] == 'add_torrent') {
 $Torrent = [];
 foreach ($URL as $u) {
     preg_match('/^'.TORRENT_GROUP_REGEX.'/i', $u, $match);
-    $GroupID = $match[4];
+    $GroupID = end($match);
     if (!$GroupID || (int)$GroupID === 0) {
         $safe = htmlspecialchars($u);
         error("The entered url ($safe) does not correspond to a torrent page on site.");
