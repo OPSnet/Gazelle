@@ -45,6 +45,7 @@ if (!empty($_GET['torrentid']) && intval($_GET['torrentid'])) {
             $TorrentID = end($Matches);
         }
     }
+
     if (!$TorrentID || !intval($TorrentID)) {
         return print_or_return('could not determine torrentid', 404);
     }
@@ -210,7 +211,7 @@ Requests::update_sphinx_requests($RequestID);
 $SphQL = new SphinxqlQuery();
 $SphQL->raw_query("UPDATE requests, requests_delta SET torrentid = $TorrentID, fillerid = $FillerID WHERE id = $RequestID", false);
 
-if (!defined('AJAX')) {
+if (defined('AJAX')) {
     return [
         'requestId' => $RequestID,
         'torrentId' => $TorrentID,
