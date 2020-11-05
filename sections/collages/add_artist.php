@@ -51,7 +51,7 @@ foreach ($URL as $u) {
         $safe = htmlspecialchars($u);
         error("The entered url ($safe) does not correspond to an artist page on site.");
     }
-    $ArtistID = $match[4];
+    $ArtistID = end($match);
     try {
         $artist = new Gazelle\Artist($ArtistID);
     }
