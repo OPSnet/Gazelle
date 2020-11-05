@@ -236,7 +236,7 @@ class Tools {
 
             G::$DB->prepared_query("
                 UPDATE users_info SET
-                    Warned = ?
+                    Warned = ?,
                     WarnedTimes = WarnedTimes + 1,
                     AdminComment = CONCAT(?, AdminComment)
                 WHERE UserID = ?
@@ -254,7 +254,7 @@ class Tools {
 
             G::$DB->prepared_query("
                 UPDATE users_info SET
-                    Warned = ?
+                    Warned = ?,
                     WarnedTimes = WarnedTimes + 1,
                     AdminComment = CONCAT(?, AdminComment)
                 WHERE UserID = ?
