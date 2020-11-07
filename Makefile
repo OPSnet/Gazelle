@@ -1,10 +1,19 @@
 .DEFAULT_GOAL := help
 
+NOW := $(shell date +'%Y%m%d-%H%M%S')
+STORAGE_PATH_RIPLOG     := $(shell scripts/getconf STORAGE_PATH_RIPLOG)
+STORAGE_PATH_RIPLOGHTML := $(shell scripts/getconf STORAGE_PATH_RIPLOGHTML)
+STORAGE_PATH_TORRENT    := $(shell scripts/getconf STORAGE_PATH_TORRENT)
+
 .SILENT: help
 .PHONY: help
 help:
 	echo '  help               - output this message'
 	echo '  build-css          - build the CSS'
+	echo '  dump-all           - create tarballs of the following:'
+	echo '  dump-riplog        - create a tarball of the rip logs'
+	echo '  dump-riploghtml    - create a tarball of the HTMLified rip logs'
+	echo '  dump-torrent       - create a tarball of the rip logs'
 	echo '  lint-css           - lint (style check) the CSS'
 	echo '  mysqldump          - dump mysql database from docker to db/data/gazelle.sql'
 	echo '  ocelot-reload-conf - signal Ocelot to reload its configuration'
@@ -16,6 +25,21 @@ help:
 .PHONY: build-css
 build-css:
 	yarn build:scss
+
+.PHONY: dump-all
+dump-all: dump-riplog dump-riploghtml dump-torrent
+
+.PHONY: dump-riplog
+dump-riplog:
+	tar -C "$(STORAGE_PATH_RIPLOG)/.." -jcf riplog.$(NOW).tar.bz2 "$$(basename $(STORAGE_PATH_RIPLOG))"
+
+.PHONY: dump-riploghtml
+dump-riploghtml:
+	tar -C "$(STORAGE_PATH_RIPLOGHTML)/.." -jcf riploghtml.$(NOW).tar.bz2 "$$(basename $(STORAGE_PATH_RIPLOGHTML))"
+
+.PHONY: dump-torrent
+dump-torrent:
+	tar -C "$(STORAGE_PATH_TORRENT)/.." -jcf torrent.$(NOW).tar.bz2 "$$(basename $(STORAGE_PATH_TORRENT))"
 
 .PHONY: lint-css
 lint-css:
