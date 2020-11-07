@@ -1,0 +1,36 @@
+#! /usr/bin/env php
+<?php
+
+/**
+ * A command-line tool to expose configuration values
+ * Switches:
+ *  -j encode the output as JSON (useful for arrays)
+ *
+ * usage:
+ *  getconf SQLPASS
+ *    (prints the db password)
+ *
+ *  getconf -j RANKING_WEIGHT
+ *    try it :)
+ */
+
+require_once(__DIR__ . '/../classes/config.php');
+
+array_shift($argv);
+$multi = count($argv) > 1;
+$json = false;
+
+foreach ($argv as $arg) {
+    switch($arg) {
+        case '-j':
+            $json = !$json;
+            break;
+        default:
+            $value = get_defined_constants()[$arg];
+            if ($json) {
+                echo json_encode($multi ? [$arg => $value] : $value), "\n";
+            } else {
+                echo ($multi ? "$arg: $value" : $value), "\n";
+            }
+    }
+}
