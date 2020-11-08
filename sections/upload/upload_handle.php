@@ -60,8 +60,8 @@ $Properties['ReleaseType'] = $_POST['releasetype'];
 $Properties['Scene'] = !empty($_POST['scene']) ? '1' : '0';
 $Properties['Format'] = trim($_POST['format']);
 $Properties['Media'] = trim($_POST['media'] ?? '');
-$Properties['Encoding'] = $Properties['Bitrate'] = trim($_POST['bitrate'] ?? '');
-if ($Properties['Encoding'] == 'Other') {
+$Properties['Encoding'] = trim($_POST['bitrate'] ?? '');
+if ($Properties['Encoding'] === 'Other') {
     $_POST['other_bitrate'] = trim($_POST['other_bitrate'] ?? '');
 }
 $Properties['MultiDisc'] = $_POST['multi_disc'] ?? null;
@@ -89,154 +89,108 @@ if (!empty($_POST['requestid'])) {
 //******************************************************************************//
 //--------------- Validate data in upload form ---------------------------------//
 
+$isMusicUpload = ($Type === 'Music');
+
+// common to all types
 $Validate->SetFields('type', '1', 'inarray', 'Please select a valid type.', ['inarray' => array_keys($Categories)]);
+$Validate->SetFields('release_desc', '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
+$Validate->SetFields('rules', '1','require','Your torrent must abide by the rules.');
+
+if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
+    $Validate->SetFields('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
+    $Validate->SetFields('image', '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
+    $Validate->SetFields('tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
+    $Validate->SetFields('title', '1','string','Title must be between 2 and 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
+    $Validate->SetFields('year', '1','number','The year of the release must be entered.');
+}
+
+// audio types
+if (in_array($Type, ['Music', 'Audiobooks', 'Comedy'])) {
+    $Validate->SetFields('format', '1','inarray','Please select a valid format.', ['inarray'=>$Formats]);
+
+    if ($Properties['Encoding'] !== 'Other') {
+        $Validate->SetFields('bitrate', '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
+    } else {
+        if ($Properties['Format'] === 'FLAC') {
+            $Validate->SetFields('bitrate', '1','string','FLAC bitrate must be lossless.', ['regex'=>'/Lossless/']);
+        } else {
+            $Validate->SetFields('other_bitrate',
+                '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
+            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');;
+        }
+    }
+}
+
+$feedType = ['torrents_all'];
+
 switch ($Type) {
     case 'Music':
+        $Validate->SetFields('groupid', '0', 'number', 'Group ID was not numeric');
+        $Validate->SetFields('media', '1','inarray','Please select a valid media.', ['inarray'=>$Media]);
+
         if (!$Properties['GroupID']) {
-            $Validate->SetFields('title',
-                '1','string','Title must be between 1 and 200 characters.', ['maxlength'=>200, 'minlength'=>1]);
-
-            $Validate->SetFields('year',
-                '1','number','The year of the original release must be entered.', ['length'=>40]);
-
-            $Validate->SetFields('releasetype',
-                '1','inarray','Please select a valid release type.', ['inarray'=>array_keys($ReleaseTypes)]);
-
-            $Validate->SetFields('tags',
-                '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-
-            $Validate->SetFields('record_label',
-                '0','string','Record label must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-
-            $Validate->SetFields('catalogue_number',
-                '0','string','Catalogue Number must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-
-            $Validate->SetFields('album_desc',
-                '1','string','The album description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
-
+            $Validate->SetFields('year', '1','number','The year of the original release must be entered.', ['length'=>40]);
+            $Validate->SetFields('releasetype', '1','inarray','Please select a valid release type.', ['inarray'=>array_keys($ReleaseTypes)]);
+            $Validate->SetFields('record_label', '0','string','Record label must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
+            $Validate->SetFields('catalogue_number', '0','string','Catalogue Number must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
             if ($Properties['Media'] == 'CD' && !$Properties['Remastered']) {
                 $Validate->SetFields('year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength'=>1982]);
             }
         }
 
-        if ($Properties['Remastered'] && !$Properties['UnknownRelease']) {
-            $Validate->SetFields('remaster_year',
-                '1','number','Year of remaster/re-issue must be entered.');
-        } else {
-            $Validate->SetFields('remaster_year',
-                '0','number','Invalid remaster year.');
-        }
-
-        if ($Properties['Media'] == 'CD' && $Properties['Remastered']) {
-            $Validate->SetFields('remaster_year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength'=>1982]);
-        }
-
-        $Validate->SetFields('remaster_title',
-            '0','string','Remaster title must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-        if ($Properties['RemasterTitle'] == 'Original Release') {
+        $Validate->SetFields('remaster_title', '0','string','Remaster title must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
+        $Validate->SetFields('remaster_record_label', '0','string','Remaster record label must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
+        $Validate->SetFields('remaster_catalogue_number', '0','string','Remaster catalogue number must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
+        if ($Properties['RemasterTitle'] === 'Original Release') {
             $Validate->SetFields('remaster_title', '0', 'string', '"Orginal Release" is not a valid remaster title.');
         }
-
-        $Validate->SetFields('remaster_record_label',
-            '0','string','Remaster record label must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-
-        $Validate->SetFields('remaster_catalogue_number',
-            '0','string','Remaster catalogue number must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-
-        $Validate->SetFields('format',
-            '1','inarray','Please select a valid format.', ['inarray'=>$Formats]);
-
-        // Handle 'other' bitrates
-        if ($Properties['Encoding'] == 'Other') {
-            if ($Properties['Format'] == 'FLAC') {
-                $Validate->SetFields('bitrate',
-                    '1','string','FLAC bitrate must be lossless.', ['regex'=>'/Lossless/']);
-            }
-
-            $Validate->SetFields('other_bitrate',
-                '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
-            $enc = $_POST['other_bitrate'];
-            if (!empty($_POST['vbr'])) {
-                $enc.= ' (VBR)';
-            }
-
-            $Properties['Encoding'] = $Properties['Bitrate'] = $enc;
+        if (!$Properties['Remastered']) {
+            $Validate->SetFields('remaster_year', '0','number','Invalid remaster year.');
         } else {
-            $Validate->SetFields('bitrate',
-                '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
-        }
-
-        $Validate->SetFields('media',
-            '1','inarray','Please select a valid media.', ['inarray'=>$Media]);
-
-        $Validate->SetFields('image',
-            '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
-
-        $Validate->SetFields('release_desc',
-            '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
-
-        $Validate->SetFields('groupid', '0', 'number', 'Group ID was not numeric');
-
-        break;
-
-    case 'Audiobooks':
-    case 'Comedy':
-        $Validate->SetFields('title',
-            '1','string','Title must be between 2 and 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-
-        $Validate->SetFields('year',
-            '1','number','The year of the release must be entered.');
-
-        $Validate->SetFields('format',
-            '1','inarray','Please select a valid format.', ['inarray'=>$Formats]);
-
-        if ($Properties['Encoding'] == 'Other') {
-            $Validate->SetFields('other_bitrate',
-                '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
-            $enc = $_POST['other_bitrate'];
-            if (!empty($_POST['vbr'])) {
-                $enc.= ' (VBR)';
+            if (!$Properties['UnknownRelease']) {
+                $Validate->SetFields('remaster_year', '1','number','Year of remaster/re-issue must be entered.');
             }
-
-            $Properties['Encoding'] = $Properties['Bitrate'] = $enc;
-        } else {
-            $Validate->SetFields('bitrate',
-                '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
+            if ($Properties['Media'] == 'CD' ) {
+                $Validate->SetFields('remaster_year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.',
+                    ['minlength' => 1982]
+                );
+            }
         }
-
-        $Validate->SetFields('album_desc',
-            '1','string','You must enter a proper audiobook description.', ['maxlength'=>1000000, 'minlength'=>10]);
-
-        $Validate->SetFields('tags',
-            '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-
-        $Validate->SetFields('release_desc',
-            '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
-
-        $Validate->SetFields('image',
-            '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
+        $feedType[] = 'torrents_music';
+        if ($Properties['Media'] === 'Vinyl') {
+            $feedType[] = 'torrents_vinyl';
+        }
+        if ($Properties['Encoding'] === 'Lossless') {
+            $feedType[] = 'torrents_lossless';
+        } elseif ($Properties['Encoding'] === '24bit Lossless') {
+            $feedType[] = 'torrents_lossless24';
+        }
+        if ($Properties['Format'] === 'MP3') {
+            $feedType[] = 'torrents_mp3';
+        } elseif ($Properties['Format'] === 'FLAC') {
+            $feedType[] = 'torrents_flac';
+        }
         break;
 
     case 'Applications':
+        $feedType[] = 'torrents_apps';
+        break;
+    case 'Audiobooks':
+        $feedType[] = 'torrents_abooks';
+        break;
+    case 'Comedy':
+        $feedType[] = 'torrents_comedy';
+        break;
     case 'Comics':
+        $feedType[] = 'torrents_comics';
+        break;
     case 'E-Books':
+        $feedType[] = 'torrents_ebooks';
+        break;
     case 'E-Learning Videos':
-        $Validate->SetFields('title',
-            '1','string','Title must be between 2 and 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-
-        $Validate->SetFields('tags',
-            '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-
-        $Validate->SetFields('release_desc',
-            '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
-
-        $Validate->SetFields('image',
-            '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
+        $feedType[] = '';
         break;
 }
-
-$Validate->SetFields('rules',
-    '1','require','Your torrent must abide by the rules.');
 
 $Err = $Validate->ValidateForm($_POST); // Validate the form
 
@@ -249,7 +203,7 @@ if (!is_uploaded_file($TorrentName) || !filesize($TorrentName)) {
     $Err = "You seem to have put something other than a torrent file into the upload field. (".$File['name'].").";
 }
 
-if ($Type == 'Music') {
+if ($isMusicUpload) {
     //extra torrent files
     $ExtraTorrents = [];
     $DupeNames = [];
@@ -294,7 +248,7 @@ if ($Type == 'Music') {
 
 //Multiple artists
 $LogName = '';
-if (empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
+if (empty($Properties['GroupID']) && empty($ArtistForm) && $isMusicUpload) {
     $MainArtistCount = 0;
     $ArtistNames = [];
     $ArtistForm = [
@@ -334,7 +288,7 @@ if ($Err) { // Show the upload form, with the data the user entered
     }
 }
 
-if (!empty($Properties['GroupID']) && empty($ArtistForm) && $Type == 'Music') {
+if (!empty($Properties['GroupID']) && empty($ArtistForm) && $isMusicUpload) {
     $DB->prepared_query('
         SELECT ta.ArtistID, aa.Name, ta.Importance
         FROM torrents_artists AS ta
@@ -453,7 +407,7 @@ $LogInDB = count($logfileSummary->all()) ? '1' : '0';
 
 $ExtraTorrentsInsert = [];
 // disable extra torrents when using ajax, just have them re-submit multiple times
-if ($Type == 'Music') {
+if ($isMusicUpload) {
     foreach ($ExtraTorrents as $ExtraTorrent) {
         $Name = $ExtraTorrent['Name'];
         $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
@@ -532,7 +486,7 @@ if ($Err) {
 //--------------- Start database stuff -----------------------------------------//
 
 $NoRevision = false;
-if ($Type == 'Music') {
+if ($isMusicUpload) {
     // Does it belong in a group?
     if ($Properties['GroupID']) {
         $DB->prepared_query("
@@ -640,7 +594,7 @@ $IsNewGroup = !isset($GroupID);
 
 //----- Start inserts
 if ($IsNewGroup) {
-    if ($Type == 'Music') {
+    if ($isMusicUpload) {
         //array to store which artists we have added already, to prevent adding an artist twice
         $ArtistsAdded = [];
         $ArtistManager = new Gazelle\Manager\Artist;
@@ -669,7 +623,7 @@ if ($IsNewGroup) {
             $Properties['GroupDescription'], $Properties['Image'], $Properties['ReleaseType'], $Properties['VanityHouse']
     );
     $GroupID = $DB->inserted_id();
-    if ($Type == 'Music') {
+    if ($isMusicUpload) {
         foreach ($ArtistForm as $Importance => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 $DB->prepared_query('
@@ -691,7 +645,7 @@ if ($IsNewGroup) {
         ', $GroupID
     );
     $Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID", "detail_files_$GroupID"]);
-    if ($Type == 'Music') {
+    if ($isMusicUpload) {
         $Properties['ReleaseType'] = $DB->scalar('
             SELECT ReleaseType
             FROM torrents_group
@@ -805,24 +759,24 @@ $Debug->set_flag('upload: sphinx updated');
 
 // Running total for amount of BP to give
 $Bonus = new Gazelle\Bonus;
-$BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Bitrate'], $LogInDB,
+$BonusPoints = $Bonus->getTorrentValue($Properties['Format'], $Properties['Media'], $Properties['Encoding'], $LogInDB,
     $logfileSummary->overallScore(), $logfileSummary->checksumStatus());
 
 //******************************************************************************//
 //---------------IRC announce and feeds ---------------------------------------//
 $Announce = '';
 
-if ($Type == 'Music') {
+if ($isMusicUpload) {
     $Announce .= Artists::display_artists($ArtistForm, false);
 }
 $Announce .= $Properties['Title'] . ' ';
 $Details = "";
-if ($Type == 'Music') {
+if ($isMusicUpload) {
     $Announce .= '['.$Properties['Year'].']';
-    if (($Type == 'Music') && ($Properties['ReleaseType'] > 0)) {
+    if ($Properties['ReleaseType'] > 0) {
         $Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
     }
-    $Details .= $Properties['Format'].' / '.$Properties['Bitrate'];
+    $Details .= $Properties['Format'].' / '.$Properties['Encoding'];
     if ($HasLog == 1) {
         $Details .= ' / Log'.($LogInDB ? " ({$logfileSummary->overallScore()}%)" : "");
     }
@@ -962,7 +916,7 @@ if (function_exists('fastcgi_finish_request')) {
 }
 
 // Manage notifications
-$UsedFormatBitrates = [];
+$seenFormatEncoding = [];
 
 if (!$IsNewGroup) {
     // maybe there are torrents in the same release as the new torrent. Let's find out (for notifications)
@@ -983,7 +937,7 @@ if (!$IsNewGroup) {
             && ($TorrentInfo['RemasterRecordLabel'] == $ThisRemasterRecordLabel)
             && ($TorrentInfo['RemasterCatalogueNumber'] == $ThisRemasterCatalogueNumber)
             && ($TorrentInfo['ID'] != $TorrentID)) {
-            $UsedFormatBitrates[] = ['format' => $TorrentInfo['Format'], 'bitrate' => $TorrentInfo['Encoding']];
+            $seenFormatEncoding[] = ['format' => $TorrentInfo['Format'], 'bitrate' => $TorrentInfo['Encoding']];
         }
     }
 }
@@ -1088,14 +1042,13 @@ $SQL .= "AND ((NewGroupsOnly = '0' ";
 // Or this is the first torrent in the group to match the formatbitrate filter
 $SQL .= ") OR ( NewGroupsOnly = '1' ";
 // Test the filter doesn't match any previous formatbitrate in the group
-foreach ($UsedFormatBitrates as $UsedFormatBitrate) {
-    $FormatReq = "(Formats LIKE '%|".db_string($UsedFormatBitrate['format'])."|%' OR Formats = '') ";
-    $BitrateReq = "(Encodings LIKE '%|".db_string($UsedFormatBitrate['bitrate'])."|%' OR Encodings = '') ";
-    $SQL .= "AND (NOT($FormatReq AND $BitrateReq)) ";
+foreach ($seenFormatEncoding as $formatEncoding) {
+    $FormatReq = "(Formats LIKE '%|".db_string($formatEncoding['format'])."|%' OR Formats = '') ";
+    $EncodingReq = "(Encodings LIKE '%|".db_string($formatEncoding['bitrate'])."|%' OR Encodings = '') ";
+    $SQL .= "AND (NOT($FormatReq AND $EncodingReq)) ";
 }
 
 $SQL .= '))';
-
 
 if ($Properties['Year'] && $Properties['RemasterYear']) {
     $SQL .= " AND (('".db_string($Properties['Year'])."' BETWEEN FromYear AND ToYear)
@@ -1153,53 +1106,19 @@ if ($DB->has_results()) {
 
 // RSS for bookmarks
 $DB->prepared_query('
-    SELECT u.ID, u.torrent_pass
+    SELECT u.torrent_pass
     FROM users_main AS u
     INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
     WHERE b.GroupID = ?
     ', $GroupID
 );
-while ([$UserID, $Passkey] = $DB->next_record()) {
-    $Feed->populate("torrents_bookmarks_t_$Passkey", $Item);
+while ([$Passkey] = $DB->next_record()) {
+    $feedType[] = "torrents_bookmarks_t_$Passkey";
 }
-
-$Feed->populate('torrents_all', $Item);
 $Debug->set_flag('upload: notifications handled');
-if ($Type == 'Music') {
-    $Feed->populate('torrents_music', $Item);
-    if ($Properties['Media'] == 'Vinyl') {
-        $Feed->populate('torrents_vinyl', $Item);
-    }
-    if ($Properties['Bitrate'] == 'Lossless') {
-        $Feed->populate('torrents_lossless', $Item);
-    }
-    if ($Properties['Bitrate'] == '24bit Lossless') {
-        $Feed->populate('torrents_lossless24', $Item);
-    }
-    if ($Properties['Format'] == 'MP3') {
-        $Feed->populate('torrents_mp3', $Item);
-    }
-    if ($Properties['Format'] == 'FLAC') {
-        $Feed->populate('torrents_flac', $Item);
-    }
-}
-if ($Type == 'Applications') {
-    $Feed->populate('torrents_apps', $Item);
-}
-if ($Type == 'E-Books') {
-    $Feed->populate('torrents_ebooks', $Item);
-}
-if ($Type == 'Audiobooks') {
-    $Feed->populate('torrents_abooks', $Item);
-}
-if ($Type == 'E-Learning Videos') {
-    $Feed->populate('torrents_evids', $Item);
-}
-if ($Type == 'Comedy') {
-    $Feed->populate('torrents_comedy', $Item);
-}
-if ($Type == 'Comics') {
-    $Feed->populate('torrents_comics', $Item);
+
+foreach ($feedType as $subFeed) {
+    $Feed->populate($subFeed, $Item);
 }
 
 // Clear cache and allow deletion of this torrent now
