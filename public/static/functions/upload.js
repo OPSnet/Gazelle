@@ -385,11 +385,21 @@ function AddArtistField() {
     RoleField.name = "importance[]";
     RoleField.options[0] = new Option("Main", "1");
     RoleField.options[1] = new Option("Guest", "2");
-    RoleField.options[2] = new Option("Composer    ", "4");
+    RoleField.options[2] = new Option("Composer", "4");
     RoleField.options[3] = new Option("Conductor", "5");
     RoleField.options[4] = new Option("DJ / Compiler", "6");
     RoleField.options[5] = new Option("Remixer", "3");
     RoleField.options[6] = new Option("Producer", "7");
+    var mapping = {
+        1: 0,
+        2: 1,
+        4: 2,
+        5: 3,
+        6: 4,
+        3: 5,
+        7: 6,
+    };
+    RoleField.selectedIndex = mapping[$("#importance_" + (ArtistCount - 1)).val()];
 
     var x = $('#artistfields').raw();
     x.appendChild(document.createElement("br"));

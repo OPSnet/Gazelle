@@ -17,57 +17,22 @@ if (empty($_GET['revisionid'])) {
 
 //----------------- Build list and get stats
 
+$User = new Gazelle\User($LoggedUser['ID']);
+$bookmark = new Gazelle\Bookmark;
+$artistMan = new Gazelle\Manager\Artist;
 try {
-    $Artist = new \Gazelle\Artist($ArtistID, $RevisionID);
+    $Artist = new Gazelle\Artist($ArtistID, $RevisionID);
 }
 catch (\Exception $e) {
     error(404);
 }
 
 $Artist->loadArtistRole();
-$Artist->loadGroups(Torrents::get_groups($Artist->groupIds(), true, true));
-
-if ($Artist->hasRole(ARTIST_GUEST)) {
-    $ReleaseTypes[1024] = 'Guest Appearance';
-}
-if ($Artist->hasRole(ARTIST_REMIXER)) {
-    $ReleaseTypes[1023] = 'Remixed By';
-}
-if ($Artist->hasRole(ARTIST_COMPOSER)) {
-    $ReleaseTypes[1022] = 'Composition';
-}
-if ($Artist->hasRole(ARTIST_PRODUCER)) {
-    $ReleaseTypes[1021] = 'Produced By';
-}
-
-function sectionTitle ($id) {
-    global $ReleaseTypes;
-    switch ($ReleaseTypes[$id]) {
-        case 'Anthology':
-            $title = 'Anthologies';
-            break;
-        case 'DJ Mix':
-            $title = 'DJ Mixes';
-            break;
-        case 'Produced By':
-        case 'Remixed By':
-            $title = $ReleaseTypes[$id];
-            break;
-        case 'Remix':
-            $title = 'Remixes';
-            break;
-        default:
-            $title = $ReleaseTypes[$id].'s';
-            break;
-    }
-    return $title;
-}
 
 function torrentEdition($title, $year, $recordLabel, $catlogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catlogueNumber, $media]);
 }
 
-$User = new \Gazelle\User($LoggedUser['ID']);
 $name = $Artist->name() ?? 'artist:' . $ArtistID;
 $Requests = [];
 
@@ -97,7 +62,6 @@ if (check_perms('site_torrents_notify')) {
     }
 }
 
-$bookmark = new \Gazelle\Bookmark;
 if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Unbookmark('artist', <?= $ArtistID ?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php } else { ?>
@@ -151,7 +115,7 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
 
 if (check_perms('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
-        list($ZIPList, $ZIPPrefs) = $LoggedUser['Collector'];
+        [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
         $ZIPList = explode(':', $ZIPList);
     } else {
         $ZIPList = ['00', '11'];
@@ -181,7 +145,7 @@ if (check_perms('zip_downloader')) {
 $OpenGroup = false;
 $LastGroupID = -1;
 foreach ($ZIPOptions as $Option) {
-    list($GroupID, $OptionID, $OptName) = $Option;
+    [$GroupID, $OptionID, $OptName] = $Option;
 
     if ($GroupID != $LastGroupID) {
         $LastGroupID = $GroupID;
@@ -213,15 +177,16 @@ foreach ($ZIPOptions as $Option) {
             <ul class="stats nobullet">
 <?php
 $artistReleaseType = [];
-foreach ($Artist->sections() as $section => $Groups) {
-    if (!isset($artistReleaseType[$section])) {
-        $artistReleaseType[$section] = 0;
+$sections = $Artist->sections();
+foreach ($sections as $sectionId => $groupList) {
+    if (!isset($artistReleaseType[$sectionId])) {
+        $artistReleaseType[$sectionId] = 0;
     }
-    $artistReleaseType[$section]++;
-    foreach ($Groups as $Group) {
-        // Skip compilations and soundtracks.
-        if ($Group['ReleaseType'] != 7 && $Group['ReleaseType'] != 3) {
-            new Tags($Group['TagList'], true);
+    $artistReleaseType[$sectionId]++;
+    foreach(array_keys($groupList) as $groupId) {
+        $group = $Artist->group($groupId);
+        if (!in_array($group['ReleaseType'], [3, 7])) { // Skip compilations and soundtracks
+            new Tags($group['TagList'], true);
         }
     }
 }
@@ -233,11 +198,11 @@ Tags::reset();
         <div class="box box_info box_statistics_artist">
             <div class="head"><strong>Statistics</strong></div>
             <ul class="stats nobullet">
-                <li>Number of groups: <?=number_format($Artist->nrGroups())?></li>
-                <li>Number of torrents: <?=number_format($Artist->nrTorrents())?></li>
-                <li>Number of seeders: <?=number_format($Artist->nrSeeders())?></li>
-                <li>Number of leechers: <?=number_format($Artist->nrLeechers())?></li>
-                <li>Number of snatches: <?=number_format($Artist->nrSnatches())?></li>
+                <li>Number of groups: <?= number_format($Artist->nrGroups()) ?></li>
+                <li>Number of torrents: <?= number_format($Artist->nrTorrents()) ?></li>
+                <li>Number of seeders: <?= number_format($Artist->nrSeeders()) ?></li>
+                <li>Number of leechers: <?= number_format($Artist->nrLeechers()) ?></li>
+                <li>Number of snatches: <?= number_format($Artist->nrSnatches()) ?></li>
             </ul>
         </div>
         <div class="box box_info box_metadata_artist">
@@ -262,7 +227,7 @@ if (!$Artist->similarArtists()) { ?>
 }
 $Max = null;
 foreach ($Artist->similarArtists() as $SimilarArtist) {
-    list($Artist2ID, $Artist2Name, $Score, $SimilarID) = $SimilarArtist;
+    [$Artist2ID, $Artist2Name, $Score, $SimilarID] = $SimilarArtist;
     $Score = $Score / 100;
     if (is_null($Max)) {
         $Max = $Score + 1;
@@ -280,8 +245,7 @@ foreach ($Artist->similarArtists() as $SimilarArtist) {
                     </div>
                     <br style="clear: both;" />
                 </li>
-<?php
-} /* foreach ($Artist->similarArtists()) */ ?>
+<?php } /* foreach ($Artist->similarArtists()) */ ?>
             </ul>
         </div>
         <div class="box box_addartists box_addartists_similar">
@@ -321,16 +285,15 @@ if ($sections = $Artist->sections()) {
         $sections = $reorderedSections;
     }
 
-    foreach ($sections as $section => $Groups) {
-        $sectionTitle = sectionTitle($section);
-        $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
-        if (isset($LoggedUser['SortHide'][$section]) && $LoggedUser['SortHide'][$section] == 1) {
-            $ToggleStr = " onclick=\"$('.releases_$section').gshow(); return true;\"";
+    foreach (array_keys($sections) as $sectionId) {
+        if (isset($LoggedUser['SortHide'][$sectionId]) && $LoggedUser['SortHide'][$sectionId] == 1) {
+            $ToggleStr = " onclick=\"$('.releases_$sectionId').gshow(); return true;\"";
         } else {
             $ToggleStr = '';
         }
 ?>
-        <a href="#torrents_<?= $sectionLabel ?>" class="brackets"<?=$ToggleStr?>><?=$sectionTitle?></a>
+        <a href="#torrents_<?= $artistMan->sectionLabel($sectionId) ?>" class="brackets"<?= $ToggleStr ?>><?=
+            $artistMan->sectionTitle($sectionId) ?></a>
 <?php
     }
 
@@ -338,35 +301,33 @@ if ($sections = $Artist->sections()) {
     if (count($Requests)) {
 ?>
     <a href="#requests" class="brackets">Requests</a>
-<?php
-    }
-?>
+<?php } ?>
     </div>
     <table class="torrent_table grouped release_table m_table">
 <?php
     $stylePath = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images/';
-
     $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 0) == 1 ? 1 : 0;
 
-    foreach ($sections as $section => $Groups) {
-        $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
-        $sectionClosed = !isset($LoggedUser['SortHide']) || (array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 0)
+    foreach ($sections as $sectionId => $groupList) {
+        $sectionClosed = !isset($LoggedUser['SortHide']) || (array_key_exists($sectionId, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$sectionId] == 0)
             ? 0 : 1;
 
         $sectionHidden = $sectionClosed ? ' hidden' : '';
         $groupsHidden = ($sectionClosed || $groupsClosed) ? ' hidden' : '';
-
 ?>
-                <tr class="colhead_dark" id="torrents_<?= $sectionLabel ?>">
+                <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
                     <td class="small"><!-- expand/collapse --></td>
-                    <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?= sectionTitle($section) ?></strong> (<a href="#" onclick="$('.releases_<?= $section ?>').gtoggle(true); return false;">View</a>)</td>
+                    <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">&uarr;</a>&nbsp;<strong><?=
+                        $artistMan->sectionTitle($sectionId) ?></strong> (<a href="#" onclick="$('.releases_<?=
+                        $sectionId ?>').gtoggle(true); return false;">View</a>)</td>
                     <td>Size</td>
                     <td class="sign snatches"><img src="<?= $stylePath ?>snatched.png" class="tooltip" alt="Snatches" title="Snatches" /></td>
                     <td class="sign seeders"><img src="<?= $stylePath ?>seeders.png" class="tooltip" alt="Seeders" title="Seeders" /></td>
                     <td class="sign leechers"><img src="<?= $stylePath ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
                 </tr>
 <?php
-    foreach ($Groups as $Group) {
+    foreach(array_keys($groupList) as $groupId) {
+        $Group = $Artist->group($groupId);
         $GroupID = $Group['ID'];
         $GroupName = $Group['Name'];
         $GroupYear = $Group['Year'];
@@ -381,11 +342,11 @@ if ($sections = $Artist->sections()) {
             $DisplayName .= ' <a href="torrents.php?action=fix_group&amp;groupid='.$GroupID.'&amp;artistid='.$ArtistID.'&amp;auth='.$LoggedUser['AuthKey'].'" class="brackets tooltip" title="Fix ghost DB entry">Fix</a>';
         }
 
-        switch ($section) {
-            case 1021: // Remixes, DJ Mixes, Guest artists, and Producers need the artist name
-            case 1023:
-            case 1024:
-            case 7:
+        switch ($sectionId) {
+            case ARTIST_SECTION_PRODUCER:
+            case ARTIST_SECTION_REMIXER:
+            case ARTIST_SECTION_GUEST:
+            case ARTIST_GUEST:
                 if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5]) || !empty($ExtendedArtists[6])) {
                     unset($ExtendedArtists[2], $ExtendedArtists[3]);
                     $DisplayName = Artists::display_artists($ExtendedArtists).$DisplayName;
@@ -393,7 +354,7 @@ if ($sections = $Artist->sections()) {
                     $DisplayName = Artists::display_artists([1 => $Artists], true, true).$DisplayName;
                 }
                 break;
-            case 1022: // Show performers on composer pages
+            case ARTIST_SECTION_COMPOSER:
                 if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
                     unset($ExtendedArtists[3], $ExtendedArtists[4], $ExtendedArtists[6]);
                     $DisplayName = Artists::display_artists($ExtendedArtists).$DisplayName;
@@ -415,28 +376,25 @@ if ($sections = $Artist->sections()) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
 ?>
-            <tr class="releases_<?=$section?> group groupid_<?=$GroupID?>_header discog<?= $sectionHidden . ($isSnatched ? ' snatched_group' : '') ?>">
+            <tr class="releases_<?= $sectionId ?> group groupid_<?=$GroupID?>_header discog<?= $sectionHidden . ($isSnatched ? ' snatched_group' : '') ?>">
                     <td class="td_collapse center m_td_left">
                         <div id="showimg_<?=$GroupID?>" class="<?= $groupsClosed ? 'show' : 'hide' ?>_torrents">
                             <a href="#" class="tooltip show_torrents_link" onclick="toggle_group(<?= $GroupID ?>, this, event);" title="Collapse this group. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all groups in this release type."></a>
                         </div>
                     </td>
                     <td colspan="5" class="td_info big_info">
-<?php
-        if ($LoggedUser['CoverArt']) { ?>
+<?php   if ($LoggedUser['CoverArt']) { ?>
                         <div class="group_image float_left clear">
                             <?php ImageTools::cover_thumb($Group['WikiImage'], $Group['CategoryID']) ?>
                         </div>
-<?php
-        } ?>
+<?php   } ?>
                         <div class="group_info clear">
                             <strong><?=$DisplayName?></strong>
 <?php if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
                             <span class="remove_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>
-<?php
-        } else { ?>
+<?php   } else { ?>
                             <span class="add_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
                             </span>
@@ -469,7 +427,7 @@ if ($sections = $Artist->sections()) {
             if ($prevEdition != $torrentEdition || $UnknownCounter === 1) {
                 $EditionID++;
 ?>
-        <tr class="releases_<?= $section ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $groupsHidden ?>">
+        <tr class="releases_<?= $sectionId ?> groupid_<?=$GroupID?> edition group_torrent discog<?=$SnatchedGroupClass . $groupsHidden ?>">
             <td colspan="6" class="edition_info"><strong><a href="#" onclick="toggle_edition(<?=$GroupID?>, <?=$EditionID?>, this, event);" class="tooltip" title="Collapse this edition. Hold [Command] <em>(Mac)</em> or [Ctrl] <em>(PC)</em> while clicking to collapse all editions in this torrent group.">&minus;</a> <?=Torrents::edition_string($Torrent, $Group)?></strong></td>
         </tr>
 <?php
@@ -477,7 +435,7 @@ if ($sections = $Artist->sections()) {
             $prevEdition = $torrentEdition;
             $SnatchedTorrentClass = ($Torrent['IsSnatched'] ? ' snatched_torrent' : '');
 ?>
-        <tr class="releases_<?=$section?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
+        <tr class="releases_<?=$sectionId?> torrent_row groupid_<?=$GroupID?> edition_<?=$EditionID?> group_torrent discog<?= $SnatchedTorrentClass . $SnatchedGroupClass . $groupsHidden ?>">
             <td class="td_info" colspan="2">
                 <span>
                     [ <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" class="tooltip" title="Download"><?=$Torrent['HasFile'] ? 'DL' : 'Missing'?></a>
@@ -537,7 +495,7 @@ if (count($Collages) > 0) {
         </tr>
 <?php
             foreach ($Indices as $i) {
-                list($CollageName, $CollageArtists, $CollageID) = $Collages[$i];
+                [$CollageName, $CollageArtists, $CollageID] = $Collages[$i];
                 unset($Collages[$i]);
 ?>
                     <tr>
@@ -547,7 +505,7 @@ if (count($Collages) > 0) {
 <?php
             }
             foreach ($Collages as $Collage) {
-                list($CollageName, $CollageArtists, $CollageID) = $Collage;
+                [$CollageName, $CollageArtists, $CollageID] = $Collage;
 ?>
                     <tr class="collage_rows hidden">
                         <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>
