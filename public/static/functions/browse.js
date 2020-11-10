@@ -268,6 +268,16 @@ function AddArtistField() {
     if (ArtistFieldCount >= 100) {
         return;
     }
+    var mapping = {
+        1: 0,
+        2: 1,
+        4: 2,
+        5: 3,
+        6: 4,
+        3: 5,
+        7: 6,
+    };
+    selected = mapping[$("#AddArtists select:last-child").val()];
     var x = $('#AddArtists').raw();
     x.appendChild(document.createElement("br"));
     var ArtistField = document.createElement("input");
@@ -279,6 +289,7 @@ function AddArtistField() {
     var Importance = document.createElement("select");
     Importance.name = "importance[]";
     Importance.innerHTML = '<option value="1">Main</option><option value="2">Guest</option><option value="4">Composer</option><option value="5">Conductor</option><option value="6">DJ / Compiler</option><option value="3">Remixer</option><option value="7">Producer</option>';
+    Importance.selectedIndex = selected;
     x.appendChild(Importance);
     if ($("#artist").data("gazelle-autocomplete")) {
         $(ArtistField).live('focus', function() {

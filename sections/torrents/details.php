@@ -295,15 +295,15 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
 <?php
         }
     }
-include(SERVER_ROOT.'/sections/torrents/vote_ranks.php');
-include(SERVER_ROOT.'/sections/torrents/vote.php');
+require_once('vote_ranks.php');
+require_once('vote.php');
+
+$DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
 ?>
         <div class="box box_tags">
             <div class="head">
                 <strong>Tags</strong>
-<?php
-                $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
-                if (!empty($DeletedTag)) { ?>
+<?php if (!empty($DeletedTag)) { ?>
                     <form style="display: none;" id="undo_tag_delete_form" name="tags" action="torrents.php" method="post">
                         <input type="hidden" name="action" value="add_tag" />
                         <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
@@ -313,45 +313,36 @@ include(SERVER_ROOT.'/sections/torrents/vote.php');
                     </form>
                     <a class="brackets" href="#" onclick="$('#undo_tag_delete_form').raw().submit(); return false;">Undo delete</a>
 
-<?php           } ?>
+<?php } ?>
             </div>
-<?php
-if (count($Tags) > 0) {
-?>
+<?php if (empty($Tags)) { ?>
+            <ul><li>There are no tags to display.</li></ul>
+<?php } else { ?>
             <ul class="stats nobullet">
-<?php
-    foreach ($Tags as $TagKey=>$Tag) {
-?>
+<?php   foreach ($Tags as $TagKey => $Tag) { ?>
                 <li>
                     <a href="torrents.php?taglist=<?=$Tag['name']?>" style="float: left; display: block;"><?=display_str($Tag['name'])?></a>
                     <div style="float: right; display: block; letter-spacing: -1px;" class="edit_tags_votes">
                     <a href="torrents.php?action=vote_tag&amp;way=up&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Vote this tag up" class="brackets tooltip vote_tag_up">&and;</a>
                     <?=$Tag['score']?>
                     <a href="torrents.php?action=vote_tag&amp;way=down&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" title="Vote this tag down" class="brackets tooltip vote_tag_down">&or;</a>
-<?php   if (check_perms('users_warn')) { ?>
+<?php       if (check_perms('users_warn')) { ?>
                     <a href="user.php?id=<?=$Tag['userid']?>" title="View the profile of the user that added this tag" class="brackets tooltip view_tag_user">U</a>
-<?php   } ?>
-<?php   if (empty($LoggedUser['DisableTagging']) && check_perms('site_delete_tag')) { ?>
+<?php
+            }
+            if (empty($LoggedUser['DisableTagging']) && check_perms('site_delete_tag')) {
+?>
                     <span class="remove remove_tag"><a href="torrents.php?action=delete_tag&amp;groupid=<?=$GroupID?>&amp;tagid=<?=$Tag['id']?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets tooltip" title="Remove tag">X</a></span>
-<?php   } ?>
+<?php       } ?>
                     </div>
                     <br style="clear: both;" />
                 </li>
-<?php
-    }
-?>
+<?php   } /* foreach */ ?>
             </ul>
-<?php
-} else { // The "no tags to display" message was wrapped in <ul> tags to pad the text.
-?>
-            <ul><li>There are no tags to display.</li></ul>
-<?php
-}
-?>
+<?php } ?>
         </div>
-<?php
-if (empty($LoggedUser['DisableTagging'])) {
-?>
+
+<?php if (empty($LoggedUser['DisableTagging'])) { ?>
         <div class="box box_addtag">
             <div class="head"><strong>Add tag</strong></div>
             <div class="body">
@@ -366,10 +357,9 @@ if (empty($LoggedUser['DisableTagging'])) {
                 <strong><a href="rules.php?p=tag" class="brackets">View tagging rules</a></strong>
             </div>
         </div>
-<?php
-}
-?>
+<?php } ?>
     </div>
+
     <div class="main_column">
         <table class="torrent_table details<?=$GroupFlags['IsSnatched'] ? ' snatched' : ''?> m_table" id="torrent_details">
             <tr class="colhead_dark">
