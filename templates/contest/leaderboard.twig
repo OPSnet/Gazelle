@@ -2,12 +2,12 @@
 {% if contest.hasBonusPool %}
     <h3>The Bonus Point pool currently stands at {{ contest.bonusPoolTotal|number_format }} points.</h3>
 {% endif %}
-{% if not contest.isOpen %}
+{% if not contest.isOpen and contest.totalEntries == 0 %}
     <p>That's not supposed to happen. Looks like the contest hasn't begun yet!<p>
 {% elseif contest.totalEntries == 0 %}
     <p>The scheduler has not run yet, there are no results to display.<p>
 {% else %}
-    <h3>A grand total of {{ contest.totalEntries|number_format }} {{ action_header }}</h3>
+    <h3>A grand total of {{ contest.totalEntries|number_format }} {{ action_header }}.</h3>
 </div>
 {{ paginator.linkbox|raw }}
 {% set rank = (paginator.page - 1) * paginator.limit %}

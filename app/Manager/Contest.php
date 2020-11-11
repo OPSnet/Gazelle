@@ -45,6 +45,7 @@ class Contest extends \Gazelle\Base {
             SELECT contest_id
             FROM contest c
             WHERE c.date_end = (SELECT max(date_end) FROM contest)
+                AND c.date_end > now() - INTERVAL 2 WEEK
         ");
         return $current ? new \Gazelle\Contest($current) : null;
     }
@@ -114,8 +115,7 @@ class Contest extends \Gazelle\Base {
         );
         $contests = array_map(function ($id) {return new \Gazelle\Contest($id);}, $this->db->collect(0));
         $totalParticipants = 0;
-        foreach ($contests as $id) {
-            $contest = new \Gazelle\Contest($id);
+        foreach ($contests as $contest) {
             $totalParticipants += $contest->doPayout($twig);
             $contest->setPaymentClosed();
         }

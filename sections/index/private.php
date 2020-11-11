@@ -257,6 +257,19 @@ if ($TopicID) {
 ?>
     </div>
     <div class="main_column">
+<?php
+$contest = (new Gazelle\Manager\Contest)->currentContest();
+if ($contest) {
+?>
+        <div id="contest-info" class="box news_post" style="text-align:center">
+<?php   if ($contest->banner()) { ?>
+            <br /><a href="/contest.php?action=leaderboard">
+                <img src="<?= $contest->banner()?>" alt="<?= $contest->name() ?>" title="<?= $contest->name() ?>" />
+            </a>
+<?php   } ?>
+            <h5>The <a href="/contest.php?action=leaderboard"><?= $contest->name() ?></a> <?= strtotime($contest->dateEnd()) >= time() ? 'ends in' : 'ended' ?> <?= time_diff($contest->dateEnd()) ?></h5>
+        </div>
+<?php } ?>
         <div id="last_uploads" class="box news_post">
             <div class="head">
                 <strong>Latest Uploads</strong>
