@@ -196,6 +196,7 @@ $Err = $Validate->ValidateForm($_POST); // Validate the form
 
 $File = $_FILES['file_input']; // This is our torrent file
 $TorrentName = $File['tmp_name'];
+$LogName = '';
 
 if (!is_uploaded_file($TorrentName) || !filesize($TorrentName)) {
     $Err = 'No torrent file uploaded, or file is empty.';
@@ -203,12 +204,10 @@ if (!is_uploaded_file($TorrentName) || !filesize($TorrentName)) {
     $Err = "You seem to have put something other than a torrent file into the upload field. (".$File['name'].").";
 }
 
-if ($isMusicUpload) {
-    //extra torrent files
+if (!$Err && $isMusicUpload) {
+    // additional torrent files
     $ExtraTorrents = [];
-    $DupeNames = [];
-    $DupeNames[] = $_FILES['file_input']['name'];
-
+    $DupeNames = [$_FILES['file_input']['name']];
     if (!empty($_POST['extra_format']) && !empty($_POST['extra_bitrate'])) {
         for ($i = 1; $i <= 5; $i++) {
             if (!empty($_FILES["extra_file_$i"])) {
@@ -244,38 +243,39 @@ if ($isMusicUpload) {
             }
         }
     }
-}
+    unset($DupeNames);
 
-//Multiple artists
-$LogName = '';
-if (empty($Properties['GroupID']) && empty($ArtistForm) && $isMusicUpload) {
-    $MainArtistCount = 0;
-    $ArtistNames = [];
-    $ArtistForm = [
-        1 => [],
-        2 => [],
-        3 => [],
-        4 => [],
-        5 => [],
-        6 => []
-    ];
-    for ($i = 0, $il = count($Artists); $i < $il; $i++) {
-        $Artists[$i] = trim($Artists[$i]);
-        if ($Artists[$i] != '') {
-            if (!in_array($Artists[$i], $ArtistNames)) {
-                $ArtistForm[$Importance[$i]][] = ['name' => Gazelle\Artist::sanitize($Artists[$i])];
-                if ($Importance[$i] == 1) {
-                    $MainArtistCount++;
+    // Multiple artists
+    if (empty($Properties['GroupID'])) {
+        $mainArtists = 0;
+        $ArtistForm = [
+            1 => [],
+            2 => [],
+            3 => [],
+            4 => [],
+            5 => [],
+            6 => [],
+            7 => [],
+        ];
+        for ($i = 0, $end = count($Artists); $i < $end; $i++) {
+            $name = Gazelle\Artist::sanitize($Artists[$i]);
+            $role = (int)$Importance[$i];
+            if ($name === '') {
+                continue;
+            }
+            if (!in_array($name, array_column($ArtistForm[$role], 'name'))) {
+                $ArtistForm[$role][] = ['name' => $name];
+                if ($role === 1) {
+                    $mainArtists++;
                 }
-                $ArtistNames[] = $Artists[$i];
             }
         }
+        if ($mainArtists < 1) {
+            $Err = 'Please enter at least one main artist';
+            $ArtistForm = [];
+        }
+        $LogName .= Artists::display_artists($ArtistForm, false, true, false);
     }
-    if ($MainArtistCount < 1) {
-        $Err = 'Please enter at least one main artist';
-        $ArtistForm = [];
-    }
-    $LogName .= Artists::display_artists($ArtistForm, false, true, false);
 }
 
 if ($Err) { // Show the upload form, with the data the user entered
