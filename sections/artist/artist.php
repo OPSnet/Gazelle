@@ -25,7 +25,6 @@ catch (\Exception $e) {
 }
 
 $Artist->loadArtistRole();
-$Artist->loadGroups(Torrents::get_groups($Artist->groupIds(), true, true));
 
 if ($Artist->hasRole(ARTIST_GUEST)) {
     $ReleaseTypes[1024] = 'Guest Appearance';
@@ -151,7 +150,7 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
 
 if (check_perms('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
-        list($ZIPList, $ZIPPrefs) = $LoggedUser['Collector'];
+        [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
         $ZIPList = explode(':', $ZIPList);
     } else {
         $ZIPList = ['00', '11'];
@@ -181,7 +180,7 @@ if (check_perms('zip_downloader')) {
 $OpenGroup = false;
 $LastGroupID = -1;
 foreach ($ZIPOptions as $Option) {
-    list($GroupID, $OptionID, $OptName) = $Option;
+    [$GroupID, $OptionID, $OptName] = $Option;
 
     if ($GroupID != $LastGroupID) {
         $LastGroupID = $GroupID;
@@ -213,15 +212,16 @@ foreach ($ZIPOptions as $Option) {
             <ul class="stats nobullet">
 <?php
 $artistReleaseType = [];
-foreach ($Artist->sections() as $section => $Groups) {
+$sections = $Artist->sections();
+foreach ($sections as $section => $groupIds) {
     if (!isset($artistReleaseType[$section])) {
         $artistReleaseType[$section] = 0;
     }
     $artistReleaseType[$section]++;
-    foreach ($Groups as $Group) {
-        // Skip compilations and soundtracks.
-        if ($Group['ReleaseType'] != 7 && $Group['ReleaseType'] != 3) {
-            new Tags($Group['TagList'], true);
+    foreach ($groupIds as $groupId) {
+        $group = $Artist->group($groupId);
+        if (!in_array($group['ReleaseType'], [3, 7])) { // Skip compilations and soundtracks
+            new Tags($group['TagList'], true);
         }
     }
 }
@@ -262,7 +262,7 @@ if (!$Artist->similarArtists()) { ?>
 }
 $Max = null;
 foreach ($Artist->similarArtists() as $SimilarArtist) {
-    list($Artist2ID, $Artist2Name, $Score, $SimilarID) = $SimilarArtist;
+    [$Artist2ID, $Artist2Name, $Score, $SimilarID] = $SimilarArtist;
     $Score = $Score / 100;
     if (is_null($Max)) {
         $Max = $Score + 1;
@@ -280,8 +280,7 @@ foreach ($Artist->similarArtists() as $SimilarArtist) {
                     </div>
                     <br style="clear: both;" />
                 </li>
-<?php
-} /* foreach ($Artist->similarArtists()) */ ?>
+<?php } /* foreach ($Artist->similarArtists()) */ ?>
             </ul>
         </div>
         <div class="box box_addartists box_addartists_similar">
@@ -321,7 +320,7 @@ if ($sections = $Artist->sections()) {
         $sections = $reorderedSections;
     }
 
-    foreach ($sections as $section => $Groups) {
+    foreach (array_keys($sections) as $section) {
         $sectionTitle = sectionTitle($section);
         $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
         if (isset($LoggedUser['SortHide'][$section]) && $LoggedUser['SortHide'][$section] == 1) {
@@ -330,7 +329,7 @@ if ($sections = $Artist->sections()) {
             $ToggleStr = '';
         }
 ?>
-        <a href="#torrents_<?= $sectionLabel ?>" class="brackets"<?=$ToggleStr?>><?=$sectionTitle?></a>
+        <a href="#torrents_<?= $sectionLabel ?>" class="brackets"<?= $ToggleStr ?>><?= $sectionTitle ?></a>
 <?php
     }
 
@@ -338,24 +337,20 @@ if ($sections = $Artist->sections()) {
     if (count($Requests)) {
 ?>
     <a href="#requests" class="brackets">Requests</a>
-<?php
-    }
-?>
+<?php } ?>
     </div>
     <table class="torrent_table grouped release_table m_table">
 <?php
     $stylePath = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images/';
-
     $groupsClosed = ($LoggedUser['TorrentGrouping'] ?? 0) == 1 ? 1 : 0;
 
-    foreach ($sections as $section => $Groups) {
+    foreach ($sections as $section => $groupIds) {
         $sectionLabel = strtolower(str_replace(' ', '_', $ReleaseTypes[$section]));
         $sectionClosed = !isset($LoggedUser['SortHide']) || (array_key_exists($section, $LoggedUser['SortHide']) && $LoggedUser['SortHide'][$section] == 0)
             ? 0 : 1;
 
         $sectionHidden = $sectionClosed ? ' hidden' : '';
         $groupsHidden = ($sectionClosed || $groupsClosed) ? ' hidden' : '';
-
 ?>
                 <tr class="colhead_dark" id="torrents_<?= $sectionLabel ?>">
                     <td class="small"><!-- expand/collapse --></td>
@@ -366,7 +361,8 @@ if ($sections = $Artist->sections()) {
                     <td class="sign leechers"><img src="<?= $stylePath ?>leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
                 </tr>
 <?php
-    foreach ($Groups as $Group) {
+    foreach ($groupIds as $groupId) {
+        $Group = $Artist->group($groupId);
         $GroupID = $Group['ID'];
         $GroupName = $Group['Name'];
         $GroupYear = $Group['Year'];
@@ -422,21 +418,18 @@ if ($sections = $Artist->sections()) {
                         </div>
                     </td>
                     <td colspan="5" class="td_info big_info">
-<?php
-        if ($LoggedUser['CoverArt']) { ?>
+<?php   if ($LoggedUser['CoverArt']) { ?>
                         <div class="group_image float_left clear">
                             <?php ImageTools::cover_thumb($Group['WikiImage'], $Group['CategoryID']) ?>
                         </div>
-<?php
-        } ?>
+<?php   } ?>
                         <div class="group_info clear">
                             <strong><?=$DisplayName?></strong>
 <?php if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) { ?>
                             <span class="remove_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Unbookmark('torrent', <?=$GroupID?>, 'Bookmark'); return false;">Remove bookmark</a>
                             </span>
-<?php
-        } else { ?>
+<?php   } else { ?>
                             <span class="add_bookmark float_right">
                                 <a style="float: right;" href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
                             </span>
@@ -537,7 +530,7 @@ if (count($Collages) > 0) {
         </tr>
 <?php
             foreach ($Indices as $i) {
-                list($CollageName, $CollageArtists, $CollageID) = $Collages[$i];
+                [$CollageName, $CollageArtists, $CollageID] = $Collages[$i];
                 unset($Collages[$i]);
 ?>
                     <tr>
@@ -547,7 +540,7 @@ if (count($Collages) > 0) {
 <?php
             }
             foreach ($Collages as $Collage) {
-                list($CollageName, $CollageArtists, $CollageID) = $Collage;
+                [$CollageName, $CollageArtists, $CollageID] = $Collage;
 ?>
                     <tr class="collage_rows hidden">
                         <td><a href="collages.php?id=<?=$CollageID?>"><?=$CollageName?></a></td>

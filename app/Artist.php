@@ -10,12 +10,16 @@ class Artist extends Base {
     protected $id = 0;
     protected $revisionId = 0;
     protected $artistRole;
-    protected $nrGroups;
-    protected $groupRole;
-    /** Release groups ordered by year and name */
-    protected $groupList;
+    protected $nrGroups = 0;
+
+    /** All the groups */
+    protected $group = [];
+
+    /** The roles an artist holds in a release */
+    protected $groupRole = [];
+
     /** Their groups, gathered into sections */
-    protected $sections;
+    protected $section = [];
 
     protected $discogsId;
     protected $discogsName;
@@ -32,10 +36,10 @@ class Artist extends Base {
     protected $vanity;
     protected $similar = [];
 
-    protected $nrLeechers;
-    protected $nrSnatches;
-    protected $nrSeeders;
-    protected $nrTorrents;
+    protected $nrLeechers = 0;
+    protected $nrSnatches = 0;
+    protected $nrSeeders = 0;
+    protected $nrTorrents = 0;
 
     protected const CACHE_PREFIX = 'artist_';
     protected const DISCOGS_API_URL = 'https://api.discogs.com/artists/%d';
@@ -107,6 +111,131 @@ class Artist extends Base {
         }
     }
 
+    public function loadArtistRole() {
+        $this->db->prepared_query("
+            SELECT ta.GroupID, ta.Importance as artistRole
+            FROM torrents_artists AS ta
+            INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
+            WHERE ta.ArtistID = ?
+            ORDER BY tg.Year DESC, tg.Name DESC
+            ", $this->id
+        );
+        $this->artistRole = [
+            ARTIST_MAIN => 0,
+            ARTIST_GUEST => 0,
+            ARTIST_REMIXER => 0,
+            ARTIST_COMPOSER => 0,
+            ARTIST_CONDUCTOR => 0,
+            ARTIST_DJ => 0,
+            ARTIST_PRODUCER => 0,
+        ];
+
+        while ([$groupId, $role] = $this->db->next_record(MYSQLI_NUM, false)) {
+            ++$this->artistRole[$role];
+            if (!isset($this->groupRole[$groupId])) {
+                $this->groupRole[$groupId] = [];
+            }
+            $this->groupRole[$groupId][] = $role;
+        }
+
+        $groupIds = array_keys($this->groupRole);
+        $torrentGroupList = \Torrents::get_groups($groupIds, true, true);
+        foreach ($groupIds as $groupId) {
+            $this->group[$groupId] = $torrentGroupList[$groupId];
+            foreach ($this->group[$groupId]['Torrents'] as $t) {
+                $this->nrLeechers += $t['Leechers'];
+                $this->nrSnatches += $t['Snatched'];
+                $this->nrSeeders  += $t['Seeders'];
+                ++$this->nrTorrents;
+            }
+            foreach ($this->groupRole[$groupId] as $role) {
+                switch ($role) {
+                    case ARTIST_GUEST:
+                        $section = 1024;
+                        break;
+                    case ARTIST_REMIXER:
+                        $section = 1023;
+                        break;
+                    case ARTIST_COMPOSER:
+                        $section = 1022;
+                        break;
+                    case ARTIST_PRODUCER:
+                        $section = 1021;
+                        break;
+                    default:
+                        $section = $role;
+                        break;
+                }
+                if (!isset($this->section[$section])) {
+                    $this->section[$section] = [];
+                }
+                $this->section[$section][] = $groupId;
+            }
+        }
+        $this->nrGroups = count($groupIds);
+        return $this;
+    }
+
+    public function artistRole(): array {
+        return $this->artistRole;
+    }
+
+    public function hasRole($role): bool {
+        return $this->artistRole[$role] > 0;
+    }
+
+    public function group(int $id): array {
+        return $this->group[$id];
+    }
+
+    public function nrGroups(): int {
+        return $this->nrGroups;
+    }
+
+    public function sections(): array {
+        return $this->section;
+    }
+
+    public function nrLeechers(): int {
+        return $this->nrLeechers;
+    }
+
+    public function nrSnatches(): int {
+        return $this->nrSnatches;
+    }
+
+    public function nrSeeders(): int {
+        return $this->nrSeeders;
+    }
+
+    public function nrTorrents(): int {
+        return $this->nrTorrents;
+    }
+
+    public function name(): ?string {
+        return $this->name;
+    }
+
+    public function image(): ?string {
+        return $this->image;
+    }
+
+    public function body(): ?string {
+        return $this->body;
+    }
+
+    public function vanityHouse(): bool {
+        return $this->vanity;
+    }
+
+    public function similarArtists(): array {
+        return $this->similar;
+    }
+
+    public function url(): string {
+        return sprintf('<a href="artist.php?id=%d">%s</a>', $this->id, $this->name);
+    }
+
     public function rename(int $userId, int $aliasId, string $name): void {
         $this->db->prepared_query("
             INSERT INTO artists_alias
@@ -136,7 +265,7 @@ class Artist extends Base {
         );
         foreach ($groups as $groupId) {
             $this->cache->delete_value("groups_artists_$groupId"); // Delete group artist cache
-            Torrents::update_hash($groupId);
+            \Torrents::update_hash($groupId);
         }
 
         // process artists in requests
@@ -288,137 +417,6 @@ class Artist extends Base {
             $this->cache->cache_value("artists_requests_" . $this->id, $requests, 3600);
         }
         return $requests;
-    }
-
-    public function loadArtistRole(): int {
-        $this->db->prepared_query('
-            SELECT ta.GroupID, ta.Importance as artistRole
-            FROM torrents_artists AS ta
-            INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
-            WHERE ta.ArtistID = ?
-            ORDER BY tg.Year DESC, tg.Name DESC
-            ', $this->id
-        );
-        $this->groupRole = [];
-        $this->groupList = [];
-        $this->artistRole = [
-            ARTIST_MAIN => 0,
-            ARTIST_GUEST => 0,
-            ARTIST_REMIXER => 0,
-            ARTIST_COMPOSER => 0,
-            ARTIST_CONDUCTOR => 0,
-            ARTIST_DJ => 0,
-            ARTIST_PRODUCER => 0,
-        ];
-        $nr = 0;
-        while ($row = $this->db->next_record(MYSQLI_ASSOC, false)) {
-            ++$nr;
-            ++$this->artistRole[$row['artistRole']];
-            $this->groupRole[$row['GroupID']] = $row['artistRole'];
-            $this->groupList[] = $row['GroupID']; // to retain year ordering
-        }
-        return $nr;
-    }
-
-    public function hasRole($role): bool {
-        return $this->artistRole[$role] > 0;
-    }
-
-    public function groupIds(): array {
-        /* this is needed to call \Torrents::get_groups() */
-        return $this->groupList ?? [];
-    }
-
-    public function loadGroups(array $torrentGroupList): int {
-        $this->sections   = [];
-        $this->nrGroups   = 0;
-        $this->nrLeechers = 0;
-        $this->nrSnatches = 0;
-        $this->nrSeeders  = 0;
-        $this->nrTorrents = 0;
-        foreach ($this->groupList as $groupId) {
-            if (!isset($torrentGroupList[$groupId])) {
-                continue;
-            }
-            ++$this->nrGroups;
-            switch ($this->groupRole[$groupId]) {
-                case ARTIST_GUEST:
-                    $section = 1024;
-                    break;
-                case ARTIST_REMIXER:
-                    $section = 1023;
-                    break;
-                case ARTIST_COMPOSER:
-                    $section = 1022;
-                    break;
-                case ARTIST_PRODUCER:
-                    $section = 1021;
-                    break;
-                default:
-                    $section = $torrentGroupList[$groupId]['ReleaseType'];
-                    break;
-            }
-            if (!isset($this->sections[$section])) {
-                $this->sections[$section] = [];
-            }
-            $this->sections[$section][] = $torrentGroupList[$groupId];
-            foreach ($torrentGroupList[$groupId]['Torrents'] as $t) {
-                $this->nrLeechers += $t['Leechers'];
-                $this->nrSnatches += $t['Snatched'];
-                $this->nrSeeders  += $t['Seeders'];
-                ++$this->nrTorrents;
-            }
-        }
-        /* TODO: See if ever $nrGroups < count($this->groupList) */
-        return $this->nrGroups;
-    }
-
-    public function nrGroups(): int {
-        return $this->nrGroups ?? 0;
-    }
-
-    public function nrLeechers(): int {
-        return $this->nrLeechers ?? 0;
-    }
-
-    public function nrSnatches(): int {
-        return $this->nrSnatches ?? 0;
-    }
-
-    public function nrSeeders(): int {
-        return $this->nrSeeders ?? 0;
-    }
-
-    public function nrTorrents(): int {
-        return $this->nrTorrents ?? 0;
-    }
-
-    public function sections(): array {
-        return $this->sections ?? [];
-    }
-
-    public function name(): ?string {
-        return $this->name;
-    }
-
-    public function image(): ?string {
-        return $this->image;
-    }
-
-    public function body(): ?string {
-        return $this->body;
-    }
-
-    public function vanityHouse(): bool {
-        return $this->vanity;
-    }
-
-    public function similarArtists(): array {
-        return $this->similar;
-    }
-
-    public function url(): string {
-        return sprintf('<a href="artist.php?id=%d">%s</a>', $this->id, $this->name);
     }
 
     /**
