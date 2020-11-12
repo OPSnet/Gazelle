@@ -18,15 +18,15 @@ if (!check_perms('site_moderate_forums') && empty($_POST['transition'])) {
     error(403);
 }
 $threadId = (int)$_POST['threadid'];
-if ($threadId < 1) {
+if (!$threadId) {
     error(404);
 }
 $newForumId = (int)$_POST['forumid'];
-if ($newForumId < 1 && !isset($_POST['transition'])) {
+if (!$newForumId && !isset($_POST['transition'])) {
     error(404);
 }
 $newTitle = trim($_POST['title']);
-if ($newTitle == '') {
+if ($newTitle === '') {
     error("Title cannot be empty");
 }
 
@@ -43,7 +43,7 @@ if (!$newSticky && $newRank > 0) {
 }
 
 $forum = new \Gazelle\Forum();
-list($oldForumId, $oldName, $minClassWrite, $posts, $threadAuthorId, $oldTitle, $oldLocked, $oldSticky, $oldRank)
+[$oldForumId, $oldName, $minClassWrite, $posts, $threadAuthorId, $oldTitle, $oldLocked, $oldSticky, $oldRank]
     = $forum->threadInfoExtended($threadId);
 $forum->setForum($oldForumId);
 
