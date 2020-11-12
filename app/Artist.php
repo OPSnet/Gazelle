@@ -148,28 +148,28 @@ class Artist extends Base {
                 $this->nrSeeders  += $t['Seeders'];
                 ++$this->nrTorrents;
             }
+            $section = [$this->group[$groupId]['ReleaseType']];
             foreach ($this->groupRole[$groupId] as $role) {
                 switch ($role) {
                     case ARTIST_GUEST:
-                        $section = 1024;
+                        $section[] = 1024;
                         break;
                     case ARTIST_REMIXER:
-                        $section = 1023;
+                        $section[] = 1023;
                         break;
                     case ARTIST_COMPOSER:
-                        $section = 1022;
+                        $section[] = 1022;
                         break;
                     case ARTIST_PRODUCER:
-                        $section = 1021;
-                        break;
-                    default:
-                        $section = $role;
+                        $section[] = 1021;
                         break;
                 }
-                if (!isset($this->section[$section])) {
-                    $this->section[$section] = [];
+            }
+            foreach ($section as $s) {
+                if (!isset($this->section[$s])) {
+                    $this->section[$s] = [];
                 }
-                $this->section[$section][] = $groupId;
+                $this->section[$s][] = $groupId;
             }
         }
         $this->nrGroups = count($groupIds);
