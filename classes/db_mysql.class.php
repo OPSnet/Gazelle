@@ -553,6 +553,23 @@ class DB_MYSQL {
     }
 
     /**
+     * Runs a prepared_query using placeholders and returns the matched row.
+     * Stashes the current query id so that this can be used within a block
+     * that is looping over an active resultset.
+     *
+     * @param string  $sql The parameterized query to run
+     * @param mixed   $args  The values of the placeholders
+     * @return array  key=>value resultset or null
+     */
+    public function rowAssoc($sql, ...$args) {
+        $qid = $this->get_query_id();
+        $this->prepared_query($sql, ...$args);
+        $result = $this->next_record(MYSQLI_ASSOC, false);
+        $this->set_query_id($qid);
+        return $result;
+    }
+
+    /**
      * Runs a prepared_query using placeholders and returns the first element
      * of the first row.
      * Stashes the current query id so that this can be used within a block

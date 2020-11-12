@@ -207,6 +207,22 @@ class User extends BaseObject {
         return $permitted;
     }
 
+    /**
+     * Checks whether user has the permission to read a forum.
+     *
+     * @param \Gazelle\Forum the forum
+     * @return boolean true if user has permission
+     */
+    public function readAccess(Forum $forum): bool {
+        if (in_array($forum->id(), $this->permittedForums())) {
+            return true;
+        }
+        if ($this->classLevel() < $forum->minClassRead() || in_array($forum->id(), $this->forbiddenForums())) {
+            return false;
+        }
+        return true;
+    }
+
     public function forceCacheFlush($flush = true) {
         return $this->forceCacheFlush = $flush;
     }
@@ -413,6 +429,27 @@ class User extends BaseObject {
                 UnRead = '0'
             WHERE UserID = ?
             ", $this->id
+        );
+        $this->cache->delete_value('notify_quoted_' . $this->id);
+        return $this->db->affected_rows() === 1;
+    }
+
+    /**
+     * Mark the user as having seen their quoted posts in a thread
+     *
+     * @param int threadId The ID of the thread
+     * @param int firstPost The first post in the thread
+     * @param int lastPost The most recent post in the thread
+     */
+    public function clearThreadQuotes(int $threadId, int $firstPost, int $lastPost): bool {
+        $this->db->prepared_query("
+            UPDATE users_notify_quoted SET
+                UnRead = false
+            WHERE Page = 'forums'
+                AND UserID = ?
+                AND PageID = ?
+                AND PostID BETWEEN ? AND ?
+            ", $this->id, $threadId, $firstPost, $lastPost
         );
         $this->cache->delete_value('notify_quoted_' . $this->id);
         return $this->db->affected_rows() === 1;

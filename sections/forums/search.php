@@ -2,8 +2,7 @@
 
 $search = new Gazelle\ForumSearch(new Gazelle\User($LoggedUser['ID']));
 $search->setSearchType($_GET['type'] ?? 'title')
-    ->setSearchText(trim($_GET['search']) ?? '')
-    ->setAuthor($_GET['user'] ?? '');
+    ->setSearchText(trim($_GET['search']) ?? '');
 
 // Searching for posts in a specific thread
 $ThreadID = (int)($_GET['threadid'] ?? 0);
@@ -18,6 +17,11 @@ if (!$ThreadID) {
     $search->setSearchType('body');
     $Title = " &rsaquo; <a href=\"forums.php?action=viewthread&amp;threadid=$ThreadID\">$Title</a>";
     $search->setThreadId($ThreadID);
+}
+
+$userSearch = trim($_GET['user'] ?? '');
+if (!empty($userSearch)) {
+    $search->setAuthor($userSearch);
 }
 
 $threadCreatedBefore = $_GET['thread_created_before'] ?? '';

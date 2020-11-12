@@ -144,6 +144,7 @@ function Edit_Form(post,key) {
         $('#bar' + postid).raw().oldbar = $('#bar' + postid).raw().innerHTML;
         $('#content' + postid).raw().innerHTML = "<div id=\"preview" + postid + "\"></div><form id=\"form" + postid + "\" method=\"post\" action=\"\">" + pmbox + "<input type=\"hidden\" name=\"auth\" value=\"" + authkey + "\" /><input type=\"hidden\" name=\"key\" value=\"" + key + "\" /><input type=\"hidden\" name=\"" + inputname + "\" value=\"" + postid + "\" /><textarea id=\"editbox" + postid + "\" onkeyup=\"resize('editbox" + postid + "');\" name=\"body\" cols=\"" + boxWidth + "\" rows=\"10\"></textarea></form>";
         $('#bar' + postid).raw().innerHTML = '<input type="button" value="Preview" onclick="Preview_Edit(' + postid + ');" /><input type="button" value="Post" onclick="Save_Edit(' + postid + ')" /><input type="button" value="Cancel" onclick="Cancel_Edit(' + postid + ');" />';
+        $('#postcontrol-' + postid).ghide();
     }
     /* If it's the initial edit, fetch the post content to be edited.
      * If editing is already underway and edit is pressed again, reset the post
@@ -168,6 +169,7 @@ function Cancel_Edit(postid) {
         $('#reply_box').gshow();
         $('#bar' + postid).raw().innerHTML = $('#bar' + postid).raw().oldbar;
         $('#content' + postid).raw().innerHTML = $('#bar' + postid).raw().cancel;
+        $('#postcontrol-' + postid).gshow();
     }
 }
 
@@ -193,6 +195,7 @@ function Save_Edit(postid) {
             $('#preview' + postid).raw().innerHTML = response;
             $('#editbox' + postid).ghide();
             $('#pmbox' + postid).ghide();
+            $('#postcontrol-' + postid).gshow();
         });
     } else {
         ajax.post("comments.php?action=take_edit","form" + postid, function (response) {
@@ -200,6 +203,7 @@ function Save_Edit(postid) {
             $('#preview' + postid).raw().innerHTML = response;
             $('#editbox' + postid).ghide();
             $('#pmbox' + postid).ghide();
+            $('#postcontrol-' + postid).gshow();
         });
     }
 }

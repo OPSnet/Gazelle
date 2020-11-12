@@ -17,7 +17,7 @@ class ForumSearch extends Base {
     protected $threadTitleSearch = true;
     protected $searchText = '';
     protected $authorName = '';
-    protected $authorId = '';
+    protected $authorId = 0;
     protected $page = 0;
     protected $threadId;
     protected $linkbox;
@@ -84,7 +84,9 @@ class ForumSearch extends Base {
                 ", $this->authorName
             );
         }
-        return $this;
+        return $this->isBodySearch()
+            ? $this->setPostCond('p.AuthorID = ?', $this->authorId)
+            : $this->setThreadCond('t.AuthorID = ?', $this->authorId);
     }
 
     /**
@@ -235,6 +237,7 @@ class ForumSearch extends Base {
                 ($this->isBodySearch() ? "p.Body" : "t.Title") . " LIKE concat('%', ?, '%')"
             )
         );
+
         return [$cond, $args];
     }
 
@@ -242,7 +245,7 @@ class ForumSearch extends Base {
      * Get the title of the thread within which the user is searching,
      * taking into account whether they are allowed to search in threads (permitted/forbidden)
      */
-    public function threadTitle(int $threadId): string {
+    public function threadTitle(int $threadId): ?string {
         [$cond, $args] = $this->configure(false);
         $cond[] = 't.ID = ?';
         $args[] = $threadId;
@@ -250,7 +253,7 @@ class ForumSearch extends Base {
         return $this->db->scalar("
             SELECT Title
             FROM forums_topics AS t
-            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            INNER JOIN forums AS f ON (f.ID = t.ForumID) $forumPostJoin
             WHERE " . implode(' AND ', $cond), ...$args
         );
     }

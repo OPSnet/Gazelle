@@ -18,28 +18,21 @@ if ($LoggedUser['DisablePosting']) {
     error('Your posting privileges have been removed.');
 }
 
-if (isset($_POST['thread']) && !is_number($_POST['thread'])) {
-    error(0);
-}
-
-if (isset($_POST['forum']) && !is_number($_POST['forum'])) {
-    error(0);
-}
-$ForumID = $_POST['forum'];
-if (!isset($Forums[$ForumID])) {
-    error(404);
-}
-if (!Forums::check_forumperm($ForumID, 'Write') || !Forums::check_forumperm($ForumID, 'Create')) {
-    error(403);
+if (isset($_POST['forum'])) {
+    $ForumID = (int)$_POST['forum'];
+    if (!$Forums[$ForumID]) {
+        error(404);
+    }
+    if (!Forums::check_forumperm($ForumID, 'Write') || !Forums::check_forumperm($ForumID, 'Create')) {
+        error(403);
+    }
 }
 
 // If you're not sending anything, go back
 if (empty($_POST['body']) || empty($_POST['title'])) {
-    $Location = (empty($_SERVER['HTTP_REFERER'])) ? "forums.php?action=viewforum&forumid={$_POST['forum']}": $_SERVER['HTTP_REFERER'];
-    header("Location: {$Location}");
-    die();
+    header("Location: " . $_SERVER['HTTP_REFERER'] ?? "forums.php?action=viewforum&forumid={$_POST['forum']}");
+    exit;
 }
-
 $Title = shortenString(trim($_POST['title']), 150, true, false);
 $Body = trim($_POST['body']);
 
@@ -74,13 +67,12 @@ if ($needPoll) {
     $forum->addPoll($threadId, $Question, $Answers);
     $Cache->cache_value("polls_$threadId", [$Question, $Answers, $Votes, null, 0], 0);
     if ($ForumID == STAFF_FORUM) {
-        send_irc('PRIVMSG '.MOD_CHAN.' :!mod Poll created by '.$LoggedUser['Username'].": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
+        send_irc('PRIVMSG '.MOD_CHAN.' :Poll created by '.$LoggedUser['Username'].": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
     }
 }
 
 if (isset($_POST['subscribe'])) {
-    $subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
-    $subscription->subscribe($threadId);
+    (new Gazelle\Manager\Subscription($LoggedUser['ID']))->subscribe($threadId);
 }
 
 header("Location: forums.php?action=viewthread&threadid=$threadId");
