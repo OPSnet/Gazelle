@@ -113,11 +113,14 @@ class Artist extends Base {
 
     public function loadArtistRole() {
         $this->db->prepared_query("
-            SELECT ta.GroupID, ta.Importance as artistRole
+            SELECT ta.GroupID AS group_id,
+                ta.Importance as artist_role,
+                rt.ID as release_type_id
             FROM torrents_artists AS ta
             INNER JOIN torrents_group AS tg ON (tg.ID = ta.GroupID)
+            INNER JOIN release_type AS rt ON (rt.ID = tg.ReleaseType)
             WHERE ta.ArtistID = ?
-            ORDER BY tg.Year DESC, tg.Name DESC
+            ORDER BY rt.ID, tg.Year DESC, tg.Name DESC
             ", $this->id
         );
         $this->artistRole = [
@@ -130,12 +133,32 @@ class Artist extends Base {
             ARTIST_PRODUCER => 0,
         ];
 
-        while ([$groupId, $role] = $this->db->next_record(MYSQLI_NUM, false)) {
-            ++$this->artistRole[$role];
+        while ([$groupId, $role, $releaseTypeId] = $this->db->next_record(MYSQLI_NUM, false)) {
+            switch($role) {
+                case ARTIST_PRODUCER:
+                    $sectionId = ARTIST_SECTION_PRODUCER;
+                    break;
+                case ARTIST_COMPOSER:
+                    $sectionId = ARTIST_SECTION_COMPOSER;
+                    break;
+                case ARTIST_REMIXER:
+                    $sectionId = ARTIST_SECTION_REMIXER;
+                    break;
+                case ARTIST_GUEST:
+                    $sectionId = ARTIST_SECTION_GUEST;
+                    break;
+                default:
+                    $sectionId = $releaseTypeId;
+            }
+            if (!isset($this->section[$sectionId])) {
+                $this->section[$sectionId] = [];
+            }
+            $this->section[$sectionId][$groupId] = true;;
             if (!isset($this->groupRole[$groupId])) {
                 $this->groupRole[$groupId] = [];
             }
             $this->groupRole[$groupId][] = $role;
+            ++$this->artistRole[$role];
         }
 
         $groupIds = array_keys($this->groupRole);
@@ -148,29 +171,6 @@ class Artist extends Base {
                 $this->nrSeeders  += $t['Seeders'];
                 ++$this->nrTorrents;
             }
-            $section = [$this->group[$groupId]['ReleaseType']];
-            foreach ($this->groupRole[$groupId] as $role) {
-                switch ($role) {
-                    case ARTIST_GUEST:
-                        $section[] = 1024;
-                        break;
-                    case ARTIST_REMIXER:
-                        $section[] = 1023;
-                        break;
-                    case ARTIST_COMPOSER:
-                        $section[] = 1022;
-                        break;
-                    case ARTIST_PRODUCER:
-                        $section[] = 1021;
-                        break;
-                }
-            }
-            foreach ($section as $s) {
-                if (!isset($this->section[$s])) {
-                    $this->section[$s] = [];
-                }
-                $this->section[$s][] = $groupId;
-            }
         }
         $this->nrGroups = count($groupIds);
         return $this;
@@ -180,12 +180,12 @@ class Artist extends Base {
         return $this->artistRole;
     }
 
-    public function hasRole($role): bool {
-        return $this->artistRole[$role] > 0;
+    public function groupIds(): array {
+        return array_keys($this->groupRole);
     }
 
-    public function group(int $id): array {
-        return $this->group[$id];
+    public function group(int $groupId): array {
+        return $this->group[$groupId];
     }
 
     public function nrGroups(): int {
