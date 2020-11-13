@@ -7,9 +7,9 @@ class Artist extends \Gazelle\Base {
     /** @see classes/config.php */
     protected $extendedSection = [
         1021 => 'Produced By',
-        1022 => 'Composition',
+        1022 => 'Compositions',
         1023 => 'Remixed By',
-        1024 => 'Guest Appearance',
+        1024 => 'Guest Appearances',
     ];
 
     public function createArtist($name) {
