@@ -53,13 +53,12 @@ class User extends AbstractAPI {
                 p.Name as ClassName,
                 p.Level,
                 GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS SecondaryClasses
-            FROM
-                users_main AS um
-                INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-                INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
-                INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
-                LEFT JOIN users_levels AS ul ON (ul.UserID = um.ID)
-                LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
+            FROM users_main AS um
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
+            INNER JOIN users_info AS ui ON (ui.UserID = um.ID)
+            INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
+            LEFT JOIN users_levels AS ul ON (ul.UserID = um.ID)
+            LEFT JOIN user_bonus AS ub ON (ub.user_id = um.ID)
             WHERE
                 {$where}", ($this->id !== null) ? $this->id : $this->username);
 
@@ -92,12 +91,11 @@ class User extends AbstractAPI {
 
     private function disableUser() {
         if ($this->id === null) {
-            $this->db->prepared_query("SELECT ID FROM users_main WHERE Username = ?",
-                $this->username);
-            if ($this->db->has_results()) {
-                $user = $this->db->next_record(MYSQLI_ASSOC, false);
-                $this->id = $user['ID'];
-            } else {
+            $this->id = $this->db->scalar("
+                SELECT ID FROM users_main WHERE Username = ?
+                ", $this->username
+            );
+            if (!$this->id) {
                 json_error("No user found with username {$this->username}");
             }
         }
@@ -151,7 +149,7 @@ class User extends AbstractAPI {
         } else {
             if (!is_null($Cur['RatioWatchEnds'])) {
                 $UpdateSet[] = "ui.RatioWatchEnds = NOW()";
-                $UpdateSet[] = "ui.RatioWatchDownload = um.Downloaded";
+                $UpdateSet[] = "ui.RatioWatchDownload = " . $Cur['Downloaded'];
                 $Comment .= ' (Ratio: '.\Format::get_ratio_html($Cur['Uploaded'],
                     $Cur['Downloaded'], false).', RR: '.number_format($Cur['RequiredRatio'], 2).')';
             }

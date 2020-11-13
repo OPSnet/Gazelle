@@ -506,7 +506,8 @@ if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
             $enableStr .= ' (Ratio: '.Format::get_ratio_html($cur['Uploaded'], $cur['Downloaded'], false).', RR: '.number_format($cur['RequiredRatio'],2).')';
             if ($cur['RatioWatchEnds']) {
                 $set[] = "i.RatioWatchEnds = now()";
-                $set[] = "i.RatioWatchDownload = m.Downloaded";
+                $set[] = "i.RatioWatchDownload = ?";
+                $args[] = $cur['Downloaded'];
                 $canLeech = 0;
             }
             $trackerUserUpdates['can_leech'] = 0;
