@@ -157,14 +157,15 @@ class Tools {
         }
         G::$DB->query("
             UPDATE users_info AS i
-                JOIN users_main AS m ON m.ID = i.UserID
-            SET m.Enabled = '2',
-                m.can_leech = '0',
+            INNER JOIN users_main AS um ON (um.ID = i.UserID)
+            INNER JOIN user_leech_stats AS uls ON (uls.UserID = i.UserID) SET
+                um.Enabled = '2',
+                um.can_leech = '0',
                 i.AdminComment = CONCAT('".sqltime()." - ".($AdminComment ? $AdminComment : 'Disabled by system')."\n\n', i.AdminComment),
                 i.BanDate = now(),
                 i.BanReason = '$BanReason',
-                i.RatioWatchDownload = ".($BanReason == 2 ? 'm.Downloaded' : "'0'")."
-            WHERE m.ID IN(".implode(',', $UserIDs).') ');
+                i.RatioWatchDownload = ".($BanReason == 2 ? 'uls.Downloaded' : "'0'")."
+            WHERE um.ID IN(".implode(',', $UserIDs).') ');
         G::$Cache->decrement('stats_user_count', G::$DB->affected_rows());
         foreach ($UserIDs as $UserID) {
             G::$Cache->delete_value("enabled_$UserID");
