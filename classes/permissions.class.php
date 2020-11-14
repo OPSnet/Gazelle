@@ -89,6 +89,7 @@ class Permissions {
             'admin_manage_user_fls' => 'Can manage user FL tokens',
             'admin_manage_applicants' => 'Can manage job roles and user applications',
             'admin_manage_referrals' => 'Can manage referrals',
+            'admin_view_notifications' => 'Can view notifications sandbox',
             'admin_view_payments' => 'Can view payments',
             'admin_manage_payments' => 'Can manage payments',
             'admin_manage_navigation' => 'Can manage navigation links',

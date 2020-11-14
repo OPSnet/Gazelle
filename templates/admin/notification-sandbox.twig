@@ -1,0 +1,229 @@
+{% macro artistlist(list) %}
+{% if list is empty -%}
+    <i>none</i>
+{%- else %}
+    {%- for a in list -%}
+        {%- if not loop.first -%}
+        <br />
+        {% endif -%}
+        {{ a.name }}
+    {%- endfor %}
+{% endif %}
+{% endmacro %}
+
+<div class="thin">
+    <div class="header">
+        <h2>Notifications Sandbox</h2>
+    </div>
+{% if group %}
+    <div class="box pad">
+    <h4>Results {{ manager.artistHtml|raw }} - <a href="/torrents.php?id={{ group.ID }}">{{ group.Name }}</a></h4>
+
+<table><tr>
+    <td style="vertical-align: top"><table>
+        <tr><td class="label" colspan="2" style="text-align: center">Release details</td></tr>
+        <tr>
+            <td class="label">Uploaded by</td>
+            <td>{{ torrent.UserID|user_full|raw }}</td>
+        </tr>
+        <tr>
+            <td class="label">Category</td>
+            <td>{{ category }}</td>
+        </tr>
+        <tr>
+            <td class="label">Release Type</td>
+            <td>{{ release }}</td>
+        </tr>
+        <tr>
+            <td class="label">Media</td>
+            <td>{{ torrent.Media }}</td>
+        </tr>
+        <tr>
+            <td class="label">Format</td>
+            <td>{{ torrent.Format }}</td>
+        </tr>
+        <tr>
+            <td class="label">Encoding</td>
+            <td>{{ torrent.Encoding }}</td>
+        </tr>
+        <tr>
+            <td class="label">Year</td>
+            <td>{{ year }}</td>
+        </tr>
+        <tr>
+            <td class="label">Record Label</td>
+            <td>{{ label }}</td>
+        </tr>
+        <tr>
+            <td class="label">Tags</td>
+            <td>{{ tags }}</td>
+        </tr>
+    </table></td>
+    <td style="vertical-align: top"><table>
+        <tr><td class="label" colspan="2" style="text-align: center">Artist details</td></tr>
+        <tr>
+            <td class="label">Main</td>
+            <td>
+                {{ _self.artistlist(manager.artistRole.main) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Composers</td>
+            <td>
+                {{ _self.artistlist(manager.artistRole.composer) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Conductors</td>
+            <td>
+                {{ _self.artistlist(manager.artistRole.conductor) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Remixers</td>
+            <td>
+                {{ _self.artistlist(manager.artistRole.dj) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">DJs</td>
+            <td>
+                {{ _self.artistlist(manager.artistRole.dj) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Producers</td>
+            <td>
+                {{ _self.artistlist(manager.artistRole.producer) }}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Guests</td>
+            <td>
+                {{ _self.artistlist(manager.artistRole.guest) }}
+            </td>
+        </tr>
+    </table></td>
+</tr>
+{% if sql %}
+<tr>
+    <td colspan="2"><code>{{ sql }}</code></td>
+<tr>
+<tr>
+    <td colspan="2">
+    {% for arg in args %}
+        {{ arg }}{% if not loop.last %}<br />{% endif %}
+    {% endfor %}
+    </td>
+<tr>
+{% endif %}
+</table>
+</div>
+
+{% if result %}
+<div class="box pad">
+<table>
+    <tr>
+        <th>User ID</th>
+        <th>Filter ID</th>
+        <th>Name</th>
+        <th>Artists</th>
+        <th>Year</th>
+        <th>Tags</th>
+        <th>Not Tags</th>
+        <th>Formats</th>
+        <th>Encodings</th>
+        <th>Media</th>
+        <th>Users</th>
+        <th>Exclude VA</th>
+        <th>New groups only</th>
+    </tr>
+    {% for r in result %}
+    <tr>
+        <td class="vertical-align: top;">{{ r.user_id|user_url|raw }}</td>
+        <td class="vertical-align: top;">{{ r.filter_id }}</td>
+        <td class="vertical-align: top;">{{ r.filter.info.label}}</td>
+        <td class="vertical-align: top;">
+        {% for artist in r.filter.info.artist|sort %}
+            {{ artist }}{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+        </td>
+        <td class="vertical-align: top;">
+        {% if r.filter.info.from_year or r.filter.info.to_year -%}
+            {{ r.filter.info.from_year }}-{{ r.filter.info.to_year }}
+        {% endif %}
+        </td>
+        <td class="vertical-align: top;">
+        {% for tag in r.filter.info.tag|sort %}
+            {{ tag }}{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+        </td>
+        <td class="vertical-align: top;">
+        {% for notTag in r.filter.info.notTag|sort %}
+            {{ notTag }}{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+        </td>
+        <td class="vertical-align: top;">
+        {% for format in r.filter.info.format|sort %}
+            {{ format }}{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+        </td>
+        <td class="vertical-align: top;">
+        {% for encoding in r.filter.info.encoding|sort %}
+            <span style="white-space: nowrap">{{ encoding }}</span>{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+        </td>
+        <td class="vertical-align: top;">
+        {% for media in r.filter.info.media|sort %}
+            {{ media }}{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+        </td>
+        <td class="vertical-align: top;">
+        {% for user in r.filter.info.user|sort %}
+            {{ user|user_url|raw }}{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+        </td>
+        <td class="vertical-align: top;">{{ r.filter.info.exclude_va }}</td>
+        <td class="vertical-align: top;">{{ r.filter.info.new_groups_only }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endif %}
+
+{% endif %}
+<div class="box pad">
+    <form class="send_form" action="" method="post">
+        <input type="hidden" name="action" value="notification_sandbox" />
+        <table class="layout">
+            <tbody>
+                <tr>
+                    <td class="label">
+                        <label for="torrentid">Torrent ID</label>
+                    </td>
+                    <td>
+                        <input type="number" name="torrentid" value="{{ torrent.ID }}" />
+                    </td>
+                <tr>
+                </tr>
+                    <td class="label">
+                        <label for="torrentid">or Uploader ID</label>
+                    </td>
+                    <td>
+                        <input type="number" name="uploaderid" value="{{ uploader_id }}" />
+                    </td>
+                <tr>
+                </tr>
+                    <td class="label">
+                        <label for="torrentid">optional notified User ID</label>
+                    </td>
+                    <td>
+                        <input type="number" name="notifiedid" value="{{ notified_id }}" />&nbsp;(To limit results to one person)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <input type="submit" value="Submit" />
+    </form>
+</div>
+</div>

@@ -178,10 +178,11 @@ Category('Site Information', [
 ]);
 
 Category('Developer Sandboxes', [
-    Item('Artist Importance', 'tools.php?action=artist_importance_sandbox', All(['users_mod'])),
-    Item('BBCode sandbox',    'tools.php?action=bbcode_sandbox',            All(['users_mod'])),
-    Item('DB Sandbox',        'tools.php?action=db_sandbox',                All(['admin_site_debug'])),
-    Item('Referral sandbox',  'tools.php?action=referral_sandbox',          All(['site_debug', 'admin_manage_referrals'])),
+    Item('Artist Importance',    'tools.php?action=artist_importance_sandbox', All(['users_mod'])),
+    Item('BBCode sandbox',       'tools.php?action=bbcode_sandbox',            All(['users_mod'])),
+    Item('DB Sandbox',           'tools.php?action=db_sandbox',                All(['admin_site_debug'])),
+    Item('Notification sandbox', 'tools.php?action=notification_sandbox',      All(['admin_view_notifications'])),
+    Item('Referral sandbox',     'tools.php?action=referral_sandbox',          All(['site_debug', 'admin_manage_referrals'])),
 ]);
 
 Category('Development', [

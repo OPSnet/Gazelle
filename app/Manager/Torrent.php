@@ -120,6 +120,56 @@ class Torrent extends \Gazelle\Base {
     }
 
     /**
+     * Get artist list
+     *
+     * return array artists group by role
+     */
+    public function artistRole(): array {
+        $key = 'shortv2_groups_artists_' . $this->groupId;
+        $roleList = $this->cache->get_value($key);
+        if ($roleList === false) {
+            $this->db->prepared_query("
+                SELECT ta.Importance,
+                    ta.ArtistID,
+                    aa.Name,
+                    ta.AliasID
+                FROM torrents_artists AS ta
+                INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
+                WHERE ta.GroupID = ?
+                ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
+                ", $this->groupId
+            );
+            $map = [
+                1 => 'main',
+                2 => 'guest',
+                3 => 'remixer',
+                4 => 'composer',
+                5 => 'conductor',
+                6 => 'dj',
+                7 => 'producer',
+            ];
+            $roleList = [
+                'main'      => [],
+                'guest'     => [],
+                'remixer'   => [],
+                'composer'  => [],
+                'conductor' => [],
+                'dj'        => [],
+                'producer'  => [],
+            ];
+            while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
+                $roleList[$map[$role]][] = [
+                    'id'      => $artistId,
+                    'aliasid' => $aliasId,
+                    'name'    => $artistName,
+                ];
+            }
+            $this->cache->cache_value($key, $roleList, 3600);
+        }
+        return $roleList;
+    }
+
+    /**
      * Generate the artist name. (Individual artists will be clickable, or VA)
      * TODO: refactor calls into artistName()
      */
@@ -135,48 +185,11 @@ class Torrent extends \Gazelle\Base {
         if (!$this->torrentId && !$this->groupId) {
             return $nameCache[$this->torrentId] = '';
         }
-        $key = 'short_groups_artists_' . $this->groupId;
-        $roleList = $this->cache->get_value($key);
-        if ($roleList === false) {
-            $this->db->prepared_query("
-                SELECT ta.Importance,
-                    ta.ArtistID,
-                    aa.Name,
-                    ta.AliasID
-                FROM torrents_artists AS ta
-                INNER JOIN artists_alias AS aa ON (ta.AliasID = aa.AliasID)
-                WHERE ta.GroupID = ?
-                ORDER BY ta.GroupID, ta.Importance ASC, aa.Name ASC
-                ", $this->groupId
-            );
-            $roleList = [];
-            while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
-                $roleList[$role][] = [
-                    'id'      => $artistId,
-                    'aliasid' => $aliasId,
-                    'name'    => $artistName,
-                ];
-            }
-            $this->cache->cache_value($key, $roleList, 3600);
-        }
-
-        $map = [
-            'main' => 1,
-            'guest' => 2,
-            'composer' => 3,
-            'conductor' => 4,
-            'dj' => 5,
-        ];
-        $artist = [];
-        $count  = [];
-        foreach ($map as $role => $id) {
-            $artist[$role] = isset($roleList[$id]) ? $roleList[$id] : [];
-            $count[$role] = count($artist[$role]);
-        }
-        $composerCount = $count['composer'];
-        $conductorCount = $count['conductor'];
-        $djCount = $count['dj'];
-        $mainCount = $count['main'];
+        $roleList = $this->artistRole();
+        $composerCount = count($roleList['composer']);
+        $conductorCount = count($roleList['conductor']);
+        $djCount = count($roleList['dj']);
+        $mainCount = count($roleList['main']);
         if ($composerCount + $mainCount + $conductorCount + $djCount == 0) {
             return $nameCache[$this->torrentId] = sprintf('(torrent id:%d)', $this->torrentId);
         }
@@ -184,17 +197,17 @@ class Torrent extends \Gazelle\Base {
         $and = $this->artistDisplay === self::ARTIST_DISPLAY_HTML ? '&amp;' : '&';
         $chunk = [];
         if ($djCount == 1) {
-            $chunk[] = $this->artistLink($artist['dj'][0]);
+            $chunk[] = $this->artistLink($roleList['dj'][0]);
         } elseif ($djCount == 2) {
-            $chunk[] = $this->artistLink($artist['dj'][0]) . " $and " . $this->artistLink($artist['dj'][1]);
+            $chunk[] = $this->artistLink($roleList['dj'][0]) . " $and " . $this->artistLink($roleList['dj'][1]);
         } elseif ($djCount > 2) {
             $chunk[] = 'Various DJs';
         } else {
             if ($composerCount > 0) {
                 if ($composerCount == 1) {
-                    $chunk[] = $this->artistLink($artist['composer'][0]);
+                    $chunk[] = $this->artistLink($roleList['composer'][0]);
                 } elseif ($composerCount == 2) {
-                    $chunk[] = $this->artistLink($artist['composer'][0]) . " $and " . $this->artistLink($artist['composer'][1]);
+                    $chunk[] = $this->artistLink($roleList['composer'][0]) . " $and " . $this->artistLink($roleList['composer'][1]);
                 } elseif ($composerCount > 2 && $mainCount + $conductorCount == 0) {
                     $chunk[] = 'Various Composers';
                 }
@@ -210,10 +223,10 @@ class Torrent extends \Gazelle\Base {
                 $chunk[] = 'Various Artists';
             } else {
                 if ($mainCount == 1) {
-                    $chunk[] = $this->artistLink($artist['main'][0]);
-                } elseif ($count['main'] == 2) {
-                    $chunk[] = $this->artistLink($artist['main'][0]) . " $and " . $this->artistLink($artist['main'][1]);
-                } elseif ($count['main'] > 2) {
+                    $chunk[] = $this->artistLink($roleList['main'][0]);
+                } elseif ($mainCount == 2) {
+                    $chunk[] = $this->artistLink($roleList['main'][0]) . " $and " . $this->artistLink($roleList['main'][1]);
+                } elseif ($mainCount > 2) {
                     $chunk[] = 'Various Artists';
                 }
 
@@ -224,10 +237,10 @@ class Torrent extends \Gazelle\Base {
                     $chunk[] = 'under';
                 }
                 if ($conductorCount == 1) {
-                    $chunk[] = $this->artistLink($artist['conductor'][0]);
-                } elseif ($count['conductor'] == 2) {
-                    $chunk[] = $this->artistLink($artist['conductor'][0]) . " $and " . $this->artistLink($artist['conductor'][1]);
-                } elseif ($count['conductor'] > 2) {
+                    $chunk[] = $this->artistLink($roleList['conductor'][0]);
+                } elseif ($conductorCount == 2) {
+                    $chunk[] = $this->artistLink($roleList['conductor'][0]) . " $and " . $this->artistLink($roleList['conductor'][1]);
+                } elseif ($conductorCount > 2) {
                     $chunk[] = 'Various Conductors';
                 }
             }
