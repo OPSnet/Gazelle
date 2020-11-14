@@ -387,6 +387,9 @@ switch ($_REQUEST['action']) {
     case 'db_sandbox':
         require(__DIR__ . '/sandboxes/db_sandbox.php');
         break;
+    case 'notification_sandbox':
+        require(__DIR__ . '/sandboxes/notification.php');
+        break;
     case 'referral_sandbox':
         require(__DIR__ . '/sandboxes/referral_sandbox.php');
         break;
