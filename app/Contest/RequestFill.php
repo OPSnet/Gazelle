@@ -85,8 +85,8 @@ class RequestFill extends AbstractContest {
         return $this->db->to_array('ID', MYSQLI_ASSOC) ?? [];
     }
 
-    public function requestPairs(int $id) {
-        $key = "contest_pairs_" . $id;
+    public function requestPairs() {
+        $key = "contest_pairs_" . $this->id;
         if (($pairs = $this->cache->get_value($key)) === false) {
             $this->db->prepared_query("
                 SELECT r.FillerID, r.UserID, count(*) AS nr
@@ -99,7 +99,7 @@ class RequestFill extends AbstractContest {
                 ", $this->begin, $this->end
             );
             $pairs = $this->db->to_array(false, MYSQLI_ASSOC);
-            $this->cache->cache_value('contest_pairs_' . $id, $pairs, 3600);
+            $this->cache->cache_value('contest_pairs_' . $this->id, $pairs, 3600);
         }
         return $pairs;
     }

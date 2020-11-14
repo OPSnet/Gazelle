@@ -45,7 +45,7 @@ $contestTypes = $contestMan->contestTypes();
 
 if (!$create) {
     echo G::$Twig->render('contest/list.twig', [
-        'current' => $contest->id(),
+        'current' => !is_null($contest) ? $contest->id() : 0,
         'pointer' => "\xE2\x98\x9E",
         'list' => $contestMan->contestList(),
         'type' => $contestTypes,

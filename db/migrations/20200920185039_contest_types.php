@@ -9,8 +9,8 @@ class ContestTypes extends AbstractMigration {
             VALUES
                 ('upload_flac'),
                 ('request_fill'),
-                ('upload_flac_no_single '),
-                ('upload_perfect_flac ')
+                ('upload_flac_no_single'),
+                ('upload_perfect_flac')
         ");
     }
 
