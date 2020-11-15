@@ -3,8 +3,6 @@
 namespace Gazelle\Manager;
 
 class Tag extends \Gazelle\Base {
-    protected $foo;
-
     /**
      * Get a tag ready for database input and display.
      * Trim whitespace, force to lower case, internal spaces and dashes become dots,
