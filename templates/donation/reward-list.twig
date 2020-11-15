@@ -27,10 +27,10 @@
     </tr>
     {% endif %}
     <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
-        <td>{{ u.user_id|user_full|raw }}</td>
+        <td>{{ u.user_id|user_full }}</td>
         <td>{{ u.rank }}</td>
         <td>{{ u.hidden }}</td>
-        <td>{{ u.donation_time|time_diff|raw }}</td>
+        <td>{{ u.donation_time|time_diff }}</td>
         <td style="word-wrap: break-word;">
            {{ u.icon_mouse }}
         </td>

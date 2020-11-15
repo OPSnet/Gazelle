@@ -13,7 +13,7 @@
     {% if loop.first %}
             <tr>
     {% endif %}
-                <td align="left">{{ u.user_id|user_full|raw }}
+                <td align="left">{{ u.user_id|user_full }}
                 <a href="user.php?action=dupes&amp;dupeaction=remove&amp;auth={{ auth }}&amp;userid={{ user_id }}&amp;removeid={{ u.user_id }}" onclick="return confirm('Are you sure you wish to remove {{ u.username }} from this group?');" class="brackets tooltip" title="Remove linked account">X</a>
                 </td>
     {% if not loop.last %}
@@ -36,7 +36,7 @@
             </tr>
             <tr>
                 <td colspan="5" align="left">
-                    <div id="dupecomments" class="{{ list|length ? '' : 'hidden' }}">{{ comments|bb_format|raw }}</div>
+                    <div id="dupecomments" class="{{ list|length ? '' : 'hidden' }}">{{ comments|bb_format }}</div>
                     <div id="editdupecomments" class="{{ list|length ? 'hidden' : '' }}">
                         <textarea name="dupecomments" onkeyup="resize('dupecommentsbox');" id="dupecommentsbox" cols="65" rows="5" style="width: 98%;"> {{ comments }}</textarea>
                     </div>

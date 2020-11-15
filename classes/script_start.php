@@ -74,113 +74,113 @@ G::$Twig = new Environment(
     ]
 );
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'article',
     function ($word) {
         return preg_match('/^[aeiou]/i', $word) ? 'an' : 'a';
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'b64',
     function (string $binary) {
         return base64_encode($binary);
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'bb_format',
     function ($text) {
-        return \Text::full_format($text);
+        return new Twig\Markup(\Text::full_format($text), 'UTF-8');
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'checked',
     function ($isChecked) {
         return $isChecked ? ' checked="checked"' : '';
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'image',
     function ($i) {
-        return ImageTools::process($i, true);
+        return new Twig\Markup(\ImageTools::process($i, true), 'UTF-8');
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'ipaddr',
     function ($ipaddr) {
-        return Tools::display_ip($ipaddr);
+        return new Twig\Markup(\Tools::display_ip($ipaddr), 'UTF-8');
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'octet_size',
     function ($size) {
-        return Format::get_size($size);
+        return \Format::get_size($size);
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'plural',
     function ($number) {
         return plural($number);
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'selected',
     function ($isSelected) {
         return $isSelected ? ' selected="selected"' : '';
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'time_diff',
     function ($time) {
-        return time_diff($time);
+        return new Twig\Markup(time_diff($time), 'UTF-8');
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'ucfirst',
     function ($text) {
         return ucfirst($text);
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'ucfirstall',
     function ($text) {
         return implode(' ', array_map(function ($w) {return ucfirst($w);}, explode(' ', $text)));
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'user_url',
     function ($userId) {
-        return Users::format_username($userId, false, false, false);
+        return new Twig\Markup(Users::format_username($userId, false, false, false), 'UTF-8');
     }
 ));
 
-G::$Twig->addFilter(new \Twig\TwigFilter(
+G::$Twig->addFilter(new Twig\TwigFilter(
     'user_full',
     function ($userId) {
-        return Users::format_username($userId, true, true, true, true);
+        return new Twig\Markup(\Users::format_username($userId, true, true, true, true), 'UTF-8');
     }
 ));
 
-G::$Twig->addFunction(new \Twig\TwigFunction('donor_icon', function($icon, $userId) {
-    return new \Twig\Markup(
-        ImageTools::process($icon, false, 'donoricon', $userId),
+G::$Twig->addFunction(new Twig\TwigFunction('donor_icon', function($icon, $userId) {
+    return new Twig\Markup(
+        \ImageTools::process($icon, false, 'donoricon', $userId),
         'UTF-8'
     );
 }));
 
-G::$Twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $config, $key) {
-    return new \Twig\Markup(
+G::$Twig->addFunction(new Twig\TwigFunction('privilege', function ($default, $config, $key) {
+    return new Twig\Markup(
         ($default
             ? sprintf(
                 '<input id="%s" type="checkbox" disabled="disabled"%s />&nbsp;',
@@ -197,9 +197,9 @@ G::$Twig->addFunction(new \Twig\TwigFunction('privilege', function ($default, $c
     );
 }));
 
-G::$Twig->addFunction(new \Twig\TwigFunction('ratio', function ($up, $down) {
-    return new \Twig\Markup(
-        Format::get_ratio_html($up, $down),
+G::$Twig->addFunction(new Twig\TwigFunction('ratio', function ($up, $down) {
+    return new Twig\Markup(
+        \Format::get_ratio_html($up, $down),
         'UTF-8'
     );
 }));

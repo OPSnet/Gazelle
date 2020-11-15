@@ -13,7 +13,7 @@
 {%      endif %}
         <li>Current donor rank: {{ current }}</li>
         <li>Leaderboard position: {{ leaderboard }}</li>
-        <li>Last donated: {{ last|time_diff|raw }}
+        <li>Last donated: {{ last|time_diff }}
         <li>Rank expires: {{ expiry|raw }}
 {% endif %}
     </ul>

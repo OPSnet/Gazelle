@@ -3,7 +3,7 @@
     <div class="pad">
     <a href="collages.php?action=search&amp;cats[{{ category_id }}]=1">{{ category_name }}</a>
 {% if is_personal %}
-collage by {{ user_id|user_url|raw }}
+collage by {{ user_id|user_url }}
 {% endif %}
     </div>
 </div>
@@ -20,7 +20,7 @@ collage by {{ user_id|user_url|raw }}
 {% endif %}
         <li>Subscribers: {{ subscribers|number_format }}</li>
         <li>Built by {{ contributors_n|number_format }} user{{ contributors_n|plural }}</li>
-        <li>Last updated: {{ updated|time_diff|raw }}</li>
+        <li>Last updated: {{ updated|time_diff }}</li>
     </ul>
 </div>
 {% if top_tags is defined %}
@@ -57,7 +57,7 @@ collage by {{ user_id|user_url|raw }}
     <div class="pad">
         <ol style="padding-left: 5px;">
 {% for user_id, additions in contributors %}
-            <li>{{ user_id|user_url|raw}} ({{ additions|number_format }})</li>
+            <li>{{ user_id|user_url }} ({{ additions|number_format }})</li>
 {% endfor %}
         </ol>
     </div>
@@ -100,7 +100,7 @@ collage by {{ user_id|user_url|raw }}
 {% for comment in comments %}
 <div class="box comment">
     <div class="head">
-        {{ comment.author_id|user_url|raw }} {{ comment.added|time_diff|raw }}
+        {{ comment.author_id|user_url }} {{ comment.added|time_diff }}
         <br />
         <a href="reports.php?action=report&amp;type=collages_comment&amp;id={{ comment.id }}" class="brackets">Report</a>
     </div>
