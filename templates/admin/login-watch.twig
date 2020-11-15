@@ -46,7 +46,7 @@
         </td>
         <td>
     {% if b.user_id %}
-            {{ b.user_id|user_url|raw }}
+            {{ b.user_id|user_url }}
     {% else %}
             <i title="no user with this name">{{ b.capture }}</i>
     {% endif %}
@@ -58,10 +58,10 @@
             {{ b.bans }}
         </td>
         <td>
-            {{ b.last_attempt|time_diff|raw }}
+            {{ b.last_attempt|time_diff }}
         </td>
         <td>
-            {{ b.banned_until|time_diff|raw }}
+            {{ b.banned_until|time_diff }}
         </td>
     {% if can_ban %}
         <td style="text-align: center">

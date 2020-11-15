@@ -45,11 +45,11 @@
     {% endif %}
 
     <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
-        <td>{{ invite.user_id|user_full|raw }}</td>
+        <td>{{ invite.user_id|user_full }}</td>
         <td>{{ invite.email }}</td>
-        <td>{{ invite.ipaddr|ipaddr|raw }}</td>
+        <td>{{ invite.ipaddr|ipaddr }}</td>
         <td><a href="register.php?invite={{ invite.key }}">{{ invite.key }}</a></td>
-        <td>{{ invite.expires|time_diff|raw }}</td>
+        <td>{{ invite.expires|time_diff }}</td>
     {% if can_edit_invites %}
         <td>
             <form class="delete_form" name="invite" action="" method="post">

@@ -24,7 +24,7 @@
         <tr><td class="label" colspan="2" style="text-align: center">Release details</td></tr>
         <tr>
             <td class="label">Uploaded by</td>
-            <td>{{ torrent.UserID|user_full|raw }}</td>
+            <td>{{ torrent.UserID|user_full }}</td>
         </tr>
         <tr>
             <td class="label">Category</td>
@@ -140,7 +140,7 @@
     </tr>
     {% for r in result %}
     <tr>
-        <td class="vertical-align: top;">{{ r.user_id|user_url|raw }}</td>
+        <td class="vertical-align: top;">{{ r.user_id|user_url }}</td>
         <td class="vertical-align: top;">{{ r.filter_id }}</td>
         <td class="vertical-align: top;">{{ r.filter.info.label}}</td>
         <td class="vertical-align: top;">
@@ -180,7 +180,7 @@
         </td>
         <td class="vertical-align: top;">
         {% for user in r.filter.info.user|sort %}
-            {{ user|user_url|raw }}{% if not loop.last %}<br />{% endif %}
+            {{ user|user_url }}{% if not loop.last %}<br />{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">{{ r.filter.info.exclude_va }}</td>

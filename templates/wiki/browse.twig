@@ -40,7 +40,7 @@
         <tr>
             <td><a href="wiki.php?action=article&amp;id={{ article.ID }}">{{ article.Title }}</a></td>
             <td>{{ article.Date }}</td>
-            <td>{{ article.Author|user_url|raw }}</td>
+            <td>{{ article.Author|user_url }}</td>
         </tr>
         {% endfor %}
     </table>
