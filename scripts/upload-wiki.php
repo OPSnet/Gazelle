@@ -6,19 +6,16 @@ define('MEMORY_EXCEPTION', true);
 define('TIME_EXCEPTION', true);
 define('ERROR_EXCEPTION', true);
 
-require_once(__DIR__.'/../classes/config.php');
-require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__ . '/../classes/config.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . '/../classes/util.php');
+
 
 use Gazelle\Util\Crypto;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
-require('classes/proxies.class.php');
-
 set_include_path(SERVER_ROOT);
-
-require_once(SERVER_ROOT.'classes/time.class.php');
-require_once(SERVER_ROOT.'classes/util.php');
 
 $Debug = new DEBUG;
 $Debug->handle_errors();

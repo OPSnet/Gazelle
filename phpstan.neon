@@ -3,9 +3,6 @@ parameters:
     bootstrapFiles:
         - classes/config.template.php
     scanFiles:
-        - classes/paranoia.class.php
-        - classes/proxies.class.php
-        - classes/time.class.php
         - classes/util.php
         - sections/artist/index.php
         - sections/torrents/functions.php

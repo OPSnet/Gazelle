@@ -81,6 +81,7 @@ switch ($Document) {
     case 'staffblog':
     case 'staffpm':
     case 'stats':
+    case 'tools':
     case 'top10':
     case 'view':
         $Valid = true;
@@ -92,4 +93,4 @@ if (!$Valid) {
     $_SERVER['SCRIPT_FILENAME'] = 'error.php';
     $Error = 404;
 }
-require_once(__DIR__.'/../classes/script_start.php');
+require_once(__DIR__.'/classes/script_start.php');

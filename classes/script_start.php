@@ -12,6 +12,7 @@
 /********************************************************/
 
 require_once(__DIR__ . '/config.php'); //The config contains all site wide configuration information
+require_once(__DIR__ . '/util.php');
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Gazelle\Util\Crypto;
@@ -23,8 +24,6 @@ use Twig\Environment;
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
     die('d14:failure reason40:Invalid .torrent, try downloading again.e');
 }
-
-require_once(__DIR__ . '/proxies.class.php');
 
 // Get the user's actual IP address if they're proxied.
 if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])
@@ -47,12 +46,6 @@ if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
 }
 
 ob_start(); //Start a buffer, mainly in case there is a mysql error
-
-set_include_path(SERVER_ROOT);
-
-require(__DIR__ . '/time.class.php'); //Require the time class
-require(__DIR__ . '/paranoia.class.php'); //Require the paranoia check_paranoia function
-require(__DIR__ . '/util.php');
 
 $Debug = new DEBUG;
 $Debug->handle_errors();
@@ -525,16 +518,15 @@ $Cache->cache_value('php_' . getmypid(),
 
 G::$Router = new Gazelle\Router($LoggedUser['AuthKey'] ?? '');
 if (isset($LoggedUser['LockedAccount']) && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
-    require(__DIR__ . '/../sections/locked/index.php');
+    require_once(__DIR__ . '/../sections/locked/index.php');
 }
 else {
     $file = __DIR__ . '/../sections/' . $Document . '/index.php';
     if (!file_exists($file)) {
         error(404);
-    }
-    else {
+    } else {
         try {
-            require($file);
+            require_once($file);
         }
         catch (\DB_MYSQL_Exception $e) {
             if (DEBUG_MODE || check_perms('site_debug')) {
@@ -544,8 +536,7 @@ else {
 <pre><?= str_replace(SERVER_ROOT .'/', '', $e->getTraceAsString()) ?></pre>
 <?php
                 View::show_footer();
-            }
-            else {
+            } else {
                 error("That is not supposed to happen, please send a Staff Message to \"Staff\" for investigation.");
             }
         }

@@ -158,7 +158,7 @@ class Tools {
         G::$DB->query("
             UPDATE users_info AS i
             INNER JOIN users_main AS um ON (um.ID = i.UserID)
-            INNER JOIN user_leech_stats AS uls ON (uls.UserID = i.UserID) SET
+            INNER JOIN users_leech_stats AS uls ON (uls.UserID = i.UserID) SET
                 um.Enabled = '2',
                 um.can_leech = '0',
                 i.AdminComment = CONCAT('".sqltime()." - ".($AdminComment ? $AdminComment : 'Disabled by system')."\n\n', i.AdminComment),
