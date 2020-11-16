@@ -4,6 +4,21 @@ namespace Gazelle\Manager;
 
 class User extends \Gazelle\Base {
     /**
+     * Get a User object based on a magic field (id or @name)
+     *
+     * @param mixed name (numeric ID or @username)
+     * @return \Gazelle\User object or null if not found
+     */
+    public function find($name) {
+        if (substr($name, 0, 1) === '@') {
+            return $this->findByUsername(substr($name, 1));
+        } elseif ((int)$name > 0) {
+            return $this->findById((int)$name);
+        }
+        return null;
+    }
+
+    /**
      * Get a User object based on their ID
      *
      * @param int userId
