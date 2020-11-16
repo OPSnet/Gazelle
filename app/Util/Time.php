@@ -241,7 +241,7 @@ class Time {
     }
 
     /**
-     * Legacy function from classes/time.class.php.
+     * Legacy function from classes/util.class.php.
      *
      * @see Time::timeOffset()
      * @deprecated Use Time::timeOffset() instead.
@@ -254,7 +254,7 @@ class Time {
     }
 
     /**
-     * Legacy function from classes/time.class.php.
+     * Legacy function from classes/util.class.php.
      *
      * @see Time::timeOffset()
      * @deprecated Use Time::timeOffset() instead.

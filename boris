@@ -25,8 +25,6 @@ define('BORIS', 1);
 
 require_once(__DIR__ . '/classes/config.php');
 require_once(__DIR__ . '/vendor/autoload.php');
-require_once(__DIR__ . '/classes/paranoia.class.php');
-require_once(__DIR__ . '/classes/time.class.php');
 require_once(__DIR__ . '/classes/util.php');
 require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 

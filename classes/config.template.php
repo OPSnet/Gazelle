@@ -121,6 +121,9 @@ define('AOTM_FORUM_ID', 51); // ID of the Album of The Month forum
 define('VANITY_HOUSE_FORUM_ID', 18); // Vanity House forum
 define('CLIENT_WHITELIST_FORUM_ID', 680); // Client whitelist suggestion forum
 
+define("PARANOIA_ALLOWED", 1);
+define("PARANOIA_OVERRIDDEN", 2);
+
 define('USER_TORRENT_DELETE_MAX', 3);
 define('USER_TORRENT_DELETE_HOURS', 24);
 
@@ -222,6 +225,20 @@ $ForumsDoublePost = [];
 define('STORAGE_PATH_TORRENT', '/var/lib/gazelle/torrent');
 define('STORAGE_PATH_RIPLOG', '/var/lib/gazelle/riplog');
 define('STORAGE_PATH_RIPLOGHTML', '/var/lib/gazelle/riploghtml');
+
+//Useful: http://www.robtex.com/cnet/
+$AllowedProxies = [
+    //Opera Turbo (may include Opera-owned IP addresses that aren't used for Turbo, but shouldn't run much risk of exploitation)
+    '64.255.180.*', //Norway
+    '64.255.164.*', //Norway
+    '80.239.242.*', //Poland
+    '80.239.243.*', //Poland
+    '91.203.96.*', //Norway
+    '94.246.126.*', //Norway
+    '94.246.127.*', //Norway
+    '195.189.142.*', //Norway
+    '195.189.143.*', //Norway
+];
 
 $Categories = ['Music', 'Applications', 'E-Books', 'Audiobooks', 'E-Learning Videos', 'Comedy', 'Comics'];
 $GroupedCategories = array_intersect(['Music'], $Categories);

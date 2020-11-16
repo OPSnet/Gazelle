@@ -18,8 +18,6 @@ if (isset($_GET['clearcache'])) {
 
 require_once(__DIR__.'/../classes/config.php');
 require_once(__DIR__.'/../vendor/autoload.php');
-require_once(__DIR__.'/../classes/time.class.php');
-require_once(__DIR__.'/../classes/paranoia.class.php');
 require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new CACHE;

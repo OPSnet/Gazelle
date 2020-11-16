@@ -31,10 +31,6 @@ if (PHP_INT_SIZE === 4) {
     }
 }
 
-function is_date($Date) {
-    return Time::isValidDate($Date);
-}
-
 /**
  * Check that some given variables (usually in _GET or _POST) are numbers
  *
@@ -480,4 +476,192 @@ function display_array($Array, $Escape = []) {
         }
     }
     return $Array;
+}
+
+function proxyCheck(string $IP): bool {
+    global $AllowedProxies;
+    foreach ($AllowedProxies as $allowed) {
+        //based on the wildcard principle it should never be shorter
+        if (strlen($IP) < strlen($allowed)) {
+            continue;
+        }
+
+        //since we're matching bit for bit iterating from the start
+        for ($j = 0, $jl = strlen($IP); $j < $jl; ++$j) {
+            //completed iteration and no inequality
+            if ($j === $jl - 1 && $IP[$j] === $allowed[$j]) {
+                return true;
+            }
+
+            //wildcard
+            if ($allowed[$j] === '*') {
+                return true;
+            }
+
+            //inequality found
+            if ($IP[$j] !== $allowed[$j]) {
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+/*** Time and date functions ***/
+
+function is_date($Date) {
+    return Time::isValidDate($Date);
+}
+
+function time_ago($TimeStamp) {
+    return Time::timeAgo($TimeStamp);
+}
+
+/*
+ * Returns a <span> by default but can optionally return the raw time
+ * difference in text (e.g. "16 hours and 28 minutes", "1 day, 18 hours").
+ */
+function time_diff($TimeStamp, $Levels = 2, $Span = true, $Lowercase = false, $StartTime = false) {
+    return Time::timeDiff($TimeStamp, $Levels, $Span, $Lowercase, $StartTime);
+}
+
+/**
+ * Given a number of hours, convert it to a human readable time of
+ * years, months, days, etc.
+ *
+ * @param $Hours
+ * @param int $Levels
+ * @param bool $Span
+ * @return string
+ */
+function convert_hours($Hours,$Levels=2,$Span=true) {
+    return Time::convertHours($Hours, $Levels, $Span);
+}
+
+/* SQL utility functions */
+
+function time_plus($Offset) {
+    return Time::timePlus($Offset);
+}
+
+function time_minus($Offset, $Fuzzy = false) {
+    return Time::timeMinus($Offset, $Fuzzy);
+}
+
+function sqltime($timestamp = false) {
+    return Time::sqlTime($timestamp);
+}
+
+function validDate($DateString) {
+    return Time::validDate($DateString);
+}
+
+function is_valid_date($Date) {
+    return Time::isValidDate($Date);
+}
+
+function is_valid_time($Time) {
+    return Time::isValidTime($Time);
+}
+
+function is_valid_datetime($DateTime, $Format = 'Y-m-d H:i') {
+    return Time::isValidDateTime($DateTime, $Format);
+}
+
+/*** Paranoia functions ***/
+
+// The following are used throughout the site:
+// uploaded, ratio, downloaded: stats
+// lastseen: approximate time the user last used the site
+// uploads: the full list of the user's uploads
+// uploads+: just how many torrents the user has uploaded
+// snatched, seeding, leeching: the list of the user's snatched torrents, seeding torrents, and leeching torrents respectively
+// snatched+, seeding+, leeching+: the length of those lists respectively
+// uniquegroups, perfectflacs: the list of the user's uploads satisfying a particular criterion
+// uniquegroups+, perfectflacs+: the length of those lists
+// If "uploads+" is disallowed, so is "uploads". So if "uploads" is in the array, the user is a little paranoid, "uploads+", very paranoid.
+
+// The following are almost only used in /sections/user/user.php:
+// requiredratio
+// requestsfilled_count: the number of requests the user has filled
+//   requestsfilled_bounty: the bounty thus earned
+//   requestsfilled_list: the actual list of requests the user has filled
+// requestsvoted_...: similar
+// artistsadded: the number of artists the user has added
+// torrentcomments: the list of comments the user has added to torrents
+//   +
+// collages: the list of collages the user has created
+//   +
+// collagecontribs: the list of collages the user has contributed to
+//   +
+// invitedcount: the number of users this user has directly invited
+
+/**
+ * Return whether currently logged in user can see $Property on a user with $Paranoia, $UserClass and (optionally) $UserID
+ * If $Property is an array of properties, returns whether currently logged in user can see *all* $Property ...
+ *
+ * @param $Property The property to check, or an array of properties.
+ * @param $Paranoia The paranoia level to check against.
+ * @param $UserClass The user class to check against (Staff can see through paranoia of lower classed staff)
+ * @param $UserID Optional. The user ID of the person being viewed
+ * @return mixed   1 representing the user has normal access
+                   2 representing that the paranoia was overridden,
+                   false representing access denied.
+ */
+
+function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
+    global $Classes;
+    if ($Property == false) {
+        return false;
+    }
+    if (!is_array($Paranoia)) {
+        $Paranoia = unserialize($Paranoia);
+    }
+    if (!is_array($Paranoia)) {
+        $Paranoia = [];
+    }
+    if (is_array($Property)) {
+        $all = true;
+        foreach ($Property as $P) {
+            $all = $all && check_paranoia($P, $Paranoia, $UserClass, $UserID);
+        }
+        return $all;
+    } else {
+        if (($UserID !== false) && (G::$LoggedUser['ID'] == $UserID)) {
+            return PARANOIA_ALLOWED;
+        }
+
+        $May = !in_array($Property, $Paranoia) && !in_array($Property . '+', $Paranoia);
+        if ($May)
+            return PARANOIA_ALLOWED;
+
+        if (check_perms('users_override_paranoia', $UserClass)) {
+            return PARANOIA_OVERRIDDEN;
+        }
+        $Override=false;
+        switch ($Property) {
+            case 'downloaded':
+            case 'ratio':
+            case 'uploaded':
+            case 'lastseen':
+                if (check_perms('users_mod', $UserClass))
+                    return PARANOIA_OVERRIDDEN;
+                break;
+            case 'snatched': case 'snatched+':
+                if (check_perms('users_view_torrents_snatchlist', $UserClass))
+                    return PARANOIA_OVERRIDDEN;
+                break;
+            case 'uploads': case 'uploads+':
+            case 'seeding': case 'seeding+':
+            case 'leeching': case 'leeching+':
+                if (check_perms('users_view_seedleech', $UserClass))
+                    return PARANOIA_OVERRIDDEN;
+                break;
+            case 'invitedcount':
+                if (check_perms('users_view_invites', $UserClass))
+                    return PARANOIA_OVERRIDDEN;
+                break;
+        }
+        return false;
+    }
 }

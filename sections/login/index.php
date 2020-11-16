@@ -451,5 +451,5 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             }
         }
     }
-    require('sections/login/login.php');
+    require_once('login.php');
 }
