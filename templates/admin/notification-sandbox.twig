@@ -145,7 +145,7 @@
         <td class="vertical-align: top;">{{ r.filter.info.label}}</td>
         <td class="vertical-align: top;">
         {% for artist in r.filter.info.artist|sort %}
-            {{ artist }}{% if not loop.last %}<br />{% endif %}
+            {{ artist }}{% if not loop.last %} &middot;{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">
@@ -202,15 +202,16 @@
                         <label for="torrentid">Torrent ID</label>
                     </td>
                     <td>
-                        <input type="number" name="torrentid" value="{{ torrent.ID }}" />
+                        <input type="number" name="torrentid" value="{{ torrent.ID }}" /> (<b>not</b> group ID!)
                     </td>
                 <tr>
                 </tr>
                     <td class="label">
-                        <label for="torrentid">or Uploader ID</label>
+                        <label for="torrentid">or Uploader</label>
                     </td>
                     <td>
-                        <input type="number" name="uploaderid" value="{{ uploader_id }}" />
+                        <input type="text" name="uploaderid" value="{{ uploader_id }}" />
+                        <br />Use <tt>@name</tt> for a username, otherwise (numeric) user ID.
                     </td>
                 <tr>
                 </tr>
@@ -218,7 +219,9 @@
                         <label for="torrentid">optional notified User ID</label>
                     </td>
                     <td>
-                        <input type="number" name="notifiedid" value="{{ notified_id }}" />&nbsp;(To limit results to one person)
+                        <input type="text" name="notifiedid" value="{{ notified_id }}" />&nbsp;(To limit results to one person)
+                        <br />Use <tt>@name</tt> for a username, otherwise (numeric) user ID.
+                    </td>
                     </td>
                 </tr>
             </tbody>

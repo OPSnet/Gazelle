@@ -63,7 +63,7 @@ class Upload extends \Gazelle\Base {
         } else {
             $this->cond[] = (empty($guestArtist) ? '' : "unf.ExcludeVA = '0' AND ") . "unf.Artists REGEXP ?";
         }
-        $this->args[] = '(?:^$|\\|' . implode('|', array_merge($mainName, $guestName)) . '\\|)';
+        $this->args[] = '(?:^$|\|(?:' . implode('|', array_merge($mainName, $guestName)) . ')\|)';
         return $this;
     }
 
@@ -79,9 +79,9 @@ class Upload extends \Gazelle\Base {
                 $escaped[] = $this->escape($tag);
             }
             $this->cond[] = "unf.Tags REGEXP ?";
-            $this->cond[] = "NOT unf.NotTags REGEXP ?";
-            $pattern = '(?:^$|\\|' . implode('|', $escaped) . '\\|)';
-            $this->args = array_merge($this->args, [$pattern, $pattern]);
+            $this->cond[] = "(unf.NotTags = '' OR NOT unf.NotTags REGEXP ?)";
+            $pattern =  '\|(?:' . implode('|', $escaped) . ')\|';
+            $this->args = array_merge($this->args, ['(?:^$|' . $pattern . ')', $pattern]);
         }
         return $this;
     }
@@ -117,7 +117,7 @@ class Upload extends \Gazelle\Base {
             return $this;
         }
         $this->cond[] = "unf.$column REGEXP ?";
-        $this->args[] = '(?:^$|\\|' . $this->escape($dimension) . '\\|)';
+        $this->args[] = '(?:^$|\|' . $this->escape($dimension) . '\|)';
         return $this;
     }
 
@@ -165,7 +165,7 @@ class Upload extends \Gazelle\Base {
      */
     public function addYear($originalYear, $remasterYear) {
         $default = "unf.FromYear = 0 AND unf.ToYear = 0";
-        if ($originalYear && $remasterYear) {
+        if ($originalYear && $remasterYear && ($originalYear !== $remasterYear)) {
             $this->cond[] = "((? BETWEEN unf.FromYear AND unf.ToYear) OR (? BETWEEN unf.FromYear AND unf.ToYear) OR ($default))";
             $this->args = array_merge($this->args, [$originalYear, $remasterYear]);
         } elseif ($originalYear || $remasterYear) {
@@ -249,10 +249,6 @@ class Upload extends \Gazelle\Base {
      * @return array mysql-escaped list of arguments
      */
     public function args(): array {
-        $out = [];
-        foreach ($this->args as $arg) {
-            $out[] = mysqli_real_escape_string($this->db->LinkID, $arg);
-        }
-        return $out;
+        return $this->args;
     }
 }
