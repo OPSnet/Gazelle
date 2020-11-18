@@ -736,23 +736,30 @@ class Torrent extends \Gazelle\Base {
         if (!($latest = $this->cache->get_value(self::CACHE_KEY_LATEST_UPLOADS . $limit))) {
             $this->db->prepared_query("
                 SELECT tg.WikiImage AS imageUrl,
-                    tg.ID           AS groupId,
-                    t.ID            AS torrentId,
-                    t.Time          AS uploadDate,
+                    R.GroupID       AS groupId,
+                    R.torrentId,
+                    R.uploadDate,
                     um.Username     AS username,
                     um.Paranoia     AS paranoia,
                     group_concat(tag.Name ORDER BY tag.Name SEPARATOR ', ') AS tags
-                FROM torrents t
-                /* Mysql cannot filter and sort from the same index, so help it - Spine */
-                INNER JOIN (SELECT ID FROM torrents ORDER BY Time DESC LIMIT 100) Recent ON (Recent.ID = t.ID)
-                INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-                INNER JOIN users_main     um ON (um.ID = t.UserID)
+                FROM (
+                    SELECT t.GroupID,
+                        max(t.ID)   AS torrentId,
+                        max(t.Time) AS uploadDate
+                    FROM torrents t
+                    INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
+                    WHERE t.Time > now() - INTERVAL 3 DAY
+                        AND t.Encoding IN ('Lossless', '24bit Lossless')
+                        AND tg.WikiImage != ''
+                    GROUP BY t.GroupID
+                ) R
+                INNER JOIN torrents_group tg ON (tg.ID = R.groupId)
                 INNER JOIN torrents_tags  tt USING (GroupID)
                 INNER JOIN tags           tag ON (tag.ID = tt.TagID)
-                WHERE t.Encoding IN ('Lossless', '24bit Lossless')
-                    AND tg.WikiImage != ''
-                GROUP BY tg.ID
-                ORDER BY t.Time DESC
+                INNER JOIN torrents       t   ON (t.ID = R.torrentId)
+                INNER JOIN users_main     um  ON (um.ID = t.UserID)
+                GROUP BY R.GroupID
+                ORDER BY R.uploadDate DESC
             ");
             $latest = [];
             while (count($latest) < $limit) {
