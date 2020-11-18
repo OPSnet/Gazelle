@@ -25,7 +25,7 @@ abstract class MASS_USER_TORRENTS_EDITOR {
      * @param string $Table
      */
     final public function set_table($Table) {
-        $this->Table = db_string($Table);
+        $this->Table = $Table;
     }
 
     /**
