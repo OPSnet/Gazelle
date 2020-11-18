@@ -23,59 +23,29 @@ if (check_perms('users_mod')) {
             <div class="head colhead_dark">
                 <strong><a href="staffblog.php">Latest staff blog posts</a></strong>
             </div>
-<?php
-if (($Blog = $Cache->get_value('staff_blog')) === false) {
-    $DB->prepared_query('
-        SELECT
-            b.ID,
-            um.Username,
-            b.Title,
-            b.Body,
-            b.Time
-        FROM staff_blog AS b
-        LEFT JOIN users_main AS um ON (b.UserID = um.ID)
-        ORDER BY Time DESC
-    ');
-    $Blog = $DB->to_array(false, MYSQLI_NUM);
-    $Cache->cache_value('staff_blog', $Blog, 86400);
-}
-if (($SBlogReadTime = $Cache->get_value('staff_blog_read_'.$LoggedUser['ID'])) === false) {
-    $DB->prepared_query('
-        SELECT Time
-        FROM staff_blog_visits
-        WHERE UserID = ?
-        ', $LoggedUser['ID']
-    );
-    if (list($SBlogReadTime) = $DB->next_record()) {
-        $SBlogReadTime = strtotime($SBlogReadTime);
-    } else {
-        $SBlogReadTime = 0;
-    }
-    $Cache->cache_value('staff_blog_read_'.$LoggedUser['ID'], $SBlogReadTime, 86400);
-}
-?>
             <ol class="stats nobullet">
 <?php
-$End = min(count($Blog), 5);
-for ($i = 0; $i < $End; $i++) {
-    list($BlogID, $Author, $Title, $Body, $BlogTime) = $Blog[$i];
-    $BlogTime = strtotime($BlogTime);
+    $blogMan = new Gazelle\Manager\StaffBlog;
+    $Blog = $blogMan->blogList();
+    $SBlogReadTime = $blogMan->readBy($LoggedUser['ID']);
+    $n = 0;
+    foreach ($Blog as $b) {
+        if (++$n > 5) {
+            break;
+        }
+        $unread = $SBlogReadTime < strtotime($b['created']);
 ?>
                 <li>
-                    <?=$SBlogReadTime < $BlogTime ? '<strong>' : ''?>
-                    <a href="staffblog.php#blog<?=$BlogID?>"><?=$Title?></a>
-                    <?=$SBlogReadTime < $BlogTime ? '</strong>' : ''?>
+                    <?= $unread ? '<strong>' : ''?>
+                    <a href="staffblog.php#blog<?= $b['id'] ?>"><?= $b['title'] ?></a>
+                    <?= $unread ? '</strong>' : ''?>
                 </li>
-<?php
-}
-?>
+<?php } ?>
             </ol>
         </div>
-<?php    } ?>
+<?php } /* users_mod */ ?>
         <div class="box">
             <div class="head colhead_dark"><strong><a href="blog.php">Latest blog posts</a></strong></div>
-<?php
-?>
             <ol class="stats">
 <?php
 $blogMan = new Gazelle\Manager\Blog;
