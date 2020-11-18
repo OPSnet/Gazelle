@@ -16,6 +16,7 @@ class StaffBlog extends \Gazelle\Base {
     protected $title;
 
     protected const CACHE_KEY = 'staff_blogv3';
+    protected const CACHE_READ_KEY = 'staff_blog_read_%d';
 
     /**
      * Update the last visited timestamp
@@ -30,7 +31,7 @@ class StaffBlog extends \Gazelle\Base {
             ON DUPLICATE KEY UPDATE Time = now()
             ", $userId
         );
-        $this->cache->delete_value("staff_blog_read_{$userId}");
+        $this->cache->delete_value(sprintf(self::CACHE_READ_KEY, $userId));
     }
 
     public function blogId(): ?int {
@@ -73,7 +74,7 @@ class StaffBlog extends \Gazelle\Base {
                     um.Username AS author,
                     b.Title     AS title,
                     b.Body      AS body,
-                    b.Time      AS time
+                    b.Time      AS created
                 FROM staff_blog AS b
                 INNER JOIN users_main AS um ON (b.UserID = um.ID)
                 ORDER BY Time DESC
@@ -82,6 +83,25 @@ class StaffBlog extends \Gazelle\Base {
             $this->cache->cache_value(self::CACHE_KEY, $list, 1209600);
         }
         return $list;
+    }
+
+    /**
+     * When was the blog read by a user?
+     *
+     * @param int user id
+     * @return int epoch
+     */
+    public function readBy(int $userId) {
+        $key = sprintf(self::CACHE_READ_KEY, $userId);
+        if (($time = $this->cache->get_value($key)) === false) {
+            $time = $this->db->scalar("
+                SELECT Time FROM staff_blog_visits WHERE UserID = ?
+                ", $userId
+            );
+            $time = $time ? strtotime($time) : 0;
+            $this->cache->cache_value($key, $time, 86400);
+        }
+        return $time;
     }
 
     /**
