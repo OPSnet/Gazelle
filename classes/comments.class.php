@@ -15,18 +15,6 @@ class Comments {
      */
     public static function post($Page, $PageID, $Body) {
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
-            SELECT
-                CEIL(
-                    (
-                        SELECT COUNT(ID) + 1
-                        FROM comments
-                        WHERE Page = '$Page'
-                            AND PageID = $PageID
-                    ) / " . TORRENT_COMMENTS_PER_PAGE . "
-                ) AS Pages");
-        list($Pages) = G::$DB->next_record();
-
         G::$DB->prepared_query("
             INSERT INTO comments
                    (Page, PageID, AuthorID, Body)
@@ -34,6 +22,12 @@ class Comments {
             ", $Page, $PageID, G::$LoggedUser['ID'], $Body
         );
         $PostID = G::$DB->inserted_id();
+        $Pages = G::$DB->scalar("
+            SELECT ceil(count(*) / ?)
+            FROM comments
+            WHERE Page = ? AND PageID = ?
+            ", TORRENT_COMMENTS_PER_PAGE, $Page, $PageID
+        );
 
         $CatalogueID = floor((TORRENT_COMMENTS_PER_PAGE * $Pages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         G::$Cache->delete_value($Page.'_comments_'.$PageID.'_catalogue_'.$CatalogueID);
@@ -61,7 +55,7 @@ class Comments {
     public static function edit($PostID, $NewBody, $SendPM = false) {
         $QueryID = G::$DB->get_query_id();
 
-        G::$DB->query("
+        [$OldBody, $AuthorID, $Page, $PageID, $AddedTime] = G::$DB->row("
             SELECT
                 Body,
                 AuthorID,
@@ -69,32 +63,43 @@ class Comments {
                 PageID,
                 AddedTime
             FROM comments
-            WHERE ID = $PostID");
-        if (!G::$DB->has_results()) {
+            WHERE ID = ?
+            ", $PostID
+        );
+        if (!$PageID) {
             return false;
         }
-        list($OldBody, $AuthorID, $Page, $PageID, $AddedTime) = G::$DB->next_record();
-
         if (G::$LoggedUser['ID'] != $AuthorID && !check_perms('site_moderate_forums')) {
             return false;
         }
 
-        G::$DB->query("
-            SELECT CEIL(COUNT(ID) / " . TORRENT_COMMENTS_PER_PAGE . ") AS Page
-            FROM comments
-            WHERE Page = '$Page'
-                AND PageID = $PageID
-                AND ID <= $PostID");
-        list($CommPage) = G::$DB->next_record();
-
         // Perform the update
-        G::$DB->query("
-            UPDATE comments
-            SET
-                Body = '" . db_string($NewBody) . "',
-                EditedUserID = " . G::$LoggedUser['ID'] . ",
-                EditedTime = '" . sqltime() . "'
-            WHERE ID = $PostID");
+        G::$DB->prepared_query("
+            UPDATE comments SET
+                EditedTime = now(),
+                Body = ?,
+                EditedUserID = ?
+            WHERE ID = ?
+            ", trim($NewBody), G::$LoggedUser['ID'], $PostID
+        );
+        $success = G::$DB->affected_rows() === 1;
+
+        G::$DB->prepared_query("
+            INSERT INTO comments_edits
+                   (Page, PostID, EditUser, Body, EditTime)
+            VALUES (?,    ?,      ?,        ?,    now())
+            ", $Page, $PostID, G::$LoggedUser['ID'], $OldBody
+        );
+
+        $CommPage = G::$DB->scalar("
+            SELECT ceil(count(*) / ?) AS Page
+            FROM comments
+            WHERE Page = ?
+                AND PageID = ?
+                AND ID <= ?
+            ", TORRENT_COMMENTS_PER_PAGE, $Page, $PageID, $PostID
+        );
+        G::$DB->set_query_id($QueryID);
 
         // Update the cache
         $CatalogueID = floor((TORRENT_COMMENTS_PER_PAGE * $CommPage - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
@@ -105,22 +110,15 @@ class Comments {
             G::$Cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $PageID));
         }
 
-        G::$DB->query("
-            INSERT INTO comments_edits (Page, PostID, EditUser, EditTime, Body)
-            VALUES ('$Page', $PostID, " . G::$LoggedUser['ID'] . ", '" . sqltime() . "', '" . db_string($OldBody) . "')");
-
-        G::$DB->set_query_id($QueryID);
-
         if ($SendPM && G::$LoggedUser['ID'] != $AuthorID) {
             // Send a PM to the user to notify them of the edit
-            $PMSubject = "Your comment #$PostID has been edited";
             $PMurl = SITE_URL."/comments.php?action=jump&postid=$PostID";
             $ProfLink = '[url='.SITE_URL.'/user.php?id='.G::$LoggedUser['ID'].']'.G::$LoggedUser['Username'].'[/url]';
             $PMBody = "One of your comments has been edited by $ProfLink: [url]{$PMurl}[/url]";
-            Misc::send_pm($AuthorID, 0, $PMSubject, $PMBody);
+            Misc::send_pm($AuthorID, 0, "Your comment #$PostID has been edited", $PMBody);
         }
 
-        return true; // TODO: this should reflect whether or not the update was actually successful, e.g. by checking G::$DB->affected_rows after the UPDATE query
+        return $success;
     }
 
     /**
@@ -129,46 +127,46 @@ class Comments {
      */
     public static function delete($PostID) {
         $QueryID = G::$DB->get_query_id();
-        // Get page, pageid
-        G::$DB->query("SELECT Page, PageID FROM comments WHERE ID = $PostID");
-        if (!G::$DB->has_results()) {
+        [$Page, $PageID] = G::$DB->scalar("
+            SELECT Page, PageID FROM comments WHERE ID = ?
+            ", $PostID
+        );
+        if (!$PageID) {
             // no such comment?
             G::$DB->set_query_id($QueryID);
             return false;
         }
-        list ($Page, $PageID) = G::$DB->next_record();
-        // get number of pages
-        G::$DB->query("
+        [$CommPages, $CommPage] = G::$DB->scalar("
             SELECT
-                CEIL(COUNT(ID) / " . TORRENT_COMMENTS_PER_PAGE . ") AS Pages,
-                CEIL(SUM(IF(ID <= $PostID, 1, 0)) / " . TORRENT_COMMENTS_PER_PAGE . ") AS Page
+                ceil(count(*) / ?) AS Pages,
+                ceil(sum(if(ID <= ?, 1, 0)) / ?) AS Page
             FROM comments
-            WHERE Page = '$Page'
-                AND PageID = $PageID
-            GROUP BY PageID");
-        if (!G::$DB->has_results()) {
+            WHERE Page = ? AND PageID = ?
+            GROUP BY PageID
+            ", TORRENT_COMMENTS_PER_PAGE, $PostID, TORRENT_COMMENTS_PER_PAGE, $Page, $PageID
+        );
+        if (!$CommPages) {
             // the comment $PostID was probably not posted on $Page
             G::$DB->set_query_id($QueryID);
             return false;
         }
-        list($CommPages, $CommPage) = G::$DB->next_record();
 
         // $CommPages = number of pages in the thread
         // $CommPage = which page the post is on
         // These are set for cache clearing.
 
-        G::$DB->query("
-            DELETE FROM comments
-            WHERE ID = $PostID");
-        G::$DB->query("
-            DELETE FROM comments_edits
-            WHERE Page = '$Page'
-                AND PostID = $PostID");
-
-        G::$DB->query("
-            DELETE FROM users_notify_quoted
-            WHERE Page = '$Page'
-                AND PostID = $PostID");
+        G::$DB->prepared_query("
+            DELETE FROM comments WHERE ID = ?
+            ", $PostID
+        );
+        G::$DB->prepared_query("
+            DELETE FROM comments_edits WHERE Page = ? AND PostID = ?
+            ", $Page, $PostID
+        );
+        G::$DB->prepared_query("
+            DELETE FROM users_notify_quoted WHERE Page = ? AND PostID = ?
+            ", $Page, $PostID
+        );
 
         $subscription = new \Gazelle\Manager\Subscription;
         $subscription->flush($Page, $PageID);
@@ -222,19 +220,13 @@ class Comments {
      * @return string|bool The URL to the comment or false on error
      */
     public static function get_url_query($PostID) {
-        $QueryID = G::$DB->get_query_id();
-
-        G::$DB->query("
-            SELECT Page, PageID
-            FROM comments
-            WHERE ID = $PostID");
-        if (!G::$DB->has_results()) {
+        [$Page, $PageID] = G::$DB->row("
+            SELECT Page, PageID FROM comments WHERE ID = ?
+            ", $PostID
+        );
+        if (!PageID) {
             error(404);
         }
-        list($Page, $PageID) = G::$DB->next_record();
-
-        G::$DB->set_query_id($QueryID);
-
         return self::get_url($Page, $PageID, $PostID);
     }
 
@@ -257,25 +249,24 @@ class Comments {
         // Get the total number of comments
         $NumComments = G::$Cache->get_value($Page."_comments_$PageID");
         if ($NumComments === false) {
-            G::$DB->query("
-                SELECT COUNT(ID)
-                FROM comments
-                WHERE Page = '$Page'
-                    AND PageID = $PageID");
-            list($NumComments) = G::$DB->next_record();
+            $NumComments = G::$DB->scalar("
+                SELECT count(*) FROM comments WHERE Page = ? AND PageID = ?
+                ", $Page, $PageID
+            );
             G::$Cache->cache_value($Page."_comments_$PageID", $NumComments, 0);
         }
 
         // If a postid was passed, we need to determine which page that comment is on.
         // Format::page_limit handles a potential $_GET['page']
         if (isset($_GET['postid']) && is_number($_GET['postid']) && $NumComments > TORRENT_COMMENTS_PER_PAGE) {
-            G::$DB->query("
-                SELECT COUNT(ID)
+            $PostNum = G::$DB->scalar("
+                SELECT count(*)
                 FROM comments
-                WHERE Page = '$Page'
-                    AND PageID = $PageID
-                    AND ID <= {$_GET['postid']}");
-            list($PostNum) = G::$DB->next_record();
+                WHERE Page = ?
+                    AND PageID = ?
+                    AND ID <= ?
+                ", $Page, $PageID, $_GET['postid']
+            );
             list($CommPage, $Limit) = Format::page_limit(TORRENT_COMMENTS_PER_PAGE, $PostNum);
         } else {
             list($CommPage, $Limit) = Format::page_limit(TORRENT_COMMENTS_PER_PAGE, $NumComments);
@@ -284,13 +275,11 @@ class Comments {
         // Get the cache catalogue
         $CatalogueID = floor((TORRENT_COMMENTS_PER_PAGE * $CommPage - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
 
-        // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
+        // Cache catalogue from which the page is selected
         $Catalogue = G::$Cache->get_value($Page.'_comments_'.$PageID.'_catalogue_'.$CatalogueID);
         if ($Catalogue === false) {
-            $CatalogueLimit = $CatalogueID * THREAD_CATALOGUE . ', ' . THREAD_CATALOGUE;
-            G::$DB->query("
-                SELECT
-                    c.ID,
+            G::$DB->prepared_query("
+                SELECT c.ID,
                     c.AuthorID,
                     c.AddedTime,
                     c.Body,
@@ -298,11 +287,12 @@ class Comments {
                     c.EditedTime,
                     u.Username
                 FROM comments AS c
-                    LEFT JOIN users_main AS u ON u.ID = c.EditedUserID
-                WHERE c.Page = '$Page'
-                    AND c.PageID = $PageID
+                LEFT JOIN users_main AS u ON (u.ID = c.EditedUserID)
+                WHERE c.Page = ? AND c.PageID = ?
                 ORDER BY c.ID
-                LIMIT $CatalogueLimit");
+                LIMIT ? OFFSET ?
+                ", $Page, $PageID, $CatalogueID * THREAD_CATALOGUE, THREAD_CATALOGUE
+            );
             $Catalogue = G::$DB->to_array(false, MYSQLI_ASSOC);
             G::$Cache->cache_value($Page.'_comments_'.$PageID.'_catalogue_'.$CatalogueID, $Catalogue, 0);
         }
@@ -314,18 +304,19 @@ class Comments {
             $LastRead = false;
         } else {
             // quote notifications
+            $FirstPost = current($Thread);
+            $FirstPost = $FirstPost['ID'];
             $LastPost = end($Thread);
             $LastPost = $LastPost['ID'];
-            $FirstPost = reset($Thread);
-            $FirstPost = $FirstPost['ID'];
-            G::$DB->query("
-                UPDATE users_notify_quoted
-                SET UnRead = false
-                WHERE UserID = " . G::$LoggedUser['ID'] . "
-                    AND Page = '$Page'
-                    AND PageID = $PageID
-                    AND PostID >= $FirstPost
-                    AND PostID <= $LastPost");
+            G::$DB->prepared_query("
+                UPDATE users_notify_quoted SET
+                    UnRead = false
+                WHERE UserID = ?
+                    AND Page = ?
+                    AND PageID = ?
+                    AND PostID BETWEEN ? AND ?
+                ", G::$LoggedUser['ID'], $Page, $PageID, $FirstPost, $LastPost
+            );
             if (G::$DB->affected_rows()) {
                 G::$Cache->delete_value('notify_quoted_' . G::$LoggedUser['ID']);
             }
@@ -372,14 +363,13 @@ class Comments {
         if (($list = G::$Cache->get_value($key)) === false) {
             $qid = G::$DB->get_query_id();
             G::$DB->prepared_query('
-                SELECT
-                    c.ID AS id,
+                SELECT c.ID AS id,
                     c.Body as body,
                     c.AuthorID as author_id,
                     c.AddedTime as added
                 FROM comments AS c
                 LEFT JOIN users_main AS um ON (um.ID = c.AuthorID)
-                WHERE c.Page = ?  AND c.PageID = ?
+                WHERE c.Page = ? AND c.PageID = ?
                 ORDER BY c.ID DESC
                 LIMIT ?
                 ', 'collages', $CollageID, $count
@@ -406,32 +396,33 @@ class Comments {
     public static function merge($Page, $PageID, $TargetPageID) {
         $QueryID = G::$DB->get_query_id();
 
-        G::$DB->query("
-            UPDATE comments
-            SET PageID = $TargetPageID
-            WHERE Page = '$Page'
-                AND PageID = $PageID");
+        G::$DB->prepared_query("
+            UPDATE comments SET
+                PageID = ?
+            WHERE Page = ? AND PageID = ?
+            ", $TargetPageID, $Page, $PageID
+        );
 
         // quote notifications
-        G::$DB->query("
-            UPDATE users_notify_quoted
-            SET PageID = $TargetPageID
-            WHERE Page = '$Page'
-                AND PageID = $PageID");
+        G::$DB->prepared_query("
+            UPDATE users_notify_quoted SET
+                PageID = ?
+            WHERE Page = ? AND PageID = ?
+            ", $TargetPageID, $Page, $PageID
+        );
 
         // comment subscriptions
         $subscription = new \Gazelle\Manager\Subscription;
         $subscription->move($Page, $PageID, $TargetPageID);
 
         // cache (we need to clear all comment catalogues)
-        G::$DB->query("
-            SELECT
-                CEIL(COUNT(ID) / " . TORRENT_COMMENTS_PER_PAGE . ") AS Pages
+        $CommPages = G::$DB->scalar("
+            SELECT ceil(count(*) / ?) AS Pages
             FROM comments
-            WHERE Page = '$Page'
-                AND PageID = $TargetPageID
-            GROUP BY PageID");
-        list($CommPages) = G::$DB->next_record();
+            WHERE Page = ? AND PageID = ?
+            GROUP BY PageID
+            ", TORRENT_COMMENTS_PER_PAGE, $Page, $TargetPageID
+        );
         $LastCatalogue = floor((TORRENT_COMMENTS_PER_PAGE * $CommPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
         for ($i = 0; $i <= $LastCatalogue; ++$i) {
             G::$Cache->delete_value($Page . "_comments_$TargetPageID" . "_catalogue_$i");
@@ -450,23 +441,22 @@ class Comments {
         $QueryID = G::$DB->get_query_id();
 
         // get number of pages
-        G::$DB->query("
-            SELECT
-                CEIL(COUNT(ID) / " . TORRENT_COMMENTS_PER_PAGE . ") AS Pages
+        $CommPages = G::$DB->scalar("
+            SELECT ceil(count(*) / ?) AS Pages
             FROM comments
-            WHERE Page = '$Page'
-                AND PageID = $PageID
-            GROUP BY PageID");
-        if (!G::$DB->has_results()) {
+            WHERE Page = ? AND PageID = ?
+            GROUP BY PageID
+            ", TORRENT_COMMENTS_PER_PAGE, $Page, $TargetPageID
+        );
+        if (!$CommPages) {
             return false;
         }
-        list($CommPages) = G::$DB->next_record();
 
         // Delete comments
-        G::$DB->query("
-            DELETE FROM comments
-            WHERE Page = '$Page'
-                AND PageID = $PageID");
+        G::$DB->prepared_query("
+            DELETE FROM comments WHERE Page = ? AND PageID = ?
+            ", $Page, $PageID
+        );
 
         // Delete quote notifications
         $subscription = new \Gazelle\Manager\Subscription;
@@ -474,9 +464,9 @@ class Comments {
         $subscription->flushQuotes($Page, $PageID);
 
         G::$DB->query("
-            DELETE FROM users_notify_quoted
-            WHERE Page = '$Page'
-                AND PageID = $PageID");
+            DELETE FROM users_notify_quoted WHERE Page = ? AND PageID = ?
+            ", $Page, $PageID
+        );
 
         // Clear cache
         $LastCatalogue = floor((TORRENT_COMMENTS_PER_PAGE * $CommPages - TORRENT_COMMENTS_PER_PAGE) / THREAD_CATALOGUE);
