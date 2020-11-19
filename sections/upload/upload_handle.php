@@ -100,7 +100,7 @@ if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
     $Validate->SetFields('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
     $Validate->SetFields('image', '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
     $Validate->SetFields('tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-    $Validate->SetFields('title', '1','string','Title must be between 2 and 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
+    $Validate->SetFields('title', '1','string','Title must be less than 200 characters.', ['maxlength'=>200, 'minlength'=>1]);
     $Validate->SetFields('year', '1','number','The year of the release must be entered.');
 }
 
