@@ -42,6 +42,7 @@ $Properties['Remastered'] = !empty($_POST['remaster']) ? '1' : '0';
 if ($Properties['Remastered'] || !empty($_POST['unknown'])) {
     $Properties['UnknownRelease'] = !empty($_POST['unknown']) ? 1 : 0;
     $Properties['RemasterYear'] = trim($_POST['remaster_year'] ?? '');
+    $_POST['remaster_year'] = $Properties['RemasterYear'];
     $Properties['RemasterTitle'] = trim($_POST['remaster_title'] ?? '');
     $Properties['RemasterRecordLabel'] = trim($_POST['remaster_record_label'] ?? '');
     $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
@@ -54,6 +55,7 @@ if (!$Properties['Remastered'] || $Properties['UnknownRelease']) {
     $Properties['RemasterCatalogueNumber'] = '';
 }
 $Properties['Year'] = trim($_POST['year']);
+$_POST['year'] = $Properties['Year'];
 $Properties['RecordLabel'] = trim($_POST['record_label'] ?? '');
 $Properties['CatalogueNumber'] = trim($_POST['catalogue_number'] ?? '');
 $Properties['ReleaseType'] = $_POST['releasetype'];
@@ -100,7 +102,7 @@ if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
     $Validate->SetFields('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
     $Validate->SetFields('image', '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
     $Validate->SetFields('tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-    $Validate->SetFields('title', '1','string','Title must be between 2 and 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
+    $Validate->SetFields('title', '1','string','Title must be less than 200 characters.', ['maxlength'=>200, 'minlength'=>1]);
     $Validate->SetFields('year', '1','number','The year of the release must be entered.');
 }
 
