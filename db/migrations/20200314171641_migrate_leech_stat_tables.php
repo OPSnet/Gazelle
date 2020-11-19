@@ -4,7 +4,7 @@ use Phinx\Migration\AbstractMigration;
 
 /* Greeting developer, nice to meet you. This migration moves column contents
  * from the torrents and users_main tables to torrent_leech_stats and
- * user_leech_stats, respectively. On a busy site with large tables, this has
+ * users_leech_stats, respectively. On a busy site with large tables, this has
  * the potential to lock the tables for a long time and cause timeouts on the
  * site. On a small site, or if the site is offline it is safe to run this
  * migration directly. If you are sure, then set the environment variable
@@ -12,7 +12,7 @@ use Phinx\Migration\AbstractMigration;
  * again.
  *
  * Otherwise, you will need to make your own arrangements to insert/update the
- * columns in torrents_leech_stats from torrents, and user_leech_stats from
+ * columns in torrents_leech_stats from torrents, and users_leech_stats from
  * users_main.
  *
  * Afterwards you will need to use gh-ost or ptosc to drop the columns from the
