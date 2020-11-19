@@ -47,7 +47,7 @@ class Payment extends \Gazelle\Base {
         $this->cache->deleteMulti([self::LIST_KEY, self::RENT_KEY, 'due_payments']);
     }
 
-    public function list () {
+    public function list() {
         if (($list = $this->cache->get_value(self::LIST_KEY)) === false) {
             $this->db->prepared_query("
                 SELECT ID, Text, Expiry, AnnualRent, cc, Active
@@ -68,16 +68,13 @@ class Payment extends \Gazelle\Base {
                 $l['fiatRate'] = $XBT->fetchRate($l['cc']);
                 if (!$l['fiatRate']) {
                     // fallback to last known rate if there is one
-                    $l['fiatRate'] = $this->db->scalar('
+                    $l['fiatRate'] = $this->db->scalar("
                         SELECT rate
                         FROM xbt_forex
-                        WHERE forex_date = (
-                                SELECT max(forex_date)
-                                FROM xbt_forex
-                                WHERE cc = ?
-                            )
-                            AND cc = ?
-                        ', $l['cc'], $l['cc']
+                        WHERE cc = ?
+                        ORDER BY forex_date DESC
+                        LIMIT 1
+                        ", $l['cc']
                     );
                     if (!$l['fiatRate']) {
                         throw new PaymentFetchForexException(sprintf('XBT id=%d cc=%s', $l['ID'], $l['cc']));
