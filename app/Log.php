@@ -14,7 +14,7 @@ class Log extends Base {
             INSERT INTO log (Message) VALUES (?)
             ", trim($message)
         );
-        $this->db->set_query_id($QueryID);
+        $this->db->set_query_id($qid);
         return $this;
     }
 
