@@ -758,6 +758,7 @@ class Torrent extends \Gazelle\Base {
                 INNER JOIN tags           tag ON (tag.ID = tt.TagID)
                 INNER JOIN torrents       t   ON (t.ID = R.torrentId)
                 INNER JOIN users_main     um  ON (um.ID = t.UserID)
+                GROUP BY R.GroupID
                 ORDER BY R.uploadDate DESC
             ");
             $latest = [];
