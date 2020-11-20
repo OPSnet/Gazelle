@@ -121,9 +121,7 @@ if (!($Properties['Remastered'] && !$Properties['RemasterYear']) || check_perms(
 if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['CategoryID'] == 1)) {
 ?>
 <div class="thin">
-<?php
-    if ($Properties['CategoryID'] == 1) {
-?>
+<?php if ($Properties['CategoryID'] == 1) { ?>
     <div class="header">
         <h2><a name="group-change">Change group</a></h2>
     </div>
@@ -236,9 +234,7 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
         </table>
         <script type="text/javascript">ChangeCategory($('#newcategoryid').raw().value);</script>
     </form>
-<?php
-    }
-?>
+<?php } ?>
 </div>
 <?php
 } // if check_perms('torrents_edit')

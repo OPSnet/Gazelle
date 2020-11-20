@@ -19,13 +19,13 @@ if (!$OldGroupID || !$NewCategoryID || !$TorrentID || empty($Title)) {
 
 switch ($Categories[$NewCategoryID-1]) {
     case 'Music':
-        $ArtistName = db_string(trim($_POST['artist']));
-        $Year = trim($_POST['year']);
-        $ReleaseType = trim($_POST['releasetype']);
-        if (empty($Year) || empty($ArtistName) || !is_number($Year) || empty($ReleaseType) || !is_number($ReleaseType)) {
+        $ArtistName = trim($_POST['artist']);
+        $Year = (int)$_POST['year'];
+        $ReleaseType = (int)$_POST['releasetype'];
+        if (empty($ArtistName) || !$Year || !$ReleaseType) {
             error(0);
         }
-        list($ArtistID, $AliasID, $Redirect, $ArtistName) = $DB->row('
+        [$ArtistID, $AliasID, $Redirect, $ArtistName] = $DB->row('
             SELECT ArtistID, AliasID, Redirect, Name
             FROM artists_alias
             WHERE Name LIKE ?
@@ -34,9 +34,9 @@ switch ($Categories[$NewCategoryID-1]) {
         if (!$DB->has_results()) {
             $Redirect = 0;
             $ArtistManager = new \Gazelle\Manager\Artist;
-            list($ArtistID, $AliasID) = $ArtistManager->createArtist($AliasName);
+            [$ArtistID, $AliasID] = $ArtistManager->createArtist($AliasName);
         } else {
-            list($ArtistID, $AliasID, $Redirect, $ArtistName) = $DB->next_record();
+            [$ArtistID, $AliasID, $Redirect, $ArtistName] = $DB->next_record();
             if ($Redirect) {
                 $AliasID = $ArtistID;
             }
@@ -59,8 +59,8 @@ switch ($Categories[$NewCategoryID-1]) {
         break;
     case 'Audiobooks':
     case 'Comedy':
-        $Year = trim($_POST['year']);
-        if (empty($Year) || !is_number($Year)) {
+        $Year = (int)$_POST['year'];
+        if (!$Year) {
             error(0);
         }
         $DB->prepared_query("
