@@ -102,7 +102,7 @@ class Comments {
 
         if ($Page == 'collages') {
             // On collages, we also need to clear the collage key (collage_$CollageID), because it has the comments in it... (why??)
-            G::$Cache->delete_value('collage_' . $PageID);
+            G::$Cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $PageID));
         }
 
         G::$DB->query("
@@ -185,7 +185,7 @@ class Comments {
 
         if ($Page == 'collages') {
             // On collages, we also need to clear the collage key (collage_$CollageID), because it has the comments in it... (why??)
-            G::$Cache->delete_value("collage_$PageID");
+            G::$Cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $PageID));
         }
 
         G::$DB->set_query_id($QueryID);

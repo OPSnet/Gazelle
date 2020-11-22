@@ -173,7 +173,7 @@ if (empty($_POST['confirm'])) {
                 AND CollageID = ?
                 ", $oldGroupId, $collageId
         );
-        $Cache->delete_value("collage_$collageId");
+        $Cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $collageId));
     }
 
     // Requests

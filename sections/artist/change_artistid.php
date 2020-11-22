@@ -173,7 +173,7 @@ if (isset($_POST['confirm'])) {
     }
     if (!empty($Collages)) {
         foreach ($Collages as $CollageID) {
-            $Cache->delete_value("collage_$CollageID");
+            $Cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $CollageID));
         }
     }
 

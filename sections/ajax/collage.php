@@ -5,7 +5,7 @@ if (empty($_GET['id']) || !is_number($_GET['id'])) {
 }
 $CollageID = $_GET['id'];
 
-$CacheKey = "collage_$CollageID";
+$CacheKey = sprintf(\Gazelle\Collage::CACHE_KEY, $CollageID);
 $CollageData = $Cache->get_value($CacheKey);
 if ($CollageData) {
     [$Name, $Description, $CommentList, $Deleted, $CollageCategoryID, $CreatorID, $Locked, $MaxGroups, $MaxGroupsPerUser, $Updated, $Subscribers] = $CollageData;

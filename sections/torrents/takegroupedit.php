@@ -178,7 +178,7 @@ if ($logInfo) {
 
 $Cache->delete_value('torrents_details_'.$GroupID);
 $DB->prepared_query("
-    SELECT concat('collage_', CollageID) as ck
+    SELECT concat('collagev2_', CollageID) as ck
     FROM collages_torrents
     WHERE GroupID = ?
     ", $GroupID

@@ -71,7 +71,6 @@ class Collage extends BaseObject {
                 $info = [true, ''];
             }
             $this->cache->cache_value($key, $info, 7200);
-            $this->cache->delete_value(sprintf('collage_%d', $this->id));
         }
         [
             $this->deleted, $taglist,
@@ -118,7 +117,6 @@ class Collage extends BaseObject {
                 ", $count, $this->id
             );
             $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-            $this->cache->delete_value(sprintf('collage_%d', $this->id));
         }
 
         foreach ($artists as $artist) {
@@ -174,7 +172,6 @@ class Collage extends BaseObject {
                 ", $count, $this->id
             );
             $this->cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
-            $this->cache->delete_value(sprintf('collage_%d', $this->id));
         }
 
         // in case of a tie in tag usage counts, order by first past the post
@@ -310,7 +307,6 @@ class Collage extends BaseObject {
         }
         $keys[] = sprintf(self::CACHE_KEY, $this->id);
         $this->cache->deleteMulti($keys);
-        $this->cache->delete_value(sprintf('collage_%d', $this->id));
         return $this;
     }
 
@@ -346,9 +342,9 @@ class Collage extends BaseObject {
             ", $delta, $this->id
         );
         $this->cache->deleteMulti([
-            'collage_subs_user_' . $userId,
-            'collage_subs_user_new_' . $userId,
-            'collage_' . $this->id
+            sprintf(self::SUBS_KEY, $userId),
+            sprintf(self::SUBS_NEW_KEY, $userId),
+            sprintf(self::CACHE_KEY, $this->id)
         ]);
         $qid = $this->db->get_query_id();
         return $this;
@@ -501,8 +497,8 @@ class Collage extends BaseObject {
         );
         $this->increment();
         $this->flush([
-            "torrents_collages_$groupId",
-            "torrents_collages_personal_$groupId",
+            "torrent_collages_$groupId",
+            "torrent_collages_personal_$groupId",
             "torrents_details_$groupId"
         ]);
         return $this;
