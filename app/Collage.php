@@ -497,8 +497,8 @@ class Collage extends BaseObject {
         );
         $this->increment();
         $this->flush([
-            "torrents_collages_$groupId",
-            "torrents_collages_personal_$groupId",
+            "torrent_collages_$groupId",
+            "torrent_collages_personal_$groupId",
             "torrents_details_$groupId"
         ]);
         return $this;
