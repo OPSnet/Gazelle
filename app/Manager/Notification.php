@@ -273,7 +273,7 @@ class Notification extends \Gazelle\Base {
             WHERE UserID = ? AND CollageID = ?
             ", $this->userId, $collageId
         );
-        $this->cache->delete_value('collage_subs_user_new_' . $this->userId);
+        $this->cache->delete_value(sprintf(\Gazelle\Collage::SUBS_NEW_KEY, $this->userId));
     }
 
     public function catchupAllCollages() {
@@ -283,7 +283,7 @@ class Notification extends \Gazelle\Base {
             WHERE UserID = ?
             ", $this->userId
         );
-        $this->cache->delete_value('collage_subs_user_new_' . $this->userId);
+        $this->cache->delete_value(sprintf(\Gazelle\Collage::SUBS_NEW_KEY, $this->userId));
     }
 
     public function loadInbox() {

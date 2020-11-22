@@ -867,7 +867,7 @@ class User extends BaseObject {
     }
 
     public function collageUnreadCount(): int {
-        if (($new = $this->cache->get_value('collage_subs_user_new_' . $this->id)) === false) {
+        if (($new = $this->cache->get_value(sprintf(Collage::SUBS_NEW_KEY, $this->id))) === false) {
             $new = $this->db->scalar("
                  SELECT count(*) FROM (
                     SELECT s.LastVisit
@@ -882,7 +882,7 @@ class User extends BaseObject {
                 ) unread
                 ", $this->id
             );
-            $this->cache->cache_value('collage_subs_user_new_' . $this->id, $new, 0);
+            $this->cache->cache_value(sprintf(Collage::SUBS_NEW_KEY, $this->id), $new, 0);
         }
         return $new;
     }

@@ -350,7 +350,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
                 WHERE GroupID = ?", $GroupID);
 
             foreach ($CollageIDs as $CollageID) {
-                G::$Cache->delete_value("collage_$CollageID");
+                G::$Cache->delete_value(sprintf(\Gazelle\Collage::CACHE_KEY, $CollageID));
             }
             G::$Cache->delete_value("torrent_collages_$GroupID");
         }
