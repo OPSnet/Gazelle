@@ -34,7 +34,9 @@ switch ($_GET['action'] ?? '') {
                         require_once('title.php');
                         break;
                     case 'collage-1':
-                        require_once('collage.php');
+                    case 'seedbox':
+                        require_once('purchase.php');
+                        break;
                     default:
                         require_once(DEFAULT_PAGE);
                         break;
