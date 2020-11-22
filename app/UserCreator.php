@@ -64,7 +64,7 @@ class UserCreator extends Base {
                 WHERE InviteKey = ?
                 ", $this->inviteKey
             );
-            if (!$inviterId) {
+            if (is_null($inviterId)) {
                 throw new UserCreatorException('invitation');
             }
             if ($this->email && strtolower($email) != strtolower($this->email[0])) {
@@ -99,6 +99,8 @@ class UserCreator extends Base {
             $mainArgs[] = $this->id;
         }
 
+        $this->db->begin_transaction();
+
         $this->db->prepared_query("
             INSERT INTO users_main
                    (" . implode(',', $mainFields) . ")
@@ -123,7 +125,6 @@ class UserCreator extends Base {
             ", ...$infoArgs
         );
 
-        // nuke the invite now: if things break from here on out the repairs are trivial
         if ($inviterId) {
             $this->db->prepared_query("
                 DELETE FROM invites WHERE InviteKey = ?
@@ -180,6 +181,8 @@ class UserCreator extends Base {
             INSERT INTO users_notifications_settings (UserID) VALUES (?)
             ", $this->id
         );
+
+        $this->db->commit();
 
         $this->cache->increment('stats_user_count');
         \Tracker::update_tracker('add_user', [
