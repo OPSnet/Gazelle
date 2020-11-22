@@ -107,26 +107,25 @@ View::show_header('External Tracker Referrals');
     $Email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $Error = false;
     $Invite = false;
-    if (filter_var($Email, FILTER_VALIDATE_EMAIL)) {
+    if (!preg_match(EMAIL_REGEX, $Email)) {
+        $Error = "Invalid email address.";
+    } else {
         $Account = $ReferralManager->getFullAccount($_POST['service']);
         if ($Account["UserIsId"] && !preg_match('/^\d+$/', $_POST['username'])) {
             $Error = "You appear to have entered a username instead of your user id.";
         } else {
             $Verified = $ReferralManager->verifyAccount($Account, $_POST['username'], $Token);
-            if ($Verified === true) {
-                list($Success, $Invite) = $ReferralManager->generateInvite($Account, $_POST['username'], $Email, G::$Twig);
+            if ($Verified !== true) {
+                $Error = $Verified;
+            } else {
+                [$Success, $Invite] = $ReferralManager->generateInvite($Account, $_POST['username'], $Email, G::$Twig);
                 if (!$Success) {
                     $Error = $Invite;
-                }
-                else if ($Invite === false) {
+                } else if ($Invite === false) {
                     $Error = "Failed to generate invite.";
                 }
-            } else {
-                $Error = $Verified;
             }
         }
-    } else {
-        $Error = "Invalid email address.";
     }
 ?>
     <br />

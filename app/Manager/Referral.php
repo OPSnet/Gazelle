@@ -210,11 +210,7 @@ class Referral extends \Gazelle\Base {
             $startDate = \Gazelle\Util\Time::timeOffset(-(3600 * 24 * 30), true);
         }
 
-        if ($endDate == NULL) {
-            $endDate = \Gazelle\Util\Time::sqlTime();
-        }
-
-        $filter = ['ru.Created BETWEEN ? AND ?'];
+        $filter = ['ru.Created BETWEEN ? AND coalesce(?, now())'];
         $params = [$startDate, $endDate];
 
         if ($view === 'pending') {
@@ -241,21 +237,24 @@ class Referral extends \Gazelle\Base {
 
         $filter = implode(' AND ', $filter);
 
-        $this->db->prepared_query("
-            SELECT SQL_CALC_FOUND_ROWS ru.ID, ru.UserID, ru.Site, ru.Username, ru.Created, ru.Joined, ru.IP, ru.Active, ru.InviteKey
+        $results = $this->db->scalar("
+            SELECT count(*)
             FROM referral_users ru
-            LEFT JOIN users_main um ON um.ID = ru.UserID
+            LEFT JOIN users_main um ON (um.ID = ru.UserID)
+            WHERE $filter
+            ", ...$params
+        );
+        $this->db->prepared_query("
+            SELECT ru.ID, ru.UserID, ru.Site, ru.Username, ru.Created, ru.Joined, ru.IP, ru.Active, ru.InviteKey
+            FROM referral_users ru
+            LEFT JOIN users_main um ON (um.ID = ru.UserID)
             WHERE $filter
             ORDER BY ru.Created DESC
             LIMIT $limit
             ", ...$params
         );
 
-        $results = $this->db->scalar("SELECT found_rows()");
-
-        $users = $results > 0 ? $this->db->to_array('ID', MYSQLI_ASSOC) : [];
-
-        return ["Results" => $results, "Users" => $users];
+        return ["Results" => $results, "Users" => $this->db->to_array('ID', MYSQLI_ASSOC)];
     }
 
     public function deleteUserReferral($id) {
@@ -619,9 +618,8 @@ class Referral extends \Gazelle\Base {
 
         $this->db->prepared_query("
             INSERT INTO referral_users
-                (Username, Site, IP, InviteKey)
-            VALUES
-                (?,        ?,    ?,  ?)
+                   (Username, Site, IP, InviteKey)
+            VALUES (?,        ?,    ?,  ?)
             ", $username, $acc["Site"], $_SERVER["REMOTE_ADDR"], $inviteKey
         );
 

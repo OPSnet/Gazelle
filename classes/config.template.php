@@ -438,12 +438,12 @@ define('RANDOM_TORRENT_MIN_SEEDS', 0);
 //resource_type://username:password@domain:port/path?query_string#anchor
 define('RESOURCE_REGEX', '(https?|ftps?):\/\/');
 define('IP_REGEX', '(\d{1,3}\.){3}\d{1,3}');
-define('DOMAIN_REGEX', '([a-z0-9\-\_]+\.)*[a-z0-9\-\_]+');
+define('DOMAIN_REGEX', '[\w-]+(?:\.[\w-]+)+');
+define('EMAIL_REGEX', '/^[\w-]+(?:\.[\w-]+)*@' . DOMAIN_REGEX . '$/');
 define('PORT_REGEX', ':\d{1,5}');
 define('URL_REGEX', '('.RESOURCE_REGEX.')('.IP_REGEX.'|'.DOMAIN_REGEX.')('.PORT_REGEX.')?(\/\S*)*');
 define('USERNAME_REGEX_SHORT', '[a-z0-9_?\.]{1,20}');
 define('USERNAME_REGEX', '/^'.USERNAME_REGEX_SHORT.'$/iD');
-define('EMAIL_REGEX','[_a-z0-9-]+([.+][_a-z0-9-]+)*@'.DOMAIN_REGEX);
 define('IMAGE_REGEX', URL_REGEX.'\/\S+\.(jpg|jpeg|tif|tiff|png|gif|bmp)(\?\S*)?');
 define('CSS_REGEX', URL_REGEX.'\/\S+\.css(\?\S*)?');
 define('SITELINK_REGEX', '(?:' . preg_quote(SITE_URL, '/') . (defined('ALT_SITE_URL') ? '|' . preg_quote(ALT_SITE_URL, '/') : '') . ')');

@@ -189,7 +189,7 @@ class Validate {
                         $MinLength = 6;
                     }
 
-                    if (!preg_match("/^".EMAIL_REGEX."$/i", $ValidateVar)) {
+                    if (!preg_match(EMAIL_REGEX, $ValidateVar)) {
                         return $Field['ErrorMessage'];
                     } elseif (strlen($ValidateVar) > $MaxLength) {
                         return $Field['ErrorMessage'];
