@@ -284,7 +284,7 @@ class Bonus extends Base {
                 AND ub.user_id = ?
             ', $price, $price, $userId
         );
-        if ($this->db->affected_rows() != 2) {
+        if ($this->db->affected_rows() !== 2) {
             throw new BonusException('collage:nofunds');
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);
