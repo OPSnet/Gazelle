@@ -37,11 +37,7 @@ if ($CategoryID == 0) {
 
 //Do we need to get artists?
 if ($CategoryName == 'Music') {
-    if (empty($Request['ReleaseType'])) {
-        $ReleaseName = 'Unknown';
-    } else {
-        $ReleaseName = $ReleaseTypes[$Request['ReleaseType']];
-    }
+    $ReleaseName = (new Gazelle\ReleaseType)->findNameById($Request['ReleaseType']);
 }
 
 //Votes time
@@ -89,7 +85,7 @@ $JsonTags = [];
 foreach ($Request['Tags'] as $Tag) {
     $JsonTags[] = $Tag;
 }
-$bookmark = new \Gazelle\Bookmark;
+$bookmark = new Gazelle\Bookmark;
 json_print('success', [
     'requestId' => (int)$RequestID,
     'requestorId' => (int)$Request['UserID'],

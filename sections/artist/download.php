@@ -151,8 +151,9 @@ ORDER BY t.GroupID ASC, Rank DESC, $Preference";
 
 $DownloadsQ = $DB->query($SQL);
 $Collector = new TorrentsDL($DownloadsQ, $ArtistName);
-$filer = new \Gazelle\File\Torrent;
-while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
+$releaseMan = new Gazelle\ReleaseType;
+$filer = new Gazelle\File\Torrent;
+while ([$Downloads, $GroupIDs] = $Collector->get_downloads('GroupID')) {
     $Artists = Artists::get_artists($GroupIDs);
     $TorrentFilesQ = $DB->prepared_query(sprintf('
         SELECT ID FROM torrents WHERE ID IN (%s)
@@ -166,7 +167,7 @@ while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
         }
         continue;
     }
-    while (list($TorrentID) = $DB->next_record(MYSQLI_NUM, false)) {
+    while ([$TorrentID] = $DB->next_record(MYSQLI_NUM, false)) {
         $GroupID = $GroupIDs[$TorrentID];
         $Download =& $Downloads[$GroupID];
         $Download['Artist'] = Artists::display_artists($Artists[$Download['GroupID']], false, true, false);
@@ -185,7 +186,7 @@ while (list($Downloads, $GroupIDs) = $Collector->get_downloads('GroupID')) {
              * 7 => Producer
              */
             case '1':
-                $ReleaseTypeName = $ReleaseTypes[$Download['ReleaseType']];
+                $ReleaseTypeName = $releaseMan->findNameById($Download['ReleaseType']);
                 break;
             case '2':
                 $ReleaseTypeName = 'Guest Appearance';

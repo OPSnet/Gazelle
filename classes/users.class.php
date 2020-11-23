@@ -398,14 +398,7 @@ class Users {
      * @param boolean $Default Returns the default list if true
      */
     public static function release_order(&$SiteOptions, $Default = false) {
-        global $ReleaseTypes;
-
-        $RT = $ReleaseTypes + [
-            1024 => 'Guest Appearance',
-            1023 => 'Remixed By',
-            1022 => 'Composition',
-            1021 => 'Produced By'];
-
+        $RT = (new \Gazelle\ReleaseType)->extendedList();
         if ($Default || empty($SiteOptions['SortHide'])) {
             $Sort =& $RT;
             $Defaults = !empty($SiteOptions['HideTypes']);
@@ -434,6 +427,7 @@ class Users {
 
                             // The HTML is indented this far for proper indentation in the generated HTML
                             // on user.php?action=edit
+                            // THIS IS SO FUCKED - Spine
 ?>
                             <li class="sortable_item">
                                 <label><input type="checkbox"<?=$Checked?> id="<?=$ID?>" /> <?=$Val?></label>

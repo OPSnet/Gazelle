@@ -267,11 +267,12 @@ if (!empty($_GET['filter_cat'])) {
     }
 }
 
+ 	$releaseTypes = (new \Gazelle\ReleaseType)->list();
 if (!empty($_GET['releases'])) {
     $ReleaseArray = $_GET['releases'];
-    if (count($ReleaseArray) !== count($ReleaseTypes)) {
+    if (count($ReleaseArray) !== count($releaseTypes)) {
         foreach ($ReleaseArray as $Index => $Value) {
-            if (!isset($ReleaseTypes[$Value])) {
+            if (!isset($releaseTypes[$Value])) {
                 unset($ReleaseArray[$Index]);
             }
         }
@@ -367,7 +368,7 @@ if ($NumResults == 0) {
             'description' => $Request['Description'],
             'recordLabel' => $Request['RecordLabel'],
             'catalogueNumber' => $Request['CatalogueNumber'],
-            'releaseType' => $ReleaseTypes[$Request['ReleaseType']],
+            'releaseType' => $releaseTypes[$Request['ReleaseType']],
             'bitrateList' => preg_split('/\|/', $Request['BitrateList'], null, PREG_SPLIT_NO_EMPTY),
             'formatList' => preg_split('/\|/', $Request['FormatList'], null, PREG_SPLIT_NO_EMPTY),
             'mediaList' => preg_split('/\|/', $Request['MediaList'], null, PREG_SPLIT_NO_EMPTY),

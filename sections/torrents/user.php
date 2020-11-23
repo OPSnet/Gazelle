@@ -71,7 +71,8 @@ if (!empty($_GET['media']) && in_array($_GET['media'], $Media)) {
     $args[] = $_GET['media'];
 }
 
-if (!empty($_GET['releasetype']) && array_key_exists($_GET['releasetype'], $ReleaseTypes)) {
+$releaseMan = new Gazelle\ReleaseType;
+if (!empty($_GET['releasetype']) && $releaseMan->exists($_GET['releasetype'])) {
     $cond[] = 'tg.ReleaseType = ?';
     $args[] = $_GET['releasetype'];
 }
@@ -124,7 +125,7 @@ if (!isset($_GET['tags_type'])) {
 }
 
 if (!empty($_GET['tags'])) {
-    $tagMan = new \Gazelle\Manager\Tag;
+    $tagMan = new Gazelle\Manager\Tag;
     $tags = explode(',', $_GET['tags']);
     $includeTags = [];
     $excludeTags = [];
@@ -374,7 +375,10 @@ View::show_header($user['Username']."'s $action torrents",'voting');
                         </select>
                         <select name="releasetype" class="ft_releasetype">
                             <option value="">Release type</option>
-<?php foreach ($ReleaseTypes as $id=>$type) { ?>
+<?php
+    $releaseTypes = $releaseMan->list();
+    foreach ($releaseTypes as $id=>$type) {
+?>
                             <option value="<?=display_str($id); ?>"<?php Format::selected('releasetype',$id); ?>><?=display_str($type); ?></option>
 <?php } ?>
                         </select>
@@ -454,9 +458,7 @@ foreach ($Categories as $catKey => $catName) {
                         <input type="checkbox" name="categories[<?=($catKey+1)?>]" id="cat_<?=($catKey+1)?>" value="1"<?php if (isset($_GET['categories'][$catKey + 1])) { ?> checked="checked"<?php } ?> />
                         <label for="cat_<?=($catKey + 1)?>"><?=$catName?></label>
                     </td>
-<?php
-}
-?>
+<?php } ?>
                 </tr>
             </table>
             <div class="submit">

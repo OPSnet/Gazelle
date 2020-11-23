@@ -297,6 +297,7 @@ if (check_perms('zip_downloader') && count($counter['ids']) > 1) {
             <td>320</td>
         </tr>
 <?php
+$releaseMan = new Gazelle\ReleaseType;
 if ($resultCount == 0) { ?>
         <tr><td colspan="4">No results found!</td></tr>
 <?php
@@ -325,7 +326,7 @@ if ($resultCount == 0) { ?>
                 $displayName .= " [$groupYear]";
             }
             if ($releaseType > 0) {
-                $displayName .= ' ['.$ReleaseTypes[$releaseType].']';
+                $displayName .= ' [' . $releaseMan->findNameById($releaseType) . ']';
             }
             if ($edition['FLACIsSnatched']) {
                 $displayName .= ' ' . Format::torrent_label('Snatched!');
@@ -352,4 +353,3 @@ if ($resultCount == 0) { ?>
 </div>
 <?php
 View::show_footer();
-?>

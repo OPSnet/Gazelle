@@ -17,13 +17,13 @@ $filter = in_array($_GET['filter'] ?? '', $filters) ? $_GET['filter'] : $filters
 $type = in_array($_GET['type'] ?? '', $types) ? $_GET['type'] : $types[0];
 $search = $_GET['search'] ?? '';
 
-$better = new \Gazelle\Manager\Better($ReleaseTypes);
+$better = new Gazelle\Manager\Better(new Gazelle\ReleaseType);
 
 if (check_perms('admin_reports') && in_array($type, $attrTypes) && $remove = (int)($_GET['remove'] ?? 0)) {
     $better->removeAttribute($type, $remove);
 }
 
-[$page, $limit, $offset] = \Gazelle\DB::pageLimit(TORRENTS_PER_PAGE);
+[$page, $limit, $offset] = Gazelle\DB::pageLimit(TORRENTS_PER_PAGE);
 
 [$results, $resultCount, $mode] = $better->missing($type, $filter, $search, $limit, $offset, $userId);
 

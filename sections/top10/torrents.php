@@ -146,7 +146,7 @@ View::show_footer();
 
 // generate a table based on data from most recent query to $DB
 function generate_torrent_table($caption, $tag, $details, $limit) {
-    global $LoggedUser, $Categories, $ReleaseTypes, $groupBy;
+    global $LoggedUser, $Categories, $groupBy;
 ?>
         <h3>Top <?="$limit $caption"?>
 <?php
@@ -240,7 +240,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
         }
 
         if ($group['CategoryID'] == 1 && $group['ReleaseType'] > 0) {
-            $displayName .= ' [' . $ReleaseTypes[$group['ReleaseType']] . ']';
+            $displayName .= ' [' . (new Gazelle\ReleaseType)->findNameById($group['ReleaseType']) . ']';
         }
 
         $torrentDetails = $group['Torrents'][$torrentID];

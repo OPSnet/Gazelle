@@ -52,7 +52,7 @@ if ($Request['BitrateList'] != '') {
 if (empty($Request['ReleaseType'])) {
     $ReleaseName = 'Unknown';
 } else {
-    $ReleaseName = $ReleaseTypes[$Request['ReleaseType']];
+    $ReleaseName = (new Gazelle\ReleaseType)->findNameById($Request['ReleaseType']);
 }
 
 //Votes time
@@ -64,7 +64,7 @@ $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 list($NumComments, $Page, $Thread, $LastRead) = Comments::load('requests', $RequestID);
 
-$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
+$subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
 View::show_header("View request: $FullName", 'comments,requests,bbcode,subscriptions');
 ?>
 <div class="thin">

@@ -16,16 +16,16 @@ $available = [
     'torrent'
 ];
 
-if (in_array($_GET['action'], $available)) {
+if (!in_array($_GET['action'], $available)) {
+    json_error('invalid action');
+} else {
     $config = [
         'Categories' => $Categories,
         'CollageCats' => $CollageCats,
-        'ReleaseTypes' => $ReleaseTypes,
+ 	        'ReleaseTypes' => (new \Gazelle\ReleaseType)->list(),
         'Debug' => $Debug
     ];
     $class = getClassObject($_GET['action'], $Twig, $config);
-} else {
-    json_error('invalid action');
 }
 
 if (empty($_GET['aid']) || empty($_GET['token'])) {
@@ -56,4 +56,3 @@ if ($app['Token'] !== $token) {
 
 $response = $class->run();
 print(json_encode(['status' => 200, 'response' => $response], JSON_UNESCAPED_SLASHES));
-//$Debug->profile();

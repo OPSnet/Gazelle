@@ -125,6 +125,7 @@ if (in_array($Type, ['Music', 'Audiobooks', 'Comedy'])) {
 
 $feedType = ['torrents_all'];
 
+$releaseTypes = (new Gazelle\ReleaseType)->list();
 switch ($Type) {
     case 'Music':
         $Validate->SetFields('groupid', '0', 'number', 'Group ID was not numeric');
@@ -132,7 +133,7 @@ switch ($Type) {
 
         if (!$Properties['GroupID']) {
             $Validate->SetFields('year', '1','number','The year of the original release must be entered.', ['length'=>40]);
-            $Validate->SetFields('releasetype', '1','inarray','Please select a valid release type.', ['inarray'=>array_keys($ReleaseTypes)]);
+            $Validate->SetFields('releasetype', '1','inarray','Please select a valid release type.', ['inarray'=>array_keys($releaseTypes)]);
             $Validate->SetFields('record_label', '0','string','Record label must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
             $Validate->SetFields('catalogue_number', '0','string','Catalogue Number must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
             if ($Properties['Media'] == 'CD' && !$Properties['Remastered']) {
@@ -776,7 +777,7 @@ $Details = "";
 if ($isMusicUpload) {
     $Announce .= '['.$Properties['Year'].']';
     if ($Properties['ReleaseType'] > 0) {
-        $Announce .= ' ['.$ReleaseTypes[$Properties['ReleaseType']].']';
+        $Announce .= ' [' . $releaseTypes[$Properties['ReleaseType']] . ']';
     }
     $Details .= $Properties['Format'].' / '.$Properties['Encoding'];
     if ($HasLog == 1) {
@@ -1009,7 +1010,7 @@ $SQL .= " AND !(" . implode(' OR ', $NotTagSQL) . ')';
 $SQL .= " AND (Categories LIKE '%|".db_string($Type)."|%' OR Categories = '') ";
 
 if ($Properties['ReleaseType']) {
-    $SQL .= " AND (ReleaseTypes LIKE '%|".db_string($ReleaseTypes[$Properties['ReleaseType']])."|%' OR ReleaseTypes = '') ";
+    $SQL .= " AND (ReleaseTypes LIKE '%|".db_string($releaseTypes[$Properties['ReleaseType']])."|%' OR ReleaseTypes = '') ";
 } else {
     $SQL .= " AND (ReleaseTypes = '') ";
 }

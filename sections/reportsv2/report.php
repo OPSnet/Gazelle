@@ -301,8 +301,9 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
         $AltName .= ' [Vanity House]';
     }
     if ($GroupCategoryID == 1) {
-        $DisplayName .= ' [' . $ReleaseTypes[$ReleaseType] . ']';
-        $AltName .= ' [' . $ReleaseTypes[$ReleaseType] . ']';
+        $name = (new Gazelle\ReleaseType)->findNameById($ReleaseType);
+        $DisplayName .= " [$name] ";
+        $AltName .= " [$name] ";
     }
 }
 

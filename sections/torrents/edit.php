@@ -202,7 +202,10 @@ if (check_perms('torrents_edit') && (check_perms('users_mod') || $Properties['Ca
                 <td class="label">Release type</td>
                 <td>
                     <select name="releasetype">
-<?php   foreach ($ReleaseTypes as $RTID => $ReleaseType) { ?>
+<?php
+        $releaseTypes = (new Gazelle\ReleaseType)->list();
+        foreach ($releaseTypes as $RTID => $ReleaseType) {
+?>
                         <option value="<?=($RTID)?>"><?=($ReleaseType)?></option>
 <?php   } ?>
                     </select>

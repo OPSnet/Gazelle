@@ -65,8 +65,7 @@ class Torrent extends \Gazelle\Json {
         }
         $groupID = $details['ID'];
 
-        // TODO: implement as a Gazelle classes
-        global $ReleaseTypes;
+        // TODO: implement as a Gazelle class
         global $Categories;
         $categoryName = ($details['CategoryID'] == 0) ? "Unknown" : $Categories[$details['CategoryID'] - 1];
 
@@ -87,7 +86,7 @@ class Torrent extends \Gazelle\Json {
                 'recordLabel'     => $details['RecordLabel'] ?? '',
                 'catalogueNumber' => $details['CatalogueNumber'] ?? '',
                 'releaseType'     => $details['ReleaseType'] ?? '',
-                'releaseTypeName' => $ReleaseTypes[$details['ReleaseType'] ?? 21], // fallback to Unknown release
+                'releaseTypeName' => (new Gazelle\ReleaseType)->findNameById($details['ReleaseType']),
                 'categoryId'      => $details['CategoryID'],
                 'categoryName'    => $categoryName,
                 'time'            => $details['Time'],

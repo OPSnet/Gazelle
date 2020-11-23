@@ -184,7 +184,10 @@ switch ($Short) {
                     <td>
                         <select id="releasetype" name="releasetype">
                             <option value="0">---</option>
-<?php   foreach ($ReleaseTypes as $Key => $Val) { ?>
+<?php
+        $releaseTypes = (new Gazelle\ReleaseType)->list();
+        foreach ($releaseTypes as $Key => $Val) {
+?>
                             <option value="<?=$Key?>"<?=(!empty($ReleaseType) ? ($Key == $ReleaseType ? ' selected="selected"' : '') : '')?>><?=$Val?></option>
 <?php   } ?>
                         </select>

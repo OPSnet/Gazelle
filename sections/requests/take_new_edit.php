@@ -101,10 +101,9 @@ if (empty($_POST['artists'])) {
     $Importance = $_POST['importance'];
 }
 
-if (!intval($_POST['releasetype']) || !array_key_exists($_POST['releasetype'], $ReleaseTypes)) {
+if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->exists($_POST['releasetype'])) {
     $Err = 'Please pick a release type';
 }
-
 $ReleaseType = $_POST['releasetype'];
 
 if (empty($_POST['all_formats']) && count($_POST['formats']) !== count($Formats)) {
@@ -354,7 +353,7 @@ if ($GroupID) {
  * 3. Create a row in the requests_artists table for each artist, based on the ID.
  */
 
-$ArtistManager = new \Gazelle\Manager\Artist;
+$ArtistManager = new Gazelle\Manager\Artist;
 foreach ($ArtistForm as $Importance => $Artists) {
     foreach ($Artists as $Num => $Artist) {
         //1. See if each artist given already exists and if it does, grab the ID.
@@ -404,7 +403,7 @@ if (!$NewRequest) {
         WHERE RequestID = ?', $RequestID);
 }
 
-$tagMan = new \Gazelle\Manager\Tag;
+$tagMan = new Gazelle\Manager\Tag;
 $Tags = array_unique(explode(',', $Tags));
 foreach ($Tags as $Index => $Tag) {
     $TagID = $tagMan->create($Tag, $LoggedUser['ID']);

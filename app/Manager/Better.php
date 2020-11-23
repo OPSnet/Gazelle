@@ -6,9 +6,9 @@ class Better extends \Gazelle\Base
 {
     protected $releaseTypes;
 
-    public function __construct(array $releaseTypes) {
+ 	    public function __construct(\Gazelle\ReleaseType $releaseMan) {
         parent::__construct();
-        $this->releaseTypes = $releaseTypes;
+        $this->releaseTypes = $releaseMan->list();
     }
 
     public function removeAttribute(string $type, int $id) {
