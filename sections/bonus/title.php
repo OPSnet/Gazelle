@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Exception\BonusException;
+
 if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST['BBCode'])) {
     echo $_REQUEST['BBCode'] === 'true'
         ? Text::full_format($_REQUEST['title'])
@@ -32,7 +34,7 @@ if (isset($_POST['confirm'])) {
     try {
         $Bonus->purchaseTitle($ID, $Label, $_POST['title']);
         header('Location: bonus.php?complete=' . urlencode($Label));
-    } catch (\Gazelle\BonusException $e) {
+    } catch (BonusException $e) {
         switch ($e->getMessage()) {
         case 'title:too-long':
             error('This title is too long, you must reduce the length.');
