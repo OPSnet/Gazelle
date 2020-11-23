@@ -1,0 +1,325 @@
+{% if can_see_db %}
+<div class="linkbox">
+    <a href="tools.php?action=database_specifics" class="brackets">Database specifics</a>
+</div>
+{% endif %}
+<div class="permissions">
+    <div class="permission_container">
+        <table>
+            <tr class="colhead">
+                <td colspan="2">Service</td>
+            </tr>
+            <tr><td colspan="2"><strong>Threads (Active)</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ mem_stats.threads|number_format }} <span style="float: right;">({{ (mem_stats.threads / mem_stats.max_connections)|number_format(1) }}%)</span></td>
+            </tr>
+            <tr>
+                <td{% if db_stats.Threads_connected.Value / db_stats.Threads_created.Value > 0.7 %} class="invalid"{% endif %}>Database:</td>
+                <td>{{ db_stats.Threads_created.Value|number_format }} <span style="float: right;">({{ (db_stats.Threads_connected.Value / db_stats.Threads_created.Value * 100)|number_format(1) }}%)</span></td>
+            </tr>
+            <tr>
+                <td>DB peak connections:</td>
+                <td>{{ db_stats.Max_used_connections.Value|number_format }} <span style="float: right;">({{ (db_stats.Max_used_connections.Value / db_vars.max_connections.Value)|number_format(1) }}%)</span></td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Connections</strong></td></tr>
+            <tr>
+                <td>Cache current:</td>
+                <td>{{ mem_stats.curr_connections|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Cache total:</td>
+                <td>{{ mem_stats.total_connections|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Database total:</td>
+                <td>{{ db_stats.Connections.Value|number_format }}</td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Booted</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ (now - mem_stats.uptime)|time_diff }}</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (now - db_stats.Uptime.Value)|time_diff }}</td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Special</strong></td></tr>
+            <tr>
+                <td>Cache Current Index:</td>
+                <td><span style="float: right;">{{ mem_stats.curr_items|number_format }}</span></td>
+            </tr>
+            <tr>
+                <td>Cache Total Index:</td>
+                <td><span style="float: right;">{{ mem_stats.total_items|number_format }}</span></td>
+            </tr>
+            <tr>
+                <td{% if mem_stats.bytes / mem_stats.limit_maxbytes > 0.85 %} class="tooltip invalid" title="Evictions begin when storage exceeds 85%"{% endif %}>Cache Storage:</td>
+                <td>{{ mem_stats.bytes|octet_size }} <span style="float: right;">{{ (mem_stats.bytes / mem_stats.limit_maxbytes)|number_format(5) }}%</span></td>
+            </tr>
+            <tr>
+                <td>Cache cold moves:</td>
+                <td>{{ mem_stats.moves_to_cold|number_format }}<span style="float: right;">{{ (mem_stats.moves_to_cold / mem_stats.uptime)|number_format(5) }}/s</span></td>
+            </tr>
+            <tr>
+                <td>Cache warm moves:</td>
+                <td>{{ mem_stats.moves_to_warm|number_format }}<span style="float: right;">{{ (mem_stats.moves_to_warm / mem_stats.uptime)|number_format(5) }}/s</span></td>
+            </tr>
+            <tr>
+                <td>Cache moves within LRU:</td>
+                <td>{{ mem_stats.moves_within_lru|number_format }}<span style="float: right;">{{ (mem_stats.moves_within_lru / mem_stats.uptime)|number_format(5) }}/s</span></td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Utilities</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>
+                    <form class="delete_form" name="cache" action="" method="post">
+                        <input type="hidden" name="action" value="service_stats" />
+                        <input type="hidden" name="auth" value="{{ auth }}" />
+                        <input type="hidden" name="global_flush" value="1" />
+                        <input type="submit" value="Manual Flush" />
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td{% if mem_stats.cmd_flush > mem_stats.uptime / 7 * 24 * 3600 -%}
+                    class="tooltip invalid" title="Flushing the cache on a regular basis defeats the benefits of it, look into using cache transactions, or deletes instead of global flushing where possible."
+                    {%- endif %}>Total flushes:</td>
+                <td>{{ mem_stats.cmd_flush|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Flush ratio:</td>
+                <td>{{ (mem_stats.cmd_flush / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+        </table>
+    </div>
+    <div class="permission_container">
+        <table>
+            <tr class="colhead">
+                <td colspan="2">Activity</td>
+            </tr>
+            <tr><td colspan="2"><strong>Total reads</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ mem_stats.cmd_get|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ db_stats.Com_select.Value|number_format }}</td>
+            </tr>
+            <tr><td colspan="2"><strong>Total writes</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ mem_stats.cmd_set|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Com_insert.Value + db_stats.Com_update.Value)|number_format }}</td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Get/Select (Success)</strong></td></tr>
+            <tr>
+                <td{% if mem_stats.get_hits / mem_stats.cmd_get < 0.7 %} class="invalid"{% endif %}>Cache:</td>
+                <td>{{ mem_stats.get_hits|number_format }} <span style="float: right;">({{ (mem_stats.get_hits / mem_stats.cmd_get * 100)|number_format(3) }}%)</span></td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ db_stats.Com_select.Value|number_format }} <span style="float: right;">(100.000%)</span></td>
+            </tr>
+            <tr><td colspan="2"><strong>Set/Insert (Success)</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ mem_stats.cmd_set|number_format }} <span style="float: right;">(100.000%)</span></td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ db_stats.Com_insert.Value|number_format }} <span style="float: right;">(100.000%)</span></td>
+            </tr>
+            <tr>
+                <td{% if mem_stats.incr_hits/(mem_stats.incr_hits + mem_stats.incr_misses) < 0.7 %} class="invalid"{% endif %}>Cache increment:</td>
+                <td>{{ mem_stats.incr_hits|number_format }} <span style="float: right;">({{ (mem_stats.incr_hits / (mem_stats.incr_hits + mem_stats.incr_misses) * 100)|number_format(3) }}%)</span></td>
+            </tr>
+            <tr>
+                <td{% if mem_stats.decr_hits / (mem_stats.decr_hits + mem_stats.decr_misses) < 0.7 %} class="invalid"{% endif %}>Cache decrement:</td>
+                <td>{{ mem_stats.decr_hits|number_format }} <span style="float: right;">({{ (mem_stats.decr_hits / (mem_stats.decr_hits + mem_stats.decr_misses) * 100)|number_format(3) }}%)</span></td>
+            </tr>
+            <tr><td colspan="2"><strong>CAS/Update (Success)</strong></td></tr>
+            <tr>
+                <td{% if mem_stats.cas_hits > 0 and mem_stats.cas_hits / (mem_stats.cas_hits + mem_stats.cas_misses) < 0.7 -%} class="tooltip invalid" title="More than 30% of the issued CAS commands were unnecessarily wasting time and resources."
+                    {%- elseif mem_stats.cas_hits == 0 %} class="tooltip notice" title="Disable CAS with the -C parameter and save resources since it is not used."
+                    {%- endif %}>Cache:</td>
+                <td>{{ mem_stats.cas_hits|number_format }} <span style="float: right;">({%
+                    if mem_stats.cas_hits > 0 %}{{ mem_stats.cas_hits / ((mem_stats.cas_hits + mem_stats.cas_misses) * 100)|number_format(3) }}{% else %}0.000{% endif %}%)</span></td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ db_stats.Com_update.Value|number_format }} <span style="float: right;">(100.000%)</span></td>
+            </tr>
+            <tr><td colspan="2"><strong>Deletes (Success)</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ mem_stats.delete_hits|number_format }} <span style="float: right;">({{ (mem_stats.delete_hits / (mem_stats.delete_hits + mem_stats.delete_misses) * 100)|number_format(3) }}%)</span></td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ db_stats.Com_delete.Value|number_format }} <span style="float: right;">(100.000%)</span></td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Special</strong></td></tr>
+            <tr>
+                <td>Expired unfetched:</td>
+                <td>{{ mem_stats.expired_unfetched|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Evicted unfetched:</td>
+                <td>{{ mem_stats.evicted_unfetched|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Evicted:</td>
+                <td>{{ mem_stats.evictions|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Slabs moved:</td>
+                <td>{{ mem_stats.slabs_moved|number_format }}</td>
+            </tr>
+            <tr>
+                <td{% if db_stats.Slow_queries.Value > db_stats.Questions.Value / 7500 %} class="tooltip invalid" title="1/7500 queries is allowed to be slow to minimize performance impact."{% endif %}>Database slow:</td>
+                <td>{{ db_stats.Slow_queries.Value|number_format }}</td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Data read</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ mem_stats.bytes_read|number_format }}</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ db_stats.Bytes_received.Value|octet_size }}</td>
+            </tr>
+            <tr><td colspan="2"><strong>Data write</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ mem_stats.bytes_written|octet_size }}</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ db_stats.Bytes_sent.Value|octet_size }}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="permission_container">
+        <table>
+            <tr class="colhead">
+                <td colspan="2">Concurrency</td>
+            </tr>
+            <tr><td colspan="2"><strong>Total reads</strong></td></tr>
+            <tr>
+                <td{% if mem_stats.cmd_get / mem_stats.uptime * 5 < db_stats.Com_select.Value / db_stats.Uptime.Value %} class="invalid"{% endif %}>Cache:</td>
+                <td>{{ (mem_stats.cmd_get / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Com_select.Value / db_stats.Uptime.Value)|number_format(5) }}/s</td>
+            </tr>
+            <tr><td colspan="2"><strong>Total writes</strong></td></tr>
+            <tr>
+                <td{% if mem_stats.cmd_set / mem_stats.uptime * 5 < (db_stats.Com_insert.Value + db_stats.Com_update.Value) / db_stats.Uptime.Value %} class="invalid"{% endif %}>Cache:</td>
+                <td>{{ (mem_stats.cmd_set / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ ((db_stats.Com_insert.Value + db_stats.Com_update.Value) / db_stats.Uptime.Value)|number_format(5) }}/s</td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Get/Select</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ (mem_stats.get_hits / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Com_select.Value / db_stats.Uptime.Value)|number_format(5) }}/s</td>
+            </tr>
+            <tr><td colspan="2"><strong>Set/Insert</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ (mem_stats.cmd_set / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Com_insert.Value / db_stats.Uptime.Value)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Cache increment:</td>
+                <td>{{ (mem_stats.incr_hits / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Cache decrement:</td>
+                <td>{{ (mem_stats.decr_hits / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr><td colspan="2"><strong>CAS/Updates</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ (mem_stats.cas_hits / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Com_update.Value / db_stats.Uptime.Value)|number_format(5) }}/s</td>
+            </tr>
+            <tr><td colspan="2"><strong>Deletes</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ (mem_stats.delete_hits / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Com_delete.Value / db_stats.Uptime.Value)|number_format(5) }}/s</td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Special</strong></td></tr>
+            <tr>
+                <td>Expired unfetched:</td>
+                <td>{{ (mem_stats.expired_unfetched / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Evicted unfetched:</td>
+                <td>{{ (mem_stats.evicted_unfetched / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Evicted:</td>
+                <td>{{ (mem_stats.evictions / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Slabs moved:</td>
+                <td>{{ (mem_stats.slabs_moved / mem_stats.uptime)|number_format(5) }}/s</td>
+            </tr>
+            <tr>
+                <td>Database slow:</td>
+                <td>{{ (db_stats.Slow_queries.Value / db_stats.Uptime.Value)|number_format(5) }}/s</td>
+            </tr>
+            <tr><td colspan="2"></td></tr>
+            <tr><td colspan="2"><strong>Data read</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ (mem_stats.bytes_read / mem_stats.uptime)|octet_size }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Bytes_received.Value / db_stats.Uptime.Value)|octet_size }}/s</td>
+            </tr>
+            <tr><td colspan="2"><strong>Data write</strong></td></tr>
+            <tr>
+                <td>Cache:</td>
+                <td>{{ (mem_stats.bytes_written / mem_stats.uptime)|octet_size }}/s</td>
+            </tr>
+            <tr>
+                <td>Database:</td>
+                <td>{{ (db_stats.Bytes_sent.Value / db_stats.Uptime.Value)|octet_size }}/s</td>
+            </tr>
+        </table>
+    </div>
+</div>
