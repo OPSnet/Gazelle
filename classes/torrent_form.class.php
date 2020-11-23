@@ -495,44 +495,25 @@ class TORRENT_FORM {
                     </span>
                 </td>
             </tr>
-<?php   if ($this->NewTorrent) { ?>
-            <tr id="upload_logs" class="hidden">
+
+            <tr id="upload_logs"<?= $this->NewTorrent ? ' class="hidden"' : '' ?>>
                 <td class="label">
-                    Log files:
+                    Log files:<br /><a href="javascript:;" onclick="AddLogField('<?=Logchecker::getAcceptValues()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
                 </td>
                 <td id="logfields">
                     Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-                    <input id="logfile_1" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField('<?=Logchecker::getAcceptValues()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
+                    <input id="logfile_1" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" /> 
                 </td>
-            </tr>
-            <tr>
-                <td class="label">Multi-format uploader:</td>
-                <td><input type="button" value="+" id="add_format" />&nbsp;<input type="button" style="display: none;" value="-" id="remove_format" /></td>
             </tr>
             <tr id="placeholder_row_top"></tr>
             <tr id="extra_format_placeholder"></tr>
-<?php
-        }
 
-        if (!$this->NewTorrent && check_perms('users_mod')) {
-?>
+<?php   if (!$this->NewTorrent && check_perms('users_mod')) { ?>
             <tr>
                 <td class="label">Log/cue:</td>
                 <td>
                     <input type="checkbox" id="flac_log" name="flac_log"<?php if ($HasLog) { echo ' checked="checked"';} ?> /> <label for="flac_log">Check this box if the torrent has, or should have, a log file.</label><br />
                     <input type="checkbox" id="flac_cue" name="flac_cue"<?php if ($HasCue) { echo ' checked="checked"';} ?> /> <label for="flac_cue">Check this box if the torrent has, or should have, a cue file.</label><br />
-<?php
-        }
-
-        if (!$this->NewTorrent && check_perms('users_mod')) {
-?>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Upload Log:</td>
-                <td id="logfields">
-                    Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-                    <input id="file" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" /> <a href="javascript:;" onclick="AddLogField('<?=Logchecker::getAcceptValues()?>');" class="brackets">+</a> <a href="javascript:;" onclick="RemoveLogField();" class="brackets">&minus;</a>
                 </td>
             </tr>
             <tr>
