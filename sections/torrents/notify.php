@@ -276,7 +276,7 @@ if (empty($Results)) {
                     $DisplayName .= " [" . $GroupInfo['Year'] . "]";
                 }
                 if ($GroupInfo['ReleaseType'] > 0) {
-                    $DisplayName .= ' ['.$ReleaseTypes[$GroupInfo['ReleaseType']].']';
+                    $DisplayName .= ' [' . (new Gazelle\ReleaseType)->findNameById($GroupInfo['ReleaseType']) . ']';
                 }
             }
 

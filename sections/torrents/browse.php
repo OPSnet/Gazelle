@@ -18,7 +18,7 @@ $headerIcons = new SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' 
 if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
     $InfoHash = (!empty($_GET['searchstr'])) ? $_GET['searchstr'] : $_GET['groupname'];
 
-    $torMan = new \Gazelle\Manager\Torrent;
+    $torMan = new Gazelle\Manager\Torrent;
     // Search by infohash
     if ($InfoHash = $torMan->isValidHash($InfoHash)) {
         if (list($ID, $GroupID) = $torMan->hashToTorrentGroup($InfoHash)) {
@@ -121,6 +121,8 @@ if (Format::form('remastertitle', true) == ''
 } else {
     $Hidden = '';
 }
+
+$releaseTypes = (new Gazelle\ReleaseType)->list();
 
 View::show_header('Browse Torrents', 'browse');
 ?>
@@ -231,7 +233,7 @@ View::show_header('Browse Torrents', 'browse');
                     </select>
                     <select name="releasetype" class="ft_releasetype fti_advanced">
                         <option value="">Release type</option>
-<?php    foreach ($ReleaseTypes as $ID=>$Type) { ?>
+<?php    foreach ($releaseTypes as $ID=>$Type) { ?>
                         <option value="<?=display_str($ID); ?>"<?php Format::selected('releasetype', $ID); ?>><?=display_str($Type); ?></option>
 <?php    } ?>
                     </select>
@@ -522,7 +524,7 @@ foreach ($Results as $Key => $GroupID) {
         if ($GroupInfo['VanityHouse']) {
             $DisplayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
         }
-        $DisplayName .= ' ['.$ReleaseTypes[$ReleaseType].']';
+        $DisplayName .= ' [' . $releaseTypes[$ReleaseType] . ']';
 ?>
     <tr class="group groupid_<?=$GroupID?>_header<?=$SnatchedGroupClass?>">
 <?php
@@ -642,7 +644,7 @@ $ShowGroups = !(!empty($LoggedUser['TorrentGrouping']) && $LoggedUser['TorrentGr
                 $DisplayName .= " [$GroupYear]";
             }
             if ($CategoryID == 1 && $ReleaseType > 0) {
-                $DisplayName .= ' ['.$ReleaseTypes[$ReleaseType].']';
+                $DisplayName .= ' [' . $releaseTypes[$ReleaseType] . ']';
             }
             $ExtraInfo = Torrents::torrent_info($Data, true, true);
         } elseif ($Data['IsSnatched']) {

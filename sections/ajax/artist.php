@@ -115,41 +115,28 @@ $NumGroups = count($TorrentList);
 
 //Get list of used release types
 $UsedReleases = [];
+
 foreach ($TorrentList as $GroupID=>$Group) {
     if ($Importances[$GroupID]['Importance'] == '2') {
-        $TorrentList[$GroupID]['ReleaseType'] = 1024;
+        $TorrentList[$GroupID]['ReleaseType'] = ARTIST_SECTION_GUEST;
         $GuestAlbums = true;
     }
     if ($Importances[$GroupID]['Importance'] == '3') {
-        $TorrentList[$GroupID]['ReleaseType'] = 1023;
+        $TorrentList[$GroupID]['ReleaseType'] = ARTIST_SECTION_REMIXER;
         $RemixerAlbums = true;
     }
     if ($Importances[$GroupID]['Importance'] == '4') {
-        $TorrentList[$GroupID]['ReleaseType'] = 1022;
+        $TorrentList[$GroupID]['ReleaseType'] = ARTIST_SECTION_COMPOSER;
         $ComposerAlbums = true;
     }
     if ($Importances[$GroupID]['Importance'] == '7') {
-        $TorrentList[$GroupID]['ReleaseType'] = 1021;
+        $TorrentList[$GroupID]['ReleaseType'] = ARTIST_SECTION_COMPOSER;
         $ProducerAlbums = true;
     }
     if (!in_array($TorrentList[$GroupID]['ReleaseType'], $UsedReleases)) {
         $UsedReleases[] = $TorrentList[$GroupID]['ReleaseType'];
     }
 }
-
-if (!empty($GuestAlbums)) {
-    $ReleaseTypes[1024] = 'Guest Appearance';
-}
-if (!empty($RemixerAlbums)) {
-    $ReleaseTypes[1023] = 'Remixed By';
-}
-if (!empty($ComposerAlbums)) {
-    $ReleaseTypes[1022] = 'Composition';
-}
-if (!empty($ProducerAlbums)) {
-    $ReleaseTypes[1021] = 'Produced By';
-}
-
 reset($TorrentList);
 
 $JsonTorrents = [];

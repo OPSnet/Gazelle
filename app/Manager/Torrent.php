@@ -546,6 +546,7 @@ class Torrent extends \Gazelle\Base {
                 . $CategoryIcons[$group['CategoryID'] - 1];
         }
         $group['VanityHouse'] = ($group['VanityHouse'] == 1);
+        $group['ReleaseType'] = (int)$group['ReleaseType'];
 
         // Reorganize tag info to be useful
         $tagIds = explode('|', $group['tagIds']);

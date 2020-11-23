@@ -211,7 +211,7 @@ class TORRENT_FORM {
         $CassetteApproved = $Torrent['CassetteApproved'];
         $LossymasterApproved = $Torrent['LossymasterApproved'];
         $LossywebApproved = $Torrent['LossywebApproved'];
-        global $ReleaseTypes;
+        $releaseTypes = (new \Gazelle\ReleaseType)->list();
 ?>
         <div id="musicbrainz_popup" style="display: none;">
             <a href="#null" id="popup_close">x</a>
@@ -236,7 +236,7 @@ class TORRENT_FORM {
                 <td>
                     <select id="releasetype" name="releasetype"<?=$this->Disabled?>>
                         <option>---</option>
-<?php       foreach ($ReleaseTypes as $Key => $Val) { ?>
+<?php       foreach ($releaseTypes as $Key => $Val) { ?>
                         <option value="<?= $Key ?>"<?= $Key == $Torrent['ReleaseType'] ? ' selected="selected"' : '' ?>><?= $Val ?></option>
 <?php       } ?>
                     </select>

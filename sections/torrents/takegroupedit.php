@@ -82,7 +82,7 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
             ", $GroupID
         );
     }
-    if ($GroupCategoryID == 1 && !isset($ReleaseTypes[$ReleaseType]) || $GroupCategoryID != 1 && $ReleaseType) {
+    if ($GroupCategoryID == 1 && !(new Gazelle\ReleaseType)->findNameById($ReleaseType) || $GroupCategoryID != 1 && $ReleaseType) {
         error(403);
     }
 

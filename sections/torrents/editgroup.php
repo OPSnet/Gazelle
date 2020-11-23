@@ -74,19 +74,18 @@ View::show_header('Edit torrent group');
 
                 <h3>Torrent group description:</h3>
                 <textarea name="body" cols="91" rows="20"><?=$Body?></textarea><br />
-<?php
-if ($CategoryID == 1) { ?>
+<?php if ($CategoryID == 1) { ?>
                 <h3>Release type:
                     <select id="releasetype" name="releasetype">
 <?php
-    foreach ($ReleaseTypes as $Key => $Val) { ?>
+    $releaseTypes = (new Gazelle\ReleaseType)->list();
+    foreach ($releaseTypes as $Key => $Val) {
+?>
                         <option value="<?=$Key?>"<?=($Key == $ReleaseType ? ' selected="selected"' : '')?>><?=$Val?></option>
-<?php
-    } ?>
+<?php } ?>
                     </select>
                 </h3>
-<?php
-    if (check_perms('torrents_edit_vanityhouse')) { ?>
+<?php if (check_perms('torrents_edit_vanityhouse')) { ?>
                 <h3>
                     <label><input type="checkbox" name="vanity_house" value="1" <?=($VanityHouse ? 'checked="checked" ' : '')?>/> Vanity House</label>
                 </h3>
@@ -139,27 +138,28 @@ if ($CategoryID == 1) { ?>
                         <input type="text" name="catalogue_number" size="40" value="<?=$CatalogueNumber?>" />
                     </td>
                 </tr>
-<?php
-    if (check_perms('torrents_freeleech')) { ?>
+<?php if (check_perms('torrents_freeleech')) { ?>
                 <tr>
                     <td class="label">Torrent <strong>group</strong> leech status</td>
                     <td>
-<?php   $Leech = ['Normal', 'Freeleech', 'Neutral Leech'];
-        foreach ($Leech as $Key => $Type) { ?>
+<?php
+        $Leech = ['Normal', 'Freeleech', 'Neutral Leech'];
+        foreach ($Leech as $Key => $Type) {
+?>
                         <label><input type="radio" name="freeleechtype" value="<?=$Key?>"<?=($Key == $Torrent['FreeTorrent'] ? ' checked="checked"' : '')?> /> <?=$Type?></label>
 <?php   } ?>
                          because
                         <select name="freeleechreason">
-<?php   $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
-        foreach ($FL as $Key => $FLType) { ?>
-                            <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$FLType?></option>
 <?php
-        } ?>
+        $FL = ['N/A', 'Staff Pick', 'Perma-FL', 'Vanity House'];
+        foreach ($FL as $Key => $FLType) {
+?>
+                            <option value="<?=$Key?>"<?=($Key == $Torrent['FreeLeechType'] ? ' selected="selected"' : '')?>><?=$FLType?></option>
+<?php   } ?>
                         </select>
                     </td>
                 </tr>
-<?php
-    } ?>
+<?php } ?>
             </table>
             <input type="submit" value="Edit" />
         </form>

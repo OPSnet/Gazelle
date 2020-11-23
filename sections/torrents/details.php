@@ -47,9 +47,11 @@ if ($GroupVanityHouse) {
     $DisplayName .= ' [Vanity House]';
     $AltName .= ' [Vanity House]';
 }
+$releaseTypes = (new Gazelle\ReleaseType)->list();
 if ($GroupCategoryID == 1) {
-    $DisplayName .= ' ['.$ReleaseTypes[$ReleaseType].']';
-    $AltName .= ' ['.$ReleaseTypes[$ReleaseType].']';
+    $name = $releaseTypes[$ReleaseType];
+    $DisplayName .= " [$name] ";
+    $AltName .= " [$name] ";
 }
 
 $Tags = [];
@@ -85,7 +87,7 @@ if (!$CoverArt) {
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 [$NumComments, $Page, $Thread, $LastRead] = Comments::load('torrents', $GroupID);
 
-$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
+$subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
 
 // Start output
 View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscriptions');
@@ -786,10 +788,10 @@ if (count($PersonalCollages) > 0) {
 <?php
 }
 // Matched Votes
-include(SERVER_ROOT.'/sections/torrents/voter_picks.php');
+require_once('voter_picks.php');
 ?>
         <div class="box torrent_description">
-            <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?=(!empty($ReleaseType) ? $ReleaseTypes[$ReleaseType].' info' : 'Info' )?></strong></div>
+            <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?=(!empty($ReleaseType) ? $releaseTypes[$ReleaseType].' info' : 'Info' )?></strong></div>
             <div class="body"><?php if ($WikiBody != '') { echo $WikiBody; } else { echo 'There is no information on this torrent.'; } ?></div>
         </div>
 <?php

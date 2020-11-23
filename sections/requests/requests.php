@@ -264,11 +264,12 @@ if (!empty($_GET['filter_cat'])) {
     }
 }
 
+$releaseTypes = (new \Gazelle\ReleaseType)->list();
 if (!empty($_GET['releases'])) {
     $ReleaseArray = $_GET['releases'];
-    if (count($ReleaseArray) !== count($ReleaseTypes)) {
+    if (count($ReleaseArray) !== count($releaseTypes)) {
         foreach ($ReleaseArray as $Index => $Value) {
-            if (!isset($ReleaseTypes[$Value])) {
+            if (!isset($releaseTypes[$Value])) {
                 unset($ReleaseArray[$Index]);
             }
         }
@@ -420,10 +421,10 @@ View::show_header($Title, 'requests');
             <tr id="release_list">
                 <td class="label">Release types</td>
                 <td>
-                    <input type="checkbox" id="toggle_releases" onchange="Toggle('releases', 0);"<?=(!$Submitted || !empty($ReleaseArray) && count($ReleaseArray) === count($ReleaseTypes) ? ' checked="checked"' : '') ?> /> <label for="toggle_releases">All</label>
+                    <input type="checkbox" id="toggle_releases" onchange="Toggle('releases', 0);"<?=(!$Submitted || !empty($ReleaseArray) && count($ReleaseArray) === count($releaseTypes) ? ' checked="checked"' : '') ?> /> <label for="toggle_releases">All</label>
 <?php
         $i = 0;
-        foreach ($ReleaseTypes as $Key => $Val) {
+        foreach ($releaseTypes as $Key => $Val) {
             if ($i % 8 === 0) {
                 echo '<br />';
             }

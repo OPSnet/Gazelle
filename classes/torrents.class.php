@@ -967,8 +967,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
      * @return string
      */
     public static function display_string($GroupID, $Mode = self::DISPLAYSTRING_DEFAULT) {
-        global $ReleaseTypes; // I hate this
-
         $GroupInfo = self::get_groups([$GroupID], true, true, false)[$GroupID];
         $ExtendedArtists = $GroupInfo['ExtendedArtists'];
 
@@ -1006,7 +1004,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         }
 
         if (($Mode & self::DISPLAYSTRING_RELEASETYPE) && $GroupInfo['ReleaseType'] > 0) {
-            $DisplayName .= ' ['.$ReleaseTypes[$GroupInfo['ReleaseType']].']';
+            $DisplayName .= ' [' . (new \Gazelle\ReleaseType)->findNameById($GroupInfo['ReleaseType']) . ']';
         }
 
         return $DisplayName;
@@ -1161,8 +1159,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         if (in_array('noreleasetype', $attr) || in_array('title', $attr)) {
             $releaseType = '';
         } else {
-            global $ReleaseTypes;
-            $releaseType = ' [' . $ReleaseTypes[$info['ReleaseType']] . ']';
+            $releaseType = ' [' . (new \Gazelle\ReleaseType)->findNameById($info['ReleaseType']) . ']';
         }
         $release = $list[$id];
         if (in_array('nometa', $attr) || in_array('title', $attr)) {

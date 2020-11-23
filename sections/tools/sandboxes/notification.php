@@ -25,7 +25,7 @@ if (isset($_POST['torrentid'])) {
             $tags = [];
         }
         $category = $Categories[$group['CategoryID'] - 1];
-        $release = $ReleaseTypes[$group['ReleaseType']];
+        $release = (new Gazelle\ReleaseType)->findNameById($group['ReleaseType']);
         $notification = new Gazelle\Notification\Upload(0);
         $notification
             ->addFormat($torrent['Format'])

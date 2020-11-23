@@ -180,7 +180,7 @@ if (!$NumResults) {
                         $Links .= " [" . $GroupInfo['Year'] . "]";
                     }
                     if ($GroupInfo['ReleaseType'] > 0) {
-                        $Links .= " [" . $ReleaseTypes[$GroupInfo['ReleaseType']] . "]";
+                        $Links .= " [" . (new Gazelle\ReleaseType)->findNameById($GroupInfo['ReleaseType']) . "]";
                     }
                     $JumpLink = 'torrents.php?id=' . $GroupInfo['ID'] . '&amp;postid=' . $Result['PostID'] . '#post' . $Result['PostID'];
                 }

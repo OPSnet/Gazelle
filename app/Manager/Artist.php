@@ -4,14 +4,6 @@ namespace Gazelle\Manager;
 
 class Artist extends \Gazelle\Base {
 
-    /** @see classes/config.php */
-    protected $extendedSection = [
-        1021 => 'Produced By',
-        1022 => 'Compositions',
-        1023 => 'Remixed By',
-        1024 => 'Guest Appearances',
-    ];
-
     public function createArtist($name) {
         $this->db->prepared_query('
             INSERT INTO artists_group (Name)
@@ -32,15 +24,8 @@ class Artist extends \Gazelle\Base {
         return [$artistId, $aliasId];
     }
 
-    public function sectionName(int $sectionId): string {
-        global $ReleaseTypes; /* FIXME */
-        if (isset($this->extendedSection[$sectionId])) {
-            return $this->extendedSection[$sectionId];
-        } elseif (isset($ReleaseTypes[$sectionId])) {
-            return $ReleaseTypes[$sectionId];
-        } else {
-            return "section:$sectionId";
-        }
+    public function sectionName(int $sectionId): ?string {
+        return (new \Gazelle\ReleaseType)->findExtendedNameById($sectionId);
     }
 
     public function sectionLabel(int $sectionId): string {
@@ -48,22 +33,6 @@ class Artist extends \Gazelle\Base {
     }
 
     public function sectionTitle(int $sectionId): string {
-        global $ReleaseTypes; /* FIXME */
-        if (!isset($ReleaseTypes[$sectionId])) {
-            return $this->sectionName($sectionId);
-        }
-        switch ($ReleaseTypes[$sectionId]) {
-            case 'Anthology':
-                return 'Anthologies';
-            case 'DJ Mix':
-                return 'DJ Mixes';
-            case 'Remix':
-                return 'Remixes';
-            case 'Produced By':
-            case 'Remixed By':
-                return $this->sectionName($sectionId);
-            default:
-                return $this->sectionName($sectionId) . 's';
-        }
+        return (new \Gazelle\ReleaseType)->sectionTitle($sectionId);
     }
 }

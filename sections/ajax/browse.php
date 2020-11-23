@@ -30,7 +30,8 @@ if ($NumResults == 0) {
     ]);
 }
 
-$bookmark = new \Gazelle\Bookmark;
+$bookmark = new Gazelle\Bookmark;
+$releaseMan = new Gazelle\ReleaseType;
 
 $JsonGroups = [];
 foreach ($Results as $Key => $GroupID) {
@@ -183,7 +184,7 @@ foreach ($Results as $Key => $GroupID) {
             'bookmarked' => $bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID),
             'vanityHouse' => $GroupInfo['VanityHouse'] == '1',
             'groupYear' => (int)$GroupYear,
-            'releaseType' => $ReleaseTypes[$ReleaseType],
+            'releaseType' => $releaseMan->findNameById($ReleaseType),
             'groupTime' => (string)$GroupTime,
             'maxSize' => (int)$MaxSize,
             'totalSnatched' => (int)$TotalSnatched,

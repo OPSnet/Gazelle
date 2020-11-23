@@ -275,11 +275,10 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                         <select id="releasetype" name="releasetype">
                             <option value="0">---</option>
 <?php
-        foreach ($ReleaseTypes as $Key => $Val) {
+        $releaseTypes = (new Gazelle\ReleaseType)->list();
+        foreach ($releaseTypes as $Key => $Val) {
 ?>                            <option value="<?=$Key?>"<?=!empty($ReleaseType) ? ($Key == $ReleaseType ? ' selected="selected"' : '') : '' ?>><?=$Val?></option>
-<?php
-        }
-?>
+<?php   } ?>
                         </select>
                     </td>
                 </tr>
