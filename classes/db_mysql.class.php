@@ -119,10 +119,6 @@ if (!extension_loaded('mysqli')) {
     throw new Exception('Mysqli Extension not loaded.');
 }
 
-function enum_boolean($bool) {
-    return $bool == true ? '1' : '0';
-}
-
 //Handles escaping
 function db_string($String, $DisableWildcards = false) {
     global $DB;
@@ -133,19 +129,6 @@ function db_string($String, $DisableWildcards = false) {
         $String = str_replace(['%','_'], ['\%','\_'], $String);
     }
     return $String;
-}
-
-function db_array($Array, $DontEscape = [], $Quote = false) {
-    foreach ($Array as $Key => $Val) {
-        if (!in_array($Key, $DontEscape)) {
-            if ($Quote) {
-                $Array[$Key] = '\''.db_string(trim($Val)).'\'';
-            } else {
-                $Array[$Key] = db_string(trim($Val));
-            }
-        }
-    }
-    return $Array;
 }
 
 class DB_MYSQL_Exception extends Exception {}
