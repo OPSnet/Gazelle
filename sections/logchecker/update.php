@@ -12,13 +12,11 @@ print <<<HTML
 <div class="thin">
     <h2 class="center">Update Log</h2>
     <div class="box pad">
-        <p>
-        This form allows you to update the logs for any torrent that you've uploaded.
+        <p>This form allows you to update the logs for any torrent that you've uploaded.
         Select a torrent and upload the log files in the form <u>below</u>, making sure to add
         all logs that you wish to upload. This will overwrite any previously uploaded logs for
         this torrent. If you wish to just have a torrent manually rescored, please report it
-        to staff.
-        </p>
+        to staff.</p>
         <br />
         <form action="" method="post" enctype="multipart/form-data">
           <input type="hidden" name="action" value="take_upload" />
@@ -29,20 +27,21 @@ print <<<HTML
             </tr>
 HTML;
 
-$DB->query("
-    SELECT
-        ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore,
-        LogChecksum
+$DB->prepared_query("
+    SELECT ID, GroupID, `Format`, Encoding, HasCue, HasLog, HasLogDB, LogScore, LogChecksum
     FROM torrents
-    WHERE HasLog='1' AND HasLogDB='1' AND UserID = " . $LoggedUser['ID']);
-
-if ($DB->has_results()) {
+    WHERE HasLog = '1' AND HasLogDB = '1' AND UserID = ?
+    ", $LoggedUser['ID']
+);
+if (!$DB->has_results()) {
+    echo "\t\t\t<tr><td colspan='2'>No uploads found.</td></tr>";
+} else {
     $GroupIDs = $DB->collect('GroupID');
     $TorrentsInfo = $DB->to_array('ID');
     $Groups = Torrents::get_groups($GroupIDs);
     foreach ($TorrentsInfo as $TorrentID => $Torrent) {
-        list($ID, $GroupID, $Format, $Encoding, $HasCue, $HasLog, $HasLogDB, $LogScore, $LogChecksum) = $Torrent;
-        $Group = $Groups[(int) $GroupID];
+        [$ID, $GroupID, $Format, $Encoding, $HasCue, $HasLog, $HasLogDB, $LogScore, $LogChecksum] = $Torrent;
+        $Group = $Groups[$GroupID];
         $GroupName = $Group['Name'];
         $GroupYear = $Group['Year'];
         $ExtendedArtists = $Group['ExtendedArtists'];
@@ -99,9 +98,6 @@ if ($DB->has_results()) {
             </tr>
 HTML;
 
-}
-else {
-    echo "\t\t\t<tr><td colspan='2'>No uploads found.</td></tr>";
 }
 print <<<HTML
           </table>
