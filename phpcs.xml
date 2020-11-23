@@ -63,7 +63,6 @@
         <properties>
             <property name="forbiddenFunctions" type="array" extend="true">
                 <element key="db_string" value="null"/>
-                <element key="db_array" value="null"/>
                 <element key="each" value="null"/>
                 <element key="eval" value="null"/>
                 <element key="extract" value="null"/>
