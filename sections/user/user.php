@@ -21,7 +21,7 @@ if (!empty($_POST)) {
     }
     try {
         $FL_OTHER_tokens = $Bonus->purchaseTokenOther($LoggedUser['ID'], $UserID, $match[1]);
-    } catch (\Gazelle\BonusException $e) {
+    } catch (Gazelle\Exception\BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase of tokens not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
         } else {

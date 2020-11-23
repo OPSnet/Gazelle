@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Exception\BonusException;
+
 enforce_login();
 authorize();
 
@@ -10,7 +12,7 @@ if (!preg_match('/^(token|other)-[1-4]$/', $Label, $match)) {
 if ($match[1] === 'token') {
     try {
         $Bonus->purchaseToken($LoggedUser['ID'], $Label);
-    } catch (\Gazelle\BonusException $e) {
+    } catch (BonusException $e) {
         $message = $e->getMessage();
         error("Purchase not concluded ($message).");
     }
@@ -27,7 +29,7 @@ else {
     }
     try {
         $Bonus->purchaseTokenOther($LoggedUser['ID'], $ID, $Label);
-    } catch (\Gazelle\BonusException $e) {
+    } catch (BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
         } else {
