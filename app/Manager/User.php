@@ -74,6 +74,106 @@ class User extends \Gazelle\Base {
     }
 
     /**
+     * Get the last year of user flow (joins, disables)
+     *
+     * @return array [week, joined, disabled]
+     */
+    public function userflow(): array {
+        if (($userflow = $this->cache->get_value('userflow')) === false) {
+            $this->db->query("
+                SELECT J.Week, J.n as Joined, coalesce(D.n, 0) as Disabled
+                FROM (
+                    SELECT DATE_FORMAT(JoinDate, '%X-%V') AS Week, count(*) AS n
+                    FROM users_info
+                    GROUP BY Week
+                    ORDER BY 1 DESC
+                    LIMIT 52) J
+                LEFT JOIN (
+                    SELECT DATE_FORMAT(BanDate, '%X-%V') AS Week, count(*) AS n
+                    FROM users_info
+                    GROUP By Week
+                    ORDER BY 1 DESC
+                    LIMIT 52) D USING (Week)
+                ORDER BY 1
+            ");
+            $userflow = $this->db->to_array('Week', MYSQLI_ASSOC, false);
+            $this->cache->cache_value('userflow', $userflow, 86400);
+        }
+        return $userflow;
+    }
+
+    /**
+     * Get total number of userflow changes (for pagination)
+     *
+     * @return int number of results
+     */
+    public function userflowTotal(): int {
+        return $this->db->scalar("
+            SELECT count(*) FROM (
+                SELECT 1
+                FROM users_info
+                GROUP BY DATE_FORMAT(coalesce(BanDate, JoinDate), '%Y-%m-%d')
+            ) D
+        ") ?? 0;
+    }
+
+    /**
+     * Get a page of userflow details
+     *
+     * @param int limit of resultset
+     * @param int offset of resultset
+     * @return array of array [day, month, joined, manual, ratio, inactivity]
+     */
+    public function userflowDetails(int $limit, int $offset): array {
+        $this->db->prepared_query("
+            SELECT j.Date                    AS date,
+                DATE_FORMAT(j.Date, '%Y-%m') AS month,
+                coalesce(j.Flow, 0)          AS joined,
+                coalesce(m.Flow, 0)          AS manual,
+                coalesce(r.Flow, 0)          AS ratio,
+                coalesce(i.Flow, 0)          AS inactivity
+            FROM (
+                    SELECT
+                        DATE_FORMAT(JoinDate, '%Y-%m-%d') AS Date,
+                        count(*) AS Flow
+                    FROM users_info
+                    GROUP BY Date
+                ) AS j
+                LEFT JOIN (
+                    SELECT
+                        DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
+                        count(*) AS Flow
+                    FROM users_info
+                    WHERE BanDate IS NOT NULL
+                        AND BanReason = '1'
+                    GROUP BY Date
+                ) AS m ON j.Date = m.Date
+                LEFT JOIN (
+                    SELECT
+                        DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
+                        count(*) AS Flow
+                    FROM users_info
+                    WHERE BanDate IS NOT NULL
+                        AND BanReason = '2'
+                    GROUP BY Date
+                ) AS r ON j.Date = r.Date
+                LEFT JOIN (
+                    SELECT
+                        DATE_FORMAT(BanDate, '%Y-%m-%d') AS Date,
+                        count(*) AS Flow
+                    FROM users_info
+                    WHERE BanDate IS NOT NULL
+                        AND BanReason = '3'
+                    GROUP BY Date
+                ) AS i ON j.Date = i.Date
+            ORDER BY j.Date DESC
+            LIMIT ? OFFSET ?
+            ", $limit, $offset
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    /**
      * Get the count of enabled users.
      *
      * @return integer Number of enabled users (this is cached).
