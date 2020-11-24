@@ -71,6 +71,8 @@ class Bonus extends Base {
         foreach ($items as $item) {
             if ($item['Label'] === 'seedbox' && $user->hasAttr('feature-seedbox')) {
                 continue;
+            } elseif ($item['Label'] === 'invite' && check_perms('site_send_unlimited_invites')) {
+                continue;
             }
             $item['Price'] = $this->getEffectivePrice($item['Label'], $user->id());
             $allowed[] = $item;
