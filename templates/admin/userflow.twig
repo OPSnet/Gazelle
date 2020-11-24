@@ -1,0 +1,33 @@
+<div class="thin">
+{% if show_flow %}
+    <div class="box pad center">
+        <figure class="highcharts-figure"><div id="user-flow"></div></figure>
+    </div>
+{% endif %}
+    {{ paginator.linkbox|raw }}
+    <table width="100%">
+        <tr class="colhead">
+            <td>Date</td>
+            <td>(+) Joined</td>
+            <td>(-) Manual</td>
+            <td>(-) Ratio</td>
+            <td>(-) Inactivity</td>
+            <td>(-) Total</td>
+            <td>Net Growth</td>
+        </tr>
+{% for d in details %}
+    {% set total_out = d.ratio + d.inactivity + d.manual %}
+        <tr class="{{ cycle(['b', 'a'], loop.index0) }}">
+            <td>{{ d.date }}</td>
+            <td>{{ d.joined|number_format }}</td>
+            <td>{{ d.manual|number_format }}</td>
+            <td>{{ d.ratio|number_format }}</td>
+            <td>{{ d.inactivity|number_format }}</td>
+            <td>{{ total_out|number_format }}</td>
+            <td>{{ (d.joined - total_out)|number_format }}</td>
+        </tr>
+{% endfor %}
+    </table>
+    {{ paginator.linkbox|raw }}
+</div>
+<?php
