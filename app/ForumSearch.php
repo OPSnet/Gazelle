@@ -3,7 +3,7 @@
 namespace Gazelle;
 
 class ForumSearch extends Base {
-    protected $user;
+
     protected $permittedForums = [];
     protected $forbiddenForums = [];
     protected $selectedForums = [];
@@ -21,6 +21,20 @@ class ForumSearch extends Base {
     protected $page = 0;
     protected $threadId;
     protected $linkbox;
+
+    protected $splitWords = false;
+
+    /** @var \Gazelle\User */
+    protected $user;
+
+    /** @var bool */
+    protected $showGrouped = false;
+
+    /** @var bool */
+    protected $showUnread = true;
+
+    /** @var int total number of posts found */
+    protected $total = 0;
 
     public function __construct(User $user) {
         parent::__construct();
@@ -102,6 +116,26 @@ class ForumSearch extends Base {
                 $this->selectedForums[] = $id;
             }
         }
+    }
+
+    /**
+     * When searching on post history, will all posts in a thread be grouped?
+     *
+     * @param bool set whether post history is grouped
+     */
+    public function setShowGrouped(bool $showGrouped) {
+        $this->showGrouped = $showGrouped;
+        return $this;
+    }
+
+    /**
+     * When searching on post history, are only unread posts wanted?
+     *
+     * @param bool set whether only unread posts are wanted
+     */
+    public function setShowUnread(bool $showUnread) {
+        $this->showUnread = $showUnread;
+        return $this;
     }
 
     /**
@@ -196,15 +230,23 @@ class ForumSearch extends Base {
     // SEARCH METHODS
 
     /**
+     * Do we need to split the search words for a full text search?
+     *
+     * @param bool do we split? (e.g. not on thread title lookups)
+     */
+    public function setSplitWords(bool $splitWords) {
+        $this->splitWords = $splitWords;
+        return $this;
+    }
+
+    /**
      * Prepare the query parameters of a forum query to allow a user to access
      * only the forums to which they are allowed according to site rules,
      * along with any other filters that have been initialized.
      *
-     * @param bool Don't configure the full text search (it may cause thread title lookups to fail)
-     *
      * @return array [sql conditions to bind, bind arguments]
      */
-    protected function configure($configureWords = true): array {
+    protected function configure(): array {
         $cond = array_merge($this->forumCond, $this->threadCond, $this->isBodySearch() ? $this->postCond : []);
         $args = array_merge($this->forumArgs, $this->threadArgs, $this->isBodySearch() ? $this->postArgs : []);
         if (!($this->permittedForums || $this->selectedForums)) {
@@ -227,17 +269,15 @@ class ForumSearch extends Base {
         }
         // full text search needed?
         $words = array_unique(explode(' ', $this->searchText));
-        if (!$configureWords || !$words) {
-            return [$cond, $args];
+        if ($this->splitWords && !empty($words)) {
+            $args = array_merge($args, $words);
+            $cond = array_merge($cond,
+                array_fill(
+                    0, count($words),
+                    ($this->isBodySearch() ? "p.Body" : "t.Title") . " LIKE concat('%', ?, '%')"
+                )
+            );
         }
-        $args = array_merge($args, $words);
-        $cond = array_merge($cond,
-            array_fill(
-                0, count($words),
-                ($this->isBodySearch() ? "p.Body" : "t.Title") . " LIKE concat('%', ?, '%')"
-            )
-        );
-
         return [$cond, $args];
     }
 
@@ -246,7 +286,7 @@ class ForumSearch extends Base {
      * taking into account whether they are allowed to search in threads (permitted/forbidden)
      */
     public function threadTitle(int $threadId): ?string {
-        [$cond, $args] = $this->configure(false);
+        [$cond, $args] = $this->configure();
         $cond[] = 't.ID = ?';
         $args[] = $threadId;
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
@@ -265,7 +305,7 @@ class ForumSearch extends Base {
      * @param int number of rows
      */
     public function totalHits(): int {
-        [$cond, $args] = $this->configure();
+        [$cond, $args] = $this->setSplitWords(true)->configure();
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
         return $this->db->scalar("
             SELECT count(*)
@@ -281,7 +321,7 @@ class ForumSearch extends Base {
      * @param array a collection of results
      */
     public function results(array $pageLimit): array {
-        [$cond, $args] = $this->configure();
+        [$cond, $args] = $this->setSplitWords(true)->configure();
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
         [$this->page, $limit] = $pageLimit;
         if ($this->isBodySearch()) {
@@ -315,6 +355,72 @@ class ForumSearch extends Base {
         }
         $this->db->prepared_query($sql, ...$args);
         return $this->db->to_array(false, MYSQLI_NUM, false);
+    }
+
+    protected function configurePostHistory(): array {
+        [$cond, $args] = $this->configure();
+        $from = "FROM forums_posts AS p
+            LEFT JOIN forums_topics AS t ON (t.ID = p.TopicID)
+            LEFT JOIN forums AS f ON (f.ID = t.ForumID)";
+        $cond[] = 'p.AuthorID = ?';
+        $args[] = $this->user->id();
+        if ($this->showUnread) {
+            $from .= "LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)\n";
+            $cond[] = "(t.IsLocked = '0' OR t.IsSticky = '1') AND (flrt.PostID < t.LastPostID OR flrt.PostID IS NULL)";
+            array_unshift($args, $this->user->id());
+        }
+        return [$from, $cond, $args];
+    }
+
+    public function postHistoryTotal(): int {
+        [$from, $cond, $args] = $this->configurePostHistory();
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM (
+                SELECT count(1)
+                $from
+                WHERE
+                " . implode(' AND ', $cond) . "
+                GROUP BY t.ID
+            ) THREAD
+            ", ...$args
+        );
+    }
+
+    public function postHistoryPage(int $limit, int $offset): array {
+        [$from, $cond, $args] = $this->configurePostHistory();
+        $args[] = $limit;
+        $args[] = $offset;
+        if ($this->showUnread) {
+            $unreadFirst = 'flrt.PostID AS last_read,';
+            $unreadCond  = 'AND (coalesce(flrt.PostID, 0) < t.LastPostID)';
+        } else {
+            $unreadFirst = '';
+            $unreadCond  = '';
+        }
+        $this->db->prepared_query("
+            SELECT p.ID         AS post_id,
+                p.AddedTime     AS added_time,
+                p.Body          AS body,
+                p.EditedUserID  AS edited_user_id,
+                p.EditedTime    AS edited_time,
+                p.TopicID       AS thread_id,
+                t.Title         AS title,
+                t.IsLocked      AS is_locked,
+                t.IsSticky      AS is_sticky,
+                t.LastPostID    AS last_post_id, $unreadFirst
+                (NOT t.IsLocked OR t.IsSticky) $unreadCond
+                                AS new
+            $from
+            WHERE
+            " . implode(' AND ', $cond)
+              . ($this->showGrouped ? ' GROUP BY t.ID' : '')
+              . "
+            ORDER BY p.ID DESC
+            LIMIT ? OFFSET ?
+            ", ...$args
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     /**

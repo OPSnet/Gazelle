@@ -127,6 +127,13 @@ G::$Twig->addFilter(new Twig\TwigFilter(
 ));
 
 G::$Twig->addFilter(new Twig\TwigFilter(
+    'shorten',
+    function (string $text, int $length) {
+        return shortenString($text, $length);
+    }
+));
+
+G::$Twig->addFilter(new Twig\TwigFilter(
     'time_diff',
     function ($time) {
         return new Twig\Markup(time_diff($time), 'UTF-8');
@@ -192,6 +199,15 @@ G::$Twig->addFunction(new Twig\TwigFunction('ratio', function ($up, $down) {
         'UTF-8'
     );
 }));
+
+G::$Twig->addFunction(new Twig\TwigFunction('shorten', function ($text, $length) {
+    return new Twig\Markup(
+        shortenString($text, $length),
+        'UTF-8'
+    );
+}));
+
+$Debug->set_flag('Twig constructed');
 
 $Debug->set_flag('start user handling');
 
