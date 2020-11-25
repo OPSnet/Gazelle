@@ -133,7 +133,14 @@ switch ($_GET['action']) {
         require('similar_artists.php');
         break;
     case 'userhistory':
-        require('userhistory/index.php');
+        switch ($_GET['type'] ?? '') {
+            case 'posts':
+                require('userhistory/post_history.php');
+                break;
+            default:
+                json_die('bad type');
+                break;
+        }
         break;
     case 'votefavorite':
         require('takevote.php');

@@ -113,23 +113,23 @@ $Requests = Requests::get_requests($Requests);
 if (!$ShowUnread) {
 ?>
             <br /><br />
-            <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>&nbsp;&nbsp;&nbsp;
+            <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>&nbsp;
 <?php
 } else {
 ?>
             <br /><br />
-            <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>&nbsp;&nbsp;&nbsp;
+            <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>&nbsp;
 <?php
 }
 if ($NumResults) {
 ?>
-            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$ShowCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;&nbsp;&nbsp;
+            <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$ShowCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
 <?php
 }
 ?>
-            <a href="userhistory.php?action=catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>&nbsp;&nbsp;&nbsp;
-            <a href="userhistory.php?action=posts&amp;userid=<?=$LoggedUser['ID']?>" class="brackets">Go to post history</a>&nbsp;&nbsp;&nbsp;
+            <a href="userhistory.php?action=posts&amp;userid=<?=$LoggedUser['ID']?>" class="brackets">Go to post history</a>&nbsp;
             <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>&nbsp;&nbsp;&nbsp;
+            <a href="userhistory.php?action=catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>
         </div>
     </div>
 <?php
@@ -161,11 +161,12 @@ if (!$NumResults) {
             case 'requests':
                 if (isset($Requests[$Result['PageID']])) {
                     $Request = $Requests[$Result['PageID']];
-                    $CategoryName = $Categories[$CategoryID - 1];
+                    $CategoryName = $Categories[$Request['CategoryID'] - 1];
 
                     $Links = 'Request: ';
                     if ($CategoryName == 'Music' || $CategoryName == 'Audiobooks' || $CategoryName == 'Comedy') {
-                        $Links .= ($CategoryName == 'Music' ? Artists::display_artists(Requests::get_artists($Result['PageID'])) : '') . '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '" dir="ltr">' . $Request['Title'] . " [" . $Request['Year'] . "]</a>";
+                        $Links .= ($CategoryName == 'Music' ? Artists::display_artists(Requests::get_artists($Result['PageID'])) : '')
+                            . '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '" dir="ltr">' . $Request['Title'] . " [" . $Request['Year'] . "]</a>";
                     } else {
                         $Links .= '<a href="requests.php?action=view&amp;id=' . $Result['PageID'] . '">' . $Request['Title'] . "</a>";
                     }

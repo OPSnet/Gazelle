@@ -1,0 +1,97 @@
+<div class="thin">
+    <div class="header">
+        <h2><a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; {{ title }}</h2>
+        <div class="linkbox">
+            <br /><br />
+{% if not own_profile %}
+            <a href="forums.php?action=search&amp;type=body&amp;user={{ user.username }}" class="brackets">Search</a>
+{% else %}
+{%  if not show_unread %}
+{%    if show_grouped %}
+            <a href="{{ url_stem|raw }}showunread=0&amp;group=0" class="brackets">Show all posts</a>&nbsp;
+{%    else %}
+            <a href="{{ url_stem|raw }}showunread=0&amp;group=1" class="brackets">Show all posts (grouped)</a>&nbsp;
+{%    endif %}
+            <a href="{{ url_stem|raw }}showunread=1&amp;group=1" class="brackets">Only display posts with unread replies (grouped)</a>&nbsp;
+{%  else %}
+            <a href="{{ url_stem|raw }}showunread=0&amp;group=0" class="brackets">Show all posts</a>&nbsp;
+{%    if not show_grouped %}
+            <a href="{{ url_stem|raw }}showunread=1&amp;group=1" class="brackets">Only display posts with unread replies (grouped)</a>&nbsp;
+{%    else %}
+            <a href="{{ url_stem|raw }}showunread=1&amp;group=0" class="brackets">Only display posts with unread replies</a>&nbsp;
+{%    endif %}
+{%  endif %}
+            <a href="userhistory.php?action=subscriptions" class="brackets">Go to subscriptions</a>
+{% endif %}
+        </div>
+    </div>
+{% if not posts %}
+    <div class="center">
+        No topics{% if show_unread %} with unread posts{% endif %}
+    </div>
+{% else %}
+    {{ paginator.linkbox|raw }}
+    {% for p in posts %}
+    <table class="forum_post vertical_margin{% if show_avatar %} noavatar{% endif %}" id="post<?=$PostID ?>">
+        <colgroup>
+        {% if show_avatar %}
+            <col class="col_avatar" />
+        {% endif %}
+            <col class="col_post_body" />
+        </colgroup>
+        <tr class="colhead_dark">
+            <td colspan="{% if show_avatar %}2{% else %}1{% endif %}">
+                <span style="float: left;">
+                    {{ p.added_time|time_diff }}
+                    in <a href="forums.php?action=viewthread&amp;threadid={{ p.thread_id }}&amp;postid={{ p.post_id
+                        }}#post{{ p.post_id }}" class="tooltip" title="{{ p.title }}">{{ p.title|shorten(75) }}</a>
+        {% if not own_profile %}
+                </span>
+        {% else %}
+            {% if p.new %}
+                    <span class="new">(New!)</span>
+            {% endif %}
+                </span>
+            {% if p.last_read %}
+                <span style="float: left;" class="tooltip last_read" title="Jump to last read">
+                    <a href="forums.php?action=viewthread&amp;threadid={{ p.thread_id }}&amp;postid={{ p.last_read }}#post{{ p.last_read }}"></a>
+                </span>
+            {% endif %}
+        {% endif %}
+                <span id="bar<?=$PostID ?>" style="float: right;">
+        {% if own_profile and not p.thread_id in subscriptions %}
+                    <a href="#" onclick="Subscribe({{ p.thread_id }}); $('.subscribelink{{ p.thread_id }}').remove(); return false;" class="brackets subscribelink{{ p.thread_id }}">Subscribe</a>
+                    &nbsp;
+        {% endif %}
+                    <a href="#">&uarr;</a>
+                </span>
+            </td>
+        </tr>
+        {% if not show_grouped %}
+        <tr>
+            {% if show_avatars %}
+            <td class="avatar" valign="top">
+                Users::show_avatar($UserInfo['Avatar'], $UserID, $UserInfo['Username'], $HeavyInfo['DisableAvatars'])
+            </td>
+            {% endif %}
+            <td class="body" valign="top">
+                <div id="content{{ p.post_id }}">
+                    {{ p.body|bb_format }}
+            {%- if p.edited_user_id -%}
+                    <br /><br />
+                    <span class="last_edited">
+                {%- if is_fmod -%}
+                    <a href="#content{{ p.post_id }}" onclick="LoadEdit({{ p.post_id }}, 1);">&laquo;</a>
+                {%- endif %}
+                    Last edited by {{ p.edited_user_id|user_url }} {{ p.edited_time|time_diff }}
+                    </span>
+            {%- endif %}
+                </div>
+            </td>
+        </tr>
+        {% endif %}
+    </table>
+    {% endfor %}
+    {{ paginator.linkbox|raw }}
+{% endif %}
+</div>
