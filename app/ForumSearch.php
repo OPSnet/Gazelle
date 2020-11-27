@@ -245,7 +245,7 @@ class ForumSearch extends Base {
      * Get the title of the thread within which the user is searching,
      * taking into account whether they are allowed to search in threads (permitted/forbidden)
      */
-    public function threadTitle(int $threadId): string {
+    public function threadTitle(int $threadId): ?string {
         [$cond, $args] = $this->configure(false);
         $cond[] = 't.ID = ?';
         $args[] = $threadId;
