@@ -15,8 +15,9 @@ if ($_POST['submit'] == 'Delete') { //Delete
     $DB->prepared_query('DELETE FROM irc_channels WHERE ID = ?', $ID);
 }
 else { //Edit & Create, Shared Validation
-    $Val->SetFields('name', '1', 'regex', "The name must be set, has a max length of 50 characters, 
-    start with '&', '#', '+' or '!', and not contain any spaces or commas", ['regex' => '/^[&|#|\+|\!][^, ]+$/i', 'maxlength' => 50, 'minlength' => 2]);
+    $Val = new Validate;
+    $Val->SetFields('name', '1', 'regex', "The name must be set, has a max length of 50 characters, start with '&', '#', '+' or '!', and not contain any spaces or commas",
+        ['regex' => '/^[&|#|\+|\!][^, ]+$/i', 'maxlength' => 50, 'minlength' => 2]);
     $Val->SetFields('sort', '1', 'number', 'Sort must be set');
     $Val->SetFields('min_level', '1', 'number', 'MinLevel must be set');
     $Err = $Val->ValidateForm($_POST); // Validate the form
@@ -42,5 +43,4 @@ else { //Edit & Create, Shared Validation
 
 $Cache->delete_value('irc_channels'); // Clear cache
 
-// Go back
 header('Location: tools.php?action=irc');

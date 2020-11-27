@@ -16,6 +16,7 @@ if ($_POST['submit'] == 'Delete') {
         DELETE FROM staff_groups
         WHERE ID = ?", $_POST['id']);
 } else {
+    $Val = new Validate;
     $Val->SetFields('sort', '1', 'number', 'Sort must be set');
     $Val->SetFields('name', '1', 'string', 'Name must be set, and has a max length of 50 characters', ['maxlength' => 50, 'minlength' => 1]);
     $Err = $Val->ValidateForm($_POST);
@@ -39,5 +40,3 @@ if ($_POST['submit'] == 'Delete') {
 $Cache->delete_value('staff');
 
 header('Location: tools.php?action=staff_groups');
-
-?>

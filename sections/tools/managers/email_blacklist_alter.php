@@ -15,6 +15,7 @@ if ($_POST['submit'] === 'Delete') { // Delete
         ", (int)$_POST['id']
     );
 } else { // Edit & Create, Shared Validation
+    $Val = new Validate;
     $Val->SetFields('email', '1', 'string', 'The email must be set', ['minlength'=>1]);
     $Val->SetFields('comment', '0', 'string', 'The description has a max length of 255 characters', ['maxlength'=>255]);
     $Err = $Val->ValidateForm($_POST);

@@ -14,6 +14,7 @@ if (isset($_POST['submit'])) {
         }
         $IPv4Man->removeBan($id);
     } else { //Edit & Create, Shared Validation
+        $Val = new Validate;
         $Val->SetFields('start', '1','regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
         $Val->SetFields('end', '1','regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
         $Val->SetFields('notes', '1','string','You must include the reason for the ban.');

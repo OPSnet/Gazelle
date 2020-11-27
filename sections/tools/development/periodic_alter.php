@@ -15,6 +15,7 @@ if ($p['submit'] == 'Delete') {
 
     $scheduler->deleteTask($p['id']);
 } else {
+    $Val = new Validate;
     $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 64 characters', ['maxlength' => 64]);
     $Val->SetFields('classname', '1', 'string', 'The class name must be set, and has a max length of 32 characters', ['maxlength' => 32]);
     $Val->SetFields('description', '1', 'string', 'The description must be set, and has a max length of 255 characters', ['maxlength' => 255]);
@@ -49,4 +50,3 @@ if ($p['submit'] == 'Delete') {
 }
 
 header('Location: tools.php?action=periodic&mode=edit');
-?>

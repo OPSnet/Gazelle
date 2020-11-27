@@ -18,6 +18,7 @@ if ($_POST['submit'] == 'Delete') { //Delete
     }
 
 } else { //Edit & Create, Shared Validation
+    $Val = new Validate;
     $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40, 'minlength' => 1]);
     $Val->SetFields('sort', '1', 'number', 'Sort must be set');
     $Err = $Val->ValidateForm($_POST); // Validate the form
@@ -47,5 +48,4 @@ if ($_POST['submit'] == 'Delete') { //Delete
 
 $Cache->delete_value('forums_categories'); // Clear cache
 
-// Go back
 header('Location: tools.php?action=categories');

@@ -5,6 +5,7 @@ if (!check_perms('admin_manage_permissions')) {
 
 $id = $_REQUEST['id'] ?? null;
 if ($id) {
+    $Val = new Validate;
     $Val->SetFields('name', true, 'string', 'You did not enter a valid name for this permission set.');
     $Val->SetFields('level', true, 'number', 'You did not enter a valid level for this permission set.');
 
@@ -114,7 +115,7 @@ if ($id) {
         $Cache->deleteMulti(['classes', 'staff']);
     }
 
-    require(__DIR__ . '/permissions_edit.php');
+    require_once('permissions_edit.php');
 } else {
     $id = $_REQUEST['removeid'] ?? null;
     if ($id) {
@@ -145,5 +146,5 @@ if ($id) {
         $Cache->delete_value('classes');
     }
 
-    require(__DIR__ . '/permissions_list.php');
+    require_once('permissions_list.php');
 }
