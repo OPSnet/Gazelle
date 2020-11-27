@@ -502,12 +502,18 @@ class TORRENT_FORM {
                 </td>
                 <td id="logfields">
                     Check your log files before uploading <a href="logchecker.php" target="_blank">here</a>. For multi-disc releases, click the "<span class="brackets">+</span>" button to add multiple log files.<br />
-                    <input id="logfile_1" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" /> 
+                    <input id="logfile_1" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" />
                 </td>
+            </tr>
+<?php   if ($this->NewTorrent) { ?>
+
+            <tr>
+                <td class="label">Multi-format uploader:</td>
+                <td><input type="button" value="+" id="add_format" />&nbsp;<input type="button" style="display: none;" value="-" id="remove_format" /></td>
             </tr>
             <tr id="placeholder_row_top"></tr>
             <tr id="extra_format_placeholder"></tr>
-
+<?php   } ?>
 <?php   if (!$this->NewTorrent && check_perms('users_mod')) { ?>
             <tr>
                 <td class="label">Log/cue:</td>
