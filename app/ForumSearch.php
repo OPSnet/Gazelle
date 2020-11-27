@@ -17,7 +17,7 @@ class ForumSearch extends Base {
     protected $threadTitleSearch = true;
     protected $searchText = '';
     protected $authorName = '';
-    protected $authorId = '';
+    protected $authorId = 0;
     protected $page = 0;
     protected $threadId;
     protected $linkbox;
@@ -84,7 +84,9 @@ class ForumSearch extends Base {
                 ", $this->authorName
             );
         }
-        return $this;
+        return $this->isBodySearch()
+            ? $this->setPostCond('p.AuthorID = ?', $this->authorId)
+            : $this->setThreadCond('t.AuthorID = ?', $this->authorId);
     }
 
     /**
@@ -235,6 +237,7 @@ class ForumSearch extends Base {
                 ($this->isBodySearch() ? "p.Body" : "t.Title") . " LIKE concat('%', ?, '%')"
             )
         );
+
         return [$cond, $args];
     }
 

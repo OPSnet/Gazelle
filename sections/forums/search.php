@@ -2,8 +2,12 @@
 
 $search = new Gazelle\ForumSearch(new Gazelle\User($LoggedUser['ID']));
 $search->setSearchType($_GET['type'] ?? 'title')
-    ->setSearchText(trim($_GET['search']) ?? '')
-    ->setAuthor($_GET['user'] ?? '');
+    ->setSearchText(trim($_GET['search']) ?? '');
+
+$userSearch = trim($_GET['user'] ?? '');
+if (!empty($userSearch)) {
+    $search->setAuthor($userSearch);
+}
 
 // Searching for posts in a specific thread
 $ThreadID = (int)($_GET['threadid'] ?? 0);
