@@ -6,6 +6,7 @@ if (!check_perms('users_mod')) {
 
 // validation functions
 $tagSpecs = ['maxlength'=>'100', 'minlength'=>'2'];
+$Val = new Validate;
 $Val->SetFields('tag',     true, 'string', 'Enter a single tag to change.', $tagSpecs);
 $Val->SetFields('replace', true, 'string', 'Enter a single replacement name.', $tagSpecs);
 
@@ -128,5 +129,4 @@ if (!$failure && $success && $_GET['list']) {
 ?>
 </div>
 <?php
-
 View::show_footer();

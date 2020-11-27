@@ -17,6 +17,7 @@ if ($_POST['submit'] == 'Delete') {
 
     $DB->prepared_query("DELETE FROM nav_items WHERE id = ?", $P['id']);
 } else {
+    $Val = new Validate;
     $Val->SetFields('tag', '1', 'string', 'The key must be set, and has a max length of 20 characters', ['maxlength' => 20]);
     $Val->SetFields('title', '1', 'string', 'The title must be set, and has a max length of 50 characters', ['maxlength' => 50]);
     $Val->SetFields('target', '1', 'string', 'The target must be set, and has a max length of 200 characters', ['maxlength' => 200]);
@@ -61,4 +62,3 @@ if ($_POST['submit'] == 'Delete') {
 
 $Cache->delete_value('nav_items');
 header('Location: tools.php?action=navigation');
-?>

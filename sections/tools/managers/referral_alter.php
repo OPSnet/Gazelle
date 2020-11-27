@@ -14,6 +14,7 @@ if ($_POST['submit'] == 'Delete') {
     }
     $ReferralManager->deleteAccount($id);
 } else {
+    $Val = new Validate;
     $Val->SetFields('site', '1', 'string', 'The site must be set, and has a max length of 30 characters', ['maxlength' => 30]);
     $Val->SetFields('url', '1', 'string', 'The URL must be set, and has a max length of 30 characters', ['maxlength' => 30]);
     $Val->SetFields('user', '1', 'string', 'The username must be set, and has a max length of 20 characters', ['maxlength' => 20]);

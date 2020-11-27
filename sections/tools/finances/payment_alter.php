@@ -10,6 +10,7 @@ if ($_POST['submit'] == 'Delete') {
     }
     $Payment->remove($_POST['id']);
 } else {
+    $Val = new Validate;
     $Val->SetFields('text', '1', 'string', 'The payment text must be set, and has a max length of 100 characters', ['maxlength' => 100]);
     $Val->SetFields('rent', '1', 'number', 'Rent must be zero or positive)', ['min' => 0, 'allowperiod' => true]);
     $Val->SetFields('cc', '1', 'regex', 'The currency code must follow the ISO-4217 standard', ['regex' => '/^(XBT|EUR|USD)$/']);
@@ -17,8 +18,8 @@ if ($_POST['submit'] == 'Delete') {
     $Err = $Val->ValidateForm($_POST);
 
     if ($Err) {
-        require(__DIR__ . '/payment_list.php');
-        die();
+        require_once('payment_list.php');
+        exit;
     }
     $values = [
         'text'   => trim($_POST['text']),

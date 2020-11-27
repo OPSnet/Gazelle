@@ -16,6 +16,7 @@ if ($_POST['submit'] == 'Delete') {
         error(403);
     }
 
+    $Val = new Validate;
     $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40, 'minlength' => 1]);
     $Val->SetFields('description', '0', 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]);
     $Val->SetFields('sort', '1', 'number', 'Sort must be set');

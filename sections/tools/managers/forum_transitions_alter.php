@@ -17,6 +17,7 @@ if ($_POST['submit'] === 'Delete') {
 
     $DB->prepared_query("DELETE FROM forums_transitions WHERE forums_transitions_id = ?", $P['id']);
 } else {
+    $Val = new Validate;
     $Val->SetFields('source', true, 'number', 'You must set a source forum ID for the transition');
     $Val->SetFields('destination', true, 'number', 'You must set a destination forum ID for the transition');
     $Val->SetFields('label', true, 'string', 'The button label must be set, and has a max length of 20 characters', ['maxlength' => 20]);
