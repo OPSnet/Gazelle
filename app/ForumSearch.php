@@ -253,7 +253,7 @@ class ForumSearch extends Base {
         return $this->db->scalar("
             SELECT Title
             FROM forums_topics AS t
-            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            INNER JOIN forums AS f ON (f.ID = t.ForumID) $forumPostJoin
             WHERE " . implode(' AND ', $cond), ...$args
         );
     }
