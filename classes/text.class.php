@@ -33,6 +33,7 @@ class Text {
         'inlineurl'  => 0,
         'mature'     => 1,
         'n'          => 0,
+        'pad'        => 1,
         'pl'         => 1,
         'plain'      => 0,
         'pre'        => 1,
@@ -570,6 +571,9 @@ class Text {
                 case 'box':
                     $Array[$ArrayPos] = ['Type'=>'box', 'Val'=>self::parse($Block)];
                     break;
+                case 'pad':
+                    $Array[$ArrayPos] = ['Type'=>'pad', 'Attr'=>$Attrib, 'Val'=>self::parse($Block)];
+                    break;
                 case 'img':
                 case 'image':
                     if (empty($Block)) {
@@ -933,6 +937,20 @@ class Text {
                 case 'box':
                     $Str .= '<div class="box pad" style="padding: 10px 10px 10px 20px">'.self::to_html($Block['Val'], $Rules).'</div>';
                     break;
+                case 'pad':
+                    $Attr = array_filter(explode('|',$Block['Attr'] ?? ''), function($x) {
+                        return is_numeric($x) && (float)$x >= 0;
+                    });
+                    if (count($Attr) === 0) {
+                        $Str .= self::to_html($Block['Val'], $Rules);
+                    } else {
+                        $Padding = implode(
+                            " ",
+                            array_map(function ($x) { return $x . "px"; }, $Attr)
+                        );
+                        $Str .= "<span style='display: inline-block; padding: {$Padding}'>" . self::to_html($Block['Val'], $Rules).'</span>';
+                    }
+                    break;
                 case 'spoiler':
                 case 'hide':
                     $Str .= '<strong>'.(($Block['Attr']) ? $Block['Attr'] : 'Hidden text').'</strong>: <a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a>';
@@ -1071,7 +1089,7 @@ class Text {
                 case 'size':
                 case 'quote':
                 case 'align':
-
+                case 'pad':
                     $Str .= self::raw_text($Block['Val']);
                     break;
                 case 'tex': //since this will never strip cleanly, just remove it
@@ -1224,6 +1242,15 @@ class Text {
                 $NewElement->setAttribute('color', str_replace(['color: ', ';'], '', $Element->getAttribute('style')));
                 $Element->parentNode->replaceChild($NewElement, $Element);
             }
+            elseif (preg_match("/display:[ ]*inline\-block;[ ]*padding:/", $Element->getAttribute('style')) !== false) {
+                $NewElement = $Document->createElement('pad');
+                $CopyNode($Element, $NewElement);
+                $Padding = explode(' ', trim(explode(':', (explode(';', $Element->getAttribute('style'))[1])[1])));
+                $NewElement->setAttribute('pad', implode('|', array_map(function($x) {
+                    return rtrim($x, 'px');
+                }, $Padding)));
+                $Element->parentNode->replaceChild($NewElement, $Element);
+            }
         }
 
         $Elements = $Document->getElementsByTagName('ul');
@@ -1316,6 +1343,8 @@ class Text {
         $Str = preg_replace("/\<(\/*)pre\>/", "[\\1pre]", $Str);
         $Str = preg_replace("/\<color color=\"(.*?)\"\>/", "[color=\\1]", $Str);
         $Str = str_replace("</color>", "[/color]", $Str);
+        $Str = preg_replace("/\<pad pad=\"(.*?)\"\>/", "[pad=\\1]", $Str);
+        $Str = str_replace("</pad>", "[/pad]", $Str);
         $Str = str_replace(['<number>', '<bullet>'], ['[#]', '[*]'], $Str);
         $Str = str_replace(['</number>', '</bullet>'], '<br />', $Str);
         $Str = str_replace(['<ul class="postlist">', '<ol class="postlist">', '</ul>', '</ol>'], '', $Str);
