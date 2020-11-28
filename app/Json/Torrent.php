@@ -86,7 +86,7 @@ class Torrent extends \Gazelle\Json {
                 'recordLabel'     => $details['RecordLabel'] ?? '',
                 'catalogueNumber' => $details['CatalogueNumber'] ?? '',
                 'releaseType'     => $details['ReleaseType'] ?? '',
-                'releaseTypeName' => (new Gazelle\ReleaseType)->findNameById($details['ReleaseType']),
+                'releaseTypeName' => (new \Gazelle\ReleaseType)->findNameById($details['ReleaseType']),
                 'categoryId'      => $details['CategoryID'],
                 'categoryName'    => $categoryName,
                 'time'            => $details['Time'],
