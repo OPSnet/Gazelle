@@ -1,58 +1,42 @@
 <?php
 
-function getClassObject($name, $twig, $config) {
-    $name = "Gazelle\\API\\".str_replace("_", "", ucwords($name, "_"));
-    return new $name($twig, $config);
-}
-
-$available = [
-    'generate_invite',
-    'user',
-    'wiki',
-    'forum',
-    'request',
-    'artist',
-    'collage',
-    'torrent'
-];
-
-if (!in_array($_GET['action'], $available)) {
+$className = "Gazelle\\API\\" . str_replace("_", "", ucwords($_GET['action'], "_"));
+if (!class_exists($className)) {
     json_error('invalid action');
-} else {
-    $config = [
-        'Categories' => $Categories,
-        'CollageCats' => $CollageCats,
- 	        'ReleaseTypes' => (new \Gazelle\ReleaseType)->list(),
-        'Debug' => $Debug
-    ];
-    $class = getClassObject($_GET['action'], $Twig, $config);
 }
-
 if (empty($_GET['aid']) || empty($_GET['token'])) {
     json_error('invalid parameters');
 }
 
-$app_id = intval($_GET['aid']);
-$token = $_GET['token'];
+$api = new $className($Twig, [
+    'Categories' => $Categories,
+    'CollageCats' => $CollageCats,
+    'ReleaseTypes' => (new \Gazelle\ReleaseType)->list(),
+    'Debug' => $Debug,
+]);
 
-$app = $Cache->get_value("api_apps_{$app_id}");
+$appId = (int)$_GET['aid'];
+$token = $_GET['token'];
+$key = "api_applications_{$appId}";
+
+$app = $Cache->get_value($key);
 if (!is_array($app)) {
-    $DB->prepared_query("
+    $app = $DB->rowAssoc("
         SELECT Token, Name
         FROM api_applications
         WHERE ID = ?
-        LIMIT 1", $app_id);
-    if ($DB->record_count() === 0) {
+        LIMIT 1
+        ", $appId
+    );
+    if (is_null($app)) {
         json_error('invalid app');
     }
-    $app = $DB->to_array(false, MYSQLI_ASSOC);
-    $Cache->cache_value("api_apps_{$app_id}", $app, 0);
+    $Cache->cache_value($key, $app, 0);
 }
-$app = $app[0];
 
 if ($app['Token'] !== $token) {
     json_error('invalid token');
 }
 
-$response = $class->run();
+$response = $api->run();
 print(json_encode(['status' => 200, 'response' => $response], JSON_UNESCAPED_SLASHES));
