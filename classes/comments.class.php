@@ -224,7 +224,7 @@ class Comments {
             SELECT Page, PageID FROM comments WHERE ID = ?
             ", $PostID
         );
-        if (!PageID) {
+        if (!$PageID) {
             error(404);
         }
         return self::get_url($Page, $PageID, $PostID);
@@ -291,7 +291,7 @@ class Comments {
                 WHERE c.Page = ? AND c.PageID = ?
                 ORDER BY c.ID
                 LIMIT ? OFFSET ?
-                ", $Page, $PageID, $CatalogueID * THREAD_CATALOGUE, THREAD_CATALOGUE
+                ", $Page, $PageID, THREAD_CATALOGUE, $CatalogueID * THREAD_CATALOGUE
             );
             $Catalogue = G::$DB->to_array(false, MYSQLI_ASSOC);
             G::$Cache->cache_value($Page.'_comments_'.$PageID.'_catalogue_'.$CatalogueID, $Catalogue, 0);
@@ -446,7 +446,7 @@ class Comments {
             FROM comments
             WHERE Page = ? AND PageID = ?
             GROUP BY PageID
-            ", TORRENT_COMMENTS_PER_PAGE, $Page, $TargetPageID
+            ", TORRENT_COMMENTS_PER_PAGE, $Page, $PageID
         );
         if (!$CommPages) {
             return false;
