@@ -10,7 +10,7 @@ return
     ],
     'environments' => [
         'default_migration_table' => 'phinxlog',
-        'default_database' => 'gazelle',
+        'default_environment' => 'gazelle',
         'gazelle' => [
             'adapter' => 'mysql',
             'host' => SQLHOST,
