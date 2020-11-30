@@ -115,7 +115,7 @@ if ($id) {
         $Cache->deleteMulti(['classes', 'staff']);
     }
 
-    require_omce('permissions_edit.php');
+    require_once('permissions_edit.php');
 } else {
     $id = $_REQUEST['removeid'] ?? null;
     if ($id) {
