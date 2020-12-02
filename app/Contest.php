@@ -248,13 +248,26 @@ class Contest extends Base {
         $contestBonus     = $this->bonusPerContest();
         $perEntryBonus    = $this->bonusPerEntry();
 
-        $participants = $this->type->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
-        $bonus = new Bonus;
         $report = fopen(TMPDIR . "/payout-contest-" . $this->id . ".txt", 'a');
+        fprintf($report, "# user=%0.2f contest=%0.2f entry=%0.f\n", $enabledUserBonus, $contestBonus, $perEntryBonus);
+
+        $bonus = new Bonus;
+        $participants = $this->type->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
         foreach ($participants as $p) {
+            $user = new Gazelle\User($p['ID']);
             $totalGain = $enabledUserBonus;
             if ($p['nr_entries']) {
                 $totalGain += $contestBonus + ($perEntryBonus * $p['nr_entries']);
+            }
+            $log = date('Y-m-d H:i:s') ." {$p['Username']} ({$p['ID']}) n={$p['nr_entries']} t={$totalGain}";
+            if ($user->hasAttr('no-fl-gifts')) {
+                fwrite($report, "$log DECLINED\n");
+                continue;
+            }
+            fwrite($report, "$log DISTRIBUTED\n");
+            fflush($report);
+            if (TEST_CONTEST_PAYOUT) {
+                continue;
             }
             \Misc::send_pm(
                 $p['ID'],
@@ -279,8 +292,6 @@ class Contest extends Base {
                 ", number_format($totalGain, 2) . " BP added for {$p['nr_entries']} entries in {$this->info['name']}\n\n",
                     $p['ID']
             );
-            fwrite($report, sqltime() . " {$p['Username']} ({$p['ID']}) n={$p['nr_entries']} t={$totalGain}\n");
-            fflush($report);
         }
         fclose($report);
         return count($participants);
