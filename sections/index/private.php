@@ -237,7 +237,7 @@ if ($contest) {
                 <img src="<?= $contest->banner()?>" alt="<?= $contest->name() ?>" title="<?= $contest->name() ?>" />
             </a>
 <?php   } ?>
-            <h5>The <a href="/contest.php?action=leaderboard"><?= $contest->name() ?></a> ends in <?= time_diff($contest->dateEnd()) ?></h5>
+            <h5>The <a href="/contest.php?action=leaderboard"><?= $contest->name() ?></a> <?= strtotime($contest->dateEnd()) >= time() ? 'ends in' : 'ended' ?> <?= time_diff($contest->dateEnd()) ?></h5>
         </div>
 <?php } ?>
         <div id="last_uploads" class="box news_post">

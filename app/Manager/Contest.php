@@ -45,6 +45,7 @@ class Contest extends \Gazelle\Base {
             SELECT contest_id
             FROM contest c
             WHERE c.date_end = (SELECT max(date_end) FROM contest)
+                AND c.date_end > now() - INTERVAL 2 WEEK
         ");
         return $current ? new \Gazelle\Contest($current) : null;
     }
