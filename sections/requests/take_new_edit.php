@@ -101,7 +101,7 @@ if (empty($_POST['artists'])) {
     $Importance = $_POST['importance'];
 }
 
-if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->exists($_POST['releasetype'])) {
+if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
     $Err = 'Please pick a release type';
 }
 $ReleaseType = $_POST['releasetype'];
