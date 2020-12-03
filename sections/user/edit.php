@@ -469,7 +469,7 @@ echo $Val->GenerateJS('userform');
                 <td class="label tooltip" title="If unchecked, other members will not have the option to gift you FL tokens."><strong>FL Tokens</strong></td>
                 <td>
                     <input type="checkbox" name="acceptfltoken" id="acceptfltoken"<?= $AcceptFL ? ' checked="checked"' : ''?> />
-                    <label for="Accept FL Tokens">Accept FL Tokens from members</label>
+                    <label for="acceptfltoken">Accept FL Tokens from members (and decline global BP handouts)</label>
                 </td>
             </tr>
         </table>
