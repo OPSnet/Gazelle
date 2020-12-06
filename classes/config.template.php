@@ -268,26 +268,6 @@ $CollageCats = [
 ];
 define('COLLAGE_ARTISTS_ID', 7);
 
-$ReleaseTypes = [
-    1  => 'Album',
-    3  => 'Soundtrack',
-    5  => 'EP',
-    6  => 'Anthology',
-    7  => 'Compilation',
-    8  => 'Sampler',
-    9  => 'Single',
-    10 => 'Demo',
-    11 => 'Live album',
-    12 => 'Split',
-    13 => 'Remix',
-    14 => 'Bootleg',
-    15 => 'Interview',
-    16 => 'Mixtape',
-    17 => 'DJ Mix',
-    18 => 'Concert recording',
-    21 => 'Unknown',
-];
-
 $ZIPGroups = [
     0 => 'MP3 (VBR) - High Quality',
     1 => 'MP3 (VBR) - Low Quality',
