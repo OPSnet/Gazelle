@@ -647,22 +647,11 @@ class User extends BaseObject {
         );
     }
 
-    /**
-     * toggle Unlimited Download setting
-     */
-    public function toggleUnlimitedDownload(bool $flag): bool {
-        $this->db->prepared_query('
-            SELECT ua.ID
-            FROM user_has_attr uha
-            INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID)
-            WHERE uha.UserID = ?
-                AND ua.Name = ?
-            ', $this->id, 'unlimited-download'
-        );
-        $found = $this->db->has_results();
+    protected function toggleAttr(string $attr, bool $flag): bool {
+        $attrId = $this->hasAttr($attr);
+        $found = !is_null($attrId);
         $toggled = false;
         if (!$flag && $found) {
-            [$attrId] = $this->db->next_record();
             $this->db->prepared_query('
                 DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
                 ', $this->id, $attrId
@@ -673,11 +662,35 @@ class User extends BaseObject {
             $this->db->prepared_query('
                 INSERT INTO user_has_attr (UserID, UserAttrID)
                     SELECT ?, ID FROM user_attr WHERE Name = ?
-                ', $this->id, 'unlimited-download'
+                ', $this->id, $attr
             );
             $toggled = $this->db->affected_rows() === 1;
         }
         return $toggled;
+    }
+
+    /**
+     * toggle Unlimited Download setting
+     */
+    public function toggleUnlimitedDownload(bool $flag): bool {
+        return $this->toggleAttr('unlimited-download', $flag);
+    }
+
+    public function hasUnlimitedDownload(): bool {
+        return $this->hasAttr('unlimited-download');
+    }
+
+    /**
+     * toggle Accept FL token setting
+     * If user accepts FL tokens and the refusal attribute is found, delete it.
+     * If user refuses FL tokens and the attribute is not found, insert it.
+     */
+    public function toggleAcceptFL($flag): bool {
+        return $this->toggleAttr('no-fl-gifts', !$flag);
+    }
+
+    public function hasAcceptFL(): bool {
+        return !$this->hasAttr('no-fl-gifts');
     }
 
     public function updateCatchup(): bool {
@@ -1404,14 +1417,7 @@ class User extends BaseObject {
     }
 
     public function downloadSnatchFactor() {
-        $this->db->prepared_query('
-            SELECT 1
-            FROM user_has_attr AS uhaud
-            INNER JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
-            WHERE uhaud.UserID = ?
-            ', 'unlimited-download', $this->id
-        );
-        if ($this->db->has_results()) {
+        if ($this->hasAttr('unlimited-download')) {
             // they are whitelisted, let them through
             return 0.0;
         }
@@ -1436,6 +1442,39 @@ class User extends BaseObject {
             $stats = $this->cache->cache_value('user_rlim_' . $this->id, $stats, 3600);
         }
         return (1 + $stats['download']) / (1 + $stats['snatch']);
+    }
+
+    /**
+     * Generates a check list of release types, ordered by the user or default
+     * @param array $option
+     * @param array $releaseType
+     */
+    public function releaseOrder(array $options, array $releaseType) {
+        if (empty($options['SortHide'])) {
+            $sort = $releaseType;
+            $defaults = !empty($option['HideTypes']);
+        } else {
+            $sort = $options['SortHide'];
+            $missingTypes = array_diff_key($releaseType, $sort);
+            foreach (array_keys($missingTypes) as $missing) {
+                $sort[$missing] = 0;
+            }
+        }
+
+        $x = [];
+        foreach ($sort as $key => $val) {
+            if (isset($defaults)) {
+                $checked = $defaults && isset($option['HideTypes'][$key]);
+            } else {
+                if (!isset($releaseType[$key])) {
+                    continue;
+                }
+                $checked = $val;
+                $val = $releaseType[$key];
+            }
+            $x[] = ['id' => $key. '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
+        }
+        return $x;
     }
 
     /**

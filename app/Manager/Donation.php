@@ -445,29 +445,30 @@ class Donation extends \Gazelle\Base {
         return $Results;
     }
 
-    public function updateReward($UserID) {
-        // TODO: could this be rewritten to avoid accessing $_POST directly?
+    public function updateReward($UserID, array $field) {
         $Rank = $this->rank($UserID);
         $SpecialRank = $this->specialRank($UserID);
-        $HasAll = $SpecialRank == 3;
+        $HasAll = ($SpecialRank === 3);
         $insert = [];
         $args = [];
 
+        $QueryID = $this->db->get_query_id();
+
         if ($Rank >= 2 || $HasAll) {
-            if (isset($_POST['donor_icon_mouse_over_text'])) {
+            if (isset($field['donor_icon_mouse_over_text'])) {
                 $insert[] = "IconMouseOverText";
-                $args[] = trim($_POST['donor_icon_mouse_over_text']);
+                $args[] = $field['donor_icon_mouse_over_text'];
             }
         }
         if ($Rank >= 3 || $HasAll) {
-            if (isset($_POST['avatar_mouse_over_text'])) {
+            if (isset($field['avatar_mouse_over_text'])) {
                 $insert[] = "AvatarMouseOverText";
-                $args[] = trim($_POST['avatar_mouse_over_text']);
+                $args[] = $field['avatar_mouse_over_text'];
             }
         }
         if ($Rank >= 4 || $HasAll) {
-            if (isset($_POST['donor_icon_link'])) {
-                $value = trim($_POST['donor_icon_link']);
+            if (isset($field['donor_icon_link'])) {
+                $value = $field['donor_icon_link'];
                 if (preg_match("/^".URL_REGEX."$/i", $value)) {
                     $insert[] = "CustomIconLink";
                     $args[] = $value;
@@ -475,27 +476,37 @@ class Donation extends \Gazelle\Base {
             }
         }
         if ($Rank >= MAX_RANK || $HasAll) {
-            if (isset($_POST['donor_icon_custom_url'])) {
-                $value = trim($_POST['donor_icon_custom_url']);
+            if (isset($field['donor_icon_custom_url'])) {
+                $value = $field['donor_icon_custom_url'];
                 if (preg_match("/^".IMAGE_REGEX."$/i", $value)) {
                     $insert[] = "CustomIcon";
                     $args[] = $value;
                 }
             }
-            $this->updateTitle($UserID, $_POST['donor_title_prefix'], $_POST['donor_title_suffix'], !empty($_POST['donor_title_comma']));
+            $comma = empty($field['donor_title_comma']) ? 0 : 1;
+            $this->db->prepared_query('
+                INSERT INTO donor_forum_usernames
+                       (UserID, Prefix, Suffix, UseComma)
+                VALUES (?,      ?,      ?,      ?)
+                ON DUPLICATE KEY UPDATE
+                    Prefix = ?, Suffix = ?, UseComma = ?
+                ', $UserID, $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
+                    $field['donor_title_prefix'], $field['donor_title_suffix'], $comma,
+            );
+            $this->cache->delete_value("donor_title_$UserID");
         }
 
         for ($i = 1; $i < min(MAX_RANK, $Rank); $i++) {
-            if (isset($_POST["profile_title_" . $i]) && isset($_POST["profile_info_" . $i])) {
+            if (isset($field["profile_title_" . $i]) && isset($field["profile_info_" . $i])) {
                 $insert[] = "ProfileInfoTitle" . $i;
                 $insert[] = "ProfileInfo" . $i;
-                $args[] = trim($_POST["profile_title_" . $i]);
-                $args[] = trim($_POST["profile_info_" . $i]);
+                $args[] = $field["profile_title_" . $i];
+                $args[] = $field["profile_info_" . $i];
             }
         }
         if ($SpecialRank >= 2) {
-            if (isset($_POST['second_avatar'])) {
-                $value = trim($_POST['second_avatar']);
+            if (isset($field['second_avatar'])) {
+                $value = $field['second_avatar'];
                 if (preg_match("/^".IMAGE_REGEX."$/i", $value)) {
                     $insert[] = "SecondAvatar";
                     $args[] = $value;
@@ -512,30 +523,12 @@ class Donation extends \Gazelle\Base {
                 $UserID, ...array_merge($args, $args)
             );
         }
+        $this->db->set_query_id($QueryID);
         $this->cache->deleteMulti(["donor_profile_rewards_$UserID", "donor_info_$UserID"]);
     }
 
-    // TODO: make $UseComma more sane
-    public function updateTitle($UserID, $Prefix, $Suffix, $UseComma) {
-        $QueryID = $this->db->get_query_id();
-        $Prefix = trim($Prefix);
-        $Suffix = trim($Suffix);
-        $UseComma = empty($UseComma) ? true : false;
-        $this->db->prepared_query('
-            INSERT INTO donor_forum_usernames
-                   (UserID, Prefix, Suffix, UseComma)
-            VALUES (?,      ?,      ?,      ?)
-            ON DUPLICATE KEY UPDATE
-                Prefix = ?, Suffix = ?, UseComma = ?
-            ', $UserID, $Prefix, $Suffix, $UseComma ? 1 : 0,
-                $Prefix, $Suffix, $UseComma ? 1 : 0
-        );
-        $this->cache->delete_value("donor_title_$UserID");
-        $this->db->set_query_id($QueryID);
-    }
-
     public function history(int $UserID) {
-        if ($UserID < 1) {
+        if (!$UserID) {
             error(404);
         }
         $QueryID = $this->db->get_query_id();

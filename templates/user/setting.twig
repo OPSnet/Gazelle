@@ -1,0 +1,67 @@
+{% from 'macro/form.twig' import checked, selected %}
+<div class="thin">
+    <div class="header">
+        <h2>{{ user.id|user_url }} &rsaquo; Settings</h2>
+    </div>
+    <form class="edit_form" name="user" id="userform" action="" method="post" autocomplete="off">
+    <input type="hidden" name="action" value="take_edit" />
+    <input type="hidden" name="userid" value="{{ user.id }}" />
+    <input type="hidden" name="auth" value="{{ auth }}" />
+    <div class="sidebar settings_sidebar">
+        <div class="box box2" id="settings_sections">
+            <div class="head">
+                <strong>Sections</strong>
+            </div>
+            <ul class="nobullet">
+                <li data-gazelle-section-id="all_settings">
+                    <h2><a href="#" class="tooltip" title="View the full list of user settings.">All Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="site_appearance_settings">
+                    <h2><a href="#" class="tooltip" title="These settings change the visual style of the entire site.">Site Appearance Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="torrent_settings">
+                    <h2><a href="#" class="tooltip" title="These settings change how torrents are searched for, grouped, displayed, and downloaded.">Torrent Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="community_settings">
+                    <h2><a href="#" class="tooltip" title="These settings change how interactions with other users are formatted, grouped, and displayed.">Community Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="notification_settings">
+                    <h2><a href="#" class="tooltip" title="These settings change the format and types of notifications you receive.">Notification Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="personal_settings">
+                    <h2><a href="#" class="tooltip" title="These settings alter the appearance of your profile and posts.">Personal Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="paranoia_settings">
+                    <h2><a href="#" class="tooltip" title="These settings allow you to display or hide different categories of information from your profile.">Paranoia Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="access_settings">
+                    <h2><a href="#" class="tooltip" title="These settings control your login and access details for {{ site_name }}, the site's IRC network, and the tracker.">Access Settings</a></h2>
+                </li>
+                <li data-gazelle-section-id="live_search">
+                    <input type="text" id="settings_search" placeholder="Live Search" />
+                </li>
+                <li>
+                    <input type="submit" id="submit" value="Save profile" />
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="main_column">
+{% include 'user/setting/appearance.twig' %}
+{% include 'user/setting/navigation.twig' with {'nav_items': nav_items, 'nav_items_user': nav_items_user} only %}
+{% include 'user/setting/display.twig' %}
+{% include 'user/setting/community.twig' %}
+{% include 'user/setting/notification.twig'
+    with {
+        'auth': auth,
+        'logged_user': logged_user,
+        'settings': notify.settings,
+        'service': notify.settings.PushService,
+        'option': notify.settings.PushOptions,
+    } only
+%}
+{% include 'user/setting/personal.twig' %}
+{% include 'user/setting/access.twig' %}
+    </div>
+    </form>
+</div>

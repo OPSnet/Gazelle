@@ -1,0 +1,77 @@
+{% from 'macro/form.twig' import checked, selected %}
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="site_appearance_settings">
+    <tr class="colhead_dark">
+        <td colspan="2">
+            <strong>Site Appearance Settings</strong>
+        </td>
+    </tr>
+    <tr id="site_style_tr">
+        <td class="label tooltip" title="Selecting a stylesheet will change {{ site_name }}'s visual appearance.">
+            <strong>Stylesheet</strong>
+        </td>
+        <td>
+            <select name="stylesheet" id="stylesheet">
+{% for sheet in stylesheets %}
+                <option value="{{ sheet.ID }}"{{ selected(sheet.ID == style_id) }}>{{ sheet.ProperName }}</option>
+{% endfor %}
+            </select>&nbsp;&nbsp;
+            <a href="#" id="toggle_css_gallery" class="brackets">Show gallery</a>
+            <div id="css_gallery">
+{% for sheet in stylesheets %}
+                <div class="preview_wrapper">
+                    <div class="preview_image" name="{{ style.Name }}">
+                        <a href="{{ static_host }}/stylespreview/full_{{ style.Name }}.png'" target="_blank">
+                            <img src="{{ static_host }}/stylespreview/thumb_{{ style.Name }}.png'" alt="{{ style.Name }}" />
+                        </a>
+                    </div>
+                    <p class="preview_name">
+                        <label><input type="radio" name="stylesheet_gallery" value="{{ style.ID }}" /> {{ style.ProperName }}</label>
+                    </p>
+                </div>
+{% endfor %}
+            </div>
+        </td>
+    </tr>
+    <tr id="site_extstyle_tr">
+        <td class="label tooltip" title="Providing a link to an externally-hosted stylesheet will override your default stylesheet selection.">
+            <strong>External stylesheet URL</strong>
+        </td>
+        <td>
+            <input type="text" size="40" name="styleurl" id="styleurl" value="{{ style_url }}" />
+        </td>
+    </tr>
+    <tr id="site_opendyslexic_tr">
+        <td class="label tooltip_interactive"
+            title="&lt;a href=&quot;http://opendyslexic.org&quot; target=&quot;_blank&quot;&gt;Click here&lt;/a&gt; to read about OpenDyslexic, a CC-BY 3.0 licensed font designed for users with dyslexia."
+            data-title-plain="Go to http://opendyslexic.org to read about OpenDyslexic, a CC-BY 3.0 licensed font designed for users with dyslexia.">
+            <strong>OpenDyslexic</strong></td>
+        <td>
+            <div class="field_div">
+                <input type="checkbox" name="useopendyslexic" id="useopendyslexic"{{ checked(option.UseOpenDyslexic) }} />
+                <label for="useopendyslexic">Enable the OpenDyslexic font</label>
+            </div>
+            <p class="min_padding">This is an experimental feature, and some stylesheets will have display issues.</p>
+        </td>
+    </tr>
+    <tr id="site_tooltips_tr">
+        <td class="label tooltip" title="Use styled tooltips instead of the browser's default when hovering elements with extra information (such as this one).">
+            <strong>Styled tooltips</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="usetooltipster" id="usetooltipster"{{ checked(option.Tooltipster) }} />
+            <label for="usetooltipster">Enable styled tooltips</label>
+        </td>
+    </tr>
+{% if is_mod %}
+    <tr id="site_autostats_tr">
+        <td class="label tooltip" title="This is a staff-only feature to bypass the &quot;Show stats&quot; button for seeding, leeching, snatched, and downloaded stats on profile pages.">
+            <strong>Reveal user stats</strong>
+        </td>
+        <td>
+            <input type="checkbox" id="autoload_comm_stats" name="autoload_comm_stats"{{ checked(option.AutoloadCommStats) }} />
+            <label for="autoload_comm_stats">Automatically fetch the snatch and peer stats on member profile pages.</label>
+        </td>
+    </tr>
+{% endif %}
+</table>
+

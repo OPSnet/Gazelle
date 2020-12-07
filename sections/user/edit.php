@@ -1,73 +1,50 @@
 <?php
 
-use \Gazelle\Manager\Notification;
-
-$UserID = $_REQUEST['userid'];
-if (!is_number($UserID)) {
-    error(404);
-}
-
-$User = new \Gazelle\User($UserID);
-
-$DB->prepared_query('
-    SELECT
-        m.Username,
-        m.Email,
-        m.IRCKey,
-        m.Paranoia,
-        m.2FA_Key,
-        i.Info,
-        i.Avatar,
-        i.StyleID,
-        i.StyleURL,
-        i.SiteOptions,
-        i.UnseededAlerts,
-        i.DownloadAlt,
-        p.Level AS Class,
-        i.InfoTitle,
-        i.NotifyOnDeleteSeeding,
-        i.NotifyOnDeleteSnatched,
-        i.NotifyOnDeleteDownloaded,
-        i.NavItems,
-        CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
-        CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
-    FROM users_main AS m
-    INNER JOIN users_info AS i ON (i.UserID = m.ID)
-    LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
-    LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = m.ID)
-    LEFT JOIN user_attr as uafl ON (uafl.ID = uhafl.UserAttrID AND uafl.Name = ?)
-    LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = m.ID)
-    LEFT JOIN user_attr as uaud ON (uaud.ID = uhaud.UserAttrID AND uaud.Name = ?)
-    WHERE m.ID = ?
-    ', 'no-fl-gifts', 'unlimited-download', $UserID
-);
-[$Username, $Email, $IRCKey, $Paranoia, $TwoFAKey, $Info, $Avatar, $StyleID, $StyleURL, $SiteOptions, $UnseededAlerts, $DownloadAlt,
-    $Class, $InfoTitle, $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems, $AcceptFL, $UnlimitedDownload] = $DB->next_record(MYSQLI_NUM, [3, 9]);
-
-if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Class)) {
-    error(403);
-}
-
-$Paranoia = unserialize($Paranoia);
-if (!is_array($Paranoia)) {
-    $Paranoia = [];
-}
-
-function paranoia_level($Setting) {
-    global $Paranoia;
-    // 0: very paranoid; 1: stats allowed, list disallowed; 2: not paranoid
-    return (in_array($Setting . '+', $Paranoia)) ? 0 : (in_array($Setting, $Paranoia) ? 1 : 2);
-}
+use Gazelle\Manager\Notification;
 
 function display_paranoia($FieldName) {
-    $Level = paranoia_level($FieldName);
+    global $Paranoia;
+    $Level = (in_array($FieldName . '+', $Paranoia)) ? 0 : (in_array($FieldName, $Paranoia) ? 1 : 2);
     $level1Checked = $Level >= 1 ? ' checked="checked"' : '';
     $level2Checked = $Level >= 2 ? ' checked="checked"' : '';
     return "<label><input type=\"checkbox\" name=\"p_{$FieldName}_c\"level1Checked" . ' onchange="AlterParanoia()" /> Show count</label>'."&nbsp;&nbsp;\n"
         . "<label><input type=\"checkbox\" name=\"p_{$FieldName}_l\"level1Checked" . ' onchange="AlterParanoia()" /> Show list</label>'."\n";
 }
 
-View::show_header("$Username &rsaquo; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
+$UserID = (int)$_REQUEST['userid'];
+if (!$UserID) {
+    error(404);
+}
+if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles')) {
+    error(403);
+}
+$User = new Gazelle\User($UserID);
+
+[$Paranoia, $Info, $InfoTitle, $Avatar, $StyleID, $StyleURL, $SiteOptions, $DownloadAlt, $UnseededAlerts,
+    $NotifyOnDeleteSeeding, $NotifyOnDeleteSnatched, $NotifyOnDeleteDownloaded, $UserNavItems] = $DB->row("
+    SELECT
+        m.Paranoia,
+        i.Info,
+        i.InfoTitle,
+        i.Avatar,
+        i.StyleID,
+        i.StyleURL,
+        i.SiteOptions,
+        i.DownloadAlt,
+        i.UnseededAlerts,
+        i.NotifyOnDeleteSeeding,
+        i.NotifyOnDeleteSnatched,
+        i.NotifyOnDeleteDownloaded,
+        i.NavItems
+    FROM users_main AS m
+    INNER JOIN users_info AS i ON (i.UserID = m.ID)
+    LEFT JOIN permissions AS p ON (p.ID = m.PermissionID)
+    WHERE m.ID = ?
+    ", $UserID
+);
+
+$options = array_merge(Users::default_site_options(), unserialize($SiteOptions) ?? []);
+$Paranoia = unserialize($Paranoia) ?? [];
 
 $NavItems = Users::get_nav_items();
 $UserNavItems = array_filter(array_map('trim', explode(',', $UserNavItems)));
@@ -100,11 +77,12 @@ foreach (range(1, 4) as $level) {
     }
 }
 
+View::show_header("$Username &rsaquo; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
+
 $Val = new Validate;
 echo $Val->GenerateJS('userform');
 
-echo G::$Twig->render('user/edit.twig', [
-    'accept_fl'        => $AcceptFL,
+echo G::$Twig->render('user/setting.twig', [
     'auth'             => $LoggedUser['AuthKey'],
     'avatar'           => $Avatar,
     'bot_nick'         => BOT_NICK,
@@ -113,15 +91,14 @@ echo G::$Twig->render('user/edit.twig', [
     'logged_user'      => $LoggedUser['ID'],
     'nav_items'        => $NavItems,
     'nav_items_user'   => $UserNavItems,
-    'option'           => array_merge(Users::default_site_options(), unserialize_array($SiteOptions)),
+    'option'           => $options,
     'profile'          => $profile,
-    'release_order'    => Users::release_order($SiteOptions),
-    'release_order_js' => Users::release_order_default_js($SiteOptions),
+    'release_order'    => $User->releaseOrder($options, (new Gazelle\ReleaseType)->extendedList()),
     'site_name'        => SITE_NAME,
     'static_host'      => STATIC_SERVER,
     'style_id'         => $StyleID,
     'style_url'        => $StyleURL,
-    'stylesheets'      => (new \Gazelle\Stylesheet)->list(),
+    'stylesheets'      => (new Gazelle\Stylesheet)->list(),
     'user'             => $User,
     'can' => [
         'advanced_search' => check_perms('site_advanced_search'),
@@ -170,10 +147,6 @@ echo G::$Twig->render('user/edit.twig', [
             'count'  => !in_array('requestsvoted_count', $Paranoia),
             'list'   => !in_array('requestsvoted_list', $Paranoia),
         ],
-    ],
-    'select'           => [
-        'comm_stats' => Format::selected('AutoloadCommStats', 1, 'checked', $SiteOptions),
-        'tags'       => Format::selected('ShowTags', 1, 'checked', $SiteOptions),
     ],
 ]);
 View::show_footer();

@@ -1,0 +1,112 @@
+{% from 'macro/form.twig' import checked %}
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="access_settings">
+    <tr class="colhead_dark">
+        <td colspan="2">
+            <strong>Access Settings</strong>
+        </td>
+    </tr>
+
+    <tr id="acc_resetpk_tr">
+        <td class="label tooltip_interactive"
+            title="For information about the function of your passkey, please &lt;a href=&quot;{{ site_url }}/wiki.php?action=article&amp;amp;name=Passkey&quot;&gt;read this wiki article&lt;/a&gt;."
+            data-title-plain="For information about the function of your passkey, please read the &quot;Passkey&quot; wiki article.">
+            <strong>Reset passkey</strong></td>
+        <td>
+            <div class="field_div">
+                <label><input type="checkbox" name="resetpasskey" id="resetpasskey" />
+                Reset your passkey?</label>
+            </div>
+            <p class="min_padding">Any active torrents must be downloaded again to continue leeching/seeding.</p>
+        </td>
+    </tr>
+
+    <tr id="acc_irckey_tr">
+        <td class="label"><strong>IRC key</strong></td>
+        <td>
+            <div class="field_div">
+                <input type="text" size="50" name="irckey" id="irckey" value="{{ user.IRCKey }}" />
+                <input type="button" onclick="RandomIRCKey();" value="Generate IRC key" />
+            </div>
+                <p class="min_padding">If set, this key will be used instead of your site password when authenticating with
+                {{ bot_nick }} on the <a href="wiki.php?action=article&amp;id=5">site's IRC network</a>. <span
+                style="white-space: nowrap;">Please note:</span></p>
+            <ul>
+                <li>This value is stored in plaintext and should not be your password.</li>
+                <li>IRC keys must be between 6 and 32 characters.</li>
+            </ul>
+        </td>
+    </tr>
+
+    <tr id="acc_email_tr">
+        <td class="label tooltip" title="This is the email address you want associated with your {{ site_name }}
+        account. It will be used if you forget your password or if an alert needs to be sent to you.">
+            <strong>Email address</strong>
+        </td>
+        <td>
+            <div class="field_div">
+                <input type="email" size="50" name="email" id="email" value="{{ user.email }}" />
+            </div>
+            <p class="min_padding">When changing your email address, you must enter your current password in the
+            "Current password" field before saving your changes.</p>
+        </td>
+    </tr>
+
+    <tr id="acc_password_tr">
+        <td class="label"><strong>Change password</strong></td>
+        <td>
+            <div class="field_div">
+                <label>Current password:<br />
+                <input type="password" size="40" name="cur_pass" id="cur_pass" value="" /></label>
+            </div>
+            <div class="field_div">
+                <label>New password:<br />
+                <input type="password" size="40" name="new_pass_1" id="new_pass_1" value="" /> <strong id="pass_strength"></strong></label>
+            </div>
+            <div class="field_div">
+                <label>Confirm new password:<br />
+                <input type="password" size="40" name="new_pass_2" id="new_pass_2" value="" /> <strong id="pass_match"></strong></label>
+            </div>
+            <div class="setting_description">
+                A strong password:
+                <ul>
+                    <li>is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol</li>
+                    <li>Or is 20 characters or longer.</li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+
+    <tr id="acc_2fa_tr">
+        <td class="label"><strong>Two-factor Authentication</strong></td>
+        <td>
+            Two-factor authentication is currently <strong class="{{ user.TFAKey ? 'r99' : 'warning' }}">{{ user.TFAKey ? 'enabled' : 'disabled' }}</strong> for your account.
+            <br><br>
+            <a href="user.php?action=2fa&amp;do={{ user.TFAKey ? 'disable' : 'enable' }}&amp;userid={{ user.id }}">Click here to {{ user.TFAKey ? 'disable' : 'enable' }}</a>
+        </td>
+    </tr>
+
+    <tr id="acc_api_keys_tr">
+        <td class="label"><strong>API Keys</strong></td>
+        <td>API keys can be generated to access our
+            <b><a href="https://github.com/OPSnet/Gazelle/wiki/JSON-API-Documentation" target='_blank'>API</a></b>.<br />
+            Rememeber to revoke tokens you no longer use.<br />
+            <strong class="important_text">Treat your tokens like passwords and keep them secret.</strong>
+            <br /><br />
+            <table class="layout border">
+                <tr class='colhead'>
+                    <th>Name</th>
+                    <th>Created</th>
+                    <th>Revoke</th>
+                </tr>
+{% for token in user.apiTokenList %}
+                <tr class="{{ cycle(['b', 'a'], loop.index0) }}">
+                    <td>{{ token.name }}</td>
+                    <td>{{ token.created|time_diff }}</td>
+                    <td style='text-align: center'><a href='user.php?action=token&amp;do=revoke&amp;user_id={{ logged_user }}&amp;token_id={{ token.id }}'>Revoke</a>
+                </tr>
+{% endfor %}
+            </table>
+            <a href="user.php?action=token&amp;user_id={{ logged_user }}">Click here to create a new token</a>
+        </td>
+    </tr>
+</table>

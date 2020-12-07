@@ -5,10 +5,10 @@ use \Gazelle\Manager\Notification;
 authorize();
 
 $UserID = empty($_REQUEST['userid']) ? $LoggedUser['ID'] : (int)$_REQUEST['userid'];
-if ($UserID < 1) {
+if (!$UserID) {
     error(404);
 }
-$donorMan = new Gazelle\Manager\Donation;
+$user = new Gazelle\User($UserID);
 
 //For this entire page, we should generally be using $UserID not $LoggedUser['ID'] and $U[] not $LoggedUser[]
 $U = Users::user_info($UserID);
@@ -40,8 +40,6 @@ if (check_perms('site_advanced_search')) {
 $Err = $Val->ValidateForm($_POST);
 if ($Err) {
     error($Err);
-    header("Location: user.php?action=edit&userid=$UserID");
-    die();
 }
 
 // Begin building $Paranoia
@@ -122,6 +120,25 @@ foreach ($Bounties as $B) {
 if (!isset($_POST['p_donor_heart'])) {
     $Paranoia[] = 'hide_donor_heart';
 }
+// End building $Paranoia
+
+$donorMan = new Gazelle\Manager\Donation;
+$donorMan->updateReward($UserID,
+    array_map('trim',
+        array_filter($_POST,
+        function ($key) {
+            return in_array($key, [
+                'second_avatar', 'avatar_mouse_over_text',
+                'donor_icon_mouse_over_text', 'donor_icon_link', 'donor_icon_custom_url',
+                'donor_title_prefix', 'donor_title_suffix', 'donor_title_comma',
+                'profile_title_1', 'profile_info_1',
+                'profile_title_2', 'profile_info_2',
+                'profile_title_3', 'profile_info_3',
+                'profile_title_4', 'profile_info_4',
+            ]);
+        }, ARRAY_FILTER_USE_KEY)
+    )
+);
 
 if (isset($_POST['p_donor_stats'])) {
     $donorMan->show($UserID);
@@ -129,49 +146,31 @@ if (isset($_POST['p_donor_stats'])) {
     $donorMan->hide($UserID);
 }
 
-// End building $Paranoia
-
 // Email change
-$CurEmail = $DB->scalar("
-    SELECT Email
-    FROM users_main
-    WHERE ID = ?
-    ", $UserID
-);
-
+$CurEmail = $user->email();
 if ($CurEmail != $_POST['email']) {
     if (!check_perms('users_edit_profiles')) { // Non-admins have to authenticate to change email
         $PassHash = $DB->scalar("
-            SELECT PassHash
-            FROM users_main
-            WHERE ID = ?
+            SELECT PassHash FROM users_main WHERE ID = ?
             ", $UserID
         );
         if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
-            $Err = 'You did not enter the correct password.';
+            error('You did not enter the correct password.');
         }
     }
-    if (!$Err) {
-        $NewEmail = $_POST['email'];
-        $DB->prepared_query("
-            INSERT INTO users_history_emails
-                   (UserID, Email, IP)
-            VALUES (?,      ?,     ?)
-            ", $UserID, $NewEmail, $_SERVER['REMOTE_ADDR']
-        );
-    } else {
-        error($Err);
-        header("Location: user.php?action=edit&userid=$UserID");
-        exit;
-    }
+    $NewEmail = $_POST['email'];
+    $DB->prepared_query("
+        INSERT INTO users_history_emails
+               (UserID, Email, IP)
+        VALUES (?,      ?,     ?)
+        ", $UserID, $NewEmail, $_SERVER['REMOTE_ADDR']
+    );
 }
 //End email change
 
-if (!$Err && !empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
+if (!empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
     $PassHash = $DB->scalar("
-        SELECT PassHash
-        FROM users_main
-        WHERE ID = ?
+        SELECT PassHash FROM users_main WHERE ID = ?
         ", $UserID
     );
     if (Users::check_password($_POST['cur_pass'], $PassHash)) {
@@ -194,8 +193,6 @@ if ($LoggedUser['DisableAvatar'] && $_POST['avatar'] != $U['Avatar']) {
 
 if ($Err) {
     error($Err);
-    header("Location: user.php?action=edit&userid=$UserID");
-    exit;
 }
 
 if (!empty($LoggedUser['DefaultSearch'])) {
@@ -231,14 +228,14 @@ if (isset($LoggedUser['DisableFreeTorrentTop10'])) {
     $Options['DisableFreeTorrentTop10'] = $LoggedUser['DisableFreeTorrentTop10'];
 }
 
-if (!empty($_POST['sorthide'])) {
+if (empty($_POST['sorthide'])) {
+    $Options['SortHide'] = [];
+} else {
     $JSON = json_decode($_POST['sorthide']);
     foreach ($JSON as $J) {
         $E = explode('_', $J);
         $Options['SortHide'][$E[0]] = $E[1];
     }
-} else {
-    $Options['SortHide'] = [];
 }
 
 if (check_perms('site_advanced_search')) {
@@ -257,9 +254,8 @@ $NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? '1' : 
 $NavItems = Users::get_nav_items();
 $UserNavItems = [];
 foreach ($NavItems as $n) {
-    list($ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory) = array_values($n);
-    if ($Mandatory || (!empty($_POST["n_$Key"]) && $_POST["n_$Key"] == 'on')) {
-        $UserNavItems[] = $ID;
+    if ($n['mandatory'] || (!empty($_POST["n_{$n['id']}"]) && $_POST["n_{$n['id']}"] == 'on')) {
+        $UserNavItems[] = $n['id'];
     }
 }
 $UserNavItems = implode(',', $UserNavItems);
@@ -300,8 +296,7 @@ if ($DB->has_results()) {
 }
 G::$Cache->delete_value("lastfm_username_$UserID");
 
-Users::toggleAcceptFL($UserID, $Options['AcceptFL']);
-$donorMan->updateReward($UserID);
+$user->toggleAcceptFL($Options['AcceptFL']);
 $notification = new Notification($UserID);
 // A little cheat technique, gets all keys in the $_POST array starting with 'notifications_'
 $settings = array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST))));
@@ -312,44 +307,26 @@ if ($DownloadAlt != $UH['DownloadAlt'] || $Options['HttpsTracker'] != $UH['Https
     $Cache->delete_value('user_'.$UH['torrent_pass']);
 }
 
-$Cache->begin_transaction("user_info_$UserID");
-$Cache->update_row(false, [
-        'Avatar' => display_str($_POST['avatar']),
-        'Paranoia' => $Paranoia
-]);
-$Cache->commit_transaction(0);
-
-$Cache->begin_transaction("user_info_heavy_$UserID");
-$Cache->update_row(false, [
-        'StyleID' => $_POST['stylesheet'],
-        'StyleURL' => display_str($_POST['styleurl']),
-        'DownloadAlt' => $DownloadAlt,
-        'NavItems' => explode(',', $UserNavItems)
-        ]);
-$Cache->update_row(false, $Options);
-$Cache->commit_transaction(0);
-
-$SQL = '
-    UPDATE users_main AS m
-        JOIN users_info AS i ON m.ID = i.UserID
-    SET
-        i.StyleID = ?,
-        i.StyleURL = ?,
-        i.Avatar = ?,
-        i.SiteOptions = ?,
-        i.NotifyOnQuote = ?,
-        i.Info = ?,
-        i.InfoTitle = ?,
-        i.DownloadAlt = ?,
-        i.UnseededAlerts = ?,
-        i.NotifyOnDeleteSeeding = ?,
-        i.NotifyOnDeleteSnatched = ?,
-        i.NotifyOnDeleteDownloaded = ?,
-        m.Email = ?,
-        m.IRCKey = ?,
-        m.Paranoia = ?,
-        i.NavItems = ?
-';
+$SQL = "
+UPDATE users_main AS m
+INNER JOIN users_info AS i ON (m.ID = i.UserID) SET
+    i.StyleID = ?,
+    i.StyleURL = ?,
+    i.Avatar = ?,
+    i.SiteOptions = ?,
+    i.NotifyOnQuote = ?,
+    i.Info = ?,
+    i.InfoTitle = ?,
+    i.DownloadAlt = ?,
+    i.UnseededAlerts = ?,
+    i.NotifyOnDeleteSeeding = ?,
+    i.NotifyOnDeleteSnatched = ?,
+    i.NotifyOnDeleteDownloaded = ?,
+    m.Email = ?,
+    m.IRCKey = ?,
+    m.Paranoia = ?,
+    i.NavItems = ?
+";
 
 $Params = [
     $_POST['stylesheet'],
@@ -396,9 +373,6 @@ if (isset($_POST['resetpasskey'])) {
             (?, ?, ?, ?, now())
         ', $UserID, $OldPassKey, $NewPassKey, $ChangerIP
     );
-    $Cache->begin_transaction("user_info_heavy_$UserID");
-    $Cache->update_row(false, ['torrent_pass' => $NewPassKey]);
-    $Cache->commit_transaction(0);
     $Cache->delete_value("user_$OldPassKey");
 
     Tracker::update_tracker('change_passkey', ['oldpasskey' => $OldPassKey, 'newpasskey' => $NewPassKey]);
@@ -408,6 +382,8 @@ $SQL .= ' WHERE m.ID = ?';
 $Params[] = $UserID;
 
 $DB->prepared_query($SQL, ...$Params);
+
+$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID"]);
 
 if ($ResetPassword) {
     logout_all_sessions($UserID);
