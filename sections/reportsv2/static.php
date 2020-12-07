@@ -605,8 +605,8 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                             <span class="tooltip" title="Warning length in weeks">
                                 <label for="warning<?=$ReportID?>"><strong>Warning</strong></label>
                                 <select name="warning" id="warning<?=$ReportID?>">
-<?php           for ($i = 0; $i < 9; $i++) { ?>
-                                    <option value="<?=$i?>"><?=$i?></option>
+<?php           foreach (range(0, 8) as $week) { ?>
+                                    <option value="<?= $week ?>"><?= $week ?></option>
 <?php           } ?>
                                 </select>
                             </span> |
@@ -640,20 +640,20 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                 <tr>
                     <td class="label"><strong>Extra</strong> log message:</td>
                     <td>
-                        <input type="text" name="log_message" id="log_message<?=$ReportID?>" size="40"<?php
+<?php
                     if ($ExtraIDs) {
                         $Extras = explode(' ', $ExtraIDs);
                         $Value = '';
                         foreach ($Extras as $ExtraID) {
-                            $Value .= SITE_URL."/torrents.php?torrentid=$ExtraID ";
+                            $Value .= SITE_URL . "/torrents.php?torrentid=$ExtraID ";
                         }
-                        echo ' value="'.trim($Value).'"';
                     } elseif (isset($ReportType['extra_log'])) {
-                        printf(' value="%s"', $ReportType['extra_log']);
-                    } ?>
-                        />
+                        $Value = $ReportType['extra_log'];
+                    }
+?>
+                        <input type="text" name="log_message" id="log_message<?=$ReportID?>" size="40" value="<?= trim($Value) ?>" />
                     </td>
-                    <td class="label"><strong>Extra</strong> staff notes:</td>
+                    <td class="label" title="These notes will be added to the user profile"><strong>Extra</strong> staff notes:</td>
                     <td>
                         <input type="text" name="admin_message" id="admin_message<?=$ReportID?>" size="40" />
                     </td>
