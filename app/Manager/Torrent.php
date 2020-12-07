@@ -908,7 +908,6 @@ class Torrent extends \Gazelle\Base {
             }
         }
 
-
         $deleteKeys[] = "torrent_download_" . $this->torrentId;
         $deleteKeys[] = "torrent_group_" . $group['ID'];
         $deleteKeys[] = "torrents_details_" . $group['ID'];

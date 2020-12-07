@@ -1822,4 +1822,15 @@ class User extends BaseObject {
         );
         return $this->db->affected_rows();
     }
+
+    public function revokeUpload(): int {
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                DisableUpload = '1'
+            WHERE UserID = ?
+            ", $this->id
+        );
+        $this->cache->delete_value("user_info_heavy_" . $this->id);
+        return $this->db->affected_rows();
+    }
 }

@@ -5,10 +5,39 @@ namespace Gazelle;
 class ReportV2 extends Base {
 
     protected $id;
+    protected $moderatorId;
+    protected $groupId;
+    protected $torrentId;
 
     public function __construct(int $id) {
         parent::__construct();
         $this->id = $id;
+    }
+
+    public function setModeratorId(int $moderatorId) {
+        $this->moderatorId = $moderatorId;
+        return $this;
+    }
+
+    public function setGroupId(int $groupId) {
+        $this->groupId = $groupId;
+        return $this;
+    }
+
+    public function setTorrentId(int $torrentId) {
+        $this->torrentId = $torrentId;
+        return $this;
+    }
+
+    public function setTorrentFlag(string $tableName): int {
+        $this->db->prepared_query("
+            INSERT IGNORE INTO {$tableNamee}
+                   (UserID, TorrentID)
+            VALUES (?,      ?)
+            ", $this->moderatorId, $this->torrentId
+        );
+        $this->cache->delete_value("torrents_details_" . $this->groupId);
+        return $this->db->affected_rows();
     }
 
     /**
