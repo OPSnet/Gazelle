@@ -75,6 +75,7 @@ class User extends BaseObject {
                 um.torrent_pass,
                 um.RequiredRatio,
                 um.IRCKey,
+                um.2FA_Key,
                 ui.RatioWatchEnds,
                 ui.AdminComment,
                 ui.Artist,
@@ -169,6 +170,10 @@ class User extends BaseObject {
 
     public function IRCKey() {
         return $this->info()['IRCKey'];
+    }
+
+    public function TFAKey() {
+        return $this->info()['2FA_Key'];
     }
 
     public function joinDate() {
@@ -861,13 +866,13 @@ class User extends BaseObject {
         );
     }
 
-    public function LastFMUsername() {
+    public function LastFMUsername(): string {
         return $this->db->scalar('
             SELECT username
             FROM lastfm_users
             WHERE ID = ?
             ', $this->id
-        );
+        ) ?? '';
     }
 
     public function personalCollages(): array {
@@ -1745,6 +1750,14 @@ class User extends BaseObject {
             ", $this->id, $name, $token
         );
         return $token;
+    }
+
+    public function apiTokenList(): array {
+        $this->db->prepared_query("
+            SELECT id, name, token, created FROM api_tokens WHERE user_id = ? ORDER BY created DESC
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
 
     public function hasTokenByName(string $name) {
