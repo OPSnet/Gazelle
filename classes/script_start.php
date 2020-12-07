@@ -17,8 +17,6 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Gazelle\Util\Crypto;
 use Gazelle\Util\Text;
-use Twig\Loader\FilesystemLoader;
-use Twig\Environment;
 
 //Deal with dumbasses
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
@@ -52,20 +50,21 @@ $Debug->handle_errors();
 $Debug->set_flag('Debug constructed');
 
 $DB = new DB_MYSQL;
+G::$DB = $DB;
 $Debug->set_flag('DB constructed');
 
 $Cache = new CACHE;
+G::$Cache = $Cache;
 $Debug->set_flag('Memcached constructed');
 
-G::$Cache = $Cache;
-G::$DB = $DB;
-G::$Twig = new Environment(
-    new FilesystemLoader(__DIR__ . '/../templates'),
-    [
+G::$Twig = new Twig\Environment(
+    new Twig\Loader\FilesystemLoader(__DIR__ . '/../templates'), [
         'debug' => DEBUG_MODE,
         'cache' => __DIR__ . '/../cache/twig'
-    ]
-);
+]);
+if (DEBUG_MODE) {
+    G::$Twig->addExtension(new Twig\Extension\DebugExtension());
+}
 
 G::$Twig->addFilter(new Twig\TwigFilter(
     'article',
@@ -249,11 +248,11 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
 
     $UserId = (int) substr(Crypto::decrypt(Text::base64UrlDecode($FullToken), ENCKEY), 32);
     if (!empty($UserId)) {
-        [$LoggedUser['ID'], $Revoked] = G::$DB->row('SELECT user_id, revoked FROM api_tokens WHERE user_id=? AND token=?', $UserId, $FullToken);
+        [$LoggedUser['ID'], $Revoked] = $DB->row('SELECT user_id, revoked FROM api_tokens WHERE user_id=? AND token=?', $UserId, $FullToken);
     }
 
     if (empty($LoggedUser['ID']) || $Revoked === 1) {
-        log_token_attempt(G::$DB);
+        log_token_attempt($DB);
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
@@ -283,7 +282,7 @@ if (isset($LoggedUser['ID'])) {
     $Session = new Gazelle\Session($LoggedUser['ID']);
 
     if (!is_null($FullToken) && !$User->hasApiToken($FullToken)) {
-        log_token_attempt(G::$DB, $LoggedUser['ID']);
+        log_token_attempt($DB, $LoggedUser['ID']);
         header('Content-type: application/json');
         json_die('failure', 'invalid token');
     }
@@ -293,7 +292,7 @@ if (isset($LoggedUser['ID'])) {
             logout($LoggedUser['ID'], $SessionID);
         }
         else {
-            log_token_attempt(G::$DB, $LoggedUser['ID']);
+            log_token_attempt($DB, $LoggedUser['ID']);
             header('Content-type: application/json');
             json_die('failure', 'invalid token');
         }
@@ -305,7 +304,7 @@ if (isset($LoggedUser['ID'])) {
     if (empty($LightInfo['Username'])) { // Ghost
         if (!is_null($FullToken)) {
             $User->flush();
-            log_token_attempt(G::$DB, $LoggedUser['ID']);
+            log_token_attempt($DB, $LoggedUser['ID']);
             header('Content-type: application/json');
             json_die('failure', 'invalid token');
         }

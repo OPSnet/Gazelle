@@ -393,62 +393,6 @@ class Users {
     }
 
     /**
-     * Generates a check list of release types, ordered by the user or default
-     * @param array $SiteOptions
-     * @param boolean $Default Returns the default list if true
-     */
-    public static function release_order(&$SiteOptions, $Default = false) {
-        $RT = (new \Gazelle\ReleaseType)->extendedList();
-        if ($Default || empty($SiteOptions['SortHide'])) {
-            $Sort =& $RT;
-            $Defaults = !empty($SiteOptions['HideTypes']);
-        } else {
-            $Sort =& $SiteOptions['SortHide'];
-            $MissingTypes = array_diff_key($RT, $Sort);
-            if (!empty($MissingTypes)) {
-                foreach (array_keys($MissingTypes) as $Missing) {
-                    $Sort[$Missing] = 0;
-                }
-            }
-        }
-
-        foreach ($Sort as $Key => $Val) {
-            if (isset($Defaults)) {
-                $Checked = $Defaults && isset($SiteOptions['HideTypes'][$Key]) ? ' checked="checked"' : '';
-            } else {
-                if (!isset($RT[$Key])) {
-                    continue;
-                }
-                $Checked = $Val ? ' checked="checked"' : '';
-                $Val = $RT[$Key];
-            }
-
-            $ID = $Key. '_' . (int)(!!$Checked);
-
-                            // The HTML is indented this far for proper indentation in the generated HTML
-                            // on user.php?action=edit
-                            // THIS IS SO FUCKED - Spine
-?>
-                            <li class="sortable_item">
-                                <label><input type="checkbox"<?=$Checked?> id="<?=$ID?>" /> <?=$Val?></label>
-                            </li>
-<?php
-        }
-    }
-
-    /**
-     * Returns the default order for the sort list in a JS-friendly string
-     * @return string
-     */
-    public static function release_order_default_js(&$SiteOptions) {
-        ob_start();
-        self::release_order($SiteOptions, true);
-        $HTML = ob_get_contents();
-        ob_end_clean();
-        return json_encode($HTML);
-    }
-
-    /**
      * Verify a password against a password hash
      *
      * @param string $Password password
@@ -856,36 +800,5 @@ class Users {
         }
         $info = self::user_info($ID);
         return $info['EffectiveClass'] >= $MinClass;
-    }
-
-    /**
-     * toggle Accept FL token setting
-     * If user accepts FL tokens and the refusal attribute is found, delete it.
-     * If user refuses FL tokens and the attribute is not found, insert it.
-     */
-    public static function toggleAcceptFL($id, $acceptFL) {
-        G::$DB->prepared_query('
-            SELECT ua.ID
-            FROM user_has_attr uha
-            INNER JOIN user_attr ua ON (ua.ID = uha.UserAttrID)
-            WHERE uha.UserID = ?
-                AND ua.Name = ?
-            ', $id, 'no-fl-gifts'
-        );
-        $found = G::$DB->has_results();
-        if ($acceptFL && $found) {
-            list($attr_id) = G::$DB->next_record();
-            G::$DB->prepared_query('
-                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
-                ', $id, $attr_id
-            );
-        }
-        elseif (!$acceptFL && !$found) {
-            G::$DB->prepared_query('
-                INSERT INTO user_has_attr (UserID, UserAttrID)
-                    SELECT ?, ID FROM user_attr WHERE Name = ?
-                ', $id, 'no-fl-gifts'
-            );
-        }
     }
 }

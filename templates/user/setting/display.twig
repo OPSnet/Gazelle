@@ -1,0 +1,178 @@
+{% from 'macro/form.twig' import checked, selected %}
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="torrent_settings">
+    <tr class="colhead_dark">
+        <td colspan="2">
+            <strong>Torrent Settings</strong>
+        </td>
+    </tr>
+{% if can.advanced_search %}
+    <tr id="tor_searchtype_tr">
+        <td class="label tooltip" title="This option allows you to choose whether the default torrent search menu will be basic (fewer options) or advanced (more options).">
+            <strong>Default search type</strong>
+        </td>
+        <td>
+            <ul class="options_list nobullet">
+                <li>
+                    <input type="radio" name="searchtype" id="search_type_simple" value="0"{{ checked(option.SearchType == 0) }} />
+                    <label for="search_type_simple">Simple</label>
+                </li>
+                <li>
+                    <input type="radio" name="searchtype" id="search_type_advanced" value="1"{{ checked(option.SearchType == 1) }} />
+                    <label for="search_type_advanced">Advanced</label>
+                </li>
+            </ul>
+        </td>
+    </tr>
+{% endif %}
+    <tr id="tor_group_tr">
+        <td style="vertical-align: top;" class="label"><strong>Torrent grouping</strong></td>
+        <td>
+            <p class="min_padding">Enabling torrent grouping on the search page will place multiple
+            formats of the same torrent group together beneath a common header.</p>
+            <div class="option_group">
+                <input type="checkbox" name="disablegrouping" id="disablegrouping"{{ checked(not option.DisableGrouping2) }} />
+                <label for="disablegrouping">Enable torrent grouping</label>
+            </div>
+        </td>
+    </tr>
+    <tr id="tor_gdisp_search_tr">
+        <td style="vertical-align: top;" class="label"><strong>Torrent group display</strong></td>
+        <td>
+            <div class="option_group">
+                <ul class="options_list nobullet">
+                    <p class="min_padding">In torrent search results and on artist pages, &quot;open&quot;
+                    will expand torrent groups by default, and &quot;closed&quot; will collapse torrent groups by default.</p>
+                    <li>
+                        <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"{{ checked(option.TorrentGrouping == 0) }} />
+                        <label for="torrent_grouping_open">Open</label>
+                    </li>
+                    <li>
+                        <input type="radio" name="torrentgrouping" id="torrent_grouping_closed" value="1"{{ checked(option.TorrentGrouping == 1) }} />
+                        <label for="torrent_grouping_closed">Closed</label>
+                    </li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+    <tr id="tor_reltype_tr">
+        <td style="vertical-align: top;" class="label"><strong>Order of release types<br />(artist pages)</strong></td>
+        <td>
+            <p class="min_padding">Drag and drop release types to change the order of display on artist pages.<br />
+            Check the box of a release type if it should be collapsed when an artist page is viewed.</p>
+            <a href="#" id="reset_sortable" class="brackets">Reset to default</a>
+            <ul class="sortable_list" id="sortable">
+{% set release -%}
+    {%- for r in release_order -%}
+                <li class="sortable_item"><input type="checkbox" id="{{ r.id }}"{{ checked(r.checked) }} /> <label for="{{ r.id }}">{{ r.label }}</label></li>
+    {%- endfor -%}
+{% endset -%}
+                {{- release }}
+            </ul>
+            <input type="hidden" id="sorthide" name="sorthide" value="" />
+        </td>
+    </tr>
+    <tr id="tor_cover_tor_tr">
+        <td class="label tooltip" title="Enabling cover artwork for torrents will show cover artwork next to torrent information. Enabling additional cover artwork will display all additional cover artwork as well.">
+            <strong>Cover art (torrents)</strong>
+        </td>
+        <td>
+            <ul class="options_list nobullet">
+                <li>
+                    <input type="hidden" name="coverart" value="" />
+                    <input type="checkbox" name="coverart" id="coverart"{{ checked(option.CoverArt) }} />
+                    <label for="coverart">Enable cover artwork</label>
+                </li>
+                <li>
+                    <input type="checkbox" name="show_extra_covers" id="show_extra_covers"{{ checked(option.ShowExtraCovers) }} />
+                    <label for="show_extra_covers">Enable additional cover artwork</label>
+                </li>
+            </ul>
+        </td>
+    </tr>
+    <tr id="tor_cover_coll_tr">
+        <td class="label tooltip" title="This option allows you to change the number of album covers to display within a single collage page.">
+            <strong>Cover art (collages)</strong>
+        </td>
+        <td>
+            <select name="collagecovers" id="collagecovers">
+                <option value="10"{{ selected(option.CollageCovers == 10) }}>10</option>
+                <option value="25"{{ selected(option.CollageCovers is null or option.CollageCovers == 25) }}>25 (default)</option>
+                <option value="50"{{ selected(option.CollageCovers == 50) }}>50</option>
+                <option value="100"{{ selected(option.CollageCovers == 100) }}>100</option>
+                <option value="1000000"{{ selected(option.CollageCovers == 1000000) }}>All</option>
+                <option value="0"{{ selected(option.CollageCovers == 0 or (option.CollageCovers is null and option.HideCollage)) }}>None</option>
+            </select>
+            covers per page
+        </td>
+    </tr>
+    <tr id="tor_autocomp_tr">
+        <td class="label tooltip" title="Autocomplete will try to predict the word or phrase that you're typing. Selecting &quot;Everywhere&quot; will enable autocomplete on artist and tag fields across the site. Selecting &quot;Searches only&quot; will enable autocomplete in searches.">
+            <strong>Autocompletion</strong>
+        </td>
+        <td>
+            <select name="autocomplete">
+                <option value="0"{{ selected(option.AutoComplete is null) }}>Everywhere</option>
+                <option value="2"{{ selected(option.AutoComplete == 2) }}>Searches only</option>
+                <option value="1"{{ selected(option.AutoComplete == 1) }}>Disable</option>
+            </select>
+        </td>
+    </tr>
+    <tr id="tor_voting_tr">
+        <td class="label tooltip" title="This option allows you to enable or disable &quot;up&quot; and &quot;down&quot; voting links on artist pages, collages, and snatched lists.">
+            <strong>Voting links</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="novotelinks" id="novotelinks"{{ checked(option.NoVoteLinks) }} />
+            <label for="novotelinks">Disable voting links</label>
+        </td>
+    </tr>
+    <tr id="tor_showfilt_tr">
+        <td class="label tooltip" title="Displaying filter controls will show torrent filtering options in the torrent search menu by default. Displaying filters for official tags will list clickable filters for official tags in the torrent search menu by default.">
+            <strong>Torrent search filters</strong>
+        </td>
+        <td>
+            <ul class="options_list nobullet">
+                <li>
+                    <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(option.ShowTorFilter) }} />
+                    <label for="showtfilter">Display filter controls</label>
+                </li>
+                <li>
+                    <input type="checkbox" name="showtags" id="showtags"{{ checked(option.ShowTags) }} />
+                    <label for="showtags">Display official tag filters</label>
+                </li>
+            </ul>
+        </td>
+    </tr>
+    <tr id="tor_snatched_tr">
+        <td class="label tooltip" title="Enabling the snatched torrents indicator will display &quot;Snatched!&quot; next to torrents you've snatched.">
+            <strong>Snatched torrents indicator</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="showsnatched" id="showsnatched"{{ checked(option.ShowSnatched) }} />
+            <label for="showsnatched">Enable snatched torrents indicator</label>
+        </td>
+    </tr>
+    <tr id="tor_dltext_tr">
+        <td class="label tooltip" title="Some ISPs block the downloading of torrent files. Enable this option if you wish to download torrent files with a &quot;.txt&quot; file extension.">
+            <strong>Text file downloads</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="downloadalt" id="downloadalt"{{ checked(download_text) }} />
+            <label for="downloadalt">Enable downloading torrent files as text files</label>
+        </td>
+    </tr>
+    <tr id="tor_https_tr">
+        <td class="label tooltip" title="Use HTTPS tracker (recommended). Older clients may not work well with https announcements.">
+            <strong>Use HTTPS Tracker</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="httpstracker" id="httpstracker"{{ checked(option.HttpsTracker) }} />
+            <label for="httpstracker">Enable HTTPs tracker for announce URL</label>
+        </td>
+    </tr>
+</table>
+<script type="text/javascript" id="sortable_default">
+    //<![CDATA[
+    var sortable_list_default = '{{ release }}';
+    //]]>
+</script>

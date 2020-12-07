@@ -403,29 +403,39 @@ class Notification extends \Gazelle\Base {
     }
 
     public function save(array $settings, array $options, int $service, $device) {
-        $Update = [];
+        $set = [];
+        $args = [];
         foreach (self::$Types as $Type) {
             $Popup = array_key_exists("notifications_{$Type}_popup", $settings);
             $Traditional = array_key_exists("notifications_{$Type}_traditional", $settings);
             $Push = array_key_exists("notifications_{$Type}_push", $settings);
-            $Result = self::OPT_DISABLED;
-            if ($Popup) {
-                $Result = $Push ? self::OPT_POPUP_PUSH : self::OPT_POPUP;
+            if ($Push) {
+                if ($Popup) {
+                    $Result = self::OPT_POPUP_PUSH;
+                } elseif ($Traditional) {
+                    $Result = self::OPT_TRADITIONAL_PUSH;
+                } else {
+                    $Result = self::OPT_PUSH;
+                }
             } elseif ($Traditional) {
-                $Result = $Push ? self::OPT_TRADITIONAL_PUSH : self::OPT_TRADITIONAL;
-            } elseif ($Push) {
-                $Result = self::OPT_PUSH;
+                $Result = self::OPT_TRADITIONAL;
+            } elseif ($Popup) {
+                $Result = self::OPT_POPUP;
+            } else {
+                $Result = self::OPT_DISABLED;
             }
-            $Update[] = "$Type = $Result";
+            $set[] = "$Type = ?";
+            $args[] = $Result;
         }
-        $Update = implode(',', $Update);
+        $set = implode(',', $set);
+        $args[] = $this->userId;
 
         $QueryID = $this->db->get_query_id();
         $this->db->prepared_query("
-            UPDATE users_notifications_settings
-            SET $Update
+            UPDATE users_notifications_settings SET
+                $set
             WHERE UserID = ?
-            ", $this->userId
+            ", ... $args
         );
 
         if (!$service) {

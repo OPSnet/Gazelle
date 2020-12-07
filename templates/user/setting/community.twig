@@ -1,0 +1,94 @@
+{% from 'macro/form.twig' import checked, selected %}
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="community_settings">
+    <tr class="colhead_dark">
+        <td colspan="2">
+            <strong>Community Settings</strong>
+        </td>
+    </tr>
+    <tr id="comm_ppp_tr">
+        <td class="label tooltip" title="This option allows you to set the desired number of displayed posts per page within forum threads.">
+            <strong>Posts per page (forums)</strong>
+        </td>
+        <td>
+            <select name="postsperpage" id="postsperpage">
+                <option value="25"{{ selected(option.PostsPerPage == 25) }}>25 (default)</option>
+                <option value="50"{{ selected(option.PostsPerPage == 50) }}>50</option>
+                <option value="100"{{ selected(option.PostsPerPage == 100) }}>100</option>
+            </select>
+            posts per page
+        </td>
+    </tr>
+    <tr id="comm_inbsort_tr">
+        <td class="label tooltip" title="This option will force unread private messages to be listed first.">
+            <strong>Inbox sorting</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="list_unread_pms_first" id="list_unread_pms_first"{{ checked(option.ListUnreadPMsFirst) }} />
+            <label for="list_unread_pms_first">List unread private messages first</label>
+        </td>
+    </tr>
+    <tr id="comm_emot_tr">
+        <td class="label tooltip" title="Emoticons are small images which replace traditional text-based &quot;smileys&quot; like :) or :(">
+            <strong>Emoticons</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="disablesmileys" id="disablesmileys"{{ checked(option.DisableSmileys) }} />
+            <label for="disablesmileys">Disable emoticons</label>
+        </td>
+    </tr>
+    <tr id="comm_mature_tr">
+        <td class="label tooltip_interactive"
+            title="{{ site_name }} has very flexible &lt;a href=&quot;wiki.php?action=article&amp;amp;id=1063&quot;&gt;mature content policies&lt;/a&gt; for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath &lt;code&gt;[mature]&lt;/code&gt; tags. If you choose not to display mature content, all content tagged with &lt;code&gt;[mature]&lt;/code&gt; tags will be hidden from you."
+            data-title-plain="{{ site_name }} has very flexible mature content policies for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath [mature] tags. If you choose not to display mature content, all content tagged with [mature] tags will be hidden from you.">
+            <strong>Mature content (forums, comments, profiles)</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="enablematurecontent" id="enablematurecontent"{{ checked(option.EnableMatureContent) }} />
+            <label for="enablematurecontent">Display mature content</label>
+        </td>
+    </tr>
+    <tr id="comm_avatars_tr">
+        <td class="label tooltip"
+            title="This option allows you to disable all avatars, show all avatars (with a placeholder for users without avatars), show all avatars &lt;em&gt;or&lt;/em&gt; an identicon set (for users without avatars), or replace all avatars with an identicon set of your choosing."
+            data-title-plain="This option allows you to disable all avatars, show all avatars (with a placeholder for users without avatars), show all avatars or an identicon set (for users without avatars), or replace all avatars with an identicon set of your choosing.">
+            <strong>Avatar display (posts)</strong>
+        </td>
+        <td>
+            <select name="disableavatars" id="disableavatars" onchange="ToggleIdenticons();">
+                <option value="1"{{ selected(option.DisableAvatars == 1) }}>Disable avatars</option>
+                <option value="0"{{ selected(option.DisableAvatars == 0) }}>Show avatars</option>
+                <option value="2"{{ selected(option.DisableAvatars == 2) }}>Show avatars or:</option>
+                <option value="3"{{ selected(option.DisableAvatars == 3) }}>Replace all avatars with:</option>
+            </select>
+            <select name="identicons" id="identicons">
+                <option value="0"{{ selected(option.Identicons == 0) }}>Identicon</option>
+                <option value="1"{{ selected(option.Identicons == 1) }}>MonsterID</option>
+                <option value="2"{{ selected(option.Identicons == 2) }}>Wavatar</option>
+                <option value="3"{{ selected(option.Identicons == 3) }}>Retro</option>
+                <option value="4"{{ selected(option.Identicons == 4) }}>Robots 1</option>
+                <option value="5"{{ selected(option.Identicons == 5) }}>Robots 2</option>
+                <option value="6"{{ selected(option.Identicons == 6) }}>Robots 3</option>
+            </select>
+        </td>
+    </tr>
+    <tr id="comm_autosave_tr">
+        <td class="label tooltip"
+            title="As you add text to a post or reply, this text is automatically saved. If you stop and return to your post at a later time (e.g. accidentally clicking a link and then pressing the &quot;Back&quot; button in your browser), the text will remain. This option allows you to disable this feature.">
+            <strong>Auto-save reply text</strong>
+        </td>
+        <td>
+            <input type="checkbox" name="disableautosave" id="disableautosave"{{ checked(option.DisableAutoSave) }} />
+            <label for="disableautosave">Disable text auto-saving</label>
+        </td>
+    </tr>
+    <tr id="comm_acceptfl_tr">
+        <td class="label tooltip"
+            title="If unchecked, other members will not have the option to gift you FL tokens. You also decline the receipt of points from global handouts. Use this when you are self-sufficient thanks to your seeding activity">
+            <strong>FL Tokens</strong>
+        </td>
+        <td >
+            <input type="checkbox" name="acceptfltoken" id="acceptfltoken"{{ checked(user.HasAcceptFL) }} />
+            <label for="acceptfltoken">Accept FL Tokens from members and accept site-wide bonus point handouts</label>
+        </td>
+    </tr>
+</table>

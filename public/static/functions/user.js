@@ -34,62 +34,51 @@ function AlterParanoia() {
         return;
     }
     var showDownload = $('input[name=p_downloaded]').raw().checked || ($('input[name=p_uploaded]').raw().checked && $('input[name=p_ratio]').raw().checked);
-    if (($('input[name=p_seeding_c]').raw().checked) && ($('input[name=p_snatched_c]').raw().checked) && showDownload) {
+    if (($('input[name=p_c_seeding]').raw().checked) && ($('input[name=p_c_snatched]').raw().checked) && showDownload) {
         $('input[type=checkbox][name=p_requiredratio]').raw().checked = true;
         $('input[type=checkbox][name=p_requiredratio]').raw().disabled = true;
     } else {
         $('input[type=checkbox][name=p_requiredratio]').raw().disabled = false;
     }
-    $('input[name=p_torrentcomments_l]').raw().disabled = !$('input[name=p_torrentcomments_c]').raw().checked;
-    $('input[name=p_collagecontribs_l]').raw().disabled = !$('input[name=p_collagecontribs_c]').raw().checked;
-    $('input[name=p_requestsfilled_list]').raw().disabled = !($('input[name=p_requestsfilled_count]').raw().checked && $('input[name=p_requestsfilled_bounty]').raw().checked);
-    $('input[name=p_requestsvoted_list]').raw().disabled = !($('input[name=p_requestsvoted_count]').raw().checked && $('input[name=p_requestsvoted_bounty]').raw().checked);
-    $('input[name=p_uploads_l]').raw().disabled = !$('input[name=p_uploads_c]').raw().checked;
-    $('input[name=p_uniquegroups_l]').raw().disabled = !$('input[name=p_uniquegroups_c]').raw().checked;
-    $('input[name=p_perfectflacs_l]').raw().disabled = !$('input[name=p_perfectflacs_c]').raw().checked;
-    $('input[name=p_seeding_l]').raw().disabled = !$('input[name=p_seeding_c]').raw().checked;
-    $('input[name=p_leeching_l]').raw().disabled = !$('input[name=p_leeching_c]').raw().checked;
-    $('input[name=p_snatched_l]').raw().disabled = !$('input[name=p_snatched_c]').raw().checked;
-    UncheckIfDisabled($('input[name=p_torrentcomments_l]').raw());
-    UncheckIfDisabled($('input[name=p_collagecontribs_l]').raw());
-    UncheckIfDisabled($('input[name=p_requestsfilled_list]').raw());
-    UncheckIfDisabled($('input[name=p_requestsvoted_list]').raw());
-    UncheckIfDisabled($('input[name=p_uploads_l]').raw());
-    UncheckIfDisabled($('input[name=p_uniquegroups_l]').raw());
-    UncheckIfDisabled($('input[name=p_perfectflacs_l]').raw());
-    UncheckIfDisabled($('input[name=p_seeding_l]').raw());
-    UncheckIfDisabled($('input[name=p_leeching_l]').raw());
-    UncheckIfDisabled($('input[name=p_snatched_l]').raw());
+
+    $.each([
+        'requestsfilled', 'requestsvoted',
+    ], function(i,val) {
+        $('input[name=p_list_' + val + ']').raw().disabled = !($('input[name=p_count_' + val + ']').raw().checked && $('input[name=p_bounty_' + val + ']').raw().checked);
+        UncheckIfDisabled($('input[name=p_list_' + val + ']').raw());
+    });
+
+    $.each([
+        'collagecontribs', 'collages', 'leeching', 'torrentcomments', 'perfectflacs', 'seeding', 'snatched', 'uniquegroups', 'uploads',
+    ], function(i,val) {
+        $('input[name=p_l_' + val + ']').raw().disabled = !$('input[name=p_c_' + val + ']').raw().checked;
+        UncheckIfDisabled($('input[name=p_l_' + val + ']').raw());
+    });
 
     // unique groups, "Perfect" FLACs and artists added are deducible from the list of uploads
-    if ($('input[name=p_uploads_l]').raw().checked) {
-        $('input[name=p_uniquegroups_c]').raw().checked = true;
-        $('input[name=p_uniquegroups_l]').raw().checked = true;
-        $('input[name=p_uniquegroups_c]').raw().disabled = true;
-        $('input[name=p_uniquegroups_l]').raw().disabled = true;
-        $('input[name=p_perfectflacs_c]').raw().checked = true;
-        $('input[name=p_perfectflacs_l]').raw().checked = true;
-        $('input[name=p_perfectflacs_c]').raw().disabled = true;
-        $('input[name=p_perfectflacs_l]').raw().disabled = true;
+    if ($('input[name=p_l_uploads]').raw().checked) {
+        $('input[name=p_c_uniquegroups]').raw().checked = true;
+        $('input[name=p_c_uniquegroups]').raw().disabled = true;
+        $('input[name=p_l_uniquegroups]').raw().checked = true;
+        $('input[name=p_l_uniquegroups]').raw().disabled = true;
+        $('input[name=p_c_perfectflacs]').raw().checked = true;
+        $('input[name=p_c_perfectflacs]').raw().disabled = true;
+        $('input[name=p_l_perfectflacs]').raw().checked = true;
+        $('input[name=p_l_perfectflacs]').raw().disabled = true;
         $('input[type=checkbox][name=p_artistsadded]').raw().checked = true;
         $('input[type=checkbox][name=p_artistsadded]').raw().disabled = true;
     } else {
-        $('input[name=p_uniquegroups_c]').raw().disabled = false;
-        $('input[name=p_uniquegroups_l]').raw().checked = false;
-        $('input[name=p_uniquegroups_l]').raw().disabled = true;
-        $('input[name=p_perfectflacs_c]').raw().disabled = false;
+        $('input[name=p_c_uniquegroups]').raw().disabled = false;
+        $('input[name=p_l_uniquegroups]').raw().disabled = true;
+        $('input[name=p_c_perfectflacs]').raw().disabled = false;
+        $('input[name=p_l_perfectflacs]').raw().disabled = true;
         $('input[type=checkbox][name=p_artistsadded]').raw().disabled = false;
     }
-    if ($('input[name=p_collagecontribs_l]').raw().checked) {
-        $('input[name=p_collages_c]').raw().disabled = true;
-        $('input[name=p_collages_l]').raw().disabled = true;
-        $('input[name=p_collages_c]').raw().checked = true;
-        $('input[name=p_collages_l]').raw().checked = true;
-    } else {
-        $('input[name=p_collages_c]').raw().disabled = false;
-        $('input[name=p_collages_l]').raw().disabled = !$('input[name=p_collages_c]').raw().checked;
-        UncheckIfDisabled($('input[name=p_collages_l]').raw());
+
+    if (!$('input[name=p_l_collagecontribs]').raw().checked) {
+        $('input[name=p_l_collages]').raw().checked = false;
     }
+    UncheckIfDisabled($('input[name=p_l_collages]').raw());
 }
 
 function ParanoiaReset(checkbox, drops) {
@@ -110,7 +99,7 @@ function ParanoiaReset(checkbox, drops) {
     for (var i = 0; i < checkboxes.results(); i++) {
         if (checkboxes.raw(i).name.match(/^p_/) && (checkboxes.raw(i).name != 'p_lastseen')) {
             if (checkbox == 3) {
-                checkboxes.raw(i).checked = !(checkboxes.raw(i).name.match(/_list$/) || checkboxes.raw(i).name.match(/_l$/));
+                checkboxes.raw(i).checked = !(checkboxes.raw(i).name.match(/^p_list_/) || checkboxes.raw(i).name.match(/^p_l_/));
             } else {
                 checkboxes.raw(i).checked = checkbox;
             }
@@ -125,13 +114,13 @@ function ParanoiaResetOff() {
 
 function ParanoiaResetStats() {
     ParanoiaReset(3, 0);
-    $('input[name=p_collages_l]').raw().checked = false;
+    $('input[name=p_l_collages]').raw().checked = false;
 }
 
 function ParanoiaResetOn() {
     ParanoiaReset(false, 0);
-    $('input[name=p_collages_c]').raw().checked = false;
-    $('input[name=p_collages_l]').raw().checked = false;
+    $('input[name=p_c_collages]').raw().checked = false;
+    $('input[name=p_l_collages]').raw().checked = false;
 }
 
 addDOMLoadEvent(AlterParanoia);
@@ -179,7 +168,7 @@ function togglePassKey(key) {
 
 function RandomIRCKey() {
     var irckeyChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    var randIRCKeyLen= 32;
+    var randIRCKeyLen = 32;
     var randIRCKey = Array(randIRCKeyLen).fill(irckeyChars).map(function(x) { return x[Math.floor(Math.random() * x.length)]; }).join('');
     irckey.value = randIRCKey;
 }

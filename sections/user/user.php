@@ -237,15 +237,11 @@ if (check_perms('admin_manage_permissions', $Class)) {
 if (check_perms('users_mod')) {
 ?>
         <a href="#staff_tools" class="brackets">Staff tools</a>
-<?php
-}
-?>
+<?php } ?>
     </div>
 
     <div class="sidebar">
-<?php
-if ($Avatar && Users::has_avatars_enabled()) {
-?>
+<?php if ($Avatar && Users::has_avatars_enabled()) { ?>
         <div class="box box_image box_image_avatar">
             <div class="head colhead_dark">Avatar</div>
             <div align="center">
@@ -257,28 +253,17 @@ if ($Avatar && Users::has_avatars_enabled()) {
 if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens))) {
 ?>
         <div class="box box_info box_userinfo_give_FL">
-<?php
-    if (isset($FL_OTHER_tokens)) {
-?>
+<?php if (isset($FL_OTHER_tokens)) { ?>
             <div class="head colhead_dark">Freeleech Tokens Given</div>
             <ul class="stats nobullet">
-<?php
-        if ($FL_OTHER_tokens > 0) {
-?>
+<?php   if ($FL_OTHER_tokens > 0) { ?>
             <li>You gave <?= $FL_OTHER_tokens ?> token<?= plural($FL_OTHER_tokens) ?> to <?= $Username ?>. Your generosity is most appreciated!</li>
-<?php
-        } else {
-?>
+<?php   } else { ?>
             <li>You attempted to give some tokens to <?= $Username ?> but something didn't work out.
             No points were spent.</li>
-<?php
-        }
-?>
+<?php   } ?>
             </ul>
-<?php
-    }
-    else {
-?>
+<?php } else { ?>
             <div class="head colhead_dark">Give Freeleech Tokens</div>
             <form class="fl_form" name="user" id="fl_form" action="user.php?id=<?= $UserID ?>" method="post">
                 <ul class="stats nobullet">
@@ -288,21 +273,15 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
 ?>
                     <li><input type="radio" name="fltype" id="fl-<?= $data['Label'] ?>" value="fl-<?= $data['Label'] ?>" />
                     <label title="<?= $label_title ?>" for="fl-<?= $data['Label'] ?>"> <?= $data['Name'] ?></label></li>
-<?php
-        }
-?>
+<?php   } ?>
             <li><input type="submit" name="flsubmit" value="Send" /></li>
                 </ul>
                 <input type="hidden" name="action" value="fltoken" />
                 <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
             </form>
-<?php
-    }
-?>
+<?php } ?>
         </div>
-<?php
-}
-?>
+<?php } ?>
         <div class="box box_info box_userinfo_stats">
             <div class="head colhead_dark">Statistics</div>
             <ul class="stats nobullet">
@@ -674,9 +653,7 @@ if (check_perms("users_mod") || $OwnProfile || $donorMan->isVisible($UserID)) {
 ?>
     </div>
     <div class="main_column">
-<?php
-if (time() < strtotime($RatioWatchEnds) && ($Downloaded * $RequiredRatio) > $Uploaded) {
-?>
+<?php if (check_perms('users_mod') && time() < strtotime($RatioWatchEnds) && ($Downloaded * $RequiredRatio) > $Uploaded) { ?>
         <div class="box">
             <div class="head">Ratio watch</div>
             <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($Downloaded * $RequiredRatio) - $Uploaded)?> in the next <?=time_diff($RatioWatchEnds)?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($Downloaded - $RatioWatchDownload)?></div>
@@ -688,15 +665,7 @@ if (time() < strtotime($RatioWatchEnds) && ($Downloaded * $RequiredRatio) > $Upl
                 <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
             </div>
             <div class="pad profileinfo" id="profilediv">
-<?php
-if (!$Info) {
-?>
-                This profile is currently empty.
-<?php
-} else {
-    echo Text::full_format($Info);
-}
-?>
+                <?= $Info ? Text::full_format($Info) : 'This profile is currently empty.' ?>
             </div>
         </div>
 <?php

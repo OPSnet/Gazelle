@@ -1,0 +1,21 @@
+{% from 'macro/form.twig' import checked %}
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border user_options" id="navigation_settings">
+    <tr class="colhead_dark">
+        <td colspan="2">
+            <strong>Navigation Settings</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;" class="label">
+            <strong>Navigation elements</strong>
+        </td>
+        <td>Select the navigation elements you wish to display at the right of the header.<br />
+{% for n in nav_items %}
+            <div style="padding: 2pt 0;">
+            <input style="padding: 2px 3px;" type="checkbox" id="n_{{ n.id }}" name="n_{{ n.id }}"{{ checked(n.mandatory or n.id in nav_items_user) }}{% if n.mandatory %} disabled="disabled"{% endif %} />
+            <label style="font-size: 1.2em;" for="n_{{ n.id }}">{{ n.title }}</label>
+            </div>
+{% endfor %}
+        </td>
+    </tr>
+</table>
