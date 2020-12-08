@@ -145,7 +145,7 @@
         <td class="vertical-align: top;">{{ r.filter.info.label}}</td>
         <td class="vertical-align: top;">
         {% for artist in r.filter.info.artist|sort %}
-            {{ artist }}{% if not loop.last %}<br />{% endif %}
+            {{ artist }}{% if not loop.last %} &middot;{% endif %}
         {% endfor %}
         </td>
         <td class="vertical-align: top;">

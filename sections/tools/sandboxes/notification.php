@@ -46,12 +46,11 @@ if (isset($_POST['torrentid'])) {
         }
         $result = $notification->lookup();
 
-        $notifiedId = null;
         if (isset($_POST['notifiedid'])) {
             $notified = $userMan->find(trim($_POST['notifiedid']));
             if ($notified) {
-                $id = $notified->id();
-                $result = array_filter($result, function ($r) use ($id) {return $r['user_id'] === $id;});
+                $notifiedId = $notified->id();
+                $result = array_filter($result, function ($r) use ($notifiedId) {return $r['user_id'] === $notifiedId;});
             }
         }
 
