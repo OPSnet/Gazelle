@@ -1,0 +1,82 @@
+<div class="header">
+    <h2>{{ header|raw }}</h2>
+</div>
+<div class="linkbox">
+    <a href="wiki.php?action=article&amp;name=bonuspoints" class="brackets">About Bonus Points</a>
+    <a href="bonus.php" class="brackets">Bonus Point Shop</a>
+    <a href="bonus.php?action=bprates{% if is_admin and not self %}&amp;userid={{ user_id }}{% endif %}" class="brackets">Bonus Point Rates</a>
+</div>
+
+<div class="thin">
+{% if paginator.offset == 0 %}
+    <div class="pad box">
+    {% if pool_total %}
+        {% for p in pool_summary %}
+        <p>{{ who_spent|raw }} {{ p.total|number_format }} bonus points to donate to the {{ p.name }}
+            {% if now > p.until_date|date('U') %}ended{% else %}ending in{% endif %}
+            {{ p.until_date|time_diff }}.</p>
+        {% endfor %}
+    {% endif %}
+    {% if summary.total %}
+        <p>{{ who_spent|raw }}{% if pool_total %} a further{% endif %} {{ summary.total|number_format }} bonus points to purchase {{
+            summary.nr|number_format }} item{% if summary.nr > 1 %}s{% endif %}.</p>
+    {% endif %}
+    {% if pool_total and summary.total %}
+        <p>That makes a grand total of {{ (pool_total + summary.total)|number_format }} points, {{ adjective }}well done!</p>
+    {% endif %}
+    </div>
+{% endif %}
+
+{% if not history %}
+    <h3>No purchase history</h3>
+{% else %}
+    {% if paginator.offset == 0 %}
+    <br />
+    <h3>Item summary</h3>
+    <table>
+        <tr class="colhead">
+            <td>Item</td>
+            <td style="text-align: right; width: 100px">Total</td>
+            <td style="text-align: right; width: 100px">Cost</td>
+        </tr>
+        {% set total_item = 0 %}
+        {% set total_cost = 0 %}
+        {% for i in item %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            {% set total_item = total_item + i.total %}
+            {% set total_cost = total_cost + i.cost %}
+            <td>{{ i.title }}</td>
+            <td style="text-align: right;">{{ i.total|number_format }}</td>
+            <td style="text-align: right;">{{ i.cost|number_format }}</td>
+        </tr>
+        {% endfor %}
+        <tr style="border-top: #333333 solid 1px;">
+            <td><i>Total</i></td>
+            <td style="text-align: right;">{{ total_item|number_format }}</td>
+            <td style="text-align: right;">{{ total_cost|number_format }}</td>
+        </tr>
+    </table>
+    <br />
+    {% endif %}
+
+    <h3>Purchase Details</h3>
+    {{ paginator.linkbox|raw }}
+    <table>
+        <tr class="colhead">
+            <td>Item</td>
+            <td style="text-align: right; width: 50px">Price</td>
+            <td width="180px">Purchase Date</td>
+            <td>For</td>
+        </tr>
+    {% for h in history %}
+        <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+            <td>{{ h.Title }}</td>
+            <td style="text-align: right;">{{ h.Price|number_format }}</td>
+            <td>{{ h.PurchaseDate|time_diff }}</td>
+            <td>{% if h.OtherUserID > 0 %}{{ h.OtherUserID|user_url }}{% else %}&nbsp;{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    {{ paginator.linkbox|raw }}
+{% endif %}
+</div>

@@ -1,0 +1,134 @@
+{% macro user(list, index) %}
+    {% if list[index] is defined %}{{ list[index].user_id|user_url }}{% else %}&nbsp;{% endif %}
+{% endmacro %}
+
+{% macro total(list, index) %}
+    {% if list[index] is defined %}{{ list[index].total|number_format }}{% else %}&nbsp;{% endif %}
+{% endmacro %}
+
+{% macro accrual(d) %}
+    {% if d is defined %}{{ d.total|number_format }}{% else %}&mdash;{% endif %}
+{% endmacro %}
+
+{% macro delta(interval, n) %}
+    {% set p = n - 1 %}
+    {% if interval[n] is defined and interval[p] is defined %}{{ (interval[p].total - interval[n].total)|number_format }}
+    {% elseif interval[n] is defined %}{{  interval[n].total|number_format }}
+    {% elseif interval[p] is defined %}{{ -interval[p].total|number_format }}
+    {% else %}&mdash;{% endif %}
+{% endmacro %}
+
+{% set max = 6 %}
+<div class="pad box">
+    <h2>Accrual</h2>
+    <table>
+        <tr class="colhead">
+            <td>Interval</td>
+            <td>Current</td>
+{% for n in range(1, max) %}
+            <td>&Delta; n-{{ n }}</td>
+{% endfor %}
+        </tr>
+        <tr class="rowa">
+            <td>Day</td>
+            <td>{{ _self.accrual(day.0) }}</td>
+{% for n in range(1, max) %}
+            <td title="{{ day[n].total|number_format }}">{{ _self.delta(day, n) }}</td>
+{% endfor %}
+        </tr>
+        <tr class="rowb">
+            <td>Week</td>
+            <td>{{ _self.accrual(week.0) }}</td>
+{% for n in range(1, max) %}
+            <td title="{{ week[n].total|number_format }}">{{ _self.delta(week, n) }}</td>
+{% endfor %}
+        </tr>
+        <tr class="rowb">
+            <td>Month</td>
+            <td>{{ _self.accrual(month.0) }}</td>
+{% for n in range(1, max) %}
+            <td title="{{ month[n].total|number_format }}">{{ _self.delta(month, n) }}</td>
+{% endfor %}
+        </tr>
+    </table>
+</div>
+
+<div class="pad box">
+    <h2>Item Purchases</h2>
+    <table>
+        <tr class="colhead">
+            <td>Item</td>
+            <td>Last day</td>
+            <td>Last week</td>
+            <td>Last month</td>
+            <td>Last quarter</td>
+            <td>Last year</td>
+            <td>Total</td>
+        </tr>
+{% set item = bonus.itemPurchase %}
+{% set day = bonus.expenditureRange('DAY', 0, 1) %}
+{% set week = bonus.expenditureRange('WEEK', 0, 1) %}
+{% set month = bonus.expenditureRange('MONTH', 0, 1) %}
+{% set quarter = bonus.expenditureRange('WEEK', 0, 13) %}
+{% set year = bonus.expenditureRange('YEAR', 0, 1) %}
+{% for i in item %}
+        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <td>{{ i.title }}</td>
+            <td>{{ day[i.id].total|number_format }}</td>
+            <td>{{ week[i.id].total|number_format }}</td>
+            <td>{{ month[i.id].total|number_format }}</td>
+            <td>{{ quarter[i.id].total|number_format }}</td>
+            <td>{{ year[i.id].total|number_format }}</td>
+            <td>{{ i.total|number_format }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div>
+
+<div class="pad box">
+    <h2>Top 10 Users</h2>
+    <table>
+        <tr class="colhead">
+            <td>&nbsp;</td>
+            <td style="text-align: center;" colspan="2">Hoarders</td>
+            <td style="text-align: center;" colspan="2">Spenders</td>
+            <td style="text-align: center;" colspan="2">Pool Contributors</td>
+            <td style="text-align: center;" colspan="2">Overall Spenders</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr class="colhead">
+            <td>&nbsp;</td>
+            <td style="text-align: right;">Points</td>
+            <td>User</td>
+            <td style="text-align: right;">Points</td>
+            <td>User</td>
+            <td style="text-align: right;">Points</td>
+            <td>User</td>
+            <td style="text-align: right;">Points</td>
+            <td>User</td>
+            <td>&nbsp;</td>
+        </tr>
+{% set limit = 10 %}
+{% set hoarders = bonus.topHoarders(limit) %}
+{% set spenders = bonus.topSpenders(limit) %}
+{% set poolers  = bonus.topPoolContributors(limit) %}
+{% set overall = bonus.topAggregateSpenders(limit) %}
+{% for i in range(0, limit - 1) %}
+        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <td style="text-align: right">{{ i + 1 }}</td>
+            <td style="text-align: right">{{ _self.total(hoarders, i) }}</td>
+            <td>{{ _self.user(hoarders, i) }}</td>
+
+            <td style="text-align: right">{{ _self.total(spenders, i) }}</td>
+            <td>{{ _self.user(spenders, i) }}</td>
+
+            <td style="text-align: right">{{ _self.total(poolers, i) }}</td>
+            <td>{{ _self.user(poolers, i) }}</td>
+
+            <td style="text-align: right">{{ _self.total(overall, i) }}</td>
+            <td>{{ _self.user(overall, i) }}</td>
+            <td style="text-align: right">{{ i + 1 }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div>

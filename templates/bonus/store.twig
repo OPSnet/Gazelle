@@ -4,12 +4,17 @@
     {% if discount %}
     <h3 style="text-align: center; color: lime;">All prices currently {{ min(100, max(0, discount)) }}% off &mdash; Hurry, sale ends soon &mdash; While stocks last!</h3>
     {% endif %}
+    {% if admin %}
+    <div class="pad box">
+        <div class="thin">NB: Bonus Shop discounts are set in the <a href="/tools.php?action=site_options">Site Options</a>.</div>
+    </div>
+    {% endif %}
     <table>
         <thead>
             <tr class="colhead">
                 <td>Description</td>
-                <td width="45px">Points</td>
-                <td width="70px">Checkout</td>
+                <td width="60px">Points</td>
+                <td width="120px">Checkout</td>
             </tr>
         </thead>
         <tbody>

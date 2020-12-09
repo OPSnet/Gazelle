@@ -255,6 +255,10 @@ switch ($_REQUEST['action']) {
         require_once('data/user_info.php');
         break;
 
+    case 'bonus_stats':
+        require_once('data/bonus_stats.php');
+        break;
+
     case 'economic_stats':
         require_once('data/economic_stats.php');
         break;

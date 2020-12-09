@@ -89,7 +89,7 @@ if ($contest instanceof Gazelle\Contest\RequestFill) {
 if ($create || $contest) {
 
     echo G::$Twig->render('contest/admin-form.twig', [
-        'action'     => $create ? 'contest.php?action=create' : 'contest.php?action=admin&amp;id=' . $contest->id(),
+        'action'     => $create ? 'contest.php?action=create' : 'contest.php?action=admin&id=' . $contest->id(),
         'auth'       => $LoggedUser['AuthKey'],
         'contest'    => $contest,
         'create'     => $create,
