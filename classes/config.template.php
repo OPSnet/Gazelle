@@ -127,6 +127,9 @@ define("PARANOIA_OVERRIDDEN", 2);
 define('USER_TORRENT_DELETE_MAX', 3);
 define('USER_TORRENT_DELETE_HOURS', 24);
 
+define('DELETE_USER_STATS_DAILY_DAY',    15); // retain how many days worth of hourly granularity
+define('DELETE_USER_STATS_MONTHLY_DAY', 120); // retain how many days worth of daily granularity
+
 if (!defined('FEATURE_EMAIL_REENABLE')) {
     define('FEATURE_EMAIL_REENABLE', true);
 }

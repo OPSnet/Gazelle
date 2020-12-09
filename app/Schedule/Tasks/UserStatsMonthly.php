@@ -7,6 +7,10 @@ class UserStatsMonthly extends \Gazelle\Schedule\Task
     public function run()
     {
         $this->db->prepared_query("
+             DELETE FROM users_stats_monthly WHERE Time < now() - INTERVAL ? DAY
+             ", DELETE_USER_STATS_MONTHLY_DAY
+        );
+        $this->db->prepared_query("
             INSERT INTO users_stats_monthly (UserID, Uploaded, Downloaded, BonusPoints, Torrents, PerfectFLACs)
             SELECT um.ID, uls.Uploaded, uls.Downloaded, coalesce(ub.points, 0), COUNT(t.ID) AS Torrents, COALESCE(p.Perfects, 0) AS PerfectFLACs
             FROM users_main um
@@ -15,7 +19,7 @@ class UserStatsMonthly extends \Gazelle\Schedule\Task
             LEFT JOIN torrents t ON (t.UserID = um.ID)
             LEFT JOIN
             (
-                SELECT UserID, COUNT(ID) AS Perfects
+                SELECT UserID, count(*) AS Perfects
                 FROM torrents
                 WHERE( Format = 'FLAC'
                     AND (
