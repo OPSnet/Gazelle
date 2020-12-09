@@ -7,9 +7,10 @@ use \Gazelle\Exception\BonusException;
 class Bonus extends Base {
     const CACHE_ITEM = 'bonus_item';
     const CACHE_OPEN_POOL = 'bonus_pool';
-    const CACHE_SUMMARY = 'bonus_summary_';
-    const CACHE_HISTORY = 'bonus_history_';
-    const CACHE_POOL_HISTORY = 'bonus_pool_history_';
+    const CACHE_PURCHASE = 'bonus_purchase_%d';
+    const CACHE_SUMMARY = 'bonus_summary_%d';
+    const CACHE_HISTORY = 'bonus_history_%d_%d';
+    const CACHE_POOL_HISTORY = 'bonus_pool_history_%d';
 
     protected $items;
 
@@ -167,15 +168,15 @@ class Bonus extends Base {
 
         $this->cache->deleteMulti([
             self::CACHE_OPEN_POOL,
-            self::CACHE_POOL_HISTORY . $userId,
+            sprintf(self::CACHE_POOL_HISTORY, $userId),
             'user_info_heavy_' . $userId,
             'user_stats_' . $userId,
         ]);
         return true;
     }
 
-    public function getUserSummary($userId) {
-        $key = self::CACHE_SUMMARY . $userId;
+    public function userSummary($userId) {
+        $key = sprintf(self::CACHE_SUMMARY, $userId);
         $summary = $this->cache->get_value($key);
         if ($summary === false) {
             $this->db->prepared_query('
@@ -188,10 +189,10 @@ class Bonus extends Base {
         return $summary;
     }
 
-    public function getUserHistory($userId, $page, $itemsPerPage) {
-        $key = self::CACHE_HISTORY . "{$userId}.{$page}";
-        $history = $this->cache->get_value($key);
-        if ($history === false) {
+    public function userHistory(int $userId, int $limit, int $offset): array {
+        $page = $offset / $limit;
+        $key = sprintf(self::CACHE_HISTORY ,$userId, $page);
+        if (($history = $this->cache->get_value($key)) === false) {
             $this->db->prepared_query('
                 SELECT i.Title, h.Price, h.PurchaseDate, h.OtherUserID
                 FROM bonus_history h
@@ -199,18 +200,18 @@ class Bonus extends Base {
                 WHERE h.UserID = ?
                 ORDER BY PurchaseDate DESC
                 LIMIT ? OFFSET ?
-                ', $userId, $itemsPerPage, $itemsPerPage * ($page-1)
+                ', $userId, $limit, $offset
             );
-            $history = $this->db->has_results() ? $this->db->to_array() : null;
+            $history = $this->db->to_array();
             $this->cache->cache_value($key, $history, 86400 * 3);
             /* since we had to fetch this page, invalidate the next one */
-            $this->cache->delete_value(self::CACHE_HISTORY . $userId . ($page+1));
+            $this->cache->delete_value(sprintf(self::CACHE_HISTORY ,$userId, $page+1));
         }
         return $history;
     }
 
-    public function getUserPoolHistory($userId) {
-        $key = self::CACHE_POOL_HISTORY . $userId;
+    public function userPoolHistory($userId) {
+        $key = sprintf(self::CACHE_POOL_HISTORY, $userId);
         $history = $this->cache->get_value($key);
         if ($history === false) {
             $this->db->prepared_query('
@@ -222,7 +223,34 @@ class Bonus extends Base {
                 ORDER BY p.until_date, p.name
                 ', $userId
             );
-            $history = $this->db->has_results() ? $this->db->to_array() : null;
+            $history = $this->db->to_array();
+            $this->cache->cache_value($key, $history, 86400 * 3);
+        }
+        return $history;
+    }
+
+    /**
+     * Get the total purchases of all items by a user
+     *
+     * @param int user_id
+     * @return array of [title, total]
+     */
+    public function purchaseHistoryByUser(int $userId): array {
+        $key = sprintf(self::CACHE_PURCHASE, $userId);
+        if (($history = $this->cache->get_value($key)) === false) {
+            $this->db->prepared_query("
+                SELECT bi.ID as id,
+                    bi.Title AS title,
+                    count(bh.ID) AS total,
+                    sum(bh.Price) AS cost
+                FROM bonus_item bi
+                LEFT JOIN bonus_history bh ON (bh.ItemID = bi.ID)
+                WHERE bh.UserID = ?
+                GROUP BY bi.Title
+                ORDER BY bi.sequence
+                ", $userId
+            );
+            $history = $this->db->to_array('id', MYSQLI_ASSOC, false);
             $this->cache->cache_value($key, $history, 86400 * 3);
         }
         return $history;
@@ -413,12 +441,17 @@ class Bonus extends Base {
         );
     }
 
-    private function addPurchaseHistory($item_id, $userId, $price, $other_userId = null) {
-        $this->cache->delete_value(self::CACHE_SUMMARY . $userId);
-        $this->cache->delete_value(self::CACHE_HISTORY . $userId . ".1");
-        $this->db->prepared_query(
-            'INSERT INTO bonus_history (ItemID, UserID, price, OtherUserID) VALUES (?, ?, ?, ?)',
-            $item_id, $userId, $price, $other_userId
+    private function addPurchaseHistory($itemId, $userId, $price, $otherUserId = null) {
+        $this->cache->deleteMulti([
+            sprintf(self::CACHE_PURCHASE, $userId),
+            sprintf(self::CACHE_SUMMARY, $userId),
+            sprintf(self::CACHE_HISTORY, $userId, 0)
+        ]);
+        $this->db->prepared_query("
+            INSERT INTO bonus_history
+                   (ItemID, UserID, Price, OtherUserID)
+            VALUES (?,      ?,      ?,     ?)
+            ", $itemId, $userId, $price, $otherUserId
         );
         return $this->db->affected_rows();
     }

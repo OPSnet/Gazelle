@@ -60,6 +60,7 @@ if ($pool) {
 }
 
 echo G::$Twig->render('bonus/store.twig', [
+    'admin'    => check_perms('admin_bp_history'),
     'auth'     => $auth,
     'class'    => $user->classLevel(),
     'discount' => $Bonus->discount(),

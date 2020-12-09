@@ -168,6 +168,7 @@ Category('Finances', [
 <?php
 
 Category('Site Information', [
+    Item('Bonus points stats',   'tools.php?action=bonus_stats',    All(['admin_bp_history'])),
     Item('Economic stats',       'tools.php?action=economic_stats', All(['site_view_flow'])),
     Item('Torrent stats',        'tools.php?action=torrent_stats',  All(['site_view_flow'])),
     Item('Ratio watch',          'tools.php?action=ratio_watch',    All(['site_view_flow'])),
