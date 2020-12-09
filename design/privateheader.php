@@ -327,7 +327,7 @@ foreach ($NavItems as $n) {
                     </li>
                     <li id="nav_irc"<?=
                         Format::add_class($PageID, ['chat'], 'active', true)?>>
-                        <a href="wiki.php?action=article&name=irc">IRC</a>
+                        <a href="wiki.php?action=article&amp;name=irc">IRC</a>
                     </li>
                     <li id="nav_top10"<?=
                         Format::add_class($PageID, ['top10'], 'active', true)?>>
