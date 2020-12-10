@@ -75,7 +75,6 @@ class News extends \Gazelle\Base {
             $this->db->prepared_query("
                 SELECT ID, Title, Body, Time
                 FROM news
-                WHERE Time < now()
                 ORDER BY Time DESC
                 LIMIT 20
             ");
