@@ -111,7 +111,6 @@ class Blog extends \Gazelle\Base {
                 SELECT b.ID, b.Title, um.Username, b.UserID, b.Body, b.Time, b.ThreadID
                 FROM blog b
                 INNER JOIN users_main um ON (um.ID = b.UserID)
-                WHERE b.Time <= now()
                 ORDER BY b.Time DESC
                 LIMIT 20
             ");

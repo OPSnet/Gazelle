@@ -54,7 +54,6 @@ switch ($_GET['feed']) {
                     Body,
                     Time
                 FROM news
-                WHERE Time < now()
                 ORDER BY Time DESC
                 LIMIT 5");
             $News = $DB->to_array(false, MYSQLI_NUM, false);
