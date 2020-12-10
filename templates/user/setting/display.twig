@@ -62,10 +62,8 @@
             <a href="#" id="reset_sortable" class="brackets">Reset to default</a>
             <ul class="sortable_list" id="sortable">
 {% set release -%}
-    {% for r in release_order -%}
-                <li class="sortable_item">
-                    <input type="checkbox" id="{{ r.id }}"{{ checked(r.checked) }} /> <label for="{{ r.id }}">{{ r.label }}</label>
-                </li>
+    {%- for r in release_order -%}
+                <li class="sortable_item"><input type="checkbox" id="{{ r.id }}"{{ checked(r.checked) }} /> <label for="{{ r.id }}">{{ r.label }}</label></li>
     {%- endfor -%}
 {% endset -%}
                 {{- release }}
@@ -173,6 +171,8 @@
         </td>
     </tr>
 </table>
-<script type="text/javascript" id="sortable_default"><![CDATA[
-    var sortable_list_default = {{ release }};
-]]></script>
+<script type="text/javascript" id="sortable_default">
+    //<![CDATA[
+    var sortable_list_default = '{{ release }}';
+    //]]>
+</script>

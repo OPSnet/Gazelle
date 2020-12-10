@@ -5,10 +5,9 @@ use Gazelle\Manager\Notification;
 function display_paranoia($FieldName) {
     global $Paranoia;
     $Level = (in_array($FieldName . '+', $Paranoia)) ? 0 : (in_array($FieldName, $Paranoia) ? 1 : 2);
-    $level1Checked = $Level >= 1 ? ' checked="checked"' : '';
-    $level2Checked = $Level >= 2 ? ' checked="checked"' : '';
-    return "<label><input type=\"checkbox\" name=\"p_{$FieldName}_c\"level1Checked" . ' onchange="AlterParanoia()" /> Show count</label>'."&nbsp;&nbsp;\n"
-        . "<label><input type=\"checkbox\" name=\"p_{$FieldName}_l\"level1Checked" . ' onchange="AlterParanoia()" /> Show list</label>'."\n";
+    return sprintf('<label><input type="checkbox" name="p_%s_c" onchange="AlterParanoia()" /> Show count</label>&nbsp;&nbsp;
+        <label><input type="checkbox" name="p_%s_l" onchange="AlterParanoia()" /> Show list</label>',
+        $FieldName, $Level >= 1 ? ' checked="checked"' : '', $FieldName, $Level >= 2 ? ' checked="checked"' : '') . "\n";
 }
 
 $UserID = (int)$_REQUEST['userid'];
@@ -124,13 +123,13 @@ echo G::$Twig->render('user/setting.twig', [
         'download'         => !in_array('downloaded', $Paranoia),
         'invited'          => !in_array('invitedcount', $Paranoia),
         'lastseen'         => !in_array('lastseen', $Paranoia),
+        'notify'           => !in_array('notifications', $Paranoia),
         'ratio'            => !in_array('ratio', $Paranoia),
         'ratio_req'        => !in_array('requiredratio', $Paranoia),
         'upload'           => !in_array('uploaded', $Paranoia),
         'collages'         => display_paranoia('collages'),
         'collages_contrib' => display_paranoia('collagecontribs'),
         'leeching'         => display_paranoia('leeching'),
-        'notify'           => display_paranoia('notifications'),
         'perfectflacs'     => display_paranoia('perfectflacs'),
         'seeding'          => display_paranoia('seeding'),
         'snatched'         => display_paranoia('snatched'),

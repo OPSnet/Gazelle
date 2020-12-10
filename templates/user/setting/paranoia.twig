@@ -22,7 +22,7 @@
             <strong>Recent activity</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_lastseen"{{ _self.checked(paranoia.lastseen) }} /> Last seen</label>
+            <label><input type="checkbox" name="p_lastseen"{{ checked(paranoia.lastseen) }} /> Last seen</label>
         </td>
     </tr>
     <tr id="para_presets_tr">
@@ -36,9 +36,9 @@
     <tr id="para_donations_tr">
         <td class="label"><strong>Donations</strong></td>
         <td>
-            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ _self.checked(donor.visible) }} />
+            <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ checked(donor.visible) }} />
             <label for="p_donor_stats">Show donor stats</label>
-            <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"{{ _self.checked(paranoia.hide_heart) }} />
+            <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"{{ checked(paranoia.hide_heart) }} />
             <label for="p_donor_heart">Show donor heart</label>
         </td>
     </tr>
@@ -47,16 +47,16 @@
             <strong>Statistics</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"{{ _self.checked(paranoia.upload) }} /> Uploaded</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"{{ _self.checked(paranoia.download) }} /> Downloaded</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"{{ _self.checked(paranoia.ratio) }} /> Ratio</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_bonuspoints"{{ _self.checked(paranoia.bonus) }} /> Bonus Points</label>
+            <label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"{{ checked(paranoia.upload) }} /> Uploaded</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"{{ checked(paranoia.download) }} /> Downloaded</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"{{ checked(paranoia.ratio) }} /> Ratio</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_bonuspoints"{{ checked(paranoia.bonus) }} /> Bonus Points</label>
         </td>
     </tr>
     <tr id="para_reqratio_tr">
         <td class="label"><strong>Required Ratio</strong></td>
         <td>
-            <label><input type="checkbox" name="p_requiredratio"{{ _self.checked(paranoia.ratio_req) }} /> Required Ratio</label>
+            <label><input type="checkbox" name="p_requiredratio"{{ checked(paranoia.ratio_req) }} /> Required Ratio</label>
         </td>
     </tr>
     <tr id="para_comments_tr">
@@ -69,23 +69,22 @@
     </tr>
     <tr id="para_collcontr_tr">
         <td class="label"><strong>Collages (contributed to)</strong></td>
-        <td>{{ paranoia.collagecontribs|raw }}</td>
-        </td>
+        <td>{{ paranoia.collages_contrib|raw }}</td>
     </tr>
     <tr id="para_reqfill_tr">
         <td class="label"><strong>Requests (filled)</strong></td>
         <td>
-            <label><input type="checkbox" name="p_requestsfilled_count" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_fill.count) }} /> Show count</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_requestsfilled_bounty" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_fill.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_requestsfilled_list" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_fill.list) }} /> Show list</label>
+            <label><input type="checkbox" name="p_requestsfilled_count" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.count) }} /> Show count</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_requestsfilled_bounty" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_requestsfilled_list" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.list) }} /> Show list</label>
         </td>
     </tr>
     <tr id="para_reqvote_tr">
         <td class="label"><strong>Requests (voted for)</strong></td>
         <td>
-            <label><input type="checkbox" name="p_requestsvoted_count" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_vote.count) }} /> Show count</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_requestsvoted_bounty" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_vote.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
-            <label><input type="checkbox" name="p_requestsvoted_list" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_vote.list) }} /> Show list</label>
+            <label><input type="checkbox" name="p_requestsvoted_count" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.count) }} /> Show count</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_requestsvoted_bounty" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
+            <label><input type="checkbox" name="p_requestsvoted_list" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.list) }} /> Show list</label>
         </td>
     </tr>
     <tr id="para_upltor_tr">
@@ -118,7 +117,7 @@
             <strong>Torrents (upload subscriptions)</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_notifications"{{ _self.checked(paranoia.notify) }} /> Allow torrent upload subscriptions</label>
+            <label><input type="checkbox" name="p_notifications"{{ checked(paranoia.notify) }} /> Allow torrent upload subscriptions</label>
         </td>
     </tr>
     <tr id="para_invited_tr">
@@ -126,7 +125,7 @@
             <strong>Invitees</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_invitedcount"{{ _self.checked(paranoia.invited) }} /> Show count</label>
+            <label><input type="checkbox" name="p_invitedcount"{{ checked(paranoia.invited) }} /> Show count</label>
         </td>
     </tr>
     <tr id="para_artistsadded_tr">
@@ -134,7 +133,7 @@
             <strong>Artists added</strong>
         </td>
         <td>
-            <label><input type="checkbox" name="p_artistsadded"{{ _self.checked(paranoia.artists) }} /> Show count</label>
+            <label><input type="checkbox" name="p_artistsadded"{{ checked(paranoia.artists) }} /> Show count</label>
         </td>
     </tr>
     <tr id="para_preview_tr">
