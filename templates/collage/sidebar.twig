@@ -14,7 +14,7 @@ collage by {{ user_id|user_url }}
 <div class="box box_info box_statistics_collage_{{ object }}s">
     <div class="head"><strong>Statistics</strong></div>
     <ul class="stats nobullet">
-        <li>{{ object|capitalize }}s: {{ entries|number_format }}</li>
+        <li>Entries: {{ entries|number_format }}</li>
 {% if artists %}
         <li>Artists: {{ artists|number_format }}</li>
 {% endif %}
