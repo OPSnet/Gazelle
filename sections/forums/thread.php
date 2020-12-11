@@ -380,12 +380,13 @@ foreach ($thread as $Key => $Post) {
             <div style="float: left;"><a class="post_id" href="forums.php?action=viewthread&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>#post<?=$PostID?>">#<?=$PostID?></a>
                 <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum); echo "\n";?>
                 <?=time_diff($AddedTime, 2); echo "\n";?>
+                <span id="postcontrol-<?= $PostID ?>">
                 - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?=$Username?>', true);" class="brackets">Quote</a>
 <?php    if ((!$threadInfo['isLocked'] && Forums::check_forumperm($forumId, 'Write') && $AuthorID == $user->id()) || check_perms('site_moderate_forums')) { ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
-<?php
-    }
-    if (check_perms('site_admin_forums') && $threadInfo['Posts'] > 1) { ?>
+<?php } ?>
+                </span>
+<?php if (check_perms('site_admin_forums') && $threadInfo['Posts'] > 1) { ?>
                 - <a href="#post<?=$PostID?>" onclick="Delete('<?=$PostID?>');" class="brackets">Delete</a>
 <?php
     }

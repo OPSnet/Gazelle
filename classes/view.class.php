@@ -30,9 +30,9 @@ class View {
         ];
 
         if (!is_array(G::$LoggedUser) || empty(G::$LoggedUser['ID']) || $PageTitle == 'Recover Password :: ' . SITE_NAME) {
-            require(SERVER_ROOT.'/design/publicheader.php');
+            require(__DIR__ . '/../design/publicheader.php');
         } else {
-            require(SERVER_ROOT.'/design/privateheader.php');
+            require(__DIR__ . '/../design/privateheader.php');
         }
     }
 
