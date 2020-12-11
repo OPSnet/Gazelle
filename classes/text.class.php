@@ -215,9 +215,6 @@ class Text {
         $Str = display_str($Str);
         self::$Headlines = [];
 
-        // @mention
-        $Str = preg_replace('/@('.USERNAME_REGEX_SHORT.')/i', '[user]@$1[/user]', $Str);
-
         //Inline links
         $URLPrefix = '(\[url\]|\[url\=|\[img\=|\[img\])';
         $Str = preg_replace('/'.$URLPrefix.'\s+/i', '$1', $Str);
@@ -764,7 +761,7 @@ class Text {
 
         if (array_key_exists('Id', $Array) && is_string($Array[0]) && count($Array) == 2) {
             self::$Levels--;
-            return self::smileys($Array[0]);
+            return self::smileys(self::userMention($Array[0]));
         }
 
         foreach ($Array as $Key=>$Block) {
@@ -772,7 +769,7 @@ class Text {
                 continue;
             }
             if (is_string($Block)) {
-                $Str .= self::smileys($Block);
+                $Str .= self::smileys(self::userMention($Block));
                 self::$Levels--;
                 continue;
             }
@@ -1120,6 +1117,33 @@ class Text {
             }
         }
         return $Str;
+    }
+
+    private static function userMention(string $text): string {
+        return preg_replace_callback('/(?<=^|\W)@(' . USERNAME_REGEX_SHORT . ')/i',
+            function ($match) {
+                $username = $match[1];
+                static $cache;
+                if (!isset($cache[$username])) {
+                    $cache[$username] = G::$DB->scalar("
+                        SELECT ID FROM users_main WHERE Username = ?
+                        ", $username
+                    );
+                    if (is_null($cache[$username]) && preg_match('/^(.*)[.?]+$/', $username, $match)) {
+                        // strip off trailing dots to see if we can match @Spine...
+                        $username = $match[1];
+                        $cache[$username] = G::$DB->scalar("
+                            SELECT ID FROM users_main WHERE Username = ?
+                            ", $username
+                        );
+                    }
+                }
+                return is_null($cache[$username])
+                    ? $match[0]
+                    : sprintf('<a href="/user.php?id=%d">@%s</a>', $cache[$username], $username);
+            },
+            $text
+        );
     }
 
     private static function smileys($Str) {
