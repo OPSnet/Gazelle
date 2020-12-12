@@ -151,7 +151,11 @@ foreach ($Notifications as $Type => $Notification) {
     }
 }
 if ($UseNoty && !empty($NotificationSpans)) {
-    NotificationsManagerView::load_js();
+    foreach (['noty/noty.js', 'noty/layouts/bottomRight.js', 'noty/themes/default.js', 'user_notifications.js'] as $inc) {
+?>
+<script src="<?= STATIC_SERVER . "/functions/$inc" ?>?v=<?= filemtime(SERVER_ROOT . "/public/static/functions/$inc")?>" type="text/javascript"></script>
+<?php
+    }
 }
 if ($notifMan->isSkipped(Notification::SUBSCRIPTIONS)) {
     $NewSubscriptions = (new Gazelle\Manager\Subscription(G::$LoggedUser['ID']))->unread();
@@ -361,7 +365,9 @@ if ($notifMan->isTraditional(Notification::INBOX)) {
     $notifMan->loadInbox();
     $NewMessages = $notifMan->notifications();
     if (isset($NewMessages[Notification::INBOX])) {
-        $Alerts[] = NotificationsManagerView::format_traditional($NewMessages[Notification::INBOX]);
+        $Alerts[] = sprintf('<a href="%s">%s</a>',
+            $NewMessages[Notification::INBOX]['url'], $NewMessages[Notification::INBOX]['message']
+        );
     }
     $notifMan->clear();
 }
@@ -377,7 +383,9 @@ if ($notifMan->isTraditional(Notification::TORRENTS)) {
     $notifMan->loadTorrents();
     $NewTorrents = $notifMan->notifications();
     if (isset($NewTorrents[Notification::TORRENTS])) {
-        $Alerts[] = NotificationsManagerView::format_traditional($NewTorrents[Notification::TORRENTS]);
+        $Alerts[] = sprintf('<a href="%s">%s</a>',
+            $NewMessages[Notification::TORRENTS]['url'], $NewMessages[Notification::TORRENTS]['message']
+        );
     }
     $notifMan->clear();
 }
