@@ -12,7 +12,7 @@ if ($categoryId > 0 || check_perms('site_collages_renamepersonal')) {
     $Val->SetFields('name', '1', 'string', 'The name must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
     $name = trim($_POST['name']);
 } else {
-    $name = $collageName->personalCollageName($LoggedUser['Username']);
+    $name = $collageMan->personalCollageName($LoggedUser['Username']);
 }
 $Val->SetFields('description', '1', 'string', 'The description must be between 10 and 65535 characters', ['maxlength' => 65535, 'minlength' => 10]);
 

@@ -4,13 +4,12 @@ enforce_login();
 
 switch ($_GET['method'] ?? '') {
     case 'missing':
-        require(__DIR__ . '/missing.php');
+        require_once('missing.php');
         break;
     case 'single':
-        require(__DIR__ . '/single.php');
+        require_once('single.php');
         break;
-    case 'transcode':
     default:
-        require(__DIR__ . '/transcode.php');
+        require_once('transcode.php');
         break;
 }

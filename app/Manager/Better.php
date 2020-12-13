@@ -6,7 +6,7 @@ class Better extends \Gazelle\Base
 {
     protected $releaseTypes;
 
- 	    public function __construct(\Gazelle\ReleaseType $releaseMan) {
+    public function __construct(\Gazelle\ReleaseType $releaseMan) {
         parent::__construct();
         $this->releaseTypes = $releaseMan->list();
     }
@@ -123,6 +123,21 @@ class Better extends \Gazelle\Base
                 }
                 $mode = 'groups';
                 break;
+            case 'artistcollage':
+                $joins[] = "INNER JOIN collages_artists ca ON (ca.ArtistID = a.ArtistID)";
+                $where[] = "(wa.Image IS NULL OR wa.Image = '')";
+                switch ($filter) {
+                    case 'uploaded':
+                        $joins[] = $artistUserUploadJoin;
+                        $joinParams[] = $userId;
+                        break;
+                    case 'snatched':
+                        $joins[] = $artistUserSnatchJoin;
+                        $joinParams[] = $userId;
+                        break;
+                }
+                $mode = 'artists';
+                break;
             case 'artistimg':
                 $where[] = "(wa.Image IS NULL OR wa.Image = '')";
                 switch ($filter) {
@@ -135,7 +150,6 @@ class Better extends \Gazelle\Base
                         $joinParams[] = $userId;
                         break;
                 }
-
                 $mode = 'artists';
                 break;
             case 'artistdesc':
