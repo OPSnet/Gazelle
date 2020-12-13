@@ -254,12 +254,12 @@ class Contest extends Base {
         $bonus = new Bonus;
         $participants = $this->type->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
         foreach ($participants as $p) {
-            $user = new Gazelle\User($p['ID']);
+            $user = new \Gazelle\User($p['ID']);
             $totalGain = $enabledUserBonus;
-            if ($p['nr_entries']) {
-                $totalGain += $contestBonus + ($perEntryBonus * $p['nr_entries']);
+            if ($p['total_entries']) {
+                $totalGain += $contestBonus + ($perEntryBonus * $p['total_entries']);
             }
-            $log = date('Y-m-d H:i:s') ." {$p['Username']} ({$p['ID']}) n={$p['nr_entries']} t={$totalGain}";
+            $log = date('Y-m-d H:i:s') ." {$p['Username']} ({$p['ID']}) n={$p['total_entries']} t={$totalGain}";
             if ($user->hasAttr('no-fl-gifts')) {
                 fwrite($report, "$log DECLINED\n");
                 continue;
@@ -280,8 +280,8 @@ class Contest extends Base {
                     'contest_bonus'   => $contestBonus,
                     'per_entry_bonus' => $perEntryBonus,
                     'name'            => $this->info['name'],
-                    'nr_entries'      => $p['nr_entries'],
-                    'entries'         => $p['nr_entries'] == 1 ? 'entry' : 'entries',
+                    'total_entries'   => $p['total_entries'],
+                    'entries'         => $p['total_entries'] == 1 ? 'entry' : 'entries',
                 ]))
             );
             $bonus->addPoints($p['ID'], $totalGain);
@@ -289,7 +289,7 @@ class Contest extends Base {
                 UPDATE users_info SET
                     AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
                 WHERE UserID = ?
-                ", number_format($totalGain, 2) . " BP added for {$p['nr_entries']} entries in {$this->info['name']}\n\n",
+                ", number_format($totalGain, 2) . " BP added for {$p['total_entries']} entries in {$this->info['name']}\n\n",
                     $p['ID']
             );
         }

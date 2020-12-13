@@ -1,8 +1,8 @@
-{% set user_bonus = per_entry_bonus * nr_entries %}
+{% set user_bonus = per_entry_bonus * total_entries %}
 Dear {{ username }},
 
-{% if nr_entries == 0 %}
-During {{ name }} that ran from {{ date.begin }} to {{ date.end }}, you uploaded {{ nr_entries }} {{ entries }}. Each upload turned out to be worth {{ per_entry_bonus|number_format(2) }} bonus points, so your uploading activity earnt you a total of {{ user_bonus|number_format(2) }} points!
+{% if total_entries == 0 %}
+During {{ name }} that ran from {{ date.begin }} to {{ date.end }}, you uploaded {{ total_entries }} {{ entries }}. Each upload turned out to be worth {{ per_entry_bonus|number_format(2) }} bonus points, so your uploading activity earnt you a total of {{ user_bonus|number_format(2) }} points!
 
 On top of that, just because you participated, you have been awarded a further {{ contest_bonus|number_format(2) }} points. And since you are awesome and are on Orpheus anyway, the cherry on top is an additional {{ enabled_bonus|number_format(2) }} points.
 
