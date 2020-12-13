@@ -752,6 +752,12 @@ class Torrent extends \Gazelle\Base {
                     WHERE t.Time > now() - INTERVAL 3 DAY
                         AND t.Encoding IN ('Lossless', '24bit Lossless')
                         AND tg.WikiImage != ''
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM torrents_tags ttex
+                            WHERE t.GroupID = ttex.GroupID
+                                AND ttex.TagID IN (" . placeholders(HOMEPAGE_TAG_IGNORE) . ")
+                        )
                     GROUP BY t.GroupID
                 ) R
                 INNER JOIN torrents_group tg ON (tg.ID = R.groupId)
@@ -761,7 +767,8 @@ class Torrent extends \Gazelle\Base {
                 INNER JOIN users_main     um  ON (um.ID = t.UserID)
                 GROUP BY R.GroupID
                 ORDER BY R.uploadDate DESC
-            ");
+                ", ...HOMEPAGE_TAG_IGNORE
+            );
             $latest = [];
             while (count($latest) < $limit) {
                 $row = $this->db->next_record(MYSQLI_ASSOC, false);
