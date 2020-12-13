@@ -16,6 +16,7 @@
                         <option value="lineage"{{ types.lineage | selected }}>Missing Lineage</option>
                         <option value="artwork"{{ types.artwork | selected }}>Missing Artwork</option>
                         <option value="artistimg"{{ types.artistimg | selected }}>Missing Artist Images</option>
+                        <option value="artistcollage"{{ types.artistcollage | selected }}>Missing Artists Images in Artist Collages</option>
                         <option value="artistdesc"{{ types.artistdesc | selected }}>Missing Artist Descriptions</option>
                         <option value="artistdiscogs"{{ types.artistdiscogs | selected }}>Missing Artist Discogs ID</option>
                     </select>
@@ -35,9 +36,7 @@
             <tr><td>&nbsp;</td><td><input type="submit" value="Search" /></td></tr>
         </table>
     </form>
-    <div class="linkbox">
-        {{ pages | raw }}
-    </div>
+    {{ paginator.linkbox|raw }}
     <div class="box pad">
         <div class="torrent">
             <h3>There are {{ result_count }} {{ mode }} remaining
@@ -66,8 +65,5 @@
             </table>
         {% endif %}
     </div>
-    <div class="linkbox">
-        {{ pages | raw }}
-    </div>
+    {{ paginator.linkbox|raw }}
 </div>
-
