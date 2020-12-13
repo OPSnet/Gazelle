@@ -115,8 +115,7 @@ class Contest extends \Gazelle\Base {
         );
         $contests = array_map(function ($id) {return new \Gazelle\Contest($id);}, $this->db->collect(0));
         $totalParticipants = 0;
-        foreach ($contests as $id) {
-            $contest = new \Gazelle\Contest($id);
+        foreach ($contests as $contest) {
             $totalParticipants += $contest->doPayout($twig);
             $contest->setPaymentClosed();
         }
