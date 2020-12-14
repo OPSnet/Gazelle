@@ -382,3 +382,23 @@ $.fn.extend({
         return this;
     }
 });
+
+$(document).ready(function () {
+    $('#torrentssearch').focus(function () { if (this.value == 'Torrents') { this.value = ''; }});
+    $('#torrentssearch').blur(function () { if (this.value == '') { this.value = 'Torrents'; }});
+
+    $('#artistsearch').focus(function () { if (this.value == 'Artists') { this.value = ''; }});
+    $('#artistsearch').blur(function () { if (this.value == '') { this.value = 'Artists'; }});
+
+    $('#requestssearch').focus(function () { if (this.value == 'Requests') { this.value = ''; }});
+    $('#requestssearch').blur(function () { if (this.value == '') { this.value = 'Requests'; }});
+
+    $('#forumssearch').focus(function () { if (this.value == 'Forums') { this.value = ''; }});
+    $('#forumssearch').blur(function () { if (this.value == '') { this.value = 'Forums'; }});
+
+    $('#logsearch').focus(function () { if (this.value == 'Log') { this.value = ''; }});
+    $('#logsearch').blur(function () { if (this.value == '') { this.value = 'Log'; }});
+
+    $('#userssearch').focus(function () { if (this.value == 'Users') { this.value = ''; }});
+    $('#userssearch').blur(function () { if (this.value == '') { this.value = 'Users'; }});
+});
