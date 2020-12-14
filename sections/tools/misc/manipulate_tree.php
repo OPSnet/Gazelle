@@ -51,12 +51,13 @@ if ($_POST['id']) {
             $message .= " entire tree ({$inviteeCount} user" . plural($inviteeCount) . ')';
             $comment = date('Y-m-d H:i:s') . " - {$_POST['comment']}\nInvite Tree $comment on $username by {$LoggedUser['Username']}";
             foreach ($inviteeList as $inviteeId) {
+                $user = $userMan->findById($inviteeId);
                 if ($doComment) {
-                    Tools::update_user_notes($inviteeId, $comment . "\n\n");
+                    $user->addStaffNote($comment)->modify();
                 } elseif ($doDisable) {
                     Tools::disable_users($inviteeId, $comment);
                 } elseif ($doInvites) {
-                    Tools::update_user_notes($inviteeId, $comment . "\n\n");
+                    $user->addStaffNote($comment)->modify();
                     $userMan->disableInvites($inviteeId);
                 }
             }
