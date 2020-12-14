@@ -45,14 +45,15 @@ class AutoEnable {
         ", $Username, self::DENIED, self::DISCARDED
         );
 
+        $user = (new \Gazelle\Manager\User)->findById($UserID);
         $IP = $_SERVER['REMOTE_ADDR'];
-        if (!$UserID) {
+        if (is_null($user)) {
             // say what?
             $Output = '';
         } elseif ($requestExists) {
             // User already has/had a pending activation request
             $Output = sprintf(self::REJECTED_MESSAGE, BOT_DISABLED_CHAN, BOT_SERVER);
-            Tools::update_user_notes($UserID, sqltime() . " - Enable request rejected from $IP\n\n");
+            $user->addStaffNote("Enable request rejected from $IP")->modify();
         } else {
             // New disable activation request
             G::$DB->prepared_query("
@@ -66,7 +67,7 @@ class AutoEnable {
             G::$Cache->increment_value(self::CACHE_KEY_NAME);
             setcookie('username', '', time() - 60 * 60, '/', '', false);
             $Output = self::RECEIVED_MESSAGE;
-            Tools::update_user_notes($UserID, sqltime() . " - Enable request " . G::$DB->inserted_id() . " received from $IP\n\n");
+            $user->addStaffNote()->modify("Enable request " . G::$DB->inserted_id() . " received from $IP");
         }
         return $Output;
     }
@@ -146,11 +147,10 @@ class AutoEnable {
         // User notes stuff
         foreach ($UserInfo as $User) {
             [$ID, $UserID] = $User;
-            Tools::update_user_notes($UserID,
-                sqltime() . " - Enable request $ID " . strtolower(self::get_outcome_string($Status))
-                    . ' by [user]' . G::$LoggedUser['Username'] . '[/user]'
-                    . (!empty($Comment) ? "\nReason: $Comment\n\n" : "\n\n")
-            );
+            (new \Gazelle\User($UserID))->addStaffNote(
+                "Enable request $ID " . strtolower(self::get_outcome_string($Status))
+                    . ' by [user]' . G::$LoggedUser['Username'] . '[/user]' . (!empty($Comment) ? "\nReason: $Comment" : "")
+            )->modify();
         }
 
         // Update database values and decrement cache
@@ -175,19 +175,20 @@ class AutoEnable {
         if (!$ID) {
             error(404);
         }
-
-        $UserID = G::$DB->scalar("
-            SELECT UserID
-            FROM users_enable_requests
-            WHERE Outcome = ?
-                AND ID = ?
-            ", self::DISCARDED, $ID
+        $user = (new \Gazelle\Manager\User)->findById(
+            G::$DB->scalar("
+                SELECT UserID
+                FROM users_enable_requests
+                WHERE Outcome = ?
+                    AND ID = ?
+                ", self::DISCARDED, $ID
+            )
         );
-        if (!$UserID) {
+        if (is_null($user)) {
             error(404);
         }
 
-        Tools::update_user_notes($UserID, sqltime() . " - Enable request $ID unresolved by [user]" . G::$LoggedUser['Username'] . '[/user]' . "\n\n");
+        $user->addStaffNote("Enable request $ID unresolved by [user]" . G::$LoggedUser['Username'] . '[/user]')->modify();
         G::$DB->prepared_query("
             UPDATE users_enable_requests SET
                 Outcome = NULL,
@@ -240,7 +241,7 @@ class AutoEnable {
             );
             if ($Timestamp < time_minus(3600 * 48)) {
                 // Old request
-                Tools::update_user_notes($UserID, sqltime() . " - Tried to use an expired enable token from ".$_SERVER['REMOTE_ADDR']."\n\n");
+                (new \Gazelle\User($UserID))->addStaffNote("Tried to use an expired enable token from ".$_SERVER['REMOTE_ADDR'])->modify();
                 $Err = "Token has expired. Please visit ".BOT_DISABLED_CHAN." on ".BOT_SERVER." to discuss this with staff.";
             } else {
                 // Good request, decrement cache value and enable account

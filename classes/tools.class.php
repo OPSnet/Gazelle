@@ -264,20 +264,4 @@ class Tools {
         }
         G::$DB->set_query_id($QueryID);
     }
-
-    /**
-     * Update the notes of a user
-     * @param unknown $UserID ID of user
-     * @param unknown $AdminComment Comment to update with
-     */
-    public static function update_user_notes($UserID, $AdminComment) {
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query("
-            UPDATE users_info SET
-                AdminComment = CONCAT(?, AdminComment)
-            WHERE UserID = ?
-            ", $AdminComment, $UserID
-        );
-        G::$DB->set_query_id($QueryID);
-    }
 }
