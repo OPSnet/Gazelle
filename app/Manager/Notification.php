@@ -294,6 +294,26 @@ class Notification extends \Gazelle\Base {
         }
     }
 
+    public function inboxAlert() {
+        $this->loadInbox();
+        $new = $this->notifications();
+        $alert = isset($new[self::INBOX])
+            ? sprintf('<a href="%s">%s</a>', $new[self::INBOX]['url'], $new[self::INBOX]['message'])
+            : null;
+        $this->clear();
+        return $alert;
+    }
+
+    public function torrentAlert() {
+        $this->loadTorrents();
+        $new = $this->notifications();
+        $alert = isset($new[self::TORRENTS])
+            ? sprintf('<a href="%s">%s</a>', $new[self::TORRENTS]['url'], $new[self::TORRENTS]['message'])
+            : null;
+        $this->clear();
+        return $alert;
+    }
+
     public function loadNews() {
         $news = new \Gazelle\Manager\News;
         [$newsId, $title] = $news->latest();

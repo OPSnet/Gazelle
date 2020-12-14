@@ -101,6 +101,13 @@ class Payment extends \Gazelle\Base {
         return $rental;
     }
 
+    public function monthlyPercent(\Gazelle\Manager\Donation $donorMan) {
+        $monthlyRental = $this->monthlyRental();
+        return $monthlyRental == 0.0
+            ? 100
+            : min(100, (int)(($donorMan->totalMonth(1) / $monthlyRental) * 100));
+    }
+
     public function due() {
         if (($due = $this->cache->get_value('due_payments')) === false) {
             $this->db->prepared_query('
