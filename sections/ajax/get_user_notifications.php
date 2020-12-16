@@ -1,9 +1,8 @@
 <?php
 
-use \Gazelle\Manager\Notification;
+$notifMan = new Gazelle\Manager\Notification($LoggedUser['ID']);
+foreach ($_GET['type'] as $type) {
+    $notifMan->setType($type);
+}
 
-$Skip = [];
-$Skip[] = db_string($_GET['skip']);
-$Notification = new Notification($LoggedUser['ID'], $Skip);
-
-json_die("success", $Notification->notifications());
+json_print('success', $notifMan->notifications());

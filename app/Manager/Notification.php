@@ -66,15 +66,17 @@ class Notification extends \Gazelle\Base {
     protected $notifications;
     protected $settings;
     protected $skipped;
+    protected $typeList = [];
 
     public function __construct(int $userId = null, array $skip = [], bool $load = true, bool $autoSkip = true) {
+        // TODO: fix this $skip/$autoSkip insanity
         parent::__construct();
         if ($userId) {
             $this->load($userId, $skip, $load, $autoSkip);
         }
     }
 
-    protected function load($userId, $skip, $load, $autoSkip) {
+    protected function load(int $userId, array $skip, bool $load, bool $autoSkip) {
         $this->userId = $userId;
         $this->user = new \Gazelle\User($userId);
         $this->notifications = [];
@@ -122,6 +124,10 @@ class Notification extends \Gazelle\Base {
         }
     }
 
+    public function setType(string $type) {
+        $this->typeList[] = $type;
+    }
+
     public function isTraditional($type) {
         return in_array($this->settings[$type], [self::OPT_TRADITIONAL, self::OPT_TRADITIONAL_PUSH]);
     }
@@ -135,6 +141,19 @@ class Notification extends \Gazelle\Base {
     }
 
     public function notifications() {
+        if ($this->typeList) {
+            // If we are coming from the Ajax endpoint, it is possible to
+            // specify only the notifications you want, however, as soon as
+            // an Notification object is built, all the notification types
+            // are loaded. This ugly hack is here to remove them after the
+            // fact to satisfy the Ajax call.
+            $typeList = array_keys($this->notifications);
+            foreach ($typeList as $type) {
+                if (!in_array($type, $this->typeList)) {
+                    unset($this->notifications[$type]);
+                }
+            }
+        }
         return $this->notifications;
     }
 
