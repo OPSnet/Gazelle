@@ -76,7 +76,8 @@ foreach (range(1, 4) as $level) {
     }
 }
 
-View::show_header("$Username &rsaquo; Settings", 'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
+View::show_header($User->username() . " &rsaquo; Settings",
+    'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
 
 $Val = new Validate;
 echo $Val->GenerateJS('userform');
@@ -110,6 +111,7 @@ echo G::$Twig->render('user/setting.twig', [
         'visible' => $donorMan->isVisible($UserID),
     ],
     'notify' => [
+        'autosub'    => $options['AutoSubscribe'] ?: false,
         'seeded'     => $NotifyOnDeleteSeeding,
         'snatched'   => $NotifyOnDeleteSnatched,
         'downloaded' => $NotifyOnDeleteDownloaded,
@@ -149,4 +151,3 @@ echo G::$Twig->render('user/setting.twig', [
     ],
 ]);
 View::show_footer();
-
