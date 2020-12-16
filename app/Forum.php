@@ -533,14 +533,16 @@ class Forum extends Base {
      * @param int threadId The thread
      * @param string question The poll question
      * @param array answer An array of answers (between 2 and 25)
+     * @param array vots An array of votes (1 per answer)
      */
-    public function addPoll(int $threadId, string $question, array $answer) {
+    public function addPoll(int $threadId, string $question, array $answers, array $votes) {
         $this->db->prepared_query("
             INSERT INTO forums_polls
                    (TopicID, Question, Answers)
             VALUES (?,       ?,        ?)
             ", $threadId, $question, serialize($answer)
         );
+        $this->cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, 0], 0);
     }
 
     /**

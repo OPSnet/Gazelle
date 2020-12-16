@@ -1,18 +1,15 @@
 <?php
 authorize();
 
-/*
-'new' if the user is creating a new thread
-    It will be accompanied with:
-    $_POST['forum']
-    $_POST['title']
-    $_POST['body']
-
-    and optionally include:
-    $_POST['question']
-    $_POST['answers']
-    the latter of which is an array
-*/
+/* Creating a new thread
+ *   Form variables:
+ *      $_POST['forum']
+ *      $_POST['title']
+ *      $_POST['body']
+ *    optional for a poll:
+ *      $_POST['question']
+ *      $_POST['answers'] (array of answers)
+ */
 
 if ($LoggedUser['DisablePosting']) {
     error('Your posting privileges have been removed.');
@@ -64,8 +61,7 @@ $forum = new \Gazelle\Forum($ForumID);
 $threadId = $forum->addThread($LoggedUser['ID'], $Title, $Body);
 
 if ($needPoll) {
-    $forum->addPoll($threadId, $Question, $Answers);
-    $Cache->cache_value("polls_$threadId", [$Question, $Answers, $Votes, null, 0], 0);
+    $forum->addPoll($threadId, $Question, $Answers, $Votes);
     if ($ForumID == STAFF_FORUM) {
         send_irc('PRIVMSG '.MOD_CHAN.' :Poll created by '.$LoggedUser['Username'].": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
     }
