@@ -42,7 +42,7 @@ $User = new Gazelle\User($UserID);
     ", $UserID
 );
 
-$options = array_merge(Users::default_site_options(), unserialize($SiteOptions) ?? []);
+$options = array_merge(Users::default_site_options(), unserialize($SiteOptions) ?: []);
 $Paranoia = unserialize($Paranoia) ?? [];
 
 $NavItems = Users::get_nav_items();
