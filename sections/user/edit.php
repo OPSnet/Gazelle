@@ -43,7 +43,7 @@ $User = new Gazelle\User($UserID);
 );
 
 $options = array_merge(Users::default_site_options(), unserialize($SiteOptions) ?: []);
-$Paranoia = unserialize($Paranoia) ?? [];
+$Paranoia = unserialize($Paranoia) ?: [];
 
 $NavItems = Users::get_nav_items();
 $UserNavItems = array_filter(array_map('trim', explode(',', $UserNavItems)));
