@@ -23,7 +23,7 @@ View::show_header($Collage->name(), 'browse,collage,bbcode,voting');
 ?>
     <div class="sidebar">
 <?= G::$Twig->render('collage/sidebar.twig', [
-    'artists'        => number_format($Collage->numArtists()),
+    'artists'        => $Collage->numArtists(),
     'auth'           => $LoggedUser['AuthKey'],
     'can_add'        => !$Collage->isLocked()
         && (
