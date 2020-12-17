@@ -62,7 +62,7 @@
     } only
 %}
 {% include 'user/setting/personal.twig' %}
-{% include 'user/setting/paranoia.twig' %}
+{% include 'user/setting/paranoia.twig' with {'paranoia': paranoia, 'site_name': site_name} only %}
 {% include 'user/setting/access.twig' %}
     </div>
     </form>

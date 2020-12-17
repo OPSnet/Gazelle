@@ -244,7 +244,7 @@ class Donation extends \Gazelle\Base {
         return $this->db->affected_rows();
     }
 
-    protected function toggleHidden(int $userId, string $state): int {
+    protected function setHidden(int $userId, string $state): int {
         $this->db->prepared_query("
             INSERT INTO users_donor_ranks
                    (UserID, Hidden)
@@ -257,11 +257,11 @@ class Donation extends \Gazelle\Base {
     }
 
     public function hide(int $userId): int {
-        return $this->toggleHidden($userId, '1');
+        return $this->setHidden($userId, '1');
     }
 
     public function show(int $userId): int {
-        return $this->toggleHidden($userId, '0');
+        return $this->setHidden($userId, '0');
     }
 
     public function hasForumAccess($UserID) {
@@ -608,14 +608,14 @@ class Donation extends \Gazelle\Base {
         return $this->rank($userId) > 0;
     }
 
-    public function isVisible(int $userId): int {
-        return is_null($this->db->scalar("
-            SELECT Hidden
+    public function isVisible(int $userId): bool {
+        return null !== $this->db->scalar("
+            SELECT 1
             FROM users_donor_ranks
-            WHERE Hidden = '1'
+            WHERE Hidden = '0'
                 AND UserID = ?
             ", $userId
-        ));
+        );
     }
 
     protected function messageBody(string $Source, string $Currency, string $amount, int $ReceivedRank, int $CurrentRank) {

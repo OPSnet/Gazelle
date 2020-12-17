@@ -1,6 +1,6 @@
 <?php
 
-use \Gazelle\Manager\Notification;
+use Gazelle\Manager\Notification;
 
 authorize();
 
@@ -44,25 +44,25 @@ if ($Err) {
 
 // Begin building $Paranoia
 // Reduce the user's input paranoia until it becomes consistent
-if (isset($_POST['p_uniquegroups_l'])) {
-    $_POST['p_uploads_l'] = 'on';
-    $_POST['p_uploads_c'] = 'on';
+if (isset($_POST['p_l_uniquegroups'])) {
+    $_POST['p_l_uploads'] = 'on';
+    $_POST['p_c_uploads'] = 'on';
 }
 
-if (isset($_POST['p_uploads_l'])) {
-    $_POST['p_uniquegroups_l'] = 'on';
-    $_POST['p_uniquegroups_c'] = 'on';
-    $_POST['p_perfectflacs_l'] = 'on';
-    $_POST['p_perfectflacs_c'] = 'on';
+if (isset($_POST['p_l_uploads'])) {
+    $_POST['p_l_uniquegroups'] = 'on';
+    $_POST['p_l_perfectflacs'] = 'on';
+    $_POST['p_c_uniquegroups'] = 'on';
+    $_POST['p_c_perfectflacs'] = 'on';
     $_POST['p_artistsadded'] = 'on';
 }
 
-if (isset($_POST['p_collagecontribs_l'])) {
-    $_POST['p_collages_l'] = 'on';
-    $_POST['p_collages_c'] = 'on';
+if (isset($_POST['p_collagecontribs'])) {
+    $_POST['p_l_collages'] = 'on';
+    $_POST['p_c_collages'] = 'on';
 }
 
-if (isset($_POST['p_snatched_c']) && isset($_POST['p_seeding_c']) && isset($_POST['p_downloaded'])) {
+if (isset($_POST['p_c_snatched']) && isset($_POST['p_c_seeding']) && isset($_POST['p_downloaded'])) {
     $_POST['p_requiredratio'] = 'on';
 }
 
@@ -89,31 +89,21 @@ foreach ($Checkboxes as $C) {
     }
 }
 
-$SimpleSelects = ['torrentcomments', 'collages', 'collagecontribs', 'uploads', 'uniquegroups', 'perfectflacs', 'seeding', 'leeching', 'snatched'];
-foreach ($SimpleSelects as $S) {
-    if (!isset($_POST["p_$S".'_c']) && !isset($_POST["p_$S".'_l'])) {
-        // Very paranoid - don't show count or list
-        $Paranoia[] = "$S+";
-    } elseif (!isset($_POST["p_$S".'_l'])) {
-        // A little paranoid - show count, don't show list
-        $Paranoia[] = $S;
+foreach (['torrentcomments', 'collages', 'collagecontribs', 'uploads', 'uniquegroups', 'perfectflacs', 'seeding', 'leeching', 'snatched'] as $S) {
+    if (!isset($_POST["p_l_$S"])) {
+        $Paranoia[] = isset($_POST["p_c_$S"]) ? $S : "$S+";
     }
 }
 
-$Bounties = ['requestsfilled', 'requestsvoted'];
-foreach ($Bounties as $B) {
-    if (isset($_POST["p_$B".'_list'])) {
-        $_POST["p_$B".'_count'] = 'on';
-        $_POST["p_$B".'_bounty'] = 'on';
+foreach (['requestsfilled', 'requestsvoted'] as $bounty) {
+    if (isset($_POST["p_list_$bounty"])) {
+        $_POST["p_count_$bounty"] = 'on';
+        $_POST["p_bounty_$bounty"] = 'on';
     }
-    if (!isset($_POST["p_$B".'_list'])) {
-        $Paranoia[] = $B.'_list';
-    }
-    if (!isset($_POST["p_$B".'_count'])) {
-        $Paranoia[] = $B.'_count';
-    }
-    if (!isset($_POST["p_$B".'_bounty'])) {
-        $Paranoia[] = $B.'_bounty';
+    foreach (['list', 'count', 'bounty'] as $item) {
+        if (!isset($_POST["p_{$item}_{$bounty}"])) {
+            $Paranoia[] = "{$bounty}_{$item}";
+        }
     }
 }
 
@@ -168,31 +158,26 @@ if ($CurEmail != $_POST['email']) {
 }
 //End email change
 
+$ResetPassword = false;
 if (!empty($_POST['cur_pass']) && !empty($_POST['new_pass_1']) && !empty($_POST['new_pass_2'])) {
     $PassHash = $DB->scalar("
         SELECT PassHash FROM users_main WHERE ID = ?
         ", $UserID
     );
-    if (Users::check_password($_POST['cur_pass'], $PassHash)) {
-        if ($_POST['cur_pass'] == $_POST['new_pass_1']) {
-            $Err = 'Your new password cannot be the same as your old password.';
-        } else if ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
-            $Err = 'You did not enter the same password twice.';
-        }
-        else {
-            $ResetPassword = true;
-        }
+    if (!Users::check_password($_POST['cur_pass'], $PassHash)) {
+        error('You did not enter the correct password.');
     } else {
-        $Err = 'You did not enter the correct password.';
+        if ($_POST['cur_pass'] == $_POST['new_pass_1']) {
+            error('Your new password cannot be the same as your old password.');
+        } else if ($_POST['new_pass_1'] !== $_POST['new_pass_2']) {
+            error('You did not enter the same password twice.');
+        }
+        $ResetPassword = true;
     }
 }
 
 if ($LoggedUser['DisableAvatar'] && $_POST['avatar'] != $U['Avatar']) {
-    $Err = 'Your avatar privileges have been revoked.';
-}
-
-if ($Err) {
-    error($Err);
+    error('Your avatar privileges have been revoked.');
 }
 
 if (!empty($LoggedUser['DefaultSearch'])) {
@@ -254,7 +239,7 @@ $NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? '1' : 
 $NavItems = Users::get_nav_items();
 $UserNavItems = [];
 foreach ($NavItems as $n) {
-    if ($n['mandatory'] || (!empty($_POST["n_{$n['id']}"]) && $_POST["n_{$n['id']}"] == 'on')) {
+    if ($n['mandatory'] || (!empty($_POST["n_{$n['tag']}"]) && $_POST["n_{$n['tag']}"] == 'on')) {
         $UserNavItems[] = $n['id'];
     }
 }

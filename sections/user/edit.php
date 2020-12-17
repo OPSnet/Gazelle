@@ -5,8 +5,8 @@ use Gazelle\Manager\Notification;
 function display_paranoia($FieldName) {
     global $Paranoia;
     $Level = (in_array($FieldName . '+', $Paranoia)) ? 0 : (in_array($FieldName, $Paranoia) ? 1 : 2);
-    return sprintf('<label><input type="checkbox" name="p_%s_c" onchange="AlterParanoia()" /> Show count</label>&nbsp;&nbsp;
-        <label><input type="checkbox" name="p_%s_l" onchange="AlterParanoia()" /> Show list</label>',
+    return sprintf('<label><input type="checkbox" name="p_c_%s"%s onchange="AlterParanoia()" /> Show count</label>&nbsp;&nbsp;
+        <label><input type="checkbox" name="p_l_%s"%s onchange="AlterParanoia()" /> Show list</label>',
         $FieldName, $Level >= 1 ? ' checked="checked"' : '', $FieldName, $Level >= 2 ? ' checked="checked"' : '') . "\n";
 }
 
@@ -108,7 +108,6 @@ echo G::$Twig->render('user/setting.twig', [
         'enabled' => $enabledReward,
         'reward'  => $donorMan->rewards($UserID),
         'title'   => $donorMan->titles($UserID),
-        'visible' => $donorMan->isVisible($UserID),
     ],
     'notify' => [
         'autosub'    => $options['AutoSubscribe'] ?: false,
@@ -119,6 +118,7 @@ echo G::$Twig->render('user/setting.twig', [
         'settings'   => (new Notification($UserID))->settings(),
     ],
     'paranoia' => [
+        'donor_visible'    => $donorMan->isVisible($UserID),
         'artists'          => !in_array('artistsadded', $Paranoia),
         'bonus'            => !in_array('bonuspoints', $Paranoia),
         'hide_heart'       => !in_array('hide_donor_heart', $Paranoia),

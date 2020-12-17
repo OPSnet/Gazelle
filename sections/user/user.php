@@ -653,9 +653,7 @@ if (check_perms("users_mod") || $OwnProfile || $donorMan->isVisible($UserID)) {
 ?>
     </div>
     <div class="main_column">
-<?php
-if (time() < strtotime($RatioWatchEnds) && ($Downloaded * $RequiredRatio) > $Uploaded) {
-?>
+<?php if (check_perms('users_mod') && time() < strtotime($RatioWatchEnds) && ($Downloaded * $RequiredRatio) > $Uploaded) { ?>
         <div class="box">
             <div class="head">Ratio watch</div>
             <div class="pad">This user is currently on ratio watch and must upload <?=Format::get_size(($Downloaded * $RequiredRatio) - $Uploaded)?> in the next <?=time_diff($RatioWatchEnds)?>, or their leeching privileges will be revoked. Amount downloaded while on ratio watch: <?=Format::get_size($Downloaded - $RatioWatchDownload)?></div>
@@ -667,15 +665,7 @@ if (time() < strtotime($RatioWatchEnds) && ($Downloaded * $RequiredRatio) > $Upl
                 <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
             </div>
             <div class="pad profileinfo" id="profilediv">
-<?php
-if (!$Info) {
-?>
-                This profile is currently empty.
-<?php
-} else {
-    echo Text::full_format($Info);
-}
-?>
+                <?= $Info ? Text::full_format($Info) : 'This profile is currently empty.' ?>
             </div>
         </div>
 <?php

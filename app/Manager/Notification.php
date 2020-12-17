@@ -465,7 +465,6 @@ class Notification extends \Gazelle\Base {
             }
             $set[] = "$Type = ?";
             $args[] = $Result;
-            echo "$Type = $Result<br />";
         }
         $set = implode(',', $set);
         $args[] = $this->userId;
