@@ -63,11 +63,12 @@ if ($Y != SITE_LAUNCH_YEAR) {
 <div id="lightbox" class="lightbox hidden"></div>
 <div id="curtain" class="curtain hidden"></div>
 <?php
-global $NotificationSpans;
-if (!empty($NotificationSpans)) {
-    foreach ($NotificationSpans as $Notification) {
-        echo "$Notification\n";
-    }
+$notifMan = new Gazelle\Manager\Notification();
+$notifications = $notifMan->registeredNotifications(G::$LoggedUser['ID']);
+foreach ($notifications as $type => $n) {
+?>
+    <span class="noty-notification" style="display: none;" data-noty-type="<?= $type ?>" data-noty-id="<?= $n['id'] ?>" data-noty-importance="<?= $n['importance'] ?>" data-noty-url="<?= $n['url'] ?>"><?= $n['message'] ?></span>
+<?php
 }
 ?>
 <!-- Extra divs, for stylesheet developers to add imagery -->

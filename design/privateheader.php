@@ -118,31 +118,22 @@ foreach ($Scripts as $Script) {
     </script>
 
 <?php
-global $ClassLevels;
+
 // Get notifications early to change menu items if needed
-global $NotificationSpans;
 $notifMan = new Notification(G::$LoggedUser['ID']);
+
 $Notifications = $notifMan->notifications();
-$UseNoty = $notifMan->useNoty();
-$NewSubscriptions = false;
-$NotificationSpans = [];
-foreach ($Notifications as $Type => $Notification) {
-    if ($Type === Notification::SUBSCRIPTIONS) {
-        $NewSubscriptions = true;
-    }
-    if ($UseNoty) {
-        $NotificationSpans[] = "<span class=\"noty-notification\" style=\"display: none;\" data-noty-type=\"$Type\" data-noty-id=\"{$Notification['id']}\" data-noty-importance=\"{$Notification['importance']}\" data-noty-url=\"{$Notification['url']}\">{$Notification['message']}</span>";
-    }
+$NewSubscriptions = isset($Notifications[Notification::SUBSCRIPTIONS]);
+if ($notifMan->isSkipped(Notification::SUBSCRIPTIONS)) {
+    $NewSubscriptions = (new Gazelle\Manager\Subscription(G::$LoggedUser['ID']))->unread();
 }
-if ($UseNoty && !empty($NotificationSpans)) {
+
+if ($notifMan->useNoty()) {
     foreach (['noty/noty.js', 'noty/layouts/bottomRight.js', 'noty/themes/default.js', 'user_notifications.js'] as $inc) {
 ?>
 <script src="<?= STATIC_SERVER . "/functions/$inc" ?>?v=<?= filemtime(SERVER_ROOT . "/public/static/functions/$inc")?>" type="text/javascript"></script>
 <?php
     }
-}
-if ($notifMan->isSkipped(Notification::SUBSCRIPTIONS)) {
-    $NewSubscriptions = (new Gazelle\Manager\Subscription(G::$LoggedUser['ID']))->unread();
 }
 
 $payMan = new Gazelle\Manager\Payment;
@@ -315,6 +306,7 @@ foreach ($navItems as $n) {
 }
 
 $UseAdvancedSearch = isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType'];
+global $ClassLevels;
 ?>
     <meta name="viewport" content="width=device-width" />
 </head>
