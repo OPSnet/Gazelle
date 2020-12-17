@@ -68,6 +68,8 @@ class Notification extends \Gazelle\Base {
     protected $skipped;
     protected $typeList = [];
 
+    protected static $registry = [];
+
     public function __construct(int $userId = null, array $skip = [], bool $load = true, bool $autoSkip = true) {
         // TODO: fix this $skip/$autoSkip insanity
         parent::__construct();
@@ -168,6 +170,24 @@ class Notification extends \Gazelle\Base {
             'message'    => $message,
             'url'        => $url,
         ];
+        if (!$this->useNoty()) {
+            return;
+        }
+        // This is needed for Noty notifications in the privatefooter
+        // There has to be a better way
+        if (!self::$registry[$this->userId]) {
+            self::$registry[$this->userId] = [];
+        }
+        self::$registry[$this->userId][$type] = [
+            'id'         => $id,
+            'importance' => $importance,
+            'message'    => $message,
+            'url'        => $url,
+        ];
+    }
+
+    public function registeredNotifications(int $userId): array {
+        return self::$registry[$userId] ?? [];
     }
 
     public function notifyUser($userId, $type, $message, $url, $importance = self::INFO) {
