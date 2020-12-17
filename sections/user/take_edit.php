@@ -239,7 +239,7 @@ $NotifyOnDeleteDownloaded = (!empty($_POST['notifyondeletedownloaded']) ? '1' : 
 $NavItems = Users::get_nav_items();
 $UserNavItems = [];
 foreach ($NavItems as $n) {
-    if ($n['mandatory'] || (!empty($_POST["n_{$n['tag']}"]) && $_POST["n_{$n['tag']}"] == 'on')) {
+    if ($n['mandatory'] || (!empty($_POST["n_{$n['id']}"]) && $_POST["n_{$n['id']}"] == 'on')) {
         $UserNavItems[] = $n['id'];
     }
 }
