@@ -72,9 +72,12 @@ if (!empty($_GET['media']) && in_array($_GET['media'], $Media)) {
 }
 
 $releaseMan = new Gazelle\ReleaseType;
-if (!empty($_GET['releasetype']) && $releaseMan->exists($_GET['releasetype'])) {
-    $cond[] = 'tg.ReleaseType = ?';
-    $args[] = $_GET['releasetype'];
+if (!empty($_GET['releasetype'])) {
+    $releaseType = (int)$_GET['releasetype'];
+    if ($releaseMan->findNameById($releaseType)) {
+        $cond[] = 'tg.ReleaseType = ?';
+        $args[] = $releaseType;
+    }
 }
 
 if (isset($_GET['scene']) && in_array($_GET['scene'], ['1', '0'])) {
