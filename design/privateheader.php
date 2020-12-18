@@ -2,8 +2,6 @@
 
 use Gazelle\Manager\Notification;
 
-define('FOOTER_FILE', __DIR__ . '/privatefooter.php');
-
 $authArgs = '&amp;user=' . G::$LoggedUser['ID']
     . '&amp;auth=' . G::$LoggedUser['RSS_Auth']
     . '&amp;passkey=' . G::$LoggedUser['torrent_pass']
