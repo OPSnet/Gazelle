@@ -8,7 +8,7 @@ if (empty($_GET['aid']) || empty($_GET['token'])) {
     json_error('invalid parameters');
 }
 
-$api = new $className(G::$Twig, [
+$api = new $className($Twig, [
     'Categories' => $Categories,
     'CollageCats' => $CollageCats,
     'ReleaseTypes' => (new \Gazelle\ReleaseType)->list(),
