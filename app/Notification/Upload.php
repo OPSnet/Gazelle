@@ -96,13 +96,27 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add the uploader id that triggers a notification
+     * Add the uploader id that triggers a notification. If the uploader is
+     * paranoid, nobody is notified. Otherwise everyone except the uploader
+     * is notified. The uploader is notified if they explicitly set a
+     * notification on their own username.
      *
      * @param int user id of the uploader
      */
     public function addUser(int $uploaderId) {
-        $this->seenUserFilter = true;
-        return $this->addDimension('Users', $uploaderId);
+        $paranoia = unserialize($this->db->scalar("
+            SELECT Paranoia FROM users_main WHERE ID = ?
+            ", $uploaderId
+        )) ?: [];
+        if (in_array('notifications', $paranoia)) {
+            $this->cond[] = "unf.UserID != ?)";
+            $this->args[] = $this->userId;
+        } else {
+            $this->cond[] = "(unf.Users REGEXP ? OR unf.UserID != ?)";
+            $this->args[] = '(?:^$|\|' . $uploaderId . '\|)';
+            $this->args[] = $this->userId;
+        }
+        return $this;
     }
 
     /**
@@ -189,10 +203,6 @@ class Upload extends \Gazelle\Base {
      * @return array of arrays [filterid, userid]
      */
     public function lookup(): array {
-        if (!$this->seenUserFilter) {
-            $this->cond[] = "unf.UserID != ?";
-            $this->args[] = $this->userId;
-        }
         $this->db->prepared_query($this->sql(), ...$this->args);
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }

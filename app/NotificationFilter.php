@@ -50,6 +50,10 @@ class NotificationFilter extends BaseObject {
         if (is_null($info) || $info === '') {
             return [];
         };
+        // FIXME: stop leaving '||' in database when a trigger field is emptied
+        if ($info === '||') {
+            return [];
+        }
         $expand = explode('|', substr($info, 1, strlen($info) - 2));
         return $expand;
     }

@@ -98,9 +98,8 @@ class Filter extends \Gazelle\Base {
             case 'format':
             case 'encoding':
             case 'media':
-                return empty($this->field[$field])
-                    ? ''
-                    : ('|' . implode('|', $this->field[$field]) . '|');
+                $arg = '|' . implode('|', $this->field[$field]) . '|';
+                return $arg === '||' ? '' : $arg;
                 break;
         }
         return null;

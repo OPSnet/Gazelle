@@ -690,13 +690,15 @@ if ($NoRevision) {
 
 // Tags
 $tagMan = new Gazelle\Manager\Tag;
+$tagList = [];
 if (!$Properties['GroupID']) {
-    foreach ($Properties['TagList'] as $Tag) {
-        $Tag = $tagMan->resolve($tagMan->sanitize($Tag));
-        if (!empty($Tag)) {
-            $TagID = $tagMan->create($Tag, $LoggedUser['ID']);
+    foreach ($Properties['TagList'] as $tag) {
+        $tag = $tagMan->resolve($tagMan->sanitize($tag));
+        if (!empty($tag)) {
+            $TagID = $tagMan->create($tag, $LoggedUser['ID']);
             $tagMan->createTorrentTag($TagID, $GroupID, $LoggedUser['ID'], 10);
         }
+        $tagList[] = $tag;
     }
 }
 
@@ -810,7 +812,7 @@ if ($Details !== "") {
 }
 
 $AnnounceSSL = "\002TORRENT:\002 \00303{$Announce}\003"
-    . " - \00312" . implode(',', $Properties['TagList']) . "\003"
+    . " - \00312" . implode(',', $tagList) . "\003"
     . " - \00304".SITE_URL."/torrents.php?id=$GroupID\003 / \00304".SITE_URL."/torrents.php?action=download&id=$TorrentID\003";
 
 // ENT_QUOTES is needed to decode single quotes/apostrophes
@@ -963,160 +965,26 @@ $Item = $Feed->item(
     'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id=' . $TorrentID,
     $LoggedUser['Username'],
     'torrents.php?id=' . $GroupID,
-    implode(',', $Properties['TagList'])
+    implode(',', $tagList)
 );
 
-//Notifications
-$SQL = "
-    SELECT unf.ID, unf.UserID, torrent_pass
-    FROM users_notify_filters AS unf
-        JOIN users_main AS um ON um.ID = unf.UserID
-    WHERE um.Enabled = '1'";
-if (empty($ArtistsUnescaped)) {
-    $ArtistsUnescaped = $ArtistForm;
-}
-if (!empty($ArtistsUnescaped)) {
-    $ArtistNameList = [];
-    $GuestArtistNameList = [];
-    foreach ($ArtistsUnescaped as $Importance => $Artists) {
-        foreach ($Artists as $Artist) {
-            if ($Importance == 1 || $Importance == 4 || $Importance == 5 || $Importance == 6) {
-                $ArtistNameList[] = "Artists LIKE '%|".db_string(str_replace('\\', '\\\\', $Artist['name']), true)."|%'";
-            } else {
-                $GuestArtistNameList[] = "Artists LIKE '%|".db_string(str_replace('\\', '\\\\', $Artist['name']), true)."|%'";
-            }
-        }
-    }
-    // Don't add notification if >2 main artists or if tracked artist isn't a main artist
-    if (count($ArtistNameList) > 2 || $Artist['name'] == 'Various Artists') {
-        $SQL .= " AND (ExcludeVA = '0' AND (";
-        $SQL .= implode(' OR ', array_merge($ArtistNameList, $GuestArtistNameList));
-        $SQL .= " OR Artists = ''))";
-    } else {
-        $SQL .= " AND (";
-        if (!empty($GuestArtistNameList)) {
-            $SQL .= "(ExcludeVA = '0' AND (";
-            $SQL .= implode(' OR ', $GuestArtistNameList);
-            $SQL .= ')) OR ';
-        }
-        $SQL .= implode(' OR ', $ArtistNameList);
-        $SQL .= " OR Artists = '')";
-    }
-} else {
-    $SQL .= "AND (Artists = '')";
-}
+// Notifications
+$notification = new Gazelle\Notification\Upload($LoggedUser['ID']);
 
-$TagSQL = [];
-$NotTagSQL = [];
-foreach ($Properties['TagList'] as $Tag) {
-    $TagSQL[] = " Tags LIKE '%|".db_string($Tag)."|%' ";
-    $NotTagSQL[] = " NotTags LIKE '%|".db_string($Tag)."|%' ";
-}
+// By now the release is in the database, so we can read it back to get the artists
+$torMan = new Gazelle\Manager\Torrent;
+$torMan->setGroupId($GroupID)->setTorrentId($TorrentID);
 
-$TagSQL[] = "Tags = ''";
-
-$SQL .= ' AND (' . implode(' OR ', $TagSQL) . ')';
-$SQL .= " AND !(" . implode(' OR ', $NotTagSQL) . ')';
-
-$SQL .= " AND (Categories LIKE '%|".db_string($Type)."|%' OR Categories = '') ";
-
-if ($Properties['ReleaseType']) {
-    $SQL .= " AND (ReleaseTypes LIKE '%|".db_string($releaseTypes[$Properties['ReleaseType']])."|%' OR ReleaseTypes = '') ";
-} else {
-    $SQL .= " AND (ReleaseTypes = '') ";
-}
-
-/*
-    Notify based on the following:
-        1. The torrent must match the formatbitrate filter on the notification
-        2. If they set NewGroupsOnly to 1, it must also be the first torrent in the group to match the formatbitrate filter on the notification
-*/
-
-
-if ($Properties['Format']) {
-    $SQL .= " AND (Formats LIKE '%|".db_string($Properties['Format'])."|%' OR Formats = '') ";
-} else {
-    $SQL .= " AND (Formats = '') ";
-}
-
-if ($_POST['bitrate']) {
-    $SQL .= " AND (Encodings LIKE '%|".db_string($_POST['bitrate'])."|%' OR Encodings = '') ";
-} else {
-    $SQL .= " AND (Encodings = '') ";
-}
-
-if ($Properties['Media']) {
-    $SQL .= " AND (Media LIKE '%|".db_string($Properties['Media'])."|%' OR Media = '') ";
-} else {
-    $SQL .= " AND (Media = '') ";
-}
-
-// Either they aren't using NewGroupsOnly
-$SQL .= "AND ((NewGroupsOnly = '0' ";
-// Or this is the first torrent in the group to match the formatbitrate filter
-$SQL .= ") OR ( NewGroupsOnly = '1' ";
-// Test the filter doesn't match any previous formatbitrate in the group
-foreach ($seenFormatEncoding as $formatEncoding) {
-    $FormatReq = "(Formats LIKE '%|".db_string($formatEncoding['format'])."|%' OR Formats = '') ";
-    $EncodingReq = "(Encodings LIKE '%|".db_string($formatEncoding['bitrate'])."|%' OR Encodings = '') ";
-    $SQL .= "AND (NOT($FormatReq AND $EncodingReq)) ";
-}
-
-$SQL .= '))';
-
-if ($Properties['Year'] && $Properties['RemasterYear']) {
-    $SQL .= " AND (('".db_string($Properties['Year'])."' BETWEEN FromYear AND ToYear)
-            OR ('".db_string($Properties['RemasterYear'])."' BETWEEN FromYear AND ToYear)
-            OR (FromYear = 0 AND ToYear = 0)) ";
-} elseif ($Properties['Year'] || $Properties['RemasterYear']) {
-    $SQL .= " AND (('".db_string(max($Properties['Year'],$Properties['RemasterYear']))."' BETWEEN FromYear AND ToYear)
-            OR (FromYear = 0 AND ToYear = 0)) ";
-} else {
-    $SQL .= " AND (FromYear = 0 AND ToYear = 0) ";
-}
-
-$Paranoia = unserialize($DB->scalar('
-    SELECT Paranoia
-    FROM users_main
-    WHERE ID = ?
-    ', $LoggedUser['ID']
-));
-if (!is_array($Paranoia)) {
-    $Paranoia = [];
-}
-if (!in_array('notifications', $Paranoia)) {
-    $SQL .= " AND (Users LIKE '%|".$LoggedUser['ID']."|%' OR Users = '') ";
-} else {
-    $SQL .= " AND (Users ='')";
-}
-
-$SQL .= " AND (UserID != '".$LoggedUser['ID']."' OR Users LIKE '%|".$LoggedUser['ID']."|%') ";
-$DB->query($SQL);
-$Debug->set_flag('upload: notification query finished');
-
-if ($DB->has_results()) {
-    $UserArray = $DB->to_array('UserID');
-    $FilterArray = $DB->to_array('ID');
-
-    $InsertSQL = '
-        INSERT IGNORE INTO users_notify_torrents (UserID, GroupID, TorrentID, FilterID)
-        VALUES ';
-    $Rows = [];
-    foreach ($UserArray as $User) {
-        [$FilterID, $UserID, $Passkey] = $User;
-        $Rows[] = "('$UserID', '$GroupID', '$TorrentID', '$FilterID')";
-        $Feed->populate("torrents_notify_$Passkey", $Item);
-        $Cache->delete_value("notifications_new_$UserID");
-    }
-    $InsertSQL .= implode(',', $Rows);
-    $DB->query($InsertSQL);
-    $Debug->set_flag('upload: notification inserts finished');
-
-    foreach ($FilterArray as $Filter) {
-        [$FilterID, $UserID, $Passkey] = $Filter;
-        $Feed->populate("torrents_notify_{$FilterID}_$Passkey", $Item);
-    }
-}
+$notification->addFormat($Properties['Format'])
+    ->addEncodings($Properties['Encoding'])
+    ->addMedia($Properties['Media'])
+    ->addYear($Properties['Year'], $Properties['RemasterYear'])
+    ->addArtists($torMan->artistRole())
+    ->addTags($tagList)
+    ->addCategory($Type)
+    ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
+    ->addUser($LoggedUser['ID'])
+    ->trigger($GroupID, $TorrentID, $Feed, $Item);
 
 // RSS for bookmarks
 $DB->prepared_query('

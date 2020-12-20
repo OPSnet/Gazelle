@@ -832,7 +832,7 @@ class User extends BaseObject {
             }
         }
         $change = 0;
-        if ($info['Artists'] === '|') {
+        if ($info['Artists'] === '||') {
             $this->db->prepared_query("
                 DELETE FROM users_notify_filters
                 WHERE ID = ?
