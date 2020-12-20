@@ -17,8 +17,6 @@ if (empty($_GET['revisionid'])) {
 
 //----------------- Build list and get stats
 
-$User = new Gazelle\User($LoggedUser['ID']);
-$bookmark = new Gazelle\Bookmark;
 $artistMan = new Gazelle\Manager\Artist;
 try {
     $Artist = new Gazelle\Artist($ArtistID, $RevisionID);
@@ -26,8 +24,11 @@ try {
 catch (\Exception $e) {
     error(404);
 }
-
 $Artist->loadArtistRole();
+
+$bookmark = new Gazelle\Bookmark;
+$collageMan = new Gazelle\Manager\Collage;
+$User = new Gazelle\User($LoggedUser['ID']);
 
 function torrentEdition($title, $year, $recordLabel, $catlogueNumber, $media) {
     return implode('::', [$title, $year, $recordLabel, $catlogueNumber, $media]);
@@ -98,7 +99,7 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
 <?php } ?>
 
         <div class="box box_search">
-            <div class="head"><strong>File Lists Search</strong></div>
+            <div class="head" title="Use this to find a particular song or track in a release"><strong>File Lists Search</strong></div>
             <ul class="nobullet">
                 <li>
                     <form class="search_form" name="filelists" action="torrents.php">
@@ -110,9 +111,118 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
                 </li>
             </ul>
         </div>
-
+        <div class="box box_tags">
+            <div class="head"><strong>Tags</strong></div>
+            <ul class="stats nobullet">
+<?php
+$artistReleaseType = [];
+$sections = $Artist->sections();
+foreach ($sections as $sectionId => $groupList) {
+    if (!isset($artistReleaseType[$sectionId])) {
+        $artistReleaseType[$sectionId] = 0;
+    }
+    $artistReleaseType[$sectionId]++;
+    foreach(array_keys($groupList) as $groupId) {
+        $group = $Artist->group($groupId);
+        if (!in_array($group['ReleaseType'], [3, 7])) { // Skip compilations and soundtracks
+            new Tags($group['TagList'], true);
+        }
+    }
+}
+echo Tags::topAsHtml(50, 'torrents.php?taglist=', $name);
+Tags::reset();
+?>
+            </ul>
+        </div>
+        <div class="box box_info box_statistics_artist">
+            <div class="head"><strong>Statistics</strong></div>
+            <ul class="stats nobullet">
+                <li>Number of groups: <?= number_format($Artist->nrGroups()) ?></li>
+                <li>Number of torrents: <?= number_format($Artist->nrTorrents()) ?></li>
+                <li>Number of seeders: <?= number_format($Artist->nrSeeders()) ?></li>
+                <li>Number of leechers: <?= number_format($Artist->nrLeechers()) ?></li>
+                <li>Number of snatches: <?= number_format($Artist->nrSnatches()) ?></li>
+            </ul>
+        </div>
+        <div class="box box_info box_addcollage_artist">
+            <div class="head"><strong>Add to artist collage</strong></div>
+                <div class="box pad">
+                    <form action="collages.php" method="post">
+                    <select name="collage_combo">
+                        <option value="0">Choose recent...</option>
+<?php foreach($collageMan->addToArtistCollageDefault($User, $ArtistID) as $id => $name) { ?>
+                        <option value="<?= $id ?>"><?= $name ?></option>
+<?php } ?>
+                    </select>
+                    <div> or enter Collage ID or URL</div>
+                    <input type="text" name="collage_ref" size="25" />
+                    <input type="hidden" name="action" value="add_artist" />
+                    <input type="hidden" name="artistid" value="<?= $ArtistID ?>" />
+                    <input type="hidden" name="userid" value="<?= $LoggedUser['ID'] ?>" />
+                    <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
+                    <br /><br /><input type="submit" value="Add" />
+                    </form>
+            </div>
+        </div>
+        <div class="box box_info box_metadata_artist">
+            <div class="head"><strong>Metadata</strong></div>
+            <ul class="stats nobullet">
+                <li>Discogs ID: <?= $Artist->discogsId() ?: '<i>not set</i>' ?></li>
+<?php if ($Artist->discogsId()) { ?>
+                <li>Name: <?= $Artist->discogsName() ?><?= $Artist->discogsIsPreferred()
+                    ? '<span title="This artist does not need to display a sequence number for disambiguation">' . " \xE2\x98\x85</span>" : '' ?></li>
+                <li><span title="Artists having the same name">Synonyms: <?= $Artist->homonymCount() - 1 ?></span></li>
+<?php } ?>
+            </ul>
+        </div>
+        <div class="box box_artists">
+            <div class="head"><strong>Similar Artists</strong></div>
+            <ul class="stats nobullet">
 <?php
 
+if (!$Artist->similarArtists()) { ?>
+                <li><span style="font-style: italic;">None found</span></li>
+<?php
+}
+$Max = null;
+foreach ($Artist->similarArtists() as $SimilarArtist) {
+    [$Artist2ID, $Artist2Name, $Score, $SimilarID] = $SimilarArtist;
+    $Score = $Score / 100;
+    if (is_null($Max)) {
+        $Max = $Score + 1;
+    }
+    $FontSize = ceil(((($Score - 2) / $Max - 2) * 4)) + 8;
+?>
+                <li>
+                    <span class="tooltip" title="<?=$Score?>"><a href="artist.php?id=<?=$Artist2ID?>" style="float: left; display: block;"><?=$Artist2Name?></a></span>
+                    <div style="float: right; display: block; letter-spacing: -1px;">
+                        <a href="artist.php?action=vote_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;way=up" class="tooltip brackets vote_artist_up" title="Vote up this similar artist. Use this when you feel that the two artists are quite similar.">&and;</a>
+                        <a href="artist.php?action=vote_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;way=down" class="tooltip brackets vote_artist_down" title="Vote down this similar artist. Use this when you feel that the two artists are not all that similar.">&or;</a>
+<?php   if (check_perms('site_delete_tag')) { ?>
+                        <span class="remove remove_artist"><a href="artist.php?action=delete_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="tooltip brackets" title="Remove this similar artist">X</a></span>
+<?php   } ?>
+                    </div>
+                    <br style="clear: both;" />
+                </li>
+<?php } /* foreach ($Artist->similarArtists()) */ ?>
+            </ul>
+        </div>
+        <div class="box box_addartists box_addartists_similar">
+            <div class="head"><strong>Add similar artist</strong></div>
+            <ul class="nobullet">
+                <li>
+                    <form class="add_form" name="similar_artists" action="artist.php" method="post">
+                        <input type="hidden" name="action" value="add_similar" />
+                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
+                        <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
+                        <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"<?php Users::has_autocomplete_enabled('other'); ?> />
+                        <input type="submit" value="+" />
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+<?php
 if (check_perms('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
         [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
@@ -172,96 +282,7 @@ foreach ($ZIPOptions as $Option) {
         </div>
 <?php
 } /* if (check_perms('zip_downloader')) */ ?>
-        <div class="box box_tags">
-            <div class="head"><strong>Tags</strong></div>
-            <ul class="stats nobullet">
-<?php
-$artistReleaseType = [];
-$sections = $Artist->sections();
-foreach ($sections as $sectionId => $groupList) {
-    if (!isset($artistReleaseType[$sectionId])) {
-        $artistReleaseType[$sectionId] = 0;
-    }
-    $artistReleaseType[$sectionId]++;
-    foreach(array_keys($groupList) as $groupId) {
-        $group = $Artist->group($groupId);
-        if (!in_array($group['ReleaseType'], [3, 7])) { // Skip compilations and soundtracks
-            new Tags($group['TagList'], true);
-        }
-    }
-}
-echo Tags::topAsHtml(50, 'torrents.php?taglist=', $name);
-Tags::reset();
-?>
-            </ul>
-        </div>
-        <div class="box box_info box_statistics_artist">
-            <div class="head"><strong>Statistics</strong></div>
-            <ul class="stats nobullet">
-                <li>Number of groups: <?= number_format($Artist->nrGroups()) ?></li>
-                <li>Number of torrents: <?= number_format($Artist->nrTorrents()) ?></li>
-                <li>Number of seeders: <?= number_format($Artist->nrSeeders()) ?></li>
-                <li>Number of leechers: <?= number_format($Artist->nrLeechers()) ?></li>
-                <li>Number of snatches: <?= number_format($Artist->nrSnatches()) ?></li>
-            </ul>
-        </div>
-        <div class="box box_info box_metadata_artist">
-            <div class="head"><strong>Metadata</strong></div>
-            <ul class="stats nobullet">
-                <li>Discogs ID: <?= $Artist->discogsId() ?: '<i>not set</i>' ?></li>
-<?php if ($Artist->discogsId()) { ?>
-                <li>Name: <?= $Artist->discogsName() ?><?= $Artist->discogsIsPreferred()
-                    ? '<span title="This artist does not need to display a sequence number for disambiguation">' . " \xE2\x98\x85</span>" : '' ?></li>
-                <li><span title="Artists having the same name">Synonyms: <?= $Artist->homonymCount() - 1 ?></span></li>
-<?php } ?>
-            </ul>
-        </div>
-        <div class="box box_artists">
-            <div class="head"><strong>Similar Artists</strong></div>
-            <ul class="stats nobullet">
-<?php
 
-if (!$Artist->similarArtists()) { ?>
-                <li><span style="font-style: italic;">None found</span></li>
-<?php
-}
-$Max = null;
-foreach ($Artist->similarArtists() as $SimilarArtist) {
-    [$Artist2ID, $Artist2Name, $Score, $SimilarID] = $SimilarArtist;
-    $Score = $Score / 100;
-    if (is_null($Max)) {
-        $Max = $Score + 1;
-    }
-    $FontSize = ceil(((($Score - 2) / $Max - 2) * 4)) + 8;
-?>
-                <li>
-                    <span class="tooltip" title="<?=$Score?>"><a href="artist.php?id=<?=$Artist2ID?>" style="float: left; display: block;"><?=$Artist2Name?></a></span>
-                    <div style="float: right; display: block; letter-spacing: -1px;">
-                        <a href="artist.php?action=vote_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;way=up" class="tooltip brackets vote_artist_up" title="Vote up this similar artist. Use this when you feel that the two artists are quite similar.">&and;</a>
-                        <a href="artist.php?action=vote_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;way=down" class="tooltip brackets vote_artist_down" title="Vote down this similar artist. Use this when you feel that the two artists are not all that similar.">&or;</a>
-<?php   if (check_perms('site_delete_tag')) { ?>
-                        <span class="remove remove_artist"><a href="artist.php?action=delete_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="tooltip brackets" title="Remove this similar artist">X</a></span>
-<?php   } ?>
-                    </div>
-                    <br style="clear: both;" />
-                </li>
-<?php } /* foreach ($Artist->similarArtists()) */ ?>
-            </ul>
-        </div>
-        <div class="box box_addartists box_addartists_similar">
-            <div class="head"><strong>Add similar artist</strong></div>
-            <ul class="nobullet">
-                <li>
-                    <form class="add_form" name="similar_artists" action="artist.php" method="post">
-                        <input type="hidden" name="action" value="add_similar" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-                        <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
-                        <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"<?php Users::has_autocomplete_enabled('other'); ?> />
-                        <input type="submit" value="+" />
-                    </form>
-                </li>
-            </ul>
-        </div>
     </div>
     <div class="main_column">
 
