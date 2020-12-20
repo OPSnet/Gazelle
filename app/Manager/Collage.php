@@ -4,6 +4,9 @@ namespace Gazelle\Manager;
 
 class Collage extends \Gazelle\Base {
 
+    protected const CACHE_DEFAULT_ARTIST = 'collage_default_artist_%d';
+    protected const CACHE_DEFAULT_GROUP = 'collage_default_group_%d';
+
     public function create(\Gazelle\User $user, int $categoryId, string $name, string $description, string $tagList, \Gazelle\Log $logger) {
         $this->db->prepared_query("
             INSERT INTO collages
@@ -30,6 +33,20 @@ class Collage extends \Gazelle\Base {
             LIMIT 1
             ", trim($name)
         );
+    }
+
+    public function findById(int $id): ?\Gazelle\Collage {
+        return $this->db->scalar("SELECT ID FROM collages WHERE ID = ?", $id)
+            ? new \Gazelle\Collage($id)
+            : null;
+    }
+
+    public function findByName(string $name): ?\Gazelle\Collage {
+        $id = $this->db->scalar("
+            SELECT ID FROM collages WHERE Name = ?
+            ", $name
+        );
+        return $id ? new \Gazelle\Collage($id) : null;
     }
 
     public function recoverById(int $id) {
@@ -83,5 +100,143 @@ class Collage extends \Gazelle\Base {
             );
         }
         return $new;
+    }
+
+    protected function idsToNames(array $idList): array {
+        $this->db->prepared_query("
+            SELECT c.ID AS id,
+                c.Name AS name
+            FROM collages c
+            WHERE c.ID IN (" . placeholders($idList) . ")
+            ORDER BY c.Updated DESC
+            ", ...$idList
+        );
+        return $this->db->to_pair('id', 'name');
+    }
+
+    public function addToArtistCollageDefault(\Gazelle\User $user, int $artistId): array {
+        $key = sprintf(self::CACHE_DEFAULT_ARTIST, $user->id());
+        if (($default = $this->cache->get_value($key)) === false) {
+            // Ensure that some of the creator's collages are in the result
+            $this->db->prepared_query("
+                SELECT c.ID
+                FROM collages c
+                WHERE c.Locked = '0'
+                    AND c.Deleted = '0'
+                    AND c.UserID = ?
+                    AND c.CategoryID = ?
+                    AND NOT EXISTS (
+                        SELECT 1 FROM collages_artists WHERE CollageID = c.ID AND ArtistID = ?
+                    )
+                ORDER BY c.Updated DESC
+                LIMIT 3
+                ", $user->id(), COLLAGE_ARTISTS_ID, $artistId
+            );
+            $list = $this->db->collect(0);
+            if (empty($list)) {
+                // Prevent empty IN operator: WHERE ID IN ()
+                $list = [0];
+            }
+
+            // Ensure that some of the other collages the user has worked on are present
+            $this->db->prepared_query("
+                SELECT DISTINCT c.ID
+                FROM collages c
+                INNER JOIN collages_artists ca ON (ca.CollageID = c.ID AND ca.UserID = ?)
+                WHERE c.Locked = '0'
+                    AND c.Deleted = '0'
+                    AND c.UserID != ?
+                    AND c.CategoryID = ?
+                    AND NOT EXISTS (
+                        SELECT 1 FROM collages_artists WHERE CollageID = c.ID AND ArtistID = ?
+                    )
+                    AND c.ID NOT IN (" . placeholders($list) . ")
+                ORDER BY c.Updated DESC LIMIT 5
+                ", $user->id(), $user->id(), COLLAGE_ARTISTS_ID, $artistId, ...$list
+            );
+            $default = $this->idsToNames(array_merge($list, $this->db->collect(0)));
+            $this->cache->cache_value($key, $default, 86400);
+        }
+        return $default;
+    }
+
+    public function addToCollageDefault(\Gazelle\User $user, int $groupId): array {
+        $key = sprintf(self::CACHE_DEFAULT_GROUP, $user->id());
+        if (($default = $this->cache->get_value($key)) === false) {
+            // All of their personal collages are in the result
+            $this->db->prepared_query("
+                SELECT c.ID
+                FROM collages c
+                WHERE c.Locked = '0'
+                    AND c.Deleted = '0'
+                    AND c.UserID = ?
+                    AND c.CategoryID = ?
+                    AND NOT EXISTS (
+                        SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
+                    )
+                ", $user->id(), COLLAGE_PERSONAL_ID, $groupId
+            );
+            $list = $this->db->collect(0) ?: [0];
+
+            // Ensure that some of the other collages the user has worked on are present
+            $this->db->prepared_query("
+                SELECT DISTINCT c.ID
+                FROM collages c
+                INNER JOIN collages_torrents ca ON (ca.CollageID = c.ID AND ca.UserID = ?)
+                WHERE c.Locked = '0'
+                    AND c.Deleted = '0'
+                    AND ca.UserID = ?
+                    AND c.CategoryID != ?
+                    AND NOT EXISTS (
+                        SELECT 1 FROM collages_torrents WHERE CollageID = c.ID AND GroupID = ?
+                    )
+                    AND c.ID NOT IN (" . placeholders($list) . ")
+                ORDER BY c.Updated DESC LIMIT 8
+                ", $user->id(), $user->id(), COLLAGE_ARTISTS_ID, $groupId, ...$list
+            );
+            unset($list[0]);
+            $default = $this->idsToNames(array_merge($list, $this->db->collect(0)));
+            $this->cache->cache_value($key, $default, 86400);
+        }
+        return $default;
+    }
+
+    public function flushDefaultArtist(int $userId) {
+        $this->cache->delete_value(sprintf(self::CACHE_DEFAULT_ARTIST, $userId));
+    }
+
+    public function flushDefaultGroup(int $userId) {
+        $this->cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $userId));
+    }
+
+    public function autocomplete(string $text): array {
+        $maxLength = 10;
+        $length = min($maxLength, max(1, mb_strlen($text)));
+        if ($length < 3) {
+            return [];
+        }
+        $stem = mb_strtolower(mb_substr($text, 0, $length));
+        $key = 'autocomplete_collage_' . $length . '_' . $stem;
+        if (($autcomplete = $this->cache->get($key)) === false) {
+            $this->db->prepared_query("
+                SELECT ID,
+                    Name
+                FROM collages
+                WHERE Locked = '0'
+                    AND Deleted = '0'
+                    AND CategoryID NOT IN (?, ?)
+                    AND lower(Name) LIKE concat('%', ?, '%')
+                ORDER BY NumTorrents DESC, Name
+                LIMIT 10
+                ", COLLAGE_ARTISTS_ID, COLLAGE_PERSONAL_ID, $stem
+            );
+            $pairs = $this->db->to_pair('ID', 'Name', false);
+            $autocomplete = [];
+            foreach($pairs as $key => $value) {
+                $autocomplete[] = ['data' => $key, 'value' => $value];
+            }
+            $this->cache->cache_value($key, $autocomplete, 1800 + 7200 * ($maxLength - $length));
+        }
+        return $autocomplete;
     }
 }

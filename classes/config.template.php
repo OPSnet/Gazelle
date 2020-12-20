@@ -273,6 +273,7 @@ $CollageCats = [
     8 => 'Awards',
     9 => 'Series',
 ];
+define('COLLAGE_PERSONAL_ID', 0);
 define('COLLAGE_ARTISTS_ID', 7);
 
 $ZIPGroups = [

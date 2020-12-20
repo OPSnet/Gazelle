@@ -1,4 +1,5 @@
 var ARTIST_AUTOCOMPLETE_URL = 'artist.php?action=autocomplete';
+var COLLAGE_AUTOCOMPLETE_URL = 'collages.php?action=autocomplete';
 var TAGS_AUTOCOMPLETE_URL = 'torrents.php?action=autocomplete_tags';
 var SELECTOR = '[data-gazelle-autocomplete="true"]';
 $(document).ready(function() {
@@ -20,6 +21,10 @@ $(document).ready(function() {
         $("#artistsimilar" + SELECTOR).autocomplete({
             deferRequestBy: 300,
             serviceUrl : ARTIST_AUTOCOMPLETE_URL
+        });
+        $("#collage_ref" + SELECTOR).autocomplete({
+            deferRequestBy: 300,
+            serviceUrl : COLLAGE_AUTOCOMPLETE_URL
         });
     }
     if (url.path == 'torrents' || url.path == 'upload' || url.path == 'collages' || url.path == 'requests' || url.path == 'top10' || (url.path == 'requests' && url.query['action'] == 'new')) {

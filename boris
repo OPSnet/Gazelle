@@ -39,14 +39,13 @@ $b = new \Boris\Boris(SITE_NAME . '> ');
 $preload = [
     'cache'       => $Cache,
     'db'          => $DB,
+    'debug'       => $Debug,
     'bonus'       => new \Gazelle\Bonus,
-    'fileHtml'    => new \Gazelle\File\RipLogHTML,
-    'fileLog'     => new \Gazelle\File\RipLog,
-    'fileTorrent' => new \Gazelle\File\Torrent,
     'forum'       => new \Gazelle\Forum,
-    'stylesheet'  => new \Gazelle\Stylesheet,
+    'collMan'     => new \Gazelle\Manager\Collage,
     'tagMan'      => new \Gazelle\Manager\Tag,
     'torMan'      => new \Gazelle\Manager\Torrent,
+    'userMan'     => new \Gazelle\Manager\User,
     'twig'        => new Twig\Environment(
         new Twig\Loader\FilesystemLoader('templates'),
         ['debug'=> true, 'cache' => __DIR__ . '/cache/twig']
