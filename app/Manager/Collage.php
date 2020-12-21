@@ -103,6 +103,9 @@ class Collage extends \Gazelle\Base {
     }
 
     protected function idsToNames(array $idList): array {
+        if (empty($idList)) {
+            return [];
+        }
         $this->db->prepared_query("
             SELECT c.ID AS id,
                 c.Name AS name
