@@ -210,7 +210,7 @@ class Text {
      * @return string
      */
     public static function full_format($Str, $OutputTOC = true, $Min = 3, $Rules = false) {
-        global $Debug;
+        $Debug = new \Gazelle\Debug;
         $Debug->set_flag('BBCode start');
         $Str = display_str($Str);
         self::$Headlines = [];

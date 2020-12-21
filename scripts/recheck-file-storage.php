@@ -55,7 +55,7 @@ if ($argc < 2 || !isset($allConfig[$argv[1]])) {
 }
 $config = $allConfig[$argv[1]];
 
-$Debug = new DEBUG;
+$Debug = new Gazelle\Debug;
 $Debug->handle_errors();
 
 ini_set('max_execution_time', -1);

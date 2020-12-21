@@ -30,8 +30,8 @@ require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
 
 $Cache = new CACHE;
 $DB = new DB_MYSQL;
-$Debug = new DEBUG;
-$Debug->handle_errors();
+$Debug = new \Gazelle\Debug;
+$Debug->setStartTime(microtime(true))->handle_errors();
 
 G::init($DB, $Cache);
 

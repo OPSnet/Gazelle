@@ -9,7 +9,7 @@
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
-$ScriptStartTime = microtime(true); //To track how long a page takes to create
+$now = microtime(true);
 
 //Lets prevent people from clearing feeds
 if (isset($_GET['clearcache'])) {
@@ -22,7 +22,8 @@ require_once(__DIR__.'/../classes/util.php');
 
 $Cache = new CACHE;
 $DB = new DB_MYSQL;
-$Debug = new DEBUG;
+$Debug = new Gazelle\Debug;
+$Debug->setStartTime($now);
 $Twig = new Environment(
     new FilesystemLoader(__DIR__.'/../templates'),
     [

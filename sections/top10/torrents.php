@@ -217,7 +217,7 @@ function generate_torrent_table($caption, $tag, $details, $limit) {
     $artists = Artists::get_artists($groupIds);
 
     $bookmark = new \Gazelle\Bookmark;
-    global $Debug;
+    $Debug = new \Gazelle\Debug;
     foreach ($details as $index => $detail) {
         [$torrentID, $groupID, $data] = $detail;
         $group = $groups[$groupID];

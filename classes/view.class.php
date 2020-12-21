@@ -49,7 +49,7 @@ class View {
             return;
         }
         self::$footerSeen = true;
-        global $ScriptStartTime, $SessionID, $UserSessions, $Debug, $Time;
+        global $SessionID, $UserSessions, $Debug, $Time;
         if (!is_array(G::$LoggedUser) || (isset($Options['recover']) && $Options['recover'] === true)) {
             require(__DIR__ . '/../design/publicfooter.php');
         } else {

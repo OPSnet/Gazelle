@@ -170,7 +170,7 @@ class DB_MYSQL {
         if ($this->Errno == 1062) {
             throw new DB_MYSQL_DuplicateKeyException;
         }
-        global $Debug, $argv;
+        $Debug = new \Gazelle\Debug;
         $DBError = 'MySQL: '.strval($Msg).' SQL error: '.strval($this->Errno).' ('.strval($this->Error).')';
         if ($this->Errno == 1194) {
             send_irc('PRIVMSG ' . ADMIN_CHAN . ' :' . $DBError);

@@ -175,7 +175,7 @@ class Notification extends \Gazelle\Base {
         }
         // This is needed for Noty notifications in the privatefooter
         // There has to be a better way
-        if (!self::$registry[$this->userId]) {
+        if (!isset(self::$registry[$this->userId])) {
             self::$registry[$this->userId] = [];
         }
         self::$registry[$this->userId][$type] = [

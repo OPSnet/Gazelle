@@ -83,7 +83,7 @@ abstract class Json extends Base {
         if (!check_perms('site_debug')) {
             return [];
         }
-        global $Debug;
+        $Debug = new \Gazelle\Debug;
         return [
             'debug' => [
                 'queries'  => $Debug->get_queries(),

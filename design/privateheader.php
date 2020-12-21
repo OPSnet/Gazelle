@@ -57,7 +57,18 @@ if (isset(G::$LoggedUser['Notify'])) {
         STATIC_SERVER?>/styles/global.css?v=<?=filemtime(SERVER_ROOT.'/sass/global.scss')?>" />
 <?php
 
-$Scripts = array_merge(['jquery', 'script_start', 'ajax.class', 'global', 'jquery.autocomplete', 'autocomplete', 'jquery.countdown.min'], explode(',', $JSIncludes));
+$Scripts = [
+    'jquery',
+    'script_start',
+    'ajax.class',
+    'global',
+    'jquery.autocomplete',
+    'autocomplete',
+    'jquery.countdown.min'
+];
+if (!empty($JSIncludes)) {
+    $Scripts = array_merge($Scripts, explode(',', $JSIncludes));
+}
 
 if (DEBUG_MODE || check_perms('site_debug')) {
     $Scripts[] = 'jquery-migrate';
