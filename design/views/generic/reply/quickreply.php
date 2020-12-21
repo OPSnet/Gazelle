@@ -35,7 +35,7 @@
             'SubscribeBox' => true
         ));
  */
-    global $HeavyInfo, $UserSubscriptions, $ThreadInfo, $ForumsDoublePost, $Document;
+    global $HeavyInfo, $UserSubscriptions, $ThreadInfo, $ForumsDoublePost;
 
     if (G::$LoggedUser['DisablePosting']) {
         return;
@@ -123,7 +123,7 @@
                         <div class="preview_submit">
 <?php
     $subscription = new \Gazelle\Manager\Subscription(G::$LoggedUser['ID']);
-    if (isset($SubscribeBox) && !isset($ForumID) && !$subscription->isSubscribedComments($Document, $InputID)) {
+    if (isset($SubscribeBox) && !isset($ForumID) && !$subscription->isSubscribedComments(\Gazelle\SiteInfo::page(), $InputID)) {
 ?>
                             <input id="subscribebox" type="checkbox" name="subscribe"<?=!empty($HeavyInfo['AutoSubscribe']) ? ' checked="checked"' : ''?> tabindex="2" />
                             <label for="subscribebox">Subscribe</label>
