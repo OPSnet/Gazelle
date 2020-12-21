@@ -11,7 +11,7 @@ class SiteLog extends \Gazelle\Base {
     protected $qid;
     protected $usernames;
 
-    public function __construct (\DEBUG $debug) {
+    public function __construct (\Gazelle\Debug $debug) {
         parent::__construct();
         $this->debug = $debug;
         $this->usernames = [];

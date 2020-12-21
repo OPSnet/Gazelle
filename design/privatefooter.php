@@ -51,7 +51,7 @@ if ($Y != SITE_LAUNCH_YEAR) {
 }
 ?>
     <p>
-        <strong>Time:</strong> <span><?=number_format(((microtime(true) - $ScriptStartTime) * 1000), 5)?> ms</span>
+        <strong>Time:</strong> <span><?=number_format(((microtime(true) - $Debug->startTime()) * 1000), 5)?> ms</span>
         <strong>Used:</strong> <span><?=Format::get_size(memory_get_usage(true))?></span>
         <strong>Load:</strong> <span><?=number_format($Load[0], 2).' '.number_format($Load[1], 2).' '.number_format($Load[2], 2)?></span>
         <strong>Date:</strong> <span id="site_date"><?=date('Y-m-d')?></span> <span id="site_time"><?=date('H:i')?></span>

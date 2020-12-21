@@ -17,7 +17,7 @@ use Twig\Environment;
 
 set_include_path(SERVER_ROOT);
 
-$Debug = new DEBUG;
+$Debug = new Gazelle\Debug;
 $Debug->handle_errors();
 $Debug->set_flag('Debug constructed');
 

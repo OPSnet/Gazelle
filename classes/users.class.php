@@ -6,7 +6,7 @@ class Users {
      * @return array ($Classes, $ClassLevels)
      */
     public static function get_classes() {
-        global $Debug;
+        $Debug = new \Gazelle\Debug;
         // Get permissions
         list($Classes, $ClassLevels) = G::$Cache->get_value('classes');
         if (!$Classes || !$ClassLevels) {

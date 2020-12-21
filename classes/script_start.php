@@ -11,6 +11,8 @@
 /*------------------------------------------------------*/
 /********************************************************/
 
+$now = microtime(true); //To track how long a page takes to create
+
 require_once(__DIR__ . '/config.php'); //The config contains all site wide configuration information
 require_once(__DIR__ . '/util.php');
 require_once(__DIR__ . '/../vendor/autoload.php');
@@ -37,17 +39,12 @@ else if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])
     $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
 }
 
-$ScriptStartTime = microtime(true); //To track how long a page takes to create
-if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
-    $RUsage = getrusage();
-    $CPUTimeStart = $RUsage['ru_utime.tv_sec'] * 1000000 + $RUsage['ru_utime.tv_usec'];
-}
-
 ob_start(); //Start a buffer, mainly in case there is a mysql error
 
-$Debug = new DEBUG;
-$Debug->handle_errors();
-$Debug->set_flag('Debug constructed');
+$Debug = new Gazelle\Debug;
+$Debug->setStartTime($now)
+    ->handle_errors()
+    ->set_flag('Debug constructed');
 
 $DB = new DB_MYSQL;
 G::$DB = $DB;
@@ -195,8 +192,6 @@ G::$Twig->addFunction(new Twig\TwigFunction('ratio', function ($up, $down) {
         'UTF-8'
     );
 }));
-
-$Debug->set_flag('Twig constructed');
 
 $Debug->set_flag('start user handling');
 
@@ -374,7 +369,6 @@ if (isset($LoggedUser['ID'])) {
 }
 
 $Debug->set_flag('end user handling');
-$Debug->set_flag('start function definitions');
 
 function parse_user_agent($Debug) {
     $Debug->set_flag('start parsing user agent');

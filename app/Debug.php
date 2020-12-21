@@ -1,52 +1,78 @@
 <?php
 
-use Gazelle\Util\Time;
-// Debug info for developers
-ini_set('max_execution_time',600);
-define('MAX_TIME', 20000); //Maximum execution time in ms
-define('MAX_ERRORS', 0); //Maxmimum errors, warnings, notices we will allow in a page
-define('MAX_MEMORY', 80 * 1024 * 1024); //Maximum memory used per pageload
-define('MAX_QUERIES', 30); //Maxmimum queries
+namespace Gazelle;
 
-class DEBUG {
-    public $Errors = [];
-    public $Flags = [];
-    public $Perf = [];
-    private $LoggedVars = [];
+use \Gazelle\Util\Time;
+
+ini_set('max_execution_time',600);
+
+class Debug {
+    protected const MAX_TIME = 20000;
+    protected const MAX_ERRORS = 0; //Maxmimum errors, warnings, notices we will allow in a page
+    protected const MAX_MEMORY = 80 * 1024 * 1024; //Maximum memory used per pageload
+
+    protected static $Errors = [];
+    protected static $Flags = [];
+    protected static $Perf = [];
+    protected static $LoggedVars = [];
+
+    protected static $startTime;
+    protected static $cpuTime = false;
+
+    public function __construct() {
+        if (self::$cpuTime === false) {
+            $r = getrusage();
+            self::$cpuTime = $r['ru_utime.tv_sec'] * 1000000 + $r['ru_utime.tv_usec'];
+        }
+    }
+
+    public function handle_errors() {
+        error_reporting(E_WARNING | E_ERROR | E_PARSE);
+        set_error_handler([$this, 'php_error_handler']);
+        return $this;
+    }
+
+    public function setStartTime(float $startTime) {
+        self::$startTime = $startTime;
+        return $this;
+    }
+
+    public function startTime() {
+        return self::$startTime;
+    }
 
     public function profile($Automatic = '') {
-        global $ScriptStartTime;
         $Reason = [];
 
         if (!empty($Automatic)) {
             $Reason[] = $Automatic;
         }
 
-        $Micro = (microtime(true) - $ScriptStartTime) * 1000;
-        if ($Micro > MAX_TIME && !defined('TIME_EXCEPTION')) {
+        $Micro = (microtime(true) - self::$startTime) * 1000;
+        if ($Micro > self::MAX_TIME && !defined('TIME_EXCEPTION')) {
             $Reason[] = number_format($Micro, 3).' ms';
         }
 
         $Errors = count($this->get_errors());
-        if ($Errors > MAX_ERRORS && !defined('ERROR_EXCEPTION')) {
+        if ($Errors > self::MAX_ERRORS && !defined('ERROR_EXCEPTION')) {
             $Reason[] = $Errors.' PHP errors';
         }
         $Ram = memory_get_usage(true);
-        if ($Ram > MAX_MEMORY && !defined('MEMORY_EXCEPTION')) {
-            $Reason[] = Format::get_size($Ram).' RAM used';
+        if ($Ram > self::MAX_MEMORY && !defined('MEMORY_EXCEPTION')) {
+            $Reason[] = \Format::get_size($Ram).' RAM used';
         }
 
-        G::$DB->warnings(); // see comment in MYSQL::query
+        \G::$DB->warnings(); // see comment in MYSQL::query
 
-        $CacheStatus = G::$Cache->server_status();
-        if (in_array(0, $CacheStatus) && !G::$Cache->get_value('cache_fail_reported')) {
+        $CacheStatus = \G::$Cache->server_status();
+        if (in_array(0, $CacheStatus) && !\G::$Cache->get_value('cache_fail_reported')) {
             // Limit to max one report every 15 minutes to avoid massive debug spam
-            G::$Cache->cache_value('cache_fail_reported', true, 900);
+            \G::$Cache->cache_value('cache_fail_reported', true, 900);
             $Reason[] = "Cache server error";
         }
 
         if (isset($_REQUEST['profile'])) {
-            $Reason[] = 'Requested by ' . G::$LoggedUser['Username'];
+            $Reason[] = 'Requested by ' . \G::$LoggedUser['Username'];
         }
 
         if (isset($Reason[0])) {
@@ -59,7 +85,6 @@ class DEBUG {
     }
 
     public function analysis($Message, $Report = '', $Time = 43200) {
-        global $ScriptStartTime;
         $RequestURI = empty($_SERVER['REQUEST_URI']) ? '' : substr($_SERVER['REQUEST_URI'], 1);
         if (PHP_SAPI === 'cli'
             || in_array($RequestURI, ['tools.php?action=db_sandbox'])
@@ -71,7 +96,7 @@ class DEBUG {
             $Report = $Message;
         }
         $Identifier = randomString(5);
-        G::$Cache->cache_value(
+        \G::$Cache->cache_value(
             'analysis_'.$Identifier,
             [
                 'url'      => $_SERVER['REQUEST_URI'] ?? 'cli',
@@ -94,10 +119,9 @@ class DEBUG {
 
     public function get_cpu_time() {
         if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
-            global $CPUTimeStart;
             $RUsage = getrusage();
-            $CPUTime = $RUsage['ru_utime.tv_sec'] * 1000000 + $RUsage['ru_utime.tv_usec'] - $CPUTimeStart;
-            return $CPUTime;
+            self::$cpuTime = $RUsage['ru_utime.tv_sec'] * 1000000 + $RUsage['ru_utime.tv_usec'] - self::$cpuTime;
+            return self::$cpuTime;
         }
         return false;
     }
@@ -109,19 +133,12 @@ class DEBUG {
             $VarName = $ID;
         }
         $File = ['path' => substr($BackTrace[0]['file'], strlen(SERVER_ROOT)), 'line' => $BackTrace[0]['line']];
-        $this->LoggedVars[$ID] = [$VarName => ['bt' => $File, 'data' => $Var]];
+        self::$LoggedVars[$ID] = [$VarName => ['bt' => $File, 'data' => $Var]];
     }
 
     public function set_flag($Event) {
-        global $ScriptStartTime;
-        $this->Flags[] = [$Event, (microtime(true) - $ScriptStartTime) * 1000, memory_get_usage(true), $this->get_cpu_time()];
-    }
-
-    //This isn't in the constructor because $this is not available, and the function cannot be made static
-    public function handle_errors() {
-        //error_reporting(E_ALL ^ E_STRICT | E_WARNING | E_DEPRECATED | E_ERROR | E_PARSE); //E_STRICT disabled
-        error_reporting(E_WARNING | E_ERROR | E_PARSE);
-        set_error_handler([$this, 'php_error_handler']);
+        self::$Flags[] = [$Event, (microtime(true) - self::$startTime) * 1000, memory_get_usage(true), $this->get_cpu_time()];
+        return $this;
     }
 
     protected function format_args($Array) {
@@ -204,7 +221,7 @@ class DEBUG {
         $Error = str_replace(SERVER_ROOT . '/', '', $Error);
 
         if (DEBUG_WARNINGS) {
-            $this->Errors[] = [$Error, $File.':'.$Line, $Call, $Args];
+            self::$Errors[] = [$Error, $File.':'.$Line, $Call, $Args];
         }
         return true;
     }
@@ -212,36 +229,35 @@ class DEBUG {
     /* Data wrappers */
 
     public function get_perf() {
-        if (empty($this->Perf)) {
-            global $ScriptStartTime;
-            $PageTime = (microtime(true) - $ScriptStartTime);
+        if (empty(self::$Perf)) {
+            $PageTime = (microtime(true) - self::$startTime);
             $CPUTime = $this->get_cpu_time();
             $Perf = [
-                'Memory usage' => Format::get_size(memory_get_usage(true)),
+                'Memory usage' => \Format::get_size(memory_get_usage(true)),
                 'Page process time' => number_format($PageTime, 3).' s',
             ];
             if ($CPUTime) {
                 $Perf['CPU time'] = number_format($CPUTime / 1000000, 3).' s';
             }
-            $Perf['Script start'] = Time::sqlTime($ScriptStartTime);
+            $Perf['Script start'] = Time::sqlTime(self::$startTime);
             $Perf['Script end'] = Time::sqlTime(microtime(true));
             return $Perf;
         }
-        return $this->Perf;
+        return self::$Perf;
     }
 
     public function get_flags() {
-        return $this->Flags;
+        return self::$Flags;
     }
 
     public function get_errors($Light = false) {
         //Because the cache can't take some of these variables
         if ($Light) {
-            foreach ($this->Errors as $Key => $Value) {
-                $this->Errors[$Key][3] = '';
+            foreach (self::$Errors as $Key => $Value) {
+                self::$Errors[$Key][3] = '';
             }
         }
-        return $this->Errors;
+        return self::$Errors;
     }
 
     public function get_constants() {
@@ -274,40 +290,40 @@ class DEBUG {
     }
 
     public function get_cache_time() {
-        return G::$Cache->Time;
+        return \G::$Cache->Time;
     }
 
     public function get_cache_keys() {
-        return array_keys(G::$Cache->CacheHits);
+        return array_keys(\G::$Cache->CacheHits);
     }
 
     public function get_sphinxql_queries() {
         if (class_exists('Sphinxql')) {
-            return Sphinxql::$Queries;
+            return \Sphinxql::$Queries;
         }
     }
 
     public function get_sphinxql_time() {
         if (class_exists('Sphinxql')) {
-            return Sphinxql::$Time;
+            return \Sphinxql::$Time;
         }
     }
 
     public function get_queries() {
-        return G::$DB->Queries;
+        return \G::$DB->Queries;
     }
 
     public function get_query_time() {
-        return G::$DB->Time;
+        return \G::$DB->Time;
     }
 
     public function get_logged_vars() {
-        return $this->LoggedVars;
+        return self::$LoggedVars;
     }
 
     public function get_ocelot_requests() {
         if (class_exists('Tracker')) {
-            return Tracker::$Requests;
+            return \Tracker::$Requests;
         }
     }
 
@@ -441,7 +457,7 @@ class DEBUG {
 <?php       if ($CPUTime !== false) { ?>
             <td align="left"><?=number_format($CPUTime / 1000, 3)?> ms</td>
 <?php       } ?>
-            <td align="left"><?=Format::get_size($Memory)?></td>
+            <td align="left"><?=\Format::get_size($Memory)?></td>
         </tr>
 <?php   } ?>
     </table>
@@ -528,7 +544,7 @@ class DEBUG {
             </td>
             <td align="left" class="debug_data debug_cache_data">
                 <pre id="debug_cache_<?=$Key?>" class="hidden">
-<?=                    display_str(print_r(G::$Cache->get_value($Key, true), true))?>
+<?=                    display_str(print_r(\G::$Cache->get_value($Key, true), true))?>
                 </pre>
             </td>
         </tr>
@@ -679,10 +695,10 @@ class DEBUG {
     public function vars_table($Vars = false) {
         $Header = 'Logged Variables';
         if (empty($Vars)) {
-            if (empty($this->LoggedVars)) {
+            if (empty(self::$LoggedVars)) {
                 return;
             }
-            $Vars = $this->LoggedVars;
+            $Vars = self::$LoggedVars;
         }
         $Header = ' '.number_format(count($Vars))." $Header:";
 

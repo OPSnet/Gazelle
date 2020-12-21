@@ -251,7 +251,7 @@ function add_json_info($Json) {
     }
     if (!isset($Json['debug']) && check_perms('site_debug')) {
         /** @var DEBUG $Debug */
-        global $Debug;
+        $Debug = new Gazelle\Debug;
         $Json = array_merge($Json, [
             'debug' => [
                 'queries' => $Debug->get_queries(),
