@@ -119,7 +119,7 @@ if (!count($Forum)) {
 
     $JsonTopics = [];
     foreach ($Forum as $Topic) {
-        list($TopicID, $Title, $AuthorID, $Locked, $Sticky, $PostCount, $LastID, $LastTime, $LastAuthorID) = array_values($Topic);
+        [$TopicID, $Title, $AuthorID, $Locked, $Sticky, $PostCount, $LastID, $LastTime, $LastAuthorID] = array_values($Topic);
 
         // handle read/unread posts - the reason we can't cache the whole page
         if ((!$Locked || $Sticky)
@@ -134,11 +134,6 @@ if (!count($Forum)) {
         $AuthorName = $UserInfo['Username'];
         $UserInfo = Users::user_info($LastAuthorID);
         $LastAuthorName = $UserInfo['Username'];
-        // Bug fix for no last time available
-        if ($LastTime == '0000-00-00 00:00:00') {
-            $LastTime = '';
-        }
-
         $JsonTopics[] = [
             'topicId' => (int)$TopicID,
             'title' => display_str($Title),
