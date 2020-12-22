@@ -357,7 +357,7 @@ class Debug {
 <?php
     }
 
-    public function include_table($Includes = false, $StripPaths = false) {
+    public function include_table($Includes = false) {
         if (!is_array($Includes)) {
             $Includes = $this->get_includes();
         }
@@ -368,18 +368,11 @@ class Debug {
         </tr>
     </table>
     <table id="debug_include" class="debug_table hidden" width="100%">
-<?php
-        foreach ($Includes as $File) {
-            if ($StripPaths) {
-                $File = str_replace(SERVER_ROOT, '', $File);
-            }
-?>
+<?php foreach ($Includes as $File) { ?>
         <tr valign="top">
-            <td><?=$File?></td>
+            <td><?= str_replace(SERVER_ROOT, '', $File) ?></td>
         </tr>
-<?php
-        }
-?>
+<?php } ?>
     </table>
 <?php
     }
