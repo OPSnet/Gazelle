@@ -2,11 +2,15 @@
 authorize();
 
 if ($_POST['type'] === 'torrents') {
-    $BU = new MASS_USER_BOOKMARKS_EDITOR;
-    if ($_POST['delete']) {
-        $BU->mass_remove();
-    } elseif ($_POST['update']) {
-        $BU->mass_update();
+
+    $editor = new Gazelle\Editor\UserBookmark($LoggedUser['ID']);
+    if (isset($_POST['update']) && !empty($_POST['sort'])) {
+        $editor->modify($_POST['sort']);
+    } elseif (isset($_POST['delete'])) {
+        $remove = array_keys($_POST['remove']);
+        if (!empty($remove)) {
+            $editor->remove($remove);
+        }
     }
 }
 

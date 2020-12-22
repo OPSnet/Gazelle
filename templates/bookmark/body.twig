@@ -1,0 +1,13 @@
+{% for b in list %}
+<tr class="drag row{{ cycle(['b', 'a'], loop.index0) }}" id="li_{{ b.group_id }}">
+    <td>
+        <input class="sort_numbers" type="text" name="sort[{{ b.group_id }}]" value="{{ b.sequence }}" id="sort_{{ b.group_id }}" size="4" />
+    </td>
+    <td>{{ loop.index }}</td>
+    <td>{{ b.year }}</td>
+    <td>{{ b.artist|raw }}{% if showcase %} [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]{% endif %}</td>
+    <td><a href="torrents.php?id={{ b.group_id }}" class="tooltip" title="View torrent">{{ b.name }}</a></td>
+    <td class="nobr tooltip" title="{{ b.added }}">{{ b.added|time_diff }}</td>
+    <td class="center"><input type="checkbox" name="remove[{{ b.group_id }}]" value="" /></td>
+</tr>
+{% endfor %}
