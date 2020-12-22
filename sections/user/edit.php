@@ -79,8 +79,8 @@ foreach (range(1, 4) as $level) {
 View::show_header($User->username() . " &rsaquo; Settings",
     'user,jquery-ui,release_sort,password_validate,validate,cssgallery,preview_paranoia,bbcode,user_settings,donor_titles');
 
-$Val = new Validate;
-echo $Val->GenerateJS('userform');
+$Val = new Gazelle\Util\Validator;
+echo $Val->generateJS('userform');
 
 echo G::$Twig->render('user/setting.twig', [
     'auth'             => $LoggedUser['AuthKey'],

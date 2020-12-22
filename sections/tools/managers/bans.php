@@ -14,13 +14,14 @@ if (isset($_POST['submit'])) {
         }
         $IPv4Man->removeBan($id);
     } else { //Edit & Create, Shared Validation
-        $Val = new Validate;
-        $Val->SetFields('start', '1','regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
-        $Val->SetFields('end', '1','regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']);
-        $Val->SetFields('notes', '1','string','You must include the reason for the ban.');
-        $Err=$Val->ValidateForm($_POST); // Validate the form
-        if ($Err) {
-            error($Err);
+        $Val = new Gazelle\Util\Validator;
+        $Val->setFields([
+            ['start', '1','regex','You must include the starting IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']],
+            ['end', '1','regex','You must include the ending IP address.',['regex'=>'/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/i']],
+            ['notes', '1','string','You must include the reason for the ban.'],
+        ]);
+        if (!$Val->validate($_POST)) {
+            error($Val->errorMessage());
         }
         $IPv4Man->createBan($LoggedUser['ID'], $_POST['start'], $_POST['end'], trim($_POST['notes']));
     }

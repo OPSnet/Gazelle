@@ -15,20 +15,22 @@ if ($p['submit'] == 'Delete') {
 
     $scheduler->deleteTask($p['id']);
 } else {
-    $Val = new Validate;
-    $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 64 characters', ['maxlength' => 64]);
-    $Val->SetFields('classname', '1', 'string', 'The class name must be set, and has a max length of 32 characters', ['maxlength' => 32]);
-    $Val->SetFields('description', '1', 'string', 'The description must be set, and has a max length of 255 characters', ['maxlength' => 255]);
-    $Val->SetFields('interval', '1', 'number', 'The interval must be a number');
-    $err = $Val->ValidateForm($p);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setFields([
+        ['name', '1', 'string', 'The name must be set, and has a max length of 64 characters', ['maxlength' => 64]],
+        ['classname', '1', 'string', 'The class name must be set, and has a max length of 32 characters', ['maxlength' => 32]],
+        ['description', '1', 'string', 'The description must be set, and has a max length of 255 characters', ['maxlength' => 255]],
+        ['interval', '1', 'number', 'The interval must be a number'],
+    ]);
+    $err = $Val->validate($p) ? false : $Validate->errorMessage();
 
     if (!$scheduler::isClassValid($p['classname'])) {
         $err = "Couldn't import class ".$p['classname'];
     }
 
-    if ($err !== null) {
-        include(SERVER_ROOT.'/sections/tools/development/periodic_edit.php');
-        die();
+    if ($err) {
+        require_once('periodic_edit.php');
+        exit;
     }
 
     if ($p['submit'] == 'Create') {

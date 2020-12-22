@@ -10,17 +10,19 @@ if ($_POST['submit'] == 'Delete') {
     }
     $Payment->remove($_POST['id']);
 } else {
-    $Val = new Validate;
-    $Val->SetFields('text', '1', 'string', 'The payment text must be set, and has a max length of 100 characters', ['maxlength' => 100]);
-    $Val->SetFields('rent', '1', 'number', 'Rent must be zero or positive)', ['min' => 0, 'allowperiod' => true]);
-    $Val->SetFields('cc', '1', 'regex', 'The currency code must follow the ISO-4217 standard', ['regex' => '/^(XBT|EUR|USD)$/']);
-    $Val->SetFields('expiry', '1', 'regex', 'The expiry must be a date in the form of YYYY-MM-DD', ['regex' => '/^\d{4}-\d{2}-\d{2}$/']);
-    $Err = $Val->ValidateForm($_POST);
-
-    if ($Err) {
+    $Val = new Gazelle\Util\Validator;
+    $Val->setFields([
+        ['text', '1', 'string', 'The payment text must be set, and has a max length of 100 characters', ['maxlength' => 100]],
+        ['rent', '1', 'number', 'Rent must be zero or positive)', ['min' => 0, 'allowperiod' => true]],
+        ['cc', '1', 'regex', 'The currency code must follow the ISO-4217 standard', ['regex' => '/^(XBT|EUR|USD)$/']],
+        ['expiry', '1', 'regex', 'The expiry must be a date in the form of YYYY-MM-DD', ['regex' => '/^\d{4}-\d{2}-\d{2}$/']],
+    ]);
+    if (!$Val->validate($_POST)) {
+        $Err = $Validate->errorMessage();
         require_once('payment_list.php');
         exit;
     }
+
     $values = [
         'text'   => trim($_POST['text']),
         'expiry' => $_POST['expiry'],

@@ -19,21 +19,19 @@ if (!check_perms('site_moderate_requests')) {
     error(403);
 }
 
-$Validate = new Validate;
-$Validate->SetFields('torrentid', '1', 'number', 'Invalid torrent ID.', ['minlength' => 1]);
-$Validate->SetFields('groupid', '1', 'number', 'Invalid group ID.', [ 'minlength' => 1]);
-$Validate->SetFields('subject', '0', 'string', 'Invalid subject.', ['maxlength' => 1000, 'minlength' => 1]);
-$Validate->SetFields('message', '0', 'string', 'Invalid message.', ['maxlength' => 10000, 'minlength' => 1]);
-$Err = $Validate->ValidateForm($_POST); // Validate the form
-
-if ($Err) {
-    error($Err);
+$Validate = new Gazelle\Util\Validator;
+$Validate->setFields([
+    ['torrentid', '1', 'number', 'Invalid torrent ID.', ['range' => [1, 999999999]]],
+    ['groupid', '1', 'number', 'Invalid group ID.', [ 'range' => [1, 999999999]]],
+    ['subject', '0', 'string', 'Invalid subject.', ['maxlength' => 1000]],
+    ['message', '0', 'string', 'Invalid message.', ['maxlength' => 10000]],
+]);
+if (!$Val->validate($_POST)) {
+    error($Val->errorMessage());
 }
 
 $DB->prepared_query('
-    SELECT uid
-    FROM xbt_snatched
-    WHERE fid = ?
+    SELECT uid FROM xbt_snatched WHERE fid = ?
     ', $TorrentID
 );
 

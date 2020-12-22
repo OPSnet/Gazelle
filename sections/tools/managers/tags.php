@@ -4,16 +4,15 @@ if (!check_perms('users_mod')) {
     error(403);
 }
 
-// validation functions
-$tagSpecs = ['maxlength'=>'100', 'minlength'=>'2'];
-$Val = new Validate;
-$Val->SetFields('tag',     true, 'string', 'Enter a single tag to change.', $tagSpecs);
-$Val->SetFields('replace', true, 'string', 'Enter a single replacement name.', $tagSpecs);
-
+$Val = new Gazelle\Util\Validator;
+$Val->setFields([
+    ['tag',     true, 'string', 'Enter a single tag to change.', ['range' => [2, 100]]],
+    ['replace', true, 'string', 'Enter a single replacement name.', ['range' => [2, 100]]],
+]);
 $tagMan = new \Gazelle\Manager\Tag;
 
 View::show_header('Batch Tag Editor', 'validate');
-echo $Val->GenerateJS('tagform');
+echo $Val->generateJS('tagform');
 ?>
 
 <div class="header">
@@ -34,9 +33,8 @@ echo $Val->GenerateJS('tagform');
 $failure = [];
 $success = [];
 while (isset($_GET['tag']) && isset($_GET['replace'])) {
-    $err = $Val->ValidateForm($_GET);
-    if ($err) {
-        $failure[] = $err;
+    if (!$Val->validate($_GET)) {
+        $failure[] = $Val->errorMessage();
         break;
     }
 

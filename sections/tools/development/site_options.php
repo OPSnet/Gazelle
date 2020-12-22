@@ -46,14 +46,14 @@ if (isset($_POST['submit'])) {
         $DB->prepared_query('DELETE FROM site_options WHERE Name = ?', $Name);
         $Cache->delete_value('site_option_' . $Name);
     } else {
-        $Val = new Validate;
-        $Val->SetFields('name', '1', 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', ['regex' => '/^[a-z][-_a-z0-9]{0,63}$/i']);
-        $Val->SetFields('value', '1', 'string', 'You must specify a value for the option.');
-        $Val->SetFields('comment', '1', 'string', 'You must specify a comment for the option.');
-
-        $Error = $Val->ValidateForm($_POST);
-        if ($Error) {
-            error($Error);
+        $Val = new Gazelle\Util\Validator;
+        $Val->setFields([
+            ['name', '1', 'regex', 'The name must be alphanumeric and may contain dashes or underscores. No spaces are allowed.', ['regex' => '/^[a-z][-_a-z0-9]{0,63}$/i']],
+            ['value', '1', 'string', 'You must specify a value for the option.'],
+            ['comment', '1', 'string', 'You must specify a comment for the option.'],
+        ]);
+        if (!$Val->validate($_POST)) {
+            error($Val->errorMessage());
         }
 
         if ($_POST['submit'] == 'Edit') {

@@ -102,69 +102,68 @@ if ($Properties['UnknownRelease'] && !($Remastered == '1' && !$RemasterYear) && 
     }
 }
 
-$Validate = new Validate;
-$Validate->SetFields('type', '1', 'number', 'Not a valid type.', ['maxlength' => count($Categories), 'minlength' => 1]);
+$Validate = new Gazelle\Util\Validator;
+$Validate->setField('type', '1', 'number', 'Not a valid type.', ['range' => [1, count($Categories)]]);
 switch ($Type) {
     case 'Music':
-        if (!empty($Properties['Remastered']) && !$Properties['UnknownRelease']) {
-            $Validate->SetFields('remaster_year', '1', 'number', 'Year of remaster/re-issue must be entered.');
-        } else {
-            $Validate->SetFields('remaster_year', '0','number', 'Invalid remaster year.');
-        }
-
         if (!empty($Properties['Remastered']) && !$Properties['UnknownRelease'] && $Properties['RemasterYear'] < 1982 && $Properties['Media'] == 'CD') {
             error('You have selected a year for an album that predates the medium you say it was created on.');
             header("Location: torrents.php?action=edit&id=$TorrentID");
             exit;
         }
-
-        $Validate->SetFields('remaster_title', '0', 'string', 'Remaster title must be between 2 and 80 characters.', ['maxlength' => 80, 'minlength' => 2]);
-
         if ($Properties['RemasterTitle'] == 'Original Release') {
             error('"Original Release" is not a valid remaster title.');
             header("Location: torrents.php?action=edit&id=$TorrentID");
             exit;
         }
 
-        $Validate->SetFields('remaster_record_label', '0', 'string', 'Remaster record label must be between 2 and 80 characters.', ['maxlength' => 80, 'minlength' => 2]);
-        $Validate->SetFields('remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 2 and 80 characters.', ['maxlength' => 80, 'minlength' => 2]);
-        $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]);
-        $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
+        $Validate->setFields([
+            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]],
+            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]],
+            ['media', '1', 'inarray', 'Not a valid media.', ['inarray' => $Media]],
+            ['release_desc', '0', 'string', 'Invalid release description.', ['range' => [0, 1000000]]],
+            ['remaster_title', '0', 'string', 'Remaster title must be between 2 and 80 characters.', ['range' => [2, 80]]],
+            ['remaster_record_label', '0', 'string', 'Remaster record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
+            ['remaster_catalogue_number', '0', 'string', 'Remaster catalogue number must be between 2 and 80 characters.', ['range' => [2, 80]]],
+        ]);
 
-        if ($Properties['Encoding'] !== 'Other') {
-            $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
+        if (!empty($Properties['Remastered']) && !$Properties['UnknownRelease']) {
+            $Validate->setField('remaster_year', '1', 'number', 'Year of remaster/re-issue must be entered.');
         } else {
-            // Handle 'other' bitrates
-            $Validate->SetFields('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
-            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
+            $Validate->setField('remaster_year', '0','number', 'Invalid remaster year.');
         }
 
-        $Validate->SetFields('media', '1', 'inarray', 'Not a valid media.', ['inarray' => $Media]);
-        $Validate->SetFields('release_desc', '0', 'string', 'Invalid release description.', ['maxlength' => 1000000, 'minlength' => 0]);
+        if ($Properties['Encoding'] !== 'Other') {
+            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
+        } else {
+            // Handle 'other' bitrates
+            $Validate->setField('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
+            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
+        }
         break;
 
     case 'Audiobooks':
     case 'Comedy':
-        $Validate->SetFields('year', '1', 'number', 'The year of the release must be entered.');
-        $Validate->SetFields('format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]);
-        $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
-
+        $Validate->setFields([
+            ['year', '1', 'number', 'The year of the release must be entered.'],
+            ['format', '1', 'inarray', 'Not a valid format.', ['inarray' => $Formats]],
+            ['bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]],
+            ['release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', ['rang' => [10, 1000000]]],
+        ]);
         // Handle 'other' bitrates
         if ($Properties['Encoding'] !== 'Other') {
-            $Validate->SetFields('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
+            $Validate->setField('bitrate', '1', 'inarray', 'You must choose a bitrate.', ['inarray' => $Bitrates]);
         } else {
-            $Validate->SetFields('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
+            $Validate->setField('other_bitrate', '1', 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
             $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
         }
-
-        $Validate->SetFields('release_desc', '0', 'string', 'The release description has a minimum length of 10 characters.', ['maxlength' => 1000000, 'minlength' => 10]);
         break;
 
     default:
         break;
 }
 
-$Err = $Validate->ValidateForm($_POST); // Validate the form
+$Err = $Val->validate($_POST) ? false : $Validate->errorMessage();
 if (!$Err && $Properties['Remastered'] && !$Properties['RemasterYear']) {
     if ($LoggedUser['ID'] !== $UserID && !check_perms('edit_unknowns')) {
         $Err = "You may not edit someone else's upload to unknown release.";

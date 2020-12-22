@@ -18,15 +18,16 @@ if ($_POST['submit'] == 'Delete') { //Delete
     }
 
 } else { //Edit & Create, Shared Validation
-    $Val = new Validate;
-    $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40, 'minlength' => 1]);
-    $Val->SetFields('sort', '1', 'number', 'Sort must be set');
-    $Err = $Val->ValidateForm($_POST); // Validate the form
-    if ($Err) {
-        error($Err);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setFields([
+        ['name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['range' => [1, 40]]],
+        ['sort', '1', 'number', 'Sort must be set'],
+    ]);
+    if (!$Val->validate($_POST)) {
+        error($Val->errorMessage());
     }
-    $Sort = intval($_POST['sort']);
 
+    $Sort = intval($_POST['sort']);
     if ($_POST['submit'] == 'Edit') {
         //Edit
         if (!is_number($_POST['id']) || $_POST['id'] == '') {
