@@ -18,7 +18,7 @@ class Time {
         }
 
         if (($filter = filter_var($timestamp, FILTER_VALIDATE_INT)) === false) {
-            if ($timestamp == '0000-00-00 00:00:00') {
+            if ($timestamp == '' || is_null($timestamp)) {
                 return false;
             }
             $timestamp = strtotime($timestamp);
@@ -36,7 +36,7 @@ class Time {
         $starttime = ($starttime === false) ? time() : strtotime($starttime);
 
         if (!Type::isInteger($timestamp)) { // Assume that $timestamp is SQL timestamp
-            if ($timestamp == '0000-00-00 00:00:00') {
+            if ($timestamp == '' || is_null($timestamp)) {
                 return 'Never';
             }
             $timestamp = strtotime($timestamp);
