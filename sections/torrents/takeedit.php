@@ -163,7 +163,7 @@ switch ($Type) {
         break;
 }
 
-$Err = $Val->validate($_POST) ? false : $Validate->errorMessage();
+$Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 if (!$Err && $Properties['Remastered'] && !$Properties['RemasterYear']) {
     if ($LoggedUser['ID'] !== $UserID && !check_perms('edit_unknowns')) {
         $Err = "You may not edit someone else's upload to unknown release.";
