@@ -1,6 +1,6 @@
 <?php
 View::show_header('Recover Password');
-echo $Validate->GenerateJS('recoverform');
+echo $Validate->generateJS('recoverform');
 ?>
 <script src="<?=(STATIC_SERVER)?>/functions/validate.js" type="text/javascript"></script>
 <script src="<?=(STATIC_SERVER)?>/functions/password_validate.js" type="text/javascript"></script>
