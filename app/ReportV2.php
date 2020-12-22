@@ -31,7 +31,7 @@ class ReportV2 extends Base {
 
     public function setTorrentFlag(string $tableName): int {
         $this->db->prepared_query("
-            INSERT IGNORE INTO {$tableNamee}
+            INSERT IGNORE INTO {$tableName}
                    (UserID, TorrentID)
             VALUES (?,      ?)
             ", $this->moderatorId, $this->torrentId
