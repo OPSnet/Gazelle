@@ -192,7 +192,7 @@ class Format {
     public static function get_pages($StartPage, $TotalRecords, $ItemsPerPage, $ShowPages = 11, $Anchor = '') {
         global $Method;
         $page = \Gazelle\SiteInfo::page();
-        $Location = "page.php";
+        $Location = "$page.php";
         $StartPage = ceil($StartPage);
         $TotalPages = 0;
         $Pages = '';
