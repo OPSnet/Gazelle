@@ -5,10 +5,6 @@ if (!check_perms('admin_manage_permissions')) {
 
 $id = $_REQUEST['id'] ?? null;
 if ($id) {
-    $Val = new Validate;
-    $Val->SetFields('name', true, 'string', 'You did not enter a valid name for this permission set.');
-    $Val->SetFields('level', true, 'number', 'You did not enter a valid level for this permission set.');
-
     if (is_numeric($id)) {
         $DB->prepared_query('
             SELECT
@@ -39,9 +35,13 @@ if ($id) {
     }
 
     if (!empty($_POST['submit'])) {
-        $err = $Val->ValidateForm($_POST);
-        if ($err) {
-            error($err);
+        $Val = new Gazelle\Util\Validator;
+        $Val->setFields([
+            ['name', true, 'string', 'You did not enter a valid name for this permission set.'],
+            ['level', true, 'number', 'You did not enter a valid level for this permission set.'],
+        ]);
+        if (!$Val->validate($_POST)) {
+            error($Val->errorMessage());
         }
 
         if (!is_numeric($id)) {

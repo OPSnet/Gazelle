@@ -154,345 +154,341 @@ if (count($_GET)) {
     $StylesheetsManager = new \Gazelle\Stylesheet;
     $Stylesheets = $StylesheetsManager->list();
 
-    $Val = new Validate;
-    $Val->SetFields('avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]);
-    $Val->SetFields('bounty', '0', 'inarray', "Invalid bounty field", $OffNumberChoices);
-    $Val->SetFields('cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]);
-    // $Val->SetFields('class', '0', 'inarray', 'Invalid class', ['inarray' => $ClassIDs]);
-    $Val->SetFields('comment', '0', 'string', 'Comment is too long.', ['maxlength' => 512]);
-    $Val->SetFields('disabled_invites', '0', 'inarray', 'Invalid disabled_invites field', $YesNo);
-    $Val->SetFields('disabled_uploads', '0', 'inarray', 'Invalid disabled_uploads field', $YesNo);
-    $Val->SetFields('donor', '0', 'inarray', 'Invalid donor field', $YesNo);
-    $Val->SetFields('downloaded', '0', 'inarray', 'Invalid downloaded field', $NumberChoices);
-    $Val->SetFields('enabled', '0', 'inarray', 'Invalid enabled field', ['inarray' => ['', 0, 1, 2]]);
-    $Val->SetFields('join1', '0', 'regexp', 'Invalid join1 field', $DateRegexp);
-    $Val->SetFields('join2', '0', 'regexp', 'Invalid join2 field', $DateRegexp);
-    $Val->SetFields('joined', '0', 'inarray', 'Invalid joined field', $DateChoices);
-    $Val->SetFields('lastactive', '0', 'inarray', 'Invalid lastactive field', $DateChoices);
-    $Val->SetFields('lastactive1', '0', 'regexp', 'Invalid lastactive1 field', $DateRegexp);
-    $Val->SetFields('lastactive2', '0', 'regexp', 'Invalid lastactive2 field', $DateRegexp);
-    $Val->SetFields('lockedaccount', '0', 'inarray', 'Invalid locked account field', ['inarray' => ['any', 'locked', 'unlocked']]);
-    $Val->SetFields('matchtype', '0', 'inarray', 'Invalid matchtype field', ['inarray' => ['strict', 'fuzzy', 'regexp']]);
-    $Val->SetFields('order', '0', 'inarray', 'Invalid ordering', $OrderVals);
-    $Val->SetFields('passkey', '0', 'string', 'Invalid passkey', ['maxlength' => 32]);
-    $Val->SetFields('ratio', '0', 'inarray', 'Invalid ratio field', $NumberChoices);
-    $Val->SetFields('secclass', '0', 'inarray', 'Invalid class', ['inarray' => $SecClassIDs]);
-    $Val->SetFields('seeding', '0', 'inarray', "Invalid seeding field", $OffNumberChoices);
-    $Val->SetFields('snatched', '0', 'inarray', "Invalid snatched field", $OffNumberChoices);
-    $Val->SetFields('stylesheet', '0', 'inarray', 'Invalid stylesheet', array_unique(array_keys($Stylesheets)));
-    $Val->SetFields('uploaded', '0', 'inarray', 'Invalid uploaded field', $NumberChoices);
-    $Val->SetFields('warned', '0', 'inarray', 'Invalid warned field', $Nullable);
-    $Val->SetFields('way', '0', 'inarray', 'Invalid way', $WayVals);
-
-    $Err = $Val->ValidateForm($_GET);
-
-    if (!$Err) {
-        // Passed validation. Let's rock.
-        $m = new SQLMatcher($_GET['matchtype']);
-
-        $Where = [];
-        $Args = [];
-        $Having = [];
-        $HavingArgs = [];
-        $Join = [];
-        $Distinct = false;
-        $Order = '';
-
-        $inviteesValue = $_GET['invitees'] == 'off'
-            ? "'X'"
-            : '(SELECT count(*) FROM users_info AS ui2 WHERE ui2.Inviter = um1.ID)';
-        $seedingValue = $_GET['seeding'] == 'off'
-            ? "'X'"
-            : '(SELECT count(DISTINCT fid)
-                FROM xbt_files_users xfu
-                WHERE xfu.active = 1 AND xfu.remaining = 0 AND xfu.mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
-                    AND xfu.uid = um1.ID)';
-        $snatchesValue = $_GET['snatched'] == 'off'
-            ? "'X'"
-            : '(SELECT count(DISTINCT fid) FROM xbt_snatched AS xs WHERE xs.uid = um1.ID)';
-
-        $SQL = "
-            SQL_CALC_FOUND_ROWS
-            um1.ID,
-            um1.Username,
-            uls1.Uploaded,
-            uls1.Downloaded,
-            (SELECT count(DISTINCT TorrentID) FROM users_downloads ud WHERE ud.UserID = um1.ID) as Downloads,
-            coalesce((SELECT sum(Bounty) FROM requests_votes rv WHERE rv.UserID = um1.ID), 0) as Bounty,
-            $seedingValue AS Seeding,
-            $snatchesValue AS Snatches,
-            $inviteesValue AS Invitees,
-            um1.PermissionID,
-            um1.Email,
-            um1.Enabled,
-            um1.Invites,
-            ui1.DisableInvites,
-            ui1.Warned,
-            ui1.Donor,
-            ui1.JoinDate,
-            ula.last_access
-        FROM users_main AS um1
-        INNER JOIN users_leech_stats AS uls1 ON (uls1.UserID = um1.ID)
-        INNER JOIN users_info AS ui1 ON (ui1.UserID = um1.ID)
-        LEFT JOIN user_last_access AS ula ON (ula.user_id = um1.ID)
-        ";
-
-        if (!empty($_GET['username'])) {
-            $Where[] = $m->match('um1.Username');
-            $Args[] = $_GET['username'];
-        }
-
-        if (!empty($_GET['email'])) {
-            if (isset($_GET['email_history'])) {
-                $Distinct = true;
-                $Join['he'] = 'INNER JOIN users_history_emails AS he ON (he.UserID = um1.ID)';
-                $Where[] = $m->match('he.Email');
-            } else {
-                $Where[] = $m->match('um1.Email');
-            }
-            $Args[] = $_GET['email'];
-        }
-
-        if (!empty($_GET['email_cnt']) && is_number($_GET['email_cnt'])) {
-            $Where[] = sprintf('um1.ID IN (%s)',
-                $m->op("
-                    SELECT UserID FROM users_history_emails GROUP BY UserID HAVING count(DISTINCT Email)
-                    ", $_GET['emails_opt']
-                )
-            );
-            $Args[] = trim($_GET['email_cnt']);
-        }
-
-        if (!empty($_GET['ip'])) {
-            if ($ipHistoryChecked) {
-                $Distinct = true;
-                $Join['hi'] = 'INNER JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
-                $Where[] = $m->left_match('hi.IP');
-            } else {
-                $Where[] = $m->left_match('um1.IP');
-            }
-            $Args[] = trim($_GET['ip']);
-        }
-
-        if ($_GET['lockedaccount'] == 'locked') {
-            $Join['la'] .= 'INNER JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
-        }
-        elseif ($_GET['lockedaccount'] == 'unlocked') {
-            $Join['la'] = 'LEFT JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
-            $Where[] = 'la.UserID IS NULL';
-        }
-
-        if (!empty($_GET['cc'])) {
-            $Where[] = $m->op('um1.ipcc', $_GET['cc_op']);
-            $Args[] = trim($_GET['cc']);
-        }
-
-        if (!empty($_GET['tracker_ip'])) {
-            $Distinct = true;
-            $Join['xfu'] = $trackerLiveSource
-                ? 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)'
-                : 'INNER JOIN xbt_snatched AS xfu ON (um1.ID = xfu.uid)';
-            $Where[] = $m->left_match('xfu.ip');
-            $Args[] = trim($_GET['tracker_ip']);
-        }
-
-        if (!empty($_GET['comment'])) {
-            $Where[] = $m->match('ui1.AdminComment');
-            $Args[] = $_GET['comment'];
-        }
-
-        if (!empty($_GET['lastfm'])) {
-            $Distinct = true;
-            $Join['lfm'] = 'INNER JOIN lastfm_users AS lfm ON (lfm.ID = um1.ID)';
-            $Where[] = $m->match('lfm.Username');
-            $Args[] = $_GET['lastfm'];
-        }
-
-        if (strlen($_GET['invites1'])) {
-            $op = $_GET['invites'];
-            $Where[] = $m->op('um1.Invites', $op);
-            $Args = array_merge($Args, [$_GET['invites1']], ($op === 'between' ? [$_GET['invites2']] : []));
-        }
-
-        if (strlen($_GET['invitees1']) && $_GET['invitees'] !== 'off') {
-            $op = $_GET['invitees'];
-            $Having[] = $m->op('Invitees', $op);
-            $HavingArgs = array_merge($HavingArgs, [$_GET['invitees1']], ($op === 'between' ? [$_GET['invitees2']] : []));
-        }
-
-        if ($_GET['disabled_invites']) {
-            $Where[] = 'ui1.DisableInvites = ?';
-            $Args[] = $_GET['disabled_invites'] === 'yes' ? '1' : '0';
-        }
-
-        if ($_GET['disabled_uploads']) {
-            $Where[] = 'ui1.DisableUpload = ?';
-            $Args[] = $_GET['disabled_uploads'] === 'yes' ? '1' : '0';
-        }
-
-        if ($_GET['join1']) {
-            $op = $_GET['joined'];
-            $Where[] = $m->date('ui1.JoinDate', $op);
-            $Args[] = $_GET['join1'];
-            if ($op === 'on') {
-                $Args[] = $_GET['join1'];
-            }
-            elseif ($op === 'between') {
-                $Args[] = $_GET['join2'];
-            }
-        }
-
-        if ($_GET['lastactive1']) {
-            $op = $_GET['lastactive'];
-            $Where[] = $m->date('ula.last_access', $op);
-            $Args[] = $_GET['lastactive1'];
-            if ($op === 'on') {
-                $Args[] = $_GET['lastactive1'];
-            }
-            elseif ($op === 'between') {
-                $Args[] = $_GET['lastactive2'];
-            }
-        }
-
-        if (strlen($_GET['ratio1'])) {
-            $Decimals = strlen(array_pop(explode('.', $_GET['ratio1'])));
-            if (!$Decimals) {
-                $Decimals = 0;
-            }
-            $op = $_GET['ratio'];
-            $Where[] = $m->op('CASE WHEN uls1.Downloaded = 0 then 0 ELSE round(uls1.Uploaded/uls1.Downloaded, ?) END', $op);
-            $Args = array_merge($Args, [$Decimals, $_GET['ratio1']], ($op === 'between' ? [$_GET['ratio2']] : []));
-        }
-
-        if ($_GET['bounty'] !== 'off' && strlen($_GET['bounty1'])) {
-            $op = $_GET['bounty'];
-            $Having[] = $m->op('Bounty', $op);
-            $HavingArgs = array_merge($HavingArgs, [$_GET['bounty1'] * 1024 ** 3], ($op === 'between' ? [$_GET['bounty2'] * 1024 ** 3] : []));
-        }
-
-        if ($_GET['downloads'] !== 'off' && strlen($_GET['downloads1'])) {
-            $op = $_GET['downloads'];
-            $Having[] = $m->op('Downloads', $op);
-            $HavingArgs = array_merge($HavingArgs, [$_GET['downloads1']], ($op === 'between' ? [$_GET['downloads2']] : []));
-        }
-
-        if ($_GET['seeding'] !== 'off' && strlen($_GET['seeding1'])) {
-            $op = $_GET['seeding'];
-            $Having[] = $m->op('Seeding', $op);
-            $HavingArgs = array_merge($HavingArgs, [$_GET['seeding1']], ($op === 'between' ? [$_GET['seeding2']] : []));
-        }
-
-        if ($_GET['snatched'] !== 'off' && strlen($_GET['snatched1'])) {
-            $op = $_GET['snatched'];
-            $Having[] = $m->op('Snatches', $op);
-            $HavingArgs = array_merge($HavingArgs, [$_GET['snatched1']], ($op === 'between' ? [$_GET['snatched2']] : []));
-        }
-
-        if (strlen($_GET['uploaded1'])) {
-            $op = $_GET['uploaded'];
-            if ($op === 'buffer') {
-                $Where[] = 'uls1.Uploaded - uls1.Downloaded BETWEEN ? AND ?';
-                $Args = array_merge($Args, [0.9 * $_GET['uploaded1'] * 1024 ** 3, 1.1 * $_GET['uploaded1'] * 1024 ** 3]);
-            } else {
-                $Where[] = $m->op('uls1.Uploaded', $op);
-                $Args[] = $_GET['uploaded1'] * 1024 ** 3;
-                if ($op === 'on') {
-                    $Args[] = $_GET['uploaded1'] * 1024 ** 3;
-                }
-                elseif ($op === 'between') {
-                    $Args[] = $_GET['uploaded2'] * 1024 ** 3;
-                }
-            }
-        }
-
-        if (strlen($_GET['downloaded1'])) {
-            $op = $_GET['downloaded'];
-            $Where[] = $m->op('uls1.Downloaded', $op);
-            $Args[] = $_GET['downloaded1'] * 1024 ** 3;
-            if ($op === 'on') {
-                $Args[] = $_GET['downloaded1'] * 1024 ** 3;
-            }
-            elseif ($op === 'between') {
-                $Args[] = $_GET['downloaded2'] * 1024 ** 3;
-            }
-        }
-
-        if ($_GET['enabled'] != '') {
-            $Where[] = 'um1.Enabled = ?';
-            $Args[] = $_GET['enabled'];
-        }
-
-        if (isset($_GET['class']) && is_array($_GET['class'])) {
-            $Where[] = 'um1.PermissionID IN (' . placeholders($_GET['class']) . ')';
-            $Args = array_merge($Args, $_GET['class']);
-        }
-
-        if ($_GET['secclass'] != '') {
-            $Join['ul'] = 'INNER JOIN users_levels AS ul ON (um1.ID = ul.UserID)';
-            $Where[] = 'ul.PermissionID = ?';
-            $Args[] = $_GET['secclass'];
-        }
-
-        if ($_GET['donor']) {
-            $Where[] = 'ui1.Donor = ?';
-            $Args[] = $_GET['donor'] === 'yes' ? '1' : '0';
-        }
-
-        if ($_GET['warned']) {
-            $Where[] = $m->op('ui1.Warned', $_GET['warned']);
-        }
-
-        if ($disabledIpChecked) {
-            $Distinct = true;
-            if ($ipHistoryChecked) {
-                if (!isset($Join['hi'])) {
-                    $Join['hi'] = 'LEFT JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
-                }
-                $Join['um2'] = 'LEFT JOIN users_main AS um2 ON (um2.ID != um1.ID AND um2.Enabled = \'2\' AND um2.ID = hi.UserID)';
-            } else {
-                $Join['um2'] = 'LEFT JOIN users_main AS um2 ON (um2.ID != um1.ID AND um2.Enabled = \'2\' AND um2.IP = um1.IP)';
-            }
-        }
-
-        if (!empty($_GET['passkey'])) {
-            $Where[] = $m->match('um1.torrent_pass');
-            $Args[] = $_GET['passkey'];
-        }
-
-        if (!empty($_GET['avatar'])) {
-            $Where[] = $m->match('ui1.Avatar');
-            $Args[] = $_GET['avatar'];
-        }
-
-        if (!empty($_GET['stylesheet'])) {
-            $Where[] = $m->match('ui1.StyleID');
-            $Args[] = $_GET['stylesheet'];
-        }
-
-        if ($OrderTable[$_GET['order']] && $WayTable[$_GET['way']]) {
-            $Order = 'ORDER BY '.$OrderTable[$_GET['order']].' '.$WayTable[$_GET['way']];
-        }
-
-        //---------- Build the query
-        $SQL = 'SELECT ' . $SQL . implode("\n", $Join);
-
-        if (count($Where)) {
-            $SQL .= "\nWHERE " . implode("\nAND ", $Where);
-        }
-
-        if ($Distinct) {
-            $SQL .= "\nGROUP BY um1.ID";
-        }
-
-        if (count($Having)) {
-            $SQL .= "\nHAVING " . implode(' AND ', $Having);
-        }
-
-        list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
-        $SQL .= "\n$Order LIMIT $Limit";
-    } else {
-        error($Err);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setFields([
+        ['avatar', '0', 'string', 'Avatar URL too long', ['maxlength' => 512]],
+        ['bounty', '0', 'inarray', "Invalid bounty field", $OffNumberChoices],
+        ['cc', '0', 'inarray', 'Invalid Country Code', ['maxlength' => 2]],
+        ['comment', '0', 'string', 'Comment is too long.', ['maxlength' => 512]],
+        ['disabled_invites', '0', 'inarray', 'Invalid disabled_invites field', $YesNo],
+        ['disabled_uploads', '0', 'inarray', 'Invalid disabled_uploads field', $YesNo],
+        ['donor', '0', 'inarray', 'Invalid donor field', $YesNo],
+        ['downloaded', '0', 'inarray', 'Invalid downloaded field', $NumberChoices],
+        ['enabled', '0', 'inarray', 'Invalid enabled field', ['inarray' => ['', 0, 1, 2]]],
+        ['join1', '0', 'regexp', 'Invalid join1 field', $DateRegexp],
+        ['join2', '0', 'regexp', 'Invalid join2 field', $DateRegexp],
+        ['joined', '0', 'inarray', 'Invalid joined field', $DateChoices],
+        ['lastactive', '0', 'inarray', 'Invalid lastactive field', $DateChoices],
+        ['lastactive1', '0', 'regexp', 'Invalid lastactive1 field', $DateRegexp],
+        ['lastactive2', '0', 'regexp', 'Invalid lastactive2 field', $DateRegexp],
+        ['lockedaccount', '0', 'inarray', 'Invalid locked account field', ['inarray' => ['any', 'locked', 'unlocked']]],
+        ['matchtype', '0', 'inarray', 'Invalid matchtype field', ['inarray' => ['strict', 'fuzzy', 'regexp']]],
+        ['order', '0', 'inarray', 'Invalid ordering', $OrderVals],
+        ['passkey', '0', 'string', 'Invalid passkey', ['maxlength' => 32]],
+        ['ratio', '0', 'inarray', 'Invalid ratio field', $NumberChoices],
+        ['secclass', '0', 'inarray', 'Invalid class', ['inarray' => $SecClassIDs]],
+        ['seeding', '0', 'inarray', "Invalid seeding field", $OffNumberChoices],
+        ['snatched', '0', 'inarray', "Invalid snatched field", $OffNumberChoices],
+        ['stylesheet', '0', 'inarray', 'Invalid stylesheet', array_unique(array_keys($Stylesheets))],
+        ['uploaded', '0', 'inarray', 'Invalid uploaded field', $NumberChoices],
+        ['warned', '0', 'inarray', 'Invalid warned field', $Nullable],
+        ['way', '0', 'inarray', 'Invalid way', $WayVals],
+    ]);
+    if (!$Val->validate($_GET)) {
+        error($Val->errorMessage());
     }
+
+    $m = new SQLMatcher($_GET['matchtype']);
+    $Where = [];
+    $Args = [];
+    $Having = [];
+    $HavingArgs = [];
+    $Join = [];
+    $Distinct = false;
+    $Order = '';
+
+    $inviteesValue = $_GET['invitees'] == 'off'
+        ? "'X'"
+        : '(SELECT count(*) FROM users_info AS ui2 WHERE ui2.Inviter = um1.ID)';
+    $seedingValue = $_GET['seeding'] == 'off'
+        ? "'X'"
+        : '(SELECT count(DISTINCT fid)
+            FROM xbt_files_users xfu
+            WHERE xfu.active = 1 AND xfu.remaining = 0 AND xfu.mtime > unix_timestamp(now() - INTERVAL 1 HOUR)
+                AND xfu.uid = um1.ID)';
+    $snatchesValue = $_GET['snatched'] == 'off'
+        ? "'X'"
+        : '(SELECT count(DISTINCT fid) FROM xbt_snatched AS xs WHERE xs.uid = um1.ID)';
+
+    $SQL = "
+        SQL_CALC_FOUND_ROWS
+        um1.ID,
+        um1.Username,
+        uls1.Uploaded,
+        uls1.Downloaded,
+        (SELECT count(DISTINCT TorrentID) FROM users_downloads ud WHERE ud.UserID = um1.ID) as Downloads,
+        coalesce((SELECT sum(Bounty) FROM requests_votes rv WHERE rv.UserID = um1.ID), 0) as Bounty,
+        $seedingValue AS Seeding,
+        $snatchesValue AS Snatches,
+        $inviteesValue AS Invitees,
+        um1.PermissionID,
+        um1.Email,
+        um1.Enabled,
+        um1.Invites,
+        ui1.DisableInvites,
+        ui1.Warned,
+        ui1.Donor,
+        ui1.JoinDate,
+        ula.last_access
+    FROM users_main AS um1
+    INNER JOIN users_leech_stats AS uls1 ON (uls1.UserID = um1.ID)
+    INNER JOIN users_info AS ui1 ON (ui1.UserID = um1.ID)
+    LEFT JOIN user_last_access AS ula ON (ula.user_id = um1.ID)
+    ";
+
+    if (!empty($_GET['username'])) {
+        $Where[] = $m->match('um1.Username');
+        $Args[] = $_GET['username'];
+    }
+
+    if (!empty($_GET['email'])) {
+        if (isset($_GET['email_history'])) {
+            $Distinct = true;
+            $Join['he'] = 'INNER JOIN users_history_emails AS he ON (he.UserID = um1.ID)';
+            $Where[] = $m->match('he.Email');
+        } else {
+            $Where[] = $m->match('um1.Email');
+        }
+        $Args[] = $_GET['email'];
+    }
+
+    if (!empty($_GET['email_cnt']) && is_number($_GET['email_cnt'])) {
+        $Where[] = sprintf('um1.ID IN (%s)',
+            $m->op("
+                SELECT UserID FROM users_history_emails GROUP BY UserID HAVING count(DISTINCT Email)
+                ", $_GET['emails_opt']
+            )
+        );
+        $Args[] = trim($_GET['email_cnt']);
+    }
+
+    if (!empty($_GET['ip'])) {
+        if ($ipHistoryChecked) {
+            $Distinct = true;
+            $Join['hi'] = 'INNER JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
+            $Where[] = $m->left_match('hi.IP');
+        } else {
+            $Where[] = $m->left_match('um1.IP');
+        }
+        $Args[] = trim($_GET['ip']);
+    }
+
+    if ($_GET['lockedaccount'] == 'locked') {
+        $Join['la'] .= 'INNER JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
+    }
+    elseif ($_GET['lockedaccount'] == 'unlocked') {
+        $Join['la'] = 'LEFT JOIN locked_accounts AS la ON (la.UserID = um1.ID)';
+        $Where[] = 'la.UserID IS NULL';
+    }
+
+    if (!empty($_GET['cc'])) {
+        $Where[] = $m->op('um1.ipcc', $_GET['cc_op']);
+        $Args[] = trim($_GET['cc']);
+    }
+
+    if (!empty($_GET['tracker_ip'])) {
+        $Distinct = true;
+        $Join['xfu'] = $trackerLiveSource
+            ? 'INNER JOIN xbt_files_users AS xfu ON (um1.ID = xfu.uid)'
+            : 'INNER JOIN xbt_snatched AS xfu ON (um1.ID = xfu.uid)';
+        $Where[] = $m->left_match('xfu.ip');
+        $Args[] = trim($_GET['tracker_ip']);
+    }
+
+    if (!empty($_GET['comment'])) {
+        $Where[] = $m->match('ui1.AdminComment');
+        $Args[] = $_GET['comment'];
+    }
+
+    if (!empty($_GET['lastfm'])) {
+        $Distinct = true;
+        $Join['lfm'] = 'INNER JOIN lastfm_users AS lfm ON (lfm.ID = um1.ID)';
+        $Where[] = $m->match('lfm.Username');
+        $Args[] = $_GET['lastfm'];
+    }
+
+    if (strlen($_GET['invites1'])) {
+        $op = $_GET['invites'];
+        $Where[] = $m->op('um1.Invites', $op);
+        $Args = array_merge($Args, [$_GET['invites1']], ($op === 'between' ? [$_GET['invites2']] : []));
+    }
+
+    if (strlen($_GET['invitees1']) && $_GET['invitees'] !== 'off') {
+        $op = $_GET['invitees'];
+        $Having[] = $m->op('Invitees', $op);
+        $HavingArgs = array_merge($HavingArgs, [$_GET['invitees1']], ($op === 'between' ? [$_GET['invitees2']] : []));
+    }
+
+    if ($_GET['disabled_invites']) {
+        $Where[] = 'ui1.DisableInvites = ?';
+        $Args[] = $_GET['disabled_invites'] === 'yes' ? '1' : '0';
+    }
+
+    if ($_GET['disabled_uploads']) {
+        $Where[] = 'ui1.DisableUpload = ?';
+        $Args[] = $_GET['disabled_uploads'] === 'yes' ? '1' : '0';
+    }
+
+    if ($_GET['join1']) {
+        $op = $_GET['joined'];
+        $Where[] = $m->date('ui1.JoinDate', $op);
+        $Args[] = $_GET['join1'];
+        if ($op === 'on') {
+            $Args[] = $_GET['join1'];
+        }
+        elseif ($op === 'between') {
+            $Args[] = $_GET['join2'];
+        }
+    }
+
+    if ($_GET['lastactive1']) {
+        $op = $_GET['lastactive'];
+        $Where[] = $m->date('ula.last_access', $op);
+        $Args[] = $_GET['lastactive1'];
+        if ($op === 'on') {
+            $Args[] = $_GET['lastactive1'];
+        }
+        elseif ($op === 'between') {
+            $Args[] = $_GET['lastactive2'];
+        }
+    }
+
+    if (strlen($_GET['ratio1'])) {
+        $Decimals = strlen(array_pop(explode('.', $_GET['ratio1'])));
+        if (!$Decimals) {
+            $Decimals = 0;
+        }
+        $op = $_GET['ratio'];
+        $Where[] = $m->op('CASE WHEN uls1.Downloaded = 0 then 0 ELSE round(uls1.Uploaded/uls1.Downloaded, ?) END', $op);
+        $Args = array_merge($Args, [$Decimals, $_GET['ratio1']], ($op === 'between' ? [$_GET['ratio2']] : []));
+    }
+
+    if ($_GET['bounty'] !== 'off' && strlen($_GET['bounty1'])) {
+        $op = $_GET['bounty'];
+        $Having[] = $m->op('Bounty', $op);
+        $HavingArgs = array_merge($HavingArgs, [$_GET['bounty1'] * 1024 ** 3], ($op === 'between' ? [$_GET['bounty2'] * 1024 ** 3] : []));
+    }
+
+    if ($_GET['downloads'] !== 'off' && strlen($_GET['downloads1'])) {
+        $op = $_GET['downloads'];
+        $Having[] = $m->op('Downloads', $op);
+        $HavingArgs = array_merge($HavingArgs, [$_GET['downloads1']], ($op === 'between' ? [$_GET['downloads2']] : []));
+    }
+
+    if ($_GET['seeding'] !== 'off' && strlen($_GET['seeding1'])) {
+        $op = $_GET['seeding'];
+        $Having[] = $m->op('Seeding', $op);
+        $HavingArgs = array_merge($HavingArgs, [$_GET['seeding1']], ($op === 'between' ? [$_GET['seeding2']] : []));
+    }
+
+    if ($_GET['snatched'] !== 'off' && strlen($_GET['snatched1'])) {
+        $op = $_GET['snatched'];
+        $Having[] = $m->op('Snatches', $op);
+        $HavingArgs = array_merge($HavingArgs, [$_GET['snatched1']], ($op === 'between' ? [$_GET['snatched2']] : []));
+    }
+
+    if (strlen($_GET['uploaded1'])) {
+        $op = $_GET['uploaded'];
+        if ($op === 'buffer') {
+            $Where[] = 'uls1.Uploaded - uls1.Downloaded BETWEEN ? AND ?';
+            $Args = array_merge($Args, [0.9 * $_GET['uploaded1'] * 1024 ** 3, 1.1 * $_GET['uploaded1'] * 1024 ** 3]);
+        } else {
+            $Where[] = $m->op('uls1.Uploaded', $op);
+            $Args[] = $_GET['uploaded1'] * 1024 ** 3;
+            if ($op === 'on') {
+                $Args[] = $_GET['uploaded1'] * 1024 ** 3;
+            }
+            elseif ($op === 'between') {
+                $Args[] = $_GET['uploaded2'] * 1024 ** 3;
+            }
+        }
+    }
+
+    if (strlen($_GET['downloaded1'])) {
+        $op = $_GET['downloaded'];
+        $Where[] = $m->op('uls1.Downloaded', $op);
+        $Args[] = $_GET['downloaded1'] * 1024 ** 3;
+        if ($op === 'on') {
+            $Args[] = $_GET['downloaded1'] * 1024 ** 3;
+        }
+        elseif ($op === 'between') {
+            $Args[] = $_GET['downloaded2'] * 1024 ** 3;
+        }
+    }
+
+    if ($_GET['enabled'] != '') {
+        $Where[] = 'um1.Enabled = ?';
+        $Args[] = $_GET['enabled'];
+    }
+
+    if (isset($_GET['class']) && is_array($_GET['class'])) {
+        $Where[] = 'um1.PermissionID IN (' . placeholders($_GET['class']) . ')';
+        $Args = array_merge($Args, $_GET['class']);
+    }
+
+    if ($_GET['secclass'] != '') {
+        $Join['ul'] = 'INNER JOIN users_levels AS ul ON (um1.ID = ul.UserID)';
+        $Where[] = 'ul.PermissionID = ?';
+        $Args[] = $_GET['secclass'];
+    }
+
+    if ($_GET['donor']) {
+        $Where[] = 'ui1.Donor = ?';
+        $Args[] = $_GET['donor'] === 'yes' ? '1' : '0';
+    }
+
+    if ($_GET['warned']) {
+        $Where[] = $m->op('ui1.Warned', $_GET['warned']);
+    }
+
+    if ($disabledIpChecked) {
+        $Distinct = true;
+        if ($ipHistoryChecked) {
+            if (!isset($Join['hi'])) {
+                $Join['hi'] = 'LEFT JOIN users_history_ips AS hi ON (hi.UserID = um1.ID)';
+            }
+            $Join['um2'] = 'LEFT JOIN users_main AS um2 ON (um2.ID != um1.ID AND um2.Enabled = \'2\' AND um2.ID = hi.UserID)';
+        } else {
+            $Join['um2'] = 'LEFT JOIN users_main AS um2 ON (um2.ID != um1.ID AND um2.Enabled = \'2\' AND um2.IP = um1.IP)';
+        }
+    }
+
+    if (!empty($_GET['passkey'])) {
+        $Where[] = $m->match('um1.torrent_pass');
+        $Args[] = $_GET['passkey'];
+    }
+
+    if (!empty($_GET['avatar'])) {
+        $Where[] = $m->match('ui1.Avatar');
+        $Args[] = $_GET['avatar'];
+    }
+
+    if (!empty($_GET['stylesheet'])) {
+        $Where[] = $m->match('ui1.StyleID');
+        $Args[] = $_GET['stylesheet'];
+    }
+
+    if ($OrderTable[$_GET['order']] && $WayTable[$_GET['way']]) {
+        $Order = 'ORDER BY '.$OrderTable[$_GET['order']].' '.$WayTable[$_GET['way']];
+    }
+
+    //---------- Build the query
+    $SQL = 'SELECT ' . $SQL . implode("\n", $Join);
+
+    if (count($Where)) {
+        $SQL .= "\nWHERE " . implode("\nAND ", $Where);
+    }
+
+    if ($Distinct) {
+        $SQL .= "\nGROUP BY um1.ID";
+    }
+
+    if (count($Having)) {
+        $SQL .= "\nHAVING " . implode(' AND ', $Having);
+    }
+
+    list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
+    $SQL .= "\n$Order LIMIT $Limit";
 }
 View::show_header('User search');
 ?>

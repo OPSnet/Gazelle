@@ -23,23 +23,26 @@ if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Permiss
     error(403);
 }
 
-$Val = new Validate;
-$Val->SetFields('stylesheet', 1, "number", "You forgot to select a stylesheet.");
-$Val->SetFields('styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => '/^'.CSS_REGEX.'$/i']);
-$Val->SetFields('postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]);
-$Val->SetFields('collagecovers', 1, "number", "You forgot to select your collage option.");
-$Val->SetFields('avatar', 0, "regex", "You did not enter a valid avatar URL.", ['regex' => "/^".IMAGE_REGEX."$/i"]);
-$Val->SetFields('email', 1, "email", "You did not enter a valid email address.");
-$Val->SetFields('irckey', 0, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['minlength' => 6, 'maxlength' => 32]);
-$Val->SetFields('new_pass_1', 0, "regex", "You did not enter a valid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol.", ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
-$Val->SetFields('new_pass_2', 1, "compare", "Your passwords do not match.", ['comparefield' => 'new_pass_1']);
+$Val = new Gazelle\Util\Validator;
+$Val->setFields([
+    ['stylesheet', 1, "number", "You forgot to select a stylesheet."],
+    ['styleurl', 0, "regex", "You did not enter a valid stylesheet URL.", ['regex' => '/^'.CSS_REGEX.'$/i']],
+    ['postsperpage', 1, "number", "You forgot to select your posts per page option.", ['inarray' => [25, 50, 100]]],
+    ['collagecovers', 1, "number", "You forgot to select your collage option."],
+    ['avatar', 0, "regex", "You did not enter a valid avatar URL.", ['regex' => "/^".IMAGE_REGEX."$/i"]],
+    ['email', 1, "email", "You did not enter a valid email address."],
+    ['irckey', 0, "string", "You did not enter a valid IRC key. An IRC key must be between 6 and 32 characters long.", ['range' => [6, 32]]],
+    ['new_pass_1', 0, "regex",
+        "You did not enter a valid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol.",
+        ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']
+    ],
+    ['new_pass_2', 1, "compare", "Your passwords do not match.", ['comparefield' => 'new_pass_1']],
+]);
 if (check_perms('site_advanced_search')) {
-    $Val->SetFields('searchtype', 1, "number", "You forgot to select your default search preference.", ['minlength' => 0, 'maxlength' => 1]);
+    $Val->setField('searchtype', 1, "number", "You forgot to select your default search preference.", ['range' => [0, 1]]);
 }
-
-$Err = $Val->ValidateForm($_POST);
-if ($Err) {
-    error($Err);
+if (!$Val->validate($_POST)) {
+    error($Val->errorMessage());
 }
 
 // Begin building $Paranoia

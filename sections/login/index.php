@@ -95,17 +95,21 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             exit;
         } else {
             // The user requested a password change and the key has not expired
-            $Validate = new Validate;
-            $Validate->SetFields('password', '1', 'regex',
-                'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer',
-                ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
-            $Validate->SetFields('verifypassword', '1', 'compare', 'Your passwords did not match.', ['comparefield' => 'password']);
+            $Validate = new Gazelle\Util\Validator;
+            $Validate->setFields([
+                ['verifypassword', '1', 'compare', 'Your passwords did not match.', ['comparefield' => 'password']],
+                ['password', '1', 'regex',
+                    'You entered an invalid password. A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer',
+                    ['regex' => '/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']
+                ],
+            ]);
 
             if (!empty($_REQUEST['password'])) {
                 // If the user has entered a password.
                 // If the user has not entered a password, $Reset is not set to 1, and the success message is not shown
-                $Err = $Validate->ValidateForm($_REQUEST);
-                if ($Err == '') {
+                if (!$Validate->validate($_REQUEST)) {
+                    $Err = $Validate->errorMessage();
+                } else {
                     // Form validates without error, set new secret and password.
                     $DB->prepared_query("
                         UPDATE
@@ -137,11 +141,11 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
         // End step 2
     } else {
         // User has not clicked the link in his email, use step 1
-        $Validate = new Validate;
-        $Validate->SetFields('email', '1', 'email', 'You entered an invalid email address.');
+        $Validate = new Gazelle\Util\Validator;
+        $Validate->setField('email', '1', 'email', 'You entered an invalid email address.');
         if (!empty($_REQUEST['email'])) {
             // User has entered email and submitted form
-            $Err = $Validate->ValidateForm($_REQUEST);
+            $Err = $Validate->validate($_REQUEST) ? false : $Validate->errorMessage();
 
             if (!$Err) {
                 // Email exists in the database?
@@ -355,10 +359,10 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             header("Location: login.php");
             exit;
         }
-        $Validate = new Validate;
-        $Validate->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
-        $Validate->SetFields('password', '1', 'string', 'You entered an invalid password.', ['minlength' => '6', 'maxlength' => -1]);
-        $Err = $Validate->ValidateForm($_POST);
+        $Validate = new Gazelle\Util\Validator;
+        $Validate->setField('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
+        $Validate->setField('password', '1', 'string', 'You entered an invalid password.', ['minlength' => 6]);
+        $Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 
         $username = trim($_POST['username']);
         if ($Err) {

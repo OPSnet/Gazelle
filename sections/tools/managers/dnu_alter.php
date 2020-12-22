@@ -26,12 +26,11 @@ if ($_POST['submit'] == 'Reorder') { // Reorder
     );
 
 } else { //Edit & Create, Shared Validation
-    $Val = new Validate;
-    $Val->SetFields('name', '1', 'string', 'The name must be set, have a length of between 5 and 100 characters.', ['maxlength' => 100, 'minlength' => 5]);
-    $Val->SetFields('comment', '0', 'string', 'The description has a maximum length of 255 characters.', ['maxlength' => 255]);
-    $Err = $Val->ValidateForm($_POST); // Validate the form
-    if ($Err) {
-        error($Err);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setField('name', '1', 'string', 'The name must be set, have a length of between 5 and 100 characters.', ['range' => [5, 100]]);
+    $Val->setField('comment', '0', 'string', 'The description has a maximum length of 255 characters.', ['maxlength' => 255]);
+    if (!$Val->validate($_POST)) {
+        error($Val->errorMessage());
     }
 
     if ($_POST['submit'] == 'Edit') { //Edit

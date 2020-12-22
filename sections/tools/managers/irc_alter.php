@@ -15,14 +15,15 @@ if ($_POST['submit'] == 'Delete') { //Delete
     $DB->prepared_query('DELETE FROM irc_channels WHERE ID = ?', $ID);
 }
 else { //Edit & Create, Shared Validation
-    $Val = new Validate;
-    $Val->SetFields('name', '1', 'regex', "The name must be set, has a max length of 50 characters, start with '&', '#', '+' or '!', and not contain any spaces or commas",
-        ['regex' => '/^[&|#|\+|\!][^, ]+$/i', 'maxlength' => 50, 'minlength' => 2]);
-    $Val->SetFields('sort', '1', 'number', 'Sort must be set');
-    $Val->SetFields('min_level', '1', 'number', 'MinLevel must be set');
-    $Err = $Val->ValidateForm($_POST); // Validate the form
-    if ($Err) {
-        error($Err);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setFields([
+        ['name', '1', 'regex', "The name must be set, has a max length of 50 characters, start with '&', '#', '+' or '!', and not contain any spaces or commas",
+            ['regex' => '/^[&|#|\+|\!][^, ]+$/i', 'range' => [2, 50]]],
+        ['sort', '1', 'number', 'Sort must be set'],
+        ['min_level', '1', 'number', 'MinLevel must be set'],
+    ]);
+    if (!$Val->validate($_POST)) {
+        error($Val->errorMessage());
     }
     $Sort = intval($_POST['sort']);
     $MinLevel = intval($_POST['min_level']);

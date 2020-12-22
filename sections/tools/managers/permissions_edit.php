@@ -8,8 +8,8 @@ $groups = $DB->to_array(false, MYSQLI_ASSOC);
 
 View::show_header('Manage Permissions', 'validate');
 
-$Val = new Validate;
-echo $Val->GenerateJS('permissionsform');
+$Val = new Gazelle\Util\Validator;
+echo $Val->generateJS('permissionsform');
 ?>
 <form class="manage_form" name="permissions" id="permissionsform" method="post" action="" onsubmit="return formVal();">
     <input type="hidden" name="action" value="permissions" />

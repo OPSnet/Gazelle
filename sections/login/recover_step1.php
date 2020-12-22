@@ -1,6 +1,6 @@
 <?php
 View::show_header('Recover Password','validate');
-echo $Validate->GenerateJS('recoverform');
+echo $Validate->generateJS('recoverform');
 ?>
 
 <div id="logo">

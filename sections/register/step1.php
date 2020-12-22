@@ -1,6 +1,6 @@
 <?php
 View::show_header('Register');
-echo $Val->GenerateJS('registerform');
+echo $Val->generateJS('registerform');
 ?>
 <script src="<?=STATIC_SERVER?>/functions/validate.js" type="text/javascript"></script>
 <script src="<?=STATIC_SERVER?>/functions/password_validate.js" type="text/javascript"></script>

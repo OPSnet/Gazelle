@@ -1,5 +1,17 @@
 <?php
 
+// needs to be defined here for fall-through to step1
+$Val = new Gazelle\Util\Validator;
+$Val->setFields([
+    ['username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]],
+    ['email', true, 'email', 'You did not enter a valid email address.'],
+    ['password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']],
+    ['confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']],
+    ['readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.'],
+    ['readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.'],
+    ['agereq', true, 'checkbox', 'You did not select the box that says you are 13 years of age or older.'],
+]);
+
 if (!empty($_REQUEST['confirm'])) {
     // Confirm registration
     $UserID = $DB->scalar("
@@ -23,20 +35,10 @@ if (!empty($_REQUEST['confirm'])) {
     }
 
 } elseif (OPEN_REGISTRATION || !empty($_REQUEST['invite'])) {
-
-    $Val = new Validate;
-    $Val->SetFields('username', true, 'regex', 'You did not enter a valid username.', ['regex' => USERNAME_REGEX]);
-    $Val->SetFields('email', true, 'email', 'You did not enter a valid email address.');
-    $Val->SetFields('password', true, 'regex', 'A strong password is 8 characters or longer, contains at least 1 lowercase and uppercase letter, and contains at least a number or symbol, or is 20 characters or longer', ['regex'=>'/(?=^.{8,}$)(?=.*[^a-zA-Z])(?=.*[A-Z])(?=.*[a-z]).*$|.{20,}/']);
-    $Val->SetFields('confirm_password', true, 'compare', 'Your passwords do not match.', ['comparefield' => 'password']);
-    $Val->SetFields('readrules', true, 'checkbox', 'You did not select the box that says you will read the rules.');
-    $Val->SetFields('readwiki', true, 'checkbox', 'You did not select the box that says you will read the wiki.');
-    $Val->SetFields('agereq', true, 'checkbox', 'You did not select the box that says you are 13 years of age or older.');
-
     if (!empty($_POST['submit'])) {
         // User has submitted registration form
 
-        $Err = $Val->ValidateForm($_REQUEST);
+        $Err = $Val->validate($_REQUEST) ? false : $Val->errorMessage();
         if (!$Err) {
             $username = trim($_REQUEST['username']);
             $email    = trim($_REQUEST['email']);

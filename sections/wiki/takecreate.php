@@ -1,29 +1,26 @@
 <?php
 authorize();
 
-$Val = new Validate;
-$Val->SetFields('title', '1', 'string', 'The title must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
-$error = $Val->ValidateForm($_POST);
+$Val = new Gazelle\Util\Validator;
+$Val->setField('title', '1', 'string', 'The title must be between 3 and 100 characters', ['range' => [3, 100]]);
+if (!$Val->validate($_POST)) {
+    error($Val->errorMessage());
+}
+
 $title = trim($_POST['title']);
 
 $wikiMan = new Gazelle\Manager\Wiki;
-
-if (!$error) {
-    $articleId = $wikiMan->findByTitle($title);
-    if ($articleId) {
-        $error = 'An article with that name already exists <a href="wiki.php?action=article&amp;id='
-            . $articleId . '">here</a>.';
-    }
-    [$minRead, $minEdit, $error] = $wikiMan->configureAccess(
-        check_perms('admin_manage_wiki'),
-        $LoggedUser['EffectiveClass'],
-        (int)$_POST['minclassread'],
-        (int)$_POST['minclassedit']
-    );
+$articleId = $wikiMan->findByTitle($title);
+if ($articleId) {
+    $error = 'An article with that name already exists <a href="wiki.php?action=article&amp;id='
+        . $articleId . '">here</a>.';
 }
-if ($error) {
-    error($error);
-}
+[$minRead, $minEdit, $error] = $wikiMan->configureAccess(
+    check_perms('admin_manage_wiki'),
+    $LoggedUser['EffectiveClass'],
+    (int)$_POST['minclassread'],
+    (int)$_POST['minclassedit']
+);
 
 $ArticleID = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $LoggedUser['ID']);
 (new Gazelle\Log)->general("Wiki article $ArticleID ($title) was created by {$LoggedUser['Username']}");

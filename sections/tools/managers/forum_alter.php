@@ -16,18 +16,20 @@ if ($_POST['submit'] == 'Delete') {
         error(403);
     }
 
-    $Val = new Validate;
-    $Val->SetFields('name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40, 'minlength' => 1]);
-    $Val->SetFields('description', '0', 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]);
-    $Val->SetFields('sort', '1', 'number', 'Sort must be set');
-    $Val->SetFields('categoryid', '1', 'number', 'Category must be set');
-    $Val->SetFields('minclassread', '1', 'number', 'MinClassRead must be set');
-    $Val->SetFields('minclasswrite', '1', 'number', 'MinClassWrite must be set');
-    $Val->SetFields('minclasscreate', '1', 'number', 'MinClassCreate must be set');
-    $Err = $Val->ValidateForm($_POST); // Validate the form
-    if ($Err) {
-        error($Err);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setFields([
+        ['name', '1', 'string', 'The name must be set, and has a max length of 40 characters', ['maxlength' => 40]],
+        ['description', '0', 'string', 'The description has a max length of 255 characters', ['maxlength' => 255]],
+        ['sort', '1', 'number', 'Sort must be set'],
+        ['categoryid', '1', 'number', 'Category must be set'],
+        ['minclassread', '1', 'number', 'MinClassRead must be set'],
+        ['minclasswrite', '1', 'number', 'MinClassWrite must be set'],
+        ['minclasscreate', '1', 'number', 'MinClassCreate must be set'],
+    ]);
+    if (!$Val->validate($_POST)) {
+        error($Val->errorMessage());
     }
+
     if ($_POST['submit'] == 'Create') {
         $forum->create($_POST);
     } elseif ($_POST['submit'] == 'Edit') {

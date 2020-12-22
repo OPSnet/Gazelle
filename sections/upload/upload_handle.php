@@ -21,7 +21,7 @@ if (!defined('AJAX')) {
     authorize();
 }
 
-$Validate = new Validate;
+$Validate = new Gazelle\Util\Validator;
 $Feed = new Feed;
 
 define('QUERY_EXCEPTION', true); // Shut up debugging
@@ -94,29 +94,37 @@ if (!empty($_POST['requestid'])) {
 $isMusicUpload = ($Type === 'Music');
 
 // common to all types
-$Validate->SetFields('type', '1', 'inarray', 'Please select a valid type.', ['inarray' => array_keys($Categories)]);
-$Validate->SetFields('release_desc', '0','string','The release description you entered is too long.', ['maxlength'=>1000000]);
-$Validate->SetFields('rules', '1','require','Your torrent must abide by the rules.');
+$Validate->setFields([
+    ['type', '1', 'inarray', 'Please select a valid type.', ['inarray' => array_keys($Categories)]],
+    ['release_desc', '0','string','The release description you entered is too long.', ['maxlength'=>1000000]],
+    ['rules', '1','require','Your torrent must abide by the rules.'],
+]);
 
 if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
-    $Validate->SetFields('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['maxlength'=>1000000, 'minlength'=>10]);
-    $Validate->SetFields('image', '0','link','The image URL you entered was invalid.', ['maxlength'=>255, 'minlength'=>12]);
-    $Validate->SetFields('tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['maxlength'=>200, 'minlength'=>2]);
-    $Validate->SetFields('title', '1','string','Title must be less than 200 characters.', ['maxlength'=>200, 'minlength'=>1]);
-    $Validate->SetFields('year', '1','number','The year of the release must be entered.');
+    $Validate->setFields([
+        ['image', '0','link','The image URL you entered was invalid.', ['range' => [255, 12]]],
+        ['tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['range' => [2, 200]]],
+        ['title', '1','string','Title must be less than 200 characters.', ['maxlength' => 200]],
+        ['year', '1','number','The year of the release must be entered.'],
+    ]);
+}
+
+if ($_POST['album_desc']) {
+    $Validate->setField('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
+} elseif ($_POST['desc']) {
+    $Validate->setField('desc', '1','string','The description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
 }
 
 // audio types
 if (in_array($Type, ['Music', 'Audiobooks', 'Comedy'])) {
-    $Validate->SetFields('format', '1','inarray','Please select a valid format.', ['inarray'=>$Formats]);
-
+    $Validate->setField('format', '1','inarray','Please select a valid format.', ['inarray'=>$Formats]);
     if ($Properties['Encoding'] !== 'Other') {
-        $Validate->SetFields('bitrate', '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
+        $Validate->setField('bitrate', '1','inarray','You must choose a bitrate.', ['inarray'=>$Bitrates]);
     } else {
         if ($Properties['Format'] === 'FLAC') {
-            $Validate->SetFields('bitrate', '1','string','FLAC bitrate must be lossless.', ['regex'=>'/Lossless/']);
+            $Validate->setField('bitrate', '1','string','FLAC bitrate must be lossless.', ['regex'=>'/Lossless/']);
         } else {
-            $Validate->SetFields('other_bitrate',
+            $Validate->setField('other_bitrate',
                 '1','string','You must enter the other bitrate (max length: 9 characters).', ['maxlength'=>9]);
             $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');;
         }
@@ -128,33 +136,36 @@ $feedType = ['torrents_all'];
 $releaseTypes = (new Gazelle\ReleaseType)->list();
 switch ($Type) {
     case 'Music':
-        $Validate->SetFields('groupid', '0', 'number', 'Group ID was not numeric');
-        $Validate->SetFields('media', '1','inarray','Please select a valid media.', ['inarray'=>$Media]);
-
+        $Validate->setFields([
+            ['groupid', '0', 'number', 'Group ID was not numeric'],
+            ['media', '1','inarray','Please select a valid media.', ['inarray'=>$Media]],
+            ['remaster_title', '0','string','Remaster title must be between 2 and 80 characters.', ['range' => [2, 80]]],
+            ['remaster_record_label', '0','string','Remaster record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
+            ['remaster_catalogue_number', '0','string','Remaster catalogue number must be between 2 and 80 characters.', ['range' => [2, 80]]],
+        ]);
         if (!$Properties['GroupID']) {
-            $Validate->SetFields('year', '1','number','The year of the original release must be entered.', ['length'=>40]);
-            $Validate->SetFields('releasetype', '1','inarray','Please select a valid release type.', ['inarray'=>array_keys($releaseTypes)]);
-            $Validate->SetFields('record_label', '0','string','Record label must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-            $Validate->SetFields('catalogue_number', '0','string','Catalogue Number must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
+            $Validate->setFields([
+                ['year', '1','number','The year of the original release must be entered.', ['length'=>40]],
+                ['releasetype', '1','inarray','Please select a valid release type.', ['inarray'=>array_keys($releaseTypes)]],
+                ['record_label', '0','string','Record label must be between 2 and 80 characters.', ['range' => [2, 80]]],
+                ['catalogue_number', '0','string','Catalogue Number must be between 2 and 80 characters.', ['range' => [2, 80]]],
+            ]);
             if ($Properties['Media'] == 'CD' && !$Properties['Remastered']) {
-                $Validate->SetFields('year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength'=>1982]);
+                $Validate->setField('year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.', ['minlength'=>1982]);
             }
         }
 
-        $Validate->SetFields('remaster_title', '0','string','Remaster title must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-        $Validate->SetFields('remaster_record_label', '0','string','Remaster record label must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
-        $Validate->SetFields('remaster_catalogue_number', '0','string','Remaster catalogue number must be between 2 and 80 characters.', ['maxlength'=>80, 'minlength'=>2]);
         if ($Properties['RemasterTitle'] === 'Original Release') {
-            $Validate->SetFields('remaster_title', '0', 'string', '"Orginal Release" is not a valid remaster title.');
+            $Validate->setField('remaster_title', '0', 'string', '"Orginal Release" is not a valid remaster title.');
         }
         if (!$Properties['Remastered']) {
-            $Validate->SetFields('remaster_year', '0','number','Invalid remaster year.');
+            $Validate->setField('remaster_year', '0','number','Invalid remaster year.');
         } else {
             if (!$Properties['UnknownRelease']) {
-                $Validate->SetFields('remaster_year', '1','number','Year of remaster/re-issue must be entered.');
+                $Validate->setField('remaster_year', '1','number','Year of remaster/re-issue must be entered.');
             }
             if ($Properties['Media'] == 'CD' ) {
-                $Validate->SetFields('remaster_year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.',
+                $Validate->setField('remaster_year', '1', 'number', 'You have selected a year for an album that predates the media you say it was created on.',
                     ['minlength' => 1982]
                 );
             }
@@ -195,7 +206,7 @@ switch ($Type) {
         break;
 }
 
-$Err = $Validate->ValidateForm($_POST); // Validate the form
+$Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 
 $File = $_FILES['file_input']; // This is our torrent file
 $TorrentName = $File['tmp_name'];

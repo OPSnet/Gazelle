@@ -14,11 +14,10 @@ if (isset($_GET['username'])) {
 
     $_GET['username'] = trim($_GET['username']);
     // form submitted
-    $Val = new Validate;
-    $Val->SetFields('username', '1', 'username', 'Please enter a username.');
-    $Err = $Val->ValidateForm($_GET);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setField('username', '1', 'username', 'Please enter a username.');
 
-    if (!$Err) {
+    if ($Val->validate($_GET)) {
         // Passed validation. Let's rock.
         list($Page, $Limit) = Format::page_limit(USERS_PER_PAGE);
         if ($Page > 10) {

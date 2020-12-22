@@ -10,19 +10,18 @@ if ($_POST) {
         $remove = array_filter($_POST, function ($x) { return preg_match('/^remove-\d+$/', $x);}, ARRAY_FILTER_USE_KEY);
         if (is_array($remove) && count($remove) == 1) {
             $PRL->remove(trim(array_keys($remove)[0], 'remove-'));
-        }
-        elseif ($_POST['task'] === 'add') {
-            $val = new Validate();
-            $val->SetFields('class', '1', 'number', 'class must be set');
-            $val->SetFields('factor', '1', 'number', 'factor must be set (usually, a number larger than 1.0)', ['minlength' => 1, 'allowperiod' => true]);
-            $val->SetFields('overshoot', '1', 'number', 'overshoot must be set', ['minlength' => 1]);
-            $err = $val->ValidateForm($_POST);
-            if ($err) {
-                error($err);
+        } elseif ($_POST['task'] === 'add') {
+            $val = new Gazelle\Util\Validator;
+            $val->setFields([
+                ['class', '1', 'number', 'class must be set'],
+                ['factor', '1', 'number', 'factor must be set (usually, a number larger than 1.0)', ['minlength' => 1, 'allowperiod' => true]],
+                ['overshoot', '1', 'number', 'overshoot must be set', ['minlength' => 1]],
+            ]);
+            if (!$Val->validate($_POST)) {
+                error($Val->errorMessage());
             }
             $PRL->save($_POST['class'], $_POST['factor'], $_POST['overshoot']);
-        }
-        else {
+        } else {
             error(403);
         }
     }

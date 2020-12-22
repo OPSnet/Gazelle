@@ -14,13 +14,17 @@ if ($_POST['submit'] == 'Delete') {
     }
     $ReferralManager->deleteAccount($id);
 } else {
-    $Val = new Validate;
-    $Val->SetFields('site', '1', 'string', 'The site must be set, and has a max length of 30 characters', ['maxlength' => 30]);
-    $Val->SetFields('url', '1', 'string', 'The URL must be set, and has a max length of 30 characters', ['maxlength' => 30]);
-    $Val->SetFields('user', '1', 'string', 'The username must be set, and has a max length of 20 characters', ['maxlength' => 20]);
-    $Val->SetFields('password', '0', 'string', 'The password must be set, and has a max length of 128 characters', ['maxlength' => 128]);
-    $Val->SetFields('active', '1', 'checkbox', '');
-    $Err = $Val->ValidateForm($_POST);
+    $Val = new Gazelle\Util\Validator;
+    $Val->setFields([
+        ['site', '1', 'string', 'The site must be set, and has a max length of 30 characters', ['maxlength' => 30]],
+        ['url', '1', 'string', 'The URL must be set, and has a max length of 30 characters', ['maxlength' => 30]],
+        ['user', '1', 'string', 'The username must be set, and has a max length of 20 characters', ['maxlength' => 20]],
+        ['password', '0', 'string', 'The password must be set, and has a max length of 128 characters', ['maxlength' => 128]],
+        ['active', '1', 'checkbox', ''],
+    ]);
+    if (!$Val->validate($_POST)) {
+        error($Val->errorMessage());
+    }
 
     if (substr($_POST['url'], -1) !== '/') {
         $_POST['url'] .= '/';

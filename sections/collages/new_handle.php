@@ -7,16 +7,15 @@ if (!is_number($_POST['category'])) {
 $categoryId = (int)$_POST['category'];
 $collageMan = new Gazelle\Manager\Collage;
 
-$Val = new Validate;
+$Val = new Gazelle\Util\Validator;
 if ($categoryId > 0 || check_perms('site_collages_renamepersonal')) {
-    $Val->SetFields('name', '1', 'string', 'The name must be between 3 and 100 characters', ['maxlength' => 100, 'minlength' => 3]);
+    $Val->setField('name', '1', 'string', 'The name must be between 3 and 100 characters', ['range' => [3, 100]]);
     $name = trim($_POST['name']);
 } else {
     $name = $collageMan->personalCollageName($LoggedUser['Username']);
 }
-$Val->SetFields('description', '1', 'string', 'The description must be between 10 and 65535 characters', ['maxlength' => 65535, 'minlength' => 10]);
-
-$Err = $Val->ValidateForm($_POST);
+$Val->setField('description', '1', 'string', 'The description must be between 10 and 65535 characters', ['range' => [10, 65535]]);
+$Err = $Val->validate($_POST) ? false : $Val->errorMessage();
 
 $user = new Gazelle\User($LoggedUser['ID']);
 if (!$Err && $categoryId === '0') {
