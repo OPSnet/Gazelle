@@ -67,14 +67,17 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                     ", $l['From'], ...$userIds
                 );
 
+                $userMan = new \Gazelle\Manager\User;
                 foreach ($userIds as $userId) {
                     $this->debug(sprintf('Demoting %d from %s to %s', $userId, $fromClass, $toClass), $userId);
 
-                    $this->cache->delete_value("user_info_$userId");
-                    $this->cache->delete_value("user_info_heavy_$userId");
-                    $this->cache->delete_value("user_stats_$userId");
-                    $this->cache->delete_value("user_rlim_$userId");
-                    $this->cache->delete_value("enabled_$userId");
+                    $this->cache->deleteMulti([
+                        "user_info_$userId",
+                        "user_info_heavy_$userId",
+                        "user_stats_$userId",
+                        "user_rlim_$userId",
+                        "enabled_$userId",
+                    ]);
                     $comment = sprintf("%s - Class changed to %s by System\n\n", sqltime(), $toClass);
                     $this->db->prepared_query("
                         UPDATE users_info
@@ -82,8 +85,12 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                         WHERE UserID = ?
                         ", $comment, $userId
                     );
-
-                    \Misc::send_pm($userId, 0, "You have been demoted to $toClass", "You now only qualify for the \"$toClass\" user class.\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
+                    $userMan->sendPM($userId, 0,
+                        "You have been demoted to $toClass",
+                        "You now only qualify for the \"$toClass\" user class.\n\nTo read more about "
+                            . SITE_NAME
+                            . "'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                    );
                 }
             }
         }

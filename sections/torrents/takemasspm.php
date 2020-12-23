@@ -35,9 +35,10 @@ $DB->prepared_query('
     ', $TorrentID
 );
 
-$Snatchers = $DB->to_array();
+$userMan = new Gazelle\Manager\User;
+$Snatchers = $DB->collect(0);
 foreach ($Snatchers as $UserID) {
-    Misc::send_pm($UserID[0], 0, $Subject, $Message);
+    $userMan->sendPM($UserID, 0, $Subject, $Message);
 }
 $n = count($Snatchers);
 (new Gazelle\Log)->general($LoggedUser['Username']." sent a mass PM to $n snatcher" . plural($n) . " of torrent $TorrentID in group $GroupID");

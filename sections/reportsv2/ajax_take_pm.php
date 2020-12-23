@@ -71,5 +71,5 @@ if ($ToID == $LoggedUser['ID']) {
 if (isset($Err)) {
     echo $Err;
 } else {
-    Misc::send_pm($ToID, $LoggedUser['ID'], $Subject, $Message);
+    (new Gazelle\Manager\User)->sendPM($ToID, $LoggedUser['ID'], $Subject, $Message);
 }

@@ -25,7 +25,7 @@ if ((bool)($_POST['pm'] ?? false) && !$comment->isAuthor($LoggedUser['ID'])) {
     $id = $comment->id();
     $url = SITE_URL . "/comments.php?action=jump&postid=$id";
     $moderator = "[url=" . SITE_URL . "/user.php?id={$LoggedUser['ID']}]{$LoggedUser['Username']}[/url]";
-    Misc::send_pm($comment->userId(), 0,
+    (new Gazelle\Manager\User)-> sendPM($comment->userId(), 0,
         "Your comment #$id has been edited",
         "One of your comments has been edited by $moderator: [url]{$url}[/url]"
     );

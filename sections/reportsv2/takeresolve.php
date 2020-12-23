@@ -243,7 +243,7 @@ if ($_POST['uploader_pm'] || $weeksWarned > 0 || isset($_POST['delete']) || $Sen
     }
 
     $message[] = "Report was handled by [user] {$LoggedUser['Username']}[/user].";
-    Misc::send_pm($uploaderId, 0, $rawName, implode("\n\n", $message));
+    (new Gazelle\Manager\User)->sendPM($uploaderId, 0, $rawName, implode("\n\n", $message));
 }
 
 $Cache->delete_value("reports_torrent_$torrentId");

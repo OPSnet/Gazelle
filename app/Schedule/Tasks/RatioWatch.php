@@ -6,6 +6,8 @@ class RatioWatch extends \Gazelle\Schedule\Task
 {
     public function run()
     {
+        $userMan = new \Gazelle\Manager\User;
+
         // Take users off ratio watch and enable leeching
         $userQuery = $this->db->prepared_query("
             SELECT
@@ -34,7 +36,11 @@ class RatioWatch extends \Gazelle\Schedule\Task
 
             foreach ($offRatioWatch as $userID) {
                 $this->cache->delete_value("user_info_heavy_$userID");
-                \Misc::send_pm($userID, 0, 'You have been taken off Ratio Watch', "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url=".SITE_URL."/rules.php?p=ratio]here[/url].\n");
+                $userMan->sendPM($userID, 0,
+                    'You have been taken off Ratio Watch',
+                    "Congratulations! Feel free to begin downloading again.\n To ensure that you do not get put on ratio watch again, please read the rules located [url="
+                        . SITE_URL."/rules.php?p=ratio]here[/url].\n"
+                );
 
                 $this->processed++;
                 $this->debug("Taking $userID off ratio watch", $userID);
@@ -74,7 +80,12 @@ class RatioWatch extends \Gazelle\Schedule\Task
 
             foreach ($onRatioWatch as $userID) {
                 $this->cache->delete_value("user_info_heavy_$userID");
-                \Misc::send_pm($userID, 0, 'You have been put on Ratio Watch', "This happens when your ratio falls below the requirements outlined in the rules located [url=".SITE_URL."/rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above.");
+                $userMan->sendPM($userID, 0,
+                    'You have been put on Ratio Watch',
+                    "This happens when your ratio falls below the requirements outlined in the rules located [url="
+                        . SITE_URL
+                        . "/rules.php?p=ratio]here[/url].\n For information about ratio watch, click the link above."
+                    );
 
                 $this->processed++;
                 $this->debug("Putting $userID on ratio watch", $userID);

@@ -252,6 +252,7 @@ class Contest extends Base {
         fprintf($report, "# user=%0.2f contest=%0.2f entry=%0.f\n", $enabledUserBonus, $contestBonus, $perEntryBonus);
 
         $bonus = new Bonus;
+        $userMan = new Manager\User;
         $participants = $this->type->userPayout($enabledUserBonus, $contestBonus, $perEntryBonus);
         foreach ($participants as $p) {
             $user = new \Gazelle\User($p['ID']);
@@ -269,11 +270,9 @@ class Contest extends Base {
             if (TEST_CONTEST_PAYOUT) {
                 continue;
             }
-            \Misc::send_pm(
-                $p['ID'],
-                0,
+            $userMan->sendPM($p['ID'], 0,
                 "You have received " . number_format($totalGain, 2) . " bonus points!",
-                \Text::full_format($twig->render('contest/payout-uploader.twig', [
+                $twig->render('contest/payout-uploader.twig', [
                     'username'        => $p['Username'],
                     'date'            => ['begin' => $this->info['date_begin'], 'end' => $this->info['date_end']],
                     'enabled_bonus'   => $enabledUserBonus,
@@ -282,7 +281,7 @@ class Contest extends Base {
                     'name'            => $this->info['name'],
                     'total_entries'   => $p['total_entries'],
                     'entries'         => $p['total_entries'] == 1 ? 'entry' : 'entries',
-                ]))
+                ])
             );
             $bonus->addPoints($p['ID'], $totalGain);
             $this->db->prepared_query("

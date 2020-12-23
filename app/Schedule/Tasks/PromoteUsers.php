@@ -68,6 +68,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                     ", $l['To'], ...$userIds
                 );
 
+                $userMan = new \Gazelle\Manager\User;
                 foreach ($userIds as $userId) {
                     $this->debug(sprintf('Promoting %d from %s to %s', $userId, $fromClass, $toClass), $userId);
 
@@ -84,7 +85,12 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                         ", $comment, $userId
                     );
 
-                    \Misc::send_pm($userId, 0, "You have been promoted to $toClass", "Congratulations on your promotion to $toClass!\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
+                    $userMan->sendPM($userId, 0,
+                        "You have been promoted to $toClass",
+                        "Congratulations on your promotion to $toClass!\n\nTo read more about "
+                            . SITE_NAME
+                            . "'s user classes, read [url=" . SITE_URL . "/wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+                    );
                 }
             }
         }

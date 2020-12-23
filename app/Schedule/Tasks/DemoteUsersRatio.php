@@ -6,12 +6,13 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
 {
     public function run()
     {
+        $userMan = new \Gazelle\Manager\User;
         foreach (\Gazelle\User::demotionCriteria() as $criteria) {
-            $this->demote($criteria['To'], $criteria['Ratio'], $criteria['Upload'], $criteria['From']);
+            $this->demote($criteria['To'], $criteria['Ratio'], $criteria['Upload'], $criteria['From'], $userMan);
         }
     }
 
-    private function demote(int $newClass, float $ratio, int $upload, array $demoteClasses) {
+    private function demote(int $newClass, float $ratio, int $upload, array $demoteClasses, \Gazelle\Manager\User $userMan) {
         $classString = \Users::make_class_string($newClass);
         $placeholders = placeholders($demoteClasses);
         $query = $this->db->prepared_query("
@@ -59,13 +60,16 @@ class DemoteUsersRatio extends \Gazelle\Schedule\Task
 
         $this->db->set_query_id($query);
         $demotions = 0;
-        while (list($userID) = $this->db->next_record()) {
+        while ([$userID] = $this->db->next_record()) {
             $demotions++;
             $this->debug("Demoting $userID to $classString for insufficient ratio", $userID);
-
-            $this->cache->delete_value("user_info_$userID");
-            $this->cache->delete_value("user_info_heavy_$userID");
-            \Misc::send_pm($userID, 0, "You have been demoted to $classString", "You now only meet the requirements for the \"$classString\" user class.\n\nTo read more about ".SITE_NAME."'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url].");
+            $this->cache->deleteMulti(["user_info_$userID", "user_info_heavy_$userID"]);
+            $userMan->sendPM($userID, 0,
+                "You have been demoted to $classString",
+                "You now only meet the requirements for the \"$classString\" user class.\n\nTo read more about "
+                    . SITE_NAME
+                    . "'s user classes, read [url=".SITE_URL."/wiki.php?action=article&amp;name=userclasses]this wiki article[/url]."
+            );
         }
 
         if ($demotions > 0) {

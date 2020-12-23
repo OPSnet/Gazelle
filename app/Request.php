@@ -141,7 +141,7 @@ class Request extends Base {
         );
         $this->cache->delete_value("user_stats_$fillerId");
         // TODO: make it easy to use Twig here
-        \Misc::send_pm($fillerId, 0, "Bounty was reduced on a request you filled",
+        (new Manager\User)->sendPM($fillerId, 0, "Bounty was reduced on a request you filled",
             sprintf("With regret, Staff informs you that a reduction of %s bounty"
                 . " was applied to a request you filled on %s.\n\n"
                 . "It has been determined that a person who had voted on this"

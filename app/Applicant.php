@@ -135,9 +135,7 @@ class Applicant extends Base {
         $this->cache->delete_value(self::CACHE_KEY_NEW_REPLY);
         $this->cache->delete_value(self::CACHE_KEY_NEW_COUNT);
         if ($visibility == 'public' && \Permissions::has_permission($posterId, 'admin_manage_applicants')) {
-            $staff = \Users::user_info($posterId);
-            $user  = \Users::user_info($this->userId());
-            \Misc::send_pm(
+            (new Manager\User)->sendPM(
                 $this->userId(),
                 0,
                 sprintf('You have a reply to your %s application', $this->roleTitle()),
@@ -149,8 +147,8 @@ You can view the reply [url=%s]here[/url].
 
 ~%s Staff <3
 END_MSG
-                    , $user['Username']
-                    , $staff['Username']
+                    , (new User($this->userId()))->username()
+                    , (new User($posterId))->username()
                     , $this->roleTitle()
                     , SITE_URL . '/apply.php?action=view&id=' . $this->id()
                     , SITE_NAME
