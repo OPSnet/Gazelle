@@ -596,7 +596,7 @@ $reclaimMsg
 --OPS Staff
 END_MSG;
                 }
-                \Misc::send_pm($ops_user_id, 0, "Your buffer stats have been updated", $Body);
+                (new Manager\User)->sendPM($ops_user_id, 0, "Your buffer stats have been updated", $Body);
             }
 
             /* insert this first to avoid a potential reallocation */

@@ -13,7 +13,7 @@ function log_attempt(int $UserID, string $capture) {
             $IPv4Man = new Gazelle\Manager\IPv4;
             $IPv4Man->createBan($UserID, $IPStr, $IPStr, 'Automated ban, too many failed login attempts');
         }
-        Misc::send_pm($UserID, 0, "Too many login attempts on your account",
+        (new Gazelle\Manager\User)->sendPM($UserID, 0, "Too many login attempts on your account",
             G::$Twig->render('login/too-many-failures.twig', [
             'ipaddr' => $IPStr,
             'username' => $capture,

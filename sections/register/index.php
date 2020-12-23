@@ -65,9 +65,7 @@ if (!empty($_REQUEST['confirm'])) {
                     ]),
                     'noreply'
                 );
-                Misc::send_pm(
-                    $user->id(),
-                    0,
+                (new Gazelle\Manager\User)->sendPM( $user->id(), 0,
                     "Welcome to " . SITE_NAME,
                     G::$Twig->render('user/welcome.twig', [
                         'username'     => $username,

@@ -9,6 +9,7 @@ if ($userID < 1) {
 }
 $ownProfile = $userID == $LoggedUser['ID'];
 $user = new Gazelle\User($userID);
+$userMan = new Gazelle\Manager\User;
 
 authorize();
 // End checking for moronity
@@ -339,7 +340,7 @@ if (check_perms('users_warn')) {
         $message['body'] .= ", by [user]" . $LoggedUser['Username'] . "[/user]."
             . " The reason given was:\n[quote]{$warnReason}[/quote]. The warning will expire on $expiry."
             . "\n\nThis is an automated message. You may reply for more information if necessary.";
-        Misc::send_pm($userID, $LoggedUser['ID'], $message['subject'], $message['body']);
+        $userMan->sendPM($userID, $LoggedUser['ID'], $message['subject'], $message['body']);
         $editSummary[] = $message['summary'] . ", expiry: $expiry"
             . ($warnReason ? ", reason: \"$warnReason\"" : '');
     }
@@ -472,7 +473,7 @@ if ($disableRequests != $cur['DisableRequests'] && check_perms('users_disable_an
 
 if ($privChange && $userReason) {
     sort($privChange);
-    Misc::send_pm(
+    $userMan->sendPM(
         $userID, 0,
         count($privChange) == 1 ? $privChange[0] : 'Multiple privileges have changed on your account',
         G::$Twig->render('user/pm-privilege.twig', [

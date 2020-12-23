@@ -161,26 +161,33 @@ if (count($Err)) {
 }
 
 //We're all good! Fill!
-$DB->prepared_query('
-    UPDATE requests
-    SET FillerID = ?,
-        TorrentID = ?,
-        TimeFilled = now()
-    WHERE ID = ?',
-    $FillerID, $TorrentID, $RequestID);
-
+$DB->prepared_query("
+    UPDATE requests SET
+        TimeFilled = now(),
+        FillerID = ?,
+        TorrentID = ?
+    WHERE ID = ?
+    ", $FillerID, $TorrentID, $RequestID
+);
 $ArtistForm = Requests::get_artists($RequestID);
 $ArtistName = Artists::display_artists($ArtistForm, false, true);
 $FullName = $ArtistName.$Title;
 
-$DB->prepared_query('
-    SELECT UserID
-    FROM requests_votes
-    WHERE RequestID = ?', $RequestID);
+$userMan = new Gazelle\Manager\User;
+$DB->prepared_query("
+    SELECT UserID FROM requests_votes WHERE RequestID = ?
+    ", $RequestID
+);
 $UserIDs = $DB->to_array();
 foreach ($UserIDs as $User) {
-    list($VoterID) = $User;
-    Misc::send_pm($VoterID, 0, "The request \"$FullName\" has been filled", 'One of your requests&#8202;&mdash;&#8202;[url='.SITE_URL."/requests.php?action=view&amp;id=$RequestID]$FullName".'[/url]&#8202;&mdash;&#8202;has been filled. You can view it here: [url]'.SITE_URL."/torrents.php?torrentid=$TorrentID".'[/url]');
+    [$VoterID] = $User;
+    $userMan->sendPM($VoterID, 0,
+        "The request \"$FullName\" has been filled",
+        'One of your requests&#8202;&mdash;&#8202;[url='.SITE_URL
+            . "/requests.php?action=view&amp;id=$RequestID]$FullName"
+            . '[/url]&#8202;&mdash;&#8202;has been filled. You can view it here: [url]'
+            . SITE_URL."/torrents.php?torrentid=$TorrentID".'[/url]'
+    );
 }
 
 $RequestVotes = Requests::get_votes_array($RequestID);

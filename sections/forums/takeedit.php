@@ -49,8 +49,7 @@ if ($UserID != $forumPost['user-id'] && !check_perms('site_moderate_forums')) {
 
 // Send a PM to the user to notify them of the edit
 if ($UserID != $forumPost['user-id'] && $DoPM) {
-    Misc::send_pm(
-        $forumPost['user-id'], 0,
+    (new Gazelle\Manager\User)->sendPM($forumPost['user-id'], 0,
         "Your post #$PostID has been edited",
         sprintf('One of your posts has been edited by %s: [url]%s[/url]',
             '[url='.SITE_URL."/user.php?id=$UserID]".$LoggedUser['Username'].'[/url]',

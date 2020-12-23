@@ -4,7 +4,8 @@ if (!check_perms('users_warn')) {
 }
 Misc::assert_isset_request($_POST, ['reason', 'privatemessage', 'body', 'length', 'postid', 'userid']);
 
-$user = (new Gazelle\Manager\User)->findById((int)$_POST['userid']);
+$userMan = new Gazelle\Manager\User;
+$user = $userMan->findById((int)$_POST['userid']);
 if (is_null($user)) {
     error(404);
 }
@@ -45,8 +46,7 @@ if ($WarningLength !== 'verbal') {
 }
 
 $user->addForumWarning($AdminComment)->addStaffNote($AdminComment)->modify();
-
-Misc::send_pm($user->id(), $LoggedUser['ID'], $Subject, $PrivateMessage);
+$userMan->sendPM($user->id(), $LoggedUser['ID'], $Subject, $PrivateMessage);
 
 if ($forumPost['is-sticky']) {
     $Cache->delete_value("thread_{$threadId}_info");

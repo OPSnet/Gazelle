@@ -19,10 +19,11 @@ class DisableLeechingRatioWatch extends \Gazelle\Schedule\Task
         $users = $this->db->to_pair('torrent_pass', 'ID');
 
         if (count($users) > 0) {
+            $userMan = new \Gazelle\Manager\User;
             $subject = 'Leeching Disabled';
             $message = 'You have downloaded more than 10 GB while on Ratio Watch. Your leeching privileges have been disabled. Please reread the rules and refer to this guide on how to improve your ratio ' . SITE_URL . '/wiki.php?action=article&amp;name=ratiotips';
             foreach ($users as $torrentPass => $userID) {
-                \Misc::send_pm($userID, 0, $subject, $message);
+                $userMan->sendPM($userID, 0, $subject, $message);
                 \Tracker::update_tracker('update_user', ['passkey' => $torrentPass, 'can_leech' => '0']);
                 $this->processed++;
                 $this->debug("Disabling leech for $userID", $userID);

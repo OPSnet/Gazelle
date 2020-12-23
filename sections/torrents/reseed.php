@@ -54,9 +54,11 @@ if ($DB->has_results()) {
 
 $usersToNotify[$UploaderID] = ["uploaded", strtotime($UploadedTime)];
 
+$userMan = new Gazelle\Manager\User;
 foreach ($usersToNotify as $UserID => $info) {
-    $Username = Users::user_info($UserID)['Username'];
-    list($action, $TimeStamp) = $info;
+    $user = new Gazelle\User($UserID);
+    $Username = $user->username();
+    [$action, $TimeStamp] = $info;
 
     $Request = "Hi $Username,
 
@@ -66,7 +68,7 @@ The exact process for re-seeding a torrent is slightly different for each client
 
 Thanks!";
 
-    Misc::send_pm($UserID, 0, "Re-seed request for torrent $Name", $Request);
+    $userMan->sendPM($UserID, 0, "Re-seed request for torrent $Name", $Request);
 }
 
 $NumUsers = count($usersToNotify);

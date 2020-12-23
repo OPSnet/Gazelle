@@ -276,4 +276,117 @@ class User extends \Gazelle\Base {
             SELECT count(*) FROM users_info WHERE BanDate IS NOT NULL AND BanReason = '2'
         ");
     }
+
+    /**
+     * Sends a PM from $FromId to $ToId.
+     *
+     * @param string $toId ID of user to send PM to. If $toId is an array and $convId is empty, a message will be sent to multiple users.
+     * @param string $fromId ID of user to send PM from, 0 to send from system
+     * @param string $subject
+     * @param string $body
+     * @param int $convId The conversation the message goes in. Leave blank to start a new conversation.
+     * @return int conversation Id
+     */
+    public function sendPM(int $toId, int $fromId, string $subject, string $body): int {
+        if ($toId === 0 || $toId === $fromId) {
+            // Don't allow users to send messages to the system or themselves
+            return 0;
+        }
+
+        $qid = $this->db->get_query_id();
+        $this->db->begin_transaction();
+
+        $this->db->prepared_query("
+            INSERT INTO pm_conversations (Subject) VALUES (?)
+            ", $subject
+        );
+        $convId = $this->db->inserted_id();
+
+        $placeholders = ["(?, ?, '1', '0', '1')"];
+        $args = [$toId, $convId];
+        if ($fromId !== 0) {
+            $placeholders[] = "(?, ?, '0', '1', '0')";
+            $args = array_merge($args, [$fromId, $convId]);
+        }
+
+        $this->db->prepared_query("
+            INSERT INTO pm_conversations_users
+                   (UserID, ConvID, InInbox, InSentbox, UnRead)
+            VALUES
+            " . implode(', ', $placeholders), ...$args
+        );
+        $this->deliverPM($toId, $fromId, $subject, $body, $convId);
+        $this->db->commit();
+        $this->db->set_query_id($qid);
+
+        return $convId;
+    }
+
+    /**
+     * Send a reply from $FromId to $ToId.
+     *
+     * @param string $toId ID of user to send PM to. If $toId is an array and $convId is empty, a message will be sent to multiple users.
+     * @param string $fromId ID of user to send PM from, 0 to send from system
+     * @param string $subject
+     * @param string $body
+     * @param int $convId The conversation the message goes in. Leave blank to start a new conversation.
+     * @return int conversation Id
+     */
+    public function replyPM(int $toId, int $fromId, string $subject, string $body, int $convId): int {
+        if ($toId === 0 || $toId === $fromId) {
+            // Don't allow users to reply to the system or themselves
+            return 0;
+        }
+
+        $qid = $this->db->get_query_id();
+        $this->db->begin_transaction();
+        $this->deliverPM($toId, $fromId, $subject, $body, $convId);
+        $this->db->commit();
+        $this->db->set_query_id($qid);
+
+        return $convId;
+    }
+
+    protected function deliverPM(int $toId, int $fromId, string $subject, string $body, int $convId) {
+        $this->db->prepared_query("
+            UPDATE pm_conversations_users SET
+                InInbox = '1',
+                UnRead = '1',
+                ReceivedDate = now()
+            WHERE UserID = ?
+                AND ConvID = ?
+            ", $toId, $convId
+        );
+        $this->db->prepared_query("
+            UPDATE pm_conversations_users SET
+                InSentbox = '1',
+                SentDate = now()
+            WHERE UserID = ?
+                AND ConvID = ?
+            ", $fromId, $convId
+        );
+
+        $this->db->prepared_query("
+            INSERT INTO pm_messages
+                   (SenderID, ConvID, Body)
+            VALUES (?,        ?,      ?)
+            ", $fromId, $convId, $body
+        );
+
+        // Update the cached new message count.
+        $this->cache->cache_value("inbox_new_$toId",
+            $this->db->scalar("
+                SELECT count(*) FROM pm_conversations_users WHERE UnRead = '1' AND InInbox = '1' AND UserID = ?
+                ", $toId
+            )
+        );
+
+        $senderName = $this->db->scalar("
+            SELECT Username FROM users_main WHERE ID = ?
+            ", $fromId
+        );
+        (new Notification)->push($toId,
+            "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', Notification::INBOX
+        );
+    }
 }

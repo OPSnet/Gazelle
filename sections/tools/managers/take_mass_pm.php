@@ -20,10 +20,11 @@ $DB->prepared_query("
     ", $permissionId, $fromId, $permissionId, $fromId
 );
 
+$userMan = new Gazelle\Manager\User;
 $subject = trim($_POST['subject']);
 $body = trim($_POST['body']);
 while([$userId] = $DB->next_record()) {
-    Misc::send_pm($userId, $fromId, $subject, $body);
+   $userMan->sendPM($userId, $fromId, $subject, $body);
 }
 
 header("Location: tools.php");

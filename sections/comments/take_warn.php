@@ -37,9 +37,7 @@ if ($Length !== 'verbal') {
     $AdminComment = "Verbally warned by {$LoggedUser['Username']}\nReason: $url - $Reason";
     $user->addStaffNote($AdminComment);
 }
-$user->addForumWarning($AdminComment)
-    ->modify();
-
-Misc::send_pm($user->id(), $LoggedUser['ID'], $Subject, $PrivateMessage);
+$user->addForumWarning($AdminComment)->modify();
+(new \Gazelle\Manager\User)->sendPM($user->id(), $LoggedUser['ID'], $Subject, $PrivateMessage);
 
 header("Location: $url");

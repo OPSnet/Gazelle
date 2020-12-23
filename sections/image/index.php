@@ -135,7 +135,7 @@ if (isset($_GET['type']) && isset($_GET['userid'])) {
             ", ucfirst($imageType) . " $url reset automatically (Size: {$sizeKb}kB, Height: {$image->height()}px).\n\n",
                 $userId
         );
-        Misc::send_pm($userId, 0, $subject, G::$Twig->render('user/reset-avatar.twig', [
+        (new Gazelle\Manager\User)->sendPM($userId, 0, $subject, G::$Twig->render('user/reset-avatar.twig', [
             'height'    => $maxHeight,
             'site_name' => SITE_NAME,
             'size_kb'   => $sizeKb,

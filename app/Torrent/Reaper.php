@@ -62,11 +62,10 @@ class Reaper extends \Gazelle\Base {
             ++$i;
         }
 
+        $userMan = new \Gazelle\Manager\User;
         foreach ($deleteNotes as $userID => $messageInfo) {
             $singular = (($messageInfo['Count'] == 1) ? true : false);
-            \Misc::send_pm(
-                $userID,
-                0,
+            $userMan->sendPM( $userID, 0,
                 $messageInfo['Count'].' of your torrents '.($singular ? 'has' : 'have').' been deleted for inactivity',
                 ($singular ? 'One' : 'Some').' of your uploads '.($singular ? 'has' : 'have').' been deleted for being unseeded. Since '.($singular ? 'it' : 'they').' didn\'t break any rules (we hope), please feel free to re-upload '.($singular ? 'it' : 'them').".\n\nThe following torrent".($singular ? ' was' : 's were').' deleted:'.$messageInfo['Msg']
             );

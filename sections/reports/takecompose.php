@@ -10,6 +10,7 @@ if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$_POST['toid']])) {
     error(403);
 }
 
+$ConvID = false;
 if (isset($_POST['convid']) && is_number($_POST['convid'])) {
     $ConvID = $_POST['convid'];
     $Subject = '';
@@ -30,7 +31,6 @@ if (isset($_POST['convid']) && is_number($_POST['convid'])) {
         error(403);
     }
 } else {
-    $ConvID = '';
     if (!is_number($_POST['toid'])) {
         $Err = 'This recipient does not exist.';
     } else {
@@ -54,6 +54,10 @@ if (!empty($Err)) {
     die();
 }
 
-$ConvID = Misc::send_pm($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
+if ($ConvID) {
+    (new Gazelle\Manager\User)->replyPM($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
+} else {
+    (new Gazelle\Manager\User)->sendPM($ToID, $LoggedUser['ID'], $Subject, $Body);
+}
 
 header('Location: reports.php');

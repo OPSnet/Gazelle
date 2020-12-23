@@ -270,10 +270,11 @@ class Torrents {
 
         // Uploader
         if ($PMUploader) {
-            Misc::send_pm($UploaderID, 0, $Subject, $MessageStart.'you uploaded'.$MessageEnd);
+            $userMan->sendPM($UploaderID, 0, $Subject, $MessageStart.'you uploaded'.$MessageEnd);
         }
         $PMedUsers = [$UploaderID];
 
+        $userMan = new \Gazelle\Manager\User;
         // Seeders
         $DB->prepared_query("
 SELECT DISTINCT(xfu.uid)
@@ -286,7 +287,7 @@ WHERE xfu.fid = ?
 ", $TorrentID, ...$PMedUsers);
         $UserIDs = $DB->collect('uid');
         foreach ($UserIDs as $UserID) {
-            Misc::send_pm($UserID, 0, $Subject, $MessageStart."you're seeding".$MessageEnd);
+            $userMan->sendPM($UserID, 0, $Subject, $MessageStart . "you're seeding" . $MessageEnd);
         }
         $PMedUsers = array_merge($PMedUsers, $UserIDs);
 
@@ -298,7 +299,7 @@ WHERE xs.fid=? AND ui.NotifyOnDeleteSnatched='1' AND xs.uid NOT IN (" . placehol
 ", $TorrentID, ...$PMedUsers);
         $UserIDs = $DB->collect('uid');
         foreach ($UserIDs as $UserID) {
-            Misc::send_pm($UserID, 0, $Subject, $MessageStart."you've snatched".$MessageEnd);
+            $userMan->sendPM($UserID, 0, $Subject, $MessageStart . "you've snatched" . $MessageEnd);
         }
         $PMedUsers = array_merge($PMedUsers, $UserIDs);
 
@@ -310,7 +311,7 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
 ", $TorrentID, ...$PMedUsers);
         $UserIDs = $DB->collect('UserID');
         foreach ($UserIDs as $UserID) {
-            Misc::send_pm($UserID, 0, $Subject, $MessageStart."you've downloaded".$MessageEnd);
+            $userMan->sendPM($UserID, 0, $Subject, $MessageStart . "you've downloaded" . $MessageEnd);
         }
     }
 

@@ -466,6 +466,7 @@ function logout_all_sessions($userId) {
 }
 
 function enforce_login() {
+        header('X-kek: kek');
     if (!G::$LoggedUser) {
         header('Location: login.php');
         die();

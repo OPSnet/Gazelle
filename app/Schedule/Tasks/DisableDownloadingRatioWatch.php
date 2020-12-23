@@ -31,12 +31,15 @@ class DisableDownloadingRatioWatch extends \Gazelle\Schedule\Task
             ", $userIDs);
         }
 
+        $userMan = new \Gazelle\Manager\User;
         foreach ($userIDs as $userID) {
             $this->cache->begin_transaction("user_info_heavy_$userID");
             $this->cache->update_row(false, ['RatioWatchDownload' => 0, 'CanLeech' => 0]);
             $this->cache->commit_transaction(0);
-            \Misc::send_pm($userID, 0, 'Your downloading privileges have been disabled', "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio.");
-
+            $userMan->sendPM($userID, 0,
+                'Your downloading privileges have been disabled',
+                "As you did not raise your ratio in time, your downloading privileges have been revoked. You will not be able to download any torrents until your ratio is above your new required ratio."
+            );
             $this->debug("Disabled leech for $userID", $userID);
             $this->processed++;
         }

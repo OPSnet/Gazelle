@@ -12,7 +12,14 @@ if (!empty($LoggedUser['DisablePM']) && !isset($StaffIDs[$_POST['toid']])) {
     error(403);
 }
 
-if (($ConvID = (int)$_POST['convid']) > 0) {
+$ConvID = (int)($_POST['convid'] ?? 0);
+if (!$ConvID) {
+    // A new conversation
+    $Subject = trim($_POST['subject']);
+    if (empty($Subject)) {
+        $Err = 'You cannot send a message without a subject.';
+    }
+} else {
     // A reply to an ongoing conversation
     $Subject = '';
     if (!$DB->scalar("
@@ -23,13 +30,6 @@ if (($ConvID = (int)$_POST['convid']) > 0) {
             ", $LoggedUser['ID'], $ConvID
     )) {
         error(403);
-    }
-} else {
-    // A new conversation
-    $ConvID = null;
-    $Subject = trim($_POST['subject']);
-    if (empty($Subject)) {
-        $Err = 'You cannot send a message without a subject.';
     }
 }
 $ToID = $DB->scalar("
@@ -52,6 +52,11 @@ if (!empty($Err)) {
     $Return = true;
     require(__DIR__ . '/compose.php');
 } else {
-    Misc::send_pm($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
+    $userMan = new Gazelle\Manager\User;
+    if ($ConvID) {
+        $userMan->replyPM($ToID, $LoggedUser['ID'], $Subject, $Body, $ConvID);
+    } else {
+        $userMan->sendPM($ToID, $LoggedUser['ID'], $Subject, $Body);
+    }
     header('Location: ' . Inbox::getLinkQuick('inbox', $LoggedUser['ListUnreadPMsFirst'] ?? false, Inbox::RAW));
 }

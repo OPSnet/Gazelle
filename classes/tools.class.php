@@ -229,9 +229,14 @@ class Tools {
             list($OldDate) = G::$DB->next_record();
             $NewExpDate = date('Y-m-d H:i:s', strtotime($OldDate) + $Duration);
 
-            Misc::send_pm($UserID, 0,
+            (new \Gazelle\Manager\User)->sendPM($UserID, 0,
                 'You have received multiple warnings.',
-                "When you received your latest warning (set to expire on ".date('Y-m-d', (time() + $Duration)).'), you already had a different warning (set to expire on '.date('Y-m-d', strtotime($OldDate)).").\n\n Due to this collision, your warning status will now expire at $NewExpDate.");
+                "When you received your latest warning (set to expire on "
+                    . date('Y-m-d', (time() + $Duration))
+                    . '), you already had a different warning (set to expire on '
+                    . date('Y-m-d', strtotime($OldDate))
+                    . ").\n\n Due to this collision, your warning status will now expire at $NewExpDate."
+            );
 
             $AdminComment = date('Y-m-d')." - Warning (Clash) extended to expire at $NewExpDate by " . G::$LoggedUser['Username'] . "\nReason: $Reason\n\n";
 

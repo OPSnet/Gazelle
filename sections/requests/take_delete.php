@@ -62,7 +62,11 @@ G::$DB->prepared_query('
         (?)', $RequestID);
 
 if ($UserID != $LoggedUser['ID']) {
-    Misc::send_pm($UserID, 0, 'A request you created has been deleted', "The request \"$FullName\" was deleted by [url=".SITE_URL.'/user.php?id='.$LoggedUser['ID'].']'.$LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason'].'[/quote]');
+    (new Gazelle\Manager\User)->sendPM($UserID, 0,
+        'A request you created has been deleted',
+        "The request \"$FullName\" was deleted by [url=".SITE_URL.'/user.php?id='.$LoggedUser['ID'].']'
+            . $LoggedUser['Username'].'[/url] for the reason: [quote]'.$_POST['reason'].'[/quote]'
+    );
 }
 
 (new Gazelle\Log)->general("Request $RequestID ($FullName) was deleted by user ".$LoggedUser['ID'].' ('.$LoggedUser['Username'].') for the reason: '.$_POST['reason']);
