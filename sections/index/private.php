@@ -23,45 +23,38 @@ if (check_perms('users_mod')) {
             <div class="head colhead_dark">
                 <strong><a href="staffblog.php">Latest staff blog posts</a></strong>
             </div>
-            <ol class="stats nobullet">
+            <ul class="stats nobullet">
 <?php
     $blogMan = new Gazelle\Manager\StaffBlog;
-    $Blog = $blogMan->blogList();
-    $SBlogReadTime = $blogMan->readBy($LoggedUser['ID']);
-    $n = 0;
-    foreach ($Blog as $b) {
-        if (++$n > 5) {
-            break;
-        }
-        $unread = $SBlogReadTime < strtotime($b['created']);
+    $Blog = array_slice($blogMan->blogList(), 0, 5);
+    $read = $blogMan->readBy($LoggedUser['ID']);
+    foreach ($Blog as $article) {
+        $unread = $read < strtotime($article['created']);
 ?>
                 <li>
                     <?= $unread ? '<strong>' : ''?>
-                    <a href="staffblog.php#blog<?= $b['id'] ?>"><?= $b['title'] ?></a>
+                    <a href="staffblog.php#blog<?= $article['id'] ?>"><?= $article['title'] ?></a>
                     <?= $unread ? '</strong>' : ''?>
                 </li>
 <?php } ?>
-            </ol>
+            </ul>
         </div>
 <?php } /* users_mod */ ?>
+
         <div class="box">
             <div class="head colhead_dark"><strong><a href="blog.php">Latest blog posts</a></strong></div>
-            <ol class="stats">
+            <ul class="stats">
 <?php
 $blogMan = new Gazelle\Manager\Blog;
-$headlines = $blogMan->headlines();
-$n = 0;
+$headlines = array_slice($blogMan->headlines(), 0, 5);
 foreach ($headlines as $article) {
-    if (++$n > 5) {
-        break;
-    }
     [$BlogID, $Title] = $article;
 ?>
                 <li>
                     <a href="blog.php#blog<?=$BlogID?>"><?=$Title?></a>
                 </li>
 <?php } ?>
-            </ol>
+            </ul>
         </div>
 <?php require('contest_leaderboard.php'); ?>
         <div class="box">
@@ -222,76 +215,16 @@ if ($TopicID) {
                 <br /><strong>Topic:</strong> <a href="forums.php?action=viewthread&amp;threadid=<?=$TopicID?>">Visit</a>
             </div>
         </div>
-<?php
-}
-?>
+<?php } ?>
     </div>
-    <div class="main_column">
-<?php
-$contest = (new Gazelle\Manager\Contest)->currentContest();
-if ($contest) {
+<?= G::$Twig->render('index/private-main.twig', [
+    'admin'   => check_perms('admin_manage_news'),
+    'contest' => (new Gazelle\Manager\Contest)->currentContest(),
+    'latest'  => (new \Gazelle\Manager\Torrent)->latestUploads(5),
+    'news'    => array_slice($newsMan->headlines(), 0, 5),
+]);
 ?>
-        <div id="contest-info" class="box news_post" style="text-align:center">
-<?php   if ($contest->banner()) { ?>
-            <br /><a href="/contest.php?action=leaderboard">
-                <img src="<?= $contest->banner()?>" alt="<?= $contest->name() ?>" title="<?= $contest->name() ?>" />
-            </a>
-<?php   } ?>
-            <h5>The <a href="/contest.php?action=leaderboard"><?= $contest->name() ?></a> <?= strtotime($contest->dateEnd()) >= time() ? 'ends in' : 'ended' ?> <?= time_diff($contest->dateEnd()) ?></h5>
-        </div>
-<?php } ?>
-        <div id="last_uploads" class="box news_post">
-            <div class="head">
-                <strong>Latest Uploads</strong>
-            </div>
-            <div class="head">
-            <ul class="collage_images" id="collage_page0">
-<?php
-$torMan = new \Gazelle\Manager\Torrent;
-$latest = $torMan->latestUploads(5);
-foreach ($latest as $upload) {
-    $title = sprintf("%s<br />(%s)<br />uploaded by %s %s",
-        display_str($upload['name']), display_str($upload['tags']), display_str($upload['username']), time_diff($upload['uploadDate'], 2, false));
-    $alt = str_replace($title, '<br />', ' ');
-?>
-                <li class="image_group_<?= $upload['groupId'] ?>">
-                <a href="torrents.php?id=<?= $upload['groupId'] ?>&amp;torrentid=<?= $upload['torrentId'] ?>#torrent<?= $upload['torrentId'] ?>">
-                <img class="tooltip_interactive" src="<?= ImageTools::process($upload['imageUrl'] , true) ?>" alt="<?= $alt ?>" title="<?= $title ?>"
-                    data-title-plain="<?= $alt ?>" width="118" /></a>
-                </li>
-<?php } ?>
-            </ul>
-            </div>
-        </div>
-<?php
-$headlines = $newsMan->headlines();
-$show = 5;
-foreach ($headlines as $article) {
-    if (--$show < 0) {
-        break;
-    }
-    list($NewsID, $Title, $Body, $NewsTime) = $article;
-?>
-        <div id="news<?=$NewsID?>" class="box news_post">
-            <div class="head">
-                <strong><?=Text::full_format($Title)?></strong> <?=time_diff($NewsTime);?>
-<?php    if (check_perms('admin_manage_news')) { ?>
-                - <a href="tools.php?action=editnews&amp;id=<?=$NewsID?>" class="brackets">Edit</a>
-<?php    } ?>
-            <span style="float: right;"><a href="#" onclick="$('#newsbody<?=$NewsID?>').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
-            </div>
 
-            <div id="newsbody<?=$NewsID?>" class="pad"><?=Text::full_format($Body)?></div>
-        </div>
-<?php
-}
-?>
-        <div id="more_news" class="box">
-            <div class="head">
-                <em><span><a href="#" onclick="news_ajax(event, 3, 5, <?=check_perms('admin_manage_news') ? 1 : 0; ?>, false); return false;">Click to load more news</a>.</span> To browse old news posts, <a href="forums.php?action=viewforum&amp;forumid=12">click here</a>.</em>
-            </div>
-        </div>
-    </div>
 </div>
 <?php
 View::show_footer(['disclaimer'=>true]);
