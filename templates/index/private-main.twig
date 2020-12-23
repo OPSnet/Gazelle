@@ -1,0 +1,51 @@
+    <div class="main_column">
+{% if contest %}
+        <div id="contest-info" class="box news_post" style="text-align:center">
+    {% if contest.banner %}
+            <br /><a href="/contest.php?action=leaderboard">
+                <img src="{{ contest.banner }}" alt="{{ contest.name }}" title="{{ contest.name }}" />
+            </a>
+    {% endif %}
+            <h5>The <a href="/contest.php?action=leaderboard">{{ contest.name }}</a> {{ contest.is_over ? 'ended' : 'ends in' }} {{ contest.dateEnd|time_diff }}</h5>
+        </div>
+{% endif %}
+
+        <div id="last_uploads" class="box news_post">
+            <div class="head">
+                <strong>Latest Uploads</strong>
+            </div>
+            <div class="head">
+            <ul class="collage_images" id="collage_page0">
+{% for upload in latest %}
+    {% set title = upload.name ~ '<br />(' ~ upload.tags ~ ')<br />uploaded by ' ~ upload.username ~ ' ' ~ upload.uploadDate|time_diff %}
+    {% set alt = title|replace({'<br />': ' '}) %}
+                <li class="image_group_{{ upload.groupId }}">
+                <a href="torrents.php?id={{ upload.groupId }}&amp;torrentid={{ upload.torrentId }}>#torrent{{ upload.torrentId }}">
+                <img class="tooltip_interactive" src="{{ upload.imageUrl|image }}" alt="{{ alt }}" title="{{ title }}"
+                    data-title-plain="{{ alt }}" width="118" /></a>
+                </li>
+{% endfor %}
+            </ul>
+            </div>
+        </div>
+
+{% for article in news %}
+        <div id="news{{ article.0 }}" class="box news_post">
+            <div class="head">
+                <strong>{{ article.1|bb_format }}</strong> {{ article.3|time_diff }}
+{% if admin %}
+                - <a href="tools.php?action=editnews&amp;id={{ article.0 }}" class="brackets">Edit</a>
+{% endif %}
+            <span style="float: right;"><a href="#" onclick="$('#newsbody{{ article.0 }}').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>
+            </div>
+
+            <div id="newsbody{{ article.0 }}" class="pad">{{ article.2|bb_format }}</div>
+        </div>
+{% endfor %}
+
+        <div id="more_news" class="box">
+            <div class="head">
+                <em><span><a href="#" onclick="news_ajax(event, 3, 5, {{ admin ? 1 : 0 }}, false); return false;">Click to load more news</a>.</span> To browse old news posts, <a href="forums.php?action=viewforum&amp;forumid=12">click here</a>.</em>
+            </div>
+        </div>
+    </div>
