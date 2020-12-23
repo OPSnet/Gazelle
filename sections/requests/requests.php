@@ -622,7 +622,7 @@ View::show_header($Title, 'requests');
 <?php        } ?>
             </td>
             <td>
-                <a href="user.php?id=<?=$Request['UserID']?>"><?=Users::format_username($Request['UserID'], false, false, false)?></a>
+                <?=Users::format_username($Request['UserID'], false, false, false)?>
             </td>
             <td class="nobr">
                 <?=time_diff($Request['TimeAdded'], 1)?>
