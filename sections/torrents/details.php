@@ -607,20 +607,17 @@ foreach ($TorrentList as $Torrent) {
 
     if (($Seeders == 0 && $LastActive != '0000-00-00 00:00:00' && time() - strtotime($LastActive) >= 345678 && time() - strtotime($LastReseedRequest) >= 864000) || check_perms('users_mod')) { ?>
                             <br /><a href="torrents.php?action=reseed&amp;torrentid=<?=$TorrentID?>&amp;groupid=<?=$GroupID?>" class="brackets" onclick="return confirm('Are you sure you want to request a re-seed of this torrent?');">Request re-seed</a>
-<?php
-    }
-
-    $NewRatio = Format::get_ratio_html(G::$LoggedUser['BytesUploaded'], G::$LoggedUser['BytesDownloaded'] + $Size);
-?>
-                            <br /><br />If you download this, your ratio will become <?=$NewRatio?>.
+<?php } ?>
+                            <br /><br />If you download this, your ratio will become <?=
+                                Format::get_ratio_html(G::$LoggedUser['BytesUploaded'],
+                                    G::$LoggedUser['BytesDownloaded'] + $Size);
+                            ?>.
                         </blockquote>
                     </div>
+                    <div class="linkbox">
 <?php if (check_perms('site_moderate_requests')) { ?>
-                    <div class="linkbox">
                         <a href="torrents.php?action=masspm&amp;id=<?=$GroupID?>&amp;torrentid=<?=$TorrentID?>" class="brackets">Mass PM snatchers</a>
-                    </div>
 <?php } ?>
-                    <div class="linkbox">
                         <a href="#" class="brackets" onclick="show_peers('<?=$TorrentID?>', 0); return false;">View peer list</a>
 <?php if ($Media === 'CD' && $HasLog && $HasLogDB) { ?>
                         <a href="#" class="brackets" onclick="show_logs('<?=$TorrentID?>', <?=$HasLogDB?>, '<?=$LogScore?>'); return false;">View log</a>

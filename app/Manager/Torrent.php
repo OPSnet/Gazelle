@@ -48,6 +48,9 @@ class Torrent extends \Gazelle\Base {
     protected $logger;
 
     const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_';
+    const CACHE_KEY_PEERLIST_TOTAL = 'peerlist_total_%d';
+    const CACHE_KEY_PEERLIST_PAGE  = 'peerlist_page_%d_%d';
+
     const FILELIST_DELIM = 0xF7; // Hex for &divide; Must be the same as phrase_boundary in sphinx.conf!
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
@@ -962,5 +965,56 @@ class Torrent extends \Gazelle\Base {
         $this->cache->delete_value("users_tokens_{$userId}");
         \Tracker::update_tracker('remove_token', ['info_hash' => rawurlencode($hash), 'userid' => $userId]);
         return true;
+    }
+
+    public function peerlistTotal(int $torrentId) {
+        $key = sprintf(self::CACHE_KEY_PEERLIST_TOTAL, $torrentId);
+        if (($total = $this->cache->get_value($key)) === false) {
+            // force flush the first page of results
+            $this->cache->delete_value(sprintf(self::CACHE_KEY_PEERLIST_PAGE, $torrentId, 0));
+            $total = $this->db->scalar("
+                SELECT count(*)
+                FROM xbt_files_users AS xfu
+                INNER JOIN users_main AS um ON (um.ID = xfu.uid)
+                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                WHERE um.Visible = '1'
+                    AND xfu.fid = ?
+                ", $torrentId
+            );
+            $this->cache->cache_value($key, $total, 300);
+        }
+        return $total;
+    }
+
+    public function peerlistPage(int $torrentId, int $userId, int $limit, int $offset) {
+        $key = sprintf(self::CACHE_KEY_PEERLIST_PAGE, $torrentId, $offset);
+        if (($list = $this->cache->get_value($key)) === false) {
+            // force flush the next page of results
+            $this->cache->delete_value(sprintf(self::CACHE_KEY_PEERLIST_PAGE, $torrentId, $offset + $limit));
+            $this->db->prepared_query("
+                SELECT
+                    xfu.active,
+                    xfu.connectable,
+                    xfu.remaining,
+                    xfu.uploaded,
+                    xfu.useragent,
+                    xfu.ip           AS ipv4addr,
+                    xfu.uid          AS user_id,
+                    t.Size           AS size,
+                    sx.name          AS seedbox
+                FROM xbt_files_users AS xfu
+                INNER JOIN users_main AS um ON (um.ID = xfu.uid)
+                INNER JOIN torrents AS t ON (t.ID = xfu.fid)
+                LEFT JOIN user_seedbox sx ON (xfu.ip = inet_ntoa(sx.ipaddr) AND xfu.useragent = sx.useragent AND xfu.uid = ?)
+                WHERE um.Visible = '1'
+                    AND xfu.fid = ?
+                ORDER BY xfu.uid = ? DESC, xfu.uploaded DESC
+                LIMIT ? OFFSET ?
+                ", $userId, $torrentId, $userId, $limit, $offset
+            );
+            $list = $this->db->to_array(false, MYSQLI_ASSOC);
+            $this->cache->cache_value($key, $list, 300);
+        }
+        return $list;
     }
 }

@@ -119,4 +119,20 @@ class Paginator {
         }
         return $this->linkbox;
     }
+
+
+    // used for pagination of peer/snatch/download lists on torrentdetails.php
+    public function linkboxJS(string $action, int $torrentId): string {
+        if ($this->total < $this->perPage) {
+            return '';
+        }
+        $page = range(1, (int)ceil($this->total / $this->perPage));
+        $link = [];
+        foreach ($page as $p) {
+            $link[] = ($p === $this->page)
+                ? $p
+                : "<a href=\"#\" onclick=\"$action($torrentId, $p); return false;\">$p</a>";
+        }
+        return '<div class="linkbox">' . implode(' &sdot; ', $link) . '</div>';
+    }
 }

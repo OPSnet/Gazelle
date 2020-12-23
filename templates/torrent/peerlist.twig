@@ -1,0 +1,41 @@
+<h4>Peer List</h4>
+{{ linkbox|raw }}
+<table>
+    <tr class="colhead_dark" style="font-weight: bold;">
+        <td>User</td>
+        <td>Active</td>
+        <td>Connectable</td>
+        <td class="number_column">Up (this session)</td>
+        <td class="number_column">Available %</td>
+        <td>IP Address</td>
+        <td>Useragent</td>
+    </tr>
+{% for peer in list %}
+    <tr>
+    {% if is_admin or peer.user_id == user_id %}
+        <td>{{ peer.user_id|user_url }}</td>
+    {% else %}
+        <td>Peer</td>
+    {% endif %}
+        <td>{% if peer.active %}<span style="color: green;">Yes</span>{% else %}<span style="color: red;">No</span>{% endif %}</td>
+        <td>{% if peer.connectable %}<span style="color: green;">Yes</span>{% else %}<span style="color: red;">No</span>{% endif %}</td>
+        <td class="number_column">{{ peer.uploaded|octet_size }}</td>
+        <td class="number_column">{{ ((peer.size - peer.remaining) / peer.size * 100)|number_format(2) }}</td>
+    {% if peer.user_id == user_id %}
+        {% if peer.seedbox %}
+        <td title="IP: {{  peer.ipv4addr }}, Useragent: {{  peer.useragent }}" colspan="2">Seedbox: <b>{{  peer.seedbox }}</b></td>
+        {% else %}
+        <td>&mdash;</td>
+        <td>{{ peer.useragent }}</td>
+        {% endif %}
+    {% elseif is_admin %}
+        <td>{{ peer.ipv4addr }}</td>
+        <td>{{ peer.useragent }}</td>
+    {% else %}
+        <td>&mdash;</td>
+        <td>{{ peer.useragent }}</td>
+    {% endif %}
+    </tr>
+{% endfor %}
+</table>
+{{ linkbox|raw }}
