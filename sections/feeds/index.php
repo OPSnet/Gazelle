@@ -23,14 +23,10 @@ if (
 $User = (int)$_GET['user'];
 
 if (!$Enabled = $Cache->get_value("enabled_$User")) {
-    $DB = new DB_MYSQL; //Load the database wrapper
-    $DB->prepared_query('
-        SELECT Enabled
-        FROM users_main
-        WHERE ID = ?
-        ', $User
+    $Enabled = $DB->scalar("
+        SELECT Enabled FROM users_main WHERE ID = ?
+        ", $User
     );
-    list($Enabled) = $DB->next_record();
     $Cache->cache_value("enabled_$User", $Enabled, 0);
 }
 
@@ -46,31 +42,28 @@ switch ($_GET['feed']) {
     case 'feed_news':
         $Feed->channel('News', 'RSS feed for site news.');
         if (!$News = $Cache->get_value('feed_news')) {
-            $DB = new DB_MYSQL; //Load the database wrapper
-            $DB->query("
-                SELECT
-                    ID,
+            $DB->prepared_query("
+                SELECT ID,
                     Title,
                     Body,
                     Time
                 FROM news
                 ORDER BY Time DESC
-                LIMIT 5");
+                LIMIT 5
+            ");
             $News = $DB->to_array(false, MYSQLI_NUM, false);
             $Cache->cache_value('feed_news', $News, 1209600);
         }
         foreach ($News as $NewsItem) {
-            list($NewsID, $Title, $Body, $NewsTime) = $NewsItem;
+            [$NewsID, $Title, $Body, $NewsTime] = $NewsItem;
             echo $Feed->item($Title, Text::strip_bbcode($Body), "index.php#news$NewsID", SITE_NAME.' Staff', '', '', $NewsTime);
         }
         break;
     case 'feed_blog':
         $Feed->channel('Blog', 'RSS feed for site blog.');
         if (!$Blog = $Cache->get_value('feed_blog')) {
-            $DB = new DB_MYSQL; //Load the database wrapper
-            $DB->query("
-                SELECT
-                    b.ID,
+            $DB->prepared_query("
+                SELECT b.ID,
                     um.Username,
                     b.UserID,
                     b.Title,
@@ -80,12 +73,13 @@ switch ($_GET['feed']) {
                 FROM blog AS b
                 LEFT JOIN users_main AS um ON (b.UserID = um.ID)
                 ORDER BY Time DESC
-                LIMIT 20");
+                LIMIT 20
+            ");
             $Blog = $DB->to_array();
             $Cache->cache_value('feed_blog', $Blog, 1209600);
         }
         foreach ($Blog as $BlogItem) {
-            list($BlogID, $Author, $AuthorID, $Title, $Body, $BlogTime, $ThreadID) = $BlogItem;
+            [$BlogID, $Author, $AuthorID, $Title, $Body, $BlogTime, $ThreadID] = $BlogItem;
             if ($ThreadID) {
                 echo $Feed->item($Title, Text::strip_bbcode($Body), "forums.php?action=viewthread&amp;threadid=$ThreadID", SITE_NAME.' Staff', '', '', $BlogTime);
             } else {
@@ -96,17 +90,17 @@ switch ($_GET['feed']) {
     case 'feed_changelog':
         $Feed->channel('Gazelle Change Log', 'RSS feed for Gazelle\'s changelog.');
         if (!$Changelog = $Cache->get_value('changelog')) {
-            $DB = new DB_MYSQL;
-            $DB->query("
+            $DB->prepared_query("
                 SELECT Message, Author, Date(Time)
                 FROM changelog
                 ORDER BY Time DESC
-                LIMIT 20");
+                LIMIT 20
+            ");
             $Changelog = $DB->to_array();
             $Cache->cache_value('changelog', $Changelog, 86400);
         }
         foreach ($Changelog as $Change) {
-            list($Message, $Author, $Date) = $Change;
+            [$Message, $Author, $Date] = $Change;
             echo $Feed->item("$Date by $Author", $Message, 'tools.php?action=change_log', SITE_NAME.' Staff', '', '', $Date);
         }
         break;
