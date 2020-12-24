@@ -2,13 +2,16 @@
 if (!check_perms('users_warn')) {
     error(404);
 }
-Misc::assert_isset_request($_POST, ['reason', 'privatemessage', 'body', 'length', 'postid']);
+foreach (['reason', 'privatemessage', 'body', 'length', 'postid'] as $var) {
+    if (!isset($_POST[$var])) {
+        error("$var not set");
+    }
+}
 
+$postId = (int)$_POST['postid'];
 $AuthorID = $DB->scalar("
-    SELECT AuthorID
-    FROM comments
-    WHERE ID = ?
-    ", $PostID
+    SELECT AuthorID FROM comments WHERE ID = ?
+    ", $postId
 );
 if (!$AuthorID) {
     error(404);
@@ -23,9 +26,8 @@ $Reason = trim($_POST['reason']);
 $PrivateMessage = trim($_POST['privatemessage']);
 $Body = trim($_POST['body']);
 $Length = trim($_POST['length']);
-$PostID = (int)$_POST['postid'];
 
-$URL = SITE_URL . '/' . Comments::get_url_query($PostID);
+$URL = SITE_URL . '/' . Comments::get_url_query($postId);
 
 if ($Length !== 'verbal') {
     $Time = (int)$Length * (7 * 24 * 60 * 60);
@@ -45,6 +47,6 @@ $user->addForumWarning($AdminComment)
 
 Misc::send_pm($AuthorID, $LoggedUser['ID'], $Subject, $PrivateMessage);
 
-Comments::edit($PostID, $Body);
+Comments::edit($postId, $Body);
 
 header("Location: $URL");
