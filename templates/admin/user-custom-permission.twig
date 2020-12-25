@@ -1,0 +1,27 @@
+<div class="thin">
+{% if list is empty %}
+    <h2 align="center">There are no users with custom permissions.</h2>
+{% else %}
+    <table width="100%">
+        <tr class="colhead">
+            <td>User</td>
+            <td>Custom Permissions</td>
+            <td>Action</td>
+        </tr>
+    {% for user_id, permission in list %}
+        <tr>
+            <td>{{ user_id|user_full }}</td>
+            <td>
+                <ul class="nobullet">
+        {% for name, value in permission %}
+                    <li>{{ name }}</li>
+        {% endfor %}
+                </ul>
+            </td>
+            <td><a href="user.php?action=permissions&amp;userid={{ user_id }}">Manage</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+</div>
+<br />

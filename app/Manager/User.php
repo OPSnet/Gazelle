@@ -50,6 +50,17 @@ class User extends \Gazelle\Base {
         return $userId ? new \Gazelle\User($userId) : null;
     }
 
+    public function findAllByCustomPermission(): array {
+        $this->db->prepared_query("
+            SELECT ID, CustomPermissions
+            FROM users_main
+            WHERE CustomPermissions NOT IN ('', 'a:0:{}')
+        ");
+        return array_map(function ($perm) {return unserialize($perm);},
+            $this->db->to_pair('ID', 'CustomPermissions', false)
+        );
+    }
+
     /**
      * Get the number of enabled users last day/week/month
      *
