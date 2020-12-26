@@ -1,0 +1,10 @@
+{% macro ajax_ipv4(ip) -%}
+<span class="host_{{ ip|replace({'.': '-'}) }}">Resolving host...
+<script type="text/javascript">
+$(document).ready(function() {
+    $.get('tools.php?action=get_host&ip={{ ip }}', function(host) {
+        $('.host_{{ ip|replace({'.': '-'}) }}').html(host);
+    });
+});
+</script></span>
+{%- endmacro %}
