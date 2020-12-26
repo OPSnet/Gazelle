@@ -112,6 +112,8 @@ define('STARTING_INVITES', 0); //# of invites to give to newly registered users
 define('BLOCK_TOR', false); //Set to true to block Tor users
 define('BLOCK_OPERA_MINI', false); //Set to true to block Opera Mini proxy
 define('DONOR_INVITES', 2);
+define('IP_OVERLAPS', 5); // Threshold for duplicate IPs
+
 define('SYSTEM_USER_ID', 17); // ID for user to create "system" threads under (e.g. Edit Requests)
 define('TRASH_FORUM_ID', 4); // ID of forum to send threads to when trash button is pressed
 define('EDITING_FORUM_ID', 34); // ID of forum to send editing requests to
