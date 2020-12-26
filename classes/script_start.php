@@ -224,14 +224,15 @@ $Debug->set_flag('start user handling');
 // Enabled - if the user's enabled or not
 // Permissions
 
-$page = Gazelle\SiteInfo::page();
+// Set the document we are loading
+$Document = basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
 
 $LoggedUser = [];
 $SessionID = false;
 $FullToken = null;
 
 // Only allow using the Authorization header for ajax endpoint
-if (!empty($_SERVER['HTTP_AUTHORIZATION']) && Gazelle\SiteInfo::ajax()) {
+if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
     if ((new \Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
         header('Content-type: application/json');
         json_die('failure', 'your ip address has been banned');
@@ -469,8 +470,8 @@ function enforce_login() {
         header('Location: login.php');
         die();
     }
-    global $SessionID, $FullToken;
-    if (!$SessionID && (Gazelle\SiteInfo::ajax()|| empty($FullToken))) {
+    global $SessionID, $FullToken, $Document;
+    if (!$SessionID && ($Document !== 'ajax' || empty($FullToken))) {
         setcookie('redirect', $_SERVER['REQUEST_URI'], time() + 60 * 30, '/', '', false);
         logout(G::$LoggedUser['ID']);
     }
@@ -506,7 +507,7 @@ function authorizeIfPost($Ajax = false) {
 $Debug->set_flag('ending function definitions');
 
 // We cannot error earlier, as we need the user info for headers and stuff
-if (!preg_match('/^[a-z0-9]+$/i', $page)) {
+if (!preg_match('/^[a-z0-9]+$/i', $Document)) {
     error(404);
 }
 
@@ -514,7 +515,7 @@ if (!preg_match('/^[a-z0-9]+$/i', $page)) {
 $Cache->cache_value('php_' . getmypid(),
     [
         'start' => sqltime(),
-        'document' => $page,
+        'document' => $Document,
         'query' => $_SERVER['QUERY_STRING'],
         'get' => $_GET,
         'post' => array_diff_key(
@@ -525,11 +526,11 @@ $Cache->cache_value('php_' . getmypid(),
 );
 
 G::$Router = new Gazelle\Router($LoggedUser['AuthKey'] ?? '');
-if (isset($LoggedUser['LockedAccount']) && !in_array($page, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
+if (isset($LoggedUser['LockedAccount']) && !in_array($Document, ['staffpm', 'ajax', 'locked', 'logout', 'login'])) {
     require_once(__DIR__ . '/../sections/locked/index.php');
 }
 else {
-    $file = __DIR__ . '/../sections/' . $page . '/index.php';
+    $file = __DIR__ . '/../sections/' . $Document . '/index.php';
     if (!file_exists($file)) {
         error(404);
     } else {

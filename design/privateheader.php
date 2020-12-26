@@ -318,11 +318,10 @@ foreach ($navItems as $n) {
 
 $UseAdvancedSearch = isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType'];
 global $ClassLevels;
-$page = \Gazelle\SiteInfo::page();
 ?>
     <meta name="viewport" content="width=device-width" />
 </head>
-<body id="<?= $page == 'collages' ? 'collage' : $page ?>">
+<body id="<?=$Document == 'collages' ? 'collage' : $Document?>">
     <input id="extracb1" class="hidden" type="checkbox">
     <input id="extracb2" class="hidden" type="checkbox">
     <input id="extracb3" class="hidden" type="checkbox">

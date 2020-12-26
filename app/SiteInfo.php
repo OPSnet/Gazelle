@@ -6,14 +6,6 @@ use Gazelle\Util\Time;
 
 class SiteInfo extends Base {
 
-    static public function page(): string {
-        return basename(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH), '.php');
-    }
-
-    static public function ajax(): string {
-        return self::page() === 'ajax';
-    }
-
     public function gitBranch() {
         return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
     }
@@ -36,7 +28,7 @@ class SiteInfo extends Base {
 
     public function uptime() {
         $in = fopen('/proc/uptime', 'r');
-        [$uptime, $idletime] = explode(' ', trim(fgets($in)));
+        list($uptime, $idletime) = explode(' ', trim(fgets($in)));
         fclose($in);
         $in = fopen('/proc/cpuinfo', 'r');
         $ncpu = 0;

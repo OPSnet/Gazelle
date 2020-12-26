@@ -17,14 +17,14 @@ class View {
      *                    example: 'somefile,somedir/somefile'
      */
     public static function show_header($PageTitle = '', $JSIncludes = '', $CSSIncludes = '') {
-        global $Classes;
+        global $Document, $Classes;
 
         if ($PageTitle != '') {
             $PageTitle .= ' :: ';
         }
         $PageTitle .= SITE_NAME;
         $PageID = [
-            \Gazelle\SiteInfo::page(),
+            $Document, // Document
             empty($_REQUEST['action']) ? false : $_REQUEST['action'], // Action
             empty($_REQUEST['type']) ? false : $_REQUEST['type'] // Type
         ];

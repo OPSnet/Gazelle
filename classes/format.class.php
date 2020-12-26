@@ -190,9 +190,8 @@ class Format {
      * @return A sanitized HTML page listing.
      */
     public static function get_pages($StartPage, $TotalRecords, $ItemsPerPage, $ShowPages = 11, $Anchor = '') {
-        global $Method;
-        $page = \Gazelle\SiteInfo::page();
-        $Location = "$page.php";
+        global $Document, $Method;
+        $Location = "$Document.php";
         $StartPage = ceil($StartPage);
         $TotalPages = 0;
         $Pages = '';
