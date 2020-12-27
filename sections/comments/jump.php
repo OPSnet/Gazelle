@@ -1,11 +1,8 @@
 <?php
-if (!isset($_REQUEST['postid']) || !is_number($_REQUEST['postid'])) {
-    error(0);
-}
 
-$URL = Comments::get_url_query((int)$_REQUEST['postid']);
-if (!$URL) {
-    error(0);
+try {
+    $comment = (new Gazelle\Manager\Comment)->findById((int)($_REQUEST['postid'] ?? 0));
+} catch (\Gazelle\Exception\ResourceNotFoundException $e) {
+    error(404);
 }
-header("Location: $URL");
-die();
+header("Location: " . $comment->url());
