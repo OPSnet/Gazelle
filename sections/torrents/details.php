@@ -241,6 +241,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
         ['offset' => 5, 'class' => 'artists_conductors', 'title' => 'Conducted by:', 'role' => 'Conductor'],
         ['offset' => 3, 'class' => 'artists_remix', 'title' => 'Remixed by:', 'role' => 'Remixer'],
         ['offset' => 7, 'class' => 'artists_producer', 'title' => 'Produced by:', 'role' => 'Producer'],
+        ['offset' => 8, 'class' => 'artists_arranger', 'title' => 'Arranged by:', 'role' => 'Arranger'],
     ];
 ?>
         <div class="box box_artists">
@@ -288,6 +289,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                             <option value="6">DJ / Compiler</option>
                             <option value="3">Remixer</option>
                             <option value="7">Producer</option>
+                            <option value="8">Arranger</option>
                         </select>
                     </div>
                     <input type="submit" value="Add" />

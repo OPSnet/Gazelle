@@ -390,6 +390,7 @@ function AddArtistField() {
     RoleField.options[4] = new Option("DJ / Compiler", "6");
     RoleField.options[5] = new Option("Remixer", "3");
     RoleField.options[6] = new Option("Producer", "7");
+    RoleField.options[7] = new Option("Arranger", "8");
     var mapping = {
         1: 0,
         2: 1,
@@ -398,6 +399,7 @@ function AddArtistField() {
         6: 4,
         3: 5,
         7: 6,
+        8: 7,
     };
     RoleField.selectedIndex = mapping[$("#importance_" + (ArtistCount - 1)).val()];
 
@@ -567,6 +569,7 @@ function fillMusicForm(group, torrent, source) {
             dj: 6,
             remixedBy: 3,
             producer: 7,
+            arranger: 8,
         };
         for (var prop in group['musicInfo']) {
             if (group['musicInfo'].hasOwnProperty(prop)) {

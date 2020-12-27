@@ -18,7 +18,7 @@ for ($i = 0; $i < count($AliasNames); $i++) {
     $AliasName = \Gazelle\Artist::sanitize($AliasNames[$i]);
     $Importance = $Importances[$i];
 
-    if (!in_array($Importance, ['1', '2', '3', '4', '5', '6', '7'])) {
+    if (!in_array($Importance, ['1', '2', '3', '4', '5', '6', '7', '8'])) {
         break;
     }
 

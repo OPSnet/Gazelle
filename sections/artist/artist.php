@@ -30,8 +30,8 @@ $bookmark = new Gazelle\Bookmark;
 $collageMan = new Gazelle\Manager\Collage;
 $User = new Gazelle\User($LoggedUser['ID']);
 
-function torrentEdition($title, $year, $recordLabel, $catlogueNumber, $media) {
-    return implode('::', [$title, $year, $recordLabel, $catlogueNumber, $media]);
+function torrentEdition($title, $year, $recordLabel, $catalogueNumber, $media) {
+    return implode('::', [$title, $year, $recordLabel, $catalogueNumber, $media]);
 }
 
 $name = $Artist->name() ?? 'artist:' . $ArtistID;
@@ -375,6 +375,7 @@ if ($sections = $Artist->sections()) {
                     $DisplayName = Artists::display_artists([1 => $Artists], true, true).$DisplayName;
                 }
                 break;
+            case ARTIST_SECTION_ARRANGER:
             case ARTIST_SECTION_COMPOSER:
                 if (!empty($ExtendedArtists[1]) || !empty($ExtendedArtists[4]) || !empty($ExtendedArtists[5])) {
                     unset($ExtendedArtists[3], $ExtendedArtists[4], $ExtendedArtists[6]);
@@ -404,7 +405,7 @@ if ($sections = $Artist->sections()) {
                         </div>
                     </td>
                     <td colspan="5" class="td_info big_info">
-<?php   if ($LoggedUser['CoverArt']) { ?>
+<?php   if (isset($LoggedUser['CoverArt']) && $LoggedUser['CoverArt']) { ?>
                         <div class="group_image float_left clear">
                             <?php ImageTools::cover_thumb($Group['WikiImage'], $Group['CategoryID']) ?>
                         </div>

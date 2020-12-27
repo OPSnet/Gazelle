@@ -150,6 +150,7 @@ class Torrent extends \Gazelle\Base {
                 5 => 'conductor',
                 6 => 'dj',
                 7 => 'producer',
+                8 => 'arranger',
             ];
             $roleList = [
                 'main'      => [],
@@ -159,6 +160,7 @@ class Torrent extends \Gazelle\Base {
                 'conductor' => [],
                 'dj'        => [],
                 'producer'  => [],
+                'arranger'  => [],
             ];
             while ([$role, $artistId, $artistName, $aliasId] = $this->db->next_record(MYSQLI_NUM, false)) {
                 $roleList[$map[$role]][] = [
@@ -191,6 +193,7 @@ class Torrent extends \Gazelle\Base {
         $roleList = $this->artistRole();
         $composerCount = count($roleList['composer']);
         $conductorCount = count($roleList['conductor']);
+        $arrangerCount = count($roleList['arranger']);
         $djCount = count($roleList['dj']);
         $mainCount = count($roleList['main']);
         if ($composerCount + $mainCount + $conductorCount + $djCount == 0) {

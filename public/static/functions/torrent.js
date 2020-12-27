@@ -57,6 +57,9 @@ function ArtistManager() {
                 case 'artists_producer':
                     importance = 7;
                     break;
+                case 'artists_arranger':
+                    importance = 8;
+                    break;
             }
             if (elArtistList.children[i].children[0].tagName.toUpperCase() == 'A') {
                 var ArtistID = elArtistList.children[i].children[0].href.match(/[?&]id=(\d+)/)[1];
@@ -135,6 +138,10 @@ function ArtistManager() {
         elOpt = document.createElement('option');
         elOpt.value = 7;
         elOpt.innerHTML = 'Producer';
+        elImportance.appendChild(elOpt);
+        elOpt = document.createElement('option');
+        elOpt.value = 8;
+        elOpt.innerHTML = 'Arranger';
         elImportance.appendChild(elOpt);
         elSubmitDiv.appendChild(elImportance);
         elSubmitDiv.appendChild(document.createTextNode(' '));

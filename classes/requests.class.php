@@ -199,6 +199,7 @@ class Requests {
             5 => 'conductor',
             6 => 'dj',
             7 => 'producer',
+            8 => 'arranger',
         ];
         $artist = self::get_artists($RequestID);
 

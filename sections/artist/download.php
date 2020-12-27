@@ -184,6 +184,7 @@ while ([$Downloads, $GroupIDs] = $Collector->get_downloads('GroupID')) {
              * 5 => Conductor
              * 6 => DJ / Compiler
              * 7 => Producer
+             * 8 => Arranger
              */
             case '1':
                 $ReleaseTypeName = $releaseMan->findNameById($Download['ReleaseType']);
@@ -205,6 +206,9 @@ while ([$Downloads, $GroupIDs] = $Collector->get_downloads('GroupID')) {
                 break;
             case '7':
                 $ReleaseTypeName = 'Produced By';
+                break;
+            case '8':
+                $ReleaseTypeName = 'Arranged By';
                 break;
             default:
                 $ReleaseTypeName = 'Other';
