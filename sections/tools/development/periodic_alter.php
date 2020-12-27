@@ -22,7 +22,7 @@ if ($p['submit'] == 'Delete') {
         ['description', '1', 'string', 'The description must be set, and has a max length of 255 characters', ['maxlength' => 255]],
         ['interval', '1', 'number', 'The interval must be a number'],
     ]);
-    $err = $Val->validate($p) ? false : $Validate->errorMessage();
+    $err = $Val->validate($p) ? false : $Val->errorMessage();
 
     if (!$scheduler::isClassValid($p['classname'])) {
         $err = "Couldn't import class ".$p['classname'];

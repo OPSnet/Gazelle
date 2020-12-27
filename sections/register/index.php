@@ -38,7 +38,7 @@ if (!empty($_REQUEST['confirm'])) {
     if (!empty($_POST['submit'])) {
         // User has submitted registration form
 
-        $Err = $Val->validate($_REQUEST) ? false : $Validate->errorMessage();
+        $Err = $Val->validate($_REQUEST) ? false : $Val->errorMessage();
         if (!$Err) {
             $username = trim($_REQUEST['username']);
             $email    = trim($_REQUEST['email']);
