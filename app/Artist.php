@@ -131,10 +131,14 @@ class Artist extends Base {
             ARTIST_CONDUCTOR => 0,
             ARTIST_DJ => 0,
             ARTIST_PRODUCER => 0,
+            ARTIST_ARRANGER => 0,
         ];
 
         while ([$groupId, $role, $releaseTypeId] = $this->db->next_record(MYSQLI_NUM, false)) {
             switch($role) {
+                case ARTIST_ARRANGER:
+                    $sectionId = ARTIST_SECTION_ARRANGER;
+                    break;
                 case ARTIST_PRODUCER:
                     $sectionId = ARTIST_SECTION_PRODUCER;
                     break;

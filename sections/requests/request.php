@@ -201,6 +201,16 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
 <?php
             }
         }
+        if (!empty($ArtistForm[8]) && count($ArtistForm[8]) > 0) {
+?>
+                <li class="artists_arranger"><strong>Arranged by:</strong></li>
+<?php            foreach ($ArtistForm[8] as $Artist) { ?>
+                <li class="artists_remix">
+                    <?=Artists::display_artist($Artist)?>
+                </li>
+<?php
+            }
+        }
 ?>
             </ul>
         </div>

@@ -15,7 +15,16 @@ function js_pages($Action, $TorrentID, $NumResults, $CurrentPage) {
 }
 
 // This gets used in a few places
-$ArtistTypes = [1 => 'Main', 2 => 'Guest', 3 => 'Remixer', 4 => 'Composer', 5 => 'Conductor', 6 => 'DJ/Compiler', 7 => 'Producer'];
+$ArtistTypes = [
+    1 => 'Main',
+    2 => 'Guest',
+    3 => 'Remixer',
+    4 => 'Composer',
+    5 => 'Conductor',
+    6 => 'DJ/Compiler',
+    7 => 'Producer',
+    8 => 'Arranger',
+];
 
 if (!empty($_REQUEST['action'])) {
     switch ($_REQUEST['action']) {

@@ -211,13 +211,18 @@ if ($CategoryName === 'Music') {
     $ArtistForm = [
         1 => [],
         2 => [],
-        3 => []
+        3 => [],
+        4 => [],
+        5 => [],
+        6 => [],
+        7 => [],
+        8 => [],
     ];
     for ($i = 0, $il = count($Artists); $i < $il; $i++) {
         if (trim($Artists[$i]) !== '') {
             if (!in_array($Artists[$i], $ArtistNames)) {
                 $ArtistForm[$Importance[$i]][] = ['name' => trim($Artists[$i])];
-                if (in_array($Importance[$i], [1, 4, 5, 6])) {
+                if (in_array($Importance[$i], [1, 4, 5, 6, 8])) {
                     $MainArtistCount++;
                 }
                 $ArtistNames[] = trim($Artists[$i]);
@@ -225,7 +230,7 @@ if ($CategoryName === 'Music') {
         }
     }
     if ($MainArtistCount < 1) {
-        $Err = 'Please enter at least one main artist, conductor, composer, or DJ.';
+        $Err = 'Please enter at least one main artist, conductor, arranger, composer, or DJ.';
     }
     if (!isset($ArtistNames[0])) {
         unset($ArtistForm);

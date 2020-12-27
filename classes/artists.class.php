@@ -18,6 +18,7 @@ class Artists {
      * 5 => Conductor
      * 6 => DJ
      * 7 => Producer
+     * 8 => Arranger
      */
     public static function get_artists($GroupIDs) {
         $Results = [];
@@ -39,7 +40,7 @@ class Artists {
                 $IDs = "null";
             }
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query("
                 SELECT ta.GroupID,
                     ta.ArtistID,
                     aa.Name,
@@ -48,9 +49,10 @@ class Artists {
                 FROM torrents_artists AS ta
                     JOIN artists_alias AS aa ON ta.AliasID = aa.AliasID
                 WHERE ta.GroupID IN ($IDs)
-                ORDER BY ta.GroupID ASC,
-                    ta.Importance ASC,
-                    aa.Name ASC;");
+                ORDER BY ta.GroupID,
+                    ta.Importance,
+                    aa.Name
+            ");
             while (list($GroupID, $ArtistID, $ArtistName, $ArtistImportance, $AliasID) = G::$DB->next_record(MYSQLI_BOTH, false)) {
                 $Results[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
                 $New[$GroupID][$ArtistImportance][] = ['id' => $ArtistID, 'name' => $ArtistName, 'aliasid' => $AliasID];
@@ -101,6 +103,7 @@ class Artists {
             5 => 'conductor',
             6 => 'dj',
             7 => 'producer',
+            8 => 'arranger',
         ];
         $artist = self::get_artists([$GroupID])[$GroupID];
 
@@ -137,11 +140,13 @@ class Artists {
             $Composers   = isset($Artists[4]) ? $Artists[4] : [];
             $Conductors  = isset($Artists[5]) ? $Artists[5] : [];
             $DJs         = isset($Artists[6]) ? $Artists[6] : [];
+            $Arrangers   = isset($Artists[8]) ? $Artists[8] : [];
 
             $MainArtistCount = count($MainArtists);
             $GuestCount      = count($Guests);
             $ComposerCount   = count($Composers);
             $ConductorCount  = count($Conductors);
+            $ArrangerCount   = count($Arrangers);
             $DJCount         = count($DJs);
 
             if ($MainArtistCount + $ConductorCount + $DJCount + $ComposerCount == 0) {
@@ -192,6 +197,22 @@ class Artists {
                     break;
                 default:
                     $link .= ' Various Conductors';
+            }
+
+            if (($ArrangerCount > 0) && ($MainArtistCount + $ArrangerCount > 0) && ($ArrangerCount < 3 || $MainArtistCount > 0)) {
+                $link .= ' arranged by ';
+            }
+            switch ($ArrangerCount) {
+                case 0:
+                    break;
+                case 1:
+                    $link .= Artists::display_artist($Arrangers[0], $MakeLink, $Escape);
+                    break;
+                case 2:
+                    $link .= Artists::display_artist($Arrangers[0], $MakeLink, $Escape).$ampersand.Artists::display_artist($Arrangers[1], $MakeLink, $Escape);
+                    break;
+                default:
+                    $link .= ' Various Arrangers';
             }
 
             if (($ComposerCount > 0) && ($MainArtistCount + $ConductorCount > 3) && ($MainArtistCount > 1) && ($ConductorCount > 1)) {

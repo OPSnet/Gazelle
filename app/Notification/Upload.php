@@ -50,7 +50,7 @@ class Upload extends \Gazelle\Base {
         foreach ($artistList as $role => $artists) {
             foreach ($artists as $artist) {
                 $name = $this->escape($artist['name']);
-                if (in_array($role, ['main', 'composer', 'conductor', 'dj'])) {
+                if (in_array($role, ['main', 'composer', 'conductor', 'arranger', 'dj'])) {
                     $mainName[] = $name;
                 } else {
                     $guestName[] = $name;

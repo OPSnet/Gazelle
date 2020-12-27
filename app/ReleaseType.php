@@ -25,6 +25,7 @@ class ReleaseType extends Base {
 
     public function extendedList(): array {
         $list = $this->list;
+        $list[ARTIST_SECTION_ARRANGER] = 'Arrangement';
         $list[ARTIST_SECTION_PRODUCER] = 'Produced By';
         $list[ARTIST_SECTION_COMPOSER] = 'Compositions';
         $list[ARTIST_SECTION_REMIXER] = 'Remixed By';
