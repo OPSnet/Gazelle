@@ -26,6 +26,10 @@ abstract class BaseObject extends Base {
         return $this;
     }
 
+    public function field(string $field) {
+        return $this->updateField[$field] ?? null;
+    }
+
     public function modify(): bool {
         if (!$this->updateField) {
             return false;
