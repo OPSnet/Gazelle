@@ -421,11 +421,10 @@ if ($sections = $Artist->sections()) {
                             </span>
 <?php
         }
-
-        $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
-        $VoteType = isset($UserVotes[$GroupID]['Type']) ? $UserVotes[$GroupID]['Type'] : '';
-        Votes::vote_link($GroupID, $VoteType);
+        if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
+                            <?= (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+<?php   } ?>
                             <div class="tags"><?=$TorrentTags->format('torrents.php?taglist=', $name)?></div>
                         </div>
                     </td>

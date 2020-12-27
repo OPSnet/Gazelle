@@ -488,7 +488,7 @@ foreach ($Categories as $catKey => $catName) {
         </tr>
 <?php
     $pageSize = 0;
-    $userVotes = Votes::get_user_votes($LoggedUser['ID']);
+    $vote = new \Gazelle\Vote($LoggedUser['ID']);
 
     foreach ($torrentsInfo as $torrentID => $info) {
         [$groupID, , $time] = array_values($info);
@@ -540,7 +540,9 @@ foreach ($Categories as $catKey => $catName) {
                         | <a href="reportsv2.php?action=report&amp;id=<?=$torrentID?>" class="tooltip" title="Report">RP</a> ]
                     </span>
                     <?= $displayName ?>
-<?php    Votes::vote_link($groupID, isset($userVotes[$groupID]) ? $userVotes[$groupID]['Type'] : ''); ?>
+<?php   if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
+                <?= $vote->setGroupId($groupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+<?php   } ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userID.'&amp;tags=')?></div>
                 </div>
             </td>
