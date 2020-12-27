@@ -541,7 +541,7 @@ foreach ($Categories as $catKey => $catName) {
                     </span>
                     <?= $displayName ?>
 <?php   if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
-                <?= $vote->setGroupId($GroupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+                <?= $vote->setGroupId($groupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
 <?php   } ?>
                     <div class="tags"><?=$torrentTags->format('torrents.php?type='.$action.'&amp;userid='.$userID.'&amp;tags=')?></div>
                 </div>
