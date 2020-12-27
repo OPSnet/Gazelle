@@ -1,114 +1,39 @@
 <?php
-// We need these to do our rankification
-include(SERVER_ROOT.'/sections/torrents/ranking_funcs.php');
 
-$userVotes = Votes::get_user_votes($LoggedUser['ID']);
-$tagMan = new \Gazelle\Manager\Tag;
+$vote = new Gazelle\Vote($LoggedUser['ID']);
+$tagMan = new Gazelle\Manager\Tag;
 
-$where = [];
-$params = [];
+$all = ($_GET['anyall'] ?? 'all') === 'all';
 
-if (!empty($_GET['advanced']) && check_perms('site_advanced_top10')) {
-    $details = 'all';
+if (empty($_GET['advanced']) || !check_perms('site_advanced_top10')) {
+    $limit = (int)($_GET['limit'] ?? 25);
+} else {
     $limit = 25;
-
-    if (!empty($_GET['tags'])) {
-        $tagsAny = isset($_GET['anyall']) && $_GET['anyall'] === 'any';
-        $tags = explode(',', trim($_GET['tags']));
-        foreach ($tags as $id => $tag) {
-            $tags[$id] = $tagMan->sanitize($tag);
+    $vote->setTopYearInterval((int)$_GET['year1'], (int)$_GET['year2']);
+    if (isset($_GET['tags'])) {
+        $list = explode(',', trim($_GET['tags']));
+        $tags = [];
+        foreach ($list as $tag) {
+            $t = $tagMan->sanitize($tag);
+            if (!empty($t)) {
+                $tags[] = $t;
+            }
         }
-        $operator = $tagsAny ? ' OR ' : ' AND ';
-        $params = $tags;
-        $where[] = sprintf('EXISTS (
-            SELECT 1
-            FROM torrents_tags tt
-            INNER JOIN tags t ON (t.ID = tt.TagID)
-            WHERE tt.GroupID = tg.ID
-                AND (%s)
-            )', implode($operator, array_fill(0, count($tags), 't.Name = ?'))
-        );
-    }
-    $year1 = (int)$_GET['year1'];
-    $year2 = (int)$_GET['year2'];
-    if ($year1 > 0 && $year2 <= 0) {
-        $where[] = 'tg.Year >= ?';
-        $params[] = $year1;
-    } elseif ($year1 > 0 && $year2 > 0) {
-        $where[] = 'tg.Year BETWEEN ? AND ?';
-        $params[] = $year1;
-        $params[] = $year2;
-    } elseif ($year2 > 0 && $year1 <= 0) {
-        $where[] = 'tg.Year <= ?';
-        $params[] = $year2;
-    }
-} else {
-    $details = 'all';
-    // defaults to 10 (duh)
-    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 25;
-    $limit = in_array($limit, [25, 100, 250]) ? $limit : 25;
-}
-$filtered = !empty($where);
-
-if ($filtered) {
-    $where = implode(' AND ', $where);
-}
-$whereSum = !$filtered ? '' : md5($where);
-
-// Unlike the other top 10s, this query just gets some raw stats
-// We'll need to do some fancy-pants stuff to translate it into
-// BPCI scores before getting the torrent data
-$query = '
-    SELECT v.GroupID, v.Ups, v.Total, v.Score
-    FROM torrents_votes AS v';
-if ($filtered) {
-    $query .= "
-    INNER JOIN torrents_group AS tg ON (tg.ID = v.GroupID)
-    WHERE $where AND ";
-} else {
-    $query .= '
-    WHERE ';
-}
-$query .= "
-        Score > 0
-    ORDER BY Score DESC
-    LIMIT $limit";
-
-$topVotes = $Cache->get_value('top10votes_'.$limit.$whereSum);
-if ($topVotes === false) {
-    if ($Cache->get_query_lock('top10votes')) {
-        $DB->prepared_query($query, ...$params);
-
-        $results = $DB->to_array('GroupID', MYSQLI_ASSOC, false);
-        $ranks = Votes::calc_ranks($DB->to_pair('GroupID', 'Score', false));
-
-        $groups = Torrents::get_groups(array_keys($results));
-
-        $topVotes = [];
-        foreach ($results as $groupID => $votes) {
-            $topVotes[$groupID] = $groups[$groupID];
-            $topVotes[$groupID]['Ups'] = $votes['Ups'];
-            $topVotes[$groupID]['Total'] = $votes['Total'];
-            $topVotes[$groupID]['Score'] = $votes['Score'];
-            $topVotes[$groupID]['Rank'] = $ranks[$groupID];
+        if ($tags) {
+            $vote->setTopTagList($tags, $all);
         }
-
-        $Cache->cache_value('top10votes_'.$limit.$whereSum, $topVotes, 60 * 30);
-        $Cache->clear_query_lock('top10votes');
-    } else {
-        $topVotes = false;
     }
 }
+$vote->setTopLimit($limit);
+
 View::show_header("Top $limit Voted Groups",'browse,voting');
 ?>
 <div class="thin">
     <div class="header">
         <h2>Top <?=$limit?> Voted Groups</h2>
-        <?php \Gazelle\Top10::renderLinkbox("votes"); ?>
+        <?php Gazelle\Top10::renderLinkbox("votes"); ?>
     </div>
-<?php
-$all = ($_GET['anyall'] ?? 'all') === 'all';
-if (check_perms('site_advanced_top10')) { ?>
+<?php if (check_perms('site_advanced_top10')) { ?>
     <form class="search_form" name="votes" action="" method="get">
         <input type="hidden" name="advanced" value="1" />
         <input type="hidden" name="type" value="votes" />
@@ -136,14 +61,9 @@ if (check_perms('site_advanced_top10')) { ?>
             </tr>
         </table>
     </form>
-<?php
-}
-
-$bookmark = new \Gazelle\Bookmark;
-?>
+<?php } ?>
     <h3>Top <?=$limit?>
-<?php
-if (empty($_GET['advanced'])) { ?>
+<?php if (empty($_GET['advanced'])) { ?>
         <small class="top10_quantity_links">
 <?php
     switch ($limit) {
@@ -163,14 +83,17 @@ if (empty($_GET['advanced'])) { ?>
             - <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
 <?php    } ?>
         </small>
-<?php
-} ?>
+<?php } ?>
     </h3>
 <?php
 
 $number = 0;
 $torrentTable = '';
+$bookmark = new Gazelle\Bookmark;
+$userVotes = $vote->userVotes();
+$topVotes = $vote->topVotes();
 foreach ($topVotes as $groupID => $group) {
+    ++$number;
     $groupName = $group['Name'];
     $groupYear = $group['Year'];
     $groupCategoryID = $group['CategoryID'];
@@ -185,7 +108,7 @@ foreach ($topVotes as $groupID => $group) {
     $downVotes = $totalVotes - $upVotes;
 
     $isBookmarked = $bookmark->isTorrentBookmarked($LoggedUser['ID'], $groupID);
-    $userVote = isset($userVotes[$groupID]) ? $userVotes[$groupID]['Type'] : '';
+    $userVote = $userVotes[$groupID] ?? '';
 
     $displayName = $group['Rank'] . " - ";
 
@@ -199,7 +122,7 @@ foreach ($topVotes as $groupID => $group) {
 
     $displayName .= '<a href="torrents.php?id='.$groupID.'" class="tooltip" title="View torrent group" dir="ltr">'.$groupName.'</a>';
     if ($groupYear > 0) {
-        $displayName = $displayName. " [$groupYear]";
+        $displayName .= " [$groupYear]";
     }
     if ($group['VanityHouse']) {
         $displayName .= ' [<abbr class="tooltip" title="This is a Vanity House release">VH</abbr>]';
@@ -235,7 +158,7 @@ foreach ($topVotes as $groupID => $group) {
 <?php        } ?>
                         <div class="group_info clear">
 
-                            <strong><?=$displayName?></strong> <!--<?php Votes::vote_link($groupID, $userVote); ?>-->
+                            <strong><?=$displayName?></strong>
 <?php        if ($isBookmarked) { ?>
                             <span class="remove_bookmark float_right">
                                 <a href="#" class="bookmarklink_torrent_<?=$groupID?> brackets" onclick="Unbookmark('torrent', <?=$groupID?>, 'Bookmark'); return false;">Remove bookmark</a>
@@ -370,7 +293,7 @@ foreach ($topVotes as $groupID => $group) {
 <?php        } ?>
                         ]
                     </span>
-                    <strong><?=$displayName?></strong> <!--<?php Votes::vote_link($groupID, $userVote); ?>-->
+                    <strong><?=$displayName?></strong>
                     <div class="tags"><?=$torrentTags->format()?></div>
                 </div>
             </td>

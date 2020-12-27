@@ -270,7 +270,7 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
 ?>
             </ul>
         </div>
-<?php   if (check_perms('torrents_add_artist')) { ?>
+<?php if (check_perms('torrents_add_artist')) { ?>
         <div class="box box_addartists">
             <div class="head"><strong>Add artist</strong><span style="float: right;" class="additional_add_artist"><a onclick="AddArtistField(); return false;" href="#" class="brackets">+</a></span></div>
             <div class="body">
@@ -326,10 +326,77 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
             </div>
         </div>
 <?php
-        }
     }
-require_once('vote_ranks.php');
-require_once('vote.php');
+}
+$vote = (new Gazelle\Vote($LoggedUser['ID']))->setGroupId($GroupID);
+if ($GroupCategoryID === 1) {
+    $decade = $GroupYear - ($GroupYear % 10);
+    $decadeEnd = $decade + 9;
+    $advanced = check_perms('site_advanced_top10');
+
+    $rankList = [
+        'overall' => [
+            'rank' => $vote->rankOverall(),
+            'title' => '<a href="top10.php?type=votes">overall</a>',
+        ],
+        'decade' => [
+            'rank' => $vote->rankDecade($GroupYear),
+            'title' => $advanced
+                ? "for the <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$decade&amp;year2=$decadeEnd\">{$decade}s</a>"
+                : "for the {$decade}s",
+        ],
+        'year' => [
+            'rank' => $vote->rankYear($GroupYear),
+            'title' => $advanced
+                ? "for <a href=\"top10.php?advanced=1&amp;type=votes&amp;year1=$GroupYear\">$GroupYear</a>"
+                : "for $GroupYear",
+        ],
+    ];
+
+    $li = [];
+    foreach ($rankList as $key => $info) {
+        $rank = $info['rank'];
+        if (!$rank) {
+            continue;
+        }
+        if ($rank <= 10) {
+            $class = ' class="vr_top_10"';
+        } elseif ($rank <= 25) {
+            $class = ' class="vr_top_25"';
+        } elseif ($rank <= 50) {
+            $class = ' class="vr_top_50"';
+        } else {
+            $class = '';
+        }
+        $li[] = sprintf('<li id="vote_rank_%s"%s>No. %d %s</li>', $key, $class, $rank, $info['title']);
+    }
+    if ($li) {
+?>
+        <div class="box" id="votes_ranks">
+            <div class="head"><strong><?= SITE_NAME ?> Favorites</strong></div>
+            <div class="vote_charts body">
+                <ul class="stats nobullet" id="vote_rankings">
+<?php   foreach ($li as $item) { ?>
+                    <?= $item ?>
+<?php   } ?>
+                </ul>
+            </div>
+        </div>
+<?php
+    }
+}
+
+echo G::$Twig->render('vote/box.twig', [
+    'auth'     => $LoggedUser['AuthKey'],
+    'can_vote' => check_perms('site_album_votes'),
+    'group_id' => $GroupID,
+    'percent'  => $vote->total() ? $vote->totalUp() / $vote->total() * 100 : '&mdash;',
+    'total'    => $vote->total(),
+    'up'       => $vote->totalUp(),
+    'down'     => $vote->totalDown(),
+    'score'    => $vote->score($vote->total(), $vote->totalUp()) * 100,
+    'vote'     => $vote->vote(),
+]);
 
 $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
 ?>
@@ -806,8 +873,31 @@ if (count($PersonalCollages) > 0) {
 <?php
 }
 // Matched Votes
-require_once('voter_picks.php');
+$similar = $vote->similarVote();
+if (!empty($similar)) {
 ?>
+        <table class="vote_matches_table" id="vote_matches">
+            <tr class="colhead">
+                <td><a href="#">&uarr;</a>&nbsp;People who like this album also liked... <a href="#" onclick="$('.votes_rows').gtoggle(); return false;">(Show)</a></td>
+            </tr>
+<?php
+    $Groups = Torrents::get_groups($similar, true, true, false);
+    $i = 0;
+    foreach ($similar as $MatchGroupID) {
+        if (!isset($Groups[$MatchGroupID])) {
+            continue;
+        }
+        $MatchGroup = $Groups[$MatchGroupID];
+        $i++;
+        $Str = Artists::display_artists($MatchGroup['ExtendedArtists']).'<a href="torrents.php?id='.$MatchGroupID.'">'.$MatchGroup['Name'].'</a>';
+?>
+            <tr class="votes_rows hidden <?=($i & 1) ? 'rowb' : 'rowa'?>">
+                <td><span class="like_ranks"><?=$i?>.</span> <?=$Str?></td>
+            </tr>
+<?php } /* foreach */ ?>
+        </table>
+<?php } /* count($similar) */ ?>
+
         <div class="box torrent_description">
             <div class="head"><a href="#">&uarr;</a>&nbsp;<strong><?=(!empty($ReleaseType) ? $releaseTypes[$ReleaseType].' info' : 'Info' )?></strong></div>
             <div class="body"><?php if ($WikiBody != '') { echo $WikiBody; } else { echo 'There is no information on this torrent.'; } ?></div>

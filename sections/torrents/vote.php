@@ -1,14 +1,15 @@
 <?php
-    $UserVotes = Votes::get_user_votes($LoggedUser['ID']);
-    $GroupVotes = Votes::get_group_votes($GroupID);
+$vote = Gazelle\Vote($LoggedUser['ID']);
+$userVote = $vote->userVotes();
+$GroupVote = $vote->groupVote($groupId);
 
-    $TotalVotes = $GroupVotes['Total'];
-    $UpVotes    = $GroupVotes['Ups'];
-    $DownVotes    = $TotalVotes - $UpVotes;
+$Score      = $GroupVote['Score'];
+$TotalVotes = $GroupVote['Total'];
+$UpVotes    = $GroupVote['Ups'];
+$DownVotes  = $TotalVotes - $UpVotes;
 
-    $Voted = isset($UserVotes[$GroupID]) ? $UserVotes[$GroupID]['Type'] : false;
-    $Score = Votes::binomial_score($UpVotes, $TotalVotes);
-    $Percentage = $TotalVotes > 0 ? number_format($UpVotes / $TotalVotes * 100, 1) : '--';
+$Voted = isset($UserVotes[$GroupID]) ? $UserVotes[$GroupID]['Type'] : false;
+$Percentage = $TotalVotes > 0 ? number_format($UpVotes / $TotalVotes * 100, 1) : '&mdaash;';
 ?>
 <div class="box" id="votes">
     <div class="head"><strong>Album Votes</strong></div>

@@ -1,0 +1,8 @@
+<span class="votespan brackets" style="white-space: nowrap;">Vote:
+    <a href="#" onclick="UpVoteGroup({{ group_id }}, '{{ auth }}'); return false;" class="tooltip small_upvote vote_link_{{ group_id }}{% if vote != 0 %} hidden{% endif %}" style="font-weight: bolder;" title="Upvote">&and;</a>
+    <span class="tooltip voted_type small_upvoted voted_up_{{ group_id }}{% if vote == -1 or vote == 0 %} hidden{% endif %}" style="font-weight: bolder;" title="You have upvoted">&and;</span>
+    <a href="#" onclick="DownVoteGroup({{ group_id }}, '{{ auth }}'); return false;" class="tooltip small_downvote vote_link_{{ group_id }}{% if vote != 0 %} hidden{% endif %}" style="font-weight: bolder;" title="Downvote">&or;</a>
+    <span class="tooltip voted_type small_downvoted voted_down_{{ group_id }}{% if vote == 1 or vote == 0 %} hidden{% endif %}" style="font-weight: bolder;" title="You have downvoted">&or;</span>
+    <a href="#" onclick="UnvoteGroup({{ group_id }}, '{{ auth }}'); return false;" class="tooltip small_clearvote vote_clear_{{ group_id }}{% if vote == 0 %} hidden{% endif %}" title="Clear your vote">x</a>
+    Score: {{ (score * 100.0)|number_format(1) }}
+</span>

@@ -173,7 +173,7 @@ $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
                 <td class="sign leechers"><img src="<?= $iconUri ?>/leechers.png" class="tooltip" alt="Leechers" title="Leechers" /></td>
             </tr>
 <?php
-$UserVotes = Votes::get_user_votes($LoggedUser['ID']);
+$vote = new Gazelle\Vote($LoggedUser['ID']);
 $Number = 0;
 foreach ($GroupIDs as $Idx => $GroupID) {
     $Group = $TorrentList[$GroupID];
@@ -243,8 +243,10 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                     </span>
 <?php
         }
-        Votes::vote_link($GroupID, $UserVote);
+        if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) {
 ?>
+                    <?= $vote->setGroupId($GroupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+<?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
         </tr>
@@ -352,7 +354,9 @@ foreach ($GroupIDs as $Idx => $GroupID) {
                         | <a href="reportsv2.php?action=report&amp;id=<?= $TorrentID ?>" class="tooltip" title="Report">RP</a>
                     </span>
                 <strong><?= $DisplayName ?></strong>
-<?php Votes::vote_link($GroupID, $UserVote); ?>
+<?php   if ((!isset(G::$LoggedUser['NoVoteLinks']) || !G::$LoggedUser['NoVoteLinks']) && check_perms('site_album_votes')) { ?>
+                <?= $vote->setGroupId($GroupID)->setTwig(G::$Twig)->links($LoggedUser['AuthKey']) ?>
+<?php   } ?>
                 <div class="tags"><?= $TorrentTags->format() ?></div>
             </td>
             <td class="td_size number_column nobr"><?= Format::get_size($Torrent['Size']) ?></td>
