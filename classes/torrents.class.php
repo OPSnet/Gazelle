@@ -1,4 +1,7 @@
 <?php
+
+require_once(__DIR__ . '/../sections/torrents/functions.php');
+
 class Torrents {
     const FILELIST_DELIM = 0xF7; // Hex for &divide; Must be the same as phrase_boundary in sphinx.conf!
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
@@ -1145,38 +1148,63 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
 
     protected static function bbcodeUrlBuild($val, $attr) {
         $id = (int)$val;
-        $groupId = G::$DB->scalar('SELECT GroupID FROM torrents WHERE ID = ?', $id);
-        if (!$groupId) {
-            return ($attr ? "[pl=$attr]" : '[pl]') . $id . '[/pl]';
+        $attr = preg_split('/\s*,\s*/m', strtolower($attr), -1, PREG_SPLIT_NO_EMPTY);
+        $torrent = G::$DB->rowAssoc("
+            SELECT GroupID, Format, Encoding, Media, HasCue, HasLog, HasLogDB, LogScore
+            FROM torrents
+            WHERE ID = ?
+            ", $id
+        );
+        if (!is_null($torrent)) {
+            $isDeleted = false;
+        } else {
+            $torrent = G::$DB->rowAssoc("
+                SELECT GroupID, Format, Encoding, Media, HasCue, HasLog, HasLogDB, LogScore
+                FROM deleted_torrents
+                WHERE ID = ?
+                ", $id
+            );
+            if (is_null($torrent)) {
+                return ($attr ? "[pl=$attr]" : '[pl]') . $id . '[/pl]';
+            }
+            $isDeleted = true;
         }
-        list ($info, $list) = get_torrent_info($id, 0, false);
+        $group = G::$DB->rowAssoc("
+            SELECT tg.ID,
+                tg.Name,
+                group_concat(DISTINCT tags.Name SEPARATOR '|') as tagNames,
+                tg.Year,
+                tg.ReleaseType
+            FROM torrents_group AS tg
+            LEFT JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
+            LEFT JOIN tags ON (tags.ID = tt.TagID)
+            WHERE tg.ID = ?
+            GROUP BY tg.ID
+            ", $torrent['GroupID']
+        );
+        $groupId = $group['ID'];
         $tagNames = implode(', ',
             array_map(function ($x) { return '#' . htmlentities($x); },
-                explode('|', $info['tagNames'])));
-        $attr = preg_split('/\s*,\s*/m', strtolower($attr), -1, PREG_SPLIT_NO_EMPTY);
+                explode('|', $group['tagNames'])));
         $year = in_array('noyear', $attr) || in_array('title', $attr)
-            ? '' : ' [' . $info['Year'] . ']';
-        if (in_array('noreleasetype', $attr) || in_array('title', $attr)) {
-            $releaseType = '';
-        } else {
-            $releaseType = ' [' . (new \Gazelle\ReleaseType)->findNameById($info['ReleaseType']) . ']';
-        }
-        $release = $list[$id];
+            ? '' : (' [' . $group['Year'] . ']');
+        $releaseType = (in_array('noreleasetype', $attr) || in_array('title', $attr))
+            ? '' : (' [' . (new \Gazelle\ReleaseType)->findNameById($group['ReleaseType']) . ']');
         if (in_array('nometa', $attr) || in_array('title', $attr)) {
             $meta = '';
         } else {
             $details = [
-                $release['Format'],
-                $release['Encoding'],
-                $release['Media'],
+                $torrent['Media'],
+                $torrent['Format'],
+                $torrent['Encoding'],
             ];
-            if ($release['HasCue']) {
+            if ($torrent['HasCue']) {
                 $details[] = 'Cue';
             }
-            if ($release['HasLog']) {
+            if ($torrent['HasLog']) {
                 $log = 'Log';
-                if ($release['HasLogDB']) {
-                    $log .= ' ' . $release['LogScore'] . '%';
+                if ($torrent['HasLogDB']) {
+                    $log .= ' ' . $torrent['LogScore'] . '%';
                 }
                 $details[] = "$log";
             }
@@ -1184,11 +1212,13 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
         }
         $url = '';
         if (!(in_array('noartist', $attr) || in_array('title', $attr))) {
-            $Group = Torrents::get_groups([$groupId], true, true, false)[$groupId];
-            $url = Artists::display_artists($Group['ExtendedArtists']);
+            $g = self::get_groups([$groupId], true, true, false)[$groupId];
+            $url = Artists::display_artists($g['ExtendedArtists']);
         }
-        return $url . sprintf('<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s%s%s</a>',
-            $tagNames, $groupId, $id, $id, $info['Name'], $year, $releaseType, $meta
+        return $url . sprintf(
+            '<a title="%s" href="/torrents.php?id=%d&torrentid=%d#torrent%d">%s%s%s</a>%s',
+            $tagNames, $groupId, $id, $id, $group['Name'], $year, $releaseType,
+            $meta . ($isDeleted ? ' <i>deleted</i>' : '')
         );
     }
 }

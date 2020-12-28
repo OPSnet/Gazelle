@@ -27,6 +27,7 @@ require_once(__DIR__ . '/classes/config.php');
 require_once(__DIR__ . '/vendor/autoload.php');
 require_once(__DIR__ . '/classes/util.php');
 require_once(__DIR__ . '/vendor/d11wtq/boris/lib/autoload.php');
+require_once(__DIR__ . '/sections/torrents/functions.php');
 
 $Cache = new CACHE;
 $DB = new DB_MYSQL;
