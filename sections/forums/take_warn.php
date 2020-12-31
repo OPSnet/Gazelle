@@ -1,51 +1,62 @@
 <?php
 if (!check_perms('users_warn')) {
-    error(404);
+    error(403);
 }
-Misc::assert_isset_request($_POST, ['reason', 'privatemessage', 'body', 'length', 'postid', 'userid']);
+
+if (empty($_POST['reason'])) {
+    error("Reason for warning not provided");
+}
+if (empty($_POST['body'])) {
+    error("Post body cannot be left empty (you can leave a reason for others to see)");
+}
+if (empty($_POST['length'])) {
+    error("Length of warning not provided");
+}
 
 $userMan = new Gazelle\Manager\User;
 $user = $userMan->findById((int)$_POST['userid']);
 if (is_null($user)) {
-    error(404);
+    error("No user ID given");
 }
 if ($user->primaryClass() > $LoggedUser['Class']) {
     error(403);
 }
 
-$forumId = (int)$_POST['forumid'];
-$postId = (int)$_POST['postid'];
-
-$forum = new Gazelle\Forum($forumId);
+$forum = new Gazelle\Forum((int)($_POST['forumid']));
+$postId = (int)($_POST['postid'] ?? 0);
 $forumPost = $forum->postInfo($postId);
+if (is_null($forumPost)) {
+    error("No forum post #$postId found");
+}
 $threadId = $forumPost['thread-id'];
 if (Forums::get_thread_info($threadId) === null) {
     error(404);
 }
+$forum->editPost($user->id(), $postId, trim($_POST['body']));
 
 $URL = SITE_URL . "/forums.php?action=viewthread&amp;postid=$postId#post$postId";
 $Reason = trim($_POST['reason']);
-$PrivateMessage = trim($_POST['privatemessage']);
-$Body = trim($_POST['body']);
-$forum->editPost($user->id(), $postId, $Body);
-
 $WarningLength = $_POST['length'];
 if ($WarningLength !== 'verbal') {
     $Time = (int)$WarningLength * (7 * 24 * 60 * 60);
     Tools::warn_user($user->id(), $Time, "$URL - $Reason");
     $Subject = 'You have received a warning';
-    $PrivateMessage = "You have received a $WarningLength week warning for [url=$URL]this post[/url].\n\n" . $PrivateMessage;
-
-    $WarnTime = time_plus($Time);
-    $AdminComment = date('Y-m-d') . " - Warned until $WarnTime by " . $LoggedUser['Username'] . " for $URL\nReason: $Reason";
+    $PrivateMessage = "You have received a $WarningLength week warning for [url=$URL]this post[/url].";
+    $warned = "Warned until " . time_plus($Time);
 
 } else {
     $Subject = 'You have received a verbal warning';
-    $PrivateMessage = "You have received a verbal warning for [url=$URL]this post[/url].\n\n" . $PrivateMessage;
-    $AdminComment = date('Y-m-d') . ' - Verbally warned by ' . $LoggedUser['Username'] . " for $URL\nReason: $Reason";
+    $PrivateMessage = "You have received a verbal warning for [url=$URL]this post[/url].";
+    $warned = "Verbally warned";
+}
+$adminComment = date('Y-m-d') . " - $warned by {$LoggedUser['Username']} for $URL\nReason: $Reason";
+
+$extraMessage = trim($_POST['privatemessage'] ?? '');
+if (strlen($extraMessage)) {
+    $PrivateMessage .= "\n\n$extraMessage";
 }
 
-$user->addForumWarning($AdminComment)->addStaffNote($AdminComment)->modify();
+$user->addForumWarning($adminComment)->addStaffNote($adminComment)->modify();
 $userMan->sendPM($user->id(), $LoggedUser['ID'], $Subject, $PrivateMessage);
 
 if ($forumPost['is-sticky']) {

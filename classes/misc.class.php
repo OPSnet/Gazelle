@@ -50,33 +50,6 @@ class Misc {
     }
 
     /**
-     * Used to check if keys in $_POST and $_GET are all set, and throws an error if not.
-     * This reduces 'if' statement redundancy for a lot of variables
-     *
-     * @param array $Request Either $_POST or $_GET, or whatever other array you want to check.
-     * @param array $Keys The keys to ensure are set.
-     * @param boolean $AllowEmpty If set to true, a key that is in the request but blank will not throw an error.
-     * @param int $Error The error code to throw if one of the keys isn't in the array.
-     */
-    public static function assert_isset_request($Request, $Keys = null, $AllowEmpty = false, $Error = 0) {
-        if (isset($Keys)) {
-            foreach ($Keys as $K) {
-                if (!isset($Request[$K]) || ($AllowEmpty == false && $Request[$K] == '')) {
-                    error($Error);
-                    break;
-                }
-            }
-        } else {
-            foreach ($Request as $R) {
-                if (!isset($R) || ($AllowEmpty == false && $R == '')) {
-                    error($Error);
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
      * HTML escape an entire array for output.
      * @param array $Array, what we want to escape
      * @param boolean|array $Escape
