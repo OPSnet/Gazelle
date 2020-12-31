@@ -347,9 +347,6 @@ switch ($_REQUEST['action']) {
         require_once('services/get_cc.php');
         break;
 
-    case 'artist_importance_sandbox':
-        require_once('sandboxes/artist_importance_sandbox.php');
-        break;
     case 'bbcode_sandbox':
         require_once('sandboxes/bbcode_sandbox.php');
         break;
