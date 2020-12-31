@@ -269,12 +269,12 @@ class Torrents {
         $MessageEnd .= "\n\n[url=".SITE_URL."/log.php?search=Torrent+{$TorrentID}]Log message[/url]: {$Log}.";
 
         // Uploader
+        $userMan = new \Gazelle\Manager\User;
         if ($PMUploader) {
             $userMan->sendPM($UploaderID, 0, $Subject, $MessageStart.'you uploaded'.$MessageEnd);
         }
         $PMedUsers = [$UploaderID];
 
-        $userMan = new \Gazelle\Manager\User;
         // Seeders
         $DB->prepared_query("
 SELECT DISTINCT(xfu.uid)
