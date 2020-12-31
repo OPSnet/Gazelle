@@ -3,9 +3,18 @@
 if (!check_perms('users_warn')) {
     error(404);
 }
-Misc::assert_isset_request($_POST, ['postid', 'userid', 'key']);
+
 $PostID = (int)$_POST['postid'];
+if (!$PostID) {
+    error(404);
+}
 $UserID = (int)$_POST['userid'];
+if (!$UserID) {
+    error(404);
+}
+if (!isset($_POST['key'])) {
+    error(404);
+}
 $Key = (int)$_POST['key'];
 $UserInfo = Users::user_info($UserID);
 $DB->query("
@@ -50,7 +59,7 @@ View::show_header('Warn User');
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">Private message:</td>
+                    <td class="label">Private message:<br />(optional)</td>
                     <td>
                         <textarea id="message" style="width: 95%;" tabindex="1" onkeyup="resize('message');" name="privatemessage" cols="90" rows="4"></textarea>
                     </td>
