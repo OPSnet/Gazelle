@@ -979,7 +979,7 @@ $notification->addFormat($Properties['Format'])
     ->addCategory($Type)
     ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
     ->addUser($LoggedUser['ID'])
-    ->trigger($GroupID, $TorrentID, \Feed $Feed, $Item);
+    ->trigger($GroupID, $TorrentID, $Feed, $Item);
 
 // RSS for bookmarks
 $DB->prepared_query('
