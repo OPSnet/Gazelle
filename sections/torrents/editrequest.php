@@ -5,7 +5,6 @@ if (empty($_GET['groupid']) || !is_numeric($_GET['groupid'])) {
 }
 $GroupID = intval($_GET['groupid']);
 
-require_once('functions.php');
 $TorrentCache = get_group_info($GroupID);
 $TorrentDetails = $TorrentCache[0];
 $TorrentList = $TorrentCache[1];

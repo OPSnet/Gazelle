@@ -1,7 +1,6 @@
 <?php
 
 require_once(__DIR__ . '/util.php');
-require_once(__DIR__ . '/../sections/torrents/functions.php');
 
 class Text {
     /**

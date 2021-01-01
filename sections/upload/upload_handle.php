@@ -13,8 +13,6 @@ use OrpheusNET\BencodeTorrent\BencodeTorrent;
 ini_set('max_file_uploads', 100);
 define('MAX_FILENAME_LENGTH', 255);
 
-require_once(__DIR__ . '/../torrents/functions.php');
-
 enforce_login();
 
 if (!defined('AJAX')) {

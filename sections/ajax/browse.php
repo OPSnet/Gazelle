@@ -1,7 +1,5 @@
 <?php
 
-require_once(__DIR__ . '/../sections/torrents/functions.php');
-
 if (!empty($_GET['order_way']) && $_GET['order_way'] == 'asc') {
     $OrderWay = 'asc';
 } else {
