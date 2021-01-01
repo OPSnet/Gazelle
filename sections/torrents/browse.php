@@ -240,29 +240,30 @@ View::show_header('Browse Torrents', 'browse');
                 </td>
             </tr>
             <tr id="misc" class="ftr_advanced<?=$HideAdvanced?>">
-                <td class="label">Misc:</td>
+                <td class="label">Miscellaneous:</td>
                 <td class="nobr ft_misc" colspan="3">
                     <select name="haslog" class="ft_haslog fti_advanced">
-                        <option value="">Has Log</option>
-                        <option value="1"<?php Format::selected('haslog', '1'); ?>>Yes</option>
-                        <option value="0"<?php Format::selected('haslog', '0'); ?>>No</option>
-                        <option value="100"<?php Format::selected('haslog', '100'); ?>>100% only</option>
+                        <option value="">Rip Log File</option>
+                        <option value="1"<?php Format::selected('haslog', '1'); ?>>Has log file</option>
+                        <option value="0"<?php Format::selected('haslog', '0'); ?>>No log file</option>
+                        <option value="99"<?php Format::selected('haslog', '99'); ?>>Scores 99%</option>
+                        <option value="100"<?php Format::selected('haslog', '100'); ?>>Scores 100%</option>
                         <option value="-1"<?php Format::selected('haslog', '-1'); ?>>&lt;100%/Unscored</option>
                     </select>
                     <select name="hascue" class="ft_hascue fti_advanced">
-                        <option value="">Has Cue</option>
-                        <option value="1"<?php Format::selected('hascue', 1); ?>>Yes</option>
-                        <option value="0"<?php Format::selected('hascue', 0); ?>>No</option>
+                        <option value="">Cue File</option>
+                        <option value="1"<?php Format::selected('hascue', 1); ?>>Has Cue</option>
+                        <option value="0"<?php Format::selected('hascue', 0); ?>>No Cue</option>
                     </select>
                     <select name="scene" class="ft_scene fti_advanced">
                         <option value="">Scene</option>
-                        <option value="1"<?php Format::selected('scene', 1); ?>>Yes</option>
-                        <option value="0"<?php Format::selected('scene', 0); ?>>No</option>
+                        <option value="1"<?php Format::selected('scene', 1); ?>>Is Scene</option>
+                        <option value="0"<?php Format::selected('scene', 0); ?>>Not Scene</option>
                     </select>
                     <select name="vanityhouse" class="ft_vanityhouse fti_advanced">
                         <option value="">Vanity House</option>
-                        <option value="1"<?php Format::selected('vanityhouse', 1); ?>>Yes</option>
-                        <option value="0"<?php Format::selected('vanityhouse', 0); ?>>No</option>
+                        <option value="1"<?php Format::selected('vanityhouse', 1); ?>>Is Vanity</option>
+                        <option value="0"<?php Format::selected('vanityhouse', 0); ?>>Not Vanity</option>
                     </select>
                     <select name="freetorrent" class="ft_freetorrent fti_advanced">
                         <option value="">Leech Status</option>
