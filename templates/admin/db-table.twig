@@ -1,0 +1,42 @@
+<div class="linkbox">
+    <a href="tools.php?action=database_specifics" class="brackets">Database specifics</a>
+</div>
+
+<div class="pad"><div class="box pad">
+    <h3>Table definition</h3>
+    <pre>{{ definition }}</pre>
+</div></div>
+
+<div class="pad"><div class="box pad">
+    <h3>Rows read</h3>
+    <table>
+        <tr>
+            <th>Rows read</th>
+            <th>Rows changed</th>
+            <th>Rows changed per index</th>
+        </tr>
+{% for r in table_read %}
+        <tr>
+            <td>{{ r.ROWS_READ|number_format }}</td>
+            <td>{{ r.ROWS_CHANGED|number_format }}</td>
+            <td>{{ r.ROWS_CHANGED_X_INDEXES|number_format }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div></div>
+
+<div class="pad"><div class="box pad">
+    <h3>Index reads</h3>
+    <table>
+        <tr>
+            <th>Index name</th>
+            <th>Rows read</th>
+        </tr>
+{% for r in index_read %}
+        <tr>
+            <td>{{ r.INDEX_NAME }}</td>
+            <td>{{ r.ROWS_READ|number_format }}</td>
+        </tr>
+{% endfor %}
+    </table>
+</div></div>
