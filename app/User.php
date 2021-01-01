@@ -195,7 +195,7 @@ class User extends BaseObject {
             (new Gazelle\Manager\User)->sendPM(2, 0, "TypeError caught by user " . $this->id,
                 var_export($_SERVER, true) . "\n\n"
                 . var_export($_REQUEST, true) . "\n\n"
-                . debug_stacktrace()
+                . debug_backtrace()
             );
         }
         return $this->info()['PermissionID'];
