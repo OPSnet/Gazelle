@@ -189,6 +189,15 @@ class User extends BaseObject {
     }
 
     public function primaryClass(): int {
+        // temp hack to understand why this is sometimes null
+        $permId = $this->info()['PermissionID'];
+        if (is_null($permId)) {
+            (new Manager\User)->sendPM(2, 0, "TypeError caught by user " . $this->id,
+                var_export($_SERVER, true) . "\n\n"
+                . var_export($_REQUEST, true) . "\n\n"
+                . var_export(debug_backtrace(), true)
+            );
+        }
         return $this->info()['PermissionID'];
     }
 
