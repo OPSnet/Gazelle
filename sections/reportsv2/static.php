@@ -13,8 +13,6 @@ if (!check_perms('admin_reports')) {
     error(403);
 }
 
-require_once(__DIR__ . '/../torrents/functions.php');
-
 $reportMan = new Gazelle\Manager\ReportV2;
 $Types = $reportMan->types();
 

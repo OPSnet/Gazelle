@@ -5,7 +5,6 @@ parameters:
     scanFiles:
         - classes/util.php
         - sections/artist/index.php
-        - sections/torrents/functions.php
     paths:
         - app
         - classes

@@ -12,8 +12,6 @@ if (!check_perms('site_top10')) {
     die();
 }
 
-require_once(__DIR__ . '/../torrents/functions.php'); //Has get_reports($TorrentID);
-
 if (empty($_GET['type']) || $_GET['type'] == 'torrents') {
     require_once('torrents.php');
 } else {

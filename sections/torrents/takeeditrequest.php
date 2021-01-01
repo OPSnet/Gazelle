@@ -7,7 +7,6 @@ if ($groupId < 1) {
     error(404);
 }
 
-require(__DIR__ . '/functions.php');
 $torrentCache = get_group_info($groupId, $RevisionID);
 
 list(, , $groupId, $groupName, $year, , , , , , $VH) = array_values($torrentCache[0]);

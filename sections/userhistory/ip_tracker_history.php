@@ -12,8 +12,6 @@ if (!check_perms('users_mod') || !check_perms('users_view_ips')) {
     error(403);
 }
 
-require_once(__DIR__ . '/../torrents/functions.php');
-
 $userId = (int)$_GET['userid'] ?? null;
 $ipAddr = $_GET['ip'] ?? null;
 
