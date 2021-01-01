@@ -392,6 +392,8 @@ class TorrentSearch {
             case 'haslog':
                 if ($Value == 0) {
                     $this->SphQL->where('haslog', 0);
+                } elseif ($Value == 99) {
+                    $this->SphQL->where('logscore', 99);
                 } elseif ($Value == 100) {
                     $this->SphQL->where('logscore', 100);
                 } elseif ($Value < 0) {
@@ -753,6 +755,9 @@ class TorrentSearch {
             } elseif ($FilterValue == '100') {
                 // 100% logs
                 $Pass = $Torrent['LogScore'] == '100';
+            } elseif ($FilterValue == '99') {
+                // 99% logs
+                $Pass = $Torrent['LogScore'] == '99';
             } elseif ($FilterValue < 0) {
                 // Unscored or <100% logs
                 $Pass = !empty($Torrent['HasLog']) && $Torrent['LogScore'] != '100';
