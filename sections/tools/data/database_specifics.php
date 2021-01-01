@@ -6,10 +6,16 @@ if (!check_perms('site_database_specifics')) {
 
 // View table definition
 if (!empty($_GET['table']) && preg_match('/([\w-]+)/', $_GET['table'], $match)) {
-    $DB->prepared_query('SHOW CREATE TABLE ' . $match[1]);
-    [,$definition] = $DB->next_record(MYSQLI_NUM, false);
-    header('Content-type: text/plain');
-    echo $definition;
+    $tableName = $match[1];
+
+    View::show_header('Database Specifics - ' . $tableName);
+    $siteInfo = new Gazelle\SiteInfo;
+    echo G::$Twig->render('admin/db-table.twig', [
+        'definition' => $DB->row('SHOW CREATE TABLE ' . $tableName)[1],
+        'table_read' => $siteInfo->tableRowsRead($tableName),
+        'index_read' => $siteInfo->indexRowsRead($tableName),
+    ]);
+    View::show_footer();
     exit;
 }
 

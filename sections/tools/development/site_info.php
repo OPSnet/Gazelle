@@ -35,6 +35,7 @@ echo G::$Twig->render('admin/site-info.twig', [
     'composer_version' => $info->composerVersion(),
     'package'          => $info->composerPackages(),
     'phinx'            => $info->phinx(),
+    'no_pk'            => $info->tablesWithoutPK(),
 ]);
 
 View::show_footer();

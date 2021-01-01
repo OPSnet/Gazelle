@@ -104,4 +104,47 @@ class SiteInfo extends Base {
         ksort($packages);
         return $packages;
     }
+
+    public function tablesWithoutPK(): array {
+        $this->db->prepared_query("
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_name NOT IN (
+                SELECT DISTINCT TABLE_NAME
+                FROM information_schema.statistics
+                WHERE INDEX_NAME = 'PRIMARY' AND  TABLE_SCHEMA = ?
+            ) AND TABLE_SCHEMA = ?
+            ORDER BY TABLE_NAME
+            ", SQLDB, SQLDB
+        );
+        return $this->db->collect(0);
+    }
+
+    public function tableRowsRead(string $tableName): array {
+        $this->db->prepared_query("
+            SELECT ROWS_READ, ROWS_CHANGED, ROWS_CHANGED_X_INDEXES
+            FROM information_schema.table_statistics
+            WHERE TABLE_SCHEMA = ?
+                AND TABLE_NAME = ?
+            ", SQLDB, $tableName
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
+    public function indexRowsRead(string $tableName): array {
+        $this->db->prepared_query("
+            SELECT DISTINCT s.INDEX_NAME,
+                coalesce(si.ROWS_READ, 0) as ROWS_READ
+            FROM information_schema.statistics s
+            LEFT JOIN information_schema.index_statistics si USING (TABLE_SCHEMA, TABLE_NAME, INDEX_NAME)
+            WHERE s.TABLE_SCHEMA = ?
+                AND s.TABLE_NAME = ?
+            ORDER BY s.TABLE_NAME,
+                s.INDEX_NAME = 'PRIMARY' DESC,
+                coalesce(si.ROWS_READ, 0) DESC,
+                s.INDEX_NAME
+            ", SQLDB, $tableName
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
 }

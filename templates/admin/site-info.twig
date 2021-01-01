@@ -55,6 +55,19 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
         <span style="width: 150px; display: inline-block;">Remote Hash:</span> {{ git_hash_remote }}
     </div>
 
+    <h3>Tables lacking a primary key</h3>
+    <div class="box pad">
+{% if no_pk is empty %}
+    <p>All tables have a primary key defined</p>
+{% else %}
+    <ul class="stats nobullet">
+    {% for table in no_pk %}
+        <li><a href="/tools.php?action=database_specifics&table={{ table }}">{{ table }}</a></li>
+    {% endfor %}
+    </ul>
+{% endif %}
+    </div>
+
     <h3>Composer</h3>
     <div class="box pad">
         Composer Version: {{ composer_version }}<br />
