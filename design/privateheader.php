@@ -175,9 +175,10 @@ if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] === FORUM_MOD) {
     }
 
     $staff = new Gazelle\Staff(G::$LoggedUser);
-    if ($staff->pmCount() > 0) {
+    $count = $staff->pmCount();
+    if ($count > 0) {
         $needStaffInbox = true;
-        $activity->setAction('<a class="nobr" href="staffpm.php">' . $staff->pmCount() . ' Staff PMs</a>');
+        $activity->setAction('<a class="nobr" href="staffpm.php">' . $count . ' Staff PMs</a>');
     }
 
     if ($staff->blogAlert()) {
