@@ -192,7 +192,7 @@ class User extends BaseObject {
         // temp hack to understand why this is sometimes null
         $permId = $this->info()['PermissionID'];
         if (is_null($permId)) {
-            (new Gazelle\Manager\User)->sendPM(2, 0, "TypeError caught by user " . $this->id,
+            (new Manager\User)->sendPM(2, 0, "TypeError caught by user " . $this->id,
                 var_export($_SERVER, true) . "\n\n"
                 . var_export($_REQUEST, true) . "\n\n"
                 . debug_backtrace()
