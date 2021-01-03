@@ -150,8 +150,8 @@ Tags::reset();
                     <form action="collages.php" method="post">
                     <select name="collage_combo">
                         <option value="0">Choose recent...</option>
-<?php foreach($collageMan->addToArtistCollageDefault($User, $ArtistID) as $id => $name) { ?>
-                        <option value="<?= $id ?>"><?= $name ?></option>
+<?php foreach($collageMan->addToArtistCollageDefault($User, $ArtistID) as $id => $collageName) { ?>
+                        <option value="<?= $id ?>"><?= $collageName ?></option>
 <?php } ?>
                     </select>
                     <div> or enter Collage ID or URL</div>

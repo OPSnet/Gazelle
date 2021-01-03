@@ -24,7 +24,15 @@ if (isset($_GET['cache'])) {
     if ($_GET['cache'] === 'artists') {
         $max = $DB->scalar("SELECT max(ArtistID) as count FROM artists_group");
         for ($i = 1; $i <= $max; $i++) {
-            $Cache->deleteMulti(['artist_' . $i, 'artist_groups_' . $i]);
+            $Cache->deleteMulti([
+                'artist_' . $i,
+                'artist_collages' . $i,
+                'artist_comments' . $i,
+                'artist_comments_' . $i . '_catalogue_0',
+                'artist_groups_' . $i,
+                'artist_requests' . $i,
+                'similar_positions_' . $i,
+            ]);
         }
         echo "<div class='save_message'>All artist caches flushed.</div>";
     }
@@ -92,7 +100,8 @@ $MultiKeyTooltip = 'Enter cache keys delimited by whitespace.';
         </tr>
         <tr>
             <td rowspan="3" style="vertical-align: top;">Flush application caches:</td>
-            <td><a href="tools.php?action=clear_cache&amp;cache=artists">Artists</a> (flushes artist_* and artist_groups_*)</td>
+            <td><a href="tools.php?action=clear_cache&amp;cache=artists">Artists</a>
+            (flushes artist_*, artist_collages*, artist_comments*, artist_comments_*_catalogue_0, artist_groups_*, artist_requests* and similar_positions_*)</td>
         </tr>
         <tr>
             <td><a href="tools.php?action=clear_cache&amp;cache=torrent_groups">Torrent Groups</a> (flushes torrent_group_* and groups_artists_*)</td>
@@ -119,7 +128,7 @@ $MultiKeyTooltip = 'Enter cache keys delimited by whitespace.';
             </tr>
 <?php } ?>
     </table>
-    <?php
+<?php
 }
 
 View::show_footer();
