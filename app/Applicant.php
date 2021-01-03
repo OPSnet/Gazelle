@@ -135,7 +135,7 @@ class Applicant extends Base {
         $this->cache->delete_value(self::CACHE_KEY_NEW_REPLY);
         $this->cache->delete_value(self::CACHE_KEY_NEW_COUNT);
         if ($visibility == 'public' && \Permissions::has_permission($posterId, 'admin_manage_applicants')) {
-            (Manager\User)->sendPM(
+            (new Manager\User)->sendPM(
                 $this->userId(),
                 0,
                 sprintf('You have a reply to your %s application', $this->roleTitle()),
