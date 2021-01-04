@@ -92,7 +92,7 @@ abstract class AbstractUserRank extends \Gazelle\Base {
         foreach ($raw as $bucket) {
             $percentile += $increment;
             if ($previous != $bucket) {
-                $table[$bucket] = (int)$percentile;
+                $table[$bucket] = (int)(round($percentile));
             }
             $previous = $bucket;
         }

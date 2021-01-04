@@ -10,20 +10,22 @@ class CollageContribution extends \Gazelle\UserRank\AbstractUserRank {
 
     public function selector(): string {
         return "
-            SELECT sum(contrib) FROM (
-                SELECT um.ID as id, count(*) AS contrib
-                FROM collages_artists c
-                INNER JOIN users_main um ON (um.ID = c.UserID)
-                WHERE um.Enabled = '1'
-                GROUP BY um.ID
-                UNION ALL
-                SELECT um.ID as id, count(*) AS contrib
-                FROM collages_torrents c
-                INNER JOIN users_main um ON (um.ID = c.UserID)
-                WHERE um.Enabled = '1'
-                GROUP BY um.ID
-            ) COLL
-            GROUP BY id
+            SELECT DISTINCT n FROM (
+                SELECT sum(contrib) AS n FROM (
+                    SELECT um.ID as id, count(*) AS contrib
+                    FROM collages_artists c
+                    INNER JOIN users_main um ON (um.ID = c.UserID)
+                    WHERE um.Enabled = '1'
+                    GROUP BY um.ID
+                    UNION ALL
+                    SELECT um.ID as id, count(*) AS contrib
+                    FROM collages_torrents c
+                    INNER JOIN users_main um ON (um.ID = c.UserID)
+                    WHERE um.Enabled = '1'
+                    GROUP BY um.ID
+                ) COLL
+                GROUP BY id
+            ) C
             ORDER BY 1
             ";
     }
