@@ -502,8 +502,7 @@ if ($isMusicUpload) {
     // Does it belong in a group?
     if ($Properties['GroupID']) {
         $DB->prepared_query("
-            SELECT
-                tg.ID,
+            SELECT tg.ID,
                 tg.WikiImage,
                 tg.WikiBody,
                 tg.RevisionID,
@@ -536,11 +535,10 @@ if ($isMusicUpload) {
         }
     }
     if (!isset($GroupID)) {
-        foreach ($ArtistForm as $Importance => $Artists) {
+        foreach ($ArtistForm as $role => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 $DB->prepared_query('
-                    SELECT
-                        tg.id,
+                    SELECT tg.id,
                         tg.WikiImage,
                         tg.WikiBody,
                         tg.RevisionID
@@ -571,15 +569,9 @@ if ($isMusicUpload) {
 
                 } else {
                     // The album hasn't been uploaded. Try to get the artist IDs
-                    $DB->prepared_query('
-                        SELECT
-                            ArtistID,
-                            AliasID,
-                            Name,
-                            Redirect
-                        FROM artists_alias
-                        WHERE Name = ?
-                        ', $Artist['name']
+                    $DB->prepared_query("
+                        SELECT ArtistID, AliasID, Name, Redirect FROM artists_alias WHERE Name = ?
+                        ", $Artist['name']
                     );
                     if ($DB->has_results()) {
                         while ([$ArtistID, $AliasID, $AliasName, $Redirect] = $DB->next_record(MYSQLI_NUM, false)) {
@@ -587,7 +579,7 @@ if ($isMusicUpload) {
                                 if ($Redirect) {
                                     $AliasID = $Redirect;
                                 }
-                                $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName];
+                                $ArtistForm[$role][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName];
                                 break;
                             }
                         }
@@ -605,20 +597,20 @@ $LogName .= $Properties['Title'];
 $IsNewGroup = !isset($GroupID);
 
 //----- Start inserts
+$artistMan = new Gazelle\Manager\Artist;
 if ($IsNewGroup) {
     if ($isMusicUpload) {
         //array to store which artists we have added already, to prevent adding an artist twice
         $ArtistsAdded = [];
-        $ArtistManager = new Gazelle\Manager\Artist;
-        foreach ($ArtistForm as $Importance => $Artists) {
+        foreach ($ArtistForm as $role => $Artists) {
             foreach ($Artists as $Num => $Artist) {
                 if (!$Artist['id']) {
                     if (isset($ArtistsAdded[strtolower($Artist['name'])])) {
-                        $ArtistForm[$Importance][$Num] = $ArtistsAdded[strtolower($Artist['name'])];
+                        $ArtistForm[$role][$Num] = $ArtistsAdded[strtolower($Artist['name'])];
                     } else {
-                        [$ArtistID, $AliasID] = $ArtistManager->createArtist($Artist['name']);
-                        $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
-                        $ArtistsAdded[strtolower($Artist['name'])] = $ArtistForm[$Importance][$Num];
+                        [$ArtistID, $AliasID] = $artistMan->create($Artist['name']);
+                        $ArtistForm[$role][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
+                        $ArtistsAdded[strtolower($Artist['name'])] = $ArtistForm[$role][$Num];
                     }
                 }
             }
@@ -636,14 +628,10 @@ if ($IsNewGroup) {
     );
     $GroupID = $DB->inserted_id();
     if ($isMusicUpload) {
-        foreach ($ArtistForm as $Importance => $Artists) {
+        $artistMan->setGroupId($GroupID)->setUserId($LoggedUser['ID']);
+        foreach ($ArtistForm as $role => $Artists) {
             foreach ($Artists as $Num => $Artist) {
-                $DB->prepared_query('
-                    INSERT IGNORE INTO torrents_artists
-                           (GroupID, ArtistID, AliasID, UserID, Importance)
-                    VALUES (?,       ?,        ?,       ?,      ?)
-                    ', $GroupID, $Artist['id'], $Artist['aliasid'], $LoggedUser['ID'], $Importance
-                );
+                $artistMan->addToGroup($Artist['id'], $Artist['aliasid'], $role);
                 $Cache->increment('stats_album_count');
             }
         }
@@ -659,9 +647,7 @@ if ($IsNewGroup) {
     $Cache->deleteMulti(["torrent_group_$GroupID", "torrents_details_$GroupID", "detail_files_$GroupID"]);
     if ($isMusicUpload) {
         $Properties['ReleaseType'] = $DB->scalar('
-            SELECT ReleaseType
-            FROM torrents_group
-            WHERE ID = ?
+            SELECT ReleaseType FROM torrents_group WHERE ID = ?
             ', $GroupID
         );
     }

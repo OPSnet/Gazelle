@@ -498,11 +498,11 @@ if (!is_array($Collages)) {
     $Cache->cache_value("artists_collages_$ArtistID", $Collages, 3600 * 6);
 }
 if (count($Collages) > 0) {
-    if (count($Collages) > MAX_COLLAGES) {
+    if (count($Collages) > COLLAGE_SAMPLE_THRESHOLD) {
         // Pick some at random
         $Range = range(0,count($Collages) - 1);
         shuffle($Range);
-        $Indices = array_slice($Range, 0, MAX_COLLAGES);
+        $Indices = array_slice($Range, 0, COLLAGE_SAMPLE_THRESHOLD);
         $SeeAll = ' <a href="#" onclick="$(\'.collage_rows\').gtoggle(); return false;">(See all)</a>';
     } else {
         $Indices = range(0, count($Collages)-1);

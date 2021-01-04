@@ -53,12 +53,12 @@ if (empty($_POST['confirm'])) {
         WHERE Name = ?
         ', $ArtistName
     );
+    $artistMan = new \Gazelle\Manager\Artist;
     if (!$DB->has_results()) {
+        [$ArtistID, $AliasID] = $artistMan->create($ArtistName);
         $Redirect = 0;
-        $ArtistManager = new \Gazelle\Manager\Artist;
-        list($ArtistID, $AliasID) = $ArtistManager->createArtist($ArtistName);
     } else {
-        list($ArtistID, $AliasID, $Redirect, $ArtistName) = $DB->next_record();
+        [$ArtistID, $AliasID, $Redirect, $ArtistName] = $DB->next_record();
         if ($Redirect) {
             $AliasID = $Redirect;
         }
@@ -72,12 +72,9 @@ if (empty($_POST['confirm'])) {
     );
     $GroupID = $DB->inserted_id();
 
-    $DB->prepared_query('
-        INSERT INTO torrents_artists
-               (GroupID, ArtistID, AliasID, UserID, Importance)
-        VALUES (?,       ?,        ?,       ?,      1)
-        ', $GroupID, $ArtistID, $AliasID, $LoggedUser['ID']
-    );
+    $artistMan->setGroupId($GroupID)
+        ->setUserId($LoggedUser['ID'])
+        ->addToGroup($ArtistID, $AliasID, 1);
 
     $DB->prepared_query('
         UPDATE torrents SET

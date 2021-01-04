@@ -278,6 +278,8 @@ $CollageCats = [
 ];
 define('COLLAGE_PERSONAL_ID', 0);
 define('COLLAGE_ARTISTS_ID', 7);
+define('COLLAGE_SAMPLE_THRESHOLD', 4);
+define('PERSONAL_COLLAGE_SAMPLE_THRESHOLD', 4);
 
 $ZIPGroups = [
     0 => 'MP3 (VBR) - High Quality',
