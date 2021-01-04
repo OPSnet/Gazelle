@@ -3,7 +3,7 @@ authorize();
 
 $UserID = $LoggedUser['ID'];
 $GroupID = $_POST['groupid'];
-$Importances = $_POST['importance'];
+$ArtistRoles = $_POST['importance'];
 $AliasNames = $_POST['aliasname'];
 
 $GroupName = $DB->scalar('SELECT Name FROM torrents_group WHERE ID = ?', (int)$GroupID);
@@ -13,12 +13,12 @@ if (!$GroupName) {
 
 $Changed = false;
 
-$ArtistManager = new \Gazelle\Manager\Artist;
+$artistMan = new \Gazelle\Manager\Artist;
+$artistMan->setGroupId($GroupID)->setUserId($UserID);
 for ($i = 0; $i < count($AliasNames); $i++) {
     $AliasName = \Gazelle\Artist::sanitize($AliasNames[$i]);
-    $Importance = $Importances[$i];
-
-    if (!in_array($Importance, ['1', '2', '3', '4', '5', '6', '7', '8'])) {
+    $role = $ArtistRoles[$i];
+    if (!in_array($role, ['1', '2', '3', '4', '5', '6', '7', '8'])) {
         break;
     }
 
@@ -38,21 +38,15 @@ for ($i = 0; $i < count($AliasNames); $i++) {
             }
         }
         if (!$AliasID) {
-            [$ArtistID, $AliasID] = $ArtistManager->createArtist($AliasName);
+            [$ArtistID, $AliasID] = $artistMan->create($AliasName);
         }
-        $ArtistName = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?', $ArtistID);
-
-        $DB->prepared_query('
-            INSERT IGNORE INTO torrents_artists
-                   (GroupID, ArtistID, AliasID, Importance, UserID)
-            VALUES (?,       ?,        ?,       ?,          ?)
-            ', $GroupID, $ArtistID, $AliasID, $Importance, $UserID
-        );
+        $artistMan->addToGroup($ArtistID, $AliasID, $role);
 
         if ($DB->affected_rows()) {
-            (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "added artist $ArtistName as ".$ArtistTypes[$Importance])
+            $ArtistName = $DB->scalar('SELECT Name FROM artists_group WHERE ArtistID = ?', $ArtistID);
+            (new Gazelle\Log)->group($GroupID, $LoggedUser['ID'], "added artist $ArtistName as ".$ArtistTypes[$role])
                 ->general("Artist $ArtistID ($ArtistName) was added to the group $GroupID ($GroupName) as "
-                    . $ArtistTypes[$Importance].' by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].')'
+                    . $ArtistTypes[$role].' by user '.$LoggedUser['ID'].' ('.$LoggedUser['Username'].')'
                 );
             $Changed = true;
         }

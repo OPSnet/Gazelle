@@ -98,7 +98,7 @@ if (empty($_POST['artists'])) {
     $Err = 'You did not enter any artists.';
 } else {
     $Artists = $_POST['artists'];
-    $Importance = $_POST['importance'];
+    $role = $_POST['importance'];
 }
 
 if (!intval($_POST['releasetype']) || !(new Gazelle\ReleaseType)->findNameById($_POST['releasetype'])) {
@@ -221,8 +221,8 @@ if ($CategoryName === 'Music') {
     for ($i = 0, $il = count($Artists); $i < $il; $i++) {
         if (trim($Artists[$i]) !== '') {
             if (!in_array($Artists[$i], $ArtistNames)) {
-                $ArtistForm[$Importance[$i]][] = ['name' => trim($Artists[$i])];
-                if (in_array($Importance[$i], [1, 4, 5, 6, 8])) {
+                $ArtistForm[$role[$i]][] = ['name' => trim($Artists[$i])];
+                if (in_array($role[$i], [1, 4, 5, 6, 8])) {
                     $MainArtistCount++;
                 }
                 $ArtistNames[] = trim($Artists[$i]);
@@ -332,10 +332,10 @@ if ($NewRequest) {
         $RequestID);
 
     // We need to be able to delete artists / tags
-    $DB->prepared_query('
-        SELECT ArtistID
-        FROM requests_artists
-        WHERE RequestID = ?', $RequestID);
+    $DB->prepared_query("
+        SELECT ArtistID FROM requests_artists WHERE RequestID = ?
+        ", $RequestID
+    );
     $RequestArtists = $DB->to_array();
     foreach ($RequestArtists as $RequestArtist) {
         $Cache->delete_value("artists_requests_$RequestArtist");
@@ -358,8 +358,8 @@ if ($GroupID) {
  * 3. Create a row in the requests_artists table for each artist, based on the ID.
  */
 
-$ArtistManager = new Gazelle\Manager\Artist;
-foreach ($ArtistForm as $Importance => $Artists) {
+$artistMan = new Gazelle\Manager\Artist;
+foreach ($ArtistForm as $role => $Artists) {
     foreach ($Artists as $Num => $Artist) {
         //1. See if each artist given already exists and if it does, grab the ID.
         $DB->prepared_query('
@@ -371,31 +371,28 @@ foreach ($ArtistForm as $Importance => $Artists) {
             FROM artists_alias
             WHERE Name = ?', $Artist['name']);
 
-        while (list($ArtistID, $AliasID, $AliasName, $Redirect) = $DB->next_record(MYSQLI_NUM, false)) {
+        while ([$ArtistID, $AliasID, $AliasName, $Redirect] = $DB->next_record(MYSQLI_NUM, false)) {
             if (!strcasecmp($Artist['name'], $AliasName)) {
                 if ($Redirect) {
                     $AliasID = $Redirect;
                 }
-                $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName];
+                $ArtistForm[$role][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $AliasName];
                 break;
             }
         }
         if (!$ArtistID) {
             //2. For each artist that didn't exist, create an artist.
-            list($ArtistID, $AliasID) = $ArtistManager->createArtist($Artist['name']);
-            $ArtistForm[$Importance][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
+            [$ArtistID, $AliasID] = $artistMan->create($Artist['name']);
+            $ArtistForm[$role][$Num] = ['id' => $ArtistID, 'aliasid' => $AliasID, 'name' => $Artist['name']];
         }
     }
 }
 
 //3. Create a row in the requests_artists table for each artist, based on the ID.
-foreach ($ArtistForm as $Importance => $Artists) {
+$artistMan->setGroupID($RequestID);
+foreach ($ArtistForm as $role => $Artists) {
     foreach ($Artists as $Num => $Artist) {
-        $DB->prepared_query('
-            INSERT IGNORE INTO requests_artists
-                (RequestID, ArtistID, AliasID, Importance)
-            VALUES
-                (?, ?, ?, ?)', $RequestID, $Artist['id'], $Artist['aliasid'], $Importance);
+        echo $artistMan->addToRequest($Artist['id'], $Artist['aliasid'], $role);
         $Cache->increment('stats_album_count');
         $Cache->delete_value('artists_requests_'.$Artist['id']);
     }
@@ -403,9 +400,10 @@ foreach ($ArtistForm as $Importance => $Artists) {
 
 //Tags
 if (!$NewRequest) {
-    $DB->prepared_query('
-        DELETE FROM requests_tags
-        WHERE RequestID = ?', $RequestID);
+    $DB->prepared_query("
+        DELETE FROM requests_tags WHERE RequestID = ?
+        ", $RequestID
+    );
 }
 
 $tagMan = new Gazelle\Manager\Tag;
@@ -418,12 +416,12 @@ foreach ($Tags as $Index => $Tag) {
 
 if ($NewRequest) {
     //Remove the bounty and create the vote
-    $DB->prepared_query('
+    $DB->prepared_query("
         INSERT INTO requests_votes
-            (RequestID, UserID, Bounty)
-        VALUES
-            (?, ?, ?)',
-        $RequestID, $LoggedUser['ID'], $Bytes * (1 - $RequestTax));
+               (RequestID, UserID, Bounty)
+        VALUES (?,         ?,      ?)
+        ", $RequestID, $LoggedUser['ID'], $Bytes * (1 - $RequestTax)
+    );
 
     $DB->prepared_query('
         UPDATE users_leech_stats

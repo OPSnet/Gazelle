@@ -4,9 +4,6 @@ function compare($X, $Y) {
 }
 header('Access-Control-Allow-Origin: *');
 
-define('MAX_PERS_COLLAGES', 3); // How many personal collages should be shown by default
-define('MAX_COLLAGES', 5); // How many normal collages should be shown by default
-
 $GroupID = (int)$_GET['id'];
 if (!empty($_GET['revisionid']) && is_number($_GET['revisionid'])) {
     $RevisionID = $_GET['revisionid'];
@@ -251,16 +248,18 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
 <?php   foreach ($section as $s) { ?>
 <?php       if (!empty($Artists[$s['offset']]) && count($Artists[$s['offset']]) > 0) { ?>
                 <li class="<?= $s['class'] ?>"><strong class="artists_label"><?= $s['title'] ?></strong></li>
-<?php           foreach ($Artists[$s['offset']] as $Artist) { ?>
+<?php
+            foreach ($Artists[$s['offset']] as $Artist) {
+            $a = new \Gazelle\Artist($Artist['id']);
+?>
                 <li class="<?= $s['class'] ?>">
                     <?= Artists::display_artist($Artist) ?>&lrm;
 <?php               if (check_perms('torrents_edit')) { ?>
-                    (<span class="tooltip" title="Artist alias ID">
-<?php
-            $a = new \Gazelle\Artist($Artist['id']);
-            echo $a->getAlias($Artist['name'])
-?>
-                        </span>)&nbsp;<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?=$GroupID?>&amp;artistid=<?=$Artist['id']?>&amp;importance=<?=$s['offset']?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?= $s['role'] ?>">X</a></span>
+                    (<span class="tooltip" title="Artist alias ID"><?= $a->getAlias($Artist['name'])
+                        ?></span>)&nbsp;<span class="remove remove_artist"><a href="javascript:void(0);" onclick="ajax.get('torrents.php?action=delete_alias&amp;auth=' + authkey + '&amp;groupid=<?= $GroupID
+                        ?>&amp;artistid=<?=$Artist['id']?>&amp;importance=<?=$s['offset']
+                        ?>'); this.parentNode.parentNode.style.display = 'none';" class="brackets tooltip" title="Remove <?= $s['role']
+                        ?>">X</a></span>
 <?php           } ?>
                 </li>
 <?php
@@ -780,11 +779,11 @@ if (!is_array($Collages)) {
     $Cache->cache_value("torrent_collages_$GroupID", $Collages, 3600 * 6);
 }
 if (count($Collages) > 0) {
-    if (count($Collages) > MAX_COLLAGES) {
+    if (count($Collages) > COLLAGE_SAMPLE_THRESHOLD) {
         // Pick some at random
         $Range = range(0, count($Collages) - 1);
         shuffle($Range);
-        $Indices = array_slice($Range, 0, MAX_COLLAGES);
+        $Indices = array_slice($Range, 0, COLLAGE_SAMPLE_THRESHOLD);
         $SeeAll = ' <a href="#" onclick="$(\'.collage_rows\').gtoggle(); return false;">(See all)</a>';
     } else {
         $Indices = range(0, count($Collages) - 1);
@@ -835,11 +834,11 @@ if (!is_array($PersonalCollages)) {
 }
 
 if (count($PersonalCollages) > 0) {
-    if (count($PersonalCollages) > MAX_PERS_COLLAGES) {
+    if (count($PersonalCollages) > PERSONAL_COLLAGE_SAMPLE_THRESHOLD) {
         // Pick some at random
         $Range = range(0,count($PersonalCollages) - 1);
         shuffle($Range);
-        $Indices = array_slice($Range, 0, MAX_PERS_COLLAGES);
+        $Indices = array_slice($Range, 0, PERSONAL_COLLAGE_SAMPLE_THRESHOLD);
         $SeeAll = ' <a href="#" onclick="$(\'.personal_rows\').gtoggle(); return false;">(See all)</a>';
     } else {
         $Indices = range(0, count($PersonalCollages) - 1);

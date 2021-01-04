@@ -31,10 +31,10 @@ switch ($Categories[$NewCategoryID-1]) {
             WHERE Name LIKE ?
             ', $ArtistName
         );
+        $artistMan = new \Gazelle\Manager\Artist;
         if (!$DB->has_results()) {
+            [$ArtistID, $AliasID] = $artistMan->create($AliasName);
             $Redirect = 0;
-            $ArtistManager = new \Gazelle\Manager\Artist;
-            [$ArtistID, $AliasID] = $ArtistManager->createArtist($AliasName);
         } else {
             [$ArtistID, $AliasID, $Redirect, $ArtistName] = $DB->next_record();
             if ($Redirect) {
@@ -50,12 +50,8 @@ switch ($Categories[$NewCategoryID-1]) {
         );
         $GroupID = $DB->inserted_id();
 
-        $DB->prepared_query("
-            INSERT INTO torrents_artists
-                   (GroupID, ArtistID, AliasID, UserID, Importance)
-            VALUES (?,       ?,        ?,       ?,      1)
-            ", $GroupID, $ArtistID, $AliasID, $LoggedUser['ID']
-        );
+        $artistMan->setGroupId($GroupID)->setUserId($LoggedUser['ID'])
+            ->addToGroup($ArtistID, $AliasID, 1);
         break;
     case 'Audiobooks':
     case 'Comedy':

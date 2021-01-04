@@ -3,8 +3,27 @@
 namespace Gazelle\Manager;
 
 class Artist extends \Gazelle\Base {
+    protected const ROLE_KEY = 'artist_role';
 
-    public function createArtist($name) {
+    protected $role;
+
+    protected $groupId; // torrent or request context
+    protected $userId; // who is manipulating the torrents_artists or requests_artists tables
+
+    public function __construct() {
+        parent::__construct();
+        if (($this->role = $this->cache->get_value(ROLE_KEY)) === false) {
+            $this->db->prepared_query("
+                SELECT slug, artist_role_id, sequence, name, title, collection
+                FROM artist_role
+                ORDER BY artist_role_id
+            ");
+            $this->role = $this->db->to_array('slug', MYSQLI_ASSOC, false);
+            $this->cache->cache_value(ROLE_KEY, $this->role, 86400 * 30);
+        }
+    }
+
+    public function create($name) {
         $this->db->prepared_query('
             INSERT INTO artists_group (Name)
             VALUES (?)
@@ -24,6 +43,16 @@ class Artist extends \Gazelle\Base {
         return [$artistId, $aliasId];
     }
 
+    public function setGroupId(int $groupId) {
+        $this->groupId = $groupId;
+        return $this;
+    }
+
+    public function setUserId(int $userId) {
+        $this->userId = $userId;
+        return $this;
+    }
+
     public function sectionName(int $sectionId): ?string {
         return (new \Gazelle\ReleaseType)->findExtendedNameById($sectionId);
     }
@@ -34,5 +63,25 @@ class Artist extends \Gazelle\Base {
 
     public function sectionTitle(int $sectionId): string {
         return (new \Gazelle\ReleaseType)->sectionTitle($sectionId);
+    }
+
+    public function addToGroup(int $artistId, int $aliasId, int $role): int {
+        $this->db->prepared_query("
+            INSERT IGNORE INTO torrents_artists
+                   (GroupID, UserID, ArtistID, AliasID, artist_role_id, Importance)
+            VALUES (?,       ?,      ?,        ?,       ?,              ?)
+            ", $this->groupId, $this->userId, $artistId, $aliasId, $role, (string)$role
+        );
+        return $this->db->affected_rows();
+    }
+
+    public function addToRequest(int $artistId, int $aliasId, int $role): int {
+        $this->db->prepared_query("
+            INSERT IGNORE INTO requests_artists
+                   (RequestID, ArtistID, AliasID, artist_role_id, Importance)
+            VALUES (?,         ?,        ?,       ?,              ?)
+            ", $this->groupId, $artistId, $aliasId, $role, (string)$role
+        );
+        return $this->db->affected_rows();
     }
 }
