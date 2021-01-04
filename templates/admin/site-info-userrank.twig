@@ -1,0 +1,48 @@
+</style>
+<div class="linkbox">
+    <a href="tools.php?action=site_info" class="brackets">Site Information</a>
+</div>
+<div class="thin">
+<h3>User Rank matrix</h3>
+
+<div class="pad">This table shows how metrics are mapped to percentiles. Taking
+the raw value of a user dimension (e.g. 45 uploads), walk down the uploads column
+and the first value that is strictly lower than their value (e.g. 44) gives their
+rank (in the left hand column). If their value is beneath the last value in the
+column then their rank is zero). The data are cached for around one hour.</div>
+
+<table>
+    <tr>
+        <th>Rank </th>
+{% for n in name %}
+        <th style="width: 8.5%; padding: 0;"><div class="rot90-container"><div class="rot90">
+            {{ n }}
+        </div></div></th>
+{% endfor %}
+    </tr>
+{% for r in range(0, 99) %}
+    <tr>
+    {% set idx = 100 - r %}
+        <td class="number_column">{{ idx }}</td>
+    {% for n in name %}
+        {% if table[n][idx] is empty %}
+        <td class="center">&sdot;</td>
+        {% else %}
+            {% if n in ['uploaded', 'downloaded', 'bounty'] %}
+        <td class="number_column">{{ table[n][idx]|octet_size }}</td>
+            {% else %}
+        <td class="number_column">{{ table[n][idx]|number_format }}</td>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    </tr>
+{% endfor %}
+    <tr>
+        <th>Rank </th>
+{% for n in name %}
+        <th style="width: 8.5%; padding: 0;"><div class="rot90-container"><div class="rot90">
+            {{ n }}
+        </div></div></th>
+{% endfor %}
+    </tr>
+</table>

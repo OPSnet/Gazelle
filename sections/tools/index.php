@@ -242,6 +242,9 @@ switch ($_REQUEST['action']) {
     case 'invite_pool':
         require_once('data/invite_pool.php');
         break;
+    case 'site_info':
+        require_once('data/site_info.php');
+        break;
 
     case 'torrent_stats':
         require_once('data/torrent_stats.php');
@@ -284,9 +287,6 @@ switch ($_REQUEST['action']) {
         break;
     case 'clear_cache':
         require_once('development/clear_cache.php');
-        break;
-    case 'site_info':
-        require_once('development/site_info.php');
         break;
     case 'site_options':
         require_once('development/site_options.php');

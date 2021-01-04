@@ -18,6 +18,9 @@ div#phpinfo .v i {color: #999;}
 div#phpinfo img {float: right; border: 0;}
 div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
 </style>
+<div class="linkbox">
+    <a href="tools.php?action=site_info&amp;mode=userrank" class="brackets">User ranks</a>
+</div>
 <div class="thin">
     <h3>OS</h3>
     <div class="box pad">
@@ -77,7 +80,6 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
                 <td>Requirement</td>
                 <td>Installed</td>
             </tr>
-        <?php
 {% for p in package %}
             <tr>
                 <td>{{ p.name }}</td>

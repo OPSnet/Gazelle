@@ -10,11 +10,13 @@ class ReleaseVotes extends \Gazelle\UserRank\AbstractUserRank {
 
     public function selector(): string {
         return "
-            SELECT count(*)
-            FROM users_votes uv
-            INNER JOIN users_main um ON (um.id = uv.userid)
-            WHERE um.enabled = '1'
-            GROUP BY um.id
+            SELECT DISTINCT n FROM (
+                SELECT count(*) AS n
+                FROM users_votes uv
+                INNER JOIN users_main um ON (um.id = uv.userid)
+                WHERE um.enabled = '1'
+                GROUP BY um.id
+            ) C
             ORDER BY 1
             ";
     }

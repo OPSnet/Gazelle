@@ -824,6 +824,25 @@ input[type="search"] {
     max-width: 800px;
 }
 
+.rot90-container {
+  position: relative;
+  display: inline-block;
+  height: 120px;
+  min-width: 20px;
+}
+.rot90 {
+  white-space: nowrap;
+  text-align: left;
+  overflow: hidden;
+  height: 20px;
+  line-height: 20px;
+  width: 120px;
+  position: absolute;
+  bottom: -10px;
+  transform: rotate(-90deg);
+  transform-origin: top left;
+}
+
 #user .twofa_text {
     font-size: 14px;
     margin-top: 10px;
