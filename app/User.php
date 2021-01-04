@@ -195,7 +195,7 @@ class User extends BaseObject {
             (new Manager\User)->sendPM(2, 0, "TypeError caught by user " . $this->id,
                 var_export($_SERVER, true) . "\n\n"
                 . var_export($_REQUEST, true) . "\n\n"
-                . debug_backtrace()
+                . var_export(debug_backtrace(), true)
             );
         }
         return $this->info()['PermissionID'];
