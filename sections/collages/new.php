@@ -42,12 +42,7 @@ if (isset($Err)) { ?>
 <?php } ?>
                     </select>
                     <br />
-                    <ul>
-<?php echo G::$Twig->render('collage/description.twig', [
-    'SITE_NAME' => SITE_NAME,
-    'personal_allowed' => $personalAllowed,
-]); ?>
-                    </ul>
+<?= G::$Twig->render('collage/description.twig', [ 'personal_allowed' => $personalAllowed, ]) ?>
                 </td>
             </tr>
             <tr>

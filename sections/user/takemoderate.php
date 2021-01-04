@@ -540,13 +540,8 @@ if ($resetAuthkey == 1 && check_perms('users_edit_reset_keys')) {
 }
 
 if ($sendHackedMail && check_perms('users_disable_any')) {
-    Misc::send_email($hackedEmail, 'Your '.SITE_NAME.' account', G::$Twig->render('emails/hacked.twig', [
-            'site_name' => SITE_NAME,
-            'server'    => BOT_SERVER,
-            'port'      => BOT_PORT,
-            'port_ssl'  => BOT_PORT_SSL,
-            'channel'   => BOT_DISABLED_CHAN,
-        ]),
+    Misc::send_email($hackedEmail, 'Your '.SITE_NAME.' account',
+        G::$Twig->render('email/hacked.twig', []),
         'noreply'
     );
     Tools::disable_users($userID, '', 1);

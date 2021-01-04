@@ -2,7 +2,7 @@
 
 authorize();
 
-list ($artistId, $name) = $DB->row("
+[$artistId, $name] = $DB->row("
     SELECT ArtistID, concat(Name, IF(VanityHouse = 0, '', ' [Vanity House]')) as Name
     FROM artists_group
     WHERE ArtistID = ?
@@ -17,10 +17,10 @@ $threadId = $forum->addThread(
     SYSTEM_USER_ID,
     "Editing request — Artist: $name",
     G::$Twig->render('forum/request-edit.twig', [
-        'user_name' => G::$LoggedUser['Username'],
-        'url'       => SITE_URL . '/artist.php?id=' . $artistId,
-        'name'      => $name,
-        'details'   => trim($_POST['edit_details']),
+        'username' => $LoggedUser['Username'],
+        'url'      => SITE_URL . '/artist.php?id=' . $artistId,
+        'name'     => $name,
+        'details'  => trim($_POST['edit_details']),
     ])
 );
 

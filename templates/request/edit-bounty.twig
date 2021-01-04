@@ -37,7 +37,7 @@
                 </tr>
 {% for b in bounty %}
                 <tr>
-                    <td>{{ b.user_name|raw }}</td>
+                    <td>{{ b.UserID|user_full }}</td>
                     <td title="{{ b.Bounty|number_format }}">{{ b.bounty_size }}</td>
                     <td><input type="radio" title="No change" name="action-{{ b.UserID }}" value="keep" checked="checked" /></td>
                     <td><input type="radio" title="Refund" name="action-{{ b.UserID }}" value="refund" /></td>

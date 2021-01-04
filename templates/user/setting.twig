@@ -35,7 +35,7 @@
                     <h2><a href="#" class="tooltip" title="These settings allow you to display or hide different categories of information from your profile.">Paranoia Settings</a></h2>
                 </li>
                 <li data-gazelle-section-id="access_settings">
-                    <h2><a href="#" class="tooltip" title="These settings control your login and access details for {{ site_name }}, the site's IRC network, and the tracker.">Access Settings</a></h2>
+                    <h2><a href="#" class="tooltip" title="These settings control your login and access details for {{ constant('SITE_NAME') }}, the site's IRC network, and the tracker.">Access Settings</a></h2>
                 </li>
                 <li data-gazelle-section-id="live_search">
                     <input type="text" id="settings_search" placeholder="Live Search" />
@@ -62,7 +62,7 @@
     } only
 %}
 {% include 'user/setting/personal.twig' %}
-{% include 'user/setting/paranoia.twig' with {'paranoia': paranoia, 'site_name': site_name} only %}
+{% include 'user/setting/paranoia.twig' with {'paranoia': paranoia} only %}
 {% include 'user/setting/access.twig' %}
     </div>
     </form>

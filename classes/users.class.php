@@ -741,18 +741,16 @@ class Users {
     {
         $ResetKey = randomString();
         G::$DB->prepared_query("
-            UPDATE users_info
-            SET
+            UPDATE users_info SET
                 ResetKey = ?,
                 ResetExpires = ?
-            WHERE UserID = ?", $ResetKey, time_plus(60 * 60), $UserID);
-
-        $template = G::$Twig->render('emails/password_reset.twig', [
-            'Username' => $Username,
-            'ResetKey' => $ResetKey,
-            'IP' => $_SERVER['REMOTE_ADDR'],
-            'SITE_NAME' => SITE_NAME,
-            'SITE_URL' => SITE_URL
+            WHERE UserID = ?
+            ", $ResetKey, time_plus(60 * 60), $UserID
+        );
+        $template = G::$Twig->render('email/password_reset.twig', [
+            'username'  => $Username,
+            'reset_key' => $ResetKey,
+            'ipaddr'    => $_SERVER['REMOTE_ADDR'],
         ]);
 
         Misc::send_email($Email, 'Password reset information for ' . SITE_NAME, $template, 'noreply');

@@ -85,7 +85,6 @@ echo $Val->generateJS('userform');
 echo G::$Twig->render('user/setting.twig', [
     'auth'             => $LoggedUser['AuthKey'],
     'avatar'           => $Avatar,
-    'bot_nick'         => BOT_NICK,
     'download_text'    => $DownloadAlt,
     'is_mod'           => check_perms('users_mod'),
     'logged_user'      => $LoggedUser['ID'],
@@ -94,8 +93,6 @@ echo G::$Twig->render('user/setting.twig', [
     'option'           => $options,
     'profile'          => $profile,
     'release_order'    => $User->releaseOrder($options, (new Gazelle\ReleaseType)->extendedList()),
-    'site_name'        => SITE_NAME,
-    'static_host'      => STATIC_SERVER,
     'style_id'         => $StyleID,
     'style_url'        => $StyleURL,
     'stylesheets'      => (new Gazelle\Stylesheet)->list(),
