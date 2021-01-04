@@ -46,14 +46,10 @@ class GenerateInvite extends AbstractAPI {
         $site_url = SITE_URL . "/register.php?invite={$key}";
 
         if (!empty($_GET['email'])) {
-            $body = $this->twig->render('emails/invite.twig', [
-                'InviterName' => $interviewer_name,
-                'InviteKey' => $key,
-                'Email' => $_GET['email'],
-                'SITE_NAME' => SITE_NAME,
-                'SITE_URL' => SITE_URL,
-                'IRC_SERVER' => BOT_SERVER,
-                'DISABLED_CHAN' => BOT_DISABLED_CHAN
+            $body = $this->twig->render('email/invite.twig', [
+                'inviter_name' => $interviewer_name,
+                'inviter_key' => $key,
+                'email' => $_GET['email'],
             ]);
 
             \Misc::send_email($_GET['email'], 'New account confirmation at '.SITE_NAME, $body, 'noreply');

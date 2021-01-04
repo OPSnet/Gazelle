@@ -74,7 +74,7 @@ style="color: gold;">Golden Rules</span> right
 <br /><br />
 
 <div id="golden_rules" class="rule_summary" style="width: 35%; font-weight: bold; display: none; text-align: left;">
-<?= G::$Twig->render('rules/golden.twig', [ 'site_name' => SITE_NAME ]) ?>
+<?= G::$Twig->render('rules/golden.twig', []) ?>
 </div>
 
 </div>

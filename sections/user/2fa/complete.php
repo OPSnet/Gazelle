@@ -12,8 +12,7 @@ $keys = unserialize($DB->scalar("
 ));
 
 echo G::$Twig->render('login/2fa-backup.twig', [
-    'site_name' => SITE_NAME,
-    'keys'      => $keys,
+    'keys' => $keys,
 ]);
 
 View::show_footer();

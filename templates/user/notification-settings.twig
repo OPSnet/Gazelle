@@ -1,32 +1,5 @@
 self::render_push_settings();
 
-{#
-    const OPT_DISABLED = 0;
-    const OPT_POPUP = 1;
-    const OPT_TRADITIONAL = 2;
-    const OPT_PUSH = 3;
-    const OPT_POPUP_PUSH = 4;
-    const OPT_TRADITIONAL_PUSH = 5;
-
-    const NEWS = 'News';
-    const BLOG = 'Blog';
-    const STAFFBLOG = 'StaffBlog';
-    const STAFFPM = 'StaffPM';
-    const INBOX = 'Inbox';
-    const QUOTES = 'Quotes';
-    const SUBSCRIPTIONS = 'Subscriptions';
-    const TORRENTS = 'Torrents';
-    const COLLAGES = 'Collages';
-    const SITEALERTS = 'SiteAlerts';
-    const FORUMALERTS = 'ForumAlerts';
-    const REQUESTALERTS = 'RequestAlerts';
-    const COLLAGEALERTS = 'CollageAlerts';
-    const TORRENTALERTS = 'TorrentAlerts';
-    const GLOBALNOTICE = 'Global';
-    
-    fuck this shit
-#}
-
 {% macro check_popup(name, setting) %}
 {% set checked = not setting or setting in [1, 4] ? " checked=\"checked\"" : "" %}
     <label>
@@ -80,7 +53,7 @@ self::render_push_settings();
     </td>
 </tr>
 <tr>
-    <td class="label tooltip" title="Enabling this will give you a notification when you receive a new private message from a member of {{ site_name }} staff.">
+    <td class="label tooltip" title="Enabling this will give you a notification when you receive a new private message from a member of {{ constant('SITE_NAME') }} staff.">
         <strong>Staff messages</strong>
     </td>
     <td>

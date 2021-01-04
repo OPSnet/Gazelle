@@ -111,36 +111,31 @@ class AutoEnable {
             }
         } else {
             // Prepare email
-            $context = [
-                'SITE_NAME' => SITE_NAME,
-                'TOKEN'     => '',
-            ];
             if ($Status == self::APPROVED) {
-                $template = 'enable_request_accepted.twig';
-                $context['SITE_URL'] = SITE_URL;
+                $subject  = "Your enable request for " . SITE_NAME . " has been approved";
+                $template = 'email/enable_request_accepted.twig';
             } else {
-                $template = 'enable_request_denied.twig';
+                $subject  = "Your enable request for " . SITE_NAME . " has been denied";
+                $template = 'email/enable_request_denied.twig';
             }
 
             foreach ($Results as $Result) {
                 [$Email, $ID, $UserID] = $Result;
                 $UserInfo[] = [$ID, $UserID];
 
-                if ($Status == self::APPROVED) {
+                if ($Status != self::APPROVED) {
+                    $token = '';
+                } else {
                     // Generate token
-                    $context['TOKEN'] = randomString();
+                    $token = randomString();
                     G::$DB->prepared_query("
                         UPDATE users_enable_requests SET
                             Token = ?
                         WHERE ID = ?
-                        ", $context['TOKEN'], $ID
+                        ", $token, $ID
                     );
                 }
-
-                // Send email
-                $Subject = "Your enable request for " . SITE_NAME . " has been "
-                    . ($Status == self::APPROVED ? 'approved' : 'denied');
-                Misc::send_email($Email, $Subject, G::$Twig->render("emails/".$template, $context), 'noreply');
+                Misc::send_email($Email, $subject, G::$Twig->render($template, ['token' => $token]), 'noreply');
             }
         }
 

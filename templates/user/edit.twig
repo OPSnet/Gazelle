@@ -39,7 +39,7 @@
                     <h2><a href="#" class="tooltip" title="These settings allow you to display or hide different categories of information from your profile.">Paranoia Settings</a></h2>
                 </li>
                 <li data-gazelle-section-id="access_settings">
-                    <h2><a href="#" class="tooltip" title="These settings control your login and access details for {{ site_name }}, the site's IRC network, and the tracker.">Access Settings</a></h2>
+                    <h2><a href="#" class="tooltip" title="These settings control your login and access details for {{ constant('SITE_NAME') }}, the site's IRC network, and the tracker.">Access Settings</a></h2>
                 </li>
                 <li data-gazelle-section-id="live_search">
                     <input type="text" id="settings_search" placeholder="Live Search" />
@@ -63,7 +63,7 @@
                 </td>
             </tr>
             <tr id="site_style_tr">
-                <td class="label tooltip" title="Selecting a stylesheet will change {{ site_name }}'s visual appearance."><strong>Stylesheet</strong></td>
+                <td class="label tooltip" title="Selecting a stylesheet will change {{ constant('SITE_NAME') }}'s visual appearance."><strong>Stylesheet</strong></td>
                 <td>
                     <select name="stylesheet" id="stylesheet">
 {% for sheet in stylesheets %}
@@ -328,7 +328,7 @@
                 </td>
             </tr>
             <tr id="comm_mature_tr">
-                <td class="label tooltip_interactive" title="{{ site_name }} has very flexible &lt;a href=&quot;wiki.php?action=article&amp;amp;id=1063&quot;&gt;mature content policies&lt;/a&gt; for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath &lt;code&gt;[mature]&lt;/code&gt; tags. If you choose not to display mature content, all content tagged with &lt;code&gt;[mature]&lt;/code&gt; tags will be hidden from you." data-title-plain="{{ site_name }} has very flexible mature content policies for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath [mature] tags. If you choose not to display mature content, all content tagged with [mature] tags will be hidden from you."><strong>Mature content (forums, comments, profiles)</strong></td>
+                <td class="label tooltip_interactive" title="{{ constant('SITE_NAME') }} has very flexible &lt;a href=&quot;wiki.php?action=article&amp;amp;id=1063&quot;&gt;mature content policies&lt;/a&gt; for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath &lt;code&gt;[mature]&lt;/code&gt; tags. If you choose not to display mature content, all content tagged with &lt;code&gt;[mature]&lt;/code&gt; tags will be hidden from you." data-title-plain="{{ constant('SITE_NAME') }} has very flexible mature content policies for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath [mature] tags. If you choose not to display mature content, all content tagged with [mature] tags will be hidden from you."><strong>Mature content (forums, comments, profiles)</strong></td>
                 <td>
                     <input type="checkbox" name="enablematurecontent" id="enablematurecontent"{{ _self.checked(option.EnableMatureContent) }} />
                     <label for="enablematurecontent">Display mature content</label>
@@ -617,7 +617,7 @@
                 </td>
             </tr>
             <tr id="para_invited_tr">
-                <td class="label tooltip" title="This option controls the visibility of your {{ site_name }} invitees."><strong>Invitees</strong></td>
+                <td class="label tooltip" title="This option controls the visibility of your {{ constant('SITE_NAME') }} invitees."><strong>Invitees</strong></td>
                 <td>
                     <label><input type="checkbox" name="p_invitedcount"{{ _self.checked(paranoia.invited) }} /> Show count</label>
                 </td>
@@ -664,7 +664,7 @@
                 </td>
             </tr>
             <tr id="acc_email_tr">
-                <td class="label tooltip" title="This is the email address you want associated with your {{ site_name }} account. It will be used if you forget your password or if an alert needs to be sent to you."><strong>Email address</strong></td>
+                <td class="label tooltip" title="This is the email address you want associated with your {{ constant('SITE_NAME') }} account. It will be used if you forget your password or if an alert needs to be sent to you."><strong>Email address</strong></td>
                 <td>
                     <div class="field_div">
                         <input type="email" size="50" name="email" id="email" value="{{ user.email }}" />

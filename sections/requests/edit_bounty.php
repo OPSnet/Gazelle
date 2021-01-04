@@ -15,7 +15,6 @@ if (!$bounty) {
 }
 
 foreach ($bounty as &$b) {
-    $b['user_name']   = Users::format_username($b['UserID'], true, true, true, true);
     $b['bounty_size'] = Format::get_size($b['Bounty']);
     unset($b); // because looping by reference
 }

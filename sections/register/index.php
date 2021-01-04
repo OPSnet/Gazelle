@@ -57,11 +57,9 @@ if (!empty($_REQUEST['confirm'])) {
                 Misc::send_email(
                     $user->email(),
                     'New account confirmation at '.SITE_NAME,
-                    G::$Twig->render('emails/new_registration.twig', [
+                    G::$Twig->render('email/new_registration.twig', [
                         'username'     => $username,
                         'announce_key' => $user->announceKey(),
-                        'site_name'    => SITE_NAME,
-                        'site_url'     => SITE_URL
                     ]),
                     'noreply'
                 );
@@ -70,8 +68,6 @@ if (!empty($_REQUEST['confirm'])) {
                     G::$Twig->render('user/welcome.twig', [
                         'username'     => $username,
                         'announce_key' => $user->announceKey(),
-                        'site_name'    => SITE_NAME,
-                        'site_url'     => SITE_URL
                     ])
                 );
                 Tracker::update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);

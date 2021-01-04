@@ -180,7 +180,6 @@ class Donation extends \Gazelle\Base {
                 "You have Reached Special Donor Rank #1! You've Earned: One User Pick. Details Inside.",
                 $this->twig->render('donation/special-rank-1.twig', [
                    'forum_url'   => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                   'site_name'   => SITE_NAME,
                    'staffpm_url' => SITE_URL . '/staffpm.php',
                 ])
             );
@@ -192,7 +191,6 @@ class Donation extends \Gazelle\Base {
                 "You have Reached Special Donor Rank #2! You've Earned: The Double-Avatar. Details Inside.",
                 $this->twig->render('donation/special-rank-2.twig', [
                    'forum_url' => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
-                   'site_name' => SITE_NAME,
                 ])
             );
             $SpecialRank = 2;
@@ -204,7 +202,6 @@ class Donation extends \Gazelle\Base {
                 $this->twig->render('donation/special-rank-3.twig', [
                    'forum_url'      => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839790#post4839790',
                    'forum_gold_url' => SITE_URL . '/forums.php?action=viewthread&threadid=178640&postid=4839789#post4839789',
-                   'site_name'      => SITE_NAME,
                 ])
             );
             $SpecialRank = 3;
