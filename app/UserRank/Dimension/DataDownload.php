@@ -10,12 +10,11 @@ class DataDownload extends \Gazelle\UserRank\AbstractUserRank {
 
     public function selector(): string {
         return "
-            SELECT DISTINCT uls.Downloaded AS n
+            SELECT uls.Downloaded AS n
             FROM users_main um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             WHERE um.Enabled = '1'
                 AND uls.Downloaded > 0
-            ORDER BY 1
-            ";
+        ";
     }
 }
