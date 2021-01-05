@@ -40,7 +40,13 @@
 </select>
     {% endif %}
 {% endfor %}
-
+<br /><br />
+Sort by <select name="viewby">
+    <option value="{{ constant('\\Gazelle\\Seedbox::VIEW_BY_NAME') }}"{{
+        viewby == constant('\\Gazelle\\Seedbox::VIEW_BY_NAME') ? ' selected="selected"' : '' }}>release name</option>
+    <option value="{{ constant('\\Gazelle\\Seedbox::VIEW_BY_PATH') }}"{{
+        viewby == constant('\\Gazelle\\Seedbox::VIEW_BY_PATH') ? ' selected="selected"' : '' }}>folder name</option>
+</select>
 </div>
 <br />
 <input type="submit" value="View seeds" />

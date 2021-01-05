@@ -1,49 +1,46 @@
 <?php
-
 use Gazelle\Util\Paginator;
 
-if (!isset($_POST['action'])) {
-    $userId = (int)($_GET['userid'] ?? $LoggedUser['ID']);
-    if (!$userId) {
-        error(404);
-    }
-    if ($LoggedUser['ID'] != $userId && !check_perms('users_view_ips')) {
-        error(403);
-    }
-} else {
+if (isset($_POST['action'])) {
     $userId = (int)$_POST['userid'];
-    if (!$userId) {
-        error(404);
-    }
+} else {
+    $userId = (int)($_GET['userid'] ?? $LoggedUser['ID']);
 }
-
+if ($LoggedUser['ID'] != $userId && !check_perms('users_view_ips')) {
+    error(403);
+}
 $user = (new Gazelle\Manager\User)->findById($userId);
-if (!$userId) {
+if (!$user) {
     error(404);
 }
 
-$seedbox = new Gazelle\Seedbox($userId);
-if (isset($_POST['action'])) {
-    $source = $_POST['source'];
-    $target = $_POST['target'];
-    $union = trim($_POST['view']) === 'union' ? 'union' : 'exclude';
-    if ($source && $source === $target) {
-        $err = "Cannot compare a location with itself!";
-    }
-    header("Location:" . $_SERVER['REQUEST_URI'] . "&source={$source}&target={$target}&view={$union}&page=1");
-    exit;
-}
+$union = trim($_REQUEST['view'] ?? 'union') === 'union';
+$source = ($_REQUEST['source'] ?? null);
+$target = ($_REQUEST['target'] ?? null);
 
-if (isset($_GET['source']) && isset($_GET['target'])) {
-    $source = $_GET['source'];
-    $target = $_GET['target'];
-    $union = trim($_GET['view']) === 'union' ? true : false;
+$seedbox = new Gazelle\Seedbox($userId);
+if (isset($_POST['action']) || isset($_REQUEST['viewby'])) {
+    if (is_null($source) || is_null($target) || $source === $target) {
+        error("Invalid comparison between two seedbox instances");
+    }
     $seedbox->setSource($source)
         ->setTarget($target)
-        ->setUnion($union);
+        ->setUnion($union ? 'union' : 'exclude');
+    if (isset($_REQUEST['viewby']) && $_REQUEST['viewby'] == Gazelle\Seedbox::VIEW_BY_PATH) {
+        $seedbox->setViewByPath();
+    } else {
+        $seedbox->setViewByName();
+    }
+    // this seems hackish
+    if (isset($_POST['action'])) {
+        $_SERVER['REQUEST_URI'] .= "&source={$_POST['source']}&target={$_POST['target']}&viewby={$_POST['viewby']}";
+    }
 }
 
+$paginator = new Paginator(TORRENTS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
+$paginator->setTotal($seedbox->total());
 View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
+
 ?>
 <div class="thin">
     <div class="header">
@@ -53,25 +50,24 @@ View::show_header($user->username() . ' &rsaquo; Seedboxes &rsaquo; View');
             <a href="user.php?action=seedbox-view&amp;userid=<?= $userId ?>" class="brackets">View</a>
         </div>
     </div>
-<?php if (isset($err)) { ?>
-<div class="pad box">
-    <?= $err ?>
-</div>
 <?php
-} elseif (isset($source) && isset($target)) {
-    $paginator = new Paginator(TORRENTS_PER_PAGE, (int)$_GET['page']);
-    $list = $seedbox->torrentList($paginator, new Gazelle\Manager\Torrent, new Gazelle\Manager\TorrentLabel);
 
+if ($source && $target) {
     echo $paginator->linkbox();
 
     echo G::$Twig->render('seedbox/report.twig', [
-        'list'   => $list,
+        'list' => $seedbox->torrentList(
+            $paginator->limit(),
+            $paginator->offset(),
+            new Gazelle\Manager\Torrent,
+            (new Gazelle\Manager\TorrentLabel)->showFlags(false)->showEdition(false)
+        ),
         'mode'   => $union ? 'union' : 'exclude',
         'source' => $seedbox->name($source),
         'target' => $seedbox->name($target),
     ]);
 
-    echo  $paginator->linkbox();
+    echo $paginator->linkbox();
 }
 
 echo G::$Twig->render('seedbox/view.twig', [
@@ -81,6 +77,7 @@ echo G::$Twig->render('seedbox/view.twig', [
     'source' => $source,
     'target' => $target,
     'userid' => $userId,
+    'viewby' => $seedbox->viewBy(),
 ]);
 ?>
 </div>

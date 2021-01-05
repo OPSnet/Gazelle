@@ -2,9 +2,9 @@
 {% for t in list %}
     {% if loop.first %}
     <h3>Seeds on {{ source }} that are {{ mode == 'union' ? 'also' : 'not' }} on {{ target }}</h3>
-    <ul>
+    <ul class="stats nobullet">
     {% endif %}
-        <li>{{ t.artist|raw }} - {{ t.name|raw }}</li>
+        <li>{{ t.artist|raw }} - {{ t.name|raw }}<br />{{ t.folder }}</li>
     {% if loop.last %}
     </ul>
     {% endif %}

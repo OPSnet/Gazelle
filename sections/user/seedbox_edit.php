@@ -65,7 +65,7 @@ if (isset($_POST['mode'])) {
             $remove = [];
             foreach ($rm as $id) {
                 if (isset($rmid["rmid-$id"])) {
-                    $remove[] = (int)$rmid["rmid-$id"];
+                    $remove[] = $rmid["rmid-$id"];
                 }
             }
             $seedbox->removeNames($remove);

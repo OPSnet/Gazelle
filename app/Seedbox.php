@@ -25,13 +25,24 @@ class Seedbox extends Base {
     /** @var int */
     protected $target;
 
+    /** @var int */
+    protected $viewBy;
+
     protected const SUMMARY_KEY = 'seedbox_summary_';
+
+    public const VIEW_BY_NAME = 0;
+    public const VIEW_BY_PATH = 1;
 
     public function __construct(int $userId) {
         parent::__construct();
         $this->userId = $userId;
         $this->hashid = new \Hashids\Hashids(SEEDBOX_SALT);
         $this->build();
+        $this->viewBy = self::VIEW_BY_NAME;
+    }
+
+    public function viewBy() {
+        return $this->viewBy;
     }
 
     public function setUnion(bool $isUnion) {
@@ -46,6 +57,16 @@ class Seedbox extends Base {
 
     public function setTarget(string $target) {
         $this->target = $this->hashid->decode($target)[0];
+        return $this;
+    }
+
+    public function setViewByName() {
+        $this->viewBy = self::VIEW_BY_NAME;
+        return $this;
+    }
+
+    public function setViewByPath() {
+        $this->viewBy = self::VIEW_BY_PATH;
         return $this;
     }
 
@@ -77,6 +98,37 @@ class Seedbox extends Base {
         return base64_encode(hash('sha256', implode('/', [$ipv4addr, $useragent, SEEDBOX_SALT]), true));
     }
 
+    protected function buildFrom(): string {
+        $has = $this->isUnion ? 'IN' : 'NOT IN';
+        return "FROM user_seedbox sx
+            INNER JOIN xbt_files_users xfu ON (
+                    xfu.ip = inet_ntoa(sx.ipaddr)
+                AND xfu.useragent = sx.useragent
+                AND xfu.active = 1
+                AND xfu.uid = ?
+            )
+            INNER JOIN torrents t ON (t.ID = xfu.fid)
+            INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
+            WHERE sx.user_seedbox_id = ?
+                AND xfu.fid $has (
+                    SELECT xfu2.fid
+                    FROM user_seedbox sx2
+                    INNER JOIN xbt_files_users xfu2 ON (
+                            xfu2.ip = inet_ntoa(sx2.ipaddr)
+                        AND xfu2.useragent = sx2.useragent
+                        AND xfu2.active = 1
+                        AND xfu2.uid = ?)
+                    WHERE sx2.user_seedbox_id = ?
+                )";
+    }
+
+    public function total(): int {
+        return $this->db->scalar("
+            SELECT count(*) " . $this->buildFrom(),
+            $this->userId, $this->source, $this->userId, $this->target
+        );
+    }
+
     /**
      * Get a page of torrents. Source and target must be set.
      *
@@ -85,59 +137,28 @@ class Seedbox extends Base {
      * @param Gazelle\Manager\TorrentLAbel to decorate the release details
      * @return array list of torrent IDs
      */
-    public function torrentList(Util\Paginator $paginator, Manager\Torrent $torMan, Manager\TorrentLabel $labelMan): array {
-        $key = implode('_', [
-            'seedbox',
-            $this->userId,
-            $this->isUnion ? 'I' : 'E',
-            $this->source,
-            $this->target
-        ]);
-        if (($info = $this->cache->get_value($key)) === false) {
-            if ($this->isUnion) {
-                $has = 'IN';
-            } else {
-                $has = 'NOT IN';
-            }
-            $from = "
-                FROM user_seedbox sx
-                INNER JOIN xbt_files_users xfu ON (xfu.ip = inet_ntoa(sx.ipaddr) AND xfu.useragent = sx.useragent AND xfu.uid = ?)
-                INNER JOIN torrents t ON (t.ID = xfu.fid)
-                INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)
-                WHERE sx.user_seedbox_id = ?
-                  AND xfu.fid $has (
-                    SELECT xfu2.fid
-                    FROM user_seedbox sx2
-                    INNER JOIN xbt_files_users xfu2 ON (xfu2.ip = inet_ntoa(sx2.ipaddr) AND xfu2.useragent = sx2.useragent AND xfu2.uid = ?)
-                    WHERE sx2.user_seedbox_id = ?
-                  )
-            ";
-            $paginator->setTotal(
-                $x = $this->db->scalar("
-                    SELECT count(*) $from
-                    ", $this->userId, $this->source, $this->userId, $this->target
-                )
-            );
-            $this->db->prepared_query("
-                SELECT xfu.fid, tg.Name, tg.Year, tg.RecordLabel,
-                    t.GroupID, tg.Name, t.RemasterTitle, t.RemasterRecordLabel,
-                    t.Format, t.Encoding, t.Media, t.HasLog, t.HasLogDB, t.LogScore, t.HasCue, t.Scene
-                    $from
-                    ORDER BY tg.Name
-                    LIMIT ? OFFSET ?
-                ", $this->userId, $this->source, $this->userId, $this->target,
-                    $paginator->limit(), $paginator->offset()
-            );
-            $info = $this->db->to_array('fid', MYSQLI_ASSOC, false);
-            $this->cache->cache_value($key, $info, 3);
-        }
+    public function torrentList(int $limit, int $offset, Manager\Torrent $torMan, Manager\TorrentLabel $labelMan): array {
+        $from = $this->buildFrom();
+        $orderBy = ['tg.Name', 't.FilePath'][$this->viewBy];
+        $this->db->prepared_query("
+            SELECT xfu.fid, tg.Name, tg.Year, tg.RecordLabel,
+                t.GroupID, tg.Name, t.FilePath, t.RemasterTitle, t.RemasterRecordLabel,
+                t.Format, t.Encoding, t.Media, t.HasLog, t.HasLogDB, t.LogScore, t.HasCue, t.Scene
+            $from
+            ORDER BY $orderBy
+            LIMIT ? OFFSET ?
+            ", $this->userId, $this->source, $this->userId, $this->target,
+                $limit, $offset
+        );
+        $info = $this->db->to_array('fid', MYSQLI_ASSOC, false);
 
-        $labelMan->showFlags(false)->showEdition(true);
         $list = [];
         foreach ($info as $tid => $details) {
             $labelMan->load($details);
             $list[] = [
                 'id' => $tid,
+                'folder' => $details['FilePath'],
+                'sortname' => $details['Name'],
                 'artist' => $torMan
                     ->setGroupId($details['GroupID'])
                     ->setTorrentId($tid)
@@ -149,14 +170,21 @@ class Seedbox extends Base {
                     $labelMan->edition(),
                     $labelMan->label()
                 ),
-                'sortname' => $details['Name'],
             ];
         }
-        usort($list, function ($x, $y) {
-            return $x['sortname'] == $y['sortname']
-                ? $x['id'] <=> $y['id']
-                : $x['sortname'] > $y['sortname'];
-        });
+        if ($this->viewBy === self::VIEW_BY_NAME) {
+            usort($list, function ($x, $y) {
+                return $x['sortname'] === $y['sortname']
+                    ? $x['id'] <=> $y['id']
+                    : $x['sortname'] > $y['sortname'];
+            });
+        } else {
+            usort($list, function ($x, $y) {
+                return $x['folder'] === $y['folder']
+                    ? $x['id'] <=> $y['id']
+                    : $x['folder'] > $y['folder'];
+            });
+        }
         return $list;
     }
 
@@ -216,7 +244,7 @@ class Seedbox extends Base {
             DELETE FROM user_seedbox
             WHERE user_id = ?
                 AND user_seedbox_id in (" . placeholders($remove) . ")
-            ", $this->userId, ...array_map(function ($id) use ($h) {return $h->decode($id);}, $remove)
+            ", $this->userId, ...array_map(function ($id) use ($h) {return $h->decode($id)[0];}, $remove)
         );
         $n = $this->db->affected_rows();
         $this->flushCache()->build();
