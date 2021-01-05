@@ -18,6 +18,7 @@ class ForumSearch extends Base {
     protected $searchText = '';
     protected $authorName = '';
     protected $authorId = 0;
+    protected $posterId;
     protected $page = 0;
     protected $threadId;
     protected $linkbox;
@@ -53,6 +54,14 @@ class ForumSearch extends Base {
 
     public function threadId(): int {
         return $this->threadId;
+    }
+
+    /**
+     * Set poster Id for posts search
+     */
+    public function setPosterId(int $posterId) {
+        $this->posterId = $posterId;
+        return $this;
     }
 
     /**
@@ -281,6 +290,21 @@ class ForumSearch extends Base {
         return [$cond, $args];
     }
 
+    protected function configurePostHistory(): array {
+        [$cond, $args] = $this->configure();
+        $from = "FROM forums_posts AS p
+            LEFT JOIN forums_topics AS t ON (t.ID = p.TopicID)
+            LEFT JOIN forums AS f ON (f.ID = t.ForumID)";
+        $cond[] = 'p.AuthorID = ?';
+        $args[] = $this->posterId;
+        if ($this->showUnread) {
+            $from .= "LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)\n";
+            $cond[] = "(t.IsLocked = '0' OR t.IsSticky = '1') AND (flrt.PostID < t.LastPostID OR flrt.PostID IS NULL)";
+            array_unshift($args, $this->posterId);
+        }
+        return [$from, $cond, $args];
+    }
+
     /**
      * Get the title of the thread within which the user is searching,
      * taking into account whether they are allowed to search in threads (permitted/forbidden)
@@ -355,21 +379,6 @@ class ForumSearch extends Base {
         }
         $this->db->prepared_query($sql, ...$args);
         return $this->db->to_array(false, MYSQLI_NUM, false);
-    }
-
-    protected function configurePostHistory(): array {
-        [$cond, $args] = $this->configure();
-        $from = "FROM forums_posts AS p
-            LEFT JOIN forums_topics AS t ON (t.ID = p.TopicID)
-            LEFT JOIN forums AS f ON (f.ID = t.ForumID)";
-        $cond[] = 'p.AuthorID = ?';
-        $args[] = $this->user->id();
-        if ($this->showUnread) {
-            $from .= "LEFT JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = t.ID AND flrt.UserID = ?)\n";
-            $cond[] = "(t.IsLocked = '0' OR t.IsSticky = '1') AND (flrt.PostID < t.LastPostID OR flrt.PostID IS NULL)";
-            array_unshift($args, $this->user->id());
-        }
-        return [$from, $cond, $args];
     }
 
     public function postHistoryTotal(): int {
