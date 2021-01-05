@@ -15,12 +15,12 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Inject the global $Debug variable
+     * Trace notification results on/off
      *
-     * @param \Debug $debug instance
+     * @param bool debug on/off
      */
-    public function setDebug(\Debug $debug) {
-        $this->debug = &$debug;
+    public function setDebug(int $debug) {
+        $this->debug = $debug;
         return $this;
     }
 
@@ -63,7 +63,7 @@ class Upload extends \Gazelle\Base {
         } else {
             $this->cond[] = (empty($guestArtist) ? '' : "unf.ExcludeVA = '0' AND ") . "unf.Artists REGEXP ?";
         }
-        $this->args[] = '(?:^$|\|(?:' . implode('|', array_merge($mainName, $guestName)) . ')\|)';
+        $this->args[] = '(?:^$|\\\\|(?:' . implode('|', array_merge($mainName, $guestName)) . ')\\\\|)';
         return $this;
     }
 
@@ -80,14 +80,14 @@ class Upload extends \Gazelle\Base {
             }
             $this->cond[] = "unf.Tags REGEXP ?";
             $this->cond[] = "(unf.NotTags = '' OR NOT unf.NotTags REGEXP ?)";
-            $pattern =  '\|(?:' . implode('|', $escaped) . ')\|';
+            $pattern =  '\\\\|(?:' . implode('|', $escaped) . ')\\\\|';
             $this->args = array_merge($this->args, ['(?:^$|' . $pattern . ')', $pattern]);
         }
         return $this;
     }
 
     /**
-     * Add a release category that triggers a notitification
+     * Add a release category that triggers a notification
      *
      * @param string category
      */
@@ -109,11 +109,11 @@ class Upload extends \Gazelle\Base {
             ", $uploaderId
         )) ?: [];
         if (in_array('notifications', $paranoia)) {
-            $this->cond[] = "unf.UserID != ?)";
+            $this->cond[] = "unf.UserID != ?";
             $this->args[] = $this->userId;
         } else {
             $this->cond[] = "(unf.Users REGEXP ? OR unf.UserID != ?)";
-            $this->args[] = '(?:^$|\|' . $uploaderId . '\|)';
+            $this->args[] = '(?:^$|\\\\|' . $uploaderId . '\\\\|)';
             $this->args[] = $this->userId;
         }
         return $this;
@@ -131,12 +131,12 @@ class Upload extends \Gazelle\Base {
             return $this;
         }
         $this->cond[] = "unf.$column REGEXP ?";
-        $this->args[] = '(?:^$|\|' . $this->escape($dimension) . '\|)';
+        $this->args[] = '(?:^$|\\\\|' . $this->escape($dimension) . '\\\\|)';
         return $this;
     }
 
     /**
-     * Add an optional release type that triggers a notitification
+     * Add an optional release type that triggers a notification
      *
      * @param string release type (Album, EP, ...)
      */
@@ -145,7 +145,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add an optional format that triggers a notitification
+     * Add an optional format that triggers a notification
      *
      * @param string format
      */
@@ -154,7 +154,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add an optional encoding that triggers a notitification
+     * Add an optional encoding that triggers a notification
      *
      * @param string encoding
      */
@@ -163,7 +163,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add an optional media that triggers a notitification
+     * Add an optional media that triggers a notification
      *
      * @param string media
      */
@@ -218,39 +218,48 @@ class Upload extends \Gazelle\Base {
      */
     public function trigger(int $groupId, int $torrentId, \Feed $feed, string $item): int {
         $results = $this->lookup();
-        if (!$results) {
-            return 0;
-        }
-        $args = [];
-        foreach ($results as $user) {
-            [$filterId, $userId, $passkey] = $user;
-            $args = array_merge($args, [$groupId, $torrentId, $userId, $filterId]);
-            $feed->populate("torrents_notify_$passkey", $item);
-            $feed->populate("torrents_notify_{$filterId}_$passkey", $item);
-            $this->cache->delete_value("notifications_new_$userId");
-        }
-        if ($this->debug) {
-            $this->debug->set_flag(sprintf('upload: notification complete: (%d users)',
-                count($results)
-            ));
-        }
-        $this->db->prepared_query("
-            INSERT IGNORE INTO users_notify_torrents (GroupID, TorrentID, UserID, FilterID)
-            VALUES " . implode(', ', array_fill(0, count($results), '(?, ?, ?, ?)')),
-            ...$args
+        $nr = count($results);
+        $file = $this->debug ? (TMPDIR . "/notification.$torrentId") : '/dev/null';
+        $out = fopen($file, "a");
+        fprintf($out, "g=$groupId t=$torrentId results=$nr\n"
+            . $this->sql()
+            . print_r($this->args(), true)
         );
-        return count($results);
+        if ($nr === 0) {
+            fclose($out);
+            return $nr;
+        }
+        $n = 0;
+        foreach ($results as $notify) {
+            fprintf($out, "hit f={$notify['filter_id']} u={$notify['user_id']}\n");
+            $this->db->prepared_query("
+                INSERT IGNORE INTO users_notify_torrents
+                       (GroupID, TorrentID, UserID, FilterID)
+                VALUES (?,       ?,         ?,      ?)
+                ", $groupId, $torrentId, $notify['user_id'], $notify['filter_id']
+            );
+            $n += $this->db->affected_rows();
+            $feed->populate("torrents_notify_{$notify['passkey']}", $item);
+            $feed->populate("torrents_notify_{$notify['filter_id']}_{$notify['passkey']}", $item);
+            $this->cache->delete_value("notifications_new_{$notify['filter_id']}");
+        }
+        fprintf($out, "inserted=%d\n", $n);
+        fclose($out);
+        return $n;
     }
 
     /* Generate the SQL notification query (handy for debugging)
+     * More than one notification filter for a user may be triggered,
+     * so we aggregate to only return the oldest filter id.
      *
      * @return SQL command with placeholders
      */
     public function sql(): string {
-        return "SELECT unf.ID AS filter_id, unf.UserID AS user_id, um.torrent_pass AS passkey
+        return "SELECT min(unf.ID) AS filter_id, unf.UserID AS user_id, um.torrent_pass AS passkey
             FROM users_notify_filters AS unf
             INNER JOIN users_main AS um ON (um.ID = unf.UserID)
-            WHERE " . implode(' AND ', $this->cond);
+            WHERE " . implode(" AND ", $this->cond) . "
+            GROUP BY unf.UserID, um.torrent_pass";
     }
 
     /**

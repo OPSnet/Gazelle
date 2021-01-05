@@ -99,6 +99,7 @@ define('TRACKER_REPORTKEY', ''); // Must be 32 characters and match report_passw
 define('CRYPT_HASH_PREFIX', '$2y$07$');
 define('DEBUG_MODE', false); //Set to false if you dont want everyone to see debug information, can be overriden with 'site_debug'
 define('DEBUG_WARNINGS', true); //Set to true if you want to see PHP warnings in the footer
+define('DEBUG_UPLOAD_NOTIFICATION', false); // Set to true to dump notification trigger results
 define('SHOW_PUBLIC_INDEX', true); // Show the public index.php landing page
 define('OPEN_REGISTRATION', true); //Set to false to disable open registration, true to allow anyone to register
 define('OPEN_EXTERNAL_REFERRALS', false); //Set to false to disable external tracker referrals, true to allow them

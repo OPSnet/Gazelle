@@ -12,17 +12,13 @@ use OrpheusNET\BencodeTorrent\BencodeTorrent;
 
 ini_set('max_file_uploads', 100);
 define('MAX_FILENAME_LENGTH', 255);
+define('QUERY_EXCEPTION', true); // Shut up debugging
 
 enforce_login();
 
 if (!defined('AJAX')) {
     authorize();
 }
-
-$Validate = new Gazelle\Util\Validator;
-$Feed = new Feed;
-
-define('QUERY_EXCEPTION', true); // Shut up debugging
 
 //******************************************************************************//
 //--------------- Set $Properties array ----------------------------------------//
@@ -92,6 +88,7 @@ if (!empty($_POST['requestid'])) {
 $isMusicUpload = ($Type === 'Music');
 
 // common to all types
+$Validate = new Gazelle\Util\Validator;
 $Validate->setFields([
     ['type', '1', 'inarray', 'Please select a valid type.', ['inarray' => array_keys($Categories)]],
     ['release_desc', '0','string','The release description you entered is too long.', ['maxlength'=>1000000]],
@@ -720,11 +717,11 @@ Tracker::update_tracker('add_torrent', ['id' => $TorrentID, 'info_hash' => rawur
 $Debug->set_flag('upload: ocelot updated');
 
 // Prevent deletion of this torrent until the rest of the upload process is done
-// (expire the key after 10 minutes to prevent locking it for too long in case there's a fatal error below)
-$Cache->cache_value("torrent_{$TorrentID}_lock", true, 600);
+// (expire the key after 5 minutes to prevent locking it for too long in case there's a fatal error below)
+$Cache->cache_value("torrent_{$TorrentID}_lock", true, 300);
 
+$torMan = new Gazelle\Manager\Torrent;
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
-    $torMan = new Gazelle\Manager\Torrent;
     $torMan->flushLatestUploads(5);
 }
 
@@ -943,6 +940,7 @@ if (!$IsNewGroup) {
 }
 
 // For RSS
+$Feed = new Feed;
 $Item = $Feed->item(
     $Title,
     Text::strip_bbcode($Properties['GroupDescription']),
@@ -955,19 +953,16 @@ $Item = $Feed->item(
 // Notifications
 $notification = new Gazelle\Notification\Upload($LoggedUser['ID']);
 
-// By now the release is in the database, so we can read it back to get the artists
-$torMan = new Gazelle\Manager\Torrent;
-$torMan->setGroupId($GroupID)->setTorrentId($TorrentID);
-
 $notification->addFormat($Properties['Format'])
     ->addEncodings($Properties['Encoding'])
     ->addMedia($Properties['Media'])
     ->addYear($Properties['Year'], $Properties['RemasterYear'])
-    ->addArtists($torMan->artistRole())
+    ->addArtists($torMan->setGroupId($GroupID)->artistRole())
     ->addTags($tagList)
     ->addCategory($Type)
     ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
     ->addUser($LoggedUser['ID'])
+    ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
     ->trigger($GroupID, $TorrentID, $Feed, $Item);
 
 // RSS for bookmarks
