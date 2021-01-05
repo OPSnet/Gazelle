@@ -15,12 +15,12 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Inject the global $Debug variable
+     * Trace notification results on/off
      *
-     * @param \Debug $debug instance
+     * @param bool debug on/off
      */
-    public function setDebug(\Debug $debug) {
-        $this->debug = &$debug;
+    public function setDebug(int $debug) {
+        $this->debug = $debug;
         return $this;
     }
 
@@ -87,7 +87,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add a release category that triggers a notitification
+     * Add a release category that triggers a notification
      *
      * @param string category
      */
@@ -136,7 +136,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add an optional release type that triggers a notitification
+     * Add an optional release type that triggers a notification
      *
      * @param string release type (Album, EP, ...)
      */
@@ -145,7 +145,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add an optional format that triggers a notitification
+     * Add an optional format that triggers a notification
      *
      * @param string format
      */
@@ -154,7 +154,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add an optional encoding that triggers a notitification
+     * Add an optional encoding that triggers a notification
      *
      * @param string encoding
      */
@@ -163,7 +163,7 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Add an optional media that triggers a notitification
+     * Add an optional media that triggers a notification
      *
      * @param string media
      */
@@ -218,28 +218,33 @@ class Upload extends \Gazelle\Base {
      */
     public function trigger(int $groupId, int $torrentId, \Feed $feed, string $item): int {
         $results = $this->lookup();
-        if (!$results) {
-            return 0;
+        $nr = count($results);
+        $file = $this->debug ? (TMPDIR . "/notification.$torrentId") : '/dev/null';
+        $out = fopen($file, "a");
+        fprintf($out, "g=$groupId t=$torrentId results=$nr\n"
+            . $this->sql()
+            . print_r($this->args(), true)
+        );
+        if ($nr === 0) {
+            fclose($out);
+            return $nr;
         }
         $args = [];
-        foreach ($results as $user) {
-            [$filterId, $userId, $passkey] = $user;
-            $args = array_merge($args, [$groupId, $torrentId, $userId, $filterId]);
-            $feed->populate("torrents_notify_$passkey", $item);
-            $feed->populate("torrents_notify_{$filterId}_$passkey", $item);
-            $this->cache->delete_value("notifications_new_$userId");
-        }
-        if ($this->debug) {
-            $this->debug->set_flag(sprintf('upload: notification complete: (%d users)',
-                count($results)
-            ));
+        foreach ($results as $notify) {
+            fprintf($out, "hit f={$notify['filter_id']} u={$notify['user_id']}\n");
+            $args = array_merge($args, [$groupId, $torrentId, $notify['user_id'], $notify['filter_id']]);
+            $feed->populate("torrents_notify_{$notify['passkey']}", $item);
+            $feed->populate("torrents_notify_{$notify['filter_id']}_{$notify['passkey']}", $item);
+            $this->cache->delete_value("notifications_new_{$notify['filter_id']}");
         }
         $this->db->prepared_query("
             INSERT IGNORE INTO users_notify_torrents (GroupID, TorrentID, UserID, FilterID)
             VALUES " . implode(', ', array_fill(0, count($results), '(?, ?, ?, ?)')),
             ...$args
         );
-        return count($results);
+        fprintf($out, "inserted=%d\n", $this->db->affected_rows());
+        fclose($out);
+        return $nr;
     }
 
     /* Generate the SQL notification query (handy for debugging)

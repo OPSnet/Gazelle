@@ -963,6 +963,7 @@ $notification->addFormat($Properties['Format'])
     ->addCategory($Type)
     ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
     ->addUser($LoggedUser['ID'])
+    ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
     ->trigger($GroupID, $TorrentID, $Feed, $Item);
 
 // RSS for bookmarks
