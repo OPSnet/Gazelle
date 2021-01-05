@@ -10,12 +10,12 @@ class DataUpload extends \Gazelle\UserRank\AbstractUserRank {
 
     public function selector(): string {
         return "
-            SELECT DISTINCT greatest(uls.Uploaded - " . STARTING_UPLOAD . ", 0) AS n
+            SELECT greatest(uls.Uploaded - " . STARTING_UPLOAD . ", 0) AS n
             FROM users_main um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             WHERE um.Enabled = '1'
                 AND uls.Uploaded > " . STARTING_UPLOAD . "
             ORDER BY 1
-            ";
+        ";
     }
 }
