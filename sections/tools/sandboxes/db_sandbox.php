@@ -49,35 +49,22 @@ if (!empty($query)) {
 <?php
     }
     if ($success) {
+        $n = $DB->record_count();
 ?>
 <div class="thin" style="overflow-x: scroll">
     <div>
-        <h3 style="display:inline">Query Results</h3>
+        <h3 style="display:inline">Query Results (<?= number_format($n) ?> row<?= plural($n) ?>)</h3>
     </div>
     <table>
 <?php
 
-$Record = $DB->fetch_record();
-$Headers = [];
-$Row = [];
-foreach ($Record as $Key => $Value) {
-    if (!is_int($Key)) {
-        $Headers[] = $Key;
-        $Row[] = $Value;
-    }
-}
-
-print_row($Headers, 'colhead');
-print_row($Row, 'rowb');
 $Cnt = 0;
-while ($Record = $DB->fetch_record()) {
+while ($Record = $DB->next_record(MYSQLI_ASSOC)) {
     $Row = [];
-    foreach ($Record as $Key => $Value) {
-        if (!is_int($Key)) {
-            $Row[] = $Value;
-        }
+    if ($Cnt === 0) {
+        print_row(array_keys($Record), 'colhead');
     }
-    print_row($Row, ($Cnt++ % 2) ? 'rowa' : 'rowb');
+    print_row(array_values($Record), ($Cnt++ % 2) ? 'rowa' : 'rowb');
 }
 ?>
     </table>
