@@ -24,9 +24,6 @@ class User extends BaseObject {
     /** @var array contents of \Users::user_info */
     protected $light;
 
-    /** @var array user attributes set for user */
-    protected $attr;
-
     /** @var \Gazelle\Manager\Torrent to look up torrents associated with a user (snatched, uploaded, ...) */
     protected $torMan;
 
@@ -62,10 +59,10 @@ class User extends BaseObject {
             return $this->info;
         }
         $this->db->prepared_query("
-            SELECT
-                um.Username,
+            SELECT um.Username,
                 um.IP,
                 um.Email,
+                um.Paranoia,
                 um.PermissionID,
                 um.Title,
                 um.Enabled,
@@ -78,7 +75,6 @@ class User extends BaseObject {
                 um.2FA_Key,
                 ui.RatioWatchEnds,
                 ui.AdminComment,
-                ui.Artist,
                 ui.JoinDate,
                 ui.Warned,
                 ui.SupportFor,
@@ -95,51 +91,103 @@ class User extends BaseObject {
                 ui.DisablePM,
                 ui.DisableIRC,
                 ui.DisableRequests,
-                sha1(ui.AdminComment) AS CommentHash,
+                ui.Collages,
                 uls.Uploaded,
                 uls.Downloaded,
                 p.Level AS Class,
-                group_concat(l.PermissionID SEPARATOR ',') AS SecondaryClasses,
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
-                la.Type,
-                ui.collages AS Collages,
-                CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS unlimitedDownload
+                la.Type as locked_account
             FROM users_main              AS um
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             INNER JOIN users_info        AS ui ON (ui.UserID = um.ID)
             INNER JOIN user_flt          AS uf ON (uf.user_id = um.ID)
             LEFT JOIN permissions        AS p ON (p.ID = um.PermissionID)
             LEFT JOIN user_bonus         AS ub ON (ub.user_id = um.ID)
-            LEFT JOIN users_levels       AS l ON (l.UserID = um.ID)
             LEFT JOIN locked_accounts    AS la ON (la.UserID = um.ID)
-            LEFT JOIN user_has_attr      AS uhaud ON (uhaud.UserID = um.ID
-                AND uhaud.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
             WHERE um.ID = ?
-            GROUP BY um.ID
-            ", 'unlimited-download', $this->id
+            ", $this->id
         );
-        $this->info = $this->db->has_results() ? $this->db->next_record(MYSQLI_ASSOC, false) : null;
+        $this->info = $this->db->next_record(MYSQLI_ASSOC, false) ?? [];
+        if (empty($this->info)) {
+            return $this->info;
+        }
+        $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
+        $this->info['CommentHash'] = sha1($this->info['AdminComment']);
+
+        $this->db->prepared_query("
+            SELECT PermissionID FROM users_levels WHERE UserID = ?
+            ", $this->id
+        );
+        $this->info['secondary_class'] = $this->db->collect(0);
+        $this->info['effective_class'] = $this->info['secondary_class']
+            ? max($this->info['Class'], ...$this->info['secondary_class'])
+            : $this->info['Class'];
+        $this->info['is_donor'] = in_array(
+            $this->db->scalar("SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1"),
+            $this->info['secondary_class']
+        );
+
+        $this->db->prepared_query("
+            SELECT ua.Name, ua.ID
+            FROM user_attr ua
+            INNER JOIN user_has_attr uha ON (uha.UserAttrID = ua.ID)
+            WHERE uha.UserID = ?
+            ", $this->id
+        );
+        $this->info['attr'] = $this->db->to_pair('Name', 'ID');
         return $this->info;
     }
 
-    public function attr(): array {
-        if (is_null($this->attr)) {
-            $this->db->prepared_query("
-                SELECT ua.Name, ua.ID
-                FROM user_attr ua
-                INNER JOIN user_has_attr uha ON (uha.UserAttrID = ua.ID)
-                WHERE uha.UserID = ?
-                ", $this->id
-            );
-            $this->attr = $this->db->to_pair('Name', 'ID');
-        }
-        return $this->attr;
+    public function hasAttr(string $name): ?int {
+        $attr = $this->info()['attr'];
+        return isset($attr[$name]) ? $attr[$name] : null;
     }
 
-    public function hasAttr(string $name): ?int {
-        $attr = $this->attr();
-        return isset($attr[$name]) ? $attr[$name] : null;
+    protected function toggleAttr(string $attr, bool $flag): bool {
+        $attrId = $this->hasAttr($attr);
+        $found = !is_null($attrId);
+        $toggled = false;
+        if (!$flag && $found) {
+            $this->db->prepared_query('
+                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
+                ', $this->id, $attrId
+            );
+            $toggled = $this->db->affected_rows() === 1;
+        }
+        elseif ($flag && !$found) {
+            $this->db->prepared_query('
+                INSERT INTO user_has_attr (UserID, UserAttrID)
+                    SELECT ?, ID FROM user_attr WHERE Name = ?
+                ', $this->id, $attr
+            );
+            $toggled = $this->db->affected_rows() === 1;
+        }
+        return $toggled;
+    }
+
+    /**
+     * toggle Unlimited Download setting
+     */
+    public function toggleUnlimitedDownload(bool $flag): bool {
+        return $this->toggleAttr('unlimited-download', $flag);
+    }
+
+    public function hasUnlimitedDownload(): bool {
+        return $this->hasAttr('unlimited-download');
+    }
+
+    /**
+     * toggle Accept FL token setting
+     * If user accepts FL tokens and the refusal attribute is found, delete it.
+     * If user refuses FL tokens and the attribute is not found, insert it.
+     */
+    public function toggleAcceptFL($flag): bool {
+        return $this->toggleAttr('no-fl-gifts', !$flag);
+    }
+
+    public function hasAcceptFL(): bool {
+        return !$this->hasAttr('no-fl-gifts');
     }
 
     protected function light() {
@@ -284,6 +332,27 @@ class User extends BaseObject {
     public function addStaffNote(string $note) {
         $this->staffNote[] = $note;
         return $this;
+    }
+
+    /**
+     * Set the user custom title
+     *
+     * @param string The text of the title (may contain BBcode)
+     */
+    public function setTitle(string $title) {
+        $title = trim($title);
+        $length = mb_strlen($title);
+        if ($length > USER_TITLE_LENGTH) {
+            throw new Exception\UserException("title-too-long:" . USER_TITLE_LENGTH . ":$length");
+        }
+        return $this->setUpdate('Title', $title);
+    }
+
+    /**
+     * Remove the custom title of a user
+     */
+    public function removeTitle() {
+        return $this->setUpdate('Title', null);
     }
 
     public function modify(): bool {
@@ -654,52 +723,6 @@ class User extends BaseObject {
             WHERE ID IN (?, ?)
             ", $newClassId, $levelClassId
         );
-    }
-
-    protected function toggleAttr(string $attr, bool $flag): bool {
-        $attrId = $this->hasAttr($attr);
-        $found = !is_null($attrId);
-        $toggled = false;
-        if (!$flag && $found) {
-            $this->db->prepared_query('
-                DELETE FROM user_has_attr WHERE UserID = ? AND UserAttrID = ?
-                ', $this->id, $attrId
-            );
-            $toggled = $this->db->affected_rows() === 1;
-        }
-        elseif ($flag && !$found) {
-            $this->db->prepared_query('
-                INSERT INTO user_has_attr (UserID, UserAttrID)
-                    SELECT ?, ID FROM user_attr WHERE Name = ?
-                ', $this->id, $attr
-            );
-            $toggled = $this->db->affected_rows() === 1;
-        }
-        return $toggled;
-    }
-
-    /**
-     * toggle Unlimited Download setting
-     */
-    public function toggleUnlimitedDownload(bool $flag): bool {
-        return $this->toggleAttr('unlimited-download', $flag);
-    }
-
-    public function hasUnlimitedDownload(): bool {
-        return $this->hasAttr('unlimited-download');
-    }
-
-    /**
-     * toggle Accept FL token setting
-     * If user accepts FL tokens and the refusal attribute is found, delete it.
-     * If user refuses FL tokens and the attribute is not found, insert it.
-     */
-    public function toggleAcceptFL($flag): bool {
-        return $this->toggleAttr('no-fl-gifts', !$flag);
-    }
-
-    public function hasAcceptFL(): bool {
-        return !$this->hasAttr('no-fl-gifts');
     }
 
     public function updateCatchup(): bool {
@@ -1841,5 +1864,45 @@ class User extends BaseObject {
         );
         $this->cache->delete_value("user_info_heavy_" . $this->id);
         return $this->db->affected_rows();
+    }
+
+    /**
+     * Checks whether a user is allowed to purchase an invite. User classes up to Elite are capped,
+     * users above this class will always return true.
+     *
+     * @param integer $minClass Minimum class level necessary to purchase invites
+     * @return boolean false if insufficient funds, otherwise true
+     */
+    public function canPurchaseInvite(): bool {
+        if ($this->info()['DisableInvites']) {
+            return false;
+        }
+        return $this->info()['effective_class'] >= MIN_INVITE_CLASS;
+    }
+
+    /**
+     * Initiate a password reset
+     *
+     * @param int $UserID The user ID
+     * @param string $Username The username
+     * @param string $Email The email address
+     */
+    public function resetPassword() {
+        $resetKey = randomString();
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                ResetExpires = now() + 1 HOUR
+                ResetKey = ?,
+            WHERE UserID = ?
+            ", $resetKey, $this->id
+        );
+        \Misc::send_email($this->email(), 'Password reset information for ' . SITE_NAME,
+            G::$Twig->render('email/password_reset.twig', [
+                'username'  => $this->username(),
+                'reset_key' => $resetKey,
+                'ipaddr'    => $_SERVER['REMOTE_ADDR'],
+            ]),
+            'noreply'
+        );
     }
 }

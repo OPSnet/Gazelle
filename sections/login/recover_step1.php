@@ -1,42 +1,41 @@
 <?php
+
+// User wants to reset their password
+
+$Validate = new Gazelle\Util\Validator;
+$sent = 0;
+if (!empty($_REQUEST['email'])) {
+    // User has entered email and submitted form
+    $Validate->setField('email', '1', 'email', 'You entered an invalid email address.');
+    $error = $Validate->validate($_REQUEST) ? false : $Validate->errorMessage();
+    if (!$error) {
+        $user = (new Gazelle\Manager\User)->findByEmail(trim($_REQUEST['email']));
+        if ($user) {
+            $user->resetPassword();
+            $session = (new Gazelle\Session($user->id()))->dropAll();
+            $session->dropAll();
+            $sent = 1; // If $sent is 1, recover_step1.php displays a success message
+        }
+        $error = "Email sent with further instructions.";
+    }
+} else {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!empty($_SESSION['reseterr'])) {
+        // User has not entered email address, and there is an error set in session data
+        // This is typically because their key has expired.
+        $error = $_SESSION['reseterr'];
+        unset($_SESSION['reseterr']);
+    }
+    session_write_close();
+}
+
+// Either a form for the user's email address, or a success message
 View::show_header('Recover Password','validate');
 echo $Validate->generateJS('recoverform');
-?>
-
-<div id="logo">
-<a href="/" style="margin-left: 0;"><img src="<?= STATIC_SERVER ?>/styles/public/images/loginlogo.png" alt="Orpheus Network" title="Orpheus Network" /></a>
-</div>
-
-<div id="main">
-<div class="pwrecover">
-
-<form class="auth_form" name="recovery" id="recoverform" method="post" action="" onsubmit="return formVal();">
-    <div style="width: 320px;">
-        <span class="titletext">Reset your password - Step 1</span><br /><br />
-<?php
-if (empty($Sent) || (!empty($Sent) && $Sent != 1)) {
-    if (!empty($Err)) {
-?>
-        <strong class="important_text"><?=$Err ?></strong><br /><br />
-<?php
-    } ?>
-        If the email address you gave is in our records, a message will be sent to it, with information on how to reset your password.<br /><br />
-        <table class="layout" cellpadding="2" cellspacing="1" border="0" align="center">
-            <tr valign="top">
-                <td align="right">Email address:&nbsp;</td>
-                <td align="left"><input type="email" name="email" id="email" class="inputtext" /></td>
-            </tr>
-            <tr>
-                <td colspan="2" align="right"><input type="submit" name="reset" value="Reset!" class="submit" /></td>
-            </tr>
-        </table>
-<?php
-} else { ?>
-    An email has been sent to you; please follow the directions in that email to reset your password.
-<?php
-} ?>
-</form>
-</div>
-</div>
-<?php
+echo G::$Twig('login/reset-password.twig', [
+    'error' => $error,
+    'sent'  => $sent,
+]);
 View::show_footer(['recover' => true]);

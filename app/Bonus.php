@@ -72,7 +72,10 @@ class Bonus extends Base {
         foreach ($items as $item) {
             if ($item['Label'] === 'seedbox' && $user->hasAttr('feature-seedbox')) {
                 continue;
-            } elseif ($item['Label'] === 'invite' && check_perms('site_send_unlimited_invites')) {
+            } elseif (
+                $item['Label'] === 'invite'
+                && (check_perms('site_send_unlimited_invites') || !$user->canPurchaseInvite())
+            ) {
                 continue;
             }
             $item['Price'] = $this->getEffectivePrice($item['Label'], $user->id());
@@ -259,7 +262,7 @@ class Bonus extends Base {
     public function purchaseInvite($userId) {
         $item = $this->items()['invite'];
         $price = $item['Price'];
-        if (!\Users::canPurchaseInvite($userId, $item['MinClass'])) {
+        if (!(new User($userId))->canPurchaseInvite()) {
             throw new BonusException('invite:minclass');
         }
         $this->db->prepared_query('
@@ -282,21 +285,23 @@ class Bonus extends Base {
     public function purchaseTitle($userId, $label, $title) {
         $item  = $this->items()[$label];
         $title = $label === 'title-bb-y' ? \Text::full_format($title) : \Text::strip_bbcode($title);
-        if (mb_strlen($title) > 1024) {
+
+        $user = new User($userId);
+        try {
+            $user->setTitle($title);
+        } catch (Exception\UserException $e) {
             throw new BonusException('title:too-long');
         }
-        $price = $this->getEffectivePrice($label, $userId);
 
         /* if the price is 0, nothing changes so avoid hitting the db */
+        $price = $this->getEffectivePrice($label, $userId);
         if ($price > 0) {
             if (!$this->removePoints($userId, $price)) {
                 throw new BonusException('title:nofunds');
             }
         }
-        if (!\Users::setCustomTitle($userId, $title)) {
-            throw new BonusException('title:set');
-            return false;
-        }
+
+        $user->modify();
         $this->addPurchaseHistory($item['ID'], $userId, $price);
         $this->flushUserCache($userId);
         return true;

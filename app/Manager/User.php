@@ -50,6 +50,23 @@ class User extends \Gazelle\Base {
         return $userId ? new \Gazelle\User($userId) : null;
     }
 
+    /**
+     * Get a User object from their email address
+     * (used for password reset)
+     *
+     * @param string username
+     * @return \Gazelle\User object or null if not found
+     */
+    public function findByEmail(string $email): ?\Gazelle\User {
+        $userId = (int)$this->db->scalar("
+            SELECT ID
+            FROM users_main
+            WHERE Email = ?
+            ", $email
+        );
+        return $userId ? new \Gazelle\User($userId) : null;
+    }
+
     public function findAllByCustomPermission(): array {
         $this->db->prepared_query("
             SELECT ID, CustomPermissions
