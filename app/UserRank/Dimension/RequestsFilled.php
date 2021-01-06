@@ -15,6 +15,7 @@ class RequestsFilled extends \Gazelle\UserRank\AbstractUserRank {
             INNER JOIN requests AS r ON (r.FillerID = um.ID)
             WHERE um.Enabled = '1'
             GROUP BY um.ID
+            ORDER BY 1
         ";
     }
 }

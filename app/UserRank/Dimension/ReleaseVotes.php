@@ -15,6 +15,7 @@ class ReleaseVotes extends \Gazelle\UserRank\AbstractUserRank {
             INNER JOIN users_main um ON (um.id = uv.userid)
             WHERE um.enabled = '1'
             GROUP BY um.id
+            ORDER BY 1
         ";
     }
 }

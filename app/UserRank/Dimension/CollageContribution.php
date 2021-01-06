@@ -30,6 +30,7 @@ class CollageContribution extends \Gazelle\UserRank\AbstractUserRank {
                 GROUP BY um.ID
             ) COLL
             GROUP BY id
+            ORDER BY 1
         ";
     }
 }

@@ -32,17 +32,12 @@ abstract class AbstractUserRank extends \Gazelle\Base {
 
         $this->db->prepared_query("
             CREATE TEMPORARY TABLE temp_stats (
-                id int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                val bigint(20) unsigned NOT NULL
-            )
-        ");
-
-        $this->db->prepared_query("
-            INSERT INTO temp_stats (val) " . $this->selector()
+                id int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT
+            ) " . $this->selector()
         );
 
         $this->db->prepared_query("
-            SELECT min(val) as bucket
+            SELECT min(n) as bucket
             FROM temp_stats
             GROUP BY ceil(id / (SELECT count(*)/100 FROM temp_stats))
             ORDER BY 1

@@ -15,6 +15,7 @@ class ForumPosts extends \Gazelle\UserRank\AbstractUserRank {
             INNER JOIN forums_posts AS p ON (p.AuthorID = um.ID)
             WHERE um.Enabled = '1'
             GROUP BY um.ID
+            ORDER BY 1
         ";
     }
 }

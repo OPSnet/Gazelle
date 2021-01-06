@@ -18,6 +18,7 @@ class ArtistsAdded extends \Gazelle\UserRank\AbstractUserRank {
             WHERE t.UserID != ta.UserID
                 AND um.Enabled = '1'
             GROUP BY tg.ID
+            ORDER BY 1
         ";
     }
 }

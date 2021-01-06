@@ -15,6 +15,7 @@ class CommentTorrent extends \Gazelle\UserRank\AbstractUserRank {
             INNER JOIN comments AS c ON (c.AuthorID = um.ID AND c.Page = 'torrents')
             WHERE um.Enabled = '1'
             GROUP BY um.ID
+            ORDER BY 1
         ";
     }
 }

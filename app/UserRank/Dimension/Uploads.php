@@ -15,6 +15,7 @@ class Uploads extends \Gazelle\UserRank\AbstractUserRank {
             INNER JOIN torrents AS t ON (t.UserID = um.ID)
             WHERE um.Enabled = '1'
             GROUP BY um.ID
+            ORDER BY 1
         ";
     }
 }

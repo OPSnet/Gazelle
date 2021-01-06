@@ -15,6 +15,7 @@ class DataUpload extends \Gazelle\UserRank\AbstractUserRank {
             INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
             WHERE um.Enabled = '1'
                 AND uls.Uploaded > " . STARTING_UPLOAD . "
+            ORDER BY 1
         ";
     }
 }
