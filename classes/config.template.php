@@ -114,6 +114,8 @@ define('BLOCK_TOR', false); //Set to true to block Tor users
 define('BLOCK_OPERA_MINI', false); //Set to true to block Opera Mini proxy
 define('DONOR_INVITES', 2);
 define('IP_OVERLAPS', 5); // Threshold for duplicate IPs
+define('MIN_INVITE_CLASS', 150); // Minimum class allowed to purchase invites
+define('USER_TITLE_LENGTH', 1024); // The maximum length of a custom user title
 
 define('SYSTEM_USER_ID', 17); // ID for user to create "system" threads under (e.g. Edit Requests)
 define('TRASH_FORUM_ID', 4); // ID of forum to send threads to when trash button is pressed

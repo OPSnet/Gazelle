@@ -9,11 +9,11 @@ if (isset($_REQUEST['preview']) && isset($_REQUEST['title']) && isset($_REQUEST[
     die();
 }
 
-$ID = $LoggedUser['ID'];
+$userId = $LoggedUser['ID'];
 $Label = $_REQUEST['label'];
 if ($Label === 'title-off') {
     authorize();
-    Users::removeCustomTitle($ID);
+    (new Gazelle\User($userId))->removeTitle()->modify();
     header('Location: bonus.php?complete=' . urlencode($Label));
 }
 if ($Label === 'title-bb-y') {
@@ -32,7 +32,7 @@ if (isset($_POST['confirm'])) {
         error(403);
     }
     try {
-        $Bonus->purchaseTitle($ID, $Label, $_POST['title']);
+        $Bonus->purchaseTitle($userId, $Label, $_POST['title']);
         header('Location: bonus.php?complete=' . urlencode($Label));
     } catch (BonusException $e) {
         switch ($e->getMessage()) {

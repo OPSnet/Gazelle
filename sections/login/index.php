@@ -58,7 +58,10 @@ $watch = new Gazelle\LoginWatch;
 
 if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
     // Recover password
-    if (!empty($_REQUEST['key'])) {
+    if (empty($_REQUEST['key'])) {
+        // initiate password reset
+        require('recover_step1.php');
+    } else {
         // User has entered a new password, use step 2
         [$UserID, $Email, $Country, $Expires] = $DB->row("
             SELECT
@@ -138,53 +141,7 @@ if (isset($_REQUEST['act']) && $_REQUEST['act'] == 'recover') {
             // Or a success message if $Reset is true
             require('recover_step2.php');
         }
-        // End step 2
-    } else {
-        // User has not clicked the link in his email, use step 1
-        $Validate = new Gazelle\Util\Validator;
-        $Validate->setField('email', '1', 'email', 'You entered an invalid email address.');
-        if (!empty($_REQUEST['email'])) {
-            // User has entered email and submitted form
-            $Err = $Validate->validate($_REQUEST) ? false : $Validate->errorMessage();
-
-            if (!$Err) {
-                // Email exists in the database?
-                [$UserID, $Username, $Email] = $DB->row("
-                    SELECT
-                        ID,
-                        Username,
-                        Email
-                    FROM users_main
-                    WHERE Enabled = '1'
-                        AND Email = ?
-                    ", $_REQUEST['email']
-                );
-
-                if ($UserID) {
-                    // Set ResetKey, send out email, and set $Sent to 1 to show success page
-                    Users::resetPassword($UserID, $Username, $Email);
-                    $session = new Gazelle\Session($UserID);
-                    $session->dropAll();
-                    $Sent = 1; // If $Sent is 1, recover_step1.php displays a success message
-                }
-                $Err = "Email sent with further instructions.";
-            }
-        } else {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-            if (!empty($_SESSION['reseterr'])) {
-                // User has not entered email address, and there is an error set in session data
-                // This is typically because their key has expired.
-                // Stick the error into $Err so recover_step1.php can take care of it
-                $Err = $_SESSION['reseterr'];
-                unset($_SESSION['reseterr']);
-            }
-            session_write_close();
-        }
-        // Either a form for the user's email address, or a success message
-        require('recover_step1.php');
-    } // End if (step 1)
+    }
     // End password recovery
 
 } elseif (isset($_REQUEST['act']) && $_REQUEST['act'] === '2fa_recovery') {
