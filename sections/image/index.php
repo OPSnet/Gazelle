@@ -128,13 +128,10 @@ if (isset($_GET['type']) && isset($_GET['userid'])) {
         }
 
         $sizeKb = number_format($sizeKb);
-        $DB->prepared_query("
-            UPDATE users_info SET
-                AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
-            WHERE UserID = ?
-            ", ucfirst($imageType) . " $url reset automatically (Size: {$sizeKb}kB, Height: {$image->height()}px).\n\n",
-                $userId
-        );
+        $user = new \Gazelle\User($userId);
+        $user->addStaffNote(
+            ucfirst($imageType) . " $url reset automatically (Size: {$sizeKb}kB, Height: {$image->height()}px)."
+        )->modify();
         (new Gazelle\Manager\User)->sendPM($userId, 0, $subject, G::$Twig->render('user/reset-avatar.twig', [
             'height'    => $maxHeight,
             'size_kb'   => $sizeKb,
