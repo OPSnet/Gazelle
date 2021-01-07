@@ -63,7 +63,7 @@ class Upload extends \Gazelle\Base {
         } else {
             $this->cond[] = (empty($guestArtist) ? '' : "unf.ExcludeVA = '0' AND ") . "unf.Artists REGEXP ?";
         }
-        $this->args[] = '(?:^$|\|(?:' . implode('|', array_merge($mainName, $guestName)) . ')\|)';
+        $this->args[] = '(?:^$|\\\\|(?:' . implode('|', array_merge($mainName, $guestName)) . ')\\\\|)';
         return $this;
     }
 
@@ -80,7 +80,7 @@ class Upload extends \Gazelle\Base {
             }
             $this->cond[] = "unf.Tags REGEXP ?";
             $this->cond[] = "(unf.NotTags = '' OR NOT unf.NotTags REGEXP ?)";
-            $pattern =  '\|(?:' . implode('|', $escaped) . ')\|';
+            $pattern =  '\\\\|(?:' . implode('|', $escaped) . ')\\\\|';
             $this->args = array_merge($this->args, ['(?:^$|' . $pattern . ')', $pattern]);
         }
         return $this;
@@ -113,7 +113,7 @@ class Upload extends \Gazelle\Base {
             $this->args[] = $this->userId;
         } else {
             $this->cond[] = "(unf.Users REGEXP ? OR unf.UserID != ?)";
-            $this->args[] = '(?:^$|\|' . $uploaderId . '\|)';
+            $this->args[] = '(?:^$|\\\\|' . $uploaderId . '\\\\|)';
             $this->args[] = $this->userId;
         }
         return $this;
@@ -131,7 +131,7 @@ class Upload extends \Gazelle\Base {
             return $this;
         }
         $this->cond[] = "unf.$column REGEXP ?";
-        $this->args[] = '(?:^$|\|' . $this->escape($dimension) . '\|)';
+        $this->args[] = '(?:^$|\\\\|' . $this->escape($dimension) . '\\\\|)';
         return $this;
     }
 
