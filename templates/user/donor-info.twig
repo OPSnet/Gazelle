@@ -1,6 +1,4 @@
-{% macro checked(flag) -%}
-    {%- if flag %} checked="checked"{% endif -%}
-{%- endmacro %}
+{% from 'macro/form.twig' import checked %}
 {% if enabled.HasSecondAvatar %}
     <tr id="pers_avatar2_tr">
         <td class="label tooltip_interactive" title="Congratulations! You've unlocked this option by reaching Special Rank #2. Thanks for donating. Your normal avatar will &quot;flip&quot; to this one when someone runs their mouse over the image. Please link to an avatar which follows the &lt;a href=&quot;rules.php&quot;&gt;site rules&lt;/a&gt;. The avatar width should be 150 pixels and will be resized if necessary." data-title-plain="Congratulations! You've unlocked this option by reaching Special Rank #2. Thanks for donating. Your normal avatar will &quot;flip&quot; to this one when someone runs their mouse over the image. Please link to an avatar which follows the site rules. The avatar width should be 150 pixels and will be resized if necessary."><strong>Second avatar URL</strong></td>
@@ -52,7 +50,7 @@
                 <label><strong>Suffix:</strong> <input type="text" size="30" maxlength="30" name="donor_title_suffix" id="donor_title_suffix" value="{{ title.Suffix }}" /></label>
             </div>
             <div class="field_div">
-                <label><strong>Hide comma:</strong> <input type="checkbox" id="donor_title_comma" name="donor_title_comma"{{ _self.checked(title.UseComma) }} /></label>
+                <label><strong>Hide comma:</strong> <input type="checkbox" id="donor_title_comma" name="donor_title_comma"{{ checked(title.UseComma) }} /></label>
             </div>
             <strong>Preview:</strong> <span id="donor_title_prefix_preview"></span>{{ user.username }}<span id="donor_title_comma_preview">, </span><span id="donor_title_suffix_preview"></span>
         </td>
