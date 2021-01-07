@@ -56,24 +56,23 @@ class TORRENT_FORM {
 ?>
 
 <div class="thin">
-<?php
-    if ($this->NewTorrent) { ?>
+<?php   if ($this->NewTorrent) { ?>
     <p style="text-align: center;">
         Your personal announce URL is:<br />
         <input type="text" value="<?= $AnnounceURL . '/' . G::$LoggedUser['torrent_pass'] . '/announce'?>" size="71" onclick="this.select();" readonly="readonly" />
     </p>
 <?php
-    }
-    if ($this->Error) {
+        }
+        if ($this->Error) {
 ?>
     <p style="color: red; text-align: center;"><?= $this->Error ?></p>
-<?php } ?>
+<?php   } ?>
     <form class="create_form" name="torrent" action="" enctype="multipart/form-data" method="post" id="upload_table" onsubmit="$('#post').raw().disabled = 'disabled';">
         <div>
             <input type="hidden" id="torrent-new" name="torrent-new" value="<?= $this->NewTorrent ? 1 : 0 ?>" />
             <input type="hidden" name="submit" value="true" />
             <input type="hidden" name="auth" value="<?=G::$LoggedUser['AuthKey']?>" />
-<?php        if (!$this->NewTorrent) { ?>
+<?php       if (!$this->NewTorrent) { ?>
                 <input type="hidden" name="action" value="takeedit" />
                 <input type="hidden" name="torrentid" value="<?=display_str($this->TorrentID)?>" />
                 <input type="hidden" name="type" id="edittype" value="<?=display_str($this->Torrent['CategoryID'])?>" />
@@ -112,8 +111,8 @@ class TORRENT_FORM {
                 <td class="label">Type:</td>
                 <td>
                     <select id="categories" name="type" onchange="Categories()"<?=$this->Disabled?>>
-<?php       foreach (Misc::display_array($this->Categories) as $Index => $Cat) { ?>
-                        <option value="<?= $Index ?>"<?= $Cat == $this->Torrent['CategoryName'] ? ' selected="selected"' : '' ?>><?= $Cat ?></option>
+<?php       foreach ($this->Categories as $Index => $Cat) { ?>
+                        <option value="<?= $Index ?>"<?= $Cat == $this->Torrent['CategoryName'] ? ' selected="selected"' : '' ?>><?= display_str($Cat) ?></option>
 <?php       } ?>
                     </select>
                 </td>
@@ -158,9 +157,9 @@ class TORRENT_FORM {
             <tr>
                 <td colspan="2" style="text-align: center;">
                     <p>Be sure that your torrent is approved by the <a href="rules.php?p=upload" target="_blank">rules</a>. Not doing this will result in a <strong class="important_text">warning</strong> or <strong class="important_text">worse</strong>.</p>
-<?php       if ($this->NewTorrent) { ?>
+<?php   if ($this->NewTorrent) { ?>
                     <p>After uploading the torrent, you will have a one hour grace period during which no one other than you can fill requests with this torrent.<br />Make use of this time wisely, and <a href="requests.php" target="_blank">search the list of requests</a>.</p>
-<?php       } ?>
+<?php   } ?>
                     <div style="width: 60%; margin: 0 auto;">
                     <ul id="check" class="nobullet" style="display: none; padding: 12px; text-align: left; border: 2px solid orangered;"></ul>
                     </div>
@@ -358,21 +357,22 @@ class TORRENT_FORM {
                         <select id="groupremasters" name="groupremasters" onchange="GroupRemaster()"<?php if ($UnknownRelease) { echo ' disabled="disabled"'; } ?>>
                             <option value="">-------</option>
 <?php
-    $LastLine = '';
+            $LastLine = '';
 
-    foreach ($GroupRemasters as $Index => $Remaster) {
-        $Line = $Remaster['RemasterYear'].' / '.$Remaster['RemasterTitle'].' / '.$Remaster['RemasterRecordLabel'].' / '.$Remaster['RemasterCatalogueNumber'];
-        if ($Line != $LastLine) {
-            $LastLine = $Line;
+            foreach ($GroupRemasters as $Index => $Remaster) {
+                $Line = $Remaster['RemasterYear'] . ' / ' . $Remaster['RemasterTitle']
+                    . ' / ' . $Remaster['RemasterRecordLabel'] . ' / ' . $Remaster['RemasterCatalogueNumber'];
+                if ($Line != $LastLine) {
+                    $LastLine = $Line;
 ?>
                             <option value="<?=$Index?>"<?=(($Remaster['ID'] == $this->TorrentID) ? ' selected="selected"' : '')?>><?=$Line?></option>
 <?php
-        }
-    }
+                }
+            }
 ?>
                         </select>
                         <br />
-<?php    } ?>
+<?php   } ?>
                         <table id="edition_information" class="layout border" border="0" width="100%">
                             <tbody>
                                 <tr id="edition_year">
@@ -429,15 +429,10 @@ class TORRENT_FORM {
                 <td>
                     <select name="media" id="media">
                         <option>---</option>
-<?php
-        foreach ($this->Media as $Media) {
-            echo "\t\t\t\t\t\t<option value=\"$Media\"";
-            if (isset($Torrent['Media']) && $Media == $Torrent['Media']) {
-                echo ' selected="selected"';
-            }
-            echo ">$Media</option>\n";
-        }
-?>
+<?php   foreach ($this->Media as $Media) { ?>
+                        <option value="<?= $Media ?>"<?=
+                            $Media == $Torrent['Media'] ? ' selected="selected"' : '' ?>><?= $Media ?></option>
+<?php   } ?>
                     </select>
                 </td>
             </tr>
@@ -447,16 +442,10 @@ class TORRENT_FORM {
                 <td>
                     <select id="format" name="format">
                         <option>---</option>
-<?php
-        foreach (Misc::display_array($this->Formats) as $Format) {
-            echo "\t\t\t\t\t\t<option value=\"$Format\"";
-            if ($Format == $Torrent['Format']) {
-                echo ' selected="selected"';
-            }
-            echo ">$Format</option>\n";
-            // <option value="$Format" selected="selected">$Format</option>
-        }
-?>
+<?php   foreach ($this->Formats as $Format) { ?>
+                        <option value="<?= $Format ?>"<?=
+                            $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?>><?= $Format ?></option>
+<?php   } ?>
                     </select>
                 <span id="format_warning" class="important_text"></span>
                 </td>
@@ -481,15 +470,14 @@ class TORRENT_FORM {
         // We have to do this screwery because '(' is a regex character.
         $SimpleBitrate = explode(' ', $Torrent['Bitrate']);
         $SimpleBitrate = $SimpleBitrate[0];
-
-        foreach (Misc::display_array($this->Bitrates) as $Bitrate) {
-            echo "\t\t\t\t\t\t<option value=\"$Bitrate\"";
-            if (($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')) {
-                echo ' selected="selected"';
-            }
-            echo ">$Bitrate</option>\n";
-        }
+        foreach ($this->Bitrates as $Bitrate) {
 ?>
+                        <option value="<?= $Bitrate ?>"<?=
+            ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
+                ? ' selected="selected"' : '' ?>
+            ?><?= $Bitrate ?></option>
+
+<?php   } ?>
                     </select>
                     <span id="other_bitrate_span"<?php if (!$OtherBitrate) { echo ' class="hidden"'; } ?>>
                         <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php if ($OtherBitrate) { echo ' value="'.display_str($Torrent['Bitrate']).'"';} ?> onchange="AltBitrate();" />
@@ -507,16 +495,18 @@ class TORRENT_FORM {
                     <input id="logfile_1" type="file" accept="<?=LogChecker::getAcceptValues()?>" multiple name="logfiles[]" size="50" />
                 </td>
             </tr>
-<?php   if ($this->NewTorrent) { ?>
 
+<?php   if ($this->NewTorrent) { ?>
             <tr>
                 <td class="label">Multi-format uploader:</td>
                 <td><input type="button" value="+" id="add_format" />&nbsp;<input type="button" style="display: none;" value="-" id="remove_format" /></td>
             </tr>
             <tr id="placeholder_row_top"></tr>
             <tr id="extra_format_placeholder"></tr>
-<?php   } ?>
-<?php   if (!$this->NewTorrent && check_perms('users_mod')) { ?>
+<?php
+        }
+        if (!$this->NewTorrent && check_perms('users_mod')) {
+?>
             <tr>
                 <td class="label">Log/cue:</td>
                 <td>
@@ -559,14 +549,14 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Tags:</td>
                 <td>
-<?php            if ($GenreTags) { ?>
+<?php       if ($GenreTags) { ?>
                     <select id="genre_tags" name="genre_tags" onchange="add_tag(); return false;"<?=$this->Disabled?>>
                         <option>---</option>
-<?php                foreach (Misc::display_array($GenreTags) as $Genre) { ?>
-                        <option value="<?=$Genre?>"><?=$Genre?></option>
-<?php                } ?>
+<?php           foreach ($GenreTags as $Genre) { ?>
+                        <option value="<?= $Genre ?>"><?= $Genre ?></option>
+<?php           } ?>
                     </select>
-<?php            } ?>
+<?php       } ?>
                     <input type="text" id="tags" name="tags" size="40" value="<?=display_str($Torrent['TagList']) ?>"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
                     <br /><?= G::$Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
@@ -578,7 +568,7 @@ class TORRENT_FORM {
                     <p class="min_padding">Contains background information such as album history and maybe a review.</p>
                 </td>
             </tr>
-<?php        } /* if new torrent */ ?>
+<?php   } /* if new torrent */ ?>
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
@@ -591,18 +581,17 @@ class TORRENT_FORM {
         //    For AJAX requests (e.g. when changing the type from Music to Applications),
         //    we don't need to include all scripts, but we do need to include the code
         //    that generates previews. It will have to be eval'd after an AJAX request.
-        if ($_SERVER['SCRIPT_NAME'] === '/ajax.php')
+        if ($_SERVER['SCRIPT_NAME'] === '/ajax.php') {
             TEXTAREA_PREVIEW::JavaScript(false);
-
+        }
         G::$DB->set_query_id($QueryID);
     }//function music_form
-
 
     function audiobook_form() {
         $Torrent = $this->Torrent;
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
-<?php        if ($this->NewTorrent) { ?>
+<?php   if ($this->NewTorrent) { ?>
             <tr id="title_tr">
                 <td class="label">Author - Title:</td>
                 <td>
@@ -610,7 +599,7 @@ class TORRENT_FORM {
                     <p class="min_padding">Should only include the author if applicable.</p>
                 </td>
             </tr>
-<?php        } ?>
+<?php   } ?>
             <tr id="year_tr">
                 <td class="label">Year:</td>
                 <td><input type="text" id="year" name="year" size="5" value="<?=display_str($Torrent['Year']) ?>" /></td>
@@ -620,17 +609,10 @@ class TORRENT_FORM {
                 <td>
                     <select id="format" name="format" onchange="Format()">
                         <option value="">---</option>
-<?php
-        foreach (Misc::display_array($this->Formats) as $Format) {
-            echo "\t\t\t\t\t\t<option value=\"$Format\"";
-            if ($Format == $Torrent['Format']) {
-                echo ' selected';
-            }
-            echo '>';
-            echo $Format;
-            echo "</option>\n";
-        }
-?>
+<?php   foreach ($this->Formats as $Format) { ?>
+                        <option value="<?= $Format ?>"<?=
+                            $Format == $Torrent['Format'] ? ' selected="selected"' : '' ?><?= $Format ?></option>
+<?php   } ?>
                     </select>
                 </td>
             </tr>
@@ -649,16 +631,16 @@ class TORRENT_FORM {
         } else {
             $OtherBitrate = false;
         }
-        foreach (Misc::display_array($this->Bitrates) as $Bitrate) {
-            echo "\t\t\t\t\t\t<option value=\"$Bitrate\"";
-            if ($Bitrate == $Torrent['Bitrate'] || ($OtherBitrate && $Bitrate == 'Other')) {
-                echo ' selected';
-            }
-            echo '>';
-            echo $Bitrate;
-            echo "</option>\n";
-        }
+        $SimpleBitrate = explode(' ', $Torrent['Bitrate']);
+        $SimpleBitrate = $SimpleBitrate[0];
+        foreach ($this->Bitrates as $Bitrate) {
 ?>
+                        <option value="<?= $Bitrate ?>"<?=
+            ($SimpleBitrate && preg_match('/^'.$SimpleBitrate.'.*/', $Bitrate)) || ($OtherBitrate && $Bitrate == 'Other')
+                ? ' selected="selected"' : '' ?>
+            ?><?= $Bitrate ?></option>
+
+<?php   } ?>
                     </select>
                     <span id="other_bitrate_span"<?php if (!$OtherBitrate) { echo ' class="hidden"'; } ?>>
                         <input type="text" name="other_bitrate" size="5" id="other_bitrate"<?php if ($OtherBitrate) { echo ' value="'.display_str($Torrent['Bitrate']).'"';} ?> onchange="AltBitrate()" />
@@ -666,7 +648,7 @@ class TORRENT_FORM {
                     </span>
                 </td>
             </tr>
-<?php       if ($this->NewTorrent) { ?>
+<?php   if ($this->NewTorrent) { ?>
             <tr>
                 <td class="label">Tags:</td>
                 <td>
@@ -680,7 +662,7 @@ class TORRENT_FORM {
                     <p class="min_padding">Contains information like the track listing, a review, a link to Discogs or MusicBrainz, etc.</p>
                 </td>
             </tr>
-<?php       } ?>
+<?php   } ?>
             <tr>
                 <td class="label">Release description (optional):</td>
                 <td>
@@ -693,17 +675,18 @@ class TORRENT_FORM {
         TEXTAREA_PREVIEW::JavaScript(false);
     }//function audiobook_form
 
-
     function simple_form($CategoryID) {
         $Torrent = $this->Torrent;
 ?>        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
-<?php       if ($this->NewTorrent) {
-                if ($this->Categories[$CategoryID] == 'E-Books') { ?>
+<?php
+        if ($this->NewTorrent) {
+            if ($this->Categories[$CategoryID] == 'E-Books') {
+?>
                 <td class="label">Author - Title:</td>
-<?php           } else { ?>
+<?php       } else { ?>
                 <td class="label">Title:</td>
-<?php           } ?>
+<?php       } ?>
                 <td><input type="text" id="title" name="title" size="60" value="<?=display_str($Torrent['Title']) ?>" /></td>
             </tr>
             <tr>
@@ -718,12 +701,13 @@ class TORRENT_FORM {
                 <td class="label">Description:</td>
                 <td>
 <?php
-    new TEXTAREA_PREVIEW('desc', 'desc', display_str($Torrent['GroupDescription']), 60, 8);
-    TEXTAREA_PREVIEW::JavaScript(false);
+            new TEXTAREA_PREVIEW('desc', 'desc', display_str($Torrent['GroupDescription']), 60, 8);
+            TEXTAREA_PREVIEW::JavaScript(false);
 ?>
                 </td>
             </tr>
-<?php       } ?>
+<?php   } ?>
         </table>
-<?php   }//function simple_form
-}//class
+<?php
+    }
+}

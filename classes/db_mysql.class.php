@@ -386,7 +386,7 @@ class DB_MYSQL {
             if (!is_array($this->Record)) {
                 $this->QueryID = false;
             } elseif ($Escape !== false) {
-                $this->Record = Misc::display_array($this->Record, $Escape, $Reverse);
+                $this->Record = $this->display_array($this->Record, $Escape, $Reverse);
             }
             return $this->Record;
         }
@@ -475,7 +475,7 @@ class DB_MYSQL {
         $Return = [];
         while ($Row = mysqli_fetch_array($this->QueryID, $Type)) {
             if ($Escape !== false) {
-                $Row = Misc::display_array($Row, $Escape);
+                $Row = $this->display_array($Row, $Escape);
             }
             if ($Key !== false) {
                 $Return[$Row[$Key]] = $Row;
@@ -609,5 +609,24 @@ class DB_MYSQL {
 
     public function rollback() {
         mysqli_rollback($this->LinkID);
+    }
+
+    /**
+     * HTML escape an entire array for output.
+     * @param array $Array, what we want to escape
+     * @param boolean|array $Escape
+     *    if true, all keys escaped
+     *    if false, no escaping.
+     *    If array, it's a list of array keys not to escape.
+     * @param boolean $Reverse reverses $Escape such that then it's an array of keys to escape
+     * @return array mutated version of $Array with values escaped.
+     */
+    protected function display_array($Array, $Escape = [], $Reverse = false) {
+        foreach ($Array as $Key => $Val) {
+            if ((!is_array($Escape) && $Escape == true) || (!$Reverse && !in_array($Key, $Escape)) || ($Reverse && in_array($Key, $Escape))) {
+                $Array[$Key] = display_str($Val);
+            }
+        }
+        return $Array;
     }
 }

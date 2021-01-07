@@ -250,7 +250,7 @@ function add_json_info($Json) {
         ]);
     }
     if (!isset($Json['debug']) && check_perms('site_debug')) {
-        /** @var DEBUG $Debug */
+        /** @var Gazelle\Debug $Debug */
         $Debug = new Gazelle\Debug;
         $Json = array_merge($Json, [
             'debug' => [
@@ -467,15 +467,6 @@ function shortenString(string $text, int $maxLength, bool $force = false, bool $
         $short .= "\xE2\x80\xA6"; // U+2026 HORIZONTAL ELLIPSIS
     }
     return $short;
-}
-
-function display_array($Array, $Escape = []) {
-    foreach ($Array as $Key => $Val) {
-        if ((!is_array($Escape) && $Escape == true) || !in_array($Key, $Escape)) {
-            $Array[$Key] = display_str($Val);
-        }
-    }
-    return $Array;
 }
 
 function proxyCheck(string $IP): bool {

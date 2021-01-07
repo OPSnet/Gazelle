@@ -1,7 +1,5 @@
 <?php
 
-use \Gazelle\Manager\Notification;
-
 class Misc {
     /**
      * Send an email.
@@ -47,25 +45,6 @@ class Misc {
         }
         $Searches[$Needle] = false;
         return false;
-    }
-
-    /**
-     * HTML escape an entire array for output.
-     * @param array $Array, what we want to escape
-     * @param boolean|array $Escape
-     *    if true, all keys escaped
-     *    if false, no escaping.
-     *    If array, it's a list of array keys not to escape.
-     * @param boolean $Reverse reverses $Escape such that then it's an array of keys to escape
-     * @return array mutated version of $Array with values escaped.
-     */
-    public static function display_array($Array, $Escape = [], $Reverse = false) {
-        foreach ($Array as $Key => $Val) {
-            if ((!is_array($Escape) && $Escape == true) || (!$Reverse && !in_array($Key, $Escape)) || ($Reverse && in_array($Key, $Escape))) {
-                $Array[$Key] = display_str($Val);
-            }
-        }
-        return $Array;
     }
 
     /**
