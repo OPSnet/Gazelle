@@ -163,7 +163,7 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                     </td>
                     <td>
                         <select id="categories" name="type" onchange="Categories();">
-<?php        foreach (Misc::display_array($CategoriesV2) as $Cat) { ?>
+<?php        foreach ($CategoriesV2 as $Cat) { ?>
                             <option value="<?=$Cat?>"<?=(!empty($CategoryName) && ($CategoryName === $Cat) ? ' selected="selected"' : '')?>><?=$Cat?></option>
 <?php        } ?>
                         </select>
@@ -259,8 +259,8 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                     <td>
                         <select id="genre_tags" name="genre_tags" onchange="add_tag(); return false;">
                             <option>---</option>
-<?php    foreach (Misc::display_array($GenreTags) as $Genre) { ?>
-                            <option value="<?=$Genre?>"><?=$Genre?></option>
+<?php    foreach ($GenreTags as $Genre) { ?>
+                            <option value="<?= display_str($Genre) ?>"><?= display_str($Genre) ?></option>
 <?php    } ?>
                         </select>
                         <input type="text" id="tags" name="tags" size="45" value="<?=(!empty($Tags) ? display_str($Tags) : '')?>"<?php Users::has_autocomplete_enabled('other'); ?> />

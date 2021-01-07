@@ -431,9 +431,15 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                         $ExtraRemasterTitle, $ExtraRemasterYear, $ExtraMedia, $ExtraFormat,
                         $ExtraEncoding, $ExtraSize, $ExtraHasCue, $ExtraHasLog, $ExtraLogScore,
                         $ExtraLastAction, $ExtraUploaderID, $ExtraUploaderName]
-                            = Misc::display_array($DB->next_record());
+                            = $DB->next_record();
 
                     if ($ExtraGroupName) {
+                        $ExtraGroupName = display_str($ExtraGroupName);
+                        $ExtraArtistName = display_str($ExtraArtistName);
+                        $ExtraDescription = display_str($ExtraDescription);
+                        $ExtraFileList = display_str($ExtraFileList);
+                        $ExtraRemasterTitle = display_str($ExtraRemasterTitle);
+                        $ExtraUploaderName = display_str($ExtraUploaderName);
                         $ExtraRemasterDisplayString = Reports::format_reports_remaster_info($ExtraRemastered, $ExtraRemasterTitle, $ExtraRemasterYear);
 
                         if ($ArtistID == 0 && empty($ArtistName)) {
@@ -452,7 +458,9 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                             strtotime($ExtraTime) < strtotime($Time) ? 'older upload' : 'more recent upload' ?>)</span>
                         <br />Last action: <?= $ExtraLastAction ?: 'Never' ?>
                         <br /><span>Audio files present:
-<?php                   $extMap = audio_file_map($ExtraFileList);
+<?php
+                        $First = false;
+                        $extMap = audio_file_map($ExtraFileList);
                         if (count($extMap) == 0) {
 ?>
                             <span class="file_ext_none">none</span>
@@ -465,78 +473,90 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
 <?php                   } ?>
                     </td>
                 </tr>
-<?php           if ($HasLog || $ExtraHasLog) { ?>
+<?php                   if ($HasLog || $ExtraHasLog) { ?>
                 <tr>
                     <td class="label">Logfiles:</td>
                     <td colspan="3">
                         <table><tr><td>Reported</td><td>Relevant</td></tr><tr>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
-<?php               $log = new Gazelle\Torrent\Log($TorrentID);
-                    $details = $log->logDetails(); ?>
+<?php                       $log = new Gazelle\Torrent\Log($TorrentID);
+                            $details = $log->logDetails(); ?>
                                 <ul class="nobullet logdetails">
-<?php               if (!count($details)) { ?>
+<?php                       if (!count($details)) { ?>
                                 <li class="nobr">No logs</li>
-<?php               } else {
-                        foreach ($details as $logId => $info) {
-                            if ($info['adjustment']) {
-                                $adj = $info['adjustment']; ?>
+<?php
+                            } else {
+                                foreach ($details as $logId => $info) {
+                                    if ($info['adjustment']) {
+                                        $adj = $info['adjustment'];
+?>
                                 <li class="nobr">Log adjusted by <?= Users::format_username($adj['userId'])
                                     ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
-<?php                       }
-                            if (isset($info['status']['tracks'])) {
-                                $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
-                            }
-                            foreach ($info['status'] as $s) { ?>
+<?php
+                                    }
+                                    if (isset($info['status']['tracks'])) {
+                                        $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
+                                    }
+                                    foreach ($info['status'] as $s) {
+?>
                                 <li class="nobr"><?= $s ?></li>
-<?php                       } ?>
+<?php                               } ?>
                                 <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?=
                                         $ripFiler->get([$TorrentID, $logId]) ?></pre></li>
                                 <li><span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= $info['log'] ?></pre></li>
-<?php                   }
-                    } ?>
+<?php
+                                }
+                            }
+?>
                                 </ul>
                             </td>
                             <td width="50%" style="vertical-align: top; max-width: 500px;">
-<?php               $log = new Gazelle\Torrent\Log($ExtraID);
-                    $details = $log->logDetails(); ?>
+<?php
+                            $log = new Gazelle\Torrent\Log($ExtraID);
+                            $details = $log->logDetails();
+?>
                                 <ul class="nobullet logdetails">
-<?php               if (!count($details)) { ?>
+<?php                       if (!count($details)) { ?>
                                 <li class="nobr">No logs</li>
-<?php               } else {
-                        foreach ($details as $logId => $info) {
-                            if ($info['adjustment']) {
-                                $adj = $info['adjustment']; ?>
+<?php
+                            } else {
+                                foreach ($details as $logId => $info) {
+                                    if ($info['adjustment']) {
+                                        $adj = $info['adjustment']; ?>
                                 <li class="nobr">Log adjusted by <?= Users::format_username($adj['userId'])
                                     ?> from score <?= $adj['score']
                                     ?> to <?= $adj['adjusted'] . ($adj['reason'] ? ', reason: ' .  $adj['reason'] : '') ?></li>
-<?php                       }
-                            if (isset($info['status']['tracks'])) {
-                                $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
-                            }
-                            foreach ($info['status'] as $s) { ?>
+<?php
+                                    }
+                                    if (isset($info['status']['tracks'])) {
+                                        $info['status']['tracks'] = implode(', ', array_keys($info['status']['tracks']));
+                                    }
+                                    foreach ($info['status'] as $s) {
+?>
                                 <li class="nobr"><?= $s ?></li>
-<?php                       } ?>
+<?php                               } ?>
                                 <li><span class="nobr"><strong>Raw logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?=
                                         $ripFiler->get([$ExtraID, $logId]) ?></pre></li>
                                 <li><span class="nobr"><strong>HTML logfile #<?= $logId ?></strong>:
                                     </span><a href="javascript:void(0);" onclick="BBCode.spoiler(this);">Show</a><pre class="hidden"><?= $info['log'] ?></pre></li>
-<?php                   }
-                    } ?>
+<?php
+                                }
+                            }
+?>
                                 </ul>
                             </td>
                         </tr></table>
                     </td>
                 </tr>
-<?php           }  ?>
+<?php                   } ?>
                 <tr>
                     <td class="label">Switch:</td>
                     <td colspan="3"><a href="#" onclick="Switch(<?=$ReportID?>, <?=$TorrentID?>, <?=$ExtraID?>); return false;" class="brackets">Switch</a> the source and target torrents (you become the report owner).
 <?php
-                        $First = false;
                     }
                 }
 ?>
@@ -544,7 +564,6 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                 </tr>
 <?php
             }
-
             if ($Images) {
 ?>
                 <tr>
@@ -558,22 +577,22 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
 <?php           } ?>
                     </td>
                 </tr>
-<?php
-            } ?>
+<?php       } ?>
                 <tr>
                     <td class="label">User comment:</td>
                     <td colspan="3" class="wrap_overflow"><?=Text::full_format($UserComment)?></td>
                 </tr>
-<?php            // END REPORTED STUFF :|: BEGIN MOD STUFF
-            if ($Status == 'InProgress') { ?>
+<?php       if ($Status == 'InProgress') { /* BEGIN MOD STUFF */ ?>
                 <tr>
                     <td class="label">In progress by:</td>
                     <td colspan="3">
                         <a href="user.php?id=<?=$ResolverID?>"><?=$ResolverName?></a>
                     </td>
                 </tr>
-<?php       }
-            if ($Status != 'Resolved') { ?>
+<?php
+            }
+            if ($Status != 'Resolved') {
+?>
                 <tr>
                     <td class="label">Report comment:</td>
                     <td colspan="3">
@@ -594,8 +613,8 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                     $Priorities[$Key] = $Value['priority'];
                 }
                 array_multisort($Priorities, SORT_ASC, $TypeList);
-
-                foreach ($TypeList as $Type => $Data) { ?>
+                foreach ($TypeList as $Type => $Data) {
+?>
                             <option value="<?=$Type?>"><?=$Data['title']?></option>
 <?php           } ?>
                         </select>
@@ -639,15 +658,15 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                     <td class="label"><strong>Extra</strong> log message:</td>
                     <td>
 <?php
-                    if ($ExtraIDs) {
-                        $Extras = explode(' ', $ExtraIDs);
+                if ($ExtraIDs) {
+                    $Extras = explode(' ', $ExtraIDs);
                         $Value = '';
                         foreach ($Extras as $ExtraID) {
                             $Value .= SITE_URL . "/torrents.php?torrentid=$ExtraID ";
                         }
-                    } elseif (isset($ReportType['extra_log'])) {
-                        $Value = $ReportType['extra_log'];
-                    }
+                } elseif (isset($ReportType['extra_log'])) {
+                    $Value = $ReportType['extra_log'];
+                }
 ?>
                         <input type="text" name="log_message" id="log_message<?=$ReportID?>" size="40" value="<?= trim($Value) ?>" />
                     </td>
@@ -660,18 +679,18 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                     <td colspan="4" style="text-align: center;">
                         <input type="button" value="Invalidate report" onclick="Dismiss(<?=$ReportID?>);" />
                         | <input type="button" value="Resolve report manually" onclick="ManualResolve(<?=$ReportID?>);" />
-<?php               if ($Status == 'InProgress' && $LoggedUser['ID'] == $ResolverID) { ?>
+<?php           if ($Status == 'InProgress' && $LoggedUser['ID'] == $ResolverID) { ?>
                         | <input type="button" value="Unclaim" onclick="GiveBack(<?=$ReportID?>);" />
-<?php               } else { ?>
+<?php           } else { ?>
                         | <input id="grab<?=$ReportID?>" type="button" value="Claim" onclick="Grab(<?=$ReportID?>);" />
-<?php               }    ?>
+<?php           } ?>
                         | <span class="tooltip" title="All checked reports will be resolved via the Multi-resolve button">
                             <input type="checkbox" name="multi" id="multi<?=$ReportID?>" />&nbsp;<label for="multi">Multi-resolve</label>
                           </span>
                         | <input type="button" id="submit_<?=$ReportID?>" value="Submit" onclick="TakeResolve(<?=$ReportID?>);" />
                     </td>
                 </tr>
-<?php           } else { ?>
+<?php       } else { ?>
                 <tr>
                     <td class="label">Resolver:</td>
                     <td colspan="3">
@@ -702,8 +721,10 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                         <input id="grab<?=$ReportID?>" type="button" value="Claim" onclick="Grab(<?=$ReportID?>);" />
                     </td>
                 </tr>
-<?php           }
-            } ?>
+<?php
+                }
+            }
+?>
             </table>
         </form>
     </div>
