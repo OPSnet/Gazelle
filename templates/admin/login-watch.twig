@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked %}
 {% if nr_ban or nr_clear %}
 <div class="pad box">
     {% if nr_ban %}
@@ -91,7 +92,7 @@
         {% endif %}
     <tr>
         <td colspan="10">
-            <input type="checkbox" id="resolve" name="resolve"{{ resolve ? ' checked="checked"' : ''}}
+            <input type="checkbox" id="resolve" name="resolve"{{ checked(resolve) }}
             />&nbsp;<label for="resolve">Resolve IP addresses (may be slow)</label><br />
             <input type="submit" name="submit" value="Update" />
         </td>

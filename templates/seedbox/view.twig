@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import selected %}
 <div class="box pad">
     <h3>Multiple seeding locations</h3>
 
@@ -20,22 +21,22 @@
     {%- if loop.first -%}
 <select name="source">
     {% endif %}
-    <option value="{{ h.id }}"{{ h.id == source or source == 0 and loop.index0 == 0 ? ' selected="selected"' : '' }}>{{ h.name }}</option>
+    <option value="{{ h.id }}"{{ selected(h.id == source or source == 0 and loop.index0 == 0) }}>{{ h.name }}</option>
     {% if loop.last %}
 </select>
     {%- endif %}
 {% endfor -%}
 
 &nbsp;that are&nbsp;<select name="view">
-    <option value="union" {{ mode == 'union' ? ' selected="selected"' : '' }}>also</option>
-    <option value="exclude" {{ mode == 'exclude' ? ' selected="selected"' : '' }}>not</option>
+    <option value="union" {{ selected(mode == 'union') }}>also</option>
+    <option value="exclude" {{ selected(mode == 'exclude') }}>not</option>
  </select>&nbsp;seeding on
 
 {%- for h in host -%}
     {%- if loop.first -%}
 &nbsp;<select name="target">
     {% endif %}
-    <option{{ h.id == target or target == 0 and loop.index0 == 1 ? ' selected="selected"' : ''}} value="{{ h.id }}">{{ h.name }}</option>
+    <option{{ selected(h.id == target or target == 0 and loop.index0 == 1) }} value="{{ h.id }}">{{ h.name }}</option>
     {% if loop.last %}
 </select>
     {% endif %}

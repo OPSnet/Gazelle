@@ -1,10 +1,4 @@
-{% macro checked(flag) -%}
-    {%- if flag %} checked="checked"{% endif -%}
-{%- endmacro %}
-{% macro selected(flag) -%}
-    {%- if flag %} selected="selected"{% endif -%}
-{%- endmacro %}
-
+{% from 'macro/form.twig' import checked, selected %}
 <div class="thin">
     <div class="header">
         <h2>{{ user.id|user_url }} &rsaquo; Settings</h2>
@@ -67,7 +61,7 @@
                 <td>
                     <select name="stylesheet" id="stylesheet">
 {% for sheet in stylesheets %}
-                        <option value="{{ sheet.ID }}"{{ _self.selected(sheet.ID == style_id) }}>{{ sheet.ProperName }}</option>
+                        <option value="{{ sheet.ID }}"{{ selected(sheet.ID == style_id) }}>{{ sheet.ProperName }}</option>
 {% endfor %}
                     </select>&nbsp;&nbsp;
                     <a href="#" id="toggle_css_gallery" class="brackets">Show gallery</a>
@@ -97,7 +91,7 @@
                 <td class="label tooltip_interactive" title="&lt;a href=&quot;http://opendyslexic.org&quot; target=&quot;_blank&quot;&gt;Click here&lt;/a&gt; to read about OpenDyslexic, a CC-BY 3.0 licensed font designed for users with dyslexia." data-title-plain="Go to http://opendyslexic.org to read about OpenDyslexic, a CC-BY 3.0 licensed font designed for users with dyslexia."><strong>OpenDyslexic</strong></td>
                 <td>
                     <div class="field_div">
-                        <input type="checkbox" name="useopendyslexic" id="useopendyslexic"{{ _self.checked(option.UseOpenDyslexic) }} />
+                        <input type="checkbox" name="useopendyslexic" id="useopendyslexic"{{ checked(option.UseOpenDyslexic) }} />
                         <label for="useopendyslexic">Enable the OpenDyslexic font</label>
                     </div>
                     <p class="min_padding">This is an experimental feature, and some stylesheets will have display issues.</p>
@@ -106,7 +100,7 @@
             <tr id="site_tooltips_tr">
                 <td class="label tooltip" title="Use styled tooltips instead of the browser's default when hovering elements with extra information (such as this one)."><strong>Styled tooltips</strong></td>
                 <td>
-                    <input type="checkbox" name="usetooltipster" id="usetooltipster"{{ _self.checked(option.Tooltipster) }} />
+                    <input type="checkbox" name="usetooltipster" id="usetooltipster"{{ checked(option.Tooltipster) }} />
                     <label for="usetooltipster">Enable styled tooltips</label>
                 </td>
             </tr>
@@ -138,7 +132,7 @@
             <tr id="nav_{{ n.Key }}_tr">
                 <td class="label tooltip"><strong>{{ n.Title }}</strong></td>
                 <td>
-                    <input type="checkbox" name="n_{{ n.Key }}"{{ _self.checked(n.Mandatory or n.ID in nav_items_user) }}{% if n.Mandatory %} disabled="disabled"{% endif %} />
+                    <input type="checkbox" name="n_{{ n.Key }}"{{ checked(n.Mandatory or n.ID in nav_items_user) }}{% if n.Mandatory %} disabled="disabled"{% endif %} />
                 </td>
             </tr>
 {% endfor %}
@@ -155,11 +149,11 @@
                 <td>
                     <ul class="options_list nobullet">
                         <li>
-                            <input type="radio" name="searchtype" id="search_type_simple" value="0"{{ _self.checked(options.SearchType == 0) }} />
+                            <input type="radio" name="searchtype" id="search_type_simple" value="0"{{ checked(options.SearchType == 0) }} />
                             <label for="search_type_simple">Simple</label>
                         </li>
                         <li>
-                            <input type="radio" name="searchtype" id="search_type_advanced" value="1"{{ _self.checked(options.SearchType == 1) }} />
+                            <input type="radio" name="searchtype" id="search_type_advanced" value="1"{{ checked(options.SearchType == 1) }} />
                             <label for="search_type_advanced">Advanced</label>
                         </li>
                     </ul>
@@ -172,7 +166,7 @@
                     <p class="min_padding">Enabling torrent grouping on the search page will place multiple
                     formats of the same torrent group together beneath a common header.</p>
                     <div class="option_group">
-                        <input type="checkbox" name="disablegrouping" id="disablegrouping"{{ _self.checked(option.DisableGrouping2) }} />
+                        <input type="checkbox" name="disablegrouping" id="disablegrouping"{{ checked(option.DisableGrouping2) }} />
                         <label for="disablegrouping">Enable torrent grouping</label>
                     </div>
                 </td>
@@ -185,11 +179,11 @@
                             <p class="min_padding">In torrent search results and on artist pages, &quot;open&quot;
                             will expand torrent groups by default, and &quot;closed&quot; will collapse torrent groups by default.</p>
                             <li>
-                                <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"{{ _self.checked(option.TorrentGrouping == 0) }}> />
+                                <input type="radio" name="torrentgrouping" id="torrent_grouping_open" value="0"{{ checked(option.TorrentGrouping == 0) }}> />
                                 <label for="torrent_grouping_open">Open</label>
                             </li>
                             <li>
-                                <input type="radio" name="torrentgrouping" id="torrent_grouping_closed" value="1"{{ _self.checked(option.TorrentGrouping == 1) }} />
+                                <input type="radio" name="torrentgrouping" id="torrent_grouping_closed" value="1"{{ checked(option.TorrentGrouping == 1) }} />
                                 <label for="torrent_grouping_closed">Closed</label>
                             </li>
                         </ul>
@@ -215,7 +209,7 @@
             <tr id="tor_snatched_tr">
                 <td class="label tooltip" title="Enabling the snatched torrents indicator will display &quot;Snatched!&quot; next to torrents you've snatched."><strong>Snatched torrents indicator</strong></td>
                 <td>
-                    <input type="checkbox" name="showsnatched" id="showsnatched"{{ _self.checked(option.ShowSnatched) }} />
+                    <input type="checkbox" name="showsnatched" id="showsnatched"{{ checked(option.ShowSnatched) }} />
                     <label for="showsnatched">Enable snatched torrents indicator</label>
                 </td>
             </tr>
@@ -225,11 +219,11 @@
                     <ul class="options_list nobullet">
                         <li>
                             <input type="hidden" name="coverart" value="" />
-                            <input type="checkbox" name="coverart" id="coverart"{{ _self.checked(option.CoverArt) }} />
+                            <input type="checkbox" name="coverart" id="coverart"{{ checked(option.CoverArt) }} />
                             <label for="coverart">Enable cover artwork</label>
                         </li>
                         <li>
-                            <input type="checkbox" name="show_extra_covers" id="show_extra_covers"{{ _self.checked(option.ShowExtraCovers) }} />
+                            <input type="checkbox" name="show_extra_covers" id="show_extra_covers"{{ checked(option.ShowExtraCovers) }} />
                             <label for="show_extra_covers">Enable additional cover artwork</label>
                         </li>
                     </ul>
@@ -239,12 +233,12 @@
                 <td class="label tooltip" title="This option allows you to change the number of album covers to display within a single collage page."><strong>Cover art (collages)</strong></td>
                 <td>
                     <select name="collagecovers" id="collagecovers">
-                        <option value="10"{{ _self.selected(option.CollageCovers == 10) }}>10</option>
-                        <option value="25"{{ _self.selected(option.CollageCovers is null or option.CollageCovers == 25) }}>25 (default)</option>
-                        <option value="50"{{ _self.selected(option.CollageCovers == 50) }}>50</option>
-                        <option value="100"{{ _self.selected(option.CollageCovers == 100) }}>100</option>
-                        <option value="1000000"{{ _self.selected(option.CollageCovers == 1000000) }}>All</option>
-                        <option value="0"{{ _self.selected(option.CollageCovers == 0 or (option.CollageCovers is null and option.HideCollage)) }}>None</option>
+                        <option value="10"{{ selected(option.CollageCovers == 10) }}>10</option>
+                        <option value="25"{{ selected(option.CollageCovers is null or option.CollageCovers == 25) }}>25 (default)</option>
+                        <option value="50"{{ selected(option.CollageCovers == 50) }}>50</option>
+                        <option value="100"{{ selected(option.CollageCovers == 100) }}>100</option>
+                        <option value="1000000"{{ selected(option.CollageCovers == 1000000) }}>All</option>
+                        <option value="0"{{ selected(option.CollageCovers == 0 or (option.CollageCovers is null and option.HideCollage)) }}>None</option>
                     </select>
                     covers per page
                 </td>
@@ -254,7 +248,7 @@
                 <td>
                     <ul class="options_list nobullet">
                         <li>
-                            <input type="checkbox" name="showtfilter" id="showtfilter"{{ _self.checked(option.ShowTorFilter) }} />
+                            <input type="checkbox" name="showtfilter" id="showtfilter"{{ checked(option.ShowTorFilter) }} />
                             <label for="showtfilter">Display filter controls</label>
                         </li>
                         <li>
@@ -268,30 +262,30 @@
                 <td class="label tooltip" title="Autocomplete will try to predict the word or phrase that you're typing. Selecting &quot;Everywhere&quot; will enable autocomplete on artist and tag fields across the site. Selecting &quot;Searches only&quot; will enable autocomplete in searches."><strong>Autocompletion</strong></td>
                 <td>
                     <select name="autocomplete">
-                        <option value="0"{{ _self.selected(option.AutoComplete is null) }}>Everywhere</option>
-                        <option value="2"{{ _self.selected(option.AutoComplete == 2) }}>Searches only</option>
-                        <option value="1"{{ _self.selected(option.AutoComplete == 1) }}>Disable</option>
+                        <option value="0"{{ selected(option.AutoComplete is null) }}>Everywhere</option>
+                        <option value="2"{{ selected(option.AutoComplete == 2) }}>Searches only</option>
+                        <option value="1"{{ selected(option.AutoComplete == 1) }}>Disable</option>
                     </select>
                 </td>
             </tr>
             <tr id="tor_voting_tr">
                 <td class="label tooltip" title="This option allows you to enable or disable &quot;up&quot; and &quot;down&quot; voting links on artist pages, collages, and snatched lists."><strong>Voting links</strong></td>
                 <td>
-                    <input type="checkbox" name="novotelinks" id="novotelinks"{{ _self.checked(option.NoVoteLinks) }} />
+                    <input type="checkbox" name="novotelinks" id="novotelinks"{{ checked(option.NoVoteLinks) }} />
                     <label for="novotelinks">Disable voting links</label>
                 </td>
             </tr>
             <tr id="tor_dltext_tr">
                 <td class="label tooltip" title="Some ISPs block the downloading of torrent files. Enable this option if you wish to download torrent files with a &quot;.txt&quot; file extension."><strong>Text file downloads</strong></td>
                 <td>
-                    <input type="checkbox" name="downloadalt" id="downloadalt"{{ _self.checked(download_text) }} />
+                    <input type="checkbox" name="downloadalt" id="downloadalt"{{ checked(download_text) }} />
                     <label for="downloadalt">Enable downloading torrent files as text files</label>
                 </td>
             </tr>
             <tr id="tor_https_tr">
                 <td class="label tooltip" title="Use HTTPs tracker. Older clients do not work well with https announcements"><strong>Use HTTPs Tracker</strong></td>
                 <td>
-                    <input type="checkbox" name="httpstracker" id="httpstracker"{{ _self.checked(option.HttpsTracker) }} />
+                    <input type="checkbox" name="httpstracker" id="httpstracker"{{ checked(option.HttpsTracker) }} />
                     <label for="httpstracker">Enable HTTPs tracker for announce URL</label>
                 </td>
             </tr>
@@ -306,9 +300,9 @@
                 <td class="label tooltip" title="This option allows you to set the desired number of displayed posts per page within forum threads."><strong>Posts per page (forums)</strong></td>
                 <td>
                     <select name="postsperpage" id="postsperpage">
-                        <option value="25"{{ _self.selected(option.PostsPerPage == 25) }}>25 (default)</option>
-                        <option value="50"{{ _self.selected(option.PostsPerPage == 50) }}>50</option>
-                        <option value="100"{{ _self.selected(option.PostsPerPage == 100) }}>100</option>
+                        <option value="25"{{ selected(option.PostsPerPage == 25) }}>25 (default)</option>
+                        <option value="50"{{ selected(option.PostsPerPage == 50) }}>50</option>
+                        <option value="100"{{ selected(option.PostsPerPage == 100) }}>100</option>
                     </select>
                     posts per page
                 </td>
@@ -316,21 +310,21 @@
             <tr id="comm_inbsort_tr">
                 <td class="label tooltip" title="This option will force unread private messages to be listed first."><strong>Inbox sorting</strong></td>
                 <td>
-                    <input type="checkbox" name="list_unread_pms_first" id="list_unread_pms_first"{{ _self.checked(option.ListUnreadPMsFirst) }} />
+                    <input type="checkbox" name="list_unread_pms_first" id="list_unread_pms_first"{{ checked(option.ListUnreadPMsFirst) }} />
                     <label for="list_unread_pms_first">List unread private messages first</label>
                 </td>
             </tr>
             <tr id="comm_emot_tr">
                 <td class="label tooltip" title="Emoticons are small images which replace traditional text-based &quot;smileys&quot; like :) or :("><strong>Emoticons</strong></td>
                 <td>
-                    <input type="checkbox" name="disablesmileys" id="disablesmileys"{{ _self.checked(option.DisableSmileys) }} />
+                    <input type="checkbox" name="disablesmileys" id="disablesmileys"{{ checked(option.DisableSmileys) }} />
                     <label for="disablesmileys">Disable emoticons</label>
                 </td>
             </tr>
             <tr id="comm_mature_tr">
                 <td class="label tooltip_interactive" title="{{ constant('SITE_NAME') }} has very flexible &lt;a href=&quot;wiki.php?action=article&amp;amp;id=1063&quot;&gt;mature content policies&lt;/a&gt; for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath &lt;code&gt;[mature]&lt;/code&gt; tags. If you choose not to display mature content, all content tagged with &lt;code&gt;[mature]&lt;/code&gt; tags will be hidden from you." data-title-plain="{{ constant('SITE_NAME') }} has very flexible mature content policies for all community areas. Choosing to display mature content will allow you to click-through to view any content posted beneath [mature] tags. If you choose not to display mature content, all content tagged with [mature] tags will be hidden from you."><strong>Mature content (forums, comments, profiles)</strong></td>
                 <td>
-                    <input type="checkbox" name="enablematurecontent" id="enablematurecontent"{{ _self.checked(option.EnableMatureContent) }} />
+                    <input type="checkbox" name="enablematurecontent" id="enablematurecontent"{{ checked(option.EnableMatureContent) }} />
                     <label for="enablematurecontent">Display mature content</label>
                 </td>
             </tr>
@@ -338,33 +332,33 @@
                 <td class="label tooltip" title="This option allows you to disable all avatars, show all avatars (with a placeholder for users without avatars), show all avatars &lt;em&gt;or&lt;/em&gt; an identicon set (for users without avatars), or replace all avatars with an identicon set of your choosing." data-title-plain="This option allows you to disable all avatars, show all avatars (with a placeholder for users without avatars), show all avatars or an identicon set (for users without avatars), or replace all avatars with an identicon set of your choosing."><strong>Avatar display (posts)</strong></td>
                 <td>
                     <select name="disableavatars" id="disableavatars" onchange="ToggleIdenticons();">
-                        <option value="1"{{ _self.selected(option.DisableAvatars == 1) }}>Disable avatars</option>
-                        <option value="0"{{ _self.selected(option.DisableAvatars == 0) }}>Show avatars</option>
-                        <option value="2"{{ _self.selected(option.DisableAvatars == 2) }}>Show avatars or:</option>
-                        <option value="3"{{ _self.selected(option.DisableAvatars == 3) }}>Replace all avatars with:</option>
+                        <option value="1"{{ selected(option.DisableAvatars == 1) }}>Disable avatars</option>
+                        <option value="0"{{ selected(option.DisableAvatars == 0) }}>Show avatars</option>
+                        <option value="2"{{ selected(option.DisableAvatars == 2) }}>Show avatars or:</option>
+                        <option value="3"{{ selected(option.DisableAvatars == 3) }}>Replace all avatars with:</option>
                     </select>
                     <select name="identicons" id="identicons">
-                        <option value="0"{{ _self.selected(option.Identicons == 0) }}>Identicon</option>
-                        <option value="1"{{ _self.selected(option.Identicons == 1) }}>MonsterID</option>
-                        <option value="2"{{ _self.selected(option.Identicons == 2) }}>Wavatar</option>
-                        <option value="3"{{ _self.selected(option.Identicons == 3) }}>Retro</option>
-                        <option value="4"{{ _self.selected(option.Identicons == 4) }}>Robots 1</option>
-                        <option value="5"{{ _self.selected(option.Identicons == 5) }}>Robots 2</option>
-                        <option value="6"{{ _self.selected(option.Identicons == 6) }}>Robots 3</option>
+                        <option value="0"{{ selected(option.Identicons == 0) }}>Identicon</option>
+                        <option value="1"{{ selected(option.Identicons == 1) }}>MonsterID</option>
+                        <option value="2"{{ selected(option.Identicons == 2) }}>Wavatar</option>
+                        <option value="3"{{ selected(option.Identicons == 3) }}>Retro</option>
+                        <option value="4"{{ selected(option.Identicons == 4) }}>Robots 1</option>
+                        <option value="5"{{ selected(option.Identicons == 5) }}>Robots 2</option>
+                        <option value="6"{{ selected(option.Identicons == 6) }}>Robots 3</option>
                     </select>
                 </td>
             </tr>
             <tr id="comm_autosave_tr">
                 <td class="label tooltip" title="As you add text to a post or reply, this text is automatically saved. If you stop and return to your post at a later time (e.g. accidentally clicking a link and then pressing the &quot;Back&quot; button in your browser), the text will remain. This option allows you to disable this feature."><strong>Auto-save reply text</strong></td>
                 <td>
-                    <input type="checkbox" name="disableautosave" id="disableautosave"{{ _self.checked(option.DisableAutoSave) }} />
+                    <input type="checkbox" name="disableautosave" id="disableautosave"{{ checked(option.DisableAutoSave) }} />
                     <label for="disableautosave">Disable text auto-saving</label>
                 </td>
             </tr>
             <tr id="comm_acceptfl_tr">
                 <td class="label tooltip" title="If unchecked, other members will not have the option to gift you FL tokens. You also decline the receipt of points from global handouts. Use this when you are self-sufficient thanks to your seeding activity"><strong>FL Tokens</strong></td>
                 <td >
-                    <input type="checkbox" name="acceptfltoken" id="acceptfltoken"{{ _self.checked(accept_fl) }} />
+                    <input type="checkbox" name="acceptfltoken" id="acceptfltoken"{{ checked(accept_fl) }} />
                     <label for="acceptfltoken">Accept FL Tokens from members and accept site-wide bonus point handouts</label>
                 </td>
             </tr>
@@ -378,35 +372,35 @@
             <tr id="notif_autosubscribe_tr">
                 <td class="label tooltip" title="Enabling this will automatically subscribe you to any thread you post in."><strong>Automatic thread subscriptions</strong></td>
                 <td>
-                    <input type="checkbox" name="autosubscribe" id="autosubscribe"{{ _self.checked(option.AutoSubscribe) }} />
+                    <input type="checkbox" name="autosubscribe" id="autosubscribe"{{ checked(option.AutoSubscribe) }} />
                     <label for="autosubscribe">Enable automatic thread subscriptions</label>
                 </td>
             </tr>
             <tr id="notif_notifyondeleteseeding_tr">
                 <td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you're seeding is deleted."><strong>Deleted seeding torrent alerts</strong></td>
                 <td>
-                    <input type="checkbox" name="notifyondeleteseeding" id="notifyondeleteseeding"{{ _self.checked(notify.seeded) }} />
+                    <input type="checkbox" name="notifyondeleteseeding" id="notifyondeleteseeding"{{ checked(notify.seeded) }} />
                     <label for="notifyondeleteseeding">Enable PM notification for deleted seeding torrents</label>
                 </td>
             </tr>
             <tr id="notif_notifyondeletesnatched_tr">
                 <td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you've snatched is deleted."><strong>Deleted snatched torrent alerts</strong></td>
                 <td>
-                    <input type="checkbox" name="notifyondeletesnatched" id="notifyondeletesnatched"{{ _self.checked(notify.snatched) }} />
+                    <input type="checkbox" name="notifyondeletesnatched" id="notifyondeletesnatched"{{ checked(notify.snatched) }} />
                     <label for="notifyondeletesnatched">Enable PM notification for deleted snatched torrents</label>
                 </td>
             </tr>
             <tr id="notif_notifyondeletedownloaded_tr">
                 <td class="label tooltip" title="Enabling this will send you a PM alert whenever a torrent you've downloaded is deleted."><strong>Deleted downloaded torrent alerts</strong></td>
                 <td>
-                    <input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"{{ _self.checked(notify.downloaded) }} />
+                    <input type="checkbox" name="notifyondeletedownloaded" id="notifyondeletedownloaded"{{ checked(notify.downloaded) }} />
                     <label for="notifyondeletedownloaded">Enable PM notification for deleted downloaded torrents</label>
                 </td>
             </tr>
             <tr id="notif_unseeded_tr">
                 <td class="label tooltip" title="Enabling this will send you a PM alert before your uploads are deleted for being unseeded."><strong>Unseeded torrent alerts</strong></td>
                 <td>
-                    <input type="checkbox" name="unseededalerts" id="unseededalerts"{{ _self.checked(notify.unseeded) }} />
+                    <input type="checkbox" name="unseededalerts" id="unseededalerts"{{ checked(notify.unseeded) }} />
                     <label for="unseededalerts">Enable unseeded torrent alerts</label>
                 </td>
             </tr>
@@ -521,7 +515,7 @@
             <tr id="para_lastseen_tr">
                 <td class="label tooltip" title="Enable this to allow others to see when your most recent site activity occurred."><strong>Recent activity</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_lastseen"{{ _self.checked(paranoia.lastseen) }} /> Last seen</label>
+                    <label><input type="checkbox" name="p_lastseen"{{ checked(paranoia.lastseen) }} /> Last seen</label>
                 </td>
             </tr>
             <tr id="para_presets_tr">
@@ -535,25 +529,25 @@
             <tr id="para_donations_tr">
                 <td class="label"><strong>Donations</strong></td>
                 <td>
-                    <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ _self.checked(donor.visible) }} />
+                    <input type="checkbox" id="p_donor_stats" name="p_donor_stats" onchange="AlterParanoia();"{{ checked(donor.visible) }} />
                     <label for="p_donor_stats">Show donor stats</label>
-                    <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"{{ _self.checked(paranoia.hide_heart) }} />
+                    <input type="checkbox" id="p_donor_heart" name="p_donor_heart" onchange="AlterParanoia();"{{ checked(paranoia.hide_heart) }} />
                     <label for="p_donor_heart">Show donor heart</label>
                 </td>
             </tr>
             <tr id="para_stats_tr">
                 <td class="label tooltip" title="These settings control the display of your uploaded data amount, downloaded data amount, and ratio."><strong>Statistics</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"{{ _self.checked(paranoia.upload) }} /> Uploaded</label>&nbsp;&nbsp;
-                    <label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"{{ _self.checked(paranoia.download) }} /> Downloaded</label>&nbsp;&nbsp;
-                    <label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"{{ _self.checked(paranoia.ratio) }} /> Ratio</label>&nbsp;&nbsp;
-                    <label><input type="checkbox" name="p_bonuspoints"{{ _self.checked(paranoia.bonus) }} /> Bonus Points</label>
+                    <label><input type="checkbox" name="p_uploaded" onchange="AlterParanoia();"{{ checked(paranoia.upload) }} /> Uploaded</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_downloaded" onchange="AlterParanoia();"{{ checked(paranoia.download) }} /> Downloaded</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_ratio" onchange="AlterParanoia();"{{ checked(paranoia.ratio) }} /> Ratio</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_bonuspoints"{{ checked(paranoia.bonus) }} /> Bonus Points</label>
                 </td>
             </tr>
             <tr id="para_reqratio_tr">
                 <td class="label"><strong>Required Ratio</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_requiredratio"{{ _self.checked(paranoia.ratio_req) }} /> Required Ratio</label>
+                    <label><input type="checkbox" name="p_requiredratio"{{ checked(paranoia.ratio_req) }} /> Required Ratio</label>
                 </td>
             </tr>
             <tr id="para_comments_tr">
@@ -572,17 +566,17 @@
             <tr id="para_reqfill_tr">
                 <td class="label"><strong>Requests (filled)</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_requestsfilled_count" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_fill.count) }} /> Show count</label>&nbsp;&nbsp;
-                    <label><input type="checkbox" name="p_requestsfilled_bounty" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_fill.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
-                    <label><input type="checkbox" name="p_requestsfilled_list" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_fill.list) }} /> Show list</label>
+                    <label><input type="checkbox" name="p_requestsfilled_count" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.count) }} /> Show count</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsfilled_bounty" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsfilled_list" onchange="AlterParanoia();"{{ checked(paranoia.request_fill.list) }} /> Show list</label>
                 </td>
             </tr>
             <tr id="para_reqvote_tr">
                 <td class="label"><strong>Requests (voted for)</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_requestsvoted_count" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_vote.count) }} /> Show count</label>&nbsp;&nbsp;
-                    <label><input type="checkbox" name="p_requestsvoted_bounty" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_vote.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
-                    <label><input type="checkbox" name="p_requestsvoted_list" onchange="AlterParanoia();"{{ _self.checked(paranoia.request_vote.list) }} /> Show list</label>
+                    <label><input type="checkbox" name="p_requestsvoted_count" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.count) }} /> Show count</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsvoted_bounty" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.bounty) }} /> Show bounty</label>&nbsp;&nbsp;
+                    <label><input type="checkbox" name="p_requestsvoted_list" onchange="AlterParanoia();"{{ checked(paranoia.request_vote.list) }} /> Show list</label>
                 </td>
             </tr>
             <tr id="para_upltor_tr">
@@ -613,19 +607,19 @@
             <tr id="para_torsubscr_tr">
                 <td class="label tooltip" title="This option allows other users to subscribe to your torrent uploads."><strong>Torrents (upload subscriptions)</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_notifications"{{ _self.checked(paranoia.notify) }} /> Allow torrent upload subscriptions</label>
+                    <label><input type="checkbox" name="p_notifications"{{ checked(paranoia.notify) }} /> Allow torrent upload subscriptions</label>
                 </td>
             </tr>
             <tr id="para_invited_tr">
                 <td class="label tooltip" title="This option controls the visibility of your {{ constant('SITE_NAME') }} invitees."><strong>Invitees</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_invitedcount"{{ _self.checked(paranoia.invited) }} /> Show count</label>
+                    <label><input type="checkbox" name="p_invitedcount"{{ checked(paranoia.invited) }} /> Show count</label>
                 </td>
             </tr>
             <tr id="para_artistsadded_tr">
                 <td class="label tooltip" title="This option controls the display of the artists you have added to torrent groups on the site. This number includes artists added via the torrent upload form, as well as artists added via the &quot;Add artists&quot; box on torrent group pages."><strong>Artists added</strong></td>
                 <td>
-                    <label><input type="checkbox" name="p_artistsadded"{{ _self.checked(paranoia.artists) }} /> Show count</label>
+                    <label><input type="checkbox" name="p_artistsadded"{{ checked(paranoia.artists) }} /> Show count</label>
                 </td>
             </tr>
             <tr id="para_preview_tr">

@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import checked %}
 <div class="thin">
     <h2><a href="forums.php">Forums</a> &rsaquo; <a href="forums.php?action=viewforum&amp;forumid={{ forum_id }}">{{ forum.Name }}</a> &rsaquo; <span id="newthreadtitle">New Thread</span></h2>
     <div class="hidden" id="newthreadpreview">
@@ -66,7 +67,7 @@
                 <tr>
                     <td></td>
                     <td>
-                        <input id="subscribebox" type="checkbox" name="subscribe"{% if is_subbed %} checked="checked"{% endif %} onchange="$('#subscribeboxpreview').raw().checked=this.checked;" />
+                        <input id="subscribebox" type="checkbox" name="subscribe"{{ checked(is_subbed) }} onchange="$('#subscribeboxpreview').raw().checked=this.checked;" />
                         <label for="subscribebox">Subscribe to topic</label>
                     </td>
                 </tr>
@@ -92,7 +93,7 @@
 {% endif %}
             </table>
             <div id="subscribediv" class="hidden">
-                <input id="subscribeboxpreview" type="checkbox" name="subscribe"{% if is_subbed %} checked="checked"{% endif %} />
+                <input id="subscribeboxpreview" type="checkbox" name="subscribe"{{ checked(is_subbed) }} />
                 <label for="subscribebox">Subscribe to topic</label>
             </div>
             <div id="buttons" class="center">
