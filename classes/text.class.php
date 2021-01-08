@@ -1128,6 +1128,14 @@ class Text {
                         SELECT ID FROM users_main WHERE Username = ?
                         ", $username
                     );
+                    if (is_null($cache[$username]) && preg_match('/^(.*)[.?]+$/', $username, $match)) {
+                        // strip off trailing dots to see if we can match @Spine...
+                        $username = $match[1];
+                        $cache[$username] = G::$DB->scalar("
+                            SELECT ID FROM users_main WHERE Username = ?
+                            ", $username
+                        );
+                    }
                 }
                 return is_null($cache[$username])
                     ? $match[0]
