@@ -84,12 +84,11 @@ abstract class Json extends Base {
             return [];
         }
         $Debug = new \Gazelle\Debug;
-        return [
-            'debug' => [
-                'queries'  => $Debug->get_queries(),
-                'searches' => $Debug->get_sphinxql_queries(),
-            ],
-        ];
+        $info = ['debug' => ['queries'  => $Debug->get_queries()]];
+        if (class_exists('Sphinxql')) {
+            $info['searches'] = \Sphinxql::$Queries;
+        }
+        return $info;
     }
 
     protected function info() {

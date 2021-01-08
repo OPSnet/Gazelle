@@ -1,0 +1,31 @@
+{% for query in list %}
+    {% if loop.first %}
+        {% set nr = list|length %}
+<table class="layout" width="100%">
+    <tr>
+        <td align="left"><strong><a href="#" id="debug-view-query" class="brackets">View</a>
+        {{ nr|number_format }} {% if list|length == 1 %}Query{% else %}Queries{% endif %}
+        ({{ time|number_format(5) }} ms):</strong></td>
+    </tr>
+</table>
+<table id="debug_query" class="debug_table hidden">
+    {% endif %}
+    <tr valign="top">
+        <td class="debug_data debug_query_data">{{ query.0|raw }}</td>
+        <td class="rowa debug_info debug_query_time" style="width: 130px;" align="right">{{ query.1|number_format(5) }} ms</td>
+        <td class="rowa debug_info debug_query_warnings">
+        {% for warning in query.2 %}
+            {% if loop.first %}
+                <ul class="stats nobullet">
+            {% endif %}
+                    <li>{{ warning }}</li>
+            {% if loop.last %}
+                </ul>
+            {% endif %}
+         {% endfor %}
+        </td>
+    </tr>
+    {% if loop.list %}
+</table>
+    {% endif %}
+{% endfor %}

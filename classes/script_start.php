@@ -59,9 +59,6 @@ G::$Twig = new Twig\Environment(
         'debug' => DEBUG_MODE,
         'cache' => __DIR__ . '/../cache/twig'
 ]);
-if (DEBUG_MODE) {
-    G::$Twig->addExtension(new Twig\Extension\DebugExtension());
-}
 
 G::$Twig->addFilter(new Twig\TwigFilter(
     'article',
@@ -382,6 +379,9 @@ if (isset($LoggedUser['ID'])) {
             'session-id'      => $SessionID
         ]);
     }
+}
+if (DEBUG_MODE || check_perms('site_debug')) {
+    G::$Twig->addExtension(new Twig\Extension\DebugExtension());
 }
 
 $Debug->set_flag('end user handling');

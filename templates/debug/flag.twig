@@ -1,0 +1,30 @@
+{% for row in list %}
+    {% if loop.first %}
+<table class="layout" width="100%">
+    <tr>
+        <td align="left"><strong><a href="#" id="debug-view-flag" class="brackets">View</a>
+        Flags:</strong></td>
+    </tr>
+</table>
+<table id="debug_flag" class="debug_table hidden">
+    <tr valign="top">
+        <td class="debug_flags_event"><strong>Event</strong></td>
+        <td style="text-align: right" class="debug_flags_time"><strong>Page time</strong></td>
+        {% if row.3 is not empty %}
+        <td style="text-align: right" class="debug_flags_time"><strong>CPU time</strong></td>
+        {% endif %}
+        <td style="text-align: right" class="debug_flags_memory"><strong>Memory</strong></td>
+    </tr>
+    {% endif %}
+    <tr valign="top">
+        <td>{{ row.0 }}</td>
+        <td style="text-align: right">{{ row.1|number_format(3) }} ms</td>
+    {% if row.3 is not empty %}
+        <td style="text-align: right">{{ (row.3 / 1000)|number_format(3) }} ms</td>
+    {% endif %}
+        <td style="text-align: right">{{ row.2|octet_size }}</td>
+    </tr>
+    {% if loop.last %}
+</table>
+    {% endif %}
+{% endfor %}

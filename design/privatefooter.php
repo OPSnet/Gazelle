@@ -4,14 +4,18 @@
 <?php if (DEBUG_MODE || check_perms('site_debug')) { ?>
     <div id="site_debug">
 <?php
-    $Debug->perf_table();
-    $Debug->flag_table();
-    $Debug->error_table();
-    $Debug->sphinx_table();
-    $Debug->query_table();
-    $Debug->cache_table();
-    $Debug->vars_table();
-    $Debug->ocelot_table();
+    echo G::$Twig->render('debug/performance.twig', ['list' => $Debug->get_perf()]);
+    echo G::$Twig->render('debug/flag.twig', ['list' => $Debug->get_flags()]);
+    echo G::$Twig->render('debug/class.twig', ['list' => $Debug->get_classes()]);
+    echo G::$Twig->render('debug/extension.twig', ['list' => $Debug->get_extensions()]);
+    echo G::$Twig->render('debug/error.twig', ['list' => $Debug->get_errors()]);
+    if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
+        echo G::$Twig->render('debug/sphinxql.twig', ['list' => \Sphinxql::$Queries, 'time' => \Sphinxql::$Time]);
+    }
+    echo G::$Twig->render('debug/query.twig', ['list' => $Debug->get_queries(), 'time' => G::$DB->Time]);
+    echo G::$Twig->render('debug/cache.twig', ['list' => $Debug->get_cache_keys(), 'time' => G::$Cache->Time]);
+    echo G::$Twig->render('debug/var.twig', ['list' => $Debug->get_logged_vars()]);
+    echo G::$Twig->render('debug/ocelot.twig', ['list' => class_exists('Tracker') ? \Tracker::$Requests : []]);
 ?>
     </div>
 <?php
