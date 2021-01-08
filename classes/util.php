@@ -252,12 +252,11 @@ function add_json_info($Json) {
     if (!isset($Json['debug']) && check_perms('site_debug')) {
         /** @var Gazelle\Debug $Debug */
         $Debug = new Gazelle\Debug;
-        $Json = array_merge($Json, [
-            'debug' => [
-                'queries' => $Debug->get_queries(),
-                'searches' => $Debug->get_sphinxql_queries()
-            ],
-        ]);
+        $info = ['debug' => ['queries' => $Debug->get_queries()]];
+        if (class_exists('Sphinxql') && !empty(\Sphinxql::$Queries)) {
+            $info['searches'] = \Sphinxql::$Queries;
+        }
+        $Json = array_merge($Json, ['debug' => $info]);
     }
     return $Json;
 }

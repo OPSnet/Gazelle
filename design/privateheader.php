@@ -72,6 +72,7 @@ if (!empty($JSIncludes)) {
 
 if (DEBUG_MODE || check_perms('site_debug')) {
     $Scripts[] = 'jquery-migrate';
+    $Scripts[] = 'debug';
 }
 if (!isset(G::$LoggedUser['Tooltipster']) || G::$LoggedUser['Tooltipster']) {
     $Scripts[] = 'tooltipster';
