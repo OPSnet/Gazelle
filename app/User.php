@@ -1891,13 +1891,13 @@ class User extends BaseObject {
         $resetKey = randomString();
         $this->db->prepared_query("
             UPDATE users_info SET
-                ResetExpires = now() + 1 HOUR
-                ResetKey = ?,
+                ResetExpires = now() + INTERVAL 1 HOUR,
+                ResetKey = ?
             WHERE UserID = ?
             ", $resetKey, $this->id
         );
         \Misc::send_email($this->email(), 'Password reset information for ' . SITE_NAME,
-            G::$Twig->render('email/password_reset.twig', [
+            \G::$Twig->render('email/password_reset.twig', [
                 'username'  => $this->username(),
                 'reset_key' => $resetKey,
                 'ipaddr'    => $_SERVER['REMOTE_ADDR'],

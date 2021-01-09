@@ -12,8 +12,7 @@ if (!empty($_REQUEST['email'])) {
         $user = (new Gazelle\Manager\User)->findByEmail(trim($_REQUEST['email']));
         if ($user) {
             $user->resetPassword();
-            $session = (new Gazelle\Session($user->id()))->dropAll();
-            $session->dropAll();
+            (new Gazelle\Session($user->id()))->dropAll();
             $sent = 1; // If $sent is 1, recover_step1.php displays a success message
         }
         $error = "Email sent with further instructions.";
@@ -34,7 +33,7 @@ if (!empty($_REQUEST['email'])) {
 // Either a form for the user's email address, or a success message
 View::show_header('Recover Password','validate');
 echo $Validate->generateJS('recoverform');
-echo G::$Twig('login/reset-password.twig', [
+echo G::$Twig->render('login/reset-password.twig', [
     'error' => $error,
     'sent'  => $sent,
 ]);
