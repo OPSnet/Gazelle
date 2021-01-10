@@ -1,48 +1,43 @@
 <?php
-//For sorting tags
-$OnlyArtistReleases = !empty($_GET['artistreleases']);
 
-if ($_GET['id'] && $_GET['artistname']) {
+if (isset($_GET['id'])) {
+    if (isset($_GET['artistname'])) {
+        json_die("failure", "cannot set both id and artistname");
+    }
+    $ArtistID = (int)$_GET['id'];
+    if (!$ArtistID) {
+        json_die("failure", "bad id");
+    }
+} elseif (isset($_GET['artistname'])) {
+    $ArtistID = $DB->scalar("
+        SELECT ArtistID FROM artists_alias WHERE Name = ?
+        ", trim($_GET['artistname'])
+    );
+    if (is_null($ArtistID)) {
+        json_die("failure", "bad artistname");
+    }
+} else {
     json_die("failure", "bad parameters");
 }
 
-$ArtistID = (int)$_GET['id'];
-if (!$ArtistID) {
-    json_die("failure");
-}
-$user = new Gazelle\User($LoggedUser['ID']);
-
-if (empty($ArtistID)) {
-    if (!empty($_GET['artistname'])) {
-        $DB->prepared_query('
-            SELECT ArtistID
-            FROM artists_alias
-            WHERE Name LIKE ?
-            LIMIT 1
-            ', trim($_GET['artistname'])
-        );
-        if (!(list($ArtistID) = $DB->next_record(MYSQLI_NUM, false))) {
-            json_die("failure");
-        }
-        // If we get here, we got the ID!
-    }
-}
-
-
-if (!empty($_GET['revisionid'])) { // if they're viewing an old revision
+if (empty($_GET['revisionid'])) {
+    $RevisionID = false; // viewing the live version
+} else {
     $RevisionID = $_GET['revisionid'];
     if (!is_number($RevisionID)) {
-        json_die("failure", "bad parameters");
+        json_die("failure", "bad revision");
     }
-} else { // viewing the live version
-    $RevisionID = false;
 }
 
+//For sorting tags
+$OnlyArtistReleases = !empty($_GET['artistreleases']);
+
+$user = new Gazelle\User($LoggedUser['ID']);
 $Artist = new Gazelle\Artist($ArtistID, $RevisionID);
 $cacheKey = $Artist->cacheKey();
 $Data = $Cache->get_value($cacheKey);
 if ($Data) {
-    list($Name, $Image, $Body, $VanityHouseArtist, $SimilarArray) = $Data;
+    [$Name, $Image, $Body, $VanityHouseArtist, $SimilarArray] = $Data;
 } else {
     $sql = 'SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse
         FROM artists_group AS ag
@@ -56,12 +51,10 @@ if ($Data) {
         $queryId = $ArtistID;
     }
 
-    $DB->prepared_query($sql, $queryId);
-    if (!$DB->has_results()) {
+    [$Name, $Image, $Body, $VanityHouseArtist] = $DB->row($sql, $queryId);
+    if (is_null($Name)) {
         json_die("failure");
     }
-    list($Name, $Image, $Body, $VanityHouseArtist)
-        = $DB->next_record(MYSQLI_NUM);
 
     $DB->prepared_query('
         SELECT
