@@ -8,9 +8,9 @@ if ($threadId < 1) {
 $forum = new \Gazelle\Forum();
 $ForumID = $forum->setForumFromThread($threadId);
 
-list($Question, $Answers, $Votes, $Featured, $Closed) = $forum->pollData($threadId);
+[$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
 if ($Closed) {
-    error(403,true);
+    error(403, true);
 }
 
 if (!empty($Votes)) {
@@ -29,12 +29,10 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
     <input type="hidden" name="large" value="<?=display_str($_POST['large'])?>" />
     <input type="hidden" name="topicid" value="<?=$threadId?>" />
-<?php
-    for ($i = 1, $il = count($Answers); $i <= $il; $i++) { ?>
+<?php for ($i = 1, $il = count($Answers); $i <= $il; $i++) { ?>
     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
     <label for="answer_<?=$i?>"><?=display_str($Answers[$i])?></label><br />
-<?php
-    } ?>
+<?php } ?>
     <br /><input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&#8202;&mdash;&#8202;Show the results!</label><br /><br />
     <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response });" value="Vote" />
 </form>
@@ -43,7 +41,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     authorize();
     $Vote = $_POST['vote'];
     if (!isset($Answers[$Vote]) && $Vote != 0) {
-        error(0,true);
+        error(0, true);
     }
 
     //Add our vote
@@ -79,17 +77,18 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
             }
         } else {
             //Staff forum, output voters, not percentages
-            $DB->query("
+            $DB->prepared_query("
                 SELECT GROUP_CONCAT(um.Username SEPARATOR ', '),
                     fpv.Vote
                 FROM users_main AS um
-                    JOIN forums_polls_votes AS fpv ON um.ID = fpv.UserID
-                WHERE TopicID = $threadId
-                GROUP BY fpv.Vote");
-
+                INNER JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
+                WHERE TopicID = ?
+                GROUP BY fpv.Vote
+                ", $threadId
+            );
             $StaffVotes = $DB->to_array();
             foreach ($StaffVotes as $StaffVote) {
-                list($StaffString, $StaffVoted) = $StaffVote;
+                [$StaffString, $StaffVoted] = $StaffVote;
 ?>
                 <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;vote=<?=(int)$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
 <?php
