@@ -88,7 +88,7 @@ $subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
 $user = new Gazelle\User($LoggedUser['ID']);
 
 // Start output
-View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscriptions');
+View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting');
 ?>
 <div class="thin">
     <div class="header">

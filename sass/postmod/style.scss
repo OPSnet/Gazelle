@@ -1099,12 +1099,24 @@ div[class~=tooltipster-content] > a {
     margin: 3px 0;
 }
 
-.vote_tag_up, .vote_artist_up, .vote_album_up, .small_upvote, .small_upvoted {
+.vote_tag_up, .vote_artist_up, .vote_album_up, .small_upvoted {
+    font-weight: bolder;
     color: green;
 }
 
-.vote_tag_down, .vote_artist_down, .vote_album_down, .small_downvote, .small_downvoted {
+.vote_tag_down, .vote_artist_down, .vote_album_down, .small_downvoted {
+    font-weight: bolder;
     color: red;
+}
+
+.main_column .group td .small_upvote {
+    font-weight: bolder;
+    color: green;
+}
+
+.main_column .group td .small_downvote {
+    font-weight: bolder;
+    color: #CC0000;
 }
 
 /* workaround for calendar display issue */

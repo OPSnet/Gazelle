@@ -935,6 +935,7 @@ div[class~=tooltipster-content] > a {
 .vote_album_up,
 .small_upvote,
 .small_upvoted {
+  font-weight: bolder;
   color: green;
 }
 
@@ -943,6 +944,7 @@ div[class~=tooltipster-content] > a {
 .vote_album_down,
 .small_downvote,
 .small_downvoted {
+  font-weight: bolder;
   color: red;
 }
 
