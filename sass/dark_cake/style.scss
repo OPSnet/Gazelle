@@ -1017,6 +1017,7 @@ div[class~=tooltipster-content] > a {
 .vote_album_up,
 .small_upvote,
 .small_upvoted {
+  font-weight: bolder;
   color: green;
 }
 
@@ -1025,7 +1026,8 @@ div[class~=tooltipster-content] > a {
 .vote_album_down,
 .small_downvote,
 .small_downvoted {
-  color: red;
+  font-weight: bolder;
+  color: #CC0000;
 }
 
 /* get rid of extraneous padding in the Top Contributors box */

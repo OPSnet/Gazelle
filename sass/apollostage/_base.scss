@@ -391,18 +391,25 @@ strong.important_text_alt {
 .r20,
 .r50,
 .r99,
+.vote_tag_up {
+  color: #4fb650;
+}
+
 .small_upvote,
 .small_upvoted,
 .vote_album_up,
 .vote_artist_up,
 .vote_tag_up {
+  font-weight: bolder;
   color: #4fb650;
 }
 
 .small_downvote,
+.small_downvoted,
 .vote_album_down,
 .vote_artist_down,
 .vote_tag_down {
+  font-weight: bolder;
   color: $ratio-red-color;
 }
 

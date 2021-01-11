@@ -1617,6 +1617,16 @@ ul.collage_images {
     background-color: #FFF;
 }
 
+.main_column .group td .small_upvote, .small_upvoted, .vote_album_up {
+    font-weight: bolder;
+    color: green;
+}
+
+.main_column .group td .small_downvote, .small_downvoted, .vote_album_down {
+    font-weight: bolder;
+    color: red;
+}
+
 #requests .tags {
     color: #656565;
 }

@@ -12,14 +12,14 @@ class Artist extends \Gazelle\Base {
 
     public function __construct() {
         parent::__construct();
-        if (($this->role = $this->cache->get_value(ROLE_KEY)) === false) {
+        if (($this->role = $this->cache->get_value(self::ROLE_KEY)) === false) {
             $this->db->prepared_query("
                 SELECT slug, artist_role_id, sequence, name, title, collection
                 FROM artist_role
                 ORDER BY artist_role_id
             ");
             $this->role = $this->db->to_array('slug', MYSQLI_ASSOC, false);
-            $this->cache->cache_value(ROLE_KEY, $this->role, 86400 * 30);
+            $this->cache->cache_value(self::ROLE_KEY, $this->role, 86400 * 30);
         }
     }
 
