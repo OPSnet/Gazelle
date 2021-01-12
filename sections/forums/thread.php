@@ -247,9 +247,10 @@ if ($threadInfo['NoPoll'] == 0) {
                     GROUP_CONCAT(um.Username SEPARATOR ', ')
                 FROM users_main AS um
                 LEFT JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
-                WHERE TopicID = $threadId
+                WHERE TopicID = ?
                 GROUP BY fpv.Vote
-            ");
+                ", $threadId
+            );
             $StaffVotesTmp = $DB->to_array();
             $StaffCount = count($StaffNames);
 
@@ -260,7 +261,7 @@ if ($threadInfo['NoPoll'] == 0) {
                 $Names = explode(', ', $Names);
                 $StaffNames = array_diff($StaffNames, $Names);
             }
-?>            <ul style="list-style: none;" id="poll_options">
+?>            <ul class="nobullet" id="poll_options">
 <?php       foreach ($Answers as $i => $Answer) { ?>
                 <li>
                     <a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=<?=(int)$i?>"><?=display_str($Answer == '' ? 'Blank' : $Answer)?></a>
@@ -272,7 +273,7 @@ if ($threadInfo['NoPoll'] == 0) {
                     <a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$auth?>&amp;vote=0"><?=($UserResponse == '0' ? '&raquo; ' : '')?>Blank</a> - <?=$StaffVotes[0]?>&nbsp;(<?=number_format(((float)$Votes[0] / $TotalVotes) * 100, 2)?>%)
                 </li>
             </ul>
-<?php       if ($forumId == STAFF_FORUM) { ?>
+<?php       if ($forumId == STAFF_FORUM_ID) { ?>
             <br />
             <strong>Votes:</strong> <?=number_format($StaffCount - count($StaffNames))?> / <?=$StaffCount?> current staff, <?=number_format($TotalVotes)?> total
             <br />
@@ -291,7 +292,7 @@ if ($threadInfo['NoPoll'] == 0) {
                     <input type="hidden" name="auth" value="<?=$auth?>" />
                     <input type="hidden" name="large" value="1" />
                     <input type="hidden" name="topicid" value="<?=$threadId?>" />
-                    <ul style="list-style: none;" id="poll_options">
+                    <ul class="nobullet" id="poll_options">
 <?php    foreach ($Answers as $i => $Answer) { ?>
                         <li>
                             <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
@@ -303,7 +304,7 @@ if ($threadInfo['NoPoll'] == 0) {
                             <input type="radio" name="vote" id="answer_0" value="0" /> <label for="answer_0">Blank&#8202;&mdash;&#8202;Show the results!</label><br />
                         </li>
                     </ul>
-<?php    if ($forumId == STAFF_FORUM) { ?>
+<?php    if ($forumId == STAFF_FORUM_ID) { ?>
                     <a href="#" onclick="AddPollOption(<?=$threadId?>); return false;" class="brackets">+</a>
                     <br />
                     <br />
