@@ -118,6 +118,7 @@ define('MIN_INVITE_CLASS', 150); // Minimum class allowed to purchase invites
 define('USER_TITLE_LENGTH', 1024); // The maximum length of a custom user title
 
 define('SYSTEM_USER_ID', 17); // ID for user to create "system" threads under (e.g. Edit Requests)
+define('STAFF_FORUM_ID', 5); // ID of principal Staff forum (for polls)
 define('TRASH_FORUM_ID', 4); // ID of forum to send threads to when trash button is pressed
 define('EDITING_FORUM_ID', 34); // ID of forum to send editing requests to
 define('HELP_FORUM_ID', 3); // ID of help forum

@@ -62,7 +62,7 @@ $threadId = $forum->addThread($LoggedUser['ID'], $Title, $Body);
 
 if ($needPoll) {
     $forum->addPoll($threadId, $Question, $Answers, $Votes);
-    if ($ForumID == STAFF_FORUM) {
+    if ($ForumID == STAFF_FORUM_ID) {
         send_irc('PRIVMSG '.MOD_CHAN.' :Poll created by '.$LoggedUser['Username'].": \"$Question\" ".SITE_URL."/forums.php?action=viewthread&threadid=$threadId");
     }
 }

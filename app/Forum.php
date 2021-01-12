@@ -159,7 +159,7 @@ class Forum extends Base {
                 ORDER BY Sort, Name
             ");
             $categories = [];
-            while (list($id, $name) = $this->db->next_record(MYSQLI_NUM, false)) {
+            while ([$id, $name] = $this->db->next_record(MYSQLI_NUM, false)) {
                 $categories[$id] = $name;
             }
             $this->cache->cache_value('forums_categories', $categories, 0);
@@ -417,7 +417,7 @@ class Forum extends Base {
      */
     public function stickyPost(int $userId, int $threadId, int $postId, bool $set) {
         // need to reset the post catalogues
-        list($bottom, $top) = $this->db->row("
+        [$bottom, $top] = $this->db->row("
             SELECT
                 floor((ceil(count(*)               / ?) * ? - ?) / ?) AS bottom,
                 floor((ceil(sum(if(ID <= ?, 1, 0)) / ?) * ? - ?) / ?) AS top
@@ -540,7 +540,7 @@ class Forum extends Base {
             INSERT INTO forums_polls
                    (TopicID, Question, Answers)
             VALUES (?,       ?,        ?)
-            ", $threadId, $question, serialize($answer)
+            ", $threadId, $question, serialize($answers)
         );
         $this->cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, 0], 0);
     }
@@ -623,8 +623,8 @@ class Forum extends Base {
      * - closed: Not more voting possible
      */
     public function pollData(int $threadId) {
-        if (!list($Question, $Answers, $Votes, $Featured, $Closed) = $this->cache->get_value('polls_'.$threadId)) {
-            list($Question, $Answers, $Featured, $Closed) = $this->db->row("
+        if (![$Question, $Answers, $Votes, $Featured, $Closed] = $this->cache->get_value('polls_'.$threadId)) {
+            [$Question, $Answers, $Featured, $Closed] = $this->db->row("
                 SELECT Question, Answers, Featured, Closed
                 FROM forums_polls
                 WHERE TopicID = ?
@@ -645,7 +645,7 @@ class Forum extends Base {
             $VoteArray = $this->db->to_array(false, MYSQLI_NUM);
             $Votes = [];
             foreach ($VoteArray as $VoteSet) {
-                list($Key,$Value) = $VoteSet;
+                [$Key,$Value] = $VoteSet;
                 $Votes[$Key] = $Value;
             }
             for ($i = 1, $end = count($Answers); $i <= $end; ++$i) {
@@ -689,7 +689,7 @@ class Forum extends Base {
      * @param int toClose toggle open/closed for voting
      (*/
     public function moderatePoll(int $threadId, int $toFeature, int $toClose) {
-        list($Question, $Answers, $Votes, $Featured, $Closed) = $this->pollData($threadId);
+        [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
         if ($toFeature && !$Featured) {
             $Featured = sqltime();
             $this->db->prepared_query("
@@ -721,7 +721,7 @@ class Forum extends Base {
      * @param string body The new contents
      */
     public function mergePost(int $userId, int $threadId, string $body) {
-        list($postId, $oldBody) = $this->db->row("
+        [$postId, $oldBody] = $this->db->row("
             SELECT ID, Body
             FROM forums_posts
             WHERE TopicID = ?
@@ -1023,9 +1023,9 @@ class Forum extends Base {
             while ($row = $this->db->next_row(MYSQLI_ASSOC)) {
                 $category = $row['categoryName'];
                 unset($row['categoryName']);
+                $row['AutoLock'] = ($row['AutoLock'] == '1');
                 if (!isset($toc[$category])) {
                     $toc[$category] = [];
-                    $toc['AutoLock'] = ($toc['AutoLock'] == '1');
                 }
                 $toc[$category][] = $row;
             }
