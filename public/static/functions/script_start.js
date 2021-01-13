@@ -92,23 +92,23 @@ function get_size(size) {
     switch (steps) {
         case 1: ext = ' B';
                 break;
-        case 1: ext = ' KB';
+        case 1: ext = ' KiB';
                 break;
-        case 2: ext = ' MB';
+        case 2: ext = ' MiB';
                 break;
-        case 3: ext = ' GB';
+        case 3: ext = ' GiB';
                 break;
-        case 4: ext = ' TB';
+        case 4: ext = ' TiB';
                 break;
-        case 5: ext = ' PB';
+        case 5: ext = ' PiB';
                 break;
-        case 6: ext = ' EB';
+        case 6: ext = ' EiB';
                 break;
-        case 7: ext = ' ZB';
+        case 7: ext = ' ZiB';
                 break;
-        case 8: ext = ' EB';
+        case 8: ext = ' YiB';
                 break;
-        default: "0.00 MB";
+        default: "0.00 MiB";
     }
     return (size.toFixed(2) + ext);
 }

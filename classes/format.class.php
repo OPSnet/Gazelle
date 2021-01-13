@@ -280,7 +280,7 @@ class Format {
      * @return string formatted number.
      */
     public static function get_size($Size, $Levels = 2) {
-        $Units = [' B', ' KB', ' MB', ' GB', ' TB', ' PB', ' EB', ' ZB', ' YB'];
+        $Units = [' B', ' KiB', ' MiB', ' GiB', ' TiB', ' PiB', ' EiB', ' ZiB', ' YiB'];
         $Size = (double)$Size;
         for ($Steps = 0; abs($Size) >= 1024; $Size /= 1024, $Steps++) {
         }

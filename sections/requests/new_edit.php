@@ -367,15 +367,15 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
 <?php    }
     if ($NewRequest) { ?>
                 <tr id="voting">
-                    <td class="label">Bounty (MB)</td>
+                    <td class="label">Bounty (MiB)</td>
                     <td>
                         <input type="text" id="amount_box" size="8" value="<?=(!empty($Bounty) ? $Bounty : '100')?>" />
                         <select id="unit" name="unit" onchange="Calculate();">
-                            <option value="mb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'mb' ? ' selected="selected"' : '') ?>>MB</option>
-                            <option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GB</option>
+                            <option value="mb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'mb' ? ' selected="selected"' : '') ?>>MiB</option>
+                            <option value="gb"<?=(!empty($_POST['unit']) && $_POST['unit'] === 'gb' ? ' selected="selected"' : '') ?>>GiB</option>
                         </select>
                         <?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
-                        <p>Bounty must be greater than or equal to 100 MB.</p>
+                        <p>Bounty must be greater than or equal to 100 MiB.</p>
                     </td>
                 </tr>
                 <tr>
@@ -386,10 +386,10 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                         <input type="hidden" id="current_downloaded" value="<?=$LoggedUser['BytesDownloaded']?>" />
                         <input type='hidden' id='request_tax' value="<?=$RequestTax?>" />
                         <?= $RequestTax > 0
-                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span></strong><br />'
-                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span>'
+                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span></strong><br />'
+                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span>'
                         ?>
-                        If you add the entered <strong><span id="new_bounty">100.00 MB</span></strong> of bounty, your new stats will be: <br />
+                        If you add the entered <strong><span id="new_bounty">100.00 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
                         Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'], $LoggedUser['BytesDownloaded'])?></span>
                     </td>

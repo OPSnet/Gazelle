@@ -66,15 +66,15 @@ function Calculate() {
     var amt = Math.floor($('#amount_box').raw().value * mul);
     if (amt > $('#current_uploaded').raw().value) {
         $('#new_uploaded').raw().innerHTML = "You can't afford that request!";
-        $('#new_bounty').raw().innerHTML = "0.00 MB";
-        $('#bounty_after_tax').raw().innerHTML = "0.00 MB";
+        $('#new_bounty').raw().innerHTML = "0.00 MiB";
+        $('#bounty_after_tax').raw().innerHTML = "0.00 MiB";
         $('#button').raw().disabled = true;
     } else if (isNaN($('#amount_box').raw().value)
             || (window.location.search.indexOf('action=new') != -1 && $('#amount_box').raw().value * mul < 100 * 1024 * 1024)
             || (window.location.search.indexOf('action=view') != -1 && $('#amount_box').raw().value * mul < 20 * 1024 * 1024)) {
         $('#new_uploaded').raw().innerHTML = get_size(($('#current_uploaded').raw().value));
-        $('#new_bounty').raw().innerHTML = "0.00 MB";
-        $('#bounty_after_tax').raw().innerHTML = "0.00 MB";
+        $('#new_bounty').raw().innerHTML = "0.00 MiB";
+        $('#bounty_after_tax').raw().innerHTML = "0.00 MiB";
         $('#button').raw().disabled = true;
     } else {
         $('#button').raw().disabled = false;
