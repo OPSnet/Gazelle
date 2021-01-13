@@ -71,9 +71,9 @@ if ($NewRequest) {
         if (!intval($Bounty)) {
             $Err = 'Your entered bounty is not a number';
         } elseif ($Bounty < 100 * 1024 * 1024) {
-            $Err = 'Minimum bounty is 100 MB.';
+            $Err = 'Minimum bounty is 100 MiB.';
         }
-        $Bytes = $Bounty; //From MB to B
+        $Bytes = $Bounty; //From MiB to B
     }
 }
 

@@ -109,9 +109,9 @@ if (isset($_POST['torrents'])) {
             </select><br /><br />
             <input type="checkbox" name="NLOver" checked />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
             <select name="scale">
-                <option value="k" <?=$_POST['scale'] == 'k' ? 'selected' : ''?>>KB</option>
-                <option value="m" <?=$_POST['scale'] == 'm' ? 'selected' : ''?>>MB</option>
-                <option value="g" <?=!isset($_POST['scale']) || $_POST['scale'] == 'g' ? 'selected' : ''?>>GB</option>
+                <option value="k" <?=$_POST['scale'] == 'k' ? 'selected' : ''?>>KiB</option>
+                <option value="m" <?=$_POST['scale'] == 'm' ? 'selected' : ''?>>MiB</option>
+                <option value="g" <?=!isset($_POST['scale']) || $_POST['scale'] == 'g' ? 'selected' : ''?>>GiB</option>
             </select><br /><br />
             <input type="submit" value="Submit" />
         </form>

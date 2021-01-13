@@ -364,15 +364,15 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
     if ($CanVote) {
 ?>
             <tr id="voting">
-                <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MB in 1 GB.">Custom vote (MB)</td>
+                <td class="label tooltip" title="These units are in base 2, not base 10. For example, there are 1,024 MiB in 1 GiB.">Custom vote (MiB)</td>
                 <td>
                     <input type="text" id="amount_box" size="8" />
                     <select id="unit" name="unit" onchange="Calculate();">
-                        <option value="mb">MB</option>
-                        <option value="gb">GB</option>
+                        <option value="mb">MiB</option>
+                        <option value="gb">GiB</option>
                     </select>
                     <?= $RequestTax > 0 ? "<strong>{$RequestTaxPercent}% of this is deducted as tax by the system.</strong>" : '' ?>
-                    <p>Bounty must be greater than or equal to 100 MB.</p>
+                    <p>Bounty must be greater than or equal to 100 MiB.</p>
                 </td>
             </tr>
             <tr>
@@ -390,10 +390,10 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
                         <input type="hidden" id="current_rr" value="<?=(float)$LoggedUser['RequiredRatio']?>" />
                         <input id="total_bounty" type="hidden" value="<?=$RequestVotes['TotalBounty']?>" />
                         <?= $RequestTax > 0
-                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span></strong><br />'
-                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MB</span>'
+                            ? 'Bounty after tax: <strong><span id="bounty_after_tax"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span></strong><br />'
+                            : '<span id="bounty_after_tax" style="display: none;"><?=sprintf("%0.2f", 100 * (1 - $RequestTax))?> MiB</span>'
                         ?>
-                        If you add the entered <strong><span id="new_bounty">0.00 MB</span></strong> of bounty, your new stats will be: <br />
+                        If you add the entered <strong><span id="new_bounty">0.00 MiB</span></strong> of bounty, your new stats will be: <br />
                         Uploaded: <span id="new_uploaded"><?=Format::get_size($LoggedUser['BytesUploaded'])?></span><br />
                         Ratio: <span id="new_ratio"><?=Format::get_ratio_html($LoggedUser['BytesUploaded'],$LoggedUser['BytesDownloaded'])?></span>
                         <input type="button" id="button" value="Vote!" disabled="disabled" onclick="Vote();" />

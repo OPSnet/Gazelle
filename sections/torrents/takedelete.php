@@ -55,7 +55,7 @@ Torrents::send_pm(
     $torrent['UserID'],
     $name,
     "Torrent $torrentId $name ("
-        . number_format($torrent['Size'] / (1024 * 1024), 2) . ' MB '
+        . number_format($torrent['Size'] / (1024 * 1024), 2) . ' MiB '
         . strtoupper($torrent['InfoHash'])
         . ") was deleted by {$LoggedUser['Username']}: $reason",
     0,

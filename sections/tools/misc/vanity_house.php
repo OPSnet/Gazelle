@@ -152,9 +152,9 @@ View::show_header('Vanity House');
             </select><br /><br />
             <input type="checkbox" name="NLOver" />&nbsp;NL Torrents over <input type="text" name="size" value="<?=isset($_POST['size']) ? $_POST['size'] : '1'?>" size=1 />
             <select name="scale">
-                <option value="k">KB</option>
-                <option value="m">MB</option>
-                <option value="g" selected>GB</option>
+                <option value="k">KiB</option>
+                <option value="m">MiB</option>
+                <option value="g" selected>GiB</option>
             </select><br /><br />
 
             <div class="center">
