@@ -156,6 +156,27 @@ function reverse_display_str($Str) {
 }
 
 /**
+ * This function formats a string containing a torrent's remaster information.
+ *
+ * @param boolean Remastered - whether the torrent contains remaster information
+ * @param string  RemasterTitle - the title of the remaster information
+ * @param string  RemasterYear - the year of the remaster information
+ * @return string remaster info
+ */
+function remasterInfo($RemasterTitle, $RemasterYear): string {
+    if ($RemasterTitle != '' && $RemasterYear != '') {
+        $info = "$RemasterTitle - $RemasterYear";
+    } elseif ($RemasterTitle != '' && $RemasterYear == '') {
+        $info = $RemasterTitle;
+    } elseif ($RemasterTitle == '' && $RemasterYear != '') {
+        $info = $RemasterYear;
+    } else {
+        return '';
+    }
+    return " &lsaquo;{$info}&rsaquo;";
+}
+
+/**
  * Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
  *
  * @param string $Raw An IRC protocol snippet to send.

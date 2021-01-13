@@ -232,7 +232,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
             } else {
                 $ReportType = $reportMan->type($Type);
             }
-            $RemasterDisplayString = Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear);
+            $RemasterDisplayString = $Remastered ? remasterInfo($RemasterTitle, $RemasterYear) : '';
 
             if ($ArtistID == 0 && empty($ArtistName)) {
                 $RawName = $GroupName.($Year ? " ($Year)" : '').($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '') . $RemasterDisplayString . ($HasCue ? ' (Cue)' : '').($HasLogDB ? " (Log: {$LogScore}%)" : '').' ('.number_format($Size / (1024 * 1024), 2).' MiB)';
@@ -440,7 +440,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                         $ExtraFileList = display_str($ExtraFileList);
                         $ExtraRemasterTitle = display_str($ExtraRemasterTitle);
                         $ExtraUploaderName = display_str($ExtraUploaderName);
-                        $ExtraRemasterDisplayString = Reports::format_reports_remaster_info($ExtraRemastered, $ExtraRemasterTitle, $ExtraRemasterYear);
+                        $ExtraRemasterDisplayString = $ExtraRemastered ? remasterInfo($ExtraRemasterTitle, $ExtraRemasterYear) : '';
 
                         if ($ArtistID == 0 && empty($ArtistName)) {
                             $ExtraLinkName = "<a href=\"torrents.php?id=$ExtraGroupID\">$ExtraGroupName".($ExtraYear ? " ($ExtraYear)" : '')."</a> <a href=\"torrents.php?torrentid=$ExtraID\"> [$ExtraFormat/$ExtraEncoding/$ExtraMedia]$ExtraRemasterDisplayString</a> " . ($ExtraHasCue == '1' ? ' (Cue)' : '').($ExtraHasLog == '1' ? " <a href=\"torrents.php?action=viewlog&amp;torrentid=$ExtraID&amp;groupid=$ExtraGroupID\">(Log: {$ExtraLogScore}%)</a>" : '').' ('.number_format($ExtraSize / (1024 * 1024), 2).' MiB)';

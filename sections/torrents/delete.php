@@ -144,7 +144,7 @@ View::show_header('Delete torrent', 'reportsv2');
     }
     $Year = ($Year ? " ($Year)" : '');
     $mastering = ($Format || $Encoding || $Media ? " [$Format/$Encoding/$Media]" : '')
-        . Reports::format_reports_remaster_info($Remastered, $RemasterTitle, $RemasterYear);
+        . ($Remastered ? remasterInfo($RemasterTitle, $RemasterYear) : '');
     $groupUrl = "torrents.php?id=$GroupID";
     $torrentUrl = "torrents.php?torrentid=$TorrentID";
     $viewLogUrl = "torrents.php?action=viewlog&amp;torrentid=$TorrentID&amp;groupid=$GroupID";
