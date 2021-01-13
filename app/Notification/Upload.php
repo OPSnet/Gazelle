@@ -248,14 +248,17 @@ class Upload extends \Gazelle\Base {
     }
 
     /* Generate the SQL notification query (handy for debugging)
+     * More than one notification filter for a user may be triggered,
+     * so we aggregate to only return the oldest filter id.
      *
      * @return SQL command with placeholders
      */
     public function sql(): string {
-        return "SELECT unf.ID AS filter_id, unf.UserID AS user_id, um.torrent_pass AS passkey
+        return "SELECT min(unf.ID) AS filter_id, unf.UserID AS user_id, um.torrent_pass AS passkey
             FROM users_notify_filters AS unf
             INNER JOIN users_main AS um ON (um.ID = unf.UserID)
-            WHERE " . implode(' AND ', $this->cond);
+            WHERE " . implode(" AND ", $this->cond) . "
+            GROUP BY unf.UserID, um.torrent_pass";
     }
 
     /**
