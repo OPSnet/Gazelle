@@ -241,24 +241,6 @@ if (!empty($_REQUEST['action'])) {
                 error(403);
             }
             break;
-        case 'fix_group':
-            if ((check_perms('users_mod') || check_perms('torrents_fix_ghosts')) && authorize() && !empty($_GET['groupid']) && is_number($_GET['groupid'])) {
-                $Count = $DB->scalar("
-                    SELECT count(*) FROM torrents WHERE GroupID = ?
-                    ", $_GET['groupid']
-                );
-                if ($Count == 0) {
-                    Torrents::delete_group($_GET['groupid']);
-                }
-                if (!empty($_GET['artistid']) && is_number($_GET['artistid'])) {
-                    header('Location: artist.php?id='.$_GET['artistid']);
-                } else {
-                    header('Location: torrents.php?id='.$_GET['groupid']);
-                }
-            } else {
-                error(403);
-            }
-            break;
         case 'add_cover_art':
             require(__DIR__ . '/add_cover_art.php');
             break;

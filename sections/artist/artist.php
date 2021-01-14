@@ -359,9 +359,6 @@ if ($sections = $Artist->sections()) {
         $ExtendedArtists = $Group['ExtendedArtists'];
 
         $DisplayName = "<a href=\"torrents.php?id=$GroupID\" class=\"tooltip\" title=\"View torrent group\" dir=\"ltr\">$GroupName</a>";
-        if (check_perms('users_mod') || check_perms('torrents_fix_ghosts')) {
-            $DisplayName .= ' <a href="torrents.php?action=fix_group&amp;groupid='.$GroupID.'&amp;artistid='.$ArtistID.'&amp;auth='.$LoggedUser['AuthKey'].'" class="brackets tooltip" title="Fix ghost DB entry">Fix</a>';
-        }
 
         switch ($sectionId) {
             case ARTIST_SECTION_PRODUCER:
