@@ -79,7 +79,6 @@ class Permissions {
             'torrents_freeleech' => 'Can make torrents freeleech',
             'torrents_search_fast' => 'Rapid search (for scripts)',
             'torrents_hide_dnu' => 'Hide the Do Not Upload list by default',
-            'torrents_fix_ghosts' => 'Can fix "ghost" groups on artist pages',
             'admin_manage_news' => 'Can manage site news',
             'admin_manage_blog' => 'Can manage the site blog',
             'admin_manage_contest' => 'Can manage contests',
