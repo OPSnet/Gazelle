@@ -109,7 +109,7 @@ class Upload extends \Gazelle\Base {
             ", $uploaderId
         )) ?: [];
         if (in_array('notifications', $paranoia)) {
-            $this->cond[] = "unf.UserID != ?)";
+            $this->cond[] = "unf.UserID != ?";
             $this->args[] = $this->userId;
         } else {
             $this->cond[] = "(unf.Users REGEXP ? OR unf.UserID != ?)";
