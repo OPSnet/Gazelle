@@ -35,7 +35,6 @@ class Users {
      *    string  Username
      *    int     PermissionID
      *    array   Paranoia - $Paranoia array sent to paranoia.class
-     *    boolean Artist
      *    boolean Donor
      *    string  Warned - When their warning expires in international time format
      *    string  Avatar - URL
@@ -59,7 +58,6 @@ class Users {
                     m.Username,
                     m.PermissionID,
                     m.Paranoia,
-                    i.Artist,
                     (donor.UserID IS NOT NULL) AS Donor,
                     i.Warned,
                     i.Avatar,
@@ -87,7 +85,6 @@ class Users {
                         'Username' => '',
                         'PermissionID' => 0,
                         'Paranoia' => [],
-                        'Artist' => false,
                         'Donor' => false,
                         'Warned' => null,
                         'Avatar' => '',
