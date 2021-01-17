@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Mail;
+
 class AutoEnable {
 
     // Constants for database values
@@ -135,7 +137,7 @@ class AutoEnable {
                         ", $token, $ID
                     );
                 }
-                Misc::send_email($Email, $subject, G::$Twig->render($template, ['token' => $token]), 'noreply');
+                (new Mail)->send($Email, $subject, G::$Twig->render($template, ['token' => $token]));
             }
         }
 

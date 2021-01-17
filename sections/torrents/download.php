@@ -51,7 +51,7 @@ if (!is_number($TorrentID)) {
     json_or_error(0, 'missing torrentid');
 }
 
-$User = new \Gazelle\User($UserID);
+$User = new Gazelle\User($UserID);
 
 /* uTorrent Remote and various scripts redownload .torrent files periodically.
  * To prevent this retardation from blowing bandwidth etc., let's block it
@@ -118,8 +118,8 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
                 VALUES (?,       ?)
                 ', $UserID, $TorrentID
             );
-            if (G::$Cache->get_value('user_flood_' . $UserID)) {
-                G::$Cache->increment('user_flood_' . $UserID);
+            if ($Cache->get_value('user_flood_' . $UserID)) {
+                $Cache->increment('user_flood_' . $UserID);
             } else {
                 Irc::sendChannel(
                     "user.php?id=" . $UserID
@@ -131,7 +131,7 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
                     . ' hit download rate limit',
                     STATUS_CHAN
                 );
-                G::$Cache->cache_value('user_429_flood_' . $UserID, 1, 3600);
+                $Cache->cache_value('user_429_flood_' . $UserID, 1, 3600);
             }
             json_or_error('rate limiting hit on downloading', 429);
         }
@@ -143,18 +143,8 @@ if (!(isset($_REQUEST['usetoken']) && $_REQUEST['usetoken']) && $TorrentUploader
  * table and update their cache key.
  */
 if ($_REQUEST['usetoken'] && $FreeTorrent == '0') {
-    if (!empty($LoggedUser)) {
-        $FLTokens = $LoggedUser['FLTokens'];
-        if ($LoggedUser['CanLeech'] != '1') {
-            json_or_error('You cannot use tokens while leech disabled.');
-        }
-    }
-    else {
-        $UInfo = Users::user_heavy_info($UserID);
-        if ($UInfo['CanLeech'] != '1') {
-            json_or_error('You may not use tokens while leech disabled.');
-        }
-        $FLTokens = $UInfo['FLTokens'];
+    if (!$User->canLeech()) {
+        json_or_error('You cannot use tokens while leeching is disabled.');
     }
 
     // First make sure this isn't already FL, and if it is, do nothing
@@ -215,7 +205,6 @@ $Contents = $filer->get($TorrentID);
 $Cache->delete_value('user_rlim_' . $UserID);
 
 $FileName = TorrentsDL::construct_file_name($Info['PlainArtists'], $Name, $Year, $Media, $Format, $Encoding, $TorrentID, $DownloadAlt);
-$AnnounceURL = ($HttpsTracker) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 if ($DownloadAlt) {
     header('Content-Type: text/plain; charset=utf-8');
 }
@@ -224,6 +213,6 @@ elseif (!$DownloadAlt || $Failed) {
 }
 header('Content-disposition: attachment; filename="'.$FileName.'"');
 
-echo TorrentsDL::get_file($Contents, $AnnounceURL."/$TorrentPass/announce", $TorrentID);
+echo TorrentsDL::get_file($Contents, $User->announceUrl(), $TorrentID);
 
 define('SKIP_NO_CACHE_HEADERS', 1);

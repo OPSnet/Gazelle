@@ -2,26 +2,6 @@
 
 class Misc {
     /**
-     * Send an email.
-     *
-     * @param string $To the email address to send it to.
-     * @param string $Subject
-     * @param string $Body
-     * @param string $From The user part of the user@MAIL_HOST email address.
-     * @param string $ContentType text/plain or text/html
-     */
-
-    public static function send_email($To, $Subject, $Body, $From, $ContentType = 'text/plain') {
-        $Headers = 'MIME-Version: 1.0'."\r\n";
-        $Headers .= 'Content-type: text/plain; charset=iso-8859-1'."\r\n";
-        $Headers .= 'From: '.SITE_NAME.' <'.$From.'@'.MAIL_HOST.'>'."\r\n";
-        $Headers .= 'Reply-To: '.$From.'@'.MAIL_HOST."\r\n";
-        $Headers .= 'Message-Id: <'.randomString().'@'.MAIL_HOST.">\r\n";
-        $Headers .= 'X-Priority: 3'."\r\n";
-        mail($To, $Subject, $Body, $Headers, "-f $From@".MAIL_HOST);
-    }
-
-    /**
      * Variant of in_array with trailing wildcard support
      *
      * @param string $Needle, array $Haystack

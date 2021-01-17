@@ -2,6 +2,8 @@
 
 namespace Gazelle\Schedule\Tasks;
 
+use Gazelle\Util\Mail;
+
 class DisableInactiveUsers extends \Gazelle\Schedule\Task
 {
     protected function userQuery($minDays, $maxDays) {
@@ -30,9 +32,13 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
     public function run() {
         // Send email
         $this->userQuery(110, 111);
-        while (list($username, $email) = $this->db->next_record()) {
-            $body = "Hi $username,\n\nIt has been almost 4 months since you used your account at ".SITE_URL."/. This is an automated email to inform you that your account will be disabled in 10 days if you do not sign in.";
-            \Misc::send_email($email, 'Your '.SITE_NAME.' account is about to be disabled', $body, 'noreply');
+        $mail = new Mail;
+        while ([$username, $email] = $this->db->next_record()) {
+            $mail->send($email, 'Your ' . SITE_NAME . ' account is about to be disabled',
+                \G::$Twig->render('email/disable-warning.twig', [
+                    'username' => $username,
+                ])
+            );
         }
 
         $this->userQuery(120, 180);

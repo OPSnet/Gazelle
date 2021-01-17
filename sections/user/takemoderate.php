@@ -1,18 +1,21 @@
 <?php
 
-// Are they being tricky blighters?
-$userID = (int)$_POST['userid'];
-if ($userID < 1) {
-    error(404);
-} elseif (!check_perms('users_mod')) {
-    error(403);
-}
-$ownProfile = $userID == $LoggedUser['ID'];
-$user = new Gazelle\User($userID);
-$userMan = new Gazelle\Manager\User;
+use Gazelle\Util\Mail;
 
 authorize();
-// End checking for moronity
+
+if (!check_perms('users_mod')) {
+    error(403);
+}
+
+$userMan = new Gazelle\Manager\User;
+$user = $userMan->findById((int)$_POST['userid']);
+if (is_null($user)) {
+    header("Location: log.php?search=User+$userID");
+    exit;
+}
+$userID = $user->id();
+$ownProfile = $userID === $LoggedUser['ID'];
 
 // Variables for database input
 $class = (int)$_POST['Class'];
@@ -99,12 +102,7 @@ if ($sendHackedMail && !empty(trim($_POST['HackedEmail']))) {
 $mergeStatsFrom = trim($_POST['MergeStatsFrom']);
 $reason = trim($_POST['Reason']);
 
-// Get the existing user information
-if (!$cur = $user->info()) { // If user doesn't exist
-    header("Location: log.php?search=User+$userID");
-    exit;
-}
-
+$cur = $user->info();
 if ($_POST['comment_hash'] != $cur['CommentHash']) {
     error("Somebody else has moderated this user since you loaded it. Please go back and refresh the page.");
 }
@@ -540,9 +538,8 @@ if ($resetAuthkey == 1 && check_perms('users_edit_reset_keys')) {
 }
 
 if ($sendHackedMail && check_perms('users_disable_any')) {
-    Misc::send_email($hackedEmail, 'Your '.SITE_NAME.' account',
-        G::$Twig->render('email/hacked.twig', []),
-        'noreply'
+    (new Mail)->send($hackedEmail, 'Your ' . SITE_NAME . ' account',
+        G::$Twig->render('email/hacked.twig')
     );
     Tools::disable_users($userID, '', 1);
     $editSummary[] = "hacked account email sent to $hackedEmail";
