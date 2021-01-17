@@ -23,15 +23,13 @@ class TorrentsDL {
      *
      * @param mysqli_result $QueryResult results from a query on the collector pages
      * @param string $Title name of the collection that will be created
-     * @param string $AnnounceURL URL to add to the created torrents
      */
     public function __construct(&$QueryResult, $Title) {
         G::$Cache->InternalCache = false; // The internal cache is almost completely useless for this
         $this->QueryResult = $QueryResult;
         $this->Title = $Title;
         $this->User = G::$LoggedUser;
-        $AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
-        $this->AnnounceURL = $AnnounceURL . '/' . G::$LoggedUser['torrent_pass'] . '/announce';
+        $this->AnnounceURL = (new \Gazelle\User(G::$LoggedUser['ID']))->announceUrl();
         $options = new ZipStream\Option\Archive;
         $options->setSendHttpHeaders(true);
         $options->setEnableZip64(false); // for macOS compatibility

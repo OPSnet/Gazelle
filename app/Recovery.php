@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Util\Mail;
+
 class Recovery {
 
     static function email_check ($raw) {
@@ -258,18 +260,16 @@ class Recovery {
              VALUES              (?,         ?,         ?,      ?,      now() + interval 1 week)
              ",                   $admin_id, $key,      $email, "Account recovery id={$id} key={$key}"
         );
-
-        \Misc::send_email($email, 'Account recovery confirmation at ' . SITE_NAME,
-            G::$Twig->render('email/recovery.twig', [
+        (new Mail)->send($email, 'Account recovery confirmation at ' . SITE_NAME,
+            \G::$Twig->render('email/recovery.twig', [
                 'invite_key' => $key,
-            ]),
-            'noreply'
+            ])
         );
 
         $db->prepared_query("
-            UPDATE recovery
-            SET state = ?,
+            UPDATE recovery SET
                 updated_dt = now(),
+                state = ?,
                 log = concat(coalesce(log, ''), ?)
             WHERE recovery_id = ?
             ", ($admin_id == RECOVERY_ADMIN_ID ? 'VALIDATED' : 'ACCEPTED'),

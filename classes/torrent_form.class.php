@@ -52,15 +52,14 @@ class TORRENT_FORM {
     }
 
     function head() {
-        $AnnounceURL = (G::$LoggedUser['HttpsTracker']) ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL;
 ?>
 
 <div class="thin">
 <?php   if ($this->NewTorrent) { ?>
-    <p style="text-align: center;">
+    <div style="text-align: center;">
         Your personal announce URL is:<br />
-        <input type="text" value="<?= $AnnounceURL . '/' . G::$LoggedUser['torrent_pass'] . '/announce'?>" size="71" onclick="this.select();" readonly="readonly" />
-    </p>
+        <div style="margin: 0 auto;"><input type="text" value="<?= (new \Gazelle\User(G::$LoggedUser['ID']))->announceUrl() ?>" size="71" onclick="this.select();" readonly="readonly" /></div>
+    </div>
 <?php
         }
         if ($this->Error) {

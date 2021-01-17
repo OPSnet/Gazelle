@@ -45,7 +45,7 @@ class User extends \Gazelle\Base {
             SELECT ID
             FROM users_main
             WHERE Username = ?
-            ", $username
+            ", trim($username)
         );
         return $userId ? new \Gazelle\User($userId) : null;
     }
@@ -212,6 +212,14 @@ class User extends \Gazelle\Base {
             $this->cache->cache_value('stats_user_count', $count, 0);
         }
         return $count;
+    }
+
+    /**
+     * Can new members be invited at this time?
+     * @return bool Yes we can
+     */
+    public function newUsersAllowed(): bool {
+        return USER_LIMIT === 0 || $this->getEnabledUsersCount() < USER_LIMIT;
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace Gazelle;
 
+use Gazelle\Util\Mail;
+
 class User extends BaseObject {
 
     /** @var int */
@@ -77,6 +79,7 @@ class User extends BaseObject {
                 ui.AdminComment,
                 ui.JoinDate,
                 ui.Warned,
+                ui.SiteOptions,
                 ui.SupportFor,
                 ui.RestrictedForums,
                 ui.PermittedForums,
@@ -112,9 +115,11 @@ class User extends BaseObject {
         if (empty($this->info)) {
             return $this->info;
         }
-        $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
-
+        $this->info['DisableInvites'] = (bool)($this->info['DisableInvites'] == '1');
+        $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
+        $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
+        $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
         $this->db->prepared_query("
             SELECT PermissionID FROM users_levels WHERE UserID = ?
             ", $this->id
@@ -210,6 +215,11 @@ class User extends BaseObject {
 
     public function announceKey(): string {
         return $this->info()['torrent_pass'];
+    }
+
+    public function announceUrl(): string {
+        return ($this->info()['SiteOptions']['HttpsTracker'] ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL)
+            . '/' . $this->announceKey() . '/announce';
     }
 
     public function email(): string {
@@ -493,6 +503,13 @@ class User extends BaseObject {
         $this->heavy = null;
         $this->cache->delete_value('user_info_heavy_' . $this->id);
         return $this->db->affected_rows() === 1;
+    }
+
+    public function onRatioWatch(): bool {
+        $stats = $this->activityStats();
+        return $this->info()['RatioWatchEndsEpoch'] !== false
+            && time() > $this->info()['RatioWatchEndsEpoch']
+            && $stats['BytesUploaded'] <= $stats['BytesDownloaded'] * $stats['RequiredRatio'];
     }
 
     public function resetRatioWatch(): bool {
@@ -1869,6 +1886,31 @@ class User extends BaseObject {
     }
 
     /**
+     * Is a user allowed to download a torrent file?
+     *
+     * @return bool Yes they can
+     */
+    public function canLeech(): bool {
+        return $this->info()['can_leech'];
+    }
+
+    /**
+     * Checks whether a user is allowed to issue an invite.
+     *  - invites not disabled
+     *  - not on ratio watch
+     *  - leeching privs not suspended
+     *  - has at least one invite to spend
+     *
+     * @return boolean false if they have been naughty, otherwise true
+     */
+    public function canInvite(): bool {
+        return !$this->info()['DisableInvites']
+            && !$this->onRatioWatch()
+            && $this->canLeech()
+            && $this->info()['Invites'] > 0;
+    }
+
+    /**
      * Checks whether a user is allowed to purchase an invite. User classes up to Elite are capped,
      * users above this class will always return true.
      *
@@ -1898,13 +1940,12 @@ class User extends BaseObject {
             WHERE UserID = ?
             ", $resetKey, $this->id
         );
-        \Misc::send_email($this->email(), 'Password reset information for ' . SITE_NAME,
+        (new Mail)->send($this->email(), 'Password reset information for ' . SITE_NAME,
             \G::$Twig->render('email/password_reset.twig', [
                 'username'  => $this->username(),
                 'reset_key' => $resetKey,
                 'ipaddr'    => $_SERVER['REMOTE_ADDR'],
-            ]),
-            'noreply'
+            ])
         );
     }
 }

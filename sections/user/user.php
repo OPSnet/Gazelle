@@ -48,16 +48,23 @@ $FA_Key = null;
 
 if (check_perms('users_mod')) {
     // Person viewing is staff
-    $DB->prepared_query('
-        SELECT
-            um.Username, um.Email, ula.last_access, um.IP, p.Level AS Class, uls.Uploaded, uls.Downloaded,
+    [$Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
+    $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia,
+    $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor,
+    $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID,
+    $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar,
+    $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging,
+    $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens,
+    $FA_Key, $InfoTitle, $LockedAccount, $MaxCollages,
+    $AcceptFL, $UnlimitedDownload] = $DB->row("
+        SELECT um.Username, um.Email, ula.last_access, um.IP, p.Level AS Class, uls.Uploaded, uls.Downloaded,
             coalesce(ub.points, 0) as BonusPoints, um.RequiredRatio, um.Title, um.torrent_pass, um.Enabled, um.Paranoia,
             um.Invites, um.can_leech, um.Visible, i.JoinDate, i.Info, i.Avatar, i.AdminComment, i.Donor,
             i.Warned, i.SupportFor, i.RestrictedForums, i.PermittedForums, i.Inviter,
             inviter.Username, COUNT(posts.id) AS ForumPosts, i.RatioWatchEnds, i.RatioWatchDownload, i.DisableAvatar,
             i.DisableInvites, i.DisablePosting, i.DisablePoints, i.DisableForums, i.DisableTagging,
             i.DisableUpload, i.DisableWiki, i.DisablePM, i.DisableIRC, i.DisableRequests, uf.tokens AS FLTokens,
-            um.2FA_Key, SHA1(i.AdminComment), i.InfoTitle, la.Type AS LockedAccount, i.collages,
+            um.2FA_Key, i.InfoTitle, la.Type AS LockedAccount, i.collages,
             CASE WHEN uhafl.UserID IS NULL THEN 1 ELSE 0 END AS AcceptFL,
             CASE WHEN uhaud.UserID IS NULL THEN 0 ELSE 1 END AS UnlimitedDownload
         FROM users_main AS um
@@ -74,23 +81,16 @@ if (check_perms('users_mod')) {
         LEFT JOIN user_has_attr AS uhaud ON (uhaud.UserID = um.ID AND uhaud.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
         WHERE um.ID = ?
         GROUP BY AuthorID
-        ', 'no-fl-gifts', 'unlimited-download', $UserID
+        ", 'no-fl-gifts', 'unlimited-download', $UserID
     );
-    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
-    $BonusPoints, $RequiredRatio, $CustomTitle, $torrent_pass, $Enabled, $Paranoia,
-    $Invites, $DisableLeech, $Visible, $JoinDate, $Info, $Avatar, $AdminComment, $Donor,
-    $Warned, $SupportFor, $RestrictedForums, $PermittedForums, $InviterID,
-    $InviterName, $ForumPosts, $RatioWatchEnds, $RatioWatchDownload, $DisableAvatar,
-    $DisableInvites, $DisablePosting, $DisablePoints, $DisableForums, $DisableTagging,
-    $DisableUpload, $DisableWiki, $DisablePM, $DisableIRC, $DisableRequests, $FLTokens,
-    $FA_Key, $CommentHash, $InfoTitle, $LockedAccount, $MaxCollages,
-    $AcceptFL, $UnlimitedDownload)
-        = $DB->next_record(MYSQLI_NUM, [9, 12]);
 } else {
     // Person viewing is a normal user
-    $DB->prepared_query('
-        SELECT
-            um.Username, um.Email, ula.last_access, um.IP, p.Level AS Class, uls.Uploaded, uls.Downloaded,
+    [$Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
+    $BonusPoints, $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle,
+    $torrent_pass, $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
+    $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle,
+    $AcceptFL] = $DB->row("
+        SELECT um.Username, um.Email, ula.last_access, um.IP, p.Level AS Class, uls.Uploaded, uls.Downloaded,
             coalesce(ub.points, 0) as BonusPoints, um.RequiredRatio, um.Enabled, um.Paranoia, um.Invites, um.Title,
             um.torrent_pass, um.can_leech, i.JoinDate, i.Info, i.Avatar, uf.tokens AS FLTokens, i.Donor, i.Warned,
             COUNT(posts.id) AS ForumPosts, i.Inviter, i.DisableInvites, inviter.username, i.InfoTitle,
@@ -107,18 +107,13 @@ if (check_perms('users_mod')) {
         LEFT JOIN user_has_attr AS uhafl ON (uhafl.UserID = um.ID AND uhafl.UserAttrID = (SELECT ID FROM user_attr WHERE Name = ?))
         WHERE um.ID = ?
         GROUP BY AuthorID
-        ', 'no-fl-gifts', $UserID
+        ", 'no-fl-gifts', $UserID
     );
-    list($Username, $Email, $LastAccess, $IP, $Class, $Uploaded, $Downloaded,
-    $BonusPoints, $RequiredRatio, $Enabled, $Paranoia, $Invites, $CustomTitle,
-    $torrent_pass, $DisableLeech, $JoinDate, $Info, $Avatar, $FLTokens, $Donor, $Warned,
-    $ForumPosts, $InviterID, $DisableInvites, $InviterName, $InfoTitle,
-    $AcceptFL)
-        = $DB->next_record(MYSQLI_NUM, [10, 12]);
     $UnlimitedDownload = null;
 }
-if (!$Username) { // If user doesn't exist
+if (is_null($Username)) { // If user doesn't exist
     header("Location: log.php?search=User+$UserID");
+    exit;
 }
 if ($Warned == '') {
     $Warned = null; // Fuck Gazelle
@@ -661,7 +656,7 @@ if (check_perms("users_mod") || $OwnProfile || $donorMan->isVisible($UserID)) {
 <?php } ?>
         <div class="box">
             <div class="head">
-                <?=!empty($InfoTitle) ? $InfoTitle : 'Profile';?>
+                <?=!empty($InfoTitle) ? display_str($InfoTitle) : 'Profile';?>
                 <span style="float: right;"><a href="#" onclick="$('#profilediv').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;" class="brackets">Hide</a></span>&nbsp;
             </div>
             <div class="pad profileinfo" id="profilediv">
@@ -978,7 +973,7 @@ if (check_perms('users_mod') || $Classes[$LoggedUser['PermissionID']]['Name'] ==
                 <a href="#" onclick="$('#staffnotes').gtoggle(); return false;" class="brackets">Toggle</a>
             </div>
             <div id="staffnotes" class="pad">
-                <input type="hidden" name="comment_hash" value="<?=$CommentHash?>" />
+                <input type="hidden" name="comment_hash" value="<?= sha1($AdminComment) ?>" />
                 <div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($AdminComment)?></div>
                 <textarea id="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=display_str($AdminComment)?></textarea>
                 <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Toggle edit</a>

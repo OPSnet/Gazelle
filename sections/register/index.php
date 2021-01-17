@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Mail;
+
 // needs to be defined here for fall-through to step1
 $Val = new Gazelle\Util\Validator;
 $Val->setFields([
@@ -54,20 +56,17 @@ if (!empty($_REQUEST['confirm'])) {
 
             try {
                 $user = $creator->create();
-                Misc::send_email(
-                    $user->email(),
-                    'New account confirmation at '.SITE_NAME,
-                    G::$Twig->render('email/new_registration.twig', [
+                (new Mail)->send($user->email(), 'New account confirmation at '.SITE_NAME,
+                    G::$Twig->render('email/registration.twig', [
                         'username'     => $username,
                         'announce_key' => $user->announceKey(),
-                    ]),
-                    'noreply'
+                    ])
                 );
                 (new Gazelle\Manager\User)->sendPM( $user->id(), 0,
                     "Welcome to " . SITE_NAME,
                     G::$Twig->render('user/welcome.twig', [
                         'username'     => $username,
-                        'announce_key' => $user->announceKey(),
+                        'announce_url' => $user->announceUrl(),
                     ])
                 );
                 Tracker::update_tracker('add_user', ['id' => $user->id(), 'passkey' => $user->announceKey()]);

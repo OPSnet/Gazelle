@@ -1,9 +1,9 @@
-This email is to confirm the account you just created at {{ constant('SITE_NAME') }}
+This email is to confirm that you have just created an account at {{ constant('SITE_NAME') }}.
 
 You have 24 hours to click the link below and finish the registration
 process for the account created with the username: {{ username }}
 
-{{ site_url }}/register.php?confirm={{ announce_key }}
+{{ constant('SITE_URL') }}/register.php?confirm={{ announce_key }}
 
 Thank you,
 {{ constant('SITE_NAME') }} Staff

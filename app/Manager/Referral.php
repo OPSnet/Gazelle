@@ -3,6 +3,7 @@
 namespace Gazelle\Manager;
 
 use Gazelle\Util\Crypto;
+use Gazelle\Util\Mail;
 use Gazelle\Util\Proxy;
 
 class Referral extends \Gazelle\Base {
@@ -518,12 +519,12 @@ class Referral extends \Gazelle\Base {
         );
 
         if (defined('REFERRAL_SEND_EMAIL') && REFERRAL_SEND_EMAIL) {
-            $message = $twig->render('email/referral.twig', [
-                'email' => $email,
-                'inviter_key' => $inviteKey,
-            ]);
-
-            \Misc::send_email($email, 'You have been invited to ' . SITE_NAME, $message, 'noreply', 'text/plain');
+            (new Mail)->send($email, 'You have been invited to ' . SITE_NAME,
+                $twig->render('email/referral.twig', [
+                    'email' => $email,
+                    'inviter_key' => $inviteKey,
+                ])
+            );
         }
 
         return [true, $inviteKey];
