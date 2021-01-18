@@ -1,0 +1,86 @@
+From: Spine
+To: Developers
+Date: 2021-01-17
+Subject: Orpheus Development Papers #4 - Witness Tables
+Version: 1
+
+This technique is a response to a problem that exists in the original
+Gazelle implementation. There are many wide tables (that is, tables with
+dozens of columns) that suffer during updates.
+
+On Orpheus, lock contentions when updating users_info.LastReadNews can
+sometimes result in fifty second response times. Similar problems occur with
+LastReadNews and CatchupTime. The contentions are probably due to scheduled
+tasks wanting to update other fields at the same time, or people opening
+multiple tabs at once. Taken together, this results in a degraded user
+experience 10-12 times a day.
+
+The idea, then, is to encapsulate the logic for keeping track of what has
+been read, or when it was read, in separate tables. At the moment, only
+integer ids and datestamps are implemented. Other contentious columns can be
+addressed in the future.
+
+All that is needed is a table that stores (user_id, thing_id) tuples, in the
+case of blog and news posts. The details to determine thing_id is handled in
+the witness() method (which will always be the "last", i.e., most recent).
+The user_id is passed in as an argument, and this tuple is passed to the
+parent witnessValue() method.
+
+In the case of the forum, the need is for a global "I have read everything"
+timestamp to perform a catchup (rather than adding/updating a reference to
+every single thread. In this case, a (user_id, datestamp) tuple is required.
+The witness() method calls the parent witnessDate() method directly, which
+in turn records the SQL value of now() in the datestamp field.
+
+Witness is a bit of dumb name. I might rename it if I have a better idea.
+
+After applying the first commit to begin writing to the tables, the
+following catch-up queries are run:
+
+1. Forum catchup is trivial, because most people never issue a global
+catchup.
+
+INSERT INTO user_read_forum (user_id, last_read)
+SELECT ui.UserID, ui.CatchupTime
+FROM users_info ui
+LEFT JOIN user_read_forum urf ON (urf.user_id = ui.UserID)
+WHERE ui.CatchupTime IS NOT NULL
+    AND urf.user_id IS NULL;
+
+2. Blog and news are a little more complicated, because the users_info
+table uses 0 to represent "has not read anything", so those rows must
+be excluded to avoid referential integrity errors.
+
+For these rows, we insert a row that represents the last news item or
+blog article that was written before they joined.
+
+Going forward, all newly created accounts will be considered as having
+read the most recent blog and news items.
+
+INSERT INTO user_read_blog (user_id, blog_id)
+SELECT ui.UserID, ui.LastReadBlog
+FROM users_info ui
+LEFT JOIN user_read_blog urb ON (urb.user_id = ui.UserID)
+WHERE ui.LastReadBlog != 0
+    AND urb.user_id IS NULL;
+
+INSERT INTO user_read_news (user_id, news_id)
+SELECT ui.UserID, ui.LastReadNews
+FROM users_info ui
+LEFT JOIN user_read_news urn ON (urn.user_id = ui.UserID)
+WHERE ui.LastReadNews != 0
+    AND urn.user_id IS NULL;
+
+INSERT INTO user_read_blog (user_id, blog_id)
+SELECT ui.UserID, max(b_max.ID)
+FROM users_info ui, blog b_max
+WHERE ui.LastReadBlog = 0
+    AND b_max.Time < ui.JoinDate
+GROUP BY ui.UserID;
+
+INSERT INTO user_read_news (user_id, news_id)
+SELECT ui.UserID, max(n_max.ID)
+FROM users_info ui, news n_max
+WHERE ui.LastReadNews = 0
+    AND n_max.Time < ui.JoinDate
+GROUP BY ui.UserID;

@@ -483,6 +483,7 @@ class User extends BaseObject {
     }
 
     public function updateLastReadNews(int $newsId): bool {
+        (new WitnessTable\UserReadNews)->witness($this->id);
         $this->db->prepared_query("
             UPDATE users_info SET
                 LastReadNews = ?
@@ -726,6 +727,7 @@ class User extends BaseObject {
     }
 
     public function updateCatchup(): bool {
+        (new WitnessTable\UserReadForum)->witness($this->id);
         $this->db->prepared_query("
             UPDATE users_info
             SET CatchupTime = now()

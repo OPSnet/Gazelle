@@ -148,6 +148,7 @@ class Blog extends \Gazelle\Base {
      * @return bool true if there was a change in status (you will need to flush their heavy cache)
      */
     public function catchupUser(int $userId): bool {
+        (new \Gazelle\WitnessTable\UserReadBlog)->witness($userId);
         $this->db->prepared_query("
             UPDATE users_info SET
                 LastReadBlog = (SELECT max(ID) FROM blog)
