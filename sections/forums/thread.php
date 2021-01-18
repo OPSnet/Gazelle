@@ -350,7 +350,7 @@ if ($threadInfo['StickyPostID']) {
 
 foreach ($thread as $Key => $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);
-    [$AuthorID, $Username, $PermissionID, $Paranoia, $Artist, $Donor, $Warned, $Avatar, $Enabled, $UserTitle] = array_values(Users::user_info($AuthorID));
+    [$AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle] = array_values(Users::user_info($AuthorID));
     $tableClass = ['forum_post', 'wrap_overflow', 'box vertical_margin'];
     if (((!$threadInfo['isLocked'] || $threadInfo['isSticky'])
             && $PostID > $lastRead

@@ -217,7 +217,7 @@ if ($ThreadInfo['StickyPostID']) {
 $JsonPosts = [];
 foreach ($Thread as $Key => $Post) {
     list($PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime) = array_values($Post);
-    list($AuthorID, $Username, $PermissionID, $Paranoia, $Artist, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
+    list($AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
 
     $UserInfo = Users::user_info($EditedUserID);
     $JsonPosts[] = [
@@ -232,7 +232,6 @@ foreach ($Thread as $Key => $Post) {
             'authorId'   => (int)$AuthorID,
             'authorName' => $Username,
             'paranoia'   => $Paranoia,
-            'artist'     => $Artist === '1',
             'donor'      => $Donor == 1,
             'warned'     => !is_null($Warned),
             'avatar'     => $Avatar,
