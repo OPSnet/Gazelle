@@ -8,6 +8,6 @@ class UserReadBlog extends AbstractWitnessTable {
     protected function valueColumn() { return 'blog_id'; }
 
     public function witness(int $id) {
-        return $this->witnessValue($id, $this->db->scalar("SELECT max(ID) FROM Blog"));
+        return $this->witnessValue($id, $this->db->scalar("SELECT max(ID) FROM blog"));
     }
 }
