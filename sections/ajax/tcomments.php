@@ -9,7 +9,7 @@ list($NumComments, $Page, $Thread) = Comments::load('torrents', (int)$_GET['id']
 $JsonComments = [];
 foreach ($Thread as $Key => $Post) {
     list($PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername) = array_values($Post);
-    list($AuthorID, $Username, $PermissionID, $Paranoia, $Artist, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
+    list($AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
     $JsonComments[] = [
         'postId' => (int)$PostID,
         'addedTime' => $AddedTime,
@@ -21,7 +21,6 @@ foreach ($Thread as $Key => $Post) {
         'userinfo' => [
             'authorId' => (int)$AuthorID,
             'authorName' => $Username,
-            'artist' => $Artist == 1,
             'donor' => $Donor == 1,
             'warned' => !is_null($Warned),
             'avatar' => $Avatar,
