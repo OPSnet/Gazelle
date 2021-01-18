@@ -99,7 +99,7 @@ class Debug {
         $Identifier = randomString(5);
         \G::$Cache->cache_value(
             'analysis_'.$Identifier, [
-                'url'      => $_SERVER['REQUEST_URI'] ?? 'cli',
+                'URI'      => isset($_SERVER['REQUEST_URI']) ? ($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) : 'cli',
                 'message'  => $Report,
                 'time'     => time(),
                 'errors'   => $this->get_errors(true),
@@ -297,6 +297,7 @@ class Debug {
             $PageTime = (microtime(true) - self::$startTime);
             $CPUTime = $this->get_cpu_time();
             $Perf = [
+                'URI' => $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
                 'Memory usage' => \Format::get_size(memory_get_usage(true)),
                 'Page process time' => number_format($PageTime, 3).' s',
             ];
