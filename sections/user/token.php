@@ -17,7 +17,7 @@ if (!empty($_GET['do']) && $userId !== $LoggedUser['ID'] && !check_perms('users_
 if ($_GET['do'] === 'revoke') {
     $user->revokeApiTokenById($tokenId);
     header('Location: user.php?action=edit&userid=' . $userId);
-    die();
+    exit;
 }
 elseif ($_GET['do'] === 'generate') {
     $tokenName = $_POST['token_name'] ?? '';

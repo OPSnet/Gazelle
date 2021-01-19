@@ -1844,7 +1844,11 @@ class User extends BaseObject {
 
     public function apiTokenList(): array {
         $this->db->prepared_query("
-            SELECT id, name, token, created FROM api_tokens WHERE user_id = ? ORDER BY created DESC
+            SELECT id, name, token, created
+            FROM api_tokens
+            WHERE user_id = ?
+                AND revoked = 0
+            ORDER BY created DESC
             ", $this->id
         );
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
@@ -1852,14 +1856,22 @@ class User extends BaseObject {
 
     public function hasTokenByName(string $name) {
         return $this->db->scalar("
-            SELECT 1 FROM api_tokens WHERE user_id = ? AND name = ?
+            SELECT 1
+            FROM api_tokens
+            WHERE revoked = 0
+                AND user_id = ?
+                AND name = ?
             ", $this->id, $name
         ) === 1;
     }
 
     public function hasApiToken(string $token): bool {
         return $this->db->scalar("
-            SELECT 1 FROM api_tokens WHERE user_id = ? AND token = ?
+            SELECT 1
+            FROM api_tokens
+            WHERE revoked = 0
+                AND user_id = ?
+                AND token = ?
             ", $this->id, $token
         ) === 1;
     }
