@@ -4,6 +4,43 @@ use Gazelle\Util\Mail;
 
 authorize();
 
+function translateUserStatus($status) {
+    switch ($status) {
+        case 0:
+            return 'Unconfirmed';
+        case 1:
+            return 'Enabled';
+        case 2:
+            return 'Disabled';
+        default:
+            return $status;
+    }
+}
+
+function enabledStatus($status) {
+    switch ($status) {
+        case 0:
+            return 'Disabled';
+        case 1:
+            return 'Enabled';
+        default:
+            return $status;
+    }
+}
+
+function disabled (bool $state) {
+    return $state ? 'disabled' : 'enabled';
+}
+
+function classNames(array $classes) {
+    return G::$DB->scalar("
+        SELECT group_concat(Name SEPARATOR ', ')
+        FROM permissions
+        WHERE ID in (" . placeholders($classes) . ")
+        ", ...$classes
+    );
+}
+
 if (!check_perms('users_mod')) {
     error(403);
 }
@@ -207,9 +244,8 @@ if ($Collages != $Cur['Collages'] && $Collages != (int)$_POST['OldCollages']
 $removedClasses = [];
 $addedClasses   = [];
 if (check_perms('users_promote_below') || check_perms('users_promote_to')) {
-    $oldClasses = $cur['SecondaryClasses'] ? explode(',', $cur['SecondaryClasses']) : [];
-    $removedClasses = array_diff($oldClasses, $secondaryClasses);
-    $addedClasses   = array_diff($secondaryClasses, $oldClasses);
+    $removedClasses = array_diff($cur['secondary_class'], $secondaryClasses);
+    $addedClasses   = array_diff($secondaryClasses, $cur['secondary_class']);
     if ($removedClasses) {
         $editSummary[] = 'secondary classes dropped: ' . classNames($removedClasses);
     }
@@ -633,40 +669,3 @@ if (count($set) || count($leechSet)) {
 }
 
 header("location: user.php?id=$userID");
-
-function translateUserStatus($status) {
-    switch ($status) {
-        case 0:
-            return 'Unconfirmed';
-        case 1:
-            return 'Enabled';
-        case 2:
-            return 'Disabled';
-        default:
-            return $status;
-    }
-}
-
-function enabledStatus($status) {
-    switch ($status) {
-        case 0:
-            return 'Disabled';
-        case 1:
-            return 'Enabled';
-        default:
-            return $status;
-    }
-}
-
-function disabled (bool $state) {
-    return $state ? 'disabled' : 'enabled';
-}
-
-function classNames(array $classes) {
-    return G::$DB->scalar("
-        SELECT group_concat(Name SEPARATOR ', ')
-        FROM permissions
-        WHERE ID in (" . placeholders($classes) . ")
-        ", ...$classes
-    );
-}
