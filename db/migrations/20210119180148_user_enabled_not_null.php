@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
 
-final class UserDefaultVisible extends AbstractMigration
+final class UserEnabledNotNull extends AbstractMigration
 {
     public function up(): void
     {
         $this->table('users_main')
-            ->ChangeColumn('Visible', 'enum', [
-                'default' => '1',
-                'values' => ['0', '1', 'yes', 'no'],
+            ->ChangeColumn('Enabled', 'enum', [
+                'default' => '0',
+                'values' => ['0','1','2','unconfirmed','enabled','disabled','banned'],
             ])
             ->save();
     }
@@ -18,10 +18,10 @@ final class UserDefaultVisible extends AbstractMigration
     public function down(): void
     {
         $this->table('users_main')
-            ->ChangeColumn('Visible', 'enum', [
+            ->ChangeColumn('Enabled', 'enum', [
                 'null' => true,
                 'default' => null,
-                'values' => ['0', '1', 'yes', 'no'],
+                'values' => ['0','1','2','unconfirmed','enabled','disabled','banned'],
             ])
             ->save();
     }
