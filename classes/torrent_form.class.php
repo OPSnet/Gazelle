@@ -59,7 +59,7 @@ class TORRENT_FORM {
     <div style="text-align: center;">
         Your personal announce URL is:<br />
         <div style="margin: 0 auto;"><input type="text" value="<?= (new \Gazelle\User(G::$LoggedUser['ID']))->announceUrl() ?>" size="71" onclick="this.select();" readonly="readonly" /></div>
-    </p>
+    </div>
 <?php
         }
         if ($this->Error) {
