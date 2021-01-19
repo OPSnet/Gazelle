@@ -65,7 +65,7 @@ foreach ($secondaryClasses as $i => $Val) {
         unset($secondaryClasses[$i]);
     }
 }
-$visible = isset($_POST['Visible']) ? 1 : 0;
+$visible = isset($_POST['Visible']) ? '1' : '0';
 $unlimitedDownload = isset($_POST['unlimitedDownload']) ? 1 : 0;
 $invites = (int)$_POST['Invites'];
 $supportFor = trim($_POST['SupportFor']);

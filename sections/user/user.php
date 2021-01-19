@@ -1042,7 +1042,7 @@ if (check_perms('users_mod') || $Classes[$LoggedUser['PermissionID']]['Name'] ==
 
     if (check_perms('users_make_invisible')) {
         echo G::$Twig->render('user/edit-peer-visibility.twig', [
-            'is_visible' => $Visible == 1,
+            'is_visible' => $Visible == '1',
         ]);
     }
 

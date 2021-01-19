@@ -29,7 +29,7 @@ class InitialUserSeeder extends AbstractSeed {
                 'PermissionID' => SYSOP,
                 'Invites' => STARTING_INVITES,
                 'Enabled' => '1',
-                'Visible' => 1,
+                'Visible' => '1',
                 'can_leech' => 1,
             ],
             [
@@ -40,7 +40,7 @@ class InitialUserSeeder extends AbstractSeed {
                 'PermissionID' => USER,
                 'Invites' => STARTING_INVITES,
                 'Enabled' => '1',
-                'Visible' => 1,
+                'Visible' => '1',
                 'can_leech' => 1,
             ],
         ])->saveData();
