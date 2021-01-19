@@ -23,6 +23,7 @@ class Mail {
         $headers = implode("\r\n", [
             "MIME-Version: 1.0",
             "Content-type: text/plain; charset=utf-8",
+            "To: $to",
             "From: " . SITE_NAME . " <$from>",
             "Reply-To: $from",
             "Message-Id: <{$msgId}@" . MAIL_HOST . '>',
