@@ -45,6 +45,7 @@ class Torrent extends \Gazelle\Base {
     protected $updateTime;
     protected $tokenCache;
     protected $artistDisplay;
+    protected $showFallbackImage = true;
     protected $logger;
 
     const CACHE_KEY_LATEST_UPLOADS = 'latest_uploads_';
@@ -86,6 +87,18 @@ class Torrent extends \Gazelle\Base {
             $this->groupId = null;
         }
         $this->torrentId = $torrentId;
+        return $this;
+    }
+
+    /**
+     * Toggle whether an internal URL is returnd for missing cover artwork
+     * is returned, or null. Used by API endpoints.
+     *
+     * @param bool false means the property will be null instead of placeholder URL
+     * @return $this to allow method chaining
+     */
+    public function showFallbackImage(bool $showFallbackImage) {
+        $this->showFallbackImage = $showFallbackImage;
         return $this;
     }
 
@@ -547,9 +560,13 @@ class Torrent extends \Gazelle\Base {
             $group[$nullable] = $group[$nullable] == '' ? null : $group[$nullable];
         }
         if (!$group['WikiImage']) {
-            global $CategoryIcons;
-            $group['WikiImage'] = STATIC_SERVER.'/common/noartwork/'
-                . $CategoryIcons[$group['CategoryID'] - 1];
+            if (!$this->showFallbackImage) {
+                $group['WikiImage'] = null;
+            } else {
+                global $CategoryIcons;
+                $group['WikiImage'] = STATIC_SERVER.'/common/noartwork/'
+                    . $CategoryIcons[$group['CategoryID'] - 1];
+            }
         }
         $group['VanityHouse'] = ($group['VanityHouse'] == 1);
         $group['ReleaseType'] = (int)$group['ReleaseType'];

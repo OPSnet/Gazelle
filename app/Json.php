@@ -10,7 +10,7 @@ abstract class Json extends Base {
     public function __construct() {
         parent::__construct();
         $this->source = SITE_NAME;
-        $this->mode = 0;
+        $this->mode = JSON_THROW_ON_ERROR;
         $this->version = 1;
     }
 
@@ -67,16 +67,20 @@ abstract class Json extends Base {
         if (!$payload) {
             return;
         }
-        print json_encode(
-            array_merge([
-                    'status' => 'success',
-                    'response' => $payload,
-                ],
-                $this->info(),
-                $this->debug()
-            ),
-            $this->mode
-        );
+        try {
+            print json_encode(
+                array_merge([
+                        'status' => 'success',
+                        'response' => $payload,
+                    ],
+                    $this->info(),
+                    $this->debug()
+                ),
+                $this->mode
+            );
+        } catch (\JsonException $e) {
+            $this->failure("JSON encoding failed, look for malformed UTF-8 encoding");
+        }
     }
 
     protected function debug() {

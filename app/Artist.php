@@ -2,10 +2,6 @@
 
 namespace Gazelle;
 
-use Requests;
-use Torrents;
-use UnexpectedValueException;
-
 class Artist extends Base {
     protected $id = 0;
     protected $revisionId = 0;
@@ -70,22 +66,20 @@ class Artist extends Base {
                 $cond = 'ag.ArtistID = ?';
                 $args = $this->id;
             }
-            $sql = "SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse,
-                    dg.artist_discogs_id, dg.name as discogs_name, dg.stem as discogs_stem, dg.sequence, dg.is_preferred
+            [$this->name, $this->image, $this->body, $this->vanity, $this->discogsId, $this->discogsName,
+                $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred
+            ] = $this->db->row("
+                SELECT ag.Name, wa.Image, wa.body, ag.VanityHouse, dg.artist_discogs_id, dg.name,
+                    dg.stem, dg.sequence, dg.is_preferred
                 FROM artists_group AS ag
                 $join
                 LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
-                WHERE $cond";
-
-            $this->db->prepared_query($sql, $args);
-            if (!$this->db->has_results()) {
+                WHERE $cond
+                ", $args
+            );
+            if (is_null($this->name)) {
                 throw new Exception\ResourceNotFoundException($id);
             }
-            [$this->name, $this->image, $this->body, $this->vanity, $this->discogsId, $this->discogsName,
-                $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred
-            ] = $this->db->next_record(MYSQLI_NUM, false);
-
-            $this->homonyms = $this->homonymCount();
 
             $this->db->prepared_query('
                 SELECT
@@ -103,6 +97,7 @@ class Artist extends Base {
                 ', $this->id
             );
             $this->similar = $this->db->to_array();
+            $this->homonyms = $this->homonymCount();
             $this->cache->cache_value($cacheKey, [
                     $this->name, $this->image, $this->body, $this->vanity, $this->similar,
                     $this->discogsId, $this->discogsName, $this->discogsStem, $this->discogsSequence, $this->discogsIsPreferred, $this->homonyms
@@ -286,7 +281,7 @@ class Artist extends Base {
         );
         foreach ($requests as $requestId) {
             $this->cache->delete_value("request_artists_$requestId"); // Delete request artist cache
-            Requests::update_sphinx_requests($requestId);
+            \Requests::update_sphinx_requests($requestId);
         }
     }
 
@@ -296,8 +291,17 @@ class Artist extends Base {
             . ($this->revisionId ? '_r' . $this->revisionId : '');
     }
 
-    public function flushCache(): void {
+    public function flushCache(): int {
+        $this->db->prepared_query("
+            SELECT DISTINCT concat('groups_artists_', GroupID)
+            FROM torrents_artists
+            WHERE ArtistID = ?
+            ", $this->id
+        );
+        $cacheKeys = $this->db->collect(0, false);
+        $this->cache->deleteMulti($cacheKeys);
         $this->cache->delete_value($this->cacheKey());
+        return count($cacheKeys);
     }
 
     /**
@@ -317,7 +321,7 @@ class Artist extends Base {
             throw new Exception\ResourceNotFoundException($redirectId);
         }
         if ($this->id !== $foundId) {
-            throw new UnexpectedValueException("Artist:not-redirected");
+            throw new Exception\ArtistRedirectException();
         }
         return $foundRedirectId > 0 ? (int) $foundRedirectId : $redirectId;
     }
@@ -533,7 +537,7 @@ class Artist extends Base {
         return preg_replace('/ +/', ' ', $name);
     }
 
-    public function id() {
+    public function id(): int {
         return $this->id;
     }
 }

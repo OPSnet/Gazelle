@@ -18,6 +18,6 @@ if ($torrentId && $torrentHash) {
     }
 }
 
-$json->setVersion(3)
+$json->setVersion(4)
     ->setViewer($LoggedUser['ID'])
     ->emit();

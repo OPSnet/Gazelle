@@ -58,6 +58,7 @@ class Torrent extends \Gazelle\Json {
             ->setTorrentId($this->id)
             ->setViewer($this->userId)
             ->setShowSnatched($this->showSnatched ?? 0)
+            ->showFallbackImage(false)
             ->torrentInfo();
         if (!$details) {
             $this->failure("bad id parameter");
@@ -114,7 +115,7 @@ class Torrent extends \Gazelle\Json {
                     'hasLog'        => $torrent['HasLog'],
                     'hasCue'        => $torrent['HasCue'],
                     'logScore'      => $torrent['LogScore'],
-                    'logChecksum'   => (int)$torrent['LogChecksum'],
+                    'logChecksum'   => $torrent['LogChecksum'],
                     'logCount'      => $torrent['LogCount'],
                     'fileCount'     => $torrent['FileCount'],
                     'size'          => $torrent['Size'],

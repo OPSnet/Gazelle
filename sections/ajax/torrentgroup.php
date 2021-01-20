@@ -41,9 +41,9 @@ $CategoryName = ($TorrentDetails['CategoryID'] == 0)
 
 $Torrent = $TorrentList[$TorrentID];
 
-$bookmark = new \Gazelle\Bookmark;
 $JsonTorrentDetails = [
     'wikiBody'        => Text::full_format($TorrentDetails['WikiBody']),
+    'wikiBBcode'      => $TorrentDetails['WikiBody'],
     'wikiImage'       => $TorrentDetails['WikiImage'],
     'id'              => (int)$TorrentDetails['ID'],
     'name'            => $TorrentDetails['Name'],
@@ -55,7 +55,7 @@ $JsonTorrentDetails = [
     'categoryName'    => $CategoryName,
     'time'            => $TorrentDetails['Time'],
     'vanityHouse'     => ($TorrentDetails['VanityHouse'] == 1),
-    'isBookmarked'    => $bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID),
+    'isBookmarked'    => (new \Gazelle\Bookmark)->isTorrentBookmarked($LoggedUser['ID'], $GroupID),
     'musicInfo'       => ($CategoryName != "Music")
         ? []
         : Artists::get_artist_by_type($GroupID),
