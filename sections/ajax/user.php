@@ -85,8 +85,8 @@ if (!(check_paranoia_here('requestsfilled_count') || check_paranoia_here('reques
     list($RequestsVoted,  $TotalSpent)  = $user->requestsVotes();
 }
 
-$Uploads          = check_paranoia_here('uploads+')     ? null : $user->uploadCount();
-$ArtistsAdded     = check_paranoia_here('artistsadded') ? null : $user->artistsAdded();
+$Uploads          = check_paranoia_here('uploads+')     ? $user->uploadCount() : null;
+$ArtistsAdded     = check_paranoia_here('artistsadded') ? $user->artistsAdded() : null;
 $releaseVotes     = $user->releaseVotes();
 $bonusPointsSpent = $user->bonusPointsSpent();
 $torrentComments  = check_paranoia_here('torrentcomments++') ? $user->torrentCommentCount() : 0;
@@ -120,11 +120,6 @@ $rank = new Gazelle\UserRank(
 if (check_paranoia_here('snatched+')) {
     list($Snatched, $UniqueSnatched) = $user->snatchCounts();
 }
-
-$NumComments        = check_paranoia_here('torrentcomments++') ? null : $user->torrentCommentCount();
-$NumArtistsComments = check_paranoia_here('torrentcomments++') ? null : $user->artistCommentCount();
-$NumCollageComments = check_paranoia_here('torrentcomments++') ? null : $user->collageCommentCount();
-$NumRequestComments = check_paranoia_here('torrentcomments++') ? null : $user->requestCommentCount();
 
 if (check_paranoia_here('uniquegroups+')) {
     $UniqueGroups = $DB->scalar("
@@ -170,7 +165,6 @@ if (!$OwnProfile) {
 if (!check_paranoia_here('lastseen')) {
     $LastAccess = null;
 }
-$Ratio = check_paranoia_here('ratio') ? Format::get_ratio($Uploaded, $Downloaded, 5) : null;
 if (!check_paranoia_here('uploaded')) {
     $Uploaded = null;
 }
@@ -192,7 +186,10 @@ if ($ParanoiaLevel == 0) {
     $ParanoiaLevelText = 'Very high';
 }
 
-header('Content-Type: text/plain; charset=utf-8');
+$NumComments        = check_paranoia_here('torrentcomments++') ? $user->torrentCommentCount() : null;
+$NumArtistsComments = check_paranoia_here('torrentcomments++') ? $user->artistCommentCount() : null;
+$NumCollageComments = check_paranoia_here('torrentcomments++') ? $user->collageCommentCount() : null;
+$NumRequestComments = check_paranoia_here('torrentcomments++') ? $user->requestCommentCount() : null;
 
 json_print("success", [
     'username'    => $Username,
@@ -201,11 +198,11 @@ json_print("success", [
     'profileText' => Text::full_format($Info),
     'stats' => [
         'joinedDate'    => $JoinDate,
-        'lastAccess'    => $LastAccess ?? '',
-        'uploaded'      => (($Uploaded == null) ? null : (int)$Uploaded),
-        'downloaded'    => (($Downloaded == null) ? null : (int)$Downloaded),
-        'ratio'         => $Ratio,
-        'requiredRatio' => (($RequiredRatio == null) ? null : (float)$RequiredRatio)
+        'lastAccess'    => $LastAccess ?: null,
+        'uploaded'      => is_null($Uploaded == null) ? null : (int)$Uploaded,
+        'downloaded'    => is_null($Downloaded == null) ? null : (int)$Downloaded,
+        'ratio'         => $Downloaded == 0 ? null : (float)round($Uploaded / $Downloaded, 2, PHP_ROUND_HALF_DOWN),
+        'requiredRatio' => is_null($RequiredRatio) ? null : (float)$RequiredRatio,
     ],
     'ranks' => [
         'uploaded'   => check_paranoia_here('uploaded') ? $rank->rank('uploaded') : null,
@@ -232,10 +229,10 @@ json_print("success", [
     ],
     'community' => [
         'posts'           => (int)$ForumPosts,
-        'torrentComments' => (($NumComments == null) ? null : (int)$NumComments),
-        'artistComments'  => (($NumArtistComments == null) ? null : (int)$NumArtistComments),
-        'collageComments' => (($NumCollageComments == null) ? null : (int)$NumCollageComments),
-        'requestComments' => (($NumRequestComments == null) ? null : (int)$NumRequestComments),
+        'torrentComments' => $NumComments,
+        'artistComments'  => $NumArtistsComments,
+        'collageComments' => $NumCollageComments,
+        'requestComments' => $NumRequestComments,
         'collagesStarted' => (($NumCollages == null) ? null : (int)$NumCollages),
         'collagesContrib' => (($NumCollageContribs == null) ? null : (int)$NumCollageContribs),
         'requestsFilled'  => (($RequestsFilled == null) ? null : (int)$RequestsFilled),
