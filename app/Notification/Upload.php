@@ -229,22 +229,23 @@ class Upload extends \Gazelle\Base {
             fclose($out);
             return $nr;
         }
-        $args = [];
+        $n = 0;
         foreach ($results as $notify) {
             fprintf($out, "hit f={$notify['filter_id']} u={$notify['user_id']}\n");
-            $args = array_merge($args, [$groupId, $torrentId, $notify['user_id'], $notify['filter_id']]);
+            $this->db->prepared_query("
+                INSERT IGNORE INTO users_notify_torrents
+                       (GroupID, TorrentID, UserID, FilterID)
+                VALUES (?,       ?,         ?,      ?)
+                ", $groupId, $torrentId, $notify['user_id'], $notify['filter_id']
+            );
+            $n += $this->db->affected_rows();
             $feed->populate("torrents_notify_{$notify['passkey']}", $item);
             $feed->populate("torrents_notify_{$notify['filter_id']}_{$notify['passkey']}", $item);
             $this->cache->delete_value("notifications_new_{$notify['filter_id']}");
         }
-        $this->db->prepared_query("
-            INSERT IGNORE INTO users_notify_torrents (GroupID, TorrentID, UserID, FilterID)
-            VALUES " . implode(', ', array_fill(0, count($results), '(?, ?, ?, ?)')),
-            ...$args
-        );
-        fprintf($out, "inserted=%d\n", $this->db->affected_rows());
+        fprintf($out, "inserted=%d\n", $n);
         fclose($out);
-        return $nr;
+        return $n;
     }
 
     /* Generate the SQL notification query (handy for debugging)
