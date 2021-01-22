@@ -3,28 +3,47 @@
 namespace Gazelle\WitnessTable;
 
 abstract class AbstractWitnessTable extends \Gazelle\Base {
+    abstract protected function reference();
     abstract protected function tableName();
     abstract protected function idColumn();
     abstract protected function valueColumn();
-    abstract public function witness(int $id);
+    abstract public function witness(int $id): bool;
 
-    protected function witnessValue(int $id, int $value) {
+    protected function latestValue(): ?int {
+        return $this->db->scalar("SELECT max(ID) FROM {$this->reference()}");
+    }
+
+    protected function witnessValue(int $userId): bool {
+        $latest = $this->latestValue();
         $this->db->prepared_query($sql = "
             INSERT INTO {$this->tableName()}
             ({$this->idColumn()}, {$this->valueColumn()}) VALUES (?, ?)
             ON DUPLICATE KEY UPDATE {$this->valueColumn()} = ?
-            ", $id, $value, $value
+            ", $userId, $latest, $latest
         );
-        return $this;
+        return $this->db->affected_rows() !== 0;
     }
 
-    protected function witnessDate(int $id) {
+    protected function witnessDate(int $userId): bool {
         $this->db->prepared_query("
             INSERT INTO {$this->tableName()}
             ({$this->idColumn()}) VALUES (?)
             ON DUPLICATE KEY UPDATE {$this->valueColumn()} = now()
-            ", $id
+            ", $userId
         );
-        return $this;
+        return $this->db->affected_rows() !== 0;
+    }
+
+    /**
+     * Return the ID of the most recent unread article
+     *
+     * @param int user ID of the reader
+     * @return int article ID or null if the reader is fully caught up
+     */
+    public function lastRead(int $userId): ?int {
+        return $this->db->scalar("
+            SELECT {$this->valueColumn()} FROM {$this->tableName()} WHERE {$this->idColumn()} = ?
+            ", $userId
+        );
     }
 }

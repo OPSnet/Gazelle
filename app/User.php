@@ -75,14 +75,8 @@ class User extends BaseObject {
                 um.RequiredRatio,
                 um.IRCKey,
                 um.2FA_Key,
-                ui.RatioWatchEnds,
                 ui.AdminComment,
-                ui.JoinDate,
-                ui.Warned,
-                ui.SiteOptions,
-                ui.SupportFor,
-                ui.RestrictedForums,
-                ui.PermittedForums,
+                ui.Collages,
                 ui.DisableAvatar,
                 ui.DisableInvites,
                 ui.DisablePoints,
@@ -94,7 +88,14 @@ class User extends BaseObject {
                 ui.DisablePM,
                 ui.DisableIRC,
                 ui.DisableRequests,
-                ui.Collages,
+                ui.JoinDate,
+                ui.NotifyOnQuote,
+                ui.PermittedForums,
+                ui.RatioWatchEnds,
+                ui.RestrictedForums,
+                ui.SiteOptions,
+                ui.SupportFor,
+                ui.Warned,
                 uls.Uploaded,
                 uls.Downloaded,
                 p.Level AS Class,
@@ -118,6 +119,7 @@ class User extends BaseObject {
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
         $this->info['DisableInvites'] = (bool)($this->info['DisableInvites'] == '1');
         $this->info['DisableRequests'] = (bool)($this->info['DisableRequests'] == '1');
+        $this->info['NotifyOnQuote'] = (bool)($this->info['NotifyOnQuote'] == '1');
         $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
@@ -194,6 +196,10 @@ class User extends BaseObject {
 
     public function hasAcceptFL(): bool {
         return !$this->hasAttr('no-fl-gifts');
+    }
+
+    public function option(string $option) {
+        return $this->info()['SiteOptions'][$option];
     }
 
     protected function light() {
@@ -298,6 +304,19 @@ class User extends BaseObject {
             return false;
         }
         return true;
+    }
+
+    /**
+     * When did the user last perform a global catchup on the forums?
+     *
+     * @return int epoch of catchup
+     */
+    public function forumCatchupEpoch() {
+        $lastRead = $this->db->scalar("
+            SELECT last_read FROM user_read_forum WHERE user_id = ?
+            ", $this->id
+        );
+        return is_null($lastRead) ? 0 : strtotime($lastRead);
     }
 
     public function forceCacheFlush($flush = true) {
@@ -494,19 +513,6 @@ class User extends BaseObject {
                 ', $this->id, $ipaddr
             );
         }
-        return $this->db->affected_rows() === 1;
-    }
-
-    public function updateLastReadNews(int $newsId): bool {
-        (new WitnessTable\UserReadNews)->witness($this->id);
-        $this->db->prepared_query("
-            UPDATE users_info SET
-                LastReadNews = ?
-            WHERE UserID = ?
-            ", $newsId, $this->id
-        );
-        $this->heavy = null;
-        $this->cache->delete_value('user_info_heavy_' . $this->id);
         return $this->db->affected_rows() === 1;
     }
 
@@ -749,16 +755,7 @@ class User extends BaseObject {
     }
 
     public function updateCatchup(): bool {
-        (new WitnessTable\UserReadForum)->witness($this->id);
-        $this->db->prepared_query("
-            UPDATE users_info
-            SET CatchupTime = now()
-            WHERE UserID = ?
-            ", $this->id
-        );
-        $this->light = null;
-        $this->cache->delete_value('user_info_' . $this->id);
-        return $this->db->affected_rows() === 1;
+        return (new WitnessTable\UserReadForum)->witness($this->id);
     }
 
     public function permissionList(): array {

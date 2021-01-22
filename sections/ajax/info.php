@@ -11,22 +11,18 @@ if ($LoggedUser['BytesUploaded'] == 0 && $LoggedUser['BytesDownloaded'] == 0) {
 }
 
 $user = new Gazelle\User($LoggedUser['ID']);
-$newsMan = new Gazelle\Manager\News;
-$blogMan = new Gazelle\Manager\Blog;
-
-$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
 
 json_print("success", [
-    'username' => $LoggedUser['Username'],
+    'username' => $user->username(),
     'id'       => (int)$LoggedUser['ID'],
     'authkey'  => $LoggedUser['AuthKey'],
     'passkey'  => $LoggedUser['torrent_pass'],
     'notifications' => [
         'messages'         => $user->inboxUnreadCount(),
         'notifications'    => $user->unreadTorrentNotifications(),
-        'newAnnouncement'  => $LoggedUser['LastReadNews'] < $newsMan->latestId(),
-        'newBlog'          => $LoggedUser['LastReadBlog'] < $blogMan->latestId(),
-        'newSubscriptions' => $subscription->unread() > 0,
+        'newAnnouncement'  => (new \Gazelle\Manager\News)->latest() < (new \Gazelle\WitnessTable\UserReadNews)->lastRead($user->id()),
+        'newBlog'          => (new \Gazelle\Manager\Blog)->latest() < (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($user->id()),
+        'newSubscriptions' => (new \Gazelle\Manager\Subscription($LoggedUser['ID']))->unread() > 0,
     ],
     'userstats' => [
         'uploaded' => (int)$LoggedUser['BytesUploaded'],

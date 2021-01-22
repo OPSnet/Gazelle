@@ -48,12 +48,10 @@ if ($action === 'Create') { /* default for non-staff */
 ?>
 <div class="thin">
 <?php
-    $blogMan = new Gazelle\Manager\Blog;
-    $headlines = $blogMan->headlines();
+    $headlines = (new Gazelle\Manager\Blog)->headlines();
     if ($headlines) {
-        if ($blogMan->catchupUser($LoggedUser['ID'])) {
+        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($LoggedUser['ID'])) {
             $Cache->delete_value('user_info_heavy_' . $LoggedUser['ID']);
-            $LoggedUser['LastReadBlog'] = $headlines[0][0];
         }
     }
 

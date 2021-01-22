@@ -61,7 +61,6 @@ class Notification extends \Gazelle\Base {
 
     protected $user;
     protected $userId;
-    protected $userInfo;
     protected $subscription;
     protected $notifications;
     protected $settings;
@@ -84,7 +83,6 @@ class Notification extends \Gazelle\Base {
         $this->notifications = [];
         $this->settings = $this->settings();
         $this->skipped = $skip;
-        $this->userInfo = \Users::user_heavy_info($this->userId);
         $this->subscription = new Subscription($this->userId);
         if ($autoSkip) {
             foreach ($this->settings as $key => $value) {
@@ -280,18 +278,10 @@ class Notification extends \Gazelle\Base {
      */
 
     public function loadBlog() {
-        $blog = new \Gazelle\Manager\Blog;
-        [$blogId, $title] = $blog->latest();
-        if ($this->userInfo['LastReadBlog'] < $blogId) {
+        [$blogId, $title] = (new \Gazelle\Manager\Blog)->latest();
+        if ($blogId > (new \Gazelle\WitnessTable\UserReadBlog)->lastRead($this->user->id())) {
             $this->create(self::BLOG, "Blog: $title", "blog.php#blog$blogId", self::IMPORTANT, $blogId);
         }
-    }
-
-    public function clearBlog() {
-        $blogMan = new \Gazelle\Manager\Blog;
-        $blogMan->catchupUser($this->userId);
-        $this->cache->delete_value('user_info_heavy_' . $this->userId);
-        return $blogMan->latestId();
     }
 
     public function loadCollages() {
@@ -326,10 +316,11 @@ class Notification extends \Gazelle\Base {
     }
 
     public function loadInbox() {
-        $new = $this->user->inboxUnreadCount();
-        if ($new > 0) {
-            $this->create(self::INBOX, 'You have ' . article($new) . ' new message' . plural($new),
-                Inbox::getLinkQuick('inbox', $this->userInfo['ListUnreadPMsFirst'] ?? false), self::INFO);
+        $count = $this->user->inboxUnreadCount();
+        if ($count > 0) {
+            $this->create(self::INBOX, 'You have ' . article($count) . ' new message' . plural($count),
+                Inbox::getLinkQuick('inbox', $this->user->option('ListUnreadPMsFirst')), self::INFO
+            );
         }
     }
 
@@ -354,24 +345,21 @@ class Notification extends \Gazelle\Base {
     }
 
     public function loadNews() {
-        $news = new \Gazelle\Manager\News;
-        [$newsId, $title] = $news->latest();
-        if ($this->userInfo['LastReadNews'] < $newsId) {
+        [$newsId, $title] = (new \Gazelle\Manager\News)->latest();
+        if ($newsId > (new \Gazelle\WitnessTable\UserReadNews)->lastRead($this->user->id())) {
             $this->create(self::NEWS, "Announcement: $title", "index.php#news$newsId", self::IMPORTANT, $newsId);
         }
     }
 
     public function clearNews() {
-        $news = new \Gazelle\Manager\News;
-        [$newsId] = $news->latest();
-        if ($this->userInfo['LastReadNews'] < $newsId) {
-            $this->user->updateLastReadNews($newsId);
+        if ((new \Gazelle\WitnessTable\UserReadNews)->witness($this->userId)) {
+            $this->cache->delete_value('user_info_heavy_' . $this->userId);
         }
-        return $newsId;
+        return (new \Gazelle\Manager\News)->latestId();
     }
 
     public function loadQuotes() {
-        if ($this->userInfo['NotifyOnQuote'] ?? 0) {
+        if ($this->user->info()['NotifyOnQuote']) {
             $count = $this->subscription->unreadQuotes();
             if ($count > 0) {
                 $this->create(self::QUOTES, 'New quote' . plural($count), 'userhistory.php?action=quote_notifications', self::INFO);

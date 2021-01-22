@@ -354,7 +354,7 @@ foreach ($thread as $Key => $Post) {
     $tableClass = ['forum_post', 'wrap_overflow', 'box vertical_margin'];
     if (((!$threadInfo['isLocked'] || $threadInfo['isSticky'])
             && $PostID > $lastRead
-            && strtotime($AddedTime) > $LoggedUser['CatchupTime']
+            && strtotime($AddedTime) > $user->forumCatchupEpoch()
             ) || (isset($RequestKey) && $Key == $RequestKey)
         ) {
         $tableClass[] = 'forum_unread';

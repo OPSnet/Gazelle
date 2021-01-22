@@ -122,39 +122,22 @@ class Blog extends \Gazelle\Base {
 
     /**
      * Get the latest blog article id and title
-     * ID will be -1 if no article yet exists.
+     * ID will be null if no article yet exists.
      *
      * @return array [$id, $title]
      */
     public function latest(): array {
         $headlines = $this->headlines();
-        return $headlines[0] ?? [-1, null, null, null, null, null, null];
+        return $headlines ? $headlines[0] : [null, null];
     }
 
     /**
      * Get the latest blog article id
-     * ID will be -1 if no article yet exists.
+     * ID will be null if no article yet exists.
      *
      * @return int $id blog article id
      */
-    public function latestId(): int {
-        [$blogId] = $this->latest();
-        return $blogId;
-    }
-
-    /**
-     * Indicate a user has read the given blog entry
-     * @param int $userId The user
-     * @return bool true if there was a change in status (you will need to flush their heavy cache)
-     */
-    public function catchupUser(int $userId): bool {
-        (new \Gazelle\WitnessTable\UserReadBlog)->witness($userId);
-        $this->db->prepared_query("
-            UPDATE users_info SET
-                LastReadBlog = (SELECT max(ID) FROM blog)
-            WHERE UserID = ?
-            ", $userId
-        );
-        return $this->db->affected_rows() == 1;
+    public function latestId(): ?int {
+        return $this->latest()[0];
     }
 }
