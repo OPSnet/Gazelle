@@ -231,7 +231,7 @@ class Torrent extends \Gazelle\Base {
                     $chunk[] = 'Various Composers';
                 }
                 if ($mainCount > 0) {
-                    $chunk[] = 'performed by';
+                    $chunk[] = 'Various Composers performed by';
                 }
             }
 
