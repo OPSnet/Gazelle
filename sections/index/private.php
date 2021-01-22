@@ -1,12 +1,10 @@
 <?php
 Text::$TOC = true;
 
-$user = new Gazelle\User($LoggedUser['ID']);
 $newsMan = new Gazelle\Manager\News;
-$latestNewsId = $newsMan->latestId();
-if ($LoggedUser['LastReadNews'] < $latestNewsId) {
-    $user->updateLastReadNews($latestNewsId);
-    $LoggedUser['LastReadNews'] = $latestNewsId;
+$newsReader = new Gazelle\WitnessTable\UserReadNews;
+if ($newsReader->lastRead($LoggedUser['ID']) < $newsMan->latestId()) {
+    $newsReader->witness($LoggedUser['ID']);
 }
 
 View::show_header('News', 'bbcode,news_ajax');

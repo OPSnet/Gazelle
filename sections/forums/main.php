@@ -2,6 +2,7 @@
 
 $forum = new \Gazelle\Forum();
 $toc = $forum->tableOfContentsMain();
+$user = new Gazelle\User($LoggedUser['ID']);
 View::show_header('Forums');
 ?>
 <div class="thin">
@@ -23,12 +24,12 @@ foreach ($toc as $category => $forumList) {
             $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
             $lastReadPost = $userLastRead[$f['LastPostTopicID']]['PostID'];
             $catchup = $userLastRead[$f['LastPostTopicID']]['PostID'] >= $f['LastPostID']
-                || $LoggedUser['CatchupTime'] >= strtotime($f['LastPostTime']);
+                || $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
             $isRead = true;
         } else {
             $lastReadPage = null;
             $lastReadPost = null;
-            $catchup = $LoggedUser['CatchupTime'] >= strtotime($f['LastPostTime']);
+            $catchup = $user->forumCatchupEpoch() >= strtotime($f['LastPostTime']);
             $isRead = false;
         }
 

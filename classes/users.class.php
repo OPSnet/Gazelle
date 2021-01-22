@@ -40,7 +40,6 @@ class Users {
      *    string  Avatar - URL
      *    boolean Enabled
      *    string  Title
-     *    string  CatchupTime - When they last caught up on forums
      *    boolean Visible - If false, they don't show up on peer lists
      *    array   ExtraClasses - Secondary classes.
      *    int     EffectiveClass - the highest level of their main and secondary classes
@@ -63,7 +62,6 @@ class Users {
                     i.Avatar,
                     m.Enabled,
                     m.Title,
-                    i.CatchupTime,
                     m.Visible,
                     la.Type AS LockedAccount,
                     GROUP_CONCAT(ul.PermissionID SEPARATOR ',') AS Levels
@@ -90,13 +88,11 @@ class Users {
                         'Avatar' => '',
                         'Enabled' => 0,
                         'Title' => '',
-                        'CatchupTime' => 0,
                         'Visible' => '1',
                         'Levels' => '',
                         'Class' => 0];
             } else {
                 $UserInfo = G::$DB->next_record(MYSQLI_ASSOC, ['Paranoia', 'Title']);
-                $UserInfo['CatchupTime'] = strtotime($UserInfo['CatchupTime']);
                 $UserInfo['Paranoia'] = unserialize_array($UserInfo['Paranoia']);
                 if ($UserInfo['Paranoia'] === false) {
                     $UserInfo['Paranoia'] = [];
@@ -172,8 +168,6 @@ class Users {
                     i.DisableTagging,
                     i.SiteOptions,
                     i.DownloadAlt,
-                    i.LastReadNews,
-                    i.LastReadBlog,
                     i.RestrictedForums,
                     i.PermittedForums,
                     i.NavItems,

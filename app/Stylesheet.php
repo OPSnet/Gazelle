@@ -4,7 +4,7 @@ namespace Gazelle;
 
 class Stylesheet extends Base {
 
-    private $stylesheets;
+    protected $stylesheets;
 
     public function __construct() {
         parent::__construct();
@@ -22,11 +22,11 @@ class Stylesheet extends Base {
         }
     }
 
-    public function list () {
+    public function list (): array {
         return $this->stylesheets;
     }
 
-    public function getName($id) {
+    public function getName(int $id): string {
         return $this->stylesheets[$id]['Name'];
     }
 }

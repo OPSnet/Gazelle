@@ -1,7 +1,5 @@
 <?php
 
-use Gazelle\Manager\Notification;
-
 authorize();
 
 $UserID = empty($_REQUEST['userid']) ? $LoggedUser['ID'] : (int)$_REQUEST['userid'];
@@ -285,10 +283,13 @@ if ($DB->has_results()) {
 G::$Cache->delete_value("lastfm_username_$UserID");
 
 $user->toggleAcceptFL($Options['AcceptFL']);
-$notification = new Notification($UserID);
-// A little cheat technique, gets all keys in the $_POST array starting with 'notifications_'
-$settings = array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST))));
-$notification->save($settings, ["PushKey" => $_POST['pushkey']], (int)$_POST['pushservice'], $_POST['pushdevice']);
+(new Gazelle\Manager\Notification($UserID))
+    ->save(
+        array_intersect_key($_POST, array_flip(preg_grep('/^notifications_/', array_keys($_POST)))),
+        ["PushKey" => $_POST['pushkey']],
+        $_POST['pushservice'],
+        $_POST['pushdevice']
+    );
 
 // Information on how the user likes to download torrents is stored in cache
 if ($DownloadAlt != $UH['DownloadAlt'] || $Options['HttpsTracker'] != $UH['HttpsTracker']) {

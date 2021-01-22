@@ -1,6 +1,7 @@
 <?php
 
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+$user = new Gazelle\User($LoggedUser['ID']);
 
 //We have to iterate here because if one is empty it breaks the query
 $TopicIDs = [];
@@ -72,7 +73,7 @@ foreach ($Forums as $Forum) {
     if ((!$Locked || $Sticky)
             && $LastPostID != 0
             && ((empty($LastRead[$LastTopicID]) || $LastRead[$LastTopicID]['PostID'] < $LastPostID)
-                && strtotime($LastTime) > $LoggedUser['CatchupTime'])
+                && strtotime($LastTime) > $user->forumCatchupEpoch())
     ) {
         $Read = 'unread';
     } else {

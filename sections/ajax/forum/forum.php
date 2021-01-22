@@ -81,6 +81,7 @@ if ($LoggedUser['CustomForums'][$ForumID] != 1 && $Forums[$ForumID]['MinClassRea
 }
 
 $ForumName = display_str($Forums[$ForumID]['Name']);
+$user = new Gazelle\User($LoggedUser['ID']);
 
 $Pages = Format::get_pages($Page, $Forums[$ForumID]['NumTopics'], TOPICS_PER_PAGE, 9);
 
@@ -124,7 +125,7 @@ if (!count($Forum)) {
         // handle read/unread posts - the reason we can't cache the whole page
         if ((!$Locked || $Sticky)
                 && ((empty($LastRead[$TopicID]) || $LastRead[$TopicID]['PostID'] < $LastID)
-                    && strtotime($LastTime) > $LoggedUser['CatchupTime'])
+                    && strtotime($LastTime) > $user->forumCatchupEpoch())
         ) {
             $Read = 'unread';
         } else {

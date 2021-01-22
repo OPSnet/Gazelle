@@ -32,18 +32,19 @@ $Pages        = Format::get_pages($page, $forum->topicCount(), TOPICS_PER_PAGE, 
 $isDonorForum = $forumId == DONOR_FORUM ? true : false;
 $perPage      = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 $userLastRead = $forum->userLastRead($LoggedUser['ID'], $perPage);
+$user         = new Gazelle\User($LoggedUser['ID']);
 
 foreach ($forumToc as &$thread) {
     if (isset($userLastRead[$thread['ID']])) {
         $thread['last_read_page'] = (int)$userLastRead[$thread['ID']]['Page'];
         $thread['last_read_post'] = $userLastRead[$thread['ID']]['PostID'];
         $catchup = $userLastRead[$thread['ID']]['PostID'] >= $thread['LastPostID']
-            || $LoggedUser['CatchupTime'] >= strtotime($thread['LastPostTime']);
+            || $user->forumCatchupEpoch() >= strtotime($thread['LastPostTime']);
         $thread['is_read'] = true;
     } else {
         $thread['last_read_page'] = null;
         $thread['last_read_post'] = null;
-        $catchup = $LoggedUser['CatchupTime'] >= strtotime($thread['LastPostTime']);
+        $catchup = $user->forumCatchupEpoch() >= strtotime($thread['LastPostTime']);
         $thread['is_read'] = false;
     }
 

@@ -3,6 +3,11 @@
 $user = new Gazelle\User($LoggedUser['ID']);
 
 $newsMan = new Gazelle\Manager\News;
+$newsReader = new \Gazelle\WitnessTable\UserReadNews;
+if ($newsMan->latest() < $newsReader->lastRead($user->id())) {
+    $newsReader->witness($user->id());
+}
+
 $headlines = $newsMan->headlines();
 $news = [];
 $show = 5;
@@ -12,7 +17,7 @@ foreach ($headlines as $item) {
     }
     [$id, $title, $body, $time] = $item;
     $news[] = [
-        'newsId'   => (int)$id,
+        'newsId'   => $id,
         'title'    => $title,
         'bbBody'   => $body,
         'body'     => Text::full_format($body),
@@ -20,25 +25,18 @@ foreach ($headlines as $item) {
     ];
 }
 
-$latestNewsId = $newsMan->latestId();
-if ($LoggedUser['LastReadNews'] < $latestNewsId) {
-    $user->updateLastReadNews($latestNewsId);
-    $LoggedUser['LastReadNews'] = $latestNewsId;
-}
-
-$blogMan = new Gazelle\Manager\News;
-$headlines = $blogMan->headlines();
+$headlines = (new Gazelle\Manager\Blog)->headlines();
 $blog = [];
 foreach ($headlines as $item) {
-    [$id, $author, , $title, $body, $time, $threadId] = $item;
+    [$id, $title, $author, , $body, $time, $threadId] = $item;
     $blog[] = [
-        'blogId'   => (int)$id,
+        'blogId'   => $id,
         'author'   => $author,
         'title'    => $title,
         'bbBody'   => $body,
         'body'     => Text::full_format($body),
         'blogTime' => $time,
-        'threadId' => (int)$threadId,
+        'threadId' => $threadId,
     ];
 }
 

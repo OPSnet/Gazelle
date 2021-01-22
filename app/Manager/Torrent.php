@@ -919,7 +919,7 @@ class Torrent extends \Gazelle\Base {
 
         // Torrent notifications
         $this->db->prepared_query("
-            SELECT concat('notifications_new_', UserID) as ck
+            SELECT concat('user_notify_upload_', UserID) as ck
             FROM users_notify_torrents
             WHERE TorrentID = ?
             ", $this->torrentId

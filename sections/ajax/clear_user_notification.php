@@ -7,7 +7,9 @@ $Type = $_POST['type'];
 
 switch($Type) {
     case 'Blog':
-        $LoggedUser['LastReadBlog'] = $notifMan->clearBlog();
+        if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($LoggedUser['ID'])) {
+            $Cache->delete_value('user_info_heavy_' . $LoggedUser['ID']);
+        }
         break;
     case 'Collages':
         $notifMan->catchupAllCollages();
@@ -19,7 +21,7 @@ switch($Type) {
         $user->markAllReadInbox();
         break;
     case 'News':
-        $LoggedUser['LastReadNews'] = $notifMan->clearNews();
+        $notifMan->clearNews();
         break;
     case 'Quotes':
         $user->clearQuotes();

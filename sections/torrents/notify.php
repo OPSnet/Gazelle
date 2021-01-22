@@ -149,12 +149,12 @@ if (!empty($GroupIDs)) {
         //Clear before header but after query so as to not have the alert bar on this page load
         $DB->prepared_query("
             UPDATE users_notify_torrents SET
-                UnRead = '0'
+                UnRead = 0
             WHERE UserID = ?
                 AND TorrentID IN (" . placeholders($UnReadIDs) . ")
             ", $LoggedUser['ID'], ...$UnReadIDs
         );
-        $Cache->delete_value('notifications_new_'.$LoggedUser['ID']);
+        $Cache->delete_value('user_notify_upload_'.$LoggedUser['ID']);
     }
 }
 if ($Sneaky) {
