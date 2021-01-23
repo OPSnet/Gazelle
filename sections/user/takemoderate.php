@@ -145,7 +145,7 @@ if ($_POST['comment_hash'] != $cur['CommentHash']) {
 }
 
 // NOW that we know the class of the current user, we can see if one staff member is trying to hax0r us.
-if (!check_perms('users_mod', $cur['Class'])) {
+if (!check_perms('users_mod')) {
     error(403);
 }
 
@@ -286,10 +286,9 @@ $args = [];
 
 if ($Classes[$class]['Level'] != $cur['Class']
     && (
-        ($Classes[$class]['Level'] < $LoggedUser['Class'] && check_perms('users_promote_below', $cur['Class']))
-        || ($Classes[$class]['Level'] <= $LoggedUser['Class'] && check_perms('users_promote_to', $cur['Class'] - 1))
-        )
-    ) {
+        ($Classes[$class]['Level'] < $LoggedUser['Class'] && check_perms('users_promote_below'))
+        || ($Classes[$class]['Level'] <= $LoggedUser['Class'] && check_perms('users_promote_to'))
+)) {
     $set[] = 'PermissionID = ?';
     $args[] = $class;
     $editSummary[] = 'class changed to '.Users::make_class_string($class);
@@ -303,7 +302,7 @@ if ($Classes[$class]['Level'] != $cur['Class']
     $Cache->delete_value("donor_info_$userID");
 }
 
-if ($username !== $cur['Username'] && check_perms('users_edit_usernames', $cur['Class'] - 1)) {
+if ($username !== $cur['Username'] && check_perms('users_edit_usernames')) {
     if (in_array($username, ['0', '1'])) {
         error('You cannot set a username of "0" or "1".');
         header("Location: user.php?id=$userID");
@@ -316,7 +315,6 @@ if ($username !== $cur['Username'] && check_perms('users_edit_usernames', $cur['
             header("Location: user.php?id=$id");
             exit;
         }
-    } else {
         $set[] = 'Username = ?';
         $args[] = $username;
         $editSummary[] = "username changed from ".$cur['Username']." to $username";
