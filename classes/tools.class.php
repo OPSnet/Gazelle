@@ -2,16 +2,6 @@
 class Tools {
 
     /**
-     * Returns the unsigned form of an IP address.
-     *
-     * @param string $IP The IP address x.x.x.x
-     * @return string the long it represents.
-     */
-    public static function ip_to_unsigned($IP) {
-        return sprintf('%u', ip2long($IP));
-    }
-
-    /**
      * Geolocate an IP address using the database
      *
      * @param $IP the ip to fetch the country for
@@ -25,18 +15,18 @@ class Tools {
         if (is_number($IP)) {
             $Long = $IP;
         } else {
-            $Long = Tools::ip_to_unsigned($IP);
+            $Long = sprintf('%u', ip2long($IP));
         }
         if (!$Long || $Long == 2130706433) { // No need to check cc for 127.0.0.1
             return false;
         }
         $QueryID = G::$DB->get_query_id();
-        G::$DB->query("
+        G::$DB->prepared_query("
             SELECT EndIP, Code
             FROM geoip_country
-            WHERE $Long >= StartIP
+            WHERE ? >= StartIP
             ORDER BY StartIP DESC
-            LIMIT 1");
+            LIMIT 1", $Long);
         if ((!list($EndIP, $Country) = G::$DB->next_record()) || $EndIP < $Long) {
             $Country = '?';
         }
