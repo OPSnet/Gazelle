@@ -80,23 +80,7 @@ class Artist extends Base {
             if (is_null($this->name)) {
                 throw new Exception\ResourceNotFoundException($id);
             }
-
-            $this->db->prepared_query('
-                SELECT
-                    s2.ArtistID,
-                    a.Name,
-                    ass.Score,
-                    ass.SimilarID
-                FROM artists_similar AS s1
-                INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
-                INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
-                INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
-                WHERE s1.ArtistID = ?
-                ORDER BY ass.Score DESC
-                LIMIT 30
-                ', $this->id
-            );
-            $this->similar = $this->db->to_array();
+            $this->similar = $this->loadSimilar();
             $this->homonyms = $this->homonymCount();
             $this->cache->cache_value($cacheKey, [
                     $this->name, $this->image, $this->body, $this->vanity, $this->similar,
@@ -104,6 +88,25 @@ class Artist extends Base {
                 ], 3600
             );
         }
+    }
+
+    public function loadSimilar() {
+        $this->db->prepared_query("
+            SELECT
+                s2.ArtistID,
+                a.Name,
+                ass.Score,
+                ass.SimilarID
+            FROM artists_similar AS s1
+            INNER JOIN artists_similar AS s2 ON (s1.SimilarID = s2.SimilarID AND s1.ArtistID != s2.ArtistID)
+            INNER JOIN artists_similar_scores AS ass ON (ass.SimilarID = s1.SimilarID)
+            INNER JOIN artists_group AS a ON (a.ArtistID = s2.ArtistID)
+            WHERE s1.ArtistID = ?
+            ORDER BY ass.Score DESC
+            LIMIT 30
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC);
     }
 
     public function loadArtistRole() {
@@ -224,7 +227,7 @@ class Artist extends Base {
     }
 
     public function vanityHouse(): bool {
-        return $this->vanity;
+        return $this->vanity == 1;
     }
 
     public function similarArtists(): array {

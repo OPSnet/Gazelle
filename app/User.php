@@ -117,6 +117,7 @@ class User extends BaseObject {
         }
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
         $this->info['DisableInvites'] = (bool)($this->info['DisableInvites'] == '1');
+        $this->info['DisableRequests'] = (bool)($this->info['DisableRequests'] == '1');
         $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
@@ -220,6 +221,10 @@ class User extends BaseObject {
     public function announceUrl(): string {
         return ($this->info()['SiteOptions']['HttpsTracker'] ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL)
             . '/' . $this->announceKey() . '/announce';
+    }
+
+    public function disableRequests(): bool {
+        return $this->info()['DisableRequests'];
     }
 
     public function email(): string {
