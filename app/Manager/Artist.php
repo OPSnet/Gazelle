@@ -23,6 +23,22 @@ class Artist extends \Gazelle\Base {
         }
     }
 
+    public function findById(int $id, int $revisionId) {
+        $artistId = $this->db->scalar("
+            SELECT ArtistID FROM artists_group WHERE ArtistID = ?
+            ", $id
+        );
+        return is_null($artistId) ? null : new \Gazelle\Artist($artistId, $revisionId);
+    }
+
+    public function findByName(string $name, int $revisionId) {
+        $artistId = $this->db->scalar("
+            SELECT ArtistID FROM artists_group WHERE Name = ?
+            ", trim($name)
+        );
+        return is_null($artistId) ? null : new \Gazelle\Artist($artistId, $revisionId);
+    }
+
     public function create($name) {
         $this->db->prepared_query('
             INSERT INTO artists_group (Name)
