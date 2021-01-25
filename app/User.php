@@ -1939,6 +1939,40 @@ class User extends BaseObject {
     }
 
     /**
+     * Remove an active invitation
+     *
+     * @param string invite key
+     * @return bool success
+     */
+    public function removeInvite(string $key) {
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            DELETE FROM invites WHERE InviteKey = ?
+            ", $key
+        );
+        if ($this->db->affected_rows() == 0) {
+            $this->db->rollback();
+            return false;
+        }
+        if (check_perms('site_send_unlimited_invites')) {
+            $this->db->commit();
+            return true;
+        }
+
+        $this->db->prepared_query("
+            UPDATE users_main SET
+                Invites = Invites + 1
+            WHERE ID = ?
+            ", $this->id
+        );
+        $this->db->commit();
+        $this->cache->begin_transaction("user_info_heavy_{$this->id()}");
+        $this->cache->update_row(false, ['Invites' => '+1']);
+        $this->cache->commit_transaction(0);
+        return true;
+    }
+
+    /**
      * Initiate a password reset
      *
      * @param int $UserID The user ID
