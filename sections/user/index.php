@@ -185,9 +185,6 @@ switch ($_REQUEST['action'] ?? '') {
     case 'sessions':
         require_once('sessions.php');
         break;
-    case 'connchecker':
-        require_once('connchecker.php');
-        break;
     case 'permissions':
         require_once('permissions.php');
         break;
