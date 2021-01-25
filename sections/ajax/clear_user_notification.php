@@ -8,7 +8,7 @@ $Type = $_POST['type'];
 switch($Type) {
     case 'Blog':
         if ((new \Gazelle\WitnessTable\UserReadBlog)->witness($LoggedUser['ID'])) {
-            $this->cache->delete_value('user_info_heavy_' . $LoggedUser['ID']);
+            $Cache->delete_value('user_info_heavy_' . $LoggedUser['ID']);
         }
         break;
     case 'Collages':
