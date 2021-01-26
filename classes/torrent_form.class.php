@@ -210,6 +210,7 @@ class TORRENT_FORM {
         $LossymasterApproved = $Torrent['LossymasterApproved'];
         $LossywebApproved = $Torrent['LossywebApproved'];
         $releaseTypes = (new \Gazelle\ReleaseType)->list();
+        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
         <div id="musicbrainz_popup" style="display: none;">
             <a href="#null" id="popup_close">x</a>
@@ -260,7 +261,8 @@ class TORRENT_FORM {
                     $n = 0;
                     foreach ($Artists as $Artist) {
 ?>
-                    <input type="text" id="artist_<?= $n++ ?>" name="artists[]" size="45" value="<?=display_str($Artist['name']) ?>" onblur="CheckVA();"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+                    <input type="text" id="artist_<?= $n++ ?>" name="artists[]" size="45" value="<?= display_str($Artist['name']) ?>" onblur="CheckVA();"<?=
+                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
                     <select id="importance" name="importance[]"<?=$this->Disabled?>>
                         <option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
                         <option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
@@ -287,7 +289,8 @@ class TORRENT_FORM {
                 }
             } else {
 ?>
-                    <input type="text" id="artist_0" name="artists[]" size="45" onblur="CheckVA();"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+                    <input type="text" id="artist_0" name="artists[]" size="45" onblur="CheckVA();"<?=
+                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
                     <select id="importance_0" name="importance[]"<?=$this->Disabled?>>
                         <option value="1">Main</option>
                         <option value="2">Guest</option>
@@ -556,7 +559,8 @@ class TORRENT_FORM {
 <?php           } ?>
                     </select>
 <?php       } ?>
-                    <input type="text" id="tags" name="tags" size="40" value="<?=display_str($Torrent['TagList']) ?>"<?php Users::has_autocomplete_enabled('other'); ?><?=$this->Disabled?> />
+                    <input type="text" id="tags" name="tags" size="40" value="<?= display_str($Torrent['TagList']) ?>"<?=
+                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?><?= $this->Disabled ?> />
                     <br /><?= G::$Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
@@ -584,10 +588,11 @@ class TORRENT_FORM {
             TEXTAREA_PREVIEW::JavaScript(false);
         }
         G::$DB->set_query_id($QueryID);
-    }//function music_form
+    }
 
     function audiobook_form() {
         $Torrent = $this->Torrent;
+        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php   if ($this->NewTorrent) { ?>
@@ -651,7 +656,9 @@ class TORRENT_FORM {
             <tr>
                 <td class="label">Tags:</td>
                 <td>
-                    <input type="text" id="tags" name="tags" size="60" value="<?=display_str($Torrent['TagList']) ?>"<?php Users::has_autocomplete_enabled('other'); ?> />
+                    <input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
+                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
+                    <br /><?= G::$Twig->render('rules/tag.twig', ['on_upload' => true]) ?>
                 </td>
             </tr>
             <tr>
@@ -672,10 +679,11 @@ class TORRENT_FORM {
         </table>
 <?php
         TEXTAREA_PREVIEW::JavaScript(false);
-    }//function audiobook_form
+    }
 
     function simple_form($CategoryID) {
         $Torrent = $this->Torrent;
+        $user = new \Gazelle\User($LoggedUser['ID']);
 ?>        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
 <?php
@@ -690,7 +698,8 @@ class TORRENT_FORM {
             </tr>
             <tr>
                 <td class="label">Tags:</td>
-                <td><input type="text" id="tags" name="tags" size="60" value="<?=display_str($Torrent['TagList']) ?>"<?php Users::has_autocomplete_enabled('other'); ?> /></td>
+                <td><input type="text" id="tags" name="tags" size="60" value="<?= display_str($Torrent['TagList']) ?>"<?=
+                    $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /></td>
             </tr>
             <tr>
                 <td class="label">Image (optional):</td>

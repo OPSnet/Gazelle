@@ -1,15 +1,12 @@
 <?php
 
 /*
- * Yeah, that's right, edit and new are the same place again.
- * It makes the page uglier to read but ultimately better as the alternative means
- * maintaining 2 copies of almost identical files.
+ * Yeah, that's right, edit and new are the same place.
+ * It makes the page uglier to read but ultimately better as the alternative
+ * means maintaining 2 copies of almost identical files.
  */
 
 $NewRequest = $_GET['action'] === 'new';
-
-$RequestTaxPercent = ($RequestTax * 100);
-
 if (!$NewRequest) {
     $RequestID = $_GET['id'];
     if (!intval($RequestID)) {
@@ -20,6 +17,9 @@ if (!$NewRequest) {
 if ($NewRequest && ($LoggedUser['BytesUploaded'] < 250 * 1024 * 1024 || !check_perms('site_submit_requests'))) {
     error('You do not have enough uploaded to make a request.');
 }
+
+$RequestTaxPercent = ($RequestTax * 100);
+$user = new Gazelle\User($LoggedUser['ID']);
 
 if (!$NewRequest) {
     if (empty($ReturnEdit)) {
@@ -180,7 +180,8 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
             foreach ($ArtistForm as $Importance => $ArtistNames) {
                 foreach ($ArtistNames as $Artist) {
 ?>
-                        <input type="text" id="artist_<?=$cnt ?>" name="artists[]"<?php Users::has_autocomplete_enabled('other'); ?> size="45" value="<?=display_str($Artist['name']) ?>" />
+                        <input type="text" id="artist_<?=$cnt ?>" name="artists[]"<?=
+                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" value="<?=display_str($Artist['name']) ?>" />
                         <select id="importance" name="importance[]">
                             <option value="1"<?=($Importance == '1' ? ' selected="selected"' : '')?>>Main</option>
                             <option value="2"<?=($Importance == '2' ? ' selected="selected"' : '')?>>Guest</option>
@@ -198,7 +199,9 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                 }
             }
         } else {
-?>                        <input type="text" id="artist_0" name="artists[]"<?php Users::has_autocomplete_enabled('other'); ?> size="45" onblur="CheckVA();" />
+?>
+                        <input type="text" id="artist_0" name="artists[]"<?=
+                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> size="45" onblur="CheckVA();" />
                         <select id="importance" name="importance[]">
                             <option value="1">Main</option>
                             <option value="2">Guest</option>
@@ -263,7 +266,8 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                             <option value="<?= display_str($Genre) ?>"><?= display_str($Genre) ?></option>
 <?php    } ?>
                         </select>
-                        <input type="text" id="tags" name="tags" size="45" value="<?=(!empty($Tags) ? display_str($Tags) : '')?>"<?php Users::has_autocomplete_enabled('other'); ?> />
+                        <input type="text" id="tags" name="tags" size="45" value="<?= empty($Tags) ? '' : display_str($Tags) ?>"<?=
+                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <br />
                         Tags should be comma-separated, and you should use a period (".") to separate words inside a tag&#8202;&mdash;&#8202;e.g. "<strong class="important_text_alt">hip.hop</strong>".
                         <br /><br />

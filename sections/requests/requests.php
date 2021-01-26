@@ -1,24 +1,6 @@
 <?php
 
-$SphQL = new SphinxqlQuery();
-$SphQL->select('id, votes, bounty')->from('requests, requests_delta');
-
-$header = new \Gazelle\Util\SortableTableHeader('created', [
-    'year'     => ['dbColumn' => 'year',       'defaultSort' => 'desc', 'text' => 'Year'],
-    'votes'    => ['dbColumn' => 'votes',      'defaultSort' => 'desc', 'text' => 'Votes'],
-    'bounty'   => ['dbColumn' => 'bounty',     'defaultSort' => 'desc', 'text' => 'Bounty'],
-    'filled'   => ['dbColumn' => 'timefilled', 'defaultSort' => 'desc', 'text' => 'Filled'],
-    'created'  => ['dbColumn' => 'timeadded',  'defaultSort' => 'desc', 'text' => 'Created'],
-    'lastvote' => ['dbColumn' => 'lastvote',   'defaultSort' => 'desc', 'text' => 'Last Vote'],
-    'random'   => ['dbColumn' => 'RAND()',     'defaultSort' => ''],
-]);
-$OrderBy = $header->getOrderBy();
-
-$SphQL->order_by($OrderBy, $header->getOrderDir());
-
-$Submitted = !empty($_GET['submit']);
-
-//Paranoia
+$user = new Gazelle\User($LoggedUser['ID']);
 if (!empty($_GET['userid'])) {
     if (!intval($_GET['userid'])) {
         error('User ID must be an integer');
@@ -31,6 +13,23 @@ if (!empty($_GET['userid'])) {
     $UserClass = $Perms['Class'];
 }
 $BookmarkView = false;
+
+$header = new \Gazelle\Util\SortableTableHeader('created', [
+    'year'     => ['dbColumn' => 'year',       'defaultSort' => 'desc', 'text' => 'Year'],
+    'votes'    => ['dbColumn' => 'votes',      'defaultSort' => 'desc', 'text' => 'Votes'],
+    'bounty'   => ['dbColumn' => 'bounty',     'defaultSort' => 'desc', 'text' => 'Bounty'],
+    'filled'   => ['dbColumn' => 'timefilled', 'defaultSort' => 'desc', 'text' => 'Filled'],
+    'created'  => ['dbColumn' => 'timeadded',  'defaultSort' => 'desc', 'text' => 'Created'],
+    'lastvote' => ['dbColumn' => 'lastvote',   'defaultSort' => 'desc', 'text' => 'Last Vote'],
+    'random'   => ['dbColumn' => 'RAND()',     'defaultSort' => ''],
+]);
+$OrderBy = $header->getOrderBy();
+
+$SphQL = new SphinxqlQuery();
+$SphQL->select('id, votes, bounty')->from('requests, requests_delta');
+$SphQL->order_by($OrderBy, $header->getOrderDir());
+
+$Submitted = !empty($_GET['submit']);
 
 if (empty($_GET['type'])) {
     $Title = 'Requests';
@@ -370,7 +369,8 @@ View::show_header($Title, 'requests');
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td>
-                    <input type="search" name="tags" id="tags" size="60" value="<?=!empty($TagNames) ? display_str($TagNames) : ''?>"<?php Users::has_autocomplete_enabled('other'); ?> />&nbsp;
+                    <input type="search" name="tags" id="tags" size="60" value="<?=!empty($TagNames) ? display_str($TagNames) : ''?>"<?=
+                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
                     <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked')?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
                     <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked')?> /><label for="tags_type1"> All</label>
                 </td>
@@ -378,7 +378,8 @@ View::show_header($Title, 'requests');
             <tr id="include_filled">
                 <td class="label"><label for="include_filled_box">Include filled:</label></td>
                 <td>
-                    <input type="checkbox" id="include_filled_box" name="show_filled"<?php if (!empty($_GET['show_filled']) || (!$Submitted && !empty($_GET['type']) && $_GET['type'] === 'filled')) { ?> checked="checked"<?php } ?> />
+                    <input type="checkbox" id="include_filled_box" name="show_filled"<?php
+                        if (!empty($_GET['show_filled']) || (!$Submitted && !empty($_GET['type']) && $_GET['type'] === 'filled')) { ?> checked="checked"<?php } ?> />
                 </td>
             </tr>
             <tr id="include_old">

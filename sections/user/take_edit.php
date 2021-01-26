@@ -209,7 +209,7 @@ $Options['AcceptFL']            = (!empty($_POST['acceptfltoken']) ? 1 : 0);
 $Options['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
 $Options['CoverArt']            = (int)!empty($_POST['coverart']);
 $Options['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
-$Options['AutoComplete']        = (int)$_POST['autocomplete'];
+$Options['AutoComplete']        = $_POST['autocomplete'];
 $Options['HttpsTracker']        = (!empty($_POST['httpstracker']) ? 1 : 0);
 
 if (isset($LoggedUser['DisableFreeTorrentTop10'])) {

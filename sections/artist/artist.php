@@ -215,7 +215,8 @@ foreach ($Artist->similarArtists() as $SimilarArtist) {
                         <input type="hidden" name="action" value="add_similar" />
                         <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                         <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
-                        <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"<?php Users::has_autocomplete_enabled('other'); ?> />
+                        <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"<?=
+                            $User->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <input type="submit" value="+" />
                     </form>
                 </li>
