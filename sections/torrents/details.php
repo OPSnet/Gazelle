@@ -250,7 +250,11 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                 <li class="<?= $s['class'] ?>"><strong class="artists_label"><?= $s['title'] ?></strong></li>
 <?php
             foreach ($Artists[$s['offset']] as $Artist) {
-            $a = new \Gazelle\Artist($Artist['id']);
+                try {
+                    $a = new \Gazelle\Artist($Artist['id']);
+                } catch (Gazelle\Exception\ResourceNotFoundException $e) {
+                    continue;
+                }
 ?>
                 <li class="<?= $s['class'] ?>">
                     <?= Artists::display_artist($Artist) ?>&lrm;
@@ -278,7 +282,8 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                         <input type="hidden" name="action" value="add_alias" />
                         <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                         <input type="hidden" name="groupid" value="<?=$GroupID?>" />
-                        <input type="text" id="artist" name="aliasname[]" size="17"<?php Users::has_autocomplete_enabled('other'); ?> />
+                        <input type="text" id="artist" name="aliasname[]" size="17"<?=
+                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                         <select name="importance[]">
                             <option value="1">Main</option>
                             <option value="2">Guest</option>
@@ -450,7 +455,8 @@ $DeletedTag = $Cache->get_value("deleted_tags_$GroupID".'_'.$LoggedUser['ID']);
                     <input type="hidden" name="action" value="add_tag" />
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                     <input type="hidden" name="groupid" value="<?=$GroupID?>" />
-                    <input type="text" name="tagname" id="tagname" size="20"<?php Users::has_autocomplete_enabled('other'); ?> />
+                    <input type="text" name="tagname" id="tagname" size="20"<?=
+                        $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
                     <input type="submit" value="+" />
                 </form>
                 <br /><br />

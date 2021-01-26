@@ -199,7 +199,7 @@ class User extends BaseObject {
     }
 
     public function option(string $option) {
-        return $this->info()['SiteOptions'][$option];
+        return $this->info()['SiteOptions'][$option] ?? null;
     }
 
     protected function light() {
@@ -272,6 +272,28 @@ class User extends BaseObject {
 
     public function classLevel(): int {
         return $this->info()['Class'];
+    }
+
+    /**
+     * Checks whether user has autocomplete enabled
+     *
+     * @param string Where the is the input requested (search, other)
+     * @return boolean
+     */
+    public function hasAutocomplete($Type): bool {
+        $autoComplete = $this->option('AutoComplete');
+        if (is_null($autoComplete)) {
+            // not set, default to enabled
+            return true;
+        } elseif ($autoComplete == 1) {
+            // disabled
+            return false;
+        } elseif ($Type === 'search' && $autoComplete != 1) {
+            return true;
+        } elseif ($Type === 'other' && $autoComplete != 2) {
+            return true;
+        }
+        return false;
     }
 
     public function forbiddenForums(): array {

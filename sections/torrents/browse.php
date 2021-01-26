@@ -2,6 +2,8 @@
 
 use Gazelle\Util\SortableTableHeader;
 
+$user = new Gazelle\User($LoggedUser['ID']);
+
 $iconUri = STATIC_SERVER . '/styles/' . $LoggedUser['StyleName'] . '/images';
 $imgTag = '<img src="' . $iconUri . '/%s.png" class="tooltip" alt="%s" title="%s"/>';
 $headerMap = [
@@ -283,7 +285,8 @@ View::show_header('Browse Torrents', 'browse');
             <tr id="tagfilter">
                 <td class="label"><span title="Use !tag to exclude tag" class="tooltip">Tags (comma-separated):</span></td>
                 <td colspan="3" class="ft_taglist">
-                    <input type="search" size="40" id="tags" name="taglist" class="inputtext smaller" value="<?=display_str($Search->get_terms('taglist'))?>"<?php Users::has_autocomplete_enabled('other'); ?> />&nbsp;
+                    <input type="search" size="40" id="tags" name="taglist" class="inputtext smaller" value="<?= display_str($Search->get_terms('taglist')) ?>"<?=
+                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />&nbsp;
                     <input type="radio" name="tags_type" id="tags_type0" value="0"<?php Format::selected('tags_type', 0, 'checked'); ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
                     <input type="radio" name="tags_type" id="tags_type1" value="1"<?php Format::selected('tags_type', 1, 'checked'); ?> /><label for="tags_type1"> All</label>
                 </td>

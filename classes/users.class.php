@@ -685,40 +685,4 @@ class Users {
         global $HeavyInfo;
         return isset($HeavyInfo['DisableAvatars']) && $HeavyInfo['DisableAvatars'] != 1;
     }
-
-    /**
-     * Checks whether user has autocomplete enabled
-     *
-     * 0 - Enabled everywhere (default), 1 - Disabled, 2 - Searches only
-     *
-     * @param string $Type the type of the input.
-     * @param boolean $Output echo out HTML
-     * @return boolean
-     */
-    public static function has_autocomplete_enabled($Type, $Output = true) {
-        $Enabled = false;
-        if (empty(G::$LoggedUser['AutoComplete'])) {
-            $Enabled = true;
-        } elseif (G::$LoggedUser['AutoComplete'] !== 1) {
-            switch ($Type) {
-                case 'search':
-                    if (G::$LoggedUser['AutoComplete'] == 2) {
-                        $Enabled = true;
-                    }
-                    break;
-                case 'other':
-                    if (G::$LoggedUser['AutoComplete'] != 2) {
-                        $Enabled = true;
-                    }
-                    break;
-            }
-        }
-        if ($Enabled && $Output) {
-            echo ' data-gazelle-autocomplete="true"';
-        }
-        if (!$Output) {
-            // don't return a boolean if you're echoing HTML
-            return $Enabled;
-        }
-    }
 }

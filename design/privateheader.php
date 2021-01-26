@@ -2,6 +2,7 @@
 
 use Gazelle\Manager\Notification;
 
+$user = new Gazelle\User(G::$LoggedUser['ID']);
 $authArgs = '&amp;user=' . G::$LoggedUser['ID']
     . '&amp;auth=' . G::$LoggedUser['RSS_Auth']
     . '&amp;passkey=' . G::$LoggedUser['torrent_pass']
@@ -474,7 +475,7 @@ if ($alerts || $actions) {
                     <li id="searchbar_artists">
                         <span class="hidden">Artist: </span>
                         <form class="search_form" name="artists" action="artist.php" method="get">
-                            <input id="artistsearch"<?= Users::has_autocomplete_enabled('search');
+                            <input id="artistsearch"<?= $user->hasAutocomplete('search') ? ' data-gazelle-autocomplete="true"' : ''
                                 ?> value="Artists" placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a" />
                         </form>
                     </li>
