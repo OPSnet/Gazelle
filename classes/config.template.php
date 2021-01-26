@@ -439,7 +439,7 @@ define('RANDOM_TORRENT_MIN_SEEDS', 0);
 define('RESOURCE_REGEX', '(https?|ftps?):\/\/');
 define('IP_REGEX', '(\d{1,3}\.){3}\d{1,3}');
 define('DOMAIN_REGEX', '[\w-]+(?:\.[\w-]+)+');
-define('EMAIL_REGEX', '/^[\w-]+(?:\.[\w-]+)*@' . DOMAIN_REGEX . '$/');
+define('EMAIL_REGEX', '/^[\w-]+(?:\.[\w-]+)*(?:\+[.\w-]*)?@' . DOMAIN_REGEX . '$/');
 define('PORT_REGEX', ':\d{1,5}');
 define('URL_REGEX', '('.RESOURCE_REGEX.')('.IP_REGEX.'|'.DOMAIN_REGEX.')('.PORT_REGEX.')?(\/\S*)*');
 define('USERNAME_REGEX_SHORT', '[\w?.]{1,20}');
