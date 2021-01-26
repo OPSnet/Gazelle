@@ -210,7 +210,7 @@ class TORRENT_FORM {
         $LossymasterApproved = $Torrent['LossymasterApproved'];
         $LossywebApproved = $Torrent['LossywebApproved'];
         $releaseTypes = (new \Gazelle\ReleaseType)->list();
-        $user = new \Gazelle\User($LoggedUser['ID']);
+        $user = new \Gazelle\User(G::$LoggedUser['ID']);
 ?>
         <div id="musicbrainz_popup" style="display: none;">
             <a href="#null" id="popup_close">x</a>
@@ -592,7 +592,7 @@ class TORRENT_FORM {
 
     function audiobook_form() {
         $Torrent = $this->Torrent;
-        $user = new \Gazelle\User($LoggedUser['ID']);
+        $user = new \Gazelle\User(G::$LoggedUser['ID']);
 ?>
         <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
 <?php   if ($this->NewTorrent) { ?>
@@ -683,7 +683,7 @@ class TORRENT_FORM {
 
     function simple_form($CategoryID) {
         $Torrent = $this->Torrent;
-        $user = new \Gazelle\User($LoggedUser['ID']);
+        $user = new \Gazelle\User(G::$LoggedUser['ID']);
 ?>        <table cellpadding="3" cellspacing="1" border="0" class="layout border slice" width="100%">
             <tr id="name">
 <?php
