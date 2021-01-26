@@ -271,7 +271,7 @@ class User extends BaseObject {
     }
 
     public function classLevel(): int {
-        return $this->light()['Class'];
+        return $this->info()['Class'];
     }
 
     public function forbiddenForums(): array {
