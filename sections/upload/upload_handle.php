@@ -97,12 +97,17 @@ $Validate->setFields([
 
 if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
     $Validate->setFields([
-        ['album_desc', '1','string','The album description has a minimum length of 10 characters.', ['range' => [10, 1000000]]],
         ['image', '0','link','The image URL you entered was invalid.', ['range' => [255, 12]]],
         ['tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['range' => [2, 200]]],
         ['title', '1','string','Title must be less than 200 characters.', ['maxlength' => 200]],
         ['year', '1','number','The year of the release must be entered.'],
     ]);
+}
+
+if ($_POST['album_desc']) {
+    $Validate->setField('album_desc', '1','string','The album description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
+} elseif ($_POST['desc']) {
+    $Validate->setField('desc', '1','string','The description has a minimum length of 10 characters.', ['range' => [10, 1000000]]);
 }
 
 // audio types
