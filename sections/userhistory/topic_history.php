@@ -1,82 +1,22 @@
 <?php
-/*
-User topic history page
-*/
 
 if (!empty($LoggedUser['DisableForums'])) {
     error(403);
 }
 
-$UserID = empty($_GET['userid']) ? $LoggedUser['ID'] : $_GET['userid'];
-if (!is_number($UserID)) {
-    error(0);
+$user = (new Gazelle\Manager\User)->findById((int)$_GET['userid'] ?: $LoggedUser['ID']);
+if (is_null($user)) {
+    error(404);
 }
+$forumSearch = new Gazelle\ForumSearch($user);
 
-$PerPage = TOPICS_PER_PAGE;
+$paginator = new Gazelle\Util\Paginator(TOPICS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
+$paginator->setTotal($forumSearch->threadsByUserTotal());
 
-[$Page, $Limit] = Format::page_limit($PerPage);
-
-$UserInfo = Users::user_info($UserID);
-$Username = $UserInfo['Username'];
-
-View::show_header("Threads started by $Username", 'subscriptions,comments,bbcode');
-
-$QueryID = $DB->prepared_query("
-SELECT SQL_CALC_FOUND_ROWS
-    t.ID,
-    t.Title,
-    t.CreatedTime,
-    t.LastPostTime,
-    f.ID,
-    f.Name
-FROM forums_topics AS t
-LEFT JOIN forums AS f ON (f.ID = t.ForumID)
-WHERE t.AuthorID = ? AND ".Forums::user_forums_sql()."
-ORDER BY t.ID DESC
-LIMIT {$Limit}", $UserID);
-
-
-$DB->prepared_query('SELECT FOUND_ROWS()');
-list($Results) = $DB->fetch_record();
-
-$Pages = Format::get_pages($Page, $Results, $PerPage, 11);
-$DB->set_query_id($QueryID);
-?>
-<div class="thin">
-    <div class="header">
-        <h2><a href="user.php?id=<?=$UserID?>"><?=$Username?></a> &rsaquo; Threads created</h2>
-    </div>
-<?php if (empty($Results)) { ?>
-        <div class="center">
-            No topics
-        </div>
-<?php } else { ?>
-        <div class="linkbox">
-            <?= $Pages ?>
-        </div>
-        <table class="forum_list border">
-            <tr class="colhead">
-                <td>Forum</td>
-                <td>Topic</td>
-                <td>Topic Creation Time</td>
-                <td>Last Post Time</td>
-            </tr>
-<?php
-        $QueryID = $DB->get_query_id();
-        while ([$TopicID, $Title, $CreatedTime, $LastPostTime, $ForumID, $ForumTitle] = $DB->fetch_record(1)) {
-?>
-            <tr>
-                <td><a href="forums.php?action=viewforum&forumid=<?=$ForumID?>"><?=$ForumTitle?></a></td>
-                <td><a href="forums.php?action=viewthread&threadid=<?=$TopicID?>"><?=$Title?></td>
-                <td><?=time_diff($CreatedTime)?></td>
-                <td><?=time_diff($LastPostTime)?></td>
-            </tr>
-<?php     } ?>
-        </table>
-        <div class="linkbox">
-            <?=$Pages?>
-        </div>
-<?php } ?>
-</div>
-<?php
+View::show_header($user->username() . " &rsaquo; Threads created", 'subscriptions,comments,bbcode');
+echo G::$Twig->render('user/thread-history.twig', [
+    'paginator' => $paginator,
+    'page' => $forumSearch->threadsByUserPage($paginator->limit(), $paginator->offset()),
+    'user' => $user,
+]);
 View::show_footer();

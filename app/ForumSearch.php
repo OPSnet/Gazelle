@@ -381,6 +381,52 @@ class ForumSearch extends Base {
         return $this->db->to_array(false, MYSQLI_NUM, false);
     }
 
+    /**
+     * How many threads has a user created?
+     *
+     * @return int number of threads
+     */
+    public function threadsByUserTotal(): int {
+        [$cond, $args] = $this->configure();
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM forums AS f
+            INNER JOIN forums_topics AS t ON (t.ForumID = f.ID)
+            WHERE t.AuthorID = ?
+                AND " . implode(' AND ', $cond),
+            $this->user->id(), ...$args
+        );
+    }
+
+    /**
+     * Return a list of threads created by a user
+     *
+     * @param int Number of threads to fetch (limit)
+     * @param int From whence in the list (offset)
+     * @return array of [thread_id, thread_title, created_time, last_post_time, forum_id, forum_title]
+     */
+    public function threadsByUserPage(int $limit, int $offset): array {
+        [$cond, $args] = $this->configure();
+        $args[] = $limit;
+        $args[] = $offset;
+        $this->db->prepared_query($sql = "
+            SELECT t.ID        AS thread_id,
+                t.Title        AS thread_title,
+                t.CreatedTime  AS created_time,
+                t.LastPostTime AS last_post_time,
+                f.ID           AS forum_id,
+                f.Name         AS forum_title
+            FROM forums AS f
+            INNER JOIN forums_topics AS t ON (t.ForumID = f.ID)
+            WHERE t.AuthorID = ?
+                AND " . implode(' AND ', $cond) . "
+            ORDER BY t.ID DESC
+            LIMIT ? OFFSET ?
+            ", $this->user->id(), ...$args
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function postHistoryTotal(): int {
         [$from, $cond, $args] = $this->configurePostHistory();
         return $this->db->scalar("

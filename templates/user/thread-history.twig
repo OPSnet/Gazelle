@@ -1,0 +1,29 @@
+<div class="thin">
+    <div class="header">
+        <h2><a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; Threads created</h2>
+    </div>
+{% if not page %}
+        <div class="center">
+            {{ user.username }} has not created any threads.
+        </div>
+{% else %}
+        {{ paginator.linkbox|raw }}
+        <table class="forum_list border">
+            <tr class="colhead">
+                <td>Forum</td>
+                <td>Thread</td>
+                <td>Created</td>
+                <td>Most recent post</td>
+            </tr>
+    {% for t in page %}
+            <tr>
+                <td><a href="forums.php?action=viewforum&forumid={{ t.forum_id }}">{{ t.forum_title }}</a></td>
+                <td><a href="forums.php?action=viewthread&threadid={{ t.thread_id }}">{{ t.thread_title }}</td>
+                <td class="nowrap">{{ t.created_time|time_diff }}</td>
+                <td class="nowrap">{{ t.last_post_time|time_diff }}</td>
+            </tr>
+    {% endfor %}
+        </table>
+        {{ paginator.linkbox|raw }}
+{% endif %}
+</div>
