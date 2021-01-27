@@ -274,6 +274,10 @@ class User extends BaseObject {
         return $this->info()['Class'];
     }
 
+    public function effectiveClass(): int {
+        return $this->info()['effective_class'];
+    }
+
     /**
      * Checks whether user has autocomplete enabled
      *

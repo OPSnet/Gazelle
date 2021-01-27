@@ -176,7 +176,7 @@ if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] === FORUM_MOD) {
         $activity->setAction('<a class="nobr" href="tools.php">Toolbox</a>');
     }
 
-    $staff = new Gazelle\Staff(G::$LoggedUser);
+    $staff = new Gazelle\Staff($user);
     $count = $staff->pmCount();
     if ($count > 0) {
         $needStaffInbox = true;

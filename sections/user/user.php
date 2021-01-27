@@ -119,15 +119,12 @@ if ($Warned == '') {
     $Warned = null; // Fuck Gazelle
 }
 
-$BonusPointsPerHour = $Bonus->userHourlyRate($UserID);
-
 // Image proxy CTs
 $DisplayCustomTitle = $CustomTitle;
 if (check_perms('site_proxy_images') && !empty($CustomTitle)) {
     $DisplayCustomTitle = preg_replace_callback('~src=("?)(http.+?)(["\s>])~',
-                                function($Matches) {
-                                    return 'src=' . $Matches[1] . ImageTools::process($Matches[2]) . $Matches[3];
-                                }, $CustomTitle);
+        function ($m) { return 'src=' . $m[1] . ImageTools::process($m[2]) . $m[3];}, $CustomTitle
+    );
 }
 
 if ($Preview == 1) {
@@ -150,8 +147,6 @@ foreach ($Paranoia as $P) {
     }
 }
 
-$JoinedDate = time_diff($JoinDate);
-
 function check_paranoia_here($Setting) {
     global $Paranoia, $Class, $UserID, $Preview;
     if ($Preview == 1) {
@@ -164,7 +159,7 @@ function check_paranoia_here($Setting) {
 View::show_header($Username, "jquery.imagesloaded,jquery.wookmark,user,bbcode,requests,lastfm,comments,info_paster", "tiles");
 $User = new Gazelle\User($UserID);
 $User->forceCacheFlush($OwnProfile);
-list($ClassRatio, $Buffer) = $User->buffer();
+[$ClassRatio, $Buffer] = $User->buffer();
 
 ?>
 <div class="thin">
@@ -280,7 +275,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
         <div class="box box_info box_userinfo_stats">
             <div class="head colhead_dark">Statistics</div>
             <ul class="stats nobullet">
-                <li>Joined: <?=$JoinedDate?></li>
+                <li>Joined: <?= time_diff($JoinDate) ?></li>
 <?php if (($Override = check_paranoia_here('lastseen'))) { ?>
                 <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>>Last seen: <?= time_diff($LastAccess) ?></li>
 <?php
@@ -349,7 +344,7 @@ if ($Enabled == 1 && $AcceptFL && (count($FL_Items) || isset($FL_OTHER_tokens)))
             $text = 'Points Per Hour';
         }
         ?></li>
-                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><?= $text ?>: <?=number_format($BonusPointsPerHour, 2)?></li>
+                <li <?=($Override === 2 ? 'class="paranoia_override"' : '')?>><?= $text ?>: <?=number_format($Bonus->userHourlyRate($UserID), 2)?></li>
 <?php
     }
     if ($OwnProfile || ($Override = check_paranoia_here(false)) || check_perms('users_mod')) {
@@ -426,13 +421,13 @@ if ($LastFMUsername)  {
 }
 
 if (check_paranoia_here('requestsfilled_count') || check_paranoia_here('requestsfilled_bounty')) {
-    list($RequestsFilled, $TotalBounty) = $User->requestsBounty();
+    [$RequestsFilled, $TotalBounty] = $User->requestsBounty();
 } else {
     $RequestsFilled = $TotalBounty = 0;
 }
 if (check_paranoia_here('requestsvoted_count') || check_paranoia_here('requestsvoted_bounty')) {
-    list($RequestsVoted, $TotalSpent) = $User->requestsVotes();
-    list($RequestsCreated, $RequestsCreatedSpent) = $User->requestsCreated();
+    [$RequestsVoted, $TotalSpent] = $User->requestsVotes();
+    [$RequestsCreated, $RequestsCreatedSpent] = $User->requestsCreated();
 } else {
     $RequestsVoted = $TotalSpent = $RequestsCreated = $RequestsCreatedSpent = 0;
 }
@@ -701,7 +696,7 @@ if (check_paranoia_here('uploads')) {
 $Collages = $User->personalCollages();
 $FirstCol = true;
 foreach ($Collages as $CollageInfo) {
-    list($CollageID, $CName) = $CollageInfo;
+    [$CollageID, $CName] = $CollageInfo;
     $DB->prepared_query('
         SELECT ct.GroupID,
             tg.WikiImage,
@@ -845,9 +840,8 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
             foreach ($Tags as $TagID => $TagName) {
                 $TagList[] = "<a href=\"requests.php?tags=$TagName\">".display_str($TagName).'</a>';
             }
-            $TagList = implode(', ', $TagList);
 ?>
-                                <?=$TagList?>
+                                <?= implode(', ', $TagList) ?>
                             </div>
                         </td>
                         <td>
@@ -871,78 +865,10 @@ if (empty($LoggedUser['DisableRequests']) && check_paranoia_here('requestsvoted_
     }
 }
 
-$IsFLS = isset($LoggedUser['ExtraClasses'][FLS_TEAM]);
-if (check_perms('users_mod', $Class) || $IsFLS) {
-    $UserLevel = $LoggedUser['EffectiveClass'];
-    $DB->prepared_query('
-        SELECT
-            SQL_CALC_FOUND_ROWS
-            spc.ID,
-            spc.Subject,
-            spc.Status,
-            spc.Level,
-            spc.AssignedToUser,
-            spc.Date,
-            COUNT(spm.ID) AS Resplies,
-            spc.ResolverID
-        FROM staff_pm_conversations AS spc
-        JOIN staff_pm_messages spm ON spm.ConvID = spc.ID
-        WHERE spc.UserID = ?
-            AND (spc.Level <= ? OR spc.AssignedToUser = ?)
-        GROUP BY spc.ID
-        ORDER BY spc.Date DESC
-        ', $UserID, $UserLevel, $LoggedUser['ID']
-    );
-    if ($DB->has_results()) {
-        $StaffPMs = $DB->to_array();
-?>
-        <div class="box" id="staffpms_box">
-            <div class="head">
-                Staff PMs <a href="#" onclick="$('#staffpms').gtoggle(); return false;" class="brackets">View</a>
-            </div>
-            <table width="100%" class="message_table hidden" id="staffpms">
-                <tr class="colhead">
-                    <td>Subject</td>
-                    <td>Date</td>
-                    <td>Assigned to</td>
-                    <td>Replies</td>
-                    <td>Resolved by</td>
-                </tr>
-<?php
-        foreach ($StaffPMs as $StaffPM) {
-            list($ID, $Subject, $Status, $Level, $AssignedToUser, $Date, $Replies, $ResolverID) = $StaffPM;
-            // Get assigned
-            if ($AssignedToUser == '') {
-                // Assigned to class
-                $Assigned = ($Level == 0) ? 'First Line Support' : $ClassLevels[$Level]['Name'];
-                // No + on Sysops
-                if ($Assigned != 'Sysop') {
-                    $Assigned .= '+';
-                }
-
-            } else {
-                // Assigned to user
-                $Assigned = Users::format_username($UserID, true, true, true, true);
-            }
-
-            if ($ResolverID) {
-                $Resolver = Users::format_username($ResolverID, true, true, true, true);
-            } else {
-                $Resolver = '(unresolved)';
-            }
-?>
-                <tr>
-                    <td><a href="staffpm.php?action=viewconv&amp;id=<?=$ID?>"><?=display_str($Subject)?></a></td>
-                    <td><?=time_diff($Date, 2, true)?></td>
-                    <td><?=$Assigned?></td>
-                    <td><?=$Replies - 1?></td>
-                    <td><?=$Resolver?></td>
-                </tr>
-<?php        } ?>
-            </table>
-        </div>
-<?php
-    }
+if (check_perms('users_mod', $Class) || isset($LoggedUser['ExtraClasses'][FLS_TEAM])) {
+    echo G::$Twig->render('admin/staffpm-list.twig', [
+        'list' => (new Gazelle\Staff($User))->userStaffPmList($LoggedUser['ID']),
+    ]);
 }
 
 // Displays a table of forum warnings viewable only to Forum Moderators
