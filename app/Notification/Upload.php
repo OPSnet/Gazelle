@@ -23,16 +23,6 @@ class Upload extends \Gazelle\Base {
     }
 
     /**
-     * Escape regexp meta-characters
-     *
-     * @param string text
-     * @return string text quoted text
-     */
-    public function escape(string $text): string {
-        return preg_replace('/([][(){}|$^.?*+])/', '\\\\\1', $text);
-    }
-
-    /**
      * Add a list of artists that will trigger a notification
      *
      * @param array array of artist roles and lists of artist ( of artists (id, id, id)
@@ -47,11 +37,10 @@ class Upload extends \Gazelle\Base {
         $guestName = [];
         foreach ($artistList as $role => $artists) {
             foreach ($artists as $artist) {
-                $name = $this->escape($artist['name']);
                 if (in_array($role, ['main', 'composer', 'conductor', 'arranger', 'dj'])) {
-                    $mainName[] = $name;
+                    $mainName[] = $artist['name'];
                 } else {
-                    $guestName[] = $name;
+                    $guestName[] = $artist['name'];
                 }
             }
         }
@@ -107,14 +96,15 @@ class Upload extends \Gazelle\Base {
             SELECT Paranoia FROM users_main WHERE ID = ?
             ", $uploader->id()
         )) ?: [];
-        if (in_array('notifications', $paranoia)) {
-            $this->cond[] = "unf.UserID != ?";
-            $this->args[] = $uploader->id();
+        if (!in_array('notifications', $paranoia)) {
+            $this->cond[] = "unf.Users = ''";
         } else {
-            $this->cond[] = "(unf.Users LIKE concat('%|', ?, '|%') OR unf.UserID != ?)";
-            $this->args[] = $uploader->username();
+            $this->cond[] = "(unf.Users = '' OR unf.Users LIKE concat('%|', ?, '|%'))";
             $this->args[] = $uploader->id();
         }
+        $this->cond[] = "(unf.UserID != ? OR Users LIKE concat('%|', ?, '|%'))";
+        $this->args[] = $uploader->id();
+        $this->args[] = $uploader->id();
         return $this;
     }
 
@@ -264,7 +254,7 @@ class Upload extends \Gazelle\Base {
     /**
      * The SQL placeholder arguments for this notification query.
      *
-     * @return array mysql-escaped list of arguments
+     * @return array list of arguments
      */
     public function args(): array {
         return $this->args;
