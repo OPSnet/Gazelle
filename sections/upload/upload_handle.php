@@ -946,7 +946,7 @@ $Item = $Feed->item(
 );
 
 // Notifications
-$notification = new Gazelle\Notification\Upload($LoggedUser['ID']);
+$notification = new Gazelle\Notification\Upload;
 
 $notification->addFormat($Properties['Format'])
     ->addEncodings($Properties['Encoding'])
@@ -956,7 +956,7 @@ $notification->addFormat($Properties['Format'])
     ->addTags($tagList)
     ->addCategory($Type)
     ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
-    ->addUser($LoggedUser['ID'])
+    ->addUser(new Gazelle\User($LoggedUser['ID']))
     ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
     ->trigger($GroupID, $TorrentID, $Feed, $Item);
 

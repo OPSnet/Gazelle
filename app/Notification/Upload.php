@@ -5,13 +5,11 @@ namespace Gazelle\Notification;
 class Upload extends \Gazelle\Base {
     protected $cond = [];
     protected $args = [];
-    protected $userId;
     protected $debug = false;
     protected $seenUserFilter = false;
 
-    public function __construct(int $userId) {
+    public function __construct() {
         parent::__construct();
-        $this->userId = $userId;
     }
 
     /**
@@ -59,11 +57,17 @@ class Upload extends \Gazelle\Base {
         }
         // Don't add notification if >2 main artists or if tracked artist isn't a main artist
         if (count($mainName) > 2) {
-            $this->cond[] = "unf.ExcludeVA = '0' AND unf.Artists REGEXP ?";
+            $like = implode(' OR ', array_merge(["unf.Artists = ''"], array_fill(0, count($mainName), "unf.Artists LIKE concat('%|', ?, '|%')")));
+            $this->cond[] = "unf.ExcludeVA = '0' AND ($like)";
+            $this->args = array_merge($this->args, $mainName);
         } else {
-            $this->cond[] = (empty($guestArtist) ? '' : "unf.ExcludeVA = '0' AND ") . "unf.Artists REGEXP ?";
+            if (!empty($guestArtist)) {
+                $this->cond[] = "unf.ExcludeVA = '0'";
+            }
+            $all = array_merge($mainName, $guestName);
+            $this->cond[] = "(" . implode(' OR ', array_merge(["unf.Artists = ''"], array_fill(0, count($all), "unf.Artists LIKE concat('%|', ?, '|%')"))) . ")";
+            $this->args = array_merge($this->args, $all);
         }
-        $this->args[] = '(?:^$|\\\\|(?:' . implode('|', array_merge($mainName, $guestName)) . ')\\\\|)';
         return $this;
     }
 
@@ -74,14 +78,9 @@ class Upload extends \Gazelle\Base {
      */
     public function addTags(array $tagList) {
         if ($tagList) {
-            $escaped = [];
-            foreach ($tagList as $tag) {
-                $escaped[] = $this->escape($tag);
-            }
-            $this->cond[] = "unf.Tags REGEXP ?";
-            $this->cond[] = "(unf.NotTags = '' OR NOT unf.NotTags REGEXP ?)";
-            $pattern =  '\\\\|(?:' . implode('|', $escaped) . ')\\\\|';
-            $this->args = array_merge($this->args, ['(?:^$|' . $pattern . ')', $pattern]);
+            $this->cond[] = "(unf.Tags = '' OR (" . implode(' OR ', array_merge([], array_fill(0, count($tagList), "unf.Tags LIKE concat('%|', ?, '|%')"))) . "))";
+            $this->cond[] = "(unf.NotTags = '' OR NOT (" . implode(' OR ', array_fill(0, count($tagList), "unf.NotTags LIKE concat('%|', ?, '|%')")) . "))";
+            $this->args = array_merge($this->args, $tagList, $tagList);
         }
         return $this;
     }
@@ -103,18 +102,18 @@ class Upload extends \Gazelle\Base {
      *
      * @param int user id of the uploader
      */
-    public function addUser(int $uploaderId) {
+    public function addUser(\Gazelle\User $uploader) {
         $paranoia = unserialize($this->db->scalar("
             SELECT Paranoia FROM users_main WHERE ID = ?
-            ", $uploaderId
+            ", $uploader->id()
         )) ?: [];
         if (in_array('notifications', $paranoia)) {
             $this->cond[] = "unf.UserID != ?";
-            $this->args[] = $this->userId;
+            $this->args[] = $uploader->id();
         } else {
-            $this->cond[] = "(unf.Users REGEXP ? OR unf.UserID != ?)";
-            $this->args[] = '(?:^$|\\\\|' . $uploaderId . '\\\\|)';
-            $this->args[] = $this->userId;
+            $this->cond[] = "(unf.Users LIKE concat('%|', ?, '|%') OR unf.UserID != ?)";
+            $this->args[] = $uploader->username();
+            $this->args[] = $uploader->id();
         }
         return $this;
     }
@@ -130,8 +129,8 @@ class Upload extends \Gazelle\Base {
             $this->cond[] = "unf.$column = ''";
             return $this;
         }
-        $this->cond[] = "unf.$column REGEXP ?";
-        $this->args[] = '(?:^$|\\\\|' . $this->escape($dimension) . '\\\\|)';
+        $this->cond[] = "(unf.$column = '' OR unf.$column LIKE concat('%|', ?, '|%'))";
+        $this->args[] = $dimension;
         return $this;
     }
 
@@ -176,7 +175,7 @@ class Upload extends \Gazelle\Base {
      *
      * @param ?int original year
      * @param ?int remaster year
-     */
+    */
     public function addYear($originalYear, $remasterYear) {
         $default = "unf.FromYear = 0 AND unf.ToYear = 0";
         if ($originalYear && $remasterYear && ($originalYear !== $remasterYear)) {
