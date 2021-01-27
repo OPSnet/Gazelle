@@ -26,7 +26,7 @@ if (isset($_POST['torrentid'])) {
         }
         $category = $Categories[$group['CategoryID'] - 1];
         $release = (new Gazelle\ReleaseType)->findNameById($group['ReleaseType']);
-        $notification = new Gazelle\Notification\Upload(0);
+        $notification = new Gazelle\Notification\Upload;
         $notification
             ->addFormat($torrent['Format'])
             ->addEncodings($torrent['Encoding'])
@@ -41,7 +41,7 @@ if (isset($_POST['torrentid'])) {
         if (isset($_POST['uploaderid'])) {
             $uploader = $userMan->find(trim($_POST['uploaderid']));
             if ($uploader) {
-                $notification->addUser($uploader->id());
+                $notification->addUser($uploader);
             }
         }
         $result = $notification->lookup();
