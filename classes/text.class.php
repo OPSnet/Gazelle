@@ -796,14 +796,14 @@ class Text {
                     $Str .= '<a href="user.php?action=search&amp;search='.urlencode(trim($Block['Val'], '@')).'">'.$Block['Val'].'</a>';
                     break;
                 case 'artist':
-                    $Str .= '<a href="artist.php?artistname='.urlencode(Format::undisplay_str($Block['Val'])).'">'.$Block['Val'].'</a>';
+                    $Str .= '<a href="artist.php?artistname='.urlencode(self::undisplay_str($Block['Val'])).'">'.$Block['Val'].'</a>';
                     break;
                 case 'rule':
                     $Rule = trim(strtolower($Block['Val']));
                 if ($Rule[0] != 'r' && $Rule[0] != 'h') {
                         $Rule = 'r'.$Rule;
                     }
-                    $Str .= '<a href="rules.php?p=upload#'.urlencode(Format::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
+                    $Str .= '<a href="rules.php?p=upload#'.urlencode(self::undisplay_str($Rule)).'">'.preg_replace('/[aA-zZ]/', '', $Block['Val']).'</a>';
                     break;
                 case 'collage':
                     $Str .= \Collages::bbcodeUrl($Block['Val']);
@@ -1336,5 +1336,16 @@ class Text {
         $Str = str_replace('</p>', '<br />', $Str);
         //return $Str;
         return str_replace(["<br />", "<br>"], "\n", $Str);
+    }
+
+    /**
+     * Reverse the effects of display_str - un-sanitize HTML.
+     * Use sparingly.
+     *
+     * @param string $Str the string to unsanitize
+     * @return unsanitized string
+     */
+    protected static function undisplay_str($Str) {
+        return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
     }
 }
