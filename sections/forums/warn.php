@@ -4,78 +4,29 @@ if (!check_perms('users_warn')) {
     error(404);
 }
 
-$PostID = (int)$_POST['postid'];
-if (!$PostID) {
+$postId = (int)$_POST['postid'];
+if (!$postId) {
     error(404);
 }
-$UserID = (int)$_POST['userid'];
-if (!$UserID) {
+$user = (new Gazelle\Manager\User)->findById((int)$_POST['userid']);
+if (is_null($user)) {
     error(404);
 }
-if (!isset($_POST['key'])) {
-    error(404);
-}
-$Key = (int)$_POST['key'];
-$UserInfo = Users::user_info($UserID);
-$DB->query("
+
+[$body, $forumId] = $DB->row("
     SELECT p.Body, t.ForumID
     FROM forums_posts AS p
-        JOIN forums_topics AS t ON p.TopicID = t.ID
-    WHERE p.ID = '$PostID'");
-list($PostBody, $ForumID) = $DB -> next_record();
-View::show_header('Warn User');
-?>
-<div class="thin">
-    <div class="header">
-        <h2>Warning <a href="user.php?id=<?=$UserID?>"><?=$UserInfo['Username']?></a></h2>
-    </div>
-    <div class="thin box pad">
-        <form class="send_form" name="warning" action="" onsubmit="quickpostform.submit_button.disabled = true;" method="post">
-            <input type="hidden" name="forumid" value="<?=$ForumID?>" />
-            <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
-            <input type="hidden" name="postid" value="<?=$PostID?>" />
-            <input type="hidden" name="userid" value="<?=$UserID?>" />
-            <input type="hidden" name="key" value="<?=$Key?>" />
-            <input type="hidden" name="action" value="take_warn" />
-            <table class="layout" align="center">
-                <tr>
-                    <td class="label">Reason:</td>
-                    <td>
-                        <input type="text" name="reason" size="60" />
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">Length:</td>
-                    <td>
-                        <select name="length">
-                            <option value="verbal">Verbal</option>
-                            <option value="1">1 week</option>
-                            <option value="2">2 weeks</option>
-                            <option value="4">4 weeks</option>
-<?php               if (check_perms('users_mod')) { ?>
-                            <option value="8">8 weeks</option>
-<?php               } ?>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">Private message:<br />(optional)</td>
-                    <td>
-                        <textarea id="message" style="width: 95%;" tabindex="1" onkeyup="resize('message');" name="privatemessage" cols="90" rows="4"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">Edit post:</td>
-                    <td>
-                        <textarea id="body" style="width: 95%;" tabindex="1" onkeyup="resize('body');" name="body" cols="90" rows="8"><?=$PostBody?></textarea>
-                        <br />
-                        <input type="submit" id="submit_button" value="Warn user" tabindex="1" />
-                    </td>
-                </tr>
-            </table>
-        </form>
-    </div>
-</div>
-<?php
+    INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
+    WHERE p.ID = ?
+    ", $postId
+);
 
+View::show_header('Warn User');
+echo G::$Twig->render('forum/warn.twig', [
+    'auth'     => $LoggedUser['AuthKey'],
+    'body'     => $body,
+    'forum_id' => $forumId,
+    'post_id'  => $postId,
+    'user'     => $user,
+]);
 View::show_footer();
