@@ -204,7 +204,11 @@ G::$Twig->addFunction(new Twig\TwigFunction('shorten', function ($text, $length)
     );
 }));
 
-$Debug->set_flag('Twig constructed');
+G::$Twig->addTest(
+    new \Twig\TwigTest('numeric', function ($value) {
+        return is_numeric($value);
+    })
+);
 
 $Debug->set_flag('start user handling');
 
