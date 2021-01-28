@@ -340,20 +340,6 @@ class Format {
         }
     }
 
-
-    /**
-     * Reverse the effects of display_str - un-sanitize HTML.
-     * Use sparingly.
-     *
-     * @param string $Str the string to unsanitize
-     * @return unsanitized string
-     */
-    // Use sparingly
-    public static function undisplay_str($Str) {
-        return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
-    }
-
-
     /**
      * Echo data sent in a GET form field, useful for text areas.
      *
