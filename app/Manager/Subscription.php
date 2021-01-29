@@ -98,8 +98,7 @@ class Subscription extends \Gazelle\Base {
      */
     public function subscribe(int $TopicID) {
         $QueryID = $this->db->get_query_id();
-        $Key = $this->isSubscribed($TopicID);
-        if ($Key !== false) {
+        if ($this->isSubscribed($TopicID) !== false) {
             $this->db->prepared_query('
                 DELETE FROM users_subscriptions
                 WHERE UserID = ?
@@ -258,12 +257,11 @@ class Subscription extends \Gazelle\Base {
 
     /**
      * Returns the key which holds this $TopicID in the subscription array.
-     * Use type-aware comparison operators with this! (ie. if (isSubscribed($TopicID) !== false) { ... })
      * @param int $TopicID
      * @return bool|int
      */
     public function isSubscribed($TopicID) {
-        return array_search($TopicID, $this->subscriptions());
+        return array_search($TopicID, $this->subscriptions()) !== false;
     }
 
     /**
@@ -272,8 +270,10 @@ class Subscription extends \Gazelle\Base {
      * @param int $PageID
      * @return bool|int
      */
-    public function isSubscribedComments($Page, $PageID) {
-        return array_search([$Page, $PageID], $this->commentSubscriptions());
+    public function isSubscribedComments($page, $pageId) {
+        return !empty(array_filter($this->commentSubscriptions(),
+            function ($s) use ($page, $pageId) { return $s[0] === $page && $s[1] == $pageId; })
+        );
     }
 
     /**

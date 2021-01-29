@@ -912,6 +912,11 @@ if (function_exists('fastcgi_finish_request')) {
     ob_start(); // So we don't keep sending data to the client
 }
 
+$user = new Gazelle\User($LoggedUser['ID']);
+if ($user->option('AutoSubscribe')) {
+    (new Gazelle\Manager\Subscription($user->id()))->subscribeComments('torrents', $GroupID);
+}
+
 // Manage notifications
 $seenFormatEncoding = [];
 
@@ -961,7 +966,7 @@ $notification->addFormat($Properties['Format'])
     ->addTags($tagList)
     ->addCategory($Type)
     ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
-    ->addUser(new Gazelle\User($LoggedUser['ID']))
+    ->addUser($user)
     ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
     ->trigger($GroupID, $TorrentID, $Feed, $Item);
 

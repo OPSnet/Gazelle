@@ -59,4 +59,9 @@ $collage = $collageMan->create(
     new Gazelle\Log
 );
 
+if ($user->option('AutoSubscribe')) {
+    $collage->toggleSubscription($user->id());
+    (new Gazelle\Manager\Subscription($user->id()))->subscribeComments('collages', $collage->id());
+}
+
 header("Location: collages.php?id=" . $collage->id());
