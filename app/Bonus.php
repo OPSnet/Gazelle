@@ -44,10 +44,7 @@ class Bonus extends Base {
      * @return int Discount rate (0: normal price, 100: everything is free :)
      */
     public function discount(): int {
-        return $this->db->scalar("
-            SELECT Value FROM site_options WHERE Name = ?
-            ", 'bonus-discount'
-        ) ?? 0;
+        return (int)(new Manager\SiteOption)->findValueByName('bonus-discount') ?? 0;
     }
 
     public function flushUserCache($userId) {
