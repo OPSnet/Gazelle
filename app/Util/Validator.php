@@ -88,10 +88,8 @@ class Validator {
 
     public function setFields(array $fields) {
         foreach ($fields as $f) {
-            [$name, $required, $type, $message, $options] = $f;
-            if (is_null($options)) {
-                $options = [];
-            }
+            [$name, $required, $type, $message] = $f;
+            $options = count($f) === 5 ? $f[4] : [];
             $this->setField($name, $required, $type, $message, $options);
         }
         return $this;
