@@ -97,7 +97,7 @@ if ($isSubscribed) {
 
 $QuoteNotificationsCount = $Cache->get_value('notify_quoted_' . $user->id());
 if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
-    $user->clearThreadQuotes($threadId, $FirstPost, $LastPost);
+    (new Gazelle\User\Quote($user))->clearThread($threadId, $FirstPost, $LastPost);
 }
 
 $Pages = Format::get_pages($Page, $threadInfo['Posts'], $PerPage, 9);

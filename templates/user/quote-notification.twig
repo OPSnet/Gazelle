@@ -1,0 +1,38 @@
+<div class="thin">
+    <div class="header">
+        <h2>
+            <a href="user.php?id={{ user.id }}">{{ user.username }}</a> &rsaquo; Quote notifications
+            {% if total and not show_all %} ({{ total }} new){% endif %}
+        </h2>
+        <div class="linkbox pager">
+            <br />
+{% if show_all %}
+            <a href="userhistory.php?action=quote_notifications" class="brackets">Show unread quotes</a>&nbsp;
+{% else %}
+            <a href="userhistory.php?action=quote_notifications&amp;showall=1" class="brackets">Show all quotes</a>&nbsp;
+{% endif %}
+            <a href="userhistory.php?action=subscriptions" class="brackets">Show subscriptions</a>&nbsp;
+            <a href="userhistory.php?action=quote_notifications&amp;catchup=1" class="brackets">Catch up</a>&nbsp;
+            <br /><br />
+        </div>
+{{ paginator.linkbox|raw }}
+{% if not total %}
+    <div class="center">No{% if not show_all %} new{% endif %} quotes.</div>
+{% endif %}
+    <br />
+{% for quote in page %}
+    <table class="forum_post box vertical_margin noavatar">
+        <tr class="colhead_dark notify_{{ quote.page }}">
+            <td colspan="2">
+                <span style="float: left;">{{ quote.title }}: {{ quote.link|raw }}
+                    &rsaquo; Quoted by {{ quote.quoter_id|user_url }} {{ quote.date|time_diff }}
+                    {% if quote.unread %} <span class="new">(New!)</span>{% endif %}
+                </span>
+                <span style="float: left;" class="tooltip last_read" title="Jump to quote"> <a href="{{ quote.jump|raw }}"></a></span>
+                <span style="float: right;"><a href="#">&uarr;</a></span>
+            </td>
+        </tr>
+    </table>
+{% endfor %}
+{{ paginator.linkbox|raw }}
+</div>
