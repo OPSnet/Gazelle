@@ -117,6 +117,7 @@ class User extends BaseObject {
             return $this->info;
         }
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
+        $this->info['DisableForums'] = (bool)($this->info['DisableForums'] == '1');
         $this->info['DisableInvites'] = (bool)($this->info['DisableInvites'] == '1');
         $this->info['DisableRequests'] = (bool)($this->info['DisableRequests'] == '1');
         $this->info['NotifyOnQuote'] = (bool)($this->info['NotifyOnQuote'] == '1');
@@ -227,6 +228,10 @@ class User extends BaseObject {
     public function announceUrl(): string {
         return ($this->info()['SiteOptions']['HttpsTracker'] ? ANNOUNCE_HTTPS_URL : ANNOUNCE_HTTP_URL)
             . '/' . $this->announceKey() . '/announce';
+    }
+
+    public function disableForums(): bool {
+        return $this->info()['DisableForums'];
     }
 
     public function disableRequests(): bool {
@@ -558,38 +563,6 @@ class User extends BaseObject {
             WHERE UserID = ?
             ", $this->id
         );
-        return $this->db->affected_rows() === 1;
-    }
-
-    public function clearQuotes(): bool {
-        $this->db->prepared_query("
-            UPDATE users_notify_quoted SET
-                UnRead = '0'
-            WHERE UserID = ?
-            ", $this->id
-        );
-        $this->cache->delete_value('notify_quoted_' . $this->id);
-        return $this->db->affected_rows() === 1;
-    }
-
-    /**
-     * Mark the user as having seen their quoted posts in a thread
-     *
-     * @param int threadId The ID of the thread
-     * @param int firstPost The first post in the thread
-     * @param int lastPost The most recent post in the thread
-     */
-    public function clearThreadQuotes(int $threadId, int $firstPost, int $lastPost): bool {
-        $this->db->prepared_query("
-            UPDATE users_notify_quoted SET
-                UnRead = false
-            WHERE Page = 'forums'
-                AND UserID = ?
-                AND PageID = ?
-                AND PostID BETWEEN ? AND ?
-            ", $this->id, $threadId, $firstPost, $lastPost
-        );
-        $this->cache->delete_value('notify_quoted_' . $this->id);
         return $this->db->affected_rows() === 1;
     }
 

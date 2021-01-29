@@ -24,7 +24,7 @@ switch($Type) {
         $notifMan->clearNews();
         break;
     case 'Quotes':
-        $user->clearQuotes();
+        (new Gazelle\User\Quote($user))->clear();
         break;
     case 'StaffPM':
         $user->markAllReadStaffPM();
