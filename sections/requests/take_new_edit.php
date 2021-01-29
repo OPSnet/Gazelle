@@ -9,6 +9,7 @@ if ($_POST['action'] !== 'takenew' && $_POST['action'] !== 'takeedit') {
 }
 
 $NewRequest = ($_POST['action'] === 'takenew');
+$user = new Gazelle\User($LoggedUser['ID']);
 
 if (!$NewRequest) {
     $ReturnEdit = true;
@@ -429,6 +430,10 @@ if ($NewRequest) {
         WHERE UserID = ?',
         $Bytes, $LoggedUser['ID']);
     $Cache->delete_value('user_stats_'.$LoggedUser['ID']);
+
+    if ($user->option('AutoSubscribe')) {
+        (new Gazelle\Manager\Subscription($user->id()))->subscribeComments('requests', $RequestID);
+    }
 
     $Announce = "\"$Title\" - ".Artists::display_artists($ArtistForm, false, false).' '.SITE_URL."/requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);
     send_irc("PRIVMSG #requests :{$Announce}");

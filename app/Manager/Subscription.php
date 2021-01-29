@@ -272,8 +272,10 @@ class Subscription extends \Gazelle\Base {
      * @param int $PageID
      * @return bool|int
      */
-    public function isSubscribedComments($Page, $PageID) {
-        return array_search([$Page, $PageID], $this->commentSubscriptions());
+    public function isSubscribedComments($page, $pageId) {
+        return !empty(array_filter($this->commentSubscriptions(),
+            function ($s) use ($page, $pageId) { return $s[0] === $page && $s[1] == $pageId; })
+        );
     }
 
     /**

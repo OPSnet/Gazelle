@@ -912,6 +912,10 @@ if (function_exists('fastcgi_finish_request')) {
     ob_start(); // So we don't keep sending data to the client
 }
 
+if ($user->option('AutoSubscribe')) {
+    (new Gazelle\Manager\Subscription($user->id()))->subscribeComments('torrents', $GroupID);
+}
+
 // Manage notifications
 $seenFormatEncoding = [];
 
