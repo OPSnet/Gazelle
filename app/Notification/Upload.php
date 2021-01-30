@@ -92,17 +92,7 @@ class Upload extends \Gazelle\Base {
      * @param int user id of the uploader
      */
     public function addUser(\Gazelle\User $uploader) {
-        $paranoia = unserialize($this->db->scalar("
-            SELECT Paranoia FROM users_main WHERE ID = ?
-            ", $uploader->id()
-        )) ?: [];
-        if (!in_array('notifications', $paranoia)) {
-            $this->cond[] = "unf.Users = ''";
-        } else {
-            $this->cond[] = "(unf.Users = '' OR unf.Users LIKE concat('%|', ?, '|%'))";
-            $this->args[] = $uploader->id();
-        }
-        $this->cond[] = "(unf.UserID != ? OR Users LIKE concat('%|', ?, '|%'))";
+        $this->cond[] = "((Users = '' AND UserId != ?) OR (Users LIKE concat('%|', ?, '|%')))";
         $this->args[] = $uploader->id();
         $this->args[] = $uploader->id();
         return $this;
@@ -210,9 +200,8 @@ class Upload extends \Gazelle\Base {
         $nr = count($results);
         $file = $this->debug ? (TMPDIR . "/notification.$torrentId") : '/dev/null';
         $out = fopen($file, "a");
-        fprintf($out, "g=$groupId t=$torrentId results=$nr\n"
-            . $this->sql()
-            . print_r($this->args(), true)
+        fprintf($out, "g=%d t=%d results=%d\n%s\n%s\n",
+            $groupId, $torrentId, $nr, $this->sql(), implode("\n", $this->args())
         );
         if ($nr === 0) {
             fclose($out);

@@ -944,47 +944,50 @@ if (!$IsNewGroup) {
     }
 }
 
-// For RSS
-$Feed = new Feed;
-$Item = $Feed->item(
-    $Title,
-    Text::strip_bbcode($Properties['GroupDescription']),
-    'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id=' . $TorrentID,
-    $LoggedUser['Username'],
-    'torrents.php?id=' . $GroupID,
-    implode(',', $tagList)
-);
+$paranoia = unserialize($DB->scalar("
+    SELECT Paranoia FROM users_main WHERE ID = ?
+    ", $user->id()
+)) ?: [];
+if (!in_array('notifications', $paranoia)) {
+    // For RSS
+    $Feed = new Feed;
+    $Item = $Feed->item(
+        $Title,
+        Text::strip_bbcode($Properties['GroupDescription']),
+        'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id=' . $TorrentID,
+        $LoggedUser['Username'],
+        'torrents.php?id=' . $GroupID,
+        implode(',', $tagList)
+    );
 
-// Notifications
-$notification = new Gazelle\Notification\Upload;
+    (new Gazelle\Notification\Upload)->addFormat($Properties['Format'])
+        ->addEncodings($Properties['Encoding'])
+        ->addMedia($Properties['Media'])
+        ->addYear($Properties['Year'], $Properties['RemasterYear'])
+        ->addArtists($torMan->setGroupId($GroupID)->artistRole())
+        ->addTags($tagList)
+        ->addCategory($Type)
+        ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
+        ->addUser($user)
+        ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
+        ->trigger($GroupID, $TorrentID, $Feed, $Item);
 
-$notification->addFormat($Properties['Format'])
-    ->addEncodings($Properties['Encoding'])
-    ->addMedia($Properties['Media'])
-    ->addYear($Properties['Year'], $Properties['RemasterYear'])
-    ->addArtists($torMan->setGroupId($GroupID)->artistRole())
-    ->addTags($tagList)
-    ->addCategory($Type)
-    ->addReleaseType($releaseTypes[$Properties['ReleaseType']])
-    ->addUser($user)
-    ->setDebug(DEBUG_UPLOAD_NOTIFICATION)
-    ->trigger($GroupID, $TorrentID, $Feed, $Item);
+    // RSS for bookmarks
+    $DB->prepared_query('
+        SELECT u.torrent_pass
+        FROM users_main AS u
+        INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
+        WHERE b.GroupID = ?
+        ', $GroupID
+    );
+    while ([$Passkey] = $DB->next_record()) {
+        $feedType[] = "torrents_bookmarks_t_$Passkey";
+    }
+    foreach ($feedType as $subFeed) {
+        $Feed->populate($subFeed, $Item);
+    }
 
-// RSS for bookmarks
-$DB->prepared_query('
-    SELECT u.torrent_pass
-    FROM users_main AS u
-    INNER JOIN bookmarks_torrents AS b ON (b.UserID = u.ID)
-    WHERE b.GroupID = ?
-    ', $GroupID
-);
-while ([$Passkey] = $DB->next_record()) {
-    $feedType[] = "torrents_bookmarks_t_$Passkey";
-}
-$Debug->set_flag('upload: notifications handled');
-
-foreach ($feedType as $subFeed) {
-    $Feed->populate($subFeed, $Item);
+    $Debug->set_flag('upload: notifications handled');
 }
 
 // Clear cache and allow deletion of this torrent now
