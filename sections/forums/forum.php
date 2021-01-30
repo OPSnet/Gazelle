@@ -8,10 +8,11 @@ Things to expect in $_GET:
 
 ********************************************************************************/
 
-$forumId = (int)$_GET['forumid'];
-if ($forumId < 1) {
+$forum = (new Gazelle\Manager\Forum)->findById((int)$_GET['forumid']);
+if (!$forum) {
     error(404);
 }
+$forumId = $forum->id();
 if (!Forums::check_forumperm($forumId)) {
     error(403);
 }
@@ -21,10 +22,6 @@ if (!check_perms('site_moderate_forums')) {
     }
 }
 
-$forum = new \Gazelle\Forum($forumId);
-if (!$forum->exists()) {
-    error(404);
-}
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $forumToc = $forum->tableOfContentsForum($page);
 

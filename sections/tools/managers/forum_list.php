@@ -22,14 +22,11 @@ function class_list($Selected = 0) {
 if (!check_perms('admin_manage_forums')) {
     error(403);
 }
-$forum = new \Gazelle\Forum;
 
-$ForumArray = $forum->nameList(); // used for generating the 'parent' drop down list
-
-// Replace the old hard-coded forum categories
-$ForumCats = $forum->categoryList();
-
-$toc = $forum->tableOfContentsMain();
+$forumMan = new \Gazelle\Manager\Forum;
+$ForumArray = $forumMan->nameList();
+$ForumCats = $forumMan->categoryList();
+$toc = $forumMan->tableOfContentsMain();
 
 View::show_header('Forum Management');
 ?>
@@ -106,7 +103,7 @@ foreach ($toc as $category => $forumList) {
 }
 ?>
     <tr class="colhead">
-        <td colspan="8">Create forum</td>
+        <td colspan="9">Create forum</td>
     </tr>
     <tr class="rowa">
         <form class="create_form" name="forum" action="" method="post">
@@ -149,7 +146,6 @@ foreach ($toc as $category => $forumList) {
             <td>
                 <input type="submit" name="submit" value="Create" />
             </td>
-
         </form>
     </tr>
 </table>

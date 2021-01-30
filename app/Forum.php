@@ -5,7 +5,6 @@ namespace Gazelle;
 class Forum extends Base {
     protected $forumId;
 
-    const CACHE_TOC_MAIN    = 'forum_toc_main';
     const CACHE_TOC_FORUM   = 'forum_toc_%d';
     const CACHE_FORUM       = 'forum_%d';
     const CACHE_THREAD_INFO = 'thread_%d_info';
@@ -14,13 +13,9 @@ class Forum extends Base {
     /**
      * Construct a Forum object
      *
-     * @param int id The forum ID. In some circumstances it may not be possible
-     * to determine in advance, for instance sections/forums/takeedit.php
-     * or sections/forums/get_post.php
-     * @see postInfo()
-     * @see postBody()
+     * @param int id The forum ID.
      */
-    public function __construct(int $id = 0) {
+    public function __construct(int $id) {
         parent::__construct();
         $this->forumId = $id;
     }
@@ -29,20 +24,15 @@ class Forum extends Base {
         return $this->forumId;
     }
 
-    /**
-     * Create a forum
-     * @param array hash of values (keyed on lowercase column names)
-     */
-    public function create(array $args) {
-        $this->db->prepared_query("
-            INSERT INTO forums
-                   (Sort, CategoryID, Name, Description, MinClassRead, MinClassWrite, MinClassCreate, AutoLock, AutoLockWeeks)
-            VALUES (?,    ?,          ?,    ?,           ?,            ?,             ?,              ?,        ?)
-            ", (int)$args['sort'], (int)$args['categoryid'], trim($args['name']), trim($args['description']),
-               (int)$args['minclassread'], (int)$args['minclasswrite'], (int)$args['minclasscreate'],
-               isset($args['autolock']) ? '1' : '0', (int)$args['autolockweeks']
+    public function findThreadIdByPostId(int $postId) {
+        $threadId = $this->db->scalar("
+            SELECT TopicID FROM forums_posts WHERE ID = ?
+            ", $postId
         );
-        $this->flushCache();
+        if (is_null($threadId)) {
+            throw new \Gazelle\Exception\ResourceNotFoundException($postId);
+        }
+        return $threadId;
     }
 
     /**
@@ -84,16 +74,6 @@ class Forum extends Base {
     }
 
     /**
-     * Does the forum exist? (Did someone try to look at forumid = 982451653?)
-     *
-     * @param int id The forum ID.
-     * @return bool True if it exists
-     */
-    public function exists() {
-        return 1 == $this->db->scalar("SELECT 1 FROM forums WHERE ID = ?", $this->forumId);
-    }
-
-    /**
      * Basic information about a forum
      *
      * @return array [forum_id, name, description, category_id,
@@ -128,69 +108,12 @@ class Forum extends Base {
 
     /* for the transition from sections/ to app/ - delete when done */
     public function flushCache() {
+        (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
             'forums_list',
-            self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
-    }
-
-    /**
-     * Get list of forum names
-     */
-    public function nameList() {
-        $this->db->prepared_query("
-            SELECT ID, Name
-            FROM forums
-            ORDER BY Sort
-        ");
-        return $this->db->to_array();
-    }
-
-    /**
-     * Get list of forums keyed by category
-     */
-    public function categoryList() {
-        if (($categories = $this->cache->get_value('forums_categories')) === false) {
-            $this->db->prepared_query("
-                SELECT ID, Name
-                FROM forums_categories
-                ORDER BY Sort, Name
-            ");
-            $categories = [];
-            while ([$id, $name] = $this->db->next_record(MYSQLI_NUM, false)) {
-                $categories[$id] = $name;
-            }
-            $this->cache->cache_value('forums_categories', $categories, 0);
-        }
-        return $categories;
-    }
-
-    /**
-     * Set the forum ID.
-     *
-     * @param int id The forum ID.
-     */
-    public function setForum(int $forumId) {
-        $this->forumId = $forumId;
-    }
-
-    /**
-     * Set the forum ID from a thread ID.
-     *
-     * @param int id The thread ID.
-     * @return int The forum ID.
-     */
-    public function setForumFromThread(int $threadId) {
-        if (!($forumId = $this->cache->get_value("thread_forum_" . $threadId))) {
-            $forumId = $this->db->scalar("
-                SELECT ForumID FROM forums_topics WHERE ID = ?
-                ", $threadId
-            );
-            $this->cache->cache_value("thread_forum_" . $threadId, $forumId, 0);
-        }
-        return $this->forumId = $forumId;
     }
 
     /**
@@ -254,8 +177,8 @@ class Forum extends Base {
      */
     public function lockThread(int $threadId) {
         $this->db->prepared_query("
-            UPDATE forums_polls
-            SET Closed = 0
+            UPDATE forums_polls SET
+                Closed = '0'
             WHERE TopicID = ?
             ", $threadId
         );
@@ -281,9 +204,9 @@ class Forum extends Base {
      * @param string title The new title of the thread
      */
     public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title) {
+        (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
             'forums_list', "forums_" . $forumId, "forums_" . $this->forumId, "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
-            self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $forumId),
         ]);
@@ -314,9 +237,9 @@ class Forum extends Base {
      * @param int threadId The thread to remove
      */
     public function removeThread(int $threadId) {
+        (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
             'forums_list', "forums_" . $this->forumId, "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
-            self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
         $this->db->prepared_query("
@@ -455,9 +378,9 @@ class Forum extends Base {
         $this->db->prepared_query("
             UPDATE forums_topics SET
                 NumPosts         = NumPosts + 1,
+                LastPostTime     = now(),
                 LastPostID       = ?,
-                LastPostAuthorID = ?,
-                LastPostTime     = now()
+                LastPostAuthorID = ?
             WHERE ID = ?
             ", $postId, $userId, $threadId
         );
@@ -517,11 +440,11 @@ class Forum extends Base {
             WHERE ID = ?
             ", $postId,  $userId, $threadId, $this->forumId
         );
+        (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
             "forums_list",
             "forums_{$threadId}",
             sprintf(self::CACHE_THREAD_INFO, $threadId),
-            self::CACHE_TOC_MAIN,
             sprintf(self::CACHE_TOC_FORUM, $this->forumId)
         ]);
     }
@@ -542,7 +465,7 @@ class Forum extends Base {
             VALUES (?,       ?,        ?)
             ", $threadId, $question, serialize($answers)
         );
-        $this->cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, 0], 0);
+        $this->cache->cache_value("polls_$threadId", [$question, $answers, $votes, null, '0'], 0);
     }
 
     /**
@@ -554,9 +477,7 @@ class Forum extends Base {
     protected function fetchPollAnswers(int $threadId) {
         return unserialize(
             $this->db->scalar("
-                SELECT Answers
-                FROM forums_polls
-                WHERE TopicID = ?
+                SELECT Answers FROM forums_polls WHERE TopicID = ?
                 ", $threadId
             )
         );
@@ -612,6 +533,28 @@ class Forum extends Base {
     }
 
     /**
+     * Vote on a poll
+     *
+     * @param int userId Who is voting?
+     * @param int threadId Where are they voting?
+     * @param int vote What are they voting for?
+     * @return int 1 if this is the first time they have voted, otherwise 0
+     */
+    public function addPollVote(int $userId, int $threadId, int $vote) {
+        $this->db->prepared_query("
+            INSERT IGNORE INTO forums_polls_votes
+                   (TopicID, UserID, Vote)
+            VALUES (?,       ?,      ?)
+            ", $threadId, $userId, $vote
+        );
+        $change = $this->db->affected_rows();
+        if ($change) {
+            $this->cache->delete_value("polls_$threadId");
+        }
+        return $change;
+    }
+
+    /**
      * Get the data for a poll (TODO: spin off into a Poll object)
      *
      * @param int threadId The thread
@@ -659,28 +602,6 @@ class Forum extends Base {
     }
 
     /**
-     * Vote on a poll
-     *
-     * @param int userId Who is voting?
-     * @param int threadId Where are they voting?
-     * @param int vote What are they voting for?
-     * @return int 1 if this is the first time they have voted, otherwise 0
-     */
-    public function addPollVote(int $userId, int $threadId, int $vote) {
-        $this->db->prepared_query("
-            INSERT IGNORE INTO forums_polls_votes
-                   (TopicID, UserID, Vote)
-            VALUES (?,       ?,      ?)
-            ", $threadId, $userId, $vote
-        );
-        $change = $this->db->affected_rows();
-        if ($change) {
-            $this->cache->delete_value("polls_$threadId");
-        }
-        return $change;
-    }
-
-    /**
      * Edit a poll
      * TODO: feature and unfeature a poll.
      *
@@ -691,12 +612,15 @@ class Forum extends Base {
     public function moderatePoll(int $threadId, int $toFeature, int $toClose) {
         [$Question, $Answers, $Votes, $Featured, $Closed] = $this->pollData($threadId);
         if ($toFeature && !$Featured) {
-            $Featured = sqltime();
             $this->db->prepared_query("
                 UPDATE forums_polls SET
-                    Featured = ?
+                    Featured = now()
                 WHERE TopicID = ?
                 ", $Featured, $threadId
+            );
+            $Featured = $this->db->scalar("
+                SELECT Featured FROM forums_polls WHERE TopicID = ?
+                ", $threadId
             );
             $this->cache->cache_value('polls_featured', $threadId ,0);
         }
@@ -706,7 +630,7 @@ class Forum extends Base {
                 UPDATE forums_polls SET
                     Closed = ?
                 WHERE TopicID = ?
-                ", !$Closed, $threadId
+                ", $Closed ? '1' : '0', $threadId
             );
         }
         $this->cache->cache_value('polls_'.$threadId, [$Question, $Answers, $Votes, $Featured, $toClose], 0);
@@ -776,23 +700,20 @@ class Forum extends Base {
     }
 
     /**
-     * Get a post body and set the forum id.
-     * Use the forum id to check whether the viewer is allowed to see it.
+     * Get a post body. It is up to the calling code to ensure the viewer
+     * has the permission to view it.
      *
      * @param int postId The post
-     * @return array [The post body, the forum id] or null if the post does not exist
+     * @return string The post body or null if no such post
      */
-    public function postBody(int $postId) {
-        [$body, $this->forumId] = $this->db->row("
-            SELECT
-                p.Body,
-                t.ForumID
+    public function postBody(int $postId): ?string {
+        return $this->db->scalar("
+            SELECT p.Body
             FROM forums_posts AS p
             INNER JOIN forums_topics AS t ON (p.TopicID = t.ID)
             WHERE p.ID = ?
             ", $postId
         );
-        return [$body, $this->forumId];
     }
 
     /**

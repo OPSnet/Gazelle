@@ -33,7 +33,7 @@ $PostID  = $_POST['post'];
 $Key     = $_POST['key'];
 $DoPM    = isset($_POST['pm']) ? $_POST['pm'] : 0;
 
-$forum = new \Gazelle\Forum();
+$forum = (new Gazelle\Manager\Forum)->findByPostId($PostID);
 $forumPost = $forum->postInfo($PostID);
 $TopicID = $forumPost['thread-id'];
 

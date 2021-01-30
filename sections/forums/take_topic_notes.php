@@ -14,7 +14,7 @@ if (!strlen($body)) {
     error("Thread note cannot be empty");
 }
 
-$forum = new \Gazelle\Forum;
+$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
 $forum->addThreadNote($threadId, $LoggedUser['ID'], $body);
 
 header("Location: forums.php?action=viewthread&threadid=$threadId#thread_notes");

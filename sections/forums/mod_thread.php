@@ -42,10 +42,9 @@ if (!$newSticky && $newRank > 0) {
     error('Ranking cannot be a negative value');
 }
 
-$forum = new \Gazelle\Forum();
+$forum = (new \Gazelle\Manager\Forum)->findByThreadId($threadId);
 [$oldForumId, $oldName, $minClassWrite, $posts, $threadAuthorId, $oldTitle, $oldLocked, $oldSticky, $oldRank]
     = $forum->threadInfoExtended($threadId);
-$forum->setForum($oldForumId);
 
 if ($minClassWrite > $LoggedUser['Class']) {
     error(403);

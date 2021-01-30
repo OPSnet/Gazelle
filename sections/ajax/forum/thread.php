@@ -79,11 +79,11 @@ if ($ThreadInfo['Posts'] > $PerPage) {
 } else {
     $PostNum = 1;
 }
-list($Page, $Limit) = Format::page_limit($PerPage, min($ThreadInfo['Posts'], $PostNum));
+[$Page, $Limit] = Format::page_limit($PerPage, min($ThreadInfo['Posts'], $PostNum));
 if (($Page - 1) * $PerPage > $ThreadInfo['Posts']) {
     $Page = ceil($ThreadInfo['Posts'] / $PerPage);
 }
-list($CatalogueID,$CatalogueLimit) = Format::catalogue_limit($Page, $PerPage, THREAD_CATALOGUE);
+[$CatalogueID,$CatalogueLimit] = Format::catalogue_limit($Page, $PerPage, THREAD_CATALOGUE);
 
 // Cache catalogue from which the page is selected, allows block caches and future ability to specify posts per page
 if (!$Catalogue = $Cache->get_value("thread_$ThreadID"."_catalogue_$CatalogueID")) {
@@ -146,8 +146,8 @@ if (in_array($ThreadID, $UserSubscriptions)) {
 
 $JsonPoll = [];
 if ($ThreadInfo['NoPoll'] == 0) {
-    $forum = new \Gazelle\Forum($ForumID);
-    list($Question, $Answers, $Votes, $Featured, $Closed) = $forum->pollData($threadId);
+    $forum = new Gazelle\Forum($ForumID);
+    [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($ThreadID);
     if (!empty($Votes)) {
         $TotalVotes = array_sum($Votes);
         $MaxVotes = max($Votes);
@@ -216,8 +216,8 @@ if ($ThreadInfo['StickyPostID']) {
 
 $JsonPosts = [];
 foreach ($Thread as $Key => $Post) {
-    list($PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime) = array_values($Post);
-    list($AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle) = array_values(Users::user_info($AuthorID));
+    [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime] = array_values($Post);
+    [$AuthorID, $Username, $PermissionID, $Paranoia, $Donor, $Warned, $Avatar, $Enabled, $UserTitle] = array_values(Users::user_info($AuthorID));
 
     $UserInfo = Users::user_info($EditedUserID);
     $JsonPosts[] = [

@@ -14,37 +14,34 @@ Things to expect in $_GET:
 // Enable TOC
 Text::$TOC = true;
 
-// Check for lame SQL injection attempts
-if (isset($_GET['threadid'])) {
-    $threadId = (int)$_GET['threadid'];
-} else {
-    if (isset($_GET['topicid'])) {
-        $threadId = (int)$_GET['topicid'];
-    } elseif (!isset($_GET['postid'])) {
-        error(404);
+$postId = 0;
+$forumMan = new Gazelle\Manager\Forum;
+try {
+    if (isset($_GET['threadid'])) {
+        $threadId = (int)$_GET['threadid'];
+        $forum = $forumMan->findByThreadId($threadId);
     } else {
-        $postId = (int)$_GET['postid'];
-        $threadId = $DB->scalar("
-            SELECT TopicID FROM forums_posts WHERE ID = ?
-            ", $postId
-        );
-        if (!$threadId) {
+        if (isset($_GET['topicid'])) {
+            $threadId = (int)$_GET['topicid'];
+            $forum = $forumMan->findByThreadId($threadId);
+        } elseif (isset($_GET['postid'])) {
+            $postId = (int)$_GET['postid'];
+            $forum = $forumMan->findByPostId($postId);
+            $threadId = $forum->findThreadIdByPostId($postId);
+            header("Location: forums.php?action=viewthread&threadid=$threadId&postid=$postId#post$postId");
+            exit;
+        } else {
             error(404);
         }
-        header("Location: forums.php?action=viewthread&threadid=$threadId&postid=$postId#post$postId");
-        exit;
     }
+} catch (Gazelle\Exception\ResourceNotFound $e) {
+    error(404);
 }
-
-//---------- Get some data to start processing
-$user = new Gazelle\User($LoggedUser['ID']);
-
-// TODO: write Gazelle\Manager\Forum that implements $forum = $manager->findByThread($threadId);
-$forum = new Gazelle\Forum(0);
 $threadInfo = $forum->threadInfo($threadId);
 if (empty($threadInfo)) {
     error(404);
 }
+$user = new Gazelle\User($LoggedUser['ID']);
 if (!$user->readAccess($forum)) {
     error(403);
 }
@@ -60,7 +57,6 @@ $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 if ($threadInfo['Posts'] <= $PerPage) {
     $PostNum = 1;
 } else {
-    $postId = (int)($_GET['postid'] ?? 0);
     if (isset($_GET['post'])) {
         $PostNum = (int)($_GET['post'] ?? 1);
     } elseif (!($postId && $postId != $threadInfo['StickyPostID'])) {

@@ -5,9 +5,7 @@ if ($threadId < 1) {
     error(0, true);
 }
 
-$forum = new \Gazelle\Forum();
-$ForumID = $forum->setForumFromThread($threadId);
-
+$forum = (new \Gazelle\Manager\Forum)->findByThreadId($threadId);
 [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
 if ($Closed) {
     error(403, true);
@@ -57,7 +55,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
 ?>
         <ul class="poll nobullet">
 <?php
-        if ($ForumID != STAFF_FORUM_ID) {
+        if ($forum->id() != STAFF_FORUM_ID) {
             for ($i = 1, $il = count($Answers); $i <= $il; $i++) {
                 if (!empty($Votes[$i]) && $TotalVotes > 0) {
                     $Ratio = $Votes[$i] / $MaxVotes;

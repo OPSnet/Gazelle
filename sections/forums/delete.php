@@ -7,11 +7,11 @@ if (!check_perms('site_admin_forums')) {
 }
 
 $postId = (int)$_GET['postid'];
-if ($postId < 1) {
-    error(0);
+if (!$postId) {
+    error(404);
 }
 
-$forum = new \Gazelle\Forum();
+$forum = (new Gazelle\Manager\Forum)-findByPostId($postId);
 if (!$forum->removePost($postId)) {
-    error(0);
+    error(404);
 }
