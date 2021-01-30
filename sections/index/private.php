@@ -138,19 +138,18 @@ if (!$PeerStatsLocked) {
         </div>
 <?php
 if (($TopicID = $Cache->get_value('polls_featured')) === false) {
-    $DB->prepared_query('
+    $TopicID = $DB->scalar("
         SELECT TopicID
         FROM forums_polls
         WHERE Featured IS NOT NULL
         ORDER BY Featured DESC
         LIMIT 1
-    ');
-    list($TopicID) = $DB->next_record();
+    ");
     $Cache->cache_value('polls_featured', $TopicID, 3600 * 6);
 }
 if ($TopicID) {
-    $forum = new \Gazelle\Forum;
-    list($Question, $Answers, $Votes, $Featured, $Closed) = $forum->pollData($TopicID);
+    $forum = (new \Gazelle\Manager\Forum)->findByThreadId($TopicID);
+    [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($TopicID);
 
     if (!empty($Votes)) {
         $TotalVotes = array_sum($Votes);

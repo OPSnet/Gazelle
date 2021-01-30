@@ -9,11 +9,11 @@ if (!check_perms('site_moderate_forums')) {
 
 $threadId = (int)$_GET['threadid'];
 $postId   = (int)$_GET['postid'];
-if ($threadId < 1 || $postId < 1) {
+if (!$threadId || !$postId) {
     error(404);
 }
 
-$forum = new \Gazelle\Forum;
+$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
 $forum->stickyPost($LoggedUser['ID'], $threadId, $postId, empty($_GET['remove']));
 
 header('Location: forums.php?action=viewthread&threadid='.$threadId);

@@ -1,8 +1,9 @@
 <?php
 
-$forum = new \Gazelle\Forum();
-$toc = $forum->tableOfContentsMain();
+$forumMan = new Gazelle\Manager\Forum();
+$toc = $forumMan->tableOfContentsMain();
 $user = new Gazelle\User($LoggedUser['ID']);
+
 View::show_header('Forums');
 ?>
 <div class="thin">
@@ -18,7 +19,7 @@ foreach ($toc as $category => $forumList) {
         if ($f['ID'] == DONOR_FORUM) {
             $f['Description'] = donorForumDescription();
         }
-        $forum->setForum($f['ID']);
+        $forum = new Gazelle\Forum($f['ID']);
         $userLastRead = $forum->userLastRead($LoggedUser['ID'], $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE);
         if (isset($userLastRead[$f['LastPostTopicID']])) {
             $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];

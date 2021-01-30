@@ -1,13 +1,12 @@
 <?php
 
-// Quick SQL injection check
 $postId = (int)$_GET['post'];
-if (!$postId) {
-    error(0);
+try {
+    $forum = (new Gazelle\Manager\Forum)->findByPostId($postId);
+} catch (Gazelle\Exception\ResourceNotFoundException $e) {
+    error(404);
 }
-
-[$body, $forumId] = (new Gazelle\Forum)->postBody($postId);
-if (!Forums::check_forumperm($forumId)) {
-    error(0);
+if (!Forums::check_forumperm($forum->id())) {
+    error(403);
 }
-echo trim(display_str($body));
+echo trim(display_str($forum->postBody($postId)));
