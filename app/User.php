@@ -547,6 +547,18 @@ class User extends BaseObject {
         return $this->db->affected_rows() === 1;
     }
 
+    public function passwordHistory(): array {
+        $this->db->prepared_query("
+            SELECT ChangeTime AS date,
+                ChangerIP     AS ipaddr
+            FROM users_history_passwords
+            WHERE UserID = ?
+            ORDER BY ChangeTime DESC
+            ", $this->id
+        );
+        return $this->db->to_array(false, MYSQLI_ASSOC, false);
+    }
+
     public function onRatioWatch(): bool {
         $stats = $this->activityStats();
         return $this->info()['RatioWatchEndsEpoch'] !== false

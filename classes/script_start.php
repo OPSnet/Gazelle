@@ -197,6 +197,25 @@ G::$Twig->addFunction(new Twig\TwigFunction('ratio', function ($up, $down) {
     );
 }));
 
+G::$Twig->addFunction(new Twig\TwigFunction('resolveIpv4', function ($addr) {
+    return new Twig\Markup(
+        (function ($ip) {
+            if (!$ip) {
+                $ip = '127.0.0.1';
+            }
+            static $cache = [];
+            if (!isset($cache[$ip])) {
+                $class = strtr($ip, '.', '-');
+                $cache[$ip] = '<span class="host_' . $class
+                    . '">Resolving host' . "\xE2\x80\xA6" . '<script type="text/javascript">$(document).ready(function() {'
+                    .  "\$.get('tools.php?action=get_host&ip=$ip', function(host) {\$('.host_$class').html(host)})})</script></span>";
+            }
+            return $cache[$ip];
+        })($addr),
+        'UTF-8'
+    );
+}));
+
 G::$Twig->addFunction(new Twig\TwigFunction('shorten', function ($text, $length) {
     return new Twig\Markup(
         shortenString($text, $length),
