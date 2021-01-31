@@ -57,7 +57,9 @@ class User extends BaseObject {
     }
 
     public function info(): ?array {
-        if ($this->info) {
+        static $cache;
+        if (isset($cache[$this->id])) {
+            $this->info = $cache[$this->id];
             return $this->info;
         }
         $this->db->prepared_query("
@@ -145,6 +147,7 @@ class User extends BaseObject {
             ", $this->id
         );
         $this->info['attr'] = $this->db->to_pair('Name', 'ID');
+        $cache[$this->id] = $this->info;
         return $this->info;
     }
 
@@ -933,6 +936,8 @@ class User extends BaseObject {
     public function isUnconfirmed() { return $this->enabledState() == 0; }
     public function isEnabled()     { return $this->enabledState() == 1; }
     public function isDisabled()    { return $this->enabledState() == 2; }
+    public function isDonor()       { return $this->info()['is_donor']; }
+    public function isWarned()      { return !is_null($this->info()['Warned']); }
 
     public function endWarningDate(int $weeks) {
         return $this->db->scalar("
@@ -1023,6 +1028,34 @@ class User extends BaseObject {
             ", $this->id
         );
         return $this->db->to_array(false, MYSQLI_NUM, false);
+    }
+
+    /**
+     * Email duplicates
+     *
+     * @return array of array of [id, email, user_id, created, ipv4, \User user]
+     */
+    public function emailDuplicateHistory(): array {
+        // Get history of matches
+        $this->db->prepared_query("
+            SELECT
+                users_history_emails_id AS id,
+                Email                   AS email,
+                UserID                  AS user_id,
+                Time                    AS created,
+                IP                      AS ipv4
+            FROM users_history_emails AS uhe
+            WHERE uhe.UserID != ?
+                AND uhe.Email in (SELECT DISTINCT Email FROM users_history_emails WHERE UserID = ?)
+            ORDER BY uhe.Email, uhe.Time DESC
+            ", $this->id, $this->id
+        );
+        $dupe = $this->db->to_array('id', MYSQLI_ASSOC, false);
+        foreach ($dupe as &$d) {
+            $d['user'] = new User($d['user_id']);
+        }
+        unset($d);
+        return $dupe;
     }
 
     public function isFriend($id) {

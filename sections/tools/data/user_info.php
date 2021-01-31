@@ -4,16 +4,15 @@ if (!check_perms('users_view_ips')) {
     error(403);
 }
 
-$UserID = (int)$_GET['userid'];
-if (!$UserID) {
+$user = (new Gazelle\Manager\User)->findById((int)$_GET['userid']);
+if (is_null($user)) {
     error(404);
 }
-$user = new Gazelle\User($UserID);
 
-View::show_header('User information');
+View::show_header($user->username() . ' &rsaquo; Email and IP summary');
 ?>
 <div class="box pad center">
-<h2>Information on <a href="/user.php?id=<?= $UserID ?>"><?= $user->info()['Username'] ?></a></h2>
+<h2><a href="/user.php?id=<?= $user->id() ?>"><?= $user->username() ?></a> &rsaquo; Email and IP summary</h2>
 <table>
 <tr><th>Now</th><td colspan="2"><?= Date('Y-m-d H:i:s') ?></td></tr>
 <tr><th>Last seen</th><td colspan="2"><?= $user->lastAccess() ?></td></tr>
