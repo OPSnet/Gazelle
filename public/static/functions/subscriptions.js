@@ -1,6 +1,6 @@
-function Subscribe(topicid) {
-    ajax.get("userhistory.php?action=thread_subscribe&topicid=" + topicid + "&auth=" + authkey, function() {
-        var subscribeLink = $("#subscribelink" + topicid).raw();
+function Subscribe(threadid) {
+    ajax.get("userhistory.php?action=thread_subscribe&threadid=" + threadid + "&auth=" + authkey, function() {
+        var subscribeLink = $("#subscribelink" + threadid).raw();
         if (subscribeLink) {
             if (subscribeLink.firstChild.nodeValue.charAt(0) == '[') {
                 subscribeLink.firstChild.nodeValue = subscribeLink.firstChild.nodeValue.charAt(1) == 'U'

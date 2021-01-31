@@ -24,7 +24,13 @@ class Forum extends Base {
         return $this->forumId;
     }
 
-    public function findThreadIdByPostId(int $postId) {
+    /**
+     * Get the thread ID from a post ID.
+     *
+     * @param int id The post ID.
+     * @return int The thread ID.
+     */
+    public function findThreadIdByPostId(int $postId): int {
         $threadId = $this->db->scalar("
             SELECT TopicID FROM forums_posts WHERE ID = ?
             ", $postId
@@ -114,19 +120,6 @@ class Forum extends Base {
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
-    }
-
-    /**
-     * Get the thread ID from a post ID.
-     *
-     * @param int id The post ID.
-     * @return int The thread ID.
-     */
-    public function threadFromPost(int $postId) {
-        return $this->db->scalar("
-            SELECT TopicID FROM forums_posts WHERE ID = ?
-            ", $postId
-        );
     }
 
     /**
@@ -848,9 +841,10 @@ class Forum extends Base {
                 FROM forums_topics AS t
                 INNER JOIN forums_posts AS fp ON (fp.TopicID = t.ID)
                 LEFT JOIN forums_polls AS p ON (p.TopicID = t.ID)
-                WHERE t.ID = ?
+                WHERE t.ForumID = ?
+                    AND t.ID = ?
                 GROUP BY t.ID
-                ", $threadId
+                ", $this->forumId, $threadId
             );
             if (!$this->db->has_results()) {
                 return [];
@@ -872,7 +866,6 @@ class Forum extends Base {
             }
             $this->cache->cache_value(sprintf(self::CACHE_THREAD_INFO, $threadId), $info, 86400);
         }
-        $this->forumId = $info['ForumID'];
         return $info;
     }
 
@@ -883,7 +876,7 @@ class Forum extends Base {
      * @param int threadId The thread
      * @return array [$forumId, $forumName, $minClassWrite, $numPosts, $authorId, $title, $isLocked, $isSticky, $ranking]
      */
-    public function threadInfoExtended(int $threadId) {
+    public function threadInfoExtended(int $threadId): ?array {
         return $this->db->row("
             SELECT
                 t.ForumID,
@@ -897,8 +890,8 @@ class Forum extends Base {
                 t.Ranking
             FROM forums_topics AS t
             INNER JOIN forums AS f ON (f.ID = t.ForumID)
-            WHERE t.ID = ?
-            ", $threadId
+            WHERE t.ForumID = ? AND t.ID = ?
+            ", $this->forumId, $threadId
         );
     }
 

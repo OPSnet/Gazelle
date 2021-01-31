@@ -14,29 +14,31 @@ Things to expect in $_GET:
 // Enable TOC
 Text::$TOC = true;
 
-$postId = 0;
 $forumMan = new Gazelle\Manager\Forum;
-try {
-    if (isset($_GET['threadid'])) {
-        $threadId = (int)$_GET['threadid'];
-        $forum = $forumMan->findByThreadId($threadId);
-    } else {
-        if (isset($_GET['topicid'])) {
-            $threadId = (int)$_GET['topicid'];
-            $forum = $forumMan->findByThreadId($threadId);
-        } elseif (isset($_GET['postid'])) {
-            $postId = (int)$_GET['postid'];
-            $forum = $forumMan->findByPostId($postId);
-            $threadId = $forum->findThreadIdByPostId($postId);
-            header("Location: forums.php?action=viewthread&threadid=$threadId&postid=$postId#post$postId");
-            exit;
-        } else {
-            error(404);
-        }
+if ($_GET['postid']) {
+    $postId = (int)$_GET['postid'];
+    $forum = $forumMan->findByPostId($postId);
+    if (is_null($forum)) {
+        error(404);
     }
-} catch (Gazelle\Exception\ResourceNotFound $e) {
+    if (!isset($_GET['threadid'])) {
+        header("Location: forums.php?action=viewthread&threadid="
+            . $forum->findThreadIdByPostId($postId) . "&postid=$postId#post$postId"
+        );
+        exit;
+    }
+    $threadId = $forum->findThreadIdByPostId($postId);
+} elseif (isset($_GET['threadid'])) {
+    $postId = false;
+    $threadId = (int)$_GET['threadid'];
+    $forum = $forumMan->findByThreadId($threadId);
+    if (is_null($forum)) {
+        error(404);
+    }
+} else {
     error(404);
 }
+$forumId = $forum->id();
 $threadInfo = $forum->threadInfo($threadId);
 if (empty($threadInfo)) {
     error(404);
@@ -45,12 +47,11 @@ $user = new Gazelle\User($LoggedUser['ID']);
 if (!$user->readAccess($forum)) {
     error(403);
 }
-$forumId = $threadInfo['ForumID'];
 
 //Escape strings for later display
 $threadTitle = display_str($threadInfo['Title']);
 $ForumName = display_str($Forums[$forumId]['Name']);
-$IsDonorForum = $forumId == DONOR_FORUM ? true : false;
+$IsDonorForum = ($forumId == DONOR_FORUM);
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 
 //Post links utilize the catalogue & key params to prevent issues with custom posts per page
@@ -59,20 +60,20 @@ if ($threadInfo['Posts'] <= $PerPage) {
 } else {
     if (isset($_GET['post'])) {
         $PostNum = (int)($_GET['post'] ?? 1);
-    } elseif (!($postId && $postId != $threadInfo['StickyPostID'])) {
-        $PostNum = 1;
-    } else {
+    } elseif ($postId && $postId != $threadInfo['StickyPostID']) {
         $PostNum = $forum->threadNumPosts($threadId, $postId, $threadInfo['StickyPostID'] < $postId);
+    } else {
+        $PostNum = 1;
     }
 }
 [$Page] = Format::page_limit($PerPage, min($threadInfo['Posts'], $PostNum));
 if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
-    $Page = ceil($threadInfo['Posts'] / $PerPage);
+    $Page = (int)ceil($threadInfo['Posts'] / $PerPage);
 }
 
 $Catalogue = $forum->threadCatalog($threadId, $PerPage, $Page, THREAD_CATALOGUE);
 $thread = array_slice($Catalogue, (($Page - 1) * $PerPage) % THREAD_CATALOGUE, $PerPage, true);
-$FirstPost = current($thread)['ID'];;
+$FirstPost = current($thread)['ID'];
 $LastPost = end($thread)['ID'];
 if ($threadInfo['Posts'] <= $PerPage * $Page && $threadInfo['StickyPostID'] > $LastPost) {
     $LastPost = $threadInfo['StickyPostID'];
@@ -287,7 +288,7 @@ if ($threadInfo['NoPoll'] == 0) {
                     <input type="hidden" name="action" value="poll" />
                     <input type="hidden" name="auth" value="<?=$auth?>" />
                     <input type="hidden" name="large" value="1" />
-                    <input type="hidden" name="topicid" value="<?=$threadId?>" />
+                    <input type="hidden" name="threadid" value="<?=$threadId?>" />
                     <ul class="nobullet" id="poll_options">
 <?php    foreach ($Answers as $i => $Answer) { ?>
                         <li>
@@ -316,7 +317,7 @@ if ($threadInfo['NoPoll'] == 0) {
             <form class="manage_form" name="poll" action="forums.php" method="post">
                 <input type="hidden" name="action" value="poll_mod" />
                 <input type="hidden" name="auth" value="<?=$auth?>" />
-                <input type="hidden" name="topicid" value="<?=$threadId?>" />
+                <input type="hidden" name="threadid" value="<?=$threadId?>" />
                 <input type="hidden" name="feature" value="1" />
                 <input type="submit" style="float: left;" onclick="return confirm('Are you sure you want to feature this poll?');" value="Feature" />
             </form>
@@ -324,7 +325,7 @@ if ($threadInfo['NoPoll'] == 0) {
             <form class="manage_form" name="poll" action="forums.php" method="post">
                 <input type="hidden" name="action" value="poll_mod" />
                 <input type="hidden" name="auth" value="<?=$auth?>" />
-                <input type="hidden" name="topicid" value="<?=$threadId?>" />
+                <input type="hidden" name="threadid" value="<?=$threadId?>" />
                 <input type="hidden" name="close" value="1" />
                 <input type="submit" style="float: left;" value="<?=(!$Closed ? 'Close' : 'Open')?>" />
             </form>
@@ -336,7 +337,7 @@ if ($threadInfo['NoPoll'] == 0) {
 
 // Squeeze in stickypost
 if ($threadInfo['StickyPostID']) {
-    if ($threadInfo['StickyPostID'] != $thread[0]['ID']) {
+    if ($threadInfo['StickyPostID'] != current($thread)['ID']) {
         array_unshift($thread, $threadInfo['StickyPost']);
     }
     if ($threadInfo['StickyPostID'] != $thread[count($thread) - 1]['ID']) {
@@ -505,7 +506,7 @@ if (check_perms('site_moderate_forums')) {
     <form action="forums.php" method="post">
         <input type="hidden" name="action" value="take_topic_notes" />
         <input type="hidden" name="auth" value="<?=$auth?>" />
-        <input type="hidden" name="topicid" value="<?=$threadId?>" />
+        <input type="hidden" name="threadid" value="<?=$threadId?>" />
         <table cellpadding="6" cellspacing="1" border="0" width="100%" class="layout border hidden" id="thread_notes_table">
 <?php foreach ($Notes as $Note) { ?>
             <tr><td><?=Users::format_username($Note['AuthorID'])?> (<?=time_diff($Note['AddedTime'], 2, true, true)?>)</td><td><?=Text::full_format($Note['Body'])?></td></tr>
