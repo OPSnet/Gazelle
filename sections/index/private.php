@@ -199,7 +199,7 @@ if ($TopicID) {
                 <form class="vote_form" name="poll" id="poll" action="">
                     <input type="hidden" name="action" value="poll" />
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-                    <input type="hidden" name="topicid" value="<?=$TopicID?>" />
+                    <input type="hidden" name="threadid" value="<?=$TopicID?>" />
 <?php         foreach ($Answers as $i => $Answer) { ?>
                     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
                     <label for="answer_<?=$i?>"><?=display_str($Answers[$i])?></label><br />

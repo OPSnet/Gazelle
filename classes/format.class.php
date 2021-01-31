@@ -141,7 +141,7 @@ class Format {
      */
     public static function page_limit($PerPage, $DefaultResult = 1) {
         if (!isset($_GET['page'])) {
-            $Page = ceil($DefaultResult / $PerPage);
+            $Page = (int)ceil($DefaultResult / $PerPage);
             if ($Page == 0) {
                 $Page = 1;
             }

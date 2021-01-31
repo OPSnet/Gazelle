@@ -24,7 +24,13 @@ class Forum extends Base {
         return $this->forumId;
     }
 
-    public function findThreadIdByPostId(int $postId) {
+    /**
+     * Get the thread ID from a post ID.
+     *
+     * @param int id The post ID.
+     * @return int The thread ID.
+     */
+    public function findThreadIdByPostId(int $postId): int {
         $threadId = $this->db->scalar("
             SELECT TopicID FROM forums_posts WHERE ID = ?
             ", $postId
@@ -114,19 +120,6 @@ class Forum extends Base {
             sprintf(self::CACHE_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
         ]);
-    }
-
-    /**
-     * Get the thread ID from a post ID.
-     *
-     * @param int id The post ID.
-     * @return int The thread ID.
-     */
-    public function threadFromPost(int $postId) {
-        return $this->db->scalar("
-            SELECT TopicID FROM forums_posts WHERE ID = ?
-            ", $postId
-        );
     }
 
     /**
@@ -872,7 +865,6 @@ class Forum extends Base {
             }
             $this->cache->cache_value(sprintf(self::CACHE_THREAD_INFO, $threadId), $info, 86400);
         }
-        $this->forumId = $info['ForumID'];
         return $info;
     }
 
@@ -883,7 +875,7 @@ class Forum extends Base {
      * @param int threadId The thread
      * @return array [$forumId, $forumName, $minClassWrite, $numPosts, $authorId, $title, $isLocked, $isSticky, $ranking]
      */
-    public function threadInfoExtended(int $threadId) {
+    public function threadInfoExtended(int $threadId): ?array {
         return $this->db->row("
             SELECT
                 t.ForumID,

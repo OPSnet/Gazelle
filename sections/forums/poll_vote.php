@@ -1,6 +1,6 @@
 <?php
 
-$threadId = (int)$_POST['topicid'];
+$threadId = (int)$_POST['threadid'];
 if ($threadId < 1) {
     error(0, true);
 }
@@ -26,7 +26,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     <input type="hidden" name="action" value="poll" />
     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
     <input type="hidden" name="large" value="<?=display_str($_POST['large'])?>" />
-    <input type="hidden" name="topicid" value="<?=$threadId?>" />
+    <input type="hidden" name="threadid" value="<?=$threadId?>" />
 <?php for ($i = 1, $il = count($Answers); $i <= $il; $i++) { ?>
     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>" />
     <label for="answer_<?=$i?>"><?=display_str($Answers[$i])?></label><br />
