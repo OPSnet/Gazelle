@@ -944,7 +944,7 @@ if (!$IsNewGroup) {
     }
 }
 
-$paranoia = unserialize($this->db->scalar("
+$paranoia = unserialize($DB->scalar("
     SELECT Paranoia FROM users_main WHERE ID = ?
     ", $uploader->id()
 )) ?: [];
