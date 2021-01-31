@@ -17,7 +17,7 @@
     </div>
 {% if group %}
     <div class="box pad">
-    <h4>Results {{ manager.artistHtml|raw }} - <a href="/torrents.php?id={{ group.ID }}">{{ group.Name }}</a></h4>
+    <h4>Results {{ manager.artistHtml|raw }} - <a href="/torrents.php?id={{ group.ID }}">{{ group.Name|raw }}</a></h4>
 
 <table><tr>
     <td style="vertical-align: top"><table>
@@ -208,16 +208,7 @@
                         <label for="torrentid">Torrent ID</label>
                     </td>
                     <td>
-                        <input type="number" name="torrentid" value="{{ torrent.ID }}" /> (<b>not</b> group ID!)
-                    </td>
-                <tr>
-                </tr>
-                    <td class="label">
-                        <label for="torrentid">or Uploader</label>
-                    </td>
-                    <td>
-                        <input type="text" name="uploaderid" value="{{ uploader_id }}" />
-                        <br />Use <tt>@name</tt> for a username, otherwise (numeric) user ID.
+                        <input type="text" name="torrentid" value="{{ torrent.ID }}" /> (<b>not</b> group ID!)
                     </td>
                 <tr>
                 </tr>

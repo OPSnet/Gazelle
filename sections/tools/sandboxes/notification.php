@@ -5,7 +5,6 @@ if (!check_perms('admin_view_notifications')) {
 }
 
 $notifiedId = null;
-$uploaderId = null;
 $group    = null;
 $tags     = [];
 $category = null;
@@ -27,27 +26,19 @@ if (isset($_POST['torrentid'])) {
         $category = $Categories[$group['CategoryID'] - 1];
         $release = (new Gazelle\ReleaseType)->findNameById($group['ReleaseType']);
         $notification = new Gazelle\Notification\Upload;
-        $notification
-            ->addFormat($torrent['Format'])
+        $notification->addFormat($torrent['Format'])
             ->addEncodings($torrent['Encoding'])
             ->addMedia($torrent['Media'])
             ->addYear($group['Year'], $torrent['RemasterYear'])
             ->addArtists($torMan->artistRole())
             ->addTags($tags)
             ->addCategory($category)
+            ->addUser(new Gazelle\User($torrent['UserID']))
             ->addReleaseType($release);
 
-        $userMan = new Gazelle\Manager\User;
-        if (isset($_POST['uploaderid'])) {
-            $uploader = $userMan->find(trim($_POST['uploaderid']));
-            if ($uploader) {
-                $notification->addUser($uploader);
-            }
-        }
         $result = $notification->lookup();
-
         if (isset($_POST['notifiedid'])) {
-            $notified = $userMan->find(trim($_POST['notifiedid']));
+            $notified = (new Gazelle\Manager\User)->find(trim($_POST['notifiedid']));
             if ($notified) {
                 $notifiedId = $notified->id();
                 $result = array_filter($result, function ($r) use ($notifiedId) {return $r['user_id'] === $notifiedId;});
@@ -67,7 +58,6 @@ if (isset($_POST['torrentid'])) {
 
 View::show_header("Notifications Sandbox");
 echo G::$Twig->render('admin/notification-sandbox.twig', [
-    'uploader_id' => $uploaderId,
     'notified_id' => $notifiedId,
 
     'group'   => $group,
