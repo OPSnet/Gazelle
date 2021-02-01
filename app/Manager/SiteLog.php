@@ -40,7 +40,6 @@ class SiteLog extends \Gazelle\Base {
             );
             $this->totalMatches = $this->db->record_count();
             if ($this->totalMatches == LOG_ENTRIES_PER_PAGE) {
-                // This is a lot faster than SQL_CALC_FOUND_ROWS
                 $sq = new \SphinxqlQuery();
                 $result = $sq->select('id')->from('log, log_delta')->limit(0, 1, 1)->query();
                 $this->debug->log_var($result, '$result');

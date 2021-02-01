@@ -296,7 +296,7 @@ for the most likely issues to encounter in web design:
     WHERE r.ID IN (?, ?, ?)
     ORDER BY e.EditionID, r.Year ASC
 
-    SELECT SQL_CALC_FOUND_ROWS c.ID, c.Subject, cu.Unread, cu.Sticky,
+    SELECT c.ID, c.Subject, cu.Unread, cu.Sticky,
         cu.ForwardedTo, cu2.UserID, cu.ReceivedDate AS Date
     FROM pm_conversations AS c
     LEFT JOIN pm_conversations_users AS cu

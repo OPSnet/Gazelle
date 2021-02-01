@@ -1,19 +1,45 @@
 <?php
-/*
-User subscription page
-*/
 
-if (isset($LoggedUser['PostsPerPage'])) {
-    $PerPage = $LoggedUser['PostsPerPage'];
-} else {
-    $PerPage = POSTS_PER_PAGE;
-}
-list($Page, $Limit) = Format::page_limit($PerPage);
+$PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
+[$Page, $Limit] = Format::page_limit($PerPage);
 
 View::show_header('Subscriptions','subscriptions,comments,bbcode');
 
 $ShowUnread = (!isset($_GET['showunread']) && !isset($HeavyInfo['SubscriptionsUnread']) || isset($HeavyInfo['SubscriptionsUnread']) && !!$HeavyInfo['SubscriptionsUnread'] || isset($_GET['showunread']) && !!$_GET['showunread']);
 $ShowCollapsed = (!isset($_GET['collapse']) && !isset($HeavyInfo['SubscriptionsCollapse']) || isset($HeavyInfo['SubscriptionsCollapse']) && !!$HeavyInfo['SubscriptionsCollapse'] || isset($_GET['collapse']) && !!$_GET['collapse']);
+
+$NumResults = $DB->scalar("
+    SELECT sum(total)
+    FROM (
+        SELECT count(*) AS total
+        FROM users_subscriptions_comments AS s
+        LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = ? AND lr.Page = s.Page AND lr.PageID = s.PageID)
+        LEFT JOIN artists_group AS a ON (s.Page = 'artist' AND a.ArtistID = s.PageID)
+        LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
+        LEFT JOIN comments AS c ON
+            (c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
+        LEFT JOIN comments AS c_lr ON (c_lr.ID = lr.PostID)
+        WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
+            AND (s.Page != 'collages' OR co.Deleted = '0')
+            " . ($ShowUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
+            AND s.UserID = ?
+        GROUP BY s.PageID
+    UNION ALL
+        SELECT count(*) AS total
+        FROM users_subscriptions AS s
+        LEFT JOIN forums_last_read_topics AS lr ON (lr.UserID = ? AND s.TopicID = lr.TopicID)
+        LEFT JOIN forums_topics AS t ON (t.ID = s.TopicID)
+        LEFT JOIN forums AS f ON (f.ID = t.ForumID)
+        LEFT JOIN forums_posts AS p ON
+            (p.ID = (SELECT max(ID) FROM forums_posts WHERE TopicID = s.TopicID))
+        LEFT JOIN forums_posts AS p_lr ON (p_lr.ID = lr.PostID)
+        WHERE " . Forums::user_forums_sql()
+            . ($ShowUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
+            AND s.UserID = ?
+        GROUP BY t.ID
+    ) TOTAL
+    ", $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID']
+);
 
 // The monster sql query:
 /*
@@ -34,9 +60,7 @@ $ShowCollapsed = (!isset($_GET['collapse']) && !isset($HeavyInfo['SubscriptionsC
  * LastReadEditedUserID
  */
 $DB->prepared_query("
-    (SELECT
-        SQL_CALC_FOUND_ROWS
-        s.Page,
+    SELECT s.Page,
         s.PageID,
         lr.PostID,
         null AS ForumID,
@@ -51,43 +75,52 @@ $DB->prepared_query("
         ui.Avatar AS LastReadAvatar,
         c_lr.EditedUserID AS LastReadEditedUserID
     FROM users_subscriptions_comments AS s
-        LEFT JOIN users_comments_last_read AS lr ON lr.UserID = {$LoggedUser['ID']} AND lr.Page = s.Page AND lr.PageID = s.PageID
-        LEFT JOIN artists_group AS a ON s.Page = 'artist' AND a.ArtistID = s.PageID
-        LEFT JOIN collages AS co ON s.Page = 'collages' AND co.ID = s.PageID
-        LEFT JOIN comments AS c ON c.ID = (
-                    SELECT MAX(ID)
-                    FROM comments
-                    WHERE Page = s.Page
-                        AND PageID = s.PageID
-                )
-        LEFT JOIN comments AS c_lr ON c_lr.ID = lr.PostID
-        LEFT JOIN users_main AS um ON um.ID = c_lr.AuthorID
-        LEFT JOIN users_info AS ui ON ui.UserID = um.ID
-    WHERE s.UserID = {$LoggedUser['ID']} AND s.Page IN ('artist', 'collages', 'requests', 'torrents') AND (s.Page != 'collages' OR co.Deleted = '0')" . ($ShowUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
-    GROUP BY s.PageID)
-    UNION ALL
-    (SELECT 'forums', s.TopicID, lr.PostID, f.ID, f.Name, t.Title, p.ID, p.AddedTime, p_lr.Body, p_lr.EditedTime, um.ID, um.Username, ui.Avatar, p_lr.EditedUserID
+    LEFT JOIN users_comments_last_read AS lr ON (lr.UserID = ? AND lr.Page = s.Page AND lr.PageID = s.PageID)
+    LEFT JOIN artists_group AS a ON (s.Page = 'artist' AND a.ArtistID = s.PageID)
+    LEFT JOIN collages AS co ON (s.Page = 'collages' AND co.ID = s.PageID)
+    LEFT JOIN comments AS c ON
+        (c.ID = (SELECT max(ID) FROM comments WHERE Page = s.Page AND PageID = s.PageID))
+    LEFT JOIN comments AS c_lr ON (c_lr.ID = lr.PostID)
+    LEFT JOIN users_main AS um ON (um.ID = c_lr.AuthorID)
+    LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
+    WHERE s.Page IN ('artist', 'collages', 'requests', 'torrents')
+        AND (s.Page != 'collages' OR co.Deleted = '0')
+        " . ($ShowUnread ? ' AND c.ID > IF(lr.PostID IS NULL, 0, lr.PostID)' : '') . "
+        AND s.UserID = ?
+    GROUP BY s.PageID
+UNION ALL
+    SELECT 'forums',
+        s.TopicID,
+        lr.PostID,
+        f.ID,
+        f.Name,
+        t.Title,
+        p.ID,
+        p.AddedTime,
+        p_lr.Body,
+        p_lr.EditedTime,
+        um.ID,
+        um.Username,
+        ui.Avatar,
+        p_lr.EditedUserID
     FROM users_subscriptions AS s
-        LEFT JOIN forums_last_read_topics AS lr ON lr.UserID = {$LoggedUser['ID']} AND s.TopicID = lr.TopicID
-        LEFT JOIN forums_topics AS t ON t.ID = s.TopicID
-        LEFT JOIN forums AS f ON f.ID = t.ForumID
-        LEFT JOIN forums_posts AS p ON p.ID = (
-                    SELECT MAX(ID)
-                    FROM forums_posts
-                    WHERE TopicID = s.TopicID
-                )
-        LEFT JOIN forums_posts AS p_lr ON p_lr.ID = lr.PostID
-        LEFT JOIN users_main AS um ON um.ID = p_lr.AuthorID
-        LEFT JOIN users_info AS ui ON ui.UserID = um.ID
-    WHERE s.UserID = {$LoggedUser['ID']}" .
-        ($ShowUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') .
-        ' AND ' . Forums::user_forums_sql() . "
-    GROUP BY t.ID)
+    LEFT JOIN forums_last_read_topics AS lr ON (lr.UserID = ? AND s.TopicID = lr.TopicID)
+    LEFT JOIN forums_topics AS t ON (t.ID = s.TopicID)
+    LEFT JOIN forums AS f ON (f.ID = t.ForumID)
+    LEFT JOIN forums_posts AS p ON
+        (p.ID = (SELECT max(ID) FROM forums_posts WHERE TopicID = s.TopicID))
+    LEFT JOIN forums_posts AS p_lr ON (p_lr.ID = lr.PostID)
+    LEFT JOIN users_main AS um ON (um.ID = p_lr.AuthorID)
+    LEFT JOIN users_info AS ui ON (ui.UserID = um.ID)
+    WHERE " . Forums::user_forums_sql()
+        . ($ShowUnread ? " AND p.ID > IF(t.IsLocked = '1' AND t.IsSticky = '0'" . ", p.ID, IF(lr.PostID IS NULL, 0, lr.PostID))" : '') . "
+        AND s.UserID = ?
+    GROUP BY t.ID
     ORDER BY LastPostTime DESC
-    LIMIT $Limit");
+    LIMIT $Limit
+    ", $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID'], $LoggedUser['ID']
+);
 $Results = $DB->to_array(false, MYSQLI_ASSOC, false);
-$DB->query('SELECT FOUND_ROWS()');
-list($NumResults) = $DB->next_record();
 
 $Debug->log_var($Results, 'Results');
 
@@ -102,6 +135,7 @@ foreach ($Results as $Result) {
 
 $TorrentGroups = Torrents::get_groups($TorrentGroups, true, true, false);
 $Requests = Requests::get_requests($Requests);
+$Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
 
 ?>
 <div class="thin">
@@ -109,14 +143,10 @@ $Requests = Requests::get_requests($Requests);
         <h2><a href="user.php?id=<?= $LoggedUser['ID'] ?>"><?= Users::user_info($LoggedUser['ID'])['Username']
             ?></a> &rsaquo; Subscriptions<?=$ShowUnread ? ' with unread posts' . ($NumResults ? ' (' . $NumResults . ' new)' : '') : ''?></h2>
         <div class="linkbox">
-<?php
-if (!$ShowUnread) {
-?>
+<?php if (!$ShowUnread) { ?>
             <br /><br />
             <a href="userhistory.php?action=subscriptions&amp;showunread=1" class="brackets">Only display subscriptions with unread replies</a>&nbsp;
-<?php
-} else {
-?>
+<?php } else { ?>
             <br /><br />
             <a href="userhistory.php?action=subscriptions&amp;showunread=0" class="brackets">Show all subscriptions</a>&nbsp;
 <?php
@@ -124,26 +154,19 @@ if (!$ShowUnread) {
 if ($NumResults) {
 ?>
             <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$ShowCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
-<?php
-}
-?>
+<?php } ?>
             <a href="userhistory.php?action=posts&amp;userid=<?=$LoggedUser['ID']?>" class="brackets">Go to post history</a>&nbsp;
             <a href="userhistory.php?action=quote_notifications" class="brackets">Quote notifications</a>&nbsp;&nbsp;&nbsp;
             <a href="userhistory.php?action=catchup&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Catch up</a>
         </div>
     </div>
-<?php
-if (!$NumResults) {
-?>
+<?php if (!$NumResults) { ?>
     <div class="center">
         No subscriptions<?=$ShowUnread ? ' with unread posts' : ''?>
     </div>
-<?php
-} else {
-?>
+<?php } else { ?>
     <div class="linkbox">
 <?php
-    $Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
     echo $Pages;
 ?>
     </div>
