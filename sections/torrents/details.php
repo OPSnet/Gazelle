@@ -250,7 +250,11 @@ if ($Categories[$GroupCategoryID - 1] == 'Music') {
                 <li class="<?= $s['class'] ?>"><strong class="artists_label"><?= $s['title'] ?></strong></li>
 <?php
             foreach ($Artists[$s['offset']] as $Artist) {
-            $a = new \Gazelle\Artist($Artist['id']);
+                try {
+                    $a = new \Gazelle\Artist($Artist['id']);
+                } catch (Gazelle\Exception\ResourceNotFoundException $e) {
+                    continue;
+                }
 ?>
                 <li class="<?= $s['class'] ?>">
                     <?= Artists::display_artist($Artist) ?>&lrm;
