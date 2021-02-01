@@ -20,19 +20,7 @@ class Tools {
         if (!$Long || $Long == 2130706433) { // No need to check cc for 127.0.0.1
             return false;
         }
-        $QueryID = G::$DB->get_query_id();
-        G::$DB->prepared_query("
-            SELECT EndIP, Code
-            FROM geoip_country
-            WHERE ? >= StartIP
-            ORDER BY StartIP DESC
-            LIMIT 1", $Long);
-        if ((!list($EndIP, $Country) = G::$DB->next_record()) || $EndIP < $Long) {
-            $Country = '?';
-        }
-        G::$DB->set_query_id($QueryID);
-        $IPs[$IP] = $Country;
-        return $Country;
+        return '?';
     }
 
     /**

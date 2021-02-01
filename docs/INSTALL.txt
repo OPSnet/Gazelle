@@ -26,9 +26,4 @@ These are our cron jobs. SCHEDULE_KEY is the same as in classes/config.php:
 *       *       *       *       *       /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate delta requests_delta log_delta >/dev/null
 5       0,12    *       *       *       /usr/bin/indexer -c /etc/sphinx/sphinx.conf --rotate --all >>/root/sphinx-indexer.log
 
-7. You're probably going to want IP geolocation information, so first you need to fill in the geoip_country tables by visiting /tools.php?action=update_geoip
-    After that finishes parsing information from MaxMind, you may want to map users to countries by running:
-        "INSERT INTO users_geodistribution (Code, Users) SELECT g.Code, COUNT(u.ID) AS Users FROM geoip_country AS g JOIN users_main AS u ON INET_ATON(u.IP) BETWEEN g.StartIP AND g.EndIP WHERE u.Enabled = '1' GROUP BY g.Code ORDER BY Users DESC"
-    This will fill in the table needed for stats.
-
-8. Start modifying stuff. Hopefully, everything will have gone smoothly so far and nothing will have exploded (ha ha ha)
+6. Start modifying stuff. Hopefully, everything will have gone smoothly so far and nothing will have exploded (ha ha ha)
