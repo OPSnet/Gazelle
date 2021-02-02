@@ -98,7 +98,6 @@ View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscription
             <a href="torrents.php?action=editgroup&amp;groupid=<?=$GroupID?>" class="brackets">Edit description</a>
 <?php } ?>
             <a href="torrents.php?action=editrequest&amp;groupid=<?=$GroupID?>" class="brackets">Request an Edit</a>
-            <a href="torrents.php?action=history&amp;groupid=<?=$GroupID?>" class="brackets">View history</a>
 <?php if ($RevisionID && check_perms('site_edit_wiki')) { ?>
             <a href="torrents.php?action=revert&amp;groupid=<?=$GroupID ?>&amp;revisionid=<?=$RevisionID ?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Revert to this revision</a>
 <?php
@@ -120,6 +119,7 @@ if (check_perms('site_submit_requests')) {
 ?>
             <a href="requests.php?action=new&amp;groupid=<?=$GroupID?>" class="brackets">Request format</a>
 <?php } ?>
+            <a href="torrents.php?action=history&amp;groupid=<?=$GroupID?>" class="brackets">View history</a>
             <a href="torrents.php?action=grouplog&amp;groupid=<?=$GroupID?>" class="brackets">View log</a>
         </div>
     </div>

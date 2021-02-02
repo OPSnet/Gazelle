@@ -707,11 +707,11 @@ function get_group_info($GroupID, $RevisionID = 0, $PersonalProperties = true, $
                 g.CategoryID,
                 g.Time,
                 g.VanityHouse,
-                GROUP_CONCAT(DISTINCT tags.Name SEPARATOR '|') as tagNames,
-                GROUP_CONCAT(DISTINCT tags.ID SEPARATOR '|'),
-                GROUP_CONCAT(tt.UserID SEPARATOR '|'),
-                GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|'),
-                GROUP_CONCAT(tt.NegativeVotes SEPARATOR '|')
+                GROUP_CONCAT(DISTINCT tags.Name SEPARATOR '|') AS tagNames,
+                GROUP_CONCAT(DISTINCT tags.ID SEPARATOR '|')   AS tagIds,
+                GROUP_CONCAT(tt.UserID SEPARATOR '|')          AS tagVoteUserIds,
+                GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|')   AS tagUpvotes,
+                GROUP_CONCAT(tt.NegativeVotes SEPARATOR '|')   AS tagDownvotes
             FROM torrents_group AS g
                 LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
                 LEFT JOIN tags ON (tags.ID = tt.TagID)";

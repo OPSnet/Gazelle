@@ -1,29 +1,16 @@
 <?php
 
-$GroupID = (int)$_GET['groupid'];
-if (!$GroupID) {
+$torMan = new Gazelle\Manager\Torrent;
+$group = $torMan->findGroupById((int)$_GET['groupid']);
+if (is_null($group)) {
     error(404);
 }
 
-$Name = $DB->scalar("
-    SELECT Name
-    FROM torrents_group
-    WHERE ID = ?
-    ", $GroupID
-);
-if (!$Name) {
-    error(404);
-}
-
-View::show_header("Revision history for $Name");
-?>
-<div class="thin">
-    <div class="header">
-        <h2>Revision history for <a href="torrents.php?id=<?=$GroupID?>"><?=$Name?></a></h2>
-    </div>
-<?php
-RevisionHistoryView::render_revision_history(RevisionHistory::get_revision_history('torrents', $GroupID), "torrents.php?id=$GroupID");
-?>
-</div>
-<?php
+View::show_header($group->name() . " &rsaquo; Revision History");
+echo G::$Twig->render('revision.twig', [
+    'id'   => $group->id(),
+    'list' => $group->revisionList(),
+    'name' => $group->name(),
+    'url'  => "torrents.php?id=",
+]);
 View::show_footer();

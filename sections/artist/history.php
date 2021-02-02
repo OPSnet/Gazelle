@@ -1,29 +1,16 @@
 <?php
 
-$ArtistID = (int)$_GET['artistid'];
-if (!$ArtistID) {
+$artistMan = new Gazelle\Manager\Artist;
+$artist = $artistMan->findById((int)$_GET['artistid'], 0);
+if (is_null($artist)) {
     error(404);
 }
 
-$Name = $DB->scalar("
-    SELECT Name
-    FROM artists_group
-    WHERE ArtistID = ?
-    ", $ArtistID
-);
-if (!$Name) {
-    error(404);
-}
-
-View::show_header("Revision history for $Name");
-?>
-<div class="thin">
-    <div class="header">
-        <h2>Revision history for <a href="artist.php?id=<?=$ArtistID?>"><?=$Name?></a></h2>
-    </div>
-<?php
-RevisionHistoryView::render_revision_history(RevisionHistory::get_revision_history('artists', $ArtistID), "artist.php?id=$ArtistID");
-?>
-</div>
-<?php
+View::show_header($artist->name() . " &rsaquo; Revision History");
+echo G::$Twig->render('revision.twig', [
+    'id'   => $artist->id(),
+    'list' => $artist->revisionList(),
+    'name' => $artist->name(),
+    'url'  => "artist.php?id=",
+]);
 View::show_footer();

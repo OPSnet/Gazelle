@@ -1,0 +1,29 @@
+<div class="thin">
+    <div class="header">
+        <h2><a href="{{ url }}{{ id }}">{{ name }}</a> &rsaquo; Revision History</h2>
+    </div>
+</div>
+<table cellpadding="6" cellspacing="1" border="0" width="100%" class="border">
+    <tr class="colhead">
+        <td>Revision</td>
+        <td>Date</td>
+        <td>User</td>
+        <td>Summary</td>
+    </tr>
+{% for info in list %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>
+            <a href="{{ url }}{{ id }}&amp;revisionid={{ info.revision }}">#{{ info.revision }}</a>
+        </td>
+        <td>
+            {{ info.time }}
+        </td>
+        <td>
+            {{ info.user_id|user_url }}
+        </td>
+        <td>
+            {{ info.summary }}
+        </td>
+    </tr>
+{% endfor %}
+</table>
