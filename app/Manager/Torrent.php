@@ -64,6 +64,20 @@ class Torrent extends \Gazelle\Base {
         $this->artistDisplay = self::ARTIST_DISPLAY_HTML;
     }
 
+    public function findGroupById(int $groupId) {
+        $id = $this->db->scalar("
+            SELECT ID
+            FROM torrents_group
+            WHERE ID = ?
+            ", $groupId
+        );
+        if (is_null($id)) {
+            return null;
+        }
+        return (new \Gazelle\TorrentGroup($id))
+            ->setInfo($this->groupInfo($id));
+    }
+
     /**
      * Set context to a specific group. Used to retrieve the
      * information needed to build a complete url.
@@ -426,11 +440,11 @@ class Torrent extends \Gazelle\Base {
                     g.CategoryID,
                     g.Time,
                     g.VanityHouse,
-                    GROUP_CONCAT(DISTINCT tags.Name SEPARATOR '|') as tagNames,
-                    GROUP_CONCAT(DISTINCT tags.ID SEPARATOR '|') as tagIds,
-                    GROUP_CONCAT(tt.UserID SEPARATOR '|') as tagVoteUserIds,
-                    GROUP_CONCAT(tt.PositiveVotes SEPARATOR '|') as tagUpvotes,
-                    GROUP_CONCAT(tt.NegativeVotes SEPARATOR '|') as tagDownvotes
+                    group_concat(DISTINCT tags.Name SEPARATOR '|') AS tagNames,
+                    group_concat(DISTINCT tags.ID SEPARATOR '|')   AS tagIds,
+                    group_concat(tt.UserID SEPARATOR '|')          AS tagVoteUserIds,
+                    group_concat(tt.PositiveVotes SEPARATOR '|')   AS tagUpvotes,
+                    group_concat(tt.NegativeVotes SEPARATOR '|')   AS tagDownvotes
                 FROM torrents_group AS g
                 LEFT JOIN torrents_tags AS tt ON (tt.GroupID = g.ID)
                 LEFT JOIN tags ON (tags.ID = tt.TagID)";
@@ -449,7 +463,7 @@ class Torrent extends \Gazelle\Base {
             $args[] = $groupId;
 
             $this->db->prepared_query($SQL, ...$args);
-            $group = $this->db->next_record(MYSQLI_ASSOC);
+            $group = $this->db->next_record(MYSQLI_ASSOC, false);
 
             // Fetch the individual torrents
             $columns = "
@@ -530,9 +544,10 @@ class Torrent extends \Gazelle\Base {
                     Media ASC,
                     Format,
                     Encoding,
-                    ID", $groupId, $groupId);
-
-            $torrentList = $this->db->to_array('ID', MYSQLI_ASSOC);
+                    ID
+                ", $groupId, $groupId
+            );
+            $torrentList = $this->db->to_array('ID', MYSQLI_ASSOC, false);
             if (empty($group) || empty($torrentList)) {
                 return null;
             }
@@ -639,9 +654,7 @@ class Torrent extends \Gazelle\Base {
      */
     public function hashToTorrentId(string $hash) {
         return $this->db->scalar("
-            SELECT ID
-            FROM torrents
-            WHERE info_hash = UNHEX(?)
+            SELECT ID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash
         );
     }
@@ -653,9 +666,7 @@ class Torrent extends \Gazelle\Base {
      */
     public function hashToGroupId(string $hash) {
         return $this->db->scalar("
-            SELECT GroupID
-            FROM torrents
-            WHERE info_hash = UNHEX(?)
+            SELECT GroupID FROM torrents WHERE info_hash = UNHEX(?)
             ", $hash
         );
     }
@@ -669,9 +680,7 @@ class Torrent extends \Gazelle\Base {
         $key = "thash_to_group_$hash";
         if (($info = $this->cache->get_value($key)) === false) {
             $info =  $this->db->row("
-                SELECT ID, GroupID
-                FROM torrents
-                WHERE info_hash = UNHEX(?)
+                SELECT ID, GroupID FROM torrents WHERE info_hash = UNHEX(?)
                 ", $hash
             );
             $this->cache->cache_value($key, $info, 86400 + rand(0, 3600));
@@ -688,9 +697,7 @@ class Torrent extends \Gazelle\Base {
         $key = "tid_to_group_$torrentId";
         if (($groupId = $this->cache->get_value($key)) === false) {
             $groupId = $this->db->scalar("
-                SELECT GroupID
-                FROM torrents
-                WHERE ID = ?
+                SELECT GroupID FROM torrents WHERE ID = ?
                 ", $torrentId
             );
             $this->cache->cache_value($key, $groupId, 86400 + rand(0, 3600));
@@ -738,9 +745,7 @@ class Torrent extends \Gazelle\Base {
      */
     public function requestFills(int $torrentId): array {
         $this->db->prepared_query("
-            SELECT r.ID, r.FillerID, r.TimeFilled
-            FROM requests AS r
-            WHERE r.TorrentID = ?
+            SELECT r.ID, r.FillerID, r.TimeFilled FROM requests AS r WHERE r.TorrentID = ?
             ", $torrentId
         );
         return $this->db->to_array(false, MYSQLI_NUM, false);

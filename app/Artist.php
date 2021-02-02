@@ -46,7 +46,7 @@ class Artist extends Base {
      * @param  int|null  $revisionId
      * @throws Gazelle\Exception\ResourceNotFoundException
      */
-    public function __construct (int $id, $revisionId = null) {
+    public function __construct(int $id, $revisionId = null) {
         parent::__construct();
         $this->id = $id;
         $this->revisionId = $revisionId ?? 0;
@@ -542,5 +542,19 @@ class Artist extends Base {
 
     public function id(): int {
         return $this->id;
+    }
+
+    public function revisionList(): array {
+         $this->db->prepared_query("
+            SELECT RevisionID AS revision,
+                Summary       AS summary,
+                Time          AS time,
+                UserID        AS user_id
+            FROM wiki_artists
+            WHERE PageID = ?
+            ORDER BY RevisionID DESC
+            ", $this->id
+        );
+        return $this->db->to_array('revision', MYSQLI_ASSOC, false);
     }
 }
