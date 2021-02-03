@@ -36,8 +36,8 @@ class Wiki extends \Gazelle\Base {
         $this->db->begin_transaction();
         $this->db->prepared_query("
             INSERT INTO wiki_articles
-                   (Title, Body, MinClassRead, MinClassEdit, Author, Date, Revision)
-            VALUES (?,     ?,    ?,            ?,            ?,      now(), 1)
+                   (Title, Body, MinClassRead, MinClassEdit, Author)
+            VALUES (?,     ?,    ?,            ?,            ?)
             ", $title, trim($body), $minRead, $minEdit, $userId
         );
         $articleId = $this->db->inserted_id();
