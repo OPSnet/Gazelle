@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
+use Phinx\Db\Adapter\MysqlAdapter;
 
 final class NukeGeoip extends AbstractMigration
 {
