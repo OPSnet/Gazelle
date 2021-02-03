@@ -841,10 +841,9 @@ class Forum extends Base {
                 FROM forums_topics AS t
                 INNER JOIN forums_posts AS fp ON (fp.TopicID = t.ID)
                 LEFT JOIN forums_polls AS p ON (p.TopicID = t.ID)
-                WHERE t.ForumID = ?
-                    AND t.ID = ?
+                WHERE t.ID = ?
                 GROUP BY t.ID
-                ", $this->forumId, $threadId
+                ", $threadId
             );
             if (!$this->db->has_results()) {
                 return [];
@@ -890,8 +889,8 @@ class Forum extends Base {
                 t.Ranking
             FROM forums_topics AS t
             INNER JOIN forums AS f ON (f.ID = t.ForumID)
-            WHERE t.ForumID = ? AND t.ID = ?
-            ", $this->forumId, $threadId
+            WHERE t.ID = ?
+            ", $threadId
         );
     }
 
