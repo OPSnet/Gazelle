@@ -16,28 +16,13 @@ class XBT extends \Gazelle\Base {
      * @return float current rate, or null if API endpoint cannot be reached or is in error.
      */
     public function fetchRate(string $CC) {
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL            => sprintf(self::FX_QUOTE_URL, $CC),
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 10,
-        ]);
-        if (defined('HTTP_PROXY')) {
-            curl_setopt_array($curl, [
-                CURLOPT_HTTPPROXYTUNNEL => true,
-                CURLOPT_PROXY => HTTP_PROXY,
-            ]);
+        $curl = new \Gazelle\Util\Curl;
+        if ($curl->fetch(sprintf(self::FX_QUOTE_URL, $CC))) {
+            // {"data":{"base":"BTC","currency":"USD","amount":"8165.93"}}
+            $payload = json_decode($curl->result());
+            return $payload->data->amount;
         }
-
-        $result = curl_exec($curl);
-        if ($result === false || curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
-            return null;
-        }
-
-        // {"data":{"base":"BTC","currency":"USD","amount":"8165.93"}}
-        $payload = json_decode($result);
-        return $payload->data->amount;
+        return null;
     }
 
     /* Persist the Forex rate for this currency
