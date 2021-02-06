@@ -2,7 +2,6 @@
 if (!check_perms('users_warn')) {
     error(403);
 }
-
 if (empty($_POST['reason'])) {
     error("Reason for warning not provided");
 }
@@ -29,7 +28,7 @@ if (is_null($forumPost)) {
     error("No forum post #$postId found");
 }
 $threadId = $forumPost['thread-id'];
-if (Forums::get_thread_info($threadId) === null) {
+if (empty($forum->threadInfo($threadId))) {
     error(404);
 }
 $forum->editPost($user->id(), $postId, trim($_POST['body']));

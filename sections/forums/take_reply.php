@@ -1,7 +1,6 @@
 <?php
 authorize();
 
-//TODO: Remove all the stupid queries that could get their information just as easily from the cache
 /*********************************************************************\
 //--------------Take Post--------------------------------------------//
 
@@ -23,56 +22,41 @@ if (!empty($LoggedUser['DisablePosting'])) {
     error('Your posting privileges have been removed.');
 }
 
-// Quick SQL injection checks
-
-if (isset($_POST['thread']) && !is_number($_POST['thread'])) {
-    error(0);
+$threadId = (int)($_POST['thread'] ?? 0);
+$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
+if (is_null($forum)) {
+    error(404);
 }
-if (isset($_POST['forum']) && !is_number($_POST['forum'])) {
-    error(0);
+$ThreadInfo = $forum->threadInfo($threadId);
+
+if (!Forums::check_forumperm($forum->id()) || !Forums::check_forumperm($forum->id(), 'Write') || $ThreadInfo['isLocked'] && !check_perms('site_moderate_forums')) {
+    error(403);
 }
 
 // If you're not sending anything, go back
-if ($_POST['body'] === '' || !isset($_POST['body'])) {
-    $Location = empty($_SERVER['HTTP_REFERER']) ? "forums.php?action=viewthread&threadid={$_POST['thread']}" : $_SERVER['HTTP_REFERER'];
-    header("Location: {$Location}");
-    die();
+$Body = trim($_POST['body'] ?? '');
+if ($Body === '') {
+    header("Location: " .  $_SERVER['HTTP_REFERER'] ?? "forums.php?action=viewthread&threadid={$_POST['thread']}");
+    exit;
 }
 
-$TopicID = (int)$_POST['thread'];
-$ThreadInfo = Forums::get_thread_info($TopicID);
-if ($ThreadInfo === null) {
-    error(404);
-}
-
-$ForumID = $ThreadInfo['ForumID'];
-if (!Forums::check_forumperm($ForumID)) {
-    error(403);
-}
-if (!Forums::check_forumperm($ForumID, 'Write') || $LoggedUser['DisablePosting'] || $ThreadInfo['IsLocked'] == '1' && !check_perms('site_moderate_forums')) {
-    error(403);
-}
-
-$subscription = new \Gazelle\Manager\Subscription($LoggedUser['ID']);
-if (isset($_POST['subscribe']) && !$subscription->isSubscribed($TopicID)) {
-    $subscription->subscribe($TopicID);
-}
-
-$forum = new \Gazelle\Forum($ForumID);
-
-$Body = trim($_POST['body']);
 if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'])) {
-    $PostID = $forum->mergePost($LoggedUser['ID'], $TopicID, $Body);
+    $PostID = $forum->mergePost($LoggedUser['ID'], $threadId, $Body);
 } else {
-    $PostID = $forum->addPost($LoggedUser['ID'], $TopicID, $Body);
+    $PostID = $forum->addPost($LoggedUser['ID'], $threadId, $Body);
     ++$ThreadInfo['Posts'];
 }
 $CatalogueID = (int)floor((POSTS_PER_PAGE * ceil($ThreadInfo['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
-$Cache->delete_value("thread_{$TopicID}_catalogue_{$CatalogueID}");
-$Cache->delete_value("thread_{$TopicID}_info");
+$Cache->deleteMulti(["thread_{$threadId}_catalogue_{$CatalogueID}", "thread_{$threadId}_info"]);
 
-$subscription->flush('forums', $TopicID);
-$subscription->quoteNotify($Body, $PostID, 'forums', $TopicID);
+$subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {
+    $subscription->subscribe($threadId);
+}
+$subscription->flush('forums', $threadId);
+$subscription->quoteNotify($Body, $PostID, 'forums', $threadId);
 
-header("Location: forums.php?action=viewthread&threadid=$TopicID&page=".ceil($ThreadInfo['Posts']
-    / ($LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE)));
+header("Location: forums.php?action=viewthread&threadid=$threadId&page="
+    . (int)ceil($ThreadInfo['Posts'] / ($LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE))
+    . "#post$PostID"
+);

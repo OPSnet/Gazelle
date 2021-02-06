@@ -1,69 +1,6 @@
 <?php
 class Forums {
     const PADLOCK = "\xF0\x9F\x94\x92";
-    /**
-     * Get information on a thread.
-     *
-     * @param int $ThreadID
-     *            the thread ID.
-     * @param boolean $Return
-     *            indicates whether thread info should be returned.
-     * @param Boolean $SelectiveCache
-     *            cache thread info/
-     * @return array holding thread information.
-     */
-    public static function get_thread_info($ThreadID, $Return = true, $SelectiveCache = false) {
-        if ((!$ThreadInfo = G::$Cache->get_value('thread_' . $ThreadID . '_info')) || !isset($ThreadInfo['Ranking'])) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
-                SELECT
-                    t.Title,
-                    t.ForumID,
-                    t.IsLocked,
-                    t.IsSticky,
-                    COUNT(fp.id) AS Posts,
-                    t.LastPostAuthorID,
-                    ISNULL(p.TopicID) AS NoPoll,
-                    t.StickyPostID,
-                    t.AuthorID as OP,
-                    t.Ranking,
-                    MAX(fp.AddedTime) as LastPostTime
-                FROM forums_topics AS t
-                    JOIN forums_posts AS fp ON fp.TopicID = t.ID
-                    LEFT JOIN forums_polls AS p ON p.TopicID = t.ID
-                WHERE t.ID = '$ThreadID'
-                GROUP BY fp.TopicID");
-            if (!G::$DB->has_results()) {
-                G::$DB->set_query_id($QueryID);
-                return null;
-            }
-            $ThreadInfo = G::$DB->next_record(MYSQLI_ASSOC, false);
-            if ($ThreadInfo['StickyPostID']) {
-                $ThreadInfo['Posts']--;
-                G::$DB->query(
-                    "SELECT
-                        p.ID,
-                        p.AuthorID,
-                        p.AddedTime,
-                        p.Body,
-                        p.EditedUserID,
-                        p.EditedTime,
-                        ed.Username
-                        FROM forums_posts AS p
-                            LEFT JOIN users_main AS ed ON ed.ID = p.EditedUserID
-                        WHERE p.TopicID = '$ThreadID'
-                            AND p.ID = '" . $ThreadInfo['StickyPostID'] . "'");
-                list ($ThreadInfo['StickyPost']) = G::$DB->to_array(false, MYSQLI_ASSOC);
-            }
-            G::$DB->set_query_id($QueryID);
-            if (!$SelectiveCache || !$ThreadInfo['IsLocked'] || $ThreadInfo['IsSticky']) {
-                G::$Cache->cache_value('thread_' . $ThreadID . '_info', $ThreadInfo, 0);
-            }
-        }
-        if ($Return) {
-            return $ThreadInfo;
-        }
-    }
 
     /**
      * Checks whether user has permissions on a forum.
