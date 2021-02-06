@@ -69,13 +69,13 @@ if (isset($_POST['GroupID'])) {
                     if (empty($Size) || !in_array($Units, ['k', 'm', 'g'])) {
                         $Err = 'Invalid size or units';
                     } else {
-                        $Bytes = Format::get_bytes($Size . $Units);
-
-                        $DB->query("
+                        $DB->prepared_query("
                             SELECT ID
                             FROM torrents
-                            WHERE ID IN (".implode(', ', $TorrentIDs).")
-                              AND Size > '$Bytes'");
+                            WHERE Size > ?
+                                AND ID IN (" . placeholders($TorrentIDs) . ")
+                            ", Format::get_bytes($Size . $Units), ...$TorrentIDs
+                        );
                         $LargeTorrents = $DB->collect('ID');
                         $TorrentIDs = array_diff($TorrentIDs, $LargeTorrents);
                     }
