@@ -30,40 +30,6 @@ class Forums {
     }
 
     /**
-     * Gets basic info on a forum.
-     *
-     * @param int $ForumID
-     *            the forum ID.
-     */
-    public static function get_forum_info($ForumID) {
-        $Forum = G::$Cache->get_value("ForumInfo_$ForumID");
-        if (!$Forum) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
-                SELECT
-                    Name,
-                    MinClassRead,
-                    MinClassWrite,
-                    MinClassCreate,
-                    COUNT(forums_topics.ID) AS Topics
-                FROM forums
-                    LEFT JOIN forums_topics ON forums_topics.ForumID = forums.ID
-                WHERE forums.ID = '$ForumID'
-                GROUP BY ForumID");
-            if (!G::$DB->has_results()) {
-                return false;
-            }
-            // Makes an array, with $Forum['Name'], etc.
-            $Forum = G::$DB->next_record(MYSQLI_ASSOC);
-
-            G::$DB->set_query_id($QueryID);
-
-            G::$Cache->cache_value("ForumInfo_$ForumID", $Forum, 86400);
-        }
-        return $Forum;
-    }
-
-    /**
      * Get the forum categories
      * @return array ForumCategoryID => Name
      */
