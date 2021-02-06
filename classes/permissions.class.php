@@ -166,10 +166,12 @@ class Permissions {
         $Permission = G::$Cache->get_value("perm_$PermissionID");
         if (empty($Permission)) {
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query("
+            G::$DB->prepared_query("
                 SELECT Level AS Class, `Values` AS Permissions, Secondary, PermittedForums
                 FROM permissions
-                WHERE ID = '$PermissionID'");
+                WHERE ID = ?
+                ", $PermissionID
+            );
             $Permission = G::$DB->next_record(MYSQLI_ASSOC, ['Permissions']);
             G::$DB->set_query_id($QueryID);
             $Permission['Permissions'] = unserialize($Permission['Permissions']) ?: [];
@@ -193,11 +195,10 @@ class Permissions {
         // Fetch custom permissions if they weren't passed in.
         if ($CustomPermissions === false) {
             $QueryID = G::$DB->get_query_id();
-            G::$DB->query('
-                SELECT CustomPermissions
-                FROM users_main
-                WHERE ID = ' . (int)$UserID);
-            list($CustomPermissions) = G::$DB->next_record(MYSQLI_NUM, false);
+            $CustomPermissions = G::$DB->scalar("
+                SELECT CustomPermissions FROM users_main WHERE ID = ?
+                ", $UserID
+            );
             G::$DB->set_query_id($QueryID);
         }
 
