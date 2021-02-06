@@ -21,8 +21,8 @@ function forumList($forums, $selected = 0) {
 }
 
 function classList($Selected = 0) {
-    global $Classes;
     $Return = '';
+    $Classes = (new Gazelle\Manager\User)->classList();
     foreach ($Classes as $ID => $Class) {
         if ($Class['Secondary']) {
             continue;
@@ -36,7 +36,6 @@ function classList($Selected = 0) {
         }
         $Return .= '>'.shortenString($Name, 20, true)."</option>\n";
     }
-    reset($Classes);
     return $Return;
 }
 

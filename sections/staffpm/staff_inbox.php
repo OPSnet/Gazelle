@@ -1,10 +1,12 @@
 <?php
+$Classes = (new Gazelle\Manager\User)->classList();
 
 View::show_header('Staff Inbox');
 
 $View = display_str(empty($_GET['view']) ? '' : $_GET['view']);
 $UserLevel = $LoggedUser['EffectiveClass'];
 $LevelCap = Permissions::get_level_cap();
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 
 // Setup for current view mode
 $SortStr = 'IF(AssignedToUser = '.$LoggedUser['ID'].', 0, 1) ASC, ';

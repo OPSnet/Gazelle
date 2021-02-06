@@ -5,6 +5,7 @@ if (empty($_GET['id']) || !is_number($_GET['id']) || (!empty($_GET['preview']) &
 $UserID = (int)$_GET['id'];
 $Bonus = new Gazelle\Bonus;
 $donorMan = new Gazelle\Manager\Donation;
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 
 if (!empty($_POST)) {
     authorize();
@@ -542,6 +543,7 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
             <ul class="stats nobullet">
                 <li>Class: <?=$ClassLevels[$Class]['Name']?></li>
 <?php
+$Classes = (new Gazelle\Manager\User)->classList();
 $UserInfo = Users::user_info($UserID);
 if (!empty($UserInfo['ExtraClasses'])) {
 ?>

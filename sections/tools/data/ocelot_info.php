@@ -9,6 +9,7 @@ if (isset($_GET['userid']) && is_number($_GET['userid'])) {
         $TorrentPass = $UserHeavyInfo['torrent_pass'];
         $UserPeerStats = Tracker::user_peer_count($TorrentPass);
         $UserInfo = Users::user_info($_GET['userid']);
+        $Classes = (new Gazelle\Manager\User)->classList();
         $UserLevel = $Classes[$UserInfo['PermissionID']]['Level'];
         if (!check_paranoia('leeching+', $UserInfo['Paranoia'], $UserLevel, $_GET['userid'])) {
             $UserPeerStats[0] = false;

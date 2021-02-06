@@ -1,4 +1,5 @@
 <?php
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 
 if ($ConvID = (int)$_GET['id']) {
     // Get conversation info

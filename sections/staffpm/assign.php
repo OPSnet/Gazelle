@@ -20,6 +20,7 @@ if ($ConvID = (int)$_GET['convid']) {
             error(404);
         } else {
             $Level = 0;
+            $Classes = (new Gazelle\Manager\User)->classList();
             switch ($_GET['to']) {
                 case 'forum':
                     $Level = $Classes[FORUM_MOD]['Level'];

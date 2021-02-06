@@ -1,5 +1,6 @@
 <?php
 
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 View::show_header('Staff PMs', 'staffpm');
 
 // Get messages

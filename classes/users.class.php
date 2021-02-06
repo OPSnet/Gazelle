@@ -1,32 +1,6 @@
 <?php
 class Users {
     /**
-     * Get $Classes (list of classes keyed by ID) and $ClassLevels
-     *        (list of classes keyed by level)
-     * @return array ($Classes, $ClassLevels)
-     */
-    public static function get_classes() {
-        $Debug = new \Gazelle\Debug;
-        // Get permissions
-        list($Classes, $ClassLevels) = G::$Cache->get_value('classes');
-        if (!$Classes || !$ClassLevels) {
-            $QueryID = G::$DB->get_query_id();
-            G::$DB->query('
-                SELECT ID, Name, Level, Secondary, badge
-                FROM permissions
-                ORDER BY Level');
-            $Classes = G::$DB->to_array('ID');
-            $ClassLevels = G::$DB->to_array('Level');
-            G::$DB->set_query_id($QueryID);
-            G::$Cache->cache_value('classes', [$Classes, $ClassLevels], 0);
-        }
-        $Debug->set_flag('Loaded permissions');
-
-        return [$Classes, $ClassLevels];
-    }
-
-
-    /**
      * Get user info, is used for the current user and usernames all over the site.
      *
      * @param $UserID int   The UserID to get info for
@@ -45,7 +19,6 @@ class Users {
      *    int     EffectiveClass - the highest level of their main and secondary classes
      */
     public static function user_info($UserID) {
-        global $Classes, $SSL;
         $UserInfo = G::$Cache->get_value("user_info_$UserID");
         // the !isset($UserInfo['Paranoia']) can be removed after a transition period
         if (empty($UserInfo) || empty($UserInfo['ID']) || !isset($UserInfo['Paranoia']) || empty($UserInfo['Class'])) {
@@ -77,6 +50,7 @@ class Users {
                 ", $UserID
             );
 
+            $Classes = (new \Gazelle\Manager\User)->classList();
             if (!G::$DB->has_results()) { // Deleted user, maybe?
                 $UserInfo = [
                         'ID' => $UserID,
@@ -420,8 +394,6 @@ class Users {
      * @return string HTML formatted username
      */
     public static function format_username($UserID, $Badges = false, $IsWarned = true, $IsEnabled = true, $Class = false, $Title = false, $IsDonorForum = false) {
-        global $Classes;
-
         if ($UserID == 0) {
             return 'System';
         }
@@ -436,6 +408,7 @@ class Users {
         $Username = $UserInfo['Username'];
         $Paranoia = $UserInfo['Paranoia'];
 
+        $Classes = (new \Gazelle\Manager\User)->classList();
         if ($UserInfo['Class'] < $Classes[MOD]['Level']) {
             $OverrideParanoia = check_perms('users_override_paranoia', $UserInfo['Class']);
         } else {
@@ -544,7 +517,7 @@ class Users {
      * @return string name
      */
     public static function make_class_string($ClassID) {
-        global $Classes;
+        $Classes = (new Gazelle\Manager\User)->classList();
         return $Classes[$ClassID]['Name'];
     }
 

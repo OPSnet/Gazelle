@@ -1,6 +1,6 @@
 <?php
 function class_list($Selected = 0) {
-    global $Classes;
+    $Classes = (new Gazelle\Manager\User)->classList();
     $Return = '';
     foreach ($Classes as $ID => $Class) {
         if ($Class['Secondary']) {
@@ -15,7 +15,6 @@ function class_list($Selected = 0) {
         }
         $Return .= '>'.shortenString($Name, 20, true)."</option>\n";
     }
-    reset($Classes);
     return $Return;
 }
 

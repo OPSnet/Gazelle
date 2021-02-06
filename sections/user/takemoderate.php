@@ -284,6 +284,7 @@ if ($editRatio) {
 $set = [];
 $args = [];
 
+$Classes = (new Gazelle\Manager\User)->classList();
 if ($Classes[$class]['Level'] != $cur['Class']
     && (
         ($Classes[$class]['Level'] < $LoggedUser['Class'] && check_perms('users_promote_below'))

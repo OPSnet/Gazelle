@@ -190,6 +190,7 @@ $NumComments        = check_paranoia_here('torrentcomments++') ? $user->torrentC
 $NumArtistsComments = check_paranoia_here('torrentcomments++') ? $user->artistCommentCount() : null;
 $NumCollageComments = check_paranoia_here('torrentcomments++') ? $user->collageCommentCount() : null;
 $NumRequestComments = check_paranoia_here('torrentcomments++') ? $user->requestCommentCount() : null;
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 
 json_print("success", [
     'username'    => $Username,

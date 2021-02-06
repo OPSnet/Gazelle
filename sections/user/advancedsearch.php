@@ -150,6 +150,7 @@ if (!empty($_GET)) {
     $DateRegexp = ['regexp' => '/\d{4}-\d{2}-\d{2}/'];
     $ClassIDs = [];
     $SecClassIDs = [];
+    $Classes = (new Gazelle\Manager\User)->classList();
     foreach ($Classes as $ClassID => $Value) {
         if ($Value['Secondary']) {
             $SecClassIDs[] = $ClassID;
@@ -510,6 +511,7 @@ if (!empty($_GET)) {
 }
 
 // Neither level nor ID is particularly useful when searching secondary classes, so sort them alphabetically.
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 $Secondaries = array_filter($ClassLevels, function ($class) { return $class['Secondary'] == '1'; });
 usort($Secondaries, function($c1, $c2) { return strcmp($c1['Name'], $c2['Name']); });
 
