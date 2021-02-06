@@ -156,14 +156,14 @@
             {{ _self.check_push("Quotes", settings.Quotes) }}
         </td>
     </tr>
-{% if can.torrent_notify %}
+{% if torrent_notify %}
     <tr>
         <td class="label tooltip" title="Enabling this will give you a notification when the torrent notification filters you have established are triggered.">
             <strong>Torrent notifications</strong>
         </td>
         <td>
-            {{ _self.check_popup("TorrentAlerts", settings.TorrentAlerts) }}
-            {{ _self.check_trad("TorrentAlerts", settings.TorrentAlerts) }}
+            {{ _self.check_popup("Torrents", settings.Torrents) }}
+            {{ _self.check_trad("Torrents", settings.Torrents) }}
         </td>
     </tr>
 {% endif %}
@@ -172,7 +172,10 @@
             <strong>Collage subscriptions</strong>
         </td>
         <td>
-            {{ _self.check_popup("CollageAlerts", settings.CollageAlerts) }}
+            {{ _self.check_popup("Collages", settings.Collages) }}
         </td>
     </tr>
+{% if request_notify %}
+{# TODO #}
+{% endif %}
 </table>

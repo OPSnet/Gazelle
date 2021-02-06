@@ -46,9 +46,9 @@ if (count($GroupIDs)) {
         UPDATE users_notify_torrents
         SET UnRead = ?
         WHERE UserID = ?
-        ', '0', $LoggedUser['ID']
+        ', 0, $LoggedUser['ID']
     );
-    $Cache->delete_value("notifications_new_" . $LoggedUser['ID']);
+    $Cache->delete_value("user_notify_upload_" . $LoggedUser['ID']);
 }
 
 $DB->set_query_id($Results);

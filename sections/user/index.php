@@ -212,7 +212,7 @@ switch ($_REQUEST['action'] ?? '') {
             'collage_subs_user_new_'  . $UserID,
             'donor_info_'             . $UserID,
             'inbox_new_'              . $UserID,
-            'notifications_new_'      . $UserID,
+            'user_notify_upload_'     . $UserID,
             'staff_pm_new_'           . $UserID,
             'subscriptions_user_new_' . $UserID,
             'user_info_'              . $UserID,

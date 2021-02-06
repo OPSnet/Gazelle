@@ -582,15 +582,15 @@ class User extends BaseObject {
     }
 
     public function unreadTorrentNotifications(): int {
-        if (($new = $this->cache->get_value('notifications_new_' . $this->id)) === false) {
+        if (($new = $this->cache->get_value('user_notify_upload_' . $this->id)) === false) {
             $new = $this->db->scalar("
                 SELECT count(*)
                 FROM users_notify_torrents
-                WHERE UnRead = '1'
+                WHERE UnRead = 1
                     AND UserID = ?
                 ", $this->id
             );
-            $this->cache->cache_value('notifications_new_' . $this->id, $new, 0);
+            $this->cache->cache_value('user_notify_upload_' . $this->id, $new, 0);
         }
         return $new;
     }
@@ -603,7 +603,7 @@ class User extends BaseObject {
                 AND UserID = ?
             ", $this->id
         );
-        $this->cache->delete_value('notifications_new_' . $this->id);
+        $this->cache->delete_value('user_notify_upload_' . $this->id);
         return $this->db->affected_rows() === 1;
     }
 

@@ -24,7 +24,8 @@ class Notification extends \Gazelle\Base {
         'important' => self::IMPORTANT,
         'critical' => self::CRITICAL,
         'warning' => self::WARNING,
-        'info' => self::INFO];
+        'info' => self::INFO,
+    ];
 
     // Types. These names must correspond to column names in users_notifications_settings
     const NEWS = 'News';
@@ -36,11 +37,7 @@ class Notification extends \Gazelle\Base {
     const SUBSCRIPTIONS = 'Subscriptions';
     const TORRENTS = 'Torrents';
     const COLLAGES = 'Collages';
-    const SITEALERTS = 'SiteAlerts';
-    const FORUMALERTS = 'ForumAlerts';
     const REQUESTALERTS = 'RequestAlerts';
-    const COLLAGEALERTS = 'CollageAlerts';
-    const TORRENTALERTS = 'TorrentAlerts';
     const GLOBALNOTICE = 'Global';
 
     // TODO: methodize
@@ -53,11 +50,8 @@ class Notification extends \Gazelle\Base {
         'Subscriptions',
         'Torrents',
         'Collages',
-        'SiteAlerts',
-        'ForumAlerts',
         'RequestAlerts',
-        'CollageAlerts',
-        'TorrentAlerts'];
+    ];
 
     protected $user;
     protected $userId;
@@ -94,31 +88,31 @@ class Notification extends \Gazelle\Base {
         }
         if ($load) {
             $this->loadGlobal();
-            if (!isset($this->skipped[self::BLOG])) {
+            if (!$this->isSkipped(self::BLOG)) {
                 $this->loadBlog();
             }
-            if (!isset($this->skipped[self::COLLAGES])) {
+            if (!$this->isSkipped(self::COLLAGES)) {
                 $this->loadCollages();
             }
-            if (!isset($this->skipped[self::STAFFBLOG])) {
+            if (!$this->isSkipped(self::STAFFBLOG)) {
                 $this->loadStaffBlog();
             }
-            if (!isset($this->skipped[self::STAFFPM])) {
+            if (!$this->isSkipped(self::STAFFPM)) {
                 $this->loadStaffPMs();
             }
-            if (!isset($this->skipped[self::INBOX])) {
+            if (!$this->isSkipped(self::INBOX)) {
                 $this->loadInbox();
             }
-            if (!isset($this->skipped[self::NEWS])) {
+            if (!$this->isSkipped(self::NEWS)) {
                 $this->loadNews();
             }
-            if (!isset($this->skipped[self::TORRENTS])) {
+            if (!$this->isSkipped(self::TORRENTS)) {
                 $this->loadTorrents();
             }
-            if (!isset($this->skipped[self::QUOTES])) {
+            if (!$this->isSkipped(self::QUOTES)) {
                 $this->loadQuotes();
             }
-            if (!isset($this->skipped[self::SUBSCRIPTIONS])) {
+            if (!$this->isSkipped(self::SUBSCRIPTIONS)) {
                 $this->loadSubscriptions();
             }
         }
@@ -126,17 +120,18 @@ class Notification extends \Gazelle\Base {
 
     public function setType(string $type) {
         $this->typeList[] = $type;
+        return $this;
     }
 
-    public function isTraditional($type) {
+    public function isTraditional(string $type): bool {
         return in_array($this->settings[$type], [self::OPT_TRADITIONAL, self::OPT_TRADITIONAL_PUSH]);
     }
 
-    public function isSkipped($type) {
+    public function isSkipped(string $type): bool {
         return isset($this->skipped[$type]);
     }
 
-    public function useNoty() {
+    public function useNoty(): bool {
         return in_array(self::OPT_POPUP, $this->settings) || in_array(self::OPT_POPUP_PUSH, $this->settings);
     }
 
@@ -199,7 +194,7 @@ class Notification extends \Gazelle\Base {
         }
         $type = db_string($type);
         if (!empty($userIds)) {
-            $userIds = implode(',', $userIds);
+            $userIds = implode(",", $userIds);
             $QueryID = $this->db->get_query_id();
             $this->db->prepared_query("
                 SELECT UserID
@@ -474,7 +469,7 @@ class Notification extends \Gazelle\Base {
             $set[] = "$Type = ?";
             $args[] = $Result;
         }
-        $set = implode(',', $set);
+        $set = implode(",", $set);
         $args[] = $this->userId;
 
         $QueryID = $this->db->get_query_id();

@@ -99,6 +99,7 @@ echo G::$Twig->render('user/setting.twig', [
     'user'             => $User,
     'can' => [
         'advanced_search' => check_perms('site_advanced_search'),
+        'request_notify'  => check_perms('site_vote'),
         'torrent_notify'  => check_perms('site_torrents_notify'),
     ],
     'donor' => [
