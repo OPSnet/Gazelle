@@ -67,6 +67,36 @@ class User extends \Gazelle\Base {
         return $userId ? new \Gazelle\User($userId) : null;
     }
 
+    /**
+     * Get list of user classes by ID
+     * @return array $classes
+     */
+    public function classList(): array {
+        if (($classList = $this->cache->get_value('user_class')) === false) {
+            $this->db->prepared_query("
+                SELECT ID, Name, Level, Secondary, badge
+                FROM permissions
+                ORDER BY Level
+            ");
+            $classList = $this->db->to_array('ID');
+            $this->cache->cache_value('user_class', $classList, 0);
+        }
+        return $classList;
+    }
+
+    /**
+     * Get list of user classes by level
+     * @return array $classes
+     */
+    public function classLevelList(): array {
+        $classList = $this->classList();
+        $classLevelList = [];
+        foreach ($classList as $c) {
+            $classLevelList[$c['Level']] = $c;
+        }
+        return $classLevelList;
+    }
+
     public function findAllByCustomPermission(): array {
         $this->db->prepared_query("
             SELECT ID, CustomPermissions

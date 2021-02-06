@@ -320,7 +320,7 @@ foreach ($navItems as $n) {
 }
 
 $UseAdvancedSearch = isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType'];
-global $ClassLevels;
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 ?>
     <meta name="viewport" content="width=device-width" />
 </head>

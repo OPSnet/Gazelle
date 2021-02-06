@@ -621,7 +621,6 @@ function is_valid_datetime($DateTime, $Format = 'Y-m-d H:i') {
  */
 
 function check_paranoia($Property, $Paranoia, $UserClass, $UserID = false) {
-    global $Classes;
     if ($Property == false) {
         return false;
     }

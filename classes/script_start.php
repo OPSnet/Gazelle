@@ -231,10 +231,6 @@ G::$Twig->addTest(
 
 $Debug->set_flag('start user handling');
 
-// Get classes
-// TODO: Remove these globals, replace by calls into Users
-[$Classes, $ClassLevels] = Users::get_classes();
-
 //-- Load user information
 // User info is broken up into many sections
 // Heavy - Things that the site never has to look at if the user isn't logged in (as opposed to things like the class, donor status, etc)

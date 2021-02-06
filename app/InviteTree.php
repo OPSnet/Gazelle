@@ -226,7 +226,7 @@ class InviteTree extends Base {
             $markup .= '<strong>' . \Users::format_username($inviteeId, true, true, ($enabled != 2 ? false : true), true)
                 . '</strong>';
 
-            global $Classes;
+            $Classes = (new Manager\User)->classList();
             if (!check_paranoia(['uploaded', 'downloaded'], $paranoia, $Classes[$permissionId]['Level'])) {
                 $markup .= "&nbsp;Hidden";
                 $stats['paranoid']++;

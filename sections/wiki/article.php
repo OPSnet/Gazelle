@@ -1,6 +1,7 @@
 <?php
 
 $wikiMan = new Gazelle\Manager\Wiki;
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 
 Text::$TOC = true;
 $ArticleID = false;

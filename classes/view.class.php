@@ -17,7 +17,7 @@ class View {
      *                    example: 'somefile,somedir/somefile'
      */
     public static function show_header($PageTitle = '', $JSIncludes = '', $CSSIncludes = '') {
-        global $Document, $Classes;
+        global $Document;
 
         if ($PageTitle != '') {
             $PageTitle .= ' :: ';

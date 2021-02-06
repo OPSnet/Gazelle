@@ -2,8 +2,9 @@
 enforce_login();
 
 function class_list($Selected = 0) {
-    global $Classes, $LoggedUser;
+    global $LoggedUser;
     $Return = '';
+    $Classes = (new Gazelle\Manager\User)->classList();
     foreach ($Classes as $ID => $Class) {
         if ($Class['Level'] <= $LoggedUser['EffectiveClass']) {
             $Return.='<option value="'.$Class['Level'].'"';
@@ -13,7 +14,6 @@ function class_list($Selected = 0) {
             $Return.='>'.shortenString($Class['Name'], 20, true).'</option>'."\n";
         }
     }
-    reset($Classes);
     return $Return;
 }
 

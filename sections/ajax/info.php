@@ -11,6 +11,7 @@ if ($LoggedUser['BytesUploaded'] == 0 && $LoggedUser['BytesDownloaded'] == 0) {
 }
 
 $user = new Gazelle\User($LoggedUser['ID']);
+$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 
 json_print("success", [
     'username' => $user->username(),

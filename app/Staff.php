@@ -46,7 +46,7 @@ class Staff extends Base {
         ];
         $effectiveClass = $this->user->effectiveClass();
         $args = [$this->user->id(), $effectiveClass];
-        [$classes] = Users::get_classes();
+        $classes = (new Manager\User)->classList();
         if ($effectiveClass >= $classes[MOD]['Level']) {
             $cond[] = 'Level >= ?';
             $args[] = $classes[MOD]['Level'];
