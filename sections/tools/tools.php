@@ -71,6 +71,7 @@ View::show_header('Staff Tools');
 <?php
 
 Category('Administration', [
+    Item('Applicant manager',        'apply.php?action=admin',            All(['admin_manage_applicants'])),
     Item('Auto-Enable requests',     'tools.php?action=enable_requests',  All(['users_mod']) && FEATURE_EMAIL_REENABLE),
     Item('Database encryption key',  'tools.php?action=dbkey',            All(['admin_site_debug'])),
     Item('Permissions manager',      'tools.php?action=permissions',      All(['admin_manage_permissions'])),
