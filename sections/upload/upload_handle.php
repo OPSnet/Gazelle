@@ -946,7 +946,7 @@ if (!$IsNewGroup) {
 
 $paranoia = unserialize($DB->scalar("
     SELECT Paranoia FROM users_main WHERE ID = ?
-    ", $uploader->id()
+    ", $user->id()
 )) ?: [];
 if (!in_array('notifications', $paranoia)) {
     // For RSS
