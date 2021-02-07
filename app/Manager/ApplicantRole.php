@@ -12,7 +12,7 @@ class ApplicantRole extends \Gazelle\Base {
             INSERT INTO applicant_role
                    (Title, Description, Published, UserID)
             VALUES (?,     ?,           ?,         ?)
-            ", $title, $description, $published, $userId
+            ", $title, $description, $published ? 1 : 0, $userId
         );
         return new \Gazelle\ApplicantRole($this->db->inserted_id());
     }
