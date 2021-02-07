@@ -90,17 +90,15 @@ class User extends AbstractAPI {
     }
 
     private function disableUser() {
+        $userMan = new \Gazelle\Manager\User;
         if ($this->id === null) {
-            $this->id = $this->db->scalar("
-                SELECT ID FROM users_main WHERE Username = ?
-                ", $this->username
-            );
-            if (!$this->id) {
+            $user = $userMan->findByUsername($this->username);
+            if (is_null($user)) {
                 json_error("No user found with username {$this->username}");
             }
+            $this->id = $user->id();
         }
-
-        \Tools::disable_users($this->id, 'Disabled via API', 1);
+        $userMan->disableUserList([$this->id], 'Disabled via API', \Gazelle\Manager\User::DISABLE_MANUAL);
         return ['disabled' => true, 'user_id' => $this->id, 'username' => $this->username];
     }
 

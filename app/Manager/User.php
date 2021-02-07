@@ -3,6 +3,11 @@
 namespace Gazelle\Manager;
 
 class User extends \Gazelle\Base {
+
+    public const DISABLE_MANUAL     = 1;
+    public const DISABLE_INACTIVITY = 3;
+    public const DISABLE_TREEBAN    = 4;
+
     /**
      * Get a User object based on a magic field (id or @name)
      *
@@ -484,5 +489,68 @@ class User extends \Gazelle\Base {
             ", $warnTime, "$warning by $staffName\nReason: $reason\n\n", $userId
         );
         return $this->db->affected_rows();
+    }
+
+    /**
+     * Disable a list of users.
+     *
+     * @param array userIds (use [$userId] to disable a single user).
+     * @param string staff note
+     * @param int reason for disabling
+     * @return int number of users disabled
+     */
+    public function disableUserList(array $userIds, string $comment, int $reason): int {
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            UPDATE users_info AS ui
+            INNER JOIN users_main AS um ON (um.ID = ui.UserID) SET
+                um.Enabled = '2',
+                um.can_leech = '0',
+                ui.BanDate = now(),
+                ui.AdminComment = CONCAT(now(), ' - ', ?, ui.AdminComment),
+                ui.BanReason = ?
+            WHERE um.ID IN (" . placeholders($userIds) . ")
+            ", "$comment\n\n", $reason, ...$userIds
+        );
+        $n = $this->db->affected_rows();
+
+        $this->db->prepared_query("
+            SELECT concat('session_', SessionID) as cacheKey
+            FROM users_sessions
+            WHERE Active = 1
+                AND UserID IN (" . placeholders($userIds) . ")
+            ", ...$userIds
+        );
+        $this->cache->deleteMulti($this->db->collect('cacheKey'));
+        $this->db->prepared_query("
+            DELETE FROM users_sessions WHERE UserID IN (" . placeholders($userIds) . ")
+            ", ...$userIds
+        );
+        foreach ($userIds as $userId) {
+            $this->cache->deleteMulti([
+                "enabled_$userId", "user_info_$userId", "user_info_heavy_$userId", "user_stats_$userId", "users_sessions_$userId"
+            ]);
+
+        }
+        $this->flushEnabledUsersCount();
+
+        // Remove the users from the tracker.
+        $this->db->prepared_query("
+            SELECT torrent_pass FROM users_main WHERE ID IN (" . placeholders($userIds) . ")
+            ", ...$userIds
+        );
+        $PassKeys = $this->db->collect('torrent_pass');
+        $this->db->commit();
+        $Concat = '';
+        foreach ($PassKeys as $PassKey) {
+            if (strlen($Concat) > 3950) { // Ocelot's read buffer is 4 KiB and anything exceeding it is truncated
+                \Tracker::update_tracker('remove_users', ['passkeys' => $Concat]);
+                $Concat = $PassKey;
+            } else {
+                $Concat .= $PassKey;
+            }
+        }
+        \Tracker::update_tracker('remove_users', ['passkeys' => $Concat]);
+        return $n;
     }
 }
