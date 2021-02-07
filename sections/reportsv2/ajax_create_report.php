@@ -27,14 +27,14 @@ if (!isset($_POST['type'])) {
     die();
 }
 
-$CategoryID = $DB->scalar("
-    SELECT tg.CategoryID
+[$CategoryID, $UserID] = $DB->row("
+    SELECT tg.CategoryID, t.UserID
     FROM torrents_group AS tg
     INNER JOIN torrents AS t ON (t.GroupID = tg.ID)
     WHERE t.ID = ?
     ", $TorrentID
 );
-if (!$CategoryID) {
+if (is_null($CategoryID)) {
     echo 'No torrent with that ID exists!';
     die();
 }
