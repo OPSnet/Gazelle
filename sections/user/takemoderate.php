@@ -284,7 +284,7 @@ if ($editRatio) {
 $set = [];
 $args = [];
 
-$Classes = (new Gazelle\Manager\User)->classList();
+$Classes = $userMan->classList();
 if ($Classes[$class]['Level'] != $cur['Class']
     && (
         ($Classes[$class]['Level'] < $LoggedUser['Class'] && check_perms('users_promote_below'))
@@ -309,7 +309,7 @@ if ($username !== $cur['Username'] && check_perms('users_edit_usernames')) {
         header("Location: user.php?id=$userID");
         exit;
     } elseif (strtolower($username) !== strtolower($cur['Username'])) {
-        $found = (new Gazelle\Manager\User)->findByUsername($username);
+        $found = $userMan->findByUsername($username);
         if ($found) {
             $id = $found->id();
             error("Username already in use by <a href=\"user.php?id=$id\">$username</a>");
@@ -522,7 +522,7 @@ if ($privChange && $userReason) {
 if ($enableUser != $cur['Enabled'] && check_perms('users_disable_users')) {
     $enableStr = 'account ' . translateUserStatus($cur['Enabled']) . ' &rarr; ' . translateUserStatus($enableUser);
     if ($enableUser == '2') {
-        Tools::disable_users($userID, '', 1);
+        $userMan->disableUserList([$userID], "Disabled via moderation", Gazelle\Manager\User::DISABLE_MANUAL);
         $trackerUserUpdates = [];
     } elseif ($enableUser == '1') {
         $Cache->increment('stats_user_count');

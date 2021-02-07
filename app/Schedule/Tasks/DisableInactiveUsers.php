@@ -44,12 +44,12 @@ class DisableInactiveUsers extends \Gazelle\Schedule\Task
         $this->userQuery(120, 180);
         if ($this->db->has_results()) {
             $userIDs = $this->db->collect('ID');
-            \Tools::disable_users($userIDs, 'Disabled for inactivity.', 3);
+            $userMan = new \Gazelle\Manager\User;
+            $userMan->disableUserList($userIDs, 'Disabled for inactivity.', \Gazelle\Manager\User::DISABLE_INACTIVITY);
             foreach ($userIDs as $userID) {
                 $this->processed++;
                 $this->debug("Disabling $userID", $userID);
             }
-            $userMan = new \Gazelle\Manager\User;
             $userMan->flushEnabledUsersCount();
         }
     }

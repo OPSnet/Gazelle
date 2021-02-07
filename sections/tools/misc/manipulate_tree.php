@@ -55,7 +55,7 @@ if ($_POST['id']) {
                 if ($doComment) {
                     $user->addStaffNote($comment)->modify();
                 } elseif ($doDisable) {
-                    Tools::disable_users($inviteeId, $comment);
+                    $userMan->disableUserList([$inviteeId], $comment, Gazelle\Manager\User::DISABLE_TREEBAN);
                 } elseif ($doInvites) {
                     $user->addStaffNote($comment)->modify();
                     $userMan->disableInvites($inviteeId);
