@@ -444,4 +444,45 @@ class User extends \Gazelle\Base {
             "Message from $senderName, Subject: $subject", $body, SITE_URL . '/inbox.php', Notification::INBOX
         );
     }
+
+    /**
+     * Warn a user.
+     *
+     * @param int $userId
+     * @param int $duration length of warning in seconds
+     * @param string $reason
+     * @return int 1 if user was warned
+     */
+    public function warn(int $userId, int $duration, string $reason, string $staffName): int {
+        $current = $this->db->scalar("
+            SELECT Warned FROM users_info UserID = ?
+            ", $userId
+        );
+        if (is_null($current)) {
+            // User was not already warned
+            $this->cache->delete_value("user_info_$userId");
+            $warnTime = time_plus($duration);
+            $warning = "Warned until $warnTime";
+        } else {
+            // User was already warned, appending new warning to old.
+            $warnTime = date('Y-m-d H:i:s', strtotime($current) + $duration);
+            $warning = "Warning extended until $warnTime";
+            $this->sendPM($userId, 0,
+                'You have received multiple warnings.',
+                "When you received your latest warning (set to expire on "
+                    . date('Y-m-d', (time() + $duration))
+                    . "), you already had a different warning (set to expire at $current).\n\n"
+                    . "Due to this collision, your warning status will now expire at $warnTime."
+            );
+        }
+        $this->db->prepared_query("
+            UPDATE users_info SET
+                WarnedTimes = WarnedTimes + 1,
+                Warned = ?,
+                AdminComment = CONCAT(now(), ' - ', ?, AdminComment)
+            WHERE UserID = ?
+            ", $warnTime, "$warning by $staffName\nReason: $reason\n\n", $userId
+        );
+        return $this->db->affected_rows();
+    }
 }
