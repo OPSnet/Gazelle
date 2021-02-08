@@ -38,25 +38,24 @@ $Reason = trim($_POST['reason']);
 $WarningLength = $_POST['length'];
 if ($WarningLength !== 'verbal') {
     $Time = (int)$WarningLength * (7 * 24 * 60 * 60);
-    Tools::warn_user($user->id(), $Time, "$URL - $Reason");
-    $Subject = 'You have received a warning';
-    $PrivateMessage = "You have received a $WarningLength week warning for [url=$URL]this post[/url].";
+    $userMan->warn($user->id(), $Time, "$URL - $Reason", $LoggedUser['Username']);
+    $subject = 'You have received a warning';
+    $message = "You have received a $WarningLength week warning for [url=$URL]this post[/url].";
     $warned = "Warned until " . time_plus($Time);
-
 } else {
-    $Subject = 'You have received a verbal warning';
-    $PrivateMessage = "You have received a verbal warning for [url=$URL]this post[/url].";
+    $subject = 'You have received a verbal warning';
+    $message = "You have received a verbal warning for [url=$URL]this post[/url].";
     $warned = "Verbally warned";
 }
 $adminComment = date('Y-m-d') . " - $warned by {$LoggedUser['Username']} for $URL\nReason: $Reason";
 
 $extraMessage = trim($_POST['privatemessage'] ?? '');
 if (strlen($extraMessage)) {
-    $PrivateMessage .= "\n\n$extraMessage";
+    $message .= "\n\n$extraMessage";
 }
 
 $user->addForumWarning($adminComment)->addStaffNote($adminComment)->modify();
-$userMan->sendPM($user->id(), $LoggedUser['ID'], $Subject, $PrivateMessage);
+$userMan->sendPM($user->id(), $LoggedUser['ID'], $subject, $message);
 
 if ($forumPost['is-sticky']) {
     $Cache->delete_value("thread_{$threadId}_info");

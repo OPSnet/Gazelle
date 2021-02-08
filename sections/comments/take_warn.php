@@ -17,6 +17,7 @@ $user = new Gazelle\User($comment->userId());
 if ($user->classLevel() > $LoggedUser['Class']) {
     error(403);
 }
+$userMan = new Gazelle\Manager\User;
 
 $url = SITE_URL . '/' . $comment->url();
 $comment->setBody(trim($_POST['body']))->modify();
@@ -27,17 +28,17 @@ $PrivateMessage = trim($_POST['privatemessage']);
 if ($Length !== 'verbal') {
     $Time = (int)$Length * (7 * 24 * 60 * 60);
     $WarnTime = time_plus($Time);
-    Tools::warn_user($user->id(), $Time, "$url - $Reason");
-    $Subject = 'You have received a warning';
-    $PrivateMessage = "You have received a $Length week warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";
-    $AdminComment = "Warned until $WarnTime by {$LoggedUser['Username']}\nReason: $url - $Reason";
+    $userMan->warn($user->id(), $Time, "$url - $Reason", $LoggedUser['UserName']);
+    $subject = 'You have received a warning';
+    $message = "You have received a $Length week warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";
+    $note = "Warned until $WarnTime by {$LoggedUser['Username']}\nReason: $url - $Reason";
 } else {
-    $Subject = 'You have received a verbal warning';
-    $PrivateMessage = "You have received a verbal warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";
-    $AdminComment = "Verbally warned by {$LoggedUser['Username']}\nReason: $url - $Reason";
-    $user->addStaffNote($AdminComment);
+    $subject = 'You have received a verbal warning';
+    $message = "You have received a verbal warning for [url=$url]this comment[/url].\n\n[quote]{$PrivateMessage}[/quote]";
+    $note = "Verbally warned by {$LoggedUser['Username']}\nReason: $url - $Reason";
+    $user->addStaffNote($note);
 }
-$user->addForumWarning($AdminComment)->modify();
-(new \Gazelle\Manager\User)->sendPM($user->id(), $LoggedUser['ID'], $Subject, $PrivateMessage);
+$user->addForumWarning($note)->modify();
+$userMan->sendPM($user->id(), $LoggedUser['ID'], $subject, $message);
 
 header("Location: $url");

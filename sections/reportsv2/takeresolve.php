@@ -183,6 +183,7 @@ if ($revokeUpload) {
     $uploader->revokeUpload();
 }
 
+$userMan = new Gazelle\Manager\User;
 if ($weeksWarned > 0) {
     $WarnLength = $weeksWarned * (7 * 86400);
     $Reason = "Uploader of torrent ($torrentId) $rawName which was resolved with the preset: ".$ResolveType['title'].'.';
@@ -192,8 +193,7 @@ if ($weeksWarned > 0) {
     if ($revokeUpload) {
         $Reason .= ' (Upload privileges removed).';
     }
-
-    Tools::warn_user($uploaderId, $WarnLength, $Reason);
+    $userMan->warn($uploaderId, $WarnLength, $Reason, $LoggedUser['Username']);
 } else {
     $staffNote = null;
     if ($revokeUpload) {
@@ -243,7 +243,7 @@ if ($_POST['uploader_pm'] || $weeksWarned > 0 || isset($_POST['delete']) || $Sen
     }
 
     $message[] = "Report was handled by [user] {$LoggedUser['Username']}[/user].";
-    (new Gazelle\Manager\User)->sendPM($uploaderId, 0, $rawName, implode("\n\n", $message));
+    $userMan->sendPM($uploaderId, 0, $rawName, implode("\n\n", $message));
 }
 
 $Cache->delete_value("reports_torrent_$torrentId");
