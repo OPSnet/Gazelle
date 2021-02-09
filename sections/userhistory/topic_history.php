@@ -9,6 +9,9 @@ if (is_null($user)) {
     error(404);
 }
 $forumSearch = new Gazelle\ForumSearch($user);
+if ($LoggedUser['ID'] != $user->id()) {
+    $forumSearch->setViewer(new Gazelle\User($LoggedUser['ID']));
+}
 
 $paginator = new Gazelle\Util\Paginator(TOPICS_PER_PAGE, (int)($_REQUEST['page'] ?? 1));
 $paginator->setTotal($forumSearch->threadsByUserTotal());

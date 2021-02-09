@@ -22,6 +22,7 @@ class ForumSearch extends Base {
     protected $page = 0;
     protected $threadId;
     protected $linkbox;
+    protected $viewer;
 
     protected $splitWords = false;
 
@@ -42,6 +43,13 @@ class ForumSearch extends Base {
         $this->user = $user;
         $this->permittedForums = $this->user->permittedForums();
         $this->forbiddenForums = $this->user->forbiddenForums();
+    }
+
+    public function setViewer(User $viewer) {
+        $this->viewer = $viewer;
+        $this->permittedForums = $this->viewer->permittedForums();
+        $this->forbiddenForums = $this->viewer->forbiddenForums();
+        return $this;
     }
 
     public function searchText(): string {
@@ -258,10 +266,11 @@ class ForumSearch extends Base {
     protected function configure(): array {
         $cond = array_merge($this->forumCond, $this->threadCond, $this->isBodySearch() ? $this->postCond : []);
         $args = array_merge($this->forumArgs, $this->threadArgs, $this->isBodySearch() ? $this->postArgs : []);
+        $userContext = $this->viewer ?: $this->user;
         if (!($this->permittedForums || $this->selectedForums)) {
             // any forum they have access to due to their class
             $cond[] = 'f.MinClassRead <= ?';
-            $args[] = $this->user->classLevel();
+            $args[] = $userContext->classLevel();
         } else {
             if ($this->selectedForums) {
                 $cond[] = 'f.ID in (' . placeholders($this->selectedForums) . ')';
@@ -269,7 +278,7 @@ class ForumSearch extends Base {
             }
 
             $cond[] = '(f.MinClassRead <= ?' . ($this->permittedForums ? ' OR f.ID IN (' . placeholders($this->permittedForums) . ')' : '') . ')';
-            $args = array_merge($args, [$this->user->classLevel()], $this->permittedForums);
+            $args = array_merge($args, [$userContext->classLevel()], $this->permittedForums);
         }
         // but not if they have been banned from it
         if ($this->forbiddenForums) {
