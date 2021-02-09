@@ -8,7 +8,7 @@ View::show_header('Privilege Matrix');
     <div class="header">
         <div class="linkbox">
             <a href="tools.php?action=permissions&amp;id=new" class="brackets">Create a new permission set</a>
-            <a href="tools.php?action=permissions" class="brackets">Privilege Mananager</a>
+            <a href="tools.php?action=permissions" class="brackets">Privilege Manager</a>
             <a href="tools.php" class="brackets">Back to tools</a>
         </div>
     </div>

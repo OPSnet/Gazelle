@@ -28,10 +28,6 @@
                     {{ privilege(default, user, 'site_moderate_requests') }}
                     {{ privilege(default, user, 'site_admin_requests') }}
                     {{ privilege(default, user, 'site_delete_artist') }}
-                    {{ privilege(default, user, 'forums_polls_create') }}
-                    {{ privilege(default, user, 'forums_polls_moderate') }}
-                    {{ privilege(default, user, 'site_moderate_forums') }}
-                    {{ privilege(default, user, 'site_admin_forums') }}
                     {{ privilege(default, user, 'site_view_flow') }}
                     {{ privilege(default, user, 'site_view_full_log') }}
                     {{ privilege(default, user, 'site_view_torrent_snatchlist') }}
@@ -77,7 +73,6 @@
                     {{ privilege(default, user, 'users_give_donor') }}
                     {{ privilege(default, user, 'users_warn') }}
                     {{ privilege(default, user, 'users_disable_users') }}
-                    {{ privilege(default, user, 'users_disable_posts') }}
                     {{ privilege(default, user, 'users_disable_any') }}
                     {{ privilege(default, user, 'users_delete_users') }}
                     {{ privilege(default, user, 'users_view_invites') }}
@@ -91,6 +86,22 @@
                     {{ privilege(default, user, 'users_make_invisible') }}
                     {{ privilege(default, user, 'users_logout') }}
                     {{ privilege(default, user, 'users_mod') }}
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr class="colhead">
+                <td>Forums</td>
+            </tr>
+            <tr>
+                <td>
+                    {{ privilege(default, user, 'admin_manage_forums') }}
+                    {{ privilege(default, user, 'forums_polls_create') }}
+                    {{ privilege(default, user, 'forums_polls_moderate') }}
+                    {{ privilege(default, user, 'site_moderate_forums') }}
+                    {{ privilege(default, user, 'site_admin_forums') }}
+                    {{ privilege(default, user, 'site_forum_post_delete') }}
+                    {{ privilege(default, user, 'users_disable_posts') }}
                 </td>
             </tr>
         </table>
@@ -127,7 +138,6 @@
                     {{ privilege(default, user, 'admin_manage_blog') }}
                     {{ privilege(default, user, 'admin_manage_contest') }}
                     {{ privilege(default, user, 'admin_manage_polls') }}
-                    {{ privilege(default, user, 'admin_manage_forums') }}
                     {{ privilege(default, user, 'admin_manage_fls') }}
                     {{ privilege(default, user, 'admin_manage_user_fls') }}
                     {{ privilege(default, user, 'admin_manage_applicants') }}

@@ -27,6 +27,7 @@ class Permissions {
             'site_admin_requests' => 'Edit request bounties',
             'site_delete_artist' => 'Can delete artists (must be able to delete torrents+requests)',
             'site_moderate_forums' => 'Forum moderation access',
+            'site_forum_post_delete' => 'Can hard delete forum posts',
             'site_admin_forums' => 'Forum administrator access',
             'site_view_flow' => 'Can view stats and data pools',
             'site_view_full_log' => 'Can view old log entries',
