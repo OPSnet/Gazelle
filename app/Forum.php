@@ -766,7 +766,7 @@ class Forum extends Base {
             WHERE fp.ID = ?
             ", $postId
         );
-        if ($this->db->affected_rows() == 0) {
+        if ($this->db->affected_rows() === 0) {
             return false;
         }
         $forumId  = $forumPost['forum-id'];

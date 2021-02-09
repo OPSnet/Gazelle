@@ -375,20 +375,19 @@ foreach ($thread as $Key => $Post) {
     </colgroup>
     <tr class="colhead_dark">
         <td colspan="<?=Users::has_avatars_enabled() ? 2 : 1?>">
-            <div style="float: left;"><a class="post_id" href="forums.php?action=viewthread&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>#post<?=$PostID?>">#<?=$PostID?></a>
+            <span style="float: left;"><a class="post_id" href="forums.php?action=viewthread&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>#post<?=$PostID?>">#<?=$PostID?></a>
                 <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum) ?>
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
 <?php if (!$threadInfo['isLocked']) { ?>
-                - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?=$Username?>', true);" class="brackets">Quote</a>
+                - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?=$Username?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
     if ((!$threadInfo['isLocked'] && Forums::check_forumperm($forumId, 'Write') && $AuthorID == $user->id()) || check_perms('site_moderate_forums')) {
 ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
 <?php } ?>
-                </span>
-<?php if (check_perms('site_admin_forums') && $threadInfo['Posts'] > 1) { ?>
+<?php if (check_perms('site_forum_post_delete') && $threadInfo['Posts'] > 1) { ?>
                 - <a href="#post<?=$PostID?>" onclick="Delete('<?=$PostID?>');" class="brackets">Delete</a>
 <?php
     }
@@ -406,8 +405,9 @@ foreach ($thread as $Key => $Post) {
         }
     }
 ?>
-            </div>
-            <div id="bar<?=$PostID?>" style="float: right;">
+                </span>
+            </span>
+            <span id="bar<?=$PostID?>" style="float: right">
                 <a href="reports.php?action=report&amp;type=post&amp;id=<?=$PostID?>" class="brackets">Report</a>
 <?php
     if (check_perms('users_warn') && $AuthorID != $user->id()) {
@@ -428,7 +428,7 @@ foreach ($thread as $Key => $Post) {
 ?>
                 &nbsp;
                 <a href="#">&uarr;</a>
-            </div>
+            </span>
         </td>
     </tr>
     <tr>

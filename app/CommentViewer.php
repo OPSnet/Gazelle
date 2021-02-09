@@ -63,7 +63,7 @@ abstract class CommentViewer {
             'header'      => '<strong>' . \Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header,
             'page'        => $this->page,
             'show_avatar' => $this->user->avatarMode() != '1',
-            'show_delete' => check_perms('site_moderate_forums'),
+            'show_delete' => check_perms('site_forum_post_delete'),
             'show_edit'   => $ownProfile || check_perms('site_moderate_forums'),
             'show_warn'   => check_perms('users_warn') && !$ownProfile && $this->user->classLevel() >= $author['Class'],
             'unread'      => $Unread,
