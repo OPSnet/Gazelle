@@ -466,7 +466,7 @@ class Donation extends \Gazelle\Base {
         if ($Rank >= 4 || $HasAll) {
             if (isset($field['donor_icon_link'])) {
                 $value = $field['donor_icon_link'];
-                if (preg_match("/^".URL_REGEX."$/i", $value)) {
+                if ($value === '' || preg_match("/^".URL_REGEX."$/i", $value)) {
                     $insert[] = "CustomIconLink";
                     $args[] = $value;
                 }
@@ -475,7 +475,7 @@ class Donation extends \Gazelle\Base {
         if ($Rank >= MAX_RANK || $HasAll) {
             if (isset($field['donor_icon_custom_url'])) {
                 $value = $field['donor_icon_custom_url'];
-                if (preg_match("/^".IMAGE_REGEX."$/i", $value)) {
+                if ($value === '' || preg_match("/^".IMAGE_REGEX."$/i", $value)) {
                     $insert[] = "CustomIcon";
                     $args[] = $value;
                 }
@@ -504,7 +504,7 @@ class Donation extends \Gazelle\Base {
         if ($SpecialRank >= 2) {
             if (isset($field['second_avatar'])) {
                 $value = $field['second_avatar'];
-                if (preg_match("/^".IMAGE_REGEX."$/i", $value)) {
+                if ($value === '' || preg_match("/^".IMAGE_REGEX."$/i", $value)) {
                     $insert[] = "SecondAvatar";
                     $args[] = $value;
                 }
