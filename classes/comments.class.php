@@ -7,45 +7,6 @@ class Comments {
      */
 
     /**
-     * Get the URL to a comment, already knowing the Page and PostID
-     * @param string $Page
-     * @param int $PageID
-     * @param int $PostID
-     * @return string|bool The URL to the comment or false on error
-     */
-    public static function get_url($Page, $PageID, $PostID = null) {
-        $Post = (!empty($PostID) ? "&postid=$PostID#post$PostID" : '');
-        switch ($Page) {
-            case 'artist':
-                return "artist.php?id=$PageID$Post";
-            case 'collages':
-                return "collages.php?action=comments&collageid=$PageID$Post";
-            case 'requests':
-                return "requests.php?action=view&id=$PageID$Post";
-            case 'torrents':
-                return "torrents.php?id=$PageID$Post";
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Get the URL to a comment
-     * @param int $PostID
-     * @return string|bool The URL to the comment or false on error
-     */
-    public static function get_url_query($PostID) {
-        [$Page, $PageID] = G::$DB->row("
-            SELECT Page, PageID FROM comments WHERE ID = ?
-            ", $PostID
-        );
-        if (!$PageID) {
-            error(404);
-        }
-        return self::get_url($Page, $PageID, $PostID);
-    }
-
-    /**
      * Load a page's comments. This takes care of `postid` and (indirectly) `page` parameters passed in $_GET.
      * Quote notifications and last read are also handled here, unless $HandleSubscriptions = false is passed.
      * @param string $Page
