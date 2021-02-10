@@ -306,6 +306,7 @@ View::show_header($Title, 'bbcode,comments');
     $DB->set_query_id($Comments);
     $isAdmin = check_perms('site_admin_forums');
     $isMod = check_perms('site_moderate_forums');
+    $commentMan = new Gazelle\Manager\Comment;
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
         switch ($Page) {
             case 'artist':
@@ -337,7 +338,7 @@ View::show_header($Title, 'bbcode,comments');
             'show_edit'   => $isMod || $ownProfile,
             'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author['Class'],
             'show_unread' => false,
-            'url'         => Comments::get_url($Page, $PageID, $PostID),
+            'url'         => $commentMan->findById($PostID)->url(),
             'username'    => $author['Username'],
         ]);
     }
