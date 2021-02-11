@@ -2,7 +2,6 @@
 
 use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
-use OrpheusNET\BencodeTorrent\BencodeTorrent;
 
 //******************************************************************************//
 //--------------- Take upload --------------------------------------------------//
@@ -337,13 +336,14 @@ if (!empty($Properties['GroupID']) && empty($ArtistForm) && $isMusicUpload) {
 //******************************************************************************//
 //--------------- Generate torrent file ----------------------------------------//
 
+$torMan = new Gazelle\Manager\Torrent;
 $torrentFiler = new Gazelle\File\Torrent();
-$Tor = new BencodeTorrent();
-$Tor->decodeFile($TorrentName);
-$PublicTorrent = $Tor->makePrivate(); // The torrent is now private.
-$UnsourcedTorrent = set_source($Tor, SOURCE, GRANDFATHER_SOURCE, GRANDFATHER_OLD_SOURCE, GRANDFATHER_NO_SOURCE);
-$InfoHash = $Tor->getHexInfoHash();
-$TorData = $Tor->getData();
+$bencoder = new OrpheusNET\BencodeTorrent\BencodeTorrent;
+$bencoder->decodeFile($TorrentName);
+$PublicTorrent = $bencoder->makePrivate(); // The torrent is now private.
+$UnsourcedTorrent = $torMan->setSourceFlag($bencoder);
+$InfoHash = $bencoder->getHexInfoHash();
+$TorData = $bencoder->getData();
 
 $ID = $DB->scalar('SELECT ID FROM torrents WHERE info_hash = ?', $InfoHash);
 if ($ID) {
@@ -351,7 +351,7 @@ if ($ID) {
         $Err = '<a href="torrents.php?torrentid='.$ID.'">The exact same torrent file already exists on the site!</a>';
     } else {
         // A lost torrent
-        $torrentFiler->put($Tor->getEncode(), $ID);
+        $torrentFiler->put($bencoder->getEncode(), $ID);
         $Err = '<a href="torrents.php?torrentid='.$ID.'">Thank you for fixing this torrent</a>';
     }
 }
@@ -363,12 +363,12 @@ if (isset($TorData['encrypted_files'])) {
 $checker = new Gazelle\Util\FileChecker;
 
 // File list and size
-['total_size' => $TotalSize, 'files' => $FileList] = $Tor->getFileList();
+['total_size' => $TotalSize, 'files' => $FileList] = $bencoder->getFileList();
 $HasLog = '0';
 $HasCue = '0';
 $TmpFileList = [];
 $TooLongPaths = [];
-$DirName = (isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : '');
+$DirName = (isset($TorData['info']['files']) ? make_utf8($bencoder->getName()) : '');
 $IgnoredLogFileNames = ['audiochecker.log', 'sox.log'];
 
 if (!$Err) {
@@ -393,7 +393,7 @@ foreach ($FileList as $FileInfo) {
         $TooLongPaths[] = "<li>$DirName/$Name</li>";
     }
     // Add file info to array
-    $TmpFileList[] = Torrents::filelist_format_file($Name, $Size);
+    $TmpFileList[] = $torMan->metaFilename($Name, $Size);
 }
 if (count($TooLongPaths) > 0) {
     $Err = 'The torrent contained one or more files with too long a name: <ul>'
@@ -428,49 +428,42 @@ if ($isMusicUpload) {
         $Name = $ExtraTorrent['Name'];
         $ExtraTorrentsInsert[$Name] = $ExtraTorrent;
         $ThisInsert =& $ExtraTorrentsInsert[$Name];
-        $ExtraTor = new BencodeTorrent();
-        $ExtraTor->decodeFile($Name);
-        $ExtraTorData = $ExtraTor->getData();
+        $bencoder->decodeFile($Name);
+        $ExtraTorData = $bencoder->getData();
         if (isset($ExtraTorData['encrypted_files'])) {
             $Err = 'At least one of the torrents contain an encrypted file list which is not supported here';
             break;
         }
-        if (!$ExtraTor->isPrivate()) {
-            $ExtraTor->makePrivate(); // The torrent is now private.
+        if (!$bencoder->isPrivate()) {
+            $bencoder->makePrivate(); // The torrent is now private.
             $PublicTorrent = true;
         }
-
-        if (set_source($ExtraTor, SOURCE, GRANDFATHER_SOURCE, GRANDFATHER_OLD_SOURCE, GRANDFATHER_NO_SOURCE)) {
+        if ($torMan->setSourceFlag($bencoder)) {
             $UnsourcedTorrent = true;
         }
 
         // File list and size
-        ['total_size' => $ExtraTotalSize, 'files' => $ExtraFileList] = $ExtraTor->getFileList();
-        $ExtraDirName = isset($ExtraTorData['info']['files']) ? make_utf8($ExtraTor->getName()) : '';
-
+        ['total_size' => $ExtraTotalSize, 'files' => $ExtraFileList] = $bencoder->getFileList();
+        $ExtraDirName = isset($ExtraTorData['info']['files']) ? make_utf8($bencoder->getName()) : '';
         $ExtraTmpFileList = [];
         foreach ($ExtraFileList as $ExtraFile) {
             ['path' => $ExtraName, 'size' => $ExtraSize] = $ExtraFile;
-
             if (!$Err) {
                 $Err = $checker->checkFile($Type, $ExtraName);
             }
-
-            // Make sure the file name is not too long
             if (mb_strlen($ExtraName, 'UTF-8') + mb_strlen($ExtraDirName, 'UTF-8') + 1 > MAX_FILENAME_LENGTH) {
                 $Err = "The torrent contained one or more files with too long of a name: <br />$ExtraDirName/$ExtraName";
                 break;
             }
-            // Add file and size to array
-            $ExtraTmpFileList[] = Torrents::filelist_format_file($ExtraName, $ExtraSize);
+            $TmpFileList[] = $torMan->metaFilename($ExtraName, $ExtraSize);
         }
 
         // To be stored in the database
         $ThisInsert['FilePath'] = $ExtraDirName;
         $ThisInsert['FileString'] = implode("\n", $ExtraTmpFileList);
-        $ThisInsert['InfoHash'] = $ExtraTor->getHexInfoHash();
+        $ThisInsert['InfoHash'] = $bencoder->getHexInfoHash();
         $ThisInsert['NumFiles'] = count($ExtraFileList);
-        $ThisInsert['TorEnc'] = $ExtraTor->getEncode();
+        $ThisInsert['TorEnc'] = $bencoder->getEncode();
         $ThisInsert['TotalSize'] = $ExtraTotalSize;
 
         $Debug->set_flag('upload: torrent decoded');
@@ -721,7 +714,6 @@ $Debug->set_flag('upload: ocelot updated');
 // (expire the key after 5 minutes to prevent locking it for too long in case there's a fatal error below)
 $Cache->cache_value("torrent_{$TorrentID}_lock", true, 300);
 
-$torMan = new Gazelle\Manager\Torrent;
 if (in_array($Properties['Encoding'], ['Lossless', '24bit Lossless'])) {
     $torMan->flushLatestUploads(5);
 }
@@ -748,7 +740,7 @@ foreach($logfileSummary->all() as $logfile) {
 //******************************************************************************//
 //--------------- Write torrent file -------------------------------------------//
 
-$torrentFiler->put($Tor->getEncode(), $TorrentID);
+$torrentFiler->put($bencoder->getEncode(), $TorrentID);
 (new Gazelle\Log)->torrent($GroupID, $TorrentID, $LoggedUser['ID'], 'uploaded ('.number_format($TotalSize / (1024 * 1024), 2).' MiB)')
     ->general("Torrent $TorrentID ($LogName) (".number_format($TotalSize / (1024 * 1024), 2).' MiB) was uploaded by ' . $LoggedUser['Username']);
 

@@ -6,6 +6,7 @@
 
 function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseType, $TorrentList, $Types) {
     global $Cache, $DB, $LoggedUser, $Twig;
+    $torMan = new Gazelle\Manager\Torrent;
 
     $LastRemasterYear = '-';
     $LastRemasterTitle = '';
@@ -79,12 +80,10 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
         </tr>';
             $FileListSplit = explode("\n", $FileList);
             foreach ($FileListSplit as $File) {
-                $FileInfo = Torrents::filelist_get_file($File);
+                $FileInfo = $torMan->splitMetaFilename($File);
                 $FileTable .= sprintf("\n<tr><td>%s</td><td class=\"number_column\">%s</td></tr>", $FileInfo['name'], Format::get_size($FileInfo['size']));
             }
-
-        $FileTable .= '
-    </table>';
+        $FileTable .= "\n</table>";
 
         $ExtraInfo = [];
         // similar to Torrents::torrent_info()
@@ -244,6 +243,7 @@ function build_torrents_table($GroupID, $GroupName, $GroupCategoryID, $ReleaseTy
 }
 
 $reportMan = new Gazelle\Manager\ReportV2;
+$torMan = new Gazelle\Manager\Torrent;
 $userMan = new Gazelle\Manager\User;
 $Types = $reportMan->types();
 
@@ -264,10 +264,10 @@ if (!isset($_GET['id']) || !is_number($_GET['id'])) {
     if (empty($CategoryID) || empty($GroupID)) {
         // Deleted torrent
         header("Location: log.php?search=Torrent+" . $TorrentID);
-        die();
+        exit;
     }
     $Artists = Artists::get_artist($GroupID);
-    [$GroupDetails, $TorrentList] = (new Gazelle\Manager\Torrent)->groupInfo($GroupID);
+    [$GroupDetails, $TorrentList] = $torMan->groupInfo($GroupID);
     $TorrentList = [$TorrentList[$TorrentID]];
     // Group details
     [$WikiBody,, $GroupID, $GroupName, $GroupYear,,, $ReleaseType, $GroupCategoryID,,

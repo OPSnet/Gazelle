@@ -14,6 +14,7 @@ if (!check_perms('admin_reports')) {
 }
 
 $reportMan = new Gazelle\Manager\ReportV2;
+$torMan = new Gazelle\Manager\Torrent;
 $userMan = new Gazelle\Manager\User;
 $Types = $reportMan->types();
 
@@ -279,7 +280,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                         <br />uploaded by <a href="user.php?id=<?=$UploaderID?>"><?= $uploaderName  ?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
                         <br />Last action: <?= $LastAction ?: 'Never' ?>
                         <br /><span class="report_torrent_file_ext">Audio files present:
-<?php                   $extMap = audio_file_map($FileList);
+<?php                   $extMap = $torMan->audioMap($FileList);
                         if (count($extMap) == 0) {
 ?>
                             <span class="file_ext_none">none</span>
@@ -453,7 +454,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                         <br /><span>Audio files present:
 <?php
                         $First = false;
-                        $extMap = audio_file_map($ExtraFileList);
+                        $extMap = $torMan->audioMap($ExtraFileList);
                         if (count($extMap) == 0) {
 ?>
                             <span class="file_ext_none">none</span>

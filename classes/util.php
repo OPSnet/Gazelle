@@ -402,26 +402,16 @@ function is_utf8($Str) {
 /**
  * Detect the encoding of a string and transform it to UTF-8.
  *
- * @param string $Str
- * @return UTF-8 encoded version of $Str
+ * @param string $str
+ * @return UTF-8 encoded version of $str
  */
-function make_utf8($Str) {
-    if ($Str != '') {
-        if (is_utf8($Str)) {
-            $Encoding = 'UTF-8';
-        }
-        if (empty($Encoding)) {
-            $Encoding = mb_detect_encoding($Str, 'UTF-8, ISO-8859-1');
-        }
-        if (empty($Encoding)) {
-            $Encoding = 'ISO-8859-1';
-        }
-        if ($Encoding == 'UTF-8') {
-            return $Str;
-        } else {
-            return @mb_convert_encoding($Str, 'UTF-8', $Encoding);
-        }
+function make_utf8($str) {
+    if (is_null($str) || $str === '' || is_utf8($str)) {
+        return $str;
     }
+    $encoding = mb_detect_encoding($str, 'UTF-8, ISO-8859-1', true);
+    return $encoding === 'ISO-8859-1'
+        ? @mb_convert_encoding($str, 'UTF-8', $encoding) : $str;
 }
 
 /**
@@ -447,30 +437,30 @@ function randomString($len = 32) {
 
 // TODO: reconcile this with log_attempt in login/index.php
 function log_token_attempt(DB_MYSQL $db, int $userId = 0): void {
-    $watch = new Gazelle\LoginWatch;
-    $ipStr = $_SERVER['REMOTE_ADDR'];
+    $ipaddr = $_SERVER['REMOTE_ADDR'];
+    $watch = new Gazelle\LoginWatch($ipaddr);
 
     [$attemptId, $attempts, $bans] = $db->row('
         SELECT ID, Attempts, Bans
         FROM login_attempts
         WHERE IP = ?
-        ', $_SERVER['REMOTE_ADDR']
+        ', $ipaddr
     );
 
     if (!$attemptId) {
-        $watch->create($ipStr, null, $userId);
+        $watch->create($ipaddr, null, $userId);
         return;
     }
 
     $attempts++;
     $watch->setWatch($attemptId);
     if ($attempts < 6) {
-        $watch->increment($userId, $ipStr, null);
+        $watch->increment($userId, $ipaddr, null);
         return;
     }
     $watch->ban($attempts, null, $userId);
     if ($bans > 9) {
-        (new IPv4())->createBan(0, $ipStr, $ipStr, 'Automated ban per failed token usage');
+        (new IPv4())->createBan(0, $ipaddr, $ipaddr, 'Automated ban per failed token usage');
     }
 }
 
@@ -889,49 +879,4 @@ function get_group_requests($GroupID) {
         $Cache->cache_value("requests_group_$GroupID", $Requests, 0);
     }
     return Requests::get_requests($Requests);
-}
-
-// Count the number of audio files in a torrent file list per audio type
-function audio_file_map($fileList) {
-    $map = [];
-    foreach (explode("\n", strtolower($fileList)) as $file) {
-        $info = Torrents::filelist_get_file($file);
-        if (!isset($info['ext'])) {
-            continue;
-        }
-        $ext = substr($info['ext'], 1); // skip over period
-        if (in_array($ext, ['ac3', 'flac', 'm4a', 'mp3'])) {
-            if (!isset($map[$ext])) {
-                $map[$ext] = 0;
-            }
-            ++$map[$ext];
-        }
-    }
-    return $map;
-}
-
-function set_source(
-    \OrpheusNET\BencodeTorrent\BencodeTorrent $torrent,
-    string $siteSource,
-    string $grandfatherSource,
-    int $grandfatherSourceDate,
-    int $grandfatherNoSourceDate
-) {
-    $torrentSource = $torrent->getSource();
-    $creationDate = $torrent->getCreationDate();
-
-    if ($torrentSource === $siteSource) {
-        return false;
-    }
-
-    if (!is_null($creationDate)) {
-        if (is_null($torrentSource) && $creationDate <= $grandfatherNoSourceDate) {
-            return false;
-        }
-        elseif (!is_null($torrentSource) && $torrentSource === $grandfatherSource && $creationDate <= $grandfatherSourceDate) {
-            return false;
-        }
-    }
-
-    return $torrent->setSource($siteSource);
 }

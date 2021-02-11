@@ -1,7 +1,6 @@
 <?php
 
 class Torrents {
-    const FILELIST_DELIM = 0xF7; // Hex for &divide; Must be the same as phrase_boundary in sphinx.conf!
     const SNATCHED_UPDATE_INTERVAL = 3600; // How often we want to update users' snatch lists
     const SNATCHED_UPDATE_AFTERDL = 300; // How long after a torrent download we want to update a user's snatch lists
 
@@ -526,99 +525,6 @@ WHERE ud.TorrentID=? AND ui.NotifyOnDeleteDownloaded='1' AND ud.UserID NOT IN ("
 
         $Cache->delete_value("groups_artists_$GroupID");
         $DB->set_query_id($QueryID);
-    }
-
-    /**
-     * Regenerate a torrent's file list from its meta data,
-     * update the database record and clear relevant cache keys
-     *
-     * @param int $TorrentID
-     */
-    public static function regenerate_filelist($TorrentID) {
-        global $Cache, $DB;
-        $QueryID = $DB->get_query_id();
-        $GroupID = $DB->scalar("
-            SELECT t.GroupID
-            FROM torrents AS t
-            WHERE t.TorrentID = ?
-            ", $TorrentID
-        );
-        if ($GroupID) {
-            $Tor = new OrpheusNET\BencodeTorrent\BencodeTorrent();
-            $Tor->decodeString((new Gazelle\File\Torrent())->get($TorrentID));
-            $TorData = $Tor->getData();
-            $FilePath = (isset($TorData['info']['files']) ? make_utf8($Tor->getName()) : '');
-            ['total_size' => $TotalSize, 'files' => $FileList] = $Tor->getFileList();
-            $TmpFileList = [];
-            foreach ($FileList as $File) {
-                $TmpFileList[] = self::filelist_format_file($File['path'], $File['size']);
-            }
-            $FileString = implode("\n", $TmpFileList);
-            $DB->prepared_query("
-                UPDATE torrents
-                SET Size = ?, FilePath = ?, FileList = ?
-                WHERE ID = ?",
-                $TotalSize, $FilePath, $FileString, $TorrentID);
-            $Cache->delete_value("torrents_details_$GroupID");
-        }
-        $DB->set_query_id($QueryID);
-    }
-
-    /**
-     * Return UTF-8 encoded string to use as file delimiter in torrent file lists
-     */
-    public static function filelist_delim() {
-        static $FilelistDelimUTF8;
-        if (isset($FilelistDelimUTF8)) {
-            return $FilelistDelimUTF8;
-        }
-        return $FilelistDelimUTF8 = utf8_encode(chr(self::FILELIST_DELIM));
-    }
-
-    /**
-     * Create a string that contains file info in a format that's easy to use for Sphinx
-     *
-     * @param  string  $Name file path
-     * @param  int  $Size file size
-     * @return string with the format .EXT sSIZEs NAME DELIMITER
-     */
-    public static function filelist_format_file(string $Name, int $Size) {
-        $Name = make_utf8(strtr($Name, "\n\r\t", '   '));
-        $ExtPos = strrpos($Name, '.');
-        // Should not be $ExtPos !== false. Extensionless files that start with a . should not get extensions
-        $Ext = ($ExtPos ? trim(substr($Name, $ExtPos + 1)) : '');
-        return sprintf("%s s%ds %s %s", ".$Ext", $Size, $Name, self::filelist_delim());
-    }
-
-    /**
-     * Create a string that contains file info in the old format for the API
-     *
-     * @param string $File string with the format .EXT sSIZEs NAME DELIMITER
-     * @return string with the format NAME{{{SIZE}}}
-     */
-    public static function filelist_old_format($File) {
-        $File = self::filelist_get_file($File);
-        return $File['name'] . '{{{' . $File['size'] . '}}}';
-    }
-
-    /**
-     * Translate a formatted file info string into a more useful array structure
-     *
-     * @param string $File string with the format .EXT sSIZEs NAME DELIMITER
-     * @return file info array with the keys 'ext', 'size' and 'name'
-     */
-    public static function filelist_get_file($File) {
-        // Need this hack because filelists are always display_str()ed
-        $DelimLen = strlen(display_str(self::filelist_delim())) + 1;
-        list($FileExt, $Size, $Name) = explode(' ', $File, 3);
-        if ($Spaces = strspn($Name, ' ')) {
-            $Name = str_replace(' ', '&nbsp;', substr($Name, 0, $Spaces)) . substr($Name, $Spaces);
-        }
-        return [
-                    'ext' => $FileExt,
-                    'size' => substr($Size, 1, -1),
-                    'name' => substr($Name, 0, -$DelimLen)
-                    ];
     }
 
     /**
