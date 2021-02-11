@@ -234,13 +234,13 @@ if (!empty($_REQUEST['action'])) {
             break;
 
         case 'regen_filelist':
-            if (check_perms('users_mod') && !empty($_GET['torrentid']) && is_number($_GET['torrentid'])) {
-                Torrents::regenerate_filelist($_GET['torrentid']);
-                header('Location: torrents.php?torrentid='.$_GET['torrentid']);
-                die();
-            } else {
-                error(403);
+            $torrentId = (int)($_REQUEST['torrentid'] ?? 0);
+            if ($torrentId && check_perms('users_mod')) {
+                (new Gazelle\Manager\Torrent)->regenerateFilelist($torrentId);
+                header("Location: torrents.php?torrentid=$torrentId");
+                exit;
             }
+            error(403);
             break;
         case 'add_cover_art':
             require_once('add_cover_art.php');
@@ -262,7 +262,9 @@ if (!empty($_REQUEST['action'])) {
                     ", $_GET['torrentid']
                 );
                 if ($GroupID) {
-                    header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid']);
+                    header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid'].'#torrent'.$_GET['torrentid']);
+                } else {
+                    header("Location: log.php?search=Torrent+" . $_GET['torrentid']);
                 }
             } else {
                 require_once('browse.php');
@@ -276,7 +278,7 @@ if (!empty($_REQUEST['action'])) {
         require_once('details.php');
     } elseif (isset($_GET['torrentid']) && intval($_GET['torrentid'])) {
         $torrent_id = (int)$_GET['torrentid'];
-        $DB->prepared_query('
+        $GroupID = $DB->scalar("
             SELECT GroupID
             FROM torrents
             WHERE ID = ?
@@ -284,8 +286,8 @@ if (!empty($_REQUEST['action'])) {
             SELECT GroupID
             FROM deleted_torrents
             WHERE ID = ?
-            ', $torrent_id, $torrent_id);
-        list($GroupID) = $DB->next_record();
+            ", $torrent_id, $torrent_id
+        );
         if ($GroupID) {
             header("Location: torrents.php?id=$GroupID&torrentid=".$_GET['torrentid'].'#torrent'.$_GET['torrentid']);
         } else {
@@ -293,12 +295,11 @@ if (!empty($_REQUEST['action'])) {
         }
     } elseif (!empty($_GET['type'])) {
         require_once('user.php');
-    } elseif (!empty($_GET['groupname']) && !empty($_GET['forward'])) {
-        $DB->prepared_query('
-            SELECT ID
-            FROM torrents_group
-            WHERE Name LIKE ?', trim($_GET['groupname']));
-        list($GroupID) = $DB->next_record();
+    } elseif (!empty($_GET['groupname'])) {
+        $GroupID = $DB->scalar("
+            SELECT ID FROM torrents_group WHERE Name LIKE ?
+            ", trim($_GET['groupname'])
+        );
         if ($GroupID) {
             header("Location: torrents.php?id=$GroupID");
         } else {
