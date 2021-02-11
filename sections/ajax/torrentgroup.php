@@ -28,12 +28,10 @@ if ($GroupID <= 0) {
 }
 
 $TorrentCache = get_group_info($GroupID, 0, true, true);
-
 if (!$TorrentCache) {
     json_die("failure", "bad id parameter");
 }
-
-list($TorrentDetails, $TorrentList) = $TorrentCache;
+[$TorrentDetails, $TorrentList] = $TorrentCache;
 
 $CategoryName = ($TorrentDetails['CategoryID'] == 0)
     ? "Unknown"
@@ -71,10 +69,10 @@ foreach ($TorrentList as $Torrent) {
 
     // Convert file list back to the old format
     $FileList = explode("\n", $Torrent['FileList']);
-    foreach ($FileList as &$File) {
-        $File = Torrents::filelist_old_format($File);
+    foreach ($FileList as &$file) {
+        $file = $torMan->apiFilename($file);
     }
-    unset($File);
+    unset($file);
     $user = $userMan->findById($Torrent['UserID']);
 
     $JsonTorrentList[] = [

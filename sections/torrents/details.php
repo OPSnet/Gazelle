@@ -515,6 +515,7 @@ foreach ($TorrentList as $t) {
 
 $LastMedia = null;
 $UnknownCounter = 0;
+$torMan = new Gazelle\Manager\Torrent;
 foreach ($TorrentList as $Torrent) {
     [$TorrentID, $Media, $Format, $Encoding, $Remastered, $RemasterYear,
         $RemasterTitle, $RemasterRecordLabel, $RemasterCatalogueNumber, $Scene,
@@ -585,17 +586,16 @@ foreach ($TorrentList as $Torrent) {
                 <div class="filelist_title" style="float: left;">File Names' . $RegenLink . '</div>
                 <div class="filelist_path" style="float: right;">' . ($FilePath ? "/$FilePath/" : '') . '</div>
             </td>
-            <td class="nobr">
+            <td class="nobr" style="text-align: right">
                 <strong>Size</strong>
             </td>
         </tr>';
     $FileListSplit = explode("\n", $FileList);
     foreach ($FileListSplit as $File) {
-        $FileInfo = Torrents::filelist_get_file($File);
+        $FileInfo = $torMan->splitMetaFilename($File);
         $FileTable .= sprintf("\n<tr><td>%s</td><td class=\"number_column nobr\">%s</td></tr>", $FileInfo['name'], Format::get_size($FileInfo['size']));
     }
-    $FileTable .= '
-    </table>';
+    $FileTable .= '</table>';
 
     $ExtraInfo = Torrents::torrent_info($Torrent, false, false, true, $GroupName);
 

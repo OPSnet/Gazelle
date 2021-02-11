@@ -55,7 +55,8 @@ class Torrent extends \Gazelle\Json {
             return null;
         }
 
-        [$details, $torrent] = (new \Gazelle\Manager\Torrent)
+        $torMan = new \Gazelle\Manager\Torrent;
+        [$details, $torrent] = $torMan
             ->setTorrentId($this->id)
             ->setViewer($this->userId)
             ->setShowSnatched($this->showSnatched ?? 0)
@@ -74,8 +75,9 @@ class Torrent extends \Gazelle\Json {
         // Convert file list back to the old format
         $fileList = explode("\n", $torrent['FileList']);
         foreach ($fileList as &$file) {
-            $file = \Torrents::filelist_old_format($file);
+            $file = $torMan->apiFilename($file);
         }
+        unset($file);
 
         $uploader = (new \Gazelle\Manager\User)->findById($torrent['UserID']);
         $username = $uploader ? $uploader->username() : '';
