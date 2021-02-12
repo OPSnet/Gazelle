@@ -458,7 +458,7 @@ class User extends \Gazelle\Base {
      * @param string $reason
      * @return int 1 if user was warned
      */
-    public static function warn(int $userId, int $duration, string $reason, string $staffName): int {
+    public function warn(int $userId, int $duration, string $reason, string $staffName): int {
         $current = $this->db->scalar("
             SELECT Warned FROM users_info UserID = ?
             ", $userId
