@@ -175,55 +175,16 @@ Tags::reset();
 <?php } ?>
             </ul>
         </div>
-        <div class="box box_artists">
-            <div class="head"><strong>Similar Artists</strong></div>
-            <ul class="stats nobullet">
-<?php
-
-if (!$Artist->similarArtists()) { ?>
-                <li><span style="font-style: italic;">None found</span></li>
-<?php
-}
-$Max = null;
-foreach ($Artist->similarArtists() as $SimilarArtist) {
-    [$Artist2ID, $Artist2Name, $Score, $SimilarID] = $SimilarArtist;
-    $Score = $Score / 100;
-    if (is_null($Max)) {
-        $Max = $Score + 1;
-    }
-    $FontSize = ceil(((($Score - 2) / $Max - 2) * 4)) + 8;
-?>
-                <li>
-                    <span class="tooltip" title="<?=$Score?>"><a href="artist.php?id=<?=$Artist2ID?>" style="float: left; display: block;"><?=$Artist2Name?></a></span>
-                    <div style="float: right; display: block; letter-spacing: -1px;">
-                        <a href="artist.php?action=vote_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;way=up" class="tooltip brackets vote_artist_up" title="Vote up this similar artist. Use this when you feel that the two artists are quite similar.">&and;</a>
-                        <a href="artist.php?action=vote_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;way=down" class="tooltip brackets vote_artist_down" title="Vote down this similar artist. Use this when you feel that the two artists are not all that similar.">&or;</a>
-<?php   if (check_perms('site_delete_tag')) { ?>
-                        <span class="remove remove_artist"><a href="artist.php?action=delete_similar&amp;artistid=<?=$ArtistID?>&amp;similarid=<?=$SimilarID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="tooltip brackets" title="Remove this similar artist">X</a></span>
-<?php   } ?>
-                    </div>
-                    <br style="clear: both;" />
-                </li>
-<?php } /* foreach ($Artist->similarArtists()) */ ?>
-            </ul>
-        </div>
-        <div class="box box_addartists box_addartists_similar">
-            <div class="head"><strong>Add similar artist</strong></div>
-            <ul class="nobullet">
-                <li>
-                    <form class="add_form" name="similar_artists" action="artist.php" method="post">
-                        <input type="hidden" name="action" value="add_similar" />
-                        <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
-                        <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
-                        <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"<?=
-                            $User->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> />
-                        <input type="submit" value="+" />
-                    </form>
-                </li>
-            </ul>
-        </div>
 
 <?php
+echo G::$Twig->render('artist/similar.twig', [
+    'admin'        => check_perms('site_delete_tag'),
+    'artist_id'    => $ArtistID,
+    'auth'         => $LoggedUser['AuthKey'],
+    'autocomplete' => $User->hasAutocomplete('other'),
+    'similar'      => $Artist->similarArtists(),
+]);
+
 if (check_perms('zip_downloader')) {
     if (isset($LoggedUser['Collector'])) {
         [$ZIPList, $ZIPPrefs] = $LoggedUser['Collector'];
@@ -241,8 +202,7 @@ if (check_perms('zip_downloader')) {
                     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                     <input type="hidden" name="artistid" value="<?=$ArtistID?>" />
                     <ul id="list" class="nobullet">
-<?php
-    foreach ($ZIPList as $ListItem) { ?>
+<?php foreach ($ZIPList as $ListItem) { ?>
                         <li id="list<?=$ListItem?>">
                             <input type="hidden" name="list[]" value="<?=$ListItem?>" />
                             <span style="float: left;"><?=$ZIPOptions[$ListItem]['2']?></span>
@@ -706,7 +666,7 @@ function require(file, callback) {
         </div>
 <?php
 if (defined('LASTFM_API_KEY')) {
-    include(__DIR__ . '/concerts.php');
+    require_once('concerts.php');
 }
 
 [$NumComments, $Page, $Thread, $LastRead] = Comments::load('artist', $ArtistID);
