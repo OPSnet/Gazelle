@@ -100,7 +100,6 @@ if (!$isMusicUpload || ($isMusicUpload && !$Properties['GroupID'])) {
         ['image', '0','link','The image URL you entered was invalid.', ['range' => [255, 12]]],
         ['tags', '1','string','You must enter at least one tag. Maximum length is 200 characters.', ['range' => [2, 200]]],
         ['title', '1','string','Title must be less than 200 characters.', ['maxlength' => 200]],
-        ['year', '1','number','The year of the release must be entered.'],
     ]);
 }
 
@@ -185,6 +184,7 @@ switch ($Type) {
         $feedType[] = 'torrents_apps';
         break;
     case 'Audiobooks':
+        $Validate->setField('year', '1','number','The year of the release must be entered.');
         $feedType[] = 'torrents_abooks';
         break;
     case 'Comedy':
