@@ -66,11 +66,15 @@ class Upload extends \Gazelle\Base {
      * @param array List of tags
      */
     public function addTags(array $tagList) {
+        $tags = ["unf.Tags = ''"];
+        $notTags = ["unf.NotTags = ''"];
         if ($tagList) {
-            $this->cond[] = "(unf.Tags = '' OR (" . implode(' OR ', array_merge([], array_fill(0, count($tagList), "unf.Tags LIKE concat('%|', ?, '|%')"))) . "))";
-            $this->cond[] = "(unf.NotTags = '' OR NOT (" . implode(' OR ', array_fill(0, count($tagList), "unf.NotTags LIKE concat('%|', ?, '|%')")) . "))";
-            $this->args = array_merge($this->args, $tagList, $tagList);
+            $tags[] = implode(' AND ', array_merge([], array_fill(0, count($tagList), "unf.Tags LIKE concat('%|', ?, '|%')")));
+            $notTags[] = implode(' OR ', array_merge([], array_fill(0, count($tagList), "unf.NotTags LIKE concat('%|', ?, '|%')")));
         }
+        $this->cond[] = "(" . implode(' OR ', $tags) . ")";
+        $this->cond[] = "(" . implode(' OR NOT ', $notTags) . ")";
+        $this->args = array_merge($this->args, $tagList, $tagList);
         return $this;
     }
 
@@ -236,7 +240,7 @@ class Upload extends \Gazelle\Base {
         return "SELECT min(unf.ID) AS filter_id, unf.UserID AS user_id, um.torrent_pass AS passkey
             FROM users_notify_filters AS unf
             INNER JOIN users_main AS um ON (um.ID = unf.UserID)
-            WHERE " . implode(" AND ", $this->cond) . "
+            WHERE " . implode("\nAND ", $this->cond) . "
             GROUP BY unf.UserID, um.torrent_pass";
     }
 
