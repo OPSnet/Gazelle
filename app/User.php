@@ -78,7 +78,7 @@ class User extends BaseObject {
                 um.IRCKey,
                 um.2FA_Key,
                 ui.AdminComment,
-                ui.Collages,
+                ui.collages,
                 ui.DisableAvatar,
                 ui.DisableInvites,
                 ui.DisablePoints,
@@ -957,6 +957,40 @@ class User extends BaseObject {
         ) ?? '';
     }
 
+    /**
+     * How many personal collages is this user allowed to create?
+     *
+     * @return int number of collages (including collages granted from donations
+     */
+    public function allowedPersonalCollages(): int {
+        return $this->info()['collages'] + (new Manager\Donation())->personalCollages($this->id);
+    }
+
+    /**
+     * How many personal collages has this user created?
+     *
+     * @return int number of active collages
+     */
+    public function activePersonalCollages(): int {
+        return $this->db->scalar("
+            SELECT count(*)
+            FROM collages
+            WHERE CategoryID = 0
+                AND Deleted = '0'
+                AND UserID = ?
+            ", $this->id
+        );
+    }
+
+    /**
+     * Is this user allowed to create a new personal collage?
+     *
+     * @return bool Yes we can
+     */
+    public function canCreatePersonalCollage(): bool {
+        return $this->allowedPersonalCollages() > $this->activePersonalCollages();
+    }
+
     public function personalCollages(): array {
         $this->db->prepared_query("
             SELECT ID, Name
@@ -968,26 +1002,6 @@ class User extends BaseObject {
             ", $this->id
         );
         return $this->db->to_array(false, MYSQLI_NUM, false);
-    }
-
-    public function canCreatePersonalCollage(): bool {
-        [$allowed, $created] = $this->db->row("
-            SELECT i.collages, coalesce(c.num, 0)
-            FROM users_info i
-            LEFT JOIN
-            (
-                SELECT UserID, count(*) AS num
-                FROM collages
-                WHERE CategoryID = 0
-                  AND Deleted = '0'
-            ) c USING (UserID)
-            WHERE i.UserID = ?
-            ", $this->id
-        );
-        $donorMan = new Manager\Donation();
-        $allowed += $donorMan->personalCollages($this->id);
-
-        return $allowed > $created;
     }
 
     public function collageUnreadCount(): int {

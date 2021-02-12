@@ -23,13 +23,6 @@ switch ($_REQUEST['action'] ?? '') {
     case 'comments':
         require('all_comments.php');
         break;
-    case 'create_personal':
-        if (!check_perms('site_collages_personal')) {
-            error(403);
-        } else {
-            Collages::create_personal_collage();
-        }
-        break;
     case 'delete':
         require('delete.php');
         break;

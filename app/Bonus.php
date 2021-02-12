@@ -104,7 +104,7 @@ class Bonus extends Base {
         return BONUS_AWARD_OTHER;
     }
 
-    public function getEffectivePrice($label, $userId) {
+    public function getEffectivePrice($label, $userId): int {
         $item  = $this->items()[$label];
         $info = \Users::user_heavy_info($userId);
         if (preg_match('/^collage-\d$/', $label)) {
@@ -112,7 +112,7 @@ class Bonus extends Base {
         }
 
         $info = \Users::user_info($userId);
-        return $info['EffectiveClass'] >= $item['FreeClass'] ? 0 : $item['Price'];
+        return $info['EffectiveClass'] >= $item['FreeClass'] ? 0 : (int)$item['Price'];
     }
 
     public function getListOther($balance) {
@@ -316,7 +316,8 @@ class Bonus extends Base {
                 AND ub.user_id = ?
             ', $price, $price, $userId
         );
-        if ($this->db->affected_rows() !== 2) {
+        $rows = $this->db->affected_rows();
+        if (!(($price > 0 && $rows === 2) || ($price === 0 && $rows === 1))) {
             throw new BonusException('collage:nofunds');
         }
         $this->addPurchaseHistory($item['ID'], $userId, $price);

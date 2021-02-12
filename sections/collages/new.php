@@ -12,12 +12,10 @@ $user = new \Gazelle\User($LoggedUser['ID']);
 $personalAllowed = $user->canCreatePersonalCollage();
 ?>
 <div class="thin">
-<?php
-if (isset($Err)) { ?>
+<?php if (isset($Err)) { ?>
     <div class="save_message error"><?=$Err?></div>
     <br />
-<?php
-} ?>
+<?php } ?>
     <form class="create_form" name="collage" action="collages.php" method="post">
         <input type="hidden" name="action" value="new_handle" />
         <input type="hidden" name="auth" value="<?= $LoggedUser['AuthKey'] ?>" />
@@ -25,7 +23,7 @@ if (isset($Err)) { ?>
             <tr id="collagename">
                 <td class="label"><strong>Name</strong></td>
                 <td>
-                    <input type="text"<?= $NoName ? ' class="hidden"' : ''; ?> name="name" size="60" id="namebox" value="<?=display_str($Name)?>" />
+                    <input type="text"<?= $NoName ? ' class="hidden"' : ''; ?> name="name" size="60" id="namebox" value="<?=display_str($Name ?? '')?>" />
                     <span id="personal"<?= $NoName ? '' : ' class="hidden"'; ?> style="font-style: oblique;"><strong><?=$LoggedUser['Username']?>'s personal collage</strong></span>
                 </td>
             </tr>
@@ -38,7 +36,7 @@ if (isset($Err)) { ?>
         continue;
     }
 ?>
-                        <option value="<?= $CatID ?>"<?= ($CatID == $Category) ? ' selected="selected"' : '' ?>><?= $CatName ?></option>
+                        <option value="<?= $CatID ?>"<?= $CatID == ($Category ?? '') ? ' selected="selected"' : '' ?>><?= $CatName ?></option>
 <?php } ?>
                     </select>
                     <br />
@@ -48,13 +46,13 @@ if (isset($Err)) { ?>
             <tr>
                 <td class="label">Description</td>
                 <td>
-                    <textarea name="description" id="description" cols="60" rows="10"><?=display_str($Description)?></textarea>
+                    <textarea name="description" id="description" cols="60" rows="10"><?=display_str($Description ?? '')?></textarea>
                 </td>
             </tr>
             <tr>
                 <td class="label"><strong>Tags (comma-separated)</strong></td>
                 <td>
-                    <input type="text" id="tags" name="tags" size="60" value="<?=display_str($Tags)?>" />
+                    <input type="text" id="tags" name="tags" size="60" value="<?=display_str($Tags ?? '')?>" />
                 </td>
             </tr>
             <tr>
