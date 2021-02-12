@@ -200,9 +200,8 @@ class Upload extends \Gazelle\Base {
         $nr = count($results);
         $file = $this->debug ? (TMPDIR . "/notification.$torrentId") : '/dev/null';
         $out = fopen($file, "a");
-        fprintf($out, "g=$groupId t=$torrentId results=$nr\n"
-            . $this->sql()
-            . print_r($this->args(), true)
+        fprintf($out, "g=%d t=%d results=%d\n%s\n%s\n",
+            $groupId, $torrentId, $nr, $this->sql(), implode("\n", $this->args())
         );
         if ($nr === 0) {
             fclose($out);
