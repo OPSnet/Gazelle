@@ -1,40 +1,5 @@
 <?php
 class Collages {
-    public static function create_personal_collage() {
-        $CollageCount = G::$DB->scalar("
-            SELECT
-                count(*)
-            FROM collages
-            WHERE CategoryID = '0'
-                AND Deleted = '0'
-                AND UserID = ?
-            ", G::$LoggedUser['ID']
-        );
-
-        if ($CollageCount >= G::$LoggedUser['Permissions']['MaxCollages']) {
-            $CollageID = G::$DB->scalar("
-                SELECT min(ID)
-                FROM collages
-                WHERE CategoryID = '0'
-                    AND Deleted = '0'
-                    AND UserID = ?
-                ", G::$LoggedUser['ID']
-            );
-            header("Location: collage.php?id=$CollageID");
-            exit;
-        }
-        $NameStr = G::$LoggedUser['Username'] . "'s personal collage" . ($CollageCount > 0 ? ' no. ' . ($CollageCount + 1) : '');
-        $Description = 'Personal collage for ' . G::$LoggedUser['Username'] . '. The first 5 albums will appear on his or her [url=' . SITE_URL . '/user.php?id= ' . G::$LoggedUser['ID'] . ']profile[/url].';
-        G::$DB->prepared_query("
-            INSERT INTO collages
-                   (Name, Description, UserID, CategoryID)
-            VALUES (?,    ?,           ?,      0)
-            ", $NameStr, $Description, G::$LoggedUser['ID']
-        );
-        $CollageID = G::$DB->inserted_id();
-        header('Location: collage.php?id='.$CollageID);
-        exit;
-    }
 
     public static function collage_cover_row(array $Group) {
         $GroupID = $Group['ID'];

@@ -12,6 +12,8 @@ $header = new \Gazelle\Util\SortableTableHeader('time', [
     'updated'     => ['dbColumn' => 'c.Updated',     'defaultSort' => 'desc', 'text' => 'Updated'],
 ]);
 
+$user = new Gazelle\User($LoggedUser['ID']);
+
 $tagMan = new \Gazelle\Manager\Tag;
 if (!empty($_GET['tags'])) {
     $Tags = explode(',', trim($_GET['tags']));
@@ -162,7 +164,7 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
                     <td class="label">Tags (comma-separated):</td>
                     <td>
                         <input type="text" id="tags" name="tags" size="70" value="<?= empty($_GET['tags']) ? '' : display_str($_GET['tags']) ?>"<?=
-                            (new Gazelle\User($LoggedUser['ID']))->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /><br />
+                            $user->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?> /><br />
                         <input type="radio" name="tags_type" id="tags_type0" value="0"<?= !$tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type0"> Any</label>&nbsp;&nbsp;
 
                         <input type="radio" name="tags_type" id="tags_type1" value="1"<?= $tagSearchAll ? ' checked=checked' : '' ?> /><label for="tags_type1"> All</label>
@@ -228,24 +230,14 @@ View::show_header($BookmarkView ? 'Your bookmarked collages' : 'Browse collages'
         <a href="collages.php?action=new" class="brackets">New collage</a>
 <?php
         }
-        if (check_perms('site_collages_personal')) {
-            $DB->prepared_query("
-                SELECT ID
-                FROM collages
-                WHERE CategoryID = '0'
-                    AND Deleted = '0'
-                    AND UserID = ?
-                ", $LoggedUser['ID']
-            );
-            $CollageCount = $DB->record_count();
-            if ($CollageCount === 1) {
-                [$CollageID] = $DB->next_record();
+        $activeCollages = $user->activePersonalCollages();
+        if ($activeCollages === 1) {
+            $collages = $user->personalCollages();
 ?>
-        <a href="collages.php?id=<?= $CollageID ?>" class="brackets">Personal collage</a>
-<?php       } elseif ($CollageCount > 1) { ?>
+        <a href="collages.php?id=<?= $collages[0]['ID'] ?>" class="brackets">Personal collage</a>
+<?php       } elseif ($activeCollages > 1) { ?>
         <a href="collages.php?action=mine" class="brackets">Personal collages</a>
 <?php
-            }
         }
         if (check_perms('site_collages_subscribe')) {
 ?>
