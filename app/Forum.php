@@ -199,7 +199,8 @@ class Forum extends Base {
     public function editThread(int $threadId, int $forumId, int $sticky, int $rank, int $locked, string $title) {
         (new \Gazelle\Manager\Forum)->flushToc();
         $this->cache->deleteMulti([
-            'forums_list', "forums_" . $forumId, "forums_" . $this->forumId, "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
+            'forums_list', "forums_" . $forumId, "forums_" . $this->forumId,
+            "thread_forum_{$threadId}", "thread_{$threadId}", sprintf(self::CACHE_THREAD_INFO, $threadId),
             sprintf(self::CACHE_TOC_FORUM, $this->forumId),
             sprintf(self::CACHE_TOC_FORUM, $forumId),
         ]);

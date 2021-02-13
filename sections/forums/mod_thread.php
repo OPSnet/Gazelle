@@ -21,7 +21,7 @@ $threadId = (int)$_POST['threadid'];
 if (!$threadId) {
     error(404);
 }
-$newForumId = (int)$_POST['forumid'];
+$newForumId = (int)($_POST['forumid'] ?? 0);
 if (!$newForumId && !isset($_POST['transition'])) {
     error(404);
 }
@@ -34,7 +34,7 @@ if ($newTitle === '') {
 $page      = (int)$_POST['page'];
 $locked    = isset($_POST['locked']) ? 1 : 0;
 $newSticky = isset($_POST['sticky']) ? 1 : 0;
-$newRank   = (int)$_POST['ranking'] ?? 0;
+$newRank   = (int)($_POST['ranking'] ?? 0);
 
 if (!$newSticky && $newRank > 0) {
     $newRank = 0;
@@ -50,16 +50,14 @@ if ($minClassWrite > $LoggedUser['Class']) {
     error(403);
 }
 
-// If we're deleting a thread
 if (isset($_POST['delete'])) {
     if (!check_perms('site_admin_forums')) {
         error(403);
     }
     $forum->removeThread($threadId);
-    header("Location: forums.php?action=viewforum&forumid=$newForumId");
-
-} else { // We are editing it
-
+    $location = "forums.php?action=viewforum&forumid=$newForumId";
+} else {
+    // We are editing it
     if (isset($_POST['transition'])) {
         $transId = (int)$_POST['transition'];
         if ($transId < 1) {
@@ -120,5 +118,6 @@ if (isset($_POST['delete'])) {
     if ($notes) {
         $forum->addThreadNote($threadId, $LoggedUser['ID'], implode("\n", $notes));
     }
-    header("Location: forums.php?action=viewthread&threadid=$threadId&page=$page");
+    $location = "forums.php?action=viewthread&threadid=$threadId&page=$page";
 }
+header("Location: $location");

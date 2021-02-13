@@ -15,7 +15,7 @@ Things to expect in $_GET:
 Text::$TOC = true;
 
 $forumMan = new Gazelle\Manager\Forum;
-if ($_GET['postid']) {
+if (isset($_GET['postid'])) {
     $postId = (int)$_GET['postid'];
     $forum = $forumMan->findByPostId($postId);
     if (is_null($forum)) {
@@ -100,7 +100,8 @@ if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
 $Pages = Format::get_pages($Page, $threadInfo['Posts'], $PerPage, 9);
 $transitions = Forums::get_thread_transitions($forumId);
 $auth = $LoggedUser['AuthKey'];
-View::show_header($threadInfo['Title'] . ' &lsaquo; '.$Forums[$forumId]['Name'].' &lsaquo; Forums','comments,subscriptions,bbcode', $IsDonorForum ? 'donor' : '');
+View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadInfo['Title']),
+    'comments,subscriptions,bbcode', $IsDonorForum ? ',donor' : '');
 ?>
 <div class="thin">
     <h2>
@@ -141,7 +142,7 @@ View::show_header($threadInfo['Title'] . ' &lsaquo; '.$Forums[$forumId]['Name'].
         </div>
 <?= $Pages; ?>
     </div>
-<?php if (count($transitions) > 0) { ?>
+<?php if ($transitions) { ?>
     <table class="layout border">
         <tr>
             <td class="label">Move thread</td>
