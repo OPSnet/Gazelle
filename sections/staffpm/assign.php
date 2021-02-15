@@ -1,17 +1,21 @@
 <?php
-if (!($IsFLS)) {
-    // Logged in user is not FLS or Staff
+if (!$user->isStaffPMReader()) {
     error(403);
 }
+if (!isset($_GET['convid']) && !isset($_POST['convid'])) {
+    header('Location: staffpm.php');
+    exit;
+}
 
+$Classes = (new Gazelle\Manager\User)->classList();
 if ($ConvID = (int)$_GET['convid']) {
     // FLS, check level of conversation
     $Level = $DB->scalar("
-        SELECT Level
-        FROM staff_pm_conversations
-        WHERE ID = ?", $ConvID);
+        SELECT Level FROM staff_pm_conversations WHERE ID = ?
+        ", $ConvID
+    );
 
-    if ($Level > 0) {
+    if ($user->isFLS() && $Level > 0) {
         // FLS trying to assign non-FLS conversation
         error(403);
     } else {
@@ -20,7 +24,6 @@ if ($ConvID = (int)$_GET['convid']) {
             error(404);
         } else {
             $Level = 0;
-            $Classes = (new Gazelle\Manager\User)->classList();
             switch ($_GET['to']) {
                 case 'forum':
                     $Level = $Classes[FORUM_MOD]['Level'];
@@ -34,8 +37,8 @@ if ($ConvID = (int)$_GET['convid']) {
             }
 
             $DB->prepared_query("
-                UPDATE staff_pm_conversations
-                SET Status = 'Unanswered',
+                UPDATE staff_pm_conversations SET
+                    Status = 'Unanswered',
                     Level = ?
                 WHERE ID = ?
                 ", $Level, $ConvID
@@ -54,14 +57,12 @@ if ($ConvID = (int)$_GET['convid']) {
         ", $ConvID
     );
 
-    $LevelCap = 1000;
-    if ($LoggedUser['EffectiveClass'] < min($Level, $LevelCap) && $AssignedToUser != $LoggedUser['ID']) {
+    if ($LoggedUser['EffectiveClass'] < $Level && $AssignedToUser != $LoggedUser['ID']) {
         // Staff member is not allowed to assign conversation
         echo '-1';
     } else {
-        // Staff member is allowed to assign conversation, assign
+        // Staff member is allowed to assign conversation
         [$LevelType, $NewLevel] = explode('_', $_POST['assign']);
-
         if ($LevelType == 'class') {
             // Assign to class
             $DB->prepared_query("
@@ -74,26 +75,20 @@ if ($ConvID = (int)$_GET['convid']) {
             );
             $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
         } else {
-            $UserInfo = Users::user_info($NewLevel);
-            $Level = $Classes[$UserInfo['PermissionID']]['Level'];
-            if (!$Level) {
-                error('Assign to user not found.');
+            $assignee = new Gazelle\User($NewLevel);
+            if (is_null($assignee)) {
+                error(404, true);
             }
-
-            // Assign to user
             $DB->prepared_query("
-                UPDATE staff_pm_conversations
-                SET Status = 'Unanswered',
+                UPDATE staff_pm_conversations SET
+                    Status = 'Unanswered',
                     AssignedToUser = ?,
                     Level = ?
                 WHERE ID = ?
-                ", $NewLevel, $Level, $ConvID
+                ", $NewLevel, $assignee->effectiveClass(), $ConvID
             );
             $Cache->delete_value("num_staff_pms_" . $LoggedUser['ID']);
         }
         echo '1';
     }
-} else {
-    // No ID
-    header('Location: staffpm.php');
 }

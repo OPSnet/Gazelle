@@ -1,6 +1,5 @@
 <?php
 
-$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
 View::show_header('Staff PMs', 'staffpm');
 
 // Get messages
@@ -25,6 +24,9 @@ $StaffPMs = $DB->prepared_query("
     <div class="header">
         <h2>Staff PMs</h2>
         <div class="linkbox">
+<?php if ($user->isFLS()) {?>
+            <a href="staffpm.php" class="brackets">Main Staff Inbox</a>
+<?php } ?>
             <a href="#" onclick="$('#compose').gtoggle();" class="brackets">Compose new</a>
         </div>
     </div>
@@ -54,6 +56,7 @@ if (!$DB->has_results()) {
                 </tr>
 <?php
     // List messages
+    $ClassLevels = (new Gazelle\Manager\User)->classLevelList();
     $Row = 'a';
     $ShowBox = 1;
     while ([$ID, $Subject, $UserID, $Status, $Level, $AssignedToUser, $Date, $Unread] = $DB->next_record()) {

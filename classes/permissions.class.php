@@ -1,7 +1,5 @@
 <?php
 class Permissions {
-    const LEVEL_CAP = 1000; // TODO: refactor as SELECT max(Level) FROM permissions
-
     public static function list() {
         return [
             'site_leech' => 'Can leech (Does this work?)',
@@ -148,16 +146,6 @@ class Permissions {
     }
 
     /**
-     * Some permission checks use this hard level cap to enable/disable
-     * functionality.
-     *
-     * @return int
-     */
-    public static function get_level_cap() {
-        return self::LEVEL_CAP;
-    }
-
-    /**
      * Gets the permissions associated with a certain permissionid
      *
      * @param int $PermissionID the kind of permissions to fetch
@@ -238,6 +226,10 @@ class Permissions {
     }
 
     public static function has_override($Level) {
-        return $Level >= self::get_level_cap();
+        static $max;
+        if (is_null($max)) {
+            $max = G::$DB->scalar('SELECT max(Level) FROM permissions');
+        }
+        return $Level >= $max;
     }
 }

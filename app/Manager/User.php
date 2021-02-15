@@ -102,6 +102,26 @@ class User extends \Gazelle\Base {
         return $classLevelList;
     }
 
+    /**
+     * Get list of staff classes by ID
+     * @return array $classes
+     */
+    public function staffLevelList(): array {
+        if (($staffLevelList = $this->cache->get_value('staff_class')) === false) {
+            $this->db->prepared_query("
+                SELECT ID, Name, Level 
+                FROM permissions
+                WHERE Secondary = 0
+                    AND LEVEL >= (SELECT Level FROM permissions WHERE ID = ?)
+                ORDER BY Level
+                ", FORUM_MOD
+            );
+            $staffLevelList = $this->db->to_array('ID');
+            $this->cache->cache_value('staff_class', $staffLevelList, 0);
+        }
+        return $staffLevelList;
+    }
+
     public function findAllByCustomPermission(): array {
         $this->db->prepared_query("
             SELECT ID, CustomPermissions

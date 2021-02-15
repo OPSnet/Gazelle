@@ -14,8 +14,10 @@ if (!$ID) {
     ", $ID
 );
 
-if (!($UserID == $LoggedUser['ID'] || $IsFLS || $AssignedToUser == $LoggedUser['ID'])) {
-    // Conversation does not belong to user
+if (  (!$user->isStaffPMReader() && $LoggedUser['ID'] != $UserID)
+    || ($user->isFLS() && !in_array($AssignedToUser, ['', $LoggedUser['ID']]))
+    || ($user->isStaff() && $Level > $user->effectiveClass())
+) {
     error(403);
 }
 
