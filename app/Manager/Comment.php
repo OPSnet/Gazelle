@@ -19,6 +19,18 @@ class Comment extends \Gazelle\Base {
         }
     }
 
+    public function findById(int $postId) {
+        [$page, $pageId] = $this->db->row("
+            SELECT Page, PageID FROM comments WHERE ID = ?
+            ", $postId
+        );
+        if (is_null($page)) {
+            throw new \Gazelle\Exception\ResourceNotFoundException($postId);
+        }
+        $className = $this->className($page);
+        return (new $className($pageId))->setPostId($postId);
+    }
+
     /**
      * Post a comment on an artist, request or torrent page.
      * @param string $page
@@ -52,18 +64,6 @@ class Comment extends \Gazelle\Base {
         $subscription->quoteNotify($body, $postId, $page, $pageId);
 
         $className = $this->className($page);
-        return new $className($pageId, $postId);
-    }
-
-    public function findById(int $postId) {
-        [$page, $pageId] = $this->db->row("
-            SELECT Page, PageID FROM comments WHERE ID = ?
-            ", $postId
-        );
-        if (is_null($page)) {
-            throw new \Gazelle\Exception\ResourceNotFoundException($postId);
-        }
-        $className = $this->className($page);
-        return new $className($pageId, $postId);
+        return (new $className($pageId))->setPostId($postId);
     }
 }

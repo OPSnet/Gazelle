@@ -668,22 +668,26 @@ function require(file, callback) {
 if (defined('LASTFM_API_KEY')) {
     require_once('concerts.php');
 }
-
-[$NumComments, $Page, $Thread, $LastRead] = Comments::load('artist', $ArtistID);
-$Pages = Format::get_pages($Page, $NumComments, TORRENT_COMMENTS_PER_PAGE, 9, '#comments');
 ?>
     <div id="artistcomments">
-        <div class="linkbox"><a name="comments"></a>
-            <?=($Pages)?>
-        </div>
 <?php
+$commentPage = new Gazelle\Comment\Artist($ArtistID);
+if (isset($_GET['postid'])) {
+    $commentPage->setPostId((int)$_GET['postid']);
+} elseif (isset($_GET['page'])) {
+    $commentPage->setPageNum((int)$_GET['page']);
+}
+$commentPage->load()->handleSubscription($User);
+
+$paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
+$paginator->setAnchor('comments')->setTotal($commentPage->total());
+
+echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Artist(G::$Twig, $LoggedUser['ID'], $ArtistID);
-$comments->renderThread($Thread, $LastRead ?: 0);
-?>
-        <div class="linkbox">
-            <?=($Pages)?>
-        </div>
-<?php
+$comments->renderThread($commentPage->thread(), $commentPage->lastRead());
+echo $paginator->linkbox();
+
+if (!$LoggedUser['DisablePosting']) {
     View::parse('generic/reply/quickreply.php', [
         'InputName' => 'pageid',
         'InputID' => $ArtistID,
@@ -691,6 +695,7 @@ $comments->renderThread($Thread, $LastRead ?: 0);
         'InputAction' => 'take_post',
         'SubscribeBox' => true
     ]);
+}
 ?>
         </div>
     </div>

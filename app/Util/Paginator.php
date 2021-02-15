@@ -3,8 +3,10 @@
 namespace Gazelle\Util;
 
 class Paginator {
+    protected $anchor = '';
     protected $perPage = 25;
     protected $page = 1;
+    protected $remove = []; // parameters to strip out of URIs (e.g. postid for comments)
     protected $total = 0;
     protected $linkbox = null;
     protected $linkCount = 10;
@@ -37,9 +39,18 @@ class Paginator {
         return $this->total;
     }
 
+    public function setAnchor(string $anchor) {
+        $this->anchor = '#' . $anchor;
+        return $this;
+    }
+
     public function setTotal(int $total) {
         $this->total = $total;
         return $this;
+    }
+
+    public function removeParam(string $param) {
+        $this->remove[] = $param;
     }
 
     public function linkbox(): string {
@@ -50,6 +61,9 @@ class Paginator {
         $this->linkbox = '';
 
         $uri = str_replace('&', '&amp;', preg_replace('/[?&]page=\d+/', '', $_SERVER['REQUEST_URI']));
+        foreach ($this->remove as $param) {
+            $url = preg_replace("/[?&]$param=(.*?)(?=(?:$|[?&]))/", '', $url);
+        }
         if (strpos($uri, '?') === false) {
             $uri .= '?';
         }
@@ -78,13 +92,13 @@ class Paginator {
             }
 
             if ($this->page > 1) {
-                $this->linkbox = "<a href=\"{$uri}&amp;page=1\"><strong>&laquo; First</strong></a> "
-                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
+                $this->linkbox = "<a href=\"{$uri}&amp;page=1{$this->anchor}\"><strong>&laquo; First</strong></a> "
+                    . "<a href=\"{$uri}&amp;page=" . ($this->page - 1) . $this->anchor . '" class="pager_prev"><strong>&lsaquo; Prev</strong></a> | ';
             }
 
             for ($i = $firstPage; $i <= $lastPage; $i++) {
                 if ($i != $this->page) {
-                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i\">";
+                    $this->linkbox .= "<a href=\"{$uri}&amp;page=$i{$this->anchor}\">";
                 }
                 $this->linkbox .= '<strong>';
                 $firstEntry = (($i - 1) * $this->perPage) + 1;
@@ -109,17 +123,21 @@ class Paginator {
             }
 
             if ($this->page && $this->page < $pageCount) {
-                $this->linkbox .= " | <a href=\"${uri}&amp;page=" . ($this->page + 1)
+                $this->linkbox .= " | <a href=\"${uri}&amp;page=" . ($this->page + 1) . $this->anchor
                     . '" class="pager_next"><strong>Next &rsaquo;</strong></a>'
                     . " <a href=\"${uri}&amp;page=$pageCount\"><strong> Last &raquo;</strong></a>";
             }
         }
+        if ($this->anchor) {
+            [$anchorBegin, $anchorEnd] = ['<a name="' . substr($this->anchor, 1) . '">', '</a>'];
+        } else {
+            [$anchorBegin, $anchorEnd] = ['', ''];
+        }
         if (strlen($this->linkbox)) {
-            $this->linkbox = '<div class="linkbox">' . $this->linkbox . '</div>';
+            $this->linkbox = "<div class=\"linkbox\">$anchorBegin{$this->linkbox}$anchorEnd</div>";
         }
         return $this->linkbox;
     }
-
 
     // used for pagination of peer/snatch/download lists on torrentdetails.php
     public function linkboxJS(string $action, int $torrentId): string {

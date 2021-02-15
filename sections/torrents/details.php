@@ -81,11 +81,20 @@ if (!$CoverArt) {
 }
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-[$NumComments, $Page, $Thread, $LastRead] = Comments::load('torrents', $GroupID);
+$user = new Gazelle\User($LoggedUser['ID']);
+$commentPage = new Gazelle\Comment\Torrent($GroupID);
+if (isset($_GET['postid'])) {
+    $commentPage->setPostId((int)$_GET['postid']);
+} elseif (isset($_GET['page'])) {
+    $commentPage->setPageNum((int)$_GET['page']);
+}
+$commentPage->load()->handleSubscription($user);
+
+$paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
+$paginator->setAnchor('comments')->setTotal($commentPage->total());
 
 $collageMan = new Gazelle\Manager\Collage;
 $subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
-$user = new Gazelle\User($LoggedUser['ID']);
 
 // Start output
 View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting');
@@ -909,21 +918,12 @@ if (!empty($similar)) {
             <div class="body"><?php if ($WikiBody != '') { echo $WikiBody; } else { echo 'There is no information on this torrent.'; } ?></div>
         </div>
 <?php
-// --- Comments ---
-$Pages = Format::get_pages($Page, $NumComments, TORRENT_COMMENTS_PER_PAGE, 9, '#comments');
-?>
-    <div id="torrent_comments">
-        <div class="linkbox"><a name="comments"></a>
-            <?=$Pages?>
-        </div>
-<?php
+echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Torrent(G::$Twig, $LoggedUser['ID'], $GroupID);
-$comments->renderThread($Thread, $LastRead ?: 0);
-?>
-        <div class="linkbox">
-            <?=$Pages?>
-        </div>
-<?php
+$comments->renderThread($commentPage->thread(), $commentPage->lastRead());
+echo $paginator->linkbox();
+
+if (!$LoggedUser['DisablePosting']) {
     View::parse('generic/reply/quickreply.php', [
         'InputName' => 'pageid',
         'InputID' => $GroupID,
@@ -932,6 +932,7 @@ $comments->renderThread($Thread, $LastRead ?: 0);
         'TextareaCols' => 65,
         'SubscribeBox' => true
     ]);
+}
 ?>
         </div>
     </div>

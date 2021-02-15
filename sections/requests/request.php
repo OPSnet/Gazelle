@@ -62,9 +62,20 @@ $UserCanEdit = (!$IsFilled && $LoggedUser['ID'] == $Request['UserID'] && $VoteCo
 $CanEdit = ($UserCanEdit || check_perms('site_moderate_requests'));
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
-list($NumComments, $Page, $Thread, $LastRead) = Comments::load('requests', $RequestID);
+$user = new Gazelle\User($LoggedUser['ID']);
+$commentPage = new Gazelle\Comment\Request($RequestID);
+if (isset($_GET['postid'])) {
+    $commentPage->setPostId((int)$_GET['postid']);
+} elseif (isset($_GET['page'])) {
+    $commentPage->setPageNum((int)$_GET['page']);
+}
+$commentPage->load()->handleSubscription($user);
+
+$paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
+$paginator->setAnchor('comments')->setTotal($commentPage->total());
 
 $subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+
 View::show_header("View request: $FullName", 'comments,requests,bbcode,subscriptions');
 ?>
 <div class="thin">
@@ -83,7 +94,7 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
             <a href="requests.php?action=delete&amp;id=<?=$RequestID?>" class="brackets">Delete</a>
 <?php
     }
-    $bookmark = new \Gazelle\Bookmark;
+    $bookmark = new Gazelle\Bookmark;
     if ($bookmark->isRequestBookmarked($LoggedUser['ID'], $RequestID)) { ?>
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Unbookmark('request', <?=$RequestID?>, 'Bookmark'); return false;" class="brackets">Remove bookmark</a>
 <?php    } else { ?>
@@ -449,31 +460,21 @@ $encoded_artist = urlencode(preg_replace("/\([^\)]+\)/", '', $encoded_artist));
             </div>
         </div>
     <div id="request_comments">
-        <div class="linkbox">
-            <a name="comments"></a>
 <?php
-$Pages = Format::get_pages($Page, $NumComments, TORRENT_COMMENTS_PER_PAGE, 9, '#comments');
-echo $Pages;
-?>
-        </div>
-<?php
-
-//---------- Begin printing
+echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Request(G::$Twig, $LoggedUser['ID'], $RequestID);
-$comments->renderThread($Thread, $LastRead ?: 0);
+$comments->renderThread($commentPage->thread(), $commentPage->lastRead());
+echo $paginator->linkbox();
 
-if ($Pages) { ?>
-        <div class="linkbox pager"><?=$Pages?></div>
-<?php
+if (!$LoggedUser['DisablePosting']) {
+    View::parse('generic/reply/quickreply.php', [
+        'InputName' => 'pageid',
+        'InputID' => $RequestID,
+        'Action' => 'comments.php?page=requests',
+        'InputAction' => 'take_post',
+        'SubscribeBox' => true
+    ]);
 }
-
-View::parse('generic/reply/quickreply.php', [
-    'InputName' => 'pageid',
-    'InputID' => $RequestID,
-    'Action' => 'comments.php?page=requests',
-    'InputAction' => 'take_post',
-    'SubscribeBox' => true
-]);
 ?>
         </div>
     </div>
