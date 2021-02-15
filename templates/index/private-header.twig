@@ -98,13 +98,13 @@
     </ul>
 </div>
 
-{% if alertList or actionList %}
+{% if alert_list or action_list %}
 <div id="alerts">
-    {% if alertList %}
-    <div class="alertbar">{{ alertList|join(' &sdot; ')|raw }}</div>
+    {% if alert_list %}
+    <div class="alertbar">{{ alert_list|join(' &sdot; ')|raw }}</div>
     {% endif %}
-    {% if actionList %}
-    <div class="alertbar blend">{{ actionList|join(' &sdot; ')|raw }}</div>
+    {% if action_list %}
+    <div class="alertbar blend">{{ action_list|join(' &sdot; ')|raw }}</div>
     {% endif %}
 </div>
 {% endif %}
