@@ -154,7 +154,7 @@ define('MOD',           '11');
 define('SYSOP',         '15');
 define('ARTIST',        '19');
 define('DONOR',         '20');
-define('FLS_TEAM',      '21');
+define('FLS_TEAM',      '23');
 define('POWER_TM',      '22');
 define('ELITE_TM',      '23');
 define('FORUM_MOD',     '28');

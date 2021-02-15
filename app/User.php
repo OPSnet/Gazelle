@@ -101,6 +101,7 @@ class User extends BaseObject {
                 uls.Uploaded,
                 uls.Downloaded,
                 p.Level AS Class,
+                if(p.Level >= (SELECT Level FROM permissions WHERE ID = ?), 1, 0) as isStaff,
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
                 la.Type as locked_account
@@ -112,7 +113,7 @@ class User extends BaseObject {
             LEFT JOIN user_bonus         AS ub ON (ub.user_id = um.ID)
             LEFT JOIN locked_accounts    AS la ON (la.UserID = um.ID)
             WHERE um.ID = ?
-            ", $this->id
+            ", FORUM_MOD, $this->id
         );
         $this->info = $this->db->next_record(MYSQLI_ASSOC, false) ?? [];
         if (empty($this->info)) {
@@ -126,18 +127,14 @@ class User extends BaseObject {
         $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
+
         $this->db->prepared_query("
             SELECT PermissionID FROM users_levels WHERE UserID = ?
             ", $this->id
         );
         $this->info['secondary_class'] = $this->db->collect(0);
-        $this->info['effective_class'] = $this->info['secondary_class']
-            ? max($this->info['Class'], ...$this->info['secondary_class'])
-            : $this->info['Class'];
-        $this->info['is_donor'] = in_array(
-            $this->db->scalar("SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1"),
-            $this->info['secondary_class']
-        );
+        $this->info['effective_class'] =
+            $this->info['secondary_class'] ? max($this->info['Class'], ...$this->info['secondary_class']) : $this->info['Class'];
 
         $this->db->prepared_query("
             SELECT ua.Name, ua.ID
@@ -933,11 +930,15 @@ class User extends BaseObject {
         return $enabled;
     }
 
-    public function isUnconfirmed() { return $this->enabledState() == 0; }
-    public function isEnabled()     { return $this->enabledState() == 1; }
-    public function isDisabled()    { return $this->enabledState() == 2; }
-    public function isDonor()       { return $this->info()['is_donor']; }
-    public function isWarned()      { return !is_null($this->info()['Warned']); }
+    public function isUnconfirmed(): bool { return $this->enabledState() == 0; }
+    public function isEnabled(): bool     { return $this->enabledState() == 1; }
+    public function isDisabled(): bool    { return $this->enabledState() == 2; }
+    public function isWarned(): bool      { return !is_null($this->info()['Warned']); }
+
+    public function isDonor(): bool         { return in_array(DONOR, $this->info()['secondary_class']); }
+    public function isFLS(): bool           { return in_array(FLS_TEAM, $this->info()['secondary_class']); }
+    public function isStaff(): bool         { return $this->info()['isStaff']; }
+    public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
 
     public function endWarningDate(int $weeks) {
         return $this->db->scalar("

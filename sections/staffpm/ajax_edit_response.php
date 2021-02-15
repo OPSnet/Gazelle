@@ -1,10 +1,4 @@
 <?php
-enforce_login();
-
-if (!$IsFLS) {
-    // Logged in user is not FLS or Staff
-    error(403);
-}
 
 $Message = trim($_POST['message']);
 $Name = trim($_POST['name']);

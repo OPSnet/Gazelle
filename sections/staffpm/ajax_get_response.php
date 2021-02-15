@@ -1,10 +1,4 @@
 <?php
-enforce_login();
-
-if (!$IsFLS) {
-    // Logged in user is not FLS or Staff
-    error(403);
-}
 
 $ID = (int)$_GET['id'];
 if (!$ID) {

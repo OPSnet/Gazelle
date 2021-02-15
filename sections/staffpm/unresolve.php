@@ -13,11 +13,10 @@ if (!$ID) {
     ", $ID
 );
 
-if (!($UserID == $LoggedUser['ID']
-    || ($IsFLS && $Level == 0)
-    || $AssignedToUser == $LoggedUser['ID']
-    || ($IsStaff && $Level <= $LoggedUser['EffectiveClass'])
-)) {
+if (  (!$user->isStaffPMReader() && !in_array($LoggedUser['ID'], [$UserID, $AssignedToUser]))
+    || ($user->isFLS() && !in_array($AssignedToUser, ['', $LoggedUser['ID']]))
+    || ($user->isStaff() && $Level > $user->effectiveClass())
+) {
     error(403);
 }
 

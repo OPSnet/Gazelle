@@ -1,6 +1,5 @@
 <?php
-if (!$IsFLS) {
-    // Logged in user is not FLS or Staff
+if (!$user->isStaffPMReader()) {
     error(403);
 }
 
@@ -10,7 +9,7 @@ View::show_header('Staff PMs', 'staffpm');
     <div class="header">
         <h2>Staff PMs - Manage common responses</h2>
         <div class="linkbox">
-<?php if ($IsStaff) { ?>
+<?php if ($user->isStaff()) { ?>
             <a href="staffpm.php" class="brackets">View your unanswered</a>
 <?php } ?>
             <a href="staffpm.php?view=unanswered" class="brackets">View all unanswered</a>
