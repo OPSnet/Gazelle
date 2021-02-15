@@ -1234,6 +1234,10 @@ class User extends BaseObject {
         ');
     }
 
+    public function inviteCount(): int {
+        return $this->info()['DisableInvites'] ? 0 : $this->info()['Invites'];
+    }
+
     public function invitedCount(): int {
         return $this->getSingleValue('user-invites', '
             SELECT count(*)
@@ -1586,6 +1590,10 @@ class User extends BaseObject {
             $x[] = ['id' => $key. '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
         }
         return $x;
+    }
+
+    public function tokenCount(): int {
+        return $this->info()['FLTokens'];
     }
 
     /**

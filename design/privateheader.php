@@ -149,18 +149,7 @@ if ($notifMan->useNoty()) {
     }
 }
 
-$payMan = new Gazelle\Manager\Payment;
-
-if (check_perms('site_send_unlimited_invites')) {
-    $Invites = ' (∞)';
-} else {
-    $Invites = (G::$LoggedUser['Invites'] > 0)
-            ? (' (' . G::$LoggedUser['Invites'] . ')')
-            : '';
-}
-
 $activity = new Gazelle\Activity;
-
 if (G::$LoggedUser['RatioWatch']) {
     $activity->setAlert('<a class="nobr" href="rules.php?p=ratio">Ratio Watch</a>: You have '
         . time_diff(G::$LoggedUser['RatioWatchEnds'], 3)
@@ -200,6 +189,7 @@ if (check_perms('users_mod') || G::$LoggedUser['PermissionID'] === FORUM_MOD) {
 }
 
 $activity->setNotification($notifMan);
+$payMan = new Gazelle\Manager\Payment;
 
 if (check_perms('admin_manage_payments')) {
     $due = $payMan->due();
@@ -213,7 +203,6 @@ if (check_perms('admin_manage_payments')) {
         $activity->setAlert($AlertText);
     }
 }
-
 
 if (check_perms('admin_reports')) {
     $repoMan = new Gazelle\Report;
@@ -267,8 +256,6 @@ if (check_perms('admin_periodic_task_view')) {
         $activity->setAlert(sprintf('<a href="tools.php?action=periodic&amp;mode=view">There are %d insane tasks</a>', $insane));
     }
 }
-$alerts = $activity->alertList();
-$actions = $activity->actionList();
 
 $parseNavItem = function($val) {
     $val = trim($val);
@@ -319,193 +306,19 @@ foreach ($navItems as $n) {
     $navLinks[] = $li . '<a href="' . $Target . '">' . $Title . "</a></li>\n";
 }
 
-$UseAdvancedSearch = isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType'];
-$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
-?>
-    <meta name="viewport" content="width=device-width" />
-</head>
-<body id="<?=$Document == 'collages' ? 'collage' : $Document?>">
-    <input id="extracb1" class="hidden" type="checkbox">
-    <input id="extracb2" class="hidden" type="checkbox">
-    <input id="extracb3" class="hidden" type="checkbox">
-    <input id="extracb4" class="hidden" type="checkbox">
-    <input id="extracb5" class="hidden" type="checkbox">
-    <div id="wrapper">
-        <h1 class="hidden"><?=SITE_NAME?></h1>
-        <div id="header">
-            <div id="logo">
-                <a href="index.php"></a>
-            </div>
-            <div id="userinfo">
-                <ul id="userinfo_username">
-                    <li id="nav_userinfo" <?=Format::add_class($PageID, ['user', false, false], 'active', true, 'id')?>>
-                        <a href="user.php?id=<?=G::$LoggedUser['ID']?>" class="username"><?=G::$LoggedUser['Username']?></a>
-                    </li>
-                    <li id="nav_userclass">
-                        <span class="hidden userclass"><?=$ClassLevels[G::$LoggedUser['Class']]['Name']?></span>
-                    </li>
-                    <li id="nav_useredit" class="brackets<?=Format::add_class($PageID, ['user','edit'], 'active', false)?>">
-                        <a href="user.php?action=edit&amp;userid=<?=G::$LoggedUser['ID']?>">Edit</a>
-                    </li>
-                    <li id="nav_logout" class="brackets">
-                        <a href="logout.php?auth=<?=G::$LoggedUser['AuthKey']?>">Logout</a>
-                    </li>
-                </ul>
-                <ul id="userinfo_major">
-                    <li id="nav_upload" class="brackets<?=Format::add_class($PageID, ['upload'], 'active', false)?>">
-                        <a href="upload.php" title="Upload">Upload</a>
-                    </li>
-                    <li id="nav_bonus" class="brackets<?=Format::add_class($PageID, ['user', 'bonus'], 'active', false)?>">
-                        <a href="bonus.php" class='tooltip' title="BP/hour: <?=number_format(G::$LoggedUser['BonusPointsPerHour'], 2)?>">Bonus (<?=number_format((int) G::$LoggedUser['BonusPoints'])?>)</a>
-                    </li>
-                    <li id="nav_invite" class="brackets<?=Format::add_class($PageID, ['user','invite'], 'active', false)?>">
-                        <a href="user.php?action=invite" class='tooltip' title="Invite<?=$Invites?>">Invite<?=$Invites?></a>
-                    </li>
-                    <li id="nav_donate" class="brackets<?=Format::add_class($PageID, ['donate'], 'active', false)?>">
-                        <a href="donate.php" class='tooltip' title="Donate">Donate (<?= $payMan->monthlyPercent(new Gazelle\Manager\Donation) ?>%)</a>
-                    </li>
-
-                </ul>
-                <ul id="userinfo_stats">
-                    <li id="stats_seeding">
-                        <a href="torrents.php?type=seeding&amp;userid=<?=G::$LoggedUser['ID']?>">Up</a>:
-                        <span class="stat tooltip" title="<?=Format::get_size(G::$LoggedUser['BytesUploaded'], 5)?>"><?=Format::get_size(G::$LoggedUser['BytesUploaded'])?></span>
-                    </li>
-                    <li id="stats_leeching">
-                        <a href="torrents.php?type=leeching&amp;userid=<?=G::$LoggedUser['ID']?>">Down</a>:
-                        <span class="stat tooltip" title="<?=Format::get_size(G::$LoggedUser['BytesDownloaded'], 5)?>"><?=Format::get_size(G::$LoggedUser['BytesDownloaded'])?></span>
-                    </li>
-                    <li id="stats_ratio">
-                        Ratio: <span class="stat"><?=Format::get_ratio_html(G::$LoggedUser['BytesUploaded'], G::$LoggedUser['BytesDownloaded'])?></span>
-                    </li>
-<?php
-if (!empty(G::$LoggedUser['RequiredRatio'])) { ?>
-                    <li id="stats_required">
-                        <a href="rules.php?p=ratio">Required</a>:
-                        <span class="stat tooltip" title="<?=number_format(G::$LoggedUser['RequiredRatio'], 5)?>"><?=number_format(G::$LoggedUser['RequiredRatio'], 2)?></span>
-                    </li>
-<?php
-}
-if (G::$LoggedUser['FLTokens'] > 0) { ?>
-                    <li id="fl_tokens">
-                        <a href="wiki.php?action=article&amp;id=57">Tokens</a>:
-                        <span class="stat">
-                            <a href="userhistory.php?action=token_history&amp;userid=<?=G::$LoggedUser['ID']?>"><?=G::$LoggedUser['FLTokens']?></a>
-                        </span>
-                    </li>
-<?php } ?>
-                </ul>
-                <ul id="userinfo_minor"<?=$NewSubscriptions ? ' class="highlite"' : ''?>>
-<?php foreach ($navLinks as $link) { ?>
-                    <?= $link ?>
-<?php } ?>
-                </ul>
-            </div>
-            <div id="menu">
-                <h4 class="hidden">Site Menu</h4>
-                <ul>
-                    <li id="nav_index"<?=
-                        Format::add_class($PageID, ['index'], 'active', true)?>>
-                        <a href="index.php">Home</a>
-                    </li>
-                    <li id="nav_torrents"<?=
-                        Format::add_class($PageID, ['torrents', false, false], 'active', true)?>>
-                        <a href="torrents.php">Torrents</a>
-                    </li>
-                    <li id="nav_collages"<?=
-                        Format::add_class($PageID, ['collages'], 'active', true)?>>
-                        <a href="collages.php">Collages</a>
-                    </li>
-                    <li id="nav_requests"<?=
-                        Format::add_class($PageID, ['requests'], 'active', true)?>>
-                        <a href="requests.php">Requests</a>
-                    </li>
-                    <li id="nav_forums"<?=
-                        Format::add_class($PageID, ['forums'], 'active', true)?>>
-                        <a href="forums.php">Forums</a>
-                    </li>
-                    <li id="nav_irc"<?=
-                        Format::add_class($PageID, ['chat'], 'active', true)?>>
-                        <a href="wiki.php?action=article&amp;name=irc">IRC</a>
-                    </li>
-                    <li id="nav_top10"<?=
-                        Format::add_class($PageID, ['top10'], 'active', true)?>>
-                        <a href="top10.php">Top 10</a>
-                    </li>
-                    <li id="nav_rules"<?=
-                        Format::add_class($PageID, ['rules'], 'active', true)?>>
-                        <a href="rules.php">Rules</a>
-                    </li>
-                    <li id="nav_wiki"<?=
-                        Format::add_class($PageID, ['wiki'], 'active', true)?>>
-                        <a href="wiki.php">Wiki</a>
-                    </li>
-                    <li id="nav_staff"<?=
-                        Format::add_class($PageID, ['staff'], 'active', true)?>>
-                        <a href="staff.php" title="Staff">Staff</a>
-                    </li>
-                </ul>
-            </div>
-<?php
-if ($alerts || $actions) {
-?>
-            <div id="alerts">
-<?php if ($alerts) { ?>
-                <div class="alertbar"><?= implode(' &sdot; ', $alerts) ?></div>
-<?php
-    }
-    if ($actions) {
-?>
-                <div class="alertbar blend"><?= implode(' &sdot; ', $actions) ?></div>
-<?php } ?>
-            </div>
-<?php } ?>
-            <div id="searchbars">
-                <ul>
-                    <li id="searchbar_torrents">
-                        <span class="hidden">Torrents: </span>
-                        <form class="search_form" name="torrents" action="torrents.php" method="get">
-<?php if ($UseAdvancedSearch) { ?>
-                            <input type="hidden" name="action" value="advanced" />
-<?php } ?>
-                            <input id="torrentssearch" value="Torrents" placeholder="Torrents" type="text" name="<?=
-                                $UseAdvancedSearch ? 'groupname' : 'searchstr' ?>" size="17" spellcheck="false" accesskey="t" />
-                        </form>
-                    </li>
-                    <li id="searchbar_artists">
-                        <span class="hidden">Artist: </span>
-                        <form class="search_form" name="artists" action="artist.php" method="get">
-                            <input id="artistsearch"<?= $user->hasAutocomplete('search') ? ' data-gazelle-autocomplete="true"' : ''
-                                ?> value="Artists" placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a" />
-                        </form>
-                    </li>
-                    <li id="searchbar_requests">
-                        <span class="hidden">Requests: </span>
-                        <form class="search_form" name="requests" action="requests.php" method="get">
-                            <input id="requestssearch" value="Requests" placeholder="Requests" type="text" name="search" size="17" spellcheck="false" accesskey="r" />
-                        </form>
-                    </li>
-                    <li id="searchbar_forums">
-                        <span class="hidden">Forums: </span>
-                        <form class="search_form" name="forums" action="forums.php" method="get">
-                            <input value="search" type="hidden" name="action" />
-                            <input id="forumssearch" value="Forums" placeholder="Forums" type="text" name="search" size="17" accesskey="f" />
-                        </form>
-                    </li>
-                    <li id="searchbar_log">
-                        <span class="hidden">Log: </span>
-                        <form class="search_form" name="log" action="log.php" method="get">
-                            <input id="logsearch" value="Log" placeholder="Log" type="text" name="search" size="17" accesskey="l" />
-                        </form>
-                    </li>
-                    <li id="searchbar_users">
-                        <span class="hidden">Users: </span>
-                        <form class="search_form" name="users" action="user.php" method="get">
-                            <input type="hidden" name="action" value="search" />
-                            <input id="userssearch" value="Users" placeholder="Users" type="text" name="search" size="20" spellcheck="false" accesskey="u" />
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div id="content">
+echo G::$Twig->render('index/private-header.twig', [
+    'action'            => $_REQUEST['action'] ?? null,
+    'action_list'       => $activity->actionList(),
+    'alert_list'        => $activity->alertList(),
+    'auth'              => G::$LoggedUser['AuthKey'],
+    'advanced_search'   => isset(G::$LoggedUser['SearchType']) && G::$LoggedUser['SearchType'],
+    'document'          => $Document,
+    'dono_target'       => $payMan->monthlyPercent(new Gazelle\Manager\Donation),
+    'nav_links'         => $navLinks,
+    'ratio'             => Format::get_ratio_html($user->activityStats()['BytesUploaded'], $user->activityStats()['BytesDownloaded']),
+    'required_ratio'    => G::$LoggedUser['RequiredRatio'],
+    'subscriptions'     => $NewSubscriptions,
+    'unlimited_invites' => check_perms('site_send_unlimited_invites'),
+    'user'              => $user,
+    'user_class'        => (new Gazelle\Manager\User)->classLevelList()[G::$LoggedUser['Class']]['Name'],
+]);

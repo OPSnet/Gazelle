@@ -104,9 +104,10 @@ G::$Twig->addFilter(new Twig\TwigFilter(
 
 G::$Twig->addFilter(new Twig\TwigFilter(
     'octet_size',
-    function ($size) {
-        return \Format::get_size($size);
-    }
+    function ($size, array $option = []) {
+        return \Format::get_size($size, empty($option) ? 2 : $option[0]);
+    },
+    ['is_variadic' => true]
 ));
 
 G::$Twig->addFilter(new Twig\TwigFilter(
