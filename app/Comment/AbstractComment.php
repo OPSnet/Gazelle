@@ -5,22 +5,45 @@ namespace Gazelle\Comment;
 abstract class AbstractComment extends \Gazelle\BaseObject {
     protected $pageId;
     protected $userId;
+    protected $lastRead = 0;
+    protected $pageNum;     // which page to view
+    protected $total = 0;   // number of comments
+    protected $thread = []; // the page of comments
+    protected $viewer;
+
+    protected const PAGE_TOTAL = '%s_comments_%d';
+    protected const CATALOG = '%s_comments_%d_catalogue_%d';
+
+    abstract public function page(): string;
+    abstract public function pageUrl(): string;
 
     public function tableName(): string {
         return 'comments';
     }
 
-    public function __construct(int $pageId, int $postId) {
-        parent::__construct($postId);
+    public function __construct(int $pageId) {
+        parent::__construct(0);
         $this->pageId = $pageId;
     }
 
-    abstract public function page(): string;
-    abstract public function pageUrl(): string;
+    public function lastRead(): int {
+        return $this->lastRead;
+    }
+
+    public function pageNum(): int {
+        return $this->pageNum;
+    }
+
+    public function thread(): array {
+        return $this->thread;
+    }
+
+    public function total(): int {
+        return $this->total;
+    }
 
     public function url(): string {
-        return $this->pageUrl()
-            . "{$this->pageId}&postid={$this->id}#post{$this->id}";
+        return $this->pageUrl() . "{$this->pageId}&postid={$this->id}#post{$this->id}";
     }
 
     public function flush() {
@@ -46,9 +69,136 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return $this;
     }
 
+    public function setPageNum(int $pageNum) {
+        $this->pageNum = $pageNum;
+        return $this;
+    }
+
+    public function setPostId(int $id) {
+        $this->id = $id;
+        return $this;
+    }
+
+    public function setViewer(\Gazelle\User $viewer) {
+        $this->viewer = $viewer;
+        return $this;
+    }
+
     public function setBody(string $body) {
         $this->setUpdate('Body', trim($body));
         return $this;
+    }
+
+    /**
+     * Load a page of comments
+     */
+    public function load() {
+        $page = $this->page();
+        $pageId = $this->pageId;
+
+        // Get the total number of comments
+        $key = sprintf(self::PAGE_TOTAL, $page, $pageId);
+        $this->total = $this->cache->get_value($key);
+        if ($this->total === false) {
+            $this->total = $this->db->scalar("
+                SELECT count(*) FROM comments WHERE Page = ? AND PageID = ?
+                ", $page, $pageId
+            );
+            $this->cache->cache_value($key, $this->total, 0);
+        }
+
+        if (is_null($this->pageNum)) {
+            // default to final page, or page where specified post is found
+            if (!$this->id) {
+                $this->pageNum = (int)ceil($this->total / TORRENT_COMMENTS_PER_PAGE);
+            } else {
+                $prior = $this->db->scalar("
+                    SELECT count(*)
+                    FROM comments
+                    WHERE Page = ?
+                        AND PageID = ?
+                        AND ID <= ?
+                    ", $page, $pageId, $this->id
+                );
+                $this->pageNum = (int)ceil($prior / TORRENT_COMMENTS_PER_PAGE);
+            }
+        }
+
+        // Cache catalogue from which the page is selected
+        $CatalogueID = (int)floor(TORRENT_COMMENTS_PER_PAGE * ($this->pageNum - 1) / THREAD_CATALOGUE);
+        $catKey = sprintf(self::CATALOG, $page, $pageId, $CatalogueID);
+        if (($Catalogue = $this->cache->get_value($catKey)) === false) {
+            $this->db->prepared_query("
+                SELECT c.ID,
+                    c.AuthorID,
+                    c.AddedTime,
+                    c.Body,
+                    c.EditedUserID,
+                    c.EditedTime,
+                    u.Username
+                FROM comments AS c
+                LEFT JOIN users_main AS u ON (u.ID = c.EditedUserID)
+                WHERE c.Page = ? AND c.PageID = ?
+                ORDER BY c.ID
+                LIMIT ? OFFSET ?
+                ", $page, $pageId, THREAD_CATALOGUE, THREAD_CATALOGUE * $CatalogueID
+            );
+            $Catalogue = $this->db->to_array(false, MYSQLI_ASSOC);
+            $this->cache->cache_value($catKey, $Catalogue, 0);
+        }
+
+        //This is a hybrid to reduce the catalogue down to the page elements: We use the page limit % catalogue
+        $this->thread = array_slice($Catalogue,
+            (TORRENT_COMMENTS_PER_PAGE * ($this->pageNum - 1)) % THREAD_CATALOGUE, TORRENT_COMMENTS_PER_PAGE, true
+        );
+        return $this;
+    }
+
+    public function handleSubscription(\Gazelle\User $user) {
+        if (empty($this->thread)) {
+            return;
+        }
+        $lastPost = end($this->thread)['ID'];
+        $page = $this->page();
+        $pageId = $this->pageId;
+        $userId = $user->id();
+
+        // quote notifications
+        $this->db->begin_transaction();
+        $this->db->prepared_query("
+            UPDATE users_notify_quoted SET
+                UnRead = false
+            WHERE Page = ?
+                AND PageID = ?
+                AND PostID BETWEEN ? AND ?
+                AND UserID = ?
+            ", $page, $pageId, current($this->thread)['ID'], $lastPost, $userId
+        );
+        if ($this->db->affected_rows()) {
+            $this->cache->delete_value("notify_quoted_$userId");
+        }
+
+        // last read
+        $this->lastRead = $this->db->scalar("
+            SELECT PostID
+            FROM users_comments_last_read
+            WHERE Page = ?
+                AND PageID = ?
+                AND UserID = ?
+            ", $page, $pageId, $userId
+        ) ?? 0;
+        if ($this->lastRead < $lastPost) {
+            $this->db->prepared_query("
+                INSERT INTO users_comments_last_read
+                       (UserID, Page, PageID, PostID)
+                VALUES (?,      ?,    ?,      ?)
+                ON DUPLICATE KEY UPDATE
+                    PostID = ?
+                ", $userId, $page, $pageId, $lastPost, $lastPost
+            );
+            $this->cache->delete_value("subscriptions_user_new_$userId");
+        }
+        $this->db->commit();
     }
 
     /**

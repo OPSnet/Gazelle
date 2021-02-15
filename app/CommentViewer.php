@@ -27,14 +27,14 @@ abstract class CommentViewer {
 
     /**
      * Render a thread of comments
-     * @param array $Thread An array as returned by Comments::load
-     * @param int $LastRead PostID of the last read post
+     * @param array [total comments, page, comment list, last read]
+     * @param int PostID of the last read post
      */
-    public function renderThread(array $Thread, int $LastRead) {
+    public function renderThread(array $Thread, int $lastRead) {
         foreach ($Thread as $Post) {
             [$PostID, $AuthorID, $AddedTime, $CommentBody, $EditedUserID, $EditedTime, $EditedUsername]
                 = array_values($Post);
-            $this->render($AuthorID, $PostID, $CommentBody, $AddedTime, $EditedUserID, $EditedTime, ($PostID > $LastRead));
+            $this->render($AuthorID, $PostID, $CommentBody, $AddedTime, $EditedUserID, $EditedTime, ($PostID > $lastRead));
         }
     }
 
