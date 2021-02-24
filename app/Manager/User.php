@@ -73,6 +73,50 @@ class User extends \Gazelle\Base {
     }
 
     /**
+     * Generate HTML for a user's avatar
+     *
+     * @param Gazelle\User viewer Who is doing the viewing, to determine how to fallback if no avatar is available
+     * @param Gazelle\User viewed Which avatar is being viewed
+     * @return HTML markup of the viewed avatar
+     */
+    public function avatarMarkup(\Gazelle\User $viewer, \Gazelle\User $viewed) {
+        static $cache = [];
+        $viewedId = $viewed->id();
+        if (!isset($cache[$viewedId])) {
+            switch ($viewer->avatarMode()) {
+                case 1:
+                    $avatar = STATIC_SERVER . '/common/avatars/default.png';
+                    break;
+                case 2:
+                    $avatar = \ImageTools::process($viewed->avatar(), false, 'avatar', $viewedId)
+                        ?: (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
+                            ->setSize(AVATAR_WIDTH)
+                            ->avatar($viewed->username());
+                    break;
+                case 3:
+                    $avatar = (new \Gazelle\Util\Avatar((int)$viewer->option('Identicons')))
+                        ->setSize(AVATAR_WIDTH)
+                        ->avatar($viewed->username());
+                    break;
+                default:
+                    $avatar = \ImageTools::process($viewed->avatar(), false, 'avatar', $viewedId)
+                        ?: STATIC_SERVER . '/common/avatars/default.png';
+                    break;
+            }
+            $attrs = ['width="' . AVATAR_WIDTH . '"'];
+            [$mouseover, $second] = (new \Gazelle\Manager\Donation)->avatarInfo($viewedId);
+            if (!is_null($mouseover)) {
+                $attrs[] = $mouseover;
+            }
+            $attr = implode(' ', $attrs);
+            $cache[$viewedId] = "<div class=\"avatar_container\"><div><img $attr class=\"avatar_0\" src=\"$avatar\" /></div>"
+                . ($second ? ("<div><img $attr class=\"avatar_1\" src=\"" . \ImageTools::process($second, false, 'avatar2', $viewedId) . '" /></div>') : '')
+                . "</div>";
+        }
+        return $cache[$viewedId];
+    }
+
+    /**
      * Get list of user classes by ID
      * @return array $classes
      */

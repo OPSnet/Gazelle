@@ -56,6 +56,9 @@ View::show_header('Friends','comments');
        <p>You have no friends! :(</p>
 <?php
 }
+$userMan = new Gazelle\Manager\User;
+$user = $userMan->findById($LoggedUser['ID']);
+
 // Start printing out friends
 foreach ($Friends as $Friend) {
     [$FriendID, $Comment, $Username, $Uploaded, $Downloaded, $Class, $Paranoia, $LastAccess, $Avatar] = $Friend;
@@ -64,7 +67,7 @@ foreach ($Friends as $Friend) {
     <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
     <table class="friends_table vertical_margin">
         <tr class="colhead">
-            <td colspan="<?=(Users::has_avatars_enabled() ? 3 : 2)?>">
+            <td colspan="<?=($user->showAvatars() ? 3 : 2)?>">
                 <span style="float: left;"><?=Users::format_username($FriendID, true, true, true, true)?>
 <?php if (check_paranoia('ratio', $Paranoia, $Class, $FriendID)) { ?>
                 &nbsp;Ratio: <strong><?=Format::get_ratio_html($Uploaded, $Downloaded)?></strong>
@@ -86,9 +89,9 @@ foreach ($Friends as $Friend) {
             </td>
         </tr>
         <tr>
-<?php if (Users::has_avatars_enabled()) { ?>
+<?php if ($user->showAvatars()) { ?>
             <td class="col_avatar avatar" valign="top">
-                <?=Users::show_avatar($Avatar, $FriendID, $Username, $HeavyInfo['DisableAvatars'])?>
+                <?= $userMan->avatarMarkup($user, new Gazelle\User($FriendID)) ?>
             </td>
 <?php } ?>
             <td valign="top">

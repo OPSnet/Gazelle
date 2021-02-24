@@ -371,6 +371,18 @@ class Donation extends \Gazelle\Base {
         return $Results;
     }
 
+    public function avatarInfo(int $userId): array {
+        $enabled = $this->enabledRewards($userId);
+        $rewards = $this->rewards($userId);
+        if (!$enabled['HasAvatarMouseOverText']) {
+            $mouseOver = null;
+        } else {
+            $text = $rewards['AvatarMouseOverText'];
+            $mouseOver = empty($text) ? null : "title=\"$text\" alt=\"$text\"";
+        }
+        return [$mouseOver, $enabled['HasSecondAvatar'] ? ($rewards['SecondAvatar'] ?: null) : null];
+    }
+
     public function enabledRewards($UserID) {
         $Rewards = [];
         $Rank = $this->rank($UserID);

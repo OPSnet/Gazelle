@@ -307,6 +307,8 @@ View::show_header($Title, 'bbcode,comments');
     $isAdmin = check_perms('site_admin_forums');
     $isMod = check_perms('site_moderate_forums');
     $commentMan = new Gazelle\Manager\Comment;
+    $userMan = new Gazelle\Manager\User;
+    $user = $userMan->findById($LoggedUser['ID']);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
         switch ($Page) {
             case 'artist':
@@ -322,10 +324,10 @@ View::show_header($Title, 'bbcode,comments');
                 $Header = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>";
                 break;
         }
-        $author = Users::user_info($AuthorID);
+        $author = new Gazelle\User($AuthorID);
         $ownProfile = $AuthorID == $LoggedUser['ID'];
         echo G::$Twig->render('comment/comment.twig', [
-            'avatar'      => Users::show_avatar($author['Avatar'], $AuthorID, $author['Username'], $LoggedUser['DisableAvatars']),
+            'avatar'      => $userMan->avatarMarkup($user, $author),
             'body'        => Text::full_format($Body),
             'edited'      => $EditedUserID,
             'editor'      => Users::format_username($EditedUserID, false, false, false),
@@ -333,13 +335,13 @@ View::show_header($Title, 'bbcode,comments');
             'id'          => $PostID,
             'is_admin'    => $isAdmin,
             'header'      => '<strong>' . Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header,
-            'show_avatar' => Users::has_avatars_enabled(),
+            'show_avatar' => $user->showAvatars(),
             'show_delete' => $isMod,
             'show_edit'   => $isMod || $ownProfile,
-            'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author['Class'],
+            'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author->classLevel(),
             'show_unread' => false,
             'url'         => $commentMan->findById($PostID)->url(),
-            'username'    => $author['Username'],
+            'username'    => $author->username(),
         ]);
     }
 }

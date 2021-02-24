@@ -5,7 +5,7 @@ namespace Gazelle;
 abstract class CommentViewer {
 
     /** @var \Gazelle\User */
-    protected $user;
+    protected $viewer;
 
     /** @var string */
     protected $page;
@@ -18,7 +18,7 @@ abstract class CommentViewer {
 
     public function __construct(\Twig\Environment $twig, int $viewerId) {
         $this->twig = $twig;
-        $this->user = new User($viewerId);
+        $this->viewer = new User($viewerId);
     }
 
     protected function baseLink(int $postId): string {
@@ -50,10 +50,10 @@ abstract class CommentViewer {
      * @param bool $Tools Whether or not to show [Edit], [Report] etc.
      */
     public function render($AuthorID, $PostID, $Body, $AddedTime, $EditedUserID, $EditedTime, $Unread = false, $Header = '') {
-        $author = \Users::user_info($AuthorID);
-        $ownProfile = $AuthorID == $this->user->id();
+        $author = new User($AuthorID);
+        $ownProfile = $AuthorID == $this->viewer->id();
         echo $this->twig->render('comment/comment.twig', [
-            'avatar'      => \Users::show_avatar($author['Avatar'], $AuthorID, $author['Username'], $this->user->avatarMode()),
+            'avatar'      => (new Manager\User)->avatarMarkup($this->viewer, $author),
             'body'        => \Text::full_format($Body),
             'edited'      => $EditedUserID,
             'editor'      => \Users::format_username($EditedUserID, false, false, false),
@@ -62,13 +62,13 @@ abstract class CommentViewer {
             'is_admin'    => check_perms('site_admin_forums'),
             'header'      => '<strong>' . \Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header,
             'page'        => $this->page,
-            'show_avatar' => $this->user->avatarMode() != '1',
+            'show_avatar' => $this->viewer->showAvatars(),
             'show_delete' => check_perms('site_forum_post_delete'),
-            'show_edit'   => $ownProfile || check_perms('site_moderate_forums'),
-            'show_warn'   => check_perms('users_warn') && !$ownProfile && $this->user->classLevel() >= $author['Class'],
+            'show_edit'   => check_perms('site_moderate_forums') || $ownProfile,
+            'show_warn'   => check_perms('users_warn') && !$ownProfile && $this->viewer->classLevel() >= $author->classLevel(),
             'unread'      => $Unread,
             'url'         => $this->baseLink($PostID),
-            'username'    => $author['Username'],
+            'username'    => $author->userName(),
         ]);
     }
 }

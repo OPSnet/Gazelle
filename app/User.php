@@ -78,6 +78,7 @@ class User extends BaseObject {
                 um.IRCKey,
                 um.2FA_Key,
                 ui.AdminComment,
+                ui.Avatar,
                 ui.collages,
                 ui.DisableAvatar,
                 ui.DisableInvites,
@@ -120,6 +121,7 @@ class User extends BaseObject {
             return $this->info;
         }
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
+        $this->info['DisableAvatar'] = (bool)($this->info['DisableAvatar'] == '1');
         $this->info['DisableForums'] = (bool)($this->info['DisableForums'] == '1');
         $this->info['DisableInvites'] = (bool)($this->info['DisableInvites'] == '1');
         $this->info['DisableRequests'] = (bool)($this->info['DisableRequests'] == '1');
@@ -238,6 +240,18 @@ class User extends BaseObject {
         return $this->info()['DisableRequests'];
     }
 
+    public function avatar(): ?string {
+        return $this->info()['Avatar'];
+    }
+
+    public function avatarMode(): int {
+        return $this->option('DisableAvatars');
+    }
+
+    public function showAvatars(): bool {
+        return !$this->info()['DisableAvatar'];
+    }
+
     public function email(): string {
         return $this->info()['Email'];
     }
@@ -256,10 +270,6 @@ class User extends BaseObject {
 
     public function supportFor() {
         return $this->info()['SupportFor'];
-    }
-
-    public function avatarMode(): string {
-        return $this->heavy()['DisableAvatars'] ?? '0';
     }
 
     public function primaryClass(): int {

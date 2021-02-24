@@ -97,6 +97,8 @@ if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
     (new Gazelle\User\Quote($user))->clearThread($threadId, $FirstPost, $LastPost);
 }
 
+$userMan = new Gazelle\Manager\User;
+
 $Pages = Format::get_pages($Page, $threadInfo['Posts'], $PerPage, 9);
 $transitions = Forums::get_thread_transitions($forumId);
 $auth = $LoggedUser['AuthKey'];
@@ -357,7 +359,7 @@ foreach ($thread as $Key => $Post) {
         ) {
         $tableClass[] = 'forum_unread';
     }
-    if (!Users::has_avatars_enabled()) {
+    if (!$user->showAvatars()) {
         $tableClass[] = 'noavatar';
     }
     if ($threadInfo['AuthorID'] == $AuthorID) {
@@ -369,13 +371,13 @@ foreach ($thread as $Key => $Post) {
 ?>
 <table class="<?= implode(' ', $tableClass) ?>" id="post<?= $PostID ?>">
     <colgroup>
-<?php if (Users::has_avatars_enabled()) { ?>
+<?php if ($user->showAvatars()) { ?>
         <col class="col_avatar" />
 <?php } ?>
         <col class="col_post_body" />
     </colgroup>
     <tr class="colhead_dark">
-        <td colspan="<?=Users::has_avatars_enabled() ? 2 : 1?>">
+        <td colspan="<?= $user->showAvatars() ? 2 : 1 ?>">
             <span style="float: left;"><a class="post_id" href="forums.php?action=viewthread&amp;threadid=<?=$threadId?>&amp;postid=<?=$PostID?>#post<?=$PostID?>">#<?=$PostID?></a>
                 <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum) ?>
                 <?=time_diff($AddedTime, 2); ?>
@@ -411,9 +413,8 @@ foreach ($thread as $Key => $Post) {
             <span id="bar<?=$PostID?>" style="float: right">
                 <a href="reports.php?action=report&amp;type=post&amp;id=<?=$PostID?>" class="brackets">Report</a>
 <?php
-    if (check_perms('users_warn') && $AuthorID != $user->id()) {
-        $AuthorInfo = Users::user_info($AuthorID);
-        if ($LoggedUser['Class'] >= $AuthorInfo['Class']) {
+    $author = new Gazelle\User($AuthorID);
+    if (check_perms('users_warn') && !$ownProfile && $user->classLevel() >= $author->classLevel()) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
                     <input type="hidden" name="action" value="warn" />
@@ -423,22 +424,19 @@ foreach ($thread as $Key => $Post) {
                     <input type="hidden" name="key" value="<?=$Key?>" />
                 </form>
                 - <a href="#" onclick="$('#warn<?=$PostID?>').raw().submit(); return false;" class="brackets">Warn</a>
-<?php
-        }
-    }
-?>
+<?php } ?>
                 &nbsp;
                 <a href="#">&uarr;</a>
             </span>
         </td>
     </tr>
     <tr>
-<?php   if (Users::has_avatars_enabled()) { ?>
+<?php   if ($user->showAvatars()) { ?>
         <td class="avatar" valign="top">
-        <?=Users::show_avatar($Avatar, $AuthorID, $Username, $HeavyInfo['DisableAvatars'], 150, true)?>
+            <?= $userMan->avatarMarkup($user, $author) ?>
         </td>
 <?php   } ?>
-        <td class="body" valign="top"<?php if (!Users::has_avatars_enabled()) { echo ' colspan="2"'; } ?>>
+        <td class="body" valign="top"<?php if (!$user->showAvatars()) { echo ' colspan="2"'; } ?>>
             <div id="content<?=$PostID?>">
                 <?= Text::full_format($Body) ?>
 <?php   if ($EditedUserID) { ?>

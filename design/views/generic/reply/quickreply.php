@@ -77,14 +77,15 @@
                     <table class="forum_post box vertical_margin hidden preview_wrap" id="preview_wrap_<?=$ReplyText->getID()?>">
                         <colgroup>
 <?php
-    if (Users::has_avatars_enabled()) { ?>
+    $user = new Gazelle\User(G::$LoggedUser['ID']);
+    if ($user->showAvatars()) { ?>
                             <col class="col_avatar" />
 <?php
     } ?>
                             <col class="col_post_body" />
                         </colgroup>
                         <tr class="colhead_dark">
-                            <td colspan="<?=(Users::has_avatars_enabled() ? 2 : 1)?>">
+                            <td colspan="<?=($user->showAvatars() ? 2 : 1)?>">
                                 <div style="float: left;"><a href="#quickreplypreview">#XXXXXX</a>
                                     by <strong><?=Users::format_username(G::$LoggedUser['ID'], true, true, true, true)?></strong> Just now
                                 </div>
@@ -97,9 +98,9 @@
                         </tr>
                         <tr>
 <?php
-    if (Users::has_avatars_enabled()) { ?>
+    if ($user->showAvatars()) { ?>
                             <td class="avatar" valign="top">
-                                <?=Users::show_avatar(G::$LoggedUser['Avatar'], G::$LoggedUser['ID'], G::$LoggedUser['Username'], $HeavyInfo['DisableAvatars'])?>
+                                <?= (new Gazelle\Manager\User)->avatarMarkup($user, $user) ?>
                             </td>
 <?php
     } ?>

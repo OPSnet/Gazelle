@@ -152,6 +152,8 @@ $Pages = Format::get_pages($Page, $NumResults, $PerPage, 11);
 <?php
 }
 if ($NumResults) {
+    $userMan = new Gazelle\Manager\User;
+    $user = $userMan->findById($LoggedUser['ID']);
 ?>
             <a href="#" onclick="Collapse(); return false;" id="collapselink" class="brackets"><?=$ShowCollapsed ? 'Show' : 'Hide' ?> post bodies</a>&nbsp;
 <?php } ?>
@@ -221,15 +223,15 @@ if ($NumResults) {
                 error(0);
         }
 ?>
-    <table class="forum_post box vertical_margin<?=(!Users::has_avatars_enabled() ? ' noavatar' : '')?>">
+    <table class="forum_post box vertical_margin<?=(!$user->showAvatars() ? ' noavatar' : '')?>">
         <colgroup>
-<?php   if (Users::has_avatars_enabled()) { ?>
+<?php   if ($user->showAvatars()) { ?>
             <col class="col_avatar" />
 <?php   } ?>
             <col class="col_post_body" />
         </colgroup>
         <tr class="colhead_dark notify_<?=$Result['Page']?>">
-            <td colspan="<?=Users::has_avatars_enabled() ? 2 : 1 ?>">
+            <td colspan="<?= $user->showAvatars() ? 2 : 1 ?>">
                 <span style="float: left;">
                     <?=$Links . ($Result['PostID'] < $Result['LastPost'] ? ' <span class="new">(New!)</span>' : '')?>
                 </span>
@@ -250,9 +252,9 @@ if ($NumResults) {
         </tr>
 <?php   if (!empty($Result['LastReadBody'])) { /* if a user is subscribed to a topic/comments but hasn't accessed the site ever, LastReadBody will be null - in this case we don't display a post. */ ?>
         <tr class="row<?=$ShowCollapsed ? ' hidden' : '' ?>">
-<?php       if (Users::has_avatars_enabled()) { ?>
+<?php       if ($user->showAvatars()) { ?>
             <td class="avatar" valign="top">
-                <?=Users::show_avatar($Result['LastReadAvatar'], $Result['LastReadUserID'], $Result['LastReadUsername'], $HeavyInfo['DisableAvatars'])?>
+                <?= $userMan->avatarMarkup($user, new Gazelle\User($Result['LastReadUserID'])) ?>
             </td>
 <?php       } ?>
             <td class="body" valign="top">
