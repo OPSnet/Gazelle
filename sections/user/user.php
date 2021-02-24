@@ -5,7 +5,9 @@ if (empty($_GET['id']) || !is_number($_GET['id']) || (!empty($_GET['preview']) &
 $UserID = (int)$_GET['id'];
 $Bonus = new Gazelle\Bonus;
 $donorMan = new Gazelle\Manager\Donation;
-$ClassLevels = (new Gazelle\Manager\User)->classLevelList();
+$userMan = new Gazelle\Manager\User;
+$ClassLevels = $userMan->classLevelList();
+$Classes = $userMan->classList();
 
 if (!empty($_POST)) {
     authorize();
@@ -232,11 +234,14 @@ if (check_perms('users_mod')) {
     </div>
 
     <div class="sidebar">
-<?php if ($Avatar && Users::has_avatars_enabled()) { ?>
+<?php
+$viewer = new Gazelle\User($LoggedUser['ID']);
+if ($viewer->showAvatars()) {
+?>
         <div class="box box_image box_image_avatar">
             <div class="head colhead_dark">Avatar</div>
             <div align="center">
-<?=                Users::show_avatar($Avatar, $UserID, $Username, $HeavyInfo['DisableAvatars'])?>
+                <?= $userMan->avatarMarkup($viewer, $User) ?>
             </div>
         </div>
 <?php
@@ -543,7 +548,6 @@ function display_rank(Gazelle\UserRank $r, string $dimension) {
             <ul class="stats nobullet">
                 <li>Class: <?=$ClassLevels[$Class]['Name']?></li>
 <?php
-$Classes = (new Gazelle\Manager\User)->classList();
 $UserInfo = Users::user_info($UserID);
 if (!empty($UserInfo['ExtraClasses'])) {
 ?>

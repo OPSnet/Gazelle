@@ -265,11 +265,9 @@ if ($Action == 'requests') {
     foreach ($RequestIDs as $RequestID) {
         $Artists[$RequestID] = Requests::get_artists($RequestID);
     }
-    $DB->set_query_id($Comments);
 } elseif ($Action == 'torrents') {
     $GroupIDs = array_flip(array_flip($DB->collect('PageID')));
     $Artists = Artists::get_artists($GroupIDs);
-    $DB->set_query_id($Comments);
 }
 
 $Links = implode(' ', $ActionLinks)
@@ -303,44 +301,46 @@ View::show_header($Title, 'bbcode,comments');
     <div class="center">No results.</div>
 <?php
 } else {
-    $DB->set_query_id($Comments);
     $isAdmin = check_perms('site_admin_forums');
-    $isMod = check_perms('site_moderate_forums');
     $commentMan = new Gazelle\Manager\Comment;
+    $userMan = new Gazelle\Manager\User;
+    $user = $userMan->findById($LoggedUser['ID']);
+    $DB->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
+        $author = new Gazelle\User($AuthorID);
+        $ownProfile = $AuthorID == $LoggedUser['ID'];
         switch ($Page) {
             case 'artist':
-                $Header = " on <a href=\"artist.php?id=$PageID\">$Name</a>";
+                $heading = " on <a href=\"artist.php?id=$PageID\">$Name</a>";
                 break;
             case 'collages':
-                $Header = " on <a href=\"collages.php?id=$PageID\">$Name</a>";
+                $heading = " on <a href=\"collages.php?id=$PageID\">$Name</a>";
                 break;
             case 'requests':
-                $Header = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"requests.php?action=view&id=$PageID\">$Name</a>";
+                $heading = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"requests.php?action=view&id=$PageID\">$Name</a>";
                 break;
             case 'torrents':
-                $Header = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>";
+                $heading = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>";
                 break;
         }
-        $author = Users::user_info($AuthorID);
-        $ownProfile = $AuthorID == $LoggedUser['ID'];
         echo G::$Twig->render('comment/comment.twig', [
-            'avatar'      => Users::show_avatar($author['Avatar'], $AuthorID, $author['Username'], $LoggedUser['DisableAvatars']),
-            'body'        => Text::full_format($Body),
-            'edited'      => $EditedUserID,
-            'editor'      => Users::format_username($EditedUserID, false, false, false),
-            'edit_time'   => time_diff($EditedTime, 2, true, true),
+            'added_time'  => $AddedTime,
+            'author'      => $author,
+            'avatar'      => $userMan->avatarMarkup($user, $author),
+            'body'        => $Body,
+            'editor'      => $userMan->findById((int)$EditedUserID),
+            'edit_time'   => $EditedTime,
             'id'          => $PostID,
             'is_admin'    => $isAdmin,
-            'header'      => '<strong>' . Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header,
-            'show_avatar' => Users::has_avatars_enabled(),
-            'show_delete' => $isMod,
-            'show_edit'   => $isMod || $ownProfile,
-            'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author['Class'],
+            'heading'     => $heading,
+            'show_avatar' => $user->showAvatars(),
+            'show_delete' => check_perms('site_forum_post_delete'),
+            'show_edit'   => check_perms('site_moderate_forums') || $ownProfile,
+            'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author->classLevel(),
             'show_unread' => false,
             'url'         => $commentMan->findById($PostID)->url(),
-            'username'    => $author['Username'],
         ]);
+        $DB->set_query_id($Comments);
     }
 }
 ?>
