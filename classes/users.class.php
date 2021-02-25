@@ -261,41 +261,6 @@ class Users {
     }
 
     /**
-     * Return the ID of a Username
-     * @param string Username
-     * @return userID if exists, null otherwise
-     */
-    public static function ID_from_username($name) {
-        $digest = base64_encode(md5($name, true));
-        $key = "username_id_$digest";
-        $ID = G::$Cache->get_value($key);
-        if ($ID == -1) {
-            return null;
-        }
-        elseif ($ID === false) {
-            G::$DB->prepared_query("SELECT ID FROM users_main WHERE Username=?", $name);
-            if (!G::$DB->has_results()) {
-                // cache negative hits for a while
-                G::$Cache->cache_value($key, -1, 300);
-                return null;
-            }
-            list($ID) = G::$DB->next_record();
-            G::$Cache->cache_value($key, $ID, 300);
-        }
-        return $ID;
-    }
-
-    /**
-     * Does this ID point to an existing user?
-     * @param integer ID
-     * @return boolean
-     */
-    public static function exists($ID) {
-        G::$DB->prepared_query("SELECT 1 FROM users_main WHERE ID = ?", $ID);
-        return G::$DB->has_results();
-    }
-
-    /**
      * Default settings to use for SiteOptions
      * @return array
      */
