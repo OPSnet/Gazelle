@@ -21,14 +21,14 @@ else {
     if (empty($_GET['user'])) {
         error('You have to enter a username to give tokens to.');
     }
-    $ID = Users::ID_from_username(urldecode($_GET['user']));
-    if (is_null($ID)) {
+    $user = (new Gazelle\Manager\User)->findByUsername(urldecode($_GET['user']));
+    if (is_null($user)) {
         error('Nobody with that name found at ' . SITE_NAME . '. Are you certain the spelling is right?');
-    } elseif ($ID == $LoggedUser['ID']) {
+    } elseif ($user->id() == $LoggedUser['ID']) {
         error('You cannot gift yourself tokens, they are cheaper to buy directly.');
     }
     try {
-        $Bonus->purchaseTokenOther($LoggedUser['ID'], $ID, $Label);
+        $Bonus->purchaseTokenOther($LoggedUser['ID'], $user->id(), $Label);
     } catch (BonusException $e) {
         if ($e->getMessage() == 'otherToken:no-gift-funds') {
             error('Purchase for other not concluded. Either you lacked funds or they have chosen to decline FL tokens.');
