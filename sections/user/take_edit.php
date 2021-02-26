@@ -372,7 +372,7 @@ $Params[] = $UserID;
 
 $DB->prepared_query($SQL, ...$Params);
 
-$Cache->deleteMulti(["user_info_$UserID", "user_info_heavy_$UserID"]);
+$user->flush();
 
 if ($ResetPassword) {
     logout_all_sessions($UserID);

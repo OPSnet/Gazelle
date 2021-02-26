@@ -71,12 +71,7 @@ class PromoteUsers extends \Gazelle\Schedule\Task
                 $userMan = new \Gazelle\Manager\User;
                 foreach ($userIds as $userId) {
                     $this->debug(sprintf('Promoting %d from %s to %s', $userId, $fromClass, $toClass), $userId);
-
-                    $this->cache->delete_value("user_info_$userId");
-                    $this->cache->delete_value("user_info_heavy_$userId");
-                    $this->cache->delete_value("user_stats_$userId");
-                    $this->cache->delete_value("user_rlim_$userId");
-                    $this->cache->delete_value("enabled_$userId");
+                    $this->cache->deleteMulti(["u_$userId", "user_info_$userId", "user_info_heavy_$userId", "user_stats_$userId", "user_rlim_$userId", "enabled_$userId"]);
                     $comment = sprintf("%s - Class changed to %s by System\n\n", sqltime(), $toClass);
                     $this->db->prepared_query("
                         UPDATE users_info

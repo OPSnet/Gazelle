@@ -13,12 +13,9 @@ class ExpireInvites extends \Gazelle\Schedule\Task
         $users = $this->db->collect('InviterID', false);
         foreach ($users as $user) {
             $this->db->prepared_query("UPDATE users_main SET Invites = Invites + 1 WHERE ID = ?", $user);
-            $this->cache->begin_transaction("user_info_heavy_$user");
-            $this->cache->update_row(false, ['Invites' => '+1']);
-            $this->cache->commit_transaction(0);
-
-            $this->processed++;
+            $this->cache->deleteMulti(["u_$user", "user_info_heavy_$user"]);
             $this->debug("Expired invite from user $user", $user);
+            $this->processed++;
         }
     }
 }

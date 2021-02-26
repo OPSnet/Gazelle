@@ -49,6 +49,7 @@ class Bonus extends Base {
 
     public function flushUserCache($userId) {
         $this->cache->deleteMulti([
+            'u_' . $userId,
             'user_info_heavy_' . $userId,
             'user_stats_' . $userId,
         ]);
@@ -105,14 +106,12 @@ class Bonus extends Base {
     }
 
     public function getEffectivePrice($label, $userId): int {
-        $item  = $this->items()[$label];
-        $info = \Users::user_heavy_info($userId);
+        $item = $this->items()[$label];
+        $user = new User($userId);
         if (preg_match('/^collage-\d$/', $label)) {
-            return $item['Price'] * pow(2, $info['Collages']);
+            return $item['Price'] * pow(2, $user->paidPersonalCollages());
         }
-
-        $info = \Users::user_info($userId);
-        return $info['EffectiveClass'] >= $item['FreeClass'] ? 0 : (int)$item['Price'];
+        return $user->effectiveClass() >= $item['FreeClass'] ? 0 : (int)$item['Price'];
     }
 
     public function getListOther($balance) {
@@ -169,6 +168,7 @@ class Bonus extends Base {
         $this->cache->deleteMulti([
             self::CACHE_OPEN_POOL,
             sprintf(self::CACHE_POOL_HISTORY, $userId),
+            'u_' . $userId,
             'user_info_heavy_' . $userId,
             'user_stats_' . $userId,
         ]);
@@ -420,6 +420,8 @@ class Bonus extends Base {
         }
         $this->addPurchaseHistory($item['ID'], $fromID, $price, $toID);
         $this->cache->deleteMulti([
+            'u_' . $fromID,
+            'u_' . $toID,
             'user_info_heavy_' . $fromID,
             'user_info_heavy_' . $toID,
             'user_stats_' . $fromID,

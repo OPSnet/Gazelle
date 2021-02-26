@@ -116,12 +116,12 @@ class Thread extends Base {
             ORDER BY created;
         ", $this->id);
         $this->story = [];
+        $userMan = new Manager\User;
         if ($this->db->has_results()) {
             $user_cache = [];
             while (($row = $this->db->next_record())) {
                 if (!in_array($row['UserID'], $user_cache)) {
-                    $user = \Users::user_info($row['UserID']);
-                    $user_cache[$row['UserID']] = $user['Username'];
+                    $user_cache[$row['UserID']] = $userMan->findById($row['UserID'])->username();
                 }
                 $this->story[] = [
                     'id'         => $row['ID'],

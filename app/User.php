@@ -6,6 +6,8 @@ use Gazelle\Util\Mail;
 
 class User extends BaseObject {
 
+    const CACHE_KEY = 'u_%d';
+
     /** @var int */
     protected $forceCacheFlush = false;
 
@@ -15,16 +17,7 @@ class User extends BaseObject {
     /** @var array queue of staff notes to persist */
     protected $staffNote = [];
 
-    /** @var array contents of info
-     * TODO: kill $heavy and $light
-     */
     protected $info;
-
-    /** @var array contents of \Users::user_heavy_info */
-    protected $heavy;
-
-    /** @var array contents of \Users::user_info */
-    protected $light;
 
     /** @var \Gazelle\Manager\Torrent to look up torrents associated with a user (snatched, uploaded, ...) */
     protected $torMan;
@@ -57,9 +50,8 @@ class User extends BaseObject {
     }
 
     public function info(): ?array {
-        static $cache;
-        if (isset($cache[$this->id])) {
-            $this->info = $cache[$this->id];
+        $key = sprintf(self::CACHE_KEY, $this->id);
+        if (($this->info = $this->cache->get_value($key)) !== false) {
             return $this->info;
         }
         $this->db->prepared_query("
@@ -91,6 +83,7 @@ class User extends BaseObject {
                 ui.DisablePM,
                 ui.DisableIRC,
                 ui.DisableRequests,
+                ui.Info,
                 ui.JoinDate,
                 ui.NotifyOnQuote,
                 ui.PermittedForums,
@@ -138,6 +131,21 @@ class User extends BaseObject {
         $this->info['effective_class'] =
             $this->info['secondary_class'] ? max($this->info['Class'], ...$this->info['secondary_class']) : $this->info['Class'];
 
+        if (!is_null($this->info['PermittedForums'])) {
+            $allowed = explode(',', $this->info['PermittedForums']);
+            foreach ($allowed as $forumId) {
+                $forumAccess[$forumId] = true;
+            }
+        }
+        if (!is_null($this->info['RestrictedForums'])) {
+            $forbidden = explode(',', $this->info['RestrictedForums']);
+            foreach ($forbidden as $forumId) {
+                // forbidden may override permitted
+                $forumAccess[$forumId] = false;
+            }
+        }
+        $this->info['forum_access'] = $forumAccess;
+
         $this->db->prepared_query("
             SELECT ua.Name, ua.ID
             FROM user_attr ua
@@ -146,7 +154,7 @@ class User extends BaseObject {
             ", $this->id
         );
         $this->info['attr'] = $this->db->to_pair('Name', 'ID');
-        $cache[$this->id] = $this->info;
+        $this->cache->cache_value($key, $this->info, 86400);
         return $this->info;
     }
 
@@ -173,6 +181,9 @@ class User extends BaseObject {
                 ', $this->id, $attr
             );
             $toggled = $this->db->affected_rows() === 1;
+        }
+        if ($toggled) {
+            $this->flush();
         }
         return $toggled;
     }
@@ -203,20 +214,6 @@ class User extends BaseObject {
 
     public function option(string $option) {
         return $this->info()['SiteOptions'][$option] ?? null;
-    }
-
-    protected function light() {
-        if (!$this->light) {
-            $this->light = \Users::user_info($this->id);
-        }
-        return $this->light;
-    }
-
-    protected function heavy() {
-        if (!$this->heavy) {
-            $this->heavy = \Users::user_heavy_info($this->id);
-        }
-        return $this->heavy;
     }
 
     public function username(): string {
@@ -315,17 +312,24 @@ class User extends BaseObject {
         return false;
     }
 
+    /**
+     * Return the list for forum IDs to which the user has been banned.
+     * (Note that banning takes precedence of permitting).
+     *
+     * return array of forum ids
+     */
     public function forbiddenForums(): array {
-        $heavy = $this->heavy();
-        return isset($heavy['CustomForums']) ? array_keys($heavy['CustomForums'], 0) : [];
+        return array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === false;}));
     }
 
+    /**
+     * Return the list for forum IDs to which the user has been granted special access.
+     *
+     * return array of forum ids
+     */
     public function permittedForums(): array {
-        $heavy = $this->heavy();
-        $permitted = isset($heavy['CustomForums']) ? array_keys($heavy['CustomForums'], 1) : [];
-        // TODO: This logic needs to be moved from the Donations manager to the User
-        $donorMan = new Manager\Donation;
-        if ($donorMan->hasForumAccess($this->id) && !in_array(DONOR_FORUM, $permitted)) {
+        $permitted = array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === true;}));
+        if ($this->isDonor() && !in_array(DONOR_FORUM, $this->forbiddenForums())) {
             $permitted[] = DONOR_FORUM;
         }
         return $permitted;
@@ -366,10 +370,9 @@ class User extends BaseObject {
 
     public function flush() {
         $this->info = null;
-        $this->heavy = null;
-        $this->light = null;
         $this->cache->deleteMulti([
             "enabled_" . $this->id,
+            "u_" . $this->id,
             "user_info_" . $this->id,
             "user_info_heavy_" . $this->id,
             "user_stats_" . $this->id,
@@ -455,7 +458,11 @@ class User extends BaseObject {
             $changed = $changed || $this->db->affected_rows() === 1;
             $this->staffNote = [];
         }
-        return parent::modify() || $changed;
+        if (parent::modify() || $changed) {
+            $this->flush(); // parent::modify() may have done a flush() but it's too much code to optimize this second call away
+            return true;
+        }
+        return false;
     }
 
     public function mergeLeechStats(string $username, string $staffname) {
@@ -483,6 +490,7 @@ class User extends BaseObject {
             ),
             $mergeId
         );
+        $this->flush();
         return ['up' => $up, 'down' => $down, 'userId' => $mergeId];
     }
 
@@ -494,6 +502,7 @@ class User extends BaseObject {
             ON DUPLICATE KEY UPDATE Type = ?
             ", $this->id, $lockType, $lockType
         );
+        $this->flush();
         return $this->db->affected_rows() === 1;
     }
 
@@ -502,6 +511,7 @@ class User extends BaseObject {
             DELETE FROM locked_accounts WHERE UserID = ?
             ", $this->id
         );
+        $this->flush();
         return $this->db->affected_rows() === 1;
     }
 
@@ -512,6 +522,7 @@ class User extends BaseObject {
             WHERE user_id = ?
             ', $n, $this->id
         );
+        $this->flush();
         return $this->db->affected_rows() === 1;
     }
 
@@ -535,8 +546,7 @@ class User extends BaseObject {
             WHERE ID = ?
             ', $newIP, \Tools::geoip($newIP), $this->id
         );
-        $this->heavy = null;
-        $this->cache->delete_value('user_info_heavy_' . $this->id);
+        $this->flush();
     }
 
     public function updatePassword(string $pw, string $ipaddr): bool {
@@ -554,6 +564,7 @@ class User extends BaseObject {
                 ', $this->id, $ipaddr
             );
         }
+        $this->flush();
         return $this->db->affected_rows() === 1;
     }
 
@@ -585,6 +596,7 @@ class User extends BaseObject {
             WHERE UserID = ?
             ", $this->id
         );
+        $this->flush();
         return $this->db->affected_rows() === 1;
     }
 
@@ -674,6 +686,7 @@ class User extends BaseObject {
             ", $this->id
         );
         $n += $this->db->affected_rows();
+        $this->flush();
         return $n;
     }
 
@@ -695,6 +708,7 @@ class User extends BaseObject {
             WHERE ID = ?
             ", $email, $this->id
         );
+        $this->flush();
         return $this->db->affected_rows() === 1;
     }
 
@@ -800,6 +814,7 @@ class User extends BaseObject {
             VALUES " . implode(', ', array_fill(0, count($classes), '(' . $this->id . ', ?)')),
             ...$classes
         );
+        $this->flush();
         return $this->db->affected_rows();
     }
 
@@ -810,6 +825,7 @@ class User extends BaseObject {
                 AND PermissionID IN (" . placeholders($classes) . ")",
             $this->id, ...$classes
         );
+        $this->flush();
         return $this->db->affected_rows();
     }
 
@@ -945,7 +961,7 @@ class User extends BaseObject {
     public function isDisabled(): bool    { return $this->enabledState() == 2; }
     public function isWarned(): bool      { return !is_null($this->info()['Warned']); }
 
-    public function isDonor(): bool         { return in_array(DONOR, $this->info()['secondary_class']); }
+    public function isDonor(): bool         { return in_array(DONOR, $this->info()['secondary_class']) || $this->classLevel() >= STAFF_LEVEL; }
     public function isFLS(): bool           { return in_array(FLS_TEAM, $this->info()['secondary_class']); }
     public function isStaff(): bool         { return $this->info()['isStaff']; }
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
@@ -974,7 +990,16 @@ class User extends BaseObject {
      * @return int number of collages (including collages granted from donations
      */
     public function allowedPersonalCollages(): int {
-        return $this->info()['collages'] + (new Manager\Donation())->personalCollages($this->id);
+        return $this->paidPersonalCollages() + (new Manager\Donation())->personalCollages($this->id);
+    }
+
+    /**
+     * How many collages has this user bought?
+     *
+     * @return int number of collages
+     */
+    public function paidPersonalCollages(): int {
+        return $this->info()['collages'];
     }
 
     /**
@@ -1659,10 +1684,10 @@ class User extends BaseObject {
      */
     public function rankFactor(): float {
         $factor = 1.0;
-        if (!strlen($this->light()['Avatar'])) {
+        if (is_null($this->avatar())) {
             $factor *= 0.75;
         }
-        if (!strlen($this->heavy()['Info'])) {
+        if (!strlen($this->info()['Info'])) {
             $factor *= 0.75;
         }
         return $factor;
@@ -1972,7 +1997,7 @@ class User extends BaseObject {
             WHERE UserID = ?
             ", $this->id
         );
-        $this->cache->delete_value("user_info_heavy_" . $this->id);
+        $this->flush();
         return $this->db->affected_rows();
     }
 
@@ -2043,9 +2068,7 @@ class User extends BaseObject {
             ", $this->id
         );
         $this->db->commit();
-        $this->cache->begin_transaction("user_info_heavy_{$this->id()}");
-        $this->cache->update_row(false, ['Invites' => '+1']);
-        $this->cache->commit_transaction(0);
+        $this->flush();
         return true;
     }
 
@@ -2065,6 +2088,7 @@ class User extends BaseObject {
             WHERE UserID = ?
             ", $resetKey, $this->id
         );
+        $this->flush();
         (new Mail)->send($this->email(), 'Password reset information for ' . SITE_NAME,
             \G::$Twig->render('email/password_reset.twig', [
                 'username'  => $this->username(),

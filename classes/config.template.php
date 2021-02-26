@@ -164,6 +164,7 @@ define('ULTIMATE_TM',   '48');
 
 // Locked account constant
 define('STAFF_LOCKED', 1);
+define('STAFF_LEVEL', 820); // least permissions.Level of staff
 
 // Pagination
 define('BOOKMARKS_PER_PAGE', 20);
@@ -230,7 +231,6 @@ define('TEST_CONTEST_PAYOUT', true); // set to true to test
 define('INDEX_WIKI_PAGE_ID', 1);
 define('RULES_WIKI_PAGE_ID', 127);
 define('SOURCE_FLAG_WIKI_PAGE_ID', 113);
-
 
 define('TMPDIR', '/tmp');
 

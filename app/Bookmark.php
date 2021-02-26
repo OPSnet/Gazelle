@@ -169,6 +169,7 @@ class Bookmark extends Base {
 
                 [$group, $list] = (new Manager\Torrent)->groupInfo($id);
                 $labelMan = new Manager\TorrentLabel;
+                $userMan = new Manager\User;
                 foreach ($list as $torrent) {
                     $Feed->populate('torrents_bookmarks_t_' . \Users::user_heavy_info($userId)['torrent_pass'],
                         $Feed->item(
@@ -176,7 +177,7 @@ class Bookmark extends Base {
                             \Text::strip_bbcode($group['WikiBody']),
                             'torrents.php?action=download&amp;authkey=[[AUTHKEY]]&amp;torrent_pass=[[PASSKEY]]&amp;id='
                                 . $torrent['ID'],
-                            \Users::user_info($torrent['UserID'])['Username'],
+                            $userMan->findById($torrent['UserID'])->username(),
                             "torrents.php?id=$id",
                             $group['tagIds']
                         )

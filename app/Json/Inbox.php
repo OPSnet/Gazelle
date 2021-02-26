@@ -82,7 +82,7 @@ class Inbox extends \Gazelle\Json {
         [$page, $limit] = \Format::page_limit(MESSAGES_PER_PAGE);
         $page = (int)$page;
 
-        $unreadSort = $this->unreadFirst ? "cu.Unread = '1' DESC" : '';
+        $orderBy = $this->unreadFirst ? "cu.Unread = '1' DESC, action_date ASC" : 'action_date ASC';
         $this->db->prepared_query("
             SELECT c.ID,
                 c.Subject,
@@ -90,32 +90,30 @@ class Inbox extends \Gazelle\Json {
                 cu.Sticky,
                 cu.ForwardedTo,
                 other.UserID,
-                (donor.UserID IS NOT NULL) AS Donor,
                 {$this->dateColumn} AS action_date
             FROM pm_conversations AS c
             INNER JOIN pm_conversations_users AS cu ON (cu.ConvID = c.ID AND cu.UserID = ?)
             LEFT JOIN pm_conversations_users AS other ON (other.ConvID = c.ID AND other.UserID != ? AND other.ForwardedTo = 0)
-            LEFT JOIN users_levels AS donor ON (donor.UserID = other.UserID
-                AND donor.PermissionID = (SELECT ID FROM permissions WHERE Name = 'Donor' LIMIT 1)
-            )
             " . implode(' ', $this->join) . "
             WHERE " . implode(' AND ', $this->cond) ."
             GROUP BY c.ID
-            ORDER BY cu.Sticky, {$unreadSort}, action_date
+            ORDER BY cu.Sticky, {$orderBy}
             LIMIT {$limit}
             ", $this->userId, $this->userId, ...$this->args
         );
 
+        $userMan = new \Gazelle\Manager\User;
         $user = [];
         $messages = [];
-        while ([$convId, $subject, $unread, $sticky, $forwardedId, $senderId, $donor, $actionDate] = $this->db->next_record()) {
+        $qid = $this->db->get_query_id();
+        while ([$convId, $subject, $unread, $sticky, $forwardedId, $senderId, $actionDate] = $this->db->next_record()) {
             $senderId = (int)$senderId;
-            if (!isset($user[$senderId])) {
-                $user[$senderId] = \Users::user_info($senderId);
+            if ($senderId && !isset($user[$senderId])) {
+                $user[$senderId] = $userMan->findById($senderId);
             }
             $forwardedId = (int)$forwardedId;
             if ($forwardedId && !isset($user[$forwardedId])) {
-                $user[$forwardedId] = \Users::user_info($forwardedId);
+                $user[$forwardedId] = $userMan->findById($forwardedId);
             }
             $messages[] = [
                 'convId'        => (int)$convId,
@@ -123,15 +121,16 @@ class Inbox extends \Gazelle\Json {
                 'unread'        => $unread == 1,
                 'sticky'        => $sticky == 1,
                 'forwardedId'   => $forwardedId,
-                'forwardedName' => $forwardedId ? $user[$forwardedId]['Username'] : null,
+                'forwardedName' => $forwardedId ? $user[$forwardedId]->username() : null,
                 'senderId'      => $senderId,
-                'username'      => $user[$senderId]['Username'],
-                'avatar'        => $user[$senderId]['Avatar'],
-                'donor'         => $donor == 1,
-                'warned'        => !is_null($user[$senderId]['Warned']),
-                'enabled'       => $user[$senderId]['Enabled'] == '1',
+                'username'      => $senderId ? $user[$senderId]->username() : 'System',
+                'avatar'        => $senderId ? $user[$senderId]->avatar() : null,
+                'donor'         => $senderId ? $user[$senderId]->isDonor() : false,
+                'warned'        => $senderId ? $user[$senderId]->isWarned() : false,
+                'enabled'       => $senderId ? $user[$senderId]->isEnabled() : false,
                 'date'          => $actionDate,
             ];
+            $this->db->set_query_id($qid);
         }
         unset($user);
 
