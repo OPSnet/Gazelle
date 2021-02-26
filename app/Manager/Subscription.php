@@ -72,7 +72,6 @@ class Subscription extends \Gazelle\Base {
 
         $Results = $this->db->to_array();
         $notification = new Notification;
-        $info = \Users::user_info($this->userId);
         foreach ($Results as $Result) {
             $this->db->prepared_query('
                 INSERT IGNORE INTO users_notify_quoted
@@ -87,7 +86,9 @@ class Subscription extends \Gazelle\Base {
                     ? "/forums.php?action=viewthread&postid=$PostID"
                     : "/comments.php?action=jump&postid=$PostID"
             );
-            $notification->push($Result['ID'], 'New Quote!', 'Quoted by ' . $info['Username'] . " $URL", $URL, Notification::QUOTES);
+            $notification->push($Result['ID'], 'New Quote!', 'Quoted by '
+                . (new User)->findById($this->userId)->username()
+                . " $URL", $URL, Notification::QUOTES);
         }
         $this->db->set_query_id($QueryID);
     }

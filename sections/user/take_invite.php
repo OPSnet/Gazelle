@@ -62,9 +62,7 @@ foreach ($Emails as $CurEmail) {
             WHERE ID = ?
             ", $LoggedUser['ID']
         );
-        $Cache->begin_transaction('user_info_heavy_' . $LoggedUser['ID']);
-        $Cache->update_row(false, ['Invites' => '-1']);
-        $Cache->commit_transaction(0);
+        $user->flush();
     }
     $DB->commit();
 

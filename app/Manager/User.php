@@ -529,7 +529,7 @@ class User extends \Gazelle\Base {
         );
         if (is_null($current)) {
             // User was not already warned
-            $this->cache->delete_value("user_info_$userId");
+            $this->cache->deleteMulti(["u_$userId", "user_info_$userId"]);
             $warnTime = time_plus($duration);
             $warning = "Warned until $warnTime";
         } else {
@@ -592,7 +592,7 @@ class User extends \Gazelle\Base {
         );
         foreach ($userIds as $userId) {
             $this->cache->deleteMulti([
-                "enabled_$userId", "user_info_$userId", "user_info_heavy_$userId", "user_stats_$userId", "users_sessions_$userId"
+                "enabled_$userId", "u_$userId", "user_info_$userId", "user_info_heavy_$userId", "user_stats_$userId", "users_sessions_$userId"
             ]);
 
         }

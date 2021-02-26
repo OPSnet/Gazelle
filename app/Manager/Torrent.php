@@ -954,7 +954,7 @@ class Torrent extends \Gazelle\Base {
         }
         $infohash = strtoupper($torrent['InfoHash']);
         $sizeMB = number_format($torrent['Size'] / (1024 * 1024), 2) . ' MB';
-        $username = $this->userId ? \Users::user_info($this->userId)['Username'] : 'system';
+        $username = $this->userId ? (new User)->findById($this->userId)->username() : 'system';
         $this->logger->general(
             "Torrent "
                 . $this->torrentId

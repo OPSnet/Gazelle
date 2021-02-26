@@ -72,6 +72,7 @@ class DemoteUsers extends \Gazelle\Schedule\Task
                     $this->debug(sprintf('Demoting %d from %s to %s', $userId, $fromClass, $toClass), $userId);
 
                     $this->cache->deleteMulti([
+                        "u_$userId",
                         "user_info_$userId",
                         "user_info_heavy_$userId",
                         "user_stats_$userId",

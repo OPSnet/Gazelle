@@ -90,6 +90,7 @@ class Session extends Base {
         );
         $this->cache->deleteMulti([
             'session_' . $sessionId,
+            'u_' . $this->id,
             'users_sessions_' . $this->id,
             'user_info_' . $this->id,
             'user_info_heavy_' . $this->id,
@@ -129,6 +130,7 @@ class Session extends Base {
         $this->cache->deleteMulti(array_merge(
             $this->db->collect('ck'),
             [
+                'u_' . $this->id,
                 'users_sessions_' . $this->id,
                 'user_info_' . $this->id,
                 'user_info_heavy_' . $this->id,

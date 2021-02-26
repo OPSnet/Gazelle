@@ -129,7 +129,7 @@ class Torrent extends \Gazelle\Json {
                     'fileList'      => implode('|||', $fileList),
                     'filePath'      => $torrent['FilePath'],
                     'userId'        => $torrent['UserID'],
-                    'username'      => \Users::user_info($torrent['UserID'])['Username'],
+                    'username'      => (new \Gazelle\Manager\User)->findById($torrent['UserID'])->username(),
                 ]
             ),
         ];
