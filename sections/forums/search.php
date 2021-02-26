@@ -1,5 +1,6 @@
 <?php
 
+$user = new Gazelle\User($LoggedUser['ID']);
 $search = new Gazelle\ForumSearch(new Gazelle\User($LoggedUser['ID']));
 $search->setSearchType($_GET['type'] ?? 'title')
     ->setSearchText(trim($_GET['search']) ?? '');
@@ -124,14 +125,15 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
     $LastCategoryID = -1;
     $Columns = 0;
     $i = 0;
+    $Forums = (new Gazelle\Manager\Forum)->tableOfContentsMain();
     foreach ($Forums as $Forum) {
-        if (!Forums::check_forumperm($Forum['ID'])) {
+        if (!$user->readAccess($Forum['ID'])) {
             continue;
         }
         $Columns++;
 
-        if ($Forum['CategoryID'] != $LastCategoryID) {
-            $LastCategoryID = $Forum['CategoryID'];
+        if ($Forum['categoryId'] != $LastCategoryID) {
+            $LastCategoryID = $Forum['categoryId'];
             if ($Open) {
                 if ($Columns % 5) {
 ?>
@@ -146,7 +148,7 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
 ?>
             <tr>
                 <td colspan="5" class="forum_cat">
-                    <strong><?=$ForumCats[$Forum['CategoryID']]?></strong>
+                    <strong><?= $Forum['categoryName'] ?></strong>
                     <a href="#" class="brackets forum_category" id="forum_category_<?=$i?>">Check all</a>
                 </td>
             </tr>

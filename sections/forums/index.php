@@ -6,7 +6,6 @@ if (!empty($LoggedUser['DisableForums'])) {
     error(403);
 }
 
-$Forums = Forums::get_forums();
 $ForumCats = Forums::get_forum_categories();
 
 G::$Router->addGet('', __DIR__ . '/main.php');

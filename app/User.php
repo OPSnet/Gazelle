@@ -11,6 +11,9 @@ class User extends BaseObject {
     /** @var int */
     protected $forceCacheFlush = false;
 
+    /** @var array hash of last post id per thread */
+    protected $lastRead;
+
     /** @var array queue of forum warnings to persist */
     protected $forumWarning = [];
 
@@ -117,6 +120,7 @@ class User extends BaseObject {
         $this->info['DisableAvatar'] = (bool)($this->info['DisableAvatar'] == '1');
         $this->info['DisableForums'] = (bool)($this->info['DisableForums'] == '1');
         $this->info['DisableInvites'] = (bool)($this->info['DisableInvites'] == '1');
+        $this->info['DisablePosting'] = (bool)($this->info['DisablePosting'] == '1');
         $this->info['DisableRequests'] = (bool)($this->info['DisableRequests'] == '1');
         $this->info['NotifyOnQuote'] = (bool)($this->info['NotifyOnQuote'] == '1');
         $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
@@ -233,6 +237,10 @@ class User extends BaseObject {
         return $this->info()['DisableForums'];
     }
 
+    public function disablePosting(): bool {
+        return $this->info()['DisablePosting'];
+    }
+
     public function disableRequests(): bool {
         return $this->info()['DisableRequests'];
     }
@@ -336,19 +344,73 @@ class User extends BaseObject {
     }
 
     /**
+     * Checks whether user has any overrides to a forum
+     *
+     * @param int forum id
+     * @return bool has access
+     */
+    public function forumAccess(int $forumId, int $forumMinClassLevel): bool {
+        return ($this->classLevel() >= $forumMinClassLevel || in_array($forumId, $this->permittedForums()))
+            && !in_array($forumId, $this->forbiddenForums());
+    }
+
+    /**
+     * Checks whether user has the permission to create a forum.
+     *
+     * @param \Gazelle\Forum the forum
+     * @return boolean true if user has permission
+     */
+    public function createAccess(Forum $forum): bool {
+        return $this->forumAccess($forum->id(), $forum->minClassCreate());
+    }
+
+    /**
      * Checks whether user has the permission to read a forum.
      *
      * @param \Gazelle\Forum the forum
      * @return boolean true if user has permission
      */
     public function readAccess(Forum $forum): bool {
-        if (in_array($forum->id(), $this->permittedForums())) {
-            return true;
+        return $this->forumAccess($forum->id(), $forum->minClassRead());
+    }
+
+    /**
+     * Checks whether user has the permission to write to a forum.
+     *
+     * @param \Gazelle\Forum the forum
+     * @return boolean true if user has permission
+     */
+    public function writeAccess(Forum $forum): bool {
+        return $this->forumAccess($forum->id(), $forum->minClassWrite());
+    }
+
+    /**
+     * Checks whether the user is up to date on the forum
+     *
+     * @param \Gazelle\Forum
+     * @return bool the user is up to date
+     */
+    public function hasReadLastPost(Forum $forum): bool {
+        return $forum->isLocked()
+            || $this->lastReadInThread($forum->lastThreadId()) >= $forum->lastPostId()
+            || $this->forumCatchupEpoch() >= $forum->lastPostTime();
+    }
+
+    /**
+     * What is the last post this user has read in a thread?
+     *
+     * @param int thread id
+     * @param int post id (or 0 if they have not read it).
+     */
+    public function lastReadInThread(int $threadId): int {
+        if (!$this->lastRead) {
+            $this->db->prepared_query("
+                SELECT TopicID, PostID FROM forums_last_read_topics WHERE UserID = ?
+                ", $this->id
+            );
+            $this->lastRead = $this->db->to_pair('TopicID', 'PostID');
         }
-        if ($this->classLevel() < $forum->minClassRead() || in_array($forum->id(), $this->forbiddenForums())) {
-            return false;
-        }
-        return true;
+        return $this->lastRead[$threadId] ?? 0;
     }
 
     /**

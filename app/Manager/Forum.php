@@ -4,7 +4,8 @@ namespace Gazelle\Manager;
 
 class Forum extends \Gazelle\Base {
 
-    protected const CACHE_TOC = 'forum_toc_main';
+    protected const CACHE_TOC  = 'forum_toc_main';
+    protected const CACHE_LIST = 'forum_list';
 
     /**
      * Create a forum
@@ -94,12 +95,26 @@ class Forum extends \Gazelle\Base {
                 SELECT ID, Name FROM forums_categories ORDER BY Sort, Name
             ");
             $categories = [];
-            while (list($id, $name) = $this->db->next_record(MYSQLI_NUM, false)) {
+            while ([$id, $name] = $this->db->next_record(MYSQLI_NUM, false)) {
                 $categories[$id] = $name;
             }
             $this->cache->cache_value('forums_categories', $categories, 0);
         }
         return $categories;
+    }
+
+    public function forumList(): array {
+        if (($list = $this->cache->get_value(self::CACHE_LIST)) === false) {
+            $this->db->prepared_query("
+                SELECT f.ID
+                FROM forums f
+                INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
+                ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
+            ");
+            $list = $this->db->collect('ID');
+            $this->cache->cache_value(self::CACHE_LIST, $list, 86400);
+        }
+        return $list;
     }
 
     /**

@@ -11,16 +11,18 @@ authorize();
  *      $_POST['answers'] (array of answers)
  */
 
-if ($LoggedUser['DisablePosting']) {
+$user = new Gazelle\User($LoggedUser['ID']);
+if ($user->disablePosting()) {
     error('Your posting privileges have been removed.');
 }
 
 if (isset($_POST['forum'])) {
-    $ForumID = (int)$_POST['forum'];
-    if (!$Forums[$ForumID]) {
+    $forum = (new Gazelle\Manager\Forum)->findById((int)$_POST['forum']);
+    if (is_null($forum)) {
         error(404);
     }
-    if (!Forums::check_forumperm($ForumID, 'Write') || !Forums::check_forumperm($ForumID, 'Create')) {
+    $ForumID = $forum->id();
+    if (!$user->writeAccess($forum) || !$user->createAccess($forum)) {
         error(403);
     }
 }

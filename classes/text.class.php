@@ -138,6 +138,8 @@ class Text {
      */
     private static $ProcessedSmileys = [];
 
+    private static $viewer;
+
     /**
      * Whether or not to turn images into URLs (used inside [quote] tags).
      * This is an integer reflecting the number of levels we're doing that
@@ -330,9 +332,9 @@ class Text {
                 }
                 switch ($args['action']) {
                     case 'viewforum':
-                        return \Forums::bbcodeForumUrl($args['forumid']) ?? null;
+                        return self::bbcodeForumUrl($args['forumid']) ?? null;
                     case 'viewthread':
-                        return \Forums::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null) ?? null;
+                        return self::bbcodeThreadUrl($args['threadid'], $args['postid'] ?? null) ?? null;
                 }
                 return null;
 
@@ -813,10 +815,10 @@ class Text {
                     $Str .= \Collages::bbcodeUrl($Block['Val']);
                     break;
                 case 'forum':
-                    $Str .= \Forums::bbcodeForumUrl($Block['Val']);
+                    $Str .= self::bbcodeForumUrl($Block['Val']);
                     break;
                 case 'thread':
-                    $Str .= \Forums::bbcodeThreadUrl($Block['Val']);
+                    $Str .= self::bbcodeThreadUrl($Block['Val']);
                     break;
                 case 'pl':
                     $Str .= \Torrents::bbcodeUrl($Block['Val'], $Block['Attr']);
@@ -1376,5 +1378,68 @@ class Text {
      */
     protected static function undisplay_str($Str) {
         return mb_convert_encoding($Str, 'UTF-8', 'HTML-ENTITIES');
+    }
+
+    protected static function bbcodeForumUrl($val) {
+        $cacheKey = 'bbcode_forum_' . $val;
+        [$id, $name] = G::$Cache->get_value($cacheKey);
+        if (is_null($id)) {
+            [$id, $name] = (int)$val > 0
+                ? G::$DB->row('SELECT ID, Name FROM forums WHERE ID = ?', $val)
+                : G::$DB->row('SELECT ID, Name FROM forums WHERE Name = ?', $val);
+            G::$Cache->cache_value($cacheKey, [$id, $name], 86400 + rand(1, 3600));
+        }
+        if (!self::$viewer) {
+            self::$viewer = new Gazelle\User(G::$LoggedUser['ID']);
+        }
+        if (!self::$viewer->readAccess(new Gazelle\Forum($id))) {
+            $name = 'restricted';
+        }
+        return $name
+            ? sprintf('<a href="forums.php?action=viewforum&forumid=%d">%s</a>', $id, $name)
+            : '[forum]' . $val . '[/forum]';
+    }
+
+    protected static function bbcodeThreadUrl($thread, $post = null) {
+        if (strpos($thread, ':') !== false) {
+            [$thread, $post] = explode(':', $thread);
+        }
+
+        $cacheKey = 'bbcode_thread_' . $thread;
+        [$id, $name, $isLocked, $forumId] = G::$Cache->get_value($cacheKey);
+        if (is_null($forumId)) {
+            if ($thread) {
+                [$id, $name, $isLocked, $forumId] = G::$DB->row('
+                    SELECT ft.ID, ft.Title, ft.IsLocked, ft.ForumID FROM forums_topics ft WHERE ft.ID = ?
+                    ', $thread
+                );
+            } else {
+                [$id, $name, $isLocked, $forumId] = G::$DB->row('
+                    SELECT ft.ID, ft.Title, ft.IsLocked, ft.ForumID
+                    FROM forums_topics ft
+                    INNER JOIN forums_posts fp ON (fp.TopicID = ft.ID)
+                    WHERE fp.ID = ?
+                    ', $post
+                );
+            }
+            G::$Cache->cache_value($cacheKey, [$id, $name, $isLocked, $forumId], 86400 + rand(1, 3600));
+        }
+        if (!self::$viewer) {
+            self::$viewer = new Gazelle\User(G::$LoggedUser['ID']);
+        }
+        if (!self::$viewer->readAccess(new Gazelle\Forum($forumId))) {
+            return sprintf('<a href="forums.php?action=viewforum&forumid=%d">%s</a>', $id, 'restricted');
+        }
+
+        if ($post) {
+            return $id
+                ? sprintf('<a href="forums.php?action=viewthread&threadid=%d&postid=%s#post%s">%s%s (Post #%s)</a>',
+                    $id, $post, $post, ($isLocked ? self::PADLOCK . ' ' : ''), $name, $post)
+                : '[thread]' .  $thread . ':' . $post . '[/thread]';
+        }
+        return $id
+            ? sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
+                $id, ($isLocked ? self::PADLOCK . ' ' : ''), $name)
+            : '[thread]' . $thread . '[/thread]';
     }
 }

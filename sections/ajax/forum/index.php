@@ -7,9 +7,6 @@ if (!empty($LoggedUser['DisableForums'])) {
 // Replace the old hard-coded forum categories
 $ForumCats = Forums::get_forum_categories();
 
-//This variable contains all our lovely forum data
-$Forums = Forums::get_forums();
-
 switch ($_GET['type'] ?? 'main') {
     case 'main':
         require('main.php');
@@ -21,6 +18,6 @@ switch ($_GET['type'] ?? 'main') {
         require('thread.php');
         break;
     default:
-        print json_encode('failure');
+        print json_error('type');
         break;
 }

@@ -50,7 +50,7 @@ if (!$user->readAccess($forum)) {
 
 //Escape strings for later display
 $threadTitle = display_str($threadInfo['Title']);
-$ForumName = display_str($Forums[$forumId]['Name']);
+$ForumName = display_str($forum->name());
 $IsDonorForum = ($forumId == DONOR_FORUM);
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 
@@ -197,7 +197,7 @@ if ($threadInfo['NoPoll'] == 0) {
         <div class="head colhead_dark"><strong>Poll<?php if ($Closed) { echo ' [Closed]'; } ?><?php if ($Featured) { echo ' [Featured]'; } ?></strong> <a href="#" onclick="$('#threadpoll').gtoggle(); log_hit(); return false;" class="brackets">View</a></div>
         <div class="pad<?php if ($threadInfo['isLocked']) { echo ' hidden'; } ?>" id="threadpoll">
             <p><strong><?=display_str($Question)?></strong></p>
-<?php if ($UserResponse !== null || $Closed || $threadInfo['isLocked'] || !Forums::check_forumperm($forumId)) { ?>
+<?php if ($UserResponse !== null || $Closed || $threadInfo['isLocked']) { ?>
             <ul class="poll nobullet">
 <?php
         if (!$RevealVoters) {
@@ -386,7 +386,7 @@ foreach ($thread as $Key => $Post) {
                 - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?=$Username?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
-    if ((!$threadInfo['isLocked'] && Forums::check_forumperm($forumId, 'Write') && $AuthorID == $user->id()) || check_perms('site_moderate_forums')) {
+    if ((!$threadInfo['isLocked'] && $user->writeAccess($forum) && $AuthorID == $user->id()) || check_perms('site_moderate_forums')) {
 ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
 <?php } ?>
@@ -465,7 +465,7 @@ foreach ($thread as $Key => $Post) {
 </div>
 <?php
 if (!$threadInfo['isLocked'] || check_perms('site_moderate_forums')) {
-    if (Forums::check_forumperm($forumId, 'Write') && !$LoggedUser['DisablePosting']) {
+    if ($user->writeAccess($forum) && !$LoggedUser['DisablePosting']) {
         View::parse('generic/reply/quickreply.php', [
             'InputTitle' => 'Post reply',
             'InputName' => 'thread',
@@ -560,19 +560,20 @@ if (check_perms('site_moderate_forums')) {
     $OpenGroup = false;
     $LastCategoryID = -1;
 
+    $Forums = (new Gazelle\Manager\Forum)->tableOfContentsMain();
     foreach ($Forums as $Forum) {
         if ($Forum['MinClassRead'] > $LoggedUser['Class']) {
             continue;
         }
 
-        if ($Forum['CategoryID'] != $LastCategoryID) {
-            $LastCategoryID = $Forum['CategoryID'];
+        if ($Forum['categoryId'] != $LastCategoryID) {
+            $LastCategoryID = $Forum['categoryId'];
             if ($OpenGroup) {
                 $OpenGroup = true;
 ?>
                     </optgroup>
 <?php       } ?>
-                    <optgroup label="<?=$ForumCats[$Forum['CategoryID']]?>">
+                    <optgroup label="<?= $Forum['categoryName'] ?>">
 <?php   } ?>
                         <option value="<?=$Forum['ID']?>"<?php if ($threadInfo['ForumID'] == $Forum['ID']) { echo ' selected="selected"';} ?>><?=display_str($Forum['Name'])?></option>
 <?php } /* foreach */ ?>
