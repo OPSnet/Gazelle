@@ -18,7 +18,8 @@ $_POST['action'] is what the user is trying to do. It can be:
 
 \*********************************************************************/
 
-if (!empty($LoggedUser['DisablePosting'])) {
+$user = new Gazelle\User($LoggedUser['ID']);
+if ($user->disablePosting()) {
     error('Your posting privileges have been removed.');
 }
 
@@ -29,7 +30,7 @@ if (is_null($forum)) {
 }
 $ThreadInfo = $forum->threadInfo($threadId);
 
-if (!Forums::check_forumperm($forum->id()) || !Forums::check_forumperm($forum->id(), 'Write') || $ThreadInfo['isLocked'] && !check_perms('site_moderate_forums')) {
+if (!$user->readAccess($forum)|| !$user->writeAccess($forum) || $ThreadInfo['isLocked'] && !check_perms('site_moderate_forums')) {
     error(403);
 }
 

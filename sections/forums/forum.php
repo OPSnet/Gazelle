@@ -13,7 +13,8 @@ if (!$forum) {
     error(404);
 }
 $forumId = $forum->id();
-if (!Forums::check_forumperm($forumId)) {
+$user = new Gazelle\User($LoggedUser['ID']);
+if (!$user->readAccess($forum)) {
     error(403);
 }
 if (!check_perms('site_moderate_forums')) {
@@ -29,7 +30,6 @@ $Pages        = Format::get_pages($page, $forum->topicCount(), TOPICS_PER_PAGE, 
 $isDonorForum = $forumId == DONOR_FORUM ? true : false;
 $perPage      = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 $userLastRead = $forum->userLastRead($LoggedUser['ID'], $perPage);
-$user         = new Gazelle\User($LoggedUser['ID']);
 
 foreach ($forumToc as &$thread) {
     if (isset($userLastRead[$thread['ID']])) {
@@ -72,14 +72,14 @@ foreach ($forumToc as &$thread) {
     unset($thread); // because looping by reference
 }
 
-View::show_header('Forums &rsaquo; ' . $Forums[$forumId]['Name'], '', $isDonorForum ? 'donor' : '');
+View::show_header('Forums &rsaquo; ' . $forum->name(), $isDonorForum ? 'donor' : '');
 ?>
 <div class="thin">
 <?php
 echo G::$Twig->render('forum/header.twig', [
-    'create' => Forums::check_forumperm($forumId, 'Write') && Forums::check_forumperm($forumId, 'Create'),
+    'create' => $user->writeAccess($forum) && $user->createAccess($forum),
     'id'     => $forumId,
-    'name'   => display_str($Forums[$forumId]['Name']),
+    'name'   => display_str($forum->name()),
 ]);
 ?>
     <div class="linkbox pager">

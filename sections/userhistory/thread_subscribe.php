@@ -2,7 +2,8 @@
 // perform the back end of subscribing to topics
 authorize();
 
-if (!empty($LoggedUser['DisableForums'])) {
+$user = new Gazelle\User($LoggedUser['ID']);
+if ($user->disableForums()) {
     error(403);
 }
 
@@ -11,8 +12,8 @@ $forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
 if (is_null($forum)) {
     error(404);
 }
-if (!Forums::check_forumperm($forum->id())) {
+if (!$user->readAccess($forum)) {
     error(403);
 }
 
-(new Gazelle\Manager\Subscription($LoggedUser['ID']))->subscribe($threadId);
+(new Gazelle\Manager\Subscription($user->id()))->subscribe($threadId);

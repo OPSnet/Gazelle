@@ -6,7 +6,7 @@ try {
 } catch (Gazelle\Exception\ResourceNotFoundException $e) {
     error(404);
 }
-if (!Forums::check_forumperm($forum->id())) {
+if (!(new Gazelle\User($LoggedUser['ID']))->readAccess($forum)) {
     error(403);
 }
 echo trim(display_str($forum->postBody($postId)));

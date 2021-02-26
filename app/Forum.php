@@ -5,8 +5,9 @@ namespace Gazelle;
 class Forum extends Base {
     protected $forumId;
 
+    const CACHE_TOC_MAIN    = 'forum_toc_main';
     const CACHE_TOC_FORUM   = 'forum_toc_%d';
-    const CACHE_FORUM       = 'forum_%d';
+    const CACHE_FORUM       = 'forumv5_%d';
     const CACHE_THREAD_INFO = 'thread_%d_info';
     const CACHE_CATALOG     = 'thread_%d_catalogue_%d';
 
@@ -89,18 +90,28 @@ class Forum extends Base {
         $key = sprintf(self::CACHE_FORUM, $this->forumId);
         if (($info = $this->cache->get_value($key)) === false) {
             $info = $this->db->rowAssoc("
-                SELECT ID          AS forum_id,
-                    Name           AS name,
-                    Description    AS description,
-                    CategoryID     AS category_id,
-                    MinClassRead   AS min_class_read,
-                    MinClassWrite  AS min_class_write,
-                    MinClassCreate AS min_class_create,
-                    Sort           AS sequence,
-                    AutoLock       AS auto_lock,
-                    AutoLockWeeks  AS auto_lock_weeks
-                FROM forums
-                WHERE ID = ?
+                SELECT f.ID            AS forum_id,
+                    f.Name             AS name,
+                    f.Description      AS description,
+                    f.CategoryID       AS category_id,
+                    cat.Name           AS category_name,
+                    f.MinClassRead     AS min_class_read,
+                    f.MinClassWrite    AS min_class_write,
+                    f.MinClassCreate   AS min_class_create,
+                    f.NumTopics        AS num_threads,
+                    f.NumPosts         AS num_posts,
+                    f.LastPostID       AS last_post_id,
+                    f.LastPostAuthorID AS last_author_id,
+                    f.LastPostTopicID  AS last_thread_id,
+                    ft.Title           AS last_thread,
+                    f.LastPostTime     AS last_post_time,
+                    f.Sort             AS sequence,
+                    f.AutoLock         AS auto_lock,
+                    f.AutoLockWeeks    AS auto_lock_weeks
+                FROM forums f
+                INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
+                LEFT JOIN forums_topics ft ON (ft.ID = f.LastPostTopicID)
+                WHERE f.ID = ?
                 ", $this->forumId
             );
             $this->cache->cache_value($key, $info, 86400);
@@ -108,8 +119,68 @@ class Forum extends Base {
         return $info;
     }
 
+    public function categoryId(): int {
+        return $this->info()['category_id'];
+    }
+
+    public function categoryName(): string {
+        return $this->info()['category_name'];
+    }
+
+    public function description(): string {
+        return $this->info()['description'];
+    }
+
+    public function isLocked(): bool {
+        return $this->info()['is_locked'] ?? false;
+    }
+
+    public function isSticky(): bool {
+        return $this->info()['is_sticky'] ?? false;
+    }
+
+    public function lastPostId(): int {
+        return $this->info()['last_post_id'];
+    }
+
+    public function lastAuthorID(): ?int {
+        return $this->info()['last_author_id'];
+    }
+
+    public function lastThread(): ?string {
+        return $this->info()['last_thread'];
+    }
+
+    public function lastThreadId(): int {
+        return $this->info()['last_thread_id'];
+    }
+
+    public function lastPostTime(): int {
+        return $this->info()['last_post_time'] ? strtotime($this->info()['last_post_time']) : 0;
+    }
+
+    public function minClassCreate(): int {
+        return $this->info()['min_class_create'];
+    }
+
     public function minClassRead(): int {
         return $this->info()['min_class_read'];
+    }
+
+    public function minClassWrite(): int {
+        return $this->info()['min_class_write'];
+    }
+
+    public function name(): string {
+        return $this->info()['name'];
+    }
+
+    public function numPosts(): int {
+        return $this->info()['num_posts'];
+    }
+
+    public function numThreads(): int {
+        return $this->info()['num_threads'];
     }
 
     /* for the transition from sections/ to app/ - delete when done */

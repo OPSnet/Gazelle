@@ -46,7 +46,7 @@ if (isset($_GET['cache'])) {
     elseif ($_GET['cache'] === 'users') {
         $max = $DB->scalar("SELECT max(ID) as count FROM users_main");
         for ($i = 1; $i <= $max; $i++) {
-            $Cache->deleteMulti(['inbox_new_' . $i, 'user_stats_' . $i, 'user_info_' . $i, 'user_info_heavy_' . $i, 'donor_info_' . $i]);
+            $Cache->deleteMulti(['inbox_new_' . $i, 'u_' . $i, 'user_stats_' . $i, 'user_info_' . $i, 'user_info_heavy_' . $i, 'donor_info_' . $i]);
         }
         echo "<div class='save_message'>All user caches flushed.</div>";
     }

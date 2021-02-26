@@ -31,6 +31,7 @@ if ($_GET['postid']) {
         print json_encode(['status' => 'failure']);
     }
 }
+$forumId = $forum->id();
 if (isset($_GET['pp'])) {
     $PerPage = $_GET['pp'];
 } elseif (isset($LoggedUser['PostsPerPage'])) {
@@ -45,8 +46,8 @@ if (empty($threadInfo)) {
 }
 
 // Make sure they're allowed to look at the page
-$forumId = $forum->id();
-if (!Forums::check_forumperm($forumId)) {
+$user = new Gazelle\User($LoggedUser['ID']);
+if (!$user->readAccess($forum)) {
     print json_encode(['status' => 'failure']);
     die();
 }
@@ -133,7 +134,6 @@ if (in_array($threadId, $UserSubscriptions)) {
 
 $JsonPoll = [];
 if ($threadInfo['NoPoll'] == 0) {
-    $forum = new Gazelle\Forum($forumId);
     [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
     if (!empty($Votes)) {
         $TotalVotes = array_sum($Votes);
@@ -182,7 +182,7 @@ if ($threadInfo['NoPoll'] == 0) {
         ];
     }
 
-    if ($UserResponse !== null || $Closed || $threadInfo['isLocked'] || $LoggedUser['Class'] < $Forums[$forumId]['MinClassWrite']) {
+    if ($UserResponse !== null || $Closed || $threadInfo['isLocked'] || $user->writeAccess($forum)) {
         $JsonPoll['voted'] = True;
     } else {
         $JsonPoll['voted'] = False;
@@ -231,8 +231,8 @@ foreach ($Thread as $Key => $Post) {
 print json_encode([
     'status' => 'success',
     'response' => [
-        'forumId'     => (int)$forumId,
-        'forumName'   => $Forums[$forumId]['Name'],
+        'forumId'     => $forumId,
+        'forumName'   => $forum->name(),
         'threadId'    => $threadId,
         'threadTitle' => display_str($threadInfo['Title']),
         'subscribed'  => in_array($threadId, $UserSubscriptions),

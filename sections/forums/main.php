@@ -13,13 +13,13 @@ View::show_header('Forums');
 foreach ($toc as $category => $forumList) {
     $seen = 0;
     foreach ($forumList as $f) {
-        if (!Forums::check_forumperm($f['ID'])) {
+        $forum = new Gazelle\Forum($f['ID']);
+        if (!$user->readAccess($forum)) {
             continue;
         }
         if ($f['ID'] == DONOR_FORUM) {
             $f['Description'] = donorForumDescription();
         }
-        $forum = new Gazelle\Forum($f['ID']);
         $userLastRead = $forum->userLastRead($LoggedUser['ID'], $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE);
         if (isset($userLastRead[$f['LastPostTopicID']])) {
             $lastReadPage = (int)$userLastRead[$f['LastPostTopicID']]['Page'];
