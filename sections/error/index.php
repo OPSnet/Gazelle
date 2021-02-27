@@ -3,7 +3,7 @@
 function notify ($Channel, $Message) {
     global $LoggedUser;
     $UserID = empty($LoggedUser['ID']) ? false : $LoggedUser['ID'];
-    send_irc("PRIVMSG "
+    Irc::sendRaw("PRIVMSG "
         . $Channel . " :" . $Message . " error by "
         . ($UserID
                 ? SITE_URL . "/user.php?id=" . $UserID . " (" . $LoggedUser['Username'] . ")"

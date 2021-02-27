@@ -46,6 +46,6 @@ if (isset($_POST['subscribe']) && $ThreadID !== null && $ThreadID > 0) {
 $notification = new Notification($LoggedUser['ID']);
 $notification->push($notification->pushableUsers(), $blog->title(), $blog->body(), SITE_URL . '/index.php', Notification::BLOG);
 
-send_irc("PRIVMSG " . BOT_CHAN . " :New blog article: " . $blog->title());
+Irc::sendRaw("PRIVMSG " . BOT_CHAN . " :New blog article: " . $blog->title());
 
 header('Location: blog.php');

@@ -506,7 +506,7 @@ function enforce_login() {
  */
 function authorize($Ajax = false) {
     if (empty($_REQUEST['auth']) || $_REQUEST['auth'] != G::$LoggedUser['AuthKey']) {
-        send_irc("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+        Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
         error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
         return false;
     }
@@ -516,7 +516,7 @@ function authorize($Ajax = false) {
 function authorizeIfPost($Ajax = false) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($_POST['auth']) || $_POST['auth'] != G::$LoggedUser['AuthKey']) {
-            send_irc("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+            Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
             error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
             return false;
         }

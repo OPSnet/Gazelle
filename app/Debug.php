@@ -118,7 +118,7 @@ class Debug {
             $Time
         );
         global $Document;
-        send_irc('PRIVMSG '.LAB_CHAN." :{$Message} $Document ".SITE_URL."/tools.php?action=analysis&case=$Identifier ".SITE_URL.'/'.$RequestURI);
+        \Irc::sendRaw('PRIVMSG '.LAB_CHAN." :{$Message} $Document ".SITE_URL."/tools.php?action=analysis&case=$Identifier ".SITE_URL.'/'.$RequestURI);
     }
 
     public function get_cpu_time() {

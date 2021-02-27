@@ -436,7 +436,7 @@ if ($NewRequest) {
     }
 
     $Announce = "\"$Title\" - ".Artists::display_artists($ArtistForm, false, false).' '.SITE_URL."/requests.php?action=view&id=$RequestID - ".implode(' ', $Tags);
-    send_irc("PRIVMSG #requests :{$Announce}");
+    Irc::sendRaw("PRIVMSG #requests :{$Announce}");
 } else {
     $Cache->delete_value("request_$RequestID");
     $Cache->delete_value("request_artists_$RequestID");
