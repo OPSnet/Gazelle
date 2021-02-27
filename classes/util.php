@@ -32,25 +32,6 @@ if (PHP_INT_SIZE === 4) {
 }
 
 /**
- * Check that some given variables (usually in _GET or _POST) are numbers
- *
- * @param array $Base array that's supposed to contain all keys to check
- * @param array $Keys list of keys to check
- * @param mixed $Error error code or string to pass to the error() function if a key isn't numeric
- */
-function assert_numbers(&$Base, $Keys, $Error = 0) {
-    // make sure both arguments are arrays
-    if (!is_array($Base) || !is_array($Keys)) {
-        return;
-    }
-    foreach ($Keys as $Key) {
-        if (!isset($Base[$Key]) || !is_number($Base[$Key])) {
-            error($Error);
-        }
-    }
-}
-
-/**
  * Awful anglo-centric hack for handling plurals ;-)
  *
  * @param $n the number
@@ -69,17 +50,6 @@ function plural(int $n) {
  */
 function article(int $n, $article = 'a') {
     return $n == 1 ? $article : $n;
-}
-
-/**
- * Return true, false or null, depending on the input value's "truthiness" or "non-truthiness"
- *
- * @param $Value the input value to check for truthiness
- * @return true if $Value is "truthy", false if it is "non-truthy" or null if $Value was not
- *         a bool-like value
- */
-function is_bool_value($Value) {
-    return Type::isBoolValue($Value);
 }
 
 /**
@@ -520,10 +490,6 @@ function proxyCheck(string $IP): bool {
 
 /*** Time and date functions ***/
 
-function is_date($Date) {
-    return Time::isValidDate($Date);
-}
-
 function time_ago($TimeStamp) {
     return Time::timeAgo($TimeStamp);
 }
@@ -569,14 +535,6 @@ function validDate($DateString) {
 
 function is_valid_date($Date) {
     return Time::isValidDate($Date);
-}
-
-function is_valid_time($Time) {
-    return Time::isValidTime($Time);
-}
-
-function is_valid_datetime($DateTime, $Format = 'Y-m-d H:i') {
-    return Time::isValidDateTime($DateTime, $Format);
 }
 
 /*** Paranoia functions ***/
