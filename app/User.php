@@ -245,7 +245,7 @@ class User extends BaseObject {
     }
 
     public function avatarMode(): int {
-        return $this->option('DisableAvatars');
+        return $this->option('DisableAvatars') ?? 0;
     }
 
     public function showAvatars(): bool {
