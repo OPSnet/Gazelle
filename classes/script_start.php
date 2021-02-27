@@ -17,8 +17,7 @@ require_once(__DIR__ . '/config.php'); //The config contains all site wide confi
 require_once(__DIR__ . '/util.php');
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use Gazelle\Util\Crypto;
-use Gazelle\Util\Text;
+use Gazelle\Util\{Crypto, Irc, Text};
 
 //Deal with dumbasses
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
@@ -250,7 +249,7 @@ $FullToken = null;
 
 // Only allow using the Authorization header for ajax endpoint
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
-    if ((new \Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
+    if ((new Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
         header('Content-type: application/json');
         json_die('failure', 'your ip address has been banned');
     }
@@ -506,7 +505,7 @@ function enforce_login() {
  */
 function authorize($Ajax = false) {
     if (empty($_REQUEST['auth']) || $_REQUEST['auth'] != G::$LoggedUser['AuthKey']) {
-        send_irc("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+        Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
         error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
         return false;
     }
@@ -516,7 +515,7 @@ function authorize($Ajax = false) {
 function authorizeIfPost($Ajax = false) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($_POST['auth']) || $_POST['auth'] != G::$LoggedUser['AuthKey']) {
-            send_irc("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
+            Irc::sendRaw("PRIVMSG " . STATUS_CHAN . " :" . G::$LoggedUser['Username'] . " just failed authorize on " . $_SERVER['REQUEST_URI'] . (!empty($_SERVER['HTTP_REFERER']) ? " coming from " . $_SERVER['HTTP_REFERER'] : ""));
             error('Invalid authorization key. Go back, refresh, and try again.', $Ajax);
             return false;
         }

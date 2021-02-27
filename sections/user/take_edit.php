@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Irc;
+
 authorize();
 
 $UserID = empty($_REQUEST['userid']) ? $LoggedUser['ID'] : (int)$_REQUEST['userid'];
@@ -17,7 +19,7 @@ $UH = Users::user_heavy_info($UserID);
 
 $Permissions = Permissions::get_permissions($U['PermissionID']);
 if ($UserID != $LoggedUser['ID'] && !check_perms('users_edit_profiles', $Permissions['Class'])) {
-    send_irc('PRIVMSG '.ADMIN_CHAN.' :User '.$LoggedUser['Username'].' ('.SITE_URL.'/user.php?id='.$LoggedUser['ID'].') just tried to edit the profile of '.SITE_URL.'/user.php?id='.$_REQUEST['userid']);
+    Irc::sendRaw('PRIVMSG '.ADMIN_CHAN.' :User '.$LoggedUser['Username'].' ('.SITE_URL.'/user.php?id='.$LoggedUser['ID'].') just tried to edit the profile of '.SITE_URL.'/user.php?id='.$_REQUEST['userid']);
     error(403);
 }
 

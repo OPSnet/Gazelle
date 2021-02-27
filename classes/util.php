@@ -147,15 +147,6 @@ function remasterInfo($RemasterTitle, $RemasterYear): string {
 }
 
 /**
- * Send a message to an IRC bot listening on SOCKET_LISTEN_PORT
- *
- * @param string $Raw An IRC protocol snippet to send.
- */
-function send_irc($Raw) {
-    Irc::sendRaw($Raw);
-}
-
-/**
  * Determine the redirect header to use based on the client HTTP_REFERER or fallback
  *
  * @param string fallback URL if HTTP_REFERER is empty

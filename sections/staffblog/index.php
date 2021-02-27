@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\Irc;
+
 enforce_login();
 
 if (!check_perms('users_mod')) {
@@ -60,7 +63,7 @@ if (check_perms('admin_manage_blog')) {
                     ->setBody($body)
                     ->setAuthorId($LoggedUser['ID'])
                     ->modify();
-                send_irc("PRIVMSG ".MOD_CHAN." :New staff blog: " . $blogMan->title()
+                Irc::sendRaw("PRIVMSG ".MOD_CHAN." :New staff blog: " . $blogMan->title()
                     . " - " . SITE_URL."/staffblog.php#blog" . $blogMan->blogId()
                 );
                 header('Location: staffblog.php');

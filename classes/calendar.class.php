@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Util\Irc;
+
 class Calendar {
     public static $Categories = [1 => "IRC Meeting", "IRC Brainstorm", "Poll Deadline", "Feature Release", "Blog Post", "Announcement", "Featured Album", "Product Release", "Staff Picks", "Forum Brainstorm", "Forum Discussion", "Promotion", "Absence", "Task"];
     public static $Importances = [1 => "Critical", "Important", "Average", "Meh"];
@@ -95,7 +98,7 @@ class Calendar {
                         VALUES
                             ('$Title', '$Body', '$Category', '$Importance', '$Team', '$StartDate', '$EndDate', '$UserID')");
         G::$DB->set_query_id($QueryID);
-        send_irc("PRIVMSG " . MOD_CHAN . " :!mod New calendar event created! Event: $Title; Starts: $StartDate; Ends: $EndDate.");
+        Irc::sendRaw("PRIVMSG " . MOD_CHAN . " :!mod New calendar event created! Event: $Title; Starts: $StartDate; Ends: $EndDate.");
     }
 
     public static function update_event($ID, $Title, $Body, $Category, $Importance, $Team, $StartDate, $EndDate = null) {

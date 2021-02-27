@@ -131,6 +131,8 @@ function db_string($String, $DisableWildcards = false) {
     return $String;
 }
 
+use \Gazelle\Util\Irc;
+
 class DB_MYSQL_Exception extends Exception {}
 
 //TODO: revisit access levels once Drone is replaced by ZeRobot
@@ -173,7 +175,7 @@ class DB_MYSQL {
         $Debug = new \Gazelle\Debug;
         $DBError = 'MySQL: '.strval($Msg).' SQL error: '.strval($this->Errno).' ('.strval($this->Error).')';
         if ($this->Errno == 1194) {
-            send_irc('PRIVMSG ' . ADMIN_CHAN . ' :' . $DBError);
+            Irc::sendRaw('PRIVMSG ' . ADMIN_CHAN . ' :' . $DBError);
         }
         $Debug->analysis('!dev DB Error', $DBError, 3600 * 24);
         throw new DB_MYSQL_Exception($DBError);

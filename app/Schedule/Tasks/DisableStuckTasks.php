@@ -2,7 +2,7 @@
 
 namespace Gazelle\Schedule\Tasks;
 
-use Gazelle\Util\{Time, Irc};
+use Gazelle\Util\{Irc, Time};
 
 class DisableStuckTasks extends \Gazelle\Schedule\Task
 {

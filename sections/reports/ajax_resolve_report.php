@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\Irc;
+
 authorize();
 
 if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {
@@ -38,7 +41,7 @@ $Remaining = (int)$DB->scalar("
     SELECT count(*) FROM reports WHERE Status = 'New'
 ");
 foreach ($Channels as $Channel) {
-    send_irc("PRIVMSG $Channel :Report $ReportID resolved by "
+    Irc::sendRaw("PRIVMSG $Channel :Report $ReportID resolved by "
         . preg_replace('/^(.{2})/', '$1·', $LoggedUser['Username'])
         . " on site ({$Remaining} remaining)."
     );
