@@ -66,4 +66,21 @@ class Comment extends \Gazelle\Base {
         $className = $this->className($page);
         return (new $className($pageId))->setPostId($postId);
     }
+
+    public function loadEdits(string $page, int $postId): array {
+        $key = "{$page}_edits_{$postId}";
+        if (($edits = $this->cache->get_value($key)) === false) {
+            $this->db->prepared_query("
+                SELECT EditUser, EditTime, Body
+                FROM comments_edits
+                WHERE Page = ?
+                    AND PostID = ?
+                ORDER BY EditTime DESC
+                ", $page, $postId
+            );
+            $edits = $this->db->to_array();
+            $this->cache->cache_value($key, $edits, 0);
+        }
+        return $edits;
+    }
 }

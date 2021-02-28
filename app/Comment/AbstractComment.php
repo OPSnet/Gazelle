@@ -89,6 +89,13 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         return $this;
     }
 
+    public function body(): string {
+        return $this->db->scalar("
+            SELECT Body FROM comments WHERE Page = ?  AND ID = ?
+            ", $this->page(), $this->id
+        );
+    }
+
     /**
      * Load a page of comments
      */
