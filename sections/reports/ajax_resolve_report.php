@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\Irc;
+
 authorize();
 
 if (!check_perms('admin_reports') && !check_perms('site_moderate_forums')) {

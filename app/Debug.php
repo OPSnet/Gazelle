@@ -2,7 +2,7 @@
 
 namespace Gazelle;
 
-use \Gazelle\Util\Time;
+use Gazelle\Util\{Irc, Time};
 
 ini_set('max_execution_time',600);
 

@@ -131,6 +131,8 @@ function db_string($String, $DisableWildcards = false) {
     return $String;
 }
 
+use \Gazelle\Util\Irc;
+
 class DB_MYSQL_Exception extends Exception {}
 class DB_MYSQL_DuplicateKeyException extends DB_MYSQL_Exception {}
 

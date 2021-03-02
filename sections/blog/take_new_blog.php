@@ -1,6 +1,7 @@
 <?php
 
 use Gazelle\Manager\Notification;
+use Gazelle\Util\Irc;
 
 authorize();
 

@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Irc;
+
 function notify ($Channel, $Message) {
     global $LoggedUser;
     $UserID = empty($LoggedUser['ID']) ? false : $LoggedUser['ID'];

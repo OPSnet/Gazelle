@@ -1,4 +1,7 @@
 <?php
+
+use \Gazelle\Util\Irc;
+
 class Calendar {
     public static $Categories = [1 => "IRC Meeting", "IRC Brainstorm", "Poll Deadline", "Feature Release", "Blog Post", "Announcement", "Featured Album", "Product Release", "Staff Picks", "Forum Brainstorm", "Forum Discussion", "Promotion", "Absence", "Task"];
     public static $Importances = [1 => "Critical", "Important", "Average", "Meh"];

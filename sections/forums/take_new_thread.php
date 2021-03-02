@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\Irc;
+
 authorize();
 
 /* Creating a new thread

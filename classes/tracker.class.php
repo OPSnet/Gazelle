@@ -1,5 +1,8 @@
 <?php
 // TODO: Turn this into a class with nice functions like update_user, etc.
+
+use \Gazelle\Util\Irc;
+
 class Tracker {
     const STATS_MAIN = 0;
     const STATS_USER = 1;

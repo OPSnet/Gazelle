@@ -1,4 +1,7 @@
 <?php
+
+use Gazelle\Util\Irc;
+
 enforce_login();
 
 if (!check_perms('users_mod')) {

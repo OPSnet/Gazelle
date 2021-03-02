@@ -1,5 +1,7 @@
 <?php
 
+use Gazelle\Util\Irc;
+
 authorize();
 
 $UserID = empty($_REQUEST['userid']) ? $LoggedUser['ID'] : (int)$_REQUEST['userid'];

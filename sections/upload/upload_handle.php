@@ -1,5 +1,6 @@
 <?php
 
+use Gazelle\Util\Irc;
 use OrpheusNET\Logchecker\Logchecker;
 use OrpheusNET\BencodeTorrent\BencodeTorrent;
 

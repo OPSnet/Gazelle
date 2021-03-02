@@ -17,8 +17,7 @@ require_once(__DIR__ . '/config.php'); //The config contains all site wide confi
 require_once(__DIR__ . '/util.php');
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-use Gazelle\Util\Crypto;
-use Gazelle\Util\Text;
+use Gazelle\Util\{Crypto, Irc, Text};
 
 //Deal with dumbasses
 if (isset($_REQUEST['info_hash']) && isset($_REQUEST['peer_id'])) {
@@ -250,7 +249,7 @@ $FullToken = null;
 
 // Only allow using the Authorization header for ajax endpoint
 if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $Document === 'ajax') {
-    if ((new \Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
+    if ((new Gazelle\Manager\IPv4())->isBanned($_SERVER['REMOTE_ADDR'])) {
         header('Content-type: application/json');
         json_die('failure', 'your ip address has been banned');
     }
