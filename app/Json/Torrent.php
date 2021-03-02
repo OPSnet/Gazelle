@@ -76,6 +76,9 @@ class Torrent extends \Gazelle\Json {
             $file = \Torrents::filelist_old_format($file);
         }
 
+        $uploader = (new \Gazelle\Manager\User)->findById($torrent['UserID']);
+        $username = $uploader ? $uploader->username() : '';
+
         return [
             'group' => [
                 'wikiBody'        => \Text::full_format($details['WikiBody']),
@@ -129,7 +132,7 @@ class Torrent extends \Gazelle\Json {
                     'fileList'      => implode('|||', $fileList),
                     'filePath'      => $torrent['FilePath'],
                     'userId'        => $torrent['UserID'],
-                    'username'      => (new \Gazelle\Manager\User)->findById($torrent['UserID'])->username(),
+                    'username'      => $username,
                 ]
             ),
         ];
