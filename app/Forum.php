@@ -392,6 +392,9 @@ class Forum extends Base {
         $postId = $this->db->inserted_id();
         $this->updateTopic($userId, $threadId, $postId);
         $this->db->set_query_id($qid);
+        $info = $this->threadInfo($threadId);
+        $catId = (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
+        $this->cache->deleteMulti(["thread_{$threadId}_catalogue_{$catId}", "thread_{$threadId}_info"]);
         return $postId;
     }
 
@@ -619,6 +622,34 @@ class Forum extends Base {
         return $change;
     }
 
+    public function modifyPollVote(int $userId, int $threadId, int $vote): int {
+        $this->db->prepared_query("
+            UPDATE forums_polls_votes SET
+                Vote = ?
+            WHERE TopicID = ?
+                AND UserID = ?
+            ", $vote, $threadId, $userId
+        );
+        if ($change) {
+            $this->cache->delete_value("polls_$threadId");
+        }
+        return $change;
+    }
+
+    /**
+     * How did a person vote in a poll?
+     *
+     * @param int the user id
+     * @param int the thread where the poll is defined
+     * @return int vote (null if they have not voted)
+     */
+    public function pollVote(int $userId, int $threadId): ?int {
+        return $this->db->scalar("
+            SELECT Vote FROM forums_polls_votes WHERE UserID = ?  AND TopicID = ?
+            ", $userId, $threadId
+        );
+    }
+
     /**
      * Get the data for a poll (TODO: spin off into a Poll object)
      *
@@ -703,6 +734,25 @@ class Forum extends Base {
     }
 
     /**
+     * Get the names of the staff who voted per item in a poll
+     *
+     * @param int thread id
+     * @return array of [concatenated user, vote]
+     */
+    public function staffVote(int $threadId): array {
+        $this->db->prepared_query("
+            SELECT group_concat(um.Username SEPARATOR ', '),
+                fpv.Vote
+            FROM users_main AS um
+            INNER JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
+            WHERE fpv.TopicID = ?
+            GROUP BY fpv.Vote
+            ", $threadId
+        );
+        return $this->db->to_array(false, MYSQLI_NUM);
+    }
+
+    /**
      * Merge an addition to the last post in a thread
      *
      * @param int userID The editor making the change
@@ -736,6 +786,9 @@ class Forum extends Base {
             VALUES (?,        ?,      ?,   'forums', now())
             ", $userId, $postId, $oldBody
         );
+        $info = $this->threadInfo($threadId);
+        $catId = (int)floor((POSTS_PER_PAGE * ceil($info['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
+        $this->cache->deleteMulti(["thread_{$threadId}_catalogue_{$catId}", "thread_{$threadId}_info"]);
         return $postId;
     }
 
@@ -746,7 +799,7 @@ class Forum extends Base {
      * @param int postId The post
      * @param string body The new contents
      */
-    public function editPost(int $userId, int $postId, string $body) {
+    public function editPost(int $userId, int $postId, string $body): int {
         $this->db->prepared_query("
             INSERT INTO comments_edits
                    (EditUser, PostID, Body, Page, EditTime)
@@ -761,7 +814,13 @@ class Forum extends Base {
             WHERE ID = ?
             ", $userId, trim($body), $postId
         );
-        $this->cache->delete_value("forums_edits_$postId");
+        $post = $this->postInfo($postId);
+        $this->cache->deleteMulti([
+            "forums_edits_$postId",
+            "thread_{$post['thread-id']}_catalogue_" . (int)floor((POSTS_PER_PAGE * $post['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE),
+            "thread_{$post['thread-id']}_info",
+        ]);
+        return $this->db->affected_rows();
     }
 
     /**
@@ -891,9 +950,10 @@ class Forum extends Base {
 
     /**
      * Get information about a thread
+     * TODO: check if ever NumPosts != Posts
      *
      * @param int threadId The thread
-     * @return array [$title, $forumId, $posts, $lastAuthor, $noPoll, $stickyPostId, $ranking, $lastPostTime, $numPosts]
+     * @return array [Title ForumId AuthorID LastPostAuthorID StickyPostID Ranking NumPosts isLocked isSticky NoPoll Posts LastPostTime StickyPost]
      */
     public function threadInfo(int $threadId): array {
         if (($info = $this->cache->get_value(sprintf(self::CACHE_THREAD_INFO, $threadId))) === false) {
@@ -1101,6 +1161,12 @@ class Forum extends Base {
             }
         }
         return $catalogue;
+    }
+
+    public function threadPage(int $threadId, int $perPage, int $page): array {
+        return array_slice($this->threadCatalog($threadId, $perPage, $page, THREAD_CATALOGUE),
+            (($page - 1) * $perPage) % THREAD_CATALOGUE, $perPage, true
+        );
     }
 
     /**

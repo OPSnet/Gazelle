@@ -66,24 +66,33 @@ if ($threadInfo['Posts'] <= $PerPage) {
         $PostNum = 1;
     }
 }
-[$Page] = Format::page_limit($PerPage, min($threadInfo['Posts'], $PostNum));
+
+$Page = max(1, isset($_GET['page'])
+    ? (int)$_GET['page']
+    : (int)ceil(min($threadInfo['Posts'], $PostNum) / $PerPage)
+);
 if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
     $Page = (int)ceil($threadInfo['Posts'] / $PerPage);
 }
+$thread = $forum->threadPage($threadId, $PerPage, $Page);
+$paginator = new Gazelle\Util\Paginator($PerPage, $Page);
+$paginator->setTotal($threadInfo['Posts']);
 
-$Catalogue = $forum->threadCatalog($threadId, $PerPage, $Page, THREAD_CATALOGUE);
-$thread = array_slice($Catalogue, (($Page - 1) * $PerPage) % THREAD_CATALOGUE, $PerPage, true);
-$FirstPost = current($thread)['ID'];
-$LastPost = end($thread)['ID'];
-if ($threadInfo['Posts'] <= $PerPage * $Page && $threadInfo['StickyPostID'] > $LastPost) {
-    $LastPost = $threadInfo['StickyPostID'];
+$firstOnPage = current($thread)['ID'];
+$lastOnPage = end($thread)['ID'];
+if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPage * $Page) {
+    $lastOnPage = $threadInfo['StickyPostID'];
 }
 
-//Handle last read
+$quoteCount = $Cache->get_value('notify_quoted_' . $user->id());
+if ($quoteCount === false || $quoteCount > 0) {
+    (new Gazelle\User\Quote($user))->clearThread($threadId, $firstOnPage, $lastOnPage);
+}
+
 if (!$threadInfo['isLocked'] || $threadInfo['isSticky']) {
     $lastRead = $forum->userLastReadPost($user->id(), $threadId);
-    if ($lastRead < $LastPost) {
-        $forum->userCatchupThread($user->id(), $threadId, $LastPost);
+    if ($lastRead < $lastOnPage) {
+        $forum->userCatchupThread($user->id(), $threadId, $lastOnPage);
     }
 }
 
@@ -92,14 +101,8 @@ if ($isSubscribed) {
     $Cache->delete_value('subscriptions_user_new_'.$user->id());
 }
 
-$QuoteNotificationsCount = $Cache->get_value('notify_quoted_' . $user->id());
-if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
-    (new Gazelle\User\Quote($user))->clearThread($threadId, $FirstPost, $LastPost);
-}
-
 $userMan = new Gazelle\Manager\User;
 
-$Pages = Format::get_pages($Page, $threadInfo['Posts'], $PerPage, 9);
 $transitions = Forums::get_thread_transitions($forumId);
 $auth = $LoggedUser['AuthKey'];
 View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadInfo['Title']),
@@ -142,9 +145,11 @@ View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadIn
                 <br />
             </div>
         </div>
-<?= $Pages; ?>
     </div>
-<?php if ($transitions) { ?>
+<?php
+echo $paginator->linkbox();
+if ($transitions) {
+?>
     <table class="layout border">
         <tr>
             <td class="label">Move thread</td>
@@ -177,18 +182,11 @@ if ($threadInfo['NoPoll'] == 0) {
     }
 
     $RevealVoters = in_array($forumId, $ForumsRevealVoters);
-    //Polls lose the you voted arrow thingy
-    $UserResponse = $DB->scalar("
-        SELECT Vote
-        FROM forums_polls_votes
-        WHERE UserID = ?
-            AND TopicID = ?
-        ", $user->id(), $threadId
-    );
+    $UserResponse = $forum->pollVote($user->id(), $threadId);
     if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     } else {
-        if (!empty($UserResponse) && $RevealVoters) {
+        if (!is_null($UserResponse) && $RevealVoters) {
             $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
         }
     }
@@ -242,18 +240,8 @@ if ($threadInfo['NoPoll'] == 0) {
                 }
             }
 
-            $DB->prepared_query("
-                SELECT fpv.Vote AS Vote,
-                    GROUP_CONCAT(um.Username SEPARATOR ', ')
-                FROM users_main AS um
-                LEFT JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
-                WHERE TopicID = ?
-                GROUP BY fpv.Vote
-                ", $threadId
-            );
-            $StaffVotesTmp = $DB->to_array();
+            $StaffVotesTmp = $forum->staffVote($threadId);
             $StaffCount = count($StaffNames);
-
             $StaffVotes = [];
             foreach ($StaffVotesTmp as $StaffVote) {
                 [$Vote, $Names] = $StaffVote;
@@ -382,11 +370,11 @@ foreach ($thread as $Key => $Post) {
                 <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum) ?>
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
-<?php if (!$threadInfo['isLocked']) { ?>
+<?php if (!$threadInfo['isLocked'] && !$user->disablePosting()) { ?>
                 - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?=$Username?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
-    if ((!$threadInfo['isLocked'] && $user->writeAccess($forum) && $AuthorID == $user->id()) || check_perms('site_moderate_forums')) {
+    if ((!$threadInfo['isLocked'] && $user->writeAccess($forum) && $AuthorID == $user->id()) && !$user->disablePosting() || check_perms('site_moderate_forums')) {
 ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
 <?php } ?>
@@ -414,7 +402,7 @@ foreach ($thread as $Key => $Post) {
                 <a href="reports.php?action=report&amp;type=post&amp;id=<?=$PostID?>" class="brackets">Report</a>
 <?php
     $author = new Gazelle\User($AuthorID);
-    if (check_perms('users_warn') && !$ownProfile && $user->classLevel() >= $author->classLevel()) {
+    if (check_perms('users_warn') && $user->id() != $AuthorID && $user->classLevel() >= $author->classLevel()) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
                     <input type="hidden" name="action" value="warn" />
@@ -460,10 +448,8 @@ foreach ($thread as $Key => $Post) {
     <a href="forums.php?action=viewforum&amp;forumid=<?=$threadInfo['ForumID']?>"><?=$ForumName?></a> &rsaquo;
     <?=$threadTitle?>
 </div>
-<div class="linkbox">
-    <?=$Pages?>
-</div>
 <?php
+echo $paginator->linkbox();
 if (!$threadInfo['isLocked'] || check_perms('site_moderate_forums')) {
     if ($user->writeAccess($forum) && !$LoggedUser['DisablePosting']) {
         View::parse('generic/reply/quickreply.php', [
@@ -559,23 +545,23 @@ if (check_perms('site_moderate_forums')) {
 <?php
     $OpenGroup = false;
     $LastCategoryID = -1;
-
-    $Forums = (new Gazelle\Manager\Forum)->tableOfContentsMain();
-    foreach ($Forums as $Forum) {
-        if ($Forum['MinClassRead'] > $LoggedUser['Class']) {
+    $Forums = (new Gazelle\Manager\Forum)->forumList();
+    foreach ($Forums as $forumId) {
+        $forum = new Gazelle\Forum($forumId);
+        if (!$user->readAccess($forum)) {
             continue;
         }
 
-        if ($Forum['categoryId'] != $LastCategoryID) {
-            $LastCategoryID = $Forum['categoryId'];
+        if ($forum->categoryId() != $LastCategoryID) {
+            $LastCategoryID = $forum->categoryId();
             if ($OpenGroup) {
                 $OpenGroup = true;
 ?>
                     </optgroup>
 <?php       } ?>
-                    <optgroup label="<?= $Forum['categoryName'] ?>">
+                    <optgroup label="<?= $forum->categoryName() ?>">
 <?php   } ?>
-                        <option value="<?=$Forum['ID']?>"<?php if ($threadInfo['ForumID'] == $Forum['ID']) { echo ' selected="selected"';} ?>><?=display_str($Forum['Name'])?></option>
+                        <option value="<?= $forumId ?>"<?php if ($threadInfo['ForumID'] == $forumId) { echo ' selected="selected"';} ?>><?=display_str($forum->name())?></option>
 <?php } /* foreach */ ?>
                     </optgroup>
                     </select>

@@ -1,7 +1,5 @@
 <?php
 class Forums {
-    const PADLOCK = "\xF0\x9F\x94\x92";
-
     /**
      * Get the forum categories
      * @return array ForumCategoryID => Name

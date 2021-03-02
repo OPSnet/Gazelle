@@ -62,9 +62,7 @@ if (empty($_POST['question']) || empty($_POST['answers']) || !check_perms('forum
     }
 }
 
-$forum = new \Gazelle\Forum($ForumID);
 $threadId = $forum->addThread($LoggedUser['ID'], $Title, $Body);
-
 if ($needPoll) {
     $forum->addPoll($threadId, $Question, $Answers, $Votes);
     if ($ForumID == STAFF_FORUM_ID) {

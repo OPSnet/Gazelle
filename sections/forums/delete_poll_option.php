@@ -1,28 +1,24 @@
 <?php
+
 authorize();
+
 if (!check_perms('site_moderate_forums')) {
-    error(404);
+    error(403);
 }
 
-$threadId = (int)$_GET['threadid'];
 $option = (int)$_GET['vote'];
-
-if ($threadId < 1 || $option < 1) {
+if (!$option) {
     error(404);
 }
-
-if (!check_perms('site_moderate_forums')) {
-    $forumId = $DB->scalar("
-        SELECT forumId
-        FROM forums_topics
-        WHERE ID = ?
-        ", $threadId
-    );
-    if (!in_array($forumId, $ForumsRevealVoters)) {
-        error(403);
-    }
+$threadId = (int)$_POST['threadid'];
+$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
+if (is_null($forum)) {
+    error(404);
 }
-$forum = new \Gazelle\Forum($forumId);
+if (!in_array($forum->id(), $ForumsRevealVoters)) {
+    error(403);
+}
+
 $forum->removePollAnswer($threadId, $option);
 
 header("Location: forums.php?action=viewthread&threadid=$threadId");

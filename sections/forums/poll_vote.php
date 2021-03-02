@@ -1,11 +1,10 @@
 <?php
 
 $threadId = (int)$_POST['threadid'];
-if ($threadId < 1) {
-    error(0, true);
+$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
+if (is_null($forum)) {
+    error(404, true);
 }
-
-$forum = (new \Gazelle\Manager\Forum)->findByThreadId($threadId);
 [$Question, $Answers, $Votes, $Featured, $Closed] = $forum->pollData($threadId);
 if ($Closed) {
     error(403, true);
@@ -75,20 +74,12 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
             }
         } else {
             //Staff forum, output voters, not percentages
-            $DB->prepared_query("
-                SELECT GROUP_CONCAT(um.Username SEPARATOR ', '),
-                    fpv.Vote
-                FROM users_main AS um
-                INNER JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
-                WHERE TopicID = ?
-                GROUP BY fpv.Vote
-                ", $threadId
-            );
-            $StaffVotes = $DB->to_array();
+
+            $StaffVotes = $forum->staffVotes($threadId);
             foreach ($StaffVotes as $StaffVote) {
                 [$StaffString, $StaffVoted] = $StaffVote;
 ?>
-                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;vote=<?=(int)$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
+                <li><a href="forums.php?action=change_vote&amp;threadid=<?=$threadId?>&amp;auth=<?=$LoggedUser['AuthKey']?>&amp;vote=<?=$StaffVoted?>"><?=display_str(empty($Answers[$StaffVoted]) ? 'Blank' : $Answers[$StaffVoted])?></a> - <?=$StaffString?></li>
 <?php
             }
         }

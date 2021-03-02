@@ -4,7 +4,7 @@ namespace Gazelle\Manager;
 
 class Forum extends \Gazelle\Base {
 
-    protected const CACHE_TOC  = 'forum_toc_main';
+    protected const CACHE_TOC  = 'forum_toc_mainv3';
     protected const CACHE_LIST = 'forum_list';
 
     /**
@@ -158,7 +158,6 @@ class Forum extends \Gazelle\Base {
             $toc = [];
             while ($row = $this->db->next_row(MYSQLI_ASSOC)) {
                 $category = $row['categoryName'];
-                unset($row['categoryName']);
                 $row['AutoLock'] = ($row['AutoLock'] == '1');
                 if (!isset($toc[$category])) {
                     $toc[$category] = [];
