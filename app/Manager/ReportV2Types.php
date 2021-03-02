@@ -312,15 +312,18 @@ Your torrent was reported because it contained transcoded audio files.'
             'report_messages' => [
                 "Please tell us the actual bitrate and the software used to check."
             ],
+            'report_messages' => [
+                'Please specify a link to the original torrent.'
+            ],
             'report_fields' => [
-                'track' => '0'
+                'sitelink' => '1'
             ],
             'resolve_options' => [
                 'upload' => '0',
-                'warn' => '2',
+                'warn' => '0',
                 'delete' => '1',
-                'pm' => '[rule]2.1.3[/rule]. Music releases must have an average bitrate of at least 192 kbps regardless of the format. Exceptions: The following VBR encodes may go under the 192 kbps limit: LAME V2 (VBR), V1 (VBR), V0 (VBR), APS (VBR), APX (VBR), MP3 192 (VBR), and AAC ~192 (VBR) to AAC ~256 (VBR) releases.
-Your torrent was reported because it contained one or more audio files that did not meet the minimum bitrate requirement.'
+                'pm' => '[rule]2.1.3[/rule]. Music releases that have a bitrate below 192 are trumped by higher bitrates.
+Your torrent was reported because there are lossy versions with higher bitrates available.'
             ]
         ],
         'mutt' => [
