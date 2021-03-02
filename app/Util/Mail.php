@@ -23,19 +23,19 @@ class Mail {
         $headers = implode("\r\n", [
             "MIME-Version: 1.0",
             "Content-type: text/plain; charset=utf-8",
-            "To: $to",
+            //"To: $to",
             "From: " . SITE_NAME . " <$from>",
             "Reply-To: $from",
             "Message-Id: <{$msgId}@" . MAIL_HOST . '>',
             "X-Priority: 3",
             '' // for final "\r\n"
         ]);
-        if (DEBUG_EMAIL) {
+        if (defined('DEBUG_EMAIL') && DEBUG_EMAIL) {
             $out = fopen(TMPDIR . "/$msgId.mail", "w");
             fwrite($out, $headers . "\n" . $body . "\n");
             fclose($out);
         } else {
-            mail($to, $subject, $body, implode("\r\n", $header), "-f $from");
+            mail($to, $subject, $body, $headers, "-f $from");
         }
     }
 }
