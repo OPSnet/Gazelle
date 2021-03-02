@@ -265,11 +265,9 @@ if ($Action == 'requests') {
     foreach ($RequestIDs as $RequestID) {
         $Artists[$RequestID] = Requests::get_artists($RequestID);
     }
-    $DB->set_query_id($Comments);
 } elseif ($Action == 'torrents') {
     $GroupIDs = array_flip(array_flip($DB->collect('PageID')));
     $Artists = Artists::get_artists($GroupIDs);
-    $DB->set_query_id($Comments);
 }
 
 $Links = implode(' ', $ActionLinks)
@@ -303,12 +301,12 @@ View::show_header($Title, 'bbcode,comments');
     <div class="center">No results.</div>
 <?php
 } else {
-    $DB->set_query_id($Comments);
     $isAdmin = check_perms('site_admin_forums');
     $isMod = check_perms('site_moderate_forums');
     $commentMan = new Gazelle\Manager\Comment;
     $userMan = new Gazelle\Manager\User;
     $user = $userMan->findById($LoggedUser['ID']);
+    $DB->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
         switch ($Page) {
             case 'artist':
