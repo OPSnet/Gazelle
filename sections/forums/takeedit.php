@@ -35,12 +35,7 @@ if ($LoggedUser['ID'] != $forumPost['user-id']) {
     }
 }
 
-$body = trim($_POST['body']);
-$forum->editPost($LoggedUser['ID'], $postId, $body);
-$Cache->deleteMulti([
-    "thread_{$forumPost['thread-id']}_catalogue_" . (int)floor((POSTS_PER_PAGE * $forumPost['page'] - POSTS_PER_PAGE) / THREAD_CATALOGUE),
-    "thread_{$forumPost['thread-id']}_info",
-]);
+$forum->editPost($LoggedUser['ID'], $postId, $_POST['body']);
 
 // This gets sent to the browser, which echoes it in place of the old body
 echo Text::full_format($body);

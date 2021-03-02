@@ -1,7 +1,7 @@
 <?php
 
 $user = new Gazelle\User($LoggedUser['ID']);
-$search = new Gazelle\ForumSearch(new Gazelle\User($LoggedUser['ID']));
+$search = new Gazelle\ForumSearch($user);
 $search->setSearchType($_GET['type'] ?? 'title')
     ->setSearchText(trim($_GET['search']) ?? '');
 
@@ -125,15 +125,16 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
     $LastCategoryID = -1;
     $Columns = 0;
     $i = 0;
-    $Forums = (new Gazelle\Manager\Forum)->tableOfContentsMain();
-    foreach ($Forums as $Forum) {
-        if (!$user->readAccess($Forum['ID'])) {
+    $Forums = (new Gazelle\Manager\Forum)->forumList();
+    foreach ($Forums as $forumId) {
+        $forum = new Gazelle\Forum($forumId);
+        if (!$user->readAccess($forum)) {
             continue;
         }
         $Columns++;
 
-        if ($Forum['categoryId'] != $LastCategoryID) {
-            $LastCategoryID = $Forum['categoryId'];
+        if ($forum->categoryId() != $LastCategoryID) {
+            $LastCategoryID = $forum->categoryId();
             if ($Open) {
                 if ($Columns % 5) {
 ?>
@@ -148,7 +149,7 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
 ?>
             <tr>
                 <td colspan="5" class="forum_cat">
-                    <strong><?= $Forum['categoryName'] ?></strong>
+                    <strong><?= $forum->categoryName() ?></strong>
                     <a href="#" class="brackets forum_category" id="forum_category_<?=$i?>">Check all</a>
                 </td>
             </tr>
@@ -158,8 +159,8 @@ View::show_header('Forums &rsaquo; Search', 'bbcode,forum_search,datetime_picker
             <tr>
 <?php   } ?>
                 <td>
-                    <input type="checkbox" name="forums[]" value="<?=$Forum['ID']?>" data-category="forum_category_<?=$i?>" id="forum_<?=$Forum['ID']?>"<?= in_array($Forum['ID'], ($_GET['forums'] ?? [])) ? ' checked="checked"' : '' ?> />
-                    <label for="forum_<?=$Forum['ID']?>"><?=htmlspecialchars($Forum['Name'])?></label>
+                    <input type="checkbox" name="forums[]" value="<?= $forumId ?>" data-category="forum_category_<?=$i?>" id="forum_<?= $forumId ?>"<?= in_array( $forumId , ($_GET['forums'] ?? [])) ? ' checked="checked"' : '' ?> />
+                    <label for="forum_<?= $forumId ?>"><?=htmlspecialchars($forum->name())?></label>
                 </td>
 <?php
     }

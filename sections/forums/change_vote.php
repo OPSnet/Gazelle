@@ -1,30 +1,20 @@
 <?php
 authorize();
-$ThreadID = (int)$_GET['threadid'];
-$NewVote = (int)$_GET['vote'];
 
-if (!$ThreadID || !$NewVote) {
+$vote = (int)$_GET['vote'];
+if (!$vote) {
     error(404);
 }
 
-if (!check_perms('site_moderate_forums')) {
-    $ForumID = $DB->scalar("
-        SELECT ForumID
-        FROM forums_topics
-        WHERE ID = ?
-        ", $ThreadID
-    );
-    if (!in_array($ForumID, $ForumsRevealVoters)) {
-        error(403);
-    }
+$threadId = (int)$_POST['threadid'];
+$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
+if (is_null($forum)) {
+    error(404);
+}
+if (!check_perms('site_moderate_forums') && !in_array($forum->id(), $ForumsRevealVoters)) {
+    error(403);
 }
 
-$DB->prepared_query("
-    UPDATE forums_polls_votes SET
-        Vote = ?
-    WHERE TopicID = ?
-        AND UserID = ?
-    ", $NewVote, $ThreadID, $LoggedUser['ID']
-);
-$Cache->delete_value('polls_'.$ThreadID);
-header("Location: forums.php?action=viewthread&threadid=".$ThreadID);
+$forum->modifyVote($LoggedUser['ID'], $threadId, $vote);
+
+header("Location: forums.php?action=viewthread&threadid=$threadId");

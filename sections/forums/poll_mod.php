@@ -6,7 +6,7 @@ if (!check_perms('forums_polls_moderate')) {
 }
 
 $threadId = (int)$_POST['threadid'];
-$forum = (new \Gazelle\Manager\Forum)->findByThreadId($threadId);
+$forum = (new Gazelle\Manager\Forum)->findByThreadId($threadId);
 if (is_null($forum)) {
     error(0, true);
 }

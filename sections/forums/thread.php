@@ -177,18 +177,11 @@ if ($threadInfo['NoPoll'] == 0) {
     }
 
     $RevealVoters = in_array($forumId, $ForumsRevealVoters);
-    //Polls lose the you voted arrow thingy
-    $UserResponse = $DB->scalar("
-        SELECT Vote
-        FROM forums_polls_votes
-        WHERE UserID = ?
-            AND TopicID = ?
-        ", $user->id(), $threadId
-    );
+    $UserResponse = $forum->userPollVote($user->id(), $threadId);
     if ($UserResponse > 0) {
         $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
     } else {
-        if (!empty($UserResponse) && $RevealVoters) {
+        if (!is_null($UserResponse) && $RevealVoters) {
             $Answers[$UserResponse] = '&raquo; '.$Answers[$UserResponse];
         }
     }
@@ -242,18 +235,8 @@ if ($threadInfo['NoPoll'] == 0) {
                 }
             }
 
-            $DB->prepared_query("
-                SELECT fpv.Vote AS Vote,
-                    GROUP_CONCAT(um.Username SEPARATOR ', ')
-                FROM users_main AS um
-                LEFT JOIN forums_polls_votes AS fpv ON (um.ID = fpv.UserID)
-                WHERE TopicID = ?
-                GROUP BY fpv.Vote
-                ", $threadId
-            );
-            $StaffVotesTmp = $DB->to_array();
+            $StaffVotesTmp = $forum->staffVote($threadId);
             $StaffCount = count($StaffNames);
-
             $StaffVotes = [];
             foreach ($StaffVotesTmp as $StaffVote) {
                 [$Vote, $Names] = $StaffVote;
@@ -414,7 +397,7 @@ foreach ($thread as $Key => $Post) {
                 <a href="reports.php?action=report&amp;type=post&amp;id=<?=$PostID?>" class="brackets">Report</a>
 <?php
     $author = new Gazelle\User($AuthorID);
-    if (check_perms('users_warn') && !$ownProfile && $user->classLevel() >= $author->classLevel()) {
+    if (check_perms('users_warn') && $user->id() != $AuthorID && $user->classLevel() >= $author->classLevel()) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
                     <input type="hidden" name="action" value="warn" />
@@ -555,27 +538,27 @@ if (check_perms('site_moderate_forums')) {
             <tr>
                 <td class="label"><label for="move_thread_selector">Move thread</label></td>
                 <td>
-                    <select name="forumid" id="move_thread_selector" tabindex="8">
+                    <noselect name="forumid" id="move_thread_selector" tabindex="8">
 <?php
     $OpenGroup = false;
     $LastCategoryID = -1;
-
-    $Forums = (new Gazelle\Manager\Forum)->tableOfContentsMain();
-    foreach ($Forums as $Forum) {
-        if ($Forum['MinClassRead'] > $LoggedUser['Class']) {
+    $Forums = (new Gazelle\Manager\Forum)->forumList();
+    foreach ($Forums as $forumId) {
+        $forum = new Gazelle\Forum($forumId);
+        if (!$user->readAccess($forum)) {
             continue;
         }
 
-        if ($Forum['categoryId'] != $LastCategoryID) {
-            $LastCategoryID = $Forum['categoryId'];
+        if ($forum->categoryId() != $LastCategoryID) {
+            $LastCategoryID = $forum->categoryId();
             if ($OpenGroup) {
                 $OpenGroup = true;
 ?>
                     </optgroup>
 <?php       } ?>
-                    <optgroup label="<?= $Forum['categoryName'] ?>">
+                    <optgroup label="<?= $forum->categoryName() ?>">
 <?php   } ?>
-                        <option value="<?=$Forum['ID']?>"<?php if ($threadInfo['ForumID'] == $Forum['ID']) { echo ' selected="selected"';} ?>><?=display_str($Forum['Name'])?></option>
+                        <option value="<?= $forumId ?>"<?php if ($threadInfo['ForumID'] == $forumId) { echo ' selected="selected"';} ?>><?=display_str($forum->name())?></option>
 <?php } /* foreach */ ?>
                     </optgroup>
                     </select>

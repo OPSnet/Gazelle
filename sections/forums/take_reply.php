@@ -47,8 +47,6 @@ if ($ThreadInfo['LastPostAuthorID'] == $LoggedUser['ID'] && isset($_POST['merge'
     $PostID = $forum->addPost($LoggedUser['ID'], $threadId, $Body);
     ++$ThreadInfo['Posts'];
 }
-$CatalogueID = (int)floor((POSTS_PER_PAGE * ceil($ThreadInfo['Posts'] / POSTS_PER_PAGE) - POSTS_PER_PAGE) / THREAD_CATALOGUE);
-$Cache->deleteMulti(["thread_{$threadId}_catalogue_{$CatalogueID}", "thread_{$threadId}_info"]);
 
 $subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
 if (isset($_POST['subscribe']) && !$subscription->isSubscribed($threadId)) {

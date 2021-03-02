@@ -14,15 +14,32 @@ the front page.
 
 authorize();
 
+$viewer = new Gazelle\User($LoggedUser['ID']);
+$forumMan = new Gazelle\Manager\Forum;
+
 if (!check_perms('site_moderate_forums') && empty($_POST['transition'])) {
     error(403);
 }
 $threadId = (int)$_POST['threadid'];
-if (!$threadId) {
+$forum = $forumMan->findByThreadId($threadId);
+if (is_null($forum)) {
     error(404);
 }
-$newForumId = (int)($_POST['forumid'] ?? 0);
-if (!$newForumId && !isset($_POST['transition'])) {
+if (!$viewer->writeAccess($forum)) {
+    error(403);
+}
+
+if (isset($_POST['delete'])) {
+    if (!check_perms('site_admin_forums')) {
+        error(403);
+    }
+    $forum->removeThread($threadId);
+    header("Location: forums.php?action=viewforum&forumid=" . $forum->id());
+    exit;
+}
+
+$newForum = $forumMan->findById((int)$_POST['forumid']);
+if (is_null($newForum) && !isset($_POST['transition'])) {
     error(404);
 }
 $newTitle = trim($_POST['title']);
@@ -42,82 +59,65 @@ if (!$newSticky && $newRank > 0) {
     error('Ranking cannot be a negative value');
 }
 
-$forum = (new \Gazelle\Manager\Forum)->findByThreadId($threadId);
-[$oldForumId, $oldName, $minClassWrite, $posts, $threadAuthorId, $oldTitle, $oldLocked, $oldSticky, $oldRank]
-    = $forum->threadInfoExtended($threadId);
-
-if ($minClassWrite > $LoggedUser['Class']) {
-    error(403);
-}
-
-if (isset($_POST['delete'])) {
-    if (!check_perms('site_admin_forums')) {
-        error(403);
-    }
-    $forum->removeThread($threadId);
-    $location = "forums.php?action=viewforum&forumid=$newForumId";
-} else {
-    // We are editing it
-    if (isset($_POST['transition'])) {
-        $transId = (int)$_POST['transition'];
-        if ($transId < 1) {
+$threadInfo = $forum->threadInfo($threadId);
+if (isset($_POST['transition'])) {
+    $transId = (int)$_POST['transition'];
+    if ($transId < 1) {
+        error(0);
+    } else {
+        // Permissions are handled inside forums.class.php
+        $transitions = Forums::get_transitions();
+        if (!isset($transitions[$transId])) {
             error(0);
         } else {
-            // Permissions are handled inside forums.class.php
-            $transitions = Forums::get_transitions();
-            if (!isset($transitions[$transId])) {
-                error(0);
-            } else {
-                $transition = $transitions[$transId];
-                if ($transition['source'] != $oldForumId) {
-                    error(403);
-                }
-                $newForumId = $transition['destination'];
-                $newSticky  = $oldSticky;
-                $locked     = $oldLocked;
-                $newRank    = $oldRank;
-                $newTitle   = $oldTitle;
-                $action     = 'transitioning';
+            $transition = $transitions[$transId];
+            if ($transition['source'] != $forum->id()) {
+                error(403);
             }
+            $newForum  = $forumMan->findById($transition['destination']);
+            $newSticky = $threadInfo['isSticky'];
+            $locked    = $threadInfo['isLocked'];
+            $newRank   = $threadInfo['Ranking'];
+            $newTitle  = $threadInfo['Title'];
+            $action    = 'transitioning';
         }
     }
-
-    if ($locked && check_perms('site_moderate_forums')) {
-        $forum->clearUserLastRead($threadId);
-    }
-
-    $forum->editThread($threadId, $newForumId, $newSticky, $newRank, $locked, $newTitle);
-
-    // topic notes and notifications
-    $notes = [];
-    $newName = $DB->scalar('SELECT Name FROM forums WHERE ID = ?', $newForumId);
-    $oldUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=$oldForumId]{$oldName}[/url]";
-    $newUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=$newForumId]{$newName}[/url]";
-    switch ($action ?? null) {
-        case 'transitioning':
-            $notes[] = "Moved from $oldUrl to $newUrl (" . $transition['label'] . " transition)";
-            break;
-        default:
-            if ($oldTitle != $newTitle) {
-                $notes[] = "Title edited from \"$oldTitle\" to \"$newTitle\"";
-            }
-            if ($oldLocked != $locked) {
-                $notes[] = $oldLocked ? 'Unlocked' : 'Locked';
-            }
-            if ($oldSticky != $newSticky) {
-                $notes[] = $oldSticky ? 'Unstickied' : 'Stickied';
-            }
-            if ($oldRank != $newRank) {
-                $notes[] = "Ranking changed from $oldRank to $newRank";
-            }
-            if ($newForumId != $oldForumId) {
-                $notes[] = "Moved from $oldUrl to $newUrl";
-            }
-            break;
-    }
-    if ($notes) {
-        $forum->addThreadNote($threadId, $LoggedUser['ID'], implode("\n", $notes));
-    }
-    $location = "forums.php?action=viewthread&threadid=$threadId&page=$page";
 }
-header("Location: $location");
+
+if ($locked && check_perms('site_moderate_forums')) {
+    $forum->clearUserLastRead($threadId);
+}
+
+$forum->editThread($threadId, $newForum->id(), $newSticky, $newRank, $locked, $newTitle);
+
+// topic notes and notifications
+$notes = [];
+$oldUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=" . $forum->id() . "]" . $forum->name() . "[/url]";
+$newUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=" . $newForum->id() . "]" . $newForum->name() . "[/url]";
+switch ($action ?? null) {
+    case 'transitioning':
+        $notes[] = "Moved from $oldUrl to $newUrl (" . $transition['label'] . " transition)";
+        break;
+    default:
+        if ($threadInfo['Title'] != $newTitle) {
+            $notes[] = "Title edited from \"{$threadInfo['Title']}\" to \"$newTitle\"";
+        }
+        if ($threadInfo['isLocked'] != $locked) {
+            $notes[] = $threadInfo['isLocked'] ? 'Unlocked' : 'Locked';
+        }
+        if ($threadInfo['isSticky'] != $newSticky) {
+            $notes[] = $threadInfo['isSticky'] ? 'Unpinned' : 'Pinned';
+        }
+        if ($threadInfo['Ranking'] != $newRank) {
+            $notes[] = "Ranking changed from {$threadInfo['Ranking']} to $newRank";
+        }
+        if ($newForum->id() != $forum->id()) {
+            $notes[] = "Moved from $oldUrl to $newUrl";
+        }
+        break;
+}
+if ($notes) {
+    $forum->addThreadNote($threadId, $LoggedUser['ID'], implode("\n", $notes));
+}
+
+header("Location: forums.php?action=viewthread&threadid=$threadId&page=$page");
