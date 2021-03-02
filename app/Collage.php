@@ -672,6 +672,10 @@ class Collage extends BaseObject {
                 case '21': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '256'"; break;
                 case '22': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '224'"; break;
                 case '23': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '192'"; break;
+                case '24': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '160'"; break;
+                case '25': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '128'"; break;
+                case '26': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '96'"; break;
+                case '27': $SQL .= "t.Format = 'MP3'  AND t.Encoding = '64'"; break;
                 case '30': $SQL .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'Vinyl'"; break;
                 case '31': $SQL .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'DVD'"; break;
                 case '32': $SQL .= "t.Format = 'FLAC' AND t.Encoding = '24bit Lossless' AND t.Media = 'SACD'"; break;

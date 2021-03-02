@@ -262,8 +262,8 @@ $CategoriesV2 = ['Music'];
 $CategoryV2Icons = ['music.png'];
 
 $Formats = ['MP3', 'FLAC', 'Ogg Vorbis', 'AAC', 'AC3', 'DTS'];
-$Bitrates = ['192', 'APS (VBR)', 'V2 (VBR)', 'V1 (VBR)', '256', 'APX (VBR)', 'V0 (VBR)', 'q8.x (VBR)', '320', 'Lossless', '24bit Lossless', 'Other'];
-$Media = ['CD', 'DVD', 'Vinyl', 'BD', 'Soundboard', 'SACD', 'DAT', 'Cassette', 'WEB'];
+$Bitrates = ['Lossless', '24bit Lossless', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '320', '256', '192', '160', '128', '96', '64', 'APS (VBR)', 'APX (VBR)', 'q8.x (VBR)', 'Other'];
+$Media = ['CD', 'WEB', 'Vinyl', 'DVD', 'BD', 'Soundboard', 'SACD', 'DAT', 'Cassette'];
 
 define('HOMEPAGE_TAG_IGNORE', [0]); // set to 'test' tag to ignore staff test uploads
 
@@ -311,6 +311,10 @@ $ZIPOptions = [
     '21' => [2, 1, '256'],
     '22' => [2, 2, '224'],
     '23' => [2, 3, '192'],
+    '24' => [2, 4, '160'],
+    '25' => [2, 5, '128'],
+    '26' => [2, 6, '96'],
+    '27' => [2, 7, '64'],
     '30' => [3, 0, 'FLAC / 24bit / Vinyl'],
     '31' => [3, 1, 'FLAC / 24bit / DVD'],
     '32' => [3, 2, 'FLAC / 24bit / SACD'],

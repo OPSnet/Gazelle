@@ -16,7 +16,7 @@ var AllowedBitrate = {
         rank: [1, 0],
     },
     MP3: {
-        list: ['320', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '256', '192', 'Other'],
+        list: ['320', 'V0 (VBR)', 'V1 (VBR)', 'V2 (VBR)', '256', '192', '160', '128', '96', '64', 'Other'],
         rank: [0, 1],
     },
     AAC: { list: ['256'], rank: [0] },
