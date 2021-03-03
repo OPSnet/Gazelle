@@ -122,12 +122,14 @@ class User extends \Gazelle\Base {
      */
     public function classList(): array {
         if (($classList = $this->cache->get_value('user_class')) === false) {
+            $qid = $this->db->get_query_id();
             $this->db->prepared_query("
                 SELECT ID, Name, Level, Secondary, badge
                 FROM permissions
                 ORDER BY Level
             ");
             $classList = $this->db->to_array('ID');
+            $this->db->set_query_id($qid);
             $this->cache->cache_value('user_class', $classList, 0);
         }
         return $classList;
