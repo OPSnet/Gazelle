@@ -1434,12 +1434,12 @@ class Text {
         if ($post) {
             return $id
                 ? sprintf('<a href="forums.php?action=viewthread&threadid=%d&postid=%s#post%s">%s%s (Post #%s)</a>',
-                    $id, $post, $post, ($isLocked ? self::PADLOCK . ' ' : ''), $name, $post)
+                    $id, $post, $post, ($isLocked ? ICON_PADLOCK . ' ' : ''), $name, $post)
                 : '[thread]' .  $thread . ':' . $post . '[/thread]';
         }
         return $id
             ? sprintf('<a href="forums.php?action=viewthread&threadid=%d">%s%s</a>',
-                $id, ($isLocked ? self::PADLOCK . ' ' : ''), $name)
+                $id, ($isLocked ? ICON_PADLOCK . ' ' : ''), $name)
             : '[thread]' . $thread . '[/thread]';
     }
 }
