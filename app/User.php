@@ -57,6 +57,7 @@ class User extends BaseObject {
         if (($this->info = $this->cache->get_value($key)) !== false) {
             return $this->info;
         }
+        $qid = $this->db->get_query_id();
         $this->db->prepared_query("
             SELECT um.Username,
                 um.IP,
@@ -76,17 +77,19 @@ class User extends BaseObject {
                 ui.Avatar,
                 ui.collages,
                 ui.DisableAvatar,
+                ui.DisableForums,
+                ui.DisableIRC,
                 ui.DisableInvites,
+                ui.DisablePM,
                 ui.DisablePoints,
                 ui.DisablePosting,
-                ui.DisableForums,
+                ui.DisableRequests,
                 ui.DisableTagging,
                 ui.DisableUpload,
                 ui.DisableWiki,
-                ui.DisablePM,
-                ui.DisableIRC,
-                ui.DisableRequests,
                 ui.Info,
+                ui.InfoTitle,
+                ui.Inviter,
                 ui.JoinDate,
                 ui.NotifyOnQuote,
                 ui.PermittedForums,
@@ -113,17 +116,25 @@ class User extends BaseObject {
             ", FORUM_MOD, $this->id
         );
         $this->info = $this->db->next_record(MYSQLI_ASSOC, false) ?? [];
+        $this->db->set_query_id($qid);
         if (empty($this->info)) {
             return $this->info;
         }
+        $this->info['DisableAvatar']   = ($this->info['DisableAvatar'] == '1');
+        $this->info['DisableForums']   = ($this->info['DisableForums'] == '1');
+        $this->info['DisableInvites']  = ($this->info['DisableInvites'] == '1');
+        $this->info['DisableIrc']      = ($this->info['DisableIRC'] == '1');
+        $this->info['DisablePM']       = ($this->info['DisablePM'] == '1');
+        $this->info['DisablePoints']   = ($this->info['DisablePoints'] == '1');
+        $this->info['DisablePosting']  = ($this->info['DisablePosting'] == '1');
+        $this->info['DisableRequests'] = ($this->info['DisableRequests'] == '1');
+        $this->info['DisableTagging']  = ($this->info['DisableTagging'] == '1');
+        $this->info['DisableUpload']   = ($this->info['DisableUpload'] == '1');
+        $this->info['DisableWiki']     = ($this->info['DisableWiki'] == '1');
+        $this->info['NotifyOnQuote']   = ($this->info['NotifyOnQuote'] == '1');
+
         $this->info['CommentHash'] = sha1($this->info['AdminComment']);
-        $this->info['DisableAvatar'] = (bool)($this->info['DisableAvatar'] == '1');
-        $this->info['DisableForums'] = (bool)($this->info['DisableForums'] == '1');
-        $this->info['DisableInvites'] = (bool)($this->info['DisableInvites'] == '1');
-        $this->info['DisablePosting'] = (bool)($this->info['DisablePosting'] == '1');
-        $this->info['DisableRequests'] = (bool)($this->info['DisableRequests'] == '1');
-        $this->info['NotifyOnQuote'] = (bool)($this->info['NotifyOnQuote'] == '1');
-        $this->info['Paranoia'] = unserialize($this->info['Paranoia']) ?: [];
+        $this->info['Paranoia']    = unserialize($this->info['Paranoia']) ?: [];
         $this->info['SiteOptions'] = unserialize($this->info['SiteOptions']) ?: ['HttpsTracker' => true];
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
 
@@ -218,7 +229,7 @@ class User extends BaseObject {
     }
 
     public function hasUnlimitedDownload(): bool {
-        return $this->hasAttr('unlimited-download');
+        return !is_null($this->hasAttr('unlimited-download'));
     }
 
     /**
@@ -251,8 +262,28 @@ class User extends BaseObject {
             . '/' . $this->announceKey() . '/announce';
     }
 
+    public function commentHash(): bool {
+        return $this->info()['CommentHash'];
+    }
+
+    public function disableBonusPoints(): bool {
+        return $this->info()['DisablePoints'];
+    }
+
     public function disableForums(): bool {
         return $this->info()['DisableForums'];
+    }
+
+    public function disableInvites(): bool {
+        return $this->info()['DisableInvites'];
+    }
+
+    public function disableIrc(): bool {
+        return $this->info()['DisableIrc'];
+    }
+
+    public function disablePm(): bool {
+        return $this->info()['DisablePM'];
     }
 
     public function disablePosting(): bool {
@@ -261,6 +292,18 @@ class User extends BaseObject {
 
     public function disableRequests(): bool {
         return $this->info()['DisableRequests'];
+    }
+
+    public function disableTagging(): bool {
+        return $this->info()['DisableTagging'];
+    }
+
+    public function disableUpload(): bool {
+        return $this->info()['DisableUpload'];
+    }
+
+    public function disableWiki(): bool {
+        return $this->info()['DisableWiki'];
     }
 
     public function avatar(): ?string {
@@ -279,6 +322,18 @@ class User extends BaseObject {
         return $this->info()['Email'];
     }
 
+    public function infoProfile() {
+        return $this->info()['Info'];
+    }
+
+    public function infoTitle(): string {
+        return $this->info()['InfoTitle'] ?? 'Profile';
+    }
+
+    public function ipaddr(): string {
+        return $this->info()['IP'];
+    }
+
     public function IRCKey() {
         return $this->info()['IRCKey'];
     }
@@ -291,8 +346,24 @@ class User extends BaseObject {
         return $this->info()['JoinDate'];
     }
 
+    public function paranoia(): array {
+        return $this->info()['Paranoia'];
+    }
+
+    public function ratioWatchExpiry(): ?string {
+        return $this->info()['RatioWatchEnds'];
+    }
+
+    public function staffNotes() {
+        return $this->info()['AdminComment'];
+    }
+
     public function supportFor() {
         return $this->info()['SupportFor'];
+    }
+
+    public function title() {
+        return $this->info()['Title'];
     }
 
     public function primaryClass(): int {
@@ -348,6 +419,10 @@ class User extends BaseObject {
         return array_keys(array_filter($this->info()['forum_access'], function ($v) {return $v === false;}));
     }
 
+    public function forbiddenForumsList(): string {
+        return $this->info()['RestrictedForums'];
+    }
+
     /**
      * Return the list for forum IDs to which the user has been granted special access.
      *
@@ -359,6 +434,10 @@ class User extends BaseObject {
             $permitted[] = DONOR_FORUM;
         }
         return $permitted;
+    }
+
+    public function permittedForumsList(): string {
+        return $this->info()['PermittedForums'];
     }
 
     /**
@@ -477,7 +556,7 @@ class User extends BaseObject {
      *
      * @param string reason for the warning.
      */
-    public function addForumWarning(string $reason) {
+     public function addForumWarning(string $reason) {
         $this->forumWarning[] = $reason;
         return $this;
     }
@@ -1039,12 +1118,22 @@ class User extends BaseObject {
     public function isUnconfirmed(): bool { return $this->enabledState() == 0; }
     public function isEnabled(): bool     { return $this->enabledState() == 1; }
     public function isDisabled(): bool    { return $this->enabledState() == 2; }
-    public function isWarned(): bool      { return !is_null($this->info()['Warned']); }
+    public function isLocked(): bool      { return !is_null($this->info()['locked_account']); }
+    public function isVisible(): bool     { return $this->info()['Visible'] == '1'; }
+    public function isWarned(): bool      { return !is_null($this->warningExpiry()); }
 
     public function isDonor(): bool         { return in_array(DONOR, $this->info()['secondary_class']) || $this->classLevel() >= STAFF_LEVEL; }
     public function isFLS(): bool           { return in_array(FLS_TEAM, $this->info()['secondary_class']); }
     public function isStaff(): bool         { return $this->info()['isStaff']; }
     public function isStaffPMReader(): bool { return $this->isFLS() || $this->isStaff(); }
+
+    public function secondaryClasses(): array {
+        return $this->info()['secondary_class'];
+    }
+
+    public function warningExpiry(): ?string {
+        return $this->info()['Warned'];
+    }
 
     public function endWarningDate(int $weeks) {
         return $this->db->scalar("
@@ -1056,11 +1145,9 @@ class User extends BaseObject {
     }
 
     public function LastFMUsername(): string {
-        return $this->db->scalar('
-            SELECT username
-            FROM lastfm_users
-            WHERE ID = ?
-            ', $this->id
+        return $this->db->scalar("
+            SELECT username FROM lastfm_users WHERE ID = ?
+            ", $this->id
         ) ?? '';
     }
 
@@ -1148,8 +1235,7 @@ class User extends BaseObject {
      */
     public function emailHistory(): array {
         $this->db->prepared_query("
-            SELECT
-                h.Email,
+            SELECT h.Email,
                 h.Time,
                 h.IP
             FROM users_history_emails AS h
@@ -1168,12 +1254,11 @@ class User extends BaseObject {
     public function emailDuplicateHistory(): array {
         // Get history of matches
         $this->db->prepared_query("
-            SELECT
-                users_history_emails_id AS id,
-                Email                   AS email,
-                UserID                  AS user_id,
-                Time                    AS created,
-                IP                      AS ipv4
+            SELECT users_history_emails_id AS id,
+                Email  AS email,
+                UserID AS user_id,
+                Time   AS created,
+                IP     AS ipv4
             FROM users_history_emails AS uhe
             WHERE uhe.UserID != ?
                 AND uhe.Email in (SELECT DISTINCT Email FROM users_history_emails WHERE UserID = ?)
@@ -1248,9 +1333,7 @@ class User extends BaseObject {
 
     public function clients(): array {
         $this->db->prepared_query('
-            SELECT DISTINCT useragent
-            FROM xbt_files_users
-            WHERE uid = ?
+            SELECT DISTINCT useragent FROM xbt_files_users WHERE uid = ?
             ', $this->id
         );
         return $this->db->collect(0) ?: ['None'];
@@ -1267,23 +1350,19 @@ class User extends BaseObject {
     }
 
     public function lastAccess() {
-        return $this->getSingleValue('user-last-access', '
-            SELECT ula.last_access
-            FROM user_last_access ula
-            WHERE user_id = ?
+        return $this->getSingleValue('user_last_access', '
+            SELECT ula.last_access FROM user_last_access ula WHERE user_id = ?
         ');
     }
 
     public function uploadCount(): int {
-        return $this->getSingleValue('user-upload-count', '
-            SELECT count(*)
-            FROM torrents
-            WHERE UserID = ?
+        return $this->getSingleValue('user_upload_count', '
+            SELECT count(*) FROM torrents WHERE UserID = ?
         ');
     }
 
     public function leechingCounts(): int {
-        return $this->getSingleValue('user-leeching-count', '
+        return $this->getSingleValue('user_leeching_count', '
             SELECT count(*)
             FROM xbt_files_users AS x
             INNER JOIN torrents AS t ON (t.ID = x.fid)
@@ -1293,7 +1372,7 @@ class User extends BaseObject {
     }
 
     public function seedingCounts(): int {
-        return $this->getSingleValue('user-seeding-count', '
+        return $this->getSingleValue('user_seeding_count', '
             SELECT count(*)
             FROM xbt_files_users AS x
             INNER JOIN torrents AS t ON (t.ID = x.fid)
@@ -1303,51 +1382,43 @@ class User extends BaseObject {
     }
 
     public function artistsAdded(): int {
-        return $this->getSingleValue('user-artists-count', '
-            SELECT count(*)
-            FROM torrents_artists
-            WHERE UserID = ?
+        return $this->getSingleValue('user_artists_count', '
+            SELECT count(*) FROM torrents_artists WHERE UserID = ?
         ');
     }
 
     public function passwordCount(): int {
-        return $this->getSingleValue('user-pw-count', '
-            SELECT count(*)
-            FROM users_history_passwords
-            WHERE UserID = ?
+        return $this->getSingleValue('user_pw_count', '
+            SELECT count(*) FROM users_history_passwords WHERE UserID = ?
         ');
     }
 
     public function passkeyCount(): int {
-        return $this->getSingleValue('user-passkey-count', '
-            SELECT count(*)
-            FROM users_history_passkeys
-            WHERE UserID = ?
+        return $this->getSingleValue('user_passkey_count', '
+            SELECT count(*) FROM users_history_passkeys WHERE UserID = ?
         ');
     }
 
     public function siteIPCount(): int {
-        return $this->getSingleValue('user-siteip-count', '
-            SELECT count(DISTINCT IP)
-            FROM users_history_ips
-            WHERE UserID = ?
+        return $this->getSingleValue('user_siteip_count', '
+            SELECT count(DISTINCT IP) FROM users_history_ips WHERE UserID = ?
         ');
     }
 
     public function trackerIPCount(): int {
-        return $this->getSingleValue('user-trackip-count', "
-            SELECT count(DISTINCT IP)
-            FROM xbt_snatched
-            WHERE uid = ? AND IP != ''
+        return $this->getSingleValue('user_trackip_count', "
+            SELECT count(DISTINCT IP) FROM xbt_snatched WHERE uid = ? AND IP != ''
         ");
     }
 
     public function emailCount(): int {
-        return $this->getSingleValue('user-email-count', '
-            SELECT count(*)
-            FROM users_history_emails
-            WHERE UserID = ?
+        return $this->getSingleValue('user_email_count', '
+            SELECT count(*) FROM users_history_emails WHERE UserID = ?
         ');
+    }
+
+    public function inviter(): ?User {
+        return $this->info()['Inviter'] ? new User($this->info()['Inviter']) : null;
     }
 
     public function inviteCount(): int {
@@ -1355,7 +1426,7 @@ class User extends BaseObject {
     }
 
     public function invitedCount(): int {
-        return $this->getSingleValue('user-invites', '
+        return $this->getSingleValue('user_invites', '
             SELECT count(*)
             FROM users_info
             WHERE Inviter = ?
@@ -1363,7 +1434,7 @@ class User extends BaseObject {
     }
 
     public function pendingInviteCount(): int {
-        return $this->getSingleValue('user-inv-pending', '
+        return $this->getSingleValue('user_inv_pending', '
             SELECT count(*)
             FROM invites
             WHERE InviterID = ?
@@ -1372,7 +1443,7 @@ class User extends BaseObject {
 
     public function passwordAge() {
         $age = time_diff(
-            $this->getSingleValue('user-pw-age', '
+            $this->getSingleValue('user_pw_age', '
                 SELECT coalesce(max(uhp.ChangeTime), ui.JoinDate)
                 FROM users_info ui
                 LEFT JOIN users_history_passwords uhp USING (UserID)
@@ -1383,7 +1454,7 @@ class User extends BaseObject {
     }
 
     public function artistCommentCount(): int {
-        return $this->getSingleValue('user-comment-artist', "
+        return $this->getSingleValue('user_comment_artist', "
             SELECT count(*)
             FROM comments
             WHERE Page = 'artists' AND AuthorID = ?
@@ -1391,7 +1462,7 @@ class User extends BaseObject {
     }
 
     public function collageCommentCount(): int {
-        return $this->getSingleValue('user-comment-collage', "
+        return $this->getSingleValue('user_comment_collage', "
             SELECT count(*)
             FROM comments
             WHERE Page = 'collages' AND AuthorID = ?
@@ -1399,7 +1470,7 @@ class User extends BaseObject {
     }
 
     public function requestCommentCount(): int {
-        return $this->getSingleValue('user-comment-request', "
+        return $this->getSingleValue('user_comment_request', "
             SELECT count(*)
             FROM comments
             WHERE Page = 'requests' AND AuthorID = ?
@@ -1407,7 +1478,7 @@ class User extends BaseObject {
     }
 
     public function torrentCommentCount(): int {
-        return $this->getSingleValue('user-comment-torrent', "
+        return $this->getSingleValue('user_comment_torrent', "
             SELECT count(*)
             FROM comments
             WHERE Page = 'torrents' AND AuthorID = ?
@@ -1415,7 +1486,7 @@ class User extends BaseObject {
     }
 
     public function forumWarning() {
-        return $this->getSingleValue('user-forumwarn', '
+        return $this->getSingleValue('user_forum_warn', '
             SELECT Comment
             FROM users_warnings_forums
             WHERE UserID = ?
@@ -1423,7 +1494,7 @@ class User extends BaseObject {
     }
 
     public function releaseVotes(): int {
-        return $this->getSingleValue('user-release-votes', '
+        return $this->getSingleValue('user_release_votes', '
             SELECT count(*)
             FROM users_votes
             WHERE UserID = ?
@@ -1431,7 +1502,7 @@ class User extends BaseObject {
     }
 
     public function bonusPointsSpent(): int {
-        return (int)$this->getSingleValue('user-bp-spent', '
+        return (int)$this->getSingleValue('user_bp_spent', '
             SELECT sum(Price)
             FROM bonus_history
             WHERE UserID = ?
@@ -1439,7 +1510,7 @@ class User extends BaseObject {
     }
 
     public function collagesCreated(): int {
-        return $this->getSingleValue('user-collage-create', "
+        return $this->getSingleValue('user_collage_create', "
             SELECT count(*)
             FROM collages
             WHERE Deleted = '0' AND UserID = ?
@@ -1447,7 +1518,7 @@ class User extends BaseObject {
     }
 
     public function artistCollageContributed(): int {
-        return $this->getSingleValue('user-collage-a-contrib', "
+        return $this->getSingleValue('user_collage_a_contrib', "
             SELECT count(DISTINCT ct.CollageID)
             FROM collages_artists AS ct
             INNER JOIN collages AS c ON (ct.CollageID = c.ID)
@@ -1456,7 +1527,7 @@ class User extends BaseObject {
     }
 
     public function torrentCollageContributed(): int {
-        return $this->getSingleValue('user-collage-t-contrib', "
+        return $this->getSingleValue('user_collage_t_contrib', "
             SELECT count(DISTINCT ct.CollageID)
             FROM collages_torrents AS ct
             INNER JOIN collages AS c ON (ct.CollageID = c.ID)
@@ -1469,7 +1540,7 @@ class User extends BaseObject {
     }
 
     public function artistCollageAdditions(): int {
-        return $this->getSingleValue('user-collage-a-add', "
+        return $this->getSingleValue('user_collage_a_add', "
             SELECT count(*)
             FROM collages_artists AS ct
             INNER JOIN collages AS c ON (ct.CollageID = c.ID)
@@ -1478,7 +1549,7 @@ class User extends BaseObject {
     }
 
     public function torrentCollageAdditions(): int {
-        return $this->getSingleValue('user-collage-t-add', "
+        return $this->getSingleValue('user_collage_t_add', "
             SELECT count(*)
             FROM collages_torrents AS ct
             INNER JOIN collages AS c ON (ct.CollageID = c.ID)
@@ -1488,6 +1559,12 @@ class User extends BaseObject {
 
     public function collageAdditions(): int {
         return $this->artistCollageAdditions() + $this->torrentCollageAdditions();
+    }
+
+    public function forumPosts(): int {
+        return $this->getSingleValue('user_forum_posts', "
+            SELECT count(*) FROM forums_posts WHERE AuthorID = ?
+        ");
     }
 
     public function peerCounts(): array {
