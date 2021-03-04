@@ -128,24 +128,42 @@ class User extends BaseObject {
         $this->info['RatioWatchEndsEpoch'] = strtotime($this->info['RatioWatchEnds']);
 
         $this->db->prepared_query("
-            SELECT PermissionID FROM users_levels WHERE UserID = ?
+            SELECT p.ID,
+                p.PermittedForums
+            FROM permissions p
+            INNER JOIN users_levels ul ON (ul.PermissionID = p.ID)
+            WHERE ul.UserID = ?
             ", $this->id
         );
-        $this->info['secondary_class'] = $this->db->collect(0);
+        $perms = $this->db->to_pair('ID', 'PermittedForums');
+        $forumAccess = [];
+        foreach ($perms as $p => $permitted) {
+            $allowed = explode(',', $permitted);
+            foreach ($allowed as $forumId) {
+                if ((int)$forumId) {
+                    $forumAccess[(int)$forumId] = true;
+                }
+            }
+        }
+        $this->info['secondary_class'] = array_keys($perms);
         $this->info['effective_class'] =
             $this->info['secondary_class'] ? max($this->info['Class'], ...$this->info['secondary_class']) : $this->info['Class'];
 
         if (!is_null($this->info['PermittedForums'])) {
             $allowed = explode(',', $this->info['PermittedForums']);
             foreach ($allowed as $forumId) {
-                $forumAccess[$forumId] = true;
+                if ((int)$forumId) {
+                    $forumAccess[(int)$forumId] = true;
+                }
             }
         }
         if (!is_null($this->info['RestrictedForums'])) {
             $forbidden = explode(',', $this->info['RestrictedForums']);
             foreach ($forbidden as $forumId) {
                 // forbidden may override permitted
-                $forumAccess[$forumId] = false;
+                if ((int)$forumId) {
+                    $forumAccess[(int)$forumId] = false;
+                }
             }
         }
         $this->info['forum_access'] = $forumAccess;
