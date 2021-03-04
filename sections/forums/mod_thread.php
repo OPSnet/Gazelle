@@ -38,10 +38,13 @@ if (isset($_POST['delete'])) {
     exit;
 }
 
-$newForum = $forumMan->findById((int)$_POST['forumid']);
-if (is_null($newForum) && !isset($_POST['transition'])) {
-    error(404);
+if (isset($_POST['forumid'])) {
+    $newForum = $forumMan->findById((int)$_POST['forumid']);
+    if (is_null($newForum) && !isset($_POST['transition'])) {
+        error(404);
+    }
 }
+
 $newTitle = trim($_POST['title']);
 if ($newTitle === '') {
     error("Title cannot be empty");
@@ -88,12 +91,15 @@ if ($locked && check_perms('site_moderate_forums')) {
     $forum->clearUserLastRead($threadId);
 }
 
-$forum->editThread($threadId, $newForum->id(), $newSticky, $newRank, $locked, $newTitle);
+$forumId = $newForum ? $newForum->id() : $forum->id();
+$forum->editThread($threadId, $forumId, $newSticky, $newRank, $locked, $newTitle);
 
 // topic notes and notifications
 $notes = [];
 $oldUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=" . $forum->id() . "]" . $forum->name() . "[/url]";
-$newUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=" . $newForum->id() . "]" . $newForum->name() . "[/url]";
+if ($newForum) {
+    $newUrl = "[url=" . SITE_URL . "/forums.php?action=viewforum&forumid=" . $newForum->id() . "]" . $newForum->name() . "[/url]";
+}
 switch ($action ?? null) {
     case 'transitioning':
         $notes[] = "Moved from $oldUrl to $newUrl (" . $transition['label'] . " transition)";
@@ -111,7 +117,7 @@ switch ($action ?? null) {
         if ($threadInfo['Ranking'] != $newRank) {
             $notes[] = "Ranking changed from {$threadInfo['Ranking']} to $newRank";
         }
-        if ($newForum->id() != $forum->id()) {
+        if ($newForum && $newForum->id() != $forum->id()) {
             $notes[] = "Moved from $oldUrl to $newUrl";
         }
         break;

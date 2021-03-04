@@ -538,7 +538,7 @@ if (check_perms('site_moderate_forums')) {
             <tr>
                 <td class="label"><label for="move_thread_selector">Move thread</label></td>
                 <td>
-                    <noselect name="forumid" id="move_thread_selector" tabindex="8">
+                    <select name="forumid" id="move_thread_selector" tabindex="8">
 <?php
     $OpenGroup = false;
     $LastCategoryID = -1;
