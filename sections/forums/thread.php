@@ -73,7 +73,6 @@ if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
 
 $Catalogue = $forum->threadCatalog($threadId, $PerPage, $Page, THREAD_CATALOGUE);
 $thread = array_slice($Catalogue, (($Page - 1) * $PerPage) % THREAD_CATALOGUE, $PerPage, true);
-$FirstPost = current($thread)['ID'];
 $LastPost = end($thread)['ID'];
 if ($threadInfo['Posts'] <= $PerPage * $Page && $threadInfo['StickyPostID'] > $LastPost) {
     $LastPost = $threadInfo['StickyPostID'];
@@ -94,7 +93,7 @@ if ($isSubscribed) {
 
 $QuoteNotificationsCount = $Cache->get_value('notify_quoted_' . $user->id());
 if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
-    (new Gazelle\User\Quote($user))->clearThread($threadId, $FirstPost, $LastPost);
+    (new Gazelle\User\Quote($user))->clearThread($threadId, $thread[0]['ID'], $LastPost);
 }
 
 $userMan = new Gazelle\Manager\User;
