@@ -38,6 +38,6 @@ if ($LoggedUser['ID'] != $forumPost['user-id']) {
 $forum->editPost($LoggedUser['ID'], $postId, $_POST['body']);
 
 // This gets sent to the browser, which echoes it in place of the old body
-echo Text::full_format($body);
+echo Text::full_format($forum->postBody($postId));
 ?>
 <br /><br /><span class="last_edited">Last edited by <a href="user.php?id=<?=$LoggedUser['ID']?>"><?=$LoggedUser['Username']?></a> Just now</span>
