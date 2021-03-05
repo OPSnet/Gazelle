@@ -14,6 +14,7 @@ if (!check_perms('admin_reports')) {
 }
 
 $reportMan = new Gazelle\Manager\ReportV2;
+$userMan = new Gazelle\Manager\User;
 $Types = $reportMan->types();
 
 $View = $_GET['view'];
@@ -103,27 +104,22 @@ $tables = "
     reportsv2 AS r
     LEFT JOIN torrents AS t ON (t.ID = r.TorrentID)
     LEFT JOIN torrents_leech_stats AS tls ON (tls.TorrentID = t.ID)
-    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)
-    LEFT JOIN users_main AS resolver ON (resolver.ID = r.ResolverID)
-    LEFT JOIN users_main AS reporter ON (reporter.ID = r.ReporterID)
-    LEFT JOIN users_main AS uploader ON (uploader.ID = t.UserID)";
+    LEFT JOIN torrents_group AS tg ON (tg.ID = t.GroupID)";
 
 $Results = $DB->scalar("
     SELECT count(*) FROM $tables WHERE
     " . implode("\n    AND ", $cond), ...$args
 );
-[$Page, $Limit] = Format::page_limit(REPORTS_PER_PAGE);
+$paginator = new Gazelle\Util\Paginator(REPORTS_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($Results);
 
 $DB->prepared_query("
-    SELECT
-        r.ID,
+    SELECT r.ID,
         r.ReporterID,
-        coalesce(reporter.Username, 'System'),
         r.TorrentID,
         r.Type,
         r.UserComment,
         r.ResolverID,
-        resolver.Username,
         r.Status,
         r.ReportedTime,
         r.LastChangeTime,
@@ -163,19 +159,17 @@ $DB->prepared_query("
         t.LogScore,
         t.LogChecksum,
         tls.last_action,
-        t.UserID AS UploaderID,
-        uploader.Username
+        t.UserID AS UploaderID
     FROM $tables
     LEFT JOIN torrents_artists AS ta ON (ta.GroupID = tg.ID AND ta.Importance = '1')
     LEFT JOIN artists_alias AS aa ON (aa.AliasID = ta.AliasID)
     WHERE " . implode("\n    AND ", $cond) . "
     GROUP BY r.ID
     $orderBy
-    LIMIT $Limit
-    ", ...$args
+    LIMIT ? OFFSET ?
+    ", ...array_merge($args, [$paginator->limit(), $paginator->offset()])
 );
 $Reports = $DB->to_array();
-$PageLinks = Format::get_pages($Page, $Results, REPORTS_PER_PAGE, 11);
 
 View::show_header('Reports V2', 'reportsv2,bbcode,torrent');
 ?>
@@ -193,11 +187,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
     | <span class="tooltip" title="Unclaim all of the reports currently displayed"><input type="button" onclick="GiveBack();" value="Unclaim all" /></span>
 <?php } ?>
 </div>
-<?php if ($PageLinks) { ?>
-<div class="linkbox">
-    <?=$PageLinks?>
-</div>
-<?php } ?>
+<?= $paginator->linkbox() ?>
 <div id="all_reports" style="width: 80%; margin-left: auto; margin-right: auto;">
 <?php if (count($Reports) === 0) { ?>
     <div class="box pad center">
@@ -208,13 +198,16 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
     $ripFiler = new Gazelle\File\RipLog;
     foreach ($Reports as $Report) {
 
-        [$ReportID, $ReporterID, $ReporterName, $TorrentID, $Type, $UserComment, $ResolverID,
-            $ResolverName, $Status, $ReportedTime, $LastChangeTime, $ModComment, $Tracks, $Images,
+        [$ReportID, $ReporterID, $TorrentID, $Type, $UserComment, $ResolverID,
+            $Status, $ReportedTime, $LastChangeTime, $ModComment, $Tracks, $Images,
             $ExtraIDs, $Links, $LogMessage, $GroupName, $GroupID, $ArtistID, $ArtistName, $Year,
             $CategoryID, $Time, $Description, $FileList, $Remastered, $RemasterTitle, $RemasterYear,
             $Media, $Format, $Encoding, $Size, $HasLog, $HasCue, $HasLogDB, $LogScore, $LogChecksum,
-            $LastAction, $UploaderID, $UploaderName
+            $LastAction, $UploaderID
         ] = $Report;
+        $reporterName = (int)$ReporterID ? $userMan->findById((int)$ReporterID)->username() : 'System';
+        $uploaderName = (int)$UploaderID ? $userMan->findById((int)$UploaderID)->username() : 'System';
+        $resolverName = (int)$ResolverID ? $userMan->findById((int)$ResolverID)->username() : 'System';
         $ModComment = display_str($ModComment);
         $report = new Gazelle\ReportV2($ReportID);
 
@@ -265,7 +258,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                 <input type="hidden" name="auth" value="<?=$LoggedUser['AuthKey']?>" />
                 <input type="hidden" id="reportid<?=$ReportID?>" name="reportid" value="<?=$ReportID?>" />
                 <input type="hidden" id="torrentid<?=$ReportID?>" name="torrentid" value="<?=$TorrentID?>" />
-                <input type="hidden" id="uploader<?=$ReportID?>" name="uploader" value="<?=$UploaderName?>" />
+                <input type="hidden" id="uploader<?=$ReportID?>" name="uploader" value="<?= $uploaderName ?>" />
                 <input type="hidden" id="uploaderid<?=$ReportID?>" name="uploaderid" value="<?=$UploaderID?>" />
                 <input type="hidden" id="reporterid<?=$ReportID?>" name="reporterid" value="<?=$ReporterID?>" />
                 <input type="hidden" id="report_reason<?=$ReportID?>" name="report_reason" value="<?=$UserComment?>" />
@@ -282,8 +275,8 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
 <?php       } else { ?>
                         <?=$LinkName?>
                         <a href="torrents.php?action=download&amp;id=<?=$TorrentID?>&amp;authkey=<?=$LoggedUser['AuthKey']?>&amp;torrent_pass=<?=$LoggedUser['torrent_pass']?>" title="Download" class="brackets tooltip">DL</a>
-                        <br /><span class="report_reporter">reported by <a href="user.php?id=<?=$ReporterID?>"><?= $ReporterName ?></a> <?=time_diff($ReportedTime)?> for the reason: <strong><?=$ReportType['title']?></strong></span>
-                        <br />uploaded by <a href="user.php?id=<?=$UploaderID?>"><?=$UploaderName?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
+                        <br /><span class="report_reporter">reported by <a href="user.php?id=<?=$ReporterID?>"><?= $reporterName ?></a> <?=time_diff($ReportedTime)?> for the reason: <strong><?=$ReportType['title']?></strong></span>
+                        <br />uploaded by <a href="user.php?id=<?=$UploaderID?>"><?= $uploaderName  ?></a> on <span title="<?= time_diff($Time, 3, false) ?>"><?= $Time ?></span>
                         <br />Last action: <?= $LastAction ?: 'Never' ?>
                         <br /><span class="report_torrent_file_ext">Audio files present:
 <?php                   $extMap = audio_file_map($FileList);
@@ -586,7 +579,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                 <tr>
                     <td class="label">In progress by:</td>
                     <td colspan="3">
-                        <a href="user.php?id=<?=$ResolverID?>"><?=$ResolverName?></a>
+                        <a href="user.php?id=<?=$ResolverID?>"><?= $resolverName ?></a>
                     </td>
                 </tr>
 <?php
@@ -694,7 +687,7 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
                 <tr>
                     <td class="label">Resolver:</td>
                     <td colspan="3">
-                        <a href="user.php?id=<?=$ResolverID?>"><?=$ResolverName?></a>
+                        <a href="user.php?id=<?=$ResolverID?>"><?= $resolverName ?></a>
                     </td>
                 </tr>
                 <tr>
@@ -738,8 +731,6 @@ if ($View === 'staff' && $LoggedUser['ID'] == $ID) { ?>
 }
 ?>
 </div>
-<?php if ($PageLinks) { ?>
-<div class="linkbox pager"><?=$PageLinks?></div>
 <?php
-}
+echo $paginator->linkbox();
 View::show_footer();
