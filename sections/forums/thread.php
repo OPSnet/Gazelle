@@ -66,23 +66,33 @@ if ($threadInfo['Posts'] <= $PerPage) {
         $PostNum = 1;
     }
 }
-[$Page] = Format::page_limit($PerPage, min($threadInfo['Posts'], $PostNum));
+
+$Page = max(1, isset($_GET['page'])
+    ? (int)$_GET['page']
+    : (int)ceil(min($threadInfo['Posts'], $PostNum) / $PerPage)
+);
 if (($Page - 1) * $PerPage > $threadInfo['Posts']) {
     $Page = (int)ceil($threadInfo['Posts'] / $PerPage);
 }
+$thread = $forum->threadPage($threadId, $PerPage, $Page);
+$paginator = new Gazelle\Util\Paginator($PerPage, $Page);
+$paginator->setTotal($threadInfo['Posts']);
 
-$Catalogue = $forum->threadCatalog($threadId, $PerPage, $Page, THREAD_CATALOGUE);
-$thread = array_slice($Catalogue, (($Page - 1) * $PerPage) % THREAD_CATALOGUE, $PerPage, true);
-$LastPost = end($thread)['ID'];
-if ($threadInfo['Posts'] <= $PerPage * $Page && $threadInfo['StickyPostID'] > $LastPost) {
-    $LastPost = $threadInfo['StickyPostID'];
+$firstOnPage = current($thread)['ID'];
+$lastOnPage = end($thread)['ID'];
+if ($lastOnPage <= $threadInfo['StickyPostID'] && $threadInfo['Posts'] <= $PerPage * $Page) {
+    $lastOnPage = $threadInfo['StickyPostID'];
 }
 
-//Handle last read
+$quoteCount = $Cache->get_value('notify_quoted_' . $user->id());
+if ($quoteCount === false || $quoteCount > 0) {
+    (new Gazelle\User\Quote($user))->clearThread($threadId, $firstOnPage, $lastOnPage);
+}
+
 if (!$threadInfo['isLocked'] || $threadInfo['isSticky']) {
     $lastRead = $forum->userLastReadPost($user->id(), $threadId);
-    if ($lastRead < $LastPost) {
-        $forum->userCatchupThread($user->id(), $threadId, $LastPost);
+    if ($lastRead < $lastOnPage) {
+        $forum->userCatchupThread($user->id(), $threadId, $lastOnPage);
     }
 }
 
@@ -91,14 +101,8 @@ if ($isSubscribed) {
     $Cache->delete_value('subscriptions_user_new_'.$user->id());
 }
 
-$QuoteNotificationsCount = $Cache->get_value('notify_quoted_' . $user->id());
-if ($QuoteNotificationsCount === false || $QuoteNotificationsCount > 0) {
-    (new Gazelle\User\Quote($user))->clearThread($threadId, $thread[0]['ID'], $LastPost);
-}
-
 $userMan = new Gazelle\Manager\User;
 
-$Pages = Format::get_pages($Page, $threadInfo['Posts'], $PerPage, 9);
 $transitions = Forums::get_thread_transitions($forumId);
 $auth = $LoggedUser['AuthKey'];
 View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadInfo['Title']),
@@ -141,9 +145,11 @@ View::show_header("Forums &rsaquo; $ForumName &rsaquo; " . display_str($threadIn
                 <br />
             </div>
         </div>
-<?= $Pages; ?>
     </div>
-<?php if ($transitions) { ?>
+<?php
+echo $paginator->linkbox();
+if ($transitions) {
+?>
     <table class="layout border">
         <tr>
             <td class="label">Move thread</td>
@@ -364,11 +370,11 @@ foreach ($thread as $Key => $Post) {
                 <?=Users::format_username($AuthorID, true, true, true, true, true, $IsDonorForum) ?>
                 <?=time_diff($AddedTime, 2); ?>
                 <span id="postcontrol-<?= $PostID ?>">
-<?php if (!$threadInfo['isLocked']) { ?>
+<?php if (!$threadInfo['isLocked'] && !$user->disablePosting()) { ?>
                 - <a href="#quickpost" id="quote_<?=$PostID?>" onclick="Quote('<?=$PostID?>', '<?=$Username?>', true);" title="Select text to quote" class="brackets">Quote</a>
 <?php
     }
-    if ((!$threadInfo['isLocked'] && $user->writeAccess($forum) && $AuthorID == $user->id()) || check_perms('site_moderate_forums')) {
+    if ((!$threadInfo['isLocked'] && $user->writeAccess($forum) && $AuthorID == $user->id()) && !$user->disablePosting() || check_perms('site_moderate_forums')) {
 ?>
                 - <a href="#post<?=$PostID?>" onclick="Edit_Form('<?=$PostID?>', '<?=$Key?>');" class="brackets">Edit</a>
 <?php } ?>
@@ -442,10 +448,8 @@ foreach ($thread as $Key => $Post) {
     <a href="forums.php?action=viewforum&amp;forumid=<?=$threadInfo['ForumID']?>"><?=$ForumName?></a> &rsaquo;
     <?=$threadTitle?>
 </div>
-<div class="linkbox">
-    <?=$Pages?>
-</div>
 <?php
+echo $paginator->linkbox();
 if (!$threadInfo['isLocked'] || check_perms('site_moderate_forums')) {
     if ($user->writeAccess($forum) && !$LoggedUser['DisablePosting']) {
         View::parse('generic/reply/quickreply.php', [

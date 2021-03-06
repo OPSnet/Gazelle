@@ -1163,6 +1163,12 @@ class Forum extends Base {
         return $catalogue;
     }
 
+    public function threadPage(int $threadId, int $perPage, int $page): array {
+        return array_slice($this->threadCatalog($threadId, $perPage, $page, THREAD_CATALOGUE),
+            (($page - 1) * $perPage) % THREAD_CATALOGUE, $perPage, true
+        );
+    }
+
     /**
      * Mark the user as having read everything in the forum.
      *
