@@ -1342,11 +1342,22 @@ class User extends BaseObject {
     protected function getSingleValue($cacheKey, $query) {
         $cacheKey .= '_' . $this->id;
         if ($this->forceCacheFlush || ($value = $this->cache->get_value($cacheKey)) === false) {
-            $this->db->prepared_query($query, $this->id);
-            [$value] = $this->db->next_record(MYSQLI_NUM);
+            $value = $this->db->scalar($query, $this->id);
             $this->cache->cache_value($cacheKey, $value, 3600);
         }
         return $value;
+    }
+
+    public function duplicateIPv4Count(): int {
+        $cacheKey = "ipv4_dup_" . str_replace('-', '_', $this->info()['IP']);
+        if (($value = $this->cache->get_value($cacheKey)) === false) {
+            $value = $this->db->scalar("
+                SELECT count(*) FROM users_history_ips WHERE IP = ?
+                ", $this->info()['IP']
+            );
+            $this->cache->cache_value($cacheKey, $value, 3600);
+        }
+        return max(0, $value - 1);
     }
 
     public function lastAccess() {

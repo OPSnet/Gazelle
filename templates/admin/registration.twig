@@ -1,0 +1,135 @@
+<div class="thin">
+<div class="box pad">
+    <form action="" method="post" acclass="thin box pad">
+        <input type="hidden" name="action" value="registration_log" />
+        <span style="display: inline-block; width: 90px">Joined after:</span><input type="date" name="after_date" value="{{ after }}" /><br />
+        <span style="display: inline-block; width: 90px">Joined before:</span><input type="date" name="before_date" value="{{ before }}" />
+        <br />
+        <br />
+        <input type="submit" value="Search" />
+    </form>
+</div>
+</div>
+
+{% if not list %}
+    <h2 align="center">No new user registrations
+{%- else -%}
+    <h2 align="center">{{ paginator.total|number_format }} New user registration{{ paginator.total|plural }}
+{%- endif %}
+{%- if after -%}
+    {%- if before %} between {{ after }} and {{ before }}
+    {%- else %} after {{ after -}}
+    {%- endif -%}
+{%- elseif before %} before {{ before -}}
+{%- else %} in the last 72 hours
+{%- endif -%}
+    </h2>
+
+{% if list %}
+    {{ paginator.linkbox|raw }}
+    <table width="100%">
+        <tr class="colhead">
+            <td>User</td>
+            <td>Uploaded</td>
+            <td>Downloaded</td>
+            <td>Ratio</td>
+            <td colspan="2">Email</td>
+            <td colspan="2">IP address</td>
+            <td colspan="2">Host</td>
+            <td>Country</td>
+            <td>Registered</td>
+        </tr>
+    {% for user in list %}
+        <tr class="row{{ cycle(['b', 'a'], loop.index0) }}">
+            <td>
+                {{ user.id|user_full }}
+                <br />
+                {{ user.inviter.id|user_full }}
+            </td>
+            <td style="vertical-align: top">
+                {{- user.activityStats.BytesUploaded|octet_size -}}
+        {%- if user.inviter -%}
+                <br />
+                {{- user.inviter.activityStats.BytesUploaded|octet_size -}}
+        {%- endif -%}
+            </td>
+            <td style="vertical-align: top">
+                {{- user.ActivityStats.BytesDownloaded|octet_size -}}
+        {%- if user.inviter -%}
+                <br />
+                {{- user.inviter.activityStats.BytesDownloaded|octet_size -}}
+        {%- endif -%}
+            </td>
+            <td style="vertical-align: top">
+                {{- ratio(user.activityStats.BytesUploaded, user.ActivityStats.BytesDownloaded) -}}
+        {%- if user.inviter -%}
+                <br />
+                {{- ratio(user.inviter.activityStats.BytesUploaded, user.inviter.ActivityStats.BytesDownloaded) -}}
+        {%- endif -%}
+            </td>
+            <td style="vertical-align: top">
+                {{- user.email -}}
+                <br />
+                {{- user.inviter.email -}}
+            </td>
+            <td style="vertical-align: top">
+                <a href="userhistory.php?action=email&amp;userid={{ user.id }}" title="Email History" class="brackets tooltip">H</a>
+                <a href="/user.php?action=search&amp;email_history=on&amp;email={{ user.email }}" title="Email Search" class="brackets tooltip">S</a>
+        {%- if user.inviter -%}
+                <br />
+                <a href="userhistory.php?action=email&amp;userid={{ user.inviter.id }}" title="Email History" class="brackets tooltip">H</a>
+                <a href="/user.php?action=search&amp;email_history=on&amp;email={{ user.inviter.email }}" title="Email Search" class="brackets tooltip">S</a>
+        {%- endif -%}
+            </td>
+            <td style="vertical-align: top">
+                <span style="float: left">
+                {{- user.ipaddr -}}
+        {%- if user.inviter.id -%}
+                <br />
+                {{- user.inviter.ipaddr -}}
+        {%- endif -%}
+                </span>
+        {%- if user.inviter and user.ipaddr == user.inviter.ipaddr -%}
+                <span title="IP addresses match" style="float: left; padding: 0px 5px;  color: #ffff00; font-size: large">&#x26A0;</span>
+        {%- endif -%}
+            </td>
+            <td style="vertical-align: top">
+                <span style="float: left; padding-left: 2px;" title="Duplicate usage by other users">
+                {{- user.duplicateIPv4Count -}}
+        {%- if user.inviter and user.ipaddr != user.inviter.ipaddr -%}
+                <br />
+                {{- user.inviter.duplicateIPv4Count -}}
+        {% endif %}
+                </span>
+            </td>
+            <td style="vertical-align: top">
+                {{- resolveIpv4(user.ipaddr) -}}
+        {% if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
+                <br />
+                {{- resolveIpv4(user.inviter.ipaddr) -}}
+        {% endif %}
+            </td>
+            <td style="vertical-align: top">
+                <a href="userhistory.php?action=ips&amp;userid{{ user.id }}" title="IP History" class="brackets tooltip">H</a>
+                <a href="/user.php?action=search&amp;ip_history=on&amp;ip={{ user.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
+                <a href="http://whatismyipaddress.com/ip/{{ user.ipaddr }}" title="whatismyipaddress.com" class="brackets tooltip">WI</a>
+        {% if user.inviter.id and user.inviter.ipaddr != user.ipaddr %}
+                <br />
+                <a href="userhistory.php?action=ips&amp;userid={{ user.inviter.id }}" title="IP History" class="brackets tooltip">H</a>
+                <a href="/user.php?action=search&amp;ip_history=on&amp;ip={{ user.inviter.ipaddr }}" title="IP Search" class="brackets tooltip">S</a>
+                <a href="http://whatismyipaddress.com/ip/{{ user.inviter.ipaddr }}" title="WI" class="brackets tooltip">WI</a>
+        {% endif %}
+            </td>
+            <td>
+                TODO
+            </td>
+            <td>
+                <span style="white-space: nowrap">{{- user.joinDate|time_diff -}}</span>
+                <br />
+                <span style="white-space: nowrap">{{- user.inviter.joinDate|time_diff -}}</span>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    {{ paginator.linkbox|raw }}
+{% endif %}
