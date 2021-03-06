@@ -528,7 +528,7 @@ if ($appMan->userIsApplicant($UserID) && (check_perms('admin_manage_applicants')
                 <li>Roles applied for: <a href="/apply.php?action=view" class="brackets">View</a></li>
 <?php
 }
-if ($OwnProfile || check_perms('users_mod') || $User->isFLS()) {
+if ($OwnProfile || check_perms('users_mod') || $viewer->isFLS()) {
 ?>
                 <li<?= check_perms('users_mod') ? ' class="paranoia_override"' : '' ?>>Torrent clients: <?=
                     implode('; ', $User->clients()) ?></li>
