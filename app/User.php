@@ -262,10 +262,6 @@ class User extends BaseObject {
             . '/' . $this->announceKey() . '/announce';
     }
 
-    public function commentHash(): bool {
-        return $this->info()['CommentHash'];
-    }
-
     public function disableBonusPoints(): bool {
         return $this->info()['DisablePoints'];
     }

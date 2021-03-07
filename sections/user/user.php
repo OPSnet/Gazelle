@@ -820,7 +820,7 @@ if (check_perms('users_mod') || $viewer->isStaff()) { ?>
                 <a href="#" onclick="$('#staffnotes').gtoggle(); return false;" class="brackets">Toggle</a>
             </div>
             <div id="staffnotes" class="pad">
-                <input type="hidden" name="comment_hash" value="<?= $User->commentHash() ?>" />
+                <input type="hidden" name="comment_hash" value="<?= $User->info()['CommentHash'] ?>" />
                 <div id="admincommentlinks" class="AdminComment" style="width: 98%;"><?=Text::full_format($User->staffNotes())?></div>
                 <textarea id="admincomment" onkeyup="resize('admincomment');" class="AdminComment hidden" name="AdminComment" cols="65" rows="26" style="width: 98%;"><?=display_str($User->staffNotes())?></textarea>
                 <a href="#" name="admincommentbutton" onclick="ChangeTo('text'); return false;" class="brackets">Toggle edit</a>
