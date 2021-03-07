@@ -1,0 +1,50 @@
+<div class="thin">
+    <div class="header">
+        <h2>Tracker info</h2>
+    </div>
+    <div class="linkbox">
+        <a href="?action={{ action }}" class="brackets" />Main stats</a>
+    </div>
+    <div class="sidebar">
+        <div class="box box2">
+            <div class="head"><strong>User stats</strong></div>
+            <div class="pad">
+                <form method="get" action="">
+                    <input type="hidden" name="action" value="ocelot_info" />
+                    <label for="userid">Get stats for user (id or @username)</label><br /><br />
+                    <input type="text" id="userid" name="userid" placeholder="User ID" value="{{ user_id }}" /><br /><br />
+                    <input type="submit" value="Go" />
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="main_column">
+        <div class="box box2">
+            <div class="head"><strong>Numbers and such</strong></div>
+            <div class="pad">
+{% if peer_stats %}
+                User ID: {{ user_id }}<br />
+                Leeching: {{ peer_stats[0]|number_format }}<br />
+                Seeding: {{ peer_stats[1]|number_format }}<br />
+{% elseif main_stats %}
+    {% for key, value in main_stats %}
+                {%- if value == "Uptime:" -%}
+                    {{ value }}
+                {%- elseif key starts with "bytes " -%}
+                    {{ value|octet_size }}
+                {%- else -%}
+                    {{ value|number_format }}
+                {%- endif %}
+                {{ key }}<br />
+    {% endfor %}
+{% elseif announce_key %}
+                Failed to get stats for user {{ user_id }}
+{% elseif user_id %}
+                User {{ user_id }} doesn't exist
+{% else %}
+                Failed to get tracker info
+{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
