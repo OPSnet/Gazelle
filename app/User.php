@@ -311,7 +311,7 @@ class User extends BaseObject {
     }
 
     public function showAvatars(): bool {
-        return !$this->info()['DisableAvatar'];
+        return $this->avatarMode() != 1;
     }
 
     public function email(): string {
