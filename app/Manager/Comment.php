@@ -68,7 +68,7 @@ class Comment extends \Gazelle\Base {
     }
 
     public function loadEdits(string $page, int $postId): array {
-        $key = "{$page}_edits_$(postId}";
+        $key = "{$page}_edits_{$postId}";
         if (($edits = $this->cache->get_value($key)) === false) {
             $this->db->prepared_query("
                 SELECT EditUser, EditTime, Body
