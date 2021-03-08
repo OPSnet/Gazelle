@@ -30,10 +30,11 @@ class Invite extends \Gazelle\Base {
     /**
      * Get a page of pending invites
      *
-     * @param string limit (e.g. "20, 60" for LIMIT 20 OFFSET 60)
+     * @param int limit
+     * @param int offset
      * @return array list of pending invites [inviter_id, ipaddr, invite_key, expires, email]
      */
-    public function pendingInvites(string $limit): array {
+    public function pendingInvites(int $limit, int $offset): array {
         if (is_null($this->search)) {
             $where = "/* no email filter */";
             $args = [];
@@ -52,8 +53,8 @@ class Invite extends \Gazelle\Base {
             INNER JOIN users_main AS um ON (um.ID = i.InviterID)
             $where
             ORDER BY i.Expires DESC
-            LIMIT $limit
-            ", ...$args
+            LIMIT ? OFFSET ?
+            ", ...array_merge($args, [$limit, $offset])
         );
         return $this->db->to_array(false, MYSQLI_ASSOC, false);
     }
