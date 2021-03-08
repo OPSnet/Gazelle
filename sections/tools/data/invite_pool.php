@@ -17,18 +17,18 @@ if ($search) {
     $inviteMan->setSearch($search);
 }
 $pending = $inviteMan->totalPending();
-[$page, $limit] = Format::page_limit(INVITES_PER_PAGE);
+
+$paginator = new Gazelle\Util\Paginator(INVITES_PER_PAGE, (int)($_GET['page'] ?? 1));
+$paginator->setTotal($inviteMan->totalPending());
 
 View::show_header('Invite Pool');
 echo G::$Twig->render('invite/pool.twig', [
-    'auth'    => $LoggedUser['AuthKey'],
-    'linkbox' => Format::get_pages($page, $pending, INVITES_PER_PAGE, 11),
-    'list'    => $inviteMan->pendingInvites($limit),
-    'page'    => $page,
-    'pending' => $pending,
-    'removed' => $removed,
-    'search'  => $search,
-    'title'   => 'Invite Pool',
-    'can_edit_invites' => check_perms('users_edit_invites'),
+    'auth'      => $LoggedUser['AuthKey'],
+    'paginator' => $paginator,
+    'list'      => $inviteMan->pendingInvites($paginator->limit(), $paginator->offset()),
+    'pending'   => $pending,
+    'removed'   => $removed,
+    'search'    => $search,
+    'can_edit'  => check_perms('users_edit_invites'),
 ]);
 View::show_footer();

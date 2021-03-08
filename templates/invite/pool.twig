@@ -1,5 +1,5 @@
 <div class="header">
-    <h2>{{ title }}</h2>
+    <h2>Invite Pool</h2>
 </div>
 
 <div class="box pad">
@@ -28,9 +28,7 @@
 
 {% for invite in list %}
     {% if loop.first %}
-<div class="linkbox">
-    {{ linkbox }}
-</div>
+    {{ paginator.linkbox|raw }}
 <table width="100%">
     <tr class="colhead">
         <td>Inviter</td>
@@ -38,7 +36,7 @@
         <td>IP address</td>
         <td>Invite link</td>
         <td>Expires</td>
-    {% if can_edit_invites %}
+    {% if can_edit %}
         <td>Controls</td>
     {% endif %}
     </tr>
@@ -50,7 +48,7 @@
         <td>{{ invite.ipaddr|ipaddr }}</td>
         <td><a href="register.php?invite={{ invite.key }}">{{ invite.key }}</a></td>
         <td>{{ invite.expires|time_diff }}</td>
-    {% if can_edit_invites %}
+    {% if can_edit %}
         <td>
             <form class="delete_form" name="invite" action="" method="post">
                 <input type="hidden" name="action" value="invite_pool" />
@@ -64,8 +62,6 @@
 
     {% if loop.last %}
 </table>
-<div class="linkbox">
-    {{ linkbox }}
-</div>
+    {{ paginator.linkbox|raw }}
     {% endif %}
 {% endfor %}
