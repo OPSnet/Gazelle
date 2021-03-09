@@ -18,7 +18,7 @@ echo G::$Twig->render('forum/new-thread.twig', [
     'auth'      => $LoggedUser['AuthKey'],
     'avatar'    => $userMan->avatarMarkup($user, $user),
     'id'        => $forum->id(),
-    'is_subbed' => !empty($HeavyInfo['AutoSubscribe']),
+    'is_subbed' => $user->option('AutoSubscribe'),
     'name'      => $forum->name(),
     'user_id'   => $LoggedUser['ID'],
 ]);
