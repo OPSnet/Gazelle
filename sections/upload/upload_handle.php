@@ -288,6 +288,26 @@ if (!$Err && $isMusicUpload) {
     }
 }
 
+if ($Properties['Image']) {
+    // Strip out Amazon's padding
+    $AmazonReg = '/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i';
+    $Matches = [];
+    if (preg_match($AmazonReg, $Properties['Image'], $Matches)) {
+        $Properties['Image'] = $Matches[1].'.jpg';
+    }
+    if (!preg_match('/^'.IMAGE_REGEX.'$/i', $Properties['Image'])) {
+        $Properties['Image'] = '';
+    } else {
+        ImageTools::blacklisted($Properties['Image']);
+    }
+    foreach (IMAGE_HOST_BANNED as $banned) {
+        if (stripos($banned, $Properties['Image']) !== false) {
+            $Err = "Please rehost images from $banned elsewhere.";
+            break;
+        }
+    }
+}
+
 if ($Err) { // Show the upload form, with the data the user entered
     if (defined('AJAX')) {
         json_error($Err);
@@ -312,20 +332,6 @@ if (!empty($Properties['GroupID']) && empty($ArtistForm) && $isMusicUpload) {
         $ArtistsUnescaped[$ArtistImportance][] = ['name' => $ArtistName];
     }
     $LogName .= Artists::display_artists($ArtistsUnescaped, false, true, false);
-}
-
-if ($Properties['Image']) {
-    // Strip out Amazon's padding
-    $AmazonReg = '/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i';
-    $Matches = [];
-    if (preg_match($AmazonReg, $Properties['Image'], $Matches)) {
-        $Properties['Image'] = $Matches[1].'.jpg';
-    }
-    if (!preg_match('/^'.IMAGE_REGEX.'$/i', $Properties['Image'])) {
-        $Properties['Image'] = '';
-    } else {
-        ImageTools::blacklisted($Properties['Image']);
-    }
 }
 
 //******************************************************************************//

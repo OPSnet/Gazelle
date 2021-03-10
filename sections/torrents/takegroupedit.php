@@ -91,6 +91,11 @@ if (!empty($_GET['action']) && $_GET['action'] == 'revert') { // if we're revert
         $Image = '';
     }
     ImageTools::blacklisted($Image);
+    foreach (IMAGE_HOST_BANNED as $banned) {
+        if (stripos($banned, $Image) !== false) {
+            error("Please rehost images from $banned elsewhere.");
+        }
+    }
 }
 
 // Insert revision

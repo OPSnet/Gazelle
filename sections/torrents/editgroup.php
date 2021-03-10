@@ -69,6 +69,10 @@ View::show_header('Edit torrent group');
                 <input type="hidden" name="groupid" value="<?=$GroupID?>" />
                 <h3>Image:</h3>
                 <input type="text" name="image" size="92" value="<?=$Image?>" /><br />
+<?php if (IMAGE_HOST_BANNED) { ?>
+                <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
+                    ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
+<?php } ?>
                 <br />Or if the release has no known official artwork (e.g. jam band live recording), check the following:<br />
                 <label><input type="checkbox" name="no_cover_art" value="1" <?=($noCoverArt ? 'checked="checked" ' : '')?>/> No release cover art</label><br /><br />
 

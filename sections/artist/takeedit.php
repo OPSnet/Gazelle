@@ -35,13 +35,18 @@ if ($_GET['action'] === 'revert') { // if we're reverting to a previous revision
     if (!preg_match("/^".IMAGE_REGEX."$/i", $image)) {
         $image = '';
     }
+    foreach (IMAGE_HOST_BANNED as $banned) {
+        if (stripos($banned, $image) !== false) {
+            error("Please rehost images from $banned elsewhere.");
+        }
+    }
 }
 
 if ($discogsId > 0) {
     if ($discogsId != $artist->discogsId() && $artist->setDiscogsRelation($discogsId, $userId)) {
         $summary[] = "Discogs relation set to $discogsId";
     }
-} else {
+} elseif (!$discogsId && $artist->discogsId()) {
     $artist->removeDiscogsRelation();
     $summary[] = "Discogs relation cleared";
 }

@@ -49,6 +49,10 @@ View::show_header('Edit artist');
         <td class="label" style="width: 120px; vertical-align: top;">Image</td>
         <td>
         <input type="text" name="image" size="92" value="<?= $image ?>" /><br />
+<?php if (IMAGE_HOST_BANNED) { ?>
+        <b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
+            ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b><br />
+<?php } ?>
         </td>
     </tr>
     <tr>

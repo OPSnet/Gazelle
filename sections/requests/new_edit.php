@@ -254,6 +254,10 @@ View::show_header(($NewRequest ? 'Create a request' : 'Edit a request'), 'reques
                     <td class="label">Image</td>
                     <td>
                         <input type="text" name="image" size="45" value="<?=(!empty($Image) ? $Image : '')?>" />
+<?php if (IMAGE_HOST_BANNED) { ?>
+                        <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
+                            ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
+<?php } ?>
                     </td>
                 </tr>
 <?php    } ?>
