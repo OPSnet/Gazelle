@@ -91,6 +91,13 @@ if (empty($_POST['image'])) {
     }
 }
 
+foreach (IMAGE_HOST_BANNED as $banned) {
+    if (stripos($banned, $Image) !== false) {
+        $Err = "Please rehost images from $banned elsewhere.";
+        break;
+    }
+}
+
 if (empty($_POST['description'])) {
     $Err = 'You forgot to enter a description.';
 } else {

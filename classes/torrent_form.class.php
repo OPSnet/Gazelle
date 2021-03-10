@@ -246,7 +246,11 @@ class TORRENT_FORM {
                 <td class="label">Image (recommended):</td>
                 <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image']) ?>"<?=$this->Disabled?> />
                     <img id="thumbnail" src="#" height="100" width="100" float="right" style="margin-left: 10px; vertical-align: top; display: none;" />
-                <br />Cover art helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
+                <br />Artwork helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
+<?php       if (IMAGE_HOST_BANNED) { ?>
+                <br /><b>Images hosted on <strong class="important_text"><?= implode(', ', IMAGE_HOST_BANNED)
+                    ?> are not allowed</strong>, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>.</b>
+<?php       } ?>
                 </td>
             </tr>
 
@@ -703,7 +707,12 @@ class TORRENT_FORM {
             </tr>
             <tr>
                 <td class="label">Image (optional):</td>
-                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image']) ?>"<?=$this->Disabled?> /></td>
+                <td><input type="text" id="image" name="image" size="60" value="<?=display_str($Torrent['Image']) ?>"<?=$this->Disabled?> />
+                <br />Artwork helps improve the quality of the catalog. Please try to find a decent sized image (500x500).
+<?php       if (IMAGE_HOST_BANNED) { ?>
+                <br />Images hosted on <?= implode(', ', IMAGE_HOST_BANNED) ?> are not allowed, please rehost first on one of <?= implode(', ', IMAGE_HOST_RECOMMENDED) ?>
+<?php       } ?>
+                </td>
             </tr>
             <tr>
                 <td class="label">Description:</td>
