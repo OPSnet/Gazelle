@@ -7,8 +7,8 @@ if (!empty($LoggedUser['DisableForums'])) {
 $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 [$Page, $Limit] = Format::page_limit($PerPage);
 
-$ShowUnread = (!isset($_GET['showunread']) && !isset($HeavyInfo['SubscriptionsUnread']) || isset($HeavyInfo['SubscriptionsUnread']) && !!$HeavyInfo['SubscriptionsUnread'] || isset($_GET['showunread']) && !!$_GET['showunread']);
-$ShowCollapsed = (!isset($_GET['collapse']) && !isset($HeavyInfo['SubscriptionsCollapse']) || isset($HeavyInfo['SubscriptionsCollapse']) && !!$HeavyInfo['SubscriptionsCollapse'] || isset($_GET['collapse']) && !!$_GET['collapse']);
+$ShowUnread = isset($_GET['showunread']) && !!$_GET['showunread'];
+$ShowCollapsed = isset($_GET['collapse']) && !!$_GET['collapse'];
 
 $cond = [
     "p.ID <= IFNULL(l.PostID, t.LastPostID)",
