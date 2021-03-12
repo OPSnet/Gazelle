@@ -1,6 +1,7 @@
 <?php
 
 View::show_header('Blog','bbcode');
+$viewer = new Gazelle\User($LoggedUser['ID']);
 
 $action = !empty($_GET['action']) && $_GET['action'] === 'editblog' ? 'Edit' : 'Create';
 if (check_perms('admin_manage_blog')) {
@@ -30,7 +31,7 @@ if (check_perms('admin_manage_blog')) {
             <input type="text" name="thread" size="8" value="<?= $action === 'Edit' ? $blog->topicId() : '' ?>" />
             (Leave blank to create thread automatically, set to 0 to not use thread)
             <br/><br/>
-            <input id="subscribebox" type="checkbox" name="subscribe"<?= !empty($HeavyInfo['AutoSubscribe']) ? ' checked="checked"' : ''; ?> tabindex="2" />
+            <input id="subscribebox" type="checkbox" name="subscribe"<?= $viewer->option('AutoSubscribe') ? ' checked="checked"' : ''; ?> tabindex="2" />
             <label for="subscribebox">Subscribe</label>
 
             <div class="center">
