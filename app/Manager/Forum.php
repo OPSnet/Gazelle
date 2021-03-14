@@ -71,7 +71,7 @@ class Forum extends \Gazelle\Base {
             ", $postId
         );
         if (is_null($forumId)) {
-            throw new \Gazelle\Exception\ResourceNotFoundException($postId);
+            return null;
         }
         return new \Gazelle\Forum($forumId);
     }
