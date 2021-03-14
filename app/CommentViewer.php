@@ -31,10 +31,11 @@ abstract class CommentViewer {
      * @param int PostID of the last read post
      */
     public function renderThread(array $Thread, int $lastRead) {
+        $userMan = new Manager\User;
         foreach ($Thread as $Post) {
             [$PostID, $AuthorID, $AddedTime, $CommentBody, $EditedUserID, $EditedTime, $EditedUsername]
                 = array_values($Post);
-            $this->render($AuthorID, $PostID, $CommentBody, $AddedTime, $EditedUserID, $EditedTime, ($PostID > $lastRead));
+            $this->render($userMan, $AuthorID, $PostID, $CommentBody, $AddedTime, (int)$EditedUserID, $EditedTime, ($PostID > $lastRead));
         }
     }
 
@@ -49,18 +50,19 @@ abstract class CommentViewer {
      * @param string $Header The header used in the post
      * @param bool $Tools Whether or not to show [Edit], [Report] etc.
      */
-    public function render($AuthorID, $PostID, $Body, $AddedTime, $EditedUserID, $EditedTime, $Unread = false, $Header = '') {
+    public function render($userMan, $AuthorID, $PostID, $Body, $AddedTime, $EditedUserID, $EditedTime, $Unread = false, $Header = '') {
         $author = new User($AuthorID);
         $ownProfile = $AuthorID == $this->viewer->id();
         echo $this->twig->render('comment/comment.twig', [
+            'added_time'  => $AddedTime,
+            'author'      => $author,
             'avatar'      => (new Manager\User)->avatarMarkup($this->viewer, $author),
-            'body'        => \Text::full_format($Body),
-            'edited'      => $EditedUserID,
-            'editor'      => \Users::format_username($EditedUserID, false, false, false),
+            'body'        => $Body,
+            'editor'      => $userMan->findById($EditedUserID),
             'edit_time'   => time_diff($EditedTime, 2, true, true),
             'id'          => $PostID,
             'is_admin'    => check_perms('site_admin_forums'),
-            'header'      => '<strong>' . \Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header,
+            'heading'     => $Header,
             'page'        => $this->page,
             'show_avatar' => $this->viewer->showAvatars(),
             'show_delete' => check_perms('site_forum_post_delete'),
@@ -68,7 +70,6 @@ abstract class CommentViewer {
             'show_warn'   => check_perms('users_warn') && !$ownProfile && $this->viewer->classLevel() >= $author->classLevel(),
             'unread'      => $Unread,
             'url'         => $this->baseLink($PostID),
-            'username'    => $author->userName(),
         ]);
     }
 }

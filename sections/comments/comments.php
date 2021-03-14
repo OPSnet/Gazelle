@@ -302,45 +302,45 @@ View::show_header($Title, 'bbcode,comments');
 <?php
 } else {
     $isAdmin = check_perms('site_admin_forums');
-    $isMod = check_perms('site_moderate_forums');
     $commentMan = new Gazelle\Manager\Comment;
     $userMan = new Gazelle\Manager\User;
     $user = $userMan->findById($LoggedUser['ID']);
     $DB->set_query_id($Comments);
     while ([$AuthorID, $Page, $PageID, $Name, $PostID, $Body, $AddedTime, $EditedTime, $EditedUserID] = $DB->next_record()) {
-        switch ($Page) {
-            case 'artist':
-                $Header = " on <a href=\"artist.php?id=$PageID\">$Name</a>";
-                break;
-            case 'collages':
-                $Header = " on <a href=\"collages.php?id=$PageID\">$Name</a>";
-                break;
-            case 'requests':
-                $Header = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"requests.php?action=view&id=$PageID\">$Name</a>";
-                break;
-            case 'torrents':
-                $Header = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>";
-                break;
-        }
         $author = new Gazelle\User($AuthorID);
         $ownProfile = $AuthorID == $LoggedUser['ID'];
+        switch ($Page) {
+            case 'artist':
+                $heading = " on <a href=\"artist.php?id=$PageID\">$Name</a>";
+                break;
+            case 'collages':
+                $heading = " on <a href=\"collages.php?id=$PageID\">$Name</a>";
+                break;
+            case 'requests':
+                $heading = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"requests.php?action=view&id=$PageID\">$Name</a>";
+                break;
+            case 'torrents':
+                $heading = ' on ' . Artists::display_artists($Artists[$PageID]) . " <a href=\"torrents.php?id=$PageID\">$Name</a>";
+                break;
+        }
         echo G::$Twig->render('comment/comment.twig', [
+            'added_time'  => $AddedTime,
+            'author'      => $author,
             'avatar'      => $userMan->avatarMarkup($user, $author),
-            'body'        => Text::full_format($Body),
-            'edited'      => $EditedUserID,
-            'editor'      => Users::format_username($EditedUserID, false, false, false),
-            'edit_time'   => time_diff($EditedTime, 2, true, true),
+            'body'        => $Body,
+            'editor'      => $userMan->findById((int)$EditedUserID),
+            'edit_time'   => $EditedTime,
             'id'          => $PostID,
             'is_admin'    => $isAdmin,
-            'header'      => '<strong>' . Users::format_username($AuthorID, true, true, true, true, false) . '</strong> ' . time_diff($AddedTime) . $Header,
+            'heading'     => $heading,
             'show_avatar' => $user->showAvatars(),
-            'show_delete' => $isMod,
-            'show_edit'   => $isMod || $ownProfile,
+            'show_delete' => check_perms('site_forum_post_delete'),
+            'show_edit'   => check_perms('site_moderate_forums') || $ownProfile,
             'show_warn'   => check_perms('users_warn') && !$ownProfile && $LoggedUser['Class'] >= $author->classLevel(),
             'show_unread' => false,
             'url'         => $commentMan->findById($PostID)->url(),
-            'username'    => $author->username(),
         ]);
+        $DB->set_query_id($Comments);
     }
 }
 ?>
