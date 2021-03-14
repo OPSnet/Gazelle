@@ -94,9 +94,8 @@ $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage-
 $paginator->setAnchor('comments')->setTotal($commentPage->total());
 
 $collageMan = new Gazelle\Manager\Collage;
-$subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('torrents', $GroupID);
 
-// Start output
 View::show_header($Title, 'browse,comments,torrent,bbcode,cover_art,subscriptions,voting');
 ?>
 <div class="thin">
@@ -119,7 +118,7 @@ if ($bookmark->isTorrentBookmarked($LoggedUser['ID'], $GroupID)) {
             <a href="#" id="bookmarklink_torrent_<?=$GroupID?>" class="add_bookmark brackets" onclick="Bookmark('torrent', <?=$GroupID?>, 'Remove bookmark'); return false;">Bookmark</a>
 <?php } ?>
             <a href="#" id="subscribelink_torrents<?=$GroupID?>" class="brackets" onclick="SubscribeComments('torrents', <?=$GroupID?>); return false;"><?=
-                $subscription->isSubscribedComments('torrents', $GroupID) ? 'Unsubscribe' : 'Subscribe'?></a>
+                $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 <?php if ($Categories[$GroupCategoryID-1] == 'Music') { ?>
             <a href="upload.php?groupid=<?=$GroupID?>" class="brackets">Add format</a>
 <?php
@@ -922,17 +921,18 @@ echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Torrent(G::$Twig, $LoggedUser['ID'], $GroupID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-
-if (!$LoggedUser['DisablePosting']) {
-    View::parse('generic/reply/quickreply.php', [
-        'InputName' => 'pageid',
-        'InputID' => $GroupID,
-        'Action' => 'comments.php?page=torrents',
-        'InputAction' => 'take_post',
-        'TextareaCols' => 65,
-        'SubscribeBox' => true
-    ]);
-}
+echo G::$Twig->render('reply.twig', [
+    'action'   => 'take_post',
+    'auth'     => $LoggedUser['AuthKey'],
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),
+    'id'       => $GroupID,
+    'name'     => 'pageid',
+    'subbed'   => $isSubscribed,
+    'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
+        65, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+    'url'      => 'comments.php?page=torrents',
+    'user'     => $user,
+]);
 ?>
         </div>
     </div>

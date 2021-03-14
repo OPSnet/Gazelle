@@ -23,7 +23,7 @@ $commentPage->load()->handleSubscription($user);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total());
 
-$subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('collages', $CollageID);
 $Collage = new Gazelle\Collage($CollageID);
 
 View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,subscriptions');
@@ -36,7 +36,7 @@ View::show_header("Comments for collage " . $Collage->name(), 'comments,bbcode,s
         </h2>
         <div class="linkbox">
             <a href="#" id="subscribelink_collages<?=$CollageID?>" class="brackets" onclick="SubscribeComments('collages', <?=$CollageID?>); return false;"><?=
-                $subscription->isSubscribedComments('collages', $CollageID) ? 'Unsubscribe' : 'Subscribe'?></a>
+                $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
         </div>
     </div>
 <?php
@@ -44,17 +44,18 @@ echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Collage(G::$Twig, $LoggedUser['ID'], $CollageID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-
-if (!$LoggedUser['DisablePosting']) {
-    View::parse('generic/reply/quickreply.php', [
-        'InputName'    => 'pageid',
-        'InputID'      => $CollageID,
-        'Action'       => 'comments.php?page=collages',
-        'InputAction'  => 'take_post',
-        'TextareaCols' => 90,
-        'SubscribeBox' => true
-    ]);
-}
+echo G::$Twig->render('reply.twig', [
+    'action'   => 'take_post',
+    'auth'     => $LoggedUser['AuthKey'],
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),
+    'id'       => $CollageID,
+    'name'     => 'pageid',
+    'subbed'   => $isSubscribed,
+    'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
+        90, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+    'url'      => 'comments.php?page=collages',
+    'user'     => $user,
+]);
 ?>
 </div>
 <?php

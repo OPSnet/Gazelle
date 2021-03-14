@@ -450,16 +450,20 @@ foreach ($thread as $Key => $Post) {
 </div>
 <?php
 echo $paginator->linkbox();
-if (!$threadInfo['isLocked'] || check_perms('site_moderate_forums')) {
-    if ($user->writeAccess($forum) && !$LoggedUser['DisablePosting']) {
-        View::parse('generic/reply/quickreply.php', [
-            'InputTitle' => 'Post reply',
-            'InputName' => 'thread',
-            'InputID' => $threadId,
-            'ForumID' => $forumId,
-            'TextareaCols' => 90
-        ]);
-    }
+$lastPost = end($thread);
+if (check_perms('site_moderate_forums') || ($user->writeAccess($forum) && !$threadInfo['isLocked'])) {
+    echo G::$Twig->render('reply.twig', [
+        'auth'     => $LoggedUser['AuthKey'],
+        'action'   => 'reply',
+        'forum'    => $forumId,
+        'id'       => $threadId,
+        'merge'    => strtotime($lastPost['AddedTime']) > time() - 3600 && $lastPost['AuthorID'] == $user->id(),
+        'name'     => 'thread',
+        'subbed'   => $isSubscribed,
+        'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
+            90, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+        'user'     => $user,
+    ]);
 }
 if (count($transitions) > 0 && !check_perms('site_moderate_forums')) {
 ?>
