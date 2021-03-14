@@ -128,13 +128,9 @@ class Paginator {
                     . " <a href=\"${uri}&amp;page=$pageCount\"><strong> Last &raquo;</strong></a>";
             }
         }
-        if ($this->anchor) {
-            [$anchorBegin, $anchorEnd] = ['<a name="' . substr($this->anchor, 1) . '">', '</a>'];
-        } else {
-            [$anchorBegin, $anchorEnd] = ['', ''];
-        }
         if (strlen($this->linkbox)) {
-            $this->linkbox = "<div class=\"linkbox\">$anchorBegin{$this->linkbox}$anchorEnd</div>";
+            $anchorName = $this->anchor ? ('<a name="' . substr($this->anchor, 1) . '"></a>') : '';
+            $this->linkbox = "<div class=\"linkbox\">$anchorName{$this->linkbox}</div>";
         }
         return $this->linkbox;
     }

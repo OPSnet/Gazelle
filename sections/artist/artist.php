@@ -28,6 +28,7 @@ $Artist->loadArtistRole();
 
 $bookmark = new Gazelle\Bookmark;
 $collageMan = new Gazelle\Manager\Collage;
+$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('artist', $ArtistID);
 $User = new Gazelle\User($LoggedUser['ID']);
 
 function torrentEdition($title, $year, $recordLabel, $catalogueNumber, $media) {
@@ -69,9 +70,7 @@ if ($bookmark->isArtistBookmarked($LoggedUser['ID'], $ArtistID)) { ?>
             <a href="#" id="bookmarklink_artist_<?= $ArtistID ?>" onclick="Bookmark('artist', <?= $ArtistID ?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
 <?php } ?>
             <a href="#" id="subscribelink_artist<?= $ArtistID ?>" class="brackets" onclick="SubscribeComments('artist', <?=
-                $ArtistID ?>);return false;"><?=
-                (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('artist', $ArtistID) !== false
-                    ? 'Unsubscribe' : 'Subscribe'?></a>
+                $ArtistID ?>);return false;"><?= $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
 
 <?php if ($RevisionID && check_perms('site_edit_wiki')) { ?>
             <a href="artist.php?action=revert&amp;artistid=<?=$ArtistID?>&amp;revisionid=<?=$RevisionID?>&amp;auth=<?=$LoggedUser['AuthKey']?>" class="brackets">Revert to this revision</a>
@@ -681,21 +680,22 @@ $commentPage->load()->handleSubscription($User);
 
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total());
-
 echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Artist(G::$Twig, $LoggedUser['ID'], $ArtistID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-
-if (!$LoggedUser['DisablePosting']) {
-    View::parse('generic/reply/quickreply.php', [
-        'InputName' => 'pageid',
-        'InputID' => $ArtistID,
-        'Action' => 'comments.php?page=artist',
-        'InputAction' => 'take_post',
-        'SubscribeBox' => true
-    ]);
-}
+echo G::$Twig->render('reply.twig', [
+    'action'   => 'take_post',
+    'auth'     => $LoggedUser['AuthKey'],
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($User, $User),
+    'id'       => $ArtistID,
+    'name'     => 'pageid',
+    'subbed'   => $isSubscribed,
+    'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
+        70, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+    'url'      => 'comments.php?page=artist',
+    'user'     => $User,
+]);
 ?>
         </div>
     </div>

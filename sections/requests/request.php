@@ -74,7 +74,7 @@ $commentPage->load()->handleSubscription($user);
 $paginator = new Gazelle\Util\Paginator(TORRENT_COMMENTS_PER_PAGE, $commentPage->pageNum());
 $paginator->setAnchor('comments')->setTotal($commentPage->total());
 
-$subscription = new Gazelle\Manager\Subscription($LoggedUser['ID']);
+$isSubscribed = (new Gazelle\Manager\Subscription($LoggedUser['ID']))->isSubscribedComments('requests', $RequestID);
 
 View::show_header("View request: $FullName", 'comments,requests,bbcode,subscriptions');
 ?>
@@ -101,7 +101,7 @@ View::show_header("View request: $FullName", 'comments,requests,bbcode,subscript
             <a href="#" id="bookmarklink_request_<?=$RequestID?>" onclick="Bookmark('request', <?=$RequestID?>, 'Remove bookmark'); return false;" class="brackets">Bookmark</a>
 <?php    } ?>
             <a href="#" id="subscribelink_requests<?=$RequestID?>" class="brackets" onclick="SubscribeComments('requests',<?=$RequestID?>);return false;"><?=
-                $subscription->isSubscribedComments('requests', $RequestID) ? 'Unsubscribe' : 'Subscribe'?></a>
+                $isSubscribed ? 'Unsubscribe' : 'Subscribe'?></a>
             <a href="reports.php?action=report&amp;type=request&amp;id=<?=$RequestID?>" class="brackets">Report request</a>
 <?php    if (!$IsFilled) { ?>
             <a href="upload.php?requestid=<?=$RequestID?><?=($Request['GroupID'] ? "&amp;groupid={$Request['GroupID']}" : '')?>" class="brackets">Upload request</a>
@@ -465,16 +465,18 @@ echo $paginator->linkbox();
 $comments = new Gazelle\CommentViewer\Request(G::$Twig, $LoggedUser['ID'], $RequestID);
 $comments->renderThread($commentPage->thread(), $commentPage->lastRead());
 echo $paginator->linkbox();
-
-if (!$LoggedUser['DisablePosting']) {
-    View::parse('generic/reply/quickreply.php', [
-        'InputName' => 'pageid',
-        'InputID' => $RequestID,
-        'Action' => 'comments.php?page=requests',
-        'InputAction' => 'take_post',
-        'SubscribeBox' => true
-    ]);
-}
+echo G::$Twig->render('reply.twig', [
+    'action'   => 'take_post',
+    'auth'     => $LoggedUser['AuthKey'],
+    'avatar'   => (new Gazelle\Manager\User)->avatarMarkup($user, $user),
+    'id'       => $RequestID,
+    'name'     => 'pageid',
+    'subbed'   => $isSubscribed,
+    'textarea' => new TEXTAREA_PREVIEW('body', 'quickpost', '',
+        70, 8, false, false, true, ['tabindex="1"', 'onkeyup="resize(\'quickpost\')"' ]),
+    'url'      => 'comments.php?page=requests',
+    'user'     => $user,
+]);
 ?>
         </div>
     </div>
