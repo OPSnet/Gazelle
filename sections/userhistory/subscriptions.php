@@ -5,8 +5,8 @@ $PerPage = $LoggedUser['PostsPerPage'] ?? POSTS_PER_PAGE;
 
 View::show_header('Subscriptions','subscriptions,comments,bbcode');
 
-$ShowUnread = isset($_GET['showunread']) && !!$_GET['showunread'];
-$ShowCollapsed = isset($_GET['collapse']) && !!$_GET['collapse'];
+$ShowCollapsed = (bool)($_GET['collapse'] ?? true);
+$ShowUnread = (bool)($_GET['showunread'] ?? true);
 
 $NumResults = $DB->scalar("
     SELECT sum(total)
